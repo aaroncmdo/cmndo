@@ -14,6 +14,7 @@ import {
   MapPinIcon,
   MessageSquareIcon,
 } from 'lucide-react'
+import { useTranslations } from 'next-intl'
 import { Card, Stack, Row, Text, Icon } from '@/components/primitives'
 import { tokens } from '@/lib/design-tokens'
 
@@ -36,7 +37,6 @@ export type MeineKanzleiProps = {
 }
 
 const LEXDRIVE_WHATSAPP = '4932221096850'
-const LEXDRIVE_WA_INTRO = 'Hallo, ich habe eine Frage zu meinem Fall.'
 
 export function MeineKanzleiCard({
   kanzlei,
@@ -44,6 +44,7 @@ export function MeineKanzleiCard({
   vollmachtSigniertAm,
   uebergebenAm,
 }: MeineKanzleiProps) {
+  const t = useTranslations('meineKanzlei')
   // Card versteckt sich wenn weder Kanzlei noch Ansprechpartner-Name gesetzt
   // ist — dann hat der Fall noch keine Kanzlei-Verbindung.
   const hatKanzlei = !!kanzlei?.name || !!ansprechpartner.name
@@ -53,8 +54,8 @@ export function MeineKanzleiCard({
   const apName = ansprechpartner.name ?? kanzleiName
   const apEmail = ansprechpartner.email ?? kanzlei?.email ?? null
   const apTel = ansprechpartner.telefon ?? null
-  const apPos = ansprechpartner.position ?? 'Fachanwalt für Verkehrsrecht'
-  const waHref = `https://wa.me/${LEXDRIVE_WHATSAPP}?text=${encodeURIComponent(LEXDRIVE_WA_INTRO)}`
+  const apPos = ansprechpartner.position ?? t('fachanwaltDefault')
+  const waHref = `https://wa.me/${LEXDRIVE_WHATSAPP}?text=${encodeURIComponent(t('whatsappIntro'))}`
 
   return (
     <Card p={5}>
@@ -63,7 +64,7 @@ export function MeineKanzleiCard({
           <Row gap={2} align="center">
             <Icon icon={ScaleIcon} size={18} color="ondo" />
             <Text variant="headingSm" color="navy">
-              Meine Kanzlei
+              {t('titel')}
             </Text>
           </Row>
           {vollmachtSigniertAm ? (
@@ -82,7 +83,7 @@ export function MeineKanzleiCard({
               }}
             >
               <CheckCircle2Icon size={10} />
-              Vollmacht erteilt
+              {t('vollmachtErteilt')}
             </span>
           ) : uebergebenAm ? (
             <span
@@ -100,14 +101,14 @@ export function MeineKanzleiCard({
               }}
             >
               <ClockIcon size={10} />
-              Vollmacht ausstehend
+              {t('vollmachtAusstehend')}
             </span>
           ) : null}
         </Row>
 
         <Stack gap={1}>
           <Text variant="bodyXs" color="ondo">
-            Ihr juristischer Ansprechpartner
+            {t('ansprechpartner')}
           </Text>
           <Text variant="body" color="navy">
             {apName}
@@ -180,7 +181,7 @@ export function MeineKanzleiCard({
             }}
           >
             <MessageSquareIcon size={14} />
-            WhatsApp-Chat
+            {t('whatsappChat')}
           </a>
           {apTel && (
             <a
@@ -202,16 +203,13 @@ export function MeineKanzleiCard({
               }}
             >
               <PhoneIcon size={14} />
-              Anrufen
+              {t('anrufen')}
             </a>
           )}
         </Row>
 
         <Text variant="bodyXs" color="ondo">
-          Die Kanzlei bearbeitet Ihren Fall rechtlich, prüft Kürzungen durch die
-          Versicherung und vertritt Sie notfalls vor Gericht. Sie erreichen die
-          Kanzlei direkt über WhatsApp, Telefon oder E-Mail — eine Antwort
-          kommt meist binnen 24 Stunden.
+          {t('rechtsText')}
         </Text>
       </Stack>
     </Card>

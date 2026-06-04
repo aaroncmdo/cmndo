@@ -12,6 +12,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import { UserCheckIcon, CheckCircle2Icon } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
@@ -19,6 +20,7 @@ import { confirmOrphanMatchAction } from '@/app/kunde/actions'
 
 export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPersonId: string }) {
   const router = useRouter()
+  const t = useTranslations('orphanMatch')
   const [pending, setPending] = useState(false)
   const [erledigt, setErledigt] = useState(false)
   const [geschlossen, setGeschlossen] = useState(false)
@@ -30,7 +32,7 @@ export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPers
       <div className="mx-4 md:mx-8 mt-4 rounded-ios-xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
         <CheckCircle2Icon className="w-5 h-5 shrink-0 text-emerald-600" />
         <p className="text-sm font-medium text-emerald-900">
-          Danke! Wir haben den früheren Vorgang Ihrem Konto zugeordnet.
+          {t('erledigt')}
         </p>
       </div>
     )
@@ -41,7 +43,7 @@ export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPers
     const res = await confirmOrphanMatchAction(orphanPersonId)
     setPending(false)
     if (!res.ok) {
-      toast.error(res.error ?? 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.')
+      toast.error(res.error ?? t('fehler'))
       return
     }
     setErledigt(true)
@@ -54,11 +56,10 @@ export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPers
         <UserCheckIcon className="w-5 h-5 shrink-0 text-claimondo-navy mt-0.5" />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-claimondo-navy">
-            Gehört ein früherer Vorgang zu Ihnen?
+            {t('frage')}
           </p>
           <p className="text-xs text-claimondo-ondo mt-0.5">
-            Wir haben einen möglichen früheren Vorgang gefunden, der zu Ihnen gehören könnte.
-            Möchten Sie ihn Ihrem Konto zuordnen?
+            {t('text')}
           </p>
         </div>
       </div>
@@ -70,10 +71,10 @@ export default function OrphanMatchBannerClient({ orphanPersonId }: { orphanPers
           loading={pending}
           disabled={pending}
         >
-          Ja, das bin ich
+          {t('jaDasBinIch')}
         </Button>
         <Button variant="ghost" size="sm" onClick={() => setGeschlossen(true)} disabled={pending}>
-          Schließen
+          {t('schliessen')}
         </Button>
       </div>
     </div>

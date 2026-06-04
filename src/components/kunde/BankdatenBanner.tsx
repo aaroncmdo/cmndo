@@ -1,6 +1,7 @@
 ﻿'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { BanknoteIcon, CheckCircleIcon } from 'lucide-react'
 
 const SHOW_STATUSES = ['gutachten-eingegangen', 'filmcheck', 'qc-pruefung', 'kanzlei-uebergeben', 'anschlussschreiben', 'regulierung-laeuft', 'regulierung']
@@ -23,6 +24,7 @@ export default function BankdatenBanner({
   bankdatenHinterlegt: boolean
   saveBankdaten: (fallId: string, iban: string, bic: string, kontoinhaber: string) => Promise<{ success: boolean; error?: string }>
 }) {
+  const t = useTranslations('bankdaten')
   const [pending, startTransition] = useTransition()
   const [showForm, setShowForm] = useState(false)
   const [iban, setIban] = useState('')
@@ -36,11 +38,11 @@ export default function BankdatenBanner({
   function handleSubmit() {
     const cleanIban = iban.replace(/\s/g, '').toUpperCase()
     if (!validateIban(cleanIban)) {
-      setError('Bitte gib eine gültige IBAN ein.')
+      setError(t('fehlerIban'))
       return
     }
     if (!kontoinhaber.trim()) {
-      setError('Bitte gib den Kontoinhaber an.')
+      setError(t('fehlerKontoinhaber'))
       return
     }
     setError('')
@@ -50,10 +52,10 @@ export default function BankdatenBanner({
         if (res.success) {
           setDone(true)
         } else {
-          setError(res.error ?? 'Fehler beim Speichern')
+          setError(res.error ?? t('fehlerSpeichern'))
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
+        setError(err instanceof Error ? err.message : t('fehlerSpeichern'))
       }
     })
   }
@@ -68,8 +70,8 @@ export default function BankdatenBanner({
           <BanknoteIcon className="w-5 h-5 text-amber-600" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-amber-800">Bankdaten für Auszahlung hinterlegen</p>
-          <p className="text-xs text-amber-600 mt-0.5">Damit wir den Betrag an dich auszahlen können, benötigen wir deine Kontodaten.</p>
+          <p className="text-sm font-semibold text-amber-800">{t('bannerTitel')}</p>
+          <p className="text-xs text-amber-600 mt-0.5">{t('bannerSub')}</p>
         </div>
       </button>
     )
@@ -79,40 +81,40 @@ export default function BankdatenBanner({
     <div className="bg-white border-2 border-amber-200 rounded-2xl p-5 space-y-4">
       <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
         <BanknoteIcon className="w-4 h-4 text-amber-600" />
-        Bankdaten für Auszahlung
+        {t('formTitel')}
       </h3>
 
       {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-ios-lg">{error}</p>}
 
       <div className="space-y-3">
         <div>
-          <label className="block text-xs text-claimondo-ondo mb-1">IBAN *</label>
+          <label className="block text-xs text-claimondo-ondo mb-1">{t('ibanLabel')}</label>
           <input
             type="text"
             value={iban}
             onChange={e => setIban(e.target.value)}
-            placeholder="DE89 3704 0044 0532 0130 00"
+            placeholder={t('ibanPlaceholder')}
             className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-lg text-sm font-mono tracking-wider"
           />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs text-claimondo-ondo mb-1">BIC (optional)</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">{t('bicLabel')}</label>
             <input
               type="text"
               value={bic}
               onChange={e => setBic(e.target.value)}
-              placeholder="COBADEFFXXX"
+              placeholder={t('bicPlaceholder')}
               className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-lg text-sm font-mono"
             />
           </div>
           <div>
-            <label className="block text-xs text-claimondo-ondo mb-1">Kontoinhaber *</label>
+            <label className="block text-xs text-claimondo-ondo mb-1">{t('kontoinhaberLabel')}</label>
             <input
               type="text"
               value={kontoinhaber}
               onChange={e => setKontoinhaber(e.target.value)}
-              placeholder="Max Mustermann"
+              placeholder={t('kontoinhaberPlaceholder')}
               className="w-full px-3 py-2.5 border border-claimondo-border rounded-ios-lg text-sm"
             />
           </div>
@@ -121,10 +123,10 @@ export default function BankdatenBanner({
 
       <div className="flex gap-2">
         <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-claimondo-bg">
-          Abbrechen
+          {t('abbrechen')}
         </button>
         <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-ios-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50">
-          {pending ? 'Speichern...' : 'Bankdaten speichern'}
+          {pending ? t('speichernPending') : t('speichern')}
         </button>
       </div>
     </div>

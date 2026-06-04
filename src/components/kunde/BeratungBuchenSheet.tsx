@@ -11,6 +11,7 @@
 //   Step 3: Zusammenfassung + Bestätigen
 
 import { useState, useMemo, useTransition, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import { CalendarIcon, ClockIcon, XIcon, CheckIcon, VideoIcon, PhoneIcon, ArrowRightIcon, ArrowLeftIcon, LoaderIcon } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
 import {
@@ -21,12 +22,22 @@ import {
 
 type Step = 1 | 2 | 3 | 'success'
 
+// Portal-i18n: Die THEMEN-Werte bleiben deutsch — sie sind der stabile, an
+// `bucheBeratungstermin` durchgereichte + in der DB persistierte Vertrag (KB sieht
+// sie intern). Nur die ANZEIGE wird lokalisiert (themaLabelKey -> beratungBuchen.themen.*).
 const THEMEN = [
   'Frage zum Gutachten',
   'Frage zur Regulierung',
   'Dokumenten-Frage',
   'Sonstiges',
 ] as const
+
+const THEMA_LABEL_KEY: Record<string, string> = {
+  'Frage zum Gutachten': 'themen.gutachten',
+  'Frage zur Regulierung': 'themen.regulierung',
+  'Dokumenten-Frage': 'themen.dokumente',
+  'Sonstiges': 'themen.sonstiges',
+}
 
 export default function BeratungBuchenSheet({
   fallId,
@@ -39,6 +50,10 @@ export default function BeratungBuchenSheet({
   onClose: () => void
   defaultKanal?: 'video' | 'telefon'
 }) {
+  const t = useTranslations('beratungBuchen')
+  // Lokalisiertes Anzeige-Label für einen (deutschen) THEMEN-Wert.
+  const themaLabel = (thema: string) =>
+    THEMA_LABEL_KEY[thema] ? t(THEMA_LABEL_KEY[thema]) : thema
   const [step, setStep] = useState<Step>(1)
   const [thema, setThema] = useState<string>(THEMEN[0])
   const [beschreibung, setBeschreibung] = useState('')
@@ -132,22 +147,22 @@ export default function BeratungBuchenSheet({
       noPadding
       hideCloseButton
       maxWidth={512}
-      ariaLabel="Beratungstermin buchen"
+      ariaLabel={t('ariaLabel')}
     >
       <div className="overflow-hidden max-h-[92vh] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
           <div>
-            <p className="text-xs uppercase tracking-wider text-claimondo-ondo">Beratungstermin</p>
+            <p className="text-xs uppercase tracking-wider text-claimondo-ondo">{t('kopfzeile')}</p>
             <p className="text-sm font-semibold text-claimondo-navy">
-              {step === 'success' ? 'Termin bestätigt' : `Schritt ${step} von 3`}
+              {step === 'success' ? t('terminBestaetigt') : t('schrittVon', { step })}
             </p>
           </div>
           <button
             type="button"
             onClick={handleClose}
             className="w-9 h-9 rounded-full hover:bg-claimondo-bg flex items-center justify-center"
-            aria-label="Schließen"
+            aria-label={t('schliessen')}
           >
             <XIcon className="w-5 h-5 text-claimondo-ondo" />
           </button>
@@ -158,33 +173,33 @@ export default function BeratungBuchenSheet({
           {step === 1 && (
             <div className="space-y-5">
               <div>
-                <label className="block text-sm font-medium text-claimondo-navy mb-2">Worum geht es?</label>
+                <label className="block text-sm font-medium text-claimondo-navy mb-2">{t('worumGehtEs')}</label>
                 <select
                   value={thema}
                   onChange={(e) => setThema(e.target.value)}
                   className="w-full min-h-11 px-3 rounded-ios-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none bg-white text-sm"
                 >
-                  {THEMEN.map(t => <option key={t} value={t}>{t}</option>)}
+                  {THEMEN.map(thm => <option key={thm} value={thm}>{themaLabel(thm)}</option>)}
                 </select>
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-claimondo-navy mb-2">
-                  Kurze Beschreibung <span className="text-xs font-normal text-claimondo-ondo">(optional)</span>
+                  {t('kurzeBeschreibung')} <span className="text-xs font-normal text-claimondo-ondo">{t('optional')}</span>
                 </label>
                 <textarea
                   value={beschreibung}
                   onChange={(e) => setBeschreibung(e.target.value.slice(0, 200))}
                   rows={3}
-                  placeholder="z. B. ‚Ich habe eine Rückfrage zur Höhe der Regulierung'"
+                  placeholder={t('beschreibungPlaceholder')}
                   // AAR-452: text-base verhindert iOS-Autozoom beim Fokus
                   className="w-full px-3 py-2 rounded-ios-xl border-2 border-claimondo-border focus:border-claimondo-ondo focus:outline-none text-base resize-none"
                 />
-                <p className="mt-1 text-xs text-claimondo-ondo">{beschreibung.length}/200 Zeichen</p>
+                <p className="mt-1 text-xs text-claimondo-ondo">{t('zeichen', { count: beschreibung.length })}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-claimondo-navy mb-2">Kanal</label>
+                <label className="block text-sm font-medium text-claimondo-navy mb-2">{t('kanal')}</label>
                 <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
@@ -193,7 +208,7 @@ export default function BeratungBuchenSheet({
                       kanal === 'video' ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
-                    <VideoIcon className="w-4 h-4" /> Video-Call
+                    <VideoIcon className="w-4 h-4" /> {t('videoCall')}
                   </button>
                   <button
                     type="button"
@@ -202,7 +217,7 @@ export default function BeratungBuchenSheet({
                       kanal === 'telefon' ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-navy' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-ondo/60'
                     }`}
                   >
-                    <PhoneIcon className="w-4 h-4" /> Telefon
+                    <PhoneIcon className="w-4 h-4" /> {t('telefon')}
                   </button>
                 </div>
               </div>
@@ -213,7 +228,7 @@ export default function BeratungBuchenSheet({
             <div className="space-y-4">
               {loading && (
                 <div className="flex items-center justify-center py-10 text-claimondo-ondo">
-                  <LoaderIcon className="w-5 h-5 animate-spin mr-2" /> Verfügbare Termine werden geladen…
+                  <LoaderIcon className="w-5 h-5 animate-spin mr-2" /> {t('ladeTermine')}
                 </div>
               )}
               {loadErr && (
@@ -223,14 +238,14 @@ export default function BeratungBuchenSheet({
               )}
               {!loading && !loadErr && availableDatums.length === 0 && (
                 <p className="text-sm text-claimondo-ondo">
-                  Aktuell sind keine Termine verfügbar. Bitte kontaktieren Sie uns direkt im Chat.
+                  {t('keineTermine')}
                 </p>
               )}
               {!loading && availableDatums.length > 0 && (
                 <>
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy mb-2 flex items-center gap-1.5">
-                      <CalendarIcon className="w-4 h-4" /> Tag wählen
+                      <CalendarIcon className="w-4 h-4" /> {t('tagWaehlen')}
                     </p>
                     <div className="grid grid-cols-3 gap-2">
                       {availableDatums.slice(0, 9).map(d => {
@@ -263,7 +278,7 @@ export default function BeratungBuchenSheet({
                   {selectedDatum && (
                     <div>
                       <p className="text-sm font-medium text-claimondo-navy mb-2 flex items-center gap-1.5">
-                        <ClockIcon className="w-4 h-4" /> Uhrzeit wählen
+                        <ClockIcon className="w-4 h-4" /> {t('uhrzeitWaehlen')}
                       </p>
                       <div className="grid grid-cols-3 gap-2">
                         {uhrzeitenForSelected.map(u => {
@@ -294,17 +309,17 @@ export default function BeratungBuchenSheet({
           {step === 3 && selectedDatum && selectedUhrzeit && (
             <div className="space-y-4">
               <div className="rounded-ios-xl border-2 border-claimondo-ondo/30 bg-claimondo-ondo/5 p-4 space-y-2.5">
-                <Row label="Thema" value={thema} />
-                {beschreibung.trim() && <Row label="Beschreibung" value={beschreibung} />}
+                <Row label={t('zusammenfassungThema')} value={themaLabel(thema)} />
+                {beschreibung.trim() && <Row label={t('zusammenfassungBeschreibung')} value={beschreibung} />}
                 <Row
-                  label="Datum"
+                  label={t('zusammenfassungDatum')}
                   value={new Date(selectedDatum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
                     weekday: 'long', day: '2-digit', month: 'long', year: 'numeric',
                   })}
                 />
-                <Row label="Uhrzeit" value={`${selectedUhrzeit} Uhr · 30 Minuten`} />
-                <Row label="Kanal" value={kanal === 'video' ? 'Video-Call' : 'Telefon'} />
-                {kbName && <Row label="Berater" value={kbName} />}
+                <Row label={t('zusammenfassungUhrzeit')} value={t('uhrzeitDauer', { uhrzeit: selectedUhrzeit })} />
+                <Row label={t('zusammenfassungKanal')} value={kanal === 'video' ? t('videoCall') : t('telefon')} />
+                {kbName && <Row label={t('zusammenfassungBerater')} value={kbName} />}
               </div>
               {bookErr && (
                 <div className="rounded-ios-xl border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900">
@@ -312,7 +327,7 @@ export default function BeratungBuchenSheet({
                 </div>
               )}
               <p className="text-xs text-claimondo-ondo">
-                Sie erhalten eine WhatsApp-Bestätigung{kanal === 'video' ? ' mit dem Video-Link' : ''}.
+                {t('whatsappHinweis', { videoLink: kanal === 'video' ? 'ja' : 'nein' })}
               </p>
             </div>
           )}
@@ -322,9 +337,9 @@ export default function BeratungBuchenSheet({
               <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
                 <CheckIcon className="w-7 h-7 text-emerald-600" strokeWidth={3} />
               </div>
-              <p className="text-lg font-semibold text-claimondo-navy">Termin gebucht!</p>
+              <p className="text-lg font-semibold text-claimondo-navy">{t('gebuchtTitel')}</p>
               <p className="mt-1.5 text-sm text-claimondo-ondo">
-                Sie erhalten in Kürze eine WhatsApp-Bestätigung.
+                {t('gebuchtSub')}
               </p>
             </div>
           )}
@@ -341,7 +356,7 @@ export default function BeratungBuchenSheet({
               }}
               className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl text-sm font-medium text-claimondo-navy hover:bg-claimondo-bg transition-colors"
             >
-              {step === 1 ? 'Abbrechen' : (<><ArrowLeftIcon className="w-4 h-4" /> Zurück</>)}
+              {step === 1 ? t('abbrechen') : (<><ArrowLeftIcon className="w-4 h-4" /> {t('zurueck')}</>)}
             </button>
             {step === 1 && (
               <button
@@ -349,7 +364,7 @@ export default function BeratungBuchenSheet({
                 onClick={() => setStep(2)}
                 className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
               >
-                Weiter <ArrowRightIcon className="w-4 h-4" />
+                {t('weiter')} <ArrowRightIcon className="w-4 h-4" />
               </button>
             )}
             {step === 2 && (
@@ -359,7 +374,7 @@ export default function BeratungBuchenSheet({
                 disabled={!selectedDatum || !selectedUhrzeit}
                 className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
               >
-                Weiter <ArrowRightIcon className="w-4 h-4" />
+                {t('weiter')} <ArrowRightIcon className="w-4 h-4" />
               </button>
             )}
             {step === 3 && (
@@ -370,7 +385,7 @@ export default function BeratungBuchenSheet({
                 className="flex items-center gap-1.5 min-h-11 px-4 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-60 transition-colors"
               >
                 {isPending ? <LoaderIcon className="w-4 h-4 animate-spin" /> : <CheckIcon className="w-4 h-4" />}
-                Termin bestätigen
+                {t('terminBestaetigen')}
               </button>
             )}
           </div>
@@ -382,7 +397,7 @@ export default function BeratungBuchenSheet({
               onClick={handleClose}
               className="w-full min-h-11 rounded-ios-xl bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield transition-colors"
             >
-              Schließen
+              {t('schliessen')}
             </button>
           </div>
         )}

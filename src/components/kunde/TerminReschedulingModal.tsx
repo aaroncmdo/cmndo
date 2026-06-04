@@ -5,6 +5,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { Modal } from '@/components/primitives/Modal'
 
 type Props = {
@@ -22,6 +23,7 @@ export default function TerminReschedulingModal({
   terminTyp,
   onSuccess,
 }: Props) {
+  const t = useTranslations('terminSection.reschedule')
   const [wunsch, setWunsch] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
@@ -39,33 +41,33 @@ export default function TerminReschedulingModal({
         })
         const json = await res.json()
         if (!res.ok || !json?.success) {
-          setError(json?.error ?? 'Fehler beim Senden der Anfrage.')
+          setError(json?.error ?? t('fehler'))
           return
         }
         setSuccess(true)
         onSuccess?.()
       } catch (e) {
-        setError(e instanceof Error ? e.message : 'Netzwerkfehler')
+        setError(e instanceof Error ? e.message : t('netzwerkfehler'))
       }
     })
   }
 
   return (
-    <Modal open={open} onClose={onClose} maxWidth={448} ariaLabel="Termin verschieben">
+    <Modal open={open} onClose={onClose} maxWidth={448} ariaLabel={t('titel')}>
       <h2
           id="reschedule-title"
           className="text-base font-semibold"
           style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
         >
-          Termin verschieben
+          {t('titel')}
         </h2>
         <p
           className="text-xs mt-1"
           style={{ color: 'var(--brand-text-secondary, #6b7280)' }}
         >
           {terminTyp === 'kb_beratung'
-            ? 'Ihr Betreuer meldet sich binnen 24 Stunden mit einem neuen Vorschlag.'
-            : 'Ihr Gutachter-Koordinator meldet sich binnen 24 Stunden mit neuen Slots.'}
+            ? t('subKb')
+            : t('subSv')}
         </p>
 
         {!success ? (
@@ -75,12 +77,12 @@ export default function TerminReschedulingModal({
                 className="text-xs font-medium"
                 style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
               >
-                Ihr Wunsch-Zeitraum (optional)
+                {t('wunschLabel')}
               </span>
               <textarea
                 value={wunsch}
                 onChange={(e) => setWunsch(e.target.value)}
-                placeholder={'z. B. „nächste Woche vormittags" oder „ab 21.04. nach 15 Uhr"'}
+                placeholder={t('wunschPlaceholder')}
                 // AAR-452: text-base verhindert iOS-Autozoom
                 className="mt-1 w-full rounded-ios-md border px-3 py-2 text-base min-h-[80px]"
                 style={{
@@ -112,7 +114,7 @@ export default function TerminReschedulingModal({
                   color: 'var(--brand-text-secondary, #4b5563)',
                 }}
               >
-                Abbrechen
+                {t('abbrechen')}
               </button>
               <button
                 type="submit"
@@ -123,7 +125,7 @@ export default function TerminReschedulingModal({
                   color: 'var(--brand-text-on-primary, #ffffff)',
                 }}
               >
-                {pending ? 'Wird gesendet…' : 'Anfrage senden'}
+                {pending ? t('wirdGesendet') : t('anfrageSenden')}
               </button>
             </div>
           </form>
@@ -133,8 +135,7 @@ export default function TerminReschedulingModal({
               className="text-sm"
               style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
             >
-              Ihre Anfrage wurde weitergeleitet. Ihr Betreuer meldet sich in
-              Kürze bei Ihnen.
+              {t('erfolg')}
             </p>
             <div className="flex justify-end">
               <button
@@ -145,7 +146,7 @@ export default function TerminReschedulingModal({
                   color: 'var(--brand-text-on-primary, #ffffff)',
                 }}
               >
-                Schließen
+                {t('schliessen')}
               </button>
             </div>
           </div>
