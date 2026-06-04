@@ -4595,6 +4595,20 @@
         "teamFallback": "فريق Claimondo",
         "chatOeffnen": "فتح المحادثة",
         "terminBuchen": "حجز موعد"
+      },
+      "betreuerStrip": {
+        "labelKb": "مسؤول حسابكم",
+        "labelSv": "خبيركم",
+        "ansprechpartner": "جهة الاتصال الشخصية",
+        "erstelltGutachten": "يُعِدّ تقرير الخبير الخاص بكم",
+        "teamFallback": "فريق Claimondo",
+        "svWirdZugewiesen": "قيد التعيين",
+        "chatAria": "فتح المحادثة مع {name}",
+        "chatTitle": "فتح المحادثة"
+      },
+      "stepper": {
+        "navigation": "الاتجاهات",
+        "uhrSuffix": ""
       }
     },
     "termine": {
@@ -4907,6 +4921,62 @@
         "submitting": "جارٍ التقديم …",
         "submit": "تقديم المواعيد"
       }
+    }
+  },
+  "phasen": {
+    "main": {
+      "erfassung": "التسجيل",
+      "begutachtung": "التقييم",
+      "regulierung": "التسوية",
+      "abschluss": "الإنهاء"
+    },
+    "subKunde": {
+      "sa_offen": "جارٍ تسجيل الضرر",
+      "vollmacht_offen": "جارٍ تجهيز المستندات",
+      "onboarding_offen": "بانتظار البيانات الأخيرة",
+      "termin": "جارٍ تحديد الموعد",
+      "besichtigung": "التقييم جارٍ",
+      "gutachten": "جارٍ إعداد تقرير الخبير",
+      "kanzlei_uebergabe": "تمت إحالة الملف إلى المكتب القانوني",
+      "versicherungskontakt": "المكتب القانوني يتواصل مع شركة التأمين",
+      "auszahlung": "جارٍ تجهيز الدفع",
+      "nachforderung": "رفض شركة التأمين — مطالبة إضافية",
+      "erfolgreich_reguliert": "اكتمل بنجاح",
+      "storniert": "تم إغلاق الملف",
+      "klage_rechtsstreit": "تمت الإحالة إلى الإجراءات القضائية",
+      "verjaehrt": "تم إغلاق الملف",
+      "abgelehnt_final": "مرفوض (نهائي)",
+      "an_externe_kanzlei": "تمت الإحالة إلى مكتب قانوني خارجي",
+      "termin_durchgefuehrt": "تم تنفيذ الموعد"
+    },
+    "subIntern": {
+      "sa_offen": "بانتظار توقيع التنازل",
+      "vollmacht_offen": "بانتظار التوكيل",
+      "onboarding_offen": "بانتظار إكمال التسجيل",
+      "termin": "الموعد",
+      "besichtigung": "المعاينة",
+      "gutachten": "تقرير الخبير",
+      "kanzlei_uebergabe": "جارٍ التسليم إلى المكتب القانوني",
+      "versicherungskontakt": "التواصل مع شركة التأمين",
+      "auszahlung": "الدفع",
+      "nachforderung": "رفض شركة التأمين — مطالبة إضافية",
+      "erfolgreich_reguliert": "تمت التسوية بنجاح",
+      "storniert": "ملغى",
+      "klage_rechtsstreit": "نزاع قضائي",
+      "verjaehrt": "سقط بالتقادم",
+      "abgelehnt_final": "مرفوض (نهائي)",
+      "an_externe_kanzlei": "تمت الإحالة إلى مكتب قانوني خارجي",
+      "termin_durchgefuehrt": "تم تنفيذ الموعد"
+    },
+    "sideQuest": {
+      "nachbesichtigung": "إعادة المعاينة",
+      "stellungnahme": "إفادة"
+    },
+    "panel": {
+      "meinFortschritt": "تقدّمي",
+      "phasen": "المراحل",
+      "fallStorniert": "تم إلغاء الملف",
+      "zusaetzlichAktiv": "نشط إضافياً"
     }
   }
 }

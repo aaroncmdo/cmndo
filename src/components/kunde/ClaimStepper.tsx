@@ -8,13 +8,12 @@ import React from 'react'
 import { CheckIcon, ClipboardListIcon, WrenchIcon, ShieldCheckIcon, FlagIcon, AlertTriangleIcon, CalendarIcon, NavigationIcon } from 'lucide-react'
 import KundeTerminVerschiebenButton from '@/components/kunde/KundeTerminVerschiebenButton'
 import TerminLiveStatus from '@/components/kunde/TerminLiveStatus'
+import { useTranslations } from 'next-intl'
 import {
-  MAIN_PHASE_LABEL,
   getVisibleMainPhases,
   type ClaimMainPhase,
   type ClaimLifecycle,
 } from '@/lib/claims/lifecycle'
-import { substateLabelForRolle } from '@/lib/fall/subphase-visibility'
 
 const PHASE_ICON: Record<ClaimMainPhase, typeof ClipboardListIcon> = {
   erfassung: ClipboardListIcon,
@@ -72,6 +71,8 @@ export default function ClaimStepper({
    *  Adresse, Navi-Button. Wird über den notices/bottomSlot gerendert. */
   terminInfo?: TerminInfo | null
 }) {
+  const tp = useTranslations('phasen')
+  const ts = useTranslations('kunde.fall.stepper')
   // AAR-939: nur_gutachter blendet die Regulierungs-Phase aus (kein
   // Regulierungs-Tail). Defensiv: faellt die aktive Phase wider Erwarten nicht
   // in die sichtbare Liste, auf alle 4 Phasen zurueckfallen.
@@ -123,11 +124,11 @@ export default function ClaimStepper({
                             : 'text-claimondo-ondo/60'
                     }`}
                   >
-                    {MAIN_PHASE_LABEL[key]}
+                    {tp(`main.${key}`)}
                   </p>
                   {isCurrent && (
                     <p className="text-[11px] text-claimondo-ondo whitespace-nowrap mt-0.5">
-                      {substateLabelForRolle(lifecycle.subPhase, 'kunde')}
+                      {tp(`subKunde.${lifecycle.subPhase}`)}
                     </p>
                   )}
                 </div>
@@ -146,7 +147,7 @@ export default function ClaimStepper({
       {lifecycle.aktiveSideQuests.length > 0 && (
         <div className="border-t border-claimondo-border pt-3">
           <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-1.5">
-            Zusätzlich aktiv
+            {tp('panel.zusaetzlichAktiv')}
           </p>
           <div className="flex flex-wrap gap-2">
             {lifecycle.aktiveSideQuests.map((auftrag) => (
@@ -154,12 +155,12 @@ export default function ClaimStepper({
                 key={auftrag.id}
                 className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-ondo/[0.06] border border-claimondo-ondo/30 px-3 py-1 text-xs font-medium text-claimondo-navy"
               >
-                {auftrag.typ === 'nachbesichtigung' ? 'Nachbesichtigung' : 'Stellungnahme'}
-                <span className="text-claimondo-navy">· {substateLabelForRolle(
+                {tp(`sideQuest.${auftrag.typ === 'nachbesichtigung' ? 'nachbesichtigung' : 'stellungnahme'}`)}
+                <span className="text-claimondo-navy">· {tp(`subKunde.${
                   auftrag.status === 'termin' ? 'termin'
                   : auftrag.status === 'besichtigung' ? 'besichtigung'
                   : 'gutachten'
-                , 'kunde')}</span>
+                }`)}</span>
               </span>
             ))}
           </div>
@@ -176,7 +177,7 @@ export default function ClaimStepper({
               <div className="min-w-0">
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                   <p className="text-sm font-semibold text-claimondo-navy">
-                    {terminInfo.datum}, {terminInfo.uhrzeit} Uhr
+                    {terminInfo.datum}, {terminInfo.uhrzeit} {ts('uhrSuffix')}
                   </p>
                   <TerminLiveStatus
                     terminId={terminInfo.terminId}
@@ -205,7 +206,7 @@ export default function ClaimStepper({
                   className="inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy hover:bg-claimondo-navy/90 text-white text-sm font-medium px-3 py-1.5 transition-colors"
                 >
                   <NavigationIcon className="w-3.5 h-3.5" />
-                  Navigation
+                  {ts('navigation')}
                 </a>
               )}
             </div>
