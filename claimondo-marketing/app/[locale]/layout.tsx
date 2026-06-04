@@ -55,6 +55,20 @@ export const metadata: Metadata = {
   authors: [{ name: 'Claimondo' }],
   creator: 'Claimondo',
   publisher: 'Claimondo',
+  // Brand-Favicon: SVG-Shield (modern, vom Browser bevorzugt) + .ico-Fallback
+  // (alte Browser / Google) + Apple-Touch + Web-App-Manifest. Spiegelt das
+  // Icon-Set der Haupt-App (app.claimondo.de). Ohne diesen Block fiel
+  // claimondo.de auf den Next-Default-Favicon (app/favicon.ico) zurueck -> die
+  // Marke wurde nicht angezeigt.
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
+    apple: '/icons/icon.svg',
+    shortcut: '/favicon.ico',
+  },
+  manifest: '/manifest.json',
   alternates: {
     canonical: SITE_URL,
     ...buildLanguageAlternates('/'),
@@ -125,6 +139,14 @@ export default async function LocaleLayout({
         {/* Perf: Preconnect zu Mapbox (gutachter-finden/-partner-Karten). */}
         <link rel="preconnect" href="https://api.mapbox.com" crossOrigin="" />
         <link rel="preconnect" href="https://events.mapbox.com" crossOrigin="" />
+        {/* Legacy-Service-Worker-Cleanup: deregistriert verwaiste Service Worker
+            frueherer claimondo.de-Deploys, die den FetchEvent fuer "/" brachen
+            (sw.js:71 "Failed to fetch"). Diese App nutzt keinen SW; der
+            Kill-Switch in /public/sw.js raeumt zusaetzlich Browser auf, deren
+            Seite vom kaputten SW gar nicht erst laedt. */}
+        <Script id="legacy-sw-cleanup" strategy="afterInteractive">
+          {`(function(){try{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(function(rs){rs.forEach(function(r){r.unregister()})}).catch(function(){})}if(window.caches&&caches.keys){caches.keys().then(function(ks){ks.forEach(function(k){caches.delete(k)})}).catch(function(){})}}catch(e){}})()`}
+        </Script>
         {shouldLoadGtag && (
           <>
             <Script
