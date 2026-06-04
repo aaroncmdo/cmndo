@@ -1,0 +1,145 @@
+name: Deploy → VPS (claimondo.de Marketing :3006)
+
+# Auto-Deploy der Marketing-App (claimondo-marketing, host-geroutet:
+# claimondo.de + gutachter./schaden./kfzgutachter./makler.claimondo.de).
+# Spiegelt deploy-vps.yml (Portal) — Build in CI + ATOMARER Verzeichnis-Switch,
+# damit es KEIN rm-rf-vor-Build-502-Fenster mehr gibt (wie beim manuellen
+# scripts/deploy-marketing-vps.py). Runtime-Env wird aus dem kanonischen
+# /etc/claimondo/.env.local frisch generiert. Bei fehlgeschlagenem Health-Check
+# rollt der SSH-Step automatisch auf das vorige Verzeichnis (-old) zurueck.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'claimondo-marketing/**'
+      - '.github/workflows/deploy-vps-marketing.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install (marketing)
+        working-directory: claimondo-marketing
+        # npm install statt npm ci — @swc/helpers-Transitive ist fuer ci zu strikt
+        # (gleicher Grund wie im manuellen deploy-marketing-vps.py).
+        run: npm install --no-audit --no-fund
+
+      - name: Build (standalone, marketing)
+        working-directory: claimondo-marketing
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          # NEXT_PUBLIC_* werden zur Build-Zeit in den Client-Bundle gebaked.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
+          NEXT_PUBLIC_IMAGIN_CUSTOMER: ${{ secrets.NEXT_PUBLIC_IMAGIN_CUSTOMER }}
+          NEXT_PUBLIC_GOOGLE_MAPS_KEY: ${{ secrets.NEXT_PUBLIC_GOOGLE_MAPS_KEY }}
+          NEXT_PUBLIC_CLARITY_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_ID }}
+          # Marketing-spezifisch (oeffentliche IDs, wie im manuellen Deploy hardcoded):
+          NEXT_PUBLIC_APP_URL: https://claimondo.de
+          NEXT_PUBLIC_GA4_ID: G-9YF2W9ZP2S
+
+      - name: Artefakt packen (standalone-Inhalt)
+        working-directory: claimondo-marketing
+        # postbuild (copy-standalone.mjs) hat static + public + content schon in
+        # .next/standalone kopiert -> der Inhalt ist self-contained.
+        run: tar -czf ../deploy-marketing.tar.gz -C .next/standalone .
+
+      - name: Deploy → VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-marketing.tar.gz
+          target: /tmp/
+
+      - name: Atomic switch + restart :3006 (+ Auto-Rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+
+            # 1. Runtime-Env frisch aus dem kanonischen /etc/claimondo/.env.local
+            #    (server-only Keys werden uebernommen, marketing-Hardcodes ergaenzt).
+            if [ ! -f /etc/claimondo/.env.local ]; then
+              echo "FATAL: /etc/claimondo/.env.local fehlt — Deploy abgebrochen."
+              exit 1
+            fi
+            mkdir -p /etc/claimondo-marketing
+            {
+              for k in NEXT_PUBLIC_SUPABASE_URL NEXT_PUBLIC_SUPABASE_ANON_KEY \
+                       SUPABASE_SERVICE_ROLE_KEY NEXT_PUBLIC_MAPBOX_TOKEN \
+                       RESEND_API_KEY RESEND_FROM BAILEYS_BASE_URL BAILEYS_AUTH_TOKEN \
+                       NEXT_PUBLIC_IMAGIN_CUSTOMER IMAGIN_SECRET GOOGLE_PLACES_API_KEY \
+                       START_LINK_HMAC_SECRET CANONICAL_FLOWLINK_ENABLED; do
+                grep "^${k}=" /etc/claimondo/.env.local || true
+              done
+              echo "NEXT_PUBLIC_APP_URL=https://claimondo.de"
+              echo "NEXT_PUBLIC_GA4_ID=G-9YF2W9ZP2S"
+              echo "NEXT_PUBLIC_CLARITY_ID=wtz8c2161v"
+              echo "PROMO_IP_SALT=$(openssl rand -hex 16)"
+            } > /etc/claimondo-marketing/.env.local
+            chmod 600 /etc/claimondo-marketing/.env.local
+
+            # 2. Neues Standalone in -new entpacken (live-Verzeichnis bleibt unberuehrt).
+            rm -rf /var/www/claimondo-marketing-new
+            mkdir -p /var/www/claimondo-marketing-new
+            tar -xzf /tmp/deploy-marketing.tar.gz -C /var/www/claimondo-marketing-new
+            ln -sf /etc/claimondo-marketing/.env.local /var/www/claimondo-marketing-new/.env.local
+
+            # 3. Atomarer Switch (kein rm-rf vor dem Build -> kein 502-Fenster).
+            rm -rf /var/www/claimondo-marketing-old 2>/dev/null || true
+            mv /var/www/claimondo-marketing /var/www/claimondo-marketing-old 2>/dev/null || true
+            mv /var/www/claimondo-marketing-new /var/www/claimondo-marketing
+
+            # 4. Restart auf :3006.
+            pm2 delete claimondo-marketing 2>/dev/null || true
+            PORT=3006 pm2 start /var/www/claimondo-marketing/server.js \
+              --name claimondo-marketing \
+              --max-memory-restart 1400M \
+              --cwd /var/www/claimondo-marketing
+            pm2 save
+            sleep 5
+
+            # 5. Health-Check + Auto-Rollback bei Fehler.
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3006/")
+            echo "Health / -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "HEALTH-CHECK FAILED ($code) — ROLLBACK auf vorheriges Verzeichnis."
+              pm2 delete claimondo-marketing 2>/dev/null || true
+              rm -rf /var/www/claimondo-marketing
+              mv /var/www/claimondo-marketing-old /var/www/claimondo-marketing
+              PORT=3006 pm2 start /var/www/claimondo-marketing/server.js \
+                --name claimondo-marketing \
+                --max-memory-restart 1400M \
+                --cwd /var/www/claimondo-marketing
+              pm2 save
+              echo "Rollback abgeschlossen — Deploy fehlgeschlagen."
+              exit 1
+            fi
+
+            # 6. Erfolg — Zusatz-Routen nur informativ loggen.
+            for p in /gutachter-partner /schaden-melden /kfz-gutachter; do
+              c=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3006$p")
+              echo "  $p -> HTTP $c"
+            done
+            rm -f /tmp/deploy-marketing.tar.gz
+            echo "Marketing-Deploy $(date) OK (HTTP $code)"
