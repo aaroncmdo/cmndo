@@ -71,7 +71,7 @@ export const CLUSTER: ClusterConfig = {
   themeColor: '#2A2E33',
   imgPath: '/assets/img/wuppertal/',
   teamImg: '/assets/img/wuppertal/team-wuppertal.webp',
-  svName: 'Tobias',
+  svName: 'Amet',
   // Telefon einheitlich ueber alle Cluster (Handoff 00a). Weicht bewusst vom
   // Mock ab (Mock tel: 0221-Festnetz) — Aaron-Vorgabe: Mobil +49 1515 3608515.
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
