@@ -98,8 +98,9 @@ export async function POST(request: Request) {
       if (extracted.erstzulassung) claimUpdate.erstzulassung = extracted.erstzulassung
       if (extracted.fahrzeug_baujahr != null) claimUpdate.fahrzeug_baujahr = extracted.fahrzeug_baujahr
       // CMM Entity Phase-4c: Halter NICHT mehr flach auf claims.halter_* (Dupe -> wird gedroppt).
-      // Halter lebt in claim_parties (ist_halter-Partei); v_claim_full speist halter_* von dort.
-      // OCR-Halter-Korrektur -> claim_parties = Follow-up (Entity-Writer-Wiring).
+      // Halter-Person lebt in personen (Entitaet), verlinkt ueber die claim_parties ist_halter-
+      // Partei (person_id); v_claim_full speist halter_* aus personen. OCR-Halter-Korrektur ->
+      // personen = Follow-up (Entity-Writer-Wiring).
       if (extracted.fahrzeug_hersteller) claimUpdate.fahrzeug_hersteller = extracted.fahrzeug_hersteller
       if (extracted.fahrzeug_modell) claimUpdate.fahrzeug_modell = extracted.fahrzeug_modell
       if (extracted.fahrzeug_farbe) claimUpdate.fahrzeug_farbe = extracted.fahrzeug_farbe
