@@ -15,6 +15,31 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
     captureAttribution()
     trackEvent('page_view', { page_type: 'stadt_lp', cluster: CLUSTER.key, city_slug: citySlug })
 
+    // Monika-Embed Conversion-Bridge (per-Cluster): faengt monika_anfrage_submit
+    // des Widgets im dataLayer ab -> Google-Ads-Lead-Conversion. Nur aktiv wenn
+    // NEXT_PUBLIC_GADS_CONV_LEAD gesetzt (sonst no-op -> GTM kann es stattdessen
+    // uebernehmen, kein Doppelzaehlen). cluster/stadt stehen im Event (per-embed).
+    // HINWEIS: das Widget feuert monika_anfrage_submit aktuell beim Submit-VERSUCH
+    // (AAR-939 G1) -> sobald die Strecke track() hinter result.ok zieht, zaehlt
+    // diese Bridge automatisch nur Erfolge (gleicher Event-Name).
+    const dl = (window.dataLayer = window.dataLayer || [])
+    const originalDlPush = dl.push.bind(dl)
+    let monikaLeadFired = false
+    function monikaConversionPush(...items: Record<string, unknown>[]): number {
+      try {
+        for (const it of items) {
+          if (it && it.cl_event_source === 'monika' && it.event === 'monika_anfrage_submit' && !monikaLeadFired) {
+            monikaLeadFired = true
+            fireAdsConversion('lead')
+          }
+        }
+      } catch {
+        /* Tracking darf die Seite nie brechen */
+      }
+      return originalDlPush(...items)
+    }
+    dl.push = monikaConversionPush
+
     function onClick(e: MouseEvent) {
       const target = e.target as HTMLElement | null
       if (!target) return
@@ -234,6 +259,7 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
     return () => {
       document.removeEventListener('click', onClick)
       window.removeEventListener('scroll', onScroll)
+      dl.push = originalDlPush
       burgerBtn?.removeEventListener('click', openBurger)
       burgerClose?.removeEventListener('click', closeBurger)
       burgerBackdrop?.removeEventListener('click', closeBurger)

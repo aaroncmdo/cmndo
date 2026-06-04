@@ -34,6 +34,7 @@ export const SITE = {
   gadsAwId: process.env.NEXT_PUBLIC_GADS_AW_ID || '',
   gadsConvCall: process.env.NEXT_PUBLIC_GADS_CONV_CALL || '',
   gadsConvWa: process.env.NEXT_PUBLIC_GADS_CONV_WA || '',
+  gadsConvLead: process.env.NEXT_PUBLIC_GADS_CONV_LEAD || '',
   plausibleDomain: process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN || '',
   clarityId: process.env.NEXT_PUBLIC_CLARITY_ID || '',
 } as const

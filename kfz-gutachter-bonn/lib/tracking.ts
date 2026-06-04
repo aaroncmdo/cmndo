@@ -76,15 +76,19 @@ export function readAttribution(): Record<string, string> {
   return out
 }
 
-/** Google-Ads-Conversion (nur wenn AW-ID + Label gesetzt). value/currency fix. */
-export function fireAdsConversion(kind: 'call' | 'wa'): void {
+/** Google-Ads-Conversion (nur wenn AW-ID + Label gesetzt). value/currency fix.
+ *  'lead' = qualifizierter Monika-Anfrage-Submit (per-Cluster, via dataLayer-Bridge
+ *  in SiteScripts). Wert 50 EUR (spec-aligned anfrage-Conversion). Feuert nur, wenn
+ *  NEXT_PUBLIC_GADS_CONV_LEAD gesetzt — sonst no-op (GTM kann es stattdessen machen). */
+export function fireAdsConversion(kind: 'call' | 'wa' | 'lead'): void {
   if (typeof window === 'undefined' || typeof window.gtag !== 'function') return
   if (!SITE.gadsAwId) return
-  const label = kind === 'call' ? SITE.gadsConvCall : SITE.gadsConvWa
+  const label = kind === 'call' ? SITE.gadsConvCall : kind === 'wa' ? SITE.gadsConvWa : SITE.gadsConvLead
   if (!label) return
+  const value = kind === 'call' ? 30.0 : kind === 'wa' ? 15.0 : 50.0
   window.gtag('event', 'conversion', {
     send_to: `${SITE.gadsAwId}/${label}`,
-    value: kind === 'call' ? 30.0 : 15.0,
+    value,
     currency: 'EUR',
   })
 }
