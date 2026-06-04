@@ -48,7 +48,7 @@ export const CLUSTER: ClusterConfig = {
   key: 'duesseldorf',
   region: 'Rheinland',
   regionDative: 'Rheinland',
-  quellenAnker: 'Polizei-Verkehrsbericht 2025',
+  quellenAnker: 'eigene Einschätzung der Verkehrslage vor Ort',
   achsen: ['A46', 'A52', 'A57', 'A3'],
   stadtteile: ['Altstadt', 'Bilk', 'Oberkassel', 'Pempelfort', 'Gerresheim', 'Derendorf'],
   domain: 'kfz-unfallgutachter-duesseldorf.de',

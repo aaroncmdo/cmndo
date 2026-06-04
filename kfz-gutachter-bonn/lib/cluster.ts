@@ -48,7 +48,7 @@ export const CLUSTER: ClusterConfig = {
   key: 'bonn',
   region: 'Rhein-Sieg',
   regionDative: 'Rhein-Sieg-Kreis',
-  quellenAnker: 'Polizei-Bonn-Verkehrsstatistik 2025',
+  quellenAnker: 'eigene Einschätzung der Verkehrslage vor Ort',
   achsen: ['A565', 'A562', 'A59', 'B9', 'B56'],
   stadtteile: ['Bad Godesberg', 'Beuel', 'Hardtberg', 'Poppelsdorf', 'Bonn-Zentrum'],
   domain: 'kfz-unfallgutachter-bonn.de',
