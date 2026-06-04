@@ -5603,5 +5603,11 @@
     "terminAbgelehnt": "❌ Sachverständiger {svName} hat den Termin am {terminDatum} abgelehnt.{hatGrund, select, ja { Grund: \"{grund}\"} other {}}",
     "terminGegenvorschlag": "📅 {rolle, select, sv {Sachverständiger} other {Kunde}}{hatName, select, ja { {name}} other {}} hat einen neuen Termin vorgeschlagen: {terminStr}.{hatGrund, select, ja { Grund: \"{grund}\"} other {}}",
     "welcome": "Fall {fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "Übersetzt",
+    "originalAnzeigen": "Original anzeigen",
+    "uebersetzungAnzeigen": "Übersetzung anzeigen",
+    "uebersetze": "Übersetze …"
   }
 }

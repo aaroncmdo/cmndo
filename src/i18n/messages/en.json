@@ -5548,5 +5548,11 @@
     "terminAbgelehnt": "❌ Expert {svName} declined the appointment on {terminDatum}.{hatGrund, select, ja { Reason: \"{grund}\"} other {}}",
     "terminGegenvorschlag": "📅 {rolle, select, sv {The expert} other {The customer}}{hatName, select, ja { {name}} other {}} proposed a new appointment: {terminStr}.{hatGrund, select, ja { Reason: \"{grund}\"} other {}}",
     "welcome": "Case {fallNummer} has been created. Welcome to your personal chat!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "Translated",
+    "originalAnzeigen": "Show original",
+    "uebersetzungAnzeigen": "Show translation",
+    "uebersetze": "Translating …"
   }
 }

@@ -1,7 +1,7 @@
 ﻿'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useTranslations, useFormatter } from 'next-intl'
+import { useTranslations, useFormatter, useLocale } from 'next-intl'
 import { CalendarIcon, SendIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
@@ -23,7 +23,7 @@ import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
-type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string; template_key?: string | null; template_params?: Record<string, string | number> | null }
+type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string; template_key?: string | null; template_params?: Record<string, string | number> | null; uebersetzungen?: Record<string, string> | null }
 type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url?: string | null }
 
 const TABS = [
@@ -251,6 +251,9 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
   const t = useTranslations('kunde.fall')
   // i18n Phase 1: System-Message-Templates in der Leser-Sprache rendern.
   const tSys = useTranslations('chatSystem')
+  // i18n Phase 2: maschinelle Übersetzung von Human-Freitext.
+  const tT = useTranslations('chatTranslate')
+  const locale = useLocale()
   const format = useFormatter()
   const [messages, setMessages] = useState(initialNachrichten)
   const [text, setText] = useState('')
@@ -371,7 +374,13 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
                   </p>
                   {isWhatsApp && <span className={`text-[9px] ${lightText}`}>{t('chat.viaWhatsApp')}</span>}
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
+                {/* i18n Phase 2: fremde Freitext-Nachrichten (de) für nicht-de-Leser
+                    übersetzen + Toggle aufs Original. Eigene + System + de unverändert. */}
+                {!isOwn && locale !== 'de' ? (
+                  <UebersetzteNachricht msg={msg} locale={locale} tT={tT} />
+                ) : (
+                  <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
+                )}
                 {msg.hat_anhang && msg.anhang_url && (
                   <a href={msg.anhang_url} target="_blank" rel="noopener noreferrer"
                     className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn ? 'text-white/70' : 'text-claimondo-ondo'}`}>
@@ -403,6 +412,76 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
         </form>
       </div>
     </div>
+  )
+}
+
+// ─── i18n Phase 2: übersetzte (fremde) Chat-Nachricht + Toggle aufs Original ──
+//
+// Rendert NUR den Nachrichten-Body + eine dezente Toggle-Zeile; die umgebende
+// Bubble (Sender, Zeit, Anhang) bleibt im ChatTab. Quelle ist immer Deutsch,
+// Ziel = Leser-Locale (≠ de). Wird per key={msg.id} gemountet, sodass der
+// useRef-Guard pro Nachricht genau einen Übersetzungs-Call garantiert.
+function UebersetzteNachricht({ msg, locale, tT }: {
+  msg: Nachricht
+  locale: string
+  tT: (key: string) => string
+}) {
+  const cached = msg.uebersetzungen?.[locale]
+  const [resolvedText, setResolvedText] = useState<string | undefined>(cached)
+  const [showOriginal, setShowOriginal] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [failed, setFailed] = useState(false)
+  const requestedRef = useRef(false)
+
+  useEffect(() => {
+    // Cache-Hit oder schon angefragt → kein (weiterer) Call. Der Ref-Guard
+    // verhindert Doppel-Calls bei Re-Renders / StrictMode-Double-Mount.
+    if (cached || requestedRef.current) return
+    requestedRef.current = true
+    let aktiv = true
+    setLoading(true)
+    ;(async () => {
+      try {
+        const { uebersetzeNachricht } = await import('./actions')
+        const r = await uebersetzeNachricht(msg.id, locale)
+        if (!aktiv) return
+        if (r.ok) setResolvedText(r.text)
+        else setFailed(true)
+      } catch {
+        if (aktiv) setFailed(true)
+      } finally {
+        if (aktiv) setLoading(false)
+      }
+    })()
+    return () => { aktiv = false }
+  }, [msg.id, locale, cached])
+
+  // Was anzeigen: Original-Toggle gewinnt; sonst Übersetzung falls vorhanden,
+  // sonst Fallback auf das Original (z.B. während des Ladens / bei Fehler).
+  const istUebersetzt = !showOriginal && !!resolvedText
+  const body = showOriginal ? msg.nachricht : (resolvedText ?? msg.nachricht)
+
+  return (
+    <>
+      <p className="text-sm whitespace-pre-wrap">{body}</p>
+      <div className="mt-0.5 text-[10px] text-claimondo-ondo/60">
+        {loading && !resolvedText ? (
+          <span>{tT('uebersetze')}</span>
+        ) : istUebersetzt ? (
+          <span>
+            {tT('uebersetzt')}
+            {' · '}
+            <button type="button" onClick={() => setShowOriginal(true)} className="underline">
+              {tT('originalAnzeigen')}
+            </button>
+          </span>
+        ) : resolvedText ? (
+          <button type="button" onClick={() => setShowOriginal(false)} className="underline">
+            {tT('uebersetzungAnzeigen')}
+          </button>
+        ) : null}
+      </div>
+    </>
   )
 }
 

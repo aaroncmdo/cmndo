@@ -5548,5 +5548,11 @@
     "terminAbgelehnt": "❌ رفض الخبير {svName} الموعد في {terminDatum}.{hatGrund, select, ja { السبب: \"{grund}\"} other {}}",
     "terminGegenvorschlag": "📅 {rolle, select, sv {الخبير} other {العميل}}{hatName, select, ja { {name}} other {}} اقترح موعداً جديداً: {terminStr}.{hatGrund, select, ja { السبب: \"{grund}\"} other {}}",
     "welcome": "تم إنشاء الملف {fallNummer}. مرحباً بك في محادثتك الشخصية!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "تمت الترجمة",
+    "originalAnzeigen": "عرض الأصل",
+    "uebersetzungAnzeigen": "عرض الترجمة",
+    "uebersetze": "جارٍ الترجمة …"
   }
 }

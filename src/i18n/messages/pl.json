@@ -5548,5 +5548,11 @@
     "terminAbgelehnt": "❌ Rzeczoznawca {svName} odrzucił termin w dniu {terminDatum}.{hatGrund, select, ja { Powód: \"{grund}\"} other {}}",
     "terminGegenvorschlag": "📅 {rolle, select, sv {Rzeczoznawca} other {Klient}}{hatName, select, ja { {name}} other {}} zaproponował nowy termin: {terminStr}.{hatGrund, select, ja { Powód: \"{grund}\"} other {}}",
     "welcome": "Sprawa {fallNummer} została utworzona. Witamy w Państwa osobistym czacie!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "Przetłumaczono",
+    "originalAnzeigen": "Pokaż oryginał",
+    "uebersetzungAnzeigen": "Pokaż tłumaczenie",
+    "uebersetze": "Tłumaczenie …"
   }
 }

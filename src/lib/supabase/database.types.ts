@@ -9473,6 +9473,7 @@ export type Database = {
           system_event: string | null
           template_key: string | null
           template_params: Json | null
+          uebersetzungen: Json | null
         }
         Insert: {
           anhang_typ?: string | null
@@ -9499,6 +9500,7 @@ export type Database = {
           system_event?: string | null
           template_key?: string | null
           template_params?: Json | null
+          uebersetzungen?: Json | null
         }
         Update: {
           anhang_typ?: string | null
@@ -9525,6 +9527,7 @@ export type Database = {
           system_event?: string | null
           template_key?: string | null
           template_params?: Json | null
+          uebersetzungen?: Json | null
         }
         Relationships: [
           {

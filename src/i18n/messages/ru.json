@@ -5548,5 +5548,11 @@
     "terminAbgelehnt": "❌ Эксперт-оценщик {svName} отклонил приём на {terminDatum}.{hatGrund, select, ja { Причина: \"{grund}\"} other {}}",
     "terminGegenvorschlag": "📅 {rolle, select, sv {Эксперт-оценщик} other {Клиент}}{hatName, select, ja { {name}} other {}} предложил новый приём: {terminStr}.{hatGrund, select, ja { Причина: \"{grund}\"} other {}}",
     "welcome": "Дело {fallNummer} создано. Добро пожаловать в Ваш личный чат!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "Переведено",
+    "originalAnzeigen": "Показать оригинал",
+    "uebersetzungAnzeigen": "Показать перевод",
+    "uebersetze": "Перевод …"
   }
 }
