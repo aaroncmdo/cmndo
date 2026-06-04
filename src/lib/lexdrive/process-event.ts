@@ -988,7 +988,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
             await db
               .from('claims')
               .update({ kanzlei_uebergeben_am: now })
-              .eq('id', fallForClaim.claim_id as string)
+              .eq('id', claimIdForKanzlei)
             // Fire-and-forget Kanzleipaket-Email an LexDrive (AAR-77 buildAndSendKanzleiEmail)
             import('@/lib/lexdrive/email-sender')
               .then(({ buildAndSendKanzleiEmail }) => buildAndSendKanzleiEmail(input.fallId))
