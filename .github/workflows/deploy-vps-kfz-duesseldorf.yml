@@ -1,0 +1,86 @@
+name: Deploy → VPS (kfz-unfallgutachter-duesseldorf.de :3004)
+
+# Auto-Deploy Cluster-LP Duesseldorf. Muster identisch zu deploy-vps-kfz-wuppertal.yml
+# (code-only Build in CI, atomarer Switch, persistente Asset-Symlinks, Auto-Rollback).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kfz-gutachter-duesseldorf/**'
+      - '.github/workflows/deploy-vps-kfz-duesseldorf.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Install (duesseldorf)
+        working-directory: kfz-gutachter-duesseldorf
+        run: npm install --no-audit --no-fund
+      - name: Build (standalone, code-only)
+        working-directory: kfz-gutachter-duesseldorf
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          NEXT_PUBLIC_SITE_URL: https://kfz-unfallgutachter-duesseldorf.de
+          NEXT_PUBLIC_EMBED_BASE: https://app.claimondo.de
+          NEXT_PUBLIC_MONIKA_EMBED_ENABLED: 'true'
+      - name: Artefakt packen (standalone-Inhalt)
+        working-directory: kfz-gutachter-duesseldorf
+        run: tar -czf ../deploy-kfz-duesseldorf.tar.gz -C .next/standalone .
+      - name: Deploy → VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-kfz-duesseldorf.tar.gz
+          target: /tmp/
+      - name: Atomic switch + Asset-Symlink + restart :3004 (+ Auto-Rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            APP=/var/www/kfz-unfallgutachter-duesseldorf-app
+            ASSETS=/var/www/kfz-assets/duesseldorf
+            if [ ! -d "$ASSETS" ]; then echo "FATAL: $ASSETS fehlt"; exit 1; fi
+            rm -rf "${APP}-new"; mkdir -p "${APP}-new"
+            tar -xzf /tmp/deploy-kfz-duesseldorf.tar.gz -C "${APP}-new"
+            cat > "${APP}-new/.env.local" <<ENV
+            NEXT_PUBLIC_MONIKA_EMBED_ENABLED=true
+            NEXT_PUBLIC_SITE_URL=https://kfz-unfallgutachter-duesseldorf.de
+            NEXT_PUBLIC_EMBED_BASE=https://app.claimondo.de
+            ENV
+            rm -rf "${APP}-new/public/assets/img"
+            mkdir -p "${APP}-new/public/assets"
+            ln -sfn "$ASSETS" "${APP}-new/public/assets/img"
+            rm -rf "${APP}-old" 2>/dev/null || true
+            mv "$APP" "${APP}-old" 2>/dev/null || true
+            mv "${APP}-new" "$APP"
+            pm2 delete kfz-gutachter-duesseldorf 2>/dev/null || true
+            PORT=3004 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" --name kfz-gutachter-duesseldorf --max-memory-restart 600M --cwd "$APP"
+            pm2 save
+            sleep 5
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3004/")
+            echo "Health / -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "HEALTH FAILED ($code) — ROLLBACK."
+              pm2 delete kfz-gutachter-duesseldorf 2>/dev/null || true
+              rm -rf "$APP"; mv "${APP}-old" "$APP"
+              if [ -f "${APP}/server.js" ]; then PORT=3004 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" --name kfz-gutachter-duesseldorf --max-memory-restart 600M --cwd "$APP"; else PORT=3004 HOSTNAME=127.0.0.1 pm2 start "${APP}/.next/standalone/server.js" --name kfz-gutachter-duesseldorf --max-memory-restart 600M --cwd "${APP}/.next/standalone"; fi
+              pm2 save; echo "Rollback fertig."; exit 1
+            fi
+            rm -f /tmp/deploy-kfz-duesseldorf.tar.gz
+            echo "Duesseldorf-Deploy $(date) OK (HTTP $code)"
