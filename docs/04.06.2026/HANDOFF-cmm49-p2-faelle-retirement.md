@@ -18,7 +18,7 @@ Chokepoint (`resolveClaimId`→bridge), Bucket-1a (5 lib/claims-Files), 3 Migrat
 ---
 
 ## 1. Branch- & DB-Stand (erste 5 Minuten)
-1. **Diese Session arbeitete auf `kitta/cmm49-p2-claim-id-lookups`** (frisch off `origin/staging`). PR **#<wird unten ergänzt>** gegen staging.
+1. **Diese Session arbeitete auf `kitta/cmm49-p2-claim-id-lookups`** (frisch off `origin/staging`). **PR #2423** gegen staging.
 2. **ZUERST prüfen:** `gh pr view <PR> --json state,mergedAt`. MERGED → neuer Branch off `origin/staging`. OPEN → drauf weiter (rebase origin/staging).
 3. DB: `mcp list_migrations` — alle `cmm49_*` (bis `20260604133657`) sind live. **Keine neuen Migrations in dieser Session** (reiner Code-Repoint; die 3 re-gelandeten Migration-Files waren schon DB-appliziert, nur File-Hygiene).
 4. Klassifikation: `node scripts/cmm49-classify-faelle-reads.mjs` + `node scripts/cmm49-classify-faelle-reads.mjs --list <KLASSE>`. DB-Projekt `paizkjajbuxxksdoycev`.
