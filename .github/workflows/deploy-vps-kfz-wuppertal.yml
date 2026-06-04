@@ -15,8 +15,7 @@ name: Deploy → VPS (kfz-unfallgutachter-wuppertal.de :3003)
 
 on:
   push:
-    # TEMP: Pilot-Branch fuer den Vor-Merge-Testlauf — vor PR wieder auf [main].
-    branches: [main, kitta/cluster-ci-wuppertal-pilot]
+    branches: [main]
     paths:
       - 'kfz-gutachter-wuppertal/**'
       - '.github/workflows/deploy-vps-kfz-wuppertal.yml'
