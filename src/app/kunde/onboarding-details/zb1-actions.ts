@@ -13,6 +13,7 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export type Zb1Korrekturen = {
   kennzeichen?: string | null
@@ -107,17 +108,23 @@ async function resolveLeadIdForKunde(
   userId: string,
   userEmail: string | undefined,
 ): Promise<string | null> {
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id, lead_id, kunde_id')
-    .eq('id', fallId)
+  // CMM-49: faelle-frei — claims = SSoT. lead_id (Backfill 20260604225709 vollstaendig)
+  // + geschaedigter_user_id (==kunde_id, 0-diff) direkt aus claims. Das app-seitige
+  // kunde_id-Ownership-Gate wird value-preserving zu geschaedigter_user_id; die tiefere
+  // claim_parties-Semantik bleibt CMM-63.
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return null
+  const { data: claim } = await admin
+    .from('claims')
+    .select('lead_id, geschaedigter_user_id')
+    .eq('id', claimId)
     .maybeSingle()
-  if (!fall) return null
-  const leadId = (fall as { lead_id?: string | null }).lead_id ?? null
+  if (!claim) return null
+  const leadId = (claim.lead_id as string | null) ?? null
   if (!leadId) return null
 
-  // Primär: kunde_id-Match auf faelle (uuid → auth.users)
-  if ((fall as { kunde_id?: string | null }).kunde_id === userId) {
+  // Primär: geschaedigter_user_id-Match (== frueheres faelle.kunde_id, 0-diff)
+  if ((claim.geschaedigter_user_id as string | null) === userId) {
     return leadId
   }
 
