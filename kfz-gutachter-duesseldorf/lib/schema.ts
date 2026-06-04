@@ -80,3 +80,17 @@ export function serviceSchema(city: City) {
     category: 'Schadensgutachten',
   }
 }
+
+export function personSchema(city: City) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: CLUSTER.svName,
+    jobTitle: 'Kfz-Sachverständiger',
+    worksFor: {
+      '@type': 'AutomotiveBusiness',
+      name: `Kfz-Gutachter ${city.name} – Claimondo-Partner`,
+    },
+    areaServed: { '@type': 'City', name: city.name },
+  }
+}
