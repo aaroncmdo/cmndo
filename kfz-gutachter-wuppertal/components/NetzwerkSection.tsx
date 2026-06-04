@@ -12,7 +12,7 @@ import { NetzwerkCompare } from './NetzwerkCompare'
 // Text + 4 Fakten-Badges + Client-Toggle <NetzwerkCompare />. Keine Props.
 export function NetzwerkSection() {
   return (
-    <section className="py-[clamp(52px,7vw,84px)] bg-petrol text-white">
+    <section id="netzwerk" className="py-[clamp(52px,7vw,84px)] bg-petrol text-white">
       <div className="max-w-wrap mx-auto px-6">
         {/* ============ MOBILE-ONLY v7.3 ============ */}
         <div className="sm:hidden max-w-[440px] mx-auto" id="netzwerkMobile">
