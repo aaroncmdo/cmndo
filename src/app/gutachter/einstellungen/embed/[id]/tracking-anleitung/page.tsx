@@ -41,9 +41,22 @@ export default async function TrackingAnleitungPage({ params }: { params: Promis
 
         <TabsContent value="ga4">
           <SectionCard title="Google Analytics 4" bodyClassName="space-y-3 text-sm text-claimondo-navy">
+            <p className="font-medium">Direkt — empfohlen, kein GTM nötig</p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Trag deine GA4-Measurement-ID <code>{ga4}</code> im Wizard-Schritt „Tracking" ein.</li>
+              <li>
+                Monika feuert bei erfolgreicher Anfrage automatisch das Ereignis <code>generate_lead</code>{' '}
+                direkt in dein GA4 — client-seitig, ohne weiteren Einbau.
+              </li>
+              <li>
+                GA4 → Verwalten → Ereignisse → <code>generate_lead</code> als „Schlüsselereignis" markieren →
+                zählt als Conversion.
+              </li>
+            </ol>
+            <p className="pt-2 font-medium">Alternativ über GTM (wenn du ohnehin GTM nutzt)</p>
             <p>
-              Monika pusht Events in den <code>window.dataLayer</code> deiner Seite — du fängst sie in GA4
-              über den Google Tag Manager ab. Kein Code auf deiner Seite nötig außer dem GTM-Container.
+              Monika pusht zusätzlich Events in den <code>window.dataLayer</code> deiner Seite — die fängst du
+              über den Google Tag Manager ab.
             </p>
             <p className="font-medium">Events, die Monika sendet:</p>
             <pre className="rounded-ios-lg bg-claimondo-navy text-white text-xs p-4 overflow-x-auto">
@@ -60,19 +73,32 @@ monika_anfrage_submit // Anfrage abgeschickt`}
               <li>GTM → Tag → „GA4-Ereignis", Mess-ID <code>{ga4}</code>, Ereignisname <code>anfrage</code>, Trigger = oben.</li>
               <li>Vorschau + Veröffentlichen.</li>
             </ol>
+            <p className="text-claimondo-ondo">
+              Datenschutz: Beim Direkt-Weg lädt Monika den Google-Tag erst nach dem Absenden der Anfrage
+              (nach Einwilligung). Führe GA4 / Google Ads in deiner eigenen Datenschutzerklärung auf.
+            </p>
             {/* SCREENSHOT-PLATZ: GTM-Trigger-Konfiguration */}
           </SectionCard>
         </TabsContent>
 
         <TabsContent value="ads">
           <SectionCard title="Google Ads" bodyClassName="space-y-3 text-sm text-claimondo-navy">
-            <p>Zwei Wege — wähle einen:</p>
-            <p className="font-medium">A) Conversion aus GA4-Event (einfach)</p>
+            <p>Drei Wege — wähle einen:</p>
+            <p className="font-medium">A) Direkt im Cockpit (empfohlen — kein GTM, kein Webhook)</p>
+            <ol className="list-decimal pl-5 space-y-1">
+              <li>Google Ads → Ziele → Conversions → neue Conversion-Action „Website" (manuell mit Code).</li>
+              <li>
+                Aus dem Snippet die Conversion-ID <code>AW-XXXXXXXXX</code> und das Conversion-Label kopieren
+                und im Wizard-Schritt „Tracking" eintragen.
+              </li>
+              <li>Monika feuert die Conversion bei erfolgreicher Anfrage direkt — zählt sofort.</li>
+            </ol>
+            <p className="font-medium">B) Conversion aus GA4-Event</p>
             <ol className="list-decimal pl-5 space-y-1">
               <li>GA4 → Verwalten → Ereignisse → <code>anfrage</code> als „Schlüsselereignis" markieren.</li>
               <li>Google Ads → Ziele → Conversions → GA4 importieren → <code>anfrage</code> auswählen.</li>
             </ol>
-            <p className="font-medium">B) Offline-Conversion via Webhook (genauer, mit gclid)</p>
+            <p className="font-medium">C) Offline-Conversion via Webhook (genauer, mit gclid)</p>
             <p>
               Unser Webhook (Tab „Webhook") liefert <code>gclid</code> + <code>value_eur</code> beim
               durchgeführten Termin. Leite das über Make.com an den Google-Ads-Conversion-Upload —
