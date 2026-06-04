@@ -13,6 +13,7 @@ import { requireRole } from '@/lib/auth/guards'
 import { closeNurGutachterTerminAlsDurchgefuehrt } from '@/lib/termine/close-nur-gutachter-termin'
 import { markBillingReviewPending } from '@/lib/embed/billing-actions'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { resolveTerminLeadId } from '@/lib/termine/resolve-lead-id'
 
 // Termin-Mutationen werden in 4 Portalen angezeigt (SV/Kunde/Admin/Dispatch).
 // Helper revalidiert alle relevanten Routen.
@@ -45,7 +46,7 @@ export async function startNavigation(
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, navigation_started_at')
+    .select('id, fall_id, claim_id, lead_id, sv_id, start_zeit, navigation_started_at')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -72,9 +73,9 @@ export async function startNavigation(
 
   // WhatsApp an Kunden (non-critical)
   try {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
-    if (fall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    const leadId = await resolveTerminLeadId(db, termin)
+    if (leadId) {
+      const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
       if (lead?.telefon) {
         await sendCommunication('sv_losgefahren', {
           telefon: lead.telefon,
@@ -128,7 +129,7 @@ export async function updateLivePosition(
   // Termin + Zieladresse laden
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, sv_angekommen_am, reminder_15min_sent_at, reminder_5min_sent_at, start_zeit, besichtigungsort_lat, besichtigungsort_lng')
+    .select('id, fall_id, claim_id, lead_id, sv_id, sv_angekommen_am, reminder_15min_sent_at, reminder_5min_sent_at, start_zeit, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -137,14 +138,15 @@ export async function updateLivePosition(
   if (tErr || !termin) return { error: 'Termin nicht gefunden' }
   if (termin.sv_angekommen_am) return { success: true, arrived: true }
 
-  // Fall-Adresse fuer Fallback-Adresse laden (schadenort_*)
-  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('id', termin.fall_id)
-    .single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  // CMM-49: schadenort_* + lead_id faelle-frei direkt aus claims (via termin.claim_id).
+  const { data: fallClaim } = termin.claim_id
+    ? await db
+        .from('claims')
+        .select('lead_id, schadenort_adresse, schadenort_plz, schadenort_ort')
+        .eq('id', termin.claim_id)
+        .maybeSingle()
+    : { data: null }
+  const leadId = (termin.lead_id as string | null) ?? (fallClaim?.lead_id as string | null) ?? null
 
   let distanceMeters: number | null = null
   let etaMinutes: number | null = null
@@ -192,8 +194,8 @@ export async function updateLivePosition(
   if (etaMinutes !== null && etaMinutes <= 15 && !termin.reminder_15min_sent_at) {
     await db.from('gutachter_termine').update({ reminder_15min_sent_at: now }).eq('id', terminId)
     try {
-      if (fall?.lead_id) {
-        const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+      if (leadId) {
+        const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
         const { data: svProfile } = await db.from('sachverstaendige').select('profile_id').eq('id', sv.id).single()
         let svName = 'Gutachter'
         if (svProfile?.profile_id) {
@@ -251,7 +253,7 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, sv_angekommen_am')
+    .select('id, fall_id, claim_id, lead_id, sv_id, sv_angekommen_am')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -266,15 +268,15 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
 
   // WhatsApp T23 (sv_angekommen): SV angekommen
   try {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+    const leadId = await resolveTerminLeadId(db, termin)
     const { data: svRec } = await db.from('sachverstaendige').select('profile_id').eq('id', sv.id).single()
     let svName = 'Gutachter'
     if (svRec?.profile_id) {
       const { data: p } = await db.from('profiles').select('vorname, nachname').eq('id', svRec.profile_id).single()
       if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ')
     }
-    if (fall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    if (leadId) {
+      const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
       if (lead?.telefon) {
         await sendCommunication('sv_angekommen', {
           telefon: lead.telefon,
@@ -286,7 +288,7 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
     }
 
     // Timeline
-    if (fall) {
+    if (termin.fall_id) {
       await db.from('timeline').insert({
         fall_id: termin.fall_id,
         typ: 'termin',
@@ -415,7 +417,7 @@ export async function completeBegutachtung(
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, durchgefuehrt_am')
+    .select('id, fall_id, claim_id, lead_id, sv_id, durchgefuehrt_am')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -466,9 +468,9 @@ export async function completeBegutachtung(
     const discrepancyCount = docs?.length ?? 0
 
     // WhatsApp T8: Begutachtung fertig → gutachten_fertig (KFZ-201: sv_begutachtung_fertig konsolidiert)
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
-    if (fall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+    const leadId = await resolveTerminLeadId(db, termin)
+    if (leadId) {
+      const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
       if (lead?.telefon) {
         await sendCommunication('gutachten_fertig', {
           telefon: lead.telefon,
@@ -658,19 +660,15 @@ export async function reportKundeGrundEmbedB(
   const db = createAdminClient()
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, lead_id, durchgefuehrt_am')
+    .select('id, sv_id, fall_id, claim_id, lead_id, durchgefuehrt_am')
     .eq('id', terminId)
     .eq('sv_id', sv.id)
     .single()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
   if (termin.durchgefuehrt_am) return { ok: false, error: 'Termin wurde bereits als durchgeführt markiert' }
 
-  // lead_id aufloesen (Termin direkt, sonst via fall_id→faelle).
-  let leadId = (termin.lead_id as string | null) ?? null
-  if (!leadId && termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).maybeSingle()
-    leadId = (fall?.lead_id as string | null) ?? null
-  }
+  // CMM-49: lead_id faelle-frei aufloesen (termin.lead_id -> claims.lead_id via claim_id).
+  const leadId = await resolveTerminLeadId(db, termin)
   if (!leadId) return { ok: false, error: 'Kein Lead fuer diesen Termin' }
 
   // gfa (Monika-B) aufloesen: primaer ueber konvertiert_zu_lead_id, Fallback fall_id.
