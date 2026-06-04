@@ -312,8 +312,11 @@ export default function EmbedSiteWizard({
       {step === 2 && (
         <SectionCard title="Tracking & Conversions (optional)" bodyClassName="space-y-4">
           <p className="text-sm text-claimondo-ondo">
-            Verbinde Monika mit deinem GA4 / Google Ads. Wir senden bei Anfrage, vereinbartem und
-            durchgeführtem Termin einen HMAC-signierten Webhook an deine URL.
+            Verbinde Monika mit deinem GA4 / Google Ads. <strong>Direkt</strong> (empfohlen): trag unten deine
+            GA4-Measurement-ID bzw. Google-Ads Conversion-ID + Label ein — Monika feuert die Conversion bei
+            erfolgreicher Anfrage direkt in dein Konto, ohne weiteres Setup. <strong>Oder per Webhook</strong>{' '}
+            für eigene Pipelines (Make/Zapier): HMAC-signiert bei Anfrage, vereinbartem und durchgeführtem Termin.
+            Pro Kanal nur einen Weg nutzen, sonst zählt die Conversion doppelt.
           </p>
           <TextField
             label="Webhook-URL (optional)"
@@ -329,6 +332,20 @@ export default function EmbedSiteWizard({
             onChange={(e) => patch({ tracking_ga4_measurement_id: e.target.value })}
             hint="Für client-seitiges Tracking. Format G-XXXXXXX."
             placeholder="G-XXXXXXX"
+          />
+          <TextField
+            label="Google-Ads Conversion-ID (optional)"
+            value={form.tracking_gads_conversion_id}
+            onChange={(e) => patch({ tracking_gads_conversion_id: e.target.value })}
+            hint="Aus Google Ads → Conversions → dein Conversion-Snippet. Format AW-XXXXXXXXX."
+            placeholder="AW-XXXXXXXXX"
+          />
+          <TextField
+            label="Google-Ads Conversion-Label (optional)"
+            value={form.tracking_gads_conversion_label}
+            onChange={(e) => patch({ tracking_gads_conversion_label: e.target.value })}
+            hint="Das Label aus demselben Snippet (send_to = Conversion-ID/Label)."
+            placeholder="AbC-D_efGhIjK"
           />
 
           {mode === 'edit' && trackingMeta ? (

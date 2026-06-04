@@ -95,6 +95,7 @@ async function boot(): Promise<void> {
       siteToken: remote?.site_token ?? null,
       cluster: null,
       stadtSlug: null,
+      tracking: remote?.tracking ?? null,
     }
   } else if (d.cluster) {
     // ── kfz_gutachter_lp: alles aus data-* (Claimondo-eigene LP) ──
@@ -115,6 +116,7 @@ async function boot(): Promise<void> {
       siteToken: null,
       cluster: d.cluster,
       stadtSlug: d.stadt || null,
+      tracking: null,
     }
   } else {
     return // weder site-id noch cluster
