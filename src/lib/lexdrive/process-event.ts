@@ -347,23 +347,25 @@ async function sendEskalationsMitteilungen(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-49: claims-direkt (faelle-frei). geschaedigter_user_id==kunde_id + sv_id (0-diff 78/0/0),
+  // kundenbetreuer_id war schon claims-SSoT (CMM-44 SP-A). NON-Auth Empfaenger-Liste.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db
+    .from('claims')
+    .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return
 
   const stufe = payload.eskalation_stufe ?? 'tag14'
   const titel = `VS-Eskalation ${stufe} — Ergebnis eingetragen`
   const inhalt = payload.ergebnis ?? 'Kein Ergebnistext hinterlegt.'
 
   const empfaenger: Array<{ id: string; rolle: 'kundenbetreuer' | 'sachverstaendiger' | 'kunde' }> = []
-  if (fall.kunde_id) empfaenger.push({ id: fall.kunde_id, rolle: 'kunde' })
-  if (fallClaim?.kundenbetreuer_id) empfaenger.push({ id: fallClaim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
-  if (fall.sv_id) empfaenger.push({ id: fall.sv_id, rolle: 'sachverstaendiger' })
+  if (claim.geschaedigter_user_id) empfaenger.push({ id: claim.geschaedigter_user_id, rolle: 'kunde' })
+  if (claim.kundenbetreuer_id) empfaenger.push({ id: claim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+  if (claim.sv_id) empfaenger.push({ id: claim.sv_id, rolle: 'sachverstaendiger' })
 
   await createMitteilungMulti(empfaenger, {
     kategorie: 'update',
@@ -402,24 +404,26 @@ async function sendAuszahlungMitteilungen(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-49: claims-direkt (faelle-frei). geschaedigter_user_id==kunde_id + sv_id (0-diff 78/0/0),
+  // kundenbetreuer_id war schon claims-SSoT (CMM-44 SP-A). NON-Auth Empfaenger-Liste.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db
+    .from('claims')
+    .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return
 
   const kundeHat = payload.auszahlung_kunde_eingegangen_am != null
   const svHat = payload.auszahlung_gutachter_eingegangen_am != null
 
-  if (fallClaim?.kundenbetreuer_id) {
+  if (claim.kundenbetreuer_id) {
     const teile: string[] = []
     if (kundeHat) teile.push(`Kunde: ${payload.auszahlung_kunde_betrag ?? '—'} EUR`)
     if (svHat) teile.push(`SV: Gutachter-Honorar eingegangen`)
     await createMitteilung({
-      empfaenger_id: fallClaim.kundenbetreuer_id,
+      empfaenger_id: claim.kundenbetreuer_id,
       empfaenger_rolle: 'kundenbetreuer',
       kategorie: 'update',
       titel: 'Auszahlung-Split eingegangen',
@@ -429,9 +433,9 @@ async function sendAuszahlungMitteilungen(
       prioritaet: 'normal',
     })
   }
-  if (kundeHat && fall.kunde_id) {
+  if (kundeHat && claim.geschaedigter_user_id) {
     await createMitteilung({
-      empfaenger_id: fall.kunde_id,
+      empfaenger_id: claim.geschaedigter_user_id,
       empfaenger_rolle: 'kunde',
       kategorie: 'update',
       titel: 'Auszahlung eingegangen',
@@ -441,9 +445,9 @@ async function sendAuszahlungMitteilungen(
       prioritaet: 'hoch',
     })
   }
-  if (svHat && fall.sv_id) {
+  if (svHat && claim.sv_id) {
     await createMitteilung({
-      empfaenger_id: fall.sv_id,
+      empfaenger_id: claim.sv_id,
       empfaenger_rolle: 'sachverstaendiger',
       kategorie: 'update',
       titel: 'Gutachter-Honorar eingegangen',
@@ -465,16 +469,17 @@ async function sendKbMitteilung(
   prioritaet: 'normal' | 'hoch' = 'normal',
 ): Promise<void> {
   const db = createAdminClient()
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .single()
-  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
-  if (!fallClaim?.kundenbetreuer_id) return
+  // CMM-49: claims-direkt (faelle-frei). kundenbetreuer_id ist claims-SSoT (CMM-44 SP-A). NON-Auth.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db
+    .from('claims')
+    .select('kundenbetreuer_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim?.kundenbetreuer_id) return
   await createMitteilung({
-    empfaenger_id: fallClaim.kundenbetreuer_id,
+    empfaenger_id: claim.kundenbetreuer_id,
     empfaenger_rolle: 'kundenbetreuer',
     kategorie: 'task',
     titel,
@@ -496,12 +501,15 @@ async function sendSvKonfrontationsAnfrage(
   payload: LexDriveEventPayload,
 ): Promise<void> {
   const db = createAdminClient()
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, sv_id')
-    .eq('id', fallId)
-    .single()
-  if (!fall?.sv_id) return
+  // CMM-49: claims-direkt (faelle-frei). sv_id 0-diff zu faelle.sv_id. NON-Auth.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db
+    .from('claims')
+    .select('sv_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim?.sv_id) return
 
   const terminDatumRaw = (payload as Record<string, unknown>).termin_datum
   const terminLabel =
@@ -516,7 +524,7 @@ async function sendSvKonfrontationsAnfrage(
       : 'offen'
 
   await createMitteilung({
-    empfaenger_id: fall.sv_id as string,
+    empfaenger_id: claim.sv_id,
     empfaenger_rolle: 'sachverstaendiger',
     kategorie: 'task',
     titel: 'Konfrontations-Begleitung angefragt',
@@ -559,19 +567,22 @@ async function sendKundeKonfrontationBestaetigt(
 ): Promise<void> {
   const db = createAdminClient()
   // CMM-44 SP-D PR2a: nachbesichtigung_sv_termin_vereinbart_am aus gutachter_termine (SSoT).
-  const { data: fall } = await db
-    .from('faelle')
-    .select('kunde_id, claim_id')
-    .eq('id', fallId)
-    .single()
-  if (!fall?.kunde_id) return
+  // CMM-49: claims-direkt (faelle-frei). geschaedigter_user_id==kunde_id (0-diff). NON-Auth Empfaenger.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db
+    .from('claims')
+    .select('geschaedigter_user_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim?.geschaedigter_user_id) return
 
   let aktTerminProcEvent: { nachbesichtigung_sv_termin_vereinbart_am: string | null } | null = null
-  if ((fall as { claim_id?: string | null }).claim_id) {
+  {
     const { data: at } = await db
       .from('gutachter_termine')
       .select('nachbesichtigung_sv_termin_vereinbart_am')
-      .eq('claim_id', (fall as { claim_id: string }).claim_id)
+      .eq('claim_id', claimId)
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -588,7 +599,7 @@ async function sendKundeKonfrontationBestaetigt(
   })
 
   await createMitteilung({
-    empfaenger_id: fall.kunde_id as string,
+    empfaenger_id: claim.geschaedigter_user_id,
     empfaenger_rolle: 'kunde',
     kategorie: 'update',
     titel: 'Dein Sachverständiger ist bei der Nachbesichtigung dabei',
@@ -615,17 +626,17 @@ async function handleVsKuerztSideEffects(
   if (typ === 'technisch' || typ === 'gemischt') {
     // Auto-Trigger der Stellungnahme — fallNr für webhook_events-Audit nachladen
     const db = createAdminClient()
-    const { data: fall } = await db
-      .from('faelle')
-      .select('claims:claim_id(claim_nummer)')
-      .eq('id', fallId)
-      .single()
+    // CMM-49: claim_nummer claims-direkt (faelle-frei). Nur Audit-Label, NON-Auth.
+    const claimId = await resolveClaimId(db, fallId)
+    const { data: claim } = claimId
+      ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
+      : { data: null }
     const grundFromPayload = typeof payload.vs_kuerzung_grund === 'string'
       ? payload.vs_kuerzung_grund
       : payload.grund ?? 'Technische VS-Kürzung'
     await processLexDriveEvent({
       fallId,
-      fallNr: (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? fallId.slice(0, 8),
+      fallNr: (claim?.claim_nummer as string | null) ?? fallId.slice(0, 8),
       eventType: 'technische_stellungnahme_benoetigt',
       payload: { grund: grundFromPayload },
       externalEventId: null,
