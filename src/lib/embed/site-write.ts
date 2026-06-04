@@ -25,6 +25,9 @@ export interface EmbedSiteFormData {
   // Tracking (8b) — beide optional
   tracking_webhook_url: string
   tracking_ga4_measurement_id: string
+  // Per-SV Ads-Conversion (AAR-939) — client-seitiges gtag, beide optional
+  tracking_gads_conversion_id: string
+  tracking_gads_conversion_label: string
 }
 
 /** AGB-Versions-Hash, der bei Variante-B-Zustimmung gespeichert wird (Q7). */
@@ -129,5 +132,7 @@ export function emptyEmbedSiteForm(): EmbedSiteFormData {
     agb_akzeptiert: false,
     tracking_webhook_url: '',
     tracking_ga4_measurement_id: '',
+    tracking_gads_conversion_id: '',
+    tracking_gads_conversion_label: '',
   }
 }

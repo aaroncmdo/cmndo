@@ -64,3 +64,19 @@ export function breadcrumbSchema(city: City, route: 'hub' | 'spoke') {
   ]
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items }
 }
+
+export function serviceSchema(city: City) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    serviceType: 'Kfz-Schadensgutachten',
+    name: `Kfz-Gutachten ${city.name}`,
+    provider: {
+      '@type': 'AutomotiveBusiness',
+      name: `Kfz-Gutachter ${city.name} – Claimondo-Partner`,
+      telephone: CLUSTER.phone.tel,
+    },
+    areaServed: { '@type': 'City', name: city.name },
+    category: 'Schadensgutachten',
+  }
+}

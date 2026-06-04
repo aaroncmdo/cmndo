@@ -48,6 +48,8 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
     agb_akzeptiert: Boolean(data.agb_akzeptiert_am),
     tracking_webhook_url: data.tracking_webhook_url ?? '',
     tracking_ga4_measurement_id: data.tracking_ga4_measurement_id ?? '',
+    tracking_gads_conversion_id: data.tracking_gads_conversion_id ?? '',
+    tracking_gads_conversion_label: data.tracking_gads_conversion_label ?? '',
   }
 
   return (

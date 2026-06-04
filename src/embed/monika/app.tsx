@@ -10,6 +10,7 @@ import type { MonikaConfig, MonikaState, DaySlot, TimeSlot, AnfragePayload } fro
 import { submitAnfrage } from './api'
 import { captureAttribution } from './attribution'
 import { track } from './tracking'
+import { fireSiteConversion } from './conversion'
 
 const DAY_LABEL: Record<DaySlot, string> = {
   asap: 'So schnell wie möglich',
@@ -70,11 +71,16 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       honeypot: honeypot.value,
       ...attr,
     }
-    track(cfg, 'monika_anfrage_submit')
     const result = await submitAnfrage(cfg.base, payload)
     sending.value = false
-    if (result.ok) go('success')
-    else error.value = result.error
+    if (result.ok) {
+      // G1: erst bei Erfolg zaehlen (vorher feuerte es auf Submit-Versuch)
+      track(cfg, 'monika_anfrage_submit')
+      fireSiteConversion(cfg)
+      go('success')
+    } else {
+      error.value = result.error
+    }
   }
 
   // ── FAB (idle) ──
