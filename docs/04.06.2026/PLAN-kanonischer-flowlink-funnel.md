@@ -77,3 +77,24 @@ Umbau auf die 5 Gebiete:
 4. Funnel-Gaps umsetzen (config-vs-Steps-Entscheidung zuerst), koordiniert mit aar-939.
 
 **Offene Challenge-Fragen:** Schadenfotos-Verortung (FlowLink vs Onboarding) · config-getrieben vs explizite Steps · Claim-Minimum für `convertLeadToClaim`.
+
+---
+
+## 7. Lead→Entity-Feld-Contract — live verifiziert (Referenz zu #2429 §6)
+
+**Stand 2026-06-04**, Spalten live gegen `paizkjajbuxxksdoycev`. Unser (Lead-Strecke) Teil des geteilten Contracts aus #2429 §6. **Plan-only** — DDL erst beim Verdrahten (nach CMM-49, koordiniert, via `apply_migration`).
+
+| Entity-Resolver (#2429 §5) | Lead-Feld | Stand |
+|---|---|---|
+| `ensureVehicleFromKennzeichen` | `gegner_kennzeichen` + `gegner_fahrzeugtyp` | ✅ vorhanden |
+| `ensureVersicherung` | `gegner_versicherung` (+ `gegner_versicherung_id`) | ✅ vorhanden |
+| `ensurePersonForData` (Halter-Person) | `halter_*` + `ist_fahrzeughalter` + `ansprechpartner_beziehung` + `halter_ungleich_fahrer_flag` | ✅ — Halter-Toggle Person-Fall voll gedeckt |
+| `ensureFirma` (Dedup `normalized_name`+`ust_id`) | `firma_ustid` | ❌ **fehlt** (keine `ust`-Spalte auf `leads`) |
+| `ensureFirma` (Gegner/Halter-Firma) | per-Rolle `firma_name` | ⚠️ `firma_name` ist **Kunde-Firma** (gewerbl. Geschädigter); Gegner-Firma = Freitext `gegner_name`, Halter-Firma = kein Feld (`halter_*` = Person) |
+
+**Offene Lead-Strecke-Arbeit (Gaps, die WIR schließen — post-CMM-49):**
+1. **`leads.firma_ustid`** (+ ggf. per-Rolle) ergänzen — ust_id ist halber `firmen`-Dedup-Key.
+2. **Strukturierte per-Rolle-Firma:** `gegner_ist_firma`/`halter_ist_firma`-Flag + `firma_name`/`ustid` je Rolle, damit `ensureFirma` den richtigen Namen je Partei bekommt (heute würde `lead.firma_name`→Gegner/Halter die Kunde-Firma fehlzuordnen).
+3. FlowLink Gebiet 1 „Halter = Person oder Firma?" + Gebiet 3 Gegner-Erfassung füllen genau diese Felder (dynamic-display: vorhandene vorausgefüllt).
+
+**Offene Frage an Entity (§5):** `ensureFirma` `ust_id`-**optional** (normalized_name-only Dedup wenn null) — Gegner/Halter-Firmen tragen am Intake fast nie ust_id.
