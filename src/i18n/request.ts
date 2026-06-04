@@ -19,6 +19,14 @@ export default getRequestConfig(async () => {
   const pathname = hdrs.get('x-pathname')
   const source = classifyLocaleSource(pathname)
 
+  // Interne Portale (admin/dispatch/sv/kanzlei/makler/mitarbeiter/faelle/gutachter)
+  // sind deutsch-only by design (Aaron 04.06.2026): NUR der Endkunde wird lokalisiert.
+  // Cookie/Profile bewusst NICHT respektieren — garantiert de fuer KB/SV/Admin/Dispatch.
+  if (source === 'intern') {
+    const messages = (await import(`./messages/${DEFAULT_LOCALE}.json`)).default
+    return { locale: DEFAULT_LOCALE, messages }
+  }
+
   let resolved: Locale | null = null
   try {
     if (source === 'profile') {
