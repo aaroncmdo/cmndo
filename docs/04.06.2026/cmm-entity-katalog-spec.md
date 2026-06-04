@@ -125,10 +125,22 @@ Welche flachen Lead-Felder die `ensure<Entity>` brauchen — Lead/FlowLink garan
 - **NEU aggregieren:** `vorschaeden[]` / `schaden` (vehicle-bound) · resolved `gegner_name`/`gegner_versicherung_name`/`werkstatt_name`.
 - **Rollen-scoped** (Kunde: eigene Partei + Gegner-Summary + Status; SV: Begutachtung; Gast: leak-safe) — **`v_claim_parties_safe`/§2-Invariante wahren** (Entity-Sourcing leakt nicht mehr PII über Rollen).
 
-**Eingefrorener `v_claim_full`-Contract für CMM-49 (Gegner/VS = flache Namen, additiv):**
-- `gegner_name` = `COALESCE(firmen.name, personen-Name)` (Gegner = Firma oder Mensch)
-- `gegner_versicherung_name` = `versicherungen.name` via `gegner_versicherung_id`
-- ids bleiben (`gegner_versicherung_id`/`gegnerisches_vehicle_id`). Konsistent zu den schon-flachen `halter_*`/`fahrzeug_*`/`kennzeichen`. Namen+Typen beim Freeze fixiert, nur additiv.
+**🔒 EINGEFRORENER `v_claim_full`-Contract v1 (für CMM-49 Bucket-2 — Namen+Typen FIXIERT 2026-06-04, live verifiziert):**
+
+CMM-49 routet Bucket-2-/faelle-Embed-Reads auf genau diese Spalten. **Garantie:** beim Entity-Sourcing (Plan 4) wechselt nur die *Quelle* der Werte (flat→Entität), **nie Name oder Typ** → kein per-File-Doppel-Touch.
+
+*Bestand, flach, bleibt:*
+- **Halter:** `halter_name` text · `halter_vorname` text · `halter_nachname` text · `halter_email` text · `halter_telefon` text · `halter_strasse` text · `halter_plz` text · `halter_stadt` text · `halter_geburtsdatum` date · `halter_ungleich_fahrer` boolean
+- **Fahrzeug:** `fahrzeug_hersteller` text · `fahrzeug_modell` text · `fahrzeug_typ` text · `kennzeichen` text · `auslandskennzeichen` boolean
+- **Gegner (ids/refs):** `gegner_bekannt` boolean · `gegner_fahrzeugtyp` text · `gegner_versicherung_id` uuid · `gegnerisches_vehicle_id` uuid · `gegner_versicherungsnummer` text · `gegner_aktenzeichen` text · `gegner_anzahl_beteiligte` integer
+- **VS:** `vs_ablehnungs_grund` text · `vs_eskalationsstufe` text · `vs_korrespondenz` jsonb
+- **jsonb-Aggregate:** `parties` jsonb · `vehicle_involvements` jsonb · `vorschaden_typ_b_bericht` jsonb
+
+*NEU — Entscheidung Gegner/VS = FLACHE NAMEN (in Plan 4 additiv ergänzt; Namen+Typen hiermit fixiert):*
+- `gegner_name` **text** — entity-sourced `COALESCE(firmen.name, personen-Name)` der `verursacher`-Partei (Gegner = Firma ODER Mensch)
+- `gegner_versicherung_name` **text** — `versicherungen.name` via `gegner_versicherung_id`
+
+→ **CMM-49: flache Namen lesen** (`gegner_name`/`gegner_versicherung_name`), **KEINE id→entity-Joins im App-Code**. Die ids bleiben zusätzlich für echten FK-Bedarf.
 
 ---
 
