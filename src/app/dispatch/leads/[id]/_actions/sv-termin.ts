@@ -10,6 +10,7 @@ import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { checkSvReachability, precomputeSvSlotEtas, isSlotReachable } from '@/lib/dispatch/reachability'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 
 /**
  * Sticky-SV-Lookup: hat dieser Lead bereits einen gewohnten SV? Match per
@@ -600,10 +601,30 @@ export async function getNextFreeSlotsForSv(
 
   const alleKandidaten: SlotCandidate[] = []
   const kandidat = new Date(now)
-  // Frühestens morgen 09:00 — heute anzurufen + morgen Termin ist normales
-  // Dispatch-Tempo.
-  kandidat.setDate(kandidat.getDate() + 1)
-  kandidat.setHours(9, 0, 0, 0)
+
+  // AAR-958: Slot-Grid in Berlin-Geschaeftszeit (Mo–Fr 09:00–16:00). Auf UTC-
+  // Node liefern getHours/getDay/setHours UTC -> +1/+2h-Versatz. Wochentag/
+  // Stunde aus der Berlin-Wall-Clock, Tageswechsel via berlinWallClockToUtc
+  // (DST-korrekt). `kandidat` bleibt echter UTC-Instant (Konflikt/Output korrekt).
+  const berlinParts = (d: Date) => {
+    const wall = toBerlinWallClock(d.toISOString())
+    return {
+      datum: wall.slice(0, 10),
+      stunde: Number(wall.slice(11, 13)),
+      wochentag: new Date(`${wall.slice(0, 10)}T00:00:00Z`).getUTCDay(),
+    }
+  }
+  const aufBerlinTag9 = (basis: Date, tagePlus: number) => {
+    const tag = new Date(`${berlinParts(basis).datum}T00:00:00Z`)
+    tag.setUTCDate(tag.getUTCDate() + tagePlus)
+    return new Date(berlinWallClockToUtc(`${tag.toISOString().slice(0, 10)}T09:00:00`))
+  }
+  const weiter = () => {
+    kandidat.setTime(kandidat.getTime() + 60 * 60_000)
+    if (berlinParts(kandidat).stunde >= 17) kandidat.setTime(aufBerlinTag9(kandidat, 1).getTime())
+  }
+  // Frühestens morgen 09:00 Berlin — heute anrufen + morgen Termin = normales Tempo.
+  kandidat.setTime(aufBerlinTag9(now, 1).getTime())
 
   const maxIter = 12 * 7 * 24
   let i = 0
@@ -614,11 +635,11 @@ export async function getNextFreeSlotsForSv(
 
   while (alleKandidaten.length < rohdatenLimit && kandidat < inZwoelfWochen && i < maxIter) {
     i++
-    const wochentag = kandidat.getDay()
+    const { stunde, wochentag } = berlinParts(kandidat)
     const iso = wochentag === 0 ? 7 : wochentag
     const istWerktag = wochentag !== 0 && wochentag !== 6
     const passtWochentag = wochentageFilter ? wochentageFilter.has(iso) : istWerktag
-    if (passtWochentag && kandidat.getHours() < 16) {
+    if (passtWochentag && stunde < 16) {
       const slotEnd = new Date(kandidat.getTime() + slotDauerMin * 60_000)
       const konflikt = (bestehend ?? []).some(
         (b) => new Date(b.start_zeit) < slotEnd && new Date(b.end_zeit) > kandidat,
@@ -629,11 +650,7 @@ export async function getNextFreeSlotsForSv(
         if (slotEtaCtx) {
           const reach = isSlotReachable(kandidat, slotEnd, slotEtaCtx)
           if (!reach.reachable) {
-            kandidat.setTime(kandidat.getTime() + 60 * 60_000)
-            if (kandidat.getHours() >= 17) {
-              kandidat.setDate(kandidat.getDate() + 1)
-              kandidat.setHours(9, 0, 0, 0)
-            }
+            weiter()
             continue
           }
         }
@@ -644,11 +661,7 @@ export async function getNextFreeSlotsForSv(
         })
       }
     }
-    kandidat.setTime(kandidat.getTime() + 60 * 60_000)
-    if (kandidat.getHours() >= 17) {
-      kandidat.setDate(kandidat.getDate() + 1)
-      kandidat.setHours(9, 0, 0, 0)
-    }
+    weiter()
   }
 
   // Ranking: wunschtermin > gleicher_tag > nahe > nach. Bei gleichem Match-Typ
