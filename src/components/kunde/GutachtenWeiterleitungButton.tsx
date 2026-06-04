@@ -6,6 +6,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { useTranslations } from 'next-intl'
 import { Modal } from '@/components/primitives/Modal'
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 }
 
 export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: Props) {
+  const t = useTranslations('gutachtenWeiterleitung')
   const [open, setOpen] = useState(false)
   const [email, setEmail] = useState(defaultEmail ?? '')
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle')
@@ -38,17 +40,17 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fall_id: fallId, empfaenger_email: email.trim() }),
         })
-        const body = await res.json().catch(() => ({ success: false, error: 'Ungültige Antwort' }))
+        const body = await res.json().catch(() => ({ success: false, error: t('fehlerUngueltigeAntwort') }))
         if (body?.success) {
           setStatus('success')
         } else {
           setStatus('error')
-          setFehlerText(body?.error ?? 'Unbekannter Fehler.')
+          setFehlerText(body?.error ?? t('fehlerUnbekannt'))
         }
       } catch (err) {
         console.error('[GutachtenWeiterleitung] fetch error:', err)
         setStatus('error')
-        setFehlerText('Netzwerkfehler. Bitte erneut versuchen.')
+        setFehlerText(t('fehlerNetzwerk'))
       }
     })
   }
@@ -65,27 +67,26 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
           background: 'var(--brand-surface, #ffffff)',
         }}
       >
-        Gutachten per E-Mail zusenden
+        {t('trigger')}
       </button>
 
       <Modal
         open={open}
         onClose={onClose}
         maxWidth={448}
-        ariaLabel="Gutachten per E-Mail zusenden"
+        ariaLabel={t('modalTitel')}
       >
         <h2
               className="text-base font-semibold mb-1"
               style={{ color: 'var(--brand-text-primary, #0D1B3E)' }}
             >
-              Gutachten per E-Mail zusenden
+              {t('modalTitel')}
             </h2>
             <p
               className="text-xs mb-4"
               style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
             >
-              Sie erhalten einen geschützten Download-Link, der 48 Stunden gültig ist.
-              Maximal 3 Anfragen pro Fall und Tag.
+              {t('intro')}
             </p>
 
             {status === 'success' ? (
@@ -96,14 +97,14 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                   color: 'var(--brand-success, #065f46)',
                 }}
               >
-                E-Mail wurde versendet. Bitte prüfen Sie auch den Spam-Ordner.
+                {t('erfolg')}
                 <div className="mt-3 text-right">
                   <button
                     type="button"
                     className="text-xs font-medium underline"
                     onClick={onClose}
                   >
-                    Schließen
+                    {t('schliessen')}
                   </button>
                 </div>
               </div>
@@ -114,14 +115,14 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                     className="text-xs font-medium"
                     style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
                   >
-                    Empfänger-E-Mail
+                    {t('empfaengerEmail')}
                   </span>
                   <input
                     type="email"
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="ihre-email@beispiel.de"
+                    placeholder={t('emailPlaceholder')}
                     // AAR-452: text-base verhindert iOS-Autozoom + min-h 44px
                     className="mt-1 w-full rounded-ios-md border px-3 min-h-[44px] text-base"
                     style={{
@@ -148,7 +149,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                     className="text-sm px-4 min-h-[44px] rounded-ios-md"
                     style={{ color: 'var(--brand-text-secondary, #4b5563)' }}
                   >
-                    Abbrechen
+                    {t('abbrechen')}
                   </button>
                   <button
                     type="submit"
@@ -159,7 +160,7 @@ export default function GutachtenWeiterleitungButton({ fallId, defaultEmail }: P
                       color: 'var(--brand-text-on-primary, #ffffff)',
                     }}
                   >
-                    {isPending ? 'Wird versendet…' : 'Link senden'}
+                    {isPending ? t('linkSendenPending') : t('linkSenden')}
                   </button>
                 </div>
               </form>
