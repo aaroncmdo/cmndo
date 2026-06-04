@@ -204,6 +204,10 @@ export default function FlowWizardKfz({
   // Beide Inputs beim Mount fixieren → STEPS bleibt session-stabil → Indizes gültig.
   const [initialNeedsBooking] = useState(needsBooking === true)
   const [initialSchuldfrage] = useState<string | null>(lead.schuldfrage ?? null)
+  // AAR-956 gegner-conditional: aktuelle Schuldfrage-Wahl (der Quali-Step setzt sie in-session).
+  // Gespeist in die feststellung-initialValues, damit conditional_on={schuldfrage:gegner} fuer die
+  // gegner-Felder dort greift — sonst stuende nur der page-load-Wert (Quali-Wahl im selben /flow waere stale).
+  const [schuldfrageWahl, setSchuldfrageWahl] = useState<string | null>(initialSchuldfrage)
   const istIncomplete = initialNeedsBooking
   const qualiPending = istIncomplete && !lead.disqualifiziert && !initialSchuldfrage
   // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
@@ -485,6 +489,7 @@ export default function FlowWizardKfz({
               <FlowQualiStep
                 token={token}
                 vorname={editVorname || lead.vorname || null}
+                onSchuldfrage={setSchuldfrageWahl}
                 onWeiter={() => setStepIndex(stepIndex + 1)}
               />
             )}
@@ -494,7 +499,7 @@ export default function FlowWizardKfz({
               <FlowFeststellungStep
                 token={token}
                 phasen={feststellungPhasen ?? []}
-                initialValues={feststellungWerte ?? {}}
+                initialValues={{ ...(feststellungWerte ?? {}), schuldfrage: schuldfrageWahl }}
                 onWeiter={() => setStepIndex(stepIndexById('termin'))}
               />
             )}

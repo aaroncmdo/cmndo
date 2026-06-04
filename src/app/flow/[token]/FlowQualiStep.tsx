@@ -14,10 +14,12 @@ export function FlowQualiStep({
   token,
   vorname,
   onWeiter,
+  onSchuldfrage,
 }: {
   token: string
   vorname: string | null
   onWeiter: () => void
+  onSchuldfrage?: (v: string) => void
 }) {
   const t = useTranslations('selfService')
   const [phase, setPhase] = useState<'frage' | 'sende' | 'abbruch' | 'fehler'>('frage')
@@ -37,6 +39,9 @@ export function FlowQualiStep({
         setPhase('abbruch')
         return
       }
+      // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden, damit die
+      // feststellung-values sie kennt (conditional_on={schuldfrage:gegner} fuer die gegner-Felder).
+      onSchuldfrage?.(value)
       onWeiter()
     } catch {
       setPhase('fehler')
