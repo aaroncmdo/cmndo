@@ -16,6 +16,7 @@
 //    im SV-Wrapper als Custom-Slots)
 //  - Kunde-`FallDetailSections` Fahrzeug/Unfall/Vorschäden-Sections
 
+import { useTranslations } from 'next-intl'
 import {
   UserIcon,
   CarIcon,
@@ -76,6 +77,9 @@ export function StammdatenReadSection({
   title = 'Stammdaten',
   className = '',
 }: StammdatenReadSectionProps) {
+  // Portal-i18n Leak 4: innere Feldlabels lokalisiert (Kunde sieht Übersetzung,
+  // interne Rollen sehen die de-Werte — locale-source 'intern' forced de).
+  const t = useTranslations('stammdaten')
   const kundenName = lead
     ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || null
     : null
@@ -203,22 +207,22 @@ export function StammdatenReadSection({
               <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-claimondo-ondo">
                 {fahrbereit === true && (
                   <span className="inline-flex items-center gap-1 text-emerald-700">
-                    <CheckCircle2Icon className="w-3 h-3" /> fahrbereit
+                    <CheckCircle2Icon className="w-3 h-3" /> {t('fahrbereit')}
                   </span>
                 )}
                 {fahrbereit === false && (
                   <span className="inline-flex items-center gap-1 text-red-700">
-                    <XCircleIcon className="w-3 h-3" /> nicht fahrbereit
+                    <XCircleIcon className="w-3 h-3" /> {t('nichtFahrbereit')}
                   </span>
                 )}
                 {leasing && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-                    Leasing{leasinggeber ? `: ${leasinggeber}` : ''}
+                    {t('leasing')}{leasinggeber ? `: ${leasinggeber}` : ''}
                   </span>
                 )}
                 {finanzierung && (
                   <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
-                    Finanzierung{finanzierungsgeber ? `: ${finanzierungsgeber}` : ''}
+                    {t('finanzierung')}{finanzierungsgeber ? `: ${finanzierungsgeber}` : ''}
                   </span>
                 )}
               </div>
@@ -232,7 +236,7 @@ export function StammdatenReadSection({
         <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
           <MapPinIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0 text-xs">
-            <p className="text-claimondo-ondo">Schadensort</p>
+            <p className="text-claimondo-ondo">{t('schadensort')}</p>
             {schadensAdresse && <p className="text-claimondo-navy">{schadensAdresse}</p>}
             {schadensOrtZeile && <p className="text-claimondo-ondo">{schadensOrtZeile}</p>}
           </div>
@@ -243,11 +247,11 @@ export function StammdatenReadSection({
         <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
           <FileTextIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0 text-xs">
-            <p className="text-claimondo-ondo">Eigene Versicherung</p>
+            <p className="text-claimondo-ondo">{t('eigeneVersicherung')}</p>
             {eigeneVs && <p className="text-claimondo-navy">{eigeneVs}</p>}
             {eigeneVsSchadenNr && (
               <p className="text-claimondo-ondo">
-                Schaden-Nr: <span className="font-mono">{eigeneVsSchadenNr}</span>
+                {t('schadenNr')}: <span className="font-mono">{eigeneVsSchadenNr}</span>
               </p>
             )}
           </div>
@@ -259,7 +263,7 @@ export function StammdatenReadSection({
           <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
             <ShieldIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
             <div className="flex-1 min-w-0 text-xs space-y-0.5">
-              <p className="text-claimondo-ondo">Gegner</p>
+              <p className="text-claimondo-ondo">{t('gegner')}</p>
               {gegnerName && (
                 <p className="text-claimondo-navy font-medium">{gegnerName}</p>
               )}
@@ -271,11 +275,11 @@ export function StammdatenReadSection({
               )}
               {(gegnerVs || gegnerVsNr) && (
                 <p className="text-claimondo-ondo truncate">
-                  {gegnerVs && <>VS: {gegnerVs}</>}
+                  {gegnerVs && <>{t('vs')}: {gegnerVs}</>}
                   {gegnerVs && gegnerVsNr && ' · '}
                   {gegnerVsNr && (
                     <>
-                      VS-Nr: <span className="font-mono">{gegnerVsNr}</span>
+                      {t('vsNr')}: <span className="font-mono">{gegnerVsNr}</span>
                     </>
                   )}
                 </p>
@@ -287,7 +291,7 @@ export function StammdatenReadSection({
       {gegnerBekannt === false && (
         <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
           <AlertCircleIcon className="w-4 h-4 text-claimondo-ondo/70 mt-0.5 shrink-0" />
-          <p className="text-xs text-claimondo-ondo">Gegner nicht bekannt</p>
+          <p className="text-xs text-claimondo-ondo">{t('gegnerNichtBekannt')}</p>
         </div>
       )}
 
@@ -295,7 +299,7 @@ export function StammdatenReadSection({
         <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
           <UserIcon className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0 text-xs">
-            <p className="text-claimondo-ondo">Halter (abweichend vom Fahrer)</p>
+            <p className="text-claimondo-ondo">{t('halterAbweichend')}</p>
             {halterName && (
               <p className="text-claimondo-navy font-medium">{halterName}</p>
             )}

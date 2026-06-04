@@ -22,7 +22,7 @@ import { SprachBanner } from '@/components/i18n/SprachBanner'
 import type { SpracheCode } from '@/lib/i18n/sprach-banner'
 // Portal-i18n F-13: app-scoped Sprach-Switcher (post-Marketing-Split #2121).
 import { LanguageSwitcher } from '@/components/i18n/LanguageSwitcher'
-import { getLocale } from 'next-intl/server'
+import { getLocale, getTranslations } from 'next-intl/server'
 // Identitaets-Engine Login-Tor Slice B: dezenter Self-Confirm-Hinweis (rendert null ohne Match).
 import OrphanMatchBanner from '@/components/kunde/OrphanMatchBanner'
 // CMM-22 / CMM-33: Globaler OffeneDatenBanner ist raus — Pflichtdokumente
@@ -103,6 +103,9 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   // Portal-i18n F-13: aktive Locale für den Switcher — kommt aus request.ts
   // (resolveUserLocale → profiles.sprache auf /kunde-Routen).
   const activeLocale = await getLocale()
+
+  // Portal-i18n: Drawer-Footer-Strings (Profil ansehen / Abmelden).
+  const tDrawer = await getTranslations('kundeDrawer')
 
   // AAR-316 W3: Sprache des Kunden aus seinem neuesten Fall laden.
   // Profile hat keine eigene Sprache — der Fall trägt sie aus leads.sprache.
@@ -407,7 +410,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-white text-sm font-medium truncate">{displayName}</p>
-              <p className="text-[10px] text-claimondo-light-blue leading-tight">Profil ansehen</p>
+              <p className="text-[10px] text-claimondo-light-blue leading-tight">{tDrawer('profilAnsehen')}</p>
             </div>
             <OutboxBadge />
             <UpdatesNav variant="dark" />
@@ -418,7 +421,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
               className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
             >
               <LogOutIcon style={{ width: 17, height: 17 }} />
-              Abmelden
+              {tDrawer('abmelden')}
             </button>
           </form>
         </div>
