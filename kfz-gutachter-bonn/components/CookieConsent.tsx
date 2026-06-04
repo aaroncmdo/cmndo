@@ -73,7 +73,17 @@ export function CookieConsentBanner() {
       onConsent: applyConsent,
       onChange: applyConsent,
     }))
-      .then(() => console.log('[cc] ok modal=', !!document.getElementById('cc-main')))
+      .then(() => {
+        // autoShow greift im Standalone-Build nicht zuverlaessig -> Consent-Modal
+        // explizit erzwingen, wenn noch keine Wahl getroffen wurde (kein #cc-main).
+        if (!document.getElementById('cc-main')) {
+          try {
+            CookieConsent.show(true)
+          } catch (e) {
+            console.error('[cc] show failed', e)
+          }
+        }
+      })
       .catch((e) => console.error('[cc] failed', e))
   }, [])
   return null
