@@ -25,6 +25,11 @@ export type Rolle = 'admin' | 'kb' | 'sv' | 'kunde' | 'makler'
 export interface SubphaseData {
   id: string
   label: string
+  /** Portal-i18n: optionaler next-intl-Key (relativ zum `phasen`-Namespace, z.B.
+   *  `subKunde.besichtigung`). Wenn gesetzt, resolvt der Consumer `label` via t();
+   *  fehlt er, bleibt `label` (de) der Fallback. Additiv — Nicht-i18n-Consumer
+   *  + Tests lesen weiter `label`. */
+  i18nKey?: string
   state: PhaseState
   reachedAt?: string
   visible: boolean
@@ -33,6 +38,9 @@ export interface SubphaseData {
 export interface PhaseStepData {
   phase: number
   name: string
+  /** Portal-i18n: optionaler next-intl-Key (relativ zu `phasen`, z.B. `main.erfassung`).
+   *  Wenn gesetzt → Consumer resolvt `name` via t(); sonst `name` (de) als Fallback. */
+  i18nKey?: string
   state: PhaseState
   reachedAt?: string
   reachedBy?: string
