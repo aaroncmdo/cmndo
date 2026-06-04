@@ -5543,5 +5543,10 @@
       "body": "For self-caused accidents, the expert costs unfortunately cannot be settled through the other party's liability insurance — so we cannot offer you a free appointment here.",
       "note": "Should the question of fault change, you're welcome to get in touch again at any time."
     }
+  },
+  "chatSystem": {
+    "terminAbgelehnt": "❌ Expert {svName} declined the appointment on {terminDatum}.{hatGrund, select, ja { Reason: \"{grund}\"} other {}}",
+    "terminGegenvorschlag": "📅 {rolle, select, sv {The expert} other {The customer}}{hatName, select, ja { {name}} other {}} proposed a new appointment: {terminStr}.{hatGrund, select, ja { Reason: \"{grund}\"} other {}}",
+    "welcome": "Case {fallNummer} has been created. Welcome to your personal chat!"
   }
 }

@@ -9472,6 +9472,7 @@ export type Database = {
           status: string | null
           system_event: string | null
           template_key: string | null
+          template_params: Json | null
         }
         Insert: {
           anhang_typ?: string | null
@@ -9497,6 +9498,7 @@ export type Database = {
           status?: string | null
           system_event?: string | null
           template_key?: string | null
+          template_params?: Json | null
         }
         Update: {
           anhang_typ?: string | null
@@ -9522,6 +9524,7 @@ export type Database = {
           status?: string | null
           system_event?: string | null
           template_key?: string | null
+          template_params?: Json | null
         }
         Relationships: [
           {

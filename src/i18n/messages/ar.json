@@ -5543,5 +5543,10 @@
       "body": "في الحوادث الناتجة عن خطأ ذاتي، لا يمكن للأسف تسوية تكاليف الخبير عبر تأمين المسؤولية المدنية للطرف الآخر — لذلك لا يمكننا أن نقدم لك هنا موعدًا مجانيًا.",
       "note": "إذا تغيّرت مسألة الخطأ، يسعدنا تواصلك معنا مجددًا في أي وقت."
     }
+  },
+  "chatSystem": {
+    "terminAbgelehnt": "❌ رفض الخبير {svName} الموعد في {terminDatum}.{hatGrund, select, ja { السبب: \"{grund}\"} other {}}",
+    "terminGegenvorschlag": "📅 {rolle, select, sv {الخبير} other {العميل}}{hatName, select, ja { {name}} other {}} اقترح موعداً جديداً: {terminStr}.{hatGrund, select, ja { السبب: \"{grund}\"} other {}}",
+    "welcome": "تم إنشاء الملف {fallNummer}. مرحباً بك في محادثتك الشخصية!"
   }
 }

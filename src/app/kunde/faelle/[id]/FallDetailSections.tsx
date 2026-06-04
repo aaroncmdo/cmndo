@@ -23,7 +23,7 @@ import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
-type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string }
+type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string; template_key?: string | null; template_params?: Record<string, string | number> | null }
 type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url?: string | null }
 
 const TABS = [
@@ -249,6 +249,8 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
   fallId: string; nachrichten: Nachricht[]; userId: string; teilnehmer: ChatTeilnehmer[]
 }) {
   const t = useTranslations('kunde.fall')
+  // i18n Phase 1: System-Message-Templates in der Leser-Sprache rendern.
+  const tSys = useTranslations('chatSystem')
   const format = useFormatter()
   const [messages, setMessages] = useState(initialNachrichten)
   const [text, setText] = useState('')
@@ -339,10 +341,15 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
 
           // KFZ-134: System-Nachrichten zentriert mit eigenem Style
           if (isSystem) {
+            // i18n Phase 1: template_key in Leser-Sprache rendern; .has()-Guard
+            // verhindert Crash bei unbekanntem Key, nachricht bleibt de-Fallback.
+            const sysText = msg.template_key && tSys.has(msg.template_key)
+              ? tSys(msg.template_key, (msg.template_params ?? {}) as Record<string, string | number>)
+              : msg.nachricht
             return (
               <div key={msg.id} className="flex justify-center">
                 <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-ios-xl px-4 py-2 max-w-[85%]">
-                  <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{msg.nachricht}</p>
+                  <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{sysText}</p>
                   <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
                     {format.dateTime(new Date(msg.created_at), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })}
                   </p>

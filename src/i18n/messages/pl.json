@@ -5543,5 +5543,10 @@
       "body": "W przypadku wypadków z własnej winy kosztów rzeczoznawcy niestety nie można rozliczyć przez ubezpieczenie OC sprawcy — dlatego nie możemy zaproponować Państwu tutaj bezpłatnego terminu.",
       "note": "Jeśli kwestia winy ulegnie zmianie, prosimy o ponowny kontakt w dowolnym momencie."
     }
+  },
+  "chatSystem": {
+    "terminAbgelehnt": "❌ Rzeczoznawca {svName} odrzucił termin w dniu {terminDatum}.{hatGrund, select, ja { Powód: \"{grund}\"} other {}}",
+    "terminGegenvorschlag": "📅 {rolle, select, sv {Rzeczoznawca} other {Klient}}{hatName, select, ja { {name}} other {}} zaproponował nowy termin: {terminStr}.{hatGrund, select, ja { Powód: \"{grund}\"} other {}}",
+    "welcome": "Sprawa {fallNummer} została utworzona. Witamy w Państwa osobistym czacie!"
   }
 }

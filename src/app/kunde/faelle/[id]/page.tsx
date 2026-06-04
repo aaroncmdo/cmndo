@@ -203,7 +203,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     // Nachrichten laden (alle Kanaele inkl. Gruppe)
     const { data: nachrichten } = await admin.from('nachrichten')
-      .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
+      .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at, template_key, template_params')
       .eq('fall_id', id)
       .order('created_at', { ascending: true })
 
