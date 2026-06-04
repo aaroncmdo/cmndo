@@ -1,0 +1,25 @@
+-- CMM-49 / Termin-Engine: Drop des kaputten Triggers trg_sa_bestaetigt_termin.
+--
+-- WARUM BROKEN: Der Trigger (BEFORE UPDATE ON faelle) referenziert die in CMM-44
+-- gedroppte Spalte NEW.gutachter_termin_status -> jeder faelle.sa_unterschrieben
+-- false->true Write wirft 'record "new" has no field "gutachter_termin_status"'.
+--
+-- WARUM SAFE:
+--  (1) DB-seitig: einzige Funktion, die gutachter_termine -> 'bestaetigt' schreibt;
+--      KEIN claims-seitiges Re-Home (7 claims-Trigger, keiner beruehrt termine
+--      oder sa_unterschrieben).
+--  (2) App-seitig re-homed: das SA-Confirm-Verhalten lebt in flow/[token]/actions.ts
+--      (CMM-21: "SA-Unterschrift ist die Termin-Bestaetigung" -> UPDATE
+--      gutachter_termine SET status='bestaetigt' WHERE lead_id=.. status='reserviert'
+--      + bestaetigeTermin -> engine bestaetige, geocoding-garantiert, claim_id-nativ).
+--      Plus Kunde-Confirm-Surfaces (kunde-termin/[token], kunde/faelle, bestaetigeTerminAlsKunde).
+--  (3) faelle.sa_unterschrieben hat keine Writer mehr (SSoT = claims.sa_unterschrieben)
+--      -> Trigger feuert im aktuellen Flow nie + wirft beim Treffer.
+--  (4) Daten: 0 Termine in Status 'reserviert' -> nichts zu bestaetigen.
+--
+-- SCOPE STRIKT: NUR dieser eine Trigger + seine Funktion. Die claims<->faelle
+-- Sync-Trigger (CMM Phase 1.5, 40 Spalten) bleiben unangetastet (CMM-49 braucht
+-- sie bis P5). CMM-49 (fb34de27) streicht trg_sa_bestaetigt_termin danach aus dem
+-- P5-faelle-Trigger-Drop-Inventar.
+DROP TRIGGER IF EXISTS trg_sa_bestaetigt_termin ON public.faelle;
+DROP FUNCTION IF EXISTS public.trigger_sa_bestaetigt_termin();
