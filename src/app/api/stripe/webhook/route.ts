@@ -338,9 +338,9 @@ export async function POST(request: Request) {
             const fallIds = (positionen ?? []).map((p) => p.fall_id as string).filter(Boolean)
             if (fallIds.length > 0) {
               const { data: claimRows } = await db
-                .from('faelle')
+                .from('faelle_claim_bridge')
                 .select('claim_id')
-                .in('id', fallIds)
+                .in('fall_id', fallIds)
               const claimIds = (claimRows ?? []).map((f) => f.claim_id as string).filter(Boolean)
               if (claimIds.length > 0) {
                 await db.from('claims').update({

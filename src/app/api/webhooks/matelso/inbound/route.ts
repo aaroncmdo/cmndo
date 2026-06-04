@@ -4,6 +4,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createLead } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
 import { matchInboundToFall } from '@/lib/inbound/match-fall'
@@ -108,8 +109,7 @@ export async function POST(req: NextRequest) {
     leadId = match.leadId
     fallId = match.fallId
     if (fallId) {
-      const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-      claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+      claimId = await resolveClaimId(admin, fallId)
     }
 
     // 5. Auto-Lead nur wenn weder Lead noch Fall gematcht (wie Aircall).
