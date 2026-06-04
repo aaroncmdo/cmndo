@@ -11,11 +11,6 @@ name: Deploy → VPS (Cluster-LPs)
 
 on:
   workflow_dispatch:
-    inputs:
-      cluster:
-        description: 'Nur einen Cluster deployen (leer = alle 3)'
-        required: false
-        default: ''
   push:
     branches: [main, kitta/cluster-lp-v15-mobile-rest]  # TEMP: Branch-Trigger fuer CI-Canary — vor Merge auf [main] zuruecksetzen
     paths:
@@ -32,8 +27,6 @@ jobs:
       fail-fast: false
       matrix:
         cluster: [wuppertal]  # TEMP: Canary nur Wuppertal — nach Erfolg auf [wuppertal, duesseldorf, bonn]
-    # Bei workflow_dispatch mit gesetztem 'cluster'-Input nur den einen fahren.
-    if: ${{ github.event_name != 'workflow_dispatch' || github.event.inputs.cluster == '' || github.event.inputs.cluster == matrix.cluster }}
 
     steps:
       - name: Checkout
