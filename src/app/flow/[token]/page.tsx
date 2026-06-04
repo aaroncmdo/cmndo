@@ -212,6 +212,10 @@ export default async function FlowPage({
       }
     }
   }
+  // AAR-956 Gebiet-3: Polizeibericht-Status (KEIN Config-Feld) fuer die dynamic-display des
+  // Upload-Blocks — FlowPolizeiberichtUpload zeigt "liegt vor" statt erneut zu prompten (Reload/
+  // Dispatcher-Upload). speichereFeststellungFlow ignoriert Nicht-Config-Keys.
+  feststellungWerte['polizeibericht_status'] = (lead.polizeibericht_status as string | null) ?? null
 
   let gutachter: {
     vorname: string
