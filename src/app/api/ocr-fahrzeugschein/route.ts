@@ -88,7 +88,7 @@ export async function POST(request: Request) {
       console.error('[OCR-ZB1] DB update error:', updateError)
     }
 
-    // Parallel auf claims schreiben — FIN/HSN/TSN/Kennzeichen/Halter sind nicht
+    // Parallel auf claims schreiben — FIN/HSN/TSN/Kennzeichen sind nicht
     // im faelle↔claims Sync-Trigger (CMM Phase 1.5a). Direkt in claims schreiben
     // damit die SSoT für SV/Kanzlei/Reports konsistent ist.
     if (fallRow?.claim_id) {
@@ -97,11 +97,9 @@ export async function POST(request: Request) {
       if (extracted.kennzeichen) claimUpdate.kennzeichen = extracted.kennzeichen
       if (extracted.erstzulassung) claimUpdate.erstzulassung = extracted.erstzulassung
       if (extracted.fahrzeug_baujahr != null) claimUpdate.fahrzeug_baujahr = extracted.fahrzeug_baujahr
-      if (extracted.halter_vorname) claimUpdate.halter_vorname = extracted.halter_vorname
-      if (extracted.halter_nachname) claimUpdate.halter_nachname = extracted.halter_nachname
-      if (extracted.halter_strasse) claimUpdate.halter_strasse = extracted.halter_strasse
-      if (extracted.halter_plz) claimUpdate.halter_plz = extracted.halter_plz
-      if (extracted.halter_stadt) claimUpdate.halter_stadt = extracted.halter_stadt
+      // CMM Entity Phase-4c: Halter NICHT mehr flach auf claims.halter_* (Dupe -> wird gedroppt).
+      // Halter lebt in claim_parties (ist_halter-Partei); v_claim_full speist halter_* von dort.
+      // OCR-Halter-Korrektur -> claim_parties = Follow-up (Entity-Writer-Wiring).
       if (extracted.fahrzeug_hersteller) claimUpdate.fahrzeug_hersteller = extracted.fahrzeug_hersteller
       if (extracted.fahrzeug_modell) claimUpdate.fahrzeug_modell = extracted.fahrzeug_modell
       if (extracted.fahrzeug_farbe) claimUpdate.fahrzeug_farbe = extracted.fahrzeug_farbe

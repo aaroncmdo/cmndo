@@ -18,7 +18,6 @@ describe('classifyLocaleSource', () => {
     expect(classifyLocaleSource('/kunde/termin')).toBe('token')
     expect(classifyLocaleSource('/kunde/termin/slot')).toBe('token')
     expect(classifyLocaleSource('/kunde-termin')).toBe('token')
-    expect(classifyLocaleSource('/sv')).toBe('token')
   })
 
   it('klassifiziert das authentifizierte Kunde-Portal als profile', () => {
@@ -31,9 +30,22 @@ describe('classifyLocaleSource', () => {
     expect(classifyLocaleSource('/')).toBe('cookie')
     expect(classifyLocaleSource('/login')).toBe('cookie')
     expect(classifyLocaleSource('/faq')).toBe('cookie')
-    expect(classifyLocaleSource('/gutachter/heute')).toBe('cookie')
+    // /gutachter-finden = Marketing (cookie); /gutachter (SV-Portal) = intern, s.u.
+    expect(classifyLocaleSource('/gutachter-finden')).toBe('cookie')
     expect(classifyLocaleSource(null)).toBe('cookie')
     expect(classifyLocaleSource(undefined)).toBe('cookie')
+  })
+
+  it('klassifiziert interne Portale als intern (deutsch-only by design, Aaron 04.06.2026)', () => {
+    expect(classifyLocaleSource('/admin')).toBe('intern')
+    expect(classifyLocaleSource('/admin/faelle')).toBe('intern')
+    expect(classifyLocaleSource('/dispatch/leads/1')).toBe('intern')
+    expect(classifyLocaleSource('/sv')).toBe('intern')
+    expect(classifyLocaleSource('/gutachter/heute')).toBe('intern')
+    expect(classifyLocaleSource('/kanzlei/mandate')).toBe('intern')
+    expect(classifyLocaleSource('/makler/akten')).toBe('intern')
+    expect(classifyLocaleSource('/mitarbeiter')).toBe('intern')
+    expect(classifyLocaleSource('/faelle/123')).toBe('intern')
   })
 })
 
