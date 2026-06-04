@@ -4595,6 +4595,16 @@
         "teamFallback": "Claimondo Ekibi",
         "chatOeffnen": "Sohbeti aç",
         "terminBuchen": "Randevu al"
+      },
+      "betreuerStrip": {
+        "labelKb": "Müşteri temsilciniz",
+        "labelSv": "Bilirkişiniz",
+        "ansprechpartner": "Kişisel iletişim kişiniz",
+        "erstelltGutachten": "Bilirkişi raporunuzu hazırlar",
+        "teamFallback": "Claimondo Ekibi",
+        "svWirdZugewiesen": "Atanıyor",
+        "chatAria": "{name} ile sohbeti aç",
+        "chatTitle": "Sohbeti aç"
       }
     },
     "termine": {

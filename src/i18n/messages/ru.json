@@ -4595,6 +4595,16 @@
         "teamFallback": "Команда Claimondo",
         "chatOeffnen": "Открыть чат",
         "terminBuchen": "Записаться на приём"
+      },
+      "betreuerStrip": {
+        "labelKb": "Ваш персональный менеджер",
+        "labelSv": "Ваш эксперт-оценщик",
+        "ansprechpartner": "Персональный контактный специалист",
+        "erstelltGutachten": "Готовит ваше заключение",
+        "teamFallback": "Команда Claimondo",
+        "svWirdZugewiesen": "Назначается",
+        "chatAria": "Открыть чат с {name}",
+        "chatTitle": "Открыть чат"
       }
     },
     "termine": {

@@ -4595,6 +4595,16 @@
         "teamFallback": "فريق Claimondo",
         "chatOeffnen": "فتح المحادثة",
         "terminBuchen": "حجز موعد"
+      },
+      "betreuerStrip": {
+        "labelKb": "مسؤول حسابكم",
+        "labelSv": "خبيركم",
+        "ansprechpartner": "جهة الاتصال الشخصية",
+        "erstelltGutachten": "يُعِدّ تقرير الخبير الخاص بكم",
+        "teamFallback": "فريق Claimondo",
+        "svWirdZugewiesen": "قيد التعيين",
+        "chatAria": "فتح المحادثة مع {name}",
+        "chatTitle": "فتح المحادثة"
       }
     },
     "termine": {

@@ -4595,6 +4595,16 @@
         "teamFallback": "Claimondo Team",
         "chatOeffnen": "Open chat",
         "terminBuchen": "Book an appointment"
+      },
+      "betreuerStrip": {
+        "labelKb": "Your account manager",
+        "labelSv": "Your expert appraiser",
+        "ansprechpartner": "Personal point of contact",
+        "erstelltGutachten": "Prepares your expert report",
+        "teamFallback": "Claimondo Team",
+        "svWirdZugewiesen": "Being assigned",
+        "chatAria": "Open chat with {name}",
+        "chatTitle": "Open chat"
       }
     },
     "termine": {

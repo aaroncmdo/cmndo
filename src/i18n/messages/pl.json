@@ -4595,6 +4595,16 @@
         "teamFallback": "Zespół Claimondo",
         "chatOeffnen": "Otwórz czat",
         "terminBuchen": "Umów termin"
+      },
+      "betreuerStrip": {
+        "labelKb": "Państwa opiekun klienta",
+        "labelSv": "Państwa rzeczoznawca",
+        "ansprechpartner": "Osobisty opiekun",
+        "erstelltGutachten": "Sporządza Państwa ekspertyzę",
+        "teamFallback": "Zespół Claimondo",
+        "svWirdZugewiesen": "Przydzielanie",
+        "chatAria": "Otwórz czat z {name}",
+        "chatTitle": "Otwórz czat"
       }
     },
     "termine": {
