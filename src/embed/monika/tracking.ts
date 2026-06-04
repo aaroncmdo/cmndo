@@ -43,9 +43,12 @@ export function track(cfg: MonikaConfig, event: MonikaEvent, extra?: Record<stri
     const url = `${cfg.base}/api/embed-track`
     const body = JSON.stringify(props)
     if (navigator.sendBeacon) {
-      navigator.sendBeacon(url, new Blob([body], { type: 'application/json' }))
+      // text/plain = "simple request" → kein CORS-Preflight. sendBeacon kann keine
+      // preflighteten Requests senden; application/json triggert einen und der Beacon
+      // wird geblockt. Die Route liest den Body via req.json() unabhaengig vom Header.
+      navigator.sendBeacon(url, new Blob([body], { type: 'text/plain' }))
     } else {
-      void fetch(url, { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'application/json' } })
+      void fetch(url, { method: 'POST', body, keepalive: true, headers: { 'Content-Type': 'text/plain' } })
     }
   } catch {
     /* Beacon best-effort */
