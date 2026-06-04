@@ -4605,6 +4605,10 @@
         "svWirdZugewiesen": "Atanıyor",
         "chatAria": "{name} ile sohbeti aç",
         "chatTitle": "Sohbeti aç"
+      },
+      "stepper": {
+        "navigation": "Yol tarifi",
+        "uhrSuffix": ""
       }
     },
     "termine": {
@@ -4917,6 +4921,62 @@
         "submitting": "Gönderiliyor …",
         "submit": "Randevuları gönder"
       }
+    }
+  },
+  "phasen": {
+    "main": {
+      "erfassung": "Kayıt",
+      "begutachtung": "Değerlendirme",
+      "regulierung": "Tazminat",
+      "abschluss": "Tamamlanma"
+    },
+    "subKunde": {
+      "sa_offen": "Hasar kaydediliyor",
+      "vollmacht_offen": "Belgeler hazırlanıyor",
+      "onboarding_offen": "Son bilgiler bekleniyor",
+      "termin": "Randevu ayarlanıyor",
+      "besichtigung": "Değerlendirme sürüyor",
+      "gutachten": "Bilirkişi raporu hazırlanıyor",
+      "kanzlei_uebergabe": "Dosya hukuk bürosuna iletiliyor",
+      "versicherungskontakt": "Hukuk bürosu sigortayla görüşüyor",
+      "auszahlung": "Ödeme hazırlanıyor",
+      "nachforderung": "Sigorta reddi — ek talep",
+      "erfolgreich_reguliert": "Başarıyla tamamlandı",
+      "storniert": "Dosya kapatıldı",
+      "klage_rechtsstreit": "Dava sürecine devredildi",
+      "verjaehrt": "Dosya kapatıldı",
+      "abgelehnt_final": "Reddedildi (nihai)",
+      "an_externe_kanzlei": "Dış hukuk bürosuna devredildi",
+      "termin_durchgefuehrt": "Randevu gerçekleştirildi"
+    },
+    "subIntern": {
+      "sa_offen": "Temlik imzası bekleniyor",
+      "vollmacht_offen": "Vekâletname bekleniyor",
+      "onboarding_offen": "Kayıt süreci bekleniyor",
+      "termin": "Randevu",
+      "besichtigung": "Ekspertiz",
+      "gutachten": "Bilirkişi raporu",
+      "kanzlei_uebergabe": "Hukuk bürosuna devir sürüyor",
+      "versicherungskontakt": "Sigorta teması",
+      "auszahlung": "Ödeme",
+      "nachforderung": "Sigorta reddi — ek talep",
+      "erfolgreich_reguliert": "Başarıyla tazmin edildi",
+      "storniert": "İptal edildi",
+      "klage_rechtsstreit": "Dava / hukuki ihtilaf",
+      "verjaehrt": "Zamanaşımına uğradı",
+      "abgelehnt_final": "Reddedildi (nihai)",
+      "an_externe_kanzlei": "Dış hukuk bürosuna devredildi",
+      "termin_durchgefuehrt": "Randevu gerçekleştirildi"
+    },
+    "sideQuest": {
+      "nachbesichtigung": "Yeniden ekspertiz",
+      "stellungnahme": "Görüş bildirimi"
+    },
+    "panel": {
+      "meinFortschritt": "İlerlemem",
+      "phasen": "Aşamalar",
+      "fallStorniert": "Dosya iptal edildi",
+      "zusaetzlichAktiv": "Ayrıca aktif"
     }
   }
 }

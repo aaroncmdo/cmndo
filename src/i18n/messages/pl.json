@@ -4605,6 +4605,10 @@
         "svWirdZugewiesen": "Przydzielanie",
         "chatAria": "Otwórz czat z {name}",
         "chatTitle": "Otwórz czat"
+      },
+      "stepper": {
+        "navigation": "Trasa dojazdu",
+        "uhrSuffix": "godz."
       }
     },
     "termine": {
@@ -4917,6 +4921,62 @@
         "submitting": "Przesyłanie…",
         "submit": "Prześlij terminy"
       }
+    }
+  },
+  "phasen": {
+    "main": {
+      "erfassung": "Rejestracja",
+      "begutachtung": "Ocena",
+      "regulierung": "Likwidacja",
+      "abschluss": "Zakończenie"
+    },
+    "subKunde": {
+      "sa_offen": "Rejestrujemy szkodę",
+      "vollmacht_offen": "Przygotowujemy dokumenty",
+      "onboarding_offen": "Oczekiwanie na ostatnie dane",
+      "termin": "Umawiamy termin",
+      "besichtigung": "Ocena w toku",
+      "gutachten": "Ekspertyza w przygotowaniu",
+      "kanzlei_uebergabe": "Sprawa przekazana do kancelarii",
+      "versicherungskontakt": "Kancelaria ustala z ubezpieczeniem",
+      "auszahlung": "Przygotowujemy wypłatę",
+      "nachforderung": "Odmowa ubezpieczyciela — roszczenie uzupełniające",
+      "erfolgreich_reguliert": "Pomyślnie zakończono",
+      "storniert": "Sprawa zamknięta",
+      "klage_rechtsstreit": "Przekazano na drogę sądową",
+      "verjaehrt": "Sprawa zamknięta",
+      "abgelehnt_final": "Odrzucono (ostatecznie)",
+      "an_externe_kanzlei": "Przekazano do zewnętrznej kancelarii",
+      "termin_durchgefuehrt": "Termin zrealizowany"
+    },
+    "subIntern": {
+      "sa_offen": "Brak podpisu cesji",
+      "vollmacht_offen": "Brak pełnomocnictwa",
+      "onboarding_offen": "Onboarding w toku",
+      "termin": "Termin",
+      "besichtigung": "Oględziny",
+      "gutachten": "Ekspertyza",
+      "kanzlei_uebergabe": "Przekazanie do kancelarii w toku",
+      "versicherungskontakt": "Kontakt z ubezpieczeniem",
+      "auszahlung": "Wypłata",
+      "nachforderung": "Odmowa ubezpieczyciela — roszczenie uzupełniające",
+      "erfolgreich_reguliert": "Pomyślnie zlikwidowano",
+      "storniert": "Anulowano",
+      "klage_rechtsstreit": "Postępowanie sądowe",
+      "verjaehrt": "Przedawniono",
+      "abgelehnt_final": "Odrzucono (ostatecznie)",
+      "an_externe_kanzlei": "Przekazano do zewnętrznej kancelarii",
+      "termin_durchgefuehrt": "Termin zrealizowany"
+    },
+    "sideQuest": {
+      "nachbesichtigung": "Ponowne oględziny",
+      "stellungnahme": "Stanowisko"
+    },
+    "panel": {
+      "meinFortschritt": "Mój postęp",
+      "phasen": "Etapy",
+      "fallStorniert": "Sprawa anulowana",
+      "zusaetzlichAktiv": "Dodatkowo aktywne"
     }
   }
 }

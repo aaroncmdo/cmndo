@@ -4605,6 +4605,10 @@
         "svWirdZugewiesen": "Being assigned",
         "chatAria": "Open chat with {name}",
         "chatTitle": "Open chat"
+      },
+      "stepper": {
+        "navigation": "Directions",
+        "uhrSuffix": "h"
       }
     },
     "termine": {
@@ -4917,6 +4921,62 @@
         "submitting": "Submitting …",
         "submit": "Submit appointments"
       }
+    }
+  },
+  "phasen": {
+    "main": {
+      "erfassung": "Intake",
+      "begutachtung": "Assessment",
+      "regulierung": "Settlement",
+      "abschluss": "Completion"
+    },
+    "subKunde": {
+      "sa_offen": "Recording your claim",
+      "vollmacht_offen": "Preparing documents",
+      "onboarding_offen": "Final details pending",
+      "termin": "Arranging your appointment",
+      "besichtigung": "Assessment in progress",
+      "gutachten": "Expert report being prepared",
+      "kanzlei_uebergabe": "Case handed to the law firm",
+      "versicherungskontakt": "Law firm liaising with the insurer",
+      "auszahlung": "Preparing your payout",
+      "nachforderung": "Insurer refusal — follow-up claim",
+      "erfolgreich_reguliert": "Successfully completed",
+      "storniert": "Case closed",
+      "klage_rechtsstreit": "Referred for legal action",
+      "verjaehrt": "Case closed",
+      "abgelehnt_final": "Rejected (final)",
+      "an_externe_kanzlei": "Handed to external law firm",
+      "termin_durchgefuehrt": "Appointment completed"
+    },
+    "subIntern": {
+      "sa_offen": "Assignment signature pending",
+      "vollmacht_offen": "Power of attorney pending",
+      "onboarding_offen": "Onboarding pending",
+      "termin": "Appointment",
+      "besichtigung": "Inspection",
+      "gutachten": "Expert report",
+      "kanzlei_uebergabe": "Law firm handover in progress",
+      "versicherungskontakt": "Insurer contact",
+      "auszahlung": "Payout",
+      "nachforderung": "Insurer refusal — follow-up claim",
+      "erfolgreich_reguliert": "Successfully settled",
+      "storniert": "Cancelled",
+      "klage_rechtsstreit": "Litigation",
+      "verjaehrt": "Time-barred",
+      "abgelehnt_final": "Rejected (final)",
+      "an_externe_kanzlei": "Handed to external law firm",
+      "termin_durchgefuehrt": "Appointment completed"
+    },
+    "sideQuest": {
+      "nachbesichtigung": "Re-inspection",
+      "stellungnahme": "Statement"
+    },
+    "panel": {
+      "meinFortschritt": "My progress",
+      "phasen": "Phases",
+      "fallStorniert": "Case cancelled",
+      "zusaetzlichAktiv": "Additionally active"
     }
   }
 }
