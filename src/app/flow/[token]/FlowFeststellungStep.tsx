@@ -162,8 +162,14 @@ export function FlowFeststellungStep({
         ))}
       </div>
 
-      {/* AAR-956 Gebiet-3: Polizeibericht-Upload — nur wenn "Polizei vor Ort" = Ja (reaktiv). */}
-      {values['polizei_vor_ort'] === 'true' && <FlowPolizeiberichtUpload token={token} />}
+      {/* AAR-956 Gebiet-3: Polizeibericht-Upload — nur wenn "Polizei vor Ort" = Ja (reaktiv).
+          bereitsHochgeladen = dynamic-display: liegt der Bericht schon vor (Reload/Dispatcher). */}
+      {values['polizei_vor_ort'] === 'true' && (
+        <FlowPolizeiberichtUpload
+          token={token}
+          bereitsHochgeladen={initialValues['polizeibericht_status'] === 'hochgeladen'}
+        />
+      )}
 
       {error && (
         <p className="mt-4 text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3">

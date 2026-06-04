@@ -8,8 +8,16 @@ import { useRef, useState } from 'react'
 import { uploadPolizeiberichtFlow } from './self-service-actions'
 import { Button } from '@/components/primitives/Button/Button.web'
 
-export function FlowPolizeiberichtUpload({ token }: { token: string }) {
-  const [status, setStatus] = useState<'idle' | 'laden' | 'bestaetigt' | 'fehler' | 'skip'>('idle')
+export function FlowPolizeiberichtUpload({
+  token,
+  bereitsHochgeladen,
+}: {
+  token: string
+  bereitsHochgeladen?: boolean
+}) {
+  const [status, setStatus] = useState<'idle' | 'laden' | 'bestaetigt' | 'fehler' | 'skip'>(
+    bereitsHochgeladen ? 'bestaetigt' : 'idle',
+  )
   const [fehler, setFehler] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -59,7 +67,14 @@ export function FlowPolizeiberichtUpload({ token }: { token: string }) {
           className="rounded-ios-sm bg-emerald-50 border border-emerald-100 p-3 text-sm text-emerald-800"
           data-testid="flow-polizeibericht-bestaetigt"
         >
-          <p className="font-medium">Polizeibericht hochgeladen ✓</p>
+          <p className="font-medium">Polizeibericht liegt vor ✓</p>
+          <button
+            type="button"
+            onClick={() => inputRef.current?.click()}
+            className="text-sm text-emerald-800/80 underline mt-1"
+          >
+            Neu hochladen
+          </button>
         </div>
       ) : (
         <div className="flex items-center gap-3">
