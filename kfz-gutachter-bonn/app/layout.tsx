@@ -3,6 +3,7 @@ import './globals.css'
 import { inter, notoSans, spaceMono } from './fonts/fonts'
 import { SITE } from '@/lib/site'
 import { CLUSTER } from '@/lib/cluster'
+import { CookieConsentBanner } from '@/components/CookieConsent'
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE.url),
@@ -34,7 +35,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       lang={SITE.lang}
       className={`${inter.variable} ${notoSans.variable} ${spaceMono.variable} antialiased`}
     >
-      <body>{children}</body>
+      <body>
+        {children}
+        <CookieConsentBanner />
+      </body>
     </html>
   )
 }
