@@ -93,6 +93,9 @@ export function buildClaimPhasePipeline(
             {
               id: lifecycle.subPhase,
               label: substateLabelForRolle(lifecycle.subPhase, rolle),
+              // Portal-i18n: rollen-abhaengiger Substate-Namespace (extern=kundenfreundlich,
+              // intern=technisch). Consumer (FallPhasenPanel) resolvt via t('phasen').
+              i18nKey: `${EXTERN_ROLLEN.has(rolle) ? 'subKunde' : 'subIntern'}.${lifecycle.subPhase}`,
               state: istTerminal ? 'done' : 'active',
               visible: true,
             },
@@ -102,6 +105,8 @@ export function buildClaimPhasePipeline(
     return {
       phase: idx + 1, // 1..4 fuer die "01".."04"-Badge in PhaseStep
       name: MAIN_PHASE_LABEL[mp],
+      // Portal-i18n: Hauptphasen-Label rollenneutral. Consumer resolvt via t('phasen').
+      i18nKey: `main.${mp}`,
       state,
       subphases,
     }

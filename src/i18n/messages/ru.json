@@ -4605,6 +4605,10 @@
         "svWirdZugewiesen": "Назначается",
         "chatAria": "Открыть чат с {name}",
         "chatTitle": "Открыть чат"
+      },
+      "stepper": {
+        "navigation": "Маршрут",
+        "uhrSuffix": "ч"
       }
     },
     "termine": {
@@ -4917,6 +4921,62 @@
         "submitting": "Отправляется …",
         "submit": "Подать встречи"
       }
+    }
+  },
+  "phasen": {
+    "main": {
+      "erfassung": "Регистрация",
+      "begutachtung": "Оценка",
+      "regulierung": "Урегулирование",
+      "abschluss": "Завершение"
+    },
+    "subKunde": {
+      "sa_offen": "Регистрируем ущерб",
+      "vollmacht_offen": "Готовим документы",
+      "onboarding_offen": "Ожидаются последние данные",
+      "termin": "Согласовываем встречу",
+      "besichtigung": "Идёт оценка",
+      "gutachten": "Готовится заключение",
+      "kanzlei_uebergabe": "Дело передано юристам",
+      "versicherungskontakt": "Юристы ведут переговоры со страховой",
+      "auszahlung": "Готовим выплату",
+      "nachforderung": "Отказ страховой — дополнительное требование",
+      "erfolgreich_reguliert": "Успешно завершено",
+      "storniert": "Дело закрыто",
+      "klage_rechtsstreit": "Передано в суд",
+      "verjaehrt": "Дело закрыто",
+      "abgelehnt_final": "Отклонено (окончательно)",
+      "an_externe_kanzlei": "Передано внешней юридической фирме",
+      "termin_durchgefuehrt": "Встреча проведена"
+    },
+    "subIntern": {
+      "sa_offen": "Ожидается подпись цессии",
+      "vollmacht_offen": "Ожидается доверенность",
+      "onboarding_offen": "Ожидается онбординг",
+      "termin": "Встреча",
+      "besichtigung": "Осмотр",
+      "gutachten": "Заключение",
+      "kanzlei_uebergabe": "Идёт передача юристам",
+      "versicherungskontakt": "Контакт со страховой",
+      "auszahlung": "Выплата",
+      "nachforderung": "Отказ страховой — дополнительное требование",
+      "erfolgreich_reguliert": "Успешно урегулировано",
+      "storniert": "Отменено",
+      "klage_rechtsstreit": "Судебный спор",
+      "verjaehrt": "Срок давности истёк",
+      "abgelehnt_final": "Отклонено (окончательно)",
+      "an_externe_kanzlei": "Передано внешней юридической фирме",
+      "termin_durchgefuehrt": "Встреча проведена"
+    },
+    "sideQuest": {
+      "nachbesichtigung": "Повторный осмотр",
+      "stellungnahme": "Заключение по запросу"
+    },
+    "panel": {
+      "meinFortschritt": "Мой прогресс",
+      "phasen": "Этапы",
+      "fallStorniert": "Дело отменено",
+      "zusaetzlichAktiv": "Дополнительно активно"
     }
   }
 }

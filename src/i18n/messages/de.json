@@ -1,4 +1,60 @@
 {
+  "phasen": {
+    "main": {
+      "erfassung": "Erfassung",
+      "begutachtung": "Begutachtung",
+      "regulierung": "Regulierung",
+      "abschluss": "Abschluss"
+    },
+    "subKunde": {
+      "sa_offen": "Schaden wird erfasst",
+      "vollmacht_offen": "Unterlagen werden vorbereitet",
+      "onboarding_offen": "Letzte Angaben ausstehend",
+      "termin": "Termin wird vereinbart",
+      "besichtigung": "Begutachtung läuft",
+      "gutachten": "Gutachten wird erstellt",
+      "kanzlei_uebergabe": "Akte geht an die Kanzlei",
+      "versicherungskontakt": "Kanzlei klärt mit der Versicherung",
+      "auszahlung": "Auszahlung wird vorbereitet",
+      "nachforderung": "VS-Ablehnung — Nachforderung",
+      "erfolgreich_reguliert": "Erfolgreich abgeschlossen",
+      "storniert": "Fall abgeschlossen",
+      "klage_rechtsstreit": "An die Klage übergeben",
+      "verjaehrt": "Fall abgeschlossen",
+      "abgelehnt_final": "Abgelehnt (final)",
+      "an_externe_kanzlei": "An externe Kanzlei übergeben",
+      "termin_durchgefuehrt": "Termin durchgeführt"
+    },
+    "subIntern": {
+      "sa_offen": "SA-Unterschrift offen",
+      "vollmacht_offen": "Vollmacht offen",
+      "onboarding_offen": "Onboarding offen",
+      "termin": "Termin",
+      "besichtigung": "Besichtigung",
+      "gutachten": "Gutachten",
+      "kanzlei_uebergabe": "Kanzlei-Übergabe läuft",
+      "versicherungskontakt": "Versicherungskontakt",
+      "auszahlung": "Auszahlung",
+      "nachforderung": "VS-Ablehnung — Nachforderung",
+      "erfolgreich_reguliert": "Erfolgreich reguliert",
+      "storniert": "Storniert",
+      "klage_rechtsstreit": "Klage / Rechtsstreit",
+      "verjaehrt": "Verjährt",
+      "abgelehnt_final": "Abgelehnt (final)",
+      "an_externe_kanzlei": "An externe Kanzlei übergeben",
+      "termin_durchgefuehrt": "Termin durchgeführt"
+    },
+    "sideQuest": {
+      "nachbesichtigung": "Nachbesichtigung",
+      "stellungnahme": "Stellungnahme"
+    },
+    "panel": {
+      "meinFortschritt": "Mein Fortschritt",
+      "phasen": "Phasen",
+      "fallStorniert": "Fall storniert",
+      "zusaetzlichAktiv": "Zusätzlich aktiv"
+    }
+  },
   "landing": {
     "hero": {
       "trust_badge": "Deutschlandweit über 50 Partner-Gutachter",
@@ -4510,6 +4566,10 @@
   },
   "kunde": {
     "fall": {
+      "stepper": {
+        "navigation": "Navigation",
+        "uhrSuffix": "Uhr"
+      },
       "betreuerStrip": {
         "labelKb": "Ihr Kundenbetreuer",
         "labelSv": "Ihr Sachverständiger",
