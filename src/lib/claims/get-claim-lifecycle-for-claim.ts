@@ -21,6 +21,7 @@
 // SQL-Spiegel-View v_claim_phase (P0 Migration).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveClaimId } from './get-claim-for-role'
 import { getAlleAuftraege, type AuftragRow } from '@/lib/auftrag/queries'
 import { getKanzleiFall, type KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
 import {
@@ -39,14 +40,9 @@ export async function getClaimLifecycleForClaim(
   admin: SupabaseClient,
   fallId: string,
 ): Promise<ClaimLifecycleBundle> {
-  // CMM-44 MP-8b: claims.id != faelle.id -> ueber faelle.claim_id den Claim aufloesen.
+  // CMM-44 MP-8b / CMM-49: fall_id -> claim_id via resolveClaimId (bridge, faelle-frei).
   // Status + lead_id kommen aus dem CLAIM (bit-gleich zur claims-zentrischen v_claim_phase).
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fall?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(admin, fallId)
 
   let lead: ClaimLifecycleInput['lead'] = null
   let claimStatus: string | null = null
