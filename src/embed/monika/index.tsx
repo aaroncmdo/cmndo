@@ -76,7 +76,8 @@ async function boot(): Promise<void> {
   const base = deriveBase(script)
 
   // SEO-Backlink IMMER (Pflicht, Variante A + B), unabhaengig vom Modus.
-  injectBacklink(base)
+  // Ziel ist fix claimondo.de (Marketing-Domain), nicht die Bundle-Origin.
+  injectBacklink()
 
   let cfg: MonikaConfig | null = null
 

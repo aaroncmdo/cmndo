@@ -12,7 +12,13 @@ const ANCHORS = [
 
 const MARKER_CLASS = 'cl-attribution'
 
-export function injectBacklink(base: string): void {
+// SEO-Backlink-Ziel: die Marketing-Domain claimondo.de (NICHT app.claimondo.de,
+// von wo das Bundle geladen wird). /sv-netzwerk existiert nicht (404) → echte
+// 200-Seite /kfz-gutachter. Hardcoded, damit das Linkjuice immer auf die SEO-
+// Domain zeigt, unabhaengig von der Bundle-Origin (Plan Task 4.12 / R9.1).
+const BACKLINK_TARGET = 'https://claimondo.de/kfz-gutachter'
+
+export function injectBacklink(): void {
   try {
     if (document.querySelector('.' + MARKER_CLASS)) return // Doppel-Injektion vermeiden
 
@@ -25,7 +31,7 @@ export function injectBacklink(base: string): void {
       'position:fixed;bottom:6px;right:90px;font-size:11px;opacity:.7;z-index:9998;font-family:system-ui,sans-serif;'
 
     const a = document.createElement('a')
-    a.href = base.replace(/\/$/, '') + '/sv-netzwerk'
+    a.href = BACKLINK_TARGET
     a.target = '_blank'
     a.rel = 'noopener' // bewusst KEIN nofollow — Linkjuice gewollt
     a.textContent = ANCHORS[idx]
