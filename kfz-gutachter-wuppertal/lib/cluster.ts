@@ -63,7 +63,7 @@ export const CLUSTER: ClusterConfig = {
   key: 'wuppertal',
   region: 'Bergisches Land',
   regionDative: 'Bergischen Land',
-  quellenAnker: 'Polizei-Jahresverkehrsbericht 2025',
+  quellenAnker: 'eigene Einschätzung der Verkehrslage vor Ort',
   achsen: ['A46', 'A1', 'B7'],
   stadtteile: ['Elberfeld', 'Barmen', 'Heckinghausen', 'Vohwinkel', 'Cronenberg', 'Ronsdorf'],
   domain: 'kfz-unfallgutachter-wuppertal.de',
