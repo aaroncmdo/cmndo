@@ -72,6 +72,16 @@ export default function FallDetailSections({
   aktiverTermin?: AktiverTermin | null
 }) {
   const t = useTranslations('kunde.fall')
+  // Portal-i18n Leak 3: kundenfreundliches, lokalisiertes Status-Label statt
+  // des rohen fall.status-Slugs (z.B. "ersterfassung"). .has()-Fallback auf den
+  // Rohwert, damit ein unbekannter Status nicht crasht (next-intl wirft sonst).
+  const tStatus = useTranslations('fallStatus')
+  const statusSlug = (fall.status as string | null) ?? null
+  const statusLabel = statusSlug
+    ? tStatus.has(statusSlug)
+      ? tStatus(statusSlug)
+      : statusSlug
+    : null
   const [activeTab, setActiveTab] = useState<'uebersicht' | 'dokumente' | 'chat'>('uebersicht')
   return (
     <div>
@@ -102,7 +112,7 @@ export default function FallDetailSections({
             <FallIdentityHeader
               rolle="kunde"
               fallNummer={(fall.claim_nummer as string) ?? (fall.id as string)?.slice(0, 8)}
-              subphaseLabel={(fall.status as string) ?? null}
+              subphaseLabel={statusLabel}
               className="!border-b-0"
             />
           </div>

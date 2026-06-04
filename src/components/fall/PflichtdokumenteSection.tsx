@@ -20,6 +20,7 @@
 
 import { useState, useTransition, useRef } from 'react'
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
 import Link from 'next/link'
 import {
   UploadIcon,
@@ -75,11 +76,12 @@ function fileToBase64(file: File): Promise<string> {
 // Escape-Hatch, da die Pflicht-Tri-State-Farben nicht 1:1 auf die Semantic-
 // Tones passen) statt einer eigenen Pill-<span>.
 function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['status']; pflicht: boolean }) {
+  const t = useTranslations('pflichtdok')
   if (status === 'erfuellt') {
     return (
       <StatusBadge colorCls="bg-emerald-50 text-emerald-700 uppercase tracking-wider">
         <CheckCircle2Icon className="w-3 h-3" />
-        Hochgeladen
+        {t('badgeHochgeladen')}
       </StatusBadge>
     )
   }
@@ -87,14 +89,14 @@ function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['s
     return (
       <StatusBadge colorCls="bg-claimondo-ondo/10 text-claimondo-ondo uppercase tracking-wider">
         <ClockIcon className="w-3 h-3" />
-        Später
+        {t('badgeSpaeter')}
       </StatusBadge>
     )
   }
   return (
     <StatusBadge colorCls="bg-amber-50 text-amber-700 uppercase tracking-wider">
       <CircleDotIcon className="w-3 h-3" />
-      {pflicht ? 'Pflicht offen' : 'Offen'}
+      {pflicht ? t('badgePflichtOffen') : t('badgeOffen')}
     </StatusBadge>
   )
 }
@@ -112,6 +114,7 @@ function SlotCard({
   canUpload: boolean
   onAfterUpload: () => void
 }) {
+  const t = useTranslations('pflichtdok')
   const [, startTransition] = useTransition()
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState<{ done: number; total: number; current: string | null }>({
@@ -126,7 +129,7 @@ function SlotCard({
   async function handleFiles(list: FileList | File[]) {
     if (!canUpload) return
     if (!slot.pflichtdokument_id) {
-      setError('Slot noch nicht initialisiert — bitte über Onboarding-Schritt hinzufügen.')
+      setError(t('fehlerSlot'))
       return
     }
     const files = Array.from(list)
@@ -155,7 +158,7 @@ function SlotCard({
         if (result.success) {
           succeeded++
         } else {
-          setError(result.error ?? 'Upload fehlgeschlagen')
+          setError(result.error ?? t('fehlerUpload'))
           break
         }
       } catch (err) {
@@ -220,13 +223,14 @@ function SlotCard({
           {uploading ? (
             <span className="inline-flex items-center gap-1.5 text-claimondo-navy">
               <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
-              Lädt … ({progress.done + 1} / {progress.total}
-              {progress.current ? ` · ${progress.current}` : ''})
+              {progress.current
+                ? t('laedt', { done: progress.done + 1, total: progress.total, current: progress.current })
+                : t('laedtOhneCurrent', { done: progress.done + 1, total: progress.total })}
             </span>
           ) : (
             <span className="text-claimondo-ondo">
               <UploadIcon className="w-3.5 h-3.5 inline mr-1" />
-              {isErfuellt ? 'Weitere Datei hinzufügen' : 'Datei ablegen oder klicken'}
+              {isErfuellt ? t('dropzoneWeitere') : t('dropzone')}
             </span>
           )}
         </div>
@@ -258,7 +262,7 @@ function SlotCard({
               className="inline-flex items-center gap-1.5 text-xs text-claimondo-navy hover:text-claimondo-shield bg-white border border-claimondo-border hover:border-claimondo-ondo rounded-ios-lg px-2.5 py-1.5 transition-colors"
             >
               <DownloadIcon className="w-3.5 h-3.5" />
-              <span className="truncate max-w-[16rem]">{f.name || 'Datei öffnen'}</span>
+              <span className="truncate max-w-[16rem]">{f.name || t('dateiOeffnen')}</span>
             </Link>
           ))}
         </div>
@@ -283,6 +287,7 @@ export default function PflichtdokumenteSection({
   variant = 'card',
   title,
 }: PflichtdokumenteSectionProps) {
+  const t = useTranslations('pflichtdok')
   const router = useRouter()
   const [popoverOpen, setPopoverOpen] = useState(false)
 
@@ -331,19 +336,23 @@ export default function PflichtdokumenteSection({
             <div>
               <p className="text-base font-semibold text-claimondo-navy">{headerTitle}</p>
               <p className="text-xs text-claimondo-ondo mt-0.5">
-                {erfuellt} / {slots.length} hochgeladen ·{' '}
-                {offenPflicht > 0
-                  ? `${offenPflicht} Pflicht offen`
-                  : offen.length > 0
-                    ? `${offen.length} optional offen`
-                    : 'alle erfüllt'}
+                {t('countZeile', {
+                  erfuellt,
+                  total: slots.length,
+                  rest:
+                    offenPflicht > 0
+                      ? t('restPflicht', { n: offenPflicht })
+                      : offen.length > 0
+                        ? t('restOptional', { n: offen.length })
+                        : t('restAlle'),
+                })}
               </p>
             </div>
             <button
               type="button"
               onClick={() => setPopoverOpen(false)}
               className="text-claimondo-ondo/70 hover:text-claimondo-ondo shrink-0"
-              aria-label="Schließen"
+              aria-label={t('schliessen')}
             >
               <XIcon className="w-5 h-5" />
             </button>
@@ -358,8 +367,8 @@ export default function PflichtdokumenteSection({
   if (variant === 'banner') {
     const headline =
       offenPflicht > 0
-        ? `${offenPflicht} Pflichtdokument${offenPflicht === 1 ? '' : 'e'} fehlen noch`
-        : `${offen.length} Dokument${offen.length === 1 ? '' : 'e'} können hochgeladen werden`
+        ? t('bannerHeadlinePflicht', { n: offenPflicht })
+        : t('bannerHeadlineOptional', { n: offen.length })
 
     return (
       <>
@@ -373,13 +382,13 @@ export default function PflichtdokumenteSection({
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-amber-900">{title ?? headline}</p>
               <p className="text-xs text-amber-800 mt-0.5">
-                Klicken zum Hochladen — Drag&Drop pro Dokument im Pop-over.
+                {t('bannerHint')}
               </p>
             </div>
             <ChevronRightIcon className="w-5 h-5 text-amber-600 shrink-0" />
           </div>
         </button>
-        {renderPopover(title ?? 'Pflichtdokumente')}
+        {renderPopover(title ?? t('titel'))}
       </>
     )
   }
@@ -398,7 +407,7 @@ export default function PflichtdokumenteSection({
           <UploadIcon className="w-4 h-4" />
           {triggerLabel}
         </button>
-        {renderPopover(title ?? 'Pflichtdokumente')}
+        {renderPopover(title ?? t('titel'))}
       </>
     )
   }
@@ -407,7 +416,7 @@ export default function PflichtdokumenteSection({
   return (
     <div className="rounded-2xl bg-white border border-claimondo-border p-4">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-semibold text-claimondo-navy">{title ?? 'Pflichtdokumente'}</p>
+        <p className="text-sm font-semibold text-claimondo-navy">{title ?? t('titel')}</p>
         <span className="text-xs text-claimondo-ondo">
           {erfuellt} / {slots.length} eingegangen
         </span>
