@@ -17,7 +17,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
  * Ersetzt die alte Implementierung die in chat_gruppen/nachrichten.gruppe_id
  * insertete (beides existiert nicht mehr).
  */
-export async function sendSystemNachricht(fallId: string, nachricht: string): Promise<void> {
+export async function sendSystemNachricht(
+  fallId: string,
+  nachricht: string,
+  // i18n Phase 1: optionaler Template-Key + Params fuer Leser-Sprach-Rendering.
+  // nachricht bleibt de-Fallback.
+  opts?: { templateKey?: string; templateParams?: Record<string, string | number> },
+): Promise<void> {
   const admin = createAdminClient()
 
   const { error } = await admin.from('nachrichten').insert({
@@ -28,6 +34,8 @@ export async function sendSystemNachricht(fallId: string, nachricht: string): Pr
     nachricht,
     hat_anhang: false,
     is_system: true,
+    template_key: opts?.templateKey ?? null,
+    template_params: opts?.templateParams ?? null,
   })
 
   if (error) {
