@@ -628,3 +628,34 @@ export async function registriereSvBasicNeu(input: {
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
   return { ok: true, svId, emailSent }
 }
+
+// ─── Action 4: Claimbare Cold-Pins fuer die gutachter-partner-Karte ───────────
+// Privacy: gibt NUR id/lat/lng offener, claimbarer Cold-Leads zurueck — exakt die
+// anon-GRANT-Spalten (#2177/#2208). Kein Name/Firma/PLZ verlaesst den Server.
+// Service-Role, weil claim_status NICHT in den anon-Spalten-Grants liegt (ein
+// anon-Filter darauf wuerfe "permission denied" und killte den Read — vgl. den
+// ist_aktiv-Hinweis in gutachter-finder-actions.ts:ladeAktiveSVs).
+// Filter (DB-verifiziert 2026-06-04: 62 Pins, quelle='excel_import_2026-05-11'):
+// claim_status='offen' + ist_aktiv; die (stillgelegte) Warteliste-Quelle
+// 'gutachter-partner-page' ausschliessen, damit nur echte Cold-Pins (Excel-/DAT-
+// Importe) als beanspruchbar erscheinen — robust gegen kuenftige Import-Quellen.
+export async function ladeClaimbarePinLeads(): Promise<
+  { ok: true; data: Array<{ id: string; lat: number; lng: number }> } | { ok: false; error: string }
+> {
+  const admin = createAdminClient()
+  const { data, error } = await admin
+    .from('sv_leads')
+    .select('id,lat,lng')
+    .eq('ist_aktiv', true)
+    .eq('claim_status', 'offen')
+    .neq('quelle', 'gutachter-partner-page')
+    .not('lat', 'is', null)
+    .not('lng', 'is', null)
+  if (error) return { ok: false, error: error.message }
+  const rows = (data ?? []).map((r) => ({
+    id: r.id as string,
+    lat: Number(r.lat),
+    lng: Number(r.lng),
+  }))
+  return { ok: true, data: rows }
+}
