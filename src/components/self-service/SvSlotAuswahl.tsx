@@ -5,25 +5,26 @@
 // genutzt, damit der Slot-Picker nicht doppelt gepflegt wird (Phase C deprecatet
 // /anfrage). Match-/Buchungs-Logik liegt beim Consumer.
 
+import { useTranslations } from 'next-intl'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { Card } from '@/components/primitives/Card'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 // AAR-956 TZ: slot.start ist ein echter UTC-Instant -> explizit Berlin formatieren
-// (sonst browser-TZ-abhaengig).
-function fmtSlot(iso: string): string {
+// (sonst browser-TZ-abhaengig). uhrSuffix kommt lokalisiert vom Consumer
+// (selfService.slot.uhr_suffix — DE "Uhr", EN "h", sonst leer; Glossar).
+function fmtSlot(iso: string, uhrSuffix: string): string {
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return iso
-  return (
-    formatBerlin(iso, {
-      weekday: 'short',
-      day: '2-digit',
-      month: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-    }) + ' Uhr'
-  )
+  const formatted = formatBerlin(iso, {
+    weekday: 'short',
+    day: '2-digit',
+    month: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+  return uhrSuffix ? `${formatted} ${uhrSuffix}` : formatted
 }
 
 export function SvSlotAuswahl({
@@ -35,13 +36,15 @@ export function SvSlotAuswahl({
   fehler: string | null
   onSlot: (sv: OeffentlichesSvProfil, slot: SlotVorschlag) => void
 }) {
+  const t = useTranslations('selfService')
+  const uhrSuffix = t('slot.uhr_suffix')
   return (
     <div className="max-w-lg w-full">
       <h1 className="text-2xl font-semibold text-claimondo-navy mb-1 text-center">
-        Ihr Gutachter-Termin
+        {t('slot.heading')}
       </h1>
       <p className="text-claimondo-navy/60 text-sm mb-6 text-center">
-        Wählen Sie einen passenden Termin — der erste Vorschlag ist Ihr bestpassender Gutachter.
+        {t('slot.sub')}
       </p>
       {fehler && <p className="text-claimondo-navy/70 text-sm mb-4 text-center">{fehler}</p>}
       <div className="flex flex-col gap-4">
@@ -60,7 +63,7 @@ export function SvSlotAuswahl({
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-claimondo-navy">{sv.vorname}</span>
                   {i === 0 && (
-                    <span className="text-[11px] font-semibold text-claimondo-ondo">Empfohlen</span>
+                    <span className="text-[11px] font-semibold text-claimondo-ondo">{t('slot.empfohlen')}</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 text-sm text-claimondo-navy/60">
@@ -78,7 +81,7 @@ export function SvSlotAuswahl({
               <p className="text-sm text-claimondo-navy/60 mb-3 line-clamp-2">{sv.profilbeschreibung}</p>
             )}
             {sv.slots.length === 0 ? (
-              <p className="text-sm text-claimondo-navy/50">Aktuell keine freien Termine.</p>
+              <p className="text-sm text-claimondo-navy/50">{t('slot.keine_termine')}</p>
             ) : (
               <div className="flex flex-wrap gap-2">
                 {sv.slots.map((slot) => (
@@ -89,9 +92,9 @@ export function SvSlotAuswahl({
                     onClick={() => onSlot(sv, slot)}
                     className="rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy transition hover:border-claimondo-ondo hover:bg-claimondo-bg"
                   >
-                    {fmtSlot(slot.start)}
+                    {fmtSlot(slot.start, uhrSuffix)}
                     {slot.matchType === 'wunschtermin' && (
-                      <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">Wunschzeit</span>
+                      <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">{t('slot.wunschzeit')}</span>
                     )}
                   </button>
                 ))}

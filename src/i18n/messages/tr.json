@@ -94,7 +94,8 @@
   "flow": {
     "step_feststellung": {
       "heading": "Hasarınız hakkında birkaç bilgi",
-      "sub": "Ne kadar ayrıntılı olursa o kadar hızlı — her şey isteğe bağlıdır ve daha sonra tamamlanabilir."
+      "sub": "Ne kadar ayrıntılı olursa o kadar hızlı — her şey isteğe bağlıdır ve daha sonra tamamlanabilir.",
+      "error_save": "Kaydetme başarısız oldu."
     },
     "progress": {
       "aria_label": "Hasar bildirme akışında ilerleme",
@@ -437,6 +438,20 @@
       "fallback_email_hint": "Erişim bilgileriniz {email} adresine gönderildi.",
       "fallback_cta": "Portalıma git",
       "error_fallback": "Hesap oluşturulamadı"
+    },
+    "expired": {
+      "heading": "Bağlantının süresi doldu",
+      "body": "Bu FlowLink artık geçerli değil. Yeni bir bağlantı için lütfen müşteri sorumlunuzla iletişime geçin."
+    },
+    "done": {
+      "heading": "Her şey hazır",
+      "body": "Giriş bilgilerinizi ve bir giriş bağlantısını e-posta ile gönderdik. Lütfen gelen kutunuzu kontrol edin.",
+      "cta_login": "Girişe git"
+    },
+    "error": {
+      "heading": "Bir şeyler ters gitti",
+      "body": "Lütfen tekrar deneyin. Sorun devam ederse lütfen bizimle iletişime geçin.",
+      "reload": "Sayfayı yeniden yükle"
     }
   },
   "common": {
@@ -5482,5 +5497,51 @@
   },
   "kundenHeader": {
     "imAuftrag": "Claimondo adına"
+  },
+  "selfService": {
+    "matching": {
+      "suche": "Size uygun bilirkişiyi arıyoruz …",
+      "moment": "Bir saniye …",
+      "kein_match_heading": "Size geri döneceğiz",
+      "kein_match_body": "Bulunduğunuz konum için şu anda uygun bir bilirkişi randevusu bulamadık. Ekibimiz kısa süre içinde sizi telefonla arayacak.",
+      "laden_fehler": "Bilirkişiler yüklenirken bir hata oluştu."
+    },
+    "errors": {
+      "allgemein": "Bir hata oluştu.",
+      "unerwartet": "Beklenmedik bir hata oluştu.",
+      "buchung": "Rezervasyon başarısız oldu."
+    },
+    "quali": {
+      "gruss": "Merhaba {vorname},",
+      "frage": "Kazaya kim sebep oldu?",
+      "hinweis": "Bu, hasarınızı sizin adınıza tazmin edip edemeyeceğimizi değerlendirmemize yardımcı olur.",
+      "optionen": {
+        "gegner": {
+          "label": "Karşı taraf",
+          "hint": "Hasara karşı taraf sebep oldu."
+        },
+        "unklar": {
+          "label": "Henüz belirsiz",
+          "hint": "Kusur durumu henüz net olarak belirlenmedi."
+        },
+        "eigenverantwortung": {
+          "label": "Kendim",
+          "hint": "Kazaya kendim sebep oldum."
+        }
+      }
+    },
+    "slot": {
+      "heading": "Bilirkişi randevunuz",
+      "sub": "Size uygun bir randevu seçin — ilk öneri sizinle en iyi eşleşen bilirkişidir.",
+      "empfohlen": "Önerilen",
+      "wunschzeit": "Tercih edilen saat",
+      "keine_termine": "Şu anda uygun randevu yok.",
+      "uhr_suffix": ""
+    },
+    "kasko": {
+      "heading": "Bilgileriniz için teşekkürler",
+      "body": "Kendi kusurunuzdan kaynaklanan kazalarda bilirkişi masrafları maalesef karşı tarafın zorunlu mali sorumluluk sigortası üzerinden tazmin edilemez — bu nedenle size burada ücretsiz bir randevu sunamıyoruz.",
+      "note": "Kusur durumu değişirse, dilediğiniz zaman tekrar bizimle iletişime geçebilirsiniz."
+    }
   }
 }

@@ -5,6 +5,7 @@
 // sonst → onWeiter (Wizard advanced zum Slot-Step).
 
 import { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { QualiOptionen } from '@/components/self-service/QualiOptionen'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { speichereQualiFlow } from './self-service-actions'
@@ -18,6 +19,7 @@ export function FlowQualiStep({
   vorname: string | null
   onWeiter: () => void
 }) {
+  const t = useTranslations('selfService')
   const [phase, setPhase] = useState<'frage' | 'sende' | 'abbruch' | 'fehler'>('frage')
   const [fehler, setFehler] = useState<string | null>(null)
 
@@ -28,7 +30,7 @@ export function FlowQualiStep({
       const r = await speichereQualiFlow(token, value)
       if (!r.ok) {
         setPhase('fehler')
-        setFehler(r.error ?? 'Es ist ein Fehler aufgetreten.')
+        setFehler(r.error ?? t('errors.allgemein'))
         return
       }
       if (r.ergebnis === 'abbruch') {
@@ -38,7 +40,7 @@ export function FlowQualiStep({
       onWeiter()
     } catch {
       setPhase('fehler')
-      setFehler('Es ist ein unerwarteter Fehler aufgetreten.')
+      setFehler(t('errors.unerwartet'))
     }
   }
 
