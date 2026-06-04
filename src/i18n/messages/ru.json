@@ -5059,5 +5059,122 @@
     "finanzierung": "Финансирование",
     "vs": "Страховая",
     "vsNr": "№ полиса"
+  },
+  "jetztZuTun": {
+    "statusLabel": "Статус",
+    "onboardingOffen": {
+      "titel": "Завершите регистрацию",
+      "beschreibung": "Пожалуйста, заполните оставшиеся данные по вашему страховому случаю. Без этих данных ваш куратор не сможет продолжить работу по делу.",
+      "cta": "Завершить сейчас"
+    },
+    "datenAnKanzlei": {
+      "titel": "Нужны данные для юридической фирмы",
+      "beschreibung": "Партнёрская юридическая фирма ждёт от вас недостающие данные. Откройте ваше дело и проверьте открытые пункты.",
+      "cta": "Открыть дело"
+    },
+    "terminVorOrt": {
+      "titel": "Осмотр уже идёт",
+      "beschreibung": "Встреча {datum}. Эксперт либо в пути, либо уже на месте."
+    },
+    "terminUnterwegs": {
+      "titel": "Осмотр скоро состоится",
+      "beschreibung": "Встреча {datum}. Ваш эксперт свяжется с вами незадолго до прибытия."
+    },
+    "nachbesichtigungWaehlen": {
+      "titel": "Повторный осмотр: выберите время",
+      "beschreibung": "Страховая требует повторного осмотра вашего автомобиля. Предложите 2–3 удобных времени.",
+      "cta": "Предложить время"
+    },
+    "terminBestaetigen": {
+      "titel": "Подтвердите время осмотра",
+      "beschreibung": "Ваш эксперт предлагает {datum}. Подтвердите или предложите своё время.",
+      "cta": "Открыть встречу"
+    },
+    "vollmachtUnterschreiben": {
+      "titel": "Подтвердите доверенность",
+      "beschreibung": "Чтобы LexDrive могла вести переговоры со страховой, нам нужна ваша электронная доверенность (Vollmacht).",
+      "cta": "Подтвердить сейчас"
+    },
+    "vsAntwortAbwarten": {
+      "titel": "Мы ждём страховую",
+      "beschreibung": "Ваше письмо-требование отправлено. У страховой теперь есть установленный законом срок для ответа — мы свяжемся с вами, как только получим ответ."
+    },
+    "fallAbgeschlossen": {
+      "titel": "Дело закрыто",
+      "beschreibung": "Ваш страховой случай полностью урегулирован. Спасибо за доверие!"
+    },
+    "keinAktionsbedarf": {
+      "titel": "Действий не требуется",
+      "beschreibung": "Ваше дело идёт по плану — мы свяжемся с вами, как только нам что-то понадобится."
+    }
+  },
+  "fallKarte": {
+    "phasen": {
+      "erfassung": "Регистрация",
+      "begutachtung": "Заключение",
+      "regulierung": "Урегулирование",
+      "abschluss": "Завершение"
+    },
+    "uhrSuffix": "",
+    "fahrzeugFallback": "Автомобиль",
+    "unfallAm": "ДТП {datum}",
+    "svVorOrt": "Эксперт на месте",
+    "svUnterwegs": "Эксперт в пути",
+    "svUnterwegsEta": "Эксперт в пути · {minuten} мин.",
+    "terminVerstrichen": "Встреча пропущена · {termin}",
+    "fallAbgeschlossen": "Дело закрыто",
+    "phaseLabel": "Этап: {phase}",
+    "phaseInBearbeitung": "В работе"
+  },
+  "kundeHero": {
+    "willkommen": "Добро пожаловать",
+    "begruessung": "Здравствуйте, {vorname} — чем мы можем помочь?",
+    "intro": "Мы занимаемся вашим страховым случаем — от экспертизы до выплаты. Вам не нужно ничего администрировать; мы информируем вас на каждом шаге.",
+    "schadenMelden": "Заявить о случае",
+    "bereitsGemeldet": "Уже заявлено? Вы получите от нас ссылку по электронной почте или SMS.",
+    "soLaeuftEs": "Как это у нас работает",
+    "schrittLabel": "Шаг {nummer}",
+    "schritt1": "Случай заявлен",
+    "schritt2": "Эксперт назначен",
+    "schritt3": "Осмотр",
+    "schritt4": "Заключение",
+    "schritt5": "Урегулировано"
+  },
+  "svLive": {
+    "gutachterFallback": "Ваш эксперт",
+    "ueberarbeitungTitel": "Заключение дорабатывается",
+    "qcTitel": "Проверка качества и передача в юридическую фирму",
+    "ueberarbeitungSub": "· Мы ждём исправленную версию",
+    "qcSub": "· Ваше заключение проверяется",
+    "gutachtenWirdErstellt": "Заключение готовится",
+    "gutachtenWirdErstelltSub": "· {vorname} работает над ним",
+    "svVorOrt": "{vorname} на месте",
+    "svVorOrtSub": "· Осмотр идёт",
+    "svUnterwegs": "{vorname} в пути",
+    "svUnterwegsAnkunft": "· Прибытие ок. {ankunft} ({minuten} мин.)"
+  },
+  "abschluss": {
+    "badge": "Завершено",
+    "titel": "Ваше дело {fallNummer} завершено",
+    "untertitel": "Закрыто {datum} · Большое спасибо за доверие.",
+    "gutachtenPdf": "Заключение (PDF)",
+    "gutachtenNichtFreigegeben": "PDF заключения ещё не выдан",
+    "gutachtenNv": "Заключение (нет)",
+    "reklamation": "Подать рекламацию",
+    "bewerten": "Оценить"
+  },
+  "auszahlung": {
+    "titel": "Ваша выплата",
+    "statusEingegangen": "Получено",
+    "statusAvisiert": "Анонсировано",
+    "nettoBetrag": "Сумма нетто (ваша доля)",
+    "eingang": "Поступление",
+    "zahlungswegLabel": "Способ оплаты",
+    "zahlungsweg": {
+      "ueberweisung": "Банковский перевод",
+      "werkstattDirekt": "Прямая оплата автосервису",
+      "scheck": "Чек"
+    },
+    "hinweis": "Это ваша доля нетто после вычета гонорара эксперта и франшизы. Сумму брутто вы видите в обзоре вашего дела."
   }
 }
