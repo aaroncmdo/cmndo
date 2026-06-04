@@ -63,6 +63,8 @@
  * (Werkstatt-Eisenschild). Kein data-theme-Switch — direkt in :root.
  * ════════════════════════════════════════════════════════════════════════ */
 :root {
+  /* Mobile-Hero (separates, hochformatiges Bild) — Swap via @media in .hero-photo-bg. */
+  --hero-mobile: url(/assets/img/bonn/hero-bonn-mobile.webp);
   --petrol: #0F1014;
   --petrol-700: #04060A;
   --petrol-300: #1F2228;
@@ -133,6 +135,7 @@ body {
         var(--petrol) 100%);
   }
   .hero-photo-bg {
+    background-image: var(--hero-mobile) !important;
     background-position: center top !important;
   }
 }

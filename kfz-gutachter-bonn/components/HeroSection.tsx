@@ -12,7 +12,7 @@ import { GOOGLE_RATING } from '@/lib/content'
 //   CTA (Telefonnummer) -> heroTrustClusterDesktop (Siegel+Stats) -> 3-Zeilen-Trust-Block.
 // Token-Hinweis: Die Mock-CSS nutzt ein fremdes Token-System (--space-*/--type-*); hier
 //   LP-nativ nachgebaut (Tailwind-Utilities + .hero-* Klassen mit Konkretwerten in globals.css).
-// Siegel: siegel-claimondo-partner-v3.svg (Master-Siegel, 2026-06-03 ausgeliefert + auf VPS deployed).
+// Siegel: siegel-claimondo-partner.svg (Brand-Siegel, im Repo unter public/assets/brand/).
 // Haupt-CTA traegt id="heroCallCta" (FabStack observed es). Klick-Tracking via data-cta.
 export function HeroSection({ city }: { city: City }) {
   // LCP: Hero-Bild ist CSS-background -> Preload zieht den Fetch nach vorn.
@@ -26,7 +26,7 @@ export function HeroSection({ city }: { city: City }) {
         className="hero-photo hero-photo-bg absolute inset-0 z-0"
         style={{ background: `url(${CLUSTER.imgPath}hero-${CLUSTER.key}.webp) center 22%/cover no-repeat` }}
       />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[56px] pb-[48px] flex flex-col min-h-[640px] md:min-h-[760px]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[56px] pb-[48px] flex flex-col min-h-[100dvh] md:min-h-[760px]">
         <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] gap-14 items-stretch flex-1">
           <div className="flex flex-col pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline (Social-Proof above-fold). */}
@@ -116,7 +116,7 @@ export function HeroSection({ city }: { city: City }) {
                 Sichtbarkeit via #heroTrustClusterDesktop CSS (none mobil, flex ab 640). */}
             <div id="heroTrustClusterDesktop" aria-label="Vertrauenssignale">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="htc-siegel" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo-Partner-Siegel" loading="lazy" />
+              <img className="htc-siegel" src="/assets/brand/siegel-claimondo-partner.svg" alt="Claimondo-Partner-Siegel" loading="lazy" />
               <div className="htc-text">
                 <span className="htc-text-main">Zertifizierter Claimondo-Partner</span>
                 <span className="htc-text-sub">Unfall-Assistance · 2026</span>
@@ -154,7 +154,7 @@ export function HeroSection({ city }: { city: City }) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     className="w-[28px] h-[28px] flex-none drop-shadow-[0_2px_4px_rgba(0,0,0,.35)]"
-                    src="/assets/brand/siegel-claimondo-partner-v3.svg"
+                    src="/assets/brand/siegel-claimondo-partner.svg"
                     alt="Claimondo-Partner-Siegel"
                     loading="lazy"
                   />
@@ -178,7 +178,7 @@ export function HeroSection({ city }: { city: City }) {
                 </div>
                 <div className="hero-brand-anchor">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="mini-seal" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo Unfall-Assistance Partner Siegel" loading="lazy" />
+                  <img className="mini-seal" src="/assets/brand/siegel-claimondo-partner.svg" alt="Claimondo Unfall-Assistance Partner Siegel" loading="lazy" />
                   <div className="brand-text-block brand-text-block-centered">
                     <span className="brand-line-main">Claimondo Unfall-Assistance</span>
                     <span className="brand-line-sub">Partner</span>

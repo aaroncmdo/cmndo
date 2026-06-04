@@ -18,7 +18,7 @@ export function MonikaEmbedSlot({ city }: { city: City }) {
       data-theme={CLUSTER.theme}
       data-phone={CLUSTER.phone.tel}
       data-wa={CLUSTER.phone.wa}
-      data-logo="/assets/img/shared/monika.png"
+      data-logo="/assets/brand/siegel-claimondo-partner.svg"
     />
   )
 }
