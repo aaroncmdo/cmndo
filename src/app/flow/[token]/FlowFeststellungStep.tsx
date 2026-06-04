@@ -11,6 +11,7 @@ import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { istFeststellungsFeld, istDokumentManuellFeld } from '@/lib/self-service/feststellung-felder'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import { FlowZb1Upload } from './FlowZb1Upload'
+import { FlowPolizeiberichtUpload } from './FlowPolizeiberichtUpload'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 // Spiegelt WizardClient.meetsCondition: ein Feld/eine Phase ist sichtbar, wenn keine
@@ -156,6 +157,9 @@ export function FlowFeststellungStep({
           </section>
         ))}
       </div>
+
+      {/* AAR-956 Gebiet-3: Polizeibericht-Upload — nur wenn "Polizei vor Ort" = Ja (reaktiv). */}
+      {values['polizei_vor_ort'] === 'true' && <FlowPolizeiberichtUpload token={token} />}
 
       {error && (
         <p className="mt-4 text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3">
