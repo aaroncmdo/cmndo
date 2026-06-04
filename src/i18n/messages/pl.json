@@ -4572,6 +4572,29 @@
         "leerText": "Po zgłoszeniu szkody pojawi się ona tutaj wraz z aktualnym statusem — będą Państwo widzieć każdy etap od umówienia wizyty do wypłaty odszkodowania.",
         "schadenMelden": "Zgłoś szkodę",
         "anzahl": "Mają Państwo u nas {count, plural, one {# aktywną sprawę} few {# aktywne sprawy} many {# aktywnych spraw} other {# aktywnych spraw}}."
+      },
+      "meinGeld": {
+        "heading": "Moje pieniądze",
+        "totalschadenBadge": "Pojazd jest szkodą całkowitą",
+        "ihreForderung": "Państwa roszczenie",
+        "beforeGutachten": "Kwoty są pokazywane po sporządzeniu ekspertyzy.",
+        "ausGutachten": "Z ekspertyzy",
+        "reparaturkosten": "Koszty naprawy",
+        "wiederbeschaffungswert": "Wartość odtworzeniowa",
+        "abzglRestwert": "minus wartość pozostałości",
+        "minderwert": "Utrata wartości",
+        "auszahlungHinweis": "Wypłaconą kwotę zobaczą Państwo po zakończeniu likwidacji w karcie wypłaty.",
+        "auszahlungLabel": "Wypłata:",
+        "aufMeinKonto": "Na moje konto",
+        "direktWerkstatt": "Bezpośrednio do warsztatu",
+        "auszahlungFrage": "Dokąd ma trafić wypłata?"
+      },
+      "meinBetreuer": {
+        "heading": "Mój opiekun klienta",
+        "ansprechpartner": "Państwa osobisty opiekun",
+        "teamFallback": "Zespół Claimondo",
+        "chatOeffnen": "Otwórz czat",
+        "terminBuchen": "Umów termin"
       }
     },
     "termine": {

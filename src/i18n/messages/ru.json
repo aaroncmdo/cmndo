@@ -4572,6 +4572,29 @@
         "leerText": "Как только вы сообщите о ущербе, он появится здесь со статусом в реальном времени — вы будете видеть каждый шаг от назначения встречи до выплаты.",
         "schadenMelden": "Сообщить об ущербе",
         "anzahl": "У вас {count, plural, one {# активное дело} few {# активных дела} many {# активных дел} other {# активных дел}} у нас."
+      },
+      "meinGeld": {
+        "heading": "Мои деньги",
+        "totalschadenBadge": "Ваш автомобиль признан полностью разбитым",
+        "ihreForderung": "Ваше требование",
+        "beforeGutachten": "Суммы отображаются после составления заключения.",
+        "ausGutachten": "Из заключения",
+        "reparaturkosten": "Стоимость ремонта",
+        "wiederbeschaffungswert": "Стоимость восстановления",
+        "abzglRestwert": "за вычетом остаточной стоимости",
+        "minderwert": "Потеря стоимости",
+        "auszahlungHinweis": "Выплаченную сумму вы увидите после урегулирования в карточке выплаты.",
+        "auszahlungLabel": "Выплата:",
+        "aufMeinKonto": "На мой счёт",
+        "direktWerkstatt": "Напрямую в автосервис",
+        "auszahlungFrage": "Куда направить выплату?"
+      },
+      "meinBetreuer": {
+        "heading": "Мой персональный менеджер",
+        "ansprechpartner": "Ваше личное контактное лицо",
+        "teamFallback": "Команда Claimondo",
+        "chatOeffnen": "Открыть чат",
+        "terminBuchen": "Записаться на приём"
       }
     },
     "termine": {

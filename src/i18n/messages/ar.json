@@ -4572,6 +4572,29 @@
         "leerText": "بمجرد الإبلاغ عن ضرر، سيظهر هنا مع حالته الحية — ستتابع كل خطوة من تحديد الموعد حتى الصرف.",
         "schadenMelden": "الإبلاغ عن ضرر",
         "anzahl": "لديك {count, plural, one {# قضية نشطة} two {# قضيتان نشطتان} few {# قضايا نشطة} many {# قضية نشطة} other {# قضايا نشطة}} لدينا."
+      },
+      "meinGeld": {
+        "heading": "أموالي",
+        "totalschadenBadge": "مركبتك في حالة خسارة كلية",
+        "ihreForderung": "مطالبتك",
+        "beforeGutachten": "تُعرض المبالغ بعد إعداد تقرير الخبير.",
+        "ausGutachten": "من تقرير الخبير",
+        "reparaturkosten": "تكاليف الإصلاح",
+        "wiederbeschaffungswert": "قيمة الاستبدال",
+        "abzglRestwert": "ناقص القيمة المتبقية",
+        "minderwert": "فقدان القيمة",
+        "auszahlungHinweis": "ستظهر لك المبالغ المدفوعة بعد التسوية في بطاقة الدفع.",
+        "auszahlungLabel": "الدفع:",
+        "aufMeinKonto": "إلى حسابي",
+        "direktWerkstatt": "مباشرةً إلى الورشة",
+        "auszahlungFrage": "إلى أين يجب توجيه الدفع؟"
+      },
+      "meinBetreuer": {
+        "heading": "مسؤول حسابي",
+        "ansprechpartner": "جهة الاتصال الشخصية الخاصة بك",
+        "teamFallback": "فريق Claimondo",
+        "chatOeffnen": "فتح المحادثة",
+        "terminBuchen": "حجز موعد"
       }
     },
     "termine": {
