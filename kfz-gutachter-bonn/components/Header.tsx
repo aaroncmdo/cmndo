@@ -18,14 +18,14 @@ const WA_PATH =
 export function Header({ city }: { city: City }) {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-paper/65 backdrop-blur-xl backdrop-saturate-150 border-b border-white/40 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.18)] transition-all duration-200">
-        <div className="max-w-wrap mx-auto px-6 flex items-center justify-between h-[84px] md:h-[92px] lg:h-[100px] gap-3.5">
+      <header className="sticky top-0 z-50 bg-petrol/70 lg:bg-paper/60 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 lg:border-black/[0.06] shadow-[0_2px_16px_-8px_rgba(0,0,0,0.28)] transition-all duration-200">
+        <div className="max-w-wrap mx-auto px-6 flex items-center justify-between h-[58px] md:h-[64px] lg:h-[72px] gap-3.5">
           <a className="flex items-center gap-3" href="/" aria-label="Kfz-Gutachter — zur Startseite">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={`${CLUSTER.imgPath}logo-${CLUSTER.key}.webp`}
               alt={`Kfz-Gutachter ${CLUSTER.cities[0].name}`}
-              className="h-16 md:h-[72px] lg:h-[80px] w-auto flex-none"
+              className="h-9 md:h-11 lg:h-12 w-auto flex-none"
               loading="eager"
             />
           </a>
@@ -61,7 +61,7 @@ export function Header({ city }: { city: City }) {
             <button
               id="burgerBtn"
               type="button"
-              className="lg:hidden inline-flex flex-col items-center justify-center gap-[5px] w-11 h-11 -mr-2 rounded-md text-ink transition active:scale-95"
+              className="lg:hidden inline-flex flex-col items-center justify-center gap-[5px] w-11 h-11 -mr-2 rounded-md text-white transition active:scale-95"
               aria-label="Menü öffnen"
               aria-expanded="false"
               aria-controls="burgerMenu"

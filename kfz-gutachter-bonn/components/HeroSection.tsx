@@ -26,7 +26,7 @@ export function HeroSection({ city }: { city: City }) {
         className="hero-photo hero-photo-bg absolute inset-0 z-0"
         style={{ background: `url(${CLUSTER.imgPath}hero-${CLUSTER.key}.webp) center 22%/cover no-repeat` }}
       />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[56px] pb-[48px] flex flex-col min-h-[640px] md:min-h-[760px]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[40px] pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] gap-14 items-stretch flex-1">
           <div className="flex flex-col pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline (Social-Proof above-fold). */}

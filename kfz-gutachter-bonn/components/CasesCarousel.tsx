@@ -20,6 +20,46 @@ function eur(n: number): string {
   }).format(n)
 }
 
+// Zaehlt den Anspruch-Betrag von erstangebot -> anspruch hoch, sobald die Zahl
+// in den Viewport scrollt (AAR-962, Aaron-Wunsch). easeOutCubic, ~1.3s, einmalig.
+// Respektiert prefers-reduced-motion (zeigt direkt den Endwert).
+function CountUpEur({ from, to }: { from: number; to: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const [val, setVal] = useState(from)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof window === 'undefined') return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(to)
+      return
+    }
+    let started = false
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !started) {
+            started = true
+            const dur = 1300
+            const t0 = performance.now()
+            const step = (now: number) => {
+              const p = Math.min(1, (now - t0) / dur)
+              const eased = 1 - Math.pow(1 - p, 3)
+              setVal(Math.round(from + (to - from) * eased))
+              if (p < 1) requestAnimationFrame(step)
+            }
+            requestAnimationFrame(step)
+            io.disconnect()
+          }
+        }
+      },
+      { threshold: 0.4 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [from, to])
+  return <span ref={ref}>{eur(val)}</span>
+}
+
 export function CasesCarousel({ city }: { city: City }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [allOpen, setAllOpen] = useState(false)
@@ -204,7 +244,7 @@ export function CasesCarousel({ city }: { city: City }) {
                       <span className="text-[9.5px] text-muted">mit unabh. Gutachten + Anwalt</span>
                     </span>
                     <span className="font-mono font-bold text-[20px] text-petrol tabular-nums leading-none">
-                      {eur(c.anspruch)}
+                      <CountUpEur from={c.erstangebot} to={c.anspruch} />
                     </span>
                   </div>
                 </div>

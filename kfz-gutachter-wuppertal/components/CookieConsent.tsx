@@ -30,7 +30,9 @@ function applyConsent(): void {
 
 export function CookieConsentBanner() {
   useEffect(() => {
-    void CookieConsent.run({
+    if (typeof window !== 'undefined') console.log('[cc] init run=', typeof CookieConsent.run)
+    Promise.resolve(CookieConsent.run({
+      autoShow: true,
       guiOptions: {
         consentModal: { layout: 'box', position: 'bottom left' },
         preferencesModal: { layout: 'box' },
@@ -70,7 +72,9 @@ export function CookieConsentBanner() {
       onFirstConsent: applyConsent,
       onConsent: applyConsent,
       onChange: applyConsent,
-    })
+    }))
+      .then(() => console.log('[cc] ok modal=', !!document.getElementById('cc-main')))
+      .catch((e) => console.error('[cc] failed', e))
   }, [])
   return null
 }
