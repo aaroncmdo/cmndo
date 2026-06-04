@@ -383,7 +383,7 @@
       "termin_label": "Randevu rezerve edildi",
       "besichtigungsort_label": "Ekspertiz yeri",
       "treffpunkt_label": "Buluşma noktası: {treffpunkt}",
-      "kein_gutachter": "Şu anda size uygun bir bilirkişi arıyoruz. Kısa süre içinde bir onay alacaksınız."
+      "kein_gutachter": "Kişisel bilirkişinizi bir sonraki adımda atayacağız. Devam etmeniz yeterli."
     },
     "step_sa": {
       "heading": "Görevlendirmeyi imzalayın",

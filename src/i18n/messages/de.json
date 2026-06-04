@@ -383,7 +383,7 @@
       "termin_label": "Termin reserviert",
       "besichtigungsort_label": "Besichtigungsort",
       "treffpunkt_label": "Treffpunkt: {treffpunkt}",
-      "kein_gutachter": "Wir suchen gerade einen passenden Sachverständigen für Sie. Sie erhalten in Kürze eine Bestätigung."
+      "kein_gutachter": "Ihren persönlichen Sachverständigen ordnen wir Ihnen im nächsten Schritt zu. Fahren Sie einfach fort."
     },
     "step_sa": {
       "heading": "Beauftragung unterzeichnen",

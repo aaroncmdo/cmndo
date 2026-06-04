@@ -383,7 +383,7 @@
       "termin_label": "Termin zarezerwowany",
       "besichtigungsort_label": "Miejsce oględzin",
       "treffpunkt_label": "Miejsce spotkania: {treffpunkt}",
-      "kein_gutachter": "Szukamy dla Ciebie odpowiedniego rzeczoznawcy. Wkrótce otrzymasz potwierdzenie."
+      "kein_gutachter": "Twojego osobistego rzeczoznawcę przypiszemy w kolejnym kroku. Wystarczy kontynuować."
     },
     "step_sa": {
       "heading": "Podpisz zlecenie",
