@@ -75,8 +75,9 @@ Block nicht (Cluster-LPs nutzen ihre eigene, bereits gebaute Bridge).
 - **`api.ts` / `index.tsx`:** `tracking` aus der Config in `cfg` übernehmen (nur `sv_embed`).
 - **`tracking.ts`:** neue Funktion `fireSiteConversion(cfg, attr)`:
   - lädt `gtag.js` **lazy** (nur falls noch kein `window.gtag`) — erst hier, post-consent.
-  - GA4: `gtag('config', ga4MeasurementId)` → `gtag('event','generate_lead', {value:50, currency:'EUR', ...attr})`.
-  - Ads: falls `gadsConversionId` → `gtag('event','conversion',{send_to:`${id}/${label}`, value:50, currency:'EUR'})`.
+  - GA4: `gtag('config', ga4MeasurementId)` → `gtag('event','generate_lead', {send_to: ga4MeasurementId})`.
+  - Ads: falls `gadsConversionId` → `gtag('event','conversion',{send_to:`${id}/${label}`})`.
+  - **Kein `value`:** der SV definiert den Wert in seiner eigenen GA4-/Ads-Conversion-Action — ein imposed `value` würde ihn überschreiben.
   - Koexistenz: vorhandenes `window.gtag` wird wiederverwendet (mehrere `config`-IDs
     koexistieren), kein zweites Laden.
 - **`app.tsx` (G1-Fix):** `track(cfg,'monika_anfrage_submit')` **und** `fireSiteConversion()`
@@ -115,5 +116,6 @@ bettet das Widget bewusst ein).
   an `app.tsx` arbeitet.
 - **gtag-Koexistenz:** wenn der SV bereits eigenes `gtag`/GA4 auf der Seite hat —
   `window.gtag` wiederverwenden, nicht doppelt `gtag.js` laden.
-- **Wert (50 EUR):** als Default gesetzt (spec-aligned mit der Anfrage-Conversion);
-  pro SV (noch) nicht konfigurierbar — bewusst YAGNI, kann später ein Cockpit-Feld werden.
+- **Kein Conversion-Wert imposed:** das Widget sendet `gtag` ohne `value` → der SV
+  definiert den Wert in seiner eigenen GA4-/Ads-Conversion-Action. Ein per-SV-Wert-Feld
+  im Cockpit ist bewusst YAGNI (später nachrüstbar).
