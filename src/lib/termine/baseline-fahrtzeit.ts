@@ -4,6 +4,7 @@
 // geloggt, blockieren aber den Reservation-Flow nicht.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 const MAPBOX_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_TOKEN ?? ''
 
@@ -54,13 +55,15 @@ export async function speichereBaselineFahrtzeit(
 
     let zielAdresse: string | null = null
     if (fallId) {
-      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-      const { data: fall } = await supabase
-        .from('faelle')
-        .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-        .eq('id', fallId)
-        .maybeSingle()
-      const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+      // CMM-49: schadenort_* faelle-frei direkt aus claims (via resolveClaimId-Chokepoint).
+      const claimId = await resolveClaimId(supabase, fallId)
+      const { data: fallClaim } = claimId
+        ? await supabase
+            .from('claims')
+            .select('schadenort_adresse, schadenort_plz, schadenort_ort')
+            .eq('id', claimId)
+            .maybeSingle()
+        : { data: null }
       const teile = [
         fallClaim?.schadenort_adresse as string | null,
         fallClaim?.schadenort_plz as string | null,

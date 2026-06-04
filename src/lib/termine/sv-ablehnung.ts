@@ -109,28 +109,22 @@ export async function ablehnTermin(terminId: string, grund: string) {
 
   // Auto-Dispatch: versuche neuen SV im gleichen Zeitslot zu finden
   try {
-    // CMM-44 SP-A2 (Cluster 1): schadens_plz aus dem Select entfernt — war
-    // ungenutzt (nur fall.id wird gelesen), Spalte wandert nach claims.
-    // CMM-44 SP-D PR2a: besichtigungsort_adresse entfernt — war ungenutzt
-    // (body uebergibt nur fall.id), kein GT-Fallback noetig.
-    const { data: fall } = await db.from('faelle')
-      .select('id')
-      .eq('id', termin.fall_id as string)
-      .single()
-
-    if (fall) {
+    // CMM-49: der Read war reiner Existenz-/id-Passthrough (fall.id == termin.fall_id,
+    // wird nur als fall_id weitergereicht) -> termin.fall_id direkt, kein faelle-Read.
+    const fallId = termin.fall_id as string | null
+    if (fallId) {
       // Trigger SV-Zuweisung API intern (gleicher Zeitslot)
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
       const resp = await fetch(`${appUrl}/api/sv-zuweisung`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.CRON_SECRET}` },
-        body: JSON.stringify({ fall_id: fall.id }),
+        body: JSON.stringify({ fall_id: fallId }),
       })
       if (resp.ok) {
         const result = await resp.json()
         if (result.sv_id) {
           await db.from('timeline').insert({
-            fall_id: fall.id, typ: 'termin',
+            fall_id: fallId, typ: 'termin',
             titel: 'Neuer SV automatisch zugewiesen',
             beschreibung: `Nach Ablehnung wurde automatisch ein Ersatz-SV gefunden.`,
           })
