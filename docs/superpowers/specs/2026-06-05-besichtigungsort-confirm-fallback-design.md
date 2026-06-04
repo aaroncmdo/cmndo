@@ -81,6 +81,14 @@ Kunde/SV korrigiert → Action (Auth) → Engine `korrigiereBesichtigungsort` �
 ## Koordination
 Token/SV-basiert → **kein kunde_id** → keine Kollision mit dem laufenden kunde_id-Sweep (fb34de27). besichtigungsort-Spalten auf `gutachter_termine` → faelle-frei, kein CMM-49-Konflikt. `termine/*` + `kunde/termin/[token]` + `gutachter/feldmodus` = Termin-Engine-Revier (AKTIV-MARKER).
 
+## Bestehendes / Reuse (Aaron-Check: abändern statt neu bauen)
+- **`GooglePlaceAutocomplete`** (`src/components/GooglePlaceAutocomplete.tsx`): reuse 1:1 als Adress-Picker. `onSelect` liefert `{ adresse, lat, lng, plz, strasse, stadt, place_id }` (Google-geocodet) — genau die Coords für die Action; Freitext→Server-Geocode-Fallback (onBlur) schon drin.
+- **`DispatchPlaceField.tsx`** (`dispatch/leads/[id]/_v2/`): UI-Pattern-Referenz (GooglePlaceAutocomplete → `besichtigungsort_*`-Write) — die Kunde/SV-Korrektur-UI spiegelt das.
+- **`updateBesichtigungsortVomKunden`** (`kunde/faelle/[id]/_actions/besichtigungsort.ts`): **0 Caller = toter Code** (auth/fallId-basiert, faelle-Fallback). → Write-Logik wandert in die Engine-Primitive; die tote Action wird **gelöscht** (kein paralleler Schreibpfad).
+- **Realtime/Token-Infra** (`KundeTrackingClient` hört `gutachter_termine`-UPDATEs; `kunde/termin/[token]/actions.ts` Token-Pattern): reuse.
+
+→ Netto NEU: Engine-Primitive (konsolidiert den toten Write) + 2 Spalten + bestaetigt-Tracking + 1 UI-Affordance (gespiegelt) + i18n. **Kein Rebuild.**
+
 ## Implementierungs-Reihenfolge (für writing-plans)
 1. DDL (2 Spalten) + Types.
 2. Engine `besichtigungsort-write.ts` + vitest + Export.
