@@ -124,12 +124,23 @@ export async function resolveTerminKontext(
     } else if (termin.bezug_typ === 'lead') {
       felder = await ladeLeadFelder(db, termin.bezug_id)
     } else if (termin.bezug_typ === 'claim') {
-      const { data: bridge } = await db.from('faelle').select('id').eq('claim_id', termin.bezug_id).maybeSingle()
-      if (bridge?.id) {
-        felder = await ladeFallFelder(db, bridge.id as string)
-      } else {
-        const { data: c } = await db.from('claims').select('claim_nummer, schadenort_adresse, schadenort_ort').eq('id', termin.bezug_id).maybeSingle()
-        felder = { ...LEER, claimNummer: (c?.claim_nummer as string | null) ?? null, schadenortAdresse: (c?.schadenort_adresse as string | null) ?? (c?.schadenort_ort as string | null) ?? null }
+      // CMM-49: KEIN faelle-Reverse (verbotenes claim_id->fall_id-Daten-Reverse, bricht eh beim Drop).
+      // Kontext claim-direkt; Deep-Link = /gutachter/fall/${claimId} — die Route-Eingangs-resolveClaimId
+      // (gutachter/fall/[id]/page.tsx:210) nimmt claims.id direkt an. fahrzeug/kennzeichen bleiben null
+      // bis CMM-50-Cutover (Kalender-Titel degradiert sauber auf "Schadenbesichtigung").
+      const { data: c } = await db
+        .from('claims')
+        .select('claim_nummer, schadenort_adresse, schadenort_ort, lead_id, geschaedigter_user_id')
+        .eq('id', termin.bezug_id)
+        .maybeSingle()
+      const kunde = await ladeKunde(db, (c?.lead_id as string | null) ?? null, (c?.geschaedigter_user_id as string | null) ?? null)
+      felder = {
+        ...LEER,
+        claimNummer: (c?.claim_nummer as string | null) ?? null,
+        schadenortAdresse: (c?.schadenort_adresse as string | null) ?? (c?.schadenort_ort as string | null) ?? null,
+        kundeName: kunde.name,
+        kundeTelefon: kunde.telefon,
+        fallId: termin.bezug_id, // = claimId; /gutachter/fall/${claimId} wird via resolveClaimId aufgeloest
       }
     }
   }

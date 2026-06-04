@@ -25,13 +25,21 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
   // Token-Validierung: Fall mit aktivem Re-Termin-Token, nicht storniert
   // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: re_termin_token_eingelaufen_am aus gutachter_termine (aktueller Termin, SSoT).
-  // re_termin_token verbleibt auf faelle fuer die Token-Suche.
+  // CMM-49 Option A: Token-Lookup via gutachter_termine.re_termin_token (CMM-44 SP-D SSoT;
+  // live-grün faelle_only_tok=0/unique) -> faelle.re_termin_token wird droppbar.
   // CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag) — via
   // Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
+  const { data: tok } = await db
+    .from('gutachter_termine')
+    .select('fall_id')
+    .eq('re_termin_token', token)
+    .limit(1)
+    .maybeSingle()
+  if (!tok?.fall_id) notFound()
   const { data: fall } = await db
     .from('faelle')
     .select('id, sv_id, lead_id, kennzeichen, claim_id, claims:claim_id(schadenort_ort, claim_nummer, auftraege(storniert_am))')
-    .eq('re_termin_token', token)
+    .eq('id', tok.fall_id)
     .single()
 
   if (!fall) notFound()

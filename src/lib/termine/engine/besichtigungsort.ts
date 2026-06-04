@@ -26,8 +26,11 @@ async function ausKandidaten(kand: Kandidat[], geocode: Geocoder, quelle: OrtQue
 
 /**
  * Aufloesungs-Kette fuers Vor-Ort-Ziel: Termin-Coords → Termin-Adresse(geocode) →
- * bezug claim(schadenort) > fall(besichtigungsort>kunde) > lead(besichtigungsort>
- * fahrzeug_standort>kunde). Bevorzugt vorhandene Koordinaten, geocodet sonst.
+ * bezug claim(schadenort) > lead(besichtigungsort>fahrzeug_standort>kunde).
+ * Bevorzugt vorhandene Koordinaten, geocodet sonst.
+ * CMM-49: die fall-Tier (faelle.besichtigungsort_* + kunde_adresse) ist entfernt - tot auf
+ * Realdaten (claim.schadenort resolved davor; P2.3b cached besichtigungsort am Termin),
+ * keine claims-Heimat noetig. Geocoding-Garantie unveraendert; nur die Legacy-Stufe weg.
  */
 export async function resolveBesichtigungsort(
   t: TerminOrtInput, db: SupabaseClient, geocode: Geocoder = geocodeMitFallback,
@@ -39,13 +42,6 @@ export async function resolveBesichtigungsort(
   if (t.claim_id) {
     const { data: c } = await db.from('claims').select('schadenort_lat, schadenort_lng, schadenort_adresse').eq('id', t.claim_id).maybeSingle()
     const r = await ausKandidaten([[c?.schadenort_lat, c?.schadenort_lng, c?.schadenort_adresse]], geocode, 'claim'); if (r) return r
-  }
-  if (t.fall_id) {
-    const { data: f } = await db.from('faelle').select('besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_adresse, kunde_adresse, kunde_strasse, kunde_plz').eq('id', t.fall_id).maybeSingle()
-    const r = await ausKandidaten([
-      [f?.besichtigungsort_lat, f?.besichtigungsort_lng, f?.besichtigungsort_adresse],
-      [null, null, f?.kunde_adresse ?? joinAdr(f?.kunde_strasse, f?.kunde_plz)],
-    ], geocode, 'fall'); if (r) return r
   }
   if (t.lead_id) {
     const { data: l } = await db.from('leads').select('besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_adresse, fahrzeug_standort_lat, fahrzeug_standort_lng, fahrzeug_standort_adresse, kunde_adresse, kunde_strasse, kunde_plz').eq('id', t.lead_id).maybeSingle()
