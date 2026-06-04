@@ -1,6 +1,6 @@
 import { SITE } from './site'
 import { CLUSTER, type City } from './cluster'
-import { FAQ, fillTokens } from './content'
+import { FAQ, fillTokens, faqAnswerText } from './content'
 import { canonicalPath } from './seo'
 
 // JSON-LD-Builder · AutomotiveBusiness (LocalBusiness), FAQPage, BreadcrumbList.
@@ -51,7 +51,7 @@ export function faqSchema(city: City) {
     mainEntity: FAQ.map((item) => ({
       '@type': 'Question',
       name: fillTokens(item.q, city, CLUSTER.region),
-      acceptedAnswer: { '@type': 'Answer', text: fillTokens(item.a, city, CLUSTER.region) },
+      acceptedAnswer: { '@type': 'Answer', text: faqAnswerText(item, city, CLUSTER.region, CLUSTER.achsen) },
     })),
   }
 }

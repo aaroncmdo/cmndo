@@ -21,10 +21,22 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
+  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  regionDative: string
+  /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
+  quellenAnker: string
+  /** Hauptachsen (FAQ-Q2, cluster-spezifisch). */
+  achsen: string[]
+  /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
+  stadtteile: string[]
   domain: string
   theme: string
   themeColor: string
   imgPath: string
+  /** Team-Foto (Netzwerk-Mobile Team-Hero-Card). */
+  teamImg: string
+  /** Vorname des lokalen SV (CTA-v8-Rolle). Persona-Default "Tobias". */
+  svName: string
   phone: { display: string; tel: string; wa: string }
   landmark: { label: string; img: string }
   facts: { value: string; label: string; accent?: boolean }[]
@@ -35,10 +47,16 @@ export interface ClusterConfig {
 export const CLUSTER: ClusterConfig = {
   key: 'bonn',
   region: 'Rhein-Sieg',
+  regionDative: 'Rhein-Sieg-Kreis',
+  quellenAnker: 'Polizei-Bonn-Verkehrsstatistik 2025',
+  achsen: ['A565', 'A562', 'A59', 'B9', 'B56'],
+  stadtteile: ['Bad Godesberg', 'Beuel', 'Hardtberg', 'Poppelsdorf', 'Bonn-Zentrum'],
   domain: 'kfz-unfallgutachter-bonn.de',
   theme: 'nacht',
   themeColor: '#0F1014',
   imgPath: '/assets/img/bonn/',
+  teamImg: '/assets/img/bonn/team-bonn.webp',
+  svName: 'Tobias',
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Bonner Münster', img: 'stadt-bonn.png' },
   facts: [

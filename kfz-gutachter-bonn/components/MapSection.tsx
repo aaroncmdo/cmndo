@@ -5,10 +5,14 @@ import { CLUSTER, type City } from '@/lib/cluster'
 
 // CLIENT-Sub-Komponente der EinsatzgebietSection. Leaflet 1.9.4 wird per CDN
 // LAZY geladen (IntersectionObserver auf dem Map-Container) — kein npm-Dep,
-// keine Bundle-Last bevor die Karte sichtbar ist. Robust gegen Doppel-Init
-// (ref-guard) + React-StrictMode-Double-Mount. Cleanup via map.remove().
+// keine Bundle-Last bevor die Karte sichtbar ist.
+// Phase 3 #7: initialisiert BEIDE Karten — #clusterMap (Desktop, von dieser
+// Komponente gerendert) + #clusterMapMobile (in der sm:hidden-Insel der
+// EinsatzgebietSection). Pro Container ein eigener Observer + Map-Instance;
+// nur der jeweils SICHTBARE Container intersected -> nur er initialisiert
+// (display:none-Container feuern nie). Robust gegen Doppel-Init (per-id-Guard)
+// + StrictMode-Double-Mount. Cleanup via map.remove() fuer alle Instanzen.
 
-// minimaler Leaflet-Typ-Shim (kein @types/leaflet als Dep)
 interface LeafletMap {
   remove(): void
 }
@@ -16,6 +20,7 @@ interface LeafletStatic {
   map(el: HTMLElement, opts?: Record<string, unknown>): {
     setView(center: [number, number], zoom: number): unknown
     remove(): void
+    invalidateSize(): void
   }
   tileLayer(url: string, opts: Record<string, unknown>): { addTo(m: unknown): unknown }
   circleMarker(latlng: [number, number], opts: Record<string, unknown>): {
@@ -35,6 +40,7 @@ declare global {
 
 const LEAFLET_CSS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
 const LEAFLET_JS = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'
+const MAP_IDS = ['clusterMap', 'clusterMapMobile'] as const
 
 function ensureLeafletCss(): void {
   if (document.querySelector(`link[href="${LEAFLET_CSS}"]`)) return
@@ -66,39 +72,37 @@ function loadLeafletJs(): Promise<LeafletStatic> {
 }
 
 export function MapSection({ city }: { city: City }) {
-  const mapRef = useRef<LeafletMap | null>(null)
-  const initedRef = useRef(false)
+  const mapsRef = useRef<Record<string, LeafletMap>>({})
+  const initedRef = useRef<Record<string, boolean>>({})
 
   useEffect(() => {
-    const container = document.getElementById('clusterMap')
-    if (!container) return
-
     let cancelled = false
+    const observers: IntersectionObserver[] = []
 
-    function initMap(L: LeafletStatic) {
-      if (cancelled || initedRef.current) return
-      const el = document.getElementById('clusterMap')
+    function initMap(L: LeafletStatic, id: string) {
+      if (cancelled || initedRef.current[id]) return
+      const el = document.getElementById(id)
       if (!el) return
-      initedRef.current = true
+      initedRef.current[id] = true
 
       const map = L.map(el, { scrollWheelZoom: false, attributionControl: true })
       map.setView([city.lat, city.lng], 10)
-      mapRef.current = map as unknown as LeafletMap
+      mapsRef.current[id] = map as unknown as LeafletMap
+      el.setAttribute('data-leaflet-init', '1') // entfernt das Mobile-Skeleton (.einsatz-map)
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '© OpenStreetMap',
         maxZoom: 19,
       }).addTo(map)
 
-      // Stadt-Marker: aktive Stadt = amber, andere = petrol Circle-Marker
+      // Stadt-Marker: aktive Stadt = amber, andere = petrol Circle-Marker.
+      // Literal-Hex (= --amber / --petrol): Leaflet setzt fillColor als SVG-Attribut, das loest CSS var() NICHT auf.
       for (const c of CLUSTER.cities) {
         const isActive = c.slug === city.slug
         L.circleMarker([c.lat, c.lng], {
           radius: isActive ? 9 : 6,
           color: '#ffffff',
           weight: 2,
-          // Literal-Hex (= --amber / --petrol aus globals.css): Leaflet setzt
-          // fillColor als SVG-Praesentations-Attribut, das loest CSS var() NICHT auf.
           fillColor: isActive ? '#D32E20' : '#2A2E33',
           fillOpacity: 1,
         })
@@ -127,42 +131,53 @@ export function MapSection({ city }: { city: City }) {
             .bindTooltip(b.name)
         })
       }
+
+      // Container in Card/Insel kann nach Init final-sizen -> Leaflet neu vermessen,
+      // damit alle Tiles fuer die echte Groesse geladen werden.
+      window.setTimeout(() => {
+        if (!cancelled && mapsRef.current[id]) map.invalidateSize()
+      }, 250)
     }
 
-    const observer = new IntersectionObserver(
-      (entries, obs) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            obs.disconnect()
-            ensureLeafletCss()
-            loadLeafletJs()
-              .then((L) => initMap(L))
-              .catch(() => {
-                /* Karte ist progressive enhancement — Fehler darf UX nicht brechen */
-              })
-            break
+    for (const id of MAP_IDS) {
+      const container = document.getElementById(id)
+      if (!container) continue
+      const observer = new IntersectionObserver(
+        (entries, obs) => {
+          for (const entry of entries) {
+            if (entry.isIntersecting) {
+              obs.disconnect()
+              ensureLeafletCss()
+              loadLeafletJs()
+                .then((L) => initMap(L, id))
+                .catch(() => {
+                  /* Karte ist progressive enhancement — Fehler darf UX nicht brechen */
+                })
+              break
+            }
           }
-        }
-      },
-      { rootMargin: '200px' },
-    )
-    observer.observe(container)
+        },
+        { rootMargin: '200px' },
+      )
+      observer.observe(container)
+      observers.push(observer)
+    }
 
     return () => {
       cancelled = true
-      observer.disconnect()
-      if (mapRef.current) {
-        mapRef.current.remove()
-        mapRef.current = null
+      observers.forEach((o) => o.disconnect())
+      for (const id of Object.keys(mapsRef.current)) {
+        mapsRef.current[id]?.remove()
       }
-      initedRef.current = false
+      mapsRef.current = {}
+      initedRef.current = {}
     }
   }, [city])
 
   return (
     <div
       id="clusterMap"
-      className="w-full h-[400px] rounded-card border border-border bg-petrol-tint mb-4 relative"
+      className="hidden sm:block w-full h-[400px] rounded-card border border-border bg-petrol-tint mb-4 relative"
       role="group"
       aria-label="Interaktive Karte des Einsatzgebiets mit Standorten"
       style={{ zIndex: 0, isolation: 'isolate' }}

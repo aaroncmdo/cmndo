@@ -4,6 +4,7 @@ import { localBusinessSchema, faqSchema, breadcrumbSchema } from '@/lib/schema'
 import { Header } from './Header'
 import { HeroSection } from './HeroSection'
 import { ReviewsSection } from './ReviewsSection'
+import { PraxisSection } from './PraxisSection'
 import { AblaufSection } from './AblaufSection'
 import { NetzwerkSection } from './NetzwerkSection'
 import { LeistungenSection } from './LeistungenSection'
@@ -35,11 +36,12 @@ export function LandingPage({ city, route }: { city: City; route: 'hub' | 'spoke
         Zum Hauptinhalt springen
       </a>
 
-      <Header />
+      <Header city={city} />
 
       <main id="main-content">
         <HeroSection city={city} />
         <ReviewsSection city={city} />
+        <PraxisSection city={city} />
         <AblaufSection />
         <NetzwerkSection />
         <LeistungenSection />

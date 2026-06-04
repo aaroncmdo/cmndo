@@ -34,6 +34,8 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       }
       const ratgeber = target.closest('[data-action="ratgeber_click"]') as HTMLElement | null
       if (ratgeber) trackEvent('ratgeber_click', { cluster: CLUSTER.key, city_slug: citySlug, topic: ratgeber.dataset.topic || '' })
+      const ratgeberHub = target.closest('[data-action="ratgeber_hub_click"]') as HTMLElement | null
+      if (ratgeberHub) trackEvent('ratgeber_hub_click', { cluster: CLUSTER.key, city_slug: citySlug })
     }
     document.addEventListener('click', onClick)
 
@@ -53,9 +55,199 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
     }
     window.addEventListener('scroll', onScroll, { passive: true })
 
+    // Burger-Nav (Phase 1.5): Off-Canvas-Drawer Toggle (Mobile/Tablet, statisches
+    // Markup aus Header.tsx). State-Machine wie Mock-IIFE, in React-useEffect portiert.
+    const burgerBtn = document.getElementById('burgerBtn')
+    const burgerMenu = document.getElementById('burgerMenu')
+    const burgerBackdrop = document.getElementById('burgerBackdrop')
+    const burgerClose = document.getElementById('burgerClose')
+    const burgerLinks = Array.from(document.querySelectorAll<HTMLElement>('[data-burger-link]'))
+
+    function openBurger() {
+      if (!burgerMenu || !burgerBackdrop) return
+      burgerMenu.classList.add('is-open')
+      burgerBackdrop.classList.add('is-open')
+      burgerBtn?.setAttribute('aria-expanded', 'true')
+      document.body.style.overflow = 'hidden' // Scroll-Lock
+      trackEvent('burger_open', { cluster: CLUSTER.key, city_slug: citySlug })
+      burgerMenu.querySelector<HTMLElement>('a, button')?.focus() // Focus-Trap-Start
+    }
+    function closeBurger() {
+      if (!burgerMenu || !burgerBackdrop) return
+      burgerMenu.classList.remove('is-open')
+      burgerBackdrop.classList.remove('is-open')
+      burgerBtn?.setAttribute('aria-expanded', 'false')
+      document.body.style.overflow = ''
+    }
+    function onBurgerKey(e: KeyboardEvent) {
+      if (e.key === 'Escape' && burgerMenu?.classList.contains('is-open')) {
+        closeBurger()
+        burgerBtn?.focus()
+      }
+    }
+    burgerBtn?.addEventListener('click', openBurger)
+    burgerClose?.addEventListener('click', closeBurger)
+    burgerBackdrop?.addEventListener('click', closeBurger)
+    document.addEventListener('keydown', onBurgerKey)
+    burgerLinks.forEach((l) => l.addEventListener('click', closeBurger))
+
+    // Hero-Scroll-Chevron (Phase 3 #3): blendet aus, sobald der Nutzer scrollt.
+    const heroChevron = document.getElementById('heroScrollChevron')
+    function onHeroScroll() {
+      if (!heroChevron) return
+      if (window.scrollY > 40) heroChevron.classList.add('is-scrolled')
+      else heroChevron.classList.remove('is-scrolled')
+    }
+    if (heroChevron) {
+      window.addEventListener('scroll', onHeroScroll, { passive: true })
+      onHeroScroll()
+    }
+
+    // Netzwerk-Mobile (Phase 3 #4): Compare-Toggle + Pain-Reveal-Observer (Vanilla-DOM
+    // analog Burger/Chevron). Desktop-Compare bleibt eigene Client-Insel (NetzwerkCompare).
+    const nzMobileBtn = document.getElementById('netzwerkMobileCompareToggle')
+    const nzMobilePanel = document.getElementById('netzwerkCompareMobilePanel')
+    let nzMobileOpen = false
+    function onNzMobileToggle(e: Event) {
+      e.preventDefault()
+      if (!nzMobilePanel || !nzMobileBtn) return
+      nzMobileOpen = !nzMobileOpen
+      nzMobilePanel.classList.toggle('is-open', nzMobileOpen)
+      nzMobilePanel.setAttribute('aria-hidden', String(!nzMobileOpen))
+      nzMobileBtn.setAttribute('aria-expanded', String(nzMobileOpen))
+      if (nzMobileBtn.firstChild) {
+        nzMobileBtn.firstChild.textContent = nzMobileOpen ? 'Vergleich schließen ' : 'Alle 8 Vergleichspunkte ansehen '
+      }
+      trackEvent(nzMobileOpen ? 'netzwerk_compare_open' : 'netzwerk_compare_close', { mode: 'mobile', cluster: CLUSTER.key, city_slug: citySlug })
+    }
+    let nzMobileIo: IntersectionObserver | undefined
+    if (nzMobileBtn && nzMobilePanel) {
+      nzMobileBtn.addEventListener('click', onNzMobileToggle)
+      // Smart-Close: Mobile-Panel scrollt aus dem Viewport -> schliessen
+      if ('IntersectionObserver' in window) {
+        nzMobileIo = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (!entry.isIntersecting && nzMobileOpen) {
+                nzMobileOpen = false
+                nzMobilePanel.classList.remove('is-open')
+                nzMobilePanel.setAttribute('aria-hidden', 'true')
+                nzMobileBtn.setAttribute('aria-expanded', 'false')
+                if (nzMobileBtn.firstChild) nzMobileBtn.firstChild.textContent = 'Alle 8 Vergleichspunkte ansehen '
+              }
+            })
+          },
+          { rootMargin: '0px 0px -15% 0px', threshold: 0 },
+        )
+        nzMobileIo.observe(nzMobilePanel)
+      }
+    }
+
+    // Pain-Story Reveal-Animation (Staggered via CSS-data-step-Delays)
+    const nzPainList = document.getElementById('netzwerkPainList')
+    let nzPainIo: IntersectionObserver | undefined
+    if (nzPainList) {
+      const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      if (prefersReduced || !('IntersectionObserver' in window)) {
+        nzPainList.classList.add('is-visible')
+      } else {
+        nzPainIo = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                nzPainList.classList.add('is-visible')
+                nzPainIo?.unobserve(nzPainList)
+              }
+            })
+          },
+          { threshold: 0.15 },
+        )
+        nzPainIo.observe(nzPainList)
+      }
+    }
+
+    // Ablauf-Mobile (Phase 3 #5): Nutzungsausfall-Tooltip + Timeline-Reveal + CTA-Welle.
+    const abInfoBtn = document.getElementById('nutzungsausfallTooltipMobile')
+    const abInfo = document.getElementById('nutzungsausfallInfoMobile')
+    function onAbInfoClick(e: MouseEvent) {
+      e.stopPropagation()
+      abInfo?.classList.toggle('hidden')
+      trackEvent('ablauf_nutzungsausfall_toggle', { source: 'mobile', cluster: CLUSTER.key, city_slug: citySlug })
+    }
+    function onAbDocClick(e: MouseEvent) {
+      const t = e.target as Node | null
+      if (abInfo && abInfoBtn && !abInfo.classList.contains('hidden') && t && !abInfo.contains(t) && t !== abInfoBtn) {
+        abInfo.classList.add('hidden')
+      }
+    }
+    if (abInfoBtn && abInfo) {
+      abInfoBtn.addEventListener('click', onAbInfoClick)
+      document.addEventListener('click', onAbDocClick)
+    }
+
+    // Timeline-Reveal (staggered) + CTA-Welle nach dem letzten Item.
+    const abTlItems = Array.from(document.querySelectorAll<HTMLElement>('#ablaufTL .ablauf-tl-item'))
+    let abTlIo: IntersectionObserver | undefined
+    let abWaveTimer: number | undefined
+    if (abTlItems.length) {
+      const abReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const abCtaWrap = document.getElementById('ablaufMobileCTAWrap')
+      const triggerAbWave = () => {
+        if (!abCtaWrap || abReduced) return
+        abCtaWrap.classList.add('is-wave')
+        abWaveTimer = window.setTimeout(() => abCtaWrap.classList.remove('is-wave'), 1500)
+      }
+      if (abReduced || !('IntersectionObserver' in window)) {
+        abTlItems.forEach((el) => el.classList.add('is-visible'))
+      } else {
+        let lastRevealTime = 0
+        const staggerGap = 250
+        const lastIdx = abTlItems.length - 1
+        let waveDone = false
+        const io = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const now = performance.now()
+                const delay = Math.max(0, lastRevealTime + staggerGap - now)
+                lastRevealTime = now + delay
+                const el = entry.target as HTMLElement
+                const idx = abTlItems.indexOf(el)
+                window.setTimeout(() => {
+                  el.classList.add('is-visible')
+                  if (idx === lastIdx && !waveDone) {
+                    waveDone = true
+                    window.setTimeout(triggerAbWave, 700)
+                  }
+                }, delay)
+                io.unobserve(el)
+              }
+            })
+          },
+          { threshold: 0.6, rootMargin: '0px 0px -22% 0px' },
+        )
+        abTlIo = io
+        abTlItems.forEach((el) => io.observe(el))
+      }
+    }
+
     return () => {
       document.removeEventListener('click', onClick)
       window.removeEventListener('scroll', onScroll)
+      burgerBtn?.removeEventListener('click', openBurger)
+      burgerClose?.removeEventListener('click', closeBurger)
+      burgerBackdrop?.removeEventListener('click', closeBurger)
+      document.removeEventListener('keydown', onBurgerKey)
+      burgerLinks.forEach((l) => l.removeEventListener('click', closeBurger))
+      if (heroChevron) window.removeEventListener('scroll', onHeroScroll)
+      nzMobileBtn?.removeEventListener('click', onNzMobileToggle)
+      nzMobileIo?.disconnect()
+      nzPainIo?.disconnect()
+      abInfoBtn?.removeEventListener('click', onAbInfoClick)
+      document.removeEventListener('click', onAbDocClick)
+      abTlIo?.disconnect()
+      if (abWaveTimer) window.clearTimeout(abWaveTimer)
+      document.body.style.overflow = ''
     }
   }, [citySlug])
 
