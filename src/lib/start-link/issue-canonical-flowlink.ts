@@ -28,7 +28,7 @@ import { pickRoundRobinDispatcher } from './pick-dispatcher'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { sendPlainSms } from '@/lib/whatsapp/send-sms-plain'
-import { sendEmail } from '@/lib/email/google/client'
+import { sendMiniWizardMagicLink } from '@/lib/email/google/flows'
 import { ensureCanonicalFlowLinkForLead } from './ensure-flowlink-for-lead'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
@@ -63,24 +63,15 @@ function buildText(vorname: string | null, url: string): string {
   ].join('\n')
 }
 
-function buildHtml(vorname: string | null, url: string): string {
-  const greet = vorname ? `Hallo ${vorname}` : 'Hallo'
-  return (
-    `<p>${greet},</p>` +
-    `<p>hier geht es zu Ihrer Schadensregulierung bei Claimondo. Mit wenigen Klicks prüfen wir Ihren Fall, Sie buchen einen Gutachter-Termin und unterschreiben die Vollmacht.</p>` +
-    `<p><a href="${url}">Jetzt fortfahren</a> (Link gültig 72 Stunden)</p>` +
-    `<p style="color:#888;font-size:12px">${url}</p>`
-  )
-}
-
 async function sendeInitialLink(opts: {
   anfrageId: string
+  leadId: string
   telefon: string | null
   email: string | null
   vorname: string | null
   url: string
 }): Promise<IssueKanal> {
-  const { anfrageId, telefon, email, vorname, url } = opts
+  const { anfrageId, leadId, telefon, email, vorname, url } = opts
   // WhatsApp bevorzugt — nur wenn laut 'gfa'-Cache/Lookup verfügbar.
   if (telefon && telefon.trim().length >= 6) {
     try {
@@ -104,17 +95,14 @@ async function sendeInitialLink(opts: {
       console.error('[issueCanonicalFlowLink] SMS-Send fehlgeschlagen:', err)
     }
   }
-  // Email-Fallback.
+  // Email-Fallback — saubere react-email-Vorlage (branded + i18n) statt Ad-hoc-HTML.
+  // Beim /start ist noch kein SV/Termin disponiert → die Plain-Vorlage (MiniWizardMagicLink),
+  // dieselbe wie der Dispatcher-kein-Termin-Versand. Eine Quelle, kein Ad-hoc-Markup mehr.
   if (email && email.includes('@')) {
     try {
-      await sendEmail({
-        to: email,
-        subject: 'Ihre Schadensregulierung bei Claimondo',
-        html: buildHtml(vorname, url),
-        empfaengerTyp: 'kunde',
-        template: 'canonical_flowlink',
-      })
-      return 'email'
+      const r = await sendMiniWizardMagicLink(leadId, url)
+      if (r.success) return 'email'
+      console.error('[issueCanonicalFlowLink] Email-Send fehlgeschlagen:', r.error)
     } catch (err) {
       console.error('[issueCanonicalFlowLink] Email-Send fehlgeschlagen:', err)
     }
@@ -211,6 +199,7 @@ export async function issueCanonicalFlowLinkForAnfrage(anfrageId: string): Promi
   const url = `${APP_URL}/flow/${token}`
   const kanal = await sendeInitialLink({
     anfrageId,
+    leadId,
     telefon: (gfa.telefon as string | null) ?? null,
     email: (gfa.email as string | null) ?? null,
     vorname: (gfa.vorname as string | null) ?? null,
