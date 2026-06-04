@@ -11,6 +11,11 @@ export interface ConfigResponse {
   whatsapp: string | null
   site_token: string | null
   paused?: boolean
+  tracking?: {
+    ga4MeasurementId: string | null
+    gadsConversionId: string | null
+    gadsConversionLabel: string | null
+  } | null
 }
 
 /** Holt die SV-Embed-Site-Konfig (Stream 5). Wirft nicht — Caller faellt auf Default zurueck. */
