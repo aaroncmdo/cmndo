@@ -8,6 +8,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 
@@ -83,12 +84,7 @@ export async function uploadTechnischeStellungnahme(
   // CMM-44 SP-H PR2: technische_stellungnahme_status/_hochgeladen_am leben auf
   // der auftraege-Sub-Tabelle (Reader lesen sie von auftraege). Auf den
   // aktuellen Auftrag des Claims schreiben (ORDER BY reihenfolge DESC LIMIT 1).
-  const { data: fallClaimRow } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(db, fallId)
   if (claimId) {
     const { data: aktAuftrag } = await db
       .from('auftraege')
