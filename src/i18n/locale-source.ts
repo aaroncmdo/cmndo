@@ -7,7 +7,7 @@
 
 import { isLocale, type Locale } from './locales'
 
-export type LocaleSource = 'cookie' | 'profile' | 'token'
+export type LocaleSource = 'cookie' | 'profile' | 'token' | 'intern'
 
 export type TokenKind = 'flow' | 'upload-dokumente' | 'upload-zb1' | 're-termin' | 'ablehnen'
 
@@ -25,7 +25,15 @@ const TOKEN_PREFIXES: ReadonlyArray<readonly [string, TokenKind]> = [
 // Sie sind anonym (kein profiles.sprache), daher als 'token' klassifiziert,
 // damit request.ts KEIN getUser() auslöst — die Auflösung fällt auf Cookie
 // zurück, weil extractTokenFromPath() hier null liefert.
-const TOKEN_EXACT_PREFIXES = ['/kunde-termin', '/kunde/termin', '/sv'] as const
+const TOKEN_EXACT_PREFIXES = ['/kunde-termin', '/kunde/termin'] as const
+
+// Interne Portale sind deutsch-only by design (Aaron 04.06.2026): NUR der Endkunde
+// (/kunde) + Magic-Links werden lokalisiert. admin/dispatch/sv/kanzlei/makler/
+// mitarbeiter (= Kundenbetreuer-Arbeitsplatz) + die Staff-Fallakte (/faelle,
+// /gutachter) forcieren DEFAULT_LOCALE und ignorieren Cookie/Profile (request.ts).
+// '/sv' war zuvor 'token' (nur um getUser() zu vermeiden) — 'intern' tut das auch
+// UND garantiert de.
+const INTERN_PORTAL_PREFIXES = ['/admin', '/dispatch', '/sv', '/kanzlei', '/makler', '/mitarbeiter', '/faelle', '/gutachter'] as const
 
 /**
  * Extrahiert Token + Strecken-Art aus einem Magic-Link-Pfad.
@@ -58,6 +66,8 @@ export function classifyLocaleSource(pathname: string | null | undefined): Local
   if (extractTokenFromPath(pathname)) return 'token'
   if (TOKEN_EXACT_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))) return 'token'
   if (pathname === '/kunde' || pathname.startsWith('/kunde/')) return 'profile'
+  // Interne Portale: deutsch-only, vor dem Cookie-Fallback abfangen.
+  if (INTERN_PORTAL_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + '/'))) return 'intern'
   return 'cookie'
 }
 
