@@ -62,9 +62,12 @@ export async function saveFilmcheck(
   // KFZ-202: Status via State-Machine
   await transitionFallStatus(fallId, 'kanzlei-uebergeben')
 
-  const { data: fallInfo } = await supabase.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fallId).single()
-  const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
-  const fallNr = fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)
+  // CMM-49: claims-direkt statt faelle-Embed (claimId via resolveClaimId oben)
+  let fallNr = fallId.slice(0, 8)
+  if (claimId) {
+    const { data: claimInfo } = await supabase.from('claims').select('claim_nummer').eq('id', claimId).single()
+    if (claimInfo?.claim_nummer) fallNr = claimInfo.claim_nummer
+  }
   const { data: kanzleiUsers } = await supabase.from('profiles').select('email').eq('rolle', 'kanzlei')
   for (const k of kanzleiUsers ?? []) {
     if (k.email) emailFilmcheckBestanden(k.email, fallNr).catch(() => {})
@@ -88,12 +91,14 @@ export async function saveFilmcheck(
 
   sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
 
-  const { data: fallForSv } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
-  const fallForSvClaim = fallForSv ? (Array.isArray(fallForSv.claims) ? fallForSv.claims[0] : fallForSv.claims) : null
-  if (fallForSv?.sv_id) {
-    createGutachterMitteilung(fallForSv.sv_id, 'qc_bestanden', fallId, {
-      claim_nummer: fallForSvClaim?.claim_nummer ?? undefined,
-    }).catch(() => {})
+  // CMM-49: claims-direkt (sv_id + claim_nummer claim-native)
+  if (claimId) {
+    const { data: claimForSv } = await supabase.from('claims').select('sv_id, claim_nummer').eq('id', claimId).single()
+    if (claimForSv?.sv_id) {
+      createGutachterMitteilung(claimForSv.sv_id, 'qc_bestanden', fallId, {
+        claim_nummer: claimForSv.claim_nummer ?? undefined,
+      }).catch(() => {})
+    }
   }
 
   autoCompleteTask(fallId, 'qc_bestanden').catch(() => {})
@@ -114,14 +119,18 @@ export async function upsertQcCheckliste(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // CMM-49: qc_checkliste claim-nativ filtern; Insert behaelt fall_id (Trigger derive_claim_id fuellt claim_id)
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden' }
+
   const { data: existing } = await supabase
     .from('qc_checkliste')
     .select('id')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .single()
 
   if (existing) {
-    const { error } = await supabase.from('qc_checkliste').update(checks).eq('fall_id', fallId)
+    const { error } = await supabase.from('qc_checkliste').update(checks).eq('claim_id', claimId)
     if (error) return { success: false, error: error.message }
   } else {
     const { error } = await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...checks })
@@ -140,11 +149,15 @@ export async function qcBestanden(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // CMM-49: claim-nativ
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden' }
+
   const now = new Date().toISOString()
   const { data: existing } = await supabase
     .from('qc_checkliste')
     .select('id')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .single()
 
   const qcData = {
@@ -155,7 +168,7 @@ export async function qcBestanden(
   }
 
   if (existing) {
-    await supabase.from('qc_checkliste').update(qcData).eq('fall_id', fallId)
+    await supabase.from('qc_checkliste').update(qcData).eq('claim_id', claimId)
   } else {
     await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...qcData })
   }
@@ -166,15 +179,13 @@ export async function qcBestanden(
     return filmcheckResult
   }
 
-  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
-  // -> via claim_id aus claims nested embed laden statt aus faelle.
-  const { data: fallForTask } = await supabase
-    .from('faelle')
-    .select('claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
+  // CMM-44 SP-A / CMM-49: kundenbetreuer_id ist claims-nativ (claims = SSoT) — claims-direkt via claim_id.
+  const { data: claimForTask } = await supabase
+    .from('claims')
+    .select('kundenbetreuer_id')
+    .eq('id', claimId)
     .single()
-  const fallForTaskClaim = Array.isArray(fallForTask?.claims) ? fallForTask.claims[0] : fallForTask?.claims
-  const fallForTaskKbId = (fallForTaskClaim?.kundenbetreuer_id as string | null) ?? null
+  const fallForTaskKbId = (claimForTask?.kundenbetreuer_id as string | null) ?? null
   triggerKanzleiPaketTask(fallId, fallForTaskKbId).catch(() => {})
   triggerAsSendedatumTask(fallId, fallForTaskKbId).catch(() => {})
   return { success: true }
@@ -188,11 +199,15 @@ export async function qcNachbesserung(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // CMM-49: claim-nativ
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden' }
+
   const now = new Date().toISOString()
   const { data: existing } = await supabase
     .from('qc_checkliste')
     .select('id')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .single()
 
   const qcData = {
@@ -203,24 +218,23 @@ export async function qcNachbesserung(
   }
 
   if (existing) {
-    await supabase.from('qc_checkliste').update(qcData).eq('fall_id', fallId)
+    await supabase.from('qc_checkliste').update(qcData).eq('claim_id', claimId)
   } else {
     await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...qcData })
   }
 
-  const { data: fallInfo } = await supabase
-    .from('faelle')
-    .select('sv_id, claims:claim_id(claim_nummer)')
-    .eq('id', fallId)
+  // CMM-49: claims-direkt (sv_id + claim_nummer claim-native)
+  const { data: claimInfo } = await supabase
+    .from('claims')
+    .select('sv_id, claim_nummer')
+    .eq('id', claimId)
     .single()
-
-  const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
-  const fallNr = fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)
+  const fallNr = claimInfo?.claim_nummer ?? fallId.slice(0, 8)
 
   // KFZ-204: Task für SV mit profile_id (damit SV ihn im Portal sieht)
   let svProfileId: string | null = null
-  if (fallInfo?.sv_id) {
-    const { data: svd } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fallInfo.sv_id).single()
+  if (claimInfo?.sv_id) {
+    const { data: svd } = await supabase.from('sachverstaendige').select('profile_id').eq('id', claimInfo.sv_id).single()
     svProfileId = svd?.profile_id ?? null
   }
 
@@ -242,10 +256,10 @@ export async function qcNachbesserung(
     erstellt_von: user.id,
   })
 
-  if (fallInfo?.sv_id) {
-    createGutachterMitteilung(fallInfo.sv_id, 'qc_nachbesserung', fallId, {
+  if (claimInfo?.sv_id) {
+    createGutachterMitteilung(claimInfo.sv_id, 'qc_nachbesserung', fallId, {
       kommentar: kommentar || undefined,
-      claim_nummer: fallInfoClaim?.claim_nummer ?? undefined,
+      claim_nummer: claimInfo.claim_nummer ?? undefined,
     }).catch(() => {})
   }
 
