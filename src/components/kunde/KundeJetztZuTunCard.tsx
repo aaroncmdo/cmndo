@@ -8,7 +8,12 @@
 // konsistente Hülle (glass-light / severity border-l / iOS-Radius).
 
 import Link from 'next/link'
+import { getTranslations } from 'next-intl/server'
 import type { KundeAktion } from '@/lib/kunde/jetzt-zu-tun'
+import {
+  resolveAktionTexte,
+  type JetztZuTunTranslator,
+} from '@/lib/kunde/jetzt-zu-tun-i18n'
 import {
   TodoCard,
   TodoCardActionBody,
@@ -36,20 +41,26 @@ const CTA_BG: Record<TodoCardSeverity, string> = {
   success: 'bg-emerald-600 hover:bg-emerald-700',
 }
 
-export default function KundeJetztZuTunCard({ aktion }: Props) {
+export default async function KundeJetztZuTunCard({ aktion }: Props) {
   if (!aktion) return null
+  // Portal-i18n: Server-Component → getTranslations. Namespace `jetztZuTun`,
+  // dynamische State-Keys via resolveAktionTexte (t.has-guard + de-Fallback).
+  const t = await getTranslations('jetztZuTun')
+  const tt = t as unknown as JetztZuTunTranslator
+  const texte = resolveAktionTexte(aktion, tt)
+
   // kein-aktionsbedarf → minimale Info-Card
   if (aktion.state === 'kein-aktionsbedarf') {
     return (
       <TodoCard
-        label="Status"
+        label={t('statusLabel')}
         severity="info"
         passive
         className="mb-4"
       >
         <div className="space-y-0.5">
-          <p className="text-sm text-claimondo-navy">{aktion.titel}</p>
-          <p className="text-xs text-claimondo-ondo">{aktion.beschreibung}</p>
+          <p className="text-sm text-claimondo-navy">{texte.titel}</p>
+          <p className="text-xs text-claimondo-ondo">{texte.beschreibung}</p>
         </div>
       </TodoCard>
     )
@@ -75,8 +86,8 @@ export default function KundeJetztZuTunCard({ aktion }: Props) {
         </span>
       )}
       <TodoCardActionBody
-        title={aktion.titel}
-        description={aktion.beschreibung}
+        title={texte.titel}
+        description={texte.beschreibung}
         deadline={deadlineText}
         severity={severity}
         cta={
@@ -85,7 +96,7 @@ export default function KundeJetztZuTunCard({ aktion }: Props) {
               href={aktion.cta.href}
               className={`inline-flex items-center gap-1 text-sm font-medium rounded-ios-md px-4 min-h-[44px] text-white transition-colors ${CTA_BG[severity]}`}
             >
-              {aktion.cta.label}
+              {texte.ctaLabel ?? aktion.cta.label}
               <span aria-hidden>→</span>
             </Link>
           ) : null

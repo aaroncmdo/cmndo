@@ -5059,5 +5059,122 @@
     "finanzierung": "Finansman",
     "vs": "Sigorta",
     "vsNr": "Poliçe no."
+  },
+  "jetztZuTun": {
+    "statusLabel": "Durum",
+    "onboardingOffen": {
+      "titel": "Kaydı tamamlayın",
+      "beschreibung": "Lütfen hasar dosyanıza ilişkin eksik bilgileri tamamlayın. Bu bilgiler olmadan müşteri temsilciniz dosyanızı işleme alamaz.",
+      "cta": "Şimdi tamamla"
+    },
+    "datenAnKanzlei": {
+      "titel": "Hukuk bürosu için bilgi gerekiyor",
+      "beschreibung": "Ortak hukuk bürosu sizden eksik bilgileri bekliyor. Lütfen dosyanızı açın ve açık maddeleri kontrol edin.",
+      "cta": "Dosyayı aç"
+    },
+    "terminVorOrt": {
+      "titel": "Ekspertiz randevunuz sürüyor",
+      "beschreibung": "{datum} tarihli randevu. Bilirkişi ya yolda ya da çoktan yerinde."
+    },
+    "terminUnterwegs": {
+      "titel": "Ekspertiz randevunuz yaklaşıyor",
+      "beschreibung": "{datum} tarihli randevu. Bilirkişiniz varmadan kısa süre önce sizinle iletişime geçecek."
+    },
+    "nachbesichtigungWaehlen": {
+      "titel": "Yeniden ekspertiz: randevu seçin",
+      "beschreibung": "Sigorta, aracınızın yeniden incelenmesini talep ediyor. Lütfen 2–3 uygun randevu önerin.",
+      "cta": "Randevu öner"
+    },
+    "terminBestaetigen": {
+      "titel": "Ekspertiz randevusunu onaylayın",
+      "beschreibung": "Bilirkişiniz {datum} tarihini öneriyor. Lütfen onaylayın veya karşı öneri yapın.",
+      "cta": "Randevuyu aç"
+    },
+    "vollmachtUnterschreiben": {
+      "titel": "Vekâletnameyi onaylayın",
+      "beschreibung": "LexDrive'ın sigorta ile müzakere edebilmesi için dijital vekâletnamenize (Vollmacht) ihtiyacımız var.",
+      "cta": "Şimdi onayla"
+    },
+    "vsAntwortAbwarten": {
+      "titel": "Sigortayı bekliyoruz",
+      "beschreibung": "Talep yazınız gönderildi. Sigortanın artık yanıt vermek için yasal bir süresi var — bir geri dönüş aldığımızda sizinle iletişime geçeceğiz."
+    },
+    "fallAbgeschlossen": {
+      "titel": "Dosya kapatıldı",
+      "beschreibung": "Hasar dosyanız tamamen tazmin edildi. Güveniniz için teşekkürler!"
+    },
+    "keinAktionsbedarf": {
+      "titel": "İşlem gerekmiyor",
+      "beschreibung": "Dosyanız planlandığı gibi ilerliyor — sizden bir şey gerektiğinde iletişime geçeceğiz."
+    }
+  },
+  "fallKarte": {
+    "phasen": {
+      "erfassung": "Kayıt",
+      "begutachtung": "Bilirkişi raporu",
+      "regulierung": "Tazminat",
+      "abschluss": "Tamamlanma"
+    },
+    "uhrSuffix": "",
+    "fahrzeugFallback": "Araç",
+    "unfallAm": "Kaza {datum}",
+    "svVorOrt": "Bilirkişi yerinde",
+    "svUnterwegs": "Bilirkişi yolda",
+    "svUnterwegsEta": "Bilirkişi yolda · {minuten} dk.",
+    "terminVerstrichen": "Randevu kaçırıldı · {termin}",
+    "fallAbgeschlossen": "Dosya kapatıldı",
+    "phaseLabel": "Aşama: {phase}",
+    "phaseInBearbeitung": "İşlemde"
+  },
+  "kundeHero": {
+    "willkommen": "Hoş geldiniz",
+    "begruessung": "Merhaba {vorname} — nasıl yardımcı olabiliriz?",
+    "intro": "Kaza hasarınızla biz ilgileniyoruz — ekspertizden ödemeye kadar. Hiçbir şeyi yönetmeniz gerekmez; sizi her adımda bilgilendiririz.",
+    "schadenMelden": "Hasar bildir",
+    "bereitsGemeldet": "Zaten bildirdiniz mi? E-posta veya SMS ile bir bağlantı alacaksınız.",
+    "soLaeuftEs": "Bizde süreç nasıl işler",
+    "schrittLabel": "{nummer}. adım",
+    "schritt1": "Hasar bildirildi",
+    "schritt2": "Bilirkişi planlandı",
+    "schritt3": "Ekspertiz",
+    "schritt4": "Bilirkişi raporu",
+    "schritt5": "Tazmin edildi"
+  },
+  "svLive": {
+    "gutachterFallback": "Bilirkişiniz",
+    "ueberarbeitungTitel": "Bilirkişi raporu revize ediliyor",
+    "qcTitel": "Kalite kontrolü ve hukuk bürosuna devir",
+    "ueberarbeitungSub": "· Düzeltilmiş sürümü bekliyoruz",
+    "qcSub": "· Bilirkişi raporunuz inceleniyor",
+    "gutachtenWirdErstellt": "Bilirkişi raporu hazırlanıyor",
+    "gutachtenWirdErstelltSub": "· {vorname} üzerinde çalışıyor",
+    "svVorOrt": "{vorname} yerinde",
+    "svVorOrtSub": "· Ekspertiz sürüyor",
+    "svUnterwegs": "{vorname} yolda",
+    "svUnterwegsAnkunft": "· Varış yakl. {ankunft} ({minuten} dk.)"
+  },
+  "abschluss": {
+    "badge": "Tamamlandı",
+    "titel": "{fallNummer} numaralı dosyanız tamamlandı",
+    "untertitel": "{datum} tarihinde kapatıldı · Güveniniz için teşekkür ederiz.",
+    "gutachtenPdf": "Bilirkişi raporu (PDF)",
+    "gutachtenNichtFreigegeben": "Bilirkişi raporu PDF henüz yayımlanmadı",
+    "gutachtenNv": "Bilirkişi raporu (yok)",
+    "reklamation": "Şikâyet aç",
+    "bewerten": "Değerlendir"
+  },
+  "auszahlung": {
+    "titel": "Ödemeniz",
+    "statusEingegangen": "Alındı",
+    "statusAvisiert": "Bildirildi",
+    "nettoBetrag": "Net tutar (sizin payınız)",
+    "eingang": "Giriş",
+    "zahlungswegLabel": "Ödeme yöntemi",
+    "zahlungsweg": {
+      "ueberweisung": "Havale",
+      "werkstattDirekt": "Servise doğrudan ödeme",
+      "scheck": "Çek"
+    },
+    "hinweis": "Bu, bilirkişi ücreti ve muafiyet düşüldükten sonraki net payınızdır. Brüt tazminatı dosya genel görünümünüzde görebilirsiniz."
   }
 }

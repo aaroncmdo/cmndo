@@ -5059,5 +5059,122 @@
     "finanzierung": "تمويل",
     "vs": "التأمين",
     "vsNr": "رقم البوليصة"
+  },
+  "jetztZuTun": {
+    "statusLabel": "الحالة",
+    "onboardingOffen": {
+      "titel": "أكمل التسجيل",
+      "beschreibung": "يرجى إكمال البيانات المتبقية الخاصة بمطالبتك. بدون هذه البيانات لا يستطيع مسؤول حسابك متابعة قضيتك.",
+      "cta": "أكمل الآن"
+    },
+    "datenAnKanzlei": {
+      "titel": "مطلوب بيانات لمكتب المحاماة",
+      "beschreibung": "مكتب المحاماة الشريك في انتظار البيانات الناقصة منك. يرجى فتح قضيتك ومراجعة النقاط المفتوحة.",
+      "cta": "فتح القضية"
+    },
+    "terminVorOrt": {
+      "titel": "موعد المعاينة جارٍ",
+      "beschreibung": "الموعد في {datum}. الخبير إما في الطريق أو موجود بالفعل في الموقع."
+    },
+    "terminUnterwegs": {
+      "titel": "موعد المعاينة قادم قريبًا",
+      "beschreibung": "الموعد في {datum}. سيتواصل معك خبيرك قبل وصوله بقليل."
+    },
+    "nachbesichtigungWaehlen": {
+      "titel": "إعادة المعاينة: اختر موعدًا",
+      "beschreibung": "تطلب شركة التأمين معاينة جديدة لسيارتك. يرجى اقتراح 2–3 مواعيد مناسبة.",
+      "cta": "اقترح مواعيد"
+    },
+    "terminBestaetigen": {
+      "titel": "أكّد موعد المعاينة",
+      "beschreibung": "يقترح خبيرك {datum}. يرجى التأكيد أو تقديم اقتراح مضاد.",
+      "cta": "فتح الموعد"
+    },
+    "vollmachtUnterschreiben": {
+      "titel": "أكّد التوكيل",
+      "beschreibung": "كي تتمكن LexDrive من التفاوض مع شركة التأمين، نحتاج إلى توكيلك الرقمي (Vollmacht).",
+      "cta": "أكّد الآن"
+    },
+    "vsAntwortAbwarten": {
+      "titel": "نحن في انتظار شركة التأمين",
+      "beschreibung": "تم إرسال خطاب المطالبة الخاص بك. أمام شركة التأمين الآن مهلة قانونية للرد — سنتواصل معك بمجرد أن نتلقى ردًا."
+    },
+    "fallAbgeschlossen": {
+      "titel": "تم إغلاق القضية",
+      "beschreibung": "تمت تسوية مطالبتك بالكامل. شكرًا لثقتك!"
+    },
+    "keinAktionsbedarf": {
+      "titel": "لا يلزم اتخاذ إجراء",
+      "beschreibung": "قضيتك تسير وفق الخطة — سنتواصل معك بمجرد أن نحتاج إلى أي شيء منك."
+    }
+  },
+  "fallKarte": {
+    "phasen": {
+      "erfassung": "التسجيل",
+      "begutachtung": "تقرير الخبير",
+      "regulierung": "التسوية",
+      "abschluss": "الإنهاء"
+    },
+    "uhrSuffix": "",
+    "fahrzeugFallback": "مركبة",
+    "unfallAm": "الحادث {datum}",
+    "svVorOrt": "الخبير في الموقع",
+    "svUnterwegs": "الخبير في الطريق",
+    "svUnterwegsEta": "الخبير في الطريق · {minuten} دقيقة",
+    "terminVerstrichen": "فات الموعد · {termin}",
+    "fallAbgeschlossen": "تم إغلاق القضية",
+    "phaseLabel": "المرحلة: {phase}",
+    "phaseInBearbeitung": "قيد المعالجة"
+  },
+  "kundeHero": {
+    "willkommen": "مرحبًا",
+    "begruessung": "مرحبًا {vorname} — كيف يمكننا المساعدة؟",
+    "intro": "نحن نتولى مطالبة حادثك — من المعاينة حتى صرف المبلغ. لا حاجة لأن تدير أي شيء؛ نُبقيك على اطلاع في كل خطوة.",
+    "schadenMelden": "الإبلاغ عن ضرر",
+    "bereitsGemeldet": "سبق الإبلاغ؟ ستتلقى منا رابطًا عبر البريد الإلكتروني أو الرسائل القصيرة.",
+    "soLaeuftEs": "كيف تسير الأمور لدينا",
+    "schrittLabel": "الخطوة {nummer}",
+    "schritt1": "تم الإبلاغ عن الضرر",
+    "schritt2": "تم تحديد موعد الخبير",
+    "schritt3": "المعاينة",
+    "schritt4": "تقرير الخبير",
+    "schritt5": "تمت التسوية"
+  },
+  "svLive": {
+    "gutachterFallback": "خبيرك",
+    "ueberarbeitungTitel": "تتم مراجعة تقرير الخبير",
+    "qcTitel": "فحص الجودة والتسليم إلى مكتب المحاماة",
+    "ueberarbeitungSub": "· ننتظر النسخة المصححة",
+    "qcSub": "· تتم مراجعة تقرير خبيرك",
+    "gutachtenWirdErstellt": "يجري إعداد تقرير الخبير",
+    "gutachtenWirdErstelltSub": "· {vorname} يعمل عليه",
+    "svVorOrt": "{vorname} في الموقع",
+    "svVorOrtSub": "· المعاينة جارية",
+    "svUnterwegs": "{vorname} في الطريق",
+    "svUnterwegsAnkunft": "· الوصول حوالي {ankunft} ({minuten} دقيقة)"
+  },
+  "abschluss": {
+    "badge": "مكتمل",
+    "titel": "قضيتك {fallNummer} منتهية",
+    "untertitel": "أُغلقت في {datum} · شكرًا جزيلًا لثقتك.",
+    "gutachtenPdf": "تقرير الخبير (PDF)",
+    "gutachtenNichtFreigegeben": "لم يُتح بعد ملف PDF لتقرير الخبير",
+    "gutachtenNv": "تقرير الخبير (غير متاح)",
+    "reklamation": "فتح شكوى",
+    "bewerten": "قيّم"
+  },
+  "auszahlung": {
+    "titel": "مبلغك",
+    "statusEingegangen": "تم الاستلام",
+    "statusAvisiert": "تم الإشعار",
+    "nettoBetrag": "المبلغ الصافي (حصتك)",
+    "eingang": "الاستلام",
+    "zahlungswegLabel": "طريقة الدفع",
+    "zahlungsweg": {
+      "ueberweisung": "تحويل بنكي",
+      "werkstattDirekt": "دفع مباشر للورشة",
+      "scheck": "شيك"
+    },
+    "hinweis": "هذه حصتك الصافية بعد خصم أتعاب الخبير والتحمّل الذاتي. يمكنك رؤية التسوية الإجمالية في نظرة عامة على قضيتك."
   }
 }
