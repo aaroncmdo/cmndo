@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { KB_BERATUNG_DURATION_MIN, KB_BERATUNG_VORLAUF_H } from './constants'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 type BookResult =
   | { ok: true; terminId: string }
@@ -26,19 +27,22 @@ export async function bookKbTermin(
 
   const db = createAdminClient()
 
-  // 1. Verify fall belongs to this kunde
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall, error: fallErr } = await db
-    .from('faelle')
-    .select('id, kunde_id, lead_id, claim_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .single()
-
-  if (fallErr || !fall) return { ok: false, error: 'Fall nicht gefunden' }
+  // 1. Verify fall belongs to this kunde — CMM-49: claims-zentrisch via resolveClaimId-Chokepoint.
+  //    geschaedigter_user_id == kunde_id (0-diff live verifiziert 78/0/0); kundenbetreuer_id = claims-SSoT.
+  //    `fall`-Shim haelt die alten Feldnamen, damit die Downstream-Nutzung unveraendert bleibt.
+  const claimId = await resolveClaimId(db, fallId)
+  const { data: claimRow } = claimId
+    ? await db.from('claims').select('geschaedigter_user_id, lead_id, kundenbetreuer_id').eq('id', claimId).maybeSingle()
+    : { data: null }
+  if (!claimRow) return { ok: false, error: 'Fall nicht gefunden' }
+  const fall = {
+    kunde_id: (claimRow.geschaedigter_user_id as string | null),
+    lead_id: (claimRow.lead_id as string | null),
+    claim_id: claimId,
+  }
   if (fall.kunde_id !== user.id) return { ok: false, error: 'Kein Zugriff' }
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const kbId = fallClaim?.kundenbetreuer_id ?? null
+  const kbId = (claimRow.kundenbetreuer_id as string | null) ?? null
   if (!kbId) return { ok: false, error: 'Kein Kundenbetreuer zugewiesen' }
 
   // 2. Parse start time — AAR-956 TZ: {datum,uhrzeit} aus getAvailableKbSlots sind
@@ -242,14 +246,13 @@ export async function cancelKbTermin(terminId: string): Promise<CancelResult> {
 
   if (terminErr || !termin) return { ok: false, error: 'Termin nicht gefunden' }
 
-  const { data: fall, error: fallErr } = await db
-    .from('faelle')
-    .select('id, kunde_id')
-    .eq('id', termin.fall_id)
-    .single()
-
-  if (fallErr || !fall) return { ok: false, error: 'Fall nicht gefunden' }
-  if (fall.kunde_id !== user.id) return { ok: false, error: 'Kein Zugriff' }
+  // CMM-49: Ownership claims-zentrisch (geschaedigter_user_id == kunde_id, 0-diff) via resolveClaimId.
+  const claimId = termin.fall_id ? await resolveClaimId(db, termin.fall_id as string) : null
+  const { data: claim } = claimId
+    ? await db.from('claims').select('geschaedigter_user_id').eq('id', claimId).maybeSingle()
+    : { data: null }
+  if (!claim) return { ok: false, error: 'Fall nicht gefunden' }
+  if (claim.geschaedigter_user_id !== user.id) return { ok: false, error: 'Kein Zugriff' }
 
   // 2. Check termin is > 1h in future
   const startZeit = new Date(termin.start_zeit)
