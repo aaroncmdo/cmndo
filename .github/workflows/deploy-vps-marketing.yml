@@ -10,7 +10,9 @@ name: Deploy → VPS (claimondo.de Marketing :3006)
 
 on:
   push:
-    branches: [main]
+    # TEMP: kitta/marketing-auto-deploy-ci nur fuer den Vor-Merge-Testlauf in der
+    # Trigger-Liste — wird vor dem PR wieder auf [main] reduziert.
+    branches: [main, kitta/marketing-auto-deploy-ci]
     paths:
       - 'claimondo-marketing/**'
       - '.github/workflows/deploy-vps-marketing.yml'
