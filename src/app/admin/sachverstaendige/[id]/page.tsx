@@ -70,7 +70,7 @@ export default async function SvDetailPage({
       .not('status', 'in', '("abgeschlossen","storniert")')
       .order('created_at', { ascending: false }),
     supabase.from('tasks')
-      .select('id, titel, typ, status, faellig_am, prioritaet, fall_id, faelle(claims:claim_id(claim_nummer))')
+      .select('id, titel, typ, status, faellig_am, prioritaet, fall_id, claims:claim_id(claim_nummer)')
       .eq('zugewiesen_an', sv.profile_id)
       .in('status', ['offen', 'in-bearbeitung'])
       .order('faellig_am', { ascending: true })
@@ -512,9 +512,8 @@ export default async function SvDetailPage({
               ) : (
                 <div className="max-h-[300px] overflow-y-auto">
                   {tasks.map(t => {
-                    const frRaw = t.faelle as unknown
-                    const fr = (Array.isArray(frRaw) ? frRaw[0] : frRaw) as { claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
-                    const frClaim = Array.isArray(fr?.claims) ? fr?.claims[0] : fr?.claims
+                    const frRaw = t.claims as unknown
+                    const frClaim = (Array.isArray(frRaw) ? frRaw[0] : frRaw) as { claim_nummer: string | null } | null
                     const fallNr = (frClaim?.claim_nummer as string) ?? '—'
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
