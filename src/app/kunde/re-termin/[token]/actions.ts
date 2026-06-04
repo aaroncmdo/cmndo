@@ -39,14 +39,21 @@ export async function waehleReTerminSlot(
 
   const db = createAdminClient()
 
-  // Token-Lookup — re_termin_token verbleibt auf faelle fuer die Suche.
-  // CMM-44 SP-D PR2a: re_termin_token_eingelaufen_am aus gutachter_termine (aktueller Termin, SSoT).
+  // CMM-49 Option A: Token-Lookup via gutachter_termine.re_termin_token (CMM-44 SP-D SSoT;
+  // live-grün faelle_only_tok=0/unique) -> faelle.re_termin_token wird droppbar.
   // CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag) — via
   // Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
+  const { data: tok } = await db
+    .from('gutachter_termine')
+    .select('fall_id')
+    .eq('re_termin_token', token)
+    .limit(1)
+    .maybeSingle()
+  if (!tok?.fall_id) return { ok: false, error: 'Token nicht gefunden' }
   const { data: fall } = await db
     .from('faelle')
     .select('id, sv_id, lead_id, claim_id, claims:claim_id(auftraege(storniert_am))')
-    .eq('re_termin_token', token)
+    .eq('id', tok.fall_id)
     .single()
 
   if (!fall) return { ok: false, error: 'Token nicht gefunden' }
