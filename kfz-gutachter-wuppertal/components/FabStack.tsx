@@ -157,7 +157,7 @@ export function FabStack({ city }: { city: City }) {
         id="backToTop"
         type="button"
         aria-label="Zurück nach oben"
-        className="fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-amber text-white grid place-items-center shadow-md hover:-translate-y-px transition opacity-0 pointer-events-none"
+        className="hidden sm:grid fixed bottom-6 left-6 z-40 w-12 h-12 rounded-full bg-amber text-white place-items-center shadow-md hover:-translate-y-px transition opacity-0 pointer-events-none"
         style={{ transition: 'opacity .3s ease,transform .2s ease' }}
       >
         <svg

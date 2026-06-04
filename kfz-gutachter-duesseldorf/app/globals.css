@@ -29,13 +29,17 @@
   --color-amber: var(--amber);
   --color-amber-700: var(--amber-700);
 
+  /* Call-CTA Signal-Rot (AAR-960) — einheitlich rot ueber ALLE Cluster, entkoppelt vom Per-City-Amber */
+  --color-cta: #E5372B;
+  --color-cta-700: #C42818;
+
   /* === TYPOGRAPHY (Variablen aus app/fonts/fonts.ts) === */
-  --font-display: var(--font-space-grotesk), system-ui, sans-serif;
+  --font-display: var(--font-noto-sans), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
   /* === FONT-SIZE-PAKETE (fluid clamp) === */
-  --text-hero-h1: clamp(34px, 4.2vw, 42px);
+  --text-hero-h1: clamp(36px, 4.8vw, 48px);
   --text-hero-h1--line-height: 1.18;
   --text-hero-h1--letter-spacing: -0.016em;
 
@@ -108,18 +112,18 @@ body {
   background:
     linear-gradient(180deg,
       transparent 0%,
-      transparent 60%,
-      color-mix(in srgb, var(--petrol) 30%, transparent) 100%),
+      transparent 64%,
+      color-mix(in srgb, var(--petrol) 24%, transparent) 100%),
     linear-gradient(180deg,
-      color-mix(in srgb, var(--petrol) 20%, transparent) 0%,
-      transparent 15%),
+      color-mix(in srgb, var(--petrol) 8%, transparent) 0%,
+      transparent 12%),
     linear-gradient(90deg,
       var(--petrol) 0%,
-      var(--petrol) 22%,
-      color-mix(in srgb, var(--petrol) 75%, transparent) 38%,
-      color-mix(in srgb, var(--petrol) 30%, transparent) 52%,
-      color-mix(in srgb, var(--petrol) 10%, transparent) 65%,
-      transparent 78%);
+      var(--petrol) 20%,
+      color-mix(in srgb, var(--petrol) 68%, transparent) 36%,
+      color-mix(in srgb, var(--petrol) 26%, transparent) 52%,
+      color-mix(in srgb, var(--petrol) 8%, transparent) 66%,
+      transparent 80%);
 }
 
 /* Mobile: vertikaler Gradient — Bild oben sichtbar, Content auf opaker Flaeche */
@@ -127,9 +131,10 @@ body {
   .hero-photo::after {
     background:
       linear-gradient(180deg,
-        color-mix(in srgb, var(--petrol) 35%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 72%, transparent) 32%,
-        var(--petrol) 50%,
+        color-mix(in srgb, var(--petrol) 24%, transparent) 0%,
+        color-mix(in srgb, var(--petrol) 50%, transparent) 36%,
+        color-mix(in srgb, var(--petrol) 88%, transparent) 56%,
+        var(--petrol) 64%,
         var(--petrol) 100%);
   }
   .hero-photo-bg {
@@ -158,6 +163,9 @@ body {
 .cases-track {
   scrollbar-width: none;
   -ms-overflow-style: none;
+  /* Transparenz-Fade zum (Bildschirm-)Rand links+rechts (AAR-962) */
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
+          mask-image: linear-gradient(to right, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
 }
 .cases-track::-webkit-scrollbar { display: none; }
 
@@ -177,7 +185,7 @@ body {
 }
 
 /* Scroll pulse */
-@keyframes scrollPulse { 0%, 100% { transform: translateY(0) } 50% { transform: translateY(4px) } }
+@keyframes scrollPulse { 0%, 100% { transform: translateY(-3px) } 50% { transform: translateY(4px) } }
 
 /* Vergleichstabelle — Mobile gestapelte Mini-Karten */
 @media (max-width: 640px) {
@@ -552,16 +560,17 @@ body {
 .rev-eyebrow { display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-display); font-size: 11px; font-weight: 600; color: var(--color-muted); letter-spacing: 1.2px; text-transform: uppercase; margin: 0 0 10px; }
 .rev-stars { color: #FCD34D; letter-spacing: 1.5px; font-size: 12px; }
 .rev-rating { font-weight: 700; color: var(--color-ink); }
-.rev-list { border-radius: 10px; background: #fff; border: 1px solid var(--color-border); padding: 0 14px; }
-.rev-item { display: grid; grid-template-columns: 36px 1fr; gap: 11px; padding: 14px 0; border-top: 1px solid var(--color-border); }
+.rev-list { border-radius: 12px; background: #fff; border: 1px solid var(--color-border); padding: 2px 18px; }
+.rev-item { display: grid; grid-template-columns: 44px 1fr; gap: 13px; padding: 17px 0; border-top: 1px solid var(--color-border); }
 .rev-item:first-of-type { border-top: none; }
-.rev-ava { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 700; color: #fff; font-family: var(--font-display); }
-.rev-name { font-size: 13.5px; font-weight: 600; color: var(--color-ink); line-height: 1.25; }
+.rev-ava { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; color: #fff; font-family: var(--font-display); }
+.rev-name { font-size: 15px; font-weight: 600; color: var(--color-ink); line-height: 1.25; }
 .rev-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; font-size: 11.5px; color: var(--color-muted); }
 .rev-stars-mini { color: #FCD34D; letter-spacing: 0.8px; font-size: 11px; }
-.rev-quote { margin-top: 6px; font-size: 13px; line-height: 1.45; color: var(--color-ink); font-style: italic; }
-.rev-soft-link { display: block; text-align: center; margin-top: 14px; font-size: 11.5px; color: var(--color-muted); text-decoration: none; letter-spacing: 0.2px; }
-.rev-soft-link:hover { color: var(--color-ink); }
+.rev-quote { margin-top: 7px; font-size: 14.5px; line-height: 1.55; color: var(--color-ink); font-style: italic; }
+.rev-all-link { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-top: 18px; padding: 12px 18px; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--color-petrol); background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 11px; text-decoration: none; letter-spacing: 0.01em; transition: border-color .2s ease, color .2s ease; }
+.rev-all-link::after { content: "→"; }
+.rev-all-link:hover { border-color: var(--amber); color: var(--amber); }
 
 /* ════════════════════════════════════════════════════════════════════════
  * Phase 3 #4 — Netzwerk-Mobile (Mock v7.3, #netzwerkMobile)
@@ -771,9 +780,9 @@ body {
   color: #fff;
   margin: 0 0 10px;
   line-height: 1.3;
-  text-align: center;
+  text-align: left;
   letter-spacing: -0.005em;
-  display: flex; align-items: center; justify-content: center; gap: 7px; flex-wrap: wrap;
+  display: flex; align-items: center; justify-content: flex-start; gap: 7px; flex-wrap: wrap;
 }
 .cmp-mobile-meta {
   background: var(--amber);
@@ -797,14 +806,13 @@ body {
   min-width: 0;
 }
 .cmp-mobile-tile--no {
-  background: rgba(255,255,255,0.04);
-  border-color: rgba(255,255,255,0.07);
-  opacity: 0.85;
+  background: color-mix(in srgb, #D32E20 14%, transparent);
+  border-color: color-mix(in srgb, #D32E20 42%, transparent);
 }
 .cmp-mobile-tile--yes {
-  background: color-mix(in srgb, var(--amber) 22%, transparent);
-  border: 0.5px solid color-mix(in srgb, var(--amber) 45%, transparent);
-  box-shadow: 0 2px 8px color-mix(in srgb, var(--amber) 15%, transparent);
+  background: color-mix(in srgb, var(--color-green) 20%, transparent);
+  border: 0.5px solid color-mix(in srgb, var(--color-green) 48%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--color-green) 16%, transparent);
 }
 .cmp-mobile-tile--big {
   text-align: center;
@@ -812,7 +820,7 @@ body {
 }
 .cmp-mobile-tile--big .cmp-mobile-txt strong {
   font-size: 16px; font-weight: 800;
-  color: var(--amber);
+  color: var(--color-green);
 }
 .cmp-mobile-tag {
   font-family: var(--font-display);
@@ -821,8 +829,8 @@ body {
   text-transform: uppercase;
   margin: 0 0 5px;
 }
-.cmp-mobile-tile--no .cmp-mobile-tag { color: rgba(255,255,255,0.45); }
-.cmp-mobile-tile--yes .cmp-mobile-tag { color: var(--amber); }
+.cmp-mobile-tile--no .cmp-mobile-tag { color: #FF9B91; }
+.cmp-mobile-tile--yes .cmp-mobile-tag { color: #5FE3A6; }
 .cmp-mobile-txt {
   font-size: 10.5px;
   color: rgba(255,255,255,0.7);
@@ -838,7 +846,7 @@ body {
 .cmp-mobile-meta--mob      { background: #7C5BC9; }
 .cmp-mobile-meta--law      { background: #0D1B3E; border: 0.5px solid rgba(255,255,255,0.2); }
 .cmp-mobile-meta--effort   { background: var(--amber); }
-.cmp-mobile-txt strong { font-weight: 700; color: var(--amber); }
+.cmp-mobile-txt strong { font-weight: 700; color: #5FE3A6; }
 .cmp-mobile-tile--no .cmp-mobile-txt strong { color: #fff; font-weight: 700; }
 .cmp-mobile-link {
   display: inline-block;

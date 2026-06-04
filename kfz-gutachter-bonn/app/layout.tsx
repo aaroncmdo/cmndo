@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
-import { inter, spaceGrotesk, spaceMono } from './fonts/fonts'
+import { inter, notoSans, spaceMono } from './fonts/fonts'
 import { SITE } from '@/lib/site'
 import { CLUSTER } from '@/lib/cluster'
 
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html
       lang={SITE.lang}
-      className={`${inter.variable} ${spaceGrotesk.variable} ${spaceMono.variable} antialiased`}
+      className={`${inter.variable} ${notoSans.variable} ${spaceMono.variable} antialiased`}
     >
       <body>{children}</body>
     </html>
