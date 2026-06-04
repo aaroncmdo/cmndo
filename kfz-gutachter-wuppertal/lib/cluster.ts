@@ -30,12 +30,25 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
+  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  regionDative: string
+  /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
+  quellenAnker: string
+  /** Hauptachsen (FAQ-Q2, cluster-spezifisch). */
+  achsen: string[]
+  /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
+  stadtteile: string[]
   domain: string
   /** data-theme-Key aus dem Mock (hier nur dokumentarisch — :root traegt die Vars). */
   theme: string
   themeColor: string
   /** Basis-Pfad fuer cluster-spezifische Bilder. */
   imgPath: string
+  /** Team-Foto (Netzwerk-Mobile Team-Hero-Card). */
+  teamImg: string
+  /** Vorname des lokalen SV (CTA-v8-Rolle + Ueber-uns). Persona-Default "Tobias"
+   *  bis Aaron echte Namen pro Cluster liefert (parallel zu Monika/Markus). */
+  svName: string
   phone: { display: string; tel: string; wa: string }
   /** Wahrzeichen-Hero (Einsatzgebiet). */
   landmark: { label: string; img: string }
@@ -49,10 +62,16 @@ export interface ClusterConfig {
 export const CLUSTER: ClusterConfig = {
   key: 'wuppertal',
   region: 'Bergisches Land',
+  regionDative: 'Bergischen Land',
+  quellenAnker: 'Polizei-Jahresverkehrsbericht 2025',
+  achsen: ['A46', 'A1', 'B7'],
+  stadtteile: ['Elberfeld', 'Barmen', 'Heckinghausen', 'Vohwinkel', 'Cronenberg', 'Ronsdorf'],
   domain: 'kfz-unfallgutachter-wuppertal.de',
   theme: 'graphit',
   themeColor: '#2A2E33',
   imgPath: '/assets/img/wuppertal/',
+  teamImg: '/assets/img/wuppertal/team-wuppertal.webp',
+  svName: 'Tobias',
   // Telefon einheitlich ueber alle Cluster (Handoff 00a). Weicht bewusst vom
   // Mock ab (Mock tel: 0221-Festnetz) — Aaron-Vorgabe: Mobil +49 1515 3608515.
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
