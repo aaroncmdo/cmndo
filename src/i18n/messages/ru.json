@@ -4783,6 +4783,14 @@
       },
       "fallback": {
         "gutachter": "Эксперт-оценщик"
+      },
+      "besichtigungsort": {
+        "titel": "Место осмотра",
+        "frage": "Место верное?",
+        "jaStimmt": "Да, верно",
+        "korrigieren": "Исправить место",
+        "bestaetigt": "Место подтверждено",
+        "abbrechen": "Отмена"
       }
     },
     "shell": {
@@ -5554,5 +5562,13 @@
     "originalAnzeigen": "Показать оригинал",
     "uebersetzungAnzeigen": "Показать перевод",
     "uebersetze": "Перевод …"
+  },
+  "gutachter": {
+    "feldmodus": {
+      "besichtigungsort": {
+        "korrigieren": "Исправить место",
+        "vomKundenBestaetigt": "Подтверждено клиентом"
+      }
+    }
   }
 }

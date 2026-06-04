@@ -4783,6 +4783,14 @@
       },
       "fallback": {
         "gutachter": "Bilirkişi"
+      },
+      "besichtigungsort": {
+        "titel": "Ekspertiz yeri",
+        "frage": "Yer doğru mu?",
+        "jaStimmt": "Evet, doğru",
+        "korrigieren": "Yeri düzelt",
+        "bestaetigt": "Yer onaylandı",
+        "abbrechen": "İptal"
       }
     },
     "shell": {
@@ -5554,5 +5562,13 @@
     "originalAnzeigen": "Orijinali göster",
     "uebersetzungAnzeigen": "Çeviriyi göster",
     "uebersetze": "Çevriliyor …"
+  },
+  "gutachter": {
+    "feldmodus": {
+      "besichtigungsort": {
+        "korrigieren": "Yeri düzelt",
+        "vomKundenBestaetigt": "Müşteri tarafından onaylandı"
+      }
+    }
   }
 }
