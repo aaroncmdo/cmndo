@@ -36,11 +36,8 @@ export function PraxisSection({ city }: { city: City }) {
         <CasesCarousel city={city} />
         {/* Vertrauenszeile (Pflicht §5 UWG) */}
         <p className="mt-5 text-[12px] text-muted leading-relaxed max-w-[820px] mx-auto text-center">
-          Alle dargestellten Fälle beruhen auf real abgerechneten, anonymisierten
-          Schadenvorgängen aus dem Claimondo-Netzwerk. Die erzielbare Auszahlung ist
-          einzelfallabhängig und keine Zusicherung eines bestimmten Betrags. Differenzen
-          entstehen typischerweise durch Wertminderung, Nutzungsausfall, Beilackierung,
-          UPE-Aufschläge und korrekte Stundensätze.
+          Alle Fälle beruhen auf real abgerechneten, anonymisierten Schadenvorgängen.
+          Auszahlung ist einzelfallabhängig.
         </p>
       </div>
     </section>
