@@ -1,5 +1,12 @@
 # HANDOFF — CMM-49 faelle-DROP — sauberer Einstiegspunkt (Stand 04.06.2026)
 
+> **▶ AN DIE CMM-49-SESSION — zuerst lesen.**
+> **Wo das hier liegt:** PR **#2425** · Branch `kitta/cmm49-handoff-clean` · Datei `docs/04.06.2026/HANDOFF-cmm49-faelle-drop-clean.md` (nach Merge auf staging auffindbar). Dein **lebendes Detail-Log bleibt #2423** — diese Datei ist nur die saubere Orientierung + der verifizierte Live-Stand.
+>
+> **Die EINE Regel, die uns zwei kollisionsfrei hält:** route deine Bucket-2 **Daten-Reads** (Person / Fahrzeug / Gegner / VS) durch **`v_claim_full`** — **nicht** `claims` direkt. Das ist die *Seam*: die Entity-Strecke macht `v_claim_full` später per **einer** View-Def-Migration entity-sourced, **ohne deine Files nochmal anzufassen**. Zeigst du stattdessen auf `claims`-direkt, muss jedes File später re-touched werden. (Nicht-Entity-Felder + ANCHOR-Reads dürfen weiter `claims` sein.) Voll erklärt in **§6 „Seam zur Entity-Strecke"**.
+>
+> **Wir editieren NIE dasselbe File** — du fährst die per-File-Strecke, ich besitze die View-Quelle + die Entitäten; wir treffen uns in `v_claim_full`. Bei den **Termin-Tabellen** (3-fach-Hotspot) ownt die termin-engine-Session die Konsolidierung — FK-Rekey dort abstimmen (§5/§6).
+
 **Was das ist:** Saubere, von **staging auffindbare** Orientierung für die CMM-49-Strecke (Ziel: `DROP TABLE faelle`, claim = SSoT). Orientiert + verlinkt — ersetzt die in-flight-Detail-Logs **nicht**.
 
 **Lebende Arbeits-Detail-Logs (Bucket-für-Bucket, churnt täglich):**
