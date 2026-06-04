@@ -6,12 +6,19 @@
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
-import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
+import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { istFeststellungsFeld, istDokumentManuellFeld } from '@/lib/self-service/feststellung-felder'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import { FlowZb1Upload } from './FlowZb1Upload'
 import { Button } from '@/components/primitives/Button/Button.web'
+
+// Spiegelt WizardClient.meetsCondition: ein Feld/eine Phase ist sichtbar, wenn keine
+// Bedingung gesetzt ist oder der aktuelle Wert des Bedingungsfelds exakt passt (String-Vergleich).
+function meetsCondition(cond: ConditionalOn | null | undefined, vals: Record<string, unknown>): boolean {
+  if (!cond) return true
+  return String(vals[cond.feld] ?? '') === cond.equals
+}
 
 export function FlowFeststellungStep({
   token,
@@ -30,9 +37,17 @@ export function FlowFeststellungStep({
   const [error, setError] = useState<string | null>(null)
   const [showManuell, setShowManuell] = useState(false)
 
-  // Nur Sektionen mit >=1 ①-Feld; Felder pro Sektion gefiltert.
+  // Nur Sektionen mit >=1 ①-Feld; Felder pro Sektion gefiltert + conditional_on-Sichtbarkeit
+  // (reaktiv auf `values` — z.B. halter_* nur bei ist_fahrzeughalter=false, polizei_aktenzeichen
+  // nur bei polizei_vor_ort=true). FlowFeststellungStep ignorierte conditional_on bisher (anders
+  // als WizardClient), wodurch ~6 bedingte Felder unbedingt erschienen (halter_*, vorschaeden_/
+  // sachschaden_beschreibung, polizei_aktenzeichen, schadentyp_freitext, kanzlei_wunsch).
   const sektionen = phasen
-    .map((p) => ({ phase: p, felder: p.felder.filter(istFeststellungsFeld) }))
+    .filter((p) => meetsCondition(p.conditional_on, values))
+    .map((p) => ({
+      phase: p,
+      felder: p.felder.filter((f) => istFeststellungsFeld(f) && meetsCondition(f.conditional_on, values)),
+    }))
     .filter((s) => s.felder.length > 0)
 
   // AAR-956 Part 2 ("nur Lücken"): liegen Kern-Fahrzeugdaten schon vor (Dispatch/früherer
