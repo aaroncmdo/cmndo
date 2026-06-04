@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { bestaetige } from '@/lib/termine/engine'
+import { resolveTerminLeadId } from '@/lib/termine/resolve-lead-id'
 
 /**
  * KFZ-192: Termin bestätigen.
@@ -27,7 +28,7 @@ export async function bestaetigeTermin(terminId: string) {
   // 2. Termin + Fall für Benachrichtigungen laden (besichtigungsort_adresse ist jetzt von bestaetige gecacht).
   const { data: termin, error: terminErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, besichtigungsort_adresse')
+    .select('id, fall_id, claim_id, lead_id, sv_id, start_zeit, besichtigungsort_adresse')
     .eq('id', terminId)
     .single()
   if (terminErr || !termin || !termin.fall_id) return
@@ -40,13 +41,14 @@ export async function bestaetigeTermin(terminId: string) {
 
   // 3. WhatsApp T4 an Kunden + Email S-E6 an SV (non-critical) — macht bestaetige NICHT.
   try {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+    // CMM-49: lead_id faelle-frei aufloesen (termin.lead_id -> claims.lead_id), value-preserving.
+    const leadId = await resolveTerminLeadId(db, termin)
     const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })
     const uhrzeit = new Date(termin.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
 
     // WhatsApp T4 an Kunden
-    if (fall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', fall.lead_id).single()
+    if (leadId) {
+      const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', leadId).single()
       if (lead?.telefon) {
         const { sendCommunication } = await import('@/lib/communications/send')
         await sendCommunication('termin_bestaetigt', {

@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { resolveTerminLeadId } from '@/lib/termine/resolve-lead-id'
 
 // KFZ-179: WhatsApp-Notification an Kunden wenn SV angekommen ist.
 
@@ -10,18 +11,18 @@ export async function notifyKundeAngekommen(terminId: string) {
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, notification_angekommen_gesendet_am')
+    .select('id, fall_id, claim_id, lead_id, sv_id, notification_angekommen_gesendet_am')
     .eq('id', terminId)
     .single()
 
   if (!termin || termin.notification_angekommen_gesendet_am) return
 
-  // Kunden-Daten
-  const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+  // Kunden-Daten — CMM-49: lead_id faelle-frei (termin.lead_id -> claims.lead_id).
+  const leadId = await resolveTerminLeadId(db, termin)
   let kundeVorname = 'Kunde'
   let kundeTelefon: string | null = null
-  if (fall?.lead_id) {
-    const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
+  if (leadId) {
+    const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).single()
     if (lead) { kundeVorname = lead.vorname ?? 'Kunde'; kundeTelefon = lead.telefon }
   }
 
