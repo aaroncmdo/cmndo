@@ -21,10 +21,22 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
+  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  regionDative: string
+  /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
+  quellenAnker: string
+  /** Hauptachsen (FAQ-Q2, cluster-spezifisch). */
+  achsen: string[]
+  /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
+  stadtteile: string[]
   domain: string
   theme: string
   themeColor: string
   imgPath: string
+  /** Team-Foto (Netzwerk-Mobile Team-Hero-Card). */
+  teamImg: string
+  /** Vorname des lokalen SV (CTA-v8-Rolle). Persona-Default "Tobias". */
+  svName: string
   phone: { display: string; tel: string; wa: string }
   landmark: { label: string; img: string }
   facts: { value: string; label: string; accent?: boolean }[]
@@ -35,10 +47,16 @@ export interface ClusterConfig {
 export const CLUSTER: ClusterConfig = {
   key: 'duesseldorf',
   region: 'Rheinland',
+  regionDative: 'Rheinland',
+  quellenAnker: 'Polizei-Verkehrsbericht 2025',
+  achsen: ['A46', 'A52', 'A57', 'A3'],
+  stadtteile: ['Altstadt', 'Bilk', 'Oberkassel', 'Pempelfort', 'Gerresheim', 'Derendorf'],
   domain: 'kfz-unfallgutachter-duesseldorf.de',
   theme: 'rhein',
   themeColor: '#0B3D6E',
   imgPath: '/assets/img/duesseldorf/',
+  teamImg: '/assets/img/duesseldorf/team-duesseldorf.webp',
+  svName: 'Tobias',
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Rheinturm', img: 'stadt-duesseldorf.png' },
   facts: [

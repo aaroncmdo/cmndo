@@ -150,10 +150,46 @@ export const ABLAUF: AblaufStep[] = [
   { icon: 'card', title: 'Geld aufs Konto', text: 'Reparatur, Wertminderung und Nutzungsausfall — die Versicherung zahlt **direkt aufs Konto**.' },
 ]
 
+// ── Ablauf-Mobile · Tage-Timeline (#ablaufMobile, "In ~32 Tagen zum Geld") ────
+// Eigene Mobile-Darstellung (TAG-0..TAG-32), NICHT die 5-Icon-Desktop-ABLAUF.
+export interface AblaufTimelineStep {
+  /** data-step 1–5 (Dot-Reveal + amber Step-1-Dot). */
+  step: number
+  /** Tag-Label: "TAG 0" … "~TAG 32". */
+  day: string
+  /** Tag-Label-Modifier → ablauf-tl-day--{start|end}. */
+  dayMod?: 'start' | 'end'
+  title: string
+  /** Groesseres End-Titel-Styling (Schritt 5). */
+  titleEnd?: boolean
+  /** Amber-Pill neben dem Titel (Schritt 3: "0 €"). */
+  pill?: string
+  /** **fett** via renderRich(sub, subStrong). */
+  sub: string
+  /** strongClassName: 'text-petrol' bzw. 'font-bold' (Schritt 1 = neutral-bold). */
+  subStrong: string
+  /** Nutzungsausfall-Tooltip (nur Schritt 4) — **fett** text-petrol. */
+  tooltip?: string
+  /** End-Dot mit "€"-Symbol (Schritt 5). */
+  dotEnd?: boolean
+  /** ablauf-tl-item--end (Schritt 5). */
+  itemEnd?: boolean
+}
+
+export const ABLAUF_TIMELINE: AblaufTimelineStep[] = [
+  { step: 1, day: 'TAG 0', dayMod: 'start', title: 'Anrufen', sub: 'Per Telefon oder WhatsApp — Rückruf **innerhalb 60 Min**.', subStrong: 'font-bold' },
+  { step: 2, day: 'TAG 1–3', title: 'Termin vor Ort', sub: 'DAT-Sachverständiger dokumentiert gerichtsfest bei Ihnen.', subStrong: 'text-petrol' },
+  { step: 3, day: 'TAG 3–7', title: 'Gutachten + Anwalt', pill: '0 €', sub: '**LexDrive** kämpft für Sie. Kosten trägt die Gegenseite.', subStrong: 'text-petrol' },
+  { step: 4, day: 'TAG 7+', title: 'Mietwagen oder Geld', sub: 'Ersatzwagen organisiert — oder Nutzungsausfall aufs Konto. **Ihre Wahl.**', subStrong: 'text-petrol', tooltip: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. **23–175 €/Tag** (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif.' },
+  { step: 5, day: '~TAG 32', dayMod: 'end', title: 'Geld auf dem Konto', titleEnd: true, sub: 'Reparatur, Wertminderung & Nutzungsausfall — direkt von der Versicherung.', subStrong: 'text-petrol', dotEnd: true, itemEnd: true },
+]
+
 // ── Leistungen / Besichtigung (6 Schritte) ───────────────────────────────────
 export interface LeistungStep {
   /** Bild in /assets/img/shared/besichtigung/ */
   img: string
+  /** Spezifischer Bild-alt (Mock-exakt, SEO/a11y) statt generischem Titel. */
+  alt: string
   title: string
   text: string
   badgeLabel: string
@@ -161,12 +197,12 @@ export interface LeistungStep {
 }
 
 export const LEISTUNGEN: LeistungStep[] = [
-  { img: 'schritt-1-erstaufnahme.png', title: 'Alles aufnehmen', text: 'Zuerst halten wir Ihr Fahrzeug rundherum mit der Kamera fest und notieren alle Fahrzeugdaten.', badgeLabel: 'Vorteil:', badgeText: 'lückenlos festgehalten — keine Diskussion mit der Versicherung.' },
-  { img: 'schritt-2-lackmessgeraet.png', title: 'Lack & Spalten prüfen', text: 'Mit einem Messgerät prüfen wir Lack und Spaltmaße — alte Reparaturen werden sichtbar.', badgeLabel: 'Versteckt:', badgeText: 'alte Reparaturen & Nachlackierungen.' },
-  { img: 'schritt-3-strukturschaden.png', title: 'Hinter die Stoßstange schauen', text: 'Wir schauen dort nach, wo man von außen nichts sieht — hinter Stoßstange und Verkleidung.', badgeLabel: 'Versteckt:', badgeText: 'verbogene Träger & Crashboxen.' },
-  { img: 'schritt-4-unterboden.png', title: 'Unterboden & Achse', text: 'Auf der Hebebühne prüfen wir Unterboden und Achse — ein Aufprall verzieht das oft.', badgeLabel: 'Versteckt:', badgeText: 'schiefe Achse, einseitiger Verschleiß.' },
-  { img: 'schritt-5-technik.png', title: 'Technik & Assistenten', text: 'Moderne Autos stecken voller Sensoren. Nach einem Unfall müssen die oft neu eingestellt werden.', badgeLabel: 'Versteckt:', badgeText: 'verstellte Assistenzsysteme.' },
-  { img: 'schritt-6-gutachten.png', title: 'Gutachten & Auszahlung', text: 'Aus allem erstellen wir Ihr unabhängiges, gerichtsfestes Gutachten inklusive Wertminderung.', badgeLabel: 'Ihr Vorteil:', badgeText: 'die volle, korrekte Summe.' },
+  { img: 'schritt-1-erstaufnahme.png', alt: 'Kfz-Gutachter dokumentiert das Unfallfahrzeug', title: 'Alles aufnehmen', text: 'Zuerst halten wir Ihr Fahrzeug rundherum mit der Kamera fest und notieren alle Fahrzeugdaten.', badgeLabel: 'Vorteil:', badgeText: 'lückenlos festgehalten — keine Diskussion mit der Versicherung.' },
+  { img: 'schritt-2-lackmessgeraet.png', alt: 'Lackschichtdicke und Spaltmaße werden gemessen', title: 'Lack & Spalten prüfen', text: 'Mit einem Messgerät prüfen wir Lack und Spaltmaße — alte Reparaturen werden sichtbar.', badgeLabel: 'Versteckt:', badgeText: 'alte Reparaturen & Nachlackierungen.' },
+  { img: 'schritt-3-strukturschaden.png', alt: 'Verdeckte Strukturschäden hinter der Stoßstange', title: 'Hinter die Stoßstange schauen', text: 'Wir schauen dort nach, wo man von außen nichts sieht — hinter Stoßstange und Verkleidung.', badgeLabel: 'Versteckt:', badgeText: 'verbogene Träger & Crashboxen.' },
+  { img: 'schritt-4-unterboden.png', alt: 'Unterboden und Achsgeometrie prüfen', title: 'Unterboden & Achse', text: 'Auf der Hebebühne prüfen wir Unterboden und Achse — ein Aufprall verzieht das oft.', badgeLabel: 'Versteckt:', badgeText: 'schiefe Achse, einseitiger Verschleiß.' },
+  { img: 'schritt-5-technik.png', alt: 'Prüfung der Assistenzsysteme', title: 'Technik & Assistenten', text: 'Moderne Autos stecken voller Sensoren. Nach einem Unfall müssen die oft neu eingestellt werden.', badgeLabel: 'Versteckt:', badgeText: 'verstellte Assistenzsysteme.' },
+  { img: 'schritt-6-gutachten.png', alt: 'Gerichtsfestes Gutachten wird erstellt', title: 'Gutachten & Auszahlung', text: 'Aus allem erstellen wir Ihr unabhängiges, gerichtsfestes Gutachten inklusive Wertminderung.', badgeLabel: 'Ihr Vorteil:', badgeText: 'die volle, korrekte Summe.' },
 ]
 
 // ── Vergleichstabelle "Claimondo-Netzwerk" (8 Zeilen) ────────────────────────
@@ -190,24 +226,131 @@ export const COMPARISON: CompareRow[] = [
   { feat: 'Ihr Aufwand am Ende', normal: '**10+** Telefonate, Briefe, Wartezeit', us: '**1 Anruf**' },
 ]
 
-// ── FAQ (8) ── Token-Templates ({city}/{region}); JSON-LD == sichtbare Q/A ────
-export interface FaqItem {
-  q: string
-  a: string
-  link?: { href: string; label: string }
-  local?: boolean
+// ── Netzwerk-Mobile · Pain-Cards (4, "Die 4 wichtigsten Fragen") ──────────────
+// Nur Mobile (#netzwerkMobile, sm:hidden). IO-Staggered-Reveal ueber data-step.
+export interface NetzwerkPainCard {
+  /** Zweistelliges Stage-Tag "01"–"04" (Anzeige im Tag-Quadrat). */
+  tag: string
+  /** data-step 1–4 — Selektor fuer die CSS-Transition-Delays. */
+  step: number
+  title: string
+  /** **fett**-Marker erlaubt; gerendert via renderRich(sub, subStrong). */
+  sub: string
+  /** strongClassName: 'font-bold' (weiss) bzw. 'netzwerk-pain-allein' (rot). */
+  subStrong: string
+  linkHref: string
+  linkLabel: string
 }
 
-export const FAQ: FaqItem[] = [
-  { q: 'Was kostet ein Kfz-Gutachter in {city}?', a: 'Bei einem unverschuldeten Unfall kostet Sie das Gutachten 0 €. Die gegnerische Haftpflichtversicherung übernimmt die Kosten inklusive Nebenkosten. Bei einem Kaskoschaden hängt der Preis von der Schadenshöhe ab.', link: { href: 'https://autounfall.io/gutachter-kosten/', label: 'Detaillierte Kosten-Aufstellung →' } },
-  { q: 'Gutachter oder Werkstatt — was ist besser?', a: 'Ein unabhängiger Kfz-Gutachter dokumentiert den Schaden neutral und sichert Ihren vollen Anspruch. Die Werkstatt repariert, bewertet aber nicht neutral.', link: { href: 'https://autounfall.io/gutachter-gut-vs-schlecht/', label: 'Wie Sie einen guten Gutachter erkennen →' } },
-  { q: 'Wann muss man den Kfz-Gutachter einschalten?', a: 'Ab etwa 750 € Schaden oder wenn die Schuldfrage unklar ist. Idealerweise noch am Unfalltag, damit alle Spuren gesichert werden — wir kommen rund um die Uhr.', link: { href: 'https://autounfall.io/gutachter-lohnt-sich/', label: 'Lohnt sich ein Gutachten? →' } },
-  { q: 'Was ist der Unterschied zwischen Gutachter und Sachverständigem?', a: 'Es gibt keinen. Kfz-Gutachter und Kfz-Sachverständiger bezeichnen dieselbe Tätigkeit. Auch Schadengutachten und Unfallgutachten meinen dasselbe.', link: { href: 'https://autounfall.io/gutachten-arten/', label: 'Die verschiedenen Gutachten-Arten →' } },
-  { q: 'Darf ich meinen Kfz-Gutachter selbst wählen?', a: 'Ja. Bei unverschuldetem Unfall haben Sie das Recht auf freie Gutachterwahl. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben.', link: { href: 'https://autounfall.io/gutachter-wer-beauftragt/', label: 'Wer den Gutachter beauftragen darf →' } },
-  { q: 'Was bedeutet „Claimondo-Partner“?', a: 'Ihr Gutachter vor Ort ist zertifizierter Partner im Claimondo-Netzwerk. Dadurch erhalten Sie über eine Plattform alles aus einer Hand: das DAT-Gutachten, einen Verkehrsrechts-Anwalt, einen Mietwagen und ein Live-Tracking Ihres Schadenfalls — bis zur vollständigen Auszahlung. Ihr Aufwand bleibt: ein Anruf.', link: { href: 'https://autounfall.io/gutachter/', label: 'Mehr im Kfz-Gutachter-Ratgeber →' } },
-  { q: 'Kommen Sie in alle Stadtteile von {city}?', a: 'Ja — wir kommen in alle Bezirke von {city} und die umliegende Region. Ein Termin im Büro ist nicht nötig, wir sind innerhalb von 60 Minuten vor Ort.', local: true },
-  { q: 'Was kostet ein Kfz-Gutachten in {city}?', a: 'Bei einem unverschuldeten Unfall 0 €. Die gegnerische Haftpflichtversicherung trägt die Kosten inklusive Nebenkosten. Bei Kaskoschäden richtet sich der Preis nach der Schadenshöhe.', local: true },
+export const NETZWERK_PAIN: NetzwerkPainCard[] = [
+  { tag: '01', step: 1, title: 'Reicht der Werkstatt-Kostenvoranschlag?', sub: 'Nein — Versicherung erkennt nur ein **neutrales Gutachten** an. Wertminderung & Nutzungsausfall fallen sonst weg.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachter-lohnt-sich/', linkLabel: 'Lohnt sich ein Gutachten? →' },
+  { tag: '02', step: 2, title: 'Welches Gutachten brauche ich?', sub: 'Haftpflicht, Kasko, Beweis — falsches Format = Versicherung lehnt ab oder kürzt.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachten-arten/', linkLabel: 'Die Gutachten-Arten →' },
+  { tag: '03', step: 3, title: 'Wer organisiert Reparatur & Mietwagen?', sub: 'Allein: Werkstatt-Bindung, Vorkasse-Risiko, Tagessatz-Streit. Bei uns: alles aus einer Hand.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
+  { tag: '04', step: 4, title: 'Wenn die Versicherung kürzt — was tun?', sub: '**Allein:** niemand widerspricht. Bei uns: Gegengutachten + Anwalt setzen volle Summe durch.', subStrong: 'netzwerk-pain-allein', linkHref: 'https://autounfall.io/wertminderung-249-bgb/', linkLabel: 'Wertminderung & §249 BGB →' },
 ]
+
+// ── Netzwerk-Mobile · 8-Karten Compare-Panel (#netzwerkCompareMobilePanel) ─────
+// Eigenes Mobile-Mapping mit Topic-Badges — bewusst NICHT die Desktop-COMPARISON
+// (7 Zeilen, andere Copy). Mock v3-praxis-v2 Z.4749-4811.
+export interface NetzwerkCompareCard {
+  /** Topic-Badge-Text (GELD/SCHUTZ/SERVICE/PORTAL/MOBILITÄT/RECHT/AUFWAND). */
+  metaLabel: string
+  /** Badge-Farbklasse → cmp-mobile-meta--{metaClass}. */
+  metaClass: 'money' | 'risk' | 'service' | 'portal' | 'mob' | 'law' | 'effort'
+  question: string
+  /** **fett** erlaubt (renderRich; CSS faerbt strong je Tile no/yes). */
+  ohne: string
+  mit: string
+  /** Card-Modifier: '' | 'cmp-mobile-card--accent' | 'cmp-mobile-card--final'. */
+  cardClass: string
+  /** Mit-Tile als grosses Solo-"1 Anruf"-Tile (nur Karte 8). */
+  mitBig?: boolean
+  linkHref?: string
+  linkLabel?: string
+}
+
+export const NETZWERK_COMPARE_MOBILE: NetzwerkCompareCard[] = [
+  { metaLabel: 'GELD', metaClass: 'money', question: 'Wer holt das versteckte Geld raus?', ohne: 'Versicherung rechnet knapp.', mit: 'Wertminderung + Nutzungsausfall.', cardClass: '', linkHref: 'https://autounfall.io/wertminderung-249-bgb/', linkLabel: 'Wertminderung & §249 BGB →' },
+  { metaLabel: 'SCHUTZ', metaClass: 'risk', question: 'Versicherung kürzt Ihr Gutachten?', ohne: 'Niemand widerspricht.', mit: '**Gegengutachten + Anwalt** setzen volle Summe durch.', cardClass: 'cmp-mobile-card--accent' },
+  { metaLabel: 'SCHUTZ', metaClass: 'risk', question: 'Versicherung legt eigenes Gutachten vor?', ohne: 'Sie stehen allein da.', mit: 'Wir prüfen **fachlich gegen**.', cardClass: 'cmp-mobile-card--accent', linkHref: 'https://autounfall.io/controlexpert-versicherer-pruefdienst/', linkLabel: 'Prüfdienste (ControlExpert) →' },
+  { metaLabel: 'SERVICE', metaClass: 'service', question: 'Wer ist Ihr Ansprechpartner?', ohne: 'Wechselnd / keiner.', mit: 'Fester persönlicher Schadensbetreuer.', cardClass: '' },
+  { metaLabel: 'PORTAL', metaClass: 'portal', question: 'Sehen Sie den Stand Ihres Falls?', ohne: 'Nachfragen per Telefon.', mit: 'Jederzeit im Online-Portal.', cardClass: '' },
+  { metaLabel: 'MOBILITÄT', metaClass: 'mob', question: 'Wer organisiert den Mietwagen?', ohne: 'Sie selbst.', mit: 'Wir — steht vor Ihrer Tür.', cardClass: '', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
+  { metaLabel: 'RECHT', metaClass: 'law', question: 'Wer kämpft mit der Versicherung?', ohne: 'Sie (oder eigener Anwalt).', mit: '**LexDrive** — inklusive.', cardClass: '', linkHref: 'https://autounfall.io/abtretungserklaerung/', linkLabel: 'Abtretungserklärung →' },
+  { metaLabel: 'AUFWAND', metaClass: 'effort', question: 'Ihr Aufwand am Ende', ohne: '**10+** Telefonate, Briefe, Wartezeit.', mit: '**1 Anruf**', cardClass: 'cmp-mobile-card--final', mitBig: true },
+]
+
+// ── FAQ (5 kuratiert, v3-praxis-v2) ── strukturiert: reiche UI + Plain-Text-JSON-LD ──
+// Sync-Pflicht (SEA, Aaron-Direktive): faqAnswerText() baut den Schema-Plain-Text aus
+// DENSELBEN Teilen wie die sichtbare FaqAccordion -> UI und JSON-LD bleiben deckungsgleich.
+export interface FaqBullet {
+  strong: string
+  rest: string
+}
+export interface FaqEntry {
+  /** Frage ({city}/{region}-Token). */
+  q: string
+  /** 0-Euro-Amber-Badge (nur Q1). */
+  badge?: string
+  /** Antwort-Haupttext ({city}-Token). */
+  intro: string
+  /** Q2: Hauptachsen-Liste anhaengen (aus CLUSTER.achsen). */
+  axes?: boolean
+  /** Q4: Trust-Bullet-Liste mit Icon. */
+  bullets?: FaqBullet[]
+  /** Q4: kursive Schluss-Sentenz. */
+  schluss?: string
+  /** Q5: Werkstatt-Andock-CTA-Text ({city}-Token). */
+  workshop?: string
+}
+
+export const FAQ: FaqEntry[] = [
+  {
+    q: 'Was kostet das Gutachten?',
+    badge: '0 €',
+    intro:
+      'Bei unverschuldetem Unfall in **{city}** 0 €. Die gegnerische Haftpflichtversicherung trägt alle Kosten — inkl. **Anfahrt zu Ihnen nach Hause, an die Unfallstelle oder zur Werkstatt**. Bei Kaskoschäden richtet sich der Preis nach der Schadenhöhe.',
+  },
+  {
+    q: 'Wann brauche ich einen Gutachter?',
+    intro:
+      'Ab etwa **750 €** Schaden oder wenn die Schuldfrage unklar ist. Idealerweise noch am Unfalltag, damit alle Spuren gesichert werden. Wir sind in **{city}** in der Regel **in 60 Minuten vor Ort** — auch über die Hauptachsen',
+    axes: true,
+  },
+  {
+    q: 'Darf ich frei wählen?',
+    intro:
+      'Ja. **§ 249 BGB** sichert Ihnen das Recht auf **freie Gutachterwahl** bei unverschuldetem Unfall. Die gegnerische Versicherung darf Ihnen keinen eigenen Sachverständigen vorschreiben — auch wenn sie es manchmal versucht.',
+  },
+  {
+    q: 'Was bedeutet „Claimondo-Partner“?',
+    intro:
+      'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles aus einer Hand**:',
+    bullets: [
+      { strong: 'DAT-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
+      { strong: 'Verkehrsrechts-Anwalt', rest: 'LexDrive Partnerkanzlei' },
+      { strong: 'Mietwagen', rest: 'solange Ihr Auto ausfällt' },
+      { strong: 'Live-Tracking', rest: 'jeder Schritt im Portal sichtbar' },
+    ],
+    schluss: 'Bis zur vollständigen Auszahlung. Ihr Aufwand: ein Anruf.',
+  },
+  {
+    q: 'Gutachter oder Werkstatt?',
+    intro:
+      'Beides hat einen Platz. Die Werkstatt repariert — bewertet aber **nicht neutral**. Ein unabhängiger Kfz-Gutachter dokumentiert den Schaden gerichtsfest und sichert Ihren vollen Anspruch — Wertminderung, Nutzungsausfall, Mietwagen.',
+    workshop: 'Wir kommen **auch in Ihre Werkstatt in {city}** — bringen Sie das Gutachten mit, der Rest läuft.',
+  },
+]
+
+/** Plain-Text-Antwort fuer JSON-LD — aus denselben Teilen wie die sichtbare FAQ (Sync garantiert). */
+export function faqAnswerText(e: FaqEntry, city: City, region: string, achsen: string[]): string {
+  let t = fillTokens(e.intro, city, region)
+  if (e.axes) t += ' ' + achsen.join(' · ') + '.'
+  if (e.bullets) t += ' ' + e.bullets.map((b) => `${b.strong} — ${b.rest}`).join('. ') + '.'
+  if (e.schluss) t += ' ' + e.schluss
+  if (e.workshop) t += ' ' + fillTokens(e.workshop, city, region)
+  return t.replaceAll('**', '') // Bold-Marker raus -> reiner Plain-Text fuer JSON-LD
+}
 
 // ── Ratgeber-Karten (4) ──────────────────────────────────────────────────────
 export interface RatgeberCard {

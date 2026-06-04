@@ -5,9 +5,11 @@ import { CLUSTER, waHref, type City } from '@/lib/cluster'
 
 // CLIENT-Section: schwebender Schnellkontakt-Stack + Mobile-Sticky-Anruf-Bar +
 // Back-to-Top. Mock-Zeilen 1088-1151.
-// - Monika-Chat-Bubble (#waBubble) + State-Machine WEGGELASSEN (Phase 2 / MonikaEmbedSlot).
-//   Die Pill ist deshalb ein reiner WhatsApp-Link (kein data-action="pill_chat_click")
-//   und statisch immer-expanded (kein collapsed/expanded-Toggle).
+// - Monika-Dedupe (AAR-939): die interaktive Monika ist das Embed-Widget
+//   (MonikaEmbedSlot -> /embed/monika.js, eigener Launcher bottom:20 right:20
+//   z-9999). Die fruehere statische "Schadensberatung"-Pill wurde entfernt
+//   (war die zweite, doppelte Monika). Dieser Stack sitzt jetzt DARUEBER
+//   (bottom-[92px]) und enthaelt nur noch WhatsApp- + Telefon-FAB.
 // - Telefon/WhatsApp aus CLUSTER (cluster.ts ist Single-Source — Mock-tel weicht ab).
 // - KEIN eigenes Klick-Tracking: data-cta-Attribute reichen, SiteScripts delegiert.
 // - Scroll-Gating: mobil (<640px) erst sichtbar wenn Hero-CTA (#heroCallCta) out-of-view,
@@ -86,7 +88,7 @@ export function FabStack({ city }: { city: City }) {
     <aside aria-label="Schnellkontakt und Soforthilfe">
       {/* ===== FAB-STACK ===== (Mobil: initial versteckt, fade-in nach Hero-CTA out-of-view) */}
       <div
-        className="fixed bottom-6 right-6 z-[100] flex flex-col items-end gap-3 fab-scroll-gated"
+        className="fixed bottom-[92px] right-6 z-[100] flex flex-col items-end gap-3 fab-scroll-gated"
         id="fabStack"
         aria-label="Schnellkontakt"
         style={{ transition: 'opacity .3s ease, transform .3s ease' }}
@@ -121,67 +123,11 @@ export function FabStack({ city }: { city: City }) {
             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
           </svg>
         </a>
-        {/* Schadensberatung-Pill — reiner WhatsApp-Link, statisch immer-expanded */}
-        <a
-          className="fab-pill flex items-center rounded-full py-1.5 shadow-[0_8px_28px_rgba(13,27,62,.45),0_0_0_2px_rgba(69,115,162,.45)] hover:-translate-y-px"
-          id="fabPill"
-          href={waHref(city)}
-          data-cta="fab_pill_wa"
-          aria-label="Schadensberatung — Wir klären Ihre Fragen"
-          style={{
-            background: 'linear-gradient(135deg,#0D1B3E 0%,#1A3060 60%,#0D1B3E 100%)',
-            border: '2px solid rgba(69,115,162,.55)',
-          }}
-        >
-          {/* Expand-Section: Avatar + Text (statisch sichtbar) */}
-          <span className="fab-pill-expand flex items-center gap-3 overflow-hidden mr-1">
-            {/* Monika-Avatar 46px */}
-            <span className="relative flex-none w-[46px] h-[46px] ml-1.5">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/img/shared/monika.png"
-                alt=""
-                className="w-[46px] h-[46px] rounded-full object-cover border-2 border-white/80"
-                loading="lazy"
-              />
-              <span
-                className="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-full bg-green border-[2.5px] border-[#0D1B3E] fab-online-pulse"
-                aria-label="online"
-              />
-            </span>
-            {/* Text: Main + Sub */}
-            <span className="flex flex-col gap-[4px] py-[2px] whitespace-nowrap">
-              <span
-                className="fab-pill-main text-white text-[14.5px] font-bold leading-[1.3] tracking-[.01em]"
-                style={{ textShadow: '0 1px 3px rgba(0,0,0,.3)' }}
-              >
-                Schadensberatung
-              </span>
-              <span className="fab-pill-sub text-white/[.82] text-[11.5px] font-medium leading-[1.3]">
-                Wir klären Ihre Fragen · 24/7
-              </span>
-            </span>
-          </span>
-          {/* Claimondo-Siegel — immer sichtbar */}
-          <span className="relative flex-none" id="fabSiegel" style={{ margin: '-8px 2px -8px 0' }}>
-            <span
-              className="block rounded-full"
-              style={{
-                boxShadow:
-                  '0 0 0 3px rgba(255,255,255,.25), 0 0 0 7px rgba(69,115,162,.15), 0 6px 24px rgba(0,0,0,.4), 0 0 22px rgba(69,115,162,.4)',
-              }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/assets/brand/siegel-claimondo-partner.svg"
-                alt="Claimondo Partner-Siegel · Unfall-Assistance 2026"
-                className="h-[84px] w-[84px] rounded-full"
-                style={{ filter: 'drop-shadow(0 2px 6px rgba(0,0,0,.3))' }}
-                loading="lazy"
-              />
-            </span>
-          </span>
-        </a>
+        {/* Monika-Pill ENTFERNT (Dedupe AAR-939): die interaktive Monika ist das
+            Embed-Widget (MonikaEmbedSlot -> /embed/monika.js, eigener Launcher
+            bottom:20 right:20 z-9999). Hier bleiben nur WhatsApp- + Telefon-FAB
+            als separate CTAs; der Stack sitzt via bottom-[92px] ueber dem
+            Embed-Launcher (keine Ueberlappung). */}
       </div>
 
       {/* ===== STICKY CALLBAR (Mobile only) ===== */}
