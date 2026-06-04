@@ -1,9 +1,12 @@
 import { CLUSTER } from '@/lib/cluster'
 import { LEISTUNGEN } from '@/lib/content'
+import { LeistungenCarousel } from './LeistungenCarousel'
 
-// LEISTUNGEN (6 Schritte) — Mock-Zeilen 868-892.
-// Server-Component (keine Interaktivitaet). Karten aus content.ts (LEISTUNGEN),
-// nicht hartkodiert. Bilder shared: /assets/img/shared/besichtigung/{img}.
+// LEISTUNGEN (6 Schritte) — Mock MASTER_preview-complete_v3-praxis-v2.html Z.5223-5301.
+// Server-Component. Karten aus content.ts (LEISTUNGEN), nicht hartkodiert.
+// Bilder shared: /assets/img/shared/besichtigung/{img}.
+// Mobile (<640): horizontales Karussell (Client-Insel LeistungenCarousel, sm:hidden).
+// Desktop/Tablet (>=640): 6-Card-Grid (hidden sm:grid) — unveraendert.
 // Telefon-CTA: <a href={`tel:${CLUSTER.phone.tel}`} data-cta="besichtigung_call"> —
 // Klick-Tracking laeuft delegiert ueber SiteScripts (kein onClick noetig).
 export function LeistungenSection() {
@@ -20,7 +23,9 @@ export function LeistungenSection() {
           <div className="font-display font-bold text-[clamp(19px,2vw,23px)] text-ink mb-2.5">Das Wichtigste sieht man nach einem Unfall oft gar nicht.</div>
           <p className="text-secondary text-base">Genau dafür kommt unser Sachverständiger. Schritt für Schritt — damit kein Schaden übersehen wird und Sie am Ende bekommen, was Ihnen zusteht.</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Mobile (<640): horizontales Karussell · Desktop/Tablet (>=640): 6-Card-Grid */}
+        <LeistungenCarousel />
+        <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {LEISTUNGEN.map((l, i) => (
             <div
               key={l.img}
@@ -33,7 +38,7 @@ export function LeistungenSection() {
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/assets/img/shared/besichtigung/${l.img}`}
-                  alt={l.title}
+                  alt={l.alt}
                   loading="lazy"
                   data-placeholder="true"
                   className="w-full h-full object-cover"
