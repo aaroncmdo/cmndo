@@ -6,6 +6,7 @@
 // die Auswahl + advanced zum gutachter-Step). Kein-Match/Standort-fehlt = Rückruf.
 
 import { useEffect, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import { ladeMatchingFlow, bucheTerminFlow } from './self-service-actions'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
@@ -19,6 +20,7 @@ export function FlowSlotStep({
   token: string
   onGebucht: (t: GebuchterTermin) => void
 }) {
+  const t = useTranslations('selfService')
   const [step, setStep] = useState<'laden' | 'auswahl' | 'absenden' | 'fehler' | 'kein_match'>('laden')
   const [svs, setSvs] = useState<OeffentlichesSvProfil[]>([])
   const [fehler, setFehler] = useState<string | null>(null)
@@ -46,13 +48,13 @@ export function FlowSlotStep({
       .catch(() => {
         if (!ab) {
           setStep('fehler')
-          setFehler('Beim Laden der Gutachter ist ein Fehler aufgetreten.')
+          setFehler(t('matching.laden_fehler'))
         }
       })
     return () => {
       ab = true
     }
-  }, [token])
+  }, [token, t])
 
   async function slotWaehlen(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
     setStep('absenden')
@@ -60,13 +62,13 @@ export function FlowSlotStep({
     try {
       const r = await bucheTerminFlow(token, sv.svId, slot.start, slot.end)
       if (!r.ok) {
-        setFehler(r.error ?? 'Buchung fehlgeschlagen.')
+        setFehler(r.error ?? t('errors.buchung'))
         setStep('auswahl')
         return
       }
       onGebucht({ svVorname: sv.vorname, svAvatar: sv.profilbild ?? null, startIso: slot.start })
     } catch {
-      setFehler('Buchung fehlgeschlagen.')
+      setFehler(t('errors.buchung'))
       setStep('auswahl')
     }
   }
@@ -75,7 +77,7 @@ export function FlowSlotStep({
     return (
       <div className="max-w-md text-center">
         <p className="text-claimondo-navy/70">
-          {step === 'laden' ? 'Wir suchen den passenden Gutachter für Sie …' : 'Einen Moment …'}
+          {step === 'laden' ? t('matching.suche') : t('matching.moment')}
         </p>
       </div>
     )
@@ -83,9 +85,9 @@ export function FlowSlotStep({
   if (step === 'kein_match') {
     return (
       <div className="max-w-md text-center" data-testid="buchung-kein-match">
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">Wir melden uns bei Ihnen</h1>
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">{t('matching.kein_match_heading')}</h1>
         <p className="text-claimondo-navy/70">
-          {fehler ?? 'Für Ihren Standort konnten wir gerade keinen freien Gutachter-Termin finden. Unser Team meldet sich kurzfristig telefonisch bei Ihnen.'}
+          {fehler ?? t('matching.kein_match_body')}
         </p>
       </div>
     )
@@ -93,7 +95,7 @@ export function FlowSlotStep({
   if (step === 'fehler') {
     return (
       <div className="max-w-md text-center">
-        <p className="text-claimondo-navy/70">{fehler ?? 'Es ist ein Fehler aufgetreten.'}</p>
+        <p className="text-claimondo-navy/70">{fehler ?? t('errors.allgemein')}</p>
       </div>
     )
   }

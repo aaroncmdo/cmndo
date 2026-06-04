@@ -231,7 +231,8 @@
   "flow": {
     "step_feststellung": {
       "heading": "Ein paar Angaben zu Ihrem Schaden",
-      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden."
+      "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.",
+      "error_save": "Speichern fehlgeschlagen."
     },
     "progress": {
       "aria_label": "Fortschritt im Schaden-Melden-Flow",
@@ -574,6 +575,20 @@
       "fallback_email_hint": "Wir haben Ihnen die Zugangsdaten an {email} gesendet.",
       "fallback_cta": "Zu meinem Portal",
       "error_fallback": "Konto konnte nicht erstellt werden"
+    },
+    "expired": {
+      "heading": "Link abgelaufen",
+      "body": "Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link."
+    },
+    "done": {
+      "heading": "Alles bereit",
+      "body": "Wir haben Ihnen die Zugangsdaten und einen Login-Link per Email geschickt. Bitte schauen Sie in Ihren Posteingang.",
+      "cta_login": "Zum Login"
+    },
+    "error": {
+      "heading": "Etwas ist schiefgelaufen",
+      "body": "Bitte versuchen Sie es erneut. Falls das Problem weiterhin besteht, kontaktieren Sie uns.",
+      "reload": "Seite neu laden"
     }
   },
   "common": {
@@ -5537,5 +5552,51 @@
   },
   "kundenHeader": {
     "imAuftrag": "im Auftrag von Claimondo"
+  },
+  "selfService": {
+    "matching": {
+      "suche": "Wir suchen den passenden Gutachter für Sie …",
+      "moment": "Einen Moment …",
+      "kein_match_heading": "Wir melden uns bei Ihnen",
+      "kein_match_body": "Für Ihren Standort konnten wir gerade keinen freien Gutachter-Termin finden. Unser Team meldet sich kurzfristig telefonisch bei Ihnen.",
+      "laden_fehler": "Beim Laden der Gutachter ist ein Fehler aufgetreten."
+    },
+    "errors": {
+      "allgemein": "Es ist ein Fehler aufgetreten.",
+      "unerwartet": "Es ist ein unerwarteter Fehler aufgetreten.",
+      "buchung": "Buchung fehlgeschlagen."
+    },
+    "quali": {
+      "gruss": "Hallo {vorname},",
+      "frage": "Wer hat den Unfall verursacht?",
+      "hinweis": "Das hilft uns einzuschätzen, ob wir Ihren Schaden für Sie regulieren können.",
+      "optionen": {
+        "gegner": {
+          "label": "Der Unfallgegner",
+          "hint": "Die Gegenseite hat den Schaden verursacht."
+        },
+        "unklar": {
+          "label": "Noch unklar",
+          "hint": "Die Schuldfrage ist noch nicht eindeutig geklärt."
+        },
+        "eigenverantwortung": {
+          "label": "Ich selbst",
+          "hint": "Ich habe den Unfall selbst verursacht."
+        }
+      }
+    },
+    "slot": {
+      "heading": "Ihr Gutachter-Termin",
+      "sub": "Wählen Sie einen passenden Termin — der erste Vorschlag ist Ihr bestpassender Gutachter.",
+      "empfohlen": "Empfohlen",
+      "wunschzeit": "Wunschzeit",
+      "keine_termine": "Aktuell keine freien Termine.",
+      "uhr_suffix": "Uhr"
+    },
+    "kasko": {
+      "heading": "Danke für Ihre Angaben",
+      "body": "Bei selbstverschuldeten Unfällen lassen sich die Gutachterkosten leider nicht über die gegnerische Haftpflichtversicherung regulieren — daher können wir Ihnen hier keinen kostenfreien Termin anbieten.",
+      "note": "Sollte sich die Schuldfrage noch ändern, melden Sie sich jederzeit gern wieder."
+    }
   }
 }
