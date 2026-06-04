@@ -19,8 +19,7 @@ name: Deploy → VPS (autounfall.io :3002)
 
 on:
   push:
-    # TEMP: Pilot-Branch fuer den Vor-Merge-Testlauf — vor PR wieder auf [main].
-    branches: [main, kitta/autounfall-deploy-ci]
+    branches: [main]
     paths:
       - 'autounfall-io/**'
       - '.github/workflows/deploy-vps-autounfall.yml'
