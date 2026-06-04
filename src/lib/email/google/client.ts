@@ -1,5 +1,6 @@
 import nodemailer from 'nodemailer'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 import { htmlToPlainText } from '@/lib/email/plain-text'
 
@@ -39,8 +40,7 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
   // (P4-TODO: claimId aus dem sendEmail-Caller-Kontext threaden statt fall_id).
   let claimId: string | null = null
   if (opts.fallId) {
-    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', opts.fallId).maybeSingle()
-    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    claimId = await resolveClaimId(admin, opts.fallId)
   }
   const toAddr = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to
 

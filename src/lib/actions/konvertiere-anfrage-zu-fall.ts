@@ -21,6 +21,7 @@
 // gespeichert. Dispatch kann manuell re-triggern.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createLead } from '@/lib/leads/create-lead'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { convertLeadToClaim } from '@/lib/leads/convert-lead-to-claim'
@@ -347,16 +348,12 @@ export async function konvertiereAnfrageZuFall(anfrageId: string, locale: string
       ((anfrage.kanzlei_wunsch as string | null | undefined) ?? 'partnerkanzlei') as
         | 'partnerkanzlei' | 'eigene_kanzlei' | 'keine_kanzlei'
     // claim_id aus faelle lesen
-    const { data: fallRow } = await admin
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', conv.fallId)
-      .maybeSingle()
-    if (fallRow?.claim_id) {
+    const convClaimId = await resolveClaimId(admin, conv.fallId)
+    if (convClaimId) {
       await admin
         .from('claims')
         .update({ kanzlei_wunsch: kanzleiWunsch, kanzlei_wunsch_gefragt_am: new Date().toISOString() })
-        .eq('id', fallRow.claim_id as string)
+        .eq('id', convClaimId)
     }
   }
 

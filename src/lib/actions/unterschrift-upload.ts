@@ -18,6 +18,7 @@
 // generiert und Flag-off Public-URLs zurückgibt (heute-Verhalten).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl } from '@/lib/storage/url'
 
 type UploadResult =
@@ -127,13 +128,7 @@ export async function signaturClaimsWrite(
   now: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = createAdminClient()
-  const { data: fallRow } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  if (!fallRow) return { ok: false, error: 'Fall nicht gefunden' }
-  const claimId = (fallRow.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(admin, fallId)
   if (!claimId) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
   const { error } = await admin.from('claims').update({
     abtretung_pdf: abtretungUrl,

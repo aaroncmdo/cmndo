@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { emailSvZugewiesen } from '@/lib/email'
 import { haversineKm } from '@/lib/gps/geofence'
 // AAR-87: nachgelagerte Trigger
@@ -236,12 +237,7 @@ export async function POST(request: Request) {
   // faelle. Org-Pool-Zweig setzt sv_zugewiesen_am auf null → claims-Write nötig.
   const now = new Date().toISOString()
   // Claim-ID fuer claims-Write holen.
-  const { data: fallForClaimId } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const fallClaimId = (fallForClaimId as { claim_id?: string | null } | null)?.claim_id ?? null
+  const fallClaimId = await resolveClaimId(supabase, fallId)
 
   const { error: updateErr } = await supabase
     .from('faelle')

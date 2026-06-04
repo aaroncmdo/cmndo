@@ -39,15 +39,14 @@ export async function getOwnedClaimIds(
     if (p.claim_id) claimIds.add(p.claim_id)
   }
 
-  // 2) faelle.kunde_id-Fallback — alte Pfade ohne claim_parties.user_id
-  //    (CMM-63-Transition: entfällt mit dem faelle-Drop in Phase 6).
-  const { data: faelleByKunde } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('kunde_id', userId)
-    .not('claim_id', 'is', null)
-  for (const f of (faelleByKunde ?? []) as Array<{ claim_id: string | null }>) {
-    if (f.claim_id) claimIds.add(f.claim_id)
+  // 2) claims.geschaedigter_user_id-Fallback — alte Pfade ohne claim_parties.user_id
+  //    (CMM-63-Transition; claims.geschaedigter_user_id == faelle.kunde_id, 0-diff -> faelle-frei).
+  const { data: claimsByKunde } = await admin
+    .from('claims')
+    .select('id')
+    .eq('geschaedigter_user_id', userId)
+  for (const c of (claimsByKunde ?? []) as Array<{ id: string }>) {
+    if (c.id) claimIds.add(c.id)
   }
 
   // 3) Lead-Email-Fallback — Kunde frisch angelegt, kunde_id noch nirgends gesetzt.

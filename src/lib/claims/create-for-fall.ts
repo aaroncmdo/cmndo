@@ -11,6 +11,7 @@
 // und die Funktion gelöscht.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveClaimId } from './get-claim-for-role'
 
 export async function createClaimForFall(
   db: SupabaseClient,
@@ -65,13 +66,9 @@ export async function createClaimForFall(
   },
   createdVia: 'lead_konvertierung' | 'manuell_admin' | 'sv_anlage' = 'lead_konvertierung',
 ): Promise<string | null> {
-  // Idempotenz-Check: Falls claim_id schon gesetzt, nicht doppelt anlegen
-  const { data: existing } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  if (existing?.claim_id) return existing.claim_id as string
+  // Idempotenz-Check: Falls claim_id schon gesetzt, nicht doppelt anlegen (CMM-49: via bridge).
+  const existingClaimId = await resolveClaimId(db, fallId)
+  if (existingClaimId) return existingClaimId
 
   const schadentag =
     source.unfalldatum ??

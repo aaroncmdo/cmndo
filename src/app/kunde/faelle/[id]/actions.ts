@@ -11,6 +11,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { bestaetigeTermin } from '@/lib/termine/bestaetigung'
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
@@ -134,12 +135,7 @@ export async function uploadPflichtdokumentKunde(
   if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
   // Claim-Pfad wenn claim_id vorhanden, sonst Fallback auf Legacy-Pfad
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-  const claimId = fall?.claim_id as string | null
+  const claimId = await resolveClaimId(admin, fallId)
   const ext = file.name.split('.').pop() ?? 'bin'
   // AAR-862: claims/ (Plural) als kanonischer Pfad
   const path = claimId

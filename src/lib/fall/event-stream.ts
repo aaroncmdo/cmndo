@@ -10,6 +10,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export type FallEventSource =
   | 'timeline'
@@ -345,8 +346,7 @@ export async function getFallEventStream(
   filter?: EventStreamFilter,
 ): Promise<FallEvent[]> {
   // CMM-49: webhook_events ist claim-gekeyt; interim faelle.claim_id-Lookup (P4-TODO: claimId threaden).
-  const { data: _wf } = await supabase.from('faelle').select('claim_id').eq('id', fall_id).maybeSingle()
-  const webhookClaimId = (_wf as { claim_id?: string | null } | null)?.claim_id ?? null
+  const webhookClaimId = await resolveClaimId(supabase, fall_id)
   const [timeline, sysNachrichten, mitteilungen, webhooks, tasks, dokumente, termine] =
     await Promise.all([
       supabase

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 // Position types we look for
 const POSITION_PATTERNS: { typ: string; bezeichnung: string; keywords: string[] }[] = [
@@ -80,8 +81,7 @@ export async function POST(req: NextRequest) {
 
     // CMM-49: forderungspositionen ist claim-gekeyt; interim faelle.claim_id-Lookup
     // (P4-TODO: claim_id aus dem Caller-Payload threaden statt fall_id).
-    const { data: _f } = await svc.from('faelle').select('claim_id').eq('id', fall_id).maybeSingle()
-    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    const claimId = await resolveClaimId(svc, fall_id)
 
     for (const pos of positions) {
       const insertData: Record<string, unknown> = {

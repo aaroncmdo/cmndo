@@ -1,5 +1,6 @@
 // AAR-104: GET Fall-Zusammenfassungen (fuer History)
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { NextRequest, NextResponse } from 'next/server'
 
 export const dynamic = 'force-dynamic'
@@ -11,8 +12,7 @@ export async function GET(req: NextRequest) {
   const supabase = await createClient()
   // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
   // fall_id-Query-Param bleibt (externer Contract); intern auf claim_id auflösen.
-  const { data: _f } = await supabase.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
   if (!claimId) return NextResponse.json({ summaries: [] })
 
   const { data: summaries, error } = await supabase

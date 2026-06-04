@@ -8,6 +8,7 @@
 // - saveFilmcheck: setzt Mandatsnummer, Status 'kanzlei-uebergeben', Kanzlei-Mail
 
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { emailFilmcheckBestanden } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
@@ -30,17 +31,9 @@ export async function saveFilmcheck(
   // Die Kanzlei-Mandat-ID (Salesforce) kommt via mandatsnummer_vergeben-Webhook in kanzlei_faelle.
   // CMM-44 SP-H PR2: filmcheck_ok/_am/_notizen sind auf die auftraege-Sub-Tabelle
   // gewandert (Reader lesen sie von auftraege).
-  const { data: fallClaimRow, error } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-
-  if (error) return { success: false, error: error.message }
-
   // filmcheck_* auf den aktuellen Auftrag des Claims schreiben (ORDER BY
   // reihenfolge DESC LIMIT 1). Kein Auftrag/claim_id -> warn + skip.
-  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
   if (claimId) {
     const { data: aktAuftrag } = await supabase
       .from('auftraege')

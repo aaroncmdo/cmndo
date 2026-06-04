@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
 
@@ -119,12 +120,7 @@ export async function gutachtenAbgeben(
   }
 
   // Auftrag-zu-Claim-Pfad ermitteln
-  const { data: fall } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', auftrag.fall_id)
-    .maybeSingle()
-  const claimId = fall?.claim_id as string | null
+  const claimId = await resolveClaimId(db, auftrag.fall_id as string)
   if (!claimId) return { ok: false, error: 'Claim nicht gefunden' }
 
   // CMM-32e: Pick die jüngste Datei für diesen Auftrag (egal ob als
