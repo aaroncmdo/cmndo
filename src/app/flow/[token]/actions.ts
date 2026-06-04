@@ -3,6 +3,7 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
 import { normalizeToLocale } from '@/i18n/locale-source'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
@@ -129,8 +130,8 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
 </body></html>`
 
   // claim_id laden damit signiertes Dokument in den Claim-Ordner geht
-  const { data: fallRow } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (fallRow?.claim_id as string | null) ?? null
+  // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+  const claimId = await resolveClaimId(admin, fallId)
 
   // AAR-862: claim-zentrierter Pfad (claims/{claim_id}/sa/...).
   // Legacy-Fallback bleibt für Faelle ohne claim_id (sollte 0 sein — CMM-Migration ist durch).
@@ -434,12 +435,8 @@ async function finalizeKundeSetup(
   // claims.geschaedigter_user_id null und die RLS-Policy lässt den Kunden
   // seinen eigenen Claim nicht sehen.
   try {
-    const { data: fallRow } = await admin
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', fallId)
-      .maybeSingle()
-    const claimId = (fallRow?.claim_id as string | null) ?? null
+    // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+    const claimId = await resolveClaimId(admin, fallId)
     if (claimId) {
       await admin
         .from('claims')
@@ -1317,12 +1314,8 @@ export async function signSAandCreateFall(
     slaPromises.push(
       (async () => {
         try {
-          const { data: fallRow } = await admin
-            .from('faelle')
-            .select('claim_id')
-            .eq('id', fall.id)
-            .maybeSingle()
-          const claimId = (fallRow?.claim_id as string | null) ?? null
+          // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+          const claimId = await resolveClaimId(admin, fall.id)
 
           const { generateGutachterPflichtdokumente } = await import(
             '@/lib/sa-tool/generate-pflichtdokumente'

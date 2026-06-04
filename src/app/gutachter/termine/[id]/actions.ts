@@ -5,6 +5,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
@@ -371,12 +372,8 @@ export async function uploadPolizeiberichtAsSv(
   // sie auf faelle zurueck (bis CMM-49 die faelle-Duplikat-Spalten dropt).
   // Legacy-Fall ohne claim_id: Fallback auf faelle.
   if (aktenzeichen) {
-    const { data: fRow } = await adminDb
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', fallId)
-      .maybeSingle()
-    const claimId = (fRow?.claim_id as string | null) ?? null
+    // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+    const claimId = await resolveClaimId(adminDb, fallId)
     if (claimId) {
       await adminDb
         .from('claims')
