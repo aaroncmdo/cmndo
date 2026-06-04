@@ -4935,6 +4935,14 @@
         "etaMin": "{minuten} Min",
         "geschaetzteAnkunft": "geschätzte Ankunft"
       },
+      "besichtigungsort": {
+        "titel": "Besichtigungsort",
+        "frage": "Stimmt der Ort?",
+        "jaStimmt": "Ja, stimmt",
+        "korrigieren": "Ort korrigieren",
+        "bestaetigt": "Ort bestätigt",
+        "abbrechen": "Abbrechen"
+      },
       "anfahrt": {
         "toastFahrtGestartet": "Fahrt gestartet — viel Erfolg!",
         "toastAnkunftBestaetigt": "Ankunft bestätigt",
