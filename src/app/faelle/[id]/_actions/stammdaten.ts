@@ -13,6 +13,7 @@ import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import {
   splitOrKeepFaelleUpdate,
   CLUSTER1_RENAMED_TO_CLAIMS,
@@ -188,16 +189,13 @@ export async function updateFallField(
     .single()
   const rolle = (profile?.rolle as FallakteRolle | undefined) ?? 'kunde'
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
+  // CMM-49 PURE_BRIDGE: fall_id->claim_id via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+  // Guard auf claimId statt fall-Existenz (bridge 1:1, verhaltensgleich).
+  const gateClaimId = await resolveClaimId(supabase, fallId)
+  if (!gateClaimId) return { success: false, error: 'Fall nicht gefunden' }
 
   // CMM-49 T1.2 (CMM-69): Edit-Lock aus abgeleiteter sub_phase (v_claim_phase) statt
   // faelle.status. claim_id → getClaimPhaseMap (Service-Read; fallId oben ist RLS-geprüft).
-  const gateClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
   const gateSubPhase = gateClaimId
     ? (await getClaimPhaseMap([gateClaimId])).get(gateClaimId)?.subPhase ?? null
     : null
@@ -215,7 +213,7 @@ export async function updateFallField(
   // Wert nicht ueberschreibt. Admin-Client, weil canEditField() oben bereits
   // autorisiert hat (analog PR-D).
   if (GUTACHTEN_ROUTED_FIELDS.has(field)) {
-    const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+    const claimId = gateClaimId
     if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
     const { data: rows, error: gErr } = await createAdminClient()
       .from('gutachten')
@@ -240,7 +238,7 @@ export async function updateFallField(
   // Das SP-A-Sync-Trigger-Paar ist gedroppt — ein faelle-Write der Duplikat-
   // Spalten ginge verloren, deshalb gehen sie direkt auf claims.
   // Legacy-Fall ohne claim_id: alles bleibt auf faelle.
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const claimId = gateClaimId
 
   // CMM-44 SP-A2: Semantik-Duplikat-Felder (anderer claims-Name) direkt mit dem
   // neuen Spaltennamen auf claims schreiben. splitOrKeepFaelleUpdate kann das
@@ -315,12 +313,8 @@ export async function updateSchadensAdresse(
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* leben auf claims (SSoT). Der
   // Schreibpfad braucht die claim_id; das SP-A-Sync-Trigger-Paar ist gedroppt.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-  const claimId = (fall as { claim_id?: string | null } | null)?.claim_id ?? null
+  // CMM-49 PURE_BRIDGE: fall_id->claim_id via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+  const claimId = await resolveClaimId(supabase, fallId)
   if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
 
   const { error } = await createAdminClient()
