@@ -14,6 +14,7 @@ import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { checkSvFreeBusyBatch, getBusyWindows, type BusyWindow } from '@/lib/google-calendar/freebusy'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
 import { precomputeSvSlotEtas, isSlotReachable } from './reachability'
+import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import {
   TERMIN_DAUER_MIN,
   TERMIN_PUFFER_MIN,
@@ -510,7 +511,8 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
 // Kalender-Fehler — dann fällt der Slot-Finder auf das vorherige
 // gutachter_termine-Only-Verhalten zurück.
  
-async function findNextFreeSlotForSv(
+// Exportiert fuer den TZ-Unit-Test (AAR-958). Sonst nur intern genutzt.
+export async function findNextFreeSlotForSv(
   db: any,
   svId: string,
   ab: Date,
@@ -554,19 +556,44 @@ async function findNextFreeSlotForSv(
 
   const kandidat = new Date(ab)
   // Bei Konflikt am exakten Wunschtermin → ab nächstem halbstündigem Slot weiter.
-  kandidat.setMinutes(kandidat.getMinutes() >= 30 ? 60 : 30, 0, 0)
+  kandidat.setUTCMinutes(kandidat.getUTCMinutes() >= 30 ? 60 : 30, 0, 0)
+
+  // AAR-958: Das Slot-Fenster sind Berlin-Geschaeftszeiten (Mo–Fr 09:00–16:00).
+  // Auf UTC-Node liefern getHours/getDay/setHours UTC -> +1/+2h-Versatz. Daher
+  // Wochentag/Stunde aus der Berlin-Wall-Clock ableiten + Tageswechsel ueber
+  // berlinWallClockToUtc (DST-korrekt). `kandidat` bleibt der echte UTC-Instant,
+  // damit Konflikt-Checks (gegen UTC-Instants) + Output korrekt sind.
+  const berlinParts = (d: Date) => {
+    const wall = toBerlinWallClock(d.toISOString()) // "YYYY-MM-DDTHH:mm:ss"
+    return {
+      datum: wall.slice(0, 10),
+      stunde: Number(wall.slice(11, 13)),
+      wochentag: new Date(`${wall.slice(0, 10)}T00:00:00Z`).getUTCDay(),
+    }
+  }
+  const weiter = () => {
+    kandidat.setTime(kandidat.getTime() + 30 * 60_000)
+    const { datum, stunde } = berlinParts(kandidat)
+    if (stunde >= 17) {
+      const naechster = new Date(`${datum}T00:00:00Z`)
+      naechster.setUTCDate(naechster.getUTCDate() + 1)
+      kandidat.setTime(
+        new Date(berlinWallClockToUtc(`${naechster.toISOString().slice(0, 10)}T09:00:00`)).getTime(),
+      )
+    }
+  }
 
   const maxIter = 12 * 7 * 24 * 2 // 30-min-Grid statt 60-min
   let i = 0
   while (kandidat < inZwoelfWochen && i < maxIter) {
     i++
-    const wochentag = kandidat.getDay()
+    const { stunde, wochentag } = berlinParts(kandidat)
     if (
       wochentag !== 0 &&
       wochentag !== 6 &&
       !blockierteWochentage.has(wochentag) &&
-      kandidat.getHours() >= 9 &&
-      kandidat.getHours() < 16
+      stunde >= 9 &&
+      stunde < 16
     ) {
       // Fenster um den Slot-Start: [t-puffer, t+dauer+puffer]
       const fensterStart = new Date(kandidat.getTime() - TERMIN_PUFFER_MIN * 60_000)
@@ -586,11 +613,7 @@ async function findNextFreeSlotForSv(
           const reach = isSlotReachable(kandidat, slotEnde, slotEtaCtx)
           if (!reach.reachable) {
             // Slot frei aber unerreichbar — weitersuchen
-            kandidat.setTime(kandidat.getTime() + 30 * 60_000)
-            if (kandidat.getHours() >= 17) {
-              kandidat.setDate(kandidat.getDate() + 1)
-              kandidat.setHours(9, 0, 0, 0)
-            }
+            weiter()
             continue
           }
         }
@@ -598,11 +621,7 @@ async function findNextFreeSlotForSv(
       }
     }
     // Zum nächsten 30-min-Slot weiter.
-    kandidat.setTime(kandidat.getTime() + 30 * 60_000)
-    if (kandidat.getHours() >= 17) {
-      kandidat.setDate(kandidat.getDate() + 1)
-      kandidat.setHours(9, 0, 0, 0)
-    }
+    weiter()
   }
   return null
 }
