@@ -15,7 +15,7 @@ export async function GET(_req: Request, context: { params: Promise<{ token: str
 
   const { data: request } = await admin
     .from('kunde_gutachten_requests')
-    .select('id, fall_id, expires_at, accessed_at')
+    .select('id, claim_id, expires_at, accessed_at')
     .eq('magic_link_token', token)
     .maybeSingle()
 
@@ -25,10 +25,11 @@ export async function GET(_req: Request, context: { params: Promise<{ token: str
   if (expired) return gonePage('Dieser Link ist abgelaufen. Bitte fordern Sie das Gutachten erneut an.')
 
   // Gutachten-Dokument aus fall_dokumente laden (dokument_typ=gutachten)
+  // CMM-49: claim-gekeyt via fall_dokumente.claim_id (value-preserving, 0-diff zu fall_id).
   const { data: gutachten } = await admin
     .from('fall_dokumente')
     .select('id, storage_path, original_filename')
-    .eq('fall_id', request.fall_id)
+    .eq('claim_id', request.claim_id as string)
     .eq('dokument_typ', 'gutachten')
     .is('geloescht_am', null)
     .order('hochgeladen_am', { ascending: false })
