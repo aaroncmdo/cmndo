@@ -358,6 +358,52 @@ export async function uploadZb1Flow(
 }
 
 /**
+ * AAR-956 Gebiet-3 (Funnel): Polizeibericht-Upload im FlowLink (flow_links-Token -> Lead, anon,
+ * pre-Konversion). Erscheint clientseitig nur, wenn "Polizei vor Ort" = Ja. KEIN OCR — reiner
+ * Dokument-Upload (Foto/PDF) in denselben Bucket wie uploadZb1Flow; setzt polizeibericht_url/
+ * _status/_hochgeladen_am. Ueberspringbar (Client). service_role wie die anderen Flow-Uploads.
+ */
+export async function uploadPolizeiberichtFlow(
+  token: string,
+  fileBase64: string,
+  contentType: string = 'image/jpeg',
+): Promise<{ ok: boolean; error?: string }> {
+  if (!fileBase64 || fileBase64.length < 100) return { ok: false, error: 'Datei fehlt oder zu klein.' }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const ext =
+    contentType === 'application/pdf'
+      ? 'pdf'
+      : contentType === 'image/png'
+        ? 'png'
+        : contentType === 'image/webp'
+          ? 'webp'
+          : 'jpg'
+  const path = `leads/${leadId}/polizeibericht_flow_${Date.now()}.${ext}`
+  const buf = Buffer.from(fileBase64, 'base64')
+  const { error: upErr } = await admin.storage
+    .from('fall-dokumente')
+    .upload(path, buf, { contentType, upsert: false })
+  if (upErr) return { ok: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
+  const { getStorageUrl } = await import('@/lib/storage/url')
+  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({
+      polizeibericht_url: publicUrl,
+      polizeibericht_status: 'hochgeladen',
+      polizeibericht_hochgeladen_am: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+/**
  * AAR-956 §4 / Part 2: manuelle Korrektur der per OCR ausgelesenen Fahrzeug-Felder
  * (der „manuell"-Weg). ANDERS als der OCR-H6-Fill: hier überschreibt der Kunde bewusst
  * (er korrigiert eine Fehl-Auslesung) → nur die übergebenen, nicht-leeren Felder setzen.
