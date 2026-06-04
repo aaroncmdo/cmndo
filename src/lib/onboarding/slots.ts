@@ -271,7 +271,7 @@ export async function reserviereSlot(
         .update({ status: 'abgelehnt' })
         .eq('sv_lead_id', gfaCurrent.zugeordneter_sv_lead_id)
         .eq('start_zeit', gfaCurrent.reservierter_slot_von)
-        .eq('status', 'pre_flowlink_reserviert')
+        .eq('status', 'reserviert')
     }
   }
 
@@ -290,9 +290,11 @@ export async function reserviereSlot(
   if (gfaErr) return { ok: false, error: gfaErr.message }
 
   // Vorläufigen Termin mit status='reserviert' anlegen.
-  // Tier 1 (svId): wird nach SA via bestaetigeSlot() auf 'geplant' gesetzt.
-  // Tier 3 (svLeadId): bleibt bei 'pre_flowlink_reserviert', Dispatcher
-  // bestaetigt manuell mit dem SV per Telefon.
+  // CHECK-Fix (2026-06-04): typ war 'vor_ort' + Tier-3-status 'pre_flowlink_reserviert' — beide
+  // NICHT im gutachter_termine-CHECK (typ ∈ {sv_begutachtung,kb_beratung,konfrontation}; status-
+  // Liste) → JEDER reserviereSlot-Insert scheiterte STILL in Prod (fire-and-forget im WizardClient).
+  // Jetzt typ='sv_begutachtung' (Engine-Default) + status='reserviert'; Tier-3 wird via sv_lead_id
+  // unterschieden, nicht via Status. Engine-Adoption (engine.reserviere) = koordinierter Sweep später.
   const { data: terminData, error: terminErr } = await supabase
     .from('gutachter_termine')
     .insert({
@@ -300,8 +302,8 @@ export async function reserviereSlot(
       sv_lead_id: svLeadId,
       start_zeit: vonISO,
       end_zeit: bisISO,
-      status: svLeadId ? 'pre_flowlink_reserviert' : 'reserviert',
-      typ: 'vor_ort',
+      status: 'reserviert',
+      typ: 'sv_begutachtung',
     })
     .select('id')
     .single()
