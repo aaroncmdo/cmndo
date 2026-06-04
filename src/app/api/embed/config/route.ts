@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { signSiteToken } from '@/lib/embed/jwt'
+import { pickPublicTracking } from '@/lib/embed/config-tracking'
 
 /**
  * AAR-939 · Monika-Embed · Stream 5 — Config-Endpoint /api/embed/config
@@ -66,6 +67,9 @@ export async function GET(req: NextRequest) {
     brand_secondary_override: string | null
     brand_accent_override: string | null
     brand_logo_url_override: string | null
+    tracking_ga4_measurement_id: string | null
+    tracking_gads_conversion_id: string | null
+    tracking_gads_conversion_label: string | null
   }
   interface SvBrand {
     brand_primary: string | null
@@ -76,7 +80,7 @@ export async function GET(req: NextRequest) {
   const db = createAdminClient() as any
   const siteRes = await db
     .from('embed_sites')
-    .select('slug, variante, aktiv, sv_id, brand_primary_override, brand_secondary_override, brand_accent_override, brand_logo_url_override')
+    .select('slug, variante, aktiv, sv_id, brand_primary_override, brand_secondary_override, brand_accent_override, brand_logo_url_override, tracking_ga4_measurement_id, tracking_gads_conversion_id, tracking_gads_conversion_label')
     .eq('slug', siteId)
     .maybeSingle()
 
@@ -137,6 +141,7 @@ export async function GET(req: NextRequest) {
       telefon: null, // TODO Aaron: public Telefon-Feld auf embed_sites?
       whatsapp: null, // TODO Aaron: WA-Deeplink-Nummer (nicht baileys_routing_nummer leaken)
       site_token: siteToken,
+      tracking: pickPublicTracking(site),
     },
     200,
   )
