@@ -8,6 +8,7 @@
 // Analog updateKbOnFallAndClaim aus kb-assignment.ts (CMM-48-Muster).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 // Generische Client-Signatur, damit Server-Action- und Admin-Client passen.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,12 +24,7 @@ export async function setSvIdForFall(
   fallId: string,
   svId: string | null,
 ): Promise<void> {
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fall?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
   if (!claimId) {
     console.error('[CMM-60] setSvIdForFall: kein claim_id fuer Fall', fallId)
     return

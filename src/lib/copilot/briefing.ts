@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { buildPreCallStaticSystem, buildPreCallUser, type PreCallContext } from './prompts'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { AI_MODELS } from '@/lib/ai/models'
@@ -19,8 +20,7 @@ async function ladeLetzteAnalyse(
 ): Promise<PreCallContext['letzteAnalyse']> {
   const db = createAdminClient()
   // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
-  const { data: _f } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(db, fallId)
   if (!claimId) return null
   const { data } = await db
     .from('fall_summaries')

@@ -8,6 +8,7 @@
 // Worker-Trigger — Fehler werden geloggt aber blockieren den Caller nicht.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import type { EventType, EventPayloads } from './types'
 import { resolveTasksFromEvent } from '@/lib/resolver/resolve-tasks-from-event'
 
@@ -30,8 +31,7 @@ export async function emitEvent<T extends EventType>(
   const effectiveFallId = opts?.fallId ?? payloadFallId ?? null
   let claimId: string | null = null
   if (effectiveFallId) {
-    const { data: _f } = await supabase.from('faelle').select('claim_id').eq('id', effectiveFallId).maybeSingle()
-    claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    claimId = await resolveClaimId(supabase, effectiveFallId)
   }
 
   const { data, error } = await supabase
