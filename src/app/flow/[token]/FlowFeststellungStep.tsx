@@ -43,7 +43,7 @@ export function FlowFeststellungStep({
     const res = await speichereFeststellungFlow(token, values)
     setSaving(false)
     if (!res.ok) {
-      setError(res.error ?? 'Speichern fehlgeschlagen.')
+      setError(res.error ?? t('step_feststellung.error_save'))
       return
     }
     onWeiter()
@@ -53,14 +53,10 @@ export function FlowFeststellungStep({
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-claimondo-navy leading-snug">
-          {t.has('step_feststellung.heading')
-            ? t('step_feststellung.heading')
-            : 'Ein paar Angaben zu Ihrem Schaden'}
+          {t('step_feststellung.heading')}
         </h1>
         <p className="mt-2 text-sm text-claimondo-ondo">
-          {t.has('step_feststellung.sub')
-            ? t('step_feststellung.sub')
-            : 'Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.'}
+          {t('step_feststellung.sub')}
         </p>
       </div>
 

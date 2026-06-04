@@ -94,7 +94,8 @@
   "flow": {
     "step_feststellung": {
       "heading": "Kilka informacji o Państwa szkodzie",
-      "sub": "Im dokładniejsze, tym szybciej — wszystko jest opcjonalne i można uzupełnić później."
+      "sub": "Im dokładniejsze, tym szybciej — wszystko jest opcjonalne i można uzupełnić później.",
+      "error_save": "Zapisywanie nie powiodło się."
     },
     "progress": {
       "aria_label": "Postęp w procesie zgłaszania szkody",
@@ -437,6 +438,20 @@
       "fallback_email_hint": "Dane dostępowe zostały wysłane na adres {email}.",
       "fallback_cta": "Do mojego portalu",
       "error_fallback": "Nie można utworzyć konta"
+    },
+    "expired": {
+      "heading": "Link wygasł",
+      "body": "Ten FlowLink nie jest już ważny. Aby otrzymać nowy link, prosimy o kontakt z opiekunem klienta."
+    },
+    "done": {
+      "heading": "Wszystko gotowe",
+      "body": "Wysłaliśmy Państwu dane dostępu oraz link do logowania na adres e-mail. Prosimy sprawdzić skrzynkę odbiorczą.",
+      "cta_login": "Przejdź do logowania"
+    },
+    "error": {
+      "heading": "Coś poszło nie tak",
+      "body": "Prosimy spróbować ponownie. Jeśli problem będzie się powtarzał, prosimy o kontakt.",
+      "reload": "Załaduj stronę ponownie"
     }
   },
   "common": {
@@ -5482,5 +5497,51 @@
   },
   "kundenHeader": {
     "imAuftrag": "w imieniu Claimondo"
+  },
+  "selfService": {
+    "matching": {
+      "suche": "Szukamy dla Państwa odpowiedniego rzeczoznawcy …",
+      "moment": "Chwileczkę …",
+      "kein_match_heading": "Skontaktujemy się z Państwem",
+      "kein_match_body": "W tej chwili nie znaleźliśmy wolnego terminu u rzeczoznawcy w Państwa okolicy. Nasz zespół wkrótce skontaktuje się z Państwem telefonicznie.",
+      "laden_fehler": "Podczas ładowania rzeczoznawców wystąpił błąd."
+    },
+    "errors": {
+      "allgemein": "Wystąpił błąd.",
+      "unerwartet": "Wystąpił nieoczekiwany błąd.",
+      "buchung": "Rezerwacja nie powiodła się."
+    },
+    "quali": {
+      "gruss": "Witamy, {vorname},",
+      "frage": "Kto spowodował wypadek?",
+      "hinweis": "Pomaga nam to ocenić, czy możemy zlikwidować Państwa szkodę w Państwa imieniu.",
+      "optionen": {
+        "gegner": {
+          "label": "Sprawca wypadku",
+          "hint": "Szkodę spowodowała strona przeciwna."
+        },
+        "unklar": {
+          "label": "Jeszcze niejasne",
+          "hint": "Kwestia winy nie została jeszcze jednoznacznie ustalona."
+        },
+        "eigenverantwortung": {
+          "label": "Ja sam",
+          "hint": "Sam spowodowałem wypadek."
+        }
+      }
+    },
+    "slot": {
+      "heading": "Państwa termin u rzeczoznawcy",
+      "sub": "Proszę wybrać pasujący termin — pierwsza propozycja to najlepiej dopasowany rzeczoznawca.",
+      "empfohlen": "Zalecane",
+      "wunschzeit": "Preferowany czas",
+      "keine_termine": "Obecnie brak wolnych terminów.",
+      "uhr_suffix": ""
+    },
+    "kasko": {
+      "heading": "Dziękujemy za Państwa dane",
+      "body": "W przypadku wypadków z własnej winy kosztów rzeczoznawcy niestety nie można rozliczyć przez ubezpieczenie OC sprawcy — dlatego nie możemy zaproponować Państwu tutaj bezpłatnego terminu.",
+      "note": "Jeśli kwestia winy ulegnie zmianie, prosimy o ponowny kontakt w dowolnym momencie."
+    }
   }
 }

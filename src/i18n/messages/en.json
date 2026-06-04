@@ -94,7 +94,8 @@
   "flow": {
     "step_feststellung": {
       "heading": "A few details about your claim",
-      "sub": "The more precise, the faster — everything is optional and can be added later."
+      "sub": "The more precise, the faster — everything is optional and can be added later.",
+      "error_save": "Saving failed."
     },
     "progress": {
       "aria_label": "Progress in the damage-report flow",
@@ -437,6 +438,20 @@
       "fallback_email_hint": "We have sent your access details to {email}.",
       "fallback_cta": "Go to my portal",
       "error_fallback": "Account could not be created"
+    },
+    "expired": {
+      "heading": "Link expired",
+      "body": "This FlowLink is no longer valid. Please contact your account manager for a new link."
+    },
+    "done": {
+      "heading": "All set",
+      "body": "We have sent you your login details and a login link by email. Please check your inbox.",
+      "cta_login": "Go to login"
+    },
+    "error": {
+      "heading": "Something went wrong",
+      "body": "Please try again. If the problem persists, please contact us.",
+      "reload": "Reload page"
     }
   },
   "common": {
@@ -5482,5 +5497,51 @@
   },
   "kundenHeader": {
     "imAuftrag": "on behalf of Claimondo"
+  },
+  "selfService": {
+    "matching": {
+      "suche": "We're finding the right expert for you …",
+      "moment": "One moment …",
+      "kein_match_heading": "We'll get back to you",
+      "kein_match_body": "We couldn't find an available expert appointment for your location right now. Our team will contact you by phone shortly.",
+      "laden_fehler": "An error occurred while loading the experts."
+    },
+    "errors": {
+      "allgemein": "An error occurred.",
+      "unerwartet": "An unexpected error occurred.",
+      "buchung": "Booking failed."
+    },
+    "quali": {
+      "gruss": "Hello {vorname},",
+      "frage": "Who caused the accident?",
+      "hinweis": "This helps us assess whether we can settle your claim for you.",
+      "optionen": {
+        "gegner": {
+          "label": "The other party",
+          "hint": "The other side caused the damage."
+        },
+        "unklar": {
+          "label": "Still unclear",
+          "hint": "The question of fault is not yet clearly established."
+        },
+        "eigenverantwortung": {
+          "label": "Myself",
+          "hint": "I caused the accident myself."
+        }
+      }
+    },
+    "slot": {
+      "heading": "Your expert appointment",
+      "sub": "Choose a suitable appointment — the first suggestion is your best-matching expert.",
+      "empfohlen": "Recommended",
+      "wunschzeit": "Preferred time",
+      "keine_termine": "No available appointments at the moment.",
+      "uhr_suffix": "h"
+    },
+    "kasko": {
+      "heading": "Thank you for your details",
+      "body": "For self-caused accidents, the expert costs unfortunately cannot be settled through the other party's liability insurance — so we cannot offer you a free appointment here.",
+      "note": "Should the question of fault change, you're welcome to get in touch again at any time."
+    }
   }
 }

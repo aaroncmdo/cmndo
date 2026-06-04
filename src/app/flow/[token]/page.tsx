@@ -8,6 +8,7 @@ import { SprachBanner } from '@/components/i18n/SprachBanner'
 import { resolveBrandingFromFlowToken } from '@/lib/branding/token-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { NextIntlClientProvider } from 'next-intl'
+import { getTranslations } from 'next-intl/server'
 import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 import { loadMessages } from '@/i18n/load-messages'
 import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
@@ -45,14 +46,20 @@ export default async function FlowPage({
   let flowLinkId: string | null = null
 
   if (flowLink) {
+    // i18n Strategie B: Locale für die Pre-Wizard-Screens aus dem Token auflösen.
+    // Hier ist der Lead noch nicht geladen — flow_links.sprache ist ohnehin die
+    // höchstpriorisierte Quelle (resolveFlowLocale), daher genügt das.
+    const preLocale = resolveFlowLocale(flowLink.sprache as string | null, null)
+    const tPre = await getTranslations({ locale: preLocale, namespace: 'flow' })
+
     // BUG-100: Token-Expiry prüfen
     if (flowLink.expires_at && new Date(flowLink.expires_at) < new Date()) {
       return (
-        <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <div style={brandStyle} dir={preLocale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
           <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x23F3;</div>
-            <h1 className="text-xl font-bold text-claimondo-navy mb-2">Link abgelaufen</h1>
-            <p className="text-claimondo-ondo">Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link.</p>
+            <h1 className="text-xl font-bold text-claimondo-navy mb-2">{tPre('expired.heading')}</h1>
+            <p className="text-claimondo-ondo">{tPre('expired.body')}</p>
           </div>
         </div>
       )
@@ -63,19 +70,18 @@ export default async function FlowPage({
     // hat seine Zugangsdaten + Magic-Link bereits per Email erhalten.
     if (flowLink.status === 'abgeschlossen') {
       return (
-        <div style={brandStyle} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
+        <div style={brandStyle} dir={preLocale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
           <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x2705;</div>
-            <h1 className="text-xl font-bold text-claimondo-navy mb-2">Alles bereit</h1>
+            <h1 className="text-xl font-bold text-claimondo-navy mb-2">{tPre('done.heading')}</h1>
             <p className="text-claimondo-ondo mb-6">
-              Wir haben Ihnen die Zugangsdaten und einen Login-Link per Email
-              geschickt. Bitte schauen Sie in Ihren Posteingang.
+              {tPre('done.body')}
             </p>
             <a
               href="/login"
               className="inline-block w-full min-h-14 py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
-              Zum Login
+              {tPre('done.cta_login')}
             </a>
           </div>
         </div>
