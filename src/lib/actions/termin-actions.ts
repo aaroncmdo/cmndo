@@ -229,6 +229,8 @@ export async function terminAblehnen({
     fallId: fId,
     text: `❌ Sachverständiger ${svName} hat den Termin am ${terminDatum} abgelehnt.${grundText}`,
     event: 'termin_abgelehnt',
+    templateKey: 'terminAbgelehnt',
+    templateParams: { svName, terminDatum, hatGrund: grund ? 'ja' : 'nein', grund: grund ?? '' },
   })
 
   // 5. Notifications: Kunde + Admin
@@ -392,11 +394,16 @@ export async function terminGegenvorschlag({
 
   // 4. Chat System-Message
   let rollenName: string
+  // i18n Phase 1: templateName traegt den geholten SV-/Kunde-Namen (oder null im
+  // else-Zweig ohne Namen), woraus hatName fuer das ICU-select abgeleitet wird.
+  let templateName: string | null = null
   if (vonWem === 'sv' && svId) {
     const name = await getSvName(admin, svId)
+    templateName = name
     rollenName = `Sachverständiger ${name}`
   } else if (vonWem === 'kunde' && kundeId) {
     const name = await getKundeName(admin, kundeId)
+    templateName = name
     rollenName = `Kunde ${name}`
   } else {
     rollenName = vonWem === 'sv' ? 'Sachverständiger' : 'Kunde'
@@ -407,6 +414,15 @@ export async function terminGegenvorschlag({
     fallId: fId,
     text: `📅 ${rollenName} hat einen neuen Termin vorgeschlagen: ${terminStr}.${grundText}`,
     event: 'termin_gegenvorschlag',
+    templateKey: 'terminGegenvorschlag',
+    templateParams: {
+      rolle: vonWem,
+      hatName: templateName ? 'ja' : 'nein',
+      name: templateName ?? '',
+      terminStr,
+      hatGrund: grund ? 'ja' : 'nein',
+      grund: grund ?? '',
+    },
   })
 
   // 5. Notifications

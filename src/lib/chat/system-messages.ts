@@ -15,10 +15,17 @@ export async function postChatSystemMessage({
   fallId,
   text,
   event,
+  templateKey,
+  templateParams,
 }: {
   fallId: string
   text: string
   event: SystemEvent
+  // i18n Phase 1: optionaler Template-Key + Params, damit der Kunde-Renderer
+  // die System-Message in der Leser-Sprache via next-intl rendern kann. text
+  // bleibt als de-Fallback in nachricht.
+  templateKey?: string
+  templateParams?: Record<string, string | number>
 }): Promise<void> {
   const admin = createAdminClient()
 
@@ -31,6 +38,8 @@ export async function postChatSystemMessage({
     hat_anhang: false,
     is_system: true,
     system_event: event,
+    template_key: templateKey ?? null,
+    template_params: templateParams ?? null,
   })
 
   if (error) {

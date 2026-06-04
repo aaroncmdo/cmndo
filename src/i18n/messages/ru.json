@@ -5543,5 +5543,16 @@
       "body": "При ДТП по собственной вине расходы на эксперта, к сожалению, не могут быть возмещены через страховую гражданской ответственности виновника — поэтому мы не можем предложить Вам здесь бесплатный приём.",
       "note": "Если вопрос вины изменится, Вы можете в любое время снова связаться с нами."
     }
+  },
+  "chatSystem": {
+    "terminAbgelehnt": "❌ Эксперт-оценщик {svName} отклонил приём на {terminDatum}.{hatGrund, select, ja { Причина: \"{grund}\"} other {}}",
+    "terminGegenvorschlag": "📅 {rolle, select, sv {Эксперт-оценщик} other {Клиент}}{hatName, select, ja { {name}} other {}} предложил новый приём: {terminStr}.{hatGrund, select, ja { Причина: \"{grund}\"} other {}}",
+    "welcome": "Дело {fallNummer} создано. Добро пожаловать в Ваш личный чат!"
+  },
+  "chatTranslate": {
+    "uebersetzt": "Переведено",
+    "originalAnzeigen": "Показать оригинал",
+    "uebersetzungAnzeigen": "Показать перевод",
+    "uebersetze": "Перевод …"
   }
 }

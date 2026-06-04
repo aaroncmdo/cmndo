@@ -17,6 +17,11 @@ import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 import { getStorageUrl } from '@/lib/storage/url'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
+import { uebersetzeChatText, type ChatTranslateLocale } from '@/lib/ai/translate-chat'
+
+// Chat-i18n Phase 2: Ziel-Locales, die wir maschinell übersetzen (de = Quelle,
+// kommt nicht vor). Muss zu ChatTranslateLocale passen.
+const UEBERSETZBARE_LOCALES: ChatTranslateLocale[] = ['en', 'tr', 'pl', 'ru', 'ar']
 
 export async function sendNachricht(
   fallId: string,
@@ -267,4 +272,64 @@ export async function updateZahlungsweg(
 
   revalidatePath(`/kunde/faelle/${fallId}`)
   return { success: true }
+}
+
+// Chat-i18n Phase 2: lazy maschinelle Übersetzung einer Chat-Nachricht (de →
+// Leser-Locale) für den Kunde-Chat. Ergebnis wird pro Ziel-Locale in
+// nachrichten.uebersetzungen (jsonb) gecacht. Ownership: identischer
+// assertKundeOwnsFall-Check wie alle anderen Actions hier (über die fall_id der
+// Nachricht). Kein revalidatePath — der Client zeigt das Ergebnis direkt an.
+export async function uebersetzeNachricht(
+  nachrichtId: string,
+  zielLocale: string,
+): Promise<{ ok: true; text: string } | { ok: false; error: string }> {
+  // Guard: nur die maschinell unterstützten Ziel-Locales (de = Quelle).
+  if (!UEBERSETZBARE_LOCALES.includes(zielLocale as ChatTranslateLocale)) {
+    return { ok: false, error: 'invalid_locale' }
+  }
+  const locale = zielLocale as ChatTranslateLocale
+
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+
+  const admin = createAdminClient()
+
+  // Nachricht laden (Admin-Client, RLS-Bypass).
+  const { data: msg, error: msgErr } = await admin
+    .from('nachrichten')
+    .select('id, fall_id, nachricht, uebersetzungen, sender_id, is_system')
+    .eq('id', nachrichtId)
+    .maybeSingle()
+  if (msgErr || !msg) return { ok: false, error: 'not_found' }
+
+  if (!msg.fall_id) return { ok: false, error: 'unauthorized' }
+
+  // Ownership: gleicher Check wie alle anderen Kunde-Actions in dieser Datei.
+  const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, msg.fall_id)
+  if (!ownership.ok) return { ok: false, error: 'unauthorized' }
+
+  // Cache-Hit: vorhandene Übersetzung für diese Locale direkt zurückgeben.
+  const cache = (msg.uebersetzungen ?? null) as Record<string, string> | null
+  const cached = cache?.[locale]
+  if (typeof cached === 'string' && cached.length > 0) {
+    return { ok: true, text: cached }
+  }
+
+  const result = await uebersetzeChatText(msg.nachricht, locale)
+  if (!result.ok) return result
+
+  // Cache schreiben: altes Objekt lesen (haben wir schon in `cache`), in JS
+  // mergen, ganzes Objekt zurückschreiben.
+  const merged = { ...(cache ?? {}), [locale]: result.text }
+  const { error: updateErr } = await admin
+    .from('nachrichten')
+    .update({ uebersetzungen: merged })
+    .eq('id', nachrichtId)
+  if (updateErr) {
+    // Übersetzung ist trotzdem nutzbar — Cache-Write-Fehler nicht hart machen.
+    console.error('[uebersetzeNachricht] Cache-Write fehlgeschlagen:', updateErr.message)
+  }
+
+  return { ok: true, text: result.text }
 }

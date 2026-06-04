@@ -105,6 +105,12 @@ export const AI_MODELS = {
    * Unfallhergang. Kurze Antwort, Speed + niedrige Kosten → Haiku 4.5.
    */
   vision_schadenbeschreibung: 'claude-haiku-4-5-20251001',
+  /**
+   * Chat-i18n Phase 2: kunde-facing maschinelle Übersetzung von Human-Freitext-
+   * Chatnachrichten (de → Leser-Locale) im Kunde-Chat. Kurze Antwort, lazy +
+   * gecacht, Speed + niedrige Kosten dominieren → Haiku 4.5.
+   */
+  chat_translate: 'claude-haiku-4-5-20251001',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
