@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { startOutboundCall, findFreeRelaySeat } from './client'
 
 /**
@@ -22,16 +23,25 @@ export async function startBridgeCall({
   const db = createAdminClient()
 
   // Fall + Kunden/SV-Daten laden
-  // CMM-49: claim_id mitladen — calls ist claim-gekeyt (P4-TODO: claimId aus Kontext threaden).
-  const { data: fall } = await db.from('faelle').select('id, kunde_id, sv_id, lead_id, claim_id').eq('id', fallId).single()
-  if (!fall) return { error: 'Fall nicht gefunden' }
+  // CMM-49: faelle-frei — claims = SSoT. geschaedigter_user_id==kunde_id + sv_id + lead_id
+  // (0-diff 78/0/0; lead_id via Backfill 20260604225709 vollstaendig). claimId IST der
+  // claims-PK (calls ist claim-gekeyt). geschaedigter_user_id !== user.id = value-preserving
+  // zum frueheren kunde_id-Gate; die tiefere claim_parties-Semantik bleibt CMM-63.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return { error: 'Fall nicht gefunden' }
+  const { data: claim } = await db
+    .from('claims')
+    .select('geschaedigter_user_id, sv_id, lead_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { error: 'Fall nicht gefunden' }
 
   // Authorisierung
   if (initiator === 'kunde') {
-    if (fall.kunde_id !== user.id) {
+    if (claim.geschaedigter_user_id !== user.id) {
       // Fallback: Lead-Email check
-      if (fall.lead_id) {
-        const { data: lead } = await db.from('leads').select('email').eq('id', fall.lead_id).single()
+      if (claim.lead_id) {
+        const { data: lead } = await db.from('leads').select('email').eq('id', claim.lead_id).single()
         if (lead?.email !== user.email) return { error: 'Kein Zugriff' }
       } else {
         return { error: 'Kein Zugriff' }
@@ -40,24 +50,24 @@ export async function startBridgeCall({
   } else {
     // SV muss dem Fall zugewiesen sein
     const { data: sv } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).single()
-    if (!sv || fall.sv_id !== sv.id) return { error: 'Kein Zugriff' }
+    if (!sv || claim.sv_id !== sv.id) return { error: 'Kein Zugriff' }
   }
 
   // Telefonnummern laden
   let kundeNummer: string | null = null
   let svNummer: string | null = null
 
-  if (fall.kunde_id) {
-    const { data: kp } = await db.from('profiles').select('telefon').eq('id', fall.kunde_id).single()
+  if (claim.geschaedigter_user_id) {
+    const { data: kp } = await db.from('profiles').select('telefon').eq('id', claim.geschaedigter_user_id).single()
     kundeNummer = kp?.telefon ?? null
   }
-  if (!kundeNummer && fall.lead_id) {
-    const { data: lead } = await db.from('leads').select('telefon').eq('id', fall.lead_id).single()
+  if (!kundeNummer && claim.lead_id) {
+    const { data: lead } = await db.from('leads').select('telefon').eq('id', claim.lead_id).single()
     kundeNummer = lead?.telefon ?? null
   }
 
-  if (fall.sv_id) {
-    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id).single()
+  if (claim.sv_id) {
+    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', claim.sv_id).single()
     if (sv?.profile_id) {
       const { data: sp } = await db.from('profiles').select('telefon').eq('id', sv.profile_id).single()
       svNummer = sp?.telefon ?? null
@@ -91,8 +101,8 @@ export async function startBridgeCall({
   const tempAircallId = `bridge_${Date.now()}`
   const { data: call, error: insertErr } = await db.from('calls').insert({
     aircall_call_id: tempAircallId,
-    claim_id: fall.claim_id ?? null,
-    lead_id: fall.lead_id,
+    claim_id: claimId,
+    lead_id: claim.lead_id,
     initiator_user_id: user.id,
     richtung: 'bridge',
     status: 'initiiert',
