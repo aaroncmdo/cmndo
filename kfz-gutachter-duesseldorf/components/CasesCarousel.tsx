@@ -22,18 +22,22 @@ function eur(n: number): string {
 
 export function CasesCarousel({ city }: { city: City }) {
   const trackRef = useRef<HTMLDivElement>(null)
-  const [openIdx, setOpenIdx] = useState<Set<number>>(new Set())
+  const [allOpen, setAllOpen] = useState(false)
   const [current, setCurrent] = useState(0)
 
-  function toggleBreakdown(i: number) {
-    setOpenIdx((prev) => {
-      const next = new Set(prev)
-      if (next.has(i)) {
-        next.delete(i)
-      } else {
-        next.add(i)
-        trackEvent('cases_breakdown_open', { card_idx: i })
-      }
+  // Refs fuer die Auto-Advance-Interval-Closure (State waere dort stale).
+  const currentRef = useRef(0)
+  const pausedRef = useRef(false)
+  const allOpenRef = useRef(false)
+
+  // Klick auf EINE Karte enthuellt ALLE Breakdowns gleichzeitig (globaler
+  // Reveal, AAR-962) und pausiert das Auto-Advance (Lesen).
+  function toggleAll() {
+    setAllOpen((prev) => {
+      const next = !prev
+      allOpenRef.current = next
+      pausedRef.current = next
+      if (next) trackEvent('cases_breakdown_open', { mode: 'all' })
       return next
     })
   }
@@ -63,6 +67,7 @@ export function CasesCarousel({ city }: { city: City }) {
           bestIdx = i
         }
       })
+      currentRef.current = bestIdx
       setCurrent(bestIdx)
     }
     function onScroll() {
@@ -76,69 +81,47 @@ export function CasesCarousel({ city }: { city: City }) {
     }
   }, [])
 
-  // Kontinuierliches Auto-Scroll (rAF) — pausiert bei Hover/Touch/offenem
-  // Breakdown, respektiert prefers-reduced-motion, läuft nur wenn sichtbar.
+  // Diskretes Auto-Advance: alle 3s eine Karte weiter (AAR-962). Pausiert bei
+  // User-Interaktion (Hover/Touch/Wheel) + offenem Reveal, respektiert
+  // prefers-reduced-motion, laeuft nur wenn sichtbar (IntersectionObserver).
   useEffect(() => {
     const track: HTMLDivElement | null = trackRef.current
     if (!track) return
     if (typeof window === 'undefined') return
-
-    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (reduceMotion) return
-    // Non-null-Alias für die rAF-Closures (TS narrowt sonst zurück auf null).
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     const el: HTMLDivElement = track
 
-    const SCROLL_SPEED = 0.35 // px/Frame (~21px/s)
-    let rafId: number | null = null
-    let paused = false
     let visible = false
     let resumeTimer: ReturnType<typeof setTimeout> | undefined
-    let endTimer: ReturnType<typeof setTimeout> | undefined
-    let loopTimer: ReturnType<typeof setTimeout> | undefined
 
-    function frame() {
-      if (!paused && visible) {
-        const maxScroll = el.scrollWidth - el.clientWidth
-        if (maxScroll > 0) {
-          if (el.scrollLeft >= maxScroll - 1) {
-            paused = true
-            endTimer = setTimeout(() => {
-              el.scrollTo({ left: 0, behavior: 'smooth' })
-              loopTimer = setTimeout(() => {
-                paused = false
-              }, 1200)
-            }, 1500)
-          } else {
-            el.scrollLeft += SCROLL_SPEED
-          }
-        }
-      }
-      rafId = requestAnimationFrame(frame)
+    function advance() {
+      if (pausedRef.current || allOpenRef.current || !visible) return
+      const next = (currentRef.current + 1) % CASES.length
+      const card = el.children[next] as HTMLElement | undefined
+      if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
     }
 
-    function pause(durationMs = 5000) {
-      paused = true
+    const interval = setInterval(advance, 3000)
+
+    // Interaktion pausiert; 6s nach letzter Interaktion (und nur wenn Reveal zu) weiter.
+    function pauseTemp() {
+      pausedRef.current = true
       clearTimeout(resumeTimer)
       resumeTimer = setTimeout(() => {
-        paused = false
-      }, durationMs)
+        if (!allOpenRef.current) pausedRef.current = false
+      }, 6000)
+    }
+    const onEnter = () => {
+      pausedRef.current = true
+    }
+    const onLeave = () => {
+      if (!allOpenRef.current) pausedRef.current = false
     }
 
-    const onTouch = () => pause(5000)
-    const onMouseDown = () => pause(5000)
-    const onWheel = () => pause(5000)
-    const onMouseEnter = () => {
-      paused = true
-    }
-    const onMouseLeave = () => {
-      paused = false
-    }
-
-    el.addEventListener('touchstart', onTouch, { passive: true })
-    el.addEventListener('mousedown', onMouseDown, { passive: true })
-    el.addEventListener('wheel', onWheel, { passive: true })
-    el.addEventListener('mouseenter', onMouseEnter)
-    el.addEventListener('mouseleave', onMouseLeave)
+    el.addEventListener('touchstart', pauseTemp, { passive: true })
+    el.addEventListener('wheel', pauseTemp, { passive: true })
+    el.addEventListener('mouseenter', onEnter)
+    el.addEventListener('mouseleave', onLeave)
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -150,19 +133,14 @@ export function CasesCarousel({ city }: { city: City }) {
     )
     io.observe(el)
 
-    rafId = requestAnimationFrame(frame)
-
     return () => {
-      if (rafId) cancelAnimationFrame(rafId)
+      clearInterval(interval)
       clearTimeout(resumeTimer)
-      clearTimeout(endTimer)
-      clearTimeout(loopTimer)
       io.disconnect()
-      el.removeEventListener('touchstart', onTouch)
-      el.removeEventListener('mousedown', onMouseDown)
-      el.removeEventListener('wheel', onWheel)
-      el.removeEventListener('mouseenter', onMouseEnter)
-      el.removeEventListener('mouseleave', onMouseLeave)
+      el.removeEventListener('touchstart', pauseTemp)
+      el.removeEventListener('wheel', pauseTemp)
+      el.removeEventListener('mouseenter', onEnter)
+      el.removeEventListener('mouseleave', onLeave)
     }
   }, [])
 
@@ -179,7 +157,7 @@ export function CasesCarousel({ city }: { city: City }) {
       >
         {CASES.map((c, idx) => {
           const diff = c.anspruch - c.erstangebot
-          const isOpen = openIdx.has(idx)
+          const isOpen = allOpen
           return (
             <div
               key={c.img}
@@ -233,7 +211,7 @@ export function CasesCarousel({ city }: { city: City }) {
                 {/* Gold-Toggle-Badge — klickbar zum Aufklappen des Breakdowns */}
                 <button
                   type="button"
-                  onClick={() => toggleBreakdown(idx)}
+                  onClick={toggleAll}
                   className="cases-toggle rounded-xl px-4 py-2.5 text-center w-full cursor-pointer transition hover:brightness-110 active:scale-[.98]"
                   aria-expanded={isOpen}
                   aria-controls={`breakdown-${idx}`}

@@ -12,7 +12,7 @@ export function ReviewsSection({ city }: { city: City }) {
   const rating = GOOGLE_RATING.value.replace('.', ',')
   return (
     <section id="reviews" className="py-9 md:py-12 bg-paper">
-      <div className="max-w-[440px] mx-auto px-5">
+      <div className="max-w-[480px] mx-auto px-5">
         <p className="rev-eyebrow">
           <span className="rev-stars" aria-hidden="true">★★★★★</span>{' '}
           <span className="rev-rating">{rating}</span> · GOOGLE-BEWERTUNGEN
@@ -21,7 +21,7 @@ export function ReviewsSection({ city }: { city: City }) {
           Was <span className="text-amber">{city.residents}</span> über uns sagen
         </h2>
         <div className="rev-list">
-          {REVIEWS.map((r) => (
+          {REVIEWS.slice(0, 4).map((r) => (
             <article key={r.name} className="rev-item">
               <div className="rev-ava" style={{ background: r.avatarBg }}>
                 {r.initials}
@@ -37,8 +37,8 @@ export function ReviewsSection({ city }: { city: City }) {
             </article>
           ))}
         </div>
-        <a className="rev-soft-link" href={GOOGLE_RATING.reviewsUrl} target="_blank" rel="noopener">
-          alle Bewertungen auf Google ansehen
+        <a className="rev-all-link" href={GOOGLE_RATING.reviewsUrl} target="_blank" rel="noopener">
+          Alle Bewertungen anzeigen
         </a>
       </div>
     </section>

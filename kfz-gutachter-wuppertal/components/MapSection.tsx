@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { CLUSTER, type City } from '@/lib/cluster'
+import { CLUSTER, cityHref, type City } from '@/lib/cluster'
 
 // CLIENT-Sub-Komponente der EinsatzgebietSection. Leaflet 1.9.4 wird per CDN
 // LAZY geladen (IntersectionObserver auf dem Map-Container) — kein npm-Dep,
@@ -24,10 +24,10 @@ interface LeafletStatic {
   }
   tileLayer(url: string, opts: Record<string, unknown>): { addTo(m: unknown): unknown }
   circleMarker(latlng: [number, number], opts: Record<string, unknown>): {
-    addTo(m: unknown): { bindTooltip(text: string): unknown }
+    addTo(m: unknown): { bindTooltip(text: string): unknown; bindPopup(html: string, opts?: Record<string, unknown>): unknown }
   }
   marker(latlng: [number, number], opts: Record<string, unknown>): {
-    addTo(m: unknown): { bindTooltip(text: string): unknown }
+    addTo(m: unknown): { bindTooltip(text: string): unknown; bindPopup(html: string, opts?: Record<string, unknown>): unknown }
   }
   divIcon(opts: Record<string, unknown>): unknown
 }
@@ -71,6 +71,21 @@ function loadLeafletJs(): Promise<LeafletStatic> {
   })
 }
 
+// Mini-Vorschau-Popup fuer Stadt-Pins (AAR-966): Titel + Tagline + Link zur
+// Spoke-Seite. Navigation bleibt im Hub (interne /lp/[slug]-Route). CSS-Vars
+// (--petrol/--amber) sind global im :root verfuegbar (Popup haengt im document).
+function spokePopupHtml(c: City): string {
+  const href = cityHref(c)
+  const label = c.main ? 'Zur Übersicht' : 'Zur Seite'
+  return (
+    '<div style="min-width:158px;font-family:var(--font-display),system-ui,sans-serif">' +
+    `<strong style="display:block;font-size:13.5px;color:var(--petrol);line-height:1.25">Kfz-Gutachter ${c.name}</strong>` +
+    `<span style="display:block;font-size:11px;color:#5F6E74;margin-top:3px;line-height:1.3">${c.h1Sub ?? ''}</span>` +
+    `<a href="${href}" style="display:inline-block;margin-top:8px;font-size:12px;font-weight:700;color:var(--amber);text-decoration:none">${label} →</a>` +
+    '</div>'
+  )
+}
+
 export function MapSection({ city }: { city: City }) {
   const mapsRef = useRef<Record<string, LeafletMap>>({})
   const initedRef = useRef<Record<string, boolean>>({})
@@ -99,15 +114,16 @@ export function MapSection({ city }: { city: City }) {
       // Literal-Hex (= --amber / --petrol): Leaflet setzt fillColor als SVG-Attribut, das loest CSS var() NICHT auf.
       for (const c of CLUSTER.cities) {
         const isActive = c.slug === city.slug
-        L.circleMarker([c.lat, c.lng], {
+        const marker = L.circleMarker([c.lat, c.lng], {
           radius: isActive ? 9 : 6,
           color: '#ffffff',
           weight: 2,
           fillColor: isActive ? '#D32E20' : '#2A2E33',
           fillOpacity: 1,
-        })
-          .addTo(map)
-          .bindTooltip(c.name)
+        }).addTo(map)
+        marker.bindTooltip(c.name)
+        // Klickbarer Pin -> Mini-Vorschau + Link zur Spoke-Seite (AAR-966).
+        marker.bindPopup(spokePopupHtml(c), { closeButton: false })
       }
 
       // Brennpunkte als rote Diamanten (nur Hauptstadt-Level — nahe city)
