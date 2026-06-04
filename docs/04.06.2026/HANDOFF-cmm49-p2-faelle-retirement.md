@@ -33,6 +33,24 @@ Chokepoint (`resolveClaimId`→bridge), Bucket-1a (5 lib/claims-Files), 3 Migrat
 
 ---
 
+## 0c. KOORDINATION 04.06. (FK-Ownership-Split + #2425-Challenge) — siehe #2425-Kommentar
+
+Aaron-Plan: **CMM-49 (diese Session) macht die Drops sauber; Entity-Strecke „nachzieht" danach** (v_claim_full entity-sourcen). Koordinations-Kommentar auf **PR #2425** gepostet (SendMessage an Peer-Sessions geht nicht). **FK→faelle = 40 Tabellen** (nicht 39; gutachter_abrechnungen+_positionen gebündelt), Liste vollständig. Ownership:
+- **CMM-49 (ich):** ~33 relationale Key-Tabellen (fall_id→claim_id, dann FK/Spalte droppen).
+- **Entity:** `parteien` (→claim_parties, stirbt) + `personenschaden_personen` (→personen) — NICHT von CMM-49 rekeyen.
+- **termin-engine:** admin_termine/gutachter_termine/kanzlei_admin_termine/termine.
+- **CMM-63:** `leads.konvertiert_zu_fall_id`.
+- Nicht-Standard-FK-Spalten: `konvertiert_zu_fall_id`(leads+gutachter_finder_anfragen), `gutschriften.referenz_fall_id`, `whatsapp_inbound_messages.matched_fall_id` — semantische claim-Äquivalente, kein blind-rename.
+
+**3 verifizierte Findings (gegen Live-DB):**
+1. **`operative_status==faelle.status` ist NICHT 0-diff** — Claim `6f2b9b40-8609-4df8-9517-6fabcecd7e94`: operative_status=NULL bei faelle.status='sv-termin'. Backfill-Loch, vor faelle.status-Drop füllen.
+2. **Gegner/VS-Seam leaky:** v_claim_full hat KEINE flachen `gegner_name`/`gegner_versicherung` — nur `gegner_versicherung_id`/`gegnerisches_vehicle_id`/`vs_*`. Halter/Fahrzeug/Kennzeichen sauber. Gegner-/VS-Namen brauchen Entity-Auflösung → v_claim_full-Spalten-Contract festzurren.
+3. **#2425 §3 widerspricht §0/§4:** §3 „ANCHOR → claims/bridge" vs „kein reverse/bridge". ANCHOR = eliminieren, nicht bridgen.
+
+Verifiziert-ok: 0 Views referenzieren faelle ✓ · geschaedigter_user_id==kunde_id 0-diff ✓ · v_claim_full hat fall_id+halter_*+fahrzeug_*+kennzeichen ✓.
+
+---
+
 ## 1. Branch- & DB-Stand (erste 5 Minuten)
 1. **Diese Session arbeitete auf `kitta/cmm49-p2-claim-id-lookups`** (frisch off `origin/staging`). **PR #2423** gegen staging.
 2. **ZUERST prüfen:** `gh pr view <PR> --json state,mergedAt`. MERGED → neuer Branch off `origin/staging`. OPEN → drauf weiter (rebase origin/staging).
