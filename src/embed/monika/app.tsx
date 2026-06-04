@@ -200,7 +200,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
 
       {cfg.theme.brandedByClaimondo && (
         <div class="powered">
-          <a href={`${cfg.base}/sv-netzwerk`} target="_blank" rel="noopener">powered by Claimondo</a>
+          <a href="https://claimondo.de" target="_blank" rel="noopener">powered by Claimondo</a>
         </div>
       )}
     </div>
