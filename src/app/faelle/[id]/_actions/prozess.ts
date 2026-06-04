@@ -9,6 +9,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
@@ -73,13 +74,7 @@ export async function requestTechnischeStellungnahme(
   // faelle->claims-Sync-Trigger feuert NICHT bei einem reinen updated_at-Write
   // (updated_at ist nicht in dessen UPDATE OF-Spaltenliste), daher expliziter
   // claims-Bump statt Drop.
-  const { data: fallClaimRow, error } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-  if (error) return { success: false, error: error.message }
-  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(db, fallId)
 
   const stellungnahmeErr = await writeAuftragSpH(db, claimId, {
     technische_stellungnahme_status: 'beauftragt',
@@ -117,13 +112,7 @@ export async function freigebeTechnischeStellungnahme(
   // auftraege.
   // CMM-65: claim_id nur noch LESEN; updated_at-Bump wandert von faelle auf
   // claims (SSoT) — siehe requestTechnischeStellungnahme.
-  const { data: fallClaimRow, error } = await db
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .single()
-  if (error) return { success: false, error: error.message }
-  const claimId = (fallClaimRow?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(db, fallId)
 
   const freigabeErr = await writeAuftragSpH(db, claimId, {
     technische_stellungnahme_status: 'freigegeben',
@@ -223,8 +212,7 @@ export async function uebergebeFallKlage(
   // gesetzt; wir setzen geschlossen_grund + updated_at auf claims (SSoT). Der
   // fruehere faelle.updated_at-Write stirbt mit dem Phase-6-DROP und entfaellt —
   // dieser claims-Write bumpt claims.updated_at (moddatetime + expliziter Wert).
-  const { data: fallRow } = await db.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const fallClaimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const fallClaimId = await resolveClaimId(db, fallId)
   if (fallClaimId) {
     await db.from('claims').update({
       geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
@@ -256,8 +244,7 @@ export async function eskalation(
   const stufeKey = stufe.toLowerCase()
   // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1 per Claim). Manuelle
   // Eskalation -> upsertKanzleiFall via Admin-Client. Claim-lose Legacy-Faelle: skip.
-  const { data: eskFall } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
-  const eskClaimId = (eskFall as { claim_id?: string | null } | null)?.claim_id ?? null
+  const eskClaimId = await resolveClaimId(supabase, fallId)
   if (eskClaimId) {
     const kfRes = await upsertKanzleiFall(createAdminClient(), eskClaimId, { vs_eskalationsstufe: stufeKey })
     if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }

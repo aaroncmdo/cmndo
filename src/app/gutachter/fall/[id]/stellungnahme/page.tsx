@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
 import StellungnahmeClient from './StellungnahmeClient'
@@ -73,12 +74,7 @@ export default async function StellungnahmePage({
   try {
     // CMM-49: forderungspositionen ist claim-gekeyt; interim faelle.claim_id-Lookup
     // (oben wird claim_id nur als Nested-Embed geladen, nicht als Flat-Spalte).
-    const { data: _fpClaim } = await supabase
-      .from('faelle')
-      .select('claim_id')
-      .eq('id', id)
-      .maybeSingle()
-    const fpClaimId = (_fpClaim as { claim_id?: string | null } | null)?.claim_id ?? null
+    const fpClaimId = await resolveClaimId(supabase, id)
     const { data: fp } = await supabase
       .from('forderungspositionen')
       .select('id, typ, bezeichnung, betrag_gefordert, betrag_reguliert, betrag_gekuerzt')

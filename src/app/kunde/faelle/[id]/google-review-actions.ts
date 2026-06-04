@@ -4,6 +4,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 
 export async function markReviewPromptGezeigt(
@@ -14,12 +15,7 @@ export async function markReviewPromptGezeigt(
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
   // claim_id des Falls holen, um auf claims zu schreiben.
-  const { data: fallRow } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fallRow as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
 
   if (!claimId) return { ok: false, error: 'Kein Claim für diesen Fall' }
 

@@ -8,6 +8,7 @@
 // KB-Fallakte (Admin + Kundenbetreuer dürfen).
 
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import type { CardentityRunResult } from '@/lib/cardentity/run-full'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
@@ -304,8 +305,7 @@ export async function uploadAnschlussschreiben(
 
   // CMM-44 SP-I2 PR2: anschlussschreiben_url lebt auf kanzlei_faelle (1:1).
   // claim_id laden, dann via upsertKanzleiFall schreiben.
-  const { data: fallClaimRow } = await supabase.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimIdForAs = (fallClaimRow?.claim_id as string | null) ?? null
+  const claimIdForAs = await resolveClaimId(supabase, fallId)
   const asUrlRes = await upsertKanzleiFall(supabase, claimIdForAs, { anschlussschreiben_url: fileUrl })
   if (!asUrlRes.ok) {
     return { success: false, error: asUrlRes.error ?? 'Anschlussschreiben-URL konnte nicht gespeichert werden' }

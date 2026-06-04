@@ -10,6 +10,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
@@ -177,8 +178,7 @@ export async function setAnschlussschreibenDatum(
   // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1). 'vs-01' = Start der
   // VS-Eskalations-Stufenleiter beim AS-Versand. Kanzlei-Pfad-Action (Caller-autorisiert)
   // -> Admin-Client. Claim-lose Legacy-Faelle: skip (Spalte stirbt in Phase 6).
-  const { data: asFall } = await supabase.from('faelle').select('claim_id').eq('id', fallId).single()
-  const asClaimId = (asFall as { claim_id?: string | null } | null)?.claim_id ?? null
+  const asClaimId = await resolveClaimId(supabase, fallId)
   if (asClaimId) {
     const kfRes = await upsertKanzleiFall(createAdminClient(), asClaimId, { vs_eskalationsstufe: 'vs-01' })
     if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
@@ -212,12 +212,7 @@ export async function recordZahlung(
 
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
   // (SSoT). Legacy-Fall ohne claim_id sauber abfangen statt zu werfen.
-  const { data: fallForBetrag } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const betragClaimId = (fallForBetrag?.claim_id as string | null) ?? null
+  const betragClaimId = await resolveClaimId(supabase, fallId)
   if (!betragClaimId) {
     return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
   }
@@ -280,12 +275,7 @@ export async function saveKanzleiAnsprechpartner(
   // CMM-48 PR-D: kanzlei_ansprechpartner_name/email/telefon sind Duplikat-
   // Spalten → claims (Single Source of Truth). position bleibt faelle-only.
   // Sync-Trigger spiegelt zurück. Legacy-Fall ohne claim_id: alles auf faelle.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const claimId = (fall?.claim_id as string | null) ?? null
+  const claimId = await resolveClaimId(supabase, fallId)
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
     {
       kanzlei_ansprechpartner_name: data.name || null,
@@ -329,12 +319,7 @@ export async function erfasseZahlungseingang(
   // CMM-49: zahlungseingaenge + zahlungspositionen sind claim-gekeyt; interim
   // faelle.claim_id-Lookup einmal oben (P4-TODO: claimId aus Caller threaden).
   // Wird auch im claims/claim_payments-Reroute-Block unten wiederverwendet.
-  const { data: fallForZE } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  const zeClaimId = (fallForZE?.claim_id as string | null) ?? null
+  const zeClaimId = await resolveClaimId(supabase, fallId)
 
   const { data: zahlung, error: zErr } = await supabase.from('zahlungseingaenge').insert({
     claim_id: zeClaimId,

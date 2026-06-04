@@ -10,6 +10,7 @@
 // direkt im Fallakte-Header sichtbar.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { BotIcon, ClockIcon, TargetIcon } from 'lucide-react'
 import { formatVorZeit } from '@/lib/format/datum'
 
@@ -25,8 +26,7 @@ type Analyse = {
 async function ladeLetzteAnalyse(fallId: string): Promise<Analyse | null> {
   const admin = createAdminClient()
   // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
-  const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-  const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+  const claimId = await resolveClaimId(admin, fallId)
   if (!claimId) return null
   const { data } = await admin
     .from('fall_summaries')

@@ -3,6 +3,7 @@
 // AAR-104: Claimondo AI Assistant - Fall-Zusammenfassung via Claude
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import Anthropic from '@anthropic-ai/sdk'
 import { revalidatePath } from 'next/cache'
 import { AI_MODELS } from '@/lib/ai/models'
@@ -160,8 +161,7 @@ Bitte erstelle die Zusammenfassung nach der im System-Prompt vorgegebenen Strukt
 
     // 5. Persist
     // CMM-49 P4-TODO: claimId aus Claim-Kontext threaden statt faelle-Lookup (interim).
-    const { data: _f } = await admin.from('faelle').select('claim_id').eq('id', fallId).maybeSingle()
-    const claimId = (_f as { claim_id?: string | null } | null)?.claim_id ?? null
+    const claimId = await resolveClaimId(admin, fallId)
     const { data: summary, error } = await admin.from('fall_summaries').insert({
       claim_id: claimId,
       kunden_anliegen: kundenAnliegen,
