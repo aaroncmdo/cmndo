@@ -254,6 +254,14 @@ export default function FlowWizardKfz({
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
   const kundenName = [editVorname, editNachname].filter(Boolean).join(' ')
 
+  // AAR-956 Task 1: Im gutachter-Step ohne zugeordneten SV/Termin NICHT passiv
+  // "wir suchen ..." zeigen, sondern aktiv weiterleiten. Gibt es einen Buchungs-Step
+  // (kanonischer Pfad) -> dorthin (Kunde bucht selbst); sonst direkt zur Beauftragung
+  // (Dispatcher-/Flag-off-Pfad ohne Slot-Picker: AAR-908 ordnet bei SA den Top-SV zu).
+  // Kein telefonischer Wartezustand mehr.
+  const gutachterWeiterZiel: StepId =
+    !gutachterAnzeige && stepIndexById('termin') >= 0 ? 'termin' : 'sa'
+
   // ─── SA unterzeichnen + Fall erstellen ─────────────────────────────────────
 
   async function handleSignSA() {
@@ -566,13 +574,13 @@ export default function FlowWizardKfz({
                     )}
                   </div>
                 ) : (
-                  <div className="bg-amber-50 border border-amber-200 rounded-ios-md p-5 mb-6 text-sm text-amber-800">
+                  <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-md p-5 mb-6 text-sm text-claimondo-navy">
                     {t('step_gutachter.kein_gutachter')}
                   </div>
                 )}
 
                 <button
-                  onClick={() => setStepIndex(stepIndexById('sa'))}
+                  onClick={() => setStepIndex(stepIndexById(gutachterWeiterZiel))}
                   className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   {t('common.weiter')}

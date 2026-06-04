@@ -384,7 +384,7 @@
       "termin_label": "Appointment reserved",
       "besichtigungsort_label": "Inspection location",
       "treffpunkt_label": "Meeting point: {treffpunkt}",
-      "kein_gutachter": "We are currently finding a suitable expert for you. You will receive a confirmation shortly."
+      "kein_gutachter": "We'll assign your personal expert in the next step. Just continue."
     },
     "step_sa": {
       "heading": "Sign engagement",
