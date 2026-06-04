@@ -41,7 +41,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="uu-quote-siegel"
-                src="/assets/brand/siegel-claimondo-partner.svg"
+                src="/assets/brand/siegel-claimondo-partner-v3.svg"
                 alt="Claimondo-Partner-Siegel"
                 loading="lazy"
                 width={42}
@@ -101,7 +101,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="w-[64px] h-[64px] flex-none drop-shadow-[0_4px_12px_rgba(0,0,0,.25)]"
-                src="/assets/brand/siegel-claimondo-partner.svg"
+                src="/assets/brand/siegel-claimondo-partner-v3.svg"
                 alt="Claimondo-Partner-Siegel"
                 loading="lazy"
               />
