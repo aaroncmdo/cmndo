@@ -11,6 +11,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { requireRole } from '@/lib/auth/guards'
 import { markSvNoShowEmbedB } from '@/lib/termine/actions'
 import { verlegeNachNoShowEmbedB } from '@/lib/termine/verlege-nach-no-show'
@@ -89,8 +90,8 @@ export async function bestaetigeDurchgefuehrtVomTeam(
   // claim_id aufloesen + nur_gutachter-Guard (analog markSvNoShowEmbedB).
   let claimId = (termin.claim_id as string | null) ?? null
   if (!claimId && termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('claim_id').eq('id', termin.fall_id).maybeSingle()
-    claimId = (fall?.claim_id as string | null) ?? null
+    // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
+    claimId = await resolveClaimId(db, termin.fall_id)
   }
   if (!claimId) return { ok: false, error: 'Kein Claim fuer diesen Termin' }
   const { data: claim } = await db.from('claims').select('service_typ').eq('id', claimId).maybeSingle()
