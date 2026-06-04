@@ -56,7 +56,7 @@ export const CLUSTER: ClusterConfig = {
   themeColor: '#0B3D6E',
   imgPath: '/assets/img/duesseldorf/',
   teamImg: '/assets/img/duesseldorf/team-duesseldorf.webp',
-  svName: 'Tobias',
+  svName: 'Daniel',
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Rheinturm', img: 'stadt-duesseldorf.png' },
   facts: [

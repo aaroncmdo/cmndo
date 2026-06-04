@@ -56,7 +56,7 @@ export const CLUSTER: ClusterConfig = {
   themeColor: '#0F1014',
   imgPath: '/assets/img/bonn/',
   teamImg: '/assets/img/bonn/team-bonn.webp',
-  svName: 'Tobias',
+  svName: 'Stefan',
   phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Bonner Münster', img: 'stadt-bonn.png' },
   facts: [
