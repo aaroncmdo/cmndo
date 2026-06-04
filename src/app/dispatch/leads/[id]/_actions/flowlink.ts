@@ -62,42 +62,45 @@ export async function sendFlowLinkMultiChannel(
     ? terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
     : ''
 
+  // AAR-956 Part 1 (Send-Text nach DB-Stand): liegt ein vollständiger SV-Termin vor,
+  // geht die Termin-Variante raus; sonst ein Plain-Link (KEIN Hard-Error mehr) — der
+  // Kunde bucht den Termin dann selbst im /flow-Resolver. Gilt für alle drei Kanäle.
+  const vornameVal = (lead.vorname ?? '').trim()
+  const terminTextMoeglich = Boolean(svVorname && svNachname && datum && uhrzeit)
+
   if (kanal === 'whatsapp') {
     if (!telefon) return { success: false, error: 'Keine Telefonnummer für WhatsApp' }
-    // AAR-226: Twilio lehnt Templates mit leeren Placeholdern als "Invalid
-    // Parameter" ab. Vor dem Send alle 6 Pflicht-Placeholder validieren +
-    // klare Fehlermeldung wenn Termin/SV fehlt (statt kryptisches Twilio-
-    // Error beim MA).
-    const vornameVal = (lead.vorname ?? '').trim()
-    const missing: string[] = []
-    if (!vornameVal) missing.push('Vorname des Kunden')
-    if (!svVorname || !svNachname) missing.push('SV-Name (SV-Termin noch nicht reserviert?)')
-    if (!datum || !uhrzeit) missing.push('Termin-Datum/Uhrzeit')
-    if (missing.length > 0) {
-      return {
-        success: false,
-        error: `FlowLink-WhatsApp kann nicht gesendet werden — fehlt: ${missing.join(', ')}. Bitte Phase 2 (SV + Termin) abschließen.`,
-      }
-    }
-    // Telefon auf E.164 normalisieren (Twilio WhatsApp verlangt +49... Format).
+    // Telefon auf E.164 normalisieren.
     let waTelefon = telefon.replace(/\s/g, '')
     if (waTelefon.startsWith('0')) waTelefon = '+49' + waTelefon.slice(1)
     else if (waTelefon.startsWith('00')) waTelefon = '+' + waTelefon.slice(2)
     if (!waTelefon.startsWith('+')) waTelefon = '+' + waTelefon
     try {
-      const { sendCommunication } = await import('@/lib/communications/send')
-      // AAR-175 P0-C: Der vorname-Key war Alt-Last aus pre-numbered-Template-Zeit.
-      // Twilio-Templates konsumieren ausschließlich die nummerierten Placeholder
-      // '1'..'6'.
-      await sendCommunication('flowlink_versand', {
-        telefon: waTelefon,
-        '1': vornameVal,
-        '2': svVorname,
-        '3': svNachname,
-        '4': datum,
-        '5': uhrzeit,
-        '6': flowUrl,
-      })
+      if (terminTextMoeglich) {
+        // Mit Termin → nummerierte Vorlage (Vorname, SV-Vorname, SV-Nachname, Datum, Uhrzeit, URL).
+        const { sendCommunication } = await import('@/lib/communications/send')
+        await sendCommunication('flowlink_versand', {
+          telefon: waTelefon,
+          '1': vornameVal,
+          '2': svVorname,
+          '3': svNachname,
+          '4': datum,
+          '5': uhrzeit,
+          '6': flowUrl,
+        })
+      } else {
+        // Kein Termin → Plain-Freitext via Baileys (WA ist seit 02.06. Baileys, kein
+        // Twilio-Template nötig). An das SendResult gekoppelt (§6.1: kein Falsch-"gesendet").
+        const { sendWhatsAppText } = await import('@/lib/whatsapp/baileys-client')
+        const greet = vornameVal ? `Hallo ${vornameVal}` : 'Hallo'
+        const sent = await sendWhatsAppText(
+          waTelefon,
+          `${greet}, hier geht es zu Ihrer Schadensregulierung bei Claimondo:\n\n${flowUrl}\n\nMit wenigen Klicks buchen Sie Ihren Gutachter-Termin und schließen ab.`,
+        )
+        if (!sent.ok) {
+          return { success: false, error: sent.error ?? 'WhatsApp-Versand fehlgeschlagen' }
+        }
+      }
     } catch (err) {
       return {
         success: false,
@@ -116,7 +119,9 @@ export async function sendFlowLinkMultiChannel(
     if (normalTo.startsWith('0')) normalTo = '+49' + normalTo.slice(1)
     else if (normalTo.startsWith('00')) normalTo = '+' + normalTo.slice(2)
     if (!normalTo.startsWith('+')) normalTo = '+' + normalTo
-    const body = `Hallo ${lead.vorname ?? ''}, Ihr Schadenportal ist bereit. Termin mit ${svVorname} ${svNachname} am ${datum} ${uhrzeit}. Portal öffnen: ${flowUrl}`
+    const body = terminTextMoeglich
+      ? `Hallo ${vornameVal}, Ihr Schadenportal ist bereit. Termin mit ${svVorname} ${svNachname} am ${datum} ${uhrzeit}. Portal öffnen: ${flowUrl}`
+      : `Hallo ${vornameVal}, hier geht es zu Ihrer Schadensregulierung bei Claimondo: ${flowUrl}`
     const params = new URLSearchParams()
     params.set('From', smsFrom)
     params.set('To', normalTo)
@@ -138,9 +143,16 @@ export async function sendFlowLinkMultiChannel(
     }
   } else if (kanal === 'email') {
     if (!lead.email) return { success: false, error: 'Keine Email-Adresse am Lead' }
-    const { sendFlowLinkVersand } = await import('@/lib/email/google/flows')
-    const r = await sendFlowLinkVersand(leadId, flowUrl)
-    if (!r.success) return { success: false, error: r.error }
+    if (terminTextMoeglich) {
+      const { sendFlowLinkVersand } = await import('@/lib/email/google/flows')
+      const r = await sendFlowLinkVersand(leadId, flowUrl)
+      if (!r.success) return { success: false, error: r.error }
+    } else {
+      // Kein Termin → saubere Plain-Vorlage (branded + i18n), keine "—"-Platzhalter.
+      const { sendMiniWizardMagicLink } = await import('@/lib/email/google/flows')
+      const r = await sendMiniWizardMagicLink(leadId, flowUrl)
+      if (!r.success) return { success: false, error: r.error }
+    }
   }
 
   // Lead-Status auf flow-versendet (AAR-116 Hardening: nur nach erfolgreichem Send).
