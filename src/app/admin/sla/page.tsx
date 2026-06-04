@@ -13,7 +13,7 @@ export default async function SlaMonitoringPage() {
 
   const { data: slas } = await db
     .from('sla_tracking')
-    .select('id, fall_id, sla_typ, started_at, breach_at, completed_at, status, eskalation_task_id, faelle(claims:claim_id(claim_nummer))')
+    .select('id, fall_id, sla_typ, started_at, breach_at, completed_at, status, eskalation_task_id, claims:claim_id(claim_nummer)')
     .in('status', ['pending', 'breached'])
     .order('breach_at', { ascending: true })
     .limit(100)
@@ -74,9 +74,8 @@ export default async function SlaMonitoringPage() {
           <Tbody>
             {(slas ?? []).map((sla) => {
               type ClaimJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
-              const fallJoin = sla.faelle as unknown as { claims: ClaimJoin } | { claims: ClaimJoin }[] | null
-              const fallRow = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
-              const claimRow = Array.isArray(fallRow?.claims) ? fallRow?.claims[0] : fallRow?.claims
+              const claimRaw = sla.claims as unknown as ClaimJoin
+              const claimRow = Array.isArray(claimRaw) ? claimRaw[0] : claimRaw
               const fallNr = claimRow?.claim_nummer ?? (sla.fall_id as string).slice(0, 8)
               const breach = new Date(sla.breach_at as string)
               const restMs = breach.getTime() - now
