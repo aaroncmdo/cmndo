@@ -100,7 +100,7 @@ export function HeroSection({ city }: { city: City }) {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5 sm:mb-7 max-w-[580px]">
               <a
                 id="heroCallCta"
-                className="inline-flex items-center justify-center gap-2.5 bg-amber text-white font-display font-bold text-[16px] sm:text-[16.5px] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_rgba(229,55,43,.32)] hover:bg-amber-700 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(229,55,43,.42)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2.5 bg-cta text-white font-display font-bold text-[16px] sm:text-[16.5px] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_rgba(229,55,43,.32)] hover:bg-cta-700 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(229,55,43,.42)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
                 href={`tel:${CLUSTER.phone.tel}`}
                 data-cta="hero_call"
                 aria-label={`Jetzt anrufen — ${CLUSTER.phone.display}`}
@@ -194,12 +194,11 @@ export function HeroSection({ city }: { city: City }) {
         <div className="hidden sm:flex justify-center pt-6 pb-3.5">
           <a
             href="#reviews"
-            className="inline-flex items-center gap-2.5 px-[22px] py-[11px] rounded-full border-[1.5px] border-white/[.32] bg-white/[.06] backdrop-blur-[8px] text-white font-semibold text-sm tracking-[.01em] transition hover:bg-white/[.14] hover:border-white/[.55] hover:translate-y-0.5"
-            style={{ animation: 'scrollPulse 2.6s ease-in-out infinite' }}
-            aria-label="Mehr erfahren"
+            className="grid place-items-center w-12 h-12 rounded-full border-[1.5px] border-white/[.32] bg-white/[.06] backdrop-blur-[8px] text-white transition hover:bg-white/[.14] hover:border-white/[.55]"
+            style={{ animation: 'scrollPulse 2.2s ease-in-out infinite' }}
+            aria-label="Mehr erfahren — nach unten scrollen"
           >
-            <span>Mehr erfahren</span>
-            <svg className="w-4 h-4 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+            <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </a>

@@ -1,4 +1,4 @@
-import { CLUSTER, cityNamesList, seoTextFor, cityHref, type City } from '@/lib/cluster'
+import { CLUSTER, cityNamesList, cityHref, type City } from '@/lib/cluster'
 import { MapSection } from './MapSection'
 
 // Einsatzgebiet-Sektion (Server-Component). MapSection (Leaflet, Client) bleibt
@@ -237,10 +237,9 @@ export function EinsatzgebietSection({ city }: { city: City }) {
           </div>
         </div>
 
-        {/* ============ SHARED (Mobile + Desktop): SEO-Text + areaTagsList ============ */}
-        <div className="max-w-[820px] mx-auto mt-8 mb-4">
-          <p className="text-secondary text-[15.5px] leading-relaxed">{seoTextFor(city.slug)}</p>
-        </div>
+        {/* ============ SHARED (Mobile + Desktop): areaTagsList ============
+            SEO-Body-Text (seoTextFor) auf Aaron-Wunsch 04.06. entfernt (Hygiene).
+            HINWEIS: war der lokale Ranking-Body-Text dieser Seiten — bei SEO-Bedenken reaktivieren. */}
         <p className="text-muted text-[13px]">Wir bedienen {cityNamesList()}.</p>
       </div>
     </section>

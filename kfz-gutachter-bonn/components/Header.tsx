@@ -18,7 +18,7 @@ const WA_PATH =
 export function Header({ city }: { city: City }) {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-paper/90 backdrop-blur-[10px] border-b border-border transition-all duration-200">
+      <header className="sticky top-0 z-50 bg-paper/65 backdrop-blur-xl backdrop-saturate-150 border-b border-white/40 shadow-[0_4px_24px_-12px_rgba(0,0,0,0.18)] transition-all duration-200">
         <div className="max-w-wrap mx-auto px-6 flex items-center justify-between h-[84px] md:h-[92px] lg:h-[100px] gap-3.5">
           <a className="flex items-center gap-3" href="/" aria-label="Kfz-Gutachter — zur Startseite">
             {/* eslint-disable-next-line @next/next/no-img-element */}

@@ -258,6 +258,15 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
         {`window.dataLayer = window.dataLayer || [];`}
       </Script>
 
+      {/* Google Consent Mode v2 Default (AAR-967): denied bis Zustimmung; liest cc_cookie
+          fuer wiederkehrende Nutzer. Laeuft vor den Tag-Loadern (JSX-Reihenfolge, gleiche
+          afterInteractive-Strategie). Nur wenn Tracking-ENV gesetzt. Banner = CookieConsent. */}
+      {SITE.gtmId || SITE.gadsAwId ? (
+        <Script id="gcm-consent-default" strategy="afterInteractive">
+          {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}var _m=document.cookie.match(/(?:^|; )cc_cookie=([^;]+)/);var _c=[];try{_c=(JSON.parse(decodeURIComponent(_m?_m[1]:'')).categories)||[]}catch(e){}var _a=_c.indexOf('analytics')>-1?'granted':'denied';var _d=_c.indexOf('ads')>-1?'granted':'denied';gtag('consent','default',{analytics_storage:_a,functionality_storage:_a,ad_storage:_d,ad_user_data:_d,ad_personalization:_d,wait_for_update:500});`}
+        </Script>
+      ) : null}
+
       {SITE.gtmId ? (
         <>
           <Script id="gtm-loader" strategy="afterInteractive">

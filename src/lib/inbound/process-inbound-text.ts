@@ -125,11 +125,15 @@ export async function processInboundText(
 
           if (intent === 'termin_bestaetigung_ja') {
             // JA: Gutachter war da — Termin abschliessen + Claim terminal.
-            let kundeId: string | null = null
-            if (fallId) {
-              const { data: f } = await db.from('faelle').select('kunde_id').eq('id', fallId).maybeSingle()
-              kundeId = (f?.kunde_id as string | null) ?? null
-            }
+            // CMM-49: kundeId via claims.geschaedigter_user_id (claim_id im Scope; NON-Auth
+            // byUserId-Attribution, 0-diff zu faelle.kunde_id) -> faelle-frei.
+            const { data: kundeClaim } = await db
+              .from('claims')
+              .select('geschaedigter_user_id')
+              .eq('id', staleTermin.claim_id as string)
+              .maybeSingle()
+            const kundeId: string | null =
+              (kundeClaim?.geschaedigter_user_id as string | null) ?? null
             await closeNurGutachterTerminAlsDurchgefuehrt(db, {
               terminId,
               claimId: staleTermin.claim_id as string,

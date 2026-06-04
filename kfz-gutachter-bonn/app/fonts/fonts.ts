@@ -1,4 +1,4 @@
-import { Inter, Space_Grotesk, Space_Mono } from 'next/font/google'
+import { Inter, Noto_Sans, Space_Mono } from 'next/font/google'
 
 // next/font/google self-hostet die Fonts beim Build (lokale /_next/static/media/
 // -woff2, KEINE Runtime-Anfrage an fonts.googleapis.com). Subset latin deckt
@@ -11,10 +11,11 @@ export const inter = Inter({
   display: 'swap',
 })
 
-export const spaceGrotesk = Space_Grotesk({
+// Headline-/Display-Font (AAR-965): Noto Sans ersetzt Space Grotesk.
+export const notoSans = Noto_Sans({
   subsets: ['latin'],
-  weight: ['500', '600', '700'],
-  variable: '--font-space-grotesk',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-noto-sans',
   display: 'swap',
 })
 
