@@ -7,6 +7,7 @@
 // Kanzlei blockt + welche Mahnungs-Stufe schon raus ist.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 type SlaRow = {
   id: string
@@ -54,11 +55,14 @@ function fmtUntil(iso: string | null): string {
 
 export default async function KanzleiSlaStatusCard({ fallId }: { fallId: string }) {
   const db = createAdminClient()
+  // CMM-49: claim-gekeyt. fallId bleibt der Prop (Route-Bookmark); intern auf claim_id aufgeloest.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return null
 
   const { data: slas } = await db
     .from('sla_tracking')
     .select('id, sla_typ, status, breach_at, letzte_mahnung_am, n_mahnungen, blocker_rolle, blocker_grund')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .eq('target_rolle', 'kanzlei')
     .in('status', ['pending', 'breached'])
     .order('breach_at', { ascending: true })

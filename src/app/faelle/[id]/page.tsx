@@ -641,7 +641,7 @@ export default async function FallaktePage({
         admin
           .from('sla_tracking')
           .select('fall_id, target_rolle, blocker_rolle, blocker_grund, status, breach_at, phase, blocker_seit')
-          .eq('fall_id', id)
+          .eq('claim_id', claimId)
           .in('status', ['pending', 'breached']),
         getStepperState(id),
       ])
