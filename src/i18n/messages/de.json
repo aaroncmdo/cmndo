@@ -4510,6 +4510,16 @@
   },
   "kunde": {
     "fall": {
+      "betreuerStrip": {
+        "labelKb": "Ihr Kundenbetreuer",
+        "labelSv": "Ihr Sachverständiger",
+        "ansprechpartner": "Persönlicher Ansprechpartner",
+        "erstelltGutachten": "Erstellt Ihr Gutachten",
+        "teamFallback": "Claimondo Team",
+        "svWirdZugewiesen": "Wird zugewiesen",
+        "chatAria": "Chat mit {name} öffnen",
+        "chatTitle": "Chat öffnen"
+      },
       "meinGeld": {
         "heading": "Mein Geld",
         "totalschadenBadge": "Ihr Fahrzeug ist ein Totalschaden",

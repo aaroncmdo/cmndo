@@ -1,4 +1,4 @@
-﻿// 2026-05-07 Design-Review Item 5b: Trust-Cards-Strip auf der Fall-Detail-
+// 2026-05-07 Design-Review Item 5b: Trust-Cards-Strip auf der Fall-Detail-
 // Page. Vorher: SaeuleMeinBetreuer existiert seit AAR-369 als Component,
 // wird aber nicht gerendert; KB + SV waren unsichtbar trotz Daten-Loading
 // auf der Page. Jetzt: 2-Spalten Strip oben auf der Page mit Avatar +
@@ -7,6 +7,7 @@
 
 import Link from 'next/link'
 import { MessageSquareIcon, HardHatIcon, HeadphonesIcon, ShieldCheckIcon } from 'lucide-react'
+import { getTranslations } from 'next-intl/server'
 import Avatar from '@/components/shared/Avatar'
 
 type Props = {
@@ -20,7 +21,7 @@ type Props = {
   svVerifiziert?: boolean
 }
 
-function BetreuerCard({
+async function BetreuerCard({
   rolle,
   icon: RolleIcon,
   name,
@@ -37,15 +38,11 @@ function BetreuerCard({
   verifiziert?: boolean
   fallId: string
 }) {
-  const labelMap = {
-    kundenbetreuer: 'Ihr Kundenbetreuer',
-    sachverstaendiger: 'Ihr Sachverständiger',
-  } as const
+  const t = await getTranslations('kunde.fall.betreuerStrip')
+  const label = rolle === 'kundenbetreuer' ? t('labelKb') : t('labelSv')
   const fallbackBeschreibung =
-    rolle === 'kundenbetreuer'
-      ? 'Persönlicher Ansprechpartner'
-      : 'Erstellt Ihr Gutachten'
-  const displayName = name ?? (rolle === 'kundenbetreuer' ? 'Claimondo Team' : 'Wird zugewiesen')
+    rolle === 'kundenbetreuer' ? t('ansprechpartner') : t('erstelltGutachten')
+  const displayName = name ?? (rolle === 'kundenbetreuer' ? t('teamFallback') : t('svWirdZugewiesen'))
 
   return (
     <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-4 flex items-center gap-3">
@@ -53,7 +50,7 @@ function BetreuerCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-claimondo-ondo">
           <RolleIcon className="w-3 h-3" />
-          {labelMap[rolle]}
+          {label}
           {verifiziert && (
             <ShieldCheckIcon className="w-3 h-3 text-emerald-600" />
           )}
@@ -68,8 +65,8 @@ function BetreuerCard({
       <Link
         href={`/kunde/faelle/${fallId}#chat`}
         className="shrink-0 inline-flex items-center justify-center w-9 h-9 rounded-full bg-[var(--brand-secondary)] text-white hover:bg-claimondo-shield transition-colors"
-        aria-label={`Chat mit ${displayName} öffnen`}
-        title="Chat öffnen"
+        aria-label={t('chatAria', { name: displayName })}
+        title={t('chatTitle')}
       >
         <MessageSquareIcon className="w-4 h-4" />
       </Link>
