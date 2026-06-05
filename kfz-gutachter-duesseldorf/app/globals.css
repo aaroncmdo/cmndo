@@ -114,16 +114,14 @@ body {
   content: "";
   position: absolute;
   inset: 0;
+  /* Basis-Scrim (Mobile + Tablet-Portrait, < lg): vertikal — oben Foto sichtbar,
+     Mitte lesbar, unten voll Petrol (Lower-Cluster auf solid Petrol). */
   background:
     linear-gradient(180deg,
-      transparent 0%,
-      transparent 72%,
-      color-mix(in srgb, var(--petrol) 16%, transparent) 100%),
-    linear-gradient(90deg,
-      color-mix(in srgb, var(--petrol) 52%, transparent) 0%,
-      color-mix(in srgb, var(--petrol) 28%, transparent) 22%,
-      color-mix(in srgb, var(--petrol) 10%, transparent) 40%,
-      transparent 54%);
+      color-mix(in srgb, var(--petrol) 28%, transparent) 0%,
+      color-mix(in srgb, var(--petrol) 55%, transparent) 48%,
+      color-mix(in srgb, var(--petrol) 88%, transparent) 80%,
+      var(--petrol) 100%);
 }
 
 /* Verschwommener Verlauf-Wedge: Foto unten-links blurren, diagonal bis 25% ausblenden (Aaron 05.06.).
@@ -136,22 +134,24 @@ body {
   pointer-events: none;
 }
 
-/* Mobile: vertikaler Gradient — Bild oben sichtbar, Content auf opaker Flaeche */
+/* Mobile (<=640): dediziertes Hochformat-Foto + Eck-Blur aus. Scrim = Basis (vertikal). */
 @media (max-width: 640px) {
-  .hero-photo::after {
-    background:
-      linear-gradient(180deg,
-        color-mix(in srgb, var(--petrol) 12%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 26%, transparent) 45%,
-        color-mix(in srgb, var(--petrol) 42%, transparent) 72%,
-        color-mix(in srgb, var(--petrol) 56%, transparent) 100%);
-  }
   .hero-photo-bg {
     background-image: var(--hero-mobile-img) !important;
     background-position: center top !important;
   }
-  /* Dediziertes Mobile-Foto ist eigener Crop -> Desktop-Eck-Blur-Wedge hier aus. */
   .hero-blur-corner { display: none !important; }
+}
+/* Tablet-Landscape + Desktop (>= lg): horizontaler Lokal-Scrim nur ueber der Copy-Spalte
+   (links 88% Petrol -> Mitte 60% -> rechts 0% = Foto klar). */
+@media (min-width: 1024px) {
+  .hero-photo::after {
+    background:
+      linear-gradient(90deg,
+        color-mix(in srgb, var(--petrol) 88%, transparent) 0%,
+        color-mix(in srgb, var(--petrol) 60%, transparent) 42%,
+        transparent 72%);
+  }
 }
 
 /* Leaflet z-index Reset — verhindert dass Marker-Layer ueber FAB/Bubble springen */

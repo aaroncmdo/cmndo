@@ -32,7 +32,7 @@ export function HeroSection({ city }: { city: City }) {
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
       <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[96px] pb-[16px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[100svh]">
-        <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] md:grid-rows-none gap-14 items-stretch flex-1">
+        <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] lg:grid-rows-none gap-14 items-stretch flex-1">
           <div className="flex flex-col sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
             <div className="sm:hidden">
@@ -45,22 +45,16 @@ export function HeroSection({ city }: { city: City }) {
             <h1 className="font-display font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
               Kfz-Gutachter <br className="sm:hidden" />
               <span className="text-amber loc">{city.name}</span>
-              <span className="hidden sm:block font-semibold text-white/85 mt-1 sm:mt-2 text-[clamp(16px,1.6vw,18px)] leading-snug tracking-normal h1-sub italic">
-                Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard, mit BVSK-Kompetenz.
-              </span>
             </h1>
-            <p className="hidden sm:block text-[clamp(17px,1.8vw,19px)] leading-[1.55] text-white/[.92] font-normal mb-4 max-w-[560px]">
+            {/* Sub-Headline (Desktop/Tablet): eine durchgehende Zeile, kein Umbruch. */}
+            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] leading-[1.4] text-white/[.92] font-normal mt-1.5 mb-4 whitespace-nowrap">
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
-            {/* Desktop: 0€-Fliesstext. Mobile: 3-zeiliger 0€-Anker-Block drunter (sm:hidden). */}
-            <p className="hidden sm:block font-bold text-[clamp(19px,2vw,22px)] leading-snug text-white mb-5 sm:mb-7 max-w-[580px]">
-              Bei unverschuldetem Unfall zahlen Sie <span className="text-amber">0&nbsp;€</span>. Die Versicherung übernimmt alles.
-            </p>
-            {/* 0€-Anker NUR MOBILE: Zahl oben, Bedingung, Proof. */}
-            <div className="sm:hidden mt-auto hero-text-shadow hero-zero-block">
-              <p className="hero-zero-big">0&nbsp;€</p>
-              <p className="hero-zero-condition">Bei unverschuldetem Unfall</p>
-              <p className="hero-post-zero">Versicherung zahlt alles</p>
+            {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
+            <div className="mt-auto sm:mt-5 self-start">
+              <p className="font-display font-bold text-amber leading-[0.95] tracking-tight text-[clamp(44px,8.5vw,96px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
+              <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
+              <p className="text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
             </div>
             <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-6 mb-0 sm:mb-7 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
