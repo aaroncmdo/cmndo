@@ -234,11 +234,11 @@ export async function ablehneDokument(
   // CMM-44 SP-B PR2a: bevorzugter_kanal wird hier nicht gelesen — der
   // Smart-Channel-Push nutzt den leads-bevorzugter_kanal weiter unten.
   // Kein claims-Embed nötig.
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('kunde_id, lead_id')
-    .eq('id', dok.fall_id as string)
-    .single()
+  // CMM-49: faelle-frei — claims = SSoT (geschaedigter_user_id==kunde_id + lead_id, 0-diff). NON-Auth Empfaenger.
+  const claimId = await resolveClaimId(admin, dok.fall_id as string)
+  const { data: claim } = claimId
+    ? await admin.from('claims').select('geschaedigter_user_id, lead_id').eq('id', claimId).maybeSingle()
+    : { data: null }
 
   await createLinkedTask({
     fall_id: dok.fall_id as string,
@@ -247,18 +247,18 @@ export async function ablehneDokument(
     prioritaet: 'dringend',
     typ: 'dokument-nachreichen',
     empfaenger_rolle: 'kunde',
-    empfaenger_user_id: (fall?.kunde_id as string | null) ?? null,
+    empfaenger_user_id: (claim?.geschaedigter_user_id as string | null) ?? null,
     trigger_event: 'dokument-ablehnung',
     auto_erstellt: false,
   })
 
   // 5. Smart-Channel Push (non-critical).
-  if (fall?.lead_id) {
+  if (claim?.lead_id) {
     try {
       const { data: lead } = await admin
         .from('leads')
         .select('vorname, telefon, email, bevorzugter_kanal')
-        .eq('id', fall.lead_id as string)
+        .eq('id', claim.lead_id as string)
         .single()
       const portalUrl = process.env.NEXT_PUBLIC_SITE_URL
         ? `${process.env.NEXT_PUBLIC_SITE_URL}/kunde/onboarding`
@@ -269,7 +269,7 @@ export async function ablehneDokument(
         {
           telefon: (lead?.telefon as string | null) ?? null,
           email: (lead?.email as string | null) ?? null,
-          leadId: fall.lead_id as string,
+          leadId: claim.lead_id as string,
           fallId: dok.fall_id as string,
           bevorzugterKanal:
             (lead?.bevorzugter_kanal as 'whatsapp' | 'sms' | 'email' | null) ?? null,
