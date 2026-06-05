@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 /**
  * Cron-Route: Termin-Erinnerungen (stuendlich)
@@ -47,11 +48,12 @@ export async function GET(request: Request) {
       const dokListe = fehlend.map(d => d.dokument_typ).join(', ')
 
       // Load fall context for WhatsApp
-      const { data: fall } = await supabase
-        .from('faelle')
-        .select('id, lead_id, kunde_id')
-        .eq('id', termin.fall_id)
-        .single()
+      // CMM-49: lead_id + kunde_id faelle-frei via claims (resolveClaimId; kunde_id == geschaedigter_user_id).
+      const claimId = termin.fall_id ? await resolveClaimId(supabase, termin.fall_id) : null
+      const { data: claim } = claimId
+        ? await supabase.from('claims').select('lead_id, geschaedigter_user_id').eq('id', claimId).maybeSingle()
+        : { data: null }
+      const fall = claim ? { lead_id: claim.lead_id, kunde_id: claim.geschaedigter_user_id } : null
 
       if (fall) {
         let vorname = ''
