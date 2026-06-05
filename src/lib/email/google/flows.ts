@@ -310,8 +310,11 @@ export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
   const { data: abr } = await db.from('gutachter_abrechnungen').select('sv_id, fall_id, schadenhoehe, leadpreis, preistyp').eq('id', abrechnungId).single()
   if (!abr) return
 
-  const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', abr.fall_id).single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+  // CMM-49: claim_nummer claims-direkt (faelle-frei).
+  const claimId = await resolveClaimId(db, abr.fall_id)
+  const { data: fallClaim } = claimId
+    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
+    : { data: null }
 
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', abr.sv_id).single()
   if (!sv?.profile_id) return
@@ -350,8 +353,11 @@ export async function sendSvRechnung(rechnungId: string): Promise<void> {
   const { data: rechnung } = await db.from('gutachter_rechnungen').select('sv_id, fall_id, rechnungs_nr, datum, betrag, pdf_url').eq('id', rechnungId).single()
   if (!rechnung) return
 
-  const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', rechnung.fall_id).single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+  // CMM-49: claim_nummer claims-direkt (faelle-frei).
+  const claimId = await resolveClaimId(db, rechnung.fall_id)
+  const { data: fallClaim } = claimId
+    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
+    : { data: null }
 
   const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', rechnung.sv_id).single()
   if (!sv?.profile_id) return
@@ -595,8 +601,11 @@ export async function sendKanzleiAbrechnungRechnung(abrechnungId: string): Promi
   const { data: abr } = await db.from('kanzlei_abrechnungen').select('fall_id, kanzlei_email, rechnungs_nr, datum, positionen, gesamtbetrag, pdf_url').eq('id', abrechnungId).single()
   if (!abr) return
 
-  const { data: fall } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', abr.fall_id).single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+  // CMM-49: claim_nummer claims-direkt (faelle-frei).
+  const claimId = await resolveClaimId(db, abr.fall_id)
+  const { data: fallClaim } = claimId
+    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
+    : { data: null }
 
   const positionen = Array.isArray(abr.positionen)
     ? abr.positionen.map((p: { bezeichnung?: string; betrag?: number }) => ({ bezeichnung: p.bezeichnung ?? '—', betrag: fmtCurrency(p.betrag ?? 0) }))
@@ -893,23 +902,26 @@ export async function sendSvTerminBestaetigung(svId: string, terminId: string): 
   if (termin.fall_id) {
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine-Row selbst (SSoT).
-    const { data: fall } = await db
-      .from('faelle')
-      .select('id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)')
-      .eq('id', termin.fall_id)
-      .single()
-    if (fall) {
-      const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-      referenz = fallClaim?.claim_nummer ?? `Fall ${fall.id.slice(0, 8)}`
+    // CMM-49: claims-direkt (faelle-frei). claim_nummer + schadenort_* + lead_id auf claims.
+    const claimId = await resolveClaimId(db, termin.fall_id)
+    const { data: fallClaim } = claimId
+      ? await db
+          .from('claims')
+          .select('claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, lead_id')
+          .eq('id', claimId)
+          .maybeSingle()
+      : { data: null }
+    if (fallClaim) {
+      referenz = fallClaim.claim_nummer ?? `Fall ${termin.fall_id.slice(0, 8)}`
       adresse =
         (termin.besichtigungsort_adresse as string | null) ??
-        joinNonEmpty([fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]) ??
+        joinNonEmpty([fallClaim.schadenort_adresse, fallClaim.schadenort_plz, fallClaim.schadenort_ort]) ??
         '—'
-      if (fall.lead_id) {
+      if (fallClaim.lead_id) {
         const { data: lead } = await db
           .from('leads')
           .select('vorname, nachname')
-          .eq('id', fall.lead_id)
+          .eq('id', fallClaim.lead_id)
           .single()
         if (lead) kundenName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
       }
@@ -987,9 +999,13 @@ async function loadTerminContext(terminId: string) {
 
   let kundenName = '—'
   if (termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
-    if (fall?.lead_id) {
-      const { data: l } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
+    // CMM-49: lead_id claims-direkt (faelle-frei).
+    const cId = await resolveClaimId(db, termin.fall_id)
+    const { data: cl } = cId
+      ? await db.from('claims').select('lead_id').eq('id', cId).maybeSingle()
+      : { data: null }
+    if (cl?.lead_id) {
+      const { data: l } = await db.from('leads').select('vorname, nachname').eq('id', cl.lead_id).single()
       if (l) kundenName = [l.vorname, l.nachname].filter(Boolean).join(' ') || '—'
     }
   } else if (termin.lead_id) {
