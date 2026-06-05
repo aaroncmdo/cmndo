@@ -428,6 +428,7 @@
       }
     },
     "step_account": {
+      "termin_folgt": "Ekspertiz randevunuzu kısa süre içinde sizinle bizzat ayarlayacağız.",
       "heading": "Tamamlandı!",
       "sub": "Davanız başarıyla oluşturuldu.",
       "success_text": "Davanız başarıyla oluşturuldu! Bilirkişi bilgilendirildi.",
@@ -5510,6 +5511,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Randevusuz devam et",
+      "spaeter_link": "Randevuyu daha sonra ayarla",
       "suche": "Size uygun bilirkişiyi arıyoruz …",
       "moment": "Bir saniye …",
       "kein_match_heading": "Size geri döneceğiz",
