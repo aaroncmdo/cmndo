@@ -5510,6 +5510,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Kontynuuj bez terminu",
+      "spaeter_link": "Umów termin później",
       "suche": "Szukamy dla Państwa odpowiedniego rzeczoznawcy …",
       "moment": "Chwileczkę …",
       "kein_match_heading": "Skontaktujemy się z Państwem",

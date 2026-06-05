@@ -5510,6 +5510,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Randevusuz devam et",
+      "spaeter_link": "Randevuyu daha sonra ayarla",
       "suche": "Size uygun bilirkişiyi arıyoruz …",
       "moment": "Bir saniye …",
       "kein_match_heading": "Size geri döneceğiz",

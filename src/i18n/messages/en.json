@@ -5510,6 +5510,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Continue without an appointment",
+      "spaeter_link": "Arrange the appointment later",
       "suche": "We're finding the right expert for you …",
       "moment": "One moment …",
       "kein_match_heading": "We'll get back to you",

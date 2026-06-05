@@ -5510,6 +5510,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Ohne Termin fortfahren",
+      "spaeter_link": "Termin lieber später vereinbaren",
       "suche": "Wir suchen den passenden Gutachter für Sie …",
       "moment": "Einen Moment …",
       "kein_match_heading": "Wir melden uns bei Ihnen",

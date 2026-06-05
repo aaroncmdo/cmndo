@@ -13,15 +13,21 @@ import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { ladeMatchingFlow, bucheTerminFlow, speichereBesichtigungsortFlow } from './self-service-actions'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
+import { Button } from '@/components/primitives/Button/Button.web'
 
 export type GebuchterTermin = { svVorname: string; svAvatar: string | null; startIso: string }
 
 export function FlowSlotStep({
   token,
   onGebucht,
+  onOhneTermin,
 }: {
   token: string
   onGebucht: (t: GebuchterTermin) => void
+  // AAR-956: Termin nicht-blockierend. kein_match (kein Slot am Ort) + dezenter Skip
+  // → ohne Buchung weiter zur SA. SV wird dort per AAR-908 zugeordnet, der Termin
+  // nachgelagert telefonisch vereinbart (kein Conversion-Dead-End mehr).
+  onOhneTermin?: () => void
 }) {
   const t = useTranslations('selfService')
   const [step, setStep] = useState<
@@ -134,6 +140,17 @@ export function FlowSlotStep({
         <p className="text-claimondo-navy/70">
           {fehler ?? t('matching.kein_match_body')}
         </p>
+        {onOhneTermin && (
+          <Button
+            variant="ondo"
+            size="md"
+            onClick={onOhneTermin}
+            className="mt-5"
+            data-testid="buchung-ohne-termin"
+          >
+            {t('matching.ohne_termin_cta')}
+          </Button>
+        )}
       </div>
     )
   }
@@ -144,5 +161,21 @@ export function FlowSlotStep({
       </div>
     )
   }
-  return <SvSlotAuswahl svs={svs} fehler={fehler} onSlot={slotWaehlen} />
+  return (
+    <div>
+      <SvSlotAuswahl svs={svs} fehler={fehler} onSlot={slotWaehlen} />
+      {onOhneTermin && (
+        <div className="mt-5 text-center">
+          <button
+            type="button"
+            onClick={onOhneTermin}
+            className="text-sm text-claimondo-ondo/70 underline"
+            data-testid="buchung-spaeter-link"
+          >
+            {t('matching.spaeter_link')}
+          </button>
+        </div>
+      )}
+    </div>
+  )
 }

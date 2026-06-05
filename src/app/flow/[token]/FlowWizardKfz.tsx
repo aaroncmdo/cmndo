@@ -520,6 +520,7 @@ export default function FlowWizardKfz({
                   setGebuchterTermin(t)
                   setStepIndex(stepIndexById('gutachter'))
                 }}
+                onOhneTermin={() => setStepIndex(stepIndexById('sa'))}
               />
             )}
 

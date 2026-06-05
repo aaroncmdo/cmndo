@@ -5510,6 +5510,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "المتابعة بدون موعد",
+      "spaeter_link": "تحديد الموعد لاحقًا",
       "suche": "نبحث لك عن الخبير المناسب …",
       "moment": "لحظة من فضلك …",
       "kein_match_heading": "سنتواصل معك",
