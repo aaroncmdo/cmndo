@@ -230,6 +230,8 @@
   },
   "flow": {
     "step_feststellung": {
+      "manuell_toggle": "Lieber ohne Foto — Fahrzeugdaten manuell eingeben",
+      "fahrzeugdaten": "Fahrzeugdaten",
       "heading": "Ein paar Angaben zu Ihrem Schaden",
       "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.",
       "error_save": "Speichern fehlgeschlagen."
@@ -5550,6 +5552,43 @@
       "heading": "Danke für Ihre Angaben",
       "body": "Bei selbstverschuldeten Unfällen lassen sich die Gutachterkosten leider nicht über die gegnerische Haftpflichtversicherung regulieren — daher können wir Ihnen hier keinen kostenfreien Termin anbieten.",
       "note": "Sollte sich die Schuldfrage noch ändern, melden Sie sich jederzeit gern wieder."
+    },
+    "zb1": {
+      "titel": "Fahrzeugschein-Foto",
+      "hinweis_bereits": "Ihre Fahrzeugdaten liegen bereits vor — ein Foto ergänzt nur noch Fehlendes. Optional.",
+      "hinweis_neu": "Foto hochladen — wir lesen Kennzeichen, Fahrzeug & Halter automatisch aus. Optional.",
+      "uebernommen": "Fahrzeugdaten übernommen",
+      "pruefen": "Ausgelesen — bitte prüfen & ggf. korrigieren:",
+      "feld_kennzeichen": "Kennzeichen",
+      "feld_hersteller": "Hersteller",
+      "feld_modell": "Modell",
+      "halter": "Halter: {name}",
+      "uebernehmen": "Übernehmen",
+      "neu_foto": "Neu fotografieren",
+      "aufnehmen": "Foto aufnehmen",
+      "wird_ausgelesen": "Wird ausgelesen …",
+      "ueberspringen": "Überspringen",
+      "fehler_lesen": "Foto konnte nicht gelesen werden.",
+      "fehler_auslesen": "Auslesen fehlgeschlagen.",
+      "fehler_speichern": "Speichern fehlgeschlagen."
+    },
+    "polizeibericht": {
+      "titel": "Polizeibericht",
+      "hinweis": "Sie gaben an, die Polizei war vor Ort. Laden Sie den Bericht hoch (Foto oder PDF) — optional, Sie können ihn auch später nachreichen.",
+      "liegt_vor": "Polizeibericht liegt vor",
+      "neu_hochladen": "Neu hochladen",
+      "hochladen": "Bericht hochladen",
+      "wird_hochgeladen": "Wird hochgeladen …",
+      "ueberspringen": "Überspringen",
+      "fehler_lesen": "Datei konnte nicht gelesen werden.",
+      "fehler_upload": "Upload fehlgeschlagen."
+    },
+    "ort": {
+      "titel": "Wo sollen wir Ihr Fahrzeug begutachten?",
+      "hinweis": "Geben Sie den Besichtigungsort ein — dann zeigen wir Ihnen passende Gutachter-Termine in der Nähe.",
+      "placeholder": "Adresse des Besichtigungsorts",
+      "speichern_laeuft": "Einen Moment, wir suchen passende Termine …",
+      "fehler_speichern": "Adresse konnte nicht gespeichert werden."
     }
   },
   "chatSystem": {

@@ -9,6 +9,7 @@
 // Flow-eigen, weil das geteilte Zb1UploadField an dokument_upload_anfragen-Token + fallId hängt.
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { uploadZb1Flow, speichereZb1KorrekturFlow } from './self-service-actions'
 import { Button } from '@/components/primitives/Button/Button.web'
 
@@ -20,6 +21,7 @@ type Zb1FlowExtracted = {
 }
 
 export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereitsErfasst?: boolean }) {
+  const t = useTranslations('selfService')
   const [status, setStatus] = useState<'idle' | 'laden' | 'fertig' | 'bestaetigt' | 'fehler' | 'skip'>(
     'idle',
   )
@@ -35,13 +37,13 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
     const base64 = await fileToBase64(file)
     if (!base64) {
       setStatus('fehler')
-      setFehler('Foto konnte nicht gelesen werden.')
+      setFehler(t('zb1.fehler_lesen'))
       return
     }
     const r = await uploadZb1Flow(token, base64, file.type || 'image/jpeg')
     if (!r.ok) {
       setStatus('fehler')
-      setFehler(r.error ?? 'Auslesen fehlgeschlagen.')
+      setFehler(r.error ?? t('zb1.fehler_auslesen'))
       return
     }
     const ex = r.extracted ?? {
@@ -65,7 +67,7 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
     const r = await speichereZb1KorrekturFlow(token, edit)
     setSaving(false)
     if (!r.ok) {
-      setFehler(r.error ?? 'Speichern fehlgeschlagen.')
+      setFehler(r.error ?? t('zb1.fehler_speichern'))
       return
     }
     setStatus('bestaetigt')
@@ -96,11 +98,9 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
           if (f) handleFile(f)
         }}
       />
-      <p className="text-sm font-semibold text-claimondo-navy mb-1">Fahrzeugschein-Foto</p>
+      <p className="text-sm font-semibold text-claimondo-navy mb-1">{t('zb1.titel')}</p>
       <p className="text-xs text-claimondo-ondo mb-3">
-        {bereitsErfasst
-          ? 'Ihre Fahrzeugdaten liegen bereits vor — ein Foto ergänzt nur noch Fehlendes. Optional.'
-          : 'Foto hochladen — wir lesen Kennzeichen, Fahrzeug & Halter automatisch aus. Optional.'}
+        {bereitsErfasst ? t('zb1.hinweis_bereits') : t('zb1.hinweis_neu')}
       </p>
 
       {status === 'bestaetigt' ? (
@@ -108,30 +108,28 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
           className="rounded-ios-sm bg-emerald-50 border border-emerald-100 p-3 text-sm text-emerald-800"
           data-testid="flow-zb1-bestaetigt"
         >
-          <p className="font-medium">Fahrzeugdaten übernommen ✓</p>
+          <p className="font-medium">{t('zb1.uebernommen')} ✓</p>
         </div>
       ) : status === 'fertig' && extracted ? (
         <div
           className="rounded-ios-sm bg-emerald-50/60 border border-emerald-100 p-3"
           data-testid="flow-zb1-fertig"
         >
-          <p className="text-sm font-medium text-emerald-800 mb-2">
-            Ausgelesen — bitte prüfen &amp; ggf. korrigieren:
-          </p>
+          <p className="text-sm font-medium text-emerald-800 mb-2">{t('zb1.pruefen')}</p>
           <div className="flex flex-col gap-2">
-            <KorrField label="Kennzeichen" value={edit.kennzeichen} onChange={(v) => setEdit({ ...edit, kennzeichen: v })} />
-            <KorrField label="Hersteller" value={edit.fahrzeug_hersteller} onChange={(v) => setEdit({ ...edit, fahrzeug_hersteller: v })} />
-            <KorrField label="Modell" value={edit.fahrzeug_modell} onChange={(v) => setEdit({ ...edit, fahrzeug_modell: v })} />
+            <KorrField label={t('zb1.feld_kennzeichen')} value={edit.kennzeichen} onChange={(v) => setEdit({ ...edit, kennzeichen: v })} />
+            <KorrField label={t('zb1.feld_hersteller')} value={edit.fahrzeug_hersteller} onChange={(v) => setEdit({ ...edit, fahrzeug_hersteller: v })} />
+            <KorrField label={t('zb1.feld_modell')} value={edit.fahrzeug_modell} onChange={(v) => setEdit({ ...edit, fahrzeug_modell: v })} />
             {extracted.halter_name && (
-              <p className="text-xs text-claimondo-ondo">Halter: {extracted.halter_name}</p>
+              <p className="text-xs text-claimondo-ondo">{t('zb1.halter', { name: extracted.halter_name })}</p>
             )}
           </div>
           <div className="flex items-center gap-3 mt-3">
             <Button variant="ondo" size="sm" loading={saving} onClick={handleUebernehmen}>
-              Übernehmen
+              {t('zb1.uebernehmen')}
             </Button>
             <button type="button" onClick={neuFotografieren} className="text-sm text-claimondo-ondo underline">
-              Neu fotografieren
+              {t('zb1.neu_foto')}
             </button>
           </div>
         </div>
@@ -143,14 +141,14 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
             loading={status === 'laden'}
             onClick={() => inputRef.current?.click()}
           >
-            {status === 'laden' ? 'Wird ausgelesen …' : 'Foto aufnehmen'}
+            {status === 'laden' ? t('zb1.wird_ausgelesen') : t('zb1.aufnehmen')}
           </Button>
           <button
             type="button"
             onClick={() => setStatus('skip')}
             className="text-sm text-claimondo-ondo/80 underline"
           >
-            Überspringen
+            {t('zb1.ueberspringen')}
           </button>
         </div>
       )}
