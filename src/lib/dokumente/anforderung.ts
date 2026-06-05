@@ -21,6 +21,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getKatalogSlot } from './katalog'
 import { createLinkedTask } from '@/lib/tasks/create-task'
@@ -94,19 +95,14 @@ export async function dokumentAnfordern(
 
   // --- 4. Fall laden (für Lead-Kontaktdaten + revalidate) --------------
   const admin = createAdminClient()
-  // CMM-44 SP-A: kundenbetreuer_id wird hier nicht genutzt — aus dem
-  // faelle-Select entfernt (die Spalte liegt jetzt auf claims als SSoT).
-  // CMM-44 SP-B PR2a: bevorzugter_kanal wird hier nicht gelesen — der
-  // Smart-Channel-Push nutzt leadBevorzugterKanal aus dem leads-Read unten.
-  // Kein claims-Embed nötig.
-  const { data: fall, error: fallErr } = await admin
-    .from('faelle')
-    .select(
-      'id, claim_id, kunde_id, lead_id',
-    )
-    .eq('id', fallId)
-    .single()
-  if (fallErr || !fall) {
+  // CMM-49: faelle-frei — claims = SSoT. geschaedigter_user_id (==kunde_id, 0-diff, NON-Auth
+  // Empfaenger) + lead_id direkt aus claims; claim_id = claimId. bevorzugter_kanal kommt aus
+  // dem leads-Read unten, kundenbetreuer hier nicht genutzt.
+  const claimId = await resolveClaimId(admin, fallId)
+  const { data: claim } = claimId
+    ? await admin.from('claims').select('geschaedigter_user_id, lead_id').eq('id', claimId).maybeSingle()
+    : { data: null }
+  if (!claim) {
     return { success: false, error: 'Fall nicht gefunden' }
   }
 
@@ -114,11 +110,11 @@ export async function dokumentAnfordern(
   let leadEmail: string | null = null
   let leadVorname: string | null = null
   let leadBevorzugterKanal: 'whatsapp' | 'sms' | 'email' | null = null
-  if (fall.lead_id) {
+  if (claim.lead_id) {
     const { data: lead } = await admin
       .from('leads')
       .select('telefon, email, vorname, bevorzugter_kanal')
-      .eq('id', fall.lead_id)
+      .eq('id', claim.lead_id)
       .single()
     leadTelefon = (lead?.telefon as string | null) ?? null
     leadEmail = (lead?.email as string | null) ?? null
@@ -133,8 +129,7 @@ export async function dokumentAnfordern(
   const { data: maxRow } = await admin
     .from('pflichtdokumente')
     .select('sort_order')
-    // CMM-49: claim-nativ via fall.claim_id (CMM-63 kunde_id-Read oben bleibt)
-    .eq('claim_id', fall.claim_id as string)
+    .eq('claim_id', claimId as string)
     .order('sort_order', { ascending: false })
     .limit(1)
     .maybeSingle()
@@ -178,7 +173,7 @@ export async function dokumentAnfordern(
     prioritaet: 'normal',
     typ: 'dokument-nachreichen',
     empfaenger_rolle: 'kunde',
-    empfaenger_user_id: fall.kunde_id as string | null,
+    empfaenger_user_id: claim.geschaedigter_user_id as string | null,
     faellig_am: new Date(fristIso),
     auto_erstellt: false,
     trigger_event: 'dokument-anforderung',
@@ -201,7 +196,7 @@ export async function dokumentAnfordern(
       {
         telefon: leadTelefon,
         email: leadEmail,
-        leadId: fall.lead_id as string | null,
+        leadId: claim.lead_id as string | null,
         fallId,
         bevorzugterKanal: leadBevorzugterKanal,
       },

@@ -5,6 +5,7 @@
 // ueberspringbar. Flow-eigen (flow_links-Token), gespiegelt an FlowZb1Upload (ohne OCR/Korrektur).
 
 import { useRef, useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { uploadPolizeiberichtFlow } from './self-service-actions'
 import { Button } from '@/components/primitives/Button/Button.web'
 
@@ -15,6 +16,7 @@ export function FlowPolizeiberichtUpload({
   token: string
   bereitsHochgeladen?: boolean
 }) {
+  const t = useTranslations('selfService')
   const [status, setStatus] = useState<'idle' | 'laden' | 'bestaetigt' | 'fehler' | 'skip'>(
     bereitsHochgeladen ? 'bestaetigt' : 'idle',
   )
@@ -27,13 +29,13 @@ export function FlowPolizeiberichtUpload({
     const base64 = await fileToBase64(file)
     if (!base64) {
       setStatus('fehler')
-      setFehler('Datei konnte nicht gelesen werden.')
+      setFehler(t('polizeibericht.fehler_lesen'))
       return
     }
     const r = await uploadPolizeiberichtFlow(token, base64, file.type || 'image/jpeg')
     if (!r.ok) {
       setStatus('fehler')
-      setFehler(r.error ?? 'Upload fehlgeschlagen.')
+      setFehler(r.error ?? t('polizeibericht.fehler_upload'))
       return
     }
     setStatus('bestaetigt')
@@ -56,24 +58,21 @@ export function FlowPolizeiberichtUpload({
           if (f) handleFile(f)
         }}
       />
-      <p className="text-sm font-semibold text-claimondo-navy mb-1">Polizeibericht</p>
-      <p className="text-xs text-claimondo-ondo mb-3">
-        Sie gaben an, die Polizei war vor Ort. Laden Sie den Bericht hoch (Foto oder PDF) — optional,
-        Sie können ihn auch später nachreichen.
-      </p>
+      <p className="text-sm font-semibold text-claimondo-navy mb-1">{t('polizeibericht.titel')}</p>
+      <p className="text-xs text-claimondo-ondo mb-3">{t('polizeibericht.hinweis')}</p>
 
       {status === 'bestaetigt' ? (
         <div
           className="rounded-ios-sm bg-emerald-50 border border-emerald-100 p-3 text-sm text-emerald-800"
           data-testid="flow-polizeibericht-bestaetigt"
         >
-          <p className="font-medium">Polizeibericht liegt vor ✓</p>
+          <p className="font-medium">{t('polizeibericht.liegt_vor')} ✓</p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
             className="text-sm text-emerald-800/80 underline mt-1"
           >
-            Neu hochladen
+            {t('polizeibericht.neu_hochladen')}
           </button>
         </div>
       ) : (
@@ -84,14 +83,14 @@ export function FlowPolizeiberichtUpload({
             loading={status === 'laden'}
             onClick={() => inputRef.current?.click()}
           >
-            {status === 'laden' ? 'Wird hochgeladen …' : 'Bericht hochladen'}
+            {status === 'laden' ? t('polizeibericht.wird_hochgeladen') : t('polizeibericht.hochladen')}
           </Button>
           <button
             type="button"
             onClick={() => setStatus('skip')}
             className="text-sm text-claimondo-ondo/80 underline"
           >
-            Überspringen
+            {t('polizeibericht.ueberspringen')}
           </button>
         </div>
       )}
