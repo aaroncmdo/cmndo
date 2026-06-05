@@ -11,17 +11,20 @@ Grund: beide settlen den Funnel-Body + `FlowSlotStep`. Kein gated-Task startet v
 ## Die 3 Threads (Hot-Files sind DISJUNKT → parallelisierbar)
 | # | Thread | Owner | Gegen-Session | Hot-Files (exklusiv) |
 |---|---|---|---|---|
-| **T1** | Entry-Cutover | aar-956 | aar-939 (embed-B), Entity (konvertiere-Ersatz) | `anfrage-from-lp`, `/anfrage`, `issue-flowlink`, `self_service_token`, `anfrage-actions` |
+| **T1** | Entry-Cutover | aar-956 | Entity (konvertiere-Ersatz) | `/anfrage`-Route, `konvertiere-anfrage-zu-fall`, `self_service_token`-Spalten |
+| **T1e** | Embed-B-Wiring | aar-939 | aar-956 (liefert Helper) | `/api/anfrage-from-lp`, `lib/embed/*`, Embed-Config, Widget |
 | **T2** | planeTermin-Repoint | Termin-Engine (ab96fed4) + aar-956 | — | `FlowSlotStep`, `bucheTerminFlow`, `actions.ts:1250` |
 | **T3** | convertLeadToClaim-Hardening | Entity (5fcd7084) + aar-956 (Lead-Contract §6) | CMM-49 | `convert-lead-to-claim` |
 
+**Verifiziert (05.06.):** `/api/anfrage-from-lp` = **embed-only** (alle Caller `src/embed/monika/*` + `lib/embed/*`; KEINE Claimondo-eigene LP-Self-Service-Form gefunden → der Embed IST der einzige LP-Entry). Folge: `anfrage-from-lp` + die `issue-flowlink`-Retire liegen in **T1e (939)**, NICHT in T1. **T1, T1e, T2, T3 fassen damit komplett DISJUNKTE Files an** — echte Parallelität, einzige Sequenz = T3→T1.1c.
+
 ## Sequenz (nach GATE 0)
 **T1 Entry-Cutover (aar-956), Sub-Schritte:**
-- **1a** Claimondo-eigene Marketing-LPs → canonical-B: `anfrage-from-lp` ruft `issueCanonicalFlowLinkForAnfrage` statt `issueSelfServiceFlowLink`. (sofort nach GATE 0)
-- **1b** `/anfrage`-Route + `issue-flowlink.ts` retire (Consumer auf canonical). (nach 1a)
-- **1c** `konvertiere-anfrage-zu-fall` killen (Anfrage→Fall-Anti-Pattern). **← GATED auf T3** (Ersatz = `convertLeadToClaim`). (nach 1b + T3)
-- **1d** `self_service_token`-Spalten droppen (6 Files) + Post-Drop-Smoke. (LAST, nach 1c + 0-Consumer-Verify, apply_migration)
-- **embed-B (aar-939, PARALLEL):** per-SV-Config-Flag + B-Branch in `/api/anfrage-from-lp` ruft `issueCanonicalFlowLinkForAnfrage`. Disjunkte Files → parallel zu 1a-1d.
+- **1a** `/anfrage`-Self-Service-Route retire + Consumer (`finalizeAnfrage`/`WizardClient`) auf den kanonischen Lead→/flow-Pfad. (sofort nach GATE 0)
+- **1b** `konvertiere-anfrage-zu-fall` killen (Anfrage→Fall-Anti-Pattern). **← GATED auf T3** (Ersatz = `convertLeadToClaim`). (nach 1a + T3)
+- **1c** `self_service_token`-Spalten droppen (6 Files) + Post-Drop-Smoke. (LAST, nach 1b + 0-Consumer-Verify, apply_migration)
+
+**T1e Embed-B-Wiring (aar-939, PARALLEL zu T1 — disjunkte Files):** per-SV-Config-Flag + A/B-Branch in `/api/anfrage-from-lp` (B ruft `issueCanonicalFlowLinkForAnfrage` + retired dabei den `issueSelfServiceFlowLink`-Call; A = gfa + SV-WhatsApp + Portal) + Widget-Danke. Ich liefere nur den Helper.
 
 **T2 planeTermin-Repoint (Termin-Engine + aar-956):** `matchAndSlots`/`findSvsForLocation` → `planeTermin` (3-Slot/2-SV-Verteilung) in `FlowSlotStep`+`bucheTerminFlow`+`actions.ts:1250`. (nach GATE 0 + planeTermin ready; Termin-Engine pingt. PARALLEL zu T1 — disjunkte Files.)
 
@@ -29,13 +32,13 @@ Grund: beide settlen den Funnel-Body + `FlowSlotStep`. Kein gated-Task startet v
 
 ## Cross-Deps (die einzigen echten Reihenfolge-Zwänge)
 1. **GATE 0 → alles.**
-2. **T3 (convertLeadToClaim solide) → T1.1c (konvertiere-retire).** Sonst bricht der Anfrage→Fall-Ersatz.
-3. Sonst alles parallel (Hot-Files disjunkt — verifiziert: T1=anfrage/lead-Erzeugung, T2=FlowSlotStep/booking, T3=convert-lead-to-claim).
+2. **T3 (convertLeadToClaim solide) → T1.1b (konvertiere-retire).** Sonst bricht der Anfrage→Fall-Ersatz.
+3. Sonst alles parallel (Hot-Files verifiziert disjunkt: T1=`/anfrage`+`konvertiere`+`self_service_token`, T1e=`anfrage-from-lp`/embed, T2=`FlowSlotStep`/booking, T3=`convert-lead-to-claim`).
 
 ## Trigger (wer pingt wen)
 - **Merge-Session:** GATE 0 done → Ping aar-956 + aar-939 + Termin-Engine.
-- **aar-956:** GATE 0 done → startet T1.1a/1b; aar-939 startet embed-B (parallel).
-- **Entity:** T3-convertLeadToClaim-Hardening done → Ping aar-956 → T1.1c + 1d.
+- **aar-956:** GATE 0 done → startet T1.1a; aar-939 startet T1e embed-B (parallel).
+- **Entity:** T3-convertLeadToClaim-Hardening done → Ping aar-956 → T1.1b + 1c.
 - **Termin-Engine:** planeTermin ready → Ping aar-956 → T2 zusammen.
 
 ## Koordinations-Kanäle (Stand 05.06.)
