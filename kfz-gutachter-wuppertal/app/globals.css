@@ -168,7 +168,7 @@ body {
   /* Desktop: Bild leicht hochzoomen + Y=0 -> Augen des Gutachters auf H2-Hoehe
      (Aaron 05.06.). Cover fuellt die Hoehe exakt -> ohne Zoom kein vertikaler Spielraum. */
   .hero-photo {
-    background-size: auto 115% !important;
+    background-size: auto 124% !important;
     background-position: 70% 0% !important;
   }
 }
