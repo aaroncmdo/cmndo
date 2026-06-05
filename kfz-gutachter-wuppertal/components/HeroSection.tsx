@@ -31,12 +31,12 @@ export function HeroSection({ city }: { city: City }) {
       />
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[clamp(70px,11.4vh,108px)] [@media(max-height:700px)]:pt-[62px] pb-[16px] md:pt-[clamp(80px,9vh,110px)] sm:pb-[40px] flex flex-col min-h-[100svh]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[clamp(70px,11.4vh,108px)] [@media(max-height:700px)]:pt-[62px] pb-[16px] [@media(max-height:700px)]:pb-[4px] md:pt-[clamp(80px,9vh,110px)] sm:pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] lg:grid-rows-none gap-14 items-stretch flex-1">
           <div className="flex flex-col md:pl-7 lg:pl-0 sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
             <div className="sm:hidden">
-              <p className="hero-eyebrow [@media(max-height:700px)]:hidden" aria-label={`${rating} von 5 Sternen`}>
+              <p className="hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
                 <span className="eyebrow-stars" aria-hidden="true">★★★★★</span>
                 <span className="eyebrow-rating">{rating}</span>
               </p>
@@ -51,7 +51,7 @@ export function HeroSection({ city }: { city: City }) {
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
-            <div className="mt-auto [@media(max-height:700px)]:mt-3 sm:mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3">
+            <div className="mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3">
               <p className="font-display font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(60px,7vw,100px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
               <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
               <p className="text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>

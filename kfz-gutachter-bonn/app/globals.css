@@ -166,6 +166,13 @@ body {
   }
 }
 
+/* iPhone SE & kurze Viewports (max-height<=700): Eyebrow-Sterne + "5,0" ausblenden.
+   Unlayered + !important, da .hero-eyebrow { display:flex } (Custom-Klasse) sonst die
+   Tailwind-hidden-Utility schlaegt (Aaron 05.06.). */
+@media (max-height: 700px) {
+  .hero-eyebrow { display: none !important; }
+}
+
 /* Leaflet z-index Reset — verhindert dass Marker-Layer ueber FAB/Bubble springen */
 #clusterMap .leaflet-pane,
 #clusterMap .leaflet-top,
