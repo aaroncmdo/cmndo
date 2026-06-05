@@ -140,7 +140,23 @@ body {
     background-image: var(--hero-mobile-img) !important;
     background-position: center top !important;
   }
-  .hero-blur-corner { display: none !important; }
+  /* Mobile-Scrim (Aaron): weniger Farbe, Foto oben klar; Fade zu solid max. bis zur Kamera. */
+  .hero-photo::after {
+    background:
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--petrol) 12%, transparent) 0%,
+        color-mix(in srgb, var(--petrol) 26%, transparent) 42%,
+        color-mix(in srgb, var(--petrol) 64%, transparent) 58%,
+        var(--petrol) 70%);
+  }
+  /* Morphism-Blur: frosted unten (einblendend ab ~46%, voll ab ~66% = Kamera-Hoehe). */
+  .hero-blur-corner {
+    display: block !important;
+    -webkit-backdrop-filter: blur(7px);
+    backdrop-filter: blur(7px);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 46%, #000 66%, #000 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, transparent 46%, #000 66%, #000 100%);
+  }
 }
 /* Tablet-Landscape + Desktop (>= lg): horizontaler Lokal-Scrim nur ueber der Copy-Spalte
    (links 88% Petrol -> Mitte 60% -> rechts 0% = Foto klar). */

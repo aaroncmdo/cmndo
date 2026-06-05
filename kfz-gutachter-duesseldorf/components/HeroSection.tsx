@@ -22,7 +22,7 @@ export function HeroSection({ city }: { city: City }) {
   ReactDOM.preload(`${CLUSTER.imgPath}hero-${CLUSTER.key}-mobile.webp`, { as: 'image', fetchPriority: 'high', media: '(max-width: 640px)' })
   const rating = GOOGLE_RATING.value.replace('.', ',')
   return (
-    <section className="relative bg-petrol text-white overflow-hidden -mt-[59px] sm:mt-0">
+    <section className="relative bg-petrol text-white overflow-hidden -mt-[59px] md:-mt-[76px] lg:-mt-[72px]">
       {/* Hero-Bild: Desktop = hero-{key}.webp (inline). Handy (<=640px) = dediziertes
           hero-{key}-mobile.webp via --hero-mobile-img (globals.css .hero-photo-bg). Gradient ebd. */}
       <div
@@ -31,7 +31,7 @@ export function HeroSection({ city }: { city: City }) {
       />
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[96px] pb-[16px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[100svh]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[clamp(70px,11.4vh,108px)] pb-[16px] md:pt-[clamp(80px,9vh,110px)] sm:pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] lg:grid-rows-none gap-14 items-stretch flex-1">
           <div className="flex flex-col sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
@@ -43,7 +43,7 @@ export function HeroSection({ city }: { city: City }) {
               <p className="hero-tagline">Unabhängige Sachverständige</p>
             </div>
             <h1 className="font-display font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
-              Kfz-Gutachter <br className="sm:hidden" />
+              Kfz-Gutachter <br />
               <span className="text-amber loc">{city.name}</span>
             </h1>
             {/* Sub-Headline (Desktop/Tablet): eine durchgehende Zeile, kein Umbruch. */}
@@ -52,18 +52,18 @@ export function HeroSection({ city }: { city: City }) {
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
             <div className="mt-auto sm:mt-5 self-start">
-              <p className="font-display font-bold text-amber leading-[0.95] tracking-tight text-[clamp(44px,8.5vw,96px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
+              <p className="font-display font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(60px,7vw,100px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
               <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
               <p className="text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
             </div>
-            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-6 mb-0 sm:mb-7 max-w-[580px] hero-text-shadow">
+            <ul className="list-none flex flex-col lg:flex-row lg:flex-wrap gap-2.5 gap-x-7 lg:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-6 mb-0 sm:mb-7 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
                   <polyline points="9 12 11 14 15 10" />
                 </svg>{' '}
                 <span className="sm:hidden">Gutachten, Anwalt, Mietwagen</span>
-                <span className="hidden sm:inline">Gutachten, Anwalt &amp; Mietwagen — alles aus einer Hand</span>
+                <span className="hidden sm:inline">Gutachten, Anwalt &amp; Mietwagen</span>
               </li>
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
@@ -94,7 +94,7 @@ export function HeroSection({ city }: { city: City }) {
                   <path d="M3 3v18h18" />
                   <path d="M7 14l4-4 4 4 5-5" />
                 </svg>{' '}
-                Versicherung kürzt? Wir holen mit Gegengutachten nach
+                Versicherung kürzt? Gegengutachten erstellen lassen
               </li>
             </ul>
             {/* CTA: mobile "Jetzt anrufen" (Verb), Desktop Telefonnummer (Glaubwuerdigkeit). */}
@@ -113,36 +113,16 @@ export function HeroSection({ city }: { city: City }) {
                 <span className="hidden sm:inline whitespace-nowrap">{CLUSTER.phone.display}</span>
               </a>
             </div>
-            {/* Trust-Cluster (Desktop+Tablet) — konsolidiert Siegel + Brand + Stats in 1 Zeile.
-                Sichtbarkeit via #heroTrustClusterDesktop CSS (none mobil, flex ab 640). */}
-            <div id="heroTrustClusterDesktop" aria-label="Vertrauenssignale">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img className="htc-siegel" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo-Partner-Siegel" loading="lazy" />
-              <div className="htc-text">
-                <span className="htc-text-main">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></span>
-                <span className="htc-text-sub">Unfall-Assistance · 2026</span>
-              </div>
-              <span className="htc-sep" aria-hidden="true" />
-              <span className="htc-stats">
-                <span><strong>2.500+</strong> Schäden begleitet</span>
-                <span><strong>10+ Jahre</strong> Erfahrung</span>
-              </span>
-            </div>
-            {/* Trust-Block — Gradient-Divider + 3 Zeilen auf Desktop, kompakter Stack + Brand-Anker auf Mobile. */}
+            {/* Trust-Block — Desktop/Tablet 3 Zeilen (konsistente Gaps, keine Hairlines, ein Claimondo-Block),
+                kompakter Stack + Brand-Anker auf Mobile. */}
             <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-auto max-w-[580px]">
-              <div
-                className="hidden sm:block h-px mb-6"
-                style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,.18) 22%, rgba(255,255,255,.18) 78%, transparent 100%)' }}
-                aria-hidden="true"
-              />
-
-              {/* Trust-Block: DESKTOP-Variante (3 Zeilen) */}
-              <div className="hidden sm:flex flex-col gap-2.5">
+              {/* Trust-Block: DESKTOP-Variante (3 Zeilen, konsistente Gaps) */}
+              <div className="hidden sm:flex flex-col gap-3">
                 <div className="flex items-center gap-2 leading-tight">
                   <span className="text-[#FCD34D] text-[15px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
                   <span className="font-mono font-bold text-white text-[15px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
                   <span className="text-white/30" aria-hidden="true">·</span>
-                  <span className="text-[14px] text-white/90 font-medium">{GOOGLE_RATING.count} Google-Bewertungen</span>
+                  <span className="text-[14px] text-white/90 font-medium">Google-Bewertungen</span>
                 </div>
                 <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[14px] leading-tight">
                   <span className="text-white/85"><strong className="text-white font-semibold">DAT-Expert</strong></span>
