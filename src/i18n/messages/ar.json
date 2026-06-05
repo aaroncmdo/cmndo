@@ -384,7 +384,7 @@
       "termin_label": "تم حجز الموعد",
       "besichtigungsort_label": "مكان المعاينة",
       "treffpunkt_label": "نقطة اللقاء: {treffpunkt}",
-      "kein_gutachter": "نحن نبحث حالياً عن خبير مناسب لك. ستتلقى تأكيداً في أقرب وقت."
+      "kein_gutachter": "سنخصّص لك خبيرك الشخصي في الخطوة التالية. ما عليك سوى المتابعة."
     },
     "step_sa": {
       "heading": "توقيع التكليف",
