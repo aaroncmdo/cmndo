@@ -4,6 +4,7 @@
 // über n_mahnungen + letzte_mahnung_am getrackt.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { sendEmail } from '@/lib/email/google/client'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { sendWhatsApp } from '@/lib/whatsapp'
@@ -248,23 +249,21 @@ export async function sendKundenReminderWegenKanzlei(
       : 'Wichtig: Ihre Kanzlei wartet auf Ihre Mitwirkung. Bitte öffnen Sie Ihr Claimondo-Portal. Ihr Claimondo-Team'
 
   try {
-    // Telefon aus fall laden.
-    // CMM-49 Reader-Sweep: BEWUSST noch .from('faelle') — kunde_id ist (noch) nicht
-    // auf claims gehomed (Home = geschaedigter_user_id, CMM-63 in Arbeit). Repoint
-    // erfolgt mit dem kunde_id-Ownership-Umbau (CMM-63), nicht in diesem Brick.
-    const { data: fullFall } = await db
-      .from('faelle')
-      .select('lead_id, kunde_id')
-      .eq('id', fall.id)
-      .single()
+    // Telefon aus dem Claim laden.
+    // CMM-49: faelle-frei — claims = SSoT (lead_id + geschaedigter_user_id==kunde_id, 0-diff).
+    // claimId via resolveClaimId (Bridge-safe). NON-Auth Telefon-Load (Mahnungs-WA), kein Gate.
+    const claimId = await resolveClaimId(db, fall.id)
+    const { data: fullClaim } = claimId
+      ? await db.from('claims').select('lead_id, geschaedigter_user_id').eq('id', claimId).maybeSingle()
+      : { data: null }
 
     let telefon: string | null = null
-    if (fullFall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('telefon').eq('id', fullFall.lead_id).maybeSingle()
+    if (fullClaim?.lead_id) {
+      const { data: lead } = await db.from('leads').select('telefon').eq('id', fullClaim.lead_id).maybeSingle()
       telefon = lead?.telefon ?? null
     }
-    if (!telefon && fullFall?.kunde_id) {
-      const { data: profile } = await db.from('profiles').select('telefon').eq('id', fullFall.kunde_id).maybeSingle()
+    if (!telefon && fullClaim?.geschaedigter_user_id) {
+      const { data: profile } = await db.from('profiles').select('telefon').eq('id', fullClaim.geschaedigter_user_id).maybeSingle()
       telefon = profile?.telefon ?? null
     }
 
