@@ -471,8 +471,11 @@ export async function POST(request: Request) {
       }
       // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
       // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
-      const fallData = await supabase.from('faelle').select('claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort)').eq('id', fallId).single()
-      const fallDataClaim = Array.isArray(fallData.data?.claims) ? fallData.data.claims[0] : fallData.data?.claims
+      // CMM-49: claim_nummer + schadenort_* faelle-frei via claims.
+      const zuwClaimId = await resolveClaimId(supabase, fallId)
+      const { data: fallDataClaim } = zuwClaimId
+        ? await supabase.from('claims').select('claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort').eq('id', zuwClaimId).maybeSingle()
+        : { data: null }
       const fallNr = fallDataClaim?.claim_nummer ?? fallId.slice(0, 8)
       const adresse = [fallDataClaim?.schadenort_adresse, fallDataClaim?.schadenort_plz, fallDataClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch((err) => {

@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
@@ -220,10 +221,13 @@ export async function uploadGutachten(
   }).catch(() => {})
 
   // E-Mail an Admin: Gutachten eingegangen
-  const { data: fallInfo } = await supabase.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fallId).single()
+  // CMM-49: claim_nummer faelle-frei via claims.
+  const giClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallInfo } = giClaimId
+    ? await supabase.from('claims').select('claim_nummer').eq('id', giClaimId).maybeSingle()
+    : { data: null }
   const { data: admins } = await supabase.from('profiles').select('email').eq('rolle', 'admin')
-  const fallInfoClaim = fallInfo ? (Array.isArray(fallInfo.claims) ? fallInfo.claims[0] : fallInfo.claims) : null
-  const fallNr = fallInfoClaim?.claim_nummer ?? fallId.slice(0, 8)
+  const fallNr = fallInfo?.claim_nummer ?? fallId.slice(0, 8)
   for (const admin of admins ?? []) {
     if (admin.email) emailGutachtenEingegangen(admin.email, fallNr).catch(() => {})
   }
