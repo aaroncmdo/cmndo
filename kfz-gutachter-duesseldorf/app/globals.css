@@ -80,6 +80,8 @@
 
   /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat — Aaron 05.06.). Cluster-spezifisch. */
   --hero-mobile-img: url('/assets/img/duesseldorf/hero-duesseldorf-mobile.webp');
+  /* Header-Glass-Tint (Mobile, dunkel) — Marineblau-Petrol. */
+  --header-glass: rgba(11, 61, 110, 0.91);
 }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */

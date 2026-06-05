@@ -80,6 +80,8 @@
 
   /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat — Aaron 05.06.). Cluster-spezifisch. */
   --hero-mobile-img: url('/assets/img/bonn/hero-bonn-mobile.webp');
+  /* Header-Glass-Tint (Mobile, dunkel) — Tinten-Schwarz. */
+  --header-glass: rgba(15, 16, 20, 0.91);
 }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
