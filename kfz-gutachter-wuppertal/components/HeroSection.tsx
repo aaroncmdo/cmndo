@@ -31,9 +31,9 @@ export function HeroSection({ city }: { city: City }) {
       />
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[clamp(70px,11.4vh,108px)] pb-[16px] md:pt-[clamp(80px,9vh,110px)] sm:pb-[40px] flex flex-col min-h-[100svh]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[clamp(70px,11.4vh,108px)] [@media(max-height:700px)]:pt-[62px] pb-[16px] md:pt-[clamp(80px,9vh,110px)] sm:pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 lg:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] lg:grid-rows-none gap-14 items-stretch flex-1">
-          <div className="flex flex-col sm:pb-2.5 hero-copy-fade">
+          <div className="flex flex-col md:pl-7 lg:pl-0 sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
             <div className="sm:hidden">
               <p className="hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
@@ -47,16 +47,16 @@ export function HeroSection({ city }: { city: City }) {
               <span className="text-amber loc">{city.name}</span>
             </h1>
             {/* Sub-Headline (Desktop/Tablet): eine durchgehende Zeile, kein Umbruch. */}
-            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] leading-[1.4] text-white/[.92] font-normal mt-1.5 mb-4 whitespace-nowrap">
+            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] leading-[1.4] text-white/[.92] font-normal mt-1.5 mb-4 md:ml-2 lg:ml-0 whitespace-nowrap">
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
-            <div className="mt-auto sm:mt-5 self-start">
+            <div className="mt-auto [@media(max-height:700px)]:mt-3 sm:mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3">
               <p className="font-display font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(60px,7vw,100px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
               <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
               <p className="text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
             </div>
-            <ul className="list-none flex flex-col lg:flex-row lg:flex-wrap gap-2.5 gap-x-7 lg:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-6 mb-0 sm:mb-7 max-w-[580px] hero-text-shadow">
+            <ul className="list-none flex flex-col lg:flex-row lg:flex-wrap gap-2.5 gap-x-7 lg:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-5 mb-0 sm:mb-0 md:ml-2 lg:ml-0 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
@@ -98,7 +98,7 @@ export function HeroSection({ city }: { city: City }) {
               </li>
             </ul>
             {/* CTA: mobile "Jetzt anrufen" (Verb), Desktop Telefonnummer (Glaubwuerdigkeit). */}
-            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-0 flex flex-col sm:flex-row sm:items-center gap-3 mb-0 sm:mb-7 max-w-[580px]">
+            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-5 flex flex-col sm:flex-row sm:items-center gap-3 mb-0 sm:mb-0 max-w-[580px]">
               <a
                 id="heroCallCta"
                 className="inline-flex items-center justify-center gap-2.5 bg-amber text-white font-display font-bold text-[clamp(14.5px,4vw,16.5px)] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_color-mix(in_srgb,var(--amber)_30%,transparent)] hover:bg-amber-700 hover:-translate-y-px hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--amber)_42%,transparent)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
@@ -115,16 +115,16 @@ export function HeroSection({ city }: { city: City }) {
             </div>
             {/* Trust-Block — Desktop/Tablet 3 Zeilen (konsistente Gaps, keine Hairlines, ein Claimondo-Block),
                 kompakter Stack + Brand-Anker auf Mobile. */}
-            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-auto max-w-[580px]">
+            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-5 md:ml-2 lg:ml-0 max-w-[580px]">
               {/* Trust-Block: DESKTOP-Variante (3 Zeilen, konsistente Gaps) */}
               <div className="hidden sm:flex flex-col gap-3">
                 <div className="flex items-center gap-2 leading-tight">
-                  <span className="text-[#FCD34D] text-[15px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
-                  <span className="font-mono font-bold text-white text-[15px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
+                  <span className="text-[#FCD34D] text-[17px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
+                  <span className="font-mono font-bold text-white text-[17px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
                   <span className="text-white/30" aria-hidden="true">·</span>
-                  <span className="text-[14px] text-white/90 font-medium">Google-Bewertungen</span>
+                  <span className="text-[15.5px] text-white/90 font-medium">Google-Bewertungen</span>
                 </div>
-                <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[14px] leading-tight">
+                <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[15.5px] leading-tight">
                   <span className="text-white/85"><strong className="text-white font-semibold">DAT-Expert</strong></span>
                   <span className="text-white/30" aria-hidden="true">·</span>
                   <span className="text-white/85"><strong className="text-white font-semibold">BVSK</strong></span>
@@ -140,8 +140,8 @@ export function HeroSection({ city }: { city: City }) {
                     loading="lazy"
                   />
                   <span className="flex flex-col leading-tight">
-                    <strong className="text-white font-semibold text-[14px] tracking-tight">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></strong>
-                    <span className="text-white/45 font-normal text-[10.5px] tracking-normal mt-0.5">Unfall-Assistance</span>
+                    <strong className="text-white font-semibold text-[15.5px] tracking-tight">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></strong>
+                    <span className="text-white/45 font-normal text-[12px] tracking-normal mt-0.5">Unfall-Assistance</span>
                   </span>
                 </div>
               </div>
@@ -186,11 +186,12 @@ export function HeroSection({ city }: { city: City }) {
         <div className="hidden sm:flex justify-center pt-6 pb-3.5">
           <a
             href="#reviews"
-            className="grid place-items-center w-12 h-12 rounded-full border-[1.5px] border-white/[.32] bg-white/[.06] backdrop-blur-[8px] text-white transition hover:bg-white/[.14] hover:border-white/[.55]"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border-[1.5px] border-white/[.32] bg-white/[.08] backdrop-blur-[8px] text-white text-[14px] font-semibold tracking-[.01em] transition hover:bg-white/[.16] hover:border-white/[.55]"
             style={{ animation: 'scrollPulse 2.2s ease-in-out infinite' }}
             aria-label="Mehr erfahren — nach unten scrollen"
           >
-            <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+            Mehr erfahren
+            <svg className="w-4 h-4 stroke-current fill-none" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
               <polyline points="6 9 12 15 18 9" />
             </svg>
           </a>

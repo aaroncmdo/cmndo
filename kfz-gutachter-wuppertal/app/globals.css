@@ -118,10 +118,10 @@ body {
      Mitte lesbar, unten voll Petrol (Lower-Cluster auf solid Petrol). */
   background:
     linear-gradient(180deg,
-      color-mix(in srgb, var(--petrol) 28%, transparent) 0%,
-      color-mix(in srgb, var(--petrol) 55%, transparent) 48%,
-      color-mix(in srgb, var(--petrol) 88%, transparent) 80%,
-      var(--petrol) 100%);
+      transparent 0%,
+      transparent 46%,
+      color-mix(in srgb, #0E1015 38%, transparent) 66%,
+      #0E1015 92%);
 }
 
 /* Verschwommener Verlauf-Wedge: Foto unten-links blurren, diagonal bis 25% ausblenden (Aaron 05.06.).
@@ -144,18 +144,18 @@ body {
   .hero-photo::after {
     background:
       linear-gradient(180deg,
-        color-mix(in srgb, var(--petrol) 12%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 26%, transparent) 42%,
-        color-mix(in srgb, var(--petrol) 64%, transparent) 58%,
-        var(--petrol) 70%);
+        transparent 0%,
+        transparent 44%,
+        color-mix(in srgb, #0E1015 40%, transparent) 64%,
+        #0E1015 90%);
   }
-  /* Morphism-Blur: frosted unten (einblendend ab ~46%, voll ab ~66% = Kamera-Hoehe). */
+  /* Morph-Glassy: kraeftiger Frost unten (einblendend ab ~42%, voll ab ~62% = Kamera). */
   .hero-blur-corner {
     display: block !important;
-    -webkit-backdrop-filter: blur(7px);
-    backdrop-filter: blur(7px);
-    -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 46%, #000 66%, #000 100%);
-            mask-image: linear-gradient(180deg, transparent 0%, transparent 46%, #000 66%, #000 100%);
+    -webkit-backdrop-filter: blur(11px) saturate(115%);
+    backdrop-filter: blur(11px) saturate(115%);
+    -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 42%, #000 62%, #000 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, transparent 42%, #000 62%, #000 100%);
   }
 }
 /* Tablet-Landscape + Desktop (>= lg): horizontaler Lokal-Scrim nur ueber der Copy-Spalte
@@ -164,9 +164,9 @@ body {
   .hero-photo::after {
     background:
       linear-gradient(90deg,
-        color-mix(in srgb, var(--petrol) 88%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 60%, transparent) 42%,
-        transparent 72%);
+        color-mix(in srgb, #0E1015 82%, transparent) 0%,
+        color-mix(in srgb, #0E1015 48%, transparent) 38%,
+        transparent 70%);
   }
 }
 
