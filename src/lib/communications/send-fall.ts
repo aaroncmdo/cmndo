@@ -8,6 +8,7 @@
 // das Telefon des tatsächlichen Empfängers verwenden, nicht das des Kunden.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { sendCommunication } from './send'
 import { COMMUNICATION_REGISTRY } from './registry'
 
@@ -24,18 +25,19 @@ export async function sendFallCommunication(
       return
     }
 
-    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-    // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
-    const { data: fall } = await supabase
-      .from('faelle')
-      .select('id, lead_id, sv_id, kunde_id, sprache, claims:claim_id(claim_nummer, kundenbetreuer_id, regulierungs_betrag)')
-      .eq('id', fallId)
-      .single()
+    // CMM-49: faelle-frei — claims = SSoT. lead_id/sv_id/geschaedigter_user_id/sprache sind
+    // 0-diff zu faelle; claim_nummer/kundenbetreuer_id/regulierungs_betrag claims-nativ.
+    const claimId = await resolveClaimId(supabase, fallId)
+    if (!claimId) return
+    const { data: claim } = await supabase
+      .from('claims')
+      .select('lead_id, sv_id, geschaedigter_user_id, sprache, claim_nummer, kundenbetreuer_id, regulierungs_betrag')
+      .eq('id', claimId)
+      .maybeSingle()
 
-    if (!fall) return
-    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-    const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
-    const fallSprache = (fall as { sprache?: string | null }).sprache ?? null
+    if (!claim) return
+    const kundenbetreuerId = claim.kundenbetreuer_id ?? null
+    const fallSprache = (claim as { sprache?: string | null }).sprache ?? null
 
     let vorname = ''
     let nachname = ''
@@ -45,11 +47,11 @@ export async function sendFallCommunication(
     // im Cron). Nur fuer Kunde-Empfaenger; SV/KB sind intern -> de.
     let leadSprache: string | null = null
 
-    if (config.recipient === 'sv' && fall.sv_id) {
+    if (config.recipient === 'sv' && claim.sv_id) {
       const { data: sv } = await supabase
         .from('sachverstaendige')
         .select('profile_id')
-        .eq('id', fall.sv_id)
+        .eq('id', claim.sv_id)
         .single()
       if (sv?.profile_id) {
         const { data: profile } = await supabase
@@ -78,11 +80,11 @@ export async function sendFallCommunication(
       }
     } else {
       // Default: Kunde (recipient === 'kunde' or anything else falls back to Kunde)
-      if (fall.lead_id) {
+      if (claim.lead_id) {
         const { data: lead } = await supabase
           .from('leads')
           .select('vorname, nachname, telefon, email, sprache')
-          .eq('id', fall.lead_id)
+          .eq('id', claim.lead_id)
           .single()
         if (lead) {
           vorname = lead.vorname ?? ''
@@ -93,11 +95,11 @@ export async function sendFallCommunication(
         }
       }
 
-      if (!telefon && fall.kunde_id) {
+      if (!telefon && claim.geschaedigter_user_id) {
         const { data: profile } = await supabase
           .from('profiles')
           .select('vorname, nachname, telefon, email')
-          .eq('id', fall.kunde_id)
+          .eq('id', claim.geschaedigter_user_id)
           .single()
         if (profile) {
           vorname = vorname || profile.vorname || ''
@@ -110,15 +112,15 @@ export async function sendFallCommunication(
 
     if (!telefon && !email) return
 
-    const betragFormatted = fallClaim?.regulierungs_betrag
+    const betragFormatted = claim.regulierungs_betrag
       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-          Number(fallClaim.regulierungs_betrag),
+          Number(claim.regulierungs_betrag),
         )
       : ''
 
     const data: Record<string, string> = {
       fall_id: fallId,
-      claim_nummer: fallClaim?.claim_nummer ?? '',
+      claim_nummer: claim.claim_nummer ?? '',
       vorname,
       nachname,
       '1': vorname || 'Empfänger',
