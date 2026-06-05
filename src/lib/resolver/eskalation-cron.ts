@@ -10,6 +10,7 @@
 // die Task-Reminder-Route unberührt bleibt).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { EVENT_TO_TASK } from './event-to-task-map'
 import type { EventType } from '@/lib/notifications/types'
@@ -86,13 +87,11 @@ export async function runEskalationsCron(): Promise<EskalationsResult> {
       // Fall-Kontext für Template-Expand
       let fallNummer = task.fall_id ? String(task.fall_id).slice(0, 8) : '—'
       if (task.fall_id) {
-        const { data: fall } = await db
-          .from('faelle')
-          .select('claims:claim_id(claim_nummer)')
-          .eq('id', task.fall_id)
-          .maybeSingle()
-        const fallClaimNummer =
-          (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
+        const escClaimId = await resolveClaimId(db, task.fall_id)
+        const { data: escClaim } = escClaimId
+          ? await db.from('claims').select('claim_nummer').eq('id', escClaimId).maybeSingle()
+          : { data: null }
+        const fallClaimNummer = escClaim?.claim_nummer ?? null
         if (fallClaimNummer) fallNummer = fallClaimNummer
       }
 

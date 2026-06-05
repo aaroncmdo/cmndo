@@ -4,6 +4,7 @@
 // (emit.ts) wirft nicht.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import type { EventType } from '@/lib/notifications/types'
 import { EVENT_TO_TASK, type TaskSpec } from './event-to-task-map'
@@ -51,13 +52,11 @@ async function buildContext(
 
   if (fallId && (!ctx.claim_nummer || ctx.claim_nummer === fallId.slice(0, 8) || !ctx.kunde_name)) {
     const supabase = createAdminClient()
-    const { data: fall } = await supabase
-      .from('faelle')
-      .select('lead_id, claims:claim_id(claim_nummer)')
-      .eq('id', fallId)
-      .maybeSingle()
-    const fallClaimNummer =
-      (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
+    const rtClaimId = await resolveClaimId(supabase, fallId)
+    const { data: fall } = rtClaimId
+      ? await supabase.from('claims').select('lead_id, claim_nummer').eq('id', rtClaimId).maybeSingle()
+      : { data: null }
+    const fallClaimNummer = fall?.claim_nummer ?? null
     if (fallClaimNummer) ctx.claim_nummer = fallClaimNummer
 
     if (fall?.lead_id && !ctx.kunde_name) {

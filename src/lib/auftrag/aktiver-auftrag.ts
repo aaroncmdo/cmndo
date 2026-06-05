@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getNaechsterAktivenAuftragForSv } from '@/lib/auftrag/queries'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export type AktiverAuftrag = {
   modus: 'anfahrt' | 'vor-ort'
@@ -24,14 +25,16 @@ export async function getAktiverAuftrag(svId: string): Promise<AktiverAuftrag> {
   const result = await getNaechsterAktivenAuftragForSv(supabase, svId)
   if (!result) return null
 
-  // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
+  // CMM-49: schadenort_* direkt aus claims (SSoT) via resolveClaimId.
   // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine (terminId = GT-Row, SSoT).
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('id', result.auftrag.fall_id)
-    .maybeSingle()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  const aaClaimId = await resolveClaimId(supabase, result.auftrag.fall_id)
+  const { data: fallClaim } = aaClaimId
+    ? await supabase
+        .from('claims')
+        .select('schadenort_adresse, schadenort_plz, schadenort_ort')
+        .eq('id', aaClaimId)
+        .maybeSingle()
+    : { data: null }
 
   const { data: terminLoc } = await supabase
     .from('gutachter_termine')

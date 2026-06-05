@@ -84,13 +84,12 @@ export async function applyKanzleiPaket(
     }
   }
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, claims:claim_id(claim_nummer)')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-49: Existenz-Gate + claim_nummer (claims-native) direkt aus claims via resolveClaimId.
+  const epClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallClaim } = epClaimId
+    ? await supabase.from('claims').select('claim_nummer').eq('id', epClaimId).maybeSingle()
+    : { data: null }
+  if (!fallClaim) return { success: false, error: 'Fall nicht gefunden' }
 
   // File-Upload falls konfiguriert und vorhanden
   let uploadedFilePath: string | undefined
@@ -230,20 +229,19 @@ export async function recordZahlung(
 
   sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
 
-  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
-  // -> via claim_id aus claims nested embed laden statt aus faelle.
+  // CMM-49: sv_id (0-diff) + kundenbetreuer_id + claim_nummer (claims-native) direkt aus
+  // claims via bereits aufgeloestem betragClaimId (oben null-geguarded).
   const { data: fallForArchive } = await supabase
-    .from('faelle')
-    .select('sv_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
-    .eq('id', fallId)
-    .single()
-  const fallForArchiveClaim = Array.isArray(fallForArchive?.claims) ? fallForArchive.claims[0] : fallForArchive?.claims
-  triggerArchivierungTask(fallId, (fallForArchiveClaim?.kundenbetreuer_id as string | null) ?? null).catch(() => {})
+    .from('claims')
+    .select('sv_id, kundenbetreuer_id, claim_nummer')
+    .eq('id', betragClaimId)
+    .maybeSingle()
+  triggerArchivierungTask(fallId, (fallForArchive?.kundenbetreuer_id as string | null) ?? null).catch(() => {})
 
   if (fallForArchive?.sv_id) {
     createGutachterMitteilung(fallForArchive.sv_id, 'kanzlei_zahlung', fallId, {
       betrag,
-      claim_nummer: (fallForArchiveClaim?.claim_nummer as string | null) ?? undefined,
+      claim_nummer: (fallForArchive?.claim_nummer as string | null) ?? undefined,
     }).catch(() => {})
   }
 
