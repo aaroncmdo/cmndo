@@ -428,6 +428,7 @@
       }
     },
     "step_account": {
+      "termin_folgt": "We'll arrange your inspection appointment with you shortly.",
       "heading": "Done!",
       "sub": "Your case has been successfully created.",
       "success_text": "Your case has been successfully created! The expert has already been notified.",

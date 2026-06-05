@@ -428,6 +428,7 @@
       }
     },
     "step_account": {
+      "termin_folgt": "Ekspertiz randevunuzu kısa süre içinde sizinle bizzat ayarlayacağız.",
       "heading": "Tamamlandı!",
       "sub": "Davanız başarıyla oluşturuldu.",
       "success_text": "Davanız başarıyla oluşturuldu! Bilirkişi bilgilendirildi.",
