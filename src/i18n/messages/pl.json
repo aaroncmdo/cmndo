@@ -93,6 +93,8 @@
   },
   "flow": {
     "step_feststellung": {
+      "manuell_toggle": "Wolę bez zdjęcia — wprowadzić dane pojazdu ręcznie",
+      "fahrzeugdaten": "Dane pojazdu",
       "heading": "Kilka informacji o Państwa szkodzie",
       "sub": "Im dokładniejsze, tym szybciej — wszystko jest opcjonalne i można uzupełnić później.",
       "error_save": "Zapisywanie nie powiodło się."

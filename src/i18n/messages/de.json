@@ -230,6 +230,8 @@
   },
   "flow": {
     "step_feststellung": {
+      "manuell_toggle": "Lieber ohne Foto — Fahrzeugdaten manuell eingeben",
+      "fahrzeugdaten": "Fahrzeugdaten",
       "heading": "Ein paar Angaben zu Ihrem Schaden",
       "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.",
       "error_save": "Speichern fehlgeschlagen."
