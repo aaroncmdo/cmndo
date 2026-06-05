@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import KanbanBoard from './KanbanBoard'
 
 // AAR-154: Zusätzlich zu fall_id laden wir jetzt Leads + SVs für Task-
@@ -8,7 +9,7 @@ import KanbanBoard from './KanbanBoard'
 export default async function TasksPage() {
   const supabase = await createClient()
 
-  const [{ data: tasks }, { data: faelle }, { data: admins }, { data: leads }, { data: svs }, { data: reassignProfiles }] =
+  const [{ data: tasks }, faelleRaw, { data: admins }, { data: leads }, { data: svs }, { data: reassignProfiles }] =
     await Promise.all([
       supabase
         .from('tasks')
@@ -16,10 +17,9 @@ export default async function TasksPage() {
           'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund',
         )
         .order('created_at', { ascending: false }),
-      // CMM-65: kein .order('created_at') mehr — die Liste fuettert nur fallMap
-      // (id -> claim_nummer), die Reihenfolge ist irrelevant; faelle.created_at
-      // stirbt mit dem Phase-6-DROP.
-      supabase.from('faelle').select('id, claims:claim_id(claim_nummer)'),
+      // CMM-49: faelle-frei — fall_id->claim_nummer via Bridge+claims (shared helper).
+      // Liefert das Array direkt (kein { data }); faelleNormalized unten formt es.
+      claimNummernForFaelle(supabase),
       supabase.from('profiles').select('id, vorname, nachname').in('rolle', ['admin', 'kanzlei']),
       supabase.from('leads').select('id, vorname, nachname, telefon'),
       supabase
@@ -35,11 +35,8 @@ export default async function TasksPage() {
         .in('rolle', ['admin', 'kundenbetreuer', 'dispatch', 'kanzlei']),
     ])
 
-  // CMM-44 SP-A3: claim_nummer aus dem claims-Embed normalisieren (SSoT).
-  const faelleNormalized = (faelle ?? []).map((f) => {
-    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return { id: f.id as string, claim_nummer: claim?.claim_nummer ?? null }
-  })
+  // CMM-49: faelleNormalized aus dem Bridge+claims-Resultat (id == fall_id).
+  const faelleNormalized = faelleRaw.map((r) => ({ id: r.fall_id, claim_nummer: r.claim_nummer }))
   const fallMap = Object.fromEntries(
     faelleNormalized.map((f) => [f.id, f.claim_nummer ?? f.id.slice(0, 8)]),
   )

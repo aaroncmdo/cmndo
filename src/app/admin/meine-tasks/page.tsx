@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { redirect } from 'next/navigation'
 import { listMyTasks } from '@/lib/tasks/manual-actions'
 import MyTasksClient from './MyTasksClient'
@@ -22,10 +23,9 @@ export default async function MeineTasksPage() {
   const fallIds = [...new Set([...assigned, ...created].map(t => t.fall_id).filter(Boolean) as string[])]
   const fallMap = new Map<string, string>()
   if (fallIds.length) {
-    const { data: faelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-    for (const f of faelle ?? []) {
-      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      fallMap.set(f.id as string, (claim?.claim_nummer as string) ?? f.id.slice(0, 8))
+    // CMM-49: faelle-frei via Bridge+claims (shared helper).
+    for (const r of await claimNummernForFaelle(supabase, fallIds)) {
+      fallMap.set(r.fall_id, r.claim_nummer ?? r.fall_id.slice(0, 8))
     }
   }
 
