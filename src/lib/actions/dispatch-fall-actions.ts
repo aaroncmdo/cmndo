@@ -16,6 +16,7 @@ import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUpl
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { convertLeadToFall, type ConvertResult } from '@/lib/leads/convert-lead-to-fall'
+import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
@@ -467,20 +468,15 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
   // KFZ-192: service_typ aus Lead in FlowLink kopieren
   const serviceTyp = (lead as Record<string, unknown>).service_typ as string ?? 'komplett'
 
-  // Create flow_links entry with unique token.
-  // RLS-Phase-1 (#3): flow_links default-deny für authenticated → service-client.
-  const svc = createServiceClient()
-  const { data: flowLink, error: flowErr } = await svc
-    .from('flow_links')
-    .insert({ lead_id: leadId, expires_at: new Date(Date.now() + 72 * 60 * 60 * 1000).toISOString(), service_typ: serviceTyp })
-    .select('token')
-    .single()
-
-  if (flowErr) return { ok: false, error: `Flow-Link Erstellung fehlgeschlagen: ${flowErr.message}` }
+  // AAR-956: EIN Lead = EIN Link — kanonische idempotente Brücke statt eigenem
+  // flow_links-Insert (reuse bestehender gültiger Link, sonst neu).
+  const flRes = await ensureCanonicalFlowLinkForLead(leadId, { serviceTyp })
+  if (!flRes.ok) return { ok: false, error: `Flow-Link Erstellung fehlgeschlagen: ${flRes.error}` }
+  const token = flRes.token
 
   // AAR-52: FlowLink per WhatsApp an Kunden senden
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
-  const flowUrl = `${baseUrl}/flow/${flowLink.token}`
+  const flowUrl = `${baseUrl}/flow/${token}`
 
   // AAR-116 Hardening: Lead-Status wird erst NACH erfolgreichem WA-Send aktualisiert
   // (siehe unten). Ohne Termin gibt es keinen WA-Send und der Lead bleibt in der
@@ -571,7 +567,7 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
   revalidatePath('/dispatch/dashboard')
   revalidatePath(`/dispatch/leads/${leadId}`)
 
-  return { ok: true, token: flowLink.token, url: flowUrl }
+  return { ok: true, token, url: flowUrl }
 }
 
 // ─── Lead → Kundenakte Konversion ───────────────────────────────────────────

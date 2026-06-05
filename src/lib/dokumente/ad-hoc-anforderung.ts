@@ -14,6 +14,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { emitEvent } from '@/lib/notifications/emit'
 import { randomBytes } from 'node:crypto'
 import type { BelegTyp } from '@/lib/ocr-beleg/types'
@@ -92,13 +93,13 @@ export async function requestDokumentFromKunde(
 
   const admin = createAdminClient()
 
-  // Fall laden — Lead-ID wird für dokument_upload_anfragen benötigt
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id, lead_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  if (!fall?.lead_id) {
+  // Lead-ID wird für dokument_upload_anfragen benötigt.
+  // CMM-49: faelle-frei — lead_id aus claims (SSoT, Backfill 20260604225709, 0-diff).
+  const claimId = await resolveClaimId(admin, fallId)
+  const { data: claim } = claimId
+    ? await admin.from('claims').select('lead_id').eq('id', claimId).maybeSingle()
+    : { data: null }
+  if (!claim?.lead_id) {
     return { success: false, error: 'Fall oder Lead nicht gefunden' }
   }
 
@@ -111,7 +112,7 @@ export async function requestDokumentFromKunde(
   const { data: anfrage, error: insErr } = await admin
     .from('dokument_upload_anfragen')
     .insert({
-      lead_id: fall.lead_id,
+      lead_id: claim.lead_id,
       kanal,
       token,
       expires_at: expiresAt.toISOString(),
@@ -193,17 +194,17 @@ export async function listAdHocAnforderungen(
   fallId: string,
 ): Promise<AdHocAnforderungRow[]> {
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('lead_id')
-    .eq('id', fallId)
-    .maybeSingle()
-  if (!fall?.lead_id) return []
+  // CMM-49: faelle-frei — lead_id aus claims (SSoT, 0-diff).
+  const claimId = await resolveClaimId(admin, fallId)
+  const { data: claim } = claimId
+    ? await admin.from('claims').select('lead_id').eq('id', claimId).maybeSingle()
+    : { data: null }
+  if (!claim?.lead_id) return []
 
   const { data: rows } = await admin
     .from('dokument_upload_anfragen')
     .select('id, kanal, status, expires_at, gesendet_am, erstellt_am, token, slots')
-    .eq('lead_id', fall.lead_id)
+    .eq('lead_id', claim.lead_id)
     .order('erstellt_am', { ascending: false })
     .limit(20)
 
