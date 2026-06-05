@@ -47,11 +47,11 @@ export function HeroSection({ city }: { city: City }) {
               <span className="text-amber loc">{city.name}</span>
             </h1>
             {/* Sub-Headline (Desktop/Tablet): eine durchgehende Zeile, kein Umbruch. */}
-            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] lg:text-[15px] sm:italic lg:not-italic leading-[1.4] text-white/[.92] font-normal mt-1.5 mb-4 md:ml-2 lg:ml-0 whitespace-nowrap">
+            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] lg:text-[15px] italic leading-[1.4] text-white/[.92] font-grotesk font-medium mt-1.5 mb-4 md:ml-2 lg:ml-0 whitespace-nowrap">
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
-            <div className="mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3 lg:px-3 lg:py-2">
+            <div className="mt-auto lg:mt-7 self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3 lg:px-3 lg:py-2">
               <p className="font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(34px,3.4vw,46px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]" style={{ fontFamily: 'Georgia, serif' }}>0&nbsp;€</p>
               <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] lg:text-[13.5px] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
               <p className="italic text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] lg:text-[11.5px] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
@@ -115,7 +115,7 @@ export function HeroSection({ city }: { city: City }) {
             </div>
             {/* Trust-Block — Desktop/Tablet 3 Zeilen (konsistente Gaps, keine Hairlines, ein Claimondo-Block),
                 kompakter Stack + Brand-Anker auf Mobile. */}
-            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-5 md:mt-8 lg:mt-5 md:ml-2 lg:ml-0 max-w-[580px]">
+            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-5 md:mt-8 md:ml-2 lg:ml-0 max-w-[580px]">
               {/* Trust-Block: DESKTOP-Variante (3 Zeilen, konsistente Gaps) */}
               <div className="hidden sm:flex flex-col gap-3">
                 <div className="flex items-center gap-2 leading-tight">
@@ -131,10 +131,10 @@ export function HeroSection({ city }: { city: City }) {
                   <span className="text-white/30" aria-hidden="true">·</span>
                   <span className="text-white/85"><strong className="text-white font-semibold">2.500+</strong> Schäden</span>
                 </div>
-                <div className="flex items-center gap-2.5 leading-tight">
+                <div className="flex items-center gap-2.5 leading-tight mt-2">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    className="w-[28px] h-[28px] lg:w-[24px] lg:h-[24px] flex-none drop-shadow-[0_2px_4px_rgba(0,0,0,.35)]"
+                    className="w-[34px] h-[34px] flex-none drop-shadow-[0_2px_4px_rgba(0,0,0,.35)]"
                     src="/assets/brand/siegel-claimondo-partner-v3.svg"
                     alt="Claimondo-Partner-Siegel"
                     loading="lazy"
