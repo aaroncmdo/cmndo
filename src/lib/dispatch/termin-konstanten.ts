@@ -7,17 +7,30 @@
  * privaten Konflikt hat — ein Termin ist nicht 2 Stunden lang, das ist
  * realistisch für den Besichtigungs-Vor-Ort-Termin.
  */
-export const TERMIN_DAUER_MIN = 45
+export const TERMIN_DAUER_MIN = 40
 
 /**
- * Pflicht-Puffer vor und nach einem Claimondo-Termin. Der SV braucht Zeit
- * zum Hinfahren und eventuell Wegfahren — und der Standort des privaten
- * Termins ist uns unbekannt. Deshalb ±60 min strikt.
- *
- * Das gesperrte Fenster um einen Claimondo-Termin mit Start 10:00 ist
- * also: 09:00 – 11:45 (60 min davor + 45 min Termin + 60 min danach).
+ * Fixer Mindest-Puffer/Floor vor und nach einem Claimondo-Termin (Parken, zur Tür,
+ * Aufräumen) + das Fenster um PRIVATE Kalender-Events (Standort unbekannt → keine ETA).
+ * Die ECHTE Fahrtzeit zwischen Claimondo-Terminen macht die Mapbox-ETA-Reachability
+ * (reachability.ts) — NICHT dieser pauschale Blanket. Daher 10 statt der alten 60
+ * (die doppelte die ETA und über-blockte den Kalender massiv).
  */
-export const TERMIN_PUFFER_MIN = 60
+export const TERMIN_PUFFER_MIN = 10
+
+/**
+ * Sicherheits-/Wrap-Marge ON TOP der echten Fahr-ETA zwischen zwei Claimondo-Terminen.
+ * Eine Quelle — vorher je lokal in reachability.ts + findBestSV.ts dupliziert (war 5).
+ */
+export const ETA_SICHERHEITS_PUFFER_MIN = 10
+
+/**
+ * ETA-Annahme wenn der Standort eines Nachbar-Termins NICHT auflösbar ist (keine
+ * Coords, kein Lead-Fallback, nicht geocodebar). Konservativ statt fail-open: 50 min
+ * Fahrt + 10 Puffer = 60 min Lücke nötig. Mapbox-API-Ausfall bei BEKANNTEM Standort
+ * bleibt fail-open (transient, blockt nicht das Geschäft).
+ */
+export const NO_LOCATION_ETA_MIN = 50
 
 /**
  * Hilfsfunktion: Wunschtermin (ISO) → [window_start, window_end] als ISOs.

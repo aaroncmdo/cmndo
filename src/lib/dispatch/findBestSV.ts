@@ -18,13 +18,13 @@ import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/t
 import {
   TERMIN_DAUER_MIN,
   TERMIN_PUFFER_MIN,
+  ETA_SICHERHEITS_PUFFER_MIN,
   naechsterWerktag10Uhr,
 } from './termin-konstanten'
 
-// AAR-CMM: Minimal-Puffer zwischen erreichbarem Termin und ETA-Eintreffen.
-// Wenn ein SV von Termin A 10:45 endet und Termin B 11:00 beginnt, müssen
-// 5 min Sicherheits-Puffer obendrauf (Aussteigen, Parken, Kunde finden).
-const ETA_SICHERHEITS_PUFFER_MIN = 5
+// P0: ETA-Marge (Aussteigen/Parken/Kunde finden) zentral aus termin-konstanten (10).
+// Der ±-Blanket nutzt TERMIN_PUFFER_MIN → automatisch 10. (Inline-no-loc-Fallback
+// stirbt in Sub-A → Thin-Wrapper; bis dahin fail-open wie heute.)
 
 export type SvMatchInput = {
   fallLat: number
