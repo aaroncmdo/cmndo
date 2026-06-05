@@ -190,11 +190,13 @@ export async function setAnschlussschreibenDatum(
   sendFallCommunication(fallId, 'as_gesendet').catch(() => {})
   autoCompleteTask(fallId, 'as_sendedatum_gesetzt').catch(() => {})
 
-  const { data: fallForAs } = await supabase.from('faelle').select('sv_id, claims:claim_id(claim_nummer)').eq('id', fallId).single()
-  const fallForAsClaim = fallForAs ? (Array.isArray(fallForAs.claims) ? fallForAs.claims[0] : fallForAs.claims) : null
+  // CMM-49: faelle-frei — sv_id + claim_nummer via claims (sv_id 0-diff). asClaimId von oben (Z.181).
+  const { data: fallForAs } = asClaimId
+    ? await supabase.from('claims').select('sv_id, claim_nummer').eq('id', asClaimId).maybeSingle()
+    : { data: null }
   if (fallForAs?.sv_id) {
     createGutachterMitteilung(fallForAs.sv_id, 'kanzlei_as_gesendet', fallId, {
-      claim_nummer: fallForAsClaim?.claim_nummer ?? undefined,
+      claim_nummer: fallForAs.claim_nummer ?? undefined,
     }).catch(() => {})
   }
 
