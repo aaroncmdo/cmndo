@@ -5542,6 +5542,43 @@
       "heading": "Bilgileriniz için teşekkürler",
       "body": "Kendi kusurunuzdan kaynaklanan kazalarda bilirkişi masrafları maalesef karşı tarafın zorunlu mali sorumluluk sigortası üzerinden tazmin edilemez — bu nedenle size burada ücretsiz bir randevu sunamıyoruz.",
       "note": "Kusur durumu değişirse, dilediğiniz zaman tekrar bizimle iletişime geçebilirsiniz."
+    },
+    "zb1": {
+      "titel": "Ruhsat fotoğrafı",
+      "hinweis_bereits": "Araç bilgileriniz halihazırda mevcut — bir fotoğraf yalnızca eksik kalanları tamamlar. İsteğe bağlı.",
+      "hinweis_neu": "Fotoğraf yükleyin — plakayı, aracı ve ruhsat sahibini otomatik olarak okuyoruz. İsteğe bağlı.",
+      "uebernommen": "Araç bilgileri alındı",
+      "pruefen": "Okundu — lütfen kontrol edin ve gerekirse düzeltin:",
+      "feld_kennzeichen": "Plaka",
+      "feld_hersteller": "Marka",
+      "feld_modell": "Model",
+      "halter": "Ruhsat sahibi: {name}",
+      "uebernehmen": "Devral",
+      "neu_foto": "Yeniden fotoğrafla",
+      "aufnehmen": "Fotoğraf çek",
+      "wird_ausgelesen": "Okunuyor …",
+      "ueberspringen": "Atla",
+      "fehler_lesen": "Fotoğraf okunamadı.",
+      "fehler_auslesen": "Okuma başarısız oldu.",
+      "fehler_speichern": "Kaydetme başarısız oldu."
+    },
+    "polizeibericht": {
+      "titel": "Polis raporu",
+      "hinweis": "Olay yerinde polisin bulunduğunu belirttiniz. Raporu yükleyin (fotoğraf veya PDF) — isteğe bağlı, daha sonra da iletebilirsiniz.",
+      "liegt_vor": "Polis raporu mevcut",
+      "neu_hochladen": "Yeniden yükle",
+      "hochladen": "Raporu yükle",
+      "wird_hochgeladen": "Yükleniyor …",
+      "ueberspringen": "Atla",
+      "fehler_lesen": "Dosya okunamadı.",
+      "fehler_upload": "Yükleme başarısız oldu."
+    },
+    "ort": {
+      "titel": "Aracınızı nerede ekspertiz edelim?",
+      "hinweis": "Ekspertiz yerini girin — ardından size yakındaki uygun bilirkişi randevularını gösterelim.",
+      "placeholder": "Ekspertiz yerinin adresi",
+      "speichern_laeuft": "Bir saniye, size uygun randevuları arıyoruz …",
+      "fehler_speichern": "Adres kaydedilemedi."
     }
   },
   "chatSystem": {
