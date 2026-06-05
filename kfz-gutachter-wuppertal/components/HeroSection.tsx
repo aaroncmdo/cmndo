@@ -31,7 +31,7 @@ export function HeroSection({ city }: { city: City }) {
       />
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[70px] pb-[16px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[100svh]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[86px] pb-[16px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] md:grid-rows-none gap-14 items-stretch flex-1">
           <div className="flex flex-col sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
@@ -107,7 +107,7 @@ export function HeroSection({ city }: { city: City }) {
             <div className="mt-auto sm:mt-0 flex flex-col sm:flex-row sm:items-center gap-3 mb-0 sm:mb-7 max-w-[580px]">
               <a
                 id="heroCallCta"
-                className="inline-flex items-center justify-center gap-2.5 bg-cta text-white font-display font-bold text-[clamp(14.5px,4vw,16.5px)] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_rgba(229,55,43,.32)] hover:bg-cta-700 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(229,55,43,.42)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2.5 bg-amber text-white font-display font-bold text-[clamp(14.5px,4vw,16.5px)] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_color-mix(in_srgb,var(--amber)_30%,transparent)] hover:bg-amber-700 hover:-translate-y-px hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--amber)_42%,transparent)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
                 href={`tel:${CLUSTER.phone.tel}`}
                 data-cta="hero_call"
                 aria-label={`Jetzt anrufen — ${CLUSTER.phone.display}`}
