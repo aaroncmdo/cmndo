@@ -3,6 +3,7 @@
 // gelten Sonderregeln (siehe Notion-Taxonomie §5.9/§5.10/§5.11).
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { EVENT_MATRIX } from './channel-matrix'
 import type {
   Channel,
@@ -23,21 +24,23 @@ type FallParticipants = {
 async function loadFallParticipants(fallId: string): Promise<FallParticipants> {
   const supabase = createAdminClient()
 
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .maybeSingle()
-
-  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
+  // CMM-49: kunde (geschaedigter_user_id, 0-diff) + sv_id (0-diff) + kundenbetreuer_id
+  // (claims-native) direkt aus claims via resolveClaimId.
+  const foClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallClaim } = foClaimId
+    ? await supabase
+        .from('claims')
+        .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
+        .eq('id', foClaimId)
+        .maybeSingle()
+    : { data: null }
 
   let svUserId: string | null = null
-  if (fall?.sv_id) {
+  if (fallClaim?.sv_id) {
     const { data: sv } = await supabase
       .from('sachverstaendige')
       .select('profile_id')
-      .eq('id', fall.sv_id)
+      .eq('id', fallClaim.sv_id)
       .maybeSingle()
     svUserId = sv?.profile_id ?? null
   }
@@ -63,7 +66,7 @@ async function loadFallParticipants(fallId: string): Promise<FallParticipants> {
   const adminUserIds = (admins ?? []).map((a) => a.id as string)
 
   return {
-    kundeUserId: fall?.kunde_id ?? null,
+    kundeUserId: fallClaim?.geschaedigter_user_id ?? null,
     svUserId,
     kundenbetreuerUserId: fallClaim?.kundenbetreuer_id ?? null,
     maklerUserIds,
