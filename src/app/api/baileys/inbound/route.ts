@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { matchInboundToFall } from '@/lib/inbound/match-fall'
 import { processInboundText } from '@/lib/inbound/process-inbound-text'
 import { processInboundMedia, type InboundMediaFile } from '@/lib/inbound/process-inbound-media'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export const dynamic = 'force-dynamic'
 
@@ -166,13 +167,13 @@ export async function POST(request: Request) {
         ownerUserId = (leadRow?.zugewiesen_an as string | null) ?? null
         ownerLink = `/dispatch/leads/${leadId}`
       } else if (fallId) {
-        const { data: fall } = await db
-          .from('faelle')
-          .select('claims:claim_id(kundenbetreuer_id)')
-          .eq('id', fallId)
-          .maybeSingle()
-        const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-        ownerUserId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
+        // CMM-49: kundenbetreuer_id claims-direkt (faelle-frei). ownerLink behält
+        // fallId (Route löst via resolveClaimId auf).
+        const claimId = await resolveClaimId(db, fallId)
+        const { data: claim } = claimId
+          ? await db.from('claims').select('kundenbetreuer_id').eq('id', claimId).maybeSingle()
+          : { data: null }
+        ownerUserId = (claim?.kundenbetreuer_id as string | null) ?? null
         ownerLink = `/faelle/${fallId}`
       }
       if (ownerUserId) {
