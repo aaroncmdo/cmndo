@@ -31,9 +31,9 @@ export function HeroSection({ city }: { city: City }) {
       />
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[40px] pb-[40px] flex flex-col min-h-[100svh]">
-        <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] gap-14 items-stretch flex-1">
-          <div className="flex flex-col pb-2.5 hero-copy-fade">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[22px] pb-[14px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[calc(100svh-58px)] sm:min-h-[100svh]">
+        <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] md:grid-rows-none gap-14 items-stretch flex-1">
+          <div className="flex flex-col justify-between sm:justify-start sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline (Social-Proof above-fold). */}
             <p className="sm:hidden hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
               <span className="eyebrow-stars" aria-hidden="true">★★★★★</span>
@@ -41,8 +41,8 @@ export function HeroSection({ city }: { city: City }) {
             </p>
             <p className="sm:hidden hero-tagline">Unabhängige Sachverständige</p>
             <h1 className="font-display font-bold text-hero-h1 text-white mt-1 mb-1 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
-              Kfz-Gutachter <span className="text-amber loc">{city.name}</span>
-              <br className="sm:hidden" />
+              Kfz-Gutachter <br className="sm:hidden" />
+              <span className="text-amber loc">{city.name}</span>
               <span className="hidden sm:block font-semibold text-white/85 mt-1 sm:mt-2 text-[clamp(16px,1.6vw,18px)] leading-snug tracking-normal h1-sub italic">
                 Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard, mit BVSK-Kompetenz.
               </span>
@@ -55,12 +55,12 @@ export function HeroSection({ city }: { city: City }) {
               Bei unverschuldetem Unfall zahlen Sie <span className="text-amber">0&nbsp;€</span>. Die Versicherung übernimmt alles.
             </p>
             {/* 0€-Anker NUR MOBILE: Zahl oben, Bedingung, Proof. */}
-            <div className="sm:hidden mt-5 hero-text-shadow hero-zero-block">
+            <div className="sm:hidden mt-3 hero-text-shadow hero-zero-block">
               <p className="hero-zero-big">0&nbsp;€</p>
               <p className="hero-zero-condition">Bei unverschuldetem Unfall</p>
               <p className="hero-post-zero">Versicherung zahlt alles</p>
             </div>
-            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-5 sm:mt-6 mb-5 sm:mb-7 max-w-[580px] hero-text-shadow">
+            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-3 sm:mt-6 mb-4 sm:mb-7 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
@@ -208,18 +208,18 @@ export function HeroSection({ city }: { city: City }) {
             </svg>
           </a>
         </div>
+        {/* Scroll-Chevron — NUR Mobile, im Flow am Fold-Boden, wippt, verschwindet bei Scroll (SiteScripts). */}
+        <a
+          href="#reviews"
+          id="heroScrollChevron"
+          className="sm:hidden hero-scroll-chevron mx-auto mt-1 grid place-items-center w-10 h-10 text-white/80 shrink-0"
+          aria-label="Weiter scrollen"
+        >
+          <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </a>
       </div>
-      {/* Scroll-Chevron — NUR Mobile, sanftes Wippen, verschwindet beim Scrollen via SiteScripts. */}
-      <a
-        href="#reviews"
-        id="heroScrollChevron"
-        className="sm:hidden hero-scroll-chevron absolute bottom-3 left-1/2 -translate-x-1/2 z-[2] grid place-items-center w-10 h-10 text-white/75"
-        aria-label="Weiter scrollen"
-      >
-        <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-          <polyline points="6 9 12 15 18 9" />
-        </svg>
-      </a>
     </section>
   )
 }
