@@ -25,12 +25,12 @@ Wirkung: **T2** frei (FlowSlotStep settled → planeTermin-Repoint möglich) + *
 
 ## Sequenz (nach GATE 0)
 **T1 Entry-Cutover (aar-956), Sub-Schritte (KORRIGIERT 05.06. — verifizierte `/anfrage`↔`issueSelfServiceFlowLink`↔Cluster-LP-Kopplung):**
-- **1a** **Cluster-LP-Swap:** `route.ts:158` `issueSelfServiceFlowLink` → `issueCanonicalFlowLinkForAnfrage` (Cluster-LP erzeugt /flow- statt /anfrage-Link). **← GATED auf #2502** (939s A/B-Refactor; ich rebase auf ihren route.ts-Stand, 939-zuerst). **MUSS zuerst** — sonst würde ein `SELF_SERVICE_AUTO_ISSUE`-Flip kaputte /anfrage-Links erzeugen.
-- **1b** `/anfrage/[token]`-Route + `issue-flowlink.ts` + `anfrage-actions.ts` retire (nach 1a = `issueSelfServiceFlowLink` hat 0 Caller → kein /anfrage-Generator mehr) + **301 für Alt-Links** (next.config.ts, KEIN redirect-Stub-page). (nach 1a)
-- **1c** `konvertiere-anfrage-zu-fall` killen (Anfrage→Fall-Anti-Pattern). **← GATED auf T3** (Ersatz = `convertLeadToClaim`). (nach 1b + T3)
+- **1a** **Cluster-LP-Swap:** `route.ts` `issueSelfServiceFlowLink` → `issueCanonicalFlowLinkForAnfrage` (Cluster-LP erzeugt /flow- statt /anfrage-Link). **✅ DONE — PR #2505** (#2502 MERGED 18:01; 939s Marker `route.ts:178` aufgelöst, Import lag bereit). Orphaned Minter-Trio mitgelöscht (`issue-flowlink.ts`+`eligibility.ts`+`eligibility.test.ts`; 0 Consumer nach Swap). Semantik-Shift: kein Eligibility-Filter mehr (jede Cluster-LP-Anfrage→Lead).
+- **1b** Route-Retire — **NEU KARTIERT 05.06.** (autoritativer Plan `docs/superpowers/plans/2026-06-03-aar956-phase-c-anfrage-deprecation.md`): **`anfrage-actions.ts` BLEIBT** (live: onboarding `WizardClient`+`TerminField` via route-neutrale Lib `@/lib/self-service/anfrage-actions`, §1-Decouple schon durch). `/anfrage/[token]`-Route + middleware-Whitelist (`middleware.ts:177`) retire + **301**. **← GATED auf `claimondo-marketing`-/start-Migration** (Marketing mintet `self_service_token` + routet eigenständig nach /anfrage → /anfrage NICHT orphan nach 1a).
+- **1c** `konvertiere-anfrage-zu-fall` killen (Anfrage→Fall-Anti-Pattern). **← GATED auf T3** (Ersatz = `convertLeadToClaim`). (nach T3)
 - **1d** `self_service_token`-Spalten droppen + Post-Drop-Smoke. (LAST, nach 1b+1c + 0-Consumer-Verify, apply_migration)
 
-**⛔ T1-Stand 05.06.: #2502 OPEN → T1 komplett gegated.** Erster startbarer Schritt (1a Cluster-LP-Swap) wartet auf #2502-Merge. `issueSelfServiceFlowLink` ist heute dormant (`SELF_SERVICE_AUTO_ISSUE` OFF, einziger Caller = route.ts:158) → /anfrage erzeugt aktuell KEINE neuen Links (also kein Live-Druck).
+**T1-Stand 05.06.: #2502 ✅ MERGED → 1a ✅ DONE (PR #2505, base staging).** Reststrecke gated: **1b** auf `claimondo-marketing`-/start-Migration (Marketing-App = eigenständiger /anfrage-Consumer), **1c** auf Entity-T3, **1d** last. **Env-Caveat 1a:** Wirkung nur bei `SELF_SERVICE_AUTO_ISSUE=true` (Memory=false vs Phase-C-Doc=scharf → VPS-Wert vor staging→main prüfen). **T2 (planeTermin) gated: OPEN #2500** (Re-land Sub-A, Squash-Race) noch nicht auf staging.
 
 **T1e Embed-B-Wiring (aar-939, PARALLEL zu T1 — disjunkte Files):** per-SV-Config-Flag + A/B-Branch in `/api/anfrage-from-lp` (B ruft `issueCanonicalFlowLinkForAnfrage` + retired dabei den `issueSelfServiceFlowLink`-Call; A = gfa + SV-WhatsApp + Portal) + Widget-Danke. Ich liefere nur den Helper.
 
