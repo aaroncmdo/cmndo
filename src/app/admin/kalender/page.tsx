@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import KalenderClient from './KalenderClient'
 import { getActiveGutachter } from '@/lib/actions/admin-kalender'
 
@@ -42,14 +43,11 @@ export default async function KalenderPage() {
   }
 
   // Fetch claim_nummer for tasks
-  const fallIds = [...new Set((tasks ?? []).map(t => t.fall_id).filter(Boolean))]
-  const { data: taskFaelle } = fallIds.length > 0
-    ? await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-    : { data: [] }
+  // CMM-49: faelle-frei via Bridge+claims (shared helper).
+  const fallIds = [...new Set((tasks ?? []).map(t => t.fall_id).filter(Boolean) as string[])]
   const fallMap: Record<string, string> = {}
-  for (const f of taskFaelle ?? []) {
-    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    fallMap[f.id] = claim?.claim_nummer ?? f.id.slice(0, 8)
+  for (const r of await claimNummernForFaelle(supabase, fallIds)) {
+    fallMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8)
   }
 
   // KFZ-138: Active Gutachter fuer Multiselect

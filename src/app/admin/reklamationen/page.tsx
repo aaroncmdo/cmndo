@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { redirect } from 'next/navigation'
 import ReklamationenClient from './ReklamationenClient'
 
@@ -32,10 +33,9 @@ export default async function AdminReklamationenPage() {
 
   const fallNrMap: Record<string, string> = {}
   if (fallIds.length > 0) {
-    const { data: faelle } = await db.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-    for (const f of faelle ?? []) {
-      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      fallNrMap[f.id] = claim?.claim_nummer ?? f.id.slice(0, 8)
+    // CMM-49: faelle-frei via Bridge+claims (shared helper).
+    for (const r of await claimNummernForFaelle(db, fallIds)) {
+      fallNrMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8)
     }
   }
 
