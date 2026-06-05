@@ -6,6 +6,7 @@
 // Konstanten (CLAIM_TERMINAL_STATUSES etc.) korrekt exportieren koennen.
 
 import type { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import type { MatchResult } from '@/lib/inbound/match-fall'
 import {
   closeNurGutachterTerminAlsDurchgefuehrt,
@@ -227,13 +228,10 @@ export async function processInboundText(
 
   // ─── 3) Nein / Umtermin — Notification an Kundenbetreuer ──────────────────
   if (matchedFallId && (intent === 'termin_bestaetigung_nein' || intent === 'umtermin')) {
-    const { data: fall } = await db
-      .from('faelle')
-      .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
-      .eq('id', matchedFallId)
-      .single()
-
-    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    const txtClaimId = await resolveClaimId(db, matchedFallId)
+    const { data: fallClaim } = txtClaimId
+      ? await db.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', txtClaimId).maybeSingle()
+      : { data: null }
     const fallKb = fallClaim?.kundenbetreuer_id as string | null | undefined
 
     if (fallKb) {
