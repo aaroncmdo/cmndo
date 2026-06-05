@@ -18,16 +18,21 @@ const WA_PATH =
 export function Header({ city }: { city: City }) {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-petrol/70 lg:bg-paper/60 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 lg:border-black/[0.06] shadow-[0_2px_16px_-8px_rgba(0,0,0,0.28)] transition-all duration-200">
+      <header className="sticky top-0 z-50 bg-petrol/85 lg:bg-paper/60 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 lg:border-black/[0.06] shadow-[0_2px_16px_-8px_rgba(0,0,0,0.28)] transition-all duration-200">
         <div className="max-w-wrap mx-auto px-6 flex items-center justify-between h-[58px] md:h-[64px] lg:h-[72px] gap-3.5">
           <a className="flex items-center gap-3" href="/" aria-label="Kfz-Gutachter — zur Startseite">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`${CLUSTER.imgPath}logo-${CLUSTER.key}.webp`}
-              alt={`Kfz-Gutachter ${CLUSTER.cities[0].name}`}
-              className="h-9 md:h-11 lg:h-12 w-auto flex-none"
-              loading="eager"
-            />
+            {/* Logo: Desktop (>=lg) dunkle Variante fuer hellen Header; Mobil/Tablet (<lg)
+                helle Variante fuer dunklen Header. <picture> laedt nur EINE Quelle. */}
+            <picture>
+              <source media="(min-width: 1024px)" srcSet={`${CLUSTER.imgPath}logo-${CLUSTER.key}.webp`} />
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={`${CLUSTER.imgPath}logo-${CLUSTER.key}-mobile.webp`}
+                alt={`Kfz-Gutachter ${CLUSTER.cities[0].name}`}
+                className="h-9 md:h-11 lg:h-12 w-auto flex-none"
+                loading="eager"
+              />
+            </picture>
           </a>
           <nav className="hidden lg:flex items-center justify-center gap-[22px] flex-1 min-w-0" aria-label="Seitennavigation">
             {NAV.map((n) => (

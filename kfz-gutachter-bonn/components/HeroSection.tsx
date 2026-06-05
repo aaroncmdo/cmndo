@@ -17,12 +17,14 @@ import { ClaimondoLink } from '@/lib/text'
 // Haupt-CTA traegt id="heroCallCta" (FabStack observed es). Klick-Tracking via data-cta.
 export function HeroSection({ city }: { city: City }) {
   // LCP: Hero-Bild ist CSS-background -> Preload zieht den Fetch nach vorn.
-  ReactDOM.preload(`${CLUSTER.imgPath}hero-${CLUSTER.key}.webp`, { as: 'image', fetchPriority: 'high' })
+  // Desktop/Tablet (>=641px) = hero-{key}.webp; Handy (<=640px) = dediziertes hero-{key}-mobile.webp.
+  ReactDOM.preload(`${CLUSTER.imgPath}hero-${CLUSTER.key}.webp`, { as: 'image', fetchPriority: 'high', media: '(min-width: 641px)' })
+  ReactDOM.preload(`${CLUSTER.imgPath}hero-${CLUSTER.key}-mobile.webp`, { as: 'image', fetchPriority: 'high', media: '(max-width: 640px)' })
   const rating = GOOGLE_RATING.value.replace('.', ',')
   return (
     <section className="relative bg-petrol text-white overflow-hidden">
-      {/* Hero-Bild: cluster-spezifisch (heroImg = hero-{key}.webp). Gradient + Mobile-
-          background-position kommen aus globals.css (.hero-photo / .hero-photo-bg). */}
+      {/* Hero-Bild: Desktop = hero-{key}.webp (inline). Handy (<=640px) = dediziertes
+          hero-{key}-mobile.webp via --hero-mobile-img (globals.css .hero-photo-bg). Gradient ebd. */}
       <div
         className="hero-photo hero-photo-bg absolute inset-0 z-0"
         style={{ background: `url(${CLUSTER.imgPath}hero-${CLUSTER.key}.webp) center 22%/cover no-repeat` }}
@@ -59,7 +61,7 @@ export function HeroSection({ city }: { city: City }) {
               <p className="hero-post-zero">Versicherung zahlt alles</p>
             </div>
             <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-5 sm:mt-6 mb-5 sm:mb-7 max-w-[580px] hero-text-shadow">
-              <li className="flex items-center gap-[11px] font-medium text-[15px] sm:text-[15.5px] text-white/95 leading-snug">
+              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
                   <polyline points="9 12 11 14 15 10" />
@@ -67,7 +69,7 @@ export function HeroSection({ city }: { city: City }) {
                 <span className="sm:hidden">Gutachten, Anwalt, Mietwagen</span>
                 <span className="hidden sm:inline">Gutachten, Anwalt &amp; Mietwagen — alles aus einer Hand</span>
               </li>
-              <li className="flex items-center gap-[11px] font-medium text-[15px] sm:text-[15.5px] text-white/95 leading-snug">
+              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <circle cx="12" cy="12" r="9" />
                   <polyline points="12 7 12 12 15 14" />
@@ -75,7 +77,7 @@ export function HeroSection({ city }: { city: City }) {
                 <span>In 60{' '}Min vor Ort in <span className="loc-uspsm">{city.name}</span></span>
               </li>
               {/* Mobile USP 3: "2.500+ Schäden begleitet" (eigener Bullet). */}
-              <li className="sm:hidden flex items-center gap-[11px] font-medium text-[15px] text-white/95 leading-snug">
+              <li className="sm:hidden flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M3 3v18h18" />
                   <path d="M7 14l4-4 4 4 5-5" />
@@ -83,7 +85,7 @@ export function HeroSection({ city }: { city: City }) {
                 2.500+ Schäden begleitet
               </li>
               {/* USP 4: "10+ Jahre Erfahrung" — alle Viewports. */}
-              <li className="flex items-center gap-[11px] font-medium text-[15px] sm:text-[15.5px] text-white/95 leading-snug">
+              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M9 12l2 2 4-4" />
                   <circle cx="12" cy="12" r="9" />
@@ -103,7 +105,7 @@ export function HeroSection({ city }: { city: City }) {
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5 sm:mb-7 max-w-[580px]">
               <a
                 id="heroCallCta"
-                className="inline-flex items-center justify-center gap-2.5 bg-cta text-white font-display font-bold text-[16px] sm:text-[16.5px] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_rgba(229,55,43,.32)] hover:bg-cta-700 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(229,55,43,.42)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
+                className="inline-flex items-center justify-center gap-2.5 bg-cta text-white font-display font-bold text-[clamp(14.5px,4vw,16.5px)] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_rgba(229,55,43,.32)] hover:bg-cta-700 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(229,55,43,.42)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
                 href={`tel:${CLUSTER.phone.tel}`}
                 data-cta="hero_call"
                 aria-label={`Jetzt anrufen — ${CLUSTER.phone.display}`}

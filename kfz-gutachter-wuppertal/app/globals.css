@@ -39,7 +39,7 @@
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
   /* === FONT-SIZE-PAKETE (fluid clamp) === */
-  --text-hero-h1: clamp(28px, 6vw, 46px);
+  --text-hero-h1: clamp(23px, 6.4vw, 46px);
   --text-hero-h1--line-height: 1.18;
   --text-hero-h1--letter-spacing: -0.016em;
 
@@ -77,6 +77,9 @@
 
   --au-container-narrow: 1180px;
   --au-container-prose: 760px;
+
+  /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat — Aaron 05.06.). Cluster-spezifisch. */
+  --hero-mobile-img: url('/assets/img/wuppertal/hero-wuppertal-mobile.webp');
 }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
@@ -136,14 +139,17 @@ body {
   .hero-photo::after {
     background:
       linear-gradient(180deg,
-        color-mix(in srgb, var(--petrol) 14%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 30%, transparent) 42%,
-        color-mix(in srgb, var(--petrol) 55%, transparent) 70%,
-        color-mix(in srgb, var(--petrol) 75%, transparent) 100%);
+        color-mix(in srgb, var(--petrol) 12%, transparent) 0%,
+        color-mix(in srgb, var(--petrol) 26%, transparent) 45%,
+        color-mix(in srgb, var(--petrol) 42%, transparent) 72%,
+        color-mix(in srgb, var(--petrol) 56%, transparent) 100%);
   }
   .hero-photo-bg {
+    background-image: var(--hero-mobile-img) !important;
     background-position: center top !important;
   }
+  /* Dediziertes Mobile-Foto ist eigener Crop -> Desktop-Eck-Blur-Wedge hier aus. */
+  .hero-blur-corner { display: none !important; }
 }
 
 /* Leaflet z-index Reset — verhindert dass Marker-Layer ueber FAB/Bubble springen */
@@ -505,7 +511,7 @@ body {
 @media (max-width: 639px) {
   .hero-copy-fade { opacity: 0; transform: translateY(12px); animation: heroFadeUp 480ms cubic-bezier(.2,.65,.3,1) 80ms forwards; }
   /* Lesbarkeit ueber dem Foto */
-  .hero-text-shadow { text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+  .hero-text-shadow { text-shadow: 0 1px 4px rgba(0,0,0,.7), 0 0 3px rgba(0,0,0,.45); }
   .hero-h1-shadow { text-shadow: 0 2px 8px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.4); }
   /* Editorial-Header: ★ 5,0 + Tagline (dezente Dark-Backplates = Lesbarkeits-Anker) */
   .hero-eyebrow {
