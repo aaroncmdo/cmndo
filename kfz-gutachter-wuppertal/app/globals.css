@@ -81,7 +81,7 @@
   /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat — Aaron 05.06.). Cluster-spezifisch. */
   --hero-mobile-img: url('/assets/img/wuppertal/hero-wuppertal-mobile.webp');
   /* Header-Glass-Tint (Mobile, dunkel) — Anthrazit-Petrol. */
-  --header-glass: rgba(25, 39, 43, 0.93);
+  --header-glass: rgba(12, 15, 18, 0.95);
 }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */

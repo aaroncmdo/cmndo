@@ -57,7 +57,7 @@ export function HeroSection({ city }: { city: City }) {
               Bei unverschuldetem Unfall zahlen Sie <span className="text-amber">0&nbsp;€</span>. Die Versicherung übernimmt alles.
             </p>
             {/* 0€-Anker NUR MOBILE: Zahl oben, Bedingung, Proof. */}
-            <div className="sm:hidden mt-5 hero-text-shadow hero-zero-block">
+            <div className="sm:hidden mt-auto hero-text-shadow hero-zero-block">
               <p className="hero-zero-big">0&nbsp;€</p>
               <p className="hero-zero-condition">Bei unverschuldetem Unfall</p>
               <p className="hero-post-zero">Versicherung zahlt alles</p>
