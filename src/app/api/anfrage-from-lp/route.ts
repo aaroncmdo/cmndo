@@ -14,6 +14,7 @@ import {
 } from '@/lib/embed/anfrage'
 import { verifySiteToken } from '@/lib/embed/jwt'
 import { issueSelfServiceFlowLink } from '@/lib/self-service/issue-flowlink'
+import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Webhook /api/anfrage-from-lp
@@ -146,13 +147,35 @@ export async function POST(req: NextRequest) {
     return json({ ok: false, error: 'insert_failed' }, 500)
   }
 
-  // ── 5. Benachrichtigung non-blocking nach Response ───────────────────────
+  // ── 5. Funnel-Modus-Branch (sv_embed A/B) ────────────────────────────────
+  // Variante B (embed_sites.funnel_modus='flowlink', opt-in pro SV): konversion-first
+  // INLINE. issueCanonicalFlowLinkForAnfrage macht alles server-seitig — Lead (idempotent),
+  // SV-Prenote (gfa.konvertiert_zu_lead_id, /flow liest den Picked-SV), EINEN kanonischen
+  // flow_link, + Versand des /flow-Links (WhatsApp -> SMS -> Email). KEINE notifyAnfrage /
+  // SV-WhatsApp (Aaron-Entscheidung): SV-Awareness laeuft ueber den Lead + die Dispatcher-
+  // Queue. Inline (nicht after()), weil die Response Kanal/Token fuers Widget-Danke traegt.
+  if (site?.funnel_modus === 'flowlink') {
+    const issued = await issueCanonicalFlowLinkForAnfrage(result.anfrageId)
+    if (issued.ok && issued.kanal !== 'none') {
+      return json(
+        { ok: true, modus: 'flowlink', kanal: issued.kanal, token: issued.token, anfrage_id: result.anfrageId },
+        200,
+      )
+    }
+    // Degraded (Fehler ODER kein Kanal erreichbar): kein Link raus -> Callback-Wording.
+    // KEIN Notify; gfa + (falls erstellt) Lead haengen in der Dispatch-Queue = Safety-Net.
+    if (!issued.ok) console.error('[AAR-939 embed-B] issueCanonical fehlgeschlagen:', issued.error)
+    return json({ ok: true, modus: 'callback', anfrage_id: result.anfrageId }, 200)
+  }
+
+  // ── 6. Variante A (callback) + Cluster-LP: Notify non-blocking nach Response ─
   after(async () => {
     await notifyAnfrage({ anfrageId: result.anfrageId, payload, variante, site })
     // AAR-940 Self-Service: gated FlowLink-Ausgabe (env SELF_SERVICE_AUTO_ISSUE,
-    // default AUS). Nur Cluster-LP — sv_embed hat seinen eigenen Pfad (embed-A/B),
+    // default AUS). Nur Cluster-LP — sv_embed hat seinen eigenen Pfad (embed-A/B oben),
     // native laeuft inline ueber den Wizard. Eligibility (Kontakt, nicht promotet)
     // prueft issueSelfServiceFlowLink selbst; Fehler bleiben non-fatal.
+    // [aar-956 Cluster-LP-Retire: diesen Call -> issueCanonical, NACH diesem A/B-Refactor.]
     if (process.env.SELF_SERVICE_AUTO_ISSUE === 'true' && payload.source === 'kfz_gutachter_lp') {
       try {
         await issueSelfServiceFlowLink(result.anfrageId)
@@ -162,5 +185,5 @@ export async function POST(req: NextRequest) {
     }
   })
 
-  return json({ ok: true, anfrage_id: result.anfrageId }, 200)
+  return json({ ok: true, modus: 'callback', anfrage_id: result.anfrageId }, 200)
 }

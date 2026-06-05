@@ -32,8 +32,10 @@ export async function loadConfig(base: string, siteId: string): Promise<ConfigRe
   }
 }
 
+export type SubmitKanal = 'whatsapp' | 'sms' | 'email'
 export type SubmitResult =
-  | { ok: true; anfrageId: string | null }
+  | { ok: true; modus: 'callback'; anfrageId: string | null }
+  | { ok: true; modus: 'flowlink'; kanal: SubmitKanal; token: string; anfrageId: string | null }
   | { ok: false; error: string }
 
 /** POST an /api/anfrage-from-lp (Stream 2). keepalive, damit der Submit auch bei Navigation durchgeht. */
@@ -49,8 +51,19 @@ export async function submitAnfrage(base: string, payload: AnfragePayload): Prom
       if (res.status === 429) return { ok: false, error: 'Zu viele Anfragen. Bitte später erneut versuchen.' }
       return { ok: false, error: 'Senden fehlgeschlagen. Bitte erneut versuchen.' }
     }
-    const data = (await res.json()) as { ok?: boolean; anfrage_id?: string | null }
-    return { ok: true, anfrageId: data.anfrage_id ?? null }
+    const data = (await res.json()) as {
+      ok?: boolean
+      anfrage_id?: string | null
+      modus?: 'callback' | 'flowlink'
+      kanal?: SubmitKanal
+      token?: string
+    }
+    // Variante B (flowlink): der /flow-Link wurde an den Kunden gesendet (kanal/token tragen das Danke).
+    if (data.modus === 'flowlink' && data.kanal && data.token) {
+      return { ok: true, modus: 'flowlink', kanal: data.kanal, token: data.token, anfrageId: data.anfrage_id ?? null }
+    }
+    // Variante A (callback) bzw. aeltere Route ohne modus: backward-kompatibel.
+    return { ok: true, modus: 'callback', anfrageId: data.anfrage_id ?? null }
   } catch {
     return { ok: false, error: 'Verbindungsfehler. Bitte erneut versuchen.' }
   }

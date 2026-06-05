@@ -22,6 +22,11 @@ const TIME_LABEL: Record<TimeSlot, string> = {
   nachmittag: 'Nachmittag (12–17 Uhr)',
   abend: 'Abend (17–20 Uhr)',
 }
+const KANAL_LABEL: Record<'whatsapp' | 'sms' | 'email', string> = {
+  whatsapp: 'WhatsApp',
+  sms: 'SMS',
+  email: 'E-Mail',
+}
 
 export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const state = useSignal<MonikaState>('idle')
@@ -33,6 +38,8 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const honeypot = useSignal('')
   const sending = useSignal(false)
   const error = useSignal('')
+  // Embed-B: bei flowlink-Modus der Versand-Kanal des /flow-Links (null = callback-Modus).
+  const successKanal = useSignal<'whatsapp' | 'sms' | 'email' | null>(null)
 
   const canSubmit = useComputed(
     () => name.value.trim().length >= 2 && telefon.value.trim().length >= 8 && consent.value && !sending.value,
@@ -77,6 +84,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       // G1: erst bei Erfolg zaehlen (vorher feuerte es auf Submit-Versuch)
       track(cfg, 'monika_anfrage_submit')
       fireSiteConversion(cfg)
+      successKanal.value = result.modus === 'flowlink' ? result.kanal : null
       go('success')
     } else {
       error.value = result.error
@@ -177,8 +185,12 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
           <>
             <div class="success-ico">✓</div>
             <p class="q">Vielen Dank!</p>
-            <p class="sub">Wir melden uns schnellstmöglich bei Ihnen.</p>
-            {cfg.whatsapp && (
+            {successKanal.value ? (
+              <p class="sub">Wir haben Ihnen den Link zur Terminbuchung per {KANAL_LABEL[successKanal.value]} geschickt.</p>
+            ) : (
+              <p class="sub">Wir melden uns schnellstmöglich bei Ihnen.</p>
+            )}
+            {!successKanal.value && cfg.whatsapp && (
               <a
                 class="wa" target="_blank" rel="noopener"
                 href={`https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent('Hallo, ich hatte einen Kfz-Unfall und möchte einen Gutachter-Termin.')}`}
