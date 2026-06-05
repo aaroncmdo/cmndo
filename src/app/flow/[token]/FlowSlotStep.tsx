@@ -79,7 +79,7 @@ export function FlowSlotStep({
     })
     setOrtSpeichern(false)
     if (!r.ok) {
-      setFehler(r.error ?? 'Adresse konnte nicht gespeichert werden.')
+      setFehler(r.error ?? t('ort.fehler_speichern'))
       return
     }
     await runMatch()
@@ -114,21 +114,14 @@ export function FlowSlotStep({
   if (step === 'ort_abfragen') {
     return (
       <div className="max-w-md" data-testid="buchung-ort-abfragen">
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">
-          Wo sollen wir Ihr Fahrzeug begutachten?
-        </h1>
-        <p className="text-sm text-claimondo-ondo mb-4">
-          Geben Sie den Besichtigungsort ein — dann zeigen wir Ihnen passende Gutachter-Termine in
-          der Nähe.
-        </p>
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">{t('ort.titel')}</h1>
+        <p className="text-sm text-claimondo-ondo mb-4">{t('ort.hinweis')}</p>
         <GooglePlaceAutocomplete
-          placeholder="Adresse des Besichtigungsorts"
+          placeholder={t('ort.placeholder')}
           onSelect={besichtigungsortGewaehlt}
         />
         {ortSpeichern && (
-          <p className="text-sm text-claimondo-ondo mt-3">
-            Einen Moment, wir suchen passende Termine …
-          </p>
+          <p className="text-sm text-claimondo-ondo mt-3">{t('ort.speichern_laeuft')}</p>
         )}
         {fehler && <p className="text-sm text-red-500 mt-3">{fehler}</p>}
       </div>

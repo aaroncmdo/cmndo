@@ -5550,6 +5550,43 @@
       "heading": "Dziękujemy za Państwa dane",
       "body": "W przypadku wypadków z własnej winy kosztów rzeczoznawcy niestety nie można rozliczyć przez ubezpieczenie OC sprawcy — dlatego nie możemy zaproponować Państwu tutaj bezpłatnego terminu.",
       "note": "Jeśli kwestia winy ulegnie zmianie, prosimy o ponowny kontakt w dowolnym momencie."
+    },
+    "zb1": {
+      "titel": "Zdjęcie dowodu rejestracyjnego",
+      "hinweis_bereits": "Dane Państwa pojazdu już posiadamy — zdjęcie uzupełni tylko brakujące informacje. Opcjonalnie.",
+      "hinweis_neu": "Proszę przesłać zdjęcie — numer rejestracyjny, pojazd i właściciela odczytamy automatycznie. Opcjonalnie.",
+      "uebernommen": "Dane pojazdu przejęte",
+      "pruefen": "Odczytano — prosimy sprawdzić i w razie potrzeby poprawić:",
+      "feld_kennzeichen": "Numer rejestracyjny",
+      "feld_hersteller": "Marka",
+      "feld_modell": "Model",
+      "halter": "Właściciel: {name}",
+      "uebernehmen": "Przejmij",
+      "neu_foto": "Zrób nowe zdjęcie",
+      "aufnehmen": "Zrób zdjęcie",
+      "wird_ausgelesen": "Trwa odczytywanie …",
+      "ueberspringen": "Pomiń",
+      "fehler_lesen": "Nie udało się odczytać zdjęcia.",
+      "fehler_auslesen": "Odczytywanie nie powiodło się.",
+      "fehler_speichern": "Zapis nie powiódł się."
+    },
+    "polizeibericht": {
+      "titel": "Raport policyjny",
+      "hinweis": "Podali Państwo, że na miejscu była policja. Prosimy przesłać raport (zdjęcie lub PDF) — opcjonalnie, mogą go Państwo dostarczyć również później.",
+      "liegt_vor": "Raport policyjny dostępny",
+      "neu_hochladen": "Prześlij ponownie",
+      "hochladen": "Prześlij raport",
+      "wird_hochgeladen": "Trwa przesyłanie …",
+      "ueberspringen": "Pomiń",
+      "fehler_lesen": "Nie udało się odczytać pliku.",
+      "fehler_upload": "Przesyłanie nie powiodło się."
+    },
+    "ort": {
+      "titel": "Gdzie mamy obejrzeć Państwa pojazd?",
+      "hinweis": "Prosimy podać miejsce oględzin — wówczas pokażemy Państwu pasujące terminy u rzeczoznawców w pobliżu.",
+      "placeholder": "Adres miejsca oględzin",
+      "speichern_laeuft": "Chwileczkę, szukamy pasujących terminów …",
+      "fehler_speichern": "Nie udało się zapisać adresu."
     }
   },
   "chatSystem": {

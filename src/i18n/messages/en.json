@@ -5550,6 +5550,43 @@
       "heading": "Thank you for your details",
       "body": "For self-caused accidents, the expert costs unfortunately cannot be settled through the other party's liability insurance — so we cannot offer you a free appointment here.",
       "note": "Should the question of fault change, you're welcome to get in touch again at any time."
+    },
+    "zb1": {
+      "titel": "Vehicle registration photo",
+      "hinweis_bereits": "Your vehicle details are already on file — a photo only fills in what's missing. Optional.",
+      "hinweis_neu": "Upload a photo — we'll automatically read out the license plate, vehicle & registered owner. Optional.",
+      "uebernommen": "Vehicle details applied",
+      "pruefen": "Read out — please check & correct if needed:",
+      "feld_kennzeichen": "License plate",
+      "feld_hersteller": "Manufacturer",
+      "feld_modell": "Model",
+      "halter": "Registered owner: {name}",
+      "uebernehmen": "Apply",
+      "neu_foto": "Retake photo",
+      "aufnehmen": "Take photo",
+      "wird_ausgelesen": "Reading out …",
+      "ueberspringen": "Skip",
+      "fehler_lesen": "The photo could not be read.",
+      "fehler_auslesen": "Read-out failed.",
+      "fehler_speichern": "Saving failed."
+    },
+    "polizeibericht": {
+      "titel": "Police report",
+      "hinweis": "You indicated that the police were on site. Upload the report (photo or PDF) — optional, you can also submit it later.",
+      "liegt_vor": "Police report on file",
+      "neu_hochladen": "Upload again",
+      "hochladen": "Upload report",
+      "wird_hochgeladen": "Uploading …",
+      "ueberspringen": "Skip",
+      "fehler_lesen": "The file could not be read.",
+      "fehler_upload": "Upload failed."
+    },
+    "ort": {
+      "titel": "Where should we inspect your vehicle?",
+      "hinweis": "Enter the inspection location — then we'll show you matching expert appointments nearby.",
+      "placeholder": "Address of the inspection location",
+      "speichern_laeuft": "One moment, we're looking for matching appointments …",
+      "fehler_speichern": "The address could not be saved."
     }
   },
   "chatSystem": {
