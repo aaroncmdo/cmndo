@@ -22,7 +22,7 @@ export function HeroSection({ city }: { city: City }) {
   ReactDOM.preload(`${CLUSTER.imgPath}hero-${CLUSTER.key}-mobile.webp`, { as: 'image', fetchPriority: 'high', media: '(max-width: 640px)' })
   const rating = GOOGLE_RATING.value.replace('.', ',')
   return (
-    <section className="relative bg-petrol text-white overflow-hidden">
+    <section className="relative bg-petrol text-white overflow-hidden -mt-[59px] sm:mt-0">
       {/* Hero-Bild: Desktop = hero-{key}.webp (inline). Handy (<=640px) = dediziertes
           hero-{key}-mobile.webp via --hero-mobile-img (globals.css .hero-photo-bg). Gradient ebd. */}
       <div
@@ -31,15 +31,17 @@ export function HeroSection({ city }: { city: City }) {
       />
       {/* Verschwommener Verlauf: Foto unten-links blurren, diagonal bis ~25% ausblenden (Aaron 05.06.) */}
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
-      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[22px] pb-[14px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[calc(100svh-58px)] sm:min-h-[100svh]">
+      <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[70px] pb-[16px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] md:grid-rows-none gap-14 items-stretch flex-1">
           <div className="flex flex-col justify-between sm:justify-start sm:pb-2.5 hero-copy-fade">
-            {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline (Social-Proof above-fold). */}
-            <p className="sm:hidden hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
-              <span className="eyebrow-stars" aria-hidden="true">★★★★★</span>
-              <span className="eyebrow-rating">{rating}</span>
-            </p>
-            <p className="sm:hidden hero-tagline">Unabhängige Sachverständige</p>
+            {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
+            <div className="sm:hidden">
+              <p className="hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
+                <span className="eyebrow-stars" aria-hidden="true">★★★★★</span>
+                <span className="eyebrow-rating">{rating}</span>
+              </p>
+              <p className="hero-tagline">Unabhängige Sachverständige</p>
+            </div>
             <h1 className="font-display font-bold text-hero-h1 text-white mt-1 mb-1 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
               Kfz-Gutachter <br className="sm:hidden" />
               <span className="text-amber loc">{city.name}</span>
@@ -191,6 +193,17 @@ export function HeroSection({ city }: { city: City }) {
                 </div>
               </div>
             </div>
+            {/* Scroll-Chevron — NUR Mobile, im Copy-Stack am Fold-Boden (via justify-between klar vom Trust/Claimondo-Link getrennt). Scrollt zu #reviews. */}
+            <a
+              href="#reviews"
+              id="heroScrollChevron"
+              className="sm:hidden hero-scroll-chevron relative z-[3] mx-auto grid place-items-center w-12 h-10 text-white/80 shrink-0"
+              aria-label="Weiter scrollen"
+            >
+              <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+                <polyline points="6 9 12 15 18 9" />
+              </svg>
+            </a>
           </div>
           {/* Rechte Spalte leer (Gutachter im Hero-Bild ist der visuelle Anker) */}
           <div />
@@ -208,17 +221,6 @@ export function HeroSection({ city }: { city: City }) {
             </svg>
           </a>
         </div>
-        {/* Scroll-Chevron — NUR Mobile, im Flow am Fold-Boden, wippt, verschwindet bei Scroll (SiteScripts). */}
-        <a
-          href="#reviews"
-          id="heroScrollChevron"
-          className="sm:hidden hero-scroll-chevron mx-auto mt-1 grid place-items-center w-10 h-10 text-white/80 shrink-0"
-          aria-label="Weiter scrollen"
-        >
-          <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-            <polyline points="6 9 12 15 18 9" />
-          </svg>
-        </a>
       </div>
     </section>
   )
