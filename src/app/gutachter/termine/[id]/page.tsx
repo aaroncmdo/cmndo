@@ -29,7 +29,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   // AAR-133: lead_id mitlesen — Termin kann pre-FlowLink sein (lead_id ohne fall_id)
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, sv_id, start_zeit, end_zeit, status, navigation_started_at, sv_angekommen_am, durchgefuehrt_am, sv_eta_minuten, sv_unterwegs_seit')
+    .select('id, fall_id, lead_id, sv_id, start_zeit, end_zeit, status, navigation_started_at, sv_angekommen_am, durchgefuehrt_am, sv_eta_minuten, sv_unterwegs_seit, kanal')
     .eq('id', id)
     .eq('typ', 'sv_begutachtung')
     .eq('sv_id', sv.id)
@@ -73,6 +73,9 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   // AAR-939 termin-engine: Besichtigungsort-Bestätigungs-Status (Kunde/SV/null).
   let besichtigungsortBestaetigtVon: string | null = null
   const istVorreservierung = !termin.fall_id && !!termin.lead_id
+  // AAR-939 termin-engine: Besichtigungsort-Korrektur nur bei Vor-Ort-Terminen
+  // (nicht Video/Telefon) — spiegelt die Kunde-Seite (istVorOrt).
+  const istVorOrt = termin.kanal !== 'video' && termin.kanal !== 'telefon'
 
   if (termin.fall_id) {
     // CMM-44 SP-A: polizei_vor_ort + polizei_aktenzeichen sind faelle<->claims-
@@ -226,11 +229,13 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
           <div>
             <p className="text-xs text-claimondo-ondo/70">Adresse</p>
             <p className="font-medium text-claimondo-navy">{adresse}</p>
-            {/* AAR-939 termin-engine: Trust-Badge + Korrektur-Affordance (SV-Seite) */}
-            <BesichtigungsortKorrektur
-              terminId={id}
-              bestaetigtVon={besichtigungsortBestaetigtVon}
-            />
+            {/* AAR-939 termin-engine: Trust-Badge + Korrektur-Affordance (SV-Seite) — nur Vor-Ort */}
+            {istVorOrt && (
+              <BesichtigungsortKorrektur
+                terminId={id}
+                bestaetigtVon={besichtigungsortBestaetigtVon}
+              />
+            )}
           </div>
           {(fahrzeugHersteller || fahrzeugModell) && (
             <div>
