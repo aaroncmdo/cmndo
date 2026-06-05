@@ -3,12 +3,15 @@
 // AAR-956 §3a: Slot-Step im /flow (termin-loser Lead). Reuse SvSlotAuswahl +
 // lead-gekeytes ladeMatchingFlow/bucheTerminFlow. NUR Match + Reservierung — KEIN
 // SA/account (das macht /flow's eigener Pfad). Bei Erfolg → onGebucht (Wizard hebt
-// die Auswahl + advanced zum gutachter-Step). Kein-Match/Standort-fehlt = Rückruf.
+// die Auswahl + advanced zum gutachter-Step).
+// AAR-956 §4 / Task 3: fehlt der Besichtigungsort, fragt der Step ihn im Flow ab
+// (GooglePlaceAutocomplete) statt "wir melden uns telefonisch" — danach Resolver erneut.
 
 import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
-import { ladeMatchingFlow, bucheTerminFlow } from './self-service-actions'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { ladeMatchingFlow, bucheTerminFlow, speichereBesichtigungsortFlow } from './self-service-actions'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 
 export type GebuchterTermin = { svVorname: string; svAvatar: string | null; startIso: string }
@@ -21,40 +24,66 @@ export function FlowSlotStep({
   onGebucht: (t: GebuchterTermin) => void
 }) {
   const t = useTranslations('selfService')
-  const [step, setStep] = useState<'laden' | 'auswahl' | 'absenden' | 'fehler' | 'kein_match'>('laden')
+  const [step, setStep] = useState<
+    'laden' | 'auswahl' | 'absenden' | 'fehler' | 'kein_match' | 'ort_abfragen'
+  >('laden')
   const [svs, setSvs] = useState<OeffentlichesSvProfil[]>([])
   const [fehler, setFehler] = useState<string | null>(null)
+  const [ortSpeichern, setOrtSpeichern] = useState(false)
+
+  // AAR-956 §4: ein Resolver-Lauf. ortFehlt → Adress-Abfrage im Flow (Task 3),
+  // sonst Slot-Auswahl bzw. kein_match. Wiederverwendbar nach dem Ort-Nachreichen.
+  async function runMatch() {
+    setStep('laden')
+    setFehler(null)
+    try {
+      const r = await ladeMatchingFlow(token)
+      if (!r.ok) {
+        if (r.ortFehlt) {
+          // Ort fehlt ist KEIN Fehler mehr — die Adress-Abfrage IST die Aufloesung.
+          // Die telefonisch-Botschaft (r.error) NICHT anzeigen (sonst widerspruechlich).
+          setFehler(null)
+          setStep('ort_abfragen')
+          return
+        }
+        setFehler(r.error ?? null)
+        setStep('fehler')
+        return
+      }
+      const list = r.svs ?? []
+      if (list.length === 0 || list.every((sv) => sv.slots.length === 0)) {
+        setStep('kein_match')
+        return
+      }
+      setSvs(list)
+      setStep('auswahl')
+    } catch {
+      setFehler(t('matching.laden_fehler'))
+      setStep('fehler')
+    }
+  }
 
   useEffect(() => {
-    let ab = false
-    ladeMatchingFlow(token)
-      .then((r) => {
-        if (ab) return
-        if (!r.ok) {
-          setFehler(r.error ?? null)
-          // AAR-956 §4: typsicher statt error-String-Sniffing — ortFehlt kommt aus
-          // dem Resolver (Task 3 ersetzt 'kein_match' hier durch eine Adress-Abfrage).
-          setStep(r.ortFehlt ? 'kein_match' : 'fehler')
-          return
-        }
-        const list = r.svs ?? []
-        if (list.length === 0 || list.every((sv) => sv.slots.length === 0)) {
-          setStep('kein_match')
-          return
-        }
-        setSvs(list)
-        setStep('auswahl')
-      })
-      .catch(() => {
-        if (!ab) {
-          setStep('fehler')
-          setFehler(t('matching.laden_fehler'))
-        }
-      })
-    return () => {
-      ab = true
+    void runMatch()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token])
+
+  // Task 3: Besichtigungsort im Flow nachreichen → speichern → erneut matchen.
+  async function besichtigungsortGewaehlt(ort: PlaceResult) {
+    setOrtSpeichern(true)
+    setFehler(null)
+    const r = await speichereBesichtigungsortFlow(token, {
+      adresse: ort.adresse,
+      lat: ort.lat,
+      lng: ort.lng,
+    })
+    setOrtSpeichern(false)
+    if (!r.ok) {
+      setFehler(r.error ?? 'Adresse konnte nicht gespeichert werden.')
+      return
     }
-  }, [token, t])
+    await runMatch()
+  }
 
   async function slotWaehlen(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
     setStep('absenden')
@@ -79,6 +108,29 @@ export function FlowSlotStep({
         <p className="text-claimondo-navy/70">
           {step === 'laden' ? t('matching.suche') : t('matching.moment')}
         </p>
+      </div>
+    )
+  }
+  if (step === 'ort_abfragen') {
+    return (
+      <div className="max-w-md" data-testid="buchung-ort-abfragen">
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">
+          Wo sollen wir Ihr Fahrzeug begutachten?
+        </h1>
+        <p className="text-sm text-claimondo-ondo mb-4">
+          Geben Sie den Besichtigungsort ein — dann zeigen wir Ihnen passende Gutachter-Termine in
+          der Nähe.
+        </p>
+        <GooglePlaceAutocomplete
+          placeholder="Adresse des Besichtigungsorts"
+          onSelect={besichtigungsortGewaehlt}
+        />
+        {ortSpeichern && (
+          <p className="text-sm text-claimondo-ondo mt-3">
+            Einen Moment, wir suchen passende Termine …
+          </p>
+        )}
+        {fehler && <p className="text-sm text-red-500 mt-3">{fehler}</p>}
       </div>
     )
   }
