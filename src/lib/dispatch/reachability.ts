@@ -10,8 +10,8 @@
 // einer zentralen Stelle lebt.
 
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
+import { ETA_SICHERHEITS_PUFFER_MIN, NO_LOCATION_ETA_MIN } from '@/lib/dispatch/termin-konstanten'
 
-const ETA_SICHERHEITS_PUFFER_MIN = 5
 const ADJACENT_WINDOW_HOURS = 4
 
 export type ReachabilityInput = {
@@ -130,15 +130,14 @@ export async function checkSvReachability(
     nextIdx = adjLocs.length
     adjLocs.push(nextLoc)
   }
-  if (adjLocs.length === 0) return { reachable: true } // keine Locations → fail-open
+  // P0: Mapbox nur wenn es Locations gibt; prev/next OHNE Standort → konservativ 50
+  // (statt vorzeitigem fail-open). Der echte „keine Nachbarn"-Fall ist oben (!prev && !next).
+  const etas = adjLocs.length > 0
+    ? await mapboxEtaMatrix({ lat: input.candidateLat, lng: input.candidateLng }, adjLocs)
+    : []
 
-  const etas = await mapboxEtaMatrix(
-    { lat: input.candidateLat, lng: input.candidateLng },
-    adjLocs,
-  )
-
-  const etaFromPrevMin = prevIdx >= 0 ? etas[prevIdx] ?? null : null
-  const etaToNextMin = nextIdx >= 0 ? etas[nextIdx] ?? null : null
+  const etaFromPrevMin = prevIdx >= 0 ? (etas[prevIdx] ?? null) : (prev ? NO_LOCATION_ETA_MIN : null)
+  const etaToNextMin = nextIdx >= 0 ? (etas[nextIdx] ?? null) : (next ? NO_LOCATION_ETA_MIN : null)
 
   // Validierung Vorgänger
   if (prev && etaFromPrevMin != null) {
@@ -273,6 +272,14 @@ export async function precomputeSvSlotEtas(
       terminMitEta[tl.idx].etaMin = etas[k]
     })
   }
+
+  // P0: Termine OHNE auflösbaren Standort → konservativ NO_LOCATION_ETA_MIN (50),
+  // statt fail-open (null wird in isSlotReachable übersprungen). Mapbox-null bei
+  // BEKANNTEM Standort bleibt null (transient → fail-open).
+  const locatedIdx = new Set(terminLocs.map((tl) => tl.idx))
+  terminMitEta.forEach((t, idx) => {
+    if (!locatedIdx.has(idx)) t.etaMin = NO_LOCATION_ETA_MIN
+  })
 
   return { termine: terminMitEta }
 }
