@@ -1162,10 +1162,15 @@ export async function getPromoStats(promoCodeId: string): Promise<PromoStats> {
   const leadIds = (leadIdsRes.data ?? []).map((r) => r.id as string)
   let aktenCount = 0
   if (leadIds.length > 0) {
+    // CMM-49: faelle-Count -> claims (lead_id 0-diff) + Bridge-Intersection (claims ⊋ faelle,
+    // nur faelle-backed; value-preserving live verifiziert, transitional bis faelle-DROP).
+    const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
+    const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id)
     const { count } = await supabase
-      .from('faelle')
+      .from('claims')
       .select('id', { count: 'exact', head: true })
       .in('lead_id', leadIds)
+      .in('id', faelleClaimIds)
     aktenCount = count ?? 0
   }
 

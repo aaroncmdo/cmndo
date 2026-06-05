@@ -50,13 +50,14 @@ export async function getCommunicationTimeline(
   const perSource = (filter?.limit ?? 50) + 10 // Etwas mehr laden für post-merge Limit
 
   // Fall-Erstellungsdatum für "Aus Lead-Phase" Badge
-  // CMM-65: created_at lebt auf claims (SSoT) — Timeline-Anker (Lead-Phase-Klassifizierung)
-  // via claims:claim_id!inner. faelle.claim_id NOT NULL -> verlustfrei.
-  // CMM-49: claim_id mitladen — calls ist claim-gekeyt (interim; P4-TODO: claimId aus Kontext threaden).
-  const { data: fall } = await db.from('faelle').select('lead_id, claim_id, claims:claim_id!inner(created_at)').eq('id', fallId).single()
-  const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
+  // CMM-49: claimId via resolveClaimId (== faelle.claim_id) statt faelle-Read; created_at
+  // (Timeline-Anker für Lead-Phase-Klassifizierung) ist claims-nativ (SSoT). faelle-frei.
+  // P4-TODO: claimId aus Kontext threaden (spart auch den resolveClaimId-Lookup).
+  const claimId = await resolveClaimId(db, fallId)
+  const { data: fallClaim } = claimId
+    ? await db.from('claims').select('created_at').eq('id', claimId).maybeSingle()
+    : { data: null }
   const fallCreated = fallClaim?.created_at ? new Date(fallClaim.created_at as string) : null
-  const claimId = (fall as { claim_id?: string | null } | null)?.claim_id ?? null
 
   // ─── 1. Calls ───────────────────────────────────────────────────────────
   if (types.includes('call')) {

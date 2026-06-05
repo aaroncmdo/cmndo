@@ -182,31 +182,35 @@ export async function findStickyKb(
   // faelle.kunde_id (faelle-only) bleibt das Match-Kriterium; kundenbetreuer_id
   // + Profil-Join kommen ueber den verknuepften claims-Datensatz.
   if (hints.kunde_id) {
-    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
-    // to-one-Spalte ordnen -> claims.created_at via !inner + clientseitig neuesten Fall picken.
-    const { data: kbFaelle } = await supabase
-      .from('faelle')
-      .select(
-        'claims:claim_id!inner(created_at, kundenbetreuer_id, profiles!claims_kundenbetreuer_id_fkey(id, aktiv, rolle))',
-      )
-      .eq('kunde_id', hints.kunde_id)
-      .not('claim_id', 'is', null)
-    const kbFall = (kbFaelle ?? [])
-      .map((r) => ({ r, _c: (Array.isArray(r.claims) ? r.claims[0] : r.claims)?.created_at ?? '' }))
-      .sort((a, b) => b._c.localeCompare(a._c))[0]?.r ?? null
-    const claimJoin = (kbFall as {
-      claims?:
-        | {
-            kundenbetreuer_id: string | null
-            profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] | null
-          }
-        | {
-            kundenbetreuer_id: string | null
-            profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] | null
-          }[]
-        | null
-    } | null)?.claims
-    const claimRow = Array.isArray(claimJoin) ? claimJoin[0] : claimJoin
+    // CMM-49: KB des neuesten faelle-backed Claims dieses Kunden — claims-direkt (SSoT)
+    // statt faelle-Embed. geschaedigter_user_id == faelle.kunde_id (0-diff 78/0/0).
+    // Bridge-Intersection: claims ist Superset von faelle (orphan-Claims ohne faelle
+    // ausschliessen), sonst koennte ein faelle-loser Claim den "neuesten" verfaelschen.
+    // Kandidaten-Satz damit identisch zur alten faelle-Query (live verifiziert 78==78,
+    // 0 Diff) + RLS-aequivalent (faelle_claim_bridge-RLS spiegelt faelle-RLS).
+    const { data: kundeClaims } = await supabase
+      .from('claims')
+      .select('id, created_at, kundenbetreuer_id, profiles!claims_kundenbetreuer_id_fkey(id, aktiv, rolle)')
+      .eq('geschaedigter_user_id', hints.kunde_id)
+    const kundeClaimIds = (kundeClaims ?? []).map((c) => (c as { id: string }).id)
+    let bridgedClaimIds = new Set<string>()
+    if (kundeClaimIds.length) {
+      const { data: bridged } = await supabase
+        .from('faelle_claim_bridge')
+        .select('claim_id')
+        .in('claim_id', kundeClaimIds)
+      bridgedClaimIds = new Set((bridged ?? []).map((b) => (b as { claim_id: string }).claim_id))
+    }
+    const claimRow = (kundeClaims ?? [])
+      .filter((c) => bridgedClaimIds.has((c as { id: string }).id))
+      .map((c) => ({
+        c: c as {
+          kundenbetreuer_id: string | null
+          profiles?: { aktiv?: boolean; rolle?: string } | { aktiv?: boolean; rolle?: string }[] | null
+        },
+        _c: (c as { created_at?: string | null }).created_at ?? '',
+      }))
+      .sort((a, b) => b._c.localeCompare(a._c))[0]?.c ?? null
     const kbId = (claimRow?.kundenbetreuer_id as string | null) ?? null
     const profileJoin = claimRow?.profiles
     const profileRow = Array.isArray(profileJoin) ? profileJoin[0] : profileJoin
