@@ -94,16 +94,17 @@ export async function softDeleteGutachter(svId: string) {
   if (!user) throw new Error('Nicht angemeldet')
 
   // Check for open cases
-  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
-  const { data: offeneClaimIds } = await supabase
-    .from('claims')
-    .select('id')
-    .not('operative_status', 'in', '("abgeschlossen","storniert")')
+  // CMM-49: Count claims-direkt (operative_status SSoT) + Bridge-Intersection — claims ist
+  // Superset von faelle, nur faelle-backed Claims zaehlen (value-preserving, live verifiziert;
+  // transitional, .in(faelleClaimIds) entfaellt nach faelle-DROP). sv_id ist 0-diff.
+  const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
+  const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id)
   const { count } = await supabase
-    .from('faelle')
+    .from('claims')
     .select('id', { count: 'exact', head: true })
     .eq('sv_id', svId)
-    .in('claim_id', (offeneClaimIds ?? []).map((c) => c.id))
+    .not('operative_status', 'in', '("abgeschlossen","storniert")')
+    .in('id', faelleClaimIds)
 
   if ((count ?? 0) > 0) {
     throw new Error(`Noch ${count} offene Fälle. Bitte zuerst umverteilen.`)
@@ -143,16 +144,17 @@ export async function softDeleteGutachter(svId: string) {
 
 export async function getOpenCasesCount(svId: string): Promise<number> {
   const supabase = await createClient()
-  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
-  const { data: offeneClaimIds } = await supabase
-    .from('claims')
-    .select('id')
-    .not('operative_status', 'in', '("abgeschlossen","storniert")')
+  // CMM-49: Count claims-direkt (operative_status SSoT) + Bridge-Intersection — claims ist
+  // Superset von faelle, nur faelle-backed Claims zaehlen (value-preserving; transitional,
+  // entfaellt nach faelle-DROP). sv_id ist 0-diff.
+  const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
+  const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id)
   const { count } = await supabase
-    .from('faelle')
+    .from('claims')
     .select('id', { count: 'exact', head: true })
     .eq('sv_id', svId)
-    .in('claim_id', (offeneClaimIds ?? []).map((c) => c.id))
+    .not('operative_status', 'in', '("abgeschlossen","storniert")')
+    .in('id', faelleClaimIds)
   return count ?? 0
 }
 
