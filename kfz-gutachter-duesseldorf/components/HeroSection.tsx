@@ -36,7 +36,7 @@ export function HeroSection({ city }: { city: City }) {
           <div className="flex flex-col md:pl-7 lg:pl-0 sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
             <div className="sm:hidden">
-              <p className="hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
+              <p className="hero-eyebrow [@media(max-height:700px)]:hidden" aria-label={`${rating} von 5 Sternen`}>
                 <span className="eyebrow-stars" aria-hidden="true">★★★★★</span>
                 <span className="eyebrow-rating">{rating}</span>
               </p>
@@ -115,7 +115,7 @@ export function HeroSection({ city }: { city: City }) {
             </div>
             {/* Trust-Block — Desktop/Tablet 3 Zeilen (konsistente Gaps, keine Hairlines, ein Claimondo-Block),
                 kompakter Stack + Brand-Anker auf Mobile. */}
-            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-5 md:ml-2 lg:ml-0 max-w-[580px]">
+            <div className="mt-[clamp(14px,2.3vh,22px)] sm:mt-5 md:mt-8 lg:mt-5 md:ml-2 lg:ml-0 max-w-[580px]">
               {/* Trust-Block: DESKTOP-Variante (3 Zeilen, konsistente Gaps) */}
               <div className="hidden sm:flex flex-col gap-3">
                 <div className="flex items-center gap-2 leading-tight">
