@@ -4,9 +4,9 @@
 
 Der mine-alone /flow-Funnel-Body ist durch (Tasks 1-5, Parts 1-2, i18n, Termin-non-blocking, service_typ-Config, Flag-on-Smoke). Es bleiben **3 gated Threads**, jeder kreuzt eine andere Session.
 
-## GATE 0 — blockt ALLES
-**#2474 (i18n) + #2489 (Termin non-blocking) müssen auf `staging` gemergt sein.** [Merge-Session.]
-Grund: beide settlen den Funnel-Body + `FlowSlotStep`. Kein gated-Task startet vor GATE 0.
+## GATE 0 — ✅ DURCH (05.06.)
+**#2474 (i18n, merged 12:09) + #2489 (Termin non-blocking, merged 14:26) sind auf `staging`.**
+Wirkung: **T2** frei (FlowSlotStep settled → planeTermin-Repoint möglich) + **T1** frei (Entry-Cutover). **T1e (939 embed-B) war NIE auf GATE 0 geblockt** — der Helper `issueCanonicalFlowLinkForAnfrage` ist live auf staging. Damit sind alle Threads entsperrt (es bleiben nur die Cross-Deps: T3→T1.1b + die route.ts-Edit-Reihenfolge 939-zuerst + planeTermin-ready für T2).
 
 ## Die 3 Threads (Hot-Files sind DISJUNKT → parallelisierbar)
 | # | Thread | Owner | Gegen-Session | Hot-Files (exklusiv) |
@@ -16,7 +16,12 @@ Grund: beide settlen den Funnel-Body + `FlowSlotStep`. Kein gated-Task startet v
 | **T2** | planeTermin-Repoint | Termin-Engine (ab96fed4) + aar-956 | — | `FlowSlotStep`, `bucheTerminFlow`, `actions.ts:1250` |
 | **T3** | convertLeadToClaim-Hardening | Entity (5fcd7084) + aar-956 (Lead-Contract §6) | CMM-49 | `convert-lead-to-claim` |
 
-**Verifiziert (05.06.):** `/api/anfrage-from-lp` = **embed-only** (alle Caller `src/embed/monika/*` + `lib/embed/*`; KEINE Claimondo-eigene LP-Self-Service-Form gefunden → der Embed IST der einzige LP-Entry). Folge: `anfrage-from-lp` + die `issue-flowlink`-Retire liegen in **T1e (939)**, NICHT in T1. **T1, T1e, T2, T3 fassen damit komplett DISJUNKTE Files an** — echte Parallelität, einzige Sequenz = T3→T1.1c.
+**Verifiziert + korrigiert (05.06., 939-Reply):** `/api/anfrage-from-lp/route.ts` ist **SHARED**, aber distinkte Regionen:
+- **T1e (939):** `after()`-`notifyAnfrage` + neuer **sv_embed-A/B-Zweig** (B: `issueCanonicalFlowLinkForAnfrage` **inline awaiten** vor `return` → token/kanal in die Response; A: notify in `after()`; degraded ok:false/kanal:'none' → „wir melden uns" + gfa/Lead-Queue als Safety-Net). KEINE SV-WhatsApp in B (SV via Lead-Prenote `konvertiert_zu_lead_id`→/flow + Dispatcher-Queue).
+- **T1 (ich):** gated **Cluster-LP-Legacy-Call** (Z.156-162, in `after()`: `SELF_SERVICE_AUTO_ISSUE && source='kfz_gutachter_lp'` → `issueSelfServiceFlowLink`, dormant/env-OFF) → swap auf `issueCanonicalFlowLinkForAnfrage`.
+- **Edit-Fenster: 939 ZUERST** (A/B-Refactor ändert Haupt-Flow + Response-Shape); ich ziehe den 1-Zeilen-Swap danach nach (rebased, dormant → kein Live-Impact). **B ist NICHT auf meine Funnel-PRs geblockt** (Helper ist live + gibt `{ ok, token, leadId, kanal, wiederverwendet }`).
+- Sonst T1/T1e/T2/T3 disjunkt; einzige inhaltliche Sequenz = T3→T1.1b.
+- Config-Flag = `embed_sites.funnel_modus` ('callback'|'flowlink', default 'callback', additiv) — 939-Migration.
 
 ## Sequenz (nach GATE 0)
 **T1 Entry-Cutover (aar-956), Sub-Schritte:**
