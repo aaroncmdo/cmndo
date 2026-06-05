@@ -39,7 +39,7 @@
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
 
   /* === FONT-SIZE-PAKETE (fluid clamp) === */
-  --text-hero-h1: clamp(23px, 6.4vw, 46px);
+  --text-hero-h1: clamp(23px, 6.4vw, 56px);
   --text-hero-h1--line-height: 1.18;
   --text-hero-h1--letter-spacing: -0.016em;
 
