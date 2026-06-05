@@ -4783,6 +4783,14 @@
       },
       "fallback": {
         "gutachter": "خبير"
+      },
+      "besichtigungsort": {
+        "titel": "موقع المعاينة",
+        "frage": "هل الموقع صحيح؟",
+        "jaStimmt": "نعم، صحيح",
+        "korrigieren": "تصحيح الموقع",
+        "bestaetigt": "تم تأكيد الموقع",
+        "abbrechen": "إلغاء"
       }
     },
     "shell": {
@@ -5554,5 +5562,13 @@
     "originalAnzeigen": "عرض الأصل",
     "uebersetzungAnzeigen": "عرض الترجمة",
     "uebersetze": "جارٍ الترجمة …"
+  },
+  "gutachter": {
+    "feldmodus": {
+      "besichtigungsort": {
+        "korrigieren": "تصحيح الموقع",
+        "vomKundenBestaetigt": "تم التأكيد من قِبل العميل"
+      }
+    }
   }
 }

@@ -715,3 +715,23 @@ export async function reportKundeGrundEmbedB(
   if (termin.fall_id) revalidatePath(`/gutachter/termine/${terminId}`)
   return { ok: true }
 }
+
+// ─── korrigiereBesichtigungsortAlsSv (AAR-939 termin-engine) ─────────────────
+//
+// Fallback-Layer: SV korrigiert den Besichtigungsort im Feldmodus (owns-Guard).
+export async function korrigiereBesichtigungsortAlsSv(
+  terminId: string, ort: { adresse: string; lat: number; lng: number },
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'unauthorized' }
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'no_sv' }
+  const db = createAdminClient()
+  const { data: termin } = await db.from('gutachter_termine').select('id, sv_id, fall_id').eq('id', terminId).eq('sv_id', sv.id).single()
+  if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
+  const { korrigiereBesichtigungsort } = await import('@/lib/termine/engine')
+  const r = await korrigiereBesichtigungsort(terminId, ort, 'sv', { db })
+  if (r.ok) { revalidateTerminRoutes(termin.fall_id as string); revalidatePath(`/gutachter/termine/${terminId}`) }
+  return r
+}

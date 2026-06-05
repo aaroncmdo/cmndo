@@ -4783,6 +4783,14 @@
       },
       "fallback": {
         "gutachter": "Rzeczoznawca"
+      },
+      "besichtigungsort": {
+        "titel": "Miejsce oględzin",
+        "frage": "Czy miejsce jest prawidłowe?",
+        "jaStimmt": "Tak, zgadza się",
+        "korrigieren": "Popraw miejsce",
+        "bestaetigt": "Miejsce potwierdzone",
+        "abbrechen": "Anuluj"
       }
     },
     "shell": {
@@ -5554,5 +5562,13 @@
     "originalAnzeigen": "Pokaż oryginał",
     "uebersetzungAnzeigen": "Pokaż tłumaczenie",
     "uebersetze": "Tłumaczenie …"
+  },
+  "gutachter": {
+    "feldmodus": {
+      "besichtigungsort": {
+        "korrigieren": "Popraw miejsce",
+        "vomKundenBestaetigt": "Potwierdzone przez klienta"
+      }
+    }
   }
 }

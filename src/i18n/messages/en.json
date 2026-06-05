@@ -4783,6 +4783,14 @@
       },
       "fallback": {
         "gutachter": "Appraiser"
+      },
+      "besichtigungsort": {
+        "titel": "Inspection location",
+        "frage": "Is the location correct?",
+        "jaStimmt": "Yes, correct",
+        "korrigieren": "Correct location",
+        "bestaetigt": "Location confirmed",
+        "abbrechen": "Cancel"
       }
     },
     "shell": {
@@ -5554,5 +5562,13 @@
     "originalAnzeigen": "Show original",
     "uebersetzungAnzeigen": "Show translation",
     "uebersetze": "Translating …"
+  },
+  "gutachter": {
+    "feldmodus": {
+      "besichtigungsort": {
+        "korrigieren": "Correct location",
+        "vomKundenBestaetigt": "Confirmed by customer"
+      }
+    }
   }
 }
