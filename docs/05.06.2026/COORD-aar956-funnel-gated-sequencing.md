@@ -24,10 +24,13 @@ Wirkung: **T2** frei (FlowSlotStep settled → planeTermin-Repoint möglich) + *
 - Config-Flag = `embed_sites.funnel_modus` ('callback'|'flowlink', default 'callback', additiv) — 939-Migration.
 
 ## Sequenz (nach GATE 0)
-**T1 Entry-Cutover (aar-956), Sub-Schritte:**
-- **1a** `/anfrage`-Self-Service-Route retire + Consumer (`finalizeAnfrage`/`WizardClient`) auf den kanonischen Lead→/flow-Pfad. (sofort nach GATE 0)
-- **1b** `konvertiere-anfrage-zu-fall` killen (Anfrage→Fall-Anti-Pattern). **← GATED auf T3** (Ersatz = `convertLeadToClaim`). (nach 1a + T3)
-- **1c** `self_service_token`-Spalten droppen (6 Files) + Post-Drop-Smoke. (LAST, nach 1b + 0-Consumer-Verify, apply_migration)
+**T1 Entry-Cutover (aar-956), Sub-Schritte (KORRIGIERT 05.06. — verifizierte `/anfrage`↔`issueSelfServiceFlowLink`↔Cluster-LP-Kopplung):**
+- **1a** **Cluster-LP-Swap:** `route.ts:158` `issueSelfServiceFlowLink` → `issueCanonicalFlowLinkForAnfrage` (Cluster-LP erzeugt /flow- statt /anfrage-Link). **← GATED auf #2502** (939s A/B-Refactor; ich rebase auf ihren route.ts-Stand, 939-zuerst). **MUSS zuerst** — sonst würde ein `SELF_SERVICE_AUTO_ISSUE`-Flip kaputte /anfrage-Links erzeugen.
+- **1b** `/anfrage/[token]`-Route + `issue-flowlink.ts` + `anfrage-actions.ts` retire (nach 1a = `issueSelfServiceFlowLink` hat 0 Caller → kein /anfrage-Generator mehr) + **301 für Alt-Links** (next.config.ts, KEIN redirect-Stub-page). (nach 1a)
+- **1c** `konvertiere-anfrage-zu-fall` killen (Anfrage→Fall-Anti-Pattern). **← GATED auf T3** (Ersatz = `convertLeadToClaim`). (nach 1b + T3)
+- **1d** `self_service_token`-Spalten droppen + Post-Drop-Smoke. (LAST, nach 1b+1c + 0-Consumer-Verify, apply_migration)
+
+**⛔ T1-Stand 05.06.: #2502 OPEN → T1 komplett gegated.** Erster startbarer Schritt (1a Cluster-LP-Swap) wartet auf #2502-Merge. `issueSelfServiceFlowLink` ist heute dormant (`SELF_SERVICE_AUTO_ISSUE` OFF, einziger Caller = route.ts:158) → /anfrage erzeugt aktuell KEINE neuen Links (also kein Live-Druck).
 
 **T1e Embed-B-Wiring (aar-939, PARALLEL zu T1 — disjunkte Files):** per-SV-Config-Flag + A/B-Branch in `/api/anfrage-from-lp` (B ruft `issueCanonicalFlowLinkForAnfrage` + retired dabei den `issueSelfServiceFlowLink`-Call; A = gfa + SV-WhatsApp + Portal) + Widget-Danke. Ich liefere nur den Helper.
 
