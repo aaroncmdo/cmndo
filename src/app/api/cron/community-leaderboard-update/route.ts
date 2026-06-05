@@ -57,39 +57,33 @@ export async function GET(request: Request) {
     }> = []
 
     for (const m of members) {
-      // CMM-44 SP-A: abgeschlossen_am ist faelle<->claims-DUP-Spalte —
-      // über claims-Embed gelesen (claims ist SSoT).
-      // CMM-65: created_at ebenfalls auf claims (faelle stirbt mit Phase-6-DROP) —
-      // via !inner-Embed (verlustfrei, faelle.claim_id NOT NULL), Filter auf
-      // claims.created_at. claims.created_at ~= faelle.created_at.
-      // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — aus dem Embed lesen.
-      const { data: faelle } = await db.from('faelle')
-        .select('id, claims:claim_id!inner(abgeschlossen_am, created_at, lead_preis_netto)')
+      // CMM-49: claims-direkt (faelle-frei). claims.sv_id==faelle.sv_id (0-diff); faelle.id
+      // wird im Aggregat nicht genutzt. Filter direkt auf claims.created_at.
+      const { data: claimRows } = await db.from('claims')
+        .select('abgeschlossen_am, created_at, lead_preis_netto')
         .eq('sv_id', m.id)
-        .gte('claims.created_at', monthStart)
-        .lt('claims.created_at', monthEnd)
+        .gte('created_at', monthStart)
+        .lt('created_at', monthEnd)
 
-      const count = faelle?.length ?? 0
-      const umsatz = (faelle ?? []).reduce((s, f) => {
-        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-        return s + Number((c as { lead_preis_netto?: number | null } | null)?.lead_preis_netto ?? 0)
-      }, 0)
+      const count = claimRows?.length ?? 0
+      const umsatz = (claimRows ?? []).reduce(
+        (s, c) => s + Number((c as { lead_preis_netto?: number | null }).lead_preis_netto ?? 0),
+        0,
+      )
 
-      // Durchschnitts-Bearbeitungsdauer (h) aus created_at -> abgeschlossen_am.
-      // CMM-65: created_at + abgeschlossen_am beide aus dem claims-Embed (SSoT).
-      const claimOf = (f: NonNullable<typeof faelle>[number]) =>
-        Array.isArray(f.claims) ? f.claims[0] : f.claims
-      const completedFaelle = (faelle ?? []).filter(f => claimOf(f)?.abgeschlossen_am)
+      // Durchschnitts-Bearbeitungsdauer (h) aus created_at -> abgeschlossen_am (claims = SSoT).
+      const completedClaims = (claimRows ?? []).filter(
+        (c) => (c as { abgeschlossen_am?: string | null }).abgeschlossen_am,
+      )
       let avgDauerH: number | null = null
-      if (completedFaelle.length > 0) {
-        const totalH = completedFaelle.reduce((s, f) => {
-          const c = claimOf(f)
+      if (completedClaims.length > 0) {
+        const totalH = completedClaims.reduce((s, c) => {
           const diff =
-            new Date(c?.abgeschlossen_am as string).getTime() -
-            new Date(c?.created_at as string).getTime()
+            new Date((c as { abgeschlossen_am: string }).abgeschlossen_am).getTime() -
+            new Date((c as { created_at: string }).created_at).getTime()
           return s + diff / (1000 * 60 * 60)
         }, 0)
-        avgDauerH = Math.round((totalH / completedFaelle.length) * 100) / 100
+        avgDauerH = Math.round((totalH / completedClaims.length) * 100) / 100
       }
 
       aggregates.push({
