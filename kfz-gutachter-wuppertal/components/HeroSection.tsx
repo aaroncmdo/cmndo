@@ -42,22 +42,22 @@ export function HeroSection({ city }: { city: City }) {
               </p>
               <p className="hero-tagline">Unabhängige Sachverständige</p>
             </div>
-            <h1 className="font-grotesk font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
+            <h1 className="font-grotesk font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 md:mb-1 lg:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
               Kfz-Gutachter <br />
               <span className="text-amber loc">{city.name}</span>
             </h1>
             {/* Sub-Headline (Desktop/Tablet): eine durchgehende Zeile, kein Umbruch. */}
-            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] leading-[1.4] text-white/[.92] font-normal mt-1.5 mb-4 md:ml-2 lg:ml-0 whitespace-nowrap">
+            <p className="hidden sm:block text-[clamp(13px,1.55vw,18px)] lg:text-[15px] sm:italic lg:not-italic leading-[1.4] text-white/[.92] font-normal mt-1.5 mb-4 md:ml-2 lg:ml-0 whitespace-nowrap">
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
             <div className="mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3">
-              <p className="font-grotesk font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(60px,7vw,100px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
+              <p className="font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(40px,4vw,58px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]" style={{ fontFamily: 'Georgia, serif' }}>0&nbsp;€</p>
               <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
-              <p className="text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
+              <p className="italic text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
             </div>
-            <ul className="list-none flex flex-col lg:flex-row lg:flex-wrap gap-2.5 gap-x-7 lg:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-5 mb-0 sm:mb-0 md:ml-2 lg:ml-0 max-w-[580px] hero-text-shadow">
-              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
+            <ul className="list-none flex flex-col gap-2.5 gap-x-7 lg:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-5 mb-0 sm:mb-0 md:ml-2 lg:ml-0 max-w-[580px] hero-text-shadow">
+              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] lg:text-[13.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
                   <polyline points="9 12 11 14 15 10" />
@@ -65,7 +65,7 @@ export function HeroSection({ city }: { city: City }) {
                 <span className="sm:hidden">Gutachten, Anwalt, Mietwagen</span>
                 <span className="hidden sm:inline">Gutachten, Anwalt &amp; Mietwagen</span>
               </li>
-              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
+              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] lg:text-[13.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <circle cx="12" cy="12" r="9" />
                   <polyline points="12 7 12 12 15 14" />
@@ -73,7 +73,7 @@ export function HeroSection({ city }: { city: City }) {
                 <span>In 60{' '}Min vor Ort in <span className="loc-uspsm">{city.name}</span></span>
               </li>
               {/* Mobile USP 3: "2.500+ Schäden begleitet" (eigener Bullet). */}
-              <li className="sm:hidden flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
+              <li className="sm:hidden flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] lg:text-[13.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M3 3v18h18" />
                   <path d="M7 14l4-4 4 4 5-5" />
@@ -81,7 +81,7 @@ export function HeroSection({ city }: { city: City }) {
                 2.500+ Schäden begleitet
               </li>
               {/* USP 4: "10+ Jahre Erfahrung" — alle Viewports. */}
-              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
+              <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] lg:text-[13.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M9 12l2 2 4-4" />
                   <circle cx="12" cy="12" r="9" />
@@ -89,7 +89,7 @@ export function HeroSection({ city }: { city: City }) {
                 10+ Jahre Erfahrung
               </li>
               {/* Desktop USP 3: Gegengutachten. */}
-              <li className="hidden sm:flex items-center gap-[11px] font-medium text-[15.5px] text-white/95 leading-snug">
+              <li className="hidden sm:flex items-center gap-[11px] font-medium text-[15.5px] lg:text-[13.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M3 3v18h18" />
                   <path d="M7 14l4-4 4 4 5-5" />
@@ -119,12 +119,12 @@ export function HeroSection({ city }: { city: City }) {
               {/* Trust-Block: DESKTOP-Variante (3 Zeilen, konsistente Gaps) */}
               <div className="hidden sm:flex flex-col gap-3">
                 <div className="flex items-center gap-2 leading-tight">
-                  <span className="text-[#FCD34D] text-[17px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
-                  <span className="font-mono font-bold text-white text-[17px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
+                  <span className="text-[#FCD34D] text-[17px] lg:text-[14px] tracking-[1.5px] flex-none" aria-hidden="true">★★★★★</span>
+                  <span className="font-mono font-bold text-white text-[17px] lg:text-[14px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
                   <span className="text-white/30" aria-hidden="true">·</span>
-                  <span className="text-[15.5px] text-white/90 font-medium">Google-Bewertungen</span>
+                  <span className="text-[15.5px] lg:text-[13px] text-white/90 font-medium">Google-Bewertungen</span>
                 </div>
-                <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[15.5px] leading-tight">
+                <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[15.5px] lg:text-[13px] leading-tight">
                   <span className="text-white/85"><strong className="text-white font-semibold">DAT-Expert</strong></span>
                   <span className="text-white/30" aria-hidden="true">·</span>
                   <span className="text-white/85"><strong className="text-white font-semibold">BVSK</strong></span>
@@ -134,14 +134,14 @@ export function HeroSection({ city }: { city: City }) {
                 <div className="flex items-center gap-2.5 leading-tight">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    className="w-[28px] h-[28px] flex-none drop-shadow-[0_2px_4px_rgba(0,0,0,.35)]"
+                    className="w-[28px] h-[28px] lg:w-[24px] lg:h-[24px] flex-none drop-shadow-[0_2px_4px_rgba(0,0,0,.35)]"
                     src="/assets/brand/siegel-claimondo-partner-v3.svg"
                     alt="Claimondo-Partner-Siegel"
                     loading="lazy"
                   />
                   <span className="flex flex-col leading-tight">
-                    <strong className="text-white font-semibold text-[15.5px] tracking-tight">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></strong>
-                    <span className="text-white/45 font-normal text-[12px] tracking-normal mt-0.5">Unfall-Assistance</span>
+                    <strong className="text-white font-semibold text-[15.5px] lg:text-[13px] tracking-tight">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></strong>
+                    <span className="text-white/45 font-normal text-[12px] lg:text-[11px] tracking-normal mt-0.5">Unfall-Assistance</span>
                   </span>
                 </div>
               </div>
