@@ -1,4 +1,5 @@
 ﻿import { createClient } from '@/lib/supabase/server'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
@@ -37,14 +38,11 @@ export default async function GutachterTasksPage() {
     .order('faellig_am', { ascending: true, nullsFirst: false })
 
   // Resolve fall numbers
-  const fallIds = [...new Set((tasks ?? []).map(t => t.fall_id).filter(Boolean))]
-  const { data: faelle } = fallIds.length > 0
-    ? await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-    : { data: [] }
+  // CMM-49: faelle-frei via Bridge+claims (shared helper).
+  const fallIds = [...new Set((tasks ?? []).map(t => t.fall_id).filter(Boolean) as string[])]
   const fallMap: Record<string, string> = {}
-  for (const f of faelle ?? []) {
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    fallMap[f.id] = (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8)
+  for (const r of await claimNummernForFaelle(supabase, fallIds)) {
+    fallMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8)
   }
 
   const offeneTasks = (tasks ?? []).filter(t => t.status === 'offen' || t.status === 'in-bearbeitung')

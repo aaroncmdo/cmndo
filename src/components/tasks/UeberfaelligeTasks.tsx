@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import Link from 'next/link'
 import { AlertTriangleIcon } from 'lucide-react'
 
@@ -39,15 +40,11 @@ export default async function UeberfaelligeTasks({
   const { data: tasks } = await query
   if (!tasks || tasks.length === 0) return null
 
-  // Resolve claim_nummern (claims.claim_nummer via faelle.claim_id)
+  // CMM-49: claim_nummern faelle-frei via Bridge+claims (shared helper).
   const fallIds = [...new Set(tasks.map(t => t.fall_id).filter(Boolean))] as string[]
-  const { data: faelle } = fallIds.length > 0
-    ? await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-    : { data: [] }
   const fallMap: Record<string, string> = {}
-  for (const f of faelle ?? []) {
-    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    fallMap[f.id] = claim?.claim_nummer ?? f.id.slice(0, 8)
+  for (const r of await claimNummernForFaelle(supabase, fallIds)) {
+    fallMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8)
   }
 
   const items: OverdueTask[] = tasks.map(t => ({
