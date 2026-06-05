@@ -121,6 +121,16 @@ body {
       transparent 54%);
 }
 
+/* Verschwommener Verlauf-Wedge: Foto unten-links blurren, diagonal bis 25% ausblenden (Aaron 05.06.).
+   backdrop-filter + diagonale Maske (to top right): voll an der unten-linken Ecke -> transparent bei 25%. */
+.hero-blur-corner {
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  -webkit-mask-image: linear-gradient(to top right, #000 0%, #000 4%, transparent 25%);
+          mask-image: linear-gradient(to top right, #000 0%, #000 4%, transparent 25%);
+  pointer-events: none;
+}
+
 /* Mobile: vertikaler Gradient — Bild oben sichtbar, Content auf opaker Flaeche */
 @media (max-width: 640px) {
   .hero-photo::after {
