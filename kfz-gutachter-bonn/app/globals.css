@@ -73,7 +73,7 @@
   --petrol-tint: #F6F3EB;
   --amber: #C9A86A;
   --amber-700: #8E7541;
-  --amber-aa: #7A5E29; /* A11y v2: AA-konformes (dunkleres) Antikgold fuer kleine Texte auf Weiss (6.04:1) — Mock v3-praxis-v2 Bonn */
+  --amber-aa: #7A5E29; /* A11y v2: AA-konformes (dunkleres) Amber fuer kleine Texte auf Weiss (5.84:1) — Mock v3-praxis-v2 */
 
   --au-container-narrow: 1180px;
   --au-container-prose: 760px;
@@ -170,8 +170,8 @@ body {
 .cases-track::-webkit-scrollbar { display: none; }
 
 /* FAQ accordion — alle geschlossen by default, bei .open aufklappen */
-.qa .a { max-height: 0; overflow: hidden; transition: max-height .45s ease; }
-.qa.open .a { max-height: 600px; }
+.qa .a { max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; transition: max-height .45s ease, padding .3s ease; }
+.qa.open .a { max-height: 600px; padding-bottom: 1rem; }
 .qa .chev { transition: transform .3s ease; display: inline-block; }
 .qa.open .chev { transform: rotate(45deg); }
 

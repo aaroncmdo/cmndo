@@ -55,7 +55,7 @@ export function HeroSection({ city }: { city: City }) {
               <p className="hero-zero-condition">Bei unverschuldetem Unfall</p>
               <p className="hero-post-zero">Versicherung zahlt alles</p>
             </div>
-            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mb-5 sm:mb-7 max-w-[580px] hero-text-shadow">
+            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-5 sm:mt-6 mb-5 sm:mb-7 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[15px] sm:text-[15.5px] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />

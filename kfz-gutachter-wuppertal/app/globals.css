@@ -170,8 +170,8 @@ body {
 .cases-track::-webkit-scrollbar { display: none; }
 
 /* FAQ accordion — alle geschlossen by default, bei .open aufklappen */
-.qa .a { max-height: 0; overflow: hidden; transition: max-height .45s ease; }
-.qa.open .a { max-height: 600px; }
+.qa .a { max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; transition: max-height .45s ease, padding .3s ease; }
+.qa.open .a { max-height: 600px; padding-bottom: 1rem; }
 .qa .chev { transition: transform .3s ease; display: inline-block; }
 .qa.open .chev { transform: rotate(45deg); }
 

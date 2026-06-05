@@ -88,8 +88,8 @@ export function RatgeberSection() {
         </div>
         <p className="text-center mt-8 text-muted text-sm font-medium">
           Alle Ratgeber-Artikel:{' '}
-          <a href="https://autounfall.io/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
-            autounfall.io →
+          <a href="https://claimondo.de/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
+            claimondo.de →
           </a>
         </p>
       </div>
