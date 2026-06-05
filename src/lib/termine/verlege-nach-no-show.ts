@@ -11,6 +11,7 @@
 // daher kein Doppel-Charge-Risiko (€70-Default unveraendert).
 import { createAdminClient } from '@/lib/supabase/admin'
 import { findBestSV } from '@/lib/dispatch/findBestSV'
+import { resolveTerminLeadId } from '@/lib/termine/resolve-lead-id'
 import { randomUUID } from 'crypto'
 
 type AdminClient = ReturnType<typeof createAdminClient>
@@ -41,7 +42,7 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
   // Alten Termin laden (sv_id + Standort + status fuer Idempotenz).
   const { data: alt } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, sv_id, status, besichtigungsort_lat, besichtigungsort_lng')
+    .select('id, fall_id, claim_id, lead_id, sv_id, status, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .maybeSingle()
   if (!alt) return { ok: false, error: 'Termin nicht gefunden' }
@@ -102,11 +103,8 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
   // Magic-Link an Kunde (non-critical: ein Baileys/Send-Fail darf die Umhaengung
   // nicht zuruecknehmen). Pattern wie meldeNoShow (storno-actions, CMM-39).
   try {
-    let leadId: string | null = null
-    if (fallId) {
-      const { data: fall } = await db.from('faelle').select('lead_id').eq('id', fallId).maybeSingle()
-      leadId = (fall?.lead_id as string | null) ?? null
-    }
+    // CMM-49: lead_id faelle-frei (termin.lead_id -> claims.lead_id via claim_id), value-preserving.
+    const leadId = await resolveTerminLeadId(db, alt)
     if (leadId) {
       const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', leadId).maybeSingle()
       const telefon = (lead?.telefon as string | null) ?? null
