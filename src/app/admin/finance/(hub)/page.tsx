@@ -493,6 +493,15 @@ export default async function FinancePage() {
   const offeneClaimIdList = (offeneClaimIds ?? []).map((c) => c.id)
   const abgeschlossenClaimIdList = (abgeschlossenClaimIds ?? []).map((c) => c.id)
 
+  // CMM-49: Bridge-Claim-IDs = exakt die faelle-backed claims (bridge↔faelle 1:1, 78).
+  // Filter-Set fuer den value-neutralen faelle-freien Aggregat-Pfad — claims ⊋ faelle (1 claim
+  // ohne faelle), daher MUSS auf die Bridge-Menge eingeschraenkt werden (sonst falsche Finanzzahlen).
+  const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
+  const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id as string)
+  const faelleClaimIdSet = new Set(faelleClaimIds)
+  const offeneFaelleClaimIds = offeneClaimIdList.filter((id) => faelleClaimIdSet.has(id))
+  const abgeschlossenFaelleClaimIds = abgeschlossenClaimIdList.filter((id) => faelleClaimIdSet.has(id))
+
   const [
     { data: aktiveSvs },
     { count: aktiveFaelle },
@@ -509,12 +518,13 @@ export default async function FinancePage() {
 
     // 2. Aktive Fälle diesen Monat
     supabase
-      // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed (faelle.claim_id NOT NULL => verlustfrei; status bleibt faelle-nativ).
-      .from('faelle')
-      .select('id, claims:claim_id!inner(created_at)', { count: 'exact', head: true })
-      .gte('claims.created_at', monatStart)
-      .lte('claims.created_at', monatEnde)
-      .in('claim_id', offeneClaimIdList),
+      // CMM-49: faelle-frei + value-neutral — claims-direkt auf den faelle-backed Claim-IDs
+      // (Bridge-Intersection; claims ⊋ faelle). count == frueherer faelle-count (bridge↔faelle 1:1).
+      .from('claims')
+      .select('id', { count: 'exact', head: true })
+      .gte('created_at', monatStart)
+      .lte('created_at', monatEnde)
+      .in('id', offeneFaelleClaimIds),
 
     // 3. Abgeschlossene Fälle diesen Monat (für Provision)
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
@@ -531,26 +541,25 @@ export default async function FinancePage() {
 
     // 4. Alle abgeschlossenen Fälle mit Betrag (für Durchschnitt)
     supabase
-      .from('faelle')
-      .select('claims:claim_id!inner(regulierungs_betrag)')
-      .in('claim_id', abgeschlossenClaimIdList)
-      .not('claims.regulierungs_betrag', 'is', null),
+      // CMM-49: faelle-frei + value-neutral via Bridge-Intersection (faelle-backed Claim-IDs).
+      .from('claims')
+      .select('regulierungs_betrag')
+      .in('id', abgeschlossenFaelleClaimIds)
+      .not('regulierungs_betrag', 'is', null),
 
     // 5. Fälle pro Monat (letzte 6 Monate) – alle Fälle nach created_at
-    // CMM-65: created_at lebt auf claims (faelle stirbt in Phase 6). from('faelle') BLEIBT Basis —
-    // claims ist ein Superset (live: 54 claims vs 53 faelle), ein base-switch waere NICHT value-neutral.
-    // created_at via claims:claim_id!inner-Embed, auf {created_at} flachgezogen. .order entfaellt:
-    // der Consumer (Chart) bucket-zaehlt clientseitig nach Monat, die Reihenfolge ist irrelevant.
+    // CMM-49: claims-direkt auf den faelle-backed Claim-IDs (Bridge-Intersection) — claims ⊋ faelle,
+    // daher .in('id', faelleClaimIds) statt base-switch (sonst zaehlt der faelle-lose claim mit).
+    // {created_at} flachgezogen; der Consumer (Chart) bucket-zaehlt clientseitig nach Monat.
     (async () => {
       const sechsMonateZurueck = new Date(now.getFullYear(), now.getMonth() - 5, 1).toISOString()
+      // CMM-49: faelle-frei + value-neutral via Bridge-Intersection (alle faelle-backed Claim-IDs).
       const { data } = await supabase
-        .from('faelle')
-        .select('claims:claim_id!inner(created_at)')
-        .gte('claims.created_at', sechsMonateZurueck)
-      return (data ?? []).map(f => {
-        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-        return { created_at: (c as { created_at?: string } | null)?.created_at ?? '' }
-      })
+        .from('claims')
+        .select('created_at')
+        .in('id', faelleClaimIds)
+        .gte('created_at', sechsMonateZurueck)
+      return (data ?? []).map((c) => ({ created_at: (c.created_at as string | null) ?? '' }))
     })(),
 
     // 6. Letzte abgeschlossene Fälle für Tabelle
@@ -576,13 +585,9 @@ export default async function FinancePage() {
     return sum + (sv.paket ? getPaket(sv.paket).preis : 0)
   }, 0)
 
-  // CMM-44 SP-A2 (Cluster 3): regulierungs_betrag aus dem claims-Embed ziehen
-  // (Array|Objekt normalisieren). Wird nur noch von Query #4 (alleAbgeschlossen)
-  // genutzt, das weiter den claims-Embed liest (kein regulierung_am-Bezug).
-  const claimRegBetrag = (f: { claims: unknown }): number => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return Number((c as { regulierungs_betrag?: number | null } | null)?.regulierungs_betrag) || 0
-  }
+  // CMM-49: alleAbgeschlossen liest jetzt claims-direkt (flach) — regulierungs_betrag direkt.
+  const claimRegBetrag = (c: { regulierungs_betrag: number | null }): number =>
+    Number(c.regulierungs_betrag) || 0
   // CMM-44 SP-I3: Query #3/#6 lesen jetzt aus v_faelle_mit_aktuellem_termin —
   // regulierung_betrag ist dort flach.
   const viewRegBetrag = (f: { regulierung_betrag: number | null }): number =>
@@ -660,19 +665,20 @@ export default async function FinancePage() {
   // CMM-65: created_at-Filter -> claims.created_at via !inner-Embed.
   // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — aus dem Embed lesen +
   // Filter auf claims.lead_preis_netto (sv_id bleibt faelle-nativ).
+  // CMM-49: faelle-frei + value-neutral via Bridge-Intersection. sv_id 0-diff zu faelle.sv_id.
   const { data: monatFaelle } = await supabase
-    .from('faelle')
-    .select('sv_id, claims:claim_id!inner(created_at, lead_preis_netto)')
+    .from('claims')
+    .select('sv_id, lead_preis_netto')
+    .in('id', faelleClaimIds)
     .not('sv_id', 'is', null)
-    .not('claims.lead_preis_netto', 'is', null)
-    .gte('claims.created_at', leadkostenMonatStart)
-    .lt('claims.created_at', leadkostenMonatEnd)
+    .not('lead_preis_netto', 'is', null)
+    .gte('created_at', leadkostenMonatStart)
+    .lt('created_at', leadkostenMonatEnd)
 
   const monatKostenMap: Record<string, number> = {}
-  for (const f of monatFaelle ?? []) {
-    if (!f.sv_id) continue
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    monatKostenMap[f.sv_id] = (monatKostenMap[f.sv_id] ?? 0) + Number((fClaim as { lead_preis_netto?: number | null } | null)?.lead_preis_netto ?? 0)
+  for (const c of monatFaelle ?? []) {
+    if (!c.sv_id) continue
+    monatKostenMap[c.sv_id] = (monatKostenMap[c.sv_id] ?? 0) + Number(c.lead_preis_netto ?? 0)
   }
 
   const svRows = (svUebersicht ?? []).map(s => {

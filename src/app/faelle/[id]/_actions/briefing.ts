@@ -10,6 +10,7 @@
 // Rate-Limit: max. 1 Regeneration pro Fall pro 10min (außer Admin).
 
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { generateSvBriefing } from '@/lib/ai/briefing'
 import { generateSvBriefingStruktur } from '@/lib/ai/briefing-structured'
@@ -79,13 +80,11 @@ export async function regenerateSvBriefingStruktur(fallId: string): Promise<{
     // CMM-44 SP-H PR2: sv_briefing_struktur lebt auf auftraege (aktueller Auftrag),
     // via Nested-Embed lesen; updated_at bleibt auf faelle. Pre-launch <=1 Auftrag
     // pro Claim, daher reicht der Embed ohne explizite reihenfolge-Ordnung.
-    const { data: fall } = await supabase
-      .from('faelle')
-      .select('claims:claim_id(updated_at, auftraege(sv_briefing_struktur))')
-      .eq('id', fallId)
-      .single()
-
-    const fallClaims = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+    // CMM-49: faelle-frei — claims-direkt (updated_at + auftraege nested auf claims).
+    const claimId = await resolveClaimId(supabase, fallId)
+    const { data: fallClaims } = claimId
+      ? await supabase.from('claims').select('updated_at, auftraege(sv_briefing_struktur)').eq('id', claimId).maybeSingle()
+      : { data: null }
     const fallAuftraege = Array.isArray(
       (fallClaims as { auftraege?: unknown } | null)?.auftraege,
     )
