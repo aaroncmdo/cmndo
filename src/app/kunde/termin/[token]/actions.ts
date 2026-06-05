@@ -172,3 +172,22 @@ export async function stopKundeTracking(
   await db.from('kunde_live_position').delete().eq('termin_id', terminId)
   return { success: true }
 }
+
+// Fallback-Layer: Kunde bestaetigt/korrigiert den Besichtigungsort (token-auth).
+export async function bestaetigeBesichtigungsortViaToken(token: string, terminId: string): Promise<ActionResult> {
+  const auth = await verifyToken(token, terminId)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const { bestaetigeBesichtigungsort } = await import('@/lib/termine/engine')
+  const r = await bestaetigeBesichtigungsort(terminId, 'kunde')
+  return r.ok ? { success: true } : { success: false, error: r.error ?? 'Fehler' }
+}
+
+export async function korrigiereBesichtigungsortViaToken(
+  token: string, terminId: string, ort: { adresse: string; lat: number; lng: number },
+): Promise<ActionResult> {
+  const auth = await verifyToken(token, terminId)
+  if (!auth.ok) return { success: false, error: auth.error }
+  const { korrigiereBesichtigungsort } = await import('@/lib/termine/engine')
+  const r = await korrigiereBesichtigungsort(terminId, ort, 'kunde')
+  return r.ok ? { success: true } : { success: false, error: r.error ?? 'Fehler' }
+}

@@ -7,6 +7,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
 import { getStorageUrl } from '@/lib/storage/url'
 import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 // AAR-939 (embed-B WA-Inbound): geteilte Resolution-Kernlogik + Stale-Gate-
 // Konstanten (identisch zu Resolution-Cron + Kunde-Banner). Siehe Block in POST().
 import { closeNurGutachterTerminAlsDurchgefuehrt, CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
@@ -319,8 +320,11 @@ export async function POST(req: NextRequest) {
     // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte —
     // über claims-Embed gelesen (claims ist SSoT).
     // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
-    const { data: fall } = await db.from('faelle').select('claims:claim_id(kundenbetreuer_id, claim_nummer)').eq('id', matchedFallId).single()
-    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    // CMM-49: kundenbetreuer_id + claim_nummer claims-direkt (faelle-frei).
+    const matchedClaimId = await resolveClaimId(db, matchedFallId)
+    const { data: fallClaim } = matchedClaimId
+      ? await db.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', matchedClaimId).maybeSingle()
+      : { data: null }
     const fallKb = fallClaim?.kundenbetreuer_id as string | null | undefined
     if (fallKb) {
       const { createNotification } = await import('@/lib/notifications')
@@ -703,8 +707,11 @@ export async function POST(req: NextRequest) {
     // CMM-44 SP-A: kundenbetreuer_id ist faelle<->claims-DUP-Spalte —
     // über claims-Embed gelesen (claims ist SSoT).
     // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
-    const { data: fall } = await db.from('faelle').select('claims:claim_id(kundenbetreuer_id, claim_nummer)').eq('id', matchedFallId).single()
-    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    // CMM-49: kundenbetreuer_id + claim_nummer claims-direkt (faelle-frei).
+    const matchedClaimId = await resolveClaimId(db, matchedFallId)
+    const { data: fallClaim } = matchedClaimId
+      ? await db.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', matchedClaimId).maybeSingle()
+      : { data: null }
     const fallKb = fallClaim?.kundenbetreuer_id as string | null | undefined
     if (fallKb && gespeichert.length > 0) {
       const { createNotification } = await import('@/lib/notifications')

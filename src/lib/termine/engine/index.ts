@@ -39,3 +39,5 @@ export { syncTerminToExternalCalendar, entferneTerminAusExternemKalender, google
 export type { KalenderProvider, SyncStatus, SyncResult, TerminSyncRow } from './kalender-sync'
 export { resolveTerminKontext, buildSummary, buildDescription } from './kalender-kontext'
 export type { TerminKontext, KontextFelder } from './kalender-kontext'
+export { korrigiereBesichtigungsort, bestaetigeBesichtigungsort } from './besichtigungsort-write'
+export type { BestaetigtVon } from './besichtigungsort-write'

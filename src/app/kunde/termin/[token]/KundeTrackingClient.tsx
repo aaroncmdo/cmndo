@@ -10,6 +10,7 @@ import { haversineKm } from '@/lib/gps/geofence'
 import Avatar from '@/components/shared/Avatar'
 import KundeAnfahrtCard from './KundeAnfahrtCard'
 import LiveAnsichtOverlay from './LiveAnsichtOverlay'
+import BesichtigungsortCheck from './BesichtigungsortCheck'
 
 // AAR-423: Brand-aware Primary-Akzente via CSS-Vars mit Claimondo-Fallbacks.
 // Surface/Background/Text bleiben Claimondo-Default — nur „Primary"-Elemente
@@ -39,6 +40,9 @@ export default function KundeTrackingClient({
   kundenTrackingAngeboten,
   kundeTrackingAktiviert,
   kundeBereitsAngekommen,
+  besichtigungsortAdresse,
+  besichtigungsortBestaetigtVon,
+  kanal,
 }: {
   svId: string
   channelHash: string
@@ -61,6 +65,9 @@ export default function KundeTrackingClient({
   kundenTrackingAngeboten: boolean
   kundeTrackingAktiviert: boolean
   kundeBereitsAngekommen: boolean
+  besichtigungsortAdresse: string | null
+  besichtigungsortBestaetigtVon: string | null
+  kanal: string | null
 }) {
   const t = useTranslations('kunde.tracking')
   const format = useFormatter()
@@ -207,6 +214,8 @@ export default function KundeTrackingClient({
 
   // KFZ-134: Gegenvorschlag UI wenn SV einen Termin vorgeschlagen hat
   const isSvVorschlag = (terminStatus === 'vorschlag' || terminStatus === 'reserviert' || (terminStatus === 'gegenvorschlag' && gegenvorschlagVon === 'sv'))
+  const istVorOrt = kanal !== 'video' && kanal !== 'telefon'
+  const ortBestaetigt = besichtigungsortBestaetigtVon != null
 
   if (actionDone) {
     return (
@@ -351,6 +360,18 @@ export default function KundeTrackingClient({
               {t('vorbereitet.wartenText', { svVorname })}
             </p>
           )}
+
+          {!isSvVorschlag && istVorOrt && (
+            <div className="mt-4">
+              <BesichtigungsortCheck
+                variant="card"
+                token={token}
+                terminId={terminId}
+                adresse={besichtigungsortAdresse ?? adresse}
+                bestaetigt={ortBestaetigt}
+              />
+            </div>
+          )}
         </div>
       </div>
     )
@@ -421,6 +442,18 @@ export default function KundeTrackingClient({
         <p className="text-xs text-claimondo-ondo/70 mt-2 flex items-center gap-1">
           <MapPinIcon className="w-3 h-3" /> {adresse}
         </p>
+
+        {istVorOrt && (
+          <div className="mt-1.5">
+            <BesichtigungsortCheck
+              variant="link"
+              token={token}
+              terminId={terminId}
+              adresse={besichtigungsortAdresse ?? adresse}
+              bestaetigt={ortBestaetigt}
+            />
+          </div>
+        )}
 
         {/* AAR-384: Anfahrt-Tracking für Kunden — nur wenn Termin nicht
             beim Kunden zuhause ist (z. B. Werkstatt, neutraler Ort). */}
