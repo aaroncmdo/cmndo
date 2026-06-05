@@ -42,7 +42,7 @@ export function HeroSection({ city }: { city: City }) {
               </p>
               <p className="hero-tagline">Unabhängige Sachverständige</p>
             </div>
-            <h1 className="font-grotesk font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 md:mb-1 lg:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
+            <h1 className="font-grotesk font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 md:mb-1 leading-[1.15] lg:leading-[1.0] tracking-[-0.016em] hero-h1-shadow">
               Kfz-Gutachter <br />
               <span className="text-amber loc">{city.name}</span>
             </h1>
@@ -51,10 +51,10 @@ export function HeroSection({ city }: { city: City }) {
               Gerichtsfestes Gutachten — neutral und schnell vor Ort.
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
-            <div className="mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3">
-              <p className="font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(40px,4vw,58px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]" style={{ fontFamily: 'Georgia, serif' }}>0&nbsp;€</p>
-              <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
-              <p className="italic text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
+            <div className="mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3 lg:px-3 lg:py-2">
+              <p className="font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(34px,3.4vw,46px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]" style={{ fontFamily: 'Georgia, serif' }}>0&nbsp;€</p>
+              <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] lg:text-[13.5px] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
+              <p className="italic text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] lg:text-[11.5px] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
             </div>
             <ul className="list-none flex flex-col gap-2.5 gap-x-7 lg:gap-y-2.5 mt-[clamp(14px,2.3vh,22px)] sm:mt-5 mb-0 sm:mb-0 md:ml-2 lg:ml-0 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] lg:text-[13.5px] text-white/95 leading-snug">

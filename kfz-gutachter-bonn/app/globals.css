@@ -165,6 +165,12 @@ body {
         color-mix(in srgb, #0E1015 48%, transparent) 38%,
         transparent 70%);
   }
+  /* Desktop: Bild leicht hochzoomen + Y=0 -> Augen des Gutachters auf H2-Hoehe
+     (Aaron 05.06.). Cover fuellt die Hoehe exakt -> ohne Zoom kein vertikaler Spielraum. */
+  .hero-photo {
+    background-size: auto 115% !important;
+    background-position: 70% 0% !important;
+  }
 }
 
 /* iPhone SE & kurze Viewports (max-height<=700): Eyebrow-Sterne + "5,0" ausblenden.
