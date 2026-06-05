@@ -5,7 +5,6 @@
 // (SEO-Diversitaet). Variante A UND B. KEIN rel="nofollow". Plan Task 4.12.
 
 const ANCHORS = [
-  'Anfrage-Formular bereitgestellt von Claimondo',
   'Kfz-Gutachter-Netzwerk Claimondo',
   'Powered by Claimondo · Sachverständige finden',
 ]
