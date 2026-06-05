@@ -42,7 +42,7 @@ export function HeroSection({ city }: { city: City }) {
               </p>
               <p className="hero-tagline">Unabhängige Sachverständige</p>
             </div>
-            <h1 className="font-display font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
+            <h1 className="font-grotesk font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
               Kfz-Gutachter <br />
               <span className="text-amber loc">{city.name}</span>
             </h1>
@@ -52,7 +52,7 @@ export function HeroSection({ city }: { city: City }) {
             </p>
             {/* 0€-Stat-Anker — 3-zeiliger Stack, ALLE Formate (zweiter Hero nach H1, prominentester Stat). */}
             <div className="mt-auto self-start bg-black/35 backdrop-blur-md rounded-2xl px-4 py-3">
-              <p className="font-display font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(60px,7vw,100px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
+              <p className="font-grotesk font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] lg:text-[clamp(60px,7vw,100px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]">0&nbsp;€</p>
               <p className="font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
               <p className="text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
             </div>

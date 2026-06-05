@@ -37,6 +37,7 @@
   --font-display: var(--font-noto-sans), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
+  --font-grotesk: var(--font-space-grotesk), system-ui, sans-serif;
 
   /* === FONT-SIZE-PAKETE (fluid clamp) === */
   --text-hero-h1: clamp(23px, 6.4vw, 56px);
