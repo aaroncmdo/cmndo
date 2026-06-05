@@ -133,7 +133,7 @@ export function FabStack({ city }: { city: City }) {
       {/* ===== STICKY CALLBAR (Mobile only) ===== */}
       <a
         id="mobileStickyCall"
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-2 bg-petrol/90 backdrop-blur-[10px] border-t border-white/10 px-4 py-3 text-white font-display font-bold text-[15px] fab-scroll-gated"
+        className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-2 bg-petrol/90 backdrop-blur-[10px] border-t-2 border-[var(--amber)] overflow-hidden sticky-callbar-shine px-4 py-3 text-white font-display font-bold text-[15px] fab-scroll-gated"
         href={`tel:${CLUSTER.phone.tel}`}
         data-cta="mobile_sticky_call"
         aria-label="Jetzt anrufen"
