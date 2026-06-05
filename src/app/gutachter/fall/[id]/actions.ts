@@ -115,16 +115,15 @@ export async function uploadGutachten(
   // Benachrichtigung läuft via Email separat (send-gutachten-an-kanzlei).
   try {
     const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
-    // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-Duplikat-Spalte
-    // → aus dem claims-Embed lesen (SSoT).
-    const { data: fallForMitteilung } = await supabase
-      .from('faelle')
-      .select('claims:claim_id(kundenbetreuer_id)')
-      .eq('id', fallId)
-      .single()
-    const claimForMitteilung = Array.isArray(fallForMitteilung?.claims)
-      ? fallForMitteilung.claims[0]
-      : fallForMitteilung?.claims
+    // CMM-49: kundenbetreuer_id direkt aus claims (SSoT) via resolveClaimId — kein faelle-Read.
+    const mitClaimId = await resolveClaimId(supabase, fallId)
+    const { data: claimForMitteilung } = mitClaimId
+      ? await supabase
+          .from('claims')
+          .select('kundenbetreuer_id')
+          .eq('id', mitClaimId)
+          .maybeSingle()
+      : { data: null }
     if (claimForMitteilung?.kundenbetreuer_id) {
       await createMitteilung({
         empfaenger_id: claimForMitteilung.kundenbetreuer_id,
@@ -137,15 +136,15 @@ export async function uploadGutachten(
   } catch { /* non-critical */ }
 
   // KFZ-204: QC-Task fuer KB "Filmcheck durchfuehren"
-  // CMM-44 SP-A: kundenbetreuer_id + claim_nummer aus claims-Embed (SSoT).
-  const { data: fallForTask } = await supabase
-    .from('faelle')
-    .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
-    .eq('id', fallId)
-    .single()
-  const claimForTask = Array.isArray(fallForTask?.claims)
-    ? fallForTask.claims[0]
-    : fallForTask?.claims
+  // CMM-49: kundenbetreuer_id + claim_nummer direkt aus claims (SSoT) via resolveClaimId.
+  const taskClaimId = await resolveClaimId(supabase, fallId)
+  const { data: claimForTask } = taskClaimId
+    ? await supabase
+        .from('claims')
+        .select('kundenbetreuer_id, claim_nummer')
+        .eq('id', taskClaimId)
+        .maybeSingle()
+    : { data: null }
 
   const fallNrForTask = (claimForTask?.claim_nummer as string | null) ?? fallId.slice(0, 8)
 
@@ -574,16 +573,18 @@ export async function declineTermin(
   const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
-  // Verify fall belongs to this gutachter
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, sv_id, claims:claim_id(claim_nummer)')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
-    .single()
-  if (!fall) return { error: 'Fall nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const fallClaimNummer = (fallClaim?.claim_nummer as string | null) ?? null
+  // Verify fall belongs to this gutachter — CMM-49: Gate + claim_nummer direkt aus claims (sv_id 0-diff).
+  const vClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallClaim } = vClaimId
+    ? await supabase
+        .from('claims')
+        .select('claim_nummer')
+        .eq('id', vClaimId)
+        .eq('sv_id', sv.id)
+        .maybeSingle()
+    : { data: null }
+  if (!fallClaim) return { error: 'Fall nicht gefunden' }
+  const fallClaimNummer = (fallClaim.claim_nummer as string | null) ?? null
 
   // 1. gutachter_termine → abgelehnt
   // KFZ-136: Termin-IDs vor dem Update holen fuer Reminder-Cancel
@@ -635,13 +636,15 @@ export async function declineTermin(
 
   // 5. Task: Neuen Gutachter zuweisen (KFZ-151: verknuepft mit case)
   try {
-    // CMM-44 SP-A: kundenbetreuer_id aus claims-Embed (SSoT).
-    const { data: fallData } = await supabase
-      .from('faelle')
-      .select('claims:claim_id(kundenbetreuer_id)')
-      .eq('id', fallId)
-      .single()
-    const claimData = Array.isArray(fallData?.claims) ? fallData.claims[0] : fallData?.claims
+    // CMM-49: kundenbetreuer_id direkt aus claims (SSoT) via resolveClaimId.
+    const ngClaimId = await resolveClaimId(supabase, fallId)
+    const { data: claimData } = ngClaimId
+      ? await supabase
+          .from('claims')
+          .select('kundenbetreuer_id')
+          .eq('id', ngClaimId)
+          .maybeSingle()
+      : { data: null }
     const { createLinkedTask } = await import('@/lib/tasks/create-task')
     await createLinkedTask({
       fall_id: fallId,
