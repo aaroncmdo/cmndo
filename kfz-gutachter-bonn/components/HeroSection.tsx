@@ -33,7 +33,7 @@ export function HeroSection({ city }: { city: City }) {
       <div className="hero-blur-corner absolute inset-0 z-0" aria-hidden="true" />
       <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[70px] pb-[16px] sm:pt-[40px] sm:pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] grid-rows-[1fr_auto] md:grid-rows-none gap-14 items-stretch flex-1">
-          <div className="flex flex-col justify-between sm:justify-start sm:pb-2.5 hero-copy-fade">
+          <div className="flex flex-col sm:pb-2.5 hero-copy-fade">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline als EINE zusammenhaengende Gruppe (fix beieinander). */}
             <div className="sm:hidden">
               <p className="hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
@@ -42,7 +42,7 @@ export function HeroSection({ city }: { city: City }) {
               </p>
               <p className="hero-tagline">Unabhängige Sachverständige</p>
             </div>
-            <h1 className="font-display font-bold text-hero-h1 text-white mt-1 mb-1 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
+            <h1 className="font-display font-bold text-hero-h1 text-white mt-2.5 mb-0 sm:mt-3 sm:mb-4 leading-[1.15] tracking-[-0.016em] hero-h1-shadow">
               Kfz-Gutachter <br className="sm:hidden" />
               <span className="text-amber loc">{city.name}</span>
               <span className="hidden sm:block font-semibold text-white/85 mt-1 sm:mt-2 text-[clamp(16px,1.6vw,18px)] leading-snug tracking-normal h1-sub italic">
@@ -57,12 +57,12 @@ export function HeroSection({ city }: { city: City }) {
               Bei unverschuldetem Unfall zahlen Sie <span className="text-amber">0&nbsp;€</span>. Die Versicherung übernimmt alles.
             </p>
             {/* 0€-Anker NUR MOBILE: Zahl oben, Bedingung, Proof. */}
-            <div className="sm:hidden mt-3 hero-text-shadow hero-zero-block">
+            <div className="sm:hidden mt-5 hero-text-shadow hero-zero-block">
               <p className="hero-zero-big">0&nbsp;€</p>
               <p className="hero-zero-condition">Bei unverschuldetem Unfall</p>
               <p className="hero-post-zero">Versicherung zahlt alles</p>
             </div>
-            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-3 sm:mt-6 mb-4 sm:mb-7 max-w-[580px] hero-text-shadow">
+            <ul className="list-none flex flex-col sm:flex-row sm:flex-wrap gap-2 gap-x-7 sm:gap-y-2.5 mt-5 sm:mt-6 mb-0 sm:mb-7 max-w-[580px] hero-text-shadow">
               <li className="flex items-center gap-[11px] font-medium text-[clamp(13px,3.6vw,15.5px)] text-white/95 leading-snug">
                 <svg className="w-[18px] h-[18px] stroke-amber fill-none flex-none" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M12 2 4 6v6c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V6l-8-4z" />
@@ -104,7 +104,7 @@ export function HeroSection({ city }: { city: City }) {
               </li>
             </ul>
             {/* CTA: mobile "Jetzt anrufen" (Verb), Desktop Telefonnummer (Glaubwuerdigkeit). */}
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5 sm:mb-7 max-w-[580px]">
+            <div className="mt-auto sm:mt-0 flex flex-col sm:flex-row sm:items-center gap-3 mb-0 sm:mb-7 max-w-[580px]">
               <a
                 id="heroCallCta"
                 className="inline-flex items-center justify-center gap-2.5 bg-cta text-white font-display font-bold text-[clamp(14.5px,4vw,16.5px)] px-7 py-4 sm:py-[15px] rounded-[12px] tracking-[.005em] shadow-[0_6px_20px_rgba(229,55,43,.32)] hover:bg-cta-700 hover:-translate-y-px hover:shadow-[0_8px_24px_rgba(229,55,43,.42)] active:scale-[.98] transition-all duration-200 min-h-[52px] w-full sm:w-auto"
@@ -135,7 +135,7 @@ export function HeroSection({ city }: { city: City }) {
               </span>
             </div>
             {/* Trust-Block — Gradient-Divider + 3 Zeilen auf Desktop, kompakter Stack + Brand-Anker auf Mobile. */}
-            <div className="mt-3 sm:mt-auto max-w-[580px]">
+            <div className="mt-2 sm:mt-auto max-w-[580px]">
               <div
                 className="hidden sm:block h-px mb-6"
                 style={{ background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,.18) 22%, rgba(255,255,255,.18) 78%, transparent 100%)' }}
@@ -197,7 +197,7 @@ export function HeroSection({ city }: { city: City }) {
             <a
               href="#reviews"
               id="heroScrollChevron"
-              className="sm:hidden hero-scroll-chevron relative z-[3] mx-auto grid place-items-center w-12 h-10 text-white/80 shrink-0"
+              className="sm:hidden hero-scroll-chevron relative z-[3] mt-2 mx-auto grid place-items-center w-12 h-10 text-white/80 shrink-0"
               aria-label="Weiter scrollen"
             >
               <svg className="w-6 h-6 stroke-current fill-none" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
