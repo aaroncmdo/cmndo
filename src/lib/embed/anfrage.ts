@@ -26,6 +26,8 @@ export interface EmbedSiteConfig {
   id: string
   slug: string
   variante: AnfrageVariante
+  /** AAR-939 Embed-B: callback (Default, SV-Rueckruf) | flowlink (Self-Service, /flow-Link). Orthogonal zu variante. */
+  funnel_modus: 'callback' | 'flowlink'
   einzelpreis_eur: number
   empfaenger_email: string
   cc_email: string | null
@@ -75,7 +77,7 @@ export async function ladeEmbedSite(slug: string): Promise<EmbedSiteConfig | nul
   const db = createAdminClient()
   const { data, error } = await db
     .from('embed_sites')
-    .select('id, slug, variante, einzelpreis_eur, empfaenger_email, cc_email, baileys_routing_nummer, erlaubte_domains, max_anfragen_pro_h, aktiv')
+    .select('id, slug, variante, funnel_modus, einzelpreis_eur, empfaenger_email, cc_email, baileys_routing_nummer, erlaubte_domains, max_anfragen_pro_h, aktiv')
     .eq('slug', slug)
     .maybeSingle()
   if (error || !data) return null
