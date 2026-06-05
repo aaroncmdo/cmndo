@@ -46,13 +46,9 @@ export async function GET(request: Request) {
     geprueft++
     if (!termin.fall_id) continue
 
-    // Fall laden (nur fuer fall.id — Flag kommt jetzt aus gutachter_termine).
-    const { data: fall } = await db
-      .from('faelle')
-      .select('id')
-      .eq('id', termin.fall_id)
-      .single()
-    if (!fall) continue
+    // CMM-49: faelle-Existenz-Read entfernt — fall_id ist FK-garantiert (Termin traegt fall_id),
+    // Child-Ops (pflichtdokumente/timeline/sendFall) nutzen fall_id direkt (Spalte ueberlebt Drop).
+    const fall = { id: termin.fall_id as string }
 
     // Flag aus dem Termin selbst lesen (SSoT nach CMM-44 SP-D).
     if (termin.sv_termin_dokument_reminder_gesendet_am) {

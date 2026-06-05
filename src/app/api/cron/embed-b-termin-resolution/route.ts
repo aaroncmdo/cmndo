@@ -30,12 +30,13 @@ type AdminClient = ReturnType<typeof createAdminClient>
 // Portal-Banner + Dispatcher-Task greifen unabhaengig.
 async function pingKundeTerminCheck(
   db: AdminClient,
-  termin: { claim_id: string | null; fall_id: string | null; lead_id: string | null },
+  termin: { claim_id: string | null; lead_id: string | null },
 ): Promise<boolean> {
   let leadId = termin.lead_id
-  if (!leadId && termin.fall_id) {
-    const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).maybeSingle()
-    leadId = (fall?.lead_id as string | null) ?? null
+  if (!leadId && termin.claim_id) {
+    // CMM-49: lead_id faelle-frei via claims (claim_id in scope, Cron filtert claim_id NOT NULL).
+    const { data: claim } = await db.from('claims').select('lead_id').eq('id', termin.claim_id).maybeSingle()
+    leadId = (claim?.lead_id as string | null) ?? null
   }
   if (!leadId) return false
   const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', leadId).maybeSingle()
@@ -99,7 +100,6 @@ export async function GET(request: Request) {
       try {
         const sent = await pingKundeTerminCheck(db, {
           claim_id: (t.claim_id as string | null) ?? null,
-          fall_id: (t.fall_id as string | null) ?? null,
           lead_id: (t.lead_id as string | null) ?? null,
         })
         if (sent) pingsGesendet++
