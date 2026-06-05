@@ -13,7 +13,6 @@ import {
   type EmbedSiteConfig,
 } from '@/lib/embed/anfrage'
 import { verifySiteToken } from '@/lib/embed/jwt'
-import { issueSelfServiceFlowLink } from '@/lib/self-service/issue-flowlink'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 
 /**
@@ -171,16 +170,21 @@ export async function POST(req: NextRequest) {
   // ── 6. Variante A (callback) + Cluster-LP: Notify non-blocking nach Response ─
   after(async () => {
     await notifyAnfrage({ anfrageId: result.anfrageId, payload, variante, site })
-    // AAR-940 Self-Service: gated FlowLink-Ausgabe (env SELF_SERVICE_AUTO_ISSUE,
+    // AAR-956 Cluster-LP: gated kanonischer FlowLink (env SELF_SERVICE_AUTO_ISSUE,
     // default AUS). Nur Cluster-LP — sv_embed hat seinen eigenen Pfad (embed-A/B oben),
-    // native laeuft inline ueber den Wizard. Eligibility (Kontakt, nicht promotet)
-    // prueft issueSelfServiceFlowLink selbst; Fehler bleiben non-fatal.
-    // [aar-956 Cluster-LP-Retire: diesen Call -> issueCanonical, NACH diesem A/B-Refactor.]
+    // native laeuft inline ueber den Wizard. issueCanonicalFlowLinkForAnfrage erzeugt
+    // Lead (idempotent) + EINEN kanonischen flow_link + Versand des /flow-Links
+    // (WhatsApp -> SMS -> Email). Ersetzt das alte /anfrage-self_service_token-Doppel
+    // (war issueSelfServiceFlowLink). Fehler non-fatal; Lead haengt als Safety-Net
+    // in der Dispatch-Queue (kein Eligibility-Filter mehr: jede Anfrage wird Lead).
     if (process.env.SELF_SERVICE_AUTO_ISSUE === 'true' && payload.source === 'kfz_gutachter_lp') {
       try {
-        await issueSelfServiceFlowLink(result.anfrageId)
+        const issued = await issueCanonicalFlowLinkForAnfrage(result.anfrageId)
+        if (!issued.ok) {
+          console.error('[aar-956 Cluster-LP] issueCanonical fehlgeschlagen:', issued.error)
+        }
       } catch (err) {
-        console.error('[AAR-940] issueSelfServiceFlowLink (gated) fehlgeschlagen:', err)
+        console.error('[aar-956 Cluster-LP] issueCanonical (gated) fehlgeschlagen:', err)
       }
     }
   })
