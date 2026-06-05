@@ -18,6 +18,11 @@ export default async function ProfilPage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  // CMM-49: Bridge-Intersection fuer den faelle-Count (claims ⊋ faelle) — vor Promise.all
+  // prefetchen, dann claims-Count statt faelle. sv_id 0-diff; transitional bis faelle-DROP.
+  const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
+  const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id)
+
   const [{ data: profile }, sv, faelleResult, bewertungRes] = await Promise.all([
     supabase
       .from('profiles')
@@ -28,9 +33,10 @@ export default async function ProfilPage() {
       .single(),
     getGutachterForUser(supabase, user.id, 'id, paket, gebiet_plz, ist_aktiv, paket_faelle_gesamt, offene_faelle, kalender_typ, kalender_sync_aktiv, kalender_sync_letzte, qualifikationen_neu, spezifikationen, schadenarten, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, firmenname, rechtsform, steuernummer, ust_id, hrb, rolle_in_organisation, community_anonym'),
     supabase
-      .from('faelle')
+      .from('claims')
       .select('id', { count: 'exact', head: true })
-      .eq('sv_id', user.id),
+      .eq('sv_id', user.id)
+      .in('id', faelleClaimIds),
     supabase
       .from('google_bewertungen_cache')
       .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am, photo_reference')
