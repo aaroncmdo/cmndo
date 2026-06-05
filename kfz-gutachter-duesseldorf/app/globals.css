@@ -614,6 +614,23 @@ body {
 .rev-all-link::after { content: "→"; }
 .rev-all-link:hover { border-color: var(--amber); color: var(--amber); }
 
+/* Desktop: 4 Bewertungen als einzelne Cards im 2x2-Grid (Aaron 05.06.) */
+@media (min-width: 1024px) {
+  #reviews .rev-list {
+    background: transparent; border: none; border-radius: 0; padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  }
+  #reviews .rev-item {
+    border-top: none;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 16px -6px rgba(13, 27, 62, 0.12);
+  }
+  #reviews .rev-all-link { width: fit-content; margin-left: auto; margin-right: auto; padding-left: 32px; padding-right: 32px; }
+}
+
 /* ════════════════════════════════════════════════════════════════════════
  * Phase 3 #4 — Netzwerk-Mobile (Mock v7.3, #netzwerkMobile)
  * Team-Hero-Card + 4 Pain-Cards (IO-Reveal) + 8-Karten Compare-Panel + CTA-v8.
