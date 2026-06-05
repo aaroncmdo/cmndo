@@ -109,7 +109,7 @@ export function FlowFeststellungStep({
               className="text-sm text-claimondo-ondo underline"
               data-testid="flow-doc-manuell-toggle"
             >
-              Lieber ohne Foto — Fahrzeugdaten manuell eingeben
+              {t('step_feststellung.manuell_toggle')}
             </button>
           ) : (
             <div
@@ -117,7 +117,7 @@ export function FlowFeststellungStep({
               data-testid="flow-doc-manuell"
             >
               <p className="text-xs font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60 mb-3">
-                Fahrzeugdaten
+                {t('step_feststellung.fahrzeugdaten')}
               </p>
               <div className="space-y-4">
                 {dokumentFelder.map((feld) => (

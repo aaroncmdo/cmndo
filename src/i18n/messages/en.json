@@ -93,6 +93,8 @@
   },
   "flow": {
     "step_feststellung": {
+      "manuell_toggle": "Prefer without a photo — enter vehicle details manually",
+      "fahrzeugdaten": "Vehicle details",
       "heading": "A few details about your claim",
       "sub": "The more precise, the faster — everything is optional and can be added later.",
       "error_save": "Saving failed."
