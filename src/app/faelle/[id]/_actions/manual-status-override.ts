@@ -11,6 +11,7 @@
 // außergerichtliche Einigung, Test/Staging.
 
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
 import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
@@ -55,18 +56,16 @@ export async function manualStatusOverride(input: OverrideInput): Promise<{
 
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
   // -> via claim_id aus claims nested embed laden statt aus faelle.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, status, claims:claim_id(kundenbetreuer_id, claim_nummer, operative_status)')
-    .eq('id', input.fallId)
-    .single()
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-49: faelle-frei — claims-direkt. operative_status = SSoT (faelle.status-Fallback entfaellt, 0-diff).
+  const claimId = await resolveClaimId(supabase, input.fallId)
+  const { data: fallClaim } = claimId
+    ? await supabase.from('claims').select('kundenbetreuer_id, claim_nummer, operative_status').eq('id', claimId).maybeSingle()
+    : { data: null }
+  if (!fallClaim) return { success: false, error: 'Fall nicht gefunden' }
   const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
-  // CMM-74 b″: alterStatus aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
-  const alterStatus = ((fallClaim?.operative_status as string | null) ?? fall.status) ?? 'unbekannt'
+  // CMM-49: alterStatus aus claims.operative_status (SSoT; faelle.status-Fallback entfaellt, 0-diff).
+  const alterStatus = (fallClaim?.operative_status as string | null) ?? 'unbekannt'
   if (alterStatus === input.neuerStatus) {
     return { success: false, error: 'Status ist bereits der gewählte Wert' }
   }
