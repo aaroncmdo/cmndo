@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 /**
  * KFZ-193: KB-Beratungstermin 24h-Erinnerung (stuendlich)
@@ -43,11 +44,13 @@ export async function GET(request: Request) {
     let telefon: string | null = null
     let vorname = 'Kunde'
 
-    const { data: fall } = await db
-      .from('faelle')
-      .select('lead_id, kunde_id')
-      .eq('id', termin.fall_id)
-      .single()
+    // CMM-49: lead_id + kunde_id faelle-frei via claims (resolveClaimId-Chokepoint).
+    // geschaedigter_user_id == kunde_id (0-diff 78/0/0), claims.lead_id == faelle.lead_id.
+    const claimId = termin.fall_id ? await resolveClaimId(db, termin.fall_id) : null
+    const { data: claim } = claimId
+      ? await db.from('claims').select('lead_id, geschaedigter_user_id').eq('id', claimId).maybeSingle()
+      : { data: null }
+    const fall = claim ? { lead_id: claim.lead_id, kunde_id: claim.geschaedigter_user_id } : null
 
     if (fall?.lead_id) {
       const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', fall.lead_id).single()

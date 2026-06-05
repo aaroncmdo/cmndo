@@ -1,6 +1,6 @@
 // AAR-864: Tagesplan eines SV im Datumsfenster — mit Adresse pro Termin
-// (Pflicht-Adresse aus faelle.besichtigungsort_*; Dispatch garantiert
-// dass jeder Termin eine Adresse hat).
+// (Pflicht-Adresse aus gutachter_termine.besichtigungsort_* (SSoT) + claims.schadenort_*-
+// Fallback; Dispatch garantiert dass jeder Termin eine Adresse hat).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 
@@ -40,15 +40,13 @@ export async function getSvTagesplan(
       start_zeit,
       end_zeit,
       status,
-      faelle!gutachter_termine_fall_id_fkey (
-        besichtigungsort_adresse,
-        besichtigungsort_lat,
-        besichtigungsort_lng,
-        claims:claim_id (
-          schadenort_adresse,
-          schadenort_plz,
-          schadenort_ort
-        )
+      besichtigungsort_adresse,
+      besichtigungsort_lat,
+      besichtigungsort_lng,
+      claims:claim_id (
+        schadenort_adresse,
+        schadenort_plz,
+        schadenort_ort
       )
     `,
     )
@@ -65,13 +63,13 @@ export async function getSvTagesplan(
   console.log('[AAR-864] getSvTagesplan: svId =', svId, '| Rows =', (data ?? []).length)
 
   return (data ?? []).map((row) => {
-    const fall = Array.isArray(row.faelle) ? row.faelle[0] : row.faelle
-    // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed (SSoT).
-    const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+    // CMM-49: besichtigungsort_* direkt vom gutachter_termine-Row (SSoT; fall-Tier tot),
+    // schadenort_* via claims:claim_id-Embed (faelle-frei). 0-Loss verifiziert (faelle_ja_gt_nein=0).
+    const claim = Array.isArray(row.claims) ? row.claims[0] : row.claims
     // Anzeige-Adresse (für UI). Routen-Berechnung läuft separat über lat/lng.
     const adresse =
-      (fall?.besichtigungsort_adresse as string | null) ||
-      [fallClaim?.schadenort_adresse, fallClaim?.schadenort_plz, fallClaim?.schadenort_ort]
+      (row.besichtigungsort_adresse as string | null) ||
+      [claim?.schadenort_adresse, claim?.schadenort_plz, claim?.schadenort_ort]
         .filter(Boolean)
         .join(', ')
     return {
@@ -81,8 +79,8 @@ export async function getSvTagesplan(
       end_zeit: row.end_zeit as string,
       status: row.status as string,
       adresse,
-      lat: (fall?.besichtigungsort_lat as number | null) ?? null,
-      lng: (fall?.besichtigungsort_lng as number | null) ?? null,
+      lat: (row.besichtigungsort_lat as number | null) ?? null,
+      lng: (row.besichtigungsort_lng as number | null) ?? null,
     }
   })
 }
