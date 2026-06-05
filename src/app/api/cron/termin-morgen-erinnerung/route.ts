@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendNachricht } from '@/lib/whatsapp/send'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 export const dynamic = 'force-dynamic'
 
@@ -59,6 +60,8 @@ export async function GET(request: Request) {
   for (const termin of termine) {
     const fallId = termin.fall_id as string | null
     const leadId = termin.lead_id as string | null
+    // CMM-49: Fall->Claim einmal aufloesen (resolveClaimId-Chokepoint) fuer lead_id + schadenort.
+    const claimId = fallId ? await resolveClaimId(db, fallId) : null
 
     // Kunden-Kontakt laden — erst Lead, dann Fall
     let kundeVorname = ''
@@ -79,14 +82,14 @@ export async function GET(request: Request) {
     }
 
     if (!kundeTelefon && fallId) {
-      const { data: fall } = await db
-        .from('faelle')
-        .select('lead_id, kunde_id')
-        .eq('id', fallId)
-        .maybeSingle()
-      if (fall?.lead_id && fall.lead_id !== leadId) {
-        const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fall.lead_id).maybeSingle()
-        if (lead) { kundeVorname = lead.vorname ?? ''; kundeTelefon = lead.telefon; kundeEntityId = fall.lead_id }
+      // CMM-49: faelle.lead_id -> claims.lead_id (resolveClaimId oben; claims.lead_id == faelle.lead_id).
+      const { data: claim } = claimId
+        ? await db.from('claims').select('lead_id').eq('id', claimId).maybeSingle()
+        : { data: null }
+      const claimLeadId = (claim?.lead_id as string | null) ?? null
+      if (claimLeadId && claimLeadId !== leadId) {
+        const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', claimLeadId).maybeSingle()
+        if (lead) { kundeVorname = lead.vorname ?? ''; kundeTelefon = lead.telefon; kundeEntityId = claimLeadId }
       }
     }
 
@@ -111,13 +114,10 @@ export async function GET(request: Request) {
     // Adresse — aus Fall wenn vorhanden
     let adresse = ''
     if (fallId) {
-      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-      const { data: fallAddr } = await db
-        .from('faelle')
-        .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-        .eq('id', fallId)
-        .maybeSingle()
-      const addrClaim = Array.isArray(fallAddr?.claims) ? fallAddr.claims[0] : fallAddr?.claims
+      // CMM-49: schadenort_* faelle-frei direkt aus claims (resolveClaimId oben).
+      const { data: addrClaim } = claimId
+        ? await db.from('claims').select('schadenort_adresse, schadenort_plz, schadenort_ort').eq('id', claimId).maybeSingle()
+        : { data: null }
       adresse = [addrClaim?.schadenort_adresse, addrClaim?.schadenort_plz, addrClaim?.schadenort_ort]
         .filter(Boolean).join(', ')
     }
