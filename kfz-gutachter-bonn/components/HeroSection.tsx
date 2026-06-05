@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom'
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
 import { GOOGLE_RATING } from '@/lib/content'
+import { ClaimondoLink } from '@/lib/text'
 
 // HeroSection — Server-Component (kein 'use client').
 // Mock-Quelle: MASTER_preview-complete_v3-praxis-v2.html Z.4252-4383 (v14b/v15).
@@ -118,7 +119,7 @@ export function HeroSection({ city }: { city: City }) {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img className="htc-siegel" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo-Partner-Siegel" loading="lazy" />
               <div className="htc-text">
-                <span className="htc-text-main">Zertifizierter Claimondo-Partner</span>
+                <span className="htc-text-main">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></span>
                 <span className="htc-text-sub">Unfall-Assistance · 2026</span>
               </div>
               <span className="htc-sep" aria-hidden="true" />
@@ -159,7 +160,7 @@ export function HeroSection({ city }: { city: City }) {
                     loading="lazy"
                   />
                   <span className="flex flex-col leading-tight">
-                    <strong className="text-white font-semibold text-[14px] tracking-tight">Zertifizierter Claimondo-Partner</strong>
+                    <strong className="text-white font-semibold text-[14px] tracking-tight">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></strong>
                     <span className="text-white/45 font-normal text-[10.5px] tracking-normal mt-0.5">Unfall-Assistance</span>
                   </span>
                 </div>
@@ -180,7 +181,7 @@ export function HeroSection({ city }: { city: City }) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img className="mini-seal" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo Unfall-Assistance Partner Siegel" loading="lazy" />
                   <div className="brand-text-block brand-text-block-centered">
-                    <span className="brand-line-main">Claimondo Unfall-Assistance</span>
+                    <span className="brand-line-main"><ClaimondoLink>Claimondo</ClaimondoLink> Unfall-Assistance</span>
                     <span className="brand-line-sub">Partner</span>
                   </div>
                 </div>

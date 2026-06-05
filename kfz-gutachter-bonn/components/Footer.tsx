@@ -1,6 +1,7 @@
 import type { City } from '@/lib/cluster'
 import { CLUSTER, cityHref, waHref } from '@/lib/cluster'
 import { SITE } from '@/lib/site'
+import { ClaimondoLink } from '@/lib/text'
 
 // Server-Component (kein 'use client'). Footer mit 4-Spalten-Grid:
 // 1) Logo + Betreiber-Block (SITE.operator) + Servicegebiet + Partnernetzwerk-Hinweis
@@ -36,7 +37,7 @@ export function Footer({ city }: { city: City }) {
             </p>
             <p className="mt-3 text-[12.5px] text-white/55 leading-snug">
               Vermittlung im{' '}
-              <strong className="text-white/85 font-semibold">Claimondo-Partnernetzwerk</strong> ·
+              <strong className="text-white/85 font-semibold"><ClaimondoLink>Claimondo-Partnernetzwerk</ClaimondoLink></strong> ·
               DAT-zertifizierte Partner-Sachverständige vor Ort
             </p>
           </div>
