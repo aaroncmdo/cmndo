@@ -12,10 +12,13 @@
 
 ---
 
-## ⚠️ Zwei GATES (vor/während Execution zu klären — KEINE versteckten Placeholder)
+## ✅ Drei GATES — RESOLVED (Lead-Strecke 753d8096, #2429 issuecomment-4632650925, 05.06.)
 
-- **GATE A — Gegner-als-Firma-Erkennung:** `leads` hat **kein** `gegner_gewerbe`/`gegner_ist_firma`-Signal; `gegner_name` ist Freitext. → **Entscheidung mit Lead-Strecke nötig:** entweder ein Lead-Flag `gegner_ist_firma` (sauber) oder eine Heuristik. **Bis dahin bleibt der Gegner eine Person** (Status quo: `gegner_name`→`nachname`). Task 5 ist deshalb bewusst NICHT implementiert, nur als Gate dokumentiert.
-- **GATE B — `leads.firma_ustid` fehlt** (live verifiziert): `ensureFirma` dedupt darum vorerst **nur per `normalized_name`** (ust_id optional). Wenn die Lead-Strecke `firma_ustid` liefert (§6), wird es additiv mitgegeben — kein Re-Touch (ensureFirma akzeptiert ust_id optional).
+- **GATE A — Gegner-als-Firma:** kein Typ-Signal heute → **Gegner bleibt Person** (Default bestätigt, data-inert). **Forward-Path:** die Lead-Strecke liefert `gegner_ist_firma` + `gegner_firma_name` (+opt. `gegner_ustid`) **mit ihrem Entry-Cutover**, an die `ensureFirma`-Signatur angeglichen → DANN aktiviert Task 5 das Gegner-Firma-Routing.
+- **GATE B — `leads.firma_ustid`:** **Lead-Strecke legt die Spalte selbst** via `apply_migration` an, sobald der Gewerbe-Flow sie befüllt (nach CMM-49). `ensureFirma` ust_id=optional ist richtig (Dedup `normalized_name` wenn null); Task 2 gibt `lead.firma_ustid ?? null` bereits mit → **kein Re-Touch**.
+- **GATE C — `firma_name`:** existiert, Gewerbe-(Kunde-)scoped, NULL bei Privat → null-safe-Wiring (Task 2 feuert nur wenn gesetzt) **bestätigt**.
+
+→ Alle 3 Defaults sind die richtige Landing; **nichts blockiert Plan 3**. Converter-Edit-Timing abgestimmt: die Lead-Strecke fasst `convert-lead-to-claim` bis post-CMM-49/Resolver-Foundation NICHT an.
 
 ---
 
@@ -183,11 +186,25 @@ import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
 
 ---
 
-## Task 5: GATE A — Gegner-als-Firma (NICHT implementieren, Entscheidung)
+## Task 5: GATE A — Gegner-als-Firma (aktiviert, wenn die Lead-Strecke das Signal liefert)
 
-**Kein Code.** Voraussetzung: ein Lead-Signal `gegner_ist_firma` (Lead-Strecke + Aaron) ODER eine vereinbarte Heuristik.
-- [ ] **Step 1:** Entscheidung in #2429 §6 + mit Lead-Strecke (753d8096) festhalten.
-- [ ] **Step 2 (wenn entschieden):** im verursacher-Block analog zu Task 2: `if (gegner_ist_firma) { ensureFirma({name: gegner_name}) -> verursacher-party.firma_id }` statt `nachname`. **Bis dahin: Gegner bleibt Person (Status quo).**
+**Trigger (RESOLVED 05.06.):** die Lead-Strecke liefert `leads.gegner_ist_firma` + `gegner_firma_name` (+opt. `gegner_ustid`) **mit ihrem Entry-Cutover** (an `ensureFirma` angeglichen). Bis dahin: **Gegner bleibt Person** (Status quo, data-inert) — nichts zu tun.
+
+- [ ] **Step 1 (wenn die Lead-Felder live sind):** im verursacher-Block, analog zu Task 2 — `firma_id` statt `nachname`:
+
+```ts
+  // CMM-Entity Plan 3 / GATE A aktiviert: Gegner-Firma -> firmen + verursacher-party.firma_id
+  if (Boolean(lead.gegner_ist_firma) && (lead.gegner_firma_name as string | null)) {
+    const gf = await ensureFirma({
+      db: admin as unknown as SupabaseClient,
+      snapshot: { name: lead.gegner_firma_name as string, ust_id: (lead.gegner_ustid as string | null) ?? null, quelle: 'lead_konvertierung' },
+    })
+    if (gf.ok) {
+      // im verursacher-partyInserts.push: firma_id: gf.firmaId, nachname weglassen
+    } else console.warn('[CMM-Entity P3] ensureFirma (gegner) fehlgeschlagen:', gf.error)
+  }
+```
+Feldnamen final aus dem Entry-Cutover der Lead-Strecke übernehmen.
 
 ---
 
