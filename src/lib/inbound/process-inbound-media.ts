@@ -7,6 +7,7 @@
 // KEIN 'use server' — wird von API-Routen aufgerufen.
 
 import type { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl } from '@/lib/storage/url'
 import { sendCommunication } from '@/lib/communications/send'
 import { scheduleBkatAnalyseAfterUpload } from '@/lib/bkat/auto-trigger'
@@ -332,13 +333,11 @@ export async function processInboundMedia(
       }
     }
 
-    // CMM-44 SP-A: kundenbetreuer_id via claims-Embed (SSoT)
-    const { data: fall } = await db
-      .from('faelle')
-      .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
-      .eq('id', fallId)
-      .single()
-    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    // CMM-49: kundenbetreuer_id + claim_nummer direkt aus claims (SSoT) via resolveClaimId.
+    const mediaClaimId = await resolveClaimId(db, fallId)
+    const { data: fallClaim } = mediaClaimId
+      ? await db.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', mediaClaimId).maybeSingle()
+      : { data: null }
     const fallKb = fallClaim?.kundenbetreuer_id as string | null | undefined
 
     if (fallKb && gespeichert.length > 0) {
