@@ -29,7 +29,7 @@ export function HeroSection({ city }: { city: City }) {
       />
       <div className="relative z-[1] max-w-wrap mx-auto px-6 pt-[40px] pb-[40px] flex flex-col min-h-[100svh]">
         <div className="grid grid-cols-1 md:grid-cols-[1.25fr_.75fr] gap-14 items-stretch flex-1">
-          <div className="flex flex-col pb-2.5 hero-copy-fade">
+          <div className="flex flex-col hero-copy-fade backdrop-blur-[3px] bg-petrol/10 rounded-2xl p-4 sm:p-5">
             {/* Editorial-Header NUR MOBILE: ★★★★★ 5,0 + Tagline (Social-Proof above-fold). */}
             <p className="sm:hidden hero-eyebrow" aria-label={`${rating} von 5 Sternen`}>
               <span className="eyebrow-stars" aria-hidden="true">★★★★★</span>

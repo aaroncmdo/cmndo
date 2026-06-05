@@ -112,18 +112,13 @@ body {
   background:
     linear-gradient(180deg,
       transparent 0%,
-      transparent 64%,
-      color-mix(in srgb, var(--petrol) 24%, transparent) 100%),
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--petrol) 8%, transparent) 0%,
-      transparent 12%),
+      transparent 72%,
+      color-mix(in srgb, var(--petrol) 16%, transparent) 100%),
     linear-gradient(90deg,
-      var(--petrol) 0%,
-      var(--petrol) 20%,
-      color-mix(in srgb, var(--petrol) 68%, transparent) 36%,
-      color-mix(in srgb, var(--petrol) 26%, transparent) 52%,
-      color-mix(in srgb, var(--petrol) 8%, transparent) 66%,
-      transparent 80%);
+      color-mix(in srgb, var(--petrol) 52%, transparent) 0%,
+      color-mix(in srgb, var(--petrol) 28%, transparent) 22%,
+      color-mix(in srgb, var(--petrol) 10%, transparent) 40%,
+      transparent 54%);
 }
 
 /* Mobile: vertikaler Gradient — Bild oben sichtbar, Content auf opaker Flaeche */
@@ -131,11 +126,10 @@ body {
   .hero-photo::after {
     background:
       linear-gradient(180deg,
-        color-mix(in srgb, var(--petrol) 24%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 50%, transparent) 36%,
-        color-mix(in srgb, var(--petrol) 88%, transparent) 56%,
-        var(--petrol) 64%,
-        var(--petrol) 100%);
+        color-mix(in srgb, var(--petrol) 14%, transparent) 0%,
+        color-mix(in srgb, var(--petrol) 30%, transparent) 42%,
+        color-mix(in srgb, var(--petrol) 55%, transparent) 70%,
+        color-mix(in srgb, var(--petrol) 75%, transparent) 100%);
   }
   .hero-photo-bg {
     background-position: center top !important;
