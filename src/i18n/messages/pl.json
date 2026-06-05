@@ -428,6 +428,7 @@
       }
     },
     "step_account": {
+      "termin_folgt": "Termin oględzin uzgodnimy z Państwem osobiście wkrótce.",
       "heading": "Gotowe!",
       "sub": "Państwa sprawa została pomyślnie utworzona.",
       "success_text": "Państwa sprawa została pomyślnie utworzona! Rzeczoznawca został już poinformowany.",
@@ -5510,6 +5511,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Kontynuuj bez terminu",
+      "spaeter_link": "Umów termin później",
       "suche": "Szukamy dla Państwa odpowiedniego rzeczoznawcy …",
       "moment": "Chwileczkę …",
       "kein_match_heading": "Skontaktujemy się z Państwem",

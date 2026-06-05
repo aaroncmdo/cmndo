@@ -565,6 +565,7 @@
       }
     },
     "step_account": {
+      "termin_folgt": "Ihren Besichtigungstermin vereinbaren wir in Kürze persönlich mit Ihnen.",
       "heading": "Geschafft!",
       "sub": "Ihr Fall wurde erfolgreich erstellt.",
       "success_text": "Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.",
@@ -5510,6 +5511,8 @@
   },
   "selfService": {
     "matching": {
+      "ohne_termin_cta": "Ohne Termin fortfahren",
+      "spaeter_link": "Termin lieber später vereinbaren",
       "suche": "Wir suchen den passenden Gutachter für Sie …",
       "moment": "Einen Moment …",
       "kein_match_heading": "Wir melden uns bei Ihnen",

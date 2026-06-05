@@ -165,6 +165,9 @@ export default function FlowWizardKfz({
   const [error, setError] = useState<string | null>(null)
   // AAR-956 §3a: frisch gebuchter Termin (incomplete-Pfad) — speist gutachter-Anzeige.
   const [gebuchterTermin, setGebuchterTermin] = useState<GebuchterTermin | null>(null)
+  // AAR-956: Kunde hat den Termin-Step ohne Buchung übersprungen (kein_match/Skip) →
+  // Erfolgsseite zeigt einen "Termin folgt"-Hinweis (SV wird via AAR-908 bei der SA zugeordnet).
+  const [ohneTermin, setOhneTermin] = useState(false)
 
   // Editierbare Stammdaten (KFZ-117: Kunde kann korrigieren)
   const [editVorname, setEditVorname] = useState(lead.vorname)
@@ -520,6 +523,10 @@ export default function FlowWizardKfz({
                   setGebuchterTermin(t)
                   setStepIndex(stepIndexById('gutachter'))
                 }}
+                onOhneTermin={() => {
+                  setOhneTermin(true)
+                  setStepIndex(stepIndexById('sa'))
+                }}
               />
             )}
 
@@ -722,6 +729,16 @@ export default function FlowWizardKfz({
                     {t('step_account.success_text')}
                   </p>
                 </div>
+
+                {/* AAR-956: Kunde ist ohne Termin-Buchung weiter (kein_match/Skip) —
+                    Erwartung setzen, dass der Termin nachgelagert vereinbart wird. */}
+                {ohneTermin && (
+                  <div className="bg-claimondo-ondo/[0.06] border border-claimondo-ondo/20 rounded-ios-md px-4 py-3 mb-5">
+                    <p className="text-sm text-claimondo-ondo">
+                      {t('step_account.termin_folgt')}
+                    </p>
+                  </div>
+                )}
 
                 {/* CMM-14: Bei Komplett-Mandat juristischen Ansprechpartner
                     anzeigen. LexDrive meldet sich proaktiv beim Kunden via
