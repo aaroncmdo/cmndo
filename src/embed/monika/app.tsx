@@ -6,7 +6,7 @@
 import { useSignal, useComputed } from '@preact/signals'
 import { useRef } from 'preact/hooks'
 import type { MonikaConfig } from './types'
-import { SCRIPT, START_STEP, type StepId, type Answers, type ChoiceOption, type ActionDef } from './flow-script'
+import { SCRIPT, START_STEP, type StepId, type Answers, type ChoiceOption, type ActionDef, type Bubble } from './flow-script'
 import { typingDurationMs } from './typing'
 import { buildPayloadFromAnswers } from './payload'
 import { submitAnfrage } from './api'
@@ -14,8 +14,6 @@ import { captureAttribution } from './attribution'
 import { track } from './tracking'
 import { fireSiteConversion } from './conversion'
 import { SIEGEL_SVG, monikaPhotoUrl } from './assets'
-
-type Bubble = { role: 'monika' | 'user'; text: string }
 
 export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const open = useSignal(false)
