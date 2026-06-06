@@ -4,6 +4,7 @@ import { sendNachricht } from '@/lib/whatsapp/send'
 import { sendEmail } from '@/lib/email/google/client'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
+import { buildAnfrageColumns, splitName, type AnfrageVariante, type InsertAnfrageInput } from './anfrage-columns'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Anfrage-Verarbeitung (Shared)
@@ -14,13 +15,15 @@ import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
  *
  * Scope (Aaron 29.05.2026): Anfrage -> Lead -> Termin. KEIN Claim/Fall/Auftrag.
  * REUSE der bestehenden gutachter_finder_anfragen (kein neues anfragen-Table).
- * Writes laufen ausschliesslich via service_role (createAdminClient) — die
- * anon-INSERT-Policy ist auf source IS NULL gescoped (Native-Funnel), Monika-
- * Zeilen (source NOT NULL) sind anon nicht insertierbar/-lesbar (Migration
- * 20260529154434).
+ * Writes laufen ausschliesslich via service_role (createAdminClient).
+ *
+ * Die PURE Spalten-Logik (splitName/buildAnfrageColumns) liegt in
+ * ./anfrage-columns (server-only-frei → vitest-testbar) und wird hier re-exportiert.
  */
 
-export type AnfrageVariante = 'A' | 'B'
+// Re-Export der PURE-Helfer/Typen — route.ts importiert AnfrageVariante weiterhin von hier.
+export { buildAnfrageColumns, splitName }
+export type { AnfrageVariante, InsertAnfrageInput }
 
 export interface EmbedSiteConfig {
   id: string
@@ -32,19 +35,14 @@ export interface EmbedSiteConfig {
   empfaenger_email: string
   cc_email: string | null
   baileys_routing_nummer: string
+  /** AAR-939 Monika-A-Flow: public tel:-Nummer fuer den Anruf-Button (NICHT baileys_routing_nummer). */
+  sv_telefon: string | null
   erlaubte_domains: string[]
   max_anfragen_pro_h: number
   aktiv: boolean
 }
 
 // ── Helfer ─────────────────────────────────────────────────────────────────
-
-/** Splittet einen Voll-Namen in vorname/nachname (gfa hat kein name-Feld). */
-export function splitName(full: string): { vorname: string; nachname: string } {
-  const parts = full.trim().split(/\s+/)
-  if (parts.length === 1) return { vorname: parts[0], nachname: '' }
-  return { vorname: parts[0], nachname: parts.slice(1).join(' ') }
-}
 
 /** Host aus einem Origin-/Referer-Header oder einer URL extrahieren. */
 export function extractHost(value: string | null | undefined): string | null {
@@ -77,7 +75,7 @@ export async function ladeEmbedSite(slug: string): Promise<EmbedSiteConfig | nul
   const db = createAdminClient()
   const { data, error } = await db
     .from('embed_sites')
-    .select('id, slug, variante, funnel_modus, einzelpreis_eur, empfaenger_email, cc_email, baileys_routing_nummer, erlaubte_domains, max_anfragen_pro_h, aktiv')
+    .select('id, slug, variante, funnel_modus, einzelpreis_eur, empfaenger_email, cc_email, baileys_routing_nummer, sv_telefon, erlaubte_domains, max_anfragen_pro_h, aktiv')
     .eq('slug', slug)
     .maybeSingle()
   if (error || !data) return null
@@ -86,68 +84,19 @@ export async function ladeEmbedSite(slug: string): Promise<EmbedSiteConfig | nul
 
 // ── Insert ───────────────────────────────────────────────────────────────────
 
-export interface InsertAnfrageInput {
-  payload: EmbedAnfrageInput
-  variante: AnfrageVariante | null // null bei Cluster-LP (kein A/B)
-  embedSiteId: string | null
-  originDomain: string | null
-}
-
 export type InsertAnfrageResult =
   | { ok: true; anfrageId: string; status: string }
   | { ok: false; error: string }
 
 /**
  * Schreibt eine Monika-Anfrage in gutachter_finder_anfragen (service_role).
- * Status-Konvention:
+ * Spalten-Map via buildAnfrageColumns (PURE, getestet). Status-Konvention:
  *   variante 'A' (free)               -> 'embed_free' (NICHT in Dispatch-Queue)
  *   variante 'B' (paid) + Cluster-LP  -> 'neu'        (Dispatch)
- *
- * ACHTUNG (Live-Schema): vorname/nachname/email/schadentyp sind NOT NULL —
- * leere Strings / Platzhalter wie im Native-Funnel (saveStep.ts), nie null.
  */
 export async function insertAnfrage(input: InsertAnfrageInput): Promise<InsertAnfrageResult> {
-  const { payload, variante, embedSiteId, originDomain } = input
   const db = createAdminClient()
-
-  const { vorname, nachname } = splitName(payload.name)
-  const status = variante === 'A' ? 'embed_free' : 'neu'
-
-  // wunschtermin_wann: menschenlesbarer Slot-String fuer den Dispatcher
-  const wunschterminWann =
-    payload.slot_text ??
-    ([payload.slot, payload.time_slot].filter(Boolean).join(' ') || null)
-
-  const columns: Record<string, unknown> = {
-    // NOT-NULL-Spalten: nie null (siehe saveStep.ts-Pattern)
-    vorname,
-    nachname,
-    email: payload.email ?? '',
-    schadentyp: payload.schadentyp ?? 'unbekannt',
-    telefon: payload.telefon,
-    schadens_kurzbeschreibung: payload.schadens_kurzbeschreibung ?? null,
-    wunschtermin_wann: wunschterminWann,
-    bevorzugter_kanal: 'whatsapp',
-    status,
-    // Monika-Diskriminatoren
-    source: payload.source,
-    variante: variante ?? null,
-    embed_site_id: embedSiteId,
-    cluster: payload.cluster ?? null,
-    stadt_slug: payload.stadt_slug ?? null,
-    page_url: payload.page_url ?? null,
-    origin_domain: originDomain,
-    // Attribution
-    gclid: payload.gclid ?? null,
-    utm_source: payload.utm_source ?? null,
-    utm_medium: payload.utm_medium ?? null,
-    utm_campaign: payload.utm_campaign ?? null,
-    utm_term: payload.utm_term ?? null,
-    utm_content: payload.utm_content ?? null,
-    ga_client_id: payload.ga_client_id ?? null,
-    // Consent: consent_ts vom Widget -> dsgvo_zustimmung_am
-    dsgvo_zustimmung_am: payload.consent_ts ?? new Date().toISOString(),
-  }
+  const columns = buildAnfrageColumns(input)
 
   const { data, error } = await db
     .from('gutachter_finder_anfragen')
@@ -158,7 +107,7 @@ export async function insertAnfrage(input: InsertAnfrageInput): Promise<InsertAn
   if (error || !data) {
     return { ok: false, error: error?.message ?? 'Insert fehlgeschlagen' }
   }
-  return { ok: true, anfrageId: data.id as string, status }
+  return { ok: true, anfrageId: data.id as string, status: columns.status as string }
 }
 
 // ── Benachrichtigung ─────────────────────────────────────────────────────────
