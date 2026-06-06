@@ -70,4 +70,17 @@ export const STYLES = `
 
 .mk-powered { padding: 7px 14px; text-align: center; font-size: 11px; background: #fff; border-top: 1px solid #eef1f6; }
 .mk-powered a { color: var(--monika-accent); text-decoration: none; }
+
+.mk-launch { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.mk-launch .mk-fab { position: static; }
+.mk-teaser { display: flex; align-items: center; gap: 8px; max-width: 280px; background: #fff; color: var(--monika-text);
+  border: 1px solid #e8ecf3; border-radius: 16px; border-bottom-right-radius: 5px; padding: 10px 12px;
+  box-shadow: 0 6px 20px rgba(13,27,62,.18); cursor: pointer; }
+.mk-teaser:focus-visible { outline: 2px solid var(--monika-accent); outline-offset: 2px; }
+.mk-teaser-in { animation: mk-teaser-pop .25s cubic-bezier(.22,1,.36,1); }
+@keyframes mk-teaser-pop { from { opacity: 0; transform: translateY(8px) scale(.96); } to { opacity: 1; transform: none; } }
+.mk-teaser .mk-mini { width: 26px; height: 26px; }
+.mk-teaser-txt { font-size: 13.5px; line-height: 1.35; flex: 1; }
+.mk-teaser-x { background: none; border: none; color: #98a4b8; font-size: 17px; line-height: 1; cursor: pointer; padding: 0 2px; align-self: flex-start; }
+.mk-teaser-x:hover { color: var(--monika-text); }
 `
