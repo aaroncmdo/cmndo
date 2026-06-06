@@ -55,6 +55,13 @@ export interface AnfragePayload extends Attribution {
   slot?: string
   slot_text?: string
   time_slot?: string
+  // Monika-A-Flow-Diskriminatoren
+  anliegen?: string
+  unfalltyp?: string
+  schuld_einschaetzung?: string
+  bewertungsgrund?: string
+  wunsch_tag?: string
+  wunsch_zeit?: string
   source: WidgetSource
   cluster?: string
   stadt_slug?: string
