@@ -22,6 +22,14 @@ export const EmbedAnfrageSchema = z.object({
   schadentyp: z.string().max(80).optional(),
   schadens_kurzbeschreibung: z.string().max(1000).optional(),
 
+  // Monika-A-Flow-Diskriminatoren (DB-CHECK ist das echte Gate; hier nur Daten-Form)
+  anliegen: z.string().max(40).optional(),
+  unfalltyp: z.string().max(40).optional(),
+  schuld_einschaetzung: z.string().max(40).optional(),
+  bewertungsgrund: z.string().max(40).optional(),
+  wunsch_tag: z.string().max(40).optional(),
+  wunsch_zeit: z.string().max(40).optional(),
+
   // Quelle
   source: z.enum(EMBED_SOURCES),
   cluster: z.string().max(80).optional(),

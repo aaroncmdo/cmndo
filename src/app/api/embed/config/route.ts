@@ -62,6 +62,7 @@ export async function GET(req: NextRequest) {
     slug: string
     variante: string | null
     aktiv: boolean
+    sv_telefon: string | null
     sv_id: string | null
     brand_primary_override: string | null
     brand_secondary_override: string | null
@@ -80,7 +81,7 @@ export async function GET(req: NextRequest) {
   const db = createAdminClient() as any
   const siteRes = await db
     .from('embed_sites')
-    .select('slug, variante, aktiv, sv_id, brand_primary_override, brand_secondary_override, brand_accent_override, brand_logo_url_override, tracking_ga4_measurement_id, tracking_gads_conversion_id, tracking_gads_conversion_label')
+    .select('slug, variante, aktiv, sv_telefon, sv_id, brand_primary_override, brand_secondary_override, brand_accent_override, brand_logo_url_override, tracking_ga4_measurement_id, tracking_gads_conversion_id, tracking_gads_conversion_label')
     .eq('slug', siteId)
     .maybeSingle()
 
@@ -138,7 +139,7 @@ export async function GET(req: NextRequest) {
   return json(
     {
       theme,
-      telefon: null, // TODO Aaron: public Telefon-Feld auf embed_sites?
+      telefon: site.sv_telefon ?? null, // AAR-939 Monika-A-Flow: public Anruf-Nummer (sv_telefon)
       whatsapp: null, // TODO Aaron: WA-Deeplink-Nummer (nicht baileys_routing_nummer leaken)
       site_token: siteToken,
       tracking: pickPublicTracking(site),
