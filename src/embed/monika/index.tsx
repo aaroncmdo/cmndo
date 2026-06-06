@@ -96,6 +96,7 @@ async function boot(): Promise<void> {
       cluster: null,
       stadtSlug: null,
       tracking: remote?.tracking ?? null,
+      isClaimondoBranded: theme.brandedByClaimondo,
     }
   } else if (d.cluster) {
     // ── kfz_gutachter_lp: alles aus data-* (Claimondo-eigene LP) ──
@@ -117,6 +118,7 @@ async function boot(): Promise<void> {
       cluster: d.cluster,
       stadtSlug: d.stadt || null,
       tracking: null,
+      isClaimondoBranded: true,
     }
   } else {
     return // weder site-id noch cluster

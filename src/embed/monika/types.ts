@@ -32,11 +32,9 @@ export interface MonikaConfig {
   stadtSlug: string | null
   /** Per-SV Tracking-IDs (nur sv_embed, aus /api/embed/config). null = kein Tracking. */
   tracking: MonikaTracking | null
+  /** Claimondo-Branding (Siegel-FAB + Monika-Foto): cluster-LP immer true, sv_embed = variante-A. */
+  isClaimondoBranded: boolean
 }
-
-export type MonikaState = 'idle' | 'qualify' | 'day' | 'time' | 'form' | 'success' | 'fallback'
-export type DaySlot = 'asap' | 'morgen' | 'uebermorgen'
-export type TimeSlot = 'vormittag' | 'nachmittag' | 'abend'
 
 export interface Attribution {
   gclid?: string

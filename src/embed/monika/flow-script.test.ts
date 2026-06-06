@@ -41,24 +41,25 @@ describe('SCRIPT — Graph-Integritaet', () => {
 })
 
 describe('Pfad-Simulation', () => {
+  function nextFor(stepId: StepId, value: string): StepId {
+    const then = SCRIPT[stepId].then
+    if (then.kind !== 'choices') throw new Error('not a choices step: ' + stepId)
+    const opt = then.options.find((o) => o.value === value)
+    if (!opt) throw new Error('no option ' + value + ' at ' + stepId)
+    return opt.next
+  }
+
   it('Haftpflicht/unverschuldet laeuft ueber den Graph bis hp_kapazitaet (contact)', () => {
-    const path: Array<[StepId, string]> = [
-      ['start', 'haftpflichtgutachten'],
-      ['hp_unfalltyp', 'auffahrunfall'],
-      ['hp_schuld', 'unverschuldet'],
-      ['hp_termin_tag', 'morgen'],
-      ['hp_termin_zeit', 'vormittag'],
-    ]
     let cur: StepId = 'start'
-    for (const [expectStep, value] of path) {
-      expect(cur).toBe(expectStep)
-      const t = SCRIPT[cur].then
-      expect(t.kind).toBe('choices')
-      if (t.kind !== 'choices') throw new Error('expected choices at ' + cur)
-      const opt = t.options.find((o) => o.value === value)
-      expect(opt).toBeTruthy()
-      cur = opt!.next
-    }
+    cur = nextFor(cur, 'haftpflichtgutachten')
+    expect(cur).toBe('hp_unfalltyp')
+    cur = nextFor(cur, 'auffahrunfall')
+    expect(cur).toBe('hp_schuld')
+    cur = nextFor(cur, 'unverschuldet')
+    expect(cur).toBe('hp_termin_tag')
+    cur = nextFor(cur, 'morgen')
+    expect(cur).toBe('hp_termin_zeit')
+    cur = nextFor(cur, 'vormittag')
     expect(cur).toBe('hp_kapazitaet')
     expect(SCRIPT.hp_kapazitaet.then.kind).toBe('contact')
   })
