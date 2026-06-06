@@ -1,218 +1,297 @@
 /** @jsxImportSource preact */
-// AAR-939 · Monika-Embed · Stream 4 — Preact-Widget (State-Machine UI)
-//
-// FAB + Panel, gerendert in den Shadow-DOM (siehe index.tsx). State via
-// @preact/signals. State-Machine: idle → qualify → day → time → form →
-// success | fallback.
+// AAR-939 · Monika-A-Flow · Chat-Widget (Skript-getrieben, Message-Player).
+// FAB (Siegel) + Panel (Monika-Header + Bubbles + Chips/Actions/Kontakt), Shadow-DOM.
+// Flow kommt aus flow-script.ts (PURE); dieser Renderer spielt messages mit Typing.
 
 import { useSignal, useComputed } from '@preact/signals'
-import type { MonikaConfig, MonikaState, DaySlot, TimeSlot, AnfragePayload } from './types'
+import { useRef } from 'preact/hooks'
+import type { MonikaConfig } from './types'
+import { SCRIPT, START_STEP, type StepId, type Answers, type ChoiceOption, type ActionDef } from './flow-script'
+import { typingDurationMs } from './typing'
+import { buildPayloadFromAnswers } from './payload'
 import { submitAnfrage } from './api'
 import { captureAttribution } from './attribution'
 import { track } from './tracking'
 import { fireSiteConversion } from './conversion'
+import { SIEGEL_SVG, monikaPhotoUrl } from './assets'
 
-const DAY_LABEL: Record<DaySlot, string> = {
-  asap: 'So schnell wie möglich',
-  morgen: 'Morgen',
-  uebermorgen: 'Übermorgen',
-}
-const TIME_LABEL: Record<TimeSlot, string> = {
-  vormittag: 'Vormittag (8–12 Uhr)',
-  nachmittag: 'Nachmittag (12–17 Uhr)',
-  abend: 'Abend (17–20 Uhr)',
-}
-const KANAL_LABEL: Record<'whatsapp' | 'sms' | 'email', string> = {
-  whatsapp: 'WhatsApp',
-  sms: 'SMS',
-  email: 'E-Mail',
-}
+type Bubble = { role: 'monika' | 'user'; text: string }
 
 export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
-  const state = useSignal<MonikaState>('idle')
-  const slot = useSignal<DaySlot | null>(null)
-  const timeSlot = useSignal<TimeSlot | null>(null)
-  const name = useSignal('')
+  const open = useSignal(false)
+  const stepId = useSignal<StepId>(START_STEP)
+  const log = useSignal<Bubble[]>([])
+  const typing = useSignal(false)
+  const awaiting = useSignal(false) // true = Chunks fertig, then-UI zeigen
+  const answers = useSignal<Answers>({})
+  const sending = useSignal(false)
+  const done = useSignal(false)
+  const error = useSignal('')
+  const vorname = useSignal('')
+  const nachname = useSignal('')
   const telefon = useSignal('')
   const consent = useSignal(false)
   const honeypot = useSignal('')
-  const sending = useSignal(false)
-  const error = useSignal('')
-  // Embed-B: bei flowlink-Modus der Versand-Kanal des /flow-Links (null = callback-Modus).
-  const successKanal = useSignal<'whatsapp' | 'sms' | 'email' | null>(null)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  const step = useComputed(() => SCRIPT[stepId.value])
+  const photo = monikaPhotoUrl(cfg.base)
+
+  function scrollDown() {
+    requestAnimationFrame(() => {
+      const el = scrollRef.current
+      if (el) el.scrollTop = el.scrollHeight
+    })
+  }
+
+  // Spielt die messages des Steps sequentiell mit Typing-Beats; dann awaiting=true.
+  function playStep(id: StepId) {
+    const s = SCRIPT[id]
+    awaiting.value = false
+    const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    let i = 0
+    const playNext = () => {
+      if (i >= s.messages.length) {
+        awaiting.value = true
+        scrollDown()
+        return
+      }
+      const text = s.messages[i++]
+      if (reduce) {
+        log.value = [...log.value, { role: 'monika', text }]
+        scrollDown()
+        playNext()
+        return
+      }
+      typing.value = true
+      scrollDown()
+      setTimeout(() => {
+        typing.value = false
+        log.value = [...log.value, { role: 'monika', text }]
+        scrollDown()
+        setTimeout(playNext, 250)
+      }, typingDurationMs(text))
+    }
+    playNext()
+  }
+
+  function openWidget() {
+    if (open.value) return
+    open.value = true
+    track(cfg, 'monika_open')
+    if (log.value.length === 0) playStep(START_STEP)
+  }
+
+  function choose(opt: ChoiceOption) {
+    const s = step.value
+    if (s.then.kind !== 'choices') return
+    answers.value = { ...answers.value, [s.then.key]: opt.value } as Answers
+    log.value = [...log.value, { role: 'user', text: opt.label }]
+    stepId.value = opt.next
+    playStep(opt.next)
+  }
+
+  function doAction(a: ActionDef) {
+    if (a.kind === 'call' && cfg.telefon) {
+      window.location.href = `tel:${cfg.telefon}`
+      return
+    }
+    if (a.kind === 'whatsapp' && cfg.whatsapp) {
+      const txt = encodeURIComponent('Hallo, ich hatte einen Kfz-Schaden und brauche einen Gutachter-Termin.')
+      window.open(`https://wa.me/${cfg.whatsapp}?text=${txt}`, '_blank', 'noopener')
+      return
+    }
+    if (a.kind === 'callback' && a.next) {
+      log.value = [...log.value, { role: 'user', text: a.label }]
+      stepId.value = a.next
+      playStep(a.next)
+    }
+  }
 
   const canSubmit = useComputed(
-    () => name.value.trim().length >= 2 && telefon.value.trim().length >= 8 && consent.value && !sending.value,
+    () => vorname.value.trim().length >= 2 && telefon.value.trim().length >= 8 && consent.value && !sending.value,
   )
 
-  function go(next: MonikaState) {
-    state.value = next
-    error.value = ''
-    if (next === 'qualify') track(cfg, 'monika_open')
-    if (next === 'form') track(cfg, 'monika_form_shown')
-  }
-
-  function slotText(): string {
-    return [slot.value ? DAY_LABEL[slot.value] : '', timeSlot.value ? TIME_LABEL[timeSlot.value] : '']
-      .filter(Boolean)
-      .join(', ')
-  }
-
-  async function submit() {
+  async function submitContact() {
     if (!canSubmit.value) return
     sending.value = true
-    const attr = captureAttribution()
-    const payload: AnfragePayload = {
-      name: name.value.trim(),
-      telefon: telefon.value.trim(),
-      slot: slot.value ?? undefined,
-      time_slot: timeSlot.value ?? undefined,
-      slot_text: slotText(),
-      source: cfg.source,
-      cluster: cfg.cluster ?? undefined,
-      stadt_slug: cfg.stadtSlug ?? undefined,
-      embed_site_slug: cfg.embedSiteSlug ?? undefined,
+    error.value = ''
+    const merged: Answers = { ...answers.value, vorname: vorname.value, nachname: nachname.value, telefon: telefon.value }
+    const payload = buildPayloadFromAnswers(merged, cfg, {
       page_url: window.location.href,
       consent_ts: new Date().toISOString(),
-      site_token: cfg.siteToken ?? undefined,
       honeypot: honeypot.value,
-      ...attr,
-    }
+      attribution: captureAttribution(),
+    })
     const result = await submitAnfrage(cfg.base, payload)
     sending.value = false
     if (result.ok) {
-      // G1: erst bei Erfolg zaehlen (vorher feuerte es auf Submit-Versuch)
       track(cfg, 'monika_anfrage_submit')
       fireSiteConversion(cfg)
-      successKanal.value = result.modus === 'flowlink' ? result.kanal : null
-      go('success')
+      done.value = true
+      awaiting.value = false
+      log.value = [
+        ...log.value,
+        { role: 'user', text: `${vorname.value} ${nachname.value}`.trim() },
+        { role: 'monika', text: 'Perfekt, vielen Dank! 😊' },
+        { role: 'monika', text: 'Wir melden uns schnellstmöglich bei Ihnen.' },
+      ]
+      scrollDown()
     } else {
       error.value = result.error
     }
   }
 
-  // ── FAB (idle) ──
-  if (state.value === 'idle') {
+  const showGutschein = useComputed(() => done.value && !!answers.value.wunsch_tag)
+
+  // ── FAB (geschlossen) ──
+  if (!open.value) {
     return (
-      <button class="fab" type="button" aria-label="Hilfe bei Kfz-Schaden" onClick={() => go('qualify')}>
-        <img src={cfg.theme.logoUrl} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+      <button class="mk-fab" type="button" aria-label="Hilfe bei Kfz-Schaden — Monika" onClick={openWidget}>
+        {cfg.isClaimondoBranded ? (
+          <span class="mk-seal" dangerouslySetInnerHTML={{ __html: SIEGEL_SVG }} />
+        ) : (
+          <img src={cfg.theme.logoUrl} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+        )}
       </button>
     )
   }
 
-  // ── Panel ──
+  const s = step.value
+
+  // ── Panel (offen) ──
   return (
-    <div class="panel" role="dialog" aria-label="Schaden-Anfrage" aria-live="polite">
-      <div class="head">
-        <img src={cfg.theme.logoUrl} alt="" />
-        <span class="title">Schnelle Hilfe</span>
-        <button class="close" type="button" aria-label="Schließen" onClick={() => go('idle')}>
+    <div class="mk-panel" role="dialog" aria-label="Chat mit Monika" aria-live="polite">
+      <div class="mk-head">
+        {cfg.isClaimondoBranded ? (
+          <img class="mk-avatar" src={photo} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.visibility = 'hidden')} />
+        ) : (
+          <img class="mk-avatar" src={cfg.theme.logoUrl} alt="" />
+        )}
+        <div class="mk-head-meta">
+          <span class="mk-name">{cfg.isClaimondoBranded ? 'Monika' : 'Schaden-Hilfe'}</span>
+          <span class="mk-role">{cfg.isClaimondoBranded ? 'Schadenberaterin · ● online' : '● online'}</span>
+        </div>
+        <button class="mk-close" type="button" aria-label="Schließen" onClick={() => (open.value = false)}>
           ×
         </button>
       </div>
 
-      <div class="body">
-        {state.value === 'qualify' && (
-          <>
-            <p class="q">Hatten Sie einen Kfz-Unfall?</p>
-            <p class="sub">Wir vermitteln Ihnen schnell einen Kfz-Sachverständigen.</p>
-            <button class="opt" type="button" onClick={() => { track(cfg, 'monika_qualify_yes'); go('day') }}>
-              Ja, ich hatte einen Unfall
-            </button>
-            <button class="opt" type="button" onClick={() => { track(cfg, 'monika_qualify_no'); go('fallback') }}>
-              Nein, andere Frage
-            </button>
-          </>
+      <div class="mk-chat" ref={scrollRef}>
+        {log.value.map((b, i) => (
+          <div key={i} class={`mk-row mk-row-${b.role}`}>
+            {b.role === 'monika' && cfg.isClaimondoBranded && <img class="mk-mini" src={photo} alt="" />}
+            <div class={`mk-bubble mk-bubble-${b.role}`}>{b.text}</div>
+          </div>
+        ))}
+        {typing.value && (
+          <div class="mk-row mk-row-monika">
+            {cfg.isClaimondoBranded && <img class="mk-mini" src={photo} alt="" />}
+            <div class="mk-bubble mk-bubble-monika mk-typing">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
         )}
 
-        {state.value === 'day' && (
-          <>
-            <p class="q">Wann passt Ihnen ein Termin?</p>
-            {(['asap', 'morgen', 'uebermorgen'] as DaySlot[]).map((d) => (
-              <button key={d} class="opt" type="button" onClick={() => { slot.value = d; go('time') }}>
-                {DAY_LABEL[d]}
+        {awaiting.value && !done.value && s.then.kind === 'choices' && (
+          <div class="mk-choices">
+            {s.then.options.map((o) => (
+              <button key={o.value} class="mk-chip" type="button" onClick={() => choose(o)}>
+                {o.label}
               </button>
             ))}
-          </>
+          </div>
         )}
 
-        {state.value === 'time' && (
-          <>
-            <p class="q">Welche Tageszeit?</p>
-            {(['vormittag', 'nachmittag', 'abend'] as TimeSlot[]).map((t) => (
-              <button key={t} class="opt" type="button" onClick={() => { timeSlot.value = t; go('form') }}>
-                {TIME_LABEL[t]}
+        {awaiting.value && !done.value && s.then.kind === 'actions' && (
+          <div class="mk-actions">
+            {s.then.actions.map((a, i) => (
+              <button
+                key={i}
+                class={`mk-act mk-act-${a.kind === 'callback' ? 'secondary' : 'primary'}`}
+                type="button"
+                onClick={() => doAction(a)}
+              >
+                {a.kind === 'call' ? '📞 ' : a.kind === 'whatsapp' ? '💬 ' : ''}
+                {a.label}
               </button>
             ))}
-          </>
+          </div>
         )}
 
-        {state.value === 'form' && (
-          <>
-            <p class="q">Ihre Kontaktdaten</p>
-            <p class="sub">Wir rufen Sie schnellstmöglich zurück.</p>
-            <label class="fld" for="monika-name">Name</label>
+        {awaiting.value && !done.value && s.then.kind === 'contact' && (
+          <div class="mk-form">
             <input
-              class="inp" id="monika-name" type="text" autocomplete="name" placeholder="Vor- und Nachname"
-              value={name.value} onInput={(e) => (name.value = (e.target as HTMLInputElement).value)}
+              class="mk-inp"
+              type="text"
+              autocomplete="given-name"
+              placeholder="Vorname"
+              value={vorname.value}
+              onInput={(e) => (vorname.value = (e.target as HTMLInputElement).value)}
             />
-            <label class="fld" for="monika-tel">Telefon</label>
             <input
-              class="inp" id="monika-tel" type="tel" autocomplete="tel" placeholder="z.B. 0151 23456789"
-              value={telefon.value} onInput={(e) => (telefon.value = (e.target as HTMLInputElement).value)}
+              class="mk-inp"
+              type="text"
+              autocomplete="family-name"
+              placeholder="Nachname"
+              value={nachname.value}
+              onInput={(e) => (nachname.value = (e.target as HTMLInputElement).value)}
+            />
+            <input
+              class="mk-inp"
+              type="tel"
+              autocomplete="tel"
+              placeholder="Telefon, z.B. 0151 23456789"
+              value={telefon.value}
+              onInput={(e) => (telefon.value = (e.target as HTMLInputElement).value)}
             />
             {/* Honeypot — Bots fuellen es, Menschen nicht */}
             <input
-              class="hp" type="text" tabIndex={-1} autocomplete="off" aria-hidden="true" name="company"
-              value={honeypot.value} onInput={(e) => (honeypot.value = (e.target as HTMLInputElement).value)}
+              class="mk-hp"
+              type="text"
+              tabIndex={-1}
+              autocomplete="off"
+              aria-hidden="true"
+              name="company"
+              value={honeypot.value}
+              onInput={(e) => (honeypot.value = (e.target as HTMLInputElement).value)}
             />
-            <label class="consent">
-              <input type="checkbox" checked={consent.value} onChange={(e) => (consent.value = (e.target as HTMLInputElement).checked)} />
+            <label class="mk-consent">
+              <input
+                type="checkbox"
+                checked={consent.value}
+                onChange={(e) => (consent.value = (e.target as HTMLInputElement).checked)}
+              />
               <span>
                 Ich akzeptiere die{' '}
-                <a href={`${cfg.base}/datenschutz`} target="_blank" rel="noopener">Datenschutzerklärung</a> und{' '}
-                <a href={`${cfg.base}/agb`} target="_blank" rel="noopener">AGB</a>.
+                <a href={`${cfg.base}/datenschutz`} target="_blank" rel="noopener">
+                  Datenschutzerklärung
+                </a>
+                .
               </span>
             </label>
-            <button class="cta" type="button" disabled={!canSubmit.value} onClick={() => void submit()}>
-              {sending.value ? 'Wird gesendet…' : 'Anfrage senden'}
+            <button class="mk-act mk-act-primary" type="button" disabled={!canSubmit.value} onClick={() => void submitContact()}>
+              {sending.value ? 'Wird gesendet…' : 'Absenden'}
             </button>
-            {error.value && <p class="err">{error.value}</p>}
-          </>
+            {error.value && <p class="mk-err">{error.value}</p>}
+          </div>
         )}
 
-        {state.value === 'success' && (
-          <>
-            <div class="success-ico">✓</div>
-            <p class="q">Vielen Dank!</p>
-            {successKanal.value ? (
-              <p class="sub">Wir haben Ihnen den Link zur Terminbuchung per {KANAL_LABEL[successKanal.value]} geschickt.</p>
-            ) : (
-              <p class="sub">Wir melden uns schnellstmöglich bei Ihnen.</p>
-            )}
-            {!successKanal.value && cfg.whatsapp && (
-              <a
-                class="wa" target="_blank" rel="noopener"
-                href={`https://wa.me/${cfg.whatsapp}?text=${encodeURIComponent('Hallo, ich hatte einen Kfz-Unfall und möchte einen Gutachter-Termin.')}`}
-              >
-                Direkt per WhatsApp schreiben
-              </a>
-            )}
-          </>
-        )}
-
-        {state.value === 'fallback' && (
-          <>
-            <p class="q">Wie können wir helfen?</p>
-            {cfg.telefon && <a class="opt" href={`tel:${cfg.telefon}`}>📞 Jetzt anrufen: {cfg.telefon}</a>}
-            <button class="opt" type="button" onClick={() => go('qualify')}>← Zurück</button>
-          </>
+        {showGutschein.value && (
+          <div class="mk-gutschein">
+            <span class="mk-gutschein-badge">25 €</span>
+            <span class="mk-gutschein-txt">Tankgutschein zum Termin — als Dankeschön. ⛽</span>
+          </div>
         )}
       </div>
 
       {cfg.theme.brandedByClaimondo && (
-        <div class="powered">
-          <a href={`${cfg.base}/sv-netzwerk`} target="_blank" rel="noopener">powered by Claimondo</a>
+        <div class="mk-powered">
+          <a href={`${cfg.base}/sv-netzwerk`} target="_blank" rel="noopener">
+            powered by Claimondo
+          </a>
         </div>
       )}
     </div>
