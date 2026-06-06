@@ -90,3 +90,13 @@ export function setBeatsShown(cfg: KeyCfg, n: number, storage: StorageLike | nul
   if (!storage) return
   try { storage.setItem(BEATS_KEY(cfg), String(n)) } catch { /* noop */ }
 }
+
+const MUTED_KEY = (cfg: KeyCfg) => `monika:${base(cfg)}:muted`
+export function getMuted(cfg: KeyCfg, storage: StorageLike | null = safeLocal()): boolean {
+  if (!storage) return false
+  try { return storage.getItem(MUTED_KEY(cfg)) === '1' } catch { return false }
+}
+export function setMuted(cfg: KeyCfg, muted: boolean, storage: StorageLike | null = safeLocal()): void {
+  if (!storage) return
+  try { storage.setItem(MUTED_KEY(cfg), muted ? '1' : '0') } catch { /* noop */ }
+}

@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   serializeState, deserializeState, storageKey, isWithinQuietWindow, STATE_VERSION,
   loadState, saveState, clearState, markDismissed, getDismissedAt, getBeatsShown, setBeatsShown,
+  getMuted, setMuted,
   type PersistedState, type StorageLike,
 } from './store'
 import type { MonikaConfig } from './types'
@@ -80,4 +81,19 @@ describe('dismiss + beats (DI)', () => {
     expect(getBeatsShown(cfg, s)).toBe(2)
   })
   it('keine beats → 0', () => expect(getBeatsShown(cfg, fakeStorage())).toBe(0))
+})
+
+describe('mute (DI)', () => {
+  it('default = false (Sound an)', () => expect(getMuted(cfg, fakeStorage())).toBe(false))
+  it('setMuted(true) dann getMuted → true', () => {
+    const s = fakeStorage()
+    setMuted(cfg, true, s)
+    expect(getMuted(cfg, s)).toBe(true)
+  })
+  it('setMuted(false) → false', () => {
+    const s = fakeStorage()
+    setMuted(cfg, true, s)
+    setMuted(cfg, false, s)
+    expect(getMuted(cfg, s)).toBe(false)
+  })
 })
