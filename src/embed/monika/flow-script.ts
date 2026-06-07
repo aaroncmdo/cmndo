@@ -200,3 +200,8 @@ export const SCRIPT: Record<StepId, Step> = {
     then: { kind: 'contact', next: 'start' },
   },
 }
+
+export interface Bubble {
+  role: 'monika' | 'user'
+  text: string
+}
