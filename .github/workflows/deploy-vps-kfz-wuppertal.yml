@@ -48,6 +48,7 @@ jobs:
           NEXT_PUBLIC_SITE_URL: https://kfz-unfallgutachter-wuppertal.de
           NEXT_PUBLIC_EMBED_BASE: https://app.claimondo.de
           NEXT_PUBLIC_MONIKA_EMBED_ENABLED: 'true'
+          NEXT_PUBLIC_GTM_ID: GTM-KD2L63T3
 
       - name: Artefakt packen (standalone-Inhalt)
         working-directory: kfz-gutachter-wuppertal
@@ -90,6 +91,7 @@ jobs:
             NEXT_PUBLIC_MONIKA_EMBED_ENABLED=true
             NEXT_PUBLIC_SITE_URL=https://kfz-unfallgutachter-wuppertal.de
             NEXT_PUBLIC_EMBED_BASE=https://app.claimondo.de
+            NEXT_PUBLIC_GTM_ID=GTM-KD2L63T3
             ENV
             rm -rf "${APP}-new/public/assets/img"
             mkdir -p "${APP}-new/public/assets"
