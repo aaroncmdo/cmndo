@@ -35,7 +35,9 @@ export const STYLES = `
 .mk-mute:hover { opacity: 1; }
 .mk-mute:focus-visible { outline: 2px solid var(--monika-accent); }
 
-.mk-chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+/* min-height:0 → die Chat-Area scrollt selbst (Flex-Kind schrumpft unter Content);
+   overscroll-behavior:contain → kein Scroll-Chaining auf die Host-Seite dahinter. */
+.mk-chat { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
 .mk-row { display: flex; align-items: flex-end; gap: 6px; max-width: 100%; }
 .mk-row-user { justify-content: flex-end; }
 .mk-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
