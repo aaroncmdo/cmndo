@@ -29,6 +29,9 @@ export const STYLES = `
 .mk-role { font-size: 11.5px; opacity: .85; }
 .mk-close { background: none; border: none; color: #fff; cursor: pointer; font-size: 22px; line-height: 1; padding: 4px; border-radius: 6px; }
 .mk-close:focus-visible { outline: 2px solid var(--monika-accent); }
+.mk-mute { background: none; border: none; color: #fff; cursor: pointer; font-size: 15px; line-height: 1; padding: 4px; border-radius: 6px; opacity: .85; }
+.mk-mute:hover { opacity: 1; }
+.mk-mute:focus-visible { outline: 2px solid var(--monika-accent); }
 
 .mk-chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
 .mk-row { display: flex; align-items: flex-end; gap: 6px; max-width: 100%; }

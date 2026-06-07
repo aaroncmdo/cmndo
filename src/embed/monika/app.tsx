@@ -1,7 +1,7 @@
 /** @jsxImportSource preact */
 // AAR-939 · Monika-A-Flow · Chat-Widget (Skript-getrieben, Message-Player).
-// Phase 1: FAB (Siegel) + Panel + 4-Pfad-Flow. Phase 2: proaktiver Teaser-Peek +
-// uebergreifender Resume (sessionStorage, pro Besuch).
+// P1: FAB (Siegel) + Panel + 4-Pfad-Flow. P2: proaktiver Teaser-Peek + uebergreifender
+// Resume (sessionStorage). P3: Sound (gesten-entsperrt) + Mute.
 
 import { useSignal, useComputed, effect } from '@preact/signals'
 import { useRef, useEffect } from 'preact/hooks'
@@ -16,9 +16,10 @@ import { fireSiteConversion } from './conversion'
 import { SIEGEL_SVG, monikaPhotoUrl } from './assets'
 import {
   loadState, saveState, markDismissed, getDismissedAt, getBeatsShown, setBeatsShown,
-  isWithinQuietWindow, type PersistedState,
+  getMuted, setMuted, isWithinQuietWindow, type PersistedState,
 } from './store'
 import { scrollDepthRatio, isScrollable, nextBeat, BEAT_TEXT, type TeaserSession } from './teaser'
+import { createSoundEngine } from './sound'
 
 export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const open = useSignal(false)
@@ -35,13 +36,18 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const telefon = useSignal('')
   const consent = useSignal(false)
   const honeypot = useSignal('')
-  // Phase 2: Teaser-Peek (0 = unsichtbar; 1/2 = Beat bzw. Resume-Peek) + Session-Beat-Zaehler.
+  // P2: Teaser-Peek (0 = unsichtbar; 1/2 = Beat bzw. Resume-Peek) + Session-Beat-Zaehler.
   const teaserBeat = useSignal<0 | 1 | 2>(0)
   const beatsShown = useSignal(0)
+  // P3: Mute-State (localStorage-persistiert, default AN = nicht gemutet).
+  const muted = useSignal(getMuted(cfg))
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const step = useComputed(() => SCRIPT[stepId.value])
   const photo = monikaPhotoUrl(cfg.base)
+  // P3: Sound-Engine einmalig (stabil ueber Re-Renders); liest muted lazy.
+  const soundRef = useRef<ReturnType<typeof createSoundEngine> | null>(null)
+  if (!soundRef.current) soundRef.current = createSoundEngine(cfg.base, () => muted.value)
 
   function scrollDown() {
     requestAnimationFrame(() => {
@@ -51,6 +57,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   }
 
   // Spielt die messages des Steps sequentiell mit Typing-Beats; dann awaiting=true.
+  // P3: playIncoming beim ERSTEN Chunk eines Steps (1x pro Monika-Turn, + Throttle in der Engine).
   function playStep(id: StepId) {
     const s = SCRIPT[id]
     awaiting.value = false
@@ -62,8 +69,10 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
         scrollDown()
         return
       }
+      const isFirst = i === 0
       const text = s.messages[i++]
       if (reduce) {
+        if (isFirst) soundRef.current?.playIncoming()
         log.value = [...log.value, { role: 'monika', text }]
         scrollDown()
         playNext()
@@ -73,6 +82,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       scrollDown()
       setTimeout(() => {
         typing.value = false
+        if (isFirst) soundRef.current?.playIncoming()
         log.value = [...log.value, { role: 'monika', text }]
         scrollDown()
         setTimeout(playNext, 250)
@@ -81,7 +91,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     playNext()
   }
 
-  // ── Phase 2: Teaser ──
+  // ── P2: Teaser ──
   function isDismissed(): boolean {
     return isWithinQuietWindow(getDismissedAt(cfg), Date.now())
   }
@@ -134,6 +144,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
 
   function openWidget() {
     if (open.value) return
+    soundRef.current?.unlock() // P3: Geste → Autoplay entsperren + Buffer laden
     open.value = true
     teaserBeat.value = 0
     track(cfg, 'monika_open')
@@ -145,6 +156,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     if (s.then.kind !== 'choices') return
     answers.value = { ...answers.value, [s.then.key]: opt.value } as Answers
     log.value = [...log.value, { role: 'user', text: opt.label }]
+    soundRef.current?.playSent()
     stepId.value = opt.next
     playStep(opt.next)
   }
@@ -161,6 +173,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     }
     if (a.kind === 'callback' && a.next) {
       log.value = [...log.value, { role: 'user', text: a.label }]
+      soundRef.current?.playSent()
       stepId.value = a.next
       playStep(a.next)
     }
@@ -184,6 +197,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     const result = await submitAnfrage(cfg.base, payload)
     sending.value = false
     if (result.ok) {
+      soundRef.current?.playSent()
       track(cfg, 'monika_anfrage_submit')
       fireSiteConversion(cfg)
       done.value = true
@@ -202,12 +216,12 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
 
   const showGutschein = useComputed(() => done.value && !!answers.value.wunsch_tag)
 
-  // ── Phase 2: Boot (einmalig) — Resume-Rehydrierung ODER Teaser-Init + Persistenz-Effekt ──
+  // ── P2: Boot (einmalig) — Resume-Rehydrierung ODER Teaser-Init + Persistenz-Effekt ──
   useEffect(() => {
     let teaserCleanup: (() => void) | undefined
     const persisted = loadState(cfg)
     if (persisted && persisted.history.length > 0) {
-      // ENGAGED/COMPLETED — Resume: History instant + stumm; aktueller Schritt live.
+      // ENGAGED/COMPLETED — Resume: History instant + stumm (KEIN playStep → kein Sound); aktueller Schritt live.
       stepId.value = persisted.stepId
       answers.value = persisted.answers
       log.value = persisted.history
@@ -304,6 +318,17 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
           <span class="mk-name">{cfg.isClaimondoBranded ? 'Monika' : 'Schaden-Hilfe'}</span>
           <span class="mk-role">{cfg.isClaimondoBranded ? 'Schadenberaterin · ● online' : '● online'}</span>
         </div>
+        <button
+          class="mk-mute"
+          type="button"
+          aria-label={muted.value ? 'Ton einschalten' : 'Ton ausschalten'}
+          onClick={() => {
+            muted.value = !muted.value
+            setMuted(cfg, muted.value)
+          }}
+        >
+          {muted.value ? '🔇' : '🔊'}
+        </button>
         <button class="mk-close" type="button" aria-label="Schließen" onClick={() => (open.value = false)}>
           ×
         </button>
