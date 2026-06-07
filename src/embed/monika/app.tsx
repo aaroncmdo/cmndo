@@ -21,6 +21,12 @@ import {
 import { scrollDepthRatio, isScrollable, nextBeat, BEAT_TEXT, type TeaserSession } from './teaser'
 import { createSoundEngine } from './sound'
 
+// AAR-939: Inaktivitaets-Reaktivierung — reagiert der Kunde an einem Auswahl-/Form-Schritt
+// ~25s nicht, schreibt Monika EINE freundliche Nachricht (einmal pro Flow). Der Schritt
+// bleibt klickbar; bei geschlossenem Widget erscheint sie als Peek-Bubble auf der Seite.
+const REACTIVATE_MS = 25000
+const REACTIVATE_TEXT = 'Sind Sie noch da? 😊 Tippen Sie einfach auf eine Option, ich helfe Ihnen gern weiter.'
+
 export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const open = useSignal(false)
   const stepId = useSignal<StepId>(START_STEP)
@@ -44,6 +50,9 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const scrollRef = useRef<HTMLDivElement>(null)
   // AAR-939: System-Zurueck-Button schliesst den Chat (History-API). Ref ueberlebt Re-Renders.
   const historyPushedRef = useRef(false)
+  // AAR-939: Inaktivitaets-Reaktivierung (einmal pro Flow) + Timer-Handle.
+  const reactivatedRef = useRef(false)
+  const inactivityRef = useRef<number>(0)
 
   const step = useComputed(() => SCRIPT[stepId.value])
   const photo = monikaPhotoUrl(cfg.base)
@@ -69,6 +78,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       if (i >= s.messages.length) {
         awaiting.value = true
         scrollDown()
+        armInactivity() // AAR-939: Inaktivitaets-Timer starten — Nutzer ist jetzt dran
         return
       }
       const isFirst = i === 0
@@ -144,6 +154,33 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     markDismissed(cfg, Date.now())
   }
 
+  // ── AAR-939: Inaktivitaets-Reaktivierung ──
+  function disarmInactivity() {
+    if (inactivityRef.current) {
+      clearTimeout(inactivityRef.current)
+      inactivityRef.current = 0
+    }
+  }
+  // Timer (neu) starten — nur wenn noch nicht reaktiviert + Flow nicht abgeschlossen.
+  function armInactivity() {
+    if (reactivatedRef.current || done.value) return
+    disarmInactivity()
+    inactivityRef.current = window.setTimeout(doReactivate, REACTIVATE_MS)
+  }
+  // EINE Reaktivierungs-Bubble; offen → im Chat (+ Ton), geschlossen → als Peek auf der Seite.
+  // awaiting bleibt unangetastet → der aktuelle Schritt bleibt klickbar.
+  function doReactivate() {
+    if (reactivatedRef.current || done.value) return
+    reactivatedRef.current = true
+    log.value = [...log.value, { role: 'monika', text: REACTIVATE_TEXT }]
+    if (open.value) {
+      soundRef.current?.playIncoming()
+      scrollDown()
+    } else {
+      teaserBeat.value = 1 // geschlossen → Peek zeigt die letzte Monika-Zeile
+    }
+  }
+
   // AAR-939: einen History-Eintrag pushen, damit der System-Zurueck-Button den Chat
   // schliesst (statt die Host-Seite zu verlassen). Idempotent via Ref.
   function pushHistoryOnce() {
@@ -182,6 +219,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   function choose(opt: ChoiceOption) {
     const s = step.value
     if (s.then.kind !== 'choices') return
+    disarmInactivity()
     answers.value = { ...answers.value, [s.then.key]: opt.value } as Answers
     log.value = [...log.value, { role: 'user', text: opt.label }]
     soundRef.current?.playSent()
@@ -200,6 +238,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       return
     }
     if (a.kind === 'callback' && a.next) {
+      disarmInactivity()
       log.value = [...log.value, { role: 'user', text: a.label }]
       soundRef.current?.playSent()
       stepId.value = a.next
@@ -213,6 +252,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
 
   async function submitContact() {
     if (!canSubmit.value) return
+    disarmInactivity()
     sending.value = true
     error.value = ''
     const merged: Answers = { ...answers.value, vorname: vorname.value, nachname: nachname.value, telefon: telefon.value }
@@ -295,6 +335,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       disposeEffect()
       teaserCleanup?.()
       window.removeEventListener('popstate', onPop)
+      disarmInactivity()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -416,7 +457,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
         )}
 
         {awaiting.value && !done.value && s.then.kind === 'contact' && (
-          <div class="mk-form">
+          <div class="mk-form" onInput={armInactivity}>
             <input
               class="mk-inp"
               type="text"
