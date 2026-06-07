@@ -27,13 +27,17 @@ export const STYLES = `
 .mk-head-meta { display: flex; flex-direction: column; flex: 1; min-width: 0; }
 .mk-name { font-weight: 700; font-size: 15px; line-height: 1.2; }
 .mk-role { font-size: 11.5px; opacity: .85; }
-.mk-close { background: none; border: none; color: #fff; cursor: pointer; font-size: 22px; line-height: 1; padding: 4px; border-radius: 6px; }
-.mk-close:focus-visible { outline: 2px solid var(--monika-accent); }
+.mk-close { background: rgba(255,255,255,.14); border: none; color: #fff; cursor: pointer; font-size: 19px; line-height: 1;
+  width: 30px; height: 30px; flex: 0 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: background .12s; }
+.mk-close:hover { background: rgba(255,255,255,.28); }
+.mk-close:focus-visible { outline: 2px solid var(--monika-accent); outline-offset: 1px; }
 .mk-mute { background: none; border: none; color: #fff; cursor: pointer; font-size: 15px; line-height: 1; padding: 4px; border-radius: 6px; opacity: .85; }
 .mk-mute:hover { opacity: 1; }
 .mk-mute:focus-visible { outline: 2px solid var(--monika-accent); }
 
-.mk-chat { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+/* min-height:0 → die Chat-Area scrollt selbst (Flex-Kind schrumpft unter Content);
+   overscroll-behavior:contain → kein Scroll-Chaining auf die Host-Seite dahinter. */
+.mk-chat { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 14px; display: flex; flex-direction: column; gap: 8px; }
 .mk-row { display: flex; align-items: flex-end; gap: 6px; max-width: 100%; }
 .mk-row-user { justify-content: flex-end; }
 .mk-mini { width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex: 0 0 auto; }
