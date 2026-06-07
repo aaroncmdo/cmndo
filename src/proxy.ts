@@ -211,10 +211,14 @@ export const config = {
   // Vollständiger Exclusion-Katalog:
   // .glb → Mapbox 3D-Modell; .js/.json → sw.js + manifest.json;
   // .obj/.mtl → Three.js OBJLoader; .pdf → statische Download-Vorlagen
-  // (public/downloads/*, z.B. Unfallskizze-Vorlage); Rest → Standard Next.js-Artefakte.
+  // (public/downloads/*, z.B. Unfallskizze-Vorlage); mp3/wav/ogg/m4a → Monika-Embed-
+  // Sounds (public/embed/sounds/*) — OHNE sie laeuft der .mp3-Request durch
+  // updateSession und wird fuer anonyme Embed-Besucher 307 -> /login umgeleitet,
+  // das Widget bekommt Login-HTML statt Audio (decodeAudioData scheitert → kein Sound);
+  // Rest → Standard Next.js-Artefakte.
   // robots.txt und sitemap.xml MÜSSEN durch den Proxy (app.claimondo.de
   // braucht eine eigene robots.txt). txt/xml deshalb NICHT im Exclusion-Pattern.
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp4|webm|js|json|pdf)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|glb|gltf|obj|mtl|hdr|ktx2|woff|woff2|mp3|wav|ogg|m4a|mp4|webm|js|json|pdf)$).*)',
   ],
 }
