@@ -70,16 +70,15 @@ export const STYLES = `
 .mk-err { color: #c0392b; font-size: 13px; margin: 4px 0 0; }
 .mk-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 
-.mk-gutschein { display: flex; align-items: center; gap: 10px; margin-top: 10px; padding: 12px 14px;
-  background: #fff8e8; border: 1.5px solid #C9A961; border-radius: 12px; }
-.mk-gutschein-badge { font-weight: 800; font-size: 17px; color: #9a7d2e; background: #fbeec4; border-radius: 8px; padding: 4px 9px; flex: 0 0 auto; }
-.mk-gutschein-txt { font-size: 13px; color: var(--monika-text); }
-
 .mk-powered { padding: 7px 14px; text-align: center; font-size: 11px; background: #fff; border-top: 1px solid #eef1f6; }
 .mk-powered a { color: var(--monika-accent); text-decoration: none; }
 
 .mk-launch { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+/* N7: auf Mobile ueber die Sticky-Call-Bar der Cluster-LP schieben (sonst verdeckt das Siegel sie). */
+@media (max-width: 639px) { .mk-launch { bottom: 84px; } }
 .mk-launch .mk-fab { position: static; }
+.mk-fab-wrap { display: flex; align-items: center; gap: 10px; }
+.mk-fab-holder { position: relative; line-height: 0; }
 .mk-teaser { display: flex; align-items: center; gap: 8px; max-width: 280px; background: #fff; color: var(--monika-text);
   border: 1px solid #e8ecf3; border-radius: 16px; border-bottom-right-radius: 5px; padding: 10px 12px;
   box-shadow: 0 6px 20px rgba(13,27,62,.18); cursor: pointer; }
@@ -90,4 +89,31 @@ export const STYLES = `
 .mk-teaser-txt { font-size: 13.5px; line-height: 1.35; flex: 1; }
 .mk-teaser-x { background: none; border: none; color: #98a4b8; font-size: 17px; line-height: 1; cursor: pointer; padding: 0 2px; align-self: flex-start; }
 .mk-teaser-x:hover { color: var(--monika-text); }
+
+/* N3: Teaser-Label "Neue Nachricht" ueber dem Text */
+.mk-teaser-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.mk-teaser-label { font-size: 9.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--monika-accent); }
+
+/* N1: Hover-Pill (Identitaet am Siegel — Desktop ausfahrend, Mobile sichtbar) */
+.mk-hoverpill { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e8ecf3;
+  border-radius: 14px; padding: 7px 12px 7px 8px; box-shadow: 0 6px 18px rgba(13,27,62,.16);
+  opacity: 0; transform: translateX(10px); transition: opacity .2s, transform .2s cubic-bezier(.22,1,.36,1);
+  pointer-events: none; white-space: nowrap; }
+.mk-fab-wrap:hover .mk-hoverpill { opacity: 1; transform: none; }
+.mk-hoverpill .mk-mini { width: 30px; height: 30px; }
+.mk-hoverpill-txt { display: flex; flex-direction: column; line-height: 1.2; }
+.mk-hoverpill-txt strong { font-size: 13px; color: var(--monika-primary); font-weight: 700; }
+.mk-hoverpill-txt span { font-size: 11.5px; color: var(--monika-accent); }
+@media (max-width: 639px) { .mk-hoverpill { opacity: 1; transform: none; } }
+
+/* N2: rote (1)-Badge auf dem Siegel (Notification, semantisches Rot) */
+.mk-badge { position: absolute; top: -3px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px;
+  background: #e53935; color: #fff; border: 2px solid #fff; border-radius: 999px; font-size: 11px; font-weight: 800;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(0,0,0,.25); }
+
+/* N8: Online-Punkt gruen + pulsierend (semantisches Gruen) */
+.mk-online-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: #2ecc71;
+  vertical-align: middle; animation: mk-pulse 1.6s ease-in-out infinite; }
+@keyframes mk-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(46,204,113,.55); opacity: 1; }
+  50% { box-shadow: 0 0 0 5px rgba(46,204,113,0); opacity: .6; } }
 `
