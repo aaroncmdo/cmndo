@@ -5,6 +5,7 @@ import { sendEmail } from '@/lib/email/google/client'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
 import { buildAnfrageColumns, splitName, type AnfrageVariante, type InsertAnfrageInput } from './anfrage-columns'
+import { svBezeichnung, kundenBestaetigungText } from './kunde-bestaetigung'
 
 /**
  * AAR-939 · Monika-Embed · Stream 2 — Anfrage-Verarbeitung (Shared)
@@ -28,6 +29,8 @@ export type { AnfrageVariante, InsertAnfrageInput }
 export interface EmbedSiteConfig {
   id: string
   slug: string
+  /** AAR-939 P4: Anzeigename des Embeds (sv_embed-Bezeichnung in der Kunden-Bestaetigung). */
+  name: string | null
   variante: AnfrageVariante
   /** AAR-939 Embed-B: callback (Default, SV-Rueckruf) | flowlink (Self-Service, /flow-Link). Orthogonal zu variante. */
   funnel_modus: 'callback' | 'flowlink'
@@ -75,7 +78,7 @@ export async function ladeEmbedSite(slug: string): Promise<EmbedSiteConfig | nul
   const db = createAdminClient()
   const { data, error } = await db
     .from('embed_sites')
-    .select('id, slug, variante, funnel_modus, einzelpreis_eur, empfaenger_email, cc_email, baileys_routing_nummer, sv_telefon, erlaubte_domains, max_anfragen_pro_h, aktiv')
+    .select('id, slug, name, variante, funnel_modus, einzelpreis_eur, empfaenger_email, cc_email, baileys_routing_nummer, sv_telefon, erlaubte_domains, max_anfragen_pro_h, aktiv')
     .eq('slug', slug)
     .maybeSingle()
   if (error || !data) return null
@@ -144,6 +147,29 @@ export async function notifyAnfrage(input: NotifyAnfrageInput): Promise<void> {
     await fireTrackingWebhook({ event: 'anfrage_eingegangen', anfrageId })
   } catch (err) {
     console.error('[AAR-939 8b] tracking anfrage_eingegangen fehlgeschlagen:', err)
+  }
+
+  // AAR-939 P4: Kunden-Bestaetigung (Callback-Flow). Variante B laeuft nicht durch
+  // notifyAnfrage → hier sind nur sv_embed-A + Cluster-LP. Best-effort: ein Fail darf
+  // die SV-/Dispatch-Notify nicht brechen. WhatsApp zuerst, SMS-Fallback.
+  if (payload.telefon) {
+    const bezeichnung = svBezeichnung(
+      { source: payload.source, cluster: payload.cluster ?? null },
+      site?.name ?? null,
+    )
+    try {
+      await sendNachricht({
+        entity: 'gfa',
+        entityId: anfrageId,
+        phone: payload.telefon,
+        text: kundenBestaetigungText(bezeichnung),
+        fallback: ['sms'],
+        empfaengerRolle: 'kunde',
+        templateKey: 'embed_kunde_bestaetigung',
+      })
+    } catch (err) {
+      console.error('[AAR-939 P4] Kunden-Bestaetigung fehlgeschlagen:', err)
+    }
   }
 
   if (payload.source === 'sv_embed' && variante === 'A' && site) {
