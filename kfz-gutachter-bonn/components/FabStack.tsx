@@ -88,7 +88,7 @@ export function FabStack({ city }: { city: City }) {
     <aside aria-label="Schnellkontakt und Soforthilfe">
       {/* ===== FAB-STACK ===== (Mobil: initial versteckt, fade-in nach Hero-CTA out-of-view) */}
       <div
-        className="fixed bottom-[92px] right-6 z-[100] flex flex-col items-end gap-3 fab-scroll-gated"
+        className="fixed bottom-[92px] max-[639px]:bottom-[156px] right-6 z-[100] flex flex-col items-end gap-3 fab-scroll-gated"
         id="fabStack"
         aria-label="Schnellkontakt"
         style={{ transition: 'opacity .3s ease, transform .3s ease' }}
