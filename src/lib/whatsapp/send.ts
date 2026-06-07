@@ -15,6 +15,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from './baileys-client'
 import { sendEmail } from '@/lib/email'
+import { sendPlainSms } from './send-sms-plain'
 import {
   checkAndCacheAvailability,
   getCachedAvailability,
@@ -127,14 +128,22 @@ export async function sendNachricht(
   // 3) Fallback-Channels durchgehen
   for (const ch of fallback) {
     if (ch === 'sms' && phone) {
-      // TODO PR #4: Twilio-SMS-Send hier einhaken — heute placeholder
-      // Wir loggen den Versuch + returnen, der echte Send erfolgt wenn
-      // sendStatusSms() Wrapper migriert wird.
-      console.info('[whatsapp/send] sms-fallback noch nicht migriert', {
-        entity,
-        entityId,
+      const smsRes = await sendPlainSms(phone, text)
+      await logNachricht({
+        kanal: 'sms',
+        empfaengerEntity: entity,
+        empfaengerId: entityId,
+        empfaengerRolle,
+        empfaengerKontakt: phone,
+        text,
         templateKey,
+        fallId,
+        externalId: smsRes.sid ?? null,
+        fehler: smsRes.success ? undefined : smsRes.error,
       })
+      if (smsRes.success) {
+        return { ok: true, channel: 'sms', messageId: smsRes.sid, whatsappVerfuegbar: waStatus.verfuegbar }
+      }
       continue
     }
     if (ch === 'email' && email) {
