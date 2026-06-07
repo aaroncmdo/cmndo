@@ -67,40 +67,51 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     })
   }
 
-  // Spielt die messages des Steps sequentiell mit Typing-Beats; dann awaiting=true.
-  // P3: playIncoming beim ERSTEN Chunk eines Steps (1x pro Monika-Turn, + Throttle in der Engine).
-  function playStep(id: StepId) {
-    const s = SCRIPT[id]
-    awaiting.value = false
+  // Tippt eine Monika-Bubble-Sequenz mit realistischen Pausen ab; ruft onDone am Ende.
+  // P3: playIncoming beim ERSTEN Chunk (1x pro Turn, + Throttle). Nicolas-UX (N4):
+  // laengere Tippzeit (typing.ts) + Denkpause vorm ersten Chunk + groessere Inter-Bubble-Pause.
+  function typeSequence(texts: string[], onDone?: () => void) {
     const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
     let i = 0
-    const playNext = () => {
-      if (i >= s.messages.length) {
-        awaiting.value = true
-        scrollDown()
-        armInactivity() // AAR-939: Inaktivitaets-Timer starten — Nutzer ist jetzt dran
+    const next = () => {
+      if (i >= texts.length) {
+        onDone?.()
         return
       }
       const isFirst = i === 0
-      const text = s.messages[i++]
+      const text = texts[i++]
       if (reduce) {
         if (isFirst) soundRef.current?.playIncoming()
         log.value = [...log.value, { role: 'monika', text }]
         scrollDown()
-        playNext()
+        next()
         return
       }
-      typing.value = true
-      scrollDown()
-      setTimeout(() => {
-        typing.value = false
-        if (isFirst) soundRef.current?.playIncoming()
-        log.value = [...log.value, { role: 'monika', text }]
+      const startTyping = () => {
+        typing.value = true
         scrollDown()
-        setTimeout(playNext, 250)
-      }, typingDurationMs(text))
+        setTimeout(() => {
+          typing.value = false
+          if (isFirst) soundRef.current?.playIncoming()
+          log.value = [...log.value, { role: 'monika', text }]
+          scrollDown()
+          setTimeout(next, 350)
+        }, typingDurationMs(text))
+      }
+      // N4: kurze Denkpause vorm ersten Chunk (Monika "liest" die Auswahl).
+      if (isFirst) setTimeout(startTyping, 450)
+      else startTyping()
     }
-    playNext()
+    next()
+  }
+
+  function playStep(id: StepId) {
+    awaiting.value = false
+    typeSequence(SCRIPT[id].messages, () => {
+      awaiting.value = true
+      scrollDown()
+      armInactivity() // AAR-939: Inaktivitaets-Timer starten — Nutzer ist jetzt dran
+    })
   }
 
   // ── P2: Teaser ──
@@ -270,19 +281,24 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       fireSiteConversion(cfg)
       done.value = true
       awaiting.value = false
-      log.value = [
-        ...log.value,
-        { role: 'user', text: `${vorname.value} ${nachname.value}`.trim() },
-        { role: 'monika', text: 'Perfekt, vielen Dank! 😊' },
-        { role: 'monika', text: 'Wir melden uns schnellstmöglich bei Ihnen.' },
+      log.value = [...log.value, { role: 'user', text: `${vorname.value} ${nachname.value}`.trim() }]
+      // N5/N6 (Nicolas-UX): getippte Abschluss-Sequenz — Zusammenfassung, naechster Schritt,
+      // WhatsApp-Schadensfotos-Hinweis (wir haben gerade geschrieben) + Tankgutschein als
+      // NACHRICHT (nicht als goldene Card). Tankgutschein nur im Termin-Pfad (wunsch_tag).
+      const vn = vorname.value.trim()
+      const closing = [
+        `Perfekt, vielen Dank${vn ? ', ' + vn : ''}! 😊`,
+        'Ich habe alles notiert — wir melden uns schnellstmöglich bei Ihnen.',
+        'Ich habe Ihnen gerade auf WhatsApp geschrieben. Sie können uns dort direkt Ihre Schadensfotos schicken, dann geht es noch schneller. 📸',
       ]
-      scrollDown()
+      if (answers.value.wunsch_tag) {
+        closing.push('Als Dankeschön für Ihren Termin gibt es übrigens einen 25 € Tankgutschein. ⛽')
+      }
+      typeSequence(closing)
     } else {
       error.value = result.error
     }
   }
-
-  const showGutschein = useComputed(() => done.value && !!answers.value.wunsch_tag)
 
   // ── P2: Boot (einmalig) — Resume-Rehydrierung ODER Teaser-Init + Persistenz-Effekt ──
   useEffect(() => {
@@ -356,7 +372,10 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
             onKeyDown={(e) => e.key === 'Enter' && openWidget()}
           >
             {cfg.isClaimondoBranded && <img class="mk-mini" src={photo} alt="" />}
-            <span class="mk-teaser-txt">{peekText}</span>
+            <div class="mk-teaser-body">
+              <span class="mk-teaser-label">Neue Nachricht</span>
+              <span class="mk-teaser-txt">{peekText}</span>
+            </div>
             <button
               class="mk-teaser-x"
               type="button"
@@ -370,13 +389,29 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
             </button>
           </div>
         )}
-        <button class="mk-fab" type="button" aria-label="Hilfe bei Kfz-Schaden — Monika" onClick={openWidget}>
-          {cfg.isClaimondoBranded ? (
-            <span class="mk-seal" dangerouslySetInnerHTML={{ __html: SIEGEL_SVG }} />
-          ) : (
-            <img src={cfg.theme.logoUrl} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+        <div class="mk-fab-wrap">
+          {/* N1: Hover-Pill (Desktop ausfahrend, Mobile sichtbar) — nur wenn kein Teaser laeuft. */}
+          {cfg.isClaimondoBranded && teaserBeat.value === 0 && (
+            <div class="mk-hoverpill" aria-hidden="true">
+              <img class="mk-mini" src={photo} alt="" />
+              <span class="mk-hoverpill-txt">
+                <strong>Claimondo</strong>
+                <span>Schadensberatung</span>
+              </span>
+            </div>
           )}
-        </button>
+          <div class="mk-fab-holder">
+            <button class="mk-fab" type="button" aria-label="Hilfe bei Kfz-Schaden — Monika" onClick={openWidget}>
+              {cfg.isClaimondoBranded ? (
+                <span class="mk-seal" dangerouslySetInnerHTML={{ __html: SIEGEL_SVG }} />
+              ) : (
+                <img src={cfg.theme.logoUrl} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+              )}
+            </button>
+            {/* N2: rote (1)-Badge bei neuer/ungelesener Nachricht (WhatsApp-Style). */}
+            {teaserBeat.value > 0 && <span class="mk-badge" aria-hidden="true">1</span>}
+          </div>
+        </div>
       </div>
     )
   }
@@ -394,7 +429,10 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
         )}
         <div class="mk-head-meta">
           <span class="mk-name">{cfg.isClaimondoBranded ? 'Monika' : 'Schaden-Hilfe'}</span>
-          <span class="mk-role">{cfg.isClaimondoBranded ? 'Schadenberaterin · ● online' : '● online'}</span>
+          <span class="mk-role">
+            {cfg.isClaimondoBranded ? 'Schadenberaterin · ' : ''}
+            <span class="mk-online-dot" aria-hidden="true"></span> online
+          </span>
         </div>
         <button
           class="mk-mute"
@@ -514,12 +552,6 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
           </div>
         )}
 
-        {showGutschein.value && (
-          <div class="mk-gutschein">
-            <span class="mk-gutschein-badge">25 €</span>
-            <span class="mk-gutschein-txt">Tankgutschein zum Termin — als Dankeschön. ⛽</span>
-          </div>
-        )}
       </div>
 
       {cfg.theme.brandedByClaimondo && (
