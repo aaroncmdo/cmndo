@@ -1,12 +1,12 @@
 /** @jsxImportSource preact */
 // AAR-939 · Monika-A-Flow · Chat-Widget (Skript-getrieben, Message-Player).
-// FAB (Siegel) + Panel (Monika-Header + Bubbles + Chips/Actions/Kontakt), Shadow-DOM.
-// Flow kommt aus flow-script.ts (PURE); dieser Renderer spielt messages mit Typing.
+// P1: FAB (Siegel) + Panel + 4-Pfad-Flow. P2: proaktiver Teaser-Peek + uebergreifender
+// Resume (sessionStorage). P3: Sound (gesten-entsperrt) + Mute.
 
-import { useSignal, useComputed } from '@preact/signals'
-import { useRef } from 'preact/hooks'
+import { useSignal, useComputed, effect } from '@preact/signals'
+import { useRef, useEffect } from 'preact/hooks'
 import type { MonikaConfig } from './types'
-import { SCRIPT, START_STEP, type StepId, type Answers, type ChoiceOption, type ActionDef } from './flow-script'
+import { SCRIPT, START_STEP, type StepId, type Answers, type ChoiceOption, type ActionDef, type Bubble } from './flow-script'
 import { typingDurationMs } from './typing'
 import { buildPayloadFromAnswers } from './payload'
 import { submitAnfrage } from './api'
@@ -14,8 +14,12 @@ import { captureAttribution } from './attribution'
 import { track } from './tracking'
 import { fireSiteConversion } from './conversion'
 import { SIEGEL_SVG, monikaPhotoUrl } from './assets'
-
-type Bubble = { role: 'monika' | 'user'; text: string }
+import {
+  loadState, saveState, markDismissed, getDismissedAt, getBeatsShown, setBeatsShown,
+  getMuted, setMuted, isWithinQuietWindow, type PersistedState,
+} from './store'
+import { scrollDepthRatio, isScrollable, nextBeat, BEAT_TEXT, type TeaserSession } from './teaser'
+import { createSoundEngine } from './sound'
 
 export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const open = useSignal(false)
@@ -32,10 +36,18 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   const telefon = useSignal('')
   const consent = useSignal(false)
   const honeypot = useSignal('')
+  // P2: Teaser-Peek (0 = unsichtbar; 1/2 = Beat bzw. Resume-Peek) + Session-Beat-Zaehler.
+  const teaserBeat = useSignal<0 | 1 | 2>(0)
+  const beatsShown = useSignal(0)
+  // P3: Mute-State (localStorage-persistiert, default AN = nicht gemutet).
+  const muted = useSignal(getMuted(cfg))
   const scrollRef = useRef<HTMLDivElement>(null)
 
   const step = useComputed(() => SCRIPT[stepId.value])
   const photo = monikaPhotoUrl(cfg.base)
+  // P3: Sound-Engine einmalig (stabil ueber Re-Renders); liest muted lazy.
+  const soundRef = useRef<ReturnType<typeof createSoundEngine> | null>(null)
+  if (!soundRef.current) soundRef.current = createSoundEngine(cfg.base, () => muted.value)
 
   function scrollDown() {
     requestAnimationFrame(() => {
@@ -45,6 +57,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   }
 
   // Spielt die messages des Steps sequentiell mit Typing-Beats; dann awaiting=true.
+  // P3: playIncoming beim ERSTEN Chunk eines Steps (1x pro Monika-Turn, + Throttle in der Engine).
   function playStep(id: StepId) {
     const s = SCRIPT[id]
     awaiting.value = false
@@ -56,8 +69,10 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
         scrollDown()
         return
       }
+      const isFirst = i === 0
       const text = s.messages[i++]
       if (reduce) {
+        if (isFirst) soundRef.current?.playIncoming()
         log.value = [...log.value, { role: 'monika', text }]
         scrollDown()
         playNext()
@@ -67,6 +82,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       scrollDown()
       setTimeout(() => {
         typing.value = false
+        if (isFirst) soundRef.current?.playIncoming()
         log.value = [...log.value, { role: 'monika', text }]
         scrollDown()
         setTimeout(playNext, 250)
@@ -75,11 +91,64 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     playNext()
   }
 
+  // ── P2: Teaser ──
+  function isDismissed(): boolean {
+    return isWithinQuietWindow(getDismissedAt(cfg), Date.now())
+  }
+  function teaserSession(): TeaserSession {
+    return { beatsShown: beatsShown.value, dismissed: isDismissed(), engaged: log.value.length > 0, completed: done.value }
+  }
+  function fireBeat() {
+    const b = nextBeat(teaserSession())
+    if (!b) return
+    teaserBeat.value = b
+    beatsShown.value = b
+    setBeatsShown(cfg, b)
+  }
+  function initTeaser(): () => void {
+    if (isDismissed()) return () => {}
+    const startedWithBeat1 = beatsShown.value === 1 // Beat 1 lief auf einer frueheren Seite (Cross-Page)
+    let beat1FiredHere = false
+    let raf = 0
+    const onScroll = () => {
+      if (raf) return
+      raf = requestAnimationFrame(() => {
+        raf = 0
+        const ratio = scrollDepthRatio(window.scrollY, document.documentElement.scrollHeight, window.innerHeight)
+        if (beatsShown.value === 0 && ratio >= 0.3) {
+          beat1FiredHere = true
+          fireBeat()
+        } else if (beatsShown.value === 1 && ((startedWithBeat1 && ratio >= 0.3) || (beat1FiredHere && ratio >= 0.7))) {
+          fireBeat()
+        }
+      })
+    }
+    let dwell = 0
+    let fallback = 0
+    if (!isScrollable(document.documentElement.scrollHeight, window.innerHeight)) {
+      fallback = window.setTimeout(() => fireBeat(), 8000) // nicht scrollbar → Zeit-Fallback
+    } else {
+      dwell = window.setTimeout(() => window.addEventListener('scroll', onScroll, { passive: true }), 3000) // Min-Dwell
+    }
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      if (raf) cancelAnimationFrame(raf)
+      clearTimeout(dwell)
+      clearTimeout(fallback)
+    }
+  }
+  function dismissTeaser() {
+    teaserBeat.value = 0
+    markDismissed(cfg, Date.now())
+  }
+
   function openWidget() {
     if (open.value) return
+    soundRef.current?.unlock() // P3: Geste → Autoplay entsperren + Buffer laden
     open.value = true
+    teaserBeat.value = 0
     track(cfg, 'monika_open')
-    if (log.value.length === 0) playStep(START_STEP)
+    if (log.value.length === 0) playStep(START_STEP) // nur Cold-Start tippt; Resume hat History
   }
 
   function choose(opt: ChoiceOption) {
@@ -87,6 +156,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     if (s.then.kind !== 'choices') return
     answers.value = { ...answers.value, [s.then.key]: opt.value } as Answers
     log.value = [...log.value, { role: 'user', text: opt.label }]
+    soundRef.current?.playSent()
     stepId.value = opt.next
     playStep(opt.next)
   }
@@ -103,6 +173,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     }
     if (a.kind === 'callback' && a.next) {
       log.value = [...log.value, { role: 'user', text: a.label }]
+      soundRef.current?.playSent()
       stepId.value = a.next
       playStep(a.next)
     }
@@ -126,6 +197,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     const result = await submitAnfrage(cfg.base, payload)
     sending.value = false
     if (result.ok) {
+      soundRef.current?.playSent()
       track(cfg, 'monika_anfrage_submit')
       fireSiteConversion(cfg)
       done.value = true
@@ -144,16 +216,90 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
 
   const showGutschein = useComputed(() => done.value && !!answers.value.wunsch_tag)
 
-  // ── FAB (geschlossen) ──
+  // ── P2: Boot (einmalig) — Resume-Rehydrierung ODER Teaser-Init + Persistenz-Effekt ──
+  useEffect(() => {
+    let teaserCleanup: (() => void) | undefined
+    const persisted = loadState(cfg)
+    if (persisted && persisted.history.length > 0) {
+      // ENGAGED/COMPLETED — Resume: History instant + stumm (KEIN playStep → kein Sound); aktueller Schritt live.
+      stepId.value = persisted.stepId
+      answers.value = persisted.answers
+      log.value = persisted.history
+      done.value = persisted.done
+      if (persisted.done) {
+        open.value = false // completed → FAB zu; Oeffnen zeigt den Danke-Log
+      } else {
+        awaiting.value = true
+        const isMobile = typeof matchMedia === 'function' && matchMedia('(max-width: 480px)').matches
+        if (isMobile) {
+          teaserBeat.value = 1 // Mobile: Resume-Peek statt Vollbild-Takeover
+          open.value = false
+        } else {
+          open.value = true // Desktop: Panel auto-open
+        }
+      }
+    } else {
+      // COLD — Teaser-Scroll-Listener (Cross-Page-Beat-Stand aus sessionStorage).
+      beatsShown.value = getBeatsShown(cfg)
+      teaserCleanup = initTeaser()
+    }
+    // Persistenz: NACH dem Boot erzeugt (kein spurious save waehrend Rehydrierung).
+    const disposeEffect = effect(() => {
+      const state: PersistedState = {
+        v: 1,
+        open: open.value,
+        stepId: stepId.value,
+        answers: answers.value,
+        history: log.value,
+        done: done.value,
+      }
+      if (state.history.length > 0) saveState(cfg, state)
+    })
+    return () => {
+      disposeEffect()
+      teaserCleanup?.()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // ── FAB + Teaser-Peek (geschlossen) ──
   if (!open.value) {
+    const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
+    const lastMonika = log.value.filter((b) => b.role === 'monika').slice(-1)[0]?.text
+    const peekText = log.value.length > 0 ? `${lastMonika ?? BEAT_TEXT[1]} — weiter ↑` : BEAT_TEXT[teaserBeat.value === 2 ? 2 : 1]
     return (
-      <button class="mk-fab" type="button" aria-label="Hilfe bei Kfz-Schaden — Monika" onClick={openWidget}>
-        {cfg.isClaimondoBranded ? (
-          <span class="mk-seal" dangerouslySetInnerHTML={{ __html: SIEGEL_SVG }} />
-        ) : (
-          <img src={cfg.theme.logoUrl} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+      <div class="mk-launch">
+        {teaserBeat.value > 0 && (
+          <div
+            class={`mk-teaser${reduce ? '' : ' mk-teaser-in'}`}
+            role="button"
+            tabIndex={0}
+            onClick={openWidget}
+            onKeyDown={(e) => e.key === 'Enter' && openWidget()}
+          >
+            {cfg.isClaimondoBranded && <img class="mk-mini" src={photo} alt="" />}
+            <span class="mk-teaser-txt">{peekText}</span>
+            <button
+              class="mk-teaser-x"
+              type="button"
+              aria-label="Schließen"
+              onClick={(e) => {
+                e.stopPropagation()
+                dismissTeaser()
+              }}
+            >
+              ×
+            </button>
+          </div>
         )}
-      </button>
+        <button class="mk-fab" type="button" aria-label="Hilfe bei Kfz-Schaden — Monika" onClick={openWidget}>
+          {cfg.isClaimondoBranded ? (
+            <span class="mk-seal" dangerouslySetInnerHTML={{ __html: SIEGEL_SVG }} />
+          ) : (
+            <img src={cfg.theme.logoUrl} alt="" onError={(e) => ((e.currentTarget as HTMLImageElement).style.display = 'none')} />
+          )}
+        </button>
+      </div>
     )
   }
 
@@ -172,6 +318,17 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
           <span class="mk-name">{cfg.isClaimondoBranded ? 'Monika' : 'Schaden-Hilfe'}</span>
           <span class="mk-role">{cfg.isClaimondoBranded ? 'Schadenberaterin · ● online' : '● online'}</span>
         </div>
+        <button
+          class="mk-mute"
+          type="button"
+          aria-label={muted.value ? 'Ton einschalten' : 'Ton ausschalten'}
+          onClick={() => {
+            muted.value = !muted.value
+            setMuted(cfg, muted.value)
+          }}
+        >
+          {muted.value ? '🔇' : '🔊'}
+        </button>
         <button class="mk-close" type="button" aria-label="Schließen" onClick={() => (open.value = false)}>
           ×
         </button>
