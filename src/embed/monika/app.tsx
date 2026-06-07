@@ -42,6 +42,8 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   // P3: Mute-State (localStorage-persistiert, default AN = nicht gemutet).
   const muted = useSignal(getMuted(cfg))
   const scrollRef = useRef<HTMLDivElement>(null)
+  // AAR-939: System-Zurueck-Button schliesst den Chat (History-API). Ref ueberlebt Re-Renders.
+  const historyPushedRef = useRef(false)
 
   const step = useComputed(() => SCRIPT[stepId.value])
   const photo = monikaPhotoUrl(cfg.base)
@@ -142,12 +144,38 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     markDismissed(cfg, Date.now())
   }
 
+  // AAR-939: einen History-Eintrag pushen, damit der System-Zurueck-Button den Chat
+  // schliesst (statt die Host-Seite zu verlassen). Idempotent via Ref.
+  function pushHistoryOnce() {
+    if (historyPushedRef.current) return
+    try {
+      history.pushState({ mkOpen: true }, '')
+      historyPushedRef.current = true
+    } catch {
+      /* History-API blockiert → Back schliesst dann nicht; das X bleibt der Weg */
+    }
+  }
+  // Schliessen (X / programmatisch): unseren History-Eintrag konsumieren (back).
+  function closeWidget() {
+    if (!open.value) return
+    open.value = false
+    if (historyPushedRef.current) {
+      historyPushedRef.current = false
+      try {
+        history.back()
+      } catch {
+        /* noop */
+      }
+    }
+  }
+
   function openWidget() {
     if (open.value) return
     soundRef.current?.unlock() // P3: Geste → Autoplay entsperren + Buffer laden
     open.value = true
     teaserBeat.value = 0
     track(cfg, 'monika_open')
+    pushHistoryOnce() // System-Back schliesst den Chat
     if (log.value.length === 0) playStep(START_STEP) // nur Cold-Start tippt; Resume hat History
   }
 
@@ -236,6 +264,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
           open.value = false
         } else {
           open.value = true // Desktop: Panel auto-open
+          pushHistoryOnce() // System-Back schliesst auch den auto-geoeffneten Chat
         }
       }
     } else {
@@ -243,6 +272,13 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       beatsShown.value = getBeatsShown(cfg)
       teaserCleanup = initTeaser()
     }
+    // AAR-939: System-Zurueck-Button schliesst den offenen Chat (popstate). Der beim
+    // Oeffnen gepushte State wird konsumiert; die Host-Seite bleibt erhalten.
+    const onPop = () => {
+      historyPushedRef.current = false // unser State wurde durch Back konsumiert
+      if (open.value) open.value = false
+    }
+    window.addEventListener('popstate', onPop)
     // Persistenz: NACH dem Boot erzeugt (kein spurious save waehrend Rehydrierung).
     const disposeEffect = effect(() => {
       const state: PersistedState = {
@@ -258,6 +294,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     return () => {
       disposeEffect()
       teaserCleanup?.()
+      window.removeEventListener('popstate', onPop)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
@@ -329,7 +366,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
         >
           {muted.value ? '🔇' : '🔊'}
         </button>
-        <button class="mk-close" type="button" aria-label="Schließen" onClick={() => (open.value = false)}>
+        <button class="mk-close" type="button" aria-label="Chat schließen" onClick={closeWidget}>
           ×
         </button>
       </div>
