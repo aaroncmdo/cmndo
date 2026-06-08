@@ -9,7 +9,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
-import { matchAndSlots, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
+import { matchAndSlots, planeTerminOeffentlich, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
 
@@ -84,11 +84,13 @@ export async function speichereQualiFlow(
 /**
  * SV-Matching für den Flow-Lead — kundensichere OeffentlichesSvProfil-Projektion.
  * AAR-956 §4: die Verzweigung (Ort-Gate / Fixer / global) kommt jetzt aus der EINEN
- * Resolver-Quelle `resolveFlowTerminState` statt inline. Das Matching selbst bleibt
- * `matchAndSlots` (keine dritte Quelle). `ortFehlt` ersetzt das fragile error-String-
- * Sniffing der Consumer (FlowSlotStep) durch ein Typ-Flag.
- *  - Fixer (gfa-Back-Reference) → Fixer zuerst + globale Alternativen gemerged.
- *  - sonst → globales Matching (findBestSV-Ranking, Prioritäts-Pakete).
+ * Resolver-Quelle `resolveFlowTerminState` statt inline. Das GLOBALE Matching nutzt
+ * `planeTerminOeffentlich` (universelle Termin-Engine #2545 — leak-sichere 2+1-Projektion
+ * via toOeffentlichesSvProfil, reachability + now-Floor); der FIXER (SV-Embed) bleibt
+ * `matchAndSlots` + funnel-seitiger Merge (keine dritte Quelle). `ortFehlt` ersetzt das
+ * fragile error-String-Sniffing der Consumer (FlowSlotStep) durch ein Typ-Flag.
+ *  - Fixer (gfa-Back-Reference) → Fixer (matchAndSlots) zuerst + globale Alternativen (planeTerminOeffentlich) gemerged.
+ *  - sonst → globales Matching via planeTerminOeffentlich (Engine-Ranking findeBestePerson + 2+1).
  */
 export async function ladeMatchingFlow(
   token: string,
@@ -150,13 +152,13 @@ export async function ladeMatchingFlow(
     // Fixer zuerst + Alternativen (global), Fixer aus den Alternativen rausdedupen.
     const [fixerList, globalList] = await Promise.all([
       matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso, fixerSvId: state.fixerSvId }),
-      matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso }),
+      planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso }),
     ])
     return { ok: true, svs: mergeFixerUndAlternativen(fixerList, globalList, state.fixerSvId) }
   }
 
   // 'buchen_global' (zeige_termin ist hier unerreichbar: hatTerminMitSv=false).
-  const svs = await matchAndSlots({ lat: Number(lat), lng: Number(lng), wunschterminIso })
+  const svs = await planeTerminOeffentlich({ lat: Number(lat), lng: Number(lng), wunschterminIso })
   return { ok: true, svs }
 }
 
