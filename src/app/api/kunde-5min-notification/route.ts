@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { sendCommunication } from '@/lib/communications/send'
 
 // KFZ-179: 5-Minuten-Notification an Kunden — getriggert vom Client wenn ETA < 5.
@@ -20,8 +21,11 @@ export async function POST(request: Request) {
   if (!termin) return NextResponse.json({ error: 'Termin nicht gefunden' }, { status: 404 })
   if (termin.notification_5min_gesendet_am) return NextResponse.json({ already_sent: true })
 
-  // Kunden-Daten
-  const { data: fall } = await db.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+  // Kunden-Daten — CMM-49: lead_id (0-diff) claims-direkt via resolveClaimId. faelle-frei.
+  const nClaimId = await resolveClaimId(db, termin.fall_id)
+  const { data: fall } = nClaimId
+    ? await db.from('claims').select('lead_id').eq('id', nClaimId).maybeSingle()
+    : { data: null }
   let kundeVorname = 'Kunde'
   let kundeTelefon: string | null = null
   if (fall?.lead_id) {

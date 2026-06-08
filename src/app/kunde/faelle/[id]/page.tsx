@@ -20,6 +20,7 @@
 import { getTranslations, getFormatter } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
@@ -354,16 +355,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // claims (SSoT) — in den claims-Embed gezogen.
     // CMM-44 SP-B PR2a: google_review_prompt_gezeigt_am lebt auf claims (SSoT) —
     // ebenfalls im claims-Embed.
-    const { data: fallExtra } = await admin
-      .from('faelle')
-      .select(
-        'claims:claim_id(hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am)',
-      )
-      .eq('id', id)
-      .maybeSingle()
-    const fallExtraClaim = fallExtra
-      ? Array.isArray(fallExtra.claims) ? fallExtra.claims[0] : fallExtra.claims
-      : null
+    // CMM-49: mietwagen_*/google_review_prompt_gezeigt_am claims-nativ (SSoT) — claims-direkt
+    // via resolveClaimId statt faelle-Embed. faelle-frei.
+    const mwClaimId = await resolveClaimId(admin, id)
+    const { data: fallExtraClaim } = mwClaimId
+      ? await admin
+          .from('claims')
+          .select('hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am')
+          .eq('id', mwClaimId)
+          .maybeSingle()
+      : { data: null }
     const ausfallProps: React.ComponentProps<typeof KundeAusfallEntschaedigungCard> | null = claimExtra
       ? {
           totalschaden: claimExtra.totalschaden,

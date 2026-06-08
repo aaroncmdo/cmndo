@@ -6,6 +6,7 @@
 // das macht KB nach Review (Phase 2).
 
 import { NextResponse } from 'next/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { extractBeleg } from '@/lib/ocr-beleg/extract'
@@ -53,12 +54,10 @@ export async function POST(request: Request) {
     }
 
     // AAR-752 Permission-Check: User muss auf den Fall zugreifen können
-    const { data: fall } = await supabase
-      .from('faelle')
-      .select('id')
-      .eq('id', body.fall_id)
-      .maybeSingle()
-    if (!fall) {
+    // CMM-49: via resolveClaimId (bridge-RLS spiegelt faelle-RLS → RLS-äquivalente
+    // Zugriffsprüfung) statt faelle-Existenz-Read.
+    const ocrClaimId = await resolveClaimId(supabase, body.fall_id)
+    if (!ocrClaimId) {
       return NextResponse.json({ success: false, error: 'Fall nicht zugänglich' }, { status: 403 })
     }
 
