@@ -699,15 +699,13 @@ export async function sendChatNachricht(
 
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
-  // Verify fall belongs to this gutachter
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
-    .single()
-
-  if (!fall) return { error: 'Fall nicht gefunden' }
+  // Verify fall belongs to this gutachter — CMM-49: Ownership-Gate claims-direkt
+  // (sv_id 0-diff) via resolveClaimId.
+  const msgClaimId = await resolveClaimId(supabase, fallId)
+  const { data: ownClaim } = msgClaimId
+    ? await supabase.from('claims').select('id').eq('id', msgClaimId).eq('sv_id', sv.id).maybeSingle()
+    : { data: null }
+  if (!ownClaim) return { error: 'Fall nicht gefunden' }
 
   // Insert message
   const { error: insertErr } = await supabase.from('nachrichten').insert({

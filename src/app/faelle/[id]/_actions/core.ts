@@ -26,9 +26,10 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
     // CMM-49 PC-4: claim_id mitladen (SSoT). Der drop-safe 2-arg-RPC loescht Sub-Entities
     // (per fall_id, ueberlebt DROP TABLE faelle), die faelle-Zeile (solange Tabelle da)
     // UND den Claim. faelle.claim_id ist seit AAR-816 NOT NULL.
-    const { data: fall, error: findErr } = await supabase.from('faelle').select('id, claim_id').eq('id', fallId).single()
-    if (findErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
-    const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+    // CMM-49: claimId via resolveClaimId (== faelle.claim_id) statt faelle-Read; Existenz +
+    // Access (user-RLS, bridge-RLS-Mirror) bleibt erhalten. p_fall_id bleibt der Param.
+    const claimId = await resolveClaimId(supabase, fallId)
+    if (!claimId) return { success: false, error: 'Fall nicht gefunden' }
 
     // delete_fall_komplett ist SECURITY DEFINER und EXECUTE ist nur fuer service_role
     // (anon/authenticated revoked, #953 + CMM-49 PC-4) → admin-Client zwingend.

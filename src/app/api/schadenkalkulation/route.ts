@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
@@ -99,18 +100,18 @@ export async function POST(request: Request) {
     // sv_id zwingend, weil gutachten.sv_id NOT NULL ohne Default — sonst NOT-NULL-Verstoss
     // bei Fällen ohne existierende gutachten-Row.
     const supabase = await createClient()
-    const { data: fallRow } = await supabase
-      .from('faelle')
-      .select('claim_id, sv_id')
-      .eq('id', fall_id)
-      .maybeSingle()
+    // CMM-49: claim_id via resolveClaimId, sv_id claims-direkt (0-diff). faelle-frei.
+    const skClaimId = await resolveClaimId(supabase, fall_id)
+    const { data: fallRow } = skClaimId
+      ? await supabase.from('claims').select('sv_id').eq('id', skClaimId).maybeSingle()
+      : { data: null }
     // Guard auf claim_id UND sv_id — gutachten.sv_id ist NOT NULL ohne Default.
     // Ein Fall ohne SV-Zuweisung wird hier sauber geskippt (keine 500), die
     // KI-Kalkulation läuft trotzdem durch und wird im Response zurückgegeben.
-    if (fallRow?.claim_id && fallRow?.sv_id) {
+    if (skClaimId && fallRow?.sv_id) {
       const { error: gErr } = await supabase.from('gutachten').upsert(
         {
-          claim_id: fallRow.claim_id,
+          claim_id: skClaimId,
           sv_id: fallRow.sv_id,
           ki_kalkulation: result,
           ki_kalkulation_am: new Date().toISOString(),

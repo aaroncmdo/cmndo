@@ -128,8 +128,11 @@ export async function GET(request: Request) {
             .limit(1)
           const hatKuerzlichGesnoozed = !!snoozed && snoozed.length > 0
           if (!hatKuerzlichGesnoozed && (!letzteSendung || letzteSendung < vor48h)) {
-            // Kunden-Telefon laden (Read auf faelle bleibt — single-row Re-Lookup für lead_id)
-            const { data: fallFull } = await db.from('faelle').select('lead_id').eq('id', fall.fall_id as string).single()
+            // Kunden-Telefon laden — CMM-49: lead_id (0-diff) claims-direkt via resolveClaimId.
+            const pdClaimId = await resolveClaimId(db, fall.fall_id as string)
+            const { data: fallFull } = pdClaimId
+              ? await db.from('claims').select('lead_id').eq('id', pdClaimId).maybeSingle()
+              : { data: null }
             if (fallFull?.lead_id) {
               const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fallFull.lead_id).single()
               if (lead?.telefon) {

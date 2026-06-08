@@ -422,14 +422,14 @@ export default async function GutachterFallPage({
   // enthalten — separat aus faelle laden für den Storage-Pfad.
   // CMM-44 SP-A2 (Cluster 3): no_show_count → claims.kunde_no_show_count (SSoT).
   // Der rose-Banner zaehlt verpasste Kunden-Termine → kunde_no_show_count.
-  const { data: fallClaim } = await admin
-    .from('faelle')
-    .select('claim_id, claims:claim_id(kunde_no_show_count)')
-    .eq('id', id)
-    .maybeSingle()
-  const claimIdForStorage = (fallClaim?.claim_id as string | null) ?? ''
+  // CMM-49: claimId via resolveClaimId (== faelle.claim_id, Storage-Pfad); kunde_no_show_count
+  // claims-nativ (SSoT). faelle-frei.
+  const noShowClaimId = await resolveClaimId(admin, id)
+  const claimIdForStorage = noShowClaimId ?? ''
   // No-Show-Counter für den rose-Banner „Termin(e) verpasst".
-  const fallClaimRow = Array.isArray(fallClaim?.claims) ? fallClaim.claims[0] : fallClaim?.claims
+  const { data: fallClaimRow } = noShowClaimId
+    ? await admin.from('claims').select('kunde_no_show_count').eq('id', noShowClaimId).maybeSingle()
+    : { data: null }
   const noShowCount = (fallClaimRow?.kunde_no_show_count as number | null) ?? 0
 
   // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims

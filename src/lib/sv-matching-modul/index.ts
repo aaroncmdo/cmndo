@@ -11,3 +11,8 @@ export type {
 export { toOeffentlichesSvProfil, rundeDistanz } from './projection'
 export { rankSlots, classifySlot, type TagSlotsInput } from './ranking'
 export { matchAndSlots, type MatchAndSlotsInput } from './match-and-slots'
+export {
+  planeTerminOeffentlich,
+  verteile2plus1Counts,
+  type PlaneTerminOeffentlichInput,
+} from './plane-termin-oeffentlich'
