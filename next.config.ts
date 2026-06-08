@@ -119,6 +119,15 @@ const nextConfig: NextConfig = {
         source: '/:path*',
         headers: securityHeaders,
       },
+      {
+        // AAR-939: Monika-Embed-Sounds laedt das Widget cross-origin (Cluster-LPs +
+        // SV-Embeds) per fetch()+decodeAudioData. Ohne CORS blockt der Browser den
+        // Response-Body -> loadBuffers faengt den Fehler -> die Sounds bleiben still.
+        // Public Audio-Assets ohne Credential -> ACAO:* ist sicher. (proxy.ts nimmt
+        // /embed/sounds vom Auth-Matcher aus, #2517 -> headers() greift hier separat.)
+        source: '/embed/sounds/:path*',
+        headers: [{ key: 'Access-Control-Allow-Origin', value: '*' }],
+      },
     ]
   },
   async redirects() {
