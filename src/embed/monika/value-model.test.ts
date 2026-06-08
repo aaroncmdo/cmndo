@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { schadenartFromAnswers, valueForSchadenart, buildConversionExtra } from './value-model'
+import { schadenartFromAnswers, valueForSchadenart, buildConversionExtra, toE164 } from './value-model'
 import type { Answers } from './flow-script'
 import type { MonikaConfig } from './types'
 
@@ -57,5 +57,24 @@ describe('buildConversionExtra', () => {
     const extra = buildConversionExtra(cluster, { anliegen: 'gegengutachten' }, { leadId: null })
     expect(extra).toEqual({ schadenart: 'gegengutachten', value: 0, currency: 'EUR' })
     expect('lead_id' in extra!).toBe(false)
+  })
+
+  it('normalisiert phone auf E.164 (Doc-12 Ä9)', () => {
+    const extra = buildConversionExtra(cluster, answers, { leadId: 'gfa_1', phone: '0151 234 5678' })
+    expect(extra!.phone).toBe('+491512345678')
+  })
+})
+
+describe('toE164', () => {
+  it('normalisiert deutsche Formate auf +49…', () => {
+    expect(toE164('0151 234 5678')).toBe('+491512345678')
+    expect(toE164('+49 151 2345678')).toBe('+491512345678')
+    expect(toE164('0049 151 2345678')).toBe('+491512345678')
+    expect(toE164('0151/234-5678')).toBe('+491512345678')
+  })
+
+  it('leere/unbrauchbare Eingabe -> leerer String', () => {
+    expect(toE164('')).toBe('')
+    expect(toE164('   ')).toBe('')
   })
 })

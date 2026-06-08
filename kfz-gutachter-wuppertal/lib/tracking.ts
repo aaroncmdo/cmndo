@@ -21,13 +21,17 @@ const ATTR_TTL_MS = 90 * 24 * 60 * 60 * 1000 // 90 Tage
 /** dataLayer-Push + gtag + Plausible + Beacon an /api/track. */
 export function trackEvent(name: string, params: TrackParams = {}): void {
   if (typeof window === 'undefined') return
-  const payload = { event: name, ts: Date.now(), ...params }
+  // Doc-12 Ä10: einheitliche Stadt-Dimension — city_slug auf stadt spiegeln (Monika-Events
+  // nutzen 'stadt'), damit GA4-Reports nicht in zwei Felder splitten. Additiv, city_slug bleibt.
+  const p: TrackParams =
+    params.city_slug != null && params.stadt == null ? { ...params, stadt: params.city_slug } : params
+  const payload = { event: name, ts: Date.now(), ...p }
   window.dataLayer = window.dataLayer || []
   window.dataLayer.push(payload)
-  if (typeof window.gtag === 'function') window.gtag('event', name, params)
+  if (typeof window.gtag === 'function') window.gtag('event', name, p)
   if (typeof window.plausible === 'function') {
     const props: Record<string, string | number | boolean> = {}
-    for (const [k, v] of Object.entries(params)) if (v !== undefined) props[k] = v
+    for (const [k, v] of Object.entries(p)) if (v !== undefined) props[k] = v
     window.plausible(name, Object.keys(props).length ? { props } : undefined)
   }
   // Server-Side-resilient: Beacon ueberlebt Tab-Wechsel (keepalive).
@@ -87,4 +91,19 @@ export function fireAdsConversion(kind: 'call' | 'wa'): void {
     value: kind === 'call' ? 30.0 : 15.0,
     currency: 'EUR',
   })
+}
+
+/**
+ * Normalisiert eine (deutsche) Telefonnummer auf E.164 (+49…) — Pflicht fuer
+ * Enhanced Conversions (Doc-12 Ä9), sonst kein Hash-Match in Google Ads.
+ * Leere/unbrauchbare Eingabe -> '' (wird dann nicht in den dataLayer geschrieben).
+ */
+export function toE164(raw: string, cc = '49'): string {
+  const s = (raw || '').replace(/[^\d+]/g, '')
+  if (!s || s === '+') return ''
+  if (s.startsWith('+')) return s
+  if (s.startsWith('00')) return '+' + s.slice(2)
+  if (s.startsWith('0')) return '+' + cc + s.slice(1)
+  if (s.startsWith(cc)) return '+' + s
+  return '+' + cc + s
 }

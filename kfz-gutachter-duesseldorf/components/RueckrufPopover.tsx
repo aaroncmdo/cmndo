@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { SITE } from '@/lib/site'
 import { CLUSTER, type City } from '@/lib/cluster'
-import { trackEvent, readAttribution } from '@/lib/tracking'
+import { trackEvent, readAttribution, toE164 } from '@/lib/tracking'
 
 // Rueckruf-Popover (AAR-939) — Bottom-Sheet, getriggert aus der mobilen Sticky-Bottom-Bar
 // (#mobileStickyCall). Mobile-only (Desktop/iPad: kein Trigger, kein Render). Submit geht an
@@ -84,7 +84,7 @@ export function RueckrufPopover({
       const ev: Record<string, string | number | undefined> = {
         value: 25,
         currency: 'EUR',
-        phone: telefon.trim(),
+        phone: toE164(telefon.trim()),
         gclid: attribution.gclid,
         cluster: CLUSTER.key,
         stadt: city.slug,

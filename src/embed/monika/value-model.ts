@@ -43,6 +43,21 @@ export function valueForSchadenart(art: Schadenart): number {
   return VALUE_BY_SCHADENART[art]
 }
 
+/**
+ * Normalisiert eine (deutsche) Telefonnummer auf E.164 (+49…) — Pflicht fuer
+ * Enhanced Conversions (Doc-12 Ä9), sonst kein Hash-Match in Google Ads.
+ * Leere/unbrauchbare Eingabe -> '' (wird dann nicht in den dataLayer geschrieben).
+ */
+export function toE164(raw: string, cc = '49'): string {
+  const s = (raw || '').replace(/[^\d+]/g, '')
+  if (!s || s === '+') return ''
+  if (s.startsWith('+')) return s
+  if (s.startsWith('00')) return '+' + s.slice(2)
+  if (s.startsWith('0')) return '+' + cc + s.slice(1)
+  if (s.startsWith(cc)) return '+' + s
+  return '+' + cc + s
+}
+
 export interface ConversionExtra {
   schadenart: Schadenart
   /** EUR-Wert als ZAHL (nie String — sonst ignoriert GA4/Ads das Wert-Bidding). */
@@ -81,7 +96,8 @@ export function buildConversionExtra(
   // zu EINER zusammenfassen (Unterzaehlung). Fehlt es, behandelt GA4/Ads jedes Event
   // als eigene Conversion — das sichere Failure-Mode.
   if (meta.leadId) extra.lead_id = meta.leadId
-  if (meta.phone) extra.phone = meta.phone
+  const phoneE164 = meta.phone ? toE164(meta.phone) : '' // Doc-12 Ä9: E.164 fuer Enhanced Conversions
+  if (phoneE164) extra.phone = phoneE164
   if (meta.gclid) extra.gclid = meta.gclid
   return extra
 }
