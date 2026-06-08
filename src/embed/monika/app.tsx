@@ -13,6 +13,7 @@ import { submitAnfrage } from './api'
 import { captureAttribution } from './attribution'
 import { track } from './tracking'
 import { fireSiteConversion } from './conversion'
+import { buildConversionExtra } from './value-model'
 import { SIEGEL_SVG, monikaPhotoUrl } from './assets'
 import {
   loadState, saveState, markDismissed, getDismissedAt, getBeatsShown, setBeatsShown,
@@ -291,17 +292,28 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     sending.value = true
     error.value = ''
     const merged: Answers = { ...answers.value, vorname: vorname.value, nachname: nachname.value, telefon: telefon.value }
+    const attribution = captureAttribution()
     const payload = buildPayloadFromAnswers(merged, cfg, {
       page_url: window.location.href,
       consent_ts: new Date().toISOString(),
       honeypot: honeypot.value,
-      attribution: captureAttribution(),
+      attribution,
     })
     const result = await submitAnfrage(cfg.base, payload)
     sending.value = false
     if (result.ok) {
       soundRef.current?.playSent()
-      track(cfg, 'monika_anfrage_submit')
+      // Doc-11 value-based Conversion: Cluster-LP traegt schadenart/value/lead_id/phone/gclid
+      // in den monika_anfrage_submit-Push (GTM -> GA4 + Google Ads Smart Bidding). sv_embed: undefined.
+      track(
+        cfg,
+        'monika_anfrage_submit',
+        buildConversionExtra(cfg, merged, {
+          leadId: result.anfrageId,
+          phone: telefon.value.trim(),
+          gclid: attribution.gclid,
+        }),
+      )
       fireSiteConversion(cfg)
       done.value = true
       awaiting.value = false
