@@ -99,6 +99,7 @@ export async function findBestSV(input: SvMatchInput, limit = 3): Promise<SvMatc
  
 // Exportiert fuer den TZ-Unit-Test (AAR-958). Sonst nur intern genutzt.
 export async function findNextFreeSlotForSv(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   db: any,
   svId: string,
   ab: Date,
