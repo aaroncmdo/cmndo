@@ -32,11 +32,9 @@ const nextConfig: NextConfig = {
     ]
     return [
       { source: '/:path*', headers: securityHeaders },
-      // HTML-Dokumente nie lange cachen: ein gecachtes altes Dokument referenziert
+      // #2528 Forward: HTML-Dokumente nie lange cachen — gecachtes altes Dokument zeigt auf
       // versionierte /_next/static-Hashes, die nach einem Deploy 404en -> ungestylte
-      // ("verzogene") Seite. Nur die Dokument-Routen revalidieren; die gehashten
-      // Assets unter /_next/static behalten Next' immutable-Caching (hier nicht
-      // angefasst).
+      // ("verzogene") Seite. Nur Dokument-Routen revalidieren; gehashte Assets bleiben immutable.
       { source: '/', headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }] },
       { source: '/lp/:slug*', headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }] },
     ]

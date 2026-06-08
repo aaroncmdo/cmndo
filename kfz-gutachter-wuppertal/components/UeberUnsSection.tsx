@@ -1,5 +1,6 @@
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
+import { ClaimondoLink } from '@/lib/text'
 
 // SERVER-Component. Founder / Ueber-uns-Block.
 // MOBILE (sm:hidden, #ueberUnsMobile, v3): heller bg-paper-Abschnitt mit
@@ -36,7 +37,7 @@ export function UeberUnsSection({ city }: { city: City }) {
                 <p className="uu-quote-name">
                   {CLUSTER.svName} <span className="uu-quote-role">· DAT-Sachverständiger</span>
                 </p>
-                <p className="uu-quote-brand">Zertifizierter Claimondo-Partner</p>
+                <p className="uu-quote-brand">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></p>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -67,7 +68,7 @@ export function UeberUnsSection({ city }: { city: City }) {
             <span className="uu-pill-sep" aria-hidden="true" />
             <div className="uu-pill" role="listitem">
               <span className="uu-pill-key">90+ Netz</span>
-              <span className="uu-pill-sub">Claimondo NRW</span>
+              <span className="uu-pill-sub"><ClaimondoLink>Claimondo</ClaimondoLink> NRW</span>
             </div>
           </div>
           <p className="uu-pillrow-foot">Codes als Beleg · Netzwerk &amp; lokales Büro getrennt</p>
@@ -107,7 +108,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               />
               <div>
                 <div className="text-[15px] text-white font-semibold leading-tight">
-                  Zertifizierter Claimondo-Partner
+                  Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink>
                 </div>
                 <div className="text-[13px] text-white/65 leading-tight mt-0.5">
                   Unfall-Assistance · Schadenregulierung aus einer Hand
@@ -115,7 +116,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               </div>
             </div>
             <p className="text-white/[.84] text-base mb-3 leading-relaxed">
-              DAT-zertifiziert, ingenieurbasiert, gerichtsfest. Als Claimondo-Partner übernehmen wir
+              DAT-zertifiziert, ingenieurbasiert, gerichtsfest. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
               die komplette Abwicklung — Gutachten, Anwalt, Mietwagen/Nutzungsausfall und
               Versicherungskommunikation. Sie sehen jeden Schritt live im Portal.
             </p>

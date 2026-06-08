@@ -20,6 +20,46 @@ function eur(n: number): string {
   }).format(n)
 }
 
+// Zaehlt den Anspruch-Betrag von erstangebot -> anspruch hoch, sobald die Zahl
+// in den Viewport scrollt (AAR-962, Aaron-Wunsch). easeOutCubic, ~1.3s, einmalig.
+// Respektiert prefers-reduced-motion (zeigt direkt den Endwert).
+function CountUpEur({ from, to }: { from: number; to: number }) {
+  const ref = useRef<HTMLSpanElement>(null)
+  const [val, setVal] = useState(from)
+  useEffect(() => {
+    const el = ref.current
+    if (!el || typeof window === 'undefined') return
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      setVal(to)
+      return
+    }
+    let started = false
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          if (e.isIntersecting && !started) {
+            started = true
+            const dur = 1300
+            const t0 = performance.now()
+            const step = (now: number) => {
+              const p = Math.min(1, (now - t0) / dur)
+              const eased = 1 - Math.pow(1 - p, 3)
+              setVal(Math.round(from + (to - from) * eased))
+              if (p < 1) requestAnimationFrame(step)
+            }
+            requestAnimationFrame(step)
+            io.disconnect()
+          }
+        }
+      },
+      { threshold: 0.4 },
+    )
+    io.observe(el)
+    return () => io.disconnect()
+  }, [from, to])
+  return <span ref={ref}>{eur(val)}</span>
+}
+
 export function CasesCarousel({ city }: { city: City }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [allOpen, setAllOpen] = useState(false)
@@ -47,7 +87,8 @@ export function CasesCarousel({ city }: { city: City }) {
     if (!track) return
     const card = track.children[i] as HTMLElement | undefined
     if (!card) return
-    track.scrollTo({ left: card.offsetLeft - track.offsetLeft, behavior: 'smooth' })
+    // Karte mittig stoppen (Aaron 05.06.): Ziel = Karten-Offset minus halbe Rest-Breite.
+    track.scrollTo({ left: card.offsetLeft - track.offsetLeft - (track.clientWidth - card.offsetWidth) / 2, behavior: 'smooth' })
   }
 
   // Dot-Sync an Scroll-Position.
@@ -61,7 +102,7 @@ export function CasesCarousel({ city }: { city: City }) {
       let minDiff = Infinity
       let bestIdx = 0
       Array.prototype.forEach.call(tr.children, (card: HTMLElement, i: number) => {
-        const diff = Math.abs(card.offsetLeft - tr.scrollLeft - tr.offsetLeft)
+        const diff = Math.abs(card.offsetLeft - tr.scrollLeft - tr.offsetLeft - (tr.clientWidth - card.offsetWidth) / 2)
         if (diff < minDiff) {
           minDiff = diff
           bestIdx = i
@@ -98,7 +139,7 @@ export function CasesCarousel({ city }: { city: City }) {
       if (pausedRef.current || allOpenRef.current || !visible) return
       const next = (currentRef.current + 1) % CASES.length
       const card = el.children[next] as HTMLElement | undefined
-      if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft, behavior: 'smooth' })
+      if (card) el.scrollTo({ left: card.offsetLeft - el.offsetLeft - (el.clientWidth - card.offsetWidth) / 2, behavior: 'smooth' })
     }
 
     const interval = setInterval(advance, 3000)
@@ -165,7 +206,7 @@ export function CasesCarousel({ city }: { city: City }) {
               role="group"
               aria-roledescription="Karte"
               aria-label={`${idx + 1} von ${CASES.length}: ${c.label}`}
-              className="snap-start flex-none w-[88%] sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] rounded-2xl overflow-hidden border border-border bg-surface shadow-sm hover:-translate-y-[3px] hover:shadow-md transition flex flex-col"
+              className="snap-center flex-none w-[88%] sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] rounded-2xl overflow-hidden border border-border bg-surface shadow-sm hover:-translate-y-[3px] hover:shadow-md transition flex flex-col"
             >
               {/* Foto 16:9 mit "Realfall"-Badge */}
               <div className="aspect-[16/9] relative bg-gradient-to-br from-[#cdd9dd] to-[#aebfc6] overflow-hidden">
@@ -204,7 +245,7 @@ export function CasesCarousel({ city }: { city: City }) {
                       <span className="text-[9.5px] text-muted">mit unabh. Gutachten + Anwalt</span>
                     </span>
                     <span className="font-mono font-bold text-[20px] text-petrol tabular-nums leading-none">
-                      {eur(c.anspruch)}
+                      <CountUpEur from={c.erstangebot} to={c.anspruch} />
                     </span>
                   </div>
                 </div>
