@@ -73,9 +73,12 @@ async function ladeSnapshotMetadaten(
   letztesTimelineEventAt: string | null
 }> {
   const admin = createAdminClient()
+  // CMM-49: operative_status claims-direkt (SSoT, == faelle.status 0-diff) via resolveClaimId.
+  const faqClaimId = await resolveClaimId(admin, fallId)
   const [fallRes, docRes, msgRes, timelineRes] = await Promise.all([
-    // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
-    admin.from('faelle').select('status, claims:claim_id(operative_status)').eq('id', fallId).maybeSingle(),
+    faqClaimId
+      ? admin.from('claims').select('operative_status').eq('id', faqClaimId).maybeSingle()
+      : Promise.resolve({ data: null }),
     admin
       .from('pflichtdokumente')
       .select('id', { count: 'exact', head: true })
@@ -93,10 +96,8 @@ async function ladeSnapshotMetadaten(
       .maybeSingle(),
   ])
   const fallClaim = fallRes.data
-    ? (Array.isArray(fallRes.data.claims) ? fallRes.data.claims[0] : fallRes.data.claims)
-    : null
   return {
-    status: ((fallClaim as { operative_status?: string | null } | null)?.operative_status) ?? (fallRes.data?.status as string | null) ?? null,
+    status: ((fallClaim as { operative_status?: string | null } | null)?.operative_status) ?? null,
     dokumente: docRes.count ?? 0,
     nachrichten: msgRes.count ?? 0,
     letztesTimelineEventAt: (timelineRes.data?.created_at as string | null) ?? null,

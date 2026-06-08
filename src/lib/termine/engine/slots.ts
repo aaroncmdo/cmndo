@@ -151,28 +151,37 @@ export async function freieSlots(
     }
   }
 
+  // AAR-956 TZ: s.uhrzeit ist Berlin-Wall-Clock -> Slot-Instant Berlin-verankert.
+  const slotInstant = (tagRef: string, s: TagSlot) => new Date(berlinWallClockToUtc(`${tagRef}T${s.uhrzeit}:00`))
+  // now-Floor: das Fenster ist [vonIso, bisIso] — Slots vor dem vonIso-Instant
+  // gehoeren NICHT dazu. Ohne Floor liefert slotsFuerTag fuer den heutigen Tag die
+  // volle 09:00–Grid (auch bereits vergangene Uhrzeiten), weil cur auf Mitternacht
+  // gefloored wird. Paritaet zum alten findNextFreeSlotForSv (floored auf jetzt).
+  // Lead-Time-Puffer = Caller-Sache: vonIso = jetzt + Puffer uebergeben.
+  const abInstant = new Date(vonIso)
+
   const result: TagVerfuegbarkeit[] = []
   const cur = new Date(vonIso)
   cur.setHours(0, 0, 0, 0)
   const ende = new Date(bisIso)
   while (cur <= ende) {
     const dowJs = cur.getDay()
+    // Lokale Kalenderdatum (passt zu den lokal erzeugten Slot-Zeiten; auf UTC-Server
+    // identisch zu toISOString, in +TZ-Umgebungen ohne Off-by-one).
+    const tagRef = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`
     const az = konfig.proWochentag(dowJs)
     let slots: TagSlot[] = az ? slotsFuerTag(cur, az, belegt, konfig.slotDauerMin, konfig.pufferMin) : []
+    if (slots.length) slots = slots.filter((s) => slotInstant(tagRef, s) >= abInstant)
     if (slots.length && etaCtx && isReachable) {
-      const tagRefDatum = `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`
       const reach = isReachable
       const ctx = etaCtx
       slots = slots.filter((s) => {
-        // AAR-956 TZ: s.uhrzeit ist Berlin-Wall-Clock -> Berlin-verankert
-        const sv = new Date(berlinWallClockToUtc(`${tagRefDatum}T${s.uhrzeit}:00`))
+        const sv = slotInstant(tagRef, s)
         return reach(sv, new Date(sv.getTime() + s.dauer * 60_000), ctx).reachable
       })
     }
     result.push({
-      // Lokale Kalenderdatum (passt zu den lokal erzeugten Slot-Zeiten; auf UTC-Server
-      // identisch zu toISOString, in +TZ-Umgebungen ohne Off-by-one).
-      datum: `${cur.getFullYear()}-${String(cur.getMonth() + 1).padStart(2, '0')}-${String(cur.getDate()).padStart(2, '0')}`,
+      datum: tagRef,
       wochentag: WOCHENTAG_LABELS[dowJs],
       frei: slots.length > 0,
       anzahl_slots: slots.length,

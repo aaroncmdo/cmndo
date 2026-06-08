@@ -5,6 +5,7 @@
 // spiegelt Dispatch/Leads actions/rueckruf.ts.
 
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 
 export type FallRueckrufResult = { success: boolean; error?: string }
@@ -35,14 +36,11 @@ export async function saveFallRueckruf(
     return { success: true }
   }
 
-  // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
-  // -> via claim_id aus claims nested embed laden statt aus faelle.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
-    .eq('id', fallId)
-    .maybeSingle()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  // CMM-49: kundenbetreuer_id + claim_nummer claims-direkt (SSoT) via resolveClaimId.
+  const rrClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallClaim } = rrClaimId
+    ? await supabase.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', rrClaimId).maybeSingle()
+    : { data: null }
   const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
 
   const titel = `Rückruf ${(fallClaim?.claim_nummer as string | null) ?? fallId.slice(0, 8)}`
