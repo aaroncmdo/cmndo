@@ -12,7 +12,7 @@ export function ReviewsSection({ city }: { city: City }) {
   const rating = GOOGLE_RATING.value.replace('.', ',')
   return (
     <section id="reviews" className="py-9 md:py-12 bg-paper">
-      <div className="max-w-[480px] mx-auto px-5">
+      <div className="max-w-[480px] lg:max-w-[860px] mx-auto px-5">
         <p className="rev-eyebrow">
           <span className="rev-stars" aria-hidden="true">★★★★★</span>{' '}
           <span className="rev-rating">{rating}</span> · GOOGLE-BEWERTUNGEN

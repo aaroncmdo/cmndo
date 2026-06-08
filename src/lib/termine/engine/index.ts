@@ -28,6 +28,9 @@ export type { AbsageStatus, VerlegeInput, VerlegeResult } from './state-transiti
 // P2.4 — findeBestePerson (Org-/Region-Level-Matching + Auto-Reservierung).
 export { findeBestePerson } from './matching'
 export type { FindeBestePersonInput, FindeBestePersonResult, PersonKandidat } from './matching'
+// Sub-A2 — universeller 2×2-Buchungs-Router + Kunde-3-Slot-Verteilung.
+export { planeTermin, verteile3Slots, verteileAusSlots, passtZuWunschzeit } from './plane-termin'
+export type { WunschzeitFilter, SlotVorschlag, PlaneTerminResult, PlaneTerminInput } from './plane-termin'
 export {
   bewerteSvKandidat, sortiereKandidaten, vergleicheTenure, istKontingentBlockiert,
   haversineKm, pointInPolygon, ersterFreierSlot,

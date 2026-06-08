@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { COMPARISON } from '@/lib/content'
-import { renderRich } from '@/lib/text'
+import { renderRich, ClaimondoLink } from '@/lib/text'
 import { trackEvent } from '@/lib/tracking'
 
 // CLIENT-Sub-Komponente der NetzwerkSection: Toggle + smooth collapsible
@@ -125,7 +125,7 @@ export function NetzwerkCompare() {
             Gutachter allein
           </div>
           <div className="px-4 py-4 text-[12px] font-bold tracking-[.02em] uppercase text-white bg-[color-mix(in_srgb,var(--amber)_24%,transparent)] leading-snug">
-            Bei uns (Claimondo-Netzwerk)
+            Bei uns (<ClaimondoLink>Claimondo-Netzwerk</ClaimondoLink>)
           </div>
         </div>
 
