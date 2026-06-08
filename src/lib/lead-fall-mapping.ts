@@ -30,6 +30,8 @@
 // FALL_COMPUTED_FIELDS liefert konstante / option-basierte Werte
 // (status, sv_id, kundenbetreuer_id usw.).
 
+import { ensureVersicherung } from '@/lib/versicherungen/ensure-versicherung'
+
 export type LeadRow = Record<string, unknown>
 
 // ─── 1. DIRECT — Feldname gleich, lead[field] ?? null ───────────────────────
@@ -294,7 +296,11 @@ export async function resolveFallEntityFks(
         .maybeSingle()
       gegnerVersicherungId = data?.id ?? null
       if (!gegnerVersicherungId) {
-        console.warn('[AAR-155] Gegner-Versicherung nicht gefunden:', gegnerVs)
+        // CMM-Entity Plan 3: kein Fuzzy-Treffer -> Entitaet find-or-create (resolve-or-ensure).
+        // admin ist hier `any` (AdminClient) -> direkt uebergeben (db erwartet SupabaseClient).
+        const ens = await ensureVersicherung({ db: admin, klartext: gegnerVs })
+        if (ens.ok) gegnerVersicherungId = ens.versicherungId
+        else console.warn('[CMM-Entity P3] ensureVersicherung fehlgeschlagen:', ens.error)
       }
     } catch { /* non-blocking */ }
   }
