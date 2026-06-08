@@ -94,12 +94,9 @@ export async function uploadFallSignatur(
   }
 
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
-    .eq('id', fallId)
-    .maybeSingle()
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
+  // CMM-49: Existenz-Check via resolveClaimId (Bridge/claims) statt faelle.
+  const sigClaimId = await resolveClaimId(admin, fallId)
+  if (!sigClaimId) return { ok: false, error: 'Fall nicht gefunden' }
 
   const decoded = decodeDataUrl(base64DataUrl)
   if (!decoded) return { ok: false, error: 'Ungültige oder zu große Bilddaten' }
