@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { sendWhatsAppText } from './whatsapp/baileys-client'
 
 // ─── WhatsApp-Versand (Baileys, VPS-Worker) ──────────────────────────────────
@@ -217,25 +218,29 @@ export async function sendStatusWhatsApp(
     // Load fall data
     // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
     // CMM-44 SP-B PR2a: claim_id mitlesen für google_review_gesendet-Write auf claims.
-    const { data: fall } = await supabase
-      .from('faelle')
-      .select('id, claim_id, lead_id, sv_id, kunde_id, claims:claim_id(claim_nummer, regulierungs_betrag)')
-      .eq('id', fallId)
-      .single()
+    // CMM-49: claims-direkt (SSoT) via resolveClaimId — sv_id/lead_id 0-diff, kunde_id ->
+    // geschaedigter_user_id (0-diff); claim_nummer/regulierungs_betrag claims-nativ.
+    const waClaimId = await resolveClaimId(supabase, fallId)
+    const { data: fallClaim } = waClaimId
+      ? await supabase
+          .from('claims')
+          .select('geschaedigter_user_id, lead_id, sv_id, claim_nummer, regulierungs_betrag')
+          .eq('id', waClaimId)
+          .maybeSingle()
+      : { data: null }
 
-    if (!fall) return
-    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    if (!fallClaim) return
 
     // Get customer name + phone from lead or profile
     let vorname = ''
     let nachname = ''
     let telefon: string | null = null
 
-    if (fall.lead_id) {
+    if (fallClaim.lead_id) {
       const { data: lead } = await supabase
         .from('leads')
         .select('vorname, nachname, telefon')
-        .eq('id', fall.lead_id)
+        .eq('id', fallClaim.lead_id)
         .single()
       if (lead) {
         vorname = lead.vorname ?? ''
@@ -245,11 +250,11 @@ export async function sendStatusWhatsApp(
     }
 
     // Fallback: try profile via kunde_id
-    if (!telefon && fall.kunde_id) {
+    if (!telefon && fallClaim.geschaedigter_user_id) {
       const { data: profile } = await supabase
         .from('profiles')
         .select('vorname, nachname, telefon')
-        .eq('id', fall.kunde_id)
+        .eq('id', fallClaim.geschaedigter_user_id)
         .single()
       if (profile) {
         vorname = vorname || profile.vorname || ''
@@ -260,11 +265,11 @@ export async function sendStatusWhatsApp(
 
     // Get gutachter name if needed
     let gutachterName: string | undefined
-    if (fall.sv_id) {
+    if (fallClaim.sv_id) {
       const { data: sv } = await supabase
         .from('sachverstaendige')
         .select('profile_id')
-        .eq('id', fall.sv_id)
+        .eq('id', fallClaim.sv_id)
         .single()
       if (sv?.profile_id) {
         const { data: svProfile } = await supabase
@@ -331,7 +336,7 @@ export async function sendStatusWhatsApp(
 
     // CMM-44 SP-B PR2a: google_review_gesendet lebt jetzt auf claims (SSoT).
     if (nachrichtTyp === 'nach_abschluss') {
-      const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+      const claimId = waClaimId
       if (claimId) {
         await supabase
           .from('claims')

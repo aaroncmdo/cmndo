@@ -2,6 +2,7 @@
 
 // AAR-108: Manuell ausgeloeste LexDrive-Events aus der Fallakte.
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { processLexDriveEvent, type LexDriveEvent, type LexDriveEventPayload } from '@/lib/lexdrive/process-event'
 import { revalidatePath } from 'next/cache'
 
@@ -24,13 +25,11 @@ export async function triggerLexDriveEventManually(
     return { success: false, error: 'Nur Admin und KB duerfen Events manuell ausloesen' }
   }
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, claims:claim_id(claim_nummer)')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const llClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallClaim } = llClaimId
+    ? await supabase.from('claims').select('claim_nummer').eq('id', llClaimId).maybeSingle()
+    : { data: null }
+  if (!fallClaim) return { success: false, error: 'Fall nicht gefunden' }
 
   const result = await processLexDriveEvent({
     fallId,

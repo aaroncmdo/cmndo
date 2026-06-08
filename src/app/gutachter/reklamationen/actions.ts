@@ -3,6 +3,7 @@
 // AAR-93: SV-Portal Reklamations-Server-Action
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createNotification } from '@/lib/notifications'
 import { revalidatePath } from 'next/cache'
 
@@ -49,14 +50,12 @@ export async function createReklamation(data: {
   if (error) return { success: false, error: error.message }
 
   // Benachrichtigungen via Admin-Client
-  // CMM-44 SP-A: kundenbetreuer_id + claim_nummer aus dem claims-Embed (SSoT).
+  // CMM-49: kundenbetreuer_id + claim_nummer claims-direkt (SSoT) via resolveClaimId.
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('claims:claim_id(kundenbetreuer_id, claim_nummer)')
-    .eq('id', data.fallId)
-    .single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  const reklClaimId = await resolveClaimId(admin, data.fallId)
+  const { data: fallClaim } = reklClaimId
+    ? await admin.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', reklClaimId).maybeSingle()
+    : { data: null }
 
   if (fallClaim?.kundenbetreuer_id) {
     await createNotification(

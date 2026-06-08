@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import {
   emailNeuerFall,
   emailSvZugewiesen,
@@ -23,23 +24,22 @@ export async function POST(req: NextRequest) {
 
   // Load fall data
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
-  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
-  // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
-  // CMM-74 b″: status aus dem Select entfernt — war ungenutzt (Dead-Select),
-  // kein faelle.status-Reader in dieser Route.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, sv_id, lead_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)')
-    .eq('id', fallId)
-    .single()
+  // CMM-49: claims-direkt (SSoT) via resolveClaimId — sv_id/lead_id sind claims<->faelle
+  // 0-diff; claim_nummer/schadenort_*/schadens_ursache claims-nativ. faelle-frei.
+  const emClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fallClaim } = emClaimId
+    ? await supabase
+        .from('claims')
+        .select('sv_id, lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache')
+        .eq('id', emClaimId)
+        .maybeSingle()
+    : { data: null }
 
-  if (!fall) {
+  if (!fallClaim) {
     return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
   }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
-  const fallNr = fallClaim?.claim_nummer ?? fall.id.slice(0, 8)
+  const fallNr = fallClaim.claim_nummer ?? fallId.slice(0, 8)
 
   try {
     switch (type) {
@@ -58,11 +58,11 @@ export async function POST(req: NextRequest) {
       }
 
       case 'sv-zugewiesen': {
-        if (!fall.sv_id) break
+        if (!fallClaim.sv_id) break
         const { data: sv } = await supabase
           .from('sachverstaendige')
           .select('profile_id')
-          .eq('id', fall.sv_id)
+          .eq('id', fallClaim.sv_id)
           .single()
         if (!sv) break
         const { data: profile } = await supabase
@@ -74,11 +74,11 @@ export async function POST(req: NextRequest) {
 
         // Get customer name
         let kundenName = '—'
-        if (fall.lead_id) {
+        if (fallClaim.lead_id) {
           const { data: lead } = await supabase
             .from('leads')
             .select('vorname, nachname')
-            .eq('id', fall.lead_id)
+            .eq('id', fallClaim.lead_id)
             .single()
           if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
         }
