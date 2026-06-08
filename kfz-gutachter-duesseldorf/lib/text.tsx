@@ -14,3 +14,19 @@ export function renderRich(text: string, strongClassName = 'text-petrol'): React
     ),
   )
 }
+
+// Verlinkt eine Claimondo-Marken-Referenz auf claimondo.de (Aaron 04.06.:
+// "ueberall wo Claimondo referenziert wird soll das Wort anklickbar sein").
+// Erbt die Textfarbe (currentColor) -> funktioniert auf hellem + dunklem Hintergrund.
+export function ClaimondoLink({ children }: { children: ReactNode }) {
+  return (
+    <a
+      href="https://claimondo.de"
+      target="_blank"
+      rel="noopener"
+      className="underline underline-offset-2 decoration-1 hover:opacity-75 transition-opacity"
+    >
+      {children}
+    </a>
+  )
+}

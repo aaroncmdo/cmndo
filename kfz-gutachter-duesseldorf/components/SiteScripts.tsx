@@ -21,7 +21,7 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       const tel = target.closest('a[href^="tel:"]') as HTMLAnchorElement | null
       if (tel) {
         const slot = tel.dataset.cta || 'generic_call'
-        trackEvent('phone_click', { cta_slot: slot, cluster: CLUSTER.key, city_slug: citySlug, phone: tel.href.replace('tel:', '') })
+        trackEvent('click_to_call', { cta_slot: slot, cluster: CLUSTER.key, city_slug: citySlug, phone: tel.href.replace('tel:', '') })
         fireAdsConversion('call')
         return
       }
