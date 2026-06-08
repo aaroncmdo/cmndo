@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { CLUSTER, waHref, type City } from '@/lib/cluster'
+import { trackEvent } from '@/lib/tracking'
+import { RueckrufModal } from './RueckrufModal'
 
 // CLIENT-Section: schwebender Schnellkontakt-Stack + Mobile-Sticky-Anruf-Bar +
 // Back-to-Top. Mock-Zeilen 1088-1151.
@@ -15,6 +17,8 @@ import { CLUSTER, waHref, type City } from '@/lib/cluster'
 // - Scroll-Gating: mobil (<640px) erst sichtbar wenn Hero-CTA (#heroCallCta) out-of-view,
 //   Desktop dauerhaft sichtbar (is-visible direkt gesetzt).
 export function FabStack({ city }: { city: City }) {
+  const [rueckrufOpen, setRueckrufOpen] = useState(false)
+
   useEffect(() => {
     const gated = Array.from(document.querySelectorAll<HTMLElement>('.fab-scroll-gated'))
     const mobileMq = window.matchMedia('(max-width: 639px)')
@@ -93,6 +97,28 @@ export function FabStack({ city }: { city: City }) {
         aria-label="Schnellkontakt"
         style={{ transition: 'opacity .3s ease, transform .3s ease' }}
       >
+        {/* Rueckruf-Button (AAR-939) — oeffnet das Rueckruf-Modal (Event tool_open) */}
+        <button
+          type="button"
+          onClick={() => {
+            setRueckrufOpen(true)
+            trackEvent('tool_open', { cluster: CLUSTER.key, city_slug: city.slug, tool: 'rueckruf' })
+          }}
+          className="w-14 h-14 rounded-full bg-petrol text-white grid place-items-center shadow-md hover:-translate-y-px transition"
+          aria-label="Rückruf anfordern"
+        >
+          <svg
+            className="w-6 h-6 stroke-current fill-none"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <rect x="5" y="3" width="14" height="18" rx="2" />
+            <path d="M9 7h6M9 11h6M9 15h4" />
+          </svg>
+        </button>
         {/* WA-Button */}
         <a
           className="w-14 h-14 rounded-full bg-green text-white grid place-items-center shadow-md hover:-translate-y-px transition"
@@ -171,6 +197,8 @@ export function FabStack({ city }: { city: City }) {
           <polyline points="18 15 12 9 6 15" />
         </svg>
       </button>
+
+      <RueckrufModal open={rueckrufOpen} onClose={() => setRueckrufOpen(false)} city={city} />
     </aside>
   )
 }
