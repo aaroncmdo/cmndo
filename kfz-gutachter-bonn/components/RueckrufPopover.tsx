@@ -3,14 +3,14 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react'
 import { SITE } from '@/lib/site'
 import { CLUSTER, type City } from '@/lib/cluster'
-import { trackEvent } from '@/lib/tracking'
+import { trackEvent, readAttribution, toE164 } from '@/lib/tracking'
 
 // Rueckruf-Popover (AAR-939) — Bottom-Sheet, getriggert aus der mobilen Sticky-Bottom-Bar
 // (#mobileStickyCall). Mobile-only (Desktop/iPad: kein Trigger, kein Render). Submit geht an
 // die bestehende Embed-Anfrage-Pipeline (claimondo.de/api/anfrage-from-lp, source=kfz_gutachter_lp):
 // Insert in gutachter_finder_anfragen + WhatsApp an KFZ_LP_BAILEYS_TARGET (uns) + Dispatch-Email
 // + WhatsApp-Bestaetigung an den Anrufer. Kein eigenes Backend. Tracking: tool_open feuert im
-// FabStack beim Oeffnen, form_submit hier bei Erfolg.
+// FabStack beim Oeffnen, monika_callback_request (value 25, Doc-11) hier bei Erfolg.
 export function RueckrufPopover({
   open,
   onClose,
@@ -76,7 +76,21 @@ export function RueckrufPopover({
         setSending(false)
         return
       }
-      trackEvent('form_submit', { cluster: CLUSTER.key, city_slug: city.slug, tool: 'rueckruf' })
+      // Doc-11: reine Rueckrufbitte -> monika_callback_request (value 25) mit lead_id
+      // (Server-Anfrage-ID = Dedupe-Transaction-ID) + phone + gclid fuer Google Ads
+      // (value-based Bidding + Enhanced Conversions). lead_id nur wenn vorhanden.
+      const data = (await res.json().catch(() => ({}))) as { anfrage_id?: string | null }
+      const attribution = readAttribution()
+      const ev: Record<string, string | number | undefined> = {
+        value: 25,
+        currency: 'EUR',
+        phone: toE164(telefon.trim()),
+        gclid: attribution.gclid,
+        cluster: CLUSTER.key,
+        stadt: city.slug,
+      }
+      if (data.anfrage_id) ev.lead_id = data.anfrage_id
+      trackEvent('monika_callback_request', ev)
       setDone(true)
     } catch {
       setError('Verbindungsfehler. Bitte erneut versuchen.')
