@@ -30,7 +30,14 @@ const nextConfig: NextConfig = {
       },
       { key: 'X-DNS-Prefetch-Control', value: 'on' },
     ]
-    return [{ source: '/:path*', headers: securityHeaders }]
+    return [
+      { source: '/:path*', headers: securityHeaders },
+      // #2528 Forward: HTML-Dokumente nie lange cachen — gecachtes altes Dokument zeigt auf
+      // versionierte /_next/static-Hashes, die nach einem Deploy 404en -> ungestylte
+      // ("verzogene") Seite. Nur Dokument-Routen revalidieren; gehashte Assets bleiben immutable.
+      { source: '/', headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }] },
+      { source: '/lp/:slug*', headers: [{ key: 'Cache-Control', value: 'public, max-age=0, must-revalidate' }] },
+    ]
   },
 }
 
