@@ -32,6 +32,10 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
+import { ensureFirma } from '@/lib/firmen/ensure-firma'
+import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
+import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import {
   buildFallInsertFromLead,
   resolveFallEntityFks,
@@ -457,6 +461,20 @@ export async function convertLeadToClaim(
     !!(lead.gegner_versicherung_id as string | null) ||
     !!(lead.gegner_fahrzeugtyp as string | null) ||
     !!(lead.gegner_schadennummer as string | null)
+
+  // CMM-Entity Plan 3 (T3): Gegner-Fahrzeug als vehicles-Entitaet (provisorisch per
+  // Kennzeichen, FIN-los -> mergebar sobald eine FIN auftaucht). Non-critical.
+  let gegnerVehicleId: string | null = null
+  if (istGegnerBekannt && (lead.gegner_kennzeichen as string | null)) {
+    const gv = await ensureVehicleFromKennzeichen({
+      db: admin as unknown as SupabaseClient,
+      kennzeichen: lead.gegner_kennzeichen as string,
+      klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
+    })
+    if (gv.ok) gegnerVehicleId = gv.vehicleId
+    else console.warn('[CMM-Entity P3] ensureVehicleFromKennzeichen fehlgeschlagen:', gv.error)
+  }
+
   if (istGegnerBekannt && hatGegnerInfo) {
     partyInserts.push({
       claim_id: claimId,
@@ -469,6 +487,8 @@ export async function convertLeadToClaim(
       fahrzeugtyp_klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
       versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
       versicherung_klartext: (lead.gegner_versicherung as string | null) ?? null,
+      // CMM-Entity Plan 3 (T3): Gegner-Fahrzeug-Entitaet (FIN-los, per Kennzeichen)
+      vehicle_id: gegnerVehicleId,
       // CMM-26: Schadennummer wird in claims.gegner_aktenzeichen abgelegt
       // (siehe claimsInsert oben), claim_parties hat keine eigene Spalte.
       adresse_land: 'DE',
@@ -514,6 +534,24 @@ export async function convertLeadToClaim(
     else console.warn('[CMM-entity P3] personen-Link bei Konversion fehlgeschlagen (non-fatal):', personRes.error)
   }
 
+  // CMM-Entity Plan 3 (T2): Geschaedigter-Firma (Gewerbe) -> firmen-Entitaet + firma_id
+  // statt Klartext. partyInserts[0] = Geschaedigter (Reihenfolge wie im Bestand).
+  // GATE B: leads hat (noch) kein firma_ustid -> Dedup per normalized_name; ust_id additiv
+  // wenn vorhanden (lead = Record<string,unknown> -> Zugriff safe, fehlt -> null).
+  // Non-critical: Fehler laesst firma_id NULL, bricht die Konversion nicht.
+  if (Boolean(lead.gewerbe_flag) && (lead.firma_name as string | null)) {
+    const firmaRes = await ensureFirma({
+      db: admin as unknown as SupabaseClient,
+      snapshot: {
+        name: lead.firma_name as string,
+        ust_id: (lead.firma_ustid as string | null) ?? null,
+        quelle: 'lead_konvertierung',
+      },
+    })
+    if (firmaRes.ok) partyInserts[0].firma_id = firmaRes.firmaId
+    else console.warn('[CMM-Entity P3] ensureFirma (geschaedigter) fehlgeschlagen:', firmaRes.error)
+  }
+
   const { error: partiesErr } = await admin
     .from('claim_parties')
     .insert(partyInserts)
@@ -547,6 +585,36 @@ export async function convertLeadToClaim(
     if (cviErr) {
       console.error('[CMM-50.0] claim_vehicle_involvements-Insert fehlgeschlagen (non-fatal):', cviErr.message)
     }
+  }
+
+  // CMM-Entity Plan 3 (T3): Gegner-Fahrzeug-Involvement. rolle='verursacher'
+  // (live-CHECK: {geschaedigter,verursacher,beteiligter,unbekannt,mietwagen} - KEIN 'gegner'),
+  // konsistent mit der verursacher-Party. Non-critical.
+  if (gegnerVehicleId) {
+    const { error: cviGErr } = await admin
+      .from('claim_vehicle_involvements')
+      .insert([
+        { claim_id: claimId, vehicle_id: gegnerVehicleId, rolle: 'verursacher', reihenfolge: 2 },
+      ])
+    if (cviGErr) {
+      console.error('[CMM-Entity P3] gegner-involvement-Insert (non-fatal):', cviGErr.message)
+    }
+  }
+
+  // CMM-Entity Plan 3 (T4): aktueller Fahrzeugschaden als vehicle-bound Damage-Entitaet.
+  // Wird beim Claim-Close zu 'vorschaden' (markClaimDamagesAsVorschaden). Non-critical.
+  if (resolvedVehicleId) {
+    const dmg = await recordVehicleDamage({
+      db: admin as unknown as SupabaseClient,
+      damage: {
+        vehicleId: resolvedVehicleId,
+        claimId,
+        state: 'aktuell',
+        beschreibung: (lead.fahrzeugschaden_beschreibung as string | null) ?? null,
+        quelle: 'lead_konvertierung',
+      },
+    })
+    if (!dmg.ok) console.warn('[CMM-Entity P3] recordVehicleDamage fehlgeschlagen:', dmg.error)
   }
 
   // ─── Schritt 8: faelle-Row (Übergangs-Phase: vollständig) ───────────────
