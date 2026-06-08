@@ -73,7 +73,10 @@ export const STYLES = `
 .mk-powered { padding: 7px 14px; text-align: center; font-size: 11px; background: #fff; border-top: 1px solid #eef1f6; }
 .mk-powered a { color: var(--monika-accent); text-decoration: none; }
 
-.mk-launch { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.mk-launch { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+  transition: opacity .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
+/* #5: cold + vor der Displayfalte → verborgen; erscheint smooth ab der Fold (wie das WA-Icon). */
+.mk-launch-off { opacity: 0; transform: translateY(16px) scale(.92); pointer-events: none; }
 /* N7: auf Mobile ueber die Sticky-Call-Bar der Cluster-LP schieben (sonst verdeckt das Siegel sie). */
 @media (max-width: 639px) { .mk-launch { bottom: 84px; } }
 .mk-launch .mk-fab { position: static; }
@@ -93,6 +96,9 @@ export const STYLES = `
 /* N3: Teaser-Label "Neue Nachricht" ueber dem Text */
 .mk-teaser-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
 .mk-teaser-label { font-size: 9.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; color: var(--monika-accent); }
+/* #6: CTA-Pill "chat öffnen" in Claimondo-Blau (ersetzt "— weiter ↑") */
+.mk-teaser-cta { align-self: flex-start; margin-top: 5px; padding: 4px 12px; background: var(--monika-primary); color: #fff;
+  border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .01em; box-shadow: 0 2px 8px rgba(13,27,62,.22); }
 
 /* N1: Hover-Pill (Identitaet am Siegel — Desktop ausfahrend, Mobile sichtbar) */
 .mk-hoverpill { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e8ecf3;

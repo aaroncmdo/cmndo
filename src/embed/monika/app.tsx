@@ -18,7 +18,7 @@ import {
   loadState, saveState, markDismissed, getDismissedAt, getBeatsShown, setBeatsShown,
   getMuted, setMuted, isWithinQuietWindow, type PersistedState,
 } from './store'
-import { scrollDepthRatio, isScrollable, nextBeat, BEAT_TEXT, type TeaserSession } from './teaser'
+import { isScrollable, nextBeat, BEAT_TEXT, type TeaserSession } from './teaser'
 import { createSoundEngine } from './sound'
 
 // AAR-939: Inaktivitaets-Reaktivierung — reagiert der Kunde an einem Auswahl-/Form-Schritt
@@ -45,6 +45,8 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   // P2: Teaser-Peek (0 = unsichtbar; 1/2 = Beat bzw. Resume-Peek) + Session-Beat-Zaehler.
   const teaserBeat = useSignal<0 | 1 | 2>(0)
   const beatsShown = useSignal(0)
+  // #5: Monika erscheint erst ab der Displayfalte (wie das WA-Icon der Cluster-LP).
+  const pastFold = useSignal(false)
   // P3: Mute-State (localStorage-persistiert, default AN = nicht gemutet).
   const muted = useSignal(getMuted(cfg))
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -127,36 +129,44 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     teaserBeat.value = b
     beatsShown.value = b
     setBeatsShown(cfg, b)
+    // #2: Teaser-Bubble (ausserhalb des Chats) klingt — wenn Audio per erster Geste entsperrt ist.
+    soundRef.current?.playIncoming()
   }
   function initTeaser(): () => void {
     if (isDismissed()) return () => {}
     const startedWithBeat1 = beatsShown.value === 1 // Beat 1 lief auf einer frueheren Seite (Cross-Page)
     let beat1FiredHere = false
     let raf = 0
+    // #5: Schwelle = ~0.65 Viewport-Hoehe (Displayfalte), nicht Seiten-Prozent — so erscheint
+    // Monika an derselben Stelle wie das WA-Icon (das ab Hero-out-of-view eingeblendet wird).
+    const foldPx = () => window.innerHeight * 0.65
     const onScroll = () => {
       if (raf) return
       raf = requestAnimationFrame(() => {
         raf = 0
-        const ratio = scrollDepthRatio(window.scrollY, document.documentElement.scrollHeight, window.innerHeight)
-        if (beatsShown.value === 0 && ratio >= 0.3) {
+        const fold = foldPx()
+        const y = window.scrollY
+        pastFold.value = y >= fold // steuert Launcher-Sichtbarkeit (cold)
+        if (beatsShown.value === 0 && y >= fold) {
           beat1FiredHere = true
           fireBeat()
-        } else if (beatsShown.value === 1 && ((startedWithBeat1 && ratio >= 0.3) || (beat1FiredHere && ratio >= 0.7))) {
+        } else if (beatsShown.value === 1 && ((startedWithBeat1 && y >= fold) || (beat1FiredHere && y >= fold * 3))) {
           fireBeat()
         }
       })
     }
-    let dwell = 0
     let fallback = 0
     if (!isScrollable(document.documentElement.scrollHeight, window.innerHeight)) {
-      fallback = window.setTimeout(() => fireBeat(), 8000) // nicht scrollbar → Zeit-Fallback
+      // nicht scrollbar → keine Fold; nach Zeit zeigen + Beat
+      fallback = window.setTimeout(() => { pastFold.value = true; fireBeat() }, 6000)
     } else {
-      dwell = window.setTimeout(() => window.addEventListener('scroll', onScroll, { passive: true }), 3000) // Min-Dwell
+      // #5: Listener SOFORT (kein 3s-Dwell), damit der Launcher genau wie das WA-Icon ab der Fold erscheint.
+      window.addEventListener('scroll', onScroll, { passive: true })
+      onScroll() // initialer Check (Seite evtl. schon gescrollt geladen)
     }
     return () => {
       window.removeEventListener('scroll', onScroll)
       if (raf) cancelAnimationFrame(raf)
-      clearTimeout(dwell)
       clearTimeout(fallback)
     }
   }
@@ -224,7 +234,21 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
     teaserBeat.value = 0
     track(cfg, 'monika_open')
     pushHistoryOnce() // System-Back schliesst den Chat
-    if (log.value.length === 0) playStep(START_STEP) // nur Cold-Start tippt; Resume hat History
+    if (log.value.length === 0) {
+      if (beatsShown.value > 0) {
+        // #3: Der Teaser hat die erste Begruessung schon "gesagt" → instant in den Log (kein
+        // Neu-Tippen derselben Nachricht); nur die FOLGE-Chunks werden getippt, dann die Optionen.
+        const msgs = SCRIPT[START_STEP].messages
+        log.value = [{ role: 'monika', text: msgs[0] }]
+        typeSequence(msgs.slice(1), () => {
+          awaiting.value = true
+          scrollDown()
+          armInactivity()
+        })
+      } else {
+        playStep(START_STEP) // direkter FAB-Klick ohne Teaser → normal tippen
+      }
+    }
   }
 
   function choose(opt: ChoiceOption) {
@@ -335,6 +359,13 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       if (open.value) open.value = false
     }
     window.addEventListener('popstate', onPop)
+    // #2: Audio bei der ERSTEN Page-Geste entsperren (touchstart/pointerdown/keydown) — damit
+    // Teaser + erste Nachricht klingen koennen (Autoplay-Policy verlangt eine Nutzer-Geste).
+    const unlockAudio = () => soundRef.current?.unlock()
+    const unlockOpts: AddEventListenerOptions = { once: true, passive: true }
+    window.addEventListener('pointerdown', unlockAudio, unlockOpts)
+    window.addEventListener('touchstart', unlockAudio, unlockOpts)
+    window.addEventListener('keydown', unlockAudio, unlockOpts)
     // Persistenz: NACH dem Boot erzeugt (kein spurious save waehrend Rehydrierung).
     const disposeEffect = effect(() => {
       const state: PersistedState = {
@@ -351,6 +382,9 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       disposeEffect()
       teaserCleanup?.()
       window.removeEventListener('popstate', onPop)
+      window.removeEventListener('pointerdown', unlockAudio)
+      window.removeEventListener('touchstart', unlockAudio)
+      window.removeEventListener('keydown', unlockAudio)
       disarmInactivity()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -360,9 +394,11 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   if (!open.value) {
     const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
     const lastMonika = log.value.filter((b) => b.role === 'monika').slice(-1)[0]?.text
-    const peekText = log.value.length > 0 ? `${lastMonika ?? BEAT_TEXT[1]} — weiter ↑` : BEAT_TEXT[teaserBeat.value === 2 ? 2 : 1]
+    const peekText = log.value.length > 0 ? (lastMonika ?? BEAT_TEXT[1]) : BEAT_TEXT[teaserBeat.value === 2 ? 2 : 1]
+    // #5: Cold (noch nie geoeffnet) erst ab der Displayfalte zeigen; Resume (history>0) sofort.
+    const monikaVisible = log.value.length > 0 || pastFold.value
     return (
-      <div class="mk-launch">
+      <div class={`mk-launch${monikaVisible ? '' : ' mk-launch-off'}`}>
         {teaserBeat.value > 0 && (
           <div
             class={`mk-teaser${reduce ? '' : ' mk-teaser-in'}`}
@@ -375,6 +411,8 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
             <div class="mk-teaser-body">
               <span class="mk-teaser-label">Neue Nachricht</span>
               <span class="mk-teaser-txt">{peekText}</span>
+              {/* #6: CTA-Pill in Claimondo-Blau statt "— weiter ↑" */}
+              <span class="mk-teaser-cta">chat öffnen</span>
             </div>
             <button
               class="mk-teaser-x"
