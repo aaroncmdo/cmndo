@@ -38,6 +38,8 @@ export interface FindeBestePersonInput {
   /** Thin Org-Hook: schränkt den Pool auf sachverstaendige.organisation_id ein. */
   organisationId?: string | null
   excludeAssigneeIds?: string[]
+  /** Kontinuität: dieser Assignee bekommt +1000 Score-Bonus, wenn im Pool (Sticky-SV). */
+  stickyAssigneeId?: string | null
   topN?: number
   /** true = Rangliste + Slot-Vorschlag OHNE reserviere (Dispatch-"Vorschlagen"). */
   nurVorschlag?: boolean
@@ -55,6 +57,14 @@ export interface PersonKandidat {
   slotVon: string | null
   slotBis: string | null
   reasons: string[]
+  // SvMatchCandidate-Parität (additiv, für den findBestSV-Thin-Wrapper in Sub-A):
+  profileId?: string | null
+  paket?: string
+  offeneFaelle?: number
+  kontingentFrei?: number
+  ablehnungen30d?: number
+  verfuegbarAmWunschtermin?: boolean
+  naechsterFreierSlot?: string | null
 }
 
 export type FindeBestePersonResult =
@@ -97,6 +107,7 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
     fensterTage = DEFAULT_FENSTER_TAGE,
     organisationId = null,
     excludeAssigneeIds = [],
+    stickyAssigneeId = null,
     topN = 3,
     nurVorschlag = false,
     typ = 'sv_begutachtung',
@@ -156,18 +167,24 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
   const bewertet: Bewertet[] = imGebiet.map((g, i) => {
     const sv = g.sv
     const paket = sv.paket || 'standard'
+    const kontingentGesamt = Number(sv.paket_faelle_gesamt) || 10
     const kontingentGenutzt = Number(sv.paket_faelle_genutzt) || Number(sv.offene_faelle) || 0
+    const kontingentFrei = kontingentGesamt - kontingentGenutzt
     const ablehnungen30d = Number(sv.ablehnungen_30_tage) || 0
     const etaVomBueroMin = etaArr[i] ?? null
-    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm })
+    const stickyBonus = stickyAssigneeId && sv.id === stickyAssigneeId ? 1000 : 0
+    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm }) + stickyBonus
     const profile = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
     const reasons = [...g.reasons, `Paket: ${paket}`]
     if (etaVomBueroMin != null) reasons.push(`${etaVomBueroMin} min Fahrt vom Büro`)
+    if (stickyBonus > 0) reasons.unshift('Bekannter SV (Sticky)')
     return {
       assignee: { typ: 'sachverstaendiger', id: sv.id },
       name: profile ? `${profile.vorname ?? ''} ${profile.nachname ?? ''}`.trim() : '—',
       score, distanzKm: Math.round(g.distanzKm * 10) / 10, etaVomBueroMin,
       slotVon: null, slotBis: null, reasons,
+      profileId: (sv.profile_id as string | null) ?? null,
+      paket, offeneFaelle: kontingentGenutzt, kontingentFrei, ablehnungen30d,
       partnerSeit: sv.partner_seit, createdAt: sv.created_at, id: sv.id, sv,
     }
   })
@@ -182,7 +199,11 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
     mitSlot.push({
       assignee: k.assignee, name: k.name, score: k.score, distanzKm: k.distanzKm,
       etaVomBueroMin: k.etaVomBueroMin, reasons: k.reasons,
+      profileId: k.profileId, paket: k.paket, offeneFaelle: k.offeneFaelle,
+      kontingentFrei: k.kontingentFrei, ablehnungen30d: k.ablehnungen30d,
       slotVon: slot?.von ?? null, slotBis: slot?.bis ?? null,
+      verfuegbarAmWunschtermin: wunschterminIso ? (slot?.istWunschtermin ?? false) : undefined,
+      naechsterFreierSlot: slot && !slot.istWunschtermin ? slot.von : null,
     })
   }
 
@@ -215,7 +236,7 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
 async function waehleSlot(
   assignee: Assignee, sv: SvRow, wunschterminIso: string | null, dauerMin: number,
   fensterVonIso: string, fensterBisIso: string, schadenort: { lat: number; lng: number }, db: SupabaseClient,
-): Promise<{ von: string; bis: string } | null> {
+): Promise<{ von: string; bis: string; istWunschtermin: boolean } | null> {
   const urlaub = sv.urlaub_von && sv.urlaub_bis ? [{ start: sv.urlaub_von, end: sv.urlaub_bis }] : []
   // Wunschtermin bevorzugt: exakte Belegungsprüfung (final race-sicher via reserviere).
   if (wunschterminIso) {
@@ -227,7 +248,7 @@ async function waehleSlot(
     if (wunschIso && !inUrlaub && wunschIso >= fensterVonIso && wunschIso <= fensterBisIso) {
       const bisIso = new Date(wunsch.getTime() + dauerMin * 60_000).toISOString()
       const pre = await pruefeBelegungStrict(assignee, wunschIso, bisIso, db)
-      if (pre.ok && pre.frei) return { von: wunschIso, bis: bisIso }
+      if (pre.ok && pre.frei) return { von: wunschIso, bis: bisIso, istWunschtermin: true }
     }
   }
   // Sonst: frühester erreichbarer freier Slot — NICHT vor "jetzt" (freieSlots liefert heute
@@ -243,5 +264,5 @@ async function waehleSlot(
   if (!slot) return null
   // AAR-956 TZ: slot.uhrzeit ist Berlin-Wall-Clock -> echter UTC-Instant.
   const von = new Date(berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}:00`))
-  return { von: von.toISOString(), bis: new Date(von.getTime() + slot.dauerMin * 60_000).toISOString() }
+  return { von: von.toISOString(), bis: new Date(von.getTime() + slot.dauerMin * 60_000).toISOString(), istWunschtermin: false }
 }
