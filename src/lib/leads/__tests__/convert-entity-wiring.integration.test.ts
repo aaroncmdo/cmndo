@@ -34,6 +34,8 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
   const tag = `ZZ_ENTITY_WIRING_${ts}`
   const firmaName = `${tag} GmbH`
   const gegnerKz = `ZZ-EW ${ts % 100000}`
+  const schadenText = `${tag} Front links` // distinktiver claims-Fingerprint (Race-Fallback-Cleanup)
+  const testFin = `ZZTESTVN${ts}`.slice(0, 17) // geschaedigter-Fahrzeug — T4 braucht resolvedVehicleId via FIN
 
   let leadId: string | null = null
   let claimId: string | null = null
@@ -51,10 +53,14 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
         email: `${tag.toLowerCase()}@entity-wiring-test.invalid`,
         gewerbe_flag: true,
         firma_name: firmaName,
+        fin: testFin,
+        fahrzeug_hersteller: 'Testmarke',
+        fahrzeug_modell: 'Testmodell',
         gegner_bekannt: true,
         gegner_kennzeichen: gegnerKz,
-        gegner_fahrzeugtyp: 'PKW',
-        fahrzeugschaden_beschreibung: 'Integrationstest Front links',
+        gegner_fahrzeugtyp: 'pkw', // faelle CHECK check_gegner_fahrzeugtyp: lowercase-Enum
+
+        fahrzeugschaden_beschreibung: schadenText,
         status: 'neu',
       })
       .select('id')
@@ -63,23 +69,34 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     leadId = lead!.id as string
   })
 
+  const purgeClaim = async (cid: string) => {
+    await db.from('vehicle_vorschaeden').delete().eq('claim_id', cid)
+    await db.from('claim_vehicle_involvements').delete().eq('claim_id', cid)
+    await db.from('claim_parties').delete().eq('claim_id', cid)
+    await db.from('faelle').delete().eq('claim_id', cid)
+    await db.from('claims').delete().eq('id', cid)
+  }
+
   afterAll(async () => {
-    // Reihenfolge: claim-gebundene Kinder zuerst, dann Claim + Lead, zuletzt die
-    // globalen Entitaeten (firmen/vehicles loeschen sich NICHT per Claim-Cascade).
-    if (claimId) {
-      await db.from('vehicle_vorschaeden').delete().eq('claim_id', claimId)
-      await db.from('claim_vehicle_involvements').delete().eq('claim_id', claimId)
-      await db.from('claim_parties').delete().eq('claim_id', claimId)
-      await db.from('faelle').delete().eq('claim_id', claimId)
-      await db.from('claims').delete().eq('id', claimId)
-    }
+    // 1) Primaer: per erfasste ID (sauberer Pfad).
+    if (claimId) await purgeClaim(claimId)
+    // 2) Race-Fallback: falls ein Timeout die ID-Erfassung verhindert hat (Converter
+    //    laeuft im Hintergrund weiter), Orphan-Claim ueber den Schaden-Fingerprint
+    //    nachraeumen — nie Orphan-Daten in der prod+staging-geteilten DB hinterlassen.
+    const { data: orphans } = await db.from('claims').select('id').eq('fahrzeugschaden_beschreibung', schadenText)
+    for (const c of orphans ?? []) await purgeClaim(c.id as string)
+    // 3) Globale Entitaeten + Lead (cascaden NICHT mit dem Claim) per ID + Tag-Fallback.
     if (leadId) await db.from('leads').delete().eq('id', leadId)
+    await db.from('personen').delete().ilike('nachname', `${tag}%`)
+    await db.from('firmen').delete().ilike('name', `${tag}%`)
     if (gegnerVehicleId) await db.from('vehicles').delete().eq('id', gegnerVehicleId)
-    if (firmaId) await db.from('firmen').delete().eq('id', firmaId)
+    await db.from('vehicles').delete().eq('kennzeichen_aktuell', gegnerKz)
+    await db.from('vehicles').delete().eq('fin', testFin)
   })
 
   it('Gewerbe-Lead -> Geschaedigter-Firma + Gegner-Vehicle-Involvement + aktueller Schaden', async () => {
     const res = await convertLeadToClaim({ leadId: leadId! })
+    if (!res.ok) console.error('convertLeadToClaim fehlgeschlagen:', res.error)
     expect(res.ok).toBe(true)
     if (!res.ok) return
     claimId = res.claimId
@@ -111,5 +128,5 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
       .eq('claim_id', claimId)
       .eq('state', 'aktuell')
     expect(count).toBe(1)
-  })
+  }, 30_000) // Remote-Converter macht viele sequentielle Round-Trips (~7s) -> Default-5s reicht nicht
 })

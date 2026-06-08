@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { slotsFuerTag } from './slots'
+import { slotsFuerTag, freieSlots } from './slots'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 describe('slotsFuerTag', () => {
@@ -25,5 +25,43 @@ describe('slotsFuerTag', () => {
     expect(
       slotsFuerTag(tag, { vonMin: 540, bisMin: 720 }, [belegt('10:30', '11:15')], 45, 15).map((s) => s.uhrzeit),
     ).toEqual(['09:00'])
+  })
+})
+
+describe('freieSlots — now-Floor (Fenster-Untergrenze vonIso)', () => {
+  // Stub: SV ohne arbeitszeiten (→ DEFAULT 09:00–17:00) + leere v_belegung. Kein
+  // schadenort → keine Reachability. Berlin-verankert via berlinWallClockToUtc → runner-TZ-unabhaengig.
+  const dbStub = {
+    from: (t: string) => {
+      if (t === 'sachverstaendige') {
+        return {
+          select: () => ({
+            eq: () => ({ maybeSingle: async () => ({ data: { arbeitszeiten: null, blockierte_wochentage: null } }) }),
+          }),
+        }
+      }
+      // v_belegung: .select().eq().eq().lt().gt().order() → {data:[],error:null}
+      const chain: Record<string, unknown> = {}
+      chain.select = () => chain
+      chain.eq = () => chain
+      chain.lt = () => chain
+      chain.gt = () => chain
+      chain.order = () => Promise.resolve({ data: [], error: null })
+      return chain
+    },
+  } as never
+
+  const sv = { typ: 'sachverstaendiger' as const, id: 'sv-1' }
+
+  it('schliesst am vonIso-Tag bereits vergangene Slots aus; Folgetag voll', async () => {
+    const von = berlinWallClockToUtc('2026-07-06T14:00:00') // Montag 14:00 Berlin
+    const bis = berlinWallClockToUtc('2026-07-07T20:00:00') // bis Dienstag
+    const tage = await freieSlots(sv, von, bis, {}, dbStub)
+    const mo = tage.find((t) => t.datum === '2026-07-06')!
+    const di = tage.find((t) => t.datum === '2026-07-07')!
+    expect(mo.slots.length).toBeGreaterThan(0)
+    expect(mo.slots.every((s) => s.uhrzeit >= '14:00')).toBe(true) // nichts Vergangenes
+    expect(mo.slots.some((s) => s.uhrzeit === '09:00')).toBe(false)
+    expect(di.slots[0]?.uhrzeit).toBe('09:00') // Folgetag ungefiltert
   })
 })
