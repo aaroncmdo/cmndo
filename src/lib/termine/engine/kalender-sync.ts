@@ -7,7 +7,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { GOOGLE_CALENDAR_TIMEZONE, toBerlinWallClock } from '@/lib/google-calendar/timezone'
-import { createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/lib/kalender/caldav/client'
+import { CalDavError, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/lib/kalender/caldav/client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { resolveTerminKontext, type TerminKontext } from './kalender-kontext'
 
@@ -22,6 +22,8 @@ export interface TerminSyncRow {
   status: string
   bezug_typ: string | null
   bezug_id: string | null
+  claim_id: string | null
+  lead_id: string | null
   besichtigungsort_adresse: string | null
   google_event_id: string | null
   google_calendar_id: string | null
@@ -42,7 +44,7 @@ export interface SyncResult {
 }
 
 const SYNC_SELECT =
-  'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, bezug_typ, bezug_id, ' +
+  'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, bezug_typ, bezug_id, claim_id, lead_id, ' +
   'besichtigungsort_adresse, google_event_id, google_calendar_id, caldav_object_url, caldav_event_uid'
 const AKTIV_STATUS = ['reserviert', 'bestaetigt', 'verlegung_pending']
 
@@ -120,22 +122,36 @@ export const caldavProvider: KalenderProvider = {
     if (!conn || !conn.calendar_url) return 'skip'
     const password = decrypt(conn.password_encrypted)
     const creds = { serverUrl: conn.server_url, username: conn.username, password }
-    if (termin.caldav_object_url && termin.caldav_event_uid) {
-      await updateCalendarEvent({
+    try {
+      if (termin.caldav_object_url && termin.caldav_event_uid) {
+        await updateCalendarEvent({
+          creds,
+          objectUrl: termin.caldav_object_url,
+          event: { uid: termin.caldav_event_uid, summary: kontext.summary, description: kontext.description, location: kontext.location, startIso: termin.start_zeit, endIso: termin.end_zeit },
+        })
+        await db.from('gutachter_termine').update({ caldav_synced_at: new Date().toISOString() }).eq('id', termin.id)
+        return 'updated'
+      }
+      const result = await createCalendarEvent({
         creds,
-        objectUrl: termin.caldav_object_url,
-        event: { uid: termin.caldav_event_uid, summary: kontext.summary, description: kontext.description, location: kontext.location, startIso: termin.start_zeit, endIso: termin.end_zeit },
+        calendarUrl: conn.calendar_url,
+        event: { summary: kontext.summary, description: kontext.description, location: kontext.location, startIso: termin.start_zeit, endIso: termin.end_zeit },
       })
-      await db.from('gutachter_termine').update({ caldav_synced_at: new Date().toISOString() }).eq('id', termin.id)
-      return 'updated'
+      await db.from('gutachter_termine').update({ caldav_object_url: result.objectUrl, caldav_event_uid: result.uid, caldav_synced_at: new Date().toISOString() }).eq('id', termin.id)
+      return 'created'
+    } catch (err) {
+      // Parity mit dem alten caldav/sv-termin-sync: bei auth_failed die Verbindung
+      // markieren, damit der SV im Profil "App-Passwort pruefen" sieht. Danach
+      // rethrow → der aeussere Sync-Loop loggt + setzt results['caldav']='error'.
+      if (err instanceof CalDavError && err.code === 'auth_failed') {
+        await db
+          .from('sv_kalender_verbindungen')
+          .update({ last_error: 'Login fehlgeschlagen — App-Passwort prüfen', last_error_at: new Date().toISOString() })
+          .eq('sv_id', termin.assignee_id)
+          .eq('provider', 'caldav')
+      }
+      throw err
     }
-    const result = await createCalendarEvent({
-      creds,
-      calendarUrl: conn.calendar_url,
-      event: { summary: kontext.summary, description: kontext.description, location: kontext.location, startIso: termin.start_zeit, endIso: termin.end_zeit },
-    })
-    await db.from('gutachter_termine').update({ caldav_object_url: result.objectUrl, caldav_event_uid: result.uid, caldav_synced_at: new Date().toISOString() }).eq('id', termin.id)
-    return 'created'
   },
   async remove(termin, db) {
     if (termin.assignee_typ !== 'sachverstaendiger' || !termin.assignee_id || !termin.caldav_object_url) return 'skip'

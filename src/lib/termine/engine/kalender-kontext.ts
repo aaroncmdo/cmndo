@@ -52,6 +52,28 @@ export function buildDescription(f: KontextFelder, location: string | null, appU
   return lines.join('\n')
 }
 
+/**
+ * Normalisiert den Event-bezug eines Termins: explizites bezug_typ/bezug_id hat
+ * Vorrang; fehlt es (Legacy-/Direkt-Buchungen, die kein bezug gesetzt haben),
+ * faellt sie auf das CMM-49-kanonische termin.claim_id zurueck, dann lead_id.
+ * Faelle-frei — KEIN fall-Fallback. So baut der externe-Kalender-Sync auch fuer
+ * bezuglose, aber claim-/lead-verankerte Termine reichen Kontext (Fahrzeug/Kunde/
+ * Claim-Nr) statt auf den generischen "Schadenbesichtigung"-Titel zu degradieren.
+ * Pure (testbar). Verifiziert gegen Prod 08.06.: 9/13 aktive Termine ohne bezug,
+ * davon 3 mit claim_id (→ rich via Fallback), 6 voellig bezuglos (SV-Eigentermine).
+ */
+export function normalisiereBezug(t: {
+  bezug_typ: string | null
+  bezug_id: string | null
+  claim_id?: string | null
+  lead_id?: string | null
+}): { typ: string | null; id: string | null } {
+  if (t.bezug_typ && t.bezug_id) return { typ: t.bezug_typ, id: t.bezug_id }
+  if (t.claim_id) return { typ: 'claim', id: t.claim_id }
+  if (t.lead_id) return { typ: 'lead', id: t.lead_id }
+  return { typ: t.bezug_typ, id: t.bezug_id }
+}
+
 async function ladeKunde(
   db: SupabaseClient, leadId: string | null, kundeId: string | null,
 ): Promise<{ name: string | null; telefon: string | null }> {
@@ -113,17 +135,24 @@ async function ladeLeadFelder(db: SupabaseClient, leadId: string): Promise<Konte
  * sonst minimal aus claims.
  */
 export async function resolveTerminKontext(
-  termin: { bezug_typ: string | null; bezug_id: string | null; besichtigungsort_adresse: string | null },
+  termin: {
+    bezug_typ: string | null
+    bezug_id: string | null
+    besichtigungsort_adresse: string | null
+    claim_id?: string | null
+    lead_id?: string | null
+  },
   db: SupabaseClient,
 ): Promise<TerminKontext> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
+  const bezug = normalisiereBezug(termin)
   let felder: KontextFelder = LEER
-  if (termin.bezug_id) {
-    if (termin.bezug_typ === 'fall') {
-      felder = await ladeFallFelder(db, termin.bezug_id)
-    } else if (termin.bezug_typ === 'lead') {
-      felder = await ladeLeadFelder(db, termin.bezug_id)
-    } else if (termin.bezug_typ === 'claim') {
+  if (bezug.id) {
+    if (bezug.typ === 'fall') {
+      felder = await ladeFallFelder(db, bezug.id)
+    } else if (bezug.typ === 'lead') {
+      felder = await ladeLeadFelder(db, bezug.id)
+    } else if (bezug.typ === 'claim') {
       // CMM-49: KEIN faelle-Reverse (verbotenes claim_id->fall_id-Daten-Reverse, bricht eh beim Drop).
       // Kontext claim-direkt; Deep-Link = /gutachter/fall/${claimId} — die Route-Eingangs-resolveClaimId
       // (gutachter/fall/[id]/page.tsx:210) nimmt claims.id direkt an. fahrzeug/kennzeichen bleiben null
@@ -131,7 +160,7 @@ export async function resolveTerminKontext(
       const { data: c } = await db
         .from('claims')
         .select('claim_nummer, schadenort_adresse, schadenort_ort, lead_id, geschaedigter_user_id')
-        .eq('id', termin.bezug_id)
+        .eq('id', bezug.id)
         .maybeSingle()
       const kunde = await ladeKunde(db, (c?.lead_id as string | null) ?? null, (c?.geschaedigter_user_id as string | null) ?? null)
       felder = {
@@ -140,7 +169,7 @@ export async function resolveTerminKontext(
         schadenortAdresse: (c?.schadenort_adresse as string | null) ?? (c?.schadenort_ort as string | null) ?? null,
         kundeName: kunde.name,
         kundeTelefon: kunde.telefon,
-        fallId: termin.bezug_id, // = claimId; /gutachter/fall/${claimId} wird via resolveClaimId aufgeloest
+        fallId: bezug.id, // = claimId; /gutachter/fall/${claimId} wird via resolveClaimId aufgeloest
       }
     }
   }
