@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { CLUSTER } from '@/lib/cluster'
 import { ABLAUF, ABLAUF_TIMELINE, type AblaufStep } from '@/lib/content'
-import { renderRich } from '@/lib/text'
+import { renderRich, ClaimondoLink } from '@/lib/text'
 import { NutzungsausfallTooltip } from './NutzungsausfallTooltip'
 
 // ABLAUF — Server-Component.
@@ -109,7 +109,7 @@ export function AblaufSection() {
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <p>
-              Jeden Schritt live verfolgen — in Ihrem persönlichen <strong>Claimondo-Portal</strong>.
+              Jeden Schritt live verfolgen — in Ihrem persönlichen <strong><ClaimondoLink>Claimondo-Portal</ClaimondoLink></strong>.
             </p>
           </div>
 
@@ -137,7 +137,7 @@ export function AblaufSection() {
             <h2 className="font-display font-bold text-section-h2 mb-3.5">So läuft Ihr Kfz-Gutachten ab</h2>
             <p className="text-secondary text-[16.5px] leading-relaxed">
               Sie melden den Schaden — wir und die{' '}
-              <strong className="text-petrol font-semibold">Claimondo Unfall-Assistance</strong> übernehmen den Rest.{' '}
+              <strong className="text-petrol font-semibold"><ClaimondoLink>Claimondo Unfall-Assistance</ClaimondoLink></strong> übernehmen den Rest.{' '}
               <strong className="text-petrol font-semibold">Bei unverschuldetem Unfall für Sie kostenlos.</strong>
             </p>
           </div>
@@ -175,7 +175,7 @@ export function AblaufSection() {
               <path d="M7 11V7a5 5 0 0 1 10 0v4" />
             </svg>
             <span>
-              Jeden Schritt live verfolgen — in Ihrem persönlichen <strong className="text-petrol">Claimondo-Portal</strong>.
+              Jeden Schritt live verfolgen — in Ihrem persönlichen <strong className="text-petrol"><ClaimondoLink>Claimondo-Portal</ClaimondoLink></strong>.
             </span>
           </div>
 
@@ -192,7 +192,7 @@ export function AblaufSection() {
           </div>
 
           <p className="text-center mt-8 text-muted text-[13px] font-medium">
-            Powered by <strong className="text-secondary font-bold">Claimondo</strong> — Plattform für komplette Unfall-Schadenabwicklung.{' '}
+            Powered by <strong className="text-secondary font-bold"><ClaimondoLink>Claimondo</ClaimondoLink></strong> — Plattform für komplette Unfall-Schadenabwicklung.{' '}
             <a
               href="https://autounfall.io/gutachter/"
               target="_blank"

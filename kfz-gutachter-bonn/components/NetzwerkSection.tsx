@@ -1,6 +1,6 @@
 import { CLUSTER, MAIN_CITY } from '@/lib/cluster'
 import { NETZWERK_PAIN, NETZWERK_COMPARE_MOBILE } from '@/lib/content'
-import { renderRich } from '@/lib/text'
+import { renderRich, ClaimondoLink } from '@/lib/text'
 import { NetzwerkCompare } from './NetzwerkCompare'
 
 // SERVER-Section "Das Claimondo-Netzwerk" (Mock #netzwerk).
@@ -37,7 +37,7 @@ export function NetzwerkSection() {
               <span className="loc-text-uc">{MAIN_CITY.name}</span>
             </span>
             <div className="netzwerk-team-bottom">
-              <div className="netzwerk-team-credentials">10+ Jahre · DAT/BVSK · Claimondo-Partner</div>
+              <div className="netzwerk-team-credentials">10+ Jahre · DAT/BVSK · <ClaimondoLink>Claimondo-Partner</ClaimondoLink></div>
             </div>
           </div>
 
@@ -232,7 +232,7 @@ export function NetzwerkSection() {
           {/* Text + Fakten + Tabelle */}
           <div>
             <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
-              <span className="eyebrow-dot"></span> Das Claimondo-Netzwerk
+              <span className="eyebrow-dot"></span> Das <ClaimondoLink>Claimondo-Netzwerk</ClaimondoLink>
             </span>
             <h2 className="font-display font-bold text-section-h2 text-white mb-4 leading-tight">
               Andere geben Ihnen ein Gutachten.

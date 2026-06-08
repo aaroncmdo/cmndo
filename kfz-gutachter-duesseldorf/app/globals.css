@@ -37,9 +37,10 @@
   --font-display: var(--font-noto-sans), system-ui, sans-serif;
   --font-body: var(--font-inter), system-ui, sans-serif;
   --font-mono: var(--font-space-mono), ui-monospace, monospace;
+  --font-grotesk: var(--font-space-grotesk), system-ui, sans-serif;
 
   /* === FONT-SIZE-PAKETE (fluid clamp) === */
-  --text-hero-h1: clamp(36px, 4.8vw, 48px);
+  --text-hero-h1: clamp(23px, 6.4vw, 56px);
   --text-hero-h1--line-height: 1.18;
   --text-hero-h1--letter-spacing: -0.016em;
 
@@ -63,7 +64,7 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
- * CLUSTER-VARS · DÜSSELDORF · Rheinland · Marineblau + Royal-Blue (v6, 2026-06-03)
+ * CLUSTER-VARS · DÜSSELDORF · Rheinland · Marineblau + Royal-Blue (v6)
  * (Werkstatt-Eisenschild). Kein data-theme-Switch — direkt in :root.
  * ════════════════════════════════════════════════════════════════════════ */
 :root {
@@ -73,10 +74,15 @@
   --petrol-tint: #F8F8F6;
   --amber: #185FA5;
   --amber-700: #114080;
-  --amber-aa: #0F3D77; /* Duesseldorf v6 Royal-Blue (Aaron 2026-06-01, Mock=SoT) — AA 5.86:1 auf Weiss; Gold-Stale-Theme abgeloest 2026-06-03 */
+  --amber-aa: #0F3D77; /* A11y v2: AA-konformes (dunkleres) Amber fuer kleine Texte auf Weiss (5.84:1) — Mock v3-praxis-v2 */
 
   --au-container-narrow: 1180px;
   --au-container-prose: 760px;
+
+  /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat — Aaron 05.06.). Cluster-spezifisch. */
+  --hero-mobile-img: url('/assets/img/duesseldorf/hero-duesseldorf-mobile.webp');
+  /* Header-Glass-Tint (Mobile, dunkel) — Marineblau-Petrol. */
+  --header-glass: rgba(11, 61, 110, 0.91);
 }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
@@ -109,37 +115,69 @@ body {
   content: "";
   position: absolute;
   inset: 0;
+  /* Basis-Scrim (Mobile + Tablet-Portrait, < lg): vertikal — oben Foto sichtbar,
+     Mitte lesbar, unten voll Petrol (Lower-Cluster auf solid Petrol). */
   background:
-    linear-gradient(180deg,
-      transparent 0%,
-      transparent 64%,
-      color-mix(in srgb, var(--petrol) 24%, transparent) 100%),
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--petrol) 8%, transparent) 0%,
-      transparent 12%),
-    linear-gradient(90deg,
-      var(--petrol) 0%,
-      var(--petrol) 20%,
-      color-mix(in srgb, var(--petrol) 68%, transparent) 36%,
-      color-mix(in srgb, var(--petrol) 26%, transparent) 52%,
-      color-mix(in srgb, var(--petrol) 8%, transparent) 66%,
-      transparent 80%);
+    radial-gradient(140% 105% at 16% 114%,
+      #0E1015 0%,
+      color-mix(in srgb, #0E1015 55%, transparent) 42%,
+      transparent 74%);
 }
 
-/* Mobile: vertikaler Gradient — Bild oben sichtbar, Content auf opaker Flaeche */
-@media (max-width: 640px) {
-  .hero-photo::after {
-    background:
-      linear-gradient(180deg,
-        color-mix(in srgb, var(--petrol) 24%, transparent) 0%,
-        color-mix(in srgb, var(--petrol) 50%, transparent) 36%,
-        color-mix(in srgb, var(--petrol) 88%, transparent) 56%,
-        var(--petrol) 64%,
-        var(--petrol) 100%);
-  }
+/* Morphism-Verlauf (KONSISTENT auf allen Versionen, Aaron 05.06.): EINE Definition
+   im Base -> gilt fuer SE/i14/ProMax/iPad/Desktop identisch. Frost unten (einblendend
+   ab ~42%, voll ab ~62% = Kamera) UND nach rechts auslaufend (Intersect 90deg-Maske)
+   -> die linke Hand in der Hosentasche bleibt scharf erkennbar. */
+.hero-blur-corner {
+  display: block;
+  -webkit-backdrop-filter: blur(9px) saturate(112%);
+  backdrop-filter: blur(9px) saturate(112%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 42%, #000 62%, #000 100%), linear-gradient(90deg, #000 0%, #000 34%, transparent 70%);
+          mask-image: linear-gradient(180deg, transparent 0%, transparent 42%, #000 62%, #000 100%), linear-gradient(90deg, #000 0%, #000 34%, transparent 70%);
+  -webkit-mask-composite: source-in;
+          mask-composite: intersect;
+  pointer-events: none;
+}
+
+/* Mobile + iPad (<=1023): dediziertes Hochformat-Foto + radialer Scrim (unten-links).
+   Der Morphism-Blur kommt aus dem Base (konsistent ueber alle Breakpoints). */
+@media (max-width: 1023px) {
   .hero-photo-bg {
+    background-image: var(--hero-mobile-img) !important;
     background-position: center top !important;
   }
+  /* Mobile-Scrim (Aaron): weniger Farbe, Foto oben klar; Fade zu solid max. bis zur Kamera. */
+  .hero-photo::after {
+    background:
+      radial-gradient(150% 100% at 15% 114%,
+        #0E1015 0%,
+        color-mix(in srgb, #0E1015 58%, transparent) 40%,
+        transparent 72%);
+  }
+}
+/* Tablet-Landscape + Desktop (>= lg): horizontaler Lokal-Scrim nur ueber der Copy-Spalte
+   (links 88% Petrol -> Mitte 60% -> rechts 0% = Foto klar). */
+@media (min-width: 1024px) {
+  .hero-photo::after {
+    background:
+      linear-gradient(90deg,
+        color-mix(in srgb, #0E1015 82%, transparent) 0%,
+        color-mix(in srgb, #0E1015 48%, transparent) 38%,
+        transparent 70%);
+  }
+  /* Desktop: Bild leicht hochzoomen + Y=0 -> Augen des Gutachters auf H2-Hoehe
+     (Aaron 05.06.). Cover fuellt die Hoehe exakt -> ohne Zoom kein vertikaler Spielraum. */
+  .hero-photo {
+    background-size: auto 124% !important;
+    background-position: 70% 0% !important;
+  }
+}
+
+/* iPhone SE & kurze Viewports (max-height<=700): Eyebrow-Sterne + "5,0" ausblenden.
+   Unlayered + !important, da .hero-eyebrow { display:flex } (Custom-Klasse) sonst die
+   Tailwind-hidden-Utility schlaegt (Aaron 05.06.). */
+@media (max-height: 700px) {
+  .hero-eyebrow { display: none !important; }
 }
 
 /* Leaflet z-index Reset — verhindert dass Marker-Layer ueber FAB/Bubble springen */
@@ -170,8 +208,8 @@ body {
 .cases-track::-webkit-scrollbar { display: none; }
 
 /* FAQ accordion — alle geschlossen by default, bei .open aufklappen */
-.qa .a { max-height: 0; overflow: hidden; transition: max-height .45s ease; }
-.qa.open .a { max-height: 600px; }
+.qa .a { max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; transition: max-height .45s ease, padding .3s ease; }
+.qa.open .a { max-height: 600px; padding-bottom: 1rem; }
 .qa .chev { transition: transform .3s ease; display: inline-block; }
 .qa.open .chev { transform: rotate(45deg); }
 
@@ -496,12 +534,16 @@ body {
 
 /* Mobile-Entrance (Copy-Spalte sanft einblenden) + Scroll-Chevron-Bounce. */
 @keyframes heroFadeUp { to { opacity: 1; transform: translateY(0); } }
-@keyframes heroChevBounce { 0%,100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 6px); } }
+@keyframes heroChevBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
+/* Sticky-Callbar Glanz-Sweep (alle 2s einmal links->rechts) + rote Oberkante via Komponente. */
+@keyframes stickyCallbarShine { 0% { transform: translateX(-160%); } 38% { transform: translateX(160%); } 100% { transform: translateX(160%); } }
+.sticky-callbar-shine::before { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 38%, rgba(255,255,255,0.22) 50%, transparent 62%); transform: translateX(-160%); animation: stickyCallbarShine 2s ease-in-out infinite; pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .sticky-callbar-shine::before { animation: none; } }
 
 @media (max-width: 639px) {
   .hero-copy-fade { opacity: 0; transform: translateY(12px); animation: heroFadeUp 480ms cubic-bezier(.2,.65,.3,1) 80ms forwards; }
   /* Lesbarkeit ueber dem Foto */
-  .hero-text-shadow { text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+  .hero-text-shadow { text-shadow: 0 1px 4px rgba(0,0,0,.7), 0 0 3px rgba(0,0,0,.45); }
   .hero-h1-shadow { text-shadow: 0 2px 8px rgba(0,0,0,.55), 0 1px 3px rgba(0,0,0,.4); }
   /* Editorial-Header: ★ 5,0 + Tagline (dezente Dark-Backplates = Lesbarkeits-Anker) */
   .hero-eyebrow {
@@ -571,6 +613,23 @@ body {
 .rev-all-link { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-top: 18px; padding: 12px 18px; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--color-petrol); background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 11px; text-decoration: none; letter-spacing: 0.01em; transition: border-color .2s ease, color .2s ease; }
 .rev-all-link::after { content: "→"; }
 .rev-all-link:hover { border-color: var(--amber); color: var(--amber); }
+
+/* Desktop: 4 Bewertungen als einzelne Cards im 2x2-Grid (Aaron 05.06.) */
+@media (min-width: 1024px) {
+  #reviews .rev-list {
+    background: transparent; border: none; border-radius: 0; padding: 0;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+  }
+  #reviews .rev-item {
+    border-top: none;
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 22px 24px;
+    box-shadow: 0 4px 16px -6px rgba(13, 27, 62, 0.12);
+  }
+  #reviews .rev-all-link { width: fit-content; margin-left: auto; margin-right: auto; padding-left: 32px; padding-right: 32px; }
+}
 
 /* ════════════════════════════════════════════════════════════════════════
  * Phase 3 #4 — Netzwerk-Mobile (Mock v7.3, #netzwerkMobile)
