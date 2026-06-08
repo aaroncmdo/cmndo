@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { CLUSTER, waHref, type City } from '@/lib/cluster'
+import { trackEvent } from '@/lib/tracking'
+import { RueckrufPopover } from './RueckrufPopover'
 
 // CLIENT-Section: schwebender Schnellkontakt-Stack + Mobile-Sticky-Anruf-Bar +
 // Back-to-Top. Mock-Zeilen 1088-1151.
@@ -15,6 +17,8 @@ import { CLUSTER, waHref, type City } from '@/lib/cluster'
 // - Scroll-Gating: mobil (<640px) erst sichtbar wenn Hero-CTA (#heroCallCta) out-of-view,
 //   Desktop dauerhaft sichtbar (is-visible direkt gesetzt).
 export function FabStack({ city }: { city: City }) {
+  const [rueckrufOpen, setRueckrufOpen] = useState(false)
+
   useEffect(() => {
     const gated = Array.from(document.querySelectorAll<HTMLElement>('.fab-scroll-gated'))
     const mobileMq = window.matchMedia('(max-width: 639px)')
@@ -130,13 +134,16 @@ export function FabStack({ city }: { city: City }) {
             Embed-Launcher (keine Ueberlappung). */}
       </div>
 
-      {/* ===== STICKY CALLBAR (Mobile only) ===== */}
-      <a
+      {/* ===== STICKY RUECKRUF-BAR (Mobile only) — oeffnet das Rueckruf-Popover (Event tool_open) ===== */}
+      <button
         id="mobileStickyCall"
+        type="button"
         className="sm:hidden fixed bottom-0 left-0 right-0 z-40 flex items-center justify-center gap-2 bg-petrol/90 backdrop-blur-[10px] border-t-2 border-[var(--amber)] overflow-hidden sticky-callbar-shine px-4 py-3 text-white font-display font-bold text-[15px] fab-scroll-gated"
-        href={`tel:${CLUSTER.phone.tel}`}
-        data-cta="mobile_sticky_call"
-        aria-label="Jetzt anrufen"
+        onClick={() => {
+          setRueckrufOpen(true)
+          trackEvent('tool_open', { cluster: CLUSTER.key, city_slug: city.slug, tool: 'rueckruf' })
+        }}
+        aria-label="Rückruf anfordern"
         style={{ transition: 'opacity .3s ease, transform .3s ease' }}
       >
         <svg
@@ -150,7 +157,7 @@ export function FabStack({ city }: { city: City }) {
           <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
         </svg>
         Rückruf in &lt; 15 Min sichern
-      </a>
+      </button>
 
       {/* Back-to-Top Button — fixed bottom-left, erscheint nach 500px Scroll */}
       <button
@@ -171,6 +178,8 @@ export function FabStack({ city }: { city: City }) {
           <polyline points="18 15 12 9 6 15" />
         </svg>
       </button>
+
+      <RueckrufPopover open={rueckrufOpen} onClose={() => setRueckrufOpen(false)} city={city} />
     </aside>
   )
 }
