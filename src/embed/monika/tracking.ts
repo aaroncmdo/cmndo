@@ -6,12 +6,12 @@
 
 import type { MonikaConfig } from './types'
 
+// Nur Events, die der Embed wirklich feuert. monika_form_shown / monika_qualify_*
+// standen in einer fruehen Spec, wurden aber nie verdrahtet (Doc-12 Ä6: bewusst
+// nicht gebaut — der Funnel verzweigt nach `anliegen`, kein Ja/Nein-Qualify).
 type MonikaEvent =
   | 'monika_shown'
   | 'monika_open'
-  | 'monika_qualify_yes'
-  | 'monika_qualify_no'
-  | 'monika_form_shown'
   | 'monika_anfrage_submit'
 
 interface DataLayerWindow extends Window {
