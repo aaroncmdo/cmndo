@@ -133,12 +133,15 @@ export async function exportTagesvorbereitung({
   // CMM-44 SP-H PR2: sv_briefing_text lebt auf auftraege (aktueller Auftrag) —
   // via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim, daher
   // reicht der Embed ohne explizite reihenfolge-Ordnung.
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). Flache Fahrzeug-/lead-Felder +
+  // claims-native schadentag/claim_nummer/schadens_ursache aus der View. sv_briefing_text
+  // lebt auf auftraege (nicht in v_claim_full) -> separater Batch-Read unten (briefingMap).
   const { data: faelle, error: fallErr } = await admin
-    .from('faelle')
+    .from('v_claim_full')
     .select(
-      'id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, claim_id, claims:claim_id(schadentag, claim_nummer, schadens_ursache, auftraege(sv_briefing_text))',
+      'id:fall_id, lead_id, kennzeichen, fin_vin, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, claim_id:id, schadentag, claim_nummer, schadens_ursache',
     )
-    .in('id', fallIds)
+    .in('fall_id', fallIds)
 
   if (fallErr) return { ok: false, error: fallErr.message }
   const fallMap = new Map((faelle ?? []).map((f) => [f.id as string, f]))
@@ -159,6 +162,21 @@ export async function exportTagesvorbereitung({
     for (const t of (terminLocs ?? []) as Array<{ claim_id: string | null; besichtigungsort_adresse: string | null }>) {
       if (t.claim_id && !besichtigungsortMap.has(t.claim_id)) {
         besichtigungsortMap.set(t.claim_id, t.besichtigungsort_adresse)
+      }
+    }
+  }
+
+  // CMM-49: sv_briefing_text aus auftraege (war vorher nested unter dem claims-Embed).
+  const briefingMap = new Map<string, string | null>()
+  if (exportClaimIds.length) {
+    const { data: briefings } = await admin
+      .from('auftraege')
+      .select('claim_id, sv_briefing_text, reihenfolge')
+      .in('claim_id', exportClaimIds)
+      .order('reihenfolge', { ascending: false })
+    for (const b of (briefings ?? []) as Array<{ claim_id: string | null; sv_briefing_text: string | null }>) {
+      if (b.claim_id && !briefingMap.has(b.claim_id)) {
+        briefingMap.set(b.claim_id, b.sv_briefing_text)
       }
     }
   }
@@ -187,17 +205,9 @@ export async function exportTagesvorbereitung({
     if (!fall) continue
     const lead = fall.lead_id ? leadMap.get(fall.lead_id as string) ?? null : null
     const lack = (fall.lackfarbe_code as LackfarbeCode | null) ?? null
-    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-    // CMM-44 SP-H PR2: sv_briefing_text aus dem auftraege-Embed (aktueller Auftrag).
-    const fallAuftraege = Array.isArray(
-      (fallClaim as { auftraege?: unknown } | null)?.auftraege,
-    )
-      ? ((fallClaim as { auftraege: unknown[] }).auftraege)
-      : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
-          ? [(fallClaim as { auftraege: unknown }).auftraege]
-          : [])
-    const aktAuftrag =
-      (fallAuftraege[0] as { sv_briefing_text?: string | null } | undefined) ?? null
+    const fallClaim = fall
+    // CMM-49: sv_briefing_text aus briefingMap (auftraege), vorher nested claims-Embed.
+    const svBriefing = briefingMap.get((fall.claim_id as string | null) ?? '') ?? null
     rows.push(
       [
         fmtDate(t.start_zeit as string | null),
@@ -216,7 +226,7 @@ export async function exportTagesvorbereitung({
         fmtDate((fallClaim?.schadentag as string | null) ?? null),
         besichtigungsortMap.get((fall.claim_id as string | null) ?? '') ?? '',
         (fallClaim?.schadens_ursache as string | null) ?? '',
-        (aktAuftrag?.sv_briefing_text ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
+        (svBriefing ?? '').replace(/\r?\n/g, ' ').slice(0, 500),
       ]
         .map(csvEscape)
         .join(';'),
