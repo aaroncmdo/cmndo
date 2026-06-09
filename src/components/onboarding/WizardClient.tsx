@@ -4,8 +4,6 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
-// AAR-956 Phase C: route-neutrale Lib statt /anfrage-Route (Decoupling-Schritt 1).
-import { speichereBeauftragungStep, speichereQuali, unterschreibeUndErstelleFall } from '@/lib/self-service/anfrage-actions'
 import { speichereSvOnboardingStep } from '@/lib/sv-onboarding/save-step'
 import { schliesseSvBasicOnboardingAb } from '@/lib/sv-onboarding/finalize'
 import { matcheSvFuerWizard, speichereZuordnung } from '@/lib/onboarding/svMatching'
@@ -56,9 +54,9 @@ interface Props {
   // AAR-zb1-wizard: vom DynamicWizard injizierte Werte für das Zb1UploadField.
   fallId?: string | null
   zb1Token?: string | null
-  // P1c (Gutachter-Finder->Self-Service): self_service_token der Anfrage. Nur fuer
-  // flow_key='beauftragung' gesetzt — aktiviert den token/lead-zentrischen Save- +
-  // Finalize-Pfad (speichereBeauftragungStep / unterschreibeUndErstelleFall).
+  // token: ehem. /anfrage-self_service_token (beauftragung-Flow, AAR-956 entfernt).
+  // Wird noch an FieldRenderer durchgereicht, dort aber ungenutzt (TerminField entfernt)
+  // — vestigial; vollständige Entfernung = separater Cleanup (Mounts setzen null/none).
   token?: string | null
 }
 
@@ -102,13 +100,6 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
   const [preSelectedSvId, setPreSelectedSvId] = useState<string | null>(null)
   const [preSelectedSvLeadId, setPreSelectedSvLeadId] = useState<string | null>(null)
   const [completed, setCompleted] = useState(false)
-  // P2: Quali-Gate-Abbruch (beauftragung, schuldfrage=Eigenverschulden) -> eigener
-  // fairer Abschluss-Screen statt Weiterleitung zur SA.
-  const [aborted, setAborted] = useState(false)
-  // Self-Dispatch-Fix: nach Convert wissen wir die fallId — für CTA "Daten
-  // vervollständigen" auf dem Erfolgsscreen, der den Kunden ins dynamische
-  // Onboarding bringt (siehe /kunde/onboarding-details).
-  const [completedFallId, setCompletedFallId] = useState<string | null>(null)
   const geoMatchedRef = useRef(false)
   // Priorität: Karten-Click (preSelectedSvId) vor Geo-Auto-Match (svMatch).
   const svId = preSelectedSvId ?? svMatch?.svId ?? null
@@ -238,70 +229,6 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     setValues(prev => ({ ...prev, [key]: val }))
   }, [])
 
-  // P2: beauftragung-Schuldfrage ist per Default "unverschuldet/Gegner" vorgewaehlt
-  // (haeufigster Fall; das Gate greift nur bei aktiver Eigenverschulden-Wahl).
-  useEffect(() => {
-    if (flowKey === 'beauftragung' && currentPhase?.phase_key === 'schuldfrage' && values['schuldfrage'] === undefined) {
-      setField('schuldfrage', 'gegner')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [flowKey, currentPhase?.phase_key])
-
-  // P1c: Beauftragung-Pfad (flow_key='beauftragung') — token/lead-zentrisch.
-  // Pro Phase -> speichereBeauftragungStep (service_role, schreibt auf den Lead);
-  // letzte Phase (sa) -> unterschreibeUndErstelleFall (Signatur -> Claim/Fall
-  // claim-nativ + Kunden-Account). Kein anfrageId/reserviereSlot/Zuordnung (das
-  // ist der GFA-Pfad); Slot-Carry + Quali-Gate folgen in P4/P2.
-  async function handleWeiterBeauftragung(felder: OnboardingFeld[]) {
-    if (!currentPhase) return
-    if (!token) { setError('Dieser Link ist nicht mehr gültig.'); return }
-
-    // P2: Schuldfrage-Phase laeuft ueber speichereQuali (bewerteSchuldfrage-Gate +
-    // Disqualifikations-Side-Effects auf dem Lead). Eigenverschulden -> Abbruch-
-    // Screen, kein Weitergang zur SA. Andere Phasen -> generischer Lead-Save.
-    if (currentPhase.phase_key === 'schuldfrage') {
-      const q = await speichereQuali(token, String(values['schuldfrage'] ?? ''))
-      if (!q.ok) { setError(q.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
-      if (q.ergebnis === 'abbruch') {
-        try { localStorage.removeItem(storageKey(flowKey)) } catch {}
-        setAborted(true)
-        return
-      }
-    } else {
-      const r = await speichereBeauftragungStep(token, currentPhase.phase_key, values, felder)
-      if (!r.ok) { setError(r.error ?? 'Speichern fehlgeschlagen. Bitte erneut versuchen.'); return }
-    }
-
-    if (phaseIdx >= totalPhases - 1) {
-      // P3: Completeness-Gate — vor dem Finalize muessen ALLE pflicht-Felder aller
-      // sichtbaren Phasen gefuellt sein. Die Per-Phase-Validierung sieht nur die
-      // aktuelle Phase; ein Resume/Prefill direkt auf die SA-Phase koennte sonst mit
-      // lueckigen Vorphasen finalisieren. Erste unvollstaendige Phase -> dorthin zurueck.
-      for (let i = 0; i < currentPhases.length; i++) {
-        const miss = validatePhase(visibleFelder(currentPhases[i].felder, values), values)
-        if (miss) {
-          setPhaseIdx(i)
-          setAnimKey(k => k + 1)
-          setError(t('pflichtfeld', { label: miss }))
-          return
-        }
-      }
-
-      try { localStorage.removeItem(storageKey(flowKey)) } catch {}
-      const signatur = typeof values['unterschrift'] === 'string' ? (values['unterschrift'] as string) : ''
-      const finalize = await unterschreibeUndErstelleFall(token, signatur)
-      if (!finalize.ok) { setError(finalize.error ?? 'Der Abschluss ist fehlgeschlagen. Bitte erneut versuchen.'); return }
-      setCompletedFallId(finalize.fallId ?? null)
-      setCompleted(true)
-      return
-    }
-
-    setPhaseIdx(i => i + 1)
-    setAnimKey(k => k + 1)
-    try { window.history.pushState({ phaseIdx: phaseIdx + 1 }, '') } catch {}
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
   // sv-onboarding: Token/lead-freier Pfad — schreibt direkt auf sachverstaendige/profiles.
   // Finalize-Erkennung: Phase enthaelt ein Feld mit db_target.tabelle === '_finalize'
   // (das Signatur-Feld hat tabelle='_finalize', spalte='unterschrift').
@@ -352,13 +279,6 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
 
     setIsSaving(true)
     try {
-      // P1c: Beauftragung (Y-Modell, token/lead-zentrisch) hat einen eigenen
-      // Save/Finalize-Pfad — die GFA-Logik darunter bleibt unveraendert.
-      if (flowKey === 'beauftragung') {
-        await handleWeiterBeauftragung(felder)
-        return
-      }
-
       // sv-onboarding: Direkt auf sachverstaendige/profiles schreiben;
       // Finalize-Phase schliesst das Basic-Onboarding ab.
       if (flowKey === 'sv-onboarding') {
@@ -469,27 +389,6 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
-  if (aborted) {
-    return (
-      <div style={{
-        fontFamily: 'var(--font-montserrat, Montserrat), sans-serif',
-        textAlign: 'center',
-        padding: 'clamp(48px, 8vw, 80px) 24px',
-        animation: 'sheetIn .5s var(--wiz-ease-out) both',
-      }}>
-        <h2 style={{ fontSize: 24, fontWeight: 700, color: 'var(--brand-primary, var(--claimondo-navy))', letterSpacing: '-.024em', marginBottom: 12 }}>
-          Keine Regulierung über die Gegenseite möglich
-        </h2>
-        <p style={{ fontSize: 15.5, color: 'var(--wiz-text-2)', maxWidth: 440, margin: '0 auto 28px', lineHeight: 1.6 }}>
-          Bei einem selbst verursachten Unfall lassen sich die Gutachterkosten nicht über die
-          gegnerische Haftpflicht abrechnen. Wenn Sie zur Schuldfrage unsicher sind, beraten wir
-          Sie gern persönlich.
-        </p>
-        <BeratungVereinbarenButton />
-      </div>
-    )
-  }
-
   if (completed) {
     return (
       <div style={{
@@ -515,35 +414,6 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         <p style={{ fontSize: 16, color: 'var(--wiz-text-2)', maxWidth: 400, margin: '0 auto 32px', lineHeight: 1.6 }}>
           {t('erfolg_text')}
         </p>
-
-        {/* Self-Service-CTA: bringt den Kunden direkt in den Login + ins
-            dynamische Onboarding (/kunde/onboarding-details). Login-Page
-            kennt den next-Parameter und zeigt nach Email-OTP/Magic-Link
-            das Onboarding für den frisch erzeugten Fall. */}
-        {completedFallId && (
-          <div style={{ marginBottom: 24 }}>
-            <a
-              href={`/login?next=${encodeURIComponent(`/kunde/onboarding-details?fall_id=${completedFallId}`)}`}
-              data-testid="self-service-cta"
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 10,
-                padding: '14px 28px',
-                background: 'var(--brand-primary, var(--claimondo-navy))',
-                color: '#fff',
-                borderRadius: 'var(--wiz-r-pill, 999px)',
-                fontSize: 15, fontWeight: 700,
-                textDecoration: 'none',
-                boxShadow: '0 6px 18px rgba(13,27,62,.22)',
-                letterSpacing: '-.01em',
-              }}
-            >
-              {t('erfolg_cta')}
-            </a>
-            <p style={{ fontSize: 12, color: 'var(--wiz-text-2)', marginTop: 10 }}>
-              {t('erfolg_magiclink')}
-            </p>
-          </div>
-        )}
 
         <div style={{
           display: 'inline-flex', gap: 12, padding: '16px 24px',
