@@ -36,13 +36,16 @@ export default async function NachrichtenPage() {
   const fallMap: Record<string, { claim_nummer: string | null; lead_id: string | null; kennzeichen: string | null }> = {}
 
   if (fallIds.length > 0) {
+    // CMM-49: faelle->v_claim_full (claim-anchored SSoT). claim_nummer flach statt
+    // claims-Embed, kennzeichen via vehicles. id:fall_id-Alias haelt die fallMap-Keys
+    // (=faelle.id); fall_id-Guard, da die View-Spalte nullable ist (Orphan-Claims).
     const { data: faelle } = await supabase
-      .from('faelle')
-      .select('id, claims:claim_id(claim_nummer), lead_id, kennzeichen')
-      .in('id', fallIds)
+      .from('v_claim_full')
+      .select('id:fall_id, claim_nummer, lead_id, kennzeichen')
+      .in('fall_id', fallIds)
     for (const f of faelle ?? []) {
-      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      fallMap[f.id] = { claim_nummer: claim?.claim_nummer ?? null, lead_id: f.lead_id, kennzeichen: f.kennzeichen }
+      if (!f.id) continue
+      fallMap[f.id] = { claim_nummer: f.claim_nummer ?? null, lead_id: f.lead_id, kennzeichen: f.kennzeichen }
     }
   }
 

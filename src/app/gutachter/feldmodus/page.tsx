@@ -143,13 +143,38 @@ export default async function FeldmodusPage() {
     // CMM-44 SP-H PR2: sv_briefing_text/sv_briefing_struktur aus dem faelle-Select
     // entfernt — leben auf auftraege (aktueller Auftrag). Werden unten aus der
     // bestehenden auftraege-Batch-Abfrage (reihenfolge DESC) in fallMap gemergt.
-    const { data: faelle } = await admin
-      .from('faelle')
+    // CMM-49: faelle->v_claim_full (claim-anchored SSoT). Fahrzeug via vehicles,
+    // schadenort_*/claim_nummer/szenario flach aus der View und zurueck in die
+    // claims-Embed-Form gemappt, damit die fallMap-Consumer (fall.claims, claim_id)
+    // unveraendert bleiben. id:fall_id + claim_id:id-Aliase erhalten Keys/Shapes.
+    const { data: faelleFlat } = await admin
+      .from('v_claim_full')
       .select(
-        'id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario)',
+        'id:fall_id, claim_id:id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, hat_vorschaeden, vorschaden_anzahl, vorschaden_letzter_datum, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario',
       )
-      .in('id', fallIds)
-    for (const f of (faelle ?? []) as unknown as Record<string, unknown>[]) {
+      .in('fall_id', fallIds)
+    const faelle = (faelleFlat ?? []).map((row) => {
+      const x = row as Record<string, unknown>
+      return {
+        id: x.id,
+        claim_id: x.claim_id,
+        kennzeichen: x.kennzeichen,
+        fahrzeug_hersteller: x.fahrzeug_hersteller,
+        fahrzeug_modell: x.fahrzeug_modell,
+        lead_id: x.lead_id,
+        hat_vorschaeden: x.hat_vorschaeden,
+        vorschaden_anzahl: x.vorschaden_anzahl,
+        vorschaden_letzter_datum: x.vorschaden_letzter_datum,
+        claims: {
+          schadenort_adresse: x.schadenort_adresse,
+          schadenort_plz: x.schadenort_plz,
+          schadenort_ort: x.schadenort_ort,
+          claim_nummer: x.claim_nummer,
+          szenario: x.szenario,
+        },
+      }
+    })
+    for (const f of faelle as unknown as Record<string, unknown>[]) {
       fallMap.set(f.id as string, f)
     }
 
