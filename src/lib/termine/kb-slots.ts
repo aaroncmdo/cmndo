@@ -1,5 +1,4 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getSvBusySlots } from '@/lib/google-calendar/busy-slots'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import {
   KB_BERATUNG_DURATION_MIN,
@@ -100,19 +99,12 @@ export async function getAvailableKbSlots(
     end: new Date((t.end_zeit as string) ?? (t.start_zeit as string)).getTime(),
   }))
 
-  // 2b. Google-Calendar-Busy-Slots des KBs (externe Termine, Urlaub, etc.).
-  // Wenn der KB nicht mit Google verbunden ist, liefert der Helper [] —
-  // dann blockieren nur die in Claimondo gebuchten Slots.
-  let externalBusy: Array<{ start: number; end: number }> = []
-  try {
-    const busy = await getSvBusySlots(kbId, windowStart, windowEnd)
-    externalBusy = busy.map((b) => ({
-      start: new Date(b.start).getTime(),
-      end: new Date(b.end).getTime(),
-    }))
-  } catch (err) {
-    console.warn('[kb-slots] Google-FreeBusy-Lookup fehlgeschlagen:', err instanceof Error ? err.message : err)
-  }
+  // 2b. (entfernt) Der frühere externe-Kalender-Busy-Lookup für den KB war ein
+  // No-Op: er löste die profile_id über sachverstaendige.profile_id auf — ein KB
+  // hat aber keine sachverstaendige-Zeile → immer []. KB-externe-Kalender-Busy war
+  // also nie verdrahtet (Prod-verifiziert: kein KB-auch-SV, keine KB-Termine). Wenn
+  // KB-Kalender-Integration gewünscht ist, ist das ein eigenes Feature. Damit ist
+  // kb-slots vom cache-busy-Reader-Layer entkoppelt.
 
   const slots: Array<{ datum: string; uhrzeit: string }> = []
 
@@ -143,16 +135,13 @@ export async function getAvailableKbSlots(
         const utcKey = `${slotTime.getUTCFullYear()}-${String(slotTime.getUTCMonth() + 1).padStart(2, '0')}-${String(slotTime.getUTCDate()).padStart(2, '0')}T${String(slotTime.getUTCHours()).padStart(2, '0')}:${String(slotTime.getUTCMinutes()).padStart(2, '0')}`
 
         if (!bookedTimes.has(utcKey)) {
-          // Prüfe Überlappung mit Google-Calendar-Busy + admin_termine
+          // Prüfe Überlappung mit admin_termine (Rückrufe/Meetings des KBs)
           const slotStart = slotTime.getTime()
           const slotEnd = slotStart + KB_BERATUNG_DURATION_MIN * 60 * 1000
-          const busyOverlap = externalBusy.some(
-            (b) => slotStart < b.end && slotEnd > b.start,
-          )
           const adminOverlap = adminBlockedRanges.some(
             (b) => slotStart < b.end && slotEnd > b.start,
           )
-          if (!busyOverlap && !adminOverlap) {
+          if (!adminOverlap) {
             const datum = slotTime.toISOString().split('T')[0]
             const uhrzeit = slotTime.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
               hour: '2-digit',
