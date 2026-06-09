@@ -12,6 +12,7 @@ import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
 import { matchAndSlots, planeTerminOeffentlich, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
+import { planeTermin } from '@/lib/termine/engine'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -178,41 +179,37 @@ export async function bucheTerminFlow(
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  const { data: konflikt } = await admin
-    .from('gutachter_termine')
-    .select('id')
-    .eq('sv_id', svId)
-    .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
-    .lt('start_zeit', endIso)
-    .gt('end_zeit', startIso)
-    .limit(1)
-  if (konflikt && konflikt.length > 0) {
-    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wählen Sie einen anderen.' }
-  }
-
+  // AAR-956 Booking-Repoint: Idempotenz (eine aktive Reservierung pro Lead) bleibt
+  // funnel-seitig — storniert alte Lead-Reservierungen vor der neuen Buchung. Dual-
+  // Lookup (Engine #2576), damit auch engine-reservierte (bezug) Termine getroffen werden.
   await admin
     .from('gutachter_termine')
     .update({ status: 'storniert' })
-    .eq('lead_id', leadId)
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
 
-  const { data: inserted, error: insErr } = await admin
-    .from('gutachter_termine')
-    .insert({
-      lead_id: leadId,
-      sv_id: svId,
-      start_zeit: startIso,
-      end_zeit: endIso,
-      status: 'reserviert',
-    })
-    .select('id')
-    .single()
-  if (insErr || !inserted) {
-    return { ok: false, error: insErr?.message ?? 'Termin konnte nicht reserviert werden.' }
+  // Reservierung über die Termin-Engine: race-safe via EXCLUSION-Constraint
+  // gutachter_termine_no_assignee_overlap (DB-Level, kein App-TOCTOU-Pre-Check mehr).
+  // FIX-Assignee (vom Kunden gewählter SV) + naheZeitpunkt → reserviere; die Engine
+  // berechnet `bis` aus dauerMin. bezug_typ='lead' → Auto-Confirm bei SA liest via
+  // findeTerminFuerLead (Dual-Lookup). endIso bleibt nur Eingabe-Guard (Engine-bis).
+  const res = await planeTermin({
+    bezug: { typ: 'lead', id: leadId },
+    quelle: 'self_service',
+    assigneeTyp: 'sachverstaendiger',
+    assignee: { typ: 'sachverstaendiger', id: svId },
+    wunschzeit: { naheZeitpunkt: startIso },
+    modus: 'buchen',
+    kanal: 'vor_ort',
+  })
+  if (res.ok && res.kind === 'gebucht') {
+    revalidatePath('/dispatch/leads')
+    return { ok: true, terminId: res.terminId }
   }
-
-  revalidatePath('/dispatch/leads')
-  return { ok: true, terminId: inserted.id as string }
+  if (!res.ok && res.code === 'belegt') {
+    return { ok: false, error: 'Dieser Termin ist leider gerade vergeben. Bitte wählen Sie einen anderen.' }
+  }
+  return { ok: false, error: (!res.ok && res.error) || 'Termin konnte nicht reserviert werden.' }
 }
 
 /**
