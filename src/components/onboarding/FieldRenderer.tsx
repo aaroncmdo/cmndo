@@ -16,7 +16,6 @@ import { SlotField } from './fields/SlotField'
 import { SignatureField } from './fields/SignatureField'
 import { FileField } from './fields/FileField'
 import { Zb1UploadField } from './fields/Zb1UploadField'
-import { TerminField } from './fields/TerminField'
 import { PhoneVerifyField } from './fields/PhoneVerifyField'
 import { AvatarUploadField } from './fields/AvatarUploadField'
 import { CalendarConnectField } from './fields/CalendarConnectField'
@@ -32,7 +31,6 @@ export function FieldRenderer({
   preSelectedSvLeadId,
   fallId,
   zb1Token,
-  token,
 }: {
   feld: OnboardingFeld
   value: unknown
@@ -144,15 +142,6 @@ export function FieldRenderer({
           disabled={disabled}
           token={zb1Token ?? null}
           fallId={fallId ?? null}
-        />
-      )
-    case 'termin':
-      return (
-        <TerminField
-          value={(value as string) ?? ''}
-          onChange={onChange as (v: string) => void}
-          disabled={disabled}
-          token={token}
         />
       )
     case 'phone-verify':
