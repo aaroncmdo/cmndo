@@ -2,6 +2,7 @@ import type { City } from '@/lib/cluster'
 import { CLUSTER, cityHref, waHref } from '@/lib/cluster'
 import { SITE } from '@/lib/site'
 import { ClaimondoLink } from '@/lib/text'
+import { CookieSettingsLink } from './CookieSettingsLink'
 
 // Server-Component (kein 'use client'). Footer mit 4-Spalten-Grid:
 // 1) Logo + Betreiber-Block (SITE.operator) + Servicegebiet + Partnernetzwerk-Hinweis
@@ -105,6 +106,7 @@ export function Footer({ city }: { city: City }) {
             >
               Datenschutz
             </a>
+            <CookieSettingsLink />
           </div>
         </div>
       </div>
