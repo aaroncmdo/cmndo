@@ -4,6 +4,7 @@ import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
 import { normalizeToLocale } from '@/i18n/locale-source'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
@@ -585,13 +586,10 @@ export async function signSAandCreateFall(
   let svIdFromTermin: string | null = null
   let aktiverTerminId: string | null = null
   {
-    const { data: existingTermin } = await admin.from('gutachter_termine')
-      .select('id, sv_id')
-      .eq('lead_id', leadId)
-      .in('status', ['reserviert', 'bestaetigt'])
-      .order('start_zeit', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    // AAR-956 Booking-Repoint: bezug-nativer Dual-Lookup (Engine #2576) statt
+    // .eq('lead_id') — findet Legacy- (lead_id) UND engine-reservierte (bezug_typ='lead')
+    // Termine, sodass der Auto-Confirm bei SA beide Welten abdeckt.
+    const existingTermin = await findeTerminFuerLead(admin, leadId)
     svIdFromTermin = existingTermin?.sv_id ?? null
     aktiverTerminId = existingTermin?.id ?? null
   }
