@@ -139,10 +139,14 @@ async function linkVehicleIfEmpty(db: DB, table: 'claims' | 'leads', id: string,
 }
 
 async function runForFall(db: DB, fallId: string, finHint?: string): Promise<CardentityRunResult> {
+  // CMM-49: vehicle-Felder (fin_vin/kilometerstand/erstzulassung) entity-sourced via
+  // v_claim_full (Plan 4, LOSS=0 verifiziert). Reine USE-Read (FIN + Context fuer die
+  // Cardentity-API, KEIN faelle->vehicles-Seed). Alias id:fall_id + claim_id:id erhaelt
+  // das faelle-Shape → Downstream (fall.claim_id/fin_vin/kilometerstand/erstzulassung) unveraendert.
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, fin_vin, claim_id, kilometerstand, erstzulassung')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('id:fall_id, fin_vin, claim_id:id, kilometerstand, erstzulassung')
+    .eq('fall_id', fallId)
     .maybeSingle()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
