@@ -76,11 +76,13 @@ export default async function AuftraegePage({
     // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
     // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT) — ebenfalls im claims-Embed.
     // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+    // CMM-49: faelle->v_claim_full (claim-anchored SSoT). Fahrzeug via vehicles,
+    // schadentag/schadenort_ort/claim_nummer/sa_unterschrieben/schadens_ursache flach;
+    // unten zurueck in die claims-Embed-Form gemappt (Downstream/AuftragCard unveraendert).
     admin
-      .from('faelle')
-      // CMM-74 b″: faelle.status hier weder gelesen noch gefiltert (Karte zeigt auftrag.status) — aus dem Select entfernt.
-      .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, claims:claim_id(schadentag, schadenort_ort, claim_nummer, sa_unterschrieben, schadens_ursache)')
-      .in('id', fallIds),
+      .from('v_claim_full')
+      .select('id:fall_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, lackfarbe_code, lead_id, schadentag, schadenort_ort, claim_nummer, sa_unterschrieben, schadens_ursache')
+      .in('fall_id', fallIds),
     admin.from('dokument_katalog').select('slot_id, uploadbar_von'),
     admin
       .from('pflichtdokumente')
@@ -95,11 +97,29 @@ export default async function AuftraegePage({
       .order('created_at', { ascending: false }),
   ])
 
-  // CMM-44 SP-B PR2b: sa_unterschrieben aus claims-Embed lesen.
-  const faelleData = (faelleRes.data ?? []).filter((f) => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return (c as { sa_unterschrieben?: boolean | null } | null)?.sa_unterschrieben === true
-  })
+  // CMM-49: flache v_claim_full-Rows zurueck in die faelle+claims-Embed-Form, dann
+  // wie gehabt auf sa_unterschrieben filtern (Downstream/AuftragCard-Shape unveraendert).
+  const faelleData = (faelleRes.data ?? [])
+    .map((row) => {
+      const x = row as Record<string, unknown>
+      return {
+        id: x.id,
+        kennzeichen: x.kennzeichen,
+        fahrzeug_hersteller: x.fahrzeug_hersteller,
+        fahrzeug_modell: x.fahrzeug_modell,
+        fahrzeug_baujahr: x.fahrzeug_baujahr,
+        lackfarbe_code: x.lackfarbe_code,
+        lead_id: x.lead_id,
+        claims: {
+          schadentag: x.schadentag,
+          schadenort_ort: x.schadenort_ort,
+          claim_nummer: x.claim_nummer,
+          sa_unterschrieben: x.sa_unterschrieben,
+          schadens_ursache: x.schadens_ursache,
+        },
+      }
+    })
+    .filter((f) => f.claims.sa_unterschrieben === true)
   const erlaubteFallIds = new Set(faelleData.map((f) => f.id as string))
   const sichtbareAuftraege = auftragList.filter((a) => erlaubteFallIds.has(a.fall_id as string))
 
