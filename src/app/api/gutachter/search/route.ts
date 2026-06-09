@@ -27,35 +27,41 @@ export async function GET(req: NextRequest) {
   if (!sv) return NextResponse.json({ faelle: [] })
 
   const pattern = `%${q}%`
+  const ql = q.toLowerCase()
+
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). kennzeichen/operative_status/
+  // claim_nummer/schadenort_ort flach aus der View; lead-Namen via lead_id de-embedded
+  // (leads-Embed gibt es auf der View nicht) -> eine gemeinsame leads-Query unten.
+  const VIEW_COLS = 'id:fall_id, kennzeichen, operative_status, lead_id, claim_nummer, schadenort_ort'
+  type SearchRow = {
+    id: string | null
+    kennzeichen: string | null
+    operative_status: string | null
+    lead_id: string | null
+    claim_nummer: string | null
+    schadenort_ort: string | null
+  }
 
   // RLS deckt die Eigenfilterung auf sv_id ab; zur Sicherheit explizit eq.
-  const { data } = await supabase
-    .from('faelle')
-    .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort, operative_status)')
+  const { data: byKennz } = await supabase
+    .from('v_claim_full')
+    .select(VIEW_COLS)
     .eq('sv_id', sv.id)
+    .not('fall_id', 'is', null)
     .ilike('kennzeichen', pattern)
     .limit(8)
 
-  // Zusätzlich Kunden-Name-Suche (Join unterstützt ilike nicht direkt).
-  const ql = q.toLowerCase()
-  const { data: byName } = await supabase
-    .from('faelle')
-    .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort, operative_status)')
+  // Kunden-Name-Suche (leads-Join unterstuetzt ilike nicht direkt) -> 40 laden, clientseitig filtern.
+  const { data: byNameRaw } = await supabase
+    .from('v_claim_full')
+    .select(VIEW_COLS)
     .eq('sv_id', sv.id)
+    .not('fall_id', 'is', null)
     .limit(40)
 
-  const nameMatches = (byName ?? []).filter((f) => {
-    const lead = (Array.isArray(f.leads) ? f.leads[0] : f.leads) as
-      | { vorname: string | null; nachname: string | null }
-      | null
-    const name = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ').toLowerCase()
-    return name.includes(ql)
-  })
-
   // CMM-44 SP-A2/A3: Schadenort- und Aktennummer-Suche — schadenort_ort und
-  // claim_nummer liegen auf claims, .or() oben kann nicht darüber filtern.
-  // Separate claims-Querys → claim-IDs, dann faelle.in('claim_id', …) und ins
-  // selbe Merge-Set einspeisen.
+  // claim_nummer liegen auf claims. Separate claims-Querys → claim-IDs, dann
+  // v_claim_full.in('id', …) (View-id == claims.id) ins selbe Merge-Set.
   const { data: ortClaims } = await supabase
     .from('claims')
     .select('id')
@@ -72,39 +78,54 @@ export async function GET(req: NextRequest) {
   ]))
   const { data: byClaim } = matchClaimIds.length
     ? await supabase
-        .from('faelle')
-        .select('id, kennzeichen, status, leads(vorname, nachname), claims:claim_id(claim_nummer, schadenort_ort, operative_status)')
+        .from('v_claim_full')
+        .select(VIEW_COLS)
         .eq('sv_id', sv.id)
-        .in('claim_id', matchClaimIds)
+        .not('fall_id', 'is', null)
+        .in('id', matchClaimIds)
         .limit(16)
-    : { data: [] as typeof data }
+    : { data: [] as SearchRow[] }
+
+  // lead-Namen de-embedded: alle lead_ids der 3 Sets -> eine leads-Query.
+  const allRows = [
+    ...((byKennz ?? []) as SearchRow[]),
+    ...((byNameRaw ?? []) as SearchRow[]),
+    ...((byClaim ?? []) as SearchRow[]),
+  ]
+  const leadIds = Array.from(new Set(allRows.map((r) => r.lead_id).filter(Boolean) as string[]))
+  const leadMap = new Map<string, { vorname: string | null; nachname: string | null }>()
+  if (leadIds.length) {
+    const { data: leads } = await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    for (const l of (leads ?? []) as Array<{ id: string; vorname: string | null; nachname: string | null }>) {
+      leadMap.set(l.id, { vorname: l.vorname, nachname: l.nachname })
+    }
+  }
+  const leadName = (leadId: string | null): string => {
+    const lead = leadId ? leadMap.get(leadId) ?? null : null
+    return [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
+  }
+
+  const nameMatches = ((byNameRaw ?? []) as SearchRow[]).filter((f) =>
+    leadName(f.lead_id).toLowerCase().includes(ql),
+  )
 
   // Merge by id, max 8 Treffer.
   const seen = new Set<string>()
-  const merged: typeof data = []
-  for (const f of [...(data ?? []), ...nameMatches, ...(byClaim ?? [])]) {
-    if (seen.has(f.id)) continue
+  const merged: SearchRow[] = []
+  for (const f of [...((byKennz ?? []) as SearchRow[]), ...nameMatches, ...((byClaim ?? []) as SearchRow[])]) {
+    if (!f.id || seen.has(f.id)) continue
     seen.add(f.id)
     merged.push(f)
     if (merged.length >= 8) break
   }
 
   return NextResponse.json({
-    faelle: merged.map((f) => {
-      const lead = (Array.isArray(f.leads) ? f.leads[0] : f.leads) as
-        | { vorname: string | null; nachname: string | null }
-        | null
-      const kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
-      const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
-        | { claim_nummer: string | null; schadenort_ort: string | null; operative_status: string | null }
-        | null
-      return {
-        id: f.id,
-        label: f.kennzeichen || claim?.claim_nummer || f.id.slice(0, 8),
-        sub: [kundeName, claim?.schadenort_ort].filter(Boolean).join(' · '),
-        // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
-        status: (claim?.operative_status as string | null) ?? f.status,
-      }
-    }),
+    faelle: merged.map((f) => ({
+      id: f.id,
+      label: f.kennzeichen || f.claim_nummer || (f.id ?? '').slice(0, 8),
+      sub: [leadName(f.lead_id), f.schadenort_ort].filter(Boolean).join(' · '),
+      // CMM-74 b″: status aus claims.operative_status (SSoT; == faelle.status, 0-diff).
+      status: f.operative_status,
+    })),
   })
 }
