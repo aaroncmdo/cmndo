@@ -237,12 +237,15 @@ export async function getDokumentenStand(supabase: any, fallId: string): Promise
   // Felder (lead_id, zeugen_vorhanden, …) bleiben auf dem faelle-Read.
   // CMM-44 SP-B PR2c: zeugen_vorhanden lebt auf claims (SSoT) —
   // aus dem faelle-Select entfernt, wird unten aus claims geladen.
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). polizeibericht_pflicht + nachname
+  // wurden aus faelle gedroppt (CMM-44 PR2) -> der bisherige faelle-Read warf bereits
+  // "column does not exist". Beide (sowie ist_fahrzeughalter) liefert ohnehin der
+  // leads-Read unten; halter_nachname + claim_id(=id)/lead_id kommen aus der View.
+  // Hinweis: getDokumentenStand ist aktuell ohne Consumer (Dead-Code) — separat aufraeumen.
   const fallRes = await supabase
-    .from('faelle')
-    .select(
-      'claim_id, lead_id, polizeibericht_pflicht, ist_fahrzeughalter, nachname, halter_nachname',
-    )
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('claim_id:id, lead_id, halter_nachname')
+    .eq('fall_id', fallId)
     .maybeSingle()
   const fall = (fallRes.data ?? {}) as Record<string, unknown>
 
