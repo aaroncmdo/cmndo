@@ -37,12 +37,11 @@ export async function uploadGutachten(
 
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, sv_id, claim_id')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
-    .single()
+  // CMM-49: Ownership-Gate (sv_id 0-diff) + claim_id claims-direkt via resolveClaimId.
+  const gutClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fall } = gutClaimId
+    ? await supabase.from('claims').select('sv_id').eq('id', gutClaimId).eq('sv_id', sv.id).maybeSingle()
+    : { data: null }
 
   if (!fall) return { error: 'Fall nicht gefunden' }
 
@@ -79,11 +78,11 @@ export async function uploadGutachten(
   // CMM-44 SP-G PR2: gutachten_eingegangen_am → fertiggestellt_am, gutachten_betrag → gesamt_schadensbetrag (SSoT: gutachten).
   // sv_id zwingend setzen — gutachten.sv_id ist NOT NULL ohne Default;
   // bei Fällen ohne existierende gutachten-Row würde der Upsert sonst schlagen.
-  if (fall.claim_id) {
+  if (gutClaimId) {
     const { error: gErr } = await supabase
       .from('gutachten')
       .upsert(
-        { claim_id: fall.claim_id as string, sv_id: fall.sv_id as string, fertiggestellt_am: new Date().toISOString(), gesamt_schadensbetrag: betrag },
+        { claim_id: gutClaimId, sv_id: fall.sv_id as string, fertiggestellt_am: new Date().toISOString(), gesamt_schadensbetrag: betrag },
         { onConflict: 'claim_id' },
       )
     if (gErr) return { error: `Gutachten-Update fehlgeschlagen: ${gErr.message}` }
@@ -277,12 +276,11 @@ export async function uploadDokument(
 
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, sv_id')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
-    .single()
+  // CMM-49: Ownership-Gate (sv_id 0-diff) claims-direkt via resolveClaimId.
+  const docClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fall } = docClaimId
+    ? await supabase.from('claims').select('id').eq('id', docClaimId).eq('sv_id', sv.id).maybeSingle()
+    : { data: null }
 
   if (!fall) return { error: 'Fall nicht gefunden' }
 
@@ -493,16 +491,15 @@ export async function uploadDatei(
 
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, sv_id, claim_id')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
-    .single()
+  // CMM-49: Ownership-Gate (sv_id 0-diff) + claim_id claims-direkt via resolveClaimId.
+  const upClaimId = await resolveClaimId(supabase, fallId)
+  const { data: fall } = upClaimId
+    ? await supabase.from('claims').select('id').eq('id', upClaimId).eq('sv_id', sv.id).maybeSingle()
+    : { data: null }
 
   if (!fall) return { error: 'Fall nicht gefunden' }
   // AAR-862: claim-zentrierter Pfad
-  const claimId = fall.claim_id as string
+  const claimId = upClaimId as string
 
   // Upload file to storage (AAR-553/AAR-862: claims/{claim_id}/<segment>/...)
   const ext = file.name.split('.').pop() ?? 'bin'
@@ -748,11 +745,11 @@ export async function storniereTermin(
 
   // WhatsApp an Kunden
   const { sendCommunication } = await import('@/lib/communications/send')
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('lead_id')
-    .eq('id', termin.fall_id)
-    .single()
+  // CMM-49: lead_id (0-diff) claims-direkt via resolveClaimId.
+  const t1ClaimId = await resolveClaimId(supabase, termin.fall_id)
+  const { data: fall } = t1ClaimId
+    ? await supabase.from('claims').select('lead_id').eq('id', t1ClaimId).maybeSingle()
+    : { data: null }
   if (fall?.lead_id) {
     const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
     const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
@@ -804,7 +801,9 @@ export async function meldeVerspaetung(
 
   // WhatsApp an Kunden
   const { sendCommunication } = await import('@/lib/communications/send')
-  const { data: fall } = await supabase.from('faelle').select('lead_id').eq('id', termin.fall_id).single()
+  // CMM-49: lead_id (0-diff) claims-direkt via resolveClaimId.
+  const t2ClaimId = await resolveClaimId(supabase, termin.fall_id)
+  const { data: fall } = t2ClaimId ? await supabase.from('claims').select('lead_id').eq('id', t2ClaimId).maybeSingle() : { data: null }
   if (fall?.lead_id) {
     const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
     const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()

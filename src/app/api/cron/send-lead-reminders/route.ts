@@ -62,13 +62,26 @@ export async function GET(request: Request) {
 
     // Lead-IDs, für die bereits ein Fall existiert → ausfiltern
     const leadIds = data.map((l) => l.id)
-    const { data: existingFaelle } = await supabase
-      .from('faelle')
-      .select('lead_id')
+    // CMM-49: Leads mit bestehendem faelle-backed Claim ausfiltern — claims-direkt
+    // (lead_id 0-diff) + Bridge-Intersection (claims Superset faelle; nur faelle-backed,
+    // value-preserving live verifiziert: lead_id-Set 78==78, 0 Diff).
+    const { data: existingClaims } = await supabase
+      .from('claims')
+      .select('id, lead_id')
       .in('lead_id', leadIds)
+    const existingClaimIds = (existingClaims ?? []).map((c) => c.id as string)
+    let bridgedClaimIds = new Set<string>()
+    if (existingClaimIds.length) {
+      const { data: bridged } = await supabase
+        .from('faelle_claim_bridge')
+        .select('claim_id')
+        .in('claim_id', existingClaimIds)
+      bridgedClaimIds = new Set((bridged ?? []).map((b) => b.claim_id as string))
+    }
     const skip = new Set(
-      (existingFaelle ?? [])
-        .map((f) => f.lead_id as string | null)
+      (existingClaims ?? [])
+        .filter((c) => bridgedClaimIds.has(c.id as string))
+        .map((c) => c.lead_id as string | null)
         .filter((x): x is string => !!x),
     )
 
