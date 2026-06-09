@@ -28,17 +28,20 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
   // (SSoT) — via Nested-Embed lesen.
   // CMM-44 SP-B PR2a: service_typ liegt ebenfalls auf claims (SSoT) — in den
   // claims-Embed aufgenommen.
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). kunde_*/firma_name via
+  // geschaedigter-Party->personen (Plan 4.1b), kennzeichen via vehicles, claims-native
+  // claim_nummer/kunde_email/vorsteuerabzugsberechtigt/service_typ flach aus der View.
   const { data: fall, error: fallErr } = await db
-    .from('faelle')
+    .from('v_claim_full')
     .select(
-      'id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(claim_nummer, kunde_email, vorsteuerabzugsberechtigt, service_typ)',
+      'kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claim_nummer, kunde_email, vorsteuerabzugsberechtigt, service_typ',
     )
-    .eq('id', fallId)
+    .eq('fall_id', fallId)
     .maybeSingle()
   if (fallErr || !fall) {
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallClaim = fall
 
   // Nur komplett-Paket → Kanzlei. nur_gutachter geht gar nicht erst hierher.
   if ((fallClaim?.service_typ as string | null) !== 'komplett') {
@@ -56,7 +59,7 @@ export async function sendMandatEmailToKanzlei(fallId: string): Promise<EmailFal
     anrede = ((profile?.anrede as string | null) ?? '').trim()
   }
 
-  const fallNr = (fallClaim?.claim_nummer as string | null) ?? fall.id
+  const fallNr = (fallClaim?.claim_nummer as string | null) ?? fallId
   const kundeName = [fall.kunde_vorname, fall.kunde_nachname].filter(Boolean).join(' ') || '—'
   const subject = `[${fallNr}] Neues Mandat: ${kundeName}`
 
