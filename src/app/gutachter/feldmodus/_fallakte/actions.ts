@@ -88,23 +88,18 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   // auf auftraege (aktueller Auftrag) — aus dem faelle-Select entfernt, separat
   // unten per reihenfolge-DESC-Query geladen (deterministisch, da SV-sichtbar).
   // CMM-49: faelle->v_claim_full (claim-anchored SSoT). Fahrzeug via vehicles,
-  // schadenort_*/claim_nummer/szenario flach aus der View. notizen lebt auf claims
-  // und ist (noch) nicht in v_claim_full -> separat nachgeladen. Reshape zurueck in
-  // die faelle+claims-Embed-Form -> Downstream (fall.claims/claim_id/sv_id) unveraendert.
+  // schadenort_*/claim_nummer/szenario/notizen flach aus der View (notizen seit
+  // Plan-4-Ergaenzung in v_claim_full). Reshape zurueck in die faelle+claims-Embed-
+  // Form -> Downstream (fall.claims/claim_id/sv_id) unveraendert.
   const { data: fallV, error: fallErr } = await admin
     .from('v_claim_full')
     .select(
-      'id:fall_id, claim_id:id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_id, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario',
+      'id:fall_id, claim_id:id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_id, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen',
     )
     .eq('fall_id', fallId)
     .single()
 
   if (fallErr || !fallV) return { success: false, error: 'Fall nicht gefunden' }
-  let notizenVal: string | null = null
-  if (fallV.claim_id) {
-    const { data: cn } = await admin.from('claims').select('notizen').eq('id', fallV.claim_id).maybeSingle()
-    notizenVal = (cn?.notizen as string | null) ?? null
-  }
   const fall = {
     id: fallV.id ?? fallId,
     claim_id: fallV.claim_id,
@@ -119,7 +114,7 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
       schadenort_ort: fallV.schadenort_ort,
       claim_nummer: fallV.claim_nummer,
       szenario: fallV.szenario,
-      notizen: notizenVal,
+      notizen: fallV.notizen,
     },
   }
   const fallClaim = fall.claims
