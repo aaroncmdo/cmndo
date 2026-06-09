@@ -72,9 +72,11 @@ export async function sendKundeWelcome(
 
   // CMM-44 SP-A2 (Cluster 1): schadentag aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT) — via termin-Row weiter unten.
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, kunde_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claims:claim_id(claim_nummer, schadentag, vehicle_id)').eq('id', fallId).single()
+  // CMM-49: v_claim_full (entity-sourced, LOSS=0 verifiziert). Alias claim_id:id erhaelt das
+  // faelle-Shape; claim_nummer/schadentag/vehicle_id flach (Embed entfaellt). USE-Read (Email).
+  const { data: fall } = await db.from('v_claim_full').select('lead_id, sv_id, kunde_id, claim_id:id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lackfarbe_code, claim_nummer, schadentag, vehicle_id').eq('fall_id', fallId).single()
   if (!fall) return
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallClaim = fall
 
   // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
   // (fahrzeug_*/kennzeichen/lackfarbe_code) als Fallback. Bis der 50.0-Write-Path vehicles
