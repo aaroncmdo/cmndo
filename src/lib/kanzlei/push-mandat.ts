@@ -79,17 +79,20 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // (SSoT) — werden zusammen mit kanzlei_wunsch aus der claims-Query unten geladen.
   // CMM-44 SP-B PR2a: service_typ liegt auf claims (SSoT) — in den claims-Embed
   // aufgenommen (claim_id ist ohnehin schon Teil des Selects).
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). kunde_*/firma_name via
+  // geschaedigter-Party->personen (Plan 4.1b), kennzeichen via vehicles, claim_nummer/
+  // service_typ flach. claim_id:id-Alias erhaelt den Schluessel fuer die claims-Query unten.
   const { data: fall, error: fallErr } = await db
-    .from('faelle')
+    .from('v_claim_full')
     .select(
-      'id, claim_id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claims:claim_id(claim_nummer, service_typ)',
+      'claim_id:id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claim_nummer, service_typ',
     )
-    .eq('id', fallId)
+    .eq('fall_id', fallId)
     .maybeSingle()
   if (fallErr || !fall) {
     return { success: false, error: `Fall nicht gefunden: ${fallErr?.message ?? fallId}` }
   }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallClaim = fall
 
   // Push-Berechtigung: komplett-Paket ODER kunde hat post-hoc partnerkanzlei
   // gewaehlt (nur_gutachter-Pfad mit nachtraeglicher Wahl). Beide Pfade
@@ -161,7 +164,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
 
   const fallClaimNummer = (fallClaim?.claim_nummer as string | null) ?? null
   const payload: MandatPayload = {
-    claimondo_fall_nr: fallClaimNummer ?? fall.id,
+    claimondo_fall_nr: fallClaimNummer ?? fallId,
     kunde: {
       anrede,
       vorname: (fall.kunde_vorname as string | null) ?? '',
@@ -182,7 +185,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
       kennzeichen: vehicleKennzeichen ?? (fall.kennzeichen as string | null) ?? null,
     },
     meta: {
-      idempotency_key: `${fallClaimNummer ?? fall.id}-mandat-${randomUUID()}`,
+      idempotency_key: `${fallClaimNummer ?? fallId}-mandat-${randomUUID()}`,
       created_at: new Date().toISOString(),
     },
   }
