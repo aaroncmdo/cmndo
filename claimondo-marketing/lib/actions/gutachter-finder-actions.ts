@@ -1,13 +1,10 @@
 'use server'
 
-import { randomBytes } from 'node:crypto'
-import { after } from 'next/server'
+import { createHmac } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
-import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
-import { sendEmail } from '@/lib/email/google/client'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { getConsentedGaClientId, trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 
@@ -326,21 +323,35 @@ export async function erstelleGutachterFinderAnfrage(
   return { ok: true, id: anfrageId }
 }
 
-// AAR-955: Live-Buchung aus dem Marketing-Finder. Erzeugt eine self-service-
-// eligible Anfrage (source NULL) mit dem karten-gewählten SV + mintet direkt
-// einen self_service_token, damit der Wizard den User INLINE in den bestehenden
-// Self-Service-Flow /anfrage/[token] (Haupt-App: SelbstQuali → SA → TerminBuchung
-// mit der fixerSvId-SV-Weiche, verifiziert von der Termin-Engine) leiten kann.
+// AAR-955 + AAR-956 T1.1b: Live-Buchung aus dem Marketing-Finder. Erzeugt eine
+// Anfrage (gutachter_finder_anfragen) mit dem karten-gewählten SV und leitet den
+// User auf den KANONISCHEN signierten /start-Link → /flow. issueCanonicalFlowLinkForAnfrage
+// (in der /start-Route der Haupt-App) macht den Rest: gfa → Lead → EIN kanonischer
+// flow_link + Versand (WA→SMS→Email). Der karten-gewählte SV (zugeordneter_sv_id) wird
+// in /flow zum Fixer; schadenort_lat/lng → lead.fahrzeug_standort_lat/lng fürs Matching.
 //
-// Bewusst NICHT issueSelfServiceFlowLink: das liegt main-app-only (Cross-App-
-// Grenze, src/lib/self-service/) + sendet WA/Email (hier inline, kein Send nötig).
-// /anfrage/[token] validiert NUR self_service_token + Expiry (verifiziert,
-// actions.ts:42-48) — gleiches AAR-940-Sicherheitsmodell. Interim-Issuer; später
-// auf einen gemeinsamen Issuer umstellbar (Owner Self-Service/Termin-Engine,
-// AAR-955). KEIN Dispatch-"SV-anrufen"-Task (Kunde bucht selbst), anders als
+// Cross-App-Grenze: issueCanonicalFlowLinkForAnfrage liegt main-app-only — die
+// Marketing-App signt NUR den /start-Link (HMAC, Gegenstück zu src/lib/start-link/
+// verify-sig.ts) und überlässt Lead/flow_link/Versand der /start-Route. KEIN
+// self_service_token mehr (AAR-956 Doppel-Retire), KEIN eigener WA/Email-Versand,
+// KEIN Dispatch-"SV-anrufen"-Task (Kunde bucht selbst), anders als
 // erstelleGutachterFinderAnfrage (Rückruf-Pfad).
 const APP_PORTAL_URL = 'https://app.claimondo.de'
-const SELF_SERVICE_TOKEN_TTL_MS = 72 * 60 * 60 * 1000
+const START_LINK_TTL_SEC = 24 * 60 * 60
+
+// Signierter /start-Link — exakt die verify-sig.ts-Formel: signedString =
+// `${anfrageId}.${exp}` (exp = Unix-Sekunden), sig = HMAC_SHA256(., SECRET) hex lowercase.
+// Fail-soft: ohne Secret null → Caller fällt auf "bitte anrufen" zurück.
+function buildSignedStartUrl(anfrageId: string): string | null {
+  const secret = process.env.START_LINK_HMAC_SECRET
+  if (!secret) {
+    console.error('[starteLiveBuchung] START_LINK_HMAC_SECRET nicht gesetzt — /start nicht signierbar')
+    return null
+  }
+  const exp = Math.floor(Date.now() / 1000) + START_LINK_TTL_SEC
+  const sig = createHmac('sha256', secret).update(`${anfrageId}.${exp}`, 'utf8').digest('hex')
+  return `${APP_PORTAL_URL}/start/${anfrageId}?exp=${exp}&sig=${sig}`
+}
 
 export async function starteLiveBuchung(payload: {
   vorname: string
@@ -362,15 +373,14 @@ export async function starteLiveBuchung(payload: {
   if (ort.length < 3) return { ok: false, error: 'Bitte angeben, wo Ihr Auto steht (PLZ oder Ort).' }
   if (!payload.schadentyp) return { ok: false, error: 'Bitte den Schadentyp wählen.' }
 
-  // Besichtigungsort geocoden → schadenort_lat/lng auf der Anfrage. OHNE Koordinaten
-  // erreicht der /anfrage-Flow den Slot-Picker NICHT (TerminBuchung braucht
-  // fahrzeug_standort_lat/lng) und fällt auf "wir rufen an" zurück (actions.ts:277).
+  // Besichtigungsort geocoden → schadenort_lat/lng auf der Anfrage. issueCanonicalFlowLinkForAnfrage
+  // mappt sie → lead.fahrzeug_standort_lat/lng fürs /flow-Matching; ohne Koordinaten fragt
+  // /flow den Besichtigungsort selbst nach (ladeMatchingFlow → ort_abfragen, AAR-956 Task 3).
   const geo = await geocodeAdresse(ort)
 
   const admin = createAdminClient()
-  const token = randomBytes(16).toString('hex')
 
-  // self_service_token-Spalten sind (noch) nicht in den generierten Types -> Cast (wie issue-flowlink.ts).
+  // Einige Spalten (matching_typ u.a.) sind nicht in den generierten Types -> Cast.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: anfrage, error } = await (admin as any)
     .from('gutachter_finder_anfragen')
@@ -391,8 +401,6 @@ export async function starteLiveBuchung(payload: {
       zugeordneter_sv_id: payload.zugeordneter_sv_id ?? null,
       matching_typ: payload.zugeordneter_sv_id ? 'karte-klick-live' : 'live',
       status: 'neu',
-      self_service_token: token,
-      self_service_token_expires_at: new Date(Date.now() + SELF_SERVICE_TOKEN_TTL_MS).toISOString(),
     })
     .select('id')
     .single()
@@ -409,78 +417,15 @@ export async function starteLiveBuchung(payload: {
     /* nicht kritisch */
   }
 
-  const url = `${APP_PORTAL_URL}/anfrage/${token}`
-
-  // FlowLink zusätzlich an den Kunden senden (WA bevorzugt, Email-Fallback) — Backup,
-  // falls der User den Inline-Flow verlässt + Bestätigung "auf dem Handy". Non-blocking
-  // via after() (Baileys/Email darf den Redirect nie verzögern/brechen). Spiegelt
-  // issueSelfServiceFlowLink (gfa-Ebene) mit den Marketing-App-Bausteinen.
+  // Signierter /start-Link → /flow. issueCanonicalFlowLinkForAnfrage (in der /start-
+  // Route) erzeugt Lead + kanonischen flow_link + versendet ihn (WA→SMS→Email) — daher
+  // KEIN eigener Marketing-Versand mehr. zugeordneter_sv_id wird in /flow zum Fixer.
   const anfrageId = (anfrage as { id: string }).id
-  after(async () => {
-    try {
-      await sendeFlowLinkAnAnfrage({ anfrageId, telefon, email, vorname, url })
-    } catch (err) {
-      console.error('[starteLiveBuchung] FlowLink-Versand fehlgeschlagen (nicht kritisch):', (err as Error).message)
-    }
-  })
+  const url = buildSignedStartUrl(anfrageId)
+  if (!url) {
+    return { ok: false, error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530' }
+  }
 
   return { ok: true, url }
 }
 
-// FlowLink an die Anfrage senden (WA bevorzugt via 'gfa'-Verfügbarkeit, sonst
-// Email). Spiegelt sendeLink aus src/lib/self-service/issue-flowlink.ts — hier
-// repliziert, weil issue-flowlink main-app-only ist (Cross-App-Grenze). Kein
-// neuer anon-Schreibpfad: der Token steht schon auf der Anfrage.
-function flowLinkText(vorname: string, url: string): string {
-  const greet = vorname ? `Hallo ${vorname}` : 'Hallo'
-  return [
-    `${greet}, hier geht es zu Ihrer Terminbuchung bei Claimondo.`,
-    '',
-    'Ihr persönlicher Link (gültig 72 Stunden):',
-    url,
-    '',
-    'Mit wenigen Klicks prüfen wir Ihren Fall, Sie unterschreiben die Vollmacht und buchen Ihren Gutachter-Termin.',
-  ].join('\n')
-}
-
-function flowLinkHtml(vorname: string, url: string): string {
-  const greet = vorname ? `Hallo ${vorname}` : 'Hallo'
-  return (
-    `<p>${greet},</p>` +
-    `<p>hier geht es zu Ihrer Terminbuchung bei Claimondo. Mit wenigen Klicks prüfen wir Ihren Fall, Sie unterschreiben die Vollmacht und buchen Ihren Gutachter-Termin.</p>` +
-    `<p><a href="${url}">Jetzt Termin buchen</a> (Link gültig 72 Stunden)</p>` +
-    `<p style="color:#888;font-size:12px">${url}</p>`
-  )
-}
-
-async function sendeFlowLinkAnAnfrage(opts: {
-  anfrageId: string
-  telefon: string
-  email: string
-  vorname: string
-  url: string
-}): Promise<void> {
-  const { anfrageId, telefon, email, vorname, url } = opts
-  // WhatsApp bevorzugt — nur wenn laut 'gfa'-Cache/Lookup verfügbar.
-  if (telefon && telefon.trim().length >= 6) {
-    try {
-      const wa = await checkAndCacheAvailability('gfa', anfrageId, telefon)
-      if (wa.verfuegbar === true) {
-        const sent = await sendWhatsAppText(telefon, flowLinkText(vorname, url))
-        if (sent.ok) return
-      }
-    } catch (err) {
-      console.error('[sendeFlowLinkAnAnfrage] WA-Send fehlgeschlagen:', (err as Error).message)
-    }
-  }
-  // Email-Fallback.
-  if (email && email.includes('@')) {
-    await sendEmail({
-      to: email,
-      subject: 'Ihre Terminbuchung bei Claimondo',
-      html: flowLinkHtml(vorname, url),
-      empfaengerTyp: 'kunde',
-      template: 'self_service_flowlink',
-    })
-  }
-}
