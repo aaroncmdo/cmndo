@@ -71,7 +71,8 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
   }
 
   // Tippt eine Monika-Bubble-Sequenz mit realistischen Pausen ab; ruft onDone am Ende.
-  // P3: playIncoming beim ERSTEN Chunk (1x pro Turn, + Throttle). Nicolas-UX (N4):
+  // playIncoming bei JEDEM Chunk — jede Monika-Nachricht klingt (1000ms-Throttle bleibt als
+  // Doppelfeuer-Schutz, stoert nicht: Chunks liegen >=1,5s auseinander). Nicolas-UX (N4):
   // laengere Tippzeit (typing.ts) + Denkpause vorm ersten Chunk + groessere Inter-Bubble-Pause.
   function typeSequence(texts: string[], onDone?: () => void) {
     const reduce = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -84,7 +85,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
       const isFirst = i === 0
       const text = texts[i++]
       if (reduce) {
-        if (isFirst) soundRef.current?.playIncoming()
+        soundRef.current?.playIncoming()
         log.value = [...log.value, { role: 'monika', text }]
         scrollDown()
         next()
@@ -95,7 +96,7 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
         scrollDown()
         setTimeout(() => {
           typing.value = false
-          if (isFirst) soundRef.current?.playIncoming()
+          soundRef.current?.playIncoming()
           log.value = [...log.value, { role: 'monika', text }]
           scrollDown()
           setTimeout(next, 350)
