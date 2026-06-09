@@ -34,14 +34,18 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   // Fall + Lead laden (inkl. claim_id für Unfallskizze).
   // CMM-44 SP-A: zeugen_kontakte liegt auf claims (SSoT) — via Nested-Embed lesen.
   // CMM-44 SP-A2 (Cluster 3): gegner_schadennummer → claims.gegner_aktenzeichen (SSoT).
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). kennzeichen/gegner_* + claims-
+  // native claim_nummer/zeugen_kontakte/gegner_aktenzeichen flach aus der View
+  // (zeugen_kontakte seit Plan-4-Ergaenzung in v_claim_full). gegner_versicherung ->
+  // Alias auf gegner_versicherung_name (LOSS=0/CONFLICT=0 verifiziert).
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, kennzeichen, lead_id, claim_id, gegner_kennzeichen, gegner_name, gegner_versicherung, claims:claim_id(claim_nummer, zeugen_kontakte, gegner_aktenzeichen)')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('claim_id:id, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung:gegner_versicherung_name, claim_nummer, zeugen_kontakte, gegner_aktenzeichen')
+    .eq('fall_id', fallId)
     .single()
 
   if (!fall) return { success: false, error: `Fall ${fallId} nicht gefunden` }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallClaim = fall
 
   let kunde: { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null; kunde_strasse: string | null; kunde_plz: string | null; kunde_stadt: string | null } | null = null
 
@@ -127,7 +131,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
 
   const text = `Neuer Fall zur Bearbeitung — Claimondo
 
-Fall-ID: ${fall.id}
+Fall-ID: ${fallId}
 Fall-Nummer: ${fallClaim?.claim_nummer ?? '—'}
 
 Mandant:
@@ -153,7 +157,7 @@ Anhaenge: ${attachments.length} (${attachments.map(a => a.filename).join(', ')})
     const result = await resend.emails.send({
       from: process.env.RESEND_FROM ?? 'Claimondo <noreply@claimondo.de>',
       to: LEXDRIVE_EMAIL,
-      subject: `Neuer Fall ${fallClaim?.claim_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
+      subject: `Neuer Fall ${fallClaim?.claim_nummer ?? fallId.slice(0, 8)} — ${kundeName}`,
       text,
       attachments: attachments.map(a => ({ filename: a.filename, content: a.content })),
     })
