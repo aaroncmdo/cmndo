@@ -11,7 +11,9 @@
 // fallen aus dem Pool raus (kein doppelter Slot pro SV).
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { TagVerfuegbarkeit, TagSlot } from '@/lib/onboarding/slots'
+// Typen aus der Engine (struktur-identisch zu onboarding/slots) — entkoppelt von der
+// alten onboarding-slots/cache-busy-Kette, damit die retired werden kann.
+import type { TagVerfuegbarkeit, TagSlot } from '@/lib/termine/engine'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 // Default-Slots Mo-Fr: 4 Termine pro Tag
