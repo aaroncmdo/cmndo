@@ -73,7 +73,7 @@ export const STYLES = `
 .mk-powered { padding: 7px 14px; text-align: center; font-size: 11px; background: #fff; border-top: 1px solid #eef1f6; }
 .mk-powered a { color: var(--monika-accent); text-decoration: none; }
 
-.mk-launch { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end; gap: 10px;
+.mk-launch { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: row; align-items: flex-end; gap: 10px;
   transition: opacity .35s ease, transform .35s cubic-bezier(.22,1,.36,1); }
 /* #5: cold + vor der Displayfalte → verborgen; erscheint smooth ab der Fold (wie das WA-Icon). */
 .mk-launch-off { opacity: 0; transform: translateY(16px) scale(.92); pointer-events: none; }
@@ -82,7 +82,7 @@ export const STYLES = `
 .mk-launch .mk-fab { position: static; }
 .mk-fab-wrap { display: flex; align-items: center; gap: 10px; }
 .mk-fab-holder { position: relative; line-height: 0; }
-.mk-teaser { display: flex; align-items: center; gap: 8px; max-width: 280px; background: #fff; color: var(--monika-text);
+.mk-teaser { display: flex; align-items: center; gap: 8px; max-width: min(280px, calc(100vw - 112px)); background: #fff; color: var(--monika-text);
   border: 1px solid #e8ecf3; border-radius: 16px; border-bottom-right-radius: 5px; padding: 10px 12px;
   box-shadow: 0 6px 20px rgba(13,27,62,.18); cursor: pointer; }
 .mk-teaser:focus-visible { outline: 2px solid var(--monika-accent); outline-offset: 2px; }
