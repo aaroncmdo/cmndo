@@ -87,16 +87,42 @@ export async function loadFeldmodusFallakteData(fallId: string): Promise<LoadRes
   // CMM-44 SP-H PR2: filmcheck_notizen/sv_notizen_vor_ort/sv_briefing_text leben
   // auf auftraege (aktueller Auftrag) — aus dem faelle-Select entfernt, separat
   // unten per reihenfolge-DESC-Query geladen (deterministisch, da SV-sichtbar).
-  const { data: fall, error: fallErr } = await admin
-    .from('faelle')
+  // CMM-49: faelle->v_claim_full (claim-anchored SSoT). Fahrzeug via vehicles,
+  // schadenort_*/claim_nummer/szenario flach aus der View. notizen lebt auf claims
+  // und ist (noch) nicht in v_claim_full -> separat nachgeladen. Reshape zurueck in
+  // die faelle+claims-Embed-Form -> Downstream (fall.claims/claim_id/sv_id) unveraendert.
+  const { data: fallV, error: fallErr } = await admin
+    .from('v_claim_full')
     .select(
-      'id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_id, claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario, notizen)',
+      'id:fall_id, claim_id:id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, sv_id, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, szenario',
     )
-    .eq('id', fallId)
+    .eq('fall_id', fallId)
     .single()
 
-  if (fallErr || !fall) return { success: false, error: 'Fall nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if (fallErr || !fallV) return { success: false, error: 'Fall nicht gefunden' }
+  let notizenVal: string | null = null
+  if (fallV.claim_id) {
+    const { data: cn } = await admin.from('claims').select('notizen').eq('id', fallV.claim_id).maybeSingle()
+    notizenVal = (cn?.notizen as string | null) ?? null
+  }
+  const fall = {
+    id: fallV.id ?? fallId,
+    claim_id: fallV.claim_id,
+    kennzeichen: fallV.kennzeichen,
+    fahrzeug_hersteller: fallV.fahrzeug_hersteller,
+    fahrzeug_modell: fallV.fahrzeug_modell,
+    lead_id: fallV.lead_id,
+    sv_id: fallV.sv_id,
+    claims: {
+      schadenort_adresse: fallV.schadenort_adresse,
+      schadenort_plz: fallV.schadenort_plz,
+      schadenort_ort: fallV.schadenort_ort,
+      claim_nummer: fallV.claim_nummer,
+      szenario: fallV.szenario,
+      notizen: notizenVal,
+    },
+  }
+  const fallClaim = fall.claims
 
   // CMM-44 SP-H PR2: aktuellen Auftrag des Claims fuer die 3 SP-H-Felder laden.
   let aktAuftragFeldakte:
@@ -254,10 +280,11 @@ export async function saveFeldmodusNotizen(
     .eq('sv_id', sv.id)
     .limit(1)
     .maybeSingle()
+  // CMM-49: Ownership-Gate auf v_claim_full (sv_id 0-diff, claim_id:id-Alias).
   const { data: fall } = await admin
-    .from('faelle')
-    .select('sv_id, claim_id')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('sv_id, claim_id:id')
+    .eq('fall_id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
   if (!auftrag && fall.sv_id !== sv.id) {
