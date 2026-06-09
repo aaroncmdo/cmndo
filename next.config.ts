@@ -148,6 +148,14 @@ const nextConfig: NextConfig = {
         destination: '/gutachter/fall/:id',
         permanent: true,
       },
+      // AAR-956 T1.1b: /anfrage/[token]-Self-Service-Strecke retired (kanonischer
+      // Ersatz = /start → /flow). Alt-Magic-Links (WhatsApp/Email, alle Token bereits
+      // abgelaufen) → Startseite statt 404. Permanent (301): Route kommt nicht zurück.
+      {
+        source: '/anfrage/:token*',
+        destination: '/',
+        permanent: true,
+      },
       // CMM-14 (14.05.26): /gutachter ist nur noch ein Redirect-Stub auf
       // /gutachter/heute (AAR-700). Der Server-Component-Redirect über
       // `redirect('/gutachter/heute')` produzierte deterministisch React-
