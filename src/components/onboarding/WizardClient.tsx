@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect, useRef } from 'react'
 import { useTranslations } from 'next-intl'
 import { ChevronLeft, ChevronRight, CheckCircle2 } from 'lucide-react'
 import { saveOnboardingStep } from './saveStep'
-import { finalizeGutachterFinderAnfrage } from './finalizeAnfrage'
 // AAR-956 Phase C: route-neutrale Lib statt /anfrage-Route (Decoupling-Schritt 1).
 import { speichereBeauftragungStep, speichereQuali, unterschreibeUndErstelleFall } from '@/lib/self-service/anfrage-actions'
 import { speichereSvOnboardingStep } from '@/lib/sv-onboarding/save-step'
@@ -442,20 +441,11 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         } else if (svMatch) {
           speichereZuordnung(result.anfrageId, svMatch).catch(() => {})
         }
-        // Finalize: Anfrage → Fall + Magic-Link. Nur für gutachter-finden Flow,
-        // andere Flows (z. B. SV-Onboarding) nutzen den Wizard ebenfalls und
-        // brauchen keine Konvertierung in einen Schadensfall.
-        if (flowKey === 'gutachter-finden') {
-          const finalize = await finalizeGutachterFinderAnfrage(result.anfrageId)
-          if (!finalize.ok) {
-            // Anfrage liegt als status='entwurf' in der DB — Dispatch sieht sie
-            // und kann manuell konvertieren. Trotzdem completed=true damit der
-            // Kunde Bestätigung sieht.
-            console.error('[WizardClient] Finalize fehlgeschlagen:', finalize.error)
-          } else {
-            setCompletedFallId(finalize.fallId)
-          }
-        }
+        // AAR-956 T1.1b §1c: gutachter-finden-Finalize (Anfrage→Fall via
+        // konvertiereAnfrageZuFall) entfernt — der flowKey wurde nie (mehr) gemountet
+        // (Marketing-App hat den gutachter-finder-Wizard übernommen), kanonischer
+        // Ersatz = /flow → convertLeadToClaim. Dieser generische Pfad bleibt für
+        // kunde-onboarding (kein Fall — nur Onboarding-Details + optionale SV-Zuordnung).
         setCompleted(true)
         return
       }
