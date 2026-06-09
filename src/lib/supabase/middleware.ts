@@ -175,10 +175,9 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-08: Token-basierter Termin-Bestätigungs-Pfad analog zu /sv und /upload —
     // Magic-Link aus Email, kein Login nötig. Token-Validierung in der Action.
     '/kunde-termin',
-    // AAR-940: Self-Service-Strecke /anfrage/[token] — Magic-Link aus WhatsApp/
-    // Email, kein Login (Token-Validierung in der Action). Ohne diesen Eintrag
-    // landet der anon-Empfänger auf /login statt im Self-Service-Flow.
-    '/anfrage',
+    // AAR-956 T1.1b: /anfrage-Whitelist entfernt — die Self-Service-Strecke
+    // /anfrage/[token] ist retired (kanonischer Ersatz = /start → /flow). Alt-Links
+    // fängt der 301-Redirect in next.config.ts ab (→ /).
     // AAR-956: kanonischer Konversions-Einstieg /start/[anfrageId]?exp=&sig= —
     // HMAC-gateter anon-Redirect (Marketing-Live-Buchung) → konvertiert die Anfrage
     // zum Lead + stellt den /flow-FlowLink aus. Ohne diesen Eintrag landet der
