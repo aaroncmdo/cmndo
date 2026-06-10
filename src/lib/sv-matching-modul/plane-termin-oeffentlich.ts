@@ -1,20 +1,21 @@
 // T2 (universelle Termin-Engine) + AAR-941: planeTerminOeffentlich
 // ─────────────────────────────────────────────────────────────────────────────
-// Der ANON-SICHERE Kunde-Gesicht-Output des planeTermin-Flows: max 3 Slots in der
-// 2+1-Verteilung (2 beim Best-Match-SV + 1 beim Zweitbesten, adaptiv) — gespeist aus
-// den ENGINE-Primitiven (findBestSV = findeBestePerson #2500 fuer das Ranking +
-// engine `freieSlots` mit Reachability + now-Floor fuer die Slots) und durch die
-// AAR-941-Projektion (toOeffentlichesSvProfil) geschuetzt: score, exakte ETA,
-// reasons und nachname verlassen das Modul NIE.
+// Der ANON-SICHERE Kunde-Gesicht-Output des planeTermin-Flows, gespeist aus den
+// ENGINE-Primitiven (findBestSV = findeBestePerson #2500 + engine `freieSlots` mit
+// Reachability + now-Floor über v_belegung) und durch die AAR-941-Projektion
+// (toOeffentlichesSvProfil) geschützt: score, exakte ETA, reasons und nachname
+// verlassen das Modul NIE. Zwei Gesichter:
+//   - GLOBAL (fixerSvId=null): findBestSV-Ranking → max 3 Slots in der 2+1-Verteilung
+//     (2 beim Best + 1 beim Zweitbesten, adaptiv).
+//   - SV-EMBED (fixerSvId gesetzt): genau dieser SV, bis FIXER_MAX_SLOTS, immer gezeigt
+//     (Merge mit globalen Alternativen funnel-seitig via mergeFixerUndAlternativen).
 //
-// Drop-in fuer den /flow-Funnel: Rueckgabe == matchAndSlots (OeffentlichesSvProfil[]),
-// nur reachability-korrekt + 2+1 statt onboarding-Slots ohne Verteilung. ladeMatchingFlow
-// (aar-956) tauscht im GLOBAL-Fall matchAndSlots → diese Fn; der SV-Embed-Fixer-Fall
-// bleibt auf matchAndSlots (Merge funnel-seitig via mergeFixerUndAlternativen).
+// matchAndSlots delegiert seit dem Fixer→Engine-Cutover an diese Fn (Thin-Wrapper) →
+// EIN engine-gespeister, leak-sicherer Slot-Pfad für den ganzen /flow-Funnel; der alte
+// onboarding-`ladeFreieSlots`/cache-busy-Pfad ist damit aus dem Matching raus.
 //
 // Boundary: dieses Modul (matching*/projection) = Termin-Engine-Revier; der Consumer
-// ladeMatchingFlow/FlowSlotStep/SvSlotAuswahl = aar-956. toOeffentlichesSvProfil wird
-// nur AUFGERUFEN, nicht veraendert (shared mit matchAndSlots + /anfrage).
+// ladeMatchingFlow/FlowSlotStep/SvSlotAuswahl = aar-956.
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { findBestSV, type SvMatchCandidate } from '@/lib/dispatch/findBestSV'
@@ -26,8 +27,10 @@ import type { OeffentlichesSvProfil, SlotVorschlag, SvBewertung, SvProfilFelder 
 
 const SLOT_FENSTER_TAGE = 14
 const KUNDE_MAX_SLOTS = 3
-// Best + Zweitbester + 1 Reserve fuer adaptive Auffuellung (z.B. Best ohne Slots).
+// Best + Zweitbester + 1 Reserve für adaptive Auffüllung (z.B. Best ohne Slots).
 const TOP_KANDIDATEN = 3
+// SV-Embed: bis 6 Slots beim fixen SV (1:1 zum früheren matchAndSlots-SLOTS_PRO_SV).
+const FIXER_MAX_SLOTS = 6
 
 export type PlaneTerminOeffentlichInput = {
   /** Besichtigungsort. */
@@ -35,12 +38,14 @@ export type PlaneTerminOeffentlichInput = {
   lng: number
   /** Optionaler Wunschtermin (ISO/UTC) — steuert NUR das Slot-Ranking (matchType), kein Hard-Filter. */
   wunschterminIso?: string | null
+  /** SV-Embed: gesetzt → genau dieser SV (kein globales Matching, bis FIXER_MAX_SLOTS, immer gezeigt). */
+  fixerSvId?: string | null
 }
 
 /**
- * PURE 2+1-Mengenverteilung in Count-Form: gegeben die (rankSlots-)verfuegbare
+ * PURE 2+1-Mengenverteilung in Count-Form: gegeben die (rankSlots-)verfügbare
  * Slot-Anzahl je nach-Score-sortiertem Kandidat → wie viele Slots zeigt jeder.
- * Best bis 2, dann je 1 von den naechsten, dann adaptive Auffuellung bis
+ * Best bis 2, dann je 1 von den nächsten, dann adaptive Auffüllung bis
  * KUNDE_MAX_SLOTS. Spiegelt verteileAusSlots (termine/engine) in der pro-SV-
  * Projektions-Welt: 1 Kandidat → bis 3 bei ihm; Best ohne Slots → von anderen. Testbar.
  */
@@ -71,11 +76,61 @@ export function verteile2plus1Counts(verfuegbar: number[]): number[] {
   return counts
 }
 
+/** Haversine-Luftlinie (km) — für die gerundete Distanz-Anzeige des fixen SV. */
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
 /**
- * Batch-laedt vorname/avatar/beschreibung (profiles) + Bewertung
- * (google_bewertungen_cache) fuer die Projektion — findBestSV liefert sie nicht mit.
- * Spiegelt den matchAndSlots-Block; bleibt hier self-contained, bis matchAndSlots
- * nach dem ladeMatchingFlow-Cutover retired wird (dann Single-Source).
+ * SV-Embed-Fall: neutraler SvMatchCandidate für genau den fixen SV (kein Scoring,
+ * kein findBestSV). Nur die für die Projektion relevanten Felder sind echt (svId,
+ * profileId, distanzKm); Scoring-Felder bleiben neutral und werden ohnehin nicht projiziert.
+ */
+async function ladeFixenSvKandidat(
+  admin: ReturnType<typeof createAdminClient>,
+  svId: string,
+  lat: number,
+  lng: number,
+): Promise<SvMatchCandidate[]> {
+  const { data: sv } = await admin
+    .from('sachverstaendige')
+    .select('id, profile_id, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet')
+    .eq('id', svId)
+    .maybeSingle()
+  if (!sv || sv.ist_aktiv === false) return []
+  const distanzKm =
+    sv.standort_lat != null && sv.standort_lng != null
+      ? haversineKm(Number(sv.standort_lat), Number(sv.standort_lng), lat, lng)
+      : 0
+  return [
+    {
+      svId: sv.id,
+      profileId: (sv.profile_id as string | null) ?? null,
+      name: '',
+      paket: '',
+      distanzKm: Math.round(distanzKm * 10) / 10,
+      etaFromBueroMin: null,
+      offeneFaelle: 0,
+      kontingentFrei: 0,
+      ablehnungen30d: 0,
+      score: 0,
+      reasons: [],
+      verfuegbarAmWunschtermin: undefined,
+      naechsterFreierSlot: null,
+    },
+  ]
+}
+
+/**
+ * Batch-lädt vorname/avatar/beschreibung (profiles) + Bewertung
+ * (google_bewertungen_cache) für die Projektion — findBestSV liefert sie nicht mit.
+ * Single-Source seit matchAndSlots ein Thin-Wrapper auf diese Fn ist.
  */
 async function ladeProfilUndBewertung(
   admin: ReturnType<typeof createAdminClient>,
@@ -108,45 +163,61 @@ async function ladeProfilUndBewertung(
 }
 
 /**
- * GLOBAL-Match Kunde-Gesicht: liefert die leak-sichere OeffentlichesSvProfil[] mit
- * der 2+1-Verteilung (Best 2 Slots + Zweitbester 1 → 2 Profile der slots-Laengen 2/1;
- * adaptiv). Reachability-gefilterte, now-floored Engine-Slots. SV-Embed (fixerSvId)
- * laeuft weiter ueber matchAndSlots — der Merge ist funnel-seitig (mergeFixerUndAlternativen).
+ * Liefert die leak-sichere OeffentlichesSvProfil[] für den /flow-Funnel — GLOBAL (2+1)
+ * oder SV-EMBED (fixerSvId). Beide Gesichter ziehen die Slots aus der Engine
+ * (`freieSlots` → v_belegung: Buchungen ∪ externe Kalender-Busy ∪ Ausnahmen,
+ * Reachability + now-Floor). projiziert via toOeffentlichesSvProfil (AAR-941).
  */
 export async function planeTerminOeffentlich(
   input: PlaneTerminOeffentlichInput,
 ): Promise<OeffentlichesSvProfil[]> {
-  const { lat, lng, wunschterminIso = null } = input
+  const { lat, lng, wunschterminIso = null, fixerSvId = null } = input
   if (!Number.isFinite(lat) || !Number.isFinite(lng)) return []
 
   const admin = createAdminClient()
-  // Wunschtermin in dieselbe Wall-Clock-Welt wie die Slots (TZ-Falle), 1:1 zu matchAndSlots.
+  // Wunschtermin in dieselbe Wall-Clock-Welt wie die Slots (TZ-Falle).
   const wunschterminWall = wunschterminIso ? toBerlinWallClock(wunschterminIso) : null
-
-  // 1. Ranking via Engine (findBestSV = findeBestePerson #2500). GLOBAL, Tier-1.
-  const candidates = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, TOP_KANDIDATEN)
-  if (candidates.length === 0) return []
-
-  // 2. Projektions-Stammdaten (vorname/avatar/beschreibung + Bewertung) batch-laden.
-  const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
-
-  // 3. Engine-Slots je Kandidat (Reachability + now-Floor), dann um den Wunschtermin ranken.
   const vonIso = new Date().toISOString()
   const bisIso = new Date(Date.now() + SLOT_FENSTER_TAGE * 24 * 60 * 60_000).toISOString()
-  const rankedPerSv: SlotVorschlag[][] = []
-  for (const cand of candidates) {
-    const assignee: Assignee = { typ: 'sachverstaendiger', id: cand.svId }
+
+  // Engine-Slots eines SVs (Reachability + now-Floor über v_belegung), Wunschtermin-geranked.
+  const slotsFuer = async (svId: string, limit: number): Promise<SlotVorschlag[]> => {
+    const assignee: Assignee = { typ: 'sachverstaendiger', id: svId }
     let tage: Awaited<ReturnType<typeof freieSlots>> = []
     try {
       tage = await freieSlots(assignee, vonIso, bisIso, { schadenort: { lat, lng } }, admin)
     } catch (err) {
-      // Slot-Ladefehler darf das Matching nicht brechen — SV ohne Slots → faellt unten raus.
-      console.warn('[planeTerminOeffentlich] freieSlots fehlgeschlagen fuer', cand.svId, err)
+      // Slot-Ladefehler darf das Matching nicht brechen.
+      console.warn('[planeTerminOeffentlich] freieSlots fehlgeschlagen für', svId, err)
     }
-    rankedPerSv.push(rankSlots(tage, wunschterminWall, KUNDE_MAX_SLOTS))
+    return rankSlots(tage, wunschterminWall, limit)
   }
 
-  // 4. 2+1-Verteilung + kundensichere Projektion. SVs ohne zugeteilte Slots fallen raus.
+  // ── SV-EMBED (Fixer): genau dieser SV, bis FIXER_MAX_SLOTS, IMMER gezeigt ──
+  if (fixerSvId) {
+    const candidates = await ladeFixenSvKandidat(admin, fixerSvId, lat, lng)
+    if (candidates.length === 0) return []
+    const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
+    const cand = candidates[0]
+    const slots = await slotsFuer(cand.svId, FIXER_MAX_SLOTS)
+    return [
+      toOeffentlichesSvProfil({
+        candidate: cand,
+        bewertung: cand.profileId ? bewById.get(cand.profileId) ?? null : null,
+        profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
+        slots,
+      }),
+    ]
+  }
+
+  // ── GLOBAL: Engine-Ranking (findBestSV) + 2+1-Verteilung ──
+  const candidates = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, TOP_KANDIDATEN)
+  if (candidates.length === 0) return []
+  const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
+  const rankedPerSv: SlotVorschlag[][] = []
+  for (const cand of candidates) rankedPerSv.push(await slotsFuer(cand.svId, KUNDE_MAX_SLOTS))
+
+  // 2+1-Verteilung + kundensichere Projektion. SVs ohne zugeteilte Slots fallen raus.
   const counts = verteile2plus1Counts(rankedPerSv.map((s) => s.length))
   const profile: OeffentlichesSvProfil[] = []
   candidates.forEach((cand, i) => {
