@@ -51,7 +51,7 @@ export function VersichererSelect({
   }, [open])
 
   const borderClass = error
-    ? 'border-red-500 focus-within:border-red-500'
+    ? 'border-danger focus-within:border-danger'
     : 'border-claimondo-border focus-within:border-claimondo-ondo'
 
   return (

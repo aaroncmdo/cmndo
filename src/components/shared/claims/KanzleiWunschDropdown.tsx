@@ -122,7 +122,7 @@ export function KanzleiWunschDropdown({ claimId, currentWunsch, viewerRole, pake
                 <button
                   type="button"
                   onClick={handlePaketJetztVersenden}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-emerald-800 bg-emerald-50 hover:bg-emerald-100 text-left font-medium"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-success-strong bg-success-soft hover:bg-success/15 text-left font-medium"
                 >
                   <PackageIcon className="w-4 h-4" />
                   Paket jetzt versenden

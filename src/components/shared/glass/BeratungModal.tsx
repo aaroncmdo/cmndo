@@ -99,7 +99,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
 
         {status === 'sent' ? (
           <div className="px-6 py-10 flex flex-col items-center text-center gap-3">
-            <CheckCircle2 className="w-14 h-14 text-emerald-500" />
+            <CheckCircle2 className="w-14 h-14 text-success" />
             <h3 className="text-xl font-bold text-claimondo-navy">Wir rufen Sie an</h3>
             <p className="text-claimondo-shield text-sm leading-relaxed max-w-[320px]">
               Unser Team meldet sich beim nächsten freien Slot. Sie brauchen nichts weiter zu tun.
@@ -197,7 +197,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
             </div>
 
             {status === 'error' && errorMsg && (
-              <div className="px-3 py-2 rounded-ios-lg bg-red-50 text-red-700 text-xs">{errorMsg}</div>
+              <div className="px-3 py-2 rounded-ios-lg bg-danger-soft text-danger-strong text-xs">{errorMsg}</div>
             )}
 
             <button

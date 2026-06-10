@@ -12,9 +12,9 @@ type Props = {
 const TONE_BG: Record<string, string> = {
   neutral: 'bg-claimondo-bg',
   info:    'bg-claimondo-light-blue/15',
-  success: 'bg-emerald-50',
-  warning: 'bg-amber-50',
-  danger:  'bg-red-50',
+  success: 'bg-success-soft',
+  warning: 'bg-warning-soft',
+  danger:  'bg-danger-soft',
   brand:   'bg-claimondo-navy/10',
   ondo:    'bg-claimondo-ondo/15',
 }
@@ -22,9 +22,9 @@ const TONE_BG: Record<string, string> = {
 const TONE_TEXT: Record<string, string> = {
   neutral: 'text-claimondo-light-blue',
   info:    'text-claimondo-ondo',
-  success: 'text-emerald-700',
-  warning: 'text-amber-700',
-  danger:  'text-red-700',
+  success: 'text-success-strong',
+  warning: 'text-warning-strong',
+  danger:  'text-danger-strong',
   brand:   'text-claimondo-navy',
   ondo:    'text-claimondo-ondo',
 }
