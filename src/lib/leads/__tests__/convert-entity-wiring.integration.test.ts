@@ -130,3 +130,80 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     expect(count).toBe(1)
   }, 30_000) // Remote-Converter macht viele sequentielle Round-Trips (~7s) -> Default-5s reicht nicht
 })
+
+// CMM-Entity Follow-up (C) — Halter-Party-Integrationstest (Kunde != Halter).
+d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => {
+  let db2: SupabaseClient
+  const ts2 = Date.now()
+  const tag2 = `ZZ_HALTER_${ts2}`
+  const schadenText2 = `${tag2} Heck rechts`
+  let leadId2: string | null = null
+  let claimId2: string | null = null
+
+  beforeAll(async () => {
+    db2 = createClient(URL!, KEY!, { auth: { autoRefreshToken: false, persistSession: false } })
+    const { data: lead, error } = await db2
+      .from('leads')
+      .insert({
+        vorname: 'KundeFahrer',
+        nachname: tag2,
+        ist_fahrzeughalter: false, // Kunde != Halter -> separate halter-Party erwartet
+        halter_vorname: 'Eigentuemer',
+        halter_nachname: `${tag2} Leasing`,
+        halter_strasse: 'Halterweg 1',
+        halter_plz: '50670',
+        halter_stadt: 'Koeln',
+        gegner_bekannt: false,
+        fahrzeugschaden_beschreibung: schadenText2,
+        status: 'neu',
+      })
+      .select('id')
+      .single()
+    if (error) throw new Error(`lead insert: ${error.message}`)
+    leadId2 = lead!.id as string
+  })
+
+  const purge2 = async (cid: string) => {
+    await db2.from('vehicle_vorschaeden').delete().eq('claim_id', cid)
+    await db2.from('claim_vehicle_involvements').delete().eq('claim_id', cid)
+    await db2.from('claim_parties').delete().eq('claim_id', cid)
+    await db2.from('faelle').delete().eq('claim_id', cid)
+    await db2.from('claims').delete().eq('id', cid)
+  }
+
+  afterAll(async () => {
+    if (claimId2) await purge2(claimId2)
+    const { data: orphans } = await db2.from('claims').select('id').eq('fahrzeugschaden_beschreibung', schadenText2)
+    for (const o of orphans ?? []) await purge2(o.id as string)
+    if (leadId2) await db2.from('leads').delete().eq('id', leadId2)
+    await db2.from('personen').delete().ilike('nachname', `${tag2}%`)
+  })
+
+  it('Kunde != Halter -> separate halter-Party (rolle=halter, ist_halter=true) mit Person; Geschaedigter ist_halter=false', async () => {
+    const res = await convertLeadToClaim({ leadId: leadId2! })
+    if (!res.ok) console.error('convertLeadToClaim (halter) fehlgeschlagen:', res.error)
+    expect(res.ok).toBe(true)
+    if (!res.ok) return
+    claimId2 = res.claimId
+
+    // Fix C: separate halter-Party aus lead.halter_* (rolle='halter', ist_halter=true, mit Person)
+    const { data: halter } = await db2
+      .from('claim_parties')
+      .select('nachname, ist_halter, person_id')
+      .eq('claim_id', claimId2)
+      .eq('rolle', 'halter')
+      .single()
+    expect(halter?.ist_halter).toBe(true)
+    expect(halter?.nachname as string | null).toContain(tag2)
+    expect(halter?.person_id).toBeTruthy() // ensurePersonForData: Halter hat Namen -> Person
+
+    // Geschaedigter-Party ist NICHT Halter (ist_fahrzeughalter=false)
+    const { data: gesch } = await db2
+      .from('claim_parties')
+      .select('ist_halter')
+      .eq('claim_id', claimId2)
+      .eq('rolle', 'geschaedigter')
+      .single()
+    expect(gesch?.ist_halter).toBe(false)
+  }, 30_000)
+})
