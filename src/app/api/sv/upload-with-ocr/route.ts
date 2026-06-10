@@ -80,10 +80,12 @@ export async function POST(req: NextRequest) {
         ocrResult = { typ: 'kfz_schein', ...kfzData }
 
         // Validate against lead data
+        // CMM-49 (Entity-Sweep): faelle -> v_claim_full. fin_vin/kennzeichen flach
+        // (value-identisch, div=0).
         const { data: fall } = await db
-          .from('faelle')
+          .from('v_claim_full')
           .select('fin_vin, kennzeichen, lead_id')
-          .eq('id', fallId)
+          .eq('fall_id', fallId)
           .single()
 
         if (fall) {
@@ -103,7 +105,7 @@ export async function POST(req: NextRequest) {
         ocrResult = { typ: 'vin', fin }
 
         if (fin) {
-          const { data: fall } = await db.from('faelle').select('fin_vin').eq('id', fallId).single()
+          const { data: fall } = await db.from('v_claim_full').select('fin_vin').eq('fall_id', fallId).single()
           if (fall?.fin_vin) {
             const validation = validateFinMatch(fin, fall.fin_vin)
             ocrResult.validation = validation
