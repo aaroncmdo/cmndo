@@ -318,11 +318,11 @@ function SlotCard({
 
   if (slot.hochgeladen) {
     return (
-      <div className="rounded-ios-md border border-green-200 bg-green-50 p-3 flex items-center gap-3">
-        <CheckCircle2Icon className="w-5 h-5 text-green-600 shrink-0" />
+      <div className="rounded-ios-md border border-success/30 bg-success-soft p-3 flex items-center gap-3">
+        <CheckCircle2Icon className="w-5 h-5 text-success shrink-0" />
         <div className="flex-1">
-          <p className="text-sm font-semibold text-green-900">{slotLabel}</p>
-          <p className="text-xs text-green-700">{t('slotDoneLabel')}</p>
+          <p className="text-sm font-semibold text-success-strong">{slotLabel}</p>
+          <p className="text-xs text-success-strong">{t('slotDoneLabel')}</p>
         </div>
       </div>
     )
@@ -375,7 +375,7 @@ function SlotCard({
             onChange={(e) => e.target.files?.[0] && onFile(e.target.files[0])}
             className="hidden"
           />
-          {state.errorMsg && <p className="text-xs text-red-600">{state.errorMsg}</p>}
+          {state.errorMsg && <p className="text-xs text-danger-strong">{state.errorMsg}</p>}
         </>
       )}
 
@@ -417,24 +417,24 @@ function SlotCard({
 
       {state.action === 'erfolg' && (
         <div className="py-2 text-center space-y-2">
-          <div className="w-10 h-10 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-            <CheckCircle2Icon className="w-6 h-6 text-green-600" />
+          <div className="w-10 h-10 mx-auto bg-success/15 rounded-full flex items-center justify-center">
+            <CheckCircle2Icon className="w-6 h-6 text-success" />
           </div>
-          <p className="text-sm font-semibold text-green-900">{t('slotSuccessLabel')}</p>
+          <p className="text-sm font-semibold text-success-strong">{t('slotSuccessLabel')}</p>
           {state.extracted && (state.extracted.kennzeichen || state.extracted.fahrzeug_hersteller) && (
-            <div className="bg-green-50 border border-green-200 rounded-ios-sm p-2 text-left text-[11px] space-y-0.5">
+            <div className="bg-success-soft border border-success/30 rounded-ios-sm p-2 text-left text-[11px] space-y-0.5">
               {state.extracted.kennzeichen && (
-                <p className="text-green-800">
+                <p className="text-success-strong">
                   {t('ocrKennzeichen', { value: state.extracted.kennzeichen })}
                 </p>
               )}
               {(state.extracted.fahrzeug_hersteller || state.extracted.fahrzeug_modell) && (
-                <p className="text-green-800">
+                <p className="text-success-strong">
                   {t('ocrFahrzeug', { value: [state.extracted.fahrzeug_hersteller, state.extracted.fahrzeug_modell].filter(Boolean).join(' ') })}
                 </p>
               )}
               {state.extracted.halter_name && (
-                <p className="text-green-800">
+                <p className="text-success-strong">
                   {t('ocrHalter', { value: state.extracted.halter_name })}
                 </p>
               )}
@@ -456,8 +456,8 @@ function SlotCard({
 
       {state.action === 'fehler' && (
         <div className="py-2 text-center space-y-2">
-          <div className="w-10 h-10 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
-            <AlertCircleIcon className="w-6 h-6 text-amber-600" />
+          <div className="w-10 h-10 mx-auto bg-warning/15 rounded-full flex items-center justify-center">
+            <AlertCircleIcon className="w-6 h-6 text-warning" />
           </div>
           <p className="text-xs text-claimondo-ondo">{state.errorMsg || t('slotErrorFallback')}</p>
           <button
@@ -478,8 +478,8 @@ function AbschlussCard({ vorname }: { vorname: string }) {
   const t = useTranslations('upload.dokumente')
   return (
     <div className="bg-white rounded-ios-lg shadow-sheet p-6 text-center space-y-3">
-      <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-        <CheckCircle2Icon className="w-8 h-8 text-green-600" />
+      <div className="w-14 h-14 mx-auto bg-success/15 rounded-full flex items-center justify-center">
+        <CheckCircle2Icon className="w-8 h-8 text-success" />
       </div>
       <h2 className="text-lg font-semibold text-claimondo-navy">
         {t('allDoneTitle', { vorname: vorname || 'empty' })}

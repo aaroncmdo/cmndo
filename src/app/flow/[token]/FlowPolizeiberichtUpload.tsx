@@ -63,14 +63,14 @@ export function FlowPolizeiberichtUpload({
 
       {status === 'bestaetigt' ? (
         <div
-          className="rounded-ios-sm bg-emerald-50 border border-emerald-100 p-3 text-sm text-emerald-800"
+          className="rounded-ios-sm bg-success-soft border border-success/30 p-3 text-sm text-success-strong"
           data-testid="flow-polizeibericht-bestaetigt"
         >
           <p className="font-medium">{t('polizeibericht.liegt_vor')} ✓</p>
           <button
             type="button"
             onClick={() => inputRef.current?.click()}
-            className="text-sm text-emerald-800/80 underline mt-1"
+            className="text-sm text-success-strong/80 underline mt-1"
           >
             {t('polizeibericht.neu_hochladen')}
           </button>
@@ -94,7 +94,7 @@ export function FlowPolizeiberichtUpload({
           </button>
         </div>
       )}
-      {fehler && <p className="mt-2 text-sm text-red-500">{fehler}</p>}
+      {fehler && <p className="mt-2 text-sm text-danger-strong">{fehler}</p>}
     </div>
   )
 }

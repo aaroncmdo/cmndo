@@ -129,7 +129,7 @@ export function FlowSlotStep({
         {ortSpeichern && (
           <p className="text-sm text-claimondo-ondo mt-3">{t('ort.speichern_laeuft')}</p>
         )}
-        {fehler && <p className="text-sm text-red-500 mt-3">{fehler}</p>}
+        {fehler && <p className="text-sm text-danger-strong mt-3">{fehler}</p>}
       </div>
     )
   }
