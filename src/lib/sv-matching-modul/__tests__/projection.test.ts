@@ -77,6 +77,22 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
     }
   })
 
+  test('Whitelist ist GESCHLOSSEN — kein neu hinzugefuegtes Feld kann durchrutschen', () => {
+    // Closed-Set-Guard: staerker als not.toHaveProperty(liste) — faengt JEDES
+    // kuenftig ergaenzte Feld (z.B. beim /flow-UI-Umbau), nicht nur bekannte.
+    const r = toOeffentlichesSvProfil({
+      candidate: makeCandidate(),
+      bewertung: { durchschnitt: 4.8, anzahl: 57, aktualisiert: null },
+      profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+      slots: [],
+    })
+    expect(Object.keys(r).sort()).toEqual([
+      'bewertungAktualisiert', 'bewertungAnzahl', 'bewertungDurchschnitt',
+      'distanzGerundet', 'istWunschterminFrei', 'profilbeschreibung',
+      'profilbild', 'slots', 'svId', 'vorname',
+    ])
+  })
+
   test('leakt KEINE internen Werte (serialisiert)', () => {
     const r = toOeffentlichesSvProfil({
       candidate: makeCandidate(),
