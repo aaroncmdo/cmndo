@@ -116,7 +116,9 @@ export async function reserviereSlot(
       await supabase
         .from('gutachter_termine')
         .update({ status: 'abgelehnt' })
-        .eq('sv_id', gfaCurrent.reservierter_sv_id)
+        // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Update-Filter)
+        .eq('assignee_id', gfaCurrent.reservierter_sv_id)
+        .eq('assignee_typ', 'sachverstaendiger')
         .eq('start_zeit', gfaCurrent.reservierter_slot_von)
         .eq('status', 'reserviert')
     }

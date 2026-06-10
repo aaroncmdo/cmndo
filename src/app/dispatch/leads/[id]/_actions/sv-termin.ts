@@ -170,7 +170,9 @@ export async function reserveSvTerminForLead(
   const { data: konflikt } = await supabase
     .from('gutachter_termine')
     .select('id')
-    .eq('sv_id', svId)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Konflikt-Filter)
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .lt('start_zeit', endDate.toISOString())
     .gt('end_zeit', startDate.toISOString())

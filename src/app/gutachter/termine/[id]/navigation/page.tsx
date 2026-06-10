@@ -21,10 +21,12 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, sv_angekommen_am, sv_eta_minuten, navigation_started_at')
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): sv_id aus Select entfernt (unused) + Filter -> assignee
+    .select('id, fall_id, start_zeit, sv_angekommen_am, sv_eta_minuten, navigation_started_at')
     .eq('id', id)
     .eq('typ', 'sv_begutachtung')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (tErr || !termin) redirect(`/gutachter/termine/${id}`)
