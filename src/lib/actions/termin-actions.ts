@@ -107,14 +107,16 @@ async function authSvToken(token: string) {
   const svc = createServiceClient()
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, start_zeit, status')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id. ablehnen_token-Termine sind
+    // SV-Termine (assignee_typ='sachverstaendiger') → assignee_id == sv_id, value-identisch.
+    .select('id, assignee_id, fall_id, start_zeit, status')
     .eq('ablehnen_token', token)
     .maybeSingle()
   if (!termin) return { error: 'Token ungültig' }
   if (!['reserviert', 'gegenvorschlag'].includes(termin.status)) {
     return { error: `Aktion im Status "${termin.status}" nicht möglich` }
   }
-  return { terminId: termin.id, svId: termin.sv_id, fallId: termin.fall_id, startZeit: termin.start_zeit, status: termin.status }
+  return { terminId: termin.id, svId: termin.assignee_id, fallId: termin.fall_id, startZeit: termin.start_zeit, status: termin.status }
 }
 
 // ─── AUTH: Kunde Portal ─────────────────────────────────────────────────────
@@ -173,7 +175,8 @@ export async function terminAblehnen({
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, start_zeit')
       .eq('fall_id', fallIdArg)
-      .eq('sv_id', auth.svId)
+      .eq('assignee_id', auth.svId)
+      .eq('assignee_typ', 'sachverstaendiger')
       .in('status', ['reserviert', 'gegenvorschlag'])
       .order('created_at', { ascending: false })
       .limit(1)
@@ -329,7 +332,8 @@ export async function terminGegenvorschlag({
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id')
       .eq('fall_id', fallIdArg)
-      .eq('sv_id', auth.svId)
+      .eq('assignee_id', auth.svId)
+      .eq('assignee_typ', 'sachverstaendiger')
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('created_at', { ascending: false })
       .limit(1)
@@ -638,7 +642,8 @@ export async function terminAnnehmen({
     const { data: termin } = await admin.from('gutachter_termine')
       .select('id, vorgeschlagenes_datum')
       .eq('fall_id', fId)
-      .eq('sv_id', auth.svId)
+      .eq('assignee_id', auth.svId)
+      .eq('assignee_typ', 'sachverstaendiger')
       .eq('status', 'gegenvorschlag')
       .order('created_at', { ascending: false })
       .limit(1)
