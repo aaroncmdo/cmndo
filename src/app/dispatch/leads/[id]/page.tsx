@@ -32,7 +32,8 @@ export default async function DispatchLeadDetail({
   const { data: svTerminRaw } = await supabase
     .from('gutachter_termine')
     .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
-    .eq('lead_id', id)
+    // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
+    .or(`lead_id.eq.${id},and(bezug_typ.eq.lead,bezug_id.eq.${id})`)
     .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
     .order('created_at', { ascending: false })
     .limit(1)

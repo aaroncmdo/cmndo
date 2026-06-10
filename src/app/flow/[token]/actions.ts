@@ -623,7 +623,10 @@ export async function signSAandCreateFall(
       // nur_gutachter: SA unterschrieben = sofort verbindlich bestätigt (keine Vollmacht nötig)
       const { data: upgradedTermine, error: upErr } = await admin.from('gutachter_termine')
         .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
-        .eq('lead_id', leadId)
+        // AAR-956 #8 (Linchpin): Engine-reservierte Termine sind bezug-nativ (lead_id NULL,
+        // bezug_typ='lead'). Dual-Filter relinkt Legacy- UND Self-Service-Termine -> setzt
+        // fall_id/claim_id, damit ALLE fall_id-Reader sie post-Conversion finden.
+        .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
         .eq('status', 'reserviert')
         .select('id')
 
@@ -672,7 +675,8 @@ export async function signSAandCreateFall(
       // davon entkoppelt. fall_id muss in jedem Fall gesetzt werden.
       const { data: updatedTermine, error: upErr } = await admin.from('gutachter_termine')
         .update({ status: 'bestaetigt', fall_id: fall.id, claim_id: convClaimId })
-        .eq('lead_id', leadId)
+        // AAR-956 #8 (Linchpin): bezug-nativen Self-Service-Termin mit-relinken (s.o.).
+        .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
         .eq('status', 'reserviert')
         .select('id')
 

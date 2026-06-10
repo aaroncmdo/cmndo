@@ -41,8 +41,9 @@ export async function sendFlowLinkMultiChannel(
   // Aktiver Termin für Template-Variablen (AAR-116 Fix: alle 6 Vars)
   const { data: terminRaw } = await supabase
     .from('gutachter_termine')
+    // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
     .select('start_zeit, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
-    .eq('lead_id', leadId)
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: true })
     .limit(1)
