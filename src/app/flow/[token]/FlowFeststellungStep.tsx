@@ -168,7 +168,7 @@ export function FlowFeststellungStep({
       )}
 
       {error && (
-        <p className="mt-4 text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3">
+        <p className="mt-4 text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-4 py-3">
           {error}
         </p>
       )}
