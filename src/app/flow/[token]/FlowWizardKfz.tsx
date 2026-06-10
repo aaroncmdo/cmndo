@@ -186,6 +186,8 @@ export default function FlowWizardKfz({
   // programmatisch submitted — Form-Submit ist der Cookie-sichere Weg
   // gegen die Race-Condition mit `window.location.assign`.
   const loginFormRef = useRef<HTMLFormElement>(null)
+  // A11y: Ref auf den SA-Volltext-Modal-Container fuer den Focus-Trap.
+  const saModalRef = useRef<HTMLDivElement>(null)
 
   // CMM-14: Werkstatt + Schadensfotos State entfernt — Step 'weitere-angaben'
   // wurde aus dem Wizard rausgenommen, der Foto-Upload erfolgt jetzt im
@@ -257,12 +259,35 @@ export default function FlowWizardKfz({
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
   const kundenName = [editVorname, editNachname].filter(Boolean).join(' ')
 
-  // A11y: SA-Volltext-Modal per Esc schliessbar (Backdrop-Klick existiert schon).
+  // A11y: SA-Volltext-Modal — Esc-schliessen, Focus-Trap (Tab-Wrap) + Focus-Restore
+  // beim Schliessen. Backdrop-Klick-schliessen existiert separat im JSX.
   useEffect(() => {
     if (!saVolltextOffen) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSaVolltextOffen(false) }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
+    const prevFocus = document.activeElement as HTMLElement | null
+    const focusables = () =>
+      saModalRef.current
+        ? Array.from(
+            saModalRef.current.querySelectorAll<HTMLElement>(
+              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => !el.hasAttribute('disabled'))
+        : []
+    focusables()[0]?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setSaVolltextOffen(false); return }
+      if (e.key !== 'Tab') return
+      const f = focusables()
+      if (!f.length) return
+      const first = f[0]
+      const last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      prevFocus?.focus?.()
+    }
   }, [saVolltextOffen])
 
   // AAR-956 Task 1: Im gutachter-Step ohne zugeordneten SV/Termin NICHT passiv
@@ -410,11 +435,13 @@ export default function FlowWizardKfz({
         <div className="mx-auto flex max-w-lg items-center justify-center gap-2 px-5 py-3">
           {STEPS.map((s, i) => (
             <div key={s.id} className="flex items-center gap-2">
-              <div className={`grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
+              <div
+                style={i === stepIndex ? { boxShadow: '0 0 0 5px color-mix(in srgb, var(--brand-secondary, #4573A2) 16%, transparent)' } : undefined}
+                className={`grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
                 i < stepIndex
                   ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                   : i === stepIndex
-                    ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06] shadow-[0_0_0_5px_rgba(69,115,162,.16)]'
+                    ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06]'
                     : 'bg-white border-claimondo-navy/[0.10] text-claimondo-ondo/60'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
@@ -634,7 +661,7 @@ export default function FlowWizardKfz({
                 {saVolltextOffen && (
                   <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
                     <div className="absolute inset-0 bg-black/40" onClick={() => setSaVolltextOffen(false)} />
-                    <div role="dialog" aria-modal="true" aria-labelledby="sa-volltext-title" className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
+                    <div ref={saModalRef} role="dialog" aria-modal="true" aria-labelledby="sa-volltext-title" className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
                       {/* Header */}
                       <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-claimondo-border flex-shrink-0">
                         <h2 id="sa-volltext-title" className="text-sm font-semibold text-claimondo-navy">{t('step_sa.popover_titel')}</h2>
