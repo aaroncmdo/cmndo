@@ -65,13 +65,15 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   if (!hardCancelled && t.fall_id && (t.status === 'bestaetigt' || t.status === 'reserviert')) {
     // CMM-44 SP-B PR2b: sa_unterschrieben + vollmacht_signiert_am + service_typ
     // leben alle auf claims (SSoT) — vollständig über den claims-Embed lesen.
+    // CMM-49 (Entity-Sweep): faelle -> v_claim_full. service_typ/sa_unterschrieben/
+    // vollmacht_signiert_am flach aus der View statt claims-Embed.
     const { data: fall } = await db
-      .from('faelle')
-      .select('claims:claim_id(service_typ, sa_unterschrieben, vollmacht_signiert_am)')
-      .eq('id', t.fall_id)
+      .from('v_claim_full')
+      .select('service_typ, sa_unterschrieben, vollmacht_signiert_am')
+      .eq('fall_id', t.fall_id)
       .maybeSingle()
     if (fall) {
-      const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+      const fallClaim = fall
       const serviceTyp = (fallClaim?.service_typ as string | null) ?? null
       const saOk = (fallClaim?.sa_unterschrieben as boolean | null) === true
       const vollmachtOk =
@@ -119,16 +121,18 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
     // ungenutzt (location nutzt t.adresse), Spalte wandert nach claims.
     // CMM-44 SP-D PR2a: besichtigungsort_adresse aus dem Select entfernt — war
     // ungenutzt (location kommt aus t.adresse = gutachter_termine.adresse).
+    // CMM-49 (Entity-Sweep): faelle -> v_claim_full. fahrzeug_*/kennzeichen flach
+    // (value-identisch, div=0); claim_nummer flach statt claims-Embed.
     const { data: fall } = await db
-      .from('faelle')
+      .from('v_claim_full')
       .select(
-        'fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lead_id, claims:claim_id(claim_nummer)',
+        'fahrzeug_hersteller, fahrzeug_modell, kennzeichen, lead_id, claim_nummer',
       )
-      .eq('id', t.fall_id)
+      .eq('fall_id', t.fall_id)
       .maybeSingle()
     if (fall) {
       eventContext.fallNummer =
-        (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? t.fall_id.slice(0, 8)
+        (fall.claim_nummer as string | null) ?? t.fall_id.slice(0, 8)
       eventContext.fahrzeug = [
         fall.fahrzeug_hersteller,
         fall.fahrzeug_modell,
