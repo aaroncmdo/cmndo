@@ -11,7 +11,7 @@ import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
-import { checkSvFreeBusy } from '@/lib/google-calendar/freebusy'
+import { ladeBelegung } from '@/lib/termine/engine'
 import { touchClaimRecencyByFall } from '@/lib/claims/touch-recency'
 
 type ActionResult = { success: boolean; error?: string }
@@ -34,21 +34,22 @@ async function assertSvKalenderFrei(
   svId: string,
   slotIso: string,
 ): Promise<ActionResult | null> {
-  const { data: sv } = await admin
-    .from('sachverstaendige')
-    .select('profile_id')
-    .eq('id', svId)
-    .maybeSingle()
-  if (!sv?.profile_id) return null // ohne profile_id kein Calendar-Check möglich
-
-  const status = await checkSvFreeBusy(sv.profile_id as string, slotIso)
-  if (status === 'belegt') {
+  // Externe-Kalender-Busy (Google/CalDAV) via v_belegung (belegung_typ='extern' =
+  // sv_kalender_events_cache, vom Cron befüllt). Bewusst NUR 'extern': Buchungen/
+  // Reservierungen (inkl. des eigenen, gerade zu bestätigenden Termins) sind
+  // 'buchung' und werden separat behandelt → kein Self-Konflikt. Asymmetrisches
+  // Fenster [t-60, t+dauer+60] (identisch zum früheren checkSvFreeBusy).
+  const t = new Date(slotIso).getTime()
+  const von = new Date(t - 60 * 60_000).toISOString()
+  const bis = new Date(t + (TERMIN_DAUER_MIN + 60) * 60_000).toISOString()
+  const fenster = await ladeBelegung({ typ: 'sachverstaendiger', id: svId }, von, bis, admin)
+  if (fenster.some((f) => f.belegungTyp === 'extern')) {
     return {
       success: false,
       error: 'Sachverständiger ist zu diesem Zeitpunkt anderweitig gebucht (Kalender). Bitte einen anderen Slot wählen.',
     }
   }
-  // 'frei' oder 'unbekannt' (Token / API down) → fail-open, weiter buchen.
+  // frei oder DB-Fehler (ladeBelegung fail-open → []) → fail-open, weiter buchen.
   return null
 }
 
