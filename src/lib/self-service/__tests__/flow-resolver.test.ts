@@ -66,4 +66,20 @@ describe('resolveFlowTerminState (AAR-956 §4 Resolver)', () => {
       }
     }
   })
+
+  // Explizite 2x2-Matrix "SV gesetzt x Termin gesetzt" (Ort vorhanden, nicht disqualifiziert).
+  // "SV gesetzt" = fixerSvId (Monika/Dispatcher-Pick); "Termin gesetzt" = hatTerminMitSv
+  // (page.tsx terminMitSv, bezug-aware seit #2636). hatTerminMitSv=true ueberstimmt
+  // fixerSvId IMMER (Termin gewinnt, §4.1) — auch wenn beide gesetzt sind.
+  it('Matrix SVxTermin: Termin gewinnt (zeige_termin); sonst SV->fixer / kein-SV->global', () => {
+    const matrix: Array<{ fixerSvId: string | null; hatTerminMitSv: boolean; erwartet: FlowTerminState['kind'] }> = [
+      { fixerSvId: 'sv-x', hatTerminMitSv: true, erwartet: 'zeige_termin' }, // SV + Termin
+      { fixerSvId: null, hatTerminMitSv: true, erwartet: 'zeige_termin' }, // kein SV + Termin (Termin gewinnt)
+      { fixerSvId: 'sv-x', hatTerminMitSv: false, erwartet: 'buchen_fixer' }, // SV + kein Termin
+      { fixerSvId: null, hatTerminMitSv: false, erwartet: 'buchen_global' }, // kein SV + kein Termin
+    ]
+    for (const { fixerSvId, hatTerminMitSv, erwartet } of matrix) {
+      expect(resolveFlowTerminState({ ...base, fixerSvId, hatTerminMitSv }).kind).toBe(erwartet)
+    }
+  })
 })
