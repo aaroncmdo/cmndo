@@ -116,7 +116,7 @@ export function FlowFeststellungStep({
               className="rounded-ios-md border border-claimondo-border bg-white p-4"
               data-testid="flow-doc-manuell"
             >
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60 mb-3">
+              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-claimondo-ondo mb-3">
                 {t('step_feststellung.fahrzeugdaten')}
               </p>
               <div className="space-y-4">
@@ -139,7 +139,7 @@ export function FlowFeststellungStep({
         {sektionen.map(({ phase, felder }) => (
           <section key={phase.id}>
             {phase.titel && (
-              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60 mb-3">
+              <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-claimondo-ondo mb-3">
                 {phase.titel}
               </h2>
             )}

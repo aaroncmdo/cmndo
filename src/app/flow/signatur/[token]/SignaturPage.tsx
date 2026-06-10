@@ -197,7 +197,7 @@ function SignatureStep({
           <button
             onClick={handleSubmit}
             disabled={isEmpty || submitting}
-            className="w-full py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
+            className="w-full py-4 rounded-ios-md bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-base disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98] transition-all"
           >
             {submitting ? t('submitting') : buttonLabel}
           </button>
