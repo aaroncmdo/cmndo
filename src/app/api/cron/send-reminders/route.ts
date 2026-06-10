@@ -57,7 +57,8 @@ export async function GET(request: Request) {
       // Termin frisch laden — Status-Check
       const { data: termin } = await supabase
         .from('gutachter_termine')
-        .select('id, sv_id, fall_id, lead_id, claim_id, start_zeit, end_zeit, status')
+        // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+        .select('id, assignee_id, fall_id, lead_id, claim_id, start_zeit, end_zeit, status')
         .eq('id', reminder.termin_id)
         .single()
 
@@ -109,7 +110,7 @@ export async function GET(request: Request) {
       const { data: sv } = await supabase
         .from('sachverstaendige')
         .select('id, profile_id, standort_lat, standort_lng')
-        .eq('id', termin.sv_id)
+        .eq('id', termin.assignee_id)
         .single()
 
       let svVorname = '', svNachname = '', svTelefon: string | null = null
@@ -181,7 +182,8 @@ export async function GET(request: Request) {
         const { data: vorig } = await supabase
           .from('gutachter_termine')
           .select('id, claim_id')
-          .eq('sv_id', termin.sv_id)
+          .eq('assignee_id', termin.assignee_id)
+          .eq('assignee_typ', 'sachverstaendiger')
           .neq('id', termin.id)
           .in('status', ['reserviert', 'bestaetigt'])
           .gte('start_zeit', `${berlinDateStr}T00:00:00Z`)
