@@ -36,7 +36,8 @@ export async function generateReminderForTermin(terminId: string): Promise<void>
   // Termin laden
   const { data: termin, error: terminErr } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, lead_id, start_zeit, end_zeit, status')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, assignee_id, fall_id, lead_id, start_zeit, end_zeit, status')
     .eq('id', terminId)
     .single()
 
@@ -62,7 +63,7 @@ export async function generateReminderForTermin(terminId: string): Promise<void>
   // 3. sv_route — berechneSvReminderZeit
   const svRoute = await berechneSvReminderZeit({
     id: termin.id,
-    sv_id: termin.sv_id,
+    assignee_id: termin.assignee_id,
     fall_id: termin.fall_id,
     start_zeit: termin.start_zeit,
     end_zeit: termin.end_zeit,
