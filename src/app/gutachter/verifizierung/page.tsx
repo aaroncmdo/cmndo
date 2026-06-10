@@ -207,21 +207,21 @@ export default async function VerifizierungPage() {
           </p>
         )}
         {sv.sa_vorlage_status === 'ausstehend' && sv.sa_vorlage_hochgeladen_am && (
-          <p className="text-sm text-claimondo-navy bg-amber-50 rounded-ios-lg px-3 py-2">
+          <p className="text-sm text-claimondo-navy bg-warning-soft rounded-ios-lg px-3 py-2">
             Eingereicht am {formatDatum(sv.sa_vorlage_hochgeladen_am)} — wird vom Admin geprüft.
           </p>
         )}
         {sv.sa_vorlage_status === 'zurueckgewiesen' && (
-          <div className="text-sm bg-red-50 rounded-ios-lg px-3 py-2 space-y-1">
-            <p className="text-red-700 font-medium">Zurückgewiesen</p>
+          <div className="text-sm bg-danger-soft rounded-ios-lg px-3 py-2 space-y-1">
+            <p className="text-danger-strong font-medium">Zurückgewiesen</p>
             {sv.sa_vorlage_admin_notiz && (
-              <p className="text-red-600 text-xs">Grund: {sv.sa_vorlage_admin_notiz}</p>
+              <p className="text-danger text-xs">Grund: {sv.sa_vorlage_admin_notiz}</p>
             )}
-            <p className="text-red-600 text-xs">Bitte neu hochladen. Der Re-Upload-Weg kommt in Kürze.</p>
+            <p className="text-danger text-xs">Bitte neu hochladen. Der Re-Upload-Weg kommt in Kürze.</p>
           </div>
         )}
         {sv.sa_vorlage_status === 'geprueft' && (
-          <p className="text-sm text-green-700 bg-green-50 rounded-ios-lg px-3 py-2">
+          <p className="text-sm text-success-strong bg-success-soft rounded-ios-lg px-3 py-2">
             Freigegeben am {sv.sa_vorlage_geprueft_am ? formatDatum(sv.sa_vorlage_geprueft_am) : '—'}. Dispatch ist aktiv.
           </p>
         )}
@@ -245,7 +245,7 @@ export default async function VerifizierungPage() {
           </p>
         )}
         {sv.verifizierung_status === 'ausstehend' && sv.verifizierung_frist_bis && tageOffen !== null && (
-          <div className={`text-sm rounded-ios-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
+          <div className={`text-sm rounded-ios-lg px-3 py-2 ${tageOffen <= 4 ? 'bg-warning-soft text-warning-strong' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
             <p className="font-medium">
               Frist: {formatDatum(sv.verifizierung_frist_bis)} — noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} offen
             </p>
@@ -253,15 +253,15 @@ export default async function VerifizierungPage() {
           </div>
         )}
         {sv.verifizierung_status === 'frist_ueberschritten' && (
-          <div className="text-sm bg-red-50 rounded-ios-lg px-3 py-2 space-y-1">
-            <p className="text-red-700 font-medium">Frist überschritten</p>
-            <p className="text-red-600 text-xs">
+          <div className="text-sm bg-danger-soft rounded-ios-lg px-3 py-2 space-y-1">
+            <p className="text-danger-strong font-medium">Frist überschritten</p>
+            <p className="text-danger text-xs">
               Bitte reichen Sie die fehlenden Unterlagen umgehend nach, damit Ihr Dispatch-Zugang nicht gesperrt wird.
             </p>
           </div>
         )}
         {sv.verifizierung_status === 'geprueft' && (
-          <p className="text-sm text-green-700 bg-green-50 rounded-ios-lg px-3 py-2">
+          <p className="text-sm text-success-strong bg-success-soft rounded-ios-lg px-3 py-2">
             Vollständig verifiziert{sv.verifiziert_am ? ` am ${formatDatum(sv.verifiziert_am)}` : ''}.
           </p>
         )}
@@ -291,7 +291,7 @@ export default async function VerifizierungPage() {
                       <p className="text-sm font-medium text-claimondo-navy">
                         {slot.label}
                         {slot.pflicht && (
-                          <span className="ml-2 text-[10px] text-red-600 font-semibold">Pflicht</span>
+                          <span className="ml-2 text-[10px] text-danger font-semibold">Pflicht</span>
                         )}
                       </p>
                       {slot.quali ? (
@@ -341,28 +341,28 @@ export default async function VerifizierungPage() {
 function StatusBadge({ status }: { status: string | null | undefined }) {
   if (status === 'geprueft') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-100 text-green-700 text-xs font-medium">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-success-soft text-success-strong text-xs font-medium">
         <CheckCircleIcon className="w-3.5 h-3.5" /> Freigegeben
       </span>
     )
   }
   if (status === 'ausstehend') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 text-xs font-medium">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-warning-soft text-warning-strong text-xs font-medium">
         <ClockIcon className="w-3.5 h-3.5" /> Ausstehend
       </span>
     )
   }
   if (status === 'zurueckgewiesen') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-danger-soft text-danger-strong text-xs font-medium">
         <XCircleIcon className="w-3.5 h-3.5" /> Zurückgewiesen
       </span>
     )
   }
   if (status === 'frist_ueberschritten') {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-red-100 text-red-700 text-xs font-medium">
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-danger-soft text-danger-strong text-xs font-medium">
         <AlertTriangleIcon className="w-3.5 h-3.5" /> Frist abgelaufen
       </span>
     )
@@ -382,14 +382,14 @@ function StatusBadge({ status }: { status: string | null | undefined }) {
 function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hochgeladenAm: string | null }) {
   if (status === 'geprueft') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-medium shrink-0">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-soft text-success-strong text-[10px] font-medium shrink-0">
         <CheckCircleIcon className="w-3 h-3" /> Freigegeben
       </span>
     )
   }
   if (status === 'abgelehnt') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[10px] font-medium shrink-0">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-danger-soft text-danger-strong text-[10px] font-medium shrink-0">
         <XCircleIcon className="w-3 h-3" /> Abgelehnt
       </span>
     )
@@ -403,7 +403,7 @@ function QualiSlotBadge({ status, hochgeladenAm }: { status: string | null; hoch
   }
   if (status === 'ausstehend') {
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[10px] font-medium shrink-0">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[10px] font-medium shrink-0">
         <ClockIcon className="w-3 h-3" /> Upload offen
       </span>
     )

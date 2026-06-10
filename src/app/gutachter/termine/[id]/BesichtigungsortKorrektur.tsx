@@ -44,8 +44,8 @@ export default function BesichtigungsortKorrektur({ terminId, bestaetigtVon }: P
     <div className="mt-1 space-y-1">
       {/* Trust-Badge: Vom Kunden bestätigt */}
       {bestaetigtVon === 'kunde' && (
-        <span className="inline-flex items-center gap-1 text-xs text-emerald-700 font-medium">
-          <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-600 flex-shrink-0" />
+        <span className="inline-flex items-center gap-1 text-xs text-success-strong font-medium">
+          <CheckCircleIcon className="w-3.5 h-3.5 text-success flex-shrink-0" />
           {t('vomKundenBestaetigt')}
         </span>
       )}
@@ -57,7 +57,7 @@ export default function BesichtigungsortKorrektur({ terminId, bestaetigtVon }: P
             placeholder={t('korrigieren')}
             onSelect={handlePlaceSelect}
           />
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <p className="text-xs text-danger">{error}</p>}
           <button
             type="button"
             onClick={() => { setKorrigieren(false); setError(null) }}
