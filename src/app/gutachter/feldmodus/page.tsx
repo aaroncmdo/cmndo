@@ -125,7 +125,9 @@ export default async function FeldmodusPage() {
       'id, fall_id, start_zeit, status, losgefahren_am, sv_angekommen_am, abschluss_zeit',
     )
     .in('id', terminIds)
-    .eq('sv_id', sv.id)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
 
   const terminById = new Map<string, Record<string, unknown>>()
   for (const t of termine ?? []) terminById.set(t.id as string, t)

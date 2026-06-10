@@ -38,7 +38,9 @@ export async function listPrivateEventsToday(): Promise<PrivatEventEntry[]> {
     supabase
       .from('gutachter_termine')
       .select('start_zeit')
-      .eq('sv_id', sv.id)
+      // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee_id/assignee_typ
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .gte('start_zeit', dayStart)
       .lt('start_zeit', dayEnd),
   ])

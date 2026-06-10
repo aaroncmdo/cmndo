@@ -131,7 +131,9 @@ export default async function HeutePage() {
   const { data: termine } = await supabase
     .from('gutachter_termine')
     .select('id, fall_id, lead_id, start_zeit, end_zeit, status, gesehen_am')
-    .eq('sv_id', sv.id)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', [
       'reserviert',
       'bestaetigt',
