@@ -107,8 +107,10 @@ export async function exportTagesvorbereitung({
   // 1. Termine für den SV im Datums-Bereich
   const { data: termine, error: terminErr } = await admin
     .from('gutachter_termine')
+    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
     .select('id, fall_id, start_zeit, status')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['bestaetigt', 'reserviert', 'durchgefuehrt'])
     .gte('start_zeit', vonDate.toISOString())
     .lt('start_zeit', bisDate.toISOString())
