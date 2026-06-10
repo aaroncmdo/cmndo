@@ -7,7 +7,9 @@ const LUECKE_GRENZE_MS = 4 * 60 * 60 * 1000 // 4 Stunden
 
 interface TerminData {
   id: string
-  sv_id: string
+  // CMM-49 (sv_id-Drop): assignee_id statt sv_id. Für SV-Begutachtungstermine
+  // gilt assignee_id == sv_id (assignee_typ='sachverstaendiger') → value-identisch.
+  assignee_id: string
   fall_id: string
   start_zeit: string
   end_zeit: string | null
@@ -28,7 +30,7 @@ export async function berechneSvReminderZeit(termin: TerminData): Promise<Date |
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select('id, standort_lat, standort_lng')
-    .eq('id', termin.sv_id)
+    .eq('id', termin.assignee_id)
     .single()
 
   if (!sv) return null
@@ -59,7 +61,8 @@ export async function berechneSvReminderZeit(termin: TerminData): Promise<Date |
   const { data: vorherigeTermine } = await supabase
     .from('gutachter_termine')
     .select('id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
-    .eq('sv_id', termin.sv_id)
+    .eq('assignee_id', termin.assignee_id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .neq('id', termin.id)
     .in('status', ['reserviert', 'bestaetigt'])
     .gte('start_zeit', dayStart.toISOString())
