@@ -27,7 +27,7 @@ export async function GET(request: Request) {
 
   const { data: termine24h } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit')
+    .select('id, fall_id, start_zeit')
     .gte('start_zeit', in23h)
     .lte('start_zeit', in25h)
     .eq('status', 'bestaetigt')
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
 
   const { data: termine2h } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit')
+    .select('id, fall_id, start_zeit')
     .gte('start_zeit', in90min)
     .lte('start_zeit', in150min)
     .eq('status', 'bestaetigt')

@@ -21,7 +21,8 @@ export async function GET(req: NextRequest) {
   // 1. Termin per Token finden
   const { data: termin } = await svc
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, start_zeit, status')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, assignee_id, fall_id, start_zeit, status')
     .eq('ablehnen_token', token)
     .maybeSingle()
 
@@ -65,7 +66,7 @@ export async function GET(req: NextRequest) {
     try {
       const { data: svData } = await svc.from('sachverstaendige')
         .select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
-        .eq('id', termin.sv_id)
+        .eq('id', termin.assignee_id)
         .single()
       const svP = (Array.isArray(svData?.profiles) ? svData?.profiles[0] : svData?.profiles) as { vorname: string | null; nachname: string | null } | null
       const svName = svP ? `${svP.vorname ?? ''} ${svP.nachname ?? ''}`.trim() : 'Unbekannt'
