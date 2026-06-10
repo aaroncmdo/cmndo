@@ -91,7 +91,9 @@ export default async function SVKalenderPage({
   const { data: verlegteRows } = await supabase
     .from('gutachter_termine')
     .select('id, start_zeit, end_zeit')
-    .eq('sv_id', sv.id)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee_id/assignee_typ
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .eq('status', 'verlegt')
     .gte('start_zeit', von)
     .lte('start_zeit', bis)

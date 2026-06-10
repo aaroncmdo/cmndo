@@ -50,7 +50,9 @@ export default async function ProfilPage() {
     const { data: termine } = await supabase
       .from('gutachter_termine')
       .select('id, fall_id, start_zeit, end_zeit')
-      .eq('sv_id', sv.id)
+      // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee_id/assignee_typ
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .eq('status', 'vorschlag')
       .order('start_zeit', { ascending: true })
     pendingTermine = termine ?? []
