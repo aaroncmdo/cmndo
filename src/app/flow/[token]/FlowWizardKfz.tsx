@@ -257,6 +257,14 @@ export default function FlowWizardKfz({
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
   const kundenName = [editVorname, editNachname].filter(Boolean).join(' ')
 
+  // A11y: SA-Volltext-Modal per Esc schliessbar (Backdrop-Klick existiert schon).
+  useEffect(() => {
+    if (!saVolltextOffen) return
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setSaVolltextOffen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [saVolltextOffen])
+
   // AAR-956 Task 1: Im gutachter-Step ohne zugeordneten SV/Termin NICHT passiv
   // "wir suchen ..." zeigen, sondern aktiv weiterleiten. Gibt es einen Buchungs-Step
   // (kanonischer Pfad) -> dorthin (Kunde bucht selbst); sonst direkt zur Beauftragung
@@ -626,11 +634,11 @@ export default function FlowWizardKfz({
                 {saVolltextOffen && (
                   <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
                     <div className="absolute inset-0 bg-black/40" onClick={() => setSaVolltextOffen(false)} />
-                    <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
+                    <div role="dialog" aria-modal="true" aria-labelledby="sa-volltext-title" className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
                       {/* Header */}
                       <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-claimondo-border flex-shrink-0">
-                        <h2 className="text-sm font-semibold text-claimondo-navy">{t('step_sa.popover_titel')}</h2>
-                        <button type="button" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-ios-sm hover:bg-claimondo-bg">
+                        <h2 id="sa-volltext-title" className="text-sm font-semibold text-claimondo-navy">{t('step_sa.popover_titel')}</h2>
+                        <button type="button" aria-label="Schließen" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-ios-sm hover:bg-claimondo-bg">
                           <XIcon className="w-4 h-4 text-claimondo-ondo" />
                         </button>
                       </div>
@@ -658,7 +666,7 @@ export default function FlowWizardKfz({
                         <p>{t('step_sa.volltext.s4_text')}</p>
                         <h3 className="font-semibold">{t('step_sa.volltext.s5_titel')}</h3>
                         <p>{t('step_sa.volltext.s5_text')}</p>
-                        <p className="text-xs text-claimondo-ondo/70 pt-2 border-t border-claimondo-border">{t('step_sa.volltext.footer_note')}</p>
+                        <p className="text-xs text-claimondo-ondo pt-2 border-t border-claimondo-border">{t('step_sa.volltext.footer_note')}</p>
                       </div>
                       {/* Footer */}
                       <div className="px-5 py-4 border-t border-claimondo-border flex-shrink-0">
@@ -867,7 +875,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 px-4 py-3 rounded-ios-md bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06]">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-claimondo-ondo">{label}</span>
       <span className="text-sm text-claimondo-navy break-words tracking-[-.005em]">{value}</span>
     </div>
   )

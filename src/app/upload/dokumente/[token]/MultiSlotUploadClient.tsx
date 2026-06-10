@@ -185,7 +185,7 @@ export default function MultiSlotUploadClient({
                     }}
                   />
                 </div>
-                <p className="text-[10px] text-claimondo-ondo/70 mt-1">
+                <p className="text-[10px] text-claimondo-ondo mt-1">
                   {t('progressLabel', {
                     uploaded: slots.filter((s) => s.hochgeladen).length,
                     total: slots.length,
@@ -291,7 +291,7 @@ export default function MultiSlotUploadClient({
           </div>
         )}
 
-        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo text-center mt-4">
           {t('privacyNote')}
         </p>
       </div>
@@ -498,7 +498,7 @@ function AbschlussCard({ vorname }: { vorname: string }) {
       <p className="text-sm text-claimondo-ondo">
         {t('allDoneBody')}
       </p>
-      <p className="text-[10px] text-claimondo-ondo/70">{t('closeHint')}</p>
+      <p className="text-[10px] text-claimondo-ondo">{t('closeHint')}</p>
     </div>
   )
 }

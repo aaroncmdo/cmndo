@@ -275,7 +275,7 @@ export default function Zb1UploadClient({
                   )}
                 </div>
               )}
-              <p className="text-[10px] text-claimondo-ondo/70">{t('closeHint')}</p>
+              <p className="text-[10px] text-claimondo-ondo">{t('closeHint')}</p>
             </div>
           )}
 
@@ -301,7 +301,7 @@ export default function Zb1UploadClient({
           )}
         </div>
 
-        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo text-center mt-4">
           {t('privacyNote')}
         </p>
       </div>

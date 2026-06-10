@@ -168,7 +168,7 @@ function KorrField({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-claimondo-ondo/70">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-claimondo-ondo">
         {label}
       </span>
       <input
