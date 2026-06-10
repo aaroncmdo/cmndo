@@ -28,11 +28,13 @@ export async function setTermin(
   // (Doppelungs-Bug: vorher wurde nur der jüngste upgedated, ältere blieben
   // aktiv → Fallansicht zog den falschen Termin). Den jüngsten upgraden,
   // alle weiteren cancelen.
+  // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
   const { data: aktiveTermine } = await supabase
     .from('gutachter_termine')
     .select('id, created_at')
     .eq('fall_id', fallId)
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
     .is('cancelled_at', null)
     .order('created_at', { ascending: false })
@@ -51,6 +53,8 @@ export async function setTermin(
     if (error) return { success: false, error: error.message }
     syncTerminId = primary.id as string
   } else {
+    // CMM-49 (sv_id-Drop): sv_id-PAYLOAD bleibt bis Writer-Step (Phase B) —
+    // normalize-Trigger füllt assignee_id, Reader lesen bereits assignee.
     const { data: inserted, error } = await supabase
       .from('gutachter_termine')
       .insert({ fall_id: fallId, claim_id: fall.claim_id, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
@@ -141,7 +145,8 @@ export async function ablehnTerminAction(
       .from('gutachter_termine')
       .select('id')
       .eq('id', terminId)
-      .eq('sv_id', sv.id)
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .maybeSingle()
 
     if (!termin) return { success: false, error: 'Termin nicht gefunden oder nicht autorisiert' }
@@ -175,7 +180,8 @@ export async function gegenvorschlagAction(
       .from('gutachter_termine')
       .select('id')
       .eq('id', terminId)
-      .eq('sv_id', sv.id)
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .maybeSingle()
 
     if (!termin) return { success: false, error: 'Termin nicht gefunden oder nicht autorisiert' }
