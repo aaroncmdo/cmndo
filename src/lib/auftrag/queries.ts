@@ -117,7 +117,9 @@ export async function getNaechsterAktivenAuftragForSv(
   const { data: vorOrtTermin } = await supabase
     .from('gutachter_termine')
     .select('id, start_zeit, geschaetzte_fahrtzeit_min, auftrag_id')
-    .eq('sv_id', svId)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .eq('typ', 'sv_begutachtung')
     .not('sv_angekommen_am', 'is', null)
     .is('durchgefuehrt_am', null)
@@ -145,7 +147,9 @@ export async function getNaechsterAktivenAuftragForSv(
   const { data: termin } = await supabase
     .from('gutachter_termine')
     .select('id, start_zeit, geschaetzte_fahrtzeit_min, auftrag_id')
-    .eq('sv_id', svId)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .eq('typ', 'sv_begutachtung')
     .in('status', ['bestaetigt', 'reserviert'])
     .is('sv_angekommen_am', null)
