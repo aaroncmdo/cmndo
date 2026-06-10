@@ -169,7 +169,7 @@ export function FlowSlotStep({
           <button
             type="button"
             onClick={onOhneTermin}
-            className="text-sm text-claimondo-ondo/70 underline"
+            className="text-sm text-claimondo-ondo underline"
             data-testid="buchung-spaeter-link"
           >
             {t('matching.spaeter_link')}
