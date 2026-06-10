@@ -32,7 +32,7 @@ const SIZE_CLS: Record<Size, string> = {
 /**
  * Wiederverwendbarer Sheet-Container fuer Modals, Bestaetigungs-Pages und
  * Wizard-Stufen. Liefert das Claimondo-Liquid-Glass-Sheet-Look mit den
- * Tokens rounded-claimondo-sheet + shadow-sheet und (optional) der
+ * Tokens rounded-ios-xl + shadow-sheet und (optional) der
  * sheetIn-Eintritts-Animation.
  */
 export function SheetCard({
@@ -46,7 +46,7 @@ export function SheetCard({
   return (
     <As
       className={cn(
-        'bg-white rounded-claimondo-sheet shadow-sheet w-full',
+        'bg-white rounded-ios-xl shadow-sheet w-full',
         SIZE_CLS[size],
         PADDING_CLS[padding],
         animateIn && 'animate-[sheetIn_.42s_cubic-bezier(.16,1,.3,1)_both]',

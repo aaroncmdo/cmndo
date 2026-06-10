@@ -18,7 +18,7 @@ export default function FlowError({ error: _error }: { error: Error }) {
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-6">
       <div className="max-w-md w-full bg-white rounded-ios-lg p-8 text-center shadow-claimondo-lg shadow-black/10">
-        <div className="w-14 h-14 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 rounded-full bg-danger/10 flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl">!</span>
         </div>
         <h1 className="text-lg font-semibold text-claimondo-navy mb-2" style={{ fontFamily: 'Montserrat, sans-serif' }}>

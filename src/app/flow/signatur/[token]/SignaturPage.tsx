@@ -92,8 +92,8 @@ function SuccessScreen() {
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-5">
       <div className="text-center max-w-xs">
-        <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-green-500/15 flex items-center justify-center">
-          <CheckIcon className="w-8 h-8 text-green-400" />
+        <div className="mx-auto mb-6 w-16 h-16 rounded-full bg-success/15 flex items-center justify-center">
+          <CheckIcon className="w-8 h-8 text-success" />
         </div>
         <h1 className="text-2xl font-semibold text-claimondo-navy mb-3">{t('successTitle')}</h1>
         <p className="text-claimondo-ondo text-sm leading-relaxed">
@@ -190,7 +190,7 @@ function SignatureStep({
         {/* Buttons */}
         <div className="space-y-3 mt-auto">
           {error && (
-            <p className="text-sm text-red-400 text-center rounded-ios-md bg-red-500/10 px-4 py-3">
+            <p className="text-sm text-danger-strong text-center rounded-ios-md bg-danger/10 px-4 py-3">
               {error}
             </p>
           )}
