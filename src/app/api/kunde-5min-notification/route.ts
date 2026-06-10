@@ -14,7 +14,8 @@ export async function POST(request: Request) {
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, notification_5min_gesendet_am')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, fall_id, assignee_id, notification_5min_gesendet_am')
     .eq('kunden_tracking_token', token)
     .single()
 
@@ -34,7 +35,7 @@ export async function POST(request: Request) {
   }
 
   // SV-Name
-  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
   let svName = 'Gutachter'
   if (sv?.profile_id) {
     const { data: p } = await db.from('profiles').select('vorname').eq('id', sv.profile_id).single()

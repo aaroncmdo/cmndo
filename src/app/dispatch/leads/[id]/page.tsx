@@ -29,9 +29,11 @@ export default async function DispatchLeadDetail({
   if (!lead) notFound()
 
   // AAR-115 + AAR-134: aktiver SV-Termin fuer das termin-Override (SvDispatchPanel).
+  // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id; der sachverstaendige-Embed lief
+  // über die sv_id-FK (bricht beim DROP) → separater Lookup unten.
   const { data: svTerminRaw } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+    .select('id, assignee_id, assignee_typ, start_zeit, end_zeit, status, sv_ablehnung_grund, sv_vorgeschlagene_slots')
     .eq('lead_id', id)
     .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'abgelehnt'])
     .order('created_at', { ascending: false })
@@ -40,24 +42,31 @@ export default async function DispatchLeadDetail({
 
   const svTerminRow = svTerminRaw as {
     id: string
-    sv_id: string
+    assignee_id: string
+    assignee_typ: string | null
     start_zeit: string
     end_zeit: string
     status: string
     sv_ablehnung_grund: string | null
     sv_vorgeschlagene_slots: { start: string; end: string }[] | null
-    sachverstaendige: unknown
   } | null
-  const svRel = svTerminRow?.sachverstaendige
-  const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
-  const profileRel = sv?.profiles
-  const svProfile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-    | { vorname: string | null; nachname: string | null }
-    | null
+  // CMM-49: SV-Profil separat laden (assignee_id ist generisch, kein FK-Embed).
+  let svProfile: { vorname: string | null; nachname: string | null } | null = null
+  if (svTerminRow?.assignee_id && svTerminRow.assignee_typ === 'sachverstaendiger') {
+    const { data: svRow } = await supabase
+      .from('sachverstaendige')
+      .select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
+      .eq('id', svTerminRow.assignee_id)
+      .maybeSingle()
+    const profileRel = (svRow as { profiles: unknown } | null)?.profiles
+    svProfile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+      | { vorname: string | null; nachname: string | null }
+      | null
+  }
   const aktiverSvTermin = svTerminRow
     ? {
         id: svTerminRow.id,
-        sv_id: svTerminRow.sv_id,
+        sv_id: svTerminRow.assignee_id,
         sv_vorname: svProfile?.vorname ?? null,
         sv_nachname: svProfile?.nachname ?? null,
         start_zeit: svTerminRow.start_zeit,

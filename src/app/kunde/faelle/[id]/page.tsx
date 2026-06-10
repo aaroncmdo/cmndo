@@ -215,7 +215,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
       .from('gutachter_termine')
-      .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id, sv_vorgeschlagene_slots')
+      // CMM-49 (sv_id-Drop): sv_id:assignee_id-Alias — Feldname sv_id bleibt für den
+      // AktiverTermin-Consumer, Wert aus assignee_id (value-identisch für SV-Termine).
+      .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id:assignee_id, sv_vorgeschlagene_slots')
       .eq('fall_id', id)
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
       .order('created_at', { ascending: false })
@@ -227,7 +229,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // Vergangenheit liegt (= Verlegung obsolet, Termin gelaufen oder verstrichen).
     const { data: verlegungPendingRow } = await admin
       .from('gutachter_termine')
-      .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, sv_id')
+      .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, assignee_id')
       .eq('fall_id', fall.id as string)
       .eq('status', 'verlegung_pending')
       .gt('start_zeit', new Date().toISOString())
@@ -243,11 +245,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .maybeSingle()
       // SV-Vorname aus profiles
       let svVorname = ''
-      if (verlegungPendingRow.sv_id) {
+      if (verlegungPendingRow.assignee_id) {
         const { data: sv } = await admin
           .from('sachverstaendige')
           .select('profile_id')
-          .eq('id', verlegungPendingRow.sv_id as string)
+          .eq('id', verlegungPendingRow.assignee_id as string)
           .maybeSingle()
         if (sv?.profile_id) {
           const { data: p } = await admin
@@ -401,7 +403,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     const aktiveStatus = ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben']
     const { data: svKandidaten } = await admin
       .from('gutachter_termine')
-      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am, sv_id, kb_id, created_at')
+      // CMM-49 (sv_id-Drop): assignee_id statt sv_id (typ='sv_begutachtung' → value-identisch).
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am, assignee_id, kb_id, created_at')
       .eq('fall_id', id)
       .eq('typ', 'sv_begutachtung')
       .in('status', aktiveStatus)
@@ -413,7 +416,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     )[0] ?? null
     const { data: kbTermin } = await admin
       .from('gutachter_termine')
-      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, sv_id, kb_id')
+      // CMM-49 (sv_id-Drop): sv_id aus Select entfernt (unused; kb_beratung-Termine haben ohnehin sv_id=null).
+      .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, kb_id')
       .eq('fall_id', id)
       .eq('typ', 'kb_beratung')
       .in('status', aktiveStatus)
@@ -425,8 +429,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     // SV-Kontakt für TerminSectionCard
     let svKontakt: { name: string | null; telefon: string | null; email: string | null; avatar_url: string | null } | null = null
-    if (svTermin?.sv_id ?? fall.sv_id) {
-      const svId = (svTermin?.sv_id as string | null) ?? (fall.sv_id as string | null)
+    if (svTermin?.assignee_id ?? fall.sv_id) {
+      const svId = (svTermin?.assignee_id as string | null) ?? (fall.sv_id as string | null)
       if (svId) {
         const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', svId).maybeSingle()
         if (sv?.profile_id) {
