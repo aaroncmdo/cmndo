@@ -16,7 +16,7 @@ type ActionResult<T = undefined> = T extends undefined
 interface TerminAuth {
   id: string
   fall_id: string
-  sv_id: string
+  // CMM-49 (sv_id-Drop): sv_id entfernt — war selektiert aber nie konsumiert (dead).
   start_zeit: string
   kunden_tracking_token: string
   kunde_tracking_aktiviert: boolean | null
@@ -31,7 +31,7 @@ async function verifyToken(
   const { data: termin } = await db
     .from('gutachter_termine')
     .select(
-      'id, fall_id, sv_id, start_zeit, kunden_tracking_token, kunde_tracking_aktiviert',
+      'id, fall_id, start_zeit, kunden_tracking_token, kunde_tracking_aktiviert',
     )
     .eq('id', terminId)
     .eq('kunden_tracking_token', token)
