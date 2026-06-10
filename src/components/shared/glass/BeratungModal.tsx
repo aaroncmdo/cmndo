@@ -71,7 +71,7 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
       onClick={(e) => { if (e.target === e.currentTarget) handleClose() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 2147483646,
-        background: 'rgba(13,27,62,.55)', backdropFilter: 'blur(8px)',
+        background: 'color-mix(in srgb, var(--brand-primary, #0D1B3E) 55%, transparent)', backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         padding: 16,

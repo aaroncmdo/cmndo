@@ -342,3 +342,75 @@ if (statusDelta < 0) {
 } else {
   console.log(`✓ Status-Ratchet: ${statusOccurrences} raw Status-Scales (= Baseline ${STATUS_BASELINE_OCCURRENCES}).`)
 }
+
+// ─── Whitelabel: Brand-rgba-in-Gradient-Ratchet ────────────────────────────
+// Ambient-Brand-Leaks: raw rgba() mit Claimondo-Marken-Toenen INNERHALB einer
+// CSS-*-gradient()-Funktion branden NICHT mit (anders als der etablierte
+// color-mix(in srgb, var(--brand-*, #fb) N%, transparent)-Pattern, ~40 Consumer).
+// Der Hex-Audit (oben) prueft nur Hex, nicht rgba — diese Luecke schliesst dieser
+// Ratchet fuer den haeufigsten + sichtbarsten Leak-Typ: Ambient-Hintergrund-
+// Verlaeufe auf kunden-/SV-gebrandeten Flaechen (FlowLink-Audit 2026-06-10).
+//
+// NUR Gradient-Kontext = hohe Praezision, ~0 False-Positives: Schatten
+// (boxShadow/drop-shadow), Avatar-/Badge-Fills, Mapbox-Paint-Arrays und
+// Native-rgba (RN hat kein color-mix/CSS-Vars) nutzen rgba LEGITIM und werden
+// NICHT erfasst. .native.tsx ist zusaetzlich ausgeschlossen.
+//
+// Baseline = Bestand (grandfathered): auth (passwort-*) + admin-Layout-Ambient
+// sind Claimondo-only / nicht whitelabel-gebrandet → keine echten Leaks; makler
+// = Follow-up (B2B-brandbar). Boy-Scout senkt. Neue Brand-rgba-Gradienten werden
+// geblockt → auf das color-mix-var-Pattern umstellen.
+const BRAND_RGBA_GRADIENT_BASELINE = 10
+const BRAND_RGBA_GRADIENT_RE = /(?:linear|radial|conic)-gradient\([^;{}\n]*?rgba\(\s*(?:13\s*,\s*27\s*,\s*62|69\s*,\s*115\s*,\s*162|123\s*,\s*163\s*,\s*204)\b/g
+
+let brandRgbaOccurrences = 0
+const brandRgbaFiles = new Set()
+const brandRgbaExamples = []
+for (const file of files) {
+  if (/\.native\.tsx$/.test(file)) continue
+  let content
+  try {
+    content = readFileSync(file, 'utf8')
+  } catch {
+    continue
+  }
+  if (/Token-Audit-Skip/i.test(content.slice(0, 400))) continue
+  BRAND_RGBA_GRADIENT_RE.lastIndex = 0
+  let g
+  let fileHit = false
+  while ((g = BRAND_RGBA_GRADIENT_RE.exec(content)) !== null) {
+    brandRgbaOccurrences++
+    fileHit = true
+    if (brandRgbaExamples.length < 5) {
+      const line = content.slice(0, g.index).split('\n').length
+      brandRgbaExamples.push(`  ${file}:${line}`)
+    }
+  }
+  if (fileHit) brandRgbaFiles.add(file)
+}
+
+const brandRgbaDelta = brandRgbaOccurrences - BRAND_RGBA_GRADIENT_BASELINE
+if (brandRgbaDelta > 0) {
+  console.error('')
+  console.error(
+    `✗ Brand-rgba-Gradient-Ratchet: ${brandRgbaOccurrences} raw Brand-rgba in CSS-Gradienten (${brandRgbaFiles.size} Files) — Baseline ist ${BRAND_RGBA_GRADIENT_BASELINE}, Delta +${brandRgbaDelta}.`,
+  )
+  console.error('')
+  console.error('Beispiele:')
+  for (const ex of brandRgbaExamples) console.error(ex)
+  console.error('')
+  console.error('Brand-Toene in Gradienten branden nicht mit. Nutze das color-mix-var-Pattern:')
+  console.error('  rgba(123,163,204,.18)  →  color-mix(in srgb, var(--brand-accent, #7BA3CC) 18%, transparent)')
+  console.error('  rgba(69,115,162,.08)   →  color-mix(in srgb, var(--brand-secondary, #4573A2) 8%, transparent)')
+  console.error('  rgba(13,27,62,.55)     →  color-mix(in srgb, var(--brand-primary, #0D1B3E) 55%, transparent)')
+  console.error('(Schatten/Avatare/Badges/Mapbox/Native nutzen rgba legitim — dieser Ratchet erfasst nur Gradient-Fills.)')
+  process.exit(1)
+}
+
+if (brandRgbaDelta < 0) {
+  console.log(
+    `✓ Brand-rgba-Gradient-Ratchet: ${brandRgbaOccurrences} Brand-rgba-Gradienten (${brandRgbaDelta} unter Baseline) — Baseline kann auf ${brandRgbaOccurrences} gesenkt werden.`,
+  )
+} else {
+  console.log(`✓ Brand-rgba-Gradient-Ratchet: ${brandRgbaOccurrences} Brand-rgba-Gradienten (= Baseline ${BRAND_RGBA_GRADIENT_BASELINE}).`)
+}
