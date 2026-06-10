@@ -343,8 +343,10 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
   const nowIso = new Date().toISOString()
   const { data: termine } = await supabase
     .from('gutachter_termine')
+    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
     .select('id, typ, start_zeit, status, fall_id')
-    .eq('sv_id', svId)
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'bestaetigt', 'unterwegs', 'losgefahren'])
     .gte('start_zeit', new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString())
     .order('start_zeit', { ascending: true })
