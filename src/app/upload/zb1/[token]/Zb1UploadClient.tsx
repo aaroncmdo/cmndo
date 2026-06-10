@@ -64,9 +64,13 @@ async function compressImage(file: File): Promise<{ base64: string; contentType:
 export default function Zb1UploadClient({
   token,
   vorname,
+  logoUrl,
+  firmenname,
 }: {
   token: string
   vorname: string
+  logoUrl?: string | null
+  firmenname?: string | null
 }) {
   const t = useTranslations('upload.zb1')
   const [step, setStep] = useState<Step>('hinweise')
@@ -133,10 +137,17 @@ export default function Zb1UploadClient({
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <span className="text-2xl font-bold tracking-tight">
-            <span className="text-claimondo-navy">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
-          </span>
+          {logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={logoUrl} alt={firmenname ?? 'Logo'} className="h-9 mx-auto object-contain" />
+          ) : firmenname ? (
+            <span className="text-2xl font-bold tracking-tight text-claimondo-navy">{firmenname}</span>
+          ) : (
+            <span className="text-2xl font-bold tracking-tight">
+              <span className="text-claimondo-navy">Claim</span>
+              <span className="text-claimondo-light-blue">ondo</span>
+            </span>
+          )}
           <p className="text-xs text-claimondo-ondo mt-1">{t('pageSubtitle')}</p>
         </div>
 

@@ -69,6 +69,8 @@ export default async function DokumenteUploadPage({
           token={token}
           vorname={status.vorname ?? ''}
           slots={status.slots}
+          logoUrl={branding.useBrand ? branding.logoUrl : null}
+          firmenname={branding.useBrand ? branding.firmenname : null}
         />
       </NextIntlClientProvider>
     </div>

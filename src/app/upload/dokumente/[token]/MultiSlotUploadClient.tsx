@@ -116,10 +116,14 @@ export default function MultiSlotUploadClient({
   token,
   vorname,
   slots: initialSlots,
+  logoUrl,
+  firmenname,
 }: {
   token: string
   vorname: string
   slots: SlotUi[]
+  logoUrl?: string | null
+  firmenname?: string | null
 }) {
   const t = useTranslations('upload.dokumente')
   const [slots, setSlots] = useState<SlotUi[]>(initialSlots)
@@ -140,17 +144,24 @@ export default function MultiSlotUploadClient({
         className="pointer-events-none absolute inset-0 -z-10"
         style={{
           background: [
-            'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%)',
-            'radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%)',
+            'radial-gradient(60% 50% at 80% 0%, color-mix(in srgb, var(--brand-accent, #7BA3CC) 18%, transparent), transparent 60%)',
+            'radial-gradient(50% 50% at 0% 100%, color-mix(in srgb, var(--brand-secondary, #4573A2) 8%, transparent), transparent 70%)',
           ].join(', '),
         }}
       />
       <div className="max-w-md mx-auto">
         <div className="text-center mb-6">
-          <span className="text-2xl font-bold tracking-tight">
-            <span className="text-claimondo-navy">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
-          </span>
+          {logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={logoUrl} alt={firmenname ?? 'Logo'} className="h-9 mx-auto object-contain" />
+          ) : firmenname ? (
+            <span className="text-2xl font-bold tracking-tight text-claimondo-navy">{firmenname}</span>
+          ) : (
+            <span className="text-2xl font-bold tracking-tight">
+              <span className="text-claimondo-navy">Claim</span>
+              <span className="text-claimondo-light-blue">ondo</span>
+            </span>
+          )}
           <p className="text-xs text-claimondo-ondo mt-1">{t('pageSubtitle')}</p>
         </div>
 
