@@ -31,12 +31,15 @@ export async function POST(req: NextRequest) {
     const db = createAdminClient()
 
     // Verify SV owns this termin
+    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine);
+    // das Select-Feld sv_id war dead (nur Existenz-Check) → gedroppt.
     const { data: termin } = await db
       .from('gutachter_termine')
-      .select('id, sv_id')
+      .select('id')
       .eq('id', terminId)
       .eq('typ', 'sv_begutachtung')
-      .eq('sv_id', sv.id)
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .single()
 
     if (!termin) return NextResponse.json({ error: 'Termin nicht gefunden' }, { status: 404 })
