@@ -357,7 +357,7 @@ function SlotCard({
             <button
               type="button"
               onClick={() => cameraInputRef.current?.click()}
-              className="flex flex-col items-center gap-1 px-2 py-3 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
+              className="flex flex-col items-center gap-1 px-2 py-3 rounded-ios-sm bg-claimondo-ondo text-white text-xs font-semibold hover:bg-claimondo-shield"
             >
               <CameraIcon className="w-5 h-5" />
               {t('cameraButton')}
@@ -407,7 +407,7 @@ function SlotCard({
             <button
               type="button"
               onClick={onUpload}
-              className="flex items-center justify-center gap-1 px-2 py-2.5 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
+              className="flex items-center justify-center gap-1 px-2 py-2.5 rounded-ios-sm bg-claimondo-ondo text-white text-xs font-semibold hover:bg-claimondo-shield"
             >
               <CheckCircle2Icon className="w-4 h-4" />
               {t('useButton')}
@@ -474,7 +474,7 @@ function SlotCard({
           <button
             type="button"
             onClick={onReset}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-sm bg-claimondo-navy text-white text-xs font-semibold hover:bg-claimondo-shield"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-sm bg-claimondo-ondo text-white text-xs font-semibold hover:bg-claimondo-shield"
           >
             <RefreshCwIcon className="w-3 h-3" />
             {t('retryButton')}

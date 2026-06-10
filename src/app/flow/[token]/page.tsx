@@ -79,7 +79,7 @@ export default async function FlowPage({
             </p>
             <a
               href="/login"
-              className="inline-block w-full min-h-14 py-4 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-base active:scale-[0.98] transition-all"
+              className="inline-block w-full min-h-14 py-4 rounded-ios-md bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-base active:scale-[0.98] transition-all"
             >
               {tPre('done.cta_login')}
             </a>

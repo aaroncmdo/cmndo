@@ -175,7 +175,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CameraIcon className="w-6 h-6" />
                   {t('cameraButton')}
@@ -227,7 +227,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={handleUpload}
-                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CheckCircle2Icon className="w-4 h-4" />
                   {t('useButton')}
@@ -292,7 +292,7 @@ export default function Zb1UploadClient({
               <button
                 type="button"
                 onClick={reset}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
               >
                 <RefreshCwIcon className="w-4 h-4" />
                 {t('retryButton')}

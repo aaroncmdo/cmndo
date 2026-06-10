@@ -665,7 +665,7 @@ export default function FlowWizardKfz({
                         <button
                           type="button"
                           onClick={() => { setSaAccepted(true); setSaVolltextOffen(false) }}
-                          className="w-full py-3.5 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-sm transition-all active:scale-[0.98]"
+                          className="w-full py-3.5 rounded-ios-md bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm transition-all active:scale-[0.98]"
                         >
                           {t('step_sa.volltext.cta_accept')}
                         </button>
