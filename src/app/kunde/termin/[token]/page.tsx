@@ -26,9 +26,12 @@ export default async function KundeTerminPage({
   const t = await getTranslations('kunde.tracking')
 
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine selbst (SSoT).
+  // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+  // Der Wert speist nur den svId-Prop → sv_live_position-Query (eigene Tabelle,
+  // eigene sv_id-Spalte) + den HMAC-Channel-Namen — beide value-identisch (gleiche UUID).
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_bestaetigt_am, besichtigungsort_bestaetigt_von, kanal')
+    .select('id, fall_id, assignee_id, start_zeit, status, losgefahren_am, ankunft_zeit, kunden_tracking_token, notification_5min_gesendet_am, vorgeschlagenes_datum, gegenvorschlag_von, kunde_tracking_aktiviert, kunde_angekommen_am, besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_bestaetigt_am, besichtigungsort_bestaetigt_von, kanal')
     .eq('kunden_tracking_token', token)
     .single()
 
@@ -55,7 +58,7 @@ export default async function KundeTerminPage({
   if (termin.ankunft_zeit) {
     const ankunftTime = new Date(termin.ankunft_zeit).getTime()
     if (now - ankunftTime > 30 * 60 * 1000) {
-      const { data: svProf } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+      const { data: svProf } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
       let svName = t('fallback.gutachter')
       if (svProf?.profile_id) {
         const { data: p } = await db.from('profiles').select('vorname').eq('id', svProf.profile_id).single()
@@ -121,7 +124,7 @@ export default async function KundeTerminPage({
   const { data: svRow } = await db
     .from('sachverstaendige')
     .select('profile_id, brand_theme, brand_primary, brand_secondary, use_custom_branding, verifiziert_am')
-    .eq('id', termin.sv_id)
+    .eq('id', termin.assignee_id)
     .single()
 
   let svVorname = t('fallback.gutachter')
@@ -174,7 +177,7 @@ export default async function KundeTerminPage({
   // BUG-105: Channel-Name hashen damit svId nicht direkt exponiert wird
   const realtimeSecret = process.env.SUPABASE_REALTIME_SECRET || 'dev-fallback-secret-change-me'
   const channelHash = createHmac('sha256', realtimeSecret)
-    .update(String(termin.sv_id) + token)
+    .update(String(termin.assignee_id) + token)
     .digest('hex')
     .slice(0, 16)
 
@@ -187,7 +190,7 @@ export default async function KundeTerminPage({
         />
         <div className="flex-1 min-h-0 flex flex-col">
           <KundeTrackingClient
-            svId={termin.sv_id}
+            svId={termin.assignee_id}
             channelHash={channelHash}
             svVorname={svVorname}
             svNachname={svNachname}
