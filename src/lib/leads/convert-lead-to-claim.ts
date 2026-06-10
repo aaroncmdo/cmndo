@@ -485,7 +485,10 @@ export async function convertLeadToClaim(
       nachname: (lead.gegner_name as string | null) ?? null,
       kennzeichen: (lead.gegner_kennzeichen as string | null) ?? null,
       fahrzeugtyp_klartext: (lead.gegner_fahrzeugtyp as string | null) ?? null,
-      versicherung_id: (lead.gegner_versicherung_id as string | null) ?? null,
+      // CMM-Entity Follow-up (B): Fuzzy-Fallback analog claims.gegner_versicherung_id —
+      // sonst hat claims den VS-Entity-Link, die verursacher-Party aber nicht.
+      versicherung_id:
+        (lead.gegner_versicherung_id as string | null) ?? entityFks.gegnerVersicherungId ?? null,
       versicherung_klartext: (lead.gegner_versicherung as string | null) ?? null,
       // CMM-Entity Plan 3 (T3): Gegner-Fahrzeug-Entitaet (FIN-los, per Kennzeichen)
       vehicle_id: gegnerVehicleId,
@@ -510,6 +513,40 @@ export async function convertLeadToClaim(
   // Auto-Merge). Non-critical: ein fehlgeschlagener Link laesst person_id NULL
   // (= bisheriges Verhalten) und bricht die Konversion NICHT. Beim Account-Nachzug
   // (finalizeKundeSetup / acceptAirdropInvitation) wird person_id idempotent korrigiert.
+  // CMM-Entity Follow-up (C): Halter-Party wenn Kunde != Halter (ist_fahrzeughalter=false).
+  // lead.halter_* haelt den abweichenden Halter (Leasing/Finanzierung/Firmenwagen). Ohne diese
+  // Party ginge der Halter beim faelle.halter_*-Drop verloren — v_claim_full.halter_* sourct aus
+  // der ist_halter=true-Party (Geschaedigter-Party hat bei Kunde!=Halter ist_halter=false).
+  // VOR dem Loop gepusht -> bekommt person_id (Empty-Guard greift, falls doch namenlos). Non-critical.
+  // Backfill Bestand entfaellt: aktuell 0 Kunde!=Halter-Claims (greenfield).
+  if ((lead.ist_fahrzeughalter as boolean | null) === false) {
+    partyInserts.push({
+      claim_id: claimId,
+      rolle: 'halter',
+      reihenfolge: partyInserts.length + 1,
+      vorname: (lead.halter_vorname as string | null) ?? null,
+      nachname: (lead.halter_nachname as string | null) ?? null,
+      adresse_strasse: (lead.halter_strasse as string | null) ?? null,
+      adresse_plz: (lead.halter_plz as string | null) ?? null,
+      adresse_ort: (lead.halter_stadt as string | null) ?? null,
+      adresse_land: 'DE',
+      telefon: (lead.halter_telefon as string | null) ?? null,
+      email: (lead.halter_email as string | null) ?? null,
+      geburtsdatum: (lead.halter_geburtsdatum as string | null) ?? null,
+      ist_halter: true,
+      ist_fahrer: false,
+      ist_gewerbe: false,
+      ist_aktiv: true,
+      ist_anonymisiert: false,
+      ist_eingeladen_via_airdrop: false,
+      hat_personenschaden: false,
+      vehicle_id: resolvedVehicleId,
+      kennzeichen: (lead.kennzeichen as string | null) ?? null,
+      quelle: 'lead_konvertierung',
+      created_by_user_id: input.triggerByUserId ?? null,
+    })
+  }
+
   for (const p of partyInserts) {
     const personRes = await ensurePersonForData({
       db: admin,
@@ -530,8 +567,8 @@ export async function convertLeadToClaim(
         fuehrerscheinklassen: (p.fuehrerscheinklassen as string | string[] | null) ?? null,
       },
     })
-    if (personRes.ok) p.person_id = personRes.personId
-    else console.warn('[CMM-entity P3] personen-Link bei Konversion fehlgeschlagen (non-fatal):', personRes.error)
+    if (!personRes.ok) console.warn('[CMM-entity P3] personen-Link bei Konversion fehlgeschlagen (non-fatal):', personRes.error)
+    else if (personRes.personId) p.person_id = personRes.personId
   }
 
   // CMM-Entity Plan 3 (T2): Geschaedigter-Firma (Gewerbe) -> firmen-Entitaet + firma_id

@@ -181,7 +181,7 @@ describe('convertLeadToClaim', () => {
     // ohne Account (kunde_id null) -> ensurePersonForData(userId:null) legt
     // genau EINE personen-Row an und der Loop haengt person_id an die Party.
     primeResponses([
-      { data: { id: 'lead-1', schadens_art: 'haftpflicht', gegner_bekannt: false } }, // 1 leads select (load + Idempotenz)
+      { data: { id: 'lead-1', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select (load + Idempotenz)
       { data: [] }, // 2 profiles select (KB Round-Robin -> keine -> null)
       { data: { id: 'claim-1', claim_nummer: 'CLM-1' } }, // 3 claims insert
       { data: { id: 'person-1' } }, // 4 personen insert (geschädigter, account-los)
