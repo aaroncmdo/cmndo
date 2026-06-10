@@ -45,7 +45,9 @@ export async function GET(req: NextRequest) {
     const { error: terminErr } = await supabase
       .from('gutachter_termine')
       .update({ status: 'abgelehnt' })
-      .eq('sv_id', gfa.reservierter_sv_id)
+      // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Update-Filter)
+      .eq('assignee_id', gfa.reservierter_sv_id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .eq('start_zeit', gfa.reservierter_slot_von)
       .eq('status', 'reserviert')
 
