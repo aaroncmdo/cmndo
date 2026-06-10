@@ -42,7 +42,8 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
 
   for (const sv of svs) {
     // Termine
-    let terminQuery = db.from('gutachter_termine').select('id, status, fall_id, created_at').eq('sv_id', sv.id)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    let terminQuery = db.from('gutachter_termine').select('id, status, fall_id, created_at').eq('assignee_id', sv.id).eq('assignee_typ', 'sachverstaendiger')
     if (filter?.startDate) terminQuery = terminQuery.gte('created_at', filter.startDate)
     if (filter?.endDate) terminQuery = terminQuery.lte('created_at', filter.endDate)
     const { data: termine } = await terminQuery
