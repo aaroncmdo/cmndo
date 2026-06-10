@@ -585,13 +585,15 @@ export async function declineTermin(
 
   // 1. gutachter_termine → abgelehnt
   // KFZ-136: Termin-IDs vor dem Update holen fuer Reminder-Cancel
+  // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
   const { data: activeTermine } = await supabase.from('gutachter_termine')
-    .select('id').eq('fall_id', fallId).eq('sv_id', sv.id).in('status', ['reserviert', 'bestaetigt'])
+    .select('id').eq('fall_id', fallId).eq('assignee_id', sv.id).eq('assignee_typ', 'sachverstaendiger').in('status', ['reserviert', 'bestaetigt'])
 
   await supabase.from('gutachter_termine')
     .update({ status: 'abgelehnt', abgelehnt_am: new Date().toISOString(), abgelehnt_grund: grund || 'Im Portal abgelehnt' })
     .eq('fall_id', fallId)
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'bestaetigt'])
 
   // KFZ-136: Reminder stornieren
@@ -732,7 +734,8 @@ export async function storniereTermin(
 
   const { data: termin } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, start_zeit, sv_id')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, fall_id, start_zeit, assignee_id')
     .eq('id', terminId)
     .single()
   if (!termin) return { error: 'Termin nicht gefunden' }
@@ -752,7 +755,7 @@ export async function storniereTermin(
     : { data: null }
   if (fall?.lead_id) {
     const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
-    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
     let svName = 'Gutachter'
     if (svProf?.profile_id) {
       const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', svProf.profile_id).single()
@@ -788,7 +791,8 @@ export async function meldeVerspaetung(
 
   const { data: termin } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, fall_id, assignee_id')
     .eq('id', terminId)
     .single()
   if (!termin) return { error: 'Termin nicht gefunden' }
@@ -806,7 +810,7 @@ export async function meldeVerspaetung(
   const { data: fall } = t2ClaimId ? await supabase.from('claims').select('lead_id').eq('id', t2ClaimId).maybeSingle() : { data: null }
   if (fall?.lead_id) {
     const { data: lead } = await supabase.from('leads').select('vorname, telefon').eq('id', fall.lead_id).single()
-    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    const { data: svProf } = await supabase.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
     let svName = 'Gutachter'
     if (svProf?.profile_id) {
       const { data: p } = await supabase.from('profiles').select('vorname, nachname').eq('id', svProf.profile_id).single()
