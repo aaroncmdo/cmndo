@@ -30,7 +30,8 @@ export default async function KundeTerminDetailPage({
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine selbst (SSoT).
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, status, start_zeit, end_zeit, sv_id, fall_id, lead_id, kanal, typ, kunden_tracking_token, sv_unterwegs_seit, sv_eta_minuten, sv_angekommen_am, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, ablehnen_token, besichtigungsort_adresse')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, status, start_zeit, end_zeit, assignee_id, fall_id, lead_id, kanal, typ, kunden_tracking_token, sv_unterwegs_seit, sv_eta_minuten, sv_angekommen_am, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, ablehnen_token, besichtigungsort_adresse')
     .eq('id', id)
     .maybeSingle()
   if (!termin) notFound()
@@ -66,11 +67,11 @@ export default async function KundeTerminDetailPage({
   let svTelefon: string | null = null
   let svAvatarUrl: string | null = null
   let svVerifiziert = false
-  if (termin.sv_id) {
+  if (termin.assignee_id) {
     const { data: sv } = await admin
       .from('sachverstaendige')
       .select('profile_id, verifizierung_status')
-      .eq('id', termin.sv_id)
+      .eq('id', termin.assignee_id)
       .single()
     if (sv?.profile_id) {
       const { data: p } = await admin

@@ -41,19 +41,21 @@ export async function getKalenderTermine(
   if (typFilter.gutachter) {
     let query = supabase
       .from('gutachter_termine')
-      .select('id, sv_id, fall_id, start_zeit, end_zeit, status')
+      // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id; typ-Guard hält die
+      // sv_id-NULL-Semantik für kb_beratung-Termine (value-identisch).
+      .select('id, assignee_id, assignee_typ, fall_id, start_zeit, end_zeit, status')
       .gte('start_zeit', startDate)
       .lte('start_zeit', endDate)
       .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
 
     if (gutachterIds.length > 0) {
-      query = query.in('sv_id', gutachterIds)
+      query = query.in('assignee_id', gutachterIds).eq('assignee_typ', 'sachverstaendiger')
     }
 
     const { data: gTermine } = await query
 
     // SV-Namen laden
-    const svIds = [...new Set((gTermine ?? []).map(t => t.sv_id).filter(Boolean))]
+    const svIds = [...new Set((gTermine ?? []).map(t => (t.assignee_typ === 'sachverstaendiger' ? t.assignee_id : null)).filter(Boolean))]
     const svNameMap: Record<string, string> = {}
     if (svIds.length > 0) {
       const { data: svs } = await supabase.from('sachverstaendige').select('id, profile_id').in('id', svIds)
@@ -82,8 +84,8 @@ export async function getKalenderTermine(
         start: t.start_zeit,
         end: t.end_zeit,
         farbe: FARBEN.gutachter,
-        gutachterId: t.sv_id,
-        gutachterName: t.sv_id ? svNameMap[t.sv_id] : undefined,
+        gutachterId: t.assignee_typ === 'sachverstaendiger' ? t.assignee_id : null,
+        gutachterName: (t.assignee_typ === 'sachverstaendiger' && t.assignee_id) ? svNameMap[t.assignee_id] : undefined,
         fallId: t.fall_id,
         fallNummer: fallNrMap[t.fall_id],
         link: t.fall_id ? `/faelle/${t.fall_id}` : undefined,

@@ -144,12 +144,14 @@ export async function listSvsByDistance(
 
   const { data: konflikte } = await supabase
     .from('gutachter_termine')
-    .select('sv_id')
+    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
+    .select('assignee_id')
+    .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .lt('start_zeit', endDate.toISOString())
     .gt('end_zeit', startDate.toISOString())
 
-  const blockierteSvs = new Set((konflikte ?? []).map((k) => k.sv_id as string))
+  const blockierteSvs = new Set((konflikte ?? []).map((k) => k.assignee_id as string))
 
   const svParsed = (svRows as unknown as Array<{
     id: string
