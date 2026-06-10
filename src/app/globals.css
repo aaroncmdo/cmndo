@@ -114,6 +114,26 @@ p, li, blockquote, article, .prose {
   --color-claimondo-card: var(--brand-surface, var(--claimondo-card));
   --color-claimondo-border: var(--brand-border, var(--claimondo-border));
 
+  /* Token-Foundation: Semantische Status-Token als Tailwind-Utilities.
+     bg-success / text-success / border-success + -soft (Pillen-BG) + -strong
+     (dunkle Text-Variante). success/warning/danger/info folgen dem Brand-
+     Resolver (var(--brand-*)) wie die claimondo-Core-Tokens — gebrandete
+     Portale ziehen ihre theme.ts:generateStatus()-harmonisierten Töne; ohne
+     Brand greift der Claimondo-Default. -soft/-strong bleiben fixe Status-Töne.
+     Werte synchron zu src/lib/design-tokens.ts (colors.success etc.). */
+  --color-success: var(--brand-success, var(--claimondo-success));
+  --color-success-soft: var(--brand-success-soft, var(--claimondo-success-soft));
+  --color-success-strong: var(--claimondo-success-strong);
+  --color-warning: var(--brand-warning, var(--claimondo-warning));
+  --color-warning-soft: var(--brand-warning-soft, var(--claimondo-warning-soft));
+  --color-warning-strong: var(--claimondo-warning-strong);
+  --color-danger: var(--brand-danger, var(--claimondo-danger));
+  --color-danger-soft: var(--brand-danger-soft, var(--claimondo-danger-soft));
+  --color-danger-strong: var(--claimondo-danger-strong);
+  --color-info: var(--brand-secondary, var(--claimondo-info));
+  --color-info-soft: var(--brand-secondary-soft, var(--claimondo-info-soft));
+  --color-info-strong: var(--claimondo-info-strong);
+
   /* AAR-727: iOS-Tokens für Tailwind.
      Nutzung: `rounded-ios-md`, `shadow-ios-lg`, `font-apple`, `ease-ios`. */
   --radius-ios-sm: var(--radius-ios-sm);
@@ -130,10 +150,8 @@ p, li, blockquote, article, .prose {
   --shadow-claimondo-sm: var(--shadow-claimondo-sm);
   --shadow-claimondo-md: var(--shadow-claimondo-md);
   --shadow-claimondo-lg: var(--shadow-claimondo-lg);
-  --radius-claimondo-sm: var(--radius-claimondo-sm);
-  --radius-claimondo-md: var(--radius-claimondo-md);
-  --radius-claimondo-lg: var(--radius-claimondo-lg);
-  --radius-claimondo-sheet: var(--radius-claimondo-sheet);
+  /* radius-claimondo-{sm,md,lg,sheet} retired (Token-Foundation 2026-06-10):
+     auf die kanonische ios-Skala rounded-ios-{sm,md,lg,xl} konsolidiert. */
   /* Semantische Shadow-Tokens für wiederkehrende Inline-Pattern */
   --shadow-focus-ondo: var(--shadow-focus-ondo);
   --shadow-cta-ondo: var(--shadow-cta-ondo);
@@ -143,6 +161,31 @@ p, li, blockquote, article, .prose {
   --shadow-glass-pill: var(--shadow-glass-pill);
   --font-apple: var(--font-apple);
   --ease-ios: var(--ease-ios);
+
+  /* Token-Foundation: Typo-Skala als Tailwind-Utilities (text-caption …
+     text-heading-lg) — 1:1 die 7 Stufen aus design-tokens.ts:typo. Ersetzt
+     text-[10px]/[11px]-Magic-Numbers + uneinheitliche Default-Scales. Tailwind v4
+     bündelt size + line-height (+ weight/tracking) pro Token. `uppercase` für
+     caption bleibt separate Utility (kein font-size-Sub-Property). */
+  --text-caption: 10px;
+  --text-caption--line-height: 14px;
+  --text-caption--font-weight: 600;
+  --text-caption--letter-spacing: 0.6px;
+  --text-body-xs: 11px;
+  --text-body-xs--line-height: 16px;
+  --text-body-sm: 13px;
+  --text-body-sm--line-height: 20px;
+  --text-body: 14px;
+  --text-body--line-height: 22px;
+  --text-heading-sm: 16px;
+  --text-heading-sm--line-height: 22px;
+  --text-heading-sm--font-weight: 600;
+  --text-heading-md: 18px;
+  --text-heading-md--line-height: 26px;
+  --text-heading-md--font-weight: 600;
+  --text-heading-lg: 24px;
+  --text-heading-lg--line-height: 32px;
+  --text-heading-lg--font-weight: 700;
 }
 
 :root {
@@ -228,6 +271,23 @@ p, li, blockquote, article, .prose {
   --claimondo-navy-soft:  #E8EDF5;
   --claimondo-ondo-soft:  #EEF3F9;
 
+  /* Token-Foundation: Semantische Status-Quellfarben (Claimondo-Default).
+     Werte synchron zu src/lib/design-tokens.ts (colors.success/-Soft/-Text etc.).
+     Via @theme als Tailwind-Utilities bg-success / bg-success-soft /
+     text-success-strong exponiert. *-strong == design-tokens *Text. */
+  --claimondo-success: #10B981;
+  --claimondo-success-soft: #ecfdf5;
+  --claimondo-success-strong: #047857;
+  --claimondo-warning: #F59E0B;
+  --claimondo-warning-soft: #fffbeb;
+  --claimondo-warning-strong: #92400e;
+  --claimondo-danger: #F43F5E;
+  --claimondo-danger-soft: #fff1f2;
+  --claimondo-danger-strong: #9f1239;
+  --claimondo-info: #4573A2;
+  --claimondo-info-soft: #eef3f9;
+  --claimondo-info-strong: #0D1B3E;
+
   /* AAR-906: Map-Pin-Farben für Mapbox-Marker (Dispatcher-Karte + Gutachter-Finder).
      Mapbox nimmt keine Tailwind-Klassen entgegen — Inline-Style mit var() ist die
      Bridge. Auf Whitelabel-Portalen pulled das Brand-Resolver-Pattern automatisch
@@ -239,13 +299,9 @@ p, li, blockquote, article, .prose {
   --brand-primary-soft:  var(--brand-primary-soft-override,  var(--claimondo-navy-soft));
   --brand-secondary-soft: var(--brand-secondary-soft-override, var(--claimondo-ondo-soft));
 
-  /* AAR-745d (2026-05-13): Radius-Tokens passend zu src/lib/design-tokens.ts.
-     `sheet` ist die Sonderform für rounded-[36px]-Sheets/Modals (7+ Stellen).
-     Tailwind v4 generiert daraus rounded-claimondo-{sm,md,lg,sheet}. */
-  --radius-claimondo-sm: 8px;
-  --radius-claimondo-md: 14px;
-  --radius-claimondo-lg: 20px;
-  --radius-claimondo-sheet: 36px;
+  /* AAR-745d radius-claimondo-{sm,md,lg,sheet} retired 2026-06-10 (Token-
+     Foundation): auf rounded-ios-{sm,md,lg,xl} (12/18/24/32) konsolidiert —
+     EINE Radius-Skala. Alle Consumer migriert, keine var(--radius-claimondo-*). */
 
   /* AAR-745d (2026-05-13): Semantische Shadow-Tokens für wiederkehrende
      Inline-Pattern, die der Smoke 13.05.2026 entdeckt hat.

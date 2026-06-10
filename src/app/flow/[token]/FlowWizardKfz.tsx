@@ -858,7 +858,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className={`w-full px-4 py-3.5 rounded-claimondo-md text-base ${liquidFieldBase}`}
+        className={`w-full px-4 py-3.5 rounded-ios-md text-base ${liquidFieldBase}`}
       />
     </div>
   )

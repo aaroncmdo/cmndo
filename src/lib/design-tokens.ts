@@ -30,6 +30,14 @@ export const colors = {
   successText: '#047857', // emerald-700
   warningText: '#92400e', // amber-800
   dangerText: '#9f1239', // rose-800
+  // Token-Foundation: helle Tint-Varianten für Status-Pillen-Backgrounds
+  // (ersetzt rohe bg-green-50/bg-amber-50/bg-red-50 ad hoc). Werte = Tailwind-50er.
+  // Via globals.css als Tailwind-Utilities bg-success-soft etc. exponiert.
+  successSoft: '#ecfdf5', // emerald-50
+  warningSoft: '#fffbeb', // amber-50
+  dangerSoft: '#fff1f2', // rose-50
+  infoSoft: '#eef3f9', // == claimondo-ondo-soft
+  infoText: '#0D1B3E', // == navy (dunkle Text-Variante für info)
 } as const
 
 /**
@@ -70,8 +78,8 @@ export const cssColors = {
  * für alles Handgerollte + shared/*. Dadurch verbog jede „handgerollt → Primitive"-
  * Migration die Form (z.B. Button 32px → 8px). Jetzt eine Quelle.
  *
- * sm = 12 (Inputs, kleine Chips)            ← --radius-ios-sm
- * md = 18 (Cards, Section-Container)        ← --radius-ios-md (== shared/SectionCard)
+ * sm = 12 (kleine Chips/Tags, Pillen-Badges) ← --radius-ios-sm
+ * md = 18 (Cards, Inputs, Section-Container)  ← --radius-ios-md (== SectionCard + Input-Primitive)
  * lg = 24 (Buttons, Modal, Drawer-Sheet)    ← --radius-ios-lg
  * xl = 32 (große CTAs / Sheets)             ← --radius-ios-xl
  * full = Avatare, Pillen, kreisförmige Bubbles

@@ -266,7 +266,7 @@ export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[]
           <button
             type="button"
             onClick={() => setView('liste')}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
               view === 'liste'
                 ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
                 : 'text-claimondo-shield hover:text-claimondo-navy'
@@ -278,7 +278,7 @@ export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[]
           <button
             type="button"
             onClick={() => setView('kanban')}
-            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-claimondo-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
+            className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-md text-xs font-semibold tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] ${
               view === 'kanban'
                 ? 'bg-white text-claimondo-navy shadow-[0_1px_2px_rgba(15,30,68,.04),0_3px_8px_rgba(15,30,68,.06)]'
                 : 'text-claimondo-shield hover:text-claimondo-navy'

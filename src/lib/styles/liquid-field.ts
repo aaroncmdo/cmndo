@@ -21,8 +21,8 @@
  * die definiert der Caller, weil sie pro Use-Case variieren.
  *
  * Empfohlene Zusätze:
- *   - Standard-Field: `w-full rounded-claimondo-md px-4 py-3 text-sm`
- *   - Großes Field: `w-full rounded-claimondo-md px-4 py-3.5 text-base`
+ *   - Standard-Field: `w-full rounded-ios-md px-4 py-3 text-sm`
+ *   - Großes Field: `w-full rounded-ios-md px-4 py-3.5 text-base`
  *   - Textarea: + `resize-none`
  */
 export const liquidFieldBase =
@@ -30,6 +30,6 @@ export const liquidFieldBase =
 
 /**
  * Standard-Field-Klassen — `liquidFieldBase` + Standard-Layout (w-full,
- * rounded-claimondo-md, px-4 py-3, text-sm). Deckt 90% der Vorkommen ab.
+ * rounded-ios-md, px-4 py-3, text-sm). Deckt 90% der Vorkommen ab.
  */
-export const liquidField = `w-full rounded-claimondo-md px-4 py-3 text-sm ${liquidFieldBase}`
+export const liquidField = `w-full rounded-ios-md px-4 py-3 text-sm ${liquidFieldBase}`
