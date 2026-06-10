@@ -27,18 +27,21 @@ export default async function KundeTermine() {
   // Admin-Read statt faelle.kunde_id. fahrzeug_* bleibt faelle-nativ bis CMM-50.
   const adminT = createAdminClient()
   const ownedClaimIds = await getOwnedClaimIds(adminT, user.id, user.email ?? null)
+  // CMM-49 (Entity-Sweep): faelle -> v_claim_full (claim-anchored SSoT). fahrzeug_*/
+  // kennzeichen flach aus der View (value-identisch live verifiziert, div=0); claim_nummer
+  // flach statt claims-Embed. id:fall_id-Alias hält f.id == frühere faelle.id; Filter auf
+  // die reale id-Spalte (= claim_id) statt .in('claim_id').
   const { data: faelle } = await adminT
-    .from('faelle')
-    .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id(claim_nummer)')
-    .in('claim_id', ownedClaimIds)
+    .from('v_claim_full')
+    .select('id:fall_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claim_nummer')
+    .in('id', ownedClaimIds)
 
-  const fallIds = (faelle ?? []).map(f => f.id)
+  const fallIds = (faelle ?? []).map(f => f.id as string)
   const fallMap: Record<string, FallInfo> = {}
   for (const f of faelle ?? []) {
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    fallMap[f.id] = {
-      id: f.id,
-      claim_nummer: (fClaim?.claim_nummer as string | null) ?? null,
+    fallMap[f.id as string] = {
+      id: f.id as string,
+      claim_nummer: (f.claim_nummer as string | null) ?? null,
       fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || f.kennzeichen || '—',
     }
   }
