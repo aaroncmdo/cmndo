@@ -64,9 +64,13 @@ async function compressImage(file: File): Promise<{ base64: string; contentType:
 export default function Zb1UploadClient({
   token,
   vorname,
+  logoUrl,
+  firmenname,
 }: {
   token: string
   vorname: string
+  logoUrl?: string | null
+  firmenname?: string | null
 }) {
   const t = useTranslations('upload.zb1')
   const [step, setStep] = useState<Step>('hinweise')
@@ -133,10 +137,17 @@ export default function Zb1UploadClient({
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <span className="text-2xl font-bold tracking-tight">
-            <span className="text-claimondo-navy">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
-          </span>
+          {logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={logoUrl} alt={firmenname ?? 'Logo'} className="h-9 mx-auto object-contain" />
+          ) : firmenname ? (
+            <span className="text-2xl font-bold tracking-tight text-claimondo-navy">{firmenname}</span>
+          ) : (
+            <span className="text-2xl font-bold tracking-tight">
+              <span className="text-claimondo-navy">Claim</span>
+              <span className="text-claimondo-light-blue">ondo</span>
+            </span>
+          )}
           <p className="text-xs text-claimondo-ondo mt-1">{t('pageSubtitle')}</p>
         </div>
 
@@ -164,7 +175,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CameraIcon className="w-6 h-6" />
                   {t('cameraButton')}
@@ -216,7 +227,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={handleUpload}
-                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CheckCircle2Icon className="w-4 h-4" />
                   {t('useButton')}
@@ -264,7 +275,7 @@ export default function Zb1UploadClient({
                   )}
                 </div>
               )}
-              <p className="text-[10px] text-claimondo-ondo/70">{t('closeHint')}</p>
+              <p className="text-[10px] text-claimondo-ondo">{t('closeHint')}</p>
             </div>
           )}
 
@@ -281,7 +292,7 @@ export default function Zb1UploadClient({
               <button
                 type="button"
                 onClick={reset}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
               >
                 <RefreshCwIcon className="w-4 h-4" />
                 {t('retryButton')}
@@ -290,7 +301,7 @@ export default function Zb1UploadClient({
           )}
         </div>
 
-        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo text-center mt-4">
           {t('privacyNote')}
         </p>
       </div>
