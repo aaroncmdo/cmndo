@@ -193,7 +193,7 @@ export default function Zb1UploadClient({
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
                 className="hidden"
               />
-              {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
+              {errorMsg && <p className="text-xs text-danger-strong">{errorMsg}</p>}
             </>
           )}
 
@@ -237,28 +237,28 @@ export default function Zb1UploadClient({
 
           {step === 'erfolg' && (
             <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle2Icon className="w-8 h-8 text-green-600" />
+              <div className="w-14 h-14 mx-auto bg-success/15 rounded-full flex items-center justify-center">
+                <CheckCircle2Icon className="w-8 h-8 text-success" />
               </div>
               <h2 className="text-lg font-semibold text-claimondo-navy">{t('successTitle')}</h2>
               <p className="text-sm text-claimondo-ondo">
                 {t('successBody')}
               </p>
               {extracted && (extracted.kennzeichen || extracted.fahrzeug_hersteller) && (
-                <div className="bg-green-50 border border-green-200 rounded-ios-md p-3 text-left text-xs space-y-1">
-                  <p className="font-semibold text-green-900">{t('ocrResultTitle')}</p>
+                <div className="bg-success-soft border border-success/30 rounded-ios-md p-3 text-left text-xs space-y-1">
+                  <p className="font-semibold text-success-strong">{t('ocrResultTitle')}</p>
                   {extracted.kennzeichen && (
-                    <p className="text-green-800">
+                    <p className="text-success-strong">
                       {t('ocrKennzeichen', { value: extracted.kennzeichen })}
                     </p>
                   )}
                   {(extracted.fahrzeug_hersteller || extracted.fahrzeug_modell) && (
-                    <p className="text-green-800">
+                    <p className="text-success-strong">
                       {t('ocrFahrzeug', { value: [extracted.fahrzeug_hersteller, extracted.fahrzeug_modell].filter(Boolean).join(' ') })}
                     </p>
                   )}
                   {extracted.halter_name && (
-                    <p className="text-green-800">
+                    <p className="text-success-strong">
                       {t('ocrHalter', { value: extracted.halter_name })}
                     </p>
                   )}
@@ -270,8 +270,8 @@ export default function Zb1UploadClient({
 
           {step === 'fehler' && (
             <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
-                <AlertCircleIcon className="w-8 h-8 text-amber-600" />
+              <div className="w-14 h-14 mx-auto bg-warning/15 rounded-full flex items-center justify-center">
+                <AlertCircleIcon className="w-8 h-8 text-warning" />
               </div>
               <h2 className="text-lg font-semibold text-claimondo-navy">{t('errorTitle')}</h2>
               <p className="text-sm text-claimondo-ondo">{errorMsg || t('errorBodyFallback')}</p>

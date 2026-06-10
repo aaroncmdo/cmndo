@@ -488,7 +488,7 @@ export default function FlowWizardKfz({
                       <LegalDocPopover titel={legalDocs?.datenschutz?.titel ?? 'Datenschutzerklärung'} markdown={legalDocs?.datenschutz?.markdown ?? ''}>
                         {t('step_summary.datenschutz_link')}
                       </LegalDocPopover>{' '}
-                      {t('step_summary.datenschutz_text_suffix')} <span className="text-red-400">*</span>
+                      {t('step_summary.datenschutz_text_suffix')} <span className="text-danger">*</span>
                     </span>
                   </label>
                 </div>
@@ -697,11 +697,11 @@ export default function FlowWizardKfz({
                     <LegalDocPopover titel={legalDocs?.agb?.titel ?? 'AGB'} markdown={legalDocs?.agb?.markdown ?? ''}>
                       {t('step_sa.agb_link')}
                     </LegalDocPopover>{' '}
-                    {t('step_sa.widerruf_link')} <span className="text-red-400">*</span>
+                    {t('step_sa.widerruf_link')} <span className="text-danger">*</span>
                   </span>
                 </label>
 
-                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3 mb-4">{error}</p>}
+                {error && <p className="text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-4 py-3 mb-4">{error}</p>}
 
                 <button
                   onClick={handleSignSA}
@@ -723,9 +723,9 @@ export default function FlowWizardKfz({
                   icon={<UserPlusIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                <div className="bg-emerald-50 border border-emerald-100 rounded-ios-md px-4 py-3 mb-5 flex items-center gap-3">
-                  <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <p className="text-sm text-emerald-700">
+                <div className="bg-success-soft border border-success/30 rounded-ios-md px-4 py-3 mb-5 flex items-center gap-3">
+                  <CheckIcon className="w-5 h-5 text-success shrink-0" />
+                  <p className="text-sm text-success-strong">
                     {t('step_account.success_text')}
                   </p>
                 </div>
@@ -769,7 +769,7 @@ export default function FlowWizardKfz({
                 )}
 
                 {error && (
-                  <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3 mb-4">
+                  <p className="text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-4 py-3 mb-4">
                     {error}
                   </p>
                 )}
