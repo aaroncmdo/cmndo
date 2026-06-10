@@ -307,7 +307,7 @@ Die App ist whitelabel-fähig: ein verifizierter SV mit `use_custom_branding=tru
   * Kunde-Portal → `resolveKundenTheme(userId)` (Gate: `verifiziert && use_custom_branding`)
   * Magic-Link-Routen → `resolveBrandingFromUploadToken` / `…Zb1Token` / `…FlowToken` aus `src/lib/branding/token-theme.ts`
   * Emails → `resolveEmailBranding({ svId | fallId | leadId })` aus `token-theme.ts` → liefert `null` wenn kein Brand → Caller rendert Claimondo
-* **Semantische Farben bleiben semantisch:** Status-Grün/Warning-Gelb/Danger-Rot werden in `theme.ts:generateStatus()` an die Brand-Saturation harmonisiert (gewollt). Ein „echtes" Material-Grün (Trust-Marker, Verifizierungs-Badge) darf hardcoded `text-emerald-600` o.ä. bleiben.
+* **Semantische Farben haben jetzt Tokens (Token-Foundation 2026-06-10):** Status nutzt `bg-success` / `bg-success-soft` / `text-success-strong` (analog `warning`/`danger`/`info`), gebunden an `src/lib/design-tokens.ts` und via Brand-Resolver `var(--brand-success, …)` an `theme.ts:generateStatus()` harmonisiert (gewollt). **Neuer Code nutzt diese Tokens, nicht roh `bg-green-50`/`text-emerald-600`** — ein Status-Ratchet (s.u.) blockt neue raw Status-Scales. Ein „echtes" Material-Grün **ohne** Status-Bedeutung (Trust-Marker, Kanal-Identität wie WhatsApp-Grün im MultiChannelChat, Data-Viz/Charts) bleibt erlaubt, braucht aber den `// Token-Audit-Skip`-Header.
 * **Nie** Layout-kritische Properties (`position`, `inset`) per Tailwind-Utility-Klasse auf einem Element, dem eine 3rd-Party-Lib (mapbox-gl etc.) eine eigene Klasse mit `position`-Regel verpasst — inline-`style` nutzen (siehe `GutachterFinderMapClient`-Incident 12.05.).
 
 **Was NICHT gebrandet wird:** Marketing-Pages (`/`, `/faq`, `/gutachter-finden` — kein User-Context), Admin-/Dispatch-/Kanzlei-Portale (interne Tools), Auth-Mails (`TwoFactorCode`), PDF-Generation, Native-App. Siehe `docs/12.05.2026/branding-rollout-spec.md`.
@@ -334,4 +334,14 @@ Das Script erkennt den Header und skippt die Datei komplett.
 2. Oder zu `var(--brand-*, #fallback)` Pattern umschreiben (für inline-style)
 3. Oder Header setzen + in dieser Liste dokumentieren (für legit Sonderfälle)
 4. Oder neue Brand-Farbe in `external-brand-colors.ts` + Whitelist im Script aufnehmen
+
+## Drift-Ratchets im selben Script (Baseline + Boy-Scout, wie component-set/knip)
+
+`check:token-audit` fährt zusätzlich drei Ratchets — sie blocken **neue** Verstöße gegen eine Baseline, Bestand wird per Boy-Scout abgebaut. **Alle drei scannen nur `src/**` (die App) — Marketing (`claimondo-marketing/`) und Cluster-LPs (`kfz-gutachter-*/`, `autounfall-io/`) sind eigene Top-Level-Builds und werden NIE erfasst.**
+
+* **Status-Ratchet** (Token-Foundation 2026-06-10): blockt **neue** raw Tailwind-Status-Scales (`green/emerald/red/rose/amber/yellow/orange/lime`-`50…950`). Status hat jetzt Tokens — `bg-success`/`-soft`/`text-success-strong` (+ `warning`/`danger`/`info`). Baseline = Bestand (grandfathered), Boy-Scout senkt. Echter Nicht-Status-Fall (Wetter/Kanal-Farbe/Trust-Marker/Data-Viz) → `// Token-Audit-Skip`-Header. Löst die frühere „Status bleibt raw erlaubt"-Ausnahme ab.
+* **Accent-Ratchet**: raw Tailwind-Akzente (`blue/indigo/sky/cyan/violet/purple/teal/fuchsia/pink`) verboten (Baseline 0) → `claimondo-*`-Tokens.
+* **Radii-Ratchet**: Tailwind-Default-Radien (`rounded-sm/md/lg/xl/2xl/3xl`) → `rounded-ios-*`.
+
+**Weitere Token-Foundation-Konventionen:** **Typo** = `text-caption`/`text-body-xs`/`-sm`/`text-body`/`text-heading-{sm,md,lg}` statt `text-[10px]`-Magic-Numbers. **Radius** = nur noch `rounded-ios-{sm,md,lg,xl}` (12/18/24/32); `rounded-claimondo-*` (8/14/20/36) ist retired.
 <!-- END:branding-rules -->

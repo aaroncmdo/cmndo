@@ -204,8 +204,9 @@ if (delta < 0) {
 // ─── AAR-909: Accent-Default-Ratchet ───────────────────────────────────────
 // Tailwind-Default-Akzentfarben (blue/indigo/sky/cyan/violet/purple/teal/
 // fuchsia/pink) sind in UI-Akzenten verboten — Brand-Akzente kommen über
-// `claimondo-*`-Tokens. Status-Farben (emerald/green/rose/red/amber/yellow/
-// orange) bleiben explizit erlaubt und werden NICHT geprüft.
+// `claimondo-*`-Tokens. Status-Farben (green/emerald/red/rose/amber/yellow/
+// orange/lime) haben seit der Token-Foundation eigene Tokens + einen eigenen
+// Status-Ratchet (s.u.) — sie werden hier (Accent-Ratchet) NICHT geprueft.
 //
 // Baseline = 0 (alle aktuellen Treffer sind in Files mit dokumentiertem
 // Token-Audit-Skip-Header, z.B. WeatherBanner.tsx für literale Himmelsfarben).
@@ -255,7 +256,7 @@ if (accentDelta > 0) {
   console.error('Bei legitimer Verwendung (Wetter-Daten, externe Brand-Farbe etc.):')
   console.error('  `// Token-Audit-Skip: <Grund>` Header in den ersten 400 Zeichen setzen.')
   console.error('')
-  console.error('Status-Farben (emerald/green/rose/red/amber/yellow/orange) bleiben erlaubt.')
+  console.error('(Status-Farben green/emerald/red/rose/amber/yellow/orange: eigener Status-Ratchet s.u. — nutze bg-success/-soft, text-danger-strong etc.)')
   process.exit(1)
 }
 
@@ -265,4 +266,79 @@ if (accentDelta < 0) {
   )
 } else {
   console.log(`✓ Accent-Ratchet: ${accentOccurrences} Default-Akzente (= Baseline ${ACCENT_BASELINE_OCCURRENCES}).`)
+}
+
+// ─── Token-Foundation: Status-Color-Ratchet ────────────────────────────────
+// Status-Farben haben seit der Token-Foundation eigene Tailwind-Tokens:
+//   bg-success / bg-success-soft / text-success-strong   (analog warning/danger/info)
+// gebunden an src/lib/design-tokens.ts (Brand-Resolver: branden auf Whitelabel
+// mit). Damit loest dieser Ratchet die fruehere "Status bleibt raw erlaubt"-
+// Ausnahme ab: raw Tailwind-Status-Scales (green/emerald/red/rose/amber/yellow/
+// orange/lime) werden geratchet — Bestand bleibt (Boy-Scout-Abbau), NEUE
+// Verstoesse werden geblockt.
+//
+// Echte Nicht-Status-Faelle bleiben legitim und gehoeren NICHT migriert:
+//   - Wetter-Farben (WeatherWidget), Kanal-Identitaet (WhatsApp-Gruen im
+//     MultiChannelChat), Trust-Marker, Data-Viz/Charts, Map-Marker.
+//   Diese bekommen einen `// Token-Audit-Skip: <Grund>`-Header (dann komplett
+//   geskippt) — oder bleiben im Bestand grandfathered bis sie angefasst werden.
+//
+// Baseline-Update: nach jedem Migrations-Batch den neuen, niedrigeren Wert
+// hier eintragen (Script nennt ihn bei Delta < 0).
+const STATUS_BASELINE_OCCURRENCES = 3177
+const STATUS_RE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|placeholder|decoration|accent|divide)-(?:green|emerald|red|rose|amber|yellow|orange|lime)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/g
+
+let statusOccurrences = 0
+const statusFiles = new Set()
+const statusExamples = []
+for (const file of files) {
+  let content
+  try {
+    content = readFileSync(file, 'utf8')
+  } catch {
+    continue
+  }
+  if (/Token-Audit-Skip/i.test(content.slice(0, 400))) continue
+  STATUS_RE.lastIndex = 0
+  let s
+  let fileHit = false
+  while ((s = STATUS_RE.exec(content)) !== null) {
+    statusOccurrences++
+    fileHit = true
+    if (statusExamples.length < 5) {
+      const line = content.slice(0, s.index).split('\n').length
+      statusExamples.push(`  ${file}:${line} — ${s[0]}`)
+    }
+  }
+  if (fileHit) statusFiles.add(file)
+}
+
+const statusDelta = statusOccurrences - STATUS_BASELINE_OCCURRENCES
+if (statusDelta > 0) {
+  console.error('')
+  console.error(
+    `✗ Status-Ratchet: ${statusOccurrences} raw Status-Scales in ${statusFiles.size} Files — Baseline ist ${STATUS_BASELINE_OCCURRENCES}, Delta +${statusDelta}.`,
+  )
+  console.error('')
+  console.error('Beispiele:')
+  for (const ex of statusExamples) console.error(ex)
+  console.error('')
+  console.error('Status-Farben haben jetzt Tokens (src/lib/design-tokens.ts + globals.css):')
+  console.error('  bg-green-50 / bg-emerald-50    →  bg-success-soft')
+  console.error('  text-green-700 / -800 / -900   →  text-success-strong')
+  console.error('  text-green-500 / -600          →  text-success   (analog warning/danger/info)')
+  console.error('  text-red-500 / bg-red-50       →  text-danger-strong / bg-danger-soft')
+  console.error('  bg-amber-50 / text-amber-800   →  bg-warning-soft / text-warning-strong')
+  console.error('')
+  console.error('Echter Nicht-Status-Fall (Wetter/Kanal-Farbe/Trust-Marker/Data-Viz/Map):')
+  console.error('  `// Token-Audit-Skip: <Grund>` Header in den ersten 400 Zeichen setzen.')
+  process.exit(1)
+}
+
+if (statusDelta < 0) {
+  console.log(
+    `✓ Status-Ratchet: ${statusOccurrences} raw Status-Scales (${statusDelta} unter Baseline) — Baseline kann auf ${statusOccurrences} gesenkt werden.`,
+  )
+} else {
+  console.log(`✓ Status-Ratchet: ${statusOccurrences} raw Status-Scales (= Baseline ${STATUS_BASELINE_OCCURRENCES}).`)
 }
