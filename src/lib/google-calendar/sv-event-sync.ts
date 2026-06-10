@@ -14,7 +14,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 
 type TerminShape = {
   id: string
-  sv_id: string | null
+  // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+  assignee_id: string | null
   fall_id: string | null
   start_zeit: string
   end_zeit: string | null
@@ -45,7 +46,7 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   const { data: termin } = await db
     .from('gutachter_termine')
     .select(
-      'id, sv_id, fall_id, start_zeit, end_zeit, typ, kanal, adresse, status, cancelled_at, google_event_id, google_calendar_id',
+      'id, assignee_id, fall_id, start_zeit, end_zeit, typ, kanal, adresse, status, cancelled_at, google_event_id, google_calendar_id',
     )
     .eq('id', terminId)
     .maybeSingle()
@@ -86,8 +87,8 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
   const shouldCreate = !hardCancelled && signaturesOk
 
   // Löschen: existierendes Event im SV-Kalender entfernen
-  if (shouldDelete && t.google_event_id && t.sv_id) {
-    const svProfileId = await loadSvProfileId(t.sv_id)
+  if (shouldDelete && t.google_event_id && t.assignee_id) {
+    const svProfileId = await loadSvProfileId(t.assignee_id)
     if (svProfileId) {
       await deleteEvent(svProfileId, t.google_event_id, t.google_calendar_id ?? 'primary').catch(
         (err) => console.warn('[sv-event-sync] delete:', err instanceof Error ? err.message : err),
@@ -104,9 +105,9 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
     return
   }
 
-  if (!shouldCreate || !t.sv_id) return
+  if (!shouldCreate || !t.assignee_id) return
 
-  const svProfileId = await loadSvProfileId(t.sv_id)
+  const svProfileId = await loadSvProfileId(t.assignee_id)
   if (!svProfileId) return
 
   // Fall-Kontext für Event-Beschreibung nachladen

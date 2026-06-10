@@ -23,7 +23,7 @@ export async function GET(
   const admin = createAdminClient()
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, fall_id, typ, start_zeit, end_zeit, kanal, video_link, sv_id, kb_id')
+    .select('id, fall_id, typ, start_zeit, end_zeit, kanal, video_link, kb_id')
     .eq('id', id)
     .maybeSingle()
   if (!termin || !termin.fall_id) return new NextResponse('Termin nicht gefunden', { status: 404 })
