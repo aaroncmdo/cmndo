@@ -43,20 +43,17 @@ export async function GET() {
 
   let fallIds: string[] = []
   if (fallFilter) {
-    // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
-    // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
-    const { data: nichtStornierteClaims } = await supabase
-      .from('claims')
-      .select('id')
-      .not('operative_status', 'in', '("storniert")')
-    const nichtStornierteClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
+    // CMM-49: faelle->v_claim_full (claim-anchored SSoT). operative_status-Filter direkt
+    // auf der View (statt 2-Schritt claims->faelle.in(claim_id)); fallFilter (sv_id/kunde_id)
+    // sind Core-View-Spalten. id:fall_id-Alias liefert die fall_id-Liste.
     const { data: faelle } = await supabase
-      .from('faelle')
-      .select('id')
+      .from('v_claim_full')
+      .select('id:fall_id')
       .eq(fallFilter.column, fallFilter.value)
-      .in('claim_id', nichtStornierteClaimIds)
+      .not('operative_status', 'in', '("storniert")')
+      .not('fall_id', 'is', null)
       .limit(100)
-    fallIds = (faelle ?? []).map(f => f.id)
+    fallIds = (faelle ?? []).map((f) => f.id).filter(Boolean) as string[]
     if (fallIds.length === 0) return NextResponse.json({ threads: [] })
   }
 
@@ -77,11 +74,16 @@ export async function GET() {
 
   const allFallIds = Array.from(new Set(nachrichten.map(n => n.fall_id).filter(Boolean) as string[]))
 
-  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
-  const { data: faelleMeta } = await supabase
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id(claim_nummer)')
-    .in('id', allFallIds.slice(0, 100))
+  // CMM-49: faelle->v_claim_full. claim_nummer flach aus der View, zurueck in die
+  // claims-Embed-Form gemappt (Downstream liest fall.claims/lead_id unveraendert).
+  const { data: faelleMetaRaw } = await supabase
+    .from('v_claim_full')
+    .select('id:fall_id, lead_id, claim_nummer')
+    .in('fall_id', allFallIds.slice(0, 100))
+  const faelleMeta = (faelleMetaRaw ?? []).map((row) => {
+    const x = row as Record<string, unknown>
+    return { id: x.id as string | null, lead_id: x.lead_id as string | null, claims: { claim_nummer: x.claim_nummer as string | null } }
+  })
 
   const leadIds = Array.from(new Set((faelleMeta ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
   const { data: leads } = leadIds.length
