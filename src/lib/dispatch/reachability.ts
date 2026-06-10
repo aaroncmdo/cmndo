@@ -58,7 +58,9 @@ export async function checkSvReachability(
   let query = db
     .from('gutachter_termine')
     .select('id, lead_id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
-    .eq('sv_id', input.svId)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    .eq('assignee_id', input.svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .gte('end_zeit', windowStart)
     .lte('start_zeit', windowEnd)
@@ -211,7 +213,9 @@ export async function precomputeSvSlotEtas(
   const { data: termineRaw } = await db
     .from('gutachter_termine')
     .select('id, lead_id, fall_id, start_zeit, end_zeit, besichtigungsort_lat, besichtigungsort_lng')
-    .eq('sv_id', svId)
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
     .gte('end_zeit', fromIso)
     .lte('start_zeit', toIso)
