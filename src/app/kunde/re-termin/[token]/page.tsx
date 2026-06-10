@@ -90,8 +90,10 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
 
   const { data: konflikte } = await db
     .from('gutachter_termine')
+    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
     .select('start_zeit, end_zeit')
-    .eq('sv_id', fall.sv_id)
+    .eq('assignee_id', fall.sv_id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', '("storniert","abgelehnt","abgesagt")')
     .gte('start_zeit', windowStart.toISOString())
     .lte('start_zeit', windowEnd.toISOString())

@@ -44,8 +44,10 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
 
   const { data: svTermine } = await admin
     .from('gutachter_termine')
+    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
     .select('start_zeit, end_zeit')
-    .eq('sv_id', svId)
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag'])
     .gte('start_zeit', now.toISOString())
     .lte('start_zeit', in14Tagen.toISOString())
