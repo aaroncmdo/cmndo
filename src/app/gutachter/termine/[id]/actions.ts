@@ -30,12 +30,13 @@ export async function svAblehneTermin(
   const adminDb = createAdminClient()
   const { data: termin } = await adminDb
     .from('gutachter_termine')
-    .select('id, sv_id, status, lead_id, fall_id')
+    .select('id, assignee_id, assignee_typ, status, lead_id, fall_id')
     .eq('id', terminId)
     .single()
 
   if (!termin) return { success: false, error: 'Termin nicht gefunden' }
-  if (termin.sv_id !== sv.id) return { success: false, error: 'Nicht autorisiert' }
+  // CMM-49 sv_id-Drop (Termin-Engine-Handoff): Ownership via assignee_id/assignee_typ statt sv_id
+  if (termin.assignee_id !== sv.id || termin.assignee_typ !== 'sachverstaendiger') return { success: false, error: 'Nicht autorisiert' }
   if (!['reserviert', 'bestaetigt'].includes(termin.status)) {
     return { success: false, error: `Termin kann im Status "${termin.status}" nicht abgelehnt werden` }
   }
@@ -159,12 +160,13 @@ export async function svGegenvorschlagTermin(
   const adminDb = createAdminClient()
   const { data: termin } = await adminDb
     .from('gutachter_termine')
-    .select('id, sv_id, status, lead_id, fall_id')
+    .select('id, assignee_id, assignee_typ, status, lead_id, fall_id')
     .eq('id', terminId)
     .single()
 
   if (!termin) return { success: false, error: 'Termin nicht gefunden' }
-  if (termin.sv_id !== sv.id) return { success: false, error: 'Nicht autorisiert' }
+  // CMM-49 sv_id-Drop (Termin-Engine-Handoff): Ownership via assignee_id/assignee_typ statt sv_id
+  if (termin.assignee_id !== sv.id || termin.assignee_typ !== 'sachverstaendiger') return { success: false, error: 'Nicht autorisiert' }
   if (!['reserviert', 'bestaetigt'].includes(termin.status)) {
     return { success: false, error: `Termin kann im Status "${termin.status}" nicht geändert werden` }
   }
@@ -298,7 +300,9 @@ export async function uploadPolizeiberichtAsSv(
       .from('gutachter_termine')
       .select('id')
       .eq('fall_id', fallId)
-      .eq('sv_id', sv.id)
+      // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
       .limit(1)
       .maybeSingle()
     svIstZustaendig = !!terminMatch

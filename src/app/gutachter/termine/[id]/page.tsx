@@ -29,10 +29,12 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   // AAR-133: lead_id mitlesen — Termin kann pre-FlowLink sein (lead_id ohne fall_id)
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, sv_id, start_zeit, end_zeit, status, navigation_started_at, sv_angekommen_am, durchgefuehrt_am, sv_eta_minuten, sv_unterwegs_seit, kanal')
+    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): sv_id aus Select entfernt (unused) + Filter -> assignee
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, status, navigation_started_at, sv_angekommen_am, durchgefuehrt_am, sv_eta_minuten, sv_unterwegs_seit, kanal')
     .eq('id', id)
     .eq('typ', 'sv_begutachtung')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (tErr || !termin) redirect('/gutachter/termine')
