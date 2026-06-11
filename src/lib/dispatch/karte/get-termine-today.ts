@@ -17,10 +17,9 @@ export async function getTermineToday(
   const { data, error } = await supabase
     .from('gutachter_termine')
     .select(
-      `id, start_zeit, status, fall_id, lead_id, sv_id,
+      `id, start_zeit, status, fall_id, lead_id, assignee_id, assignee_typ,
        gps_lat_ankunft, gps_lng_ankunft,
        lead:leads(vorname, nachname, besichtigungsort_lat, besichtigungsort_lng, kunde_plz, halter_plz),
-       sv:sachverstaendige(standort_lat, standort_lng, profile:profiles!sachverstaendige_profile_id_fkey(vorname, nachname)),
        fall:faelle(claims:claim_id(claim_nummer))`,
     )
     .gte('start_zeit', startOfDay)
@@ -54,12 +53,33 @@ export async function getTermineToday(
     status: string | null
     fall_id: string | null
     lead_id: string | null
-    sv_id: string | null
+    assignee_id: string | null
+    assignee_typ: string | null
     gps_lat_ankunft: number | null
     gps_lng_ankunft: number | null
     lead?: EmbeddedLead | EmbeddedLead[] | null
-    sv?: EmbeddedSv | EmbeddedSv[] | null
     fall?: EmbeddedFall | EmbeddedFall[] | null
+  }
+
+  // CMM-49 sv_id-Drop: der FK-Embed sv:sachverstaendige(...) haengt an der zu
+  // droppenden sv_id-FK → assignee_id-Lookup (typ-guarded, value-identisch).
+  // Map assignee_id (= SV-id) -> SV-Geo + Profil-Name.
+  const svAssigneeIds = Array.from(
+    new Set(
+      ((data ?? []) as unknown as Row[])
+        .filter((r) => r.assignee_typ === 'sachverstaendiger' && r.assignee_id)
+        .map((r) => r.assignee_id as string),
+    ),
+  )
+  const svMap = new Map<string, EmbeddedSv>()
+  if (svAssigneeIds.length > 0) {
+    const { data: svRows } = await supabase
+      .from('sachverstaendige')
+      .select('id, standort_lat, standort_lng, profile:profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
+      .in('id', svAssigneeIds)
+    for (const s of (svRows ?? []) as unknown as Array<{ id: string } & EmbeddedSv>) {
+      svMap.set(s.id, { standort_lat: s.standort_lat, standort_lng: s.standort_lng, profile: s.profile })
+    }
   }
 
   const pins: TerminPin[] = []
@@ -67,7 +87,7 @@ export async function getTermineToday(
 
   for (const raw of ((data ?? []) as unknown as Row[])) {
     const lead = Array.isArray(raw.lead) ? raw.lead[0] : raw.lead
-    const sv = Array.isArray(raw.sv) ? raw.sv[0] : raw.sv
+    const sv = raw.assignee_typ === 'sachverstaendiger' && raw.assignee_id ? svMap.get(raw.assignee_id) ?? null : null
     const fall = Array.isArray(raw.fall) ? raw.fall[0] : raw.fall
     const fallClaim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
     const svProfile = sv
@@ -82,7 +102,7 @@ export async function getTermineToday(
       status: raw.status,
       fall_id: raw.fall_id,
       lead_id: raw.lead_id,
-      sv_id: raw.sv_id,
+      sv_id: raw.assignee_typ === 'sachverstaendiger' ? raw.assignee_id : null,
       gps_lat_ankunft: raw.gps_lat_ankunft,
       gps_lng_ankunft: raw.gps_lng_ankunft,
       lead_lat: lead?.besichtigungsort_lat ?? null,

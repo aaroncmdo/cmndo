@@ -23,14 +23,11 @@ type GutachterTerminRow = {
   kanal: string | null
   adresse: string | null
   fall_id: string | null
-  sv_id: string | null
+  assignee_id: string | null
+  assignee_typ: string | null
   fall:
     | { id: string; claims: ClaimNrJoin; kundenbetreuer_id: string | null; lead_id: string | null }
     | { id: string; claims: ClaimNrJoin; kundenbetreuer_id: string | null; lead_id: string | null }[]
-    | null
-  sachverstaendige:
-    | { id: string; profile_id: string | null }
-    | { id: string; profile_id: string | null }[]
     | null
 }
 
@@ -46,9 +43,8 @@ export default async function MitarbeiterKundentermine() {
   const { data: termineRaw } = await supabase
     .from('gutachter_termine')
     .select(
-      'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, sv_id, ' +
-        'fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer), kundenbetreuer_id, lead_id), ' +
-        'sachverstaendige!gutachter_termine_sv_id_fkey(id, profile_id)',
+      'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, assignee_id, assignee_typ, ' +
+        'fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer), kundenbetreuer_id, lead_id)',
     )
     .neq('typ', 'kb_beratung')
     .in('status', ['reserviert', 'bestaetigt'])
@@ -90,17 +86,27 @@ export default async function MitarbeiterKundentermine() {
     }
   }
 
-  // SV-Namen nachladen (Join über profile_id)
-  const profileIds = Array.from(
+  // SV-Namen nachladen — CMM-49 sv_id-Drop: der FK-Embed
+  // sachverstaendige!gutachter_termine_sv_id_fkey haengt an der zu droppenden
+  // sv_id-FK → ersetzt durch assignee_id-Lookup (typ-guarded, value-identisch).
+  const svAssigneeIds = Array.from(
     new Set(
       termine
-        .map((t) => {
-          const s = Array.isArray(t.sachverstaendige) ? t.sachverstaendige[0] ?? null : (t.sachverstaendige as { profile_id: string | null } | null)
-          return s?.profile_id ?? null
-        })
-        .filter(Boolean) as string[],
+        .filter((t) => t.assignee_typ === 'sachverstaendiger' && t.assignee_id)
+        .map((t) => t.assignee_id as string),
     ),
   )
+  const svProfileMap = new Map<string, string>() // assignee_id (= SV-id) -> profile_id
+  if (svAssigneeIds.length > 0) {
+    const { data: svs } = await supabase
+      .from('sachverstaendige')
+      .select('id, profile_id')
+      .in('id', svAssigneeIds)
+    for (const s of svs ?? []) {
+      if (s.profile_id) svProfileMap.set(s.id, s.profile_id)
+    }
+  }
+  const profileIds = Array.from(new Set(Array.from(svProfileMap.values())))
   const svNameMap: Record<string, string> = {}
   if (profileIds.length > 0) {
     const { data: profs } = await supabase
@@ -154,9 +160,9 @@ export default async function MitarbeiterKundentermine() {
               {(rows ?? []).map((t) => {
                 const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; claims: ClaimNrJoin; lead_id: string | null } | null)
                 const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-                const sv = Array.isArray(t.sachverstaendige) ? t.sachverstaendige[0] ?? null : (t.sachverstaendige as { profile_id: string | null } | null)
+                const svProfileId = t.assignee_typ === 'sachverstaendiger' && t.assignee_id ? svProfileMap.get(t.assignee_id) ?? null : null
                 const kundeName = fall?.lead_id ? leadNameMap[fall.lead_id] ?? 'Kunde' : 'Kunde'
-                const svName = sv?.profile_id ? svNameMap[sv.profile_id] ?? 'SV' : 'SV'
+                const svName = svProfileId ? svNameMap[svProfileId] ?? 'SV' : 'SV'
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
                   <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">

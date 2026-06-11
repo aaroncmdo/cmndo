@@ -583,7 +583,7 @@ export async function getKundeFallDetailRecord(
   const { data: terminRow } = await admin
     .from('gutachter_termine')
     .select(
-      'id, status, start_zeit, end_zeit, sv_id, kanal, typ, final_verbindlich_ab, besichtigungsort_adresse, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
+      'id, status, start_zeit, end_zeit, kanal, typ, final_verbindlich_ab, besichtigungsort_adresse, nachbesichtigung_status, nachbesichtigung_termin_datum, nachbesichtigung_angefordert_am',
     )
     .eq('fall_id', fallId)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
