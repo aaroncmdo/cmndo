@@ -1,4 +1,5 @@
-import { CLUSTER, waHref, type City } from '@/lib/cluster'
+import Link from 'next/link'
+import { CLUSTER, MAIN_CITY, waHref, type City } from '@/lib/cluster'
 
 // SERVER-Component (kein 'use client'). Statisches Markup; die Burger-Toggle-
 // State-Machine (open/close/ESC/Backdrop/Link) liegt clientseitig in SiteScripts
@@ -18,22 +19,43 @@ const WA_PATH =
 export function Header({ city }: { city: City }) {
   return (
     <>
-      <header className="sticky top-0 z-50 bg-[var(--header-glass)] lg:bg-paper/95 backdrop-blur-xl backdrop-saturate-150 border-b border-white/10 lg:border-black/[0.06] shadow-[0_2px_16px_-8px_rgba(0,0,0,0.28)] transition-all duration-200">
-        <div className="max-w-wrap mx-auto px-6 flex items-center justify-between h-[58px] md:h-[76px] lg:h-[72px] gap-3.5">
-          <a className="flex items-center gap-3" href="/" aria-label="Kfz-Gutachter — zur Startseite">
-            {/* Logo: Desktop (>=lg) dunkle Variante fuer hellen Header; Mobil/Tablet (<lg)
-                helle Variante fuer dunklen Header. <picture> laedt nur EINE Quelle. */}
-            <picture>
-              <source media="(min-width: 1024px)" srcSet={`${CLUSTER.imgPath}logo-${CLUSTER.key}.webp`} />
+      <header className="relative sm:sticky sm:top-0 z-50 border-b border-white/15 sm:border-white/40 header-glossy transition-all duration-200">
+        {/* BRIEF 08d · Header schmaler (Aaron 10.06.: Kopf-Overlap Desktop). */}
+        <div className="max-w-wrap header-wrap mx-auto px-5 sm:px-6 flex items-center justify-between h-[60px] sm:h-[72px] md:h-[80px] lg:h-[84px] gap-3.5">
+          <Link className="flex items-center gap-3" href="/" aria-label="Kfz-Gutachter — zur Startseite">
+            {/* BRIEF 08d F2 · DOM-Composite-Wortmarke auf ALLEN Viewports (ersetzt den
+                logo-{key}-new.svg-Asset-TODO). Mobile (<640, dunkler Cluster-Glossy):
+                White-Signet + weisse Wortmarke; Desktop (>=640, hell): Dark-Signet.
+                Logo-Endung pro Cluster (CLUSTER.logoExt: Aachen Vektor-SVG, Koeln PNG). */}
+            <span className="flex items-center gap-2.5 sm:gap-3 flex-none">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={`${CLUSTER.imgPath}logo-${CLUSTER.key}-mobile.webp`}
-                alt={`Kfz-Gutachter ${CLUSTER.cities[0].name}`}
-                className="h-9 md:h-[52px] lg:h-12 w-auto flex-none"
+                src={`${CLUSTER.imgPath}logo-${CLUSTER.key}-white.${CLUSTER.logoExt}?v=${CLUSTER.assetVersion}`}
+                alt=""
+                aria-hidden="true"
+                className="sm:hidden flex-none object-contain h-8 w-auto max-w-[56px]"
                 loading="eager"
               />
-            </picture>
-          </a>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* 08h A4b · Logo-Leiter: Signet ~62% der Header-Hoehe >=1024 (52/58/64px),
+                  Stufen im globals-08h-A4-Block (.brand-signet-desk). */}
+              <img
+                src={`${CLUSTER.imgPath}logo-${CLUSTER.key}-dark.${CLUSTER.logoExt}?v=${CLUSTER.assetVersion}`}
+                alt=""
+                aria-hidden="true"
+                className="brand-signet-desk hidden sm:block flex-none object-contain h-11 w-auto max-w-[72px]"
+                loading="eager"
+              />
+              <span className="block w-px self-stretch min-h-[28px] sm:min-h-[34px] bg-amber" aria-hidden="true" />
+              <span className="flex flex-col leading-none">
+                <span className="brand-z1 font-display font-bold text-[13px] sm:text-[clamp(17px,1.4vw,22px)] tracking-[-0.012em] text-white sm:text-ink">Kfz-Gutachter</span>
+                {/* 08h A4a (Aaron-Copy-Entscheid 10.06.): "{Stadt} und Umgebung" in normaler
+                    Gross-/Kleinschreibung, Sperrung zurueckgenommen — Spoke-Besucher duerfen
+                    nicht durch ein hartes Versal-"KOELN" verwirrt werden; Marke deckt die Region. */}
+                <span className="brand-z2 font-display font-bold text-[8.5px] sm:text-[clamp(9.5px,0.8vw,12px)] tracking-[0.02em] mt-1 sm:mt-1.5 text-[var(--accent-on-dark,var(--amber))] sm:text-amber">{MAIN_CITY.name} und Umgebung</span>
+              </span>
+            </span>
+          </Link>
           <nav className="hidden lg:flex items-center justify-center gap-[22px] flex-1 min-w-0" aria-label="Seitennavigation">
             {NAV.map((n) => (
               <a
@@ -60,13 +82,14 @@ export function Header({ city }: { city: City }) {
               aria-label="Jetzt anrufen"
             >
               <span aria-hidden="true">☎</span>
-              <span>{CLUSTER.phone.display}</span>
+              {/* 08e A2: national formatiert (gleiche Konvention wie Hero-CTA). */}
+              <span>{CLUSTER.phone.displayNational}</span>
             </a>
             {/* Burger (Phase 1.5) — nur <lg; oeffnet Off-Canvas-Drawer (Toggle in SiteScripts) */}
             <button
               id="burgerBtn"
               type="button"
-              className="lg:hidden inline-flex flex-col items-center justify-center gap-[5px] w-11 h-11 -mr-2 rounded-md text-white transition active:scale-95"
+              className="lg:hidden inline-flex flex-col items-center justify-center gap-[5px] w-11 h-11 -mr-2 rounded-md text-white sm:text-ink transition active:scale-95"
               aria-label="Menü öffnen"
               aria-expanded="false"
               aria-controls="burgerMenu"

@@ -1,6 +1,6 @@
 import type { City } from '@/lib/cluster'
 import { JsonLd } from './JsonLd'
-import { localBusinessSchema, faqSchema, breadcrumbSchema, serviceSchema } from '@/lib/schema'
+import { localBusinessSchema, faqSchema, breadcrumbSchema, serviceSchema, personSchema } from '@/lib/schema'
 import { Header } from './Header'
 import { HeroSection } from './HeroSection'
 import { ReviewsSection } from './ReviewsSection'
@@ -12,6 +12,7 @@ import { UeberUnsSection } from './UeberUnsSection'
 import { EinsatzgebietSection } from './EinsatzgebietSection'
 import { FaqAccordion } from './FaqAccordion'
 import { RatgeberSection } from './RatgeberSection'
+import { SeoBodySection } from './SeoBodySection'
 import { FinalCta } from './FinalCta'
 import { Footer } from './Footer'
 import { FabStack } from './FabStack'
@@ -29,6 +30,7 @@ export function LandingPage({ city, route }: { city: City; route: 'hub' | 'spoke
       <JsonLd data={faqSchema(city)} />
       <JsonLd data={breadcrumbSchema(city, route)} />
       <JsonLd data={serviceSchema(city)} />
+      <JsonLd data={personSchema()} />
 
       <a
         href="#main-content"
@@ -48,7 +50,11 @@ export function LandingPage({ city, route }: { city: City; route: 'hub' | 'spoke
         <LeistungenSection />
         <UeberUnsSection city={city} />
         <EinsatzgebietSection city={city} />
+        {/* 08l A5 · Block 3 "Ratgeber/Wissen": FAQ ("Sprechen wir Klartext." =
+            Bruecke) -> SEO-Body (08b-Editorial, unveraendert) -> Ratgeber-Teaser
+            ans Block-Ende (Swap Ratgeber<->SeoBody; keine Copy-Aenderungen). */}
         <FaqAccordion city={city} />
+        <SeoBodySection stadtSlug={city.slug} stadtName={city.name} />
         <RatgeberSection />
         <FinalCta city={city} />
       </main>

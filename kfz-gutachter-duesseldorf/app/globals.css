@@ -64,31 +64,372 @@
 }
 
 /* ════════════════════════════════════════════════════════════════════════
- * CLUSTER-VARS · DÜSSELDORF · Rheinland · Marineblau + Royal-Blue (v6)
- * (Werkstatt-Eisenschild). Kein data-theme-Switch — direkt in :root.
+ * CLUSTER-VARS · KÖLN  —  Graphit (Anthrazit) + Bernstein-Gold (Akzent).
+ * Quelle: BRAND_IDENTITY_KOELN_2026-06-09. Diese :root-Vars + layout.tsx
+ * themeColor sind DER Theme-Customizing-Punkt. Kein data-theme-Switch.
  * ════════════════════════════════════════════════════════════════════════ */
 :root {
   --petrol: #0B3D6E;
   --petrol-700: #062542;
   --petrol-300: #1F5A95;
   --petrol-tint: #F8F8F6;
-  --amber: #185FA5;
-  --amber-700: #114080;
-  --amber-aa: #0F3D77; /* A11y v2: AA-konformes (dunkleres) Amber fuer kleine Texte auf Weiss (5.84:1) — Mock v3-praxis-v2 */
+  --amber: #185FA5;      /* Köln-Akzent: Bernstein-Gold (Hanse) — dekorativ + auf graphit-BG (6.3:1) */
+  --amber-700: #114080;  /* accent-dark (Active/Hover) — dunkle (graphit) Schrift drauf */
+  --amber-aa: #0F3D77;   /* A11y: AA-konformes dunkles Gold fuer kleine Texte auf Weiss (~6.2:1) */
 
   --au-container-narrow: 1180px;
   --au-container-prose: 760px;
 
-  /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat — Aaron 05.06.). Cluster-spezifisch. */
-  --hero-mobile-img: url('/assets/img/duesseldorf/hero-duesseldorf-mobile.webp');
-  /* Header-Glass-Tint (Mobile, dunkel) — Marineblau-Petrol. */
+  /* Mobile-Hero-Foto (nur <=640px, dediziertes Hochformat). BRIEF 08d: neues Koeln-
+     Mobile-Bild verdrahtet, avif aktiv via image-set (Assets 09./10.06. geliefert). */
+  --hero-mobile-img: image-set(
+    url('/assets/img/duesseldorf/hero-duesseldorf-mobile.avif?v=1') type('image/avif'),
+    url('/assets/img/duesseldorf/hero-duesseldorf-mobile.webp?v=1') type('image/webp')
+  );
+  /* 08m A1 · Desktop-Hero q90-webp + q84-avif als image-set (Schaerfe-Re-Export
+     aus dem _src-Master; der fruehere 78-kB-q82-Export erzeugte Straehnen-
+     Artefakte). Greift >=1024 (gemeinsame .hero-photo-bg-Regel). */
+  --hero-desktop-img: image-set(
+    url('/assets/img/duesseldorf/hero-duesseldorf.avif?v=1') type('image/avif'),
+    url('/assets/img/duesseldorf/hero-duesseldorf.webp?v=1') type('image/webp')
+  );
+  /* Header-Glass-Tint (Mobile, dunkel) — Anthrazit-Petrol. */
   --header-glass: rgba(11, 61, 110, 0.91);
+
+  /* === BRIEF 08/08a/08d · Hero-Polish Theme-Werte === */
+  /* K1-Entscheid Aaron (08d F5): CTAs im Cluster-Design-System, WCAG-sicheres Paar. */
+  --cta-pill-bg: #185FA5;             /* Koeln-CTA: Amber (Cluster-Akzent) */
+  --cta-pill-bg-hover: #114080;       /* amber-700 */
+  --cta-text-color: #FFFFFF;          /* graphit-900 auf Amber (6.7:1) — NICHT weiss (1.9:1-Fail) */
+  --hero-scrim-strength: 68;          /* 08e A4: vereinheitlicht (Brief: Aachen 68, Koeln analog) */
+  --hero-tint-strength: 55;           /* 08e A4: Glas-Tint mobil (<640) */
+  --hero-scrim-color: #0E1015;        /* 08e A4: Darken-Layer NEUTRAL (nicht Cluster — Patina-Schleier-Fix); Akzent nur im ::before-Tint */
+  /* 08n N11a · Mobile-Top-Scrim (<640): H1-Zone oben links hatte KEINE
+     Abdeckung (245deg-Tint + Radial schuetzen nur unten) — je nach Geraete-
+     Ratio stand die H1 auf hellem Himmel. Reiner Gradient (kein Blur, keine
+     LCP-Last); Wert als Cluster-Token, Mechanik wie --hero-scrim-*. */
+  --hero-scrim-top: linear-gradient(185deg, rgba(14, 16, 21, .72) 0%, rgba(14, 16, 21, .45) 26%, transparent 48%);
+  /* 08o O5 · Desktop-Vignette (>=1024): Mobile/iPad tragen Vignette+Verlauf,
+     Desktop bisher nicht — Token gleicht die Bildwirkung formatuebergreifend
+     an. Reiner Gradient (kein Blur, keine LCP-Last); Staerke je Cluster
+     anpassbar. Liegt als eigene Schicht UEBER den Scrims (hero-blur-corner),
+     A2b-Personen-Maske + Scrims bleiben unangetastet. */
+  --hero-vignette: radial-gradient(115% 115% at 50% 42%, transparent 56%, rgba(10, 12, 16, 0.32) 100%);
+  --zero-anchor-bg: rgba(11, 61, 110, 0.45); /* 0€-Block graphit-getintet (Action 9) */
 }
+
+/* BRIEF 08 A5 · Glas-Tint reduziert ab Tablet (Mock Z.1928-1931) — Gutachter klar
+   erkennbar. 08m A2: 40 -> 38 = identische Staerke wie Aachens Patina-Version
+   (Aaron: "Aachen ist sehr gut geloest") — Farbton bleibt Cluster-Graphit. */
+@media (min-width: 640px) {
+  :root { --hero-tint-strength: 38; }
+}
+
+/* BRIEF 08h A5 · EYES-Kalibrierung Koeln 0.35 (hero-koeln-desktop-neu 1535x1025,
+   Headroom 28%): bgPosY je Format aus p = (EYES*H - subMid)/(H - secH), live
+   gemessen (subMid 222/222/385, secH 774/785/1013). headTop 162/155/295 >= 100.
+   1024 ist hoehen-limitiert (H 684 < secH 738) -> Y wirkungslos, X=center
+   steuert (08e-A3-Befund) — dokumentiertes Format-Limit. */
+/* 08n N2: Rekalibrierung fuer 100svh-Hoehe (Formel wie 08h A5; Koeln braucht
+   Zoom <=115%, weil H_screen knapp ueber secH liegt). Live verifiziert. */
+/* 08n N12c · Kopffreiheits-Guard ab 1024: bg-y als LAENGEN-calc statt % —
+   die %-Mechanik koppelt den Bild-Offset an die FENSTERHOEHE (flaches
+   Fenster -> Overhang waechst -> Kopf rutscht unter den Header; Befund
+   Aaron/Cowork auf Retina-MacBooks ~1300 CSS-px). Formel je Breiten-Band:
+   L(vw) = -(H_img(vw) - REF_vh) * p_ref  mit H_img = size/AR * vw
+   (AR hero-koeln 1.49756). Haelt den Kopf hoehen-UNABHAENGIG exakt auf der
+   abgenommenen Referenz-Position (REF: 1280x800 / 1440x900 / 1920x1080) —
+   je flacher das Fenster, desto tiefer croppt das Bild unten (oben bleibt
+   die Master-Luft). max()-Guard: bei sehr hohen Fenstern bleibt die
+   Bild-Unterkante an der Container-Unterkante (keine Luecke).
+   1024-1279 braucht keinen Override: default y=0 + cover ist hoehenstabil. */
+/* Duesseldorf-Re-Skin: Koelns px-Laengen-Hero-Calc entfernt (war auf Koelns Foto-AR
+   kalibriert -> Gesicht abgeschnitten). Duesseldorfs Foto nutzt die einfache Original-
+   Kalibrierung center 28% / cover (Gesicht im oberen Drittel) via Defaults unten. */
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
 @utility max-w-wrap {
   max-width: var(--container-wrap);
 }
+
+/* BRIEF 08a · Conversion-CTAs = universal Notfall-Rot (Mock Z.1851) — Action-Code
+   cluster-uebergreifend einheitlich; der Cluster-Akzent ist Identitaet, NICHT Action.
+   (Ersetzt BRIEF-08-A1-Dunkeltext-Loesung.) Icons erben via fill-/stroke-current. */
+#heroCallCta,
+[data-cta="header_call"],
+[data-cta="burger_call"],
+[data-cta="fab_call"],
+[data-cta="final_cta_call"] {
+  background: var(--cta-pill-bg, var(--amber)) !important;
+  color: var(--cta-text-color, #fff) !important;
+}
+#heroCallCta:hover,
+[data-cta="header_call"]:hover,
+[data-cta="burger_call"]:hover,
+[data-cta="fab_call"]:hover,
+[data-cta="final_cta_call"]:hover {
+  background: var(--cta-pill-bg-hover, var(--amber-700)) !important;
+}
+
+/* BRIEF 08a · Akzent-auf-Dunkel (H1-City, USP-City, 0€-Zahl): pro Cluster heller
+   Akzent-Ton; Fallback = --amber (Koeln: Gold bleibt). */
+h1 .loc,
+.loc-uspsm,
+.zero-accent {
+  color: var(--accent-on-dark, var(--amber)) !important;
+}
+
+/* BRIEF 08a 2.1 · Glossy-Paper-Glas-Header (Mock Z.4182): Gradient + blur(14) +
+   Inset-Highlight + Soft-Drop. Hell auf ALLEN Viewports (Mock-SOLL). */
+.header-glossy {
+  /* 08m A8 · ROOT-CAUSE der drei "kein backdrop-filter"-Funde (08d Mobile,
+     08e ::before, heute heller Header): Lightning CSS minifiziert den Space
+     zwischen Filter-Funktionen weg -> "saturate(180%)blur(14px)" ist eine
+     UNGUELTIGE Liste -> computed none. Fix: Wert in Custom Property kapseln
+     (var-Inhalte werden nicht re-serialisiert). Opazitaet .92/.82/.78 ->
+     .95/.88/.85 (Aaron: "man sieht die Sachen dahinter durchscheinen").
+     Gilt automatisch auch fuer den dunklen <640-Header (gleiche Klasse). */
+  --hg-bf: saturate(180%) blur(14px);
+  background: linear-gradient(180deg, rgba(255,255,255,.95) 0%, rgba(251,250,248,.88) 60%, rgba(251,250,248,.85) 100%);
+  -webkit-backdrop-filter: var(--hg-bf);
+  backdrop-filter: var(--hg-bf);
+  box-shadow: 0 1px 0 rgba(255,255,255,.7) inset, 0 4px 18px -8px rgba(15,36,41,.18);
+}
+/* 08m A8-Nachfass (Cowork-Ruecklaeufer): Pipeline-feste DOPPELUNG in @supports —
+   weder Lightning (Prod) noch Turbopack-Dev koennen hier mit der Basisregel
+   mergen/dedupen; beide Schreibweisen garantiert im CSSOM. */
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .header-glossy {
+    -webkit-backdrop-filter: var(--hg-bf);
+    backdrop-filter: var(--hg-bf);
+  }
+  .hero-photo::before {
+    -webkit-backdrop-filter: var(--hp-bf);
+    backdrop-filter: var(--hp-bf);
+  }
+}
+/* BRIEF 08d F2 (K2-Entscheid 09.06.): Mobile (<640) = DUNKLER Cluster-Glossy
+   (Tint aus --petrol, cluster-agnostisch via color-mix); Desktop bleibt hell. */
+@media (max-width: 639px) {
+  .header-glossy {
+    background: linear-gradient(180deg,
+      color-mix(in srgb, var(--petrol) 94%, transparent) 0%,
+      color-mix(in srgb, var(--petrol) 86%, transparent) 100%);
+    box-shadow: 0 1px 0 rgba(255,255,255,.12) inset, 0 4px 18px -8px rgba(0,0,0,.35);
+  }
+}
+/* D1920+: Header-Inhalt breiter (Mock/08a 2.1). */
+@media (min-width: 1920px) {
+  .header-wrap { max-width: clamp(1280px, 92vw, 1600px); }
+}
+
+/* BRIEF 08b A4 · Mobile-Collapse SEO-Body (<768): grid-rows-Trick (sanft animierbar,
+   Content bleibt vollstaendig im DOM/SSR — kein display:none auf Text, kein CLS:
+   collapsed-Zustand kommt aus diesem CSS, nicht aus JS). Desktop/Tablet immer offen. */
+@media (max-width: 767px) {
+  .seo-rest { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .45s ease; }
+  .seo-rest > div { overflow: hidden; }
+  .seo-rest-open { grid-template-rows: 1fr; }
+}
+@media (min-width: 768px) {
+  .seo-more-btn { display: none; }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+ * BRIEF 08h · Editorial-Port >=640 — SOLL = GERENDERTE Mock-Matrix (±0.5px),
+ * NICHT Mock-CSS (Schichten-Palimpsest). Mobile <640 byte-identisch: alle
+ * Regeln media-geguardet, Mobile-Markup-Klassen unveraendert.
+ * Stufen statt fluid: Acceptance misst 768/1024/1280/1440/1920 — Stufen
+ * treffen jeden Messpunkt exakt. Einzige fluide Groesse: --hero-indent
+ * clamp(16px,1.6vw,24px) trifft die Matrix-Indents 16/16.4/20.5/23/24 genau.
+ * .hero-shell-pt = Matrix-pt + Header-Hoehe (Header ueberlagert den Hero via
+ * -mt; der Mock misst seinen Container NACH dem Header). Mess-Knoten im
+ * Matrix-Diff-Report: pt_eff = computedPt - HeaderH.
+ * ════════════════════════════════════════════════════════════════════════ */
+@media (min-width: 640px) {
+  :root { --hero-indent: clamp(16px, 1.6vw, 24px); }
+
+  /* Container: content-getrieben, minH nur als Boden (Matrix "Container"). */
+  .hero-shell {
+    padding-top: 108px !important;   /* 36 + sm-Header 72 */
+    padding-bottom: 16px !important;
+    min-height: 0 !important;        /* 100svh bleibt nur mobil (Dock-Mechanik) */
+  }
+
+  .hero-copy-fade h1 { font-size: 36.9px !important; letter-spacing: -0.8px !important; }
+
+  /* Font-DNA: leiser Kompetenz-Beleg — 400 italic, nie semibold. */
+  .h1-sub { font-size: 15px !important; font-weight: 400 !important; padding-left: var(--hero-indent); }
+
+  /* 0€-Anker: Georgia-Serif-Editorial (SUPERSEDE 08-A0.3 + 08e-A2.1) —
+     Glas-Box nur mobil, >=640 frei stehend; der Serif-Kontrast IST der Effekt. */
+  .zero-anchor-block {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    margin-bottom: 16px;             /* Abstand zu USPs (kein Matrix-Messpunkt) */
+  }
+  .za-big  { font-size: 42px !important; font-weight: 800 !important; letter-spacing: -1px !important; }
+  .za-cond { font-size: 14px !important; font-weight: 600 !important; }
+  .za-post { font-size: 12px !important; font-weight: 400 !important; font-style: italic !important; }
+
+  /* USPs: vertikale Beweisliste mit Indent (Inter 500 via font-medium). */
+  .hero-usps {
+    flex-direction: column !important;
+    padding-left: var(--hero-indent);
+    margin-top: 0 !important;
+    margin-bottom: 28px !important; /* 08m A4: Matrix 20 +8 (Aaron-Entscheid CTA-Atmung) */
+  }
+  .hero-usps li { font-size: 14px !important; }
+
+  /* Trust: kleine mt-Stufe statt mt-auto-Loch + Indent (Matrix-Zeile Trust). */
+  .hero-trust-wrap {
+    margin-top: 12px !important;
+    margin-left: 0 !important;
+    padding-left: var(--hero-indent);
+  }
+}
+@media (min-width: 768px) {
+  .hero-shell { padding-top: 116px !important; }  /* 36 + md-Header 80 */
+}
+@media (min-width: 1024px) {
+  .hero-shell { padding-top: 108px !important; min-height: 560px !important; } /* 24 + lg-Header 84 */
+  .hero-copy-fade h1 { font-size: 45.1px !important; letter-spacing: -1px !important; }
+  .za-big { font-size: 38px !important; }
+  .hero-usps { margin-bottom: 22px !important; } /* 08m A4: Matrix 14 +8 */
+  .hero-trust-wrap { margin-top: 8px !important; }
+}
+@media (min-width: 1280px) {
+  /* 08n N2 (Aaron): Hero schliesst an der Falte — 100svh statt content-getrieben
+     (SUPERSEDET die 08h-A6-Fold-Bruecke ab 1280; 768-1024 bleiben content-
+     getrieben, Mobile unveraendert). bgPosY/Zoom unten neu kalibriert. */
+  .hero-shell { padding-top: 116px !important; min-height: 100svh !important; } /* 24 + xl-Header 92 (08h A4b) */
+  .hero-copy-fade h1 { font-size: 56px !important; letter-spacing: -1.2px !important; }
+  .za-big { font-size: 46.1px !important; }
+  .trust-rating { font-size: 16px !important; }
+  .hero-trust-desk strong { font-size: 15.4px !important; }
+  .hero-trust-wrap { margin-top: 11.5px !important; }
+}
+@media (min-width: 1440px) {
+  .za-big { font-size: 50px !important; }
+  .trust-rating { font-size: 18px !important; }
+  .hero-trust-desk strong { font-size: 17px !important; }
+  .hero-trust-wrap { margin-top: 13px !important; }
+}
+@media (min-width: 1920px) {
+  .hero-shell { padding-top: 143.2px !important; } /* 43.2 + 1920er-Header 100; minH 100svh erbt aus 1280 (08n N2) */
+  .hero-copy-fade h1 { font-size: 84px !important; letter-spacing: -1.8px !important; }
+  .h1-sub { font-size: 20px !important; }
+  .za-big { font-size: 72px !important; }
+  .za-cond { font-size: 18px !important; }
+  .za-post { font-size: 14px !important; }
+  .hero-usps { margin-bottom: 38px !important; } /* 08m A4: Matrix 30 +8 */
+  .hero-usps li { font-size: 17px !important; }
+  .hero-trust-desk strong { font-size: 15px !important; } /* Matrix: @1920 bewusst zurueck auf 15 */
+  .hero-trust-wrap { margin-top: 14px !important; }
+}
+
+/* ── 08n N11b · Tablet-Spacing (sm/md-Hero, 640-1023): gemessen @768 standen
+   H1->0€ bei 16px und CTA->Trust bei 12px — der Hero klebte. Soll-Gaps
+   44 / 36 / 28 (Cowork-Preview: Hero 783->824px, Trust atmet). Scope endet
+   bei 1023: ab 1024 gelten die unveraenderten Matrix-Stufen (kein Bruch),
+   <640 bleibt der Mobile-Stand (sm:mt-0-Utility greift dort nicht). ─────── */
+@media (min-width: 640px) and (max-width: 1023px) {
+  .zero-anchor-block { margin-top: 28px !important; }   /* H1->0€: 16 + 28 = 44 */
+  .hero-usps { margin-bottom: 36px !important; }        /* USP->CTA: 28 -> 36 */
+  .hero-trust-wrap { margin-top: 28px !important; }     /* CTA->Trust: 12 -> 28 */
+}
+
+/* ── 08n N12b · Desktop-Hero-Atmung (NUR >=1440): Die Copy-Spalte nutzt die
+   N2-Fold-Hoehe nicht — Ist @1440 16/16/8/22/13/10/10. Soll (eng in den
+   Gruppen, Luft dazwischen): H1->0€ 32 · 0€->USPs 28 · USP-Zeilen 10 ·
+   USPs->CTA 32 · CTA->Sterne 40 · Sterne->Codes 12 · Codes->Siegel 14.
+   (CTA->Sterne war als 24 spezifiziert — Aaron-Nachfass 11.06. am
+   1440er-Screenshot: "Trust noch zu nah am CTA" -> 40, Trust setzt sich
+   als eigene Fuss-Schicht ueber die 32er-Gruppengaps ab.)
+   Steht NACH allen Matrix-Stufen -> ueberschreibt @1440 (22/13) UND @1920
+   (38/14) bewusst (Soll gilt einheitlich >=1440). 1024-1439, N11b-Stufen
+   (640-1023) und Mobile <640 unangetastet. za-mt 16 = Soll 32 - 16 Flow-Gap
+   (Messkonvention wie N11b). */
+@media (min-width: 1440px) {
+  .zero-anchor-block { margin-top: 16px !important; margin-bottom: 28px !important; }
+  .hero-usps { gap: 10px !important; margin-bottom: 32px !important; }
+  .hero-trust-wrap { margin-top: 40px !important; }
+  .hero-trust-desk { gap: 12px !important; }
+  .hero-trust-desk > div:last-child { margin-top: 2px; } /* 12 + 2 = 14 zum Siegel */
+}
+
+/* ── 08o O4 · Ablauf-Desktop-Animation (>=768, Mobile unveraendert):
+   Linie scaleX von links (~400ms), Steps gestaffelt (Fade + 12px von unten,
+   90ms Versatz) — nur transform/opacity, 0 CLS. .ablauf-anim-ready setzt
+   SiteScripts NUR >=768 ohne reduced-motion; ohne JS bleibt alles statisch. */
+@media (min-width: 768px) {
+  .ablauf-anim-ready .ablauf-line { transform: scaleX(0); transform-origin: left center; }
+  .ablauf-anim-ready [data-ablauf-step] { opacity: 0; transform: translateY(12px); }
+  .ablauf-anim-go .ablauf-line { transform: scaleX(1); transition: transform 0.4s ease-out; }
+  .ablauf-anim-go [data-ablauf-step] { opacity: 1; transform: none; transition: opacity 0.45s ease-out, transform 0.45s ease-out; }
+  .ablauf-anim-go [data-ablauf-step="0"] { transition-delay: 0.4s; }
+  .ablauf-anim-go [data-ablauf-step="1"] { transition-delay: 0.49s; }
+  .ablauf-anim-go [data-ablauf-step="2"] { transition-delay: 0.58s; }
+  .ablauf-anim-go [data-ablauf-step="3"] { transition-delay: 0.67s; }
+  .ablauf-anim-go [data-ablauf-step="4"] { transition-delay: 0.76s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ablauf-anim-ready .ablauf-line,
+  .ablauf-anim-ready [data-ablauf-step] { opacity: 1; transform: none; transition: none; }
+}
+
+
+/* ── BRIEF 08h A6 (Aaron-Final, NUR >=1440) · Copy-Start einheitlich 11.5vw —
+   @1920 loest das die Copy-Spalte aus der Wrapper-Zentrierung (war ~20% =
+   "viel zu zentral"); Spalte linksbuendig gepinnt, max-w 660. Foto bleibt
+   unangetastet (absolute, viewport-weit). Die "Mehr erfahren"-Pill wird auf
+   den Viewport rezentriert (asymmetrische Paddings). 768-1280: NICHT anfassen.
+   Fold (Reviews in der Falz) kommt aus dem A1-minH-Port — Beweis im Sweep. ── */
+@media (min-width: 1440px) {
+  .hero-shell { max-width: none !important; padding-left: 11.5vw !important; }
+  .hero-copy-fade { max-width: 660px; }
+  .hero-more-pill { margin-left: calc(24px - 11.5vw); }
+}
+
+/* ── BRIEF 08h A4 · Header-Brand: Logo-Groessenleiter (Signet ≈ 62% Header-Hoehe,
+   Aaron: "Desktop-Logos nicht im Verhaeltnis") + Wortmarken-Stufen. Header waechst
+   >=1280 auf 92, >=1920 auf 100 — Hero--mt zieht mit (sonst Foto-Luecke). Mobile
+   (<640, Signet 32/Header 60) bleibt der abgenommene 08d-Stand. ─────────────── */
+/* 08m A5: Ratio 0.62 -> 0.68 (Aaron: "erkenne nicht, was es ist") — gilt
+   header-hoehen-unabhaengig auf ALLEN >=640-Headern inkl. Tablet (iPad-
+   Nachschaerfung). Aachen-Signet zusaetzlich per feMorphology-dilate
+   aufgedickt (SVG ist fill-basiert, stroke-width existiert nicht). */
+@media (min-width: 640px) {
+  .brand-signet-desk { height: 49px !important; max-width: 76px !important; } /* 49/72 = 0.68 */
+}
+@media (min-width: 768px) {
+  .brand-signet-desk { height: 54px !important; max-width: 84px !important; } /* 54/80 = 0.68 */
+}
+@media (min-width: 1024px) {
+  .brand-signet-desk { height: 57px !important; max-width: 88px !important; } /* 57/84 = 0.68 */
+  .brand-z1 { font-size: 17px !important; }
+  .brand-z2 { font-size: 11px !important; }
+}
+@media (min-width: 1280px) {
+  .header-wrap { height: 92px !important; }
+  .hero-section { margin-top: -92px !important; }
+  .brand-signet-desk { height: 63px !important; max-width: 96px !important; } /* 63/92 = 0.68 */
+  .brand-z1 { font-size: 18px !important; }
+  .brand-z2 { font-size: 12px !important; }
+}
+@media (min-width: 1920px) {
+  .header-wrap { height: 100px !important; }
+  .hero-section { margin-top: -100px !important; }
+  .brand-signet-desk { height: 68px !important; max-width: 104px !important; } /* 68/100 = 0.68 */
+  .brand-z1 { font-size: 20px !important; }
+  .brand-z2 { font-size: 13px !important; }
+}
+
+/* BRIEF 08f: #heroTrustClusterDesktop-CSS entfernt (Markup raus, kein toter Code —
+   das Element ist im Mock per display:none deaktiviert, v7-Notiz Z.1190-1192). */
 
 /* ════════════════════════════════════════════════════════════════════════
  * BASE
@@ -110,74 +451,125 @@ body {
  * GLOBALE KOMPONENTEN-KLASSEN (aus Mock — identisch in allen 3 Clustern)
  * ════════════════════════════════════════════════════════════════════════ */
 
-/* Hero gradient — mehrschichtig: Copy lesbar, Gutachter klarer sichtbar */
+/* Hero gradient — mehrschichtig: Copy lesbar, Gutachter klarer sichtbar.
+   BRIEF 08 A5: Farbe/Dichte ueber Theme-Tokens (--hero-scrim-color/-strength). */
 .hero-photo::after {
   content: "";
   position: absolute;
   inset: 0;
-  /* Basis-Scrim (Mobile + Tablet-Portrait, < lg): vertikal — oben Foto sichtbar,
-     Mitte lesbar, unten voll Petrol (Lower-Cluster auf solid Petrol). */
+  /* Basis-Scrim (<640): Top-Band (08n N11a, H1-Guard) + radial unten-links —
+     Mitte bleibt Foto, unten solid fuer Lower-Cluster. >=640 ueberschreibt
+     der 3-Layer-Block den kompletten background-Stack (Top-Darken + 90deg
+     decken die H1-Zone dort bereits — gemessen, kein Band noetig). */
   background:
-    radial-gradient(140% 105% at 16% 114%,
-      #0E1015 0%,
-      color-mix(in srgb, #0E1015 55%, transparent) 42%,
-      transparent 74%);
+    var(--hero-scrim-top),
+    radial-gradient(150% 100% at 15% 114%,
+      color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 75) * 1.2%), #0E1015) 0%,
+      color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 75) * 0.78%), transparent) 40%,
+      transparent 72%);
 }
 
-/* Morphism-Verlauf (KONSISTENT auf allen Versionen, Aaron 05.06.): EINE Definition
-   im Base -> gilt fuer SE/i14/ProMax/iPad/Desktop identisch. Frost unten (einblendend
-   ab ~42%, voll ab ~62% = Kamera) UND nach rechts auslaufend (Intersect 90deg-Maske)
-   -> die linke Hand in der Hosentasche bleibt scharf erkennbar. */
-.hero-blur-corner {
-  display: block;
-  -webkit-backdrop-filter: blur(9px) saturate(112%);
-  backdrop-filter: blur(9px) saturate(112%);
-  -webkit-mask-image: linear-gradient(180deg, transparent 0%, transparent 42%, #000 62%, #000 100%), linear-gradient(90deg, #000 0%, #000 34%, transparent 70%);
-          mask-image: linear-gradient(180deg, transparent 0%, transparent 42%, #000 62%, #000 100%), linear-gradient(90deg, #000 0%, #000 34%, transparent 70%);
-  -webkit-mask-composite: source-in;
-          mask-composite: intersect;
+/* BRIEF 08 A5 · Diagonal-Glas-Tint (Mock v10, Z.1911-1934): Hand/Kamera oben-rechts FREI
+   (Mask ab 40%), Wash unten-links subtil getoent. Ersetzt den frueheren .hero-blur-corner. */
+.hero-photo::before {
+  content: "";
+  position: absolute;
+  inset: 0;
   pointer-events: none;
+  z-index: 1;
+  /* 08m A8: var-Kapselung (Lightning-CSS-Space-Bug, s. .header-glossy). */
+  --hp-bf: blur(4px) saturate(130%);
+  -webkit-backdrop-filter: var(--hp-bf);
+  backdrop-filter: var(--hp-bf);
+  background: linear-gradient(245deg,
+    transparent 40%,
+    color-mix(in srgb, var(--petrol) calc(var(--hero-tint-strength, 70) * 0.35%), transparent) 62%,
+    color-mix(in srgb, var(--petrol) calc(var(--hero-tint-strength, 70) * 0.65%), transparent) 82%,
+    color-mix(in srgb, var(--petrol) calc(var(--hero-tint-strength, 70) * 0.85%), transparent) 100%);
+  -webkit-mask-image: linear-gradient(245deg, transparent 40%, black 65%, black 100%);
+  mask-image: linear-gradient(245deg, transparent 40%, black 65%, black 100%);
+}
+@media (min-width: 640px) {
+  .hero-photo::before {
+    --hp-bf: blur(3px) saturate(125%); /* 08m A8: var-Kapselung */
+    -webkit-backdrop-filter: var(--hp-bf);
+    backdrop-filter: var(--hp-bf);
+  }
 }
 
-/* Mobile + iPad (<=1023): dediziertes Hochformat-Foto + radialer Scrim (unten-links).
-   Der Morphism-Blur kommt aus dem Base (konsistent ueber alle Breakpoints). */
+/* Stillgelegt (BRIEF 08): Morphism-Frost ersetzt durch .hero-photo::before (Mock-Parity).
+   Markup-DIV bleibt — Komponente unveraendert. */
+.hero-blur-corner { display: none; }
+/* 08o O5: >=1024 reaktiviert als Vignetten-Layer — das Markup-DIV existiert
+   seit BRIEF 08 (absolute inset-0). z-index 1 legt ihn ueber hero-photo
+   (+Scrims); der Content-Shell (z-[1], spaeter im DOM) bleibt darueber. */
+@media (min-width: 1024px) {
+  .hero-blur-corner { display: block; background: var(--hero-vignette); z-index: 1; pointer-events: none; }
+}
+
+/* Mobile + iPad (<=1023): dediziertes Hochformat-Foto. BRIEF 08 A2: center 22%/cover
+   (Mock Z.1778) statt center top. */
 @media (max-width: 1023px) {
   .hero-photo-bg {
     background-image: var(--hero-mobile-img) !important;
-    background-position: center top !important;
-  }
-  /* Mobile-Scrim (Aaron): weniger Farbe, Foto oben klar; Fade zu solid max. bis zur Kamera. */
-  .hero-photo::after {
-    background:
-      radial-gradient(150% 100% at 15% 114%,
-        #0E1015 0%,
-        color-mix(in srgb, #0E1015 58%, transparent) 40%,
-        transparent 72%);
+    background-position: center 22% !important;
+    background-size: cover !important;
   }
 }
-/* Tablet-Landscape + Desktop (>= lg): horizontaler Lokal-Scrim nur ueber der Copy-Spalte
-   (links 88% Petrol -> Mitte 60% -> rechts 0% = Foto klar). */
-@media (min-width: 1024px) {
+/* 08e A4 · Tablet+Desktop (>=640): Mock-3-Layer-Darken (Z.1874-1893) — Bottom-Darken
+   + Top-Darken + Hauptgradient 90deg (Stops 22/38/52/65/78). NEUTRAL-basiert (NICHT
+   Cluster-Farbe — Patina-Schleier-Fix), Cap <=35% Deckkraft (Brief-Acceptance);
+   Cluster-Akzent lebt NUR im ::before-Glas-Tint. Dichte via --hero-scrim-strength. */
+@media (min-width: 640px) {
   .hero-photo::after {
     background:
+      linear-gradient(180deg, transparent 0%, transparent 60%,
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 68) * 0.44%), transparent) 100%),
+      linear-gradient(180deg,
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 68) * 0.29%), transparent) 0%,
+        transparent 15%),
       linear-gradient(90deg,
-        color-mix(in srgb, #0E1015 82%, transparent) 0%,
-        color-mix(in srgb, #0E1015 48%, transparent) 38%,
-        transparent 70%);
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) 35%, transparent) 0%,
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) 35%, transparent) 22%,
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 68) * 0.38%), transparent) 38%,
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 68) * 0.19%), transparent) 52%,
+        color-mix(in srgb, var(--hero-scrim-color, #0E1015) calc(var(--hero-scrim-strength, 68) * 0.07%), transparent) 65%,
+        transparent 78%);
+    -webkit-mask-image: none;
+    mask-image: none;
   }
-  /* Desktop: Bild leicht hochzoomen + Y=0 -> Augen des Gutachters auf H2-Hoehe
-     (Aaron 05.06.). Cover fuellt die Hoehe exakt -> ohne Zoom kein vertikaler Spielraum. */
+}
+/* Tablet-Landscape + Desktop (>= lg): Foto-Geometrie. 08h A5: bgPosY ueber
+   Cluster-Token --hero-bg-y (EYES-Kalibrierung Koeln 0.35 / Aachen 0.27 —
+   neue Assets mit echtem Headroom; Stufen pro Format im :root-Bereich der
+   Cluster, Werte per Mess-Snippet: Augen ~ H1-Sub ±30, Kopf-Top >=100).
+   Mit content-getriebener Hoehe (08h A1) ist >=1024 breiten-limitiert ->
+   bgPosY wirkt; X=center (08e-A3-Befund bleibt gueltig). */
+@media (min-width: 1024px) {
   .hero-photo {
-    background-size: auto 124% !important;
-    background-position: 70% 0% !important;
+    background-size: var(--hero-bg-size, cover) !important;
+    background-position: center var(--hero-bg-y, 28%) !important;
+  }
+  /* 08m A1: avif/webp-image-set fuer den Desktop-Hero (Token im :root). */
+  .hero-photo-bg { background-image: var(--hero-desktop-img) !important; }
+  /* 08m A2b · Personen-Zone vom Darken-Scrim FREISTELLEN (Original-Spec 08d A1 /
+     Mock Z.1907-1934, beim 08e-Port verloren): Top-/Bottom-Darken + Haupt-
+     gradient enden per Maske vor der Figur (steht ab ~50-55% vw) — der
+     Gutachter behaelt Hautton/Polo-Farbe wie auf Tablet (dort Referenz-
+     natuerlich, Foto <=1023 ist das Mobile-Bild). KEINE Bildbearbeitung.
+     Copy-Zone links bleibt voll gescrimmt (Kontrast >=4.5). */
+  .hero-photo::after {
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, #000 46%, transparent 64%);
+    mask-image: linear-gradient(90deg, #000 0%, #000 46%, transparent 64%);
   }
 }
 
-/* iPhone SE & kurze Viewports (max-height<=700): Eyebrow-Sterne + "5,0" ausblenden.
-   Unlayered + !important, da .hero-eyebrow { display:flex } (Custom-Klasse) sonst die
-   Tailwind-hidden-Utility schlaegt (Aaron 05.06.). */
-@media (max-height: 700px) {
-  .hero-eyebrow { display: none !important; }
+/* BRIEF 08 A4 · Eyebrow ★ 5,0 bleibt auf ALLEN Mobiles sichtbar (Mock v15 Z.2205 —
+   Social-Proof above-fold wichtiger als Atmen). Frueherer max-height<=700-Hide entfernt.
+   Auf sehr schmalen Screens (<=380, M-SE) nur kompakter (Mock Z.2206-2209). */
+@media (max-width: 380px) {
+  .hero-eyebrow { font-size: 11px; margin: 0 0 4px; }
+  .eyebrow-stars, .eyebrow-rating { font-size: 11px; }
 }
 
 /* Leaflet z-index Reset — verhindert dass Marker-Layer ueber FAB/Bubble springen */
@@ -201,11 +593,56 @@ body {
 .cases-track {
   scrollbar-width: none;
   -ms-overflow-style: none;
-  /* Transparenz-Fade zum (Bildschirm-)Rand links+rechts (AAR-962) */
+  /* Transparenz-Fade zum (Bildschirm-)Rand links+rechts (AAR-962); <640 unveraendert. */
   -webkit-mask-image: linear-gradient(to right, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
           mask-image: linear-gradient(to right, transparent 0, #000 30px, #000 calc(100% - 30px), transparent 100%);
 }
 .cases-track::-webkit-scrollbar { display: none; }
+/* BRIEF 08j A2: >=640 Fade auf 48px-KANTE begrenzt (nur Transparenz-Verlauf,
+   kein Weiss-Schleier) — Peek-Karte bleibt lesbar (Kartenbreiten 46%/35%
+   liefern den Anschnitt als staerkste Blaetter-Affordance). */
+@media (min-width: 640px) {
+  /* 08n N4: Fade-Kante 48 -> 26px (Aaron: Verlauf zu aggressiv — angeschnittene
+     Karten muessen als Karten erkennbar bleiben). */
+  .cases-track {
+    -webkit-mask-image: linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0, #000 26px, #000 calc(100% - 26px), transparent 100%);
+  }
+}
+/* BRIEF 08j A1: Pfeil-Buttons — 44px Glas, vertikal mittig auf Kartenhoehe.
+   Doppelter Guard: CSS-Media (hover+pointer:fine, >=1024) UND DOM-Guard in der
+   Komponente (matchMedia) — iPad-Landscape bekommt nie Pfeile. */
+.cases-arrow { display: none; }
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .cases-arrow {
+    display: grid;
+    place-items: center;
+    position: absolute;
+    top: calc(50% - 40px);
+    z-index: 5;
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    color: var(--color-petrol);
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1.5px solid var(--color-border);
+    box-shadow: 0 4px 14px -4px rgba(13, 27, 62, 0.22);
+    cursor: pointer;
+    transition: background .2s ease, border-color .2s ease, opacity .2s ease;
+  }
+  .cases-arrow:hover { background: #fff; border-color: var(--amber); }
+  .cases-arrow:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  /* 08n N4: Icon im Gold-Ton (dezent, KEIN Vollflaechen-Gold) + Pfeile klar
+     ausserhalb der Karten-Flucht (>=1280 ganz draussen; @1024 halb, Viewport-Rand). */
+  .cases-arrow { color: var(--amber-aa, var(--amber)); }
+}
+@media (min-width: 1280px) and (hover: hover) and (pointer: fine) {
+  /* translate-Property (Tailwind v4 nutzt sie fuer -translate-x-*) statt transform. */
+  .cases-arrow.left-0 { translate: calc(-100% - 10px) 0; }
+  .cases-arrow.right-0 { translate: calc(100% + 10px) 0; }
+}
 
 /* FAQ accordion — alle geschlossen by default, bei .open aufklappen */
 .qa .a { max-height: 0; overflow: hidden; padding-top: 0; padding-bottom: 0; transition: max-height .45s ease, padding .3s ease; }
@@ -510,28 +947,6 @@ body {
  * unveraendert (bestehende .hero-photo-Regeln). Block identisch in allen 3 Clustern.
  * ════════════════════════════════════════════════════════════════════════ */
 
-/* Trust-Cluster (Desktop+Tablet) — Siegel + Brand + Stats in 1 Zeile. */
-#heroTrustClusterDesktop { display: none; }
-@media (min-width: 640px) {
-  #heroTrustClusterDesktop {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.16);
-    flex-wrap: wrap;
-    max-width: 580px;
-  }
-}
-#heroTrustClusterDesktop .htc-siegel { width: 32px; height: 32px; flex: none; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.45)); }
-#heroTrustClusterDesktop .htc-text { display: flex; flex-direction: column; line-height: 1.25; flex: none; }
-#heroTrustClusterDesktop .htc-text-main { font-size: 13px; font-weight: 600; color: #fff; letter-spacing: 0.01em; }
-#heroTrustClusterDesktop .htc-text-sub { font-size: 10.5px; font-weight: 500; color: rgba(255, 255, 255, 0.6); letter-spacing: 0.04em; }
-#heroTrustClusterDesktop .htc-sep { width: 1px; align-self: stretch; min-height: 26px; background: rgba(255, 255, 255, 0.2); }
-#heroTrustClusterDesktop .htc-stats { display: flex; gap: 14px; font-size: 12px; color: rgba(255, 255, 255, 0.85); flex-wrap: wrap; }
-#heroTrustClusterDesktop .htc-stats strong { color: #fff; font-weight: 700; }
-
 /* Mobile-Entrance (Copy-Spalte sanft einblenden) + Scroll-Chevron-Bounce. */
 @keyframes heroFadeUp { to { opacity: 1; transform: translateY(0); } }
 @keyframes heroChevBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(6px); } }
@@ -602,32 +1017,29 @@ body {
 .rev-eyebrow { display: flex; align-items: center; justify-content: center; gap: 6px; font-family: var(--font-display); font-size: 11px; font-weight: 600; color: var(--color-muted); letter-spacing: 1.2px; text-transform: uppercase; margin: 0 0 10px; }
 .rev-stars { color: #FCD34D; letter-spacing: 1.5px; font-size: 12px; }
 .rev-rating { font-weight: 700; color: var(--color-ink); }
-.rev-list { border-radius: 12px; background: #fff; border: 1px solid var(--color-border); padding: 2px 18px; }
-.rev-item { display: grid; grid-template-columns: 44px 1fr; gap: 13px; padding: 17px 0; border-top: 1px solid var(--color-border); }
-.rev-item:first-of-type { border-top: none; }
-.rev-ava { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; color: #fff; font-family: var(--font-display); }
+/* BRIEF 08i: Karten-Grid (gestapelt <640 · 2x2 Tablet · 2 Reihen x 3 Spalten
+   Desktop), gleiche Kartenhoehe via stretch + line-clamp-4 in der Komponente.
+   Slot-Sichtbarkeit (6/4/3) steuert die Komponente per Klassen. */
+.rev-grid { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: stretch; }
+@media (min-width: 640px) { .rev-grid { grid-template-columns: 1fr 1fr; gap: 16px; } }
+@media (min-width: 1024px) { .rev-grid { grid-template-columns: 1fr 1fr 1fr; gap: 18px; } }
+.rev-card {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 16px;
+  padding: 18px 20px;
+  box-shadow: 0 4px 16px -6px rgba(13, 27, 62, 0.12);
+}
+.rev-ava { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; font-weight: 700; color: #fff; font-family: var(--font-display); flex: none; }
 .rev-name { font-size: 15px; font-weight: 600; color: var(--color-ink); line-height: 1.25; }
-.rev-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; font-size: 11.5px; color: var(--color-muted); }
+.rev-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; font-size: 11.5px; color: var(--color-muted); flex-wrap: wrap; }
 .rev-stars-mini { color: #FCD34D; letter-spacing: 0.8px; font-size: 11px; }
-.rev-quote { margin-top: 7px; font-size: 14.5px; line-height: 1.55; color: var(--color-ink); font-style: italic; }
+.rev-lg-badge { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--amber-aa, var(--amber)); border: 1px solid color-mix(in srgb, var(--amber) 45%, transparent); border-radius: 99px; padding: 1px 7px; }
+.rev-quote { margin-top: 10px; font-size: 14.5px; line-height: 1.55; color: var(--color-ink); font-style: italic; }
 .rev-all-link { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-top: 18px; padding: 12px 18px; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--color-petrol); background: var(--color-surface); border: 1.5px solid var(--color-border); border-radius: 11px; text-decoration: none; letter-spacing: 0.01em; transition: border-color .2s ease, color .2s ease; }
 .rev-all-link::after { content: "→"; }
 .rev-all-link:hover { border-color: var(--amber); color: var(--amber); }
-
-/* Desktop: 4 Bewertungen als einzelne Cards im 2x2-Grid (Aaron 05.06.) */
 @media (min-width: 1024px) {
-  #reviews .rev-list {
-    background: transparent; border: none; border-radius: 0; padding: 0;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
-  }
-  #reviews .rev-item {
-    border-top: none;
-    background: #fff;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
-    padding: 22px 24px;
-    box-shadow: 0 4px 16px -6px rgba(13, 27, 62, 0.12);
-  }
   #reviews .rev-all-link { width: fit-content; margin-left: auto; margin-right: auto; padding-left: 32px; padding-right: 32px; }
 }
 

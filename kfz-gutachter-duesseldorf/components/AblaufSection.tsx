@@ -142,12 +142,15 @@ export function AblaufSection() {
             </p>
           </div>
 
-          <div className="relative grid grid-cols-1 md:grid-cols-5 gap-x-3.5 gap-y-8 md:gap-y-3.5 mt-2.5">
+          {/* 08o O4: Animations-Hooks — SiteScripts setzt .ablauf-anim-ready
+              (nur >=768 + ohne reduced-motion) und per IO einmalig
+              .ablauf-anim-go; CSS im globals-08o-Block. No-JS = statisch. */}
+          <div id="ablaufStepsGrid" className="relative grid grid-cols-1 md:grid-cols-5 gap-x-3.5 gap-y-8 md:gap-y-3.5 mt-2.5">
             {/* Verbindungslinie (nur Desktop) */}
-            <div className="hidden md:block absolute top-8 left-[11%] right-[11%] h-0.5 bg-gradient-to-r from-green to-green/30 z-0" />
+            <div className="ablauf-line hidden md:block absolute top-8 left-[11%] right-[11%] h-0.5 bg-gradient-to-r from-green to-green/30 z-0" />
 
             {ABLAUF.map((step, i) => (
-              <div key={step.title} className="relative z-[1] text-center px-1 flex flex-col items-center">
+              <div key={step.title} data-ablauf-step={i} className="relative z-[1] text-center px-1 flex flex-col items-center">
                 <div className="relative w-16 h-16 mb-3.5">
                   <div className="w-16 h-16 rounded-full bg-surface border-2 border-green-soft text-green grid place-items-center shadow-sm">
                     {ICONS[step.icon]}
@@ -158,10 +161,14 @@ export function AblaufSection() {
                 </div>
                 <h3 className="font-display font-bold text-[15.5px] md:text-base mb-1.5 text-petrol leading-tight min-h-[44px] md:min-h-[40px] flex items-start justify-center">
                   {step.title}
-                  {step.titleAccent && <span className="whitespace-nowrap text-amber"> {step.titleAccent}</span>}
+                  {/* 08p P3b: Accent als eigene Zeile — "Anwalt —" / "0 € inklusive";
+                      der fruehere nowrap-Inline lief @768 in die Nachbarspalte. */}
+                  {step.titleAccent && <span className="block text-amber">{step.titleAccent}</span>}
                 </h3>
-                <p className="text-[13px] md:text-[13px] text-secondary leading-snug min-h-[60px]">
-                  {renderRich(step.text)}
+                <p className="hidden lg:block text-[13px] text-secondary leading-snug min-h-[60px]">
+                  {/* 08p P3c: Bold neutral in Textfarbe — Akzentfarbe bleibt
+                      Nummern/Icons/Linie vorbehalten (Entscheid Aaron). */}
+                  {renderRich(step.text, 'text-ink')}
                   {step.icon === 'car' && step.info && <NutzungsausfallTooltip info={step.info} />}
                 </p>
               </div>
@@ -191,27 +198,12 @@ export function AblaufSection() {
             <p className="mt-3 text-muted text-[12.5px]">Kostenlos & unverbindlich bei unverschuldetem Unfall.</p>
           </div>
 
-          <p className="text-center mt-8 text-muted text-[13px] font-medium">
-            Powered by <strong className="text-secondary font-bold"><ClaimondoLink>Claimondo</ClaimondoLink></strong> — Plattform für komplette Unfall-Schadenabwicklung.{' '}
-            <a
-              href="https://autounfall.io/gutachter/"
-              target="_blank"
-              rel="noopener"
-              className="text-petrol font-bold underline underline-offset-[3px] ml-1"
-            >
-              Kfz-Gutachter-Ratgeber →
-            </a>
-          </p>
-          <div className="flex items-center justify-center gap-3.5 mt-4 flex-wrap">
-            <span className="text-muted text-[13px] font-semibold">Partnerkanzlei für Verkehrsrecht:</span>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src="/assets/brand/kanzlei-lexdrive-logo.png"
-              alt="LexDrive — Partnerkanzlei für Verkehrsrecht"
-              className="h-[30px] w-auto"
-              loading="lazy"
-            />
-          </div>
+          {/* 08k A5 (Aaron-Entscheid): Powered-by-Block + LexDrive-Logo-Zeile
+              entfernt (zu viel unter dem CTA). SEO-Link-Verbleib: claimondo.de
+              bleibt via ClaimondoLink in Hero/Netzwerk/UeberUns/Footer;
+              autounfall.io/gutachter/ war NUR hier -> in den Footer aufgenommen
+              (Verlinkungs-Strategie 27c). LexDrive bleibt in der 08k-Team-Kette
+              + Vergleichstabelle praesent. */}
         </div>
       </div>
     </section>

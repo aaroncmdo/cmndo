@@ -4,6 +4,7 @@ import { Fragment, useState } from 'react'
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
 import { FAQ, fillTokens } from '@/lib/content'
+import { LOKALDATEN } from '@/lib/lokaldaten'
 
 // CLIENT-Komponente: rendert die FAQ-Sektion (#faq) nach v3-praxis-v2-Spec:
 // 5 kuratierte FAQ (Akkordeon) mit Spezial-Elementen (Q1 0€-Badge, Q4 Trust-Bullets,
@@ -12,13 +13,6 @@ import { FAQ, fillTokens } from '@/lib/content'
 // - Sichtbare Antwort == faqAnswerText() (lib/content) -> JSON-LD (lib/schema) bleibt synchron.
 // - .faq-* Klassen aus globals.css. Tracking: Pills via data-action delegiert (SiteScripts).
 // - Cluster-Daten: CLUSTER.achsen (Q2), CLUSTER.stadtteile (Lokal-Card), CLUSTER.quellenAnker.
-
-const RATGEBER_PILLS = [
-  { topic: 'kosten', label: 'Kosten', sub: 'Wer zahlt was?', href: 'https://autounfall.io/gutachter-kosten/' },
-  { topic: 'arten', label: 'Arten', sub: 'Welches Gutachten?', href: 'https://autounfall.io/gutachten-arten/' },
-  { topic: 'wer-beauftragt', label: 'Wer beauftragt?', sub: 'Ihre Rechte', href: 'https://autounfall.io/gutachter-wer-beauftragt/' },
-  { topic: 'lohnt-sich', label: 'Lohnt sich?', sub: 'Ab welcher Höhe?', href: 'https://autounfall.io/gutachter-lohnt-sich/' },
-]
 
 // Wandelt **fett**-Marker (aus content.ts-Intros/Workshop) in <strong> fuer Inline-Hervorhebung.
 function renderRich(text: string) {
@@ -56,6 +50,45 @@ export function FaqAccordion({ city }: { city: City }) {
 
         {/* Akkordeon — 5 kuratierte FAQ */}
         <div className="max-w-[760px] mx-auto space-y-2.5 sm:space-y-3">
+          {/* 08l A4 · 2 lokale Fragen je Stadt an Position 1+2 (Daten-Layer,
+              Orts-Label-Chip); Daten-Guard: ohne faqLokal rendern nur die
+              generischen. FAQ-Schema (lib/schema) umfasst lokal + generisch. */}
+          {(LOKALDATEN[city.slug]?.faqLokal ?? []).map((item, li) => {
+            const i = 1000 + li
+            return (
+              <div
+                key={`lokal-${li}`}
+                className={`qa border border-border rounded-cta bg-surface overflow-hidden${open.has(i) ? ' open' : ''}`}
+              >
+                <button
+                  type="button"
+                  onClick={() => toggle(i)}
+                  aria-expanded={open.has(i)}
+                  aria-controls={`faq-panel-lokal-${li}`}
+                  className="w-full flex items-center justify-between gap-2 px-4 sm:px-5 py-3.5 sm:py-4 text-left font-display font-bold text-[15px] sm:text-[16px] text-ink cursor-pointer bg-transparent border-0"
+                >
+                  <span className="flex-1">{item.q}</span>
+                  <span className="flex items-center gap-2.5 flex-none">
+                    <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[10.5px] font-mono font-bold tracking-[.06em] uppercase bg-[color-mix(in_srgb,var(--amber)_14%,white)] text-[var(--amber-aa)] border border-[color-mix(in_srgb,var(--amber)_32%,white)]">
+                      {city.name}
+                    </span>
+                    <span className="chev text-amber font-bold text-xl" aria-hidden="true">
+                      +
+                    </span>
+                  </span>
+                </button>
+                <div
+                  id={`faq-panel-lokal-${li}`}
+                  role="region"
+                  className="a px-5 pb-4"
+                  aria-hidden={!open.has(i)}
+                  inert={!open.has(i) ? true : undefined}
+                >
+                  <p className="text-secondary text-[15px] leading-relaxed">{item.a}</p>
+                </div>
+              </div>
+            )
+          })}
           {FAQ.map((item, i) => (
             <div
               key={i}
@@ -160,49 +193,8 @@ export function FaqAccordion({ city }: { city: City }) {
           </p>
         </div>
 
-        {/* Ratgeber-Bruecke — Magazin-Divider + Pills + CTA */}
-        <div className="max-w-[760px] mx-auto mt-[clamp(28px,4vw,40px)]">
-          <div className="faq-magazin-divider">
-            <span className="faq-magazin-divider-line" />
-            <span className="faq-magazin-divider-label">Tiefer einsteigen</span>
-            <span className="faq-magazin-divider-line" />
-          </div>
-          <div className="faq-ratgeber-pills">
-            {RATGEBER_PILLS.map((p) => (
-              <a
-                key={p.topic}
-                href={p.href}
-                target="_blank"
-                rel="noopener"
-                className="faq-ratgeber-pill"
-                data-action="ratgeber_click"
-                data-topic={p.topic}
-              >
-                <span className="faq-ratgeber-icon" aria-hidden="true">
-                  <svg className="w-4 h-4 fill-none stroke-current" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
-                  </svg>
-                </span>
-                <span className="faq-ratgeber-text">
-                  <span className="faq-ratgeber-label">{p.label}</span>
-                  <span className="faq-ratgeber-sub">{p.sub}</span>
-                </span>
-              </a>
-            ))}
-          </div>
-          <div className="text-center mt-4">
-            <a
-              href="https://autounfall.io/"
-              target="_blank"
-              rel="noopener"
-              className="faq-magazin-cta"
-              data-action="ratgeber_hub_click"
-            >
-              Mehr im Magazin entdecken →
-            </a>
-          </div>
-        </div>
+        {/* 08n N8: Ratgeber-Bruecke (Divider + 4 Pills + Magazin-CTA) in die
+            RatgeberSection verschoben — dort ist der inhaltliche Kontext. */}
       </div>
     </section>
   )

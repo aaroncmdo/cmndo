@@ -1,5 +1,5 @@
 import type { City } from '@/lib/cluster'
-import { CLUSTER, cityHref, waHref } from '@/lib/cluster'
+import { CLUSTER, MAIN_CITY, cityHref, waHref } from '@/lib/cluster'
 import { SITE } from '@/lib/site'
 import { ClaimondoLink } from '@/lib/text'
 import { CookieSettingsLink } from './CookieSettingsLink'
@@ -18,12 +18,20 @@ export function Footer({ city }: { city: City }) {
           <div>
             <div className="flex items-center gap-3 mb-3.5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
+              {/* BRIEF 08d · Weiss-Variante auf dunklem Footer (logoExt pro Cluster).
+                  08h A4a · Composite-Wortmarke wie im Header: Hairline + 2 Zeilen,
+                  Zeile 2 "{Stadt} und Umgebung" normal geschrieben (Aaron 10.06.). */}
               <img
-                src={`${CLUSTER.imgPath}logo-${CLUSTER.key}.webp`}
+                src={`${CLUSTER.imgPath}logo-${CLUSTER.key}-white.${CLUSTER.logoExt}?v=${CLUSTER.assetVersion}`}
                 alt={SITE.name}
                 className="h-14 md:h-16 w-auto flex-none"
                 loading="lazy"
               />
+              <span className="block w-px self-stretch min-h-[34px] bg-amber" aria-hidden="true" />
+              <span className="flex flex-col leading-none">
+                <span className="font-display font-bold text-[17px] tracking-[-0.012em] text-white">Kfz-Gutachter</span>
+                <span className="font-display font-bold text-[11px] tracking-[0.02em] mt-1.5 text-[var(--accent-on-dark,var(--amber))]">{MAIN_CITY.name} und Umgebung</span>
+              </span>
             </div>
             <p className="font-semibold text-white">
               Kitta &amp; Sprafke UG{' '}
@@ -34,13 +42,23 @@ export function Footer({ city }: { city: City }) {
               {SITE.operator.postalCode} {SITE.operator.city}
             </p>
             <p className="mt-1.5 text-[13px] text-white/55">
-              Servicegebiet: {city.name} &amp; Umland
+              Servicegebiet: {city.name}{' '}&amp; Umland
             </p>
             <p className="mt-3 text-[12.5px] text-white/55 leading-snug">
               Vermittlung im{' '}
               <strong className="text-white/85 font-semibold"><ClaimondoLink>Claimondo-Partnernetzwerk</ClaimondoLink></strong> ·
               DAT-zertifizierte Partner-Sachverständige vor Ort
             </p>
+            {/* 08k A5: Ratgeber-Link aus der Ablauf-Section hierher (war dort
+                der einzige autounfall.io/gutachter/-Treffer — Strategie 27c). */}
+            <a
+              href="https://autounfall.io/gutachter/"
+              target="_blank"
+              rel="noopener"
+              className="inline-block mt-2 text-[12.5px] text-white/70 underline underline-offset-2 hover:text-white transition"
+            >
+              Kfz-Gutachter-Ratgeber →
+            </a>
           </div>
 
           {/* 2) Kontakt */}
@@ -90,8 +108,11 @@ export function Footer({ city }: { city: City }) {
         <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10 text-[13px] text-white/55">
           <span>© 2026 {SITE.name} · {CLUSTER.region}</span>
           <div className="flex gap-4">
+            {/* 08q Q4: TMG verlangt unmittelbare Erreichbarkeit — Deep-Links
+                auf /impressum bzw. /datenschutz, nicht auf die claimondo.de-
+                Startseite. */}
             <a
-              href={SITE.legalUrl}
+              href={`${SITE.legalUrl}/impressum`}
               target="_blank"
               rel="noopener"
               className="hover:text-white transition"
@@ -99,7 +120,7 @@ export function Footer({ city }: { city: City }) {
               Impressum
             </a>
             <a
-              href={SITE.legalUrl}
+              href={`${SITE.legalUrl}/datenschutz`}
               target="_blank"
               rel="noopener"
               className="hover:text-white transition"
