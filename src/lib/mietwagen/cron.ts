@@ -12,8 +12,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
 
 type MietwagenFall = {
-  id: string
-  lead_id: string | null
+  fall_id: string
   // CMM-44 SP-B PR2c: mietwagen_*-Felder aus claims (SSoT) via Embed
   claims: {
     mietwagen_seit_datum: string | null
@@ -50,10 +49,12 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
   // CMM-74 b″: Storno-Filter auf claims.operative_status (SSoT, 1:1-Mirror von
   // faelle.status) — selber !inner-Embed-Filter-Mechanismus wie hat_mietwagen oben.
   // faelle.status wird sonst nirgends gelesen → aus dem Select entfernt (Dead-Select).
+  // CMM-49 Display-Sweep: faelle->faelle_claim_bridge (claim_id->claims-FK #2719); !inner-Embed +
+  // claims-Filter unveraendert. lead_id war Dead-Select -> entfernt. Service-Cron -> RLS-neutral.
   const { data: faelle, error } = await db
-    .from('faelle')
+    .from('faelle_claim_bridge')
     .select(
-      'id, lead_id, claims:claim_id!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
+      'fall_id, claims:claim_id!inner(mietwagen_seit_datum, mietwagen_limit_tage, mietwagen_argumentations_puffer, mietwagen_rechnung_vorhanden, abgeschlossen_am, hat_mietwagen)',
     )
     .eq('claims.hat_mietwagen', true)
     .is('claims.abgeschlossen_am', null)
@@ -90,11 +91,11 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
         await emitEvent(
           'mietwagen.ueber_limit',
           {
-            fallId: fall.id,
+            fallId: fall.fall_id,
             tage_ueber: taegeIm - limit,
             limit_datum: limitDatum,
           },
-          { fallId: fall.id },
+          { fallId: fall.fall_id },
         )
         result.ueber_limit++
         continue
@@ -105,11 +106,11 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
         await emitEvent(
           'mietwagen.abgabe_naht',
           {
-            fallId: fall.id,
+            fallId: fall.fall_id,
             tage_rest: restTage,
             limit_datum: limitDatum,
           },
-          { fallId: fall.id },
+          { fallId: fall.fall_id },
         )
         result.abgabe_naht++
       }
@@ -126,17 +127,17 @@ export async function runMietwagenCron(): Promise<MietwagenCronResult> {
           await emitEvent(
             'mietwagen.rechnung_ausstehend',
             {
-              fallId: fall.id,
+              fallId: fall.fall_id,
               seit_tage: taegeIm,
             },
-            { fallId: fall.id },
+            { fallId: fall.fall_id },
           )
           result.rechnung_ausstehend++
         }
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
-      result.errors.push(`Fall ${fall.id}: ${msg}`)
+      result.errors.push(`Fall ${fall.fall_id}: ${msg}`)
     }
   }
 
