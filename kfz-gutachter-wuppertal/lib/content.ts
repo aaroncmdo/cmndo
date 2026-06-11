@@ -17,7 +17,15 @@ export function fillTokens(
     .replaceAll('{residents}', city.residents)
 }
 
-// ── Google-Reviews (7, statisch) ───────────────────────────────────────────
+// ── Google-Reviews (BRIEF 08i: Aaron-kuratierte Whitelist, GBP 2026-06-10) ──
+// ORIGINAL-Zitate aus dem GBP — exakt uebernommen, Kuerzungen NUR per „…",
+// NIE umformulieren (Bewertungsrecht). Reihenfolge = Whitelist = Slot-Logik
+// (Desktop 1-6, Tablet 1-4, Mobile 1+2+5). Themen-Logik fuer kuenftige Pflege:
+// Portal/Auszahlung · Schadensfall · Mietwagen/Anwalt · Regulierung ·
+// Schnelligkeit · WhatsApp. Ersatzbank (falls Review aus GBP verschwindet):
+// Philip Puhl, daniel bonn, Leon Conrady (Texte in BRIEF_08i).
+// Relative Zeiten: im 08i-Datenstand nicht mitgeliefert -> leer (nichts
+// erfinden); Feld bleibt fuer den GBP-Sync.
 export interface Review {
   name: string
   initials: string
@@ -26,28 +34,110 @@ export interface Review {
   text: string
   /** true = echter Review-Text, false = "Bewertet mit 5 Sternen." */
   hasText: boolean
+  /** Google "Local Guide"-Badge (Authority-Anzeige). */
+  localGuide?: boolean
 }
 
 export const REVIEWS: Review[] = [
-  { name: 'Vincent Heinen', initials: 'VH', avatarBg: '#4573A2', meta: 'vor 5 Tagen', hasText: true, text: '„Claimondo war von vorne bis hinten einfach nur super. Besonders gut hat mir das Kundenportal gefallen und die Schnelligkeit der Abwicklung.“' },
-  { name: 'Kevin Privat', initials: 'KP', avatarBg: '#0D1B3E', meta: 'vor 6 Tagen · Local Guide', hasText: false, text: 'Bewertet mit 5 Sternen.' },
-  { name: 'daniel bonn', initials: 'DB', avatarBg: '#1E3A5F', meta: 'vor 6 Tagen', hasText: true, text: '„Top Service! Gut erreichbar, schnell und kompetent.“' },
-  { name: 'charli st.', initials: 'CS', avatarBg: '#374151', meta: 'vor 6 Tagen', hasText: false, text: 'Bewertet mit 5 Sternen.' },
-  { name: 'Daniel Bundesmann', initials: 'DB', avatarBg: '#4573A2', meta: 'vor 6 Tagen', hasText: true, text: '„Vielen Dank für die hervorragende Abwicklung.“' },
-  { name: 'David Nelles', initials: 'DN', avatarBg: '#0D1B3E', meta: 'vor 3 Tagen', hasText: false, text: 'Bewertet mit 5 Sternen.' },
-  { name: 'Victoria Weden', initials: 'VW', avatarBg: '#1E3A5F', meta: 'vor 3 Tagen', hasText: false, text: 'Bewertet mit 5 Sternen.' },
+  { name: 'Vincent Heinen', initials: 'VH', avatarBg: '#4573A2', meta: '', hasText: true, text: '„Claimondo war von vorne bis hinten einfach nur super. Besonders gut hat mir das Kundenportal gefallen und die schnelle Auszahlung. Die DAT-Expert Gutachter haben kompetent und zuverlässig gearbeitet. Ich musste mich um nichts kümmern und würde Claimondo jederzeit weiterempfehlen!“' },
+  { name: 'V. R.', initials: 'VR', avatarBg: '#0D1B3E', meta: '', hasText: true, localGuide: true, text: '„Ich bin sehr positiv überrascht gewesen, wie unkompliziert und schnell der Service durch Claimondo erfolgte. Als ich Opfer eines Parkremplers wurde, wusste ich erstmal auch nicht, was ich machen sollte … Claimondo … organisierten mir schnell einen Gutachtertermin und unterstützten mich in der Abwicklung von A bis Z!“' },
+  { name: 'Jan', initials: 'J', avatarBg: '#1E3A5F', meta: '', hasText: true, text: '„Schaden wurde gut betreut und vor allem wurde sich um Mietwagen und Kommunikation mit den Rechtsanwälten gekümmert. Kann ich nur empfehlen.“' },
+  { name: 'Busra Sevim', initials: 'BS', avatarBg: '#374151', meta: '', hasText: true, text: '„Der Service ist super! Der Gutachter hat super Arbeit geleistet und die Kanzlei hat schnell reguliert. Ich bin sehr zufrieden und kann es nur weiter empfehlen.“' },
+  { name: 'Lyubomir Bodurov', initials: 'LB', avatarBg: '#4573A2', meta: '', hasText: true, text: '„Unerwartet schnelle Bearbeitung. Besonders freundlicher Kontakt! Kann nur empfehlen!“' },
+  { name: 'Laura Kolde', initials: 'LK', avatarBg: '#0D1B3E', meta: '', hasText: true, text: '„Super Service, auch gute Idee über WhatsApp. Werde euch weiter empfehlen“' },
 ]
 
-/** Google-Bewertungs-Profil (UWG: Quelle sichtbar machen). */
+/** Google-Bewertungs-Profil (UWG: Quelle sichtbar machen).
+ *  gbpReviewCount = echte Gesamtzahl aus dem GBP (BRIEF 08i, Inhaber-Ansicht
+ *  2026-06-10: 5,0 · 22 Rezensionen) — Datenfeld, wird beim Sync aktualisiert;
+ *  nirgends hardcoden (Eyebrow + aggregateRating lesen von hier). */
 export const GOOGLE_RATING = {
   value: '5.0',
-  count: 7,
+  gbpReviewCount: 22,
   reviewsUrl: 'https://share.google/zj25kQndK5IHp1GCQ',
 } as const
+
+// ── Hero-Features (08n N11c: EIN Datenfeld fuer Mobile + sm+) ───────────────
+// Entscheid Aaron 2026-06-10: "alles aus einer Hand" + "Versicherung kuerzt?
+// Wir holen mit Gegengutachten nach" fliegen aus dem Hero. sm+ zeigt 3
+// Features (2.500+ steht dort schon in der Trust-Zeile — kein Doppel),
+// Mobile 4 (Mobile-Trust hat kein 2.500+). Beide Sets aus DIESER Quelle —
+// Format-Flags statt divergierender Markup-Varianten. {city}-Token wird in
+// der HeroSection mit dem Akzent-Span (.loc-uspsm) gerendert.
+export interface HeroFeature {
+  /** Icon-Key — SVGs liegen in HeroSection (FEATURE_ICON). */
+  icon: 'shield' | 'clock' | 'chart' | 'check'
+  /** Sichtbar <640 */
+  mobile: boolean
+  /** Sichtbar >=640 */
+  desktop: boolean
+  /** Basis-Text ({city}-Token erlaubt) */
+  text: string
+  /** Optionaler kuerzerer Mobile-Wortlaut (sonst text) */
+  textMobile?: string
+}
+
+export const HERO_FEATURES: HeroFeature[] = [
+  {
+    icon: 'shield',
+    mobile: true,
+    desktop: true,
+    text: 'Gutachten, Anwalt & Mietwagen — komplett koordiniert',
+    textMobile: 'Gutachten, Anwalt, Mietwagen',
+  },
+  { icon: 'clock', mobile: true, desktop: true, text: 'In 60 Min vor Ort in {city}' },
+  { icon: 'chart', mobile: true, desktop: false, text: '2.500+ Schäden begleitet' },
+  { icon: 'check', mobile: true, desktop: true, text: '10+ Jahre Erfahrung' },
+]
 
 // ── Praxis-Cases (5) ────────────────────────────────────────────────────────
 // erstangebot = Schnell-Angebot der Versicherung · anspruch = durchgesetzt
 // (mit unabh. Gutachten + Anwalt). breakdown-Summe == (anspruch - erstangebot).
+// ── Partner-Zeile (08o O3: EIN Datenfeld fuer alle drei Lockups) ─────────────
+// Vorher drei Varianten (Mobile-Hero "CLAIMONDO UNFALL-ASSISTANCE/PARTNER",
+// sm+-Hero "Zertifizierter Claimondo-Partner/Unfall-Assistance", Buero mit
+// "...Schadenregulierung aus einer Hand"-Zusatz). brand wird in den Komponenten
+// mit <ClaimondoLink> gewrappt.
+export const PARTNER_LINE = {
+  pre: 'Zertifizierter',
+  brand: 'Claimondo-Partner',
+  sub: 'Unfall-Assistance',
+} as const
+
+// ── Netzwerk-Personen-Karten (08o O2: ersetzen die Icon-Spalten) ─────────────
+// EIN Datenfeld, wortgleich lt. Brief; {sv} = Gutachter-Vorname des Clusters
+// (CLUSTER.svName — Koeln Stefan / Aachen Markus), Avatar-Aufloesung in der
+// NetzwerkSection (sv -> cluster-Asset, monika/lexdrive -> shared).
+export interface NetzwerkPerson {
+  avatar: 'sv' | 'monika' | 'lexdrive'
+  /** '{sv}' wird mit CLUSTER.svName ersetzt. */
+  name: string
+  funktion: string
+  zitat: string
+  /** 08p P4: object-position je Asset (Gesicht mittig im runden Crop). */
+  avatarPos?: string
+}
+export const NETZWERK_PERSONEN: NetzwerkPerson[] = [
+  {
+    avatar: 'sv',
+    name: '{sv}',
+    funktion: 'Kfz-Sachverständiger',
+    zitat: 'Ich bin in 60 Minuten bei Ihnen und dokumentiere Ihren Schaden gerichtsfest — nach DAT/BVSK.',
+  },
+  {
+    avatar: 'monika',
+    name: 'Monika',
+    funktion: 'Schadensbetreuung 24/7 · Claimondo Unfall-Assistance',
+    zitat: 'Ich regle alles rund um Ihren Fall: Termin, Mietwagen und den kompletten Papierkram.',
+  },
+  {
+    avatar: 'lexdrive',
+    name: 'Partnerkanzlei LexDrive',
+    funktion: 'Verkehrsrecht',
+    zitat: 'Kürzt die Versicherung, widersprechen wir — und holen die volle Summe für Sie raus.',
+  },
+]
+
 // ⚠️ Bilder sind KI-Platzhalter (data-placeholder) — vor Live durch echte Fotos.
 export interface CaseBreakdown {
   label: string
@@ -142,12 +232,15 @@ export interface AblaufStep {
   info?: string
 }
 
+// 08o O4 (Aaron, wortgleich): Copy gestrafft — Titel/Icons/Nummern bleiben,
+// Texte <=10 Woerter inkl. Titel (Zaehlung im 08o-Report; Tooltip-info ist
+// eigenes UI, kein Step-Text).
 export const ABLAUF: AblaufStep[] = [
-  { icon: 'phone', title: 'Anrufen', text: 'Per Telefon oder WhatsApp melden — wir melden uns **innerhalb einer Stunde**.' },
-  { icon: 'calendar', title: 'Termin vor Ort', text: 'DAT-Sachverständiger dokumentiert gerichtsfest — in der Regel **binnen 24–72 Stunden** bei Ihnen.' },
-  { icon: 'scale', title: 'Anwalt inklusive', titleAccent: '— 0 €', text: '**LexDrive** kämpft für Sie gegen die Versicherung. Kosten trägt die Gegenseite.' },
-  { icon: 'car', title: 'Mietwagen oder Geld', text: 'Ersatzwagen organisiert — oder Nutzungsausfall pro Tag aufs Konto. **Ihre Wahl.**', info: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. 23–175 €/Tag (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif. Was günstiger ist, klären wir mit Ihnen.' },
-  { icon: 'card', title: 'Geld aufs Konto', text: 'Reparatur, Wertminderung und Nutzungsausfall — die Versicherung zahlt **direkt aufs Konto**.' },
+  { icon: 'phone', title: 'Anrufen', text: 'Per Telefon oder WhatsApp — Rückmeldung **innerhalb einer Stunde**.' },
+  { icon: 'calendar', title: 'Termin vor Ort', text: 'Gutachter dokumentiert **gerichtsfest** — meist binnen 24–72 Stunden.' },
+  { icon: 'scale', title: 'Anwalt —', titleAccent: '0 € inklusive', text: 'LexDrive setzt Ihren Anspruch durch — **zahlt die Gegenseite**.' },
+  { icon: 'car', title: 'Mietwagen oder Geld', text: 'Ersatzwagen oder Nutzungsausfall pro Tag — **Ihre Wahl**.', info: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. 23–175 €/Tag (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif. Was günstiger ist, klären wir mit Ihnen.' },
+  { icon: 'card', title: 'Geld aufs Konto', text: 'Versicherung zahlt **direkt**: Reparatur, Wertminderung, Nutzungsausfall.' },
 ]
 
 // ── Ablauf-Mobile · Tage-Timeline (#ablaufMobile, "In ~32 Tagen zum Geld") ────
@@ -217,7 +310,9 @@ export interface CompareRow {
 
 export const COMPARISON: CompareRow[] = [
   { feat: 'Wer holt das versteckte Geld raus?', normal: 'Versicherung rechnet knapp.', normalLink: { href: 'https://autounfall.io/wertminderung-249-bgb/', label: 'Wertminderung →' }, us: 'Wertminderung, Nutzungsausfall, korrekte Ersatzteilpreise' },
-  { feat: 'Was, wenn die Versicherung Ihr Gutachten kürzt?', normal: 'Niemand widerspricht.', us: '**Gegengutachten + Anwalt** setzen die volle Summe durch', highlight: true },
+  // 08k A4.5 Copy-Fix (Aaron): "Gegengutachten" raus aus DIESER Zelle (Zeile
+  // "eigenes Gutachten vorlegt" + Fussnote behalten den Begriff).
+  { feat: 'Was, wenn die Versicherung Ihr Gutachten kürzt?', normal: 'Niemand widerspricht.', us: '**Anwalt widerspricht und setzt die volle Summe durch**', highlight: true },
   { feat: 'Wenn die Versicherung ihr eigenes Gutachten vorlegt?', normal: 'Sie stehen allein da.', normalLink: { href: 'https://autounfall.io/controlexpert-versicherer-pruefdienst/', label: 'Prüfdienste →' }, us: 'Wir prüfen es **fachlich gegen** (DAT-/BVSK-Standard)', highlight: true },
   { feat: 'Wer ist Ihr Ansprechpartner?', normal: 'Wechselnd / keiner', us: 'Fester persönlicher Schadensbetreuer' },
   { feat: 'Sehen Sie den Stand Ihres Falls?', normal: 'Nachfragen per Telefon', us: 'Jederzeit im eigenen Online-Portal' },
@@ -245,7 +340,7 @@ export interface NetzwerkPainCard {
 export const NETZWERK_PAIN: NetzwerkPainCard[] = [
   { tag: '01', step: 1, title: 'Reicht der Werkstatt-Kostenvoranschlag?', sub: 'Nein — Versicherung erkennt nur ein **neutrales Gutachten** an. Wertminderung & Nutzungsausfall fallen sonst weg.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachter-lohnt-sich/', linkLabel: 'Lohnt sich ein Gutachten? →' },
   { tag: '02', step: 2, title: 'Welches Gutachten brauche ich?', sub: 'Haftpflicht, Kasko, Beweis — falsches Format = Versicherung lehnt ab oder kürzt.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachten-arten/', linkLabel: 'Die Gutachten-Arten →' },
-  { tag: '03', step: 3, title: 'Wer organisiert Reparatur & Mietwagen?', sub: 'Allein: Werkstatt-Bindung, Vorkasse-Risiko, Tagessatz-Streit. Bei uns: alles aus einer Hand.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
+  { tag: '03', step: 3, title: 'Wer organisiert Reparatur & Mietwagen?', sub: 'Allein: Werkstatt-Bindung, Vorkasse-Risiko, Tagessatz-Streit. Bei uns: alles komplett koordiniert.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
   { tag: '04', step: 4, title: 'Wenn die Versicherung kürzt — was tun?', sub: '**Allein:** niemand widerspricht. Bei uns: Gegengutachten + Anwalt setzen volle Summe durch.', subStrong: 'netzwerk-pain-allein', linkHref: 'https://autounfall.io/wertminderung-249-bgb/', linkLabel: 'Wertminderung & §249 BGB →' },
 ]
 
@@ -325,7 +420,7 @@ export const FAQ: FaqEntry[] = [
   {
     q: 'Was bedeutet „Claimondo-Partner“?',
     intro:
-      'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles aus einer Hand**:',
+      'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles komplett koordiniert**:',
     bullets: [
       { strong: 'DAT-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
       { strong: 'Verkehrsrechts-Anwalt', rest: 'LexDrive Partnerkanzlei' },

@@ -110,15 +110,18 @@ export function MapSection({ city }: { city: City }) {
         maxZoom: 19,
       }).addTo(map)
 
-      // Stadt-Marker: aktive Stadt = amber, andere = petrol Circle-Marker.
-      // Literal-Hex (= --amber / --petrol): Leaflet setzt fillColor als SVG-Attribut, das loest CSS var() NICHT auf.
+      // Stadt-Marker: aktive Stadt = Cluster-Akzent, andere = Cluster-Primaer.
+      // BRIEF 08d/K1: Leaflet loest var() nicht auf -> Tokens zur Laufzeit lesen.
+      const rootStyle = getComputedStyle(document.documentElement)
+      const markerAccent = rootStyle.getPropertyValue('--amber').trim() || '#D32E20'
+      const markerPrimary = rootStyle.getPropertyValue('--petrol').trim() || '#2A2E33'
       for (const c of CLUSTER.cities) {
         const isActive = c.slug === city.slug
         const marker = L.circleMarker([c.lat, c.lng], {
           radius: isActive ? 9 : 6,
           color: '#ffffff',
           weight: 2,
-          fillColor: isActive ? '#D32E20' : '#2A2E33',
+          fillColor: isActive ? markerAccent : markerPrimary,
           fillOpacity: 1,
         }).addTo(map)
         marker.bindTooltip(c.name)
