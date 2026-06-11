@@ -61,42 +61,42 @@ export default async function AbrechnungPage() {
   // Fetch abrechnungen from the real billing table
   const { data: abrechnungen } = await supabase
     .from('gutachter_abrechnungen')
-    .select('id, fall_id, schadenhoehe, leadpreis, preistyp, abgerechnet_am')
+    .select('id, claim_id, schadenhoehe, leadpreis, preistyp, abgerechnet_am')
     .eq('sv_id', sv.id)
     .order('abgerechnet_am', { ascending: false })
 
-  // Build a lookup: fall_id → abrechnung
+  // CMM-49: Lookup claim_id → abrechnung (gutachter_abrechnungen.claim_id native FK; der
+  // completedFaelle-Anker ist jetzt claims-zentrisch, claim.id != altem faelle.id).
   const abrMap: Record<string, { leadpreis: number; preistyp: string }> = {}
   for (const a of abrechnungen ?? []) {
-    if (a.fall_id) abrMap[a.fall_id] = { leadpreis: Number(a.leadpreis), preistyp: a.preistyp ?? '' }
+    if (a.claim_id) abrMap[a.claim_id] = { leadpreis: Number(a.leadpreis), preistyp: a.preistyp ?? '' }
   }
 
   // Fetch completed cases
-  // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
-  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
-  // einer eingebetteten to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig
-  // created_at-desc sortieren. claim_id ist NOT NULL (live 0) -> !inner droppt 0 Zeilen.
+  // CMM-49 Reader-Sweep: claims-direkt (faelle-frei). sv_id = claims.sv_id (CMM-60, 0-diff);
+  // created_at/claim_nummer/gutachten direkt am claims-Anker (frueher via faelle->claims-!inner).
+  // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
   const { data: completedFaelleRaw } = await supabase
-    .from('faelle')
-    .select('id, lead_id, claim_id, claims:claim_id!inner(created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
+    .from('claims')
+    .select('id, lead_id, created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am)')
     .eq('sv_id', sv.id)
   // CMM-49 T1.2 (CMM-72): abgeleitete Phase je Claim (ersetzt den fall_status-Scope).
   const abrPhaseMap = await getClaimPhaseMap(
-    ((completedFaelleRaw ?? []) as Array<{ claim_id: string | null }>)
-      .map((f) => f.claim_id)
+    ((completedFaelleRaw ?? []) as Array<{ id: string }>)
+      .map((f) => f.id)
       .filter((x): x is string => !!x),
   )
   const completedFaelle = (completedFaelleRaw ?? [])
     .map((f) => {
-      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-        ? ((c as { gutachten: unknown[] }).gutachten)[0]
-        : (c as { gutachten?: unknown } | null)?.gutachten
+      // CMM-49: gutachten-Embed jetzt direkt am claims-Anker (Array|Objekt normalisieren).
+      const g = Array.isArray((f as { gutachten?: unknown }).gutachten)
+        ? ((f as { gutachten: unknown[] }).gutachten)[0]
+        : (f as { gutachten?: unknown }).gutachten
       const gg = g as { gesamt_schadensbetrag?: number | null; fertiggestellt_am?: string | null } | null
-      const cell = f.claim_id ? abrPhaseMap.get(f.claim_id) : undefined
+      const cell = f.id ? abrPhaseMap.get(f.id) : undefined
       return {
         ...f,
-        created_at: (c?.created_at as string | null) ?? null,
+        created_at: (f.created_at as string | null) ?? null,
         mainPhase: cell?.mainPhase ?? 'erfassung',
         subPhase: cell?.subPhase ?? 'sa_offen',
         _hasGutachten: gg?.gesamt_schadensbetrag != null || gg?.fertiggestellt_am != null,
@@ -171,18 +171,16 @@ export default async function AbrechnungPage() {
   // CMM-44 SP-G PR2: gesamt_schadensbetrag + fertiggestellt_am aus gutachten-Embed (SSoT).
   type CompletedFall = NonNullable<typeof completedFaelle>[number]
   function getGutachtenBetrag(fall: CompletedFall): number | null {
-    const c = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-      ? ((c as { gutachten: unknown[] }).gutachten)[0]
-      : (c as { gutachten?: unknown } | null)?.gutachten
+    const g = Array.isArray((fall as { gutachten?: unknown }).gutachten)
+      ? ((fall as { gutachten: unknown[] }).gutachten)[0]
+      : (fall as { gutachten?: unknown }).gutachten
     const v = (g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
     return v != null ? Number(v) : null
   }
   function getGutachtenDatum(fall: CompletedFall): string | null {
-    const c = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-    const g = Array.isArray((c as { gutachten?: unknown } | null)?.gutachten)
-      ? ((c as { gutachten: unknown[] }).gutachten)[0]
-      : (c as { gutachten?: unknown } | null)?.gutachten
+    const g = Array.isArray((fall as { gutachten?: unknown }).gutachten)
+      ? ((fall as { gutachten: unknown[] }).gutachten)[0]
+      : (fall as { gutachten?: unknown }).gutachten
     return (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
   }
   // CMM-49 T1.2 (CMM-72): Honorar eingegangen/offen aus abgeleiteter Phase statt faelle.status.
@@ -350,7 +348,7 @@ export default async function AbrechnungPage() {
                           >
                             <Td>
                               <span className="text-[var(--brand-accent)] font-mono text-xs">
-                                {(Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? fall.id.slice(0, 8)}
+                                {(fall.claim_nummer as string | null) ?? fall.id.slice(0, 8)}
                               </span>
                             </Td>
                             <Td>{name}</Td>
@@ -411,7 +409,7 @@ export default async function AbrechnungPage() {
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <span className="text-[var(--brand-accent)] font-mono text-xs">
-                            {(Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer ?? fall.id.slice(0, 8)}
+                            {(fall.claim_nummer as string | null) ?? fall.id.slice(0, 8)}
                           </span>
                           <p className="text-claimondo-navy text-sm font-medium mt-0.5">{name}</p>
                         </div>

@@ -23,6 +23,7 @@ export const dynamic = 'force-dynamic'
 type PendingRow = {
   id: string
   fall_id: string | null
+  claim_id: string | null
   betrag_netto_eur: number | string
   service_typ: 'komplett' | 'nur_gutachter'
   hold_until: string
@@ -67,7 +68,7 @@ export async function GET(request: Request) {
   // der Hold-Periode aber vor Cron-Run storniert wurden.
   const { data: pendingRaw, error: pendingErr } = await db
     .from('makler_provisionen')
-    .select('id, fall_id, betrag_netto_eur, service_typ, hold_until, makler_id')
+    .select('id, fall_id, claim_id, betrag_netto_eur, service_typ, hold_until, makler_id')
     .eq('status', 'pending')
     .limit(500)
 
@@ -80,26 +81,44 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, storniert: 0, released: 0, emails_sent: 0, checked: 0 })
   }
 
-  // 2) Zugehörige Fälle laden (status + Aktennummer für Email).
-  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
-  const fallIds = Array.from(
-    new Set(pending.map((p) => p.fall_id).filter((x): x is string => !!x)),
+  // 2) Zugehörige Claims laden (status + Aktennummer für Email).
+  // CMM-49 Reader-Sweep: faelle-frei — status (Storno-Check) + claim_nummer kommen direkt aus
+  // claims via makler_provisionen.claim_id (native FK, derive-trigger-gefuellt). operative_status
+  // ist die CMM-74-SSoT (== faelle.status 0-diff bei non-null). fallMap bleibt fall_id-gekeyt
+  // (Storno/Release-Logik + leads-Lookup unveraendert); der fall_id kommt aus makler_provisionen
+  // selbst (KEIN claim_id→fall_id-Reverse).
+  const claimIds = Array.from(
+    new Set(pending.map((p) => p.claim_id).filter((x): x is string => !!x)),
   )
   const fallMap = new Map<string, FallRow>()
-  if (fallIds.length > 0) {
-    // CMM-74 b″: status (Storno-Check) liest die SSoT claims.operative_status
-    // via Embed; faelle.status bleibt als defensiver Fallback im Select.
-    const { data: faelle, error: faelleErr } = await db
-      .from('faelle')
-      .select('id, status, claims:claim_id(claim_nummer, operative_status)')
-      .in('id', fallIds)
-    if (faelleErr) {
-      return NextResponse.json({ error: faelleErr.message }, { status: 500 })
+  if (claimIds.length > 0) {
+    const { data: claims, error: claimsErr } = await db
+      .from('claims')
+      .select('id, claim_nummer, operative_status')
+      .in('id', claimIds)
+    if (claimsErr) {
+      return NextResponse.json({ error: claimsErr.message }, { status: 500 })
     }
-    for (const f of faelle ?? []) {
-      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      const status = ((claim?.operative_status as string | null) ?? f.status) as string
-      fallMap.set(f.id, { id: f.id, status, claim_nummer: claim?.claim_nummer ?? null })
+    const claimMap = new Map<string, { claim_nummer: string | null; operative_status: string | null }>()
+    for (const c of claims ?? []) {
+      claimMap.set(c.id as string, {
+        claim_nummer: (c.claim_nummer as string | null) ?? null,
+        operative_status: (c.operative_status as string | null) ?? null,
+      })
+    }
+    for (const p of pending) {
+      if (!p.fall_id || !p.claim_id) continue
+      const c = claimMap.get(p.claim_id)
+      if (!c) continue
+      // operative_status = SSoT (CMM-74). Die 2 prod-Faelle mit null operative_status verlieren
+      // den frueheren faelle.status-Fallback (faelle stirbt) → status '' (≠ 'storniert' → Freigabe).
+      // makler_provisionen aktuell 0 Rows → kein Live-Impact; null-operative_status ist ein
+      // CMM-74-Mirror-Gap, kein Reader-Concern.
+      fallMap.set(p.fall_id, {
+        id: p.fall_id,
+        status: c.operative_status ?? '',
+        claim_nummer: c.claim_nummer,
+      })
     }
   }
 

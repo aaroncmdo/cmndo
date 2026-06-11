@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 type RevertResult = {
   werbebudget_rueckgebucht: number
@@ -23,36 +24,34 @@ export async function revertCaseBilling(
 ): Promise<RevertResult> {
   const db = createAdminClient()
 
-  // Fall laden.
-  // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto/
-  // abrechnung_id liegen auf claims (SSoT) → via Embed.
-  // CMM-44 Phase 3: lead_preis_netto liegt jetzt ebenfalls auf claims; der Reset auf 0
-  // erfolgt via splitOrKeepFaelleUpdate (unten), daher hier kein Read mehr noetig.
-  const { data: fall } = await db.from('faelle')
-    .select('id, sv_id, claim_id, claims:claim_id(guthaben_verrechnet_netto, sv_nachzahlung_netto, abrechnung_id)')
-    .eq('id', fallId)
+  // CMM-49 Reader-Sweep: claims-direkt via resolveClaimId (faelle-Anker raus).
+  // guthaben_verrechnet_netto/sv_nachzahlung_netto/abrechnung_id sind claims-SSoT (CMM-44 SP-J);
+  // sv_id = claims.sv_id (CMM-60).
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) throw new Error('Fall nicht gefunden')
+  const { data: claim } = await db.from('claims')
+    .select('sv_id, guthaben_verrechnet_netto, sv_nachzahlung_netto, abrechnung_id')
+    .eq('id', claimId)
     .single()
 
-  if (!fall) throw new Error('Fall nicht gefunden')
+  if (!claim) throw new Error('Fall nicht gefunden')
 
-  const claimId = (fall.claim_id as string | null) ?? null
-  const revClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const guthabenVerrechnet = (revClaim as { guthaben_verrechnet_netto?: number | null } | null)?.guthaben_verrechnet_netto ?? null
-  const svNachzahlung = (revClaim as { sv_nachzahlung_netto?: number | null } | null)?.sv_nachzahlung_netto ?? null
-  const abrechnungId = (revClaim as { abrechnung_id?: string | null } | null)?.abrechnung_id ?? null
+  const guthabenVerrechnet = (claim as { guthaben_verrechnet_netto?: number | null }).guthaben_verrechnet_netto ?? null
+  const svNachzahlung = (claim as { sv_nachzahlung_netto?: number | null }).sv_nachzahlung_netto ?? null
+  const abrechnungId = (claim as { abrechnung_id?: string | null }).abrechnung_id ?? null
 
   const guthabenRueck = Number(guthabenVerrechnet ?? 0)
 
   // 1. Werbebudget zurückbuchen (atomar)
-  if (guthabenRueck > 0 && fall.sv_id) {
+  if (guthabenRueck > 0 && claim.sv_id) {
     const { data: sv } = await db.from('sachverstaendige')
       .select('werbebudget_guthaben_netto')
-      .eq('id', fall.sv_id)
+      .eq('id', claim.sv_id)
       .single()
     const neuesGuthaben = Number(sv?.werbebudget_guthaben_netto ?? 0) + guthabenRueck
     await db.from('sachverstaendige')
       .update({ werbebudget_guthaben_netto: neuesGuthaben })
-      .eq('id', fall.sv_id)
+      .eq('id', claim.sv_id)
   }
 
   // 2. Case-Felder zurücksetzen.
@@ -133,7 +132,7 @@ export async function revertCaseBilling(
       const { FINANCE } = await import('@/lib/finance/constants')
       const mwst = Math.round(nachzahlung * (FINANCE.MWST_PROZENT / 100) * 100) / 100
       const { data: gs } = await db.from('gutschriften').insert({
-        sv_id: fall.sv_id,
+        sv_id: claim.sv_id,
         betrag_netto: nachzahlung,
         mwst_betrag: mwst,
         betrag_brutto: Math.round((nachzahlung + mwst) * 100) / 100,
