@@ -27,6 +27,14 @@ export const EmbedAnfrageSchema = z.object({
   // Fehlt = Legacy-Pfad (funnel_modus/callback) unveraendert.
   aktion: z.enum(['senden', 'direkt']).optional(),
 
+  // AAR-956 P5 (gutachter-finder-Intake): per-Request-Fixer-SV (Karten-Klick) +
+  // geocodeter Besichtigungsort. Das Embed leitet den SV sonst per-Site ab; der
+  // gutachter-finder pickt ihn pro Anfrage. Optional → andere Quellen unberuehrt.
+  zugeordneter_sv_id: z.string().uuid().optional(),
+  besichtigungsort_lat: z.number().optional(),
+  besichtigungsort_lng: z.number().optional(),
+  besichtigungsort_adresse: z.string().max(300).optional(),
+
   // Monika-A-Flow-Diskriminatoren (DB-CHECK ist das echte Gate; hier nur Daten-Form)
   anliegen: z.string().max(40).optional(),
   unfalltyp: z.string().max(40).optional(),
