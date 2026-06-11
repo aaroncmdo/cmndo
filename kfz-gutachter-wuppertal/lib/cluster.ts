@@ -91,7 +91,7 @@ export const CLUSTER: ClusterConfig = {
   h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard.',
   teamImg: '/assets/img/wuppertal/team-wuppertal.webp?v=1',
   svName: 'Amet',
-  svSurname: 'Krämer', // Persona-Nachname (Amet Krämer)
+  svSurname: 'Egetürk', // Persona-Nachname (Amet Egetürk)
   phone: { display: '+49 1515 3608515', displayNational: '0151 5360 8515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Schwebebahn', img: 'stadt-wuppertal.png' },
   facts: [
