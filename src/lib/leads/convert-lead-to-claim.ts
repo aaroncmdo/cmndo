@@ -667,6 +667,13 @@ export async function convertLeadToClaim(
   })
   // Bridge: faelle.claim_id zeigt auf den eben angelegten Claim
   fallInsert.claim_id = claimId
+  // CMM-49 Step 3 (faelle-Drop-Vorbereitung): faelle.id == claim_id (Identity).
+  // Der Claim wird oben (Schritt 3) ZUERST angelegt, claimId ist gesetzt. Identity
+  // sorgt dafuer, dass der faelle->bridge-Trigger (C,C) statt (F,C) schreibt und der
+  // kommende claims->bridge-Trigger via ON CONFLICT(fall_id) sauber dedupt, statt die
+  // 1:1-Bridge lautlos zu fan-outen (kein UNIQUE(claim_id)-Konflikt). Wert-neutral:
+  // faelle.id war zuvor ein eigenes gen_random_uuid(), das nichts referenziert.
+  fallInsert.id = claimId
   // Kunde-User-ID auf den Fall heften (Frontend nutzt das noch)
   if (kundeUserId) {
     fallInsert.kunde_id = kundeUserId
