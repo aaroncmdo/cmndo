@@ -196,7 +196,7 @@ function Field({ label, name, errorMessage, ...rest }: FieldProps) {
         aria-invalid={hasError}
         aria-describedby={hasError ? `${id}-err` : undefined}
         {...rest}
-        className={`w-full rounded-ios-md border bg-white/85 px-4 py-3 text-base transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${
+        className={`w-full rounded-ios-md border bg-white/85 px-4 py-3 text-base text-claimondo-navy placeholder:text-claimondo-shield/55 transition-all focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-70 ${
           hasError
             ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20'
             : 'border-claimondo-border focus:border-claimondo-ondo focus:ring-claimondo-ondo/20'

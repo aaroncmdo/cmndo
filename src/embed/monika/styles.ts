@@ -100,12 +100,13 @@ export const STYLES = `
 .mk-teaser-cta { align-self: flex-start; margin-top: 5px; padding: 4px 12px; background: var(--monika-primary); color: #fff;
   border-radius: 999px; font-size: 11.5px; font-weight: 700; letter-spacing: .01em; box-shadow: 0 2px 8px rgba(13,27,62,.22); }
 
-/* N1: Hover-Pill (Identitaet am Siegel — Desktop ausfahrend, Mobile sichtbar) */
+/* N1: Identitaets-Pill am Siegel — statisch ausgefahren (Desktop >=640 + Mobile, s. Media-Regeln). */
 .mk-hoverpill { display: flex; align-items: center; gap: 8px; background: #fff; border: 1px solid #e8ecf3;
   border-radius: 14px; padding: 7px 12px 7px 8px; box-shadow: 0 6px 18px rgba(13,27,62,.16);
   opacity: 0; transform: translateX(10px); transition: opacity .2s, transform .2s cubic-bezier(.22,1,.36,1);
   pointer-events: none; white-space: nowrap; }
-.mk-fab-wrap:hover .mk-hoverpill { opacity: 1; transform: none; }
+/* Desktop: statisch ausgefahren statt erst bei Hover (frueher .mk-fab-wrap:hover). Mobile <=639 via Regel unten. */
+@media (min-width: 640px) { .mk-hoverpill { opacity: 1; transform: none; } }
 .mk-hoverpill .mk-mini { width: 30px; height: 30px; }
 .mk-hoverpill-txt { display: flex; flex-direction: column; line-height: 1.2; }
 .mk-hoverpill-txt strong { font-size: 13px; color: var(--monika-primary); font-weight: 700; }
