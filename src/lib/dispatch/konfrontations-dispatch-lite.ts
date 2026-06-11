@@ -136,7 +136,8 @@ export async function triggerKonfrontationsDispatch(
     .insert({
       fall_id: input.fallId,
       claim_id: fall.claim_id,
-      sv_id: fall.sv_id as string,
+      assignee_id: fall.sv_id as string,
+      assignee_typ: 'sachverstaendiger',
       start_zeit: startDate.toISOString(),
       end_zeit: endDate.toISOString(),
       typ: 'konfrontation',
