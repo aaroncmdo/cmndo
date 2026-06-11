@@ -3,6 +3,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
+import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { revalidatePath } from 'next/cache'
 
@@ -117,7 +118,7 @@ export async function erstelleOeffentlichenRueckruf(
   }))
   await admin.from('mitteilungen').insert(mitteilungen)  // non-critical, ignore error
 
-  // 5. Email + WhatsApp via shared notifyNewLead (Aaron-Direktive 2026-05-20).
+  // 5. Email + WhatsApp ans Team via shared notifyNewLead (Aaron-Direktive 2026-05-20).
   await notifyNewLead({
     leadId: lead.id,
     source: `Rueckruf-Form (${input.quelle})`,
@@ -130,6 +131,27 @@ export async function erstelleOeffentlichenRueckruf(
       { label: 'Start-Zeit (Termin)', value: startZeit },
     ],
   })
+
+  // 6. Bestaetigungs-WhatsApp an den Kunden (Aaron 12.06.: "eine Nachricht an den
+  //    Geschaedigten per Baileys"). Gilt fuer ALLE Rueckruf-Formulare (Aaron-Entscheid
+  //    12.06.). Non-critical: telefon ist oben validiert (>=5 Zeichen); ein Baileys-Fail
+  //    (z.B. keine WA-Nummer) wird nur geloggt und bricht die Rueckruf-Anlage nie.
+  try {
+    const kundeText = [
+      '✅ Wir haben Ihre Anfrage erhalten',
+      '',
+      `Hallo ${vorname},`,
+      input.zeitfenster
+        ? `danke für Ihre Rückruf-Anfrage. Unser Team meldet sich ${input.zeitfenster.toLowerCase()} bei Ihnen.`
+        : 'danke für Ihre Rückruf-Anfrage. Unser Team meldet sich in Kürze bei Ihnen.',
+      '',
+      'Ihr Claimondo-Team',
+    ].join('\n')
+    const r = await sendWhatsAppText(telefon, kundeText)
+    if (!r.ok) console.error('[public-rueckruf] Kunde-Bestaetigungs-WA fehlgeschlagen:', r.code, r.error)
+  } catch (err) {
+    console.error('[public-rueckruf] Kunde-WA-Block fehlgeschlagen (nicht kritisch):', (err as Error).message)
+  }
 
   revalidatePath('/dispatch/dashboard')
   revalidatePath('/dispatch/rueckrufe')

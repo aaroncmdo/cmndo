@@ -14,7 +14,7 @@ import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePl
 import { FlowSlotStep, type GebuchterTermin } from '@/app/flow/[token]/FlowSlotStep'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
-import { starteEmbedBuchung } from '../actions'
+import { starteEmbedBuchung, sendeEmbedTerminBestaetigung } from '../actions'
 
 type Ort = { adresse: string; lat: number; lng: number }
 type Phase = 'ort' | 'schaden' | 'kontakt' | 'slot' | 'gebucht'
@@ -184,6 +184,10 @@ export function FinderWizard() {
           onGebucht={(t) => {
             setGebucht(t)
             setPhase('gebucht')
+            // WS5 (Aaron 12.06.): Bestaetigungs-WhatsApp an Kunde + Team, sobald der
+            // Slot reserviert ist. Fire-and-forget / non-critical — der Termin liegt
+            // bereits race-safe in der DB (FlowSlotStep → bucheTerminFlow → Engine).
+            void sendeEmbedTerminBestaetigung({ token, svVorname: t.svVorname, startIso: t.startIso })
           }}
         />
       )}

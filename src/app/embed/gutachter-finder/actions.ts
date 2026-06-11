@@ -16,6 +16,9 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 
 export type EmbedBuchungInput = {
   vorname: string
@@ -49,4 +52,94 @@ export async function starteEmbedBuchung(
   if (!issued.ok) return { ok: false, error: issued.error }
 
   return { ok: true, token: issued.token }
+}
+
+/**
+ * AAR-956 WS5: Bestaetigungs-WhatsApp NACH der Termin-Reservierung (Aaron 12.06.:
+ * "auch eine bei der Termin-Reservierung"). Getriggert aus FinderWizard.onGebucht,
+ * sobald <FlowSlotStep> einen Slot reserviert hat. Resolved flow_links-Token → Lead
+ * → telefon/name und schickt zwei Nachrichten:
+ *   - an den Kunden: Termin-Bestaetigung ("Ihr Termin ist reserviert …")
+ *   - ans Team: Reservierungs-Notiz (notifyTeamWhatsApp, dieselben Empfaenger wie Leads)
+ *
+ * Fire-and-forget / non-critical: der Termin ist zu diesem Zeitpunkt bereits race-safe
+ * in der DB reserviert (bucheTerminFlow via Engine) — ein Baileys-Fail aendert daran
+ * nichts und wird nur geloggt. KEIN Eingriff in bucheTerminFlow (geteilt mit dem
+ * echten /flow-Pfad); der Reservierungs-Send haengt embed-seitig am onGebucht-Callback.
+ */
+export async function sendeEmbedTerminBestaetigung(input: {
+  token: string
+  svVorname: string
+  startIso: string
+}): Promise<void> {
+  try {
+    if (!input.token || !input.startIso) return
+    const admin = createAdminClient()
+
+    // flow_links-Token → Lead (service_role; identisch zu resolveFlowLead im /flow-Pfad).
+    const { data: flowLink } = await admin
+      .from('flow_links')
+      .select('lead_id')
+      .eq('token', input.token)
+      .maybeSingle()
+    const leadId = (flowLink?.lead_id as string | null) ?? null
+    if (!leadId) return
+
+    const { data: lead } = await admin
+      .from('leads')
+      .select('vorname, nachname, telefon')
+      .eq('id', leadId)
+      .maybeSingle()
+    if (!lead) return
+
+    const vorname = ((lead.vorname as string | null) ?? '').trim()
+    const name =
+      [vorname, ((lead.nachname as string | null) ?? '').trim()].filter(Boolean).join(' ').trim() || 'Kunde'
+    const telefon = ((lead.telefon as string | null) ?? '').trim()
+
+    // Server laeuft UTC → explizite Berlin-TZ, sonst 2h-Versatz. Matcht das Format
+    // der On-Screen-"Termin reserviert"-Bestaetigung im Wizard.
+    const wann = new Date(input.startIso).toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    // ── an den Kunden ──
+    if (telefon.length >= 5) {
+      const kundeText = [
+        '✅ Ihr Termin ist reserviert',
+        '',
+        `Hallo ${vorname || name},`,
+        `Ihr Kfz-Gutachter ${input.svVorname} ist für ${wann} Uhr reserviert.`,
+        '',
+        'Wir bestätigen Ihren Termin in Kürze. Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
+        '',
+        'Ihr Claimondo-Team',
+      ].join('\n')
+      const r = await sendWhatsAppText(telefon, kundeText)
+      if (!r.ok) console.error('[embed-termin-bestaetigung] Kunde-WA fehlgeschlagen:', r.code, r.error)
+    }
+
+    // ── ans Team ──
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+    const teamText = [
+      '📅 Neuer Termin reserviert (Gutachter-Finder)',
+      '',
+      `👤 ${name}`,
+      telefon ? `📞 ${telefon}` : null,
+      `🔧 SV: ${input.svVorname}`,
+      `🕐 ${wann} Uhr`,
+      '',
+      `${base}/dispatch/leads/${leadId}`,
+    ]
+      .filter(Boolean)
+      .join('\n')
+    await notifyTeamWhatsApp(teamText)
+  } catch (err) {
+    console.error('[embed-termin-bestaetigung] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+  }
 }
