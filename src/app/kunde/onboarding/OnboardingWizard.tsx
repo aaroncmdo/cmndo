@@ -439,13 +439,13 @@ export default function OnboardingWizard({
           {visibleSteps.map((s, i) => (
             <div key={s.id} className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold transition-colors ${
-                i < stepIndex ? 'bg-emerald-500 text-white' :
+                i < stepIndex ? 'bg-success text-white' :
                 i === stepIndex ? 'bg-claimondo-ondo text-white' :
                 'bg-claimondo-border text-claimondo-ondo/70'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
               </div>
-              {i < visibleSteps.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-emerald-400' : 'bg-claimondo-border'}`} />}
+              {i < visibleSteps.length - 1 && <div className={`w-6 h-0.5 rounded ${i < stepIndex ? 'bg-success' : 'bg-claimondo-border'}`} />}
             </div>
           ))}
         </div>
@@ -479,8 +479,8 @@ export default function OnboardingWizard({
                         </p>
 
                         {welcomeOcrResult && (
-                          <div className="mt-3 rounded-ios-xl border border-emerald-200 bg-emerald-50 p-3">
-                            <p className="text-xs font-semibold text-emerald-800 flex items-center gap-1.5">
+                          <div className="mt-3 rounded-ios-xl border border-success/30 bg-success-soft p-3">
+                            <p className="text-xs font-semibold text-success-strong flex items-center gap-1.5">
                               <CheckIcon className="h-3.5 w-3.5" />
                               {t('welcome.fieldsRecognized', { count: welcomeOcrResult.fieldsFound })}
                             </p>
@@ -514,7 +514,7 @@ export default function OnboardingWizard({
                         )}
 
                         {welcomeOcrError && (
-                          <p className="mt-2 text-xs text-amber-700">{welcomeOcrError}</p>
+                          <p className="mt-2 text-xs text-warning-strong">{welcomeOcrError}</p>
                         )}
 
                         <label className="mt-3 inline-flex items-center justify-center gap-2 px-4 py-2 rounded-ios-xl bg-claimondo-navy hover:bg-claimondo-shield text-white text-xs font-semibold cursor-pointer active:scale-[0.98] transition-all">
@@ -633,7 +633,7 @@ export default function OnboardingWizard({
                 )}
 
                 {/* Korrekturhinweis */}
-                <div className="mt-5 rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900">
+                <div className="mt-5 rounded-ios-xl border border-warning/30 bg-warning-soft p-4 text-xs text-warning-strong">
                   {t('fall.korrekturHinweis')}
                 </div>
 
@@ -652,12 +652,12 @@ export default function OnboardingWizard({
                 <div className="mb-4"><CalendarIcon className="w-10 h-10 text-claimondo-ondo" /></div>
                 <h1 className="text-2xl font-semibold text-claimondo-navy">{t('termin.title')}</h1>
                 {termin ? (
-                  <div className="mt-4 bg-gradient-to-br from-emerald-50 to-emerald-50/50 border border-emerald-200 rounded-2xl p-5">
+                  <div className="mt-4 bg-gradient-to-br from-success-soft to-success-soft/50 border border-success/30 rounded-2xl p-5">
                     <div className="flex items-center gap-2 mb-3">
-                      <div className="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center">
+                      <div className="w-7 h-7 rounded-full bg-success text-white flex items-center justify-center">
                         <CheckIcon className="w-4 h-4" />
                       </div>
-                      <p className="text-xs uppercase tracking-wider text-emerald-700 font-semibold">{t('termin.confirmed')}</p>
+                      <p className="text-xs uppercase tracking-wider text-success-strong font-semibold">{t('termin.confirmed')}</p>
                     </div>
                     <p className="text-lg font-bold text-claimondo-navy">
                       {format.dateTime(new Date(termin.datum), { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric', timeZone: 'Europe/Berlin' })}
@@ -677,7 +677,7 @@ export default function OnboardingWizard({
                         <span>{t('termin.svPrefix')}: <strong>{termin.svName}</strong></span>
                       </p>
                     )}
-                    <div className="mt-4 pt-4 border-t border-emerald-200">
+                    <div className="mt-4 pt-4 border-t border-success/30">
                       <p className="text-xs text-claimondo-ondo leading-relaxed">
                         💡 {t('termin.reminderHint')}
                       </p>
@@ -720,7 +720,7 @@ export default function OnboardingWizard({
                       />
                     )
                   ) : (
-                    <p className="text-sm text-amber-700 text-center py-4 rounded-ios-xl bg-amber-50 border border-amber-200">
+                    <p className="text-sm text-warning-strong text-center py-4 rounded-ios-xl bg-warning-soft border border-warning/30">
                       {t('dokumente.preparing')}
                     </p>
                   )}
@@ -781,8 +781,8 @@ export default function OnboardingWizard({
                 <div className="text-center">
                   {allesErfuellt ? (
                     <>
-                      <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-5">
-                        <CheckIcon className="w-8 h-8 text-emerald-500" />
+                      <div className="w-16 h-16 rounded-full bg-success-soft flex items-center justify-center mx-auto mb-5">
+                        <CheckIcon className="w-8 h-8 text-success" />
                       </div>
                       <h1 className="text-2xl font-semibold text-claimondo-navy">{t('fertig.readyTitle')}</h1>
                       <p className="mt-3 text-sm text-claimondo-ondo">
@@ -791,8 +791,8 @@ export default function OnboardingWizard({
                     </>
                   ) : (
                     <>
-                      <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto mb-5">
-                        <AlertCircleIcon className="w-8 h-8 text-amber-500" />
+                      <div className="w-16 h-16 rounded-full bg-warning-soft flex items-center justify-center mx-auto mb-5">
+                        <AlertCircleIcon className="w-8 h-8 text-warning" />
                       </div>
                       <h1 className="text-2xl font-semibold text-claimondo-navy">{t('fertig.pendingTitle')}</h1>
                       <p className="mt-3 text-sm text-claimondo-ondo">
@@ -806,7 +806,7 @@ export default function OnboardingWizard({
                     className={`mt-6 w-full min-h-14 py-4 rounded-2xl text-white font-semibold text-base disabled:opacity-50 active:scale-[0.98] transition-all ${
                       allesErfuellt
                         ? 'bg-claimondo-shield hover:bg-claimondo-ondo'
-                        : 'bg-amber-500 hover:bg-amber-600'
+                        : 'bg-warning hover:bg-warning-strong'
                     }`}
                   >
                     {pending ? t('fertig.saving') : t('fertig.cta')}

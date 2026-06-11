@@ -87,10 +87,10 @@ export default function KundeAnfahrtCard({
 
   if (angekommen) {
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 text-center">
-        <CheckCircleIcon className="w-8 h-8 text-emerald-600 mx-auto mb-2" />
-        <p className="text-sm font-semibold text-emerald-900">{t('anfahrt.amOrtTitel')}</p>
-        <p className="text-xs text-emerald-800/80 mt-1">
+      <div className="bg-success-soft border border-success/30 rounded-2xl p-4 text-center">
+        <CheckCircleIcon className="w-8 h-8 text-success mx-auto mb-2" />
+        <p className="text-sm font-semibold text-success-strong">{t('anfahrt.amOrtTitel')}</p>
+        <p className="text-xs text-success-strong/80 mt-1">
           {t('anfahrt.amOrtText')}
         </p>
       </div>
@@ -150,12 +150,12 @@ export default function KundeAnfahrtCard({
       </div>
 
       {permissionState === 'denied' && (
-        <p className="text-[11px] text-amber-700 bg-amber-50 rounded-ios-lg px-2 py-1.5">
+        <p className="text-[11px] text-warning-strong bg-warning-soft rounded-ios-lg px-2 py-1.5">
           {t('anfahrt.standortVerweigert')}
         </p>
       )}
       {error && permissionState !== 'denied' && (
-        <p className="text-[11px] text-red-700 bg-red-50 rounded-ios-lg px-2 py-1.5">
+        <p className="text-[11px] text-danger-strong bg-danger-soft rounded-ios-lg px-2 py-1.5">
           {error}
         </p>
       )}
@@ -174,7 +174,7 @@ export default function KundeAnfahrtCard({
           type="button"
           onClick={handleAngekommen}
           disabled={isPending}
-          className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold disabled:opacity-50"
+          className="inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-xl bg-success hover:bg-success-strong text-white text-xs font-semibold disabled:opacity-50"
         >
           {isPending ? (
             <Loader2Icon className="w-3.5 h-3.5 animate-spin" />

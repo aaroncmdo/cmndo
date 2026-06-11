@@ -188,8 +188,8 @@ export default function KundeTrackingClient({
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md text-center">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
+          <div className="w-16 h-16 bg-success-soft rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircleIcon className="w-8 h-8 text-success" />
           </div>
           <h1 className="text-2xl font-bold text-claimondo-navy mb-2">{t('besichtigung.titel')}</h1>
           <p className="text-claimondo-ondo">{t('besichtigung.text', { svVorname })}</p>
@@ -202,8 +202,8 @@ export default function KundeTrackingClient({
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md text-center">
-          <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <CheckCircleIcon className="w-8 h-8 text-emerald-600" />
+          <div className="w-16 h-16 bg-success-soft rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircleIcon className="w-8 h-8 text-success" />
           </div>
           <h1 className="text-2xl font-bold text-claimondo-navy mb-2">{t('angekommen.titel', { svVorname })}</h1>
           <p className="text-claimondo-ondo">{t('angekommen.text')}</p>
@@ -221,7 +221,7 @@ export default function KundeTrackingClient({
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-10">
         <div className="max-w-md text-center">
-          <CheckCircleIcon className="w-12 h-12 text-emerald-500 mx-auto mb-4" />
+          <CheckCircleIcon className="w-12 h-12 text-success mx-auto mb-4" />
           <h1 className="text-xl font-bold text-claimondo-navy mb-2">{actionDone}</h1>
         </div>
       </div>
@@ -264,7 +264,7 @@ export default function KundeTrackingClient({
               <button
                 onClick={() => setShowGegenvorschlag(true)}
                 disabled={actionPending}
-                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-amber-700 border border-amber-200 rounded-ios-xl py-3 text-sm font-medium transition-colors"
+                className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-warning-strong border border-warning/30 rounded-ios-xl py-3 text-sm font-medium transition-colors"
               >
                 <RefreshCwIcon className="w-4 h-4" /> {t('vorbereitet.anderenVorschlagenButton')}
               </button>
@@ -320,7 +320,7 @@ export default function KundeTrackingClient({
                           <p className="text-sm font-semibold text-claimondo-navy">{v.label}</p>
                           <p className="text-xs text-claimondo-ondo capitalize">{v.sub} {t('gegenvorschlag.uhrSuffix')}</p>
                         </div>
-                        <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        <CheckCircleIcon className="w-4 h-4 text-success flex-shrink-0" />
                       </button>
                     ))}
                   </div>
@@ -346,7 +346,7 @@ export default function KundeTrackingClient({
                       await submit(new Date(gegenDatum).toISOString(), gegenGrund)
                     }}
                     disabled={actionPending || !gegenDatum}
-                    className="flex-1 min-h-[44px] rounded-ios-xl text-sm font-semibold bg-amber-500 text-white disabled:opacity-50"
+                    className="flex-1 min-h-[44px] rounded-ios-xl text-sm font-semibold bg-warning text-white disabled:opacity-50"
                   >
                     {t('gegenvorschlag.eigeneZeitVorschlagenButton')}
                   </button>

@@ -45,8 +45,8 @@ export default async function NachbesichtigungPickerPage({
         </div>
 
         {bereitsEingereicht ? (
-          <div className="bg-white rounded-ios-xl border border-emerald-200 p-5 space-y-2">
-            <p className="text-sm font-semibold text-emerald-900">{t('nachbesichtigungPicker.bereitsTitle')}</p>
+          <div className="bg-white rounded-ios-xl border border-success/30 p-5 space-y-2">
+            <p className="text-sm font-semibold text-success-strong">{t('nachbesichtigungPicker.bereitsTitle')}</p>
             <p className="text-xs text-claimondo-ondo">
               {t('nachbesichtigungPicker.bereitsBody')}
             </p>
