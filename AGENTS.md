@@ -337,11 +337,12 @@ Das Script erkennt den Header und skippt die Datei komplett.
 
 ## Drift-Ratchets im selben Script (Baseline + Boy-Scout, wie component-set/knip)
 
-`check:token-audit` fährt zusätzlich drei Ratchets — sie blocken **neue** Verstöße gegen eine Baseline, Bestand wird per Boy-Scout abgebaut. **Alle drei scannen nur `src/**` (die App) — Marketing (`claimondo-marketing/`) und Cluster-LPs (`kfz-gutachter-*/`, `autounfall-io/`) sind eigene Top-Level-Builds und werden NIE erfasst.**
+`check:token-audit` fährt zusätzlich vier Ratchets — sie blocken **neue** Verstöße gegen eine Baseline, Bestand wird per Boy-Scout abgebaut. **Alle vier scannen nur `src/**` (die App) — Marketing (`claimondo-marketing/`) und Cluster-LPs (`kfz-gutachter-*/`, `autounfall-io/`) sind eigene Top-Level-Builds und werden NIE erfasst.**
 
 * **Status-Ratchet** (Token-Foundation 2026-06-10): blockt **neue** raw Tailwind-Status-Scales (`green/emerald/red/rose/amber/yellow/orange/lime`-`50…950`). Status hat jetzt Tokens — `bg-success`/`-soft`/`text-success-strong` (+ `warning`/`danger`/`info`). Baseline = Bestand (grandfathered), Boy-Scout senkt. Echter Nicht-Status-Fall (Wetter/Kanal-Farbe/Trust-Marker/Data-Viz) → `// Token-Audit-Skip`-Header. Löst die frühere „Status bleibt raw erlaubt"-Ausnahme ab.
 * **Accent-Ratchet**: raw Tailwind-Akzente (`blue/indigo/sky/cyan/violet/purple/teal/fuchsia/pink`) verboten (Baseline 0) → `claimondo-*`-Tokens.
 * **Radii-Ratchet**: Tailwind-Default-Radien (`rounded-sm/md/lg/xl/2xl/3xl`) → `rounded-ios-*`.
+* **Brand-rgba-Gradient-Ratchet** (FlowLink-Audit 2026-06-10): blockt **neue** raw `rgba()` mit Marken-Tönen (`13,27,62` / `69,115,162` / `123,163,204`) **innerhalb einer CSS-`*-gradient()`-Funktion** — die branden nicht mit. Nutze stattdessen `color-mix(in srgb, var(--brand-accent/-secondary/-primary, #fb) N%, transparent)` (das etablierte Tinting-Pattern, ~40 Consumer). Schließt die Lücke des Hex-Audits (der nur Hex prüft, nicht rgba). **Bewusst nur Gradient-Kontext** = ~0 False-Positives: Schatten (`boxShadow`), Avatar-/Badge-Fills, Mapbox-Paint und Native-rgba (RN hat kein `color-mix`; `.native.tsx` ausgeschlossen) nutzen rgba legitim. Baseline 10 grandfathered (auth/admin-Ambient = Claimondo-only/nicht gebrandet; makler = Follow-up).
 
 **Weitere Token-Foundation-Konventionen:** **Typo** = `text-caption`/`text-body-xs`/`-sm`/`text-body`/`text-heading-{sm,md,lg}` statt `text-[10px]`-Magic-Numbers. **Radius** = nur noch `rounded-ios-{sm,md,lg,xl}` (12/18/24/32); `rounded-claimondo-*` (8/14/20/36) ist retired.
 <!-- END:branding-rules -->
