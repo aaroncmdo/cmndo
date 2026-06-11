@@ -185,6 +185,13 @@ export function NetzwerkCompare() {
         <a href="https://autounfall.io/abtretungserklaerung/" target="_blank" rel="noopener" className="underline underline-offset-2 text-white/90 hover:text-white">Abtretung</a>
         {' →'}
       </p>
+      {/* 08q Q2.3 · Gegengutachten-Fussnote (aus NetzwerkSection hierher) —
+          nur bei offener Tabelle sichtbar, direkt unter der Vergleichszeile zur
+          fachlichen Widerlegung; unter dem CTA bleibt nichts. */}
+      <p className={`mt-3 text-[12px] text-white/[.55] leading-relaxed ${open ? '' : 'hidden'}`}>
+        „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts/Versicherergutachtens
+        nach DAT/BVSK-Standard. Die erzielbare Auszahlung ist einzelfallabhängig.
+      </p>
     </div>
   )
 }

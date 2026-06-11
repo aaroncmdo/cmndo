@@ -1,4 +1,5 @@
 import type { City } from '@/lib/cluster'
+import { PARTNER_LINE } from '@/lib/content'
 import { CLUSTER } from '@/lib/cluster'
 import { ClaimondoLink } from '@/lib/text'
 
@@ -37,7 +38,7 @@ export function UeberUnsSection({ city }: { city: City }) {
                 <p className="uu-quote-name">
                   {CLUSTER.svName} <span className="uu-quote-role">· DAT-Sachverständiger</span>
                 </p>
-                <p className="uu-quote-brand">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></p>
+                <p className="uu-quote-brand">{PARTNER_LINE.pre} <ClaimondoLink>{PARTNER_LINE.brand}</ClaimondoLink></p>
               </div>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -107,10 +108,11 @@ export function UeberUnsSection({ city }: { city: City }) {
               />
               <div>
                 <div className="text-[15px] text-white font-semibold leading-tight">
-                  Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink>
+                  {PARTNER_LINE.pre} <ClaimondoLink>{PARTNER_LINE.brand}</ClaimondoLink>
                 </div>
+                {/* 08o O3: "Schadenregulierung aus einer Hand"-Zusatz entfaellt ersatzlos. */}
                 <div className="text-[13px] text-white/65 leading-tight mt-0.5">
-                  Unfall-Assistance · Schadenregulierung aus einer Hand
+                  {PARTNER_LINE.sub}
                 </div>
               </div>
             </div>

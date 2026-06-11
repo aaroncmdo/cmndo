@@ -1,37 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { CLUSTER, seoTextFor } from '@/lib/cluster'
-import { vorortAbsatzFor } from '@/lib/seoVorOrt'
+import { CLUSTER, seoBodyFor, type SeoAbsatz } from '@/lib/cluster'
 
 interface SeoBodySectionProps {
   stadtSlug: string
   stadtName: string
 }
 
-// BRIEF 08b · H3-Katalog: Trigger → Zwischenüberschrift. Reihenfolge = Prioritaet
-// (spezifisch vor generisch); jede H3 max. 1x pro Seite, vor dem ERSTEN Treffer.
-// Absatz 0 (Intro) bekommt bewusst keine H3.
-const H3_CATALOG: { key: string; test: RegExp; h3: (stadt: string) => string }[] = [
-  // 08n N9 (Aaron, redaktionell): vorher 'Hochwasser-Schäden: Erfahrung aus
-  // 2021' — wortgleicher Erfahrungs-Claim auf beiden Hubs, unbelegt; in Köln
-  // feuerte /Hochwasser/ zudem auf einem VERKEHRS-Absatz ("Hochwasser bremst
-  // den Verkehr aus") und verdraengte dessen Brennpunkte-H3. Jetzt: sachliche
-  // Themen-H3 ohne Erfahrungs-/Jahres-Claim + Trigger nur auf echte
-  // Flutschaden-Begriffe (Koeln-Hub matcht nicht mehr, Aachen-Hub weiter).
-  { key: 'hochwasser', test: /Hochwasser-?Schäden|Sturzflut|Wassergutachten|Wasserschaden/, h3: () => 'Wasser- und Hochwasserschäden am Fahrzeug' },
-  { key: 'ausland', test: /Grüne Karte|ausländisch|niederländisch|belgisch/, h3: () => 'Unfall mit ausländischer Beteiligung' },
-  { key: 'rechte', test: /§ ?249|Gegengutachten|kürzt/, h3: () => 'Ihre Rechte: 0 € für Sie nach §249 BGB' },
-  { key: 'werkstatt', test: /Werkstattwahl|Werkstatt zu wählen|Werkstatt Ihrer Wahl/, h3: () => 'Werkstatt: Ihre Wahl, Ihr Recht' },
-  { key: 'brennpunkte', test: /Verkehrsschwerpunkt|Anschlussstelle|Autobahnring|Unfallschwerpunkt/, h3: (s) => `Unfallschwerpunkte in ${s}` },
-  // 08l A2: 'vorort' aus dem Katalog entfernt — der Absatz zieht samt H3 in
-  // Block 1 der Lokal-Strecke (EinsatzgebietSection, via lib/seoVorOrt).
-  { key: 'schritte', test: /Drei Schritte/, h3: () => 'In 3 Schritten zum Gutachten' },
-]
+/* 08o O6 · H3s sind EDITORIAL an ihre Absaetze gebunden (SEO_BODY-Datenfeld
+   in lib/cluster: h3/text/liste/vorort je Absatz). Der fruehere Trigger-
+   Katalog (Regex -> Ueberschrift, BRIEF 08b) ist abgeschafft — er erzeugte
+   Fehlpaarungen (N9 Hochwasser/Koeln, O6 Leverkusen: Rechte-H3 ueber dem
+   A1-Sanierungs-Absatz). Leistungs-Aufzaehlungen rendern als kompakte Liste. */
 
-/** Pull-Quote (BRIEF 08b A3): erster Satz des 2. Absatzes (= staerkster Lokal-Anker
- *  in allen 18 Texten). Schnitt am ':' wenn frueher als '.' (Texte enden Satz 1 oft
- *  mit Doppelpunkt-Hinfuehrung). KEINE neue Copy — 1:1-Duplikat aus dem Text. */
+/** Pull-Quote (BRIEF 08b A3): erster Satz des 2. sichtbaren Absatzes (=
+ *  staerkster Lokal-Anker). Schnitt am ':' wenn frueher als '.'. KEINE neue
+ *  Copy — 1:1-Duplikat aus dem Text. */
 function pullQuoteFrom(paragraph: string | undefined): string | null {
   if (!paragraph) return null
   const dot = paragraph.indexOf('. ')
@@ -42,42 +27,19 @@ function pullQuoteFrom(paragraph: string | undefined): string | null {
   return sentence.length >= 40 ? sentence : null
 }
 
-// Editorial-SEO-Body (BRIEF 07 + 08b): 720px-Editorial-Spalte, H3-Gliederung,
-// Fakten-Chips, Pull-Quote, Mobile-Collapse (<768px; Content bleibt VOLL im DOM —
-// Server-gerendert via RSC-SSR, kein display:none auf Absaetzen, kein Lazy-Inject).
+// Editorial-SEO-Body (BRIEF 07 + 08b + 08o O6): 720px-Editorial-Spalte,
+// gebundene H3-Gliederung, Fakten-Chips, Pull-Quote, Mobile-Collapse (<768px;
+// Content bleibt VOLL im DOM — Server-gerendert via RSC-SSR, kein display:none
+// auf Absaetzen, kein Lazy-Inject).
 export function SeoBodySection({ stadtSlug, stadtName }: SeoBodySectionProps) {
   const [open, setOpen] = useState(false)
-  const text = seoTextFor(stadtSlug)
-
-  if (!text || text.trim() === '' || text.includes('PLATZHALTER')) {
-    return null
-  }
 
   // 08l A2: Der "Vor Ort"-Absatz rendert in Block 1 (Einsatzgebiet) — hier
-  // ausschliessen, damit die Copy nicht doppelt erscheint (byte-identisch dort).
-  const vorort = vorortAbsatzFor(stadtSlug)
-  const paragraphs = text
-    .split('\n\n')
-    .map((p) => p.trim())
-    .filter((p) => p.length > 0)
-    .filter((p, idx) => idx === 0 || p !== vorort)
+  // ueberspringen (Markierung editorial via vorort-Flag, 08o O6).
+  const items = seoBodyFor(stadtSlug).filter((a) => !a.vorort)
+  if (items.length === 0) return null
 
-  // H3-Zuordnung: ab Absatz 1, jede H3 nur einmal (used-Set).
-  const used = new Set<string>()
-  const h3For = (p: string, idx: number): string | null => {
-    if (idx === 0) return null
-    for (const entry of H3_CATALOG) {
-      if (used.has(entry.key)) continue
-      if (entry.test.test(p)) {
-        used.add(entry.key)
-        return entry.h3(stadtName)
-      }
-    }
-    return null
-  }
-  const items = paragraphs.map((p, idx) => ({ p, h3: h3For(p, idx) }))
-
-  const quote = pullQuoteFrom(paragraphs[1])
+  const quote = pullQuoteFrom(items[1]?.text)
   const chips = [
     '0 € für Sie',
     'Gutachten in 48h',
@@ -85,15 +47,25 @@ export function SeoBodySection({ stadtSlug, stadtName }: SeoBodySectionProps) {
     `${CLUSTER.cities.length} Städte im Einsatzgebiet`,
   ]
 
-  const renderItem = ({ p, h3 }: { p: string; h3: string | null }, idx: number) => (
+  const renderItem = (a: SeoAbsatz, idx: number) => (
     <div key={idx}>
-      {h3 && (
+      {a.h3 && (
         <h3 className="font-display font-bold text-[20px] md:text-[22px] leading-snug text-ink mt-9 mb-3 flex items-center gap-2.5">
           <span aria-hidden="true" className="inline-block w-2 h-2 rounded-full bg-amber flex-none" />
-          {h3}
+          {a.h3}
         </h3>
       )}
-      <p className="mt-4 first:mt-0">{p}</p>
+      <p className="mt-4 first:mt-0">{a.text}</p>
+      {a.liste && (
+        <ul className="mt-3 mb-1 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-1.5 list-none p-0">
+          {a.liste.map((li) => (
+            <li key={li} className="flex items-start gap-2.5 text-[15.5px] leading-snug">
+              <span aria-hidden="true" className="inline-block w-1.5 h-1.5 rounded-full bg-amber flex-none mt-[7px]" />
+              {li}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 

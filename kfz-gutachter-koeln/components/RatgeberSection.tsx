@@ -101,10 +101,13 @@ export function RatgeberSection() {
           </a>
         </div>
 
+        {/* 08q Q4: Ziel auf den Ratgeber-Hub autounfall.io korrigiert — die
+            Artikel liegen dort, nicht auf der claimondo.de-Startseite (Text/
+            Ziel sonst widersprüchlich). Konsistent mit dem Footer-Ratgeber-Link. */}
         <p className="text-center mt-8 text-muted text-sm font-medium">
           Alle Ratgeber-Artikel:{' '}
-          <a href="https://claimondo.de/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
-            claimondo.de →
+          <a href="https://autounfall.io/gutachter/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
+            autounfall.io →
           </a>
         </p>
       </div>

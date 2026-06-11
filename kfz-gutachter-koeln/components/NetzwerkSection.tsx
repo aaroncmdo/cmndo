@@ -1,5 +1,5 @@
 import { CLUSTER, MAIN_CITY } from '@/lib/cluster'
-import { NETZWERK_PAIN, NETZWERK_COMPARE_MOBILE, GOOGLE_RATING } from '@/lib/content'
+import { NETZWERK_PAIN, NETZWERK_COMPARE_MOBILE, NETZWERK_PERSONEN, ABLAUF_TIMELINE } from '@/lib/content'
 import { renderRich, ClaimondoLink } from '@/lib/text'
 import { NetzwerkCompare } from './NetzwerkCompare'
 
@@ -10,6 +10,10 @@ import { NetzwerkCompare } from './NetzwerkCompare'
 // Reveal-Observer + Compare-Toggle leben in SiteScripts.tsx (Vanilla-DOM, analog
 // Burger/Chevron). DESKTOP/TABLET (hidden sm:grid): Original 1:1 — Bild-Karte +
 // Text + 4 Fakten-Badges + Client-Toggle <NetzwerkCompare />. Keine Props.
+// 08o O2: "~TAG 32" (letzter Timeline-Step) -> "~32 Tage" — EIN Datenfeld,
+// laeuft mit der Mobile-Timeline mit.
+const TIMELINE_TAGE = `~${(ABLAUF_TIMELINE[ABLAUF_TIMELINE.length - 1].day.match(/\d+/) ?? ['32'])[0]} Tage`
+
 export function NetzwerkSection() {
   return (
     <section id="netzwerk" className="py-[clamp(52px,7vw,84px)] bg-petrol text-white">
@@ -200,86 +204,93 @@ export function NetzwerkSection() {
             Spalten statt Avatar-Kette, Stat-Leiste statt Kennzahlen-Grid.
             Ziel ~520-600px Sectionhoehe @1440. Mobile-Insel unveraendert. ============ */}
         <div className="hidden sm:block relative">
-          {/* N5.3 · Kundengespraech als Diagonal-Panel oben rechts (nur >=1024):
-              weicher 102deg-Mask-Verlauf (globals .netzwerk-diagonal) + Bottom-
-              Blend in den Section-Grund — Foto bleibt Foto, kein UI-Layer,
-              KEIN clip-path, keine Kante. Hinter dem Content (z-0). */}
-          <div className="netzwerk-diagonal hidden lg:block absolute top-0 right-0 w-[47%] h-[400px] z-0 pointer-events-none" aria-hidden="true">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={`${CLUSTER.imgPath}kundengespraech-${CLUSTER.key}.webp?v=${CLUSTER.assetVersion}`}
-              alt=""
-              className="w-full h-full object-cover"
-              style={{ objectPosition: '65% 25%' }}
-              loading="lazy"
-            />
-            <div
-              className="absolute inset-0"
-              style={{ background: 'linear-gradient(180deg, transparent 45%, var(--petrol) 97%)' }}
-            />
-          </div>
-
+          {/* 08o O2 · Kopfzeile 2-spaltig: links Eyebrow + H2 + Lead, rechts das
+              Kundengespraech-Foto als GRID-KACHEL. 08q Q2.1: Diagonal-/Links-
+              Verlauf entfernt (Entscheid Aaron) — saubere rounded Kachel, Bild
+              steht fuer sich. Grid statt absolutem Overlay -> keine Text-auf-
+              Foto-Kollision. */}
           <div className="relative z-[1]">
-            <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
-              <span className="eyebrow-dot"></span> Das <ClaimondoLink>Claimondo-Netzwerk</ClaimondoLink>
-            </span>
-            <h2 className="font-display font-bold text-section-h2 text-white mb-4 leading-tight lg:max-w-[58%]">
-              <span className="block text-white/70 text-[0.78em] font-semibold">Andere geben Ihnen ein Gutachten.</span>
-              Wir geben Ihnen die <span className="text-amber">komplette Lösung</span>.
-            </h2>
-            {/* N5.2 · Lead-Satz (aus der Textwand promotet, exakt wortgleich) —
-                die restliche Textwand entfaellt ersatzlos. */}
-            <p className="text-white/[.86] text-[16.5px] leading-relaxed lg:max-w-[58%]">
-              Sie melden den Schaden einmal — alles Weitere koordinieren wir.
-            </p>
-
-            {/* N5.4 · 3 Spalten mit Tabler-Line-Icons (Inline-SVG, stroke 2,
-                Tabler-Geometrie; KEINE Avatare). Copy exakt aus dem Brief. */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-7 mt-10">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,44%)] gap-8 lg:gap-10 items-center">
               <div>
-                <svg className="w-7 h-7 stroke-amber fill-none mb-3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M5 7h1a2 2 0 0 0 2-2 1 1 0 0 1 1-1h6a1 1 0 0 1 1 1 2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2" />
-                  <circle cx="12" cy="13" r="3" />
-                </svg>
-                <h3 className="font-display font-bold text-white text-[16.5px] mb-1.5">Gutachter vor Ort</h3>
-                <p className="text-white/75 text-[14px] leading-relaxed">In 60 Min bei Ihnen — gerichtsfest nach DAT/BVSK.</p>
+                <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
+                  <span className="eyebrow-dot"></span> Das <ClaimondoLink>Claimondo-Netzwerk</ClaimondoLink>
+                </span>
+                <h2 className="font-display font-bold text-section-h2 text-white mb-4 leading-tight">
+                  <span className="block text-white/70 text-[0.78em] font-semibold">Andere geben Ihnen ein Gutachten.</span>
+                  Wir geben Ihnen die <span className="text-amber">komplette Lösung</span>.
+                </h2>
+                <p className="text-white/[.86] text-[16.5px] leading-relaxed">
+                  Sie melden den Schaden einmal — alles Weitere koordinieren wir.
+                </p>
               </div>
-              <div>
-                <svg className="w-7 h-7 stroke-amber fill-none mb-3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M4 14v-3a8 8 0 1 1 16 0v3" />
-                  <path d="M18 19a2 2 0 0 0 2-2v-3h-3v5h1zM4 14h3v5H6a2 2 0 0 1-2-2v-3z" />
-                  <path d="M20 17a4 4 0 0 1-4 4h-2" />
-                </svg>
-                <h3 className="font-display font-bold text-white text-[16.5px] mb-1.5">Betreuung rund um die Uhr</h3>
-                <p className="text-white/75 text-[14px] leading-relaxed">Ein Ansprechpartner für Termin, Mietwagen, Schriftverkehr.</p>
-              </div>
-              <div>
-                <svg className="w-7 h-7 stroke-amber fill-none mb-3" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M7 20h10M6 6l6-2 6 2" />
-                  <path d="M12 4v16" />
-                  <path d="M9 12c0 1.66-1.34 3-3 3s-3-1.34-3-3l3-6 3 6zM21 12c0 1.66-1.34 3-3 3s-3-1.34-3-3l3-6 3 6z" />
-                </svg>
-                <h3 className="font-display font-bold text-white text-[16.5px] mb-1.5">Anwalt setzt durch</h3>
-                <p className="text-white/75 text-[14px] leading-relaxed">Kürzt die Versicherung, widerspricht unser Partneranwalt und setzt die volle Summe durch.</p>
+              <div className="hidden lg:block relative rounded-2xl overflow-hidden h-[280px]" aria-hidden="true">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`${CLUSTER.imgPath}kundengespraech-${CLUSTER.key}.webp?v=${CLUSTER.assetVersion}`}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: '65% 25%' }}
+                  loading="lazy"
+                />
               </div>
             </div>
 
-            {/* N5.6 · Stat-Leiste (eine Zeile, Hairlines oben+unten; "Portal"
-                entfaellt). 5,0 aus GOOGLE_RATING (gleiche Quelle wie 08i). */}
-            <div className="mt-10 border-y border-white/[.14] py-3.5 flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-[14px] text-white/85 whitespace-nowrap">
-              <span><strong className="text-white font-semibold">90+</strong> Gutachter</span>
-              <span className="text-white/30" aria-hidden="true">·</span>
-              <span className="text-white font-semibold">DAT</span>
-              <span className="text-white/30" aria-hidden="true">·</span>
-              <span className="text-white font-semibold">BVSK</span>
-              <span className="text-white/30" aria-hidden="true">·</span>
-              <span><strong className="text-white font-semibold">{GOOGLE_RATING.value.replace('.', ',')}</strong> <span className="text-[#FCD34D]" aria-hidden="true">★</span> Google</span>
-              <span className="text-white/30" aria-hidden="true">·</span>
-              <span><strong className="text-amber font-semibold">0 €</strong> bei unverschuldetem Unfall</span>
+            {/* 08o O2 · 3 Personen-Karten statt Icon-Spalten — wortgleich aus
+                NETZWERK_PERSONEN (lib/content); {sv} = CLUSTER.svName. Struktur
+                ueberall: Avatar links, Name/Funktion + Ich-Zitat rechts —
+                >=1024 als 3er-Grid, 640-1023 gestapelte Zeilen. */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mt-8">
+              {NETZWERK_PERSONEN.map((p) => (
+                <div key={p.avatar} className="border border-white/[.14] rounded-2xl p-5 flex gap-3.5 items-start">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {/* 08p P4: 34px war zu klein (25-31% der Tablet-Zeilenhoehe,
+                      Gesichter kaum erkennbar — Aaron/Bridge). Tablet/Mobile-
+                      Zeilen 60px + vertikal zentriert (~55% Zeilenhoehe),
+                      Desktop-Karten 46px; object-position via avatarPos je
+                      Asset (Gesicht mittig, Kopf nicht anschneiden). */}
+                  <img
+                    src={p.avatar === 'sv'
+                      ? `${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`
+                      : `/assets/img/shared/avatar-${p.avatar}.png`}
+                    alt={`${p.name === '{sv}' ? CLUSTER.svName : p.name} — ${p.funktion}`}
+                    width={60}
+                    height={60}
+                    loading="lazy"
+                    style={p.avatarPos ? { objectPosition: p.avatarPos } : undefined}
+                    className="w-[60px] h-[60px] lg:w-[46px] lg:h-[46px] rounded-full object-cover flex-none self-center lg:self-start lg:mt-0.5"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-white font-display font-bold text-[15px] leading-tight">
+                      {p.name === '{sv}' ? CLUSTER.svName : p.name}
+                    </p>
+                    <p className="text-white/60 text-[12.5px] leading-snug mt-0.5">{p.funktion}</p>
+                    <p className="text-white/80 italic text-[14px] leading-relaxed mt-2">„{p.zitat}“</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* 08q Q2.2 · Nutzen-Leiste aufgewertet: keine Hairlines mehr, drei
+                zentrierte Mini-Stat-Bloecke mit Wert/Label-Hierarchie (Wert
+                20-22px — 0 €/~32 Tage Gold, "Jeden Schritt live" Weiss; Label
+                klein/gedaempft). Grosszuegiger Abstand zu Karten und CTA. */}
+            <div className="mt-12 flex flex-wrap items-start justify-center gap-x-12 gap-y-6 text-center">
+              <div>
+                <p className="font-display font-bold text-[22px] leading-none text-amber">0 €</p>
+                <p className="text-[13px] text-white/60 mt-1.5">bei unverschuldetem Unfall</p>
+              </div>
+              <div>
+                <p className="font-display font-bold text-[22px] leading-none text-amber">{TIMELINE_TAGE}</p>
+                <p className="text-[13px] text-white/60 mt-1.5">bis zum Geld auf dem Konto</p>
+              </div>
+              <div>
+                <p className="font-display font-bold text-[22px] leading-none text-white">Jeden Schritt live</p>
+                <p className="text-[13px] text-white/60 mt-1.5">im Online-Portal</p>
+              </div>
             </div>
 
             {/* N5.7 · CTA ab 768 horizontal zentriert (Entscheid Aaron). */}
-            <div className="mt-7 flex justify-center">
+            <div className="mt-10 flex justify-center">
               <button
                 type="button"
                 id="netzwerkCompareToggleDesk"
@@ -293,13 +304,11 @@ export function NetzwerkSection() {
             </div>
 
             {/* Vergleichstabelle: Aufklapp-Mechanik unveraendert (NetzwerkCompare
-                bindet den Button per id). */}
+                bindet den Button per id). 08q Q2.3: Gegengutachten-Fussnote ist
+                IN die Tabelle gezogen (nur bei offener Tabelle sichtbar) — unter
+                dem CTA bleibt nichts. */}
             <div className="netzwerk-compare-fullspan">
               <NetzwerkCompare />
-              <p className="netzwerk-compare-hint mt-4 text-[12.5px] text-white/[.62] leading-relaxed">
-                Hinweis: „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts/Versicherergutachtens
-                nach DAT/BVSK-Standard. Die erzielbare Auszahlung ist einzelfallabhängig.
-              </p>
             </div>
           </div>
         </div>

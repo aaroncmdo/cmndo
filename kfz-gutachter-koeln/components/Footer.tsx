@@ -108,8 +108,11 @@ export function Footer({ city }: { city: City }) {
         <div className="flex flex-wrap items-center justify-between gap-4 pt-6 border-t border-white/10 text-[13px] text-white/55">
           <span>© 2026 {SITE.name} · {CLUSTER.region}</span>
           <div className="flex gap-4">
+            {/* 08q Q4: TMG verlangt unmittelbare Erreichbarkeit — Deep-Links
+                auf /impressum bzw. /datenschutz, nicht auf die claimondo.de-
+                Startseite. */}
             <a
-              href={SITE.legalUrl}
+              href={`${SITE.legalUrl}/impressum`}
               target="_blank"
               rel="noopener"
               className="hover:text-white transition"
@@ -117,7 +120,7 @@ export function Footer({ city }: { city: City }) {
               Impressum
             </a>
             <a
-              href={SITE.legalUrl}
+              href={`${SITE.legalUrl}/datenschutz`}
               target="_blank"
               rel="noopener"
               className="hover:text-white transition"

@@ -189,647 +189,137 @@ export function cityNamesList(): string {
 // Doorway-Content) — echte Nachbarorte, PLZ, Autobahnen; KEINE erfundenen Statistiken.
 // Muster + Tonfall: siehe Wuppertal-Cluster (5-6 Saetze, lokal verankert). Die Platzhalter
 // unten rendern bereits, damit der Local-Build vollstaendig aussieht.
-export const SEO_TEXT: Record<string, string> = {
-  aachen: `Aachen ist Krönungsstadt, Grenzstadt und Pendlerstadt zugleich. Wer hier in
-einen unverschuldeten Unfall verwickelt wird — am Aachener Kreuz auf der A 4,
-auf der Adenauerallee am Bahnhof oder in der Innenstadt rund um Dom und Markt
-— braucht einen Sachverständigen, der die Region kennt und gerichtsfest
-dokumentiert. Markus Lennartz, Kfz-Sachverständiger aus Aachen-Burtscheid,
-ist meist binnen 60 Minuten bei Ihnen — egal ob Sie in Aachen-Mitte,
-Frankenberger Viertel, Forst, Haaren, Eilendorf, Brand, Laurensberg oder
-Richterich stehen. 0 € für Sie — die gegnerische Versicherung übernimmt die
-Honorarkosten nach §249 BGB.
-
-Aachen hat eine besondere Verkehrslage: Die Stadt liegt im Dreiländereck
-Deutschland-Belgien-Niederlande, mit täglich tausenden Grenzpendlern und
-einer eigenen Schadensdynamik. Auf der A 4 zwischen Aachener Kreuz und der
-belgischen Grenze sind Auffahrunfälle im Berufsverkehr klassisch. Die A 44
-verbindet Richtung Mönchengladbach und Düsseldorf — Knotenpunkt für
-Pendler aus Alsdorf, Würselen und Jülich. Innerstädtisch dominiert die
-Adenauerallee als Hauptverkehrsachse vom Hauptbahnhof Richtung Dom, mit
-hohem Lieferverkehr und Bus-Verkehr.
-
-Wer in Aachen einen Kfz-Gutachter sucht, sollte auf drei Dinge achten:
-Neutralität, lokale Erfahrung und gerichtsfeste Dokumentation. Markus
-arbeitet nach DAT- und BVSK-Standard, dokumentiert mit Lackmessgerät und
-strukturierter Foto-Aufnahme, prüft Strukturschäden und ermittelt
-Reparaturkosten, Wertminderung und Restwert nach belastbaren Marktdaten.
-Das Gutachten liegt binnen 48 Stunden bei Ihnen, die Versicherungsregulierung
-läuft parallel mit dem Claimondo-Partnernetzwerk.
-
-Eine Besonderheit der Region: Schäden mit ausländischen Beteiligten — Belgier,
-Niederländer, EU-Pendler. Hier braucht es Erfahrung im Umgang mit
-ausländischen Versicherern, mit der Grünen Karte und dem Zentralruf der
-Autoversicherer. Markus arbeitet seit Jahren mit BE- und NL-Versicherungen
-zusammen und kennt die Regulierungswege. Wenn der Unfallverursacher aus
-Lüttich, Maastricht oder Kerkrade kommt, ist das kein Problem — die
-Schadensabwicklung läuft sauber über die internationalen Standards.
-
-Aachen hat aber noch eine andere Besonderheit, die für die Schadens-Bewertung
-wichtig ist: Markus Lennartz war als Sachverständiger 2021 nach dem
-Hochwasser im Indetal — in Eschweiler, Stolberg und Düren — über Monate
-mit Totalschäden und Wassergutachten beschäftigt. Wer in der Region nach
-einer Sturzflut, einem Wasserschaden oder einem Unfall mit Hochwasser-
-Folgekosten einen Gutachter braucht, ist bei ihm richtig. Hochwasser-Schäden
-sind versicherungstechnisch ein eigenes Kapitel — hier zählt Erfahrung mit
-Teilkaskoabwicklung und Wiederbeschaffungswert-Ermittlung.
-
-Verkehrsschwerpunkte rund um Aachen: Das Aachener Kreuz (A 4 / A 44) ist
-einer der wichtigsten Drehscheiben im Westen NRWs. Stop-and-Go im
-Berufsverkehr, Spurwechsel-Manöver Richtung Köln, Belgien und
-Mönchengladbach. Die A 4 Anschlussstelle Aachen-Mitte ist Hauptzubringer
-in die Stadt, oft staureich. Innerstädtisch sind die Adalbertstraße und
-die Pontstraße enge Achsen mit Tram-Verkehr und Park-Konflikten — typische
-Innenstadt-Schadensorte. Der Europaplatz ist Drehscheibe für grenzüberschreitenden
-Verkehr und entsprechend unfallträchtig.
-
-Was viele Aachener nicht wissen: Sie haben das Recht auf einen unabhängigen
-Sachverständigen Ihrer Wahl — nicht den, den die gegnerische Versicherung
-schickt. Markus arbeitet ausschließlich in Ihrem Interesse und dokumentiert
-so, dass die Versicherung sauber reguliert. Falls sie kürzt — etwa
-Reparaturkosten zu niedrig ansetzt oder Wertminderung verweigert —, erstellen
-wir auf Wunsch ein Gegengutachten. Auch das wird von der gegnerischen
-Versicherung übernommen, nach BGH-Rechtsprechung.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche Karosserie- und
-Lackbetriebe in der Region — von Aachen-Mitte über Burtscheid bis nach Brand
-und Eilendorf. Sie sind nicht verpflichtet, die Werkstatt zu nehmen, die die
-gegnerische Versicherung Ihnen empfiehlt. Auch hier gilt: gerichtsfestes
-Gutachten als Basis, Werkstatt nach Ihrer Wahl.
-
-Drei Schritte für die Schadensregulierung: 1) Sie melden sich telefonisch
-oder über WhatsApp. 2) Markus kommt vor Ort, alle Stadtteile abgedeckt. 3)
-Gutachten in 48 Stunden, Versicherungsabwicklung läuft parallel. 0 € für Sie.
-
-Kfz-Gutachter Aachen — neutral, gerichtsfest, schnell vor Ort. Markus
-Lennartz ist Ihr Ansprechpartner. Rufen Sie an oder schreiben Sie über
-WhatsApp, und wir klären in 5 Minuten, wie es weitergeht.`,
-  dueren: `Düren ist die Industriestadt im Westen Nordrhein-Westfalens — Papier,
-Maschinenbau, Logistik prägen seit Jahrzehnten das Stadtbild. Verkehrslich
-ist Düren mit der A 4-Anschlussstelle und der B 56 eine der wichtigsten
-Drehscheiben zwischen Köln und Aachen. Wer hier in einen unverschuldeten
-Unfall verwickelt wird, hat einen klaren Ansprechpartner: Markus Lennartz,
-Kfz-Sachverständiger aus Aachen-Burtscheid, ist meist binnen 60 Minuten in
-Düren-Mitte, Birkesdorf, Gürzenich, Lendersdorf, Niederau oder Rölsdorf. 0 €
-für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.
-
-Düren hat ein verkehrsreiches Profil: Die A 4-Anschlussstelle Düren ist seit
-Jahren staureich und besonders im Berufsverkehr Richtung Köln und Aachen
-ein klassischer Auffahrunfall-Hotspot. Auch die A 4 Düren-Süd ist
-betroffen — Pendler aus Niederzier und Inden steigen hier ein. Die B 56
-durch die Stadt — die Aachener Landstraße — ist innerstädtische
-Hauptverkehrsachse mit hohem Lieferverkehr. Die B 264 Köln-Düren-Aachen ist
-alternative Hauptverbindung, mit eigenem Stau-Profil.
-
-Eine Besonderheit von Düren: Die Veldener Straße im Industriegebiet ist seit
-Jahrzehnten Heimat traditioneller Sachverständigenbüros. Wir respektieren das
-— und bieten gleichzeitig etwas anderes: einen modernen, digitalen Ansatz
-mit Sofort-Erreichbarkeit über WhatsApp, schneller Vor-Ort-Aufnahme und
-Gutachten-Lieferung in 48 Stunden. Markus arbeitet nach DAT- und
-BVSK-Standard, ist als Sachverständiger gerichtsfest und dokumentiert
-strukturiert mit Lackmessgerät, Foto- und Maß-Aufnahme. Plus: das gesamte
-Claimondo-Partnernetzwerk mit Verkehrsrechtsanwalt, Werkstatt-Vermittlung
-und Mietwagenservice.
-
-Düren ist eine besondere Region in der Schadens-Geschichte: 2021 traf das
-Hochwasser im Indetal die Stadt mit voller Wucht. Hunderte Totalschäden,
-Wassertotalschäden, Beschädigungen durch Schlamm und Geröll. Markus war damals
-über Monate mit Hochwasser-Gutachten beschäftigt — in Birkesdorf, Gürzenich,
-am Industriegebiet Distelrath und in Lendersdorf. Wer in der Region
-versicherungstechnisch mit Hochwasser-Folgekosten zu tun hat oder einen
-Sachverständigen mit dieser Erfahrung sucht, ist bei ihm richtig. Die
-Teilkaskoabwicklung bei Wassertotalschäden ist ein eigenes Kapitel — Markus
-kennt die Regulierungswege.
-
-Verkehrsschwerpunkte in Düren: Die A 4-Anschlussstelle ist Hotspot Nr. 1.
-Auffahrunfälle bei Stop-and-Go, Spurwechsel-Manöver beim Ausfahren — klassische
-Profile. Die B 56 als Stadtdurchquerung ist innerstädtische
-Hauptverkehrsachse mit Bus-, Fahrrad- und Pkw-Mischverkehr. Die Schoellerstraße
-und die Aachener Straße sind innerstädtische Achsen mit hohem Park-Aufkommen.
-Im Industriegebiet Distelrath kommt Logistik-Verkehr hinzu, Lkw und
-Sondertransporte — eigene Schadens-Profile.
-
-Ein typischer Schadenstyp in Düren: Auffahrunfall an der A 4-Anschlussstelle
-im Berufsverkehr Richtung Köln. Markus dokumentiert den Heckschaden
-strukturiert, prüft auch versteckte Schäden im Heckblech und Kofferraumboden,
-ermittelt Wertminderung nach Marktdaten. Bei jüngeren Fahrzeugen ist die
-Wertminderung oft höher als die Versicherung zugestehen möchte. Markus
-dokumentiert so, dass die Versicherung nicht einfach kürzen kann.
-
-Was viele Dürener nicht wissen: Sie haben das Recht auf einen unabhängigen
-Sachverständigen Ihrer Wahl. Die gegnerische Versicherung schickt manchmal
-schnell einen eigenen Gutachter — der arbeitet aber für die Versicherung,
-nicht für Sie. Markus ist Ihr Sachverständiger, ausschließlich in Ihrem
-Interesse. Plus: bei Bedarf erstellen wir auf Wunsch ein Gegengutachten,
-wenn die gegnerische Versicherung die Schadenshöhe kürzt. Auch das wird
-übernommen.
-
-Werkstattwahl in Düren bleibt Ihr Recht. Markus kennt Karosserie- und
-Lackbetriebe in Düren-Mitte, Birkesdorf und am Industriegebiet — vom freien
-Fachbetrieb bis zur Markenwerkstatt. Wenn Sie keine eigene Werkstatt haben,
-vermittelt er gerne. Die Werkstatt rechnet auf Basis des Gutachtens ab. Sie
-behalten die Wahl.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten in Düren, alle Stadtteile abgedeckt. 3) Gutachten in 48 Stunden,
-Versicherungsabwicklung läuft parallel. 0 € für Sie.
-
-Kfz-Gutachter Düren — modern, digital, gerichtsfest. Markus Lennartz ist
-Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, ob ein
-Sachverständiger sinnvoll ist und wie es weitergeht.`,
-  alsdorf: `Alsdorf, nordöstlich von Aachen, war über Jahrzehnte vom Steinkohle-Bergbau
-geprägt und hat sich nach dem Strukturwandel zur Wohn- und Logistikstadt
-entwickelt. Verkehrlich ist Alsdorf über die A 44 mit Aachen und über die
-L 240 mit dem Mariadorf-Industriegebiet gut angebunden. Wer hier in einen
-unverschuldeten Unfall geraten ist, hat einen klaren Ansprechpartner:
-Markus Lennartz, Kfz-Sachverständiger aus Aachen-Burtscheid, ist meist
-binnen 60 Minuten bei Ihnen in Alsdorf-Mitte, Schaufenberg, Hoengen oder
-Mariadorf. 0 € für Sie — die gegnerische Versicherung übernimmt die
-Honorarkosten nach §249 BGB.
-
-Alsdorf hat vier Stadtteile mit jeweils eigener Schadens-Identität.
-Alsdorf-Mitte ist Verwaltungs- und Einkaufszentrum mit der Annakirche,
-klassische Innenstadt-Dynamik mit Park-Remplern und Innenstadt-Konflikten.
-Schaufenberg ist Wohngebiet, Hoengen liegt westlich und ist klassisch
-Pendler-orientiert. Mariadorf im Osten ist Industriegebiet — hier kommen
-Flotten- und Logistik-Schäden hinzu.
-
-Wer in Alsdorf einen Kfz-Sachverständigen braucht, sollte auf drei Dinge
-achten: Neutralität, lokale Erfahrung und gerichtsfeste Dokumentation.
-Markus arbeitet nach DAT- und BVSK-Standard, dokumentiert mit Lackmessgerät
-und Foto-Setup, prüft Strukturschäden und ermittelt Wertminderung und
-Restwert nach belastbaren Marktdaten. Das Gutachten ist binnen 48 Stunden
-bei Ihnen — die Versicherungsregulierung läuft parallel mit dem
-Claimondo-Partnernetzwerk.
-
-Verkehrsschwerpunkte rund um Alsdorf: Die A 44 Anschlussstelle Alsdorf ist
-Hauptzubringer Richtung Aachen und Mönchengladbach — entsprechend hoher
-Pendlerverkehr im Berufsverkehr. Auffahrunfälle bei Stop-and-Go sind
-klassisch. Die L 240 verbindet Richtung Mariadorf-Industriegebiet, mit
-Lkw- und Flottenverkehr. Die B 264 Industriestraße ist Achsen für
-Schwerlastverkehr — eigene Schadens-Profile.
-
-Ein typischer Schadenstyp in Alsdorf: Auffahrunfall an der A 44
-Anschlussstelle im Berufsverkehr Richtung Aachen. Markus dokumentiert den
-Heckschaden strukturiert, prüft Strukturschäden im Heckblech und ermittelt
-Wertminderung nach Marktdaten. Bei Flottenfahrzeugen aus dem
-Mariadorf-Industriegebiet kommt die Frage hinzu, wie Firmenversicherung und
-gegnerische Haftpflicht zusammenspielen — Markus dokumentiert so, dass
-beide Seiten sauber abrechnen können.
-
-Was viele Alsdorfer nicht wissen: Auch bei Schäden durch ausländische
-Beteiligte — und in der Region kommen niederländische und belgische
-Pendler vor — gibt es klare Regulierungsabläufe. Über die Grüne Karte und
-den Zentralruf der Autoversicherer kann der Schaden auch bei nicht-deutschen
-Beteiligten abgewickelt werden. Markus und das Claimondo-Netzwerk kennen die
-Wege und übernehmen die Abwicklung.
-
-Ein weiterer Punkt, der gerade nach Auffahrunfällen wichtig ist: Die
-Wertminderung. Bei jüngeren Fahrzeugen kann ein Auffahrunfall zu einem
-merkantilen Minderwert führen — also einer dauerhaften Wertreduzierung,
-auch nach fachgerechter Reparatur. Versicherungen zahlen diese Wertminderung
-oft nicht freiwillig. Markus berechnet sie sauber und dokumentiert so, dass
-die gegnerische Versicherung sie auch zahlen muss.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche
-Karosseriefachbetriebe und Lackiererien in Alsdorf-Mitte und Mariadorf —
-vom freien Betrieb bis zur Markenwerkstatt. Wenn Sie keine eigene Werkstatt
-haben, vermittelt er gerne. Sie sind nicht verpflichtet, die Werkstatt zu
-nehmen, die die gegnerische Versicherung empfiehlt.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten in Alsdorf, alle Stadtteile abgedeckt. 3) Gutachten in 48 Stunden,
-Versicherungsabwicklung läuft parallel. 0 € für Sie.
-
-Kfz-Gutachter Alsdorf — neutral, gerichtsfest, schnell vor Ort. Markus
-Lennartz ist Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, wie es
-weitergeht.`,
-  wuerselen: `Würselen liegt direkt nordöstlich von Aachen und ist klassische
-Pendlerstadt mit Bildungs- und Wohnschwerpunkt. Über die A 44 und die A 4
-ist die Stadt eng mit Aachen und Köln verbunden, die L 12 als Aachener
-Straße ist innerstädtische Hauptverkehrsachse. Wer hier in einen
-unverschuldeten Unfall verwickelt wird, hat einen klaren Ansprechpartner:
-Markus Lennartz, Kfz-Sachverständiger aus Aachen-Burtscheid, ist meist binnen
-60 Minuten bei Ihnen in Würselen-Mitte, Bardenberg oder Broichweiden. 0 €
-für Sie — die gegnerische Versicherung übernimmt die Honorarkosten nach
-§249 BGB.
-
-Würselen hat drei größere Stadtteile mit unterschiedlicher Schadens-Dynamik.
-Würselen-Mitte ist Verwaltungs- und Einkaufszentrum mit der Kaiserstraße als
-Hauptachse — hier dominieren Innenstadt-Rempler und Konflikte mit Bus- und
-Fahrradverkehr. Bardenberg westlich ist Wohngebiet mit eigener
-Identität — klassische Wohnschäden, Park-Rempler an Schulen und Kitas.
-Broichweiden östlich ist ländlicher geprägt, mit höherem Anteil an
-Pendlerschäden und Wildunfällen Richtung Bergisches Land.
-
-Wer in Würselen einen Kfz-Gutachter sucht, sollte auf drei Dinge achten:
-Neutralität, lokale Erfahrung und gerichtsfeste Dokumentation. Markus
-arbeitet nach DAT- und BVSK-Standard, dokumentiert strukturiert mit
-Lackmessgerät und Foto-Aufnahme, prüft Strukturschäden und ermittelt
-Reparaturkosten, Wertminderung und Restwert nach belastbaren Marktdaten.
-Das Gutachten liegt binnen 48 Stunden bei Ihnen — die Versicherungsregulierung
-läuft parallel mit dem Claimondo-Partnernetzwerk.
-
-Verkehrsschwerpunkte rund um Würselen: Die A 44 Anschlussstelle Würselen
-ist direkter Aachen-Verbinder mit hohem Pendlerverkehr im Berufsverkehr —
-klassische Auffahrunfall-Strecke. Die A 4 Anschlussstelle Würselen-West
-verbindet Richtung Köln und ist ebenfalls staureich. Innerörtlich ist die
-L 12 Aachener Straße Hauptverkehrsachse mit Mischverkehr aus Pkw, Bus und
-Fahrrad.
-
-Ein typischer Schadenstyp in Würselen: Auffahrunfall an der A 44 im
-Berufsverkehr nach Aachen. Markus dokumentiert den Heckschaden strukturiert,
-prüft Strukturschäden und ermittelt Wertminderung. Bei jüngeren Fahrzeugen
-ist der merkantile Minderwert oft höher, als die Versicherung freiwillig
-zugesteht — hier zählt die saubere Berechnung. Auch Schäden mit Bildungsbus-
-oder Schüler-Beteiligung sind in Würselen nicht selten, gerade in Schulnähe
-in Würselen-Mitte und Bardenberg.
-
-Was viele Würselener nicht wissen: Auch die Anwaltskosten übernimmt die
-gegnerische Versicherung bei unverschuldetem Unfall. Sie zahlen 0 € für
-Gutachter, Anwalt, Mietwagen und Mietwagenkostenversicherung. Markus und das
-Claimondo-Partnernetzwerk vermitteln einen Verkehrsrechtsanwalt aus der
-Region, der den Fall sauber abwickelt — von der Schadensmeldung bis zur
-Auszahlung. Sie behalten den Überblick, ohne den Aufwand zu haben.
-
-Bei Schäden mit ausländischen Beteiligten — Niederländer aus Heerlen und
-Kerkrade sind in der Region häufig — gibt es klare Regulierungswege.
-Markus arbeitet seit Jahren mit BE- und NL-Versicherungen zusammen und kennt
-die Standards. Wenn der Unfallverursacher aus dem Ausland kommt, ist das
-kein Problem — die Schadensabwicklung läuft über die internationalen Wege.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt Karosserie- und Lackbetriebe in
-Würselen-Mitte und Bardenberg — vom freien Fachbetrieb bis zur
-Markenwerkstatt. Wenn Sie keine eigene Werkstatt haben, vermittelt er
-gerne. Sie sind nicht verpflichtet, die Werkstatt zu nehmen, die die
-gegnerische Versicherung empfiehlt — das ist Ihr Recht nach BGH-Rechtsprechung.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten in Würselen, alle Stadtteile abgedeckt. 3) Gutachten in 48 Stunden,
-Versicherungsabwicklung läuft parallel. 0 € für Sie.
-
-Kfz-Gutachter Würselen — neutral, gerichtsfest, schnell vor Ort. Markus
-Lennartz ist Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, wie es
-weitergeht.`,
-  baesweiler: `Baesweiler liegt nördlich von Aachen in unmittelbarer Grenznähe zu den
-Niederlanden und ist klassische Pendlerstadt mit eigenen
-Logistik- und Industriestandorten. Verkehrlich ist die Stadt über die B 57
-und die L 240 angebunden, dazu kommt die Nähe zur niederländischen Grenze
-und damit täglicher grenzüberschreitender Verkehr. Wer hier in einen
-unverschuldeten Unfall verwickelt wird, hat einen klaren Ansprechpartner:
-Markus Lennartz, Kfz-Sachverständiger aus Aachen-Burtscheid, ist meist binnen
-60 Minuten bei Ihnen in Baesweiler-Mitte, Setterich oder Oidtweiler. 0 € für
-Sie — die gegnerische Versicherung übernimmt die Honorarkosten nach §249 BGB.
-
-Baesweiler hat drei Stadtteile mit jeweils eigener Schadens-Identität.
-Baesweiler-Mitte ist Verwaltungs- und Einkaufszentrum, hier dominieren
-Innenstadt-Rempler. Setterich südlich ist Wohngebiet, Oidtweiler westlich
-ist ländlicher geprägt mit Pendlerverkehr Richtung Niederlande. Die ehemalige
-Bergbau-Vergangenheit hat das Industrieprofil der Stadt bis heute geprägt —
-Logistik und Wohnstadt im Wechsel.
-
-Wer in Baesweiler einen Kfz-Sachverständigen braucht, sollte auf eines
-besonders achten: Erfahrung mit grenzüberschreitenden Schäden. Markus
-arbeitet seit Jahren mit niederländischen Versicherungen zusammen und kennt
-die Regulierungswege über die Grüne Karte und den Zentralruf der
-Autoversicherer. Wenn der Unfallverursacher aus Geilenkirchen, Heinsberg
-oder aus Kerkrade oder Heerlen kommt, ist das kein Problem — die
-Schadensabwicklung läuft sauber über die internationalen Standards.
-
-Plus die Standard-Disziplin: Markus arbeitet nach DAT- und BVSK-Standard,
-dokumentiert mit Lackmessgerät und strukturierter Foto-Aufnahme, prüft
-Strukturschäden und ermittelt Reparaturkosten, Wertminderung und Restwert
-nach belastbaren Marktdaten. Das Gutachten liegt binnen 48 Stunden bei Ihnen
-— die Versicherungsregulierung läuft parallel mit dem
-Claimondo-Partnernetzwerk.
-
-Verkehrsschwerpunkte rund um Baesweiler: Die B 57 Aachener Straße ist
-Hauptverkehrsachse Nord-Süd, mit hohem Pendlerverkehr Richtung Aachen und
-Heinsberg. Die L 240 Industriestraße ist Logistik-Achse — hier kommt
-Schwerlastverkehr mit eigenen Schadens-Profilen ins Spiel. Die Grenznähe NL
-erzeugt eine Besonderheit: Niederländische Fahrzeuge sind im Stadtbild
-häufig, mit entsprechend grenzüberschreitenden Schäden.
-
-Ein typischer Schadenstyp in Baesweiler: Auffahrunfall mit niederländischer
-Beteiligung auf der B 57 im Berufsverkehr. Markus dokumentiert den
-Heckschaden strukturiert, ermittelt Wertminderung und Restwert nach
-deutschen Standards und sorgt dafür, dass die niederländische
-Versicherung sauber reguliert. Über den Zentralruf der Autoversicherer wird
-der Schaden an die niederländische Haftpflicht weitergeleitet, mit klaren
-Fristen und Standards. Das Gutachten ist auch international anerkannt — DAT-
-und BVSK-Standard sind in der EU akzeptiert.
-
-Was viele Baesweiler nicht wissen: Auch bei Schäden mit ausländischen
-Beteiligten gilt das Recht auf einen eigenen, unabhängigen
-Sachverständigen. Sie müssen nicht den Gutachter nehmen, den die
-niederländische Versicherung Ihnen empfiehlt. Markus arbeitet ausschließlich
-in Ihrem Interesse — das gilt grenzüberschreitend.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche Karosserie- und
-Lackbetriebe in Baesweiler-Mitte und Setterich — vom freien Fachbetrieb bis
-zur Markenwerkstatt. Wenn Sie keine eigene Werkstatt haben, vermittelt er.
-Sie behalten die Wahl.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten in Baesweiler, alle Stadtteile inklusive Setterich. 3) Gutachten
-in 48 Stunden, Versicherungsabwicklung läuft parallel — auch bei
-grenzüberschreitenden Schäden. 0 € für Sie.
-
-Kfz-Gutachter Baesweiler — neutral, gerichtsfest, schnell vor Ort. Markus
-Lennartz ist Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, wie es
-weitergeht.`,
-  eschweiler: `Eschweiler ist mit rund 56.000 Einwohnern eine der größten Städte im
-Aachen-Cluster und hat eine bewegte Schadens-Geschichte: 2021 traf das
-Hochwasser im Indetal die Stadt mit voller Wucht. Hunderte Totalschäden,
-Wassertotalschäden, Beschädigungen durch Schlamm und Geröll — bis heute
-prägt das die Versicherungs- und Sachverständigen-Landschaft. Markus
-Lennartz war damals über Monate vor Ort und kennt die Hochwasser-Schäden
-der Region wie kaum ein anderer Sachverständiger. Wer in Eschweiler einen
-Kfz-Gutachter sucht, ist bei ihm richtig — egal ob klassischer Auffahrunfall
-oder Wasserschaden mit komplizierter Versicherungsabwicklung. 0 € für Sie —
-die gegnerische Versicherung übernimmt die Honorarkosten nach §249 BGB.
-
-Eschweiler hat vier größere Stadtteile mit eigener Schadens-Dynamik.
-Eschweiler-Mitte ist Verwaltungs- und Einkaufszentrum mit der Indestraße
-als Hauptachse — klassische Innenstadt-Dynamik. Weisweiler ist Kraftwerk-
-Stadtteil und hat eine ganz andere Schadens-Identität mit
-Industrieverkehr und Sondertransporten. Dürwiß und Nothberg sind Wohngebiete
-mit Pendlerschwerpunkt und klassischen Innenstadt-Schäden.
-
-Wer in Eschweiler einen Kfz-Sachverständigen braucht, sollte auf die
-Hochwasser-Erfahrung achten. Das Hochwasser 2021 hat eine eigene
-versicherungstechnische Komplexität geschaffen: Wassertotalschäden bei
-Teilkasko, Beweisführung über Schlamm- und Geröll-Spuren, Bewertung von
-Folgeschäden an Elektronik und Lager. Markus hat damals hunderte solcher
-Gutachten erstellt und kennt die Regulierungswege. Bei aktuellen Schäden mit
-Wasser- oder Hochwasser-Bezug — etwa nach Starkregen-Ereignissen, die
-weiterhin regelmäßig auftreten — ist diese Erfahrung gold wert.
-
-Plus die Standard-Disziplin: Markus arbeitet nach DAT- und BVSK-Standard,
-dokumentiert mit Lackmessgerät und strukturierter Foto-Aufnahme, prüft
-Strukturschäden und ermittelt Reparaturkosten, Wertminderung und Restwert
-nach belastbaren Marktdaten. Das Gutachten liegt binnen 48 Stunden bei
-Ihnen — die Versicherungsregulierung läuft parallel mit dem Claimondo-
-Partnernetzwerk.
-
-Verkehrsschwerpunkte rund um Eschweiler: Die A 4 Anschlussstelle Eschweiler
-ist Hauptzubringer mit hohem Pendleraufkommen Richtung Aachen und Köln.
-Stop-and-Go im Berufsverkehr ist klassisch. Die Indestraße als
-Stadtdurchquerung ist innerstädtische Hauptverkehrsachse mit
-Mischverkehr aus Pkw, Bus und Fahrrad. Die Hauptstraße verbindet die
-Innenstadt mit den Wohngebieten und ist Schwerpunkt für Innenstadt-Rempler.
-
-Ein typischer Schadenstyp in Eschweiler — abseits klassischer Auffahrunfälle:
-Wasserschaden nach Starkregen. Das Fahrzeug stand auf einer überfluteten
-Straße, Wasser ist in den Motor- oder Innenraum eingedrungen,
-Folgeschäden an Elektronik sind drohend. Markus dokumentiert die
-Wassereinwirkung sauber und ermittelt den Schaden so, dass die Teilkasko
-oder die gegnerische Haftpflicht (bei Verkehrsverursachung) sauber
-reguliert. Auch der Wiederbeschaffungswert bei Totalschäden wird belastbar
-berechnet.
-
-Was viele Eschweiler nicht wissen: Bei Hochwasser-Schäden gibt es klare
-Beweisregeln. Die Versicherung verlangt häufig Nachweise über die Wasserlage,
-den Verbleib auf der Straße und die Schadenshöhe. Markus dokumentiert
-strukturiert mit Foto-Belegen, Pegelständen und Schadensspuren — so dass die
-Versicherung sauber reguliert. Falls die Versicherung kürzt — etwa
-Wiederbeschaffungswert zu niedrig ansetzt —, erstellen wir auf Wunsch ein
-Gegengutachten.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche Karosserie-,
-Lack- und Elektronik-Fachbetriebe in Eschweiler-Mitte und Weisweiler — vom
-freien Fachbetrieb bis zur Markenwerkstatt. Auch Spezialwerkstätten für
-Wassertotalschäden mit Trocknungs- und Elektronik-Diagnose-Erfahrung sind
-im Netzwerk vermittelbar.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten, alle Stadtteile inklusive Weisweiler. 3) Gutachten in 48 Stunden,
-Versicherungsabwicklung läuft parallel. 0 € für Sie.
-
-Kfz-Gutachter Eschweiler — Hochwasser-Erfahrung 2021, gerichtsfest, schnell
-vor Ort. Markus Lennartz ist Ihr Ansprechpartner. Wir klären in 5 Minuten am
-Telefon, wie es weitergeht.`,
-  juelich: `Jülich ist Forschungs- und Geschichts-Stadt zugleich: Das Forschungszentrum
-Jülich ist eine der größten interdisziplinären Forschungseinrichtungen in
-Europa, gleichzeitig prägt die historische Zitadelle und der Hexenturm das
-Stadtbild. Verkehrlich ist Jülich über die A 44 mit Aachen und über die
-B 56 mit Düren verbunden. Wer hier in einen unverschuldeten Unfall geraten
-ist, hat einen klaren Ansprechpartner: Markus Lennartz, Kfz-Sachverständiger
-aus Aachen-Burtscheid, ist meist binnen 60 Minuten bei Ihnen in
-Jülich-Mitte, Stetternich, Selgersdorf oder Koslar. 0 € für Sie — die
-gegnerische Versicherung übernimmt das Honorar nach §249 BGB.
-
-Jülich hat vier Stadtteile mit unterschiedlicher Schadensdynamik.
-Jülich-Mitte ist Verwaltungs- und Einkaufszentrum mit der Zitadelle als
-historischem Anker, hier dominieren Innenstadt-Rempler. Stetternich östlich
-ist Forschungszentrum-Stadtteil mit hohem Berufspendlerverkehr aus
-Deutschland und dem Ausland — Wissenschaftler und Mitarbeiter aus
-verschiedenen Ländern erzeugen eine internationale Schadens-Lage. Selgersdorf
-westlich und Koslar südlich sind Wohngebiete mit Pendlerprofil.
-
-Wer in Jülich einen Kfz-Gutachter braucht, sollte auf drei Dinge achten:
-Neutralität, lokale Erfahrung und gerichtsfeste Dokumentation. Markus
-arbeitet nach DAT- und BVSK-Standard, dokumentiert mit Lackmessgerät und
-Foto-Aufnahme, prüft Strukturschäden und ermittelt Wertminderung und
-Restwert nach belastbaren Marktdaten. Das Gutachten liegt binnen 48 Stunden
-bei Ihnen — die Versicherungsregulierung läuft parallel mit dem
-Claimondo-Partnernetzwerk.
-
-Verkehrsschwerpunkte rund um Jülich: Die A 44 Anschlussstelle Jülich ist
-Hauptzubringer Richtung Aachen mit hohem Forschungs- und Pendlerverkehr —
-typische Auffahrunfall-Strecke im Berufsverkehr. Die B 56 Aachener
-Landstraße ist Hauptverkehrsachse Richtung Düren und Aachen, mit hohem
-Lieferverkehr. Die L 241 Düren-Jülich ist Pendlerstrecke zwischen den
-beiden Städten — eigene Schadens-Profile.
-
-Eine Besonderheit in Jülich: Internationale Beteiligte. Mitarbeiter des
-Forschungszentrums kommen aus aller Welt, mit entsprechenden internationalen
-Versicherungsbeziehungen. Markus arbeitet auch mit nicht-deutschen
-Versicherungen zusammen und kennt die internationalen Regulierungswege.
-Plus die regionale Nähe zu den Niederlanden und Belgien — auch hier sind
-grenzüberschreitende Schäden nicht selten.
-
-Ein typischer Schadenstyp in Jülich: Auffahrunfall auf der A 44 im
-Berufsverkehr Richtung Aachen. Markus dokumentiert den Heckschaden
-strukturiert, prüft Strukturschäden und ermittelt Wertminderung nach
-Marktdaten. Bei jüngeren Fahrzeugen ist der merkantile Minderwert oft höher,
-als die Versicherung freiwillig zugesteht. Markus dokumentiert so, dass die
-Versicherung nicht einfach kürzen kann. Falls sie es doch tut, erstellen wir
-auf Wunsch ein Gegengutachten.
-
-Was viele Jülicher nicht wissen: Sie haben das Recht auf einen
-unabhängigen Sachverständigen Ihrer Wahl. Die gegnerische Versicherung
-schickt manchmal einen eigenen Gutachter — der arbeitet aber für die
-Versicherung, nicht für Sie. Markus ist ausschließlich in Ihrem Interesse
-tätig, dokumentiert gerichtsfest und liefert ein neutrales Gutachten.
-
-Plus: Bei Schäden mit Hochwasser- oder Wasserbezug — die im Indetal nach
-2021 weiterhin regelmäßig vorkommen — bringt Markus die spezifische
-Erfahrung mit. Wassertotalschäden, Folgeschäden an Elektronik,
-Schlammspuren als Beweis — alles strukturiert dokumentiert.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche Karosserie- und
-Lackbetriebe in Jülich-Mitte, Stetternich und Selgersdorf. Wenn Sie keine
-eigene Werkstatt haben, vermittelt er gerne.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten in Jülich, alle Stadtteile inklusive Forschungszentrum-Umfeld.
-3) Gutachten in 48 Stunden, Versicherungsabwicklung läuft parallel. 0 €.
-
-Kfz-Gutachter Jülich — neutral, gerichtsfest, schnell vor Ort. Markus
-Lennartz ist Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, wie es
-weitergeht.`,
-  stolberg: `Stolberg ist mit rund 57.000 Einwohnern eine der größten Städte im
-Aachen-Cluster und hat ebenso wie Eschweiler eine Hochwasser-Geschichte:
-2021 traf das Hochwasser auch Stolberg massiv, vor allem die Vichtbach- und
-Indetal-Lage. Hunderte Schäden, Totalschäden, Wassergutachten. Wer hier
-einen erfahrenen Sachverständigen braucht — egal ob für einen klassischen
-Auffahrunfall oder einen Wasserschaden mit komplizierter Versicherungs-
-abwicklung — ist bei Markus Lennartz richtig. Der Kfz-Sachverständige aus
-Aachen-Burtscheid ist meist binnen 60 Minuten bei Ihnen in Stolberg-Mitte,
-Atsch, Münsterbusch oder Vicht. 0 € für Sie — die gegnerische Versicherung
-übernimmt das Honorar nach §249 BGB.
-
-Stolberg hat vier größere Stadtteile mit eigener Schadens-Identität.
-Stolberg-Mitte mit der historischen Altstadt und der Burg ist Touristen-
-und Kultur-Schwerpunkt — Park-Rempler in den engen Altstadtgassen sind
-klassisch. Atsch südlich ist Industriegebiet, geprägt von der ehemaligen
-Buntmetall-Industrie — hier dominieren Logistik- und Flotten-Schäden.
-Münsterbusch westlich ist Wohngebiet, Vicht im Süden ist Eifel-Vorland mit
-Wildunfall-Risiko.
-
-Wer in Stolberg einen Kfz-Sachverständigen braucht, sollte auf die
-Hochwasser-Erfahrung achten. Markus war 2021 monatelang vor Ort und kennt
-die Schadens-Lage der Vichtbach- und Indetal-Region wie kaum ein anderer
-Sachverständiger. Wassertotalschäden, Folgeschäden an Elektronik, Beweisführung
-über Schlamm- und Geröll-Spuren — alles strukturiert dokumentiert nach DAT-
-und BVSK-Standard.
-
-Plus die Standard-Disziplin: Markus arbeitet nach DAT- und BVSK-Standard,
-dokumentiert mit Lackmessgerät und strukturierter Foto-Aufnahme, prüft
-Strukturschäden und ermittelt Reparaturkosten, Wertminderung und Restwert
-nach belastbaren Marktdaten. Das Gutachten liegt binnen 48 Stunden bei Ihnen.
-
-Verkehrsschwerpunkte rund um Stolberg: Die A 4 Anschlussstelle Stolberg ist
-zentraler Zubringer Richtung Aachen und Köln, mit hohem Pendleraufkommen im
-Berufsverkehr — klassisches Auffahrunfall-Profil. Die B 258 als Hauptstraße
-durch die Stadt ist innerstädtische Hauptverkehrsachse mit hohem
-Pendler- und Lieferverkehr. Die L 238 Eschweilerer Straße verbindet
-Richtung Eschweiler. In der Altstadt sind die engen Gassen rund um die Burg
-Schwerpunkt für Park-Konflikte und Touristen-Rempler.
-
-Ein typischer Schadenstyp in Stolberg: Wasserschaden nach Starkregen,
-Auffahrunfall am A 4-Anschluss oder Wildunfall in Vicht-Eifel-Vorland.
-Markus dokumentiert je nach Schadensart strukturiert — bei Wasserschäden mit
-Pegelstand-Belegen und Schadensspuren, bei Auffahrunfällen mit Strukturschäden
-und Wertminderungs-Berechnung, bei Wildunfällen mit Wildhärchen- und
-Aufprall-Dokumentation für die Teilkasko-Abwicklung.
-
-Was viele Stolberger nicht wissen: Bei Hochwasser-Folgeschäden — die auch
-Jahre nach 2021 noch auftreten — gibt es klare Beweisregeln. Wenn
-Korrosionsschäden oder Elektronik-Folgeschäden erst später sichtbar werden,
-können sie unter Umständen noch reguliert werden. Markus dokumentiert so,
-dass die Versicherung sauber reguliert. Auch bei Wildunfällen ist die
-saubere Aufnahme der Schadensspur entscheidend für die Teilkasko-Abwicklung.
-
-Eine Besonderheit für Stolberg: Da die Suchanfrage "kfz gutachter stolberg"
-in der Region weniger geläufig ist als "kfz sachverständiger stolberg",
-arbeiten wir oft auch unter dem Begriff Kfz-Sachverständiger. Das ist
-dasselbe — die rechtliche Stellung ist identisch, das Gutachten ist
-gerichtsfest und DAT-/BVSK-Standard.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche Karosserie- und
-Lackbetriebe in Stolberg-Mitte und Atsch — vom freien Fachbetrieb bis zur
-Markenwerkstatt. Auch Spezialwerkstätten für Wassertotalschäden mit
-Trocknungs- und Elektronik-Diagnose-Erfahrung sind im Netzwerk vermittelbar.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten, alle Stadtteile inklusive Atsch und Vicht. 3) Gutachten in
-48 Stunden, Versicherungsabwicklung läuft parallel. 0 € für Sie.
-
-Kfz-Sachverständiger Stolberg — Hochwasser-Erfahrung 2021, gerichtsfest,
-schnell vor Ort. Markus Lennartz ist Ihr Ansprechpartner. Wir klären in
-5 Minuten am Telefon, wie es weitergeht.`,
-  herzogenrath: `Herzogenrath ist die Grenzstadt par excellence: Direkt an der niederländischen
-Grenze gelegen, mit dem Eurodepartement Kerkrade quasi zusammengewachsen,
-prägt der grenzüberschreitende Verkehr die Stadt mehr als jedes andere
-Element. Wer hier in einen unverschuldeten Unfall verwickelt wird — auf der
-A 4 Anschlussstelle Herzogenrath, auf der B 57 Roermonder Straße oder im
-Stadtkern rund um die Burg Rode —, braucht einen Sachverständigen, der die
-internationale Schadens-Abwicklung kennt. Markus Lennartz, Kfz-Sachverständiger
-aus Aachen-Burtscheid, ist meist binnen 60 Minuten bei Ihnen in
-Herzogenrath-Mitte, Kohlscheid oder Merkstein. 0 € für Sie — die gegnerische
-Versicherung übernimmt das Honorar nach §249 BGB.
-
-Herzogenrath hat drei größere Stadtteile mit jeweils eigener
-Schadensdynamik. Herzogenrath-Mitte mit der Burg Rode als historischem
-Anker ist Verwaltungs- und Einkaufszentrum mit klassischer Innenstadt-Dynamik
-und Park-Remplern. Kohlscheid südlich ist Wohngebiet, Merkstein nördlich
-liegt direkt an der niederländischen Grenze und hat entsprechend hohen
-grenzüberschreitenden Verkehr.
-
-Wer in Herzogenrath einen Kfz-Sachverständigen sucht, sollte auf eines
-besonders achten: Erfahrung mit grenzüberschreitenden Schäden. Markus
-arbeitet seit Jahren mit niederländischen Versicherungen zusammen und kennt
-die Regulierungswege über die Grüne Karte und den Zentralruf der
-Autoversicherer. Wenn der Unfallverursacher aus Kerkrade, Heerlen oder
-Maastricht kommt, ist das kein Problem — die Schadensabwicklung läuft sauber
-über die internationalen Standards.
-
-Plus die Standard-Disziplin: Markus arbeitet nach DAT- und BVSK-Standard,
-dokumentiert mit Lackmessgerät und strukturierter Foto-Aufnahme, prüft
-Strukturschäden und ermittelt Reparaturkosten, Wertminderung und Restwert
-nach belastbaren Marktdaten. Das Gutachten liegt binnen 48 Stunden bei Ihnen
-— die Versicherungsregulierung läuft parallel mit dem
-Claimondo-Partnernetzwerk.
-
-Verkehrsschwerpunkte rund um Herzogenrath: Die A 4 Anschlussstelle
-Herzogenrath ist Hauptzubringer Richtung Köln und Aachen mit hohem
-Pendlerverkehr — Auffahrunfälle bei Stop-and-Go sind klassisch. Die B 57
-Roermonder Straße ist Hauptverkehrsachse Richtung Niederlande und entsprechend
-unfallträchtig. Innerstädtisch sind die engen Gassen rund um die Burg
-Schwerpunkt für Innenstadt-Rempler.
-
-Eine Besonderheit für die Region: Die Eurogebiet-Grenze zu Kerkrade ist
-quasi unsichtbar — niederländische und deutsche Fahrzeuge sind im
-Stadtbild gleichermaßen häufig. Bei Schäden mit niederländischer Beteiligung
-gilt: Sie haben das Recht auf einen eigenen, unabhängigen Sachverständigen,
-auch wenn die gegnerische Versicherung in NL sitzt. Markus arbeitet
-ausschließlich in Ihrem Interesse — das gilt grenzüberschreitend.
-
-Ein typischer Schadenstyp in Herzogenrath: Auffahrunfall auf der A 4 oder
-B 57 mit niederländischer Beteiligung. Markus dokumentiert den Heckschaden
-strukturiert, ermittelt Wertminderung und Restwert nach deutschen
-Standards. Über den Zentralruf der Autoversicherer wird der Schaden an die
-niederländische Haftpflicht weitergeleitet, mit klaren Fristen.
-
-Was viele Herzogenrather nicht wissen: Auch bei Schäden mit ausländischen
-Beteiligten gilt das Recht auf einen eigenen Sachverständigen. Sie müssen
-nicht den Gutachter nehmen, den die niederländische Versicherung Ihnen
-empfiehlt. Das ist Ihr Recht nach EU-Standard. Markus dokumentiert so, dass
-die Versicherung — egal ob deutsch oder niederländisch — sauber reguliert.
-
-Wichtig zu wissen: In Herzogenrath ist der Sachverständigen-Markt eng und
-wettbewerbsintensiv. Wir bieten einen klaren Mehrwert: schnelle
-Vor-Ort-Aufnahme, Gutachten in 48 Stunden, Versicherungsabwicklung über
-das Claimondo-Partnernetzwerk inklusive Anwalt und Mietwagen — alles
-kostenfrei für Sie.
-
-Werkstattwahl bleibt Ihr Recht. Markus kennt verlässliche Karosserie- und
-Lackbetriebe in Herzogenrath-Mitte und Kohlscheid — vom freien Fachbetrieb
-bis zur Markenwerkstatt. Wenn Sie keine eigene Werkstatt haben, vermittelt
-er gerne.
-
-Drei Schritte: 1) Anruf oder WhatsApp an Markus. 2) Vor-Ort-Termin binnen
-60 Minuten, alle Stadtteile inklusive Merkstein. 3) Gutachten in 48 Stunden,
-Versicherungsabwicklung läuft parallel — auch bei niederländischer
-Beteiligung. 0 € für Sie.
-
-Kfz-Gutachter Herzogenrath — neutral, gerichtsfest, schnell vor Ort, auch
-bei Grenzschäden. Markus Lennartz ist Ihr Ansprechpartner. Wir klären in
-5 Minuten am Telefon, wie es weitergeht.`,
+// ── SEO-Body (08o O6: strukturierte Absaetze statt Fliesstext) ───────────────
+// H3s sind EDITORIAL an ihre Absaetze gebunden (kein Trigger-Katalog mehr —
+// Fehlgriff-Klasse N9/O6). `vorort: true` markiert den Absatz, der in der
+// Einsatzgebiet-Lokalstrecke rendert (lib/seoVorOrt); `liste` rendert als
+// kompakte Leistungs-Liste. Lokale Fakten (Strassen, Bruecken, Stadtteile)
+// sind der Ranking-Kern — beim Straffen unangetastet.
+export interface SeoAbsatz {
+  /** Editorial gebundene Zwischenueberschrift — stellt die Frage, die der Absatz beantwortet. */
+  h3?: string
+  text: string
+  /** Kompakte Leistungs-Liste nach dem Text. */
+  liste?: string[]
+  /** Rendert in der Einsatzgebiet-Lokalstrecke ("Vor Ort"), nicht im SeoBody. */
+  vorort?: boolean
 }
 
-export function seoTextFor(slug: string): string {
-  return SEO_TEXT[slug] ?? ''
+// Leistungs-Kern (identisch je Stadt — die Uniqueness tragen die lokalen Absaetze).
+const LEISTUNGS_LISTE = [
+  'Lackmessung & Strukturschäden-Prüfung',
+  'Foto- und Maß-Dokumentation',
+  'Reparaturkosten nach DAT-Kalkulation',
+  'Wertminderung (merkantiler Minderwert)',
+  'Restwert nach belastbaren Marktdaten',
+  'Gutachten binnen 48 Stunden',
+]
+
+export const SEO_BODY: Record<string, SeoAbsatz[]> = {
+  aachen: [
+    { text: `Aachen ist Krönungsstadt, Grenzstadt und Pendlerstadt zugleich. Wer am Aachener Kreuz auf der A 4, auf der Adenauerallee oder rund um Dom und Markt unverschuldet in einen Unfall gerät, braucht einen Sachverständigen, der die Region kennt und gerichtsfest dokumentiert. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten bei Ihnen — von Aachen-Mitte über das Frankenberger Viertel, Forst, Haaren und Eilendorf bis Brand, Laurensberg und Richterich. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Aachens Verkehrslage ist besonders: Das Dreiländereck bringt täglich Tausende Grenzpendler. Auf der A 4 zwischen Aachener Kreuz und belgischer Grenze sind Auffahrunfälle im Berufsverkehr klassisch, die A 44 bündelt Pendler aus Alsdorf, Würselen und Jülich. Innerstädtisch trägt die Adenauerallee den Verkehr vom Hauptbahnhof Richtung Dom — mit hohem Liefer- und Busverkehr.` },
+    { h3: 'Worauf kommt es bei der Gutachter-Wahl in Aachen an?', text: `Neutralität, lokale Erfahrung, gerichtsfeste Dokumentation. Wir arbeiten nach DAT- und BVSK-Standard — die Regulierung läuft parallel mit dem Claimondo-Partnernetzwerk:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Unfall mit Belgiern oder Niederländern: Wie läuft die Regulierung?', text: `Über die Grüne Karte und den Zentralruf der Autoversicherer. Wir arbeiten seit Jahren mit BE- und NL-Versicherungen zusammen — kommt der Unfallverursacher aus Lüttich, Maastricht oder Kerkrade, läuft die Abwicklung sauber über die internationalen Standards.` },
+    { h3: 'Wasser- und Hochwasserschäden: Wer hilft?', text: `Unser Sachverständiger war 2021 nach dem Hochwasser im Indetal — in Eschweiler, Stolberg und Düren — über Monate mit Totalschäden und Wassergutachten beschäftigt. Bei Sturzfluten, Wasserschäden oder Hochwasser-Folgekosten zählt genau diese Praxis: Teilkaskoabwicklung und Wiederbeschaffungswert-Ermittlung sind versicherungstechnisch ein eigenes Kapitel.` },
+    { h3: 'Wo kracht es in Aachen am häufigsten?', text: `Das Aachener Kreuz (A 4/A 44) gehört zu den wichtigsten Drehscheiben im Westen NRWs — Stop-and-Go und Spurwechsel Richtung Köln, Belgien und Mönchengladbach. Die Anschlussstelle Aachen-Mitte ist oft staureich, innerstädtisch sind Adalbertstraße und Pontstraße enge Achsen mit Tram-Verkehr und Park-Konflikten, der Europaplatz ist Drehscheibe des Grenzverkehrs.` },
+    { h3: 'Was tun, wenn die Versicherung kürzt?', text: `Sie haben das Recht auf einen unabhängigen Sachverständigen Ihrer Wahl — nicht den der gegnerischen Versicherung. Setzt diese die Reparaturkosten zu niedrig an oder verweigert die Wertminderung, erstellen wir auf Wunsch ein Gegengutachten; auch das wird nach BGH-Rechtsprechung übernommen.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Wir kennen verlässliche Karosserie- und Lackbetriebe von Aachen-Mitte über Burtscheid bis Brand und Eilendorf — ohne Bindung an die Empfehlung der Versicherung. Das gerichtsfeste Gutachten ist die Abrechnungsbasis.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Telefon oder WhatsApp. 2) Der Sachverständige kommt vor Ort, alle Stadtteile. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Aachen — neutral, gerichtsfest, schnell vor Ort. Rufen Sie an oder schreiben Sie über WhatsApp, und wir klären in 5 Minuten, wie es weitergeht.` },
+  ],
+  dueren: [
+    { text: `Düren ist die Industriestadt im Westen NRWs — Papier, Maschinenbau, Logistik — und mit A 4-Anschluss und B 56 eine der wichtigsten Drehscheiben zwischen Köln und Aachen. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Düren-Mitte, Birkesdorf, Gürzenich, Lendersdorf, Niederau oder Rölsdorf. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Dürens Profil ist verkehrsreich: Die A 4-Anschlussstelle ist seit Jahren staureich und im Berufsverkehr Richtung Köln und Aachen ein klassischer Auffahrunfall-Hotspot — auch Düren-Süd, wo Pendler aus Niederzier und Inden einsteigen. Die B 56 Aachener Landstraße trägt den Lieferverkehr durch die Stadt, die B 264 Köln-Düren-Aachen ist die Alternativroute mit eigenem Stau-Profil.` },
+    { h3: 'Was unterscheidet den modernen Ansatz?', text: `Die Veldener Straße ist seit Jahrzehnten Heimat traditioneller Sachverständigenbüros — wir respektieren das und bieten bewusst etwas anderes: Sofort-Erreichbarkeit über WhatsApp, schnelle Vor-Ort-Aufnahme und das komplette Claimondo-Partnernetzwerk mit Verkehrsrechtsanwalt, Werkstatt-Vermittlung und Mietwagenservice. Die Basis bleibt klassisch — gerichtsfeste Dokumentation nach DAT- und BVSK-Standard:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Hochwasser 2021: Was bedeutet das bis heute?', text: `Das Indetal-Hochwasser traf Düren mit voller Wucht — Unser Sachverständiger war über Monate mit Hochwasser-Gutachten beschäftigt, in Birkesdorf, Gürzenich, am Industriegebiet Distelrath und in Lendersdorf. Wer heute mit Hochwasser-Folgekosten zu tun hat, profitiert von dieser Praxis: Die Teilkaskoabwicklung bei Wassertotalschäden ist ein eigenes Kapitel.` },
+    { h3: 'Wo passiert es in Düren am häufigsten?', text: `Die A 4-Anschlussstelle ist Hotspot Nummer 1 — Auffahrunfälle im Stop-and-Go, Spurwechsel beim Ausfahren. Die B 56 als Stadtdurchquerung mischt Bus-, Fahrrad- und Pkw-Verkehr, Schoellerstraße und Aachener Straße haben hohes Park-Aufkommen, und im Industriegebiet Distelrath kommen Lkw und Sondertransporte hinzu.` },
+    { h3: 'Wertminderung: Warum wird so oft gekürzt?', text: `Bei jüngeren Fahrzeugen ist der merkantile Minderwert nach einem Auffahrunfall oft höher, als die Versicherung zugestehen möchte — und versteckte Schäden in Heckblech und Kofferraumboden bleiben ohne strukturierte Prüfung unentdeckt. Wir dokumentieren so, dass nicht einfach gekürzt werden kann; falls doch, erstellen wir ein Gegengutachten auf Kosten der Gegenseite.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Der Sachverständige kennt Karosserie- und Lackbetriebe in Düren-Mitte, Birkesdorf und am Industriegebiet — vom freien Fachbetrieb bis zur Markenwerkstatt. Die Werkstatt rechnet auf Basis des Gutachtens ab.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Düren — modern, digital, gerichtsfest. Wir klären in 5 Minuten am Telefon, ob ein Sachverständiger sinnvoll ist und wie es weitergeht.` },
+  ],
+  alsdorf: [
+    { text: `Alsdorf, nordöstlich von Aachen, war Jahrzehnte vom Steinkohle-Bergbau geprägt und ist heute Wohn- und Logistikstadt — über die A 44 mit Aachen verbunden, über die L 240 mit dem Mariadorf-Industriegebiet. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Alsdorf-Mitte, Schaufenberg, Hoengen oder Mariadorf. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Vier Stadtteile, eigene Profile: Alsdorf-Mitte mit der Annakirche hat klassische Innenstadt-Dynamik mit Park-Remplern, Schaufenberg ist Wohngebiet, Hoengen im Westen pendlerorientiert. Mariadorf im Osten ist Industriegebiet — dort kommen Flotten- und Logistik-Schäden hinzu.` },
+    { h3: 'Worauf kommt es bei der Gutachter-Wahl an?', text: `Neutralität, lokale Erfahrung, gerichtsfeste Dokumentation. Wir arbeiten nach DAT- und BVSK-Standard — die Regulierung läuft parallel mit dem Claimondo-Partnernetzwerk:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Alsdorf?', text: `Die A 44-Anschlussstelle Alsdorf ist Hauptzubringer Richtung Aachen und Mönchengladbach — Auffahrunfälle im Stop-and-Go des Berufsverkehrs sind klassisch. Die L 240 trägt Lkw- und Flottenverkehr ins Mariadorf-Industriegebiet, die B 264 Industriestraße den Schwerlastverkehr. Bei Flottenfahrzeugen dokumentieren wir so, dass Firmenversicherung und gegnerische Haftpflicht sauber abrechnen können.` },
+    { h3: 'Unfall mit ausländischer Beteiligung — was nun?', text: `Niederländische und belgische Pendler gehören in der Region zum Alltag. Über die Grüne Karte und den Zentralruf der Autoversicherer wird der Schaden auch mit nicht-deutschen Beteiligten abgewickelt — Wir und das Claimondo-Netzwerk kennen die Wege.` },
+    { h3: 'Wertminderung: Was steht Ihnen zu?', text: `Bei jüngeren Fahrzeugen führt ein Auffahrunfall zu merkantilem Minderwert — einer dauerhaften Wertreduzierung trotz fachgerechter Reparatur. Versicherungen zahlen sie selten freiwillig; wir berechnen sie sauber und dokumentieren so, dass die Gegenseite sie auch zahlen muss.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Wir kennen verlässliche Karosseriefachbetriebe und Lackierereien in Alsdorf-Mitte und Mariadorf — ohne Bindung an die Empfehlung der gegnerischen Versicherung.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Alsdorf — neutral, gerichtsfest, schnell vor Ort. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+  wuerselen: [
+    { text: `Würselen, direkt nordöstlich von Aachen, ist klassische Pendlerstadt mit Bildungs- und Wohnschwerpunkt — über A 44 und A 4 eng mit Aachen und Köln verbunden, die L 12 Aachener Straße trägt den Verkehr durch die Stadt. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Würselen-Mitte, Bardenberg oder Broichweiden. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Drei Stadtteile, drei Profile: Würselen-Mitte hat mit der Kaiserstraße Innenstadt-Rempler und Konflikte mit Bus- und Fahrradverkehr, Bardenberg ist Wohngebiet mit Park-Remplern an Schulen und Kitas. Broichweiden im Osten ist ländlicher — mit Pendlerschäden und Wildunfall-Risiko Richtung Bergisches Land.` },
+    { h3: 'Worauf kommt es bei der Gutachter-Wahl an?', text: `Neutralität, lokale Erfahrung, gerichtsfeste Dokumentation. Wir arbeiten nach DAT- und BVSK-Standard:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Würselen?', text: `Die A 44-Anschlussstelle Würselen ist der direkte Aachen-Verbinder — klassische Auffahrunfall-Strecke im Berufsverkehr, ebenso die staureiche A 4 Würselen-West Richtung Köln. Innerörtlich mischt die L 12 Aachener Straße Pkw, Bus und Fahrrad; in Schulnähe in Würselen-Mitte und Bardenberg sind auch Schüler- und Bus-Beteiligungen nicht selten. Bei jüngeren Fahrzeugen zählt nach dem Heckschaden die saubere Wertminderungs-Berechnung.` },
+    { h3: 'Wer zahlt den Anwalt?', text: `Bei unverschuldetem Unfall die gegnerische Versicherung — wie Gutachter und Mietwagen. Wir und das Claimondo-Partnernetzwerk vermitteln einen Verkehrsrechtsanwalt aus der Region, der den Fall von der Schadensmeldung bis zur Auszahlung abwickelt.` },
+    { h3: 'Unfall mit Niederländern aus Heerlen oder Kerkrade?', text: `In der Region häufig — und klar geregelt: Wir arbeiten seit Jahren mit BE- und NL-Versicherungen zusammen, die Abwicklung läuft über die internationalen Wege.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie — das ist Ihr Recht nach BGH-Rechtsprechung. Wir kennen Karosserie- und Lackbetriebe in Würselen-Mitte und Bardenberg, vom freien Fachbetrieb bis zur Markenwerkstatt.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Würselen — neutral, gerichtsfest, schnell vor Ort. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+  baesweiler: [
+    { text: `Baesweiler, nördlich von Aachen in unmittelbarer Grenznähe zu den Niederlanden, ist Pendlerstadt mit eigenen Logistik- und Industriestandorten — angebunden über B 57 und L 240, dazu täglicher grenzüberschreitender Verkehr. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Baesweiler-Mitte, Setterich oder Oidtweiler. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Drei Stadtteile, eigene Profile: Baesweiler-Mitte hat Innenstadt-Rempler, Setterich ist Wohngebiet, Oidtweiler ländlicher mit Pendlerverkehr Richtung Niederlande. Die Bergbau-Vergangenheit prägt das Industrieprofil bis heute — Logistik und Wohnstadt im Wechsel.` },
+    { h3: 'Grenzüberschreitender Unfall: Wer reguliert?', text: `Hier zählt Erfahrung mit niederländischen Versicherungen: Wir kennen die Regulierungswege über die Grüne Karte und den Zentralruf der Autoversicherer. Ob der Verursacher aus Geilenkirchen, Heinsberg, Kerkrade oder Heerlen kommt — die Abwicklung läuft über die internationalen Standards, das DAT-/BVSK-Gutachten ist EU-weit anerkannt.` },
+    { h3: 'Was gehört zum Gutachten?', text: `Die Standard-Disziplin nach DAT- und BVSK-Standard — die Regulierung läuft parallel mit dem Claimondo-Partnernetzwerk:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Baesweiler?', text: `Die B 57 Aachener Straße ist die Nord-Süd-Hauptachse mit Pendlerverkehr Richtung Aachen und Heinsberg, die L 240 Industriestraße trägt den Schwerlastverkehr. Durch die Grenznähe sind niederländische Fahrzeuge im Stadtbild häufig — ein Auffahrunfall mit NL-Beteiligung auf der B 57 ist der typische Fall: Wir dokumentieren nach deutschen Standards, der Zentralruf leitet den Schaden mit klaren Fristen an die niederländische Haftpflicht weiter.` },
+    { h3: 'Müssen Sie den Gutachter der NL-Versicherung nehmen?', text: `Nein. Auch bei ausländischen Beteiligten gilt Ihr Recht auf einen eigenen, unabhängigen Sachverständigen — wir arbeiten ausschließlich in Ihrem Interesse, grenzüberschreitend.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Der Sachverständige kennt verlässliche Karosserie- und Lackbetriebe in Baesweiler-Mitte und Setterich — vom freien Fachbetrieb bis zur Markenwerkstatt.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile inklusive Setterich. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel — auch bei grenzüberschreitenden Schäden. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Baesweiler — neutral, gerichtsfest, schnell vor Ort. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+  eschweiler: [
+    { text: `Eschweiler ist mit rund 56.000 Einwohnern eine der größten Städte im Aachen-Cluster — und hat eine bewegte Schadens-Geschichte: Das Hochwasser 2021 traf das Indetal mit voller Wucht, mit hunderten Totalschäden durch Wasser, Schlamm und Geröll. Unser Sachverständiger war damals über Monate vor Ort im Einsatz. Ob klassischer Auffahrunfall oder Wasserschaden mit komplizierter Abwicklung: 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Vier Stadtteile, eigene Dynamik: Eschweiler-Mitte hat mit der Indestraße klassische Innenstadt-Schäden, Weisweiler als Kraftwerk-Stadtteil Industrieverkehr und Sondertransporte. Dürwiß und Nothberg sind Wohngebiete mit Pendlerschwerpunkt.` },
+    { h3: 'Hochwasser und Starkregen: Warum zählt Erfahrung?', text: `Das Hochwasser 2021 hat eine eigene versicherungstechnische Komplexität geschaffen — Wassertotalschäden bei Teilkasko, Beweisführung über Schlamm- und Geröll-Spuren, Folgeschäden an Elektronik. Unsere Sachverständigen haben damals eine Vielzahl solcher Gutachten erstellt und kennen die Regulierungswege; bei Starkregen-Ereignissen, die weiterhin auftreten, zahlt sich genau das aus.` },
+    { h3: 'Was gehört zum Gutachten?', text: `Die Standard-Disziplin nach DAT- und BVSK-Standard — die Regulierung läuft parallel mit dem Claimondo-Partnernetzwerk:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Eschweiler?', text: `Die A 4-Anschlussstelle Eschweiler ist Hauptzubringer mit hohem Pendleraufkommen Richtung Aachen und Köln — Stop-and-Go im Berufsverkehr ist klassisch. Die Indestraße mischt als Stadtdurchquerung Pkw, Bus und Fahrrad, die Hauptstraße ist Schwerpunkt für Innenstadt-Rempler.` },
+    { h3: 'Wasserschaden nach Starkregen: Wie wird reguliert?', text: `Fahrzeug auf überfluteter Straße, Wasser im Motor- oder Innenraum, drohende Elektronik-Folgeschäden: Wir dokumentieren die Wassereinwirkung mit Foto-Belegen, Pegelständen und Schadensspuren — so reguliert die Teilkasko oder (bei Verkehrsverursachung) die gegnerische Haftpflicht sauber, inklusive belastbarem Wiederbeschaffungswert bei Totalschäden. Kürzt die Versicherung, erstellen wir ein Gegengutachten.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Wir kennen Karosserie-, Lack- und Elektronik-Fachbetriebe in Eschweiler-Mitte und Weisweiler — auch Spezialwerkstätten für Wassertotalschäden mit Trocknungs- und Diagnose-Erfahrung sind im Netzwerk vermittelbar.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile inklusive Weisweiler. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Eschweiler — gerichtsfest, schnell vor Ort, mit Hochwasser-Praxis seit 2021. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+  juelich: [
+    { text: `Jülich ist Forschungs- und Geschichts-Stadt: Das Forschungszentrum Jülich zählt zu den größten interdisziplinären Forschungseinrichtungen Europas, Zitadelle und Hexenturm prägen das Stadtbild. Verkehrlich verbinden A 44 und B 56 die Stadt mit Aachen und Düren. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Jülich-Mitte, Stetternich, Selgersdorf oder Koslar. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Vier Stadtteile, eigene Dynamik: Jülich-Mitte mit der Zitadelle hat Innenstadt-Rempler, Stetternich ist Forschungszentrum-Stadtteil mit internationalem Berufspendlerverkehr. Selgersdorf und Koslar sind Wohngebiete mit Pendlerprofil.` },
+    { h3: 'Worauf kommt es bei der Gutachter-Wahl an?', text: `Neutralität, lokale Erfahrung, gerichtsfeste Dokumentation. Wir arbeiten nach DAT- und BVSK-Standard:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Jülich?', text: `Die A 44-Anschlussstelle Jülich ist Hauptzubringer Richtung Aachen mit Forschungs- und Pendlerverkehr — typische Auffahrunfall-Strecke im Berufsverkehr. Die B 56 Aachener Landstraße trägt den Lieferverkehr Richtung Düren und Aachen, die L 241 verbindet als Pendlerstrecke beide Städte.` },
+    { h3: 'Internationale Beteiligte: Wie läuft die Abwicklung?', text: `Die Mitarbeiter des Forschungszentrums kommen aus aller Welt — und die Nähe zu den Niederlanden und Belgien bringt zusätzlich grenzüberschreitende Fälle. Wir arbeiten auch mit nicht-deutschen Versicherungen und kennen die internationalen Regulierungswege.` },
+    { h3: 'Wertminderung: Warum kürzen Versicherungen so gern?', text: `Bei jüngeren Fahrzeugen ist der merkantile Minderwert oft höher, als die Versicherung freiwillig zugesteht. Wir dokumentieren so, dass nicht einfach gekürzt werden kann — falls doch, erstellen wir ein Gegengutachten auf Kosten der Gegenseite. Und bei Wasser- oder Hochwasser-Bezug, der im Indetal seit 2021 immer wieder vorkommt, bringen wir die spezifische Gutachten-Praxis mit.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Wir kennen verlässliche Karosserie- und Lackbetriebe in Jülich-Mitte, Stetternich und Selgersdorf und vermitteln auf Wunsch.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile inklusive Forschungszentrum-Umfeld. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 €.` },
+    { text: `Kfz-Gutachter Jülich — neutral, gerichtsfest, schnell vor Ort. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+  stolberg: [
+    { text: `Stolberg ist mit rund 57.000 Einwohnern eine der größten Städte im Aachen-Cluster — und teilt mit Eschweiler die Hochwasser-Geschichte: 2021 traf es vor allem die Vichtbach- und Indetal-Lage, mit hunderten Schäden und Wassergutachten. Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Stolberg-Mitte, Atsch, Münsterbusch oder Vicht. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Vier Stadtteile, eigene Profile: Stolberg-Mitte mit Altstadt und Burg ist Touristen-Schwerpunkt — Park-Rempler in den engen Gassen sind klassisch. Atsch ist Industriegebiet mit Buntmetall-Vergangenheit und Logistik-Schäden, Münsterbusch Wohngebiet, Vicht im Süden Eifel-Vorland mit Wildunfall-Risiko.` },
+    { h3: 'Hochwasser-Region: Was heißt das für Gutachten?', text: `Unser Sachverständiger war 2021 monatelang in der Vichtbach- und Indetal-Region im Einsatz — Wassertotalschäden, Elektronik-Folgeschäden, Beweisführung über Schlamm- und Geröll-Spuren, dokumentiert nach DAT- und BVSK-Standard. Diese Praxis zählt bis heute:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Stolberg?', text: `Die A 4-Anschlussstelle Stolberg ist der zentrale Zubringer Richtung Aachen und Köln — klassisches Auffahrunfall-Profil im Berufsverkehr. Die B 258 trägt als Hauptstraße den Pendler- und Lieferverkehr durch die Stadt, die L 238 verbindet Richtung Eschweiler, und in den engen Altstadtgassen rund um die Burg häufen sich Park-Konflikte.` },
+    { h3: 'Wasserschaden, Auffahrunfall oder Wildunfall — wie wird dokumentiert?', text: `Je nach Schadensart: bei Wasserschäden mit Pegelstand-Belegen und Schadensspuren, bei Auffahrunfällen mit Strukturschäden-Prüfung und Wertminderungs-Berechnung, bei Wildunfällen in Vicht mit Wildhärchen- und Aufprall-Dokumentation für die Teilkasko.` },
+    { h3: 'Hochwasser-Folgeschäden Jahre später: Geht da noch was?', text: `Oft ja — wenn Korrosions- oder Elektronik-Folgeschäden erst später sichtbar werden, können sie unter Umständen noch reguliert werden. Es gelten klare Beweisregeln; wir dokumentieren so, dass die Versicherung sauber reguliert.` },
+    { h3: 'Gutachter oder Sachverständiger — gibt es einen Unterschied?', text: `Nein — die rechtliche Stellung ist identisch. Ob Sie nach „Kfz-Gutachter Stolberg" oder „Kfz-Sachverständiger Stolberg" suchen: Das Gutachten ist gerichtsfest und folgt dem DAT-/BVSK-Standard.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Der Sachverständige kennt verlässliche Karosserie- und Lackbetriebe in Stolberg-Mitte und Atsch — auch Spezialwerkstätten für Wassertotalschäden mit Trocknungs- und Elektronik-Diagnose sind im Netzwerk vermittelbar.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile inklusive Atsch und Vicht. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel. 0 € für Sie.` },
+    { text: `Kfz-Sachverständiger Stolberg — gerichtsfest, schnell vor Ort, mit Hochwasser-Praxis seit 2021. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+  herzogenrath: [
+    { text: `Herzogenrath ist die Grenzstadt par excellence — mit Kerkrade praktisch zusammengewachsen, prägt der grenzüberschreitende Verkehr die Stadt wie kein anderes Element. Ob A 4-Anschlussstelle, B 57 Roermonder Straße oder Stadtkern an der Burg Rode: Unser Kfz-Sachverständiger ist meist binnen 60 Minuten in Herzogenrath-Mitte, Kohlscheid oder Merkstein. 0 € für Sie — die gegnerische Versicherung übernimmt das Honorar nach §249 BGB.` },
+    { vorort: true, text: `Drei Stadtteile, eigene Dynamik: Herzogenrath-Mitte mit der Burg Rode hat klassische Innenstadt-Rempler, Kohlscheid ist Wohngebiet — und Merkstein liegt direkt an der niederländischen Grenze mit entsprechend hohem grenzüberschreitendem Verkehr.` },
+    { h3: 'Grenzüberschreitender Unfall: Wer reguliert?', text: `Hier zählt Erfahrung mit niederländischen Versicherungen: Wir kennen die Regulierungswege über die Grüne Karte und den Zentralruf der Autoversicherer. Ob der Verursacher aus Kerkrade, Heerlen oder Maastricht kommt — die Abwicklung läuft über die internationalen Standards.` },
+    { h3: 'Was gehört zum Gutachten?', text: `Die Standard-Disziplin nach DAT- und BVSK-Standard — die Regulierung läuft parallel mit dem Claimondo-Partnernetzwerk:`, liste: LEISTUNGS_LISTE },
+    { h3: 'Wo kracht es rund um Herzogenrath?', text: `Die A 4-Anschlussstelle Herzogenrath ist Hauptzubringer Richtung Köln und Aachen — Auffahrunfälle im Stop-and-Go sind klassisch. Die B 57 Roermonder Straße trägt den Verkehr Richtung Niederlande und ist entsprechend unfallträchtig; im Stadtkern sind die engen Gassen an der Burg Schwerpunkt für Rempler. Der typische Fall: Auffahrunfall mit niederländischer Beteiligung — wir dokumentieren nach deutschen Standards, der Zentralruf leitet mit klaren Fristen an die NL-Haftpflicht weiter.` },
+    { h3: 'Müssen Sie den Gutachter der NL-Versicherung nehmen?', text: `Nein — das Recht auf einen eigenen, unabhängigen Sachverständigen gilt nach EU-Standard auch bei ausländischen Beteiligten. Wir dokumentieren so, dass die Versicherung sauber reguliert — egal ob deutsch oder niederländisch.` },
+    { h3: 'Was bekommen Sie zusätzlich?', text: `Schnelle Vor-Ort-Aufnahme, Gutachten in 48 Stunden und die Versicherungsabwicklung über das Claimondo-Partnernetzwerk inklusive Anwalt und Mietwagen — alles kostenfrei für Sie.` },
+    { h3: 'Wer entscheidet über die Werkstatt?', text: `Sie. Wir kennen verlässliche Karosserie- und Lackbetriebe in Herzogenrath-Mitte und Kohlscheid — vom freien Fachbetrieb bis zur Markenwerkstatt.` },
+    { h3: 'Wie läuft es ab?', text: `Drei Schritte: 1) Anruf oder WhatsApp. 2) Vor-Ort-Termin binnen 60 Minuten, alle Stadtteile inklusive Merkstein. 3) Gutachten in 48 Stunden, Versicherungsabwicklung parallel — auch bei niederländischer Beteiligung. 0 € für Sie.` },
+    { text: `Kfz-Gutachter Herzogenrath — neutral, gerichtsfest, schnell vor Ort, auch bei Grenzschäden. Wir klären in 5 Minuten am Telefon, wie es weitergeht.` },
+  ],
+}
+
+export function seoBodyFor(slug: string): SeoAbsatz[] {
+  return SEO_BODY[slug] ?? []
 }
