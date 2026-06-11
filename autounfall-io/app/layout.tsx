@@ -46,6 +46,15 @@ export const metadata: Metadata = {
       { url: '/favicon.ico', sizes: 'any' },
     ],
   },
+  // BRIEF-03: Site-Verification (Google Search Console / Bing / Ahrefs) —
+  // Verifizierung-zuerst, isoliert. Rendert site-weit 3 <meta>-Tags im <head>.
+  verification: {
+    google: 'M4ETfqi3R-Mwpf7r9yiiPzBMUbKC-o9awrKGBrErp1o',
+    other: {
+      'msvalidate.01': '0F96BC6374ACAA551D0151E1EEDF77C0',
+      'ahrefs-site-verification': 'f246283242d6908182b41a4f97e61a5be3d4eed80eb3f1e0ee5bc274a4c7c6b7',
+    },
+  },
 }
 
 export const viewport: Viewport = {
