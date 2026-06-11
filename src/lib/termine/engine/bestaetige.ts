@@ -20,7 +20,7 @@ export async function bestaetige(
   const geocode = opts?.geocode ?? geocodeMitFallback
 
   const { data: t, error } = await db.from('gutachter_termine')
-    .select('id, kanal, sv_id, fall_id, claim_id, lead_id, besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_adresse, start_zeit')
+    .select('id, kanal, assignee_id, assignee_typ, fall_id, claim_id, lead_id, besichtigungsort_lat, besichtigungsort_lng, besichtigungsort_adresse, start_zeit')
     .eq('id', terminId).maybeSingle()
   if (error) return { ok: false, error: error.message, code: 'db' }
   if (!t) return { ok: false, error: 'Termin nicht gefunden', code: 'not_found' }
@@ -44,10 +44,10 @@ export async function bestaetige(
   if (upErr) return { ok: false, error: upErr.message, code: 'db' }
 
   // CMM-73 (best-effort, non-critical): erstgutachten-Auftrag → v_claim_phase derivt korrekt.
-  if (t.fall_id && t.sv_id) {
+  if (t.fall_id && t.assignee_typ === 'sachverstaendiger' && t.assignee_id) {
     try {
       const { createErstgutachtenAuftragWennNoetig } = await import('@/lib/auftrag/create')
-      await createErstgutachtenAuftragWennNoetig(db, t.fall_id as string, t.sv_id as string, [terminId])
+      await createErstgutachtenAuftragWennNoetig(db, t.fall_id as string, t.assignee_id as string, [terminId])
     } catch (e) { console.error('[bestaetige] erstgutachten:', e instanceof Error ? e.message : e) }
   }
   // Timeline (non-critical).

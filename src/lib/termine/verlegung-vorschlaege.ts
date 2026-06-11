@@ -375,7 +375,8 @@ export async function istSlotFrei(
   let q = supabase
     .from('gutachter_termine')
     .select('id', { count: 'exact', head: true })
-    .eq('sv_id', svId)
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .in('status', ['bestaetigt', 'reserviert', 'verlegt', 'verlegung_pending'])
     .lt('start_zeit', endIso)
     .gt('end_zeit', startIso)

@@ -50,7 +50,8 @@ export async function getSvTagesplan(
       )
     `,
     )
-    .eq('sv_id', svId)
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .gte('start_zeit', vonIso)
     .lte('start_zeit', bisIso)
     .in('status', ['bestaetigt', 'verlegung_pending'])

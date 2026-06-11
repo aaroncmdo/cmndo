@@ -122,7 +122,7 @@ export async function loadTermine(
   {
     let gtQuery = supabase
       .from('gutachter_termine')
-      .select('id, typ, start_zeit, end_zeit, status, fall_id, lead_id, sv_id, kb_id, kanal, notiz_intern')
+      .select('id, typ, start_zeit, end_zeit, status, fall_id, lead_id, assignee_id, assignee_typ, kb_id, kanal, notiz_intern')
       .is('cancelled_at', null)
 
     // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL, bezug_typ='lead') ->
@@ -145,14 +145,15 @@ export async function loadTermine(
       status: string
       fall_id: string | null
       lead_id: string | null
-      sv_id: string | null
+      assignee_id: string | null
+      assignee_typ: string | null
       kb_id: string | null
       kanal: string | null
       notiz_intern: string | null
     }>
 
     // SV-Namen via profiles
-    const svIds = [...new Set(rows.map(r => r.sv_id).filter(Boolean) as string[])]
+    const svIds = [...new Set(rows.filter(r => r.assignee_typ === 'sachverstaendiger').map(r => r.assignee_id).filter(Boolean) as string[])]
     const svNameMap: Record<string, string> = {}
     if (svIds.length > 0) {
       const { data: svs } = await supabase
@@ -195,7 +196,7 @@ export async function loadTermine(
         leadId: r.lead_id,
         verantwortlichName: isKb
           ? r.kb_id ? kbNameMap[r.kb_id] ?? null : null
-          : r.sv_id ? svNameMap[r.sv_id] ?? null : null,
+          : r.assignee_typ === 'sachverstaendiger' && r.assignee_id ? svNameMap[r.assignee_id] ?? null : null,
         kanal: r.kanal,
       })
     }

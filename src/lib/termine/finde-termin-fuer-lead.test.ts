@@ -2,8 +2,11 @@ import { describe, it, expect } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { findeTerminFuerLead } from './finde-termin-fuer-lead'
 
-type Row = { id: string; sv_id: string | null; start_zeit: string }
-const r = (id: string, sv: string | null, start: string): Row => ({ id, sv_id: sv, start_zeit: start })
+type Row = { id: string; assignee_id: string | null; assignee_typ: string | null; start_zeit: string }
+// CMM-49 sv_id-Drop: Helper liest assignee_id/assignee_typ; `sv` = SV-id (typ 'sachverstaendiger'),
+// optionaler `typ`-Override fuer Nicht-SV-Assignees (sv_lead/kb) → Return-sv_id bleibt null.
+const r = (id: string, sv: string | null, start: string, typ: string | null = sv ? 'sachverstaendiger' : null): Row =>
+  ({ id, assignee_id: sv, assignee_typ: typ, start_zeit: start })
 
 // Stub: branched über die ERSTE .eq()-Spalte — bezug-Query startet mit eq('bezug_typ'),
 // Legacy-Query mit eq('lead_id'). .in() ist der terminale Promise.
@@ -49,8 +52,8 @@ describe('findeTerminFuerLead — Dual-Lookup (Legacy lead_id ∪ Engine bezug)'
     expect(await findeTerminFuerLead(makeDb([], []), 'L1')).toBeNull()
   })
 
-  it('sv_id darf null sein (sv_lead/kb-Assignee)', async () => {
-    const db = makeDb([], [r('t4', null, '2026-07-01T09:00:00Z')])
+  it('sv_id ist null bei Nicht-SV-Assignee (kb) trotz gesetzter assignee_id', async () => {
+    const db = makeDb([], [r('t4', 'kb1', '2026-07-01T09:00:00Z', 'kundenbetreuer')])
     expect(await findeTerminFuerLead(db, 'L1')).toEqual({ id: 't4', sv_id: null })
   })
 })
