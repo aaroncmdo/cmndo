@@ -163,6 +163,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const popupRef = useRef<Popup | null>(null)
   const popupRootRef = useRef<Root | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
+  const carMarkerRef = useRef<Marker | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
@@ -379,12 +380,38 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       )
     }
 
+    // Auto-Marker + Zoom, sobald der Wizard den Besichtigungsort kennt (Aaron 11.06.):
+    // der Wizard dispatcht claimondo:embed-ort {lat,lng} → Navy-Auto-Pin ans Fahrzeug + flyTo.
+    function handleEmbedOrt(e: Event) {
+      const ce = e as CustomEvent<{ lat?: number; lng?: number }>
+      const lat = ce.detail?.lat
+      const lng = ce.detail?.lng
+      if (typeof lat !== 'number' || typeof lng !== 'number') return
+      carMarkerRef.current?.remove()
+      const carEl = document.createElement('div')
+      carEl.setAttribute('aria-label', 'Fahrzeug-Standort')
+      carEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0D1B3E;border:3px solid #fff;box-shadow:0 6px 18px rgba(13,27,62,0.35);display:grid;place-items:center">
+            <div style="transform:rotate(45deg);display:grid;place-items:center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 1 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+            </div>
+          </div>
+        </div>
+      `
+      carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
+      map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+    }
+    document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
+
     return () => {
       window.clearTimeout(loadTimeout)
+      document.removeEventListener('claimondo:embed-ort', handleEmbedOrt)
       resizeObs.disconnect()
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
       userMarkerRef.current?.remove()
+      carMarkerRef.current?.remove()
       popupRootRef.current?.unmount()
       popupRef.current?.remove()
       map.remove()
