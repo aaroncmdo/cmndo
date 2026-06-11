@@ -176,7 +176,8 @@ export default async function FlowPage({
   const { data: terminMitSv } = await svc
     .from('gutachter_termine')
     .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma))')
-    .eq('lead_id', leadId)
+    // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: false })
     .limit(1)

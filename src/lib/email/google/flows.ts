@@ -1126,8 +1126,10 @@ export async function sendFlowLinkVersand(
   // Aktiver Termin (reserviert oder bestaetigt) um SV-Name + Datum zu zeigen
   const { data: terminRaw } = await db
     .from('gutachter_termine')
+    // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden
+    // (Email-Zwilling von flowlink.ts; FlowLink-Versand laeuft pre-Conversion, #8 greift hier nicht).
     .select('start_zeit, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
-    .eq('lead_id', leadId)
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
     .order('start_zeit', { ascending: true })
     .limit(1)

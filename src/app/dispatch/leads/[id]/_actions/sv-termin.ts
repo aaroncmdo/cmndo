@@ -211,10 +211,12 @@ export async function reserveSvTerminForLead(
   }
 
   // AAR-134: 'abgelehnt' auch stornieren — verhindert Doppel-Termine nach SV-Ablehnung.
+  // AAR-956: bezug-native Self-Service-Termine (lead_id NULL) mit-stornieren, sonst bliebe
+  // beim Rebook ein reservierter Self-Service-Termin haengen (EXCLUSION-Slot-Blocker).
   await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
-    .eq('lead_id', leadId)
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'gegenvorschlag', 'abgelehnt'])
 
   const { data: inserted, error } = await supabase
@@ -345,10 +347,12 @@ export async function cancelSvTerminForLead(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   // AAR-134: 'abgelehnt' mit drin — Dispatcher kann roten Card-Termin schließen.
+  // AAR-956 (Spec-Erweiterung): identische bezug-Blindheit wie der Rebook-Cancel oben —
+  // ein bezug-nativer Self-Service-Termin muss beim Dispatcher-Cancel ebenfalls weg.
   const { error } = await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
-    .eq('lead_id', leadId)
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'abgelehnt'])
 
   if (error) return { success: false, error: error.message }

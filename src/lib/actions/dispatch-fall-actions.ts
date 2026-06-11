@@ -493,8 +493,10 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
     // (value-identisch für SV-Termine; typ-Guard schließt kb_beratung aus).
     const { data: terminRaw } = await supabase
       .from('gutachter_termine')
+      // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden
+      // (sitzt auf #2644 assignee_id/assignee_typ auf — Profil-Lookup separat unten).
       .select('start_zeit, assignee_id, assignee_typ')
-      .eq('lead_id', leadId)
+      .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
       .in('status', ['reserviert', 'bestaetigt'])
       .order('start_zeit', { ascending: true })
       .limit(1)
