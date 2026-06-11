@@ -85,10 +85,13 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
     // bleiben faelle-only. Embed wird unten auf die flache FallRow normalisiert.
     // CMM-44 SP-A2 (Cluster 1): schadenort_* ebenfalls aus dem claims-Embed (SSoT).
     // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin selbst, SSoT).
+    // CMM-49 (Entity-Sweep): faelle -> v_claim_full. fahrzeug_*/kennzeichen flach
+    // (value-identisch, div=0); polizei_*/schadenort_*/claim_nummer/service_typ flach
+    // (claims-SSoT) statt claims-Embed. id:fall_id-Alias hält f.id == frühere faelle.id.
     const { data: f } = await db
-      .from('faelle')
-      .select('id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, service_typ)')
-      .eq('id', termin.fall_id)
+      .from('v_claim_full')
+      .select('id:fall_id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, polizei_vor_ort, polizei_aktenzeichen, schadenort_adresse, schadenort_plz, schadenort_ort, claim_nummer, service_typ')
+      .eq('fall_id', termin.fall_id)
       .single()
     // Dieser Termin IST die gutachter_termine-Zeile — besichtigungsort_adresse direkt laden.
     const { data: terminDetail } = await db
@@ -97,7 +100,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
       .eq('id', id)
       .maybeSingle()
     if (f) {
-      const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      const fClaim = f
       serviceTyp = (fClaim?.service_typ as string | null) ?? null
       // AAR-939 termin-engine: besichtigungsort_bestaetigt_von ist noch nicht in
       // database.types → as-cast. Wert 'kunde'|'sv'|null.
