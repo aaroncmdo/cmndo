@@ -59,13 +59,13 @@ async function main() {
     console.log('=== gutachter_termine (Google + CalDAV) ===')
     let query = db
       .from('gutachter_termine')
-      .select('id, sv_id, fall_id, status, start_zeit, google_event_id, caldav_object_url')
+      .select('id, assignee_id, assignee_typ, fall_id, status, start_zeit, google_event_id, caldav_object_url')
       .in('status', ['reserviert', 'bestaetigt', 'verlegung_pending'])
       .gte('start_zeit', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString())
     if (!includeUnsynced) {
       query = query.or('google_event_id.not.is.null,caldav_object_url.not.is.null')
     }
-    if (svFilter) query = query.eq('sv_id', svFilter)
+    if (svFilter) query = query.eq('assignee_id', svFilter).eq('assignee_typ', 'sachverstaendiger')
     const { data: termine, error } = await query
     if (error) {
       console.error('Query-Fehler:', error.message)
@@ -73,7 +73,7 @@ async function main() {
     }
     console.log(`${termine?.length ?? 0} aktive SV-Termine gefunden`)
     for (const t of termine ?? []) {
-      const ref = `${t.id} (sv=${(t.sv_id as string).slice(0, 8)}, ${t.start_zeit})`
+      const ref = `${t.id} (sv=${(t.assignee_id as string).slice(0, 8)}, ${t.start_zeit})`
       if (!t.fall_id) {
         console.log(`  SKIP ${ref} — ohne fall_id (Pre-FlowLink)`)
         stats.gutachter.skip++
