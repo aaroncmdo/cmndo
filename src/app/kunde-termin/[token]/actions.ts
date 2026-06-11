@@ -24,7 +24,7 @@ async function loadTerminByToken(token: string) {
   const { data: termin } = await db
     .from('gutachter_termine')
     .select(
-      'id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_grund, fall_id, sv_id, lead_id, kunde_response_token_expires_at',
+      'id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_grund, fall_id, assignee_id, assignee_typ, lead_id, kunde_response_token_expires_at',
     )
     .eq('kunde_response_token', token)
     .maybeSingle()
@@ -48,8 +48,8 @@ export async function getKundeTerminByToken(
   let fallNummer: string | null = null
   let kundeVorname = 'Kunde'
 
-  if (termin.sv_id) {
-    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+  if (termin.assignee_typ === 'sachverstaendiger' && termin.assignee_id) {
+    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
     if (sv?.profile_id) {
       const { data: p } = await db.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
       if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || 'Sachverständiger'
@@ -199,8 +199,8 @@ export async function counterByToken(
 
   // SV per Email + WhatsApp informieren (non-critical)
   try {
-    if (termin.sv_id) {
-      const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    if (termin.assignee_typ === 'sachverstaendiger' && termin.assignee_id) {
+      const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
       if (sv?.profile_id) {
         const { data: p } = await db
           .from('profiles')

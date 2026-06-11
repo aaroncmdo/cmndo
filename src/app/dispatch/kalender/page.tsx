@@ -60,7 +60,7 @@ export default async function DispatchKalenderPage({
   const { data: terminRows } = await supabase
     .from('gutachter_termine')
     .select(
-      'id, sv_id, lead_id, fall_id, start_zeit, end_zeit, status, typ, notiz_intern, ' +
+      'id, assignee_id, assignee_typ, lead_id, fall_id, start_zeit, end_zeit, status, typ, notiz_intern, ' +
         'leads(vorname, nachname, kennzeichen), faelle(claims:claim_id(claim_nummer), kennzeichen)',
     )
     .gte('start_zeit', weekStart.toISOString())
@@ -71,7 +71,8 @@ export default async function DispatchKalenderPage({
   type ClaimNrJoin = { claim_nummer: string | null } | Array<{ claim_nummer: string | null }> | null
   const termine: KalenderTermin[] = ((terminRows ?? []) as unknown as Array<{
     id: string
-    sv_id: string | null
+    assignee_id: string | null
+    assignee_typ: string | null
     lead_id: string | null
     fall_id: string | null
     start_zeit: string
@@ -92,7 +93,7 @@ export default async function DispatchKalenderPage({
       : ''
     return {
       id: t.id,
-      svId: t.sv_id,
+      svId: t.assignee_typ === 'sachverstaendiger' ? t.assignee_id : null,
       leadId: t.lead_id,
       fallId: t.fall_id,
       startZeit: t.start_zeit,

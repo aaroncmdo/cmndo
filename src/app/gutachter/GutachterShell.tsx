@@ -294,7 +294,8 @@ export default function GutachterShell({
     const { count: neueTermineCount } = await supabase
       .from('gutachter_termine')
       .select('id', { count: 'exact', head: true })
-      .in('sv_id', svIds)
+      .in('assignee_id', svIds)
+      .eq('assignee_typ', 'sachverstaendiger')
       .is('gesehen_am', null)
 
     setBadgeCounts({
