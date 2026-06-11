@@ -63,22 +63,22 @@ type Sv = {
 const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof CheckCircle2Icon }> = {
   reserviert: {
     label: 'Reserviert — wartet auf SV-Bestätigung',
-    cls: 'bg-amber-50 text-amber-700 border-amber-200',
+    cls: 'bg-warning-soft text-warning-strong border-warning/30',
     icon: ClockIcon,
   },
   bestaetigt: {
     label: 'Termin bestätigt',
-    cls: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    cls: 'bg-success-soft text-success-strong border-success/30',
     icon: CheckCircle2Icon,
   },
   gegenvorschlag: {
     label: 'Neuer Vorschlag — Antwort nötig',
-    cls: 'bg-amber-50 text-amber-800 border-amber-200',
+    cls: 'bg-warning-soft text-warning-strong border-warning/30',
     icon: AlertCircleIcon,
   },
   abgelehnt: {
     label: 'Abgelehnt',
-    cls: 'bg-red-50 text-red-700 border-red-200',
+    cls: 'bg-danger-soft text-danger-strong border-danger/30',
     icon: AlertCircleIcon,
   },
   abgesagt: {
@@ -88,7 +88,7 @@ const STATUS_LABEL: Record<string, { label: string; cls: string; icon: typeof Ch
   },
   abgeschlossen: {
     label: 'Durchgeführt',
-    cls: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+    cls: 'bg-success-soft text-success-strong border-success/30',
     icon: CheckCircle2Icon,
   },
 }
@@ -185,11 +185,11 @@ export default function KundeTerminDetailClient({
   return (
     <div className="w-full px-4 md:px-8 pt-5 pb-10 max-w-2xl mx-auto space-y-5">
       {besichtigungLaeuft && (
-        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
-          <CheckCircle2Icon className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+        <div className="rounded-2xl bg-success-soft border border-success/30 px-4 py-3 flex items-center gap-3">
+          <CheckCircle2Icon className="w-5 h-5 text-success flex-shrink-0" />
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-emerald-900">{t('detail.besichtigungLaeuftTitle')}</p>
-            <p className="text-xs text-emerald-800/80">
+            <p className="text-sm font-semibold text-success-strong">{t('detail.besichtigungLaeuftTitle')}</p>
+            <p className="text-xs text-success-strong/80">
               {t('detail.besichtigungLaeuftText')}
             </p>
           </div>
@@ -235,24 +235,24 @@ export default function KundeTerminDetailClient({
       {isUnterwegs && termin.kunden_tracking_token && (
         <Link
           href={`/kunde/termin/${termin.kunden_tracking_token}`}
-          className="block rounded-2xl border-2 border-emerald-300 bg-emerald-50 p-4 hover:bg-emerald-100 transition-colors"
+          className="block rounded-2xl border-2 border-success/30 bg-success-soft p-4 hover:bg-success/15 transition-colors"
         >
           <div className="flex items-center gap-3">
             <span className="relative flex h-3 w-3">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" />
-              <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-600" />
+              <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75 animate-ping" />
+              <span className="relative inline-flex h-3 w-3 rounded-full bg-success" />
             </span>
             <div className="flex-1">
-              <p className="text-sm font-semibold text-emerald-900">
+              <p className="text-sm font-semibold text-success-strong">
                 {t('detail.svUnterwegs', { name: sv.name ?? t('detail.svFallback') })}
               </p>
-              <p className="text-xs text-emerald-700 mt-0.5">
+              <p className="text-xs text-success-strong mt-0.5">
                 {termin.sv_eta_minuten != null
                   ? t('detail.etaMitMinuten', { minuten: termin.sv_eta_minuten })
                   : t('detail.etaOhneMinuten')}
               </p>
             </div>
-            <span className="text-emerald-700 text-lg">→</span>
+            <span className="text-success-strong text-lg">→</span>
           </div>
         </Link>
       )}
@@ -350,7 +350,7 @@ export default function KundeTerminDetailClient({
         (termin.status === 'reserviert' || termin.status === 'gegenvorschlag') && (
           <Link
             href={`/kunde/termin/${termin.kunden_tracking_token ?? termin.ablehnen_token}`}
-            className="block rounded-2xl border border-amber-200 bg-amber-50 p-4 hover:bg-amber-100 transition-colors text-amber-900 text-sm"
+            className="block rounded-2xl border border-warning/30 bg-warning-soft p-4 hover:bg-warning/15 transition-colors text-warning-strong text-sm"
           >
             {termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
               ? t('detail.gegenvorschlagAntworten')

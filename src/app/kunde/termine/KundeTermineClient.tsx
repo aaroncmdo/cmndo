@@ -40,19 +40,19 @@ const STATUS_LABEL: Record<string, string> = {
 }
 
 const STATUS_BADGE: Record<string, string> = {
-  reserviert: 'bg-amber-50 text-amber-700 border-amber-200',
-  bestaetigt: 'bg-emerald-50 text-emerald-700 border-emerald-200',
-  gegenvorschlag: 'bg-amber-50 text-amber-700 border-amber-200',
-  abgelehnt: 'bg-red-50 text-red-700 border-red-200',
+  reserviert: 'bg-warning-soft text-warning-strong border-warning/30',
+  bestaetigt: 'bg-success-soft text-success-strong border-success/30',
+  gegenvorschlag: 'bg-warning-soft text-warning-strong border-warning/30',
+  abgelehnt: 'bg-danger-soft text-danger-strong border-danger/30',
   abgeschlossen: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
 }
 
 // Dot-Farbe pro Status im Kalender
 const DOT_CLS: Record<string, string> = {
-  bestaetigt: 'bg-emerald-500',
-  reserviert: 'bg-amber-400',
-  gegenvorschlag: 'bg-amber-400',
-  abgelehnt: 'bg-red-400',
+  bestaetigt: 'bg-success',
+  reserviert: 'bg-warning',
+  gegenvorschlag: 'bg-warning',
+  abgelehnt: 'bg-danger',
   abgeschlossen: 'bg-claimondo-border',
 }
 
