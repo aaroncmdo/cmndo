@@ -72,11 +72,17 @@
 
 ---
 
-## In-flight Migrationen (Stand 2026-06-10)
+## Migrationen — gesettled (Stand 2026-06-11)
 
-- **sv_id → assignee_id** (CMM-49, Session `fb34de27`): Reader-Sweep läuft. Dual-Write-Brücke offen bis „Flip-Ready". Engine-Seite (`writes.ts:assigneeLegacyPatch`, `kalender-sync`, `state-transitions`) flippt die Termin-Engine-Session synchron auf deren Signal. Marker: `COORDINATION-cmm49-svid-befund.md`.
-- **lead_id-Reader → bezug-aware** (#2580-Strecke, Session `753d8096`): ~8 Reader auf `findeTerminFuerLead` migrieren. Marker: `COORDINATION-flow-relink-bezug-bug.md`.
+- **sv_id → assignee_id** (CMM-49, Session `fb34de27`): **DONE.** Reader-Sweep + Writer-Flip durch, `gutachter_termine.sv_id` **gedroppt** (PR #2674); Tabelle rein assignee-basiert. Marker: `COORDINATION-svid-drop-endstrecke.md`.
+- **lead_id-Reader → bezug-aware** (#2580-Strecke, Session `753d8096`): auf staging **gesettled** — 0 rohe `.eq('lead_id')`-Reader auf `gutachter_termine` außerhalb `engine/*` (Ratchet-Scan). Marker: `COORDINATION-flow-relink-bezug-bug.md`.
 
-## Durchsetzung (geplant)
+## Durchsetzung (aktiv)
 
-Sobald die obigen Migrationen gesettled sind: `check:termin-engine-contract`-Ratchet (analog `check:component-set`/`check:knip`), der NEUE `.eq('lead_id')`/`.eq('sv_id')`-Direktfilter auf `gutachter_termine` außerhalb `engine/*` gegen eine Baseline blockt. Bis dahin gilt dieser Contract advisory — Boy-Scout beim Anfassen.
+`npm run check:termin-engine-contract` blockt **NEUE** direkte Legacy-Filter (`.eq('lead_id')` / `.eq('sv_id')`) auf `gutachter_termine` außerhalb `engine/*` + dem kanonischen `finde-termin-fuer-lead.ts`. **Baseline = 0** (`scripts/termin-engine-contract-baseline.json`) — beide Migrationen gesettled, kein Altbestand. Drei Modi (analog `check:component-set`/`check:knip`):
+
+- *(default)* `--warn` → listet Verdachts-Files, exit 0 (lokal).
+- `--ratchet` → exit 1 bei NEUEN Verletzern ggü. Baseline (CI-Gate).
+- `--update-baseline` → Baseline neu schreiben (nur mit PR-Begründung, z. B. bewusste, unvermeidbare Ausnahme).
+
+Der sanktionierte bezug-aware `.or('lead_id.eq.${x},and(bezug_typ.eq.lead,bezug_id.eq.${x})')`-Pattern triggert den Scan **nicht** (nur `.eq('lead_id')`-Methodenaufrufe zählen). Block-aware: ein `.eq` zählt nur im selben `.from('gutachter_termine')`-Segment — Filter auf `faelle`/`claims`/`sachverstaendige` etc. sind kein Treffer.
