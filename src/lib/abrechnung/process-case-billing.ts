@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getLeadPriceFromTable, isCaseInKontingent } from './calculate-lead-price'
 
 /**
@@ -24,32 +25,27 @@ export async function processCaseBilling(fallId: string): Promise<{
 } | null> {
   const db = createAdminClient()
 
-  // Fall laden.
-  // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — via claims-Embed.
-  // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
-  // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — fuer den Idempotenz-Guard
-  // aus dem claims-Embed lesen; Legacy-Fall ohne claim_id nutzt den faelle-Fallback.
-  const { data: fall } = await db.from('faelle')
-    .select('id, claim_id, sv_id, claims:claim_id(schadens_hoehe_netto, lead_preis_netto, gutachten(gesamt_schadensbetrag)), lead_preis_netto')
-    .eq('id', fallId)
+  // CMM-49 Reader-Sweep: claims-direkt via resolveClaimId (faelle-Anker raus).
+  // schadens_hoehe_netto + lead_preis_netto sind claims-SSoT (CMM-44 SP-B/Phase 3);
+  // gutachten.gesamt_schadensbetrag via claims-Sub-Embed (SP-G); sv_id = claims.sv_id (CMM-60).
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return null
+  const { data: claim } = await db.from('claims')
+    .select('id, sv_id, schadens_hoehe_netto, lead_preis_netto, gutachten(gesamt_schadensbetrag)')
+    .eq('id', claimId)
     .single()
 
-  if (!fall?.sv_id) return null
+  if (!claim?.sv_id) return null
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-
-  // Bereits berechnet? claims ist SSoT (CMM-44 Phase 3); Legacy-Fall ohne claim_id
-  // liest den faelle-Fallback (Helper haelt den Wert dort).
-  const existingLeadPreis = fall.claim_id
-    ? (fallClaim as { lead_preis_netto?: number | null } | null)?.lead_preis_netto
-    : (fall as { lead_preis_netto?: number | null }).lead_preis_netto
+  // Bereits berechnet? (Idempotenz-Guard) — lead_preis_netto ist claims-SSoT.
+  const existingLeadPreis = (claim as { lead_preis_netto?: number | null }).lead_preis_netto
   if (existingLeadPreis != null) return null
-  const fallGutachten = Array.isArray((fallClaim as { gutachten?: unknown } | null)?.gutachten)
-    ? ((fallClaim as { gutachten: unknown[] }).gutachten)[0]
-    : (fallClaim as { gutachten?: unknown } | null)?.gutachten
+  const claimGutachten = Array.isArray((claim as { gutachten?: unknown }).gutachten)
+    ? ((claim as { gutachten: unknown[] }).gutachten)[0]
+    : (claim as { gutachten?: unknown }).gutachten
   const schadenhoehe = Number(
-    (fallClaim as { schadens_hoehe_netto?: number | null } | null)?.schadens_hoehe_netto
-    ?? (fallGutachten as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
+    (claim as { schadens_hoehe_netto?: number | null }).schadens_hoehe_netto
+    ?? (claimGutachten as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
     ?? 0
   )
   if (schadenhoehe <= 0) return null
@@ -57,7 +53,7 @@ export async function processCaseBilling(fallId: string): Promise<{
   // Kontingent prüfen — W1.1/AAR-945 Task 2: Stichtag = Bepreisungszeitpunkt (now),
   // NICHT Fall-Erstelldatum. Das Kontingent (Paket vs. Einzel) wird am
   // Fakturierungsmonat gezählt — konsistent zur Billing-Window-Logik (Task 1).
-  const imKontingent = await isCaseInKontingent(fall.sv_id, new Date())
+  const imKontingent = await isCaseInKontingent(claim.sv_id, new Date())
 
   // Lead-Preis berechnen
   const { betrag_netto: leadPreis, typ } = await getLeadPriceFromTable(schadenhoehe, imKontingent)
@@ -66,7 +62,7 @@ export async function processCaseBilling(fallId: string): Promise<{
   // daher: read + update mit Optimistic Concurrency via werbebudget_guthaben_netto Check)
   const { data: sv } = await db.from('sachverstaendige')
     .select('werbebudget_guthaben_netto')
-    .eq('id', fall.sv_id)
+    .eq('id', claim.sv_id)
     .single()
 
   const currentGuthaben = Number(sv?.werbebudget_guthaben_netto ?? 0)
@@ -80,14 +76,12 @@ export async function processCaseBilling(fallId: string): Promise<{
   if (guthabenAbzug > 0) {
     await db.from('sachverstaendige')
       .update({ werbebudget_guthaben_netto: guthabenNeu })
-      .eq('id', fall.sv_id)
+      .eq('id', claim.sv_id)
   }
 
-  // Fall updaten.
-  // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto liegen
-  // auf claims (SSoT) → via splitOrKeepFaelleUpdate routen; lead_preis_* bleiben
-  // faelle-native. Legacy-Fall ohne claim_id: alles bleibt auf faelle (Fallback).
-  const pcbClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  // Billing-Felder schreiben. CMM-44 SP-J/Phase 3: lead_preis_*, guthaben_verrechnet_netto,
+  // sv_nachzahlung_netto sind alle claims-SSoT (CLAIM_OWNED) → splitOrKeepFaelleUpdate routet
+  // sie auf claims (faelleUpdate bleibt leer). claimId via resolveClaimId immer gesetzt.
   const { faelleUpdate: pcbFaelle, claimsUpdate: pcbClaims } = splitOrKeepFaelleUpdate(
     {
       lead_preis_netto: leadPreis,
@@ -96,13 +90,13 @@ export async function processCaseBilling(fallId: string): Promise<{
       guthaben_verrechnet_netto: guthabenAbzug,
       sv_nachzahlung_netto: nachzahlung,
     },
-    pcbClaimId,
+    claimId,
   )
   if (Object.keys(pcbFaelle).length > 0) {
     await db.from('faelle').update(pcbFaelle).eq('id', fallId)
   }
-  if (pcbClaimId && Object.keys(pcbClaims).length > 0) {
-    await db.from('claims').update(pcbClaims).eq('id', pcbClaimId)
+  if (Object.keys(pcbClaims).length > 0) {
+    await db.from('claims').update(pcbClaims).eq('id', claimId)
   }
 
   console.log(`[KFZ-149] Case ${fallId}: Lead-Preis=${leadPreis} (${typ}), Guthaben-Abzug=${guthabenAbzug}, Nachzahlung=${nachzahlung}, Guthaben-Neu=${guthabenNeu}`)
