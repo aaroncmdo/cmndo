@@ -32,7 +32,7 @@ import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
-import { GlassPill, BeratungVereinbarenButton } from '@/components/shared/glass'
+import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
 import { createRoot, type Root } from 'react-dom/client'
 import { SvProfilePopup } from './SvProfilePopup'
 
@@ -163,6 +163,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const popupRef = useRef<Popup | null>(null)
   const popupRootRef = useRef<Root | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
   // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
@@ -220,7 +221,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       const popup = new mapboxgl.Popup({
         offset: 22,
         closeButton: true,
-        maxWidth: '300px',
+        maxWidth: '340px',
         anchor: 'bottom',
         className: 'sv-finder-popup',
       })
@@ -380,6 +381,37 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
   return (
     <div className="relative w-full" style={{ height }}>
+      {/* WS2 (Glass-Popup): Mapbox-Popup-Wrapper transparent stellen, damit die
+          GlassCard die Oberfläche ist (kein weisser Default-Kasten), Tip aus,
+          Close-Button als runder Navy-Button. Scoped via .sv-finder-popup. */}
+      <style>{`
+        .sv-finder-popup .mapboxgl-popup-content {
+          background: transparent;
+          padding: 0;
+          box-shadow: none;
+          border-radius: var(--glass-radius-card);
+        }
+        .sv-finder-popup.mapboxgl-popup { z-index: 12; }
+        .sv-finder-popup .mapboxgl-popup-tip { display: none; }
+        .sv-finder-popup .mapboxgl-popup-close-button {
+          top: 10px;
+          right: 10px;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 9999px;
+          color: var(--claimondo-navy, #0D1B3E);
+          font-size: 16px;
+          line-height: 1;
+          z-index: 3;
+          transition: background 0.15s ease;
+        }
+        .sv-finder-popup .mapboxgl-popup-close-button:hover {
+          background: color-mix(in srgb, var(--claimondo-navy, #0D1B3E) 8%, transparent);
+        }
+      `}</style>
       {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
           falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
           wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die
@@ -441,7 +473,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         style={{
           width: 'clamp(520px, 44vw, 820px)',
           background:
-            'linear-gradient(100deg, color-mix(in srgb, #f8f9fb 80%, transparent) 0%, color-mix(in srgb, #f8f9fb 52%, transparent) 38%, color-mix(in srgb, #f8f9fb 22%, transparent) 64%, transparent 92%)',
+            'linear-gradient(100deg, color-mix(in srgb, var(--glass-tint-soft) 80%, transparent) 0%, color-mix(in srgb, var(--glass-tint-soft) 52%, transparent) 38%, color-mix(in srgb, var(--glass-tint-soft) 22%, transparent) 64%, transparent 92%)',
           backdropFilter: 'blur(22px) saturate(1.05)',
           WebkitBackdropFilter: 'blur(22px) saturate(1.05)',
           maskImage: 'linear-gradient(to right, #000 0%, #000 60%, rgba(0,0,0,.35) 80%, transparent 100%)',
@@ -483,8 +515,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           </GlassPill>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
-          <BeratungVereinbarenButton className="hidden sm:inline-flex" />
-          <BeratungVereinbarenButton label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className="hidden sm:inline-flex" />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
         </div>
       </div>
 
@@ -544,11 +576,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       >
         <div
           // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
-          className="rounded-t-[32px] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          className="rounded-t-[32px] border-x border-t border-white/60 bg-white/85 backdrop-blur-md max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
           style={{
-            borderTop: 'var(--glass-border-nested)',
-            borderLeft: 'var(--glass-border-nested)',
-            borderRight: 'var(--glass-border-nested)',
             boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -556,7 +585,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         >
           <button
             onClick={() => setMobileSheetOpen((v) => !v)}
-            className="w-full sticky top-0 z-[1] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)] px-5 py-3 flex items-center justify-between"
+            className="w-full sticky top-0 z-[1] bg-white/85 backdrop-blur-md px-5 py-3 flex items-center justify-between"
           >
             <span className="flex items-center gap-2">
               <span
@@ -581,7 +610,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           <div className="px-5 pb-6 pt-2">
             {/* Beratungs-CTA auch im Mobile-Sheet (top-right ist auf Mobile versteckt) */}
             <div className="flex justify-end mb-3 sm:hidden">
-              <BeratungVereinbarenButton />
+              <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} />
             </div>
             {wizardSlot}
           </div>
@@ -595,6 +624,11 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
       {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}
       {hoveredId && <input type="hidden" data-selected-sv-id={hoveredId} />}
+
+      {/* Beratung-Rückruf-Modal auf Root-Ebene (NICHT im z-[5]-Header). Sonst bleibt die
+          z-[10]-Sidebar ÜBER dem Modal-Backdrop "hervorgehoben" — das fixed-Modal wäre im
+          Header-Stacking-Context gefangen. Hier escaped es + deckt das ganze Overlay ab. */}
+      <BeratungModal open={beratungOpen} onClose={() => setBeratungOpen(false)} quelle="embed-gutachter-finder" />
     </div>
   )
 }

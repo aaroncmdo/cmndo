@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from './_components/FinderMap'
+import { GlassSurface } from './_components/GlassSurface'
 
 // AAR-956 — Gutachter-Finder Embed (Haupt-App, standalone, iframe-baar).
 // Zieht den Finder aus der Marketing-App hierher → direkter Termin-Engine-Zugriff,
@@ -20,13 +21,13 @@ export const metadata: Metadata = {
 // Inline-Wizard (FlowSlotStep) einsetzt. Server-gerendert, als Prop an FinderMap.
 function WizardSlotPlaceholder() {
   return (
-    <div className="rounded-ios-lg border border-claimondo-border bg-white/85 p-6 text-center shadow-sm backdrop-blur-sm">
+    <GlassSurface className="flex flex-col gap-2 p-5 text-center">
       <p className="text-body-sm font-bold text-claimondo-navy">Anfrage in 3 Schritten</p>
-      <p className="mt-1.5 text-caption leading-relaxed text-claimondo-ondo/80">
+      <p className="text-caption leading-relaxed text-claimondo-ondo/80">
         Schaden schildern · Kontakt &amp; Ort · Termin wählen
       </p>
-      <p className="mt-3 text-caption text-claimondo-ondo/50">Wird gerade fertiggestellt.</p>
-    </div>
+      <p className="text-caption text-claimondo-ondo/50">Wird gerade fertiggestellt.</p>
+    </GlassSurface>
   )
 }
 
