@@ -571,14 +571,21 @@ export function MonikaApp({ cfg }: { cfg: MonikaConfig }) {
               value={telefon.value}
               onInput={(e) => (telefon.value = (e.target as HTMLInputElement).value)}
             />
-            {/* Honeypot — Bots fuellen es, Menschen nicht */}
+            {/* Honeypot — Bots fuellen es, Menschen nicht. Feldname bewusst NICHT-semantisch
+                (kein "company"/"email"/"tel"/"organization") + lp/1p-ignore — sonst fuellt
+                Desktop-Browser-Autofill bzw. ein Passwort-Manager das versteckte Feld aus
+                ("company" = Organisations-Kategorie!), die Bot-Falle schnappt fuer echte Nutzer
+                zu und die Anfrage wird still verworfen (AAR-939: Autofill-Honeypot-False-Positive). */}
             <input
               class="mk-hp"
               type="text"
               tabIndex={-1}
               autocomplete="off"
               aria-hidden="true"
-              name="company"
+              name="mk_hp"
+              data-1p-ignore="true"
+              data-lpignore="true"
+              data-form-type="other"
               value={honeypot.value}
               onInput={(e) => (honeypot.value = (e.target as HTMLInputElement).value)}
             />
