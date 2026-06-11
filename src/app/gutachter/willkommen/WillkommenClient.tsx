@@ -419,16 +419,16 @@ export default function WillkommenClient({
           </div>
 
           <div className="bg-white border border-claimondo-border rounded-2xl p-6">
-            <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-5 flex items-start gap-3">
-              <ClockIcon className="w-6 h-6 text-amber-600 flex-shrink-0 mt-0.5" />
-              <div className="text-sm text-amber-800">
+            <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-5 flex items-start gap-3">
+              <ClockIcon className="w-6 h-6 text-warning flex-shrink-0 mt-0.5" />
+              <div className="text-sm text-warning-strong">
                 <p className="font-semibold mb-1">Dein Inhaber muss noch die Anzahlung leisten.</p>
                 <p>
                   Du wirst per Email benachrichtigt sobald dein Account freigeschaltet ist und du
                   die ersten Fälle erhalten kannst.
                 </p>
                 {organisation && (
-                  <p className="mt-2 text-xs text-amber-700">
+                  <p className="mt-2 text-xs text-warning-strong">
                     Organisation: <strong>{organisation.name}</strong>
                   </p>
                 )}
@@ -547,11 +547,11 @@ export default function WillkommenClient({
             <div className="space-y-5">
               {/* KFZ-152 Phase 3: Community-Banner wenn der User Mitglied einer Community ist */}
               {rolle === 'community_member' && organisation && (
-                <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-4 flex items-start gap-3">
-                  <Building2Icon className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-amber-800">
+                <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-4 flex items-start gap-3">
+                  <Building2Icon className="w-5 h-5 text-warning flex-shrink-0 mt-0.5" />
+                  <div className="text-sm text-warning-strong">
                     <p className="font-medium">Du bist Mitglied der Community <strong>{organisation.name}</strong>.</p>
-                    <p className="text-xs text-amber-700 mt-1">
+                    <p className="text-xs text-warning-strong mt-1">
                       Du zahlst deine Anzahlung selbst und unterzeichnest deinen eigenen Vertrag.
                       Der Unterschied zur Solo-Mitgliedschaft: dein Lead-Pool ist mit anderen Community-Mitgliedern geteilt.
                     </p>
@@ -642,7 +642,7 @@ export default function WillkommenClient({
                   </div>
                 </div>
               ) : (
-                <div className="px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-700 text-sm">
+                <div className="px-4 py-3 rounded-ios-xl bg-warning-soft border border-warning/30 text-warning-strong text-sm">
                   Es sind noch keine Sub-Standorte angelegt. Bitte aaron.sprafke@claimondo.de kontaktieren.
                 </div>
               )}
@@ -795,7 +795,7 @@ export default function WillkommenClient({
               {/* Name */}
               <div>
                 <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                  Dein Name (juristisch verbindlich) <span className="text-red-400">*</span>
+                  Dein Name (juristisch verbindlich) <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -808,7 +808,7 @@ export default function WillkommenClient({
               {/* Signature Pad — BUG-81 controlled component bleibt */}
               <div>
                 <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                  Unterschrift <span className="text-red-400">*</span>
+                  Unterschrift <span className="text-danger">*</span>
                 </label>
                 <SignaturePadInput
                   value={signaturePng}
@@ -881,7 +881,7 @@ export default function WillkommenClient({
               {/* Name-Bestätigung */}
               <div>
                 <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                  Dein Name (zur Bestätigung) <span className="text-red-400">*</span>
+                  Dein Name (zur Bestätigung) <span className="text-danger">*</span>
                 </label>
                 <input
                   type="text"
@@ -926,7 +926,7 @@ export default function WillkommenClient({
               </div>
 
               {r === 'buero_inhaber' && gesamtAnzahlung <= 0 && (
-                <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+                <div className="px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
                   Es sind keine Sub-Standorte mit Anzahlungsbetrag vorhanden. Bitte aaron.sprafke@claimondo.de kontaktieren.
                 </div>
               )}
@@ -949,19 +949,19 @@ export default function WillkommenClient({
                 {/* Rechte Spalte: Embedded Stripe Checkout + Branding-Footer */}
                 <div className="space-y-3">
                   {!stripePublishableKey ? (
-                    <div className="px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+                    <div className="px-4 py-3 rounded-ios-xl bg-warning-soft border border-warning/30 text-warning-strong text-sm">
                       Stripe-Konfiguration fehlt (STRIPE_PUBLISHABLE_KEY). Bitte aaron.sprafke@claimondo.de kontaktieren.
                     </div>
                   ) : error ? (
                     // AAR-509: Sichtbare Fehlermeldung + Retry-Button statt
                     // Endlos-Spinner, falls startStripeCheckout fehlschlägt.
-                    <div className="rounded-ios-xl border border-red-200 bg-red-50 p-5 space-y-3">
+                    <div className="rounded-ios-xl border border-danger/30 bg-danger-soft p-5 space-y-3">
                       <div className="flex items-start gap-2">
-                        <AlertTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-                        <div className="text-sm text-red-800">
+                        <AlertTriangleIcon className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+                        <div className="text-sm text-danger-strong">
                           <p className="font-semibold mb-1">Checkout konnte nicht initialisiert werden.</p>
-                          <p className="text-xs text-red-700">{error}</p>
-                          <p className="text-[11px] text-red-700 mt-2">
+                          <p className="text-xs text-danger-strong">{error}</p>
+                          <p className="text-[11px] text-danger-strong mt-2">
                             Falls der Fehler anhält, schreib uns an{' '}
                             <a href="mailto:aaron.sprafke@claimondo.de" className="underline">
                               aaron.sprafke@claimondo.de
@@ -973,7 +973,7 @@ export default function WillkommenClient({
                         type="button"
                         onClick={retryCheckout}
                         disabled={saving}
-                        className="w-full py-2 rounded-ios-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50"
+                        className="w-full py-2 rounded-ios-xl bg-danger hover:bg-danger-strong text-white text-sm font-semibold disabled:opacity-50"
                       >
                         {saving ? 'Wird geladen ...' : 'Erneut versuchen'}
                       </button>
@@ -1053,7 +1053,7 @@ export default function WillkommenClient({
           {/* AAR-509: Anzahlungs-Step hat eigenes Error-UI mit Retry — sonst
               würde der Fehler doppelt erscheinen. */}
           {error && currentKey !== 'anzahlung' && (
-            <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+            <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
               {error}
             </div>
           )}
@@ -1179,7 +1179,7 @@ function StammRow({ label, value, breakAll }: { label: string; value: string; br
 
 function KontaktHinweis() {
   return (
-    <div className="text-xs text-claimondo-ondo bg-amber-50 border border-amber-200 rounded-ios-xl p-4">
+    <div className="text-xs text-claimondo-ondo bg-warning-soft border border-warning/30 rounded-ios-xl p-4">
       <strong>Stimmt etwas nicht?</strong> Schreib uns an{' '}
       <a href="mailto:aaron.sprafke@claimondo.de" className="text-[var(--brand-primary)] underline">
         aaron.sprafke@claimondo.de

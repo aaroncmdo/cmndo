@@ -28,9 +28,9 @@ type Props = {
 // Terminale Endzustaende (Abschluss). in_kommunikation_vs (nicht-terminal) wird separat
 // unter dem Divider gerendert.
 const ITEMS: { mode: EndzustandMode; label: string; icon: typeof CheckCircleIcon; tone: string }[] = [
-  { mode: 'reguliert',          label: 'Reguliert',            icon: CheckCircleIcon, tone: 'text-emerald-700' },
-  { mode: 'abgelehnt',          label: 'Abgelehnt',            icon: XCircleIcon,     tone: 'text-red-700' },
-  { mode: 'klage_rechtsstreit', label: 'Klage / Rechtsstreit', icon: ScaleIcon,       tone: 'text-amber-700' },
+  { mode: 'reguliert',          label: 'Reguliert',            icon: CheckCircleIcon, tone: 'text-success-strong' },
+  { mode: 'abgelehnt',          label: 'Abgelehnt',            icon: XCircleIcon,     tone: 'text-danger-strong' },
+  { mode: 'klage_rechtsstreit', label: 'Klage / Rechtsstreit', icon: ScaleIcon,       tone: 'text-warning-strong' },
   { mode: 'verjaehrt',          label: 'Verjährt',             icon: ClockIcon,       tone: 'text-claimondo-light-blue' },
   { mode: 'storniert',          label: 'Stornieren',           icon: PauseCircleIcon, tone: 'text-claimondo-light-blue' },
 ]

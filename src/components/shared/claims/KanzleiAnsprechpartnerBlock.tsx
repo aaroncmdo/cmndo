@@ -47,13 +47,13 @@ export function KanzleiAnsprechpartnerBlock({
   return (
     <div
       className={`bg-white rounded-ios-xl border shadow-sm p-5 space-y-4 ${
-        isProminent ? 'border-amber-400 border-2' : 'border-claimondo-border'
+        isProminent ? 'border-warning border-2' : 'border-claimondo-border'
       }`}
     >
       {isProminent && (
-        <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 flex items-start gap-2">
-          <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-          <p className="text-xs text-amber-900">
+        <div className="bg-warning-soft border border-warning/30 rounded-ios-lg p-3 flex items-start gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-warning-strong shrink-0 mt-0.5" />
+          <p className="text-xs text-warning-strong">
             Die Versicherung hat abgelehnt — sprich mit deiner Kanzlei. Sie übernimmt jetzt die rechtliche Vertretung.
           </p>
         </div>
