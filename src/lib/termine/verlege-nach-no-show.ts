@@ -42,7 +42,7 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
   // Alten Termin laden (sv_id + Standort + status fuer Idempotenz).
   const { data: alt } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, status, besichtigungsort_lat, besichtigungsort_lng')
+    .select('id, fall_id, claim_id, lead_id, assignee_id, assignee_typ, status, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .maybeSingle()
   if (!alt) return { ok: false, error: 'Termin nicht gefunden' }
@@ -51,7 +51,8 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
   // (Completion-Marker) -> bereits verlegt = No-Op (kein doppeltes Umhaengen/Token).
   if ((alt.status as string | null) === 'verlegt') return { ok: true }
 
-  const altSvId = (alt.sv_id as string | null) ?? null
+  // CMM-49: assignee_id (typ-guarded) statt sv_id — No-Show-Termin ist immer SV, value-identisch.
+  const altSvId = (alt.assignee_typ === 'sachverstaendiger' ? (alt.assignee_id as string | null) : null) ?? null
   const claimId = (alt.claim_id as string | null) ?? null
   const fallId = (alt.fall_id as string | null) ?? null
 

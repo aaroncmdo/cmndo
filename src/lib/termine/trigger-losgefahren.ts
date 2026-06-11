@@ -21,7 +21,7 @@ export async function triggerSvLosgefahren(
   // Termin laden
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, start_zeit, losgefahren_am, kunden_tracking_token')
+    .select('id, fall_id, claim_id, lead_id, assignee_id, assignee_typ, start_zeit, losgefahren_am, kunden_tracking_token')
     .eq('id', terminId)
     .single()
   if (!termin) return { error: 'Termin nicht gefunden' }
@@ -31,7 +31,7 @@ export async function triggerSvLosgefahren(
   const { data: sv } = await db
     .from('sachverstaendige')
     .select('id, profile_id')
-    .eq('id', termin.sv_id)
+    .eq('id', termin.assignee_id)
     .single()
   if (!sv || sv.profile_id !== user.id) return { error: 'Nicht dein Termin' }
 
@@ -63,7 +63,7 @@ export async function triggerSvLosgefahren(
   const { data: lastPos } = await db
     .from('sv_live_position')
     .select('lat, lng')
-    .eq('sv_id', termin.sv_id)
+    .eq('sv_id', termin.assignee_id)
     .order('updated_at', { ascending: false })
     .limit(1)
     .maybeSingle()
