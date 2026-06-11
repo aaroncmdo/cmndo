@@ -16,10 +16,11 @@ export type SvLeadPublic = {
   lng: number
 }
 
-// Tier-1 SVs (sachverstaendige). Klickbarkeit + Popup-Inhalt richten sich
-// nach `paket`: paket='standard' → klickbares Profil-Popup mit Sterne, Specs,
-// Region, Initiale. Alle anderen Pakete → Dead-Pin wie Tier-3.
-// Felder *NUR* gesetzt wenn paket='standard'.
+// Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron "die Profile sollen public
+// sein"): JEDER verifizierte, aktive SV (RLS-gegated auf verifiziert+map_ready)
+// bekommt ein klickbares anonymes Profil-Popup (Sterne, Specs, Region, Initiale)
+// — nicht mehr nur paket='standard'. `paket` bleibt im Typ für künftige
+// Differenzierung. Felder werden für alle zurückgegebenen Zeilen befüllt.
 export type AktiverSVPublic = {
   id: string
   standort_lat: number
@@ -104,12 +105,19 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
 
 export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
   // Read 1 (anon-RLS): Geo + paket + spezifikationen + firmenname (NUR für
-  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht)
+  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht).
+  //
+  // KEIN .eq('ist_aktiv', true): `ist_aktiv` ist NICHT in den anon-Spalten-Grants
+  // (anon-Leak-Fix granted nur 9 Map-Spalten). Ein Filter darauf wirft als anon
+  // "permission denied for table sachverstaendige" und killt den GESAMTEN Read
+  // → 0 SVs auf der Karte (nur sv_lead-Dead-Pins). Die anon-RLS-Policy
+  // `sachverstaendige_anon_select_map_ready` erzwingt ist_aktiv=true +
+  // verifiziert=true + geloescht_am IS NULL ohnehin server-seitig — der App-Filter
+  // war redundant. isochrone_polygon + standort_lat SIND granted → Filter ok.
   const supabase = await createClient()
   const { data: allRows, error } = await supabase
     .from('sachverstaendige')
     .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
-    .eq('ist_aktiv', true)
     .not('isochrone_polygon', 'is', null)
     .not('standort_lat', 'is', null)
   if (error) return { ok: false, error: error.message }
@@ -118,11 +126,13 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const rows = (allRows ?? []).filter((r) => !isTestAccount(r.firmenname as string | null))
   if (rows.length === 0) return { ok: true, data: [] }
 
-  // Read 2 (Service-Role): Vorname-Initiale + Reviews nur für paket='standard'.
-  // profiles + google_bewertungen_cache sind anon-RLS-blocked — wir lesen sie
-  // intern und reichen nur die anonymisierten Aggregate raus.
-  const standardRows = rows.filter((r) => r.paket === 'standard' && r.profile_id)
-  const profileIds = Array.from(new Set(standardRows.map((r) => r.profile_id as string)))
+  // Read 2 (Service-Role): Vorname-Initiale + Reviews für ALLE verifizierten SVs
+  // (2026-06-02, Aaron: "die Profile sollen public sein" — nicht mehr nur
+  // paket='standard'). profiles + google_bewertungen_cache sind anon-RLS-blocked
+  // — wir lesen sie intern via Service-Role und reichen nur die anonymisierten
+  // Aggregate raus (Vorname-Initiale, Review-Schnitt+Anzahl).
+  const profilRows = rows.filter((r) => r.profile_id)
+  const profileIds = Array.from(new Set(profilRows.map((r) => r.profile_id as string)))
 
   const vornameByProfileId = new Map<string, string | null>()
   const bewertungByProfileId = new Map<string, { durchschnitt: number; anzahl: number }>()
@@ -150,10 +160,9 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   }
 
   const mapped: AktiverSVPublic[] = rows.map((r) => {
-    const isStandard = r.paket === 'standard'
     const profileId = r.profile_id as string | null
-    const vorname = isStandard && profileId ? vornameByProfileId.get(profileId) ?? null : null
-    const bew = isStandard && profileId ? bewertungByProfileId.get(profileId) : undefined
+    const vorname = profileId ? vornameByProfileId.get(profileId) ?? null : null
+    const bew = profileId ? bewertungByProfileId.get(profileId) : undefined
     const specsAll = Array.isArray(r.spezifikationen) ? (r.spezifikationen as string[]) : []
     return {
       id: r.id,
@@ -161,11 +170,11 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       standort_lng: Number(r.standort_lng),
       isochrone_polygon: r.isochrone_polygon,
       paket: r.paket,
-      vorname_initiale: isStandard ? firstInitial(vorname) : null,
-      stadt: isStandard ? extractStadt(r.standort_adresse as string | null) : null,
-      spezifikationen_top3: isStandard ? specsAll.slice(0, 3) : [],
-      bewertungs_durchschnitt: isStandard && bew ? bew.durchschnitt : null,
-      bewertungs_anzahl: isStandard && bew ? bew.anzahl : null,
+      vorname_initiale: firstInitial(vorname),
+      stadt: extractStadt(r.standort_adresse as string | null),
+      spezifikationen_top3: specsAll.slice(0, 3),
+      bewertungs_durchschnitt: bew ? bew.durchschnitt : null,
+      bewertungs_anzahl: bew ? bew.anzahl : null,
     }
   })
 
