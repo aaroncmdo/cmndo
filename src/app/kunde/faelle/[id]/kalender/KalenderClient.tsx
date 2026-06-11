@@ -78,9 +78,9 @@ export default function KalenderClient({
 
   if (done) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-ios-xl p-8 text-center">
-        <p className="text-lg font-semibold text-green-700 mb-2">{t('kalender.gebucht')}</p>
-        <p className="text-sm text-green-600 mb-4">
+      <div className="bg-success-soft border border-success/30 rounded-ios-xl p-8 text-center">
+        <p className="text-lg font-semibold text-success-strong mb-2">{t('kalender.gebucht')}</p>
+        <p className="text-sm text-success mb-4">
           {confirmSlot && format.dateTime(new Date(confirmSlot), { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
         </p>
         <button onClick={() => router.push(`/kunde/faelle/${fallId}`)}
@@ -139,7 +139,7 @@ export default function KalenderClient({
                     onClick={() => setConfirmSlot(isSelected ? null : slot.time)}
                     className={`py-2.5 rounded-ios-lg text-sm font-medium transition-colors ${
                       slot.belegt
-                        ? 'bg-red-50 text-red-300 cursor-not-allowed'
+                        ? 'bg-danger-soft text-danger cursor-not-allowed'
                         : isSelected
                           ? 'bg-claimondo-ondo text-white ring-2 ring-claimondo-ondo ring-offset-1'
                           : 'bg-claimondo-bg text-claimondo-navy hover:bg-claimondo-ondo/10'
@@ -178,7 +178,7 @@ export default function KalenderClient({
           <span>{t('kalender.frei')}</span>
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="w-3 h-3 rounded bg-red-50 border border-red-200" />
+          <div className="w-3 h-3 rounded bg-danger-soft border border-danger/30" />
           <span>{t('kalender.belegt')}</span>
         </div>
       </div>
