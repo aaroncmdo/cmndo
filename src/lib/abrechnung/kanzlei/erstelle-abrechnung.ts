@@ -14,7 +14,7 @@ const BETRAG_PRO_VOLLMACHT_NETTO = 150
 /**
  * KFZ-188: Generiert Kanzlei-Monatsabrechnungen fuer alle aktiven Kanzleien.
  *
- * Prueft faelle WHERE:
+ * Prueft Claims WHERE:
  *   - vollmacht_status = 'unterschrieben'
  *   - kanzlei_provision_status = 'berechtigt'
  *   - kanzlei_abrechnung_id IS NULL
@@ -82,53 +82,48 @@ export async function erstelleKanzleiAbrechnung(
         continue
       }
 
-      // Berechtigte Faelle laden.
-      // CMM-44 SP-B PR2b: vollmacht_signiert_am + vollmacht_status leben auf
-      // claims (SSoT) — via claims-Embed laden, SP-B-Filter in App-Code.
-      // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id liegt auf claims (SSoT). Der
-      // .is(null)-Filter laesst sich nicht auf dem Embed ausdruecken → in den
-      // claims-Embed aufnehmen und in App-Code filtern (wie die SP-B-Felder).
-      // claim_id zusaetzlich fuer den Write unten.
-      // CMM-44 SP-I6: kanzlei_id lebt auf kanzlei_faelle (1:1) — der .eq-Filter geht nicht auf
-      // dem Embed, daher kanzlei_faelle(kanzlei_id) mitladen + clientseitig auf kanzlei.id
-      // filtern.
-      // CMM-61: kanzlei_provision_status + kanzlei_honorar leben auf claims (SSoT) —
-      // in den claims-Embed aufgenommen; der 'berechtigt'-Server-Filter laeuft jetzt
-      // ueber claims.kanzlei_provision_status (claims-Embed !inner, narrowt vor; alle
-      // faelle haben claim_id NOT NULL -> kein Row-Verlust durch !inner).
-      const { data: faellRaw, error: faelleErr } = await db
-        .from('faelle')
-        .select('id, claim_id, fall_nr, kanzlei_faelle(kanzlei_id), claims:claim_id!inner(vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id, kanzlei_honorar)')
-        .eq('claims.kanzlei_provision_status', 'berechtigt')
-      // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster in App-Code.
-      // SP-J-Filter: kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet).
-      const faelle = (faellRaw ?? []).filter((f) => {
+      // Berechtigte Claims laden.
+      // CMM-49 Reader-Sweep: Anker auf claims (faelle-frei, ueberlebt den faelle-DROP).
+      // vollmacht_signiert_am/vollmacht_status (CMM-44 SP-B), kanzlei_abrechnung_id (SP-J),
+      // kanzlei_honorar + kanzlei_provision_status (CMM-61) leben alle auf claims (SSoT) →
+      // direkt selektieren statt ueber den frueheren faelle->claims-!inner-Embed.
+      // kanzlei_faelle(fall_id, kanzlei_id): kanzlei_id fuer die Kanzlei-Zuordnung,
+      // fall_id (native Spalte, 0-null verifiziert) fuer die fall_id-gekeyten
+      // kanzlei_abrechnung_positionen + leads (KEIN claim_id->fall_id-Reverse).
+      // claim_nummer = altes faelle.fall_nr (0-diff). claim.id = altes claim_id.
+      // SP-B/SP-J-Filter (vollmacht_status/-fenster, abrechnung_id IS NULL) in App-Code.
+      const { data: claimsRaw, error: claimsErr } = await db
+        .from('claims')
+        .select('id, claim_nummer, kanzlei_faelle(fall_id, kanzlei_id), vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id, kanzlei_honorar')
+        .eq('kanzlei_provision_status', 'berechtigt')
+      const berechtigteClaims = (claimsRaw ?? []).filter((c) => {
         // CMM-44 SP-I6: Kanzlei-Zuordnung aus dem kanzlei_faelle-Embed (Array-normalisiert).
-        const kf = Array.isArray((f as { kanzlei_faelle?: unknown }).kanzlei_faelle)
-          ? (f as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
-          : (f as { kanzlei_faelle?: unknown }).kanzlei_faelle
+        const kf = Array.isArray((c as { kanzlei_faelle?: unknown }).kanzlei_faelle)
+          ? (c as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+          : (c as { kanzlei_faelle?: unknown }).kanzlei_faelle
         if (((kf as { kanzlei_id?: string | null } | null)?.kanzlei_id) !== kanzlei.id) return false
-        const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-        if ((c as { kanzlei_abrechnung_id?: string | null } | null)?.kanzlei_abrechnung_id != null) return false
-        if ((c?.vollmacht_status as string | null) !== 'unterschrieben') return false
-        const vam = (c?.vollmacht_signiert_am as string | null) ?? null
+        // SP-J-Filter: kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet).
+        if ((c as { kanzlei_abrechnung_id?: string | null }).kanzlei_abrechnung_id != null) return false
+        // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster.
+        if ((c.vollmacht_status as string | null) !== 'unterschrieben') return false
+        const vam = (c.vollmacht_signiert_am as string | null) ?? null
         if (!vam) return false
         return vam >= startStr && vam <= endeStr + 'T23:59:59'
       })
 
-      if (faelleErr) {
-        console.error(`[KFZ-188] faelle Query fuer ${kanzlei.id}:`, faelleErr.message)
+      if (claimsErr) {
+        console.error(`[KFZ-188] claims Query fuer ${kanzlei.id}:`, claimsErr.message)
         fehler++
         continue
       }
 
-      if (!faelle?.length) {
+      if (!berechtigteClaims?.length) {
         uebersprungen++
         continue
       }
 
       // Betraege berechnen
-      const anzahl = faelle.length
+      const anzahl = berechtigteClaims.length
       const nettoGesamt = anzahl * BETRAG_PRO_VOLLMACHT_NETTO
       const mwstBetrag = Math.round(nettoGesamt * FINANCE.MWST_PROZENT / 100 * 100) / 100
       const brutto = Math.round((nettoGesamt + mwstBetrag) * 100) / 100
@@ -184,31 +179,39 @@ export async function erstelleKanzleiAbrechnung(
         position_nr: number
       }> = []
 
-      for (let i = 0; i < faelle.length; i++) {
-        const fall = faelle[i]
+      for (let i = 0; i < berechtigteClaims.length; i++) {
+        const claim = berechtigteClaims[i]
+
+        // CMM-49: fall_id aus dem kanzlei_faelle-Embed (native Spalte, 0-null verifiziert).
+        // kanzlei_abrechnung_positionen.fall_id + leads sind fall_id-gekeyt; kf.fall_id ist die
+        // echte kanzlei_faelle-Spalte (KEIN claim_id->fall_id-Reverse via Bridge).
+        const claimKf = Array.isArray((claim as { kanzlei_faelle?: unknown }).kanzlei_faelle)
+          ? (claim as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+          : (claim as { kanzlei_faelle?: unknown }).kanzlei_faelle
+        const fallId = (claimKf as { fall_id?: string | null } | null)?.fall_id as string
 
         // Kundenname aus leads Tabelle
         let kundeName = 'Unbekannt'
         const { data: lead } = await db
           .from('leads')
           .select('vorname, nachname')
-          .eq('fall_id', fall.id)
+          .eq('fall_id', fallId)
           .limit(1)
           .maybeSingle()
         if (lead) {
           kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
         }
 
-        // CMM-44 SP-B PR2b: vollmacht_signiert_am aus claims-Embed.
-        const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
         positionen.push({
           kanzlei_abrechnung_id: abrechnungId,
-          fall_id: fall.id,
-          fall_nr: (fall.fall_nr as string | null) ?? null,
+          fall_id: fallId,
+          // CMM-49: claim_nummer (= altes faelle.fall_nr, 0-diff) aus dem claims-Anker.
+          fall_nr: (claim.claim_nummer as string | null) ?? null,
           kunde_name: kundeName,
-          vollmacht_unterschrieben_am: (fallClaim?.vollmacht_signiert_am as string) ?? '',
-          // CMM-61: kanzlei_honorar aus dem claims-Embed (SSoT), nicht mehr faelle.
-          betrag_netto: Number((fallClaim as { kanzlei_honorar?: number | null } | null)?.kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
+          // CMM-44 SP-B PR2b: vollmacht_signiert_am aus claims (SSoT, direkt am Anker).
+          vollmacht_unterschrieben_am: (claim.vollmacht_signiert_am as string) ?? '',
+          // CMM-61: kanzlei_honorar aus claims (SSoT), nicht mehr faelle.
+          betrag_netto: Number((claim as { kanzlei_honorar?: number | null }).kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
           position_nr: i + 1,
         })
       }
@@ -223,8 +226,8 @@ export async function erstelleKanzleiAbrechnung(
       // claims aktualisieren (SSoT).
       // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id auf claims.
       // CMM-61: kanzlei_provision_status auf claims (war faelle-nativ) — beide Writes
-      // in EINEM claims.update gebuendelt ueber die claim_ids.
-      const kanzleiClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
+      // in EINEM claims.update gebuendelt ueber die claim_ids (= berechtigteClaims.id).
+      const kanzleiClaimIds = berechtigteClaims.map((c) => c.id).filter((id): id is string => !!id)
       if (kanzleiClaimIds.length > 0) {
         await db
           .from('claims')

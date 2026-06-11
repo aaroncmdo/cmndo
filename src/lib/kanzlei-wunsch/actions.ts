@@ -614,17 +614,23 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
   if (!base.ok) return base
 
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle').select('claim_id, lead_id').eq('id', fallId).maybeSingle()
-  if (!fall?.claim_id) return { ok: false, error: 'Kein Claim am Fall' }
+  // CMM-49 Reader-Sweep: faelle-frei (Read) — claimId via resolveClaimId, lead_id aus claims
+  // (0-diff). Der faelle-Stammdaten-WRITE unten bleibt bewusst (P5/Entity-W-track).
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return { ok: false, error: 'Kein Claim am Fall' }
+  const { data: claim } = await admin
+    .from('claims')
+    .select('lead_id')
+    .eq('id', claimId)
+    .maybeSingle()
 
   const nowIso = new Date().toISOString()
 
   // Lead: Vollmacht signiert
-  if (fall.lead_id) {
+  if (claim?.lead_id) {
     await admin.from('leads').update({
       vollmacht_signiert_am: nowIso,
-    }).eq('id', fall.lead_id as string)
+    }).eq('id', claim.lead_id as string)
   }
 
   // Fall: Stammdaten.
@@ -648,11 +654,11 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     phase: '6_kommunikation_versicherung',
     status: 'in_kommunikation_vs',
     vollmacht_signiert_am: nowIso,
-  }).eq('id', fall.claim_id as string)
+  }).eq('id', claimId)
 
   // Smoke-OCR-Werte über die zentrale RPC schreiben → gutachten-Tabelle.
   await admin.rpc('apply_gutachten_ocr', {
-    p_claim_id: fall.claim_id as string,
+    p_claim_id: claimId,
     p_values: {
       reparaturkosten_brutto: 6500,
       minderwert: 500,
@@ -680,7 +686,7 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     }).eq('id', erstgutachten.id as string)
   }
 
-  revalidateClaim(fall.claim_id as string, fallId)
+  revalidateClaim(claimId, fallId)
   return { ok: true }
 }
 
@@ -698,16 +704,24 @@ export async function smokePflichtdokumenteAnlegen(
   if (!user) return { ok: false, error: 'Nicht angemeldet', angelegt: 0 }
 
   const admin = createAdminClient()
-  const { data: fall } = await admin
-    .from('faelle').select('id, claim_id, lead_id').eq('id', fallId).maybeSingle()
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden', angelegt: 0 }
+  // CMM-49 Reader-Sweep: claimId via resolveClaimId (faelle-frei), lead_id aus claims (0-diff).
+  const claimId = await resolveClaimId(admin, fallId)
+  if (!claimId) return { ok: false, error: 'Fall nicht gefunden', angelegt: 0 }
+  const { data: claim } = await admin
+    .from('claims')
+    .select('lead_id')
+    .eq('id', claimId)
+    .maybeSingle()
 
   // Katalog-Pfad
   let lead: Record<string, unknown> | null = null
-  if (fall.lead_id) {
-    const { data } = await admin.from('leads').select('*').eq('id', fall.lead_id as string).maybeSingle()
+  if (claim?.lead_id) {
+    const { data } = await admin.from('leads').select('*').eq('id', claim.lead_id as string).maybeSingle()
     lead = (data as Record<string, unknown> | null) ?? null
   }
+  // CMM-49 DEFER (Owner B / Entity): select('*') liest alle faelle-Stammdaten-Spalten fuer
+  // createPflichtdokumenteFromKatalog (kennzeichen/fahrzeug/schadenart = Entity-Felder) →
+  // braucht v_claim_full, nicht claims-direkt. Bleibt bis Entity-Repoint (Smoke-Helper, test-only).
   const { data: fallRow } = await admin.from('faelle').select('*').eq('id', fallId).maybeSingle()
   try {
     const { createPflichtdokumenteFromKatalog } = await import('@/lib/dokumente/create-pflicht')
@@ -738,11 +752,9 @@ export async function smokePflichtdokumenteAnlegen(
     await admin.from('pflichtdokumente').insert(toInsert)
   }
 
-  if (fall.claim_id) revalidateClaim(fall.claim_id as string, fallId)
-  else {
-    revalidatePath(`/kunde/faelle/${fallId}`)
-    revalidatePath('/kunde', 'layout')
-  }
+  // CMM-49: claimId via resolveClaimId immer gesetzt → revalidateClaim deckt /kunde/faelle/${fallId}
+  // + /kunde-Layout (frueherer else-Zweig) mit ab.
+  revalidateClaim(claimId, fallId)
   return { ok: true, angelegt: toInsert.length }
 }
 

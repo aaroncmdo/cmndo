@@ -53,3 +53,30 @@ faelle=278 Spalten → 167 faelle-only → **46 populated** → 121 dead (droppb
 3. **Koordinieren mit 1eb0febf** (Sweep-Fortschritt + Step-5-Timing) + Merge-Session (#2686/#2688/#2703).
 
 **Hygiene-Stand Session-Ende:** Working-Tree clean, alle Branches gepusht, kein eigener Stash. 3 Migrationen prod-appliziert + getrackt.
+
+---
+
+## ✅ SESSION-2 (fb34de27-Fortsetzung): Finance/Kanzlei-Slice GEBAUT + tsc-grün (0 Errors)
+
+**6 Files migriert (claims-direkt, faelle-frei FORWARD-Reads, `npx tsc --noEmit` = 0 Errors verifiziert):**
+
+| File | Migration | Value-Neutralität (prod-verifiziert) |
+|---|---|---|
+| `src/lib/finance/fall-finanzen.ts` | faelle-Read → `resolveClaimId` + `claims(sv_id, kanzlei_faelle(regulierung_am))` | accept-loss `wertminderung`+`nutzungsausfall_tagessatz` → `null` (**0-coverage über alle 79** verifiziert → exakt wert-neutral); sv_id 0-diff |
+| `src/lib/abrechnung/kanzlei/erstelle-abrechnung.ts` | faelle-List-Anker → **claims-Anker**; `positionen.fall_id`+leads via **`kanzlei_faelle.fall_id`** (native Spalte, 0-null — KEIN Bridge-Reverse) | **+ LATENT-BUG-FIX:** Original las `faelle.fall_nr` = **Phantom-Spalte** (existiert nicht → PostgREST-Reject → jede Kanzlei `fehler++`, Monatsabrechnung tot). Neu: `claims.claim_nummer`. Kein Finanzschaden (0 berechtigt-Claims) |
+| `src/app/api/cron/case-billing-batch/route.ts` | Zwei-Schritt (claims→ids→faelle) → **EINE** claims-Query | Orphan-Claim hat **sv_id=NULL** → `.not('sv_id','is',null)` schließt aus; processCaseBilling idempotent (claims.lead_preis_netto-Guard) → outcome-identisch |
+| `src/app/api/cron/release-makler-provisionen/route.ts` | faelle-Read → claims via `makler_provisionen.claim_id` (native FK); fallMap bleibt fall_id-gekeyt (downstream+leads unverändert) | makler_provisionen=**0 Rows**; operative_status SSoT (==faelle.status 0-diff bei non-null); **2 null-operative_status-Faelle** verlieren faelle.status-Fallback = CMM-74-Mirror-Gap (dokumentiert, 0-Impact) |
+| `src/app/gutachter/abrechnung/page.tsx` | faelle-Anker → claims-Anker; abrMap auf **`gutachter_abrechnungen.claim_id`** re-keyed; gutachten-Embed direkt am claims-Anker | gutachter_abrechnungen=**0 Rows**; sv_id 0-diff; strukturell value-neutral (claim_id-FK + derive-Trigger) |
+| `src/lib/kanzlei-wunsch/actions.ts` | 2 Smoke-Helper-FORWARD-Reads (smokeLexDriveSigniert + smokePflicht) → `resolveClaimId` | lead_id 0-diff; matcht das bestehende resolveClaimId-Muster im File (3 Funktionen schon migriert) |
+
+**Schema-Fakten verifiziert (prod, execute_sql READ, sv_id-Disziplin):** alle 4 Child-Tische (gutachter_abrechnungen / makler_provisionen / kanzlei_abrechnung_positionen / kanzlei_faelle) haben **`claim_id`+`fall_id`**; kanzlei_faelle.fall_id 0-null/12 rows; **Orphan-Claim 1 (sv_id=NULL)**; accept-loss wertminderung/tagessatz **0-coverage**; sv_id/lead_id 0-diff (79); operative_status==status (2 null-only); **`faelle.fall_nr` existiert NICHT** (faelle hat gutachten_nummer/mandatsnummer; claims hat claim_nummer); alle 13 genutzten claims-Spalten existieren.
+
+### DEFERS — bewusst NICHT migriert (anderer Owner, NIE naiv swappen)
+- **`src/lib/kanzlei/actions.ts` `loadClaimContext`** (1 Read): `from('faelle').eq('claim_id')` **REVERSE-Lookup** für `revalidatePath('/faelle/…')` + sendEmail/emitEvent `fallId`. → **Owner F (Route-Key)**. Bridge-Reverse VERBOTEN; Eliminierung braucht claim-keyed Routes + Branding-Signatur-Refactor.
+- **`src/lib/kanzlei-wunsch/actions.ts` (Rest):** 6 REVERSE-Reads (setKanzleiWunsch×2 / reset / updateAnsprechpartner / versende / bestaetigeSelbst — `select('id').eq('claim_id')` für revalidate / pushMandatToKanzlei / auftraege-fallId) → **Owner F**; 1 `select('*')` (smokePflicht → createPflichtdokumenteFromKatalog liest faelle-Stammdaten) → **Owner B (v_claim_full)**; 2 faelle-WRITES (smokeReset status, smokeLexDrive stammdaten) → **P5/Entity-W-track**.
+- **`src/app/kanzlei/mandate/page.tsx` + `src/app/kanzlei/kanban/page.tsx`**: lesen `kunde_vorname/kunde_nachname` (geschädigter-Party, **NICHT** claims.halter_*) + `kennzeichen` (vehicle) unter **kanzlei-RLS** → Entity-gated EMBED-Reads = **Owner B (v_claim_full)**; `f.id` als `/kanzlei/fall/[id]`-Route-Key = Owner F.
+
+### → KOORD AN 1eb0febf (Entity-Lane): 3.5 Files der Finance/Kanzlei-Slice sind EUER Revier
+mandate + kanban (kunde-PII/kennzeichen via v_claim_full, kanzlei-RLS) + smokePflicht `select('*')` gehören zum Entity-EMBED-Reader-Repoint. kanzlei/actions + die 6 kanzlei-wunsch-Reverse-Reads sind Route-Key (Owner F). Meine Slice deckt die **service-role/intern claims-direkt FORWARD-Reads** (Finance/Billing) — die sind durch.
+
+**PR:** `kitta/cmm49-sweep-finance-kanzlei` → 1 Slice-PR `--base staging` (→ Merge-Session). tsc-grün. **Kein faelle-WRITE angefasst.** Branch jetzt: 2 (process/revert-case-billing) + 6 neue Migrationen + dieser Doc-Update.
