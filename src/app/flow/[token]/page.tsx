@@ -175,7 +175,7 @@ export default async function FlowPage({
   // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
   const { data: terminMitSv } = await svc
     .from('gutachter_termine')
-    .select('id, start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma))')
+    .select('id, start_zeit, assignee_id, assignee_typ')
     // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
@@ -229,14 +229,22 @@ export default async function FlowPage({
     googleAnzahl: number | null
     googleAktualisiertAm: string | null
   } | null = null
-  if (terminMitSv?.sachverstaendige) {
-    const svJoin = terminMitSv.sachverstaendige as unknown as
-      | { profile_id: string; profiles: { vorname: string | null; avatar_url: string | null; firma: string | null } | { vorname: string | null; avatar_url: string | null; firma: string | null }[] | null }
-      | { profile_id: string; profiles: unknown }[] | null
-    const svRow = Array.isArray(svJoin) ? svJoin[0] : svJoin
-    const profile = svRow?.profiles as { vorname: string | null; avatar_url: string | null; firma: string | null } | { vorname: string | null; avatar_url: string | null; firma: string | null }[] | null
+  // CMM-49 sv_id-Drop: FK-Embed sachverstaendige(...) haengt an der zu droppenden
+  // sv_id-FK → assignee_id-Lookup (typ-guarded, value-identisch fuer SV-Termine).
+  const svReserviert =
+    terminMitSv?.assignee_typ === 'sachverstaendiger' && terminMitSv.assignee_id
+      ? (
+          await svc
+            .from('sachverstaendige')
+            .select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
+            .eq('id', terminMitSv.assignee_id)
+            .maybeSingle()
+        ).data
+      : null
+  if (svReserviert) {
+    const profile = svReserviert.profiles as { vorname: string | null; avatar_url: string | null; firma: string | null } | { vorname: string | null; avatar_url: string | null; firma: string | null }[] | null
     const profileRow = Array.isArray(profile) ? profile[0] : profile
-    const svProfileId = svRow?.profile_id as string | null | undefined
+    const svProfileId = svReserviert.profile_id as string | null | undefined
 
     // Google-Bewertungs-Cache (CMM-31) für die SV-Profil-ID laden — non-critical
     let googleDurchschnitt: number | null = null
@@ -260,7 +268,7 @@ export default async function FlowPage({
         vorname: profileRow.vorname,
         avatarUrl: profileRow.avatar_url ?? null,
         firma: profileRow.firma ?? null,
-        terminDatum: (terminMitSv.start_zeit as string | null) ?? null,
+        terminDatum: (terminMitSv?.start_zeit as string | null) ?? null,
         besichtigungsAdresse,
         svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
         googleDurchschnitt,
