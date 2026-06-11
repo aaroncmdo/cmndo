@@ -284,6 +284,8 @@ export async function runPhase4(prevResult = {}) {
     }
     if (claim && !fall) {
       const { data: newFall } = await db.from('faelle').insert({
+        // CMM-49 Step 3: faelle.id == claim_id (Identity) — sonst Bridge-Fan-out / UNIQUE(claim_id)-Throw post-Step-4
+        id: claim.id,
         lead_id: leadId,
         claim_id: claim.id,
         status: 'sv-zugewiesen',
