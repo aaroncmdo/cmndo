@@ -155,7 +155,8 @@ export async function reserviereSlot(
   const { data: terminData, error: terminErr } = await supabase
     .from('gutachter_termine')
     .insert({
-      sv_id: svLeadId ? null : svId,
+      assignee_id: svLeadId ?? svId,
+      assignee_typ: svLeadId ? 'sv_lead' : 'sachverstaendiger',
       sv_lead_id: svLeadId,
       start_zeit: vonISO,
       end_zeit: bisISO,

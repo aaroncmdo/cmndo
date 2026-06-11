@@ -223,7 +223,8 @@ export async function reserveSvTerminForLead(
     .from('gutachter_termine')
     .insert({
       lead_id: leadId,
-      sv_id: svId,
+      assignee_id: svId,
+      assignee_typ: 'sachverstaendiger',
       start_zeit: startDate.toISOString(),
       end_zeit: endDate.toISOString(),
       status: 'reserviert',

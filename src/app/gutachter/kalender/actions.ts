@@ -53,11 +53,10 @@ export async function setTermin(
     if (error) return { success: false, error: error.message }
     syncTerminId = primary.id as string
   } else {
-    // CMM-49 (sv_id-Drop): sv_id-PAYLOAD bleibt bis Writer-Step (Phase B) —
-    // normalize-Trigger füllt assignee_id, Reader lesen bereits assignee.
+    // CMM-49 (sv_id-Drop) Phase B: assignee_id/assignee_typ direkt geschrieben statt sv_id.
     const { data: inserted, error } = await supabase
       .from('gutachter_termine')
-      .insert({ fall_id: fallId, claim_id: fall.claim_id, sv_id: sv.id, start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
+      .insert({ fall_id: fallId, claim_id: fall.claim_id, assignee_id: sv.id, assignee_typ: 'sachverstaendiger', start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
       .select('id')
       .single()
     if (error) return { success: false, error: error.message }

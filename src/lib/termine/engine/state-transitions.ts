@@ -59,7 +59,7 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
 
   const { data: alt, error: ladeErr } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, sv_lead_id, fall_id, claim_id, kb_id, kanal, typ, status')
+    .select('id, assignee_id, assignee_typ, sv_lead_id, fall_id, claim_id, kb_id, kanal, typ, status')
     .eq('id', terminId)
     .maybeSingle()
   if (ladeErr) return { ok: false, error: ladeErr.message, code: 'db' }
@@ -80,11 +80,13 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
   if (altErr) return { ok: false, error: altErr.message, code: 'db' }
   if (!altUpd || altUpd.length === 0) return { ok: false, error: 'Quell-Termin race', code: 'alt_nicht_aktiv' }
 
-  // 2) neuen Slot anlegen (race-sicher via Constraint; Normalize-Trigger fuellt assignee aus sv_id)
+  // 2) neuen Slot anlegen (race-sicher via Constraint; CMM-49: assignee direkt aus alt
+  //    geschrieben, sv_id nicht mehr — der Normalize-Trigger ist damit no-op)
   const { data: neu, error: insErr } = await db
     .from('gutachter_termine')
     .insert({
-      sv_id: alt.sv_id,
+      assignee_id: alt.assignee_id,
+      assignee_typ: alt.assignee_typ,
       sv_lead_id: alt.sv_lead_id,
       fall_id: alt.fall_id,
       claim_id: alt.claim_id,

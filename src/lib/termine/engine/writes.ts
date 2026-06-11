@@ -23,7 +23,7 @@ export type ReserviereResult =
 /** assignee → passende Legacy-FK-Spalte (Dual-Write fuer Phase-3-Lesbarkeit). kanzlei = keine. */
 export function assigneeLegacyPatch(a: Assignee): Record<string, string> {
   switch (a.typ) {
-    case 'sachverstaendiger': return { sv_id: a.id }
+    case 'sachverstaendiger': return {} // CMM-49: sv_id-Dual-Write entfernt — assignee_id/assignee_typ werden direkt geschrieben (Z.49-50)
     case 'sv_lead': return { sv_lead_id: a.id }
     case 'kundenbetreuer': return { kb_id: a.id }
     default: return {}

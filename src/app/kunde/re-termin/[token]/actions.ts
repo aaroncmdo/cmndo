@@ -102,12 +102,12 @@ export async function waehleReTerminSlot(
 
   // Insert: kunde-vorgeschlagener Termin als 'reserviert'. SV bestaetigt
   // ueber sein Portal — dann wird daraus 'bestaetigt'.
-  // CMM-49 (sv_id-Drop): sv_id-PAYLOAD bleibt bis Writer-Step (Phase B) —
-  // normalize-Trigger füllt assignee_id, Reader lesen bereits assignee.
+  // CMM-49 (sv_id-Drop) Phase B: assignee_id/assignee_typ direkt geschrieben statt sv_id.
   const { data: inserted, error: insertErr } = await db.from('gutachter_termine').insert({
     fall_id: fall.id,
     claim_id: fall.claim_id,
-    sv_id: fall.sv_id,
+    assignee_id: fall.sv_id,
+    assignee_typ: 'sachverstaendiger',
     start_zeit: start.toISOString(),
     end_zeit: end.toISOString(),
     status: 'reserviert',
