@@ -1,5 +1,5 @@
 import { CLUSTER, MAIN_CITY } from '@/lib/cluster'
-import { NETZWERK_PAIN, NETZWERK_COMPARE_MOBILE } from '@/lib/content'
+import { NETZWERK_PAIN, NETZWERK_COMPARE_MOBILE, NETZWERK_PERSONEN, ABLAUF_TIMELINE } from '@/lib/content'
 import { renderRich, ClaimondoLink } from '@/lib/text'
 import { NetzwerkCompare } from './NetzwerkCompare'
 
@@ -10,6 +10,10 @@ import { NetzwerkCompare } from './NetzwerkCompare'
 // Reveal-Observer + Compare-Toggle leben in SiteScripts.tsx (Vanilla-DOM, analog
 // Burger/Chevron). DESKTOP/TABLET (hidden sm:grid): Original 1:1 — Bild-Karte +
 // Text + 4 Fakten-Badges + Client-Toggle <NetzwerkCompare />. Keine Props.
+// 08o O2: "~TAG 32" (letzter Timeline-Step) -> "~32 Tage" — EIN Datenfeld,
+// laeuft mit der Mobile-Timeline mit.
+const TIMELINE_TAGE = `~${(ABLAUF_TIMELINE[ABLAUF_TIMELINE.length - 1].day.match(/\d+/) ?? ['32'])[0]} Tage`
+
 export function NetzwerkSection() {
   return (
     <section id="netzwerk" className="py-[clamp(52px,7vw,84px)] bg-petrol text-white">
@@ -128,7 +132,7 @@ export function NetzwerkSection() {
               <img
                 id="netzwerkAvatarTobias"
                 className="cta-v8-role-img"
-                src={`${CLUSTER.imgPath}avatar-tobias-${CLUSTER.key}.png`}
+                src={`${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`}
                 alt="Sachverständiger vor Ort"
                 loading="lazy"
                 width={56}
@@ -194,112 +198,118 @@ export function NetzwerkSection() {
           </p>
         </div>
 
-        {/* ============ DESKTOP / TABLET — Original 1:1 ============ */}
-        <div className="hidden sm:grid grid-cols-1 md:grid-cols-[1fr_1.25fr] gap-[46px] items-start">
-          {/* Bild-Karte: Kundengespräch (cluster-spezifisch) + Schadensbetreuer-Karte */}
-          <div
-            id="netzwerkCard"
-            className="relative bg-cover bg-center bg-no-repeat border border-white/[.14] rounded-2xl overflow-hidden min-h-[400px] flex flex-col justify-end"
-            style={{
-              backgroundImage: `linear-gradient(180deg,rgba(14,24,32,.15) 0%,rgba(14,24,32,.50) 55%,rgba(14,24,32,.88) 100%),url('${CLUSTER.imgPath}kundengespraech-${CLUSTER.key}.webp')`,
-            }}
-          >
-            <div className="p-5 flex flex-col gap-2.5">
-              <div className="flex items-center gap-3 w-full bg-white/12 border border-white/20 rounded-[14px] p-3 backdrop-blur-[4px]">
+        {/* ============ DESKTOP / TABLET — BRIEF 08n N5: Variante B+ (Entscheid
+            Aaron 10.06., Cowork-Live-Preview abgenommen). Ersetzt das 08k-Layout:
+            Lead statt Textwand, Diagonal-Foto-Panel statt Foto-Spalte, 3 Icon-
+            Spalten statt Avatar-Kette, Stat-Leiste statt Kennzahlen-Grid.
+            Ziel ~520-600px Sectionhoehe @1440. Mobile-Insel unveraendert. ============ */}
+        <div className="hidden sm:block relative">
+          {/* 08o O2 · Kopfzeile 2-spaltig: links Eyebrow + H2 + Lead, rechts das
+              Kundengespraech-Foto als GRID-KACHEL. 08q Q2.1: Diagonal-/Links-
+              Verlauf entfernt (Entscheid Aaron) — saubere rounded Kachel, Bild
+              steht fuer sich. Grid statt absolutem Overlay -> keine Text-auf-
+              Foto-Kollision. */}
+          <div className="relative z-[1]">
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,44%)] gap-8 lg:gap-10 items-center">
+              <div>
+                <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
+                  <span className="eyebrow-dot"></span> Das <ClaimondoLink>Claimondo-Netzwerk</ClaimondoLink>
+                </span>
+                <h2 className="font-display font-bold text-section-h2 text-white mb-4 leading-tight">
+                  <span className="block text-white/70 text-[0.78em] font-semibold">Andere geben Ihnen ein Gutachten.</span>
+                  Wir geben Ihnen die <span className="text-amber">komplette Lösung</span>.
+                </h2>
+                <p className="text-white/[.86] text-[16.5px] leading-relaxed">
+                  Sie melden den Schaden einmal — alles Weitere koordinieren wir.
+                </p>
+              </div>
+              <div className="hidden lg:block relative rounded-2xl overflow-hidden h-[280px]" aria-hidden="true">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  className="w-[54px] h-[54px] rounded-full object-cover flex-none border-2 border-white/60"
-                  src="/assets/img/shared/monika.png"
-                  alt="Monika — Ihre persönliche Schadensbetreuerin"
+                  src={`${CLUSTER.imgPath}kundengespraech-${CLUSTER.key}.webp?v=${CLUSTER.assetVersion}`}
+                  alt=""
+                  className="w-full h-full object-cover"
+                  style={{ objectPosition: '65% 25%' }}
                   loading="lazy"
                 />
-                <div className="text-left flex-1 min-w-0">
-                  <strong className="block text-white text-[14.5px] leading-tight">
-                    Ihre persönliche Schadensbetreuerin
-                  </strong>
-                  <span className="block text-white/80 text-[12px] mt-[3px] leading-snug">
-                    <span className="text-green font-semibold">● online</span> · 24/7 erreichbar &amp; eigenes
-                    Kundenportal
-                  </span>
-                </div>
-              </div>
-              <div className="inline-flex items-center gap-2 text-white/[.82] text-[11.5px] font-semibold">
-                Lokaler DAT-/BVSK-Sachverständiger vor Ort
               </div>
             </div>
-          </div>
 
-          {/* Text + Fakten + Tabelle */}
-          <div>
-            <span className="inline-flex items-center gap-2 font-mono text-xs font-bold tracking-[.08em] uppercase text-amber mb-3.5">
-              <span className="eyebrow-dot"></span> Das <ClaimondoLink>Claimondo-Netzwerk</ClaimondoLink>
-            </span>
-            <h2 className="font-display font-bold text-section-h2 text-white mb-4 leading-tight">
-              Andere geben Ihnen ein Gutachten.
-              <br />
-              Wir geben Ihnen die <span className="text-amber">komplette Lösung</span>.
-            </h2>
-            <p className="text-white/[.86] text-[15.5px] leading-relaxed mb-5">
-              Über uns erhalten Sie Zugriff auf{' '}
-              <strong className="text-white">
-                90+ unabhängige, nach DAT- und BVSK-Standard zertifizierte Kfz-Sachverständige
-              </strong>{' '}
-              in Ihrer Region — mit eigenem Online-Portal, persönlichem Schadensbetreuer und voller Abwicklung über
-              unsere Partnerkanzlei. Und falls die Versicherung kürzt:{' '}
-              <strong className="text-white">
-                Wir prüfen gegen und setzen Ihre Ansprüche mit einem gerichtsfesten Gegengutachten durch
-              </strong>
-              .
-            </p>
+            {/* 08o O2 · 3 Personen-Karten statt Icon-Spalten — wortgleich aus
+                NETZWERK_PERSONEN (lib/content); {sv} = CLUSTER.svName. Struktur
+                ueberall: Avatar links, Name/Funktion + Ich-Zitat rechts —
+                >=1024 als 3er-Grid, 640-1023 gestapelte Zeilen. */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6 mt-8">
+              {NETZWERK_PERSONEN.map((p) => (
+                <div key={p.avatar} className="border border-white/[.14] rounded-2xl p-5 flex gap-3.5 items-start">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  {/* 08p P4: 34px war zu klein (25-31% der Tablet-Zeilenhoehe,
+                      Gesichter kaum erkennbar — Aaron/Bridge). Tablet/Mobile-
+                      Zeilen 60px + vertikal zentriert (~55% Zeilenhoehe),
+                      Desktop-Karten 46px; object-position via avatarPos je
+                      Asset (Gesicht mittig, Kopf nicht anschneiden). */}
+                  <img
+                    src={p.avatar === 'sv'
+                      ? `${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`
+                      : `/assets/img/shared/avatar-${p.avatar}.png`}
+                    alt={`${p.name === '{sv}' ? CLUSTER.svName : p.name} — ${p.funktion}`}
+                    width={60}
+                    height={60}
+                    loading="lazy"
+                    style={p.avatarPos ? { objectPosition: p.avatarPos } : undefined}
+                    className="w-[60px] h-[60px] lg:w-[46px] lg:h-[46px] rounded-full object-cover flex-none self-center lg:self-start lg:mt-0.5"
+                  />
+                  <div className="min-w-0">
+                    <p className="text-white font-display font-bold text-[15px] leading-tight">
+                      {p.name === '{sv}' ? CLUSTER.svName : p.name}
+                    </p>
+                    <p className="text-white/60 text-[12.5px] leading-snug mt-0.5">{p.funktion}</p>
+                    <p className="text-white/80 italic text-[14px] leading-relaxed mt-2">„{p.zitat}“</p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-            {/* Fakten-Leiste: 4 kompakte Badges */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-6">
-              <div className="bg-white/[.06] border border-white/[.14] rounded-xl px-3 py-3 text-center">
-                <div className="font-mono font-bold text-amber text-[22px] leading-none tabular-nums">90+</div>
-                <div className="text-[10.5px] text-white/75 mt-1.5 leading-tight">
-                  zertifizierte
-                  <br />
-                  Gutachter
-                </div>
+            {/* 08q Q2.2 · Nutzen-Leiste aufgewertet: keine Hairlines mehr, drei
+                zentrierte Mini-Stat-Bloecke mit Wert/Label-Hierarchie (Wert
+                20-22px — 0 €/~32 Tage Gold, "Jeden Schritt live" Weiss; Label
+                klein/gedaempft). Grosszuegiger Abstand zu Karten und CTA. */}
+            <div className="mt-12 flex flex-wrap items-start justify-center gap-x-12 gap-y-6 text-center">
+              <div>
+                <p className="font-display font-bold text-[22px] leading-none text-amber">0 €</p>
+                <p className="text-[13px] text-white/60 mt-1.5">bei unverschuldetem Unfall</p>
               </div>
-              <div className="bg-white/[.06] border border-white/[.14] rounded-xl px-3 py-3 text-center">
-                <div className="font-display font-bold text-white text-[14px] leading-tight">DAT · BVSK</div>
-                <div className="text-[10.5px] text-white/75 mt-1.5 leading-tight">
-                  anerkannte
-                  <br />
-                  Standards
-                </div>
+              <div>
+                <p className="font-display font-bold text-[22px] leading-none text-amber">{TIMELINE_TAGE}</p>
+                <p className="text-[13px] text-white/60 mt-1.5">bis zum Geld auf dem Konto</p>
               </div>
-              <div className="bg-white/[.06] border border-white/[.14] rounded-xl px-3 py-3 text-center">
-                <div className="font-display font-bold text-white text-[14px] leading-tight">Eigenes Portal</div>
-                <div className="text-[10.5px] text-white/75 mt-1.5 leading-tight">
-                  Schaden jederzeit
-                  <br />
-                  im Blick
-                </div>
-              </div>
-              <div className="bg-white/[.06] border border-white/[.14] rounded-xl px-3 py-3 text-center">
-                <div className="font-mono font-bold text-amber text-[22px] leading-none tabular-nums">0 €</div>
-                <div className="text-[10.5px] text-white/75 mt-1.5 leading-tight">
-                  bei unverschuldetem
-                  <br />
-                  Unfall
-                </div>
+              <div>
+                <p className="font-display font-bold text-[22px] leading-none text-white">Jeden Schritt live</p>
+                <p className="text-[13px] text-white/60 mt-1.5">im Online-Portal</p>
               </div>
             </div>
-          </div>
 
-          {/* Vergleichstabelle als full-width Grid-Sibling (DIFF 1, v15 Cowork):
-              spannt via .netzwerk-compare-fullspan (globals.css) auf Tablet+Desktop
-              beide Spalten, statt in der schmalen rechten 1.25fr-Spalte zu stauchen. */}
-          <div className="netzwerk-compare-fullspan">
-            {/* Toggle + vollständige Vergleichstabelle (Client) */}
-            <NetzwerkCompare />
+            {/* N5.7 · CTA ab 768 horizontal zentriert (Entscheid Aaron). */}
+            <div className="mt-10 flex justify-center">
+              <button
+                type="button"
+                id="netzwerkCompareToggleDesk"
+                aria-expanded="false"
+                aria-controls="netzwerkCompareTable"
+                className="inline-flex items-center gap-2 cursor-pointer bg-amber text-white font-display font-semibold text-sm px-[18px] py-2.5 rounded-full shadow-md hover:bg-amber-700 hover:-translate-y-px transition border-0"
+              >
+                <span className="netzwerk-toggle-label">Komplett-Service im Vergleich ansehen</span>
+                <span className="netzwerk-toggle-chev text-[12px]" aria-hidden="true">▾</span>
+              </button>
+            </div>
 
-            <p className="netzwerk-compare-hint mt-4 text-[12.5px] text-white/[.62] leading-relaxed">
-              Hinweis: „Gegengutachten“ bezeichnet die fachliche Widerlegung eines Prüfberichts/Versicherergutachtens
-              nach DAT/BVSK-Standard. Die erzielbare Auszahlung ist einzelfallabhängig.
-            </p>
+            {/* Vergleichstabelle: Aufklapp-Mechanik unveraendert (NetzwerkCompare
+                bindet den Button per id). 08q Q2.3: Gegengutachten-Fussnote ist
+                IN die Tabelle gezogen (nur bei offener Tabelle sichtbar) — unter
+                dem CTA bleibt nichts. */}
+            <div className="netzwerk-compare-fullspan">
+              <NetzwerkCompare />
+            </div>
           </div>
         </div>
       </div>
