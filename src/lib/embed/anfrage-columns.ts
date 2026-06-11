@@ -88,5 +88,15 @@ export function buildAnfrageColumns(input: InsertAnfrageInput): Record<string, u
     utm_content: payload.utm_content ?? null,
     ga_client_id: payload.ga_client_id ?? null,
     dsgvo_zustimmung_am: payload.consent_ts ?? new Date().toISOString(),
+    // AAR-956 P5 (gutachter-finder): per-Request-Fixer + geocodeter Besichtigungsort.
+    // schadenort_lat/lng sind die einzigen Koord-Spalten der gfa (issueCanonical
+    // mappt sie -> lead.fahrzeug_standort_lat/lng fuers /flow-Matching, wie der alte
+    // starteLiveBuchung-Pfad). zugeordneter_sv_id wird in /flow zum Fixer. Andere
+    // Quellen senden diese Felder nicht -> null (Verhalten unveraendert).
+    zugeordneter_sv_id: payload.zugeordneter_sv_id ?? null,
+    schadenort_lat: payload.besichtigungsort_lat ?? null,
+    schadenort_lng: payload.besichtigungsort_lng ?? null,
+    besichtigungsort_adresse: payload.besichtigungsort_adresse ?? null,
+    matching_typ: payload.zugeordneter_sv_id ? 'karte-klick-live' : null,
   }
 }
