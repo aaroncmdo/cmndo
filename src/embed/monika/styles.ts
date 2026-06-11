@@ -105,13 +105,14 @@ export const STYLES = `
   border-radius: 14px; padding: 7px 12px 7px 8px; box-shadow: 0 6px 18px rgba(13,27,62,.16);
   opacity: 0; transform: translateX(10px); transition: opacity .2s, transform .2s cubic-bezier(.22,1,.36,1);
   pointer-events: none; white-space: nowrap; }
-/* Desktop: statisch ausgefahren statt erst bei Hover (frueher .mk-fab-wrap:hover). Mobile <=639 via Regel unten. */
-@media (min-width: 640px) { .mk-hoverpill { opacity: 1; transform: none; } }
+/* Identitaets-Pill NUR auf echtem Desktop (Maus/Trackpad, >=1024) statisch ausgefahren.
+   Mobil + iPad (Touch: hover:none / pointer:coarse) bleiben auf default=versteckt
+   -> dort uebernehmen die Teaser-Anstupser (mk-teaser) das Aufmerksam-Machen. */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) { .mk-hoverpill { opacity: 1; transform: none; } }
 .mk-hoverpill .mk-mini { width: 30px; height: 30px; }
 .mk-hoverpill-txt { display: flex; flex-direction: column; line-height: 1.2; }
 .mk-hoverpill-txt strong { font-size: 13px; color: var(--monika-primary); font-weight: 700; }
 .mk-hoverpill-txt span { font-size: 11.5px; color: var(--monika-accent); }
-@media (max-width: 639px) { .mk-hoverpill { opacity: 1; transform: none; } }
 
 /* N2: rote (1)-Badge auf dem Siegel (Notification, semantisches Rot) */
 .mk-badge { position: absolute; top: -3px; right: -3px; min-width: 20px; height: 20px; padding: 0 5px;
