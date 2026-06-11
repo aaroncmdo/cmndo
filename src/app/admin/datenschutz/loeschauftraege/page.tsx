@@ -23,9 +23,9 @@ type AuftragRow = {
 }
 
 const STATUS_META: Record<AuftragRow['status'], { label: string; color: string; icon: typeof ClockIcon }> = {
-  eingereicht: { label: 'Eingereicht', color: 'bg-amber-100 text-amber-800 border-amber-200', icon: ClockIcon },
+  eingereicht: { label: 'Eingereicht', color: 'bg-warning-soft text-warning-strong border-warning/30', icon: ClockIcon },
   bestaetigt: { label: '14d Karenz', color: 'bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/30', icon: ClockIcon },
-  ausgefuehrt: { label: 'Ausgeführt', color: 'bg-emerald-100 text-emerald-800 border-emerald-200', icon: CheckCircleIcon },
+  ausgefuehrt: { label: 'Ausgeführt', color: 'bg-success-soft text-success-strong border-success/30', icon: CheckCircleIcon },
   abgelehnt: { label: 'Abgelehnt', color: 'bg-claimondo-navy/[0.06] text-claimondo-shield border-claimondo-border', icon: XCircleIcon },
   storniert: { label: 'Storniert', color: 'bg-claimondo-navy/[0.06] text-claimondo-shield border-claimondo-border', icon: XCircleIcon },
 }
@@ -61,10 +61,10 @@ export default async function AdminDsgvoLoeschauftraegePage() {
     <div className="w-full max-w-5xl px-4 py-6 mx-auto space-y-6">
       <PageHeader title="DSGVO Lösch-Anträge" size="lg" />
 
-      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-4">
+      <div className="rounded-ios-xl border border-warning/30 bg-warning-soft p-4">
         <div className="flex items-start gap-3">
-          <ShieldAlertIcon width={18} height={18} className="text-amber-700 mt-0.5 shrink-0" />
-          <div className="text-xs leading-relaxed text-amber-900">
+          <ShieldAlertIcon width={18} height={18} className="text-warning-strong mt-0.5 shrink-0" />
+          <div className="text-xs leading-relaxed text-warning-strong">
             <p className="font-semibold">DSGVO Art. 17 — Recht auf Vergessenwerden.</p>
             <p className="mt-1">
               Bestätigung startet 14-Tage-Karenz. Direkt-Ausführen ohne Karenz nur in
