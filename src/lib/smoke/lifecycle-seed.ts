@@ -165,6 +165,10 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
   let fallId = ''
   if (!sceneNeedsLeadOnly) {
     const { data: fall, error: fallErr } = await db.from('faelle').insert({
+      // CMM-49 Step 3 (faelle-Drop-Vorbereitung): faelle.id == claim_id (Identity).
+      // Claim wird oben (@136) zuerst angelegt -> claimId gesetzt. Haelt die Bridge 1:1
+      // unter dem kommenden claims->bridge-Trigger (sonst UNIQUE(claim_id)-Throw beim Smoke).
+      id: claimId,
       claim_id: claimId,
       lead_id: leadId,
       kunde_id: KUNDE_ID,

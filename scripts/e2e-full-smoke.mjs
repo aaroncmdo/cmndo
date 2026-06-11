@@ -403,7 +403,8 @@ async function main() {
               // Fallakte mit claim_id anlegen
               const { data: newFall, error: fallErr } = await db2
                 .from('faelle')
-                .insert({ lead_id: leadId, claim_id: claimRow.id, status: 'sv-termin' })
+                // CMM-49 Step 3: faelle.id == claim_id (Identity) — sonst Bridge-Fan-out / UNIQUE(claim_id)-Throw post-Step-4
+                .insert({ id: claimRow.id, lead_id: leadId, claim_id: claimRow.id, status: 'sv-termin' })
                 .select('id')
                 .single()
               if (fallErr) {

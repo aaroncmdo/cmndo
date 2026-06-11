@@ -62,6 +62,8 @@ async function run() {
   // 3. Minimaler Fall mit sv_id gesetzt (Kernbedingung für Schritt 12)
   const fallNummer = `CLM-TEST-${Date.now()}`
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
+    // CMM-49 Step 3: faelle.id == claim_id (Identity) — sonst Bridge-Fan-out / UNIQUE(claim_id)-Throw post-Step-4
+    id: claimId,
     lead_id: leadId,
     claim_id: claimId,
     fall_nummer: fallNummer,
