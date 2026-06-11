@@ -1,0 +1,128 @@
+name: Deploy → VPS (kfz-unfallgutachter-koeln.de :3007)
+
+# Auto-Deploy der Cluster-LP Koeln (Standalone Next-16, eigene Domain,
+# PM2 kfz-gutachter-koeln :3007). Klon des Wuppertal/Bonn/Duesseldorf-Patterns.
+#   - Build in CI (code-only) — keine static image-imports, Bild-Assets gitignored.
+#   - Atomarer Verzeichnis-Switch -> kein 502-Fenster.
+#   - Assets PERSISTENT unter /var/www/kfz-assets/koeln/ -> in jeden Deploy gesymlinkt.
+#   - Runtime-ENV = 4 public NEXT_PUBLIC_-Werte (keine Secrets), im SSH-Step geschrieben.
+#   - Health-Check :3007/ mit Auto-Rollback auf das vorige Verzeichnis (-old).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'kfz-gutachter-koeln/**'
+      - '.github/workflows/deploy-vps-kfz-koeln.yml'
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install (koeln)
+        working-directory: kfz-gutachter-koeln
+        run: npm install --no-audit --no-fund
+
+      - name: Build (standalone, code-only)
+        working-directory: kfz-gutachter-koeln
+        run: npm run build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
+          # 4 public NEXT_PUBLIC_-Werte (= VPS-Runtime-ENV, kein Secret noetig):
+          NEXT_PUBLIC_SITE_URL: https://kfz-unfallgutachter-koeln.de
+          NEXT_PUBLIC_EMBED_BASE: https://app.claimondo.de
+          NEXT_PUBLIC_MONIKA_EMBED_ENABLED: 'true'
+          NEXT_PUBLIC_GTM_ID: GTM-KD2L63T3
+
+      - name: Artefakt packen (standalone-Inhalt)
+        working-directory: kfz-gutachter-koeln
+        run: tar -czf ../deploy-kfz-koeln.tar.gz -C .next/standalone .
+
+      - name: Deploy → VPS (SCP)
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          source: deploy-kfz-koeln.tar.gz
+          target: /tmp/
+
+      - name: Atomic switch + Asset-Symlink + restart :3007 (+ Auto-Rollback)
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 212.132.119.110
+          username: root
+          key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 10m
+          script: |
+            set -euo pipefail
+            APP=/var/www/kfz-unfallgutachter-koeln-app
+            ASSETS=/var/www/kfz-assets/koeln
+
+            # 0. Persistente Assets muessen existieren (one-time vorab angelegt).
+            if [ ! -d "$ASSETS" ]; then
+              echo "FATAL: $ASSETS fehlt — erst die Bild-Assets persistent ablegen (one-time)."
+              exit 1
+            fi
+
+            # 1. Neues Standalone in -new entpacken (live bleibt unberuehrt).
+            rm -rf "${APP}-new"
+            mkdir -p "${APP}-new"
+            tar -xzf /tmp/deploy-kfz-koeln.tar.gz -C "${APP}-new"
+
+            # 2. Runtime-ENV (4 public Werte) + persistente Assets in -new.
+            cat > "${APP}-new/.env.local" <<ENV
+            NEXT_PUBLIC_MONIKA_EMBED_ENABLED=true
+            NEXT_PUBLIC_SITE_URL=https://kfz-unfallgutachter-koeln.de
+            NEXT_PUBLIC_EMBED_BASE=https://app.claimondo.de
+            NEXT_PUBLIC_GTM_ID=GTM-KD2L63T3
+            ENV
+            rm -rf "${APP}-new/public/assets/img"
+            mkdir -p "${APP}-new/public/assets"
+            ln -sfn "$ASSETS" "${APP}-new/public/assets/img"
+
+            # 3. Atomarer Switch.
+            rm -rf "${APP}-old" 2>/dev/null || true
+            mv "$APP" "${APP}-old" 2>/dev/null || true
+            mv "${APP}-new" "$APP"
+
+            # 4. Restart :3007 (flache Standalone-Struktur: server.js im App-Root).
+            pm2 delete kfz-gutachter-koeln 2>/dev/null || true
+            PORT=3007 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" \
+              --name kfz-gutachter-koeln \
+              --max-memory-restart 600M \
+              --cwd "$APP"
+            pm2 save
+            sleep 5
+
+            # 5. Health-Check + Auto-Rollback (restauriert die VORIGE Struktur robust).
+            code=$(curl -s -L -o /dev/null -w "%{http_code}" --max-time 20 "http://localhost:3007/")
+            echo "Health / -> HTTP $code"
+            if [ "$code" != "200" ]; then
+              echo "HEALTH-CHECK FAILED ($code) — ROLLBACK."
+              pm2 delete kfz-gutachter-koeln 2>/dev/null || true
+              rm -rf "$APP"
+              mv "${APP}-old" "$APP"
+              if [ -f "${APP}/server.js" ]; then
+                PORT=3007 HOSTNAME=127.0.0.1 pm2 start "${APP}/server.js" --name kfz-gutachter-koeln --max-memory-restart 600M --cwd "$APP"
+              else
+                PORT=3007 HOSTNAME=127.0.0.1 pm2 start "${APP}/.next/standalone/server.js" --name kfz-gutachter-koeln --max-memory-restart 600M --cwd "${APP}/.next/standalone"
+              fi
+              pm2 save
+              echo "Rollback abgeschlossen — Deploy fehlgeschlagen."
+              exit 1
+            fi
+
+            rm -f /tmp/deploy-kfz-koeln.tar.gz
+            echo "Koeln-Deploy $(date) OK (HTTP $code)"

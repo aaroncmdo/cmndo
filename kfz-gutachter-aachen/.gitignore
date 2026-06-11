@@ -1,0 +1,35 @@
+# deps
+/node_modules
+/.pnp
+.pnp.*
+
+# next
+/.next/
+/out/
+next-env.d.ts
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# env
+.env*.local
+.env
+
+# typescript
+*.tsbuildinfo
+
+# Bild-Assets (Binaries, ~400MB) NICHT ins Git — werden via brand-assets-archiv.zip
+# in public/assets/img/ extrahiert (Deploy/Dev), analog autounfall-io (Drive-Assets).
+# Siehe DEPLOY.md + MISSING-ASSETS.md. Ausnahme: ratgeber/ (4 kleine autounfall-
+# Heroes, ~90KB, Ratgeber-Karten-Banner) + brand-SVGs + favicon bleiben getrackt.
+/public/assets/img/*
+!/public/assets/img/ratgeber/
