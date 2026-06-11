@@ -145,7 +145,7 @@
    1024-1279 braucht keinen Override: default y=0 + cover ist hoehenstabil. */
 @media (min-width: 1280px) { :root { --hero-bg-y: max(calc(656px - 59.136vw), calc(100svh - 72.117vw)); --hero-bg-size: 108% auto; } }
 @media (min-width: 1440px) { :root { --hero-bg-y: max(calc(720px - 61.433vw), calc(100svh - 76.791vw)); --hero-bg-size: 115% auto; } }
-@media (min-width: 1920px) { :root { --hero-bg-y: max(calc(342.4px - 21.168vw), calc(100svh - 66.776vw)); --hero-bg-size: cover; } }
+@media (min-width: 1920px) { :root { --hero-bg-y: 70px; --hero-bg-size: cover; } }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
 @utility max-w-wrap {
