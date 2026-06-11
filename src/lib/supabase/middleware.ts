@@ -183,6 +183,11 @@ function isPublicPath(pathname: string): boolean {
     // zum Lead + stellt den /flow-FlowLink aus. Ohne diesen Eintrag landet der
     // anon-Request auf /login statt im Flow (Smoke-Befund 03.06.).
     '/start',
+    // AAR-956 Embed: gutachter-finder als Haupt-App-iframe-Embed (/embed/gutachter-finder).
+    // Public/anon — Karte + 3-Step-Wizard + Termin-Engine inline, per iframe ueberall
+    // einbettbar. MIT Slash ('/embed/') wie '/g/' — ohne Slash wuerde startsWith z.B.
+    // ein kuenftiges geschuetztes '/embed-xyz' faelschlich oeffnen (Auth-Bypass).
+    '/embed/',
     // AAR-134: SV-Token-Ablehnung via Email-Link (kein Login nötig)
     '/ablehnen',
     // AAR-339: ZB1-Upload-Link (/upload/zb1/[token]) — Kunde hat noch keinen
