@@ -5,7 +5,9 @@
 // als Phase-5-Primärweg.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
+import { persistFlowLinkVersand } from '@/lib/start-link/persist-flowlink-versand'
 import { revalidatePath } from 'next/cache'
 
 export async function sendFlowLinkMultiChannel(
@@ -154,6 +156,15 @@ export async function sendFlowLinkMultiChannel(
       const r = await sendMiniWizardMagicLink(leadId, flowUrl)
       if (!r.success) return { success: false, error: r.error }
     }
+  }
+
+  // AAR-956 P4: Versand-State auf flow_links persistieren (Dispatcher sieht
+  // gesendet?/wann/Kanal + Re-Send-Anzahl). Service-Role, da flow_links default-deny
+  // fuer authenticated ist. Non-fatal — der Send ist hier bereits erfolgreich.
+  try {
+    await persistFlowLinkVersand(createAdminClient(), token, kanal)
+  } catch (err) {
+    console.error('[sendFlowLinkMultiChannel] persistFlowLinkVersand:', err)
   }
 
   // Lead-Status auf flow-versendet (AAR-116 Hardening: nur nach erfolgreichem Send).

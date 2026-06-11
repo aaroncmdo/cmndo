@@ -146,6 +146,30 @@ export async function POST(req: NextRequest) {
     return json({ ok: false, error: 'insert_failed' }, 500)
   }
 
+  // ── 4b. AAR-956 P3: 2-Knopf-Funnel (aktion). Eine explizite Aktion vom Formular
+  // entscheidet VOR dem Legacy-funnel_modus-Branch (D3-deprecate-Vorlauf):
+  //   'direkt' → issue OHNE Versand (opts.send=false) → Token zurueck → Client
+  //              redirectet nach /flow/[token] (Self-Onboarding sofort).
+  //   'senden' → issue MIT Versand (WA→SMS→Email, persistiert via P2) → Lead haengt
+  //              zusaetzlich in der Dispatch-Queue (manueller Kontakt).
+  // Fehlt aktion (heutige Monika-Embed/Cluster-Caller) → Fall-through, unveraendert.
+  if (payload.aktion === 'direkt' || payload.aktion === 'senden') {
+    const issued = await issueCanonicalFlowLinkForAnfrage(result.anfrageId, {
+      send: payload.aktion === 'senden',
+    })
+    if (!issued.ok) {
+      console.error('[AAR-956 P3] issueCanonical fehlgeschlagen:', issued.error)
+      return json({ ok: true, modus: 'callback', anfrage_id: result.anfrageId }, 200)
+    }
+    if (payload.aktion === 'senden') {
+      return json(
+        { ok: true, modus: 'gesendet', kanal: issued.kanal, token: issued.token, anfrage_id: result.anfrageId },
+        200,
+      )
+    }
+    return json({ ok: true, modus: 'direkt', token: issued.token, anfrage_id: result.anfrageId }, 200)
+  }
+
   // ── 5. Funnel-Modus-Branch (sv_embed A/B) ────────────────────────────────
   // Variante B (embed_sites.funnel_modus='flowlink', opt-in pro SV): konversion-first
   // INLINE. issueCanonicalFlowLinkForAnfrage macht alles server-seitig — Lead (idempotent),
