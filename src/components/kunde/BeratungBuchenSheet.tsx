@@ -232,7 +232,7 @@ export default function BeratungBuchenSheet({
                 </div>
               )}
               {loadErr && (
-                <div className="rounded-ios-xl border-2 border-red-200 bg-red-50 p-4 text-sm text-red-900">
+                <div className="rounded-ios-xl border-2 border-danger/30 bg-danger-soft p-4 text-sm text-danger-strong">
                   {loadErr}
                 </div>
               )}
@@ -322,7 +322,7 @@ export default function BeratungBuchenSheet({
                 {kbName && <Row label={t('zusammenfassungBerater')} value={kbName} />}
               </div>
               {bookErr && (
-                <div className="rounded-ios-xl border-2 border-red-200 bg-red-50 p-3 text-sm text-red-900">
+                <div className="rounded-ios-xl border-2 border-danger/30 bg-danger-soft p-3 text-sm text-danger-strong">
                   {bookErr}
                 </div>
               )}
@@ -334,8 +334,8 @@ export default function BeratungBuchenSheet({
 
           {step === 'success' && (
             <div className="flex flex-col items-center py-8 text-center">
-              <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mb-4">
-                <CheckIcon className="w-7 h-7 text-emerald-600" strokeWidth={3} />
+              <div className="w-14 h-14 rounded-full bg-success-soft flex items-center justify-center mb-4">
+                <CheckIcon className="w-7 h-7 text-success" strokeWidth={3} />
               </div>
               <p className="text-lg font-semibold text-claimondo-navy">{t('gebuchtTitel')}</p>
               <p className="mt-1.5 text-sm text-claimondo-ondo">

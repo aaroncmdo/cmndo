@@ -789,36 +789,36 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* VS-Kürzung-Hinweis (Brutto-Beträge bewusst nicht gerendert) */}
         {(fall.status as string) === 'vs-kuerzt' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 space-y-2">
+          <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="text-amber-700 text-lg">&#9888;</span>
-              <p className="text-sm font-semibold text-amber-900">{t('vsKuerzt.titel')}</p>
+              <span className="text-warning-strong text-lg">&#9888;</span>
+              <p className="text-sm font-semibold text-warning-strong">{t('vsKuerzt.titel')}</p>
             </div>
             {typeof fall.vs_kuerzung_grund === 'string' && (fall.vs_kuerzung_grund as string) && (
-              <div className="rounded-ios-md bg-white/60 border border-amber-200 p-2 text-[11px] text-amber-800">
+              <div className="rounded-ios-md bg-white/60 border border-warning/30 p-2 text-[11px] text-warning-strong">
                 <strong className="block mb-0.5">{t('vsKuerzt.begruendung')}</strong>
                 {fall.vs_kuerzung_grund as string}
               </div>
             )}
-            <p className="text-[11px] text-amber-700">
+            <p className="text-[11px] text-warning-strong">
               {t('vsKuerzt.hinweis')}
             </p>
           </div>
         )}
 
         {(fall.status as string) === 'vs-abgelehnt' && (
-          <div className="bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 space-y-1">
-            <p className="text-sm font-semibold text-red-900">{t('vsAbgelehnt.titel')}</p>
-            <p className="text-xs text-red-700">
+          <div className="bg-danger-soft border border-danger/30 rounded-ios-xl px-4 py-3 space-y-1">
+            <p className="text-sm font-semibold text-danger-strong">{t('vsAbgelehnt.titel')}</p>
+            <p className="text-xs text-danger-strong">
               {t('vsAbgelehnt.text')}
             </p>
           </div>
         )}
 
         {(fall.status as string) === 'klage' && (
-          <div className="bg-red-50 border border-red-200 rounded-ios-xl px-4 py-3 space-y-1">
-            <p className="text-sm font-semibold text-red-900">{t('klage.titel')}</p>
-            <p className="text-xs text-red-700">
+          <div className="bg-danger-soft border border-danger/30 rounded-ios-xl px-4 py-3 space-y-1">
+            <p className="text-sm font-semibold text-danger-strong">{t('klage.titel')}</p>
+            <p className="text-xs text-danger-strong">
               {t('klage.text')}
             </p>
           </div>
@@ -924,8 +924,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             variant="progress-card"
             banner={
               szenario === 'ruegefall' ? (
-                <div className="mt-4 bg-amber-50 border border-amber-200 rounded-ios-xl px-3 py-2">
-                  <p className="text-xs text-amber-700 font-medium">
+                <div className="mt-4 bg-warning-soft border border-warning/30 rounded-ios-xl px-3 py-2">
+                  <p className="text-xs text-warning-strong font-medium">
                     {t('ruegefall.banner')}
                   </p>
                 </div>
@@ -958,7 +958,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     console.error('[KundeFallDetail] Error:', err)
     return (
       <div className="p-8 text-center">
-        <p className="text-red-600 font-semibold">{t('fehler.titel')}</p>
+        <p className="text-danger font-semibold">{t('fehler.titel')}</p>
         <p className="text-sm text-claimondo-ondo mt-1">{t('fehler.text')}</p>
       </div>
     )

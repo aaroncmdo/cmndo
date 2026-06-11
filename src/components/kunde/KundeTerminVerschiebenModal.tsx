@@ -185,7 +185,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
         )}
 
         {!ladeVorschlaege && vorschlaegeErr && (
-          <p className="text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg p-2">
+          <p className="text-sm text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg p-2">
             {vorschlaegeErr}
           </p>
         )}
@@ -261,8 +261,8 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
 
             {/* Alternativen wenn Wunschslot belegt */}
             {alternatives.length > 0 && (
-              <div className="rounded-ios-xl bg-amber-50 border border-amber-300 p-3">
-                <p className="text-sm font-semibold text-amber-900 mb-2">
+              <div className="rounded-ios-xl bg-warning-soft border border-warning/30 p-3">
+                <p className="text-sm font-semibold text-warning-strong mb-2">
                   {t('wunschBelegt')}
                 </p>
                 <div className="space-y-2">
@@ -276,16 +276,16 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
                         className={`w-full text-left rounded-ios-lg border p-2.5 transition-colors ${
                           sel
                             ? 'border-claimondo-navy bg-claimondo-navy/[0.06]'
-                            : 'border-amber-200 bg-white hover:bg-amber-100/50'
+                            : 'border-warning/30 bg-white hover:bg-warning/15'
                         }`}
                       >
                         <div className="flex items-center gap-2">
                           {alt.diffTage > 0 ? (
-                            <CalendarIcon className="w-4 h-4 text-amber-700" />
+                            <CalendarIcon className="w-4 h-4 text-warning-strong" />
                           ) : (
-                            <ClockIcon className="w-4 h-4 text-amber-700" />
+                            <ClockIcon className="w-4 h-4 text-warning-strong" />
                           )}
-                          <span className="text-xs uppercase tracking-wider text-amber-700 font-semibold">
+                          <span className="text-xs uppercase tracking-wider text-warning-strong font-semibold">
                             {alt.label}
                           </span>
                         </div>
@@ -300,7 +300,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
             )}
 
             {fehler && alternatives.length === 0 && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-lg p-2">
+              <p className="text-sm text-danger bg-danger-soft border border-danger/30 rounded-ios-lg p-2">
                 {fehler}
               </p>
             )}
@@ -323,7 +323,7 @@ export default function KundeTerminVerschiebenModal({ open, onClose, terminId }:
       </div>
 
       {fehler && !showCustom && (
-        <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-lg p-2 mb-3">
+        <p className="text-sm text-danger bg-danger-soft border border-danger/30 rounded-ios-lg p-2 mb-3">
           {fehler}
         </p>
       )}

@@ -119,13 +119,13 @@ export default async function KundeAusfallEntschaedigungCard({
       <section
         className={`rounded-2xl border p-5 space-y-3 ${
           istUeberfaellig
-            ? 'bg-red-50 border-red-300'
+            ? 'bg-danger-soft border-danger/30'
             : className ?? 'bg-white border-claimondo-border'
         }`}
       >
         <header className="flex items-center gap-2">
           <CarIcon
-            className={`w-4 h-4 ${istUeberfaellig ? 'text-red-700' : 'text-claimondo-shield'}`}
+            className={`w-4 h-4 ${istUeberfaellig ? 'text-danger-strong' : 'text-claimondo-shield'}`}
           />
           <h3 className="text-sm font-semibold text-claimondo-navy">{t('mietwagenTitel')}</h3>
         </header>
@@ -140,7 +140,7 @@ export default async function KundeAusfallEntschaedigungCard({
               icon={CalendarIcon}
               label={t('abgabeSpaetestens')}
               value={formatDate(abgabeDatum)}
-              accent={istUeberfaellig ? 'rose' : tageBisAbgabe != null && tageBisAbgabe <= 3 ? 'amber' : null}
+              accent={istUeberfaellig ? 'danger' : tageBisAbgabe != null && tageBisAbgabe <= 3 ? 'warning' : null}
             />
           )}
           {limit != null && (
@@ -157,7 +157,7 @@ export default async function KundeAusfallEntschaedigungCard({
         </dl>
 
         {istUeberfaellig && (
-          <p className="text-xs text-red-800 bg-red-100 border border-red-200 rounded-ios-lg p-2 flex items-start gap-2">
+          <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg p-2 flex items-start gap-2">
             <AlertCircleIcon className="w-4 h-4 shrink-0 mt-0.5" />
             <span>
               {t('ueberfaellig', { datum: formatDate(abgabeDatum) })}
@@ -171,7 +171,7 @@ export default async function KundeAusfallEntschaedigungCard({
             {t('nachRueckgabeText')}
           </p>
           {mietwagenRechnungVorhanden && (
-            <p className="text-emerald-700 flex items-center gap-1.5">
+            <p className="text-success-strong flex items-center gap-1.5">
               <CheckCircleIcon className="w-3.5 h-3.5" />
               {t('rechnungLiegtVor')}
             </p>
@@ -263,13 +263,13 @@ function Row({
   icon: typeof CarIcon
   label: string
   value: string
-  accent?: 'rose' | 'amber' | null
+  accent?: 'danger' | 'warning' | null
 }) {
   const valueColor =
-    accent === 'rose'
-      ? 'text-red-700'
-      : accent === 'amber'
-        ? 'text-amber-700'
+    accent === 'danger'
+      ? 'text-danger-strong'
+      : accent === 'warning'
+        ? 'text-warning-strong'
         : 'text-claimondo-navy'
   return (
     <div className="flex items-start gap-2 sm:contents">

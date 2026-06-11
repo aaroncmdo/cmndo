@@ -107,29 +107,29 @@ type BannerCfg = {
 
 function getBannerCfg(severity: KundeAktion['severity'], variant: KundeAktion['variant']): BannerCfg {
   if (variant === 'live') return {
-    bg: 'bg-emerald-50', border: 'border-emerald-200',
-    textColor: 'text-emerald-800', labelColor: 'text-emerald-700',
+    bg: 'bg-success-soft', border: 'border-success/30',
+    textColor: 'text-success-strong', labelColor: 'text-success-strong',
     icon: (
       <span className="relative inline-flex h-2.5 w-2.5 shrink-0 mt-0.5">
-        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-500" />
+        <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75 animate-ping" />
+        <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-success" />
       </span>
     ),
   }
   if (severity === 'success') return {
-    bg: 'bg-emerald-50', border: 'border-emerald-200',
-    textColor: 'text-emerald-800', labelColor: 'text-emerald-700',
-    icon: <CircleCheckIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0 mt-0.5" />,
+    bg: 'bg-success-soft', border: 'border-success/30',
+    textColor: 'text-success-strong', labelColor: 'text-success-strong',
+    icon: <CircleCheckIcon className="w-3.5 h-3.5 text-success shrink-0 mt-0.5" />,
   }
   if (severity === 'critical') return {
-    bg: 'bg-amber-50', border: 'border-amber-300',
-    textColor: 'text-amber-900', labelColor: 'text-amber-800',
-    icon: <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-600 shrink-0 mt-0.5" />,
+    bg: 'bg-warning-soft', border: 'border-warning/30',
+    textColor: 'text-warning-strong', labelColor: 'text-warning-strong',
+    icon: <AlertTriangleIcon className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" />,
   }
   if (severity === 'warning') return {
-    bg: 'bg-amber-50', border: 'border-amber-200',
-    textColor: 'text-amber-800', labelColor: 'text-amber-700',
-    icon: <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500 shrink-0 mt-0.5" />,
+    bg: 'bg-warning-soft', border: 'border-warning/30',
+    textColor: 'text-warning-strong', labelColor: 'text-warning-strong',
+    icon: <AlertTriangleIcon className="w-3.5 h-3.5 text-warning shrink-0 mt-0.5" />,
   }
   return {
     bg: 'bg-claimondo-ondo/5', border: 'border-claimondo-light-blue/30',
@@ -192,15 +192,15 @@ export default function FallKarte({
   const lexdriveAusstehend = aktion?.state === 'vollmacht-unterschreiben'
 
   const wrapperBorder = terminVerstrichen
-    ? 'border-2 border-red-400'
+    ? 'border-2 border-danger'
     : nachbesichtigungPending
-      ? 'border-2 border-amber-400'
+      ? 'border-2 border-warning'
       : kanzleiWunschOffen
       ? 'border-2 border-claimondo-ondo/60'
       : lexdriveAusstehend
         ? 'border-2 border-[#0e5be9]'
         : abgeschlossen
-          ? 'border-2 border-emerald-400'
+          ? 'border-2 border-success'
           : 'border border-claimondo-border'
 
   return (
@@ -306,10 +306,10 @@ export default function FallKarte({
         {nextTermin && !abgeschlossen && !terminVerstrichen && (
           <div className="rounded-ios-xl bg-white border border-claimondo-border/60 shadow-sm px-3 py-2">
             {svLive ? (
-              <p className="flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-success-strong">
                 <span className="relative inline-flex h-2 w-2 shrink-0">
-                  <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+                  <span className="absolute inline-flex h-full w-full rounded-full bg-success opacity-75 animate-ping" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
                 {nextTermin.sv_angekommen_am
                   ? t('svVorOrt')
@@ -327,8 +327,8 @@ export default function FallKarte({
         )}
         {/* Verstrichen — Termin in Vergangenheit, durchgefuehrt_am noch nicht gesetzt */}
         {nextTermin && !abgeschlossen && terminVerstrichen && (
-          <div className="rounded-ios-xl bg-red-50 border border-red-200 px-3 py-2">
-            <p className="flex items-center gap-1.5 text-xs font-medium text-red-700">
+          <div className="rounded-ios-xl bg-danger-soft border border-danger/30 px-3 py-2">
+            <p className="flex items-center gap-1.5 text-xs font-medium text-danger-strong">
               <AlertTriangleIcon className="w-3.5 h-3.5 shrink-0" />
               {t('terminVerstrichen', { termin: fmtTermin(nextTermin.start_zeit, uhrSuffix) })}
             </p>
@@ -361,10 +361,10 @@ export default function FallKarte({
           })()
         : abgeschlossen
           ? (
-            <div className="mx-3 mb-3 rounded-2xl bg-emerald-50 border border-emerald-200 px-3.5 py-2.5">
+            <div className="mx-3 mb-3 rounded-2xl bg-success-soft border border-success/30 px-3.5 py-2.5">
               <div className="flex items-center gap-2">
-                <CircleCheckIcon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                <p className="text-xs font-semibold text-emerald-700">{t('fallAbgeschlossen')}</p>
+                <CircleCheckIcon className="w-3.5 h-3.5 text-success shrink-0" />
+                <p className="text-xs font-semibold text-success-strong">{t('fallAbgeschlossen')}</p>
               </div>
             </div>
           )

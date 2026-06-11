@@ -399,7 +399,7 @@ function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }
 
       {/* Input */}
       <div className="p-4 border-t border-claimondo-border">
-        {error && <p className="text-red-500 text-xs mb-2">{error}</p>}
+        {error && <p className="text-danger text-xs mb-2">{error}</p>}
         <form onSubmit={handleSend} className="flex gap-2">
           <input type="text" value={text} onChange={e => setText(e.target.value)}
             placeholder={t('chat.platzhalter')}
@@ -524,8 +524,8 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
   if (done) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-ios-xl p-4">
-        <p className="text-sm text-green-700 font-medium">{done}</p>
+      <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4">
+        <p className="text-sm text-success-strong font-medium">{done}</p>
       </div>
     )
   }
@@ -626,8 +626,8 @@ function SlotAuswahlBanner({
 
   if (done) {
     return (
-      <div className="bg-green-50 border border-green-200 rounded-ios-xl p-4">
-        <p className="text-sm text-green-700 font-medium">{done}</p>
+      <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4">
+        <p className="text-sm text-success-strong font-medium">{done}</p>
       </div>
     )
   }
@@ -664,7 +664,7 @@ function SlotAuswahlBanner({
           )
         })}
       </div>
-      {error && <p className="text-red-500 text-xs mt-3">{error}</p>}
+      {error && <p className="text-danger text-xs mt-3">{error}</p>}
     </div>
   )
 }
