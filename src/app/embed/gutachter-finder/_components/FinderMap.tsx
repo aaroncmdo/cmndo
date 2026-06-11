@@ -27,7 +27,8 @@ import { useEffect, useRef, useState } from 'react'
 // Turbopack-Build den Constructor verloren → "i.Color is not a constructor"-
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
+import { fetchDrivingRoute } from '@/lib/mapbox/directions'
+import type { Map as MapboxMap, Marker, Popup, GeoJSONSource } from 'mapbox-gl'
 import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
@@ -400,7 +401,45 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         </div>
       `
       carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
-      map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+
+      // WS3: nächstgelegenen aktiven SV finden → echte Auto-Route (Mapbox Directions)
+      // Fahrzeug → SV zeichnen + auf beide fitten (empfohlener SV als Route, Aaron #9).
+      // Kein SV → nur flyTo aufs Fahrzeug.
+      let bestSv: AktiverSVPublic | null = null
+      let bestD = Infinity
+      for (const s of aktiveSVs) {
+        const d = (s.standort_lng - lng) ** 2 + (s.standort_lat - lat) ** 2
+        if (d < bestD) { bestD = d; bestSv = s }
+      }
+      if (!bestSv) {
+        map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+        return
+      }
+      const sv = bestSv
+      void fetchDrivingRoute([lng, lat], [sv.standort_lng, sv.standort_lat]).then(({ primary }) => {
+        if (!mapRef.current) return
+        const data: GeoJSON.Feature = {
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
+          properties: {},
+        }
+        const src = map.getSource('embed-route') as GeoJSONSource | undefined
+        if (src) {
+          src.setData(data)
+        } else {
+          map.addSource('embed-route', { type: 'geojson', data })
+          map.addLayer({
+            id: 'embed-route-line',
+            type: 'line',
+            source: 'embed-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': COL_ONDO, 'line-width': 4, 'line-opacity': 0.9 },
+          })
+        }
+        const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
+        const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
+        map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
+      })
     }
     document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
 
