@@ -191,9 +191,9 @@ export function FinderWizard() {
       {phase === 'gebucht' && gebucht && (
         <div className="flex flex-col items-center gap-2 py-4 text-center">
           <CheckCircle2 className="h-12 w-12 text-success" />
-          <h3 className="text-body font-bold text-claimondo-navy">Termin gebucht</h3>
+          <h3 className="text-body font-bold text-claimondo-navy">Termin reserviert</h3>
           <p className="text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
-            {gebucht.svVorname} kommt am{' '}
+            {gebucht.svVorname} ist für{' '}
             {new Date(gebucht.startIso).toLocaleString('de-DE', {
               weekday: 'long',
               day: '2-digit',
@@ -201,7 +201,7 @@ export function FinderWizard() {
               hour: '2-digit',
               minute: '2-digit',
             })}{' '}
-            Uhr zur Begutachtung.
+            Uhr reserviert. Wir bestätigen Ihren Termin in Kürze.
           </p>
         </div>
       )}
