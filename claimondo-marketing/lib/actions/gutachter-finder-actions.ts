@@ -1,6 +1,5 @@
 'use server'
 
-import { createHmac } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
@@ -323,109 +322,35 @@ export async function erstelleGutachterFinderAnfrage(
   return { ok: true, id: anfrageId }
 }
 
-// AAR-955 + AAR-956 T1.1b: Live-Buchung aus dem Marketing-Finder. Erzeugt eine
-// Anfrage (gutachter_finder_anfragen) mit dem karten-gewählten SV und leitet den
-// User auf den KANONISCHEN signierten /start-Link → /flow. issueCanonicalFlowLinkForAnfrage
-// (in der /start-Route der Haupt-App) macht den Rest: gfa → Lead → EIN kanonischer
-// flow_link + Versand (WA→SMS→Email). Der karten-gewählte SV (zugeordneter_sv_id) wird
-// in /flow zum Fixer; schadenort_lat/lng → lead.fahrzeug_standort_lat/lng fürs Matching.
-//
-// Cross-App-Grenze: issueCanonicalFlowLinkForAnfrage liegt main-app-only — die
-// Marketing-App signt NUR den /start-Link (HMAC, Gegenstück zu src/lib/start-link/
-// verify-sig.ts) und überlässt Lead/flow_link/Versand der /start-Route. KEIN
-// self_service_token mehr (AAR-956 Doppel-Retire), KEIN eigener WA/Email-Versand,
-// KEIN Dispatch-"SV-anrufen"-Task (Kunde bucht selbst), anders als
-// erstelleGutachterFinderAnfrage (Rückruf-Pfad).
-const APP_PORTAL_URL = 'https://app.claimondo.de'
-const START_LINK_TTL_SEC = 24 * 60 * 60
+// AAR-956 P5: gutachter-finder als Embed mit 2-Knopf-Funnel. Der Wizard POSTet die
+// Anfrage CLIENT-seitig an app.claimondo.de/api/anfrage-from-lp (source=kfz_gutachter_lp,
+// Origin-Auth via Browser-Origin) — der kanonische Intake legt gfa → Lead → flow_link an
+// und entscheidet per `aktion`: 'direkt' → Token-Redirect nach /flow (Self-Onboarding
+// sofort), 'senden' → FlowLink-Versand (WA→SMS→Email) + Lead in der Dispatch-Queue.
+// Diese Action liefert dem Client NUR die Geocode-Koordinaten (Mapbox-Token ist
+// server-only). KEIN /start, KEIN gfa-Insert hier, KEIN HMAC-Signing mehr (/start retired).
+export async function bereiteLiveBuchungVor(payload: {
+  ort: string
+}): Promise<{ ok: true; lat: number | null; lng: number | null; adresse: string } | { ok: false; error: string }> {
+  const ort = payload.ort?.trim() ?? ''
+  if (ort.length < 3) return { ok: false, error: 'Bitte angeben, wo Ihr Auto steht (PLZ oder Ort).' }
 
-// Signierter /start-Link — exakt die verify-sig.ts-Formel: signedString =
-// `${anfrageId}.${exp}` (exp = Unix-Sekunden), sig = HMAC_SHA256(., SECRET) hex lowercase.
-// Fail-soft: ohne Secret null → Caller fällt auf "bitte anrufen" zurück.
-function buildSignedStartUrl(anfrageId: string): string | null {
-  const secret = process.env.START_LINK_HMAC_SECRET
-  if (!secret) {
-    console.error('[starteLiveBuchung] START_LINK_HMAC_SECRET nicht gesetzt — /start nicht signierbar')
-    return null
-  }
-  const exp = Math.floor(Date.now() / 1000) + START_LINK_TTL_SEC
-  const sig = createHmac('sha256', secret).update(`${anfrageId}.${exp}`, 'utf8').digest('hex')
-  return `${APP_PORTAL_URL}/start/${anfrageId}?exp=${exp}&sig=${sig}`
+  // Besichtigungsort geocoden → besichtigungsort_lat/lng auf der Anfrage. Der Intake
+  // mappt sie → schadenort_lat/lng → lead.fahrzeug_standort_lat/lng fürs /flow-Matching;
+  // ohne Koordinaten fragt /flow den Ort selbst nach (ladeMatchingFlow → ort_abfragen).
+  const geo = await geocodeAdresse(ort)
+  return { ok: true, lat: geo?.lat ?? null, lng: geo?.lng ?? null, adresse: geo?.formatted ?? ort }
 }
 
-export async function starteLiveBuchung(payload: {
-  vorname: string
-  nachname: string
-  email: string
-  telefon: string
-  ort: string
-  schadentyp: string
-  zugeordneter_sv_id?: string
-}): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
-  const vorname = payload.vorname?.trim() ?? ''
-  const nachname = payload.nachname?.trim() ?? ''
-  const email = payload.email?.trim() ?? ''
-  const telefon = payload.telefon?.trim() ?? ''
-  const ort = payload.ort?.trim() ?? ''
-  if (vorname.length < 2 || nachname.length < 2) return { ok: false, error: 'Bitte Vor- und Nachnamen angeben.' }
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse angeben.' }
-  if (!/[\+0-9\s\-()]{8,}/.test(telefon)) return { ok: false, error: 'Bitte eine gültige Telefonnummer angeben.' }
-  if (ort.length < 3) return { ok: false, error: 'Bitte angeben, wo Ihr Auto steht (PLZ oder Ort).' }
-  if (!payload.schadentyp) return { ok: false, error: 'Bitte den Schadentyp wählen.' }
-
-  // Besichtigungsort geocoden → schadenort_lat/lng auf der Anfrage. issueCanonicalFlowLinkForAnfrage
-  // mappt sie → lead.fahrzeug_standort_lat/lng fürs /flow-Matching; ohne Koordinaten fragt
-  // /flow den Besichtigungsort selbst nach (ladeMatchingFlow → ort_abfragen, AAR-956 Task 3).
-  const geo = await geocodeAdresse(ort)
-
-  const admin = createAdminClient()
-
-  // Einige Spalten (matching_typ u.a.) sind nicht in den generierten Types -> Cast.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: anfrage, error } = await (admin as any)
-    .from('gutachter_finder_anfragen')
-    .insert({
-      vorname,
-      nachname,
-      email,
-      telefon,
-      schadentyp: payload.schadentyp,
-      // Besichtigungsort = wo das Auto STEHT (für den Gutachter), NICHT schadenort
-      // (=Unfallort) — sonst würde es u.a. als schadens_hergang fehlgelesen. Die
-      // Koordinaten landen in schadenort_lat/lng, weil das die einzigen Koord-Spalten
-      // der Anfrage sind und der /anfrage-Flow sie → lead.fahrzeug_standort_lat/lng
-      // mappt (anfrage-actions.ts:105) — genau die, die TerminBuchung braucht.
-      besichtigungsort_adresse: geo?.formatted ?? ort,
-      schadenort_lat: geo?.lat ?? null,
-      schadenort_lng: geo?.lng ?? null,
-      zugeordneter_sv_id: payload.zugeordneter_sv_id ?? null,
-      matching_typ: payload.zugeordneter_sv_id ? 'karte-klick-live' : 'live',
-      status: 'neu',
-    })
-    .select('id')
-    .single()
-  if (error || !anfrage) {
-    console.error('[starteLiveBuchung] Insert fehlgeschlagen:', error?.message)
-    return { ok: false, error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530' }
-  }
-
-  // GA4-Conversion (fire-and-forget, consent-respektierend).
+// GA4-Conversion (generate_lead, server-seitig + consent-respektierend). Der Wizard ruft
+// das NACH erfolgreicher Anfrage auf, damit die Conversion nur bei real angelegtem Lead
+// feuert — nicht bei einem Origin-/Rate-Limit-Reject des Intakes.
+export async function trackLiveBuchungLead(): Promise<void> {
   try {
     const gaClientId = await getConsentedGaClientId()
-    void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder_live' } })
+    await trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder_live' } })
   } catch {
     /* nicht kritisch */
   }
-
-  // Signierter /start-Link → /flow. issueCanonicalFlowLinkForAnfrage (in der /start-
-  // Route) erzeugt Lead + kanonischen flow_link + versendet ihn (WA→SMS→Email) — daher
-  // KEIN eigener Marketing-Versand mehr. zugeordneter_sv_id wird in /flow zum Fixer.
-  const anfrageId = (anfrage as { id: string }).id
-  const url = buildSignedStartUrl(anfrageId)
-  if (!url) {
-    return { ok: false, error: 'Konfigurationsfehler — bitte rufen Sie an: +49 221 25 906 530' }
-  }
-
-  return { ok: true, url }
 }
 

@@ -37,7 +37,10 @@
     "cta": "Przejdź do rezerwacji",
     "cta_pending": "Chwila …",
     "redirect_title": "Przekierowanie do rezerwacji …",
-    "redirect_sub": "Za chwilę wybierzesz wolny, preferowany termin."
+    "redirect_sub": "Za chwilę wybierzesz wolny, preferowany termin.",
+    "cta_senden": "Wyślij zapytanie",
+    "gesendet_title": "Zapytanie otrzymane",
+    "gesendet_sub": "Skontaktujemy się z Tobą osobiście i wyślemy link do rezerwacji terminu."
   },
   "check": {
     "badge": "Bezpłatnie · bez ryzyka kosztów",

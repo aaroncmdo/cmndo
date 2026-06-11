@@ -3,21 +3,21 @@
 import { useEffect, useState, useTransition, type FormEvent } from 'react'
 import { ChevronLeft, ChevronRight, ShieldCheck, CalendarCheck, Loader2 } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { starteLiveBuchung } from '@/lib/actions/gutachter-finder-actions'
+import { bereiteLiveBuchungVor, trackLiveBuchungLead } from '@/lib/actions/gutachter-finder-actions'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 
-// Live-Buchungs-Wizard für den Marketing-Finder ("Termin"-Tab des KartenWizard-
-// Toggle). 2 Schritte: Schaden → Kontakt + Besichtigungsort → `starteLiveBuchung`
-// (legt eine self-service-eligible Anfrage mit dem karten-gewählten SV an, geocodet
-// den Besichtigungsort → schadenort_lat/lng + mintet einen self_service_token) →
-// **Inline-Redirect** auf `app.claimondo.de/anfrage/[token]`, wo der bestehende
-// Self-Service-Flow (SelbstQuali → SA → TerminBuchung) den echten Slot beim
-// gewählten SV buchen lässt (SV-Weiche `fixerSvId`, AAR-955). Der Besichtigungsort
-// ist Pflicht: ohne Koordinaten erreicht TerminBuchung den Slot-Picker NICHT und
-// fällt auf "wir rufen an" zurück (anfrage-actions.ts:277).
-//
-// i18n ×6 via useTranslations('live_wizard'). Der `schadentyp`-VALUE bleibt
-// Deutsch (geht so an Dispatch/DB), nur das Label wird übersetzt.
+// Live-Buchungs-Wizard für den Marketing-Finder (claimondo.de/gutachter-finden,
+// "Termin"-Tab des KartenWizard-Toggle). 2 Schritte: Schaden → Kontakt +
+// Besichtigungsort. AAR-956 2-Knopf-Funnel: der Wizard geocodet den Ort
+// (bereiteLiveBuchungVor — Mapbox-Token server-only) und POSTet die Anfrage
+// CLIENT-seitig an app.claimondo.de/api/anfrage-from-lp (source=kfz_gutachter_lp,
+// Origin-Auth). Der kanonische Intake legt gfa → Lead → flow_link an:
+//   • "Weiter zur Terminbuchung" (aktion='direkt') → Token zurück → window.location auf
+//     /flow/[token] → Self-Onboarding-Slot-Picker beim karten-gewählten SV (Fixer).
+//   • "Anfrage senden" (aktion='senden') → FlowLink-Versand (WA→SMS→Email) + Lead in
+//     der Dispatch-Queue → Bestätigungs-Screen ("wir melden uns").
+// KEIN /start mehr (retired). i18n ×6 via useTranslations('live_wizard'); der
+// schadentyp-VALUE bleibt Deutsch (geht so an Dispatch/DB), nur das Label wird übersetzt.
 
 const SCHADEN_OPTIONS = [
   { value: 'Auffahrunfall', key: 'auffahr' },
@@ -26,6 +26,10 @@ const SCHADEN_OPTIONS = [
   { value: 'Glasschaden', key: 'glas' },
   { value: 'Sonstiger Schaden', key: 'sonstige' },
 ] as const
+
+// Ziel-App für den kanonischen Intake + /flow-Redirect (claimondo.de → app.claimondo.de,
+// cross-origin; der Browser-Origin muss in MONIKA_CLUSTER_DOMAINS / clusterAllowlist() stehen).
+const PORTAL_URL = 'https://app.claimondo.de'
 
 export function GutachterFinderAnfrageWizard() {
   const t = useTranslations('live_wizard')
@@ -40,6 +44,8 @@ export function GutachterFinderAnfrageWizard() {
   const [svId, setSvId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [redirecting, setRedirecting] = useState(false)
+  const [sent, setSent] = useState(false)
+  const [pendingAktion, setPendingAktion] = useState<'direkt' | 'senden' | null>(null)
   const [pending, startTransition] = useTransition()
 
   // SV-Vorauswahl aus dem Karten-Klick (Popup-CTA → claimondo:select-sv).
@@ -52,8 +58,15 @@ export function GutachterFinderAnfrageWizard() {
     return () => document.removeEventListener('claimondo:select-sv', onSelect)
   }, [])
 
-  function submit(event: FormEvent<HTMLFormElement>) {
+  function onFormSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    handle('direkt')
+  }
+
+  // 2-Knopf-Funnel: 'direkt' → sofort in den /flow-Slot-Picker; 'senden' → FlowLink
+  // wird versendet + Dispatcher kontaktiert. Beide gehen über DENSELBEN kanonischen
+  // Intake (anfrage-from-lp), nur das `aktion`-Feld unterscheidet.
+  function handle(aktion: 'direkt' | 'senden') {
     setError(null)
     if (!schadentyp) { setStep(0); return }
     if (vorname.trim().length < 2 || nachname.trim().length < 2) { setError(t('err_name')); return }
@@ -62,21 +75,53 @@ export function GutachterFinderAnfrageWizard() {
     if (ort.trim().length < 3) { setError(t('err_ort')); return }
     if (!dsgvo) { setError(t('err_dsgvo')); return }
 
+    setPendingAktion(aktion)
     startTransition(async () => {
-      const result = await starteLiveBuchung({
-        vorname: vorname.trim(),
-        nachname: nachname.trim(),
-        email: email.trim(),
-        telefon: telefon.trim(),
-        ort: ort.trim(),
-        schadentyp,
-        zugeordneter_sv_id: svId ?? undefined,
-      })
-      if (result.ok) {
-        setRedirecting(true)
-        window.location.href = result.url
-      } else {
-        setError(result.error || t('err_submit'))
+      // 1. Besichtigungsort geocoden (Mapbox-Token ist server-only).
+      const prep = await bereiteLiveBuchungVor({ ort: ort.trim() })
+      if (!prep.ok) { setError(prep.error || t('err_submit')); return }
+
+      // 2. Kanonischer Intake (cross-origin POST, Origin-Auth). Legt gfa → Lead →
+      // flow_link an und entscheidet per `aktion`. besichtigungsort_lat/lng nur senden
+      // wenn geocodet (Zod .optional() akzeptiert kein null).
+      try {
+        const res = await fetch(`${PORTAL_URL}/api/anfrage-from-lp`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            source: 'kfz_gutachter_lp',
+            aktion,
+            name: `${vorname.trim()} ${nachname.trim()}`,
+            telefon: telefon.trim(),
+            email: email.trim(),
+            schadentyp,
+            besichtigungsort_adresse: prep.adresse,
+            ...(prep.lat != null && prep.lng != null
+              ? { besichtigungsort_lat: prep.lat, besichtigungsort_lng: prep.lng }
+              : {}),
+            ...(svId ? { zugeordneter_sv_id: svId } : {}),
+            page_url: typeof window !== 'undefined' ? window.location.href : undefined,
+            consent_ts: new Date().toISOString(),
+          }),
+        })
+        const data = (await res.json().catch(() => null)) as { ok?: boolean; modus?: string; token?: string } | null
+        if (!res.ok || !data?.ok) { setError(t('err_submit')); return }
+
+        // 3. GA4-Conversion (server-seitig, consent-aware) — nur bei real angelegtem
+        // Lead; non-blocking (eine GA-Panne darf den Funnel nicht stoppen).
+        await trackLiveBuchungLead().catch(() => {})
+
+        // 4. 'direkt' → Token-Redirect in den Slot-Picker; 'senden'/'callback' (Versand
+        // fehlgeschlagen) → Bestätigung, Dispatcher meldet sich (kann FlowLink re-senden).
+        if (data.modus === 'direkt' && data.token) {
+          setRedirecting(true)
+          window.location.href = `${PORTAL_URL}/flow/${data.token}`
+          return
+        }
+        setSent(true)
+      } catch {
+        setError(t('err_submit'))
+        return
       }
     })
   }
@@ -88,6 +133,17 @@ export function GutachterFinderAnfrageWizard() {
         <Loader2 className="mx-auto h-8 w-8 animate-spin text-claimondo-ondo" aria-hidden />
         <p className="mt-3 text-sm font-semibold text-claimondo-navy">{t('redirect_title')}</p>
         <p className="mt-1 text-xs text-claimondo-shield">{t('redirect_sub')}</p>
+      </div>
+    )
+  }
+
+  // ── Bestätigung nach "Anfrage senden" (FlowLink versendet) bzw. Callback-Fallback ──
+  if (sent) {
+    return (
+      <div role="status" aria-live="polite" className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
+        <ShieldCheck className="mx-auto h-8 w-8 text-claimondo-ondo" aria-hidden />
+        <p className="mt-3 text-sm font-semibold text-claimondo-navy">{t('gesendet_title')}</p>
+        <p className="mt-1 text-xs text-claimondo-shield">{t('gesendet_sub')}</p>
       </div>
     )
   }
@@ -126,7 +182,7 @@ export function GutachterFinderAnfrageWizard() {
           </div>
         </div>
       ) : (
-        <form onSubmit={submit} noValidate data-tracking="gutachter-finder-livebuchung-wizard">
+        <form onSubmit={onFormSubmit} noValidate data-tracking="gutachter-finder-livebuchung-wizard">
           <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{t('step_of', { n: 2 })}</p>
           <h3 className="mt-1.5 text-lg font-bold text-claimondo-navy">{t('daten_heading')}</h3>
 
@@ -163,13 +219,18 @@ export function GutachterFinderAnfrageWizard() {
             </div>
           ) : null}
 
-          <div className="mt-4 flex items-center gap-2">
-            <button type="button" onClick={() => setStep(0)} disabled={pending} className="inline-flex items-center gap-1 rounded-full border border-claimondo-border bg-white px-4 py-3 text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-70">
-              <ChevronLeft className="h-4 w-4" aria-hidden /> {t('back')}
-            </button>
-            <button type="submit" disabled={pending} aria-busy={pending} className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-base font-bold text-white shadow-claimondo-md transition hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70">
-              <CalendarCheck className="h-4 w-4" aria-hidden />
-              {pending ? t('cta_pending') : t('cta')}
+          <div className="mt-4 space-y-2.5">
+            <div className="flex items-center gap-2">
+              <button type="button" onClick={() => setStep(0)} disabled={pending} className="inline-flex items-center gap-1 rounded-full border border-claimondo-border bg-white px-4 py-3 text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-70">
+                <ChevronLeft className="h-4 w-4" aria-hidden /> {t('back')}
+              </button>
+              <button type="submit" disabled={pending} aria-busy={pending && pendingAktion === 'direkt'} className="flex-1 inline-flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-6 py-3.5 text-base font-bold text-white shadow-claimondo-md transition hover:bg-claimondo-shield active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-70">
+                <CalendarCheck className="h-4 w-4" aria-hidden />
+                {pending && pendingAktion === 'direkt' ? t('cta_pending') : t('cta')}
+              </button>
+            </div>
+            <button type="button" onClick={() => handle('senden')} disabled={pending} aria-busy={pending && pendingAktion === 'senden'} className="w-full inline-flex items-center justify-center gap-2 rounded-full border border-claimondo-border bg-white px-4 py-2.5 text-sm font-semibold text-claimondo-shield transition hover:border-claimondo-ondo hover:text-claimondo-navy disabled:cursor-not-allowed disabled:opacity-70">
+              {pending && pendingAktion === 'senden' ? t('cta_pending') : t('cta_senden')}
             </button>
           </div>
         </form>

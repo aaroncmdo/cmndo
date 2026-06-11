@@ -37,7 +37,10 @@
     "cta": "Weiter zur Terminbuchung",
     "cta_pending": "Einen Moment …",
     "redirect_title": "Weiterleitung zur Terminbuchung …",
-    "redirect_sub": "Gleich wählen Sie Ihren freien Wunsch-Termin."
+    "redirect_sub": "Gleich wählen Sie Ihren freien Wunsch-Termin.",
+    "cta_senden": "Anfrage senden",
+    "gesendet_title": "Anfrage eingegangen",
+    "gesendet_sub": "Wir melden uns persönlich bei Ihnen und schicken Ihnen den Link zur Terminbuchung."
   },
   "check": {
     "badge": "Kostenlos · ohne Kostenrisiko",
