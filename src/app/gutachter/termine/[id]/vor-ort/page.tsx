@@ -31,10 +31,12 @@ export default async function VorOrtPage({ params }: { params: Promise<{ id: str
 
   if (tErr || !termin) redirect(`/gutachter/termine/${id}`)
 
+  // CMM-49 (Entity-Sweep): faelle -> v_claim_full. fahrzeug_*/kennzeichen flach
+  // (value-identisch, div=0); claim_nummer flach statt claims-Embed.
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer)')
-    .eq('id', termin.fall_id)
+    .from('v_claim_full')
+    .select('id:fall_id, lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claim_nummer')
+    .eq('fall_id', termin.fall_id)
     .single()
 
   let leadName = '—'
@@ -69,7 +71,7 @@ export default async function VorOrtPage({ params }: { params: Promise<{ id: str
     <VorOrtClient
       terminId={id}
       fallId={termin.fall_id}
-      fallNummer={(fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer : null) ?? id.slice(0, 8)}
+      fallNummer={(fall?.claim_nummer as string | null) ?? id.slice(0, 8)}
       leadName={leadName}
       leadVorname={leadVorname}
       fahrzeug={fahrzeug || null}
