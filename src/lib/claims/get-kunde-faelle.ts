@@ -447,19 +447,24 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
   // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
   // CMM-44 Phase 3: bankdaten_hinterlegt_am -> claims-Read oben (SSoT, nicht mehr faelle).
+  // CMM-49 Display-Sweep: aus v_claim_full statt faelle. Aliasing haelt den FALL_SELECT_KUNDE-
+  // Vertrag: id<-fall_id, claim_id<-claims.id, status<-operative_status (claims-SSoT, post-drop-safe).
   const FALL_DETAIL_SELECT =
-    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung'
+    'id:fall_id, claim_id:id, status:operative_status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung'
+  // fallId kann claim_id (vcf.id) ODER fall_id (vcf.fall_id) sein — beide Pfade wie zuvor.
   const byClaim = await admin
-    .from('faelle')
+    .from('v_claim_full')
     .select(FALL_DETAIL_SELECT)
-    .eq('claim_id', fallId)
-    // CMM-65: claim-scoped (faelle↔claims 1:1) — keine faelle.created_at-Order noetig, limit(1) genuegt.
+    .eq('id', fallId)
     .limit(1)
     .maybeSingle()
-  const fallRow =
-    byClaim.data ??
-    (await admin.from('faelle').select(FALL_DETAIL_SELECT).eq('id', fallId).maybeSingle()).data
+  // operative_status lebt in der DB-View, fehlt in den generierten Typen → unknown-Bridge.
+  const fallRow = (byClaim.data ??
+    (await admin.from('v_claim_full').select(FALL_DETAIL_SELECT).eq('fall_id', fallId).maybeSingle())
+      .data) as unknown as Record<string, unknown> | null
 
+  // v_claim_full ist claims-ankernd → laedt fuer jeden gueltigen Claim (Aaron-Entscheid 12.06.:
+  // alle Kunde-Claims sichtbar). Alte faelle-Existenz-Gate haette post-Step-5 neue Faelle ge-404t.
   if (!fallRow) return null
 
   // 2. Ownership: claim_parties.user_id ODER faelle.kunde_id ODER lead.email
