@@ -206,12 +206,12 @@ export function StammdatenReadSection({
             {(fahrbereit !== null || leasing || finanzierung) && (
               <div className="flex flex-wrap items-center gap-2 mt-1 text-[11px] text-claimondo-ondo">
                 {fahrbereit === true && (
-                  <span className="inline-flex items-center gap-1 text-emerald-700">
+                  <span className="inline-flex items-center gap-1 text-success-strong">
                     <CheckCircle2Icon className="w-3 h-3" /> {t('fahrbereit')}
                   </span>
                 )}
                 {fahrbereit === false && (
-                  <span className="inline-flex items-center gap-1 text-red-700">
+                  <span className="inline-flex items-center gap-1 text-danger-strong">
                     <XCircleIcon className="w-3 h-3" /> {t('nichtFahrbereit')}
                   </span>
                 )}

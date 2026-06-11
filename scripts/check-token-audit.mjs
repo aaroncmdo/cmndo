@@ -285,7 +285,10 @@ if (accentDelta < 0) {
 //
 // Baseline-Update: nach jedem Migrations-Batch den neuen, niedrigeren Wert
 // hier eintragen (Script nennt ihn bei Delta < 0).
-const STATUS_BASELINE_OCCURRENCES = 3115
+// 10.06.2026: 3115 -> 3007 (-108) durch Welle-1 Shared-Layer-Status-Migration
+// (statusLabels.ts STATUS_SLOT_CLASSES + ~22 shared-Components auf success/
+// warning/danger/info-Tokens). SCHADENS_URSACHE + Rating/Action-Hovers = LEAVE.
+const STATUS_BASELINE_OCCURRENCES = 3007
 const STATUS_RE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|placeholder|decoration|accent|divide)-(?:green|emerald|red|rose|amber|yellow|orange|lime)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/g
 
 let statusOccurrences = 0

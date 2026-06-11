@@ -74,7 +74,7 @@ export function TerminPicker({
         : 'Dein Termin ist verbindlich reserviert. Wir senden dir eine Bestätigung per Email und WhatsApp.'
     return (
       <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
-        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success">
           <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
@@ -170,7 +170,7 @@ export function TerminPicker({
       {error ? (
         <div
           role="alert"
-          className="mb-4 rounded-ios-sm border border-red-200 bg-red-50 p-3 text-sm text-red-700"
+          className="mb-4 rounded-ios-sm border border-danger/30 bg-danger-soft p-3 text-sm text-danger-strong"
         >
           {error}
         </div>

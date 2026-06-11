@@ -8,8 +8,8 @@ import { PhaseStatusDot } from './PhaseStatusDot'
 
 const STATE_ICON_COLOR: Record<string, string> = {
   active: 'text-claimondo-ondo',
-  done: 'text-emerald-500',
-  blocked: 'text-red-500',
+  done: 'text-success',
+  blocked: 'text-danger',
   skipped: 'text-claimondo-light-blue',
   upcoming: 'text-claimondo-light-blue',
 }
@@ -41,8 +41,8 @@ export function PhaseStep({
   }
   const stateBg: Record<string, string> = {
     active: 'bg-claimondo-ondo/10',
-    done: 'bg-emerald-50',
-    blocked: 'bg-red-50',
+    done: 'bg-success-soft',
+    blocked: 'bg-danger-soft',
     skipped: 'bg-claimondo-bg opacity-60',
     upcoming: 'bg-transparent',
   }
@@ -61,7 +61,7 @@ export function PhaseStep({
       : data.state === 'done'
         ? 'text-claimondo-navy'
         : data.state === 'blocked'
-          ? 'font-medium text-red-700'
+          ? 'font-medium text-danger-strong'
           : 'text-claimondo-ondo'
 
   return (
@@ -80,7 +80,7 @@ export function PhaseStep({
           <span className={`text-sm ${labelClass}`}>{data.name}</span>
         </span>
         {data.state === 'blocked' && data.blockReason && (
-          <span className="block mt-0.5 text-[11px] text-red-700">{data.blockReason}</span>
+          <span className="block mt-0.5 text-[11px] text-danger-strong">{data.blockReason}</span>
         )}
         {showTimestamps && data.reachedAt && (
           <span className="block mt-0.5 text-[11px] text-claimondo-ondo/70">
