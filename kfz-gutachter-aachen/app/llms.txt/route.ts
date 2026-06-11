@@ -20,7 +20,7 @@ export function GET() {
 > der Regel binnen 60 Minuten, 24/7 erreichbar. Bei unverschuldetem Unfall zahlt
 > die gegnerische Versicherung das Gutachten (§ 249 BGB) — 0 € für Geschädigte.
 > Teil des Claimondo-Partnernetzwerks: Gutachten, Mietwagen, Schadensbetreuung
-> und Verkehrsanwalt aus einer Hand. Google-Bewertung: ${GOOGLE_RATING.value.replace('.', ',')}/5
+> und Verkehrsanwalt — komplett koordiniert. Google-Bewertung: ${GOOGLE_RATING.value.replace('.', ',')}/5
 > aus ${GOOGLE_RATING.gbpReviewCount} Bewertungen.
 
 ## Kern-Seiten

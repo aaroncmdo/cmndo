@@ -142,12 +142,15 @@ export function AblaufSection() {
             </p>
           </div>
 
-          <div className="relative grid grid-cols-1 md:grid-cols-5 gap-x-3.5 gap-y-8 md:gap-y-3.5 mt-2.5">
+          {/* 08o O4: Animations-Hooks — SiteScripts setzt .ablauf-anim-ready
+              (nur >=768 + ohne reduced-motion) und per IO einmalig
+              .ablauf-anim-go; CSS im globals-08o-Block. No-JS = statisch. */}
+          <div id="ablaufStepsGrid" className="relative grid grid-cols-1 md:grid-cols-5 gap-x-3.5 gap-y-8 md:gap-y-3.5 mt-2.5">
             {/* Verbindungslinie (nur Desktop) */}
-            <div className="hidden md:block absolute top-8 left-[11%] right-[11%] h-0.5 bg-gradient-to-r from-green to-green/30 z-0" />
+            <div className="ablauf-line hidden md:block absolute top-8 left-[11%] right-[11%] h-0.5 bg-gradient-to-r from-green to-green/30 z-0" />
 
             {ABLAUF.map((step, i) => (
-              <div key={step.title} className="relative z-[1] text-center px-1 flex flex-col items-center">
+              <div key={step.title} data-ablauf-step={i} className="relative z-[1] text-center px-1 flex flex-col items-center">
                 <div className="relative w-16 h-16 mb-3.5">
                   <div className="w-16 h-16 rounded-full bg-surface border-2 border-green-soft text-green grid place-items-center shadow-sm">
                     {ICONS[step.icon]}
@@ -158,10 +161,14 @@ export function AblaufSection() {
                 </div>
                 <h3 className="font-display font-bold text-[15.5px] md:text-base mb-1.5 text-petrol leading-tight min-h-[44px] md:min-h-[40px] flex items-start justify-center">
                   {step.title}
-                  {step.titleAccent && <span className="whitespace-nowrap text-amber"> {step.titleAccent}</span>}
+                  {/* 08p P3b: Accent als eigene Zeile — "Anwalt —" / "0 € inklusive";
+                      der fruehere nowrap-Inline lief @768 in die Nachbarspalte. */}
+                  {step.titleAccent && <span className="block text-amber">{step.titleAccent}</span>}
                 </h3>
-                <p className="text-[13px] md:text-[13px] text-secondary leading-snug min-h-[60px]">
-                  {renderRich(step.text)}
+                <p className="hidden lg:block text-[13px] text-secondary leading-snug min-h-[60px]">
+                  {/* 08p P3c: Bold neutral in Textfarbe — Akzentfarbe bleibt
+                      Nummern/Icons/Linie vorbehalten (Entscheid Aaron). */}
+                  {renderRich(step.text, 'text-ink')}
                   {step.icon === 'car' && step.info && <NutzungsausfallTooltip info={step.info} />}
                 </p>
               </div>
