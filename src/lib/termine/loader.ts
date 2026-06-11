@@ -125,12 +125,14 @@ export async function loadTermine(
       .select('id, typ, start_zeit, end_zeit, status, fall_id, lead_id, sv_id, kb_id, kanal, notiz_intern')
       .is('cancelled_at', null)
 
+    // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL, bezug_typ='lead') ->
+    // den bezug-Term ergaenzen, sonst verfehlt der Lead-Zweig sie.
     if (scope.fallId && scope.leadId) {
-      gtQuery = gtQuery.or(`fall_id.eq.${scope.fallId},lead_id.eq.${scope.leadId}`)
+      gtQuery = gtQuery.or(`fall_id.eq.${scope.fallId},lead_id.eq.${scope.leadId},and(bezug_typ.eq.lead,bezug_id.eq.${scope.leadId})`)
     } else if (scope.fallId) {
       gtQuery = gtQuery.eq('fall_id', scope.fallId)
     } else {
-      gtQuery = gtQuery.eq('lead_id', scope.leadId)
+      gtQuery = gtQuery.or(`lead_id.eq.${scope.leadId},and(bezug_typ.eq.lead,bezug_id.eq.${scope.leadId})`)
     }
 
     const { data: gt } = await gtQuery.order('start_zeit', { ascending: false })
