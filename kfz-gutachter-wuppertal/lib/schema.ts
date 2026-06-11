@@ -1,6 +1,7 @@
 import { SITE } from './site'
 import { CLUSTER, type City } from './cluster'
-import { FAQ, fillTokens, faqAnswerText } from './content'
+import { FAQ, GOOGLE_RATING, fillTokens, faqAnswerText } from './content'
+import { LOKALDATEN } from './lokaldaten'
 import { canonicalPath } from './seo'
 
 // JSON-LD-Builder · AutomotiveBusiness (LocalBusiness), FAQPage, BreadcrumbList.
@@ -39,20 +40,31 @@ export function localBusinessSchema(city: City, route: 'hub' | 'spoke') {
         closes: '23:59',
       },
     ],
-    aggregateRating: { '@type': 'AggregateRating', ratingValue: '5.0', bestRating: '5', ratingCount: '7' },
+    // BRIEF 08i: ratingCount aus dem GBP-Datenfeld (echte Gesamtzahl, kein Hardcode).
+    aggregateRating: { '@type': 'AggregateRating', ratingValue: GOOGLE_RATING.value, bestRating: '5', ratingCount: String(GOOGLE_RATING.gbpReviewCount) },
     areaServed: CLUSTER.cities.map((c) => ({ '@type': 'City', name: c.name })),
   }
 }
 
 export function faqSchema(city: City) {
+  // 08l A4: FAQ-Schema umfasst lokale (Position 1+2, Daten-Layer) + generische
+  // Fragen — synchron zur Render-Reihenfolge im Accordion.
+  const lokal = (LOKALDATEN[city.slug]?.faqLokal ?? []).map((item) => ({
+    '@type': 'Question',
+    name: item.q,
+    acceptedAnswer: { '@type': 'Answer', text: item.a },
+  }))
   return {
     '@context': 'https://schema.org',
     '@type': 'FAQPage',
-    mainEntity: FAQ.map((item) => ({
-      '@type': 'Question',
-      name: fillTokens(item.q, city, CLUSTER.region),
-      acceptedAnswer: { '@type': 'Answer', text: faqAnswerText(item, city, CLUSTER.region, CLUSTER.achsen) },
-    })),
+    mainEntity: [
+      ...lokal,
+      ...FAQ.map((item) => ({
+        '@type': 'Question',
+        name: fillTokens(item.q, city, CLUSTER.region),
+        acceptedAnswer: { '@type': 'Answer', text: faqAnswerText(item, city, CLUSTER.region, CLUSTER.achsen) },
+      })),
+    ],
   }
 }
 
@@ -78,5 +90,23 @@ export function serviceSchema(city: City) {
     },
     areaServed: { '@type': 'City', name: city.name },
     category: 'Schadensgutachten',
+  }
+}
+
+// Person-Schema · lokaler Sachverstaendiger (Persona). Name = Vorname + Nachname
+// aus CLUSTER (z.B. "Stefan Wagner"). Cluster-level (Hub + alle Spokes identisch).
+export function personSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Person',
+    name: `${CLUSTER.svName} ${CLUSTER.svSurname}`,
+    jobTitle: 'Kfz-Sachverständiger',
+    worksFor: {
+      '@type': 'Organization',
+      name: 'Claimondo Partner-Netzwerk',
+      url: 'https://app.claimondo.de',
+    },
+    knowsAbout: ['Kfz-Schadengutachten', 'Unfallgutachten', 'Wertgutachten', 'BVSK', 'DAT-Standard'],
+    areaServed: { '@type': 'AdministrativeArea', name: CLUSTER.region },
   }
 }

@@ -166,6 +166,53 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       }
     }
 
+    // 08o O4 · Ablauf-Desktop-Animation (>=768): Linie scaleX, Steps
+    // gestaffelt (CSS im globals-08o-Block). Einmalig, threshold 0.3;
+    // reduced-motion/No-JS = sofort statisch (ready wird nie gesetzt).
+    const ablaufGrid = document.getElementById('ablaufStepsGrid')
+    let ablaufIo: IntersectionObserver | undefined
+    let ablaufPageshow: ((e: PageTransitionEvent) => void) | undefined
+    if (ablaufGrid) {
+      const abReduced2 = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+      const abDesktop = window.matchMedia('(min-width: 768px)').matches
+      if (!abReduced2 && abDesktop && 'IntersectionObserver' in window) {
+        // 08p P2 · Haertung: go darf NUR bei echtem Viewport-Eintritt stehen.
+        // (1) Klassen-Reset vor Init — raeumt geklebte Zustaende ab (z. B.
+        // bfcache-/Restore-DOM, in dem ready+go schon stehen, obwohl die
+        // Section nicht sichtbar ist — Bridge-Befund 08o). (2) Doppel-Guard
+        // im Callback (isIntersecting + ratio + rect). (3) pageshow(persisted)
+        // setzt nach bfcache-Restore zurueck und beobachtet neu. Kein Timeout-
+        // Fallback — ohne Eintritt bleibt es beim ready-Zustand.
+        ablaufGrid.classList.remove('ablauf-anim-go')
+        ablaufGrid.classList.add('ablauf-anim-ready')
+        const arm = () => {
+          ablaufIo?.disconnect()
+          ablaufIo = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                const r = ablaufGrid.getBoundingClientRect()
+                const imViewport = r.top < window.innerHeight && r.bottom > 0
+                if (entry.isIntersecting && entry.intersectionRatio >= 0.25 && imViewport) {
+                  ablaufGrid.classList.add('ablauf-anim-go')
+                  ablaufIo?.unobserve(ablaufGrid)
+                }
+              })
+            },
+            { threshold: 0.3 },
+          )
+          ablaufIo.observe(ablaufGrid)
+        }
+        arm()
+        ablaufPageshow = (e: PageTransitionEvent) => {
+          if (e.persisted) {
+            ablaufGrid.classList.remove('ablauf-anim-go')
+            arm()
+          }
+        }
+        window.addEventListener('pageshow', ablaufPageshow)
+      }
+    }
+
     // Ablauf-Mobile (Phase 3 #5): Nutzungsausfall-Tooltip + Timeline-Reveal + CTA-Welle.
     const abInfoBtn = document.getElementById('nutzungsausfallTooltipMobile')
     const abInfo = document.getElementById('nutzungsausfallInfoMobile')
@@ -243,6 +290,8 @@ export function SiteScripts({ citySlug }: { citySlug: string }) {
       nzMobileBtn?.removeEventListener('click', onNzMobileToggle)
       nzMobileIo?.disconnect()
       nzPainIo?.disconnect()
+      ablaufIo?.disconnect()
+      if (ablaufPageshow) window.removeEventListener('pageshow', ablaufPageshow)
       abInfoBtn?.removeEventListener('click', onAbInfoClick)
       document.removeEventListener('click', onAbDocClick)
       abTlIo?.disconnect()

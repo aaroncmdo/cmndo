@@ -64,6 +64,12 @@ export function CasesCarousel({ city }: { city: City }) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [allOpen, setAllOpen] = useState(false)
   const [current, setCurrent] = useState(0)
+  // BRIEF 08j: Pfeile NUR >=1024 + echte Maus (hover+pointer:fine) — DOM-Guard
+  // via matchMedia (iPad-Landscape @1024+ bekommt KEINE Pfeile, behaelt Swipe+Peek).
+  // Initial false = kein SSR/Hydration-Mismatch; CSS .cases-arrow guarded zusaetzlich.
+  const [showArrows, setShowArrows] = useState(false)
+  const [atStart, setAtStart] = useState(true)
+  const [atEnd, setAtEnd] = useState(false)
 
   // Refs fuer die Auto-Advance-Interval-Closure (State waere dort stale).
   const currentRef = useRef(0)
@@ -91,7 +97,7 @@ export function CasesCarousel({ city }: { city: City }) {
     track.scrollTo({ left: card.offsetLeft - track.offsetLeft - (track.clientWidth - card.offsetWidth) / 2, behavior: 'smooth' })
   }
 
-  // Dot-Sync an Scroll-Position.
+  // Dot-Sync + Pfeil-States an Scroll-Position (08j: atStart/atEnd fuer Dim/aria).
   useEffect(() => {
     const track = trackRef.current
     if (!track) return
@@ -110,7 +116,10 @@ export function CasesCarousel({ city }: { city: City }) {
       })
       currentRef.current = bestIdx
       setCurrent(bestIdx)
+      setAtStart(tr.scrollLeft < 8)
+      setAtEnd(tr.scrollLeft + tr.clientWidth >= tr.scrollWidth - 8)
     }
+    updateDots()
     function onScroll() {
       clearTimeout(scrollTimer)
       scrollTimer = setTimeout(updateDots, 80)
@@ -121,6 +130,25 @@ export function CasesCarousel({ city }: { city: City }) {
       track.removeEventListener('scroll', onScroll)
     }
   }, [])
+
+  // 08j: Pfeil-Sichtbarkeit nur bei echter Maus auf Desktop-Breite (DOM-Guard).
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 1024px) and (hover: hover) and (pointer: fine)')
+    const apply = () => setShowArrows(mq.matches)
+    apply()
+    mq.addEventListener('change', apply)
+    return () => mq.removeEventListener('change', apply)
+  }, [])
+
+  // 08j: Klick = exakt 1 Kartenbreite + gap; respektiert prefers-reduced-motion.
+  function scrollByCard(dir: 1 | -1) {
+    const tr = trackRef.current
+    if (!tr || tr.children.length < 2) return
+    const step = (tr.children[1] as HTMLElement).offsetLeft - (tr.children[0] as HTMLElement).offsetLeft
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+    pausedRef.current = true
+    tr.scrollBy({ left: dir * step, behavior: reduced ? 'auto' : 'smooth' })
+  }
 
   // Diskretes Auto-Advance: alle 3s eine Karte weiter (AAR-962). Pausiert bei
   // User-Interaktion (Hover/Touch/Wheel) + offenem Reveal, respektiert
@@ -191,6 +219,36 @@ export function CasesCarousel({ city }: { city: City }) {
 
   return (
     <div className="relative">
+      {/* BRIEF 08j A1: runde 44px-Glas-Pfeile — nur >=1024 + pointer:fine (DOM-
+          Guard oben, CSS .cases-arrow guarded doppelt). Links initial gedimmt. */}
+      {showArrows ? (
+        <>
+          <button
+            type="button"
+            onClick={() => scrollByCard(-1)}
+            aria-label="Vorherige Fälle"
+            aria-disabled={atStart}
+            className="cases-arrow left-0 -translate-x-1/2"
+            style={{ opacity: atStart ? 0.45 : 1 }}
+          >
+            <svg className="w-5 h-5 stroke-current fill-none" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => scrollByCard(1)}
+            aria-label="Weitere Fälle"
+            aria-disabled={atEnd}
+            className="cases-arrow right-0 translate-x-1/2"
+            style={{ opacity: atEnd ? 0.45 : 1 }}
+          >
+            <svg className="w-5 h-5 stroke-current fill-none" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" aria-hidden="true">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </>
+      ) : null}
       <div
         ref={trackRef}
         id="casesTrack"
@@ -206,7 +264,7 @@ export function CasesCarousel({ city }: { city: City }) {
               role="group"
               aria-roledescription="Karte"
               aria-label={`${idx + 1} von ${CASES.length}: ${c.label}`}
-              className="snap-center flex-none w-[88%] sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] rounded-2xl overflow-hidden border border-border bg-surface shadow-sm hover:-translate-y-[3px] hover:shadow-md transition flex flex-col"
+              className="snap-center flex-none w-[88%] sm:w-[calc(46%-8px)] lg:w-[calc(35%-11px)] rounded-2xl overflow-hidden border border-border bg-surface shadow-sm hover:-translate-y-[3px] hover:shadow-md transition flex flex-col"
             >
               {/* Foto 16:9 mit "Realfall"-Badge */}
               <div className="aspect-[16/9] relative bg-gradient-to-br from-[#cdd9dd] to-[#aebfc6] overflow-hidden">
@@ -366,9 +424,10 @@ export function CasesCarousel({ city }: { city: City }) {
             aria-label={`Zu Karte ${i + 1}`}
             aria-current={i === current ? 'true' : undefined}
             className={
+              /* 08j A3: Feinschliff nur >=640 (Pill 12x6 / 6px) — Mobile wie bisher. */
               i === current
-                ? 'w-6 h-2 rounded-full bg-amber transition-all'
-                : 'w-2 h-2 rounded-full bg-border hover:bg-secondary/40 transition-all'
+                ? 'w-6 h-2 sm:w-3 sm:h-1.5 rounded-full bg-amber transition-all'
+                : 'w-2 h-2 sm:w-1.5 sm:h-1.5 rounded-full bg-border hover:bg-secondary/40 transition-all'
             }
           />
         ))}
