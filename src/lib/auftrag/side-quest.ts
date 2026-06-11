@@ -90,12 +90,14 @@ async function createSideQuest(
   if (typ === 'nachbesichtigung' && fallId) {
     try {
       const admin2 = createAdminClient()
-      const { data: fallRow } = await admin2
-        .from('faelle')
+      // CMM-49 Reader-Sweep: lead_id aus claims (SSoT, 0-diff) — claimId ist der Funktions-Param,
+      // faelle-frei (kein extra resolveClaimId noetig).
+      const { data: claimRow } = await admin2
+        .from('claims')
         .select('lead_id')
-        .eq('id', fallId)
+        .eq('id', claimId)
         .maybeSingle()
-      const leadId = (fallRow?.lead_id as string | null) ?? null
+      const leadId = (claimRow?.lead_id as string | null) ?? null
       if (leadId) {
         const { data: lead } = await admin2
           .from('leads')

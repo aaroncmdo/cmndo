@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 // AAR-310: Die alten chat_gruppen / chat_teilnehmer Tabellen existieren nicht
 // mehr (Architektur ist seit AAR-102 auf nachrichten.kanal mit CHECK-Constraint
@@ -56,26 +57,29 @@ export async function getChatTeilnehmer(fallId: string): Promise<Array<{
 }>> {
   const admin = createAdminClient()
 
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
-    .maybeSingle()
+  // CMM-49 Reader-Sweep: faelle-frei — claims = SSoT. geschaedigter_user_id==kunde_id (0-diff,
+  // NON-Auth Teilnehmer-Anzeige), sv_id (0-diff), kundenbetreuer_id alle nativ auf claims.
+  const claimId = await resolveClaimId(admin, fallId)
+  const { data: claim } = claimId
+    ? await admin
+        .from('claims')
+        .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
+        .eq('id', claimId)
+        .maybeSingle()
+    : { data: null }
 
-  if (!fall) return []
+  if (!claim) return []
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const teilnehmer: Array<{ user_id: string; rolle: 'kunde' | 'kundenbetreuer' | 'gutachter' }> = []
 
-  if (fall.kunde_id) teilnehmer.push({ user_id: fall.kunde_id, rolle: 'kunde' })
-  if (fallClaim?.kundenbetreuer_id) teilnehmer.push({ user_id: fallClaim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
+  if (claim.geschaedigter_user_id) teilnehmer.push({ user_id: claim.geschaedigter_user_id, rolle: 'kunde' })
+  if (claim.kundenbetreuer_id) teilnehmer.push({ user_id: claim.kundenbetreuer_id, rolle: 'kundenbetreuer' })
 
-  if (fall.sv_id) {
+  if (claim.sv_id) {
     const { data: sv } = await admin
       .from('sachverstaendige')
       .select('profile_id')
-      .eq('id', fall.sv_id)
+      .eq('id', claim.sv_id)
       .maybeSingle()
     if (sv?.profile_id) {
       teilnehmer.push({ user_id: sv.profile_id, rolle: 'gutachter' })

@@ -3,6 +3,7 @@
 // AAR-102: Chat-Nachricht senden (persistiert immer in nachrichten,
 // bei kanal=whatsapp zusaetzlich via Twilio outbound)
 import { createClient } from '@/lib/supabase/server'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import type { ChatKanal } from './channels'
 
@@ -57,11 +58,15 @@ export async function sendChatMessage(params: {
   // Bei WhatsApp: zusaetzlich via Twilio outbound
   if (params.kanal === 'whatsapp') {
     try {
-      const { data: fall } = await supabase
-        .from('faelle')
-        .select('lead_id, leads(telefon, vorname)')
-        .eq('id', params.fallId)
-        .single()
+      // CMM-49 Reader-Sweep: lead+telefon aus claims (SSoT, lead_id 0-diff), faelle-frei via resolveClaimId.
+      const chatClaimId = await resolveClaimId(supabase, params.fallId)
+      const { data: fall } = chatClaimId
+        ? await supabase
+            .from('claims')
+            .select('lead_id, leads(telefon, vorname)')
+            .eq('id', chatClaimId)
+            .single()
+        : { data: null }
       const leadJoin = fall?.leads as unknown as { telefon: string | null; vorname: string | null } | { telefon: string | null; vorname: string | null }[] | null
       const lead = Array.isArray(leadJoin) ? leadJoin[0] : leadJoin
       if (lead?.telefon) {
