@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getCurrentClaimPayment, type CurrentClaimPayment } from '@/lib/faelle/claim-payments'
 
 export type FallFinanzen = {
@@ -39,42 +40,40 @@ export type FallFinanzen = {
 export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   const db = createAdminClient()
 
-  // Cluster F+G PR-2b: faelle nur noch für Lifecycle/Honorar-Felder, die F+G-Werte
-  // (wiederbeschaffungswert, restwert, nutzungsausfall_tage, reparaturkosten) kommen
-  // aus v_gutachten_werte (Single-Source Gutachten-Tabelle nach PR-2b-Drop).
-  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag aus dem Select entfernt — war
-  // ungenutzt (Dead-Select), kein Reader-Wechsel noetig.
-  // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — aus dem
-  // faelle-Select entfernt, wird unten separat aus claims geladen.
-  // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
-  // gutachten_betrag aus Select entfernt; Wert kommt unten aus gutachten-Tabelle.
-  // CMM-44 SP-J: zahlung_betrag/zahlung_eingegangen_am liegen auf claim_payments
-  // (unten via getCurrentClaimPayment); zahlung_erwartet_am = Bucket C
-  // (Phase-6-DROP, nicht migriert) — beide aus dem faelle-Select entfernt.
-  // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — aus dem
-  // faelle-Select entfernt, via top-level kanzlei_faelle-Embed gelesen.
-  // CMM-65 Part B: marketing_provision lebt auf claims (SSoT) — aus dem faelle-
-  // Select entfernt, kommt unten aus dem claims-Read. marketing_quelle war ein
-  // ungenutzter Dead-Select -> ersatzlos entfernt.
-  // CMM-61: kanzlei_honorar lebt auf claims (SSoT) — ebenfalls aus dem faelle-
-  // Select entfernt, kommt unten aus dem claims-Read.
-  const { data: fall } = await db.from('faelle')
-    .select('claim_id, wertminderung, nutzungsausfall_tagessatz, sv_id, kanzlei_faelle(regulierung_am)')
-    .eq('id', fallId)
+  // CMM-49 Reader-Sweep: claims-direkt via resolveClaimId (faelle-Anker raus, ueberlebt
+  // den faelle-DROP). sv_id = claims.sv_id (CMM-60, 0-diff 79/0). regulierung_am via
+  // kanzlei_faelle-Embed (kanzlei_faelle.claim_id-FK → claims, 1:1).
+  //
+  // accept-loss (Aaron 11.06. ratifiziert; prod 0-coverage ueber alle 79 Faelle verifiziert):
+  //   wertminderung + nutzungsausfall_tagessatz waren nur faelle-nativ, kein claims/Entity-Home
+  //   → Read entfaellt, Werte null (wert-neutral, da prod immer null/0). nutzungsausfallGesamt
+  //   faellt damit ebenfalls auf null.
+  //
+  // Restliche Werte sind bereits claim_id-gekeyt: F+G aus v_gutachten_werte,
+  // schadens_hoehe_netto/marketing_provision/kanzlei_honorar aus claims (CMM-44 SP-B /
+  // CMM-65 Part B / CMM-61), gutachten.gesamt_schadensbetrag (SP-G), claim_payments (SP-J),
+  // forderungspositionen + zahlungseingaenge claim-gekeyt.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) {
+    return emptyFinanzen()
+  }
+  const { data: claim } = await db.from('claims')
+    .select('sv_id, kanzlei_faelle(regulierung_am)')
+    .eq('id', claimId)
     .single()
 
-  if (!fall) {
+  if (!claim) {
     return emptyFinanzen()
   }
 
   // CMM-44 SP-I3: regulierung_am aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
-  const fallKf = Array.isArray((fall as { kanzlei_faelle?: unknown }).kanzlei_faelle)
-    ? (fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
-    : (fall as { kanzlei_faelle?: unknown }).kanzlei_faelle
-  const regulierungAm = (fallKf as { regulierung_am?: string | null } | null)?.regulierung_am ?? null
+  const claimKf = Array.isArray((claim as { kanzlei_faelle?: unknown }).kanzlei_faelle)
+    ? (claim as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
+    : (claim as { kanzlei_faelle?: unknown }).kanzlei_faelle
+  const regulierungAm = (claimKf as { regulierung_am?: string | null } | null)?.regulierung_am ?? null
 
   // F+G-Werte aus v_gutachten_werte + schadens_hoehe_netto aus claims
-  // (CMM-44 SP-B PR2c) — beides geht nur wenn claim_id verknüpft ist.
+  // (CMM-44 SP-B PR2c). claimId via resolveClaimId immer gesetzt → unconditional.
   // CMM-44 SP-G PR2: gesamt_schadensbetrag aus gutachten (SSoT) statt faelle.gutachten_betrag.
   let gutachtenWerte: {
     wiederbeschaffungswert: number | null
@@ -92,21 +91,21 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungseingang_am/
   // erhaltener_betrag) — ersetzt die alten faelle.zahlung_*-Reads.
   let currentPayment: CurrentClaimPayment | null = null
-  if (fall.claim_id) {
+  {
     const [{ data }, { data: claimRow }, { data: gutachtenRow }, claimPayment] = await Promise.all([
       db.from('v_gutachten_werte')
         .select('wiederbeschaffungswert, restwert, reparaturkosten_netto, reparaturkosten_brutto, nutzungsausfall_tage')
-        .eq('claim_id', fall.claim_id as string)
+        .eq('claim_id', claimId)
         .maybeSingle(),
       db.from('claims')
         .select('schadens_hoehe_netto, marketing_provision, kanzlei_honorar')
-        .eq('id', fall.claim_id as string)
+        .eq('id', claimId)
         .maybeSingle(),
       db.from('gutachten')
         .select('gesamt_schadensbetrag')
-        .eq('claim_id', fall.claim_id as string)
+        .eq('claim_id', claimId)
         .maybeSingle(),
-      getCurrentClaimPayment(db, fall.claim_id as string),
+      getCurrentClaimPayment(db, claimId),
     ])
     gutachtenWerte = data
     schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
@@ -120,11 +119,11 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   let svHonorar: number | null = null
   let svLeadpreis: number | null = null
   let svPreistyp: string | null = null
-  if (fall.sv_id) {
+  if (claim.sv_id) {
     const { data: abr } = await db.from('gutachter_abrechnungen')
       .select('leadpreis, preistyp')
       .eq('fall_id', fallId)
-      .eq('sv_id', fall.sv_id)
+      .eq('sv_id', claim.sv_id)
       .limit(1)
       .maybeSingle()
     if (abr) {
@@ -135,25 +134,23 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   }
 
   // Forderungspositionen
-  // CMM-49: forderungspositionen ist claim-gekeyt — Reader auf claim_id (fall.claim_id
-  // bereits oben geladen). Claim-lose Legacy-Faelle: claim_id null ⇒ 0 Rows (korrekt).
+  // CMM-49: forderungspositionen ist claim-gekeyt — Reader auf claimId (immer gesetzt).
   const { data: forderungen } = await db.from('forderungspositionen')
     .select('betrag_gefordert')
-    .eq('claim_id', (fall.claim_id as string | null) ?? '00000000-0000-0000-0000-000000000000')
+    .eq('claim_id', claimId)
   const forderungenGesamt = forderungen?.reduce((sum, f) => sum + (Number(f.betrag_gefordert) || 0), 0) ?? null
   const forderungenAnzahl = forderungen?.length ?? 0
 
   // Zahlungseingaenge
-  // CMM-49: zahlungseingaenge ist claim-gekeyt — Reader auf claim_id.
+  // CMM-49: zahlungseingaenge ist claim-gekeyt — Reader auf claimId.
   const { data: zahlungen } = await db.from('zahlungseingaenge')
     .select('gesamtbetrag')
-    .eq('claim_id', (fall.claim_id as string | null) ?? '00000000-0000-0000-0000-000000000000')
+    .eq('claim_id', claimId)
   const zahlungEingegangen = zahlungen?.reduce((sum, z) => sum + (Number(z.gesamtbetrag) || 0), 0) ?? null
 
-  // Nutzungsausfall berechnen — Tage aus Gutachten-View, Tagessatz bleibt auf faelle
-  const nutzungsausfallGesamt = (gutachtenWerte?.nutzungsausfall_tage && fall.nutzungsausfall_tagessatz)
-    ? Number(gutachtenWerte.nutzungsausfall_tage) * Number(fall.nutzungsausfall_tagessatz)
-    : null
+  // Nutzungsausfall: nutzungsausfall_tagessatz ist accept-loss (s.o.) → kein Tagessatz mehr,
+  // daher kein berechneter Gesamtwert (prod 0-coverage, war ohnehin immer null).
+  const nutzungsausfallGesamt: number | null = null
 
   // Schadenhoehe (bester Wert) — gutachten.gesamt_schadensbetrag (CMM-44 SP-G PR2) hat Vorrang
   // als geprüfter Gutachtenwert; schadens_hoehe_netto aus claims (CMM-44 SP-B PR2c) ist Fallback.
@@ -196,7 +193,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     wiederbeschaffungswert: Number(gutachtenWerte?.wiederbeschaffungswert) || null,
     restwert: Number(gutachtenWerte?.restwert) || null,
     reparaturkosten: Number(reparaturkostenView) || null,
-    wertminderung: Number(fall.wertminderung) || null,
+    // accept-loss (s.o.): wertminderung war faelle-nativ, prod 0-coverage → null.
+    wertminderung: null,
     nutzungsausfallGesamt,
     svHonorar,
     svLeadpreis,

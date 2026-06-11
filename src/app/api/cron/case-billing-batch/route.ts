@@ -12,7 +12,7 @@ export const dynamic = 'force-dynamic'
  * den State-Trigger verpasst haben (Crash, manuelle DB-Updates, Status-Sprung
  * via Webhook ohne transitionFallStatus()-Call usw.).
  *
- * Filter: sv_id IS NOT NULL AND lead_preis_netto IS NULL AND status in
+ * Filter: sv_id IS NOT NULL AND lead_preis_netto IS NULL AND operative_status in
  * BILLABLE_STATUSES. processCaseBilling() ist idempotent (no-op bei bereits
  * gesetztem lead_preis_netto), Race-Safe auch wenn parallel mit State-Trigger.
  *
@@ -44,44 +44,28 @@ export async function GET(request: Request) {
 
   const db = createAdminClient()
 
-  // CMM-74 b″: Status-Filter liest die SSoT claims.operative_status (mirror von
-  // faelle.status; jeder Fall hat genau einen Claim). PostgREST kann nicht über
-  // den Embed filtern → Zwei-Schritt: erst Claim-IDs mit passendem
-  // operative_status, dann faelle.in('claim_id', …). Verhalten identisch zum
-  // früheren .in('status', BILLABLE_STATUSES) auf faelle.
-  const { data: billableClaims, error: claimsErr } = await db
+  // CMM-49 Reader-Sweep: faelle-frei — alle Filterfelder leben auf claims (SSoT):
+  // operative_status (CMM-74 b″, mirror von faelle.status), sv_id (CMM-60, 0-diff),
+  // lead_preis_netto (CMM-44 SP-J, CLAIM_OWNED). Der frühere Zwei-Schritt
+  // (claims→billableIds→faelle.in('claim_id')) entfaellt; eine claims-Query deckt alles.
+  // Value-neutral: der 1 faelle-lose Orphan-Claim hat sv_id=NULL → vom
+  // .not('sv_id','is',null)-Filter ausgeschlossen. processCaseBilling nimmt eine claims.id
+  // (resolveClaimId(claimId)=claimId) + ist idempotent (no-op bei gesetztem
+  // claims.lead_preis_netto), daher outcome-identisch zum frueheren faelle-Anker.
+  const { data: billable, error } = await db
     .from('claims')
-    .select('id')
+    .select('id, operative_status')
     .in('operative_status', BILLABLE_STATUSES)
-    .limit(2000)
-
-  if (claimsErr) {
-    console.error('[AAR-924] case-billing-batch claims pre-query failed:', claimsErr.message)
-    return NextResponse.json({ error: claimsErr.message }, { status: 500 })
-  }
-
-  const billableClaimIds = (billableClaims ?? []).map((c) => c.id)
-  if (billableClaimIds.length === 0) {
-    return NextResponse.json({ ok: true, processed: 0, skipped: 0, errors: 0 })
-  }
-
-  // Faelle mit SV, fakturierbar, aber noch keine Berechnung.
-  // status bleibt im Select für die Log-Zeile unten (operative_status als SSoT
-  // via claims-Embed, faelle.status als defensiver Fallback).
-  const { data: faelle, error } = await db
-    .from('faelle')
-    .select('id, status, claims:claim_id(operative_status)')
     .not('sv_id', 'is', null)
     .is('lead_preis_netto', null)
-    .in('claim_id', billableClaimIds)
     .limit(500)
 
   if (error) {
-    console.error('[AAR-924] case-billing-batch query failed:', error.message)
+    console.error('[AAR-924] case-billing-batch claims query failed:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
 
-  if (!faelle?.length) {
+  if (!billable?.length) {
     return NextResponse.json({ ok: true, processed: 0, skipped: 0, errors: 0 })
   }
 
@@ -89,14 +73,13 @@ export async function GET(request: Request) {
   let skipped = 0
   let errors = 0
 
-  for (const fall of faelle) {
-    const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-    const fallStatus = (fallClaim?.operative_status as string | null) ?? fall.status
+  for (const claim of billable) {
+    const claimStatus = (claim.operative_status as string | null) ?? null
     try {
-      const result = await processCaseBilling(fall.id)
+      const result = await processCaseBilling(claim.id)
       if (result) {
         processed++
-        console.log(`[AAR-924] batch processed fall ${fall.id} (status=${fallStatus}): lead_preis=${result.lead_preis_netto}`)
+        console.log(`[AAR-924] batch processed claim ${claim.id} (status=${claimStatus}): lead_preis=${result.lead_preis_netto}`)
       } else {
         // null = bereits berechnet, schadenhoehe 0, oder kein sv_id (sollte
         // durch Filter ausgeschlossen sein)
@@ -104,7 +87,7 @@ export async function GET(request: Request) {
       }
     } catch (err) {
       errors++
-      console.error(`[AAR-924] processCaseBilling fall ${fall.id} fehlgeschlagen:`, err)
+      console.error(`[AAR-924] processCaseBilling claim ${claim.id} fehlgeschlagen:`, err)
     }
   }
 
@@ -113,6 +96,6 @@ export async function GET(request: Request) {
     processed,
     skipped,
     errors,
-    total_candidates: faelle.length,
+    total_candidates: billable.length,
   })
 }
