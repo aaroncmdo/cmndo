@@ -640,7 +640,9 @@ export async function signSAandCreateFall(
               .from('gutachter_termine')
               .select('id')
               .eq('fall_id', fall.id)
-              .eq('sv_id', svIdFromTermin)
+              // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch; svIdFromTermin ist eine SV-id).
+              .eq('assignee_id', svIdFromTermin)
+              .eq('assignee_typ', 'sachverstaendiger')
               .in('status', ['bestaetigt', 'reserviert'])
             terminIdsForAuftrag = (existingTermine ?? []).map((t) => t.id as string)
           }
@@ -691,7 +693,9 @@ export async function signSAandCreateFall(
               .from('gutachter_termine')
               .select('id')
               .eq('fall_id', fall.id)
-              .eq('sv_id', svIdFromTermin)
+              // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch; svIdFromTermin ist eine SV-id).
+              .eq('assignee_id', svIdFromTermin)
+              .eq('assignee_typ', 'sachverstaendiger')
               .in('status', ['bestaetigt', 'reserviert'])
             terminIdsForAuftrag = (existingTermine ?? []).map((t) => t.id as string)
           }
@@ -1115,16 +1119,17 @@ export async function signSAandCreateFall(
     try {
       // Gutachter-Daten laden
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, ablehnen_token')
+        // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+        .select('id, assignee_id, ablehnen_token')
         .eq('fall_id', fall.id)
         .eq('status', 'bestaetigt')
         .limit(1)
         .maybeSingle()
 
-      if (terminRow?.sv_id) {
+      if (terminRow?.assignee_id) {
         const { data: svData } = await admin.from('sachverstaendige')
           .select('profile_id, profiles(telefon, vorname, nachname)')
-          .eq('id', terminRow.sv_id)
+          .eq('id', terminRow.assignee_id)
           .single()
 
         const svProfile = (Array.isArray(svData?.profiles) ? svData?.profiles[0] : svData?.profiles) as { telefon: string | null; vorname: string | null; nachname: string | null } | null
@@ -1155,7 +1160,9 @@ export async function signSAandCreateFall(
 
           // Mitteilung im Gutachter-Portal
           await admin.from('gutachter_mitteilungen').insert({
-            sv_id: terminRow.sv_id,
+            // CMM-49 (sv_id-Drop): Wert aus terminRow.assignee_id; gutachter_mitteilungen.sv_id
+            // ist Fremd-Tabelle (eigene Spalte, bleibt) — value-identisch.
+            sv_id: terminRow.assignee_id,
             typ: 'termin_bestaetigt',
             titel: `Neuer Termin: ${datum} ${uhrzeit}`,
             nachricht: `Besichtigung bei ${kundeName} in ${adresse}. Kennzeichen: ${lead.kennzeichen || '—'}.`,
@@ -1174,7 +1181,9 @@ export async function signSAandCreateFall(
   if (lead.gutachter_termin && lead.telefon) {
     try {
       const { data: terminRow } = await admin.from('gutachter_termine')
-        .select('id, sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname))')
+        // CMM-49 (sv_id-Drop): der sachverstaendige-Embed lief über die gutachter_termine.sv_id-FK
+        // (bricht beim DROP) → assignee_id + separater Lookup unten (nur vorname an Kunde, AAR-941).
+        .select('id, assignee_id, assignee_typ')
         .eq('fall_id', fall.id)
         .in('status', ['bestaetigt', 'reserviert'])
         .limit(1)
@@ -1192,12 +1201,19 @@ export async function signSAandCreateFall(
       // CMM-21: nur Vorname an den Kunden — Vor-/Nachname zusammen würde
       // dem Kunden ermöglichen den Sachverständigen direkt zu identifizieren
       // und an Claimondo vorbei zu beauftragen.
-      const svRel = (terminRow as { sachverstaendige: unknown } | null)?.sachverstaendige
-      const sv = (Array.isArray(svRel) ? svRel[0] : svRel) as { profiles: unknown } | null
-      const profileRel = sv?.profiles
-      const profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
-        | { vorname: string | null }
-        | null
+      // CMM-49 (sv_id-Drop): SV-Vorname separat laden (assignee_id, kein FK-Embed).
+      // Nur vorname an den Kunden (AAR-941, wie bisher).
+      let profile: { vorname: string | null } | null = null
+      if (terminRow?.assignee_id && terminRow.assignee_typ === 'sachverstaendiger') {
+        const { data: svRow } = await admin.from('sachverstaendige')
+          .select('profiles!sachverstaendige_profile_id_fkey(vorname)')
+          .eq('id', terminRow.assignee_id)
+          .maybeSingle()
+        const profileRel = (svRow as { profiles: unknown } | null)?.profiles
+        profile = (Array.isArray(profileRel) ? profileRel[0] : profileRel) as
+          | { vorname: string | null }
+          | null
+      }
       const svName = (profile?.vorname ?? '').trim() || 'Ihrem Gutachter'
       const terminDate = new Date(lead.gutachter_termin)
       const datumUhrzeit = `${terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric' })} um ${terminDate.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
