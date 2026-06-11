@@ -162,6 +162,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const markersRef = useRef<Marker[]>([])
   const popupRef = useRef<Popup | null>(null)
   const popupRootRef = useRef<Root | null>(null)
+  const userMarkerRef = useRef<Marker | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
@@ -359,6 +360,17 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           const lng = pos.coords.longitude
           setUserLocation({ lat, lng })
           map.flyTo({ center: [lng, lat], zoom: USER_LOCATION_ZOOM, duration: 1400, essential: true })
+          // "Sie sind hier"-Marker — nur nach Geolocation-Consent sichtbar (Aaron 11.06.).
+          userMarkerRef.current?.remove()
+          const ueEl = document.createElement('div')
+          ueEl.setAttribute('aria-label', 'Ihr Standort')
+          ueEl.innerHTML = `
+            <div style="position:relative;width:20px;height:20px">
+              <div style="position:absolute;inset:-10px;border-radius:50%;background:rgba(69,115,162,0.20);animation:gf-user-pulse 2.4s ease-out infinite"></div>
+              <div style="position:absolute;inset:0;border-radius:50%;background:#4573A2;border:3px solid #fff;box-shadow:0 2px 8px rgba(13,27,62,0.40)"></div>
+            </div>
+          `
+          userMarkerRef.current = new mapboxgl.Marker({ element: ueEl, anchor: 'center' }).setLngLat([lng, lat]).addTo(map)
         },
         (err) => {
           console.info('[gutachter-finden] Geolocation verweigert/Fehler:', err.message)
@@ -372,6 +384,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       resizeObs.disconnect()
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
+      userMarkerRef.current?.remove()
       popupRootRef.current?.unmount()
       popupRef.current?.remove()
       map.remove()
@@ -410,6 +423,10 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         }
         .sv-finder-popup .mapboxgl-popup-close-button:hover {
           background: color-mix(in srgb, var(--claimondo-navy, #0D1B3E) 8%, transparent);
+        }
+        @keyframes gf-user-pulse {
+          0% { transform: scale(0.5); opacity: 0.55; }
+          80%, 100% { transform: scale(1.9); opacity: 0; }
         }
       `}</style>
       {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
