@@ -1,19 +1,30 @@
-// Cluster-Konfiguration · BONN (Rhein-Sieg) — Klon des Wuppertal-Masters.
-// Daten aus preview-complete.html (CLUSTERS.bonn + RESIDENTS).
+// ============================================================================
+// CLUSTER-KONFIG · BONN (Rhein-Sieg)
+// ============================================================================
+// Re-Skin auf den Koeln-Endstand (08o-08q): Schema + Komponenten aus der
+// Koeln-Vorlage, Inhalt/Farbe/Assets bleiben Bonn. Einzige Datei mit der
+// Cluster-Identitaet. Theme-Farben: app/globals.css :root (Tinten-Schwarz +
+// Antikgold). themeColor: layout.tsx. Bilder: public/assets/img/bonn/.
+// ============================================================================
 
 export interface City {
   slug: string
   name: string
   plz: string
+  /** H1-Untertitel (SEO-Variation pro Stadt). */
   h1Sub: string
+  /** Einwohner-Bezeichnung ("Bonner") fuer Reviews-Headline. */
   residents: string
+  /** Stadt-Zentrum-Koordinaten (LocalBusiness-geo + Map-Pin). */
   lat: number
   lng: number
+  /** Hauptstadt des Clusters (Hub). */
   main?: boolean
 }
 
 export interface Brennpunkt {
   name: string
+  /** Pfad relativ zu CLUSTER.imgPath */
   img: string
   desc: string
 }
@@ -21,7 +32,7 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
-  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  /** Region im Dativ ("im Rhein-Sieg-Kreis") fuer Ueber-uns-Copy. */
   regionDative: string
   /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
   quellenAnker: string
@@ -30,16 +41,35 @@ export interface ClusterConfig {
   /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
   stadtteile: string[]
   domain: string
+  /** data-theme-Key (dokumentarisch — :root in globals.css traegt die Vars). */
   theme: string
   themeColor: string
+  /** Basis-Pfad fuer cluster-spezifische Bilder. */
   imgPath: string
+  /** Dateiendung der Logo-Varianten logo-{key}-dark/-white. */
+  logoExt: 'png' | 'svg'
+  /** 08m A6 · Cache-Busting: bei INHALTS-Tausch eines Assets (gleicher Dateiname) hochzaehlen. */
+  assetVersion: string
+  /** H1-Sub-Span im Hero (NUR Desktop lg:+). */
+  h1SubSpan: string
   /** Team-Foto (Netzwerk-Mobile Team-Hero-Card). */
   teamImg: string
-  /** Vorname des lokalen SV (CTA-v8-Rolle). Persona-Default "Tobias". */
+  /** Vorname des lokalen SV (CTA-Rolle + Ueber-uns). */
   svName: string
-  phone: { display: string; tel: string; wa: string }
+  /** Nachname des lokalen SV (Person-Schema / formale Nennung). */
+  svSurname: string
+  phone: {
+    display: string
+    /** National formatiertes CTA-Label — href/tel bleibt international. */
+    displayNational: string
+    tel: string
+    wa: string
+  }
+  /** Wahrzeichen-Hero (Einsatzgebiet). */
   landmark: { label: string; img: string }
+  /** Verkehrs-Hauptachsen + Vor-Ort-Zeit (Facts-Grid). */
   facts: { value: string; label: string; accent?: boolean }[]
+  /** Verkehrsschwerpunkte (Hauptstadt-Level). */
   brennpunkte: Brennpunkt[]
   cities: City[]
 }
@@ -52,12 +82,16 @@ export const CLUSTER: ClusterConfig = {
   achsen: ['A565', 'A562', 'A59', 'B9', 'B56'],
   stadtteile: ['Bad Godesberg', 'Beuel', 'Hardtberg', 'Poppelsdorf', 'Bonn-Zentrum'],
   domain: 'kfz-unfallgutachter-bonn.de',
-  theme: 'nacht',
+  theme: 'nacht', // Bonn: Tinten-Schwarz + Antikgold — globals.css :root traegt die Vars
   themeColor: '#0F1014',
   imgPath: '/assets/img/bonn/',
-  teamImg: '/assets/img/bonn/team-bonn.webp',
+  logoExt: 'svg', // Bonn: logo-bonn-dark.svg vorhanden — TODO Aaron: logo-bonn-white.svg fehlt noch
+  assetVersion: '1',
+  h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard.',
+  teamImg: '/assets/img/bonn/team-bonn.webp?v=1',
   svName: 'Tobias',
-  phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
+  svSurname: 'Becker', // Persona-Nachname (Tobias Becker)
+  phone: { display: '+49 1515 3608515', displayNational: '0151 5360 8515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Bonner Münster', img: 'stadt-bonn.png' },
   facts: [
     { value: 'A59', label: 'Hauptachse' },
@@ -84,41 +118,98 @@ export const CLUSTER: ClusterConfig = {
   ],
 }
 
+/** Hauptstadt (Hub-Page /). */
 export const MAIN_CITY: City = CLUSTER.cities.find((c) => c.main) ?? CLUSTER.cities[0]
+
+/** Alle Slugs. */
 export const CITY_SLUGS: string[] = CLUSTER.cities.map((c) => c.slug)
+
+/** Spoke-Slugs (alle ausser Hauptstadt) — generateStaticParams. */
 export const SPOKE_SLUGS: string[] = CLUSTER.cities.filter((c) => !c.main).map((c) => c.slug)
 
+/** Routing-Pfad einer Stadt (Hauptstadt → "/"). */
 export function cityHref(city: City): string {
   return city.main ? '/' : `/lp/${city.slug}`
 }
+
+/** Stadt per Slug (oder undefined → 404). */
 export function getCity(slug: string): City | undefined {
   return CLUSTER.cities.find((c) => c.slug === slug)
 }
+
+/** Vorausgefuellter WhatsApp-Text pro Stadt. */
 export function waText(city: City): string {
   return `Hallo, ich hatte einen Unfall in ${city.name} und brauche einen Gutachter.`
 }
+
+/** Vollstaendiger wa.me-Link mit vorausgefuelltem Text. */
 export function waHref(city: City): string {
   return `https://wa.me/${CLUSTER.phone.wa}?text=${encodeURIComponent(waText(city))}`
 }
+
+/** Komma-Liste aller Staedte (Servicegebiet-Text / areaServed). */
 export function cityNamesList(): string {
   const names = CLUSTER.cities.map((c) => c.name)
   return names.slice(0, -1).join(', ') + ' und ' + names[names.length - 1]
 }
 
-/** Einzigartiger lokaler SEO-Absatz pro Stadt (gegen Doorway/Duplicate-Content). */
-export const SEO_TEXT: Record<string, string> = {
-  bonn: 'Als ehemalige Bundesstadt am Rhein bündelt Bonn mit der PLZ 53111 ein dichtes Verkehrsaufkommen aus Berufspendlern, Behördenverkehr und Anschlüssen an die A565. Nach einem unverschuldeten Unfall lohnt sich ein unabhängiger Kfz-Gutachter Bonn, der das Schadensbild zeitnah vor Ort dokumentiert. Wir begutachten nach DAT- und BVSK-Standard, halten Wertminderung und Reparaturweg neutral fest und arbeiten unabhängig von der gegnerischen Versicherung. Trägt die Gegenseite die Schuld, übernimmt deren Haftpflicht das Honorar, sodass für Sie 0 € anfallen. Auch Sankt Augustin und Bornheim liegen in unserem Einzugsgebiet.',
-  'sankt-augustin': 'Sankt Augustin (53757) reiht sich östlich von Bonn in den Rhein-Sieg-Kreis ein und ist über die A560 gut erschlossen. Wer hier nach einem Verkehrsunfall steht, braucht zuerst Klarheit über den tatsächlichen Schaden. Ein unabhängiger Kfz-Sachverständiger Sankt Augustin kommt zur Begutachtung zu Ihnen, erfasst Schadenumfang, Reparaturkosten und Wertminderung und erstellt ein Gutachten nach DAT- und BVSK-Vorgaben. Bei unverschuldetem Unfall rechnen wir direkt mit der gegnerischen Versicherung ab. Über unser Netzwerk vermitteln wir bei Bedarf einen Anwalt und einen Mietwagen. Siegburg und Troisdorf sind nur Minuten entfernt.',
-  siegburg: 'Siegburg mit der PLZ 53721 ist das Verwaltungszentrum des Rhein-Sieg-Kreises und durch Bahn und A3 ein vielbefahrener Knotenpunkt. Genau dort passieren Blechschäden schnell. Statt sich auf die Einschätzung der Gegenseite zu verlassen, sichern Sie Ihre Ansprüche besser mit einem eigenen Kfz-Gutachter Siegburg. Wir kommen kurzfristig zur Vor-Ort-Begutachtung, dokumentieren den Schaden beweissicher und erstellen ein neutrales Gutachten nach DAT- und BVSK-Standard. War der Unfall unverschuldet, zahlt die gegnerische Haftpflicht das Sachverständigenhonorar. Auch in Sankt Augustin und Hennef sind wir für Sie unterwegs.',
-  troisdorf: 'Im Norden des Rhein-Sieg-Kreises gelegen, verbindet Troisdorf (53840) über die A59 den Großraum Köln-Bonn mit dem Umland. Nach einem Unfall zählt zuerst eine ehrliche Schadensaufnahme: Welche Reparatur ist nötig, wie hoch ist die Wertminderung? Ein unabhängiger Kfz-Sachverständiger Troisdorf klärt das vor Ort und unabhängig von der Versicherung der Gegenseite. Das Gutachten folgt DAT- und BVSK-Standard und dient als belastbare Grundlage für Ihre Forderung. Bei unverschuldetem Unfall entstehen Ihnen keine Kosten, weil die gegnerische Haftpflicht zahlt. Siegburg und Hennef liegen in direkter Nachbarschaft.',
-  koenigswinter: 'Königswinter (53639) liegt am rechten Rheinufer am Fuß des Siebengebirges und zieht neben Pendlern auch viel Ausflugsverkehr an. Gerade dort kommt es zu Auffahr- und Parkschäden. Damit Sie nach einem fremdverschuldeten Unfall nicht auf Kosten sitzen bleiben, dokumentiert ein unabhängiger Kfz-Gutachter Königswinter den Schaden direkt bei Ihnen. Wir bewerten Reparaturweg und Wertminderung neutral nach DAT- und BVSK-Standard und vermitteln über unser Netzwerk bei Bedarf Anwalt und Mietwagen. Die Begutachtung erfolgt zeitnah; das Honorar trägt bei unverschuldetem Unfall die gegnerische Versicherung. Bad Honnef und Bonn sind schnell erreicht.',
-  'bad-honnef': 'Ganz im Süden des Rhein-Sieg-Kreises grenzt Bad Honnef (53604) an Rheinland-Pfalz und liegt verkehrsgünstig an der B42 entlang des Rheins. Wer hier in einen unverschuldeten Unfall gerät, sollte den Schaden nicht von der Gegenseite bewerten lassen. Ein unabhängiger Kfz-Sachverständiger Bad Honnef erstellt ein neutrales Gutachten nach DAT- und BVSK-Standard und sichert so Ihre Ansprüche. Wir kommen zur schnellen Vor-Ort-Begutachtung und rechnen das Honorar direkt mit der gegnerischen Haftpflicht ab, sodass für Sie 0 € bleiben. Königswinter ist der nächste Nachbar, Bonn nur eine kurze Fahrt entfernt.',
-  hennef: 'Hennef an der Sieg (53773) erstreckt sich über zahlreiche Ortsteile und ist über die A560 und die Bahnstrecke ins Siegtal angebunden. Nach einem Verkehrsunfall ist die größte Sorge oft, ob die Reparatur fair bewertet wird. Hier hilft ein unabhängiger Kfz-Gutachter Hennef, der vor Ort den Schaden aufnimmt und ein Gutachten nach DAT- und BVSK-Standard erstellt, völlig unabhängig von der gegnerischen Versicherung. Bei unverschuldetem Unfall übernimmt deren Haftpflicht die Kosten. Über das Netzwerk organisieren wir bei Bedarf Anwalt und Mietwagen. Siegburg und Troisdorf gehören zum gleichen Einzugsgebiet.',
-  bornheim: 'Bornheim (53332) liegt westlich des Rheins auf der Vorgebirgsterrasse zwischen Bonn und Köln und ist über die A555 angebunden. Passiert auf dem Weg zur Arbeit ein Auffahrunfall, sollten Sie den Schaden früh und beweissicher festhalten lassen. Ein unabhängiger Kfz-Sachverständiger Bornheim kommt dafür zu Ihnen, erfasst Reparaturkosten und Wertminderung und dokumentiert alles nach DAT- und BVSK-Standard. War der Unfall unverschuldet, trägt die gegnerische Versicherung das Honorar, für Sie fallen 0 € an. Bonn grenzt direkt an, und auch Rheinbach im Süden erreichen wir zügig für eine schnelle Vor-Ort-Begutachtung.',
-  rheinbach: 'Am Rand der Voreifel gelegen, bildet Rheinbach (53359) den südwestlichen Ausläufer des Rhein-Sieg-Kreises und ist über die A61 mit dem Umland verbunden. Nach einem fremdverschuldeten Unfall lohnt sich ein eigenes, neutrales Schadensgutachten statt der Einschätzung der Gegenseite. Ein unabhängiger Kfz-Gutachter Rheinbach nimmt den Schaden vor Ort auf, bewertet Reparaturweg und Wertminderung nach DAT- und BVSK-Standard und schafft so die Grundlage für Ihre Forderung. Das Honorar zahlt bei unverschuldetem Unfall die gegnerische Haftpflicht. Über unser Netzwerk vermitteln wir Anwalt und Mietwagen; Bornheim und Bonn liegen im selben Einzugsgebiet.',
-  meckenheim: 'Meckenheim (53340) liegt in der Voreifel am südwestlichen Rand des Rhein-Sieg-Kreises und ist über das Autobahnkreuz Meckenheim direkt an A61 und A565 angebunden — eine vielbefahrene Pendlerachse Richtung Bonn und Köln. Wer hier in einen unverschuldeten Unfall gerät, sollte den Schaden nicht von der Gegenseite bewerten lassen. Ein unabhängiger Kfz-Sachverständiger Meckenheim kommt zur Vor-Ort-Begutachtung zu Ihnen, erfasst Reparaturkosten und Wertminderung und dokumentiert alles neutral nach DAT- und BVSK-Standard. War der Unfall unverschuldet, trägt die gegnerische Haftpflicht das Honorar, für Sie bleiben 0 €. Über unser Netzwerk vermitteln wir bei Bedarf Anwalt und Mietwagen. Die Ortsteile Merl, Lüftelberg und Ersdorf sowie das benachbarte Rheinbach gehören ebenfalls zu unserem Einzugsgebiet.',
+// ── SEO-Body (08o O6: strukturierte Absaetze statt Fliesstext) ───────────────
+// `vorort: true` markiert den Absatz, der in der Einsatzgebiet-Lokalstrecke
+// rendert (lib/seoVorOrt). Bonn-Re-Skin: bestehende Lokal-Texte 1:1 erhalten,
+// je Stadt in Intro-Absatz + Vor-Ort-Absatz (Nachbarorte) gesplittet.
+export interface SeoAbsatz {
+  /** Editorial gebundene Zwischenueberschrift. */
+  h3?: string
+  text: string
+  /** Kompakte Leistungs-Liste nach dem Text. */
+  liste?: string[]
+  /** Rendert in der Einsatzgebiet-Lokalstrecke ("Vor Ort"), nicht im SeoBody. */
+  vorort?: boolean
 }
 
-export function seoTextFor(slug: string): string {
-  return SEO_TEXT[slug] ?? ''
+export const SEO_BODY: Record<string, SeoAbsatz[]> = {
+  bonn: [
+    { text: `Als ehemalige Bundesstadt am Rhein bündelt Bonn mit der PLZ 53111 ein dichtes Verkehrsaufkommen aus Berufspendlern, Behördenverkehr und Anschlüssen an die A565. Nach einem unverschuldeten Unfall lohnt sich ein unabhängiger Kfz-Gutachter Bonn, der das Schadensbild zeitnah vor Ort dokumentiert. Wir begutachten nach DAT- und BVSK-Standard, halten Wertminderung und Reparaturweg neutral fest und arbeiten unabhängig von der gegnerischen Versicherung. Trägt die Gegenseite die Schuld, übernimmt deren Haftpflicht das Honorar, sodass für Sie 0 € anfallen.` },
+    { vorort: true, text: `Auch Sankt Augustin und Bornheim liegen in unserem Einzugsgebiet.` },
+  ],
+  'sankt-augustin': [
+    { text: `Sankt Augustin (53757) reiht sich östlich von Bonn in den Rhein-Sieg-Kreis ein und ist über die A560 gut erschlossen. Wer hier nach einem Verkehrsunfall steht, braucht zuerst Klarheit über den tatsächlichen Schaden. Ein unabhängiger Kfz-Sachverständiger Sankt Augustin kommt zur Begutachtung zu Ihnen, erfasst Schadenumfang, Reparaturkosten und Wertminderung und erstellt ein Gutachten nach DAT- und BVSK-Vorgaben. Bei unverschuldetem Unfall rechnen wir direkt mit der gegnerischen Versicherung ab. Über unser Netzwerk vermitteln wir bei Bedarf einen Anwalt und einen Mietwagen.` },
+    { vorort: true, text: `Siegburg und Troisdorf sind nur Minuten entfernt.` },
+  ],
+  siegburg: [
+    { text: `Siegburg mit der PLZ 53721 ist das Verwaltungszentrum des Rhein-Sieg-Kreises und durch Bahn und A3 ein vielbefahrener Knotenpunkt. Genau dort passieren Blechschäden schnell. Statt sich auf die Einschätzung der Gegenseite zu verlassen, sichern Sie Ihre Ansprüche besser mit einem eigenen Kfz-Gutachter Siegburg. Wir kommen kurzfristig zur Vor-Ort-Begutachtung, dokumentieren den Schaden beweissicher und erstellen ein neutrales Gutachten nach DAT- und BVSK-Standard. War der Unfall unverschuldet, zahlt die gegnerische Haftpflicht das Sachverständigenhonorar.` },
+    { vorort: true, text: `Auch in Sankt Augustin und Hennef sind wir für Sie unterwegs.` },
+  ],
+  troisdorf: [
+    { text: `Im Norden des Rhein-Sieg-Kreises gelegen, verbindet Troisdorf (53840) über die A59 den Großraum Köln-Bonn mit dem Umland. Nach einem Unfall zählt zuerst eine ehrliche Schadensaufnahme: Welche Reparatur ist nötig, wie hoch ist die Wertminderung? Ein unabhängiger Kfz-Sachverständiger Troisdorf klärt das vor Ort und unabhängig von der Versicherung der Gegenseite. Das Gutachten folgt DAT- und BVSK-Standard und dient als belastbare Grundlage für Ihre Forderung. Bei unverschuldetem Unfall entstehen Ihnen keine Kosten, weil die gegnerische Haftpflicht zahlt.` },
+    { vorort: true, text: `Siegburg und Hennef liegen in direkter Nachbarschaft.` },
+  ],
+  koenigswinter: [
+    { text: `Königswinter (53639) liegt am rechten Rheinufer am Fuß des Siebengebirges und zieht neben Pendlern auch viel Ausflugsverkehr an. Gerade dort kommt es zu Auffahr- und Parkschäden. Damit Sie nach einem fremdverschuldeten Unfall nicht auf Kosten sitzen bleiben, dokumentiert ein unabhängiger Kfz-Gutachter Königswinter den Schaden direkt bei Ihnen. Wir bewerten Reparaturweg und Wertminderung neutral nach DAT- und BVSK-Standard und vermitteln über unser Netzwerk bei Bedarf Anwalt und Mietwagen. Die Begutachtung erfolgt zeitnah; das Honorar trägt bei unverschuldetem Unfall die gegnerische Versicherung.` },
+    { vorort: true, text: `Bad Honnef und Bonn sind schnell erreicht.` },
+  ],
+  'bad-honnef': [
+    { text: `Ganz im Süden des Rhein-Sieg-Kreises grenzt Bad Honnef (53604) an Rheinland-Pfalz und liegt verkehrsgünstig an der B42 entlang des Rheins. Wer hier in einen unverschuldeten Unfall gerät, sollte den Schaden nicht von der Gegenseite bewerten lassen. Ein unabhängiger Kfz-Sachverständiger Bad Honnef erstellt ein neutrales Gutachten nach DAT- und BVSK-Standard und sichert so Ihre Ansprüche. Wir kommen zur schnellen Vor-Ort-Begutachtung und rechnen das Honorar direkt mit der gegnerischen Haftpflicht ab, sodass für Sie 0 € bleiben.` },
+    { vorort: true, text: `Königswinter ist der nächste Nachbar, Bonn nur eine kurze Fahrt entfernt.` },
+  ],
+  hennef: [
+    { text: `Hennef an der Sieg (53773) erstreckt sich über zahlreiche Ortsteile und ist über die A560 und die Bahnstrecke ins Siegtal angebunden. Nach einem Verkehrsunfall ist die größte Sorge oft, ob die Reparatur fair bewertet wird. Hier hilft ein unabhängiger Kfz-Gutachter Hennef, der vor Ort den Schaden aufnimmt und ein Gutachten nach DAT- und BVSK-Standard erstellt, völlig unabhängig von der gegnerischen Versicherung. Bei unverschuldetem Unfall übernimmt deren Haftpflicht die Kosten. Über das Netzwerk organisieren wir bei Bedarf Anwalt und Mietwagen.` },
+    { vorort: true, text: `Siegburg und Troisdorf gehören zum gleichen Einzugsgebiet.` },
+  ],
+  bornheim: [
+    { text: `Bornheim (53332) liegt westlich des Rheins auf der Vorgebirgsterrasse zwischen Bonn und Köln und ist über die A555 angebunden. Passiert auf dem Weg zur Arbeit ein Auffahrunfall, sollten Sie den Schaden früh und beweissicher festhalten lassen. Ein unabhängiger Kfz-Sachverständiger Bornheim kommt dafür zu Ihnen, erfasst Reparaturkosten und Wertminderung und dokumentiert alles nach DAT- und BVSK-Standard. War der Unfall unverschuldet, trägt die gegnerische Versicherung das Honorar, für Sie fallen 0 € an.` },
+    { vorort: true, text: `Bonn grenzt direkt an, und auch Rheinbach im Süden erreichen wir zügig für eine schnelle Vor-Ort-Begutachtung.` },
+  ],
+  rheinbach: [
+    { text: `Am Rand der Voreifel gelegen, bildet Rheinbach (53359) den südwestlichen Ausläufer des Rhein-Sieg-Kreises und ist über die A61 mit dem Umland verbunden. Nach einem fremdverschuldeten Unfall lohnt sich ein eigenes, neutrales Schadensgutachten statt der Einschätzung der Gegenseite. Ein unabhängiger Kfz-Gutachter Rheinbach nimmt den Schaden vor Ort auf, bewertet Reparaturweg und Wertminderung nach DAT- und BVSK-Standard und schafft so die Grundlage für Ihre Forderung. Das Honorar zahlt bei unverschuldetem Unfall die gegnerische Haftpflicht.` },
+    { vorort: true, text: `Über unser Netzwerk vermitteln wir Anwalt und Mietwagen; Bornheim und Bonn liegen im selben Einzugsgebiet.` },
+  ],
+  meckenheim: [
+    { text: `Meckenheim (53340) liegt in der Voreifel am südwestlichen Rand des Rhein-Sieg-Kreises und ist über das Autobahnkreuz Meckenheim direkt an A61 und A565 angebunden — eine vielbefahrene Pendlerachse Richtung Bonn und Köln. Wer hier in einen unverschuldeten Unfall gerät, sollte den Schaden nicht von der Gegenseite bewerten lassen. Ein unabhängiger Kfz-Sachverständiger Meckenheim kommt zur Vor-Ort-Begutachtung zu Ihnen, erfasst Reparaturkosten und Wertminderung und dokumentiert alles neutral nach DAT- und BVSK-Standard. War der Unfall unverschuldet, trägt die gegnerische Haftpflicht das Honorar, für Sie bleiben 0 €. Über unser Netzwerk vermitteln wir bei Bedarf Anwalt und Mietwagen.` },
+    { vorort: true, text: `Die Ortsteile Merl, Lüftelberg und Ersdorf sowie das benachbarte Rheinbach gehören ebenfalls zu unserem Einzugsgebiet.` },
+  ],
+}
+
+export function seoBodyFor(slug: string): SeoAbsatz[] {
+  return SEO_BODY[slug] ?? []
 }
