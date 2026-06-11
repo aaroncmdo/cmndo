@@ -93,6 +93,51 @@ export const HERO_FEATURES: HeroFeature[] = [
 // ── Praxis-Cases (5) ────────────────────────────────────────────────────────
 // erstangebot = Schnell-Angebot der Versicherung · anspruch = durchgesetzt
 // (mit unabh. Gutachten + Anwalt). breakdown-Summe == (anspruch - erstangebot).
+// ── Partner-Zeile (08o O3: EIN Datenfeld fuer alle drei Lockups) ─────────────
+// Vorher drei Varianten (Mobile-Hero "CLAIMONDO UNFALL-ASSISTANCE/PARTNER",
+// sm+-Hero "Zertifizierter Claimondo-Partner/Unfall-Assistance", Buero mit
+// "...Schadenregulierung aus einer Hand"-Zusatz). brand wird in den Komponenten
+// mit <ClaimondoLink> gewrappt.
+export const PARTNER_LINE = {
+  pre: 'Zertifizierter',
+  brand: 'Claimondo-Partner',
+  sub: 'Unfall-Assistance',
+} as const
+
+// ── Netzwerk-Personen-Karten (08o O2: ersetzen die Icon-Spalten) ─────────────
+// EIN Datenfeld, wortgleich lt. Brief; {sv} = Gutachter-Vorname des Clusters
+// (CLUSTER.svName — Koeln Stefan / Aachen Markus), Avatar-Aufloesung in der
+// NetzwerkSection (sv -> cluster-Asset, monika/lexdrive -> shared).
+export interface NetzwerkPerson {
+  avatar: 'sv' | 'monika' | 'lexdrive'
+  /** '{sv}' wird mit CLUSTER.svName ersetzt. */
+  name: string
+  funktion: string
+  zitat: string
+  /** 08p P4: object-position je Asset (Gesicht mittig im runden Crop). */
+  avatarPos?: string
+}
+export const NETZWERK_PERSONEN: NetzwerkPerson[] = [
+  {
+    avatar: 'sv',
+    name: '{sv}',
+    funktion: 'Kfz-Sachverständiger',
+    zitat: 'Ich bin in 60 Minuten bei Ihnen und dokumentiere Ihren Schaden gerichtsfest — nach DAT/BVSK.',
+  },
+  {
+    avatar: 'monika',
+    name: 'Monika',
+    funktion: 'Schadensbetreuung 24/7 · Claimondo Unfall-Assistance',
+    zitat: 'Ich regle alles rund um Ihren Fall: Termin, Mietwagen und den kompletten Papierkram.',
+  },
+  {
+    avatar: 'lexdrive',
+    name: 'Partnerkanzlei LexDrive',
+    funktion: 'Verkehrsrecht',
+    zitat: 'Kürzt die Versicherung, widersprechen wir — und holen die volle Summe für Sie raus.',
+  },
+]
+
 // ⚠️ Bilder sind KI-Platzhalter (data-placeholder) — vor Live durch echte Fotos.
 export interface CaseBreakdown {
   label: string
@@ -187,12 +232,15 @@ export interface AblaufStep {
   info?: string
 }
 
+// 08o O4 (Aaron, wortgleich): Copy gestrafft — Titel/Icons/Nummern bleiben,
+// Texte <=10 Woerter inkl. Titel (Zaehlung im 08o-Report; Tooltip-info ist
+// eigenes UI, kein Step-Text).
 export const ABLAUF: AblaufStep[] = [
-  { icon: 'phone', title: 'Anrufen', text: 'Per Telefon oder WhatsApp melden — wir melden uns **innerhalb einer Stunde**.' },
-  { icon: 'calendar', title: 'Termin vor Ort', text: 'DAT-Sachverständiger dokumentiert gerichtsfest — in der Regel **binnen 24–72 Stunden** bei Ihnen.' },
-  { icon: 'scale', title: 'Anwalt inklusive', titleAccent: '— 0 €', text: '**LexDrive** kämpft für Sie gegen die Versicherung. Kosten trägt die Gegenseite.' },
-  { icon: 'car', title: 'Mietwagen oder Geld', text: 'Ersatzwagen organisiert — oder Nutzungsausfall pro Tag aufs Konto. **Ihre Wahl.**', info: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. 23–175 €/Tag (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif. Was günstiger ist, klären wir mit Ihnen.' },
-  { icon: 'card', title: 'Geld aufs Konto', text: 'Reparatur, Wertminderung und Nutzungsausfall — die Versicherung zahlt **direkt aufs Konto**.' },
+  { icon: 'phone', title: 'Anrufen', text: 'Per Telefon oder WhatsApp — Rückmeldung **innerhalb einer Stunde**.' },
+  { icon: 'calendar', title: 'Termin vor Ort', text: 'Gutachter dokumentiert **gerichtsfest** — meist binnen 24–72 Stunden.' },
+  { icon: 'scale', title: 'Anwalt —', titleAccent: '0 € inklusive', text: 'LexDrive setzt Ihren Anspruch durch — **zahlt die Gegenseite**.' },
+  { icon: 'car', title: 'Mietwagen oder Geld', text: 'Ersatzwagen oder Nutzungsausfall pro Tag — **Ihre Wahl**.', info: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. 23–175 €/Tag (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif. Was günstiger ist, klären wir mit Ihnen.' },
+  { icon: 'card', title: 'Geld aufs Konto', text: 'Versicherung zahlt **direkt**: Reparatur, Wertminderung, Nutzungsausfall.' },
 ]
 
 // ── Ablauf-Mobile · Tage-Timeline (#ablaufMobile, "In ~32 Tagen zum Geld") ────
@@ -292,7 +340,7 @@ export interface NetzwerkPainCard {
 export const NETZWERK_PAIN: NetzwerkPainCard[] = [
   { tag: '01', step: 1, title: 'Reicht der Werkstatt-Kostenvoranschlag?', sub: 'Nein — Versicherung erkennt nur ein **neutrales Gutachten** an. Wertminderung & Nutzungsausfall fallen sonst weg.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachter-lohnt-sich/', linkLabel: 'Lohnt sich ein Gutachten? →' },
   { tag: '02', step: 2, title: 'Welches Gutachten brauche ich?', sub: 'Haftpflicht, Kasko, Beweis — falsches Format = Versicherung lehnt ab oder kürzt.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/gutachten-arten/', linkLabel: 'Die Gutachten-Arten →' },
-  { tag: '03', step: 3, title: 'Wer organisiert Reparatur & Mietwagen?', sub: 'Allein: Werkstatt-Bindung, Vorkasse-Risiko, Tagessatz-Streit. Bei uns: alles aus einer Hand.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
+  { tag: '03', step: 3, title: 'Wer organisiert Reparatur & Mietwagen?', sub: 'Allein: Werkstatt-Bindung, Vorkasse-Risiko, Tagessatz-Streit. Bei uns: alles komplett koordiniert.', subStrong: 'font-bold', linkHref: 'https://autounfall.io/mietwagen-anspruch/', linkLabel: 'Mietwagen-Anspruch →' },
   { tag: '04', step: 4, title: 'Wenn die Versicherung kürzt — was tun?', sub: '**Allein:** niemand widerspricht. Bei uns: Gegengutachten + Anwalt setzen volle Summe durch.', subStrong: 'netzwerk-pain-allein', linkHref: 'https://autounfall.io/wertminderung-249-bgb/', linkLabel: 'Wertminderung & §249 BGB →' },
 ]
 
@@ -372,7 +420,7 @@ export const FAQ: FaqEntry[] = [
   {
     q: 'Was bedeutet „Claimondo-Partner“?',
     intro:
-      'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles aus einer Hand**:',
+      'Ihr Sachverständiger vor Ort in **{city}** ist zertifizierter Partner im Claimondo-Netzwerk (über 90 Sachverständige in NRW). Sie bekommen **alles komplett koordiniert**:',
     bullets: [
       { strong: 'DAT-Gutachten', rest: 'ingenieurbasiert & gerichtsfest' },
       { strong: 'Verkehrsrechts-Anwalt', rest: 'LexDrive Partnerkanzlei' },

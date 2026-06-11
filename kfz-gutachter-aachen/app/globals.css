@@ -111,6 +111,12 @@
      Ratio stand die H1 auf hellem Himmel. Reiner Gradient (kein Blur, keine
      LCP-Last); Wert als Cluster-Token, Mechanik wie --hero-scrim-*. */
   --hero-scrim-top: linear-gradient(185deg, rgba(14, 16, 21, .72) 0%, rgba(14, 16, 21, .45) 26%, transparent 48%);
+  /* 08o O5 · Desktop-Vignette (>=1024): Mobile/iPad tragen Vignette+Verlauf,
+     Desktop bisher nicht — Token gleicht die Bildwirkung formatuebergreifend
+     an. Reiner Gradient (kein Blur, keine LCP-Last); Staerke je Cluster
+     anpassbar. Liegt als eigene Schicht UEBER den Scrims (hero-blur-corner),
+     A2b-Personen-Maske + Scrims bleiben unangetastet. */
+  --hero-vignette: radial-gradient(115% 115% at 50% 42%, transparent 56%, rgba(10, 12, 16, 0.32) 100%);
   --zero-anchor-bg: rgba(24, 56, 47, 0.55); /* 0€-Block patina-getintet (Brand v2: patina-700-Basis) */
 }
 
@@ -125,9 +131,14 @@
    minimaler Zoom 111.5% (Brief-Limit <=115%) statt Crop. headTop 205/203/359.
    1024 hoehen-limitiert (Y wirkungslos, X=center — 08e-A3-Befund). */
 /* 08n N2: Rekalibrierung fuer 100svh-Hoehe (Formel wie 08h A5). Live verifiziert. */
-@media (min-width: 1280px) { :root { --hero-bg-y: 15%; } }
-@media (min-width: 1440px) { :root { --hero-bg-y: 63%; } }
-@media (min-width: 1920px) { :root { --hero-bg-y: 0%; --hero-bg-size: 111.5% auto; } }
+/* 08n N12c · Kopffreiheits-Guard ab 1024 — Mechanik/Begruendung siehe
+   Koeln-Pendant (bg-y als Laengen-calc, hoehenstabil zur abgenommenen
+   Referenz; AR hero-aachen 1.50235, cover-H = 66.563vw). REF: 1280x800 /
+   1440x900; 1920 stand schon auf 0 (hoehenstabil), nur max()-Guard dazu.
+   1024-1279: default y=0 + cover, kein Override noetig. */
+@media (min-width: 1280px) { :root { --hero-bg-y: max(calc(120px - 9.984vw), calc(100svh - 66.563vw)); } }
+@media (min-width: 1440px) { :root { --hero-bg-y: max(calc(567px - 41.935vw), calc(100svh - 66.563vw)); } }
+@media (min-width: 1920px) { :root { --hero-bg-y: max(0px, calc(100svh - 74.218vw)); --hero-bg-size: 111.5% auto; } }
 
 /* max-w-wrap Utility (Mock nutzt max-w-wrap = 1180px) */
 @utility max-w-wrap {
@@ -324,15 +335,45 @@ h1 .loc,
   .hero-trust-wrap { margin-top: 28px !important; }     /* CTA->Trust: 12 -> 28 */
 }
 
-/* ── BRIEF 08n N5 · Netzwerk Variante B+: Diagonal-Foto-Panel (>=1024) —
-   weicher 102deg-Verlauf (Brief-exakte Stops), KEIN clip-path/Kante; das
-   Bottom-Blend-Overlay liegt als Inline-Gradient in der Komponente. ───────── */
-@media (min-width: 1024px) {
-  .netzwerk-diagonal {
-    -webkit-mask-image: linear-gradient(102deg, transparent 4%, rgba(0,0,0,.8) 36%, #000 54%);
-    mask-image: linear-gradient(102deg, transparent 4%, rgba(0,0,0,.8) 36%, #000 54%);
-  }
+/* ── 08n N12b · Desktop-Hero-Atmung (NUR >=1440): Die Copy-Spalte nutzt die
+   N2-Fold-Hoehe nicht — Ist @1440 16/16/8/22/13/10/10. Soll (eng in den
+   Gruppen, Luft dazwischen): H1->0€ 32 · 0€->USPs 28 · USP-Zeilen 10 ·
+   USPs->CTA 32 · CTA->Sterne 40 · Sterne->Codes 12 · Codes->Siegel 14.
+   (CTA->Sterne war als 24 spezifiziert — Aaron-Nachfass 11.06. am
+   1440er-Screenshot: "Trust noch zu nah am CTA" -> 40, Trust setzt sich
+   als eigene Fuss-Schicht ueber die 32er-Gruppengaps ab.)
+   Steht NACH allen Matrix-Stufen -> ueberschreibt @1440 (22/13) UND @1920
+   (38/14) bewusst (Soll gilt einheitlich >=1440). 1024-1439, N11b-Stufen
+   (640-1023) und Mobile <640 unangetastet. za-mt 16 = Soll 32 - 16 Flow-Gap
+   (Messkonvention wie N11b). */
+@media (min-width: 1440px) {
+  .zero-anchor-block { margin-top: 16px !important; margin-bottom: 28px !important; }
+  .hero-usps { gap: 10px !important; margin-bottom: 32px !important; }
+  .hero-trust-wrap { margin-top: 40px !important; }
+  .hero-trust-desk { gap: 12px !important; }
+  .hero-trust-desk > div:last-child { margin-top: 2px; } /* 12 + 2 = 14 zum Siegel */
 }
+
+/* ── 08o O4 · Ablauf-Desktop-Animation (>=768, Mobile unveraendert):
+   Linie scaleX von links (~400ms), Steps gestaffelt (Fade + 12px von unten,
+   90ms Versatz) — nur transform/opacity, 0 CLS. .ablauf-anim-ready setzt
+   SiteScripts NUR >=768 ohne reduced-motion; ohne JS bleibt alles statisch. */
+@media (min-width: 768px) {
+  .ablauf-anim-ready .ablauf-line { transform: scaleX(0); transform-origin: left center; }
+  .ablauf-anim-ready [data-ablauf-step] { opacity: 0; transform: translateY(12px); }
+  .ablauf-anim-go .ablauf-line { transform: scaleX(1); transition: transform 0.4s ease-out; }
+  .ablauf-anim-go [data-ablauf-step] { opacity: 1; transform: none; transition: opacity 0.45s ease-out, transform 0.45s ease-out; }
+  .ablauf-anim-go [data-ablauf-step="0"] { transition-delay: 0.4s; }
+  .ablauf-anim-go [data-ablauf-step="1"] { transition-delay: 0.49s; }
+  .ablauf-anim-go [data-ablauf-step="2"] { transition-delay: 0.58s; }
+  .ablauf-anim-go [data-ablauf-step="3"] { transition-delay: 0.67s; }
+  .ablauf-anim-go [data-ablauf-step="4"] { transition-delay: 0.76s; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ablauf-anim-ready .ablauf-line,
+  .ablauf-anim-ready [data-ablauf-step] { opacity: 1; transform: none; transition: none; }
+}
+
 
 /* ── BRIEF 08h A6 (Aaron-Final, NUR >=1440) · Copy-Start einheitlich 11.5vw —
    @1920 loest das die Copy-Spalte aus der Wrapper-Zentrierung (war ~20% =
@@ -452,6 +493,12 @@ body {
 /* Stillgelegt (BRIEF 08): Morphism-Frost ersetzt durch .hero-photo::before (Mock-Parity).
    Markup-DIV bleibt — Komponente unveraendert. */
 .hero-blur-corner { display: none; }
+/* 08o O5: >=1024 reaktiviert als Vignetten-Layer — das Markup-DIV existiert
+   seit BRIEF 08 (absolute inset-0). z-index 1 legt ihn ueber hero-photo
+   (+Scrims); der Content-Shell (z-[1], spaeter im DOM) bleibt darueber. */
+@media (min-width: 1024px) {
+  .hero-blur-corner { display: block; background: var(--hero-vignette); z-index: 1; pointer-events: none; }
+}
 
 /* Mobile + iPad (<=1023): dediziertes Hochformat-Foto. BRIEF 08 A2: center 22%/cover
    (Mock Z.1778) statt center top. */
