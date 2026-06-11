@@ -59,16 +59,23 @@ export function extractHost(value: string | null | undefined): string | null {
   }
 }
 
-/** Cluster-LP-Domains, gegen die kfz_gutachter_lp-Anfragen validiert werden. */
+/** Cluster-LP-Domains, gegen die kfz_gutachter_lp-Anfragen validiert werden.
+ *  Die 5 kanonischen Cluster-Domains sind IMMER erlaubt (hardcoded base);
+ *  MONIKA_CLUSTER_DOMAINS ERGAENZT optional weitere (Preview/neue Cluster),
+ *  statt die base zu ersetzen. Sonst sperrt ein stale Env still einzelne Cluster
+ *  aus — Koeln/Aachen-Incident 2026-06-11: Submit lief in 403 origin_not_allowed,
+ *  weil der alte Fallback/Env nur wuppertal/duesseldorf/bonn kannte. */
 export function clusterAllowlist(): string[] {
-  const env = process.env.MONIKA_CLUSTER_DOMAINS
-  if (env) return env.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean)
-  // Fallback: die drei Cluster-LP-Domains (no-hyphen Variante, siehe Cluster-LP-Memory)
-  return [
+  const base = [
     'kfz-unfallgutachter-wuppertal.de',
     'kfz-unfallgutachter-duesseldorf.de',
     'kfz-unfallgutachter-bonn.de',
+    'kfz-unfallgutachter-koeln.de',
+    'kfz-unfallgutachter-aachen.de',
   ]
+  const env = process.env.MONIKA_CLUSTER_DOMAINS
+  const extra = env ? env.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean) : []
+  return [...new Set([...base, ...extra])]
 }
 
 // ── Embed-Site laden ─────────────────────────────────────────────────────────
