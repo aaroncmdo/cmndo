@@ -36,12 +36,14 @@ export default async function NavigationPage({ params }: { params: Promise<{ id:
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (Termin selbst, SSoT).
+  // CMM-49 (Entity-Sweep): faelle -> v_claim_full. schadenort_* flach (claims-SSoT,
+  // value-identisch) statt claims-Embed.
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('id', termin.fall_id)
+    .from('v_claim_full')
+    .select('id:fall_id, lead_id, schadenort_adresse, schadenort_plz, schadenort_ort')
+    .eq('fall_id', termin.fall_id)
     .single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
+  const fallClaim = fall
 
   let leadName = '—'
   if (fall?.lead_id) {
