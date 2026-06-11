@@ -347,11 +347,11 @@ export default function SVKalenderClient({
                             href={`/gutachter/fall/${fall.id}`}
                             className={`block px-2 py-1.5 rounded-ios-lg text-[10px] leading-tight transition-colors ${
                               overdue
-                                ? 'bg-red-50/80 text-red-300 hover:bg-red-900/80'
+                                ? 'bg-danger-soft/80 text-danger hover:bg-danger-strong/80'
                                 : isVerlegungPending
-                                  ? 'bg-amber-50 text-amber-700 hover:bg-amber-100 border-2 border-dashed border-amber-400'
+                                  ? 'bg-warning-soft text-warning-strong hover:bg-warning/15 border-2 border-dashed border-warning'
                                   : isReserviert
-                                    ? 'bg-amber-50 text-amber-600 hover:bg-amber-100'
+                                    ? 'bg-warning-soft text-warning hover:bg-warning/15'
                                     : 'bg-[var(--brand-secondary)]/10 text-[var(--brand-accent)] hover:bg-[var(--brand-primary)]/80'
                             }`}
                           >
@@ -370,11 +370,11 @@ export default function SVKalenderClient({
                             <div className="flex gap-0.5">
                               <button
                                 onClick={() => { setSvAktionModal({ type: 'gegenvorschlag', termin: gtTermin }); setGegSlots([{ datum: '', uhrzeit: '10:00' }]); setSvAktionError(null) }}
-                                className="flex-1 text-[8px] px-1 py-0.5 bg-amber-50 text-amber-600 hover:bg-amber-100 rounded transition-colors"
+                                className="flex-1 text-[8px] px-1 py-0.5 bg-warning-soft text-warning hover:bg-warning/15 rounded transition-colors"
                               >Vorschlag</button>
                               <button
                                 onClick={() => { setSvAktionModal({ type: 'ablehnen', termin: gtTermin }); setAblehnenGrund(''); setSvAktionError(null) }}
-                                className="flex-1 text-[8px] px-1 py-0.5 bg-red-50 text-red-500 hover:bg-red-100 rounded transition-colors"
+                                className="flex-1 text-[8px] px-1 py-0.5 bg-danger-soft text-danger hover:bg-danger/15 rounded transition-colors"
                               >Ablehnen</button>
                             </div>
                           )}
@@ -447,7 +447,7 @@ export default function SVKalenderClient({
                   </div>
                 </div>
 
-                {error && <p className="text-red-400 text-xs mb-3">{error}</p>}
+                {error && <p className="text-danger text-xs mb-3">{error}</p>}
 
                 <div className="flex gap-2">
                   <button onClick={() => setDialogFall(null)} className="flex-1 py-2.5 rounded-ios-lg text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors">
@@ -468,7 +468,7 @@ export default function SVKalenderClient({
 
         {/* KFZ-192: Ablehnen Modal */}
         <Modal open={svAktionModal?.type === 'ablehnen'} onClose={() => setSvAktionModal(null)} maxWidth={384} ariaLabel="Termin ablehnen">
-          <h2 className="text-claimondo-navy font-semibold mb-1 text-red-600">Termin ablehnen</h2>
+          <h2 className="text-claimondo-navy font-semibold mb-1 text-danger">Termin ablehnen</h2>
                 <p className="text-claimondo-ondo text-xs mb-4">
                   Bitte geben Sie einen Grund an (optional). Dieser wird dem Admin mitgeteilt.
                 </p>
@@ -477,9 +477,9 @@ export default function SVKalenderClient({
                   onChange={e => setAblehnenGrund(e.target.value)}
                   placeholder="Ablehnungsgrund (z.B. Terminkonflikt, Krankheit ...)"
                   rows={3}
-                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-red-300 mb-4 resize-none"
+                  className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-danger/30 mb-4 resize-none"
                 />
-                {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
+                {svAktionError && <p className="text-danger text-xs mb-3">{svAktionError}</p>}
                 <div className="flex gap-2">
                   <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors">
                     Abbrechen
@@ -487,7 +487,7 @@ export default function SVKalenderClient({
                   <button
                     onClick={handleSvAblehnen}
                     disabled={svAktionSaving}
-                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-colors disabled:opacity-40"
+                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-danger hover:bg-danger-strong text-white transition-colors disabled:opacity-40"
                   >
                     {svAktionSaving ? 'Wird abgelehnt...' : 'Ablehnen'}
                   </button>
@@ -529,7 +529,7 @@ export default function SVKalenderClient({
                     </button>
                   )}
                 </div>
-                {svAktionError && <p className="text-red-400 text-xs mb-3">{svAktionError}</p>}
+                {svAktionError && <p className="text-danger text-xs mb-3">{svAktionError}</p>}
                 <div className="flex gap-2">
                   <button onClick={() => setSvAktionModal(null)} className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:bg-claimondo-bg transition-colors">
                     Abbrechen
@@ -537,7 +537,7 @@ export default function SVKalenderClient({
                   <button
                     onClick={handleSvGegenvorschlag}
                     disabled={svAktionSaving}
-                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-amber-500 hover:bg-amber-600 text-white transition-colors disabled:opacity-40"
+                    className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-warning hover:bg-warning-strong text-white transition-colors disabled:opacity-40"
                   >
                     {svAktionSaving ? 'Wird gesendet...' : 'Vorschlag senden'}
                   </button>

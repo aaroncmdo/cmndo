@@ -27,7 +27,7 @@ function statusBadge(status: string): { label: string; className: string } {
     case 'bestaetigt':
       return {
         label: 'Bestätigt',
-        className: 'bg-emerald-50 text-emerald-700',
+        className: 'bg-success-soft text-success-strong',
       }
     case 'abgeschlossen':
       return {
@@ -35,18 +35,18 @@ function statusBadge(status: string): { label: string; className: string } {
         className: 'bg-claimondo-bg text-claimondo-ondo',
       }
     case 'abgelehnt':
-      return { label: 'Abgelehnt', className: 'bg-red-50 text-red-600' }
+      return { label: 'Abgelehnt', className: 'bg-danger-soft text-danger' }
     case 'no_show':
-      return { label: 'No-Show', className: 'bg-amber-50 text-amber-700' }
+      return { label: 'No-Show', className: 'bg-warning-soft text-warning-strong' }
     case 'reserviert':
       return { label: 'Reserviert', className: 'bg-claimondo-bg text-claimondo-ondo' }
     // AAR-864: Verlegungs-Slots
     case 'verlegung_pending':
-      return { label: 'Verlegung pending', className: 'bg-amber-50 text-amber-700' }
+      return { label: 'Verlegung pending', className: 'bg-warning-soft text-warning-strong' }
     case 'verlegt':
       return { label: 'Verlegt', className: 'bg-claimondo-border/40 text-claimondo-ondo italic' }
     default:
-      return { label: 'Offen', className: 'bg-amber-50 text-amber-700' }
+      return { label: 'Offen', className: 'bg-warning-soft text-warning-strong' }
   }
 }
 
@@ -76,7 +76,7 @@ export default function TerminCard({
         vergangen
           ? 'bg-claimondo-bg border border-claimondo-border opacity-60'
           : termin.status === 'verlegung_pending'
-            ? 'bg-amber-50 border-2 border-dashed border-amber-400 shadow-[0_2px_6px_rgba(15,30,68,.05)]'
+            ? 'bg-warning-soft border-2 border-dashed border-warning shadow-[0_2px_6px_rgba(15,30,68,.05)]'
             : termin.status === 'verlegt'
               ? 'bg-claimondo-border/30 border border-claimondo-border opacity-70 italic'
               : 'bg-white border border-claimondo-border hover:border-claimondo-ondo hover:-translate-y-[1px] shadow-[0_1px_2px_rgba(15,30,68,.04),0_4px_12px_rgba(15,30,68,.04)] hover:shadow-claimondo-md'
@@ -89,7 +89,7 @@ export default function TerminCard({
             {/* AAR-724: Roter Punkt für noch nicht gesehene Termine. */}
             {!termin.gesehen_am && (
               <span
-                className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                className="inline-block w-2 h-2 rounded-full bg-danger shrink-0"
                 aria-label="Neu, noch nicht angesehen"
               />
             )}
@@ -142,7 +142,7 @@ export default function TerminCard({
           </Link>
         ) : (
           <span
-            className="inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-3 py-1.5 font-semibold tracking-[-.005em]"
+            className="inline-flex items-center gap-1 text-xs text-warning-strong bg-warning-soft border border-warning/30 rounded-full px-3 py-1.5 font-semibold tracking-[-.005em]"
             title="Termin ist reserviert, aber der Kunde hat die SA noch nicht unterschrieben. Fallakte wird erst danach angelegt."
           >
             SA ausstehend

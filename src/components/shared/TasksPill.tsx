@@ -51,8 +51,8 @@ export default function TasksPill({
       aria-label={`${count} offene Tasks`}
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors ${
         isDark
-          ? 'bg-red-500 hover:bg-red-600 text-white'
-          : 'bg-red-100 hover:bg-red-200 text-red-700 border border-red-200'
+          ? 'bg-danger hover:bg-danger/90 text-white'
+          : 'bg-danger-soft hover:bg-danger/15 text-danger-strong border border-danger/30'
       }`}
     >
       <ClipboardListIcon className="w-3.5 h-3.5" />

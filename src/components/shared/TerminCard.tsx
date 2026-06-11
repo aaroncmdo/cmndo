@@ -90,9 +90,9 @@ function getStatusUi(
 }
 
 const TONE_CLASSES: Record<StatusUi['tone'], string> = {
-  emerald: 'bg-emerald-50 text-emerald-800 border-emerald-200',
-  amber: 'bg-amber-50 text-amber-800 border-amber-200',
-  red: 'bg-red-50 text-red-800 border-red-200',
+  emerald: 'bg-success-soft text-success-strong border-success/30',
+  amber: 'bg-warning-soft text-warning-strong border-warning/30',
+  red: 'bg-danger-soft text-danger-strong border-danger/30',
   gray: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border',
 }
 

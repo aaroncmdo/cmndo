@@ -150,7 +150,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
   // Button-Farben
   let buttonClass = ''
   if (hasKritisch) {
-    buttonClass = 'bg-red-500 hover:bg-red-600 text-white'
+    buttonClass = 'bg-danger hover:bg-danger/90 text-white'
   } else if (unreadTotal > 0) {
     buttonClass = variant === 'dark'
       ? 'bg-claimondo-shield hover:bg-claimondo-navy text-white'
@@ -163,7 +163,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
 
   const flashClass = flashing
     ? hasKritisch
-      ? 'ring-4 ring-red-400/60 animate-pulse'
+      ? 'ring-4 ring-danger/60 animate-pulse'
       : 'ring-4 ring-claimondo-light-blue/60 animate-pulse'
     : ''
 
@@ -188,7 +188,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
         <BellIcon className="w-3.5 h-3.5" />
         <span>Updates</span>
         {unreadTotal > 0 && (
-          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-white/95 text-red-600">
+          <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-white/95 text-danger">
             {unreadTotal > 99 ? '99+' : unreadTotal}
           </span>
         )}
@@ -229,7 +229,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                   className={`flex-1 flex flex-col items-center gap-0.5 px-2 py-2 text-[11px] font-medium transition-colors ${
                     active
                       ? isKritisch
-                        ? 'text-red-600 border-b-2 border-red-500 bg-red-50/30'
+                        ? 'text-danger border-b-2 border-danger bg-danger-soft/30'
                         : 'text-claimondo-navy border-b-2 border-claimondo-ondo bg-claimondo-ondo/5'
                       : 'text-claimondo-ondo hover:text-claimondo-navy'
                   }`}
@@ -239,7 +239,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                     <span>{t.label}</span>
                     {c > 0 && (
                       <span className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold ${
-                        isKritisch ? 'bg-red-500 text-white' : 'bg-claimondo-ondo text-white'
+                        isKritisch ? 'bg-danger text-white' : 'bg-claimondo-ondo text-white'
                       }`}>
                         {c > 99 ? '99+' : c}
                       </span>
@@ -274,7 +274,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                         >
                           <p className={`text-xs leading-snug ${m.gelesen ? 'text-claimondo-ondo' : 'text-claimondo-navy font-semibold'} truncate`}>
                             {m.prioritaet === 'dringend' && (
-                              <span className="inline-block mr-1 text-red-500" aria-label="Kritisch">●</span>
+                              <span className="inline-block mr-1 text-danger" aria-label="Kritisch">●</span>
                             )}
                             {m.titel}
                           </p>
@@ -286,7 +286,7 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
                         {!m.gelesen && (
                           <button
                             onClick={() => markAsRead(m.id)}
-                            className="shrink-0 p-1 text-claimondo-ondo/70 hover:text-green-600"
+                            className="shrink-0 p-1 text-claimondo-ondo/70 hover:text-success"
                             aria-label="Als gelesen markieren"
                             title="Als gelesen markieren"
                           >
