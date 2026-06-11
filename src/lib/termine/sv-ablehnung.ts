@@ -13,7 +13,7 @@ export async function ablehnTermin(terminId: string, grund: string) {
   // Termin laden
   const { data: termin, error: terminErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, final_verbindlich_ab, status')
+    .select('id, fall_id, assignee_id, assignee_typ, final_verbindlich_ab, status')
     .eq('id', terminId)
     .single()
 
@@ -40,7 +40,8 @@ export async function ablehnTermin(terminId: string, grund: string) {
   if (updateErr) throw new Error(`Termin-Update fehlgeschlagen: ${updateErr.message}`)
 
   // ablehnungen_30_tage inkrementieren + Ablehnquote pruefen
-  const svId = termin.sv_id as string
+  // CMM-49: assignee_id (typ-guarded) statt sv_id — Ablehnung ist immer SV-Aktion, value-identisch.
+  const svId = termin.assignee_id as string
   const { data: sv, error: svErr } = await db
     .from('sachverstaendige')
     .select('ablehnungen_30_tage, ist_aktiv, profile_id')
@@ -59,7 +60,8 @@ export async function ablehnTermin(terminId: string, grund: string) {
     const { count: termineCount } = await db
       .from('gutachter_termine')
       .select('*', { count: 'exact', head: true })
-      .eq('sv_id', svId)
+      .eq('assignee_id', svId)
+      .eq('assignee_typ', 'sachverstaendiger')
       .gte('created_at', dreissigTageHer)
 
     const quote = (termineCount && termineCount > 0) ? (neueAnzahl / termineCount) * 100 : 0

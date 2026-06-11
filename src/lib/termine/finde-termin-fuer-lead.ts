@@ -16,9 +16,12 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 export type LeadTermin = { id: string; sv_id: string | null }
 
 const AKTIV_STATUS = ['reserviert', 'bestaetigt']
-const SELECT = 'id, sv_id, start_zeit'
+// CMM-49 sv_id-Drop: intern auf assignee_id/typ lesen; Return-Feld `sv_id` (LeadTermin)
+// bleibt als Alias erhalten (value-identisch fuer SV-Termine) → flow/[token]/actions.ts:593
+// (existingTermin.sv_id) unveraendert.
+const SELECT = 'id, assignee_id, assignee_typ, start_zeit'
 
-type Row = { id: string; sv_id: string | null; start_zeit: string }
+type Row = { id: string; assignee_id: string | null; assignee_typ: string | null; start_zeit: string }
 
 /**
  * Jüngster AKTIVER (reserviert|bestaetigt) gutachter_termine eines Leads, oder null.
@@ -32,9 +35,9 @@ export async function findeTerminFuerLead(db: SupabaseClient, leadId: string): P
     db.from('gutachter_termine').select(SELECT).eq('bezug_typ', 'lead').eq('bezug_id', leadId).in('status', AKTIV_STATUS),
     db.from('gutachter_termine').select(SELECT).eq('lead_id', leadId).in('status', AKTIV_STATUS),
   ])
-  const byId = new Map<string, Row>()
+  const byId = new Map<string, { id: string; sv_id: string | null; start_zeit: string }>()
   for (const r of [...((bezugRes.data ?? []) as Row[]), ...((legacyRes.data ?? []) as Row[])]) {
-    if (r?.id) byId.set(r.id, { id: r.id, sv_id: r.sv_id ?? null, start_zeit: r.start_zeit })
+    if (r?.id) byId.set(r.id, { id: r.id, sv_id: r.assignee_typ === 'sachverstaendiger' ? r.assignee_id ?? null : null, start_zeit: r.start_zeit })
   }
   const neuester = Array.from(byId.values()).sort((a, b) => (a.start_zeit < b.start_zeit ? 1 : -1))[0]
   return neuester ? { id: neuester.id, sv_id: neuester.sv_id } : null

@@ -28,7 +28,7 @@ export async function bestaetigeTermin(terminId: string) {
   // 2. Termin + Fall für Benachrichtigungen laden (besichtigungsort_adresse ist jetzt von bestaetige gecacht).
   const { data: termin, error: terminErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, start_zeit, besichtigungsort_adresse')
+    .select('id, fall_id, claim_id, lead_id, assignee_id, assignee_typ, start_zeit, besichtigungsort_adresse')
     .eq('id', terminId)
     .single()
   if (terminErr || !termin || !termin.fall_id) return
@@ -61,9 +61,9 @@ export async function bestaetigeTermin(terminId: string) {
         })
       }
 
-      // Email S-E6 an SV
-      if (termin.sv_id) {
-        const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+      // Email S-E6 an SV — CMM-49: assignee_id (typ-guarded) statt sv_id
+      if (termin.assignee_typ === 'sachverstaendiger' && termin.assignee_id) {
+        const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
         if (sv?.profile_id) {
           const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
           if (svProfile?.email) {
