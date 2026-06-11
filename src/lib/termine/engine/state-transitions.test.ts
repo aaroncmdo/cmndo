@@ -53,7 +53,7 @@ describe('sageAb', () => {
 describe('verlege', () => {
   it('propose: alt -> verlegt, neuer Slot verlegung_pending', async () => {
     const db = makeDb([
-      { data: { id: 'alt', sv_id: 's', status: 'bestaetigt' }, error: null }, // load alt
+      { data: { id: 'alt', assignee_id: 's', assignee_typ: 'sachverstaendiger', status: 'bestaetigt' }, error: null }, // load alt
       { data: [{ id: 'alt' }], error: null }, // alt update
       { data: { id: 'neu' }, error: null }, // insert single
     ])
@@ -66,10 +66,14 @@ describe('verlege', () => {
     const ins = calls.find((c) => 'insert' in c)!.insert as Record<string, unknown>
     expect(ins.status).toBe('verlegung_pending')
     expect(ins.verlegung_quelle_id).toBe('alt')
+    // CMM-49: assignee direkt aus alt geschrieben (statt sv_id + Normalize-Trigger)
+    expect(ins.assignee_id).toBe('s')
+    expect(ins.assignee_typ).toBe('sachverstaendiger')
+    expect(ins.sv_id).toBeUndefined()
   })
   it('kunde-koenig: neuerStatus bestaetigt -> alt verschoben', async () => {
     const db = makeDb([
-      { data: { id: 'alt', sv_id: 's', status: 'bestaetigt' }, error: null },
+      { data: { id: 'alt', assignee_id: 's', assignee_typ: 'sachverstaendiger', status: 'bestaetigt' }, error: null },
       { data: [{ id: 'alt' }], error: null },
       { data: { id: 'neu' }, error: null },
     ])
@@ -87,7 +91,7 @@ describe('verlege', () => {
   })
   it('23P01 beim Insert -> belegt + Rollback alt', async () => {
     const db = makeDb([
-      { data: { id: 'alt', sv_id: 's', status: 'bestaetigt' }, error: null },
+      { data: { id: 'alt', assignee_id: 's', assignee_typ: 'sachverstaendiger', status: 'bestaetigt' }, error: null },
       { data: [{ id: 'alt' }], error: null },
       { data: null, error: { code: '23P01', message: 'exclusion' } }, // insert kollidiert
       { data: null, error: null }, // rollback update

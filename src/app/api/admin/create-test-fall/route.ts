@@ -162,7 +162,8 @@ export async function POST() {
     const terminEnd = new Date(morgen.getTime() + 90 * 60 * 1000) // 60min + 30min Puffer
     // CMM-44 SP-D PR2b: besichtigungsort auf gutachter_termine (Phase-6-valid).
     await admin.from('gutachter_termine').insert({
-      sv_id: sv.id,
+      assignee_id: sv.id,
+      assignee_typ: 'sachverstaendiger',
       fall_id: fall.id,
       claim_id: fall.claim_id,
       lead_id: lead.id,
