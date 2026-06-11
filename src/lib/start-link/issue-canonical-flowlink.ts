@@ -30,6 +30,7 @@ import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { sendPlainSms } from '@/lib/whatsapp/send-sms-plain'
 import { sendMiniWizardMagicLink } from '@/lib/email/google/flows'
 import { ensureCanonicalFlowLinkForLead } from './ensure-flowlink-for-lead'
+import { persistFlowLinkVersand } from './persist-flowlink-versand'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 
@@ -114,7 +115,10 @@ async function sendeInitialLink(opts: {
  * Konversion-first: gfa-Anfrage → Lead → EIN kanonischer flow_links-FlowLink → Versand.
  * Idempotent. service_role; anon-aufrufbar nach HMAC-Verify (/start-Route).
  */
-export async function issueCanonicalFlowLinkForAnfrage(anfrageId: string): Promise<IssueCanonicalResult> {
+export async function issueCanonicalFlowLinkForAnfrage(
+  anfrageId: string,
+  opts?: { send?: boolean },
+): Promise<IssueCanonicalResult> {
   if (!anfrageId) return { ok: false, error: 'anfrage_id fehlt' }
   const admin = createAdminClient()
 
@@ -195,16 +199,23 @@ export async function issueCanonicalFlowLinkForAnfrage(anfrageId: string): Promi
   const token = flRes.token
   const wiederverwendet = flRes.wiederverwendet
 
-  // 3. Einfacher Initial-Link-Versand (best-effort, non-fatal).
+  // 3. Initial-Link-Versand (best-effort, non-fatal). AAR-956 P2: opts.send=false
+  //    (Direkt-Knopf, P3) skippt den Versand — der Client redirectet direkt nach
+  //    /flow/[token]. Bei erfolgreichem Send: Versand-State auf flow_links persistieren
+  //    (Dispatcher sieht gesendet?/wann/Kanal + entscheidet aktiv ueber Re-Send, P4).
   const url = `${APP_URL}/flow/${token}`
-  const kanal = await sendeInitialLink({
-    anfrageId,
-    leadId,
-    telefon: (gfa.telefon as string | null) ?? null,
-    email: (gfa.email as string | null) ?? null,
-    vorname: (gfa.vorname as string | null) ?? null,
-    url,
-  })
+  let kanal: IssueKanal = 'none'
+  if (opts?.send ?? true) {
+    kanal = await sendeInitialLink({
+      anfrageId,
+      leadId,
+      telefon: (gfa.telefon as string | null) ?? null,
+      email: (gfa.email as string | null) ?? null,
+      vorname: (gfa.vorname as string | null) ?? null,
+      url,
+    })
+    if (kanal !== 'none') await persistFlowLinkVersand(admin, token, kanal)
+  }
 
   return { ok: true, token, leadId, kanal, wiederverwendet }
 }
