@@ -91,7 +91,7 @@ export default async function DispatchLeadDetail({
   const admin = createAdminClient()
   const { data: flowLinksRaw } = await admin
     .from('flow_links')
-    .select('id, token, status, erstellt_am, expires_at, geoeffnet_am, abgeschlossen_am, fall_id')
+    .select('id, token, status, erstellt_am, expires_at, geoeffnet_am, abgeschlossen_am, fall_id, gesendet_am, gesendet_kanal, gesendet_anzahl')
     .eq('lead_id', id)
     .order('erstellt_am', { ascending: false })
     .limit(5)
@@ -104,6 +104,9 @@ export default async function DispatchLeadDetail({
     geoeffnet_am: (fl.geoeffnet_am ?? null) as string | null,
     abgeschlossen_am: (fl.abgeschlossen_am ?? null) as string | null,
     fall_id: (fl.fall_id ?? null) as string | null,
+    gesendet_am: (fl.gesendet_am ?? null) as string | null,
+    gesendet_kanal: (fl.gesendet_kanal ?? null) as string | null,
+    gesendet_anzahl: (fl.gesendet_anzahl ?? 0) as number,
   }))
 
   // AAR-631/653 + CMM-47: Vorschaden-Felder vom Fall (v_claim_full) ins lead-Objekt

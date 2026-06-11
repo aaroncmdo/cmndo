@@ -26,6 +26,9 @@ export type DispatchFlowLink = {
   geoeffnet_am: string | null
   abgeschlossen_am: string | null
   fall_id: string | null
+  gesendet_am: string | null
+  gesendet_kanal: string | null
+  gesendet_anzahl: number
 }
 
 const FLOWLINK_STATUS_TONE: Record<string, 'success' | 'warning' | 'neutral'> = {
@@ -33,6 +36,8 @@ const FLOWLINK_STATUS_TONE: Record<string, 'success' | 'warning' | 'neutral'> = 
   geoeffnet: 'neutral',
   abgelaufen: 'warning',
 }
+
+const KANAL_LABEL: Record<string, string> = { whatsapp: 'WhatsApp', sms: 'SMS', email: 'E-Mail' }
 
 export function DispatchFlowlinkPanel({
   leadId,
@@ -179,18 +184,25 @@ export function DispatchFlowlinkPanel({
       )}
 
       {latest && (
-        <p className="text-[11px] text-claimondo-ondo/70">
-          Letzter FlowLink vom {formatDatumUhrzeit(latest.created_at)} ·{' '}
-          <a
-            href={`/flow/${latest.token}`}
-            target="_blank"
-            rel="noopener"
-            className="text-claimondo-ondo underline hover:text-claimondo-navy"
-          >
-            Portal öffnen
-          </a>
-          {latest.fall_id && <span className="ml-1 text-emerald-600">· zu Fall konvertiert</span>}
-        </p>
+        <div className="space-y-1 text-[11px] text-claimondo-ondo/70">
+          <p className="font-medium text-claimondo-navy/80">
+            {latest.gesendet_am
+              ? `Gesendet: ${formatDatumUhrzeit(latest.gesendet_am)}${latest.gesendet_kanal ? ` via ${KANAL_LABEL[latest.gesendet_kanal] ?? latest.gesendet_kanal}` : ''}${latest.gesendet_anzahl > 1 ? ` · ${latest.gesendet_anzahl}× versendet` : ''}`
+              : 'Noch nicht versendet'}
+          </p>
+          <p>
+            Letzter FlowLink vom {formatDatumUhrzeit(latest.created_at)} ·{' '}
+            <a
+              href={`/flow/${latest.token}`}
+              target="_blank"
+              rel="noopener"
+              className="text-claimondo-ondo underline hover:text-claimondo-navy"
+            >
+              Portal öffnen
+            </a>
+            {latest.fall_id && <span className="ml-1 text-emerald-600">· zu Fall konvertiert</span>}
+          </p>
+        </div>
       )}
     </div>
   )
