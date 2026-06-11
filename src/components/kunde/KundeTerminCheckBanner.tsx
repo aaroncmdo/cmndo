@@ -57,9 +57,9 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
 
   if (erledigt === 'ja') {
     return (
-      <div className="rounded-ios-xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
-        <CheckCircle2Icon className="w-5 h-5 shrink-0 text-emerald-600" />
-        <p className="text-sm font-medium text-emerald-900">
+      <div className="rounded-ios-xl bg-success-soft border border-success/30 px-4 py-3 flex items-center gap-3">
+        <CheckCircle2Icon className="w-5 h-5 shrink-0 text-success" />
+        <p className="text-sm font-medium text-success-strong">
           {t('erledigtJa')}
         </p>
       </div>
@@ -68,9 +68,9 @@ export default function KundeTerminCheckBanner({ terminId, svVorname, terminLabe
 
   if (erledigt === 'nein') {
     return (
-      <div className="rounded-ios-xl bg-amber-50 border border-amber-200 px-4 py-3 flex items-center gap-3">
-        <CalendarClockIcon className="w-5 h-5 shrink-0 text-amber-600" />
-        <p className="text-sm font-medium text-amber-900">
+      <div className="rounded-ios-xl bg-warning-soft border border-warning/30 px-4 py-3 flex items-center gap-3">
+        <CalendarClockIcon className="w-5 h-5 shrink-0 text-warning" />
+        <p className="text-sm font-medium text-warning-strong">
           {t('erledigtNein')}
         </p>
       </div>
