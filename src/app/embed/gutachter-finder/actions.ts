@@ -16,6 +16,7 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import { planeTerminOeffentlich } from '@/lib/sv-matching-modul'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
@@ -141,5 +142,32 @@ export async function sendeEmbedTerminBestaetigung(input: {
     await notifyTeamWhatsApp(teamText)
   } catch (err) {
     console.error('[embed-termin-bestaetigung] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+  }
+}
+
+/**
+ * AAR-956 WS3-Follow-up (Aaron 12.06.): den für einen Besichtigungsort empfohlenen SV
+ * aus dem ECHTEN Engine-Ranking liefern — `planeTerminOeffentlich` (GLOBAL, findBestSV
+ * + 2+1), NICHT ein client-seitiger Distanz-Proxy. Es ist exakt dieselbe Funktion +
+ * derselbe Top-SV, den der Buchungs-Step (`ladeMatchingFlow` → `planeTerminOeffentlich`)
+ * als #1 zeigt → die Karten-Route/-Profil-Empfehlung und die tatsächlich buchbare
+ * Empfehlung stimmen überein (vorher konnten sie divergieren).
+ *
+ * Anon-sicher (CONTRACT.md): `planeTerminOeffentlich` projiziert via
+ * `toOeffentlichesSvProfil` (kein Score-/ETA-/PII-Leak). Zurück geht NUR das opake
+ * `svId`-Buchungs-Handle — es matcht `AktiverSVPublic.id` (beides `sachverstaendige.id`),
+ * der Client findet damit den Pin + das angereicherte Profil. Liefert `null` (→ Client
+ * fällt auf den nächstgelegenen Pin zurück), wenn die Engine nichts findet.
+ */
+export async function empfehleSvFuerOrt(
+  input: { lat: number; lng: number },
+): Promise<{ svId: string | null }> {
+  try {
+    if (typeof input?.lat !== 'number' || typeof input?.lng !== 'number') return { svId: null }
+    const svs = await planeTerminOeffentlich({ lat: input.lat, lng: input.lng })
+    return { svId: svs[0]?.svId ?? null }
+  } catch (err) {
+    console.error('[empfehleSvFuerOrt] Engine-Ranking fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return { svId: null }
   }
 }

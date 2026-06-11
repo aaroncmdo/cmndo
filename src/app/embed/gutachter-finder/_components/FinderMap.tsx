@@ -36,6 +36,7 @@ import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-find
 import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
 import { createRoot, type Root } from 'react-dom/client'
 import { SvProfilePopup } from './SvProfilePopup'
+import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
   /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
@@ -402,57 +403,65 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       `
       carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
 
-      // WS3: nächstgelegenen aktiven SV finden → echte Auto-Route (Mapbox Directions)
-      // Fahrzeug → SV zeichnen + auf beide fitten (empfohlener SV als Route, Aaron #9).
-      // Kein SV → nur flyTo aufs Fahrzeug.
-      let bestSv: AktiverSVPublic | null = null
-      let bestD = Infinity
-      for (const s of aktiveSVs) {
-        const d = (s.standort_lng - lng) ** 2 + (s.standort_lat - lat) ** 2
-        if (d < bestD) { bestD = d; bestSv = s }
-      }
-      if (!bestSv) {
-        map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
-        return
-      }
-      const sv = bestSv
-      void fetchDrivingRoute([lng, lat], [sv.standort_lng, sv.standort_lat]).then(({ primary }) => {
+      // WS3 (Engine-Ranking, Aaron 12.06.): empfohlenen SV aus dem ECHTEN Engine-
+      // Ranking holen (planeTerminOeffentlich — derselbe Top-SV, den der Buchungs-
+      // Step zeigt), Distanz-Proxy nur als Fallback. Dann echte Auto-Route (Mapbox
+      // Directions) Fahrzeug → SV + auf beide fitten + Profil auf. Kein SV → flyTo.
+      void empfehleSvFuerOrt({ lat, lng }).then(({ svId }) => {
         if (!mapRef.current) return
-        const data: GeoJSON.Feature = {
-          type: 'Feature',
-          geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
-          properties: {},
+        let ziel: AktiverSVPublic | null =
+          svId ? aktiveSVs.find((s) => s.id === svId) ?? null : null
+        if (!ziel) {
+          // Fallback: nächstgelegener aktiver SV (Engine leer / Top-SV nicht auf der Karte).
+          let bestD = Infinity
+          for (const s of aktiveSVs) {
+            const d = (s.standort_lng - lng) ** 2 + (s.standort_lat - lat) ** 2
+            if (d < bestD) { bestD = d; ziel = s }
+          }
         }
-        const src = map.getSource('embed-route') as GeoJSONSource | undefined
-        if (src) {
-          src.setData(data)
-        } else {
-          map.addSource('embed-route', { type: 'geojson', data })
-          // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
-          map.addLayer({
-            id: 'embed-route-casing',
-            type: 'line',
-            source: 'embed-route',
-            layout: { 'line-cap': 'round', 'line-join': 'round' },
-            paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
-          })
-          map.addLayer({
-            id: 'embed-route-line',
-            type: 'line',
-            source: 'embed-route',
-            layout: { 'line-cap': 'round', 'line-join': 'round' },
-            paint: {
-              'line-color': COL_ONDO,
-              'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
-              'line-opacity': 1,
-            },
-          })
+        if (!ziel) {
+          map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+          return
         }
-        const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
-        const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
-        map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
-        // Profil des empfohlenen SV gleich aufmachen (Aaron: Profil auf, sobald die Route steht).
-        openSvPopup(sv)
+        const sv = ziel
+        void fetchDrivingRoute([lng, lat], [sv.standort_lng, sv.standort_lat]).then(({ primary }) => {
+          if (!mapRef.current) return
+          const data: GeoJSON.Feature = {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
+            properties: {},
+          }
+          const src = map.getSource('embed-route') as GeoJSONSource | undefined
+          if (src) {
+            src.setData(data)
+          } else {
+            map.addSource('embed-route', { type: 'geojson', data })
+            // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
+            map.addLayer({
+              id: 'embed-route-casing',
+              type: 'line',
+              source: 'embed-route',
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+              paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
+            })
+            map.addLayer({
+              id: 'embed-route-line',
+              type: 'line',
+              source: 'embed-route',
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+              paint: {
+                'line-color': COL_ONDO,
+                'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
+                'line-opacity': 1,
+              },
+            })
+          }
+          const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
+          const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
+          map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
+          // Profil des empfohlenen SV gleich aufmachen (Aaron: Profil auf, sobald die Route steht).
+          openSvPopup(sv)
+        })
       })
     }
     document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
