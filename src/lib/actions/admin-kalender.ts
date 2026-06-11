@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { revalidatePath } from 'next/cache'
 
 type TypFilter = { gutachter: boolean; rueckruf: boolean; kunde: boolean; intern: boolean }
@@ -72,8 +73,8 @@ export async function getKalenderTermine(
     const fallIds = [...new Set((gTermine ?? []).map(t => t.fall_id).filter(Boolean))]
     const fallNrMap: Record<string, string> = {}
     if (fallIds.length > 0) {
-      const { data: faelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-      for (const f of faelle ?? []) { const c = Array.isArray(f.claims) ? f.claims[0] : f.claims; fallNrMap[f.id] = c?.claim_nummer ?? f.id.slice(0, 8) }
+      // CMM-49 Display-Sweep: faelle-frei via claimNummernForFaelle (Bridge + claims, RLS-aequivalent).
+      for (const r of await claimNummernForFaelle(supabase, fallIds)) { fallNrMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8) }
     }
 
     for (const t of gTermine ?? []) {
@@ -113,8 +114,8 @@ export async function getKalenderTermine(
     const fallIds = [...new Set((aTermine ?? []).map(t => t.fall_id).filter(Boolean))]
     const fallNrMap: Record<string, string> = {}
     if (fallIds.length > 0) {
-      const { data: faelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', fallIds)
-      for (const f of faelle ?? []) { const c = Array.isArray(f.claims) ? f.claims[0] : f.claims; fallNrMap[f.id] = c?.claim_nummer ?? f.id.slice(0, 8) }
+      // CMM-49 Display-Sweep: faelle-frei via claimNummernForFaelle (Bridge + claims, RLS-aequivalent).
+      for (const r of await claimNummernForFaelle(supabase, fallIds)) { fallNrMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8) }
     }
 
     for (const t of aTermine ?? []) {
@@ -147,8 +148,8 @@ export async function getKalenderTermine(
     const kbFallIds = [...new Set((kbTermine ?? []).map(t => t.fall_id).filter(Boolean))]
     const kbFallNrMap: Record<string, string> = {}
     if (kbFallIds.length > 0) {
-      const { data: kbFaelle } = await supabase.from('faelle').select('id, claims:claim_id(claim_nummer)').in('id', kbFallIds)
-      for (const f of kbFaelle ?? []) { const c = Array.isArray(f.claims) ? f.claims[0] : f.claims; kbFallNrMap[f.id] = c?.claim_nummer ?? f.id.slice(0, 8) }
+      // CMM-49 Display-Sweep: faelle-frei via claimNummernForFaelle (Bridge + claims, RLS-aequivalent).
+      for (const r of await claimNummernForFaelle(supabase, kbFallIds)) { kbFallNrMap[r.fall_id] = r.claim_nummer ?? r.fall_id.slice(0, 8) }
     }
 
     for (const t of kbTermine ?? []) {
