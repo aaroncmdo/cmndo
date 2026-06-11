@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
 import { createLinkedTask } from '@/lib/tasks/create-task'
@@ -291,11 +292,11 @@ export async function einreicheReklamation(data: {
   if (error || !rekl) return { success: false, error: error?.message ?? 'Reklamation konnte nicht angelegt werden' }
 
   // Admin-Task (KFZ-151: verknuepft mit reklamation)
-  const { data: fallInfo } = await db.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', data.fallId).single()
-  const fallInfoClaim = Array.isArray(fallInfo?.claims) ? fallInfo?.claims[0] : fallInfo?.claims
+  // CMM-49 Display-Sweep: faelle-frei via claimNummernForFaelle (Bridge + claims, RLS-aequivalent).
+  const fallClaimNummer = (await claimNummernForFaelle(db, [data.fallId]))[0]?.claim_nummer ?? null
   await createLinkedTask({
     fall_id: data.fallId,
-    titel: `Reklamation von SV zu Fall ${fallInfoClaim?.claim_nummer ?? data.fallId.slice(0, 8)} prüfen`,
+    titel: `Reklamation von SV zu Fall ${fallClaimNummer ?? data.fallId.slice(0, 8)} prüfen`,
     typ: 'reklamation',
     prioritaet: 'dringend',
     faellig_am: new Date(),
