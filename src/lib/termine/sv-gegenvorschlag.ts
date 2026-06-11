@@ -15,7 +15,7 @@ export async function gegenvorschlagTermin(terminId: string, slots: Slot[]) {
   // Termin laden
   const { data: termin, error: terminErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, sv_id, final_verbindlich_ab')
+    .select('id, fall_id, final_verbindlich_ab')
     .eq('id', terminId)
     .single()
 

@@ -11,7 +11,7 @@ export async function notifyKundeAngekommen(terminId: string) {
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, notification_angekommen_gesendet_am')
+    .select('id, fall_id, claim_id, lead_id, assignee_id, assignee_typ, notification_angekommen_gesendet_am')
     .eq('id', terminId)
     .single()
 
@@ -26,8 +26,11 @@ export async function notifyKundeAngekommen(terminId: string) {
     if (lead) { kundeVorname = lead.vorname ?? 'Kunde'; kundeTelefon = lead.telefon }
   }
 
-  // SV-Name
-  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+  // SV-Name — CMM-49: assignee_id (typ-guarded) statt sv_id (value-identisch fuer SV-Termine)
+  const svAssigneeId = termin.assignee_typ === 'sachverstaendiger' ? termin.assignee_id : null
+  const { data: sv } = svAssigneeId
+    ? await db.from('sachverstaendige').select('profile_id').eq('id', svAssigneeId).single()
+    : { data: null }
   let svName = 'Gutachter'
   if (sv?.profile_id) {
     const { data: p } = await db.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()

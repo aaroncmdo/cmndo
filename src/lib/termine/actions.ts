@@ -46,10 +46,11 @@ export async function startNavigation(
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, start_zeit, navigation_started_at')
+    .select('id, fall_id, claim_id, lead_id, start_zeit, navigation_started_at')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (tErr || !termin) return { error: 'Termin nicht gefunden' }
@@ -129,10 +130,11 @@ export async function updateLivePosition(
   // Termin + Zieladresse laden
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, sv_angekommen_am, reminder_15min_sent_at, reminder_5min_sent_at, start_zeit, besichtigungsort_lat, besichtigungsort_lng')
+    .select('id, fall_id, claim_id, lead_id, sv_angekommen_am, reminder_15min_sent_at, reminder_5min_sent_at, start_zeit, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (tErr || !termin) return { error: 'Termin nicht gefunden' }
@@ -253,10 +255,11 @@ export async function arrived(terminId: string): Promise<{ success?: boolean; er
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, sv_angekommen_am')
+    .select('id, fall_id, claim_id, lead_id, sv_angekommen_am')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (tErr || !termin) return { error: 'Termin nicht gefunden' }
@@ -338,9 +341,10 @@ export async function updateAuftragLive(
 
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, sv_unterwegs_seit, sv_angekommen_am')
+    .select('id, fall_id, sv_unterwegs_seit, sv_angekommen_am')
     .eq('id', terminId)
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
@@ -382,9 +386,10 @@ export async function markTerminDurchgefuehrt(
   const db = createAdminClient()
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, sv_angekommen_am, durchgefuehrt_am')
+    .select('id, fall_id, sv_angekommen_am, durchgefuehrt_am')
     .eq('id', terminId)
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
@@ -417,10 +422,11 @@ export async function completeBegutachtung(
 
   const { data: termin, error: tErr } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, claim_id, lead_id, sv_id, durchgefuehrt_am')
+    .select('id, fall_id, claim_id, lead_id, durchgefuehrt_am')
     .eq('id', terminId)
     .eq('typ', 'sv_begutachtung')
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (tErr || !termin) return { error: 'Termin nicht gefunden' }
@@ -535,9 +541,10 @@ export async function markNurGutachterTerminDurchgefuehrt(
   const db = createAdminClient()
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, claim_id, durchgefuehrt_am')
+    .select('id, fall_id, claim_id, durchgefuehrt_am')
     .eq('id', terminId)
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
 
   if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
@@ -660,9 +667,10 @@ export async function reportKundeGrundEmbedB(
   const db = createAdminClient()
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, claim_id, lead_id, durchgefuehrt_am')
+    .select('id, fall_id, claim_id, lead_id, durchgefuehrt_am')
     .eq('id', terminId)
-    .eq('sv_id', sv.id)
+    .eq('assignee_id', sv.id)
+    .eq('assignee_typ', 'sachverstaendiger')
     .single()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
   if (termin.durchgefuehrt_am) return { ok: false, error: 'Termin wurde bereits als durchgeführt markiert' }
@@ -728,7 +736,7 @@ export async function korrigiereBesichtigungsortAlsSv(
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { ok: false, error: 'no_sv' }
   const db = createAdminClient()
-  const { data: termin } = await db.from('gutachter_termine').select('id, sv_id, fall_id').eq('id', terminId).eq('sv_id', sv.id).single()
+  const { data: termin } = await db.from('gutachter_termine').select('id, fall_id').eq('id', terminId).eq('assignee_id', sv.id).eq('assignee_typ', 'sachverstaendiger').single()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden' }
   const { korrigiereBesichtigungsort } = await import('@/lib/termine/engine')
   const r = await korrigiereBesichtigungsort(terminId, ort, 'sv', { db })
