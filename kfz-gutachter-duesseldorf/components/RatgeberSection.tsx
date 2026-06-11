@@ -86,10 +86,28 @@ export function RatgeberSection() {
             </a>
           ))}
         </div>
+        {/* 08n N8 (Entscheid Aaron, Ruecklaeufer 10.06.): Divider + 4 Pills
+            entfernt — sie doppelten die Karten darueber. Der Magazin-CTA
+            bleibt als einziges Element unter dem Karten-Grid. */}
+        <div className="text-center mt-[clamp(28px,4vw,40px)]">
+          <a
+            href="https://autounfall.io/"
+            target="_blank"
+            rel="noopener"
+            className="faq-magazin-cta"
+            data-action="ratgeber_hub_click"
+          >
+            Mehr im Magazin entdecken →
+          </a>
+        </div>
+
+        {/* 08q Q4: Ziel auf den Ratgeber-Hub autounfall.io korrigiert — die
+            Artikel liegen dort, nicht auf der claimondo.de-Startseite (Text/
+            Ziel sonst widersprüchlich). Konsistent mit dem Footer-Ratgeber-Link. */}
         <p className="text-center mt-8 text-muted text-sm font-medium">
           Alle Ratgeber-Artikel:{' '}
-          <a href="https://claimondo.de/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
-            claimondo.de →
+          <a href="https://autounfall.io/gutachter/" target="_blank" rel="noopener" className="text-petrol font-bold underline underline-offset-[3px]">
+            autounfall.io →
           </a>
         </p>
       </div>
