@@ -70,7 +70,7 @@ export async function POST() {
         await admin.from('gutachter_mitteilungen').delete().in('sv_id', svIdsToDelete)
         await admin.from('gutachter_abrechnungen').delete().in('sv_id', svIdsToDelete)
         await admin.from('gutachter_einzahlungen').delete().in('sv_id', svIdsToDelete)
-        await admin.from('gutachter_termine').delete().in('sv_id', svIdsToDelete)
+        await admin.from('gutachter_termine').delete().in('assignee_id', svIdsToDelete).eq('assignee_typ', 'sachverstaendiger')
       }
 
       // Get faelle IDs for these users (as kunde or kundenbetreuer)
@@ -620,7 +620,8 @@ export async function POST() {
     ]
     for (const t of terminDefs) {
       await admin.from('gutachter_termine').insert({
-        sv_id: t.sv_id,
+        assignee_id: t.sv_id,
+        assignee_typ: 'sachverstaendiger',
         fall_id: t.fall_id,
         claim_id: t.claim_id,
         start_zeit: t.start_zeit,
