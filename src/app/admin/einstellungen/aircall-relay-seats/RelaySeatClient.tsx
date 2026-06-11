@@ -67,17 +67,17 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
           />
         </div>
 
-        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 mb-5">
-          <p className="text-xs text-amber-700">Ein Relay-Seat kann immer nur EINEN aktiven Bridge-Call haben. Für parallele Bridge-Calls müssen mehrere Seats angelegt sein.</p>
+        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-3 mb-5">
+          <p className="text-xs text-warning-strong">Ein Relay-Seat kann immer nur EINEN aktiven Bridge-Call haben. Für parallele Bridge-Calls müssen mehrere Seats angelegt sein.</p>
         </div>
 
         <div className="space-y-3">
           {seats.map(seat => (
-            <div key={seat.id} className={`bg-white border rounded-ios-xl p-4 ${seat.belegt ? 'border-red-200' : seat.aktiv ? 'border-claimondo-border' : 'border-claimondo-border opacity-60'}`}>
+            <div key={seat.id} className={`bg-white border rounded-ios-xl p-4 ${seat.belegt ? 'border-danger/30' : seat.aktiv ? 'border-claimondo-border' : 'border-claimondo-border opacity-60'}`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${seat.belegt ? 'bg-red-100' : seat.aktiv ? 'bg-green-100' : 'bg-claimondo-bg'}`}>
-                    <PhoneIcon className={`w-4 h-4 ${seat.belegt ? 'text-red-500' : seat.aktiv ? 'text-green-500' : 'text-claimondo-ondo/70'}`} />
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${seat.belegt ? 'bg-danger-soft' : seat.aktiv ? 'bg-success-soft' : 'bg-claimondo-bg'}`}>
+                    <PhoneIcon className={`w-4 h-4 ${seat.belegt ? 'text-danger' : seat.aktiv ? 'text-success' : 'text-claimondo-ondo/70'}`} />
                   </div>
                   <div>
                     <p className="text-sm font-medium text-claimondo-navy">{seat.bezeichnung}</p>
