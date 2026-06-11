@@ -87,22 +87,22 @@ export async function PflichtdokumenteBanner({ fallId }: { fallId?: string } = {
   const rest = offen.length - shown.length
 
   return (
-    <div className="mx-4 md:mx-6 mt-4 mb-2 rounded-2xl border-2 border-amber-300 bg-amber-50 p-4 md:p-5">
+    <div className="mx-4 md:mx-6 mt-4 mb-2 rounded-2xl border-2 border-warning/30 bg-warning-soft p-4 md:p-5">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-warning text-white flex items-center justify-center flex-shrink-0">
           <AlertTriangleIcon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm md:text-base font-semibold text-amber-900">
+          <p className="text-sm md:text-base font-semibold text-warning-strong">
             Wir benötigen noch folgende Dokumente:
           </p>
           <ul className="mt-2 space-y-1.5">
             {shown.map(s => (
               <li key={`${s.fall_id}:${s.slot_id}`} className="flex items-center justify-between gap-3 text-sm">
-                <span className="text-amber-900 truncate">• {s.label}</span>
+                <span className="text-warning-strong truncate">• {s.label}</span>
                 <Link
                   href={`/kunde/onboarding?step=dokumente`}
-                  className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-3 min-h-[44px] rounded-ios-lg bg-amber-600 text-white hover:bg-amber-700 active:scale-[0.98] transition-all"
+                  className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold px-3 min-h-[44px] rounded-ios-lg bg-warning text-white hover:bg-warning-strong active:scale-[0.98] transition-all"
                 >
                   <UploadCloudIcon className="w-3.5 h-3.5" />
                   Jetzt hochladen
@@ -110,12 +110,12 @@ export async function PflichtdokumenteBanner({ fallId }: { fallId?: string } = {
               </li>
             ))}
             {rest > 0 && (
-              <li className="text-xs text-amber-800 italic">
+              <li className="text-xs text-warning-strong italic">
                 … und {rest} weitere{rest === 1 ? 's' : ''}
               </li>
             )}
           </ul>
-          <p className="mt-2 text-xs text-amber-800">
+          <p className="mt-2 text-xs text-warning-strong">
             Bitte laden Sie diese so bald wie möglich hoch.
           </p>
         </div>

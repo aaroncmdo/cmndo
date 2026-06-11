@@ -55,25 +55,25 @@ export default async function OffeneDatenBanner() {
   if (offen == null || offen === 0) return null
 
   return (
-    <div className="border-b border-amber-200 bg-amber-50">
+    <div className="border-b border-warning/30 bg-warning-soft">
       <Link
         href="/kunde/onboarding?step=dokumente"
-        className="flex items-center gap-3 px-4 py-3 hover:bg-amber-100 transition-colors"
+        className="flex items-center gap-3 px-4 py-3 hover:bg-warning/15 transition-colors"
       >
-        <div className="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-warning text-white flex items-center justify-center flex-shrink-0">
           <AlertCircleIcon className="w-4 h-4" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-amber-900">
+          <p className="text-sm font-semibold text-warning-strong">
             {offen === 1
               ? 'Ein Dokument fehlt noch'
               : `${offen} Dokumente fehlen noch`}
           </p>
-          <p className="text-xs text-amber-800">
+          <p className="text-xs text-warning-strong">
             Tippen Sie hier, um die fehlenden Unterlagen hochzuladen.
           </p>
         </div>
-        <span className="text-amber-900 text-sm font-medium">›</span>
+        <span className="text-warning-strong text-sm font-medium">›</span>
       </Link>
     </div>
   )

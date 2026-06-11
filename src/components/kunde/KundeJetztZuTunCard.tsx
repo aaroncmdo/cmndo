@@ -36,9 +36,9 @@ function mapSeverity(
 const CTA_BG: Record<TodoCardSeverity, string> = {
   default: 'bg-claimondo-navy hover:bg-claimondo-ondo',
   info: 'bg-claimondo-navy hover:bg-claimondo-ondo',
-  warning: 'bg-amber-600 hover:bg-amber-700',
-  critical: 'bg-red-600 hover:bg-red-700',
-  success: 'bg-emerald-600 hover:bg-emerald-700',
+  warning: 'bg-warning hover:bg-warning-strong',
+  critical: 'bg-danger hover:bg-danger-strong',
+  success: 'bg-success hover:bg-success-strong',
 }
 
 export default async function KundeJetztZuTunCard({ aktion }: Props) {

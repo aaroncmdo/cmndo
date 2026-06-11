@@ -78,10 +78,10 @@ export default function TerminLiveStatus({ terminId, svVorname, kundeVorname }: 
 
   if (state.besichtigungGestartetAm) {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft border border-success/30 px-3 py-1 text-xs font-semibold text-success-strong">
         <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-emerald-500" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-success" />
+          <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
         </span>
         Besichtigung läuft
       </span>
@@ -91,7 +91,7 @@ export default function TerminLiveStatus({ terminId, svVorname, kundeVorname }: 
   if (state.svAngekommenAm) {
     const name = svVorname || 'Gutachter'
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-success-soft border border-success/30 px-3 py-1 text-xs font-semibold text-success-strong">
         <MapPinCheckIcon className="w-3.5 h-3.5" />
         {name} ist da
       </span>
@@ -101,7 +101,7 @@ export default function TerminLiveStatus({ terminId, svVorname, kundeVorname }: 
   if (state.kundeAngekommenAm) {
     const name = kundeVorname || 'Kunde'
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 border border-amber-200 px-3 py-1 text-xs font-semibold text-amber-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-warning-soft border border-warning/30 px-3 py-1 text-xs font-semibold text-warning-strong">
         <CheckCircle2Icon className="w-3.5 h-3.5" />
         {name} ist da
       </span>
