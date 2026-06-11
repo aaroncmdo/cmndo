@@ -141,6 +141,7 @@ export const CLUSTER: ClusterConfig = {
     { slug: 'bruehl',            name: 'Brühl',             plz: '50321',             h1Sub: 'unabhängiger Schadengutachter',                   residents: 'Brühler',            lat: 50.8268, lng: 6.9056 },
     { slug: 'wesseling',         name: 'Wesseling',         plz: '50389',             h1Sub: 'Kfz-Sachverständiger Rhein-Erft-Kreis',           residents: 'Wesselinger',        lat: 50.8289, lng: 6.9747 },
     { slug: 'kerpen',            name: 'Kerpen',            plz: '50171',             h1Sub: 'Kfz-Sachverständiger Rhein-Erft-Kreis',           residents: 'Kerpener',           lat: 50.8703, lng: 6.6962 },
+    { slug: 'erftstadt',         name: 'Erftstadt',         plz: '50374',             h1Sub: 'Kfz-Sachverständiger Rhein-Erft-Kreis',           residents: 'Erftstädter',        lat: 50.8154, lng: 6.7686 },
   ],
 }
 
@@ -756,6 +757,71 @@ Drei Schritte: 1) Anruf oder WhatsApp an Stefan. 2) Vor-Ort-Termin binnen
 48 Stunden, Versicherungsabwicklung läuft parallel. 0 €.
 
 Kfz-Gutachter Kerpen — neutral, gerichtsfest, schnell vor Ort. Stefan Wagner
+ist Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, wie es weitergeht.`,
+  erftstadt: `Erftstadt liegt südwestlich von Köln im Rhein-Erft-Kreis, dort
+wo die Erft die Börde durchzieht. Die Stadt ist polyzentrisch — 15 Stadtteile,
+vom historischen Lechenich mit Burg und Stadtmauer bis zum Verwaltungssitz
+Liblar. Verkehrlich treffen A 1 und A 61 am Autobahnkreuz Bliesheim mitten im
+Stadtgebiet aufeinander, dazu die B 265 Luxemburger Straße Richtung Köln. Wenn
+Sie hier unverschuldet in einen Unfall geraten, ist Stefan Wagner,
+Kfz-Sachverständiger aus Köln-Lindenthal, meist binnen 60 Minuten bei Ihnen in
+Liblar, Lechenich, Bliesheim, Kierdorf oder Gymnich. 0 € für Sie — die
+gegnerische Versicherung übernimmt die Honorarkosten nach §249 BGB.
+
+Erftstadt hat mehrere größere Stadtteile mit jeweils eigener Schadens-Dynamik.
+Liblar ist Verwaltungs- und Bahnhofs-Stadtteil mit hohem Pendleraufkommen
+Richtung Köln — klassische Park- und Berufsverkehr-Rempler. Lechenich im Osten
+hat eine enge historische Altstadt, in der es vor allem um Abbiege- und
+Rangierschäden geht. Bliesheim im Süden liegt direkt am Autobahnkreuz, hier
+dominieren Auffahrunfälle aus dem Stau. Kierdorf und Köttingen im Norden sind
+wohngeprägt, Gymnich im Westen mit seinem Schloss eher ländlich mit
+Landstraßen-Profil.
+
+Wer in Erftstadt einen Kfz-Gutachter braucht, sollte auf drei Dinge achten:
+Neutralität, Geschwindigkeit und gerichtsfeste Dokumentation. Stefan arbeitet
+nach DAT- und BVSK-Standard, dokumentiert mit Lackmessgerät und Foto-Setup,
+prüft Strukturschäden und ermittelt Wertminderung und Restwert nach belastbaren
+Marktdaten. Das Gutachten ist in der Regel binnen 48 Stunden bei Ihnen, die
+Versicherungsregulierung läuft parallel.
+
+Verkehrsschwerpunkte in Erftstadt: Das Autobahnkreuz Bliesheim verbindet die
+A 1 Richtung Köln mit der A 61 Richtung Koblenz — ein klassisches Pendler-
+Auffahrunfall-Profil im Berufsverkehr. Die B 265 Luxemburger Straße ist die
+alte Fernstraße nach Köln-Süd und Hürth, mit dichtem Pendlerverkehr. In
+Lechenich und Liblar sind es die engen Ortsdurchfahrten, wo Streif- und
+Abbiegeschäden passieren. Wer Richtung Kerpen oder Brühl pendelt, kennt die
+Landstraßen über Erp und Friesheim.
+
+Ein typischer Schadenstyp in Erftstadt: Auffahrunfall auf der A 1 Richtung Köln
+im Berufsverkehr. Stefan dokumentiert den Heckschaden strukturiert, prüft auch
+versteckte Schäden im Heckblech und Kofferraumboden, ermittelt die
+Wertminderung nach Marktdaten und sorgt dafür, dass die gegnerische Versicherung
+sauber reguliert. Auch bei Streifschäden in der Lechenicher Altstadt — enge
+Gassen, parkende Autos, Lieferverkehr — kommt es auf eine saubere Foto-Spur an,
+die belegt, wer wo fuhr.
+
+Was viele Erftstädter nicht wissen: Nach einem unverschuldeten Unfall haben Sie
+das Recht auf einen eigenen, neutralen Gutachter — Sie müssen sich nicht auf
+den Prüfer der gegnerischen Versicherung verlassen. Genau hier liegt der
+Unterschied. Stefan vertritt ausschließlich Ihre Seite, nimmt den Schaden
+unabhängig auf und schafft die Grundlage für Ihre volle Forderung.
+
+Eine Besonderheit bei Erftstädter Schäden: Bei jüngeren Fahrzeugen ist die
+Wertminderung nach einem Unfall oft höher, als die Versicherung zugestehen
+möchte. Hier zählt die saubere Berechnung des merkantilen Minderwerts, damit
+die Versicherung nicht einfach kürzt. Falls sie es doch tut, erstellen wir auf
+Wunsch ein Gegengutachten — auch das wird übernommen.
+
+Werkstattwahl bleibt Ihr Recht. Stefan kennt verlässliche Partner in Liblar,
+Lechenich und im benachbarten Hürth — vom freien Karosseriefachbetrieb bis zur
+Markenwerkstatt. Wenn Sie keine eigene Werkstatt haben, vermittelt er. Die
+Werkstatt rechnet auf Basis des Gutachtens ab.
+
+Drei Schritte: 1) Anruf oder WhatsApp an Stefan. 2) Vor-Ort-Termin binnen
+60 Minuten, alle Stadtteile inklusive Lechenich und Bliesheim. 3) Gutachten in
+48 Stunden, Versicherungsabwicklung läuft parallel. 0 €.
+
+Kfz-Gutachter Erftstadt — neutral, gerichtsfest, schnell vor Ort. Stefan Wagner
 ist Ihr Ansprechpartner. Wir klären in 5 Minuten am Telefon, wie es weitergeht.`,
 }
 
