@@ -33,6 +33,8 @@ import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-find
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
 import { GlassPill, BeratungVereinbarenButton } from '@/components/shared/glass'
+import { createRoot, type Root } from 'react-dom/client'
+import { SvProfilePopup } from './SvProfilePopup'
 
 type Props = {
   /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
@@ -97,13 +99,15 @@ function addDeadPin(
   store.push(marker)
 }
 
-// Klickbarer Avatar-Marker für SVs mit paket='standard'. Öffnet ein
-// anonymisiertes Profil-Popup (Region, Sterne, Specs, Vorname-Initiale).
+// Klickbarer Avatar-Marker für verifizierte SVs. Click → onClick (öffnet das
+// React-Profil-Popup über dem Pin, WS2). KEIN setPopup/HTML-Popup + kein
+// Wizard-CTA mehr — die Buchung läuft über den 3-Step-Wizard (WS4), den SV
+// wählt das System (WS3).
 function addClickableMarker(
   map: MapboxMap,
   store: Marker[],
   sv: AktiverSVPublic,
-  strings: { svIn: string; zertifiziert: string; bewertungen: string; popupCta: string },
+  onClick: () => void,
 ) {
   const initiale = sv.vorname_initiale ?? '·'
   const el = document.createElement('div')
@@ -116,78 +120,14 @@ function addClickableMarker(
       </div>
     </div>
   `
-
-  // Privacy-Popup: nur Region + Sterne + Top-3-Specs + Wizard-CTA.
-  // KEIN Firmenname, KEINE Adresse, KEIN Telefon/Email, KEIN Vor-/Nachname.
-  const stadt = sv.stadt ?? 'Ihrer Region'
-  const sterneRow =
-    sv.bewertungs_durchschnitt && sv.bewertungs_anzahl
-      ? `
-        <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:${COL_NAVY};font-weight:600">
-          <span style="color:#F3C053;font-size:13px;line-height:1">★</span>
-          <span>${sv.bewertungs_durchschnitt.toFixed(1)} <span style="color:#6b7280;font-weight:500">(${sv.bewertungs_anzahl} ${escapeHtml(strings.bewertungen)})</span></span>
-        </div>
-      `
-      : ''
-  const specsRow =
-    sv.spezifikationen_top3.length > 0
-      ? `
-        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
-          ${sv.spezifikationen_top3
-            .map(
-              (s) =>
-                `<span style="padding:2px 8px;border-radius:999px;background:rgba(69,115,162,0.08);color:${COL_NAVY};font-size:10.5px;font-weight:600;letter-spacing:-.01em">${escapeHtml(s)}</span>`,
-            )
-            .join('')}
-        </div>
-      `
-      : ''
-  const popupHTML = `
-    <div style="padding:14px 16px;font-family:Montserrat,system-ui,sans-serif;min-width:240px;max-width:280px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:50%;background:${COL_ONDO};display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${initiale}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:700;color:${COL_NAVY};line-height:1.25;letter-spacing:-.01em">${escapeHtml(strings.svIn)} ${escapeHtml(stadt)}</div>
-          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">${escapeHtml(strings.zertifiziert)}</div>
-        </div>
-      </div>
-      ${sterneRow}
-      ${specsRow}
-      <button
-        data-testid="sv-anfrage-popup"
-        data-sv-id="${sv.id}"
-        onclick="document.dispatchEvent(new CustomEvent('claimondo:open-wizard', { detail: { svId: '${sv.id}' } }))"
-        style="margin-top:12px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:9px 12px;cursor:pointer;letter-spacing:-.01em"
-      >
-        ${escapeHtml(strings.popupCta)}
-      </button>
-    </div>
-  `
-  const popup = new mapboxgl.Popup({ offset: 24, closeButton: true, maxWidth: '280px' }).setHTML(popupHTML)
+  el.addEventListener('click', (e) => {
+    e.stopPropagation()
+    onClick()
+  })
   const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
     .setLngLat([sv.standort_lng, sv.standort_lat])
-    .setPopup(popup)
     .addTo(map)
   store.push(marker)
-}
-
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case '&':
-        return '&amp;'
-      case '<':
-        return '&lt;'
-      case '>':
-        return '&gt;'
-      case '"':
-        return '&quot;'
-      case "'":
-        return '&#39;'
-      default:
-        return c
-    }
-  })
 }
 
 // DE-only Embed (AAR-956 Open-Decision #2): Map-Strings inline statt next-intl.
@@ -208,10 +148,6 @@ const MAP_STRINGS: Record<string, string> = {
   error_auth: 'Mapbox lehnt die Anfrage ab (401/403) — Token-URL-Restriction oder ungültiger Token.',
   error_timeout: 'Timeout — das Mapbox-Style-Laden hat nach 12s nicht reagiert (Netzwerk geblockt? CSP? api.mapbox.com nicht erreichbar?).',
   error_generic: 'Mapbox-Fehler:',
-  sv_popup_zertifiziert: 'zertifiziert · BVSK',
-  sv_popup_in: 'Sachverständiger in',
-  sv_popup_bewertungen: 'Bewertungen',
-  sv_popup_cta: 'Über Wizard anfragen →',
   beratung_label: 'Beratung',
 }
 function tMap(key: string, vars?: { count?: number }): string {
@@ -225,6 +161,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const containerRef = useRef<HTMLDivElement | null>(null)
   const markersRef = useRef<Marker[]>([])
   const popupRef = useRef<Popup | null>(null)
+  const popupRootRef = useRef<Root | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
   // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
@@ -270,6 +207,35 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       bearing: -8,
     })
     mapRef.current = map
+
+    // WS2: Profil-Popup ÜBER dem Pin (anchor:'bottom') via React-Render
+    // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
+    // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
+    function openSvPopup(sv: AktiverSVPublic) {
+      popupRef.current?.remove()
+      popupRootRef.current?.unmount()
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      root.render(<SvProfilePopup sv={sv} />)
+      const popup = new mapboxgl.Popup({
+        offset: 22,
+        closeButton: true,
+        maxWidth: '300px',
+        anchor: 'bottom',
+        className: 'sv-finder-popup',
+      })
+        .setLngLat([sv.standort_lng, sv.standort_lat])
+        .setDOMContent(container)
+        .addTo(map)
+      popup.on('close', () => {
+        root.unmount()
+        if (popupRef.current === popup) popupRef.current = null
+        if (popupRootRef.current === root) popupRootRef.current = null
+      })
+      setHoveredId(sv.id)
+      popupRef.current = popup
+      popupRootRef.current = root
+    }
 
     // resize() nach dem nächsten Frame + beim load-Event, plus ein
     // ResizeObserver — robust gegen Container-Größenänderungen (Layout-Settle,
@@ -366,14 +332,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       // consented Partner, die gefunden werden WOLLEN — kein paket-abhängiger
       // Dead-Pin mehr. Nur Tier-3 sv_leads (Excel-Import ohne Consent) bleiben
       // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
-      const markerStrings = {
-        svIn: t('sv_popup_in'),
-        zertifiziert: t('sv_popup_zertifiziert'),
-        bewertungen: t('sv_popup_bewertungen'),
-        popupCta: t('sv_popup_cta'),
-      }
       aktiveSVs.forEach((sv) => {
-        addClickableMarker(map, markersRef.current, sv, markerStrings)
+        addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv))
       })
 
       // ─── Tier-3 sv_leads — immer Dead-Pin ────────────────────────────
@@ -382,29 +342,9 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       })
     })
 
-    // Popup-CTA "Über Wizard anfragen →" feuert claimondo:open-wizard. Wir
-    // scrollen die Sidebar zum Anfang und öffnen das Mobile-Bottom-Sheet —
-    // KEIN direkter Kontakt-Pfad, keine Identität preisgegeben.
-    //
-    // Self-Dispatch-Fix: Der WizardClient hört auf das separate Event
-    // 'claimondo:select-sv' mit { id, tier } und schreibt den SV dann als
-    // zugeordneter_sv_id in die Anfrage + triggert reserviereSlot beim
-    // Submit. Ohne diesen Re-Dispatch blieb zugeordneter_sv_id=null →
-    // convertLeadToClaim(svIdFromTermin=null) → kein Auftrag/Termin/WA.
-    function handleOpenWizard(e: Event) {
-      const ce = e as CustomEvent<{ svId?: string }>
-      if (ce.detail?.svId) {
-        setHoveredId(ce.detail.svId)
-        document.dispatchEvent(
-          new CustomEvent('claimondo:select-sv', {
-            detail: { id: ce.detail.svId, tier: 'premium' as const },
-          }),
-        )
-      }
-      sidebarScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-      setMobileSheetOpen(true)
-    }
-    document.addEventListener('claimondo:open-wizard', handleOpenWizard)
+    // WS2: Popup ist jetzt view-only (React-Profil). Die alte claimondo:open-wizard /
+    // claimondo:select-sv-Verdrahtung (Self-Dispatch der Marketing-Karte) entfällt —
+    // im Embed wählt das System den SV (WS3), Buchung über den Inline-Wizard (WS4).
 
     // 2026-05-12 Aaron-Smoke: Beim Page-Load Geolocation anfragen. Bei
     // Allow: Map zoomt zum User, Header-Badge wechselt auf "in Ihrer
@@ -429,9 +369,9 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     return () => {
       window.clearTimeout(loadTimeout)
       resizeObs.disconnect()
-      document.removeEventListener('claimondo:open-wizard', handleOpenWizard)
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
+      popupRootRef.current?.unmount()
       popupRef.current?.remove()
       map.remove()
       mapRef.current = null
