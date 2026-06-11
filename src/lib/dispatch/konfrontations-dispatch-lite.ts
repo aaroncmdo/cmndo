@@ -57,11 +57,17 @@ export async function triggerKonfrontationsDispatch(
   // Konfrontations-Dispatch wenn der Fall gerade gelöscht wurde (Race).
   // CMM-44 SP-D PR2a: nachbesichtigung_sv_konfrontation_gewuenscht + _termin_vereinbart_am
   // aus gutachter_termine (SSoT) geladen.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, sv_id, claim_id, claims:claim_id(claim_nummer)')
-    .eq('id', input.fallId)
+  // CMM-49 Display-Sweep: faelle-frei via Bridge (fall_id->claim_id) + claims.sv_id (sv_id-Sync).
+  // claim_nummer im alten Select war ungenutzt; id == input.fallId. Admin-Client -> RLS-neutral.
+  const { data: bridgeRow } = await db
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id(sv_id, claim_nummer)')
+    .eq('fall_id', input.fallId)
     .maybeSingle()
+  const bridgeClaim = Array.isArray(bridgeRow?.claims) ? bridgeRow?.claims[0] : bridgeRow?.claims
+  const fall = bridgeRow
+    ? { sv_id: (bridgeClaim?.sv_id ?? null) as string | null, claim_id: bridgeRow.claim_id as string | null, claims: bridgeRow.claims }
+    : null
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
   if (!fall.sv_id) {
