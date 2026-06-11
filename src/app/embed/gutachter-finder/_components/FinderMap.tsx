@@ -451,6 +451,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
         const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
         map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
+        // Profil des empfohlenen SV gleich aufmachen (Aaron: Profil auf, sobald die Route steht).
+        openSvPopup(sv)
       })
     }
     document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
