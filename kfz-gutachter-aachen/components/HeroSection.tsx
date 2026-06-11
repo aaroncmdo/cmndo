@@ -1,7 +1,7 @@
 import ReactDOM from 'react-dom'
 import type { City } from '@/lib/cluster'
 import { CLUSTER } from '@/lib/cluster'
-import { GOOGLE_RATING, HERO_FEATURES, type HeroFeature } from '@/lib/content'
+import { GOOGLE_RATING, HERO_FEATURES, PARTNER_LINE, type HeroFeature } from '@/lib/content'
 import { ClaimondoLink } from '@/lib/text'
 
 // 08n N11c · Icon-Set der Hero-Features (Stroke-Stil wie gehabt, 18px/1.9).
@@ -115,9 +115,12 @@ export function HeroSection({ city }: { city: City }) {
             </h1>
             {/* 08h A1: Sub-Lead-P + 0€-Fliesstext entfernt (Matrix: P unsichtbar auf
                 ALLEN >=640; 0€ ist der Georgia-Anker — Mock-Render, nicht Mock-CSS). */}
-            {/* 0€-Anker (Mock v14b5): mobil 3-zeilig in Glas-Box + mt-auto-Dock;
-                >=640 frei stehend als Georgia-Serif-Editorial-Anker (08h-Block). */}
-            <div className="zero-anchor-block mt-auto sm:mt-0 self-start bg-[var(--zero-anchor-bg,rgba(0,0,0,0.35))] backdrop-blur-md sm:backdrop-blur-none rounded-2xl px-4 py-3">
+            {/* 0€-Anker: 08q Q1 — Glas-Box auch mobil ENTFERNT (Bridge-A/B @390:
+                Top-Scrim + dunkle Bildzone tragen die Lesbarkeit, 0 € wirkt frei
+                staerker; Card-over-Photo-Anti-Pattern + Blur-Last raus). Block
+                steht frei auf dem Scrim, linksbuendig; mt-auto-Dock bleibt,
+                >=640 weiter Georgia-Serif-Editorial (08h-Block). */}
+            <div className="zero-anchor-block mt-auto sm:mt-0 self-start">
               <p className="za-big zero-accent font-bold text-amber leading-[0.95] tracking-tight text-[clamp(34px,5.2vh,68px)] [text-shadow:0_3px_14px_rgba(0,0,0,.42)]" style={{ fontFamily: 'Georgia, serif' }}>0&nbsp;€</p>
               <p className="za-cond font-semibold text-white/95 leading-snug text-[clamp(14px,1.7vw,19px)] mt-1.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Bei unverschuldetem Unfall</p>
               <p className="za-post italic text-white/75 leading-snug text-[clamp(12px,1.4vw,16px)] mt-0.5 [text-shadow:0_1px_4px_rgba(0,0,0,.55)]">Versicherung zahlt alles</p>
@@ -195,8 +198,9 @@ export function HeroSection({ city }: { city: City }) {
                     loading="lazy"
                   />
                   <span className="flex flex-col leading-tight">
-                    <strong className="text-white font-semibold text-[14px] tracking-tight">Zertifizierter <ClaimondoLink>Claimondo-Partner</ClaimondoLink></strong>
-                    <span className="text-white/45 font-normal text-[10.5px] tracking-normal mt-0.5">Unfall-Assistance</span>
+                    {/* 08o O3: Wortlaut aus PARTNER_LINE (ein Datenfeld, drei Lockups). */}
+                    <strong className="text-white font-semibold text-[14px] tracking-tight">{PARTNER_LINE.pre} <ClaimondoLink>{PARTNER_LINE.brand}</ClaimondoLink></strong>
+                    <span className="text-white/45 font-normal text-[10.5px] tracking-normal mt-0.5">{PARTNER_LINE.sub}</span>
                   </span>
                 </div>
               </div>
@@ -216,8 +220,9 @@ export function HeroSection({ city }: { city: City }) {
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img className="mini-seal" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo Unfall-Assistance Partner Siegel" loading="lazy" />
                   <div className="brand-text-block brand-text-block-centered">
-                    <span className="brand-line-main"><ClaimondoLink>Claimondo</ClaimondoLink> Unfall-Assistance</span>
-                    <span className="brand-line-sub">Partner</span>
+                    {/* 08o O3: Badge-Stil bleibt, Worte aus PARTNER_LINE. */}
+                    <span className="brand-line-main">{PARTNER_LINE.pre} <ClaimondoLink>{PARTNER_LINE.brand}</ClaimondoLink></span>
+                    <span className="brand-line-sub">{PARTNER_LINE.sub}</span>
                   </div>
                 </div>
               </div>
