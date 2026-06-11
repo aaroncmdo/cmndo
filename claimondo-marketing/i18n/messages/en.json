@@ -37,7 +37,10 @@
     "cta": "Continue to booking",
     "cta_pending": "One moment …",
     "redirect_title": "Redirecting to booking …",
-    "redirect_sub": "You'll pick your free preferred appointment next."
+    "redirect_sub": "You'll pick your free preferred appointment next.",
+    "cta_senden": "Send request",
+    "gesendet_title": "Request received",
+    "gesendet_sub": "We'll get in touch personally and send you the link to book your appointment."
   },
   "check": {
     "badge": "Free · no cost risk",

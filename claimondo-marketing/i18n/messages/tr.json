@@ -37,7 +37,10 @@
     "cta": "Randevuya devam et",
     "cta_pending": "Bir saniye …",
     "redirect_title": "Randevu sayfasına yönlendiriliyor …",
-    "redirect_sub": "Birazdan istediğiniz boş randevuyu seçeceksiniz."
+    "redirect_sub": "Birazdan istediğiniz boş randevuyu seçeceksiniz.",
+    "cta_senden": "Talep gönder",
+    "gesendet_title": "Talebiniz alındı",
+    "gesendet_sub": "Sizinle kişisel olarak iletişime geçeceğiz ve randevu bağlantısını göndereceğiz."
   },
   "check": {
     "badge": "Ücretsiz · maliyet riski yok",
