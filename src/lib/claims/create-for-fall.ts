@@ -82,6 +82,11 @@ export async function createClaimForFall(
   const { data: claim, error } = await db
     .from('claims')
     .insert({
+      // CMM-49 Step 3 (faelle-Drop-Vorbereitung): claim.id == fall_id (Identity).
+      // Hier existiert die faelle-Row schon (fallId), der Claim wird fuer sie angelegt
+      // -> claim.id auf fallId setzen, damit die Bridge 1:1 bleibt (s. convert-lead-to-claim).
+      // Deckt auch admin/faelle/anlegen (einziger Live-Caller). Idempotent via resolveClaimId oben.
+      id: fallId,
       vehicle_id: source.vehicle_id ?? null,
       schadentag,
       schadenort_adresse: source.unfallort ?? source.schadens_adresse ?? null,
