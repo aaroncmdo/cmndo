@@ -428,12 +428,24 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           src.setData(data)
         } else {
           map.addSource('embed-route', { type: 'geojson', data })
+          // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
+          map.addLayer({
+            id: 'embed-route-casing',
+            type: 'line',
+            source: 'embed-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
+          })
           map.addLayer({
             id: 'embed-route-line',
             type: 'line',
             source: 'embed-route',
             layout: { 'line-cap': 'round', 'line-join': 'round' },
-            paint: { 'line-color': COL_ONDO, 'line-width': 4, 'line-opacity': 0.9 },
+            paint: {
+              'line-color': COL_ONDO,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
+              'line-opacity': 1,
+            },
           })
         }
         const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
