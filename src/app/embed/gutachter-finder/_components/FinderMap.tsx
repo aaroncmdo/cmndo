@@ -455,6 +455,39 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           0% { transform: scale(0.5); opacity: 0.55; }
           80%, 100% { transform: scale(1.9); opacity: 0; }
         }
+        /* Google-Places-Dropdown (.pac-container) in unsere Tokens bringen. Google
+           rendert es an document.body → global; greift nur solange der Embed gemountet
+           ist. Doppelklasse = höhere Spezifität als Googles Default-Stylesheet.
+           "powered by Google" (::after) bleibt erhalten (Places-ToS). */
+        .pac-container.pac-container {
+          margin-top: 6px;
+          padding: 4px;
+          border: 1px solid var(--claimondo-border, #e4e7ef);
+          border-radius: var(--radius-ios-md, 18px);
+          box-shadow: 0 14px 36px rgba(13, 27, 62, 0.14);
+          background: #fff;
+          font-family: var(--font-montserrat, "Montserrat", system-ui, sans-serif);
+        }
+        .pac-container .pac-item {
+          border: 0;
+          border-radius: var(--radius-ios-sm, 12px);
+          padding: 9px 12px;
+          font-size: 13px;
+          line-height: 1.3;
+          color: var(--claimondo-navy, #0D1B3E);
+          cursor: pointer;
+        }
+        .pac-container .pac-item:hover,
+        .pac-container .pac-item-selected {
+          background: color-mix(in srgb, var(--claimondo-ondo, #4573A2) 12%, transparent);
+        }
+        .pac-container .pac-item-query {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--claimondo-navy, #0D1B3E);
+        }
+        .pac-container .pac-matched { font-weight: 700; }
+        .pac-container .pac-icon { display: none; }
       `}</style>
       {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
           falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
