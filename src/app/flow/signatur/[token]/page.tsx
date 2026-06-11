@@ -3,6 +3,8 @@ import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 import { loadMessages } from '@/i18n/load-messages'
 import { NextIntlClientProvider } from 'next-intl'
 import SignaturPage from './SignaturPage'
+import { resolveBrandingFromFallId } from '@/lib/branding/token-theme'
+import { generateCssVars } from '@/lib/branding/css-vars'
 
 export default async function Page({
   params,
@@ -26,8 +28,13 @@ export default async function Page({
   const flowLocale = resolveFlowLocale(null, sprache)
   const flowMessages = await loadMessages(flowLocale)
 
+  // Whitelabel: Signatur-Route brandet jetzt wie /flow + /upload/* (Token = faelle.id).
+  // Legal-Texte bleiben "Claimondo GmbH" (Abtretungs-Empfaenger) — nur Farb-Chrome brandet.
+  const branding = await resolveBrandingFromFallId(token)
+  const brandStyle = branding.useBrand ? generateCssVars(branding.theme, 'full') : undefined
+
   return (
-    <div dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+    <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
       <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
         <SignaturPage fallId={token} />
       </NextIntlClientProvider>

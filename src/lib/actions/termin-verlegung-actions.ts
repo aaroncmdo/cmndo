@@ -116,7 +116,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // bei manchen Rows nur über auftrag_id.fall_id auflösbar.
   const { data: termin, error: terminErr } = await admin
     .from('gutachter_termine')
-    .select('id, sv_id, start_zeit, end_zeit, status, fall_id, auftrag_id')
+    .select('id, assignee_id, start_zeit, end_zeit, status, fall_id, auftrag_id')
     .eq('id', input.terminId)
     .maybeSingle()
   if (terminErr || !termin) {
@@ -124,11 +124,11 @@ export async function getVerlegungsVorschlaegeAction(input: {
   }
 
   // Auth-Guard: User muss der SV des Termins sein, oder Admin/Staff
-  if (termin.sv_id) {
+  if (termin.assignee_id) {
     const { data: sv } = await admin
       .from('sachverstaendige')
       .select('profile_id')
-      .eq('id', termin.sv_id as string)
+      .eq('id', termin.assignee_id as string)
       .maybeSingle()
     const istEigenerTermin = sv?.profile_id === user.id
     if (!istEigenerTermin) {
@@ -209,11 +209,11 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // SV-Standort als Fallback wenn an einem Tag kein Vor-Termin existiert.
   // Lat/Lng aus sachverstaendige.standort_lat/lng (Isochron-Anker).
   let svStandort: { lat: number; lng: number; label: string } | null = null
-  if (termin.sv_id) {
+  if (termin.assignee_id) {
     const { data: sv } = await admin
       .from('sachverstaendige')
       .select('standort_adresse, standort_lat, standort_lng')
-      .eq('id', termin.sv_id as string)
+      .eq('id', termin.assignee_id as string)
       .maybeSingle()
     const lat = sv?.standort_lat as number | null
     const lng = sv?.standort_lng as number | null
@@ -226,7 +226,7 @@ export async function getVerlegungsVorschlaegeAction(input: {
     }
   }
 
-  const vorschlaege = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
+  const vorschlaege = await findVerlegungsVorschlaege(admin, termin.assignee_id as string, {
     besichtigungsortLat: Number(zielLat),
     besichtigungsortLng: Number(zielLng),
     besichtigungsortLabel: zielLabel,
@@ -267,7 +267,7 @@ export async function terminVerlegungVorschlagen(input: {
   // Alter Termin laden — muss bestaetigt sein und dem SV gehören
   const { data: alt, error: altErr } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit')
+    .select('id, assignee_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (altErr || !alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -317,8 +317,8 @@ export async function terminVerlegungVorschlagen(input: {
   revalidatePath('/gutachter/heute')
 
   // Notifikation fire-and-forget — Worker nimmt's auf, Caller wird nicht blockiert
-  if (alt.fall_id && alt.sv_id) {
-    const svVorname = await lookupSvVorname(alt.sv_id as string)
+  if (alt.fall_id && alt.assignee_id) {
+    const svVorname = await lookupSvVorname(alt.assignee_id as string)
     emitEvent(
       'termin.verlegung_vorgeschlagen',
       {
@@ -363,7 +363,7 @@ export async function getKundeTerminVorschlaegeAction(
 
   const { data: termin } = await admin
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, start_zeit, end_zeit, status')
+    .select('id, assignee_id, fall_id, start_zeit, end_zeit, status')
     .eq('id', terminId)
     .maybeSingle()
   if (!termin) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -414,11 +414,11 @@ export async function getKundeTerminVorschlaegeAction(
   const slotDauerMin = dauerMin >= 30 && dauerMin <= 240 ? dauerMin : 45
 
   let svStandort: { lat: number; lng: number; label: string } | null = null
-  if (termin.sv_id) {
+  if (termin.assignee_id) {
     const { data: sv } = await admin
       .from('sachverstaendige')
       .select('standort_adresse, standort_lat, standort_lng')
-      .eq('id', termin.sv_id as string)
+      .eq('id', termin.assignee_id as string)
       .maybeSingle()
     const lat = sv?.standort_lat as number | null
     const lng = sv?.standort_lng as number | null
@@ -429,7 +429,7 @@ export async function getKundeTerminVorschlaegeAction(
 
   let vorschlaegeRaw: import('@/lib/termine/verlegung-vorschlaege').VerlegungsVorschlag[] = []
   try {
-    vorschlaegeRaw = await findVerlegungsVorschlaege(admin, termin.sv_id as string, {
+    vorschlaegeRaw = await findVerlegungsVorschlaege(admin, termin.assignee_id as string, {
       besichtigungsortLat: Number(zielLat),
       besichtigungsortLng: Number(zielLng),
       besichtigungsortLabel: zielLabel,
@@ -442,7 +442,7 @@ export async function getKundeTerminVorschlaegeAction(
     return { ok: false, error: `Engine-Fehler: ${e instanceof Error ? e.message : String(e)}` }
   }
 
-  console.log('[AAR-864] getKundeTerminVorschlaegeAction: vorschlaegeRaw.length =', vorschlaegeRaw.length, '| svId =', termin.sv_id, '| fallId =', termin.fall_id, '| zielLat =', zielLat, '| zielLng =', zielLng)
+  console.log('[AAR-864] getKundeTerminVorschlaegeAction: vorschlaegeRaw.length =', vorschlaegeRaw.length, '| svId =', termin.assignee_id, '| fallId =', termin.fall_id, '| zielLat =', zielLat, '| zielLng =', zielLng)
 
   // Routen-Details rausfiltern — Kunde sieht nur Datum + Uhrzeit (SV-Privatsphäre)
   const vorschlaege = vorschlaegeRaw.map((v) => ({ start: v.start, end: v.end, datum: v.datum }))
@@ -475,7 +475,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // Termin laden
   const { data: alt } = await admin
     .from('gutachter_termine')
-    .select('id, sv_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
+    .select('id, assignee_id, fall_id, claim_id, kb_id, kanal, typ, status, start_zeit, end_zeit')
     .eq('id', input.terminId)
     .maybeSingle()
   if (!alt) return { ok: false, error: 'Termin nicht gefunden.' }
@@ -503,7 +503,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   // verschieben ihn ja, er soll dafür kein Konflikt sein)
   const frei = await istSlotFrei(
     admin,
-    alt.sv_id as string,
+    alt.assignee_id as string,
     wunschStart.toISOString(),
     wunschEnde.toISOString(),
     alt.id as string,
@@ -511,7 +511,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   if (!frei) {
     const alternatives = await findAlternativenZuWunschslot(
       admin,
-      alt.sv_id as string,
+      alt.assignee_id as string,
       input.neuesStartIso,
       slotDauerMin,
       alt.id as string,
@@ -538,7 +538,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
     if (verlegeRes.code === 'belegt') {
       const alternatives = await findAlternativenZuWunschslot(
         admin,
-        alt.sv_id as string,
+        alt.assignee_id as string,
         input.neuesStartIso,
         slotDauerMin,
         alt.id as string,
@@ -552,7 +552,7 @@ export async function kundeTerminVerlegungVorschlagen(input: {
   revalidateFallPaths(alt.fall_id as string | null)
 
   // Notifikation: SV informieren — kein Bestätigungs-Request, nur Hinweis
-  const svVorname = await lookupSvVorname(alt.sv_id as string)
+  const svVorname = await lookupSvVorname(alt.assignee_id as string)
   emitEvent(
     'termin.verschoben_durch_kunde',
     {

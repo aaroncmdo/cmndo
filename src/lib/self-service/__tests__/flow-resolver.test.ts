@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveFlowTerminState, type FlowTerminInput } from '../flow-resolver'
+import { resolveFlowTerminState, type FlowTerminInput, type FlowTerminState } from '../flow-resolver'
 
 // AAR-956 §4: Resolver-State-Machine fuer den kanonischen /flow.
 // Reine Entscheidungs-Funktion (kein I/O) — sie sagt NUR welcher Zustand,

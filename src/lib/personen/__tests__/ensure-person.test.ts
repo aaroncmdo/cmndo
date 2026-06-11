@@ -92,9 +92,17 @@ describe('ensurePersonForData', () => {
     expect((ins!.payload as { user_id: unknown }).user_id).toBeNull()
   })
 
+  it('CMM-Entity (A): ohne Account UND ohne Identitaet -> skip (kein personen-Insert)', async () => {
+    const { db, calls } = makeMockDb([])
+    const r = await ensurePersonForData({ db, userId: null, snapshot: { adresse_ort: 'Koeln' } })
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.personId).toBeNull()
+    expect(calls.filter((c) => c.op === 'insert' && c.table === 'personen')).toHaveLength(0)
+  })
+
   it('fuehrerscheinklassen text[] -> text (join), KEIN Array ins text-Feld', async () => {
     const { db, calls } = makeMockDb([{ data: { id: 'p-fs' } }])
-    await ensurePersonForData({ db, userId: null, snapshot: { fuehrerscheinklassen: ['B', 'BE'] } })
+    await ensurePersonForData({ db, userId: null, snapshot: { nachname: 'Fahrer', fuehrerscheinklassen: ['B', 'BE'] } })
     const ins = calls.find((c) => c.op === 'insert' && c.table === 'personen')
     expect((ins!.payload as { fuehrerscheinklassen: unknown }).fuehrerscheinklassen).toBe('B, BE')
   })

@@ -22,7 +22,7 @@ function DiagPage({ stage, error }: { stage: string; error: unknown }) {
   const showDebug = process.env.NODE_ENV !== 'production'
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-xl rounded-claimondo-md bg-claimondo-card border border-claimondo-border shadow-claimondo-md p-8 text-center">
+      <div className="w-full max-w-xl rounded-ios-md bg-claimondo-card border border-claimondo-border shadow-claimondo-md p-8 text-center">
         <div className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-700 text-2xl">
           ⚠
         </div>
@@ -39,7 +39,7 @@ function DiagPage({ stage, error }: { stage: string; error: unknown }) {
             </p>
             <p className="text-xs font-mono text-claimondo-shield break-all mb-2">{message}</p>
             {stack && (
-              <pre className="text-[10px] font-mono text-claimondo-shield/70 bg-claimondo-bg border border-claimondo-border rounded-claimondo-sm p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all">
+              <pre className="text-[10px] font-mono text-claimondo-shield/70 bg-claimondo-bg border border-claimondo-border rounded-ios-sm p-3 overflow-auto max-h-64 whitespace-pre-wrap break-all">
                 {stack}
               </pre>
             )}

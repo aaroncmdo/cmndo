@@ -102,7 +102,7 @@ export default function TerminListeClient({
       {
         let q = supabase
           .from('gutachter_termine')
-          .select('id, typ, start_zeit, status, fall_id, lead_id, sv_id, kb_id, kanal, notiz_intern')
+          .select('id, typ, start_zeit, status, fall_id, lead_id, kb_id, kanal, notiz_intern')
           .is('cancelled_at', null)
         // AAR-956: bezug-native Self-Service-Termine (lead_id NULL, bezug_typ='lead') mitfinden.
         if (fallId && leadId) q = q.or(`fall_id.eq.${fallId},lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)

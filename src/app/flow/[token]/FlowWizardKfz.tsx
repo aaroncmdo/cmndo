@@ -186,6 +186,8 @@ export default function FlowWizardKfz({
   // programmatisch submitted — Form-Submit ist der Cookie-sichere Weg
   // gegen die Race-Condition mit `window.location.assign`.
   const loginFormRef = useRef<HTMLFormElement>(null)
+  // A11y: Ref auf den SA-Volltext-Modal-Container fuer den Focus-Trap.
+  const saModalRef = useRef<HTMLDivElement>(null)
 
   // CMM-14: Werkstatt + Schadensfotos State entfernt — Step 'weitere-angaben'
   // wurde aus dem Wizard rausgenommen, der Foto-Upload erfolgt jetzt im
@@ -256,6 +258,37 @@ export default function FlowWizardKfz({
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100)
   const fahrzeug = [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' ')
   const kundenName = [editVorname, editNachname].filter(Boolean).join(' ')
+
+  // A11y: SA-Volltext-Modal — Esc-schliessen, Focus-Trap (Tab-Wrap) + Focus-Restore
+  // beim Schliessen. Backdrop-Klick-schliessen existiert separat im JSX.
+  useEffect(() => {
+    if (!saVolltextOffen) return
+    const prevFocus = document.activeElement as HTMLElement | null
+    const focusables = () =>
+      saModalRef.current
+        ? Array.from(
+            saModalRef.current.querySelectorAll<HTMLElement>(
+              'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])',
+            ),
+          ).filter((el) => !el.hasAttribute('disabled'))
+        : []
+    focusables()[0]?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setSaVolltextOffen(false); return }
+      if (e.key !== 'Tab') return
+      const f = focusables()
+      if (!f.length) return
+      const first = f[0]
+      const last = f[f.length - 1]
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus() }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus() }
+    }
+    document.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      prevFocus?.focus?.()
+    }
+  }, [saVolltextOffen])
 
   // AAR-956 Task 1: Im gutachter-Step ohne zugeordneten SV/Termin NICHT passiv
   // "wir suchen ..." zeigen, sondern aktiv weiterleiten. Gibt es einen Buchungs-Step
@@ -375,8 +408,8 @@ export default function FlowWizardKfz({
         className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background: [
-            'radial-gradient(60% 50% at 80% 0%, rgba(123,163,204,0.18), transparent 60%)',
-            'radial-gradient(50% 50% at 0% 100%, rgba(69,115,162,0.08), transparent 70%)',
+            'radial-gradient(60% 50% at 80% 0%, color-mix(in srgb, var(--brand-accent, #7BA3CC) 18%, transparent), transparent 60%)',
+            'radial-gradient(50% 50% at 0% 100%, color-mix(in srgb, var(--brand-secondary, #4573A2) 8%, transparent), transparent 70%)',
           ].join(', '),
         }}
       />
@@ -402,11 +435,13 @@ export default function FlowWizardKfz({
         <div className="mx-auto flex max-w-lg items-center justify-center gap-2 px-5 py-3">
           {STEPS.map((s, i) => (
             <div key={s.id} className="flex items-center gap-2">
-              <div className={`grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
+              <div
+                style={i === stepIndex ? { boxShadow: '0 0 0 5px color-mix(in srgb, var(--brand-secondary, #4573A2) 16%, transparent)' } : undefined}
+                className={`grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
                 i < stepIndex
                   ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                   : i === stepIndex
-                    ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06] shadow-[0_0_0_5px_rgba(69,115,162,.16)]'
+                    ? 'bg-claimondo-ondo border-claimondo-ondo text-white scale-[1.06]'
                     : 'bg-white border-claimondo-navy/[0.10] text-claimondo-ondo/60'
               }`}>
                 {i < stepIndex ? <CheckIcon className="w-3.5 h-3.5" /> : i + 1}
@@ -488,7 +523,7 @@ export default function FlowWizardKfz({
                       <LegalDocPopover titel={legalDocs?.datenschutz?.titel ?? 'Datenschutzerklärung'} markdown={legalDocs?.datenschutz?.markdown ?? ''}>
                         {t('step_summary.datenschutz_link')}
                       </LegalDocPopover>{' '}
-                      {t('step_summary.datenschutz_text_suffix')} <span className="text-red-400">*</span>
+                      {t('step_summary.datenschutz_text_suffix')} <span className="text-danger">*</span>
                     </span>
                   </label>
                 </div>
@@ -626,11 +661,11 @@ export default function FlowWizardKfz({
                 {saVolltextOffen && (
                   <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
                     <div className="absolute inset-0 bg-black/40" onClick={() => setSaVolltextOffen(false)} />
-                    <div className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
+                    <div ref={saModalRef} role="dialog" aria-modal="true" aria-labelledby="sa-volltext-title" className="relative z-10 w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-ios-md shadow-claimondo-lg flex flex-col max-h-[90dvh]">
                       {/* Header */}
                       <div className="flex items-center justify-between px-5 pt-5 pb-3 border-b border-claimondo-border flex-shrink-0">
-                        <h2 className="text-sm font-semibold text-claimondo-navy">{t('step_sa.popover_titel')}</h2>
-                        <button type="button" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-ios-sm hover:bg-claimondo-bg">
+                        <h2 id="sa-volltext-title" className="text-sm font-semibold text-claimondo-navy">{t('step_sa.popover_titel')}</h2>
+                        <button type="button" aria-label="Schließen" onClick={() => setSaVolltextOffen(false)} className="p-1.5 rounded-ios-sm hover:bg-claimondo-bg">
                           <XIcon className="w-4 h-4 text-claimondo-ondo" />
                         </button>
                       </div>
@@ -658,14 +693,14 @@ export default function FlowWizardKfz({
                         <p>{t('step_sa.volltext.s4_text')}</p>
                         <h3 className="font-semibold">{t('step_sa.volltext.s5_titel')}</h3>
                         <p>{t('step_sa.volltext.s5_text')}</p>
-                        <p className="text-xs text-claimondo-ondo/70 pt-2 border-t border-claimondo-border">{t('step_sa.volltext.footer_note')}</p>
+                        <p className="text-xs text-claimondo-ondo pt-2 border-t border-claimondo-border">{t('step_sa.volltext.footer_note')}</p>
                       </div>
                       {/* Footer */}
                       <div className="px-5 py-4 border-t border-claimondo-border flex-shrink-0">
                         <button
                           type="button"
                           onClick={() => { setSaAccepted(true); setSaVolltextOffen(false) }}
-                          className="w-full py-3.5 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white font-semibold text-sm transition-all active:scale-[0.98]"
+                          className="w-full py-3.5 rounded-ios-md bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm transition-all active:scale-[0.98]"
                         >
                           {t('step_sa.volltext.cta_accept')}
                         </button>
@@ -697,11 +732,11 @@ export default function FlowWizardKfz({
                     <LegalDocPopover titel={legalDocs?.agb?.titel ?? 'AGB'} markdown={legalDocs?.agb?.markdown ?? ''}>
                       {t('step_sa.agb_link')}
                     </LegalDocPopover>{' '}
-                    {t('step_sa.widerruf_link')} <span className="text-red-400">*</span>
+                    {t('step_sa.widerruf_link')} <span className="text-danger">*</span>
                   </span>
                 </label>
 
-                {error && <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3 mb-4">{error}</p>}
+                {error && <p className="text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-4 py-3 mb-4">{error}</p>}
 
                 <button
                   onClick={handleSignSA}
@@ -723,9 +758,9 @@ export default function FlowWizardKfz({
                   icon={<UserPlusIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                <div className="bg-emerald-50 border border-emerald-100 rounded-ios-md px-4 py-3 mb-5 flex items-center gap-3">
-                  <CheckIcon className="w-5 h-5 text-emerald-500 shrink-0" />
-                  <p className="text-sm text-emerald-700">
+                <div className="bg-success-soft border border-success/30 rounded-ios-md px-4 py-3 mb-5 flex items-center gap-3">
+                  <CheckIcon className="w-5 h-5 text-success shrink-0" />
+                  <p className="text-sm text-success-strong">
                     {t('step_account.success_text')}
                   </p>
                 </div>
@@ -769,7 +804,7 @@ export default function FlowWizardKfz({
                 )}
 
                 {error && (
-                  <p className="text-sm text-red-500 bg-red-50 border border-red-100 rounded-ios-md px-4 py-3 mb-4">
+                  <p className="text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-4 py-3 mb-4">
                     {error}
                   </p>
                 )}
@@ -858,7 +893,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
         type={type}
         value={value}
         onChange={e => onChange(e.target.value)}
-        className={`w-full px-4 py-3.5 rounded-claimondo-md text-base ${liquidFieldBase}`}
+        className={`w-full px-4 py-3.5 rounded-ios-md text-base ${liquidFieldBase}`}
       />
     </div>
   )
@@ -867,7 +902,7 @@ function EditableInput({ label, value, onChange, type = 'text' }: { label: strin
 function SummaryRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 px-4 py-3 rounded-ios-md bg-claimondo-navy/[0.03] border border-claimondo-navy/[0.06]">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-claimondo-ondo/60">{label}</span>
+      <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-claimondo-ondo">{label}</span>
       <span className="text-sm text-claimondo-navy break-words tracking-[-.005em]">{value}</span>
     </div>
   )

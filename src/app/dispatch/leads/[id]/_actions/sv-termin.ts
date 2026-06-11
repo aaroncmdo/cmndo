@@ -560,8 +560,10 @@ export async function getNextFreeSlotsForSv(
 
   const { data: bestehend } = await supabase
     .from('gutachter_termine')
+    // CMM-49 (sv_id-Drop, exhaustive-scan miss): assignee_id+typ statt sv_id (value-identisch).
     .select('start_zeit, end_zeit')
-    .eq('sv_id', svId)
+    .eq('assignee_id', svId)
+    .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', '("storniert","abgelehnt","abgesagt")')
     .gte('start_zeit', now.toISOString())
     .lte('start_zeit', inZwoelfWochen.toISOString())

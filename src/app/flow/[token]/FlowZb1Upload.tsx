@@ -105,17 +105,17 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
 
       {status === 'bestaetigt' ? (
         <div
-          className="rounded-ios-sm bg-emerald-50 border border-emerald-100 p-3 text-sm text-emerald-800"
+          className="rounded-ios-sm bg-success-soft border border-success/30 p-3 text-sm text-success-strong"
           data-testid="flow-zb1-bestaetigt"
         >
           <p className="font-medium">{t('zb1.uebernommen')} ✓</p>
         </div>
       ) : status === 'fertig' && extracted ? (
         <div
-          className="rounded-ios-sm bg-emerald-50/60 border border-emerald-100 p-3"
+          className="rounded-ios-sm bg-success-soft/60 border border-success/30 p-3"
           data-testid="flow-zb1-fertig"
         >
-          <p className="text-sm font-medium text-emerald-800 mb-2">{t('zb1.pruefen')}</p>
+          <p className="text-sm font-medium text-success-strong mb-2">{t('zb1.pruefen')}</p>
           <div className="flex flex-col gap-2">
             <KorrField label={t('zb1.feld_kennzeichen')} value={edit.kennzeichen} onChange={(v) => setEdit({ ...edit, kennzeichen: v })} />
             <KorrField label={t('zb1.feld_hersteller')} value={edit.fahrzeug_hersteller} onChange={(v) => setEdit({ ...edit, fahrzeug_hersteller: v })} />
@@ -152,7 +152,7 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
           </button>
         </div>
       )}
-      {fehler && <p className="mt-2 text-sm text-red-500">{fehler}</p>}
+      {fehler && <p className="mt-2 text-sm text-danger-strong">{fehler}</p>}
     </div>
   )
 }
@@ -168,7 +168,7 @@ function KorrField({
 }) {
   return (
     <label className="flex flex-col gap-1">
-      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-claimondo-ondo/70">
+      <span className="text-[11px] font-semibold uppercase tracking-[0.08em] text-claimondo-ondo">
         {label}
       </span>
       <input

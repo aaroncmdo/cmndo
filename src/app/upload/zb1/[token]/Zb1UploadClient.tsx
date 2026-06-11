@@ -64,9 +64,13 @@ async function compressImage(file: File): Promise<{ base64: string; contentType:
 export default function Zb1UploadClient({
   token,
   vorname,
+  logoUrl,
+  firmenname,
 }: {
   token: string
   vorname: string
+  logoUrl?: string | null
+  firmenname?: string | null
 }) {
   const t = useTranslations('upload.zb1')
   const [step, setStep] = useState<Step>('hinweise')
@@ -133,10 +137,17 @@ export default function Zb1UploadClient({
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-6">
-          <span className="text-2xl font-bold tracking-tight">
-            <span className="text-claimondo-navy">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
-          </span>
+          {logoUrl ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={logoUrl} alt={firmenname ?? 'Logo'} className="h-9 mx-auto object-contain" />
+          ) : firmenname ? (
+            <span className="text-2xl font-bold tracking-tight text-claimondo-navy">{firmenname}</span>
+          ) : (
+            <span className="text-2xl font-bold tracking-tight">
+              <span className="text-claimondo-navy">Claim</span>
+              <span className="text-claimondo-light-blue">ondo</span>
+            </span>
+          )}
           <p className="text-xs text-claimondo-ondo mt-1">{t('pageSubtitle')}</p>
         </div>
 
@@ -164,7 +175,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={() => cameraInputRef.current?.click()}
-                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                  className="flex flex-col items-center gap-1 px-3 py-4 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CameraIcon className="w-6 h-6" />
                   {t('cameraButton')}
@@ -193,7 +204,7 @@ export default function Zb1UploadClient({
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
                 className="hidden"
               />
-              {errorMsg && <p className="text-xs text-red-600">{errorMsg}</p>}
+              {errorMsg && <p className="text-xs text-danger-strong">{errorMsg}</p>}
             </>
           )}
 
@@ -216,7 +227,7 @@ export default function Zb1UploadClient({
                 <button
                   type="button"
                   onClick={handleUpload}
-                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                  className="flex items-center justify-center gap-2 px-3 py-3 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
                 >
                   <CheckCircle2Icon className="w-4 h-4" />
                   {t('useButton')}
@@ -237,41 +248,41 @@ export default function Zb1UploadClient({
 
           {step === 'erfolg' && (
             <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto bg-green-100 rounded-full flex items-center justify-center">
-                <CheckCircle2Icon className="w-8 h-8 text-green-600" />
+              <div className="w-14 h-14 mx-auto bg-success/15 rounded-full flex items-center justify-center">
+                <CheckCircle2Icon className="w-8 h-8 text-success" />
               </div>
               <h2 className="text-lg font-semibold text-claimondo-navy">{t('successTitle')}</h2>
               <p className="text-sm text-claimondo-ondo">
                 {t('successBody')}
               </p>
               {extracted && (extracted.kennzeichen || extracted.fahrzeug_hersteller) && (
-                <div className="bg-green-50 border border-green-200 rounded-ios-md p-3 text-left text-xs space-y-1">
-                  <p className="font-semibold text-green-900">{t('ocrResultTitle')}</p>
+                <div className="bg-success-soft border border-success/30 rounded-ios-md p-3 text-left text-xs space-y-1">
+                  <p className="font-semibold text-success-strong">{t('ocrResultTitle')}</p>
                   {extracted.kennzeichen && (
-                    <p className="text-green-800">
+                    <p className="text-success-strong">
                       {t('ocrKennzeichen', { value: extracted.kennzeichen })}
                     </p>
                   )}
                   {(extracted.fahrzeug_hersteller || extracted.fahrzeug_modell) && (
-                    <p className="text-green-800">
+                    <p className="text-success-strong">
                       {t('ocrFahrzeug', { value: [extracted.fahrzeug_hersteller, extracted.fahrzeug_modell].filter(Boolean).join(' ') })}
                     </p>
                   )}
                   {extracted.halter_name && (
-                    <p className="text-green-800">
+                    <p className="text-success-strong">
                       {t('ocrHalter', { value: extracted.halter_name })}
                     </p>
                   )}
                 </div>
               )}
-              <p className="text-[10px] text-claimondo-ondo/70">{t('closeHint')}</p>
+              <p className="text-[10px] text-claimondo-ondo">{t('closeHint')}</p>
             </div>
           )}
 
           {step === 'fehler' && (
             <div className="py-6 text-center space-y-3">
-              <div className="w-14 h-14 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
-                <AlertCircleIcon className="w-8 h-8 text-amber-600" />
+              <div className="w-14 h-14 mx-auto bg-warning/15 rounded-full flex items-center justify-center">
+                <AlertCircleIcon className="w-8 h-8 text-warning" />
               </div>
               <h2 className="text-lg font-semibold text-claimondo-navy">{t('errorTitle')}</h2>
               <p className="text-sm text-claimondo-ondo">{errorMsg || t('errorBodyFallback')}</p>
@@ -281,7 +292,7 @@ export default function Zb1UploadClient({
               <button
                 type="button"
                 onClick={reset}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-ios-md bg-claimondo-ondo text-white text-sm font-semibold hover:bg-claimondo-shield"
               >
                 <RefreshCwIcon className="w-4 h-4" />
                 {t('retryButton')}
@@ -290,7 +301,7 @@ export default function Zb1UploadClient({
           )}
         </div>
 
-        <p className="text-[10px] text-claimondo-ondo/70 text-center mt-4">
+        <p className="text-[10px] text-claimondo-ondo text-center mt-4">
           {t('privacyNote')}
         </p>
       </div>

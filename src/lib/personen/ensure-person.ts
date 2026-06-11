@@ -47,6 +47,7 @@ export type PersonSnapshot = {
 
 export type EnsurePersonResult =
   | { ok: true; personId: string; created: boolean }
+  | { ok: true; personId: null; created: false; skipped: true }
   | { ok: false; error: string }
 
 /** text[] (claim_parties) -> text (personen). Leeres Array / Nullish -> null.
@@ -55,6 +56,19 @@ export type EnsurePersonResult =
 function klassenToText(v: string | string[] | null | undefined): string | null {
   if (Array.isArray(v)) return v.length > 0 ? v.join(', ') : null
   return v ?? null
+}
+
+/** CMM-Entity Follow-up (A): hat der Snapshot ein identifizierendes Feld? Verhindert leere
+ *  personen-Entitaeten fuer Parteien ohne Identitaet (z.B. Gegner nur per KZ/Versicherung). */
+function hasIdentifyingData(s: PersonSnapshot): boolean {
+  return Boolean(
+    (s.vorname && s.vorname.trim()) ||
+    (s.nachname && s.nachname.trim()) ||
+    (s.firma && s.firma.trim()) ||
+    (s.email && s.email.trim()) ||
+    (s.telefon && s.telefon.trim()) ||
+    (s.mobil && s.mobil.trim()),
+  )
 }
 
 function buildPersonInsert(
@@ -99,6 +113,12 @@ export async function ensurePersonForData(params: {
   const userId = params.userId ?? null
 
   try {
+    // CMM-Entity Follow-up (A): ohne Account UND ohne identifizierendes Feld keine personen-Zeile
+    // anlegen (sonst Junk-Entitaet pro namenlosem Gegner). person_id bleibt dann NULL.
+    if (!userId && !hasIdentifyingData(params.snapshot)) {
+      return { ok: true, personId: null, created: false, skipped: true }
+    }
+
     if (userId) {
       const { data: existing, error: selErr } = await db
         .from('personen')

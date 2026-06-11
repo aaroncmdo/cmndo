@@ -49,7 +49,12 @@ export default async function Zb1UploadPage({
   return (
     <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
       <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
-        <Zb1UploadClient token={token} vorname={status.vorname ?? ''} />
+        <Zb1UploadClient
+          token={token}
+          vorname={status.vorname ?? ''}
+          logoUrl={branding.useBrand ? branding.logoUrl : null}
+          firmenname={branding.useBrand ? branding.firmenname : null}
+        />
       </NextIntlClientProvider>
     </div>
   )
