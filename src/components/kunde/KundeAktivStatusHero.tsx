@@ -90,7 +90,7 @@ export default function KundeAktivStatusHero({ fall }: { fall: KundeAktivStatusH
               <div
                 className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                   done
-                    ? 'bg-emerald-500 text-white'
+                    ? 'bg-success text-white'
                     : active
                     ? 'bg-claimondo-navy text-white ring-4 ring-claimondo-navy/15'
                     : 'bg-claimondo-ondo/10 text-claimondo-ondo/60'
@@ -124,7 +124,7 @@ export default function KundeAktivStatusHero({ fall }: { fall: KundeAktivStatusH
         </p>
       )}
       {!nextStep && (
-        <p className="text-xs text-emerald-700 border-t border-claimondo-border/60 pt-3">
+        <p className="text-xs text-success-strong border-t border-claimondo-border/60 pt-3">
           ✓ Ihr Fall ist abgeschlossen.
         </p>
       )}

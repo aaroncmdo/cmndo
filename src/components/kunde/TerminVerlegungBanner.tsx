@@ -95,13 +95,13 @@ export default function TerminVerlegungBanner({
       <div
         className={
           embedded
-            ? 'border-t-2 border-amber-400 bg-amber-50 p-5'
-            : 'rounded-2xl border-2 border-amber-400 bg-amber-50 p-5'
+            ? 'border-t-2 border-warning bg-warning-soft p-5'
+            : 'rounded-2xl border-2 border-warning bg-warning-soft p-5'
         }
       >
         <div className="flex items-start gap-3 mb-3">
-          <div className="w-10 h-10 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
-            <CalendarClockIcon className="w-5 h-5 text-amber-700" />
+          <div className="w-10 h-10 rounded-full bg-warning-soft border border-warning/30 flex items-center justify-center shrink-0">
+            <CalendarClockIcon className="w-5 h-5 text-warning-strong" />
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-base font-semibold text-claimondo-navy mb-1">
@@ -114,7 +114,7 @@ export default function TerminVerlegungBanner({
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
-          <div className="rounded-ios-xl bg-white border border-amber-200 p-3">
+          <div className="rounded-ios-xl bg-white border border-warning/30 p-3">
             <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-1">
               {t('bisheriger')}
             </p>
@@ -131,13 +131,13 @@ export default function TerminVerlegungBanner({
         </div>
 
         {grund && (
-          <p className="text-sm text-claimondo-ondo italic mb-4 px-3 py-2 bg-white/60 rounded-ios-lg border border-amber-200">
+          <p className="text-sm text-claimondo-ondo italic mb-4 px-3 py-2 bg-white/60 rounded-ios-lg border border-warning/30">
             „{grund}"
           </p>
         )}
 
         {fehler && (
-          <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-ios-lg p-2 mb-3">
+          <p className="text-sm text-danger bg-danger-soft border border-danger/30 rounded-ios-lg p-2 mb-3">
             {fehler}
           </p>
         )}
@@ -146,7 +146,7 @@ export default function TerminVerlegungBanner({
           <button
             onClick={() => setModal('ablehnen')}
             disabled={busy !== null}
-            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 rounded-ios-lg text-sm font-medium text-danger-strong bg-white border border-danger/30 hover:bg-danger/15 transition-colors disabled:opacity-50"
           >
             <XIcon className="w-4 h-4" />
             {t('ablehnen')}
@@ -200,7 +200,7 @@ export default function TerminVerlegungBanner({
           <button
             onClick={ablehnen}
             disabled={busy === 'ablehnen'}
-            className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-danger hover:bg-danger-strong transition-colors disabled:opacity-50"
           >
             {busy === 'ablehnen' ? t('wirdAbgelehnt') : t('jaAblehnen')}
           </button>

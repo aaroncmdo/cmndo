@@ -64,27 +64,27 @@ export default function BankdatenBanner({
     return (
       <button
         onClick={() => setShowForm(true)}
-        className="w-full bg-amber-50 border-2 border-amber-200 rounded-2xl p-5 flex items-center gap-4 hover:bg-amber-100 transition-colors text-left"
+        className="w-full bg-warning-soft border-2 border-warning/30 rounded-2xl p-5 flex items-center gap-4 hover:bg-warning/15 transition-colors text-left"
       >
-        <div className="w-10 h-10 rounded-ios-xl bg-amber-100 flex items-center justify-center shrink-0">
-          <BanknoteIcon className="w-5 h-5 text-amber-600" />
+        <div className="w-10 h-10 rounded-ios-xl bg-warning-soft flex items-center justify-center shrink-0">
+          <BanknoteIcon className="w-5 h-5 text-warning" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-amber-800">{t('bannerTitel')}</p>
-          <p className="text-xs text-amber-600 mt-0.5">{t('bannerSub')}</p>
+          <p className="text-sm font-semibold text-warning-strong">{t('bannerTitel')}</p>
+          <p className="text-xs text-warning mt-0.5">{t('bannerSub')}</p>
         </div>
       </button>
     )
   }
 
   return (
-    <div className="bg-white border-2 border-amber-200 rounded-2xl p-5 space-y-4">
+    <div className="bg-white border-2 border-warning/30 rounded-2xl p-5 space-y-4">
       <h3 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-        <BanknoteIcon className="w-4 h-4 text-amber-600" />
+        <BanknoteIcon className="w-4 h-4 text-warning" />
         {t('formTitel')}
       </h3>
 
-      {error && <p className="text-xs text-red-600 bg-red-50 px-3 py-2 rounded-ios-lg">{error}</p>}
+      {error && <p className="text-xs text-danger bg-danger-soft px-3 py-2 rounded-ios-lg">{error}</p>}
 
       <div className="space-y-3">
         <div>
@@ -125,7 +125,7 @@ export default function BankdatenBanner({
         <button onClick={() => setShowForm(false)} className="flex-1 px-3 py-2.5 rounded-ios-lg border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-claimondo-bg">
           {t('abbrechen')}
         </button>
-        <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-ios-lg bg-amber-600 text-white text-sm font-medium hover:bg-amber-700 disabled:opacity-50">
+        <button disabled={pending} onClick={handleSubmit} className="flex-1 px-3 py-2.5 rounded-ios-lg bg-warning text-white text-sm font-medium hover:bg-warning-strong disabled:opacity-50">
           {pending ? t('speichernPending') : t('speichern')}
         </button>
       </div>

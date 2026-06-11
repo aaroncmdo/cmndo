@@ -65,8 +65,8 @@ export default function BesichtigungsortCheck({
     if (state === 'done') {
       return (
         <div className="bg-white border border-claimondo-border rounded-2xl p-4 flex items-center gap-2">
-          <CheckCircleIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-          <span className="text-sm text-emerald-700 font-medium">{t('bestaetigt')}</span>
+          <CheckCircleIcon className="w-4 h-4 text-success flex-shrink-0" />
+          <span className="text-sm text-success-strong font-medium">{t('bestaetigt')}</span>
         </div>
       )
     }
@@ -88,7 +88,7 @@ export default function BesichtigungsortCheck({
               placeholder={t('korrigieren')}
               onSelect={handlePlaceSelect}
             />
-            {error && <p className="text-xs text-red-600">{error}</p>}
+            {error && <p className="text-xs text-danger">{error}</p>}
             <button
               type="button"
               onClick={() => { setState('idle'); setError(null) }}
@@ -100,7 +100,7 @@ export default function BesichtigungsortCheck({
           </div>
         ) : (
           <div className="space-y-2">
-            {error && <p className="text-xs text-red-600">{error}</p>}
+            {error && <p className="text-xs text-danger">{error}</p>}
             <button
               type="button"
               onClick={handleBestaetigen}
@@ -130,7 +130,7 @@ export default function BesichtigungsortCheck({
   // variant === 'link'
   if (state === 'done') {
     return (
-      <span className="inline-flex items-center gap-1 text-xs text-emerald-700">
+      <span className="inline-flex items-center gap-1 text-xs text-success-strong">
         <CheckCircleIcon className="w-3 h-3" />
         {t('bestaetigt')}
       </span>
@@ -145,7 +145,7 @@ export default function BesichtigungsortCheck({
             placeholder={t('korrigieren')}
             onSelect={handlePlaceSelect}
           />
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <p className="text-xs text-danger">{error}</p>}
           <button
             type="button"
             onClick={() => { setState('idle'); setError(null) }}
@@ -157,7 +157,7 @@ export default function BesichtigungsortCheck({
         </>
       ) : (
         <>
-          {error && <p className="text-xs text-red-600">{error}</p>}
+          {error && <p className="text-xs text-danger">{error}</p>}
           <button
             type="button"
             onClick={() => setState('correcting')}

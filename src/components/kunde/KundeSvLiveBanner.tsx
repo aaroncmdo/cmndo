@@ -73,11 +73,11 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
     const titel = inUeberarbeitung ? t('ueberarbeitungTitel') : t('qcTitel')
     const sub = inUeberarbeitung ? t('ueberarbeitungSub') : t('qcSub')
     return (
-      <div className="rounded-2xl bg-amber-500 text-white px-4 py-3 flex items-center gap-3">
+      <div className="rounded-2xl bg-warning text-white px-4 py-3 flex items-center gap-3">
         <FileTextIcon className="w-4 h-4 shrink-0" />
         <div className="flex-1 min-w-0">
           <span className="text-sm font-semibold">{titel}</span>
-          <span className="text-sm text-amber-50 ml-2">{sub}</span>
+          <span className="text-sm text-warning-soft ml-2">{sub}</span>
         </div>
       </div>
     )
@@ -86,11 +86,11 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
   // Termin durchgeführt, Gutachten noch nicht da → gelber „Gutachten wird erstellt"-Status.
   if (state.durchgefuehrt_am) {
     return (
-      <div className="rounded-2xl bg-amber-500 text-white px-4 py-3 flex items-center gap-3">
+      <div className="rounded-2xl bg-warning text-white px-4 py-3 flex items-center gap-3">
         <FileTextIcon className="w-4 h-4 shrink-0" />
         <div className="flex-1 min-w-0">
           <span className="text-sm font-semibold">{t('gutachtenWirdErstellt')}</span>
-          <span className="text-sm text-amber-50 ml-2">{t('gutachtenWirdErstelltSub', { vorname })}</span>
+          <span className="text-sm text-warning-soft ml-2">{t('gutachtenWirdErstelltSub', { vorname })}</span>
         </div>
       </div>
     )
@@ -98,11 +98,11 @@ export default function KundeSvLiveBanner({ terminId, svName, gutachtenHochgelad
 
   if (state.sv_angekommen_am) {
     return (
-      <div className="rounded-2xl bg-emerald-600 text-white px-4 py-3 flex items-center gap-3">
+      <div className="rounded-2xl bg-success text-white px-4 py-3 flex items-center gap-3">
         <MapPinCheckIcon className="w-4 h-4 shrink-0" />
         <div className="flex-1 min-w-0">
           <span className="text-sm font-semibold">{t('svVorOrt', { vorname })}</span>
-          <span className="text-sm text-emerald-100 ml-2">{t('svVorOrtSub')}</span>
+          <span className="text-sm text-success-soft ml-2">{t('svVorOrtSub')}</span>
         </div>
       </div>
     )

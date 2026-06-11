@@ -82,7 +82,7 @@ export default function ClaimStepper({
   const abgeschlossen = lifecycle.mainPhase === 'abschluss'
 
   const outerCls = bottomSlot
-    ? 'rounded-2xl bg-white border-2 border-amber-400 overflow-hidden'
+    ? 'rounded-2xl bg-white border-2 border-warning overflow-hidden'
     : 'rounded-2xl bg-white border border-claimondo-border overflow-hidden'
 
   return (
@@ -102,9 +102,9 @@ export default function ClaimStepper({
                 <div
                   className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                     istVerlegungWarn
-                      ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                      ? 'bg-warning text-white ring-2 ring-warning/30'
                       : isDone
-                        ? 'bg-emerald-500 text-white'
+                        ? 'bg-success text-white'
                         : isCurrent
                           ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-navy/20'
                           : 'bg-claimondo-border/40 text-claimondo-ondo/60'
@@ -116,11 +116,11 @@ export default function ClaimStepper({
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
                       istVerlegungWarn
-                        ? 'text-amber-700'
+                        ? 'text-warning-strong'
                         : isCurrent
                           ? 'text-claimondo-navy'
                           : isDone
-                            ? 'text-emerald-700'
+                            ? 'text-success-strong'
                             : 'text-claimondo-ondo/60'
                     }`}
                   >
@@ -135,7 +135,7 @@ export default function ClaimStepper({
               </div>
               {i < phasen.length - 1 && (
                 <div
-                  className={`flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-border'}`}
+                  className={`flex-1 h-px mx-2 sm:mx-4 ${isDone ? 'bg-success/30' : 'bg-claimondo-border'}`}
                 />
               )}
             </React.Fragment>

@@ -98,23 +98,23 @@ function getStatusConfig(termin: TerminSectionProps['termin'], t: Translator): S
   const startMs = termin.start_zeit ? new Date(termin.start_zeit).getTime() : NaN
   const endMs = termin.end_zeit ? new Date(termin.end_zeit).getTime() : startMs + 60 * 60 * 1000
 
-  if (termin.sv_angekommen_am) return { label: t('status.laeuftGerade'), cls: 'bg-emerald-50 text-emerald-700' }
+  if (termin.sv_angekommen_am) return { label: t('status.laeuftGerade'), cls: 'bg-success-soft text-success-strong' }
   if (termin.sv_unterwegs_seit) return { label: t('status.aufDemWeg'), cls: 'bg-claimondo-bg text-claimondo-ondo' }
   if (termin.status === 'reserviert' || termin.status === 'gegenvorschlag')
-    return { label: t('status.vorgeschlagen'), cls: 'bg-amber-50 text-amber-700' }
+    return { label: t('status.vorgeschlagen'), cls: 'bg-warning-soft text-warning-strong' }
   if (termin.status === 'bestaetigt') {
     if (!Number.isNaN(startMs) && now >= startMs && now <= endMs)
-      return { label: t('status.laeuftGerade'), cls: 'bg-emerald-50 text-emerald-700' }
+      return { label: t('status.laeuftGerade'), cls: 'bg-success-soft text-success-strong' }
     if (!Number.isNaN(startMs) && startMs > now && startMs - now < 2 * 3_600_000)
       return { label: t('status.inKuerze'), cls: 'bg-claimondo-bg text-claimondo-ondo' }
     if (!Number.isNaN(startMs) && endMs < now)
       return { label: t('status.vergangen'), cls: 'bg-claimondo-bg text-claimondo-ondo' }
-    return { label: t('status.bestaetigt'), cls: 'bg-emerald-50 text-emerald-700' }
+    return { label: t('status.bestaetigt'), cls: 'bg-success-soft text-success-strong' }
   }
   if (termin.status === 'abgesagt' || termin.status === 'storniert')
-    return { label: t('status.abgesagt'), cls: 'bg-red-50 text-red-600' }
+    return { label: t('status.abgesagt'), cls: 'bg-danger-soft text-danger' }
   if (termin.status === 'verschoben')
-    return { label: t('status.verschoben'), cls: 'bg-amber-50 text-amber-700' }
+    return { label: t('status.verschoben'), cls: 'bg-warning-soft text-warning-strong' }
   return { label: termin.status, cls: 'bg-claimondo-bg text-claimondo-ondo' }
 }
 
@@ -217,8 +217,8 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
     >
       {isLive && (
         <span aria-hidden className="absolute top-3 right-3 inline-flex h-3 w-3">
-          <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-emerald-500" />
-          <span className="relative inline-flex h-3 w-3 rounded-full bg-emerald-500" />
+          <span className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping bg-success" />
+          <span className="relative inline-flex h-3 w-3 rounded-full bg-success" />
         </span>
       )}
 
@@ -375,12 +375,12 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
       )}
 
       {localStatus === 'abgesagt' && (
-        <p className="mt-3 text-xs font-medium text-red-600">
+        <p className="mt-3 text-xs font-medium text-danger">
           {t('abgesagtHinweis')}
         </p>
       )}
       {localError && (
-        <p className="mt-3 text-xs text-red-600">{localError}</p>
+        <p className="mt-3 text-xs text-danger">{localError}</p>
       )}
 
       <TerminReschedulingModal

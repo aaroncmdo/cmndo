@@ -120,8 +120,8 @@ function Bestaetigung({ fallNummer }: { fallNummer: string | null }) {
   return (
     <main className="min-h-screen bg-claimondo-bg flex items-center justify-center px-4 py-8">
       <div className="bg-white rounded-2xl border border-claimondo-border p-6 max-w-md w-full text-center">
-        <div className="w-12 h-12 mx-auto rounded-full bg-emerald-100 flex items-center justify-center mb-3">
-          <svg className="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <div className="w-12 h-12 mx-auto rounded-full bg-success-soft flex items-center justify-center mb-3">
+          <svg className="w-6 h-6 text-success" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>
         </div>

@@ -65,16 +65,16 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
   // Bereits eingereichter Antrag → Status anzeigen
   if (auftrag) {
     return (
-      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-5">
+      <div className="rounded-ios-xl border border-warning/30 bg-warning-soft p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-amber-100 text-amber-700">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-warning-soft text-warning-strong">
             <ClockIcon width={18} height={18} />
           </span>
           <div className="flex-1">
-            <h3 className="text-sm font-semibold text-amber-900">
+            <h3 className="text-sm font-semibold text-warning-strong">
               {t('antragLiegtVor')}
             </h3>
-            <p className="mt-1 text-xs leading-relaxed text-amber-800">
+            <p className="mt-1 text-xs leading-relaxed text-warning-strong">
               {t('eingereichtAm', {
                 datum: new Date(auftrag.eingereicht_am).toLocaleDateString('de-DE', {
                   day: '2-digit',
@@ -95,14 +95,14 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
                 type="button"
                 onClick={() => antragStornieren(auftrag.id)}
                 disabled={pending}
-                className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-semibold text-amber-900 hover:bg-amber-100 disabled:opacity-50"
+                className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-warning/30 bg-white px-3 py-1.5 text-xs font-semibold text-warning-strong hover:bg-warning/15 disabled:opacity-50"
               >
                 <XIcon width={12} height={12} />
                 {pending ? t('stornierenPending') : t('stornieren')}
               </button>
             )}
             {error && (
-              <p className="mt-2 text-xs text-red-700">{error}</p>
+              <p className="mt-2 text-xs text-danger-strong">{error}</p>
             )}
           </div>
         </div>
@@ -115,7 +115,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
     return (
       <div className="rounded-ios-xl border border-claimondo-border bg-white p-5">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-red-50 text-red-600">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-danger-soft text-danger">
             <ShieldAlertIcon width={18} height={18} />
           </span>
           <div className="flex-1">
@@ -128,7 +128,7 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
             <button
               type="button"
               onClick={() => setIsOpen(true)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-red-200 bg-red-50 px-3 py-1.5 text-xs font-semibold text-red-700 hover:bg-red-100"
+              className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg border border-danger/30 bg-danger-soft px-3 py-1.5 text-xs font-semibold text-danger-strong hover:bg-danger/15"
             >
               {t('antragStellen')}
             </button>
@@ -140,9 +140,9 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
 
   // Confirm-Form mit optionaler Grund-Angabe
   return (
-    <div className="rounded-ios-xl border border-red-200 bg-red-50/50 p-5">
+    <div className="rounded-ios-xl border border-danger/30 bg-danger-soft/50 p-5">
       <div className="flex items-start gap-3">
-        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-red-100 text-red-700">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-xl bg-danger-soft text-danger-strong">
           <ShieldAlertIcon width={18} height={18} />
         </span>
         <div className="flex-1">
@@ -166,14 +166,14 @@ export default function DsgvoLoeschCard({ bestehenderAuftrag }: Props) {
             />
           </label>
           {error && (
-            <p className="mt-2 text-xs text-red-700">{error}</p>
+            <p className="mt-2 text-xs text-danger-strong">{error}</p>
           )}
           <div className="mt-3 flex flex-wrap gap-2">
             <button
               type="button"
               onClick={antragStellen}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-ios-lg bg-danger px-3.5 py-1.5 text-xs font-semibold text-white shadow-sm hover:bg-danger-strong disabled:opacity-50"
             >
               <CheckIcon width={12} height={12} />
               {pending ? t('jaAntragStellenPending') : t('jaAntragStellen')}
