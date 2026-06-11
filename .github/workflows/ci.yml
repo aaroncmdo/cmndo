@@ -73,6 +73,13 @@ jobs:
       - name: Component-Set-Ratchet
         run: npm run check:component-set -- --ratchet
 
+      # Termin-Engine-Contract-Drift-Bremse (Ratchet): blockt NEUE direkte
+      # Legacy-Filter (.eq('lead_id')/.eq('sv_id')) auf gutachter_termine
+      # ausserhalb engine/* ggue. scripts/termin-engine-contract-baseline.json
+      # (Baseline 0). Siehe src/lib/termine/engine/CONTRACT.md.
+      - name: Termin-Engine-Contract-Ratchet
+        run: npm run check:termin-engine-contract -- --ratchet
+
       # Dead-Code-Drift-Bremse (knip, Ratchet): blockt NEUE ungenutzte Files +
       # NEUE unused/unlisted Dependencies ggue. scripts/knip-baseline.json.
       # Exports/Types laufen NUR --warn (FP-behaftet: Barrel-Re-Exports +
