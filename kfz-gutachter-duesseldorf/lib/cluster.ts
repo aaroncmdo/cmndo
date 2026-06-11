@@ -93,7 +93,7 @@ export const CLUSTER: ClusterConfig = {
   h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard.',
   teamImg: '/assets/img/duesseldorf/team-duesseldorf.webp?v=1',
   svName: 'Tobias', // Düsseldorf-Cluster Persona (Vorname)
-  svSurname: 'Berg', // TODO Aaron: Düsseldorf-Persona-Nachname finalisieren (Platzhalter, Person-Schema)
+  svSurname: 'Vogt', // Persona-Nachname (Tobias Vogt)
   // Telefon einheitlich ueber alle Cluster (Aaron-Vorgabe Mobil).
   phone: { display: '+49 1515 3608515', displayNational: '0151 5360 8515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Rheinturm', img: 'stadt-duesseldorf.png' },
