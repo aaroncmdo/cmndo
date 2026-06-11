@@ -1,19 +1,31 @@
-// Cluster-Konfiguration · DÜSSELDORF (Rheinland) — Klon des Wuppertal-Masters.
-// Daten aus preview-complete.html (CLUSTERS.duesseldorf + RESIDENTS).
+// ============================================================================
+// CLUSTER-KONFIG · DÜSSELDORF (Rheinland)
+// ============================================================================
+// Re-Skin auf den Köln-Endstand (08o–08q): Schema + Komponenten stammen aus der
+// Köln-Vorlage, Inhalt/Farbe/Assets bleiben Düsseldorf. Dies ist die EINZIGE
+// Datei mit der Cluster-Identität (Städte, Region, Brennpunkte, SEO).
+// Theme-Farben: app/globals.css :root. themeColor: app/layout.tsx.
+// Bilder: public/assets/img/duesseldorf/.
+// ============================================================================
 
 export interface City {
   slug: string
   name: string
   plz: string
+  /** H1-Untertitel (SEO-Variation pro Stadt). */
   h1Sub: string
+  /** Einwohner-Bezeichnung ("Düsseldorfer") fuer Reviews-Headline. */
   residents: string
+  /** Stadt-Zentrum-Koordinaten (LocalBusiness-geo + Map-Pin). */
   lat: number
   lng: number
+  /** Hauptstadt des Clusters (Hub). */
   main?: boolean
 }
 
 export interface Brennpunkt {
   name: string
+  /** Pfad relativ zu CLUSTER.imgPath */
   img: string
   desc: string
 }
@@ -21,7 +33,7 @@ export interface Brennpunkt {
 export interface ClusterConfig {
   key: string
   region: string
-  /** Region im Dativ ("im Bergischen Land") fuer Ueber-uns-Copy. */
+  /** Region im Dativ ("im Rheinland") fuer Ueber-uns-Copy. */
   regionDative: string
   /** Quellen-Anker fuer Brennpunkt-Statistik (Einsatzgebiet-Disclaimer). */
   quellenAnker: string
@@ -30,16 +42,37 @@ export interface ClusterConfig {
   /** Stadtteile der Hauptstadt (FAQ-Lokal-Card). */
   stadtteile: string[]
   domain: string
+  /** data-theme-Key (dokumentarisch — :root in globals.css traegt die Vars). */
   theme: string
   themeColor: string
+  /** Basis-Pfad fuer cluster-spezifische Bilder. */
   imgPath: string
+  /** Dateiendung der Logo-Varianten logo-{key}-dark/-white. */
+  logoExt: 'png' | 'svg'
+  /** 08m A6 · Cache-Busting: bei INHALTS-Tausch eines Assets (gleicher Dateiname)
+   *  hochzaehlen — haengt als ?v=… an Hero-/Logo-/Team-Referenzen (Komponenten +
+   *  die beiden image-set-Vars in globals.css manuell mitziehen!). */
+  assetVersion: string
+  /** H1-Sub-Span im Hero (NUR Desktop lg:+, Action 0 P2). */
+  h1SubSpan: string
   /** Team-Foto (Netzwerk-Mobile Team-Hero-Card). */
   teamImg: string
-  /** Vorname des lokalen SV (CTA-v8-Rolle). Persona-Default "Tobias". */
+  /** Vorname des lokalen SV (CTA-Rolle + Ueber-uns). */
   svName: string
-  phone: { display: string; tel: string; wa: string }
+  /** Nachname des lokalen SV (Person-Schema / formale Nennung). */
+  svSurname: string
+  phone: {
+    display: string
+    /** National formatiertes CTA-Label — href/tel bleibt international. */
+    displayNational: string
+    tel: string
+    wa: string
+  }
+  /** Wahrzeichen-Hero (Einsatzgebiet). */
   landmark: { label: string; img: string }
+  /** Verkehrs-Hauptachsen + Vor-Ort-Zeit (Facts-Grid). */
   facts: { value: string; label: string; accent?: boolean }[]
+  /** Verkehrsschwerpunkte (Hauptstadt-Level). */
   brennpunkte: Brennpunkt[]
   cities: City[]
 }
@@ -52,12 +85,17 @@ export const CLUSTER: ClusterConfig = {
   achsen: ['A46', 'A52', 'A57', 'A3'],
   stadtteile: ['Altstadt', 'Bilk', 'Oberkassel', 'Pempelfort', 'Gerresheim', 'Derendorf'],
   domain: 'kfz-unfallgutachter-duesseldorf.de',
-  theme: 'rhein',
-  themeColor: '#0B3D6E',
+  theme: 'rhein', // Düsseldorf-Cluster: Marineblau + Royal-Blue — globals.css :root traegt die Vars
+  themeColor: '#0B3D6E', // Düsseldorf-Cluster (matched globals.css :root)
   imgPath: '/assets/img/duesseldorf/',
-  teamImg: '/assets/img/duesseldorf/team-duesseldorf.webp',
-  svName: 'Tobias',
-  phone: { display: '+49 1515 3608515', tel: '+4915153608515', wa: '4915153608515' },
+  logoExt: 'svg', // Düsseldorf: logo-duesseldorf-dark.svg vorhanden — TODO Aaron: logo-duesseldorf-white.svg fehlt noch (Header-transparent + Footer)
+  assetVersion: '1',
+  h1SubSpan: 'Unabhängige Sachverständige. Gerichtsfeste Gutachten nach DAT-Standard.',
+  teamImg: '/assets/img/duesseldorf/team-duesseldorf.webp?v=1',
+  svName: 'Tobias', // Düsseldorf-Cluster Persona (Vorname)
+  svSurname: 'Berg', // TODO Aaron: Düsseldorf-Persona-Nachname finalisieren (Platzhalter, Person-Schema)
+  // Telefon einheitlich ueber alle Cluster (Aaron-Vorgabe Mobil).
+  phone: { display: '+49 1515 3608515', displayNational: '0151 5360 8515', tel: '+4915153608515', wa: '4915153608515' },
   landmark: { label: 'Rheinturm', img: 'stadt-duesseldorf.png' },
   facts: [
     { value: 'A3', label: 'Hauptachse' },
@@ -65,11 +103,13 @@ export const CLUSTER: ClusterConfig = {
     { value: 'A57', label: 'Hauptachse' },
     { value: '60 Min', label: 'vor Ort', accent: true },
   ],
+  // Verkehrsschwerpunkte Düsseldorf-Hub — lokal verankert (Quellen s. quellenAnker).
   brennpunkte: [
     { name: 'Berliner Allee', img: 'duesseldorf_berliner-allee.webp', desc: 'Dichter Innenstadtverkehr, viele Spurwechsel — häufig Auffahr- und Abbiegeunfälle.' },
     { name: 'Corneliusstraße', img: 'duesseldorf_corneliusstrasse.webp', desc: 'Stark befahrene Hauptachse mit Straßenbahn — regelmäßig Kollisionen.' },
     { name: 'Ernst-Reuter-Platz', img: 'duesseldorf_ernst-reuter-platz.webp', desc: 'Komplexer Knotenpunkt mit hoher Frequenz — Vorfahrts- und Radverkehrs-Unfälle.' },
   ],
+  // Hub = Düsseldorf (main:true). Spokes = die uebrigen.
   cities: [
     { slug: 'duesseldorf',  name: 'Düsseldorf',  plz: '40210', main: true, h1Sub: 'unabhängiger Sachverständiger',          residents: 'Düsseldorfer',   lat: 51.2277, lng: 6.7735 },
     { slug: 'neuss',        name: 'Neuss',        plz: '41460',             h1Sub: 'Kfz-Sachverständiger Rhein-Kreis Neuss',   residents: 'Neusser',        lat: 51.1979, lng: 6.6855 },
@@ -83,40 +123,96 @@ export const CLUSTER: ClusterConfig = {
   ],
 }
 
+/** Hauptstadt (Hub-Page /). */
 export const MAIN_CITY: City = CLUSTER.cities.find((c) => c.main) ?? CLUSTER.cities[0]
+
+/** Alle Slugs. */
 export const CITY_SLUGS: string[] = CLUSTER.cities.map((c) => c.slug)
+
+/** Spoke-Slugs (alle ausser Hauptstadt) — generateStaticParams. Die Hauptstadt
+ *  IST der Hub "/" → kein dupliziertes /lp/{main}/ (SEO-Dedup). */
 export const SPOKE_SLUGS: string[] = CLUSTER.cities.filter((c) => !c.main).map((c) => c.slug)
 
+/** Routing-Pfad einer Stadt (Hauptstadt → "/"). */
 export function cityHref(city: City): string {
   return city.main ? '/' : `/lp/${city.slug}`
 }
+
+/** Stadt per Slug (oder undefined → 404). */
 export function getCity(slug: string): City | undefined {
   return CLUSTER.cities.find((c) => c.slug === slug)
 }
+
+/** Vorausgefuellter WhatsApp-Text pro Stadt. */
 export function waText(city: City): string {
   return `Hallo, ich hatte einen Unfall in ${city.name} und brauche einen Gutachter.`
 }
+
+/** Vollstaendiger wa.me-Link mit vorausgefuelltem Text. */
 export function waHref(city: City): string {
   return `https://wa.me/${CLUSTER.phone.wa}?text=${encodeURIComponent(waText(city))}`
 }
+
+/** Komma-Liste aller Staedte (Servicegebiet-Text / areaServed). */
 export function cityNamesList(): string {
   const names = CLUSTER.cities.map((c) => c.name)
   return names.slice(0, -1).join(', ') + ' und ' + names[names.length - 1]
 }
 
-/** Einzigartiger lokaler SEO-Absatz pro Stadt (gegen Doorway/Duplicate-Content). */
-export const SEO_TEXT: Record<string, string> = {
-  duesseldorf: 'Nach einem Verkehrsunfall in Düsseldorf (40210) zählt jede Stunde: Als unabhängiger Kfz-Gutachter vor Ort dokumentieren wir den Schaden zeitnah und neutral nach DAT- und BVSK-Standard. Die Landeshauptstadt im Herzen des Rheinlands ist über die A57, A52 und A46 erreichbar, und auch Anfragen aus den Nachbarorten Neuss und Meerbusch bearbeiten wir kurzfristig. War der Unfall unverschuldet, trägt die gegnerische Versicherung die Kosten des Gutachtens für Sie. Über unser Netzwerk vermitteln wir bei Bedarf zusätzlich einen Anwalt und einen Mietwagen.',
-  neuss: 'Auf der linken Rheinseite gelegen, ist Neuss (41460) über die A57 und A46 gut angebunden und damit für unseren Kfz-Sachverständigen schnell erreichbar. Wir kommen zu Ihnen, begutachten das beschädigte Fahrzeug und erstellen ein unabhängiges Gutachten nach BVSK-Richtlinien. Nach einem unverschuldeten Unfall zahlt die Versicherung der Gegenseite, für Sie entstehen 0 Euro. Auch Einsätze in den benachbarten Städten Grevenbroich und Meerbusch koordinieren wir zügig. Bei Bedarf stellen wir über unser Netzwerk Kontakt zu einem Anwalt und einem Mietwagenangebot her.',
-  hilden: 'Hilden (40721) liegt verkehrsgünstig im Kreis Mettmann am Autobahnkreuz von A3 und A46. Diese Knotenlage bringt viel Durchgangsverkehr mit sich, und genau hier sind wir als unabhängiger Kfz-Gutachter Hilden für Sie da: schnelle Vor-Ort-Begutachtung, neutrale Bewertung nach DAT- und BVSK-Standard und eine klare Dokumentation für die Schadensregulierung. Bei einem unverschuldeten Unfall übernimmt die gegnerische Versicherung die Gutachterkosten. Anfragen aus Erkrath und Langenfeld bedienen wir ebenso, und über unser Netzwerk vermitteln wir Anwalt sowie Mietwagen.',
-  erkrath: 'Direkt östlich von Düsseldorf gelegen, profitiert Erkrath (40699) von der Anbindung an die A3 und die A46. Wenn Ihr Auto nach einem Unfall beschädigt wurde, prüfen wir es als unabhängige Kfz-Sachverständige vor Ort und halten Schadenhöhe sowie Wertminderung nach anerkannten Standards fest. Bei unverschuldeten Unfällen rechnen wir direkt mit der gegnerischen Versicherung ab, sodass für Sie keine Kosten anfallen. Wir sind auch in den Nachbarstädten Hilden und Ratingen tätig. Auf Wunsch organisieren wir über unser Netzwerk anwaltliche Unterstützung und einen Mietwagen.',
-  langenfeld: 'Zwischen Düsseldorf und Köln im südlichen Rheinland gelegen, ist Langenfeld (40764) über die A3 und A542 angebunden. Als Kfz-Gutachter Langenfeld kommen wir kurzfristig zu Ihnen, begutachten das Unfallfahrzeug und erstellen ein unabhängiges, gerichtsfestes Gutachten nach DAT-Kalkulation. Nach einem unverschuldeten Unfall trägt die Versicherung des Verursachers sämtliche Kosten, für Sie bleibt es bei 0 Euro. Einsätze in Monheim und Hilden gehören ebenfalls zu unserem Gebiet. Bei Bedarf vermitteln wir über unser Netzwerk einen passenden Anwalt und einen Mietwagen.',
-  monheim: 'Am Rhein zwischen Düsseldorf und Leverkusen liegt Monheim (40789), verkehrlich über die A59 und A542 erschlossen. Brauchen Sie nach einem Blechschaden eine neutrale Einschätzung, übernimmt das unser unabhängiger Kfz-Sachverständiger direkt vor Ort, inklusive Fotodokumentation und Bewertung nach BVSK-Standard. Ist die Schuldfrage zu Ihren Gunsten geklärt, zahlt die gegnerische Versicherung das Gutachten. Wir betreuen auch die angrenzenden Städte Langenfeld und Düsseldorf. Über unser Netzwerk stellen wir Ihnen auf Wunsch einen Anwalt sowie einen Mietwagen zur Seite.',
-  ratingen: 'Nördlich von Düsseldorf im Kreis Mettmann gelegen, ist Ratingen (40878) über die A3, A44 und A52 hervorragend erreichbar. Diese Lage am Autobahndreieck sorgt für dichten Verkehr, und nach einem Unfall begutachten wir Ihr Fahrzeug als unabhängiger Kfz-Gutachter Ratingen schnell und neutral. Die Bewertung erfolgt nach DAT- und BVSK-Standard, das Ergebnis ist für die Regulierung verwertbar. Bei unverschuldeten Unfällen zahlt die Gegenseite. Auch in Meerbusch und Erkrath sind wir im Einsatz, und über unser Netzwerk vermitteln wir Anwalt und Mietwagen.',
-  meerbusch: 'Meerbusch (40667) liegt linksrheinisch zwischen Düsseldorf und Neuss und ist über die A57 und A44 angebunden. Hatten Sie einen Verkehrsunfall, kommt unser unabhängiger Kfz-Sachverständiger zu Ihnen nach Hause oder in die Werkstatt und erstellt zeitnah ein neutrales Gutachten nach anerkannten Standards. Trifft Sie keine Schuld, übernimmt die Versicherung des Unfallgegners die Kosten vollständig. Wir sind ebenso in den Nachbarstädten Ratingen und Neuss unterwegs. Auf Wunsch organisieren wir über unser Netzwerk die passende anwaltliche Begleitung und einen Mietwagen.',
-  grevenbroich: 'Im Rhein-Kreis Neuss am westlichen Rand des Rheinlands gelegen, ist Grevenbroich (41515) über die A540 und A46 erschlossen. Nach einem Unfall begutachten wir Ihr beschädigtes Fahrzeug als unabhängiger Kfz-Gutachter Grevenbroich direkt vor Ort und dokumentieren Reparaturkosten und Wertminderung nach DAT- und BVSK-Standard. War der Unfall unverschuldet, rechnen wir mit der gegnerischen Versicherung ab, für Sie entstehen 0 Euro. Wir betreuen auch Neuss und Langenfeld in der Umgebung. Bei Bedarf vermitteln wir über unser Netzwerk einen Anwalt und einen Mietwagen.',
+// ── SEO-Body (08o O6: strukturierte Absaetze statt Fliesstext) ───────────────
+// H3s sind EDITORIAL an ihre Absaetze gebunden. `vorort: true` markiert den
+// Absatz, der in der Einsatzgebiet-Lokalstrecke rendert (lib/seoVorOrt); `liste`
+// rendert als kompakte Leistungs-Liste. Düsseldorf-Re-Skin: bestehende kurze
+// Lokal-Texte 1:1 erhalten, je Stadt in Intro-Absatz + Vor-Ort-Absatz gesplittet.
+export interface SeoAbsatz {
+  /** Editorial gebundene Zwischenueberschrift — stellt die Frage, die der Absatz beantwortet. */
+  h3?: string
+  text: string
+  /** Kompakte Leistungs-Liste nach dem Text. */
+  liste?: string[]
+  /** Rendert in der Einsatzgebiet-Lokalstrecke ("Vor Ort"), nicht im SeoBody. */
+  vorort?: boolean
 }
 
-export function seoTextFor(slug: string): string {
-  return SEO_TEXT[slug] ?? ''
+export const SEO_BODY: Record<string, SeoAbsatz[]> = {
+  duesseldorf: [
+    { text: `Nach einem Verkehrsunfall in Düsseldorf (40210) zählt jede Stunde: Als unabhängiger Kfz-Gutachter vor Ort dokumentieren wir den Schaden zeitnah und neutral nach DAT- und BVSK-Standard. Die Landeshauptstadt im Herzen des Rheinlands ist über die A57, A52 und A46 erreichbar, und auch Anfragen aus den Nachbarorten Neuss und Meerbusch bearbeiten wir kurzfristig.` },
+    { vorort: true, text: `War der Unfall unverschuldet, trägt die gegnerische Versicherung die Kosten des Gutachtens für Sie. Über unser Netzwerk vermitteln wir bei Bedarf zusätzlich einen Anwalt und einen Mietwagen.` },
+  ],
+  neuss: [
+    { text: `Auf der linken Rheinseite gelegen, ist Neuss (41460) über die A57 und A46 gut angebunden und damit für unseren Kfz-Sachverständigen schnell erreichbar. Wir kommen zu Ihnen, begutachten das beschädigte Fahrzeug und erstellen ein unabhängiges Gutachten nach BVSK-Richtlinien.` },
+    { vorort: true, text: `Nach einem unverschuldeten Unfall zahlt die Versicherung der Gegenseite, für Sie entstehen 0 Euro. Auch Einsätze in den benachbarten Städten Grevenbroich und Meerbusch koordinieren wir zügig. Bei Bedarf stellen wir über unser Netzwerk Kontakt zu einem Anwalt und einem Mietwagenangebot her.` },
+  ],
+  hilden: [
+    { text: `Hilden (40721) liegt verkehrsgünstig im Kreis Mettmann am Autobahnkreuz von A3 und A46. Diese Knotenlage bringt viel Durchgangsverkehr mit sich, und genau hier sind wir als unabhängiger Kfz-Gutachter Hilden für Sie da: schnelle Vor-Ort-Begutachtung, neutrale Bewertung nach DAT- und BVSK-Standard und eine klare Dokumentation für die Schadensregulierung.` },
+    { vorort: true, text: `Bei einem unverschuldeten Unfall übernimmt die gegnerische Versicherung die Gutachterkosten. Anfragen aus Erkrath und Langenfeld bedienen wir ebenso, und über unser Netzwerk vermitteln wir Anwalt sowie Mietwagen.` },
+  ],
+  erkrath: [
+    { text: `Direkt östlich von Düsseldorf gelegen, profitiert Erkrath (40699) von der Anbindung an die A3 und die A46. Wenn Ihr Auto nach einem Unfall beschädigt wurde, prüfen wir es als unabhängige Kfz-Sachverständige vor Ort und halten Schadenhöhe sowie Wertminderung nach anerkannten Standards fest.` },
+    { vorort: true, text: `Bei unverschuldeten Unfällen rechnen wir direkt mit der gegnerischen Versicherung ab, sodass für Sie keine Kosten anfallen. Wir sind auch in den Nachbarstädten Hilden und Ratingen tätig. Auf Wunsch organisieren wir über unser Netzwerk anwaltliche Unterstützung und einen Mietwagen.` },
+  ],
+  langenfeld: [
+    { text: `Zwischen Düsseldorf und Köln im südlichen Rheinland gelegen, ist Langenfeld (40764) über die A3 und A542 angebunden. Als Kfz-Gutachter Langenfeld kommen wir kurzfristig zu Ihnen, begutachten das Unfallfahrzeug und erstellen ein unabhängiges, gerichtsfestes Gutachten nach DAT-Kalkulation.` },
+    { vorort: true, text: `Nach einem unverschuldeten Unfall trägt die Versicherung des Verursachers sämtliche Kosten, für Sie bleibt es bei 0 Euro. Einsätze in Monheim und Hilden gehören ebenfalls zu unserem Gebiet. Bei Bedarf vermitteln wir über unser Netzwerk einen passenden Anwalt und einen Mietwagen.` },
+  ],
+  monheim: [
+    { text: `Am Rhein zwischen Düsseldorf und Leverkusen liegt Monheim (40789), verkehrlich über die A59 und A542 erschlossen. Brauchen Sie nach einem Blechschaden eine neutrale Einschätzung, übernimmt das unser unabhängiger Kfz-Sachverständiger direkt vor Ort, inklusive Fotodokumentation und Bewertung nach BVSK-Standard.` },
+    { vorort: true, text: `Ist die Schuldfrage zu Ihren Gunsten geklärt, zahlt die gegnerische Versicherung das Gutachten. Wir betreuen auch die angrenzenden Städte Langenfeld und Düsseldorf. Über unser Netzwerk stellen wir Ihnen auf Wunsch einen Anwalt sowie einen Mietwagen zur Seite.` },
+  ],
+  ratingen: [
+    { text: `Nördlich von Düsseldorf im Kreis Mettmann gelegen, ist Ratingen (40878) über die A3, A44 und A52 hervorragend erreichbar. Diese Lage am Autobahndreieck sorgt für dichten Verkehr, und nach einem Unfall begutachten wir Ihr Fahrzeug als unabhängiger Kfz-Gutachter Ratingen schnell und neutral. Die Bewertung erfolgt nach DAT- und BVSK-Standard, das Ergebnis ist für die Regulierung verwertbar.` },
+    { vorort: true, text: `Bei unverschuldeten Unfällen zahlt die Gegenseite. Auch in Meerbusch und Erkrath sind wir im Einsatz, und über unser Netzwerk vermitteln wir Anwalt und Mietwagen.` },
+  ],
+  meerbusch: [
+    { text: `Meerbusch (40667) liegt linksrheinisch zwischen Düsseldorf und Neuss und ist über die A57 und A44 angebunden. Hatten Sie einen Verkehrsunfall, kommt unser unabhängiger Kfz-Sachverständiger zu Ihnen nach Hause oder in die Werkstatt und erstellt zeitnah ein neutrales Gutachten nach anerkannten Standards.` },
+    { vorort: true, text: `Trifft Sie keine Schuld, übernimmt die Versicherung des Unfallgegners die Kosten vollständig. Wir sind ebenso in den Nachbarstädten Ratingen und Neuss unterwegs. Auf Wunsch organisieren wir über unser Netzwerk die passende anwaltliche Begleitung und einen Mietwagen.` },
+  ],
+  grevenbroich: [
+    { text: `Im Rhein-Kreis Neuss am westlichen Rand des Rheinlands gelegen, ist Grevenbroich (41515) über die A540 und A46 erschlossen. Nach einem Unfall begutachten wir Ihr beschädigtes Fahrzeug als unabhängiger Kfz-Gutachter Grevenbroich direkt vor Ort und dokumentieren Reparaturkosten und Wertminderung nach DAT- und BVSK-Standard.` },
+    { vorort: true, text: `War der Unfall unverschuldet, rechnen wir mit der gegnerischen Versicherung ab, für Sie entstehen 0 Euro. Wir betreuen auch Neuss und Langenfeld in der Umgebung. Bei Bedarf vermitteln wir über unser Netzwerk einen Anwalt und einen Mietwagen.` },
+  ],
+}
+
+export function seoBodyFor(slug: string): SeoAbsatz[] {
+  return SEO_BODY[slug] ?? []
 }
