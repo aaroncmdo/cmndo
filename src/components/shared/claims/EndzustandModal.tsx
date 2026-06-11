@@ -174,7 +174,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         {mode === 'reguliert' && (
           <div>
             <label className="block text-xs font-medium text-claimondo-navy mb-1">
-              Regulierungsbetrag (EUR) <span className="text-red-600">*</span>
+              Regulierungsbetrag (EUR) <span className="text-danger">*</span>
             </label>
             <input
               type="text"
@@ -191,7 +191,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
           <>
             <div>
               <label className="block text-xs font-medium text-claimondo-navy mb-1">
-                Ablehnungsgrund <span className="text-red-600">*</span>
+                Ablehnungsgrund <span className="text-danger">*</span>
               </label>
               <select
                 value={vsAblehnungsGrund}
@@ -222,7 +222,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
         {/* Begründung — immer Pflicht */}
         <div>
           <label className="block text-xs font-medium text-claimondo-navy mb-1">
-            Begründung (Audit) <span className="text-red-600">*</span>
+            Begründung (Audit) <span className="text-danger">*</span>
           </label>
           <textarea
             value={grund}
@@ -240,10 +240,10 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
 
         {/* Storno-Confirm (Schutz vor versehentlichem Klick) */}
         {mode === 'storniert' && (
-          <div className="bg-amber-50 border border-amber-200 rounded-ios-lg p-3 text-xs flex items-start gap-2">
-            <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+          <div className="bg-warning-soft border border-warning/30 rounded-ios-lg p-3 text-xs flex items-start gap-2">
+            <AlertTriangleIcon className="w-4 h-4 text-warning-strong shrink-0 mt-0.5" />
             <div className="flex-1 space-y-2">
-              <p className="text-amber-900">
+              <p className="text-warning-strong">
                 Stornierung ist irreversibel. Tippe <strong>STORNIEREN</strong> zur Bestätigung.
               </p>
               <input
@@ -251,7 +251,7 @@ export function EndzustandModal({ open, onClose, claimId, mode }: Props) {
                 value={stornoConfirm}
                 onChange={(e) => setStornoConfirm(e.target.value)}
                 placeholder="STORNIEREN"
-                className="w-full px-2 py-1.5 rounded border border-amber-300 text-sm font-mono"
+                className="w-full px-2 py-1.5 rounded border border-warning/40 text-sm font-mono"
               />
             </div>
           </div>

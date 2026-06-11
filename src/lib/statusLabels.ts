@@ -77,15 +77,17 @@ export const FALL_STATUS_LABELS_SHORT: Record<string, string> = {
 // ─── Status-Farb-Slots (Token-basiert) ──────────────────────────────────────
 // Alle Status-Badge-Farben werden auf diese 7 Slots gemappt statt hardkodiert.
 // Neutrale UI-Farben: Claimondo-Tokens (#f8f9fb, #0D1B3E, #4573A2).
-// Semantische Farben (success/warning/danger): emerald/amber/orange/red erlaubt.
+// Semantische Farben nutzen die Status-Token-Utilities (bg-success-soft /
+// text-success-strong etc.) — branden via var(--brand-*) mit. pending teilt
+// sich den warning-Ton (das Token-System hat keinen separaten pending-Slot).
 const STATUS_SLOT_CLASSES = {
   neutral: 'bg-claimondo-bg text-claimondo-ondo',
   active:  'bg-claimondo-ondo/10 text-claimondo-ondo',
-  pending: 'bg-amber-50 text-amber-700',
+  pending: 'bg-warning-soft text-warning-strong',
   done:    'bg-claimondo-bg text-claimondo-navy',
-  success: 'bg-emerald-50 text-emerald-700',
-  warning: 'bg-orange-50 text-orange-700',
-  danger:  'bg-red-50 text-red-700',
+  success: 'bg-success-soft text-success-strong',
+  warning: 'bg-warning-soft text-warning-strong',
+  danger:  'bg-danger-soft text-danger-strong',
 } as const
 
 type StatusSlot = keyof typeof STATUS_SLOT_CLASSES

@@ -488,38 +488,46 @@ export async function sendFlowLink(leadId: string): Promise<SendFlowLinkResult> 
     // SV-Nachname, Datum, Uhrzeit, FlowLink-URL). Wir suchen den reservierten
     // Gutachter-Termin zum Lead und liefern alle Felder. Ohne Termin waere das
     // Template leer und Twilio wuerde die Nachricht mit leeren Placeholdern rendern.
+    // CMM-49 (sv_id-Drop): der sachverstaendige-Embed lief über die gutachter_termine.sv_id-FK
+    // (bricht beim DROP COLUMN sv_id) → assignee_id + separater sachverstaendige-Lookup
+    // (value-identisch für SV-Termine; typ-Guard schließt kb_beratung aus).
     const { data: terminRaw } = await supabase
       .from('gutachter_termine')
-      // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
-      .select('start_zeit, sv_id, sachverstaendige(profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname))')
+      // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden
+      // (sitzt auf #2644 assignee_id/assignee_typ auf — Profil-Lookup separat unten).
+      .select('start_zeit, assignee_id, assignee_typ')
       .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
       .in('status', ['reserviert', 'bestaetigt'])
       .order('start_zeit', { ascending: true })
       .limit(1)
       .maybeSingle()
-    // Nested-FK-Relations kommen je nach Cardinality als Array ODER Objekt zurück.
-    // Safe-Normalisierung via Array.isArray (siehe SvKalenderModal.tsx Pattern).
-    const termin = terminRaw as { start_zeit: string; sv_id: string | null; sachverstaendige: unknown } | null
-    const svRaw = termin?.sachverstaendige
-    const sv = (Array.isArray(svRaw) ? svRaw[0] : svRaw) as { profile_id: string | null; profiles: unknown } | null
-    const profileRaw = sv?.profiles
-    let profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as
-      | { vorname: string | null; nachname: string | null }
-      | null
-    // AAR-607 B2: Wenn Nested-FK leer ist, Profile separat per profile_id laden —
-    // sonst kommt die FlowLink-Email mit leeren Placeholder-Namen raus.
-    if (!profile && sv?.profile_id) {
-      const { data: p } = await supabase
-        .from('profiles')
-        .select('vorname, nachname')
-        .eq('id', sv.profile_id)
+    const termin = terminRaw as { start_zeit: string; assignee_id: string | null; assignee_typ: string | null } | null
+    let profile: { vorname: string | null; nachname: string | null } | null = null
+    if (termin?.assignee_id && termin.assignee_typ === 'sachverstaendiger') {
+      const { data: sv } = await supabase
+        .from('sachverstaendige')
+        .select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, nachname)')
+        .eq('id', termin.assignee_id)
         .maybeSingle()
-      profile = p
+      // Nested-FK-Relations kommen je nach Cardinality als Array ODER Objekt zurück.
+      const profileRaw = (sv as { profiles: unknown } | null)?.profiles
+      profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as
+        | { vorname: string | null; nachname: string | null }
+        | null
+      // AAR-607 B2: Wenn Nested-FK leer ist, Profile separat per profile_id laden.
+      if (!profile && sv?.profile_id) {
+        const { data: p } = await supabase
+          .from('profiles')
+          .select('vorname, nachname')
+          .eq('id', sv.profile_id as string)
+          .maybeSingle()
+        profile = p
+      }
     }
     const svVorname = profile?.vorname ?? ''
     const svNachname = profile?.nachname ?? ''
     if (termin && !svVorname && !svNachname) {
-      console.warn('[sendFlowLink] SV-Name nicht auflösbar für Termin', { leadId, svId: termin.sv_id })
+      console.warn('[sendFlowLink] SV-Name nicht auflösbar für Termin', { leadId, svId: termin.assignee_id })
     }
     const terminDate = termin?.start_zeit ? new Date(termin.start_zeit) : null
     const datum = terminDate ? terminDate.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : ''

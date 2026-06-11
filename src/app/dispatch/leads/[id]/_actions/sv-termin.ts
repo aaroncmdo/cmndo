@@ -373,7 +373,8 @@ export async function acceptGegenvorschlag(
   // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine selbst (SSoT).
   const { data: termin } = await supabase
     .from('gutachter_termine')
-    .select('id, sv_id, status, sv_vorgeschlagene_slots, lead_id, fall_id, besichtigungsort_lat, besichtigungsort_lng')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, assignee_id, status, sv_vorgeschlagene_slots, lead_id, fall_id, besichtigungsort_lat, besichtigungsort_lng')
     .eq('id', terminId)
     .single()
 
@@ -394,7 +395,7 @@ export async function acceptGegenvorschlag(
   // AAR-CMM Reachability-Hard-Check: SV-Gegenvorschlag muss erreichbar sein.
   // Wenn der SV inzwischen einen Vor-/Nachfolge-Termin bekommen hat, blocken
   // wir die Annahme.
-  if (termin.sv_id) {
+  if (termin.assignee_id) {
     let candLat: number | null = null
     let candLng: number | null = null
     if (termin.fall_id) {
@@ -412,7 +413,7 @@ export async function acceptGegenvorschlag(
     }
     if (candLat != null && candLng != null) {
       const reach = await checkSvReachability(supabase, {
-        svId: termin.sv_id,
+        svId: termin.assignee_id,
         candidateLat: Number(candLat),
         candidateLng: Number(candLng),
         candidateStartIso: slot.start,

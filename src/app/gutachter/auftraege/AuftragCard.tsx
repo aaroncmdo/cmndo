@@ -158,8 +158,8 @@ export default function AuftragCard(props: AuftragCardProps) {
 
       {/* CMM-24: Mitteilungs-Slot — gelber Badge bei offenen Doku-Anforderungen */}
       {(props.offeneDokumente ?? 0) > 0 && (
-        <div className="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-ios-lg bg-amber-50 border border-amber-200 text-amber-900 text-xs font-medium pointer-events-none">
-          <AlertCircleIcon className="w-3.5 h-3.5 text-amber-600" />
+        <div className="relative z-10 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-ios-lg bg-warning-soft border border-warning/30 text-warning-strong text-xs font-medium pointer-events-none">
+          <AlertCircleIcon className="w-3.5 h-3.5 text-warning" />
           <span>
             {props.offeneDokumente}{' '}
             {props.offeneDokumente === 1 ? 'Dokument fehlt' : 'Dokumente fehlen'}
@@ -183,16 +183,16 @@ export default function AuftragCard(props: AuftragCardProps) {
         {/* CMM-25: Termin als gefärbte Meta-Zeile, kein Button. Klickfläche
             ist die ganze Card. */}
         {terminMeta?.kind === 'geblockt' && (
-          <div className="flex items-center gap-1.5 text-amber-800">
-            <ClockIcon className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+          <div className="flex items-center gap-1.5 text-warning-strong">
+            <ClockIcon className="w-3.5 h-3.5 text-warning shrink-0" />
             <span className="truncate">
               Termin geblockt: {fmtDateShort(terminMeta.datum)} — wartet auf SA-Unterschrift
             </span>
           </div>
         )}
         {terminMeta?.kind === 'bestaetigt' && (
-          <div className="flex items-center gap-1.5 text-emerald-700">
-            <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+          <div className="flex items-center gap-1.5 text-success-strong">
+            <CheckCircle2Icon className="w-3.5 h-3.5 text-success shrink-0" />
             <span className="truncate">Termin: {fmtDateShort(terminMeta.datum)}</span>
           </div>
         )}

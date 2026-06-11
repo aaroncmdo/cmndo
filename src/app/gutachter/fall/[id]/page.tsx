@@ -577,9 +577,9 @@ export default async function GutachterFallPage({
       )}
       {/* CMM-32 Walkthrough Polish: Termin-Status-Warnbanner (server-side berechnet). */}
       {aktiverTerminVerstrichen && (
-        <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
-          <p className="text-sm font-semibold text-red-900">Termin verstrichen</p>
-          <p className="text-xs text-red-800 mt-1">
+        <div className="rounded-2xl border-2 border-danger/30 bg-danger-soft p-4">
+          <p className="text-sm font-semibold text-danger-strong">Termin verstrichen</p>
+          <p className="text-xs text-danger-strong mt-1">
             Der bestätigte Besichtigungstermin liegt in der Vergangenheit und wurde nicht abgehakt.
             Bitte den Status aktualisieren (durchgeführt / Kunde nicht erschienen) oder einen neuen Termin vereinbaren.
           </p>
@@ -588,9 +588,9 @@ export default async function GutachterFallPage({
       {/* Kunde hat den Termin selbst verlegt — gelb bis zum nächsten Aufruf der
           Fallakte (auto-gesehen-Mechanik, Quelle: gutachter_termine.verlegung_initiator_kunde). */}
       {hatNeueKundeVerlegung && (
-        <div className="rounded-2xl border-2 border-amber-300 bg-amber-50 p-4">
-          <p className="text-sm font-semibold text-amber-900">Termin durch Kunde verschoben</p>
-          <p className="text-xs text-amber-800 mt-1">
+        <div className="rounded-2xl border-2 border-warning/30 bg-warning-soft p-4">
+          <p className="text-sm font-semibold text-warning-strong">Termin durch Kunde verschoben</p>
+          <p className="text-xs text-warning-strong mt-1">
             Der Kunde hat den Termin selbst verlegt. Keine Bestätigung von dir nötig — der neue Slot ist bereits aktiv.
             Diese Markierung verschwindet beim nächsten Aufruf der Fallakte.
           </p>
@@ -598,11 +598,11 @@ export default async function GutachterFallPage({
       )}
       {/* No-Show-Hinweis (claims.kunde_no_show_count). */}
       {noShowCount > 0 && (
-        <div className="rounded-2xl border-2 border-red-300 bg-red-50 p-4">
-          <p className="text-sm font-semibold text-red-900">
+        <div className="rounded-2xl border-2 border-danger/30 bg-danger-soft p-4">
+          <p className="text-sm font-semibold text-danger-strong">
             {noShowCount === 1 ? 'Termin wurde verpasst' : `${noShowCount} Termine wurden verpasst`}
           </p>
-          <p className="text-xs text-red-800 mt-1">
+          <p className="text-xs text-danger-strong mt-1">
             Der Kunde war beim letzten Termin nicht vor Ort und hat keinen Bescheid gegeben. Plane Puffer für den
             Folgetermin ein und stimme dich ggf. mit dem Kundenbetreuer ab.
           </p>
@@ -625,9 +625,9 @@ export default async function GutachterFallPage({
           ans Ende der Seite (Aaron-Spec) — wird via vorOrtCard-Prop unten
           angehängt, nicht hier in topServerBlocks. */}
       {stellungnahmeAktiv && (
-        <div className="rounded-2xl border-2 border-orange-300 bg-orange-50 p-4">
-          <p className="text-sm font-semibold text-orange-900">Stellungnahme angefordert</p>
-          <p className="text-xs text-orange-800 mt-1">
+        <div className="rounded-2xl border-2 border-warning/30 bg-warning-soft p-4">
+          <p className="text-sm font-semibold text-warning-strong">Stellungnahme angefordert</p>
+          <p className="text-xs text-warning-strong mt-1">
             Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
             Bitte über den Chat mit dem Betreuer abstimmen.
           </p>

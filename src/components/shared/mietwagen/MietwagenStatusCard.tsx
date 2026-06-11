@@ -62,11 +62,11 @@ export function MietwagenStatusCard({ rolle, fall, className = '' }: Props) {
 
   const warnungCls =
     warnungState === 'kritisch'
-      ? 'bg-red-50 border border-red-200 text-red-800'
+      ? 'bg-danger-soft border border-danger/30 text-danger-strong'
       : warnungState === 'dringend'
-        ? 'bg-orange-50 border border-orange-200 text-orange-800'
+        ? 'bg-warning-soft border border-warning/30 text-warning-strong'
         : warnungState === 'warnung'
-          ? 'bg-amber-50 border border-amber-200 text-amber-800'
+          ? 'bg-warning-soft border border-warning/30 text-warning-strong'
           : null
 
   const warnungText =
@@ -138,7 +138,7 @@ export function MietwagenStatusCard({ rolle, fall, className = '' }: Props) {
       <div className="border-t border-claimondo-border pt-3 flex items-start gap-2 text-xs">
         <ReceiptIcon
           className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-            fall.mietwagen_rechnung_vorhanden ? 'text-emerald-600' : 'text-amber-600'
+            fall.mietwagen_rechnung_vorhanden ? 'text-success' : 'text-warning'
           }`}
         />
         <div className="flex-1">

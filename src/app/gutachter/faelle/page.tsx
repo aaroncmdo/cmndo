@@ -200,7 +200,7 @@ export default async function GutachterFaellePage({
                           <span
                             className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
                               k.status === 'auszahlung'
-                                ? 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                                ? 'bg-success-soft text-success-strong border border-success/30'
                                 : 'bg-claimondo-ondo/[0.06] text-claimondo-navy border border-claimondo-ondo/30'
                             }`}
                           >

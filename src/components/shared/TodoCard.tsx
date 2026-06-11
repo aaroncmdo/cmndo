@@ -112,9 +112,9 @@ export function TodoCardActionBody({
   const deadlineColor = {
     default: 'text-claimondo-ondo',
     info: 'text-claimondo-ondo',
-    warning: 'text-amber-700',
-    critical: 'text-red-700',
-    success: 'text-emerald-700',
+    warning: 'text-warning-strong',
+    critical: 'text-danger-strong',
+    success: 'text-success-strong',
   }[severity]
 
   return (

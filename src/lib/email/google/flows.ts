@@ -141,7 +141,8 @@ export async function sendKundeWelcome(
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
   let terminInfo: { datum: string; uhrzeit: string; adresse: string; svName: string | null } | null = null
   const { data: termin } = await db.from('gutachter_termine')
-    .select('start_zeit, sv_id, fall_id, besichtigungsort_adresse')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('start_zeit, assignee_id, fall_id, besichtigungsort_adresse')
     .eq('fall_id', fallId)
     .in('status', ['reserviert', 'bestaetigt'])
     .gte('start_zeit', new Date().toISOString())
@@ -152,8 +153,8 @@ export async function sendKundeWelcome(
   if (termin) {
     const tDate = new Date(termin.start_zeit)
     let terminSvName: string | null = svName
-    if (!terminSvName && termin.sv_id) {
-      const { data: sv2 } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+    if (!terminSvName && termin.assignee_id) {
+      const { data: sv2 } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
       if (sv2?.profile_id) {
         const { data: p2 } = await db.from('profiles').select('vorname, nachname').eq('id', sv2.profile_id).single()
         if (p2) terminSvName = [p2.vorname, p2.nachname].filter(Boolean).join(' ') || null
@@ -985,14 +986,15 @@ async function loadTerminContext(terminId: string) {
   const db = admin()
   const { data: termin } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, sv_id, start_zeit')
+    // CMM-49 (sv_id-Drop): assignee_id statt sv_id (value-identisch für SV-Termine).
+    .select('id, fall_id, lead_id, assignee_id, start_zeit')
     .eq('id', terminId)
     .single()
   if (!termin) return null
 
   let svName = 'Sachverständiger'
-  if (termin.sv_id) {
-    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.sv_id).single()
+  if (termin.assignee_id) {
+    const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', termin.assignee_id).single()
     if (sv?.profile_id) {
       const { data: p } = await db.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
       if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || svName
