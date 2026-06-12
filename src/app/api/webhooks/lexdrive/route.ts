@@ -50,10 +50,11 @@ export async function POST(req: NextRequest) {
   const db = createAdminClient()
   // CMM-44 SP-A3: Die alte Akten-Spalte auf faelle ist abgeschafft — der extern
   // gelieferte fall_nr ist die kanonische claims.claim_nummer. claims hat keine
-  // fall_id-Spalte, daher Rueckverknuepfung ueber faelle.claim_id.
+  // fall_id-Spalte, daher Rueckverknuepfung ueber die Bridge (faelle_claim_bridge.claim_id).
+  // CMM-49 (faelle-Drop-Runway): fall_id==faelle.id; die Bridge ist der Re-Key-Resolver.
   const { data: claim } = await db.from('claims').select('id').eq('claim_nummer', fallNr).maybeSingle()
   const { data: fall } = claim?.id
-    ? await db.from('faelle').select('id').eq('claim_id', claim.id).maybeSingle()
+    ? await db.from('faelle_claim_bridge').select('fall_id').eq('claim_id', claim.id).maybeSingle()
     : { data: null }
 
   if (!fall) {
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
   }
 
   const result = await processLexDriveEvent({
-    fallId: fall.id,
+    fallId: fall.fall_id,
     fallNr,
     eventType: eventType as LexDriveEvent,
     payload: body as LexDriveEventPayload,
@@ -83,5 +84,5 @@ export async function POST(req: NextRequest) {
   if (!result.success) {
     return NextResponse.json({ error: 'Processing failed', detail: result.error }, { status: 500 })
   }
-  return NextResponse.json({ ok: true, fall_id: fall.id, event_type: eventType, skipped: result.skipped })
+  return NextResponse.json({ ok: true, fall_id: fall.fall_id, event_type: eventType, skipped: result.skipped })
 }

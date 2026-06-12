@@ -222,10 +222,24 @@ async function runForLead(db: DB, leadId: string): Promise<CardentityRunResult> 
     .maybeSingle()
   if (!lead) return { success: false, error: 'Lead nicht gefunden' }
 
-  // Wenn der Lead bereits einen Fall hat: ueber den Fall-Pfad (claim-gebunden persistieren)
-  const { data: fall } = await db.from('faelle').select('id').eq('lead_id', leadId).order('erstellt_am', { ascending: false }).limit(1).maybeSingle()
+  // Wenn der Lead bereits einen Fall hat: ueber den Fall-Pfad (claim-gebunden persistieren).
+  // CMM-49 (faelle-Drop-Runway): lead->Fall via claims (SSoT fuer lead_id) + Bridge (fall_id==
+  // faelle.id) statt .from('faelle'). REGRESSION-FIX: der alte Read ordnete nach faelle.erstellt_am
+  // — diese Spalte existiert nicht (CMM-Rename -> created_at) -> die Query failte IMMER -> fall=null
+  // -> lead-scoped Cardentity routete konvertierte Leads NIE auf den Fall-Pfad (lief faelschlich den
+  // Lead-Pfad/lead.cardentity_report). 0 Leads mit >1 Fall -> Sortierung ohnehin value-irrelevant.
+  const { data: leadClaim } = await db
+    .from('claims')
+    .select('id')
+    .eq('lead_id', leadId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  const { data: fall } = leadClaim?.id
+    ? await db.from('faelle_claim_bridge').select('fall_id').eq('claim_id', leadClaim.id).maybeSingle()
+    : { data: null }
   const leadFin = ((lead.fin as string | null) ?? '').trim().toUpperCase()
-  if (fall) return runForFall(db, fall.id as string, leadFin || undefined)
+  if (fall) return runForFall(db, fall.fall_id as string, leadFin || undefined)
 
   if (!leadFin) return { success: false, error: 'Keine FIN auf dem Lead — bitte FIN erfassen' }
   if (!VIN_REGEX.test(leadFin)) {

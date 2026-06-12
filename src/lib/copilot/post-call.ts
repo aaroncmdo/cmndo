@@ -27,15 +27,17 @@ export async function analyzeCallPostHoc(callId: string): Promise<void> {
   // Kunden-Daten laden
   let kundeName = '—'
   let fallNummer = '—'
-  // CMM-49: faelle nun via claim_id auflösen (interim — faelle.claim_id ist der Join-Key).
-  // fallId nur noch für logAiUsage gebraucht (out-of-scope-Sink mit eigenem faelle->claim-Lookup).
+  // CMM-49 (faelle-Drop-Runway): claim_id->fall via Bridge (fall_id==faelle.id); claim_nummer
+  // + lead_id aus claims (SSoT, div=0). fallId nur noch fuer logAiUsage gebraucht.
   let fallIdForLog: string | null = null
   if (call.claim_id) {
-    const { data: fall } = await db.from('faelle').select('id, claims:claim_id(claim_nummer), lead_id').eq('claim_id', call.claim_id).maybeSingle()
-    fallIdForLog = fall?.id ?? null
-    fallNummer = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? '—'
-    if (fall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
+    const { data: fallRaw } = await db.from('faelle_claim_bridge').select('fall_id, claims:claim_id(claim_nummer, lead_id)').eq('claim_id', call.claim_id).maybeSingle()
+    const fall = fallRaw as unknown as { fall_id: string; claims?: { claim_nummer: string | null; lead_id: string | null } | { claim_nummer: string | null; lead_id: string | null }[] | null } | null
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    fallIdForLog = fall?.fall_id ?? null
+    fallNummer = fallClaim?.claim_nummer ?? '—'
+    if (fallClaim?.lead_id) {
+      const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fallClaim.lead_id).single()
       if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
     }
   }
