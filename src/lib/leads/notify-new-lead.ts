@@ -18,10 +18,9 @@
 // dort keine Email/WA-Notification (zuviel Lärm bei jedem Anruf).
 
 import { sendEmail } from '@/lib/email/google/client'
-import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 
 const EMAIL_EMPFAENGER = 'info@claimondo.de'
-const WA_EMPFAENGER = ['+491633628571', '+4917620289514']
 const DISPATCH_BASE_URL =
   process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 
@@ -98,7 +97,7 @@ export async function notifyNewLead(opts: NotifyNewLeadOpts): Promise<void> {
     )
   }
 
-  // ─── WhatsApp via Baileys an feste Empfaenger ────────────────────────
+  // ─── WhatsApp via Baileys an die Team-Empfaenger (team-notify) ───────
   try {
     const waLines = [
       `🔔 Neuer Lead`,
@@ -112,19 +111,7 @@ export async function notifyNewLead(opts: NotifyNewLeadOpts): Promise<void> {
       ``,
       leadUrl,
     ].filter(Boolean) as string[]
-    const waText = waLines.join('\n')
-    await Promise.all(
-      WA_EMPFAENGER.map(async (phone) => {
-        const r = await sendWhatsAppText(phone, waText)
-        if (!r.ok) {
-          console.error(
-            `[notify-new-lead] Baileys-WA an ${phone} fehlgeschlagen:`,
-            r.code,
-            r.error,
-          )
-        }
-      }),
-    )
+    await notifyTeamWhatsApp(waLines.join('\n'))
   } catch (err) {
     console.error(
       '[notify-new-lead] WhatsApp-Notify fehlgeschlagen (nicht kritisch):',

@@ -3,20 +3,20 @@
 // dies ist eine INTERNE React-Section, die per Code auf beliebige Marketing-
 // Seiten gesetzt wird — Platzierung bestimmt der Entwickler.
 //
-//   variant='full'   -> volle interaktive Karte (Marker + Finder + Wizard-Toggle),
-//                       Höhe via `height` (default '100dvh' für die /gutachter-finden-
-//                       Seite; für In-Page-Sections z.B. height="78vh").
+//   variant='full'   -> der interaktive Finder, eingebettet als <iframe> auf den
+//                       Haupt-App-Embed (app.claimondo.de/embed/gutachter-finder).
+//                       Höhe via `height` (default '100dvh'; In-Page z.B. "70vh").
 //   variant='teaser' -> kompakter PLZ/Stadt-Finder, CTA -> volle Seite (vorzentriert).
 //
-// Server-Component: lädt im full-Modus die SV-Daten selbst (gutachter-finder-actions)
-// und reicht den Wizard-Toggle (Schnell-Anfrage Mini-Wizard ↔ Termin-Portal-Link
-// in der App) rein — self-contained, ein <GutachterFindenSection/> genügt.
+// AAR-956 WS6: Der Finder lebt jetzt als standalone Embed in der Haupt-App
+// (direkter Termin-Engine-Zugriff + Inline-Slot-Booking, das der alte Marketing-
+// Finder nie konnte). Diese Section ist nur noch ein iframe-Wrapper + der Teaser.
+// EMBED_ORIGIN pro Env (prod -> app.claimondo.de, staging -> app.staging.…) via
+// NEXT_PUBLIC_EMBED_ORIGIN.
 
-import { ladeSvLeads, ladeAktiveSVs } from '@/lib/actions/gutachter-finder-actions'
-import { GutachterFinderMapClient } from '@/app/[locale]/gutachter-finden/GutachterFinderMapClient'
-import { GutachterFinderAnfrageWizard } from '@/app/[locale]/gutachter-finden/GutachterFinderAnfrageWizard'
-import { KartenWizardToggle } from '@/components/onboarding/KartenWizardToggle'
 import { GutachterFindenTeaser } from './GutachterFindenTeaser'
+
+const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
 
 type Props = {
   variant?: 'full' | 'teaser'
@@ -31,7 +31,7 @@ type Props = {
   subline?: string
 }
 
-export async function GutachterFindenSection({
+export function GutachterFindenSection({
   variant = 'full',
   initialCenter = null,
   initialZoom,
@@ -44,27 +44,24 @@ export async function GutachterFindenSection({
     return <GutachterFindenTeaser eyebrow={eyebrow} heading={heading} subline={subline} />
   }
 
-  const [svLeadsResult, aktiveSVsResult] = await Promise.all([ladeSvLeads(), ladeAktiveSVs()])
-  const svLeads = svLeadsResult.ok ? svLeadsResult.data : []
-  const aktiveSVs = aktiveSVsResult.ok ? aktiveSVsResult.data : []
+  // full: das server-geocodete Start-Zentrum als ?lat&lng[&zoom] an den Embed
+  // durchreichen → FinderMap zentriert vor + unterdrückt die Geolocation-Abfrage.
+  const params = new URLSearchParams()
+  if (initialCenter) {
+    params.set('lat', String(initialCenter.lat))
+    params.set('lng', String(initialCenter.lng))
+    if (initialZoom) params.set('zoom', String(initialZoom))
+  }
+  const qs = params.toString()
+  const src = `${EMBED_ORIGIN}/embed/gutachter-finder${qs ? `?${qs}` : ''}`
 
   return (
-    <GutachterFinderMapClient
-      svLeads={svLeads}
-      aktiveSVs={aktiveSVs}
-      initialCenter={initialCenter}
-      initialZoom={initialZoom ?? (initialCenter ? 11 : undefined)}
-      height={height}
-      // Marketing-Wizard (Aaron 02.06.): echter Anfrage-Wizard im "Termin"-Tab
-      // (Schaden → Kontakt + Wunschtermin → erstelleGutachterFinderAnfrage →
-      // Dispatch-Rückruf), SV aus dem Karten-Klick vorausgewählt. Ersetzt den
-      // bisherigen statischen "Zum Termin-Portal"-App-Link. INTERIM: noch kein
-      // Live-Slot-Picker (würde SV-Kalender öffentlich exponieren + überschneidet
-      // sich mit Termin-Engine/AAR-940 — Spec separat). "Schnellanfrage"-Tab
-      // (MiniWizard) bleibt als Alternative.
-      wizardSlot={
-        <KartenWizardToggle dynamicWizard={<GutachterFinderAnfrageWizard />} />
-      }
+    <iframe
+      src={src}
+      title="Kfz-Gutachter in Ihrer Nähe finden"
+      loading="lazy"
+      allow="geolocation"
+      style={{ width: '100%', height, border: 'none', display: 'block' }}
     />
   )
 }
