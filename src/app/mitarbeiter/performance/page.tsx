@@ -65,7 +65,9 @@ export default async function MitarbeiterPerformancePage() {
 
   const [{ data: heuteTermine }, { data: heuteTasks }, { data: heuteGutachterTermine }] = await Promise.all([
     supabase.from('termine')
-      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle(leads!faelle_lead_id_fkey(vorname, nachname))')
+      // CMM-49 #2688-Fix: termine.fall_id-FK zeigt jetzt auf bridge → faelle-Embed über bridge,
+      // Kunde-Name via bridge→claims→leads (claims_lead_id_fkey, fk_bridge_claim #2719).
+      .select('id, fall_id, typ, datum, dauer_minuten, betreff, meet_link, status, faelle:faelle_claim_bridge!termine_fall_id_fkey(claims:claim_id(leads:lead_id(vorname, nachname)))')
       .eq('betreuer_user_id', user.id)
       .gte('datum', todayStart)
       .lt('datum', todayEnd)
@@ -79,7 +81,9 @@ export default async function MitarbeiterPerformancePage() {
       .order('faellig_am', { ascending: true })
       .limit(20),
     supabase.from('gutachter_termine')
-      .select('id, fall_id, start_zeit, end_zeit, status, faelle(claims:claim_id(claim_nummer), sv_id, sachverstaendige(profiles!sachverstaendige_profile_id_fkey(vorname, nachname)))')
+      // CMM-49 #2688-Fix: faelle-Embed über bridge; nur claim_nummer wird gelesen (sv_id/sachverstaendige
+      // waren toter Over-Fetch, daher entfernt).
+      .select('id, fall_id, start_zeit, end_zeit, status, faelle:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claim_id(claim_nummer))')
       .gte('start_zeit', todayStart)
       .lt('start_zeit', todayEnd)
       .in('status', ['bestaetigt'])
@@ -90,8 +94,12 @@ export default async function MitarbeiterPerformancePage() {
   const timelineItems: { zeit: string; typ: string; label: string; detail: string; color: string; link?: string; meetLink?: string }[] = []
 
   for (const t of heuteTermine ?? []) {
-    const fallRaw = t.faelle as unknown as Record<string, unknown> | null
-    const leadRaw = fallRaw?.leads as { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+    // CMM-49 #2688-Fix: lead jetzt über bridge→claims→leads normalisieren.
+    const fallRaw = t.faelle as unknown
+    const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as { claims: unknown } | null
+    const claimRaw = fall?.claims as unknown
+    const claim = (Array.isArray(claimRaw) ? claimRaw[0] : claimRaw) as { leads: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null } | null
+    const leadRaw = claim?.leads ?? null
     const lead = Array.isArray(leadRaw) ? leadRaw[0] : leadRaw
     const kundeName = lead ? [lead?.vorname, lead?.nachname].filter(Boolean).join(' ') : 'Kunde'
     timelineItems.push({
