@@ -57,7 +57,7 @@ export default async function MitarbeiterDashboard() {
     supabase
       .from('admin_termine')
       .select(
-        'id, start_zeit, titel, notizen, lead_id, fall_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), fall:faelle!admin_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))',
+        'id, start_zeit, titel, notizen, lead_id, fall_id, lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), fall:faelle_claim_bridge!admin_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer))',
       )
       .eq('typ', 'rueckruf')
       .eq('status', 'offen')
@@ -66,7 +66,7 @@ export default async function MitarbeiterDashboard() {
       .limit(5),
     supabase
       .from('admin_termine')
-      .select('id, typ, start_zeit, titel, fall_id, lead_id, fall:faelle!admin_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))')
+      .select('id, typ, start_zeit, titel, fall_id, lead_id, fall:faelle_claim_bridge!admin_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer))')
       .in('typ', ['kunde', 'intern'])
       .eq('status', 'offen')
       .eq('zugewiesen_an', user.id)
@@ -76,7 +76,7 @@ export default async function MitarbeiterDashboard() {
     // AAR-640: KB-Beratungen dieses Mitarbeiters
     supabase
       .from('gutachter_termine')
-      .select('id, start_zeit, kanal, fall_id, fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))')
+      .select('id, start_zeit, kanal, fall_id, fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer))')
       .eq('typ', 'kb_beratung')
       .eq('kb_id', user.id)
       .in('status', ['reserviert', 'bestaetigt'])
