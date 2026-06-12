@@ -26,3 +26,4 @@ export type {
   BucheDeadPinTermin,
 } from './fallback'
 export { ladeDeadPinFallback, generischeDeadPinSlots } from './lade-deadpin-fallback'
+export { bucheDeadPinTermin } from './buche-deadpin-termin'
