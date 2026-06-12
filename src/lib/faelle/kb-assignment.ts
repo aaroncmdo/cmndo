@@ -399,18 +399,20 @@ export async function reassignAllFaelleForInactiveKbs(
 
   // 2. Alle offenen Fälle laden mit inaktivem KB
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT).
-  // Der KB-Filter laeuft auf claims, faelle wird via nested join fuer id +
-  // Workflow-Status (faelle-only) mitgelesen. !inner: seit CMM-Phase-1.5 hat
-  // jeder Claim genau einen faelle-Twin (Sync-Trigger) — der Inner-Join macht
-  // diese Invariante explizit statt sich auf einen Null-Filter zu verlassen.
+  // CMM-49 DROP-Prep: fall_id (Reassign-Target == faelle.id) jetzt aus
+  // faelle_claim_bridge statt faelle — der Reverse-Embed faelle!faelle_claim_id_fkey
+  // braeche bei DROP TABLE faelle. bridge.fall_id == faelle.id (Route-Key, NICHT
+  // claims.id: 78/79 divergieren). !inner: jeder Claim hat genau eine Bridge-Row
+  // (claims->bridge-Trigger) → behavior-identisch zum frueheren faelle!inner; der
+  // einzige faelle-lose Orphan-Claim hat einen AKTIVEN KB → erreicht inactive-Filter nie.
   const { data: claimsWithInactiveKb } = await supabase
     .from('claims')
-    .select('id, kundenbetreuer_id, faelle:faelle!faelle_claim_id_fkey!inner(id)')
+    .select('id, kundenbetreuer_id, bridge:faelle_claim_bridge!inner(fall_id)')
     .in('kundenbetreuer_id', inactiveIds)
   const claimRows = (claimsWithInactiveKb ?? []) as Array<{
     id: string
     kundenbetreuer_id: string
-    faelle: { id: string } | { id: string }[]
+    bridge: { fall_id: string } | { fall_id: string }[]
   }>
   // CMM-49 T1.2: aktiv = abgeleitete main_phase != 'abschluss' (loest faelle.status
   // != abgeschlossen/storniert ab; deckt jetzt alle Terminals ab). faelle.id bleibt
@@ -418,8 +420,8 @@ export async function reassignAllFaelleForInactiveKbs(
   const phaseMap = await getClaimPhaseMap(claimRows.map(c => c.id).filter((x): x is string => !!x))
   const list = claimRows
     .map((c) => {
-      const fallJoin = Array.isArray(c.faelle) ? c.faelle[0] : c.faelle
-      return { id: fallJoin.id, claimId: c.id, kundenbetreuer_id: c.kundenbetreuer_id }
+      const bridgeJoin = Array.isArray(c.bridge) ? c.bridge[0] : c.bridge
+      return { id: bridgeJoin.fall_id, claimId: c.id, kundenbetreuer_id: c.kundenbetreuer_id }
     })
     .filter((f) => phaseMap.get(f.claimId)?.mainPhase !== 'abschluss')
 
