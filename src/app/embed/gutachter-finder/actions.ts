@@ -16,7 +16,13 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
-import { planeTerminMitFallback, ladeDeadPinFallback, bucheDeadPinTermin, type DeadPinOeffentlich } from '@/lib/sv-matching-modul'
+import {
+  planeTerminMitFallback,
+  ladeDeadPinFallback,
+  bucheDeadPinTermin,
+  type PlaneTerminMitFallbackResult,
+} from '@/lib/sv-matching-modul'
+import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
@@ -53,6 +59,83 @@ export async function starteEmbedBuchung(
   if (!issued.ok) return { ok: false, error: issued.error }
 
   return { ok: true, token: issued.token }
+}
+
+/**
+ * AAR-956 Reorder (Aaron 12.06.): Termin-Wahl ist jetzt Schritt 2 (vor den Kontaktdaten) —
+ * also TOKEN-LOS. Liefert das diskriminierte Engine-Matching NUR aus dem Besichtigungsort
+ * (planeTerminMitFallback: Partner mit Slots ODER Dead-Pin-Fallback). Der Nutzer waehlt hier
+ * einen Slot; die echte Reservierung passiert erst beim Kontakt-Submit (reserviereEmbedTermin).
+ * `forceFallback` (?fallback=1) erzwingt den Dead-Pin-Pfad (Test).
+ */
+export async function ladeEmbedMatching(input: {
+  lat: number
+  lng: number
+  forceFallback?: boolean
+}): Promise<PlaneTerminMitFallbackResult> {
+  try {
+    if (typeof input?.lat !== 'number' || typeof input?.lng !== 'number') return { kind: 'fallback', deadPins: [] }
+    if (input.forceFallback) {
+      const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
+      return { kind: 'fallback', deadPins }
+    }
+    return await planeTerminMitFallback({ lat: input.lat, lng: input.lng })
+  } catch (err) {
+    console.error('[ladeEmbedMatching] Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return { kind: 'fallback', deadPins: [] }
+  }
+}
+
+/**
+ * AAR-956 Reorder: finaler Submit (Kontakt = letzter Schritt). Legt Lead+Token an
+ * (starteEmbedBuchung) und reserviert DANN den in Schritt 2 gewaehlten Slot — Partner
+ * (bucheTerminFlow) oder Dead-Pin (bucheDeadPinTermin). Bei Erfolg gehen die Kunde+Team-
+ * Bestaetigungen raus (SV nie). `auswahl: null` = kein Slot waehlbar war (0 Verfuegbarkeit)
+ * → nur Lead anlegen, Team koordiniert telefonisch. Race-safe: schlaegt die Buchung fehl
+ * (Slot inzwischen weg), kommt `{ ok:false }` zurueck → Client laesst neu waehlen.
+ */
+export async function reserviereEmbedTermin(input: {
+  vorname: string
+  nachname: string
+  telefon: string
+  email: string
+  schadentyp: string
+  ort: { adresse: string; lat: number; lng: number }
+  auswahl:
+    | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
+    | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
+    | null
+}): Promise<
+  | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null }
+  | { ok: false; error: string; slotWeg?: boolean }
+> {
+  // 1) Lead + Token (idempotent; sendet den Flowlink-WA an den Kunden).
+  const res = await starteEmbedBuchung({
+    vorname: input.vorname,
+    nachname: input.nachname,
+    telefon: input.telefon,
+    email: input.email,
+    schadentyp: input.schadentyp,
+    ort: input.ort,
+  })
+  if (!res.ok) return { ok: false, error: res.error }
+  const token = res.token
+
+  // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
+  if (!input.auswahl) return { ok: true, svVorname: null, ortLabel: null, startIso: null }
+
+  // 3) Reservieren — Partner ODER Dead-Pin.
+  if (input.auswahl.kind === 'partner') {
+    const b = await bucheTerminFlow(token, input.auswahl.svId, input.auswahl.start, input.auswahl.end)
+    if (!b.ok) return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
+    void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
+    return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start }
+  }
+
+  const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
+  if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
+  void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
+  return { ok: true, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start }
 }
 
 /**
@@ -205,23 +288,11 @@ export async function empfehleSvFuerOrt(input: {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AAR-956 Dead-Pin-Fallback — Consumer-Aktionen (12.06.). MATCHING (#2729) + BUCHUNG
-// (#2735, b2) sind gelandet → beide ECHT verdrahtet. `ladeEmbedDeadPinFallback` ruft
-// `ladeDeadPinFallback`, `bucheEmbedDeadPin` ruft `bucheDeadPinTermin` (write-only →
-// `dispatch_pending` sv_lead-Termin in die Dispatch-Queue). Kunde+Team-Bestätigung macht
-// der Embed (Vertrag Gap-2: der sv_lead wird NIE benachrichtigt).
+// (#2735, b2) sind gelandet → beide ECHT verdrahtet. Das Matching (Partner ODER Dead-Pin)
+// läuft über `ladeEmbedMatching`/`planeTerminMitFallback`; `bucheEmbedDeadPin` ruft
+// `bucheDeadPinTermin` (write-only → `dispatch_pending` sv_lead-Termin in die Dispatch-Queue).
+// Kunde+Team-Bestätigung macht der Embed (Vertrag Gap-2: der sv_lead wird NIE benachrichtigt).
 // ─────────────────────────────────────────────────────────────────────────────
-
-/** Lite-Dead-Pin-Fallback (leak-safe) für den Besichtigungsort — wenn 0 buchbare Partner. */
-export async function ladeEmbedDeadPinFallback(
-  input: { lat: number; lng: number },
-): Promise<DeadPinOeffentlich[]> {
-  try {
-    return await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
-  } catch (err) {
-    console.error('[ladeEmbedDeadPinFallback] Fallback-Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
-    return []
-  }
-}
 
 /**
  * Reserviert einen generischen Dead-Pin-Slot → `dispatch_pending` sv_lead-Termin (b2 #2735,

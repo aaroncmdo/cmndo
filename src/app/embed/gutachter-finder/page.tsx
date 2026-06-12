@@ -10,7 +10,8 @@ import { FinderWizard } from './_components/FinderWizard'
 // WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/ladeSvLeads (leak-safe, Google-Reviews).
 // WS1b: Karten-UI <FinderMap> aus der Marketing-Karte portiert (next-intl → inline DE).
 // WS2: Profil-ueber-Pin + GoogleBewertungBadge. WS3: empfohlener SV + Route/Zoom.
-// WS4: 3-Step-Wizard mit <FlowSlotStep> (Engine inline) füllt den wizardSlot.
+// WS4 + Reorder: 4-Step-Wizard (Ort → Termin → Schaden → Kontakt) füllt den wizardSlot;
+// Termin-Wahl token-los via ladeEmbedMatching, Reservierung beim Kontakt-Submit.
 
 export const metadata: Metadata = {
   // Embed nicht separat indexiert — /gutachter-finden (Marketing) ist die SEO-Flaeche.

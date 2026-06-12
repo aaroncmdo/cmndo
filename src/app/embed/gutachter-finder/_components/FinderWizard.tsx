@@ -1,31 +1,38 @@
 'use client'
 
-// AAR-956 WS4 — Gutachter-Finder-Wizard (location-first, Aaron 11.06.).
-// Step 1 Besichtigungsort (wo steht das Auto — die Engine matcht GENAU darauf) →
-// Step 2 Schaden → Step 3 Kontakt → Submit (gfa mit Ort+Schaden+Kontakt → Token) →
-// Step 4 Slot-Picker (<FlowSlotStep>, echter Engine-Inline-Termin) → Step 5 Bestaetigung.
-// Marketing-Look (GlassSurface + claimondo-Tokens), DE-only mit echten Umlauten.
-// Reuse: FlowSlotStep (+SvSlotAuswahl) + die /flow-Actions via Token — kein Neubau,
-// kein Extraktions-Move (Cross-Import von @/app/flow/[token]/* ist im Repo etabliert).
+// AAR-956 WS4 + Reorder (Aaron 12.06.) — Gutachter-Finder-Wizard, location-first.
+// Reihenfolge GEDREHT: Step 1 Besichtigungsort → Step 2 TERMIN direkt wählen → Step 3 Schaden
+// → Step 4 Kontakt (zuletzt) → Submit reserviert den gewählten Termin → Step 5 Bestätigung.
+//
+// Der Clou: die Termin-Wahl (Step 2) ist TOKEN-LOS — `ladeEmbedMatching({lat,lng})` liefert
+// das diskriminierte Engine-Matching nur aus dem Ort (Partner-Slots ODER Dead-Pin-Fallback).
+// Der Nutzer wählt einen Slot (gemerkt, NICHT gebucht); die echte Reservierung passiert erst
+// beim Kontakt-Submit (`reserviereEmbedTermin`: Lead anlegen → buchen → Kunde+Team-Bestätigung).
+// Lead-Erstellung bleibt damit exakt wo sie war (Kontakt-Submit), nur die UI-Reihenfolge dreht sich.
+//
+// Marketing-Look (GlassSurface + claimondo-Tokens), DE-only mit echten Umlauten. Reuse:
+// SvSlotAuswahl (Partner-Karten, geteilt mit /flow) + DeadPinSlotStep (Lite, Select-Mode).
 
 import { useState, useTransition } from 'react'
 import { ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import { FlowSlotStep, type GebuchterTermin } from '@/app/flow/[token]/FlowSlotStep'
+import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
-import {
-  starteEmbedBuchung,
-  sendeEmbedTerminBestaetigung,
-  ladeEmbedDeadPinFallback,
-  bucheEmbedDeadPin,
-  sendeEmbedDeadPinBestaetigung,
-} from '../actions'
+import { ladeEmbedMatching, reserviereEmbedTermin } from '../actions'
 import { DeadPinSlotStep } from './DeadPinSlotStep'
-import type { DeadPinOeffentlich } from '@/lib/sv-matching-modul'
+import type {
+  DeadPinOeffentlich,
+  OeffentlichesSvProfil,
+  SlotVorschlag,
+  PlaneTerminMitFallbackResult,
+} from '@/lib/sv-matching-modul'
 
 type Ort = { adresse: string; lat: number; lng: number }
-type Phase = 'ort' | 'schaden' | 'kontakt' | 'slot' | 'gebucht'
+type Phase = 'ort' | 'termin' | 'schaden' | 'kontakt' | 'gebucht'
+type Auswahl =
+  | { kind: 'partner'; sv: OeffentlichesSvProfil; slot: SlotVorschlag }
+  | { kind: 'deadpin'; dp: DeadPinOeffentlich; slot: SlotVorschlag }
 
 // clamp-freundliche Werte (issueCanonical.clampSchadentyp matcht via Substring:
 // auffahr/park/spur/vorfahr → sonst sonstiges).
@@ -43,103 +50,144 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
   )
 }
 
+// Karte über das Event informieren: Ort gewählt (Auto-Pin + Route + Highlight nächster Treffer).
+function dispatchOrt(lat: number, lng: number) {
+  if (typeof document !== 'undefined') {
+    document.dispatchEvent(new CustomEvent('claimondo:embed-ort', { detail: { lat, lng } }))
+  }
+}
+// Karte: der Nutzer hat einen Gutachter gewählt → dorthin routen + hervorheben.
+function dispatchGutachterWahl(detail: Record<string, unknown>) {
+  if (typeof document !== 'undefined') {
+    document.dispatchEvent(new CustomEvent('claimondo:embed-sv-selected', { detail }))
+  }
+}
+
 export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
+  // Step 2: token-loses Engine-Matching (Partner-Slots ODER Dead-Pin-Fallback).
+  const [matching, setMatching] = useState<PlaneTerminMitFallbackResult | null>(null)
+  const [matchLoading, setMatchLoading] = useState(false)
+  const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
+  const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
+  const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
   const [schadentyp, setSchadentyp] = useState<string | null>(null)
   const [vorname, setVorname] = useState('')
   const [nachname, setNachname] = useState('')
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
   const [dsgvo, setDsgvo] = useState(false)
-  const [token, setToken] = useState<string | null>(null)
-  const [gebucht, setGebucht] = useState<GebuchterTermin | null>(null)
-  // AAR-956 Dead-Pin-Fallback: keinPartner = FlowSlotStep meldete 0 buchbare Partner;
-  // deadPins = die geladenen Lite-Karten (null = lädt noch).
-  const [keinPartner, setKeinPartner] = useState(false)
-  const [deadPins, setDeadPins] = useState<DeadPinOeffentlich[] | null>(null)
-  // AAR-956 #4: der gewählte Dead-Pin (default = nächster). Auswahl dispatcht an die Karte.
-  const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
+  const [gebucht, setGebucht] = useState<{ svVorname: string | null; ortLabel: string | null; startIso: string | null } | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
+  const [slotWeg, setSlotWeg] = useState(false)
   const [pending, startTransition] = useTransition()
 
+  // Step 1 → 2: Ort gewählt → Karte informieren + token-loses Matching laden.
+  function ortGewaehlt(p: PlaceResult) {
+    const o = { adresse: p.adresse, lat: p.lat, lng: p.lng }
+    setOrt(o)
+    dispatchOrt(o.lat, o.lng)
+    setPhase('termin')
+    setMatching(null)
+    setAuswahl(null)
+    setSelectedSvId(null)
+    setSelectedDeadPinId(null)
+    setMatchLoading(true)
+    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, forceFallback }).then((res) => {
+      setMatching(res)
+      setMatchLoading(false)
+      // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
+      if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+      else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+    })
+  }
+
+  // Step 2: Slot gewählt → merken + weiter zu Schaden (Reservierung erst am Ende).
+  function waehleSvSlot(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
+    setAuswahl({ kind: 'partner', sv, slot })
+    setSelectedSvId(sv.svId)
+    setPhase('schaden')
+  }
+  function waehleDeadPinSlot(dp: DeadPinOeffentlich, slot: SlotVorschlag) {
+    setAuswahl({ kind: 'deadpin', dp, slot })
+    setSelectedDeadPinId(dp.deadPinId)
+    setPhase('schaden')
+  }
+  // 0 Verfügbarkeit → ohne Termin weiter (Team koordiniert telefonisch).
+  function ohneTerminWeiter() {
+    setAuswahl(null)
+    setPhase('schaden')
+  }
+
+  // Step 4: Kontakt-Submit → Lead anlegen + gewählten Slot reservieren + Bestätigung.
   function kontaktAbsenden(e: React.FormEvent) {
     e.preventDefault()
     setFehler(null)
-    if (!ort || !schadentyp) return
+    setSlotWeg(false)
+    if (!ort) return
     if (vorname.trim().length < 2 || nachname.trim().length < 2) return setFehler('Bitte Vor- und Nachnamen angeben.')
     if (telefon.trim().length < 5) return setFehler('Bitte eine gültige Telefonnummer angeben.')
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setFehler('Bitte eine gültige E-Mail-Adresse angeben.')
     if (!dsgvo) return setFehler('Bitte der Datenverarbeitung zustimmen.')
+
+    const auswahlPayload =
+      auswahl == null
+        ? null
+        : auswahl.kind === 'partner'
+          ? {
+              kind: 'partner' as const,
+              svId: auswahl.sv.svId,
+              svVorname: auswahl.sv.vorname,
+              start: auswahl.slot.start,
+              end: auswahl.slot.end,
+            }
+          : { kind: 'deadpin' as const, deadPinId: auswahl.dp.deadPinId, ort: auswahl.dp.ort, start: auswahl.slot.start }
+
     startTransition(async () => {
-      const res = await starteEmbedBuchung({
+      const res = await reserviereEmbedTermin({
         vorname: vorname.trim(),
         nachname: nachname.trim(),
         telefon: telefon.trim(),
         email: email.trim(),
-        schadentyp,
+        schadentyp: schadentyp ?? 'Sonstiger Schaden',
         ort,
+        auswahl: auswahlPayload,
       })
-      if (!res.ok) return setFehler(res.error || 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.')
-      setToken(res.token)
-      setPhase('slot')
-      // Test-Override (?fallback=1): direkt in den Dead-Pin-Fallback (Partner-Match
-      // überspringen), damit der Dead-Pin-Flow live testbar ist — echte Daten triggern
-      // ihn selten (wo Dead-Pins sind, sind meist erreichbare Partner). Vor Prod entfernen.
-      if (forceFallback) partnerlosFallback()
+      if (!res.ok) {
+        setFehler(res.error || 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.')
+        // Slot zwischenzeitlich vergeben → zurück zur Termin-Wahl (frisch laden).
+        if (res.slotWeg && ort) setSlotWeg(true)
+        return
+      }
+      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso })
+      setPhase('gebucht')
     })
   }
 
-  // AAR-956 Dead-Pin-Fallback (FlowSlotStep.onKeinMatch): 0 buchbare Partner → die
-  // echten Lite-Dead-Pin-Karten (ladeEmbedDeadPinFallback → engine ladeDeadPinFallback)
-  // für den Besichtigungsort laden. Leere Liste → telefonisch-Botschaft (= bisheriges
-  // kein_match-Verhalten, keine Regression).
-  function partnerlosFallback() {
-    setKeinPartner(true)
-    setDeadPins(null)
-    if (!ort) {
-      setDeadPins([])
-      return
-    }
-    void ladeEmbedDeadPinFallback({ lat: ort.lat, lng: ort.lng }).then((dps) => {
-      const liste = dps ?? []
-      setDeadPins(liste)
-      // #4: nächsten Dead-Pin als Default hervorheben (Karte zeigt ihn schon) — kein Dispatch.
-      setSelectedDeadPinId(liste[0]?.deadPinId ?? null)
-    })
-  }
-
-  // Reserviert einen generischen Dead-Pin-Slot (→ dispatch_pending). Bei Erfolg geht die
-  // Kunde+Team-Bestätigung raus (generisches Label, SV nie). bucheEmbedDeadPin ist bis b2
-  // ein TEMP-Stub → der Success-Pfad (inkl. Notify) ist erst nach dem b2-Landing erreichbar.
-  async function buchePinFallback(
-    deadPinId: string,
-    startIso: string,
-  ): Promise<{ ok: boolean; error?: string }> {
-    if (!token) return { ok: false, error: 'Die Sitzung ist abgelaufen. Bitte starten Sie neu.' }
-    const r = await bucheEmbedDeadPin({ token, deadPinId, startIso })
-    if (r.ok) {
-      const ortLabel = deadPins?.find((d) => d.deadPinId === deadPinId)?.ort ?? null
-      void sendeEmbedDeadPinBestaetigung({ token, ortLabel, startIso })
-    }
-    return r
-  }
-
-  // AAR-956 #4 (Aaron 12.06.): dem Karten-Layer mitteilen, welchen Gutachter der Nutzer gewählt
-  // hat → die Karte routet dorthin + hebt ihn hervor (FinderMap hört auf claimondo:embed-sv-selected).
-  function dispatchGutachterWahl(detail: Record<string, unknown>) {
-    if (typeof document !== 'undefined') {
-      document.dispatchEvent(new CustomEvent('claimondo:embed-sv-selected', { detail }))
+  // zurück zur Termin-Wahl (z.B. Slot war weg) → frisch matchen.
+  function zurueckZuTermin() {
+    setFehler(null)
+    setSlotWeg(false)
+    setPhase('termin')
+    if (ort) {
+      setMatchLoading(true)
+      void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, forceFallback }).then((res) => {
+        setMatching(res)
+        setMatchLoading(false)
+        if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+        else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+      })
     }
   }
 
-  const stepIdx = phase === 'ort' ? 0 : phase === 'schaden' ? 1 : 2
+  const stepIdx = phase === 'ort' ? 0 : phase === 'termin' ? 1 : phase === 'schaden' ? 2 : 3
 
   return (
     <GlassSurface className="flex flex-col gap-4 p-5">
-      {(phase === 'ort' || phase === 'schaden' || phase === 'kontakt') && (
+      {phase !== 'gebucht' && (
         <div className="flex items-center gap-1.5">
-          {[0, 1, 2].map((i) => (
+          {[0, 1, 2, 3].map((i) => (
             <span key={i} className={`h-1.5 flex-1 rounded-full ${i <= stepIdx ? 'bg-claimondo-ondo' : 'bg-claimondo-border'}`} />
           ))}
         </div>
@@ -156,15 +204,57 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
           <GooglePlaceAutocomplete
             placeholder="Adresse eingeben…"
             className="w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
-            onSelect={(p: PlaceResult) => {
-              setOrt({ adresse: p.adresse, lat: p.lat, lng: p.lng })
-              // Auto-Marker + Zoom auf der Karte (FinderMap hört auf das Event).
-              if (typeof document !== 'undefined') {
-                document.dispatchEvent(new CustomEvent('claimondo:embed-ort', { detail: { lat: p.lat, lng: p.lng } }))
-              }
-              setPhase('schaden')
-            }}
+            onSelect={ortGewaehlt}
           />
+        </div>
+      )}
+
+      {phase === 'termin' && (
+        <div className="flex flex-col gap-3">
+          {matchLoading || matching === null ? (
+            <p className="py-6 text-center text-[0.8125rem] text-claimondo-shield/80">
+              Wir suchen verfügbare Gutachter in Ihrer Nähe…
+            </p>
+          ) : matching.kind === 'partner' ? (
+            <SvSlotAuswahl
+              svs={matching.svs}
+              fehler={null}
+              onSlot={waehleSvSlot}
+              onSvSelect={(sv) => {
+                setSelectedSvId(sv.svId)
+                dispatchGutachterWahl({ kind: 'partner', svId: sv.svId })
+              }}
+              selectedSvId={selectedSvId}
+            />
+          ) : matching.deadPins.length > 0 ? (
+            <DeadPinSlotStep
+              deadPins={matching.deadPins}
+              onSelectSlot={waehleDeadPinSlot}
+              selectedDeadPinId={selectedDeadPinId}
+              onSelect={(dp) => {
+                setSelectedDeadPinId(dp.deadPinId)
+                dispatchGutachterWahl({ kind: 'deadpin', deadPinId: dp.deadPinId, lat: dp.lat, lng: dp.lng, ort: dp.ort })
+              }}
+            />
+          ) : (
+            <div className="py-3 text-center">
+              <h3 className="text-body font-bold text-claimondo-navy">Wir melden uns telefonisch</h3>
+              <p className="mt-1 text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
+                In Ihrer Nähe ist gerade kein Gutachter online verfügbar. Hinterlassen Sie Ihre Daten —
+                unser Team meldet sich für die Terminvereinbarung.
+              </p>
+              <Button onClick={ohneTerminWeiter} variant="ondo" className="mt-4">
+                Anfrage absenden
+              </Button>
+            </div>
+          )}
+          <button
+            type="button"
+            onClick={() => setPhase('ort')}
+            className="inline-flex items-center gap-1 self-start text-[0.8125rem] font-semibold text-claimondo-shield/70 hover:text-claimondo-ondo"
+          >
+            <ChevronLeft className="h-4 w-4" /> Anderer Ort
+          </button>
         </div>
       )}
 
@@ -192,7 +282,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
           </div>
           <button
             type="button"
-            onClick={() => setPhase('ort')}
+            onClick={() => setPhase('termin')}
             className="inline-flex items-center gap-1 self-start text-[0.8125rem] font-semibold text-claimondo-shield/70 hover:text-claimondo-ondo"
           >
             <ChevronLeft className="h-4 w-4" /> Zurück
@@ -204,7 +294,9 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         <form onSubmit={kontaktAbsenden} className="flex flex-col gap-3">
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Ihre Kontaktdaten</h3>
-            <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">Damit wir den Termin mit Ihnen bestätigen können.</p>
+            <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
+              {auswahl ? 'Damit wir Ihren Termin bestätigen können.' : 'Damit wir uns für die Terminvereinbarung melden können.'}
+            </p>
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Field label="Vorname" value={vorname} onChange={(e) => setVorname(e.target.value)} autoComplete="given-name" />
@@ -222,7 +314,14 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             <span>Ich willige ein, dass Claimondo mich zur Schadenabwicklung kontaktiert.</span>
           </label>
           {fehler && (
-            <p className="rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">{fehler}</p>
+            <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">
+              {fehler}
+              {slotWeg && (
+                <button type="button" onClick={zurueckZuTermin} className="ml-1 font-semibold underline">
+                  Anderen Termin wählen
+                </button>
+              )}
+            </div>
           )}
           <div className="flex items-center justify-between gap-2">
             <button
@@ -233,69 +332,37 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
               <ChevronLeft className="h-4 w-4" /> Zurück
             </button>
             <Button type="submit" loading={pending} variant="navy">
-              Weiter zur Terminbuchung
+              {auswahl ? 'Termin reservieren' : 'Anfrage absenden'}
             </Button>
           </div>
         </form>
       )}
 
-      {phase === 'slot' && token && !keinPartner && (
-        <FlowSlotStep
-          token={token}
-          onGebucht={(t) => {
-            setGebucht(t)
-            setPhase('gebucht')
-            // WS5 (Aaron 12.06.): Bestaetigungs-WhatsApp an Kunde + Team, sobald der
-            // Slot reserviert ist. Fire-and-forget / non-critical — der Termin liegt
-            // bereits race-safe in der DB (FlowSlotStep → bucheTerminFlow → Engine).
-            void sendeEmbedTerminBestaetigung({ token, svVorname: t.svVorname, startIso: t.startIso })
-          }}
-          onKeinMatch={partnerlosFallback}
-          onSvSelect={(sv) => dispatchGutachterWahl({ kind: 'partner', svId: sv.svId })}
-        />
-      )}
-
-      {/* AAR-956 Dead-Pin-Fallback: 0 buchbare Partner → echte Lite-Dead-Pin-Karten
-          (Matching live). Leere Abdeckung → telefonisch (= bisheriges Verhalten). */}
-      {phase === 'slot' && token && keinPartner &&
-        (deadPins === null ? (
-          <p className="py-4 text-center text-[0.8125rem] text-claimondo-shield/80">
-            Wir prüfen verfügbare Gutachter in Ihrer Nähe…
-          </p>
-        ) : deadPins.length > 0 ? (
-          <DeadPinSlotStep
-            deadPins={deadPins}
-            onBook={buchePinFallback}
-            selectedDeadPinId={selectedDeadPinId}
-            onSelect={(dp) => {
-              setSelectedDeadPinId(dp.deadPinId)
-              dispatchGutachterWahl({ kind: 'deadpin', deadPinId: dp.deadPinId, lat: dp.lat, lng: dp.lng, ort: dp.ort })
-            }}
-          />
-        ) : (
-          <div className="py-3 text-center">
-            <h3 className="text-body font-bold text-claimondo-navy">Wir melden uns telefonisch</h3>
-            <p className="mt-1 text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
-              In Ihrer Nähe ist gerade kein Gutachter online verfügbar. Unser Team meldet sich
-              für die Terminvereinbarung bei Ihnen.
-            </p>
-          </div>
-        ))}
-
       {phase === 'gebucht' && gebucht && (
         <div className="flex flex-col items-center gap-2 py-4 text-center">
           <CheckCircle2 className="h-12 w-12 text-success" />
-          <h3 className="text-body font-bold text-claimondo-navy">Termin reserviert</h3>
+          <h3 className="text-body font-bold text-claimondo-navy">
+            {gebucht.startIso ? 'Termin reserviert' : 'Anfrage eingegangen'}
+          </h3>
           <p className="text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
-            {gebucht.svVorname} ist für{' '}
-            {new Date(gebucht.startIso).toLocaleString('de-DE', {
-              weekday: 'long',
-              day: '2-digit',
-              month: 'long',
-              hour: '2-digit',
-              minute: '2-digit',
-            })}{' '}
-            Uhr reserviert. Wir bestätigen Ihren Termin in Kürze.
+            {gebucht.startIso ? (
+              <>
+                {gebucht.svVorname
+                  ? `${gebucht.svVorname} ist`
+                  : `Ihr Kfz-Gutachter${gebucht.ortLabel ? ` in ${gebucht.ortLabel}` : ''} ist`}{' '}
+                für{' '}
+                {new Date(gebucht.startIso).toLocaleString('de-DE', {
+                  weekday: 'long',
+                  day: '2-digit',
+                  month: 'long',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}{' '}
+                Uhr reserviert. Wir bestätigen Ihren Termin in Kürze.
+              </>
+            ) : (
+              'Vielen Dank — unser Team meldet sich in Kürze telefonisch für die Terminvereinbarung.'
+            )}
           </p>
         </div>
       )}
