@@ -209,8 +209,15 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
       setBuchungToken(res.token)
       setBuchungLeadId(res.leadId)
       // Conversion (value-based, wie Monika): Reservierung = haftpflicht-Lead (100 €) + lead_id-Dedupe
-      // + E.164-Telefon (Enhanced Conversions). Feuert in dataLayer (GTM/GA4/Ads) + Beacon.
-      track('gf_anfrage_submit', reservierungConversion({ leadId: res.leadId, telefon: telefon.trim() }))
+      // + user_data (E-Mail/Telefon/Name → Enhanced Conversions for Leads). Feuert in dataLayer (GTM/
+      // GA4/Ads) + Beacon. E-Mail ist das stärkste EC-Signal — alle Felder sind Pflicht im Formular.
+      track('gf_anfrage_submit', reservierungConversion({
+        leadId: res.leadId,
+        telefon: telefon.trim(),
+        email: email.trim(),
+        vorname: vorname.trim(),
+        nachname: nachname.trim(),
+      }))
       setPhase('gebucht')
     })
   }
@@ -243,8 +250,15 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
       const r = await bucheRueckrufBeimDispatcher({ token: buchungToken, wunschzeitLokal: rueckrufZeit })
       if (r.ok) {
         setRueckrufGebucht(true)
-        // Conversion: Rückruf = Beratungsgespräch (25 €), gleicher Lead (eigene Conversion-Action).
-        track('gf_rueckruf', rueckrufConversion({ leadId: buchungLeadId }))
+        // Conversion: Rückruf = Beratungsgespräch (25 €), gleicher Lead (eigene Conversion-Action)
+        // + user_data (EC) — Lead-Daten kennen wir aus dem Reservierungs-Step noch im State.
+        track('gf_rueckruf', rueckrufConversion({
+          leadId: buchungLeadId,
+          telefon: telefon.trim(),
+          email: email.trim(),
+          vorname: vorname.trim(),
+          nachname: nachname.trim(),
+        }))
       } else setRueckrufFehler(r.error ?? 'Der Rückruf konnte nicht gebucht werden.')
     })
   }

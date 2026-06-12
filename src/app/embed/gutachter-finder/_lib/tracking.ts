@@ -77,29 +77,70 @@ export function track(event: GfEvent, extra?: Record<string, unknown>): void {
 }
 
 /**
- * value-based Conversion-Bag für die Reservierung (gf_anfrage_submit) — Wert + Währung + lead_id
- * (Dedupe/Transaction-ID) + E.164-Telefon (Enhanced Conversions). Leere Werte weglassen: ein leeres
- * lead_id würde GA4/Ads alle id-losen Conversions zu EINER zusammenfassen (Unterzählung).
+ * Enhanced-Conversions-User-Data: ROHE (ungehashte) E-Mail/Telefon/Name in den dataLayer — GTM
+ * hasht clientseitig SHA-256, BEVOR es an Google geht (und nur wenn dein Consent es zulässt).
+ * Struktur = Googles `user_data` (email + phone_number E.164 + address{first/last_name}). Nur
+ * nicht-leere Felder; `undefined` wenn nichts da ist (dann kein user_data im Push).
  */
-export function reservierungConversion(meta: { leadId?: string | null; telefon?: string | null }): Record<string, unknown> {
+function userDataBag(meta: {
+  email?: string | null
+  telefon?: string | null
+  vorname?: string | null
+  nachname?: string | null
+}): Record<string, unknown> | undefined {
+  const ud: Record<string, unknown> = {}
+  const email = (meta.email ?? '').trim().toLowerCase()
+  if (email) ud.email = email
+  const phone = meta.telefon ? toE164(meta.telefon) : ''
+  if (phone) ud.phone_number = phone
+  const first = (meta.vorname ?? '').trim()
+  const last = (meta.nachname ?? '').trim()
+  if (first || last) {
+    const address: Record<string, unknown> = {}
+    if (first) address.first_name = first
+    if (last) address.last_name = last
+    ud.address = address
+  }
+  return Object.keys(ud).length > 0 ? ud : undefined
+}
+
+type ConversionMeta = {
+  leadId?: string | null
+  telefon?: string | null
+  email?: string | null
+  vorname?: string | null
+  nachname?: string | null
+}
+
+/**
+ * value-based Conversion-Bag für die Reservierung (gf_anfrage_submit) — Wert + Währung + lead_id
+ * (Dedupe/Transaction-ID) + `user_data` (Enhanced Conversions for Leads: E-Mail/Telefon/Name).
+ * Leeres lead_id weglassen, sonst fasst GA4/Ads alle id-losen Conversions zu EINER zusammen
+ * (Unterzählung). EC ist hier der EIGENTLICHE Attributions-Mechanismus: die Conversion feuert im
+ * iframe (app.claimondo.de), der Ad-Klick landet auf claimondo.de → kein gemeinsames GCLID-Cookie;
+ * gehashte E-Mail/Telefon matchen die Conversion ohne Cookie zum Klick.
+ */
+export function reservierungConversion(meta: ConversionMeta): Record<string, unknown> {
   const extra: Record<string, unknown> = {
     schadenart: 'haftpflicht',
     value: VALUE_RESERVIERUNG,
     currency: 'EUR',
   }
   if (meta.leadId) extra.lead_id = meta.leadId
-  const phone = meta.telefon ? toE164(meta.telefon) : ''
-  if (phone) extra.phone = phone
+  const ud = userDataBag(meta)
+  if (ud) extra.user_data = ud
   return extra
 }
 
-/** Conversion-Bag für den Rückruf (gf_rueckruf) — Beratungsgespräch = 25 €. */
-export function rueckrufConversion(meta: { leadId?: string | null }): Record<string, unknown> {
+/** Conversion-Bag für den Rückruf (gf_rueckruf) — Beratungsgespräch = 25 €, gleicher Lead + EC. */
+export function rueckrufConversion(meta: ConversionMeta): Record<string, unknown> {
   const extra: Record<string, unknown> = {
     schadenart: 'schadensberatung',
     value: VALUE_RUECKRUF,
     currency: 'EUR',
   }
   if (meta.leadId) extra.lead_id = meta.leadId
+  const ud = userDataBag(meta)
+  if (ud) extra.user_data = ud
   return extra
 }
