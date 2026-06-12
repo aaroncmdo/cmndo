@@ -49,13 +49,15 @@ async function resolveBrandingFromSvId(db: SupabaseClient, svId: string): Promis
 async function resolveBrandingFromLeadId(db: SupabaseClient, leadId: string): Promise<KundenThemeResult> {
   // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
   // to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig neuesten picken.
-  const { data: leadFaelle } = await db
-    .from('faelle')
-    .select('sv_id, claims:claim_id!inner(created_at)')
+  // CMM-49 (faelle-Drop-Runway): claims-direkt statt .from('faelle'). Nur sv_id gebraucht.
+  // lead_id==claims.lead_id (div=0), sv_id 0-diff, created_at claims-nativ.
+  const { data: leadClaims } = await db
+    .from('claims')
+    .select('sv_id, created_at')
     .eq('lead_id', leadId)
     .not('sv_id', 'is', null)
-  const fall = (leadFaelle ?? [])
-    .map((f) => ({ sv_id: f.sv_id as string | null, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+  const fall = (leadClaims ?? [])
+    .map((c) => ({ sv_id: c.sv_id as string | null, _c: (c.created_at as string | null) ?? '' }))
     .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
   if (!fall?.sv_id) return FALLBACK
   return resolveBrandingFromSvId(db, fall.sv_id as string)
@@ -108,13 +110,16 @@ export async function resolveBrandingFromFlowToken(token: string): Promise<Kunde
 export async function resolveBrandingFromFallId(fallId: string): Promise<KundenThemeResult> {
   if (!fallId) return FALLBACK
   const db = createAdminClient()
-  const { data: fall } = await db
-    .from('faelle')
-    .select('sv_id')
-    .eq('id', fallId)
+  // CMM-49 (faelle-Drop-Runway): sv_id via Bridge->claims statt .from('faelle'). sv_id 0-diff.
+  const { data: bridgeRow } = await db
+    .from('faelle_claim_bridge')
+    .select('claims:claim_id(sv_id)')
+    .eq('fall_id', fallId)
     .maybeSingle()
-  if (!fall?.sv_id) return FALLBACK
-  return resolveBrandingFromSvId(db, fall.sv_id as string)
+  const cRaw = (bridgeRow as { claims?: unknown } | null)?.claims
+  const svId = ((Array.isArray(cRaw) ? cRaw[0] : cRaw) as { sv_id?: string | null } | null | undefined)?.sv_id ?? null
+  if (!svId) return FALLBACK
+  return resolveBrandingFromSvId(db, svId)
 }
 
 // ── Email-Branding ──────────────────────────────────────────────────────────
@@ -152,13 +157,16 @@ export async function resolveEmailBranding(
   if (opts.svId) return toEmailBrand(await resolveBrandingFromSvId(db, opts.svId))
   if (opts.leadId) return toEmailBrand(await resolveBrandingFromLeadId(db, opts.leadId))
   if (opts.fallId) {
-    const { data: fall } = await db
-      .from('faelle')
-      .select('sv_id')
-      .eq('id', opts.fallId)
+    // CMM-49 (faelle-Drop-Runway): sv_id via Bridge->claims statt .from('faelle'). sv_id 0-diff.
+    const { data: bridgeRow } = await db
+      .from('faelle_claim_bridge')
+      .select('claims:claim_id(sv_id)')
+      .eq('fall_id', opts.fallId)
       .maybeSingle()
-    if (!fall?.sv_id) return null
-    return toEmailBrand(await resolveBrandingFromSvId(db, fall.sv_id as string))
+    const cRaw = (bridgeRow as { claims?: unknown } | null)?.claims
+    const svId = ((Array.isArray(cRaw) ? cRaw[0] : cRaw) as { sv_id?: string | null } | null | undefined)?.sv_id ?? null
+    if (!svId) return null
+    return toEmailBrand(await resolveBrandingFromSvId(db, svId))
   }
   return null
 }

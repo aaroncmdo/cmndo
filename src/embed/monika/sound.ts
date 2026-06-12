@@ -24,6 +24,10 @@ export function createSoundEngine(base: string, isMuted: () => boolean): SoundEn
   let sent: AudioBuffer | null = null
   let lastIncomingAt: number | null = null
   let loading = false
+  // P3-Fix (Teaser-Sound): feuert ein Teaser bevor Audio per erster Geste entsperrt ODER
+  // der Buffer geladen ist, merken wir das hier -> beim naechsten unlock() nachholen. Sonst
+  // sind die ERSTEN Teaser-Bubbles (Scroll/6s, vor jeder Geste) stumm (Browser-Autoplay).
+  let pendingIncoming = false
 
   function ensureCtx(): AudioContext | null {
     if (ctx) return ctx
@@ -68,18 +72,37 @@ export function createSoundEngine(base: string, isMuted: () => boolean): SoundEn
     }
   }
 
+  // Holt einen vor dem Unlock gefeuerten Incoming-Sound nach, sobald Audio laeuft + Buffer da.
+  function flushPending(): void {
+    if (pendingIncoming && ctx && ctx.state === 'running' && incoming) {
+      pendingIncoming = false
+      play(incoming)
+    }
+  }
+
   return {
-    // Im FAB-Click-Handler synchron aufrufen: entsperrt Autoplay (Geste) + laedt Buffer.
+    // Bei der ERSTEN Page-Geste / im FAB-Click synchron aufrufen: entsperrt Autoplay, laedt
+    // Buffer UND holt einen vor der Geste gefeuerten Teaser-Sound nach (sonst erster Teaser stumm).
     unlock() {
       const c = ensureCtx()
       if (!c) return
-      if (c.state === 'suspended') void c.resume()
-      void loadBuffers(c)
+      const ready = () => {
+        void loadBuffers(c).then(flushPending)
+        flushPending()
+      }
+      if (c.state === 'suspended') void c.resume().then(ready)
+      else ready()
     },
     playIncoming() {
       const now = Date.now()
       if (shouldThrottle(lastIncomingAt, now)) return
       lastIncomingAt = now
+      // Audio noch nicht spielbereit (gesperrt / Buffer nicht geladen) -> merken, beim
+      // naechsten unlock() (erste Geste) nachholen. Sonst stiller erster Teaser.
+      if (!ctx || ctx.state !== 'running' || !incoming) {
+        pendingIncoming = true
+        return
+      }
       play(incoming)
     },
     playSent() {
