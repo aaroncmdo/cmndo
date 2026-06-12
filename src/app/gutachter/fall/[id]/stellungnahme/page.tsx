@@ -24,15 +24,18 @@ export default async function StellungnahmePage({
   // CMM-44 SP-H PR2: technische_stellungnahme_status/_beauftragt_am leben auf
   // auftraege (aktueller Auftrag) — via Nested-Embed unter claims. Pre-launch
   // <=1 Auftrag pro Claim.
-  const { data: fall } = await supabase
-    .from('faelle')
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner; sv-Filter via embedded
+  // claims.sv_id (SSoT div=0).
+  const { data: fallRaw } = await supabase
+    .from('faelle_claim_bridge')
     .select(
       // CMM-44 SP-I3: vs_kuerzung_grund + kuerzungs_betrag leben auf kanzlei_faelle (1:1) — Nested-Embed unter claims.
-      'id, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am), kanzlei_faelle(vs_kuerzung_grund, kuerzungs_betrag))',
+      'claims:claim_id!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am), kanzlei_faelle(vs_kuerzung_grund, kuerzungs_betrag))',
     )
-    .eq('id', id)
-    .eq('sv_id', sv.id)
+    .eq('fall_id', id)
+    .eq('claims.sv_id', sv.id)
     .maybeSingle()
+  const fall = fallRaw as unknown as { claims: Record<string, unknown> | Record<string, unknown>[] | null } | null
 
   if (!fall) notFound()
 

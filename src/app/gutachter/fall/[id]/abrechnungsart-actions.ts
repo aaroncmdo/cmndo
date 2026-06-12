@@ -32,14 +32,19 @@ export async function saveAbrechnungsart(
   }
 
   if (rolle === 'sachverstaendiger') {
+    // CMM-49 (faelle-Drop-Runway): sv_id aus v_claim_full (SSoT, flat) + sachverstaendige-Lookup
+    // separat (faelle-frei). Gate unveraendert: der dem Fall zugewiesene SV-profile_id == user.id.
     const { data: fall } = await supabase
-      .from('faelle')
-      .select('sv_id, sachverstaendige(profile_id)')
-      .eq('id', fallId)
+      .from('v_claim_full')
+      .select('sv_id')
+      .eq('fall_id', fallId)
       .maybeSingle()
-    const svRaw = (fall as { sachverstaendige: unknown } | null)?.sachverstaendige
-    const sv = (Array.isArray(svRaw) ? svRaw[0] : svRaw) as { profile_id: string } | null
-    if (!sv?.profile_id || sv.profile_id !== user.id) {
+    let svProfileId: string | null = null
+    if (fall?.sv_id) {
+      const { data: svRow } = await supabase.from('sachverstaendige').select('profile_id').eq('id', fall.sv_id as string).maybeSingle()
+      svProfileId = (svRow?.profile_id as string | null) ?? null
+    }
+    if (!svProfileId || svProfileId !== user.id) {
       return { success: false, error: 'Fall ist dir nicht zugewiesen' }
     }
   }
