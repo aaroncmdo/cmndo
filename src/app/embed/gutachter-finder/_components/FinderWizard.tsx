@@ -21,6 +21,7 @@ import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
 import { ladeEmbedMatching, reserviereEmbedTermin } from '../actions'
 import { DeadPinSlotStep } from './DeadPinSlotStep'
+import { WunschterminPicker } from './WunschterminPicker'
 import type {
   DeadPinOeffentlich,
   OeffentlichesSvProfil,
@@ -61,6 +62,20 @@ function dispatchGutachterWahl(detail: Record<string, unknown>) {
   if (typeof document !== 'undefined') {
     document.dispatchEvent(new CustomEvent('claimondo:embed-sv-selected', { detail }))
   }
+}
+// „YYYY-MM-DDTHH:MM" (Berlin-Wall-Clock) → deutsche Anzeige „Mo., 16.06., 14:00 Uhr".
+function fmtWunsch(lokal: string): string {
+  const d = new Date(lokal)
+  if (Number.isNaN(d.getTime())) return ''
+  return (
+    d.toLocaleString('de-DE', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    }) + ' Uhr'
+  )
 }
 
 export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
@@ -202,15 +217,10 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
               Slot-Ranking in Schritt 2; leer = nächste freie Termine. */}
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Ihr Wunschtermin</h3>
-            <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
-              Optional — wir schlagen Ihnen passende Zeiten vor.
+            <p className="mt-0.5 mb-2 text-[0.8125rem] text-claimondo-shield/80">
+              Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
             </p>
-            <input
-              type="datetime-local"
-              value={wunschterminLokal}
-              onChange={(e) => setWunschterminLokal(e.target.value)}
-              className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy focus:border-claimondo-ondo focus:outline-none"
-            />
+            <WunschterminPicker value={wunschterminLokal} onChange={setWunschterminLokal} />
           </div>
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Wo steht das Fahrzeug?</h3>
@@ -228,6 +238,13 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
 
       {phase === 'termin' && (
         <div className="flex flex-col gap-3">
+          {/* Wunschtermin oben anzeigen (Aaron 12.06.) — sobald gesetzt. */}
+          {wunschterminLokal && (
+            <div className="flex items-center gap-2 rounded-ios-md bg-claimondo-bg px-3 py-2 text-[0.8125rem]">
+              <span className="text-claimondo-shield/70">Ihr Wunschtermin:</span>
+              <span className="font-semibold text-claimondo-navy">{fmtWunsch(wunschterminLokal)}</span>
+            </div>
+          )}
           {matchLoading || matching === null ? (
             <p className="py-6 text-center text-[0.8125rem] text-claimondo-shield/80">
               Wir suchen verfügbare Gutachter in Ihrer Nähe…

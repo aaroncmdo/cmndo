@@ -20,6 +20,7 @@ import {
   planeTerminMitFallback,
   ladeDeadPinFallback,
   bucheDeadPinTermin,
+  type DeadPinOeffentlich,
   type PlaneTerminMitFallbackResult,
 } from '@/lib/sv-matching-modul'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
@@ -89,11 +90,24 @@ export async function ladeEmbedMatching(input: {
         wunschterminIso = null
       }
     }
+    // Dead-Pins (generische, dispatch-bestätigte Slots) ÜBERNEHMEN den Wunschtermin direkt:
+    // er wird als erster Slot vorangestellt (matchType 'wunschtermin') — der Kunde sieht GENAU
+    // seine Wunschzeit, die generischen bleiben als Alternativen. (Partner-Slots rankt die Engine.)
+    const mitWunsch = (deadPins: DeadPinOeffentlich[]): DeadPinOeffentlich[] => {
+      if (!wunschterminIso) return deadPins
+      const start = wunschterminIso
+      const end = new Date(new Date(start).getTime() + 90 * 60_000).toISOString()
+      const wunschSlot = { start, end, matchType: 'wunschtermin' as const }
+      return deadPins.map((dp) => ({ ...dp, slots: [wunschSlot, ...dp.slots.filter((s) => s.start !== start)] }))
+    }
+
     if (input.forceFallback) {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
-      return { kind: 'fallback', deadPins }
+      return { kind: 'fallback', deadPins: mitWunsch(deadPins) }
     }
-    return await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso })
+    const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso })
+    if (res.kind === 'fallback') return { kind: 'fallback', deadPins: mitWunsch(res.deadPins) }
+    return res
   } catch (err) {
     console.error('[ladeEmbedMatching] Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return { kind: 'fallback', deadPins: [] }

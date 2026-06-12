@@ -75,7 +75,7 @@ export function DeadPinSlotStep({
             key={dp.deadPinId}
             className={`rounded-ios-md border p-4 ${
               dunkel
-                ? 'border-claimondo-navy bg-claimondo-navy'
+                ? 'border-white/15 bg-claimondo-navy/80 shadow-glass-card backdrop-blur-md'
                 : selektiert
                   ? 'border-claimondo-ondo bg-white/70 outline outline-2 outline-offset-2 outline-claimondo-navy'
                   : 'border-claimondo-border bg-white/70'
@@ -106,6 +106,9 @@ export function DeadPinSlotStep({
                     className="rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-body-sm text-claimondo-navy transition hover:border-claimondo-ondo hover:bg-claimondo-bg"
                   >
                     {fmtSlot(slot.start)}
+                    {slot.matchType === 'wunschtermin' && (
+                      <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">Wunschzeit</span>
+                    )}
                   </button>
                 ))}
               </div>

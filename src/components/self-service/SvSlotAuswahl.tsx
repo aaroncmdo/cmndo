@@ -121,16 +121,8 @@ export function SvSlotAuswahl({
               </div>
             </>
           )
-          return (
-            <Card
-              key={sv.svId}
-              p={5}
-              radius="lg"
-              glass={dunkel ? 'dark' : undefined}
-              // Auswahl-Outline NUR auf weißen Karten (die navy-glassy #1 ist eh hervorgehoben).
-              // outline statt ring, weil Card inline boxShadow den Tailwind-ring schluckt.
-              className={selektiert && !dunkel ? 'outline outline-2 outline-offset-2 outline-claimondo-navy' : undefined}
-            >
+          const inhalt = (
+            <>
               {onSvSelect ? (
                 <button
                   type="button"
@@ -158,7 +150,13 @@ export function SvSlotAuswahl({
                       type="button"
                       data-testid={`buchung-slot-${sv.svId}-${slot.start}`}
                       onClick={() => onSlot(sv, slot)}
-                      className="rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy transition hover:border-claimondo-ondo hover:bg-claimondo-bg"
+                      className={cn(
+                        'rounded-ios-md border px-3 py-2 text-sm transition',
+                        // auf der navy-glassy Card: helle, leicht-transluzente Slot-Buttons
+                        dunkel
+                          ? 'border-white/25 bg-white/90 text-claimondo-navy hover:bg-white'
+                          : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-ondo hover:bg-claimondo-bg',
+                      )}
                     >
                       {fmtSlot(slot.start, uhrSuffix)}
                       {slot.matchType === 'wunschtermin' && (
@@ -168,6 +166,27 @@ export function SvSlotAuswahl({
                   ))}
                 </div>
               )}
+            </>
+          )
+          // Empfohlener (#1, embedMode) = navy-GLASSY Surface (translucent Navy + backdrop-blur,
+          // Pendant zu GlassSurface) — Aaron 12.06.: „nicht glassy oder morphed". Sonst weiße Card
+          // (Primitive). Die glassy Card NICHT via Card-Primitive (dessen glass='dark' ist opak).
+          return dunkel ? (
+            <div
+              key={sv.svId}
+              className="rounded-ios-lg border border-white/15 bg-claimondo-navy/80 p-5 shadow-glass-card backdrop-blur-md"
+            >
+              {inhalt}
+            </div>
+          ) : (
+            <Card
+              key={sv.svId}
+              p={5}
+              radius="lg"
+              // Auswahl-Outline (outline statt ring, weil Card inline boxShadow den ring schluckt).
+              className={selektiert ? 'outline outline-2 outline-offset-2 outline-claimondo-navy' : undefined}
+            >
+              {inhalt}
             </Card>
           )
         })}

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-02T12:10:59.940Z",
-  "count": 133,
+  "generatedAt": "2026-06-12T13:28:42.142Z",
+  "count": 131,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -25,9 +25,7 @@
     "src/app/admin/vertraege/VertragseditorClient.tsx",
     "src/app/dispatch/isochrone/IsochroneClient.tsx",
     "src/app/dispatch/kalender/SpontanTerminModal.tsx",
-    "src/app/dispatch/leads/[id]/PhaseHeader.tsx",
     "src/app/dispatch/leads/[id]/_phases/DokumenteAnfordernCard.tsx",
-    "src/app/dispatch/leads/[id]/_sidebar/SidebarStubs.tsx",
     "src/app/dispatch/sachverstaendige/[id]/page.tsx",
     "src/app/faelle/[id]/_components/LexDriveTriggerPanel.tsx",
     "src/app/faelle/[id]/_prozess/Sections.tsx",
