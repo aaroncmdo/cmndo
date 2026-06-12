@@ -406,9 +406,29 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
   const db = admin()
   // CMM-44 SP-A2 (Cluster 1): schadentag + schadenort_ort aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (SSoT).
-  const { data: fall } = await db.from('faelle').select('lead_id, sv_id, claim_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, kanzlei_uebergabe_am, claims:claim_id(claim_nummer, schadentag, schadenort_ort, vehicle_id)').eq('id', fallId).single()
-  const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
-  if (!fall) return
+  // CMM-49 (Drop-Runway): Anker faelle_claim_bridge (fall_id==faelle.id) + claims-Embed
+  // statt .from('faelle'). REGRESSION-FIX: der alte Select las das nicht-existente
+  // faelle.kanzlei_uebergabe_am (Tippfehler; echte Spalte = claims.kanzlei_uebergeben_am,
+  // s. claim-duplicate-columns.ts) -> die .single()-Query failte IMMER -> diese Kanzlei-
+  // Auftragszusammenfassung-Email sendete nie (Phantom-Bug, von CMM-49 in Migration
+  // 20260610225410 dokumentiert). lead_id -> claims (SSoT, div=0); fahrzeug_*/kennzeichen-
+  // Snapshot war 0-populated -> Drop value-neutral (Quelle = vehicles via claims.vehicle_id).
+  type KanzClaim = {
+    lead_id: string | null
+    claim_nummer: string | null
+    schadentag: string | null
+    schadenort_ort: string | null
+    vehicle_id: string | null
+    kanzlei_uebergeben_am: string | null
+  }
+  const { data: fallBr } = await db
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id(lead_id, claim_nummer, schadentag, schadenort_ort, vehicle_id, kanzlei_uebergeben_am)')
+    .eq('fall_id', fallId)
+    .maybeSingle()
+  if (!fallBr) return
+  const fall = fallBr as unknown as { claim_id: string | null; claims?: KanzClaim | KanzClaim[] | null }
+  const fallClaim = (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) as KanzClaim | null | undefined
 
   // CMM-50.3b: Fahrzeug vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot Fallback.
   let kanzVeh: { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null } | null = null
@@ -417,9 +437,10 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     const { data: v } = await db.from('vehicles').select('hersteller, modell_haupttyp, kennzeichen_aktuell').eq('id', kanzVehicleId).maybeSingle()
     kanzVeh = (v as { hersteller: string | null; modell_haupttyp: string | null; kennzeichen_aktuell: string | null } | null)
   }
-  const kanzFzHersteller = kanzVeh?.hersteller ?? (fall.fahrzeug_hersteller as string | null) ?? null
-  const kanzFzModell = kanzVeh?.modell_haupttyp ?? (fall.fahrzeug_modell as string | null) ?? null
-  const kanzFzKennzeichen = kanzVeh?.kennzeichen_aktuell ?? (fall.kennzeichen as string | null) ?? null
+  // CMM-49: faelle.fahrzeug_*-Snapshot entfaellt (0-populated, faelle-Drop) -> nur vehicles.
+  const kanzFzHersteller = kanzVeh?.hersteller ?? null
+  const kanzFzModell = kanzVeh?.modell_haupttyp ?? null
+  const kanzFzKennzeichen = kanzVeh?.kennzeichen_aktuell ?? null
 
   let kanzleiBesichtigungsortAdresse: string | null = null
   if ((fall as { claim_id?: string | null }).claim_id) {
@@ -435,8 +456,8 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
 
   // Kunde
   let kundeName = '—'
-  if (fall.lead_id) {
-    const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fall.lead_id).single()
+  if (fallClaim?.lead_id) {
+    const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fallClaim.lead_id).single()
     if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
   }
 
@@ -579,7 +600,7 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
       attachments.length > 0
         ? `Als Anhang erhalten Sie: ${attachments.map((a) => a.filename).join(', ')}.`
         : 'Kanzlei-Paket und Gutachten folgen in Kürze — sie finden sie vorab über den Portal-Link.',
-    uebergabeDatum: fmtDate(fall.kanzlei_uebergabe_am),
+    uebergabeDatum: fmtDate(fallClaim?.kanzlei_uebergeben_am ?? null),
     fallId,
     dokumenteLinks,
   }
