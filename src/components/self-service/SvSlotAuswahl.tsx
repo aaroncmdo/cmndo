@@ -31,10 +31,17 @@ export function SvSlotAuswahl({
   svs,
   fehler,
   onSlot,
+  onSvSelect,
+  selectedSvId,
 }: {
   svs: OeffentlichesSvProfil[]
   fehler: string | null
   onSlot: (sv: OeffentlichesSvProfil, slot: SlotVorschlag) => void
+  // AAR-956 #4 (Embed, Aaron 12.06.): SV-Karte auswählbar → die Embed-Karte routet zum
+  // gewählten SV + hebt ihn hervor. Optional/additiv — ohne die Props (z.B. /flow, /anfrage)
+  // bleibt die Karte unveraendert (Kopf nicht klickbar, keine Hervorhebung).
+  onSvSelect?: (sv: OeffentlichesSvProfil) => void
+  selectedSvId?: string | null
 }) {
   const t = useTranslations('selfService')
   const uhrSuffix = t('slot.uhr_suffix')
@@ -48,9 +55,10 @@ export function SvSlotAuswahl({
       </p>
       {fehler && <p className="text-claimondo-navy/70 text-sm mb-4 text-center">{fehler}</p>}
       <div className="flex flex-col gap-4">
-        {svs.map((sv, i) => (
-          <Card key={sv.svId} p={5} radius="lg">
-            <div data-testid={`buchung-sv-${i}`} className="flex items-center gap-3 mb-3">
+        {svs.map((sv, i) => {
+          const selektiert = !!onSvSelect && selectedSvId === sv.svId
+          const kopf = (
+            <>
               {sv.profilbild ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={sv.profilbild} alt={sv.vorname} className="h-12 w-12 rounded-full object-cover" />
@@ -76,32 +84,55 @@ export function SvSlotAuswahl({
                   />
                 </div>
               </div>
-            </div>
-            {sv.profilbeschreibung && (
-              <p className="text-sm text-claimondo-navy/60 mb-3 line-clamp-2">{sv.profilbeschreibung}</p>
-            )}
-            {sv.slots.length === 0 ? (
-              <p className="text-sm text-claimondo-navy/50">{t('slot.keine_termine')}</p>
-            ) : (
-              <div className="flex flex-wrap gap-2">
-                {sv.slots.map((slot) => (
-                  <button
-                    key={slot.start}
-                    type="button"
-                    data-testid={`buchung-slot-${sv.svId}-${slot.start}`}
-                    onClick={() => onSlot(sv, slot)}
-                    className="rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy transition hover:border-claimondo-ondo hover:bg-claimondo-bg"
-                  >
-                    {fmtSlot(slot.start, uhrSuffix)}
-                    {slot.matchType === 'wunschtermin' && (
-                      <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">{t('slot.wunschzeit')}</span>
-                    )}
-                  </button>
-                ))}
-              </div>
-            )}
-          </Card>
-        ))}
+            </>
+          )
+          return (
+            <Card
+              key={sv.svId}
+              p={5}
+              radius="lg"
+              className={selektiert ? 'ring-2 ring-claimondo-ondo ring-offset-1' : undefined}
+            >
+              {onSvSelect ? (
+                <button
+                  type="button"
+                  data-testid={`buchung-sv-${i}`}
+                  onClick={() => onSvSelect(sv)}
+                  className="mb-3 flex w-full items-center gap-3 text-left"
+                >
+                  {kopf}
+                </button>
+              ) : (
+                <div data-testid={`buchung-sv-${i}`} className="flex items-center gap-3 mb-3">
+                  {kopf}
+                </div>
+              )}
+              {sv.profilbeschreibung && (
+                <p className="text-sm text-claimondo-navy/60 mb-3 line-clamp-2">{sv.profilbeschreibung}</p>
+              )}
+              {sv.slots.length === 0 ? (
+                <p className="text-sm text-claimondo-navy/50">{t('slot.keine_termine')}</p>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {sv.slots.map((slot) => (
+                    <button
+                      key={slot.start}
+                      type="button"
+                      data-testid={`buchung-slot-${sv.svId}-${slot.start}`}
+                      onClick={() => onSlot(sv, slot)}
+                      className="rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy transition hover:border-claimondo-ondo hover:bg-claimondo-bg"
+                    >
+                      {fmtSlot(slot.start, uhrSuffix)}
+                      {slot.matchType === 'wunschtermin' && (
+                        <span className="ml-1 text-[10px] font-semibold text-claimondo-ondo">{t('slot.wunschzeit')}</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </Card>
+          )
+        })}
       </div>
     </div>
   )

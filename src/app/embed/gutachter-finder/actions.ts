@@ -171,7 +171,7 @@ export async function sendeEmbedTerminBestaetigung(input: {
 // ein dünner Adapter: Engine-Result → Route-Ziel-Shape (svId bzw. Dead-Pin-Liste fürs Rendering).
 type EmbedRouteZiel =
   | { kind: 'partner'; svId: string }
-  | { kind: 'deadpin'; deadPins: Array<{ lat: number; lng: number; ort: string | null }> }
+  | { kind: 'deadpin'; deadPins: Array<{ deadPinId: string; lat: number; lng: number; ort: string | null }> }
   | { kind: 'none' }
 
 export async function empfehleSvFuerOrt(input: {
@@ -185,7 +185,7 @@ export async function empfehleSvFuerOrt(input: {
     if (input.forceFallback) {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
       return deadPins.length > 0
-        ? { kind: 'deadpin', deadPins: deadPins.map((d) => ({ lat: d.lat, lng: d.lng, ort: d.ort })) }
+        ? { kind: 'deadpin', deadPins: deadPins.map((d) => ({ deadPinId: d.deadPinId, lat: d.lat, lng: d.lng, ort: d.ort })) }
         : { kind: 'none' }
     }
     // Engine-verankerte Diskriminierung (planeTerminMitFallback = EINE Quelle für Karte + Buchung).
@@ -195,7 +195,7 @@ export async function empfehleSvFuerOrt(input: {
     const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng })
     if (res.kind === 'partner') return { kind: 'partner', svId: res.svs[0].svId }
     return res.deadPins.length > 0
-      ? { kind: 'deadpin', deadPins: res.deadPins.map((d) => ({ lat: d.lat, lng: d.lng, ort: d.ort })) }
+      ? { kind: 'deadpin', deadPins: res.deadPins.map((d) => ({ deadPinId: d.deadPinId, lat: d.lat, lng: d.lng, ort: d.ort })) }
       : { kind: 'none' }
   } catch (err) {
     console.error('[empfehleSvFuerOrt] fehlgeschlagen (nicht kritisch):', (err as Error).message)

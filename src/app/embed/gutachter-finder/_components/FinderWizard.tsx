@@ -58,6 +58,8 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   // deadPins = die geladenen Lite-Karten (null = lädt noch).
   const [keinPartner, setKeinPartner] = useState(false)
   const [deadPins, setDeadPins] = useState<DeadPinOeffentlich[] | null>(null)
+  // AAR-956 #4: der gewählte Dead-Pin (default = nächster). Auswahl dispatcht an die Karte.
+  const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -99,7 +101,12 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
       setDeadPins([])
       return
     }
-    void ladeEmbedDeadPinFallback({ lat: ort.lat, lng: ort.lng }).then((dps) => setDeadPins(dps ?? []))
+    void ladeEmbedDeadPinFallback({ lat: ort.lat, lng: ort.lng }).then((dps) => {
+      const liste = dps ?? []
+      setDeadPins(liste)
+      // #4: nächsten Dead-Pin als Default hervorheben (Karte zeigt ihn schon) — kein Dispatch.
+      setSelectedDeadPinId(liste[0]?.deadPinId ?? null)
+    })
   }
 
   // Reserviert einen generischen Dead-Pin-Slot (→ dispatch_pending). Bei Erfolg geht die
@@ -116,6 +123,14 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
       void sendeEmbedDeadPinBestaetigung({ token, ortLabel, startIso })
     }
     return r
+  }
+
+  // AAR-956 #4 (Aaron 12.06.): dem Karten-Layer mitteilen, welchen Gutachter der Nutzer gewählt
+  // hat → die Karte routet dorthin + hebt ihn hervor (FinderMap hört auf claimondo:embed-sv-selected).
+  function dispatchGutachterWahl(detail: Record<string, unknown>) {
+    if (typeof document !== 'undefined') {
+      document.dispatchEvent(new CustomEvent('claimondo:embed-sv-selected', { detail }))
+    }
   }
 
   const stepIdx = phase === 'ort' ? 0 : phase === 'schaden' ? 1 : 2
@@ -236,6 +251,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             void sendeEmbedTerminBestaetigung({ token, svVorname: t.svVorname, startIso: t.startIso })
           }}
           onKeinMatch={partnerlosFallback}
+          onSvSelect={(sv) => dispatchGutachterWahl({ kind: 'partner', svId: sv.svId })}
         />
       )}
 
@@ -247,7 +263,15 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             Wir prüfen verfügbare Gutachter in Ihrer Nähe…
           </p>
         ) : deadPins.length > 0 ? (
-          <DeadPinSlotStep deadPins={deadPins} onBook={buchePinFallback} />
+          <DeadPinSlotStep
+            deadPins={deadPins}
+            onBook={buchePinFallback}
+            selectedDeadPinId={selectedDeadPinId}
+            onSelect={(dp) => {
+              setSelectedDeadPinId(dp.deadPinId)
+              dispatchGutachterWahl({ kind: 'deadpin', deadPinId: dp.deadPinId, lat: dp.lat, lng: dp.lng, ort: dp.ort })
+            }}
+          />
         ) : (
           <div className="py-3 text-center">
             <h3 className="text-body font-bold text-claimondo-navy">Wir melden uns telefonisch</h3>
