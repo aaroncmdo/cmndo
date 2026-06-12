@@ -61,8 +61,15 @@ export default async function KundeStartseite() {
         .update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() })
         .eq('id', lead.id)
       // Fall-ID für Task + Timeline ermitteln
-      const { data: linkedFall } = await admin.from('faelle').select('id').eq('lead_id', lead.id).limit(1).maybeSingle()
-      const fallId = linkedFall?.id ?? null
+      // CMM-49 (faelle-Drop-Runway): lead->fall via Bridge+claims!inner statt .from('faelle').
+      // faelle.lead_id == claims.lead_id (Divergenz=0 live verifiziert). Non-critical Pfad.
+      const { data: linkedFall } = await admin
+        .from('faelle_claim_bridge')
+        .select('fall_id, claims:claim_id!inner(lead_id)')
+        .eq('claims.lead_id', lead.id)
+        .limit(1)
+        .maybeSingle()
+      const fallId = (linkedFall as { fall_id?: string | null } | null)?.fall_id ?? null
       await admin.from('tasks').insert({
         fall_id: fallId,
         titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (Portal geöffnet)`,
