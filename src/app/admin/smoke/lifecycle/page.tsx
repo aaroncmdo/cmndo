@@ -33,7 +33,9 @@ export default async function SmokeLifecyclePage() {
     fall_typ: string | null
     claim_nummer: string | null
     status: string | null
-    faelle: Array<{ id: string; status: string | null }> | null
+    // CMM-49 DROP-Prep: faelle.id via bridge.fall_id (Reverse-Embed faelle:faelle(...) braeche
+    // bei DROP TABLE faelle). faelle.status war toter Over-Fetch (nur f.id konsumiert).
+    bridge: { fall_id: string } | Array<{ fall_id: string }> | null
   }
   let claims: SmokeClaim[] = []
   let loadError: string | null = null
@@ -41,7 +43,7 @@ export default async function SmokeLifecyclePage() {
     const admin = createAdminClient()
     const { data: smokeClaims, error } = await admin
       .from('claims')
-      .select('id, fall_typ, claim_nummer, status, faelle:faelle(id, status)')
+      .select('id, fall_typ, claim_nummer, status, bridge:faelle_claim_bridge!fk_bridge_claim(fall_id)')
       .like('fall_typ', 'SMOKE-LC%')
       .order('id')
     if (error) {
@@ -60,9 +62,10 @@ export default async function SmokeLifecyclePage() {
   for (let i = 0; i < SCENARIOS.length; i++) {
     const tag = smokeTagForScenario(i)
     const c = claims.find((cl) => cl.fall_typ === tag)
-    const f = c ? (c.faelle ?? [])[0] : undefined
+    const bridgeRaw = c?.bridge
+    const f = Array.isArray(bridgeRaw) ? bridgeRaw[0] : (bridgeRaw ?? undefined)
     if (f) {
-      fallByScenario.set(SCENARIOS[i].key, { id: f.id, claim_nummer: c?.claim_nummer ?? null })
+      fallByScenario.set(SCENARIOS[i].key, { id: f.fall_id, claim_nummer: c?.claim_nummer ?? null })
     }
   }
 
