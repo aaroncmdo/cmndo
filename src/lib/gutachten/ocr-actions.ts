@@ -85,11 +85,11 @@ export async function uploadGutachtenPdf(input: {
 
   // fall_id für emit + revalidate
   const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
+    .from('faelle_claim_bridge')
+    .select('fall_id')
     .eq('claim_id', gutachten.claim_id as string)
     .maybeSingle()
-  const fallId = (fall?.id as string | null) ?? null
+  const fallId = (fall?.fall_id as string | null) ?? null
 
   // Edge Function fire-and-forget triggern
   try {
@@ -176,11 +176,11 @@ export async function retryGutachtenOcr(input: {
   }
 
   const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
+    .from('faelle_claim_bridge')
+    .select('fall_id')
     .eq('claim_id', gutachten.claim_id as string)
     .maybeSingle()
-  if (fall?.id) revalidatePath(`/faelle/${fall.id}`)
+  if (fall?.fall_id) revalidatePath(`/faelle/${fall.fall_id}`)
 
   return { ok: true, data: { run_nummer: nextRunNummer } }
 }
@@ -237,26 +237,26 @@ export async function manuallyOverrideGutachtenFields(input: {
 
   // Notification an KB + Geschädigter
   const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
+    .from('faelle_claim_bridge')
+    .select('fall_id')
     .eq('claim_id', current.claim_id as string)
     .maybeSingle()
 
-  if (fall?.id) {
+  if (fall?.fall_id) {
     try {
       await emitEvent(
         'gutachten.fertig',
         {
-          fallId:       fall.id as string,
+          fallId:       fall.fall_id as string,
           gutachtenId:  input.gutachten_id,
           pdfUrl:       '',
         },
-        { fallId: fall.id as string, triggeredBy: auth.user.id },
+        { fallId: fall.fall_id as string, triggeredBy: auth.user.id },
       )
     } catch (err) {
       console.error('[AAR-838] emit gutachten.fertig fehlgeschlagen:', err)
     }
-    revalidatePath(`/faelle/${fall.id}`)
+    revalidatePath(`/faelle/${fall.fall_id}`)
   }
 
   return { ok: true }
