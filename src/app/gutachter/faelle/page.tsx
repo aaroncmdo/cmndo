@@ -99,27 +99,20 @@ export default async function GutachterFaellePage({
   }
 
   const [faelleRes, leadsRes] = await Promise.all([
-    // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT) via claim_id-Embed.
-    // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+    // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus claims (SSoT). CMM-49: alles flach aus
+    // v_claim_full (faelle-frei). fall_id == faelle.id (Key/Route).
     admin
-      .from('faelle')
-      .select('id, lead_id, claims:claim_id(schadenort_ort, claim_nummer, schadens_ursache)')
-      .in('id', fallIds),
+      .from('v_claim_full')
+      .select('fall_id, lead_id, schadenort_ort, claim_nummer, schadens_ursache')
+      .in('fall_id', fallIds),
     Promise.resolve(null), // placeholder, leads kommen unten via leadIds
   ])
   void leadsRes
 
-  const fallMap = Object.fromEntries((faelleRes.data ?? []).map((f) => [f.id, f]))
-  // CMM-44 SP-A2 (Cluster 1): schadenort_ort aus dem claims-Embed (Array/Objekt normalisieren).
-  const fallSchadenOrt = (f: { claims?: unknown }): string | null => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return (c as { schadenort_ort?: string | null } | null)?.schadenort_ort ?? null
-  }
-  // CMM-44 SP-A3: claim_nummer aus dem claims-Embed (Array/Objekt normalisieren).
-  const fallClaimNummer = (f: { claims?: unknown }): string | null => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return (c as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
-  }
+  const fallMap = Object.fromEntries((faelleRes.data ?? []).map((f) => [f.fall_id, f]))
+  // CMM-49: schadenort_ort/claim_nummer flach aus v_claim_full (kein claims-Embed mehr).
+  const fallSchadenOrt = (f: { schadenort_ort?: string | null }): string | null => f.schadenort_ort ?? null
+  const fallClaimNummer = (f: { claim_nummer?: string | null }): string | null => f.claim_nummer ?? null
   const leadIds = (faelleRes.data ?? []).map((f) => f.lead_id).filter(Boolean) as string[]
   const { data: leads } = leadIds.length
     ? await admin.from('leads').select('id, vorname, nachname').in('id', leadIds)
@@ -172,8 +165,6 @@ export default async function GutachterFaellePage({
                   {filtered.map((k) => {
                     const f = fallMap[k.fall_id as string]
                     if (!f) return null
-                    // CMM-44 SP-B PR2c: schadens_ursache aus claims-Embed (SSoT).
-                    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                     const lead = f.lead_id ? leadMap[f.lead_id as string] : null
                     const name = lead ? `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() : '—'
                     return (
@@ -183,15 +174,15 @@ export default async function GutachterFaellePage({
                       >
                         <Td>
                           <Link
-                            href={`/gutachter/fall/${f.id}`}
+                            href={`/gutachter/fall/${f.fall_id}`}
                             className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] font-mono text-xs"
                           >
-                            {fallClaimNummer(f) ?? (f.id as string).slice(0, 8)}
+                            {fallClaimNummer(f) ?? (f.fall_id as string).slice(0, 8)}
                           </Link>
                         </Td>
                         <Td>{name}</Td>
                         <Td className="whitespace-nowrap">
-                          <SchadensUrsacheBadge ursache={(fClaim as { schadens_ursache?: string | null } | null)?.schadens_ursache ?? null} plain />
+                          <SchadensUrsacheBadge ursache={f.schadens_ursache ?? null} plain />
                         </Td>
                         <Td className="!text-claimondo-ondo text-xs">
                           {fallSchadenOrt(f) ?? '—'}
