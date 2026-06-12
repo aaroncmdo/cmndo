@@ -19,7 +19,7 @@ import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePl
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
-import { ladeEmbedMatching, reserviereEmbedTermin } from '../actions'
+import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher } from '../actions'
 import { DeadPinSlotStep } from './DeadPinSlotStep'
 import { WunschterminPicker } from './WunschterminPicker'
 import type {
@@ -105,6 +105,13 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   const [fehler, setFehler] = useState<string | null>(null)
   const [slotWeg, setSlotWeg] = useState(false)
   const [pending, startTransition] = useTransition()
+  // Rückruf/Beratungsgespräch beim Dispatcher (Danke-Seite, Aaron 12.06.): Token nach der
+  // Buchung (Kunde kennt ihn eh per WA), gewählte Wunschzeit, Buchungs-Status.
+  const [buchungToken, setBuchungToken] = useState<string | null>(null)
+  const [rueckrufZeit, setRueckrufZeit] = useState('')
+  const [rueckrufGebucht, setRueckrufGebucht] = useState(false)
+  const [rueckrufFehler, setRueckrufFehler] = useState<string | null>(null)
+  const [rueckrufPending, startRueckrufTransition] = useTransition()
 
   // Step 1 → 2: Ort gewählt → Karte informieren + token-loses Matching laden.
   function ortGewaehlt(p: PlaceResult) {
@@ -185,6 +192,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         return
       }
       setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher })
+      setBuchungToken(res.token)
       setPhase('gebucht')
     })
   }
@@ -203,6 +211,21 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
       })
     }
+  }
+
+  // Danke-Seite: Rückruf/Beratungsgespräch beim zugewiesenen Dispatcher buchen (token = aus der
+  // Buchung; Lead-Daten kennen wir schon → nur die Wunschzeit).
+  function bucheRueckruf() {
+    if (!buchungToken || !rueckrufZeit) {
+      setRueckrufFehler('Bitte eine Wunschzeit wählen.')
+      return
+    }
+    setRueckrufFehler(null)
+    startRueckrufTransition(async () => {
+      const r = await bucheRueckrufBeimDispatcher({ token: buchungToken, wunschzeitLokal: rueckrufZeit })
+      if (r.ok) setRueckrufGebucht(true)
+      else setRueckrufFehler(r.error ?? 'Der Rückruf konnte nicht gebucht werden.')
+    })
   }
 
   const stepIdx = phase === 'ort' ? 0 : phase === 'termin' ? 1 : phase === 'schaden' ? 2 : 3
@@ -442,6 +465,37 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
               >
                 <Phone className="h-4 w-4" /> Jetzt anrufen
               </a>
+            </div>
+          )}
+
+          {/* Rückruf/Beratungsgespräch beim zugewiesenen Dispatcher buchen (Aaron 12.06.): wir
+              kennen den Lead schon → der Kunde wählt NUR die Wunschzeit, der Rückruf landet als
+              admin_termine (rueckruf) beim Dispatcher (/dispatch/rueckrufe). */}
+          {gebucht.dispatcher && buchungToken && (
+            <div className="mt-3 w-full rounded-ios-lg border border-claimondo-border bg-claimondo-bg/50 p-4 text-left">
+              {rueckrufGebucht ? (
+                <div className="flex items-center gap-2 text-[0.8125rem] font-semibold text-claimondo-navy">
+                  <CheckCircle2 className="h-5 w-5 flex-shrink-0 text-success" />
+                  <span>Beratungsgespräch vereinbart — {gebucht.dispatcher.vorname} ruft Sie zurück.</span>
+                </div>
+              ) : (
+                <>
+                  <h4 className="text-body-sm font-bold text-claimondo-navy">Lieber persönlich beraten lassen?</h4>
+                  <p className="mt-0.5 mb-2 text-[0.8125rem] text-claimondo-shield/80">
+                    Wählen Sie eine Wunschzeit — {gebucht.dispatcher.vorname} ruft Sie für ein kostenloses
+                    Beratungsgespräch zurück.
+                  </p>
+                  <WunschterminPicker value={rueckrufZeit} onChange={setRueckrufZeit} />
+                  {rueckrufFehler && (
+                    <p className="mt-2 rounded-ios-md bg-danger-soft px-3 py-2 text-[0.8125rem] text-danger-strong">
+                      {rueckrufFehler}
+                    </p>
+                  )}
+                  <Button onClick={bucheRueckruf} loading={rueckrufPending} variant="ondo" className="mt-3 w-full">
+                    Rückruf vereinbaren
+                  </Button>
+                </>
+              )}
             </div>
           )}
         </div>

@@ -28,6 +28,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { revalidatePath } from 'next/cache'
 
 export type EmbedBuchungInput = {
   vorname: string
@@ -200,7 +201,7 @@ export async function reserviereEmbedTermin(input: {
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
     | null
 }): Promise<
-  | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null }
+  | { ok: true; token: string; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
   // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
@@ -231,7 +232,7 @@ export async function reserviereEmbedTermin(input: {
   const dispatcher = await ladeLeadDispatcher(token)
 
   // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
-  if (!input.auswahl) return { ok: true, svVorname: null, ortLabel: null, startIso: null, dispatcher }
+  if (!input.auswahl) return { ok: true, token, svVorname: null, ortLabel: null, startIso: null, dispatcher }
 
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
@@ -242,13 +243,13 @@ export async function reserviereEmbedTermin(input: {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
     void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
-    return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher }
+    return { ok: true, token, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
   void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
-  return { ok: true, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher }
+  return { ok: true, token, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher }
 }
 
 /**
@@ -502,5 +503,112 @@ export async function sendeEmbedDeadPinBestaetigung(input: {
     await notifyTeamWhatsApp(teamText)
   } catch (err) {
     console.error('[embed-deadpin-bestaetigung] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+  }
+}
+
+/**
+ * AAR-956 (Aaron 12.06.): Rückruf/Beratungsgespräch beim dem Lead zugewiesenen Dispatcher buchen —
+ * von der Danke-Seite aus. Der Lead existiert schon (token), wir kennen Name/Telefon — der Kunde
+ * gibt NUR die Wunschzeit ein. Legt einen `admin_termine` (typ='rueckruf') auf den BESTEHENDEN Lead
+ * an, `zugewiesen_an`=Dispatcher (erscheint auf /dispatch/rueckrufe), + Mitteilung an den Dispatcher
+ * + WhatsApp-Bestätigung an den Kunden. KEIN neuer Lead (anders als erstelleOeffentlichenRueckruf).
+ */
+export async function bucheRueckrufBeimDispatcher(
+  input: { token: string; wunschzeitLokal: string },
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    if (!input.token || !input.wunschzeitLokal) return { ok: false, error: 'Bitte eine Wunschzeit wählen.' }
+    let startIso: string
+    try {
+      startIso = berlinWallClockToUtc(input.wunschzeitLokal)
+    } catch {
+      return { ok: false, error: 'Ungültige Wunschzeit.' }
+    }
+    const admin = createAdminClient()
+    const { data: fl } = await admin.from('flow_links').select('lead_id').eq('token', input.token).maybeSingle()
+    const leadId = (fl?.lead_id as string | null) ?? null
+    if (!leadId) return { ok: false, error: 'Die Sitzung ist abgelaufen. Bitte starten Sie neu.' }
+    const { data: lead } = await admin
+      .from('leads')
+      .select('vorname, nachname, telefon, zugewiesen_an')
+      .eq('id', leadId)
+      .maybeSingle()
+    if (!lead) return { ok: false, error: 'Anfrage nicht gefunden.' }
+
+    // Dispatcher = der dem Lead zugewiesene; Fallback = erster Dispatch-User (erstellt_von ist NOT NULL).
+    let dispId = (lead.zugewiesen_an as string | null) ?? null
+    if (!dispId) {
+      const { data: d } = await admin.from('profiles').select('id').eq('rolle', 'dispatch').limit(1).maybeSingle()
+      dispId = (d?.id as string | null) ?? null
+    }
+    if (!dispId) return { ok: false, error: 'Aktuell ist kein Ansprechpartner verfügbar.' }
+
+    const vorname = ((lead.vorname as string | null) ?? '').trim()
+    const name = [vorname, ((lead.nachname as string | null) ?? '').trim()].filter(Boolean).join(' ').trim() || 'Kunde'
+    const telefon = ((lead.telefon as string | null) ?? '').trim()
+    const endIso = new Date(new Date(startIso).getTime() + 30 * 60_000).toISOString()
+    const wann = new Date(startIso).toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    const { data: termin, error } = await admin
+      .from('admin_termine')
+      .insert({
+        typ: 'rueckruf',
+        titel: `Beratungsgespräch: ${name}`,
+        beschreibung: `Rückruf-Wunsch aus dem Gutachter-Finder (Danke-Seite). Lead bereits qualifiziert — Beratungsgespräch.\nQuelle: embed-gutachter-finder`,
+        start_zeit: startIso,
+        end_zeit: endIso,
+        status: 'offen',
+        lead_id: leadId,
+        erstellt_von: dispId,
+        zugewiesen_an: dispId,
+        erinnerung_min_vorher: 10,
+      })
+      .select('id')
+      .single()
+    if (error || !termin) return { ok: false, error: error?.message ?? 'Der Rückruf konnte nicht gebucht werden.' }
+
+    // Mitteilung an den Dispatcher (non-critical).
+    try {
+      await admin.from('mitteilungen').insert({
+        empfaenger_id: dispId,
+        empfaenger_rolle: 'dispatch',
+        kategorie: 'anruf',
+        titel: `Beratungs-Rückruf: ${name}`,
+        inhalt: `Tel: ${telefon} · Wunschzeit: ${wann} Uhr`,
+        prioritaet: 'hoch',
+        icon: '📞',
+        route_url: `/dispatch/rueckrufe?open=${termin.id}`,
+      })
+    } catch (err) {
+      console.error('[rueckruf-dispatcher] Mitteilung fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    }
+
+    // WhatsApp-Bestätigung an den Kunden (non-critical; lokal ohne Baileys nur geloggt).
+    if (telefon.length >= 5) {
+      const text = [
+        '✅ Ihr Beratungsgespräch ist vereinbart',
+        '',
+        `Hallo ${vorname || name},`,
+        `wir rufen Sie am ${wann} Uhr für Ihr persönliches Beratungsgespräch zurück.`,
+        '',
+        'Ihr Claimondo-Team',
+      ].join('\n')
+      const r = await sendWhatsAppText(telefon, text)
+      if (!r.ok) console.error('[rueckruf-dispatcher] Kunde-WA fehlgeschlagen:', r.code, r.error)
+    }
+
+    revalidatePath('/dispatch/rueckrufe')
+    revalidatePath('/dispatch/dashboard')
+    return { ok: true }
+  } catch (err) {
+    console.error('[bucheRueckrufBeimDispatcher] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return { ok: false, error: 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.' }
   }
 }
