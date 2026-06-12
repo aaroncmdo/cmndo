@@ -392,9 +392,15 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         svMarkerElsRef.current.set(sv.id, marker.getElement())
       })
 
-      // ─── Tier-3 sv_leads — NICHT mehr alle als Pins (Aaron 12.06.: „nur die wo die
-      // 15-km-Ghost-Isochrone passt, falls kein Partner verfügbar"). Die deckenden Dead-Pins
-      // werden erst nach der Ort-Eingabe gesetzt (handleEmbedOrt → empfehleSvFuerOrt → deadPins).
+      // ─── Tier-3 sv_leads — als Dead-Pins gerendert (Aaron 12.06.: „die Dead-Pins müssen
+      // trotzdem gerendert werden"). Die 15-km-Ghost-Isochrone filtert NUR die Buchung + das
+      // Route-Ziel, NICHT die Karten-Darstellung. El nach ID (= sv_leads.id = deadPinId)
+      // merken → den gematchten/gewählten Dead-Pin hervorheben.
+      deadPinElsRef.current.clear()
+      svLeads.forEach((sv) => {
+        const m = addDeadPin(map, deadPinMarkersRef.current, sv.lng, sv.lat)
+        deadPinElsRef.current.set(sv.id, m.getElement())
+      })
     })
 
     // WS2: Popup ist jetzt view-only (React-Profil). Die alte claimondo:open-wizard /
@@ -526,10 +532,6 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       // forceFallback (?fallback=1) erzwingt den Dead-Pin-Pfad (Test).
       void empfehleSvFuerOrt({ lat, lng, forceFallback }).then((ziel) => {
         if (!mapRef.current) return
-        // Dead-Pins der vorigen Ort-Eingabe entfernen (die neue Empfehlung setzt ihre eigenen).
-        deadPinMarkersRef.current.forEach((m) => m.remove())
-        deadPinMarkersRef.current = []
-        deadPinElsRef.current.clear()
         if (ziel.kind === 'partner') {
           const sv = aktiveSVs.find((s) => s.id === ziel.svId) ?? null
           if (!sv) {
@@ -541,12 +543,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
             openSvPopup(sv)
           })
         } else if (ziel.kind === 'deadpin') {
-          // GENAU die deckenden Dead-Pins (15-km-Isochrone) als Pins setzen — nicht alle 62.
-          // Route + Light-Popup zum nächsten (deadPins[0], nach Distanz sortiert).
-          ziel.deadPins.forEach((dp) => {
-            const marker = addDeadPin(map, deadPinMarkersRef.current, dp.lng, dp.lat)
-            deadPinElsRef.current.set(dp.deadPinId, marker.getElement())
-          })
+          // Die Dead-Pins sind bereits gerendert (Baseline). Route + Light-Popup zum nächsten
+          // DECKENDEN (deadPins[0], 15-km-Isochrone, nach Distanz) + diesen hervorheben.
           const naechster = ziel.deadPins[0]
           if (!naechster) {
             map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
