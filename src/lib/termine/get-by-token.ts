@@ -76,12 +76,14 @@ export async function getTerminByToken(
   if ((termin.besichtigungsort_adresse as string | null)) adresse = termin.besichtigungsort_adresse as string
 
   if (termin.fall_id) {
+    // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). lead_id/fahrzeug_*/
+    // kennzeichen/claim_nummer alle flach (fahrzeug_*-Snapshot 0-pop, value-identisch).
     const { data: fall } = await svc
-      .from('faelle')
-      .select('lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claims:claim_id(claim_nummer)')
-      .eq('id', termin.fall_id)
+      .from('v_claim_full')
+      .select('lead_id, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, claim_nummer')
+      .eq('fall_id', termin.fall_id)
       .single()
-    fallNummer = (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null
+    fallNummer = fall?.claim_nummer ?? null
     if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
     const fp = [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell].filter(Boolean)
     if (fp.length > 0) fahrzeug = fp.join(' ')
