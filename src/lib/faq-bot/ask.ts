@@ -138,10 +138,12 @@ async function loadFallContext(fallId: string, rolle: FaqBotRolle) {
 
   const [fallRes, leadRes, timelineRes, tasksRes] = await Promise.all([
     admin.from('v_faelle_mit_aktuellem_termin').select('*').eq('id', fallId).maybeSingle(),
+    // CMM-49 (faelle-Drop-Runway): Lead-Kontaktdaten via Bridge->claims->leads (claims.lead_id
+    // == faelle.lead_id, div=0) statt .from('faelle'). Nested-Embed liefert denselben Lead.
     admin
-      .from('faelle')
-      .select('lead_id, leads(vorname, nachname, email, telefon, unfallhergang, schadentyp)')
-      .eq('id', fallId)
+      .from('faelle_claim_bridge')
+      .select('claims:claim_id(leads:lead_id(vorname, nachname, email, telefon, unfallhergang, schadentyp))')
+      .eq('fall_id', fallId)
       .maybeSingle(),
     timelineQueryScoped,
     // AAR-438: Tasks nach Fälligkeit sortiert — Priorität (TEXT kritisch/dringend/normal)
@@ -156,7 +158,10 @@ async function loadFallContext(fallId: string, rolle: FaqBotRolle) {
   ])
 
   const fall = fallRes.data as Record<string, unknown> | null
-  const leadRaw = (leadRes.data as { leads: unknown } | null)?.leads
+  // CMM-49: Bridge->claims->leads entschachteln (claims + leads je nach Cardinality Array oder Objekt).
+  const leadClaimRaw = (leadRes.data as { claims: unknown } | null)?.claims
+  const leadClaim = (Array.isArray(leadClaimRaw) ? leadClaimRaw[0] : leadClaimRaw) as { leads: unknown } | null
+  const leadRaw = leadClaim?.leads
   const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as Record<string, unknown> | null
 
   // AAR-438: Top-10 Tasks nach Priorität (kritisch > dringend > normal), dann Fälligkeit.
