@@ -178,3 +178,53 @@ export async function entscheideVerlegung(
     return { ok: true }
   }
 }
+
+export interface ReassigniereDeadPinInput {
+  /** Ziel-Partner (sachverstaendige.id) — validate_assignee-Trigger prueft die Existenz. */
+  partnerId: string
+  /** Ziel-Status. default 'bestaetigt' (Dispatch bestaetigt den echten Partner). Achtung:
+   *  'reserviert' unterliegt der bestehenden TTL-Bereinigung (expire_geblockte_termine_ohne_sa:
+   *  reserviert_bis IS NULL + fall_id IS NULL + >1h -> storniert) — fuer eine DAUERHAFTE
+   *  Zuweisung 'bestaetigt' nutzen (Default). */
+  neuerStatus?: 'reserviert' | 'bestaetigt'
+  db?: SupabaseClient
+}
+export type ReassigniereDeadPinResult =
+  | { ok: true; terminId: string }
+  | { ok: false; error: string; code: 'nicht_dispatch_pending' | 'belegt' | 'db' }
+
+/**
+ * AAR-956 Dead-Pin-Reassign-Safety-Net: weist einen Dead-Pin-Termin (assignee_typ='sv_lead',
+ * status='dispatch_pending') einem echten Partner (sachverstaendiger) zu. Beim Flip in den
+ * Exclusion-Status (reserviert/bestaetigt) greift gutachter_termine_no_assignee_overlap →
+ * 23P01 bei Doppelbuchung des Partners (belegt) — dispatch_pending war exempt, jetzt schuetzt
+ * die Constraint den Partner. sv_lead_id wird genullt (kein Dead-Pin mehr). status-gegate
+ * (.eq dispatch_pending + sv_lead) → idempotent. Reine DB-Transition — Notify/Auth = Caller
+ * (Dispatch-Revier).
+ */
+export async function reassigniereDeadPin(
+  terminId: string,
+  input: ReassigniereDeadPinInput,
+): Promise<ReassigniereDeadPinResult> {
+  const db = input.db ?? (await import('@/lib/supabase/admin')).createAdminClient()
+  const neuerStatus = input.neuerStatus ?? 'bestaetigt'
+  const { data, error } = await db
+    .from('gutachter_termine')
+    .update({
+      assignee_typ: 'sachverstaendiger',
+      assignee_id: input.partnerId,
+      sv_lead_id: null,
+      status: neuerStatus,
+    })
+    .eq('id', terminId)
+    .eq('status', 'dispatch_pending')
+    .eq('assignee_typ', 'sv_lead')
+    .select('id')
+  if (error) {
+    if (error.code === '23P01') return { ok: false, error: 'Partner zu dieser Zeit belegt', code: 'belegt' }
+    return { ok: false, error: error.message, code: 'db' }
+  }
+  if (!data || data.length === 0)
+    return { ok: false, error: 'Termin nicht (mehr) dispatch_pending', code: 'nicht_dispatch_pending' }
+  return { ok: true, terminId }
+}
