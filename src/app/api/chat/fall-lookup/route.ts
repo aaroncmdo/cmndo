@@ -20,8 +20,8 @@ export async function GET(req: NextRequest) {
   const pattern = `%${q}%`
 
   // CMM-74 b": Status-Filter claims-zentrisch (operative_status SSoT). Zwei-Schritt:
-  // erst claims.operative_status filtern -> claim-IDs -> faelle.in('claim_id', …).
-  // Eine gemeinsame Pre-Query für beide faelle-Querys (byFallNr + byLead).
+  // erst claims.operative_status filtern -> claim-IDs -> bridge.in('claim_id', …).
+  // Eine gemeinsame Pre-Query für beide Bridge-Querys (byFallNr + byLead).
   const { data: nichtStornierteClaims } = await supabase
     .from('claims')
     .select('id')
@@ -30,11 +30,13 @@ export async function GET(req: NextRequest) {
 
   // Suche nach Fällen mit Kunden-Namen (über leads join) oder Aktennummer.
   // CMM-44 SP-A3: Aktennummer ist claims.claim_nummer (nested über claim_id).
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner (fall_id==faelle.id;
+  // claim_nummer/lead_id aus claims SSoT, div=0). !inner ersetzt .not('claims','is',null). RLS:
+  // faelle_claim_bridge spiegelt faelle-Case-Access -> gleiche Sicht. Value-neutral (SET EQUAL probed).
   const { data: byFallNr } = await supabase
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id(claim_nummer)')
+    .from('faelle_claim_bridge')
+    .select('fall_id, claims:claim_id!inner(claim_nummer, lead_id)')
     .ilike('claims.claim_nummer', pattern)
-    .not('claims', 'is', null)
     .in('claim_id', nichtStornierteClaimIds)
     .limit(5)
 
@@ -46,24 +48,34 @@ export async function GET(req: NextRequest) {
 
   const leadIdsByName = new Set((byName ?? []).map((l) => l.id))
 
-  let { data: byLead } = leadIdsByName.size > 0
+  // CMM-49: lead_id-Filter -> claims.lead_id (embedded, SSoT div=0); !inner.
+  const { data: byLeadRaw } = leadIdsByName.size > 0
     ? await supabase
-        .from('faelle')
-        .select('id, lead_id, claims:claim_id(claim_nummer)')
-        .in('lead_id', [...leadIdsByName])
+        .from('faelle_claim_bridge')
+        .select('fall_id, claims:claim_id!inner(claim_nummer, lead_id)')
+        .in('claims.lead_id', [...leadIdsByName])
         .in('claim_id', nichtStornierteClaimIds)
         .limit(10)
-    : { data: [] as Array<{ id: string; lead_id: string | null; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null }> }
+    : { data: [] }
 
-  byLead = byLead ?? []
+  // CMM-49: Bridge-Rows -> {fallId, fallNummer, leadId} normalisieren (claims je Cardinality
+  // Array-oder-Objekt), dann dedupe nach fall_id.
+  type BridgeRow = { fall_id: string; claims: { claim_nummer: string | null; lead_id: string | null } | { claim_nummer: string | null; lead_id: string | null }[] | null }
+  const normalize = (rows: unknown): Array<{ fallId: string; fallNummer: string | null; leadId: string | null }> =>
+    ((rows as BridgeRow[] | null) ?? []).map((r) => {
+      const c = Array.isArray(r.claims) ? r.claims[0] : r.claims
+      return { fallId: r.fall_id, fallNummer: c?.claim_nummer ?? null, leadId: c?.lead_id ?? null }
+    })
+  const byFallNrN = normalize(byFallNr)
+  const byLeadN = normalize(byLeadRaw)
 
   // Alle unique lead_ids auflösen
   const allFaelle = [
-    ...(byFallNr ?? []),
-    ...byLead.filter((f) => !(byFallNr ?? []).some((x) => x.id === f.id)),
+    ...byFallNrN,
+    ...byLeadN.filter((f) => !byFallNrN.some((x) => x.fallId === f.fallId)),
   ].slice(0, 8)
 
-  const leadIds = [...new Set(allFaelle.map((f) => f.lead_id).filter(Boolean) as string[])]
+  const leadIds = [...new Set(allFaelle.map((f) => f.leadId).filter(Boolean) as string[])]
   const { data: leads } = leadIds.length > 0
     ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
     : { data: [] as Array<{ id: string; vorname: string | null; nachname: string | null }> }
@@ -71,12 +83,11 @@ export async function GET(req: NextRequest) {
   const leadMap = new Map((leads ?? []).map((l) => [l.id, l]))
 
   const results: FallLookupResult[] = allFaelle.map((f) => {
-    const lead = f.lead_id ? leadMap.get(f.lead_id) : null
+    const lead = f.leadId ? leadMap.get(f.leadId) : null
     const kundeName = lead
       ? [lead.vorname, lead.nachname].filter(Boolean).join(' ')
       : 'Unbekannt'
-    const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return { fallId: f.id, fallNummer: claim?.claim_nummer ?? null, kundeName: kundeName || 'Unbekannt' }
+    return { fallId: f.fallId, fallNummer: f.fallNummer, kundeName: kundeName || 'Unbekannt' }
   })
 
   return NextResponse.json({ results })

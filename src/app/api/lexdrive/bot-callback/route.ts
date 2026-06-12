@@ -46,8 +46,9 @@ export async function POST(req: NextRequest) {
   if (!fallId && body.claim_nummer) {
     const { data: claim } = await db.from('claims').select('id').eq('claim_nummer', body.claim_nummer).maybeSingle()
     if (claim?.id) {
-      const { data: fall } = await db.from('faelle').select('id').eq('claim_id', claim.id).maybeSingle()
-      fallId = fall?.id ?? null
+      // CMM-49 (faelle-Drop-Runway): claim_id->fall_id via Bridge (fall_id==faelle.id).
+      const { data: fall } = await db.from('faelle_claim_bridge').select('fall_id').eq('claim_id', claim.id).maybeSingle()
+      fallId = fall?.fall_id ?? null
     }
   }
 
