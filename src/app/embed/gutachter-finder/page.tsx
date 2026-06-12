@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
@@ -40,15 +41,28 @@ export default async function GutachterFinderEmbedPage({
   const zoomN = sp.zoom ? Number(sp.zoom) : NaN
   const initialZoom = Number.isFinite(zoomN) ? zoomN : undefined
 
+  // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn NEXT_PUBLIC_GF_GTM_ID gesetzt ist
+  // (auf app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM
+  // → GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). Consent-Gating
+  // + EC-Hashing macht GTM selbst. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
+  const gtmId = process.env.NEXT_PUBLIC_GF_GTM_ID
+
   return (
-    <FinderMap
-      svLeads={leadPins}
-      aktiveSVs={svs}
-      height="100dvh"
-      initialCenter={initialCenter}
-      initialZoom={initialZoom}
-      forceFallback={sp.fallback === '1'}
-      wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
-    />
+    <>
+      {gtmId ? (
+        <Script id="gf-gtm" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
+        </Script>
+      ) : null}
+      <FinderMap
+        svLeads={leadPins}
+        aktiveSVs={svs}
+        height="100dvh"
+        initialCenter={initialCenter}
+        initialZoom={initialZoom}
+        forceFallback={sp.fallback === '1'}
+        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
+      />
+    </>
   )
 }
