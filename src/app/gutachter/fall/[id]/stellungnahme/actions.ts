@@ -42,12 +42,16 @@ export async function submitStellungnahme(
   const db = createAdminClient()
   // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
   // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, sv_id, claims:claim_id(claim_nummer, auftraege(technische_stellungnahme_status))')
-    .eq('id', input.fallId)
-    .eq('sv_id', sv.id)
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner; sv-Filter via embedded
+  // claims.sv_id (SSoT div=0). claim_nummer + auftraege.technische_stellungnahme_status via claims.
+  const { data: fallRaw } = await db
+    .from('faelle_claim_bridge')
+    .select('claims:claim_id!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status))')
+    .eq('fall_id', input.fallId)
+    .eq('claims.sv_id', sv.id)
     .maybeSingle()
+  type StClaim = { sv_id: string | null; claim_nummer: string | null; auftraege: unknown }
+  const fall = fallRaw as unknown as { claims: StClaim | StClaim[] | null } | null
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims

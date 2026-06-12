@@ -33,14 +33,15 @@ async function loadFallFuerSv(
   const db = createAdminClient()
   // CMM-44 SP-D PR2a: nachbesichtigung_sv_konfrontation_gewuenscht +
   // nachbesichtigung_sv_termin_vereinbart_am aus gutachter_termine (aktueller Termin, SSoT).
-  const { data: fall } = await db
-    .from('faelle')
-    .select(
-      'id, sv_id, claim_id, claims:claim_id(claim_nummer)',
-    )
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge (claim_id nativ fuer GT-Lookup);
+  // sv-Filter via embedded claims.sv_id (SSoT div=0); claim_nummer via claims.
+  const { data: fallRaw } = await db
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id!inner(sv_id, claim_nummer)')
+    .eq('fall_id', fallId)
+    .eq('claims.sv_id', sv.id)
     .maybeSingle()
+  const fall = fallRaw as unknown as { claim_id: string | null; claims: { sv_id: string | null; claim_nummer: string | null } | { sv_id: string | null; claim_nummer: string | null }[] | null } | null
 
   if (!fall) return { error: 'Fall nicht gefunden oder nicht autorisiert' }
 
@@ -65,7 +66,7 @@ async function loadFallFuerSv(
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   return {
-    fall: { id: fall.id as string, claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null },
+    fall: { id: fallId, claim_nummer: (fallClaim?.claim_nummer as string | null) ?? null },
     userId: user.id,
   }
 }
