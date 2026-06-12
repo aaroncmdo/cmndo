@@ -38,20 +38,16 @@ export default async function KundeChatPage({
   // kunde_id-Read + lead-email-Merge in EINER Ownership-Quelle. Dann die faelle
   // dieser Claims laden (id/lead_id/created_at faelle-nativ bis Phase 6).
   const ownedClaimIds = await getOwnedClaimIds(admin, user.id, user.email ?? null)
-  // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
-  // to-one-Spalte ordnen -> claims.created_at via !inner mitladen + clientseitig
-  // created_at-desc sortieren (juengster Fall zuerst, wie bisher).
-  type ClaimEmbed = { claim_nummer: string | null; created_at: string | null } | { claim_nummer: string | null; created_at: string | null }[] | null
-  type FallRow = { id: string; lead_id: string | null; claims: ClaimEmbed }
+  // CMM-65: created_at lebt auf claims (SSoT). CMM-49: via v_claim_full (flat, faelle-frei) —
+  // vcf.id = claim_id (Filter), fall_id == faelle.id, claim_nummer/created_at flach. Sortierung
+  // clientseitig created_at-desc (juengster Fall zuerst).
+  type FallRow = { fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }
   const { data: faelleData } = await admin
-    .from('faelle')
-    .select('id, lead_id, claims:claim_id!inner(claim_nummer, created_at)')
-    .in('claim_id', ownedClaimIds)
+    .from('v_claim_full')
+    .select('fall_id, lead_id, claim_nummer, created_at')
+    .in('id', ownedClaimIds)
   const faelle = ((faelleData ?? []) as FallRow[])
-    .map(f => {
-      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      return { id: f.id, claim_nummer: c?.claim_nummer ?? null, lead_id: f.lead_id, _c: c?.created_at ?? '' }
-    })
+    .map(f => ({ id: f.fall_id, claim_nummer: f.claim_nummer ?? null, lead_id: f.lead_id, _c: f.created_at ?? '' }))
     .sort((a, b) => b._c.localeCompare(a._c))
 
   if (faelle.length === 0) {
