@@ -163,13 +163,15 @@ export async function getVerlegungsVorschlaegeAction(input: {
   // direkt für die Routen-Berechnung.
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (SSoT).
-  const { data: fall } = await admin
-    .from('faelle')
-    .select(
-      'id, claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)',
-    )
-    .eq('id', fallId)
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge (claim_id nativ fuer den GT-Lookup;
+  // schadenort_* via claims-Embed, SSoT). faelle.id war ungenutzt.
+  const { data: fallRaw } = await admin
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
+    .eq('fall_id', fallId)
     .maybeSingle()
+  type VerlClaim = { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }
+  const fall = fallRaw as unknown as { claim_id: string | null; claims: VerlClaim | VerlClaim[] | null } | null
   if (!fall) return { ok: false, error: `Fall ${fallId} nicht gefunden.` }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
@@ -377,11 +379,13 @@ export async function getKundeTerminVorschlaegeAction(
 
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_* aus gutachter_termine (SSoT).
-  const { data: fall } = await admin
-    .from('faelle')
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge (claim_id nativ; schadenort_* via Embed).
+  const { data: fallRaw } = await admin
+    .from('faelle_claim_bridge')
     .select('claim_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('id', termin.fall_id as string)
+    .eq('fall_id', termin.fall_id as string)
     .maybeSingle()
+  const fall = fallRaw as unknown as { claim_id: string | null; claims: { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null } | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null }[] | null } | null
   if (!fall) return { ok: false, error: 'Fall nicht gefunden.' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
 
@@ -604,16 +608,15 @@ async function assertDarfVerlegungEntscheiden(
   const rolle = (prof?.rolle as string | undefined) ?? ''
   if (rolle === 'admin' || rolle === 'staff' || rolle === 'dispatch') return null
 
-  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
+  // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT). CMM-49: via v_claim_full (flat, faelle-frei).
   const { data: fall } = await admin
-    .from('faelle')
-    .select('kunde_id, sv_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('kunde_id, sv_id, kundenbetreuer_id')
+    .eq('fall_id', fallId)
     .maybeSingle()
   if (!fall) return 'Fall nicht gefunden.'
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   if (fall.kunde_id === userId) return null
-  if (fallClaim?.kundenbetreuer_id === userId) return null
+  if (fall.kundenbetreuer_id === userId) return null
   // SV-Auth: User muss profile_id des zugewiesenen SV sein
   if (fall.sv_id) {
     const { data: sv } = await admin
@@ -687,9 +690,9 @@ export async function terminVerlegungBestaetigen(input: {
   // Notifikation an SV
   if (neu.fall_id) {
     const { data: fall } = await admin
-      .from('faelle')
+      .from('v_claim_full')
       .select('kunde_id')
-      .eq('id', neu.fall_id as string)
+      .eq('fall_id', neu.fall_id as string)
       .maybeSingle()
     const kundenVorname = await lookupKundenVorname((fall?.kunde_id as string | null) ?? null)
     const von_wem = await lookupUserRolle(user.id)
@@ -775,9 +778,9 @@ export async function terminVerlegungAblehnen(input: {
   // Notifikation an SV (mit Grund)
   if (neu.fall_id) {
     const { data: fall } = await admin
-      .from('faelle')
+      .from('v_claim_full')
       .select('kunde_id')
-      .eq('id', neu.fall_id as string)
+      .eq('fall_id', neu.fall_id as string)
       .maybeSingle()
     const kundenVorname = await lookupKundenVorname((fall?.kunde_id as string | null) ?? null)
     const von_wem = await lookupUserRolle(user.id)
