@@ -2,6 +2,11 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
+// AAR-956 WS1b — portiert aus claimondo-marketing/app/[locale]/gutachter-finden/
+// GutachterFinderMapClient.tsx in die Haupt-App (Embed-Route /embed/gutachter-finder).
+// next-intl → inline DE (Open-Decision #2); ansonsten visuell deckungsgleich.
+// WS2 redesignt das Pin-Popup (+ GoogleBewertungBadge), WS3 Route/Zoom, WS4 füllt wizardSlot.
+//
 // 2026-05-11: Gutachter-Finder mit Mapbox-Vollbild-Karte (Referenz:
 // docs/Pages/sv-live-mapbox_25.html) + DynamicWizard im Sidebar-Panel
 // (Referenz: docs/Pages/terminierung-flow.html).
@@ -16,28 +21,31 @@
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
-import { useTranslations } from 'next-intl'
 // 2026-05-12: NICHT aus '@/lib/mapbox' (Index) importieren — der Index
 // re-exportiert sv-car-3d-three (THREE.js am Top-Level) und cesium-3d-tiles,
 // die sonst in den Public-Map-Bundle wandern. THREE.Color hat im minified
 // Turbopack-Build den Constructor verloren → "i.Color is not a constructor"-
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import type { Map as MapboxMap, Marker, Popup } from 'mapbox-gl'
+import { fetchDrivingRoute } from '@/lib/mapbox/directions'
+import type { Map as MapboxMap, Marker, Popup, GeoJSONSource } from 'mapbox-gl'
 import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 // AAR-glass-s1: Liquid-Glass-Design-System (siehe
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
-import { GlassPill, BeratungVereinbarenButton } from '@/components/shared/glass'
+import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
+import { createRoot, type Root } from 'react-dom/client'
+import { SvProfilePopup } from './SvProfilePopup'
+import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
   /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
   svLeads: SvLeadPublic[]
-  /** Tier-1 SVs (sachverstaendige). paket='standard' = klickbar mit anonymem
-   * Profil-Popup. Andere Pakete = Dead-Pin wie Tier-3. */
+  /** Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron): JEDER verifizierte,
+   * aktive SV ist klickbar mit anonymem Profil-Popup (RLS-gegated). */
   aktiveSVs?: AktiverSVPublic[]
-  /** Server-Component-Rendered DynamicWizard für die Sidebar. */
-  wizardSlot: React.ReactNode
+  /** Slot für den Inline-Wizard (WS4 — FlowSlotStep). WS1b: Platzhalter aus der Page. */
+  wizardSlot?: React.ReactNode
   /** Doc 34 0a.3: Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng),
    * server-seitig via Mapbox geocodet. Wenn gesetzt, startet die Karte hier
    * UND die automatische Geolocation-Abfrage entfällt (explizite User-Wahl
@@ -93,13 +101,15 @@ function addDeadPin(
   store.push(marker)
 }
 
-// Klickbarer Avatar-Marker für SVs mit paket='standard'. Öffnet ein
-// anonymisiertes Profil-Popup (Region, Sterne, Specs, Vorname-Initiale).
+// Klickbarer Avatar-Marker für verifizierte SVs. Click → onClick (öffnet das
+// React-Profil-Popup über dem Pin, WS2). KEIN setPopup/HTML-Popup + kein
+// Wizard-CTA mehr — die Buchung läuft über den 3-Step-Wizard (WS4), den SV
+// wählt das System (WS3).
 function addClickableMarker(
   map: MapboxMap,
   store: Marker[],
   sv: AktiverSVPublic,
-  strings: { svIn: string; zertifiziert: string; bewertungen: string; popupCta: string },
+  onClick: () => void,
 ) {
   const initiale = sv.vorname_initiale ?? '·'
   const el = document.createElement('div')
@@ -112,87 +122,52 @@ function addClickableMarker(
       </div>
     </div>
   `
-
-  // Privacy-Popup: nur Region + Sterne + Top-3-Specs + Wizard-CTA.
-  // KEIN Firmenname, KEINE Adresse, KEIN Telefon/Email, KEIN Vor-/Nachname.
-  const stadt = sv.stadt ?? 'Ihrer Region'
-  const sterneRow =
-    sv.bewertungs_durchschnitt && sv.bewertungs_anzahl
-      ? `
-        <div style="margin-top:8px;display:flex;align-items:center;gap:6px;font-size:11.5px;color:${COL_NAVY};font-weight:600">
-          <span style="color:#F3C053;font-size:13px;line-height:1">★</span>
-          <span>${sv.bewertungs_durchschnitt.toFixed(1)} <span style="color:#6b7280;font-weight:500">(${sv.bewertungs_anzahl} ${escapeHtml(strings.bewertungen)})</span></span>
-        </div>
-      `
-      : ''
-  const specsRow =
-    sv.spezifikationen_top3.length > 0
-      ? `
-        <div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">
-          ${sv.spezifikationen_top3
-            .map(
-              (s) =>
-                `<span style="padding:2px 8px;border-radius:999px;background:rgba(69,115,162,0.08);color:${COL_NAVY};font-size:10.5px;font-weight:600;letter-spacing:-.01em">${escapeHtml(s)}</span>`,
-            )
-            .join('')}
-        </div>
-      `
-      : ''
-  const popupHTML = `
-    <div style="padding:14px 16px;font-family:Montserrat,system-ui,sans-serif;min-width:240px;max-width:280px">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="width:36px;height:36px;border-radius:50%;background:${COL_ONDO};display:grid;place-items:center;font-size:14px;font-weight:800;color:#fff;flex-shrink:0">${initiale}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:12.5px;font-weight:700;color:${COL_NAVY};line-height:1.25;letter-spacing:-.01em">${escapeHtml(strings.svIn)} ${escapeHtml(stadt)}</div>
-          <div style="font-size:10.5px;color:#6b7280;margin-top:1px;font-weight:500">${escapeHtml(strings.zertifiziert)}</div>
-        </div>
-      </div>
-      ${sterneRow}
-      ${specsRow}
-      <button
-        data-testid="sv-anfrage-popup"
-        data-sv-id="${sv.id}"
-        onclick="document.dispatchEvent(new CustomEvent('claimondo:open-wizard', { detail: { svId: '${sv.id}' } }))"
-        style="margin-top:12px;width:100%;border:none;border-radius:999px;background:${COL_ONDO};color:#fff;font-family:inherit;font-size:12.5px;font-weight:600;padding:9px 12px;cursor:pointer;letter-spacing:-.01em"
-      >
-        ${escapeHtml(strings.popupCta)}
-      </button>
-    </div>
-  `
-  const popup = new mapboxgl.Popup({ offset: 24, closeButton: true, maxWidth: '280px' }).setHTML(popupHTML)
+  el.addEventListener('click', (e) => {
+    e.stopPropagation()
+    onClick()
+  })
   const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
     .setLngLat([sv.standort_lng, sv.standort_lat])
-    .setPopup(popup)
     .addTo(map)
   store.push(marker)
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => {
-    switch (c) {
-      case '&':
-        return '&amp;'
-      case '<':
-        return '&lt;'
-      case '>':
-        return '&gt;'
-      case '"':
-        return '&quot;'
-      case "'":
-        return '&#39;'
-      default:
-        return c
-    }
-  })
+// DE-only Embed (AAR-956 Open-Decision #2): Map-Strings inline statt next-intl.
+// Die Marketing-SEO-Seite bleibt ×6 lokalisiert; der Embed ist eine deutsche
+// Claimondo-Fläche. Lokaler t-Shim hält die Call-Sites unverändert.
+const MAP_STRINGS: Record<string, string> = {
+  h1: 'Kfz-Gutachter in Ihrer Nähe finden.',
+  sub: '4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.',
+  pill_near: '{count} Sachverständige in Ihrer Nähe',
+  pill_bundesweit: '{count} Sachverständige bundesweit verfügbar',
+  pill_short_near: '{count} SVs in Ihrer Nähe',
+  pill_short_bundesweit: '{count} SVs verfügbar',
+  sheet_open: 'Karte zeigen',
+  sheet_closed: 'Anfrage starten',
+  attribution: 'Mapbox · OpenStreetMap',
+  error_title: 'Karte konnte nicht geladen werden',
+  error_no_token: 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.',
+  error_auth: 'Mapbox lehnt die Anfrage ab (401/403) — Token-URL-Restriction oder ungültiger Token.',
+  error_timeout: 'Timeout — das Mapbox-Style-Laden hat nach 12s nicht reagiert (Netzwerk geblockt? CSP? api.mapbox.com nicht erreichbar?).',
+  error_generic: 'Mapbox-Fehler:',
+  beratung_label: 'Beratung',
+}
+function tMap(key: string, vars?: { count?: number }): string {
+  const s = MAP_STRINGS[key] ?? key
+  return typeof vars?.count === 'number' ? s.replace('{count}', String(vars.count)) : s
 }
 
-export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh' }: Props) {
-  const t = useTranslations('gutachter_finden.map_client')
+export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh' }: Props) {
+  const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
   const markersRef = useRef<Marker[]>([])
   const popupRef = useRef<Popup | null>(null)
+  const popupRootRef = useRef<Root | null>(null)
+  const userMarkerRef = useRef<Marker | null>(null)
+  const carMarkerRef = useRef<Marker | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
   // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
@@ -237,6 +212,35 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       bearing: -8,
     })
     mapRef.current = map
+
+    // WS2: Profil-Popup ÜBER dem Pin (anchor:'bottom') via React-Render
+    // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
+    // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
+    function openSvPopup(sv: AktiverSVPublic) {
+      popupRef.current?.remove()
+      popupRootRef.current?.unmount()
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      root.render(<SvProfilePopup sv={sv} />)
+      const popup = new mapboxgl.Popup({
+        offset: 22,
+        closeButton: true,
+        maxWidth: '340px',
+        anchor: 'bottom',
+        className: 'sv-finder-popup',
+      })
+        .setLngLat([sv.standort_lng, sv.standort_lat])
+        .setDOMContent(container)
+        .addTo(map)
+      popup.on('close', () => {
+        root.unmount()
+        if (popupRef.current === popup) popupRef.current = null
+        if (popupRootRef.current === root) popupRootRef.current = null
+      })
+      setHoveredId(sv.id)
+      popupRef.current = popup
+      popupRootRef.current = root
+    }
 
     // resize() nach dem nächsten Frame + beim load-Event, plus ein
     // ResizeObserver — robust gegen Container-Größenänderungen (Layout-Settle,
@@ -333,14 +337,8 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       // consented Partner, die gefunden werden WOLLEN — kein paket-abhängiger
       // Dead-Pin mehr. Nur Tier-3 sv_leads (Excel-Import ohne Consent) bleiben
       // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
-      const markerStrings = {
-        svIn: t('sv_popup_in'),
-        zertifiziert: t('sv_popup_zertifiziert'),
-        bewertungen: t('sv_popup_bewertungen'),
-        popupCta: t('sv_popup_cta'),
-      }
       aktiveSVs.forEach((sv) => {
-        addClickableMarker(map, markersRef.current, sv, markerStrings)
+        addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv))
       })
 
       // ─── Tier-3 sv_leads — immer Dead-Pin ────────────────────────────
@@ -349,29 +347,9 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       })
     })
 
-    // Popup-CTA "Über Wizard anfragen →" feuert claimondo:open-wizard. Wir
-    // scrollen die Sidebar zum Anfang und öffnen das Mobile-Bottom-Sheet —
-    // KEIN direkter Kontakt-Pfad, keine Identität preisgegeben.
-    //
-    // Self-Dispatch-Fix: Der WizardClient hört auf das separate Event
-    // 'claimondo:select-sv' mit { id, tier } und schreibt den SV dann als
-    // zugeordneter_sv_id in die Anfrage + triggert reserviereSlot beim
-    // Submit. Ohne diesen Re-Dispatch blieb zugeordneter_sv_id=null →
-    // convertLeadToClaim(svIdFromTermin=null) → kein Auftrag/Termin/WA.
-    function handleOpenWizard(e: Event) {
-      const ce = e as CustomEvent<{ svId?: string }>
-      if (ce.detail?.svId) {
-        setHoveredId(ce.detail.svId)
-        document.dispatchEvent(
-          new CustomEvent('claimondo:select-sv', {
-            detail: { id: ce.detail.svId, tier: 'premium' as const },
-          }),
-        )
-      }
-      sidebarScrollRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
-      setMobileSheetOpen(true)
-    }
-    document.addEventListener('claimondo:open-wizard', handleOpenWizard)
+    // WS2: Popup ist jetzt view-only (React-Profil). Die alte claimondo:open-wizard /
+    // claimondo:select-sv-Verdrahtung (Self-Dispatch der Marketing-Karte) entfällt —
+    // im Embed wählt das System den SV (WS3), Buchung über den Inline-Wizard (WS4).
 
     // 2026-05-12 Aaron-Smoke: Beim Page-Load Geolocation anfragen. Bei
     // Allow: Map zoomt zum User, Header-Badge wechselt auf "in Ihrer
@@ -385,6 +363,17 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
           const lng = pos.coords.longitude
           setUserLocation({ lat, lng })
           map.flyTo({ center: [lng, lat], zoom: USER_LOCATION_ZOOM, duration: 1400, essential: true })
+          // "Sie sind hier"-Marker — nur nach Geolocation-Consent sichtbar (Aaron 11.06.).
+          userMarkerRef.current?.remove()
+          const ueEl = document.createElement('div')
+          ueEl.setAttribute('aria-label', 'Ihr Standort')
+          ueEl.innerHTML = `
+            <div style="position:relative;width:20px;height:20px">
+              <div style="position:absolute;inset:-10px;border-radius:50%;background:rgba(69,115,162,0.20);animation:gf-user-pulse 2.4s ease-out infinite"></div>
+              <div style="position:absolute;inset:0;border-radius:50%;background:#4573A2;border:3px solid #fff;box-shadow:0 2px 8px rgba(13,27,62,0.40)"></div>
+            </div>
+          `
+          userMarkerRef.current = new mapboxgl.Marker({ element: ueEl, anchor: 'center' }).setLngLat([lng, lat]).addTo(map)
         },
         (err) => {
           console.info('[gutachter-finden] Geolocation verweigert/Fehler:', err.message)
@@ -393,12 +382,99 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       )
     }
 
+    // Auto-Marker + Zoom, sobald der Wizard den Besichtigungsort kennt (Aaron 11.06.):
+    // der Wizard dispatcht claimondo:embed-ort {lat,lng} → Navy-Auto-Pin ans Fahrzeug + flyTo.
+    function handleEmbedOrt(e: Event) {
+      const ce = e as CustomEvent<{ lat?: number; lng?: number }>
+      const lat = ce.detail?.lat
+      const lng = ce.detail?.lng
+      if (typeof lat !== 'number' || typeof lng !== 'number') return
+      carMarkerRef.current?.remove()
+      const carEl = document.createElement('div')
+      carEl.setAttribute('aria-label', 'Fahrzeug-Standort')
+      carEl.innerHTML = `
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0D1B3E;border:3px solid #fff;box-shadow:0 6px 18px rgba(13,27,62,0.35);display:grid;place-items:center">
+            <div style="transform:rotate(45deg);display:grid;place-items:center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 1 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/></svg>
+            </div>
+          </div>
+        </div>
+      `
+      carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
+
+      // WS3 (Engine-Ranking, Aaron 12.06.): empfohlenen SV aus dem ECHTEN Engine-
+      // Ranking holen (planeTerminOeffentlich — derselbe Top-SV, den der Buchungs-
+      // Step zeigt), Distanz-Proxy nur als Fallback. Dann echte Auto-Route (Mapbox
+      // Directions) Fahrzeug → SV + auf beide fitten + Profil auf. Kein SV → flyTo.
+      void empfehleSvFuerOrt({ lat, lng }).then(({ svId }) => {
+        if (!mapRef.current) return
+        let ziel: AktiverSVPublic | null =
+          svId ? aktiveSVs.find((s) => s.id === svId) ?? null : null
+        if (!ziel) {
+          // Fallback: nächstgelegener aktiver SV (Engine leer / Top-SV nicht auf der Karte).
+          let bestD = Infinity
+          for (const s of aktiveSVs) {
+            const d = (s.standort_lng - lng) ** 2 + (s.standort_lat - lat) ** 2
+            if (d < bestD) { bestD = d; ziel = s }
+          }
+        }
+        if (!ziel) {
+          map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+          return
+        }
+        const sv = ziel
+        void fetchDrivingRoute([lng, lat], [sv.standort_lng, sv.standort_lat]).then(({ primary }) => {
+          if (!mapRef.current) return
+          const data: GeoJSON.Feature = {
+            type: 'Feature',
+            geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
+            properties: {},
+          }
+          const src = map.getSource('embed-route') as GeoJSONSource | undefined
+          if (src) {
+            src.setData(data)
+          } else {
+            map.addSource('embed-route', { type: 'geojson', data })
+            // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
+            map.addLayer({
+              id: 'embed-route-casing',
+              type: 'line',
+              source: 'embed-route',
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+              paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
+            })
+            map.addLayer({
+              id: 'embed-route-line',
+              type: 'line',
+              source: 'embed-route',
+              layout: { 'line-cap': 'round', 'line-join': 'round' },
+              paint: {
+                'line-color': COL_ONDO,
+                'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
+                'line-opacity': 1,
+              },
+            })
+          }
+          const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
+          const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
+          map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
+          // Profil des empfohlenen SV gleich aufmachen (Aaron: Profil auf, sobald die Route steht).
+          openSvPopup(sv)
+        })
+      })
+    }
+    document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
+
     return () => {
       window.clearTimeout(loadTimeout)
+      document.removeEventListener('claimondo:embed-ort', handleEmbedOrt)
       resizeObs.disconnect()
-      document.removeEventListener('claimondo:open-wizard', handleOpenWizard)
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
+      userMarkerRef.current?.remove()
+      carMarkerRef.current?.remove()
+      popupRootRef.current?.unmount()
       popupRef.current?.remove()
       map.remove()
       mapRef.current = null
@@ -407,6 +483,74 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
 
   return (
     <div className="relative w-full" style={{ height }}>
+      {/* WS2 (Glass-Popup): Mapbox-Popup-Wrapper transparent stellen, damit die
+          GlassCard die Oberfläche ist (kein weisser Default-Kasten), Tip aus,
+          Close-Button als runder Navy-Button. Scoped via .sv-finder-popup. */}
+      <style>{`
+        .sv-finder-popup .mapboxgl-popup-content {
+          background: transparent;
+          padding: 0;
+          box-shadow: none;
+          border-radius: var(--glass-radius-card);
+        }
+        .sv-finder-popup.mapboxgl-popup { z-index: 12; }
+        .sv-finder-popup .mapboxgl-popup-tip { display: none; }
+        .sv-finder-popup .mapboxgl-popup-close-button {
+          top: 10px;
+          right: 10px;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 9999px;
+          color: var(--claimondo-navy, #0D1B3E);
+          font-size: 16px;
+          line-height: 1;
+          z-index: 3;
+          transition: background 0.15s ease;
+        }
+        .sv-finder-popup .mapboxgl-popup-close-button:hover {
+          background: color-mix(in srgb, var(--claimondo-navy, #0D1B3E) 8%, transparent);
+        }
+        @keyframes gf-user-pulse {
+          0% { transform: scale(0.5); opacity: 0.55; }
+          80%, 100% { transform: scale(1.9); opacity: 0; }
+        }
+        /* Google-Places-Dropdown (.pac-container) in unsere Tokens bringen. Google
+           rendert es an document.body → global; greift nur solange der Embed gemountet
+           ist. Doppelklasse = höhere Spezifität als Googles Default-Stylesheet.
+           "powered by Google" (::after) bleibt erhalten (Places-ToS). */
+        .pac-container.pac-container {
+          margin-top: 6px;
+          padding: 4px;
+          border: 1px solid var(--claimondo-border, #e4e7ef);
+          border-radius: var(--radius-ios-md, 18px);
+          box-shadow: 0 14px 36px rgba(13, 27, 62, 0.14);
+          background: #fff;
+          font-family: var(--font-montserrat, "Montserrat", system-ui, sans-serif);
+        }
+        .pac-container .pac-item {
+          border: 0;
+          border-radius: var(--radius-ios-sm, 12px);
+          padding: 9px 12px;
+          font-size: 13px;
+          line-height: 1.3;
+          color: var(--claimondo-navy, #0D1B3E);
+          cursor: pointer;
+        }
+        .pac-container .pac-item:hover,
+        .pac-container .pac-item-selected {
+          background: color-mix(in srgb, var(--claimondo-ondo, #4573A2) 12%, transparent);
+        }
+        .pac-container .pac-item-query {
+          font-size: 13px;
+          font-weight: 600;
+          color: var(--claimondo-navy, #0D1B3E);
+        }
+        .pac-container .pac-matched { font-weight: 700; }
+        .pac-container .pac-icon { display: none; }
+      `}</style>
       {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
           falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
           wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die
@@ -468,7 +612,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
         style={{
           width: 'clamp(520px, 44vw, 820px)',
           background:
-            'linear-gradient(100deg, color-mix(in srgb, #f8f9fb 80%, transparent) 0%, color-mix(in srgb, #f8f9fb 52%, transparent) 38%, color-mix(in srgb, #f8f9fb 22%, transparent) 64%, transparent 92%)',
+            'linear-gradient(100deg, color-mix(in srgb, var(--glass-tint-soft) 80%, transparent) 0%, color-mix(in srgb, var(--glass-tint-soft) 52%, transparent) 38%, color-mix(in srgb, var(--glass-tint-soft) 22%, transparent) 64%, transparent 92%)',
           backdropFilter: 'blur(22px) saturate(1.05)',
           WebkitBackdropFilter: 'blur(22px) saturate(1.05)',
           maskImage: 'linear-gradient(to right, #000 0%, #000 60%, rgba(0,0,0,.35) 80%, transparent 100%)',
@@ -510,8 +654,8 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
           </GlassPill>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
-          <BeratungVereinbarenButton className="hidden sm:inline-flex" />
-          <BeratungVereinbarenButton label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className="hidden sm:inline-flex" />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
         </div>
       </div>
 
@@ -571,11 +715,8 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
       >
         <div
           // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
-          className="rounded-t-[32px] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur-strong)] [-webkit-backdrop-filter:var(--glass-blur-strong)] max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          className="rounded-t-[32px] border-x border-t border-white/60 bg-white/85 backdrop-blur-md max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
           style={{
-            borderTop: 'var(--glass-border-nested)',
-            borderLeft: 'var(--glass-border-nested)',
-            borderRight: 'var(--glass-border-nested)',
             boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
             scrollbarWidth: 'none',
             msOverflowStyle: 'none',
@@ -583,7 +724,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
         >
           <button
             onClick={() => setMobileSheetOpen((v) => !v)}
-            className="w-full sticky top-0 z-[1] [background:var(--glass-bg-nested)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)] px-5 py-3 flex items-center justify-between"
+            className="w-full sticky top-0 z-[1] bg-white/85 backdrop-blur-md px-5 py-3 flex items-center justify-between"
           >
             <span className="flex items-center gap-2">
               <span
@@ -608,7 +749,7 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
           <div className="px-5 pb-6 pt-2">
             {/* Beratungs-CTA auch im Mobile-Sheet (top-right ist auf Mobile versteckt) */}
             <div className="flex justify-end mb-3 sm:hidden">
-              <BeratungVereinbarenButton />
+              <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} />
             </div>
             {wizardSlot}
           </div>
@@ -622,6 +763,11 @@ export function GutachterFinderMapClient({ svLeads, aktiveSVs = [], wizardSlot, 
 
       {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}
       {hoveredId && <input type="hidden" data-selected-sv-id={hoveredId} />}
+
+      {/* Beratung-Rückruf-Modal auf Root-Ebene (NICHT im z-[5]-Header). Sonst bleibt die
+          z-[10]-Sidebar ÜBER dem Modal-Backdrop "hervorgehoben" — das fixed-Modal wäre im
+          Header-Stacking-Context gefangen. Hier escaped es + deckt das ganze Overlay ab. */}
+      <BeratungModal open={beratungOpen} onClose={() => setBeratungOpen(false)} quelle="embed-gutachter-finder" />
     </div>
   )
 }

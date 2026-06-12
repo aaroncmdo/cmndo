@@ -16,10 +16,11 @@ export type SvLeadPublic = {
   lng: number
 }
 
-// Tier-1 SVs (sachverstaendige). Klickbarkeit + Popup-Inhalt richten sich
-// nach `paket`: paket='standard' → klickbares Profil-Popup mit Sterne, Specs,
-// Region, Initiale. Alle anderen Pakete → Dead-Pin wie Tier-3.
-// Felder *NUR* gesetzt wenn paket='standard'.
+// Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron "die Profile sollen public
+// sein"): JEDER verifizierte, aktive SV (RLS-gegated auf verifiziert+map_ready)
+// bekommt ein klickbares anonymes Profil-Popup (Sterne, Specs, Region, Initiale)
+// — nicht mehr nur paket='standard'. `paket` bleibt im Typ für künftige
+// Differenzierung. Felder werden für alle zurückgegebenen Zeilen befüllt.
 export type AktiverSVPublic = {
   id: string
   standort_lat: number
@@ -28,7 +29,17 @@ export type AktiverSVPublic = {
   paket: string
   vorname_initiale: string | null
   stadt: string | null
+  // Anonyme Trust-Signale (Profil-Anreicherung, AAR-956 WS2-Glass). KEINE Identitaet:
+  // gutachter_typ + Umkreis + Qualifikationen + Specs + Schadenarten + Credential-
+  // Presence. KEIN Firmenname/Adresse/Kontakt/Mitglieds-NUMMER/Kammer.
+  gutachter_typ: string | null
+  umkreis_km: number | null
+  qualifikationen: string[]
   spezifikationen_top3: string[]
+  spezifikationen_alle: string[]
+  schadenarten: string[]
+  oeffentlich_bestellt: boolean
+  mitgliedschaften: string[]
   bewertungs_durchschnitt: number | null
   bewertungs_anzahl: number | null
 }
@@ -104,12 +115,19 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
 
 export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
   // Read 1 (anon-RLS): Geo + paket + spezifikationen + firmenname (NUR für
-  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht)
+  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht).
+  //
+  // KEIN .eq('ist_aktiv', true): `ist_aktiv` ist NICHT in den anon-Spalten-Grants
+  // (anon-Leak-Fix granted nur 9 Map-Spalten). Ein Filter darauf wirft als anon
+  // "permission denied for table sachverstaendige" und killt den GESAMTEN Read
+  // → 0 SVs auf der Karte (nur sv_lead-Dead-Pins). Die anon-RLS-Policy
+  // `sachverstaendige_anon_select_map_ready` erzwingt ist_aktiv=true +
+  // verifiziert=true + geloescht_am IS NULL ohnehin server-seitig — der App-Filter
+  // war redundant. isochrone_polygon + standort_lat SIND granted → Filter ok.
   const supabase = await createClient()
   const { data: allRows, error } = await supabase
     .from('sachverstaendige')
     .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
-    .eq('ist_aktiv', true)
     .not('isochrone_polygon', 'is', null)
     .not('standort_lat', 'is', null)
   if (error) return { ok: false, error: error.message }
@@ -118,54 +136,96 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const rows = (allRows ?? []).filter((r) => !isTestAccount(r.firmenname as string | null))
   if (rows.length === 0) return { ok: true, data: [] }
 
-  // Read 2 (Service-Role): Vorname-Initiale + Reviews nur für paket='standard'.
-  // profiles + google_bewertungen_cache sind anon-RLS-blocked — wir lesen sie
-  // intern und reichen nur die anonymisierten Aggregate raus.
-  const standardRows = rows.filter((r) => r.paket === 'standard' && r.profile_id)
-  const profileIds = Array.from(new Set(standardRows.map((r) => r.profile_id as string)))
+  // Read 2 (Service-Role): Vorname-Initiale + Google-Reviews + Profil-Anreicherung.
+  // profiles + google_bewertungen_cache sind anon-RLS-blocked; die Anreicherungs-
+  // Spalten auf sachverstaendige (qualifikationen_neu, schadenarten, paket_umkreis_km,
+  // gutachter_typ, Credential-Flags) sind NICHT in den 9 anon-Grants. Wir lesen ALLES
+  // intern via Service-Role NUR für die bereits anon-gegateten Zeilen (Read 1 = RLS-
+  // gefiltert auf verifiziert+ist_aktiv+map_ready) und projizieren ausschliesslich
+  // anonyme Trust-Signale (kein Firmenname/Adresse/Kontakt/Mitglieds-Nummer/Kammer).
+  const profilRows = rows.filter((r) => r.profile_id)
+  const profileIds = Array.from(new Set(profilRows.map((r) => r.profile_id as string)))
+  const svIds = rows.map((r) => r.id as string)
 
   const vornameByProfileId = new Map<string, string | null>()
   const bewertungByProfileId = new Map<string, { durchschnitt: number; anzahl: number }>()
+  type SvEnrich = {
+    gutachter_typ: string | null
+    umkreis_km: number | null
+    qualifikationen: string[]
+    schadenarten: string[]
+    oeffentlich_bestellt: boolean
+    mitgliedschaften: string[]
+  }
+  const enrichBySvId = new Map<string, SvEnrich>()
 
-  if (profileIds.length > 0) {
-    const admin = createAdminClient()
-    const [profilesRes, bewRes] = await Promise.all([
-      admin.from('profiles').select('id,vorname').in('id', profileIds),
-      admin
-        .from('google_bewertungen_cache')
-        .select('profile_id,durchschnitt,anzahl_bewertungen')
-        .in('profile_id', profileIds),
-    ])
-    if (profilesRes.data) {
-      for (const p of profilesRes.data) vornameByProfileId.set(p.id, p.vorname)
+  const admin = createAdminClient()
+  const [profilesRes, bewRes, enrichRes] = await Promise.all([
+    admin.from('profiles').select('id,vorname').in('id', profileIds),
+    admin
+      .from('google_bewertungen_cache')
+      .select('profile_id,durchschnitt,anzahl_bewertungen')
+      .in('profile_id', profileIds),
+    admin
+      .from('sachverstaendige')
+      .select(
+        'id,gutachter_typ,paket_umkreis_km,qualifikationen_neu,schadenarten,oeffentlich_bestellt,bvsk_mitgliedsnummer,ihk_zertifikat_nummer,oebuv_bestellungsnummer,dat_nummer',
+      )
+      .in('id', svIds),
+  ])
+  if (profilesRes.data) {
+    for (const p of profilesRes.data) vornameByProfileId.set(p.id, p.vorname)
+  }
+  if (bewRes.data) {
+    for (const b of bewRes.data) {
+      bewertungByProfileId.set(b.profile_id, {
+        durchschnitt: Number(b.durchschnitt),
+        anzahl: b.anzahl_bewertungen ?? 0,
+      })
     }
-    if (bewRes.data) {
-      for (const b of bewRes.data) {
-        bewertungByProfileId.set(b.profile_id, {
-          durchschnitt: Number(b.durchschnitt),
-          anzahl: b.anzahl_bewertungen ?? 0,
-        })
-      }
+  }
+  if (enrichRes.data) {
+    for (const e of enrichRes.data) {
+      const mitgliedschaften: string[] = []
+      if (e.bvsk_mitgliedsnummer) mitgliedschaften.push('BVSK')
+      if (e.ihk_zertifikat_nummer) mitgliedschaften.push('IHK')
+      if (e.oebuv_bestellungsnummer) mitgliedschaften.push('öbuv')
+      if (e.dat_nummer) mitgliedschaften.push('DAT')
+      enrichBySvId.set(e.id, {
+        gutachter_typ: e.gutachter_typ ?? null,
+        umkreis_km: e.paket_umkreis_km ?? null,
+        qualifikationen: Array.isArray(e.qualifikationen_neu) ? (e.qualifikationen_neu as string[]) : [],
+        schadenarten: Array.isArray(e.schadenarten) ? (e.schadenarten as string[]) : [],
+        oeffentlich_bestellt: e.oeffentlich_bestellt === true,
+        mitgliedschaften,
+      })
     }
   }
 
   const mapped: AktiverSVPublic[] = rows.map((r) => {
-    const isStandard = r.paket === 'standard'
     const profileId = r.profile_id as string | null
-    const vorname = isStandard && profileId ? vornameByProfileId.get(profileId) ?? null : null
-    const bew = isStandard && profileId ? bewertungByProfileId.get(profileId) : undefined
+    const vorname = profileId ? vornameByProfileId.get(profileId) ?? null : null
+    const bew = profileId ? bewertungByProfileId.get(profileId) : undefined
     const specsAll = Array.isArray(r.spezifikationen) ? (r.spezifikationen as string[]) : []
+    const enrich = enrichBySvId.get(r.id as string)
     return {
       id: r.id,
       standort_lat: Number(r.standort_lat),
       standort_lng: Number(r.standort_lng),
       isochrone_polygon: r.isochrone_polygon,
       paket: r.paket,
-      vorname_initiale: isStandard ? firstInitial(vorname) : null,
-      stadt: isStandard ? extractStadt(r.standort_adresse as string | null) : null,
-      spezifikationen_top3: isStandard ? specsAll.slice(0, 3) : [],
-      bewertungs_durchschnitt: isStandard && bew ? bew.durchschnitt : null,
-      bewertungs_anzahl: isStandard && bew ? bew.anzahl : null,
+      vorname_initiale: firstInitial(vorname),
+      stadt: extractStadt(r.standort_adresse as string | null),
+      gutachter_typ: enrich?.gutachter_typ ?? null,
+      umkreis_km: enrich?.umkreis_km ?? null,
+      qualifikationen: enrich?.qualifikationen ?? [],
+      spezifikationen_top3: specsAll.slice(0, 3),
+      spezifikationen_alle: specsAll,
+      schadenarten: enrich?.schadenarten ?? [],
+      oeffentlich_bestellt: enrich?.oeffentlich_bestellt ?? false,
+      mitgliedschaften: enrich?.mitgliedschaften ?? [],
+      bewertungs_durchschnitt: bew ? bew.durchschnitt : null,
+      bewertungs_anzahl: bew ? bew.anzahl : null,
     }
   })
 
