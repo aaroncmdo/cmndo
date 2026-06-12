@@ -66,20 +66,24 @@ export async function createSideQuestAuftrag(
   claimId: string,
   typ: SideQuestTyp,
 ): Promise<{ ok: boolean; auftragId?: string; error?: string }> {
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id, sv_id')
+  // CMM-49 (faelle-Drop-Runway): fall_id+sv_id via Bridge+claims statt .from('faelle').
+  // bridge.fall_id == faelle.id; sv_id -> claims.sv_id (div=0).
+  const { data: fallBr } = await admin
+    .from('faelle_claim_bridge')
+    .select('fall_id, claims:claim_id(sv_id)')
     .eq('claim_id', claimId)
     .maybeSingle()
 
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
+  if (!fallBr) return { ok: false, error: 'Fall nicht gefunden' }
+  const br = fallBr as unknown as { fall_id: string; claims?: { sv_id: string | null } | { sv_id: string | null }[] | null }
+  const brClaim = Array.isArray(br.claims) ? br.claims[0] : br.claims
 
   const { data, error } = await admin
     .from('auftraege')
     // CMM-59: status 'termin' (Lifecycle-Start) — der auftraege_status_check
     // erlaubt nur termin|besichtigung|gutachten|abgeschlossen, 'geplant' hat
     // den Insert mit CHECK-Verstoss crashen lassen.
-    .insert({ fall_id: fall.id as string, sv_id: fall.sv_id as string | null, typ, status: 'termin', reihenfolge: 1 })
+    .insert({ fall_id: br.fall_id, sv_id: brClaim?.sv_id ?? null, typ, status: 'termin', reihenfolge: 1 })
     .select('id')
     .single()
 

@@ -45,9 +45,10 @@ async function loadClaimContext(claimId: string): Promise<
 
   if (claimErr || !claim) return { ok: false, error: 'Claim nicht gefunden' }
 
+  // CMM-49 (faelle-Drop-Runway): fallId via Bridge statt .from('faelle'). bridge.fall_id == faelle.id.
   const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
+    .from('faelle_claim_bridge')
+    .select('fall_id')
     .eq('claim_id', claimId)
     .maybeSingle()
 
@@ -55,7 +56,7 @@ async function loadClaimContext(claimId: string): Promise<
 
   return {
     ok: true,
-    fallId: fall.id as string,
+    fallId: fall.fall_id as string,
     status: (claim.status as string | null) ?? null,
     work_state: (claim.work_state as string | null) ?? null,
     kbId: (claim.kundenbetreuer_id as string | null) ?? null,
