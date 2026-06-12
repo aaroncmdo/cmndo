@@ -97,9 +97,12 @@ const nextConfig: NextConfig = {
   // CSP NICHT gesetzt: Mapbox-GL, Sentry, Google-Fonts, Vercel-Analytics
   // brauchen explizite Quellen — separater Audit nötig wenn enforced.
   async headers() {
+    // X-Frame-Options ist BEWUSST aus securityHeaders raus (greift unten separat
+    // ueberall AUSSER /embed). Grund: X-Frame-Options kennt keinen "erlaube genau
+    // diese Origins"-Wert — die Embed-Route (AAR-956 WS6) wird absichtlich cross-
+    // origin auf claimondo.de eingebettet, also darf sie SAMEORIGIN schlicht nicht
+    // senden; statt dessen steuert die frame-ancestors-CSP unten, wer einbetten darf.
     const securityHeaders = [
-      // Klickjacking-Schutz (sticky bei alten Browsern, frame-ancestors in CSP wäre moderner)
-      { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
       // MIME-Sniffing aus
       { key: 'X-Content-Type-Options', value: 'nosniff' },
       // Referrer policy: Cross-Site keine vollen URLs leaken
@@ -118,6 +121,24 @@ const nextConfig: NextConfig = {
       {
         source: '/:path*',
         headers: securityHeaders,
+      },
+      {
+        // Klickjacking-Schutz (X-Frame-Options) ueberall AUSSER /embed/* — der
+        // Negative-Lookahead haelt die Embed-Route frei, damit sie einbettbar bleibt.
+        source: '/((?!embed/).*)',
+        headers: [{ key: 'X-Frame-Options', value: 'SAMEORIGIN' }],
+      },
+      {
+        // AAR-956 WS6: der Gutachter-Finder-Embed wird per <iframe> auf claimondo.de
+        // (Apex) + *.claimondo.de (www/app/staging) eingebettet. KEIN X-Frame-Options
+        // hier; frame-ancestors erlaubt genau diese Origins (Partner-Domains spaeter).
+        source: '/embed/:path*',
+        headers: [
+          {
+            key: 'Content-Security-Policy',
+            value: "frame-ancestors 'self' https://claimondo.de https://*.claimondo.de",
+          },
+        ],
       },
       {
         // AAR-939: Monika-Embed-Sounds laedt das Widget cross-origin (Cluster-LPs +
