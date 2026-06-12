@@ -51,29 +51,33 @@ export async function assertKundeOwnsFall(
   // SSoT). Statt faelle.kundenbetreuer_id wird sie via nested embed aus dem
   // verknuepften claims-Datensatz mitgelesen — die faelle-Spalte wird in PR2
   // gedroppt. Nested embed spart den separaten Round-Trip.
+  // CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge statt .from('faelle').
+  // kunde_id -> claims.geschaedigter_user_id (div=0, IDENTISCHER denormalisierter Wert wie
+  // faelle.kunde_id -> value-neutral; gleiches Drift-Profil). Der claim_parties-Pfad (2b) bleibt
+  // der verlaessliche Ownership-SSoT als Safety-Net. lead_id/sv_id/kundenbetreuer_id claims-nativ.
   const { data: fall } = await admin
-    .from('faelle')
-    .select('id, claim_id, kunde_id, lead_id, sv_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id(geschaedigter_user_id, lead_id, sv_id, kundenbetreuer_id)')
+    .eq('fall_id', fallId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'not_found' }
 
-  const fallBase = fall as {
-    id: string
+  const fallBase = fall as unknown as {
+    fall_id: string
     claim_id: string | null
-    kunde_id: string | null
-    lead_id: string | null
-    sv_id: string | null
-    claims?: { kundenbetreuer_id: string | null } | { kundenbetreuer_id: string | null }[] | null
+    claims?:
+      | { geschaedigter_user_id: string | null; lead_id: string | null; sv_id: string | null; kundenbetreuer_id: string | null }
+      | { geschaedigter_user_id: string | null; lead_id: string | null; sv_id: string | null; kundenbetreuer_id: string | null }[]
+      | null
   }
 
   const claim = Array.isArray(fallBase.claims) ? fallBase.claims[0] : fallBase.claims
   const fallRow = {
-    id: fallBase.id,
+    id: fallBase.fall_id,
     claim_id: fallBase.claim_id,
-    kunde_id: fallBase.kunde_id,
-    lead_id: fallBase.lead_id,
-    sv_id: fallBase.sv_id,
+    kunde_id: claim?.geschaedigter_user_id ?? null,
+    lead_id: claim?.lead_id ?? null,
+    sv_id: claim?.sv_id ?? null,
     kundenbetreuer_id: claim?.kundenbetreuer_id ?? null,
   }
 
@@ -182,16 +186,17 @@ export async function assertKundeOwnsClaim(
 
   // fallId-Transitions-Brücke: timeline/fall_dokumente/pflichtdokumente keyen noch
   // auf faelle.id. Die (1:1 während Übergang) zugehörige faelle.id mitliefern.
+  // CMM-49 (faelle-Drop-Runway): fallId-Bruecke via Bridge statt .from('faelle'). bridge.fall_id == faelle.id.
   const { data: f } = await admin
-    .from('faelle')
-    .select('id')
+    .from('faelle_claim_bridge')
+    .select('fall_id')
     .eq('claim_id', claimId)
     .limit(1)
     .maybeSingle()
 
   const resolved = {
     claimId: claimRow.id,
-    fallId: (f?.id as string | null) ?? null,
+    fallId: (f?.fall_id as string | null) ?? null,
     leadId: claimRow.lead_id,
     kundenbetreuerId: claimRow.kundenbetreuer_id,
     svId: claimRow.sv_id,
