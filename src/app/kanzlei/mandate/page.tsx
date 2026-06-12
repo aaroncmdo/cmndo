@@ -38,26 +38,35 @@ export default async function KanzleiDashboardPage() {
   // CMM-65: nach claims.created_at sortieren + anzeigen (Aaron-Entscheidung;
   // faelle.updated_at stirbt mit Phase-6-Drop, claims.updated_at backfill-geclobbert).
   // supabase-js kann nicht nach eingebetteter to-one-Spalte ordnen -> flachziehen + client-sort.
-  const { data: faelleRaw, error } = await supabase
-    .from('faelle')
-    .select(
-      // CMM-44 MP-8c: claim_id (faelle->claims-FK) explizit selektieren — wird fuer
-      // den claim_id-keyed v_claim_phase-Lookup unten gebraucht (claims.id != faelle.id).
-      'id, claim_id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
-    )
+  // CMM-49 (faelle-Drop-Runway): Anker von .from('faelle') auf claims-zentrisch (Bridge+vcf).
+  // 1) RLS-Scope: welche komplett-Claims sieht diese Kanzlei? faelle_claim_bridge-RLS spiegelt
+  //    die faelle-RLS exakt (service_typ='komplett' AND rolle='kanzlei') -> gleiche Sichtbarkeit.
+  const { data: scopeRows, error: scopeErr } = await supabase
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id!inner(service_typ)')
     .eq('claims.service_typ', 'komplett')
-  const faelle = (faelleRaw ?? [])
-    .map((f) => {
-      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      return { ...f, created_at: (c?.created_at as string | null) ?? null }
-    })
+  const scopedClaimIds = (scopeRows ?? []).map((r) => r.claim_id as string)
+  // 2) Display via v_claim_full (DEFINER loest kunde_vorname/kennzeichen/mandatsnummer flach;
+  //    NUR fuer die bridge-RLS-autorisierten claim_ids -> leak-safe; div=0 vs faelle).
+  type KanzleiVcfRow = {
+    id: string; fall_id: string | null; claim_nummer: string | null
+    kunde_vorname: string | null; kunde_nachname: string | null; kennzeichen: string | null
+    operative_status: string | null; created_at: string | null; mandatsnummer: string | null
+  }
+  const { data: vcfRaw, error: vcfErr } = scopedClaimIds.length
+    ? await supabase
+        .from('v_claim_full')
+        .select('id, fall_id, claim_nummer, kunde_vorname, kunde_nachname, kennzeichen, operative_status, created_at, mandatsnummer')
+        .in('id', scopedClaimIds)
+    : { data: [], error: null }
+  const error = scopeErr ?? vcfErr
+  const faelle = ((vcfRaw ?? []) as unknown as KanzleiVcfRow[])
+    .slice()
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
-  // CMM-44 MP-8c: Phasen via shared getClaimPhaseMap — Helper liest v_claim_phase
-  // claim_id-keyed (claims-zentrisch, MP-8b-Invariante: claims.id != faelle.id).
-  // Frueher: inline-Read mit mandatIds=faelle.id → matchte 73/74 nicht.
+  // CMM-44 MP-8c: Phasen via getClaimPhaseMap — claim_id-keyed (= vcf.id).
   const mandatClaimIds = faelle
-    .map((f) => f.claim_id)
+    .map((f) => f.id)
     .filter((x): x is string => !!x)
   const phaseMap = await getClaimPhaseMap(mandatClaimIds)
 
@@ -110,25 +119,22 @@ export default async function KanzleiDashboardPage() {
               <Tbody className="!divide-y-0">
                 {faelle.map((f) => {
                   const kunde = [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—'
-                  // CMM-44 SP-I2: claim_nummer aus dem claims-Embed (Array|Objekt normalisieren).
-                  const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-                  // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id).
-                  const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
-                  // CMM-44 MP-8c: phaseMap ist claim_id-keyed (claims.id != faelle.id).
-                  const ph = f.claim_id ? phaseMap.get(f.claim_id) : undefined
+                  // CMM-49: vcf flach — phaseMap claim_id-keyed (= vcf.id); Link/Key via fall_id (== faelle.id).
+                  const ph = phaseMap.get(f.id)
                   const mainPhase = ph?.mainPhase ?? toClaimMainPhase(null)
                   const subPhase = ph?.subPhase ?? toClaimSubPhase(null)
+                  const fallId = f.fall_id ?? f.id
                   return (
                     <Tr
-                      key={f.id}
+                      key={fallId}
                       className="border-t border-claimondo-border hover:bg-claimondo-bg transition-colors"
                     >
                       <Td className="font-mono text-[12px]">
                         <Link
-                          href={`/kanzlei/fall/${f.id}`}
+                          href={`/kanzlei/fall/${fallId}`}
                           className="hover:underline"
                         >
-                          {(fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8)}
+                          {f.claim_nummer ?? fallId.slice(0, 8)}
                         </Link>
                       </Td>
                       <Td>{kunde}</Td>
@@ -140,16 +146,16 @@ export default async function KanzleiDashboardPage() {
                         <span className="block text-[11px] text-claimondo-ondo">{SUBPHASE_LABEL[subPhase]}</span>
                       </Td>
                       <Td>
-                        <FallStatusBadge status={f.status as string | null} size="md" />
+                        <FallStatusBadge status={f.operative_status} size="md" />
                       </Td>
                       <Td className="font-mono text-[12px]">
-                        {(fKf?.mandatsnummer as string | null) ?? '—'}
+                        {f.mandatsnummer ?? '—'}
                       </Td>
                       <Td className="!text-claimondo-ondo text-xs">
-                        {formatDate((f.created_at as string | null) ?? null)}
+                        {formatDate(f.created_at)}
                       </Td>
                       <Td className="!text-claimondo-ondo/70">
-                        <Link href={`/kanzlei/fall/${f.id}`} aria-label="Öffnen">
+                        <Link href={`/kanzlei/fall/${fallId}`} aria-label="Öffnen">
                           <ArrowRightIcon className="w-4 h-4" />
                         </Link>
                       </Td>
