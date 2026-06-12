@@ -47,7 +47,7 @@ export default async function MitarbeiterTermine() {
       .select(
         'id, typ, titel, start_zeit, end_zeit, status, notizen, lead_id, fall_id, ' +
           'lead:leads!admin_termine_lead_id_fkey(id, vorname, nachname, telefon), ' +
-          'fall:faelle!admin_termine_fall_id_fkey(id, claims:claim_id(claim_nummer))',
+          'fall:faelle_claim_bridge!admin_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer))',
       )
       .eq('zugewiesen_an', user.id)
       .eq('status', 'offen')
@@ -58,7 +58,7 @@ export default async function MitarbeiterTermine() {
       .from('gutachter_termine')
       .select(
         'id, start_zeit, end_zeit, status, fall_id, lead_id, kanal, notiz_intern, ' +
-          'fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer), lead_id)',
+          'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer, lead_id))',
       )
       .eq('typ', 'kb_beratung')
       .eq('kb_id', user.id)
@@ -71,6 +71,9 @@ export default async function MitarbeiterTermine() {
   // CMM-44 SP-A3: claim_nummer aus dem nested claims-Embed auf das flache
   // TerminRow.fall normalisieren (Array|Objekt je nach Cardinality).
   type ClaimNrJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+  // CMM-49 #2688-Fix: KB-fall liest lead_id jetzt aus dem nested claims-Embed (faelle-Embed
+  // ueber bridge, faelle.lead_id direkt nicht mehr resolvebar).
+  type ClaimNrLeadJoin = { claim_nummer: string | null; lead_id: string | null } | { claim_nummer: string | null; lead_id: string | null }[] | null
   const adminTermine: TerminRow[] = ((adminR.data ?? []) as unknown as Array<
     Omit<TerminRow, 'fall'> & {
       fall: { id: string; claims: ClaimNrJoin } | { id: string; claims: ClaimNrJoin }[] | null
@@ -90,7 +93,7 @@ export default async function MitarbeiterTermine() {
     lead_id: string | null
     kanal: string | null
     notiz_intern: string | null
-    fall: { id: string; claims: ClaimNrJoin; lead_id: string | null } | { id: string; claims: ClaimNrJoin; lead_id: string | null }[] | null
+    fall: { id: string; claims: ClaimNrLeadJoin } | { id: string; claims: ClaimNrLeadJoin }[] | null
   }
   const kbTermineRaw = (kbR.data ?? []) as unknown as KbRow[]
 
@@ -100,8 +103,9 @@ export default async function MitarbeiterTermine() {
       kbTermineRaw
         .map(k => {
           const fallRaw = k.fall as unknown
-          const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { lead_id: string | null } | null)
-          return fall?.lead_id ?? k.lead_id
+          const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { claims: ClaimNrLeadJoin } | null)
+          const claim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+          return claim?.lead_id ?? k.lead_id
         })
         .filter(Boolean) as string[],
     ),
@@ -114,9 +118,9 @@ export default async function MitarbeiterTermine() {
 
   const kbAsTermine: TerminRow[] = kbTermineRaw.map(k => {
     const fallRaw = k.fall as unknown
-    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: ClaimNrJoin; lead_id: string | null } | null)
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: ClaimNrLeadJoin } | null)
     const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-    const namesLeadId = fall?.lead_id ?? k.lead_id
+    const namesLeadId = fallClaim?.lead_id ?? k.lead_id
     const kundenName = namesLeadId ? kbLeadNameMap[namesLeadId] : null
     return {
       id: k.id,

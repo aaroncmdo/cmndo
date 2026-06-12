@@ -61,7 +61,10 @@ export default async function DispatchKalenderPage({
     .from('gutachter_termine')
     .select(
       'id, assignee_id, assignee_typ, lead_id, fall_id, start_zeit, end_zeit, status, typ, notiz_intern, ' +
-        'leads(vorname, nachname, kennzeichen), faelle(claims:claim_id(claim_nummer), kennzeichen)',
+        // CMM-49 #2688-Fix: faelle-Embed über bridge (FK admin/gutachter_termine→bridge repointet);
+        // nested claims via fk_bridge_claim (#2719). kennzeichen wohnt auf faelle/leads, nicht claims
+        // → fällt weg, lead.kennzeichen deckt es ab (s.u.).
+        'leads(vorname, nachname, kennzeichen), faelle:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claim_id(claim_nummer))',
     )
     .gte('start_zeit', weekStart.toISOString())
     .lt('start_zeit', weekEnd.toISOString())
@@ -81,7 +84,7 @@ export default async function DispatchKalenderPage({
     typ: string
     notiz_intern: string | null
     leads: { vorname: string | null; nachname: string | null; kennzeichen: string | null } | Array<{ vorname: string | null; nachname: string | null; kennzeichen: string | null }> | null
-    faelle: { claims: ClaimNrJoin; kennzeichen: string | null } | Array<{ claims: ClaimNrJoin; kennzeichen: string | null }> | null
+    faelle: { claims: ClaimNrJoin } | Array<{ claims: ClaimNrJoin }> | null
   }>).map((t) => {
     const leadRaw = t.leads
     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) ?? null
@@ -101,7 +104,7 @@ export default async function DispatchKalenderPage({
       status: t.status,
       typ: t.typ,
       kundeName: kundeName || null,
-      kennzeichen: lead?.kennzeichen ?? fall?.kennzeichen ?? null,
+      kennzeichen: lead?.kennzeichen ?? null,
       fallNummer: claim?.claim_nummer ?? null,
     }
   })

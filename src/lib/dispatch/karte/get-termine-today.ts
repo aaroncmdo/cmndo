@@ -20,7 +20,7 @@ export async function getTermineToday(
       `id, start_zeit, status, fall_id, lead_id, assignee_id, assignee_typ,
        gps_lat_ankunft, gps_lng_ankunft,
        lead:leads(vorname, nachname, besichtigungsort_lat, besichtigungsort_lng, kunde_plz, halter_plz),
-       fall:faelle(claims:claim_id(claim_nummer))`,
+       fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claim_id(claim_nummer))`,
     )
     .gte('start_zeit', startOfDay)
     .lte('start_zeit', endOfDay)

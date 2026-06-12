@@ -13,7 +13,10 @@ import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
-type ClaimNrJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
+// CMM-49 #2688-Fix: faelle-Embed laeuft jetzt ueber faelle_claim_bridge (die fall_id-FKs
+// zeigen nach #2688 auf bridge). kundenbetreuer_id + lead_id wandern in den nested
+// claims-Embed (claims = SSoT, 0-diff; faelle.* direkt nicht mehr resolvebar).
+type ClaimJoin = { claim_nummer: string | null; kundenbetreuer_id: string | null; lead_id: string | null } | { claim_nummer: string | null; kundenbetreuer_id: string | null; lead_id: string | null }[] | null
 
 type GutachterTerminRow = {
   id: string
@@ -26,8 +29,8 @@ type GutachterTerminRow = {
   assignee_id: string | null
   assignee_typ: string | null
   fall:
-    | { id: string; claims: ClaimNrJoin; kundenbetreuer_id: string | null; lead_id: string | null }
-    | { id: string; claims: ClaimNrJoin; kundenbetreuer_id: string | null; lead_id: string | null }[]
+    | { id: string; claims: ClaimJoin }
+    | { id: string; claims: ClaimJoin }[]
     | null
 }
 
@@ -44,7 +47,7 @@ export default async function MitarbeiterKundentermine() {
     .from('gutachter_termine')
     .select(
       'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, assignee_id, assignee_typ, ' +
-        'fall:faelle!gutachter_termine_fall_id_fkey(id, claims:claim_id(claim_nummer), kundenbetreuer_id, lead_id)',
+        'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer, kundenbetreuer_id, lead_id))',
     )
     .neq('typ', 'kb_beratung')
     .in('status', ['reserviert', 'bestaetigt'])
@@ -60,8 +63,9 @@ export default async function MitarbeiterKundentermine() {
   // immer zuverlässig durchreicht. Bei Bedarf als RLS-Policy umziehen.
   const termine = termineAll.filter((t) => {
     const fallRaw = t.fall as unknown
-    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { kundenbetreuer_id: string | null } | null)
-    return fall?.kundenbetreuer_id === user.id
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { claims: ClaimJoin } | null)
+    const claim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    return claim?.kundenbetreuer_id === user.id
   })
 
   // Kunden-Namen für Lead-Ids nachladen
@@ -69,8 +73,9 @@ export default async function MitarbeiterKundentermine() {
     new Set(
       termine
         .map((t) => {
-          const f = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { lead_id: string | null } | null)
-          return f?.lead_id ?? null
+          const f = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { claims: ClaimJoin } | null)
+          const claim = Array.isArray(f?.claims) ? f?.claims[0] : f?.claims
+          return claim?.lead_id ?? null
         })
         .filter(Boolean) as string[],
     ),
@@ -158,10 +163,10 @@ export default async function MitarbeiterKundentermine() {
             </div>
             <div className="divide-y divide-claimondo-border">
               {(rows ?? []).map((t) => {
-                const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; claims: ClaimNrJoin; lead_id: string | null } | null)
+                const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; claims: ClaimJoin } | null)
                 const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
                 const svProfileId = t.assignee_typ === 'sachverstaendiger' && t.assignee_id ? svProfileMap.get(t.assignee_id) ?? null : null
-                const kundeName = fall?.lead_id ? leadNameMap[fall.lead_id] ?? 'Kunde' : 'Kunde'
+                const kundeName = fallClaim?.lead_id ? leadNameMap[fallClaim.lead_id] ?? 'Kunde' : 'Kunde'
                 const svName = svProfileId ? svNameMap[svProfileId] ?? 'SV' : 'SV'
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
