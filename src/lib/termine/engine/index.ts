@@ -22,9 +22,11 @@ export { resolveBesichtigungsort } from './besichtigungsort'
 export type { ResolvedOrt, OrtQuelle, TerminOrtInput } from './besichtigungsort'
 export { bestaetige } from './bestaetige'
 export type { BestaetigeResult } from './bestaetige'
-// P2.3c — State-Transitions (Absage + Verlegung).
-export { sageAb, verlege, entscheideVerlegung } from './state-transitions'
-export type { AbsageStatus, VerlegeInput, VerlegeResult } from './state-transitions'
+// P2.3c — State-Transitions (Absage + Verlegung). AAR-956: Dead-Pin-Reassign.
+export { sageAb, verlege, entscheideVerlegung, reassigniereDeadPin } from './state-transitions'
+export type {
+  AbsageStatus, VerlegeInput, VerlegeResult, ReassigniereDeadPinInput, ReassigniereDeadPinResult,
+} from './state-transitions'
 // P2.4 — findeBestePerson (Org-/Region-Level-Matching + Auto-Reservierung).
 export { findeBestePerson } from './matching'
 export type { FindeBestePersonInput, FindeBestePersonResult, PersonKandidat } from './matching'
