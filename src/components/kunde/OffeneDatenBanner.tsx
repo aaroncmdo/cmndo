@@ -26,12 +26,14 @@ async function loadOffenCount(): Promise<number | null> {
 
     // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
     // to-one-Spalte ordnen -> claims.created_at via !inner + clientseitig neuesten picken.
+    // CMM-49 (faelle-Drop-Runway): Anker claims-zentrisch via Bridge statt .from('faelle').
+    // kunde_id == claims.geschaedigter_user_id (Divergenz=0), bridge.fall_id == faelle.id.
     const { data: kundeFaelle } = await supabase
-      .from('faelle')
-      .select('id, claims:claim_id!inner(created_at)')
-      .eq('kunde_id', user.id)
+      .from('faelle_claim_bridge')
+      .select('fall_id, claims:claim_id!inner(geschaedigter_user_id, created_at)')
+      .eq('claims.geschaedigter_user_id', user.id)
     const fall = (kundeFaelle ?? [])
-      .map((f) => ({ id: f.id as string, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+      .map((f) => ({ id: f.fall_id as string, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
       .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
     if (!fall?.id) return null
 
