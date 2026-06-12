@@ -56,16 +56,26 @@ export async function getMaklerLeads(maklerId: string) {
  */
 export async function getMaklerFaelle(maklerId: string) {
   const supabase = await createClient()
+  // CMM-49 Regression-Fix (#2688): faelle!inner via makler_fall_consent.fall_id-FK failt seit
+  // FK->bridge ("no relationship faelle"). -> faelle_claim_bridge!inner; status<-claims.operative_status,
+  // service_typ<-claims.service_typ (SSoT); fall-Shape {id,status,service_typ} rekonstruiert -> Caller unveraendert.
   const { data } = await supabase
     .from('makler_fall_consent')
     .select(`
       id, consent_scope, consent_gegeben_am, widerrufen_am,
-      fall:faelle!inner(id, status, service_typ)
+      fall:faelle_claim_bridge!inner(fall_id, claims:claim_id(operative_status, service_typ))
     `)
     .eq('makler_id', maklerId)
     .is('widerrufen_am', null)
     .order('consent_gegeben_am', { ascending: false })
-  return data ?? []
+  return (data ?? []).map((row) => {
+    const b = Array.isArray(row.fall) ? row.fall[0] : row.fall
+    const c = b ? (Array.isArray(b.claims) ? b.claims[0] : b.claims) : null
+    return {
+      ...row,
+      fall: b ? { id: b.fall_id, status: c?.operative_status ?? null, service_typ: c?.service_typ ?? null } : null,
+    }
+  })
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -148,8 +158,8 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
     .select(`
       id, vorname, nachname, fahrzeug_hersteller, fahrzeug_modell,
       unfalldatum, status, created_at, disqualifiziert,
-      fall:faelle(
-        id,
+      fall:faelle_claim_bridge(
+        id:fall_id,
         claims:claim_id(service_typ),
         makler_consent:makler_fall_consent(consent_scope, widerrufen_am)
       )
