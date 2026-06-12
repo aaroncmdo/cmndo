@@ -28,45 +28,52 @@ export default async function KanzleiKanbanPage() {
   // CMM-44-SP-Backfills geclobbert (0 Ordering-Signal). Aaron-Entscheidung: nach
   // claims.created_at sortieren + anzeigen (immer vorhanden). supabase-js kann nicht nach
   // eingebetteter to-one-Spalte ordnen -> flachziehen + clientseitig created_at-desc.
-  const { data: faelleRaw, error } = await supabase
-    .from('faelle')
-    .select(
-      // CMM-44 MP-8c: claim_id (faelle->claims-FK) explizit selektieren — wird fuer
-      // den claim_id-keyed v_claim_phase-Lookup unten gebraucht (claims.id != faelle.id).
-      'id, claim_id, status, kunde_vorname, kunde_nachname, kennzeichen, kanzlei_faelle(mandatsnummer), claims:claim_id!inner(claim_nummer, service_typ, created_at)',
-    )
+  // CMM-49 (faelle-Drop-Runway): Anker von .from('faelle') auf claims-zentrisch (Bridge+vcf).
+  // 1) RLS-Scope: faelle_claim_bridge-RLS spiegelt faelle-RLS exakt (service_typ='komplett'
+  //    AND rolle='kanzlei') -> gleiche komplett-Sichtbarkeit fuer die Kanzlei.
+  const { data: scopeRows, error: scopeErr } = await supabase
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id!inner(service_typ)')
     .eq('claims.service_typ', 'komplett')
-  const faelle = (faelleRaw ?? [])
-    .map((f) => {
-      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      return { ...f, created_at: (c?.created_at as string | null) ?? null }
-    })
+  const scopedClaimIds = (scopeRows ?? []).map((r) => r.claim_id as string)
+  // 2) Display via v_claim_full (DEFINER; nur fuer die autorisierten claim_ids -> leak-safe; div=0).
+  type KanzleiVcfRow = {
+    id: string; fall_id: string | null; claim_nummer: string | null
+    kunde_vorname: string | null; kunde_nachname: string | null; kennzeichen: string | null
+    operative_status: string | null; created_at: string | null; mandatsnummer: string | null
+  }
+  const { data: vcfRaw, error: vcfErr } = scopedClaimIds.length
+    ? await supabase
+        .from('v_claim_full')
+        .select('id, fall_id, claim_nummer, kunde_vorname, kunde_nachname, kennzeichen, operative_status, created_at, mandatsnummer')
+        .in('id', scopedClaimIds)
+    : { data: [], error: null }
+  const error = scopeErr ?? vcfErr
+  const faelle = ((vcfRaw ?? []) as unknown as KanzleiVcfRow[])
+    .slice()
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
-  // CMM-44 MP-8c: Phasen via shared getClaimPhaseMap — Helper liest v_claim_phase
-  // claim_id-keyed (MP-8b: claims.id != faelle.id). Frueher: ids=faelle.id-Bug.
+  // CMM-44 MP-8c: Phasen via getClaimPhaseMap — claim_id-keyed (= vcf.id).
   const kartenClaimIds = faelle
-    .map((f) => f.claim_id)
+    .map((f) => f.id)
     .filter((x): x is string => !!x)
   const phaseMap = await getClaimPhaseMap(kartenClaimIds)
 
   const karten: KanbanKarte[] = (faelle ?? []).map((f) => {
-    // CMM-44 SP-I2: claim_nummer aus dem claims-Embed (Array|Objekt normalisieren).
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    // CMM-44 SP-I2: mandatsnummer aus kanzlei_faelle (1:1 via fall_id), Array|Objekt normalisieren.
-    const fKf = Array.isArray(f.kanzlei_faelle) ? f.kanzlei_faelle[0] : f.kanzlei_faelle
+    // CMM-49: vcf flach — id/Link via fall_id (== faelle.id); phaseMap claim_id-keyed (= vcf.id).
+    const fallId = f.fall_id ?? f.id
     return {
-    id: f.id as string,
-    claim_nummer: (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8),
+    id: fallId,
+    claim_nummer: f.claim_nummer ?? fallId.slice(0, 8),
     kunde:
       [f.kunde_vorname, f.kunde_nachname].filter(Boolean).join(' ') || '—',
-    kennzeichen: (f.kennzeichen as string | null) ?? null,
-    mandatsnummer: (fKf?.mandatsnummer as string | null) ?? null,
-    status: (f.status as string | null) ?? null,
-    // CMM-44 MP-8c: phaseMap ist claim_id-keyed (claims.id != faelle.id).
-    mainPhase: (f.claim_id ? phaseMap.get(f.claim_id)?.mainPhase : undefined) ?? toClaimMainPhase(null),
-    subPhase: (f.claim_id ? phaseMap.get(f.claim_id)?.subPhase : undefined) ?? toClaimSubPhase(null),
-    created_at: (f.created_at as string | null) ?? null,
+    kennzeichen: f.kennzeichen ?? null,
+    mandatsnummer: f.mandatsnummer ?? null,
+    status: f.operative_status ?? null,
+    // CMM-49: phaseMap ist claim_id-keyed (= vcf.id).
+    mainPhase: phaseMap.get(f.id)?.mainPhase ?? toClaimMainPhase(null),
+    subPhase: phaseMap.get(f.id)?.subPhase ?? toClaimSubPhase(null),
+    created_at: f.created_at ?? null,
     }
   })
 
