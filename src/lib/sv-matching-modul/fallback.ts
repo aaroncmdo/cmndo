@@ -1,52 +1,51 @@
 // AAR-956 Dead-Pin-Fallback — VERTRAG (Typen + Signaturen, Typ-Ebene).
 //
-// Additiv: laesst planeTerminOeffentlich (/flow + SV-Embed) UNBERUEHRT. Der Fallback
-// ist ein neuer, opt-in Entry-Point fuer den gutachter-finder-Embed (aar-956).
-// Modell + Begruendung: memory-Marker COORDINATION-deadpin-fallback-to-aar956.md
-// (Aaron-abgestimmt 12.06.).
+// Additiv: laesst planeTerminOeffentlich + den Partner-Pfad UNBERUEHRT. Der Fallback
+// wird vom Consumer NUR aufgerufen, wenn der Partner-Match 0 Treffer hat (onKeinMatch
+// auf FlowSlotStep) — kein Doppel-Match, Partner-Pfad unbesteuert (aar-956-Design 12.06.).
+// Modell: memory COORDINATION-deadpin-fallback-to-aar956.md (Aaron-abgestimmt).
 //
-// Diese Datei ist REINE Typ-Ebene (kein Live-Stub), damit aar-956 driftfrei dagegen
-// bauen kann. Die Bodies (planeTerminMitFallback / bucheDeadPinTermin) folgen separat
-// (Schritt b) und erfuellen exakt diese Signaturen.
+// REINE Typ-Ebene (kein Live-Stub). Bodies (ladeDeadPinFallback / bucheDeadPinTermin)
+// folgen separat (Schritt b) und erfuellen exakt diese Signaturen.
 
-import type { OeffentlichesSvProfil, SlotVorschlag } from './types'
-import type { PlaneTerminOeffentlichInput } from './plane-termin-oeffentlich'
+import type { SlotVorschlag } from './types'
 
 /**
  * Dead-Pin Lite-Projektion (sv_leads = unclaimter Excel-Import, Tier-4).
- * Leak-safe wie die Marketing-Karte: KEIN name/firma/adresse. Wird dem Kunden als
- * ABGESPECKTE Partner-Karte gezeigt — nur Ort + gerundete Distanz + generische Slots.
+ * Leak-safe: KEIN name/firma/adresse. Dem Kunden als ABGESPECKTE Partner-Karte gezeigt.
  */
 export type DeadPinOeffentlich = {
-  /** sv_leads.id — opakes Buchungs-Handle (Rolle wie OeffentlichesSvProfil.svId). */
+  /** sv_leads.id — opakes Buchungs-Handle. */
   deadPinId: string
   /** Stadt (grob) — Label „Kfz-Gutachter in {ort}". KEIN Name (Privacy). */
   ort: string | null
   /** Datenschutz-gerundet, z.B. „in Ihrer Naehe" — Paritaet zu OeffentlichesSvProfil. */
   distanzGerundet: string
-  /** Fuer die Karte (Dead-Pin-Pin). */
+  /** Fuer die Karte (Dead-Pin-Pin; KEINE Route — Dead-Pins sind eh nur Pins). */
   lat: number
   lng: number
-  /** GENERISCHE Immer-frei-Slots — KEIN freieSlots/ETA/Busy (Dispatch koordiniert manuell). */
+  /** GENERISCHE Immer-frei-Slots. Partner-Slot-Shape → gleicher SvSlotAuswahl-Renderer. KEIN freieSlots/ETA/Busy. */
   slots: SlotVorschlag[]
   /** Diskriminator → Lite-Karte + bucheDeadPinTermin-Pfad. */
   istDeadPin: true
 }
 
 /**
- * Diskriminiertes Matching-Ergebnis. Echte Partner haben IMMER Vorrang; Dead-Pins
- * erscheinen NUR, wenn die Engine 0 buchbare Partner-Slots liefert (kein Partner in
- * Reichweite ODER kein Partner hat freie Termine).
+ * Standalone Dead-Pin-Fallback-Fetch. Consumer ruft das via `onKeinMatch` (GENAU wenn
+ * 0 Partner) — NICHT als Upfront-Branch (kein Doppel-Match, Partner-Pfad unbesteuert).
+ * Liefert die sv_leads, deren Isochrone den Ort deckt, mit generischen Slots.
+ * Leer = keine Dead-Pin-Abdeckung (sehr selten).
  */
-export type PlaneTerminMitFallbackResult =
-  | { kind: 'partner'; svs: OeffentlichesSvProfil[] }
-  | { kind: 'fallback'; deadPins: DeadPinOeffentlich[] }
+export type LadeDeadPinFallbackInput = { lat: number; lng: number }
+export type LadeDeadPinFallback = (
+  input: LadeDeadPinFallbackInput,
+) => Promise<DeadPinOeffentlich[]>
 
 export type BucheDeadPinTerminInput = {
+  /** flow_links-Token (konsistent zu bucheTerminFlow(token, …)); wird intern zu lead aufgeloest. */
+  token: string
   /** = DeadPinOeffentlich.deadPinId (sv_leads.id). */
   deadPinId: string
-  /** bezug=lead (aus gfa→lead, wie bucheTerminFlow). */
-  leadId: string
   /** Gewaehlter generischer Slot (ISO/UTC). */
   startIso: string
 }
@@ -55,22 +54,12 @@ export type BucheDeadPinTerminResult =
   | { ok: true; terminId: string }
   | { ok: false; error: string }
 
-// ─── Signaturen (Typ-Ebene; Bodies in Schritt b) ──────────────────────────────
-
-/**
- * Matching mit Dead-Pin-Fallback. Laeuft ERST den Partner-Match (engine-ranked, =
- * planeTerminOeffentlich-Logik): ≥1 Partner mit ≥1 Slot → `{kind:'partner', svs}`
- * (`svs[0]` = empfohlen, da findBestSV-Score-sortiert). Sonst → `{kind:'fallback',
- * deadPins}`. `fixerSvId` gesetzt → immer `{kind:'partner'}` (dieser SV, kein Fallback).
- */
-export type PlaneTerminMitFallback = (
-  input: PlaneTerminOeffentlichInput,
-) => Promise<PlaneTerminMitFallbackResult>
-
 /**
  * Dead-Pin-Buchung → `gutachter_termine` (`assignee_typ='sv_lead'`,
- * `status='dispatch_pending'`). KEINE SV-Notification, KEINE Exclusion-Constraint
- * (dispatch_pending ist exempt). Landet zur MANUELLEN Koordination beim Dispatch.
+ * `status='dispatch_pending'`). NUR der Write — KEIN Versand: Kunde+Team-Notify macht der
+ * Embed (generisches „Kfz-Gutachter in {ort}"-Label), der SV wird NIE benachrichtigt.
+ * KEINE Exclusion-Constraint (dispatch_pending exempt). Landet zur MANUELLEN Koordination
+ * beim Dispatch.
  */
 export type BucheDeadPinTermin = (
   input: BucheDeadPinTerminInput,

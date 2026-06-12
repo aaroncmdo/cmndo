@@ -19,9 +19,9 @@ export {
 // AAR-956 Dead-Pin-Fallback — Vertrag (Typen + Signaturen; Bodies folgen separat).
 export type {
   DeadPinOeffentlich,
-  PlaneTerminMitFallbackResult,
+  LadeDeadPinFallbackInput,
+  LadeDeadPinFallback,
   BucheDeadPinTerminInput,
   BucheDeadPinTerminResult,
-  PlaneTerminMitFallback,
   BucheDeadPinTermin,
 } from './fallback'
