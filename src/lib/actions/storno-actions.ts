@@ -92,16 +92,21 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   // daher kunde_no_show_count, nicht sv_no_show_count. claim_id + Counter via
   // Nested-Embed lesen, Inkrement direkt auf claims schreiben.
   // CMM-44 SP-D PR2a: re_termin_token aus gutachter_termine (aktueller Termin, SSoT).
-  const { data: fall } = await db.from('faelle')
-    .select('claim_id, lead_id, claims:claim_id(kunde_no_show_count)')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner (kunde_no_show_count
+  // ist NICHT in v_claim_full -> Embed). claim_id = bridge nativ; sv-Filter via embedded
+  // claims.sv_id (== faelle.sv_id, div=0); lead_id war vestigial -> raus.
+  const { data: fallRaw } = await db.from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id!inner(sv_id, lead_id, kunde_no_show_count)')
+    .eq('fall_id', fallId)
+    .eq('claims.sv_id', sv.id)
     .single()
+  type StornoClaim = { sv_id: string | null; lead_id: string | null; kunde_no_show_count: number | null }
+  const fall = fallRaw as unknown as { claim_id: string | null; claims: StornoClaim | StornoClaim[] | null } | null
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const claimId = fall.claim_id ?? null
   if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
 
   // CMM-44 SP-D PR2a: re_termin_token aus gutachter_termine (aktueller Termin, SSoT).
@@ -189,8 +194,8 @@ export async function meldeNoShow(fallId: string): Promise<{ success: boolean; e
   const reTerminUrl = `${baseUrl}/kunde/re-termin/${reTerminToken}`
 
   // KFZ-202 + CMM-39: WA an Kunde mit Re-Termin-Link (Var 2)
-  if (fall.lead_id) {
-    const { data: lead } = await db.from('leads').select('vorname, nachname, telefon, email').eq('id', fall.lead_id).single()
+  if (fallClaim?.lead_id) {
+    const { data: lead } = await db.from('leads').select('vorname, nachname, telefon, email').eq('id', fallClaim.lead_id).single()
     if (lead?.telefon) {
       const { sendCommunication } = await import('@/lib/communications/send')
       sendCommunication('no_show_kunde', {
@@ -262,14 +267,11 @@ export async function einreicheReklamation(data: {
   if (data.begruendung.length < 20) return { success: false, error: 'Begründung muss mindestens 20 Zeichen lang sein' }
 
   const db = createAdminClient()
-  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT) — via claims-Embed.
-  const { data: fall } = await db.from('faelle').select('id, sv_id, claims:claim_id(sv_zugewiesen_am)').eq('id', data.fallId).eq('sv_id', sv.id).single()
+  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT). CMM-49: via v_claim_full (flat,
+  // faelle-frei). sv_id-Filter = self-scope (SV reklamiert eigenen Fall).
+  const { data: fall } = await db.from('v_claim_full').select('fall_id, sv_zugewiesen_am').eq('fall_id', data.fallId).eq('sv_id', sv.id).single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-  const fallClaimRaw = (fall as { claims?: unknown }).claims ?? null
-  const fallClaimEmbed = Array.isArray(fallClaimRaw)
-    ? (fallClaimRaw as Array<{ sv_zugewiesen_am: string | null }>)[0] ?? null
-    : (fallClaimRaw as { sv_zugewiesen_am: string | null } | null)
-  const svZugewiesenAm = fallClaimEmbed?.sv_zugewiesen_am ?? null
+  const svZugewiesenAm = fall.sv_zugewiesen_am ?? null
 
   // 5-Werktage-Frist berechnen
   const zugewiesen = svZugewiesenAm ? new Date(svZugewiesenAm) : new Date()
