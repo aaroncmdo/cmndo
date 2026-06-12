@@ -16,7 +16,7 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
-import { planeTerminOeffentlich } from '@/lib/sv-matching-modul'
+import { planeTerminOeffentlich, ladeDeadPinFallback, bucheDeadPinTermin, type DeadPinOeffentlich } from '@/lib/sv-matching-modul'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
@@ -169,5 +169,123 @@ export async function empfehleSvFuerOrt(
   } catch (err) {
     console.error('[empfehleSvFuerOrt] Engine-Ranking fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return { svId: null }
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AAR-956 Dead-Pin-Fallback — Consumer-Aktionen (12.06.). MATCHING (#2729) + BUCHUNG
+// (#2735, b2) sind gelandet → beide ECHT verdrahtet. `ladeEmbedDeadPinFallback` ruft
+// `ladeDeadPinFallback`, `bucheEmbedDeadPin` ruft `bucheDeadPinTermin` (write-only →
+// `dispatch_pending` sv_lead-Termin in die Dispatch-Queue). Kunde+Team-Bestätigung macht
+// der Embed (Vertrag Gap-2: der sv_lead wird NIE benachrichtigt).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** Lite-Dead-Pin-Fallback (leak-safe) für den Besichtigungsort — wenn 0 buchbare Partner. */
+export async function ladeEmbedDeadPinFallback(
+  input: { lat: number; lng: number },
+): Promise<DeadPinOeffentlich[]> {
+  try {
+    return await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
+  } catch (err) {
+    console.error('[ladeEmbedDeadPinFallback] Fallback-Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return []
+  }
+}
+
+/**
+ * Reserviert einen generischen Dead-Pin-Slot → `dispatch_pending` sv_lead-Termin (b2 #2735,
+ * write-only). Der Termin landet in der Dispatch-Queue (`status='dispatch_pending' AND
+ * assignee_typ='sv_lead'`) zur MANUELLEN Koordination; KEINE Exclusion-Constraint (exempt).
+ * Bei Erfolg schickt FinderWizard die Kunde+Team-Bestätigung (`sendeEmbedDeadPinBestaetigung`,
+ * generisches Label) — der sv_lead wird NIE benachrichtigt.
+ */
+export async function bucheEmbedDeadPin(
+  input: { token: string; deadPinId: string; startIso: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const r = await bucheDeadPinTermin({
+    token: input.token,
+    deadPinId: input.deadPinId,
+    startIso: input.startIso,
+  })
+  return r.ok ? { ok: true } : { ok: false, error: r.error }
+}
+
+/**
+ * Kunde+Team-Bestätigung NACH einer Dead-Pin-Reservierung (Vertrag Gap-2: der Embed
+ * macht den Notify, der sv_lead wird NIE benachrichtigt). Generisches Label
+ * „Kfz-Gutachter in {ort}" (KEIN SV-Name — leak-safe). Spiegelt
+ * `sendeEmbedTerminBestaetigung`, nur ohne svVorname + mit Dispatch-Hinweis im Team-Text.
+ * Non-critical fire-and-forget; getriggert aus FinderWizard nach erfolgreicher Buchung.
+ */
+export async function sendeEmbedDeadPinBestaetigung(input: {
+  token: string
+  ortLabel: string | null
+  startIso: string
+}): Promise<void> {
+  try {
+    if (!input.token || !input.startIso) return
+    const admin = createAdminClient()
+    const { data: flowLink } = await admin
+      .from('flow_links')
+      .select('lead_id')
+      .eq('token', input.token)
+      .maybeSingle()
+    const leadId = (flowLink?.lead_id as string | null) ?? null
+    if (!leadId) return
+
+    const { data: lead } = await admin
+      .from('leads')
+      .select('vorname, nachname, telefon')
+      .eq('id', leadId)
+      .maybeSingle()
+    if (!lead) return
+
+    const vorname = ((lead.vorname as string | null) ?? '').trim()
+    const name =
+      [vorname, ((lead.nachname as string | null) ?? '').trim()].filter(Boolean).join(' ').trim() || 'Kunde'
+    const telefon = ((lead.telefon as string | null) ?? '').trim()
+    const gutachterLabel = input.ortLabel ? `Kfz-Gutachter in ${input.ortLabel}` : 'Kfz-Gutachter in Ihrer Nähe'
+    const wann = new Date(input.startIso).toLocaleString('de-DE', {
+      timeZone: 'Europe/Berlin',
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+
+    // ── an den Kunden ──
+    if (telefon.length >= 5) {
+      const kundeText = [
+        '✅ Ihr Termin ist reserviert',
+        '',
+        `Hallo ${vorname || name},`,
+        `Ihr ${gutachterLabel} ist für ${wann} Uhr vorgemerkt.`,
+        '',
+        'Wir bestätigen Ihren Termin in Kürze. Bei Rückfragen antworten Sie einfach auf diese Nachricht.',
+        '',
+        'Ihr Claimondo-Team',
+      ].join('\n')
+      const r = await sendWhatsAppText(telefon, kundeText)
+      if (!r.ok) console.error('[embed-deadpin-bestaetigung] Kunde-WA fehlgeschlagen:', r.code, r.error)
+    }
+
+    // ── ans Team (Dispatch koordiniert den Dead-Pin manuell — kein verifizierter Partner) ──
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+    const teamText = [
+      '📞 Neue Dead-Pin-Reservierung — bitte koordinieren',
+      '',
+      `👤 ${name}`,
+      telefon ? `📞 ${telefon}` : null,
+      `🔧 ${gutachterLabel} (sv_lead, nicht verifiziert)`,
+      `🕐 ${wann} Uhr`,
+      '',
+      `${base}/dispatch/leads/${leadId}`,
+    ]
+      .filter(Boolean)
+      .join('\n')
+    await notifyTeamWhatsApp(teamText)
+  } catch (err) {
+    console.error('[embed-deadpin-bestaetigung] fehlgeschlagen (nicht kritisch):', (err as Error).message)
   }
 }

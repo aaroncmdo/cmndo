@@ -21,6 +21,7 @@ export function FlowSlotStep({
   token,
   onGebucht,
   onOhneTermin,
+  onKeinMatch,
 }: {
   token: string
   onGebucht: (t: GebuchterTermin) => void
@@ -28,6 +29,11 @@ export function FlowSlotStep({
   // → ohne Buchung weiter zur SA. SV wird dort per AAR-908 zugeordnet, der Termin
   // nachgelagert telefonisch vereinbart (kein Conversion-Dead-End mehr).
   onOhneTermin?: () => void
+  // AAR-956 Dead-Pin-Fallback: feuert GENAU wenn 0 buchbare Partner (statt der
+  // internen kein_match-Ansicht). Der Consumer (Embed) übernimmt dann mit den
+  // Lite-Dead-Pin-Karten. Optional + additiv — ohne die Prop (z.B. /flow) bleibt
+  // das bisherige kein_match-Verhalten unverändert.
+  onKeinMatch?: () => void
 }) {
   const t = useTranslations('selfService')
   const [step, setStep] = useState<
@@ -58,6 +64,12 @@ export function FlowSlotStep({
       }
       const list = r.svs ?? []
       if (list.length === 0 || list.every((sv) => sv.slots.length === 0)) {
+        // AAR-956 Dead-Pin-Fallback: 0 buchbare Partner → Consumer übernimmt (Embed:
+        // Lite-Dead-Pin-Karten). Ohne onKeinMatch (/flow) das bisherige Verhalten.
+        if (onKeinMatch) {
+          onKeinMatch()
+          return
+        }
         setStep('kein_match')
         return
       }

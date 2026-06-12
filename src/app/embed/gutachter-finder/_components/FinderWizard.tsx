@@ -14,7 +14,15 @@ import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePl
 import { FlowSlotStep, type GebuchterTermin } from '@/app/flow/[token]/FlowSlotStep'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
-import { starteEmbedBuchung, sendeEmbedTerminBestaetigung } from '../actions'
+import {
+  starteEmbedBuchung,
+  sendeEmbedTerminBestaetigung,
+  ladeEmbedDeadPinFallback,
+  bucheEmbedDeadPin,
+  sendeEmbedDeadPinBestaetigung,
+} from '../actions'
+import { DeadPinSlotStep } from './DeadPinSlotStep'
+import type { DeadPinOeffentlich } from '@/lib/sv-matching-modul'
 
 type Ort = { adresse: string; lat: number; lng: number }
 type Phase = 'ort' | 'schaden' | 'kontakt' | 'slot' | 'gebucht'
@@ -46,6 +54,10 @@ export function FinderWizard() {
   const [dsgvo, setDsgvo] = useState(false)
   const [token, setToken] = useState<string | null>(null)
   const [gebucht, setGebucht] = useState<GebuchterTermin | null>(null)
+  // AAR-956 Dead-Pin-Fallback: keinPartner = FlowSlotStep meldete 0 buchbare Partner;
+  // deadPins = die geladenen Lite-Karten (null = lädt noch).
+  const [keinPartner, setKeinPartner] = useState(false)
+  const [deadPins, setDeadPins] = useState<DeadPinOeffentlich[] | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
@@ -70,6 +82,36 @@ export function FinderWizard() {
       setToken(res.token)
       setPhase('slot')
     })
+  }
+
+  // AAR-956 Dead-Pin-Fallback (FlowSlotStep.onKeinMatch): 0 buchbare Partner → die
+  // echten Lite-Dead-Pin-Karten (ladeEmbedDeadPinFallback → engine ladeDeadPinFallback)
+  // für den Besichtigungsort laden. Leere Liste → telefonisch-Botschaft (= bisheriges
+  // kein_match-Verhalten, keine Regression).
+  function partnerlosFallback() {
+    setKeinPartner(true)
+    setDeadPins(null)
+    if (!ort) {
+      setDeadPins([])
+      return
+    }
+    void ladeEmbedDeadPinFallback({ lat: ort.lat, lng: ort.lng }).then((dps) => setDeadPins(dps ?? []))
+  }
+
+  // Reserviert einen generischen Dead-Pin-Slot (→ dispatch_pending). Bei Erfolg geht die
+  // Kunde+Team-Bestätigung raus (generisches Label, SV nie). bucheEmbedDeadPin ist bis b2
+  // ein TEMP-Stub → der Success-Pfad (inkl. Notify) ist erst nach dem b2-Landing erreichbar.
+  async function buchePinFallback(
+    deadPinId: string,
+    startIso: string,
+  ): Promise<{ ok: boolean; error?: string }> {
+    if (!token) return { ok: false, error: 'Die Sitzung ist abgelaufen. Bitte starten Sie neu.' }
+    const r = await bucheEmbedDeadPin({ token, deadPinId, startIso })
+    if (r.ok) {
+      const ortLabel = deadPins?.find((d) => d.deadPinId === deadPinId)?.ort ?? null
+      void sendeEmbedDeadPinBestaetigung({ token, ortLabel, startIso })
+    }
+    return r
   }
 
   const stepIdx = phase === 'ort' ? 0 : phase === 'schaden' ? 1 : 2
@@ -178,7 +220,7 @@ export function FinderWizard() {
         </form>
       )}
 
-      {phase === 'slot' && token && (
+      {phase === 'slot' && token && !keinPartner && (
         <FlowSlotStep
           token={token}
           onGebucht={(t) => {
@@ -189,8 +231,28 @@ export function FinderWizard() {
             // bereits race-safe in der DB (FlowSlotStep → bucheTerminFlow → Engine).
             void sendeEmbedTerminBestaetigung({ token, svVorname: t.svVorname, startIso: t.startIso })
           }}
+          onKeinMatch={partnerlosFallback}
         />
       )}
+
+      {/* AAR-956 Dead-Pin-Fallback: 0 buchbare Partner → echte Lite-Dead-Pin-Karten
+          (Matching live). Leere Abdeckung → telefonisch (= bisheriges Verhalten). */}
+      {phase === 'slot' && token && keinPartner &&
+        (deadPins === null ? (
+          <p className="py-4 text-center text-[0.8125rem] text-claimondo-shield/80">
+            Wir prüfen verfügbare Gutachter in Ihrer Nähe…
+          </p>
+        ) : deadPins.length > 0 ? (
+          <DeadPinSlotStep deadPins={deadPins} onBook={buchePinFallback} />
+        ) : (
+          <div className="py-3 text-center">
+            <h3 className="text-body font-bold text-claimondo-navy">Wir melden uns telefonisch</h3>
+            <p className="mt-1 text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
+              In Ihrer Nähe ist gerade kein Gutachter online verfügbar. Unser Team meldet sich
+              für die Terminvereinbarung bei Ihnen.
+            </p>
+          </div>
+        ))}
 
       {phase === 'gebucht' && gebucht && (
         <div className="flex flex-col items-center gap-2 py-4 text-center">
