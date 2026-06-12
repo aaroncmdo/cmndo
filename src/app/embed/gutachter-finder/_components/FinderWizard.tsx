@@ -400,21 +400,28 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             )}
           </p>
 
-          {/* Ansprechpartner (= dem Lead zugewiesener Dispatcher) + Anruf-Button (Aaron 12.06.).
-              Nummer = die normale Claimondo-Rufnummer (wie BeratungVereinbarenButton). */}
+          {/* Ansprechpartner (= dem Lead zugewiesener Dispatcher, NUR Vorname öffentlich) als
+              ausgebaute Profil-Card + prominenter Anruf-Button (Aaron 12.06.). Nummer = die normale
+              Claimondo-Rufnummer (wie BeratungVereinbarenButton). */}
           {gebucht.dispatcherName && (
-            <div className="mt-3 flex w-full items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-white/70 px-4 py-3 text-left">
-              <div className="min-w-0">
-                <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
-                  Ihr Ansprechpartner
-                </p>
-                <p className="truncate text-body-sm font-bold text-claimondo-navy">{gebucht.dispatcherName}</p>
+            <div className="mt-4 w-full rounded-ios-lg border border-claimondo-border bg-white/80 p-4 text-left shadow-glass-card">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-heading-sm font-extrabold text-white">
+                  {gebucht.dispatcherName.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
+                    Ihr persönlicher Ansprechpartner
+                  </p>
+                  <p className="truncate text-body font-bold text-claimondo-navy">{gebucht.dispatcherName}</p>
+                  <p className="text-[0.75rem] text-claimondo-shield/70">Claimondo Schaden-Team</p>
+                </div>
               </div>
               <a
                 href="tel:+4922198557270"
-                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-ios-md bg-claimondo-ondo px-3.5 py-2 text-body-sm font-semibold text-white transition-colors hover:bg-claimondo-navy"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-ios-md bg-claimondo-ondo px-4 py-2.5 text-body-sm font-semibold text-white transition-colors hover:bg-claimondo-navy"
               >
-                <Phone className="h-4 w-4" /> Anrufen
+                <Phone className="h-4 w-4" /> Jetzt anrufen
               </a>
             </div>
           )}

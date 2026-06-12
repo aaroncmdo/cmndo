@@ -95,24 +95,41 @@ export async function ladeEmbedMatching(input: {
       }
     }
     // Request-Modell (Aaron 12.06.): bei GESETZTEM Wunschtermin bietet JEDER Gutachter (Partner
-    // UND Dead-Pin) genau die Wunschzeit als EINZIGE Option an — kein Slot-Listen-Wirrwarr. Die
-    // Reservierung ist dann eine Anfrage auf diese Zeit; der Dispatcher (Lead-Owner) bestätigt.
-    // Ohne Wunschtermin: unverändert (Partner = echte Engine-Slots, Dead-Pin = generische).
-    const nurWunsch = <T extends { slots: SlotVorschlag[] }>(items: T[]): T[] => {
-      if (!wunschterminIso) return items
-      const start = wunschterminIso
-      const end = new Date(new Date(start).getTime() + 90 * 60_000).toISOString()
-      const wunschSlot: SlotVorschlag = { start, end, matchType: 'wunschtermin' }
-      return items.map((it) => ({ ...it, slots: [wunschSlot] }))
-    }
+    // UND Dead-Pin) 3 ZEITEN an — die Wunschzeit (Badge) + 2 Alternativen (±2h, gleicher Tag,
+    // 8–18 Uhr, chronologisch). Die Reservierung ist eine Anfrage auf die gewählte Zeit; der
+    // Dispatcher (Lead-Owner) bestätigt. Ohne Wunschtermin: unverändert (Partner = echte Engine-
+    // Slots, Dead-Pin = generische).
+    const dreiZeiten = ((): SlotVorschlag[] => {
+      if (!wunschterminIso || !input.wunschterminLokal) return []
+      const [datum, zeit] = input.wunschterminLokal.split('T')
+      const H = parseInt((zeit ?? '10:00').split(':')[0] ?? '10', 10)
+      if (!datum || Number.isNaN(H)) return []
+      // Wunschstunde + ±2h-Alternativen, geclamped 8–18, eindeutig, chronologisch, max 3.
+      const stunden = [...new Set([H, H + 2, H - 2, H + 4, H - 4].filter((h) => h >= 8 && h <= 18))]
+        .slice(0, 3)
+        .sort((a, b) => a - b)
+      const out: SlotVorschlag[] = []
+      for (const h of stunden) {
+        try {
+          const start = berlinWallClockToUtc(`${datum}T${String(h).padStart(2, '0')}:00`)
+          const end = new Date(new Date(start).getTime() + 90 * 60_000).toISOString()
+          out.push({ start, end, matchType: h === H ? 'wunschtermin' : 'nahe' })
+        } catch {
+          /* ungültige Stunde überspringen */
+        }
+      }
+      return out
+    })()
+    const mitZeiten = <T extends { slots: SlotVorschlag[] }>(items: T[]): T[] =>
+      dreiZeiten.length ? items.map((it) => ({ ...it, slots: dreiZeiten })) : items
 
     if (input.forceFallback) {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
-      return { kind: 'fallback', deadPins: nurWunsch(deadPins) }
+      return { kind: 'fallback', deadPins: mitZeiten(deadPins) }
     }
     const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso })
-    if (res.kind === 'partner') return { kind: 'partner', svs: nurWunsch(res.svs) }
-    return { kind: 'fallback', deadPins: nurWunsch(res.deadPins) }
+    if (res.kind === 'partner') return { kind: 'partner', svs: mitZeiten(res.svs) }
+    return { kind: 'fallback', deadPins: mitZeiten(res.deadPins) }
   } catch (err) {
     console.error('[ladeEmbedMatching] Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return { kind: 'fallback', deadPins: [] }
@@ -120,9 +137,10 @@ export async function ladeEmbedMatching(input: {
 }
 
 /**
- * Liefert den Namen des dem Lead zugewiesenen Dispatchers (leads.zugewiesen_an → profiles).
- * Der Dispatcher wird bei der Lead-Erstellung Round-Robin gesetzt (issueCanonicalFlowLinkForAnfrage).
- * Für die Danke-Seite: „Ihr Ansprechpartner: {Name}" + Anruf-Button (Aaron 12.06.).
+ * Liefert den VORNAMEN des dem Lead zugewiesenen Dispatchers (leads.zugewiesen_an → profiles).
+ * Öffentlich (Danke-Seite) wird NUR der Vorname gezeigt (Aaron 12.06.: „das Profil öffentlich nur
+ * den Vornamen aus der Datenbank") — kein Nachname. Der Dispatcher wird bei der Lead-Erstellung
+ * Round-Robin gesetzt (issueCanonicalFlowLinkForAnfrage).
  */
 async function ladeLeadDispatcher(token: string): Promise<string | null> {
   try {
@@ -133,9 +151,9 @@ async function ladeLeadDispatcher(token: string): Promise<string | null> {
     const { data: lead } = await admin.from('leads').select('zugewiesen_an').eq('id', leadId).maybeSingle()
     const dispId = (lead?.zugewiesen_an as string | null) ?? null
     if (!dispId) return null
-    const { data: p } = await admin.from('profiles').select('vorname, nachname').eq('id', dispId).maybeSingle()
-    if (!p) return null
-    return [p.vorname as string | null, p.nachname as string | null].filter(Boolean).join(' ').trim() || null
+    const { data: p } = await admin.from('profiles').select('vorname').eq('id', dispId).maybeSingle()
+    const vorname = ((p?.vorname as string | null) ?? '').trim()
+    return vorname || null
   } catch (err) {
     console.error('[ladeLeadDispatcher] fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return null
