@@ -23,7 +23,7 @@ const TYP_LABEL: Record<string, string> = {
 // Light-Profil ist optisch ein vollwertiges Profil, nur mit leak-safem Inhalt.
 function PopupCard({ children }: { children: React.ReactNode }) {
   return (
-    <GlassSurface className="flex min-w-[270px] max-w-[330px] flex-col gap-3.5 p-5">
+    <GlassSurface className="flex min-w-[260px] max-w-[330px] flex-col gap-2.5 p-4">
       {children}
     </GlassSurface>
   )
@@ -32,7 +32,7 @@ function PopupCard({ children }: { children: React.ReactNode }) {
 // Avatar-Kreis (Ondo-Fill) — geteilt: SV zeigt die Vorname-Initiale, Dead-Pin ein Pin-Icon.
 function PopupAvatar({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-heading-sm font-extrabold text-white">
+    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-body font-extrabold text-white">
       {children}
     </div>
   )
@@ -43,7 +43,7 @@ function Chip({ children, strong = false }: { children: React.ReactNode; strong?
   return (
     <span
       className={cn(
-        'rounded-full border bg-claimondo-bg px-3 py-1 text-[0.8125rem] font-semibold text-claimondo-shield',
+        'rounded-full border bg-claimondo-bg px-2.5 py-0.5 text-[0.75rem] font-semibold text-claimondo-shield',
         strong ? 'border-claimondo-ondo/30' : 'border-claimondo-border',
       )}
     >
@@ -55,7 +55,7 @@ function Chip({ children, strong = false }: { children: React.ReactNode; strong?
 function Section({ titel, children }: { titel: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
+      <div className="mb-1.5 text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
         {titel}
       </div>
       <div className="flex flex-wrap gap-2">{children}</div>
@@ -69,7 +69,7 @@ export function SvProfilePopup({ sv }: { sv: AktiverSVPublic }) {
   const rolle = (sv.gutachter_typ ? TYP_LABEL[sv.gutachter_typ] : undefined) ?? 'Sachverständiger'
   const hatBewertung = sv.bewertungs_durchschnitt !== null && sv.bewertungs_anzahl !== null
   const specs = sv.spezifikationen_alle.length > 0 ? sv.spezifikationen_alle : sv.spezifikationen_top3
-  const specsShown = specs.slice(0, 8)
+  const specsShown = specs.slice(0, 4)
   const specsRest = specs.length - specsShown.length
   const hatCredentials = sv.oeffentlich_bestellt || sv.mitgliedschaften.length > 0 || sv.qualifikationen.length > 0
 
@@ -148,14 +148,14 @@ export function SvProfilePopup({ sv }: { sv: AktiverSVPublic }) {
       {/* Schadenarten */}
       {sv.schadenarten.length > 0 && (
         <Section titel="Schadenarten">
-          {sv.schadenarten.slice(0, 6).map((s) => (
+          {sv.schadenarten.slice(0, 3).map((s) => (
             <Chip key={s}>{s}</Chip>
           ))}
-          {sv.schadenarten.length > 6 && <Chip>+{sv.schadenarten.length - 6} weitere</Chip>}
+          {sv.schadenarten.length > 3 && <Chip>+{sv.schadenarten.length - 3} weitere</Chip>}
         </Section>
       )}
 
-      <p className="text-[0.8125rem] leading-relaxed text-claimondo-shield/60">
+      <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/60">
         Den passenden Gutachter wählt das System anhand Ihres Schadenorts.
       </p>
     </PopupCard>
@@ -185,7 +185,7 @@ export function DeadPinProfilePopup({ ort }: { ort: string | null }) {
         </div>
       </div>
 
-      <p className="text-[0.8125rem] leading-relaxed text-claimondo-shield/60">
+      <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/60">
         Wählen Sie einen Wunschtermin — wir bestätigen ihn nach Ihrer Anfrage telefonisch.
       </p>
     </PopupCard>
