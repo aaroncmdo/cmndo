@@ -286,10 +286,11 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
 /** Gibt den Gegner-VS-Namen zurück (oder null) — wird für die Suggestion-Chips genutzt. */
 export async function getFallGegnerVs(fallId: string): Promise<string | null> {
   const admin = createAdminClient()
+  // CMM-49 Display-Sweep: gegner_versicherung aus v_claim_full (verursacher-Party-Home, divergence=0). admin-client = RLS-safe.
   const { data } = await admin
-    .from('faelle')
+    .from('v_claim_full')
     .select('gegner_versicherung')
-    .eq('id', fallId)
+    .eq('fall_id', fallId)
     .maybeSingle()
   return (data?.gegner_versicherung as string | null) ?? null
 }
