@@ -14,7 +14,7 @@
 // SvSlotAuswahl (Partner-Karten, geteilt mit /flow) + DeadPinSlotStep (Lite, Select-Mode).
 
 import { useState, useTransition } from 'react'
-import { ChevronRight, ChevronLeft, CheckCircle2 } from 'lucide-react'
+import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import { Button } from '@/components/primitives'
@@ -96,7 +96,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
   const [dsgvo, setDsgvo] = useState(false)
-  const [gebucht, setGebucht] = useState<{ svVorname: string | null; ortLabel: string | null; startIso: string | null } | null>(null)
+  const [gebucht, setGebucht] = useState<{ svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcherName: string | null } | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [slotWeg, setSlotWeg] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -179,7 +179,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         if (res.slotWeg && ort) setSlotWeg(true)
         return
       }
-      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso })
+      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcherName: res.dispatcherName })
       setPhase('gebucht')
     })
   }
@@ -399,6 +399,25 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
               'Vielen Dank — unser Team meldet sich in Kürze telefonisch für die Terminvereinbarung.'
             )}
           </p>
+
+          {/* Ansprechpartner (= dem Lead zugewiesener Dispatcher) + Anruf-Button (Aaron 12.06.).
+              Nummer = die normale Claimondo-Rufnummer (wie BeratungVereinbarenButton). */}
+          {gebucht.dispatcherName && (
+            <div className="mt-3 flex w-full items-center justify-between gap-3 rounded-ios-md border border-claimondo-border bg-white/70 px-4 py-3 text-left">
+              <div className="min-w-0">
+                <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
+                  Ihr Ansprechpartner
+                </p>
+                <p className="truncate text-body-sm font-bold text-claimondo-navy">{gebucht.dispatcherName}</p>
+              </div>
+              <a
+                href="tel:+4922198557270"
+                className="inline-flex flex-shrink-0 items-center gap-1.5 rounded-ios-md bg-claimondo-ondo px-3.5 py-2 text-body-sm font-semibold text-white transition-colors hover:bg-claimondo-navy"
+              >
+                <Phone className="h-4 w-4" /> Anrufen
+              </a>
+            </div>
+          )}
         </div>
       )}
     </GlassSurface>

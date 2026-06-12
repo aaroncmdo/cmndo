@@ -120,6 +120,29 @@ export async function ladeEmbedMatching(input: {
 }
 
 /**
+ * Liefert den Namen des dem Lead zugewiesenen Dispatchers (leads.zugewiesen_an → profiles).
+ * Der Dispatcher wird bei der Lead-Erstellung Round-Robin gesetzt (issueCanonicalFlowLinkForAnfrage).
+ * Für die Danke-Seite: „Ihr Ansprechpartner: {Name}" + Anruf-Button (Aaron 12.06.).
+ */
+async function ladeLeadDispatcher(token: string): Promise<string | null> {
+  try {
+    const admin = createAdminClient()
+    const { data: fl } = await admin.from('flow_links').select('lead_id').eq('token', token).maybeSingle()
+    const leadId = (fl?.lead_id as string | null) ?? null
+    if (!leadId) return null
+    const { data: lead } = await admin.from('leads').select('zugewiesen_an').eq('id', leadId).maybeSingle()
+    const dispId = (lead?.zugewiesen_an as string | null) ?? null
+    if (!dispId) return null
+    const { data: p } = await admin.from('profiles').select('vorname, nachname').eq('id', dispId).maybeSingle()
+    if (!p) return null
+    return [p.vorname as string | null, p.nachname as string | null].filter(Boolean).join(' ').trim() || null
+  } catch (err) {
+    console.error('[ladeLeadDispatcher] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return null
+  }
+}
+
+/**
  * AAR-956 Reorder + Request-Modell (Aaron 12.06.): finaler Submit (Kontakt = letzter Schritt).
  * Legt Lead+Token an (starteEmbedBuchung — der Lead bekommt via createLead einen Round-Robin-
  * Dispatcher als `zugewiesen_an`) und reserviert DANN den gewählten Termin — Partner
@@ -147,7 +170,7 @@ export async function reserviereEmbedTermin(input: {
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
     | null
 }): Promise<
-  | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null }
+  | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcherName: string | null }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
   // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
@@ -174,8 +197,11 @@ export async function reserviereEmbedTermin(input: {
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
 
+  // Dem Lead zugewiesener Dispatcher (für die Danke-Seite: Ansprechpartner + Anruf-Button).
+  const dispatcherName = await ladeLeadDispatcher(token)
+
   // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
-  if (!input.auswahl) return { ok: true, svVorname: null, ortLabel: null, startIso: null }
+  if (!input.auswahl) return { ok: true, svVorname: null, ortLabel: null, startIso: null, dispatcherName }
 
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
@@ -186,13 +212,13 @@ export async function reserviereEmbedTermin(input: {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
     void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
-    return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start }
+    return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcherName }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
   void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
-  return { ok: true, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start }
+  return { ok: true, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcherName }
 }
 
 /**
