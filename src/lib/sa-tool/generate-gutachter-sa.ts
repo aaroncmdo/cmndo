@@ -92,10 +92,11 @@ export async function generateGutachterSA({
     // 2. Kunden-Unterschrift-URL bestimmen. Der FlowLink-Caller kann sie
     // direkt übergeben; sonst Fallback auf persistierte Fall-Spalten.
     // CMM-44 SP-B PR2b: sa_unterschrift_url + abtretung_pdf leben auf claims (SSoT).
+    // CMM-49 Display-Sweep: faelle->faelle_claim_bridge (claim_id->claims-FK #2719). claims-Embed + Consumer unveraendert.
     const { data: fall, error: fallErr } = await admin
-      .from('faelle')
+      .from('faelle_claim_bridge')
       .select('claim_id, claims:claim_id(claim_nummer, sa_unterschrift_url, abtretung_pdf)')
-      .eq('id', fallId)
+      .eq('fall_id', fallId)
       .maybeSingle()
     if (fallErr || !fall) {
       return { success: false, error: `Fall-Lookup fehlgeschlagen: ${fallErr?.message ?? 'not found'}` }
