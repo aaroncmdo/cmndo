@@ -96,9 +96,10 @@ async function authSvPortal(fallId: string) {
   if (!user) return { error: 'Nicht angemeldet' }
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { error: 'Kein SV-Profil' }
-  const { data: fall } = await supabase.from('faelle').select('id, sv_id').eq('id', fallId).eq('sv_id', sv.id).single()
+  // CMM-49 (faelle-Drop-Runway): Auth-Gate via v_claim_full (flat, faelle-frei). sv_id-Filter = self-scope.
+  const { data: fall } = await supabase.from('v_claim_full').select('fall_id').eq('fall_id', fallId).eq('sv_id', sv.id).single()
   if (!fall) return { error: 'Fall nicht gefunden' }
-  return { userId: user.id, svId: sv.id, fallId: fall.id }
+  return { userId: user.id, svId: sv.id, fallId: fall.fall_id }
 }
 
 // ─── AUTH: SV Token ─────────────────────────────────────────────────────────
@@ -126,7 +127,8 @@ async function authKundePortal(fallId: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' }
   const admin = createAdminClient()
-  const { data: fall } = await admin.from('faelle').select('id, kunde_id, sv_id, lead_id').eq('id', fallId).single()
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat; kunde_id/sv_id/lead_id SSoT, faelle-frei).
+  const { data: fall } = await admin.from('v_claim_full').select('kunde_id, sv_id, lead_id').eq('fall_id', fallId).single()
   if (!fall) return { error: 'Fall nicht gefunden' }
   // Ownership: kunde_id oder lead-email
   if (fall.kunde_id !== user.id) {
@@ -137,7 +139,7 @@ async function authKundePortal(fallId: string) {
       return { error: 'Kein Zugriff' }
     }
   }
-  return { userId: user.id, fallId: fall.id, svId: fall.sv_id }
+  return { userId: user.id, fallId, svId: fall.sv_id }
 }
 
 // ─── 1. terminAblehnen ─────────────────────────────────────────────────────
@@ -239,9 +241,8 @@ export async function terminAblehnen({
 
   // 5. Notifications: Kunde + Admin
   try {
-    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
-    const { data: fallData } = await admin.from('faelle').select('kunde_id, claims:claim_id(claim_nummer, kundenbetreuer_id)').eq('id', fId).single()
-    const fallDataClaim = fallData ? (Array.isArray(fallData.claims) ? fallData.claims[0] : fallData.claims) : null
+    // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT). CMM-49: via v_claim_full (flat, faelle-frei).
+    const { data: fallData } = await admin.from('v_claim_full').select('kunde_id, claim_nummer, kundenbetreuer_id').eq('fall_id', fId).single()
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     // Kunde benachrichtigen
@@ -249,7 +250,7 @@ export async function terminAblehnen({
       const { data: kundeProfile } = await admin.from('profiles').select('telefon').eq('id', fallData.kunde_id).single()
       if (kundeProfile?.telefon) {
         await sendManualWhatsApp(kundeProfile.telefon,
-          `⚠️ Der Sachverständige hat den Termin am ${terminDatum} für Ihren Fall ${fallDataClaim?.claim_nummer ?? ''} abgelehnt. Wir suchen umgehend einen neuen Gutachter für Sie.`,
+          `⚠️ Der Sachverständige hat den Termin am ${terminDatum} für Ihren Fall ${fallData?.claim_nummer ?? ''} abgelehnt. Wir suchen umgehend einen neuen Gutachter für Sie.`,
           fId)
       }
     }
@@ -259,7 +260,7 @@ export async function terminAblehnen({
     for (const a of admins ?? []) {
       if (a.telefon) {
         await sendManualWhatsApp(a.telefon,
-          `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallDataClaim?.claim_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
+          `⚠️ Gutachter ${svName} hat den Termin am ${terminDatum} für ${fallData?.claim_nummer ?? 'Fall'} ABGELEHNT. Bitte neuen Gutachter zuweisen.`,
           fId)
       }
     }
@@ -268,11 +269,11 @@ export async function terminAblehnen({
     const { createLinkedTask } = await import('@/lib/tasks/create-task')
     await createLinkedTask({
       fall_id: fId,
-      titel: `Neuen Gutachter zuweisen für ${fallDataClaim?.claim_nummer ?? 'Fall'}`,
+      titel: `Neuen Gutachter zuweisen für ${fallData?.claim_nummer ?? 'Fall'}`,
       typ: 'dispatch',
       prioritaet: 'dringend',
       faellig_am: new Date(),
-      zugewiesen_an: fallDataClaim?.kundenbetreuer_id ?? null,
+      zugewiesen_an: fallData?.kundenbetreuer_id ?? null,
       entity_type: 'case',
       entity_id: fId,
     })
@@ -432,9 +433,8 @@ export async function terminGegenvorschlag({
 
   // 5. Notifications
   try {
-    const { data: fallData } = await admin.from('faelle').select('kunde_id, claims:claim_id(claim_nummer)').eq('id', fId).single()
-    const fallDataClaimNummer =
-      (Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims)?.claim_nummer ?? null
+    const { data: fallData } = await admin.from('v_claim_full').select('kunde_id, claim_nummer').eq('fall_id', fId).single()
+    const fallDataClaimNummer = fallData?.claim_nummer ?? null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (vonWem === 'sv') {
@@ -460,9 +460,9 @@ export async function terminGegenvorschlag({
         let kundenVorname: string | null = null
         let kundenSprache: string | null = null
         const { data: fallEmail } = await admin
-          .from('faelle')
+          .from('v_claim_full')
           .select('lead_id, kunde_id')
-          .eq('id', fId)
+          .eq('fall_id', fId)
           .single()
         if (fallEmail?.lead_id) {
           const { data: lead } = await admin
@@ -716,9 +716,8 @@ export async function terminAnnehmen({
 
   // Notifications
   try {
-    const { data: fallData } = await admin.from('faelle').select('kunde_id, claims:claim_id(claim_nummer)').eq('id', fId).single()
-    const fallDataClaimNummer =
-      (Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims)?.claim_nummer ?? null
+    const { data: fallData } = await admin.from('v_claim_full').select('kunde_id, claim_nummer').eq('fall_id', fId).single()
+    const fallDataClaimNummer = fallData?.claim_nummer ?? null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (source === 'kunde' && svId) {
@@ -769,12 +768,11 @@ export async function terminAnnehmen({
     const svName = svId ? await getSvName(admin, svId) : 'Gutachter'
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: ortRow } = await admin
-      .from('faelle')
-      .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-      .eq('id', fId)
+      .from('v_claim_full')
+      .select('schadenort_adresse, schadenort_plz, schadenort_ort')
+      .eq('fall_id', fId)
       .single()
-    const ortClaim = Array.isArray(ortRow?.claims) ? ortRow.claims[0] : ortRow?.claims
-    const ort = [ortClaim?.schadenort_adresse, ortClaim?.schadenort_plz, ortClaim?.schadenort_ort]
+    const ort = [ortRow?.schadenort_adresse, ortRow?.schadenort_plz, ortRow?.schadenort_ort]
       .filter(Boolean)
       .join(', ')
     await emitEvent(
@@ -891,9 +889,8 @@ export async function terminBuchen({
 
   // Notifications an SV + Admin
   try {
-    const { data: fallData } = await admin.from('faelle').select('claims:claim_id(claim_nummer)').eq('id', fId).single()
-    const fallDataClaimNummer =
-      (Array.isArray(fallData?.claims) ? fallData?.claims[0] : fallData?.claims)?.claim_nummer ?? null
+    const { data: fallData } = await admin.from('v_claim_full').select('claim_nummer').eq('fall_id', fId).single()
+    const fallDataClaimNummer = fallData?.claim_nummer ?? null
     const { sendManualWhatsApp } = await import('@/lib/whatsapp')
 
     if (svId) {
@@ -923,12 +920,11 @@ export async function terminBuchen({
     const svName = svId ? await getSvName(admin, svId) : 'Gutachter'
     // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
     const { data: ortRow } = await admin
-      .from('faelle')
-      .select('claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-      .eq('id', fId)
+      .from('v_claim_full')
+      .select('schadenort_adresse, schadenort_plz, schadenort_ort')
+      .eq('fall_id', fId)
       .single()
-    const ortClaim = Array.isArray(ortRow?.claims) ? ortRow.claims[0] : ortRow?.claims
-    const ort = [ortClaim?.schadenort_adresse, ortClaim?.schadenort_plz, ortClaim?.schadenort_ort]
+    const ort = [ortRow?.schadenort_adresse, ortRow?.schadenort_plz, ortRow?.schadenort_ort]
       .filter(Boolean)
       .join(', ')
     await emitEvent(
