@@ -20,7 +20,7 @@ import {
   planeTerminMitFallback,
   ladeDeadPinFallback,
   bucheDeadPinTermin,
-  type DeadPinOeffentlich,
+  type SlotVorschlag,
   type PlaneTerminMitFallbackResult,
 } from '@/lib/sv-matching-modul'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
@@ -36,6 +36,9 @@ export type EmbedBuchungInput = {
   email: string
   schadentyp: string
   ort: { adresse: string; lat: number; lng: number }
+  /** Wunschtermin (UTC-ISO) — wird auf die gfa/Lead geschrieben, damit der Dispatcher (Lead-
+   * Owner) die gewünschte Zeit sieht (Request-Modell, Aaron 12.06.). */
+  wunschterminIso?: string | null
 }
 
 export async function starteEmbedBuchung(
@@ -51,6 +54,7 @@ export async function starteEmbedBuchung(
     schadenort: input.ort.adresse,
     schadenort_lat: input.ort.lat,
     schadenort_lng: input.ort.lng,
+    wunschtermin: input.wunschterminIso ?? undefined,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -90,24 +94,25 @@ export async function ladeEmbedMatching(input: {
         wunschterminIso = null
       }
     }
-    // Dead-Pins (generische, dispatch-bestätigte Slots) ÜBERNEHMEN den Wunschtermin direkt:
-    // er wird als erster Slot vorangestellt (matchType 'wunschtermin') — der Kunde sieht GENAU
-    // seine Wunschzeit, die generischen bleiben als Alternativen. (Partner-Slots rankt die Engine.)
-    const mitWunsch = (deadPins: DeadPinOeffentlich[]): DeadPinOeffentlich[] => {
-      if (!wunschterminIso) return deadPins
+    // Request-Modell (Aaron 12.06.): bei GESETZTEM Wunschtermin bietet JEDER Gutachter (Partner
+    // UND Dead-Pin) genau die Wunschzeit als EINZIGE Option an — kein Slot-Listen-Wirrwarr. Die
+    // Reservierung ist dann eine Anfrage auf diese Zeit; der Dispatcher (Lead-Owner) bestätigt.
+    // Ohne Wunschtermin: unverändert (Partner = echte Engine-Slots, Dead-Pin = generische).
+    const nurWunsch = <T extends { slots: SlotVorschlag[] }>(items: T[]): T[] => {
+      if (!wunschterminIso) return items
       const start = wunschterminIso
       const end = new Date(new Date(start).getTime() + 90 * 60_000).toISOString()
-      const wunschSlot = { start, end, matchType: 'wunschtermin' as const }
-      return deadPins.map((dp) => ({ ...dp, slots: [wunschSlot, ...dp.slots.filter((s) => s.start !== start)] }))
+      const wunschSlot: SlotVorschlag = { start, end, matchType: 'wunschtermin' }
+      return items.map((it) => ({ ...it, slots: [wunschSlot] }))
     }
 
     if (input.forceFallback) {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
-      return { kind: 'fallback', deadPins: mitWunsch(deadPins) }
+      return { kind: 'fallback', deadPins: nurWunsch(deadPins) }
     }
     const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso })
-    if (res.kind === 'fallback') return { kind: 'fallback', deadPins: mitWunsch(res.deadPins) }
-    return res
+    if (res.kind === 'partner') return { kind: 'partner', svs: nurWunsch(res.svs) }
+    return { kind: 'fallback', deadPins: nurWunsch(res.deadPins) }
   } catch (err) {
     console.error('[ladeEmbedMatching] Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return { kind: 'fallback', deadPins: [] }
@@ -115,12 +120,19 @@ export async function ladeEmbedMatching(input: {
 }
 
 /**
- * AAR-956 Reorder: finaler Submit (Kontakt = letzter Schritt). Legt Lead+Token an
- * (starteEmbedBuchung) und reserviert DANN den in Schritt 2 gewaehlten Slot — Partner
- * (bucheTerminFlow) oder Dead-Pin (bucheDeadPinTermin). Bei Erfolg gehen die Kunde+Team-
- * Bestaetigungen raus (SV nie). `auswahl: null` = kein Slot waehlbar war (0 Verfuegbarkeit)
- * → nur Lead anlegen, Team koordiniert telefonisch. Race-safe: schlaegt die Buchung fehl
- * (Slot inzwischen weg), kommt `{ ok:false }` zurueck → Client laesst neu waehlen.
+ * AAR-956 Reorder + Request-Modell (Aaron 12.06.): finaler Submit (Kontakt = letzter Schritt).
+ * Legt Lead+Token an (starteEmbedBuchung — der Lead bekommt via createLead einen Round-Robin-
+ * Dispatcher als `zugewiesen_an`) und reserviert DANN den gewählten Termin — Partner
+ * (bucheTerminFlow) oder Dead-Pin (bucheDeadPinTermin → dispatch_pending).
+ *
+ * `wunschterminLokal` gesetzt = Request-Modell: der Kunde hat eine konkrete Wunschzeit gewählt.
+ * Sie wird auf die gfa/Lead geschrieben (Dispatcher sieht sie) und beim Partner als „weiche"
+ * Reservierung versucht — schlägt die Kalender-Buchung fehl (SV zu der Zeit belegt), ist das KEIN
+ * Fehler für den Kunden: Lead + Dispatcher + Wunschzeit + Bestätigung stehen, der Dispatcher
+ * bestätigt die genaue Zeit. OHNE Wunschtermin (Verfügbarkeits-Modell, echter Slot) bleibt die
+ * Buchung hart (Slot weg → Client wählt neu).
+ *
+ * `auswahl: null` = 0 Verfügbarkeit → nur Lead, Team koordiniert telefonisch.
  */
 export async function reserviereEmbedTermin(input: {
   vorname: string
@@ -129,6 +141,7 @@ export async function reserviereEmbedTermin(input: {
   email: string
   schadentyp: string
   ort: { adresse: string; lat: number; lng: number }
+  wunschterminLokal?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -137,7 +150,18 @@ export async function reserviereEmbedTermin(input: {
   | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
-  // 1) Lead + Token (idempotent; sendet den Flowlink-WA an den Kunden).
+  // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
+  let wunschterminIso: string | null = null
+  if (input.wunschterminLokal) {
+    try {
+      wunschterminIso = berlinWallClockToUtc(input.wunschterminLokal)
+    } catch {
+      wunschterminIso = null
+    }
+  }
+  const requestModus = wunschterminIso != null
+
+  // 1) Lead + Token (idempotent; Lead bekommt Round-Robin-Dispatcher + Flowlink-WA an den Kunden).
   const res = await starteEmbedBuchung({
     vorname: input.vorname,
     nachname: input.nachname,
@@ -145,6 +169,7 @@ export async function reserviereEmbedTermin(input: {
     email: input.email,
     schadentyp: input.schadentyp,
     ort: input.ort,
+    wunschterminIso,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
@@ -155,7 +180,11 @@ export async function reserviereEmbedTermin(input: {
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
     const b = await bucheTerminFlow(token, input.auswahl.svId, input.auswahl.start, input.auswahl.end)
-    if (!b.ok) return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
+    // Request-Modell: Kalender-Buchung ist best-effort. Schlägt sie fehl, steht die Anfrage
+    // trotzdem (Lead + Dispatcher + Wunschzeit auf der gfa + Bestätigung) — Dispatcher bestätigt.
+    if (!b.ok && !requestModus) {
+      return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
+    }
     void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
     return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start }
   }

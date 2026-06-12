@@ -6,7 +6,7 @@
 // + Zeit-Chips (08–18 Uhr). Gibt „YYYY-MM-DDTHH:MM" (Berlin-Wall-Clock) zurück, das die Action
 // via berlinWallClockToUtc an die Engine reicht.
 
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
 
 const WOCHENTAG = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
 const ZEITEN = ['08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00']
@@ -21,8 +21,11 @@ export function WunschterminPicker({
 }) {
   const [datum, zeit] = value ? value.split('T') : ['', '']
 
-  // Nächste 14 Werktage (Sonntag raus). Client-seitig — `new Date()` ist hier erlaubt.
-  const tage = useMemo(() => {
+  // Nächste 14 Werktage (Sonntag raus). HYDRATION-SAFE: `new Date()` erst NACH dem Mount
+  // (useEffect), sonst differiert die Server-SSR-Liste (Server=UTC) von der Client-Liste
+  // (Browser=Berlin) an Tagesgrenzen → Hydration-Mismatch. Server rendert leer, Client füllt.
+  const [tage, setTage] = useState<{ iso: string; tag: string; wtag: string }[]>([])
+  useEffect(() => {
     const out: { iso: string; tag: string; wtag: string }[] = []
     const heute = new Date()
     for (let i = 0; out.length < 14 && i < 21; i++) {
@@ -33,7 +36,7 @@ export function WunschterminPicker({
       const da = String(d.getDate()).padStart(2, '0')
       out.push({ iso: `${y}-${mo}-${da}`, tag: `${da}.${mo}.`, wtag: WOCHENTAG[d.getDay()] })
     }
-    return out
+    setTage(out)
   }, [])
 
   function waehleDatum(iso: string) {

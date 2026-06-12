@@ -170,6 +170,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         email: email.trim(),
         schadentyp: schadentyp ?? 'Sonstiger Schaden',
         ort,
+        wunschterminLokal: wunschterminLokal || null,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
