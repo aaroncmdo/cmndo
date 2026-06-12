@@ -14,16 +14,30 @@ export async function GET(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
-  // Load fall
-  // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (nested über claim_id).
-  // CMM-44 SP-G PR2: gutachten_betrag/gutachten_eingegangen_am → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
+  // Load fall — CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge (RLS spiegelt faelle) statt
+  // .from('faelle'). Nur 6 Felder wurden real genutzt (select('*') war vestigial): claim_id (bridge)
+  // + via claims-Embed lead_id/sv_id/operative_status/claim_nummer/gutachten + kanzlei_faelle.mandatsnummer.
+  // Alle SSoT; lead_id/sv_id/mandatsnummer div=0 vs faelle live verifiziert; status->operative_status SSoT.
   const { data: fall } = await supabase
-    .from('faelle')
-    .select('*, lead_id, sv_id, claims:claim_id(claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am))')
-    .eq('id', id)
-    .single()
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id(claim_nummer, lead_id, sv_id, operative_status, gutachten(gesamt_schadensbetrag, fertiggestellt_am), kanzlei_faelle(mandatsnummer))')
+    .eq('fall_id', id)
+    .maybeSingle()
 
   if (!fall) return NextResponse.json({ error: 'Fall nicht gefunden' }, { status: 404 })
+  const fallClaim = (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) as
+    | {
+        claim_nummer: string | null
+        lead_id: string | null
+        sv_id: string | null
+        operative_status: string | null
+        gutachten: { gesamt_schadensbetrag: number | null; fertiggestellt_am: string | null } | { gesamt_schadensbetrag: number | null; fertiggestellt_am: string | null }[] | null
+        kanzlei_faelle: { mandatsnummer: string | null } | { mandatsnummer: string | null }[] | null
+      }
+    | null
+    | undefined
+  const fallLeadId = fallClaim?.lead_id ?? null
+  const fallSvId = fallClaim?.sv_id ?? null
 
   // CMM-44 SP-A2 (Cluster 1): Schadensdatum + Schadensort leben auf claims
   // (SSoT — schadentag / entdeckt_am / schadenort_*). Claim ueber claim_id laden.
@@ -61,11 +75,11 @@ export async function GET(
     supabase.from('parteien')
       .select('rolle, name, versicherung_name, versicherung_nr, telefon, email')
       .eq('fall_id', id),
-    fall.lead_id
-      ? supabase.from('leads').select('vorname, nachname, email, telefon').eq('id', fall.lead_id).single()
+    fallLeadId
+      ? supabase.from('leads').select('vorname, nachname, email, telefon').eq('id', fallLeadId).single()
       : Promise.resolve({ data: null }),
-    fall.sv_id
-      ? supabase.from('sachverstaendige').select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').eq('id', fall.sv_id).single()
+    fallSvId
+      ? supabase.from('sachverstaendige').select('profiles!sachverstaendige_profile_id_fkey(vorname, nachname)').eq('id', fallSvId).single()
       : Promise.resolve({ data: null }),
     claimResult,
   ])
@@ -107,14 +121,17 @@ export async function GET(
   const fotos = dokumenteMapped.filter(d => d.typ?.startsWith('foto'))
   const beweise = dokumenteMapped.filter(d => !d.typ?.startsWith('foto'))
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   // CMM-44 SP-G PR2: gesamt_schadensbetrag + fertiggestellt_am aus gutachten (SSoT).
+  // CMM-49: fallClaim oben aus dem Bridge->claims-Embed normalisiert (wiederverwendet).
   const fallGutachten = Array.isArray(fallClaim?.gutachten) ? fallClaim?.gutachten[0] : fallClaim?.gutachten
+  const fallKf = Array.isArray(fallClaim?.kanzlei_faelle) ? fallClaim?.kanzlei_faelle[0] : fallClaim?.kanzlei_faelle
   const data: KanzleiPaketData = {
     fallNummer: fallClaim?.claim_nummer ?? id.slice(0, 8),
-    mandatsnummer: fall.mandatsnummer ?? null,
+    mandatsnummer: fallKf?.mandatsnummer ?? null,
     datum: new Date().toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' }),
-    status: fall.status,
+    // CMM-49: status = claims.operative_status (SSoT); '' nur fuer seltene null-Faelle
+    // (KanzleiPaketData.status ist non-null; aktive komplett-Mandate haben immer einen Status).
+    status: fallClaim?.operative_status ?? '',
     geschaedigter,
     schaediger,
     // CMM-44 SP-B PR2c: schadens_ursache aus claims (SSoT).

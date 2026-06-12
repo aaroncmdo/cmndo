@@ -15,8 +15,12 @@ export async function GET(req: NextRequest) {
   // die Anzeige. Der .or('mandatsnummer.ilike')-Filter unten greift weiter auf faelle.mandatsnummer
   // (additiv vorhanden bis Phase-6); fuer neue Faelle ist die Mandat-Textsuche degradiert (SF-ID,
   // selten Volltext-gesucht) — Aktennummer-Suche laeuft ueber claims.claim_nummer.
+  // CMM-49 #2688-Fix: kanzlei_faelle.fall_id zeigt jetzt auf bridge -> der direkte
+  // faelle.kanzlei_faelle-Embed brach (PGRST200 -> leere Fall-Suche). Nested in den
+  // claims-Embed gezogen (kanzlei_faelle.claim_id->claims intakt). Der .or(mandatsnummer)-
+  // Filter unten bleibt auf faelle.mandatsnummer (additiv bis Phase-6).
   const FAELLE_SELECT =
-    'id, status, kennzeichen, lead_id, kanzlei_faelle(mandatsnummer), claims:claim_id(claim_nummer, schadenort_ort)'
+    'id, status, kennzeichen, lead_id, claims:claim_id(claim_nummer, schadenort_ort, kanzlei_faelle(mandatsnummer))'
 
   const [faelleRes, leadsRes, svRes, ortClaimsRes, nrClaimsRes] = await Promise.all([
     // CMM-44 SP-A2/A3 (Cluster 1): schadenort_ort und claim_nummer leben auf claims
@@ -80,11 +84,12 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     faelle: faelleMerged.map(f => {
       const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
-        | { claim_nummer: string | null; schadenort_ort: string | null }
+        | { claim_nummer: string | null; schadenort_ort: string | null; kanzlei_faelle: { mandatsnummer: string | null } | Array<{ mandatsnummer: string | null }> | null }
         | null
-      const kf = (Array.isArray((f as Record<string, unknown>).kanzlei_faelle)
-        ? ((f as Record<string, unknown>).kanzlei_faelle as Array<{ mandatsnummer: string | null }>)[0]
-        : ((f as Record<string, unknown>).kanzlei_faelle as { mandatsnummer: string | null } | null)) ?? null
+      // CMM-49 #2688-Fix: kanzlei_faelle jetzt unter claims genested (s. FAELLE_SELECT).
+      const kf = (Array.isArray(claim?.kanzlei_faelle)
+        ? (claim?.kanzlei_faelle as Array<{ mandatsnummer: string | null }>)[0]
+        : (claim?.kanzlei_faelle as { mandatsnummer: string | null } | null)) ?? null
       return {
         id: f.id,
         // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primäres Label, mandatsnummer (kanzlei_faelle) als Sekundär-Detail.
