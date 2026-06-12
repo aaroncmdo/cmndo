@@ -33,13 +33,25 @@ const db = {
 
 type SvOpts = {
   id: string; paket?: string; lat?: number; lng?: number
-  genutzt?: number; gesamt?: number; ablehnungen?: number; partnerSeit?: string; radius?: number
+  genutzt?: number; gesamt?: number; ablehnungen?: number; partnerSeit?: string; iso?: unknown
+}
+// Quadrat-Isochrone (Format A: [{lat,lng}]) um den Standort. half=0.3° ≈ 33km → ein SV AM Ort
+// deckt ORT, ein ferner (Hamburg) nicht. Ersetzt den früheren Radius (Engine ist isochrone-only).
+function isoBox(lat: number, lng: number, half = 0.3) {
+  return [
+    { lat: lat - half, lng: lng - half },
+    { lat: lat - half, lng: lng + half },
+    { lat: lat + half, lng: lng + half },
+    { lat: lat + half, lng: lng - half },
+  ]
 }
 function mkSv(o: SvOpts) {
+  const lat = o.lat ?? 50.95
+  const lng = o.lng ?? 6.96
   return {
     id: o.id, profile_id: `${o.id}-p`, paket: o.paket ?? 'standard',
-    standort_lat: o.lat ?? 50.95, standort_lng: o.lng ?? 6.96,
-    isochrone_polygon: null, paket_umkreis_km: o.radius ?? 40,
+    standort_lat: lat, standort_lng: lng,
+    isochrone_polygon: o.iso !== undefined ? o.iso : isoBox(lat, lng), paket_umkreis_km: 40,
     paket_faelle_gesamt: o.gesamt ?? 10, paket_faelle_genutzt: o.genutzt ?? 0,
     offene_faelle: 0, ablehnungen_30_tage: o.ablehnungen ?? 0,
     urlaub_von: null, urlaub_bis: null,
@@ -81,12 +93,21 @@ describe('findeBestePerson — populierte Orchestrierung', () => {
     expect(got).not.toContain('pro-voll')
   })
 
-  it('SV ausserhalb von Radius UND Isochrone faellt raus', async () => {
+  it('SV ausserhalb der Isochrone faellt raus (isochrone-only)', async () => {
     poolReturns([
-      mkSv({ id: 'nah', lat: 50.95, lng: 6.96, radius: 40 }),
-      mkSv({ id: 'fern', lat: 53.55, lng: 10.0, radius: 40 }), // Hamburg ~360km ≫ 40
+      mkSv({ id: 'nah', lat: 50.95, lng: 6.96 }),         // Iso deckt ORT
+      mkSv({ id: 'fern', lat: 53.55, lng: 10.0 }),        // Hamburg-Iso deckt Koeln NICHT
     ])
     expect(ids(await matche())).toEqual(['nah'])
+  })
+
+  it('SV ohne Isochrone-Polygon matcht NICHT (kein Radius-Fallback)', async () => {
+    poolReturns([
+      mkSv({ id: 'ohne-iso', lat: 50.95, lng: 6.96, iso: null }), // direkt am Ort, aber keine Iso
+    ])
+    const r = await matche()
+    expect(r.ok).toBe(false)
+    if (!r.ok) expect(r.code).toBe('kein_kandidat')
   })
 
   it('hoeheres Paket gewinnt das Ranking (premium vor standard, beide nah)', async () => {
@@ -119,7 +140,7 @@ describe('findeBestePerson — populierte Orchestrierung', () => {
   })
 
   it('leerer Pool nach Filtern → kein_kandidat', async () => {
-    poolReturns([mkSv({ id: 'fern', lat: 53.55, lng: 10.0, radius: 40 })]) // alle ausser Gebiet
+    poolReturns([mkSv({ id: 'fern', lat: 53.55, lng: 10.0 })]) // Hamburg-Iso deckt Koeln nicht
     const r = await matche()
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.code).toBe('kein_kandidat')

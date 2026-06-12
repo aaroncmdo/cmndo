@@ -2,9 +2,10 @@
 
 // AAR-778: Migriert auf shared PortalNav (dark variant, 2 Sektionen).
 
+import Link from 'next/link'
 import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
-  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon,
+  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon, UserIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -75,6 +76,13 @@ export default function DispatchNav({
               <p className="text-sm text-white/80 truncate">{email}</p>
             </div>
           </div>
+          <Link
+            href="/mitarbeiter/profil"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
+          >
+            <UserIcon style={{ width: 17, height: 17 }} />
+            Mein Profil
+          </Link>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"

@@ -137,7 +137,11 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
   )
   if (pool.length === 0) return { ok: false, code: 'kein_kandidat', error: 'Keine buchbaren SVs im Pool' }
 
-  // 2. Gebiet-Filter (Isochrone ODER Radius) + Kontingent — billige Geo/Logik VOR Mapbox.
+  // 2. Gebiet-Filter (NUR Isochrone — Aaron 12.06.: „nur über die Isochrone, wir brauchen den
+  //    Radius nicht") + Kontingent — billige Geo/Logik VOR Mapbox. Der frühere Umkreis-Radius-
+  //    Fallback (paket_umkreis_km) ist raus: ein SV ist nur zuständig, wenn der Schadenort in
+  //    seiner Fahrzeit-Isochrone liegt. SVs ohne Isochrone matchen nicht (Daten-Pflicht: die
+  //    Isochrone wird beim Profil-Speichern erzeugt). distanzKm bleibt fürs Scoring.
   type ImGebiet = { sv: SvRow; distanzKm: number; reasons: string[] }
   const imGebiet: ImGebiet[] = []
   for (const sv of pool) {
@@ -147,12 +151,8 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
     if (istKontingentBlockiert(paket, kontingentGesamt - kontingentGenutzt)) continue
     const distanzKm = haversineKm(Number(sv.standort_lat), Number(sv.standort_lng), schadenort.lat, schadenort.lng)
     const polygon = parseIsochrone(sv.isochrone_polygon)
-    const radius = Number(sv.paket_umkreis_km) || 40
-    const reasons: string[] = []
-    let drin = false
-    if (polygon && pointInPolygon([schadenort.lng, schadenort.lat], polygon)) { drin = true; reasons.push('im Einsatzgebiet (Isochrone)') }
-    if (!drin && distanzKm <= radius) { drin = true; reasons.push(`${Math.round(distanzKm)}km (max ${radius}, Radius)`) }
-    if (drin) imGebiet.push({ sv, distanzKm, reasons })
+    if (!polygon || !pointInPolygon([schadenort.lng, schadenort.lat], polygon)) continue
+    imGebiet.push({ sv, distanzKm, reasons: ['im Einsatzgebiet (Isochrone)'] })
   }
   if (imGebiet.length === 0) return { ok: false, code: 'kein_kandidat', error: 'Kein SV im Einsatzgebiet' }
 

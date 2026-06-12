@@ -10,7 +10,8 @@ import { FinderWizard } from './_components/FinderWizard'
 // WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/ladeSvLeads (leak-safe, Google-Reviews).
 // WS1b: Karten-UI <FinderMap> aus der Marketing-Karte portiert (next-intl → inline DE).
 // WS2: Profil-ueber-Pin + GoogleBewertungBadge. WS3: empfohlener SV + Route/Zoom.
-// WS4: 3-Step-Wizard mit <FlowSlotStep> (Engine inline) füllt den wizardSlot.
+// WS4 + Reorder: 4-Step-Wizard (Ort → Termin → Schaden → Kontakt) füllt den wizardSlot;
+// Termin-Wahl token-los via ladeEmbedMatching, Reservierung beim Kontakt-Submit.
 
 export const metadata: Metadata = {
   // Embed nicht separat indexiert — /gutachter-finden (Marketing) ist die SEO-Flaeche.
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
 export default async function GutachterFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string }>
 }) {
   const sp = await searchParams
 
@@ -46,7 +47,8 @@ export default async function GutachterFinderEmbedPage({
       height="100dvh"
       initialCenter={initialCenter}
       initialZoom={initialZoom}
-      wizardSlot={<FinderWizard />}
+      forceFallback={sp.fallback === '1'}
+      wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
     />
   )
 }

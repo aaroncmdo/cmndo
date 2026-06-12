@@ -29,6 +29,13 @@ const ALLOWED_EVENTS = new Set([
   'monika_qualify_no',
   'monika_form_shown',
   'monika_anfrage_submit',
+  // AAR-956 Gutachter-Finder-Embed (cl_event_source='gutachter_finder')
+  'gf_shown',
+  'gf_ort_gewaehlt',
+  'gf_termin_gewaehlt',
+  'gf_anfrage_submit',
+  'gf_rueckruf',
+  'phone_click',
 ])
 
 export async function OPTIONS() {
