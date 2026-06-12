@@ -96,7 +96,12 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
   const [dsgvo, setDsgvo] = useState(false)
-  const [gebucht, setGebucht] = useState<{ svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcherName: string | null } | null>(null)
+  const [gebucht, setGebucht] = useState<{
+    svVorname: string | null
+    ortLabel: string | null
+    startIso: string | null
+    dispatcher: { vorname: string; avatarUrl: string | null; beschreibung: string | null } | null
+  } | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [slotWeg, setSlotWeg] = useState(false)
   const [pending, startTransition] = useTransition()
@@ -179,7 +184,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         if (res.slotWeg && ort) setSlotWeg(true)
         return
       }
-      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcherName: res.dispatcherName })
+      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher })
       setPhase('gebucht')
     })
   }
@@ -400,23 +405,37 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             )}
           </p>
 
-          {/* Ansprechpartner (= dem Lead zugewiesener Dispatcher, NUR Vorname öffentlich) als
-              ausgebaute Profil-Card + prominenter Anruf-Button (Aaron 12.06.). Nummer = die normale
-              Claimondo-Rufnummer (wie BeratungVereinbarenButton). */}
-          {gebucht.dispatcherName && (
+          {/* Ansprechpartner (= dem Lead zugewiesener Dispatcher) als Profil-Card: Foto (avatar_url,
+              sonst Initiale) + NUR Vorname öffentlich + Profilbeschreibung (alles im Portal unter
+              /mitarbeiter/profil editierbar, in der DB) + Anruf-Button mit der normalen Rufnummer. */}
+          {gebucht.dispatcher && (
             <div className="mt-4 w-full rounded-ios-lg border border-claimondo-border bg-white/80 p-4 text-left shadow-glass-card">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-heading-sm font-extrabold text-white">
-                  {gebucht.dispatcherName.charAt(0).toUpperCase()}
-                </div>
+                {gebucht.dispatcher.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={gebucht.dispatcher.avatarUrl}
+                    alt={gebucht.dispatcher.vorname}
+                    className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-heading-sm font-extrabold text-white">
+                    {gebucht.dispatcher.vorname.charAt(0).toUpperCase()}
+                  </div>
+                )}
                 <div className="min-w-0 flex-1">
                   <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
                     Ihr persönlicher Ansprechpartner
                   </p>
-                  <p className="truncate text-body font-bold text-claimondo-navy">{gebucht.dispatcherName}</p>
+                  <p className="truncate text-body font-bold text-claimondo-navy">{gebucht.dispatcher.vorname}</p>
                   <p className="text-[0.75rem] text-claimondo-shield/70">Claimondo Schaden-Team</p>
                 </div>
               </div>
+              {gebucht.dispatcher.beschreibung && (
+                <p className="mt-3 text-[0.8125rem] leading-relaxed text-claimondo-shield/80">
+                  {gebucht.dispatcher.beschreibung}
+                </p>
+              )}
               <a
                 href="tel:+4922198557270"
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-ios-md bg-claimondo-ondo px-4 py-2.5 text-body-sm font-semibold text-white transition-colors hover:bg-claimondo-navy"

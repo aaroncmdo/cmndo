@@ -136,13 +136,16 @@ export async function ladeEmbedMatching(input: {
   }
 }
 
+type EmbedDispatcher = { vorname: string; avatarUrl: string | null; beschreibung: string | null }
+
 /**
- * Liefert den VORNAMEN des dem Lead zugewiesenen Dispatchers (leads.zugewiesen_an → profiles).
- * Öffentlich (Danke-Seite) wird NUR der Vorname gezeigt (Aaron 12.06.: „das Profil öffentlich nur
- * den Vornamen aus der Datenbank") — kein Nachname. Der Dispatcher wird bei der Lead-Erstellung
- * Round-Robin gesetzt (issueCanonicalFlowLinkForAnfrage).
+ * Liefert das ÖFFENTLICHE Profil des dem Lead zugewiesenen Dispatchers (leads.zugewiesen_an →
+ * profiles). Öffentlich (Danke-Seite, Aaron 12.06.): NUR der Vorname (kein Nachname) + das
+ * Profilbild (avatar_url, public avatare-Bucket) + die Profilbeschreibung — alles in der DB
+ * gespeichert + im Portal unter /mitarbeiter/profil editierbar (AvatarUpload + Profiltext). Der
+ * Dispatcher wird bei der Lead-Erstellung Round-Robin gesetzt (issueCanonicalFlowLinkForAnfrage).
  */
-async function ladeLeadDispatcher(token: string): Promise<string | null> {
+async function ladeLeadDispatcher(token: string): Promise<EmbedDispatcher | null> {
   try {
     const admin = createAdminClient()
     const { data: fl } = await admin.from('flow_links').select('lead_id').eq('token', token).maybeSingle()
@@ -151,9 +154,18 @@ async function ladeLeadDispatcher(token: string): Promise<string | null> {
     const { data: lead } = await admin.from('leads').select('zugewiesen_an').eq('id', leadId).maybeSingle()
     const dispId = (lead?.zugewiesen_an as string | null) ?? null
     if (!dispId) return null
-    const { data: p } = await admin.from('profiles').select('vorname').eq('id', dispId).maybeSingle()
+    const { data: p } = await admin
+      .from('profiles')
+      .select('vorname, avatar_url, profilbeschreibung')
+      .eq('id', dispId)
+      .maybeSingle()
     const vorname = ((p?.vorname as string | null) ?? '').trim()
-    return vorname || null
+    if (!vorname) return null
+    return {
+      vorname,
+      avatarUrl: ((p?.avatar_url as string | null) ?? null) || null,
+      beschreibung: (((p?.profilbeschreibung as string | null) ?? '').trim()) || null,
+    }
   } catch (err) {
     console.error('[ladeLeadDispatcher] fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return null
@@ -188,7 +200,7 @@ export async function reserviereEmbedTermin(input: {
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
     | null
 }): Promise<
-  | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcherName: string | null }
+  | { ok: true; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
   // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
@@ -215,11 +227,11 @@ export async function reserviereEmbedTermin(input: {
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
 
-  // Dem Lead zugewiesener Dispatcher (für die Danke-Seite: Ansprechpartner + Anruf-Button).
-  const dispatcherName = await ladeLeadDispatcher(token)
+  // Dem Lead zugewiesener Dispatcher (für die Danke-Seite: Profil-Card + Anruf-Button).
+  const dispatcher = await ladeLeadDispatcher(token)
 
   // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
-  if (!input.auswahl) return { ok: true, svVorname: null, ortLabel: null, startIso: null, dispatcherName }
+  if (!input.auswahl) return { ok: true, svVorname: null, ortLabel: null, startIso: null, dispatcher }
 
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
@@ -230,13 +242,13 @@ export async function reserviereEmbedTermin(input: {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
     void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
-    return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcherName }
+    return { ok: true, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
   void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
-  return { ok: true, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcherName }
+  return { ok: true, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher }
 }
 
 /**
