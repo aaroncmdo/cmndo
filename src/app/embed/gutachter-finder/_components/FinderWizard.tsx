@@ -43,7 +43,7 @@ function Field({ label, ...props }: { label: string } & React.InputHTMLAttribute
   )
 }
 
-export function FinderWizard() {
+export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
   const [schadentyp, setSchadentyp] = useState<string | null>(null)
@@ -81,6 +81,10 @@ export function FinderWizard() {
       if (!res.ok) return setFehler(res.error || 'Es ist ein Fehler aufgetreten. Bitte erneut versuchen.')
       setToken(res.token)
       setPhase('slot')
+      // Test-Override (?fallback=1): direkt in den Dead-Pin-Fallback (Partner-Match
+      // überspringen), damit der Dead-Pin-Flow live testbar ist — echte Daten triggern
+      // ihn selten (wo Dead-Pins sind, sind meist erreichbare Partner). Vor Prod entfernen.
+      if (forceFallback) partnerlosFallback()
     })
   }
 

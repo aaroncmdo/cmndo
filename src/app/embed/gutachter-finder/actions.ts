@@ -16,7 +16,7 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
-import { planeTerminOeffentlich, ladeDeadPinFallback, bucheDeadPinTermin, type DeadPinOeffentlich } from '@/lib/sv-matching-modul'
+import { planeTerminMitFallback, ladeDeadPinFallback, bucheDeadPinTermin, type DeadPinOeffentlich } from '@/lib/sv-matching-modul'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
@@ -159,16 +159,47 @@ export async function sendeEmbedTerminBestaetigung(input: {
  * der Client findet damit den Pin + das angereicherte Profil. Liefert `null` (→ Client
  * fällt auf den nächstgelegenen Pin zurück), wenn die Engine nichts findet.
  */
-export async function empfehleSvFuerOrt(
-  input: { lat: number; lng: number },
-): Promise<{ svId: string | null }> {
+// Empfohlenes Route-Ziel für die Karte — diskriminiert Partner vs. Dead-Pin (Aaron 12.06.:
+// die Route soll im Fallback zum Dead-Pin gehen, nicht zum fernen Partner).
+//   partner  → ≥1 buchbarer Partner (planeTerminOeffentlich, svs[0]=Top, in aktiveSVs findbar)
+//   deadpin  → 0 buchbare Partner → ALLE deckenden Dead-Pins (15-km-Ghost-Isochrone); Route zum nächsten
+//   none     → weder Partner noch Dead-Pin → flyTo (kein Route-Ziel)
+// `forceFallback` (?fallback=1) überspringt den Partner-Match → erzwingt den Dead-Pin (Test).
+//
+// Engine-Konsistenz (Aaron 12.06.): die Partner-vs-Dead-Pin-Diskriminierung ist jetzt IN DER
+// ENGINE verankert (`planeTerminMitFallback`, sv-matching-modul). empfehleSvFuerOrt ist nur noch
+// ein dünner Adapter: Engine-Result → Route-Ziel-Shape (svId bzw. Dead-Pin-Liste fürs Rendering).
+type EmbedRouteZiel =
+  | { kind: 'partner'; svId: string }
+  | { kind: 'deadpin'; deadPins: Array<{ lat: number; lng: number; ort: string | null }> }
+  | { kind: 'none' }
+
+export async function empfehleSvFuerOrt(input: {
+  lat: number
+  lng: number
+  forceFallback?: boolean
+}): Promise<EmbedRouteZiel> {
   try {
-    if (typeof input?.lat !== 'number' || typeof input?.lng !== 'number') return { svId: null }
-    const svs = await planeTerminOeffentlich({ lat: input.lat, lng: input.lng })
-    return { svId: svs[0]?.svId ?? null }
+    if (typeof input?.lat !== 'number' || typeof input?.lng !== 'number') return { kind: 'none' }
+    // forceFallback (?fallback=1, Test): Partner-Check überspringen → direkt die Dead-Pins.
+    if (input.forceFallback) {
+      const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
+      return deadPins.length > 0
+        ? { kind: 'deadpin', deadPins: deadPins.map((d) => ({ lat: d.lat, lng: d.lng, ort: d.ort })) }
+        : { kind: 'none' }
+    }
+    // Engine-verankerte Diskriminierung (planeTerminMitFallback = EINE Quelle für Karte + Buchung).
+    //   partner  → svs[0] = engine-ranked Top (= Buchungs-Vorschlag #1)
+    //   fallback → alle Dead-Pins, deren 15-km-Ghost-Isochrone den Ort deckt (nächste zuerst);
+    //              die Karte zeigt GENAU diese (statt aller 62 Pins) + routet zum nächsten.
+    const res = await planeTerminMitFallback({ lat: input.lat, lng: input.lng })
+    if (res.kind === 'partner') return { kind: 'partner', svId: res.svs[0].svId }
+    return res.deadPins.length > 0
+      ? { kind: 'deadpin', deadPins: res.deadPins.map((d) => ({ lat: d.lat, lng: d.lng, ort: d.ort })) }
+      : { kind: 'none' }
   } catch (err) {
-    console.error('[empfehleSvFuerOrt] Engine-Ranking fehlgeschlagen (nicht kritisch):', (err as Error).message)
-    return { svId: null }
+    console.error('[empfehleSvFuerOrt] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return { kind: 'none' }
   }
 }
 

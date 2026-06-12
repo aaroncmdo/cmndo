@@ -20,7 +20,7 @@ export const metadata: Metadata = {
 export default async function GutachterFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string }>
 }) {
   const sp = await searchParams
 
@@ -46,7 +46,8 @@ export default async function GutachterFinderEmbedPage({
       height="100dvh"
       initialCenter={initialCenter}
       initialZoom={initialZoom}
-      wizardSlot={<FinderWizard />}
+      forceFallback={sp.fallback === '1'}
+      wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
     />
   )
 }
