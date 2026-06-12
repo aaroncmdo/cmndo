@@ -17,7 +17,9 @@ export async function setTermin(
 
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { success: false, error: 'Kein Sachverständiger gefunden' }
-  const { data: fall } = await supabase.from('faelle').select('id, claim_id').eq('id', fallId).eq('sv_id', sv.id).maybeSingle()
+  // CMM-49 (faelle-Drop-Runway): sv-Gate via v_claim_full (flat, faelle-frei). vcf.id = claim_id
+  // (fuer den gutachter_termine-Insert unten).
+  const { data: fall } = await supabase.from('v_claim_full').select('id').eq('fall_id', fallId).eq('sv_id', sv.id).maybeSingle()
   if (!fall) return { success: false, error: 'Nicht autorisiert' }
 
   // Termin-Datum setzen: upsert in gutachter_termine statt auf faelle.sv_termin
@@ -56,7 +58,7 @@ export async function setTermin(
     // CMM-49 (sv_id-Drop) Phase B: assignee_id/assignee_typ direkt geschrieben statt sv_id.
     const { data: inserted, error } = await supabase
       .from('gutachter_termine')
-      .insert({ fall_id: fallId, claim_id: fall.claim_id, assignee_id: sv.id, assignee_typ: 'sachverstaendiger', start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
+      .insert({ fall_id: fallId, claim_id: fall.id, assignee_id: sv.id, assignee_typ: 'sachverstaendiger', start_zeit: startZeit.toISOString(), end_zeit: endZeit.toISOString(), status: 'bestaetigt' })
       .select('id')
       .single()
     if (error) return { success: false, error: error.message }
