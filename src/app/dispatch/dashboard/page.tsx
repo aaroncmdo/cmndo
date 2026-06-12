@@ -82,12 +82,15 @@ export default async function DispatchDashboard() {
   const fallToLeadMap = new Map<string, string>()
   if (fallOnlyTasks.length > 0) {
     const fallIds = Array.from(new Set(fallOnlyTasks.map((t) => t.fall_id as string)))
+    // CMM-49 (faelle-Drop-Runway): fall_id->lead_id via Bridge+claims statt .from('faelle').
+    // lead_id lebt auf claims (SSoT, Divergenz=0); jede faelle hat Bridge-Row (0 missing, live verifiziert).
     const { data: faelleRows } = await supabase
-      .from('faelle')
-      .select('id, lead_id')
-      .in('id', fallIds)
-    for (const f of (faelleRows ?? []) as Array<{ id: string; lead_id: string | null }>) {
-      if (f.lead_id) fallToLeadMap.set(f.id, f.lead_id)
+      .from('faelle_claim_bridge')
+      .select('fall_id, claims:claim_id!inner(lead_id)')
+      .in('fall_id', fallIds)
+    for (const f of (faelleRows ?? []) as Array<{ fall_id: string; claims: { lead_id: string | null } | { lead_id: string | null }[] | null }>) {
+      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      if (c?.lead_id) fallToLeadMap.set(f.fall_id, c.lead_id)
     }
   }
   function leadIdForTask(t: { lead_id: string | null; fall_id: string | null }): string | null {
