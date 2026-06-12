@@ -94,35 +94,33 @@ export default async function TeamPage() {
   // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann den Parent nicht nach
   // einer eingebetteten to-one-Spalte ordnen, und ein DB-.limit ohne diese Order liefert
   // beliebige Zeilen -> claims.created_at flachziehen + clientseitig sortieren + auf 50 slicen.
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). organisation_id/sv_id flach;
+  // created_at/spezifikation/schadenort_*/schadenart/claim_nummer/operative_status flach (kein Embed).
   const { data: poolFaelleRaw } = await supabase
-    .from('faelle')
-    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claims:claim_id!inner(created_at, spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer, operative_status)')
+    .from('v_claim_full')
+    .select('fall_id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, created_at, spezifikation, schadenort_plz, schadenort_ort, schadenort_adresse, schadenart, claim_nummer, operative_status')
     .eq('organisation_id', sv.organisation_id)
     .is('sv_id', null)
   const poolFaelle = (poolFaelleRaw ?? [])
-    .map((f) => {
-      const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-      return { ...f, created_at: (c?.created_at as string | null) ?? null }
-    })
+    .slice()
     .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
     .slice(0, 50)
 
   const poolLeads: PoolLeadData[] = (poolFaelle ?? []).map(f => {
-    const fClaim = Array.isArray(f.claims) ? f.claims[0] : f.claims
     return {
-      id: f.id as string,
-      claim_nummer: (fClaim?.claim_nummer as string | null) ?? f.id.slice(0, 8),
-      // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
-      status: ((fClaim?.operative_status as string | null) ?? (f.status as string | null)) ?? 'ersterfassung',
-      schadens_plz: (fClaim?.schadenort_plz as string | null) ?? null,
-      schadens_ort: (fClaim?.schadenort_ort as string | null) ?? null,
-      schadens_adresse: (fClaim?.schadenort_adresse as string | null) ?? null,
+      id: f.fall_id as string,
+      claim_nummer: (f.claim_nummer as string | null) ?? (f.fall_id as string).slice(0, 8),
+      // CMM-74 b″: status aus claims.operative_status (SSoT), Fallback faelle.status (beide vcf-flat).
+      status: ((f.operative_status as string | null) ?? (f.status as string | null)) ?? 'ersterfassung',
+      schadens_plz: (f.schadenort_plz as string | null) ?? null,
+      schadens_ort: (f.schadenort_ort as string | null) ?? null,
+      schadens_adresse: (f.schadenort_adresse as string | null) ?? null,
       kennzeichen: (f.kennzeichen as string) ?? null,
       fahrzeug: [f.fahrzeug_hersteller, f.fahrzeug_modell].filter(Boolean).join(' ') || null,
-      spezifikation: (fClaim?.spezifikation as string) ?? null,
-      // CMM-44 SP-A2 (Cluster 2): aus claims.schadenart. Property-Name
+      spezifikation: (f.spezifikation as string) ?? null,
+      // CMM-44 SP-A2 (Cluster 2): aus claims.schadenart (vcf-flat). Property-Name
       // schadens_art bleibt als Vertrag fuer PoolLeadData/TeamClient.
-      schadens_art: (fClaim?.schadenart as string) ?? null,
+      schadens_art: (f.schadenart as string) ?? null,
       created_at: (f.created_at as string) ?? null,
     }
   })
