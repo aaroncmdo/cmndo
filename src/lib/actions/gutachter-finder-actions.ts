@@ -28,6 +28,9 @@ export type AktiverSVPublic = {
   isochrone_polygon: unknown
   paket: string
   vorname_initiale: string | null
+  /** Vorname des SV — NUR bei aktiven, verifizierten Partnern öffentlich gezeigt (Aaron 12.06.).
+   * Kein Nachname. Dead-Pins (sv_leads) bleiben anonym (eigener DeadPinProfilePopup). */
+  vorname: string | null
   stadt: string | null
   // Anonyme Trust-Signale (Profil-Anreicherung, AAR-956 WS2-Glass). KEINE Identitaet:
   // gutachter_typ + Umkreis + Qualifikationen + Specs + Schadenarten + Credential-
@@ -215,6 +218,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       isochrone_polygon: r.isochrone_polygon,
       paket: r.paket,
       vorname_initiale: firstInitial(vorname),
+      vorname: (vorname ?? '').trim() || null,
       stadt: extractStadt(r.standort_adresse as string | null),
       gutachter_typ: enrich?.gutachter_typ ?? null,
       umkreis_km: enrich?.umkreis_km ?? null,

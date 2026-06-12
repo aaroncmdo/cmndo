@@ -79,9 +79,20 @@ export function SvProfilePopup({ sv }: { sv: AktiverSVPublic }) {
       <div className="flex items-center gap-3">
         <PopupAvatar>{initiale}</PopupAvatar>
         <div className="min-w-0">
-          <div className="text-body-sm font-bold leading-tight text-claimondo-navy">
-            {rolle} in {stadt}
-          </div>
+          {/* Vorname NUR bei aktiven Partnern (Aaron 12.06.) — dieses Popup wird ausschließlich für
+              verifizierte SVs gerendert; Dead-Pins haben den anonymen DeadPinProfilePopup. */}
+          {sv.vorname ? (
+            <>
+              <div className="text-body-sm font-bold leading-tight text-claimondo-navy">{sv.vorname}</div>
+              <div className="text-[0.8125rem] font-medium text-claimondo-shield/80">
+                {rolle} in {stadt}
+              </div>
+            </>
+          ) : (
+            <div className="text-body-sm font-bold leading-tight text-claimondo-navy">
+              {rolle} in {stadt}
+            </div>
+          )}
           <div className="mt-1 flex items-center gap-1 text-[0.8125rem] font-medium text-claimondo-shield/80">
             <ShieldCheck className="h-3.5 w-3.5 flex-shrink-0" />
             Verifizierter Claimondo-Partner
