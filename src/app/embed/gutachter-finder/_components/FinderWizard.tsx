@@ -66,6 +66,9 @@ function dispatchGutachterWahl(detail: Record<string, unknown>) {
 export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
+  // Wunschtermin (Aaron 12.06.: „oben angeben") — Berlin-Wall-Clock aus <input datetime-local>,
+  // optional; rankt die Partner-Slots in Schritt 2 (Engine matchType 'wunschtermin').
+  const [wunschterminLokal, setWunschterminLokal] = useState('')
   // Step 2: token-loses Engine-Matching (Partner-Slots ODER Dead-Pin-Fallback).
   const [matching, setMatching] = useState<PlaneTerminMitFallbackResult | null>(null)
   const [matchLoading, setMatchLoading] = useState(false)
@@ -94,7 +97,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setSelectedSvId(null)
     setSelectedDeadPinId(null)
     setMatchLoading(true)
-    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, forceFallback }).then((res) => {
+    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
       setMatching(res)
       setMatchLoading(false)
       // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
@@ -172,7 +175,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setPhase('termin')
     if (ort) {
       setMatchLoading(true)
-      void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, forceFallback }).then((res) => {
+      void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
         setMatching(res)
         setMatchLoading(false)
         if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
@@ -194,18 +197,32 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
       )}
 
       {phase === 'ort' && (
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
+          {/* Wunschtermin (optional) — oben, vor dem Ort (Aaron 12.06.). Beeinflusst das
+              Slot-Ranking in Schritt 2; leer = nächste freie Termine. */}
+          <div>
+            <h3 className="text-body font-bold text-claimondo-navy">Ihr Wunschtermin</h3>
+            <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
+              Optional — wir schlagen Ihnen passende Zeiten vor.
+            </p>
+            <input
+              type="datetime-local"
+              value={wunschterminLokal}
+              onChange={(e) => setWunschterminLokal(e.target.value)}
+              className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy focus:border-claimondo-ondo focus:outline-none"
+            />
+          </div>
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Wo steht das Fahrzeug?</h3>
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
               Wir finden den passenden Gutachter in Ihrer Nähe.
             </p>
+            <GooglePlaceAutocomplete
+              placeholder="Adresse eingeben…"
+              className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
+              onSelect={ortGewaehlt}
+            />
           </div>
-          <GooglePlaceAutocomplete
-            placeholder="Adresse eingeben…"
-            className="w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
-            onSelect={ortGewaehlt}
-          />
         </div>
       )}
 

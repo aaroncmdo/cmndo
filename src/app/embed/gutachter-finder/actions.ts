@@ -26,6 +26,7 @@ import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export type EmbedBuchungInput = {
   vorname: string
@@ -66,20 +67,33 @@ export async function starteEmbedBuchung(
  * also TOKEN-LOS. Liefert das diskriminierte Engine-Matching NUR aus dem Besichtigungsort
  * (planeTerminMitFallback: Partner mit Slots ODER Dead-Pin-Fallback). Der Nutzer waehlt hier
  * einen Slot; die echte Reservierung passiert erst beim Kontakt-Submit (reserviereEmbedTermin).
+ * `wunschterminLokal` (Aaron 12.06.: „der Kunde soll oben seinen Wunschtermin angeben") ist die
+ * Berlin-Wall-Clock aus dem <input type="datetime-local"> — wird DST-sicher zu UTC konvertiert und
+ * an die Engine gereicht; sie rankt die Partner-Slots danach (matchType 'wunschtermin' → Badge).
  * `forceFallback` (?fallback=1) erzwingt den Dead-Pin-Pfad (Test).
  */
 export async function ladeEmbedMatching(input: {
   lat: number
   lng: number
+  wunschterminLokal?: string | null
   forceFallback?: boolean
 }): Promise<PlaneTerminMitFallbackResult> {
   try {
     if (typeof input?.lat !== 'number' || typeof input?.lng !== 'number') return { kind: 'fallback', deadPins: [] }
+    // Wunschtermin (Berlin-Wall-Clock „YYYY-MM-DDTHH:MM") → UTC-Instant für die Engine.
+    let wunschterminIso: string | null = null
+    if (input.wunschterminLokal) {
+      try {
+        wunschterminIso = berlinWallClockToUtc(input.wunschterminLokal)
+      } catch {
+        wunschterminIso = null
+      }
+    }
     if (input.forceFallback) {
       const deadPins = await ladeDeadPinFallback({ lat: input.lat, lng: input.lng })
       return { kind: 'fallback', deadPins }
     }
-    return await planeTerminMitFallback({ lat: input.lat, lng: input.lng })
+    return await planeTerminMitFallback({ lat: input.lat, lng: input.lng, wunschterminIso })
   } catch (err) {
     console.error('[ladeEmbedMatching] Matching fehlgeschlagen (nicht kritisch):', (err as Error).message)
     return { kind: 'fallback', deadPins: [] }
