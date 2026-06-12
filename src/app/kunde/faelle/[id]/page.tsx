@@ -173,11 +173,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // sichtbar sind. Abgelehnte Iterationen werden ausgeblendet.
     let claimFallIds: string[] = [id]
     if (fall.claim_id) {
+      // CMM-49 (faelle-Drop-Runway): claim_id->fall_id via Bridge statt .from('faelle').
+      // claim_id ist 1:1 mit faelle (live verifiziert: 0 Multi-faelle) -> selbe fall_ids.
       const { data: claimFaelle } = await admin
-        .from('faelle')
-        .select('id')
+        .from('faelle_claim_bridge')
+        .select('fall_id')
         .eq('claim_id', fall.claim_id as string)
-      claimFallIds = ((claimFaelle ?? []) as Array<{ id: string }>).map((f) => f.id)
+      claimFallIds = ((claimFaelle ?? []) as Array<{ fall_id: string }>).map((f) => f.fall_id)
       if (claimFallIds.length === 0) claimFallIds = [id]
     }
     const { data: dokumenteRaw } = await admin.from('fall_dokumente')

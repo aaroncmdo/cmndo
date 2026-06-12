@@ -14,9 +14,11 @@ export default async function NachbesichtigungPage() {
   // Join unten) via Admin über claim_id statt faelle.kunde_id.
   const adminNb = createAdminClient()
   const claimIds = await getOwnedClaimIds(adminNb, user.id, user.email ?? null)
+  // CMM-49 (faelle-Drop-Runway): claim_id<->fall_id via Bridge statt .from('faelle')
+  // (war ohnehin nur die claim_id->fall_id-Map). claim_id 1:1 mit faelle (live verifiziert).
   const { data: kundeFaelle } = await adminNb
-    .from('faelle')
-    .select('id, claim_id')
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id')
     .in('claim_id', claimIds)
 
   let faelle: Array<{ id: string; nachbesichtigung_status: string | null; nachbesichtigung_termin_datum: string | null; nachbesichtigung_angefordert_am: string | null }> = []
@@ -54,7 +56,7 @@ export default async function NachbesichtigungPage() {
         .map((f) => {
           const cid = (f as { claim_id?: string | null }).claim_id as string
           const nb = matchingClaims.get(cid)!
-          return { id: f.id as string, ...nb }
+          return { id: f.fall_id as string, ...nb }
         })
     }
   }
