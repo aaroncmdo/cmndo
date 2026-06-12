@@ -49,17 +49,17 @@ export default async function OffeneFaellePage() {
     .select('id')
     .in('operative_status', BILLABLE_STATUSES)
 
+  // CMM-49 (faelle-Drop-Runway): Anker auf faelle_claim_bridge statt .from('faelle').
+  // status/sv_id/kennzeichen ziehen in den claims-Embed (SSoT, live verifiziert):
+  //   status->operative_status (Display nun konsistent mit dem bereits operative_status-
+  //   basierten billable-Filter oben; ≤2 stale Legacy-faelle.status-Rows zeigen jetzt SSoT),
+  //   sv_id 0-diff, kennzeichen->vehicles.kennzeichen_aktuell 0-diff.
+  // CMM-44 SP-B/G + CMM-65 (historisch): claim_nummer/status_changed_at/schadens_hoehe_netto/
+  //   created_at/gutachten leben auf claims (SSoT). Sort+Limit clientseitig (s.u.).
   const { data: faelle } = await supabase
-    .from('faelle')
-    // CMM-44 SP-B PR2a: status_changed_at lebt auf claims (SSoT) — ins Embed.
-    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) — ins Embed.
-    // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag (SSoT).
-    // CMM-65: created_at von faelle (stirbt mit Phase-6-DROP) auf claims (SSoT) —
-    // ins !inner-Embed (verlustfrei). Sort+Limit clientseitig (s.u.), da supabase-js
-    // nicht nach einer eingebetteten to-one-Spalte ordnen kann.
-    .select('id, claims:claim_id!inner(claim_nummer, status_changed_at, schadens_hoehe_netto, created_at, gutachten(gesamt_schadensbetrag)), status, sv_id, kennzeichen')
-    .not('sv_id', 'is', null)
-    // CMM-44 Phase 3: lead_preis_netto lebt auf claims (SSoT) — Filter auf claims-Embed.
+    .from('faelle_claim_bridge')
+    .select('fall_id, claims:claim_id!inner(claim_nummer, status_changed_at, schadens_hoehe_netto, created_at, operative_status, sv_id, vehicles:vehicle_id(kennzeichen_aktuell), gutachten(gesamt_schadensbetrag))')
+    .not('claims.sv_id', 'is', null)
     .is('claims.lead_preis_netto', null)
     .in('claim_id', (billableClaimIds ?? []).map((c) => c.id))
 
@@ -73,7 +73,10 @@ export default async function OffeneFaellePage() {
     .slice(0, 200)
 
   // SV-Namen aufloesen
-  const svIds = Array.from(new Set(rows.map(f => f.sv_id).filter(Boolean) as string[]))
+  const svIds = Array.from(new Set(rows.map(f => {
+    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
+    return c?.sv_id
+  }).filter(Boolean) as string[]))
   const { data: svs } = svIds.length > 0
     ? await supabase
         .from('sachverstaendige')
@@ -121,12 +124,15 @@ export default async function OffeneFaellePage() {
                 const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
                 // CMM-44 SP-G PR2: gesamt_schadensbetrag kommt aus gutachten (SSoT).
                 const gutachtenRow = Array.isArray(claim?.gutachten) ? claim?.gutachten[0] : claim?.gutachten
+                // CMM-49: kennzeichen aus vehicles (via claims.vehicle_id), sv_id/status aus claims.
+                const veh = Array.isArray(claim?.vehicles) ? claim?.vehicles[0] : claim?.vehicles
+                const svId = (claim?.sv_id as string | null) ?? null
                 return (
-                <Tr key={f.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
-                  <Td className="px-4 font-mono text-xs">{claim?.claim_nummer ?? f.id.slice(0, 8)}</Td>
-                  <Td className="px-4">{f.kennzeichen ?? '–'}</Td>
-                  <Td className="px-4">{f.sv_id ? svNameMap[f.sv_id] ?? '–' : '–'}</Td>
-                  <Td className="px-4 text-xs">{f.status}</Td>
+                <Tr key={f.fall_id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
+                  <Td className="px-4 font-mono text-xs">{claim?.claim_nummer ?? f.fall_id.slice(0, 8)}</Td>
+                  <Td className="px-4">{veh?.kennzeichen_aktuell ?? '–'}</Td>
+                  <Td className="px-4">{svId ? svNameMap[svId] ?? '–' : '–'}</Td>
+                  <Td className="px-4 text-xs">{claim?.operative_status}</Td>
                   <Td className="px-4 text-right tabular-nums">
                     {claim?.schadens_hoehe_netto != null
                       ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(claim.schadens_hoehe_netto))
@@ -137,7 +143,7 @@ export default async function OffeneFaellePage() {
                   <Td className="px-4 text-center">{formatDate((claim?.created_at as string | null) ?? null)}</Td>
                   <Td className="px-4 text-right">
                     <Link
-                      href={`/admin/faelle/${f.id}`}
+                      href={`/admin/faelle/${f.fall_id}`}
                       className="text-claimondo-ondo hover:text-claimondo-navy underline text-sm"
                     >
                       Öffnen

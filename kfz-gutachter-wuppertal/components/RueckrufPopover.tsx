@@ -81,14 +81,17 @@ export function RueckrufPopover({
       // (value-based Bidding + Enhanced Conversions). lead_id nur wenn vorhanden.
       const data = (await res.json().catch(() => ({}))) as { anfrage_id?: string | null }
       const attribution = readAttribution()
+      // Phone nur wenn E.164-normalisierbar in den dataLayer — identisch zum Haupt-Embed
+      // (value-model.ts): kein leeres phone, sonst inkonsistente dataLayer-Bags. AAR-939.
+      const phoneE164 = toE164(telefon.trim())
       const ev: Record<string, string | number | undefined> = {
         value: 25,
         currency: 'EUR',
-        phone: toE164(telefon.trim()),
         gclid: attribution.gclid,
         cluster: CLUSTER.key,
         stadt: city.slug,
       }
+      if (phoneE164) ev.phone = phoneE164
       if (data.anfrage_id) ev.lead_id = data.anfrage_id
       trackEvent('monika_callback_request', ev)
       setDone(true)
