@@ -76,11 +76,14 @@ export async function triggerKonditionaleDokumentTasks(
     const meta = SLOT_META[slotId]
 
     // Task anlegen (Owner = Kunde via empfaenger_user_id aus faelle.kunde_id)
-    const { data: fall } = await supabase
-      .from('faelle')
-      .select('kunde_id')
-      .eq('id', fallId)
+    // CMM-49 Display-Sweep: kunde_id via Bridge+claims (faelle-frei). kunde_id==claims.geschaedigter_user_id (divergence=0).
+    const { data: bridgeRow } = await supabase
+      .from('faelle_claim_bridge')
+      .select('claims:claim_id!inner(geschaedigter_user_id)')
+      .eq('fall_id', fallId)
       .single()
+    const claimEmbed = Array.isArray(bridgeRow?.claims) ? bridgeRow?.claims[0] : bridgeRow?.claims
+    const fall = { kunde_id: (claimEmbed?.geschaedigter_user_id ?? null) as string | null }
 
     await supabase.from('tasks').insert({
       fall_id: fallId,

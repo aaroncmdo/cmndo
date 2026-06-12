@@ -264,11 +264,13 @@ export async function cancelAdHocAnforderung(
   if (error) return { success: false, error: error.message }
 
   if (anfrageRow?.lead_id) {
-    const { data: fall } = await admin
-      .from('faelle')
-      .select('id')
-      .eq('lead_id', anfrageRow.lead_id)
+    // CMM-49 Display-Sweep: lead->fall_id via Bridge+claims (faelle-frei). claims.lead_id==faelle.lead_id (sync).
+    const { data: bridgeRow } = await admin
+      .from('faelle_claim_bridge')
+      .select('fall_id, claims:claim_id!inner(lead_id)')
+      .eq('claims.lead_id', anfrageRow.lead_id)
       .maybeSingle()
+    const fall = bridgeRow ? { id: bridgeRow.fall_id as string } : null
     if (fall?.id) revalidateAnforderungRoutes(fall.id)
   }
 
@@ -301,11 +303,13 @@ export async function resendAdHocAnforderung(
   if (!VALID_TYPS.has(typ)) return { success: false, error: 'Ungültiger Beleg-Typ' }
 
   // Lead → Fall zurück-auflösen für Event-Kontext
-  const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
-    .eq('lead_id', anfrage.lead_id)
+  // CMM-49 Display-Sweep: lead->fall_id via Bridge+claims (faelle-frei).
+  const { data: bridgeRow } = await admin
+    .from('faelle_claim_bridge')
+    .select('fall_id, claims:claim_id!inner(lead_id)')
+    .eq('claims.lead_id', anfrage.lead_id)
     .maybeSingle()
+  const fall = bridgeRow ? { id: bridgeRow.fall_id as string } : null
   if (!fall?.id) return { success: false, error: 'Fall nicht gefunden' }
 
   const kanal = kanalOverride ?? (anfrage.kanal as AdHocKanal)
