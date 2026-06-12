@@ -45,22 +45,21 @@ export default async function PosteingangPage({
     .select('id')
     .not('operative_status', 'in', '("storniert")')
   const aktiveClaimIds = (nichtStornierteClaims ?? []).map((c) => c.id as string)
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id = claim_id (Filter);
+  // fall_id == faelle.id; claim_nummer + created_at flach (SSoT).
   const { data: faelleRaw } = aktiveClaimIds.length
     ? await supabase
-        .from('faelle')
-        .select('id, lead_id, claims:claim_id!inner(claim_nummer, created_at)')
+        .from('v_claim_full')
+        .select('fall_id, lead_id, claim_nummer, created_at')
         .eq('sv_id', sv.id)
-        .in('claim_id', aktiveClaimIds)
-    : { data: [] as Array<{ id: string; lead_id: string | null; claims: { claim_nummer: string | null; created_at: string | null } | { claim_nummer: string | null; created_at: string | null }[] | null }> }
-  const claimCreatedAt = (f: { claims: unknown }): string => {
-    const c = Array.isArray(f.claims) ? f.claims[0] : f.claims
-    return (c as { created_at?: string | null } | null)?.created_at ?? ''
-  }
+        .in('id', aktiveClaimIds)
+    : { data: [] as Array<{ fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }> }
+  const claimCreatedAt = (f: { created_at?: string | null }): string => f.created_at ?? ''
   const faelle = (faelleRaw ?? [])
     .slice()
     .sort((a, b) => claimCreatedAt(b).localeCompare(claimCreatedAt(a)))
 
-  const fallIds = (faelle ?? []).map(f => f.id)
+  const fallIds = (faelle ?? []).map(f => f.fall_id)
   const threads: FallThread[] = []
 
   if (fallIds.length > 0) {
@@ -95,9 +94,9 @@ export default async function PosteingangPage({
     const threadMap = new Map<string, FallThread>()
     for (const fall of faelle ?? []) {
       const kundeName = fall.lead_id ? (kundenMap[fall.lead_id] ?? 'Kunde') : 'Kunde'
-      threadMap.set(fall.id, {
-        fallId: fall.id,
-        fallNummer: ((Array.isArray(fall.claims) ? fall.claims[0] : fall.claims)?.claim_nummer as string | null) ?? null,
+      threadMap.set(fall.fall_id, {
+        fallId: fall.fall_id,
+        fallNummer: fall.claim_nummer ?? null,
         kundeName,
         lastMessage: '',
         lastAt: '',
