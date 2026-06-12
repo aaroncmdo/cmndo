@@ -372,23 +372,32 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
   if (!gewaehlt.fall_id) return { ok: false, reason: 'no_fall' }
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse/lat/lng direkt aus gutachter_termine (SSoT).
+  // CMM-49 (faelle-Drop-Runway): Anker auf faelle_claim_bridge (RLS spiegelt faelle-Case-Access
+  // -> gleiche Sichtbarkeit) statt .from('faelle'). claims-Embed via FK #2719.
   const { data: fall } = await supabase
-    .from('faelle')
+    .from('faelle_claim_bridge')
     .select(
-      'id, kunde_vorname, kunde_nachname, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)',
+      'fall_id, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort, schadenort_plz)',
     )
-    .eq('id', gewaehlt.fall_id)
+    .eq('fall_id', gewaehlt.fall_id)
     .maybeSingle()
   if (!fall) return { ok: false, reason: 'no_fall' }
   const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  // CMM-49: kunde_vorname/nachname leben nicht auf claims -> via v_claim_full (DEFINER loest
+  // claim_parties[geschaedigter]->personen) fuer den bereits RLS-autorisierten claim. div=0 vs faelle.
+  const { data: vcfKunde } = await supabase
+    .from('v_claim_full')
+    .select('kunde_vorname, kunde_nachname')
+    .eq('id', fall.claim_id as string)
+    .maybeSingle()
 
   // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus aktuellem gutachter_termin (SSoT).
   let aktTerminKarte: { besichtigungsort_adresse: string | null; besichtigungsort_lat: number | null; besichtigungsort_lng: number | null } | null = null
-  if ((fall as { claim_id?: string | null }).claim_id) {
+  if (fall.claim_id) {
     const { data: at } = await supabase
       .from('gutachter_termine')
       .select('besichtigungsort_adresse, besichtigungsort_lat, besichtigungsort_lng')
-      .eq('claim_id', (fall as { claim_id?: string | null }).claim_id as string)
+      .eq('claim_id', fall.claim_id as string)
       .order('start_zeit', { ascending: false })
       .limit(1)
       .maybeSingle()
@@ -411,7 +420,7 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
     'Unbekannte Adresse'
 
   const kundeName =
-    [fall.kunde_vorname, fall.kunde_nachname].filter(Boolean).join(' ') || null
+    [vcfKunde?.kunde_vorname, vcfKunde?.kunde_nachname].filter(Boolean).join(' ') || null
 
   return {
     ok: true,
@@ -420,7 +429,7 @@ export async function getSvAktiverTermin(svId: string): Promise<SvAktiverTerminR
       typ: (gewaehlt.typ as string | null) ?? null,
       startZeit: gewaehlt.start_zeit as string,
       status: (gewaehlt.status as string | null) ?? null,
-      fallId: (fall.id as string) ?? null,
+      fallId: (fall.fall_id as string) ?? null,
       fallNummer: (fallClaim?.claim_nummer as string | null) ?? null,
       kundeName,
     },
