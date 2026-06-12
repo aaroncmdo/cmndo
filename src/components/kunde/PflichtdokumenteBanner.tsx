@@ -24,11 +24,13 @@ export async function PflichtdokumenteBanner({ fallId }: { fallId?: string } = {
   if (fallId) {
     fallIds = [fallId]
   } else {
-    const { data: faelle } = await supabase
-      .from('faelle')
-      .select('id')
-      .eq('kunde_id', user.id)
-    fallIds = (faelle ?? []).map((f) => f.id as string)
+    // CMM-49 (faelle-Drop-Runway): fall_ids claims-zentrisch via Bridge statt .from('faelle').
+    // kunde_id == claims.geschaedigter_user_id (Divergenz=0 live verifiziert), bridge.fall_id == faelle.id.
+    const { data: bridgeRows } = await supabase
+      .from('faelle_claim_bridge')
+      .select('fall_id, claims:claim_id!inner(geschaedigter_user_id)')
+      .eq('claims.geschaedigter_user_id', user.id)
+    fallIds = (bridgeRows ?? []).map((r) => r.fall_id as string)
   }
   if (fallIds.length === 0) return null
 

@@ -157,8 +157,11 @@ type TerminRow = {
 // Listenview = null (Detail-Loader befuellt ihn, analog gutachten_eingegangen_am SP-G).
 // CMM-65: created_at aus FALL_SELECT entfernt — lebt auf claims (SSoT), Merge unten
 // nutzt claim.created_at (claims.created_at ist NOT NULL → kein fall-Fallback noetig).
+// CMM-49 Display-Sweep: Quelle v_claim_full statt faelle. Aliasing haelt den Consumer-Vertrag
+// (FallRow-Shape): id<-fall_id, claim_id<-claims.id, status<-operative_status (claims-SSoT,
+// 1:1-Mirror von faelle.status, post-drop-safe). Restliche Spalten heissen in vcf identisch.
 const FALL_SELECT =
-  'id, claim_id, status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id:fall_id, claim_id:id, status:operative_status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
 
 // CMM-74 b″: operative_status (claims = SSoT, 1:1-Mirror von faelle.status) ergaenzt.
 const CLAIM_SELECT =
@@ -192,14 +195,14 @@ export async function getKundeFaelle(
     if (p.claim_id) claimIds.add(p.claim_id)
   }
 
-  // 1b) faelle.kunde_id-Fallback — alte Pfade ohne claim_parties.user_id
-  const { data: faelleByKunde } = await admin
-    .from('faelle')
-    .select('claim_id')
-    .eq('kunde_id', userId)
-    .not('claim_id', 'is', null)
-  for (const f of (faelleByKunde ?? []) as Array<{ claim_id: string | null }>) {
-    if (f.claim_id) claimIds.add(f.claim_id)
+  // 1b) claims.geschaedigter_user_id-Fallback (= faelle.kunde_id-Home, divergence=0) —
+  // alte Pfade ohne claim_parties.user_id. CMM-49 Display-Sweep: faelle-frei aus claims.
+  const { data: claimsByKunde } = await admin
+    .from('claims')
+    .select('id')
+    .eq('geschaedigter_user_id', userId)
+  for (const c of (claimsByKunde ?? []) as Array<{ id: string }>) {
+    claimIds.add(c.id)
   }
 
   // 1c) Lead-Email-Fallback — Kunde wurde frisch angelegt, kunde_id ist
@@ -228,7 +231,7 @@ export async function getKundeFaelle(
   // ─── 2. Claims + Faelle parallel laden ─────────────────────────────────
   const [claimsRes, faelleRes, terminRes, cviRes] = await Promise.all([
     admin.from('claims').select(CLAIM_SELECT).in('id', claimIdArr),
-    admin.from('faelle').select(FALL_SELECT).in('claim_id', claimIdArr),
+    admin.from('v_claim_full').select(FALL_SELECT).in('id', claimIdArr),
     // CMM-44 SP-D PR2a: besichtigungsort_adresse + nachbesichtigung_status
     // aus gutachter_termine (SSoT) geladen.
     admin
@@ -246,7 +249,9 @@ export async function getKundeFaelle(
   // CMM-74 b″: operative_status lebt in der DB, fehlt aber (noch) in den
   // generierten Supabase-Typen → unknown-Bridge wie A1 (types-regen aufgeschoben).
   const claims = (claimsRes.data ?? []) as unknown as ClaimRow[]
-  const faelle = (faelleRes.data ?? []) as FallRow[]
+  // CMM-74 b″/CMM-49: operative_status lebt in der DB-View v_claim_full, fehlt aber in den
+  // generierten Typen → unknown-Bridge wie der ClaimRow-Cast oben.
+  const faelle = (faelleRes.data ?? []) as unknown as FallRow[]
   const termine = (terminRes.data ?? []) as TerminRow[]
   const cviRows = (cviRes.data ?? []) as VehicleInvolvementRow[]
 
@@ -301,7 +306,10 @@ export async function getKundeFaelle(
   const result: KundeFallView[] = []
   for (const claim of claims) {
     const fall = fallByClaim.get(claim.id) ?? null
-    if (!fall) continue // Kein faelle-Row → noch kein konvertierter Lead, nicht im Kunde-Portal sichtbar
+    // v_claim_full ist claims-ankernd → jeder Kunde-Claim hat eine Row. Zeigt damit ALLE
+    // konvertierten Claims (Aaron-Entscheid 12.06.) — ersetzt die alte faelle-Existenz-Gate,
+    // die post-Step-5 (kein faelle fuer neue Claims) jeden neuen Fall versteckt haette.
+    if (!fall) continue
 
     const cvi = cviByClaim.get(claim.id) ?? null
     const vehicle = cvi?.vehicle_id ? vehiclesById.get(cvi.vehicle_id) : null
@@ -439,19 +447,24 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund -> kanzlei_faelle-Read unten.
   // CMM-44 SP-I6: kanzlei_id -> kanzlei_faelle-Read unten.
   // CMM-44 Phase 3: bankdaten_hinterlegt_am -> claims-Read oben (SSoT, nicht mehr faelle).
+  // CMM-49 Display-Sweep: aus v_claim_full statt faelle. Aliasing haelt den FALL_SELECT_KUNDE-
+  // Vertrag: id<-fall_id, claim_id<-claims.id, status<-operative_status (claims-SSoT, post-drop-safe).
   const FALL_DETAIL_SELECT =
-    'id, claim_id, status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung'
+    'id:fall_id, claim_id:id, status:operative_status, kunde_id, lead_id, sv_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, gegner_versicherung'
+  // fallId kann claim_id (vcf.id) ODER fall_id (vcf.fall_id) sein — beide Pfade wie zuvor.
   const byClaim = await admin
-    .from('faelle')
+    .from('v_claim_full')
     .select(FALL_DETAIL_SELECT)
-    .eq('claim_id', fallId)
-    // CMM-65: claim-scoped (faelle↔claims 1:1) — keine faelle.created_at-Order noetig, limit(1) genuegt.
+    .eq('id', fallId)
     .limit(1)
     .maybeSingle()
-  const fallRow =
-    byClaim.data ??
-    (await admin.from('faelle').select(FALL_DETAIL_SELECT).eq('id', fallId).maybeSingle()).data
+  // operative_status lebt in der DB-View, fehlt in den generierten Typen → unknown-Bridge.
+  const fallRow = (byClaim.data ??
+    (await admin.from('v_claim_full').select(FALL_DETAIL_SELECT).eq('fall_id', fallId).maybeSingle())
+      .data) as unknown as Record<string, unknown> | null
 
+  // v_claim_full ist claims-ankernd → laedt fuer jeden gueltigen Claim (Aaron-Entscheid 12.06.:
+  // alle Kunde-Claims sichtbar). Alte faelle-Existenz-Gate haette post-Step-5 neue Faelle ge-404t.
   if (!fallRow) return null
 
   // 2. Ownership: claim_parties.user_id ODER faelle.kunde_id ODER lead.email
