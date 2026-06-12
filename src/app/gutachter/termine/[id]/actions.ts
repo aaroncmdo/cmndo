@@ -70,7 +70,7 @@ export async function svAblehneTermin(
         let kundeEntityId = ''
 
         if (termin.fall_id) {
-          const { data: fall } = await adminDb.from('faelle').select('lead_id, kunde_id').eq('id', termin.fall_id).maybeSingle()
+          const { data: fall } = await adminDb.from('v_claim_full').select('lead_id, kunde_id').eq('fall_id', termin.fall_id).maybeSingle()
           if (fall?.lead_id) leadId = fall.lead_id
         }
 
@@ -200,7 +200,7 @@ export async function svGegenvorschlagTermin(
         let kundeEntityId = ''
 
         if (termin.fall_id) {
-          const { data: fall } = await adminDb.from('faelle').select('lead_id').eq('id', termin.fall_id).maybeSingle()
+          const { data: fall } = await adminDb.from('v_claim_full').select('lead_id').eq('fall_id', termin.fall_id).maybeSingle()
           if (fall?.lead_id) leadId = fall.lead_id
         }
 
@@ -286,10 +286,11 @@ export async function uploadPolizeiberichtAsSv(
   if (!sv) return { success: false, error: 'Kein Sachverständigen-Profil' }
 
   const adminDb = createAdminClient()
+  // CMM-49 (faelle-Drop-Runway): sv_id aus v_claim_full (flat, SSoT, faelle-frei).
   const { data: fall } = await adminDb
-    .from('faelle')
-    .select('id, sv_id')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('sv_id')
+    .eq('fall_id', fallId)
     .single()
 
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
@@ -396,9 +397,9 @@ export async function uploadPolizeiberichtAsSv(
   // wie Kunde-Upload damit `bkat_unfallart` für Kanzlei-Reports konsistent
   // gefüllt wird, egal wer den Bericht hochgeladen hat.
   const { data: fallLead } = await adminDb
-    .from('faelle')
+    .from('v_claim_full')
     .select('lead_id')
-    .eq('id', fallId)
+    .eq('fall_id', fallId)
     .maybeSingle()
   const leadIdForBkat = (fallLead?.lead_id as string | null) ?? null
   if (leadIdForBkat) {
