@@ -42,9 +42,11 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
 
   // Fall laden + verifizieren dass er im Pool dieser Org ist
   // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Write auf claims (SSoT).
-  const { data: fall } = await db.from('faelle')
-    .select('id, claim_id, organisation_id, sv_id')
-    .eq('id', fall_id)
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id = claim_id (Re-Key);
+  // organisation_id/sv_id flach (value-identisch). Der faelle.update unten bleibt = Step 5.
+  const { data: fall } = await db.from('v_claim_full')
+    .select('id, organisation_id, sv_id')
+    .eq('fall_id', fall_id)
     .maybeSingle()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
   if (fall.organisation_id !== auth.orgId) return { success: false, error: 'Fall gehoert nicht zu deiner Organisation' }
@@ -69,7 +71,7 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
   }).eq('id', fall_id)
   if (updErr) return { success: false, error: `Zuweisung fehlgeschlagen: ${updErr.message}` }
   // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT).
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  const claimId = (fall.id as string | null) ?? null
   if (claimId) {
     await db.from('claims').update({ sv_zugewiesen_am: now }).eq('id', claimId)
   }
