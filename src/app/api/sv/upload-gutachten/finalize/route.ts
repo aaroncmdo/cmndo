@@ -32,15 +32,17 @@ export async function POST(req: NextRequest) {
 
     const db = createAdminClient()
 
+    // CMM-49 Regression-Fix (#2688): der faelle!inner-Embed via auftraege.fall_id-FK failt seit dem
+    // FK->bridge-Repoint ("no relationship faelle"). auftraege.claim_id ist nativ (CMM-44) -> direkt lesen.
     const { data: auftrag } = await db
       .from('auftraege')
-      .select('id, fall_id, sv_id, gutachten_url, status, faelle!inner(claim_id)')
+      .select('id, fall_id, sv_id, gutachten_url, status, claim_id')
       .eq('id', body.auftragId)
       .eq('sv_id', sv.id)
       .single()
     if (!auftrag) return NextResponse.json({ error: 'Auftrag nicht gefunden' }, { status: 404 })
 
-    const claimId = (auftrag as unknown as { faelle: { claim_id: string | null } }).faelle?.claim_id
+    const claimId = auftrag.claim_id
     if (!claimId) return NextResponse.json({ error: 'Claim nicht gefunden' }, { status: 400 })
 
     // AAR-862: Pfad-Whitelist auf claims/<claimId>/gutachten/<auftragId>/[nachbesserung/]
