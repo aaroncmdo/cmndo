@@ -143,19 +143,22 @@ export async function startRuege(
   if ('error' in auth) return { success: false, error: auth.error }
 
   const db = createAdminClient()
-  // CMM-44 SP-I5: ruege_counter + ruege_gesendet_am leben auf kanzlei_faelle (1:1).
-  // prevCounter aus dem kanzlei_faelle-Embed (Array-normalisiert; COALESCE auf DB-Default 0).
-  const { data: fall } = await db
-    .from('faelle')
-    .select('claim_id, kanzlei_faelle(ruege_counter)')
-    .eq('id', fallId)
-    .single()
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-  const ruegeClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  // CMM-44 SP-I5: ruege_counter + ruege_gesendet_am leben auf kanzlei_faelle (1:1 per Claim).
+  // CMM-49 (faelle-Drop + #2688-REVERSE-Embed-Fix): der frühere faelle.kanzlei_faelle(...)-Embed
+  // lief über die kanzlei_faelle.fall_id->faelle-FK, die #2688 auf die Bridge repointete -> PGRST200
+  // (Action war broken). claim_id via Bridge, ruege_counter direkt aus kanzlei_faelle (claim_id-keyed).
+  const { data: bridgeRow } = await db
+    .from('faelle_claim_bridge')
+    .select('claim_id')
+    .eq('fall_id', fallId)
+    .maybeSingle()
+  const ruegeClaimId = (bridgeRow as { claim_id?: string | null } | null)?.claim_id ?? null
   if (!ruegeClaimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
-  const ruegeKf = Array.isArray((fall as { kanzlei_faelle?: unknown }).kanzlei_faelle)
-    ? (fall as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
-    : (fall as { kanzlei_faelle?: unknown }).kanzlei_faelle
+  const { data: ruegeKf } = await db
+    .from('kanzlei_faelle')
+    .select('ruege_counter')
+    .eq('claim_id', ruegeClaimId)
+    .maybeSingle()
 
   const prevCounter = Number((ruegeKf as { ruege_counter?: number | null } | null)?.ruege_counter ?? 0)
   if (prevCounter >= 2) {
