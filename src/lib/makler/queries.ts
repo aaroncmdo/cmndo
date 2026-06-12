@@ -927,11 +927,13 @@ export async function getMaklerAbrechnungsData(
         `
         id, betrag_netto_eur, status, service_typ, trigger_event,
         trigger_at, hold_until, storniert_am, storno_grund,
-        fall:faelle!makler_provisionen_fall_id_fkey(
-          id,
-          claims:claim_id(claim_nummer),
-          leads(vorname, nachname),
-          kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
+        fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+          id:fall_id,
+          claims:claim_id(
+            claim_nummer,
+            leads:lead_id(vorname, nachname),
+            kunde:geschaedigter_user_id(vorname, nachname)
+          )
         )
       `,
       )
@@ -942,31 +944,35 @@ export async function getMaklerAbrechnungsData(
 
   const provisionen: MaklerProvisionRow[] = (rowsRes.data ?? []).map((row) => {
     const fallRaw = (row as { fall?: unknown }).fall
+    // CMM-49 Regression-Fix (#2688): FK->bridge-Repoint. leads/kunde haengen jetzt
+    // unter claims (bridge hat keine lead_id/kunde_id) -> ueber fallClaim lesen.
     const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
       | {
           id: string | null
           claims?:
-            | Array<{ claim_nummer: string | null }>
-            | { claim_nummer: string | null }
-            | null
-          leads?:
-            | Array<{ vorname: string | null; nachname: string | null }>
-            | { vorname: string | null; nachname: string | null }
-            | null
-          kunde?:
-            | Array<{ vorname: string | null; nachname: string | null }>
-            | { vorname: string | null; nachname: string | null }
+            | Array<{
+                claim_nummer: string | null
+                leads: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+                kunde: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+              }>
+            | {
+                claim_nummer: string | null
+                leads: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+                kunde: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+              }
             | null
         }
       | null
       | undefined
 
-    const leadRaw = fall?.leads
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+
+    const leadRaw = fallClaim?.leads
     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
       | { vorname: string | null; nachname: string | null }
       | null
       | undefined
-    const kundeRaw = fall?.kunde
+    const kundeRaw = fallClaim?.kunde
     const kunde = (Array.isArray(kundeRaw) ? kundeRaw[0] : kundeRaw) as
       | { vorname: string | null; nachname: string | null }
       | null
@@ -990,8 +996,7 @@ export async function getMaklerAbrechnungsData(
       storniert_am: (row.storniert_am as string | null) ?? null,
       storno_grund: (row.storno_grund as string | null) ?? null,
       fall_id: fall?.id ?? null,
-      claim_nummer:
-        (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null,
+      claim_nummer: fallClaim?.claim_nummer ?? null,
       kunde_name: kundeName,
     }
   })
@@ -1303,11 +1308,13 @@ export async function getMaklerAktiveConsents(
     .select(
       `
       id, consent_scope, consent_gegeben_am,
-      fall:faelle!makler_fall_consent_fall_id_fkey(
-        id,
-        claims:claim_id(claim_nummer),
-        leads(vorname, nachname),
-        kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
+      fall:faelle_claim_bridge!makler_fall_consent_fall_id_fkey(
+        id:fall_id,
+        claims:claim_id(
+          claim_nummer,
+          leads:lead_id(vorname, nachname),
+          kunde:geschaedigter_user_id(vorname, nachname)
+        )
       )
       `,
     )
@@ -1317,31 +1324,35 @@ export async function getMaklerAktiveConsents(
 
   return (data ?? []).map((row) => {
     const fallRaw = (row as { fall?: unknown }).fall
+    // CMM-49 Regression-Fix (#2688): FK->bridge-Repoint. leads/kunde haengen jetzt
+    // unter claims (bridge hat keine lead_id/kunde_id) -> ueber fallClaim lesen.
     const fall = (Array.isArray(fallRaw) ? fallRaw[0] : fallRaw) as
       | {
           id: string | null
           claims?:
-            | Array<{ claim_nummer: string | null }>
-            | { claim_nummer: string | null }
-            | null
-          leads?:
-            | Array<{ vorname: string | null; nachname: string | null }>
-            | { vorname: string | null; nachname: string | null }
-            | null
-          kunde?:
-            | Array<{ vorname: string | null; nachname: string | null }>
-            | { vorname: string | null; nachname: string | null }
+            | Array<{
+                claim_nummer: string | null
+                leads: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+                kunde: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+              }>
+            | {
+                claim_nummer: string | null
+                leads: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+                kunde: { vorname: string | null; nachname: string | null } | { vorname: string | null; nachname: string | null }[] | null
+              }
             | null
         }
       | null
       | undefined
 
-    const leadRaw = fall?.leads
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+
+    const leadRaw = fallClaim?.leads
     const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
       | { vorname: string | null; nachname: string | null }
       | null
       | undefined
-    const kundeRaw = fall?.kunde
+    const kundeRaw = fallClaim?.kunde
     const kunde = (Array.isArray(kundeRaw) ? kundeRaw[0] : kundeRaw) as
       | { vorname: string | null; nachname: string | null }
       | null
@@ -1357,8 +1368,7 @@ export async function getMaklerAktiveConsents(
       consent_scope: (row.consent_scope as string | null) ?? null,
       consent_gegeben_am: (row.consent_gegeben_am as string | null) ?? null,
       fall_id: fall?.id ?? null,
-      claim_nummer:
-        (Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims)?.claim_nummer ?? null,
+      claim_nummer: fallClaim?.claim_nummer ?? null,
       kunde_name: kundeName,
     }
   })
