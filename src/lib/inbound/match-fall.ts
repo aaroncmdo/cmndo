@@ -66,39 +66,47 @@ export async function matchInboundToFall(
     return { fallId: null, leadId: firstLead, multipleCandidates: false, candidates: [] }
   }
 
-  // Alle offenen Faelle finden (IN-List funktioniert auch mit leerem Array dank OR)
-  const orParts: string[] = []
-  if (kundeIds.length) orParts.push(`kunde_id.in.(${kundeIds.join(',')})`)
-  if (fallIdsFromLeads.length) orParts.push(`id.in.(${fallIdsFromLeads.join(',')})`)
-
   // CMM-65: created_at lebt auf claims (SSoT). claim_id NOT NULL -> !inner verlustfrei.
-  // supabase-js kann nicht nach eingebetteter to-one-Spalte ordnen -> Sortierung clientseitig.
   // CMM-74 b″: Offen-Filter auf claims.operative_status (SSoT, 1:1-Mirror von faelle.status).
   // Zwei-Schritt (PostgREST kann nicht nach Embed-Spalte negieren): erst die nicht-
-  // abgeschlossenen/-stornierten claim-IDs, dann faelle.in('claim_id', …).
+  // abgeschlossenen/-stornierten claim-IDs, dann .in('claim_id', …).
   const { data: openClaims } = await admin
     .from('claims')
     .select('id')
     .not('operative_status', 'in', `(${CLOSED_STATUSES.map(s => `"${s}"`).join(',')})`)
   const openClaimIds = (openClaims ?? []).map((c) => c.id as string)
-  let query = admin
-    .from('faelle')
-    .select('id, status, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, kunde_id, claims:claim_id!inner(claim_nummer, operative_status, created_at)')
-    .in('claim_id', openClaimIds)
 
-  if (orParts.length === 1) {
-    // .or braucht das Format ohne Praefix
-    const single = orParts[0]
-    if (single.startsWith('kunde_id.in.')) {
-      query = query.in('kunde_id', kundeIds)
-    } else if (single.startsWith('id.in.')) {
-      query = query.in('id', fallIdsFromLeads)
-    }
-  } else if (orParts.length > 1) {
-    query = query.or(orParts.join(','))
+  // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner statt .from('faelle').
+  // fall_id==faelle.id (Output-Key); kunde_id -> claims.geschaedigter_user_id (SSoT, div=0);
+  // kennzeichen/fahrzeug_* -> vehicles via claims.vehicle_id (faelle-Snapshot war 0-populated
+  // -> value-neutral); status -> claims.operative_status (SSoT). created_at -> claims (CMM-65).
+  // kunde_id (-> embedded claims-Spalte) und id (-> bridge.fall_id, Anchor) liegen nach der
+  // Migration auf VERSCHIEDENEN Tabellen -> ein gemeinsames .or() geht nicht. Stattdessen je
+  // Quelle eine Query + Merge/Dedupe nach fall_id (orParts war ohnehin max. 2 Teile).
+  const SELECT =
+    'fall_id, claim_id, claims:claim_id!inner(claim_nummer, operative_status, created_at, geschaedigter_user_id, vehicle_id, vehicles:vehicle_id(kennzeichen_aktuell, hersteller, modell_haupttyp))'
+  const bridgeQueries = []
+  if (kundeIds.length) {
+    bridgeQueries.push(
+      admin.from('faelle_claim_bridge').select(SELECT).in('claim_id', openClaimIds).in('claims.geschaedigter_user_id', kundeIds),
+    )
   }
-
-  const { data: offeneFaelleRaw } = await query
+  if (fallIdsFromLeads.length) {
+    bridgeQueries.push(
+      admin.from('faelle_claim_bridge').select(SELECT).in('claim_id', openClaimIds).in('fall_id', fallIdsFromLeads),
+    )
+  }
+  const bridgeResults = await Promise.all(bridgeQueries)
+  const seenFallIds = new Set<string>()
+  const offeneFaelleRaw: Array<Record<string, unknown>> = []
+  for (const res of bridgeResults) {
+    for (const row of (res.data ?? []) as Array<Record<string, unknown>>) {
+      const fid = row.fall_id as string
+      if (seenFallIds.has(fid)) continue
+      seenFallIds.add(fid)
+      offeneFaelleRaw.push(row)
+    }
+  }
 
   if (!offeneFaelleRaw || offeneFaelleRaw.length === 0) {
     return { fallId: null, leadId: leads[0]?.id ?? null, multipleCandidates: false, candidates: [] }
@@ -106,19 +114,30 @@ export async function matchInboundToFall(
 
   // CMM-65: claims.created_at + claim_nummer flachziehen und clientseitig nach
   // created_at DESC sortieren (aktuellster offener Fall = candidates[0]).
+  type ClaimEmbed = {
+    claim_nummer: string | null
+    operative_status: string | null
+    created_at: string | null
+    geschaedigter_user_id: string | null
+    vehicle_id: string | null
+    vehicles: VehEmbed | VehEmbed[] | null
+  }
+  type VehEmbed = { kennzeichen_aktuell: string | null; hersteller: string | null; modell_haupttyp: string | null }
   const candidates: MatchedFall[] = offeneFaelleRaw
     .map((f) => {
-      const claim = Array.isArray(f.claims) ? f.claims[0] : f.claims
+      const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as ClaimEmbed | null
+      const veh = (Array.isArray(claim?.vehicles) ? claim?.vehicles[0] : claim?.vehicles) as VehEmbed | null | undefined
       return {
-        id: f.id,
-        claim_nummer: (claim?.claim_nummer as string | null) ?? null,
-        // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
-        status: ((claim?.operative_status as string | null) ?? f.status),
-        kennzeichen: f.kennzeichen,
-        fahrzeug_hersteller: f.fahrzeug_hersteller,
-        fahrzeug_modell: f.fahrzeug_modell,
-        kunde_id: f.kunde_id,
-        created_at: (claim?.created_at as string | null) ?? '',
+        id: f.fall_id as string,
+        claim_nummer: claim?.claim_nummer ?? null,
+        // CMM-74 b″: status aus claims.operative_status (SSoT, 1:1-Mirror von faelle.status).
+        status: claim?.operative_status ?? null,
+        // CMM-50/CMM-49: Fahrzeug aus vehicles (claims.vehicle_id); faelle-Snapshot war 0-populated.
+        kennzeichen: veh?.kennzeichen_aktuell ?? null,
+        fahrzeug_hersteller: veh?.hersteller ?? null,
+        fahrzeug_modell: veh?.modell_haupttyp ?? null,
+        kunde_id: claim?.geschaedigter_user_id ?? null,
+        created_at: claim?.created_at ?? '',
       }
     })
     .sort((a, b) => b.created_at.localeCompare(a.created_at))
