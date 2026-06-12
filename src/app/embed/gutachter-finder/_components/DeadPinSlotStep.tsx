@@ -48,25 +48,38 @@ export function DeadPinSlotStep({
           Wählen Sie einen Wunschtermin — wir bestätigen ihn in Kürze.
         </p>
       </div>
-      {deadPins.map((dp) => {
+      {deadPins.map((dp, i) => {
         const selektiert = !!onSelect && selectedDeadPinId === dp.deadPinId
+        // Empfohlener (= nächster) Dead-Pin navy-glassy hervorgehoben, analog zu SvSlotAuswahl.
+        const dunkel = i === 0
         const kopf = (
           <>
-            <span className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-claimondo-bg text-claimondo-ondo">
+            <span className={`grid h-9 w-9 flex-shrink-0 place-items-center rounded-full ${dunkel ? 'bg-white/15 text-white' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
               <MapPin className="h-4 w-4" />
             </span>
             <div className="min-w-0">
-              <p className="truncate text-body-sm font-semibold text-claimondo-navy">
+              <p className={`truncate text-body-sm font-semibold ${dunkel ? 'text-white' : 'text-claimondo-navy'}`}>
                 Kfz-Gutachter{dp.ort ? ` in ${dp.ort}` : ' in Ihrer Nähe'}
               </p>
-              <p className="text-[0.75rem] text-claimondo-shield/70">{dp.distanzGerundet}</p>
+              <p className={`text-[0.75rem] ${dunkel ? 'text-white/70' : 'text-claimondo-shield/70'}`}>{dp.distanzGerundet}</p>
             </div>
+            {dunkel && (
+              <span className="ml-auto rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-claimondo-navy">
+                Empfohlen
+              </span>
+            )}
           </>
         )
         return (
           <div
             key={dp.deadPinId}
-            className={`rounded-ios-md border bg-white/70 p-4 ${selektiert ? 'border-claimondo-ondo ring-2 ring-claimondo-ondo ring-offset-1' : 'border-claimondo-border'}`}
+            className={`rounded-ios-md border p-4 ${
+              dunkel
+                ? 'border-claimondo-navy bg-claimondo-navy'
+                : selektiert
+                  ? 'border-claimondo-ondo bg-white/70 outline outline-2 outline-offset-2 outline-claimondo-navy'
+                  : 'border-claimondo-border bg-white/70'
+            }`}
           >
             {onSelect ? (
               <button
@@ -80,7 +93,7 @@ export function DeadPinSlotStep({
               <div className="mb-2 flex items-center gap-2">{kopf}</div>
             )}
             {dp.slots.length === 0 ? (
-              <p className="text-[0.8125rem] text-claimondo-shield/60">
+              <p className={`text-[0.8125rem] ${dunkel ? 'text-white/70' : 'text-claimondo-shield/60'}`}>
                 Aktuell keine freien Zeiten — wir melden uns telefonisch.
               </p>
             ) : (

@@ -226,7 +226,23 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     })
     mapRef.current = map
 
-    // WS2: Profil-Popup ÜBER dem Pin (anchor:'bottom') via React-Render
+    // AAR-956 (Aaron 12.06.): das Popup darf den Pin NICHT verdecken. Anchor + Offset so wählen,
+    // dass das Popup in den freien Raum öffnet und der Pin frei bleibt:
+    //   - Pin hinter der Wizard-Spalte (links) → nach RECHTS (anchor 'left')
+    //   - Pin nah am oberen Rand → nach UNTEN (anchor 'top'), sonst clippt es oben weg
+    //   - sonst → nach OBEN (anchor 'bottom') mit genug Offset, um den 40px-Avatar frei zu lassen
+    function popupPlatzierung(lng: number, lat: number): {
+      anchor: 'left' | 'top' | 'bottom'
+      offset: [number, number]
+    } {
+      const p = map.project([lng, lat])
+      const desktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+      if (desktop && p.x < 640) return { anchor: 'left', offset: [26, -6] }
+      if (p.y < 300) return { anchor: 'top', offset: [0, 16] }
+      return { anchor: 'bottom', offset: [0, -46] }
+    }
+
+    // WS2: Profil-Popup NEBEN/ÜBER dem Pin (popupPlatzierung) via React-Render
     // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
     // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
     function openSvPopup(sv: AktiverSVPublic) {
@@ -235,16 +251,12 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<SvProfilePopup sv={sv} />)
-      // WS3-Fix (Aaron 12.06.): das Popup darf NICHT über das Wizard-Overlay (links)
-      // ragen. Liegt der Pin im linken Bereich (Desktop-Wizard ~470px + Popup-Halbbreite),
-      // öffnet das Popup nach RECHTS (anchor 'left') statt zentriert über dem Pin.
-      const pinX = map.project([sv.standort_lng, sv.standort_lat]).x
-      const ueberlapptWizard = typeof window !== 'undefined' && window.innerWidth >= 1024 && pinX < 640
+      const { anchor, offset } = popupPlatzierung(sv.standort_lng, sv.standort_lat)
       const popup = new mapboxgl.Popup({
-        offset: 22,
+        offset,
         closeButton: true,
         maxWidth: '340px',
-        anchor: ueberlapptWizard ? 'left' : 'bottom',
+        anchor,
         className: 'sv-finder-popup',
       })
         .setLngLat([sv.standort_lng, sv.standort_lat])
@@ -270,13 +282,12 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<DeadPinProfilePopup ort={ort} />)
-      const pinX = map.project([lng, lat]).x
-      const ueberlapptWizard = typeof window !== 'undefined' && window.innerWidth >= 1024 && pinX < 640
+      const { anchor, offset } = popupPlatzierung(lng, lat)
       const popup = new mapboxgl.Popup({
-        offset: 22,
+        offset,
         closeButton: true,
         maxWidth: '340px',
-        anchor: ueberlapptWizard ? 'left' : 'bottom',
+        anchor,
         className: 'sv-finder-popup',
       })
         .setLngLat([lng, lat])
