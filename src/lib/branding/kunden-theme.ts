@@ -38,13 +38,16 @@ export async function resolveKundenTheme(kundeId: string): Promise<KundenThemeRe
   // 1) Neuesten Fall des Kunden mit zugewiesenem SV finden
   // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
   // to-one-Spalte ordnen -> claims.created_at flachziehen + clientseitig neuesten picken.
-  const { data: kundeFaelle } = await supabase
-    .from('faelle')
-    .select('sv_id, claims:claim_id!inner(created_at)')
-    .eq('kunde_id', kundeId)
+  // CMM-49 (faelle-Drop-Runway): claims-direkt statt .from('faelle'). Nur sv_id gebraucht
+  // (-> resolveBrandingFromSvId). kunde_id==claims.geschaedigter_user_id (div=0), sv_id 0-diff,
+  // created_at lebt claims-nativ -> kein Embed/Bridge noetig.
+  const { data: kundeClaims } = await supabase
+    .from('claims')
+    .select('sv_id, created_at')
+    .eq('geschaedigter_user_id', kundeId)
     .not('sv_id', 'is', null)
-  const fall = (kundeFaelle ?? [])
-    .map((f) => ({ sv_id: f.sv_id as string | null, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+  const fall = (kundeClaims ?? [])
+    .map((c) => ({ sv_id: c.sv_id as string | null, _c: (c.created_at as string | null) ?? '' }))
     .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
 
   if (!fall?.sv_id) return fallback
