@@ -13,13 +13,14 @@
 // Marketing-Look (GlassSurface + claimondo-Tokens), DE-only mit echten Umlauten. Reuse:
 // SvSlotAuswahl (Partner-Karten, geteilt mit /flow) + DeadPinSlotStep (Lite, Select-Mode).
 
-import { useState, useTransition } from 'react'
+import { useEffect, useState, useTransition } from 'react'
 import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
 import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher } from '../actions'
+import { track, reservierungConversion, rueckrufConversion } from '../_lib/tracking'
 import { DeadPinSlotStep } from './DeadPinSlotStep'
 import { WunschterminPicker } from './WunschterminPicker'
 import type {
@@ -108,15 +109,26 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   // Rückruf/Beratungsgespräch beim Dispatcher (Danke-Seite, Aaron 12.06.): Token nach der
   // Buchung (Kunde kennt ihn eh per WA), gewählte Wunschzeit, Buchungs-Status.
   const [buchungToken, setBuchungToken] = useState<string | null>(null)
+  const [buchungLeadId, setBuchungLeadId] = useState<string | null>(null)
   const [rueckrufZeit, setRueckrufZeit] = useState('')
   const [rueckrufGebucht, setRueckrufGebucht] = useState(false)
   const [rueckrufFehler, setRueckrufFehler] = useState<string | null>(null)
   const [rueckrufPending, startRueckrufTransition] = useTransition()
 
+  // gf_shown einmal feuern — der Wizard rendert 2× (Desktop-Sidebar + Mobile-Sheet), window-Guard
+  // verhindert den Doppel-Count.
+  useEffect(() => {
+    const w = window as Window & { __gfShown?: boolean }
+    if (w.__gfShown) return
+    w.__gfShown = true
+    track('gf_shown')
+  }, [])
+
   // Step 1 → 2: Ort gewählt → Karte informieren + token-loses Matching laden.
   function ortGewaehlt(p: PlaceResult) {
     const o = { adresse: p.adresse, lat: p.lat, lng: p.lng }
     setOrt(o)
+    track('gf_ort_gewaehlt')
     dispatchOrt(o.lat, o.lng)
     setPhase('termin')
     setMatching(null)
@@ -137,11 +149,13 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   function waehleSvSlot(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
     setAuswahl({ kind: 'partner', sv, slot })
     setSelectedSvId(sv.svId)
+    track('gf_termin_gewaehlt', { gutachter: 'partner' })
     setPhase('schaden')
   }
   function waehleDeadPinSlot(dp: DeadPinOeffentlich, slot: SlotVorschlag) {
     setAuswahl({ kind: 'deadpin', dp, slot })
     setSelectedDeadPinId(dp.deadPinId)
+    track('gf_termin_gewaehlt', { gutachter: 'deadpin' })
     setPhase('schaden')
   }
   // 0 Verfügbarkeit → ohne Termin weiter (Team koordiniert telefonisch).
@@ -193,6 +207,10 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
       }
       setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher })
       setBuchungToken(res.token)
+      setBuchungLeadId(res.leadId)
+      // Conversion (value-based, wie Monika): Reservierung = haftpflicht-Lead (100 €) + lead_id-Dedupe
+      // + E.164-Telefon (Enhanced Conversions). Feuert in dataLayer (GTM/GA4/Ads) + Beacon.
+      track('gf_anfrage_submit', reservierungConversion({ leadId: res.leadId, telefon: telefon.trim() }))
       setPhase('gebucht')
     })
   }
@@ -223,8 +241,11 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setRueckrufFehler(null)
     startRueckrufTransition(async () => {
       const r = await bucheRueckrufBeimDispatcher({ token: buchungToken, wunschzeitLokal: rueckrufZeit })
-      if (r.ok) setRueckrufGebucht(true)
-      else setRueckrufFehler(r.error ?? 'Der Rückruf konnte nicht gebucht werden.')
+      if (r.ok) {
+        setRueckrufGebucht(true)
+        // Conversion: Rückruf = Beratungsgespräch (25 €), gleicher Lead (eigene Conversion-Action).
+        track('gf_rueckruf', rueckrufConversion({ leadId: buchungLeadId }))
+      } else setRueckrufFehler(r.error ?? 'Der Rückruf konnte nicht gebucht werden.')
     })
   }
 
@@ -461,6 +482,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
               )}
               <a
                 href="tel:+4922198557270"
+                onClick={() => track('phone_click', { context: 'danke_ansprechpartner' })}
                 className="mt-3 flex w-full items-center justify-center gap-2 rounded-ios-md bg-claimondo-ondo px-4 py-2.5 text-body-sm font-semibold text-white transition-colors hover:bg-claimondo-navy"
               >
                 <Phone className="h-4 w-4" /> Jetzt anrufen

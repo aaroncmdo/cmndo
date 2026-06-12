@@ -201,7 +201,7 @@ export async function reserviereEmbedTermin(input: {
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
     | null
 }): Promise<
-  | { ok: true; token: string; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null }
+  | { ok: true; token: string; leadId: string | null; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
   // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
@@ -231,8 +231,17 @@ export async function reserviereEmbedTermin(input: {
   // Dem Lead zugewiesener Dispatcher (für die Danke-Seite: Profil-Card + Anruf-Button).
   const dispatcher = await ladeLeadDispatcher(token)
 
+  // lead_id für die Conversion-Dedupe (Transaction-ID im gf_anfrage_submit-Event) auflösen.
+  let leadId: string | null = null
+  try {
+    const { data: flx } = await createAdminClient().from('flow_links').select('lead_id').eq('token', token).maybeSingle()
+    leadId = (flx?.lead_id as string | null) ?? null
+  } catch {
+    leadId = null
+  }
+
   // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
-  if (!input.auswahl) return { ok: true, token, svVorname: null, ortLabel: null, startIso: null, dispatcher }
+  if (!input.auswahl) return { ok: true, token, leadId, svVorname: null, ortLabel: null, startIso: null, dispatcher }
 
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
@@ -243,13 +252,13 @@ export async function reserviereEmbedTermin(input: {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
     void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
-    return { ok: true, token, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher }
+    return { ok: true, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
   void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
-  return { ok: true, token, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher }
+  return { ok: true, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher }
 }
 
 /**
