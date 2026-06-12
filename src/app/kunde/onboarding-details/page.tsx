@@ -69,12 +69,16 @@ export default async function OnboardingDetailsPage({
   if (hatZb1Feld) {
     const { createAdminClient } = await import('@/lib/supabase/admin')
     const adminDb = createAdminClient()
-    const { data: fall } = await adminDb
-      .from('faelle')
-      .select('lead_id')
-      .eq('id', fallId)
+    // CMM-49 (faelle-Drop-Runway): lead_id lebt auf claims (SSoT) -> via Bridge lesen.
+    // faelle.lead_id == claims.lead_id (Divergenz=0 live verifiziert).
+    const { data: fallBridge } = await adminDb
+      .from('faelle_claim_bridge')
+      .select('claims:claim_id(lead_id)')
+      .eq('fall_id', fallId)
       .maybeSingle()
-    const leadIdFuerZb1 = (fall as { lead_id?: string | null } | null)?.lead_id ?? null
+    const fcRaw = (fallBridge as { claims?: unknown } | null)?.claims
+    const fallClaim = (Array.isArray(fcRaw) ? fcRaw[0] : fcRaw) as { lead_id?: string | null } | null | undefined
+    const leadIdFuerZb1 = fallClaim?.lead_id ?? null
     if (leadIdFuerZb1) {
       const { ensureZb1Anfrage } = await import('@/lib/onboarding/ensure-zb1-anfrage')
       const res = await ensureZb1Anfrage(leadIdFuerZb1)
