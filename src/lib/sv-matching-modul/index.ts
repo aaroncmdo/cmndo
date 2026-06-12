@@ -16,3 +16,12 @@ export {
   verteile2plus1Counts,
   type PlaneTerminOeffentlichInput,
 } from './plane-termin-oeffentlich'
+// AAR-956 Dead-Pin-Fallback — Vertrag (Typen + Signaturen; Bodies folgen separat).
+export type {
+  DeadPinOeffentlich,
+  PlaneTerminMitFallbackResult,
+  BucheDeadPinTerminInput,
+  BucheDeadPinTerminResult,
+  PlaneTerminMitFallback,
+  BucheDeadPinTermin,
+} from './fallback'
