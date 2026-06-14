@@ -402,9 +402,11 @@ export async function saveFinVinGutachter(
   const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
+  // CMM-50 Phase-B: Ownership-Gate via faelle (RLS + explizites sv_id) — nur noch claim_id,
+  // KEINE Fahrzeug-Cols mehr. Der Fahrzeug-Snapshot kommt unten aus vehicles (via v_claim_full).
   const { data: fall } = await supabase
     .from('faelle')
-    .select('id, claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben')
+    .select('claim_id')
     .eq('id', fallId)
     .eq('sv_id', sv.id)
     .single()
@@ -428,9 +430,19 @@ export async function saveFinVinGutachter(
   // anlegen + claims.vehicle_id via faelle.claim_id setzen (Admin-Client fuer den
   // claims-Write; die faelle-Ownership ist oben bereits geprueft). Non-critical.
   try {
-    const fr = fall as Record<string, unknown>
-    const claimId = (fr.claim_id as string | null) ?? null
+    const claimId = (fall.claim_id as string | null) ?? null
     const admin = createAdminClient()
+    // CMM-50 Phase-B: Fahrzeug-Snapshot aus vehicles (via v_claim_full, prescoped auf den
+    // ownership-verifizierten Claim — leak-safe) statt aus den faelle-Fahrzeug-Spalten.
+    let fr: Record<string, unknown> = {}
+    if (claimId) {
+      const { data: snap } = await admin
+        .from('v_claim_full')
+        .select('kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben')
+        .eq('id', claimId)
+        .single()
+      fr = (snap as Record<string, unknown> | null) ?? {}
+    }
     const veh = await ensureVehicleFromFin({
       fin: cleaned,
       snapshot: {
@@ -440,7 +452,7 @@ export async function saveFinVinGutachter(
         hsn: (fr.hsn as string | null) ?? null,
         tsn: (fr.tsn as string | null) ?? null,
         kilometerstand: (fr.kilometerstand as number | null) ?? null,
-        // CMM-50.1: Snapshot-Restfelder aus dem faelle-Stand
+        // CMM-50.1: Snapshot-Restfelder — jetzt aus vehicles (vcf)
         kennzeichenBuchstaben: (fr.kennzeichen_buchstaben as string | null) ?? null,
         farbe: (fr.fahrzeug_farbe as string | null) ?? null,
         farbcode: (fr.lackfarbe_code as string | null) ?? null,
