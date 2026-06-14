@@ -108,13 +108,24 @@ export async function syncPflichtdokumenteForFall(
   // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
   // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim,
   // daher reicht der Embed ohne explizite reihenfolge-Ordnung.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, lead_id, vorschaden_erkannt, claims:claim_id(zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
-    .eq('id', fallId)
+  // CMM-49 + CMM-64: vorschaden_erkannt ist claims-SSoT (cardentity-Writer lib/cardentity/run-full.ts:196
+  // schreibt claims; v_claim_full liest c.vorschaden_erkannt). faelle.vorschaden_erkannt = stale Legacy
+  // (kein Writer mehr). bridge-Anchor (RLS-Client, admin/KB-gated) + claims-Embed; lead_id claims div=0;
+  // id=bridge.fall_id. zeugen_vorhanden/auftraege wie bisher unter claims.
+  const { data: fallRow } = await supabase
+    .from('faelle_claim_bridge')
+    .select('fall_id, claims:claim_id!inner(lead_id, vorschaden_erkannt, zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
+    .eq('fall_id', fallId)
     .single()
-  if (!fall) return { success: false, error: 'Fall nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if (!fallRow) return { success: false, error: 'Fall nicht gefunden' }
+  const fallClaim = Array.isArray(fallRow.claims) ? fallRow.claims[0] : fallRow.claims
+  const fall = {
+    id: fallRow.fall_id,
+    lead_id: (fallClaim as { lead_id?: string | null } | null)?.lead_id ?? null,
+    // claims-SSoT null (cardentity nie gelaufen) -> false, reproduziert exakt den faelle-INSERT-Default
+    // (faelle.vorschaden_erkannt war immer false, kein Writer); true nur wenn cardentity erkannt hat.
+    vorschaden_erkannt: (fallClaim as { vorschaden_erkannt?: boolean | null } | null)?.vorschaden_erkannt ?? false,
+  }
   const fallAuftraege = Array.isArray(
     (fallClaim as { auftraege?: unknown } | null)?.auftraege,
   )
