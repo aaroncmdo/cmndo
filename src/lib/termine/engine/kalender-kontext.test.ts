@@ -29,6 +29,17 @@ const claimDbStub = (claim: Record<string, unknown> | null) =>
     }),
   }) as never
 
+// CMM-50: DB-Stub der NUR fuer v_claim_full eine Zeile liefert (faelle → null). Damit faellt der
+// alte faelle-Reader auf LEER (RED), der neue vcf-Reader liefert reichen Kontext (GREEN).
+const vcfDbStub = (row: Record<string, unknown> | null) =>
+  ({
+    from: (t: string) => ({
+      select: () => ({
+        eq: () => ({ maybeSingle: async () => ({ data: t === 'v_claim_full' ? row : null }) }),
+      }),
+    }),
+  }) as never
+
 describe('normalisiereBezug — faelle-freier bezug-Fallback (claim_id → lead_id)', () => {
   it('explizites bezug hat Vorrang vor claim_id', () => {
     expect(normalisiereBezug({ bezug_typ: 'claim', bezug_id: 'B', claim_id: 'C', lead_id: 'L' })).toEqual({
@@ -139,5 +150,38 @@ describe('resolveTerminKontext — Delegation-Sicherheit (bezug-Fallback end-to-
     expect(kontext.summary).toBe('Schadenbesichtigung')
     expect(kontext.description).toContain('Claimondo-Auftrag')
     expect(kontext.location).toBeUndefined()
+  })
+})
+
+describe('resolveTerminKontext — fall-bezug liest v_claim_full (CMM-50, vehicles-SSoT)', () => {
+  it('fall-bezug → Fahrzeug/Kennzeichen/Claim-Nr/Ort aus v_claim_full (nicht faelle)', async () => {
+    const db = vcfDbStub({
+      kennzeichen: 'K-XY 99',
+      fahrzeug_hersteller: 'BMW',
+      fahrzeug_modell: 'X3',
+      claim_nummer: 'CMD-2026-0001',
+      schadenort_adresse: 'Ringstr. 2, Köln',
+      schadenort_ort: 'Köln',
+      lead_id: null,
+      kunde_id: null,
+    })
+    const kontext = await resolveTerminKontext(
+      { bezug_typ: 'fall', bezug_id: 'fall-1', claim_id: null, lead_id: null, besichtigungsort_adresse: null },
+      db,
+    )
+    expect(kontext.summary).toBe('BMW X3 (K-XY 99) — Ringstr. 2, Köln · CMD-2026-0001')
+    expect(kontext.location).toBe('Ringstr. 2, Köln')
+    expect(kontext.description).toContain('Kennzeichen: K-XY 99')
+    expect(kontext.description).toContain('Fahrzeug: BMW X3')
+  })
+
+  it('fall-bezug ohne vcf-Treffer → generisch, kein Crash, fallId-Deep-Link bleibt', async () => {
+    const db = vcfDbStub(null)
+    const kontext = await resolveTerminKontext(
+      { bezug_typ: 'fall', bezug_id: 'fall-x', claim_id: null, lead_id: null, besichtigungsort_adresse: null },
+      db,
+    )
+    expect(kontext.summary).toBe('Schadenbesichtigung')
+    expect(kontext.description).toContain('Fallakte:') // fallId gesetzt → Deep-Link
   })
 })
