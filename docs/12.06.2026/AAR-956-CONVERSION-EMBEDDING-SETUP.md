@@ -129,15 +129,22 @@ app.claimondo.de**. Für saubere Zuordnung:
 
 ## 5 · GTM-Container in die Embed-Seite bringen — ✅ GEBAUT (env-gegated, in diesem PR)
 
-Der env-gegatete Loader ist jetzt in `src/app/embed/gutachter-finder/page.tsx` drin (`next/script`,
-`strategy="afterInteractive"`). Er lädt den GTM-Container **nur** wenn `NEXT_PUBLIC_GF_GTM_ID`
-gesetzt ist — ohne ENV ist es ein No-op (nichts lädt, kein halbes Setup). CSP auf `/embed` ist
-nur `frame-ancestors` (kein `script-src`) → GTM lädt ungehindert.
+Der env-gegatete Loader ist in `src/app/embed/gutachter-finder/page.tsx` drin (`next/script`,
+`strategy="afterInteractive"`). Er lädt den GTM-Container **nur** wenn `GF_GTM_ID` gesetzt ist —
+ohne ENV ist es ein No-op (nichts lädt, kein halbes Setup). CSP auf `/embed` ist nur
+`frame-ancestors` (kein `script-src`) → GTM lädt ungehindert.
+
+> **`GF_GTM_ID` ist bewusst NICHT `NEXT_PUBLIC_`:** Die Embed-Page ist eine dynamische
+> Server-Component (await searchParams + Daten-Fetch) → sie liest `GF_GTM_ID` **pro Request zur
+> Laufzeit** und rendert den Script server-seitig in die HTML. Heißt: **Var setzen + Server-Restart
+> reicht — KEIN Rebuild nötig.** (`NEXT_PUBLIC_*` wäre build-time-inlined → Footgun: Var nur am
+> laufenden Server setzen ohne Rebuild → GTM lädt still nie. Der Wert ist nicht geheim, steht eh im
+> Client-HTML.)
 
 **Was DU noch tun musst:**
 * GTM-Container anlegen/wählen → **Container-ID** (`GTM-XXXXXXX`).
-* `NEXT_PUBLIC_GF_GTM_ID` = diese ID **auf der app.claimondo.de-Deployment** (VPS Portal :3000) setzen
-  (+ auf app.staging.claimondo.de für den Staging-Test). Redeploy → Container lädt, die
+* `GF_GTM_ID` = diese ID **auf der app.claimondo.de-Deployment** (VPS Portal :3000) setzen
+  (+ auf app.staging.claimondo.de für den Staging-Test) → Server-Restart → Container lädt, die
   `dataLayer`-Pushes erreichen GTM, deine Tags (§3) feuern.
 * Verifizieren mit **GTM Preview-Mode** auf `app.claimondo.de/embed/gutachter-finder`.
 
@@ -172,7 +179,7 @@ frame-ancestors 'self' https://claimondo.de https://*.claimondo.de
 ## 7 · Checkliste für dich
 
 - [ ] GTM-Container für den GF-Embed anlegen (oder „Embed"-Container wiederverwenden) → Container-ID
-- [ ] `NEXT_PUBLIC_GF_GTM_ID` auf app.claimondo.de setzen + GTM-Loader in die Embed-Seite (kleiner PR, sag Bescheid)
+- [ ] `GF_GTM_ID` auf app.claimondo.de setzen + GTM-Loader in die Embed-Seite (kleiner PR, sag Bescheid)
 - [ ] GTM: 9 Data-Layer-Variablen + 3–6 Custom-Event-Trigger + GA4-Config/Event-Tags + Conversion-Linker
 - [ ] Google Ads: 3 Conversion-Actions (Reservierung wertbasiert + Dedupe / Rückruf / Anruf), Enhanced Conv. mit `phone`
 - [ ] GA4: `gf_anfrage_submit` + `gf_rueckruf` als Schlüsselereignis
@@ -198,7 +205,7 @@ Hinweise fürs GTM-Wiring:
   (E-Mail/Telefon/Name, §2/§3a — GTM hasht selbst). EC ist kontoweit auf „über GTM verwaltet" gestellt.
 * „Anruf" bewusst **Kategorie Kontakt statt Anruf-Lead**: Die Anruf-Lead-Kategorie erlaubt als Datenquelle nur Telefon-Tracking (Weiterleitungsnummern), keine Website-Events — `phone_click` ist aber ein GTM-Website-Event.
 * Standardwert-Fallback steht auf 1 € (greift nur, wenn der Push kein `value` enthält — passiert laut tracking.ts nie bei den zwei primären).
-* Status im Konto: „Inaktiv/Keine aktuellen Conversions", bis die ersten Events über den GTM-Container feuern. **Loader ist gebaut (§5)** — es fehlt nur noch die **GTM-Container-ID + `NEXT_PUBLIC_GF_GTM_ID` auf der VPS**.
+* Status im Konto: „Inaktiv/Keine aktuellen Conversions", bis die ersten Events über den GTM-Container feuern. **Loader ist gebaut (§5)** — es fehlt nur noch die **GTM-Container-ID + `GF_GTM_ID` auf der VPS**.
 
 > ⚠️ **Flag — Doppelzählung:** `gf_anfrage_submit` (100€) **und** `gf_rueckruf` (25€) können für
 > denselben Lead feuern (Rückruf ist ein Danke-Seite-Add-on). Beide **primär** → eine Person =
