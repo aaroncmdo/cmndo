@@ -1,12 +1,19 @@
 ﻿'use client'
 
-// AAR-344 Pfad A: Self-Service-Komponente zum Ändern der 2FA-Telefonnummer.
+// AAR-344 Pfad A: Self-Service-Komponente zum Einrichten/Ändern der 2FA-Nummer.
 // Zwei-Stufen-UI: Nummer eingeben → SMS-Code bestätigen. Funktioniert auf
 // admin/gutachter/kunde Profil-Seiten.
+// AAR-939: Läuft jetzt über Supabase-MFA (Phone-Faktor) — enroll(neu) + verify,
+// danach alte Faktoren wegräumen + Anzeige-Nummer syncen.
 
 import { useState, useTransition } from 'react'
 import { ShieldCheckIcon, LoaderIcon, XIcon } from 'lucide-react'
-import { initPhoneChange, confirmPhoneChange } from '@/lib/auth/twofa/change-phone'
+import {
+  enrollePhoneFaktor,
+  verifyPhoneFaktor,
+  entferneAndereFaktoren,
+  merkeTwofaTelefon,
+} from '@/lib/auth/twofa/mfa'
 import { Modal } from '@/components/primitives/Modal'
 
 export function TwoFaPhoneChange({
@@ -20,6 +27,8 @@ export function TwoFaPhoneChange({
   const [step, setStep] = useState<'input' | 'code'>('input')
   const [neuePhone, setNeuePhone] = useState('')
   const [normalized, setNormalized] = useState('')
+  const [factorId, setFactorId] = useState<string | null>(null)
+  const [challengeId, setChallengeId] = useState<string | null>(null)
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -32,6 +41,8 @@ export function TwoFaPhoneChange({
     setStep('input')
     setNeuePhone('')
     setNormalized('')
+    setFactorId(null)
+    setChallengeId(null)
     setCode('')
     setError(null)
     setSuccess(null)
@@ -40,24 +51,34 @@ export function TwoFaPhoneChange({
   function sendCode() {
     setError(null)
     startTransition(async () => {
-      const r = await initPhoneChange(neuePhone)
-      if (!r.success) {
-        setError(r.error ?? 'SMS-Versand fehlgeschlagen')
+      // Legt einen (neuen) Phone-Faktor an + löst die erste SMS aus.
+      const r = await enrollePhoneFaktor(neuePhone)
+      if (!r.ok) {
+        setError(r.error)
         return
       }
-      setNormalized(r.normalized ?? neuePhone)
+      setFactorId(r.factorId)
+      setChallengeId(r.challengeId)
+      setNormalized(neuePhone)
       setStep('code')
     })
   }
 
   function confirm() {
     setError(null)
+    if (!factorId || !challengeId) {
+      setError('Bitte zuerst einen Code anfordern.')
+      return
+    }
     startTransition(async () => {
-      const r = await confirmPhoneChange(normalized, code)
-      if (!r.success) {
-        setError(r.error ?? 'Code ungültig')
+      const r = await verifyPhoneFaktor(factorId, challengeId, code)
+      if (!r.ok) {
+        setError(r.error)
         return
       }
+      // Neuer Faktor verifiziert → alte Nummern wegräumen + Anzeige syncen.
+      await entferneAndereFaktoren(factorId)
+      await merkeTwofaTelefon(normalized)
       setSuccess(`2FA-Nummer geändert auf ${mask(normalized)}`)
       // Modal nach kurzer Zeit schließen + Page refreshen via reload
       setTimeout(() => {

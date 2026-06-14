@@ -4,11 +4,18 @@ import { Button } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
 import type { OnboardingFeld } from '../types'
 
+// AAR-939: Telefon-Verifizierung im Onboarding richtet jetzt direkt einen
+// Supabase-MFA-Phone-Faktor ein (Entscheidung Aaron: verifizieren = 2FA-an).
+// Ablauf: Nummer eingeben -> enroll+SMS -> Code -> verify (Session aal2) ->
+// alte Faktoren wegräumen + Anzeige-Nummer syncen.
+
 export function PhoneVerifyField({ feld, value, onChange, disabled }: {
   feld: OnboardingFeld; value: string; onChange: (v: string) => void; disabled?: boolean
 }) {
   const [telefon, setTelefon] = useState('')
   const [code, setCode] = useState('')
+  const [factorId, setFactorId] = useState<string | null>(null)
+  const [challengeId, setChallengeId] = useState<string | null>(null)
   const [phase, setPhase] = useState<'eingabe' | 'code' | 'fertig'>(value ? 'fertig' : 'eingabe')
   const [fehler, setFehler] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
@@ -17,19 +24,25 @@ export function PhoneVerifyField({ feld, value, onChange, disabled }: {
     setFehler(null)
     if (telefon.trim().length < 5) { setFehler('Bitte eine gültige Telefonnummer eingeben.'); return }
     startTransition(async () => {
-      const { requestPhoneVerification } = await import('@/lib/auth/twofa/send-code')
-      const res = await requestPhoneVerification(telefon.trim())
-      if (!res.success) { setFehler(res.error ?? 'Code konnte nicht gesendet werden.'); return }
+      const { enrollePhoneFaktor } = await import('@/lib/auth/twofa/mfa')
+      const res = await enrollePhoneFaktor(telefon.trim())
+      if (!res.ok) { setFehler(res.error); return }
+      setFactorId(res.factorId)
+      setChallengeId(res.challengeId)
       setPhase('code')
     })
   }
   function bestaetigen() {
     setFehler(null)
-    if (code.trim().length < 4) { setFehler('Bitte den 6-stelligen Code eingeben.'); return }
+    if (code.trim().length < 6) { setFehler('Bitte den 6-stelligen Code eingeben.'); return }
+    if (!factorId || !challengeId) { setFehler('Bitte zuerst einen Code anfordern.'); return }
     startTransition(async () => {
-      const { confirmPhoneVerification } = await import('@/lib/auth/twofa/verify-code')
-      const res = await confirmPhoneVerification(telefon.trim(), code.trim())
-      if (!res.success) { setFehler(res.error ?? 'Code ungültig.'); return }
+      const { verifyPhoneFaktor, entferneAndereFaktoren, merkeTwofaTelefon } = await import('@/lib/auth/twofa/mfa')
+      const res = await verifyPhoneFaktor(factorId, challengeId, code.trim())
+      if (!res.ok) { setFehler(res.error); return }
+      // Genau einen Faktor behalten + Anzeige-Nummer syncen.
+      await entferneAndereFaktoren(factorId)
+      await merkeTwofaTelefon(telefon.trim())
       try {
         const { checkAndCacheAvailability } = await import('@/lib/whatsapp/availability')
         const { createClient } = await import('@/lib/supabase/client')

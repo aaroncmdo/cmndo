@@ -12,6 +12,12 @@ import TwoFactorCodeEmail, {
 
 // AAR-494: Email-OTP senden als alternative 2FA-Methode.
 //
+// AAR-939 STATUS: Mit der Umstellung auf Supabase-Phone-MFA hat dieser Pfad
+// aktuell KEINE Consumer mehr (das Login-2FA läuft über supabase.auth.mfa, der
+// Soft-Enroll nutzt einen Skip statt eines Email-Escapes). Bewusst RETAINED für
+// ein Folge-Ticket „Email-OTP retire" (inkl. DROP email_otp_codes) — nicht
+// gelöscht, weil das Table-Drop DDL ist und separat entschieden wird.
+//
 // Rate-Limit: max. 3 Codes pro Stunde und Nutzer (verhindert Versand-Missbrauch
 // und schützt unsere Resend-Quota).
 // Code: 6 Ziffern, sha256-gehasht in email_otp_codes, 5 Min Gültigkeit.
