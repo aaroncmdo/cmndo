@@ -4,6 +4,7 @@ import { getDecoder, getDecoderSlugs } from '@/lib/decoders'
 import { siteGraph, decoderGraph } from '@/lib/jsonld'
 import { JsonLd } from '@/components/JsonLd'
 import { DecoderArticle } from '@/components/decoder/DecoderArticle'
+import { metaTitle } from '@/lib/meta'
 
 export const dynamicParams = false
 
@@ -21,7 +22,7 @@ export async function generateMetadata({
   if (!d) return {}
   const url = `/versicherer-decoder/${d.slug}`
   return {
-    title: d.title,
+    title: metaTitle(d.title),
     description: d.metaDesc,
     alternates: { canonical: url },
     openGraph: { type: 'article', url, title: d.title, description: d.metaDesc },

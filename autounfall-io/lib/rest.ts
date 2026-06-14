@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { restPages } from '@/content/rest-pages'
 import type { RestPage } from '@/lib/rest-types'
+import { metaTitle } from '@/lib/meta'
 
 // Loader fuer die WP-7-Seiten. Routing-Strategie (kollisionsfrei zu WP-2 `[article]`):
 //  - flache statische Segmente (Pillars + Master-Hubs + flache hub-sf): route mit
@@ -46,7 +47,7 @@ export function restMetadata(route: string): Metadata {
   const page = getRestPage(route)
   if (!page) return {}
   return {
-    title: page.title,
+    title: metaTitle(page.title),
     description: page.description,
     alternates: { canonical: route },
     openGraph: {
