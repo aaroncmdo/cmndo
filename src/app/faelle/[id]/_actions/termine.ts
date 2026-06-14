@@ -34,17 +34,17 @@ export async function createKbVideoterminByKb(
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
   // -> via claim_id aus claims nested embed laden statt aus faelle.
   const db = createAdminClient()
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat). vcf.id=claim_id (für den Termin-Insert);
+  // kundenbetreuer_id claims-SSoT; kunde_id/lead_id div=0.
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, kunde_id, lead_id, claim_id, claims:claim_id(kundenbetreuer_id)')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('id, kunde_id, lead_id, kundenbetreuer_id')
+    .eq('fall_id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-
   // KB-ID: primär der zugewiesene KB, fallback auf den einloggenden User
-  const kbId = (fallClaim?.kundenbetreuer_id as string | null) ?? user.id
+  const kbId = (fall.kundenbetreuer_id as string | null) ?? user.id
 
   const startZeit = new Date(startZeitIso)
   if (isNaN(startZeit.getTime())) return { success: false, error: 'Ungültige Startzeit' }
@@ -76,7 +76,7 @@ export async function createKbVideoterminByKb(
     .from('gutachter_termine')
     .insert({
       fall_id: fallId,
-      claim_id: fall.claim_id,
+      claim_id: fall.id,
       kb_id: kbId,
       typ: 'kb_beratung',
       kanal,
@@ -143,15 +143,15 @@ export async function createTermin(
   // AAR-95: Fall + Kunde-Email + KB-Email
   // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
   // -> via claim_id aus claims nested embed laden statt aus faelle.
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat). kundenbetreuer_id/claim_nummer claims-SSoT.
   const { data: fall } = await supabase
-    .from('faelle')
-    .select('kunde_id, lead_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('kunde_id, lead_id, kundenbetreuer_id, claim_nummer')
+    .eq('fall_id', fallId)
     .single()
   if (!fall) return { success: false, error: 'Fall nicht gefunden' }
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const kbUserId = (fallClaim?.kundenbetreuer_id as string | null) ?? user.id
+  const kbUserId = (fall.kundenbetreuer_id as string | null) ?? user.id
 
   let meetLink: string | null = null
   let googleEventId: string | null = null
@@ -188,7 +188,7 @@ export async function createTermin(
         kbEmail: kbProfile.email,
         kundeEmail,
         kundeName,
-        fallNummer: (fallClaim?.claim_nummer as string | null) ?? fallId.slice(0, 8),
+        fallNummer: (fall.claim_nummer as string | null) ?? fallId.slice(0, 8),
         startISO: data.datum,
         dauerMinuten: data.dauer_minuten,
         beschreibung: data.notiz,
