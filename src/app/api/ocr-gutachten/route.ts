@@ -183,6 +183,28 @@ export async function POST(request: Request) {
 
     const claimId = fallRow?.claim_id ?? null
 
+    // CMM-68: fin_vin gehoert auf vehicles (Gutachten-OCR war eine Luecke — schrieb faelle.fin_vin,
+    // aber nie vehicles; analog zur ocr-fahrzeugschein-Luecke in #2818). FIN -> dedup-Row via RPC +
+    // claims.vehicle_id verlinken (FIN ist autoritativ -> Merge auf bestehendes Fahrzeug). Additiv,
+    // non-critical: der faelle.fin_vin-Write oben bleibt vorerst (Retire = Phase-B-Write-Cutover).
+    if (fin_vin && claimId) {
+      try {
+        const { ensureVehicleFromFin } = await import('@/lib/vehicles/ensure-vehicle')
+        const veh = await ensureVehicleFromFin({
+          fin: fin_vin,
+          snapshot: { finQuelle: 'gutachten_ocr', finExtrahiertAm: new Date().toISOString() },
+          db: admin,
+        })
+        if (veh.ok) {
+          await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+        } else {
+          console.warn('[CMM-68] ocr-gutachten vehicles (FIN):', veh.error)
+        }
+      } catch (err) {
+        console.error('[CMM-68] ocr-gutachten vehicles-Write fehlgeschlagen (non-fatal):', err)
+      }
+    }
+
     // CMM-44 SP-B PR2c: schadens_hoehe_netto auf claims schreiben (SSoT).
     if (claimId && schadenhoehe_netto != null) {
       const { error: claimOcrErr } = await admin
