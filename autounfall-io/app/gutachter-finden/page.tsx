@@ -3,7 +3,8 @@ import { Suspense } from 'react'
 import { JsonLd } from '@/components/JsonLd'
 import { siteGraph } from '@/lib/jsonld'
 import { LeadFormClient } from '@/components/lead/LeadFormClient'
-import { GutachterFinderEmbedPlaceholder } from '@/components/placeholders/GutachterFinderEmbedPlaceholder'
+import { FinderMap } from '@/components/finder/FinderMap'
+import { ladeFinderPins, type FinderPins } from '@/lib/finder/pins'
 
 // WP-6 · Lead-Formular. Löst die /gutachter-finden-CTAs aus WP-2/3/4/5/7 ein
 // (vorher transiente 404). Anfrage → Server Action submitAutounfallLead →
@@ -15,6 +16,9 @@ export const metadata: Metadata = {
   alternates: { canonical: '/gutachter-finden' },
 }
 
+// SV-Pins aendern sich selten -> ISR (1h gecached, kein force-dynamic-Perf-Hit).
+export const revalidate = 3600
+
 const TRUST = [
   'Unabhängige, BVSK-orientierte Sachverständige',
   'Bei Fremdverschulden kostenfrei (§ 249 BGB)',
@@ -22,7 +26,14 @@ const TRUST = [
   'Keine Verpflichtung, keine versteckten Kosten',
 ]
 
-export default function GutachterFindenPage() {
+export default async function GutachterFindenPage() {
+  // Footprint-safe: Pins server-seitig aus der geteilten Supabase (nur anon Felder).
+  let pins: FinderPins = { deadPins: [], aktiveSVs: [] }
+  try {
+    pins = await ladeFinderPins()
+  } catch {
+    // Supabase-Hiccup -> Karte leer; das Lead-Formular unten bleibt voll nutzbar.
+  }
   return (
     <>
       <JsonLd data={siteGraph()} />
@@ -54,12 +65,14 @@ export default function GutachterFindenPage() {
           </ul>
         </header>
 
+        {/* Native, footprint-safe Finder-Karte (au.io-gebrandet, anonyme SV-Pins aus
+            der geteilten Supabase). Pin-Klick -> Ort-Prefill + SV-Praeferenz im Formular. */}
+        <FinderMap deadPins={pins.deadPins} aktiveSVs={pins.aktiveSVs} />
+
         {/* useSearchParams (?ref=/?utm_*) braucht eine Suspense-Grenze (Next 16). */}
         <Suspense fallback={null}>
           <LeadFormClient />
         </Suspense>
-
-        <GutachterFinderEmbedPlaceholder />
 
         <p className="mt-6 text-xs leading-relaxed text-au-muted">
           Ihre Daten werden ausschließlich zur Bearbeitung dieser Anfrage und zur Vermittlung

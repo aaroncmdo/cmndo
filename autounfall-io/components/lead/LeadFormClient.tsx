@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useRef, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { submitAutounfallLead, type SubmitLeadResult } from '@/app/gutachter-finden/actions'
 import { trackCtaClick, trackFormStart, trackLeadSubmit } from '@/lib/track'
 
@@ -34,6 +34,24 @@ export function LeadFormClient() {
   const [pending, startTransition] = useTransition()
   const [result, setResult] = useState<SubmitLeadResult | null>(null)
   const startedRef = useRef(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const plzRef = useRef<HTMLInputElement>(null)
+  // SV-Praeferenz aus einem Karten-Pin-Klick (FinderMap dispatcht 'auio:finder-select').
+  const [svId, setSvId] = useState('')
+
+  useEffect(() => {
+    function onSelect(e: Event) {
+      const detail = (e as CustomEvent<{ svId?: string; stadt?: string }>).detail
+      if (detail?.svId) setSvId(detail.svId)
+      // Ort vorbefuellen, wenn das Feld noch leer ist (bestehende Eingabe nie ueberschreiben).
+      if (plzRef.current && detail?.stadt && !plzRef.current.value.trim()) {
+        plzRef.current.value = detail.stadt
+      }
+      formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+    window.addEventListener('auio:finder-select', onSelect)
+    return () => window.removeEventListener('auio:finder-select', onSelect)
+  }, [])
 
   // Funnel-Start: erste Interaktion mit dem Formular (einmal pro Mount).
   function onFormFirstInteract() {
@@ -78,7 +96,7 @@ export function LeadFormClient() {
   const fieldError = (f: string) => (result && !result.ok && result.field === f ? result.error : null)
 
   return (
-    <form onSubmit={onSubmit} onFocus={onFormFirstInteract} noValidate data-clarity-mask="true" className="rounded-ios-md border border-au-sand-dark bg-au-surface p-6 sm:p-8">
+    <form ref={formRef} onSubmit={onSubmit} onFocus={onFormFirstInteract} noValidate data-clarity-mask="true" className="rounded-ios-md border border-au-sand-dark bg-au-surface p-6 sm:p-8">
       {/* Hidden-Kontext aus ?query (UTM/ref/schadenstyp) */}
       <input type="hidden" name="ref" value={ref} />
       <input type="hidden" name="utm_source" value={sp.get('utm_source') ?? ''} />
@@ -86,6 +104,8 @@ export function LeadFormClient() {
       <input type="hidden" name="utm_campaign" value={sp.get('utm_campaign') ?? ''} />
       <input type="hidden" name="utm_term" value={sp.get('utm_term') ?? ''} />
       <input type="hidden" name="utm_content" value={sp.get('utm_content') ?? ''} />
+      {/* SV-Praeferenz aus Karten-Pin-Klick (optional, weiche Zuordnung im Payload) */}
+      <input type="hidden" name="zugeordneter_sv_id" value={svId} />
 
       <div className="space-y-4">
         <div>
@@ -108,7 +128,7 @@ export function LeadFormClient() {
             <label htmlFor="lf-plz" className={labelCls}>
               Ort oder PLZ
             </label>
-            <input id="lf-plz" name="plz_oder_stadt" type="text" autoComplete="address-level2" required placeholder="z. B. 50670 Köln" className={fieldCls} />
+            <input ref={plzRef} id="lf-plz" name="plz_oder_stadt" type="text" autoComplete="address-level2" required placeholder="z. B. 50670 Köln" className={fieldCls} />
             {fieldError('plz_oder_stadt') ? <p className="mt-1 text-sm text-au-danger">{fieldError('plz_oder_stadt')}</p> : null}
           </div>
         </div>
