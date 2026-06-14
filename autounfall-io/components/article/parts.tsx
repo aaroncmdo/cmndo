@@ -8,6 +8,11 @@ import { SITE } from '@/lib/site'
 
 // Markdown-Renderer (RSC): interne /-Links → next/link, externe → neuer Tab.
 const mdComponents: Components = {
+  // Defekt-8 (Bing-Site-Scan 14.06.): Body-Markdown mit fuehrendem „# …" rendert
+  // sonst ein ZWEITES <h1> neben dem Seitentitel-<h1> (betraf 14 Cluster-Sub-
+  // Artikel: /wbw-* + /schmerzensgeld-*). In-Body-„#" auf <h2> demoten -> genau
+  // ein <h1> pro Seite. *.generated.ts (Markdown) bleibt unberuehrt.
+  h1: ({ node, ...props }) => <h2 {...props} />,
   a({ href, children }) {
     const url = href ?? '#'
     if (url.startsWith('/')) return <Link href={url}>{children}</Link>
