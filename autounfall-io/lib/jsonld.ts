@@ -17,23 +17,27 @@ const WEBSITE_ID = `${SITE.url}/#website`
 
 /** Betreiber / publisher / author-Affiliation — nur Kitta & Sprafke UG. */
 export function organizationSchema(): JsonLdNode {
-  return {
+  const node: JsonLdNode = {
     '@type': 'Organization',
     '@id': ORG_ID,
     name: SITE.publisher.name,
     url: SITE.url,
     logo: `${SITE.url}/favicon.svg`,
   }
+  // sameAs nur emittieren, wenn geclaimte Profile vorhanden sind (omit-if-empty).
+  const sameAs = [...SITE.publisher.sameAs]
+  if (sameAs.length > 0) node.sameAs = sameAs
+  return node
 }
 
-/** Partnerkanzlei — #legal-reviewer bleibt benannt (Aaron-Entscheidung 2026-05-23). */
+/** #legal-reviewer — generische Verkehrsrechts-Partnerkanzlei (UNBENANNT,
+ *  Cowork 2026-06-12). reviewedBy in Article/Decoder referenziert weiter diese @id. */
 export function legalReviewerSchema(): JsonLdNode {
   return {
     '@type': 'Organization',
     '@id': LEGAL_REVIEWER_ID,
     name: SITE.legalReviewer.name,
-    url: SITE.legalReviewer.url,
-    description: 'Partnerkanzlei für Verkehrsrecht.',
+    description: 'Verkehrsrechts-Partnerkanzlei (fachliche Begleitung).',
     areaServed: 'DE',
   }
 }

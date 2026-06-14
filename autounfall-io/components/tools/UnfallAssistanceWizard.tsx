@@ -10,11 +10,12 @@ import { trackToolComplete } from '@/lib/track'
 // Route-bewusst (?context= / ?ref=), in-memory State (die Vorlage nutzt KEIN
 // localStorage). Dev-Kontext-Switcher (Prototyp-only) entfernt.
 //
-// STANDALONE-Override (gilt über allem): die Footprint-Telefon-/WhatsApp-Nummer
-// 0221 25906530 (kfzgutachter-Nummer) wird NICHT portiert — sie würde au.io
-// öffentlich mit Claimondo verknüpfen (siehe site.ts: SITE.phone=null, und
-// ArticleCta ohne tel/WA). Entfernte CTAs: alle „Anrufen“-tel + die wa.me/4922…-
-// WhatsApp. Die nummernlose Teilen-WhatsApp (wa.me/?text=…autounfall.io) bleibt.
+// STANDALONE-Override (gilt über allem): die Telefon-/WhatsApp-Nummer
+// 0221 25906530 wird im Wizard NICHT als CTA portiert — Anruf-/WhatsApp-CTAs
+// bleiben aus dem Conversion-Funnel (auch ArticleCta ohne tel/WA). Die Nummer
+// selbst steht seit der LexDrive-Freigabe 12.06.2026 im Impressum/Datenschutz
+// (site.ts: SITE.phone gesetzt). Entfernte CTAs: alle „Anrufen“-tel + die
+// wa.me/4922…-WhatsApp. Die nummernlose Teilen-WhatsApp (wa.me/?text=…) bleibt.
 //
 // hrefs auf Next-Routen umgeschrieben (transienter 404 für /gutachter-finden WP-6
 // und Hub-Routen WP-7 — bewusst, wie WP-2/3-Cross-Links).
@@ -141,12 +142,12 @@ function planFor(state: Answers): Plan {
       lead: 'Hier geht es nicht um Schadensersatz für Sie, sondern um Schadensbegrenzung — und darum, dem Geschädigten eine saubere Regulierung zu ermöglichen (das senkt Ihr Regress-Risiko).',
       steps: [
         'Prüfe, ob sich Selbstzahlung lohnt — der SF-Rechner unten zeigt die Größenordnung.',
-        'Bei Fahrerflucht zählt das 24h-Fenster: hol Ihnen früh eine anwaltliche Einschätzung (LexDrive).',
+        'Bei Fahrerflucht zählt das 24h-Fenster: hol Ihnen früh eine anwaltliche Einschätzung.',
         'Informiere den Geschädigten — per WhatsApp-Brücke weiß er sofort, was ihm zusteht.',
       ],
       ctas: [
         ['SF-Rückstufung prüfen', '#calc', 'prim'],
-        ['LexDrive-Erstberatung', 'https://lex-drive.com', 'ghost'],
+        ['Anwaltliche Erstberatung', '/gutachter-finden', 'ghost'],
         ['Geschädigten per WhatsApp informieren', WA_SHARE, 'ghost'],
       ],
       weiter: 'Weiterlesen: <a href="/schadenfreiheitsklasse">SF-Klasse & Rückstufung</a>',
@@ -160,10 +161,10 @@ function planFor(state: Answers): Plan {
       steps: [
         'Prüfe, welche Position gekürzt wurde (Verbringungskosten, UPE-Aufschläge, Stundensatz, Nutzungsausfall).',
         'Hol Ihnen das passende BGH-Argument als Beleg.',
-        'Bei hartnäckiger Kürzung: LexDrive schreibt das für Sie — bei Fremdverschulden ohne Kostenrisiko.',
+        'Bei hartnäckiger Kürzung: unsere Verkehrsrechts-Partnerkanzlei schreibt das für Sie — bei Fremdverschulden ohne Kostenrisiko.',
       ],
       ctas: [
-        ['Anwalt einschalten (LexDrive)', 'https://lex-drive.com', 'prim'],
+        ['Anwalt einschalten', '/gutachter-finden', 'prim'],
         ['Kürzungs-Checker öffnen', '/kuerzungs-checker', 'ghost'],
       ],
       weiter: 'Weiterlesen: <a href="/werkstattrisiko-bgh-2024">Werkstattrisiko (BGH 2024)</a>',
@@ -176,11 +177,11 @@ function planFor(state: Answers): Plan {
       steps: [
         'Ärztliche Dokumentation sichern (auch verzögerte Beschwerden).',
         'Schmerzensgeld grob einordnen (Schätzer unten).',
-        'Anwalt einschalten — Personenschaden gehört in fachkundige Hände (LexDrive).',
+        'Anwalt einschalten — Personenschaden gehört in fachkundige Hände.',
       ],
       ctas: [
         ['Schmerzensgeld schätzen', '#calc', 'prim'],
-        ['Anwalt (LexDrive)', 'https://lex-drive.com', 'ghost'],
+        ['Anwalt einschalten', '/gutachter-finden', 'ghost'],
       ],
       weiter: 'Weiterlesen: <a href="/schmerzensgeld-hws-schleudertrauma">HWS / Schleudertrauma</a>',
       calc: 'schmerzensgeld',
@@ -210,9 +211,9 @@ function planFor(state: Answers): Plan {
       steps: [
         'Frist beachten: Einspruch meist binnen 2 Wochen.',
         'Bescheid prüfen lassen — ob sich ein Einspruch lohnt.',
-        'LexDrive übernimmt die Prüfung und den Einspruch.',
+        'Unsere Verkehrsrechts-Partnerkanzlei übernimmt die Prüfung und den Einspruch.',
       ],
-      ctas: [['Bußgeld prüfen lassen (LexDrive)', 'https://lex-drive.com', 'prim']],
+      ctas: [['Bußgeld prüfen lassen', '/gutachter-finden', 'prim']],
       weiter: '',
     }
   }
@@ -663,11 +664,7 @@ export function UnfallAssistanceWizard() {
 
       <p className="mt-4 text-[13px] leading-relaxed text-au-muted">
         Keine Rechtsberatung; Schätzwerte sind Richtwerte (§249/§253 BGB, „vorbehaltlich
-        Anerkenntnis“). Rechtlich begleitet durch{' '}
-        <a href="https://lex-drive.com" rel="noopener" target="_blank" className="font-semibold text-au-amber-dark underline">
-          LexDrive UG
-        </a>
-        .
+        Anerkenntnis“). Rechtlich begleitet durch unsere Verkehrsrechts-Partnerkanzlei.
       </p>
     </div>
   )
@@ -744,11 +741,7 @@ function Result({ answers, onReset }: { answers: Answers; onReset: () => void })
       ) : null}
       <div className="mt-4 border-t border-au-sand-dark pt-3 text-[13px] leading-relaxed text-au-muted">
         Erste Orientierung, keine Rechtsberatung. Kostenübernahme „bei unverschuldetem Unfall“
-        vorbehaltlich Anerkenntnis durch die gegnerische Versicherung. Geprüft durch{' '}
-        <a href="https://lex-drive.com" rel="noopener" target="_blank" className="font-semibold text-au-amber-dark underline">
-          LexDrive UG
-        </a>
-        .
+        vorbehaltlich Anerkenntnis durch die gegnerische Versicherung. Geprüft durch unsere Verkehrsrechts-Partnerkanzlei.
         <div className="mt-2">
           <button type="button" className={backBtn} onClick={onReset}>
             ↺ Von vorn

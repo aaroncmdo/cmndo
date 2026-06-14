@@ -11,8 +11,12 @@ export const SITE = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://autounfall.io',
   locale: 'de_DE',
   lang: 'de',
-  /** Cookieloses Analytics. KEIN GA4/Google-Ads/Clarity. */
+  /** Analytics: Plausible (cookielos, immer aktiv) + Microsoft Clarity (Opt-out,
+   *  Art. 6 Abs. 1 lit. f). KEIN GA4/Google-Ads. */
   plausibleDomain: process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'autounfall.io',
+  /** Clarity-Projekt-ID (public, kein Secret). Override via Env; oeffentliche ID
+   *  als Default, damit Clarity im Opt-out-Modell ohne Extra-Config laedt. */
+  clarityProjectId: process.env.NEXT_PUBLIC_CLARITY_PROJECT_ID ?? 'x5ty9kh510',
 
   /** Betreiber / publisher / author-Affiliation — ausschliesslich diese Entitaet. */
   publisher: {
@@ -23,22 +27,26 @@ export const SITE = {
     city: 'Köln',
     country: 'Deutschland',
     managingDirectors: 'Aaron Sprafke, Nicolas Kitta',
+    /** Verifizierte, geclaimte Unternehmensprofile (Organization sameAs). Nur real
+     *  existierende Profile — kein X/YouTube (nicht angelegt), kein claimondo.de. */
+    sameAs: [
+      'https://www.linkedin.com/company/autounfall-io',
+      'https://www.crunchbase.com/organization/autounfall-io',
+      'https://www.startbase.de/organization/autounfall-io',
+    ],
   },
 
-  /** Partnerkanzlei — Aaron-Entscheidung: LexDrive bleibt benannt (#legal-reviewer). */
+  /** Verkehrsrechts-Partnerkanzlei — bewusst UNBENANNT (Cowork 2026-06-12,
+   *  ueberschreibt „LexDrive bleibt benannt"). Singular, real = 1 Kanzlei. */
   legalReviewer: {
-    name: 'LexDrive UG',
-    url: 'https://lex-drive.com',
+    name: 'Verkehrsrechts-Partnerkanzlei',
   },
 
-  // TODO(Aaron): eigene autounfall.io-Telefonnummer nachliefern. `0221 25906530`
-  // ist eine kfzgutachter-Nummer (Footprint) → bis dahin KEINE Nummer hart
-  // eintragen. Default null = Platzhalter (nichts rendern).
-  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? null,
-  // TODO(Aaron): eigene autounfall.io-Kontakt-Mail. `aaron.sprafke@claimondo.de`
-  // ist ein claimondo.de-Footprint (verlinkt au.io <-> Claimondo oeffentlich) →
-  // bis dahin null = Platzhalter. Vor Go-Live setzen (NEXT_PUBLIC_SITE_EMAIL).
-  contactEmail: process.env.NEXT_PUBLIC_SITE_EMAIL ?? null,
+  // Telefon 0221 25906530 bleibt (Entscheidung Aaron/LexDrive 12.06.2026).
+  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0221 25906530',
+  // Kontakt-Mail team@autounfall.io (LexDrive-Freigabe 12.06.2026). Postfach muss
+  // operativ vor Go-Live aktiv sein. Override via NEXT_PUBLIC_SITE_EMAIL.
+  contactEmail: process.env.NEXT_PUBLIC_SITE_EMAIL ?? 'team@autounfall.io',
 } as const
 
 export type SiteConfig = typeof SITE

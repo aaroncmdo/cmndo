@@ -173,11 +173,7 @@ export default async function PseoPage({
               Wer mit guter Aktenlage (Sachverständigen-Gutachten + Zeugen + Polizeibericht) arbeitet,
               setzt sich gegen Versicherungs-Kürzungen wesentlich besser durch.
             </strong>{' '}
-            Anwalt einschalten über{' '}
-            <a href="https://lex-drive.com" rel="noopener" target="_blank">
-              LexDrive UG
-            </a>{' '}
-            verfügbar bei strittigen Quoten.
+            Anwalt einschalten über unsere Verkehrsrechts-Partnerkanzlei verfügbar bei strittigen Quoten.
           </p>
 
           <h2>Sachverständige in {city.name} finden</h2>
@@ -249,12 +245,8 @@ export default async function PseoPage({
         </section>
 
         <p className="mt-6 border-l-4 border-au-amber pl-4 text-sm italic text-au-ink-soft">
-          In Partnerschaft mit{' '}
-          <a href="https://lex-drive.com" rel="noopener" target="_blank" className="font-semibold text-au-ink underline">
-            LexDrive UG
-          </a>{' '}
-          · Partnerkanzlei für Verkehrsrecht. Stand: Mai 2026. Keine individuelle Rechtsberatung — bei
-          konkreten Fragen Anwalt konsultieren.
+          In Zusammenarbeit mit unserer Verkehrsrechts-Partnerkanzlei. Stand: Juni 2026. Keine
+          individuelle Rechtsberatung — bei konkreten Fragen Anwalt konsultieren.
         </p>
       </article>
 

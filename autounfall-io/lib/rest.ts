@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { restPages } from '@/content/rest-pages.generated'
+import { restPages } from '@/content/rest-pages'
 import type { RestPage } from '@/lib/rest-types'
 
 // Loader fuer die WP-7-Seiten. Routing-Strategie (kollisionsfrei zu WP-2 `[article]`):

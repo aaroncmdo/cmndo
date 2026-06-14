@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { SF_PROVIDERS, DEFAULT_BASE_PREMIUM_EUR, type SfProvider } from '@/lib/tools/sf-versicherer'
-import { trackToolComplete } from '@/lib/track'
+import { trackCtaClick, trackToolComplete } from '@/lib/track'
 
 // SF-Rückstufungs-Rechner v2 (versicherer-spezifisch) · 1:1 portiert aus
 // assets-autounfall/sf-rueckstufungs-rechner-widget.js. State in localStorage
@@ -334,6 +334,7 @@ function ResultView({ r, providerSlug }: { r: Result; providerSlug: string }) {
       <Link
         href={`/gutachter-finden?ref=sf-rechner&provider=${providerSlug}`}
         className="mt-3.5 inline-flex items-center gap-2 rounded-ios-sm bg-au-amber px-[18px] py-3 text-[15px] font-bold text-au-surface transition-opacity hover:opacity-90"
+        onClick={() => trackCtaClick('sf-rechner')}
       >
         Sachverständigen-Termin anfragen →
       </Link>
