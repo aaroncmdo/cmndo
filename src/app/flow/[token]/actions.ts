@@ -170,17 +170,17 @@ export async function notifyNeuerFall(fallId: string) {
   const supabase = await createClient()
 
   // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
+  // CMM-49 (faelle-Drop-Runway): claim_nummer/schadens_ursache flach aus v_claim_full (faelle-frei).
   const { data: fall } = await supabase
-    .from('faelle')
-    .select('claims:claim_id(claim_nummer, schadens_ursache)')
-    .eq('id', fallId)
-    .single()
+    .from('v_claim_full')
+    .select('claim_nummer, schadens_ursache')
+    .eq('fall_id', fallId)
+    .maybeSingle()
 
   if (!fall) return
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const fallNr = fallClaim?.claim_nummer ?? fallId.slice(0, 8)
-  const schadensart = (fallClaim?.schadens_ursache as string | null) ?? 'Unbekannt'
+  const fallNr = fall.claim_nummer ?? fallId.slice(0, 8)
+  const schadensart = (fall.schadens_ursache as string | null) ?? 'Unbekannt'
 
   const { data: admins } = await supabase
     .from('profiles')
@@ -301,7 +301,7 @@ export async function createKundeAccount(
     //    Defensive Check: kunde_id muss tatsächlich auf einen rolle='kunde'-
     //    Account zeigen, sonst nicht anfassen.
     const { data: existingFall } = await admin
-      .from('faelle').select('kunde_id').eq('id', fallId).maybeSingle()
+      .from('v_claim_full').select('kunde_id').eq('fall_id', fallId).maybeSingle()
     if (existingFall?.kunde_id) {
       const { data: linkedProfile } = await admin
         .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
@@ -398,13 +398,17 @@ async function finalizeKundeSetup(
   // de→en-Wahl des Kunden auf den neuen Lead-Wert zurücksetzen würde.
   // Non-fatal: ein Fehler hier darf die Account-Erstellung nicht brechen.
   try {
+    // CMM-49 (faelle-Drop-Runway): lead_id via v_claim_full (faelle-frei), dann leads.sprache.
     const { data: spracheRow } = await admin
-      .from('faelle')
-      .select('leads!faelle_lead_id_fkey(sprache)')
-      .eq('id', fallId)
+      .from('v_claim_full')
+      .select('lead_id')
+      .eq('fall_id', fallId)
       .maybeSingle()
-    const sRaw = (spracheRow as { leads: unknown } | null)?.leads
-    const leadRow = (Array.isArray(sRaw) ? sRaw[0] : sRaw) as { sprache?: string | null } | null
+    let leadRow: { sprache?: string | null } | null = null
+    if (spracheRow?.lead_id) {
+      const { data: lr } = await admin.from('leads').select('sprache').eq('id', spracheRow.lead_id).maybeSingle()
+      leadRow = lr as { sprache?: string | null } | null
+    }
     const leadSprache = normalizeToLocale(leadRow?.sprache)
     if (leadSprache) {
       await admin
@@ -474,12 +478,18 @@ async function finalizeKundeSetup(
   // AAR-125: Lead laden für conditional Polizeibericht
   // AAR-607 A3: .single() throwed bei 0 Rows + leadDocs=null Propagation zu
   // createPflichtdokumenteFromKatalog war Silent-Fail-Pfad.
-  const { data: leadForDocs } = await admin
-    // AAR-658: faelle→leads ist mehrdeutig (lead_id + konvertiert_von_lead),
-    // FK-Hint nötig sonst liefert PostgREST PGRST201 und leadDocs=null.
-    .from('faelle').select('lead_id, leads!faelle_lead_id_fkey(polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall)').eq('id', fallId).maybeSingle()
-  const lRaw = (leadForDocs as { leads: unknown } | null)?.leads
-  const leadDocs = (Array.isArray(lRaw) ? lRaw[0] : lRaw) as Record<string, unknown> | null
+  // CMM-49 (faelle-Drop-Runway): lead_id via v_claim_full (faelle-frei), dann Lead-Doc-Flags via leads.
+  const { data: docsFallRow } = await admin.from('v_claim_full').select('lead_id').eq('fall_id', fallId).maybeSingle()
+  const docsLeadId = (docsFallRow?.lead_id as string | null) ?? null
+  let leadDocs: Record<string, unknown> | null = null
+  if (docsLeadId) {
+    const { data: ld } = await admin
+      .from('leads')
+      .select('polizei_vor_ort, polizeibericht_pflicht, polizeibericht_status, personenschaden_flag, hat_vorschaeden, zb1_status, service_typ, wa_gesendet, mietwagen_flag, nutzungsausfall')
+      .eq('id', docsLeadId)
+      .maybeSingle()
+    leadDocs = ld as Record<string, unknown> | null
+  }
   if (!leadDocs) {
     console.warn('[finalizeKundeSetup] Lead-Relation für Fall', fallId, 'nicht gefunden — Pflichtdokumente-Katalog übersprungen')
   } else {
@@ -488,7 +498,7 @@ async function finalizeKundeSetup(
     // anwenden — Kunde soll nicht „X fehlen" sehen für Dokumente die schon
     // im Lead waren.
     try {
-      const leadId = (leadForDocs as { lead_id: string | null } | null)?.lead_id
+      const leadId = docsLeadId
       if (leadId) {
         const { syncLeadDokumenteAnPflicht } = await import('@/lib/dokumente/sync-lead-zu-pflicht')
         const { data: leadFull } = await admin
@@ -868,7 +878,7 @@ export async function signSAandCreateFall(
     const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
     const empfaenger: Array<{ id: string; rolle: 'admin' | 'sachverstaendiger' }> = []
     if (lead.zugewiesen_an) empfaenger.push({ id: lead.zugewiesen_an as string, rolle: 'admin' })
-    const { data: fallSv } = await admin.from('faelle').select('sv_id').eq('id', fall.id).single()
+    const { data: fallSv } = await admin.from('v_claim_full').select('sv_id').eq('fall_id', fall.id).single()
     if (fallSv?.sv_id) {
       const { data: svP } = await admin.from('sachverstaendige').select('profile_id').eq('id', fallSv.sv_id).single()
       if (svP?.profile_id) empfaenger.push({ id: svP.profile_id, rolle: 'sachverstaendiger' })
@@ -1277,9 +1287,9 @@ export async function signSAandCreateFall(
           const topSv = candidates?.[0]
           if (topSv?.svId) {
             const { data: currentFall } = await admin
-              .from('faelle')
+              .from('v_claim_full')
               .select('sv_id')
-              .eq('id', fall.id)
+              .eq('fall_id', fall.id)
               .single()
             if (!currentFall?.sv_id) {
               await admin
@@ -1439,19 +1449,19 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
 
   // Fall laden, um service_typ zu prüfen
   // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat). vcf.id = claim_id; service_typ/lead_id flach.
   const { data: fall, error: fallErr } = await admin
-    .from('faelle')
-    .select('id, claim_id, claims:claim_id(service_typ, lead_id)')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('id, service_typ, lead_id')
+    .eq('fall_id', fallId)
     .single()
 
   if (fallErr || !fall) return
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const claimIdForVollmacht = (fall.claim_id as string | null) ?? null
-  const leadIdForVollmacht = (fallClaim?.lead_id as string | null) ?? null
+  const claimIdForVollmacht = (fall.id as string | null) ?? null
+  const leadIdForVollmacht = (fall.lead_id as string | null) ?? null
 
   // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
-  if (((fallClaim?.service_typ as string | null) ?? 'komplett') !== 'komplett') return
+  if (((fall.service_typ as string | null) ?? 'komplett') !== 'komplett') return
 
   // Aktiven Termin finden (status='reserviert')
   const { data: termin, error: terminErr } = await admin
