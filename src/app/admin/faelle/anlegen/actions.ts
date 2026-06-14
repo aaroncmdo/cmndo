@@ -137,6 +137,13 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     if (claimId) {
       const { data: claim } = await db.from('claims').select('claim_nummer').eq('id', claimId).single()
       claimNummer = claim?.claim_nummer ?? null
+      // CMM-68: manuelle Anlage hat keine FIN -> FIN-loser vehicles-Stub + claims.vehicle_id,
+      // damit der vehicles-Write-Path auch hier vollstaendig ist (Kennzeichen aus dem Formular).
+      if (data.kennzeichen?.trim()) {
+        const { ensureVehicleForClaim } = await import('@/lib/vehicles/ensure-vehicle')
+        const veh = await ensureVehicleForClaim({ claimId, snapshot: { kennzeichen: data.kennzeichen.trim() }, db })
+        if (!veh.ok) console.warn('[CMM-68] vehicles-Stub bei manueller Anlage:', veh.error)
+      }
     }
   } catch (err) { console.error('[AAR-811] createClaimForFall (admin-anlegen):', err) }
 

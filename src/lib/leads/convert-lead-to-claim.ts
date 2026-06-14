@@ -30,7 +30,7 @@
 //     RLS-Boundary-übergreifend Lead, Claim, Fall und Profiles anfasst.
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
+import { ensureVehicleFromFin, createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
@@ -145,6 +145,29 @@ export async function convertLeadToClaim(
     })
     if (veh.ok) resolvedVehicleId = veh.vehicleId
     else console.warn('[CMM-50.0] vehicles-Upsert bei Konversion fehlgeschlagen:', veh.error)
+  } else if (!resolvedVehicleId && (lead.kennzeichen || lead.fahrzeug_hersteller || lead.fahrzeug_modell)) {
+    // CMM-68: kein FIN, aber Fahrzeugdaten (Kennzeichen/Hersteller) -> FIN-loser Stub, damit
+    // claims.vehicle_id schon bei Konversion gesetzt ist. Die FIN kommt spaeter (ZB1) und
+    // dedupliziert dann via ensureVehicleFromFin (ein Fahrzeug, mehrere Claims). Non-critical.
+    const veh = await createVehicleStub({
+      snapshot: {
+        kennzeichen: (lead.kennzeichen as string | null) ?? null,
+        hersteller: (lead.fahrzeug_hersteller as string | null) ?? null,
+        modell: (lead.fahrzeug_modell as string | null) ?? null,
+        hsn: (lead.hsn as string | null) ?? null,
+        tsn: (lead.tsn as string | null) ?? null,
+        kilometerstand: (lead.kilometerstand as number | null) ?? null,
+        kennzeichenBuchstaben: (lead.kennzeichen_buchstaben as string | null) ?? null,
+        farbe: (lead.fahrzeug_farbe as string | null) ?? null,
+        farbcode: (lead.lackfarbe_code as string | null) ?? null,
+        baujahr: (lead.fahrzeug_baujahr as number | null) ?? null,
+        erstzulassung: (lead.erstzulassung as string | null) ?? null,
+        ausstattung: lead.fahrzeug_ausstattung ?? null,
+      },
+      db: admin,
+    })
+    if (veh.ok) resolvedVehicleId = veh.vehicleId
+    else console.warn('[CMM-68] vehicles-Stub bei Konversion (kein FIN):', veh.error)
   }
 
   // ─── Schritt 7a: KB Round-Robin (falls nicht angegeben) ─────────────────

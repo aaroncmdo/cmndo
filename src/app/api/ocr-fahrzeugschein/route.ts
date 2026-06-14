@@ -92,22 +92,12 @@ export async function POST(request: Request) {
     // im faelle↔claims Sync-Trigger (CMM Phase 1.5a). Direkt in claims schreiben
     // damit die SSoT für SV/Kanzlei/Reports konsistent ist.
     if (fallRow?.claim_id) {
+      // CMM-68 Fix: Fahrzeugdaten (fin_vin/kennzeichen/fahrzeug_*/hsn/tsn/erstzulassung) gehoeren
+      // auf vehicles, NICHT auf claims — diese Spalten existieren auf claims gar nicht, der alte
+      // claimUpdate failte komplett still (PostgREST lehnt unbekannte Spalten ab). claims behaelt
+      // NUR brn (echte claims-Dup-Spalte, CMM-48). Fahrzeug -> vehicles unten.
       const claimUpdate: Record<string, unknown> = {}
-      if (extracted.fin_vin) claimUpdate.fin_vin = extracted.fin_vin
-      if (extracted.kennzeichen) claimUpdate.kennzeichen = extracted.kennzeichen
-      if (extracted.erstzulassung) claimUpdate.erstzulassung = extracted.erstzulassung
-      if (extracted.fahrzeug_baujahr != null) claimUpdate.fahrzeug_baujahr = extracted.fahrzeug_baujahr
-      // CMM Entity Phase-4c: Halter NICHT mehr flach auf claims.halter_* (Dupe -> wird gedroppt).
-      // Halter-Person lebt in personen (Entitaet), verlinkt ueber die claim_parties ist_halter-
-      // Partei (person_id); v_claim_full speist halter_* aus personen. OCR-Halter-Korrektur ->
-      // personen = Follow-up (Entity-Writer-Wiring).
-      if (extracted.fahrzeug_hersteller) claimUpdate.fahrzeug_hersteller = extracted.fahrzeug_hersteller
-      if (extracted.fahrzeug_modell) claimUpdate.fahrzeug_modell = extracted.fahrzeug_modell
-      if (extracted.fahrzeug_farbe) claimUpdate.fahrzeug_farbe = extracted.fahrzeug_farbe
       if (extracted.brn) claimUpdate.brn = extracted.brn
-      if (extracted.hsn) claimUpdate.hsn = extracted.hsn
-      if (extracted.tsn) claimUpdate.tsn = extracted.tsn
-
       if (Object.keys(claimUpdate).length > 0) {
         const { error: claimError } = await supabase
           .from('claims')
@@ -116,6 +106,41 @@ export async function POST(request: Request) {
         if (claimError) {
           console.error('[OCR-ZB1] claims update error:', claimError)
         }
+      }
+
+      // CMM-68: vehicles-Write-Path. Der Fahrzeugschein-OCR war eine Luecke — schrieb Fahrzeugdaten
+      // auf faelle (+ kaputt auf claims), aber NIE auf vehicles. Mit FIN -> dedup-Row (RPC); ohne FIN
+      // -> FIN-loser Stub. claims.vehicle_id verlinken. Admin-Client (direkter vehicles-Write/RPC,
+      // RLS-frei). Non-critical: ein Fehler bricht den OCR-Lauf nicht.
+      try {
+        const { createAdminClient } = await import('@/lib/supabase/admin')
+        const { ensureVehicleFromFin, ensureVehicleForClaim } = await import('@/lib/vehicles/ensure-vehicle')
+        const vehDb = createAdminClient()
+        const vehSnapshot = {
+          kennzeichen: extracted.kennzeichen ?? null,
+          hersteller: extracted.fahrzeug_hersteller ?? null,
+          modell: extracted.fahrzeug_modell ?? null,
+          hsn: extracted.hsn ?? null,
+          tsn: extracted.tsn ?? null,
+          farbe: extracted.fahrzeug_farbe ?? null,
+          baujahr: extracted.fahrzeug_baujahr ?? null,
+          erstzulassung: extracted.erstzulassung ?? null,
+          finQuelle: 'fahrzeugschein_ocr',
+          finExtrahiertAm: new Date().toISOString(),
+        }
+        if (extracted.fin_vin) {
+          const veh = await ensureVehicleFromFin({ fin: extracted.fin_vin, snapshot: vehSnapshot, db: vehDb })
+          if (veh.ok) {
+            await vehDb.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', fallRow.claim_id)
+          } else {
+            console.warn('[CMM-68] OCR vehicles (FIN):', veh.error)
+          }
+        } else {
+          const veh = await ensureVehicleForClaim({ claimId: fallRow.claim_id, snapshot: vehSnapshot, db: vehDb })
+          if (!veh.ok) console.warn('[CMM-68] OCR vehicles (Stub):', veh.error)
+        }
+      } catch (err) {
+        console.error('[CMM-68] OCR vehicles-Write fehlgeschlagen (non-fatal):', err)
       }
     }
 
