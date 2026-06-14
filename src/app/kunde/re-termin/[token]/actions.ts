@@ -50,23 +50,24 @@ export async function waehleReTerminSlot(
     .limit(1)
     .maybeSingle()
   if (!tok?.fall_id) return { ok: false, error: 'Token nicht gefunden' }
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, sv_id, lead_id, claim_id, claims:claim_id(auftraege(storniert_am))')
-    .eq('id', tok.fall_id)
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id=claim_id (Flip),
+  // vcf.fall_id=faelle.id; sv_id/lead_id div=0.
+  const { data: fallRow } = await db
+    .from('v_claim_full')
+    .select('id, fall_id, sv_id, lead_id')
+    .eq('fall_id', tok.fall_id)
     .single()
 
-  if (!fall) return { ok: false, error: 'Token nicht gefunden' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const fallAuftraege = Array.isArray(
-    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
-  )
-    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
-    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
-        ? [(fallClaim as { auftraege: unknown }).auftraege]
-        : [])
-  const aktAuftrag =
-    (fallAuftraege[0] as { storniert_am?: string | null } | undefined) ?? null
+  if (!fallRow) return { ok: false, error: 'Token nicht gefunden' }
+  const fall = { id: fallRow.fall_id as string, claim_id: fallRow.id, sv_id: fallRow.sv_id, lead_id: fallRow.lead_id }
+  // CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag) — by claim_id (vcf.id).
+  // Pre-launch <=1 Auftrag pro Claim (live: 0 Claims mit >1 Auftrag).
+  const { data: aktAuftrag } = await db
+    .from('auftraege')
+    .select('storniert_am')
+    .eq('claim_id', fallRow.id)
+    .limit(1)
+    .maybeSingle()
   if (aktAuftrag?.storniert_am) return { ok: false, error: 'Fall wurde storniert' }
 
   let aktTerminReTermin: { re_termin_token_eingelaufen_am: string | null } | null = null
