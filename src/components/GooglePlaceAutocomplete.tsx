@@ -12,6 +12,8 @@ export type PlaceResult = {
   lat: number
   lng: number
   place_id: string
+  /** AAR-956: Business-Name bei types=establishment (sonst undefined). */
+  name?: string
 }
 
 // Google Maps Script einmalig laden (singleton)
@@ -75,6 +77,7 @@ function ensureGoogleMapsScript(): Promise<void> {
 
 export default function GooglePlaceAutocomplete({
   defaultValue,
+  types,
   placeholder,
   onSelect,
   onBlur,
@@ -82,6 +85,8 @@ export default function GooglePlaceAutocomplete({
   className,
 }: {
   defaultValue?: string
+  /** AAR-956: Autocomplete-Typ. Default ['address'] (Geocoder); ['establishment'] = Business-Suche. */
+  types?: string[]
   placeholder?: string
   onSelect: (result: PlaceResult) => void
   // AAR-262: Optionaler Blur-Handler für Server-Side-Geocoding-Fallback
@@ -100,6 +105,8 @@ export default function GooglePlaceAutocomplete({
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null)
   const onSelectRef = useRef(onSelect)
   onSelectRef.current = onSelect
+  const typesRef = useRef(types)
+  typesRef.current = types
 
   // AAR-237: Sync mit defaultValue wenn es sich ändert (z.B. Parent-State-Reset).
   // Ohne diesen Sync würde der Autocomplete-Value stale bleiben wenn der
@@ -118,18 +125,21 @@ export default function GooglePlaceAutocomplete({
 
       const autocomplete = new google.maps.places.Autocomplete(inputRef.current, {
         componentRestrictions: { country: 'de' },
-        fields: ['formatted_address', 'geometry', 'place_id', 'address_components'],
-        types: ['address'],
+        fields: ['name', 'formatted_address', 'geometry', 'place_id', 'address_components'],
+        types: typesRef.current ?? ['address'],
       })
 
       autocomplete.addListener('place_changed', () => {
         const place = autocomplete.getPlace()
-        if (!place.geometry?.location) return
-
-        const lat = place.geometry.location.lat()
-        const lng = place.geometry.location.lng()
         const placeId = place.place_id ?? ''
-        const formattedAddress = place.formatted_address ?? ''
+        // AAR-956: Business-Suche (types=establishment) braucht nur die place_id —
+        // Geocoder-Adressen haben immer geometry, Betriebe meist auch; ohne → 0/0.
+        if (!placeId) return
+
+        const loc = place.geometry?.location
+        const lat = loc ? loc.lat() : 0
+        const lng = loc ? loc.lng() : 0
+        const formattedAddress = place.formatted_address ?? place.name ?? ''
 
         // CMM-23: alle Adress-Komponenten extrahieren — Straße, Hausnummer,
         // PLZ, Stadt — damit der Lead-Insert die separate Spalten füllt.
@@ -147,7 +157,7 @@ export default function GooglePlaceAutocomplete({
         const strasse = [route, streetNumber].filter(Boolean).join(' ').trim()
 
         setValue(formattedAddress)
-        onSelectRef.current({ adresse: formattedAddress, plz, strasse, stadt, lat, lng, place_id: placeId })
+        onSelectRef.current({ adresse: formattedAddress, plz, strasse, stadt, lat, lng, place_id: placeId, name: place.name ?? undefined })
       })
 
       autocompleteRef.current = autocomplete
