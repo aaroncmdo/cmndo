@@ -46,8 +46,8 @@ async function loadClaimContext(claimId: string): Promise<
   if (error || !claim) return { ok: false, error: 'Claim nicht gefunden' }
 
   const { data: fall } = await admin
-    .from('faelle')
-    .select('id')
+    .from('faelle_claim_bridge')
+    .select('id:fall_id')
     .eq('claim_id', claimId)
     .maybeSingle()
   if (!fall) return { ok: false, error: 'Kein Fall für diesen Claim' }
