@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
@@ -10,7 +11,8 @@ import { FinderWizard } from './_components/FinderWizard'
 // WS1a: Datenschicht WIEDERVERWENDET — ladeAktiveSVs/ladeSvLeads (leak-safe, Google-Reviews).
 // WS1b: Karten-UI <FinderMap> aus der Marketing-Karte portiert (next-intl → inline DE).
 // WS2: Profil-ueber-Pin + GoogleBewertungBadge. WS3: empfohlener SV + Route/Zoom.
-// WS4: 3-Step-Wizard mit <FlowSlotStep> (Engine inline) füllt den wizardSlot.
+// WS4 + Reorder: 4-Step-Wizard (Ort → Termin → Schaden → Kontakt) füllt den wizardSlot;
+// Termin-Wahl token-los via ladeEmbedMatching, Reservierung beim Kontakt-Submit.
 
 export const metadata: Metadata = {
   // Embed nicht separat indexiert — /gutachter-finden (Marketing) ist die SEO-Flaeche.
@@ -20,7 +22,7 @@ export const metadata: Metadata = {
 export default async function GutachterFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string }>
 }) {
   const sp = await searchParams
 
@@ -39,14 +41,28 @@ export default async function GutachterFinderEmbedPage({
   const zoomN = sp.zoom ? Number(sp.zoom) : NaN
   const initialZoom = Number.isFinite(zoomN) ? zoomN : undefined
 
+  // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn NEXT_PUBLIC_GF_GTM_ID gesetzt ist
+  // (auf app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM
+  // → GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). Consent-Gating
+  // + EC-Hashing macht GTM selbst. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
+  const gtmId = process.env.NEXT_PUBLIC_GF_GTM_ID
+
   return (
-    <FinderMap
-      svLeads={leadPins}
-      aktiveSVs={svs}
-      height="100dvh"
-      initialCenter={initialCenter}
-      initialZoom={initialZoom}
-      wizardSlot={<FinderWizard />}
-    />
+    <>
+      {gtmId ? (
+        <Script id="gf-gtm" strategy="afterInteractive">
+          {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${gtmId}');`}
+        </Script>
+      ) : null}
+      <FinderMap
+        svLeads={leadPins}
+        aktiveSVs={svs}
+        height="100dvh"
+        initialCenter={initialCenter}
+        initialZoom={initialZoom}
+        forceFallback={sp.fallback === '1'}
+        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
+      />
+    </>
   )
 }

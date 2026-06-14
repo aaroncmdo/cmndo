@@ -8,7 +8,7 @@
 //   • Text  = claimondo-navy (Headings) / claimondo-shield (Sekundär + Labels)
 // View-only, anonyme Trust-Signale aus ladeAktiveSVs. KEINE PII. SV-Wahl = System (WS3).
 
-import { ShieldCheck, MapPin } from 'lucide-react'
+import { ShieldCheck, MapPin, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import type { AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
@@ -18,12 +18,32 @@ const TYP_LABEL: Record<string, string> = {
   'kfz-gutachter': 'Kfz-Sachverständiger',
 }
 
+// AAR-956 (Aaron 12.06.): EIN geteilter Popup-Wrapper für SV-Profil UND Dead-Pin-
+// Light-Profil — damit beide exakt dieselbe Shell/Größe/Optik/Anchor haben. Das
+// Light-Profil ist optisch ein vollwertiges Profil, nur mit leak-safem Inhalt.
+function PopupCard({ children }: { children: React.ReactNode }) {
+  return (
+    <GlassSurface className="flex min-w-[260px] max-w-[330px] flex-col gap-2.5 p-4">
+      {children}
+    </GlassSurface>
+  )
+}
+
+// Avatar-Kreis (Ondo-Fill) — geteilt: SV zeigt die Vorname-Initiale, Dead-Pin ein Pin-Icon.
+function PopupAvatar({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-body font-extrabold text-white">
+      {children}
+    </div>
+  )
+}
+
 // Chip exakt im Marketing-Stil (claimondo.de): heller, umrandeter Pill mit shield-Text.
 function Chip({ children, strong = false }: { children: React.ReactNode; strong?: boolean }) {
   return (
     <span
       className={cn(
-        'rounded-full border bg-claimondo-bg px-3 py-1 text-[0.8125rem] font-semibold text-claimondo-shield',
+        'rounded-full border bg-claimondo-bg px-2.5 py-0.5 text-[0.75rem] font-semibold text-claimondo-shield',
         strong ? 'border-claimondo-ondo/30' : 'border-claimondo-border',
       )}
     >
@@ -35,7 +55,7 @@ function Chip({ children, strong = false }: { children: React.ReactNode; strong?
 function Section({ titel, children }: { titel: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="mb-2 text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
+      <div className="mb-1.5 text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
         {titel}
       </div>
       <div className="flex flex-wrap gap-2">{children}</div>
@@ -49,21 +69,30 @@ export function SvProfilePopup({ sv }: { sv: AktiverSVPublic }) {
   const rolle = (sv.gutachter_typ ? TYP_LABEL[sv.gutachter_typ] : undefined) ?? 'Sachverständiger'
   const hatBewertung = sv.bewertungs_durchschnitt !== null && sv.bewertungs_anzahl !== null
   const specs = sv.spezifikationen_alle.length > 0 ? sv.spezifikationen_alle : sv.spezifikationen_top3
-  const specsShown = specs.slice(0, 8)
+  const specsShown = specs.slice(0, 4)
   const specsRest = specs.length - specsShown.length
   const hatCredentials = sv.oeffentlich_bestellt || sv.mitgliedschaften.length > 0 || sv.qualifikationen.length > 0
 
   return (
-    <GlassSurface className="flex min-w-[270px] max-w-[330px] flex-col gap-3.5 p-5">
+    <PopupCard>
       {/* Kopf — Avatar + Rolle/Region + Verifiziert-Marker */}
       <div className="flex items-center gap-3">
-        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-heading-sm font-extrabold text-white">
-          {initiale}
-        </div>
+        <PopupAvatar>{initiale}</PopupAvatar>
         <div className="min-w-0">
-          <div className="text-body-sm font-bold leading-tight text-claimondo-navy">
-            {rolle} in {stadt}
-          </div>
+          {/* Vorname NUR bei aktiven Partnern (Aaron 12.06.) — dieses Popup wird ausschließlich für
+              verifizierte SVs gerendert; Dead-Pins haben den anonymen DeadPinProfilePopup. */}
+          {sv.vorname ? (
+            <>
+              <div className="text-body-sm font-bold leading-tight text-claimondo-navy">{sv.vorname}</div>
+              <div className="text-[0.8125rem] font-medium text-claimondo-shield/80">
+                {rolle} in {stadt}
+              </div>
+            </>
+          ) : (
+            <div className="text-body-sm font-bold leading-tight text-claimondo-navy">
+              {rolle} in {stadt}
+            </div>
+          )}
           <div className="mt-1 flex items-center gap-1 text-[0.8125rem] font-medium text-claimondo-shield/80">
             <ShieldCheck className="h-3.5 w-3.5 flex-shrink-0" />
             Verifizierter Claimondo-Partner
@@ -119,16 +148,46 @@ export function SvProfilePopup({ sv }: { sv: AktiverSVPublic }) {
       {/* Schadenarten */}
       {sv.schadenarten.length > 0 && (
         <Section titel="Schadenarten">
-          {sv.schadenarten.slice(0, 6).map((s) => (
+          {sv.schadenarten.slice(0, 3).map((s) => (
             <Chip key={s}>{s}</Chip>
           ))}
-          {sv.schadenarten.length > 6 && <Chip>+{sv.schadenarten.length - 6} weitere</Chip>}
+          {sv.schadenarten.length > 3 && <Chip>+{sv.schadenarten.length - 3} weitere</Chip>}
         </Section>
       )}
 
-      <p className="text-[0.8125rem] leading-relaxed text-claimondo-shield/60">
+      <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/60">
         Den passenden Gutachter wählt das System anhand Ihres Schadenorts.
       </p>
-    </GlassSurface>
+    </PopupCard>
+  )
+}
+
+// AAR-956 Dead-Pin-Light-Profil (Aaron 12.06.: „selber Wrapper wie die normalen Profile").
+// Leak-safe — KEIN Name/Firma/Reviews/Specs (ein Dead-Pin ist ein nicht-verifizierter
+// sv_lead). Nur Region (ort) + generischer Verfügbarkeits-Hinweis, in DERSELBEN PopupCard +
+// demselben Avatar/Kopf-Layout wie SvProfilePopup → optische Parität.
+export function DeadPinProfilePopup({ ort }: { ort: string | null }) {
+  const region = ort ?? 'Ihrer Nähe'
+  return (
+    <PopupCard>
+      <div className="flex items-center gap-3">
+        <PopupAvatar>
+          <MapPin className="h-6 w-6" />
+        </PopupAvatar>
+        <div className="min-w-0">
+          <div className="text-body-sm font-bold leading-tight text-claimondo-navy">
+            Kfz-Gutachter in {region}
+          </div>
+          <div className="mt-1 flex items-center gap-1 text-[0.8125rem] font-medium text-claimondo-shield/80">
+            <Clock className="h-3.5 w-3.5 flex-shrink-0" />
+            Termin online reservierbar
+          </div>
+        </div>
+      </div>
+
+      <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/60">
+        Wählen Sie einen Wunschtermin — wir bestätigen ihn nach Ihrer Anfrage telefonisch.
+      </p>
+    </PopupCard>
   )
 }
