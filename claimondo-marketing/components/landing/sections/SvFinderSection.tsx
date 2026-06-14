@@ -53,7 +53,6 @@ export async function SvFinderSection() {
         <div className="overflow-hidden rounded-ios-lg border border-claimondo-border shadow-claimondo-md">
           {hasFinder ? (
             <GutachterFindenSection
-              variant="full"
               height="70vh"
               initialCenter={{ lat: 51.1, lng: 10.2 }}
               initialZoom={5.3}
