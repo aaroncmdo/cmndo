@@ -3,9 +3,10 @@ import { JsonLd } from '@/components/JsonLd'
 import { siteGraph, toolGraph } from '@/lib/jsonld'
 import { ToolPageHeader } from '@/components/tools/ToolPageHeader'
 import { KuerzungsChecker } from '@/components/tools/KuerzungsChecker'
+import { metaTitle } from '@/lib/meta'
 
 export const metadata: Metadata = {
-  title: 'Kürzungs-Checker: Was die Versicherung gestrichen hat zurückholen',
+  title: metaTitle('Kürzungs-Checker: Was die Versicherung gestrichen hat zurückholen'),
   description:
     'Hat die Versicherung gekürzt? In drei Schritten zeigt der Kürzungs-Checker, welche Positionen Ihnen nach BGH zustehen und welcher Weg sie zurückholt.',
   alternates: { canonical: '/kuerzungs-checker' },
