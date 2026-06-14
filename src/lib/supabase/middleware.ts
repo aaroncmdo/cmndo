@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { entscheideMfaGate, hatVerifiziertenFaktor } from '@/lib/auth/mfa-gate'
 
 // BUG-83 Befund 7: gleiche Konstante wie in server.ts.
 const REMEMBER_COOKIE_NAME = 'cm_remember'
@@ -101,15 +102,32 @@ export async function updateSession(request: NextRequest) {
   if (!user) {
     // Nicht eingeloggt + geschützter Pfad → /login
     response = NextResponse.redirect(externalUrl(request, '/login'))
-  } else if (request.nextUrl.pathname !== '/login/2fa') {
-    // Eingeloggt + geschützter Pfad (auch /admin/*): ZUERST 2FA-Check (KFZ-184)
-    const isGoogleUser = user.app_metadata?.provider === 'google'
-    const has2faCookie = request.cookies.get('claimondo_2fa_verified')?.value === '1'
-    const hasRememberCookie = !!request.cookies.get('claimondo_remember')?.value
+  } else {
+    // AAR-939: 2FA-Gate auf Supabase-MFA/AAL statt claimondo_2fa_verified-Cookie.
+    // Das Assurance-Level steckt im (oben per getUser validierten) Session-JWT und
+    // läuft NICHT unabhängig von der Session ab → die alte Reload-Loop-Klasse ist
+    // strukturell ausgeschlossen. currentLevel lokal aus dem JWT (kein Netz-Call);
+    // hasVerifiedFactor aus user.factors (kommt mit getUser).
+    let aalCurrent: 'aal1' | 'aal2' | null = null
+    try {
+      const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+      aalCurrent = aal?.currentLevel ?? null
+    } catch {
+      aalCurrent = null
+    }
 
-    // /gutachter-Portal hat kein 2FA — SVs werden direkt durchgelassen
-    const isGutachterPath = request.nextUrl.pathname.startsWith('/gutachter')
-    if (!isGoogleUser && !has2faCookie && !hasRememberCookie && !isGutachterPath) {
+    // KFZ-184/AAR-111: 2FA-Check ZUERST (vor dem Admin-Rollen-Check), sonst
+    // umgehen Admin-User den 2FA-Flow solange sie unter /admin/* bleiben.
+    const decision = entscheideMfaGate({
+      isOn2faPage: request.nextUrl.pathname === '/login/2fa',
+      isGoogleUser: user.app_metadata?.provider === 'google',
+      isGutachterPath: request.nextUrl.pathname.startsWith('/gutachter'),
+      aalCurrent,
+      hasVerifiedFactor: hatVerifiziertenFaktor(user.factors),
+      hasRememberToken: !!request.cookies.get('claimondo_remember')?.value,
+    })
+
+    if (decision === 'challenge') {
       response = NextResponse.redirect(externalUrl(request, '/login/2fa'))
     } else if (request.nextUrl.pathname.startsWith('/admin')) {
       // 2FA OK → Admin-Rollen-Check (KFZ-203: Dispatch-User darf nicht auf /admin/*)
@@ -120,12 +138,9 @@ export async function updateSession(request: NextRequest) {
         response = NextResponse.next({ request: { headers: requestHeaders } })
       }
     } else {
-      // 2FA OK + kein /admin/* → durchlassen
+      // 2FA OK (oder /login/2fa selbst / Google / Gutachter / kein Faktor) → durchlassen
       response = NextResponse.next({ request: { headers: requestHeaders } })
     }
-  } else {
-    // Public path oder /login/2fa selbst → durchlassen
-    response = NextResponse.next({ request: { headers: requestHeaders } })
   }
 
   // Apply collected cookie updates to response
