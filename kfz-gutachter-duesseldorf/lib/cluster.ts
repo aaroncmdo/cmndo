@@ -216,3 +216,18 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
 export function seoBodyFor(slug: string): SeoAbsatz[] {
   return SEO_BODY[slug] ?? []
 }
+
+// Per-Stadt-metaHook (Lever 2): kurzer, unique lokaler Aufhaenger fuer die Meta-
+// Description (seo.ts) statt des recycelten h1Sub -> killt near-duplicate-Snippets.
+// Distilliert aus SEO_BODY, <=40 Z. Fehlt ein Slug -> Fallback auf city.h1Sub.
+export const META_HOOKS: Record<string, string> = {
+  duesseldorf: 'Landeshauptstadt am Rhein, A57/A52/A46',
+  neuss: 'Linksrheinisch im Rhein-Kreis, A57/A46',
+  hilden: 'Autobahnkreuz A3/A46, Kreis Mettmann',
+  erkrath: 'Neandertal-Rand, A3 & A46',
+  langenfeld: 'Zwischen Düsseldorf & Köln, A3',
+  monheim: 'Am Rhein zw. Düsseldorf & Leverkusen',
+  ratingen: 'AD A3/A44/A52, Kreis Mettmann',
+  meerbusch: 'Linksrheinisch zw. Düsseldorf & Neuss',
+  grevenbroich: 'Rhein-Kreis-Westrand, A540 & A46',
+}

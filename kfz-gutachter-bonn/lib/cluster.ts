@@ -213,3 +213,19 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
 export function seoBodyFor(slug: string): SeoAbsatz[] {
   return SEO_BODY[slug] ?? []
 }
+
+// Per-Stadt-metaHook (Lever 2): kurzer, unique lokaler Aufhaenger fuer die Meta-
+// Description (seo.ts) statt des recycelten h1Sub -> killt near-duplicate-Snippets.
+// Distilliert aus SEO_BODY, <=40 Z. Fehlt ein Slug -> Fallback auf city.h1Sub.
+export const META_HOOKS: Record<string, string> = {
+  bonn: 'Ehem. Bundeshauptstadt am Rhein, A565',
+  'sankt-augustin': 'Rhein-Sieg östlich Bonn, A560',
+  siegburg: 'Verwaltungszentrum Rhein-Sieg, A3',
+  troisdorf: 'A59-Korridor Köln-Bonn, Rhein-Sieg',
+  koenigswinter: 'Siebengebirge & Rhein-Ausflugsverkehr',
+  'bad-honnef': 'Südlichster Rhein-Sieg-Ort, B42',
+  hennef: 'An der Sieg, A560 & Siegtalbahn',
+  bornheim: 'Vorgebirgsterrasse, A555 Bonn-Köln',
+  rheinbach: 'Voreifel-Rand Rhein-Sieg, A61',
+  meckenheim: 'A61/A565-Kreuz in der Voreifel',
+}
