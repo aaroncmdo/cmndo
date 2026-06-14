@@ -31,6 +31,23 @@ const nextConfig: NextConfig = {
     ]
     return [{ source: '/:path*', headers: securityHeaders }]
   },
+
+  // Monika-Chat-Widget FOOTPRINT-SAFE proxen: Script + Sounds + Submit/Tracking-API
+  // -> app.claimondo.de. Das Widget leitet seinen embedBase aus dem eigenen Script-src
+  // ab (autounfall.io/embed/monika.js), also laufen ALLE Runtime-Requests ueber
+  // autounfall.io und werden hier serverseitig geproxt -> KEIN crawlbarer claimondo.de-
+  // Ref im HTML (Entity-Lock). Spezifische Pfade (nicht /api/:path*), damit au.io-eigene
+  // Routen nicht geschattet werden.
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/embed/:path*', destination: 'https://app.claimondo.de/embed/:path*' },
+        { source: '/api/anfrage-from-lp', destination: 'https://app.claimondo.de/api/anfrage-from-lp' },
+        { source: '/api/embed-track', destination: 'https://app.claimondo.de/api/embed-track' },
+        { source: '/api/embed/:path*', destination: 'https://app.claimondo.de/api/embed/:path*' },
+      ],
+    }
+  },
 }
 
 export default nextConfig
