@@ -527,33 +527,28 @@ export default async function FallaktePage({
       .select('id')
       .not('operative_status', 'in', '("abgeschlossen","storniert")')
     const offeneClaimIds = (offeneClaims ?? []).map((c) => c.id as string)
+    // CMM-49/CMM-50 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). offeneClaimIds ist
+    // bereits via claims-RLS gescoped -> vcf.in('id', …) ist leak-sicher (Prescope). kennzeichen kommt
+    // aus vcf (vehicles-COALESCE, DROP-safe); geschaedigter_user_id==kunde_id (div=0);
+    // operative_status/claim_nummer/created_at claims-nativ; faelle.status-Fallback war tot (operative_status
+    // non-null da offeneClaimIds aus claims.operative_status gefiltert).
     const { data: others } = offeneClaimIds.length
       ? await supabase
-          .from('faelle')
-          .select('id, kennzeichen, status, claims:claim_id!inner(claim_nummer, created_at, operative_status)')
-          .eq('kunde_id', fall.kunde_id)
-          .neq('id', id)
-          .in('claim_id', offeneClaimIds)
-      : { data: [] as Array<{ id: string; kennzeichen: string | null; status: string | null; claims: { claim_nummer: string | null; created_at: string | null; operative_status: string | null } | { claim_nummer: string | null; created_at: string | null; operative_status: string | null }[] | null }> }
-    // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
-    // to-one-Spalte ordnen -> claims.created_at clientseitig created_at-desc sortieren (wie bisher).
+          .from('v_claim_full')
+          .select('fall_id, kennzeichen, claim_nummer, created_at, operative_status')
+          .eq('geschaedigter_user_id', fall.kunde_id)
+          .neq('fall_id', id)
+          .in('id', offeneClaimIds)
+      : { data: [] as Array<{ fall_id: string; kennzeichen: string | null; claim_nummer: string | null; created_at: string | null; operative_status: string | null }> }
     otherKundeFaelle = (others ?? [])
       .slice()
-      .sort((a, b) => {
-        const ca = (Array.isArray(a.claims) ? a.claims[0] : a.claims) as { created_at?: string | null } | null
-        const cb = (Array.isArray(b.claims) ? b.claims[0] : b.claims) as { created_at?: string | null } | null
-        return (cb?.created_at ?? '').localeCompare(ca?.created_at ?? '')
-      })
-      .map((o) => {
-        const claim = Array.isArray(o.claims) ? o.claims[0] : o.claims
-        return {
-          id: o.id,
-          claim_nummer: claim?.claim_nummer ?? null,
-          kennzeichen: o.kennzeichen,
-          // CMM-74 b″: status aus claims.operative_status (SSoT-Cutover), Fallback faelle.status.
-          status: ((claim as { operative_status?: string | null } | null)?.operative_status ?? o.status) ?? null,
-        }
-      })
+      .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
+      .map((o) => ({
+        id: o.fall_id as string,
+        claim_nummer: o.claim_nummer ?? null,
+        kennzeichen: o.kennzeichen,
+        status: o.operative_status ?? null,
+      }))
   }
 
   // 13.05.2026 Restore: OCR-Auswertung admin-only laden (30 Spalten — pre-Merge
