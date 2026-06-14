@@ -322,3 +322,19 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
 export function seoBodyFor(slug: string): SeoAbsatz[] {
   return SEO_BODY[slug] ?? []
 }
+
+// Per-Stadt-metaHook (Lever 2): kurzer, unique lokaler Aufhaenger fuer die Meta-
+// Description (seo.ts) statt des recycelten h1Sub -> killt near-duplicate-Snippets.
+// Distilliert aus SEO_BODY, <=40 Z. Fehlt ein Slug -> Fallback auf city.h1Sub.
+export const META_HOOKS: Record<string, string> = {
+  koeln: 'A1/A3/A4-Ring & Heumarer Dreieck',
+  leverkusen: 'Bayer-Kreuz & gesperrte A1-Brücke',
+  'bergisch-gladbach': 'A4 Bensberg & Wildunfälle im Bergischen',
+  huerth: 'A1/A4-Kreuz Köln-West & MMC Studios',
+  frechen: 'A4 Königsdorf & Keramikstadt',
+  pulheim: 'A1 Brauweiler & A57-Pendlerstadt',
+  bruehl: 'Phantasialand & Schloss Augustusburg',
+  wesseling: 'Shell-Raffinerie & A555-Chemie',
+  kerpen: 'A4/A61 & Tagebau Hambach',
+  erftstadt: 'AK Bliesheim A1/A61, 15 Stadtteile',
+}
