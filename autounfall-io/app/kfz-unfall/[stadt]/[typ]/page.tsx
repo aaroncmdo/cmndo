@@ -8,6 +8,7 @@ import { JsonLd } from '@/components/JsonLd'
 import { PSEO_LOCAL } from '@/content/pseo-local'
 import { PSEO_INDEXABLE } from '@/content/pseo-indexable.mjs'
 import { SITE } from '@/lib/site'
+import { metaTitle } from '@/lib/meta'
 
 // WP-5 · Programmatic-SEO-Stadtseiten /kfz-unfall/[stadt]/[typ] (20×5 = 100).
 // ALLE noindex (Duplicate-Jaccard 0,61 dokumentiert) bis unikater Lokal-Content
@@ -29,7 +30,7 @@ export async function generateMetadata({
   if (!page) return {}
   const meta = pseoMeta(page)
   return {
-    title: meta.title,
+    title: metaTitle(meta.title),
     description: meta.description,
     alternates: { canonical: `/kfz-unfall/${stadt}/${typ}` },
     // WP-5: noindex bis Lokal-Content je Stadt steht; gesteuert über PSEO_INDEXABLE.

@@ -16,6 +16,7 @@ import {
   ArticleCta,
 } from '@/components/article/parts'
 import { RelatedTopics } from '@/components/RelatedTopics'
+import { metaTitle } from '@/lib/meta'
 
 // Nur bekannte Artikel-Slugs werden statisch erzeugt; alles andere → 404.
 // (Statische Routen wie /impressum gehen vor diesem dynamischen Segment vor.)
@@ -35,7 +36,7 @@ export async function generateMetadata({
   if (!article) return {}
   const url = `/${article.slug}`
   return {
-    title: article.title,
+    title: metaTitle(article.title),
     description: article.description,
     alternates: { canonical: url },
     openGraph: {
