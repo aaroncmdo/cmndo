@@ -5547,6 +5547,8 @@
       "heading": "Your expert appointment",
       "sub": "Choose a suitable appointment — the first suggestion is your best-matching expert.",
       "empfohlen": "Recommended",
+      "empfohlener_partner": "Recommended partner",
+      "partner": "Partner",
       "wunschzeit": "Preferred time",
       "keine_termine": "No available appointments at the moment.",
       "uhr_suffix": "h"
