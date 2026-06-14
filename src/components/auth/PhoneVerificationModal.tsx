@@ -1,16 +1,20 @@
-﻿'use client'
+'use client'
 
 // KFZ-184 Phase B: Phone Verification Modal (Onboarding + Profil).
 // AAR-781: Migriert auf Modal-Primitive.
-
-// KFZ-184 Phase B: Phone Verification Modal (Onboarding + Profil).
-// AAR-781: Migriert auf Modal-Primitive.
+// AAR-939: Telefon-Verifizieren richtet jetzt einen Supabase-MFA-Phone-Faktor
+// ein (Entscheidung Aaron: verifizieren = 2FA-an). enroll+SMS -> verify -> alte
+// Faktoren wegräumen + Anzeige-Nummer syncen.
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { SmartphoneIcon, XIcon, CheckCircleIcon } from 'lucide-react'
-import { requestPhoneVerification } from '@/lib/auth/twofa/send-code'
-import { confirmPhoneVerification } from '@/lib/auth/twofa/verify-code'
+import {
+  enrollePhoneFaktor,
+  verifyPhoneFaktor,
+  entferneAndereFaktoren,
+  merkeTwofaTelefon,
+} from '@/lib/auth/twofa/mfa'
 import { Modal } from '@/components/primitives'
 
 export default function PhoneVerificationModal({
@@ -24,6 +28,8 @@ export default function PhoneVerificationModal({
   const [step, setStep] = useState<'phone' | 'code'>('phone')
   const [telefon, setTelefon] = useState('')
   const [code, setCode] = useState('')
+  const [factorId, setFactorId] = useState<string | null>(null)
+  const [challengeId, setChallengeId] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
   const [done, setDone] = useState(false)
@@ -32,25 +38,28 @@ export default function PhoneVerificationModal({
     if (!telefon.trim()) { setError('Telefonnummer eingeben'); return }
     setError(null)
     startTransition(async () => {
-      const r = await requestPhoneVerification(telefon)
-      if (r.success) setStep('code')
-      else setError(r.error ?? 'Fehler beim Senden')
+      const r = await enrollePhoneFaktor(telefon.trim())
+      if (!r.ok) { setError(r.error); return }
+      setFactorId(r.factorId)
+      setChallengeId(r.challengeId)
+      setStep('code')
     })
   }
 
   function handleVerify() {
     if (code.length !== 6) { setError('6-stelligen Code eingeben'); return }
+    if (!factorId || !challengeId) { setError('Bitte zuerst einen Code anfordern.'); return }
     setError(null)
     startTransition(async () => {
-      const r = await confirmPhoneVerification(telefon, code)
-      if (r.success) {
-        setDone(true)
-        onVerified?.()
-        router.refresh()
-        setTimeout(onClose, 1500)
-      } else {
-        setError(r.error ?? 'Ungültiger Code')
-      }
+      const r = await verifyPhoneFaktor(factorId, challengeId, code)
+      if (!r.ok) { setError(r.error); return }
+      // Genau einen Faktor behalten + Anzeige-Nummer syncen.
+      await entferneAndereFaktoren(factorId)
+      await merkeTwofaTelefon(telefon.trim())
+      setDone(true)
+      onVerified?.()
+      router.refresh()
+      setTimeout(onClose, 1500)
     })
   }
 

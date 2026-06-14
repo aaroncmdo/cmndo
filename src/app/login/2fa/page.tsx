@@ -2,27 +2,26 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import TwoFaClient from './TwoFaClient'
-import TwoFaSkipRedirect from './TwoFaSkipRedirect'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue, LOGIN_CONTINUE_COOKIE } from '@/lib/auth/safe-continue'
 
-// KFZ-184: 2FA SMS-Code Eingabe nach Email+Passwort Login.
-// AAR-494: Email-OTP als alternative Methode, wenn aktiviert (oder als Fallback
-// ohne Telefon).
-// AAR-718: Redirect-Targets auf roleToPath(rolle) umgestellt — vorher gingen
-// drei Pfade auf `/`, was authentifizierte User auf der Landing-Page statt
-// in ihrem Portal landen ließ (mit verwirrendem „Zu meinem Portal"-Button).
-// Der Bug-Class ist der gleiche wie in role-redirect.ts Zeile 5 beschrieben.
+// AAR-939: 2FA via Supabase-MFA (Phone-Faktor). Diese Page unterscheidet drei
+// Fälle und rendert den passenden Modus:
+//   - verifizierter Phone-Faktor vorhanden  -> 'challenge' (SMS-Code verifizieren)
+//   - Legacy-2FA gewollt, aber kein Faktor   -> 'enroll' (Soft-Enroll, vorausgefüllt)
+//   - sonst (kein Faktor, kein Legacy-Flag)  -> direkt ins Ziel (kein 2FA)
+// Google-Login überspringt 2FA komplett.
+//
+// Anders als früher gibt es KEINEN claimondo_2fa_verified-Cookie mehr — das
+// Durchlassen entscheidet die Middleware über die Session-AAL.
 
 export default async function TwoFaPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
 
-  // Kein User = kein Login = zurueck zum Login
+  // Kein User = kein Login = zurück zum Login
   if (!user) redirect('/login')
 
-  // AAR-718: Profil früh laden — wird sowohl für roleToPath als auch für die
-  // 2FA-Flag-Checks benötigt.
   const { data: profile } = await supabase
     .from('profiles')
     .select('rolle, twofa_telefon, telefon, twofa_aktiviert, twofa_email_aktiviert')
@@ -30,53 +29,51 @@ export default async function TwoFaPage() {
     .single()
 
   const targetPath = roleToPath(profile?.rolle as string | null | undefined)
-  // AAR-login-embed: continue ueberlebt den 2FA-Hop via kurzlebigem Cookie
-  // (in login/actions.ts gesetzt). Hat Vorrang vor roleToPath.
+  // AAR-login-embed: continue überlebt den 2FA-Hop via kurzlebigem Cookie.
   const cont = safeContinue((await cookies()).get(LOGIN_CONTINUE_COOKIE)?.value)
   const finalTarget = cont ?? targetPath
 
-  // Wenn Google-Login: 2FA ueberspringen — direkt ins Ziel.
+  // Google-Login: kein Custom-2FA.
   if (user.app_metadata?.provider === 'google') redirect(finalTarget)
 
-  // 2FA nicht aktiviert → NICHT per Server-`redirect()` ins Portal: eine
-  // Server-Component kann kein Cookie setzen, also sieht die Middleware beim
-  // Ziel-Pfad weiterhin kein `claimondo_2fa_verified` und wirft sofort wieder
-  // auf /login/2fa = Endlos-Reload-Loop (reproduziert 31.05.: 18 /login/2fa-
-  // Navigationen in 6s, wenn das Cookie fehlt/abgelaufen ist). Stattdessen die
-  // Bridge rendern: sie setzt das Cookie via Server-Action `markTwoFaSkipForInactive`
-  // UND navigiert dann hart — beim nächsten Middleware-Hit ist das Cookie da,
-  // der Bounce ist gebrochen. (Der Bridge-Pfad existierte, war aber nie verdrahtet.)
-  if (profile?.twofa_aktiviert === false && profile?.twofa_email_aktiviert === false) {
-    return <TwoFaSkipRedirect targetPath={finalTarget} />
+  // Verifizierten Phone-Faktor suchen.
+  const { data: factors } = await supabase.auth.mfa.listFactors()
+  const verifiedPhone = (factors?.all ?? []).find(
+    (f) => f.factor_type === 'phone' && f.status === 'verified',
+  )
+
+  if (verifiedPhone) {
+    // CHALLENGE-Modus: Faktor existiert → SMS-Code verifizieren.
+    const telefon = profile?.twofa_telefon ?? profile?.telefon ?? null
+    const maskedPhone = telefon
+      ? telefon.slice(0, 4) + '****' + telefon.slice(-3)
+      : null
+    return (
+      <TwoFaClient
+        mode="challenge"
+        factorId={verifiedPhone.id}
+        maskedPhone={maskedPhone}
+        targetPath={finalTarget}
+      />
+    )
   }
 
-  const telefon = profile?.twofa_telefon ?? profile?.telefon
-  const maskedPhone = telefon
-    ? telefon.slice(0, 4) + '****' + telefon.slice(-3)
-    : null
+  const legacyWanted =
+    profile?.twofa_aktiviert === true || profile?.twofa_email_aktiviert === true
 
-  const email = user.email ?? null
-  const maskedEmail = email
-    ? email.replace(/^(.{2}).*(@.*)$/, '$1***$2')
-    : null
+  if (legacyWanted) {
+    // SOFT-ENROLL-Modus: Legacy-2FA-User ohne Supabase-Faktor holt ihn nach.
+    // Soft = überspringbar; die Middleware lässt faktor-lose User ohnehin durch.
+    return (
+      <TwoFaClient
+        mode="enroll"
+        prefillPhone={profile?.twofa_telefon ?? profile?.telefon ?? null}
+        targetPath={finalTarget}
+      />
+    )
+  }
 
-  // AAR-494: Methoden-Verfügbarkeit
-  const smsVerfuegbar = Boolean(telefon) && profile?.twofa_aktiviert !== false
-  const emailVerfuegbar = profile?.twofa_email_aktiviert === true && Boolean(email)
-
-  // Wenn nur eine Methode verfügbar ist, direkt diese vorauswählen.
-  // Wenn keine Telefonnummer da ist aber Email-Konto — Email als Fallback.
-  const initialMethod: 'sms' | 'email' =
-    smsVerfuegbar ? 'sms' : 'email'
-
-  return (
-    <TwoFaClient
-      maskedPhone={maskedPhone}
-      maskedEmail={maskedEmail}
-      smsVerfuegbar={smsVerfuegbar}
-      emailVerfuegbar={emailVerfuegbar || !smsVerfuegbar}
-      initialMethod={initialMethod}
-      targetPath={finalTarget}
-    />
-  )
+  // Kein Faktor + kein Legacy-Flag → kein 2FA. Direkt ins Ziel (die Middleware
+  // ließe ohnehin durch).
+  redirect(finalTarget)
 }
