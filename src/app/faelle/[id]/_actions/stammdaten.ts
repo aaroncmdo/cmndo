@@ -365,19 +365,23 @@ export async function saveFinVin(
 
   if (error) return { success: false, error: error.message }
 
-  // CMM-50.0: vehicles-Write-Path. Die manuelle FIN ist die zuverlaessige Quelle
-  // (unabhaengig von Cardentity). vehicles-Row anlegen + claims.vehicle_id setzen
-  // (via faelle.claim_id, da faelle.vehicle_id gedroppt ist). Admin-Client wie der
-  // claims-Write in updateFallField. Non-critical.
+  // CMM-50.0 / Phase-B: vehicles-Write-Path. Die manuelle FIN ist die zuverlaessige Quelle
+  // (unabhaengig von Cardentity). vehicles-Row anlegen + claims.vehicle_id setzen.
+  // CMM-50 Phase-B: Fahrzeug-Snapshot aus vehicles (via v_claim_full, vehicles-sourced) lesen
+  // statt aus den faelle-Fahrzeug-Spalten — macht den FIN-Entry-Pfad vehicles-nativ und robust
+  // gegen den Konvertierungs-Write-Retire (faelle-Fahrzeug-Cols werden dort kuenftig NULL).
+  // v_claim_full.id == claim_id, .fall_id == faelle.id. Admin-Read by fall_id (die Mutation oben
+  // ist bereits RLS-gegatet). finQuelle/-Am literal 'manuell'/now — dies IST eine manuelle Eingabe
+  // (entspricht dem, was der faelle.update oben setzt). Non-critical.
   try {
     const admin = createAdminClient()
-    const { data: fallRow } = await admin
-      .from('faelle')
-      .select('claim_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben, fin_quelle, fin_extrahiert_am')
-      .eq('id', fallId)
+    const { data: snap } = await admin
+      .from('v_claim_full')
+      .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, hsn, tsn, kilometerstand, fahrzeug_typ, fahrzeug_baujahr, fahrzeug_farbe, lackfarbe_code, erstzulassung, fahrzeug_ausstattung, kennzeichen_buchstaben')
+      .eq('fall_id', fallId)
       .single()
-    const fr = fallRow as Record<string, unknown> | null
-    const claimId = (fr?.claim_id as string | null) ?? null
+    const fr = snap as Record<string, unknown> | null
+    const claimId = (fr?.id as string | null) ?? null
     const veh = await ensureVehicleFromFin({
       fin: cleaned,
       snapshot: {
@@ -387,7 +391,7 @@ export async function saveFinVin(
         hsn: (fr?.hsn as string | null) ?? null,
         tsn: (fr?.tsn as string | null) ?? null,
         kilometerstand: (fr?.kilometerstand as number | null) ?? null,
-        // CMM-50.1: Snapshot-Restfelder aus dem faelle-Stand
+        // CMM-50.1: Snapshot-Restfelder — jetzt aus vehicles (vcf)
         kennzeichenBuchstaben: (fr?.kennzeichen_buchstaben as string | null) ?? null,
         farbe: (fr?.fahrzeug_farbe as string | null) ?? null,
         farbcode: (fr?.lackfarbe_code as string | null) ?? null,
@@ -395,8 +399,8 @@ export async function saveFinVin(
         baujahr: (fr?.fahrzeug_baujahr as number | null) ?? null,
         erstzulassung: (fr?.erstzulassung as string | null) ?? null,
         ausstattung: fr?.fahrzeug_ausstattung ?? null,
-        finQuelle: (fr?.fin_quelle as string | null) ?? null,
-        finExtrahiertAm: (fr?.fin_extrahiert_am as string | null) ?? null,
+        finQuelle: 'manuell',
+        finExtrahiertAm: new Date().toISOString(),
       },
       db: admin,
     })
