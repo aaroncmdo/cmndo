@@ -37,12 +37,22 @@ export type KCheckSituation = {
 }
 
 export const KCHECK_POSITIONS: KCheckPosition[] = [
-  { id: 'verbringung', label: 'Verbringungskosten', typicalEur: 130, bgh: 'VI ZR 174/24' },
-  { id: 'upe', label: 'UPE-Aufschläge', typicalEur: 280, bgh: 'VI ZR 234/16' },
-  { id: 'wertminderung', label: 'Wertminderung', typicalEur: 800, bgh: 'VI ZR 174/24' },
-  { id: 'nutzungsausfall', label: 'Nutzungsausfall', typicalEur: 500, bgh: 'Sanden/Danner' },
-  { id: 'sv-kosten', label: 'Sachverständigen-Kosten', typicalEur: 900, bgh: 'VI ZR 65/18' },
-  { id: 'mietwagen', label: 'Mietwagenkosten', typicalEur: 400, bgh: 'VI ZR 211/15' },
+  // Quellen-Label (verbatim gerendert, KEIN „BGH "-Prefix im Markup — manche Posten
+  // sind keine BGH-Az: § 249 BGB / Sanden-Danner). Az-Zuordnung 14.06. (Cowork-
+  // WebSearch-Verifikation, Nachzieh-MD v2 — loest die erste, teils falsche Runde ab):
+  //   Verbringung + UPE -> VI ZR 65/18 (25.09.2018) — EINE Entscheidung deckt UPE UND
+  //     Verbringung. (Vorher: Verbringung=§249, UPE=234/16 — 234/16 nicht bestaetigt.)
+  //   Wertminderung     -> VI ZR 357/03 (23.11.2004).
+  //   Nutzungsausfall   -> GSZ 1/86 (Gr. Senat, 09.07.1986) + Sanden/Danner-Tabelle.
+  //   SV-Kosten + Mietwagen -> KEIN bestaetigtes Az (65/18 ist UPE/Verbringung, nicht
+  //     SV-Kosten; 211/15 unbestaetigt) -> § 249 BGB als Grundlage bis RA Genter das
+  //     konkrete Az liefert. „Im Zweifel kein falsches Az" — NICHT raten.
+  { id: 'verbringung', label: 'Verbringungskosten', typicalEur: 130, bgh: 'BGH VI ZR 65/18' },
+  { id: 'upe', label: 'UPE-Aufschläge', typicalEur: 280, bgh: 'BGH VI ZR 65/18' },
+  { id: 'wertminderung', label: 'Wertminderung', typicalEur: 800, bgh: 'BGH VI ZR 357/03' },
+  { id: 'nutzungsausfall', label: 'Nutzungsausfall', typicalEur: 500, bgh: 'BGH GSZ 1/86 (Sanden/Danner)' },
+  { id: 'sv-kosten', label: 'Sachverständigen-Kosten', typicalEur: 900, bgh: '§ 249 BGB' },
+  { id: 'mietwagen', label: 'Mietwagenkosten', typicalEur: 400, bgh: '§ 249 BGB' },
 ]
 
 export const KCHECK_SITUATIONS: KCheckSituation[] = [

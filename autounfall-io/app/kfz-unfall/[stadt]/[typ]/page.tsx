@@ -7,6 +7,7 @@ import { siteGraph, pseoGraph } from '@/lib/jsonld'
 import { JsonLd } from '@/components/JsonLd'
 import { PSEO_LOCAL } from '@/content/pseo-local'
 import { PSEO_INDEXABLE } from '@/content/pseo-indexable.mjs'
+import { SITE } from '@/lib/site'
 
 // WP-5 · Programmatic-SEO-Stadtseiten /kfz-unfall/[stadt]/[typ] (20×5 = 100).
 // ALLE noindex (Duplicate-Jaccard 0,61 dokumentiert) bis unikater Lokal-Content
@@ -245,7 +246,7 @@ export default async function PseoPage({
         </section>
 
         <p className="mt-6 border-l-4 border-au-amber pl-4 text-sm italic text-au-ink-soft">
-          In Zusammenarbeit mit unserer Verkehrsrechts-Partnerkanzlei. Stand: Juni 2026. Keine
+          In Zusammenarbeit mit unserer Verkehrsrechts-Partnerkanzlei. Stand: {SITE.contentStand}. Keine
           individuelle Rechtsberatung — bei konkreten Fragen Anwalt konsultieren.
         </p>
       </article>

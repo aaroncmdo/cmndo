@@ -11,6 +11,12 @@ export const SITE = {
   url: process.env.NEXT_PUBLIC_SITE_URL ?? 'https://autounfall.io',
   locale: 'de_DE',
   lang: 'de',
+  /** „Stand:"-Datum aller Ratgeber-/Artikel-Seiten (Header-Meta-Zeile in
+   *  components/article/parts.tsx + Seiten-Disclaimer). EINE Quelle, damit Eyebrow
+   *  und Disclaimer nie auseinanderlaufen (Legal-Defekt 14.06.: parts.tsx zeigte
+   *  „Mai 2026", Disclaimer „Juni 2026"). Generierte Daten-Vintage-Zitate
+   *  („AKB Stand Mai 2026") sind bewusst NICHT betroffen — andere Semantik. */
+  contentStand: 'Juni 2026',
   /** Analytics: Plausible (cookielos, immer aktiv) + Microsoft Clarity (Opt-out,
    *  Art. 6 Abs. 1 lit. f). KEIN GA4/Google-Ads. */
   plausibleDomain: process.env.NEXT_PUBLIC_PLAUSIBLE_DOMAIN ?? 'autounfall.io',
