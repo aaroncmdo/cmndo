@@ -81,9 +81,15 @@ export async function submitAutounfallLead(formData: FormData): Promise<SubmitLe
   const rawRef = String(formData.get('ref') ?? '').trim()
   const ref = /^[a-z0-9_-]{1,64}$/.test(rawRef) ? rawRef : null
 
+  // Optionale SV-Praeferenz aus dem Karten-Pin-Klick (weiche Zuordnung; Dispatch
+  // sieht sie im Payload, KEIN hartes Routing). UUID-validiert gegen View-Vergiftung.
+  const rawSvId = String(formData.get('zugeordneter_sv_id') ?? '').trim()
+  const svPref = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(rawSvId) ? rawSvId : null
+
   const payload: Record<string, string> = {}
   if (schadenstyp) payload.schadenstyp = schadenstyp
   if (ref) payload.ref = ref
+  if (svPref) payload.zugeordneter_sv_id = svPref
 
   const email = parsed.data.email && parsed.data.email !== '' ? parsed.data.email : null
 
