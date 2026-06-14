@@ -120,8 +120,31 @@ async function boot(): Promise<void> {
       tracking: null,
       isClaimondoBranded: true,
     }
+  } else if (d.mode === 'generic') {
+    // ── generic_lp: anon-Portal (z.B. autounfall.io) — kein Cluster, kein SV.
+    //    Lead landet anon in der Dispatch-Queue. data-* steuert Theme/Logo (au.io).
+    const theme: MonikaTheme = {
+      primary: d.primary || DEFAULT_THEME.primary,
+      accent: d.accent || DEFAULT_THEME.accent,
+      text: d.text || DEFAULT_THEME.text,
+      logoUrl: d.logo || `${base}${DEFAULT_LOGO_PATH}`,
+      brandedByClaimondo: false,
+    }
+    cfg = {
+      source: 'generic_lp',
+      base,
+      theme,
+      telefon: d.phone || null,
+      whatsapp: normalizePhone(d.wa),
+      embedSiteSlug: null,
+      siteToken: null,
+      cluster: null,
+      stadtSlug: d.stadt || null,
+      tracking: null,
+      isClaimondoBranded: false,
+    }
   } else {
-    return // weder site-id noch cluster
+    return // weder site-id noch cluster noch generic-mode
   }
 
   mount(cfg)
