@@ -13,17 +13,18 @@ export default async function Page({
 }) {
   const { token } = await params
 
-  // token ist eine faelle.id (UUID) — sprache via faelle -> leads holen
+  // token ist eine faelle.id (UUID) — CMM-49: sprache via v_claim_full (lead_id, faelle-frei) -> leads.
   const svc = createServiceClient()
   const { data: fall } = await svc
-    .from('faelle')
-    .select('lead_id, leads!faelle_lead_id_fkey(sprache)')
-    .eq('id', token)
+    .from('v_claim_full')
+    .select('lead_id')
+    .eq('fall_id', token)
     .maybeSingle()
-
-  const leadsJoin = fall?.leads as unknown
-  const leadsRow = Array.isArray(leadsJoin) ? leadsJoin[0] : leadsJoin
-  const sprache = (leadsRow as { sprache: string | null } | null)?.sprache ?? null
+  let sprache: string | null = null
+  if (fall?.lead_id) {
+    const { data: leadRow } = await svc.from('leads').select('sprache').eq('id', fall.lead_id).maybeSingle()
+    sprache = (leadRow?.sprache as string | null) ?? null
+  }
 
   const flowLocale = resolveFlowLocale(null, sprache)
   const flowMessages = await loadMessages(flowLocale)
