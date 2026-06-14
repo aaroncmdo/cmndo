@@ -98,7 +98,8 @@ export default async function FlowPage({
 
       // AAR-229 W4: Mitteilung an zugewiesenen MA + SV
       try {
-        const { data: zugehFall } = await svc.from('faelle').select('id, sv_id').eq('lead_id', leadId).limit(1).maybeSingle()
+        // CMM-49 (faelle-Drop-Runway): lead_id->fall via v_claim_full (flat, faelle-frei). fall_id==faelle.id.
+        const { data: zugehFall } = await svc.from('v_claim_full').select('fall_id, sv_id').eq('lead_id', leadId).limit(1).maybeSingle()
         const { data: leadForName } = await svc.from('leads').select('vorname, nachname, zugewiesen_an').eq('id', leadId).single()
         const name = [leadForName?.vorname, leadForName?.nachname].filter(Boolean).join(' ') || 'Kunde'
         const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
@@ -114,7 +115,7 @@ export default async function FlowPage({
             titel: 'Kunde hat FlowLink geöffnet',
             inhalt: name,
             kontext_typ: 'fall',
-            kontext_id: zugehFall?.id,
+            kontext_id: zugehFall?.fall_id,
           })
         }
       } catch { /* non-critical */ }
@@ -124,8 +125,8 @@ export default async function FlowPage({
     const { data: lead } = await svc.from('leads').select('qualifizierungs_phase, vorname, nachname').eq('id', leadId).single()
     if (lead?.qualifizierungs_phase === 'kalt') {
       await svc.from('leads').update({ qualifizierungs_phase: 'in-qualifizierung', updated_at: new Date().toISOString() }).eq('id', leadId)
-      const { data: linkedFall } = await svc.from('faelle').select('id').eq('lead_id', leadId).limit(1).maybeSingle()
-      const fallId = linkedFall?.id ?? null
+      const { data: linkedFall } = await svc.from('v_claim_full').select('fall_id').eq('lead_id', leadId).limit(1).maybeSingle()
+      const fallId = linkedFall?.fall_id ?? null
       await svc.from('tasks').insert({ fall_id: fallId, titel: `Lead reaktiviert: ${lead.vorname ?? ''} ${lead.nachname ?? ''} (FlowLink geöffnet)`, typ: 'dispatch', prioritaet: 'dringend', status: 'offen' })
       if (fallId) {
         await svc.from('timeline').insert({ fall_id: fallId, typ: 'system', titel: 'Lead reaktiviert (FlowLink geöffnet)', beschreibung: `${lead.vorname ?? ''} ${lead.nachname ?? ''} war kalt, hat sich selbst reaktiviert.` })
@@ -156,14 +157,14 @@ export default async function FlowPage({
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (user) {
       const { data: fallFuerKunde } = await svc
-        .from('faelle')
-        .select('id, kunde_id')
+        .from('v_claim_full')
+        .select('fall_id, kunde_id')
         .eq('lead_id', leadId)
         .eq('kunde_id', user.id)
         .limit(1)
         .maybeSingle()
-      if (fallFuerKunde?.id) {
-        redirect(`/kunde/onboarding-details?fall_id=${fallFuerKunde.id}`)
+      if (fallFuerKunde?.fall_id) {
+        redirect(`/kunde/onboarding-details?fall_id=${fallFuerKunde.fall_id}`)
       }
     }
   } catch (err) {
