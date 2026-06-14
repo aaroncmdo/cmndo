@@ -163,8 +163,8 @@ export async function setKanzleiWunsch(
     if (wunsch === 'partnerkanzlei') {
       try {
         const { data: fallRow } = await admin
-          .from('faelle')
-          .select('id')
+          .from('faelle_claim_bridge')
+          .select('id:fall_id')
           .eq('claim_id', claimId)
           .maybeSingle()
         // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle — Idempotenz-Guard
@@ -189,7 +189,7 @@ export async function setKanzleiWunsch(
   // Timeline-Audit
   try {
     const { data: fall } = await admin
-      .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+      .from('faelle_claim_bridge').select('id:fall_id').eq('claim_id', claimId).maybeSingle()
     if (fall?.id) {
       await admin.from('timeline').insert({
         fall_id: fall.id,
@@ -224,7 +224,7 @@ export async function resetKanzleiWunsch(
   if (error) return { ok: false, error: error.message }
   try {
     const { data: fall } = await admin
-      .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+      .from('faelle_claim_bridge').select('id:fall_id').eq('claim_id', claimId).maybeSingle()
     revalidateClaim(claimId, fall?.id ?? null)
   } catch { /* ignore */ }
   return { ok: true }
@@ -262,7 +262,7 @@ export async function updateKanzleiAnsprechpartner(
   if (error) return { ok: false, error: error.message }
 
   const { data: fall } = await admin
-    .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+    .from('faelle_claim_bridge').select('id:fall_id').eq('claim_id', claimId).maybeSingle()
   revalidateClaim(claimId, fall?.id ?? null)
   return { ok: true }
 }
@@ -295,7 +295,7 @@ export async function versendeKanzleiPaketAnEigeneKanzlei(
   // Gutachten-Freigabe als Sanity — wir versenden nur wenn das Gutachten
   // QC-bestanden ist. Sonst hat der Kunde nichts in der Hand.
   const { data: fall } = await admin
-    .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+    .from('faelle_claim_bridge').select('id:fall_id').eq('claim_id', claimId).maybeSingle()
   if (!fall?.id) return { ok: false, error: 'Kein Fall am Claim' }
 
   const { data: erstgutachten } = await admin
@@ -384,7 +384,7 @@ export async function bestaetigeSelbstEinreichungOhneKanzlei(
   if (claim.kanzlei_uebergeben_am) return { ok: true }
 
   const { data: fall } = await admin
-    .from('faelle').select('id').eq('claim_id', claimId).maybeSingle()
+    .from('faelle_claim_bridge').select('id:fall_id').eq('claim_id', claimId).maybeSingle()
   if (!fall?.id) return { ok: false, error: 'Kein Fall am Claim' }
 
   // Sanity: Gutachten muss freigegeben sein, sonst hat der Kunde nichts in der Hand.
