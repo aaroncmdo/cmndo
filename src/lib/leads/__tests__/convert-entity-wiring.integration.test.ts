@@ -6,6 +6,12 @@
 //   T2  claim_parties[geschaedigter].firma_id      <- ensureFirma (firmen-Entitaet)
 //   T3  claim_vehicle_involvements rolle='verursacher' <- ensureVehicleFromKennzeichen
 //   T4  vehicle_vorschaeden state='aktuell'        <- recordVehicleDamage
+//   T5  claims.vehicle_id + vehicles-Row (FIN/Kennzeichen/Hersteller/Modell) <- ensureVehicleFromFin
+//       == Verifikations-Gate fuer den faelle-Vehicle-Col-Write-Retire (#2830): beweist, dass die
+//       Fahrzeugdaten in der vehicles-SSoT landen (nicht nur in faelle) -> Retire ist data-lossless.
+//   T6  claim_parties[geschaedigter].adresse_strasse <- lead.kunde_strasse  (+ person_id)
+//       == Gate fuer den Conversion-Clean Group B (faelle.kunde_*-INSERT-Retire): die Kunde-Identitaet/
+//       -Anschrift landet auf der Geschaedigter-Partei.
 //
 // GEGATET: laeuft NUR mit RUN_DB_INTEGRATION=1 + Service-Creds in der Env —
 // sonst describe.skip (normaler `vitest run` / CI ueberspringt es). Manuell:
@@ -34,8 +40,10 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
   const tag = `ZZ_ENTITY_WIRING_${ts}`
   const firmaName = `${tag} GmbH`
   const gegnerKz = `ZZ-EW ${ts % 100000}`
+  const geschKz = `ZZ-GS ${ts % 100000}` // T5: Geschaedigten-Fahrzeug-Kennzeichen (distinkt vom Gegner)
   const schadenText = `${tag} Front links` // distinktiver claims-Fingerprint (Race-Fallback-Cleanup)
   const testFin = `ZZTESTVN${ts}`.slice(0, 17) // geschaedigter-Fahrzeug — T4 braucht resolvedVehicleId via FIN
+  const kundeStrasse = `${tag} Kundenstr 5` // T6 (Group B): Kunde-Anschrift -> Geschaedigter-Partei
 
   let leadId: string | null = null
   let claimId: string | null = null
@@ -56,6 +64,10 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
         fin: testFin,
         fahrzeug_hersteller: 'Testmarke',
         fahrzeug_modell: 'Testmodell',
+        kennzeichen: geschKz, // T5: Geschaedigten-Fahrzeug -> vehicles via ensureVehicleFromFin
+        kunde_strasse: kundeStrasse, // T6: Kunde-Anschrift -> Geschaedigter-Partei
+        kunde_plz: '50667',
+        kunde_stadt: 'Koeln',
         gegner_bekannt: true,
         gegner_kennzeichen: gegnerKz,
         gegner_fahrzeugtyp: 'pkw', // faelle CHECK check_gegner_fahrzeugtyp: lowercase-Enum
@@ -92,9 +104,10 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     if (gegnerVehicleId) await db.from('vehicles').delete().eq('id', gegnerVehicleId)
     await db.from('vehicles').delete().eq('kennzeichen_aktuell', gegnerKz)
     await db.from('vehicles').delete().eq('fin', testFin)
+    await db.from('vehicles').delete().eq('kennzeichen_aktuell', geschKz) // T5: Geschaedigten-Vehicle (Beleg+Suspenders)
   })
 
-  it('Gewerbe-Lead -> Geschaedigter-Firma + Gegner-Vehicle-Involvement + aktueller Schaden', async () => {
+  it('Gewerbe-Lead -> Firma + Geschaedigter-Vehicle (vehicles-SSoT/#2830) + Kunde-Adresse-Partei + Gegner-Involvement + Schaden', async () => {
     const res = await convertLeadToClaim({ leadId: leadId! })
     if (!res.ok) console.error('convertLeadToClaim fehlgeschlagen:', res.error)
     expect(res.ok).toBe(true)
@@ -104,12 +117,18 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     // T2: Geschaedigter-Partei traegt firma_id (firmen-Entitaet via ensureFirma)
     const { data: gp } = await db
       .from('claim_parties')
-      .select('firma_id')
+      .select('firma_id, adresse_strasse, vehicle_id, person_id')
       .eq('claim_id', claimId)
       .eq('rolle', 'geschaedigter')
       .single()
     expect(gp?.firma_id).toBeTruthy()
     firmaId = (gp!.firma_id as string | null) ?? null
+
+    // T6 (Conversion-Clean Group B): die Kunde-Anschrift landet auf der Geschaedigter-Partei
+    // (claim_parties.adresse_strasse <- lead.kunde_strasse) + Person via ensurePersonForData.
+    // Damit ist der faelle.kunde_*-INSERT-Retire data-lossless.
+    expect(gp?.adresse_strasse).toBe(kundeStrasse)
+    expect(gp?.person_id).toBeTruthy()
 
     // T3: genau ein Gegner-Fahrzeug-Involvement mit rolle='verursacher'
     const { data: inv } = await db
@@ -128,6 +147,27 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
       .eq('claim_id', claimId)
       .eq('state', 'aktuell')
     expect(count).toBe(1)
+
+    // T5 (#2830-Gate): Geschaedigten-Fahrzeug in der vehicles-SSoT + am Claim verlinkt.
+    // claims.vehicle_id == claim_parties[geschaedigter].vehicle_id; die vehicles-Row traegt
+    // die Lead-Fahrzeugdaten (FIN/Kennzeichen/Hersteller/Modell). Beweist: der faelle-Vehicle-
+    // Col-Write-Retire (#2830) verliert keine Daten.
+    const { data: claimRow } = await db
+      .from('claims')
+      .select('vehicle_id')
+      .eq('id', claimId)
+      .single()
+    expect(claimRow?.vehicle_id).toBeTruthy()
+    expect(claimRow?.vehicle_id).toBe(gp?.vehicle_id)
+    const { data: veh } = await db
+      .from('vehicles')
+      .select('fin, kennzeichen_aktuell, hersteller, modell_haupttyp')
+      .eq('id', claimRow!.vehicle_id as string)
+      .single()
+    expect(veh?.fin).toBe(testFin)
+    expect(veh?.kennzeichen_aktuell).toBe(geschKz)
+    expect(veh?.hersteller).toBe('Testmarke')
+    expect(veh?.modell_haupttyp).toBe('Testmodell')
   }, 30_000) // Remote-Converter macht viele sequentielle Round-Trips (~7s) -> Default-5s reicht nicht
 })
 
