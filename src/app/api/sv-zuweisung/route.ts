@@ -300,12 +300,26 @@ export async function POST(request: Request) {
     // ersten Dispatch existiert noch kein Termin — fallback auf leads.wunschtermin.
     const { data: fallFull } = await supabase
       .from('faelle')
-      .select('id, lead_id, sv_id, kennzeichen, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
+      .select('id, lead_id, sv_id, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
       .eq('id', fallId)
       .single()
 
     if (fallFull) {
       const fallFullClaim = Array.isArray(fallFull.claims) ? fallFull.claims[0] : fallFull.claims
+
+      // CMM-50 Phase-B: Kennzeichen aus vehicles (via v_claim_full), nicht mehr aus
+      // faelle.kennzeichen. Prescoped auf den RLS-verifizierten claim_id (der faelle-Read
+      // oben war RLS-gegatet) -> Admin-Read leak-safe. Nur fuer den Notification-Text.
+      let kennzeichen: string | null = null
+      if (fallFull.claim_id) {
+        const adminVeh = createAdminClient()
+        const { data: vsnap } = await adminVeh
+          .from('v_claim_full')
+          .select('kennzeichen')
+          .eq('id', fallFull.claim_id)
+          .single()
+        kennzeichen = (vsnap?.kennzeichen as string | null) ?? null
+      }
 
       // wunschtermin: aus dem neuesten Termin (falls vorhanden), sonst aus leads
       let wunschtermin: string | null = null
@@ -355,7 +369,7 @@ export async function POST(request: Request) {
           svProfileData.profile_id,
           kundeName,
           adresse,
-          fallFull.kennzeichen ?? '',
+          kennzeichen ?? '',
           fallFullClaim?.schadens_ursache ?? '',
           wunschtermin,
         ).catch((err) => {
@@ -383,7 +397,7 @@ export async function POST(request: Request) {
             empfaenger_rolle: 'sachverstaendiger',
             kategorie: 'update',
             titel: 'Neuer Auftrag zugewiesen',
-            inhalt: kundeName ? `${kundeName} — ${fallFull.kennzeichen ?? ''} — ${adresse}` : undefined,
+            inhalt: kundeName ? `${kundeName} — ${kennzeichen ?? ''} — ${adresse}` : undefined,
             kontext_typ: 'fall',
             kontext_id: fallId,
           }))
