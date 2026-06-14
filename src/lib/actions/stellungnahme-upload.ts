@@ -28,15 +28,18 @@ export async function uploadTechnischeStellungnahme(
   // CMM-44 SP-A: kundenbetreuer_id liegt auf claims (SSoT) — via Nested-Embed lesen.
   // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
   // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, sv_id, claims:claim_id(claim_nummer, kundenbetreuer_id, auftraege(technische_stellungnahme_status))')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
+  // CMM-49 (faelle-Drop-Runway): bridge-Anchor + claims-Embed (admin-client). Auth-Gate sv_id (div=0)
+  // wandert auf .eq('claims.sv_id') mit !inner (kein Match -> Row gedroppt -> null -> nicht autorisiert).
+  // claim_nummer/kundenbetreuer_id + auftraege.technische_stellungnahme_status claims/auftraege-SSoT.
+  const { data: fallBridge } = await db
+    .from('faelle_claim_bridge')
+    .select('claims:claim_id!inner(claim_nummer, kundenbetreuer_id, sv_id, auftraege(technische_stellungnahme_status))')
+    .eq('fall_id', fallId)
+    .eq('claims.sv_id', sv.id)
     .single()
 
-  if (!fall) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if (!fallBridge) return { success: false, error: 'Fall nicht gefunden oder nicht autorisiert' }
+  const fallClaim = Array.isArray(fallBridge.claims) ? fallBridge.claims[0] : fallBridge.claims
   const kundenbetreuerId = fallClaim?.kundenbetreuer_id ?? null
   const fallAuftraege = Array.isArray(
     (fallClaim as { auftraege?: unknown } | null)?.auftraege,
