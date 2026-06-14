@@ -133,7 +133,7 @@ export default async function GutachterFindenPage({
 
       {/* Vollbild-Finder als wiederverwendbare Section (Karte + Finder +
           Wizard-Toggle mit App-Link). initialCenter aus ?stadt/?plz/?lat&lng. */}
-      <GutachterFindenSection variant="full" height="100dvh" initialCenter={initialCenter} />
+      <GutachterFindenSection height="100dvh" initialCenter={initialCenter} />
 
       {/* Premium-Polish 2026-05-14: scroll-bare Section unterhalb der Karte
           mit Trust-Strip, BGH-Authority, FAQ und Bottom-CTA. Karten-UX
