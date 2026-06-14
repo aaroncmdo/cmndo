@@ -41,11 +41,17 @@ export default async function GutachterFinderEmbedPage({
   const zoomN = sp.zoom ? Number(sp.zoom) : NaN
   const initialZoom = Number.isFinite(zoomN) ? zoomN : undefined
 
-  // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn NEXT_PUBLIC_GF_GTM_ID gesetzt ist
-  // (auf app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM
-  // → GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). Consent-Gating
+  // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
+  // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
+  // GA4 + Google Ads (Conversion-ID 18202744855). Ohne ENV = no-op (nichts lädt). Consent-Gating
   // + EC-Hashing macht GTM selbst. Siehe docs/12.06.2026/AAR-956-CONVERSION-EMBEDDING-SETUP.md.
-  const gtmId = process.env.NEXT_PUBLIC_GF_GTM_ID
+  //
+  // BEWUSST NICHT-öffentliches `GF_GTM_ID` (kein NEXT_PUBLIC_): diese Server-Component ist dynamisch
+  // (await searchParams + Daten-Fetch → `ƒ`), liest die Var also pro Request zur LAUFZEIT und rendert
+  // den Script server-seitig in die HTML. So ist die Container-ID runtime-konfigurierbar (Var setzen
+  // + Restart, KEIN Rebuild) — NEXT_PUBLIC_* wäre build-time-inlined (Footgun: runtime-Set ohne
+  // Rebuild lädt still nie). Der Wert ist ohnehin nicht geheim (steht im Client-HTML).
+  const gtmId = process.env.GF_GTM_ID
 
   return (
     <>

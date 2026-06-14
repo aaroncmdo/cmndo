@@ -59,8 +59,12 @@ export function track(event: GfEvent, extra?: Record<string, unknown>): void {
 
   // (2) Beacon an /api/embed-track (same-origin). text/plain = simple request → kein CORS-Preflight
   // (sendBeacon kann keine preflighteten Requests senden); die Route liest via req.json() unabhängig.
+  // user_data (E-Mail/Telefon/Name) ist NUR fürs clientseitige GTM/EC-Hashing → NICHT an den
+  // Server-Beacon (Server-Analytics braucht keine PII; hält sie aus Log + künftigem Stream-8b-Persist).
   try {
-    const body = JSON.stringify(props)
+    const beaconProps: Record<string, unknown> = { ...props }
+    delete beaconProps.user_data
+    const body = JSON.stringify(beaconProps)
     if (navigator.sendBeacon) {
       navigator.sendBeacon('/api/embed-track', new Blob([body], { type: 'text/plain' }))
     } else {
