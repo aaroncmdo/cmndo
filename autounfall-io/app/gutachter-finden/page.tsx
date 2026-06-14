@@ -16,8 +16,10 @@ export const metadata: Metadata = {
   alternates: { canonical: '/gutachter-finden' },
 }
 
-// SV-Pins aendern sich selten -> ISR (1h gecached, kein force-dynamic-Perf-Hit).
-export const revalidate = 3600
+// Pins brauchen den Service-Role-Key (Runtime-Secret aus /etc/autounfall/.env.local).
+// Der fehlt in der CI-Build-Env -> ein ISR-Prerender liefe dort ins Leere (0 Pins).
+// force-dynamic holt die Pins zur REQUEST-Zeit auf dem VPS (wie das Lead-Form schon).
+export const dynamic = 'force-dynamic'
 
 const TRUST = [
   'Unabhängige, BVSK-orientierte Sachverständige',
