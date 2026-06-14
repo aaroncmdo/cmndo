@@ -5547,6 +5547,8 @@
       "heading": "Ihr Gutachter-Termin",
       "sub": "Wählen Sie einen passenden Termin — der erste Vorschlag ist Ihr bestpassender Gutachter.",
       "empfohlen": "Empfohlen",
+      "empfohlener_partner": "Empfohlener Partner",
+      "partner": "Partner",
       "wunschzeit": "Wunschzeit",
       "keine_termine": "Aktuell keine freien Termine.",
       "uhr_suffix": "Uhr"
