@@ -9,6 +9,7 @@ import {
   notifyAnfrage,
   extractHost,
   clusterAllowlist,
+  anonAllowlist,
   type AnfrageVariante,
   type EmbedSiteConfig,
 } from '@/lib/embed/anfrage'
@@ -94,6 +95,14 @@ export async function POST(req: NextRequest) {
       return json({ ok: false, error: 'invalid_site_token' }, 401)
     }
     variante = site.variante
+  } else if (payload.source === 'generic_lp') {
+    // generic_lp (anon-Portal, z.B. autounfall.io): Origin gegen Cluster- + anon-Allowlist
+    // (MONIKA_ANON_DOMAINS). Kein Cluster/SV -> Lead landet anon in der Dispatch-Queue.
+    const allow = [...clusterAllowlist(), ...anonAllowlist()]
+    if (!originHost || !allow.includes(originHost)) {
+      return json({ ok: false, error: 'origin_not_allowed' }, 403)
+    }
+    variante = null // anon-Portal hat keine A/B-Variante
   } else {
     // kfz_gutachter_lp: gegen die fixen Cluster-Domains
     const allow = clusterAllowlist()
@@ -110,7 +119,7 @@ export async function POST(req: NextRequest) {
   // Schreibpfad gegen eine evtl. gestresste DB). Der native Funnel (source NULL,
   // same-origin, bestehende getestete Conversion-Strecke) bleibt FAIL-OPEN —
   // Verfuegbarkeit > Strenge, unveraendertes Verhalten.
-  const isEmbedSource = payload.source === 'sv_embed' || payload.source === 'kfz_gutachter_lp'
+  const isEmbedSource = payload.source === 'sv_embed' || payload.source === 'kfz_gutachter_lp' || payload.source === 'generic_lp'
   const ipRaw =
     req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
     req.headers.get('x-real-ip')?.trim() ||
