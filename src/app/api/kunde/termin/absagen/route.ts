@@ -44,18 +44,21 @@ export async function POST(req: Request) {
     // CMM-44 SP-A: kundenbetreuer_id ist eine faelle<->claims-DUP-Spalte —
     // wird über den claims-Embed gelesen (claims.kundenbetreuer_id ist SSoT).
     // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
-    const { data: fall } = await admin
-      .from('faelle')
-      .select('id, kunde_id, lead_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
-      .eq('id', termin.fall_id)
+    // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.fall_id=faelle.id;
+    // kunde_id/lead_id/kundenbetreuer_id/claim_nummer div=0.
+    const { data: fallRow } = await admin
+      .from('v_claim_full')
+      .select('fall_id, kunde_id, lead_id, kundenbetreuer_id, claim_nummer')
+      .eq('fall_id', termin.fall_id)
       .maybeSingle()
-    if (!fall) {
+    if (!fallRow) {
       return NextResponse.json(
         { success: false, error: 'Fall nicht gefunden.' },
         { status: 404 },
       )
     }
-    const claim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+    const fall = { id: fallRow.fall_id as string, kunde_id: fallRow.kunde_id, lead_id: fallRow.lead_id }
+    const claim = { kundenbetreuer_id: fallRow.kundenbetreuer_id, claim_nummer: fallRow.claim_nummer }
     const kundenbetreuerId = (claim?.kundenbetreuer_id as string | null) ?? null
 
     let owned = fall.kunde_id === user.id

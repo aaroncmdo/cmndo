@@ -83,20 +83,20 @@ export default async function KundeTerminPage({
   // Fall-Daten laden
   // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
   // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (Termin oben, SSoT).
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). kennzeichen/lead_id/schadenort_* div=0.
   const { data: fallRaw } = await db
-    .from('faelle')
-    .select('kennzeichen, lead_id, claims:claim_id(schadenort_adresse, schadenort_plz, schadenort_ort)')
-    .eq('id', termin.fall_id)
+    .from('v_claim_full')
+    .select('kennzeichen, lead_id, schadenort_adresse, schadenort_plz, schadenort_ort')
+    .eq('fall_id', termin.fall_id)
     .single()
-  const fallClaim = Array.isArray(fallRaw?.claims) ? fallRaw.claims[0] : fallRaw?.claims
   const fall = fallRaw
     ? {
         kennzeichen: fallRaw.kennzeichen,
         besichtigungsort_adresse: (termin as { besichtigungsort_adresse?: string | null }).besichtigungsort_adresse ?? null,
         lead_id: fallRaw.lead_id,
-        schadens_adresse: fallClaim?.schadenort_adresse ?? null,
-        schadens_plz: fallClaim?.schadenort_plz ?? null,
-        schadens_ort: fallClaim?.schadenort_ort ?? null,
+        schadens_adresse: fallRaw.schadenort_adresse ?? null,
+        schadens_plz: fallRaw.schadenort_plz ?? null,
+        schadens_ort: fallRaw.schadenort_ort ?? null,
       }
     : null
 

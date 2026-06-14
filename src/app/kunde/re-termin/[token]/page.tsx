@@ -36,23 +36,30 @@ export default async function ReTerminPage({ params }: { params: Promise<{ token
     .limit(1)
     .maybeSingle()
   if (!tok?.fall_id) notFound()
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, sv_id, lead_id, kennzeichen, claim_id, claims:claim_id(schadenort_ort, claim_nummer, auftraege(storniert_am))')
-    .eq('id', tok.fall_id)
+  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id=claim_id (Flip),
+  // vcf.fall_id=faelle.id; sv_id/lead_id/kennzeichen/schadenort_ort/claim_nummer div=0.
+  const { data: fallRow } = await db
+    .from('v_claim_full')
+    .select('id, sv_id, lead_id, kennzeichen, schadenort_ort, claim_nummer')
+    .eq('fall_id', tok.fall_id)
     .single()
 
-  if (!fall) notFound()
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  const fallAuftraege = Array.isArray(
-    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
-  )
-    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
-    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
-        ? [(fallClaim as { auftraege: unknown }).auftraege]
-        : [])
-  const aktAuftrag =
-    (fallAuftraege[0] as { storniert_am?: string | null } | undefined) ?? null
+  if (!fallRow) notFound()
+  const fall = {
+    claim_id: fallRow.id,
+    sv_id: fallRow.sv_id,
+    lead_id: fallRow.lead_id,
+    kennzeichen: fallRow.kennzeichen,
+  }
+  const fallClaim = { claim_nummer: fallRow.claim_nummer, schadenort_ort: fallRow.schadenort_ort }
+  // CMM-44 SP-H PR2: storniert_am lebt auf auftraege (aktueller Auftrag) — by claim_id (vcf.id).
+  // Pre-launch <=1 Auftrag pro Claim (live: 0 Claims mit >1 Auftrag).
+  const { data: aktAuftrag } = await db
+    .from('auftraege')
+    .select('storniert_am')
+    .eq('claim_id', fallRow.id)
+    .limit(1)
+    .maybeSingle()
   if (aktAuftrag?.storniert_am) notFound()
 
   let aktTerminRePage: { re_termin_token_eingelaufen_am: string | null } | null = null

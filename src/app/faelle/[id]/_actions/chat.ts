@@ -82,14 +82,15 @@ export async function sendChatNachricht(
     const senderName = [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || 'Claimondo'
     // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims = SSoT)
     // -> via claim_id aus claims nested embed laden statt aus faelle.
+    // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). kundenbetreuer_id/claim_nummer
+    // claims-SSoT; kunde_id/sv_id/lead_id div=0.
     const { data: fall } = await admin
-      .from('faelle')
-      .select('lead_id, kunde_id, sv_id, claims:claim_id(kundenbetreuer_id, claim_nummer)')
-      .eq('id', fallId)
+      .from('v_claim_full')
+      .select('lead_id, kunde_id, sv_id, kundenbetreuer_id, claim_nummer')
+      .eq('fall_id', fallId)
       .single()
-    const fallClaim = Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims
-    const kundenbetreuerId = (fallClaim?.kundenbetreuer_id as string | null) ?? null
-    const claimNummer = (fallClaim?.claim_nummer as string | null) ?? null
+    const kundenbetreuerId = (fall?.kundenbetreuer_id as string | null) ?? null
+    const claimNummer = (fall?.claim_nummer as string | null) ?? null
 
     type Empfaenger = { user_id: string; isKunde: boolean }
     const empfaenger: Empfaenger[] = []
