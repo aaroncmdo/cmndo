@@ -120,7 +120,7 @@ function addClickableMarker(
   el.style.cursor = 'pointer'
   el.innerHTML = `
     <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
-      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_ONDO};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_NAVY};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
         ${initiale}
         <div style="position:absolute;bottom:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
       </div>
@@ -143,10 +143,10 @@ function addClickableMarker(
 const MAP_STRINGS: Record<string, string> = {
   h1: 'Kfz-Gutachter in Ihrer Nähe finden.',
   sub: '4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.',
-  pill_near: '{count} Sachverständige in Ihrer Nähe',
-  pill_bundesweit: '{count} Sachverständige bundesweit verfügbar',
-  pill_short_near: '{count} SVs in Ihrer Nähe',
-  pill_short_bundesweit: '{count} SVs verfügbar',
+  pill_near: '{count} Gutachter in Ihrer Nähe',
+  pill_bundesweit: '{count} Gutachter bundesweit verfügbar',
+  pill_short_near: '{count} Gutachter in Ihrer Nähe',
+  pill_short_bundesweit: '{count} Gutachter verfügbar',
   sheet_open: 'Karte zeigen',
   sheet_closed: 'Anfrage starten',
   attribution: 'Mapbox · OpenStreetMap',
@@ -161,6 +161,24 @@ function tMap(key: string, vars?: { count?: number }): string {
   const s = MAP_STRINGS[key] ?? key
   return typeof vars?.count === 'number' ? s.replace('{count}', String(vars.count)) : s
 }
+
+// AAR-956 (Aaron 14.06.): Haversine-Luftlinie (km) für den standortabhängigen
+// „Gutachter in Ihrer Nähe"-Count.
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+// AAR-956 (Aaron 14.06.): Glass-Override für die Beratung-CTA (leicht transparent + blur,
+// geräteübergreifend) — überschreibt die GlassButton-secondary-Defaults via gleicher
+// Arbitrary-Properties (twMerge nimmt die letzte).
+const BERATUNG_GLASS =
+  '[background:color-mix(in_srgb,white_60%,transparent)] [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] border-white/50 text-claimondo-ondo'
 
 export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
@@ -184,10 +202,41 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
   // AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) statt engem Pin-Popup.
   const [sheetSv, setSheetSv] = useState<AktiverSVPublic | null>(null)
+  // AAR-956 (Aaron 14.06.): Touch-Start-Y fürs Drag-to-toggle des Anfrage-Bottom-Sheets.
+  const sheetDragRef = useRef<number | null>(null)
+  // AAR-956 (Aaron 14.06.): Live-Drag-Offset (px) fürs Anfrage-Sheet — folgt dem Finger.
+  const [sheetDragY, setSheetDragY] = useState(0)
+  // AAR-956 (Aaron 14.06.): Live-Drag-to-close fürs Profil-Sheet (herunterziehen schließt, nicht
+  // nur Klick auf den Strich) + Scroll-Lock (Hintergrund darf bei offenem Sheet nicht scrollen).
+  const [profileDragY, setProfileDragY] = useState(0)
+  const profileDragStartRef = useRef<number | null>(null)
+  const profileSheetRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!sheetSv) {
+      setProfileDragY(0)
+      return
+    }
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [sheetSv])
   // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
   // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  // AAR-956 (Aaron 14.06.): standortabhängiger „Gutachter in Ihrer Nähe"-Count (geräteübergreifend):
+  // aktive Gutachter, deren Umkreis den bekannten Ort deckt + Dead-Pins im 15-km-Radius.
+  const loc = userLocation
+  const naeheCount = loc
+    ? aktiveSVs.filter(
+        (s) =>
+          s.standort_lat != null &&
+          s.standort_lng != null &&
+          haversineKm(loc.lat, loc.lng, s.standort_lat, s.standort_lng) <= (s.umkreis_km ?? 30),
+      ).length + svLeads.filter((s) => haversineKm(loc.lat, loc.lng, s.lat, s.lng) <= 15).length
+    : null
   // AAR-2026-05-12: sichtbarer Map-Diagnose-Status — damit man ohne DevTools
   // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
   // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403).
@@ -292,6 +341,10 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     function openDeadPinPopup(lng: number, lat: number, ort: string | null) {
       popupRef.current?.remove()
       popupRootRef.current?.unmount()
+      // AAR-956 (Aaron 14.06.): Mobil/iPad (<lg) → KEIN enges Map-Popup für Dead-Pins —
+      // exakt wie bei den aktiven SVs (openSvPopup). Der Wizard zeigt den Dead-Pin-Slot-Step;
+      // ein Popup würde auf Mobil nur die Karte verdecken. Desktop (≥1024) behält das Popup.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) return
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<DeadPinProfilePopup ort={ort} />)
@@ -547,6 +600,9 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       `
       carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
       lastOrtRef.current = { lat, lng }
+      // AAR-956 (Aaron 14.06.): eingegebener Ort steuert die „Gutachter in Ihrer Nähe"-Pill
+      // (geräteübergreifend) → der Count reagiert auf den Standort.
+      setUserLocation({ lat, lng })
 
       // WS3 (Aaron 12.06.): Route-Ziel DISKRIMINIERT — Partner ODER Dead-Pin (Fallback).
       // empfehleSvFuerOrt liefert {kind}: partner → Pin aus aktiveSVs + Profil-Popup;
@@ -803,23 +859,23 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
               {/* Kurz auf Mobile */}
               <span className="sm:hidden">
                 {userLocation
-                  ? t('pill_short_near', { count: svLeads.length + aktiveSVs.length })
-                  : t('pill_short_bundesweit', { count: svLeads.length + aktiveSVs.length })}
+                  ? t('pill_short_near', { count: naeheCount ?? 0 })
+                  : t('pill_short_bundesweit', { count: aktiveSVs.length })}
               </span>
               {/* Voll ab sm — Aaron 14.05.2026: kein "Premium-Partner"-Wording
                   mehr (Privacy-Refactor: paket-Detail wird nicht preisgegeben).
                   Einheitliche Sachverständigen-Zählung. */}
               <span className="hidden sm:inline">
                 {userLocation
-                  ? t('pill_near', { count: svLeads.length + aktiveSVs.length })
-                  : t('pill_bundesweit', { count: svLeads.length + aktiveSVs.length })}
+                  ? t('pill_near', { count: naeheCount ?? 0 })
+                  : t('pill_bundesweit', { count: aktiveSVs.length })}
               </span>
             </span>
           </GlassPill>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
-          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className="hidden sm:inline-flex" />
-          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className={`hidden sm:inline-flex ${BERATUNG_GLASS}`} />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className={`sm:hidden flex-shrink-0 text-[12px] px-3 ${BERATUNG_GLASS}`} />
         </div>
       </div>
 
@@ -871,15 +927,20 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
       {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen).
           AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
+      {/* Mobile Bottom-Sheet — AAR-956 (Aaron 14.06.): EINE Glass-Fläche (leicht transparent +
+          backdrop-blur), draggable, nur der Chevron als Affordance. Grab-Strich + „Anfrage
+          starten"-Text raus (redundant — der Pfeil suggeriert das Öffnen). Header transparent +
+          innere Wizard-Card transparent ([&>div]-Override, NUR hier mobil → Desktop-Card bleibt
+          Glass) → keine gestapelten Glass-Schichten mehr. */}
       <div
         className="lg:hidden absolute left-0 right-0 bottom-0 z-[10] transition-[transform] duration-500 ease-[cubic-bezier(.32,.72,0,1)]"
         style={{
-          transform: mobileSheetOpen ? 'translateY(0)' : 'translateY(calc(100% - 88px))',
+          transform: `${mobileSheetOpen ? 'translateY(0)' : 'translateY(calc(100% - 56px))'} translateY(${sheetDragY}px)`,
+          transition: sheetDragRef.current !== null ? 'none' : undefined,
         }}
       >
         <div
-          // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
-          className="rounded-t-[32px] border-x border-t border-white/60 bg-white/85 backdrop-blur-md max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          className="rounded-t-[32px] border-x border-t border-white/50 bg-white/70 backdrop-blur-xl max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
           style={{
             boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
             scrollbarWidth: 'none',
@@ -888,29 +949,36 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         >
           <button
             onClick={() => setMobileSheetOpen((v) => !v)}
-            className="w-full sticky top-0 z-[1] bg-white/85 backdrop-blur-md px-5 py-3 flex items-center justify-between"
+            onTouchStart={(e) => {
+              sheetDragRef.current = e.touches[0].clientY
+            }}
+            onTouchMove={(e) => {
+              const start = sheetDragRef.current
+              if (start == null) return
+              const dy = e.touches[0].clientY - start
+              // offen → nur nach unten ziehen; Peek → nur nach oben ziehen (Live-Follow)
+              setSheetDragY(mobileSheetOpen ? Math.max(0, Math.min(dy, 500)) : Math.min(0, Math.max(dy, -700)))
+            }}
+            onTouchEnd={(e) => {
+              const start = sheetDragRef.current
+              sheetDragRef.current = null
+              setSheetDragY(0)
+              if (start == null) return
+              e.preventDefault() // Click-Synthese nach Touch unterdrücken (sonst Doppel-Toggle)
+              const dy = e.changedTouches[0].clientY - start
+              if (dy < -24) setMobileSheetOpen(true)
+              else if (dy > 24) setMobileSheetOpen(false)
+              else setMobileSheetOpen((v) => !v)
+            }}
+            aria-label={mobileSheetOpen ? 'Schließen' : 'Anfrage öffnen'}
+            className="w-full px-5 pt-2.5 pb-1 flex items-center justify-center"
           >
-            <span className="flex items-center gap-2">
-              <span
-                className="block w-10 h-1 rounded-full"
-                style={{ background: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 30%, transparent)' }}
-              />
-              <span
-                className="text-sm font-semibold"
-                style={{
-                  fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                  color: 'var(--brand-primary, var(--claimondo-navy))',
-                }}
-              >
-                {mobileSheetOpen ? t('sheet_open') : t('sheet_closed')}
-              </span>
-            </span>
             <ChevronUp
-              className={`h-5 w-5 transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
+              className={`h-6 w-6 transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
               style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))' }}
             />
           </button>
-          <div className="px-5 pb-6 pt-2">
+          <div className="px-1 pb-6 pt-1 [&>div]:bg-transparent [&>div]:border-transparent [&>div]:shadow-none [&>div]:backdrop-blur-none">
             {/* AAR-956 (Aaron 14.06.): KEIN zweiter Beratungs-CTA im Anfrage-Sheet — der
                 Header-Button oben rechts (auch auf Mobile sichtbar) reicht. Doppelung raus. */}
             {wizardSlot}
@@ -939,7 +1007,31 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
               setHoveredId(null)
             }}
           />
-          <div className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-ios-xl border-t border-white/60 bg-white/90 shadow-glass-card backdrop-blur-md animate-in slide-in-from-bottom duration-300">
+          <div
+            ref={profileSheetRef}
+            onTouchStart={(e) => {
+              // Drag-to-close nur initiieren, wenn der Inhalt oben steht — sonst scrollt der Inhalt.
+              if ((profileSheetRef.current?.scrollTop ?? 0) <= 0) profileDragStartRef.current = e.touches[0].clientY
+            }}
+            onTouchMove={(e) => {
+              if (profileDragStartRef.current === null) return
+              const dy = e.touches[0].clientY - profileDragStartRef.current
+              if (dy > 0) setProfileDragY(dy) // nur nach unten
+            }}
+            onTouchEnd={() => {
+              if (profileDragY > 90) {
+                setSheetSv(null)
+                setHoveredId(null)
+              }
+              setProfileDragY(0)
+              profileDragStartRef.current = null
+            }}
+            style={{
+              transform: profileDragY ? `translateY(${profileDragY}px)` : undefined,
+              transition: profileDragStartRef.current !== null ? 'none' : 'transform 0.25s ease-out',
+            }}
+            className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto overscroll-contain rounded-t-ios-xl border-t border-white/50 bg-white/70 shadow-glass-card backdrop-blur-xl animate-in slide-in-from-bottom duration-300"
+          >
             <button
               type="button"
               onClick={() => {
@@ -947,7 +1039,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
                 setHoveredId(null)
               }}
               aria-label="Profil schließen"
-              className="sticky top-0 z-10 flex w-full justify-center bg-white/80 pt-2.5 pb-2 backdrop-blur-md"
+              className="sticky top-0 z-10 flex w-full justify-center pt-2.5 pb-2"
             >
               <span className="block h-1 w-10 rounded-full bg-claimondo-navy/25" />
             </button>

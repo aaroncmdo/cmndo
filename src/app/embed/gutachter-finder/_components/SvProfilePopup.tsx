@@ -31,8 +31,11 @@ function PopupAvatar({ children, gross = false }: { children: React.ReactNode; g
   return (
     <div
       className={cn(
+        // text-white + tailwind-merge-erkannte Größen (text-2xl/text-base) → Farbe koexistiert
+        // konfliktfrei. (Custom-Typo-Tokens wie text-heading-sm/text-body droppten via Merge die
+        // Farbe → Initiale erschien nicht weiß; Aaron 14.06.: „Initialen wieder weiß".)
         'flex flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo font-extrabold text-white',
-        gross ? 'h-14 w-14 text-heading-sm' : 'h-10 w-10 text-body',
+        gross ? 'h-14 w-14 text-2xl' : 'h-10 w-10 text-base',
       )}
     >
       {children}

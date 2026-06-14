@@ -13,7 +13,7 @@
 // Marketing-Look (GlassSurface + claimondo-Tokens), DE-only mit echten Umlauten. Reuse:
 // SvSlotAuswahl (Partner-Karten, geteilt mit /flow) + DeadPinSlotStep (Lite, Select-Mode).
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
@@ -88,6 +88,10 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   // Step 2: token-loses Engine-Matching (Partner-Slots ODER Dead-Pin-Fallback).
   const [matching, setMatching] = useState<PlaneTerminMitFallbackResult | null>(null)
   const [matchLoading, setMatchLoading] = useState(false)
+  // AAR-956 (Aaron 14.06.): monoton steigende Match-Request-ID — nur die jüngste
+  // ladeEmbedMatching-Antwort darf den State setzen (Stale-Race-Guard bei schnellem Ort-Wechsel:
+  // eine späte Antwort eines früheren Orts überschrieb sonst das aktuelle Matching).
+  const matchReqRef = useRef(0)
   const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
   const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
   const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
@@ -136,7 +140,9 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setSelectedSvId(null)
     setSelectedDeadPinId(null)
     setMatchLoading(true)
+    const req = ++matchReqRef.current
     void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+      if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
       setMatching(res)
       setMatchLoading(false)
       // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
@@ -229,7 +235,9 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setPhase('termin')
     if (ort) {
       setMatchLoading(true)
+      const req = ++matchReqRef.current
       void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+        if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
         setMatching(res)
         setMatchLoading(false)
         if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
