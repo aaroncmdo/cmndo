@@ -323,3 +323,18 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
 export function seoBodyFor(slug: string): SeoAbsatz[] {
   return SEO_BODY[slug] ?? []
 }
+
+// Per-Stadt-metaHook (Lever 2): kurzer, unique lokaler Aufhaenger fuer die Meta-
+// Description (seo.ts) statt des recycelten h1Sub -> killt near-duplicate-Snippets.
+// Distilliert aus SEO_BODY, <=40 Z. Fehlt ein Slug -> Fallback auf city.h1Sub.
+export const META_HOOKS: Record<string, string> = {
+  aachen: 'Dreiländereck DE/NL/BE & Aachener Kreuz',
+  dueren: 'Rur-Industriestadt an der A4',
+  alsdorf: 'Ex-Bergbaustadt & A44-Logistikachse',
+  wuerselen: 'A44/A4-Pendlerstadt im Aachener Norden',
+  baesweiler: 'NL-Grenznähe & B57-Pendlerachse',
+  eschweiler: 'Indetal-Hochwasser 2021 & A4',
+  juelich: 'Forschungszentrum & A44/B56-Kreuz',
+  stolberg: 'Vichtbach-Hochwasser & A4-Eifelrand',
+  herzogenrath: 'Grenzstadt DE/NL & B57 Roermonder',
+}

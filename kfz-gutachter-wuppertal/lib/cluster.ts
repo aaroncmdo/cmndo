@@ -224,3 +224,21 @@ export const SEO_BODY: Record<string, SeoAbsatz[]> = {
 export function seoBodyFor(slug: string): SeoAbsatz[] {
   return SEO_BODY[slug] ?? []
 }
+
+// Per-Stadt-metaHook (Lever 2): kurzer, unique lokaler Aufhaenger fuer die Meta-
+// Description (seo.ts) statt des recycelten h1Sub -> killt near-duplicate-Snippets.
+// Distilliert aus SEO_BODY, <=40 Z. Fehlt ein Slug -> Fallback auf city.h1Sub.
+export const META_HOOKS: Record<string, string> = {
+  wuppertal: 'Tallagen & dichter A46-Verkehr',
+  solingen: 'Klingenstadt im Bergischen Land',
+  velbert: 'Schloss-/Beschlägestadt an der A44',
+  heiligenhaus: 'Niederberg-Lage bei Velbert',
+  wuelfrath: 'Kalkstadt am Rand des Bergischen',
+  mettmann: 'Kreisstadt im Neandertal, A3 & A44',
+  haan: 'Pendlerort Mettmann/Solingen, A46',
+  schwelm: 'Am Autobahnkreuz A1/A46',
+  sprockhoevel: 'Landstraßen & Wildwechsel, Ennepe-Ruhr',
+  remscheid: 'Werkzeugstadt, kurvenreiche Höhen',
+  ennepetal: 'Kluterthöhle & A1-Nähe',
+  hattingen: 'Historische Altstadt an der Ruhr, A43',
+}
