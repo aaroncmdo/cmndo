@@ -52,12 +52,16 @@ jobs:
           cp -r .next/static .next/standalone/.next/static
         env:
           NODE_OPTIONS: --max-old-space-size=6144
-          # 5 oeffentliche NEXT_PUBLIC_-Werte (= au.io-Build-Inlining, kein Secret):
+          # 6 oeffentliche NEXT_PUBLIC_-Werte (= au.io-Build-Inlining, kein Secret):
           NEXT_PUBLIC_SITE_URL: https://autounfall.io
           NEXT_PUBLIC_PLAUSIBLE_DOMAIN: autounfall.io
           NEXT_PUBLIC_SITE_EMAIL: nicolas.kitta@icloud.com
           NEXT_PUBLIC_SITE_PHONE: '+4917620289514'
           NEXT_PUBLIC_SUPABASE_URL: https://paizkjajbuxxksdoycev.supabase.co
+          # Finder-Karte /gutachter-finden (public pk.*, api.mapbox.com — kein Footprint).
+          # Als GH-Actions-Secret hinterlegt (NICHT committet — GitHub Push-Protection
+          # flaggt Mapbox-Tokens generisch, auch oeffentliche pk.*).
+          NEXT_PUBLIC_MAPBOX_TOKEN: ${{ secrets.NEXT_PUBLIC_MAPBOX_TOKEN }}
 
       - name: Artefakt packen (standalone-Inhalt)
         working-directory: autounfall-io
