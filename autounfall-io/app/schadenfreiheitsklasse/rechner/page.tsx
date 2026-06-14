@@ -3,12 +3,13 @@ import { JsonLd } from '@/components/JsonLd'
 import { siteGraph, toolGraph } from '@/lib/jsonld'
 import { ToolPageHeader } from '@/components/tools/ToolPageHeader'
 import { SfRechner } from '@/components/tools/SfRechner'
+import { metaTitle } from '@/lib/meta'
 
 // Aus WP-3 zurückgestellt (ARTICLE-sf-klasse-rechner = WebApplication).
 // Eigene Route trotz noch fehlendem /schadenfreiheitsklasse-Hub (WP-7) — der
 // Breadcrumb nennt den Hub bereits (Ziel-URL, transienter 404 bis WP-7).
 export const metadata: Metadata = {
-  title: 'SF-Rückstufungs-Rechner: Was ein Unfall Ihre Versicherung kostet',
+  title: metaTitle('SF-Rückstufungs-Rechner: Was ein Unfall Ihre Versicherung kostet'),
   description:
     'Versicherer-spezifischer SF-Rückstufungs-Rechner: Mehrkosten über die Wiederaufstiegs-Jahre schätzen und entscheiden — selbst zahlen oder der Versicherung melden.',
   alternates: { canonical: '/schadenfreiheitsklasse/rechner' },
