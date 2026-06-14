@@ -80,7 +80,7 @@ export const KCHECK_SITUATIONS: KCheckSituation[] = [
     tone: 'fight',
     headline: 'Die Versicherung muss zahlen',
     body: 'Wenn Sie bereits ein unabhängiges Gutachten haben und die VS kürzt trotzdem, ist das fast immer ein angreifbarer Bescheid. Mit dem Gutachten als Beleg und der BGH-Linie als Argument lassen sich die gestrichenen Positionen in der Regel nachfordern. Eine anwaltliche Begleitung erhöht die Erfolgsquote deutlich.',
-    ctaPrimary: { label: 'LexDrive Erstberatung kostenlos', href: 'https://lex-drive.com' },
+    ctaPrimary: { label: 'Anwaltliche Erstberatung', href: '/gutachter-finden' },
     ctaSecondary: { label: 'BGH-Argumente parat haben', href: '/ratgeber/bgh-argumente-spickzettel' },
     valueAdd: {
       financial: 'Volle Differenz zwischen VS-Auszahlung und Gutachten-Forderung',
@@ -94,7 +94,7 @@ export const KCHECK_SITUATIONS: KCheckSituation[] = [
     tone: 'split',
     headline: 'Was Sie unterschrieben haben, entscheidet',
     body: 'Bei bereits ausgezahltem Geld ist die Frage: <strong>haben Sie eine Ausgleichsquittung unterschrieben?</strong> Wenn ja, ist eine Nachforderung schwieriger (aber nicht unmöglich). Wenn nein, ist die Nachforderung in der Regel offen. Eine kurze anwaltliche Prüfung klärt das in wenigen Minuten.',
-    ctaPrimary: { label: 'Anwalt soll prüfen', href: 'https://lex-drive.com' },
+    ctaPrimary: { label: 'Anwalt soll prüfen', href: '/gutachter-finden' },
     ctaSecondary: { label: 'Was ist eine Ausgleichsquittung?', href: '/schuldanerkenntnis-vermeiden' },
     valueAdd: {
       financial: 'Je nach Quittungs-Status 0–100 % nachfordbar',

@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import { NUTZ, SCHMERZ, bsOf, rueckOf, eur } from '@/lib/tools/rechner-data'
-import { trackToolComplete } from '@/lib/track'
+import { trackCtaClick, trackToolComplete } from '@/lib/track'
 
 // 6-in-1 Köder-Rechner · 1:1 portiert aus assets-autounfall/au-rechner.js.
 // Felder = idiomatisches React (controlled), Ergebnis = exakt der HTML-String der
@@ -215,15 +215,15 @@ function CtaLink({ kind }: { kind: Exclude<CtaKind, null> }) {
     'mt-3.5 inline-flex items-center gap-2 rounded-ios-sm bg-au-amber px-[18px] py-2.5 text-[15px] font-bold text-au-surface transition-opacity hover:opacity-90'
   if (kind === 'gutachter') {
     return (
-      <Link href="/gutachter-finden#anfrage" className={cls}>
+      <Link href="/gutachter-finden#anfrage" className={cls} onClick={() => trackCtaClick('rechner')}>
         Exakt durch Gutachter — anfragen →
       </Link>
     )
   }
   return (
-    <a href="https://lex-drive.com" rel="noopener" target="_blank" className={cls}>
-      Mit Anwalt durchsetzen (LexDrive) →
-    </a>
+    <Link href="/gutachter-finden" className={cls} onClick={() => trackCtaClick('rechner-anwalt')}>
+      Mit Anwalt durchsetzen →
+    </Link>
   )
 }
 

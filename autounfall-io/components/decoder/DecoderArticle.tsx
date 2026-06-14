@@ -1,6 +1,8 @@
 import Link from 'next/link'
+import { CtaLink } from '@/components/analytics/CtaLink'
 import type { Decoder, DecoderCtaKind } from '@/lib/decoder-types'
 import { SITE } from '@/lib/site'
+import { RelatedTopics } from '@/components/RelatedTopics'
 
 // HTML-Felder (tldr/brief/sections.html/muster.body) sind kontrollierter Content
 // aus decoder_content.py (hrefs umgeschrieben) → dangerouslySetInnerHTML ist ok.
@@ -9,7 +11,7 @@ function Html({ html, className }: { html: string; className?: string }) {
 }
 
 const CTA_LABEL: Record<DecoderCtaKind, string> = {
-  lex: 'Anwalt einschalten (LexDrive) →',
+  lex: 'Anwalt einschalten →',
   gutachter: 'Unabhängigen Gutachter anfragen →',
   checker: 'Kürzungs-Checker öffnen',
   musterbrief: 'Musterbrief nutzen',
@@ -23,16 +25,16 @@ function CtaButton({ kind }: { kind: DecoderCtaKind }) {
     : 'inline-flex items-center gap-2 rounded-ios-md border border-au-surface/40 px-6 py-3 font-semibold text-au-surface transition-colors hover:border-au-amber-soft hover:text-au-amber-soft'
   if (kind === 'lex') {
     return (
-      <a href={SITE.legalReviewer.url} target="_blank" rel="noopener noreferrer" className={cls}>
+      <CtaLink href="/gutachter-finden" location="decoder-anwalt" className={cls}>
         {label}
-      </a>
+      </CtaLink>
     )
   }
   const href = kind === 'gutachter' ? '/gutachter-finden' : kind === 'checker' ? '/kuerzungs-checker' : '#musterbrief'
   return (
-    <Link href={href} className={cls}>
+    <CtaLink href={href} location="decoder" className={cls}>
       {label}
-    </Link>
+    </CtaLink>
   )
 }
 
@@ -174,10 +176,12 @@ export function DecoderArticle({ decoder }: { decoder: Decoder }) {
         {decoder.sources ? (
           <p className="mt-10 border-t border-au-sand-dark pt-6 text-xs text-au-muted">
             <strong className="text-au-ink-soft">Quellen:</strong> {decoder.sources} Keine
-            Rechtsberatung — Einordnung im Einzelfall. Inhaltliche Begleitung: {SITE.legalReviewer.name}.
+            Rechtsberatung — Einordnung im Einzelfall. Inhaltliche Begleitung durch unsere {SITE.legalReviewer.name}.
           </p>
         ) : null}
       </article>
+
+      <RelatedTopics route={'/versicherer-decoder/' + decoder.slug} />
 
       {/* CTA */}
       {decoder.cta ? (
