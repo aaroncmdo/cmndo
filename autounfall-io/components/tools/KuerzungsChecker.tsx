@@ -176,7 +176,7 @@ export function KuerzungsChecker() {
                     className="mr-3 h-[18px] w-[18px] accent-au-amber"
                   />
                   <span className="flex-1 text-[15px] text-au-ink">
-                    <strong>{p.label}</strong> · typisch {p.typicalEur} € · BGH {p.bgh}
+                    <strong>{p.label}</strong> · typisch {p.typicalEur} € · {p.bgh}
                   </span>
                 </label>
               )
