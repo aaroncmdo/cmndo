@@ -6,6 +6,7 @@ import { UploadCloudIcon, XIcon, CheckCircle2Icon, SparklesIcon } from 'lucide-r
 import { uploadSvLogo, uploadBueroLogo, applyBrandPreset, saveSvBrandColors } from '@/lib/actions/branding-actions'
 import { LoadingButton } from '@/components/ui/loading-button'
 import BrandPresetPicker from '@/components/branding/BrandPresetPicker'
+import GoogleBusinessFeld from '@/components/GoogleBusinessFeld'
 import { generateLogoPresets } from '@/lib/branding/logo-presets'
 import type { BrandPreset } from '@/lib/branding/theme-presets'
 
@@ -303,6 +304,11 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
           <BrandPresetPicker onApply={handlePreset} />
         </div>
       ) : null}
+
+      {/* AAR-956: Google-Business-Profil verknüpfen (als Konfiguration im Logo-/
+          Branding-Schritt). Schaltet die echte Sterne-Bewertung im Gutachter-
+          Finder frei. Optional — überspringbar via "Später machen". */}
+      <GoogleBusinessFeld />
 
       {/* Buttons — AAR-220: nach Upload gibt es nur noch "Weiter" (Auto-Save
           ist bereits passiert), davor "Später machen" für Skip-Pfad. */}
