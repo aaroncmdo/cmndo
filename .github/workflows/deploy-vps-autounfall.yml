@@ -135,3 +135,13 @@ jobs:
 
             rm -f /tmp/deploy-autounfall.tar.gz
             echo "autounfall-Deploy $(date) OK (HTTP $code)"
+
+      - name: IndexNow-Ping (Bing/Yandex/Seznam, post-deploy)
+        if: success()
+        working-directory: autounfall-io
+        # Re-Ping-Hook (Indexierungs-MD 14.06.): meldet alle indexierbaren Canonicals
+        # der FRISCH deployten sitemap.xml an IndexNow. Script ist dep-frei (global
+        # fetch) + exit 0 auch bei Fehler -> Deploy bleibt gruen. Key e176…354 in public/.
+        run: |
+          sleep 5
+          node scripts/indexnow-ping.mjs https://autounfall.io

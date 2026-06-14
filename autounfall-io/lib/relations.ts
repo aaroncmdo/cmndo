@@ -34,6 +34,21 @@ const DECODER_HEAD: Record<string, string> = Object.fromEntries(
   Object.entries(HEAD_DECODER).map(([h, d]) => [d, h]),
 )
 
+// Orphan-Fix (Indexierungs-MD 14.06., Task 1.7): indexierbare Tools liegen ausserhalb des
+// Artikel-/Decoder-Graphen → ohne Hilfe 0 interne Inbound-Links. Je Tool >=3 thematische
+// Host-Seiten (Pillars/Decoder, die RelatedTopics rendern, also echte Graph-Nodes); das Tool
+// erscheint in deren „Verwandte Themen" → >=3 kontextuelle Inbound-Links. Hosts so verteilt,
+// dass keine Seite >2 Tools traegt. (Tool-Seiten rendern RelatedTopics selbst nicht — Inbound
+// genuegt fuers Crawlen/Indexieren; /unfallbericht ist als Node oben separat eingewoben.)
+const ORPHAN_TOOLS: { url: string; title: string; hosts: string[] }[] = [
+  { url: '/gutachter-finden', title: 'Kostenlosen Gutachter in Ihrer Region finden', hosts: ['/anspruch', '/gutachter-ratgeber', '/reparatur'] },
+  { url: '/kuerzungs-checker', title: 'Kürzungs-Checker: Was die Versicherung gestrichen hat', hosts: ['/unfall-was-tun', '/versicherer-decoder/controlexpert-kuerzung', '/anspruch'] },
+  { url: '/rechner', title: 'Schaden-Rechner: Was steht Ihnen zu?', hosts: ['/gutachter-ratgeber', '/reparatur', '/unfall-was-tun'] },
+  { url: '/schadenfreiheitsklasse/rechner', title: 'SF-Klassen-Rechner', hosts: ['/schadenfreiheitsklasse', '/hub-sf-herausfinden', '/hub-sf-uebertragen-nachteile'] },
+]
+const TOOL_INBOUND: Record<string, RelatedLink[]> = {}
+for (const t of ORPHAN_TOOLS) for (const h of t.hosts) (TOOL_INBOUND[h] ??= []).push({ url: t.url, title: t.title })
+
 function buildNodes(): Node[] {
   const out: Node[] = []
   for (const a of getAllArticles()) {
@@ -99,6 +114,12 @@ export function getRelatedFor(route: string): RelatedLink[] {
   // 1b) Head <-> Decoder konsequent (gruppenuebergreifend, hohe Relevanz)
   const counterpart = HEAD_DECODER[route] ?? DECODER_HEAD[route]
   if (counterpart) add(byRoute.get(counterpart))
+  // 1c) Orphan-Tools: ist diese Route ein Host, das/die zugehoerige(n) Tool(s) einweben.
+  for (const link of TOOL_INBOUND[route] ?? [])
+    if (!seen.has(link.url)) {
+      seen.add(link.url)
+      out.push(link)
+    }
   // 2) bis zu 2 Kinder (falls diese Route selbst Pillar/Hub ist)
   const kids = nodes.filter((n) => n.parent === route)
   kids.slice(0, 2).forEach(add)
