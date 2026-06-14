@@ -33,6 +33,9 @@ export function Logo({
         <circle cx="32" cy="29.8" r="3.2" fill="#000" />
       </mask>
       <rect x="2" y="2" width="40" height="40" rx="12" fill="currentColor" mask={`url(#${maskId})`} />
+      {/* Orange Akzent-Punkt im Icon — fuellt die Masken-Aussparung in Brand-Farbe
+          (konsistent zur Wortmarke + favicon.svg). */}
+      <circle cx="32" cy="29.8" r="3.2" fill="var(--color-au-amber, #C04920)" />
       <text
         x="54"
         y="29.5"

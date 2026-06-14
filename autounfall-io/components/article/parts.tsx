@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { CtaLink } from '@/components/analytics/CtaLink'
 import Image from 'next/image'
 import Markdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -167,11 +168,15 @@ export function Sources({ sources }: { sources: string[] }) {
   )
 }
 
+const MONATE_DE = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember']
+
 export function ArticleDisclaimer() {
+  const now = new Date()
+  const stand = `${MONATE_DE[now.getMonth()]} ${now.getFullYear()}`
   return (
     <p className="mt-10 border-t border-au-sand-dark pt-6 text-xs italic text-au-muted">
       Keine Rechtsberatung. Die Einordnung hängt vom Einzelfall ab — bei strittiger Lage einen Anwalt
-      für Verkehrsrecht einschalten. Inhaltliche Begleitung: {SITE.legalReviewer.name}. Stand: Mai 2026.
+      für Verkehrsrecht einschalten. Inhaltliche Begleitung durch unsere {SITE.legalReviewer.name}. Stand: {stand}.
     </p>
   )
 }
@@ -194,12 +199,13 @@ export function ArticleCta() {
           Bei unverschuldetem Unfall kostenfrei · § 249 BGB
         </p>
         <div className="mt-7">
-          <Link
+          <CtaLink
             href="/gutachter-finden"
+            location="artikel-hub"
             className="inline-flex items-center gap-2 rounded-ios-md bg-au-amber px-7 py-3.5 font-semibold text-au-surface shadow-au-md transition-opacity hover:opacity-90"
           >
             Sachverständigen anfragen
-          </Link>
+          </CtaLink>
         </div>
       </div>
     </section>

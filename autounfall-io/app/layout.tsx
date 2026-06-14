@@ -4,6 +4,9 @@ import { fraunces, inter, jetbrainsMono } from './fonts/fonts'
 import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Plausible } from '@/components/analytics/Plausible'
+import { ClarityAnalytics } from '@/components/analytics/Clarity'
+import { ScrollDepth } from '@/components/analytics/ScrollDepth'
+import { MonikaPlaceholder } from '@/components/placeholders/MonikaPlaceholder'
 import { JsonLd } from '@/components/JsonLd'
 import { siteGraph } from '@/lib/jsonld'
 import { SITE } from '@/lib/site'
@@ -40,20 +43,18 @@ export const metadata: Metadata = {
     follow: true,
     googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 },
   },
-  icons: {
-    icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
-      { url: '/favicon.ico', sizes: 'any' },
-    ],
-  },
-  // BRIEF-03: Site-Verification (Google Search Console / Bing / Ahrefs) —
-  // Verifizierung-zuerst, isoliert. Rendert site-weit 3 <meta>-Tags im <head>.
   verification: {
     google: 'M4ETfqi3R-Mwpf7r9yiiPzBMUbKC-o9awrKGBrErp1o',
     other: {
       'msvalidate.01': '0F96BC6374ACAA551D0151E1EEDF77C0',
       'ahrefs-site-verification': 'f246283242d6908182b41a4f97e61a5be3d4eed80eb3f1e0ee5bc274a4c7c6b7',
     },
+  },
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' },
+    ],
   },
 }
 
@@ -75,7 +76,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
             auf den Content-Seiten NICHT. Dieser <link> greift site-weit. */}
         <link rel="alternate" type="application/rss+xml" title="autounfall.io — Unfall-Ratgeber" href="/feed.xml" />
         {/* Site-weites JSON-LD (Organization #publisher = Kitta & Sprafke UG,
-            #legal-reviewer = LexDrive UG, WebSite) — STANDALONE, kein Claimondo. */}
+            #legal-reviewer = Verkehrsrechts-Partnerkanzlei (unbenannt), WebSite) — STANDALONE, kein Claimondo. */}
         <JsonLd data={siteGraph()} />
         <a
           href="#main-content"
@@ -89,6 +90,9 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         </main>
         <Footer />
         <Plausible />
+        <ClarityAnalytics />
+        <ScrollDepth />
+        <MonikaPlaceholder />
       </body>
     </html>
   )
