@@ -52,11 +52,13 @@ jobs:
           cp -r .next/static .next/standalone/.next/static
         env:
           NODE_OPTIONS: --max-old-space-size=6144
-          # 6 oeffentliche NEXT_PUBLIC_-Werte (= au.io-Build-Inlining, kein Secret):
+          # 4 oeffentliche NEXT_PUBLIC_-Werte (= au.io-Build-Inlining, kein Secret).
+          # Kontakt (SITE_EMAIL/SITE_PHONE) wird hier BEWUSST NICHT gesetzt -> lib/site.ts
+          # ist die Single-Source-of-Truth (team@autounfall.io / 0221 25906530, beides
+          # au.io-eigen). Der fruehere icloud/Mobil-Override war der Legal-Defekt vom
+          # 14.06. (privat-Mail + private Mobilnummer site-weit live) -> entfernt.
           NEXT_PUBLIC_SITE_URL: https://autounfall.io
           NEXT_PUBLIC_PLAUSIBLE_DOMAIN: autounfall.io
-          NEXT_PUBLIC_SITE_EMAIL: nicolas.kitta@icloud.com
-          NEXT_PUBLIC_SITE_PHONE: '+4917620289514'
           NEXT_PUBLIC_SUPABASE_URL: https://paizkjajbuxxksdoycev.supabase.co
           # Finder-Karte /gutachter-finden (public pk.*, api.mapbox.com — kein Footprint).
           # Als GH-Actions-Secret hinterlegt (NICHT committet — GitHub Push-Protection

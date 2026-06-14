@@ -37,12 +37,17 @@ export type KCheckSituation = {
 }
 
 export const KCHECK_POSITIONS: KCheckPosition[] = [
-  { id: 'verbringung', label: 'Verbringungskosten', typicalEur: 130, bgh: 'VI ZR 174/24' },
-  { id: 'upe', label: 'UPE-Aufschläge', typicalEur: 280, bgh: 'VI ZR 234/16' },
-  { id: 'wertminderung', label: 'Wertminderung', typicalEur: 800, bgh: 'VI ZR 174/24' },
-  { id: 'nutzungsausfall', label: 'Nutzungsausfall', typicalEur: 500, bgh: 'Sanden/Danner' },
-  { id: 'sv-kosten', label: 'Sachverständigen-Kosten', typicalEur: 900, bgh: 'VI ZR 65/18' },
-  { id: 'mietwagen', label: 'Mietwagenkosten', typicalEur: 400, bgh: 'VI ZR 211/15' },
+  // Quellen-Label (verbatim gerendert, KEIN „BGH "-Prefix mehr im Markup — manche
+  // Posten sind keine BGH-Az, z.B. § 249 BGB / Sanden-Danner-Tabelle). 14.06.: das
+  // falsche „VI ZR 174/24" (= Totalschaden/Restwert) bei Verbringung + Wertminderung
+  // korrigiert. Verbringung -> § 249 BGB (Basis von /versicherer-decoder/
+  // verbringungskosten-abgelehnt), Wertminderung -> VI ZR 357/03 (wie /anspruch).
+  { id: 'verbringung', label: 'Verbringungskosten', typicalEur: 130, bgh: '§ 249 BGB' },
+  { id: 'upe', label: 'UPE-Aufschläge', typicalEur: 280, bgh: 'BGH VI ZR 234/16' },
+  { id: 'wertminderung', label: 'Wertminderung', typicalEur: 800, bgh: 'BGH VI ZR 357/03' },
+  { id: 'nutzungsausfall', label: 'Nutzungsausfall', typicalEur: 500, bgh: 'Sanden/Danner-Tabelle' },
+  { id: 'sv-kosten', label: 'Sachverständigen-Kosten', typicalEur: 900, bgh: 'BGH VI ZR 65/18' },
+  { id: 'mietwagen', label: 'Mietwagenkosten', typicalEur: 400, bgh: 'BGH VI ZR 211/15' },
 ]
 
 export const KCHECK_SITUATIONS: KCheckSituation[] = [

@@ -92,7 +92,7 @@ export function ArticleHeader({ article }: { article: Article }) {
         )}
       </h1>
       <div className="mt-7 flex flex-wrap items-center gap-3 font-mono text-xs text-au-muted">
-        <span>Stand: Mai 2026</span>
+        <span>Stand: {SITE.contentStand}</span>
         <span className="text-au-sand-dark">·</span>
         <span>In Partnerschaft mit {SITE.legalReviewer.name}</span>
         {article.readingNote ? (
