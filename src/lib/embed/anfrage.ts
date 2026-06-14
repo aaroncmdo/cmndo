@@ -78,6 +78,14 @@ export function clusterAllowlist(): string[] {
   return [...new Set([...base, ...extra])]
 }
 
+/** Anon-Portal-Domains (generic_lp, z.B. autounfall.io), gegen die anon-Embed-Anfragen
+ *  validiert werden. Nur via Env (MONIKA_ANON_DOMAINS) — getrennt von den Cluster-Domains,
+ *  damit ein anon-Portal nicht versehentlich als Cluster-LP durchgeht. */
+export function anonAllowlist(): string[] {
+  const env = process.env.MONIKA_ANON_DOMAINS
+  return env ? env.split(',').map((d) => d.trim().toLowerCase()).filter(Boolean) : []
+}
+
 // ── Embed-Site laden ─────────────────────────────────────────────────────────
 
 /** Laedt die aktive Embed-Site-Konfig per slug (service_role). */
@@ -159,7 +167,10 @@ export async function notifyAnfrage(input: NotifyAnfrageInput): Promise<void> {
   // AAR-939 P4: Kunden-Bestaetigung (Callback-Flow). Variante B laeuft nicht durch
   // notifyAnfrage → hier sind nur sv_embed-A + Cluster-LP. Best-effort: ein Fail darf
   // die SV-/Dispatch-Notify nicht brechen. WhatsApp zuerst, SMS-Fallback.
-  if (payload.telefon) {
+  // generic_lp (autounfall.io): KEINE Claimondo-WA/SMS an den Kunden — au.io-Standalone-
+  // Stance (kein WA, nur in-app/Dispatch) + Footprint-Lock. Der Lead haengt trotzdem in
+  // der Dispatch-Queue (gfa-Insert steht).
+  if (payload.telefon && payload.source !== 'generic_lp') {
     const bezeichnung = svBezeichnung(
       { source: payload.source, cluster: payload.cluster ?? null },
       site?.name ?? null,

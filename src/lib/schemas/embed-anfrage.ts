@@ -6,7 +6,7 @@
 
 import { z } from 'zod'
 
-export const EMBED_SOURCES = ['kfz_gutachter_lp', 'sv_embed'] as const
+export const EMBED_SOURCES = ['kfz_gutachter_lp', 'sv_embed', 'generic_lp'] as const
 
 const PHONE_RE = /^\+?[0-9\s\-/()]{8,20}$/
 

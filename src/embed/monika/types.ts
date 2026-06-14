@@ -3,7 +3,7 @@
 // Self-contained Preact-Widget, per esbuild als IIFE nach public/embed/monika.js
 // gebaut. KEINE @/-Imports — laeuft cross-origin auf fremden Domains, isoliert.
 
-export type WidgetSource = 'kfz_gutachter_lp' | 'sv_embed'
+export type WidgetSource = 'kfz_gutachter_lp' | 'sv_embed' | 'generic_lp'
 
 export interface MonikaTheme {
   primary: string
