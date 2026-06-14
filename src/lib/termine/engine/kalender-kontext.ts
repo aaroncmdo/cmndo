@@ -89,22 +89,27 @@ async function ladeKunde(
 }
 
 async function ladeFallFelder(db: SupabaseClient, fallId: string): Promise<KontextFelder> {
+  // CMM-50: Fahrzeugdaten kommen aus vehicles (SSoT) via v_claim_full statt direkt aus der
+  // faelle-Tabelle — der Konvertierungs-Write-Retire (#2830) leert faelle.kennzeichen/fahrzeug_*.
+  // vcf ist faelle-frei (sourct kennzeichen/fahrzeug_* aus vehicles) und hat claim_nummer/
+  // schadenort_*/lead_id/kunde_id flach (kein claims-Embed mehr). vcf.fall_id == faelle.id.
+  // db ist hier service_role (syncTerminToExternalCalendar -> createAdminClient, alle Caller
+  // ohne db-Arg) -> .eq('fall_id') ok, KEIN RLS-Leak (gleiches Risikoprofil wie der faelle-Read).
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, lead_id, kunde_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_ort)')
-    .eq('id', fallId)
+    .from('v_claim_full')
+    .select('kennzeichen, fahrzeug_hersteller, fahrzeug_modell, claim_nummer, schadenort_adresse, schadenort_ort, lead_id, kunde_id')
+    .eq('fall_id', fallId)
     .maybeSingle()
   if (!fall) return { ...LEER, fallId }
-  const claim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const kunde = await ladeKunde(db, (fall.lead_id as string | null) ?? null, (fall.kunde_id as string | null) ?? null)
   return {
-    claimNummer: (claim?.claim_nummer as string | null) ?? null,
+    claimNummer: (fall.claim_nummer as string | null) ?? null,
     fahrzeugHersteller: (fall.fahrzeug_hersteller as string | null) ?? null,
     fahrzeugModell: (fall.fahrzeug_modell as string | null) ?? null,
     kennzeichen: (fall.kennzeichen as string | null) ?? null,
     kundeName: kunde.name,
     kundeTelefon: kunde.telefon,
-    schadenortAdresse: (claim?.schadenort_adresse as string | null) ?? (claim?.schadenort_ort as string | null) ?? null,
+    schadenortAdresse: (fall.schadenort_adresse as string | null) ?? (fall.schadenort_ort as string | null) ?? null,
     fallId,
   }
 }
