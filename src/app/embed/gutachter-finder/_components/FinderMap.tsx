@@ -35,7 +35,7 @@ import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-find
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
 import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
 import { createRoot, type Root } from 'react-dom/client'
-import { SvProfilePopup, DeadPinProfilePopup } from './SvProfilePopup'
+import { SvProfilePopup, DeadPinProfilePopup, SvProfileInhalt } from './SvProfilePopup'
 import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
@@ -182,6 +182,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  // AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) statt engem Pin-Popup.
+  const [sheetSv, setSheetSv] = useState<AktiverSVPublic | null>(null)
   // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
   // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
@@ -245,9 +247,20 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     // WS2: Profil-Popup NEBEN/ÜBER dem Pin (popupPlatzierung) via React-Render
     // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
     // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
-    function openSvPopup(sv: AktiverSVPublic) {
+    function openSvPopup(sv: AktiverSVPublic, opts?: { mobilSheet?: boolean }) {
       popupRef.current?.remove()
       popupRootRef.current?.unmount()
+      // AAR-956 (Aaron 14.06.): Mobil/iPad (<lg) → Bottom-Sheet NUR bei direktem Pin-Klick
+      // (opts.mobilSheet). Auto-Open (empfohlener SV nach Route) + Slot-Picker-Select öffnen
+      // auf Mobil NICHTS — ein Sheet würde sonst den Slot-Picker verdecken. Desktop (≥1024)
+      // behält in allen Fällen das Map-Popup.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        if (opts?.mobilSheet) {
+          setSheetSv(sv)
+          setHoveredId(sv.id)
+        }
+        return
+      }
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<SvProfilePopup sv={sv} />)
@@ -399,7 +412,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
       svMarkerElsRef.current.clear()
       aktiveSVs.forEach((sv) => {
-        const marker = addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv))
+        const marker = addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv, { mobilSheet: true }))
         svMarkerElsRef.current.set(sv.id, marker.getElement())
       })
 
@@ -898,10 +911,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
             />
           </button>
           <div className="px-5 pb-6 pt-2">
-            {/* Beratungs-CTA auch im Mobile-Sheet (top-right ist auf Mobile versteckt) */}
-            <div className="flex justify-end mb-3 sm:hidden">
-              <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} />
-            </div>
+            {/* AAR-956 (Aaron 14.06.): KEIN zweiter Beratungs-CTA im Anfrage-Sheet — der
+                Header-Button oben rechts (auch auf Mobile sichtbar) reicht. Doppelung raus. */}
             {wizardSlot}
           </div>
         </div>
@@ -914,6 +925,38 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
       {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}
       {hoveredId && <input type="hidden" data-selected-sv-id={hoveredId} />}
+
+      {/* AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) — von unten
+          ausfahrbar, mehr Platz + Touch-freundlich als das enge Pin-Popup. Avatar + Sterne +
+          Trust-Signale (gross-Variante). Desktop (≥1024) nutzt weiterhin das Map-Popup. */}
+      {sheetSv && (
+        <div className="lg:hidden fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Gutachter-Profil">
+          <div
+            className="absolute inset-0 backdrop-blur-sm animate-in fade-in"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary, #0D1B3E) 22%, transparent)' }}
+            onClick={() => {
+              setSheetSv(null)
+              setHoveredId(null)
+            }}
+          />
+          <div className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto rounded-t-ios-xl border-t border-white/60 bg-white/90 shadow-glass-card backdrop-blur-md animate-in slide-in-from-bottom duration-300">
+            <button
+              type="button"
+              onClick={() => {
+                setSheetSv(null)
+                setHoveredId(null)
+              }}
+              aria-label="Profil schließen"
+              className="sticky top-0 z-10 flex w-full justify-center bg-white/80 pt-2.5 pb-2 backdrop-blur-md"
+            >
+              <span className="block h-1 w-10 rounded-full bg-claimondo-navy/25" />
+            </button>
+            <div className="px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+              <SvProfileInhalt sv={sheetSv} gross />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Beratung-Rückruf-Modal auf Root-Ebene (NICHT im z-[5]-Header). Sonst bleibt die
           z-[10]-Sidebar ÜBER dem Modal-Backdrop "hervorgehoben" — das fixed-Modal wäre im
