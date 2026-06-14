@@ -266,7 +266,10 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   const stepIdx = phase === 'ort' ? 0 : phase === 'termin' ? 1 : phase === 'schaden' ? 2 : 3
 
   return (
-    <GlassSurface className="flex flex-col gap-4 p-5">
+    // AAR-956 (Aaron 14.06.): sanfter Load-Reveal — die Wizard-Card fährt beim Mount einmal
+    // ein (fade + leichter slide-up). GlassSurface persistiert über Phasen → kein Re-Trigger
+    // bei Step-Wechseln. Dezent, im Claimondo-Look.
+    <GlassSurface className="flex flex-col gap-4 p-5 animate-in fade-in slide-in-from-bottom-3 duration-700 ease-out">
       {phase !== 'gebucht' && (
         <div className="flex items-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (

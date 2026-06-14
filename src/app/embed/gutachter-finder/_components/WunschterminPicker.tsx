@@ -71,8 +71,9 @@ export function WunschterminPicker({
           )
         })}
       </div>
-      {/* Zeit — Chip-Wrap */}
-      <div className="flex flex-wrap gap-1.5">
+      {/* Zeit — horizontale Chip-Leiste (scrollbar, wie die Datums-Reihe) statt dichtem
+          Wrap über 2–3 Zeilen. AAR-956 (Aaron 14.06.): eine ruhige Bewegungs-Sprache. */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden" style={{ scrollbarWidth: 'none' }}>
         {ZEITEN.map((z) => {
           const aktiv = zeit === z
           return (
@@ -80,7 +81,7 @@ export function WunschterminPicker({
               key={z}
               type="button"
               onClick={() => waehleZeit(z)}
-              className={`rounded-ios-md border px-2.5 py-1.5 text-[0.8125rem] font-semibold transition-colors ${
+              className={`flex-shrink-0 rounded-ios-md border px-2.5 py-1.5 text-[0.8125rem] font-semibold transition-colors ${
                 aktiv
                   ? 'border-claimondo-ondo bg-claimondo-ondo text-white'
                   : 'border-claimondo-border bg-white text-claimondo-navy hover:border-claimondo-ondo'
