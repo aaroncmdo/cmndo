@@ -164,3 +164,97 @@ export async function ensureVehicleFromFin(params: {
 
   return { ok: true, vehicleId }
 }
+
+/** Mappt einen VehicleSnapshot auf vehicles-Spalten (ALLE Felder, inkl. Kern-Identitaet).
+ *  Nur gesetzte (non-null) Felder -> kein NULL-Clobber. Datums-Felder best-effort geparst;
+ *  ungueltige werden ausgelassen. Geteilt von createVehicleStub + ensureVehicleForClaim. */
+function mapSnapshotToVehicleColumns(s: VehicleSnapshot): Record<string, unknown> {
+  const row: Record<string, unknown> = {}
+  if (s.kennzeichen != null) row.kennzeichen_aktuell = s.kennzeichen
+  if (s.kennzeichenBuchstaben != null) row.kennzeichen_buchstaben = s.kennzeichenBuchstaben
+  if (s.hersteller != null) row.hersteller = s.hersteller
+  if (s.modell != null) row.modell_haupttyp = s.modell
+  if (s.hsn != null) row.hsn = s.hsn
+  if (s.tsn != null) row.tsn = s.tsn
+  if (s.kilometerstand != null) row.aktueller_kilometerstand = s.kilometerstand
+  if (s.farbe != null) row.farbe_klartext = s.farbe
+  if (s.farbcode != null) row.farbcode = s.farbcode
+  if (s.bauart != null) row.bauart = s.bauart
+  const baujahrMonat = yearToDateStr(s.baujahr)
+  if (baujahrMonat) row.baujahr_monat = baujahrMonat
+  const erstzulassungDate = textToDateStr(s.erstzulassung)
+  if (erstzulassungDate) row.erstzulassung = erstzulassungDate
+  if (s.ausstattung != null) row.fahrzeug_ausstattung = s.ausstattung
+  if (s.finQuelle != null) row.fin_quelle = s.finQuelle
+  if (s.finExtrahiertAm != null) row.fin_extrahiert_am = s.finExtrahiertAm
+  return row
+}
+
+/**
+ * CMM-68: Legt eine FIN-LOSE vehicles-Row an (Stub) und liefert deren UUID.
+ *
+ * Fuer Eingabepunkte OHNE FIN: das Fahrzeug existiert physisch, die FIN steht aber
+ * (noch) nicht fest — Kennzeichen kommt frueh (Unfallmeldung), die FIN erst spaeter
+ * via ZB1/Fahrzeugschein (oder nie). `vehicles.fin` ist nullable + unique → mehrere
+ * FIN-lose Rows sind erlaubt (NULLs sind in Postgres distinct). Sobald spaeter eine
+ * FIN reinkommt, dedupliziert `ensureVehicleFromFin` (ON CONFLICT(fin)) und der Caller
+ * haengt claims.vehicle_id auf die FIN-Row um → "ein Fahrzeug, mehrere Claims".
+ *
+ * Non-critical: wirft nie. Legt KEINE leere Row an (leerer Snapshot -> ok:false).
+ * @param db Admin- (service_role) Client — direkter vehicles-Insert (wie der
+ *           Secondary-UPDATE in ensureVehicleFromFin) laeuft service-role.
+ */
+export async function createVehicleStub(params: {
+  snapshot?: VehicleSnapshot
+  db: SupabaseClient
+}): Promise<EnsureVehicleResult> {
+  const row = mapSnapshotToVehicleColumns(params.snapshot ?? {})
+  if (Object.keys(row).length === 0) {
+    return { ok: false, error: 'createVehicleStub: leerer Snapshot (kein Fahrzeugdatum)' }
+  }
+  row.fin = null
+  const { data, error } = await params.db.from('vehicles').insert(row).select('id').single()
+  if (error) return { ok: false, error: error.message }
+  const vehicleId = typeof (data as { id?: unknown } | null)?.id === 'string' ? (data as { id: string }).id : null
+  if (!vehicleId) return { ok: false, error: 'createVehicleStub lieferte keine vehicle-id' }
+  return { ok: true, vehicleId }
+}
+
+/**
+ * CMM-68: Stellt sicher, dass `claims.vehicle_id` auf ein Fahrzeug zeigt — auch OHNE FIN.
+ *
+ * - Hat der Claim bereits ein Fahrzeug (z.B. via vorheriger FIN-Anlage): nur den
+ *   Snapshot non-clobber nachziehen, bestehende vehicle-id zurueck.
+ * - Sonst: FIN-losen Stub anlegen (createVehicleStub) + claims.vehicle_id setzen.
+ *
+ * Der Caller, der spaeter eine FIN gewinnt, ruft ensureVehicleFromFin und setzt
+ * claims.vehicle_id auf die FIN-deduplizierte Row um (verwaist den Stub; Cleanup = Folge).
+ * Non-critical: wirft nie.
+ * @param db Admin- (service_role) Client.
+ */
+export async function ensureVehicleForClaim(params: {
+  claimId: string
+  snapshot?: VehicleSnapshot
+  db: SupabaseClient
+}): Promise<EnsureVehicleResult> {
+  const { data: claim, error: claimErr } = await params.db
+    .from('claims').select('vehicle_id').eq('id', params.claimId).maybeSingle()
+  if (claimErr) return { ok: false, error: claimErr.message }
+  const existingVid = (claim?.vehicle_id as string | null) ?? null
+
+  if (existingVid) {
+    const snapCols = mapSnapshotToVehicleColumns(params.snapshot ?? {})
+    if (Object.keys(snapCols).length > 0) {
+      const { error: updErr } = await params.db.from('vehicles').update(snapCols).eq('id', existingVid)
+      if (updErr) console.warn('[CMM-68] vehicles Snapshot-Nachzug (non-fatal):', updErr.message)
+    }
+    return { ok: true, vehicleId: existingVid }
+  }
+
+  const created = await createVehicleStub({ snapshot: params.snapshot, db: params.db })
+  if (!created.ok) return created
+  const { error: linkErr } = await params.db
+    .from('claims').update({ vehicle_id: created.vehicleId }).eq('id', params.claimId)
+  if (linkErr) return { ok: false, error: linkErr.message }
+  return created
+}
