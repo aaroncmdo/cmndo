@@ -25,10 +25,15 @@ export function UeberUnsSection({ city }: { city: City }) {
             </p>
             <div className="uu-quote-rule" aria-hidden="true" />
             <div className="uu-quote-sign">
+              {/* SV-Avatar: committed Brand-SVG (Monogramm AE) statt des .png aus dem
+                  brand-assets-archiv.zip — letzteres fehlte fuer Wuppertal (404:
+                  avatar-amet-wuppertal.png nie generiert/eingespielt). Sobald ein
+                  echtes Foto im ZIP liegt, zurueck auf
+                  `${CLUSTER.imgPath}avatar-${svName}-${key}.png`. */}
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 className="uu-quote-avatar"
-                src={`${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`}
+                src="/assets/brand/sv-avatar-wuppertal.svg"
                 alt="Sachverständiger vor Ort"
                 loading="lazy"
                 width={44}
