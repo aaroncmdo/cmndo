@@ -103,7 +103,8 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   const { data: fall, error: fallErr } = await db.from('faelle').insert({
     lead_id: lead.id,
     status: 'ersterfassung',
-    kennzeichen: data.kennzeichen?.trim() || null,
+    // CMM-50/CMM-68: kennzeichen NICHT mehr in faelle — geht via ensureVehicleForClaim (unten,
+    // nach createClaimForFall) auf vehicles + claims.vehicle_id.
     dispatch_id: user.id,
     konvertiert_am: new Date().toISOString(),
   }).select('id').single()
