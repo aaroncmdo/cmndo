@@ -35,3 +35,17 @@ export function trackCtaClick(location: string): void {
     window.plausible('cta_click', { props: { location } })
   }
 }
+
+/** Erste Interaktion mit dem Lead-Formular (Funnel-Start). */
+export function trackFormStart(form: string): void {
+  if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+    window.plausible('form_start', { props: { form } })
+  }
+}
+
+/** Scroll-Tiefe — `scroll_50` / `scroll_90`, je einmal pro Seitenaufruf. */
+export function trackScrollDepth(depth: 50 | 90): void {
+  if (typeof window !== 'undefined' && typeof window.plausible === 'function') {
+    window.plausible(`scroll_${depth}`)
+  }
+}

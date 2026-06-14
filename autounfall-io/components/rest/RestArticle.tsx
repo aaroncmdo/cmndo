@@ -8,6 +8,7 @@ import {
   ArticleDisclaimer,
   ArticleCta,
 } from '@/components/article/parts'
+import { RelatedTopics } from '@/components/RelatedTopics'
 
 // Shared-Render fuer alle WP-7-Seiten (Pillar/Hub/SF/nested-Artikel). Reused die
 // WP-2-Parts (Prose=react-markdown, QuickAnswer, FaqAccordion, Sources,
@@ -80,6 +81,7 @@ export function RestArticle({ page }: { page: RestPage }) {
         {page.sources ? <Sources sources={page.sources} /> : null}
         <ArticleDisclaimer />
       </article>
+      <RelatedTopics route={page.route} />
       <ArticleCta />
     </>
   )

@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { useState, useTransition } from 'react'
+import { useRef, useState, useTransition } from 'react'
 import { submitAutounfallLead, type SubmitLeadResult } from '@/app/gutachter-finden/actions'
-import { trackCtaClick, trackLeadSubmit } from '@/lib/track'
+import { trackCtaClick, trackFormStart, trackLeadSubmit } from '@/lib/track'
 
 // Lead-Formular für /gutachter-finden. Felder name/telefon/email?/plz_oder_stadt
 // + Schadenskontext + DSGVO-Pflicht-Checkbox. Hidden-Inputs für utm_*/ref/
@@ -33,6 +33,14 @@ export function LeadFormClient() {
   const presetTyp = sp.get('situation') ? '' : (sp.get('schadenstyp') ?? '')
   const [pending, startTransition] = useTransition()
   const [result, setResult] = useState<SubmitLeadResult | null>(null)
+  const startedRef = useRef(false)
+
+  // Funnel-Start: erste Interaktion mit dem Formular (einmal pro Mount).
+  function onFormFirstInteract() {
+    if (startedRef.current) return
+    startedRef.current = true
+    trackFormStart('gutachter-finden')
+  }
 
   function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -70,7 +78,7 @@ export function LeadFormClient() {
   const fieldError = (f: string) => (result && !result.ok && result.field === f ? result.error : null)
 
   return (
-    <form onSubmit={onSubmit} noValidate className="rounded-ios-md border border-au-sand-dark bg-au-surface p-6 sm:p-8">
+    <form onSubmit={onSubmit} onFocus={onFormFirstInteract} noValidate data-clarity-mask="true" className="rounded-ios-md border border-au-sand-dark bg-au-surface p-6 sm:p-8">
       {/* Hidden-Kontext aus ?query (UTM/ref/schadenstyp) */}
       <input type="hidden" name="ref" value={ref} />
       <input type="hidden" name="utm_source" value={sp.get('utm_source') ?? ''} />

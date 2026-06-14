@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Logo } from '@/components/Logo'
+import { CookieSettings } from '@/components/analytics/CookieSettings'
 import { SITE } from '@/lib/site'
 
 // Foundation-Footer (STANDALONE): Betreiber = Kitta & Sprafke UG, Pflicht-
@@ -27,6 +28,7 @@ export function Footer() {
             <Link href="/datenschutz" className="transition-colors hover:text-au-surface">
               Datenschutz
             </Link>
+            <CookieSettings />
           </nav>
         </div>
         <div className="mt-10 border-t border-au-surface/15 pt-6 text-xs text-au-surface/60">

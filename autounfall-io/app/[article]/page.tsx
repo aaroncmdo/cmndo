@@ -15,6 +15,7 @@ import {
   ArticleDisclaimer,
   ArticleCta,
 } from '@/components/article/parts'
+import { RelatedTopics } from '@/components/RelatedTopics'
 
 // Nur bekannte Artikel-Slugs werden statisch erzeugt; alles andere → 404.
 // (Statische Routen wie /impressum gehen vor diesem dynamischen Segment vor.)
@@ -82,6 +83,7 @@ export default async function ArticlePage({ params }: { params: Promise<{ articl
         {article.sources ? <Sources sources={article.sources} /> : null}
         <ArticleDisclaimer />
       </article>
+      <RelatedTopics route={'/' + article.slug} />
       <ArticleCta />
     </>
   )

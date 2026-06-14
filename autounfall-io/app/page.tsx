@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
+import { CtaLink } from '@/components/analytics/CtaLink'
 import { getAllRestPages } from '@/lib/rest'
 import { JsonLd } from '@/components/JsonLd'
 import { siteGraph } from '@/lib/jsonld'
@@ -55,12 +56,13 @@ export default function HomePage() {
             vermeiden müssen.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <Link
+            <CtaLink
               href="/gutachter-finden"
+              location="home"
               className="inline-flex items-center gap-2 rounded-ios-md bg-au-amber px-7 py-3.5 font-semibold text-au-surface shadow-au-md transition-opacity hover:opacity-90"
             >
               Sachverständigen anfragen
-            </Link>
+            </CtaLink>
             <Link
               href="/unfall-assistance"
               className="inline-flex items-center gap-2 rounded-ios-md border-[1.5px] border-au-sand-dark bg-au-surface px-7 py-3.5 font-semibold text-au-ink transition-colors hover:border-au-amber hover:text-au-amber"
@@ -151,12 +153,13 @@ export default function HomePage() {
             Forderung. Bei Fremdverschulden kostenfrei nach § 249 BGB.
           </p>
           <div className="mt-7">
-            <Link
+            <CtaLink
               href="/gutachter-finden"
+              location="home"
               className="inline-flex items-center gap-2 rounded-ios-md bg-au-amber px-7 py-3.5 font-semibold text-au-surface shadow-au-md transition-opacity hover:opacity-90"
             >
               Sachverständigen anfragen
-            </Link>
+            </CtaLink>
           </div>
         </div>
       </section>

@@ -3,6 +3,7 @@ import { Suspense } from 'react'
 import { JsonLd } from '@/components/JsonLd'
 import { siteGraph } from '@/lib/jsonld'
 import { LeadFormClient } from '@/components/lead/LeadFormClient'
+import { GutachterFinderEmbedPlaceholder } from '@/components/placeholders/GutachterFinderEmbedPlaceholder'
 
 // WP-6 · Lead-Formular. Löst die /gutachter-finden-CTAs aus WP-2/3/4/5/7 ein
 // (vorher transiente 404). Anfrage → Server Action submitAutounfallLead →
@@ -57,6 +58,8 @@ export default function GutachterFindenPage() {
         <Suspense fallback={null}>
           <LeadFormClient />
         </Suspense>
+
+        <GutachterFinderEmbedPlaceholder />
 
         <p className="mt-6 text-xs leading-relaxed text-au-muted">
           Ihre Daten werden ausschließlich zur Bearbeitung dieser Anfrage und zur Vermittlung

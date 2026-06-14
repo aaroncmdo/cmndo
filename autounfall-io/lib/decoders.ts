@@ -1,12 +1,15 @@
 import { decoders as decodersBase } from '@/content/decoder-data.generated'
 import { decodersExtra } from '@/content/decoder-extra.generated'
 import type { Decoder } from '@/lib/decoder-types'
+import { deepGenerifyContent } from '@/lib/genericize-partner'
 
 export * from '@/lib/decoder-types'
 
 // WP-3-Basis (20) + WP-7-Nachzügler (decoder-extra, 1). Basis zuerst, Nachzügler
 // ans Ende — Cluster-Gruppierung (getDecodersByCluster) bleibt stabil.
-const decoders: Decoder[] = [...decodersBase, ...decodersExtra]
+// Verkehrsrechts-Partnerkanzlei generisch (Cowork 2026-06-12): Deep-Transform auf
+// alle generierten Decoder (Name/Link entnamen), generated.ts unveraendert.
+const decoders: Decoder[] = [...decodersBase, ...decodersExtra].map(deepGenerifyContent)
 
 // Anzeige-Reihenfolge der Cluster im Hub (Schadenregulierungs-Flow).
 const CLUSTER_ORDER = ['Verzögerung', 'Kürzungen', 'Gutachter aufdrängen', 'Wertminderung & Co.']
