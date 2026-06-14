@@ -3,9 +3,10 @@ import { JsonLd } from '@/components/JsonLd'
 import { siteGraph, toolGraph } from '@/lib/jsonld'
 import { ToolPageHeader } from '@/components/tools/ToolPageHeader'
 import { UnfallberichtTool } from '@/components/tools/UnfallberichtTool'
+import { metaTitle } from '@/lib/meta'
 
 export const metadata: Metadata = {
-  title: 'Unfallbericht-Vorlage: ausfüllen, drucken, als PDF speichern',
+  title: metaTitle('Unfallbericht-Vorlage: ausfüllen, drucken, als PDF speichern'),
   description:
     'Interaktiver Unfallbericht nach dem Europäischen Unfallbericht — mit Feld-Anleitung, lokal in Ihrem Browser, drucken oder als PDF speichern. Kein Schuldanerkenntnis.',
   alternates: { canonical: '/unfallbericht' },

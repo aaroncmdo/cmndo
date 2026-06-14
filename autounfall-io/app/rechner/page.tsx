@@ -3,9 +3,10 @@ import { JsonLd } from '@/components/JsonLd'
 import { siteGraph, toolGraph } from '@/lib/jsonld'
 import { ToolPageHeader } from '@/components/tools/ToolPageHeader'
 import { Rechner, type RechnerType } from '@/components/tools/Rechner'
+import { metaTitle } from '@/lib/meta'
 
 export const metadata: Metadata = {
-  title: 'Schaden-Rechner: Nutzungsausfall, Schmerzensgeld, Totalschaden & mehr',
+  title: metaTitle('Schaden-Rechner: Nutzungsausfall, Schmerzensgeld, Totalschaden & mehr'),
   description:
     'Sechs kostenlose Orientierungs-Rechner rund um den Kfz-Unfallschaden: Nutzungsausfall, Schmerzensgeld, SF-Rückstufung, Totalschaden, Wertminderung und Verzugszinsen.',
   alternates: { canonical: '/rechner' },

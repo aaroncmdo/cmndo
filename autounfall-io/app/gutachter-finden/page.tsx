@@ -5,12 +5,13 @@ import { siteGraph } from '@/lib/jsonld'
 import { LeadFormClient } from '@/components/lead/LeadFormClient'
 import { FinderMap } from '@/components/finder/FinderMap'
 import { ladeFinderPins, type FinderPins } from '@/lib/finder/pins'
+import { metaTitle } from '@/lib/meta'
 
 // WP-6 · Lead-Formular. Löst die /gutachter-finden-CTAs aus WP-2/3/4/5/7 ein
 // (vorher transiente 404). Anfrage → Server Action submitAutounfallLead →
 // anfragen → RPC convert_anfrage_zu_lead. STANDALONE, kein Claimondo im Formular.
 export const metadata: Metadata = {
-  title: 'Sachverständigen finden — unabhängiges Kfz-Gutachten anfragen',
+  title: metaTitle('Sachverständigen finden — unabhängiges Kfz-Gutachten anfragen'),
   description:
     'Nach unverschuldetem Unfall: unabhängigen Kfz-Sachverständigen in Ihrer Nähe anfragen. Bei Fremdverschulden kostenfrei nach § 249 BGB. Match in der Regel binnen 24 Stunden.',
   alternates: { canonical: '/gutachter-finden' },
