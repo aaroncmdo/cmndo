@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
 import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import GoogleBusinessFeld from '@/components/GoogleBusinessFeld'
 import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
@@ -468,6 +469,9 @@ export default function ProfilClient({
             </div>
           </SectionCard>
         )}
+        {/* AAR-956: Google-Business-Profil verknüpfen — schaltet die echte
+            Sterne-Bewertung im Gutachter-Finder frei (Places API). */}
+        <GoogleBusinessFeld />
         {/* KFZ-139: Branding Section */}
         <BrandingSection svId={sv.id} />
         {/* AAR-500 N5: Benachrichtigungs-Präferenzen */}
