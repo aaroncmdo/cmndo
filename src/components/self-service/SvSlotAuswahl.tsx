@@ -6,7 +6,7 @@
 // /anfrage). Match-/Buchungs-Logik liegt beim Consumer.
 
 import { useTranslations } from 'next-intl'
-import { Check } from 'lucide-react'
+import { Check, BadgeCheck } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { Card } from '@/components/primitives/Card'
@@ -64,6 +64,16 @@ export function SvSlotAuswahl({
           // Card hervorgehoben (glass='dark'); Inhalt dann in Weiß. /flow (kein embedMode) bleibt
           // unverändert (weiße Card, Ondo-„Empfohlen"-Text).
           const dunkel = embedMode && i === 0
+          // AAR-956 (Aaron 14.06.): Tier-1 (zahlender Partner) vs Tier-2 (basic) sichtbar
+          // machen — NUR im Slot-Picker (embedMode). Eine Plakette pro Karte, Text variiert:
+          //   #1 + Tier-1 → „Empfohlener Partner" · #1 + Tier-2 → „Empfohlen" (bestpassend,
+          //   aber kein Partner-Framing) · sonst Tier-1 → „Partner" · Tier-2 → keine.
+          // Tier-1-Plaketten tragen ein BadgeCheck-Icon. /flow + /anfrage (kein embedMode)
+          // zeigen weiterhin nur das schlichte „Empfohlen" beim #1 (else-Zweig unten).
+          const istTop = sv.istTopPartner === true
+          const embedBadge = i === 0
+            ? (istTop ? t('slot.empfohlener_partner') : t('slot.empfohlen'))
+            : (istTop ? t('slot.partner') : null)
           const kopf = (
             <>
               {sv.profilbild ? (
@@ -78,19 +88,20 @@ export function SvSlotAuswahl({
                 </div>
               )}
               <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className={cn('font-semibold', dunkel ? 'text-white' : 'text-claimondo-navy')}>{sv.vorname}</span>
-                  {i === 0 && (
-                    embedMode ? (
+                  {embedMode ? (
+                    embedBadge && (
                       <span className={cn(
-                        'rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
+                        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
                         dunkel ? 'bg-white/90 text-claimondo-navy' : 'bg-claimondo-navy text-white',
                       )}>
-                        {t('slot.empfohlen')}
+                        {istTop && <BadgeCheck className="h-3 w-3" />}
+                        {embedBadge}
                       </span>
-                    ) : (
-                      <span className="text-[11px] font-semibold text-claimondo-ondo">{t('slot.empfohlen')}</span>
                     )
+                  ) : (
+                    i === 0 && <span className="text-[11px] font-semibold text-claimondo-ondo">{t('slot.empfohlen')}</span>
                   )}
                   {selektiert && (
                     <span className={cn('ml-auto inline-flex items-center gap-1 text-[11px] font-bold', dunkel ? 'text-white' : 'text-claimondo-navy')}>

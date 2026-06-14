@@ -5547,6 +5547,8 @@
       "heading": "Państwa termin u rzeczoznawcy",
       "sub": "Proszę wybrać pasujący termin — pierwsza propozycja to najlepiej dopasowany rzeczoznawca.",
       "empfohlen": "Zalecane",
+      "empfohlener_partner": "Polecany partner",
+      "partner": "Partner",
       "wunschzeit": "Preferowany czas",
       "keine_termine": "Obecnie brak wolnych terminów.",
       "uhr_suffix": ""

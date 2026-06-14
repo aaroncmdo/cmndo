@@ -58,6 +58,7 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
     expect(r.bewertungAktualisiert).toBe('2026-05-01T00:00:00Z')
     expect(r.distanzGerundet).toBe('ca. 10 km')
     expect(r.istWunschterminFrei).toBe(true)
+    expect(r.istTopPartner).toBe(true) // makeCandidate: paket='premium'
     expect(r.slots).toEqual(slots)
   })
 
@@ -80,6 +81,9 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
   test('Whitelist ist GESCHLOSSEN — kein neu hinzugefuegtes Feld kann durchrutschen', () => {
     // Closed-Set-Guard: staerker als not.toHaveProperty(liste) — faengt JEDES
     // kuenftig ergaenzte Feld (z.B. beim /flow-UI-Umbau), nicht nur bekannte.
+    // 'istTopPartner' ist die BEWUSSTE Ergaenzung (Aaron 14.06., AAR-956): ein
+    // abgeleitetes Boolean (paket !== 'basic'), kein roher paket-Wert — s. die
+    // separaten istTopPartner-Tests unten + das types.ts-AUSNAHME-Kommentar.
     const r = toOeffentlichesSvProfil({
       candidate: makeCandidate(),
       bewertung: { durchschnitt: 4.8, anzahl: 57, aktualisiert: null },
@@ -88,8 +92,8 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
     })
     expect(Object.keys(r).sort()).toEqual([
       'bewertungAktualisiert', 'bewertungAnzahl', 'bewertungDurchschnitt',
-      'distanzGerundet', 'istWunschterminFrei', 'profilbeschreibung',
-      'profilbild', 'slots', 'svId', 'vorname',
+      'distanzGerundet', 'istTopPartner', 'istWunschterminFrei',
+      'profilbeschreibung', 'profilbild', 'slots', 'svId', 'vorname',
     ])
   })
 
@@ -140,5 +144,44 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
       slots: [],
     })
     expect(r.istWunschterminFrei).toBe(false)
+  })
+
+  // AAR-956 (Aaron 14.06.): istTopPartner = abgeleitetes Tier-Signal fuer den
+  // Embed-Slot-Picker. Tier-1 (zahlend) = true, Tier-2 (basic) = false. Der
+  // rohe paket-Wert wird NIE projiziert (s. „leakt KEINE internen Werte").
+  describe('istTopPartner — Tier-1/Tier-2-Ableitung (paket !== basic)', () => {
+    function tier(paket: string): boolean {
+      return toOeffentlichesSvProfil({
+        candidate: makeCandidate({ paket }),
+        bewertung: null,
+        profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+        slots: [],
+      }).istTopPartner
+    }
+
+    test('Tier-1 (zahlende Pakete) → true', () => {
+      expect(tier('premium')).toBe(true)
+      expect(tier('pro')).toBe(true)
+      expect(tier('standard')).toBe(true)
+    })
+
+    test('Tier-2 (basic) → false', () => {
+      expect(tier('basic')).toBe(false)
+    })
+
+    test('leeres/unbekanntes paket (z.B. Fixer-SV-Neutral) → false (kein falscher Partner-Badge)', () => {
+      expect(tier('')).toBe(false)
+    })
+
+    test('verraet den exakten Tier nicht — nur das Boolean, nie der paket-String', () => {
+      const r = toOeffentlichesSvProfil({
+        candidate: makeCandidate({ paket: 'premium' }),
+        bewertung: null,
+        profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+        slots: [],
+      })
+      expect(r.istTopPartner).toBe(true)
+      expect(JSON.stringify(r)).not.toContain('premium')
+    })
   })
 })

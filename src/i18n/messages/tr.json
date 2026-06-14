@@ -5547,6 +5547,8 @@
       "heading": "Bilirkişi randevunuz",
       "sub": "Size uygun bir randevu seçin — ilk öneri sizinle en iyi eşleşen bilirkişidir.",
       "empfohlen": "Önerilen",
+      "empfohlener_partner": "Önerilen partner",
+      "partner": "Partner",
       "wunschzeit": "Tercih edilen saat",
       "keine_termine": "Şu anda uygun randevu yok.",
       "uhr_suffix": ""
