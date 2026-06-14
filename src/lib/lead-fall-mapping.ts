@@ -45,19 +45,12 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'gegner_anzahl_beteiligte',
   'gegner_fahrzeugtyp',
   // Fahrzeug
-  'kennzeichen', 'kennzeichen_kreis', 'kennzeichen_buchstaben', 'kennzeichen_zahl', 'kennzeichen_suffix',
-  'fahrzeug_hersteller',
-  'fahrzeug_modell',
-  'fahrzeug_farbe',
-  'lackfarbe_code',
-  'erstzulassung',
-  // AAR-181: Baujahr wird jetzt in Phase 4 als Pflichtfeld erfasst und muss
-  // beim Fall-Erstellen übernommen werden
-  'fahrzeug_baujahr',
-  // AAR-576 (A2): HSN/TSN aus ZB1-OCR — DAT-API-Blocker. Gleicher Spaltenname
-  // in leads + faelle.
-  'hsn',
-  'tsn',
+  // CMM-50/CMM-68: Vehicle-Master-Cols (kennzeichen / kennzeichen_buchstaben / fahrzeug_hersteller /
+  // _modell / _farbe / lackfarbe_code / erstzulassung / fahrzeug_baujahr / hsn / tsn) NICHT mehr in
+  // den faelle-Insert — sie leben auf `vehicles` (convert-lead schreibt sie unbedingt: ensureVehicleFromFin
+  // bei FIN, sonst createVehicleStub fuer JEDES Fahrzeugdatum) + `kennzeichen` zusaetzlich auf der
+  // geschaedigter-claim_party. NUR die kennzeichen-PARTS bleiben (haben kein vehicles-Home).
+  'kennzeichen_kreis', 'kennzeichen_zahl', 'kennzeichen_suffix',
   // Gegner
   'gegner_name',
   'gegner_versicherung',
@@ -169,7 +162,8 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // Semantik-Duplikat-Spalten — claims ist SSoT (claims.schadentag /
   // schadenort_adresse/_plz/_ort). convertLeadToClaim schreibt sie dort;
   // der faelle-Insert (buildFallInsertFromLead) befuellt sie nicht mehr.
-  fin_vin: 'fin',
+  // CMM-50/CMM-68: fin_vin (← lead.fin) NICHT mehr in faelle — lebt auf `vehicles.fin`
+  // (convert-lead schreibt es via ensureVehicleFromFin).
   // AAR-575 (A1): Kunden-Identität wird auf Lead in `vorname/nachname/email/
   // telefon` geführt (dort unabhängig von `ist_fahrzeughalter`); in faelle
   // prefixen wir mit `kunde_` um sie klar von halter_* abzugrenzen.
@@ -194,10 +188,8 @@ export const LEAD_TO_FALL_TRANSFORM_FIELDS: Record<
   string,
   { leadField: string; transform: (v: unknown) => unknown }
 > = {
-  kilometerstand: {
-    leadField: 'kilometerstand',
-    transform: (v) => (v ? Number(v) : null),
-  },
+  // CMM-50/CMM-68: kilometerstand NICHT mehr in faelle — lebt auf vehicles.aktueller_kilometerstand
+  // (convert-lead via ensureVehicleFromFin/createVehicleStub). Map aktuell leer (Erweiterungspunkt).
 }
 
 // ─── 5. COMPUTED — option-basierte / konstante Werte ───────────────────────
