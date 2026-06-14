@@ -34,14 +34,24 @@ export async function POST(req: Request) {
 
     const admin = createAdminClient()
     // CMM-44 SP-G PR2: gutachten_eingegangen_am → gutachten.fertiggestellt_am (SSoT).
-    const { data: fall } = await admin
-      .from('faelle')
-      .select('id, kunde_id, lead_id, kennzeichen, claim_id, claims:claim_id(claim_nummer)')
-      .eq('id', body.fall_id)
+    // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat, faelle-frei). vcf.id=claim_id (Flip),
+    // vcf.fall_id=faelle.id; kunde_id/lead_id/kennzeichen/claim_nummer div=0.
+    const { data: fallRow } = await admin
+      .from('v_claim_full')
+      .select('id, fall_id, kunde_id, lead_id, kennzeichen, claim_nummer')
+      .eq('fall_id', body.fall_id)
       .maybeSingle()
-    if (!fall) {
+    if (!fallRow) {
       return NextResponse.json({ success: false, error: 'Fall nicht gefunden.' }, { status: 404 })
     }
+    const fall = {
+      id: fallRow.fall_id as string,
+      claim_id: fallRow.id,
+      kunde_id: fallRow.kunde_id,
+      lead_id: fallRow.lead_id,
+      kennzeichen: fallRow.kennzeichen,
+    }
+    const claim = { claim_nummer: fallRow.claim_nummer }
 
     let owned = fall.kunde_id === user.id
     if (!owned && fall.lead_id) {
@@ -105,7 +115,6 @@ export async function POST(req: Request) {
     }
 
     const magicUrl = `${APP_URL}/api/kunde/gutachten/magic/${encodeURIComponent(token)}`
-    const claim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
     const fallLabel = (fall.kennzeichen as string | null) || (claim?.claim_nummer as string | null) || 'Ihr Fall'
 
     // Mail schicken (non-critical try/catch, damit der DB-Insert stehen bleibt)
