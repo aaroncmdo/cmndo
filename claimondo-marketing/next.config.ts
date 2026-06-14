@@ -28,8 +28,12 @@ const nextConfig: NextConfig = {
       { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
       { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
       {
+        // AAR-956: geolocation an die app.claimondo.de-Embed-iframe (Gutachter-Finder) delegieren.
+        // Der Finder braucht den User-Standort fuer Karten-Zentrierung + Route zum naechsten SV.
+        // `(self)` allein erlaubt nur die eigene Origin → die Cross-Origin-iframe wird sonst
+        // blockiert TROTZ allow="geolocation" ("blocked because of a permissions policy").
         key: 'Permissions-Policy',
-        value: 'geolocation=(self), camera=(), microphone=(), payment=(), usb=()',
+        value: 'geolocation=(self "https://app.claimondo.de"), camera=(), microphone=(), payment=(), usb=()',
       },
       { key: 'X-DNS-Prefetch-Control', value: 'on' },
     ]
