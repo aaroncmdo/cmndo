@@ -21,6 +21,8 @@ export function FlowSlotStep({
   token,
   onGebucht,
   onOhneTermin,
+  onKeinMatch,
+  onSvSelect,
 }: {
   token: string
   onGebucht: (t: GebuchterTermin) => void
@@ -28,6 +30,15 @@ export function FlowSlotStep({
   // → ohne Buchung weiter zur SA. SV wird dort per AAR-908 zugeordnet, der Termin
   // nachgelagert telefonisch vereinbart (kein Conversion-Dead-End mehr).
   onOhneTermin?: () => void
+  // AAR-956 Dead-Pin-Fallback: feuert GENAU wenn 0 buchbare Partner (statt der
+  // internen kein_match-Ansicht). Der Consumer (Embed) übernimmt dann mit den
+  // Lite-Dead-Pin-Karten. Optional + additiv — ohne die Prop (z.B. /flow) bleibt
+  // das bisherige kein_match-Verhalten unverändert.
+  onKeinMatch?: () => void
+  // AAR-956 #4 (Embed, Aaron 12.06.): der Nutzer waehlt im Slot-Step einen SV → der Consumer
+  // (Embed) laesst die Karte dorthin routen + hebt ihn hervor. Optional/additiv — ohne die
+  // Prop (/flow, /anfrage) keine Auswahl-Interaktion, keine Hervorhebung (Karte unveraendert).
+  onSvSelect?: (sv: OeffentlichesSvProfil) => void
 }) {
   const t = useTranslations('selfService')
   const [step, setStep] = useState<
@@ -36,6 +47,10 @@ export function FlowSlotStep({
   const [svs, setSvs] = useState<OeffentlichesSvProfil[]>([])
   const [fehler, setFehler] = useState<string | null>(null)
   const [ortSpeichern, setOrtSpeichern] = useState(false)
+  // AAR-956 #4: der aktuell hervorgehobene SV (default = #1/empfohlen). Nur gesetzt/genutzt
+  // wenn onSvSelect vorliegt (Embed) — der Default-Set emittiert NICHT (die Karte zeigt den
+  // Top-SV beim Ort-Schritt schon), erst die Nutzer-Auswahl re-routet.
+  const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
 
   // AAR-956 §4: ein Resolver-Lauf. ortFehlt → Adress-Abfrage im Flow (Task 3),
   // sonst Slot-Auswahl bzw. kein_match. Wiederverwendbar nach dem Ort-Nachreichen.
@@ -58,11 +73,19 @@ export function FlowSlotStep({
       }
       const list = r.svs ?? []
       if (list.length === 0 || list.every((sv) => sv.slots.length === 0)) {
+        // AAR-956 Dead-Pin-Fallback: 0 buchbare Partner → Consumer übernimmt (Embed:
+        // Lite-Dead-Pin-Karten). Ohne onKeinMatch (/flow) das bisherige Verhalten.
+        if (onKeinMatch) {
+          onKeinMatch()
+          return
+        }
         setStep('kein_match')
         return
       }
       setSvs(list)
       setStep('auswahl')
+      // #4: Top-SV (list[0]) als Default hervorheben — kein Emit (Karte zeigt ihn schon).
+      if (onSvSelect && list[0]) setSelectedSvId(list[0].svId)
     } catch {
       setFehler(t('matching.laden_fehler'))
       setStep('fehler')
@@ -163,7 +186,20 @@ export function FlowSlotStep({
   }
   return (
     <div>
-      <SvSlotAuswahl svs={svs} fehler={fehler} onSlot={slotWaehlen} />
+      <SvSlotAuswahl
+        svs={svs}
+        fehler={fehler}
+        onSlot={slotWaehlen}
+        onSvSelect={
+          onSvSelect
+            ? (sv) => {
+                setSelectedSvId(sv.svId)
+                onSvSelect(sv)
+              }
+            : undefined
+        }
+        selectedSvId={onSvSelect ? selectedSvId : undefined}
+      />
       {onOhneTermin && (
         <div className="mt-5 text-center">
           <button

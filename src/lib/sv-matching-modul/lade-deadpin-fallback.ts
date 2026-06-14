@@ -1,10 +1,10 @@
 // AAR-956 Dead-Pin-Fallback — Body: ladeDeadPinFallback + generischeDeadPinSlots.
 //
 // Standalone: NUR die Tier-3-sv_leads-Coverage (leak-safe), KEIN Partner-Match — der
-// Consumer ruft das via `onKeinMatch` (genau bei 0 Partnern). Reuse der bewaehrten
-// Coverage-Logik aus findSvsForLocation (parseIsochrone + pointInPolygon, sonst Haversine
-// <= paket_umkreis_km). Slots = generisch immer-frei (KEIN freieSlots/ETA/Busy) — der
-// Kunde waehlt eine Wunsch-Zeit, Dispatch bestaetigt + koordiniert manuell.
+// Consumer ruft das via `onKeinMatch` (genau bei 0 Partnern). Coverage-Logik = parseIsochrone
+// + pointInPolygon (15-km-Ghost-Isochrone der sv_leads), sonst Haversine <= paket_umkreis_km
+// als Fallback NUR für sv_leads ohne Polygon. Slots = generisch immer-frei (KEIN freieSlots/
+// ETA/Busy) — der Kunde waehlt eine Wunsch-Zeit, Dispatch bestaetigt + koordiniert manuell.
 //
 // KEIN 'use server' (plain module, server-seitig aufgerufen wie planeTerminOeffentlich)
 // und KEINE Server-Imports in ./fallback (das bleibt reine Typ-Ebene fuer Client-Import).

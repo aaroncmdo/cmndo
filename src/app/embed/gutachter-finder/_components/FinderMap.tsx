@@ -35,7 +35,7 @@ import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-find
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
 import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
 import { createRoot, type Root } from 'react-dom/client'
-import { SvProfilePopup } from './SvProfilePopup'
+import { SvProfilePopup, DeadPinProfilePopup } from './SvProfilePopup'
 import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
@@ -56,6 +56,9 @@ type Props = {
    * Für In-Page-Sections z.B. '78vh' oder '680px' übergeben — Karte + Overlays
    * sind container-relativ und skalieren mit. */
   height?: string
+  /** Test-Override (?fallback=1): erzwingt den Dead-Pin-Pfad in der Route-Empfehlung
+   * (empfehleSvFuerOrt), damit der Dead-Pin-Flow live testbar ist. Vor Prod raus. */
+  forceFallback?: boolean
 }
 
 // NRW-Mittelpunkt — gute Start-Ansicht da die 62 SVs hauptsächlich in NRW
@@ -99,6 +102,7 @@ function addDeadPin(
     .setLngLat([lng, lat])
     .addTo(map)
   store.push(marker)
+  return marker
 }
 
 // Klickbarer Avatar-Marker für verifizierte SVs. Click → onClick (öffnet das
@@ -130,6 +134,7 @@ function addClickableMarker(
     .setLngLat([sv.standort_lng, sv.standort_lat])
     .addTo(map)
   store.push(marker)
+  return marker
 }
 
 // DE-only Embed (AAR-956 Open-Decision #2): Map-Strings inline statt next-intl.
@@ -157,7 +162,7 @@ function tMap(key: string, vars?: { count?: number }): string {
   return typeof vars?.count === 'number' ? s.replace('{count}', String(vars.count)) : s
 }
 
-export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh' }: Props) {
+export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -166,6 +171,14 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const popupRootRef = useRef<Root | null>(null)
   const userMarkerRef = useRef<Marker | null>(null)
   const carMarkerRef = useRef<Marker | null>(null)
+  // AAR-956 (Aaron 12.06.): die im Fallback gematchten Dead-Pins (15-km-Ghost-Isochrone) als
+  // dynamische Pins — getrennt von markersRef (Partner), damit ich sie pro Ort neu setzen kann.
+  const deadPinMarkersRef = useRef<Marker[]>([])
+  // AAR-956 #4 (Aaron 12.06.): Marker-Elemente nach ID, um den GEWÄHLTEN Gutachter
+  // hervorzuheben (Partner via svId, Dead-Pin via deadPinId) + letzter Ort für die Re-Route.
+  const svMarkerElsRef = useRef<Map<string, HTMLElement>>(new Map())
+  const deadPinElsRef = useRef<Map<string, HTMLElement>>(new Map())
+  const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
@@ -213,7 +226,23 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     })
     mapRef.current = map
 
-    // WS2: Profil-Popup ÜBER dem Pin (anchor:'bottom') via React-Render
+    // AAR-956 (Aaron 12.06.): das Popup darf den Pin NICHT verdecken. Anchor + Offset so wählen,
+    // dass das Popup in den freien Raum öffnet und der Pin frei bleibt:
+    //   - Pin hinter der Wizard-Spalte (links) → nach RECHTS (anchor 'left')
+    //   - Pin nah am oberen Rand → nach UNTEN (anchor 'top'), sonst clippt es oben weg
+    //   - sonst → nach OBEN (anchor 'bottom') mit genug Offset, um den 40px-Avatar frei zu lassen
+    function popupPlatzierung(lng: number, lat: number): {
+      anchor: 'left' | 'top' | 'bottom'
+      offset: [number, number]
+    } {
+      const p = map.project([lng, lat])
+      const desktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+      if (desktop && p.x < 640) return { anchor: 'left', offset: [26, -6] }
+      if (p.y < 300) return { anchor: 'top', offset: [0, 16] }
+      return { anchor: 'bottom', offset: [0, -46] }
+    }
+
+    // WS2: Profil-Popup NEBEN/ÜBER dem Pin (popupPlatzierung) via React-Render
     // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
     // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
     function openSvPopup(sv: AktiverSVPublic) {
@@ -222,11 +251,12 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<SvProfilePopup sv={sv} />)
+      const { anchor, offset } = popupPlatzierung(sv.standort_lng, sv.standort_lat)
       const popup = new mapboxgl.Popup({
-        offset: 22,
+        offset,
         closeButton: true,
         maxWidth: '340px',
-        anchor: 'bottom',
+        anchor,
         className: 'sv-finder-popup',
       })
         .setLngLat([sv.standort_lng, sv.standort_lat])
@@ -238,6 +268,36 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         if (popupRootRef.current === root) popupRootRef.current = null
       })
       setHoveredId(sv.id)
+      popupRef.current = popup
+      popupRootRef.current = root
+    }
+
+    // Light-Profil-Popup für den empfohlenen Dead-Pin (Aaron 12.06.: SELBER Wrapper wie das
+    // SV-Profil). React-Render via createRoot/setDOMContent (wie openSvPopup) — leak-safe
+    // <DeadPinProfilePopup> (kein Name/Profil/Reviews), nur „Kfz-Gutachter in {ort}" + Hinweis,
+    // in derselben GlassSurface-Shell. Anti-Wizard-Overlap-Anchor wie openSvPopup.
+    function openDeadPinPopup(lng: number, lat: number, ort: string | null) {
+      popupRef.current?.remove()
+      popupRootRef.current?.unmount()
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      root.render(<DeadPinProfilePopup ort={ort} />)
+      const { anchor, offset } = popupPlatzierung(lng, lat)
+      const popup = new mapboxgl.Popup({
+        offset,
+        closeButton: true,
+        maxWidth: '340px',
+        anchor,
+        className: 'sv-finder-popup',
+      })
+        .setLngLat([lng, lat])
+        .setDOMContent(container)
+        .addTo(map)
+      popup.on('close', () => {
+        root.unmount()
+        if (popupRef.current === popup) popupRef.current = null
+        if (popupRootRef.current === root) popupRootRef.current = null
+      })
       popupRef.current = popup
       popupRootRef.current = root
     }
@@ -337,13 +397,20 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       // consented Partner, die gefunden werden WOLLEN — kein paket-abhängiger
       // Dead-Pin mehr. Nur Tier-3 sv_leads (Excel-Import ohne Consent) bleiben
       // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
+      svMarkerElsRef.current.clear()
       aktiveSVs.forEach((sv) => {
-        addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv))
+        const marker = addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv))
+        svMarkerElsRef.current.set(sv.id, marker.getElement())
       })
 
-      // ─── Tier-3 sv_leads — immer Dead-Pin ────────────────────────────
+      // ─── Tier-3 sv_leads — als Dead-Pins gerendert (Aaron 12.06.: „die Dead-Pins müssen
+      // trotzdem gerendert werden"). Die 15-km-Ghost-Isochrone filtert NUR die Buchung + das
+      // Route-Ziel, NICHT die Karten-Darstellung. El nach ID (= sv_leads.id = deadPinId)
+      // merken → den gematchten/gewählten Dead-Pin hervorheben.
+      deadPinElsRef.current.clear()
       svLeads.forEach((sv) => {
-        addDeadPin(map, markersRef.current, sv.lng, sv.lat)
+        const m = addDeadPin(map, deadPinMarkersRef.current, sv.lng, sv.lat)
+        deadPinElsRef.current.set(sv.id, m.getElement())
       })
     })
 
@@ -382,6 +449,70 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       )
     }
 
+    // AAR-956 #4: gewählten Gutachter hervorheben — Klasse aufs Marker-Element (Partner ODER
+    // Dead-Pin, gegenseitig exklusiv). CSS-Regeln im <style>-Block unten.
+    function highlightSv(svId: string | null) {
+      svMarkerElsRef.current.forEach((el, id) => el.classList.toggle('sv-marker-selected', id === svId))
+      deadPinElsRef.current.forEach((el) => el.classList.remove('deadpin-selected'))
+    }
+    function highlightDeadPin(deadPinId: string | null) {
+      deadPinElsRef.current.forEach((el, id) => el.classList.toggle('deadpin-selected', id === deadPinId))
+      svMarkerElsRef.current.forEach((el) => el.classList.remove('sv-marker-selected'))
+    }
+
+    // AAR-956 #4: Fahr-Route vom Besichtigungsort zum Ziel + Kamera + onArrive (Popup). EINE
+    // Quelle für die Erst-Empfehlung (handleEmbedOrt) UND die spätere Auswahl (handleSvSelected).
+    function routeToTarget(
+      originLng: number,
+      originLat: number,
+      zielLng: number,
+      zielLat: number,
+      onArrive: () => void,
+    ) {
+      void fetchDrivingRoute([originLng, originLat], [zielLng, zielLat]).then(({ primary }) => {
+        if (!mapRef.current) return
+        const data: GeoJSON.Feature = {
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
+          properties: {},
+        }
+        const src = map.getSource('embed-route') as GeoJSONSource | undefined
+        if (src) {
+          src.setData(data)
+        } else {
+          map.addSource('embed-route', { type: 'geojson', data })
+          // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
+          map.addLayer({
+            id: 'embed-route-casing',
+            type: 'line',
+            source: 'embed-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
+          })
+          map.addLayer({
+            id: 'embed-route-line',
+            type: 'line',
+            source: 'embed-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: {
+              'line-color': COL_ONDO,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
+              'line-opacity': 1,
+            },
+          })
+        }
+        const bounds = new mapboxgl.LngLatBounds([originLng, originLat], [originLng, originLat]).extend([zielLng, zielLat])
+        const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
+        map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
+        // Popup des Ziels öffnen, sobald Route + Kamera stehen (moveend → finale Pin-Position
+        // für den Anti-Wizard-Overlap-Anchor).
+        map.once('moveend', () => {
+          if (!mapRef.current) return
+          onArrive()
+        })
+      })
+    }
+
     // Auto-Marker + Zoom, sobald der Wizard den Besichtigungsort kennt (Aaron 11.06.):
     // der Wizard dispatcht claimondo:embed-ort {lat,lng} → Navy-Auto-Pin ans Fahrzeug + flyTo.
     function handleEmbedOrt(e: Event) {
@@ -402,76 +533,82 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         </div>
       `
       carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
+      lastOrtRef.current = { lat, lng }
 
-      // WS3 (Engine-Ranking, Aaron 12.06.): empfohlenen SV aus dem ECHTEN Engine-
-      // Ranking holen (planeTerminOeffentlich — derselbe Top-SV, den der Buchungs-
-      // Step zeigt), Distanz-Proxy nur als Fallback. Dann echte Auto-Route (Mapbox
-      // Directions) Fahrzeug → SV + auf beide fitten + Profil auf. Kein SV → flyTo.
-      void empfehleSvFuerOrt({ lat, lng }).then(({ svId }) => {
+      // WS3 (Aaron 12.06.): Route-Ziel DISKRIMINIERT — Partner ODER Dead-Pin (Fallback).
+      // empfehleSvFuerOrt liefert {kind}: partner → Pin aus aktiveSVs + Profil-Popup;
+      // deadpin (0 buchbare Partner) → dessen Koordinate + Lite-Popup (leak-safe);
+      // none → flyTo. KEIN Distanz-Proxy-über-Partner mehr (der war die Ursache, dass
+      // im Fallback immer ein ferner Partner statt der Dead-Pin geroutet wurde).
+      // forceFallback (?fallback=1) erzwingt den Dead-Pin-Pfad (Test).
+      void empfehleSvFuerOrt({ lat, lng, forceFallback }).then((ziel) => {
         if (!mapRef.current) return
-        let ziel: AktiverSVPublic | null =
-          svId ? aktiveSVs.find((s) => s.id === svId) ?? null : null
-        if (!ziel) {
-          // Fallback: nächstgelegener aktiver SV (Engine leer / Top-SV nicht auf der Karte).
-          let bestD = Infinity
-          for (const s of aktiveSVs) {
-            const d = (s.standort_lng - lng) ** 2 + (s.standort_lat - lat) ** 2
-            if (d < bestD) { bestD = d; ziel = s }
+        if (ziel.kind === 'partner') {
+          const sv = aktiveSVs.find((s) => s.id === ziel.svId) ?? null
+          if (!sv) {
+            map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+            return
           }
-        }
-        if (!ziel) {
+          routeToTarget(lng, lat, sv.standort_lng, sv.standort_lat, () => {
+            highlightSv(sv.id)
+            openSvPopup(sv)
+          })
+        } else if (ziel.kind === 'deadpin') {
+          // Die Dead-Pins sind bereits gerendert (Baseline). Route + Light-Popup zum nächsten
+          // DECKENDEN (deadPins[0], 15-km-Isochrone, nach Distanz) + diesen hervorheben.
+          const naechster = ziel.deadPins[0]
+          if (!naechster) {
+            map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+            return
+          }
+          routeToTarget(lng, lat, naechster.lng, naechster.lat, () => {
+            highlightDeadPin(naechster.deadPinId)
+            openDeadPinPopup(naechster.lng, naechster.lat, naechster.ort)
+          })
+        } else {
           map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
-          return
         }
-        const sv = ziel
-        void fetchDrivingRoute([lng, lat], [sv.standort_lng, sv.standort_lat]).then(({ primary }) => {
-          if (!mapRef.current) return
-          const data: GeoJSON.Feature = {
-            type: 'Feature',
-            geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
-            properties: {},
-          }
-          const src = map.getSource('embed-route') as GeoJSONSource | undefined
-          if (src) {
-            src.setData(data)
-          } else {
-            map.addSource('embed-route', { type: 'geojson', data })
-            // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
-            map.addLayer({
-              id: 'embed-route-casing',
-              type: 'line',
-              source: 'embed-route',
-              layout: { 'line-cap': 'round', 'line-join': 'round' },
-              paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
-            })
-            map.addLayer({
-              id: 'embed-route-line',
-              type: 'line',
-              source: 'embed-route',
-              layout: { 'line-cap': 'round', 'line-join': 'round' },
-              paint: {
-                'line-color': COL_ONDO,
-                'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
-                'line-opacity': 1,
-              },
-            })
-          }
-          const bounds = new mapboxgl.LngLatBounds([lng, lat], [lng, lat]).extend([sv.standort_lng, sv.standort_lat])
-          const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
-          map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
-          // Profil des empfohlenen SV gleich aufmachen (Aaron: Profil auf, sobald die Route steht).
-          openSvPopup(sv)
-        })
       })
     }
     document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
 
+    // AAR-956 #4 (Aaron 12.06.): der Nutzer wählt im Booking einen Gutachter → Karte routet
+    // dorthin + hebt ihn hervor. Partner via svId (aus aktiveSVs), Dead-Pin via Koordinate.
+    function handleSvSelected(e: Event) {
+      const detail = (e as CustomEvent<{ kind?: string; svId?: string; deadPinId?: string; lat?: number; lng?: number; ort?: string | null }>).detail
+      const ort = lastOrtRef.current
+      if (!ort || !mapRef.current || !detail) return
+      if (detail.kind === 'partner' && typeof detail.svId === 'string') {
+        const sv = aktiveSVs.find((s) => s.id === detail.svId) ?? null
+        if (!sv) return
+        routeToTarget(ort.lng, ort.lat, sv.standort_lng, sv.standort_lat, () => {
+          highlightSv(sv.id)
+          openSvPopup(sv)
+        })
+      } else if (detail.kind === 'deadpin' && typeof detail.lat === 'number' && typeof detail.lng === 'number') {
+        const dLng = detail.lng
+        const dLat = detail.lat
+        const dOrt = detail.ort ?? null
+        const dId = detail.deadPinId ?? null
+        routeToTarget(ort.lng, ort.lat, dLng, dLat, () => {
+          highlightDeadPin(dId)
+          openDeadPinPopup(dLng, dLat, dOrt)
+        })
+      }
+    }
+    document.addEventListener('claimondo:embed-sv-selected', handleSvSelected)
+
     return () => {
       window.clearTimeout(loadTimeout)
       document.removeEventListener('claimondo:embed-ort', handleEmbedOrt)
+      document.removeEventListener('claimondo:embed-sv-selected', handleSvSelected)
       resizeObs.disconnect()
       markersRef.current.forEach((m) => m.remove())
       markersRef.current = []
+      deadPinMarkersRef.current.forEach((m) => m.remove())
+      deadPinMarkersRef.current = []
+      svMarkerElsRef.current.clear()
+      deadPinElsRef.current.clear()
       userMarkerRef.current?.remove()
       carMarkerRef.current?.remove()
       popupRootRef.current?.unmount()
@@ -479,7 +616,12 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       map.remove()
       mapRef.current = null
     }
-  }, [svLeads])
+    // AAR-956 Fix: Karte NUR einmal (mount) initialisieren. Mit [svLeads] lief der
+    // Effekt nach jedem Server-Action-Refresh (Buchung → RSC-Refresh → neue svLeads-Ref)
+    // neu → Cleanup map.remove() → Route + Fahrzeug-Pin weg. svLeads/aktiveSVs sind im
+    // Embed statisch (server-once geladen), also ist [] korrekt (kein Marker-Verlust).
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <div className="relative w-full" style={{ height }}>
@@ -516,6 +658,15 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         @keyframes gf-user-pulse {
           0% { transform: scale(0.5); opacity: 0.55; }
           80%, 100% { transform: scale(1.9); opacity: 0; }
+        }
+        /* AAR-956 #4: der gewählte Gutachter ist hervorgehoben (Marker größer + Ondo-Ring). */
+        .sv-marker-selected .sv-marker-inner { transform: scale(1.28); z-index: 5; }
+        .sv-marker-selected .sv-marker-inner > div {
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--claimondo-ondo, #4573A2) 38%, transparent), 0 8px 22px rgba(13,27,62,0.34);
+        }
+        .deadpin-selected .sv-deadpin {
+          transform: scale(1.5);
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--claimondo-ondo, #4573A2) 38%, transparent), 0 4px 12px rgba(13,27,62,0.4);
         }
         /* Google-Places-Dropdown (.pac-container) in unsere Tokens bringen. Google
            rendert es an document.body → global; greift nur solange der Embed gemountet
