@@ -208,13 +208,21 @@ export async function getFreieSlotsFuerKunde(fallId: string): Promise<FreierSlot
   // CMM-44 SP-D PR2a: nachbesichtigung_status aus gutachter_termine (aktueller Termin, SSoT).
   // CMM-44 SP-H PR2: technische_stellungnahme_status lebt auf auftraege (aktueller
   // Auftrag) — via Nested-Embed unter claims. Pre-launch <=1 Auftrag pro Claim.
-  const { data: fall } = await supabase
-    .from('faelle')
-    .select('id, kunde_id, lead_id, claim_id, claims:claim_id(zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
-    .eq('id', fallId)
+  // CMM-49 (faelle-Drop-Runway): bridge-Anchor (spiegelt faelle-RLS) + claims-Embed. kunde_id->
+  // geschaedigter_user_id (div=0) fuer Ownership; lead_id claims (div=0); claim_id=bridge nativ;
+  // zeugen_vorhanden claim-owned (schon claims-Read). vcf hier nicht (RLS-Client -> Leak).
+  const { data: fallRow } = await supabase
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id!inner(geschaedigter_user_id, lead_id, zeugen_vorhanden, auftraege(technische_stellungnahme_status))')
+    .eq('fall_id', fallId)
     .single()
-  if (!fall || fall.kunde_id !== user.id) return []
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  const fallClaim = Array.isArray(fallRow?.claims) ? fallRow.claims[0] : fallRow?.claims
+  if (!fallRow || (fallClaim as { geschaedigter_user_id?: string | null } | null)?.geschaedigter_user_id !== user.id) return []
+  const fall = {
+    id: fallRow.fall_id,
+    claim_id: fallRow.claim_id,
+    lead_id: (fallClaim as { lead_id?: string | null } | null)?.lead_id ?? null,
+  }
   const fallAuftraege = Array.isArray(
     (fallClaim as { auftraege?: unknown } | null)?.auftraege,
   )
@@ -534,9 +542,11 @@ export async function completeOnboarding(
     const ownedClaimIds = await getOwnedClaimIds(admin, user.id, user.email ?? null)
     // CMM-65: created_at lebt auf claims (SSoT). supabase-js kann nicht nach eingebetteter
     // to-one-Spalte ordnen -> claims.created_at via !inner + clientseitig aelteste (asc) picken.
+    // CMM-49 (faelle-Drop-Runway): bridge-Anchor erhaelt faelle-Zeilenmenge (faelle ⊊ claims);
+    // onboarding_complete claim-owned (schon claims-Read), created_at claims-SSoT.
     const { data: faelleRowsRaw } = await admin
-      .from('faelle')
-      .select('id, claim_id, claims!inner(onboarding_complete, created_at)')
+      .from('faelle_claim_bridge')
+      .select('fall_id, claim_id, claims:claim_id!inner(onboarding_complete, created_at)')
       .in('claim_id', ownedClaimIds)
       .eq('claims.onboarding_complete', false)
     const faelleRows = (faelleRowsRaw ?? [])
@@ -544,7 +554,7 @@ export async function completeOnboarding(
       .sort((a, b) => a._c.localeCompare(b._c))
     const firstRow = faelleRows?.[0] ?? null
     if (firstRow) {
-      targetFallId = firstRow.id as string
+      targetFallId = firstRow.fall_id as string
       targetClaimId = (firstRow as { claim_id?: string | null }).claim_id ?? null
     }
   } else {

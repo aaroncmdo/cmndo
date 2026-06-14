@@ -154,13 +154,15 @@ export async function uploadDokumentViaAnfrageToken(
   if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
 
   // 3. Zugehörigen Fall finden (falls vorhanden — für fall_dokumente-Insert)
+  // CMM-49 (faelle-Drop-Runway): lead->fall-Resolver via v_claim_full (flat, faelle-frei; admin-client).
+  // vcf.fall_id = faelle.id; lead_id div=0.
   const { data: fallRow } = await db
-    .from('faelle')
-    .select('id')
+    .from('v_claim_full')
+    .select('fall_id')
     .eq('lead_id', anfrage.lead_id)
     .limit(1)
     .maybeSingle()
-  const fallId = (fallRow?.id as string | null) ?? null
+  const fallId = (fallRow?.fall_id as string | null) ?? null
 
   // 4. Slot-spezifische Logik
   let extracted: DokumentUploadResult['extracted'] = undefined
