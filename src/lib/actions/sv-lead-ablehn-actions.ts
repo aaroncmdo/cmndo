@@ -51,14 +51,25 @@ export async function lehneLeadAb(
 
   // Fall laden + Eigentumspruefung
   // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Clear auf claims (SSoT).
-  const { data: fall } = await db
-    .from('faelle')
-    .select('id, claim_id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer, operative_status, lead_preis_netto)')
-    .eq('id', fallId)
+  // CMM-49 (faelle-Drop-Runway): bridge-Anchor (admin-client) + claims-Embed. sv_id/operative_status/
+  // lead_preis_netto claims-SSoT (lead_preis_netto claim-owned; div_sv=0). faelle.status/lead_preis_netto
+  // waren tote Fallbacks (claim_id 79/79 gesetzt) -> fall.* aus claims gemappt, Downstream unveraendert.
+  const { data: bridgeRow } = await db
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id!inner(sv_id, claim_nummer, operative_status, lead_preis_netto)')
+    .eq('fall_id', fallId)
     .single()
 
-  if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
-  const fallClaimObj = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
+  if (!bridgeRow) return { ok: false, error: 'Fall nicht gefunden' }
+  const fallClaimObj = Array.isArray(bridgeRow.claims) ? bridgeRow.claims[0] : bridgeRow.claims
+  const fco = fallClaimObj as { sv_id?: string | null; operative_status?: string | null; lead_preis_netto?: number | null } | null
+  const fall = {
+    id: bridgeRow.fall_id,
+    claim_id: bridgeRow.claim_id,
+    sv_id: fco?.sv_id ?? null,
+    status: fco?.operative_status ?? null,
+    lead_preis_netto: fco?.lead_preis_netto ?? null,
+  }
   const fallClaimNummer = (fallClaimObj as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
   if (fall.sv_id !== sv.id) return { ok: false, error: 'Nicht zugewiesen' }
   // CMM-74 b″: Status-Gate auf claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
