@@ -3,9 +3,10 @@ import Link from 'next/link'
 import { getDecodersByCluster } from '@/lib/decoders'
 import { siteGraph } from '@/lib/jsonld'
 import { JsonLd } from '@/components/JsonLd'
+import { metaTitle } from '@/lib/meta'
 
 export const metadata: Metadata = {
-  title: 'Versicherer-Decoder — was die Kfz-Versicherung wirklich meint',
+  title: metaTitle('Versicherer-Decoder — was die Kfz-Versicherung wirklich meint'),
   description:
     'Standard-Floskeln und Kürzungen der Kfz-Versicherung entschlüsselt: was dahintersteckt, was rechtlich gilt und wie Sie reagieren — mit Musterbriefen.',
   alternates: { canonical: '/versicherer-decoder' },
