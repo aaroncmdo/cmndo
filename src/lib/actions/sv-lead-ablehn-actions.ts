@@ -51,16 +51,21 @@ export async function lehneLeadAb(
 
   // Fall laden + Eigentumspruefung
   // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Clear auf claims (SSoT).
+  // CMM-49 (faelle-Drop-Runway): Anker auf faelle_claim_bridge statt .from('faelle')
+  // (Admin-Client -> kein RLS-Belang; bridge.fall_id == faelle.id, 1:1). sv_id +
+  // lead_preis_netto aus claims (SSoT, div=0); der faelle.lead_preis_netto-Legacy-
+  // Fallback ist tot (0 claim-lose faelle).
   const { data: fall } = await db
-    .from('faelle')
-    .select('id, claim_id, sv_id, lead_preis_netto, claims:claim_id(claim_nummer, operative_status, lead_preis_netto)')
-    .eq('id', fallId)
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id(claim_nummer, operative_status, lead_preis_netto, sv_id)')
+    .eq('fall_id', fallId)
     .single()
 
   if (!fall) return { ok: false, error: 'Fall nicht gefunden' }
   const fallClaimObj = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const fallClaimNummer = (fallClaimObj as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
-  if (fall.sv_id !== sv.id) return { ok: false, error: 'Nicht zugewiesen' }
+  const fallSvId = (fallClaimObj as { sv_id?: string | null } | null)?.sv_id ?? null
+  if (fallSvId !== sv.id) return { ok: false, error: 'Nicht zugewiesen' }
   // CMM-74 b2 reader-fallback-drop: Status-Gate NUR auf claims.operative_status (SSoT) — der
   // faelle.status-Fallback ist entfernt, da operative_status vollstaendig ist (alle Creator + Backfill, #2884).
   const fallStatus = (fallClaimObj as { operative_status?: string | null } | null)?.operative_status ?? null
@@ -71,11 +76,9 @@ export async function lehneLeadAb(
   const grundLabel = `lead_abgelehnt_${grund}${begruendung ? `: ${begruendung}` : ''}`
 
   // 1. revertCaseBilling falls Preis schon berechnet.
-  // CMM-44 Phase 3: lead_preis_netto aus claims (SSoT); Legacy-Fall ohne claim_id
-  // liest den faelle-Fallback.
-  const leadPreisVal = fall.claim_id
-    ? (fallClaimObj as { lead_preis_netto?: number | null } | null)?.lead_preis_netto
-    : (fall as { lead_preis_netto?: number | null }).lead_preis_netto
+  // CMM-44 Phase 3 / CMM-49: lead_preis_netto aus claims (SSoT). Der faelle-Legacy-
+  // Fallback entfiel mit dem Bridge-Anker (jede faelle hat einen claim, div=0).
+  const leadPreisVal = (fallClaimObj as { lead_preis_netto?: number | null } | null)?.lead_preis_netto
   if (leadPreisVal != null && Number(leadPreisVal) > 0) {
     try {
       await revertCaseBilling(fallId, grundLabel, user.id)
