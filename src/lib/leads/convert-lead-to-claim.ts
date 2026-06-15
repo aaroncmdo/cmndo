@@ -792,11 +792,14 @@ async function pickKundenbetreuerRoundRobin(
 
   const counts: Record<string, number> = {}
   for (const b of betreuer) {
+    // CMM-74 b2 reader-fallback-drop: aktive Faelle pro KB via claims.operative_status zaehlen
+    // (claims=SSoT; kundenbetreuer_id + operative_status leben auf claims, 1:1 zu faelle, gleiches
+    // Status-Vokabular) — entkoppelt vom faelle.status-Read (Drop-Runway).
     const { count } = await admin
-      .from('faelle')
+      .from('claims')
       .select('id', { count: 'exact', head: true })
       .eq('kundenbetreuer_id', b.id as string)
-      .not('status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
+      .not('operative_status', 'in', '("abgeschlossen","storniert","reguliert","abgelehnt")')
     counts[b.id as string] = count ?? 0
   }
 
