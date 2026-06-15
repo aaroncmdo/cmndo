@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { Phone, X, Send, Check } from 'lucide-react'
+import Link from 'next/link'
+import { Phone, X, Send, Check, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
 import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
@@ -20,6 +21,7 @@ type Props = {
 // Modal mit Glass-Backdrop + rounded-Inputs.
 export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
   const t = useTranslations('home')
+  const tNav = useTranslations('nav')
 
   const zeitfensterOptions = t.raw('sticky_call.zeitfenster_options') as string[]
 
@@ -45,7 +47,17 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
   return (
     <>
       {/* Sticky Bar — Floating-Pill mit Glass-Backdrop */}
-      <div className="fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 items-stretch gap-2 sm:left-auto sm:right-6 sm:translate-x-0">
+      <div className="fixed bottom-4 left-1/2 z-40 flex w-[calc(100%-2rem)] max-w-md -translate-x-1/2 flex-col gap-2 sm:left-auto sm:right-6 sm:translate-x-0">
+        {/* Gutachter finden — Mobile-Primaer-CTA (Aaron 15.06.: eigener Button unten mittig) */}
+        <Link
+          href="/gutachter-finden"
+          data-tracking="finder-sticky"
+          className="flex items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.32)] transition-all duration-200 hover:bg-claimondo-shield active:scale-[0.97] md:hidden"
+        >
+          <Search className="h-4 w-4" aria-hidden />
+          {tNav('gutachter_finden')}
+        </Link>
+        <div className="flex items-stretch gap-2">
         <a
           href={`tel:${PHONE_TEL}`}
           className="flex flex-1 items-center justify-center gap-2 rounded-full bg-claimondo-navy px-5 py-3.5 text-sm font-bold text-white shadow-[0_8px_28px_rgba(13,27,62,0.30)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_12px_36px_rgba(13,27,62,0.38)] active:scale-[0.97]"
@@ -75,6 +87,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
         >
           {t('sticky_call.btn_rueckruf')}
         </button>
+        </div>
       </div>
 
       {/* Modal — Glass-Backdrop + glassy Sheet */}
