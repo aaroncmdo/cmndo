@@ -188,6 +188,12 @@ export default async function FlowPage({
   // Pfad (Quali+Slot), server-seitig flag-gegatet (CANONICAL_FLOWLINK_ENABLED).
   // Dispatcher-Leads (Termin vorhanden) ODER Flag OFF → heutiger Pfad unverändert.
   const needsBooking = !terminMitSv && process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+  // AAR-956 self-service (Aaron 14.06.): ① Feststellung ist FAKTEN-gegatet, nicht termin-gegatet.
+  // Ein Embed-Lead hat einen gebuchten Termin ABER noch keinen unfallhergang → die Feststellung
+  // soll laufen (da kommen Hergang/Fahrzeug/Gegner/Vorschäden rein). Sobald unfallhergang gefüllt
+  // ist, fällt sie weg. ②Quali+③Slot bleiben termin-gegatet (needsBooking).
+  const feststellungNeeded =
+    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' && !lead.unfallhergang
 
   // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
   // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,
@@ -201,7 +207,7 @@ export default async function FlowPage({
   // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte
   // nur im incomplete-Pfad laden (sonst unnoetig). Werte feld_key -> aktueller
   // leads-Wert (Boolean -> String fuer segmented/toggle-cards; Action coercet zurueck).
-  const feststellungPhasen = needsBooking
+  const feststellungPhasen = feststellungNeeded
     ? await ladeFlowPhasen('lead-erfassung', 'kunde')
     : []
   const feststellungWerte: Record<string, unknown> = {}
