@@ -193,6 +193,7 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
         halter_strasse: 'Halterweg 1',
         halter_plz: '50670',
         halter_stadt: 'Koeln',
+        halter_geburtsdatum: '1980-05-15', // CMM-50 Group C: vcf.halter_geburtsdatum aus personen-Snapshot
         gegner_bekannt: false,
         fahrzeugschaden_beschreibung: schadenText2,
         status: 'neu',
@@ -236,6 +237,19 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
     expect(halter?.ist_halter).toBe(true)
     expect(halter?.nachname as string | null).toContain(tag2)
     expect(halter?.person_id).toBeTruthy() // ensurePersonForData: Halter hat Namen -> Person
+
+    // CMM-50 Group C: v_claim_full.halter_* sourct aus der halter-Party-PERSON (halter_p LATERAL).
+    // Beweist, dass die Konvertierung den Halter VOLLSTAENDIG ins Entity-Modell schreibt (inkl.
+    // geburtsdatum, die zuvor fehlende Snapshot-Luecke) → der faelle.halter_*-Write-Retire ist
+    // data-lossless (vcf zeigt den Halter aus personen, nicht aus faelle).
+    const { data: vcfHalter } = await db2
+      .from('v_claim_full')
+      .select('halter_nachname, halter_geburtsdatum, halter_strasse')
+      .eq('id', claimId2)
+      .single()
+    expect(vcfHalter?.halter_nachname as string | null).toContain(tag2)
+    expect(vcfHalter?.halter_geburtsdatum).toBe('1980-05-15')
+    expect(vcfHalter?.halter_strasse).toBe('Halterweg 1')
 
     // Geschaedigter-Party ist NICHT Halter (ist_fahrzeughalter=false)
     const { data: gesch } = await db2
