@@ -41,9 +41,10 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // CMM-44 SP-A2 (Cluster 2): schadens_fall_typ + schadens_art sind Semantik-
   // Duplikate — claims.fall_typ / claims.schadenart sind SSoT (convertLeadToClaim
   // schreibt sie dort). Aus der faelle-COPY-Liste entfernt.
-  // KFZ-153 Unfall + Gegner Detaildaten
+  // KFZ-153 Unfall + Gegner Detaildaten. CMM-50 Group C: gegner_fahrzeugtyp RAUS — Twin =
+  // verursacher-claim_party.fahrzeugtyp_klartext (convert datengetrieben; vcf.gegner_fahrzeugtyp
+  // sourct daraus). gegner_anzahl_beteiligte bleibt (claims-Twin: vcf = anzahl_beteiligte_total-1).
   'gegner_anzahl_beteiligte',
-  'gegner_fahrzeugtyp',
   // Fahrzeug
   // CMM-50/CMM-68: Vehicle-Master-Cols (kennzeichen / kennzeichen_buchstaben / fahrzeug_hersteller /
   // _modell / _farbe / lackfarbe_code / erstzulassung / fahrzeug_baujahr / hsn / tsn) NICHT mehr in
@@ -51,11 +52,11 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // bei FIN, sonst createVehicleStub fuer JEDES Fahrzeugdatum) + `kennzeichen` zusaetzlich auf der
   // geschaedigter-claim_party. NUR die kennzeichen-PARTS bleiben (haben kein vehicles-Home).
   'kennzeichen_kreis', 'kennzeichen_zahl', 'kennzeichen_suffix',
-  // Gegner
-  'gegner_name',
-  'gegner_versicherung',
-  // CMM-44 SP-A: gegner_versicherung_id ist DUP-Spalte — nur noch in claims.
-  'gegner_kennzeichen',
+  // Gegner — CMM-50 Group C: gegner_name/_versicherung/_kennzeichen RAUS aus dem faelle-INSERT.
+  // Twin = verursacher-claim_party (nachname / versicherung_klartext / kennzeichen, convert
+  // datengetrieben angelegt; vcf.gegner_* sourct via COALESCE(party/firma/versicherung)). Kein
+  // faelle-table-direkter Produktions-Reader mehr (copilot-prompt liest gegner jetzt aus vcf).
+  // gegner_versicherung_id war eh nur claims (CMM-44 SP-A).
   // Hergang
   // CMM-44 SP-A2 (Cluster 2): unfallhergang + schadens_hergang sind Semantik-
   // Duplikate — claims.hergang_kunde_text ist SSoT (convertLeadToClaim schreibt
