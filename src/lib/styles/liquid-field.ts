@@ -26,7 +26,7 @@
  *   - Textarea: + `resize-none`
  */
 export const liquidFieldBase =
-  'bg-claimondo-navy/[0.06] border-[1.5px] border-transparent text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo'
+  'bg-claimondo-navy/[0.04] border-[1.5px] border-claimondo-border text-claimondo-navy tracking-[-.005em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:border-claimondo-ondo/40 hover:bg-claimondo-navy/[0.06] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo'
 
 /**
  * Standard-Field-Klassen — `liquidFieldBase` + Standard-Layout (w-full,
