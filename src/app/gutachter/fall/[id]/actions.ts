@@ -417,18 +417,10 @@ export async function saveFinVinGutachter(
     return { error: 'Ungültige FIN. Muss 17 alphanumerische Zeichen lang sein.' }
   }
 
-  await supabase
-    .from('faelle')
-    .update({
-      fin_vin: cleaned,
-      fin_quelle: 'gutachter_manuell',
-      fin_extrahiert_am: new Date().toISOString(),
-    })
-    .eq('id', fallId)
-
-  // CMM-50.0: vehicles-Write-Path (SV-Portal-FIN, analog saveFinVin). vehicles-Row
-  // anlegen + claims.vehicle_id via faelle.claim_id setzen (Admin-Client fuer den
-  // claims-Write; die faelle-Ownership ist oben bereits geprueft). Non-critical.
+  // CMM-50 Phase-B (Write-Retire): Die FIN gehoert auf vehicles (SSoT) — KEIN faelle.fin_vin-Write
+  // mehr (alle Reader lesen via v_claim_full aus vehicles, #2836/#2842 live). vehicles-Anlage ist
+  // jetzt der PRIMAERE, kritische Write — Fehler => Form-Fehler statt stillem Verlust. Snapshot aus
+  // dem existierenden Fahrzeug (vcf, prescoped auf den ownership-verifizierten Claim).
   try {
     const claimId = (fall.claim_id as string | null) ?? null
     const admin = createAdminClient()
@@ -465,10 +457,10 @@ export async function saveFinVinGutachter(
       },
       db: admin,
     })
-    if (!veh.ok) console.warn('[CMM-50.0] vehicles-Upsert bei saveFinVinGutachter fehlgeschlagen:', veh.error)
-    else if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+    if (!veh.ok) return { error: veh.error ?? 'Fahrzeug konnte nicht gespeichert werden' }
+    if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
   } catch (e) {
-    console.warn('[CMM-50.0] vehicles-Write-Path (saveFinVinGutachter):', e)
+    return { error: e instanceof Error ? e.message : 'Fahrzeug-Speicherung fehlgeschlagen' }
   }
 
   await supabase.from('timeline').insert({
