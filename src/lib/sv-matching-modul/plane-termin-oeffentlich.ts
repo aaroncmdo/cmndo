@@ -214,8 +214,12 @@ export async function planeTerminOeffentlich(
   const candidates = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, TOP_KANDIDATEN)
   if (candidates.length === 0) return []
   const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
-  const rankedPerSv: SlotVorschlag[][] = []
-  for (const cand of candidates) rankedPerSv.push(await slotsFuer(cand.svId, KUNDE_MAX_SLOTS))
+  // AAR-956 (Aaron 14.06.): die slotsFuer-Calls (freieSlots, DB-schwer) PARALLEL statt sequenziell —
+  // der Hauptgrund der „Wir suchen"-Sekunden war 3× freieSlots nacheinander. Promise.all erhält die
+  // Reihenfolge (Engine-Ranking) → Ergebnis bit-identisch, nur ~3× schneller.
+  const rankedPerSv: SlotVorschlag[][] = await Promise.all(
+    candidates.map((cand) => slotsFuer(cand.svId, KUNDE_MAX_SLOTS)),
+  )
 
   // 2+1-Verteilung + kundensichere Projektion. SVs ohne zugeteilte Slots fallen raus.
   const counts = verteile2plus1Counts(rankedPerSv.map((s) => s.length))
