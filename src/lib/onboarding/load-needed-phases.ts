@@ -44,10 +44,13 @@ export async function ladeNoetigePhasen(
   const locale = await getLocale()
 
   // ─── 1. DB-Snapshot: Fall + Claim + Lead + Vehicle + Documents ───────
+  // CMM-49 (faelle-Drop-Runway): aus faelle werden hier NUR claim_id + lead_id genutzt
+  // (alle übrigen Stammdaten kommen unten aus claims/leads/vehicle). Das select('*') war
+  // inert → Anker auf faelle_claim_bridge; lead_id aus claims (SSoT, div=0).
   const { data: fall } = await supabase
-    .from('faelle')
-    .select('*')
-    .eq('id', fallId)
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id(lead_id)')
+    .eq('fall_id', fallId)
     .maybeSingle()
 
   if (!fall) {
@@ -55,7 +58,9 @@ export async function ladeNoetigePhasen(
   }
 
   const claim_id = (fall as Record<string, unknown>).claim_id as string | null
-  const lead_id = (fall as Record<string, unknown>).lead_id as string | null
+  const claimsEmbed = (fall as { claims?: unknown }).claims
+  const claimRow = Array.isArray(claimsEmbed) ? claimsEmbed[0] : claimsEmbed
+  const lead_id = (claimRow as { lead_id?: string | null } | null)?.lead_id ?? null
 
   const [claimRes, leadRes, docsRes] = await Promise.all([
     claim_id
