@@ -26,8 +26,8 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
 
   // Alle aktiven SVs
   const { data: svs } = await db.from('sachverstaendige')
-    .select('id, profile_id, gutachter_typ, status')
-    .eq('status', 'aktiv')
+    .select('id, profile_id, gutachter_typ, ist_aktiv')
+    .eq('ist_aktiv', true)
 
   if (!svs?.length) return { items: [], berechnetAus: 'sachverstaendige.status=aktiv' }
 
