@@ -147,6 +147,19 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
         }
       }
     }
+
+    // CMM-50 Group C: Gegner aus der verursacher-claim_party (via v_claim_full, party-sourced)
+    // statt aus dem faelle-Snapshot — buildContextText liest danach fall.gegner_name/
+    // gegner_versicherung. Reader-Gate fuer den faelle.gegner_*-Write-Retire (Party = SSoT).
+    const { data: vcfGegner } = await admin
+      .from('v_claim_full')
+      .select('gegner_name, gegner_versicherung')
+      .eq('id', fallRaw.claim_id as string)
+      .maybeSingle()
+    if (vcfGegner) {
+      fallRaw.gegner_name = vcfGegner.gegner_name ?? null
+      fallRaw.gegner_versicherung = vcfGegner.gegner_versicherung ?? null
+    }
   }
 
   const leadRaw = fallRaw?.leads
