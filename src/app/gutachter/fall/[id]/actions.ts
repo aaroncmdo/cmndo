@@ -402,13 +402,14 @@ export async function saveFinVinGutachter(
   const sv = await getGutachterForUser(supabase, user.id, 'id')
   if (!sv) return { error: 'Kein Sachverständigen-Profil gefunden' }
 
-  // CMM-50 Phase-B: Ownership-Gate via faelle (RLS + explizites sv_id) — nur noch claim_id,
-  // KEINE Fahrzeug-Cols mehr. Der Fahrzeug-Snapshot kommt unten aus vehicles (via v_claim_full).
+  // CMM-50 Phase-B: Ownership-Gate (RLS + explizites sv_id) — nur claim_id.
+  // CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge + claims.sv_id (SSoT, div=0 vs
+  // faelle.sv_id). Bridge-RLS spiegelt SV-Case-Access; !inner + .eq doppelt-gaten.
   const { data: fall } = await supabase
-    .from('faelle')
-    .select('claim_id')
-    .eq('id', fallId)
-    .eq('sv_id', sv.id)
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id!inner(sv_id)')
+    .eq('fall_id', fallId)
+    .eq('claims.sv_id', sv.id)
     .single()
   if (!fall) return { error: 'Fall nicht gefunden' }
 
