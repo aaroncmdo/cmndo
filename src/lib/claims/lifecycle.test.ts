@@ -7,7 +7,7 @@
 // ab. In P6 baut der B<->C-Konsistenz-Test hierauf auf.
 
 import { describe, it, expect } from 'vitest'
-import { getClaimLifecycle, getVisibleMainPhases, toClaimMainPhase, toClaimSubPhase, type ClaimLifecycleInput } from './lifecycle'
+import { getClaimLifecycle, getVisibleMainPhases, toClaimMainPhase, toClaimSubPhase, mainPhaseOf, type ClaimLifecycleInput } from './lifecycle'
 import type { AuftragRow } from '@/lib/auftrag/queries'
 import type { KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
 
@@ -29,6 +29,8 @@ function mkAuftrag(p: Partial<AuftragRow> & Pick<AuftragRow, 'typ' | 'status'>):
     zurueckgewiesen_am: p.zurueckgewiesen_am ?? null,
     erstellt_am: p.erstellt_am ?? TS,
     updated_at: p.updated_at ?? TS,
+    // CMM-74 b2: filmcheck_ok fuer die filmcheck/qc-pruefung-Verfeinerung im Begutachtungs-Block.
+    filmcheck_ok: p.filmcheck_ok ?? null,
   }
 }
 
@@ -43,6 +45,9 @@ function mkKanzlei(p: Partial<KanzleiFallRow> & Pick<KanzleiFallRow, 'status'>):
     updated_at: p.updated_at ?? TS,
     // CMM-44 MP-3: lexdrive_case_id triggert den regulierung-Eintritt (B-10).
     lexdrive_case_id: p.lexdrive_case_id ?? null,
+    // CMM-74 b2: Regulierungs-Trigger fuer die operativen Sub-Phasen vs-kuerzt/anschlussschreiben.
+    vs_reaktion_typ: p.vs_reaktion_typ ?? null,
+    anschlussschreiben_am: p.anschlussschreiben_am ?? null,
   }
 }
 
@@ -282,6 +287,112 @@ describe('getClaimLifecycle — MP-8 Terminal-Vokabular & Status-Regulierung', (
     const r = getClaimLifecycle({ ...noLead, claimStatus: 'abgelehnt_final' })
     expect(r.mainPhase).toBe('abschluss')
     expect(r.subPhase).toBe('abgelehnt_final')
+  })
+})
+
+// CMM-74 b2 §1: die 5 operativen Sub-Phasen, die die SQL-Spiegel-View v_claim_phase
+// (Migration 20260602083708) schon emittiert — getClaimLifecycle muss bitgleich
+// ableiten (Parity-Gate). Precedence (nach terminal): nachbesichtigung-laeuft >
+// vs-kuerzt > anschlussschreiben(pre-lexdrive) > lexdrive > status-regulierung >
+// kanzlei_uebergabe > filmcheck/qc-pruefung/gutachten > lead.
+describe('getClaimLifecycle — CMM-74 b2: operative Sub-Phasen (+5, v_claim_phase-Parity)', () => {
+  it('regulierung/nachbesichtigung-laeuft bei aktivem Nachbesichtigungs-Auftrag', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [
+        mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen', reihenfolge: 1 }),
+        mkAuftrag({ typ: 'nachbesichtigung', status: 'termin', reihenfolge: 2 }),
+      ],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('nachbesichtigung-laeuft')
+  })
+
+  it('nachbesichtigung-laeuft hat Vorrang vor lexdrive-Regulierung (View: nb.active zuerst)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'nachbesichtigung', status: 'besichtigung', reihenfolge: 2 })],
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', lexdrive_case_id: 'LX-1' }),
+    })
+    expect(r.subPhase).toBe('nachbesichtigung-laeuft')
+  })
+
+  it('regulierung/vs-kuerzt bei kanzlei_faelle.vs_reaktion_typ=gekuerzt', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', vs_reaktion_typ: 'gekuerzt' }),
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('vs-kuerzt')
+  })
+
+  it('regulierung/anschlussschreiben bei anschlussschreiben_am (pre-lexdrive)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', anschlussschreiben_am: TS }),
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('anschlussschreiben')
+  })
+
+  it('anschlussschreiben gilt NUR pre-lexdrive — mit lexdrive_case_id schlaegt die lexdrive-Regulierung', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', anschlussschreiben_am: TS, lexdrive_case_id: 'LX-1' }),
+    })
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+
+  it('begutachtung/filmcheck bei Erstgutachten status=gutachten + gutachten_url (ohne filmcheck_ok)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten', gutachten_url: 'https://x' })],
+      kanzleiFall: null,
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('filmcheck')
+  })
+
+  it('begutachtung/qc-pruefung bei filmcheck_ok=true', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten', gutachten_url: 'https://x', filmcheck_ok: true })],
+      kanzleiFall: null,
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('qc-pruefung')
+  })
+
+  it('Erstgutachten status=gutachten OHNE gutachten_url bleibt gutachten (kein vorzeitiger Filmcheck)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten' })],
+      kanzleiFall: null,
+    })
+    expect(r.subPhase).toBe('gutachten')
+  })
+
+  it('terminal schlaegt nachbesichtigung-laeuft (Abschluss-Vorrang bleibt)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'nachbesichtigung', status: 'termin' })],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }),
+      claimStatus: 'reguliert_vollstaendig',
+    })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('erfolgreich_reguliert')
+  })
+
+  it('mainPhaseOf bildet die 5 neuen Sub-Phasen korrekt ab', () => {
+    expect(mainPhaseOf('filmcheck')).toBe('begutachtung')
+    expect(mainPhaseOf('qc-pruefung')).toBe('begutachtung')
+    expect(mainPhaseOf('vs-kuerzt')).toBe('regulierung')
+    expect(mainPhaseOf('anschlussschreiben')).toBe('regulierung')
+    expect(mainPhaseOf('nachbesichtigung-laeuft')).toBe('regulierung')
   })
 })
 

@@ -83,6 +83,9 @@ export function projectNextEvents(input: {
         ]
       case 'gutachten':
       case 'kanzlei_uebergabe':
+      // CMM-74 b2 §1: filmcheck/qc-pruefung = begutachtung-Tail → gleiche Projektion (Reparatur).
+      case 'filmcheck':
+      case 'qc-pruefung':
         return [
           {
             event_typ: 'repair.geplant',
@@ -99,7 +102,14 @@ export function projectNextEvents(input: {
 
   // ── Regulierung ── VS-Kontakt: Forderung raus, Reparatur ggf. noch offen.
   if (mainPhase === 'regulierung') {
-    if (subPhase === 'versicherungskontakt') {
+    // CMM-74 b2 §1: vs-kuerzt/anschlussschreiben/nachbesichtigung-laeuft sind weiter VS-Prozess
+    // (noch keine Auszahlung) → gleiche Projektion wie versicherungskontakt.
+    if (
+      subPhase === 'versicherungskontakt' ||
+      subPhase === 'vs-kuerzt' ||
+      subPhase === 'anschlussschreiben' ||
+      subPhase === 'nachbesichtigung-laeuft'
+    ) {
       const events: ProjectedEvent[] = []
       if (reparaturEndeIso) {
         events.push({
