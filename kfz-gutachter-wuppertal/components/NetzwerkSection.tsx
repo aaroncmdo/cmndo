@@ -132,7 +132,7 @@ export function NetzwerkSection() {
               <img
                 id="netzwerkAvatarTobias"
                 className="cta-v8-role-img"
-                src="/assets/brand/sv-avatar-wuppertal.svg"
+                src={`${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`}
                 alt="Sachverständiger vor Ort"
                 loading="lazy"
                 width={56}
@@ -250,7 +250,7 @@ export function NetzwerkSection() {
                       Asset (Gesicht mittig, Kopf nicht anschneiden). */}
                   <img
                     src={p.avatar === 'sv'
-                      ? '/assets/brand/sv-avatar-wuppertal.svg'
+                      ? `${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`
                       : `/assets/img/shared/avatar-${p.avatar}.png`}
                     alt={`${p.name === '{sv}' ? CLUSTER.svName : p.name} — ${p.funktion}`}
                     width={60}
