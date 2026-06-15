@@ -248,7 +248,12 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // RLS/Trigger auf faelle.organisation_id). options.organisationId bleibt resolved
     // (resolveFallEntityFks) fuer eine kuenftige Org-Home-Entscheidung (claims?), wird
     // aber nicht mehr nach faelle geschrieben.
-    dispatch_id: options.dispatchId ?? null,
+    // CMM-65/CMM-49 (faelle-Drop): dispatch_id EBENFALLS NICHT mehr in den faelle-Insert —
+    // reader-frei (v_claim_full = NULL::uuid AS dispatch_id [live 0/80 non-null], keine RLS/Trigger
+    // auf faelle.dispatch_id). options.dispatchId bleibt resolved (resolveFallEntityFks) fuer einen
+    // kuenftigen claims-Home (Master-Plan A2), wird aber nicht mehr nach faelle geschrieben.
+    // NB: der admin/statistiken dispatch-„nurEigene"-Filter liest v_claim_full.dispatch_id=NULL und
+    // ist daher schon HEUTE leer (pre-existing) — Fix = dispatch_id auf claims re-homen, separat.
   }
 }
 
