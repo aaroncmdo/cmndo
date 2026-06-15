@@ -180,6 +180,41 @@ function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): nu
 const BERATUNG_GLASS =
   '[background:color-mix(in_srgb,white_60%,transparent)] [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] border-white/50 text-claimondo-ondo'
 
+// AAR-956 (Aaron 14.06.): Status-Pill als eigene Komponente — Desktop im Header (links), Mobil
+// unten-mittig über dem Anfrage-Sheet. Responsiver Text via die zwei spans (kurz/voll).
+function GutachterPill({
+  userLocation,
+  naeheCount,
+  gesamt,
+}: {
+  userLocation: { lat: number; lng: number } | null
+  naeheCount: number | null
+  gesamt: number
+}) {
+  return (
+    <GlassPill className="px-3 py-2 sm:px-4">
+      <span className="relative flex h-2 w-2 flex-shrink-0">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+      </span>
+      <span
+        className="text-[11px] sm:text-xs font-semibold whitespace-nowrap"
+        style={{
+          fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+          color: 'var(--brand-secondary, var(--claimondo-ondo))',
+        }}
+      >
+        <span className="sm:hidden">
+          {userLocation ? tMap('pill_short_near', { count: naeheCount ?? 0 }) : tMap('pill_short_bundesweit', { count: gesamt })}
+        </span>
+        <span className="hidden sm:inline">
+          {userLocation ? tMap('pill_near', { count: naeheCount ?? 0 }) : tMap('pill_bundesweit', { count: gesamt })}
+        </span>
+      </span>
+    </GlassPill>
+  )
+}
+
 export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
@@ -843,41 +878,25 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed).
           Mobile: kurzer Pill-Text + Beratung als Icon-only-Pill, sonst läuft's über. */}
       <div className="absolute top-0 left-0 right-0 z-[5] px-3 pt-3 sm:px-6 sm:pt-6 pointer-events-none">
-        <div className="flex items-center justify-between gap-2 pointer-events-auto">
-          <GlassPill className="px-3 py-2 sm:px-4">
-            <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
-            </span>
-            <span
-              className="text-[11px] sm:text-xs font-semibold whitespace-nowrap"
-              style={{
-                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                color: 'var(--brand-secondary, var(--claimondo-ondo))',
-              }}
-            >
-              {/* Kurz auf Mobile */}
-              <span className="sm:hidden">
-                {userLocation
-                  ? t('pill_short_near', { count: naeheCount ?? 0 })
-                  : t('pill_short_bundesweit', { count: aktiveSVs.length })}
-              </span>
-              {/* Voll ab sm — Aaron 14.05.2026: kein "Premium-Partner"-Wording
-                  mehr (Privacy-Refactor: paket-Detail wird nicht preisgegeben).
-                  Einheitliche Sachverständigen-Zählung. */}
-              <span className="hidden sm:inline">
-                {userLocation
-                  ? t('pill_near', { count: naeheCount ?? 0 })
-                  : t('pill_bundesweit', { count: aktiveSVs.length })}
-              </span>
-            </span>
-          </GlassPill>
+        <div className="flex items-center justify-end sm:justify-between gap-2 pointer-events-auto">
+          {/* AAR-956 (Aaron 14.06.): Pill nur Desktop im Header — Mobil unten-mittig (s.u.). */}
+          <div className="hidden sm:block">
+            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length} />
+          </div>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
           <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className={`hidden sm:inline-flex ${BERATUNG_GLASS}`} />
           <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className={`sm:hidden flex-shrink-0 text-[12px] px-3 ${BERATUNG_GLASS}`} />
         </div>
       </div>
+
+      {/* AAR-956 (Aaron 14.06.): Status-Pill auf Mobil unten-mittig über dem Anfrage-Sheet
+          (nicht oben links) — ausgeblendet wenn das Sheet offen ist. Desktop = Header (s.o.). */}
+      {!mobileSheetOpen && (
+        <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-[72px] z-[8] flex justify-center">
+          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length} />
+        </div>
+      )}
 
       {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper,
           dynamische Breite (clamp). WICHTIG: paddingInline 28px — overflow-y-auto
