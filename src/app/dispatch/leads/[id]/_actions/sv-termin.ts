@@ -47,10 +47,10 @@ async function findStickySvForLead(
     if (svId) {
       const { data: sv } = await supabase
         .from('sachverstaendige')
-        .select('id, status')
+        .select('id, ist_aktiv')
         .eq('id', svId)
         .maybeSingle()
-      if (sv && sv.status !== 'inaktiv') return sv.id as string
+      if (sv && sv.ist_aktiv !== false) return sv.id as string
     }
   }
 
@@ -96,10 +96,10 @@ async function findStickySvForLead(
   for (const f of faelleSorted) {
     const { data: sv } = await supabase
       .from('sachverstaendige')
-      .select('id, status')
+      .select('id, ist_aktiv')
       .eq('id', f.sv_id)
       .maybeSingle()
-    if (sv && sv.status !== 'inaktiv') return sv.id as string
+    if (sv && sv.ist_aktiv !== false) return sv.id as string
   }
   return null
 }
