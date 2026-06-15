@@ -82,11 +82,20 @@ export const PHASE_VISIBLE_SECTIONS: Record<string, StammdatenSection[]> = {
   gutachten: [...BASIS, 'besichtigung', 'kernwerte'],
   // Kanzlei-Übergabe-Interim (begutachtung-Tail; alt kanzlei-uebergeben/filmcheck/qc)
   kanzlei_uebergabe: [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
+  // CMM-74 b2 §1: filmcheck/qc-pruefung sind begutachtung-Tail (Gutachten hochgeladen, in QC) —
+  // dieselben Sektionen wie kanzlei_uebergabe (≥ gutachten → Invariante "nie weniger" gewahrt).
+  filmcheck: [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
+  'qc-pruefung': [...BASIS, 'besichtigung', 'kernwerte', 'as-status'],
 
   // ── Regulierung (großzügig, s. REGULIERUNG_SECTIONS) ─────────────────
   versicherungskontakt: REGULIERUNG_SECTIONS,
   nachforderung: REGULIERUNG_SECTIONS,
   auszahlung: [...REGULIERUNG_SECTIONS, 'auszahlung'],
+  // CMM-74 b2 §1: die nun expliziten Regulierungs-Sub-Phasen (im REGULIERUNG_SECTIONS-
+  // Kommentar oben bereits als kollabiert benannt) → dasselbe großzügige Set.
+  'vs-kuerzt': REGULIERUNG_SECTIONS,
+  anschlussschreiben: REGULIERUNG_SECTIONS,
+  'nachbesichtigung-laeuft': REGULIERUNG_SECTIONS,
 
   // ── Abschluss (terminal) — ALLE Sektionen (wie alt abgeschlossen/storniert/klage) ──
   erfolgreich_reguliert: ALLE_SECTIONS,
