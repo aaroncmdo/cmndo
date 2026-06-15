@@ -168,6 +168,22 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     expect(veh?.kennzeichen_aktuell).toBe(geschKz)
     expect(veh?.hersteller).toBe('Testmarke')
     expect(veh?.modell_haupttyp).toBe('Testmodell')
+
+    // CMM-49 D2 (claim-first Genesis): convertLeadToClaim legt KEINE faelle-Row mehr an.
+    // fall_id == claim_id; die faelle_claim_bridge (via trg_sync_claims_to_bridge) ist der
+    // fall_id->claim_id-Lookup fuer die fall_id-Kinder. Gate fuer den Genesis-INSERT-Cutover.
+    const { count: faelleCount } = await db
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('claim_id', claimId)
+    expect(faelleCount).toBe(0)
+    const { data: bridge } = await db
+      .from('faelle_claim_bridge')
+      .select('fall_id, claim_id')
+      .eq('claim_id', claimId)
+      .single()
+    expect(bridge?.fall_id).toBe(claimId)
+    expect(res.fallId).toBe(claimId)
   }, 30_000) // Remote-Converter macht viele sequentielle Round-Trips (~7s) -> Default-5s reicht nicht
 })
 
