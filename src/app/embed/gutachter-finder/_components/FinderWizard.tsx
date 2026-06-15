@@ -304,6 +304,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             </p>
             <GooglePlaceAutocomplete
               placeholder="Adresse eingeben…"
+              scrollIntoViewOnFocus
               className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
               onSelect={ortGewaehlt}
             />

@@ -305,6 +305,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
+      language: 'de', // AAR-956 (Aaron 14.06.): Karten-Labels auf Deutsch (mapbox-gl v3 localization)
       center: startCenter,
       zoom: startZoom,
       pitch: 35,
@@ -881,7 +882,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         <div className="flex items-center justify-end sm:justify-between gap-2 pointer-events-auto">
           {/* AAR-956 (Aaron 14.06.): Pill nur Desktop im Header — Mobil unten-mittig (s.u.). */}
           <div className="hidden sm:block">
-            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length} />
+            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
           </div>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
@@ -894,7 +895,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           (nicht oben links) — ausgeblendet wenn das Sheet offen ist. Desktop = Header (s.o.). */}
       {!mobileSheetOpen && (
         <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-[72px] z-[8] flex justify-center">
-          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length} />
+          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
         </div>
       )}
 
@@ -959,7 +960,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         }}
       >
         <div
-          className="rounded-t-[32px] border-x border-t border-white/50 bg-white/70 backdrop-blur-xl max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          className="rounded-t-[32px] border-x border-t border-white/50 bg-white/70 backdrop-blur-xl max-h-[85dvh] overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden"
           style={{
             boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
             scrollbarWidth: 'none',
@@ -990,7 +991,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
               else setMobileSheetOpen((v) => !v)
             }}
             aria-label={mobileSheetOpen ? 'Schließen' : 'Anfrage öffnen'}
-            className="w-full px-5 pt-2.5 pb-1 flex items-center justify-center"
+            className="w-full px-5 pt-2.5 pb-1 flex items-center justify-center touch-none"
           >
             <ChevronUp
               className={`h-6 w-6 transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
