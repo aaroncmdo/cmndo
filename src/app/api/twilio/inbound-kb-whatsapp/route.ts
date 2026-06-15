@@ -88,12 +88,14 @@ export async function POST(req: Request) {
       .select('id')
       .not('operative_status', 'in', '("abgeschlossen","storniert")')
     const aktiveClaimIds = (aktiveClaims ?? []).map((c) => c.id as string)
-    const { data: faelleRaw } = await db.from('faelle')
-      .select('id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
+    // CMM-49 (faelle-Drop-Runway): Anker faelle_claim_bridge statt .from('faelle')
+    // (gleiche RLS-Sichtbarkeit; Output fall_id == faelle.id). Filter claims-zentrisch.
+    const { data: faelleRaw } = await db.from('faelle_claim_bridge')
+      .select('fall_id, claim_id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
       .eq('claims.kundenbetreuer_id', kb.id)
       .in('claim_id', aktiveClaimIds)
     const faelle = (faelleRaw ?? [])
-      .map((f) => ({ ...f, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+      .map((f) => ({ id: f.fall_id as string, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
       .sort((a, b) => b._c.localeCompare(a._c))
 
     if (faelle?.length === 1) {
@@ -101,13 +103,13 @@ export async function POST(req: Request) {
     } else if (faelle && faelle.length > 1) {
       // Try matching by lead telefon
       if (lead) {
-        const { data: matchedRaw } = await db.from('faelle')
-          .select('id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
+        const { data: matchedRaw } = await db.from('faelle_claim_bridge')
+          .select('fall_id, claim_id, claims:claim_id!inner(kundenbetreuer_id, created_at)')
           .eq('claims.kundenbetreuer_id', kb.id)
-          .eq('lead_id', lead.id)
+          .eq('claims.lead_id', lead.id)
           .in('claim_id', aktiveClaimIds)
         const matched = (matchedRaw ?? [])
-          .map((f) => ({ id: f.id, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
+          .map((f) => ({ id: f.fall_id as string, _c: (Array.isArray(f.claims) ? f.claims[0] : f.claims)?.created_at ?? '' }))
           .sort((a, b) => b._c.localeCompare(a._c))[0] ?? null
         fallId = matched?.id ?? faelle[0].id
       } else {
