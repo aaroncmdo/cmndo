@@ -408,6 +408,15 @@ export async function convertLeadToClaim(
     kanzlei_wunsch: 'nicht_gefragt',
   }
 
+  // CMM-74 b2: operative_status (Engine-Cursor, claims=SSoT) initial = faelle.status-Initialwert
+  // (== fallComputedFields: svIdFromTermin ? 'sv-termin' : 'ersterfassung'). Schliesst die
+  // Konvert-Luecke — neue Claims bekommen den Cursor schon bei Anlage statt NULL bis zum ersten
+  // Engine-Transition (sonst Reader-Fallback ?? faelle.status noetig + NULL-Straggler). Value-neutral
+  // (== was faelle.status traegt). operative_status fehlt noch in den generierten Claims-Typen
+  // (b'' types-regen aufgeschoben) -> Record-Bridge wie die b''-Reader (vgl. fallInsert.kunde_id unten).
+  ;(claimsInsert as Record<string, unknown>).operative_status =
+    input.svIdFromTermin ? 'sv-termin' : 'ersterfassung'
+
   const { data: claim, error: claimErr } = await admin
     .from('claims')
     .insert(claimsInsert)

@@ -79,9 +79,12 @@ export async function createClaimForFall(
   const VALID_SCHADENARTEN = ['haftpflicht', 'vollkasko', 'teilkasko', 'eigenverschulden', 'unbekannt']
   const schadenart = VALID_SCHADENARTEN.includes(schadenartRaw) ? schadenartRaw : 'unbekannt'
 
-  const { data: claim, error } = await db
-    .from('claims')
-    .insert({
+  // CMM-74 b2: operative_status (Engine-Cursor, claims=SSoT) bei Anlage = 'ersterfassung'
+  // (manuell_admin/sv_anlage legen den Fall mit faelle.status='ersterfassung' an) — schliesst
+  // die 2. Creator-Luecke (convert = 1. Creator, PR #2884) -> kein NULL-operative_status-Straggler.
+  // operative_status fehlt noch in den generierten Claims-Typen (b'' types-regen aufgeschoben)
+  // -> Record-Bridge wie die b''-Reader + convert (#2884).
+  const claimInsertObj = {
       // CMM-49 Step 3 (faelle-Drop-Vorbereitung): claim.id == fall_id (Identity).
       // Hier existiert die faelle-Row schon (fallId), der Claim wird fuer sie angelegt
       // -> claim.id auf fallId setzen, damit die Bridge 1:1 bleibt (s. convert-lead-to-claim).
@@ -130,7 +133,11 @@ export async function createClaimForFall(
       lead_id: source.lead_id ?? null,
       created_by_user_id: source.kundenbetreuer_id ?? null,
       created_via: createdVia,
-    })
+  }
+  ;(claimInsertObj as Record<string, unknown>).operative_status = 'ersterfassung'
+  const { data: claim, error } = await db
+    .from('claims')
+    .insert(claimInsertObj)
     .select('id')
     .single()
 
