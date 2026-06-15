@@ -53,7 +53,7 @@ export async function lehneLeadAb(
   // CMM-44 SP-B PR2a: claim_id fuer sv_zugewiesen_am-Clear auf claims (SSoT).
   const { data: fall } = await db
     .from('faelle')
-    .select('id, claim_id, sv_id, status, lead_preis_netto, claims:claim_id(claim_nummer, operative_status, lead_preis_netto)')
+    .select('id, claim_id, sv_id, lead_preis_netto, claims:claim_id(claim_nummer, operative_status, lead_preis_netto)')
     .eq('id', fallId)
     .single()
 
@@ -61,8 +61,9 @@ export async function lehneLeadAb(
   const fallClaimObj = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
   const fallClaimNummer = (fallClaimObj as { claim_nummer?: string | null } | null)?.claim_nummer ?? null
   if (fall.sv_id !== sv.id) return { ok: false, error: 'Nicht zugewiesen' }
-  // CMM-74 b″: Status-Gate auf claims.operative_status (SSoT, 1:1-Mirror) — faelle.status-Fallback.
-  const fallStatus = ((fallClaimObj as { operative_status?: string | null } | null)?.operative_status) ?? (fall.status as string | null)
+  // CMM-74 b2 reader-fallback-drop: Status-Gate NUR auf claims.operative_status (SSoT) — der
+  // faelle.status-Fallback ist entfernt, da operative_status vollstaendig ist (alle Creator + Backfill, #2884).
+  const fallStatus = (fallClaimObj as { operative_status?: string | null } | null)?.operative_status ?? null
   if (!['sv-zugewiesen', 'sv-termin'].includes(fallStatus as string)) {
     return { ok: false, error: 'Lead kann in diesem Status nicht mehr abgelehnt werden' }
   }
