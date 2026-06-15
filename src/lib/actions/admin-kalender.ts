@@ -182,8 +182,8 @@ export async function getActiveGutachter(): Promise<Array<{
   const supabase = await createClient()
   const { data: svs } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, gutachter_typ, status')
-    .eq('status', 'aktiv')
+    .select('id, profile_id, gutachter_typ, ist_aktiv')
+    .eq('ist_aktiv', true)
 
   if (!svs?.length) return []
 
