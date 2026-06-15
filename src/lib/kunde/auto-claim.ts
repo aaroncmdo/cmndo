@@ -34,7 +34,7 @@ export async function claimFaelleByEmail(
   const leadIds = (leads ?? []).map((l) => l.id as string)
   if (leadIds.length === 0) return { claimed: 0 }
 
-  // Alle Fälle dieser Leads die noch keinen Kunden haben → claimen
+  // 1. faelle.kunde_id — faelle-RLS für „kunde" ist kunde_id=auth.uid() (bis faelle-DROP).
   const { data: updated, error } = await admin
     .from('faelle')
     .update({ kunde_id: userId })
@@ -43,8 +43,37 @@ export async function claimFaelleByEmail(
     .select('id')
 
   if (error) {
-    console.warn('[claimFaelleByEmail] Update fehlgeschlagen:', error.message)
+    console.warn('[claimFaelleByEmail] faelle-Update fehlgeschlagen:', error.message)
     return { claimed: 0 }
+  }
+
+  // 2. claims-seitige Ownership mitsetzen (CMM-49 Option A, Aaron 15.06.):
+  // Nach dem faelle-DROP ist claims.geschaedigter_user_id der Ownership-SSoT (Kunde-Portal
+  // + RLS). Würde auto-claim das NICHT mitsetzen, hinge die Sichtbarkeit eines spät
+  // registrierten Kunden allein am Email-Fallback (assertKundeOwnsFall/-Claim 2c). Additiv +
+  // idempotent (`is null`), gleicher Email-Match-Grant wie der faelle-Write oben. Best-effort:
+  // ein Fehler hier bricht den Login-Flow nicht (nächster Page-Load wiederholt es idempotent).
+  const { data: claimRows } = await admin
+    .from('claims')
+    .select('id')
+    .in('lead_id', leadIds)
+  const claimIds = (claimRows ?? []).map((c) => c.id as string)
+  if (claimIds.length > 0) {
+    const { error: claimErr } = await admin
+      .from('claims')
+      .update({ geschaedigter_user_id: userId })
+      .in('id', claimIds)
+      .is('geschaedigter_user_id', null)
+    if (claimErr) console.warn('[claimFaelleByEmail] claims.geschaedigter_user_id-Update:', claimErr.message)
+
+    // claim_parties(geschaedigter).user_id — den OR-Ownership-Pfad + Identitäts-Link mitziehen.
+    const { error: partyErr } = await admin
+      .from('claim_parties')
+      .update({ user_id: userId })
+      .in('claim_id', claimIds)
+      .eq('rolle', 'geschaedigter')
+      .is('user_id', null)
+    if (partyErr) console.warn('[claimFaelleByEmail] claim_parties.user_id-Update:', partyErr.message)
   }
 
   return { claimed: (updated ?? []).length }
