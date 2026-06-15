@@ -252,11 +252,14 @@ export async function POST(request: Request) {
     .eq('id', fallId)
 
   // CMM-44 SP-B PR2a: sv_zugewiesen_am → claims (SSoT).
+  // CMM-74 b2: operative_status (Engine-Cursor, claims=SSoT) mit dem Dispatch-Status mitziehen —
+  // sonst zeigt der Reader den alten op-Status (faelle.status='sv-zugewiesen'/'sv-gesucht', op stale).
+  // Record-Bridge (operative_status fehlt in gen. Typen, b''-Konvention wie convert/#2884).
   if (fallClaimId) {
     const adminDb = createAdminClient()
-    await adminDb.from('claims').update({
-      sv_zugewiesen_am: orgPool ? null : now,
-    }).eq('id', fallClaimId)
+    const claimsUpd = { sv_zugewiesen_am: orgPool ? null : now }
+    ;(claimsUpd as Record<string, unknown>).operative_status = orgPool ? 'sv-gesucht' : 'sv-zugewiesen'
+    await adminDb.from('claims').update(claimsUpd).eq('id', fallClaimId)
   }
 
   // CMM-60 Schritt 3: SV-Zuweisung auf der SSoT claims.sv_id (Reverse-Trigger
