@@ -55,10 +55,14 @@ export async function POST(request: Request) {
   // CMM-74 b″: status aus dem Select entfernt — war ungenutzt (nur sv_id +
   // claims-Embed werden gelesen). faelle.status wird weiter unten geschrieben,
   // aber nirgends in dieser Route gelesen.
+  // CMM-49 (faelle-Drop-Runway): Anker auf faelle_claim_bridge statt .from('faelle')
+  // (Policy faelle_claim_bridge_select_consolidated spiegelt faelle's Case-Access exakt
+  // -> gleiche Sichtbarkeit; bridge.fall_id == faelle.id, 1:1). sv_id aus claims.sv_id
+  // (SSoT, div=0 vs faelle.sv_id).
   const { data: fall, error: fallErr } = await supabase
-    .from('faelle')
-    .select('id, sv_id, claims:claim_id(spezifikation, schadenort_plz, schadenart)')
-    .eq('id', fallId)
+    .from('faelle_claim_bridge')
+    .select('fall_id, claim_id, claims:claim_id(sv_id, spezifikation, schadenort_plz, schadenart)')
+    .eq('fall_id', fallId)
     .single()
 
   if (fallErr || !fall) {
@@ -68,7 +72,7 @@ export async function POST(request: Request) {
   const fallSpezifikation = (fallClaim?.spezifikation as string | null) ?? null
   const fallSchadenPlz = (fallClaim?.schadenort_plz as string | null) ?? null
   const fallSchadenart = (fallClaim?.schadenart as string | null) ?? null
-  if (fall.sv_id) {
+  if (fallClaim?.sv_id) {
     return NextResponse.json({ error: 'Bereits ein SV zugewiesen' }, { status: 409 })
   }
   if (!fallSchadenPlz) {
@@ -302,14 +306,18 @@ export async function POST(request: Request) {
     // CMM-44 SP-B PR2c: schadens_ursache lebt auf claims (SSoT) — ins Embed.
     // CMM-44 SP-D PR2a: wunschtermin aus gutachter_termine (aktueller Termin, SSoT). Null-safe: beim
     // ersten Dispatch existiert noch kein Termin — fallback auf leads.wunschtermin.
+    // CMM-49 (faelle-Drop-Runway): Anker auf faelle_claim_bridge statt .from('faelle')
+    // (gleiche RLS-Sichtbarkeit). lead_id aus claims.lead_id (SSoT, div=0). Das frühere
+    // sv_id-Select war vestigial (nirgends gelesen — Zuweisung nutzt bestSv.id) -> weg.
     const { data: fallFull } = await supabase
-      .from('faelle')
-      .select('id, lead_id, sv_id, claim_id, claims:claim_id(claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
-      .eq('id', fallId)
+      .from('faelle_claim_bridge')
+      .select('fall_id, claim_id, claims:claim_id(lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
+      .eq('fall_id', fallId)
       .single()
 
     if (fallFull) {
       const fallFullClaim = Array.isArray(fallFull.claims) ? fallFull.claims[0] : fallFull.claims
+      const fallFullLeadId = (fallFullClaim?.lead_id as string | null) ?? null
 
       // CMM-50 Phase-B: Kennzeichen aus vehicles (via v_claim_full), nicht mehr aus
       // faelle.kennzeichen. Prescoped auf den RLS-verifizierten claim_id (der faelle-Read
@@ -337,11 +345,11 @@ export async function POST(request: Request) {
           .maybeSingle()
         wunschtermin = (neuestTermin?.wunschtermin as string | null) ?? null
       }
-      if (!wunschtermin && fallFull.lead_id) {
+      if (!wunschtermin && fallFullLeadId) {
         const { data: leadWt } = await supabase
           .from('leads')
           .select('wunschtermin')
-          .eq('id', fallFull.lead_id)
+          .eq('id', fallFullLeadId)
           .maybeSingle()
         wunschtermin = (leadWt?.wunschtermin as string | null) ?? null
       }
@@ -353,8 +361,8 @@ export async function POST(request: Request) {
 
       // Kunde-Daten + Adresse fuer Trigger
       let kundeName = ''
-      if (fallFull.lead_id) {
-        const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fallFull.lead_id).single()
+      if (fallFullLeadId) {
+        const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fallFullLeadId).single()
         kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
       }
       const adresse = [fallFullClaim?.schadenort_adresse, fallFullClaim?.schadenort_plz, fallFullClaim?.schadenort_ort].filter(Boolean).join(', ') || ''
@@ -473,27 +481,25 @@ export async function POST(request: Request) {
     const p = Array.isArray(svProfile.profiles) ? svProfile.profiles[0] : svProfile.profiles
     const svEmail = (p as { email?: string })?.email
     if (svEmail) {
+      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id.
+      // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer.
+      // CMM-49 (faelle-Drop-Runway): claim_nummer + schadenort_* + lead_id faelle-frei
+      // via claims (ein Read statt zusätzlichem faelle.lead_id-Read).
+      const zuwClaimId = await resolveClaimId(supabase, fallId)
+      const { data: fallDataClaim } = zuwClaimId
+        ? await supabase.from('claims').select('lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort').eq('id', zuwClaimId).maybeSingle()
+        : { data: null }
+
       let kundenName = '—'
-      const { data: leadForEmail } = await supabase
-        .from('faelle')
-        .select('lead_id')
-        .eq('id', fallId)
-        .single()
-      if (leadForEmail?.lead_id) {
+      const emailLeadId = (fallDataClaim?.lead_id as string | null) ?? null
+      if (emailLeadId) {
         const { data: lead } = await supabase
           .from('leads')
           .select('vorname, nachname')
-          .eq('id', leadForEmail.lead_id)
+          .eq('id', emailLeadId)
           .single()
         if (lead) kundenName = `${lead.vorname ?? ''} ${lead.nachname ?? ''}`.trim() || '—'
       }
-      // CMM-44 SP-A2 (Cluster 1): schadenort_* aus claims (SSoT) via claim_id-Embed.
-      // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer (gleiches Embed).
-      // CMM-49: claim_nummer + schadenort_* faelle-frei via claims.
-      const zuwClaimId = await resolveClaimId(supabase, fallId)
-      const { data: fallDataClaim } = zuwClaimId
-        ? await supabase.from('claims').select('claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort').eq('id', zuwClaimId).maybeSingle()
-        : { data: null }
       const fallNr = fallDataClaim?.claim_nummer ?? fallId.slice(0, 8)
       const adresse = [fallDataClaim?.schadenort_adresse, fallDataClaim?.schadenort_plz, fallDataClaim?.schadenort_ort].filter(Boolean).join(', ') || '—'
       emailSvZugewiesen(svEmail, fallNr, kundenName, adresse).catch((err) => {
