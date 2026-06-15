@@ -20,9 +20,9 @@ export async function GET(req: NextRequest) {
   // claims-Embed gezogen (kanzlei_faelle.claim_id->claims intakt). Der .or(mandatsnummer)-
   // Filter unten bleibt auf faelle.mandatsnummer (additiv bis Phase-6).
   const FAELLE_SELECT =
-    'id, status, kennzeichen, lead_id, claims:claim_id(claim_nummer, schadenort_ort, kanzlei_faelle(mandatsnummer))'
+    'id, status, kennzeichen, lead_id, claims:claim_id(claim_nummer, schadenort_ort, vehicle:vehicle_id(kennzeichen_aktuell), kanzlei_faelle(mandatsnummer))'
 
-  const [faelleRes, leadsRes, svRes, ortClaimsRes, nrClaimsRes] = await Promise.all([
+  const [faelleRes, leadsRes, svRes, ortClaimsRes, nrClaimsRes, vehKzRes] = await Promise.all([
     // CMM-44 SP-A2/A3 (Cluster 1): schadenort_ort und claim_nummer leben auf claims
     // (SSoT) — als Embed fuer die Anzeige geladen. PostgREST .or() kann nicht ueber
     // Embeds filtern; Schadenort- und Aktennummer-Suche laufen separat (unten).
@@ -53,11 +53,25 @@ export async function GET(req: NextRequest) {
       .select('id')
       .ilike('claim_nummer', pattern)
       .limit(5),
+    // CMM-50: Kennzeichen lebt auf vehicles (faelle.kennzeichen = Legacy, fuer neue Faelle null).
+    // ilike auf vehicles.kennzeichen_aktuell -> vehicle_ids; die claims.in(vehicle_id)-Query unten
+    // ist der RLS-Gate (nur Claims des Users). Alte Faelle weiter via faelle.kennzeichen (.or oben).
+    supabase
+      .from('vehicles')
+      .select('id')
+      .ilike('kennzeichen_aktuell', pattern)
+      .limit(10),
   ])
 
+  // CMM-50: Kennzeichen-Treffer aus vehicles -> claims (RLS-gegatet) -> claim_ids dazu mergen.
+  const vehicleIds = (vehKzRes.data ?? []).map(v => v.id as string)
+  const { data: vehClaims } = vehicleIds.length
+    ? await supabase.from('claims').select('id').in('vehicle_id', vehicleIds).limit(10)
+    : { data: [] as { id: string }[] }
   const matchClaimIds = Array.from(new Set([
     ...(ortClaimsRes.data ?? []).map(c => c.id as string),
     ...(nrClaimsRes.data ?? []).map(c => c.id as string),
+    ...(vehClaims ?? []).map(c => c.id as string),
   ]))
   const { data: claimFaelle } = matchClaimIds.length
     ? await supabase.from('faelle').select(FAELLE_SELECT).in('claim_id', matchClaimIds).limit(10)
@@ -84,17 +98,21 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     faelle: faelleMerged.map(f => {
       const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
-        | { claim_nummer: string | null; schadenort_ort: string | null; kanzlei_faelle: { mandatsnummer: string | null } | Array<{ mandatsnummer: string | null }> | null }
+        | { claim_nummer: string | null; schadenort_ort: string | null; vehicle: { kennzeichen_aktuell: string | null } | Array<{ kennzeichen_aktuell: string | null }> | null; kanzlei_faelle: { mandatsnummer: string | null } | Array<{ mandatsnummer: string | null }> | null }
         | null
       // CMM-49 #2688-Fix: kanzlei_faelle jetzt unter claims genested (s. FAELLE_SELECT).
       const kf = (Array.isArray(claim?.kanzlei_faelle)
         ? (claim?.kanzlei_faelle as Array<{ mandatsnummer: string | null }>)[0]
         : (claim?.kanzlei_faelle as { mandatsnummer: string | null } | null)) ?? null
+      // CMM-50: Kennzeichen aus vehicles (claims.vehicle_id -> vehicles), Fallback auf das
+      // Legacy-faelle.kennzeichen (alte Faelle ohne vehicles-Row).
+      const claimVeh = (Array.isArray(claim?.vehicle) ? claim?.vehicle[0] : claim?.vehicle) as { kennzeichen_aktuell: string | null } | null
+      const kennzeichen = (f.kennzeichen as string | null) ?? claimVeh?.kennzeichen_aktuell ?? null
       return {
         id: f.id,
         // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primäres Label, mandatsnummer (kanzlei_faelle) als Sekundär-Detail.
         label: claim?.claim_nummer ?? f.id.slice(0, 8),
-        sub: [kf?.mandatsnummer, f.kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
+        sub: [kf?.mandatsnummer, kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
         status: f.status,
       }
     }),
