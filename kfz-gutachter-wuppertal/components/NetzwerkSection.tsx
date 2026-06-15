@@ -133,7 +133,7 @@ export function NetzwerkSection() {
                 id="netzwerkAvatarTobias"
                 className="cta-v8-role-img"
                 src={`${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`}
-                alt="Sachverständiger vor Ort"
+                alt={`${CLUSTER.svName} ${CLUSTER.svSurname}, DAT-Gutachter vor Ort`}
                 loading="lazy"
                 width={56}
                 height={56}

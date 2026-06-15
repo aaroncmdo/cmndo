@@ -274,6 +274,8 @@ export function CasesCarousel({ city }: { city: City }) {
                   alt={c.alt}
                   data-placeholder="true"
                   loading="lazy"
+                  width={1600}
+                  height={900}
                   className="absolute inset-0 w-full h-full object-cover"
                 />
                 <span className="absolute top-3 left-3 inline-flex items-center gap-1.5 bg-petrol/85 backdrop-blur-sm text-white text-[10.5px] font-mono font-bold tracking-[.06em] uppercase px-2.5 py-1 rounded-full z-[1]">

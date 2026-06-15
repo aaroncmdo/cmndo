@@ -61,10 +61,13 @@ export function RatgeberSection() {
             >
               {/* Banner-Bild (autounfall-io-Hero zum verlinkten Artikel) */}
               <div className="aspect-[16/9] bg-petrol-tint overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={`/assets/img/ratgeber/${card.img}`}
                   alt={card.title}
                   loading="lazy"
+                  width={1600}
+                  height={900}
                   className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
                 />
               </div>

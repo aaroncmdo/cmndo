@@ -196,6 +196,8 @@ export function HeroSection({ city }: { city: City }) {
                     src="/assets/brand/siegel-claimondo-partner-v3.svg"
                     alt="Claimondo-Partner-Siegel"
                     loading="lazy"
+                    width={28}
+                    height={28}
                   />
                   <span className="flex flex-col leading-tight">
                     {/* 08o O3: Wortlaut aus PARTNER_LINE (ein Datenfeld, drei Lockups). */}
@@ -218,7 +220,7 @@ export function HeroSection({ city }: { city: City }) {
                 </div>
                 <div className="hero-brand-anchor">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img className="mini-seal" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo Unfall-Assistance Partner Siegel" loading="lazy" />
+                  <img className="mini-seal" src="/assets/brand/siegel-claimondo-partner-v3.svg" alt="Claimondo-Partner-Siegel" loading="lazy" />
                   <div className="brand-text-block brand-text-block-centered">
                     {/* 08o O3: Badge-Stil bleibt, Worte aus PARTNER_LINE. */}
                     <span className="brand-line-main">{PARTNER_LINE.pre} <ClaimondoLink>{PARTNER_LINE.brand}</ClaimondoLink></span>
