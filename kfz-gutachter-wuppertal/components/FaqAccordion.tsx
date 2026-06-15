@@ -122,7 +122,7 @@ export function FaqAccordion({ city }: { city: City }) {
               >
                 <p className="text-secondary text-[15px] leading-relaxed">
                   {renderRich(fillTokens(item.intro, city, CLUSTER.region))}
-                  {item.axes ? <> {CLUSTER.achsen.join(' · ')}.</> : null}
+                  {item.axes ? <> {LOKALDATEN[city.slug]?.achsen ?? CLUSTER.achsen.join(' · ')}.</> : null}
                 </p>
                 {item.bullets ? (
                   <ul className="faq-claimondo-bullets mt-3">
