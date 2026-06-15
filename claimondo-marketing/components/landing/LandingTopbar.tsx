@@ -3,6 +3,7 @@ import { ChevronDown } from 'lucide-react'
 import { LoginEmbed } from '@/components/shared/LoginEmbed'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/shared'
+import { MobileNav } from './MobileNav'
 
 // AAR-462 F4: Topbar der öffentlichen Landing-Page.
 // - Eingeloggte User sehen einen Smart-CTA „Zu meinem Portal →" (rollen-spezifisch).
@@ -147,11 +148,11 @@ export function LandingTopbar({ authenticatedUser }: Props) {
         <div className="flex items-center gap-1.5 sm:gap-2">
           <LanguageSwitcher variant="compact" />
           {/* Doc 35 Fix 1: Primär-Conversion-Ziel (gutachter-finden) als
-              sichtbarer Header-CTA — vorher nur im Footer vergraben. sm+ wie
-              die Wortmarke/Portal-Texte (Mobile behält Hero + StickyCallBar). */}
+              sichtbarer Header-CTA. md+ (Desktop); auf Mobile uebernehmen das
+              Hamburger-Menue (MobileNav) + der StickyCallBar-Finder-Button. */}
           <Link
             href="/gutachter-finden"
-            className="hidden items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97] sm:inline-flex"
+            className="hidden items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97] md:inline-flex"
           >
             {t('gutachter_finden')}
           </Link>
@@ -169,6 +170,20 @@ export function LandingTopbar({ authenticatedUser }: Props) {
           ) : (
             <LoginEmbed triggerClassName="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]" />
           )}
+
+          {/* Mobile (< md): Hamburger-Menue mit allen Nav-Punkten + Finder-CTA */}
+          <MobileNav
+            links={[
+              { href: '/wie-es-funktioniert', label: t('wie_es_funktioniert') },
+              { href: '/check', label: t('check_pruefen') },
+              { href: '/ueber-uns', label: t('ueber_uns') },
+            ]}
+            ratgeber={{ hubHref: '/ratgeber', label: t('ratgeber'), items: ratgeberMenu }}
+            gutachter={{ hubHref: '/kfz-gutachter', label: t('gutachter'), items: gutachterMenu }}
+            finder={{ href: '/gutachter-finden', label: t('gutachter_finden') }}
+            menuLabel="Menü"
+            closeLabel="Schließen"
+          />
         </div>
       </div>
     </header>
