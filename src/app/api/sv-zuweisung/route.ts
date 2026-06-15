@@ -241,11 +241,12 @@ export async function POST(request: Request) {
 
   const { error: updateErr } = await supabase
     .from('faelle')
+    // CMM-49 (faelle-Drop): organisation_id NICHT mehr nach faelle geschrieben — Org-Pool
+    // ruht + reader-frei (v_claim_full=NULL::uuid, keine RLS/Trigger). Nur der Status-Write
+    // bleibt (faelle.status = separater CMM-74-Retire).
     .update(orgPool ? {
-      organisation_id: bestSv.organisation_id,
       status: 'sv-gesucht',
     } : {
-      organisation_id: bestSv.organisation_id ?? null,
       status: 'sv-zugewiesen',
     })
     .eq('id', fallId)
