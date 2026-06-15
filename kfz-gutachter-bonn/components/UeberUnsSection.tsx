@@ -29,7 +29,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               <img
                 className="uu-quote-avatar"
                 src={`${CLUSTER.imgPath}avatar-${CLUSTER.svName.toLowerCase()}-${CLUSTER.key}.png`}
-                alt="Sachverständiger vor Ort"
+                alt={`${CLUSTER.svName} ${CLUSTER.svSurname}, Kfz-Sachverständiger vor Ort in ${city.name}`}
                 loading="lazy"
                 width={44}
                 height={44}
@@ -94,6 +94,8 @@ export function UeberUnsSection({ city }: { city: City }) {
                 alt={`Kfz-Sachverständigen-Team in ${city.name} — DAT-zertifiziert, Claimondo-Partner`}
                 loading="lazy"
                 data-placeholder="true"
+                width={600}
+                height={400}
                 className="w-full h-full object-cover lg:object-[50%_30%]"
               />
             </div>
@@ -105,6 +107,8 @@ export function UeberUnsSection({ city }: { city: City }) {
                 src="/assets/brand/siegel-claimondo-partner-v3.svg"
                 alt="Claimondo-Partner-Siegel"
                 loading="lazy"
+                width={64}
+                height={64}
               />
               <div>
                 <div className="text-[15px] text-white font-semibold leading-tight">
