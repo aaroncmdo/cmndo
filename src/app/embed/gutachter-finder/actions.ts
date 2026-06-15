@@ -59,10 +59,11 @@ export async function starteEmbedBuchung(
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
-  // 2) gfa → lead → flow_link (Service-Role, idempotent). send:true = Flowlink-WA an den
-  //    Kunden raus (Aaron 11.06.: beim Absenden des Kontaktformulars muss die WhatsApp raus)
-  //    + Self-Service-Einstieg. Der Nutzer bucht zusätzlich inline weiter (FlowSlotStep).
-  const issued = await issueCanonicalFlowLinkForAnfrage(gfa.id, { send: true })
+  // 2) gfa → lead → flow_link (Service-Role, idempotent). send:false = KEINE Flowlink-WA an den
+  //    Kunden (Aaron 14.06.: im Embed soll kein Magic-Link rausgehen — der Kunde bucht inline
+  //    weiter via FlowSlotStep; der Token wird nur intern für die Inline-Buchung gebraucht).
+  //    (Vorher send:true seit 11.06. — bewusst zurückgenommen für die Self-Service-Strecke.)
+  const issued = await issueCanonicalFlowLinkForAnfrage(gfa.id, { send: false })
   if (!issued.ok) return { ok: false, error: issued.error }
 
   return { ok: true, token: issued.token }
