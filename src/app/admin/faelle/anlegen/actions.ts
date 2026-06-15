@@ -105,7 +105,8 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
     status: 'ersterfassung',
     // CMM-50/CMM-68: kennzeichen NICHT mehr in faelle — geht via ensureVehicleForClaim (unten,
     // nach createClaimForFall) auf vehicles + claims.vehicle_id.
-    dispatch_id: user.id,
+    // CMM-65/CMM-49 (faelle-Drop): dispatch_id raus — reader-frei (v_claim_full=NULL, keine RLS/Trigger);
+    // der dispatch-„nurEigene"-Statistik-Filter liest v_claim_full.dispatch_id=NULL (pre-existing leer).
     konvertiert_am: new Date().toISOString(),
   }).select('id').single()
 
