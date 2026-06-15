@@ -37,6 +37,8 @@ export function localBusinessSchema(city: City, route: 'hub' | 'spoke') {
         '@type': 'OpeningHoursSpecification',
         dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
         opens: '00:00',
+        // 24/7: Googles empfohlenes Pattern fuer durchgehend geoeffnet ist 00:00–23:59
+        // (24:00 ist zwar ISO-8601, wird aber von manchen Validatoren als out-of-range gewarnt).
         closes: '23:59',
       },
     ],
@@ -62,17 +64,19 @@ export function faqSchema(city: City) {
       ...FAQ.map((item) => ({
         '@type': 'Question',
         name: fillTokens(item.q, city, CLUSTER.region),
-        acceptedAnswer: { '@type': 'Answer', text: faqAnswerText(item, city, CLUSTER.region, CLUSTER.achsen) },
+        acceptedAnswer: { '@type': 'Answer', text: faqAnswerText(item, city, CLUSTER.region, LOKALDATEN[city.slug]?.achsen ?? CLUSTER.achsen.join(' · ')) },
       })),
     ],
   }
 }
 
 export function breadcrumbSchema(city: City, route: 'hub' | 'spoke') {
+  // Audit-Fix 15.06.: vorher zeigten Position 1 (Start) + 2 (Städte-Übersicht) auf
+  // dieselbe URL "/" (degenerierter Breadcrumb, Validator-Warning). Jetzt 2 Ebenen:
+  // Start (/) › Stadt (Spoke-URL bzw. aktuelle Seite = ohne item).
   const items = [
     { '@type': 'ListItem', position: 1, name: 'Start', item: absoluteUrl('/') },
-    { '@type': 'ListItem', position: 2, name: `${CLUSTER.region} · Städte-Übersicht`, item: absoluteUrl('/') },
-    { '@type': 'ListItem', position: 3, name: city.name, ...(route === 'spoke' && !city.main ? { item: absoluteUrl(`/lp/${city.slug}`) } : {}) },
+    { '@type': 'ListItem', position: 2, name: city.name, ...(route === 'spoke' && !city.main ? { item: absoluteUrl(`/lp/${city.slug}`) } : {}) },
   ]
   return { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: items }
 }
