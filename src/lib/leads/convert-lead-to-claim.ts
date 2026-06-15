@@ -347,6 +347,11 @@ export async function convertLeadToClaim(
       (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
     zeugen_kontakte: (lead.zeugen_kontakte ?? null) as ClaimInsert['zeugen_kontakte'],
     kunde_email: (lead.email as string | null) ?? null,
+    // CMM-50 Group D / CMM-48: claims.sprache jetzt bei Konversion gesetzt (war ungeschrieben
+    // -> DB-Default 'de'; send-fall.ts las claim.sprache nur als Fallback HINTER lead.sprache).
+    // = lead.sprache ?? 'de' (identisch zu dem, was faelle.sprache vorher hielt). claims = SSoT;
+    // faelle.sprache entfaellt aus buildFallInsertFromLead. Value-neutral (lead-Prioritaet bleibt).
+    sprache: (lead.sprache as string | null) ?? 'de',
 
     // — CMM-44 SP-B PR2c: Cluster-c-Duplikat-Spalten aus dem Lead. claims ist
     // die SSoT — buildFallInsertFromLead schreibt sie ab dem Reader-Sweep NICHT

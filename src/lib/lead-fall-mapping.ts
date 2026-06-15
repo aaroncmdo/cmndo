@@ -92,8 +92,11 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'halter_geburtsdatum',
   // AAR-314: Deutsche Büro Grüne Karte — Anfrage-Datum bei Auslandskennzeichen
   'gegner_versicherung_anfrage_datum',
-  // AAR-316: Kundensprache — wird auch an flow_links.sprache weitergereicht
-  'sprache',
+  // AAR-316 / CMM-50 Group D / CMM-48: sprache RAUS aus dem faelle-INSERT — claims.sprache ist
+  // SSoT (convert-lead-to-claim claimsInsert schreibt sie jetzt = lead.sprache ?? 'de' = was
+  // faelle.sprache vorher hielt; vcf.sprache sourct von claims). faelle.sprache (DB-Default 'de',
+  // kein Produktions-Reader ausser '*') entfaellt. flow_links.sprache + send-fall-Locale kommen
+  // weiterhin primaer aus lead.sprache (lead-Prioritaet) -> value-neutral.
   // CMM-44 SP-A: unfallskizze_svg/_url/_ablehnung_grund/_generiert_am/_bestaetigt
   // sowie sachschaden_beschreibung sind DUP-Spalten — nur noch in claims.
   // AAR-575 (A1) / CMM-50 Group B (Conversion-Clean): kunde_strasse/_plz/_stadt RAUS
