@@ -6,7 +6,7 @@ import { Footer } from '@/components/layout/Footer'
 import { Plausible } from '@/components/analytics/Plausible'
 import { ClarityAnalytics } from '@/components/analytics/Clarity'
 import { ScrollDepth } from '@/components/analytics/ScrollDepth'
-import { MonikaPlaceholder } from '@/components/placeholders/MonikaPlaceholder'
+import { MonikaEmbedSlot } from '@/components/MonikaEmbedSlot'
 import { JsonLd } from '@/components/JsonLd'
 import { siteGraph } from '@/lib/jsonld'
 import { SITE } from '@/lib/site'
@@ -92,7 +92,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Plausible />
         <ClarityAnalytics />
         <ScrollDepth />
-        <MonikaPlaceholder />
+        <MonikaEmbedSlot />
       </body>
     </html>
   )
