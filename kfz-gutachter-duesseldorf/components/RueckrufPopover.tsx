@@ -180,18 +180,20 @@ export function RueckrufPopover({
                   type="text"
                   required
                   autoComplete="given-name"
+                  aria-label="Vorname"
                   placeholder="Vorname"
                   value={vorname}
                   onChange={(e) => setVorname(e.target.value)}
-                  className="rounded-xl border border-border bg-paper px-3.5 py-3 text-[16px] text-ink outline-none transition focus:border-petrol"
+                  className="rounded-xl border border-border bg-paper px-3.5 py-3 text-[16px] text-ink outline-none transition focus:border-petrol focus:ring-2 focus:ring-[var(--petrol)]"
                 />
                 <input
                   type="text"
                   autoComplete="family-name"
+                  aria-label="Nachname"
                   placeholder="Nachname"
                   value={nachname}
                   onChange={(e) => setNachname(e.target.value)}
-                  className="rounded-xl border border-border bg-paper px-3.5 py-3 text-[16px] text-ink outline-none transition focus:border-petrol"
+                  className="rounded-xl border border-border bg-paper px-3.5 py-3 text-[16px] text-ink outline-none transition focus:border-petrol focus:ring-2 focus:ring-[var(--petrol)]"
                 />
               </div>
               <input
@@ -199,10 +201,11 @@ export function RueckrufPopover({
                 required
                 inputMode="tel"
                 autoComplete="tel"
+                aria-label="Telefonnummer"
                 placeholder="Telefonnummer"
                 value={telefon}
                 onChange={(e) => setTelefon(e.target.value)}
-                className="rounded-xl border border-border bg-paper px-3.5 py-3 text-[16px] text-ink outline-none transition focus:border-petrol"
+                className="rounded-xl border border-border bg-paper px-3.5 py-3 text-[16px] text-ink outline-none transition focus:border-petrol focus:ring-2 focus:ring-[var(--petrol)]"
               />
               {error ? (
                 <p className="text-sm text-cta" role="alert">
