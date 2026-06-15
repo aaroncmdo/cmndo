@@ -482,7 +482,9 @@ export async function convertLeadToClaim(
   // FlowLink/Kunde keinen Gegner zu sehen bekam. Jetzt: anlegen sobald
   // `gegner_bekannt !== false` UND irgendein Identifier (KZ / Versicherung /
   // Name / Fahrzeugtyp / Schadennummer) gesetzt ist.
-  const istGegnerBekannt = lead.gegner_bekannt !== false
+  // CMM-50 Group C: `gegner_bekannt`-Guard entfernt — nie false in den Daten (0/358 Leads), und
+  // entity-getrieben (statt vom Flag) macht den faelle.gegner_*-Write-Retire robust value-neutral.
+  // verursacher-Party + Gegner-Fahrzeug werden rein datengetrieben (hatGegnerInfo) angelegt.
   const hatGegnerInfo =
     !!(lead.gegner_kennzeichen as string | null) ||
     !!(lead.gegner_name as string | null) ||
@@ -494,7 +496,7 @@ export async function convertLeadToClaim(
   // CMM-Entity Plan 3 (T3): Gegner-Fahrzeug als vehicles-Entitaet (provisorisch per
   // Kennzeichen, FIN-los -> mergebar sobald eine FIN auftaucht). Non-critical.
   let gegnerVehicleId: string | null = null
-  if (istGegnerBekannt && (lead.gegner_kennzeichen as string | null)) {
+  if (lead.gegner_kennzeichen as string | null) {
     const gv = await ensureVehicleFromKennzeichen({
       db: admin as unknown as SupabaseClient,
       kennzeichen: lead.gegner_kennzeichen as string,
@@ -504,7 +506,7 @@ export async function convertLeadToClaim(
     else console.warn('[CMM-Entity P3] ensureVehicleFromKennzeichen fehlgeschlagen:', gv.error)
   }
 
-  if (istGegnerBekannt && hatGegnerInfo) {
+  if (hatGegnerInfo) {
     partyInserts.push({
       claim_id: claimId,
       rolle: 'verursacher',
