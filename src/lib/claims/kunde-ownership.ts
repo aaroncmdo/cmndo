@@ -145,9 +145,14 @@ export async function assertKundeOwnsFall(
 // Claim-natives Pendant zu assertKundeOwnsFall. Nimmt eine `claim_id` (neuer
 // Route-Key des kunde-Portals) statt faelle.id und liest `claims` als Basis-Row.
 //
-// Ownership-SSoT = claim_parties(rolle='geschaedigter').user_id (empirisch 45/45
-// sauber). `claims.geschaedigter_user_id` ist denormalisiert + driftet (1 Test-Mismatch
-// CLM-2026-00115) → nur als Fallback, NIE als alleiniger Ownership-Filter.
+// Ownership-Check = (claims.geschaedigter_user_id OR claim_parties(geschaedigter).user_id
+// OR Lead-Email) — die Reihenfolge der 2a/2b/2c-Zweige ist nur Short-Circuit, das Prädikat
+// ist ein OR (kein Zweig ändert das Ergebnis-Set).
+// CMM-49 (Option A, Aaron 15.06.): claims.geschaedigter_user_id ist der KANONISCHE
+// Ownership-SSoT — div=0 vs faelle.kunde_id (75/75), am vollständigsten, RLS-genutzt + von
+// auto-claim/create-for-fall direkt geschrieben. claim_parties.user_id bleibt OR-Erweiterung
+// (Multi-Party/Airdrop ruht: 0 Rows → kein Sync-Trigger nötig bis zur Aktivierung). Die
+// frühere „driftet (CLM-2026-00115)"-Warnung war eine fehlende Party-Row, kein Wertkonflikt.
 //
 // `fallId` wird mitgeliefert, weil timeline / fall_dokumente / pflichtdokumente noch
 // auf `faelle.id` keyen (FK-Repoint erst in Phase 6). Bis dahin Transitions-Brücke.
