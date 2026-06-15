@@ -517,6 +517,25 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             )}
           </p>
 
+          {/* AAR-956 (Aaron 14.06.): Handoff in den Self-Service-Lead — der Kunde vervollständigt den
+              Schaden (Hergang/Fahrzeug/Vollmacht) im /flow. target=_top bricht aus dem Embed-iframe
+              auf die volle /flow-Seite (app.claimondo.de) aus; die FlowLink-WA ist bewusst aus. */}
+          {buchungToken && (
+            <div className="mt-4 w-full">
+              <a
+                href={`/flow/${buchungToken}`}
+                target="_top"
+                className="inline-flex w-full items-center justify-center gap-2 rounded-ios-md bg-claimondo-navy px-5 py-3 text-body-sm font-semibold text-white transition-colors hover:bg-claimondo-ondo"
+              >
+                Schaden jetzt vervollständigen
+                <ChevronRight className="h-4 w-4" />
+              </a>
+              <p className="mt-1.5 text-[0.75rem] text-claimondo-shield/60">
+                Hergang, Fahrzeugdaten &amp; Vollmacht — dauert nur wenige Minuten.
+              </p>
+            </div>
+          )}
+
           {/* Ansprechpartner (= dem Lead zugewiesener Dispatcher) als Profil-Card: Foto (avatar_url,
               sonst Initiale) + NUR Vorname öffentlich + Profilbeschreibung (alles im Portal unter
               /mitarbeiter/profil editierbar, in der DB) + Anruf-Button mit der normalen Rufnummer. */}
