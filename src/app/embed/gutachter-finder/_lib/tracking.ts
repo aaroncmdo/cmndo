@@ -5,9 +5,10 @@
 //       Bidding), Marker `cl_event_source='gutachter_finder'`.
 //   (2) Beacon an /api/embed-track (same-origin Haupt-App; die Route loggt + ist Stream-8b-bereit).
 //
-// Wertmodell = wie Monika (value-model.ts): die Reservierung ist ein Unfall-Gutachten-Lead
-// (haftpflicht = 100 €), der Rückruf ein Beratungsgespräch (schadensberatung = 25 €). Werte hier
-// inline gespiegelt (self-contained, kein Cross-Embed-Import) — bei Änderung beide angleichen.
+// Wertmodell (an Monika value-model.ts angelehnt): die Reservierung ist ein Unfall-Gutachten-Lead
+// (reservierter Termin = 150 €, Aaron 15.06. — höher gewichtet als Monikas haftpflicht-Lead 100 €),
+// der Rückruf ein Beratungsgespräch (schadensberatung = 25 €, = Monika). Werte hier inline
+// (self-contained, kein Cross-Embed-Import); Rückruf spiegelt Monika, Reservierung bewusst NICHT.
 
 export type GfEvent =
   | 'gf_shown'
@@ -21,9 +22,10 @@ interface DataLayerWindow extends Window {
   dataLayer?: Array<Record<string, unknown>>
 }
 
-// EUR-Werte (Number, nie String — sonst ignoriert GA4/Ads das Wert-Bidding). Spiegelt Monikas
-// VALUE_BY_SCHADENART: haftpflicht=100, schadensberatung=25.
-const VALUE_RESERVIERUNG = 100
+// EUR-Werte (Number, nie String — sonst ignoriert GA4/Ads das Wert-Bidding). Rückruf = Monikas
+// VALUE_BY_SCHADENART.schadensberatung (25). Reservierter Termin GF-spezifisch 150 (Aaron 15.06.)
+// — bewusst ABWEICHEND von Monikas haftpflicht-Lead (100), NICHT "zurück-syncen".
+const VALUE_RESERVIERUNG = 150
 const VALUE_RUECKRUF = 25
 
 /**
