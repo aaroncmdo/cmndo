@@ -354,25 +354,12 @@ export async function saveFinVin(
     return { success: false, error: 'Ungültige FIN. Muss 17 alphanumerische Zeichen lang sein.' }
   }
 
-  const { error } = await supabase
-    .from('faelle')
-    .update({
-      fin_vin: cleaned,
-      fin_quelle: 'manuell',
-      fin_extrahiert_am: new Date().toISOString(),
-    })
-    .eq('id', fallId)
-
-  if (error) return { success: false, error: error.message }
-
-  // CMM-50.0 / Phase-B: vehicles-Write-Path. Die manuelle FIN ist die zuverlaessige Quelle
-  // (unabhaengig von Cardentity). vehicles-Row anlegen + claims.vehicle_id setzen.
-  // CMM-50 Phase-B: Fahrzeug-Snapshot aus vehicles (via v_claim_full, vehicles-sourced) lesen
-  // statt aus den faelle-Fahrzeug-Spalten — macht den FIN-Entry-Pfad vehicles-nativ und robust
-  // gegen den Konvertierungs-Write-Retire (faelle-Fahrzeug-Cols werden dort kuenftig NULL).
-  // v_claim_full.id == claim_id, .fall_id == faelle.id. Admin-Read by fall_id (die Mutation oben
-  // ist bereits RLS-gegatet). finQuelle/-Am literal 'manuell'/now — dies IST eine manuelle Eingabe
-  // (entspricht dem, was der faelle.update oben setzt). Non-critical.
+  // CMM-50 Phase-B (Write-Retire): Die FIN gehoert auf vehicles (SSoT) — KEIN faelle.fin_vin-Write
+  // mehr. Alle Reader lesen via v_claim_full aus vehicles (Reader-Migration #2836/#2842 live). Die
+  // vehicles-Anlage ist damit der PRIMAERE, kritische Persistenz-Write (vorher non-critical neben
+  // dem faelle.update) — schlaegt er fehl, ist die FIN nirgends gespeichert => Form-Fehler statt
+  // stillem Verlust. Snapshot aus dem existierenden Fahrzeug (vcf, vehicles-sourced); finQuelle/-Am
+  // literal 'manuell'/now (manuelle Eingabe). v_claim_full.id == claim_id, .fall_id == faelle.id.
   try {
     const admin = createAdminClient()
     const { data: snap } = await admin
@@ -404,10 +391,10 @@ export async function saveFinVin(
       },
       db: admin,
     })
-    if (!veh.ok) console.warn('[CMM-50.0] vehicles-Upsert bei saveFinVin fehlgeschlagen:', veh.error)
-    else if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
+    if (!veh.ok) return { success: false, error: veh.error ?? 'Fahrzeug konnte nicht gespeichert werden' }
+    if (claimId) await admin.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
   } catch (e) {
-    console.warn('[CMM-50.0] vehicles-Write-Path (saveFinVin):', e)
+    return { success: false, error: e instanceof Error ? e.message : 'Fahrzeug-Speicherung fehlgeschlagen' }
   }
 
   await supabase.from('timeline').insert({

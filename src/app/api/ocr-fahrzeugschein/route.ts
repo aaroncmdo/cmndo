@@ -56,26 +56,16 @@ export async function POST(request: Request) {
       ocr_extrahiert_am: new Date().toISOString(),
     }
 
-    if (extracted.fin_vin) {
-      updateData.fin_vin = extracted.fin_vin
-      updateData.fin_quelle = 'fahrzeugschein_ocr'
-      updateData.fin_extrahiert_am = new Date().toISOString()
-    }
-    if (extracted.kennzeichen) updateData.kennzeichen = extracted.kennzeichen
-    if (extracted.erstzulassung) updateData.erstzulassung = extracted.erstzulassung
-    if (extracted.fahrzeug_baujahr != null) updateData.fahrzeug_baujahr = extracted.fahrzeug_baujahr
+    // CMM-50 Phase-B (Write-Retire): Fahrzeugdaten (fin_vin/kennzeichen/fahrzeug_*/hsn/tsn/
+    // erstzulassung/baujahr) NICHT mehr auf faelle — sie gehoeren auf vehicles (SSoT; unten via
+    // ensureVehicleFromFin/ensureVehicleForClaim aus `extracted` geschrieben, alle Reader lesen
+    // via v_claim_full aus vehicles). faelle behaelt nur das OCR-Audit (oben) + die Halter-Felder
+    // (CMM-67-Domaene, separate Migration). brn -> claims (claimUpdate unten, CMM-48 PR-E).
     if (extracted.halter_vorname) updateData.halter_vorname = extracted.halter_vorname
     if (extracted.halter_nachname) updateData.halter_nachname = extracted.halter_nachname
     if (extracted.halter_strasse) updateData.halter_strasse = extracted.halter_strasse
     if (extracted.halter_plz) updateData.halter_plz = extracted.halter_plz
     if (extracted.halter_stadt) updateData.halter_stadt = extracted.halter_stadt
-    if (extracted.fahrzeug_hersteller) updateData.fahrzeug_hersteller = extracted.fahrzeug_hersteller
-    if (extracted.fahrzeug_modell) updateData.fahrzeug_modell = extracted.fahrzeug_modell
-    if (extracted.fahrzeug_farbe) updateData.fahrzeug_farbe = extracted.fahrzeug_farbe
-    // CMM-48 PR-E: brn ist eine faelle<->claims-Duplikat-Spalte — wird unten
-    // direkt auf claims geschrieben (claimUpdate.brn), nicht mehr auf faelle.
-    if (extracted.hsn) updateData.hsn = extracted.hsn
-    if (extracted.tsn) updateData.tsn = extracted.tsn
 
     const { data: fallRow, error: updateError } = await supabase
       .from('faelle')
