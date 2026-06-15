@@ -35,7 +35,7 @@ import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-find
 // docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
 import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
 import { createRoot, type Root } from 'react-dom/client'
-import { SvProfilePopup, DeadPinProfilePopup } from './SvProfilePopup'
+import { SvProfilePopup, DeadPinProfilePopup, SvProfileInhalt } from './SvProfilePopup'
 import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
@@ -120,7 +120,7 @@ function addClickableMarker(
   el.style.cursor = 'pointer'
   el.innerHTML = `
     <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
-      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_ONDO};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_NAVY};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
         ${initiale}
         <div style="position:absolute;bottom:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
       </div>
@@ -143,10 +143,10 @@ function addClickableMarker(
 const MAP_STRINGS: Record<string, string> = {
   h1: 'Kfz-Gutachter in Ihrer Nähe finden.',
   sub: '4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.',
-  pill_near: '{count} Sachverständige in Ihrer Nähe',
-  pill_bundesweit: '{count} Sachverständige bundesweit verfügbar',
-  pill_short_near: '{count} SVs in Ihrer Nähe',
-  pill_short_bundesweit: '{count} SVs verfügbar',
+  pill_near: '{count} Gutachter in Ihrer Nähe',
+  pill_bundesweit: '{count} Gutachter bundesweit verfügbar',
+  pill_short_near: '{count} Gutachter in Ihrer Nähe',
+  pill_short_bundesweit: '{count} Gutachter verfügbar',
   sheet_open: 'Karte zeigen',
   sheet_closed: 'Anfrage starten',
   attribution: 'Mapbox · OpenStreetMap',
@@ -160,6 +160,59 @@ const MAP_STRINGS: Record<string, string> = {
 function tMap(key: string, vars?: { count?: number }): string {
   const s = MAP_STRINGS[key] ?? key
   return typeof vars?.count === 'number' ? s.replace('{count}', String(vars.count)) : s
+}
+
+// AAR-956 (Aaron 14.06.): Haversine-Luftlinie (km) für den standortabhängigen
+// „Gutachter in Ihrer Nähe"-Count.
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
+
+// AAR-956 (Aaron 14.06.): Glass-Override für die Beratung-CTA (leicht transparent + blur,
+// geräteübergreifend) — überschreibt die GlassButton-secondary-Defaults via gleicher
+// Arbitrary-Properties (twMerge nimmt die letzte).
+const BERATUNG_GLASS =
+  '[background:color-mix(in_srgb,white_60%,transparent)] [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] border-white/50 text-claimondo-ondo'
+
+// AAR-956 (Aaron 14.06.): Status-Pill als eigene Komponente — Desktop im Header (links), Mobil
+// unten-mittig über dem Anfrage-Sheet. Responsiver Text via die zwei spans (kurz/voll).
+function GutachterPill({
+  userLocation,
+  naeheCount,
+  gesamt,
+}: {
+  userLocation: { lat: number; lng: number } | null
+  naeheCount: number | null
+  gesamt: number
+}) {
+  return (
+    <GlassPill className="px-3 py-2 sm:px-4 [background:color-mix(in_srgb,white_70%,transparent)] [backdrop-filter:blur(24px)] [-webkit-backdrop-filter:blur(24px)] [border:1px_solid_color-mix(in_srgb,white_50%,transparent)]">
+      <span className="relative flex h-2 w-2 flex-shrink-0">
+        <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
+        <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
+      </span>
+      <span
+        className="text-[11px] sm:text-xs font-semibold whitespace-nowrap"
+        style={{
+          fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
+          color: 'var(--brand-secondary, var(--claimondo-ondo))',
+        }}
+      >
+        <span className="sm:hidden">
+          {userLocation ? tMap('pill_short_near', { count: naeheCount ?? 0 }) : tMap('pill_short_bundesweit', { count: gesamt })}
+        </span>
+        <span className="hidden sm:inline">
+          {userLocation ? tMap('pill_near', { count: naeheCount ?? 0 }) : tMap('pill_bundesweit', { count: gesamt })}
+        </span>
+      </span>
+    </GlassPill>
+  )
 }
 
 export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
@@ -182,10 +235,44 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
   const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  // AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) statt engem Pin-Popup.
+  const [sheetSv, setSheetSv] = useState<AktiverSVPublic | null>(null)
+  // AAR-956 (Aaron 14.06.): Touch-Start-Y fürs Drag-to-toggle des Anfrage-Bottom-Sheets.
+  const sheetDragRef = useRef<number | null>(null)
+  // AAR-956 (Aaron 14.06.): Live-Drag-Offset (px) fürs Anfrage-Sheet — folgt dem Finger.
+  const [sheetDragY, setSheetDragY] = useState(0)
+  const anfrageSheetRef = useRef<HTMLDivElement>(null)
+  // AAR-956 (Aaron 14.06.): Live-Drag-to-close fürs Profil-Sheet (herunterziehen schließt, nicht
+  // nur Klick auf den Strich) + Scroll-Lock (Hintergrund darf bei offenem Sheet nicht scrollen).
+  const [profileDragY, setProfileDragY] = useState(0)
+  const profileDragStartRef = useRef<number | null>(null)
+  const profileSheetRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!sheetSv) {
+      setProfileDragY(0)
+      return
+    }
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [sheetSv])
   // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
   // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
   // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  // AAR-956 (Aaron 14.06.): standortabhängiger „Gutachter in Ihrer Nähe"-Count (geräteübergreifend):
+  // aktive Gutachter, deren Umkreis den bekannten Ort deckt + Dead-Pins im 15-km-Radius.
+  const loc = userLocation
+  const naeheCount = loc
+    ? aktiveSVs.filter(
+        (s) =>
+          s.standort_lat != null &&
+          s.standort_lng != null &&
+          haversineKm(loc.lat, loc.lng, s.standort_lat, s.standort_lng) <= (s.umkreis_km ?? 30),
+      ).length + svLeads.filter((s) => haversineKm(loc.lat, loc.lng, s.lat, s.lng) <= 15).length
+    : null
   // AAR-2026-05-12: sichtbarer Map-Diagnose-Status — damit man ohne DevTools
   // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
   // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403).
@@ -219,6 +306,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
+      language: 'de', // AAR-956 (Aaron 14.06.): Karten-Labels auf Deutsch (mapbox-gl v3 localization)
       center: startCenter,
       zoom: startZoom,
       pitch: 35,
@@ -245,9 +333,20 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     // WS2: Profil-Popup NEBEN/ÜBER dem Pin (popupPlatzierung) via React-Render
     // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
     // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
-    function openSvPopup(sv: AktiverSVPublic) {
+    function openSvPopup(sv: AktiverSVPublic, opts?: { mobilSheet?: boolean }) {
       popupRef.current?.remove()
       popupRootRef.current?.unmount()
+      // AAR-956 (Aaron 14.06.): Mobil/iPad (<lg) → Bottom-Sheet NUR bei direktem Pin-Klick
+      // (opts.mobilSheet). Auto-Open (empfohlener SV nach Route) + Slot-Picker-Select öffnen
+      // auf Mobil NICHTS — ein Sheet würde sonst den Slot-Picker verdecken. Desktop (≥1024)
+      // behält in allen Fällen das Map-Popup.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        if (opts?.mobilSheet) {
+          setSheetSv(sv)
+          setHoveredId(sv.id)
+        }
+        return
+      }
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<SvProfilePopup sv={sv} />)
@@ -279,6 +378,10 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     function openDeadPinPopup(lng: number, lat: number, ort: string | null) {
       popupRef.current?.remove()
       popupRootRef.current?.unmount()
+      // AAR-956 (Aaron 14.06.): Mobil/iPad (<lg) → KEIN enges Map-Popup für Dead-Pins —
+      // exakt wie bei den aktiven SVs (openSvPopup). Der Wizard zeigt den Dead-Pin-Slot-Step;
+      // ein Popup würde auf Mobil nur die Karte verdecken. Desktop (≥1024) behält das Popup.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) return
       const container = document.createElement('div')
       const root = createRoot(container)
       root.render(<DeadPinProfilePopup ort={ort} />)
@@ -399,7 +502,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
       svMarkerElsRef.current.clear()
       aktiveSVs.forEach((sv) => {
-        const marker = addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv))
+        const marker = addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv, { mobilSheet: true }))
         svMarkerElsRef.current.set(sv.id, marker.getElement())
       })
 
@@ -534,6 +637,9 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       `
       carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
       lastOrtRef.current = { lat, lng }
+      // AAR-956 (Aaron 14.06.): eingegebener Ort steuert die „Gutachter in Ihrer Nähe"-Pill
+      // (geräteübergreifend) → der Count reagiert auf den Standort.
+      setUserLocation({ lat, lng })
 
       // WS3 (Aaron 12.06.): Route-Ziel DISKRIMINIERT — Partner ODER Dead-Pin (Fallback).
       // empfehleSvFuerOrt liefert {kind}: partner → Pin aus aktiveSVs + Profil-Popup;
@@ -774,41 +880,25 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed).
           Mobile: kurzer Pill-Text + Beratung als Icon-only-Pill, sonst läuft's über. */}
       <div className="absolute top-0 left-0 right-0 z-[5] px-3 pt-3 sm:px-6 sm:pt-6 pointer-events-none">
-        <div className="flex items-center justify-between gap-2 pointer-events-auto">
-          <GlassPill className="px-3 py-2 sm:px-4">
-            <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
-            </span>
-            <span
-              className="text-[11px] sm:text-xs font-semibold whitespace-nowrap"
-              style={{
-                fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                color: 'var(--brand-secondary, var(--claimondo-ondo))',
-              }}
-            >
-              {/* Kurz auf Mobile */}
-              <span className="sm:hidden">
-                {userLocation
-                  ? t('pill_short_near', { count: svLeads.length + aktiveSVs.length })
-                  : t('pill_short_bundesweit', { count: svLeads.length + aktiveSVs.length })}
-              </span>
-              {/* Voll ab sm — Aaron 14.05.2026: kein "Premium-Partner"-Wording
-                  mehr (Privacy-Refactor: paket-Detail wird nicht preisgegeben).
-                  Einheitliche Sachverständigen-Zählung. */}
-              <span className="hidden sm:inline">
-                {userLocation
-                  ? t('pill_near', { count: svLeads.length + aktiveSVs.length })
-                  : t('pill_bundesweit', { count: svLeads.length + aktiveSVs.length })}
-              </span>
-            </span>
-          </GlassPill>
+        <div className="flex items-center justify-end sm:justify-between gap-2 pointer-events-auto">
+          {/* AAR-956 (Aaron 14.06.): Pill nur Desktop im Header — Mobil unten-mittig (s.u.). */}
+          <div className="hidden sm:block">
+            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
+          </div>
           {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
               kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
-          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className="hidden sm:inline-flex" />
-          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3" />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className={`hidden sm:inline-flex ${BERATUNG_GLASS}`} />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className={`sm:hidden flex-shrink-0 text-[12px] px-3 ${BERATUNG_GLASS}`} />
         </div>
       </div>
+
+      {/* AAR-956 (Aaron 14.06.): Status-Pill auf Mobil unten-mittig über dem Anfrage-Sheet
+          (nicht oben links) — ausgeblendet wenn das Sheet offen ist. Desktop = Header (s.o.). */}
+      {!mobileSheetOpen && (
+        <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-[72px] z-[8] flex justify-center">
+          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
+        </div>
+      )}
 
       {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper,
           dynamische Breite (clamp). WICHTIG: paddingInline 28px — overflow-y-auto
@@ -858,15 +948,21 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
       {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen).
           AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
+      {/* Mobile Bottom-Sheet — AAR-956 (Aaron 14.06.): EINE Glass-Fläche (leicht transparent +
+          backdrop-blur), draggable, nur der Chevron als Affordance. Grab-Strich + „Anfrage
+          starten"-Text raus (redundant — der Pfeil suggeriert das Öffnen). Header transparent +
+          innere Wizard-Card transparent ([&>div]-Override, NUR hier mobil → Desktop-Card bleibt
+          Glass) → keine gestapelten Glass-Schichten mehr. */}
       <div
+        ref={anfrageSheetRef}
         className="lg:hidden absolute left-0 right-0 bottom-0 z-[10] transition-[transform] duration-500 ease-[cubic-bezier(.32,.72,0,1)]"
         style={{
-          transform: mobileSheetOpen ? 'translateY(0)' : 'translateY(calc(100% - 88px))',
+          transform: `${mobileSheetOpen ? 'translateY(0)' : 'translateY(calc(100% - 56px))'} translateY(${sheetDragY}px)`,
+          transition: sheetDragRef.current !== null ? 'none' : undefined,
         }}
       >
         <div
-          // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
-          className="rounded-t-[32px] border-x border-t border-white/60 bg-white/85 backdrop-blur-md max-h-[85dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden"
+          className="rounded-t-[32px] border-x border-t border-white/50 bg-white/70 backdrop-blur-xl max-h-[85dvh] overflow-y-auto overscroll-contain [&::-webkit-scrollbar]:hidden"
           style={{
             boxShadow: '0 -14px 36px color-mix(in srgb, transparent 85%, var(--brand-primary, var(--claimondo-navy)))',
             scrollbarWidth: 'none',
@@ -875,33 +971,40 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         >
           <button
             onClick={() => setMobileSheetOpen((v) => !v)}
-            className="w-full sticky top-0 z-[1] bg-white/85 backdrop-blur-md px-5 py-3 flex items-center justify-between"
+            onTouchStart={(e) => {
+              sheetDragRef.current = e.touches[0].clientY
+            }}
+            onTouchMove={(e) => {
+              const start = sheetDragRef.current
+              if (start == null) return
+              const dy = e.touches[0].clientY - start
+              // offen → nur nach unten (bis Peek); Peek → nur nach oben (bis offen). Clamp an die
+              // ECHTE Sheet-Höhe (− 56px Peek), damit es nicht weiter als nötig zieht (Aaron 14.06.).
+              const maxDrag = Math.max(0, (anfrageSheetRef.current?.offsetHeight ?? 600) - 56)
+              setSheetDragY(mobileSheetOpen ? Math.max(0, Math.min(dy, maxDrag)) : Math.min(0, Math.max(dy, -maxDrag)))
+            }}
+            onTouchEnd={(e) => {
+              const start = sheetDragRef.current
+              sheetDragRef.current = null
+              setSheetDragY(0)
+              if (start == null) return
+              e.preventDefault() // Click-Synthese nach Touch unterdrücken (sonst Doppel-Toggle)
+              const dy = e.changedTouches[0].clientY - start
+              if (dy < -24) setMobileSheetOpen(true)
+              else if (dy > 24) setMobileSheetOpen(false)
+              else setMobileSheetOpen((v) => !v)
+            }}
+            aria-label={mobileSheetOpen ? 'Schließen' : 'Anfrage öffnen'}
+            className="w-full px-5 pt-2.5 pb-1 flex items-center justify-center touch-none"
           >
-            <span className="flex items-center gap-2">
-              <span
-                className="block w-10 h-1 rounded-full"
-                style={{ background: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 30%, transparent)' }}
-              />
-              <span
-                className="text-sm font-semibold"
-                style={{
-                  fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                  color: 'var(--brand-primary, var(--claimondo-navy))',
-                }}
-              >
-                {mobileSheetOpen ? t('sheet_open') : t('sheet_closed')}
-              </span>
-            </span>
             <ChevronUp
-              className={`h-5 w-5 transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
+              className={`h-6 w-6 transition-transform duration-300 ${mobileSheetOpen ? 'rotate-180' : ''}`}
               style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))' }}
             />
           </button>
-          <div className="px-5 pb-6 pt-2">
-            {/* Beratungs-CTA auch im Mobile-Sheet (top-right ist auf Mobile versteckt) */}
-            <div className="flex justify-end mb-3 sm:hidden">
-              <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} />
-            </div>
+          <div className="px-1 pb-6 pt-1 [&>div]:bg-transparent [&>div]:border-transparent [&>div]:shadow-none [&>div]:backdrop-blur-none">
+            {/* AAR-956 (Aaron 14.06.): KEIN zweiter Beratungs-CTA im Anfrage-Sheet — der
+                Header-Button oben rechts (auch auf Mobile sichtbar) reicht. Doppelung raus. */}
             {wizardSlot}
           </div>
         </div>
@@ -914,6 +1017,62 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
       {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}
       {hoveredId && <input type="hidden" data-selected-sv-id={hoveredId} />}
+
+      {/* AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) — von unten
+          ausfahrbar, mehr Platz + Touch-freundlich als das enge Pin-Popup. Avatar + Sterne +
+          Trust-Signale (gross-Variante). Desktop (≥1024) nutzt weiterhin das Map-Popup. */}
+      {sheetSv && (
+        <div className="lg:hidden fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Gutachter-Profil">
+          <div
+            className="absolute inset-0 backdrop-blur-sm animate-in fade-in"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary, #0D1B3E) 22%, transparent)' }}
+            onClick={() => {
+              setSheetSv(null)
+              setHoveredId(null)
+            }}
+          />
+          <div
+            ref={profileSheetRef}
+            onTouchStart={(e) => {
+              // Drag-to-close nur initiieren, wenn der Inhalt oben steht — sonst scrollt der Inhalt.
+              if ((profileSheetRef.current?.scrollTop ?? 0) <= 0) profileDragStartRef.current = e.touches[0].clientY
+            }}
+            onTouchMove={(e) => {
+              if (profileDragStartRef.current === null) return
+              const dy = e.touches[0].clientY - profileDragStartRef.current
+              if (dy > 0) setProfileDragY(dy) // nur nach unten
+            }}
+            onTouchEnd={() => {
+              if (profileDragY > 90) {
+                setSheetSv(null)
+                setHoveredId(null)
+              }
+              setProfileDragY(0)
+              profileDragStartRef.current = null
+            }}
+            style={{
+              transform: profileDragY ? `translateY(${profileDragY}px)` : undefined,
+              transition: profileDragStartRef.current !== null ? 'none' : 'transform 0.25s ease-out',
+            }}
+            className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto overscroll-contain rounded-t-ios-xl border-t border-white/50 bg-white/70 shadow-glass-card backdrop-blur-xl animate-in slide-in-from-bottom duration-300"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setSheetSv(null)
+                setHoveredId(null)
+              }}
+              aria-label="Profil schließen"
+              className="sticky top-0 z-10 flex w-full justify-center pt-2.5 pb-2"
+            >
+              <span className="block h-1 w-10 rounded-full bg-claimondo-navy/25" />
+            </button>
+            <div className="px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+              <SvProfileInhalt sv={sheetSv} gross />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Beratung-Rückruf-Modal auf Root-Ebene (NICHT im z-[5]-Header). Sonst bleibt die
           z-[10]-Sidebar ÜBER dem Modal-Backdrop "hervorgehoben" — das fixed-Modal wäre im

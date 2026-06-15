@@ -87,6 +87,11 @@ export const ladeDeadPinFallback: LadeDeadPinFallback = async ({ lat, lng }) => 
   const treffer: Array<DeadPinOeffentlich & { _km: number }> = []
   for (const row of (data ?? []) as SvLeadGeoRow[]) {
     const distanzKm = haversineKm(lat, lng, row.lat, row.lng)
+    // AAR-956 (Aaron 14.06.): Haversine-Vorfilter VOR dem teuren parseIsochrone/pointInPolygon.
+    // Die Isochrone ist aus paket_umkreis_km generiert (Fahrweg >= Luftlinie) → sie kann den Ort
+    // nicht decken, wenn die Luftlinie > 2x Umkreis ist. Spart pointInPolygon (~18k Punkte) für die
+    // fernen Dead-Pins (bundesweit ~62 → nur die nahen werden voll geprüft). Marge 2x = safe.
+    if (distanzKm > (row.paket_umkreis_km ?? DEFAULT_UMKREIS_KM) * 2) continue
     const polygon = parseIsochrone(row.isochrone_polygon)
     const deckt =
       polygon && polygon.length >= 3
