@@ -96,13 +96,13 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'sprache',
   // CMM-44 SP-A: unfallskizze_svg/_url/_ablehnung_grund/_generiert_am/_bestaetigt
   // sowie sachschaden_beschreibung sind DUP-Spalten — nur noch in claims.
-  // AAR-575 (A1): Kunde-Anschrift retten, wenn Kunde ≠ Halter.
-  // Gleicher Spaltenname in leads + faelle — Lead-Converter füllt sie nur,
-  // wenn `ist_fahrzeughalter=false` im Lead gesetzt war (bei Halter=Kunde
-  // bleiben die Felder null, weil lead.kunde_* dann auch null ist).
-  'kunde_strasse',
-  'kunde_plz',
-  'kunde_stadt',
+  // AAR-575 (A1) / CMM-50 Group B (Conversion-Clean): kunde_strasse/_plz/_stadt RAUS
+  // aus dem faelle-INSERT — sie sind Duplikate der Geschaedigter-claim_party
+  // (adresse_strasse/_plz/_ort, UNBEDINGT in convert-lead-to-claim:460-462 geschrieben;
+  // v_claim_full.kunde_p sourct sie von dort). Kein faelle-table-direkter Produktions-
+  // Reader mehr (Explore-Fan-out 15.06.: load-needed-phases nutzt sie nicht [Onboarding-
+  // Felder zielen auf leads/claims], kanzlei-wunsch-Smoke = test-only DEFER).
+  // kunde_adresse/_lat/_lng BLEIBEN — kein party-Twin (Group A KEEP).
   'kunde_adresse',
   'kunde_lat',
   'kunde_lng',
@@ -164,13 +164,12 @@ export const LEAD_TO_FALL_RENAMED_FIELDS: Record<string, string> = {
   // der faelle-Insert (buildFallInsertFromLead) befuellt sie nicht mehr.
   // CMM-50/CMM-68: fin_vin (← lead.fin) NICHT mehr in faelle — lebt auf `vehicles.fin`
   // (convert-lead schreibt es via ensureVehicleFromFin).
-  // AAR-575 (A1): Kunden-Identität wird auf Lead in `vorname/nachname/email/
-  // telefon` geführt (dort unabhängig von `ist_fahrzeughalter`); in faelle
-  // prefixen wir mit `kunde_` um sie klar von halter_* abzugrenzen.
-  kunde_vorname: 'vorname',
-  kunde_nachname: 'nachname',
-  // CMM-44 SP-A: kunde_email ist DUP-Spalte — nur noch in claims.
-  kunde_telefon: 'telefon',
+  // CMM-50 Group B (Conversion-Clean): kunde_vorname/_nachname/_telefon RAUS aus dem
+  // faelle-INSERT — Duplikate der Geschaedigter-claim_party (vorname/nachname/telefon,
+  // UNBEDINGT in convert-lead-to-claim:455-458 geschrieben; v_claim_full.kunde_p sourct
+  // sie via COALESCE(person, party)). Kein faelle-table-direkter Produktions-Reader mehr
+  // (Explore-Fan-out 15.06.). kunde_email war eh nur claims (CMM-44 SP-A). ist_fahrzeughalter
+  // bleibt vorerst (CMM-67-Halter-Domaene + faelle-DB-Default true; separat).
 }
 
 // ─── 3b. RENAMED + DEFAULT — Fall-Spalte ≠ Lead-Spalte mit NOT-NULL-Fallback
