@@ -60,7 +60,7 @@ beforeEach(() => {
 describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)', () => {
   it('baut lead aus leads-Row (via claims.lead_id) und delegiert (erfassung/vollmacht_offen)', async () => {
     const admin = fakeAdmin({
-      faelle: { claim_id: 'claim-1' },
+      faelle_claim_bridge: { claim_id: 'claim-1' },
       claims: { status: null, lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: null },
     })
@@ -70,14 +70,14 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
   })
 
   it('lead bleibt null wenn claims.lead_id null ist -> Fallback erfassung/sa_offen', async () => {
-    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
+    const admin = fakeAdmin({ faelle_claim_bridge: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('erfassung')
     expect(r.lifecycle.subPhase).toBe('sa_offen')
   })
 
   it('lead bleibt null wenn lead_id gesetzt, aber die leads-Row fehlt', async () => {
-    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: 'lead-weg' }, leads: null })
+    const admin = fakeAdmin({ faelle_claim_bridge: { claim_id: 'claim-1' }, claims: { status: null, lead_id: 'lead-weg' }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('erfassung')
     expect(r.lifecycle.subPhase).toBe('sa_offen')
@@ -86,7 +86,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
   it('delegiert an getClaimLifecycle: aktiver Erstgutachten-Auftrag -> begutachtung/termin', async () => {
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     const admin = fakeAdmin({
-      faelle: { claim_id: 'claim-1' },
+      faelle_claim_bridge: { claim_id: 'claim-1' },
       claims: { status: null, lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
     })
@@ -99,7 +99,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     vi.mocked(getKanzleiFall).mockResolvedValue(kanzleiVk)
     const admin = fakeAdmin({
-      faelle: { claim_id: 'claim-1' },
+      faelle_claim_bridge: { claim_id: 'claim-1' },
       claims: { status: null, lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
     })
@@ -109,7 +109,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
 
   it('claims.status terminal (storniert) -> abschluss (Loader liest Status aus dem Claim)', async () => {
     const admin = fakeAdmin({
-      faelle: { claim_id: 'claim-1' },
+      faelle_claim_bridge: { claim_id: 'claim-1' },
       claims: { status: 'storniert', lead_id: 'lead-1' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: TS },
     })
@@ -120,7 +120,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
 
   it('AAR-939: reicht claims.service_typ als lifecycle.serviceTyp durch (Stepper-Sicht-Filter)', async () => {
     const admin = fakeAdmin({
-      faelle: { claim_id: 'claim-1' },
+      faelle_claim_bridge: { claim_id: 'claim-1' },
       claims: { status: null, lead_id: 'lead-1', service_typ: 'nur_gutachter' },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: null },
     })
@@ -129,7 +129,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
   })
 
   it('AAR-939: serviceTyp = null wenn claims.service_typ fehlt', async () => {
-    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
+    const admin = fakeAdmin({ faelle_claim_bridge: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.serviceTyp).toBeNull()
   })
@@ -137,7 +137,7 @@ describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)
   it('reicht auftraege + kanzleiFall unveraendert ins Bundle durch (kein Doppel-Load fuer Detail-Pages)', async () => {
     vi.mocked(getAlleAuftraege).mockResolvedValue([erstgutachtenTermin])
     vi.mocked(getKanzleiFall).mockResolvedValue(kanzleiVk)
-    const admin = fakeAdmin({ faelle: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
+    const admin = fakeAdmin({ faelle_claim_bridge: { claim_id: 'claim-1' }, claims: { status: null, lead_id: null }, leads: null })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.auftraege).toEqual([erstgutachtenTermin])
     expect(r.kanzleiFall).toEqual(kanzleiVk)
