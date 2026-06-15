@@ -35,6 +35,9 @@ export type ClaimSubPhase =
   | 'termin'
   | 'besichtigung'
   | 'gutachten'
+  // CMM-74 b2 (v_claim_phase-Parity): operative Begutachtungs-Sub-States aus auftraege.erstgutachten
+  | 'filmcheck'
+  | 'qc-pruefung'
   // CMM-44 MP-3: Kanzlei-Uebergabe-Interim (begutachtung-Tail, kf da / lexdrive null, B-10)
   | 'kanzlei_uebergabe'
   // Regulierung
@@ -42,6 +45,10 @@ export type ClaimSubPhase =
   | 'auszahlung'
   // CMM-44 MP-8: einfache VS-Ablehnung (nicht-terminal, nachforderbar)
   | 'nachforderung'
+  // CMM-74 b2 (v_claim_phase-Parity): operative Regulierungs-Sub-States (kanzlei_faelle / nachbesichtigung)
+  | 'vs-kuerzt'
+  | 'anschlussschreiben'
+  | 'nachbesichtigung-laeuft'
   // Abschluss (CMM-44 MP-3 / B-5/B-11 / MP-8: terminale claims.status-Substates)
   | 'erfolgreich_reguliert'
   | 'storniert'
@@ -103,10 +110,15 @@ export const SUBPHASE_LABEL: Record<ClaimSubPhase, string> = {
   termin: 'Termin',
   besichtigung: 'Besichtigung',
   gutachten: 'Gutachten',
+  filmcheck: 'Filmcheck',
+  'qc-pruefung': 'QC-Prüfung',
   kanzlei_uebergabe: 'Kanzlei-Übergabe läuft',
   versicherungskontakt: 'Versicherungskontakt',
   auszahlung: 'Auszahlung',
   nachforderung: 'VS-Ablehnung — Nachforderung',
+  'vs-kuerzt': 'VS-Kürzung',
+  anschlussschreiben: 'Anschlussschreiben',
+  'nachbesichtigung-laeuft': 'Nachbesichtigung läuft',
   erfolgreich_reguliert: 'Erfolgreich reguliert',
   storniert: 'Storniert',
   klage_rechtsstreit: 'Klage / Rechtsstreit',
@@ -140,8 +152,8 @@ const REGULIERUNG_STATUS_SUBSTATE: Record<string, ClaimSubPhase> = {
 /** Innerhalb welcher Hauptphase lebt diese Subphase? */
 export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
   if (sub === 'sa_offen' || sub === 'vollmacht_offen' || sub === 'onboarding_offen') return 'erfassung'
-  if (sub === 'termin' || sub === 'besichtigung' || sub === 'gutachten' || sub === 'kanzlei_uebergabe') return 'begutachtung'
-  if (sub === 'versicherungskontakt' || sub === 'auszahlung' || sub === 'nachforderung') return 'regulierung'
+  if (sub === 'termin' || sub === 'besichtigung' || sub === 'gutachten' || sub === 'kanzlei_uebergabe' || sub === 'filmcheck' || sub === 'qc-pruefung') return 'begutachtung'
+  if (sub === 'versicherungskontakt' || sub === 'auszahlung' || sub === 'nachforderung' || sub === 'vs-kuerzt' || sub === 'anschlussschreiben' || sub === 'nachbesichtigung-laeuft') return 'regulierung'
   return 'abschluss'
 }
 
@@ -159,6 +171,27 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
   const terminal = claimStatus ? ABSCHLUSS_SUBSTATE[claimStatus] : undefined
   if (terminal) {
     return { mainPhase: 'abschluss', subPhase: terminal, aktiveSideQuests: [], aktiverAuftrag: null }
+  }
+
+  // ── CMM-74 b2 (v_claim_phase-Parity) ── operative Regulierungs-Sub-Phasen, die VOR
+  // dem lexdrive-Eintritt greifen. Reihenfolge bitgleich zur View: nb.active > vs-kuerzt >
+  // anschlussschreiben(pre-lexdrive). Vor diesen steht nur der terminal-Abschluss (oben).
+  const aktiveNachbesichtigung = auftraege.find(
+    (a) => a.typ === 'nachbesichtigung' && a.status !== 'abgeschlossen',
+  )
+  if (aktiveNachbesichtigung) {
+    return {
+      mainPhase: 'regulierung',
+      subPhase: 'nachbesichtigung-laeuft',
+      aktiveSideQuests: sideQuests,
+      aktiverAuftrag: aktiveNachbesichtigung,
+    }
+  }
+  if (kanzleiFall?.vs_reaktion_typ === 'gekuerzt') {
+    return { mainPhase: 'regulierung', subPhase: 'vs-kuerzt', aktiveSideQuests: sideQuests, aktiverAuftrag: null }
+  }
+  if (kanzleiFall?.anschlussschreiben_am && !kanzleiFall?.lexdrive_case_id) {
+    return { mainPhase: 'regulierung', subPhase: 'anschlussschreiben', aktiveSideQuests: sideQuests, aktiverAuftrag: null }
   }
 
   // ── Regulierung ── B-10: Eintritt erst wenn lexdrive_case_id gesetzt ist
@@ -198,15 +231,21 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
 
   // ── Begutachtung ── aktiver Erstgutachten-Auftrag.
   if (erstgutachten && erstgutachten.status !== 'abgeschlossen') {
-    const subMap: Record<AuftragRow['status'], ClaimSubPhase> = {
-      termin: 'termin',
-      besichtigung: 'besichtigung',
-      gutachten: 'gutachten',
-      abgeschlossen: 'gutachten',
+    let sub: ClaimSubPhase =
+      erstgutachten.status === 'termin'
+        ? 'termin'
+        : erstgutachten.status === 'besichtigung'
+          ? 'besichtigung'
+          : 'gutachten'
+    // CMM-74 b2 (v_claim_phase-Parity): innerhalb 'gutachten' verfeinern —
+    // filmcheck_ok=true → QC-Pruefung; sonst mit hochgeladenem Gutachten → Filmcheck.
+    if (erstgutachten.status === 'gutachten') {
+      if (erstgutachten.filmcheck_ok === true) sub = 'qc-pruefung'
+      else if (erstgutachten.gutachten_url) sub = 'filmcheck'
     }
     return {
       mainPhase: 'begutachtung',
-      subPhase: subMap[erstgutachten.status],
+      subPhase: sub,
       aktiveSideQuests: [],
       aktiverAuftrag: erstgutachten,
     }
