@@ -41,6 +41,8 @@ export function LeistungenSection() {
                   alt={l.alt}
                   loading="lazy"
                   data-placeholder="true"
+                  width={1200}
+                  height={900}
                   className="w-full h-full object-cover"
                 />
               </div>

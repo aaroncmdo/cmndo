@@ -240,6 +240,8 @@ export function EinsatzgebietSection({ city }: { city: City }) {
                           src={`/assets/img/local/brennpunkte/${b.img}`}
                           alt={`${b.name} ${city.name} — Unfallschwerpunkt`}
                           loading="lazy"
+                          width={1600}
+                          height={900}
                           className="w-full h-full object-cover"
                         />
                       </div>
