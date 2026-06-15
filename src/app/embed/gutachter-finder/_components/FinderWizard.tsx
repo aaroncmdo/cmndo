@@ -13,7 +13,7 @@
 // Marketing-Look (GlassSurface + claimondo-Tokens), DE-only mit echten Umlauten. Reuse:
 // SvSlotAuswahl (Partner-Karten, geteilt mit /flow) + DeadPinSlotStep (Lite, Select-Mode).
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
@@ -82,12 +82,18 @@ function fmtWunsch(lokal: string): string {
 export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
+  // AAR-956 (Aaron 14.06.): Adress-Eingabe als Vollbild-Overlay auf Mobil (Dropdown-Platz).
+  const [ortOverlay, setOrtOverlay] = useState(false)
   // Wunschtermin (Aaron 12.06.: „oben angeben") — Berlin-Wall-Clock aus <input datetime-local>,
   // optional; rankt die Partner-Slots in Schritt 2 (Engine matchType 'wunschtermin').
   const [wunschterminLokal, setWunschterminLokal] = useState('')
   // Step 2: token-loses Engine-Matching (Partner-Slots ODER Dead-Pin-Fallback).
   const [matching, setMatching] = useState<PlaneTerminMitFallbackResult | null>(null)
   const [matchLoading, setMatchLoading] = useState(false)
+  // AAR-956 (Aaron 14.06.): monoton steigende Match-Request-ID — nur die jüngste
+  // ladeEmbedMatching-Antwort darf den State setzen (Stale-Race-Guard bei schnellem Ort-Wechsel:
+  // eine späte Antwort eines früheren Orts überschrieb sonst das aktuelle Matching).
+  const matchReqRef = useRef(0)
   const [auswahl, setAuswahl] = useState<Auswahl | null>(null)
   const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
   const [selectedDeadPinId, setSelectedDeadPinId] = useState<string | null>(null)
@@ -136,7 +142,9 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setSelectedSvId(null)
     setSelectedDeadPinId(null)
     setMatchLoading(true)
+    const req = ++matchReqRef.current
     void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+      if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
       setMatching(res)
       setMatchLoading(false)
       // Default-Hervorhebung = der Top-Treffer (die Karte hat ihn beim Ort-Schritt schon geroutet).
@@ -229,7 +237,9 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     setPhase('termin')
     if (ort) {
       setMatchLoading(true)
+      const req = ++matchReqRef.current
       void ladeEmbedMatching({ lat: ort.lat, lng: ort.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+        if (matchReqRef.current !== req) return // veraltete Antwort eines früheren Orts ignorieren
         setMatching(res)
         setMatchLoading(false)
         if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
@@ -266,7 +276,10 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
   const stepIdx = phase === 'ort' ? 0 : phase === 'termin' ? 1 : phase === 'schaden' ? 2 : 3
 
   return (
-    <GlassSurface className="flex flex-col gap-4 p-5">
+    // AAR-956 (Aaron 14.06.): sanfter Load-Reveal — die Wizard-Card fährt beim Mount einmal
+    // ein (fade + leichter slide-up). GlassSurface persistiert über Phasen → kein Re-Trigger
+    // bei Step-Wechseln. Dezent, im Claimondo-Look.
+    <GlassSurface className="flex flex-col gap-4 p-5 animate-in fade-in slide-in-from-bottom-3 duration-700 ease-out">
       {phase !== 'gebucht' && (
         <div className="flex items-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (
@@ -291,11 +304,52 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
               Wir finden den passenden Gutachter in Ihrer Nähe.
             </p>
-            <GooglePlaceAutocomplete
-              placeholder="Adresse eingeben…"
-              className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
-              onSelect={ortGewaehlt}
-            />
+            {/* Desktop: inline (Dropdown hat Platz). Mobil: Trigger → Vollbild-Overlay, sonst
+                läuft Googles nach unten öffnendes pac-Dropdown aus dem Bottom-Sheet (Aaron 14.06.). */}
+            <div className="hidden lg:block">
+              <GooglePlaceAutocomplete
+                placeholder="Adresse eingeben…"
+                className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
+                onSelect={ortGewaehlt}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setOrtOverlay(true)}
+              className="lg:hidden mt-2 flex w-full items-center rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-left text-body-sm transition-colors focus:border-claimondo-ondo focus:outline-none"
+            >
+              {ort?.adresse ? (
+                <span className="text-claimondo-navy">{ort.adresse}</span>
+              ) : (
+                <span className="text-claimondo-shield/50">Adresse eingeben…</span>
+              )}
+            </button>
+            {ortOverlay && (
+              <div className="lg:hidden fixed inset-0 z-[130] flex flex-col bg-white">
+                <div className="flex items-center gap-3 border-b border-claimondo-border px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setOrtOverlay(false)}
+                    aria-label="Zurück"
+                    className="-ml-1 flex h-8 w-8 items-center justify-center text-claimondo-navy"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <span className="text-body font-bold text-claimondo-navy">Wo steht das Fahrzeug?</span>
+                </div>
+                <div className="p-4">
+                  <GooglePlaceAutocomplete
+                    autoFocus
+                    placeholder="Adresse eingeben…"
+                    className="w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-3 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 focus:border-claimondo-ondo focus:outline-none"
+                    onSelect={(p) => {
+                      setOrtOverlay(false)
+                      ortGewaehlt(p)
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

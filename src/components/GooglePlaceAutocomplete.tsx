@@ -83,6 +83,8 @@ export default function GooglePlaceAutocomplete({
   onBlur,
   onChange,
   className,
+  scrollIntoViewOnFocus,
+  autoFocus,
 }: {
   defaultValue?: string
   /** AAR-956: Autocomplete-Typ. Default ['address'] (Geocoder); ['establishment'] = Business-Suche. */
@@ -97,6 +99,11 @@ export default function GooglePlaceAutocomplete({
   // blur durchläuft).
   onChange?: (currentValue: string) => void
   className?: string
+  // AAR-956: Mobil — beim Fokus das Input nach oben scrollen, damit Googles pac-Dropdown
+  // (öffnet nach unten) im Bottom-Sheet nicht unter den Bildschirm läuft.
+  scrollIntoViewOnFocus?: boolean
+  // AAR-956: Overlay-Popover — Input beim Mount fokussieren (sobald Google geladen + enabled).
+  autoFocus?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState(defaultValue ?? '')
@@ -183,6 +190,11 @@ export default function GooglePlaceAutocomplete({
     return () => { cancelled = true }
   }, [])
 
+  // AAR-956: Overlay-Popover — Input fokussieren, sobald Google geladen + das Input enabled ist.
+  useEffect(() => {
+    if (autoFocus && !loading) inputRef.current?.focus()
+  }, [autoFocus, loading])
+
   const defaultCls = 'w-full px-4 py-3 rounded-ios-xl border border-claimondo-border bg-white text-claimondo-navy placeholder-claimondo-ondo/60 text-sm focus:outline-none focus:border-claimondo-ondo transition-colors'
 
   return (
@@ -202,6 +214,13 @@ export default function GooglePlaceAutocomplete({
         onKeyDown={e => { if (e.key === 'Enter') e.preventDefault() }}
         // AAR-262: Blur-Handler für Server-Side-Geocoding-Fallback.
         onBlur={() => onBlur?.(value)}
+        // AAR-956: Mobil im Bottom-Sheet — nach dem Keyboard-Slide das Input nach oben scrollen,
+        // damit das nach unten öffnende pac-Dropdown Platz hat (sonst läuft es aus dem Screen).
+        onFocus={() => {
+          if (scrollIntoViewOnFocus) {
+            window.setTimeout(() => inputRef.current?.scrollIntoView({ block: 'start', behavior: 'smooth' }), 350)
+          }
+        }}
         placeholder={loading ? 'Google Maps lädt…' : placeholder ?? 'Adresse eingeben...'}
         className={className ?? defaultCls}
         disabled={loading && !loadError}
