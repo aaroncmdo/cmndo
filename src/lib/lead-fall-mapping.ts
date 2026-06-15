@@ -243,7 +243,11 @@ export function fallComputedFields(lead: LeadRow, options: BuildFallOptions): Re
     // CMM-44 SP-I6: kanzlei_id lebt jetzt auf kanzlei_faelle (1:1) — NICHT mehr im
     // faelle-Insert. convert-lead-to-claim routet die LexDrive-Pfad-Zuordnung
     // (options.kanzleiId) nach Claim-Creation via upsertKanzleiFall dorthin.
-    organisation_id: options.organisationId ?? null,
+    // CMM-49 (faelle-Drop): organisation_id NICHT mehr in den faelle-Insert. Org-Pool
+    // ruht (live 0 Orgs / 0 akademie_sub), reader-frei (v_claim_full=NULL::uuid, keine
+    // RLS/Trigger auf faelle.organisation_id). options.organisationId bleibt resolved
+    // (resolveFallEntityFks) fuer eine kuenftige Org-Home-Entscheidung (claims?), wird
+    // aber nicht mehr nach faelle geschrieben.
     dispatch_id: options.dispatchId ?? null,
   }
 }
