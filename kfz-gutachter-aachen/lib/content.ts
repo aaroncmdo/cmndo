@@ -438,9 +438,11 @@ export const FAQ: FaqEntry[] = [
 ]
 
 /** Plain-Text-Antwort fuer JSON-LD — aus denselben Teilen wie die sichtbare FAQ (Sync garantiert). */
-export function faqAnswerText(e: FaqEntry, city: City, region: string, achsen: string[]): string {
+export function faqAnswerText(e: FaqEntry, city: City, region: string, achsenText: string): string {
   let t = fillTokens(e.intro, city, region)
-  if (e.axes) t += ' ' + achsen.join(' · ') + '.'
+  // achsenText ist bereits aufgeloest (per-Stadt LOKALDATEN ?? Cluster-Fallback) —
+  // identische Quelle wie FaqAccordion, damit JSON-LD == sichtbarer Text bleibt.
+  if (e.axes) t += ' ' + achsenText + '.'
   if (e.bullets) t += ' ' + e.bullets.map((b) => `${b.strong} — ${b.rest}`).join('. ') + '.'
   if (e.schluss) t += ' ' + e.schluss
   if (e.workshop) t += ' ' + fillTokens(e.workshop, city, region)
