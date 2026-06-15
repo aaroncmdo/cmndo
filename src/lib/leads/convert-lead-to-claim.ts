@@ -591,6 +591,9 @@ export async function convertLeadToClaim(
         nachname: p.nachname as string | null,
         firma: (p.firma as string | null) ?? null,
         ist_gewerbe: (p.ist_gewerbe as boolean | null) ?? false,
+        // CMM-50 Group C (halter): geburtsdatum in den Person-Snapshot (war Luecke) — vcf.halter_*
+        // sourct aus personen; Voraussetzung fuer den faelle.halter_geburtsdatum-Removal.
+        geburtsdatum: (p.geburtsdatum as string | null) ?? null,
         email: p.email as string | null,
         telefon: p.telefon as string | null,
         mobil: p.mobil as string | null,

@@ -74,13 +74,14 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   'source_domain',
   // KFZ-208 Mandantenfragebogen-Detaildaten
   // (schadens_hergang siehe Hergang-Block oben — CMM-44 SP-A2 entfernt)
-  'halter_vorname',
-  'halter_nachname',
-  'halter_strasse',
-  'halter_plz',
-  'halter_stadt',
-  'halter_telefon',
-  'halter_email',
+  // CMM-50 Group C (halter): halter_vorname/_nachname/_strasse/_plz/_stadt/_telefon/_email RAUS
+  // aus dem faelle-INSERT. Twin = halter-claim_party (convert:554-564, NUR Kunde≠Halter =
+  // ist_fahrzeughalter===false). Wizard-gekoppelt: halter_*-Felder sind conditional_on
+  // ist_fahrzeughalter=false → halter_* gesetzt ⟺ Party angelegt (kein Doppel-Halter, keine
+  // Contradiction fuer neue Leads). vcf.halter_* sourct aus der halter-Party-PERSON
+  // (ensurePersonForData; geburtsdatum-Snapshot-Luecke mit-gefixt). Kein faelle-table-direkter
+  // Produktions-Reader ausser ocr-trigger:131 (halter_geburtsdatum, eigene R+W → CMM-67/DROP-time).
+  // 2 Legacy-Rows (halter_* + ist_fahrzeughalter≠false) behalten faelle.halter_* bis Backfill (CMM-67).
   // CMM-44 SP-A: finanzierungsgeber_name/_adresse/_vertragsnr sind DUP-Spalten — nur claims.
   // KFZ-202 Vorschäden
   'vorschaeden_beschreibung',
@@ -88,8 +89,8 @@ export const LEAD_TO_FALL_DIRECT_FIELDS = [
   // CMM-44 SP-B PR2c: werkstatt_seit_datum + fahrzeug_fahrbereit sind Cluster-c-
   // Duplikat-Spalten — claims ist SSoT (convertLeadToClaim schreibt dort).
   // Aus der faelle-COPY-Liste entfernt.
-  // AAR-318: Halter-Geburtsdatum (Vor-/Nachname/Adresse sind oben schon)
-  'halter_geburtsdatum',
+  // AAR-318 / CMM-50 Group C: halter_geburtsdatum RAUS (siehe halter-Block oben; Person-Snapshot
+  // jetzt mit geburtsdatum → vcf.halter_geburtsdatum sourct aus personen).
   // AAR-314: Deutsche Büro Grüne Karte — Anfrage-Datum bei Auslandskennzeichen
   'gegner_versicherung_anfrage_datum',
   // AAR-316 / CMM-50 Group D / CMM-48: sprache RAUS aus dem faelle-INSERT — claims.sprache ist
