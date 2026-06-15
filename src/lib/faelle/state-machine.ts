@@ -6,7 +6,9 @@ import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/
 import { mapFallStatusToClaimStatus } from '@/lib/faelle/fall-status-claim-mapping'
 
 /**
- * KFZ-202: Zentrale State-Machine fuer faelle.status.
+ * KFZ-202: Zentrale State-Machine fuer den operativen Status (claims.operative_status, SSoT).
+ * AAR-939: claim-native — liest/schreibt KEIN faelle mehr (Cursor + Validierung via
+ * faelle_claim_bridge-Anker auf claims.operative_status). D2-Gate (claim-first ohne faelle-Row).
  * Validiert alle Uebergaenge, setzt Timestamps, schreibt Timeline.
  *
  * AAR-501 N6: Jeder Übergang emittet das entsprechende Notification-Event
@@ -58,16 +60,22 @@ export async function transitionFallStatus(
 ): Promise<void> {
   const db = createAdminClient()
 
-  const { data: fall, error: fetchErr } = await db
-    .from('faelle')
-    .select('id, status, claim_id, claims:claim_id(status, operative_status)')
-    .eq('id', fallId)
-    .single()
+  // AAR-939: claim-native — Cursor + Validierung kommen aus claims.operative_status (SSoT)
+  // ueber den faelle_claim_bridge-Anker. KEIN faelle-Read mehr (D2-Gate: claim-first-Faelle
+  // haben keine faelle-Row; die Bridge ist der fall_id->claim_id-Lookup fuer ALLE Faelle —
+  // verifiziert 0 faelle ohne Bridge-Row).
+  const { data: bridge, error: fetchErr } = await db
+    .from('faelle_claim_bridge')
+    .select('claim_id, claims:claim_id(status, operative_status)')
+    .eq('fall_id', fallId)
+    .maybeSingle()
 
-  if (fetchErr || !fall) throw new Error(`Fall ${fallId} nicht gefunden`)
+  if (fetchErr || !bridge) throw new Error(`Fall ${fallId} nicht gefunden`)
+
+  const claimId = (bridge as { claim_id?: string | null }).claim_id ?? null
 
   // T1.2-b: aktueller claims.status (fuer den abgeschlossen-Terminal-Guard im Mapping).
-  const claimRel = (fall as {
+  const claimRel = (bridge as {
     claims?:
       | { status?: string | null; operative_status?: string | null }
       | { status?: string | null; operative_status?: string | null }[]
@@ -75,10 +83,15 @@ export async function transitionFallStatus(
   }).claims
   const claimRow = (Array.isArray(claimRel) ? claimRel[0] : claimRel) ?? null
   const currentClaimStatus = claimRow?.status ?? null
-  // CMM-74 b'' (Variante A): Transition-Cursor aus claims.operative_status statt faelle.status.
-  // Fallback faelle.status fuer Legacy-Rows ohne Backfill. faelle.status bleibt vorerst dual-
-  // geschrieben (A1) -> Reader-Tail unbeeinflusst; harter Write-Stopp = A3 nach Reader-Sweep (A2).
-  const currentStatus = (claimRow?.operative_status as string | null) ?? (fall.status as string)
+  // AAR-939: Transition-Cursor = claims.operative_status (vollstaendiger SSoT seit #2884:
+  // alle Creator setzen ihn bei Anlage + Backfill). KEIN faelle.status-Fallback mehr —
+  // entkoppelt die Engine von faelle (D2-Gate). NULL = Cursor nicht lesbar -> harter Bruch.
+  const currentStatus = claimRow?.operative_status as string | null
+  if (!currentStatus) {
+    throw new Error(
+      `Fall ${fallId} (claim ${claimId ?? 'null'}): operative_status fehlt, Cursor nicht lesbar`,
+    )
+  }
 
   // Validate transition
   const allowed = FALL_STATUS_TRANSITIONS[currentStatus]
@@ -141,7 +154,7 @@ export async function transitionFallStatus(
   // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt jetzt auf kanzlei_faelle (1:1).
   // ZUERST peelen (vor SP-H-Peel), damit es nicht in faelle/claims landet.
   // Write via upsertKanzleiFall nach den faelle/claims/auftraege-Writes (s.u.).
-  const claimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  // claimId kommt aus dem bridge-Anker oben (AAR-939, kein faelle-Read mehr).
   const { rest: spi2Rest, kfUpdate } = peelKanzleiFaelleColumns(update)
 
   // CMM-44 SP-H PR2: storniert_am/storno_grund sind auf die auftraege-Sub-Tabelle
@@ -184,14 +197,14 @@ export async function transitionFallStatus(
     claimsUpdate.operative_status = newStatus
   }
 
-  const { error: updateErr } = await db
-    .from('faelle')
-    .update(faelleUpdate)
-    .eq('id', fallId)
-
-  if (updateErr) throw new Error(updateErr.message)
-
+  // AAR-939: KEIN faelle-Write mehr. Nach peelKanzlei + peelAuftraege + split bleibt in
+  // faelleUpdate nur noch { updated_at } (alle Status-Felder routen bereits nach
+  // kanzlei_faelle [regulierung_*/vs_reaktion_*/vs_kuerzung_grund/anschlussschreiben_am],
+  // auftraege [storniert_*] bzw. claims [status_changed_at/abgeschlossen_am/
+  // kanzlei_uebergeben_am/geschlossen_grund + vs_ablehnungs_grund]). Der faelle.updated_at-
+  // Bump entfaellt ersatzlos (redundant: claims.updated_at hier + claim_recency unten).
   if (claimId && Object.keys(claimsUpdate).length > 0) {
+    claimsUpdate.updated_at = now
     const { error: claimUpdateErr } = await db
       .from('claims')
       .update(claimsUpdate)
@@ -417,10 +430,10 @@ export async function transitionFallStatus(
       // Duplikate — claims.hat_mietwagen / hat_nutzungsausfall ist SSoT, via
       // claims-Embed gelesen.
       const { data: details } = await db
-        .from('faelle')
+        .from('faelle_claim_bridge')
         .select('claim_id, claims:claim_id(hat_mietwagen, hat_nutzungsausfall)')
-        .eq('id', fallId)
-        .single()
+        .eq('fall_id', fallId)
+        .maybeSingle()
       const detailClaim = details
         ? Array.isArray(details.claims) ? details.claims[0] : details.claims
         : null
