@@ -89,13 +89,14 @@ export async function verlegeNachNoShowEmbedB(terminId: string): Promise<Verlegu
     if (svErr) return { ok: false, error: 'SV-Umhaengung fehlgeschlagen: ' + svErr.message }
   }
 
-  // Re-Termin-Token: faelle.re_termin_token = Lookup-Quelle von waehleReTerminSlot;
-  // gutachter_termine = SSoT + eingelaufen_am=null entwertet die Consumed-Sperre auf
-  // dem (noch aktuellen) alten Termin, damit der Kunde picken darf.
+  // Re-Termin-Token NUR auf gutachter_termine (SSoT, CMM-44 SP-D): waehleReTerminSlot
+  // sucht den Termin via gutachter_termine.re_termin_token (CMM-49 Option A) und
+  // v_claim_full sourct re_termin_token aus dem aktuellen gutachter_termine-Row.
+  // eingelaufen_am=null entwertet die Consumed-Sperre auf dem (noch aktuellen) alten
+  // Termin, damit der Kunde picken darf.
+  // CMM-49 faelle-Drop-Runway: faelle.re_termin_token-Shadow-Write entfernt — reader-frei
+  // (kein Consumer liest faelle.re_termin_token; live faelle_only_tok=0).
   const token = randomUUID()
-  if (fallId) {
-    await db.from('faelle').update({ re_termin_token: token }).eq('id', fallId)
-  }
   await db
     .from('gutachter_termine')
     .update({ re_termin_token: token, re_termin_token_eingelaufen_am: null })
