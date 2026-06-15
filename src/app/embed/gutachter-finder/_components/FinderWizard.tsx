@@ -82,6 +82,8 @@ function fmtWunsch(lokal: string): string {
 export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
+  // AAR-956 (Aaron 14.06.): Adress-Eingabe als Vollbild-Overlay auf Mobil (Dropdown-Platz).
+  const [ortOverlay, setOrtOverlay] = useState(false)
   // Wunschtermin (Aaron 12.06.: „oben angeben") — Berlin-Wall-Clock aus <input datetime-local>,
   // optional; rankt die Partner-Slots in Schritt 2 (Engine matchType 'wunschtermin').
   const [wunschterminLokal, setWunschterminLokal] = useState('')
@@ -302,12 +304,52 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
               Wir finden den passenden Gutachter in Ihrer Nähe.
             </p>
-            <GooglePlaceAutocomplete
-              placeholder="Adresse eingeben…"
-              scrollIntoViewOnFocus
-              className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
-              onSelect={ortGewaehlt}
-            />
+            {/* Desktop: inline (Dropdown hat Platz). Mobil: Trigger → Vollbild-Overlay, sonst
+                läuft Googles nach unten öffnendes pac-Dropdown aus dem Bottom-Sheet (Aaron 14.06.). */}
+            <div className="hidden lg:block">
+              <GooglePlaceAutocomplete
+                placeholder="Adresse eingeben…"
+                className="mt-2 w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 transition-colors focus:border-claimondo-ondo focus:outline-none"
+                onSelect={ortGewaehlt}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setOrtOverlay(true)}
+              className="lg:hidden mt-2 flex w-full items-center rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5 text-left text-body-sm transition-colors focus:border-claimondo-ondo focus:outline-none"
+            >
+              {ort?.adresse ? (
+                <span className="text-claimondo-navy">{ort.adresse}</span>
+              ) : (
+                <span className="text-claimondo-shield/50">Adresse eingeben…</span>
+              )}
+            </button>
+            {ortOverlay && (
+              <div className="lg:hidden fixed inset-0 z-[130] flex flex-col bg-white">
+                <div className="flex items-center gap-3 border-b border-claimondo-border px-4 py-3">
+                  <button
+                    type="button"
+                    onClick={() => setOrtOverlay(false)}
+                    aria-label="Zurück"
+                    className="-ml-1 flex h-8 w-8 items-center justify-center text-claimondo-navy"
+                  >
+                    <ChevronLeft className="h-6 w-6" />
+                  </button>
+                  <span className="text-body font-bold text-claimondo-navy">Wo steht das Fahrzeug?</span>
+                </div>
+                <div className="p-4">
+                  <GooglePlaceAutocomplete
+                    autoFocus
+                    placeholder="Adresse eingeben…"
+                    className="w-full rounded-ios-md border border-claimondo-border bg-white px-4 py-3 text-body-sm text-claimondo-navy placeholder-claimondo-shield/50 focus:border-claimondo-ondo focus:outline-none"
+                    onSelect={(p) => {
+                      setOrtOverlay(false)
+                      ortGewaehlt(p)
+                    }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -192,7 +192,7 @@ function GutachterPill({
   gesamt: number
 }) {
   return (
-    <GlassPill className="px-3 py-2 sm:px-4">
+    <GlassPill className="px-3 py-2 sm:px-4 [background:color-mix(in_srgb,white_70%,transparent)] [backdrop-filter:blur(24px)] [-webkit-backdrop-filter:blur(24px)] [border:1px_solid_color-mix(in_srgb,white_50%,transparent)]">
       <span className="relative flex h-2 w-2 flex-shrink-0">
         <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 opacity-75 animate-ping" aria-hidden />
         <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" aria-hidden />
@@ -241,6 +241,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const sheetDragRef = useRef<number | null>(null)
   // AAR-956 (Aaron 14.06.): Live-Drag-Offset (px) fürs Anfrage-Sheet — folgt dem Finger.
   const [sheetDragY, setSheetDragY] = useState(0)
+  const anfrageSheetRef = useRef<HTMLDivElement>(null)
   // AAR-956 (Aaron 14.06.): Live-Drag-to-close fürs Profil-Sheet (herunterziehen schließt, nicht
   // nur Klick auf den Strich) + Scroll-Lock (Hintergrund darf bei offenem Sheet nicht scrollen).
   const [profileDragY, setProfileDragY] = useState(0)
@@ -953,6 +954,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           innere Wizard-Card transparent ([&>div]-Override, NUR hier mobil → Desktop-Card bleibt
           Glass) → keine gestapelten Glass-Schichten mehr. */}
       <div
+        ref={anfrageSheetRef}
         className="lg:hidden absolute left-0 right-0 bottom-0 z-[10] transition-[transform] duration-500 ease-[cubic-bezier(.32,.72,0,1)]"
         style={{
           transform: `${mobileSheetOpen ? 'translateY(0)' : 'translateY(calc(100% - 56px))'} translateY(${sheetDragY}px)`,
@@ -976,8 +978,10 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
               const start = sheetDragRef.current
               if (start == null) return
               const dy = e.touches[0].clientY - start
-              // offen → nur nach unten ziehen; Peek → nur nach oben ziehen (Live-Follow)
-              setSheetDragY(mobileSheetOpen ? Math.max(0, Math.min(dy, 500)) : Math.min(0, Math.max(dy, -700)))
+              // offen → nur nach unten (bis Peek); Peek → nur nach oben (bis offen). Clamp an die
+              // ECHTE Sheet-Höhe (− 56px Peek), damit es nicht weiter als nötig zieht (Aaron 14.06.).
+              const maxDrag = Math.max(0, (anfrageSheetRef.current?.offsetHeight ?? 600) - 56)
+              setSheetDragY(mobileSheetOpen ? Math.max(0, Math.min(dy, maxDrag)) : Math.min(0, Math.max(dy, -maxDrag)))
             }}
             onTouchEnd={(e) => {
               const start = sheetDragRef.current

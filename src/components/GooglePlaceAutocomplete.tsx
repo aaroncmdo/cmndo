@@ -84,6 +84,7 @@ export default function GooglePlaceAutocomplete({
   onChange,
   className,
   scrollIntoViewOnFocus,
+  autoFocus,
 }: {
   defaultValue?: string
   /** AAR-956: Autocomplete-Typ. Default ['address'] (Geocoder); ['establishment'] = Business-Suche. */
@@ -101,6 +102,8 @@ export default function GooglePlaceAutocomplete({
   // AAR-956: Mobil — beim Fokus das Input nach oben scrollen, damit Googles pac-Dropdown
   // (öffnet nach unten) im Bottom-Sheet nicht unter den Bildschirm läuft.
   scrollIntoViewOnFocus?: boolean
+  // AAR-956: Overlay-Popover — Input beim Mount fokussieren (sobald Google geladen + enabled).
+  autoFocus?: boolean
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
   const [value, setValue] = useState(defaultValue ?? '')
@@ -186,6 +189,11 @@ export default function GooglePlaceAutocomplete({
 
     return () => { cancelled = true }
   }, [])
+
+  // AAR-956: Overlay-Popover — Input fokussieren, sobald Google geladen + das Input enabled ist.
+  useEffect(() => {
+    if (autoFocus && !loading) inputRef.current?.focus()
+  }, [autoFocus, loading])
 
   const defaultCls = 'w-full px-4 py-3 rounded-ios-xl border border-claimondo-border bg-white text-claimondo-navy placeholder-claimondo-ondo/60 text-sm focus:outline-none focus:border-claimondo-ondo transition-colors'
 
