@@ -1,6 +1,7 @@
 ﻿import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
 import { SprachBanner } from '@/components/i18n/SprachBanner'
@@ -300,6 +301,11 @@ export default async function FlowPage({
 
   return (
     <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+      {/* AAR-956 Self-Service #3b: Live-Refresh der /flow-Seite. Anon-Client
+          empfaengt leads-UPDATE via "Flow anon select leads" (status=flow-gesendet)
+          + leads REPLICA IDENTITY FULL. Server-Props (reservierter SV/Termin,
+          besichtigungsort) ziehen nach; lokaler Wizard-Input bleibt erhalten. */}
+      <LeadRealtimeRefresh leadId={lead.id} />
       {/* Banner nur noch als Rest-Fallback: wenn KEINE echte Übersetzung greift
           (flowLocale='de') der Empfänger aber nicht-deutsch ist ('other'/unbekannt). */}
       <SprachBanner
