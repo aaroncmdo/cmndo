@@ -166,11 +166,11 @@ describe('SP-J Bucket B routet auf claims', () => {
       schlussabrechnung_am: 't',
       auszahlung_gutachter_betrag: 5,
       abrechnung_id: 'a1',
-      lead_preis_netto: 99, // faelle-native (NICHT SP-J) — bleibt faelle
+      lead_preis_netto: 99, // CMM-44 Phase 3: claims-native (CLAIM_OWNED) -> claimsUpdate
     }
     const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
-    expect(claimsUpdate).toEqual({ schlussabrechnung_am: 't', auszahlung_gutachter_betrag: 5, abrechnung_id: 'a1' })
-    expect(faelleUpdate).toEqual({ status: 'x', lead_preis_netto: 99 })
+    expect(claimsUpdate).toEqual({ schlussabrechnung_am: 't', auszahlung_gutachter_betrag: 5, abrechnung_id: 'a1', lead_preis_netto: 99 })
+    expect(faelleUpdate).toEqual({ status: 'x' })
   })
 
   it('alle 8 Bucket-B-Spalten sind im Set', () => {
