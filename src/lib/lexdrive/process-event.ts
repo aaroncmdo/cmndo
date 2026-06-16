@@ -820,6 +820,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         'nachbesichtigung_sv_konfrontation_gewuenscht',
         'nachbesichtigung_kunde_termin_vorschlaege',
         'nachbesichtigung_kunde_termin_eingereicht_am',
+        // CMM-49/AAR-552: die nachbesichtigung_*-Felder aus computeFieldUpdates
+        // (vs_nachbesichtigung*-Events) leben ebenfalls auf gutachter_termine (SSoT;
+        // Reader v_faelle `t` + get-kunde-faelle + subphase-resolver §8.5) — bisher
+        // fielen sie in fuFaelle (faelle, reader-frei/divergent). Jetzt mit auf den
+        // aktuellen Termin geroutet.
+        'nachbesichtigung_status',
+        'nachbesichtigung_angefordert_am',
+        'nachbesichtigung_termin_datum',
+        'nachbesichtigung_konfrontation',
+        'nachbesichtigung_ergebnis',
       ]
       const gtUpdate: Record<string, unknown> = {}
       for (const col of SPD_COLS_TO_GT) {
@@ -829,16 +839,20 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         }
       }
       if (Object.keys(gtUpdate).length > 0 && claimIdForUpdates) {
-        const { data: aktT } = await db.from('gutachter_termine').select('id')
-          .eq('claim_id', claimIdForUpdates)
-          .order('start_zeit', { ascending: false })
-          .limit(1)
-          .maybeSingle()
-        if (aktT?.id) {
-          const { error: gtErr } = await db.from('gutachter_termine').update(gtUpdate).eq('id', aktT.id)
+        // CMM-49/AAR-552: kanonischer aktueller-Termin (== v_faelle `t`-Selektion,
+        // status-priorisiert) via RPC statt simple-`start_zeit DESC` — sonst landen die
+        // nachbesichtigung_*-Writes bei >1 Termin/Claim auf einem ANDEREN Termin als der
+        // Reader liest. Non-critical: Fehler nur loggen (Status-Update bricht das Event nicht).
+        const { data: terminId, error: rpcErr } = await db.rpc('get_aktueller_gt_termin_id', {
+          p_claim_id: claimIdForUpdates,
+        })
+        if (rpcErr) {
+          console.error('[CMM-49 SP-D] get_aktueller_gt_termin_id fehlgeschlagen:', rpcErr.message)
+        } else if (terminId) {
+          const { error: gtErr } = await db.from('gutachter_termine').update(gtUpdate).eq('id', terminId as string)
           if (gtErr) console.error('[CMM-44 SP-D] process-event GT-Update fehlgeschlagen:', gtErr.message)
         } else {
-          console.warn(`[CMM-44 SP-D] kein Termin fuer claim ${claimIdForUpdates} — nachbesichtigung_* skip`)
+          console.warn(`[CMM-49 SP-D] kein aktueller Termin fuer claim ${claimIdForUpdates} — nachbesichtigung_* skip`)
         }
       }
 
