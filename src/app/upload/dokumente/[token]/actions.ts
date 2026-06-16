@@ -14,6 +14,7 @@
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
+import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { getStorageUrl } from '@/lib/storage/url'
 
 type Slot = {
@@ -403,24 +404,9 @@ async function runZb1OcrAndUpdate(
     zb1_upload_versuche: ((lead.zb1_upload_versuche as number | null) ?? 0) + 1,
     updated_at: new Date().toISOString(),
   }
-  function setIfEmpty(field: string, value: string | number | null | undefined) {
-    if (value == null) return
-    const current = (lead as unknown as Record<string, unknown>)[field]
-    if (current == null || current === '') leadUpdate[field] = value
-  }
-  setIfEmpty('fin', extracted.fin_vin)
-  setIfEmpty('kennzeichen', extracted.kennzeichen)
-  setIfEmpty('fahrzeug_hersteller', extracted.fahrzeug_hersteller)
-  setIfEmpty('fahrzeug_modell', extracted.fahrzeug_modell)
-  setIfEmpty('fahrzeug_baujahr', extracted.fahrzeug_baujahr)
-  setIfEmpty('erstzulassung', extracted.erstzulassung)
-  setIfEmpty('halter_vorname', extracted.halter_vorname)
-  setIfEmpty('halter_nachname', extracted.halter_nachname)
-  setIfEmpty('halter_strasse', extracted.halter_strasse)
-  setIfEmpty('halter_plz', extracted.halter_plz)
-  setIfEmpty('halter_stadt', extracted.halter_stadt)
-  setIfEmpty('hsn', extracted.hsn)
-  setIfEmpty('tsn', extracted.tsn)
+  // AAR-956: geteiltes OCR->leads-Mapping (H6) — fuellt jetzt auch fahrzeug_farbe
+  // + brn, die hier vorher fehlten. Der Halter<->Kunde-Name-Match folgt darunter.
+  Object.assign(leadUpdate, buildZb1LeadUpdate(extracted, lead as unknown as Record<string, unknown>))
 
   // AAR-666: Auto-Match Halter ↔ Kunde nach OCR.
   // Wenn der Fahrzeugschein einen Namen liefert, der nach Trim/Case-Insensitive

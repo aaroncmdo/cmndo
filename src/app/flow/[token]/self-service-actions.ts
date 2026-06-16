@@ -13,6 +13,7 @@ import { matchAndSlots, planeTerminOeffentlich, type OeffentlichesSvProfil } fro
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
 import { planeTermin } from '@/lib/termine/engine'
+import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -264,6 +265,13 @@ export async function uploadZb1Flow(
     fahrzeug_hersteller: string | null
     fahrzeug_modell: string | null
     halter_name: string | null
+    // AAR-956 15.06.: strukturierte Halter-Felder für den Client-Merge (Halter-
+    // Step vorausfüllen + ist_fahrzeughalter Name-Match) statt nur Anzeige.
+    halter_vorname: string | null
+    halter_nachname: string | null
+    halter_strasse: string | null
+    halter_plz: string | null
+    halter_stadt: string | null
   }
 }> {
   if (!imageBase64 || imageBase64.length < 100) return { ok: false, error: 'Bild fehlt oder zu klein.' }
@@ -321,26 +329,7 @@ export async function uploadZb1Flow(
     zb1_upload_versuche: versuche,
     updated_at: new Date().toISOString(),
   }
-  const setIfEmpty = (field: string, value: string | number | null | undefined) => {
-    if (value == null) return
-    const current = (lead as Record<string, unknown>)[field]
-    if (current == null || current === '') update[field] = value
-  }
-  setIfEmpty('fin', extracted.fin_vin)
-  setIfEmpty('kennzeichen', extracted.kennzeichen)
-  setIfEmpty('fahrzeug_hersteller', extracted.fahrzeug_hersteller)
-  setIfEmpty('fahrzeug_modell', extracted.fahrzeug_modell)
-  setIfEmpty('fahrzeug_baujahr', extracted.fahrzeug_baujahr)
-  setIfEmpty('erstzulassung', extracted.erstzulassung)
-  setIfEmpty('halter_vorname', extracted.halter_vorname)
-  setIfEmpty('halter_nachname', extracted.halter_nachname)
-  setIfEmpty('halter_strasse', extracted.halter_strasse)
-  setIfEmpty('halter_plz', extracted.halter_plz)
-  setIfEmpty('halter_stadt', extracted.halter_stadt)
-  setIfEmpty('hsn', extracted.hsn)
-  setIfEmpty('tsn', extracted.tsn)
-  setIfEmpty('fahrzeug_farbe', extracted.fahrzeug_farbe)
-  setIfEmpty('brn', extracted.brn)
+  Object.assign(update, buildZb1LeadUpdate(extracted, lead as Record<string, unknown>))
   const { error: updErr2 } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr2) return { ok: false, error: updErr2.message }
   revalidatePath('/dispatch/leads')
@@ -352,6 +341,11 @@ export async function uploadZb1Flow(
       fahrzeug_hersteller: extracted.fahrzeug_hersteller ?? null,
       fahrzeug_modell: extracted.fahrzeug_modell ?? null,
       halter_name: [extracted.halter_vorname, extracted.halter_nachname].filter(Boolean).join(' ') || null,
+      halter_vorname: extracted.halter_vorname ?? null,
+      halter_nachname: extracted.halter_nachname ?? null,
+      halter_strasse: extracted.halter_strasse ?? null,
+      halter_plz: extracted.halter_plz ?? null,
+      halter_stadt: extracted.halter_stadt ?? null,
     },
   }
 }

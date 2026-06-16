@@ -11,10 +11,16 @@ import { Chip, ChipRow } from '@/components/ui/Chip'
 export default async function DispatchLeads({
   searchParams,
 }: {
-  searchParams: Promise<{ phase?: string }>
+  searchParams: Promise<{ phase?: string; filter?: string }>
 }) {
   const params = await searchParams
   const supabase = await createClient()
+
+  // AAR-956 Self-Service #4: Abbrecher-Filter. Leads, die den FlowLink geoeffnet,
+  // aber nicht abgeschlossen haben (status != disqualifiziert). Der Dispatcher
+  // ruft sie an (alle Daten inkl. Mail liegen vor). Eigene Filter-Dimension,
+  // orthogonal zu den Phase-Chips; sortiert nach letzter Aktivitaet (updated_at).
+  const istAbbrecherFilter = params.filter === 'abbrecher'
 
   // leads-Audit 15.05.2026 (#2): status + kunden_konstellation ergänzt. Vorher
   // lud die Liste nur qualifizierungs_phase — der Dispatcher sah den
@@ -37,15 +43,32 @@ export default async function DispatchLeads({
       zugewiesen_an_profile:profiles!leads_zugewiesen_an_fk(id, vorname, nachname, avatar_url)
       `,
     )
-    .order('created_at', { ascending: false })
     .limit(200)
 
-  if (params.phase) {
-    query = query.eq('qualifizierungs_phase', params.phase)
+  if (istAbbrecherFilter) {
+    query = query
+      .eq('flow_link_geoeffnet', true)
+      .eq('flow_link_abgeschlossen', false)
+      .neq('status', 'disqualifiziert')
+      .order('updated_at', { ascending: false })
+  } else {
+    query = query.order('created_at', { ascending: false })
+    if (params.phase) {
+      query = query.eq('qualifizierungs_phase', params.phase)
+    }
   }
 
   const { data: leads } = await query
-  const activePhase = params.phase ?? ''
+  const activePhase = istAbbrecherFilter ? '' : (params.phase ?? '')
+
+  // Abbrecher-Zaehler fuer den Chip-Badge (immer berechnen, auch ausserhalb des
+  // Filters): gibt dem Dispatcher ein dauerhaftes glanceable Signal.
+  const { count: abbrecherCount } = await supabase
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('flow_link_geoeffnet', true)
+    .eq('flow_link_abgeschlossen', false)
+    .neq('status', 'disqualifiziert')
 
   return (
     <div className="py-6 space-y-4">
@@ -66,7 +89,7 @@ export default async function DispatchLeads({
             key={opt.value}
             href={opt.value ? `/dispatch/leads?phase=${opt.value}` : '/dispatch/leads'}
             className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
-              activePhase === opt.value
+              !istAbbrecherFilter && activePhase === opt.value
                 ? 'bg-claimondo-navy text-white'
                 : 'bg-white border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg'
             }`}
@@ -74,6 +97,18 @@ export default async function DispatchLeads({
             {opt.label}
           </Chip>
         ))}
+        {/* AAR-956 #4: Abbrecher — FlowLink geoeffnet, nicht abgeschlossen. Eigene
+            Filter-Dimension (amber = Achtung, wie das FlowLink-Offen-Badge). */}
+        <Chip
+          href="/dispatch/leads?filter=abbrecher"
+          className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
+            istAbbrecherFilter
+              ? 'bg-amber-500 text-white'
+              : 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
+          }`}
+        >
+          Abbrecher{typeof abbrecherCount === 'number' ? ` (${abbrecherCount})` : ''}
+        </Chip>
       </ChipRow>
 
       {/* Liste / Kanban Toggle + View */}

@@ -10,6 +10,14 @@ const OCR_FOLGEDATEN_FELDER = new Set([
 ])
 const EXCLUDE_FELDER = new Set<string>([
   'schuldfrage', // §3a-Quali-Step
+  // AAR-956 15.06. (Aaron): „kann der Kunde nicht wissen/haben" -> raus aus der
+  // Kunden-Feststellung. Bleibt via Dispatcher-Form (audience=beide) am Claim durch
+  // KB/Admin ausfuellbar (kein Datenverlust).
+  'nutzungsausfall', // Abrechnungs-Konzept
+  'gegner_schadennummer', // kriegt der Kunde erst spaeter von der VS
+  'gegner_email', // wird am Unfallort kaum getauscht
+  'fahrzeugschaden_beschreibung', // doppelt zu Fotos + Hergang
+  'vorschaeden_beschreibung', // Vorschaeden kommen via Cardentity
   ...OCR_FOLGEDATEN_FELDER,
 ])
 

@@ -478,7 +478,7 @@
       "labels": {
         "standort": "Standort",
         "fahrzeug": "Fahrzeug",
-        "schadentyp": "Schadentyp",
+        "schadentyp": "Unfalltyp",
         "art_des_unfalls": "Art des Unfalls",
         "unfallgegner": "Unfallgegner",
         "fahrzeugtyp_gegner": "Fahrzeugtyp Gegner",
