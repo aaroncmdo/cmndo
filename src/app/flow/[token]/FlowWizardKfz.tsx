@@ -37,6 +37,7 @@ import {
 } from 'lucide-react'
 import LegalDocPopover from '@/components/legal/LegalDocPopover'
 import { SheetCard } from '@/components/shared/SheetCard'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -567,6 +568,19 @@ export default function FlowWizardKfz({
                     )}
                     <p className="text-xs uppercase tracking-wider text-claimondo-ondo mb-1">{t('step_gutachter.sv_label')}</p>
                     <h2 className="text-2xl font-bold text-claimondo-navy mb-2">{gutachterAnzeige.vorname}</h2>
+                    {gutachterAnzeige.firma && (
+                      <p className="text-sm text-claimondo-ondo mb-2">{gutachterAnzeige.firma}</p>
+                    )}
+                    {gutachterAnzeige.googleDurchschnitt !== null && gutachterAnzeige.googleAnzahl !== null && (
+                      <div className="flex justify-center mb-3">
+                        <GoogleBewertungBadge
+                          durchschnitt={gutachterAnzeige.googleDurchschnitt}
+                          anzahl={gutachterAnzeige.googleAnzahl}
+                          zuletztAktualisiert={gutachterAnzeige.googleAktualisiertAm}
+                          size="md"
+                        />
+                      </div>
+                    )}
                     <p className="text-sm text-claimondo-ondo">{t('step_gutachter.kontakt_hinweis')}</p>
                     {gutachterAnzeige.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
