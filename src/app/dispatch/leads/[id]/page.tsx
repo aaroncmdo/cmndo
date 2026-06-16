@@ -12,6 +12,8 @@ import DispatchLeadForm from './DispatchLeadForm'
 import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 import { computeQualificationStatus } from './_lib/qualification-engine'
+import { ladeLeadTerminGutachter } from '@/lib/dispatch/lade-lead-termin-gutachter'
+import LeadTerminGutachterBanner from './_components/LeadTerminGutachterBanner'
 
 export default async function DispatchLeadDetail({
   params,
@@ -28,6 +30,12 @@ export default async function DispatchLeadDetail({
     .single()
 
   if (!lead) notFound()
+
+  // AAR-956: Single-Source Termin + Gutachter (v_lead_termin_gutachter) fuers
+  // Reconciliation-Banner — EINE Quelle ueber dispatch-/self-service-Termin +
+  // Gutachter-Finder-Kundenwunsch, inkl. Divergenz-Warnung (gebucht != Wunsch).
+  const terminGutachterMap = await ladeLeadTerminGutachter([id])
+  const terminGutachterInfo = terminGutachterMap[id] ?? null
 
   // AAR-115 + AAR-134: aktiver SV-Termin fuer das termin-Override (SvDispatchPanel).
   // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id; der sachverstaendige-Embed lief
@@ -138,6 +146,7 @@ export default async function DispatchLeadDetail({
   return (
     <>
       <LeadRealtimeRefresh leadId={id} watchTermine />
+      <LeadTerminGutachterBanner info={terminGutachterInfo} />
       <DispatchLeadForm
         lead={lead as Record<string, unknown> & { id: string }}
         phasen={phasen}
