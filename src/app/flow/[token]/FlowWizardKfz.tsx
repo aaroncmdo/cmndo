@@ -218,18 +218,26 @@ export default function FlowWizardKfz({
   // AAR-956 P4-A: ① Feststellung-Step nur wenn die Config sichtbare ①-Felder liefert.
   // feststellungPhasen ist ein Server-Prop (session-stabil) → kein Stale-Index-Risiko.
   const hatFeststellung = (feststellungPhasen ?? []).some((p) => p.felder.some(istFeststellungsFeld))
+  // AAR-956 self-service (Aaron 14.06.): hatFeststellung beim Mount cappen (wie initialNeedsBooking)
+  // — sonst fällt der ①-Step aus STEPS, sobald der Kunde den Hergang submittet (feststellungPhasen→[]
+  // beim RSC-Re-Render, da unfallhergang dann gefüllt) → Stale-Step-Index. Session-stabil halten.
+  const [initialHatFeststellung] = useState(hatFeststellung)
   const STEPS: { id: StepId; label: string }[] = istIncomplete
     ? [
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
         ...(qualiPending ? [{ id: 'quali' as StepId, label: 'Schuldfrage' }] : []),
-        ...(hatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
+        ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
         { id: 'termin', label: 'Termin' },
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
         { id: 'account', label: 'Konto' },
       ]
     : [
+        // AAR-956 self-service (Aaron 14.06.): Embed-Lead hat einen Termin, ① Feststellung muss
+        // aber trotzdem laufen (Hergang/Fahrzeug/Gegner) — wenn die Config sie liefert (s. page.tsx
+        // feststellungNeeded). ②Quali+③Slot bleiben weg (Termin steht).
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
+        ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
         { id: 'account', label: 'Konto' },

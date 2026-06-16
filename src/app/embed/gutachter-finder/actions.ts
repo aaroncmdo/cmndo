@@ -40,6 +40,12 @@ export type EmbedBuchungInput = {
   /** Wunschtermin (UTC-ISO) — wird auf die gfa/Lead geschrieben, damit der Dispatcher (Lead-
    * Owner) die gewünschte Zeit sieht (Request-Modell, Aaron 12.06.). */
   wunschterminIso?: string | null
+  /** AAR-956 (Aaron 14.06.): gewählter Gutachter wird auf die gfa mitgereicht — Partner →
+   * zugeordneter_sv_id, Dead-Pin → zugeordneter_sv_lead_id; matching_typ = 'partner'|'deadpin'.
+   * Damit sieht der Dispatcher den SV direkt auf der gfa/Lead (nicht nur über den Termin). */
+  zugeordneter_sv_id?: string | null
+  zugeordneter_sv_lead_id?: string | null
+  matching_typ?: string | null
 }
 
 export async function starteEmbedBuchung(
@@ -56,6 +62,10 @@ export async function starteEmbedBuchung(
     schadenort_lat: input.ort.lat,
     schadenort_lng: input.ort.lng,
     wunschtermin: input.wunschterminIso ?? undefined,
+    // AAR-956 (Aaron 14.06.): gewählten Gutachter mitreichen → gfa.zugeordneter_sv_(lead_)id.
+    zugeordneter_sv_id: input.zugeordneter_sv_id ?? undefined,
+    zugeordneter_sv_lead_id: input.zugeordneter_sv_lead_id ?? undefined,
+    matching_typ: input.matching_typ ?? undefined,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -225,6 +235,10 @@ export async function reserviereEmbedTermin(input: {
     schadentyp: input.schadentyp,
     ort: input.ort,
     wunschterminIso,
+    // AAR-956 (Aaron 14.06.): gewählten Gutachter aus der Auswahl mitreichen (Partner|Dead-Pin).
+    zugeordneter_sv_id: input.auswahl?.kind === 'partner' ? input.auswahl.svId : null,
+    zugeordneter_sv_lead_id: input.auswahl?.kind === 'deadpin' ? input.auswahl.deadPinId : null,
+    matching_typ: input.auswahl?.kind ?? null,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
