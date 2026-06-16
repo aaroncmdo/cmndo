@@ -422,17 +422,18 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       }
     }, 12_000)
 
-    // ALLE Mapbox-Fehler abfangen + verbatim sichtbar machen — ohne DevTools-Raten.
+    // Nur echte Auth-/Token-Fehler (401/403) loggen + sichtbar machen. Transiente
+    // Mapbox-'error'-Events (geblockte Telemetry/events.mapbox.com, Tile-Hiccups)
+    // feuern "nach einiger Zeit" obwohl die Karte laeuft — die NICHT mehr als
+    // Karten-Fehler loggen/anzeigen (Aaron 16.06.).
     map.on('error', (e) => {
       const errObj = e?.error as { message?: string; status?: number } | undefined
       const msg = errObj?.message ?? String(e?.error ?? 'unbekannter Mapbox-Fehler')
       const status = errObj?.status
-      console.error('[gutachter-finden] Mapbox-Fehler:', status, msg, e)
-      setMapErrorMsg(`${status ? `[${status}] ` : ''}${msg}`)
       if (status === 401 || status === 403 || /unauthorized|forbidden|access token/i.test(msg)) {
+        console.error('[gutachter-finden] Mapbox-Auth-Fehler:', status, msg)
+        setMapErrorMsg(`${status ? `[${status}] ` : ''}${msg}`)
         setMapStatus('auth-error')
-      } else {
-        setMapStatus((s) => (s === 'auth-error' ? s : 'error'))
       }
     })
 
