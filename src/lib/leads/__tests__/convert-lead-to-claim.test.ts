@@ -20,7 +20,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // Wir bauen ein Spy-Objekt, das die Supabase-Builder-Chain simuliert.
 type Operation = {
   table: string
-  op: 'select' | 'insert' | 'update' | 'delete'
+  op: 'select' | 'insert' | 'update' | 'delete' | 'upsert'
   payload?: unknown
   filters: Array<{ method: string; args: unknown[] }>
 }
@@ -90,6 +90,12 @@ const mockAdmin = {
       },
       insert: (payload: unknown) => {
         const op: Operation = { table, op: 'insert', payload, filters: [] }
+        operations.push(op)
+        return makeBuilder(op)
+      },
+      // CMM-49: faelle_claim_bridge wird via upsert geschrieben (claim-first converter).
+      upsert: (payload: unknown) => {
+        const op: Operation = { table, op: 'upsert', payload, filters: [] }
         operations.push(op)
         return makeBuilder(op)
       },

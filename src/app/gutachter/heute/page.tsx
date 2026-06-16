@@ -270,7 +270,8 @@ export default async function HeutePage() {
     const { data: parties } = await admin
       .from('claim_parties')
       .select(
-        'claim_id, rolle, vorname, nachname, anrede, telefon, mobil, user_id, reihenfolge, personen!claim_parties_person_id_fkey(vorname, nachname, anrede, telefon, mobil)',
+        // CMM-49 Entity Plan-5 (4b): pure-entity — Person-Felder nur noch aus personen (flat-Spalten gedroppt).
+        'claim_id, rolle, user_id, reihenfolge, personen!claim_parties_person_id_fkey(vorname, nachname, anrede, telefon, mobil)',
       )
       .in('claim_id', claimIds)
       .eq('rolle', 'geschaedigter')
@@ -278,21 +279,19 @@ export default async function HeutePage() {
     for (const p of (parties ?? []) as Array<Record<string, unknown>>) {
       const cId = p.claim_id as string
       if (partyMap.has(cId)) continue // erste/primäre geschaedigter-Row gewinnt
-      // CMM-49 Entity Plan-5: person-Felder entity-primaer aus personen (via
-      // person_id-FK), claim_parties.<x> bleibt Fallback bis zum flat-DROP-
-      // Cutover. DB-verifiziert 0 Divergenz (vorname/nachname/anrede/telefon/
-      // mobil) -> verhaltensidentisch; der Fallback haelt un-backfillte Rows
-      // (andere Env / kuenftige Daten) robust.
+      // CMM-49 Entity Plan-5 (4b): person-Felder PURE-entity aus personen (via person_id-FK).
+      // Flat-Fallback entfernt — die claim_parties-Person-Spalten sind gedroppt (DB-verifiziert
+      // 0 Divergenz vor dem Cutover -> verhaltensidentisch).
       const person = (Array.isArray(p.personen) ? p.personen[0] : p.personen) as
         | Record<string, unknown>
         | null
         | undefined
-      const telefonVal = (person?.telefon as string | null) ?? (p.telefon as string | null)
-      const mobilVal = (person?.mobil as string | null) ?? (p.mobil as string | null)
+      const telefonVal = (person?.telefon as string | null) ?? null
+      const mobilVal = (person?.mobil as string | null) ?? null
       partyMap.set(cId, {
-        vorname: ((person?.vorname as string | null) ?? (p.vorname as string | null)) ?? null,
-        nachname: ((person?.nachname as string | null) ?? (p.nachname as string | null)) ?? null,
-        anrede: ((person?.anrede as string | null) ?? (p.anrede as string | null)) ?? null,
+        vorname: (person?.vorname as string | null) ?? null,
+        nachname: (person?.nachname as string | null) ?? null,
+        anrede: (person?.anrede as string | null) ?? null,
         telefon: (telefonVal ?? mobilVal) ?? null,
         user_id: (p.user_id as string | null) ?? null,
       })

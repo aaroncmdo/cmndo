@@ -118,17 +118,18 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     // T2: Geschaedigter-Partei traegt firma_id (firmen-Entitaet via ensureFirma)
     const { data: gp } = await db
       .from('claim_parties')
-      .select('firma_id, adresse_strasse, vehicle_id, person_id')
+      .select('firma_id, vehicle_id, person_id, personen!claim_parties_person_id_fkey(adresse_strasse)')
       .eq('claim_id', claimId)
       .eq('rolle', 'geschaedigter')
       .single()
     expect(gp?.firma_id).toBeTruthy()
     firmaId = (gp!.firma_id as string | null) ?? null
 
-    // T6 (Conversion-Clean Group B): die Kunde-Anschrift landet auf der Geschaedigter-Partei
-    // (claim_parties.adresse_strasse <- lead.kunde_strasse) + Person via ensurePersonForData.
+    // T6 (CMM-49 Plan-5): die Kunde-Anschrift liegt jetzt in der personen-Entitaet (via person_id),
+    // nicht mehr flach auf claim_parties (flat-Spalten gedroppt) — Person via ensurePersonForData.
     // Damit ist der faelle.kunde_*-INSERT-Retire data-lossless.
-    expect(gp?.adresse_strasse).toBe(kundeStrasse)
+    const gpPerson = (Array.isArray(gp?.personen) ? gp?.personen[0] : gp?.personen) as { adresse_strasse?: string | null } | null | undefined
+    expect(gpPerson?.adresse_strasse).toBe(kundeStrasse)
     expect(gp?.person_id).toBeTruthy()
 
     // T3: genau ein Gegner-Fahrzeug-Involvement mit rolle='verursacher'
@@ -247,12 +248,14 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
     // Fix C: separate halter-Party aus lead.halter_* (rolle='halter', ist_halter=true, mit Person)
     const { data: halter } = await db2
       .from('claim_parties')
-      .select('nachname, ist_halter, person_id')
+      .select('ist_halter, person_id, personen!claim_parties_person_id_fkey(nachname)')
       .eq('claim_id', claimId2)
       .eq('rolle', 'halter')
       .single()
     expect(halter?.ist_halter).toBe(true)
-    expect(halter?.nachname as string | null).toContain(tag2)
+    // CMM-49 Plan-5: Halter-Name in personen (via person_id), nicht mehr flach auf claim_parties.
+    const halterPerson = (Array.isArray(halter?.personen) ? halter?.personen[0] : halter?.personen) as { nachname?: string | null } | null | undefined
+    expect(halterPerson?.nachname as string | null).toContain(tag2)
     expect(halter?.person_id).toBeTruthy() // ensurePersonForData: Halter hat Namen -> Person
 
     // CMM-50 Group C: v_claim_full.halter_* sourct aus der halter-Party-PERSON (halter_p LATERAL).
