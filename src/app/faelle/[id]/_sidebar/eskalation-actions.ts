@@ -54,17 +54,16 @@ export async function eskaliereFallAnAdmin(
 
   const admin = createAdminClient()
   // CMM-44 SP-B PR2a: eskaliert_* leben jetzt auf claims (SSoT).
+  // CMM-49 (faelle-Drop): nur CLAIM_OWNED-Spalten -> toter {updated_at}-faelle-Spiegel-
+  // Write entfernt (updated_at trigger-redundant + reader-frei). Nur noch claimsUpdate.
   const claimId = await resolveClaimId(admin, fallId)
   const now = new Date().toISOString()
   const updateObj = {
     eskaliert_an_admin_id: adminId,
     eskaliert_am: now,
     eskaliert_grund: grund ?? null,
-    updated_at: now,
   }
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
-  const { error } = await admin.from('faelle').update(faelleUpdate).eq('id', fallId)
-  if (error) return { ok: false, error: error.message }
+  const { claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
   if (claimId && Object.keys(claimsUpdate).length > 0) {
     // eskaliert_an_admin_id ist nach SP-B die Eskalations-Zielspalte (claims)
     // + treibt den Admin-Nav-Indikator — Fehler konsistent zur faelle-Seite
@@ -95,17 +94,15 @@ export async function eskalationZuruecknehmen(
 
   const admin = createAdminClient()
   // CMM-44 SP-B PR2a: eskaliert_* leben jetzt auf claims (SSoT).
+  // CMM-49 (faelle-Drop): nur CLAIM_OWNED-Spalten -> toter {updated_at}-faelle-Spiegel-
+  // Write entfernt (updated_at trigger-redundant + reader-frei). Nur noch claimsUpdate.
   const claimId = await resolveClaimId(admin, fallId)
-  const now = new Date().toISOString()
   const updateObj = {
     eskaliert_an_admin_id: null,
     eskaliert_am: null,
     eskaliert_grund: null,
-    updated_at: now,
   }
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
-  const { error } = await admin.from('faelle').update(faelleUpdate).eq('id', fallId)
-  if (error) return { ok: false, error: error.message }
+  const { claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
   if (claimId && Object.keys(claimsUpdate).length > 0) {
     // eskaliert_an_admin_id ist nach SP-B die Eskalations-Zielspalte (claims)
     // + treibt den Admin-Nav-Indikator — Fehler konsistent zur faelle-Seite

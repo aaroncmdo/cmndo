@@ -77,16 +77,15 @@ export async function deactivateFall(
 
   const now = new Date().toISOString()
   // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
-  // splitOrKeepFaelleUpdate routet sie auf claims; updated_at + faelle-only-Felder
-  // bleiben auf faelle.
+  // CMM-49 (faelle-Drop): updateObj enthaelt nur CLAIM_OWNED-Spalten -> faelleUpdate
+  // war immer nur {updated_at} (trigger-redundant via update_faelle_updated_at +
+  // reader-frei) -> toter faelle-Spiegel-Write entfernt. Nur noch claimsUpdate.
   const claimId = await resolveClaimId(supabase, fallId)
   const updateObj = {
     ist_aktiv: false, deaktiviert_am: now,
     deaktiviert_grund: grund, deaktiviert_notiz: notiz || null,
-    updated_at: now,
   }
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
-  await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+  const { claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
   if (claimId && Object.keys(claimsUpdate).length > 0) {
     // claims.ist_aktiv steuert die Admin-Hub-Sichtbarkeit — Fehler nicht
     // verschlucken, sonst entsteht eine faelle<->claims-Diskrepanz.
@@ -113,15 +112,15 @@ export async function reactivateFall(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  const now = new Date().toISOString()
   // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
+  // CMM-49 (faelle-Drop): nur CLAIM_OWNED-Spalten -> toter {updated_at}-faelle-Spiegel-
+  // Write entfernt (updated_at trigger-redundant + reader-frei). Nur noch claimsUpdate.
   const claimId = await resolveClaimId(supabase, fallId)
   const updateObj = {
     ist_aktiv: true, deaktiviert_am: null, deaktiviert_grund: null,
-    deaktiviert_notiz: null, updated_at: now,
+    deaktiviert_notiz: null,
   }
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
-  await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
+  const { claimsUpdate } = splitOrKeepFaelleUpdate(updateObj, claimId)
   if (claimId && Object.keys(claimsUpdate).length > 0) {
     // claims.ist_aktiv steuert die Admin-Hub-Sichtbarkeit — Fehler nicht
     // verschlucken, sonst entsteht eine faelle<->claims-Diskrepanz.
