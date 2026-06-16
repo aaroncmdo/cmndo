@@ -12,7 +12,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon } from 'lucide-react'
+import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon, CalendarCheckIcon, UserCheckIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { Chip } from '@/components/ui/Chip'
@@ -20,6 +20,12 @@ import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/component
 import DensityToggle from '@/components/shared/DensityToggle'
 import { useDensityPreference, type Density } from '@/hooks/useDensityPreference'
 import { createClient } from '@/lib/supabase/client'
+import {
+  type TerminGutachterInfo,
+  TONE_BADGE,
+  terminStatusTone,
+  formatTerminKurz,
+} from '@/lib/dispatch/lead-termin-gutachter'
 
 type DispatcherProfile = {
   id: string
@@ -181,7 +187,13 @@ function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { 
   return { label: '—', cls: 'text-claimondo-ondo/50' }
 }
 
-export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[] }) {
+export default function LeadsViewToggle({
+  leads: initialLeads,
+  terminGutachter,
+}: {
+  leads: Lead[]
+  terminGutachter: Record<string, TerminGutachterInfo>
+}) {
   const [view, setView] = useState<'liste' | 'kanban'>('liste')
   const [density] = useDensityPreference('dispatch-leads')
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
@@ -305,9 +317,9 @@ export default function LeadsViewToggle({ leads: initialLeads }: { leads: Lead[]
       </div>
 
       {view === 'liste' ? (
-        <ListView leads={leads} density={density} highlightIds={newLeadIds} />
+        <ListView leads={leads} density={density} highlightIds={newLeadIds} terminGutachter={terminGutachter} />
       ) : (
-        <KanbanView leads={leads} highlightIds={newLeadIds} />
+        <KanbanView leads={leads} highlightIds={newLeadIds} terminGutachter={terminGutachter} />
       )}
     </div>
   )
@@ -317,10 +329,12 @@ function ListView({
   leads,
   density,
   highlightIds,
+  terminGutachter,
 }: {
   leads: Lead[]
   density: Density
   highlightIds: Set<string>
+  terminGutachter: Record<string, TerminGutachterInfo>
 }) {
   const compact = density === 'compact'
   const rowPadCls = compact ? 'px-3 py-1.5' : 'px-4 py-3'
@@ -334,6 +348,7 @@ function ListView({
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Telefon</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Status</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">FlowLink</Th>
+              <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Termin · Gutachter</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Service</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Zugewiesen</Th>
               <Th className="!font-semibold text-claimondo-shield text-[11px] uppercase tracking-[0.12em]">Erstellt</Th>
@@ -386,6 +401,9 @@ function ListView({
                   <Td className={cellPadCls}>
                     <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${fl.cls}`}>{fl.label}</span>
                   </Td>
+                  <Td className={cellPadCls}>
+                    <TerminGutachterCell info={terminGutachter[lead.id]} />
+                  </Td>
                   <Td className="!text-claimondo-ondo text-xs">
                     {lead.service_typ === 'nur_gutachter' ? 'Nur SV' : 'Komplett'}
                   </Td>
@@ -408,7 +426,7 @@ function ListView({
             })}
             {leads.length === 0 && (
               <Tr>
-                <Td colSpan={8} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
+                <Td colSpan={9} className="!py-12 text-center text-sm !text-claimondo-ondo/70">Keine Leads gefunden</Td>
               </Tr>
             )}
           </Tbody>
@@ -420,9 +438,11 @@ function ListView({
 function KanbanView({
   leads,
   highlightIds,
+  terminGutachter,
 }: {
   leads: Lead[]
   highlightIds: Set<string>
+  terminGutachter: Record<string, TerminGutachterInfo>
 }) {
   // Kanban-Bucketing: jede DB-Phase muss eine eigene Spalte haben damit Leads
   // nicht stillschweigend in 'neu' verschwinden (Audit-Fix AAR-179 Follow-up).
@@ -489,6 +509,7 @@ function KanbanView({
                         </span>
                       </span>
                     </div>
+                    <TerminGutachterMini info={terminGutachter[lead.id]} />
                   </Link>
                 )
               })}
@@ -499,6 +520,77 @@ function KanbanView({
           </div>
         )
       })}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────
+// AAR-956: Single-Source Termin/Gutachter-Zellen (Tabelle + Kanban).
+// Quelle = v_lead_termin_gutachter (eine Zeile pro Lead). undefined (z. B. ein
+// soeben per Realtime eingegangener Lead, noch ohne Termin/Gutachter) → "—".
+// ─────────────────────────────────────────────────────────────
+
+function TerminGutachterCell({ info }: { info?: TerminGutachterInfo }) {
+  if (!info || (!info.hat_termin && !info.hat_gutachter)) {
+    return <span className="text-xs text-claimondo-ondo/40">—</span>
+  }
+  return (
+    <div className="flex flex-col items-start gap-1">
+      {info.hat_termin ? (
+        <span className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}>
+          <CalendarCheckIcon className="h-3 w-3" />
+          {formatTerminKurz(info.termin_start)}
+        </span>
+      ) : (
+        <span className="inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/50">
+          <CalendarCheckIcon className="h-3 w-3 opacity-40" />
+          kein Termin
+        </span>
+      )}
+      {info.hat_gutachter ? (
+        <span className="inline-flex max-w-[190px] items-center gap-1">
+          <UserCheckIcon className="h-3 w-3 shrink-0 text-claimondo-ondo" />
+          <span className="truncate text-[11px] font-medium text-claimondo-navy">{info.gutachter_name ?? 'Gutachter'}</span>
+          {info.gutachter_divergiert ? (
+            <span
+              title={`Kunde wählte ursprünglich ${info.kunden_pick_name ?? '—'}`}
+              className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${TONE_BADGE.warning}`}
+            >
+              ≠ Wunsch
+            </span>
+          ) : info.gutachter_quelle === 'kunden_pick' ? (
+            <span className={`shrink-0 rounded-full px-1.5 py-0.5 text-[9px] ${TONE_BADGE.neutral}`}>Wunsch</span>
+          ) : null}
+        </span>
+      ) : (
+        <span className="inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/50">
+          <UserCheckIcon className="h-3 w-3 opacity-40" />
+          kein Gutachter
+        </span>
+      )}
+    </div>
+  )
+}
+
+function TerminGutachterMini({ info }: { info?: TerminGutachterInfo }) {
+  if (!info || (!info.hat_termin && !info.hat_gutachter)) return null
+  return (
+    <div className="mt-1.5 flex flex-wrap items-center gap-1">
+      {info.hat_termin && (
+        <span className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${TONE_BADGE[terminStatusTone(info.termin_status)]}`}>
+          <CalendarCheckIcon className="h-2.5 w-2.5" />
+          {formatTerminKurz(info.termin_start)}
+        </span>
+      )}
+      {info.hat_gutachter && (
+        <span
+          title={info.gutachter_name ?? undefined}
+          className={`inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[9px] font-medium ${info.gutachter_divergiert ? TONE_BADGE.warning : 'bg-claimondo-navy/[0.06] text-claimondo-navy'}`}
+        >
+          <UserCheckIcon className="h-2.5 w-2.5" />
+          <span className="max-w-[90px] truncate">{info.gutachter_name ?? 'SV'}</span>
+        </span>
+      )}
     </div>
   )
 }
