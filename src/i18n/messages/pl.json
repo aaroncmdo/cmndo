@@ -447,9 +447,8 @@
       "body": "Ten FlowLink nie jest już ważny. Aby otrzymać nowy link, prosimy o kontakt z opiekunem klienta."
     },
     "done": {
-      "heading": "Wszystko gotowe",
-      "body": "Wysłaliśmy Państwu dane dostępu oraz link do logowania na adres e-mail. Prosimy sprawdzić skrzynkę odbiorczą.",
-      "cta_login": "Przejdź do logowania"
+      "heading": "Gotowe!",
+      "body": "Państwa zgłoszenie szkody już do nas dotarło — od tej chwili zajmiemy się wszystkim i wkrótce się z Państwem skontaktujemy."
     },
     "error": {
       "heading": "Coś poszło nie tak",
