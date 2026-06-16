@@ -375,13 +375,11 @@ export async function reIssueAbrechnung(
   if (korrekturen?.length) {
     for (const k of korrekturen) {
       const kClaimId = await resolveClaimId(db, k.fall_id)
-      const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+      // CMM-49 (faelle-Drop): sv_nachzahlung_netto ist CLAIM_OWNED -> faelleUpdate war leer, toter faelle-Write entfernt.
+      const { claimsUpdate } = splitOrKeepFaelleUpdate(
         { sv_nachzahlung_netto: k.neuer_betrag_netto },
         kClaimId,
       )
-      if (Object.keys(faelleUpdate).length > 0) {
-        await db.from('faelle').update(faelleUpdate).eq('id', k.fall_id)
-      }
       if (kClaimId && Object.keys(claimsUpdate).length > 0) {
         await db.from('claims').update(claimsUpdate).eq('id', kClaimId)
       }

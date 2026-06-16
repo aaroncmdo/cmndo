@@ -54,17 +54,13 @@ export async function revertCaseBilling(
       .eq('id', claim.sv_id)
   }
 
-  // 2. Case-Felder zurücksetzen.
-  // CMM-44 SP-J Bucket B: guthaben_verrechnet_netto/sv_nachzahlung_netto → claims.
-  // lead_preis_* bleiben faelle-native. Via splitOrKeepFaelleUpdate (Legacy ohne
-  // claim_id: alles auf faelle).
-  const { faelleUpdate: revFaelle, claimsUpdate: revClaims } = splitOrKeepFaelleUpdate(
+  // 2. Case-Felder zurücksetzen. CMM-44 SP-J Bucket B + Phase 3: guthaben_verrechnet_netto/
+  // sv_nachzahlung_netto/lead_preis_* sind alle CLAIM_OWNED -> claims.
+  // CMM-49 (faelle-Drop): revFaelle war immer leer -> toter faelle-Spiegel-Write entfernt.
+  const { claimsUpdate: revClaims } = splitOrKeepFaelleUpdate(
     { lead_preis_netto: 0, guthaben_verrechnet_netto: 0, sv_nachzahlung_netto: 0, lead_preis_typ: null },
     claimId,
   )
-  if (Object.keys(revFaelle).length > 0) {
-    await db.from('faelle').update(revFaelle).eq('id', fallId)
-  }
   if (claimId && Object.keys(revClaims).length > 0) {
     await db.from('claims').update(revClaims).eq('id', claimId)
   }
