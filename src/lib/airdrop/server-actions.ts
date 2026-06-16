@@ -86,7 +86,7 @@ export async function inviteGegnerViaAirdrop(
   // Existierende Verursacher-Party wiederverwenden oder neue anlegen
   const { data: existingVerursacher } = await admin
     .from('claim_parties')
-    .select('id')
+    .select('id, person_id')
     .eq('claim_id', args.claim_id)
     .eq('rolle', 'verursacher')
     .eq('ist_aktiv', true)
@@ -95,15 +95,40 @@ export async function inviteGegnerViaAirdrop(
   let party_id: string
 
   if (existingVerursacher) {
+    // CMM-49 Entity Plan-5 (4c): Hint nachname/firma nicht mehr flach auf claim_parties (gedroppt),
+    // sondern in die personen-Entitaet — bestehende Gegner-Person updaten, sonst find-or-create + verlinken.
+    let gegnerPersonId = (existingVerursacher.person_id as string | null) ?? null
+    if (args.party_data_hint?.nachname || args.party_data_hint?.firma) {
+      if (gegnerPersonId) {
+        await admin
+          .from('personen')
+          .update({
+            ...(args.party_data_hint?.nachname ? { nachname: args.party_data_hint.nachname } : {}),
+            ...(args.party_data_hint?.firma ? { firma: args.party_data_hint.firma, ist_gewerbe: true } : {}),
+          })
+          .eq('id', gegnerPersonId)
+      } else {
+        const hp = await ensurePersonForData({
+          db: admin,
+          userId: null,
+          snapshot: {
+            nachname: args.party_data_hint?.nachname ?? null,
+            firma: args.party_data_hint?.firma ?? null,
+            ist_gewerbe: !!args.party_data_hint?.firma,
+          },
+        })
+        if (hp.ok && hp.personId) gegnerPersonId = hp.personId
+        else if (!hp.ok) console.warn('[CMM-entity P3] gegner-person (re-invite) non-fatal:', hp.error)
+      }
+    }
     await admin
       .from('claim_parties')
       .update({
         ist_eingeladen_via_airdrop: true,
         airdrop_token: token.hash,
         airdrop_eingeladen_am: new Date().toISOString(),
-        ...(args.party_data_hint?.nachname ? { nachname: args.party_data_hint.nachname } : {}),
-        ...(args.party_data_hint?.firma ? { firma: args.party_data_hint.firma } : {}),
         ...(args.party_data_hint?.kennzeichen ? { kennzeichen: args.party_data_hint.kennzeichen } : {}),
+        ...(gegnerPersonId && gegnerPersonId !== existingVerursacher.person_id ? { person_id: gegnerPersonId } : {}),
       })
       .eq('id', existingVerursacher.id)
     party_id = existingVerursacher.id
@@ -124,17 +149,14 @@ export async function inviteGegnerViaAirdrop(
     if (!gegnerPerson.ok) console.warn('[CMM-entity P3] person fuer gegner_airdrop non-fatal:', gegnerPerson.error)
     const { data: newParty, error: insErr } = await admin
       .from('claim_parties')
+      // CMM-49 Entity Plan-5 (4c): Person-flat (nachname/firma/telefon/email/ist_gewerbe) nicht mehr
+      // auf claim_parties — die Daten liegen via ensurePersonForData oben in personen (person_id).
       .insert({
         claim_id: args.claim_id,
         rolle: 'gegner_airdrop',
         reihenfolge: 2,
         person_id: gegnerPerson.ok ? gegnerPerson.personId : null,
-        nachname: args.party_data_hint?.nachname ?? null,
-        firma: args.party_data_hint?.firma ?? null,
         kennzeichen: args.party_data_hint?.kennzeichen ?? null,
-        telefon: args.party_data_hint?.telefon ?? args.gegner_telefon ?? null,
-        email: args.party_data_hint?.email ?? null,
-        ist_gewerbe: !!args.party_data_hint?.firma,
         ist_eingeladen_via_airdrop: true,
         airdrop_token: token.hash,
         airdrop_eingeladen_am: new Date().toISOString(),
