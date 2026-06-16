@@ -149,6 +149,61 @@ export async function ladeEmbedMatching(input: {
 }
 
 type EmbedDispatcher = { vorname: string; avatarUrl: string | null; beschreibung: string | null }
+type EmbedGutachterProfil = {
+  vorname: string
+  avatarUrl: string | null
+  firma: string | null
+  googleDurchschnitt: number | null
+  googleAnzahl: number | null
+  googleAktualisiertAm: string | null
+}
+
+// AAR-956 (Aaron 16.06.): öffentliches Profil des gewählten Gutachters für die Danke-Seite —
+// Foto/Name/Firma + Google-Bewertung (analog zum /flow-Lookup in page.tsx), per sv_id. Non-critical.
+async function ladeGutachterProfil(svId: string): Promise<EmbedGutachterProfil | null> {
+  try {
+    const admin = createAdminClient()
+    const { data: sv } = await admin
+      .from('sachverstaendige')
+      .select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
+      .eq('id', svId)
+      .maybeSingle()
+    if (!sv) return null
+    const profile = sv.profiles as
+      | { vorname: string | null; avatar_url: string | null; firma: string | null }
+      | { vorname: string | null; avatar_url: string | null; firma: string | null }[]
+      | null
+    const p = Array.isArray(profile) ? profile[0] : profile
+    if (!p?.vorname) return null
+    const svProfileId = sv.profile_id as string | null | undefined
+    let googleDurchschnitt: number | null = null
+    let googleAnzahl: number | null = null
+    let googleAktualisiertAm: string | null = null
+    if (svProfileId) {
+      const { data: gb } = await admin
+        .from('google_bewertungen_cache')
+        .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+        .eq('profile_id', svProfileId)
+        .maybeSingle()
+      if (gb) {
+        googleDurchschnitt = (gb.durchschnitt as number | null) ?? null
+        googleAnzahl = (gb.anzahl_bewertungen as number | null) ?? null
+        googleAktualisiertAm = (gb.zuletzt_aktualisiert_am as string | null) ?? null
+      }
+    }
+    return {
+      vorname: p.vorname,
+      avatarUrl: (p.avatar_url ?? null) || null,
+      firma: (p.firma ?? null) || null,
+      googleDurchschnitt,
+      googleAnzahl,
+      googleAktualisiertAm,
+    }
+  } catch (err) {
+    console.error('[ladeGutachterProfil] fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    return null
+  }
+}
 
 /**
  * Liefert das ÖFFENTLICHE Profil des dem Lead zugewiesenen Dispatchers (leads.zugewiesen_an →
@@ -212,7 +267,7 @@ export async function reserviereEmbedTermin(input: {
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
     | null
 }): Promise<
-  | { ok: true; token: string; leadId: string | null; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null }
+  | { ok: true; token: string; leadId: string | null; svVorname: string | null; ortLabel: string | null; startIso: string | null; dispatcher: EmbedDispatcher | null; gutachter: EmbedGutachterProfil | null }
   | { ok: false; error: string; slotWeg?: boolean }
 > {
   // Wunschtermin (Berlin-Wall-Clock) → UTC-Instant für die gfa/Lead.
@@ -256,7 +311,7 @@ export async function reserviereEmbedTermin(input: {
   }
 
   // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
-  if (!input.auswahl) return { ok: true, token, leadId, svVorname: null, ortLabel: null, startIso: null, dispatcher }
+  if (!input.auswahl) return { ok: true, token, leadId, svVorname: null, ortLabel: null, startIso: null, dispatcher, gutachter: null }
 
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
@@ -267,13 +322,14 @@ export async function reserviereEmbedTermin(input: {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
     void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
-    return { ok: true, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher }
+    const gutachter = await ladeGutachterProfil(input.auswahl.svId)
+    return { ok: true, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher, gutachter }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
   void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
-  return { ok: true, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher }
+  return { ok: true, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher, gutachter: null }
 }
 
 /**
