@@ -27,6 +27,14 @@ function fmtDate(iso: string | null | undefined): string {
   return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
 }
 
+// CMM-49: v_gutachten_werte liefert numeric/money als String — auf number coercen,
+// damit buildContextText die gesamtforderung summieren kann (filtert typeof === 'number').
+function numOrNull(v: unknown): number | null {
+  if (v === null || v === undefined) return null
+  const n = Number(v)
+  return Number.isFinite(n) ? n : null
+}
+
 export const MAKLER_COPILOT_SYSTEM_STATIC = `Du bist der Claimondo-Copilot für Makler. Du hilfst dem Makler, Kunden-Fragen
 zum Fall professionell und konkret zu beantworten. Antworte immer auf Deutsch.
 
@@ -81,17 +89,21 @@ type LoadedContext = {
 
 async function loadContext(fallId: string): Promise<LoadedContext> {
   const admin = createAdminClient()
-  const [fallRes, timelineRes, chatRes] = await Promise.all([
+
+  // CMM-49 (faelle-Drop-Runway): Fall-Kontext claims-zentrisch aus v_claim_full statt
+  // faelle.select('*'). Die Gutachten-Werte kommen aus der gebauten Entity
+  // v_gutachten_werte (claim_id-keyed); die alten faelle.reparaturkosten/wertminderung/
+  // nutzungsausfall_gesamt/gutachter_honorar waren tote Legacy-Spalten (0-populated, vor
+  // dem Entity-Refactor) -> der GUTACHTEN-Block war faktisch immer leer (latenter Bug, jetzt
+  // gefixt). Netto-Sicht (Forderung). Kunde-Name party-sourced (v_claim_full.kunde_*),
+  // Fallback Lead. timeline/nachrichten bleiben fall_id-keyed (== claims.id via Bridge, 1:1).
+  const [vcfRes, timelineRes, chatRes] = await Promise.all([
     admin
-      .from('faelle')
+      .from('v_claim_full')
       .select(
-        `
-        *,
-        leads(vorname, nachname),
-        kunde:profiles!faelle_kunde_id_fkey(vorname, nachname)
-      `,
+        'id, lead_id, claim_nummer, service_typ, schadentag, schadenort_adresse, hergang_kunde_text, schadenart, gegner_name, gegner_versicherung, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_baujahr, kunde_vorname, kunde_nachname',
       )
-      .eq('id', fallId)
+      .eq('fall_id', fallId)
       .maybeSingle(),
     admin
       .from('timeline')
@@ -108,88 +120,95 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
       .limit(5),
   ])
 
-  const fallRaw = fallRes.data as (Record<string, unknown> & {
-    leads?: unknown
-    kunde?: unknown
-  }) | null
+  const timeline = (timelineRes.data ?? []) as LoadedContext['timeline']
+  const chatExcerpt = (chatRes.data ?? []) as LoadedContext['chatExcerpt']
 
-  // CMM-44 SP-A2 (Cluster 1): unfalldatum + unfallort sind Semantik-Duplikate —
-  // claims (schadentag / schadenort_adresse) ist SSoT. Werte aus claims nachladen
-  // und auf die fall-Record-Keys mappen, damit buildContextText sie weiter liest.
-  if (fallRaw?.claim_id) {
-    const { data: claimRow } = await admin
-      .from('claims')
-      .select('schadentag, schadenort_adresse, vehicle_id')
-      .eq('id', fallRaw.claim_id as string)
-      .maybeSingle()
-    fallRaw.unfalldatum = claimRow?.schadentag ?? null
-    fallRaw.unfallort = claimRow?.schadenort_adresse ?? null
-
-    // CMM-50.3b: Fahrzeug vehicles-first — vehicles-Werte (claims.vehicle_id -> vehicles)
-    // ueberschreiben den faelle-Snapshot wenn vorhanden; buildContextText liest danach
-    // fall.fahrzeug_*. Bis der 50.0-Write-Path vehicles fuellt: No-Op (Snapshot bleibt).
-    const copilotVehicleId = (claimRow?.vehicle_id as string | null) ?? null
-    if (copilotVehicleId) {
-      const { data: v } = await admin
-        .from('vehicles')
-        .select('hersteller, modell_haupttyp, baujahr_monat')
-        .eq('id', copilotVehicleId)
-        .maybeSingle()
-      if (v) {
-        if (v.hersteller != null) fallRaw.fahrzeug_hersteller = v.hersteller
-        if (v.modell_haupttyp != null) fallRaw.fahrzeug_modell = v.modell_haupttyp
-        // baujahr_monat (date 'YYYY-MM-DD') -> Jahr (int), TZ-sicher via Substring statt
-        // new Date().getFullYear() (liegt auf UTC-negativen Hosts fuer Jan-1 ein Jahr daneben)
-        // -> matcht exakt den View-Cast EXTRACT(year FROM baujahr_monat)::integer.
-        if (v.baujahr_monat != null) {
-          const jahr = Number(String(v.baujahr_monat).slice(0, 4))
-          if (Number.isFinite(jahr)) fallRaw.fahrzeug_baujahr = jahr
-        }
-      }
-    }
-
-    // CMM-50 Group C: Gegner aus der verursacher-claim_party (via v_claim_full, party-sourced)
-    // statt aus dem faelle-Snapshot — buildContextText liest danach fall.gegner_name/
-    // gegner_versicherung. Reader-Gate fuer den faelle.gegner_*-Write-Retire (Party = SSoT).
-    const { data: vcfGegner } = await admin
-      .from('v_claim_full')
-      .select('gegner_name, gegner_versicherung')
-      .eq('id', fallRaw.claim_id as string)
-      .maybeSingle()
-    if (vcfGegner) {
-      fallRaw.gegner_name = vcfGegner.gegner_name ?? null
-      fallRaw.gegner_versicherung = vcfGegner.gegner_versicherung ?? null
+  const vcf = vcfRes.data as Record<string, unknown> | null
+  if (!vcf) {
+    return {
+      fall: null,
+      leadVorname: null,
+      leadNachname: null,
+      kundeVorname: null,
+      kundeNachname: null,
+      phaseLabel: null,
+      timeline,
+      chatExcerpt,
     }
   }
 
-  const leadRaw = fallRaw?.leads
-  const lead = (Array.isArray(leadRaw) ? leadRaw[0] : leadRaw) as
-    | { vorname: string | null; nachname: string | null }
-    | null
-    | undefined
-  const kundeRaw = fallRaw?.kunde
-  const kunde = (Array.isArray(kundeRaw) ? kundeRaw[0] : kundeRaw) as
-    | { vorname: string | null; nachname: string | null }
-    | null
-    | undefined
+  const claimId = vcf.id as string
+  const leadId = (vcf.lead_id as string | null) ?? null
 
-  // CMM-44 MP-6a/MP-8b: abgeleitete 4-Phase + Substate via v_claim_phase-Service-Read.
-  // v_claim_phase ist claims-zentrisch -> ueber fallRaw.claim_id (claims.id). Label "<Hauptphase> · <Substate>".
-  const promptClaimId = (fallRaw?.claim_id as string | null) ?? null
-  const phaseCell = promptClaimId ? (await getClaimPhaseMap([promptClaimId])).get(promptClaimId) : undefined
+  // Gutachten-Werte (Entity) + abgeleitete 4-Phase (v_claim_phase) parallel.
+  const [gutRes, phaseMap] = await Promise.all([
+    admin
+      .from('v_gutachten_werte')
+      .select(
+        'reparaturkosten_netto, minderwert, nutzungsausfall_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_sv_honorar_netto, wiederbeschaffungswert, restwert, totalschaden',
+      )
+      .eq('claim_id', claimId)
+      .maybeSingle(),
+    getClaimPhaseMap([claimId]),
+  ])
+  const gut = gutRes.data as Record<string, unknown> | null
+
+  // Lead-Name nur als Fallback fuer den Kunde-Namen (v_claim_full.kunde_* ist party-
+  // sourced und meist gesetzt); separater Read nur wenn lead_id vorhanden.
+  let leadVorname: string | null = null
+  let leadNachname: string | null = null
+  if (leadId) {
+    const { data: lead } = await admin
+      .from('leads')
+      .select('vorname, nachname')
+      .eq('id', leadId)
+      .maybeSingle()
+    leadVorname = (lead?.vorname as string | null) ?? null
+    leadNachname = (lead?.nachname as string | null) ?? null
+  }
+
+  // nutzungsausfall_gesamt rekonstruiert die alte faelle-Gesamtspalte: Tage × Tagessatz.
+  const naTage = numOrNull(gut?.nutzungsausfall_tage)
+  const naSatz = numOrNull(gut?.gutachten_nutzungsausfall_tagessatz_eur)
+  const nutzungsausfallGesamt = naTage != null && naSatz != null ? naTage * naSatz : null
+
+  // fall-Record mit genau den Keys, die buildContextText liest. Money-Felder als number
+  // (Entity liefert numeric als String -> numOrNull) damit die gesamtforderung-Summe greift.
+  const fall: Record<string, unknown> = {
+    claim_nummer: vcf.claim_nummer ?? null,
+    service_typ: vcf.service_typ ?? null,
+    unfalldatum: vcf.schadentag ?? null,
+    unfallort: vcf.schadenort_adresse ?? null,
+    unfallhergang: vcf.hergang_kunde_text ?? null,
+    schadens_art: vcf.schadenart ?? null,
+    gegner_name: vcf.gegner_name ?? null,
+    gegner_versicherung: vcf.gegner_versicherung ?? null,
+    fahrzeug_hersteller: vcf.fahrzeug_hersteller ?? null,
+    fahrzeug_modell: vcf.fahrzeug_modell ?? null,
+    fahrzeug_baujahr: vcf.fahrzeug_baujahr ?? null,
+    reparaturkosten: numOrNull(gut?.reparaturkosten_netto),
+    wertminderung: numOrNull(gut?.minderwert),
+    nutzungsausfall_gesamt: nutzungsausfallGesamt,
+    gutachter_honorar: numOrNull(gut?.gutachten_sv_honorar_netto),
+    wiederbeschaffungswert: numOrNull(gut?.wiederbeschaffungswert),
+    restwert: numOrNull(gut?.restwert),
+    totalschaden: (gut?.totalschaden as boolean | null) ?? null,
+  }
+
+  const phaseCell = phaseMap.get(claimId)
   const phaseLabel = phaseCell
     ? `${MAIN_PHASE_LABEL[phaseCell.mainPhase]} · ${SUBPHASE_LABEL[phaseCell.subPhase]}`
     : null
 
   return {
-    fall: fallRaw,
-    leadVorname: lead?.vorname ?? null,
-    leadNachname: lead?.nachname ?? null,
-    kundeVorname: kunde?.vorname ?? null,
-    kundeNachname: kunde?.nachname ?? null,
+    fall,
+    leadVorname,
+    leadNachname,
+    kundeVorname: (vcf.kunde_vorname as string | null) ?? null,
+    kundeNachname: (vcf.kunde_nachname as string | null) ?? null,
     phaseLabel,
-    timeline: (timelineRes.data ?? []) as LoadedContext['timeline'],
-    chatExcerpt: (chatRes.data ?? []) as LoadedContext['chatExcerpt'],
+    timeline,
+    chatExcerpt,
   }
 }
 
