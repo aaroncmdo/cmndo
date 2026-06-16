@@ -181,11 +181,6 @@ export default function FlowWizardKfz({
   const [accountEmail, setAccountEmail] = useState(editEmail)
   const [creatingAccount, setCreatingAccount] = useState(false)
   const [accountCreated, setAccountCreated] = useState(false)
-  const [magicLink, setMagicLink] = useState<string | null>(null)
-  // CMM-14: Ref auf das versteckte Login-Form. Wird nach Account-Anlage
-  // programmatisch submitted — Form-Submit ist der Cookie-sichere Weg
-  // gegen die Race-Condition mit `window.location.assign`.
-  const loginFormRef = useRef<HTMLFormElement>(null)
   // A11y: Ref auf den SA-Volltext-Modal-Container fuer den Focus-Trap.
   const saModalRef = useRef<HTMLDivElement>(null)
 
@@ -360,23 +355,11 @@ export default function FlowWizardKfz({
         return
       }
       setAccountPassword(result.password)
-      setMagicLink(result.magicLink)
       setAccountCreated(true)
-
-      // CMM-14: Form-Submit zur loginAfterFlowFormAction. Das ist der einzige
-      // zuverlässige Weg gegen den Cookie-Race — Next.js handled die
-      // Set-Cookie-Header der Server-Action-Response korrekt VOR dem
-      // redirect(), beim window.location.assign nach manuell-await ist der
-      // Cookie noch nicht persistiert wenn der nächste Request rausgeht.
-      // Das Form ist im JSX gerendert und wird hier programmatisch submitted.
-      const form = loginFormRef.current
-      if (form) {
-        const emailInput = form.elements.namedItem('email') as HTMLInputElement | null
-        const passwordInput = form.elements.namedItem('password') as HTMLInputElement | null
-        if (emailInput) emailInput.value = accountEmail
-        if (passwordInput) passwordInput.value = result.password
-        form.requestSubmit()
-      }
+      // AAR-956 16.06. (Aaron): kein Auto-Login/Redirect mehr. Account + Fall +
+      // Magic-Link werden weiter angelegt (Magic-Link geht per Email raus), aber
+      // der Kunde bleibt auf dem Flow-Abschluss-Screen ("wir melden uns"). Das
+      // Claim-/Onboarding-Portal wird separat nachgezogen.
     } catch (err) {
       setError(err instanceof Error ? err.message : t('step_account.error_fallback'))
     } finally {
@@ -384,9 +367,9 @@ export default function FlowWizardKfz({
     }
   }
 
-  // CMM-14: Account-Anlage automatisch beim Erreichen des Account-Steps,
-  // damit der Kunde keinen weiteren Klick mehr macht und direkt im Onboarding
-  // landet (Auto-Login + Redirect zu /kunde/onboarding).
+  // CMM-14: Account-Anlage automatisch beim Erreichen des Account-Steps, damit
+  // der Kunde keinen weiteren Klick mehr macht. AAR-956: KEIN Redirect mehr —
+  // danach folgt direkt der Abschluss-Screen ("wir melden uns").
   useEffect(() => {
     if (currentStep.id === 'account' && fallId && !accountCreated && !creatingAccount && !error) {
       handleCreateAccount()
@@ -421,20 +404,6 @@ export default function FlowWizardKfz({
           ].join(', '),
         }}
       />
-      {/* CMM-14: Verstecktes Login-Form für den Auto-Login nach Account-
-          Anlage. Submit zu Route-Handler /api/auth/login-after-flow — der
-          macht signInWithPassword + Set-Cookie + 303-Redirect. Browser
-          folgt mit einer echten Hard-Navigation, kein RSC-Stream. */}
-      <form
-        ref={loginFormRef}
-        method="POST"
-        action="/api/auth/login-after-flow"
-        style={{ display: 'none' }}
-      >
-        <input type="hidden" name="email" defaultValue="" />
-        <input type="hidden" name="password" defaultValue="" />
-      </form>
-
       {/* Sticky-Glass-Step-Indicator (iOS Brief §8.6) */}
       <div className="sticky top-0 z-20 border-b border-claimondo-navy/[0.06] bg-white/[0.78] backdrop-blur-[22px] backdrop-saturate-150">
         <div className="h-1 w-full bg-claimondo-navy/[0.06]">
@@ -800,14 +769,10 @@ export default function FlowWizardKfz({
                   </div>
                 )}
 
-                {(creatingAccount || (accountCreated && !error)) && (
+                {creatingAccount && (
                   <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
                     <div className="inline-block w-6 h-6 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin mb-3" />
-                    <p className="text-sm text-claimondo-ondo">
-                      {creatingAccount
-                        ? t('step_account.creating')
-                        : t('step_account.logging_in')}
-                    </p>
+                    <p className="text-sm text-claimondo-ondo">{t('step_account.creating')}</p>
                   </div>
                 )}
 
@@ -817,23 +782,9 @@ export default function FlowWizardKfz({
                   </p>
                 )}
 
-                {/* Fallback: Wenn Account angelegt ist aber das Auto-Login
-                    nicht weitergeleitet hat (z.B. Browser-Block), bietet der
-                    Button einen manuellen Eintritt — Magic-Link primär,
-                    /kunde als letzter Fallback. */}
-                {accountCreated && error && (
-                  <div className="space-y-4 mt-4">
-                    <div className="rounded-ios-md bg-claimondo-bg border border-claimondo-border p-4 text-sm text-claimondo-ondo">
-                      {t('step_account.fallback_email_hint', { email: accountEmail })}
-                    </div>
-                    <a
-                      href={magicLink ?? '/kunde/onboarding'}
-                      className="block w-full text-center min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
-                    >
-                      {t('step_account.fallback_cta')}
-                    </a>
-                  </div>
-                )}
+                {/* AAR-956: Account-Fehler ist non-kritisch — der Fall/Claim
+                    ist bei SA-Unterschrift bereits angelegt. Kunde sieht nur den
+                    Abschluss-Screen, das Team legt den Account bei Bedarf nach. */}
               </div>
             )}
 
