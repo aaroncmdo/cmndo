@@ -432,9 +432,10 @@ async function finalizeKundeSetup(
     console.warn('[finalizeKundeSetup] user_metadata.force_password_change Update fehlgeschlagen:', err)
   }
 
-  await admin.from('faelle').update({ kunde_id: userId }).eq('id', fallId)
-
-  // CMM-19: claims.geschaedigter_user_id auch nachziehen — beim Initial-
+  // CMM-49 (faelle-Drop-Runway): faelle.kunde_id-Spiegel-Write entfernt — faelle.kunde_id
+  // ist prod-reader-frei (copilot #2915, makler/queries=claims-View); die Ownership lebt
+  // claims-nativ (geschaedigter_user_id + claim_parties, unten).
+  // CMM-19: claims.geschaedigter_user_id nachziehen — beim Initial-
   // Convert via signSAandCreateFall ist lead.kunde_id noch null (Account
   // wird ja erst HIER nach SA angelegt). Ohne dieses Update bleibt
   // claims.geschaedigter_user_id null und die RLS-Policy lässt den Kunden
