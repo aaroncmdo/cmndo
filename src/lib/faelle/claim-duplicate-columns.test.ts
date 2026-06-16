@@ -198,4 +198,14 @@ describe('SP-J Bucket B routet auf claims', () => {
     expect(claimsUpdate).toEqual({ zahlungsweg: 'kundenkonto' })
     expect(faelleUpdate).toEqual({ status: 'x' })
   })
+
+  // CMM-49 Phase 2b: mietwagen_kanzlei_informiert ist ein claims-Duplikat (Reader
+  // liest claims via v_faelle_mit_aktuellem_termin) -> jetzt CLAIM_OWNED.
+  it('CMM-49 Phase 2b: mietwagen_kanzlei_informiert routet auf claims', () => {
+    expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has('mietwagen_kanzlei_informiert')).toBe(true)
+    const u = { mietwagen_kanzlei_informiert: true, status: 'x' }
+    const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(u, 'claim-1')
+    expect(claimsUpdate).toEqual({ mietwagen_kanzlei_informiert: true })
+    expect(faelleUpdate).toEqual({ status: 'x' })
+  })
 })

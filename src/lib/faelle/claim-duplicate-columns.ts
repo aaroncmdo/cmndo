@@ -80,6 +80,11 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'mietwagen_rechnung_url',
   'mietwagen_argumentations_puffer',
   'mietwagen_vermieter',
+  // CMM-49 Phase 2b: claims-Duplikat (existiert auf claims UND faelle). Reader liest
+  // claims (v_faelle_mit_aktuellem_termin.mietwagen_kanzlei_informiert = c.-Spalte),
+  // der updateFallField-Checkbox-Writer schrieb aber faelle -> Divergenz. Aufnahme nach
+  // CLAIM_OWNED routet den Write auf claims (SSoT) und behebt sie; faelle-Spalte reader-frei.
+  'mietwagen_kanzlei_informiert',
   'schadens_hoehe_netto',
   'schadens_ursache',
   'zeugen_vorhanden',

@@ -272,11 +272,12 @@ export async function saveKanzleiAnsprechpartner(
     }
   }
 
-  // CMM-48 PR-D: kanzlei_ansprechpartner_name/email/telefon sind Duplikat-
-  // Spalten → claims (Single Source of Truth). position bleibt faelle-only.
-  // Sync-Trigger spiegelt zurück. Legacy-Fall ohne claim_id: alles auf faelle.
+  // CMM-48 PR-D: kanzlei_ansprechpartner_name/email/telefon sind Duplikat-Spalten
+  // → claims (SSoT). CMM-49 Phase 2b: position ist seit PR2c ebenfalls CLAIM_OWNED
+  // (nicht mehr faelle-only) und das SP-A-Sync-Trigger-Paar ist gedroppt → alle 4
+  // Felder gehen auf claims, faelleUpdate war immer leer → toter faelle-Write entfernt.
   const claimId = await resolveClaimId(supabase, fallId)
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+  const { claimsUpdate } = splitOrKeepFaelleUpdate(
     {
       kanzlei_ansprechpartner_name: data.name || null,
       kanzlei_ansprechpartner_email: data.email || null,
@@ -285,11 +286,6 @@ export async function saveKanzleiAnsprechpartner(
     },
     claimId,
   )
-
-  if (Object.keys(faelleUpdate).length > 0) {
-    const { error } = await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
-    if (error) return { success: false, error: error.message }
-  }
 
   if (claimId && Object.keys(claimsUpdate).length > 0) {
     const { error: claimErr } = await createAdminClient()
