@@ -13,6 +13,8 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getStorageUrl } from '@/lib/storage/url'
 import { trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
+import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 
 /**
  * AAR-90: FIN im Flow setzen + Cardentity-Anreicherung triggern.
@@ -622,6 +624,52 @@ export async function signSAandCreateFall(
   const convClaimId = conv.claimId
   const fallNummer = conv.claimNummer ?? ''
   const kundenbetreuerId = conv.kundenbetreuerId
+
+  // AAR-956 16.06. (Aaron): Self-Service abgeschlossen -> Willkommens-WhatsApp an den
+  // Kunden + "Flow abgeschlossen"-WA ans Team (Baileys). Fire-and-forget (VPS-PM2, kein
+  // Cold-Kill); ein Baileys-Fail darf die Konversion nie brechen.
+  void (async () => {
+    try {
+      const vorname = ((lead.vorname as string | null) ?? '').trim()
+      const nachname = ((lead.nachname as string | null) ?? '').trim()
+      const name = [vorname, nachname].filter(Boolean).join(' ').trim() || 'Kunde'
+      const telefon = ((lead.telefon as string | null) ?? '').trim()
+      const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const hatTermin = !!aktiverTerminId
+
+      if (telefon.length >= 5) {
+        const kundeText = [
+          `👋 Willkommen bei Claimondo${vorname ? `, ${vorname}` : ''}!`,
+          '',
+          'Ihre Schadenmeldung ist bei uns eingegangen — ab jetzt kümmern wir uns um alles.',
+          '',
+          hatTermin
+            ? 'Ihr Gutachter-Termin ist reserviert; wir melden uns mit den nächsten Schritten.'
+            : 'Wir vereinbaren zeitnah Ihren Gutachter-Termin und melden uns bei Ihnen.',
+          '',
+          'Bei Fragen antworten Sie einfach auf diese Nachricht. Ihr Claimondo-Team',
+        ].join('\n')
+        const r = await sendWhatsAppText(telefon, kundeText)
+        if (!r.ok) console.error('[AAR-956] Willkommens-WA (Kunde) fehlgeschlagen:', r.code, r.error)
+      }
+
+      const teamText = [
+        '✅ Self-Service abgeschlossen (Flow)',
+        '',
+        `👤 ${name}`,
+        telefon ? `📞 ${telefon}` : null,
+        `📦 Service: ${(lead.service_typ as string | null) ?? '—'}`,
+        hatTermin ? '🕐 Termin reserviert' : '⚠ kein Termin gebucht',
+        '',
+        `${base}/dispatch/leads/${leadId}`,
+      ]
+        .filter(Boolean)
+        .join('\n')
+      await notifyTeamWhatsApp(teamText)
+    } catch (err) {
+      console.error('[AAR-956] Flow-Abschluss-Notify fehlgeschlagen:', err)
+    }
+  })()
 
   // 5. KFZ-192 + AAR-345: Termin-State-Machine basierend auf service_typ.
   // Guard auf aktiverTerminId statt Legacy-Feld lead.gutachter_termin —

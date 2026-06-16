@@ -568,12 +568,12 @@
       "termin_folgt": "Ihren Besichtigungstermin vereinbaren wir in Kürze persönlich mit Ihnen.",
       "heading": "Geschafft!",
       "sub": "Ihr Fall wurde erfolgreich erstellt.",
-      "success_text": "Ihr Fall wurde erfolgreich erstellt! Der Gutachter wurde bereits informiert.",
+      "success_text": "Ihr Fall wurde erfolgreich erstellt. Wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen.",
       "lexdrive": {
         "label": "Ihr juristischer Ansprechpartner",
         "hinweis": "Unsere Partnerkanzlei. Sie wird sich in den nächsten Werktagen direkt bei Ihnen melden."
       },
-      "creating": "Wir richten Ihr Portal ein …",
+      "creating": "Einen Moment, wir schließen alles ab …",
       "logging_in": "Sie werden eingeloggt …",
       "fallback_email_hint": "Wir haben Ihnen die Zugangsdaten an {email} gesendet.",
       "fallback_cta": "Zu meinem Portal",
