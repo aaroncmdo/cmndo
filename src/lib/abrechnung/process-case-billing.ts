@@ -82,7 +82,8 @@ export async function processCaseBilling(fallId: string): Promise<{
   // Billing-Felder schreiben. CMM-44 SP-J/Phase 3: lead_preis_*, guthaben_verrechnet_netto,
   // sv_nachzahlung_netto sind alle claims-SSoT (CLAIM_OWNED) → splitOrKeepFaelleUpdate routet
   // sie auf claims (faelleUpdate bleibt leer). claimId via resolveClaimId immer gesetzt.
-  const { faelleUpdate: pcbFaelle, claimsUpdate: pcbClaims } = splitOrKeepFaelleUpdate(
+  // CMM-49 (faelle-Drop): pcbFaelle war immer leer (alle Billing-Felder CLAIM_OWNED) -> toter faelle-Spiegel-Write entfernt.
+  const { claimsUpdate: pcbClaims } = splitOrKeepFaelleUpdate(
     {
       lead_preis_netto: leadPreis,
       lead_preis_typ: typ,
@@ -92,9 +93,6 @@ export async function processCaseBilling(fallId: string): Promise<{
     },
     claimId,
   )
-  if (Object.keys(pcbFaelle).length > 0) {
-    await db.from('faelle').update(pcbFaelle).eq('id', fallId)
-  }
   if (Object.keys(pcbClaims).length > 0) {
     await db.from('claims').update(pcbClaims).eq('id', claimId)
   }
