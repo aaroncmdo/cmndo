@@ -1,6 +1,7 @@
 import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendNachricht } from '@/lib/whatsapp/send'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { sendEmail } from '@/lib/email/google/client'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 import { fireTrackingWebhook } from '@/lib/embed/tracking-webhook'
@@ -162,6 +163,32 @@ export async function notifyAnfrage(input: NotifyAnfrageInput): Promise<void> {
     await fireTrackingWebhook({ event: 'anfrage_eingegangen', anfrageId })
   } catch (err) {
     console.error('[AAR-939 8b] tracking anfrage_eingegangen fehlgeschlagen:', err)
+  }
+
+  // AAR-956 16.06. (Aaron): Team-WhatsApp bei JEDER Anfrage-Submission. Cluster-LP
+  // hat unten schon den KFZ_LP_BAILEYS_TARGET-Send -> hier nur die anderen Quellen
+  // (sv_embed A/B), damit das Team auch ohne Cluster + ohne spaetere Reservierung
+  // sofort eine WA bekommt. VOR den Varianten-Branches (Variante A returnt frueh).
+  if (payload.source !== 'kfz_gutachter_lp') {
+    try {
+      const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const teamText = [
+        '🆕 Neue Anfrage (Gutachter-Finder)',
+        '',
+        `👤 ${kunde}`,
+        payload.telefon ? `📞 ${payload.telefon}` : null,
+        `📍 ${stadt}`,
+        `🗓️ Wunschtermin: ${slot}`,
+        `↳ Quelle: ${payload.source}${variante ? ` · Variante ${variante}` : ''}`,
+        '',
+        `${base}/dispatch/gutachter-finder/${anfrageId}`,
+      ]
+        .filter(Boolean)
+        .join('\n')
+      await notifyTeamWhatsApp(teamText)
+    } catch (err) {
+      console.error('[AAR-956] Team-WA bei Anfrage fehlgeschlagen:', err)
+    }
   }
 
   // AAR-939 P4: Kunden-Bestaetigung (Callback-Flow). Variante B laeuft nicht durch
