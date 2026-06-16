@@ -211,11 +211,10 @@ export async function terminAblehnen({
   // KFZ-136: Reminder stornieren
   try { await cancelRemindersForTermin(tId) } catch (err) { console.error('[KFZ-136] Reminder-Cancel fehlgeschlagen:', err) }
 
-  // 2. Fall updaten — sv_id freigeben; Termin-Status spiegelt die View aus gutachter_termine
-  // CMM-65: updated_at-Touch entfernt — der sv_id-Write feuert
-  // trg_sync_faelle_sv_id_to_claims (schreibt claims.sv_id -> bumpt claims.updated_at
-  // + claims-Realtime-Subscription).
-  await admin.from('faelle').update({
+  // 2. Fall updaten — sv_id freigeben (claims = SSoT); Termin-Status spiegelt die View aus gutachter_termine
+  // CMM-49 (faelle-Drop-Runway): sv_id claims-direkt statt faelle.sv_id; claims.id == fall_id.
+  // claims.updated_at bumpt automatisch (+ claims-Realtime-Subscription).
+  await admin.from('claims').update({
     sv_id: null,
   }).eq('id', fId)
 

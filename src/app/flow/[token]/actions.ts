@@ -1292,10 +1292,10 @@ export async function signSAandCreateFall(
               .eq('fall_id', fall.id)
               .single()
             if (!currentFall?.sv_id) {
+              // CMM-49 (faelle-Drop-Runway): sv_id claims-direkt (SSoT) statt faelle.sv_id;
+              // claims.id == fall_id. claims.updated_at bumpt automatisch (+ claims-Realtime).
               await admin
-                .from('faelle')
-                // CMM-65: updated_at-Touch entfernt — der sv_id-Write feuert
-                // trg_sync_faelle_sv_id_to_claims (bumpt claims.updated_at).
+                .from('claims')
                 .update({ sv_id: topSv.svId })
                 .eq('id', fall.id)
               console.log('[AAR-908] Auto-SV-Match', { fallId: fall.id, svId: topSv.svId, score: topSv.score })
