@@ -272,8 +272,11 @@ export async function updateFallField(
     return { success: true }
   }
 
+  // CMM-49 Phase 2b: updated_at NICHT mehr mitschreiben — trigger-redundant
+  // (update_faelle_updated_at) + reader-frei. So feuert der faelle-Write nur noch
+  // fuer echte faelle-only-Felder; CLAIM_OWNED-Felder gehen ohne faelle-Write auf claims.
   const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
-    { [field]: normalized, updated_at: new Date().toISOString() },
+    { [field]: normalized },
     claimId,
   )
 
