@@ -13,8 +13,8 @@
 //   5. claim_vehicle_involvements insert — geschädigtes + ggf. gegnerisches Fahrzeug
 //   6. (entfaellt — CMM-44 SP-A3: claim_nummer kommt vom DB-Trigger)
 //   7. KB Round-Robin falls nicht zugewiesen
-//   8. faelle-Row anlegen — VOLLSTÄNDIG mit Schadensdaten (Frontend liest das
-//      bis Phase 6 noch). Bridge: faelle.claim_id = claim.id.
+//   8. (CMM-49 D2) claim-first: KEINE faelle-Row mehr — fall_id == claim_id, die
+//      Bridge legt trg_sync_claims_to_bridge an (hier idempotent abgesichert).
 //   9. leads-Update: status='umgewandelt', konvertiert_zu_claim_id,
 //      konvertiert_zu_fall_id, konvertiert_am, konvertiert_durch_user_id
 //   10. Bei Fehler in 4-9: Cleanup (delete claim → sub-entities CASCADE).
@@ -36,10 +36,7 @@ import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import {
-  buildFallInsertFromLead,
-  resolveFallEntityFks,
-} from '@/lib/lead-fall-mapping'
+import { resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { parseUhrzeit } from '@/lib/format/zeit'
 import type { ClaimInsert } from '@/lib/claims/types'
@@ -413,7 +410,7 @@ export async function convertLeadToClaim(
   // Konvert-Luecke — neue Claims bekommen den Cursor schon bei Anlage statt NULL bis zum ersten
   // Engine-Transition (sonst Reader-Fallback ?? faelle.status noetig + NULL-Straggler). Value-neutral
   // (== was faelle.status traegt). operative_status fehlt noch in den generierten Claims-Typen
-  // (b'' types-regen aufgeschoben) -> Record-Bridge wie die b''-Reader (vgl. fallInsert.kunde_id unten).
+  // (b'' types-regen aufgeschoben) -> Record-Cast wie bei anderen noch-nicht-getypten Spalten.
   ;(claimsInsert as Record<string, unknown>).operative_status =
     input.svIdFromTermin ? 'sv-termin' : 'ersterfassung'
 
@@ -702,43 +699,23 @@ export async function convertLeadToClaim(
     if (!dmg.ok) console.warn('[CMM-Entity P3] recordVehicleDamage fehlgeschlagen:', dmg.error)
   }
 
-  // ─── Schritt 8: faelle-Row (Übergangs-Phase: vollständig) ───────────────
-  // Bis Phase 6 wird faelle weiter mit allen Schadendaten gefüllt, weil das
-  // Frontend das noch liest. Phase 6 dropt diese Spalten und macht faelle
-  // zur reinen Assignment-Tabelle. Wir setzen nur ZUSÄTZLICH faelle.claim_id.
-  // CMM-44 SP-A: entityFks ist bereits oben (vor dem claimsInsert) resolved.
-  const fallInsert = buildFallInsertFromLead(lead as never, {
-    kundenbetreuerId,
-    svIdFromTermin: input.svIdFromTermin ?? null,
-    signatureUrl: input.signatureUrl ?? '',
-    ...entityFks,
-  })
-  // Bridge: faelle.claim_id zeigt auf den eben angelegten Claim
-  fallInsert.claim_id = claimId
-  // CMM-49 Step 3 (faelle-Drop-Vorbereitung): faelle.id == claim_id (Identity).
-  // Der Claim wird oben (Schritt 3) ZUERST angelegt, claimId ist gesetzt. Identity
-  // sorgt dafuer, dass der faelle->bridge-Trigger (C,C) statt (F,C) schreibt und der
-  // kommende claims->bridge-Trigger via ON CONFLICT(fall_id) sauber dedupt, statt die
-  // 1:1-Bridge lautlos zu fan-outen (kein UNIQUE(claim_id)-Konflikt). Wert-neutral:
-  // faelle.id war zuvor ein eigenes gen_random_uuid(), das nichts referenziert.
-  fallInsert.id = claimId
-  // Kunde-User-ID auf den Fall heften (Frontend nutzt das noch)
-  if (kundeUserId) {
-    fallInsert.kunde_id = kundeUserId
+  // ─── Schritt 8: claim-first — KEINE faelle-Row mehr (CMM-49 D2-Cutover) ──
+  // Der frühere faelle-INSERT war ein toter Volldatensatz-Duplikat: alle Schadendaten leben
+  // längst auf claims/claim_parties/vehicles (Entity-Migration), die Reader sind faelle-frei
+  // (CMM-49 Reader-Sweep), die Engine ist claim-native (AAR-939 #2902). kunde_id ist gedeckt
+  // über claims.geschaedigter_user_id (Schritt 3) + claim_parties(geschaedigter).user_id
+  // (Schritt 4). fall_id == claim_id (die bisherige Identity); die fall_id-Kinder
+  // (timeline/tasks/dokumente; KEIN FK auf faelle) keyen weiter auf diesen Wert.
+  // Die Bridge legt der trg_sync_claims_to_bridge (AFTER INSERT claims, ON CONFLICT DO NOTHING)
+  // beim Claim-Insert (Schritt 3) BEREITS an — wir sichern sie hier idempotent ab (robust,
+  // falls der Sync-Trigger in Phase F entfällt).
+  const fallId = claimId
+  const { error: bridgeErr } = await admin
+    .from('faelle_claim_bridge')
+    .upsert({ fall_id: fallId, claim_id: claimId }, { onConflict: 'fall_id', ignoreDuplicates: true })
+  if (bridgeErr) {
+    return cleanupAndFail(`Bridge-Insert fehlgeschlagen: ${bridgeErr.message}`)
   }
-
-  const { data: fall, error: fallErr } = await admin
-    .from('faelle')
-    .insert(fallInsert as never)
-    .select('id')
-    .single()
-  if (fallErr || !fall) {
-    return cleanupAndFail(
-      `Fall-Insert fehlgeschlagen: ${fallErr?.message ?? 'unbekannt'}`,
-    )
-  }
-
-  const fallId = fall.id as string
 
   // CMM-44 SP-I6: kanzlei_id (Fall->Kanzlei-Zuordnung, LexDrive-Pfad A) lebt auf
   // kanzlei_faelle (1:1) statt faelle. Nur bei aufgeloester Kanzlei eine Row anlegen
