@@ -1,5 +1,6 @@
 'use server'
 
+import { randomUUID } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
@@ -83,73 +84,47 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   }
   const lead = { id: created.leadId }
 
-  // 2. Fall-Eintrag direkt anlegen (kein Round-Robin Kundenbetreuer hier —
-  //    Admin uebernimmt die Verantwortung selbst)
-  // CMM-44 SP-A2 (Cluster 1): schadens_adresse/_plz/_ort sind Semantik-Duplikat-
-  // Spalten — claims (schadenort_adresse/_plz/_ort) ist SSoT. createClaimForFall
-  // unten schreibt sie dort; der faelle-Insert befuellt sie nicht mehr.
-  // CMM-44 SP-A2 (Cluster 2): schadens_art + schadens_fall_typ sind Semantik-
-  // Duplikate — claims.schadenart / claims.fall_typ ist SSoT (createClaimForFall
-  // unten schreibt schadenart; fall_typ bleibt hier wie bisher leer).
-  // CMM-44 SP-A2 (Cluster 3): konvertiert_von_lead aus dem faelle-Insert
-  // entfernt — die Lead-Konversions-Verknuepfung ist claims.lead_id (SSoT);
-  // createClaimForFall unten bekommt lead.id durchgereicht.
-  // CMM-44 SP-A3: die alte faelle-Aktennummer-Spalte aus dem Insert entfernt —
-  // die kanonische Aktennummer ist claims.claim_nummer, vom DB-Trigger
-  // set_claim_nummer automatisch beim Claim-Insert befuellt.
-  // CMM-44 SP-B PR2c: schadens_ursache ist eine Cluster-c-Duplikat-Spalte —
-  // claims ist SSoT. createClaimForFall unten schreibt sie dort; der faelle-
-  // Insert befuellt sie nicht mehr.
-  const { data: fall, error: fallErr } = await db.from('faelle').insert({
-    lead_id: lead.id,
-    status: 'ersterfassung',
-    // CMM-50/CMM-68: kennzeichen NICHT mehr in faelle — geht via ensureVehicleForClaim (unten,
-    // nach createClaimForFall) auf vehicles + claims.vehicle_id.
-    // CMM-65/CMM-49 (faelle-Drop): dispatch_id raus — reader-frei (v_claim_full=NULL, keine RLS/Trigger);
-    // der dispatch-„nurEigene"-Statistik-Filter liest v_claim_full.dispatch_id=NULL (pre-existing leer).
-    konvertiert_am: new Date().toISOString(),
-  }).select('id').single()
-
-  if (fallErr || !fall) {
-    // Rollback: Lead loeschen
-    await db.from('leads').delete().eq('id', lead.id)
-    return { success: false, error: `Fall-Anlage fehlgeschlagen: ${fallErr?.message ?? 'unbekannt'}` }
-  }
-
-  // AAR-811: claims-Write (non-blocking)
-  // CMM-44 SP-A/SP-A2: spezifikation + schadenort_* sind faelle<->claims-Duplikat-
-  // Spalten → werden hier auf claims geschrieben (SSoT), nicht mehr in den
-  // faelle-Insert oben. Das SP-A-Sync-Trigger-Paar ist gedroppt — claims ist
-  // der einzige Schreibpfad.
-  // CMM-44 SP-A3: nach dem Claim-Insert claim_nummer nachladen — der
-  // DB-Trigger set_claim_nummer hat sie befuellt.
+  // 2. (CMM-49 D2) claim-first: KEINE faelle-Row mehr. createClaimForFall legt den Claim
+  //    mit id == fallId (Identity) an; die faelle_claim_bridge kommt vom trg_sync_claims_to_bridge
+  //    (der faelle.update-Backref in createClaimForFall no-oppt mangels Row). Der frühere
+  //    Skelett-faelle-INSERT ({lead_id,status,konvertiert_am}) ist data-lossless: lead_id ->
+  //    claims.lead_id, status -> claims.operative_status='ersterfassung', konvertiert_am ~
+  //    claims.created_at. Schadenort/-art/-ursache/spezifikation schreibt createClaimForFall
+  //    claims-seitig (SSoT). Kein Round-Robin-KB hier — Admin übernimmt selbst.
+  const fallId = randomUUID()
   let claimNummer: string | null = null
   try {
     const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
-    const claimId = await createClaimForFall(db, fall.id, {
+    const claimId = await createClaimForFall(db, fallId, {
       schadens_plz: data.schadens_plz,
       schadens_adresse: data.schadens_adresse ?? null,
       schadens_ort: data.schadens_ort ?? null,
       schadens_ursache: data.schadensursache ?? null,
       schadens_art: data.schadens_art ?? null,
       spezifikation: data.spezifikation ?? null,
-      // CMM-44 SP-A2 (Cluster 3): Lead-Konversions-Verknuepfung claims-seitig.
       lead_id: lead.id,
     }, 'manuell_admin')
-    if (claimId) {
-      const { data: claim } = await db.from('claims').select('claim_nummer').eq('id', claimId).single()
-      claimNummer = claim?.claim_nummer ?? null
-      // CMM-68: manuelle Anlage hat keine FIN -> FIN-loser vehicles-Stub + claims.vehicle_id,
-      // damit der vehicles-Write-Path auch hier vollstaendig ist (Kennzeichen aus dem Formular).
-      if (data.kennzeichen?.trim()) {
-        const { ensureVehicleForClaim } = await import('@/lib/vehicles/ensure-vehicle')
-        const veh = await ensureVehicleForClaim({ claimId, snapshot: { kennzeichen: data.kennzeichen.trim() }, db })
-        if (!veh.ok) console.warn('[CMM-68] vehicles-Stub bei manueller Anlage:', veh.error)
-      }
+    if (!claimId) {
+      // Rollback: Lead loeschen (kein Claim -> kein Fall).
+      await db.from('leads').delete().eq('id', lead.id)
+      return { success: false, error: 'Fall-Anlage fehlgeschlagen: Claim konnte nicht angelegt werden' }
     }
-  } catch (err) { console.error('[AAR-811] createClaimForFall (admin-anlegen):', err) }
+    const { data: claim } = await db.from('claims').select('claim_nummer').eq('id', claimId).single()
+    claimNummer = claim?.claim_nummer ?? null
+    // CMM-68: manuelle Anlage hat keine FIN -> FIN-loser vehicles-Stub + claims.vehicle_id,
+    // damit der vehicles-Write-Path auch hier vollstaendig ist (Kennzeichen aus dem Formular).
+    if (data.kennzeichen?.trim()) {
+      const { ensureVehicleForClaim } = await import('@/lib/vehicles/ensure-vehicle')
+      const veh = await ensureVehicleForClaim({ claimId, snapshot: { kennzeichen: data.kennzeichen.trim() }, db })
+      if (!veh.ok) console.warn('[CMM-68] vehicles-Stub bei manueller Anlage:', veh.error)
+    }
+  } catch (err) {
+    console.error('[AAR-811] createClaimForFall (admin-anlegen):', err)
+    await db.from('leads').delete().eq('id', lead.id)
+    return { success: false, error: 'Fall-Anlage fehlgeschlagen (Claim-Insert)' }
+  }
 
   revalidatePath('/admin/faelle', 'page')
   revalidatePath('/dispatch/dashboard', 'page')
-  return { success: true, fall_id: fall.id, claim_nummer: claimNummer }
+  return { success: true, fall_id: fallId, claim_nummer: claimNummer }
 }
