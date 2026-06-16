@@ -51,7 +51,12 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GutachterFindenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stadt?: string; plz?: string; lat?: string; lng?: string }>
+  searchParams: Promise<{
+    stadt?: string; plz?: string; lat?: string; lng?: string
+    // AAR-956: Google-Ads-Click-IDs (Ad-Klick landet auf dieser Parent-URL) → an den
+    // Embed-iframe weiterreichen, damit der Conversion-Linker im Container _gcl_aw schreibt.
+    gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string
+  }>
 }) {
   const t = await getTranslations('gutachter_finden')
   const sp = await searchParams
@@ -105,7 +110,11 @@ export default async function GutachterFindenPage({
 
       {/* Vollbild-Finder (Karte + Finder + Wizard). initialCenter aus ?stadt/?plz/?lat&lng.
           Embed-only: bewusst KEIN Content darunter (sauberer Mobile-Scroll). */}
-      <GutachterFindenSection height="100dvh" initialCenter={initialCenter} />
+      <GutachterFindenSection
+        height="100dvh"
+        initialCenter={initialCenter}
+        clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
+      />
     </>
   )
 }
