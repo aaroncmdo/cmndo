@@ -108,10 +108,8 @@ export async function reissueAbrechnung(
   // splitOrKeepFaelleUpdate (claim-linked → claims, Legacy ohne claim_id → faelle).
   for (const f of faelle) {
     const fClaimId = (f as { claim_id?: string | null }).claim_id ?? null
-    const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate({ abrechnung_id: neue.id }, fClaimId)
-    if (Object.keys(faelleUpdate).length > 0) {
-      await db.from('faelle').update(faelleUpdate).eq('id', f.id)
-    }
+    // CMM-49 (faelle-Drop): abrechnung_id ist CLAIM_OWNED -> faelleUpdate war leer, toter faelle-Write entfernt.
+    const { claimsUpdate } = splitOrKeepFaelleUpdate({ abrechnung_id: neue.id }, fClaimId)
     if (fClaimId && Object.keys(claimsUpdate).length > 0) {
       await db.from('claims').update(claimsUpdate).eq('id', fClaimId)
     }
