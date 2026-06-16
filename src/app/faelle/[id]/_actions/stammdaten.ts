@@ -161,6 +161,19 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
 // gedroppt — ein faelle-Write lief seither still ins Leere.
 const GUTACHTEN_ROUTED_FIELDS = new Set<string>(['restwert', 'wiederbeschaffungswert'])
 
+// CMM-49/AAR-552: Felder, deren SSoT der "aktuelle Termin" (gutachter_termine) ist —
+// Reader lesen sie aus dem t-LATERAL von v_faelle_mit_aktuellem_termin, NICHT aus faelle.
+// updateFallField routet sie via get_aktueller_gt_termin_id (kanonischer Selektor =
+// exakt die View-t-Selektion) auf den aktuellen Termin; sonst landeten Inline-Edits auf
+// faelle und wuerden nirgends gelesen (Divergenz, gleiche Klasse wie mietwagen #2928).
+const GT_ROUTED_FIELDS = new Set<string>([
+  'besichtigungsort_adresse',
+  'besichtigungsort_lat',
+  'besichtigungsort_lng',
+  'besichtigungsort_place_id',
+  'nachbesichtigung_ergebnis',
+])
+
 // CMM-44 SP-A2 (Cluster 1+2): Semantik-Duplikat-Felder routet updateFallField
 // direkt mit dem neuen claims-Namen auf claims (NICHT ueber splitOrKeepFaelle-
 // Update — der Helper kann nur gleichnamige Spalten). Das Mapping liegt zentral
@@ -227,6 +240,34 @@ export async function updateFallField(
         error: 'Noch kein Gutachten erfasst — der Wert kann erst nach Gutachten-Eingang gesetzt werden.',
       }
     }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
+  // CMM-49/AAR-552: besichtigungsort_*/nachbesichtigung_ergebnis leben auf dem aktuellen
+  // Termin (gutachter_termine). Auf den kanonisch selektierten Termin schreiben
+  // (get_aktueller_gt_termin_id == View-t-Selektion), damit Writer und Reader denselben
+  // Termin treffen. Admin-Client: canEditField() hat oben bereits autorisiert.
+  if (GT_ROUTED_FIELDS.has(field)) {
+    const claimId = gateClaimId
+    if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const admin = createAdminClient()
+    const { data: terminId, error: rpcErr } = await admin.rpc('get_aktueller_gt_termin_id', {
+      p_claim_id: claimId,
+    })
+    if (rpcErr) return { success: false, error: rpcErr.message }
+    if (!terminId) {
+      return {
+        success: false,
+        error:
+          'Noch kein aktueller Termin — Besichtigungsort/Nachbesichtigung kann erst nach Terminvergabe gesetzt werden.',
+      }
+    }
+    const { error: gtErr } = await admin
+      .from('gutachter_termine')
+      .update({ [field]: normalized })
+      .eq('id', terminId as string)
+    if (gtErr) return { success: false, error: gtErr.message }
     revalidatePath(`/faelle/${fallId}`)
     return { success: true }
   }
