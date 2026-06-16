@@ -13,21 +13,14 @@
 
 import { useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
-import type { OnboardingPhase, OnboardingFeld, ConditionalOn } from '@/components/onboarding/types'
+import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import { istFeststellungsFeld, istDokumentManuellFeld } from '@/lib/self-service/feststellung-felder'
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import { FlowZb1Upload, type Zb1FlowExtracted } from './FlowZb1Upload'
 import { FlowPolizeiberichtUpload } from './FlowPolizeiberichtUpload'
-import { FESTSTELLUNG_STEPS } from './feststellung-steps'
+import { computeActiveFeststellungSteps, meetsCondition } from './feststellung-steps'
 import { Button } from '@/components/primitives/Button/Button.web'
-
-// Spiegelt WizardClient.meetsCondition: sichtbar wenn keine Bedingung gesetzt ist
-// oder der aktuelle Wert des Bedingungsfelds exakt passt (String-Vergleich).
-function meetsCondition(cond: ConditionalOn | null | undefined, vals: Record<string, unknown>): boolean {
-  if (!cond) return true
-  return String(vals[cond.feld] ?? '') === cond.equals
-}
 
 const istLeer = (v: unknown) => v == null || (typeof v === 'string' && v.trim() === '')
 
@@ -57,6 +50,14 @@ export function FlowFeststellungStep({
 }) {
   const t = useTranslations('flow')
   const [values, setValues] = useState<Record<string, unknown>>(initialValues)
+  // AAR-956 16.06. (Aaron-Bug "1/1"/Sprung): phasen beim Mount cappen. Der /flow-RSC-
+  // Re-Render (LeadRealtimeRefresh, page.tsx:302) leert feststellungPhasen, sobald
+  // unfallhergang gefüllt ist (page.tsx: feststellungNeeded = !lead.unfallhergang).
+  // Ohne Cap recomputen felderByKey + activeSteps auf die leere Config → alle felder-
+  // Schritte fallen raus, nur der immer-sichtbare zb1-Step bleibt → "1/1" + Sprung
+  // zum Fahrzeugschein mitten im Flow. Spiegelt initialHatFeststellung im Eltern-
+  // Wizard (FlowWizardKfz), der denselben RSC-Shrink am OUTER-Step cappt.
+  const [phasenStabil] = useState(phasen)
   // AAR-956 16.06. (Aaron): Navigation an die Schritt-ID, NICHT an den Positions-Index.
   // activeSteps re-filtert reaktiv (bedingte Schritte aus values) — ein Positions-Index
   // zeigte nach dem Re-Filter auf einen ANDEREN Schritt → der Flow "sprang". null = erster Schritt.
@@ -68,34 +69,27 @@ export function FlowFeststellungStep({
   // feld_key -> sichtbares ①-Feststellungsfeld (audience kunde schon via ladeFlowPhasen).
   const felderByKey = useMemo(() => {
     const m = new Map<string, OnboardingFeld>()
-    for (const p of phasen) for (const f of p.felder) if (istFeststellungsFeld(f)) m.set(f.feld_key, f)
+    for (const p of phasenStabil) for (const f of p.felder) if (istFeststellungsFeld(f)) m.set(f.feld_key, f)
     return m
-  }, [phasen])
+  }, [phasenStabil])
 
   // OCR-Folgedaten (Fahrzeug-ID), die der Kunde OHNE Foto manuell eintippen kann —
   // nur die noch leeren, dedupet je feld_key. Leben im ZB1-Schritt als Fallback.
   const dokumentFelder = useMemo(
     () =>
       Array.from(
-        new Map(phasen.flatMap((p) => p.felder).filter(istDokumentManuellFeld).map((f) => [f.feld_key, f])).values(),
+        new Map(phasenStabil.flatMap((p) => p.felder).filter(istDokumentManuellFeld).map((f) => [f.feld_key, f])).values(),
       ).filter((f) => istLeer(initialValues[f.feld_key])),
-    [phasen, initialValues],
+    [phasenStabil, initialValues],
   )
 
   const fahrzeugErfasst = ['kennzeichen', 'fin', 'fahrzeug_hersteller'].some((k) => !istLeer(initialValues[k]))
 
   // Aktive Schritte (reaktiv auf values): felder-Schritt sichtbar wenn >=1 Feld
-  // sichtbar, polizeibericht nur bei Polizei vor Ort, zb1 immer.
+  // sichtbar, polizeibericht nur bei Polizei vor Ort, zb1 immer. felderByKey ist
+  // mount-stabil (phasenStabil) → kein "1/1"-Kollaps nach RSC-Shrink.
   const activeSteps = useMemo(
-    () =>
-      FESTSTELLUNG_STEPS.filter((step) => {
-        if (step.kind === 'zb1') return true
-        if (step.kind === 'polizeibericht') return values['polizei_vor_ort'] === 'true'
-        return step.feldKeys.some((k) => {
-          const f = felderByKey.get(k)
-          return f != null && meetsCondition(f.conditional_on, values)
-        })
-      }),
+    () => computeActiveFeststellungSteps(felderByKey, values),
     [felderByKey, values],
   )
 
