@@ -1,16 +1,27 @@
+'use client'
+
 // Wiederverwendbare gutachter-finden-Section für Marketing-Seiten.
 // NICHT zu verwechseln mit dem Monika-Embed (public <script>-Widget, AAR-939):
 // dies ist eine INTERNE React-Section, die per Code auf beliebige Marketing-
 // Seiten gesetzt wird — Platzierung bestimmt der Entwickler.
 //
 // Der interaktive Finder ist als <iframe> auf den Haupt-App-Embed eingebettet
-// (app.claimondo.de/embed/gutachter-finder). Höhe via `height` (default '100dvh';
-// In-Page z.B. "70vh").
+// (app.claimondo.de/embed/gutachter-finder). Höhe via `height` (default '100dvh').
 //
-// AAR-956 WS6: Der Finder lebt jetzt als standalone Embed in der Haupt-App
-// (direkter Termin-Engine-Zugriff + Inline-Slot-Booking, das der alte Marketing-
-// Finder nie konnte). Diese Section ist nur noch ein iframe-Wrapper. EMBED_ORIGIN
-// pro Env (prod -> app.claimondo.de, staging -> app.staging.…) via NEXT_PUBLIC_EMBED_ORIGIN.
+// AAR-956 WS6: Der Finder lebt als standalone Embed in der Haupt-App. Diese Section ist ein
+// iframe-Wrapper. EMBED_ORIGIN pro Env via NEXT_PUBLIC_EMBED_ORIGIN.
+//
+// AAR-956 Consent-Bridge: 'use client', weil der Embed-iframe (cross-origin) den Consent der
+// Parent-Seite nicht automatisch erbt. Wir reichen den GCM-v2-State per postMessage durch
+// (Handshake + CONSENT_CHANGED_EVENT) → der iframe-Container hebt von default=denied an.
+
+import { useEffect, useRef } from 'react'
+import {
+  CONSENT_COOKIE_NAME,
+  CONSENT_CHANGED_EVENT,
+  parseConsent,
+  categoriesToGcm,
+} from '@/lib/analytics/consent'
 
 const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
 
@@ -21,14 +32,17 @@ type Props = {
   /** Container-Höhe (default '100dvh' = Vollseite; In-Page z.B. '70vh'). */
   height?: string
   /**
-   * AAR-956: Google-Ads-Click-IDs (gclid/gbraid/wbraid/gclsrc) aus der Parent-URL.
-   * Werden an die iframe-`src` gehängt, damit der Conversion-Linker IM iframe-Container
-   * (GTM-KD2L63T3 auf app.claimondo.de) `_gcl_aw` schreibt → die Ads-Conversion attribuiert
-   * auf den Klick. Nötig, weil die Parent-Seite nur GA4-gtag lädt (kein Conversion-Linker)
-   * und daher KEIN `_gcl_aw` setzt — das Same-Site-Cookie-Sharing hätte sonst nichts zu teilen
-   * (live verifiziert 16.06.: iframe liest `.claimondo.de`-Cookies, aber `_gcl_aw` fehlt ganz).
+   * AAR-956: Google-Ads-Click-IDs (gclid/gbraid/wbraid/gclsrc) aus der Parent-URL → an die
+   * iframe-`src`, damit der Conversion-Linker im iframe-Container `_gcl_aw` schreibt (Attribution).
    */
   clickIds?: { gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string }
+}
+
+/** Aktueller Consent-State (aus cc_cookie) als GCM-v2-Update-Payload für den iframe. */
+function currentGcm(): Record<string, 'granted' | 'denied'> {
+  if (typeof document === 'undefined') return categoriesToGcm({ statistics: false, marketing: false })
+  const m = document.cookie.match(new RegExp('(?:^|;\\s*)' + CONSENT_COOKIE_NAME + '=([^;]+)'))
+  return categoriesToGcm(parseConsent(m?.[1]))
 }
 
 export function GutachterFindenSection({
@@ -37,8 +51,9 @@ export function GutachterFindenSection({
   height = '100dvh',
   clickIds,
 }: Props) {
-  // Das server-geocodete Start-Zentrum als ?lat&lng[&zoom] an den Embed durchreichen
-  // → FinderMap zentriert vor + unterdrückt die Geolocation-Abfrage.
+  const iframeRef = useRef<HTMLIFrameElement>(null)
+
+  // Das server-geocodete Start-Zentrum als ?lat&lng[&zoom] an den Embed durchreichen.
   const params = new URLSearchParams()
   if (initialCenter) {
     params.set('lat', String(initialCenter.lat))
@@ -53,8 +68,35 @@ export function GutachterFindenSection({
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}/embed/gutachter-finder${qs ? `?${qs}` : ''}`
 
+  // Consent-Propagation: GCM-State per postMessage an den iframe — getriggert durch (a) den
+  // „ready"-Handshake des iframe (ConsentBridge meldet sich, wenn ihr Listener steht → löst die
+  // Race „Parent sendet zu früh") und (b) jede Consent-Änderung (CONSENT_CHANGED_EVENT vom CMP).
+  useEffect(() => {
+    function sendConsent() {
+      const win = iframeRef.current?.contentWindow
+      if (!win) return
+      try {
+        win.postMessage({ type: 'claimondo-consent', gcm: currentGcm() }, EMBED_ORIGIN)
+      } catch {
+        /* iframe weg / cross-origin-Block → no-op */
+      }
+    }
+    function onIframeReady(e: MessageEvent) {
+      if (e.origin === EMBED_ORIGIN && (e.data as { type?: string } | null)?.type === 'claimondo-consent-ready') {
+        sendConsent()
+      }
+    }
+    window.addEventListener(CONSENT_CHANGED_EVENT, sendConsent)
+    window.addEventListener('message', onIframeReady)
+    return () => {
+      window.removeEventListener(CONSENT_CHANGED_EVENT, sendConsent)
+      window.removeEventListener('message', onIframeReady)
+    }
+  }, [])
+
   return (
     <iframe
+      ref={iframeRef}
       src={src}
       title="Kfz-Gutachter in Ihrer Nähe finden"
       loading="lazy"
