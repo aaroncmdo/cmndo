@@ -249,13 +249,28 @@ export async function findStickyKb(
     if (k.telefon) filters.push(`telefon.eq.${k.telefon}`)
     if (filters.length === 0) continue
 
-    // claim_parties → claim → faelle.kundenbetreuer_id
-    const { data: parties } = await supabase
-      .from('claim_parties')
-      .select('claim_id, email, telefon')
+    // claim_parties → claim → claims.kundenbetreuer_id
+    // CMM-49 Entity Plan-5: Sticky-KB-Kontakt-Suche über personen (SSoT) statt der flachen
+    // claim_parties.email/telefon — zwei-hop (personen by Kontakt → claim_parties by person_id).
+    // DB-verifiziert: personen.email/telefon == claim_parties-flat für alle 80 person-
+    // verknüpften Kontakt-Rows (0 flat-only, 0 case-/value-diff) → matchgleicher claim_id-Satz;
+    // die einzige contact-ohne-person-Row ist synthetisches Seed. Damit hängt die Suche nicht
+    // mehr an den flat-Spalten (Voraussetzung für den späteren Flat-DROP).
+    const { data: persons } = await supabase
+      .from('personen')
+      .select('id')
       .or(filters.join(','))
-      .limit(5)
-    const claimIds = ((parties ?? []) as Array<{ claim_id: string }>).map((p) => p.claim_id)
+      .limit(50)
+    const personIds = ((persons ?? []) as Array<{ id: string }>).map((p) => p.id)
+    let claimIds: string[] = []
+    if (personIds.length > 0) {
+      const { data: parties } = await supabase
+        .from('claim_parties')
+        .select('claim_id')
+        .in('person_id', personIds)
+        .limit(5)
+      claimIds = ((parties ?? []) as Array<{ claim_id: string }>).map((p) => p.claim_id)
+    }
     if (claimIds.length > 0) {
       // CMM-44 SP-A: kundenbetreuer_id ist claims-Duplikat-Spalte (claims =
       // SSoT). Da wir die claim_ids ohnehin haben, lesen wir direkt auf claims
