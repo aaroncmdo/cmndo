@@ -584,9 +584,8 @@
       "body": "Dieser FlowLink ist nicht mehr gültig. Bitte kontaktieren Sie Ihren Berater für einen neuen Link."
     },
     "done": {
-      "heading": "Alles bereit",
-      "body": "Wir haben Ihnen die Zugangsdaten und einen Login-Link per Email geschickt. Bitte schauen Sie in Ihren Posteingang.",
-      "cta_login": "Zum Login"
+      "heading": "Geschafft!",
+      "body": "Ihre Schadenmeldung ist bereits eingegangen — wir kümmern uns ab jetzt um alles und melden uns in Kürze bei Ihnen."
     },
     "error": {
       "heading": "Etwas ist schiefgelaufen",
