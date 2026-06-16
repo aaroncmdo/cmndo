@@ -612,8 +612,19 @@ export async function convertLeadToClaim(
         fuehrerscheinklassen: (p.fuehrerscheinklassen as string | string[] | null) ?? null,
       },
     })
-    if (!personRes.ok) console.warn('[CMM-entity P3] personen-Link bei Konversion fehlgeschlagen (non-fatal):', personRes.error)
-    else if (personRes.personId) p.person_id = personRes.personId
+    // CMM-49 Entity Plan-5 (4d, Strategie A): nach dem flat-DROP ist person_id das einzige Netz
+    // fuer Personen-Identitaet. Bei identitaetstragenden Parteien (geschaedigter/halter) bricht ein
+    // fehlgeschlagener Link die Konversion sauber ab (cleanupAndFail, retrybar) statt Name/Kontakt
+    // permanent zu verlieren. Sekundaere Parteien (verursacher/Gegner — im Mandat re-captured)
+    // bleiben tolerant (non-fatal). Skipped (identitaetslos, ok:true) faellt harmlos durch.
+    if (!personRes.ok) {
+      if (p.rolle === 'geschaedigter' || p.rolle === 'halter') {
+        return cleanupAndFail(`personen-Link fuer Partei '${String(p.rolle)}' fehlgeschlagen: ${personRes.error}`)
+      }
+      console.warn(`[CMM-entity P3] personen-Link (${String(p.rolle)}) non-fatal:`, personRes.error)
+    } else if (personRes.personId) {
+      p.person_id = personRes.personId
+    }
   }
 
   // CMM-Entity Plan 3 (T2): Geschaedigter-Firma (Gewerbe) -> firmen-Entitaet + firma_id
@@ -632,6 +643,19 @@ export async function convertLeadToClaim(
     })
     if (firmaRes.ok) partyInserts[0].firma_id = firmaRes.firmaId
     else console.warn('[CMM-Entity P3] ensureFirma (geschaedigter) fehlgeschlagen:', firmaRes.error)
+  }
+
+  // CMM-49 Entity Plan-5 (4c): Person-flat-Keys vor dem Insert entfernen — personen ist die SSoT
+  // (ensurePersonForData oben hat den vollstaendigen Snapshot uebernommen + person_id gesetzt).
+  // claim_parties speichert Personen-Daten nicht mehr flach (diese Spalten werden gedroppt). KEPT:
+  // person_id/firma_id/user_id/rolle/vehicle_id/kennzeichen/Struktur-/airdrop-Flags.
+  const PERSON_FLAT_KEYS = [
+    'anrede', 'titel', 'vorname', 'nachname', 'firma', 'ist_gewerbe', 'geburtsdatum', 'email',
+    'telefon', 'mobil', 'adresse_strasse', 'adresse_plz', 'adresse_ort', 'adresse_land',
+    'fuehrerscheinnummer', 'fuehrerscheinklassen', 'ust_id',
+  ]
+  for (const party of partyInserts) {
+    for (const k of PERSON_FLAT_KEYS) delete party[k]
   }
 
   const { error: partiesErr } = await admin
