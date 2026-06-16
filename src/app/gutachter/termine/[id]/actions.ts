@@ -373,9 +373,11 @@ export async function uploadPolizeiberichtAsSv(
 
   // Aktenzeichen optional nachpflegen wenn vorhanden.
   // CMM-48 PR-E: polizei_aktenzeichen ist eine faelle<->claims-Duplikat-Spalte
-  // → auf claims schreiben (Single Source of Truth). Der Sync-Trigger spiegelt
-  // sie auf faelle zurueck (bis CMM-49 die faelle-Duplikat-Spalten dropt).
-  // Legacy-Fall ohne claim_id: Fallback auf faelle.
+  // → auf claims schreiben (Single Source of Truth). Das CMM-44-SP-A-Sync-Trigger-
+  // Paar wurde gedroppt (s. claim-duplicate-columns.ts) — claims ist der einzige Write.
+  // CMM-49 Write-Retirement: der frühere faelle-Legacy-Fallback ist entfernt — jeder
+  // Fall hat einen Claim (faelle_no_claim=0, bridge 1:1 → resolveClaimId trifft immer),
+  // d.h. der else-Zweig war toter, beim faelle-DROP brechender Code.
   if (aktenzeichen) {
     // CMM-49 PURE_BRIDGE: via resolveClaimId (bridge-basiert, faelle-Drop-sicher).
     const claimId = await resolveClaimId(adminDb, fallId)
@@ -384,11 +386,6 @@ export async function uploadPolizeiberichtAsSv(
         .from('claims')
         .update({ polizei_aktenzeichen: aktenzeichen })
         .eq('id', claimId)
-    } else {
-      await adminDb
-        .from('faelle')
-        .update({ polizei_aktenzeichen: aktenzeichen })
-        .eq('id', fallId)
     }
   }
 
