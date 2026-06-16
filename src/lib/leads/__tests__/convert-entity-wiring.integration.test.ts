@@ -25,6 +25,7 @@
 // Alle Fixtures sind ZZ_-getaggt fuer eindeutige Identifizierung.
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { randomUUID } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { convertLeadToClaim } from '../convert-lead-to-claim'
 
@@ -168,6 +169,22 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     expect(veh?.kennzeichen_aktuell).toBe(geschKz)
     expect(veh?.hersteller).toBe('Testmarke')
     expect(veh?.modell_haupttyp).toBe('Testmodell')
+
+    // CMM-49 D2 (claim-first Genesis): convertLeadToClaim legt KEINE faelle-Row mehr an.
+    // fall_id == claim_id; die faelle_claim_bridge (via trg_sync_claims_to_bridge) ist der
+    // fall_id->claim_id-Lookup fuer die fall_id-Kinder. Gate fuer den Genesis-INSERT-Cutover.
+    const { count: faelleCount } = await db
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('claim_id', claimId)
+    expect(faelleCount).toBe(0)
+    const { data: bridge } = await db
+      .from('faelle_claim_bridge')
+      .select('fall_id, claim_id')
+      .eq('claim_id', claimId)
+      .single()
+    expect(bridge?.fall_id).toBe(claimId)
+    expect(res.fallId).toBe(claimId)
   }, 30_000) // Remote-Converter macht viele sequentielle Round-Trips (~7s) -> Default-5s reicht nicht
 })
 
@@ -260,4 +277,45 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
       .single()
     expect(gesch?.ist_halter).toBe(false)
   }, 30_000)
+})
+
+// CMM-49 D2-Teil-2: createClaimForFall claim-first (admin/faelle/anlegen-Pfad).
+// Beweist: createClaimForFall mit frischem fallId (KEINE faelle-Row vorhanden) legt den Claim
+// mit id==fallId an, die Bridge entsteht via trg_sync_claims_to_bridge, der faelle.update-Backref
+// no-oppt mangels Row -> der admin-Genesis ist faelle-frei.
+d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
+  let db3: SupabaseClient
+  let fallId3: string | null = null
+
+  beforeAll(() => {
+    db3 = createClient(URL!, KEY!, { auth: { autoRefreshToken: false, persistSession: false } })
+  })
+
+  afterAll(async () => {
+    if (fallId3) {
+      await db3.from('faelle_claim_bridge').delete().eq('claim_id', fallId3)
+      await db3.from('claims').delete().eq('id', fallId3)
+    }
+  })
+
+  it('frischer fallId -> Claim id==fallId + Bridge, KEINE faelle-Row', async () => {
+    const { createClaimForFall } = await import('../../claims/create-for-fall')
+    fallId3 = randomUUID()
+    const claimId = await createClaimForFall(db3, fallId3, {
+      schadens_plz: '50667',
+      schadens_art: 'haftpflicht',
+    }, 'manuell_admin')
+    expect(claimId).toBe(fallId3) // Identity: claim.id == fallId
+    const { count: fc } = await db3
+      .from('faelle')
+      .select('id', { count: 'exact', head: true })
+      .eq('id', fallId3)
+    expect(fc).toBe(0)
+    const { data: br } = await db3
+      .from('faelle_claim_bridge')
+      .select('fall_id, claim_id')
+      .eq('claim_id', fallId3)
+      .single()
+    expect(br?.fall_id).toBe(fallId3)
+  }, 20_000)
 })
