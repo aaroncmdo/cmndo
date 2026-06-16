@@ -13,6 +13,8 @@
 // ueber den Sprach-Banner-Fallback). TODO: nach messages/<locale>.json ziehen,
 // sobald die Strecke steht.
 
+import type { ConditionalOn, OnboardingFeld } from '@/components/onboarding/types'
+
 export type FeststellungMicroStep =
   | { kind: 'felder'; id: string; kapitel: string; titel: string; sub?: string; feldKeys: string[] }
   | { kind: 'zb1'; id: string; kapitel: string; titel: string; sub?: string }
@@ -36,3 +38,37 @@ export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   // ④ Service
   { kind: 'felder', id: 'service', kapitel: 'Service', titel: 'Wie sollen wir helfen?', feldKeys: ['service_typ', 'kanzlei_wunsch'] },
 ]
+
+// Spiegelt WizardClient.meetsCondition: sichtbar wenn keine Bedingung gesetzt ist
+// oder der aktuelle Wert des Bedingungsfelds exakt passt (String-Vergleich).
+export function meetsCondition(
+  cond: ConditionalOn | null | undefined,
+  vals: Record<string, unknown>,
+): boolean {
+  if (!cond) return true
+  return String(vals[cond.feld] ?? '') === cond.equals
+}
+
+// Aktive Micro-Schritte fuer die gegebene Feld-Config (felderByKey) + Werte:
+//  - zb1 immer sichtbar,
+//  - polizeibericht nur bei Polizei vor Ort,
+//  - felder-Schritt sobald >=1 seiner feldKeys in der Config liegt UND dessen
+//    conditional_on erfuellt ist.
+// WICHTIG: felderByKey MUSS aus der mount-stabilen Phasen-Config stammen. Leert sie
+// sich (RSC-Re-Render nachdem unfallhergang gefuellt wurde, page.tsx feststellungNeeded),
+// bleibt nur der immer-sichtbare zb1-Step uebrig → activeSteps.length === 1 → der
+// "1/1"-Sprung-Bug (AAR-956 16.06.). Der Cap passiert im Consumer (FlowFeststellungStep:
+// phasenStabil); diese Funktion macht ihn testbar.
+export function computeActiveFeststellungSteps(
+  felderByKey: Map<string, Pick<OnboardingFeld, 'conditional_on'>>,
+  values: Record<string, unknown>,
+): FeststellungMicroStep[] {
+  return FESTSTELLUNG_STEPS.filter((step) => {
+    if (step.kind === 'zb1') return true
+    if (step.kind === 'polizeibericht') return values['polizei_vor_ort'] === 'true'
+    return step.feldKeys.some((k) => {
+      const f = felderByKey.get(k)
+      return f != null && meetsCondition(f.conditional_on, values)
+    })
+  })
+}
