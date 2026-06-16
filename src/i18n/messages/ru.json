@@ -384,6 +384,8 @@
       "sv_label": "Ваш эксперт-оценщик",
       "kontakt_hinweis": "Свяжется с вами",
       "termin_label": "Встреча запланирована",
+      "wunschtermin_label": "Ваша желаемая дата",
+      "wunschtermin_pending": "Мы подтвердим точное время в ближайшее время.",
       "besichtigungsort_label": "Место осмотра",
       "treffpunkt_label": "Место встречи: {treffpunkt}",
       "kein_gutachter": "Вашего персонального эксперта-оценщика мы назначим на следующем шаге. Просто продолжайте."

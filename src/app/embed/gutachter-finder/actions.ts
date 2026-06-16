@@ -50,7 +50,7 @@ export type EmbedBuchungInput = {
 
 export async function starteEmbedBuchung(
   input: EmbedBuchungInput,
-): Promise<{ ok: true; token: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; token: string; anfrageId: string } | { ok: false; error: string }> {
   // 1) gfa (Anfrage) anlegen — Ort landet auf schadenort_* (→ lead.fahrzeug_standort_*).
   const gfa = await erstelleGutachterFinderAnfrage({
     vorname: input.vorname,
@@ -76,7 +76,9 @@ export async function starteEmbedBuchung(
   const issued = await issueCanonicalFlowLinkForAnfrage(gfa.id, { send: false })
   if (!issued.ok) return { ok: false, error: issued.error }
 
-  return { ok: true, token: issued.token }
+  // AAR-956 16.06. (Aaron): anfrageId mit zurueckgeben → reserviereEmbedTermin kann
+  // gfa.termin_id eindeutig setzen (Anfrage↔Termin als eigene Datenquelle).
+  return { ok: true, token: issued.token, anfrageId: gfa.id }
 }
 
 /**
@@ -297,6 +299,7 @@ export async function reserviereEmbedTermin(input: {
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
+  const anfrageId = res.anfrageId
 
   // Dem Lead zugewiesener Dispatcher (für die Danke-Seite: Profil-Card + Anruf-Button).
   const dispatcher = await ladeLeadDispatcher(token)
@@ -316,6 +319,19 @@ export async function reserviereEmbedTermin(input: {
   // 3) Reservieren — Partner ODER Dead-Pin.
   if (input.auswahl.kind === 'partner') {
     const b = await bucheTerminFlow(token, input.auswahl.svId, input.auswahl.start, input.auswahl.end)
+    // AAR-956 16.06. (Aaron): bei erfolgreicher Buchung den Termin eindeutig an die Anfrage
+    // haengen (gfa.termin_id) — vorher blieb die Zuordnung null und /flow musste ueber
+    // lead_id/bezug raten. Non-critical: ein Fehler hier aendert den Buchungs-Status nicht.
+    if (b.ok && b.terminId && anfrageId) {
+      try {
+        await createAdminClient()
+          .from('gutachter_finder_anfragen')
+          .update({ termin_id: b.terminId })
+          .eq('id', anfrageId)
+      } catch (err) {
+        console.error('[reserviereEmbedTermin] gfa.termin_id setzen fehlgeschlagen:', err)
+      }
+    }
     // Request-Modell: Kalender-Buchung ist best-effort. Schlägt sie fehl, steht die Anfrage
     // trotzdem (Lead + Dispatcher + Wunschzeit auf der gfa + Bestätigung) — Dispatcher bestätigt.
     if (!b.ok && !requestModus) {
