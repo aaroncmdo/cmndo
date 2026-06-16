@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
+import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { getConsentedGaClientId, trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
@@ -369,6 +370,34 @@ export async function erstelleGutachterFinderAnfrage(
     }
   } catch (taskErr) {
     console.error('[GutachterFinder] Dispatch-Task fehlgeschlagen:', taskErr)
+  }
+
+  // AAR-956 16.06. (Aaron): Team-WhatsApp bei jeder Gutachter-Finder-Anfrage
+  // (Baileys -> Team-Nummern, dieselbe Quelle wie Lead-/Reservierungs-Notify).
+  // Non-critical — wirft nie, der gfa-Insert steht bereits.
+  try {
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+    const name = `${payload.vorname} ${payload.nachname}`.trim() || 'Kunde'
+    const wann = payload.wunschtermin
+      ? new Date(payload.wunschtermin).toLocaleString('de-DE', {
+          weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+        })
+      : 'kein Wunschtermin'
+    const teamText = [
+      '🆕 Neue Anfrage (Gutachter-Finder)',
+      '',
+      `👤 ${name}`,
+      payload.telefon ? `📞 ${payload.telefon}` : null,
+      `🔧 Schaden: ${payload.schadentyp}`,
+      `🗓️ ${wann}`,
+      '',
+      `${base}/dispatch/gutachter-finder/${anfrageId}`,
+    ]
+      .filter(Boolean)
+      .join('\n')
+    await notifyTeamWhatsApp(teamText)
+  } catch (waErr) {
+    console.error('[AAR-956] Team-WA (Gutachter-Finder) fehlgeschlagen:', waErr)
   }
 
   revalidatePath('/admin/faelle')
