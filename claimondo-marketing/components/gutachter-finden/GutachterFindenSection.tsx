@@ -20,12 +20,22 @@ type Props = {
   initialZoom?: number
   /** Container-Höhe (default '100dvh' = Vollseite; In-Page z.B. '70vh'). */
   height?: string
+  /**
+   * AAR-956: Google-Ads-Click-IDs (gclid/gbraid/wbraid/gclsrc) aus der Parent-URL.
+   * Werden an die iframe-`src` gehängt, damit der Conversion-Linker IM iframe-Container
+   * (GTM-KD2L63T3 auf app.claimondo.de) `_gcl_aw` schreibt → die Ads-Conversion attribuiert
+   * auf den Klick. Nötig, weil die Parent-Seite nur GA4-gtag lädt (kein Conversion-Linker)
+   * und daher KEIN `_gcl_aw` setzt — das Same-Site-Cookie-Sharing hätte sonst nichts zu teilen
+   * (live verifiziert 16.06.: iframe liest `.claimondo.de`-Cookies, aber `_gcl_aw` fehlt ganz).
+   */
+  clickIds?: { gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string }
 }
 
 export function GutachterFindenSection({
   initialCenter = null,
   initialZoom,
   height = '100dvh',
+  clickIds,
 }: Props) {
   // Das server-geocodete Start-Zentrum als ?lat&lng[&zoom] an den Embed durchreichen
   // → FinderMap zentriert vor + unterdrückt die Geolocation-Abfrage.
@@ -34,6 +44,11 @@ export function GutachterFindenSection({
     params.set('lat', String(initialCenter.lat))
     params.set('lng', String(initialCenter.lng))
     if (initialZoom) params.set('zoom', String(initialZoom))
+  }
+  // Ads-Click-IDs in die iframe-URL durchreichen (Allowlist — keine beliebigen Params).
+  for (const key of ['gclid', 'gbraid', 'wbraid', 'gclsrc'] as const) {
+    const v = clickIds?.[key]
+    if (v) params.set(key, v)
   }
   const qs = params.toString()
   const src = `${EMBED_ORIGIN}/embed/gutachter-finder${qs ? `?${qs}` : ''}`
