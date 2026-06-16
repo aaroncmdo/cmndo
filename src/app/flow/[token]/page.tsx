@@ -66,24 +66,18 @@ export default async function FlowPage({
       )
     }
 
-    // CMM-14: Wenn der FlowLink schon verbraucht ist (Browser-Reload nach
-    // Konvertierung), schicken wir den Kunden direkt zum Portal-Login. Er
-    // hat seine Zugangsdaten + Magic-Link bereits per Email erhalten.
+    // CMM-14 + AAR-956 16.06. (Aaron): FlowLink schon verbraucht (Reload nach
+    // Konvertierung) → nur eine "wir melden uns"-Bestätigung. KEIN Login-/Portal-Button
+    // am Ende (konsistent mit dem Account-Step; Claim-/Onboarding-Portal kommt separat).
     if (flowLink.status === 'abgeschlossen') {
       return (
         <div style={brandStyle} dir={preLocale === 'ar' ? 'rtl' : 'ltr'} className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
           <div className="bg-white rounded-ios-md shadow p-8 max-w-md w-full text-center">
             <div className="text-4xl mb-4">&#x2705;</div>
             <h1 className="text-xl font-bold text-claimondo-navy mb-2">{tPre('done.heading')}</h1>
-            <p className="text-claimondo-ondo mb-6">
+            <p className="text-claimondo-ondo">
               {tPre('done.body')}
             </p>
-            <a
-              href="/login"
-              className="inline-block w-full min-h-14 py-4 rounded-ios-md bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-base active:scale-[0.98] transition-all"
-            >
-              {tPre('done.cta_login')}
-            </a>
           </div>
         </div>
       )

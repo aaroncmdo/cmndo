@@ -447,9 +447,8 @@
       "body": "Bu FlowLink artık geçerli değil. Yeni bir bağlantı için lütfen müşteri sorumlunuzla iletişime geçin."
     },
     "done": {
-      "heading": "Her şey hazır",
-      "body": "Giriş bilgilerinizi ve bir giriş bağlantısını e-posta ile gönderdik. Lütfen gelen kutunuzu kontrol edin.",
-      "cta_login": "Girişe git"
+      "heading": "Her şey tamam!",
+      "body": "Hasar bildiriminiz bize ulaştı — bundan sonrasını biz hallediyoruz ve kısa süre içinde sizinle iletişime geçeceğiz."
     },
     "error": {
       "heading": "Bir şeyler ters gitti",

@@ -447,9 +447,8 @@
       "body": "This FlowLink is no longer valid. Please contact your account manager for a new link."
     },
     "done": {
-      "heading": "All set",
-      "body": "We have sent you your login details and a login link by email. Please check your inbox.",
-      "cta_login": "Go to login"
+      "heading": "All done!",
+      "body": "Your claim report has already reached us — we'll take care of everything from here and will be in touch with you shortly."
     },
     "error": {
       "heading": "Something went wrong",
