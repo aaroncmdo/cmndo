@@ -25,41 +25,32 @@ export async function waehleNachbesichtigungsTermin(
     return { success: false, error: ownership.error === 'not_found' ? 'Fall nicht gefunden' : 'Nicht autorisiert' }
   }
 
-  let aktTerminNB: { nachbesichtigung_status: string | null } | null = null
+  // CMM-49/AAR-552: kanonischer aktueller Termin (== v_faelle `t`-Selektion, status-
+  // priorisiert) via RPC statt simple-`start_zeit DESC` — so treffen Guard-Check UND Write
+  // denselben Termin, den die Reader (v_faelle / get-kunde-faelle) lesen (sonst Mismatch bei
+  // >1 Termin/Claim). Eine Selektion fuer beides (Status fuer den Guard + id fuer den Write).
+  let aktTermin: { id: string; nachbesichtigung_status: string | null } | null = null
   if (ownership.claimId) {
-    const { data: at } = await db
-      .from('gutachter_termine')
-      .select('nachbesichtigung_status')
-      .eq('claim_id', ownership.claimId)
-      .order('start_zeit', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    aktTerminNB = at
+    const { data: terminId } = await db.rpc('get_aktueller_gt_termin_id', { p_claim_id: ownership.claimId })
+    if (terminId) {
+      const { data: t } = await db
+        .from('gutachter_termine')
+        .select('id, nachbesichtigung_status')
+        .eq('id', terminId as string)
+        .maybeSingle()
+      aktTermin = (t as { id: string; nachbesichtigung_status: string | null } | null) ?? null
+    }
   }
 
-  if (aktTerminNB?.nachbesichtigung_status !== 'angefordert') {
+  if (aktTermin?.nachbesichtigung_status !== 'angefordert') {
     return { success: false, error: 'Keine offene Nachbesichtigung' }
   }
 
   // CMM-44 SP-D PR2b: nachbesichtigung_termin_datum + _status → gutachter_termine (aktueller Termin, SSoT).
-  // aktTerminNB kommt aus dem oben geladenen current-termin-Query — wir brauchen nur die id.
-  let nachbTerminId: string | null = null
-  if (ownership.claimId) {
-    const { data: t } = await db.from('gutachter_termine').select('id')
-      .eq('claim_id', ownership.claimId)
-      .order('start_zeit', { ascending: false })
-      .limit(1)
-      .maybeSingle()
-    nachbTerminId = (t?.id as string | null) ?? null
-  }
-  if (nachbTerminId) {
-    await db.from('gutachter_termine').update({
-      nachbesichtigung_termin_datum: datum,
-      nachbesichtigung_status: 'termin-gewaehlt',
-    }).eq('id', nachbTerminId)
-  } else {
-    console.warn(`[CMM-44 SP-D] kein Termin fuer fall ${fallId} — nachbesichtigung_* skip`)
-  }
+  await db.from('gutachter_termine').update({
+    nachbesichtigung_termin_datum: datum,
+    nachbesichtigung_status: 'termin-gewaehlt',
+  }).eq('id', aktTermin.id)
 
   await db.from('timeline').insert({
     fall_id: fallId,
