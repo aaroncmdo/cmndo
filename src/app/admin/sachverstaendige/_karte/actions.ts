@@ -70,17 +70,15 @@ export async function reassignCases(fromSvId: string, toSvId: string) {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) throw new Error('Nicht angemeldet')
 
-  // CMM-74 b″: status-Filter auf claims.operative_status repointet (SSoT-Cutover).
-  const { data: offeneClaimIds } = await supabase
-    .from('claims')
-    .select('id')
-    .not('operative_status', 'in', '("abgeschlossen","storniert")')
-
+  // CMM-49 (faelle-Drop-Runway): sv_id-Reassign claims-direkt (SSoT) statt faelle.sv_id.
+  // claims.sv_id == faelle.sv_id (bidirektional gesynct, div=0); der Status-Filter ist eh schon
+  // operative_status (CMM-74 b″) -> inline statt Zwei-Schritt. Faengt jetzt ALLE offenen Claims des
+  // SV (auch claim-only ohne faelle-Row) = value-erhaltend bzw. vollstaendiger Richtung faelle-DROP.
   const { data, error } = await supabase
-    .from('faelle')
+    .from('claims')
     .update({ sv_id: toSvId })
     .eq('sv_id', fromSvId)
-    .in('claim_id', (offeneClaimIds ?? []).map((c) => c.id))
+    .not('operative_status', 'in', '("abgeschlossen","storniert")')
     .select('id')
 
   if (error) throw new Error(error.message)
