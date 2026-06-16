@@ -524,7 +524,13 @@ export default function FlowWizardKfz({
                 token={token}
                 phasen={feststellungPhasen ?? []}
                 initialValues={{ ...(feststellungWerte ?? {}), schuldfrage: schuldfrageWahl }}
-                onWeiter={() => setStepIndex(stepIndexById('termin'))}
+                // AAR-956 16.06. (Aaron-Bug "etwas ist schiefgelaufen"): nächster Step
+                // statt hardcoded 'termin'. Die Feststellung läuft auch im Embed-Pfad
+                // (needsBooking=false) — dort gibt es KEINEN 'termin'-Step →
+                // stepIndexById('termin')=-1 → setStepIndex(-1) → currentStep undefined
+                // → Error-Boundary. stepIndex+1 trifft den jeweils nächsten Step
+                // (termin im incomplete-, gutachter im embed-Pfad), wie quali-onWeiter.
+                onWeiter={() => setStepIndex(stepIndex + 1)}
               />
             )}
 
