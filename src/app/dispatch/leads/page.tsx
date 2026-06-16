@@ -7,6 +7,7 @@ import LeadsViewToggle from './_components/LeadsViewToggle'
 import { PHASE_OPTIONS } from './_components/leadPhaseConstants'
 import PageHeader from '@/components/shared/PageHeader'
 import { Chip, ChipRow } from '@/components/ui/Chip'
+import { ladeLeadTerminGutachter } from '@/lib/dispatch/lade-lead-termin-gutachter'
 
 export default async function DispatchLeads({
   searchParams,
@@ -61,6 +62,12 @@ export default async function DispatchLeads({
   const { data: leads } = await query
   const activePhase = istAbbrecherFilter ? '' : (params.phase ?? '')
 
+  // AAR-956: Single-Source Termin + Gutachter pro Lead (v_lead_termin_gutachter)
+  // batch nachladen — gibt dem Dispatcher in der Liste auf einen Blick, ob ein
+  // Lead schon einen Termin und/oder einen Gutachter hat (Self-Service-Leads
+  // bringen beides aus dem Embed-Flow mit, bevor der Dispatcher draufschaut).
+  const terminGutachter = await ladeLeadTerminGutachter((leads ?? []).map((l) => l.id))
+
   // Abbrecher-Zaehler fuer den Chip-Badge (immer berechnen, auch ausserhalb des
   // Filters): gibt dem Dispatcher ein dauerhaftes glanceable Signal.
   const { count: abbrecherCount } = await supabase
@@ -112,7 +119,7 @@ export default async function DispatchLeads({
       </ChipRow>
 
       {/* Liste / Kanban Toggle + View */}
-      <LeadsViewToggle leads={leads ?? []} />
+      <LeadsViewToggle leads={leads ?? []} terminGutachter={terminGutachter} />
 
       {/* Floating Action Button — zentriert im Content-Bereich rechts der
           Sidebar. --app-sidebar-width wird vom PortalNav auf <html> gesetzt
