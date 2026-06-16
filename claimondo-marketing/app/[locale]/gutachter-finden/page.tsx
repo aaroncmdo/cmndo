@@ -56,7 +56,11 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function GutachterFindenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ stadt?: string; plz?: string; lat?: string; lng?: string }>
+  searchParams: Promise<{
+    stadt?: string; plz?: string; lat?: string; lng?: string
+    // AAR-956: Google-Ads-Click-IDs vom Ad-Klick (landet auf dieser Parent-URL).
+    gclid?: string; gbraid?: string; wbraid?: string; gclsrc?: string
+  }>
 }) {
   const t = await getTranslations('gutachter_finden')
   const sp = await searchParams
@@ -133,7 +137,11 @@ export default async function GutachterFindenPage({
 
       {/* Vollbild-Finder als wiederverwendbare Section (Karte + Finder +
           Wizard-Toggle mit App-Link). initialCenter aus ?stadt/?plz/?lat&lng. */}
-      <GutachterFindenSection height="100dvh" initialCenter={initialCenter} />
+      <GutachterFindenSection
+        height="100dvh"
+        initialCenter={initialCenter}
+        clickIds={{ gclid: sp.gclid, gbraid: sp.gbraid, wbraid: sp.wbraid, gclsrc: sp.gclsrc }}
+      />
 
       {/* Premium-Polish 2026-05-14: scroll-bare Section unterhalb der Karte
           mit Trust-Strip, BGH-Authority, FAQ und Bottom-CTA. Karten-UX
