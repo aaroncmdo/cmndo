@@ -17,6 +17,7 @@ import { useEffect, useRef, useState, useTransition } from 'react'
 import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
+import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
 import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher } from '../actions'
@@ -108,6 +109,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
     ortLabel: string | null
     startIso: string | null
     dispatcher: { vorname: string; avatarUrl: string | null; beschreibung: string | null } | null
+    gutachter: { vorname: string; avatarUrl: string | null; firma: string | null; googleDurchschnitt: number | null; googleAnzahl: number | null; googleAktualisiertAm: string | null } | null
   } | null>(null)
   const [fehler, setFehler] = useState<string | null>(null)
   const [slotWeg, setSlotWeg] = useState(false)
@@ -213,7 +215,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         if (res.slotWeg && ort) setSlotWeg(true)
         return
       }
-      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher })
+      setGebucht({ svVorname: res.svVorname, ortLabel: res.ortLabel, startIso: res.startIso, dispatcher: res.dispatcher, gutachter: res.gutachter })
       setBuchungToken(res.token)
       setBuchungLeadId(res.leadId)
       // Conversion (value-based, wie Monika): Reservierung = haftpflicht-Lead (100 €) + lead_id-Dedupe
@@ -516,6 +518,44 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
               'Vielen Dank — unser Team meldet sich in Kürze telefonisch für die Terminvereinbarung.'
             )}
           </p>
+
+          {/* AAR-956 (Aaron 16.06.): gewählter Gutachter als Profil-Card (Foto/Name/Firma + Google-
+              Bewertung) — der Kunde sieht direkt, mit wem er den Termin hat (neben dem Ansprechpartner). */}
+          {gebucht.gutachter && (
+            <div className="mt-4 w-full rounded-ios-lg border border-claimondo-border bg-white/80 p-4 text-left shadow-glass-card">
+              <div className="flex items-center gap-3">
+                {gebucht.gutachter.avatarUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={gebucht.gutachter.avatarUrl}
+                    alt={gebucht.gutachter.vorname}
+                    className="h-14 w-14 flex-shrink-0 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-claimondo-ondo text-heading-sm font-extrabold text-white">
+                    {gebucht.gutachter.vorname.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-[0.6875rem] font-bold uppercase tracking-wide text-claimondo-shield/60">
+                    Ihr Gutachter
+                  </p>
+                  <p className="truncate text-body font-bold text-claimondo-navy">{gebucht.gutachter.vorname}</p>
+                  {gebucht.gutachter.firma && (
+                    <p className="truncate text-[0.75rem] text-claimondo-shield/70">{gebucht.gutachter.firma}</p>
+                  )}
+                </div>
+                {gebucht.gutachter.googleDurchschnitt !== null && gebucht.gutachter.googleAnzahl !== null && (
+                  <GoogleBewertungBadge
+                    durchschnitt={gebucht.gutachter.googleDurchschnitt}
+                    anzahl={gebucht.gutachter.googleAnzahl}
+                    zuletztAktualisiert={gebucht.gutachter.googleAktualisiertAm}
+                    size="sm"
+                  />
+                )}
+              </div>
+            </div>
+          )}
 
           {/* AAR-956 (Aaron 14.06.): Handoff in den Self-Service-Lead — der Kunde vervollständigt den
               Schaden (Hergang/Fahrzeug/Vollmacht) im /flow. target=_top bricht aus dem Embed-iframe

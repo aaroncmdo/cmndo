@@ -155,11 +155,20 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'unfallort_lng',
 ])
 
-// CMM-57: Felder aus der Allowlist, die nicht auf faelle/claims leben, sondern
-// in der gutachten-Sub-Tabelle (F+G-Cluster). updateFallField routet sie
-// dorthin. restwert + wiederbeschaffungswert wurden von #1322 aus faelle
-// gedroppt — ein faelle-Write lief seither still ins Leere.
-const GUTACHTEN_ROUTED_FIELDS = new Set<string>(['restwert', 'wiederbeschaffungswert'])
+// CMM-57: Felder aus der Allowlist, die nicht auf faelle/claims leben, sondern in der
+// gutachten-Sub-Tabelle (F+G-Cluster). updateFallField routet sie dorthin (Admin-Override
+// des OCR-Werts). Map = UI-Feld -> gutachten-Spalte (gleichnamig ODER Rename).
+// - restwert/wiederbeschaffungswert: gleichnamig (von #1322 aus faelle gedroppt).
+// - CMM-49: reparaturkosten/wertminderung sind 0-populated dead-legacy auf faelle; der
+//   Reader exponiert v_faelle.reparaturkosten = gutachten.reparaturkosten_netto und
+//   v_faelle.wertminderung = gutachten.minderwert -> Admin-Override dorthin (Rename, netto)
+//   statt toten faelle-Write. Behebt den bislang ins Leere laufenden Override.
+const GUTACHTEN_FIELD_MAP: Record<string, string> = {
+  restwert: 'restwert',
+  wiederbeschaffungswert: 'wiederbeschaffungswert',
+  reparaturkosten: 'reparaturkosten_netto',
+  wertminderung: 'minderwert',
+}
 
 // CMM-49/AAR-552: Felder, deren SSoT der "aktuelle Termin" (gutachter_termine) ist —
 // Reader lesen sie aus dem t-LATERAL von v_faelle_mit_aktuellem_termin, NICHT aus faelle.
@@ -225,12 +234,13 @@ export async function updateFallField(
   // + gutachten_ocr_manuell_ueberschrieben=true, damit ein Re-OCR den manuellen
   // Wert nicht ueberschreibt. Admin-Client, weil canEditField() oben bereits
   // autorisiert hat (analog PR-D).
-  if (GUTACHTEN_ROUTED_FIELDS.has(field)) {
+  const gutachtenCol = GUTACHTEN_FIELD_MAP[field]
+  if (gutachtenCol) {
     const claimId = gateClaimId
     if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
     const { data: rows, error: gErr } = await createAdminClient()
       .from('gutachten')
-      .update({ [field]: normalized, gutachten_ocr_manuell_ueberschrieben: true })
+      .update({ [gutachtenCol]: normalized, gutachten_ocr_manuell_ueberschrieben: true })
       .eq('claim_id', claimId)
       .select('id')
     if (gErr) return { success: false, error: gErr.message }
