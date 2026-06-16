@@ -1,8 +1,7 @@
 'use client'
 
-// AAR-glass-s1: Auswahl-Cards als Glass-Cards. Aktive Card = CTA-Gradient-Fill,
-// inaktive = neutrales Glass. Icon-Bubble entfällt nicht ganz, wird aber
-// dezenter (kein Hintergrund-Kreis bei inaktiv).
+// AAR-956 15.06.: vereinheitlicht auf Flow-/Claimondo-Stil. Auswahl-Cards solide
+// (aktiv = Ondo-Border + dezenter Ondo-Tint), statt Glass/Gradient.
 
 import type { OnboardingFeld } from '../types'
 
@@ -15,41 +14,15 @@ interface Props {
 
 export function ToggleCardsField({ feld, value, onChange, disabled }: Props) {
   const optionen = feld.optionen ?? []
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0, width: '100%' }}>
-      <label
-        style={{
-          fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '.1em',
-          color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 75%, transparent)',
-          padding: '0 22px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-        }}
-      >
+    <div className="flex w-full min-w-0 flex-col gap-2">
+      <label className="text-sm font-semibold tracking-[-.01em] text-claimondo-navy">
         {feld.label}
-        {feld.pflicht && <span style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))', fontSize: 13 }}>*</span>}
+        {feld.pflicht && <span className="text-danger"> *</span>}
       </label>
-      {feld.hint && (
-        <span
-          style={{
-            fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
-            fontSize: 12,
-            color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 50%, transparent)',
-            padding: '0 22px',
-            marginTop: -2,
-          }}
-        >
-          {feld.hint}
-        </span>
-      )}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        {optionen.map(opt => {
+      {feld.hint && <span className="-mt-1 text-xs text-claimondo-ondo">{feld.hint}</span>}
+      <div className="flex flex-col gap-2.5">
+        {optionen.map((opt) => {
           const isActive = value === opt.value
           return (
             <button
@@ -61,64 +34,19 @@ export function ToggleCardsField({ feld, value, onChange, disabled }: Props) {
               data-active={isActive}
               disabled={disabled}
               onClick={() => onChange(opt.value)}
-              className={
+              className={`flex w-full min-w-0 items-center gap-3.5 rounded-ios-md border px-5 py-4 text-left transition-all duration-200 disabled:cursor-not-allowed ${
                 isActive
-                  ? ''
-                  : '[background:var(--glass-bg)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)]'
-              }
-              style={{
-                borderRadius: 18,
-                padding: '14px 20px',
-                display: 'flex',
-                gap: 14,
-                alignItems: 'center',
-                cursor: disabled ? 'not-allowed' : 'pointer',
-                transition: 'all .2s ease',
-                textAlign: 'left',
-                width: '100%',
-                minWidth: 0,
-                fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
-                background: isActive ? 'var(--cta-gradient)' : undefined,
-                border: isActive ? '1px solid rgba(255,255,255,.3)' : 'var(--glass-border)',
-                boxShadow: isActive
-                  ? '0 12px 32px color-mix(in srgb, transparent 60%, var(--brand-primary, var(--claimondo-ondo)))'
-                  : 'var(--glass-shadow)',
-              }}
+                  ? 'border-claimondo-ondo bg-claimondo-ondo/5'
+                  : 'border-claimondo-border bg-white hover:border-claimondo-ondo/40 hover:bg-claimondo-bg'
+              }`}
             >
-              {opt.icon && (
-                <span
-                  style={{
-                    fontSize: 22,
-                    flexShrink: 0,
-                    filter: isActive ? 'brightness(0) invert(1)' : 'none',
-                    opacity: isActive ? 0.95 : 1,
-                  }}
-                >
-                  {opt.icon}
-                </span>
-              )}
-              <span style={{ display: 'flex', flexDirection: 'column', gap: 2, minWidth: 0 }}>
-                <strong
-                  style={{
-                    fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-                    fontSize: 15,
-                    fontWeight: 700,
-                    letterSpacing: '-.012em',
-                    color: isActive ? '#fff' : 'var(--brand-primary, var(--claimondo-navy))',
-                  }}
-                >
+              {opt.icon && <span className="shrink-0 text-[22px] leading-none">{opt.icon}</span>}
+              <span className="flex min-w-0 flex-col gap-0.5">
+                <strong className="text-[15px] font-bold tracking-[-.012em] text-claimondo-navy">
                   {opt.label}
                 </strong>
                 {opt.description && (
-                  <span
-                    style={{
-                      fontSize: 12.5,
-                      lineHeight: 1.45,
-                      color: isActive
-                        ? 'rgba(255,255,255,.85)'
-                        : 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 60%, transparent)',
-                    }}
-                  >
+                  <span className="text-[12.5px] leading-relaxed text-claimondo-ondo">
                     {opt.description}
                   </span>
                 )}

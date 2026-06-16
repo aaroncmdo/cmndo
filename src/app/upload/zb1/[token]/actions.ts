@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
 import { revalidatePath } from 'next/cache'
 import type { ZB1ExtractedData } from '@/lib/ocr/zb1-parser'
+import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { getStorageUrl } from '@/lib/storage/url'
 
 export type ZB1UploadResult = {
@@ -155,27 +156,8 @@ export async function uploadZb1ViaToken(
     updated_at: new Date().toISOString(),
   }
 
-  // H6: Nur überschreiben wenn Feld noch leer
-  function setIfEmpty(field: string, value: string | number | null | undefined) {
-    if (value == null) return
-    const current = (lead as unknown as Record<string, unknown>)[field]
-    if (current == null || current === '') leadUpdate[field] = value
-  }
-  setIfEmpty('fin', extracted.fin_vin)
-  setIfEmpty('kennzeichen', extracted.kennzeichen)
-  setIfEmpty('fahrzeug_hersteller', extracted.fahrzeug_hersteller)
-  setIfEmpty('fahrzeug_modell', extracted.fahrzeug_modell)
-  setIfEmpty('fahrzeug_baujahr', extracted.fahrzeug_baujahr)
-  setIfEmpty('erstzulassung', extracted.erstzulassung)
-  setIfEmpty('halter_vorname', extracted.halter_vorname)
-  setIfEmpty('halter_nachname', extracted.halter_nachname)
-  setIfEmpty('halter_strasse', extracted.halter_strasse)
-  setIfEmpty('halter_plz', extracted.halter_plz)
-  setIfEmpty('halter_stadt', extracted.halter_stadt)
-  setIfEmpty('hsn', extracted.hsn)
-  setIfEmpty('tsn', extracted.tsn)
-  setIfEmpty('fahrzeug_farbe', extracted.fahrzeug_farbe)
-  setIfEmpty('brn', extracted.brn)
+  // H6 (geteiltes Mapping, AAR-956): nur leere Felder fuellen.
+  Object.assign(leadUpdate, buildZb1LeadUpdate(extracted, lead as unknown as Record<string, unknown>))
 
   await db.from('leads').update(leadUpdate).eq('id', lead.id)
 

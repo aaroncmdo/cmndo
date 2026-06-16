@@ -1,7 +1,7 @@
 'use client'
 
-// AAR-glass-s1: Segmented-Control als Glass-Pill-Container mit CTA-Gradient-
-// Fill für die aktive Option.
+// AAR-956 15.06.: vereinheitlicht auf Flow-/Claimondo-Stil. Segmented-Control mit
+// solidem Ondo-Fill für die aktive Option (statt Glass/Gradient).
 
 import type { OnboardingFeld } from '../types'
 
@@ -14,44 +14,15 @@ interface Props {
 
 export function SegmentedField({ feld, value, onChange, disabled }: Props) {
   const optionen = feld.optionen ?? []
-
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0, width: '100%' }}>
-      <label
-        style={{
-          fontFamily: 'var(--font-heading, "Montserrat", system-ui, sans-serif)',
-          fontSize: 11,
-          fontWeight: 700,
-          textTransform: 'uppercase',
-          letterSpacing: '.1em',
-          color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 75%, transparent)',
-          padding: '0 22px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: 4,
-        }}
-      >
+    <div className="flex w-full min-w-0 flex-col gap-2">
+      <label className="text-sm font-semibold tracking-[-.01em] text-claimondo-navy">
         {feld.label}
-        {feld.pflicht && <span style={{ color: 'var(--brand-secondary, var(--claimondo-ondo))', fontSize: 13 }}>*</span>}
+        {feld.pflicht && <span className="text-danger"> *</span>}
       </label>
-      {feld.hint && (
-        <span
-          style={{
-            fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
-            fontSize: 12,
-            color: 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 50%, transparent)',
-            padding: '0 22px',
-            marginTop: -2,
-          }}
-        >
-          {feld.hint}
-        </span>
-      )}
-      <div
-        className="[background:var(--glass-bg)] [backdrop-filter:var(--glass-blur)] [-webkit-backdrop-filter:var(--glass-blur)] [box-shadow:var(--glass-shadow)] rounded-[var(--glass-radius-pill)]"
-        style={{ display: 'flex', padding: 4, border: 'var(--glass-border)', width: '100%', minWidth: 0, gap: 4 }}
-      >
-        {optionen.map(opt => {
+      {feld.hint && <span className="-mt-1 text-xs text-claimondo-ondo">{feld.hint}</span>}
+      <div className="flex w-full min-w-0 gap-1 rounded-ios-md bg-claimondo-navy/[0.06] p-1">
+        {optionen.map((opt) => {
           const isActive = value === opt.value
           return (
             <button
@@ -63,28 +34,13 @@ export function SegmentedField({ feld, value, onChange, disabled }: Props) {
               data-active={isActive}
               disabled={disabled}
               onClick={() => onChange(opt.value)}
-              style={{
-                flex: 1,
-                minWidth: 0,
-                display: 'inline-flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: 6,
-                padding: '9px 12px',
-                fontFamily: 'var(--font-body, "Noto Sans", system-ui, sans-serif)',
-                fontSize: 13.5,
-                fontWeight: 600,
-                letterSpacing: '-.01em',
-                cursor: disabled ? 'not-allowed' : 'pointer',
-                transition: 'all .22s ease',
-                borderRadius: 999,
-                border: isActive ? '1px solid rgba(255,255,255,.3)' : 'none',
-                background: isActive ? 'var(--cta-gradient)' : 'transparent',
-                color: isActive ? '#fff' : 'color-mix(in srgb, var(--brand-primary, var(--claimondo-navy)) 65%, transparent)',
-                boxShadow: isActive ? '0 6px 16px color-mix(in srgb, transparent 65%, var(--brand-primary, var(--claimondo-ondo)))' : 'none',
-              }}
+              className={`inline-flex min-w-0 flex-1 items-center justify-center gap-1.5 rounded-ios-sm px-3 py-2.5 text-sm font-semibold tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] disabled:cursor-not-allowed ${
+                isActive
+                  ? 'bg-claimondo-ondo text-white shadow-cta-ondo'
+                  : 'text-claimondo-ondo hover:bg-white/60'
+              }`}
             >
-              {opt.icon && <span style={{ fontSize: 14, lineHeight: 1, opacity: isActive ? 0.95 : 0.8 }}>{opt.icon}</span>}
+              {opt.icon && <span className="text-sm leading-none">{opt.icon}</span>}
               {opt.label}
             </button>
           )

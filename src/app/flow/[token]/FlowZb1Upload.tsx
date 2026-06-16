@@ -13,14 +13,31 @@ import { useTranslations } from 'next-intl'
 import { uploadZb1Flow, speichereZb1KorrekturFlow } from './self-service-actions'
 import { Button } from '@/components/primitives/Button/Button.web'
 
-type Zb1FlowExtracted = {
+export type Zb1FlowExtracted = {
   kennzeichen: string | null
   fahrzeug_hersteller: string | null
   fahrzeug_modell: string | null
   halter_name: string | null
+  // AAR-956 15.06.: strukturierte Halter-Felder fürs Vorausfüllen des Halter-
+  // Steps + ist_fahrzeughalter Name-Match (Spiegel der uploadZb1Flow-Shape).
+  halter_vorname: string | null
+  halter_nachname: string | null
+  halter_strasse: string | null
+  halter_plz: string | null
+  halter_stadt: string | null
 }
 
-export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereitsErfasst?: boolean }) {
+export function FlowZb1Upload({
+  token,
+  bereitsErfasst,
+  onExtracted,
+}: {
+  token: string
+  bereitsErfasst?: boolean
+  // AAR-956 15.06.: OCR-Ergebnis in den Eltern-Stepper hochreichen (Halter/Fahrzeug
+  // in die Formular-values mergen) — statt der bisherigen Nur-Anzeige.
+  onExtracted?: (ex: Zb1FlowExtracted) => void
+}) {
   const t = useTranslations('selfService')
   const [status, setStatus] = useState<'idle' | 'laden' | 'fertig' | 'bestaetigt' | 'fehler' | 'skip'>(
     'idle',
@@ -46,11 +63,16 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
       setFehler(r.error ?? t('zb1.fehler_auslesen'))
       return
     }
-    const ex = r.extracted ?? {
+    const ex: Zb1FlowExtracted = r.extracted ?? {
       kennzeichen: null,
       fahrzeug_hersteller: null,
       fahrzeug_modell: null,
       halter_name: null,
+      halter_vorname: null,
+      halter_nachname: null,
+      halter_strasse: null,
+      halter_plz: null,
+      halter_stadt: null,
     }
     setExtracted(ex)
     setEdit({
@@ -58,6 +80,8 @@ export function FlowZb1Upload({ token, bereitsErfasst }: { token: string; bereit
       fahrzeug_hersteller: ex.fahrzeug_hersteller ?? '',
       fahrzeug_modell: ex.fahrzeug_modell ?? '',
     })
+    // AAR-956: OCR-Werte in den Stepper mergen (Halter/Kennzeichen vorausfüllen).
+    onExtracted?.(ex)
     setStatus('fertig')
   }
 

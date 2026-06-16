@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import DispatchLeadForm from './DispatchLeadForm'
+import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 import { computeQualificationStatus } from './_lib/qualification-engine'
 
@@ -135,20 +136,23 @@ export default async function DispatchLeadDetail({
   }
 
   return (
-    <DispatchLeadForm
-      lead={lead as Record<string, unknown> & { id: string }}
-      phasen={phasen}
-      flowLinks={flowLinks}
-      aktiverTermin={aktiverSvTermin}
-      hardGateOk={qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei}
-      hardGateDetails={{ q1: qual.q1_schuldfrage, q2: qual.q2_schaden, q3: qual.q3_polizei }}
-      wunschterminIso={(lead.wunschtermin as string | null) ?? null}
-      wunschterminWochentage={
-        Array.isArray(lead.wunschtermin_wochentage) && lead.wunschtermin_wochentage.length > 0
-          ? (lead.wunschtermin_wochentage as number[])
-          : null
-      }
-      fallId={fallId}
-    />
+    <>
+      <LeadRealtimeRefresh leadId={id} watchTermine />
+      <DispatchLeadForm
+        lead={lead as Record<string, unknown> & { id: string }}
+        phasen={phasen}
+        flowLinks={flowLinks}
+        aktiverTermin={aktiverSvTermin}
+        hardGateOk={qual.q1_schuldfrage && qual.q2_schaden && qual.q3_polizei}
+        hardGateDetails={{ q1: qual.q1_schuldfrage, q2: qual.q2_schaden, q3: qual.q3_polizei }}
+        wunschterminIso={(lead.wunschtermin as string | null) ?? null}
+        wunschterminWochentage={
+          Array.isArray(lead.wunschtermin_wochentage) && lead.wunschtermin_wochentage.length > 0
+            ? (lead.wunschtermin_wochentage as number[])
+            : null
+        }
+        fallId={fallId}
+      />
+    </>
   )
 }

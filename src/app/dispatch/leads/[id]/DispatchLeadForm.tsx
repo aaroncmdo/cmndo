@@ -10,7 +10,7 @@
 // Zeugen-Editor) + Gates->Flags folgen in P2c/P2d.
 
 import { useState, useRef, useEffect, useCallback } from 'react'
-import { ChevronDown } from 'lucide-react'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { saveDispatchLeadFelder } from './_actions/dispatch-lead-felder'
@@ -41,6 +41,25 @@ function initialValue(feld: OnboardingFeld, lead: LeadRow): unknown {
 }
 
 const DEBOUNCE_MS = 700
+
+// Kurze Tab-Labels je Phase (sonst sprengen "Unfallhergang"/"Fahrzeug & Halter" die Leiste).
+const TAB_LABELS: Record<string, string> = {
+  kontakt: 'Kontakt',
+  schaden: 'Schaden',
+  unfall: 'Unfall',
+  fahrzeug: 'Fahrzeug',
+  schuld: 'Schuld',
+  service_kanzlei: 'Service',
+  termin_sv: 'Termin',
+  vollmacht: 'Vollmacht',
+  status: 'Status',
+}
+
+// Feld-Typen, die im 2-Spalten-Grid die volle Breite brauchen (mehrzeilig/Rich).
+const FULL_WIDTH_TYPEN = new Set<string>([
+  'textarea', 'toggle-cards', 'file', 'signature', 'zb1-upload', 'slot', 'termin',
+  'phone-verify', 'avatar-upload', 'calendar-connect', 'embed-site-create',
+])
 
 export default function DispatchLeadForm({
   lead,
@@ -120,6 +139,23 @@ export default function DispatchLeadForm({
     }
   }, [flush])
 
+  // AAR-956 Realtime: nach router.refresh (LeadRealtimeRefresh bei leads-UPDATE) kommt
+  // ein frischer `lead`-Prop. Wir mergen die neuen Werte fuer Felder, die der Dispatcher
+  // NICHT gerade bearbeitet (nicht in dirtyRef) — so erscheint die Kunde-Live-Eingabe aus
+  // dem /flow, ohne die laufende Eingabe des Dispatchers zu ueberschreiben.
+  useEffect(() => {
+    setValues((prev) => {
+      const next = { ...prev }
+      for (const phase of phasen) {
+        for (const feld of phase.felder) {
+          if (dirtyRef.current.has(feld.feld_key)) continue
+          next[feld.feld_key] = initialValue(feld, lead)
+        }
+      }
+      return next
+    })
+  }, [lead, phasen])
+
   const titel = `${(lead.vorname as string) ?? ''} ${(lead.nachname as string) ?? ''}`.trim() || 'Lead'
 
   return (
@@ -127,7 +163,7 @@ export default function DispatchLeadForm({
     // (flex-1 min-h-0 overflow-y-auto). Sidebar: lg:sticky lg:top-0 / lg:max-h-screen —
     // gegen tatsaechliche Header-Hoehe im Task-11-Smoke verifizieren (ggf. top-[56px]).
     <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
-      <main className="flex-1 min-w-0 max-w-3xl px-4 sm:px-6 py-6">
+      <main className="flex-1 min-w-0 px-4 sm:px-6 py-6">
       <div className="mb-4 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-claimondo-navy">{titel}</h1>
@@ -143,31 +179,30 @@ export default function DispatchLeadForm({
 
       <DispatchGatesPanel values={values} lead={lead} />
 
-      <div className="flex flex-col gap-3 max-w-3xl">
+      {/* AAR-956 15.06. (Aaron): Sektionen als Tabs (Desktop-Power-User) statt
+          gestapeltem Akkordeon; Felder im 2-Spalten-Grid (mehrzeilig/Rich = volle
+          Breite) — keine lange Einspalter-Kolonne mobile-first Felder mehr. */}
+      <Tabs defaultValue={phasen[0]?.phase_key} className="w-full">
+        <TabsList variant="default" className="w-full overflow-x-auto bg-claimondo-navy/[0.06]">
+          {phasen.map((phase) => (
+            <TabsTrigger key={phase.id} value={phase.phase_key}>
+              {TAB_LABELS[phase.phase_key] ?? phase.titel.split('&')[0].trim()}
+            </TabsTrigger>
+          ))}
+        </TabsList>
         {phasen.map((phase) => (
-          <details
-            key={phase.id}
-            open
-            className="group rounded-ios-xl border border-claimondo-border bg-white"
-          >
-            <summary className="flex items-center justify-between cursor-pointer select-none px-4 py-3 text-sm font-semibold text-claimondo-navy">
-              <span>
-                {phase.titel}
-                <span className="ml-2 text-xs font-normal text-claimondo-ondo/50">
-                  {phase.felder.length} Feld{phase.felder.length === 1 ? '' : 'er'}
-                </span>
-              </span>
-              <ChevronDown className="w-4 h-4 text-claimondo-ondo/50 transition-transform group-open:rotate-180" />
-            </summary>
-            <div className="flex flex-col gap-3 px-4 pb-4 pt-1">
+          <TabsContent key={phase.id} value={phase.phase_key} className="pt-5">
+            <div className="grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-2 xl:grid-cols-3">
               {phase.felder.map((feld) => {
-                // P2d-1: Dispatcher-Override (z.B. termin -> SvDispatchPanel) vor
-                // dem generischen FieldRenderer. Override-Felder schreiben NICHT
-                // ueber den Autosave — sie haben eigene Server-Actions + revalidate.
-                if (hasDispatchFieldOverride(feld.feld_key)) {
-                  return (
-                    <div key={feld.id}>
-                      {renderDispatchFieldOverride(feld, {
+                // P2d-1: Dispatcher-Override (z.B. termin -> SvDispatchPanel) vor dem
+                // generischen FieldRenderer. Override-Felder schreiben NICHT ueber den
+                // Autosave — eigene Server-Actions + revalidate. Rich/mehrzeilig = voll.
+                const istVollbreit =
+                  FULL_WIDTH_TYPEN.has(feld.typ) || hasDispatchFieldOverride(feld.feld_key)
+                return (
+                  <div key={feld.id} className={istVollbreit ? 'col-span-full' : 'min-w-0'}>
+                    {hasDispatchFieldOverride(feld.feld_key) ? (
+                      renderDispatchFieldOverride(feld, {
                         leadId,
                         lead,
                         hardGateOk,
@@ -175,28 +210,29 @@ export default function DispatchLeadForm({
                         aktiverTermin,
                         wunschterminIso,
                         wunschterminWochentage,
-                      })}
-                    </div>
-                  )
-                }
-                return (
-                  <FieldRenderer
-                    key={feld.id}
-                    feld={feld}
-                    value={values[feld.feld_key]}
-                    onChange={(val) => setField(feld.feld_key, val)}
-                    disabled={false}
-                  />
+                      })
+                    ) : (
+                      <FieldRenderer
+                        feld={feld}
+                        value={values[feld.feld_key]}
+                        onChange={(val) => setField(feld.feld_key, val)}
+                        disabled={false}
+                      />
+                    )}
+                  </div>
                 )
               })}
-              {/* P2d-3: Sektion-Panels (Unfallskizze / Zeugen / Wunschtag-Pills)
-                  NACH den Feldern dieser Sektion (Mechanismus B). */}
-              {hasDispatchSectionPanels(phase.phase_key) &&
-                renderDispatchSectionPanels(phase.phase_key, { leadId, lead, values })}
+              {/* P2d-3: Sektion-Panels (Unfallskizze / Zeugen / Wunschtag-Pills) nach
+                  den Feldern dieser Sektion (Mechanismus B). */}
+              {hasDispatchSectionPanels(phase.phase_key) && (
+                <div className="col-span-full">
+                  {renderDispatchSectionPanels(phase.phase_key, { leadId, lead, values })}
+                </div>
+              )}
             </div>
-          </details>
+          </TabsContent>
         ))}
-      </div>
+      </Tabs>
 
       {/* P2f / §8c Teil 1: nicht-blockierende Erfassungs-Checkliste (erfasst/offen). */}
       <DispatchChecklistPanel phasen={phasen} values={values} />
@@ -204,7 +240,7 @@ export default function DispatchLeadForm({
       {/* P2f / §8c Teil 2: Anforder-Buttons — Dokumente beim Kunden anfordern.
           Wiederverwendung der bestehenden DokumenteAnfordernCard (war repo-weit
           dormant). id-Wrapper = Scroll-Target (z.B. „Kunde hat Unfallfotos"). */}
-      <div id="dokumente-anfordern-card" className="mt-3 max-w-3xl">
+      <div id="dokumente-anfordern-card" className="mt-3">
         <DokumenteAnfordernCard
           leadId={leadId}
           lead={lead}
