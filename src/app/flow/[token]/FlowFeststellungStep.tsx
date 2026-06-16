@@ -57,7 +57,10 @@ export function FlowFeststellungStep({
 }) {
   const t = useTranslations('flow')
   const [values, setValues] = useState<Record<string, unknown>>(initialValues)
-  const [microIndex, setMicroIndex] = useState(0)
+  // AAR-956 16.06. (Aaron): Navigation an die Schritt-ID, NICHT an den Positions-Index.
+  // activeSteps re-filtert reaktiv (bedingte Schritte aus values) — ein Positions-Index
+  // zeigte nach dem Re-Filter auf einen ANDEREN Schritt → der Flow "sprang". null = erster Schritt.
+  const [currentStepId, setCurrentStepId] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showManuell, setShowManuell] = useState(false)
@@ -96,9 +99,19 @@ export function FlowFeststellungStep({
     [felderByKey, values],
   )
 
-  const idx = Math.min(microIndex, Math.max(0, activeSteps.length - 1))
+  // Index aus der Schritt-ID ableiten (stabil bei activeSteps-Refilter). currentStepId=null
+  // ODER verschwundener Schritt → Fallback auf den ersten (greift praktisch nie, da der
+  // aktuelle Schritt nie aus seinem EIGENEN Feld heraus deaktiviert wird).
+  const foundIdx = currentStepId == null ? 0 : activeSteps.findIndex((s) => s.id === currentStepId)
+  const idx = foundIdx >= 0 ? Math.min(foundIdx, Math.max(0, activeSteps.length - 1)) : 0
   const currentStep = activeSteps[idx]
   const isLast = idx >= activeSteps.length - 1
+
+  // Navigation IMMER über die Ziel-Schritt-ID (clampt + merkt sich die ID).
+  function gotoIdx(target: number) {
+    const c = Math.max(0, Math.min(target, activeSteps.length - 1))
+    setCurrentStepId(activeSteps[c]?.id ?? null)
+  }
 
   function setFeld(key: string, val: unknown) {
     setValues((v) => ({ ...v, [key]: val }))
@@ -131,7 +144,7 @@ export function FlowFeststellungStep({
 
   function handleZurueck() {
     setError(null)
-    setMicroIndex((i) => Math.max(0, Math.min(i, activeSteps.length - 1) - 1))
+    gotoIdx(idx - 1)
   }
 
   async function handleWeiter() {
@@ -139,7 +152,7 @@ export function FlowFeststellungStep({
       // Hintergrund-Autosave (best effort): Resume + Realtime, nicht blockierend.
       void speichereFeststellungFlow(token, values).catch(() => {})
       setError(null)
-      setMicroIndex(idx + 1)
+      gotoIdx(idx + 1)
       return
     }
     setSaving(true)
