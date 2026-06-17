@@ -95,6 +95,8 @@
     "step_feststellung": {
       "manuell_toggle": "Prefer without a photo — enter vehicle details manually",
       "fahrzeugdaten": "Vehicle details",
+      "zeugenaussage_titel": "Upload witness statement",
+      "zeugenaussage_hinweis": "If you have a written witness statement, upload it here (photo or PDF).",
       "heading": "A few details about your claim",
       "sub": "The more precise, the faster — everything is optional and can be added later.",
       "error_save": "Saving failed."
