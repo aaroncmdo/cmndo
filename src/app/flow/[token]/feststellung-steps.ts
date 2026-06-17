@@ -35,8 +35,9 @@ export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   { kind: 'felder', id: 'dein_fahrzeug', kapitel: 'Fahrzeug', titel: 'Dein Fahrzeug', feldKeys: ['kennzeichen', 'fahrzeug_fahrbereit', 'mietwagen_flag'] },
   { kind: 'felder', id: 'halter', kapitel: 'Fahrzeug', titel: 'Wem gehört das Fahrzeug?', feldKeys: ['ist_fahrzeughalter', 'halter_vorname', 'halter_nachname', 'halter_geburtsdatum', 'halter_strasse', 'halter_plz', 'halter_stadt'] },
   { kind: 'felder', id: 'vorschaeden', kapitel: 'Fahrzeug', titel: 'Vorschäden am Auto?', feldKeys: ['hat_vorschaeden'] },
-  // ④ Service
-  { kind: 'felder', id: 'service', kapitel: 'Service', titel: 'Wie sollen wir helfen?', feldKeys: ['service_typ', 'kanzlei_wunsch'] },
+  // ④ Service-/Kanzlei-Wahl (service_typ + kanzlei_wunsch) wandert in den Signatur-Step
+  //    (POS) — Aaron 16.06.: "die Kanzlei nicht am Feststellung-Ende, sondern wo unterschrieben
+  //    wird". Gerendert in FlowWizardKfz (SA-Step), Config via serviceFelder-Prop.
 ]
 
 // Spiegelt WizardClient.meetsCondition: sichtbar wenn keine Bedingung gesetzt ist
