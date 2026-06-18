@@ -282,6 +282,35 @@ export async function updateFallField(
     return { success: true }
   }
 
+  // CMM-49: kunde_email lebt in der geschaedigter-Party->personen (SSoT). v_claim_full/v_faelle
+  // sourcen es von dort (#2982/#2984); ein Inline-Edit muss personen.email der geschaedigter-Party
+  // schreiben — sonst maskiert die party-first-Sicht den Edit (und der Write landete nur auf dem
+  // zu droppenden claims.kunde_email). Selektion == v_claim_full.kunde_p (reihenfolge, created_at).
+  // Admin-Client: canEditField() hat oben bereits autorisiert.
+  if (field === 'kunde_email') {
+    const admin = createAdminClient()
+    const { data: party } = await admin
+      .from('claim_parties')
+      .select('person_id')
+      .eq('claim_id', gateClaimId)
+      .eq('rolle', 'geschaedigter')
+      .order('reihenfolge', { ascending: true })
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const personId = (party?.person_id as string | null) ?? null
+    if (!personId) {
+      return {
+        success: false,
+        error: 'Kein verknuepfter Kunde (geschaedigter-Party ohne Person) — E-Mail kann nicht gesetzt werden.',
+      }
+    }
+    const { error: pErr } = await admin.from('personen').update({ email: normalized }).eq('id', personId)
+    if (pErr) return { success: false, error: pErr.message }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   // CMM-48 PR-D: Duplikat-Spalten gehen auf claims (Single Source of Truth).
   // canEditField() hat die Autorisierung bereits geprüft → der claims-Write
   // läuft über den Admin-Client (RLS-Bypass gerechtfertigt). Workflow-/
