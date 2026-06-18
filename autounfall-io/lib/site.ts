@@ -48,9 +48,10 @@ export const SITE = {
     name: 'Verkehrsrechts-Partnerkanzlei',
   },
 
-  // Telefon: au.io-eigene Mobilnr (Entscheidung Aaron 14.06.2026 — ersetzt die
-  // 0221-Festnetznr, die in .env.example als Claimondo-Footprint geflaggt war).
-  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0171 20289514',
+  // Telefon: au.io-eigene Festnetznr 0221 25906530 (Aaron/LexDrive-Freigabe 12.06.2026,
+  // als au.io-exklusiv bestaetigt 18.06.2026 — KEIN Claimondo-/kfzgutachter-Footprint).
+  // Revert der #2840-Mobilnr 0171, die auf einem inzwischen ueberholten Footprint-Flag beruhte.
+  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0221 25906530',
   // Kontakt-Mail team@autounfall.io (LexDrive-Freigabe 12.06.2026). Postfach muss
   // operativ vor Go-Live aktiv sein. Override via NEXT_PUBLIC_SITE_EMAIL.
   contactEmail: process.env.NEXT_PUBLIC_SITE_EMAIL ?? 'team@autounfall.io',
