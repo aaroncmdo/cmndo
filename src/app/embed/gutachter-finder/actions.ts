@@ -28,7 +28,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
-import { revalidatePath } from 'next/cache'
+import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
 
 export type EmbedBuchungInput = {
   vorname: string
@@ -311,6 +311,22 @@ export async function reserviereEmbedTermin(input: {
     leadId = (flx?.lead_id as string | null) ?? null
   } catch {
     leadId = null
+  }
+
+  // AAR-956: Auto-Rückruf — jede Reservierung erzeugt GENAU EINEN Rückruf-Task beim
+  // Dispatcher (auch bei 0-Verfügbarkeit, auswahl=null). Non-critical: bricht die
+  // Reservierung nie. Die Danke-Seite (bucheRueckrufBeimDispatcher) aktualisiert
+  // später DIESELBE Zeile via Upsert (kein zweiter Rückruf). ASAP-Hinweis (now+5min).
+  if (leadId) {
+    try {
+      await upsertReservierungsRueckruf({
+        leadId,
+        startIso: new Date(Date.now() + 5 * 60_000).toISOString(),
+        vonKunde: false,
+      })
+    } catch (err) {
+      console.error('[reserviereEmbedTermin] Auto-Rückruf fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    }
   }
 
   // 2) Kein Slot waehlbar (0 Verfuegbarkeit) → nur Lead, Team koordiniert.
@@ -626,23 +642,22 @@ export async function bucheRueckrufBeimDispatcher(
     if (!leadId) return { ok: false, error: 'Die Sitzung ist abgelaufen. Bitte starten Sie neu.' }
     const { data: lead } = await admin
       .from('leads')
-      .select('vorname, nachname, telefon, zugewiesen_an')
+      .select('vorname, nachname, telefon')
       .eq('id', leadId)
       .maybeSingle()
     if (!lead) return { ok: false, error: 'Anfrage nicht gefunden.' }
 
-    // Dispatcher = der dem Lead zugewiesene; Fallback = erster Dispatch-User (erstellt_von ist NOT NULL).
-    let dispId = (lead.zugewiesen_an as string | null) ?? null
-    if (!dispId) {
-      const { data: d } = await admin.from('profiles').select('id').eq('rolle', 'dispatch').limit(1).maybeSingle()
-      dispId = (d?.id as string | null) ?? null
+    // AAR-956: kundengewählte Wunschzeit → DENSELBEN Reservierungs-Rückruf aktualisieren
+    // (Auto-Anlage aus reserviereEmbedTermin). Der Upsert garantiert: kein zweiter Rückruf,
+    // resolved den Dispatcher und revalidiert /dispatch/rueckrufe + /dispatch/dashboard.
+    const r = await upsertReservierungsRueckruf({ leadId, startIso, vonKunde: true })
+    if (!r.ok || !r.terminId || !r.dispId) {
+      return { ok: false, error: r.error ?? 'Der Rückruf konnte nicht gebucht werden.' }
     }
-    if (!dispId) return { ok: false, error: 'Aktuell ist kein Ansprechpartner verfügbar.' }
 
     const vorname = ((lead.vorname as string | null) ?? '').trim()
     const name = [vorname, ((lead.nachname as string | null) ?? '').trim()].filter(Boolean).join(' ').trim() || 'Kunde'
     const telefon = ((lead.telefon as string | null) ?? '').trim()
-    const endIso = new Date(new Date(startIso).getTime() + 30 * 60_000).toISOString()
     const wann = new Date(startIso).toLocaleString('de-DE', {
       timeZone: 'Europe/Berlin',
       weekday: 'short',
@@ -652,35 +667,17 @@ export async function bucheRueckrufBeimDispatcher(
       minute: '2-digit',
     })
 
-    const { data: termin, error } = await admin
-      .from('admin_termine')
-      .insert({
-        typ: 'rueckruf',
-        titel: `Beratungsgespräch: ${name}`,
-        beschreibung: `Rückruf-Wunsch aus dem Gutachter-Finder (Danke-Seite). Lead bereits qualifiziert — Beratungsgespräch.\nQuelle: embed-gutachter-finder`,
-        start_zeit: startIso,
-        end_zeit: endIso,
-        status: 'offen',
-        lead_id: leadId,
-        erstellt_von: dispId,
-        zugewiesen_an: dispId,
-        erinnerung_min_vorher: 10,
-      })
-      .select('id')
-      .single()
-    if (error || !termin) return { ok: false, error: error?.message ?? 'Der Rückruf konnte nicht gebucht werden.' }
-
     // Mitteilung an den Dispatcher (non-critical).
     try {
       await admin.from('mitteilungen').insert({
-        empfaenger_id: dispId,
+        empfaenger_id: r.dispId,
         empfaenger_rolle: 'dispatch',
         kategorie: 'anruf',
         titel: `Beratungs-Rückruf: ${name}`,
         inhalt: `Tel: ${telefon} · Wunschzeit: ${wann} Uhr`,
         prioritaet: 'hoch',
         icon: '📞',
-        route_url: `/dispatch/rueckrufe?open=${termin.id}`,
+        route_url: `/dispatch/rueckrufe?open=${r.terminId}`,
       })
     } catch (err) {
       console.error('[rueckruf-dispatcher] Mitteilung fehlgeschlagen (nicht kritisch):', (err as Error).message)
@@ -696,12 +693,10 @@ export async function bucheRueckrufBeimDispatcher(
         '',
         'Ihr Claimondo-Team',
       ].join('\n')
-      const r = await sendWhatsAppText(telefon, text)
-      if (!r.ok) console.error('[rueckruf-dispatcher] Kunde-WA fehlgeschlagen:', r.code, r.error)
+      const waRes = await sendWhatsAppText(telefon, text)
+      if (!waRes.ok) console.error('[rueckruf-dispatcher] Kunde-WA fehlgeschlagen:', waRes.code, waRes.error)
     }
 
-    revalidatePath('/dispatch/rueckrufe')
-    revalidatePath('/dispatch/dashboard')
     return { ok: true }
   } catch (err) {
     console.error('[bucheRueckrufBeimDispatcher] fehlgeschlagen (nicht kritisch):', (err as Error).message)
