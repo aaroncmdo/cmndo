@@ -109,7 +109,9 @@ const meldeSchadenInput = {
   hergang: z.string().min(3).max(1000).describe('Kurze Schilderung, was passiert ist (Unfallhergang).'),
   plz: z.string().regex(/^\d{5}$/).describe('5-stellige PLZ des Besichtigungsorts (wo das Fahrzeug steht).'),
   sv_id: z.string().uuid().optional().describe('Opakes Gutachter-Handle aus claimondo_finde_gutachter_termine (gutachter[].id), falls gewählt.'),
-  wunschtermin: z.string().optional().describe('Gewählter Slot als ISO-8601 (gutachter[].termine[].start) — weicher Hold.'),
+  slot_start: z.string().optional().describe('Gewählter Slot-START als ISO-8601 (gutachter[].termine[].start). Mit slot_end + sv_id → echte Termin-Reservierung.'),
+  slot_end: z.string().optional().describe('Gewählter Slot-ENDE als ISO-8601 (gutachter[].termine[].end). Zusammen mit slot_start.'),
+  wunschtermin: z.string().optional().describe('Optional: vager Wunschtermin (weicher Hold), falls KEIN konkreter Slot gewählt wurde.'),
   name: z.string().min(2).max(80).describe('Name des Kunden.'),
   telefon: z.string().min(8).max(20).describe('WhatsApp-Nummer des Kunden (für den FlowLink-Versand).'),
   einwilligung_erteilt: z
@@ -242,10 +244,10 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
         openWorldHint: true,
       },
     },
-    async ({ schadenart, hergang, plz, sv_id, wunschtermin, name, telefon, einwilligung_erteilt }) => {
+    async ({ schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, einwilligung_erteilt }) => {
       try {
         const r = await meldeSchaden(
-          { schadenart, hergang, plz, sv_id, wunschtermin, name, telefon, einwilligung_erteilt },
+          { schadenart, hergang, plz, sv_id, wunschtermin, slot_start, slot_end, name, telefon, einwilligung_erteilt },
           API_BASE,
         )
         return {
@@ -362,7 +364,9 @@ async function runHttp(): Promise<void> {
               hergang: { type: 'string', description: 'Kurze Schilderung des Unfallhergangs.' },
               plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige PLZ des Besichtigungsorts.' },
               sv_id: { type: 'string', format: 'uuid', description: 'Gutachter-Handle aus claimondo_finde_gutachter_termine (optional).' },
-              wunschtermin: { type: 'string', format: 'date-time', description: 'Gewählter Slot (ISO-8601; weicher Hold).' },
+              slot_start: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Start (ISO-8601); mit slot_end + sv_id → Reservierung.' },
+              slot_end: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Ende (ISO-8601).' },
+              wunschtermin: { type: 'string', format: 'date-time', description: 'Optional: vager Wunschtermin (weicher Hold), falls kein konkreter Slot.' },
               name: { type: 'string', description: 'Name des Kunden.' },
               telefon: { type: 'string', description: 'WhatsApp-Nummer des Kunden.' },
               einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein nach ausdrücklicher Nutzer-Zustimmung (DSGVO + WhatsApp + KI-Dienst/USA).' },

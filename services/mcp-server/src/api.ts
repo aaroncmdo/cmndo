@@ -341,6 +341,9 @@ export type MeldeSchadenInput = {
   hergang: string
   plz: string
   sv_id?: string
+  /** Konkreter gewaehlter Slot (gutachter[].termine[].start/end). Beide + sv_id -> echte Reservierung. */
+  slot_start?: string
+  slot_end?: string
   wunschtermin?: string
   name: string
   telefon: string
@@ -365,6 +368,8 @@ export async function meldeSchaden(
     plz: input.plz,
     sv_id: input.sv_id,
     wunschtermin: input.wunschtermin,
+    slot_start: input.slot_start,
+    slot_end: input.slot_end,
     name: input.name,
     telefon: input.telefon,
     einwilligung: { zugestimmt: input.einwilligung_erteilt, policy_version: MCP_CONSENT_POLICY_VERSION },
