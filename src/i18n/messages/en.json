@@ -386,6 +386,7 @@
       "sv_label": "Your expert",
       "kontakt_hinweis": "Will be in touch with you",
       "termin_label": "Appointment reserved",
+      "termin_bestaetigt_label": "Appointment confirmed",
       "wunschtermin_label": "Your preferred date",
       "wunschtermin_pending": "We'll confirm the exact appointment shortly.",
       "besichtigungsort_label": "Inspection location",

@@ -386,6 +386,7 @@
       "sv_label": "خبيرك",
       "kontakt_hinweis": "سيتواصل معك قريباً",
       "termin_label": "تم حجز الموعد",
+      "termin_bestaetigt_label": "تم تأكيد الموعد",
       "wunschtermin_label": "موعدك المفضّل",
       "wunschtermin_pending": "سنؤكّد الموعد الدقيق قريباً.",
       "besichtigungsort_label": "مكان المعاينة",
