@@ -99,7 +99,8 @@
       "zeugenaussage_hinweis": "If you have a written witness statement, upload it here (photo or PDF).",
       "heading": "A few details about your claim",
       "sub": "The more precise, the faster — everything is optional and can be added later.",
-      "error_save": "Saving failed."
+      "error_save": "Saving failed.",
+      "vorerst_ueberspringen": "Skip for now"
     },
     "progress": {
       "aria_label": "Progress in the damage-report flow",
