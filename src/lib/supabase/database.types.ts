@@ -1768,28 +1768,18 @@ export type Database = {
       }
       claim_parties: {
         Row: {
-          adresse_land: string
-          adresse_ort: string | null
-          adresse_plz: string | null
-          adresse_strasse: string | null
           airdrop_eingeladen_am: string | null
           airdrop_response_am: string | null
           airdrop_token: string | null
           anonymisiert_am: string | null
-          anrede: string | null
           arbeitsunfaehig_bis: string | null
           arbeitsunfaehig_seit: string | null
           beziehung_zum_halter: string | null
           claim_id: string
           created_at: string
           created_by_user_id: string | null
-          email: string | null
           fahrzeugtyp_klartext: string | null
-          firma: string | null
           firma_id: string | null
-          fuehrerscheinklassen: string[] | null
-          fuehrerscheinnummer: string | null
-          geburtsdatum: string | null
           hat_personenschaden: boolean
           id: string
           ist_aktiv: boolean
@@ -1797,7 +1787,6 @@ export type Database = {
           ist_eingeladen_via_airdrop: boolean
           ist_fahrer: boolean
           ist_fahrzeuginsasse: boolean | null
-          ist_gewerbe: boolean
           ist_halter: boolean
           kennzeichen: string | null
           kennzeichen_buchstaben: string | null
@@ -1805,50 +1794,34 @@ export type Database = {
           kennzeichen_suffix: string | null
           kennzeichen_zahl: string | null
           krankenhaus_name: string | null
-          mobil: string | null
-          nachname: string | null
           notiz: string | null
           person_id: string | null
           previous_person_id: string | null
           quelle: string
           reihenfolge: number | null
           rolle: string
-          telefon: string | null
-          titel: string | null
           updated_at: string
           user_id: string | null
-          ust_id: string | null
           vehicle_id: string | null
           verletzungsart: string | null
           versicherung_id: string | null
           versicherung_klartext: string | null
           versicherungs_aktenzeichen: string | null
           versicherungsnummer: string | null
-          vorname: string | null
         }
         Insert: {
-          adresse_land?: string
-          adresse_ort?: string | null
-          adresse_plz?: string | null
-          adresse_strasse?: string | null
           airdrop_eingeladen_am?: string | null
           airdrop_response_am?: string | null
           airdrop_token?: string | null
           anonymisiert_am?: string | null
-          anrede?: string | null
           arbeitsunfaehig_bis?: string | null
           arbeitsunfaehig_seit?: string | null
           beziehung_zum_halter?: string | null
           claim_id: string
           created_at?: string
           created_by_user_id?: string | null
-          email?: string | null
           fahrzeugtyp_klartext?: string | null
-          firma?: string | null
           firma_id?: string | null
-          fuehrerscheinklassen?: string[] | null
-          fuehrerscheinnummer?: string | null
-          geburtsdatum?: string | null
           hat_personenschaden?: boolean
           id?: string
           ist_aktiv?: boolean
@@ -1856,7 +1829,6 @@ export type Database = {
           ist_eingeladen_via_airdrop?: boolean
           ist_fahrer?: boolean
           ist_fahrzeuginsasse?: boolean | null
-          ist_gewerbe?: boolean
           ist_halter?: boolean
           kennzeichen?: string | null
           kennzeichen_buchstaben?: string | null
@@ -1864,50 +1836,34 @@ export type Database = {
           kennzeichen_suffix?: string | null
           kennzeichen_zahl?: string | null
           krankenhaus_name?: string | null
-          mobil?: string | null
-          nachname?: string | null
           notiz?: string | null
           person_id?: string | null
           previous_person_id?: string | null
           quelle: string
           reihenfolge?: number | null
           rolle: string
-          telefon?: string | null
-          titel?: string | null
           updated_at?: string
           user_id?: string | null
-          ust_id?: string | null
           vehicle_id?: string | null
           verletzungsart?: string | null
           versicherung_id?: string | null
           versicherung_klartext?: string | null
           versicherungs_aktenzeichen?: string | null
           versicherungsnummer?: string | null
-          vorname?: string | null
         }
         Update: {
-          adresse_land?: string
-          adresse_ort?: string | null
-          adresse_plz?: string | null
-          adresse_strasse?: string | null
           airdrop_eingeladen_am?: string | null
           airdrop_response_am?: string | null
           airdrop_token?: string | null
           anonymisiert_am?: string | null
-          anrede?: string | null
           arbeitsunfaehig_bis?: string | null
           arbeitsunfaehig_seit?: string | null
           beziehung_zum_halter?: string | null
           claim_id?: string
           created_at?: string
           created_by_user_id?: string | null
-          email?: string | null
           fahrzeugtyp_klartext?: string | null
-          firma?: string | null
           firma_id?: string | null
-          fuehrerscheinklassen?: string[] | null
-          fuehrerscheinnummer?: string | null
-          geburtsdatum?: string | null
           hat_personenschaden?: boolean
           id?: string
           ist_aktiv?: boolean
@@ -1915,7 +1871,6 @@ export type Database = {
           ist_eingeladen_via_airdrop?: boolean
           ist_fahrer?: boolean
           ist_fahrzeuginsasse?: boolean | null
-          ist_gewerbe?: boolean
           ist_halter?: boolean
           kennzeichen?: string | null
           kennzeichen_buchstaben?: string | null
@@ -1923,26 +1878,20 @@ export type Database = {
           kennzeichen_suffix?: string | null
           kennzeichen_zahl?: string | null
           krankenhaus_name?: string | null
-          mobil?: string | null
-          nachname?: string | null
           notiz?: string | null
           person_id?: string | null
           previous_person_id?: string | null
           quelle?: string
           reihenfolge?: number | null
           rolle?: string
-          telefon?: string | null
-          titel?: string | null
           updated_at?: string
           user_id?: string | null
-          ust_id?: string | null
           vehicle_id?: string | null
           verletzungsart?: string | null
           versicherung_id?: string | null
           versicherung_klartext?: string | null
           versicherungs_aktenzeichen?: string | null
           versicherungsnummer?: string | null
-          vorname?: string | null
         }
         Relationships: [
           {

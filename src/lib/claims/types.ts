@@ -17,6 +17,23 @@ export type ClaimInsert = Database['public']['Tables']['claims']['Insert']
 export type ClaimUpdate = Database['public']['Tables']['claims']['Update']
 
 export type ClaimParty = Database['public']['Tables']['claim_parties']['Row']
+
+// CMM-49 Plan-5: Nach dem claim_parties-Person-Flat-Drop leben vorname/nachname/
+// adresse_*/telefon/email/geburtsdatum in `personen`. v_claim_full.parties overlayt sie
+// per jsonb auf jede Party (+ nested `person`). ClaimPartyView modelliert diese
+// View-Realität — die rohe ClaimParty-Row (oben) hat diese Spalten nicht mehr.
+type PartyPersonOverlay = {
+  vorname: string | null
+  nachname: string | null
+  adresse_strasse: string | null
+  adresse_plz: string | null
+  adresse_ort: string | null
+  telefon: string | null
+  email: string | null
+  geburtsdatum: string | null
+  person: Database['public']['Tables']['personen']['Row'] | null
+}
+export type ClaimPartyView = ClaimParty & PartyPersonOverlay
 export type ClaimVehicleInvolvement =
   Database['public']['Tables']['claim_vehicle_involvements']['Row']
 export type ClaimPayment = Database['public']['Tables']['claim_payments']['Row']
@@ -34,7 +51,7 @@ export type ClaimFull = Claim & {
   sv_id: string | null
   service_typ: string | null
   // Sub-Entities (jsonb_agg → Arrays; nie null, ggf. leer)
-  parties: ClaimParty[]
+  parties: ClaimPartyView[]
   vehicle_involvements: ClaimVehicleInvolvement[]
   payments: ClaimPayment[]
   mietwagen: ClaimMietwagen[]

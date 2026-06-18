@@ -23,7 +23,7 @@ export { debugSvMatching } from './_actions/debug-sv'
 // AAR-352: kombinierter Multi-Slot-Upload-Trigger.
 export { triggerDokumenteUploadRequest } from './_actions/dokumente-anfordern'
 export type { SlotEingabe } from './_actions/dokumente-anfordern'
-export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from './_actions/versicherungen'
+export { searchVersicherungen, getVersicherungById, type VersicherungSuggestion } from '@/lib/versicherungen/search-actions'
 // AAR-358: Personenschäden-Personen-CRUD
 export {
   listPersonenForLead,
