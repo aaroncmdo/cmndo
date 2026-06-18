@@ -386,6 +386,7 @@
       "sv_label": "Ваш эксперт-оценщик",
       "kontakt_hinweis": "Свяжется с вами",
       "termin_label": "Встреча запланирована",
+      "termin_bestaetigt_label": "Встреча подтверждена",
       "wunschtermin_label": "Ваша желаемая дата",
       "wunschtermin_pending": "Мы подтвердим точное время в ближайшее время.",
       "besichtigungsort_label": "Место осмотра",
