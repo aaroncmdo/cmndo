@@ -40,7 +40,7 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
   // Alias auf gegner_versicherung_name (LOSS=0/CONFLICT=0 verifiziert).
   const { data: fall } = await db
     .from('v_claim_full')
-    .select('claim_id:id, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung:gegner_versicherung_name, claim_nummer, zeugen_kontakte, gegner_aktenzeichen')
+    .select('claim_id:id, kennzeichen, lead_id, gegner_kennzeichen, gegner_name, gegner_versicherung:gegner_versicherung_name, claim_nummer, zeugen_kontakte, gegner_aktenzeichen, kunde_email')
     .eq('fall_id', fallId)
     .single()
 
@@ -59,25 +59,21 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
     kunde = lead
   }
 
-  // Email aus claims.kunde_email bevorzugen — direktes Feld, immer aktuell
-  // (Lead-Email kann veraltet sein wenn Kunde seine Email nach Konvertierung geändert hat)
-  if (fall.claim_id) {
-    const { data: claimEmail } = await db
-      .from('claims')
-      .select('kunde_email')
-      .eq('id', fall.claim_id as string)
-      .single()
-    if (claimEmail?.kunde_email) {
-      kunde = {
-        ...kunde,
-        vorname: kunde?.vorname ?? null,
-        nachname: kunde?.nachname ?? null,
-        telefon: kunde?.telefon ?? null,
-        kunde_strasse: kunde?.kunde_strasse ?? null,
-        kunde_plz: kunde?.kunde_plz ?? null,
-        kunde_stadt: kunde?.kunde_stadt ?? null,
-        email: claimEmail.kunde_email as string,
-      }
+  // Email entity-sourced aus v_claim_full (geschaedigter-Party->personen) bevorzugen — die
+  // SSoT-Email ist immer aktuell (Lead-Email kann veraltet sein wenn Kunde sie nach der
+  // Konvertierung geaendert hat). CMM-49: nicht mehr claims.kunde_email direkt — die View
+  // sourct kunde_email aus der Party (Vorbereitung des claims.kunde_email-Drops).
+  const partyEmail = (fall.kunde_email as string | null) ?? null
+  if (partyEmail) {
+    kunde = {
+      ...kunde,
+      vorname: kunde?.vorname ?? null,
+      nachname: kunde?.nachname ?? null,
+      telefon: kunde?.telefon ?? null,
+      kunde_strasse: kunde?.kunde_strasse ?? null,
+      kunde_plz: kunde?.kunde_plz ?? null,
+      kunde_stadt: kunde?.kunde_stadt ?? null,
+      email: partyEmail,
     }
   }
 
