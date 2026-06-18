@@ -15,6 +15,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}`, lastModified: now, changeFrequency: 'monthly', priority: 1 },
     { url: `${SITE.url}/impressum`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE.url}/datenschutz`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    // E-E-A-T: Über-uns-Seite (Redaktion/Methodik/Finanzierung).
+    { url: `${SITE.url}/ueber-uns`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     // WP-6: Lead-Formular (indexierbar — Conversion-Einstieg).
     { url: `${SITE.url}/gutachter-finden`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     // WP-4: interaktive Tools (indexierbar; /unfall-assistance ist noindex → raus).
