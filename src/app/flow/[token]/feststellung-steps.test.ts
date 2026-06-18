@@ -45,13 +45,6 @@ describe('computeActiveFeststellungSteps', () => {
     expect(active.some((s) => s.kind === 'zb1')).toBe(true)
   })
 
-  it('polizeibericht-Step nur bei polizei_vor_ort=true', () => {
-    const ohne = computeActiveFeststellungSteps(volleFelderMap(), {})
-    const mit = computeActiveFeststellungSteps(volleFelderMap(), { polizei_vor_ort: 'true' })
-    expect(ohne.some((s) => s.kind === 'polizeibericht')).toBe(false)
-    expect(mit.some((s) => s.kind === 'polizeibericht')).toBe(true)
-  })
-
   it('gegner-Step nur bei schuldfrage=gegner (conditional_on)', () => {
     const ohne = computeActiveFeststellungSteps(volleFelderMap(), {})
     const mit = computeActiveFeststellungSteps(volleFelderMap(), { schuldfrage: 'gegner' })

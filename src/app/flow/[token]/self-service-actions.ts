@@ -392,6 +392,77 @@ export async function uploadPolizeiberichtFlow(
     })
     .eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
+
+  // AAR-956 16.06. (Aaron): BKAT-Auslese aus dem Polizeibericht (Claude Vision via inferBkat)
+  // — Aktenzeichen + abgeleitete bkat_unfallart. Best-effort/non-critical (ANTHROPIC_API_KEY
+  // noetig; ohne Key No-op). H6: nur leere Lead-Felder fuellen. Polizei war vor Ort (Upload
+  // nur dann sichtbar). getStorageUrl liefert eine (signierte) URL → Claude kann sie fetchen.
+  try {
+    const { inferBkat } = await import('@/lib/bkat/inference')
+    const { data: leadVor } = await admin
+      .from('leads')
+      .select('unfallhergang, polizei_aktenzeichen, bkat_unfallart')
+      .eq('id', leadId)
+      .maybeSingle()
+    const bkat = await inferBkat({
+      polizeibericht_urls: publicUrl ? [publicUrl] : [],
+      unfallhergang: (leadVor?.unfallhergang as string | null) ?? null,
+    })
+    const bkatUpdate: Record<string, unknown> = {}
+    if (bkat.unfallart && !leadVor?.bkat_unfallart) bkatUpdate.bkat_unfallart = bkat.unfallart
+    if (bkat.aktenzeichen && !leadVor?.polizei_aktenzeichen) bkatUpdate.polizei_aktenzeichen = bkat.aktenzeichen
+    if (Object.keys(bkatUpdate).length > 0) {
+      bkatUpdate.updated_at = new Date().toISOString()
+      await admin.from('leads').update(bkatUpdate).eq('id', leadId)
+    }
+  } catch (err) {
+    console.error('[uploadPolizeiberichtFlow] BKAT-Auslese fehlgeschlagen (non-critical):', err)
+  }
+
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+/**
+ * AAR-956 16.06. (Aaron): Zeugenaussage-Upload im Flow (Polizei-&-Zeugen-Schritt, nur wenn
+ * Zeugen='Ja'). Spiegelt uploadPolizeiberichtFlow — Foto/PDF in fall-dokumente, KEIN OCR.
+ */
+export async function uploadZeugenaussageFlow(
+  token: string,
+  fileBase64: string,
+  contentType: string = 'image/jpeg',
+): Promise<{ ok: boolean; error?: string }> {
+  if (!fileBase64 || fileBase64.length < 100) return { ok: false, error: 'Datei fehlt oder zu klein.' }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  const ext =
+    contentType === 'application/pdf'
+      ? 'pdf'
+      : contentType === 'image/png'
+        ? 'png'
+        : contentType === 'image/webp'
+          ? 'webp'
+          : 'jpg'
+  const path = `leads/${leadId}/zeugenaussage_flow_${Date.now()}.${ext}`
+  const buf = Buffer.from(fileBase64, 'base64')
+  const { error: upErr } = await admin.storage
+    .from('fall-dokumente')
+    .upload(path, buf, { contentType, upsert: false })
+  if (upErr) return { ok: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
+  const { getStorageUrl } = await import('@/lib/storage/url')
+  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
+
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({
+      zeugenaussage_url: publicUrl,
+      zeugenaussage_status: 'hochgeladen',
+      zeugenaussage_hochgeladen_am: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }

@@ -221,18 +221,33 @@ export default async function FlowPage({
   // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + aktuelle Lead-Werte
   // nur im incomplete-Pfad laden (sonst unnoetig). Werte feld_key -> aktueller
   // leads-Wert (Boolean -> String fuer segmented/toggle-cards; Action coercet zurueck).
-  const feststellungPhasen = feststellungNeeded
-    ? await ladeFlowPhasen('lead-erfassung', 'kunde')
-    : []
+  // AAR-956 16.06. (Aaron): die lead-erfassung(kunde)-Config IMMER laden — daraus speist sich
+  // (a) die Feststellung (nur im incomplete-Pfad, feststellungNeeded) UND (b) die Service-/
+  // Kanzlei-Wahl im SA-/POS-Step (unabhaengig davon, ob die Feststellung noch laeuft).
+  const allKundeConfig = await ladeFlowPhasen('lead-erfassung', 'kunde')
+  const feststellungPhasen = feststellungNeeded ? allKundeConfig : []
+  const leseFeldWert = (spalte: string | undefined): unknown => {
+    if (spalte && spalte in (lead as Record<string, unknown>)) {
+      const v = (lead as Record<string, unknown>)[spalte]
+      return typeof v === 'boolean' ? String(v) : v
+    }
+    return undefined
+  }
   const feststellungWerte: Record<string, unknown> = {}
   for (const phase of feststellungPhasen) {
     for (const feld of phase.felder) {
-      const spalte = feld.db_target?.spalte
-      if (spalte && spalte in (lead as Record<string, unknown>)) {
-        const v = (lead as Record<string, unknown>)[spalte]
-        feststellungWerte[feld.feld_key] = typeof v === 'boolean' ? String(v) : v
-      }
+      const v = leseFeldWert(feld.db_target?.spalte)
+      if (v !== undefined) feststellungWerte[feld.feld_key] = v
     }
+  }
+  // Service-/Kanzlei-Felder (service_typ + kanzlei_wunsch) + Werte fuer den SA-/POS-Step.
+  const serviceFelder = allKundeConfig
+    .flatMap((p) => p.felder)
+    .filter((f) => f.feld_key === 'service_typ' || f.feld_key === 'kanzlei_wunsch')
+  const serviceWerte: Record<string, unknown> = {}
+  for (const f of serviceFelder) {
+    const v = leseFeldWert(f.db_target?.spalte)
+    if (v !== undefined) serviceWerte[f.feld_key] = v
   }
   // AAR-956 Gebiet-3: Polizeibericht-Status (KEIN Config-Feld) fuer die dynamic-display des
   // Upload-Blocks — FlowPolizeiberichtUpload zeigt "liegt vor" statt erneut zu prompten (Reload/
@@ -388,6 +403,8 @@ export default async function FlowPage({
           besichtigungsAdresse={besichtigungsAdresse}
           feststellungPhasen={feststellungPhasen}
           feststellungWerte={feststellungWerte}
+          serviceFelder={serviceFelder}
+          serviceWerte={serviceWerte}
           lead={{
             id: lead.id,
             vorname: lead.vorname ?? '',

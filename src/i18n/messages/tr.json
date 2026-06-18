@@ -95,6 +95,8 @@
     "step_feststellung": {
       "manuell_toggle": "Fotoğraf olmadan — araç bilgilerini elle girin",
       "fahrzeugdaten": "Araç bilgileri",
+      "zeugenaussage_titel": "Tanık ifadesini yükle",
+      "zeugenaussage_hinweis": "Yazılı bir tanık ifadeniz varsa, buraya yükleyin (fotoğraf veya PDF).",
       "heading": "Hasarınız hakkında birkaç bilgi",
       "sub": "Ne kadar ayrıntılı olursa o kadar hızlı — her şey isteğe bağlıdır ve daha sonra tamamlanabilir.",
       "error_save": "Kaydetme başarısız oldu."
