@@ -1,0 +1,182 @@
+// MCP Write-API (Phase 2) — Inkrement 2: Schaden melden + Gutachter/Termin (weicher Hold)
+// aus dem LLM-Chat. POST /api/v1/melde-schaden
+//
+// Server-to-server-Endpoint fuer das MCP-Tool claimondo_melde_schaden (kein Browser-Origin
+// -> KEIN Origin-Check wie /api/anfrage-from-lp; stattdessen strenger Rate-Limit + Consent-
+// Pflicht + das natuerliche WhatsApp-Gate). Wrappt den BESTEHENDEN Funnel — baut nichts neu:
+//   insertAnfrage (gfa, source='mcp') → issueCanonicalFlowLinkForAnfrage (Lead idempotent +
+//   EIN flow_link + WhatsApp/SMS/Email-Versand).
+//
+// Weicher Hold (819dab90-Vorgabe, KEIN langer harter Hold): der gewaehlte SV bleibt als
+// gfa.zugeordneter_sv_id (Fixer, vom /flow gelesen) + der Wunsch-Slot als gfa.wunschtermin
+// (-> lead.wunschtermin -> Slot-Ranking im /flow). Die eigentliche Termin-Reservierung macht
+// der Kunde im /flow (bucheTerminFlow); laeuft der harte 15-min-Hold ab, traegt der weiche
+// Hold via terminPending.
+//
+// Consent (Stage 1, pure-chat): einwilligung.zugestimmt MUSS true sein -> consent_ts ->
+// anfragen.dsgvo_zustimmung_am + ein consent_records-Audit. Tiefere Consents (Vollmacht etc.)
+// folgen im /flow (Stage 2). Spec: docs/geo/geo-mcp-write-api-review-paket-2026-06-18.md.
+import { NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { insertAnfrage } from '@/lib/embed/anfrage'
+import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
+
+// Strenger als der Read (60/min): ein Write legt einen Lead an + sendet WhatsApp.
+const RATE_WINDOW_MS = 60_000
+const RATE_MAX = 10
+const ipHits = new Map<string, number[]>()
+function rateLimited(ip: string): boolean {
+  const now = Date.now()
+  const hits = (ipHits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS)
+  hits.push(now)
+  ipHits.set(ip, hits)
+  if (ipHits.size > 5000) {
+    for (const [k, v] of ipHits) {
+      if (v.every((t) => now - t >= RATE_WINDOW_MS)) ipHits.delete(k)
+    }
+  }
+  return hits.length > RATE_MAX
+}
+
+const CORS: Record<string, string> = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type',
+}
+function json(body: unknown, status: number) {
+  return NextResponse.json(body, { status, headers: CORS })
+}
+
+const PHONE_RE = /^\+?[0-9\s\-/()]{8,20}$/
+const MeldeSchadenSchema = z.object({
+  schadenart: z.string().trim().min(2).max(80),
+  hergang: z.string().trim().min(3).max(1000),
+  plz: z.string().regex(/^\d{5}$/),
+  /** Gewaehlter Gutachter aus claimondo_finde_gutachter_termine (opakes Handle); optional. */
+  sv_id: z.string().uuid().optional(),
+  /** Gewaehlter Slot als ISO-8601 (weicher Hold); optional. */
+  wunschtermin: z.string().max(40).optional(),
+  name: z.string().trim().min(2).max(80),
+  telefon: z.string().trim().regex(PHONE_RE),
+  /** Stage-1-Einwilligung — Pflicht. zugestimmt MUSS true sein, sonst kein Write. */
+  einwilligung: z.object({
+    zugestimmt: z.literal(true),
+    policy_version: z.string().min(1).max(40),
+  }),
+})
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS })
+}
+
+export async function POST(req: Request) {
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]?.trim() || 'unknown'
+  if (rateLimited(ip)) {
+    return json({ ok: false, error: 'Rate limit exceeded (10 requests/minute)' }, 429)
+  }
+
+  let raw: unknown
+  try {
+    raw = await req.json()
+  } catch {
+    return json({ ok: false, error: 'invalid_json' }, 400)
+  }
+  const parsed = MeldeSchadenSchema.safeParse(raw)
+  if (!parsed.success) {
+    const consentMissing = parsed.error.issues.some((i) => i.path[0] === 'einwilligung')
+    return json(
+      {
+        ok: false,
+        error: consentMissing ? 'einwilligung_erforderlich' : 'validation',
+        issues: parsed.error.issues.map((i) => i.path.join('.')),
+      },
+      400,
+    )
+  }
+  const input = parsed.data
+
+  const center = await geocodeAdresse(input.plz)
+  if (!center) return json({ ok: false, error: 'PLZ not found' }, 404)
+
+  // Stage-1-Consent-Zeitpunkt (Server-Zeit der bestaetigten in-chat-Einwilligung).
+  const consentTs = new Date().toISOString()
+
+  const payload: EmbedAnfrageInput = {
+    name: input.name,
+    telefon: input.telefon,
+    schadentyp: input.schadenart,
+    schadens_kurzbeschreibung: input.hergang,
+    source: 'mcp',
+    zugeordneter_sv_id: input.sv_id,
+    besichtigungsort_lat: center.lat,
+    besichtigungsort_lng: center.lng,
+    consent_ts: consentTs,
+    aktion: 'senden',
+  }
+
+  const ins = await insertAnfrage({ payload, variante: null, embedSiteId: null, originDomain: 'mcp' })
+  if (!ins.ok) {
+    console.error('[melde-schaden] insertAnfrage fehlgeschlagen:', ins.error)
+    return json({ ok: false, error: 'insert_failed' }, 500)
+  }
+
+  const admin = createAdminClient()
+
+  // Weicher Hold: gewaehlter Slot (ISO) -> gfa.wunschtermin -> lead.wunschtermin (issueCanonical)
+  // -> Slot-Ranking im /flow. KEINE harte Reservierung hier (819dab90).
+  if (input.wunschtermin) {
+    const { error: wtErr } = await admin
+      .from('gutachter_finder_anfragen')
+      .update({ wunschtermin: input.wunschtermin })
+      .eq('id', ins.anfrageId)
+    if (wtErr) console.error('[melde-schaden] wunschtermin-Update fehlgeschlagen:', wtErr.message)
+  }
+
+  // Stage-1-Consent-Audit (zusaetzlich zu anfragen.dsgvo_zustimmung_am via consent_ts). Non-fatal.
+  try {
+    await admin.from('consent_records').insert({
+      categories: ['mcp_schaden_melden', 'whatsapp_kontakt', 'drittland_llm'],
+      policy_version: input.einwilligung.policy_version,
+      user_agent: 'mcp',
+      created_at: consentTs,
+    })
+  } catch (err) {
+    console.error('[melde-schaden] consent_records insert fehlgeschlagen:', err)
+  }
+
+  // Lead (idempotent) + EIN flow_link + Versand (WhatsApp -> SMS -> Email). Wrappt den
+  // bestehenden Funnel — KEIN Token/keine PII zurueck ins LLM (der Link geht per WhatsApp).
+  const issued = await issueCanonicalFlowLinkForAnfrage(ins.anfrageId, { send: true })
+  if (!issued.ok) {
+    console.error('[melde-schaden] issueCanonical fehlgeschlagen:', issued.error)
+    // gfa + (falls erstellt) Lead haengen als Safety-Net in der Dispatch-Queue.
+    return json(
+      {
+        ok: true,
+        status: 'angelegt_ohne_versand',
+        kanal: 'none',
+        hinweis: 'Anfrage angelegt; FlowLink-Versand fehlgeschlagen — Dispatch kontaktiert manuell.',
+      },
+      200,
+    )
+  }
+
+  return json(
+    {
+      ok: true,
+      status: 'angelegt',
+      kanal: issued.kanal,
+      hinweis:
+        issued.kanal === 'none'
+          ? 'Anfrage angelegt; kein Kontakt-Kanal erreichbar — Dispatch kontaktiert manuell.'
+          : `Lead angelegt; persönlicher FlowLink per ${issued.kanal} an den Kunden versandt. Kein Link im Chat (Datenschutz).`,
+    },
+    200,
+  )
+}

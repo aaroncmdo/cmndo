@@ -331,3 +331,84 @@ export function formatGutachterTermine(r: GutachterTermineResult): string {
   )
   return lines.join('\n')
 }
+
+// --- Schaden melden (WRITE: Lead + FlowLink + WhatsApp) ----------------------
+// Wrappt POST /api/v1/melde-schaden. ANDERS als die Read-Tools: das ist eine SCHREIBENDE
+// Aktion (legt einen Lead an + sendet dem Kunden den FlowLink per WhatsApp). Consent-Pflicht.
+
+export type MeldeSchadenInput = {
+  schadenart: string
+  hergang: string
+  plz: string
+  sv_id?: string
+  wunschtermin?: string
+  name: string
+  telefon: string
+  /** MUSS true sein + NUR nach ausdruecklicher Nutzer-Einwilligung gesetzt werden (Stage-1-Consent). */
+  einwilligung_erteilt: boolean
+}
+
+export type MeldeSchadenResult = { ok: boolean; status: string; kanal: string; hinweis: string }
+
+// Version des in-chat gezeigten Einwilligungs-/Datenschutz-Texts (Stage-1-Consent-Audit).
+const MCP_CONSENT_POLICY_VERSION = 'mcp-consent-2026-06'
+
+/** Meldet einen Schaden (Lead + FlowLink + WhatsApp-Versand). Wirft {@link ClaimondoApiError} bei Fehlern/fehlender Einwilligung. */
+export async function meldeSchaden(
+  input: MeldeSchadenInput,
+  apiBase: string = DEFAULT_API_BASE,
+): Promise<MeldeSchadenResult> {
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/melde-schaden`
+  const body = {
+    schadenart: input.schadenart,
+    hergang: input.hergang,
+    plz: input.plz,
+    sv_id: input.sv_id,
+    wunschtermin: input.wunschtermin,
+    name: input.name,
+    telefon: input.telefon,
+    einwilligung: { zugestimmt: input.einwilligung_erteilt, policy_version: MCP_CONSENT_POLICY_VERSION },
+  }
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(
+        `Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten. Bitte später erneut versuchen.`,
+      )
+    }
+    throw new ClaimondoApiError(
+      `Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`,
+    )
+  } finally {
+    clearTimeout(timer)
+  }
+  const data = (await res.json().catch(() => ({}))) as {
+    ok?: boolean
+    status?: string
+    kanal?: string
+    hinweis?: string
+    error?: string
+  }
+  if (!res.ok || data.ok === false) {
+    if (res.status === 429) {
+      throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten und erneut versuchen.', 429)
+    }
+    if (data.error === 'einwilligung_erforderlich') {
+      throw new ClaimondoApiError(
+        'Einwilligung erforderlich: Der Nutzer muss der Datenverarbeitung + dem WhatsApp-Kontakt (inkl. Drittland-Hinweis) ausdrücklich zustimmen, bevor der Schaden gemeldet wird. Bitte erst die Zustimmung einholen.',
+        400,
+      )
+    }
+    throw new ClaimondoApiError(data.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return { ok: true, status: data.status ?? 'angelegt', kanal: data.kanal ?? 'none', hinweis: data.hinweis ?? '' }
+}

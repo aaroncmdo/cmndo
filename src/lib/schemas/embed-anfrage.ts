@@ -6,7 +6,11 @@
 
 import { z } from 'zod'
 
-export const EMBED_SOURCES = ['kfz_gutachter_lp', 'sv_embed', 'generic_lp'] as const
+// 'mcp': externer LLM-Chat (ChatGPT/Claude via MCP-Write-Tool claimondo_melde_schaden).
+// Geht NICHT durch den /api/anfrage-from-lp-Webhook (kein Browser-Origin), sondern ueber
+// den server-to-server /api/v1/melde-schaden-Endpoint — additiver Enum-Wert fuer Attribution
+// (lead.source_channel='mcp') + die insertAnfrage-TypprUfung.
+export const EMBED_SOURCES = ['kfz_gutachter_lp', 'sv_embed', 'generic_lp', 'mcp'] as const
 
 const PHONE_RE = /^\+?[0-9\s\-/()]{8,20}$/
 
