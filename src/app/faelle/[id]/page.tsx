@@ -87,7 +87,7 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, gegner_aktenzeichen')
+      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
@@ -96,8 +96,15 @@ export default async function FallaktePage({
         schadenort_adresse: string | null
         schadenort_plz: string | null
         schadenort_ort: string | null
-        gegner_aktenzeichen: string | null
       }>()
+    // CMM-49 Tier-2: gegner_aktenzeichen aus v_claim_full (verursacher-Party-
+    // sourced via COALESCE party->claims) statt direkt aus claims — ueberlebt den
+    // kommenden claims.gegner_aktenzeichen-DROP. Wert heute identisch (Party leer).
+    const { data: vcfGegner } = await supabase
+      .from('v_claim_full')
+      .select('gegner_aktenzeichen')
+      .eq('id', claimId)
+      .maybeSingle<{ gegner_aktenzeichen: string | null }>()
     // D2/T1.1b: Badge zeigt die Lifecycle/Terminal-Achse (status); fällt für aktive
     // Claims (status NULL) auf die Dispatch/Processing-Achse (work_state) zurück.
     claimStatus        = claimRow?.status ?? claimRow?.work_state ?? null
@@ -107,7 +114,7 @@ export default async function FallaktePage({
         schadenort_adresse: claimRow.schadenort_adresse ?? null,
         schadenort_plz:     claimRow.schadenort_plz     ?? null,
         schadenort_ort:     claimRow.schadenort_ort     ?? null,
-        gegner_aktenzeichen: claimRow.gegner_aktenzeichen ?? null,
+        gegner_aktenzeichen: vcfGegner?.gegner_aktenzeichen ?? null,
       }
     }
   }
