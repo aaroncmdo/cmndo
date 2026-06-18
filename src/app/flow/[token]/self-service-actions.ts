@@ -214,6 +214,67 @@ export async function bucheTerminFlow(
 }
 
 /**
+ * AAR-956 18.06. (Aaron): Termin/Gutachter im FlowLink selbst ändern. Der Kunde ist
+ * NICHT mehr an seine Reservierung gebunden (vorher: read-only zeige_termin).
+ *  - bestätigter Termin (SV ggf. committed) → NICHT still stornieren, sondern Rückruf-
+ *    Flag + Notiz für Dispatch (modus='dispatch_anfrage'); der Termin bleibt bestehen.
+ *  - reservierter Termin ODER Wunschtermin-pending → gfa-Pick + Wunschtermin lösen, sodass
+ *    ladeMatchingFlow auf buchen_global fällt (NEUER Gutachter wählbar). KEIN Pre-Storno:
+ *    bucheTerminFlow storniert die alte reservierte Buchung beim Neu-Buchen atomar
+ *    (Idempotenz) → kein Fenster ohne Termin; ein Abbruch behält den alten Termin (er
+ *    bleibt 'reserviert', terminMitSv bleibt true → zeige_termin). Der gelöste Pick
+ *    verhindert zudem das falsche „≠ Wunsch"-Divergenz-Badge nach der Neuwahl.
+ *  (modus='neu_waehlen' → der Consumer zeigt den Slot-Step inline.)
+ */
+export async function aendereTerminFlow(
+  token: string,
+): Promise<{ ok: boolean; modus?: 'neu_waehlen' | 'dispatch_anfrage'; error?: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  // Aktueller harter Termin (Dual-Lookup) — der Status entscheidet den Pfad.
+  const { data: termin } = await admin
+    .from('gutachter_termine')
+    .select('id, status')
+    .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
+    .in('status', ['reserviert', 'bestaetigt'])
+    .order('start_zeit', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+
+  const { data: leadRow } = await admin.from('leads').select('notiz').eq('id', leadId).maybeSingle()
+  const nowIso = new Date().toISOString()
+  const bestehend = (leadRow?.notiz as string | null) ?? null
+
+  // Bestätigter Termin → SV ggf. committed → an Dispatch (Rückruf), nicht still stornieren.
+  if (termin?.status === 'bestaetigt') {
+    const notiz = `[Self-Service ${nowIso.slice(0, 10)}] Kunde möchte Termin/Gutachter ändern — bestätigter Termin, bitte Rückruf/Umbuchung.${bestehend ? `\n${bestehend}` : ''}`
+    const { error: updErr } = await admin
+      .from('leads')
+      .update({ status: 'rueckruf', notiz, updated_at: nowIso })
+      .eq('id', leadId)
+    if (updErr) return { ok: false, error: updErr.message }
+    revalidatePath('/dispatch/leads')
+    return { ok: true, modus: 'dispatch_anfrage' }
+  }
+
+  // reserviert ODER Wunschtermin-pending → Pick lösen (→ buchen_global) + Wunschtermin leeren.
+  await admin
+    .from('gutachter_finder_anfragen')
+    .update({ zugeordneter_sv_id: null, termin_id: null })
+    .eq('konvertiert_zu_lead_id', leadId)
+
+  const notiz = `[Self-Service ${nowIso.slice(0, 10)}] Kunde hat Termin/Gutachter abgebrochen — wählt neu.${bestehend ? `\n${bestehend}` : ''}`
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({ wunschtermin: null, notiz, updated_at: nowIso })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true, modus: 'neu_waehlen' }
+}
+
+/**
  * AAR-956 §4 / Task 3: Besichtigungsort im Flow nachreichen (statt „wir melden uns
  * telefonisch"). Schreibt besichtigungsort_adresse/lat/lng auf den Lead; danach ruft
  * der Consumer (FlowSlotStep) erneut ladeMatchingFlow → der Resolver verlaesst den
