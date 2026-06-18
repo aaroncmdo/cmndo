@@ -282,12 +282,23 @@ export async function updateFallField(
     return { success: true }
   }
 
-  // CMM-49: kunde_email lebt in der geschaedigter-Party->personen (SSoT). v_claim_full/v_faelle
-  // sourcen es von dort (#2982/#2984); ein Inline-Edit muss personen.email der geschaedigter-Party
-  // schreiben — sonst maskiert die party-first-Sicht den Edit (und der Write landete nur auf dem
-  // zu droppenden claims.kunde_email). Selektion == v_claim_full.kunde_p (reihenfolge, created_at).
-  // Admin-Client: canEditField() hat oben bereits autorisiert.
-  if (field === 'kunde_email') {
+  // CMM-49: die kunde_*-Stammdaten leben in der geschaedigter-Party->personen (SSoT).
+  // v_claim_full/v_faelle sourcen sie von dort (kunde_p/cp_g-LATERAL, #2982/#2984); ein
+  // Inline-Edit muss personen der geschaedigter-Party schreiben — sonst maskiert die
+  // party-first-Sicht den Edit (er landete sonst auf faelle.kunde_* / claims.kunde_email,
+  // die niemand mehr liest). Mapping UI-Feld -> personen-Spalte; Selektion == v_claim_full.kunde_p
+  // (reihenfolge, created_at). Admin-Client: canEditField() hat oben bereits autorisiert.
+  const KUNDE_PERSON_COL: Record<string, string> = {
+    kunde_email: 'email',
+    kunde_vorname: 'vorname',
+    kunde_nachname: 'nachname',
+    kunde_telefon: 'telefon',
+    kunde_strasse: 'adresse_strasse',
+    kunde_plz: 'adresse_plz',
+    kunde_stadt: 'adresse_ort',
+  }
+  const personCol = KUNDE_PERSON_COL[field]
+  if (personCol) {
     const admin = createAdminClient()
     const { data: party } = await admin
       .from('claim_parties')
@@ -302,10 +313,10 @@ export async function updateFallField(
     if (!personId) {
       return {
         success: false,
-        error: 'Kein verknuepfter Kunde (geschaedigter-Party ohne Person) — E-Mail kann nicht gesetzt werden.',
+        error: 'Kein verknuepfter Kunde (geschaedigter-Party ohne Person) — Feld kann nicht gesetzt werden.',
       }
     }
-    const { error: pErr } = await admin.from('personen').update({ email: normalized }).eq('id', personId)
+    const { error: pErr } = await admin.from('personen').update({ [personCol]: normalized }).eq('id', personId)
     if (pErr) return { success: false, error: pErr.message }
     revalidatePath(`/faelle/${fallId}`)
     return { success: true }
