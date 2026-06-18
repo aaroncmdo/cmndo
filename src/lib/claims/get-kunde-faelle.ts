@@ -521,7 +521,7 @@ export async function getKundeFallDetailRecord(
   // 50.0-Write-Path haelt beide Schluessel auf dasselbe FIN-Vehicle konsistent.
   let detailVeh: { kennzeichen_aktuell: string | null; hersteller: string | null; modell_haupttyp: string | null; baujahr_monat: string | null } | null = null
   if (claimId) {
-    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment, { data: kfRow }] = await Promise.all([
+    const [{ data: claimData }, { data: viewData }, { data: gutachtenRow }, { data: aktAuftragRow }, claimPayment, { data: kfRow }, { data: vcfGegner }] = await Promise.all([
       admin
         .from('claims')
         .select(
@@ -539,7 +539,7 @@ export async function getKundeFallDetailRecord(
           // CMM-44 Phase 3: bankdaten_hinterlegt_am ergaenzt — lebt auf claims (SSoT).
           // CMM-50.3b: vehicle_id ergaenzt — Fahrzeug aus vehicles (SSoT) nachladen.
           // CMM-74 b″: operative_status ergaenzt — claims = SSoT (1:1-Mirror faelle.status).
-          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, gegner_aktenzeichen, gegner_versicherungsnummer, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id',
+          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -566,8 +566,19 @@ export async function getKundeFallDetailRecord(
       getCurrentClaimPayment(admin, claimId),
       // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund + SP-I6: kanzlei_id aus kanzlei_faelle (1:1).
       admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, kanzlei_id').eq('claim_id', claimId).maybeSingle(),
+      // CMM-49 Tier-2: gegner_aktenzeichen/versicherungsnummer aus v_claim_full
+      // (verursacher-Party-sourced) statt direkt aus claims — ueberlebt den DROP.
+      admin.from('v_claim_full').select('gegner_aktenzeichen, gegner_versicherungsnummer').eq('id', claimId).maybeSingle(),
     ])
     claimRow = (claimData ?? null) as unknown as Record<string, unknown> | null
+    // CMM-49 Tier-2: gegner_aktenzeichen/versicherungsnummer kommen aus v_claim_full
+    // (verursacher-Party-sourced) statt direkt aus claims — claimRow anreichern, damit
+    // der Mapping-Code unten (c.gegner_*) den Party-Wert sieht (DROP-safe, heute identisch).
+    if (claimRow && vcfGegner) {
+      const g = vcfGegner as { gegner_aktenzeichen?: string | null; gegner_versicherungsnummer?: string | null }
+      claimRow.gegner_aktenzeichen = g.gegner_aktenzeichen ?? null
+      claimRow.gegner_versicherungsnummer = g.gegner_versicherungsnummer ?? null
+    }
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
