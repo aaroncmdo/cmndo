@@ -11,6 +11,7 @@
 // (server-flag-gegatet via CANONICAL_FLOWLINK_ENABLED). Neue Features sind hier ok.
 
 import { useState, useRef, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { signSAandCreateFall, createKundeAccount, updateLeadStammdaten, generateSAPdf } from './actions'
 import { uploadFlowSignatur } from '@/lib/actions/unterschrift-upload'
@@ -18,6 +19,7 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 // AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
 import { FlowQualiStep } from './FlowQualiStep'
 import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
+import { aendereTerminFlow } from './self-service-actions'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { FlowFeststellungStep } from './FlowFeststellungStep'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
@@ -182,6 +184,31 @@ export default function FlowWizardKfz({
   // AAR-956: Kunde hat den Termin-Step ohne Buchung übersprungen (kein_match/Skip) →
   // Erfolgsseite zeigt einen "Termin folgt"-Hinweis (SV wird via AAR-908 bei der SA zugeordnet).
   const [ohneTermin, setOhneTermin] = useState(false)
+  // AAR-956 18.06. (Aaron): Termin/Gutachter im FlowLink ändern (kein read-only-Lock mehr).
+  // umbuchen → Inline-Slot-Step (neuer SV+Termin); umgebucht → die frische Auswahl vor dem
+  // (kurz stale) Server-Pick bevorzugen; dispatchAnfrage → bestätigter Termin geht an
+  // Dispatch (Rückruf) statt Self-Service-Storno.
+  const router = useRouter()
+  const [umbuchen, setUmbuchen] = useState(false)
+  const [umbuchenConfirm, setUmbuchenConfirm] = useState(false)
+  const [umbuchenLoading, setUmbuchenLoading] = useState(false)
+  const [umbuchenError, setUmbuchenError] = useState<string | null>(null)
+  const [dispatchAnfrage, setDispatchAnfrage] = useState(false)
+  const [umgebucht, setUmgebucht] = useState(false)
+
+  async function handleUmbuchen() {
+    setUmbuchenLoading(true)
+    setUmbuchenError(null)
+    const r = await aendereTerminFlow(token)
+    setUmbuchenLoading(false)
+    if (!r.ok) {
+      setUmbuchenError(r.error ?? t('step_gutachter.aendern_fehler'))
+      return
+    }
+    setUmbuchenConfirm(false)
+    if (r.modus === 'dispatch_anfrage') setDispatchAnfrage(true)
+    else setUmbuchen(true)
+  }
   // AAR-956 16.06. (Aaron): Service-/Kanzlei-Wahl im SA-/POS-Step. Init aus dem Lead-Stand;
   // Autosave bei jeder Aenderung (speichereFeststellungFlow), damit signSAandCreateFall den
   // gewaehlten Service/Kanzlei vom Lead liest.
@@ -267,7 +294,8 @@ export default function FlowWizardKfz({
   // gutachter-Anzeige: server-Prop (Dispatcher-Pfad) ODER die frisch gebuchte
   // Auswahl (incomplete-Pfad, vor Page-Reload).
   const gutachterAnzeige: GutachterInfo | null =
-    gutachter ??
+    // Nach Self-Service-Umbuchung den (kurz stale) Server-Pick ignorieren → frische Auswahl.
+    (umgebucht ? null : gutachter) ??
     (gebuchterTermin
       ? {
           vorname: gebuchterTermin.svVorname,
@@ -582,7 +610,7 @@ export default function FlowWizardKfz({
                   icon={<UserIcon className="w-8 h-8 text-claimondo-ondo" />}
                 />
 
-                {gutachterAnzeige ? (
+                {!umbuchen && (gutachterAnzeige ? (
                   <div className="bg-gradient-to-br from-claimondo-ondo/10 to-claimondo-shield/5 border border-claimondo-ondo/20 rounded-ios-lg p-7 text-center mb-6">
                     {gutachterAnzeige.avatarUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
@@ -645,14 +673,93 @@ export default function FlowWizardKfz({
                   <div className="bg-claimondo-ondo/5 border border-claimondo-ondo/20 rounded-ios-md p-5 mb-6 text-sm text-claimondo-navy">
                     {t('step_gutachter.kein_gutachter')}
                   </div>
+                ))}
+
+                {/* AAR-956 18.06. (Aaron): Inline Termin/Gutachter neu wählen (Slot-Step).
+                    onGebucht → bucheTerminFlow swappt die alte Reservierung atomar. */}
+                {umbuchen && (
+                  <div className="mb-6">
+                    <FlowSlotStep
+                      token={token}
+                      onGebucht={(gt) => {
+                        setGebuchterTermin(gt)
+                        setUmgebucht(true)
+                        setUmbuchen(false)
+                        router.refresh()
+                      }}
+                      onOhneTermin={() => {
+                        setOhneTermin(true)
+                        setUmbuchen(false)
+                        setStepIndex(stepIndexById('sa'))
+                      }}
+                    />
+                    <div className="mt-4 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setUmbuchen(false)}
+                        className="text-sm text-claimondo-ondo underline"
+                      >
+                        {t('step_gutachter.aendern_zurueck')}
+                      </button>
+                    </div>
+                  </div>
                 )}
 
-                <button
-                  onClick={() => setStepIndex(stepIndexById(gutachterWeiterZiel))}
-                  className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
-                >
-                  {t('common.weiter')}
-                </button>
+                {/* Termin/Gutachter ändern — Self-Service. Bestätigte Termine gehen an Dispatch. */}
+                {!umbuchen &&
+                  gutachterAnzeige &&
+                  !dispatchAnfrage &&
+                  (umbuchenConfirm ? (
+                    <div className="mb-6 rounded-ios-md border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-4">
+                      <p className="text-sm text-claimondo-navy mb-3">{t('step_gutachter.aendern_confirm')}</p>
+                      {umbuchenError && <p className="text-sm text-danger-strong mb-2">{umbuchenError}</p>}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleUmbuchen}
+                          disabled={umbuchenLoading}
+                          className="inline-flex items-center justify-center min-h-10 px-4 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-60 transition-colors"
+                        >
+                          {umbuchenLoading ? t('step_gutachter.aendern_laeuft') : t('step_gutachter.aendern_ja')}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUmbuchenConfirm(false)
+                            setUmbuchenError(null)
+                          }}
+                          className="inline-flex items-center justify-center min-h-10 px-4 rounded-full border border-claimondo-border text-claimondo-ondo text-sm font-medium hover:bg-claimondo-bg transition-colors"
+                        >
+                          {t('step_gutachter.aendern_zurueck')}
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mb-6 text-center">
+                      <button
+                        type="button"
+                        onClick={() => setUmbuchenConfirm(true)}
+                        className="text-sm text-claimondo-ondo underline"
+                      >
+                        {t('step_gutachter.aendern_cta')}
+                      </button>
+                    </div>
+                  ))}
+
+                {!umbuchen && dispatchAnfrage && (
+                  <div className="mb-6 rounded-ios-md bg-warning-soft p-4 text-sm text-warning-strong">
+                    {t('step_gutachter.aendern_dispatch_hinweis')}
+                  </div>
+                )}
+
+                {!umbuchen && (
+                  <button
+                    onClick={() => setStepIndex(stepIndexById(gutachterWeiterZiel))}
+                    className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
+                  >
+                    {t('common.weiter')}
+                  </button>
+                )}
 
               </div>
             )}
