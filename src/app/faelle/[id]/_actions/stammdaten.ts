@@ -322,6 +322,54 @@ export async function updateFallField(
     return { success: true }
   }
 
+  // CMM-49 Tier-2: gegner_versicherungsnummer/gegner_schadennummer leben in der
+  // verursacher-claim_party (versicherungsnummer/versicherungs_aktenzeichen, SSoT).
+  // v_claim_full sourct sie von dort (gp-LATERAL, #3004); ein Inline-Edit muss die
+  // verursacher-Party schreiben — sonst maskiert die party-first-Sicht den Edit (er
+  // landete sonst auf claims.gegner_*, das nach dem Cutover niemand mehr liest).
+  // Anders als kunde_*: meist existiert noch KEINE verursacher-Party (1/84) -> on-demand
+  // anlegen (Option A, volle Kanonisierung). Selektion == v_claim_full.gp (reihenfolge, created_at).
+  // Admin-Client: canEditField() hat oben bereits autorisiert.
+  const GEGNER_PARTY_COL: Record<string, string> = {
+    gegner_versicherungsnummer: 'versicherungsnummer',
+    gegner_schadennummer: 'versicherungs_aktenzeichen',
+  }
+  const gegnerCol = GEGNER_PARTY_COL[field]
+  if (gegnerCol) {
+    const admin = createAdminClient()
+    const { data: party } = await admin
+      .from('claim_parties')
+      .select('id')
+      .eq('claim_id', gateClaimId)
+      .eq('rolle', 'verursacher')
+      .order('reihenfolge', { ascending: true })
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const partyId = (party?.id as string | null) ?? null
+    if (partyId) {
+      const { error: upErr } = await admin
+        .from('claim_parties')
+        .update({ [gegnerCol]: normalized })
+        .eq('id', partyId)
+      if (upErr) return { success: false, error: upErr.message }
+    } else if (normalized != null) {
+      // Option A: keine verursacher-Party vorhanden -> on-demand anlegen (kanonisches Home).
+      // Minimal-Insert (claim_id/rolle/quelle Pflicht, Rest default); reihenfolge=2 wie convert.
+      const { error: insErr } = await admin.from('claim_parties').insert({
+        claim_id: gateClaimId,
+        rolle: 'verursacher',
+        reihenfolge: 2,
+        quelle: 'stammdaten_edit',
+        [gegnerCol]: normalized,
+      })
+      if (insErr) return { success: false, error: insErr.message }
+    }
+    // normalized == null && keine Party: No-op (keine leere verursacher-Party anlegen).
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   // CMM-48 PR-D: Duplikat-Spalten gehen auf claims (Single Source of Truth).
   // canEditField() hat die Autorisierung bereits geprüft → der claims-Write
   // läuft über den Admin-Client (RLS-Bypass gerechtfertigt). Workflow-/
