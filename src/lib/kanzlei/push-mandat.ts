@@ -85,7 +85,7 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   const { data: fall, error: fallErr } = await db
     .from('v_claim_full')
     .select(
-      'claim_id:id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claim_nummer, service_typ',
+      'claim_id:id, kunde_id, kunde_vorname, kunde_nachname, kunde_telefon, kunde_strasse, kunde_plz, kunde_stadt, firma_name, kennzeichen, claim_nummer, service_typ, kunde_email',
     )
     .eq('fall_id', fallId)
     .maybeSingle()
@@ -98,7 +98,9 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   // gewaehlt (nur_gutachter-Pfad mit nachtraeglicher Wahl). Beide Pfade
   // brauchen die Kanzlei.
   let kanzleiWunsch: string | null = null
-  let claimKundeEmail: string | null = null
+  // CMM-49: kunde_email entity-sourced via v_claim_full (geschaedigter-Party->personen),
+  // nicht mehr aus claims.kunde_email direkt (Vorbereitung des claims.kunde_email-Drops).
+  const claimKundeEmail: string | null = (fall.kunde_email as string | null) ?? null
   let claimVorsteuer: boolean | null = null
   // CMM-50.3b: Kennzeichen vehicles-first (claims.vehicle_id -> vehicles), faelle-Snapshot
   // als Fallback. Bis der 50.0-Write-Path vehicles fuellt, greift der Fallback (No-Op).
@@ -106,11 +108,10 @@ export async function pushMandatToKanzlei(fallId: string): Promise<PushMandatRes
   if (fall.claim_id) {
     const { data: claim } = await db
       .from('claims')
-      .select('kanzlei_wunsch, kunde_email, vorsteuerabzugsberechtigt, vehicle_id')
+      .select('kanzlei_wunsch, vorsteuerabzugsberechtigt, vehicle_id')
       .eq('id', fall.claim_id)
       .maybeSingle()
     kanzleiWunsch = (claim?.kanzlei_wunsch as string | null) ?? null
-    claimKundeEmail = (claim?.kunde_email as string | null) ?? null
     claimVorsteuer = (claim?.vorsteuerabzugsberechtigt as boolean | null) ?? null
     const vehId = (claim?.vehicle_id as string | null) ?? null
     if (vehId) {
