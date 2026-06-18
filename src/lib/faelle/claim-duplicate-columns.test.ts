@@ -208,4 +208,12 @@ describe('SP-J Bucket B routet auf claims', () => {
     expect(claimsUpdate).toEqual({ mietwagen_kanzlei_informiert: true })
     expect(faelleUpdate).toEqual({ status: 'x' })
   })
+
+  // CMM-49 kunde_email-Cutover: kunde_email ist KEIN claims-Duplikat mehr — es lebt in
+  // personen.email (geschaedigter-Party). Es darf NICHT im Set stehen, sonst wuerde ein
+  // Update nach dem claims.kunde_email-DROP weiter nach claims geroutet (42703). Der
+  // einzige Writer (stammdaten updateFallField) routet kunde_email direkt nach personen (#2987).
+  it('CMM-49: kunde_email ist NICHT im Set (lebt in personen.email)', () => {
+    expect(CLAIM_OWNED_DUPLICATE_COLUMNS.has('kunde_email')).toBe(false)
+  })
 })
