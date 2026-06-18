@@ -286,7 +286,7 @@ export function WizardClient({ phases, flowKey, prefilledValues, fallId, zb1Toke
         return
       }
 
-      const result = await saveOnboardingStep(anfrageId, currentPhase.phase_key, values, felder)
+      const result = await saveOnboardingStep(anfrageId, currentPhase.phase_key, values, felder, fallId)
       if (!result.ok) {
         // AAR-890: Anfrage existiert nicht (mehr) — RLS oder DSGVO-Hard-Delete.
         // Wizard resetten statt blind weiterklicken (silent data loss).
