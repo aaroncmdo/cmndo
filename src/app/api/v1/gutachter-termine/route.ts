@@ -1,0 +1,146 @@
+// MCP Write-API (Phase 2) — Inkrement 1: Public-Read fuer buchbare Gutachter + Termin-Slots.
+// GET /api/v1/gutachter-termine?plz=50670[&wunschtermin=ISO]
+//
+// Anonyme Public-API (gleiches Muster wie /api/v1/sv-in-naehe: CORS, In-Process-IP-
+// Rate-Limit, Geocode-Cache). Wrappt planeTerminOeffentlich (universelle Termin-Engine,
+// leak-sichere OeffentlichesSvProfil[] mit 2+1-Slot-Verteilung) — anders als sv-in-naehe
+// liefert das hier die *buchbaren* Gutachter MIT freien Slots. Vorstufe zum Buchen via
+// dem Write-Tool claimondo_melde_schaden (Inkrement 2). Read-only, legt nichts an.
+import { NextResponse } from 'next/server'
+import { planeTerminOeffentlich } from '@/lib/sv-matching-modul/plane-termin-oeffentlich'
+import { geocodeAdresse, type GeocodeResult } from '@/lib/mapbox/geocode'
+import { SITE_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+
+// planeTerminOeffentlich nutzt Server-Actions/Admin-Client -> Node-Runtime.
+export const runtime = 'nodejs'
+
+// planeTerminOeffentlich ist DB-schwer (findBestSV + parallele freieSlots). Geocode
+// (PLZ->Koords) ist stabil -> 24 h. Das Matching-Ergebnis cachen wir kurz (60 s) je
+// PLZ+Wunschtermin: schuetzt den heissen Endpoint vor wiederholten identischen Calls;
+// 60-s-stale Slots sind fuer einen VORSCHLAG ok (das Buchen in Inkrement 2 reserviert
+// race-sicher neu -> ein inzwischen vergebener Slot faellt dort sauber raus).
+const GEOCODE_CACHE_TTL_MS = 24 * 60 * 60_000
+const RESULT_CACHE_TTL_MS = 60_000
+const geocodeCache = new Map<string, { value: GeocodeResult; ts: number }>()
+const resultCache = new Map<string, { value: object; ts: number }>()
+
+async function geocodeCached(plz: string): Promise<GeocodeResult | null> {
+  const now = Date.now()
+  const hit = geocodeCache.get(plz)
+  if (hit && now - hit.ts < GEOCODE_CACHE_TTL_MS) return hit.value
+  const value = await geocodeAdresse(plz)
+  if (value) geocodeCache.set(plz, { value, ts: now })
+  return value
+}
+
+// In-Process-IP-Rate-Limit (PM2-Single-Process, kein DB-Cost): 60 Requests/Min pro IP.
+const RATE_WINDOW_MS = 60_000
+const RATE_MAX = 60
+const ipHits = new Map<string, number[]>()
+function rateLimited(ip: string): boolean {
+  const now = Date.now()
+  const hits = (ipHits.get(ip) ?? []).filter((t) => now - t < RATE_WINDOW_MS)
+  hits.push(now)
+  ipHits.set(ip, hits)
+  if (ipHits.size > 5000) {
+    for (const [k, v] of ipHits) {
+      if (v.every((t) => now - t >= RATE_WINDOW_MS)) ipHits.delete(k)
+    }
+  }
+  return hits.length > RATE_MAX
+}
+
+const CORS: Record<string, string> = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
+  'Access-Control-Max-Age': '86400',
+}
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 204, headers: CORS })
+}
+
+export async function GET(req: Request) {
+  const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]?.trim() || 'unknown'
+  if (rateLimited(ip)) {
+    return NextResponse.json(
+      { error: 'Rate limit exceeded (60 requests/minute)' },
+      { status: 429, headers: { ...CORS, 'Retry-After': '60' } },
+    )
+  }
+
+  const url = new URL(req.url)
+  const plz = url.searchParams.get('plz')
+  const wunschterminRaw = url.searchParams.get('wunschtermin')
+
+  if (!plz || !/^\d{5}$/.test(plz)) {
+    return NextResponse.json(
+      { error: 'plz required (5-digit German postal code)' },
+      { status: 400, headers: CORS },
+    )
+  }
+  // Wunschtermin optional; nur ein valides ISO-Datum durchreichen (steuert das
+  // Slot-Ranking, kein Hard-Filter), sonst ignorieren.
+  let wunschterminIso: string | null = null
+  if (wunschterminRaw) {
+    const d = new Date(wunschterminRaw)
+    if (!Number.isNaN(d.getTime())) wunschterminIso = d.toISOString()
+  }
+
+  const cacheKey = `${plz}|${wunschterminIso ?? ''}`
+  const now = Date.now()
+  const cached = resultCache.get(cacheKey)
+  if (cached && now - cached.ts < RESULT_CACHE_TTL_MS) {
+    return NextResponse.json(cached.value, {
+      headers: { 'Cache-Control': 'public, max-age=60', ...CORS },
+    })
+  }
+
+  const center = await geocodeCached(plz)
+  if (!center) {
+    return NextResponse.json({ error: 'PLZ not found' }, { status: 404, headers: CORS })
+  }
+
+  const profile = await planeTerminOeffentlich({
+    lat: center.lat,
+    lng: center.lng,
+    wunschterminIso,
+  })
+
+  // OeffentlichesSvProfil ist bereits die anon-kundensichere Projektion (kein
+  // score/ETA/Nachname); svId ist ein opakes, RLS-geschuetztes Buchungs-Handle.
+  const gutachter = profile.map((p) => ({
+    id: p.svId,
+    vorname: p.vorname,
+    profilbild: p.profilbild,
+    bewertung_schnitt: p.bewertungDurchschnitt,
+    bewertung_anzahl: p.bewertungAnzahl,
+    entfernung: p.distanzGerundet,
+    ist_top_partner: p.istTopPartner,
+    wunschtermin_frei: p.istWunschterminFrei,
+    termine: p.slots.map((s) => ({ start: s.start, end: s.end, passung: s.matchType })),
+  }))
+
+  const payload = {
+    plz,
+    wunschtermin: wunschterminIso,
+    center: { lat: center.lat, lng: center.lng },
+    anzahl_gutachter: gutachter.length,
+    gutachter,
+    interaktive_karte_url: `${SITE_URL}/gutachter-finden?plz=${plz}`,
+    buchungs_telefon: PHONE_DISPLAY,
+    buchungs_hinweis:
+      'Termin buchen aktuell über die interaktive Karte (interaktive_karte_url) oder telefonischen Rückruf (buchungs_telefon). Die gutachter[].id + ein termin.start sind das Buchungs-Handle für den späteren Schaden-melden-Schritt.',
+    _meta: {
+      quelle: 'Claimondo Public API',
+      stand: new Date().toISOString().slice(0, 10),
+      hinweis:
+        'Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+    },
+  }
+
+  resultCache.set(cacheKey, { value: payload, ts: now })
+  return NextResponse.json(payload, {
+    headers: { 'Cache-Control': 'public, max-age=60', ...CORS },
+  })
+}

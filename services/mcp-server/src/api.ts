@@ -200,3 +200,134 @@ export async function fetchWissensbasis(apiBase: string = DEFAULT_API_BASE): Pro
   wissensbasisCache = { text, ts: now }
   return text
 }
+
+// --- Gutachter + Termine (buchbar) ------------------------------------------
+// Wrappt GET /api/v1/gutachter-termine (anonym, IP-rate-limited) — buchbare
+// Partner-Gutachter MIT freien Slots (anders als sv-in-naehe = nur anonymisierte
+// Liste). Vorstufe zum Buchen. Read-only, sendet keine Nutzerdaten.
+
+export type TerminSlot = { start: string; end: string; passung: string }
+
+export type GutachterMitTerminen = {
+  id: string
+  vorname: string
+  profilbild: string | null
+  bewertung_schnitt: number | null
+  bewertung_anzahl: number | null
+  entfernung: string
+  ist_top_partner: boolean
+  wunschtermin_frei: boolean
+  termine: TerminSlot[]
+}
+
+export type GutachterTermineResult = {
+  plz: string
+  wunschtermin: string | null
+  anzahl_gutachter: number
+  gutachter: GutachterMitTerminen[]
+  interaktive_karte_url: string
+  buchungs_telefon: string
+}
+
+interface RawGutachterTermine {
+  plz?: string
+  wunschtermin?: string | null
+  anzahl_gutachter?: number
+  gutachter?: GutachterMitTerminen[]
+  interaktive_karte_url?: string
+  buchungs_telefon?: string
+  error?: string
+}
+
+/** Fetch buchbare Gutachter + freie Slots zu einer PLZ. Timeout 30 s, wirft {@link ClaimondoApiError}. */
+export async function fetchGutachterTermine(
+  plz: string,
+  wunschtermin: string | undefined,
+  apiBase: string = DEFAULT_API_BASE,
+): Promise<GutachterTermineResult> {
+  const qs = new URLSearchParams({ plz })
+  if (wunschtermin) qs.set('wunschtermin', wunschtermin)
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/gutachter-termine?${qs.toString()}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(
+        `Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten. Bitte später erneut versuchen.`,
+      )
+    }
+    throw new ClaimondoApiError(
+      `Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`,
+    )
+  } finally {
+    clearTimeout(timer)
+  }
+  const body = (await res.json().catch(() => ({}))) as RawGutachterTermine
+  if (!res.ok) {
+    if (res.status === 429) {
+      throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten und erneut versuchen.', 429)
+    }
+    throw new ClaimondoApiError(body.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return {
+    plz: body.plz ?? plz,
+    wunschtermin: body.wunschtermin ?? null,
+    anzahl_gutachter: body.anzahl_gutachter ?? body.gutachter?.length ?? 0,
+    gutachter: body.gutachter ?? [],
+    interaktive_karte_url: body.interaktive_karte_url ?? '',
+    buchungs_telefon: body.buchungs_telefon ?? '',
+  }
+}
+
+function formatSlot(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('de-DE', {
+      weekday: 'short',
+      day: '2-digit',
+      month: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'Europe/Berlin',
+    })
+  } catch {
+    return iso
+  }
+}
+
+/** Menschenlesbare deutsche Zusammenfassung (markdown response_format, user-facing). */
+export function formatGutachterTermine(r: GutachterTermineResult): string {
+  const lines: string[] = [`# Buchbare Kfz-Gutachter + freie Termine — PLZ ${r.plz}`, '']
+  if (r.anzahl_gutachter === 0) {
+    lines.push(
+      'Aktuell kein Partner-Gutachter mit freien Online-Terminen im Umkreis. Über die interaktive Karte oder den Telefon-Rückruf lässt sich trotzdem ein Termin (i. d. R. < 48 h) organisieren.',
+    )
+  } else {
+    for (const g of r.gutachter) {
+      const head: string[] = [g.vorname]
+      if (g.bewertung_schnitt != null) head.push(`${g.bewertung_schnitt}★ (${g.bewertung_anzahl ?? 0})`)
+      head.push(g.entfernung)
+      if (g.ist_top_partner) head.push('Empfohlener Partner')
+      lines.push(`## ${head.join(' · ')}`)
+      if (g.termine.length === 0) {
+        lines.push('_keine freien Slots_')
+      } else {
+        for (const t of g.termine) {
+          lines.push(`- ${formatSlot(t.start)}${t.passung === 'wunschtermin' ? ' (Wunschtermin frei)' : ''}`)
+        }
+      }
+      lines.push('')
+    }
+    lines.push('> Profile anonymisiert; die konkrete Zuordnung + Buchung erfolgt bei Beauftragung.')
+  }
+  lines.push('')
+  if (r.interaktive_karte_url) lines.push(`Interaktive Karte / Buchung: ${r.interaktive_karte_url}`)
+  if (r.buchungs_telefon) lines.push(`Telefon-Rückruf (i. d. R. < 15 Min): ${r.buchungs_telefon}`)
+  lines.push(
+    '',
+    'Für unverschuldet Geschädigte 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).',
+  )
+  return lines.join('\n')
+}
