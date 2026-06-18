@@ -31,7 +31,7 @@ import {
 } from 'lucide-react'
 import { useFall } from '../FallContext'
 import InlineEditField from './InlineEditField'
-import { getVersicherungById, type VersicherungSuggestion } from '@/app/dispatch/leads/[id]/_actions/versicherungen'
+import { getVersicherungById, type VersicherungSuggestion } from '@/lib/versicherungen/search-actions'
 import { CardentityButton } from '@/components/cardentity/CardentityButton'
 import { requestCardentityTypBForFall } from '../_actions/dokumente'
 import { SectionCard } from '@/components/shared/SectionCard'
