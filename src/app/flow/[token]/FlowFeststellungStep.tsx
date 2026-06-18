@@ -161,6 +161,16 @@ export function FlowFeststellungStep({
     onWeiter()
   }
 
+  // AAR-956 18.06. (Aaron): explizites „vorerst überspringen" — die GANZE Feststellung
+  // überspringen (best-effort-Save des bisher Eingegebenen, nicht blockierend) und raus
+  // aus dem Block. Hält die Conversion frei; die Fakten kommen via Dispatch oder später
+  // im Kunde-Onboarding nach (DB-vorbefüllt → kein Doppel-Tippen).
+  function handleSkipAll() {
+    void speichereFeststellungFlow(token, values).catch(() => {})
+    setError(null)
+    onWeiter()
+  }
+
   if (!currentStep) return null
 
   const sichtbareFelder =
@@ -281,6 +291,20 @@ export function FlowFeststellungStep({
             {t('common.weiter')}
           </Button>
         </div>
+      </div>
+
+      {/* AAR-956 18.06. (Aaron): expliziter Skip — die Feststellung ist optional und darf
+          die Conversion nicht blockieren. Subtiler Link, kein zweiter Primär-Button. */}
+      <div className="mt-4 text-center">
+        <button
+          type="button"
+          onClick={handleSkipAll}
+          disabled={saving}
+          className="text-sm text-claimondo-ondo underline disabled:opacity-50"
+          data-testid="feststellung-skip-all"
+        >
+          {t('step_feststellung.vorerst_ueberspringen')}
+        </button>
       </div>
     </div>
   )

@@ -99,7 +99,8 @@
       "zeugenaussage_hinweis": "Jeśli masz pisemne zeznanie świadka, prześlij je tutaj (zdjęcie lub PDF).",
       "heading": "Kilka informacji o Państwa szkodzie",
       "sub": "Im dokładniejsze, tym szybciej — wszystko jest opcjonalne i można uzupełnić później.",
-      "error_save": "Zapisywanie nie powiodło się."
+      "error_save": "Zapisywanie nie powiodło się.",
+      "vorerst_ueberspringen": "Pomiń na razie"
     },
     "progress": {
       "aria_label": "Postęp w procesie zgłaszania szkody",
