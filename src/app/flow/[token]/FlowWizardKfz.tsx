@@ -21,7 +21,10 @@ import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { FlowFeststellungStep } from './FlowFeststellungStep'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
-import type { OnboardingPhase } from '@/components/onboarding/types'
+import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
+import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
+import { meetsCondition } from './feststellung-steps'
+import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import {
   CheckIcon,
   FileTextIcon,
@@ -127,6 +130,8 @@ export default function FlowWizardKfz({
   besichtigungsAdresse,
   feststellungPhasen,
   feststellungWerte,
+  serviceFelder,
+  serviceWerte,
   legalDocs,
 }: {
   token: string
@@ -144,6 +149,10 @@ export default function FlowWizardKfz({
   // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + Initialwerte (server).
   feststellungPhasen?: OnboardingPhase[]
   feststellungWerte?: Record<string, unknown>
+  // AAR-956 16.06. (Aaron): Service-/Kanzlei-Felder (service_typ + kanzlei_wunsch) + Werte —
+  // gerendert im SA-/POS-Step (Kanzlei-Frage am Conversion-Punkt, nicht am Feststellung-Ende).
+  serviceFelder?: OnboardingFeld[]
+  serviceWerte?: Record<string, unknown>
   // legalDocs wird serverseitig übergeben — datenschutz + agb mit Titel/Markdown.
   legalDocs?: {
     datenschutz?: { titel: string; markdown: string }
@@ -173,6 +182,17 @@ export default function FlowWizardKfz({
   // AAR-956: Kunde hat den Termin-Step ohne Buchung übersprungen (kein_match/Skip) →
   // Erfolgsseite zeigt einen "Termin folgt"-Hinweis (SV wird via AAR-908 bei der SA zugeordnet).
   const [ohneTermin, setOhneTermin] = useState(false)
+  // AAR-956 16.06. (Aaron): Service-/Kanzlei-Wahl im SA-/POS-Step. Init aus dem Lead-Stand;
+  // Autosave bei jeder Aenderung (speichereFeststellungFlow), damit signSAandCreateFall den
+  // gewaehlten Service/Kanzlei vom Lead liest.
+  const [serviceValues, setServiceValues] = useState<Record<string, unknown>>(serviceWerte ?? {})
+  function setServiceFeld(key: string, val: unknown) {
+    setServiceValues((v) => {
+      const next = { ...v, [key]: val }
+      void speichereFeststellungFlow(token, next).catch(() => {})
+      return next
+    })
+  }
 
   // Editierbare Stammdaten (KFZ-117: Kunde kann korrigieren)
   const [editVorname, setEditVorname] = useState(lead.vorname)
@@ -653,6 +673,25 @@ export default function FlowWizardKfz({
                   <p className="font-medium text-claimondo-navy mb-2">{t('step_sa.summary_label')}</p>
                   <p>{t.rich('step_sa.summary_text', { strong: (chunks) => <strong>{chunks}</strong> })}</p>
                 </div>
+
+                {/* AAR-956 16.06. (Aaron): Service-/Kanzlei-Wahl am POS (statt am Feststellung-Ende).
+                    Config-getrieben via serviceFelder; kanzlei_wunsch nur bei service_typ='komplett'
+                    (meetsCondition). Autosave → der Lead hat die Wahl, wenn signSAandCreateFall feuert. */}
+                {serviceFelder && serviceFelder.length > 0 && (
+                  <div className="flex flex-col gap-5 mb-6">
+                    {serviceFelder
+                      .filter((feld) => meetsCondition(feld.conditional_on, serviceValues))
+                      .map((feld) => (
+                        <FieldRenderer
+                          key={feld.id}
+                          feld={feld}
+                          value={serviceValues[feld.feld_key]}
+                          onChange={(val) => setServiceFeld(feld.feld_key, val)}
+                          disabled={submittingSA}
+                        />
+                      ))}
+                  </div>
+                )}
 
                 <button
                   type="button"

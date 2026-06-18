@@ -18,7 +18,6 @@ import type { ConditionalOn, OnboardingFeld } from '@/components/onboarding/type
 export type FeststellungMicroStep =
   | { kind: 'felder'; id: string; kapitel: string; titel: string; sub?: string; feldKeys: string[] }
   | { kind: 'zb1'; id: string; kapitel: string; titel: string; sub?: string }
-  | { kind: 'polizeibericht'; id: string; kapitel: string; titel: string; sub?: string }
 
 export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   // ① Schaden
@@ -27,16 +26,18 @@ export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   { kind: 'felder', id: 'folgeschaeden', kapitel: 'Schaden', titel: 'Verletzte oder weitere Schäden?', feldKeys: ['personenschaden_flag', 'sachschaden_flag', 'sachschaden_beschreibung'] },
   // ② Unfall
   { kind: 'felder', id: 'wann_wo', kapitel: 'Unfall', titel: 'Wann und wo?', feldKeys: ['unfalldatum', 'unfall_uhrzeit', 'unfallort'] },
+  // AAR-956 16.06. (Aaron): "Polizei & Zeugen" — der Polizeibericht-Upload ist hier INLINE
+  // (FlowFeststellungStep), kein eigener Schritt mehr; nach Upload läuft die BKAT-Auslese.
   { kind: 'felder', id: 'polizei_zeugen', kapitel: 'Unfall', titel: 'Polizei & Zeugen', feldKeys: ['polizei_vor_ort', 'polizei_aktenzeichen', 'zeugen'] },
-  { kind: 'polizeibericht', id: 'polizeibericht', kapitel: 'Unfall', titel: 'Polizeibericht', sub: 'Falls du den Bericht schon hast, lad ihn hier hoch.' },
   { kind: 'felder', id: 'gegner', kapitel: 'Unfall', titel: 'Daten des Unfallgegners', sub: 'Steht auf dem europäischen Unfallbericht oder der Visitenkarte.', feldKeys: ['gegner_kennzeichen', 'auslandskennzeichen', 'gegner_versicherung', 'gegner_telefon'] },
   // ③ Fahrzeug
   { kind: 'zb1', id: 'fahrzeugschein', kapitel: 'Fahrzeug', titel: 'Fahrzeugschein fotografieren', sub: 'Ein Foto füllt Marke, FIN und Halter automatisch aus.' },
   { kind: 'felder', id: 'dein_fahrzeug', kapitel: 'Fahrzeug', titel: 'Dein Fahrzeug', feldKeys: ['kennzeichen', 'fahrzeug_fahrbereit', 'mietwagen_flag'] },
   { kind: 'felder', id: 'halter', kapitel: 'Fahrzeug', titel: 'Wem gehört das Fahrzeug?', feldKeys: ['ist_fahrzeughalter', 'halter_vorname', 'halter_nachname', 'halter_geburtsdatum', 'halter_strasse', 'halter_plz', 'halter_stadt'] },
   { kind: 'felder', id: 'vorschaeden', kapitel: 'Fahrzeug', titel: 'Vorschäden am Auto?', feldKeys: ['hat_vorschaeden'] },
-  // ④ Service
-  { kind: 'felder', id: 'service', kapitel: 'Service', titel: 'Wie sollen wir helfen?', feldKeys: ['service_typ', 'kanzlei_wunsch'] },
+  // ④ Service-/Kanzlei-Wahl (service_typ + kanzlei_wunsch) wandert in den Signatur-Step
+  //    (POS) — Aaron 16.06.: "die Kanzlei nicht am Feststellung-Ende, sondern wo unterschrieben
+  //    wird". Gerendert in FlowWizardKfz (SA-Step), Config via serviceFelder-Prop.
 ]
 
 // Spiegelt WizardClient.meetsCondition: sichtbar wenn keine Bedingung gesetzt ist
@@ -51,7 +52,6 @@ export function meetsCondition(
 
 // Aktive Micro-Schritte fuer die gegebene Feld-Config (felderByKey) + Werte:
 //  - zb1 immer sichtbar,
-//  - polizeibericht nur bei Polizei vor Ort,
 //  - felder-Schritt sobald >=1 seiner feldKeys in der Config liegt UND dessen
 //    conditional_on erfuellt ist.
 // WICHTIG: felderByKey MUSS aus der mount-stabilen Phasen-Config stammen. Leert sie
@@ -65,7 +65,6 @@ export function computeActiveFeststellungSteps(
 ): FeststellungMicroStep[] {
   return FESTSTELLUNG_STEPS.filter((step) => {
     if (step.kind === 'zb1') return true
-    if (step.kind === 'polizeibericht') return values['polizei_vor_ort'] === 'true'
     return step.feldKeys.some((k) => {
       const f = felderByKey.get(k)
       return f != null && meetsCondition(f.conditional_on, values)
