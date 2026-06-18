@@ -19,6 +19,7 @@ import { istFeststellungsFeld, istDokumentManuellFeld } from '@/lib/self-service
 import { speichereFeststellungFlow } from './self-service-feststellung-actions'
 import { FlowZb1Upload, type Zb1FlowExtracted } from './FlowZb1Upload'
 import { FlowPolizeiberichtUpload } from './FlowPolizeiberichtUpload'
+import { FlowZeugenaussageUpload } from './FlowZeugenaussageUpload'
 import { computeActiveFeststellungSteps, meetsCondition } from './feststellung-steps'
 import { Button } from '@/components/primitives/Button/Button.web'
 
@@ -207,6 +208,24 @@ export function FlowFeststellungStep({
               disabled={saving}
             />
           ))}
+          {/* AAR-956 16.06. (Aaron): Polizeibericht-Upload INLINE im "Polizei & Zeugen"-
+              Schritt (statt eigenem Schritt) — nur wenn Polizei vor Ort war. BKAT-Auslese
+              (TBNR/Aktenzeichen via Claude) passiert serverseitig im Upload. */}
+          {currentStep.id === 'polizei_zeugen' && values['polizei_vor_ort'] === 'true' && (
+            <FlowPolizeiberichtUpload
+              token={token}
+              bereitsHochgeladen={initialValues['polizeibericht_status'] === 'hochgeladen'}
+            />
+          )}
+          {/* AAR-956 16.06. (Aaron): Zeugenaussage-Upload INLINE, wenn Zeugen = Ja. */}
+          {currentStep.id === 'polizei_zeugen' && values['zeugen'] === 'true' && (
+            <FlowZeugenaussageUpload
+              token={token}
+              titel={t('step_feststellung.zeugenaussage_titel')}
+              hinweis={t('step_feststellung.zeugenaussage_hinweis')}
+              bereitsHochgeladen={initialValues['zeugenaussage_status'] === 'hochgeladen'}
+            />
+          )}
         </div>
       )}
 
@@ -242,13 +261,6 @@ export function FlowFeststellungStep({
               </div>
             ))}
         </div>
-      )}
-
-      {currentStep.kind === 'polizeibericht' && (
-        <FlowPolizeiberichtUpload
-          token={token}
-          bereitsHochgeladen={initialValues['polizeibericht_status'] === 'hochgeladen'}
-        />
       )}
 
       {error && (
