@@ -384,6 +384,8 @@
       "sv_label": "Twój rzeczoznawca",
       "kontakt_hinweis": "Skontaktuje się z Tobą",
       "termin_label": "Termin zarezerwowany",
+      "wunschtermin_label": "Preferowany termin",
+      "wunschtermin_pending": "Wkrótce potwierdzimy dokładny termin.",
       "besichtigungsort_label": "Miejsce oględzin",
       "treffpunkt_label": "Miejsce spotkania: {treffpunkt}",
       "kein_gutachter": "Twojego osobistego rzeczoznawcę przypiszemy w kolejnym kroku. Wystarczy kontynuować."
