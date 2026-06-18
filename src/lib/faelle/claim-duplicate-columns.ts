@@ -31,7 +31,12 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'kanzlei_ansprechpartner_name',
   'kanzlei_ansprechpartner_email',
   'kanzlei_ansprechpartner_telefon',
-  'kunde_email',
+  // CMM-49 kunde_email-Cutover: kunde_email ENTFERNT. Die Kunden-Email lebt jetzt in
+  // personen.email (geschaedigter-Party, v_claim_full.kunde_p) — nicht mehr auf faelle
+  // (Spalte bereits gedroppt) und claims.kunde_email wird gedroppt. Der einzige Writer
+  // (stammdaten updateFallField) routet kunde_email direkt nach personen (#2987), kein
+  // Payload erreicht diesen Helper -> toter Eintrag. Muss VOR dem claims.kunde_email-DROP
+  // raus, sonst wuerde ein etwaiges Update mit kunde_email weiter nach claims geroutet (42703).
   'sachschaden_beschreibung',
   'gegner_versicherung_id',
   'gegner_versicherungsnummer',
