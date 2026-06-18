@@ -123,6 +123,7 @@ export default function FlowWizardKfz({
   lead,
   gutachter,
   needsBooking,
+  terminPending,
   besichtigungsAdresse,
   feststellungPhasen,
   feststellungWerte,
@@ -136,6 +137,9 @@ export default function FlowWizardKfz({
   // via CANONICAL_FLOWLINK_ENABLED). besichtigungsAdresse speist die gutachter-
   // Anzeige nach Client-seitiger Reservierung.
   needsBooking?: boolean
+  // AAR-956 16.06. (Aaron Wunschtermin-Modell): kein harter Termin, aber gewählter SV +
+  // Wunschtermin → Gutachter-Step zeigt den Wunschtermin als "wird bestätigt" (kein Re-Pick).
+  terminPending?: boolean
   besichtigungsAdresse?: string | null
   // AAR-956 P4-A: ① Feststellung — lead-erfassung(kunde)-Phasen + Initialwerte (server).
   feststellungPhasen?: OnboardingPhase[]
@@ -590,13 +594,18 @@ export default function FlowWizardKfz({
                     <p className="text-sm text-claimondo-ondo">{t('step_gutachter.kontakt_hinweis')}</p>
                     {gutachterAnzeige.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
-                        <p className="text-xs text-claimondo-ondo mb-1">{t('step_gutachter.termin_label')}</p>
+                        <p className="text-xs text-claimondo-ondo mb-1">
+                          {terminPending ? t('step_gutachter.wunschtermin_label') : t('step_gutachter.termin_label')}
+                        </p>
                         <p className="text-sm font-semibold text-claimondo-navy">
                           {formatBerlin(gutachterAnzeige.terminDatum, { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
                         </p>
                         <p className="text-sm text-claimondo-ondo">
                           {formatBerlin(gutachterAnzeige.terminDatum, { hour: '2-digit', minute: '2-digit' })} Uhr
                         </p>
+                        {terminPending && (
+                          <p className="mt-1 text-xs italic text-claimondo-ondo/80">{t('step_gutachter.wunschtermin_pending')}</p>
+                        )}
                         {/* Besichtigungsort prominent — NICHT der Unfallort */}
                         {gutachterAnzeige.besichtigungsAdresse && (
                           <div className="mt-3 pt-3 border-t border-claimondo-ondo/10">

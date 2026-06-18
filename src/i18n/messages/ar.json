@@ -384,6 +384,8 @@
       "sv_label": "خبيرك",
       "kontakt_hinweis": "سيتواصل معك قريباً",
       "termin_label": "تم حجز الموعد",
+      "wunschtermin_label": "موعدك المفضّل",
+      "wunschtermin_pending": "سنؤكّد الموعد الدقيق قريباً.",
       "besichtigungsort_label": "مكان المعاينة",
       "treffpunkt_label": "نقطة اللقاء: {treffpunkt}",
       "kein_gutachter": "سنخصّص لك خبيرك الشخصي في الخطوة التالية. ما عليك سوى المتابعة."
