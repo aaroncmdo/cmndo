@@ -179,10 +179,29 @@ export default async function FlowPage({
     .limit(1)
     .maybeSingle()
 
-  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-
-  // Pfad (Quali+Slot), server-seitig flag-gegatet (CANONICAL_FLOWLINK_ENABLED).
-  // Dispatcher-Leads (Termin vorhanden) ODER Flag OFF → heutiger Pfad unverändert.
-  const needsBooking = !terminMitSv && process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
+  // AAR-956 16.06. (Aaron Wunschtermin-Modell): Wenn KEIN harter Termin (mehr) existiert
+  // (verfallen/Buchung fehlgeschlagen), die Anfrage aber einen gewählten SV + Wunschtermin
+  // trägt, zwingen wir den Kunden NICHT zur Neu-Buchung — er sieht "Wunschtermin wird
+  // bestätigt" (Dispatch finalisiert den Slot). Nur ohne SV-Pick UND ohne Wunschtermin
+  // bleibt die Buchung Pflicht. Schmaler Gate: trifft genau den Re-Select-Bug.
+  const wunschterminIso = (lead.wunschtermin as string | null) ?? null
+  let chosenSvId: string | null = null
+  if (!terminMitSv) {
+    const { data: gfaPick } = await svc
+      .from('gutachter_finder_anfragen')
+      .select('zugeordneter_sv_id')
+      .eq('konvertiert_zu_lead_id', leadId)
+      .order('erstellt_am', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    chosenSvId = (gfaPick?.zugeordneter_sv_id as string | null) ?? null
+  }
+  const terminPending = !terminMitSv && chosenSvId != null && wunschterminIso != null
+
+  // AAR-956 §3a: termin-loser Self-Service-Lead → datengetriebener incomplete-Pfad
+  // (Quali+Slot), flag-gegatet. Dispatcher-Lead (Termin) ODER Wunschtermin-Pending → kein Slot-Step.
+  const needsBooking =
+    !terminMitSv && !terminPending && process.env.CANONICAL_FLOWLINK_ENABLED === 'true'
   // AAR-956 self-service (Aaron 14.06.): ① Feststellung ist FAKTEN-gegatet, nicht termin-gegatet.
   // Ein Embed-Lead hat einen gebuchten Termin ABER noch keinen unfallhergang → die Feststellung
   // soll laufen (da kommen Hergang/Fahrzeug/Gegner/Vorschäden rein). Sobald unfallhergang gefüllt
@@ -280,6 +299,53 @@ export default async function FlowPage({
     }
   }
 
+  // AAR-956 16.06. (Aaron): kein harter Termin, aber gewählter SV + Wunschtermin →
+  // den gewählten SV laden + den Wunschtermin als (noch zu bestätigendes) Datum zeigen.
+  // Spiegelt das svReserviert-Profil-/Google-Pattern oben (chosenSvId statt assignee_id).
+  if (!gutachter && terminPending && chosenSvId) {
+    const { data: svPick } = await svc
+      .from('sachverstaendige')
+      .select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
+      .eq('id', chosenSvId)
+      .maybeSingle()
+    if (svPick) {
+      const p = svPick.profiles as
+        | { vorname: string | null; avatar_url: string | null; firma: string | null }
+        | { vorname: string | null; avatar_url: string | null; firma: string | null }[]
+        | null
+      const pr = Array.isArray(p) ? p[0] : p
+      const svPid = svPick.profile_id as string | null | undefined
+      let gd: number | null = null
+      let ga: number | null = null
+      let gaa: string | null = null
+      if (svPid) {
+        const { data: gb } = await svc
+          .from('google_bewertungen_cache')
+          .select('durchschnitt, anzahl_bewertungen, zuletzt_aktualisiert_am')
+          .eq('profile_id', svPid)
+          .maybeSingle()
+        if (gb) {
+          gd = (gb.durchschnitt as number | null) ?? null
+          ga = (gb.anzahl_bewertungen as number | null) ?? null
+          gaa = (gb.zuletzt_aktualisiert_am as string | null) ?? null
+        }
+      }
+      if (pr?.vorname) {
+        gutachter = {
+          vorname: pr.vorname,
+          avatarUrl: pr.avatar_url ?? null,
+          firma: pr.firma ?? null,
+          terminDatum: wunschterminIso,
+          besichtigungsAdresse,
+          svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
+          googleDurchschnitt: gd,
+          googleAnzahl: ga,
+          googleAktualisiertAm: gaa,
+        }
+      }
+    }
+  }
+
   // AAR-316: Sprach-Priorität flow_links.sprache > lead.sprache > 'de'
   const sprache =
     (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
@@ -318,6 +384,7 @@ export default async function FlowPage({
           flowLinkId={flowLinkId}
           gutachter={gutachter}
           needsBooking={needsBooking}
+          terminPending={terminPending}
           besichtigungsAdresse={besichtigungsAdresse}
           feststellungPhasen={feststellungPhasen}
           feststellungWerte={feststellungWerte}
