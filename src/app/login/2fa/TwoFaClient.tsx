@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, useRef, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
 import { ShieldCheckIcon, SmartphoneIcon, RefreshCwIcon } from 'lucide-react'
 import {
   challengePhoneFaktor,
@@ -42,7 +41,6 @@ export default function TwoFaClient({
   prefillPhone,
   targetPath,
 }: Props) {
-  const router = useRouter()
   const [phase, setPhase] = useState<'phone' | 'code'>(mode === 'enroll' ? 'phone' : 'code')
   const [phone, setPhone] = useState(prefillPhone ?? '')
   const [activeFactorId, setActiveFactorId] = useState<string | null>(factorId ?? null)
@@ -146,8 +144,14 @@ export default function TwoFaClient({
           null,
         )
       }
-      router.push(targetPath)
-      router.refresh()
+      // AAR-939 enroll-navfix: Hard-Navigate statt router.push. router.push
+      // verlässt sich auf den Client-Router-Cache und navigiert nach dem
+      // AAL2-Wechsel + der 2. Server-Action (merkeTwofaTelefon) unzuverlässig —
+      // der Enroll-Pfad blieb auf /login/2fa hängen, obwohl die Session schon
+      // aal2 war (Live-Smoke 18.06., direkter /kunde-Aufruf lud sofort).
+      // window.location erzwingt einen frischen Request mit dem aal2-Cookie.
+      // Gleiche Lehre wie früher in TwoFaSkipRedirect.
+      window.location.href = targetPath
     })
   }
 
@@ -263,7 +267,7 @@ export default function TwoFaClient({
           // Soft-Enroll: überspringbar. Die Middleware lässt faktor-lose User
           // ohnehin durch — der Link macht das ehrlich statt eine Wand vorzutäuschen.
           <button
-            onClick={() => router.push(targetPath)}
+            onClick={() => { window.location.href = targetPath }}
             className="w-full mt-4 py-2 text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo transition-colors text-center"
           >
             Später einrichten
