@@ -12,6 +12,7 @@
 import { useEffect, useId, useRef, useState } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { PhoneIcon, ExternalLinkIcon, LayoutGridIcon, ListIcon, BellIcon, UserIcon, CalendarCheckIcon, UserCheckIcon } from 'lucide-react'
 import { PHASE_BADGES, PHASE_LABELS, KANBAN_PHASEN } from './leadPhaseConstants'
 import PhoneButton from '@/components/shared/PhoneButton'
@@ -199,6 +200,8 @@ export default function LeadsViewToggle({
   const [leads, setLeads] = useState<Lead[]>(initialLeads)
   const [newLeadIds, setNewLeadIds] = useState<Set<string>>(new Set())
   const channelInstanceId = useId() // verhindert Channel-Kollision wenn der Component mehrfach mountet
+  const router = useRouter()
+  const refreshTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Initial-Props syncen, falls Server eine Refresh ausliefert (revalidatePath
   // oder Phase-Filter wechselt → neue Props, lokaler State soll mit ziehen).
@@ -267,6 +270,37 @@ export default function LeadsViewToggle({
       supabase.removeChannel(channel)
     }
   }, [channelInstanceId])
+
+  // AAR-956 #4: Termin/Gutachter live in der Liste. Die "Termin · Gutachter"-Spalte
+  // kommt aus v_lead_termin_gutachter (Server-Prop terminGutachter). Eine Buchung/
+  // Umlegung/Stornierung ODER SV-Zuweisung landet als gutachter_termine-Change —
+  // global abonniert (kein lead_id-Filter: die Liste zeigt viele Leads), debounced
+  // router.refresh() laedt terminGutachter (+ leads) frisch nach. Spiegelt
+  // LeadRealtimeRefresh(watchTermine) der Detail-Sicht auf Listen-Ebene. Kein gfa-
+  // Watch noetig: eine SV-Zuweisung schreibt immer gutachter_termine; der kunden_pick
+  // (gfa) ist post-Konversion statisch und nicht in der Realtime-Publication.
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel(`dispatch-leads-termine:${channelInstanceId}`)
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'gutachter_termine' },
+        () => {
+          if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+          refreshTimerRef.current = setTimeout(() => {
+            router.refresh()
+            refreshTimerRef.current = null
+          }, 600)
+        },
+      )
+      .subscribe()
+
+    return () => {
+      if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current)
+      supabase.removeChannel(channel)
+    }
+  }, [channelInstanceId, router])
 
   const newCount = newLeadIds.size
 
