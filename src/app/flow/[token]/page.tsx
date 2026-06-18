@@ -171,7 +171,7 @@ export default async function FlowPage({
   // AAR-99: Reservierten SV+Termin laden fuer Schritt 2
   const { data: terminMitSv } = await svc
     .from('gutachter_termine')
-    .select('id, start_zeit, assignee_id, assignee_typ')
+    .select('id, start_zeit, assignee_id, assignee_typ, status')
     // AAR-956: Self-Service-Termine sind bezug-nativ (lead_id NULL) -> Dual-Lookup mitfinden.
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'bestaetigt'])
@@ -264,6 +264,7 @@ export default async function FlowPage({
     googleDurchschnitt: number | null
     googleAnzahl: number | null
     googleAktualisiertAm: string | null
+    terminStatus: string | null
   } | null = null
   // CMM-49 sv_id-Drop: FK-Embed sachverstaendige(...) haengt an der zu droppenden
   // sv_id-FK → assignee_id-Lookup (typ-guarded, value-identisch fuer SV-Termine).
@@ -310,6 +311,7 @@ export default async function FlowPage({
         googleDurchschnitt,
         googleAnzahl,
         googleAktualisiertAm,
+        terminStatus: (terminMitSv?.status as string | null) ?? null,
       }
     }
   }
@@ -356,6 +358,7 @@ export default async function FlowPage({
           googleDurchschnitt: gd,
           googleAnzahl: ga,
           googleAktualisiertAm: gaa,
+          terminStatus: null, // Wunschtermin = noch kein harter Termin
         }
       }
     }

@@ -386,6 +386,7 @@
       "sv_label": "Bilirkişiniz",
       "kontakt_hinweis": "Sizi arayacak",
       "termin_label": "Randevu rezerve edildi",
+      "termin_bestaetigt_label": "Randevu onaylandı",
       "wunschtermin_label": "Tercih ettiğiniz tarih",
       "wunschtermin_pending": "Kesin randevuyu kısa süre içinde onaylayacağız.",
       "besichtigungsort_label": "Ekspertiz yeri",

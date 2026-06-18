@@ -100,6 +100,8 @@ export type GutachterInfo = {
   googleDurchschnitt: number | null
   googleAnzahl: number | null
   googleAktualisiertAm: string | null
+  // AAR-956 18.06. (Aaron): Termin-Status fürs Card-Label (reserviert vs. bestätigt).
+  terminStatus: string | null
 }
 
 // CMM-14: 4-Step Flow. Step 'weitere-angaben' (Werkstatt + Schadenfotos)
@@ -307,6 +309,7 @@ export default function FlowWizardKfz({
           googleDurchschnitt: null,
           googleAnzahl: null,
           googleAktualisiertAm: null,
+          terminStatus: 'reserviert', // frisch gebucht (bucheTerminFlow) → immer reserviert
         }
       : null)
 
@@ -643,7 +646,11 @@ export default function FlowWizardKfz({
                     {gutachterAnzeige.terminDatum && (
                       <div className="mt-4 pt-4 border-t border-claimondo-ondo/20">
                         <p className="text-xs text-claimondo-ondo mb-1">
-                          {terminPending ? t('step_gutachter.wunschtermin_label') : t('step_gutachter.termin_label')}
+                          {terminPending
+                            ? t('step_gutachter.wunschtermin_label')
+                            : gutachterAnzeige.terminStatus === 'bestaetigt'
+                              ? t('step_gutachter.termin_bestaetigt_label')
+                              : t('step_gutachter.termin_label')}
                         </p>
                         <p className="text-sm font-semibold text-claimondo-navy">
                           {formatBerlin(gutachterAnzeige.terminDatum, { weekday: 'long', day: '2-digit', month: 'long', year: 'numeric' })}
