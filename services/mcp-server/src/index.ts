@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchGutachterTermine, fetchSvInNaehe, fetchWissensbasis, formatGutachterTermine, formatMarkdown } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchGutachterTermine, fetchSvInNaehe, fetchWissensbasis, formatGutachterTermine, formatMarkdown, meldeSchaden } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -101,6 +101,26 @@ const gutachterTermineOutput = {
   gutachter: z.array(z.object(gutachterItemSchema)),
   interaktive_karte_url: z.string(),
   buchungs_telefon: z.string(),
+}
+
+// --- claimondo_melde_schaden (WRITE: Lead + FlowLink + WhatsApp) -------------
+const meldeSchadenInput = {
+  schadenart: z.string().min(2).max(80).describe('Schadenart / Unfalltyp, z. B. "Auffahrunfall", "Parkschaden".'),
+  hergang: z.string().min(3).max(1000).describe('Kurze Schilderung, was passiert ist (Unfallhergang).'),
+  plz: z.string().regex(/^\d{5}$/).describe('5-stellige PLZ des Besichtigungsorts (wo das Fahrzeug steht).'),
+  sv_id: z.string().uuid().optional().describe('Opakes Gutachter-Handle aus claimondo_finde_gutachter_termine (gutachter[].id), falls gewählt.'),
+  wunschtermin: z.string().optional().describe('Gewählter Slot als ISO-8601 (gutachter[].termine[].start) — weicher Hold.'),
+  name: z.string().min(2).max(80).describe('Name des Kunden.'),
+  telefon: z.string().min(8).max(20).describe('WhatsApp-Nummer des Kunden (für den FlowLink-Versand).'),
+  einwilligung_erteilt: z
+    .boolean()
+    .describe('MUSS true sein und NUR nach ausdrücklicher Nutzer-Zustimmung gesetzt werden: Verarbeitung der Angaben + WhatsApp-Kontakt + Hinweis auf KI-Dienst/USA.'),
+}
+const meldeSchadenOutput = {
+  ok: z.boolean(),
+  status: z.string(),
+  kanal: z.string(),
+  hinweis: z.string(),
 }
 
 /**
@@ -200,6 +220,48 @@ Hinweis: gutachter[].id + ein termin.start sind das Buchungs-Handle; die eigentl
     },
   )
 
+  server.registerTool(
+    'claimondo_melde_schaden',
+    {
+      title: 'Schaden melden + Gutachter-Termin anstoßen (WRITE)',
+      description: `Meldet einen Kfz-Schaden bei Claimondo und stößt die Gutachter-/Termin-Buchung an. ERZEUGT EINEN LEAD und sendet dem Kunden seinen persönlichen FlowLink per WhatsApp — eine SCHREIBENDE Aktion, kein read.
+
+WICHTIG — Einwilligung (DSGVO): Rufe dieses Tool NUR mit einwilligung_erteilt=true auf, NACHDEM du dem Nutzer erklärt hast, dass (a) Claimondo seine Angaben zur Gutachter-/Termin-Vermittlung verarbeitet, (b) der Kontakt per WhatsApp erfolgt, (c) die Verarbeitung teils über einen KI-Dienst in den USA läuft — UND der Nutzer ausdrücklich zugestimmt hat. Ohne Zustimmung lehnt der Server ab (einwilligung_erforderlich).
+
+WICHTIG — keine Rechtsberatung: Du vermittelst Gutachter + Termin (allgemeine Infos zur Schadensregulierung sind ok), keine individuelle Rechtsberatung.
+
+Ablauf: erst claimondo_finde_gutachter_termine (Gutachter + freie Slots) → Nutzer wählt (sv_id + wunschtermin) → Name + WhatsApp-Nr erfragen → Einwilligung einholen → dieses Tool. Den finalen Termin + die Details (Vollmacht, Schuldfrage) setzt der Kunde anschließend selbst im FlowLink (/flow).
+
+Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/keine PII im Ergebnis — der Link geht direkt per WhatsApp an den Kunden.`,
+      inputSchema: meldeSchadenInput,
+      outputSchema: meldeSchadenOutput,
+      annotations: {
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: true,
+      },
+    },
+    async ({ schadenart, hergang, plz, sv_id, wunschtermin, name, telefon, einwilligung_erteilt }) => {
+      try {
+        const r = await meldeSchaden(
+          { schadenart, hergang, plz, sv_id, wunschtermin, name, telefon, einwilligung_erteilt },
+          API_BASE,
+        )
+        return {
+          content: [{ type: 'text', text: r.hinweis || `Status: ${r.status} (Kanal: ${r.kanal}).` }],
+          structuredContent: r,
+        }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
   server.registerResource(
     'wissensbasis',
     'claimondo://wissensbasis',
@@ -287,6 +349,25 @@ async function runHttp(): Promise<void> {
               response_format: { type: 'string', enum: ['markdown', 'json'], default: 'markdown', description: 'Ausgabeformat.' },
             },
             required: ['plz'],
+          },
+        },
+        {
+          name: 'claimondo_melde_schaden',
+          description:
+            'Meldet einen Kfz-Schaden + stößt die Gutachter-/Termin-Buchung an (WRITE — erzeugt einen Lead, sendet den FlowLink per WhatsApp). Nur mit ausdrücklicher Nutzer-Einwilligung (einwilligung_erteilt=true; DSGVO + Drittland-Hinweis).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              schadenart: { type: 'string', description: 'Schadenart / Unfalltyp.' },
+              hergang: { type: 'string', description: 'Kurze Schilderung des Unfallhergangs.' },
+              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige PLZ des Besichtigungsorts.' },
+              sv_id: { type: 'string', format: 'uuid', description: 'Gutachter-Handle aus claimondo_finde_gutachter_termine (optional).' },
+              wunschtermin: { type: 'string', format: 'date-time', description: 'Gewählter Slot (ISO-8601; weicher Hold).' },
+              name: { type: 'string', description: 'Name des Kunden.' },
+              telefon: { type: 'string', description: 'WhatsApp-Nummer des Kunden.' },
+              einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein nach ausdrücklicher Nutzer-Zustimmung (DSGVO + WhatsApp + KI-Dienst/USA).' },
+            },
+            required: ['schadenart', 'hergang', 'plz', 'name', 'telefon', 'einwilligung_erteilt'],
           },
         },
       ],
