@@ -1,10 +1,17 @@
 'use server'
 
-// AAR-265: Server-Action für Versicherungs-Autocomplete in Phase 4 Stammdaten.
-// Sucht in der versicherungen-Stammdaten-Tabelle (95+ KFZ-Versicherer im Seed)
-// und liefert Top-10-Treffer mit Schaden-Kontaktdaten für Lead/Fall.
+// Versicherer-Stammdaten-Suche (oeffentliche Referenzdaten: 95+ KFZ-Versicherer).
+// AAR-956: aus dem dispatch-privaten _actions/versicherungen.ts in eine neutrale,
+// domaenenuebergreifende Lib gezogen — Consumer sind jetzt Dispatch (Stammdaten),
+// faelle (getById) UND der anonyme /flow (gegner_versicherung-Autocomplete).
+//
+// Admin-Client (service_role) statt SSR-Auth-Client: die versicherungen-Tabelle ist
+// RLS-geschuetzt (nur `authenticated` SELECT), der /flow laeuft aber ANONYM → der
+// Auth-Client laege bei 0 Treffern. Die Daten sind reine oeffentliche Referenzdaten
+// (Versicherer-Name + Schaden-Kontakt, KEIN Kunden-PII) und die Projektion ist fix +
+// leak-sicher, daher ist der anon-erreichbare Service-Role-Read unbedenklich.
 
-import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export type VersicherungSuggestion = {
   id: string
@@ -18,7 +25,7 @@ export async function searchVersicherungen(query: string): Promise<VersicherungS
   const trimmed = query.trim()
   if (trimmed.length < 2) return []
 
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('versicherungen')
     .select('id, name, schaden_telefon, schaden_email, bafin_nummer')
@@ -35,7 +42,7 @@ export async function searchVersicherungen(query: string): Promise<VersicherungS
 }
 
 export async function getVersicherungById(id: string): Promise<VersicherungSuggestion | null> {
-  const supabase = await createClient()
+  const supabase = createAdminClient()
   const { data, error } = await supabase
     .from('versicherungen')
     .select('id, name, schaden_telefon, schaden_email, bafin_nummer')

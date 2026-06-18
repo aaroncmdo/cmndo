@@ -20,6 +20,7 @@ import { PhoneVerifyField } from './fields/PhoneVerifyField'
 import { AvatarUploadField } from './fields/AvatarUploadField'
 import { CalendarConnectField } from './fields/CalendarConnectField'
 import { EmbedSiteCreateField } from './fields/EmbedSiteCreateField'
+import VersicherungAutocomplete from '@/components/VersicherungAutocomplete'
 
 export function FieldRenderer({
   feld,
@@ -43,6 +44,22 @@ export function FieldRenderer({
   zb1Token?: string | null
   token?: string | null
 }) {
+  // AAR-956: gegner_versicherung rendert IMMER als Versicherer-Autocomplete
+  // (Stammdaten-Suche statt Freitext) — analog zum Dispatch-Override
+  // (hasDispatchFieldOverride → DispatchVersichererField faengt den Dispatch-Pfad
+  // schon VOR diesem Renderer ab). Per feld_key statt eigenem typ, damit KEIN
+  // Live-Config-Flip noetig ist (der die noch nicht deployte Prod-Sicht auf den
+  // null-Default werfen wuerde). Name-only: die FK-Denormalisierung
+  // (gegner_versicherung_id) bleibt dispatch-seitig; der Flow speichert nur den Namen.
+  if (feld.feld_key === 'gegner_versicherung') {
+    return (
+      <VersicherungAutocomplete
+        initialName={(value as string) ?? ''}
+        onSelect={(sel) => onChange(sel.name)}
+        onFreitextConfirm={(name) => onChange(name)}
+      />
+    )
+  }
   switch (feld.typ) {
     case 'text':
     case 'email':
