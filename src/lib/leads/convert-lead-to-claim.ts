@@ -309,10 +309,11 @@ export async function convertLeadToClaim(
       (lead.gegner_versicherung_id as string | null) ??
       entityFks.gegnerVersicherungId ??
       null,
-    gegner_versicherungsnummer: null, // Lead hat heute keine separate Spalte
-    // CMM-26: gegner_aktenzeichen = Schadennummer der gegnerischen
-    // Versicherung. Lead-Spalte heißt `gegner_schadennummer` (UI-Wording).
-    gegner_aktenzeichen: (lead.gegner_schadennummer as string | null) ?? null,
+    // CMM-49 Tier-2: gegner_versicherungsnummer/gegner_aktenzeichen wandern in die
+    // verursacher-Party (versicherungsnummer/versicherungs_aktenzeichen, SSoT) — s.u.
+    // partyInserts. Nicht mehr auf claims (Cutover-Drop; Reader lesen v_claim_full.gegner_*
+    // = COALESCE party->claims, #3004). gegner_schadennummer ist Teil von hatGegnerInfo
+    // -> die verursacher-Party existiert immer, wenn eine Schadennummer da ist.
     anzahl_beteiligte_total:
       ((lead.gegner_anzahl_beteiligte as number | null) ?? 0) + 1,
 
@@ -536,8 +537,10 @@ export async function convertLeadToClaim(
       versicherung_klartext: (lead.gegner_versicherung as string | null) ?? null,
       // CMM-Entity Plan 3 (T3): Gegner-Fahrzeug-Entitaet (FIN-los, per Kennzeichen)
       vehicle_id: gegnerVehicleId,
-      // CMM-26: Schadennummer wird in claims.gegner_aktenzeichen abgelegt
-      // (siehe claimsInsert oben), claim_parties hat keine eigene Spalte.
+      // CMM-49 Tier-2: Schadennummer (UI: gegner_schadennummer) lebt jetzt als
+      // versicherungs_aktenzeichen in der verursacher-Party (SSoT), nicht mehr auf
+      // claims.gegner_aktenzeichen. versicherungsnummer: Lead hat keine Quelle -> null.
+      versicherungs_aktenzeichen: (lead.gegner_schadennummer as string | null) ?? null,
       adresse_land: 'DE',
       ist_halter: false,
       ist_fahrer: false,
