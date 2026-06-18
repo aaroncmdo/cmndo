@@ -243,27 +243,17 @@ export async function POST(request: Request) {
   // Claim-ID fuer claims-Write holen.
   const fallClaimId = await resolveClaimId(supabase, fallId)
 
-  const { error: updateErr } = await supabase
-    .from('faelle')
-    // CMM-49 (faelle-Drop): organisation_id NICHT mehr nach faelle geschrieben — Org-Pool
-    // ruht + reader-frei (v_claim_full=NULL::uuid, keine RLS/Trigger). Nur der Status-Write
-    // bleibt (faelle.status = separater CMM-74-Retire).
-    .update(orgPool ? {
-      status: 'sv-gesucht',
-    } : {
-      status: 'sv-zugewiesen',
-    })
-    .eq('id', fallId)
-
   // CMM-44 SP-B PR2a: sv_zugewiesen_am → claims (SSoT).
-  // CMM-74 b2: operative_status (Engine-Cursor, claims=SSoT) mit dem Dispatch-Status mitziehen —
-  // sonst zeigt der Reader den alten op-Status (faelle.status='sv-zugewiesen'/'sv-gesucht', op stale).
-  // Record-Bridge (operative_status fehlt in gen. Typen, b''-Konvention wie convert/#2884).
+  // CMM-74: faelle.status-Write retired — operative_status (Engine-Cursor, claims=SSoT) traegt
+  // den Dispatch-Status ('sv-gesucht' Org-Pool / 'sv-zugewiesen' direkt). faelle.status war ein
+  // reiner Dual-Write (0-divergent verifiziert). Record-Bridge (operative_status fehlt in gen. Typen).
+  let updateErr: { message: string } | null = null
   if (fallClaimId) {
     const adminDb = createAdminClient()
     const claimsUpd = { sv_zugewiesen_am: orgPool ? null : now }
     ;(claimsUpd as Record<string, unknown>).operative_status = orgPool ? 'sv-gesucht' : 'sv-zugewiesen'
-    await adminDb.from('claims').update(claimsUpd).eq('id', fallClaimId)
+    const { error } = await adminDb.from('claims').update(claimsUpd).eq('id', fallClaimId)
+    updateErr = error
   }
 
   // CMM-60 Schritt 3: SV-Zuweisung auf der SSoT claims.sv_id (Reverse-Trigger
