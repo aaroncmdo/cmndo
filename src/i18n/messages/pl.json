@@ -390,7 +390,14 @@
       "wunschtermin_pending": "Wkrótce potwierdzimy dokładny termin.",
       "besichtigungsort_label": "Miejsce oględzin",
       "treffpunkt_label": "Miejsce spotkania: {treffpunkt}",
-      "kein_gutachter": "Twojego osobistego rzeczoznawcę przypiszemy w kolejnym kroku. Wystarczy kontynuować."
+      "kein_gutachter": "Twojego osobistego rzeczoznawcę przypiszemy w kolejnym kroku. Wystarczy kontynuować.",
+      "aendern_cta": "Wybierz inny termin lub rzeczoznawcę",
+      "aendern_confirm": "Twój obecny termin zostanie zwolniony, a Ty wybierzesz ponownie. Kontynuować?",
+      "aendern_ja": "Tak, wybierz ponownie",
+      "aendern_laeuft": "Zwalnianie …",
+      "aendern_zurueck": "Zostaw",
+      "aendern_fehler": "Zmiana nie powiodła się. Spróbuj ponownie.",
+      "aendern_dispatch_hinweis": "Twój termin jest już potwierdzony — zadzwonimy do Ciebie, aby go przełożyć."
     },
     "step_sa": {
       "heading": "Podpisz zlecenie",

@@ -390,7 +390,14 @@
       "wunschtermin_pending": "We'll confirm the exact appointment shortly.",
       "besichtigungsort_label": "Inspection location",
       "treffpunkt_label": "Meeting point: {treffpunkt}",
-      "kein_gutachter": "We'll assign your personal expert in the next step. Just continue."
+      "kein_gutachter": "We'll assign your personal expert in the next step. Just continue.",
+      "aendern_cta": "Choose a different appointment or expert",
+      "aendern_confirm": "Your current appointment will be released and you'll choose again. Continue?",
+      "aendern_ja": "Yes, choose again",
+      "aendern_laeuft": "Releasing …",
+      "aendern_zurueck": "Keep it",
+      "aendern_fehler": "Change failed. Please try again.",
+      "aendern_dispatch_hinweis": "Your appointment is already confirmed — we'll call you briefly to rebook it."
     },
     "step_sa": {
       "heading": "Sign engagement",
