@@ -99,7 +99,8 @@
       "zeugenaussage_hinweis": "Yazılı bir tanık ifadeniz varsa, buraya yükleyin (fotoğraf veya PDF).",
       "heading": "Hasarınız hakkında birkaç bilgi",
       "sub": "Ne kadar ayrıntılı olursa o kadar hızlı — her şey isteğe bağlıdır ve daha sonra tamamlanabilir.",
-      "error_save": "Kaydetme başarısız oldu."
+      "error_save": "Kaydetme başarısız oldu.",
+      "vorerst_ueberspringen": "Şimdilik atla"
     },
     "progress": {
       "aria_label": "Hasar bildirme akışında ilerleme",

@@ -236,7 +236,8 @@
       "zeugenaussage_hinweis": "Falls du eine schriftliche Zeugenaussage hast, lad sie hier hoch (Foto oder PDF).",
       "heading": "Ein paar Angaben zu Ihrem Schaden",
       "sub": "Je genauer, desto schneller — alles ist optional und kann später ergänzt werden.",
-      "error_save": "Speichern fehlgeschlagen."
+      "error_save": "Speichern fehlgeschlagen.",
+      "vorerst_ueberspringen": "Vorerst überspringen"
     },
     "progress": {
       "aria_label": "Fortschritt im Schaden-Melden-Flow",
