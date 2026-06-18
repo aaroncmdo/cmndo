@@ -22,6 +22,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 
 export const runtime = 'nodejs'
@@ -60,7 +61,11 @@ const MeldeSchadenSchema = z.object({
   plz: z.string().regex(/^\d{5}$/),
   /** Gewaehlter Gutachter aus claimondo_finde_gutachter_termine (opakes Handle); optional. */
   sv_id: z.string().uuid().optional(),
-  /** Gewaehlter Slot als ISO-8601 (weicher Hold); optional. */
+  /** Konkreter gewaehlter Slot (aus claimondo_finde_gutachter_termine: termine[].start/end)
+   *  als ISO-8601. Beide zusammen + sv_id -> echte Reservierung (bucheTerminFlow). */
+  slot_start: z.string().max(40).optional(),
+  slot_end: z.string().max(40).optional(),
+  /** Vager Wunschtermin-Label (weicher Hold), falls kein konkreter Slot gewaehlt wurde. */
   wunschtermin: z.string().max(40).optional(),
   name: z.string().trim().min(2).max(80),
   telefon: z.string().trim().regex(PHONE_RE),
@@ -128,12 +133,14 @@ export async function POST(req: Request) {
 
   const admin = createAdminClient()
 
-  // Weicher Hold: gewaehlter Slot (ISO) -> gfa.wunschtermin -> lead.wunschtermin (issueCanonical)
-  // -> Slot-Ranking im /flow. KEINE harte Reservierung hier (819dab90).
-  if (input.wunschtermin) {
+  // Weicher Hold: gewaehlter Slot/Wunsch (ISO) -> gfa.wunschtermin -> lead.wunschtermin
+  // (issueCanonical) -> Slot-Ranking im /flow. Bleibt als Async-Fallback, falls die harte
+  // Reservierung unten ausbleibt/verfaellt (819dab90: kurz hart reservieren + weicher Hold).
+  const wunschterminIso = input.slot_start ?? input.wunschtermin ?? null
+  if (wunschterminIso) {
     const { error: wtErr } = await admin
       .from('gutachter_finder_anfragen')
-      .update({ wunschtermin: input.wunschtermin })
+      .update({ wunschtermin: wunschterminIso })
       .eq('id', ins.anfrageId)
     if (wtErr) console.error('[melde-schaden] wunschtermin-Update fehlgeschlagen:', wtErr.message)
   }
@@ -167,15 +174,44 @@ export async function POST(req: Request) {
     )
   }
 
+  // Harte Reservierung (kurzer Hold) — wie der Embed (reserviereEmbedTermin). Nur wenn ein
+  // konkreter SV + Slot gewaehlt wurde. bucheTerminFlow ist token-basiert (issued.token),
+  // idempotent + race-safe (Engine-EXCLUSION-Constraint). NON-FATAL: bei 'belegt'/Fehler
+  // bleibt der weiche Hold (gfa.wunschtermin + zugeordneter_sv_id) -> /flow terminPending.
+  let reserviert = false
+  if (input.sv_id && input.slot_start && input.slot_end) {
+    try {
+      const buchung = await bucheTerminFlow(issued.token, input.sv_id, input.slot_start, input.slot_end)
+      if (buchung.ok && buchung.terminId) {
+        reserviert = true
+        const { error: tidErr } = await admin
+          .from('gutachter_finder_anfragen')
+          .update({ termin_id: buchung.terminId })
+          .eq('id', ins.anfrageId)
+        if (tidErr) console.error('[melde-schaden] gfa.termin_id-Update fehlgeschlagen:', tidErr.message)
+      } else {
+        console.error('[melde-schaden] Reservierung nicht möglich (Soft-Hold bleibt):', buchung.error)
+      }
+    } catch (err) {
+      console.error('[melde-schaden] bucheTerminFlow-Fehler (Soft-Hold bleibt):', err)
+    }
+  }
+
+  const terminHinweis = reserviert
+    ? 'Termin beim gewählten Gutachter reserviert. '
+    : input.slot_start
+      ? 'Wunschtermin vorgemerkt (finale Bestätigung im Link). '
+      : ''
   return json(
     {
       ok: true,
       status: 'angelegt',
+      reserviert,
       kanal: issued.kanal,
       hinweis:
         issued.kanal === 'none'
-          ? 'Anfrage angelegt; kein Kontakt-Kanal erreichbar — Dispatch kontaktiert manuell.'
-          : `Lead angelegt; persönlicher FlowLink per ${issued.kanal} an den Kunden versandt. Kein Link im Chat (Datenschutz).`,
+          ? `${terminHinweis}Anfrage angelegt; kein Kontakt-Kanal erreichbar — Dispatch kontaktiert manuell.`
+          : `${terminHinweis}Lead angelegt; persönlicher FlowLink per ${issued.kanal} an den Kunden versandt. Kein Link im Chat (Datenschutz).`,
     },
     200,
   )
