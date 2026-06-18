@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchSvInNaehe, fetchWissensbasis, formatMarkdown } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchGutachterTermine, fetchSvInNaehe, fetchWissensbasis, formatGutachterTermine, formatMarkdown } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -66,6 +66,43 @@ const outputSchema = {
   buchungs_telefon: z.string(),
 }
 
+// --- claimondo_finde_gutachter_termine (buchbare Gutachter + freie Slots) ----
+const gutachterTermineInput = {
+  plz: z
+    .string()
+    .regex(/^\d{5}$/, 'PLZ muss eine 5-stellige deutsche Postleitzahl sein (z. B. 50670).')
+    .describe('5-stellige deutsche Postleitzahl, z. B. 50670 für Köln.'),
+  wunschtermin: z
+    .string()
+    .optional()
+    .describe('Optionaler Wunschtermin als ISO-8601-Zeitstempel (z. B. 2026-06-20T10:00:00Z) — steuert das Slot-Ranking, kein harter Filter.'),
+  response_format: z
+    .enum(['markdown', 'json'])
+    .default('markdown')
+    .describe("Ausgabeformat: 'markdown' (menschenlesbar) oder 'json' (strukturiert)."),
+}
+
+const slotSchema = { start: z.string(), end: z.string(), passung: z.string() }
+const gutachterItemSchema = {
+  id: z.string(),
+  vorname: z.string(),
+  profilbild: z.string().nullable(),
+  bewertung_schnitt: z.number().nullable(),
+  bewertung_anzahl: z.number().nullable(),
+  entfernung: z.string(),
+  ist_top_partner: z.boolean(),
+  wunschtermin_frei: z.boolean(),
+  termine: z.array(z.object(slotSchema)),
+}
+const gutachterTermineOutput = {
+  plz: z.string(),
+  wunschtermin: z.string().nullable(),
+  anzahl_gutachter: z.number(),
+  gutachter: z.array(z.object(gutachterItemSchema)),
+  interaktive_karte_url: z.string(),
+  buchungs_telefon: z.string(),
+}
+
 /**
  * Baut einen frisch konfigurierten Server (Tool + Resource). Fuer stdio einmal,
  * fuer stateless HTTP pro Request — so gibt es keinen Cross-Request-State.
@@ -104,6 +141,51 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
       try {
         const result = await fetchSvInNaehe(plz, radius, API_BASE)
         const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatMarkdown(result)
+        return {
+          content: [{ type: 'text', text }],
+          structuredContent: result,
+        }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
+  server.registerTool(
+    'claimondo_finde_gutachter_termine',
+    {
+      title: 'Buchbare Kfz-Gutachter + freie Termine finden',
+      description: `Findet buchbare Partner-Kfz-Gutachter MIT freien Terminen im Umkreis einer deutschen Postleitzahl über Claimondo.
+
+Anders als claimondo_finde_sachverstaendige (nur anonymisierte Liste) liefert dieses Tool die *buchbaren* Gutachter mit konkreten freien Slots (Vorschau aufs Buchen). Read-only und anonym — legt nichts an und meldet keinen Schaden.
+
+Args:
+  - plz (string): 5-stellige deutsche PLZ, z. B. "50670".
+  - wunschtermin (string, optional): Wunschtermin als ISO-8601 (steuert das Slot-Ranking, kein harter Filter).
+  - response_format ("markdown" | "json"): Ausgabeformat (Standard "markdown").
+
+Returns (structuredContent bzw. json):
+  { plz, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }] }], interaktive_karte_url, buchungs_telefon }
+
+Use when: Nutzer will einen Gutachter-Termin sehen/vergleichen (z. B. „wann hat ein Gutachter in 50670 Zeit?").
+Hinweis: gutachter[].id + ein termin.start sind das Buchungs-Handle; die eigentliche Buchung läuft aktuell über die interaktive Karte / Telefon-Rückruf.`,
+      inputSchema: gutachterTermineInput,
+      outputSchema: gutachterTermineOutput,
+      annotations: {
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async ({ plz, wunschtermin, response_format }) => {
+      try {
+        const result = await fetchGutachterTermine(plz, wunschtermin, API_BASE)
+        const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatGutachterTermine(result)
         return {
           content: [{ type: 'text', text }],
           structuredContent: result,
@@ -188,6 +270,20 @@ async function runHttp(): Promise<void> {
             properties: {
               plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670.' },
               radius: { type: 'integer', minimum: 1, maximum: 200, default: 30, description: 'Suchradius in Kilometern (1–200, Standard 30).' },
+              response_format: { type: 'string', enum: ['markdown', 'json'], default: 'markdown', description: 'Ausgabeformat.' },
+            },
+            required: ['plz'],
+          },
+        },
+        {
+          name: 'claimondo_finde_gutachter_termine',
+          description:
+            'Findet buchbare Partner-Kfz-Gutachter MIT freien Terminen im Umkreis einer deutschen PLZ. Read-only und anonym — Vorstufe zum Buchen.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670.' },
+              wunschtermin: { type: 'string', format: 'date-time', description: 'Optionaler Wunschtermin (ISO-8601); steuert das Slot-Ranking.' },
               response_format: { type: 'string', enum: ['markdown', 'json'], default: 'markdown', description: 'Ausgabeformat.' },
             },
             required: ['plz'],
