@@ -116,8 +116,9 @@ export async function createClaimForFall(
       polizeibericht_status: source.polizeibericht_status ?? null,
       geschaedigter_user_id: source.kunde_id ?? null,
       gegner_versicherung_id: source.gegner_versicherung_id ?? null,
-      gegner_versicherungsnummer: source.gegner_versicherungsnummer ?? null,
-      gegner_aktenzeichen: source.gegner_schadennummer ?? null,
+      // CMM-49 Tier-2: gegner_versicherungsnummer/gegner_aktenzeichen -> verursacher-Party
+      // (SSoT, s.u. nach dem Claim-Insert). Nicht mehr auf claims (Cutover-Drop).
+      // gegner_versicherung_id bleibt auf claims (FK; v_claim_full liest gv ueber claims).
       gegner_bekannt: source.gegner_bekannt ?? true,
       anzahl_beteiligte_total: (source.gegner_anzahl_beteiligte ?? 0) + 1,
       hat_personenschaden: source.personenschaden_flag ?? false,
@@ -148,6 +149,27 @@ export async function createClaimForFall(
 
   // claim_id auf faelle zurückschreiben
   await db.from('faelle').update({ claim_id: claim.id }).eq('id', fallId)
+
+  // CMM-49 Tier-2: gegner_versicherungsnummer/-schadennummer leben in der verursacher-
+  // claim_party (SSoT), nicht claims.gegner_*. create-for-fall legte bisher KEINE Parties
+  // an -> verursacher-Party on-demand anlegen wenn Gegner-Daten vorhanden (Option A).
+  // versicherung_id zusaetzlich (wie convert; claims behaelt den FK fuer die gv-Join-View).
+  // Non-critical: ein Fehlschlag bricht die Claim-Anlage nicht (claim.id ist schon da).
+  const hatGegnerDaten = !!(
+    source.gegner_versicherungsnummer || source.gegner_schadennummer || source.gegner_versicherung_id
+  )
+  if (hatGegnerDaten) {
+    const { error: vpErr } = await db.from('claim_parties').insert({
+      claim_id: claim.id,
+      rolle: 'verursacher',
+      reihenfolge: 2,
+      quelle: 'create_for_fall',
+      versicherung_id: source.gegner_versicherung_id ?? null,
+      versicherungsnummer: source.gegner_versicherungsnummer ?? null,
+      versicherungs_aktenzeichen: source.gegner_schadennummer ?? null,
+    })
+    if (vpErr) console.error('[CMM-49] verursacher-Party-Insert (create-for-fall):', vpErr.message)
+  }
 
   return claim.id as string
 }
