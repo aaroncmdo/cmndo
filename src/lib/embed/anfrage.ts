@@ -197,7 +197,11 @@ export async function notifyAnfrage(input: NotifyAnfrageInput): Promise<void> {
   // generic_lp (autounfall.io): KEINE Claimondo-WA/SMS an den Kunden — au.io-Standalone-
   // Stance (kein WA, nur in-app/Dispatch) + Footprint-Lock. Der Lead haengt trotzdem in
   // der Dispatch-Queue (gfa-Insert steht).
-  if (payload.telefon && payload.source !== 'generic_lp') {
+  // mcp (LLM-Chat): bekommt den FlowLink direkt (issueCanonicalFlowLinkForAnfrage, send:true)
+  // statt dieser Callback-Bestaetigung — die "wir melden uns"-Nachricht waere redundant +
+  // irrefuehrend. notifyAnfrage laeuft fuer mcp ohnehin nicht (der /api/v1/melde-schaden-
+  // Endpoint ruft nur insertAnfrage); der Ausschluss haelt den Pfad typ-/semantik-korrekt.
+  if (payload.telefon && payload.source !== 'generic_lp' && payload.source !== 'mcp') {
     const bezeichnung = svBezeichnung(
       { source: payload.source, cluster: payload.cluster ?? null },
       site?.name ?? null,
