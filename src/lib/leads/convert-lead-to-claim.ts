@@ -343,7 +343,9 @@ export async function convertLeadToClaim(
     finanzierungsgeber_vertragsnr:
       (lead.finanzierungsgeber_vertragsnr as string | null) ?? null,
     zeugen_kontakte: (lead.zeugen_kontakte ?? null) as ClaimInsert['zeugen_kontakte'],
-    kunde_email: (lead.email as string | null) ?? null,
+    // CMM-49: kunde_email NICHT mehr auf claims schreiben — die Kunden-Email lebt in der
+    // geschaedigter-Party->personen (via ensurePersonForData unten, snapshot.email = lead.email).
+    // v_claim_full/v_faelle sourcen kunde_email von dort (#2982). claims.kunde_email wird gedroppt.
     // CMM-50 Group D / CMM-48: claims.sprache jetzt bei Konversion gesetzt (war ungeschrieben
     // -> DB-Default 'de'; send-fall.ts las claim.sprache nur als Fallback HINTER lead.sprache).
     // = lead.sprache ?? 'de' (identisch zu dem, was faelle.sprache vorher hielt). claims = SSoT;
