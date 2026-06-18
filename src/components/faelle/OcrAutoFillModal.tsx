@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { XIcon, CheckIcon, SparklesIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { updateFallField } from '@/app/faelle/[id]/_actions/stammdaten'
 import { Modal } from '@/components/primitives/Modal'
 // CMM-44 SP-A: gegner_versicherungsnummer ist eine faelle<->claims-Duplikat-
 // Spalte → claims-Anteil des Updates per Helper abspalten und auf claims
@@ -94,6 +95,16 @@ export default function OcrAutoFillModal({
       if (!mapping?.column) continue
       const val = editedValues[key]
       if (val) updates[mapping.column] = val
+    }
+
+    // CMM-49 Tier-2: gegner_versicherungsnummer -> verursacher-Party (SSoT) via
+    // updateFallField (routet auf die Party seit #3009) statt client-seitigem claims-
+    // Write -> ueberlebt den claims.gegner_versicherungsnummer-DROP. Ohne #3009 faellt
+    // updateFallField via splitOrKeep auf claims zurueck (kein Bruch). Single Editor-Pfad.
+    if (updates.gegner_versicherungsnummer !== undefined) {
+      const res = await updateFallField(fallId, 'gegner_versicherungsnummer', updates.gegner_versicherungsnummer)
+      if (!res.success) setFehler(res.error ?? 'Gegner-Versicherungsnummer konnte nicht gespeichert werden.')
+      delete updates.gegner_versicherungsnummer
     }
 
     if (Object.keys(updates).length > 0) {
