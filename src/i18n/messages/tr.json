@@ -390,7 +390,14 @@
       "wunschtermin_pending": "Kesin randevuyu kısa süre içinde onaylayacağız.",
       "besichtigungsort_label": "Ekspertiz yeri",
       "treffpunkt_label": "Buluşma noktası: {treffpunkt}",
-      "kein_gutachter": "Kişisel bilirkişinizi bir sonraki adımda atayacağız. Devam etmeniz yeterli."
+      "kein_gutachter": "Kişisel bilirkişinizi bir sonraki adımda atayacağız. Devam etmeniz yeterli.",
+      "aendern_cta": "Başka bir randevu veya bilirkişi seç",
+      "aendern_confirm": "Mevcut randevunuz serbest bırakılacak ve yeniden seçeceksiniz. Devam edilsin mi?",
+      "aendern_ja": "Evet, yeniden seç",
+      "aendern_laeuft": "Serbest bırakılıyor …",
+      "aendern_zurueck": "Yine de kalsın",
+      "aendern_fehler": "Değişiklik başarısız oldu. Lütfen tekrar deneyin.",
+      "aendern_dispatch_hinweis": "Randevunuz zaten onaylandı — yeniden planlamak için sizi kısaca arayacağız."
     },
     "step_sa": {
       "heading": "Görevlendirmeyi imzalayın",
