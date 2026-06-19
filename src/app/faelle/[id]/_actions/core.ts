@@ -50,8 +50,11 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
         try { await admin.from(table).delete().eq('fall_id', fallId) } catch { /* */ }
       }
       // faelle zuerst (faelle.claim_id ist ON DELETE RESTRICT), dann den Claim (SSoT).
-      // faelle evtl. schon gedroppt (Phase G) → Fehler tolerieren.
-      await admin.from('faelle').delete().eq('id', fallId)
+      // CMM-49 faelle-DROP-Runway: faelle evtl. schon gedroppt (Phase G) → Fehler tolerieren
+      // (inneres try/catch wie die Child-Table-Loop oben). Sonst wuerfe der bare Delete nach
+      // DROP TABLE faelle ein 42703 in den Funktions-catch -> Claim-Delete unten uebersprungen,
+      // deleteFall schluege fehl. Mit try/catch laeuft der Claim-Delete (ohne FK-RESTRICT) durch.
+      try { await admin.from('faelle').delete().eq('id', fallId) } catch { /* faelle ggf. gedroppt */ }
       if (claimId) {
         const { error: claimDelErr } = await admin.from('claims').delete().eq('id', claimId)
         if (claimDelErr) return { success: false, error: claimDelErr.message }
