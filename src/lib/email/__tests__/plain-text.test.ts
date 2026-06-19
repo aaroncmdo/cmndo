@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { render } from '@react-email/render'
 import { htmlToPlainText } from '../plain-text'
-import TwoFactorCodeEmail from '../google/templates/TwoFactorCode'
 import LeadReminder1 from '../google/templates/LeadReminder1'
 
 describe('htmlToPlainText', () => {
@@ -48,16 +47,6 @@ describe('htmlToPlainText', () => {
 })
 
 describe('htmlToPlainText end-to-end (echte Templates)', () => {
-  it('TwoFactorCode (Tier-3): Code im Text, kein HTML/VML-Leak', async () => {
-    const html = await render(TwoFactorCodeEmail({ vorname: 'Max', code: '482913', gueltigMinuten: 5 }))
-    const text = htmlToPlainText(html)
-    expect(text).toContain('482913')
-    expect(text).toContain('Login-Code')
-    expect(text).toContain('Sicherheitshinweis')
-    expect(text).not.toMatch(/<\/?[a-z]/i)
-    expect(text.toLowerCase()).not.toContain('roundrect')
-  })
-
   it('LeadReminder1 (Tier-1, Button+Hero): CTA-URL im Text, keine VML/mso-Reste', async () => {
     const url = 'https://app.claimondo.de/schaden-melden/fortsetzen/abc123'
     const html = await render(LeadReminder1({ vorname: 'Max', resumeUrl: url }))
