@@ -755,7 +755,6 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       const overrideUpdate: Record<string, unknown> = {
         status: neuerStatus,
         status_changed_at: now,
-        updated_at: now,
       }
       if (neuerStatus === 'abgeschlossen') {
         overrideUpdate.abgeschlossen_am = now
@@ -772,9 +771,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         ovRest,
         claimIdForUpdates,
       )
-      if (Object.keys(ovFaelle).length > 0) {
-        await db.from('faelle').update(ovFaelle).eq('id', input.fallId)
+      // CMM-74: faelle.status retired -> claims.operative_status (Engine-Cursor/SSoT).
+      // Der Override bleibt validation-frei (direktes Setzen). Bisher setzte er NUR
+      // faelle.status, nicht operative_status -> der Engine-Cursor zog beim Override nicht
+      // mit; jetzt korrekt. status ist nicht CLAIM_OWNED -> landet in ovFaelle, hier umgehaengt.
+      if ('status' in ovFaelle) {
+        if (claimIdForUpdates) ovClaims.operative_status = ovFaelle.status
+        delete ovFaelle.status
       }
+      // ovFaelle ist danach leer (status -> operative_status; updated_at trigger-redundant
+      // entfernt) -> kein faelle-Write mehr (CMM-49 faelle-Drop-Runway).
       if (claimIdForUpdates && Object.keys(ovClaims).length > 0) {
         await db.from('claims').update(ovClaims).eq('id', claimIdForUpdates)
       }

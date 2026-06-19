@@ -549,21 +549,17 @@ export async function smokeResetAufKanzleiWunsch(
     }).eq('id', claim.lead_id as string)
   }
 
-  // 2) Fall — Status regulierung.
-  // CMM-44 SP-B PR2a/b: onboarding_complete + vollmacht_signiert_am leben auf claims.
-  // CMM-49: dieser faelle.status-WRITE bleibt bewusst (deploy-safe Dual-Write; faelle.status
-  // stirbt mit der Spalte in P5). Nur die Reads dieses Smoke-Helpers sind faelle-frei.
-  await admin.from('faelle').update({
-    status: 'regulierung',
-  }).eq('id', fallId)
+  // 2) Status regulierung -> claims.operative_status (Engine-Cursor/SSoT).
+  // CMM-74: faelle.status-Write retired (war reiner Dual-Write, 0-divergent verifiziert);
+  // operative_status traegt den Status (im claims-Update unten via Record-Bridge).
 
   // 3) Claim — Kanzlei-Wunsch zurueck, Phase auf 4_gutachten_fertig.
   // onboarding_complete=true ebenfalls auf claims (SP-B SSoT).
   // CMM-44 SP-B PR2b: vollmacht_signiert_am=null auf claims (SSoT).
   if (claimId) {
-    await admin.from('claims').update({
+    const claimsUpd = {
       onboarding_complete: true,
-      kanzlei_wunsch: 'noch_unentschieden',
+      kanzlei_wunsch: 'noch_unentschieden' as const,
       kanzlei_wunsch_gefragt_am: null,
       kanzlei_uebergeben_am: null,
       kanzlei_ansprechpartner_name: null,
@@ -572,9 +568,13 @@ export async function smokeResetAufKanzleiWunsch(
       // D2/T1.1b: work_state statt status (Dispatch/Processing-Achse). `phase`
       // entfernt — claims.phase ist seit MP-6c gedroppt (abgeleitet via v_claim_phase),
       // der Write lief ins Leere.
-      work_state: 'in_bearbeitung',
+      work_state: 'in_bearbeitung' as const,
       vollmacht_signiert_am: null,
-    }).eq('id', claimId as string)
+    }
+    // CMM-74: operative_status (Engine-Cursor/SSoT) ersetzt den retired faelle.status-Write.
+    // Record-Bridge — operative_status fehlt in gen. Typen (b''-Konvention wie sv-zuweisung/#2884).
+    ;(claimsUpd as Record<string, unknown>).operative_status = 'regulierung'
+    await admin.from('claims').update(claimsUpd).eq('id', claimId as string)
 
     // 4) kanzlei_faelle - alle Eintraege fuer diesen Claim entfernen
     await admin.from('kanzlei_faelle').delete().eq('claim_id', claimId as string)
