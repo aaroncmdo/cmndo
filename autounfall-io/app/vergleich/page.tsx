@@ -5,7 +5,9 @@ import { siteGraph } from '@/lib/jsonld'
 import { JsonLd } from '@/components/JsonLd'
 
 export function generateMetadata(): Metadata {
-  return restMetadata('/vergleich')
+  // noindex (Footprint-Schutz, Entscheidung Aaron 2026-06-15) — Hub bleibt live,
+  // aber nicht im Index; follow=true. Analog zur [slug]-Detailroute.
+  return { ...restMetadata('/vergleich'), robots: { index: false, follow: true } }
 }
 
 export default function VergleichHubPage() {
