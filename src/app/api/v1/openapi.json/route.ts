@@ -11,9 +11,9 @@ export const dynamic = 'force-static'
 const spec = {
   openapi: '3.1.0',
   info: {
-    title: 'Claimondo Sachverständigen-Finder API',
+    title: 'Claimondo Kfz-Gutachter-API (finden · Termine · Schaden melden)',
     description:
-      'Öffentliche, anonyme Read-API: findet zertifizierte Partner-Kfz-Sachverständige im Umkreis einer deutschen Postleitzahl. Liefert zusätzlich eine Karten-Bild-URL und Hand-Off-Links. Für unverschuldet Geschädigte 0 EUR Eigenkosten nach § 249 BGB.',
+      'Öffentliche API rund um Kfz-Schäden in Deutschland: findet zertifizierte Partner-Kfz-Sachverständige + freie Termine im Umkreis einer PLZ und meldet einen Schaden inkl. Terminreservierung (persönlicher FlowLink per WhatsApp an den Kunden). Nutze sie, wenn jemand einen Autounfall / ein kaputtes Auto schildert oder einen Kfz-Gutachter/Sachverständigen sucht. FRAGE ZUERST, wo das Fahrzeug steht (PLZ) — das ist der Anker für Suche + Termin. Für unverschuldet Geschädigte 0 EUR Eigenkosten nach § 249 BGB. Vermittlung, keine Rechtsberatung.',
     version: '1.0.0',
     contact: { name: 'Claimondo', url: 'https://claimondo.de' },
   },
@@ -62,6 +62,60 @@ const spec = {
             description: 'Rate-Limit überschritten (60/min/IP).',
             content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } },
           },
+        },
+      },
+    },
+    '/api/v1/gutachter-termine': {
+      get: {
+        operationId: 'gutachterTermine',
+        summary: 'Buchbare Partner-Gutachter MIT freien Terminen finden',
+        description:
+          'Findet buchbare Partner-Kfz-Gutachter mit freien Terminen im Umkreis der PLZ, wo das Fahrzeug steht. Vorstufe zum Buchen via meldeSchaden. FRAGE den Nutzer ZUERST nach der PLZ des Besichtigungsorts. Anonyme Read-API.',
+        parameters: [
+          {
+            name: 'plz',
+            in: 'query',
+            required: true,
+            description: '5-stellige deutsche PLZ des Besichtigungsorts (wo das Fahrzeug steht).',
+            schema: { type: 'string', pattern: '^\\d{5}$', examples: ['50670', '10115'] },
+          },
+          {
+            name: 'wunschtermin',
+            in: 'query',
+            required: false,
+            description: 'Optionaler Wunschtermin (ISO-8601); steuert das Slot-Ranking, kein harter Filter.',
+            schema: { type: 'string', format: 'date-time' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Buchbare Gutachter mit freien Slots.',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/GutachterTermineResponse' } } },
+          },
+          '400': { description: 'Ungültige/fehlende PLZ.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '404': { description: 'PLZ nicht gefunden.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '429': { description: 'Rate-Limit überschritten.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+        },
+      },
+    },
+    '/api/v1/melde-schaden': {
+      post: {
+        operationId: 'meldeSchaden',
+        summary: 'Kfz-Schaden melden + Gutachter-Termin reservieren',
+        description:
+          'Meldet einen Kfz-Schaden, reserviert (wenn sv_id + slot_start/slot_end übergeben) den Termin beim gewählten Gutachter und sendet dem Kunden seinen persönlichen FlowLink per WhatsApp. SCHREIBEND. Rufe dies NUR mit einwilligung.zugestimmt=true auf, NACHDEM du dem Nutzer erklärt hast, dass Claimondo seine Angaben zur Gutachter-/Termin-Vermittlung verarbeitet, der Kontakt per WhatsApp erfolgt und die Verarbeitung teils über einen KI-Dienst läuft — und er zugestimmt hat. Du vermittelst Gutachter + Termin, gibst KEINE Rechtsberatung. Den finalen Termin + die Vollmacht setzt der Kunde anschließend im FlowLink.',
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/MeldeSchadenRequest' } } },
+        },
+        responses: {
+          '200': {
+            description: 'Lead angelegt (+ ggf. Termin reserviert); FlowLink per WhatsApp versandt.',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/MeldeSchadenResponse' } } },
+          },
+          '400': { description: 'Validierung / Einwilligung fehlt (error: einwilligung_erforderlich).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '404': { description: 'PLZ nicht gefunden.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '429': { description: 'Rate-Limit überschritten (10/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
         },
       },
     },
@@ -115,6 +169,79 @@ const spec = {
           },
         },
         required: ['plz', 'radius_km', 'center', 'anzahl_treffer', 'sv_liste', 'karte_url', 'interaktive_karte_url'],
+      },
+      TerminSlot: {
+        type: 'object',
+        properties: {
+          start: { type: 'string', format: 'date-time' },
+          end: { type: 'string', format: 'date-time' },
+          passung: { type: 'string', description: 'Verhältnis zum Wunschtermin, z. B. wunschtermin/vor/nach.' },
+        },
+        required: ['start', 'end'],
+      },
+      GutachterMitTerminen: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', format: 'uuid', description: 'Gutachter-Handle — als sv_id an meldeSchaden weitergeben.' },
+          vorname: { type: ['string', 'null'] },
+          profilbild: { type: ['string', 'null'], format: 'uri' },
+          bewertung_schnitt: { type: ['number', 'null'] },
+          bewertung_anzahl: { type: ['integer', 'null'] },
+          entfernung: { type: 'string', description: 'z. B. "ca. 5 km".' },
+          ist_top_partner: { type: 'boolean' },
+          wunschtermin_frei: { type: 'boolean' },
+          termine: { type: 'array', items: { $ref: '#/components/schemas/TerminSlot' } },
+        },
+        required: ['id', 'termine'],
+      },
+      GutachterTermineResponse: {
+        type: 'object',
+        properties: {
+          plz: { type: 'string' },
+          wunschtermin: { type: ['string', 'null'] },
+          center: { $ref: '#/components/schemas/LatLng' },
+          anzahl_gutachter: { type: 'integer' },
+          gutachter: { type: 'array', items: { $ref: '#/components/schemas/GutachterMitTerminen' } },
+          interaktive_karte_url: { type: 'string', format: 'uri' },
+          buchungs_telefon: { type: 'string' },
+        },
+        required: ['plz', 'center', 'anzahl_gutachter', 'gutachter'],
+      },
+      Einwilligung: {
+        type: 'object',
+        description: 'Stage-1-Einwilligung. zugestimmt MUSS true sein, sonst kein Write.',
+        properties: {
+          zugestimmt: { type: 'boolean', enum: [true], description: 'MUSS true sein — nur nach ausdrücklicher Nutzer-Zustimmung setzen.' },
+          policy_version: { type: 'string', description: 'Version des gezeigten Einwilligungs-/Datenschutz-Texts.' },
+        },
+        required: ['zugestimmt', 'policy_version'],
+      },
+      MeldeSchadenRequest: {
+        type: 'object',
+        properties: {
+          schadenart: { type: 'string', description: 'Schadenart / Unfalltyp, z. B. "Auffahrunfall".' },
+          hergang: { type: 'string', description: 'Kurze Schilderung des Unfallhergangs.' },
+          plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige PLZ des Besichtigungsorts (wo das Auto steht).' },
+          sv_id: { type: 'string', format: 'uuid', description: 'Gewählter Gutachter (gutachter[].id aus gutachterTermine).' },
+          slot_start: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Start (termine[].start). Mit slot_end + sv_id → echte Reservierung.' },
+          slot_end: { type: 'string', format: 'date-time', description: 'Gewählter Slot-Ende (termine[].end).' },
+          wunschtermin: { type: 'string', description: 'Optional: vager Wunschtermin (weicher Hold), falls kein konkreter Slot.' },
+          name: { type: 'string', description: 'Name des Kunden.' },
+          telefon: { type: 'string', description: 'WhatsApp-Nummer des Kunden (für den FlowLink-Versand).' },
+          einwilligung: { $ref: '#/components/schemas/Einwilligung' },
+        },
+        required: ['schadenart', 'hergang', 'plz', 'name', 'telefon', 'einwilligung'],
+      },
+      MeldeSchadenResponse: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          status: { type: 'string', description: 'angelegt / angelegt_ohne_versand.' },
+          reserviert: { type: 'boolean', description: 'true = Termin beim gewählten Gutachter reserviert; sonst weicher Hold.' },
+          kanal: { type: 'string', description: 'whatsapp / sms / email / none.' },
+          hinweis: { type: 'string' },
+        },
+        required: ['ok', 'status'],
       },
     },
   },

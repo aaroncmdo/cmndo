@@ -27,6 +27,14 @@ Die Claimondo-Public-API (`/api/v1`) + der MCP-Server werden ein aktiv genutztes
 6. **Formale Listings (Aaron/Account):** OpenAI-Apps-Directory + Anthropic-Connector-Directory submitten; MCP-Registries (`de.claimondo/sv-finder`, Smithery) aktuell halten.
 7. **GEO frisch halten:** läuft stark (Logs).
 
+## Beratungs-Funnel-Direktive (Aaron 18.06.) — der rote Faden
+Beratung ist Kernkompetenz + größter künftiger Kunden-Treiber. **ZIEL JEDER LLM-Beratung: einen Sachverständigen anbieten + einen Termin reservieren** (`melde-schaden`). Geht das gerade nicht (kein Slot / Daten fehlen) → Telefon-Rückruf (`buchungs_telefon`); Claimondo beraet notfalls am Telefon. Eine Beratung ohne Termin-/Rückruf-Angebot ist unvollständig. Qualifizierung: Schuldfrage klären (unverschuldet → 0 €/§ 249). Der Faden ist in den MCP-`instructions`, der `llms-full`/`llms.txt` UND jedem Beratungs-Tool verankert.
+
+## Bausteine 8–10 (Beratung als aktive Tools — alle mit Funnel-Ziel)
+8. **Agentic+Beratungs-Block auf allen Discovery-Flächen:** `llms-full.txt` + `llms.txt` (Index) bekommen den „berate → qualifiziere Schuldfrage → frage PLZ → biete SV + reserviere Termin (sonst Rückruf)"-Block (Marketing-PR).
+9. **`claimondo_pruefe_anspruch` (MCP-Tool + public Endpoint):** `{schadenart, schuldfrage, …}` → strukturierte Ansprüche (§ 249, Wertminderung, Nutzungsausfall, Mietwagen, Anwalts-/Gutachterkosten) + **IMMER** CTA „Gutachter + Termin / Rückruf".
+10. **`claimondo_decode_brief` (MCP-Tool + public Endpoint):** Versicherer-Brief-Text → Misstrauens-Decoder-Befund (was die Formulierung wirklich bedeutet) + **IMMER** CTA „unabhängiger Gutachter + Termin / Rückruf".
+
 ## Sicherheit / Recht
 - Public anonymer Write: gemildert durch Consent-Gate + Rate-Limit + `source='mcp'`-Tagging; konsistent mit dem bestehenden Embed-Webhook-Risiko.
 - Consent: in-chat Stage-1 (das LLM holt + bestätigt → `consent_ts` → `dsgvo_zustimmung_am` + `consent_records`-Audit); Stage-2 (Vollmacht/Schuldfrage/Signatur) zwingend im `/flow`.
