@@ -119,6 +119,37 @@ const spec = {
         },
       },
     },
+    '/api/v1/pruefe-anspruch': {
+      get: {
+        operationId: 'pruefeAnspruch',
+        summary: 'Schadensersatz-Ansprüche nach Schuldfrage prüfen (Beratung)',
+        description:
+          'Liefert die strukturierten Ansprüche eines Kfz-Unfall-Geschädigten nach Schuldfrage (Wertminderung, Nutzungsausfall, Reparatur-/Gutachter-/Anwaltskosten — § 249/251/823 BGB) und IMMER den nächsten Schritt: Gutachter + Termin (gutachter-termine + melde-schaden) oder Telefon-Rückruf. Beratung, keine individuelle Rechtsberatung. Read-only.',
+        parameters: [
+          {
+            name: 'schuldfrage',
+            in: 'query',
+            required: true,
+            description: 'Schuldfrage: unverschuldet / teilschuld / selbst / unklar. Erfrage sie zuerst.',
+            schema: { type: 'string', enum: ['unverschuldet', 'teilschuld', 'selbst', 'unklar'] },
+          },
+          {
+            name: 'schadenart',
+            in: 'query',
+            required: false,
+            description: 'Optionale Schadenart / Unfalltyp für den Kontext.',
+            schema: { type: 'string' },
+          },
+        ],
+        responses: {
+          '200': {
+            description: 'Strukturierter Anspruchskatalog + nächster Schritt.',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/PruefeAnspruchResponse' } } },
+          },
+          '429': { description: 'Rate-Limit überschritten (60/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -242,6 +273,29 @@ const spec = {
           hinweis: { type: 'string' },
         },
         required: ['ok', 'status'],
+      },
+      Anspruch: {
+        type: 'object',
+        properties: {
+          titel: { type: 'string' },
+          norm: { type: 'string' },
+          hinweis: { type: 'string' },
+        },
+        required: ['titel', 'norm', 'hinweis'],
+      },
+      PruefeAnspruchResponse: {
+        type: 'object',
+        properties: {
+          schuldfrage: { type: 'string' },
+          schadenart: { type: ['string', 'null'] },
+          anspruchslage: { type: 'string', description: 'voll / anteilig / keine_gegen_gegner / unklar.' },
+          eigenkosten: { type: 'string' },
+          ansprueche: { type: 'array', items: { $ref: '#/components/schemas/Anspruch' } },
+          empfehlung: { type: 'string' },
+          naechster_schritt: { type: 'string', description: 'Immer: Gutachter + Termin (gutachter-termine + melde-schaden) oder Rückruf.' },
+          hinweis: { type: 'string' },
+        },
+        required: ['schuldfrage', 'anspruchslage', 'eigenkosten', 'ansprueche', 'naechster_schritt'],
       },
     },
   },

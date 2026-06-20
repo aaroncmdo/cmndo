@@ -417,3 +417,70 @@ export async function meldeSchaden(
   }
   return { ok: true, status: data.status ?? 'angelegt', kanal: data.kanal ?? 'none', hinweis: data.hinweis ?? '' }
 }
+
+// --- Anspruch-Check (Beratung, read-only) -----------------------------------
+// Wrappt GET /api/v1/pruefe-anspruch. Strukturierter Anspruchskatalog nach
+// Schuldfrage + IMMER der naechste Schritt (Gutachter + Termin / Rueckruf).
+
+export type Anspruch = { titel: string; norm: string; hinweis: string }
+export type PruefeAnspruchResult = {
+  schuldfrage: string
+  schadenart: string | null
+  anspruchslage: string
+  eigenkosten: string
+  ansprueche: Anspruch[]
+  empfehlung: string
+  naechster_schritt: string
+  hinweis: string
+}
+
+/** Prueft die Schadensersatz-Ansprueche nach Schuldfrage. Wirft {@link ClaimondoApiError} bei Fehlern. */
+export async function fetchPruefeAnspruch(
+  schuldfrage: string,
+  schadenart: string | undefined,
+  apiBase: string = DEFAULT_API_BASE,
+): Promise<PruefeAnspruchResult> {
+  const qs = new URLSearchParams({ schuldfrage })
+  if (schadenart) qs.set('schadenart', schadenart)
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/pruefe-anspruch?${qs.toString()}`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(`Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`)
+    }
+    throw new ClaimondoApiError(`Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`)
+  } finally {
+    clearTimeout(timer)
+  }
+  const data = (await res.json().catch(() => ({}))) as Partial<PruefeAnspruchResult> & { error?: string }
+  if (!res.ok) {
+    if (res.status === 429) throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten.', 429)
+    throw new ClaimondoApiError(data.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return {
+    schuldfrage: data.schuldfrage ?? schuldfrage,
+    schadenart: data.schadenart ?? null,
+    anspruchslage: data.anspruchslage ?? 'unklar',
+    eigenkosten: data.eigenkosten ?? '',
+    ansprueche: data.ansprueche ?? [],
+    empfehlung: data.empfehlung ?? '',
+    naechster_schritt: data.naechster_schritt ?? '',
+    hinweis: data.hinweis ?? '',
+  }
+}
+
+/** Menschenlesbarer Markdown-Report fuer den Anspruch-Check. */
+export function formatPruefeAnspruch(r: PruefeAnspruchResult): string {
+  const lines: string[] = [`# Ansprüche bei Schuldfrage: ${r.schuldfrage}`, '', `**Eigenkosten:** ${r.eigenkosten}`, '', r.empfehlung, '']
+  if (r.ansprueche.length > 0) {
+    lines.push('**Ihre Ansprüche:**')
+    for (const a of r.ansprueche) lines.push(`- **${a.titel}** (${a.norm}) — ${a.hinweis}`)
+    lines.push('')
+  }
+  lines.push(`**Nächster Schritt:** ${r.naechster_schritt}`, '', `_${r.hinweis}_`)
+  return lines.join('\n')
+}
