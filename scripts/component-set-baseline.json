@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-12T13:28:42.142Z",
-  "count": 131,
+  "generatedAt": "2026-06-20T15:46:49.058Z",
+  "count": 133,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -73,6 +73,7 @@
     "src/app/kunde/re-termin/[token]/page.tsx",
     "src/app/kunde/termin/[token]/KundeAnfahrtCard.tsx",
     "src/app/kunde/termine/KundeTermineClient.tsx",
+    "src/app/login/2fa/TotpChallengeClient.tsx",
     "src/app/login/2fa/TwoFaClient.tsx",
     "src/app/login/LoginClient.tsx",
     "src/app/makler/onboarding/page.tsx",
@@ -88,6 +89,7 @@
     "src/components/admin/fallakte/KanzleiPaketModal.tsx",
     "src/components/admin/fallakte/RegelDebugModal.tsx",
     "src/components/auth/PhoneVerificationModal.tsx",
+    "src/components/auth/TotpEnrollCard.tsx",
     "src/components/auth/TwoFaPhoneChange.tsx",
     "src/components/branding/BrandingEditor.tsx",
     "src/components/branding/LivePreview.tsx",
