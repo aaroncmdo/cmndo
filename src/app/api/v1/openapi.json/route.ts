@@ -1,6 +1,6 @@
 // Doc 34 Task 0b.2 — OpenAPI 3.1 Spec fuer den ChatGPT-Custom-GPT-Action.
 // GET /api/v1/openapi.json -> maschinen-lesbare Beschreibung von /api/v1/sv-in-naehe.
-// Im GPT-Builder via "Import from URL" (https://claimondo.de/api/v1/openapi.json)
+// Im GPT-Builder via "Import from URL" (https://app.claimondo.de/api/v1/openapi.json)
 // ladbar. /api/v1-versioniert + .json vom Proxy-Matcher ausgenommen -> public.
 import { NextResponse } from 'next/server'
 import { SITE_URL } from '@/lib/seo/jsonld'
@@ -15,9 +15,11 @@ const spec = {
     description:
       'Öffentliche API rund um Kfz-Schäden in Deutschland: findet zertifizierte Partner-Kfz-Sachverständige + freie Termine im Umkreis einer PLZ und meldet einen Schaden inkl. Terminreservierung (persönlicher FlowLink per WhatsApp an den Kunden). Nutze sie, wenn jemand einen Autounfall / ein kaputtes Auto schildert oder einen Kfz-Gutachter/Sachverständigen sucht. FRAGE ZUERST, wo das Fahrzeug steht (PLZ) — das ist der Anker für Suche + Termin. Für unverschuldet Geschädigte 0 EUR Eigenkosten nach § 249 BGB. Vermittlung, keine Rechtsberatung.',
     version: '1.0.0',
-    contact: { name: 'Claimondo', url: 'https://claimondo.de' },
+    contact: { name: 'Claimondo', url: SITE_URL },
   },
-  servers: [{ url: SITE_URL, description: 'Claimondo Production' }],
+  // app.claimondo.de = Host der oeffentlichen /api/v1-Routen. claimondo.de ist die
+  // Marketing-Domain ohne /api (ein servers=claimondo.de liefe ins 404-Leere).
+  servers: [{ url: 'https://app.claimondo.de', description: 'Claimondo API (Produktion)' }],
   paths: {
     '/api/v1/sv-in-naehe': {
       get: {
