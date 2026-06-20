@@ -3,6 +3,7 @@ import {
   entscheideMfaGate,
   entscheideLoginRouting,
   hatVerifiziertenFaktor,
+  waehleZweitFaktor,
   type MfaGateInput,
   type LoginRoutingInput,
 } from './mfa-gate'
@@ -140,5 +141,43 @@ describe('hatVerifiziertenFaktor', () => {
         { status: 'verified', factor_type: 'phone' },
       ]),
     ).toBe(true)
+  })
+})
+
+// AAR-939 TOTP: Wahl des Login-Zweitfaktors. TOTP wird bevorzugt (offline, kein
+// SMS-Delay/-Cost); ein zusätzlicher Phone-Faktor ist dann der SMS-Fallback.
+describe('waehleZweitFaktor', () => {
+  it('nur Phone → preferred=phone, kein SMS-Fallback', () => {
+    expect(waehleZweitFaktor([{ id: 'p1', status: 'verified', factor_type: 'phone' }])).toEqual({
+      preferred: 'phone', totpId: null, phoneId: 'p1', hasSmsFallback: false,
+    })
+  })
+
+  it('nur TOTP → preferred=totp, kein Fallback', () => {
+    expect(waehleZweitFaktor([{ id: 't1', status: 'verified', factor_type: 'totp' }])).toEqual({
+      preferred: 'totp', totpId: 't1', phoneId: null, hasSmsFallback: false,
+    })
+  })
+
+  it('beide → TOTP bevorzugt + SMS-Fallback', () => {
+    expect(waehleZweitFaktor([
+      { id: 'p1', status: 'verified', factor_type: 'phone' },
+      { id: 't1', status: 'verified', factor_type: 'totp' },
+    ])).toEqual({ preferred: 'totp', totpId: 't1', phoneId: 'p1', hasSmsFallback: true })
+  })
+
+  it('ignoriert unverifizierte Faktoren', () => {
+    expect(waehleZweitFaktor([
+      { id: 't-un', status: 'unverified', factor_type: 'totp' },
+      { id: 'p1', status: 'verified', factor_type: 'phone' },
+    ])).toEqual({ preferred: 'phone', totpId: null, phoneId: 'p1', hasSmsFallback: false })
+  })
+
+  it('keine verifizierten / leer / null → preferred=null', () => {
+    const leer = { preferred: null, totpId: null, phoneId: null, hasSmsFallback: false }
+    expect(waehleZweitFaktor([{ id: 'x', status: 'unverified', factor_type: 'totp' }])).toEqual(leer)
+    expect(waehleZweitFaktor([])).toEqual(leer)
+    expect(waehleZweitFaktor(null)).toEqual(leer)
+    expect(waehleZweitFaktor(undefined)).toEqual(leer)
   })
 })
