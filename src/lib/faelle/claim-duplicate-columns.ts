@@ -39,7 +39,11 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   // raus, sonst wuerde ein etwaiges Update mit kunde_email weiter nach claims geroutet (42703).
   'sachschaden_beschreibung',
   'gegner_versicherung_id',
-  'gegner_versicherungsnummer',
+  // CMM-49 gegner Tier-2-Cutover: gegner_versicherungsnummer ENTFERNT — lebt jetzt in der
+  // verursacher-claim_party (versicherungsnummer); claims.gegner_versicherungsnummer gedroppt.
+  // Writer (stammdaten/ocr/creators) routen via GEGNER_PARTY_COL nach party -> toter Eintrag,
+  // muss vor dem DROP raus (sonst Stray-Routing nach claims -> 42703). gegner_versicherung_id
+  // (Live-FK gv-Join) + gegner_bekannt (claim-Flag) BLEIBEN.
   'finanzierung_leasing',
   'vorsteuerabzugsberechtigt',
   'gegner_bekannt',
@@ -251,7 +255,9 @@ export const CLUSTER2_RENAMED_TO_CLAIMS: Record<string, string> = {
  * Writer/Reader, die das Feld bewusst als Konversions-Anker behandeln.
  */
 export const CLUSTER3_RENAMED_TO_CLAIMS: Record<string, string> = {
-  gegner_schadennummer: 'gegner_aktenzeichen',
+  // CMM-49 gegner Tier-2-Cutover: gegner_schadennummer->gegner_aktenzeichen ENTFERNT —
+  // claims.gegner_aktenzeichen gedroppt; gegner_schadennummer routet via GEGNER_PARTY_COL
+  // (faelle-stammdaten :335, short-circuit VOR CLUSTER3) nach party.versicherungs_aktenzeichen.
   no_show_count: 'kunde_no_show_count',
   // CMM-44 MP-6c: aktuelle_phase -> phase entfernt — claims.phase wurde gedroppt
   // (tote 10-Code-Spalte, 0 Reader/Writer; Phase kommt aus v_claim_phase).
