@@ -136,31 +136,27 @@ export async function POST(request: Request) {
       totalschaden,
     }
 
-    // Cluster F+G PR-2b (#1322) hat restwert/wiederbeschaffungswert/
-    // nutzungsausfall_tage/totalschaden aus faelle gedroppt — diese G-Werte
-    // leben jetzt in der gutachten-Sub-Tabelle. faelle bekommt nur noch die
-    // dort weiterhin existierenden OCR-Spalten; die 4 G-Werte gehen via RPC
-    // apply_gutachten_ocr (kanonischer Writer, analog lib/ai/gutachten-ocr.ts).
-    // CMM-44 SP-B PR2c: schadens_hoehe_netto lebt auf claims (SSoT) —
-    // aus faelleUpdate entfernt, wird unten separat auf claims geschrieben.
-    const faelleUpdate: Record<string, unknown> = {
-      ocr_extrahiert_am: new Date().toISOString(),
-      ocr_rohdaten: { text_length: pdfText.length, extracted },
-    }
-    if (nutzungsausfall_tagessatz != null) faelleUpdate.nutzungsausfall_tagessatz = nutzungsausfall_tagessatz
-    if (reparaturdauer_tage != null) faelleUpdate.reparaturdauer_tage = reparaturdauer_tage
-    if (gutachter_honorar != null) faelleUpdate.gutachter_honorar = gutachter_honorar
-    if (fin_vin) faelleUpdate.fin_vin = fin_vin
-
-    const { data: fallRow, error: faelleError } = await admin
-      .from('faelle')
-      .update(faelleUpdate)
-      .eq('id', fall_id)
+    // Routing der OCR-Werte (kein faelle-Write mehr — s. Bridge-Block + Begruendung unten):
+    //   4 G-Werte (restwert/WBW/nutzungsausfall_tage/totalschaden) -> gutachten via RPC apply_gutachten_ocr;
+    //   schadens_hoehe_netto -> claims (SSoT); fin_vin -> vehicles. Analog lib/ai/gutachten-ocr.ts.
+    // CMM-49 faelle-DROP: der faelle-Write war komplett reader-frei -> entfernt. Wir holen nur noch
+    // die claim_id aus der Bridge (fall_id == bridge.fall_id) fuer die gutachten-RPC / claims /
+    // vehicles-Writes unten. Reader-frei-Begruendung der entfallenen Felder:
+    //   - ocr_rohdaten / ocr_extrahiert_am : 0 Reader (OCR-Audit).
+    //   - fin_vin                          : v_claim_full liest vehicles.fin; unten eh -> vehicles.
+    //   - nutzungsausfall_tagessatz        : accept-loss (fall-finanzen); canonical = AI-OCR-Feld
+    //                                        gutachten_nutzungsausfall_tagessatz_eur.
+    //   - reparaturdauer_tage              : reader-frei (nur Test-Seed).
+    //   - gutachter_honorar                : faelle-nativ, aber 0 Views lesen faelle (pg_depend) ->
+    //     Reader gehen ueber v_faelle_mit_aktuellem_termin.gutachter_honorar (NICHT aus faelle).
+    //     ⚠ Folge-Ticket: gutachter_honorar-Kanonisierung (echtes Home + View + Sections-Editor) —
+    //     die Spalte ist heute faelle-nativ + reader-frei = wahrscheinlich gebrochenes Honorar-Feld.
+    const { data: bridge } = await admin
+      .from('faelle_claim_bridge')
       .select('claim_id')
+      .eq('fall_id', fall_id)
       .maybeSingle()
-    if (faelleError) {
-      console.error('[ocr-gutachten] faelle-Update fehlgeschlagen:', faelleError.message)
-    }
+    const claimId = (bridge as { claim_id?: string | null } | null)?.claim_id ?? null
 
     // Die 4 G-Werte (restwert, WBW, nutzungsausfall_tage, totalschaden) gehen in
     // die gutachten-Sub-Tabelle. apply_gutachten_ocr legt/aktualisiert den Row
@@ -181,12 +177,10 @@ export async function POST(request: Request) {
       gutachtenWerte.gutachten_ocr_manuell_ueberschrieben = false
     }
 
-    const claimId = fallRow?.claim_id ?? null
-
     // CMM-68: fin_vin gehoert auf vehicles (Gutachten-OCR war eine Luecke — schrieb faelle.fin_vin,
     // aber nie vehicles; analog zur ocr-fahrzeugschein-Luecke in #2818). FIN -> dedup-Row via RPC +
-    // claims.vehicle_id verlinken (FIN ist autoritativ -> Merge auf bestehendes Fahrzeug). Additiv,
-    // non-critical: der faelle.fin_vin-Write oben bleibt vorerst (Retire = Phase-B-Write-Cutover).
+    // claims.vehicle_id verlinken (FIN ist autoritativ -> Merge auf bestehendes Fahrzeug).
+    // CMM-49 faelle-DROP: der faelle.fin_vin-Write oben ist jetzt ENTFERNT — vehicles ist der einzige Pfad.
     if (fin_vin && claimId) {
       try {
         const { ensureVehicleFromFin } = await import('@/lib/vehicles/ensure-vehicle')
