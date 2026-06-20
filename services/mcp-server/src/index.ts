@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchGutachterTermine, fetchSvInNaehe, fetchWissensbasis, formatGutachterTermine, formatMarkdown, meldeSchaden } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchGutachterTermine, fetchPruefeAnspruch, fetchSvInNaehe, fetchWissensbasis, formatGutachterTermine, formatMarkdown, formatPruefeAnspruch, meldeSchaden } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -122,6 +122,24 @@ const meldeSchadenOutput = {
   ok: z.boolean(),
   status: z.string(),
   kanal: z.string(),
+  hinweis: z.string(),
+}
+
+// --- claimondo_pruefe_anspruch (Beratung, read-only) ------------------------
+const pruefeAnspruchInput = {
+  schuldfrage: z
+    .enum(['unverschuldet', 'teilschuld', 'selbst', 'unklar'])
+    .describe('Schuldfrage des Nutzers: unverschuldet / teilschuld / selbst (eigenverschulden) / unklar. Erfrage sie vorher.'),
+  schadenart: z.string().optional().describe('Optional: Schadenart / Unfalltyp (z. B. "Auffahrunfall") für den Kontext.'),
+}
+const pruefeAnspruchOutput = {
+  schuldfrage: z.string(),
+  schadenart: z.string().nullable(),
+  anspruchslage: z.string(),
+  eigenkosten: z.string(),
+  ansprueche: z.array(z.object({ titel: z.string(), norm: z.string(), hinweis: z.string() })),
+  empfehlung: z.string(),
+  naechster_schritt: z.string(),
   hinweis: z.string(),
 }
 
@@ -278,6 +296,31 @@ Returns: { ok, status, kanal (whatsapp|sms|email|none), hinweis }. KEIN Link/kei
     },
   )
 
+  server.registerTool(
+    'claimondo_pruefe_anspruch',
+    {
+      title: 'Ansprüche prüfen (Beratung) + Gutachter anbieten',
+      description: `Liefert die strukturierten Schadensersatz-Ansprüche eines Kfz-Unfall-Geschädigten nach Schuldfrage (Wertminderung, Nutzungsausfall, Reparaturkosten, Anwalts-/Gutachterkosten — § 249/251/823 BGB) — und IMMER den nächsten Schritt: einen Gutachter + Termin anbieten (claimondo_finde_gutachter_termine + claimondo_melde_schaden) oder Telefon-Rückruf.
+
+Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu"). Erfrage zuerst die Schuldfrage (unverschuldet/teilschuld/selbst). Allgemeine Information, KEINE individuelle Rechtsberatung. Eine Beratung ohne Angebot eines Gutachter-Termins ist unvollständig.`,
+      inputSchema: pruefeAnspruchInput,
+      outputSchema: pruefeAnspruchOutput,
+      annotations: { readOnlyHint: true, openWorldHint: true },
+    },
+    async ({ schuldfrage, schadenart }) => {
+      try {
+        const r = await fetchPruefeAnspruch(schuldfrage, schadenart, API_BASE)
+        return { content: [{ type: 'text', text: formatPruefeAnspruch(r) }], structuredContent: r }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
   server.registerResource(
     'wissensbasis',
     'claimondo://wissensbasis',
@@ -386,6 +429,19 @@ async function runHttp(): Promise<void> {
               einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein nach ausdrücklicher Nutzer-Zustimmung (DSGVO + WhatsApp + KI-Dienst/USA).' },
             },
             required: ['schadenart', 'hergang', 'plz', 'name', 'telefon', 'einwilligung_erteilt'],
+          },
+        },
+        {
+          name: 'claimondo_pruefe_anspruch',
+          description:
+            'Strukturierte Schadensersatz-Ansprüche nach Schuldfrage (§ 249/251/823 BGB) + immer der nächste Schritt: Gutachter + Termin. Beratung, keine individuelle Rechtsberatung. Read-only.',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              schuldfrage: { type: 'string', enum: ['unverschuldet', 'teilschuld', 'selbst', 'unklar'], description: 'Schuldfrage des Nutzers.' },
+              schadenart: { type: 'string', description: 'Optional: Schadenart / Unfalltyp.' },
+            },
+            required: ['schuldfrage'],
           },
         },
       ],
