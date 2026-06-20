@@ -48,40 +48,26 @@ export async function POST(request: Request) {
       })
     }
 
-    // ─── Step 4: Write to faelle table ──────────────────────────────────────
+    // ─── Step 4: claim_id via Bridge (CMM-49 faelle-DROP) ───────────────────
+    // Frueher schrieb diese Route ocr_rohdaten/ocr_extrahiert_am + halter_* nach faelle und holte
+    // dabei die claim_id. Beide Gruppen sind reader-frei: die OCR-Audit-Spalten haben 0 Reader, die
+    // halter_* liest niemand direkt (v_claim_full.halter_* sourct aus der ist_halter-Party-Person;
+    // das eigentliche halter_*->Person-Routing ist CMM-67-Domaene). Der faelle-Write war also tot
+    // -> entfernt. Wir holen nur noch die claim_id aus der Bridge (fall_id == bridge.fall_id) fuer
+    // die claims/vehicles-Writes unten -> Route ist faelle-frei (DROP-Enabler). Das extrahierte
+    // Halter-Feld bleibt im Timeline-Eintrag (Step 5) human-readable sichtbar.
     const supabase = await createClient()
-
-    const updateData: Record<string, unknown> = {
-      ocr_rohdaten: { raw_text: fullText, extracted, timestamp: new Date().toISOString() },
-      ocr_extrahiert_am: new Date().toISOString(),
-    }
-
-    // CMM-50 Phase-B (Write-Retire): Fahrzeugdaten (fin_vin/kennzeichen/fahrzeug_*/hsn/tsn/
-    // erstzulassung/baujahr) NICHT mehr auf faelle — sie gehoeren auf vehicles (SSoT; unten via
-    // ensureVehicleFromFin/ensureVehicleForClaim aus `extracted` geschrieben, alle Reader lesen
-    // via v_claim_full aus vehicles). faelle behaelt nur das OCR-Audit (oben) + die Halter-Felder
-    // (CMM-67-Domaene, separate Migration). brn -> claims (claimUpdate unten, CMM-48 PR-E).
-    if (extracted.halter_vorname) updateData.halter_vorname = extracted.halter_vorname
-    if (extracted.halter_nachname) updateData.halter_nachname = extracted.halter_nachname
-    if (extracted.halter_strasse) updateData.halter_strasse = extracted.halter_strasse
-    if (extracted.halter_plz) updateData.halter_plz = extracted.halter_plz
-    if (extracted.halter_stadt) updateData.halter_stadt = extracted.halter_stadt
-
-    const { data: fallRow, error: updateError } = await supabase
-      .from('faelle')
-      .update(updateData)
-      .eq('id', fall_id)
+    const { data: bridge } = await supabase
+      .from('faelle_claim_bridge')
       .select('claim_id')
-      .single()
-
-    if (updateError) {
-      console.error('[OCR-ZB1] DB update error:', updateError)
-    }
+      .eq('fall_id', fall_id)
+      .maybeSingle()
+    const claimId = (bridge as { claim_id?: string | null } | null)?.claim_id ?? null
 
     // Parallel auf claims schreiben — FIN/HSN/TSN/Kennzeichen sind nicht
     // im faelle↔claims Sync-Trigger (CMM Phase 1.5a). Direkt in claims schreiben
     // damit die SSoT für SV/Kanzlei/Reports konsistent ist.
-    if (fallRow?.claim_id) {
+    if (claimId) {
       // CMM-68 Fix: Fahrzeugdaten (fin_vin/kennzeichen/fahrzeug_*/hsn/tsn/erstzulassung) gehoeren
       // auf vehicles, NICHT auf claims — diese Spalten existieren auf claims gar nicht, der alte
       // claimUpdate failte komplett still (PostgREST lehnt unbekannte Spalten ab). claims behaelt
@@ -92,7 +78,7 @@ export async function POST(request: Request) {
         const { error: claimError } = await supabase
           .from('claims')
           .update(claimUpdate)
-          .eq('id', fallRow.claim_id)
+          .eq('id', claimId)
         if (claimError) {
           console.error('[OCR-ZB1] claims update error:', claimError)
         }
@@ -121,12 +107,12 @@ export async function POST(request: Request) {
         if (extracted.fin_vin) {
           const veh = await ensureVehicleFromFin({ fin: extracted.fin_vin, snapshot: vehSnapshot, db: vehDb })
           if (veh.ok) {
-            await vehDb.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', fallRow.claim_id)
+            await vehDb.from('claims').update({ vehicle_id: veh.vehicleId }).eq('id', claimId)
           } else {
             console.warn('[CMM-68] OCR vehicles (FIN):', veh.error)
           }
         } else {
-          const veh = await ensureVehicleForClaim({ claimId: fallRow.claim_id, snapshot: vehSnapshot, db: vehDb })
+          const veh = await ensureVehicleForClaim({ claimId, snapshot: vehSnapshot, db: vehDb })
           if (!veh.ok) console.warn('[CMM-68] OCR vehicles (Stub):', veh.error)
         }
       } catch (err) {
