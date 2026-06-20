@@ -156,10 +156,13 @@ export async function proxy(request: NextRequest) {
 
   // ─── app.claimondo.de — nur Portal ────────────────────────────────────
   if (hostname === HOST_APP) {
-    // Eigene robots.txt: App-Subdomain komplett aus dem Index halten.
+    // Eigene robots.txt: App-Subdomain aus dem Index halten — BIS AUF die oeffentliche
+    // /api/v1-Funnel-API. Allow: /api/v1/ (longest-match schlaegt Disallow: /) macht
+    // openapi + Endpunkte fuer AI-/Such-Crawler auffindbar (LLM-Discovery). /api/* selbst
+    // bekommt keinen noindex-Header (early return ein paar Zeilen weiter unten).
     if (pathname === '/robots.txt') {
       return new NextResponse(
-        'User-agent: *\nDisallow: /\nAllow: /login\nAllow: /passwort-vergessen\n',
+        'User-agent: *\nDisallow: /\nAllow: /login\nAllow: /passwort-vergessen\nAllow: /api/v1/\n',
         { status: 200, headers: { 'content-type': 'text/plain' } },
       )
     }
