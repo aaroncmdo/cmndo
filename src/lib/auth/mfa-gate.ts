@@ -25,6 +25,39 @@ export function hatVerifiziertenFaktor(
   return (factors ?? []).some((f) => f.status === 'verified')
 }
 
+/** Faktor-Eintrag mit ID — für die Login-Zweitfaktor-Wahl. */
+export type FaktorEintrag = { id: string; status: string; factor_type?: string }
+
+export type FaktorWahl = {
+  /** Bevorzugter Faktor für die Login-Challenge (TOTP vor Phone), null = keiner */
+  preferred: 'totp' | 'phone' | null
+  totpId: string | null
+  phoneId: string | null
+  /** preferred=totp UND ein Phone-Faktor existiert → „Stattdessen SMS"-Fallback anbieten */
+  hasSmsFallback: boolean
+}
+
+/**
+ * AAR-939 TOTP: Wählt den Login-Zweitfaktor aus den verifizierten Faktoren.
+ * TOTP wird bevorzugt (offline, kein SMS-Delay/-Cost); ein zusätzlicher
+ * Phone-Faktor ist dann der SMS-Fallback. Pure Logik — der Caller (login/2fa
+ * page) sammelt user.factors.
+ */
+export function waehleZweitFaktor(
+  factors: readonly FaktorEintrag[] | null | undefined,
+): FaktorWahl {
+  const verified = (factors ?? []).filter((f) => f.status === 'verified')
+  const totp = verified.find((f) => f.factor_type === 'totp') ?? null
+  const phone = verified.find((f) => f.factor_type === 'phone') ?? null
+  const preferred: 'totp' | 'phone' | null = totp ? 'totp' : phone ? 'phone' : null
+  return {
+    preferred,
+    totpId: totp?.id ?? null,
+    phoneId: phone?.id ?? null,
+    hasSmsFallback: preferred === 'totp' && phone !== null,
+  }
+}
+
 export type MfaGateInput = {
   /** request.nextUrl.pathname === '/login/2fa' — nie auf sich selbst redirecten */
   isOn2faPage: boolean
