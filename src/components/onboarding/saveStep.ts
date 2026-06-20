@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { buildVerursacherPartyUpdates } from '@/lib/onboarding/verursacher-party-facts'
 import type { OnboardingFeld, SaveOnboardingResult } from './types'
 
 const ALLOWED_TABLES = new Set<string>(['gutachter_finder_anfragen'])
@@ -46,6 +47,15 @@ export async function saveOnboardingStep(
   const claimsFelder = felder.filter(f => f.db_target?.tabelle === 'claims')
   if (claimsFelder.length > 0) {
     const r = await saveClaimsOnboardingFacts(supabase, fallId ?? null, values, claimsFelder)
+    if (!r.ok) return r
+  }
+
+  // CMM-49 Feststellung-doppelt (Increment 3): Gegner-Fakten (db_target.tabelle='claim_parties')
+  // gehen ownership-gated auf die verursacher-claim_party (SSoT) — wie die claims-Fakten, NICHT
+  // in die gfa-Gruppierung. Inert solange keine 'claim_parties'-Felder geseedet sind.
+  const partyFelder = felder.filter(f => f.db_target?.tabelle === 'claim_parties')
+  if (partyFelder.length > 0) {
+    const r = await saveVerursacherPartyOnboardingFacts(supabase, fallId ?? null, values, partyFelder)
     if (!r.ok) return r
   }
 
@@ -160,29 +170,10 @@ async function saveClaimsOnboardingFacts(
   values: Record<string, unknown>,
   claimsFelder: OnboardingFeld[],
 ): Promise<SaveOnboardingResult> {
-  const { data: userData } = await supabase.auth.getUser()
-  const user = userData?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
-  if (!fallId) return { ok: false, error: 'Kein Fall-Kontext fuer die Fakten-Speicherung' }
-
-  // fall_id -> claim_id (Bridge; fall_id != claim_id, MP-8b-Invariante)
-  const claimId = await resolveClaimId(supabase, fallId)
-  if (!claimId) return { ok: false, error: 'Kein Claim zu diesem Fall gefunden' }
-
-  // Ownership-Gate: eingeloggter Kunde == Geschaedigter des Claims. canEditField gilt
-  // NICHT (kunde-Rolle=stammdaten:read) -> expliziter scoped Check. Admin-Read fuer den
-  // Vergleich, dann admin-Write NACH bestandenem Check.
-  const admin = createAdminClient()
-  const { data: claimRow, error: ownErr } = await admin
-    .from('claims')
-    .select('geschaedigter_user_id')
-    .eq('id', claimId)
-    .maybeSingle()
-  if (ownErr) return { ok: false, error: ownErr.message }
-  const ownerId = ((claimRow as { geschaedigter_user_id?: string | null } | null)?.geschaedigter_user_id) ?? null
-  if (!ownerId || ownerId !== user.id) {
-    return { ok: false, error: 'Keine Berechtigung fuer diesen Fall' }
-  }
+  // Ownership-gate + fall_id->claim_id-Bridge (geteilt mit saveVerursacherPartyOnboardingFacts).
+  const gate = await resolveOwnedClaimId(supabase, fallId)
+  if (!gate.ok) return gate
+  const { claimId } = gate
 
   // Update bauen — harte Allowlist (Defense-in-Depth) + Typ-Coercion (segmented->bool, leer->null).
   const updates: Record<string, unknown> = {}
@@ -202,9 +193,92 @@ async function saveClaimsOnboardingFacts(
     }
     updates[spalte] = val
   }
-  if (Object.keys(updates).length === 0) return { ok: true, anfrageId: fallId }
+  if (Object.keys(updates).length === 0) return { ok: true, anfrageId: claimId }
 
+  const admin = createAdminClient()
   const { error } = await admin.from('claims').update(updates).eq('id', claimId)
   if (error) return { ok: false, error: error.message }
-  return { ok: true, anfrageId: fallId }
+  return { ok: true, anfrageId: claimId }
+}
+
+// CMM-49 Feststellung-doppelt: ownership-gate + fall_id->claim_id-Bridge, geteilt von
+// saveClaimsOnboardingFacts und saveVerursacherPartyOnboardingFacts. Der eingeloggte Kunde
+// MUSS der Geschaedigte des Claims sein (geschaedigter_user_id == auth.uid()) — scoped
+// Permission, weil die kunde-Rolle stammdaten=read hat (canEditField=false). Admin-Read fuer
+// den Vergleich; der jeweilige Write passiert NACH bestandenem Check.
+async function resolveOwnedClaimId(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  fallId: string | null,
+): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+  const { data: userData } = await supabase.auth.getUser()
+  const user = userData?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  if (!fallId) return { ok: false, error: 'Kein Fall-Kontext fuer die Fakten-Speicherung' }
+
+  // fall_id -> claim_id (Bridge; fall_id != claim_id, MP-8b-Invariante)
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { ok: false, error: 'Kein Claim zu diesem Fall gefunden' }
+
+  const admin = createAdminClient()
+  const { data: claimRow, error: ownErr } = await admin
+    .from('claims')
+    .select('geschaedigter_user_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (ownErr) return { ok: false, error: ownErr.message }
+  const ownerId = ((claimRow as { geschaedigter_user_id?: string | null } | null)?.geschaedigter_user_id) ?? null
+  if (!ownerId || ownerId !== user.id) {
+    return { ok: false, error: 'Keine Berechtigung fuer diesen Fall' }
+  }
+  return { ok: true, claimId }
+}
+
+// CMM-49 Feststellung-doppelt (Increment 3): Gegner-Fakten aus dem kunde-onboarding auf die
+// verursacher-claim_party (kanonisches SSoT). v_claim_full liest die Gegner-Felder bereits von
+// der Party (gp-LATERAL: kennzeichen / versicherung_klartext / versicherungsnummer) -> kein
+// v_claim_full-Change noetig, keine Kollision mit der gegner-Cutover-Lane. Selektion ==
+// v_claim_full.gp (rolle='verursacher', reihenfolge, created_at); existiert keine verursacher-
+// Party (meist der Fall, 1/84) -> on-demand anlegen (Option A, quelle='kunde_self' per
+// claim_parties_quelle_check). Ownership-gated wie der claims-Writer.
+async function saveVerursacherPartyOnboardingFacts(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  fallId: string | null,
+  values: Record<string, unknown>,
+  partyFelder: OnboardingFeld[],
+): Promise<SaveOnboardingResult> {
+  const gate = await resolveOwnedClaimId(supabase, fallId)
+  if (!gate.ok) return gate
+  const { claimId } = gate
+
+  const updates = buildVerursacherPartyUpdates(partyFelder, values)
+  if (Object.keys(updates).length === 0) return { ok: true, anfrageId: claimId }
+
+  const admin = createAdminClient()
+  const { data: party, error: selErr } = await admin
+    .from('claim_parties')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('rolle', 'verursacher')
+    .order('reihenfolge', { ascending: true })
+    .order('created_at', { ascending: true })
+    .limit(1)
+    .maybeSingle()
+  if (selErr) return { ok: false, error: selErr.message }
+
+  const partyId = ((party as { id?: string } | null)?.id) ?? null
+  if (partyId) {
+    const { error: upErr } = await admin.from('claim_parties').update(updates).eq('id', partyId)
+    if (upErr) return { ok: false, error: upErr.message }
+    return { ok: true, anfrageId: claimId }
+  }
+
+  // Keine verursacher-Party: nur anlegen wenn mind. ein echter Wert kommt (kein leeres Insert).
+  const hasValue = Object.values(updates).some(v => v != null)
+  if (hasValue) {
+    const { error: insErr } = await admin
+      .from('claim_parties')
+      .insert({ claim_id: claimId, rolle: 'verursacher', reihenfolge: 2, quelle: 'kunde_self', ...updates })
+    if (insErr) return { ok: false, error: insErr.message }
+  }
+  return { ok: true, anfrageId: claimId }
 }
