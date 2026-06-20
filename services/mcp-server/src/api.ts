@@ -4,7 +4,10 @@
 // the route lives in the main app at src/app/api/v1/sv-in-naehe/route.ts and is
 // live on prod. This client is read-only and never sends user data.
 
-export const DEFAULT_API_BASE = 'https://claimondo.de'
+// app.claimondo.de = Portal-Host mit den /api/v1-Routen. Der Apex claimondo.de ist
+// die Marketing-App (kein /api/v1) — ein Default auf claimondo.de liefert 404 (Prod-
+// Incident 20.06., live MCP-Tools waren tot). Override per env CLAIMONDO_API_BASE.
+export const DEFAULT_API_BASE = 'https://app.claimondo.de'
 // 30 s: /api/v1/sv-in-naehe geocodet + liest die SV-Liste aus der DB und ist daher
 // langsam + lastabhaengig (live gemessen 8-15 s+). Lieber eine langsame echte Antwort
 // als ein vorzeitiger Timeout. /llms-full.txt ist mit ~0,5 s unkritisch.
@@ -480,6 +483,67 @@ export function formatPruefeAnspruch(r: PruefeAnspruchResult): string {
     lines.push('**Ihre Ansprüche:**')
     for (const a of r.ansprueche) lines.push(`- **${a.titel}** (${a.norm}) — ${a.hinweis}`)
     lines.push('')
+  }
+  lines.push(`**Nächster Schritt:** ${r.naechster_schritt}`, '', `_${r.hinweis}_`)
+  return lines.join('\n')
+}
+
+// --- Brief-Decoder (Beratung, read-only) ------------------------------------
+// Wrappt POST /api/v1/decode-brief. Entschluesselt ein Schreiben der gegnerischen
+// Haftpflichtversicherung (Kuerzungs-/Hinhalte-Formulierungen) + IMMER der naechste
+// Schritt (unabhaengiger Gutachter + Termin / Rueckruf).
+
+export type DecodeBriefBefund = { phrase: string; bedeutet: string; recht: string; norm: string | null }
+export type DecodeBriefResult = {
+  erkannte_muster: number
+  befunde: DecodeBriefBefund[]
+  einschaetzung: string
+  naechster_schritt: string
+  hinweis: string
+}
+
+/** Entschluesselt ein Versicherer-Schreiben. Wirft {@link ClaimondoApiError} bei Fehlern. */
+export async function fetchDecodeBrief(text: string, apiBase: string = DEFAULT_API_BASE): Promise<DecodeBriefResult> {
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/decode-brief`
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({ text }),
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(`Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`)
+    }
+    throw new ClaimondoApiError(`Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`)
+  } finally {
+    clearTimeout(timer)
+  }
+  const data = (await res.json().catch(() => ({}))) as Partial<DecodeBriefResult> & { error?: string }
+  if (!res.ok) {
+    if (res.status === 429) throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten.', 429)
+    throw new ClaimondoApiError(data.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return {
+    erkannte_muster: data.erkannte_muster ?? data.befunde?.length ?? 0,
+    befunde: data.befunde ?? [],
+    einschaetzung: data.einschaetzung ?? '',
+    naechster_schritt: data.naechster_schritt ?? '',
+    hinweis: data.hinweis ?? '',
+  }
+}
+
+/** Menschenlesbarer Markdown-Report fuer den Brief-Decoder. */
+export function formatDecodeBrief(r: DecodeBriefResult): string {
+  const lines: string[] = [`# Decoder: ${r.erkannte_muster} typische Versicherer-Formulierung(en) erkannt`, '', r.einschaetzung, '']
+  for (const b of r.befunde) {
+    lines.push(`## „${b.phrase}"`)
+    lines.push(`**Was das bedeutet:** ${b.bedeutet}`)
+    lines.push(`**Ihr Recht:** ${b.recht}${b.norm ? ` (${b.norm})` : ''}`, '')
   }
   lines.push(`**Nächster Schritt:** ${r.naechster_schritt}`, '', `_${r.hinweis}_`)
   return lines.join('\n')
