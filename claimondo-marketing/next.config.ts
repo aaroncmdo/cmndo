@@ -39,6 +39,20 @@ const nextConfig: NextConfig = {
     ]
     return [{ source: '/:path*', headers: securityHeaders }]
   },
+
+  // Brand-Domain-Discovery: claimondo.de/openapi.json -> kanonische OpenAPI 3.1 der
+  // oeffentlichen Funnel-API auf dem Portal-Host. AI-Crawler/Action-Importer, die die
+  // OpenAPI auf der Brand-Domain raten, landen so beim echten Spec. Single Source bleibt
+  // das Portal (src/app/api/v1/openapi.json) — kein Duplikat. 308 (permanent).
+  async redirects() {
+    return [
+      {
+        source: '/openapi.json',
+        destination: 'https://app.claimondo.de/api/v1/openapi.json',
+        permanent: true,
+      },
+    ]
+  },
 }
 
 export default withNextIntl(nextConfig)
