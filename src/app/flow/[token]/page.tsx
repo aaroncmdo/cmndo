@@ -273,7 +273,7 @@ export default async function FlowPage({
       ? (
           await svc
             .from('sachverstaendige')
-            .select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
+            .select('profile_id, firmenname, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
             .eq('id', terminMitSv.assignee_id)
             .maybeSingle()
         ).data
@@ -300,11 +300,14 @@ export default async function FlowPage({
       }
     }
 
-    if (profileRow?.vorname) {
+    // AAR-956 19.06. (Aaron-Bug): Gutachter-Finder-SVs haben oft keinen profiles.vorname
+    // (nur firmenname) → Fallback auf firmenname statt gutachter=null ("kein_gutachter").
+    const anzeigeName = profileRow?.vorname ?? (svReserviert.firmenname as string | null) ?? null
+    if (anzeigeName) {
       gutachter = {
-        vorname: profileRow.vorname,
-        avatarUrl: profileRow.avatar_url ?? null,
-        firma: profileRow.firma ?? null,
+        vorname: anzeigeName,
+        avatarUrl: profileRow?.avatar_url ?? null,
+        firma: profileRow?.firma ?? null,
         terminDatum: (terminMitSv?.start_zeit as string | null) ?? null,
         besichtigungsAdresse,
         svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
@@ -322,7 +325,7 @@ export default async function FlowPage({
   if (!gutachter && terminPending && chosenSvId) {
     const { data: svPick } = await svc
       .from('sachverstaendige')
-      .select('profile_id, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
+      .select('profile_id, firmenname, profiles!sachverstaendige_profile_id_fkey(vorname, avatar_url, firma)')
       .eq('id', chosenSvId)
       .maybeSingle()
     if (svPick) {
@@ -347,11 +350,12 @@ export default async function FlowPage({
           gaa = (gb.zuletzt_aktualisiert_am as string | null) ?? null
         }
       }
-      if (pr?.vorname) {
+      const pickName = pr?.vorname ?? (svPick.firmenname as string | null) ?? null
+      if (pickName) {
         gutachter = {
-          vorname: pr.vorname,
-          avatarUrl: pr.avatar_url ?? null,
-          firma: pr.firma ?? null,
+          vorname: pickName,
+          avatarUrl: pr?.avatar_url ?? null,
+          firma: pr?.firma ?? null,
           terminDatum: wunschterminIso,
           besichtigungsAdresse,
           svTreffpunkt: (lead.besichtigungsort_notiz as string | null) ?? null,
