@@ -25,9 +25,11 @@ export async function emitEvent<T extends EventType>(
       ? ((payload as { fallId: string }).fallId)
       : undefined
 
-  // CMM-49: notification_events ist claim-gekeyt; interim faelle.claim_id-Lookup aus der
-  // fallId (P4-TODO: claimId aus dem emitEvent-Caller threaden). Nur emit.ts schreibt
-  // notification_events.fall_id; der Dispatcher (process/route.ts) liest die Spalte nicht.
+  // CMM-49: notification_events ist claim-gekeyt (claim_id). ABER fan-out.ts gatet weiterhin auf
+  // event.fall_id (loadFallParticipants(fall_id) -> resolveClaimId). P0-Hotfix 2026-06-20: fall_id
+  // MUSS mitgeschrieben werden, sonst liefert computeRecipients [] und die gesamte Pipeline ist fuer
+  // alle fall-scoped Events dunkel (war es ~02.-20.06., still completed ohne deliveries). Folge-
+  // Cleanup (CMM-49-Revier): fan-out claim-native lesen, dann kann der fall_id-Write hier wieder weg.
   const effectiveFallId = opts?.fallId ?? payloadFallId ?? null
   let claimId: string | null = null
   if (effectiveFallId) {
@@ -39,6 +41,7 @@ export async function emitEvent<T extends EventType>(
     .insert({
       event_type: eventType,
       payload: payload as unknown as Record<string, unknown>,
+      fall_id: effectiveFallId,
       claim_id: claimId,
       triggered_by_user_id: opts?.triggeredBy ?? null,
     })
