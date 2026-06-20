@@ -11,7 +11,7 @@
  *  - 'stdio' (default) — local clients (Claude Desktop, Cline, Cursor).
  *  - 'http'  — Streamable HTTP (stateless JSON) for remote hosting (mcp.claimondo.de).
  *
- * Config: CLAIMONDO_API_BASE (default https://claimondo.de), TRANSPORT (stdio|http),
+ * Config: CLAIMONDO_API_BASE (default https://app.claimondo.de), TRANSPORT (stdio|http),
  * PORT (http only, default 4002). See README.
  */
 import { setDefaultResultOrder } from 'node:dns'

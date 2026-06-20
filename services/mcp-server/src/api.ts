@@ -4,7 +4,10 @@
 // the route lives in the main app at src/app/api/v1/sv-in-naehe/route.ts and is
 // live on prod. This client is read-only and never sends user data.
 
-export const DEFAULT_API_BASE = 'https://claimondo.de'
+// app.claimondo.de = Portal-Host mit den /api/v1-Routen. Der Apex claimondo.de ist
+// die Marketing-App (kein /api/v1) — ein Default auf claimondo.de liefert 404 (Prod-
+// Incident 20.06., live MCP-Tools waren tot). Override per env CLAIMONDO_API_BASE.
+export const DEFAULT_API_BASE = 'https://app.claimondo.de'
 // 30 s: /api/v1/sv-in-naehe geocodet + liest die SV-Liste aus der DB und ist daher
 // langsam + lastabhaengig (live gemessen 8-15 s+). Lieber eine langsame echte Antwort
 // als ein vorzeitiger Timeout. /llms-full.txt ist mit ~0,5 s unkritisch.
