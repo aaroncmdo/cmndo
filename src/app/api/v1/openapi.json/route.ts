@@ -150,6 +150,26 @@ const spec = {
         },
       },
     },
+    '/api/v1/decode-brief': {
+      post: {
+        operationId: 'decodeBrief',
+        summary: 'Schreiben der gegnerischen Versicherung entschlüsseln (Beratung)',
+        description:
+          'Erkennt in einem Schreiben der gegnerischen Kfz-Haftpflichtversicherung typische Formulierungen, mit denen Ansprüche gekürzt oder hinausgezögert werden ("keine Wertminderung", "unser Sachverständiger", "Reparatur unwirtschaftlich", "alle Ansprüche abgegolten" u. a.), erklärt was sie wirklich bedeuten + welches Recht dem Geschädigten zusteht — und IMMER den nächsten Schritt: unabhängiger Gutachter + Termin (gutachter-termine + melde-schaden) oder Telefon-Rückruf. Beratung, keine individuelle Rechtsberatung. Read-only (POST nur wegen des Brief-Texts im Body).',
+        requestBody: {
+          required: true,
+          content: { 'application/json': { schema: { $ref: '#/components/schemas/DecodeBriefRequest' } } },
+        },
+        responses: {
+          '200': {
+            description: 'Decoder-Befund + nächster Schritt.',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/DecodeBriefResponse' } } },
+          },
+          '400': { description: 'Brief-Text fehlt oder ist zu lang.', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '429': { description: 'Rate-Limit überschritten (60/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -296,6 +316,34 @@ const spec = {
           hinweis: { type: 'string' },
         },
         required: ['schuldfrage', 'anspruchslage', 'eigenkosten', 'ansprueche', 'naechster_schritt'],
+      },
+      DecodeBriefRequest: {
+        type: 'object',
+        properties: {
+          text: { type: 'string', description: 'Der Text des Versicherer-Schreibens (oder der relevante Auszug). Max. 20.000 Zeichen.' },
+        },
+        required: ['text'],
+      },
+      DecodeBriefBefund: {
+        type: 'object',
+        properties: {
+          phrase: { type: 'string', description: 'Die erkannte Versicherer-Formulierung.' },
+          bedeutet: { type: 'string', description: 'Was die Formulierung wirklich bedeutet / welche Taktik dahintersteckt.' },
+          recht: { type: 'string', description: 'Das tatsächliche Recht des Geschädigten.' },
+          norm: { type: ['string', 'null'], description: 'Rechtsnorm / BGH-Aktenzeichen, falls einschlägig.' },
+        },
+        required: ['phrase', 'bedeutet', 'recht'],
+      },
+      DecodeBriefResponse: {
+        type: 'object',
+        properties: {
+          erkannte_muster: { type: 'integer' },
+          befunde: { type: 'array', items: { $ref: '#/components/schemas/DecodeBriefBefund' } },
+          einschaetzung: { type: 'string' },
+          naechster_schritt: { type: 'string', description: 'Immer: unabhängiger Gutachter + Termin (gutachter-termine + melde-schaden) oder Rückruf.' },
+          hinweis: { type: 'string' },
+        },
+        required: ['erkannte_muster', 'befunde', 'einschaetzung', 'naechster_schritt'],
       },
     },
   },
