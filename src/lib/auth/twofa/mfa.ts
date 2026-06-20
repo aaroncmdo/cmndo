@@ -59,9 +59,35 @@ export async function enrollePhoneFaktor(
   return { ok: true, factorId: enrollData.id, challengeId: challengeData.id }
 }
 
+export type TotpEnroll = { factorId: string; qrCode: string; secret: string }
+
 /**
- * Challenge fuer einen bestehenden Faktor — loest beim Login die SMS aus, und
- * dient auch dem "Code erneut senden".
+ * AAR-939 TOTP: Authenticator-App-Faktor anlegen. Liefert den QR-Code (data:svg,
+ * von Supabase fertig gerendert) + das Secret (manuelle Eingabe). KEIN Challenge
+ * hier — der QR wird angezeigt, dann bestaetigt der User per challengePhoneFaktor
+ * + verifyPhoneFaktor (beide factorId-generisch, s.u.). Stale unverifizierte
+ * TOTP-Faktoren (abgebrochene Versuche) werden vorher aufgeraeumt.
+ */
+export async function enrolleTotpFaktor(): Promise<MfaResult<TotpEnroll>> {
+  const supabase = await createClient()
+  const { data: liste } = await supabase.auth.mfa.listFactors()
+  const stale = (liste?.all ?? []).filter(
+    (f) => f.status === 'unverified' && f.factor_type === 'totp',
+  )
+  for (const f of stale) {
+    await supabase.auth.mfa.unenroll({ factorId: f.id })
+  }
+  const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
+  if (error || !data || data.type !== 'totp') {
+    return { ok: false, error: uebersetzeMfaFehler(error?.message) }
+  }
+  return { ok: true, factorId: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret }
+}
+
+/**
+ * Challenge fuer einen bestehenden Faktor. FACTORID-GENERISCH: fuer Phone loest
+ * es die SMS aus, fuer TOTP erzeugt es nur die Challenge (der Code kommt aus der
+ * App). Dient dem Login + dem "Code erneut senden" (nur SMS).
  */
 export async function challengePhoneFaktor(
   factorId: string,
@@ -75,8 +101,9 @@ export async function challengePhoneFaktor(
 }
 
 /**
- * Verify: bestaetigt eine Enroll- ODER Login-Challenge. Bei Erfolg hebt Supabase
- * die Session auf aal2 — danach laesst das Middleware-Gate durch.
+ * Verify: bestaetigt eine Enroll- ODER Login-Challenge (Phone ODER TOTP —
+ * factorId-generisch). Bei Erfolg hebt Supabase die Session auf aal2 — danach
+ * laesst das Middleware-Gate durch.
  */
 export async function verifyPhoneFaktor(
   factorId: string,
@@ -109,6 +136,29 @@ export async function listePhoneFaktoren(): Promise<MfaResult<{ faktoren: PhoneF
       status: f.status === 'verified' ? 'verified' : 'unverified',
       friendlyName: f.friendly_name ?? null,
     }))
+  return { ok: true, faktoren }
+}
+
+export type Faktor = {
+  id: string
+  type: 'phone' | 'totp' | 'webauthn'
+  status: 'verified' | 'unverified'
+  friendlyName: string | null
+}
+
+/** Generische Faktor-Liste (Phone + TOTP) fuer Login-Routing + Faktor-Manager. */
+export async function listeFaktoren(): Promise<MfaResult<{ faktoren: Faktor[] }>> {
+  const supabase = await createClient()
+  const { data, error } = await supabase.auth.mfa.listFactors()
+  if (error || !data) {
+    return { ok: false, error: uebersetzeMfaFehler(error?.message) }
+  }
+  const faktoren: Faktor[] = (data.all ?? []).map((f) => ({
+    id: f.id,
+    type: f.factor_type as 'phone' | 'totp' | 'webauthn',
+    status: f.status === 'verified' ? 'verified' : 'unverified',
+    friendlyName: f.friendly_name ?? null,
+  }))
   return { ok: true, faktoren }
 }
 

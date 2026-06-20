@@ -15,6 +15,8 @@ import PageHeader from '@/components/shared/PageHeader'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
+// AAR-939: TOTP (Authenticator-App) als optionaler 2. Faktor
+import { TotpEnrollCard } from '@/components/auth/TotpEnrollCard'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 // AAR-369: Profilbild-Upload + Anzeige-Felder
 import AvatarUpload from '@/components/shared/AvatarUpload'
@@ -452,6 +454,11 @@ export default function ProfilClient({
             aktuelleTwofaTelefon={profile.twofa_telefon ?? null}
             fallbackTelefon={profile.telefon}
           />
+        </div>
+
+        {/* AAR-939: TOTP (Authenticator-App) — optionaler 2. Faktor */}
+        <div className="mt-5">
+          <TotpEnrollCard />
         </div>
         {/* KFZ-184: Telefon-Verifizierung fuer 2FA */}
         <TwoFaPhoneSection />
