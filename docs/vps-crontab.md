@@ -11,10 +11,12 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 ## Live-Crontab (Abzug 2026-06-20)
 
 ```cron
-# Backups (Shell-Skripte, nicht App-Routen)
-0 2 * * *   /root/backup-daily.sh   >> /var/log/claimondo-backup.log 2>&1
-0 3 * * 0   /root/backup-weekly.sh  >> /var/log/claimondo-backup.log 2>&1
-0 4 1 * *   /root/backup-monthly.sh >> /var/log/claimondo-backup.log 2>&1
+# Backups (Shell-Skripte) — ⛔ ALLE 3 DEAKTIVIERT 2026-06-20: tarrten /var/www/claimondo/data/
+#   claimondo.db (existiert NICHT; App=/var/www/claimondo-v2 + Supabase) -> 4KB-Leerarchiv = Fake.
+#   Echtes Netz = Supabase-PITR. (live auskommentiert; Backup /root/crontab.bak.20260620-claude-2)
+# 0 2 * * *   /root/backup-daily.sh   >> /var/log/claimondo-backup.log 2>&1
+# 0 3 * * 0   /root/backup-weekly.sh  >> /var/log/claimondo-backup.log 2>&1
+# 0 4 1 * *   /root/backup-monthly.sh >> /var/log/claimondo-backup.log 2>&1
 
 # ─── KRITISCH ───
 */5  * * * *  cron-call.sh /api/cron/dispatch-lead-alert
@@ -25,7 +27,8 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 */15 * * * *  cron-call.sh /api/cron/sla-check
 */15 * * * *  cron-call.sh /api/cron/kb-termin-reminder-1h
 */30 * * * *  cron-call.sh /api/cron/verlegung-eskalation      # einzige emitEvent-Cron
-*/30 * * * *  cron-call.sh /api/cron/whatsapp-erinnerungen     # ⚠ Reminder-Dup #2
+# ⛔ DEAKTIVIERT 2026-06-20 (Dup von termin-erinnerungen → Kunden-Doppel-WA; Route gelöscht #3056):
+# */30 * * * *  cron-call.sh /api/cron/whatsapp-erinnerungen
 0    * * * *  cron-call.sh /api/cron/termin-erinnerungen       # ⚠ Reminder-Dup #3
 0    * * * *  cron-call.sh /api/cron/re-termin-eskalation
 0    8 * * *  cron-call.sh /api/cron/vs-timer
