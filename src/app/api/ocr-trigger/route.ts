@@ -115,11 +115,14 @@ export async function POST(request: Request) {
     })
     .eq('id', dokumentId)
 
-  // AAR-CMM: Geburtsdatum aus Personalausweis/Führerschein-OCR nach
-  // faelle.halter_geburtsdatum schreiben — H6-Regel: nur wenn Feld leer.
-  // ZB1 enthält selbst kein Geburtsdatum, daher kommt es aus den
-  // Personendokumenten und befüllt das Halter-Feld (Halter=Fahrer im
-  // Standardfall, sonst korrigiert der Dispatcher manuell).
+  // CMM-49 faelle-DROP (CMM-67 / CMM-50 Group C): Geburtsdatum aus Personalausweis-/
+  // Fuehrerschein-OCR auf die ist_halter-claim_party -> personen.geburtsdatum schreiben
+  // (NICHT mehr faelle.halter_geburtsdatum). v_claim_full.halter_geburtsdatum sourct genau
+  // diese Person (halter_p-LATERAL: ist_halter=true, ORDER BY reihenfolge, created_at LIMIT 1).
+  // Der fruehere faelle-Write war reader-frei (Display liest vcf=Person) -> das OCR-Geburtsdatum
+  // versickerte; jetzt sichtbar UND faelle-frei (letzter direkter faelle.halter_geburtsdatum-
+  // Accessor -> DROP-Enabler). H6-Regel ("nur wenn leer") bleibt, jetzt gegen die SSoT (Person)
+  // geprueft. ZB1 enthaelt selbst kein Geburtsdatum; Halter=Fahrer im Standardfall.
   if (
     (dok.dokument_typ === 'personalausweis' || dok.dokument_typ === 'fuehrerschein') &&
     dok.fall_id
@@ -127,16 +130,34 @@ export async function POST(request: Request) {
     const parsed = (extractedData as { parsed?: { geburtsdatum?: string | null } }).parsed
     const geb = parsed?.geburtsdatum ? toIsoDate(parsed.geburtsdatum) : null
     if (geb) {
-      const { data: fall } = await db
-        .from('faelle')
-        .select('halter_geburtsdatum')
-        .eq('id', dok.fall_id)
-        .single()
-      if (fall && !fall.halter_geburtsdatum) {
-        await db
-          .from('faelle')
-          .update({ halter_geburtsdatum: geb })
-          .eq('id', dok.fall_id)
+      // fall_id -> claim_id (Bridge) -> ist_halter-Party -> Person (== v_claim_full.halter_p)
+      const { data: bridge } = await db
+        .from('faelle_claim_bridge')
+        .select('claim_id')
+        .eq('fall_id', dok.fall_id)
+        .maybeSingle()
+      const claimId = (bridge as { claim_id?: string | null } | null)?.claim_id ?? null
+      if (claimId) {
+        const { data: halterParty } = await db
+          .from('claim_parties')
+          .select('person_id')
+          .eq('claim_id', claimId)
+          .eq('ist_halter', true)
+          .order('reihenfolge', { ascending: true })
+          .order('created_at', { ascending: true })
+          .limit(1)
+          .maybeSingle()
+        const personId = (halterParty as { person_id?: string | null } | null)?.person_id ?? null
+        if (personId) {
+          const { data: person } = await db
+            .from('personen')
+            .select('geburtsdatum')
+            .eq('id', personId)
+            .single()
+          if (person && !person.geburtsdatum) {
+            await db.from('personen').update({ geburtsdatum: geb }).eq('id', personId)
+          }
+        }
       }
     }
   }
