@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { XIcon, CameraIcon, CheckIcon, NavigationIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
+import { speichereVorOrtBesichtigung } from '@/lib/actions/vor-ort-besichtigung-actions'
 
 interface VorOrtPanelProps {
   fallId: string
@@ -58,11 +59,15 @@ export default function VorOrtPanel({ fallId, kundeName, kennzeichen, adresse, o
     setCompleting(true)
     try {
       const supabase = createClient()
-      // Update fall
-      const updates: Record<string, unknown> = { status: 'besichtigung' }
-      if (fin.length === 17) updates.fin_vin = fin.toUpperCase()
-      if (km) updates.kilometerstand = parseInt(km)
-      await supabase.from('faelle').update(updates).eq('id', fallId)
+      // CMM-49 faelle-DROP: FIN + Kilometerstand kanonisch auf vehicles (Server-Action mit admin +
+      // Ownership), NICHT mehr faelle.{fin_vin,kilometerstand} (reader-frei -> SV-Eingabe versickerte).
+      // status='besichtigung' war vestigial (Transition laeuft ueber dispatch-fall-actions +
+      // gutachter_termine.besichtigung_gestartet_am) -> entfaellt.
+      const r = await speichereVorOrtBesichtigung(fallId, {
+        fin: fin.length === 17 ? fin.toUpperCase() : null,
+        kilometerstand: km ? parseInt(km) : null,
+      })
+      if (!r.ok) console.warn('[VorOrt] vehicles-Speicherung fehlgeschlagen:', r.error)
 
       // Timeline
       await supabase.from('timeline').insert({
