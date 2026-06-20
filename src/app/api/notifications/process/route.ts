@@ -24,6 +24,10 @@ const BATCH_SIZE = 25
 
 const BACKOFF_MINUTES = [1, 5, 30, 120]
 
+// Lease-Dauer fuer 'processing'-Claims. Laeuft sie ab (Worker-Instanz waehrend processing
+// gestorben), wird das Event wieder aufgenommen statt ewig 'processing' zu haengen.
+const PROCESSING_LEASE_MINUTES = 10
+
 function nextRetryAt(retryCount: number): string | null {
   if (retryCount >= BACKOFF_MINUTES.length) return null
   const minutes = BACKOFF_MINUTES[retryCount]
@@ -144,12 +148,15 @@ async function processSingleEvent(event: NotificationEvent): Promise<{ ok: boole
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     const nextRetry = nextRetryAt(event.retry_count + 1)
-    const finalStatus = nextRetry ? 'failed' : 'failed'
+    // nextRetry === null → Retries ausgeschoepft. Es gibt keinen 'dead_letter'-Status im CHECK-
+    // Constraint; terminal ist ein Event durch status='failed' MIT next_retry_at=NULL (der Claim-
+    // Filter verlangt next_retry_at <= now; NULL matcht das nie → wird nie mehr reclaimed).
+    // Dead-Letter-Monitoring: WHERE status='failed' AND next_retry_at IS NULL.
     await supabase
       .from('notification_events')
       .update({
-        status: finalStatus,
-        error_message: msg,
+        status: 'failed',
+        error_message: nextRetry ? msg : `[dead-letter nach ${event.retry_count + 1} Versuchen] ${msg}`,
         retry_count: event.retry_count + 1,
         next_retry_at: nextRetry,
       })
@@ -166,14 +173,21 @@ async function processSingleEvent(event: NotificationEvent): Promise<{ ok: boole
 async function claimPendingEvents(): Promise<NotificationEvent[]> {
   const supabase = createAdminClient()
   const nowIso = new Date().toISOString()
+  const leaseIso = new Date(Date.now() + PROCESSING_LEASE_MINUTES * 60 * 1000).toISOString()
 
-  // MVP: Zwei-Schritt-Claim. Erst select IDs (ohne Lock), dann update-returning
-  // nur die Rows, die noch pending/retry-due sind. Race-condition-sicher durch
-  // den Status-Filter im update.
+  // MVP: Zwei-Schritt-Claim. Erst select IDs (ohne Lock), dann update-returning nur die Rows, die
+  // noch pending/retry-due/lease-abgelaufen sind. Race-condition-sicher durch den Status-Filter im
+  // update. Beim Claim setzen wir next_retry_at = now + Lease; ein 'processing'-Event mit
+  // abgelaufener Lease (Instanz gestorben) wird so wieder aufgenommen statt ewig zu haengen.
+  const claimFilter =
+    `status.eq.pending,` +
+    `and(status.eq.failed,next_retry_at.lte.${nowIso}),` +
+    `and(status.eq.processing,next_retry_at.lte.${nowIso})`
+
   const { data: candidates } = await supabase
     .from('notification_events')
     .select('id')
-    .or(`status.eq.pending,and(status.eq.failed,next_retry_at.lte.${nowIso})`)
+    .or(claimFilter)
     .order('created_at', { ascending: true })
     .limit(BATCH_SIZE)
 
@@ -182,9 +196,9 @@ async function claimPendingEvents(): Promise<NotificationEvent[]> {
 
   const { data: claimed, error } = await supabase
     .from('notification_events')
-    .update({ status: 'processing' })
+    .update({ status: 'processing', next_retry_at: leaseIso })
     .in('id', ids)
-    .or(`status.eq.pending,and(status.eq.failed,next_retry_at.lte.${nowIso})`)
+    .or(claimFilter)
     .select('*')
 
   if (error) {
@@ -211,7 +225,10 @@ async function processSingleById(eventId: string): Promise<{ processed: number; 
   // Claim nur die eine Event-Row wenn sie noch pending ist.
   const { data: claimed } = await supabase
     .from('notification_events')
-    .update({ status: 'processing' })
+    .update({
+      status: 'processing',
+      next_retry_at: new Date(Date.now() + PROCESSING_LEASE_MINUTES * 60 * 1000).toISOString(),
+    })
     .eq('id', eventId)
     .eq('status', 'pending')
     .select('*')
