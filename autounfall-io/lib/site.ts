@@ -29,10 +29,18 @@ export const SITE = {
     name: 'Kitta & Sprafke UG (haftungsbeschränkt)',
     shortName: 'Kitta & Sprafke UG',
     street: 'Hansaring 10',
-    postalCode: '50670',
+    postalCode: '50672',
     city: 'Köln',
     country: 'Deutschland',
-    managingDirectors: 'Aaron Sprafke, Nicolas Kitta',
+    // Geschäftsführer: Anzeige-String (Impressum „Vertreten durch").
+    managingDirectors: 'Nicolas Kitta, Aaron Benjamin Sprafke',
+    // Geschäftsführer als Person-Liste → Organization founder/employee (JSON-LD).
+    directors: ['Nicolas Kitta', 'Aaron Benjamin Sprafke'],
+    // Handelsregister: HRB 128389, AG Köln (eingetragen 16.06.2026). Gründung der
+    // UG = foundingDate. Eine Quelle für Impressum + Organization-Schema (identifier).
+    registerCourt: 'Amtsgericht Köln',
+    registerNumber: 'HRB 128389',
+    foundingDate: '2026-04-13',
     /** Verifizierte, geclaimte Unternehmensprofile (Organization sameAs). Nur real
      *  existierende Profile — kein X/YouTube (nicht angelegt), kein claimondo.de. */
     sameAs: [

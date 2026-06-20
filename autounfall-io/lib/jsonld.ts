@@ -17,15 +17,32 @@ const WEBSITE_ID = `${SITE.url}/#website`
 
 /** Betreiber / publisher / author-Affiliation — nur Kitta & Sprafke UG. */
 export function organizationSchema(): JsonLdNode {
+  const p = SITE.publisher
   const node: JsonLdNode = {
     '@type': 'Organization',
     '@id': ORG_ID,
-    name: SITE.publisher.name,
+    name: p.name,
+    legalName: p.name,
     url: SITE.url,
     logo: `${SITE.url}/favicon.svg`,
+    foundingDate: p.foundingDate,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: p.street,
+      postalCode: p.postalCode,
+      addressLocality: p.city,
+      addressCountry: 'DE',
+    },
+    identifier: {
+      '@type': 'PropertyValue',
+      propertyID: 'Handelsregister',
+      value: `${p.registerNumber}, ${p.registerCourt}`,
+    },
+    founder: p.directors.map((name) => ({ '@type': 'Person', name })),
+    employee: p.directors.map((name) => ({ '@type': 'Person', name })),
   }
   // sameAs nur emittieren, wenn geclaimte Profile vorhanden sind (omit-if-empty).
-  const sameAs = [...SITE.publisher.sameAs]
+  const sameAs = [...p.sameAs]
   if (sameAs.length > 0) node.sameAs = sameAs
   return node
 }
