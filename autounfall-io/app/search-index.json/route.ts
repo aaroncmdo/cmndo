@@ -30,7 +30,7 @@ export function GET() {
     { t: 'Unfallbericht', u: '/unfallbericht' },
     { t: 'SF-Rückstufungs-Rechner', u: '/schadenfreiheitsklasse/rechner' },
     { t: 'Gutachter finden', u: '/gutachter-finden' },
-    // 'Über uns' (/ueber-uns) folgt, sobald #3014 auf main gemergt ist (sonst 404-Such-Treffer).
+    { t: 'Über uns', u: '/ueber-uns' },
   ]
   return NextResponse.json(items)
 }
