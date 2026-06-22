@@ -119,7 +119,7 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
       {/* Zusammenfassung */}
       <div className="grid grid-cols-3 gap-4">
         <Card bordered radius="md">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
             Gesamt
           </p>
           <p className="mt-1 text-heading-sm font-bold text-claimondo-navy">
@@ -127,7 +127,7 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
           </p>
         </Card>
         <Card bordered radius="md">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
             Ausstehend
           </p>
           <p className="mt-1 text-heading-sm font-bold text-warning-strong">
@@ -135,7 +135,7 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
           </p>
         </Card>
         <Card bordered radius="md">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
             Freigegeben
           </p>
           <p className="mt-1 text-heading-sm font-bold text-success-strong">
@@ -177,7 +177,7 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
                     </Td>
                     <Td>
                       <span
-                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-semibold ${vis.className}`}
+                        className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-body-xs font-semibold ${vis.className}`}
                         title={vis.tooltip}
                       >
                         {vis.icon}

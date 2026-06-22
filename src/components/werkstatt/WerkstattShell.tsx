@@ -70,7 +70,7 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
               </span>
               <TasksPill userId={userId} href="/werkstatt" />
             </div>
-            <p className="mt-1 inline-block rounded bg-claimondo-shield px-2 py-0.5 text-[10px] uppercase tracking-wider text-claimondo-light-blue">
+            <p className="mt-1 inline-block rounded bg-claimondo-shield px-2 py-0.5 text-caption uppercase tracking-wider text-claimondo-light-blue">
               Werkstatt
             </p>
             <p className="mt-1 truncate text-xs text-claimondo-light-blue">{werkstatt.name}</p>
@@ -85,7 +85,7 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm text-white/90">{werkstatt.name}</p>
-                <p className="truncate text-[11px] text-claimondo-light-blue">{email}</p>
+                <p className="truncate text-body-xs text-claimondo-light-blue">{email}</p>
               </div>
               <UpdatesNav variant="dark" />
             </div>
@@ -110,7 +110,7 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
             <span className="text-white">Claim</span>
             <span className="text-claimondo-light-blue">ondo</span>
           </span>
-          <span className="rounded bg-claimondo-shield px-2 py-0.5 text-[10px] uppercase tracking-wider text-claimondo-light-blue">
+          <span className="rounded bg-claimondo-shield px-2 py-0.5 text-caption uppercase tracking-wider text-claimondo-light-blue">
             Werkstatt
           </span>
         </header>

@@ -84,7 +84,7 @@ export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
         <div className="space-y-5">
           {/* URL-Anzeige + Kopieren */}
           <div>
-            <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium">
+            <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
               Ihr Einstiegs-Link
             </p>
             <div className="mt-2 flex items-center gap-2">
@@ -117,7 +117,7 @@ export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
           {/* QR-Code */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo font-medium inline-flex items-center gap-1.5">
+              <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium inline-flex items-center gap-1.5">
                 <QrCodeIcon width={12} height={12} />
                 QR-Code — {werkstattName}
               </p>
@@ -144,7 +144,7 @@ export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
               className="flex items-center justify-center p-6 rounded-ios-xl bg-claimondo-bg border border-claimondo-border"
               dangerouslySetInnerHTML={{ __html: qrSvg }}
             />
-            <p className="mt-2 text-[11px] text-claimondo-shield text-center">
+            <p className="mt-2 text-body-xs text-claimondo-shield text-center">
               Scan führt Ihre Kunden direkt zur Schadensmeldung — ohne manuelle Eingabe.
             </p>
           </div>
