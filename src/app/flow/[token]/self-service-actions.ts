@@ -15,6 +15,7 @@ import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
 import { planeTermin } from '@/lib/termine/engine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -104,7 +105,7 @@ export async function ladeMatchingFlow(
   const { data: lead } = await admin
     .from('leads')
     .select(
-      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, wunschtermin, disqualifiziert',
+      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, wunschtermin, disqualifiziert, werkstatt_id',
     )
     .eq('id', leadId)
     .maybeSingle()
@@ -146,6 +147,52 @@ export async function ladeMatchingFlow(
             .eq('id', leadId)
         } catch (err) {
           console.error('[ladeMatchingFlow] Geocode-Persist fehlgeschlagen (nicht kritisch):', err)
+        }
+      }
+    }
+  }
+
+  // Task 11 — Werkstatt-Geo-Safety-Net (Resume-Pfad): Wenn Coords IMMER NOCH fehlen
+  // UND der Lead eine werkstatt_id hat, die Werkstatt-Geo als Besichtigungsort verwenden.
+  // Hauptpfad (FinderWizard, Task 10) setzt den Ort bereits vor Lead-Anlage — dieser
+  // Block ist NUR das Resume-Safety-Net (z.B. Magic-Link nach Seiten-Refresh).
+  // Persist best-effort: Fehler duerfen den Flow nicht unterbrechen.
+  if (lat == null || lng == null) {
+    const werkstattId = (lead as unknown as { werkstatt_id?: string | null }).werkstatt_id ?? null
+    if (werkstattId) {
+      const { data: ws } = await admin
+        .from('werkstaetten')
+        .select('lat, lng, adresse_strasse, adresse_plz, adresse_ort')
+        .eq('id', werkstattId)
+        .maybeSingle()
+      const fallback = resolveWerkstattFallbackGeo(
+        lat,
+        lng,
+        ws
+          ? {
+              lat: (ws as unknown as { lat: number | null }).lat ?? null,
+              lng: (ws as unknown as { lng: number | null }).lng ?? null,
+              adresse_strasse: (ws.adresse_strasse as string | null) ?? null,
+              adresse_plz: (ws.adresse_plz as string | null) ?? null,
+              adresse_ort: (ws.adresse_ort as string | null) ?? null,
+            }
+          : null,
+      )
+      if (fallback) {
+        lat = fallback.lat
+        lng = fallback.lng
+        try {
+          await admin
+            .from('leads')
+            .update({
+              besichtigungsort_adresse: fallback.adresse || null,
+              besichtigungsort_lat: fallback.lat,
+              besichtigungsort_lng: fallback.lng,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', leadId)
+        } catch (err) {
+          console.error('[ladeMatchingFlow] Werkstatt-Geo-Persist fehlgeschlagen (nicht kritisch):', err)
         }
       }
     }

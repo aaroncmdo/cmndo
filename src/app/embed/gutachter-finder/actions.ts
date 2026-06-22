@@ -46,6 +46,7 @@ export type EmbedBuchungInput = {
   zugeordneter_sv_id?: string | null
   zugeordneter_sv_lead_id?: string | null
   matching_typ?: string | null
+  werkstatt_id?: string | null
 }
 
 export async function starteEmbedBuchung(
@@ -66,6 +67,7 @@ export async function starteEmbedBuchung(
     zugeordneter_sv_id: input.zugeordneter_sv_id ?? undefined,
     zugeordneter_sv_lead_id: input.zugeordneter_sv_lead_id ?? undefined,
     matching_typ: input.matching_typ ?? undefined,
+    werkstatt_id: input.werkstatt_id ?? undefined,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -264,6 +266,7 @@ export async function reserviereEmbedTermin(input: {
   schadentyp: string
   ort: { adresse: string; lat: number; lng: number }
   wunschterminLokal?: string | null
+  werkstatt_id?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -296,6 +299,7 @@ export async function reserviereEmbedTermin(input: {
     zugeordneter_sv_id: input.auswahl?.kind === 'partner' ? input.auswahl.svId : null,
     zugeordneter_sv_lead_id: input.auswahl?.kind === 'deadpin' ? input.auswahl.deadPinId : null,
     matching_typ: input.auswahl?.kind ?? null,
+    werkstatt_id: input.werkstatt_id ?? null,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
