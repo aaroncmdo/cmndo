@@ -1,14 +1,27 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
+// 2026-06-20: Tabellenliste auf den kanonischen Satz korrigiert (Notification/Cron-Audit).
+// Vorher kaputt: 'gutachter_organisationen' + 'rechnungen' existieren NICHT (heissen
+// 'organisationen' / 'abrechnungen') -> jeder Lauf loggte Fehler + sicherte leer; 'faelle'
+// ist deprecated (CMM-49-Drop) und die SSoT-Tabellen claims/claim_parties/leads/vehicles
+// fehlten komplett. (db-backup ist error-tolerant pro Tabelle; echtes DR-Netz = Supabase-PITR,
+// dies ist ein ergaenzender JSON-Export der Kern-Tabellen.)
 const BACKUP_TABLES = [
+  // Kern-Entitaeten (CMM-49 SSoT)
+  'claims',
+  'claim_parties',
+  'leads',
+  'vehicles',
+  'gutachter_termine',
+  // Akteure
   'profiles',
   'sachverstaendige',
-  'gutachter_organisationen',
-  'faelle',
+  'organisationen',
+  // Billing + Dokumente
+  'abrechnungen',
   'fall_dokumente',
   'vertraege_unterzeichnet',
-  'rechnungen',
   'vertragsvorlagen',
 ] as const
 
