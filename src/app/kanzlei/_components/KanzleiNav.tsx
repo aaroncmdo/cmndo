@@ -2,7 +2,7 @@
 
 // AAR-778: Migriert auf shared PortalNav (light variant).
 
-import { LayoutDashboardIcon, KanbanSquareIcon, CalendarIcon } from 'lucide-react'
+import { LayoutDashboardIcon, KanbanSquareIcon, CalendarIcon, ShieldCheckIcon } from 'lucide-react'
 import { PortalNav } from '@/components/shared/portal-nav'
 
 export default function KanzleiNav() {
@@ -15,6 +15,7 @@ export default function KanzleiNav() {
           { href: '/kanzlei/mandate', label: 'Mandate', icon: LayoutDashboardIcon },
           { href: '/kanzlei/kanban', label: 'Pipeline', icon: KanbanSquareIcon },
           { href: '/kanzlei/termin', label: 'Termin buchen', icon: CalendarIcon },
+          { href: '/kanzlei/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
         ],
       }]}
     />

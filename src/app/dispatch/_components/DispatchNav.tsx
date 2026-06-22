@@ -5,7 +5,7 @@
 import Link from 'next/link'
 import {
   LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
-  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon, UserIcon,
+  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon, UserIcon, ShieldCheckIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -24,6 +24,7 @@ const NAV_ARBEIT: PortalNavItem[] = [
 const NAV_NACHSCHLAGEN: PortalNavItem[] = [
   { href: '/dispatch/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/dispatch/isochrone', label: 'Isochrone', icon: TargetIcon },
+  { href: '/dispatch/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
 ]
 
 export default function DispatchNav({
