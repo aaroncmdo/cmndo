@@ -170,6 +170,22 @@ export const PERMISSION_MATRIX: Record<UserRolle, Permission> = {
     },
     capabilities: new Set<PermissionCapability>([]),
   },
+
+  // AAR-956 WP-B: Werkstatt-Vermittler — eigenes Portal, read-only auf
+  // Provisions-Daten (werkstatt_provisionen). Kein Fall-Zugriff.
+  werkstatt: {
+    scope: 'own',
+    resources: {
+      fall: 'none',
+      stammdaten: 'none',
+      abrechnung: 'read',         // Eigene Provision einsehen
+      dokumente: 'none',
+      chat: 'none',
+      tasks: 'none',
+      prozess: 'none',
+    },
+    capabilities: new Set<PermissionCapability>([]),
+  },
 }
 
 /**

@@ -416,6 +416,10 @@ export async function convertLeadToClaim(
   // (b'' types-regen aufgeschoben) -> Record-Cast wie bei anderen noch-nicht-getypten Spalten.
   ;(claimsInsert as Record<string, unknown>).operative_status =
     input.svIdFromTermin ? 'sv-termin' : 'ersterfassung'
+  // AAR-956 Werkstatt: vermittelnde Werkstatt (QR) -> claims.werkstatt_id (DB-Trigger legt
+  // die Provision an). Record-Cast wie operative_status (generierte Types laggen die DB-Spalte).
+  ;(claimsInsert as Record<string, unknown>).werkstatt_id =
+    (lead.werkstatt_id as string | null) ?? null
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')

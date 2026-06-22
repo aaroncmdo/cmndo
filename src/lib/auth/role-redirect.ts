@@ -13,6 +13,7 @@ export type Rolle =
   | 'kunde'
   | 'kanzlei'
   | 'makler'
+  | 'werkstatt'
   | string
 
 export function roleToPath(rolle: Rolle | null | undefined): string {
@@ -35,6 +36,9 @@ export function roleToPath(rolle: Rolle | null | undefined): string {
     // kommt aus AAR-461 F3 (user_role-Enum-Erweiterung).
     case 'makler':
       return '/makler'
+    // AAR-956 WP-B: Werkstatt-Vermittler-Portal.
+    case 'werkstatt':
+      return '/werkstatt'
     // KB hat eigenes Portal (/mitarbeiter/*, AAR-61/68) — bis dahin landete KB
     // im Admin-Portal ohne seine zugewiesenen Fälle/Tasks zu sehen.
     case 'kundenbetreuer':

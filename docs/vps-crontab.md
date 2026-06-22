@@ -54,6 +54,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 20  11 * * *  cron-call.sh /api/cron/verifizierung-reminder
 0   9  * * *  cron-call.sh /api/cron/mietwagen-tracking
 0   2  * * *  cron-call.sh /api/cron/release-makler-provisionen
+0   2  * * *  cron-call.sh /api/cron/release-werkstatt-provisionen
 0   9  * * 1  cron-call.sh /api/cron/vs-korrespondenz-review
 0   3  * * *  cron-call.sh /api/cron/db-backup
 0   3  * * *  cron-call.sh /api/cron/kb-reassign-inactive

@@ -120,3 +120,7 @@ docs/probe-runs/
 # 2026-05-15: Marketing-Strategie-Arbeitsdokumente (Brand- + SEO-Konzepte,
 # arbeiten lokal, gehen nicht ins Repo)
 marketing-strategy/
+
+# Subagent-Prozess-Artefakte (SDD task-reports, werden ins .git-interne sdd/-Dir geschrieben
+# aber gelegentlich versehentlich in den Working-Tree; nie versionieren).
+/sdd/

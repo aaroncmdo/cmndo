@@ -137,6 +137,33 @@ export async function issueCanonicalFlowLinkForAnfrage(
   let leadId = (gfa.konvertiert_zu_lead_id as string | null) ?? null
   if (!leadId) {
     const dispatcherId = await pickRoundRobinDispatcher(admin)
+    const extra = {
+      zugewiesen_an: dispatcherId,
+      qualifizierungs_phase: 'erstkontakt',
+      schadentyp: clampSchadentyp(gfa.schadentyp as string | null),
+      // AAR-956 (Aaron 14.06.): schadens_hergang = die SCHILDERUNG, NICHT die Unfallart —
+      // KEIN Fallback mehr auf schadentyp/schadenort. Im Self-Service wird der Hergang im
+      // Lead-Flow sauber beschrieben; bis dahin null (statt irreführend dem Typ-/Ort-Label).
+      schadens_hergang: (gfa.schadens_kurzbeschreibung as string | null) ?? null,
+      fahrzeug_standort_lat: (gfa.schadenort_lat as number | null) ?? null,
+      fahrzeug_standort_lng: (gfa.schadenort_lng as number | null) ?? null,
+      fahrzeug_standort_adresse:
+        (gfa.besichtigungsort_adresse as string | null) ??
+        (gfa.schadenort as string | null) ??
+        null,
+      fin: (gfa.fin_vin as string | null) ?? null,
+      kennzeichen: (gfa.kennzeichen as string | null) ?? null,
+      hsn: (gfa.hsn as string | null) ?? null,
+      tsn: (gfa.tsn as string | null) ?? null,
+      fahrzeug_hersteller: (gfa.fahrzeug_hersteller as string | null) ?? null,
+      fahrzeug_modell: (gfa.fahrzeug_modell as string | null) ?? null,
+      fahrzeug_baujahr: (gfa.fahrzeug_baujahr as number | null) ?? null,
+      wunschtermin: (gfa.wunschtermin as string | null) ?? null,
+      ga_client_id: (gfa.ga_client_id as string | null) ?? null,
+    }
+    // AAR-956 Werkstatt: werkstatt_id durchreichen (gfa->lead). Record-Cast, da die generierten
+    // Lead-Types die frische DB-Spalte noch nicht kennen (Type-Regen aufgeschoben, AGENTS.md §6).
+    ;(extra as Record<string, unknown>).werkstatt_id = (gfa.werkstatt_id as string | null) ?? null
     const created = await createLead(
       admin,
       {
@@ -147,30 +174,7 @@ export async function issueCanonicalFlowLinkForAnfrage(
         telefon: (gfa.telefon as string | null) ?? null,
         email: (gfa.email as string | null) ?? null,
       },
-      {
-        zugewiesen_an: dispatcherId,
-        qualifizierungs_phase: 'erstkontakt',
-        schadentyp: clampSchadentyp(gfa.schadentyp as string | null),
-        // AAR-956 (Aaron 14.06.): schadens_hergang = die SCHILDERUNG, NICHT die Unfallart —
-        // KEIN Fallback mehr auf schadentyp/schadenort. Im Self-Service wird der Hergang im
-        // Lead-Flow sauber beschrieben; bis dahin null (statt irreführend dem Typ-/Ort-Label).
-        schadens_hergang: (gfa.schadens_kurzbeschreibung as string | null) ?? null,
-        fahrzeug_standort_lat: (gfa.schadenort_lat as number | null) ?? null,
-        fahrzeug_standort_lng: (gfa.schadenort_lng as number | null) ?? null,
-        fahrzeug_standort_adresse:
-          (gfa.besichtigungsort_adresse as string | null) ??
-          (gfa.schadenort as string | null) ??
-          null,
-        fin: (gfa.fin_vin as string | null) ?? null,
-        kennzeichen: (gfa.kennzeichen as string | null) ?? null,
-        hsn: (gfa.hsn as string | null) ?? null,
-        tsn: (gfa.tsn as string | null) ?? null,
-        fahrzeug_hersteller: (gfa.fahrzeug_hersteller as string | null) ?? null,
-        fahrzeug_modell: (gfa.fahrzeug_modell as string | null) ?? null,
-        fahrzeug_baujahr: (gfa.fahrzeug_baujahr as number | null) ?? null,
-        wunschtermin: (gfa.wunschtermin as string | null) ?? null,
-        ga_client_id: (gfa.ga_client_id as string | null) ?? null,
-      },
+      extra,
     )
     if (!created.ok) return { ok: false, error: created.error }
     leadId = created.leadId
