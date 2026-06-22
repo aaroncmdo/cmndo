@@ -149,6 +149,11 @@ export function FinderWizard({
     track('gf_shown')
   }, [])
 
+  // AAR-956 Final-Review: werkstattAntwort bei werkstattId-Prop-Wechsel zuruecksetzen
+  // (SPA-Reuse: Werkstatt A→B wuerde sonst das „Nein" von A behalten und B's Frage ueberspringen).
+  // embed-Pfad: werkstattId=undefined+stabil → laeuft einmal bei Mount, null→null, no-op.
+  useEffect(() => { setWerkstattAntwort(null) }, [werkstattId])
+
   // AAR-956 Task 10: „Ja, in der Werkstatt" → werkstattGeo als Ort setzen und direkt zu Matching.
   // Nutzt resolveWerkstattOrt('ja', werkstattGeo, null) + ruft denselben Downstream-Pfad wie
   // ortGewaehlt() auf, nur ohne GooglePlace-Overhead (kein onSelect-Callback nötig).

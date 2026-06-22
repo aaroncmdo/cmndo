@@ -92,7 +92,6 @@ export async function createWerkstatt(
     email,
     lat,
     lng,
-    partner: true,
     user_id: userId,
     provision_betrag_netto: provision,
     provision_aktiv: true,

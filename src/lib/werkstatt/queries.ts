@@ -61,8 +61,10 @@ export async function getWerkstattOverview(werkstattId: string): Promise<Werksta
   const supabase = await createClient()
 
   const [claimsRes, offenRes, freigRes, ausgRes] = await Promise.all([
+    // Fix: claims hat keine werkstatt-RLS-Policy → count via werkstatt_provisionen
+    // (UNIQUE auf claim_id, eine Provision-Row pro Claim → count == vermittelte Claims).
     supabase
-      .from('claims')
+      .from('werkstatt_provisionen')
       .select('id', { count: 'exact', head: true })
       .eq('werkstatt_id', werkstattId),
     supabase
