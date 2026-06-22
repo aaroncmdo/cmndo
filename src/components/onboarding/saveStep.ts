@@ -19,6 +19,11 @@ const CLAIMS_ONBOARDING_WRITABLE = new Set<string>([
   'hat_personenschaden', 'hat_sachschaden', 'sachschaden_beschreibung',
   'polizei_vor_ort', 'polizei_aktenzeichen',
   'zeugen_vorhanden', 'zeugen_kontakte',
+  // CMM-49 WP-D: service_typ (Service-Umfang, toggle-cards komplett/nur_gutachter) zeigte frueher
+  // auf faelle.service_typ -> still verschluckt (Feld-Verlust). Config jetzt claims.service_typ
+  // (Mig 20260622120730_cmm49_onboarding_faelle_targets_cleanup); hier in die Allowlist, damit der
+  // claims-Handler den Wert schreibt (kein Bool -> Pass-through-Coercion, leer->null).
+  'service_typ',
 ])
 const CLAIMS_ONBOARDING_BOOL = new Set<string>([
   'hat_personenschaden', 'hat_sachschaden', 'polizei_vor_ort', 'zeugen_vorhanden',

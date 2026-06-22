@@ -8,7 +8,8 @@
 //
 // Datenfluss (siehe docs/plans/funnel-vereinfachung-2026-05-11.md):
 //   1. Page laedt ladeNoetigePhasen(fallId)
-//   2. Read auf faelle + claims + leads + vehicles + fall_documents
+//   2. Read auf faelle_claim_bridge (nur claim_id/lead_id) + claims + leads + vehicles + fall_documents
+//      (CMM-49: faelle-Read schon auf die Bridge migriert — kein from('faelle') mehr)
 //   3. Pro Feld pruefen: DB-Wert vorhanden?
 //   4. Pro Phase pruefen: alle Pflichtfelder gefuellt? → Phase weglassen
 //   5. WizardClient bekommt:
