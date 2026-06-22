@@ -86,7 +86,7 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     await db.from('vehicle_vorschaeden').delete().eq('claim_id', cid)
     await db.from('claim_vehicle_involvements').delete().eq('claim_id', cid)
     await db.from('claim_parties').delete().eq('claim_id', cid)
-    await db.from('faelle').delete().eq('claim_id', cid)
+    // CMM-49 faelle-DROP: faelle gedroppt — Claim-Delete raeumt die Bridge via ON DELETE CASCADE.
     await db.from('claims').delete().eq('id', cid)
   }
 
@@ -171,14 +171,9 @@ d('convert-lead-to-claim Entity-Wiring (DB-Integration)', () => {
     expect(veh?.hersteller).toBe('Testmarke')
     expect(veh?.modell_haupttyp).toBe('Testmodell')
 
-    // CMM-49 D2 (claim-first Genesis): convertLeadToClaim legt KEINE faelle-Row mehr an.
-    // fall_id == claim_id; die faelle_claim_bridge (via trg_sync_claims_to_bridge) ist der
-    // fall_id->claim_id-Lookup fuer die fall_id-Kinder. Gate fuer den Genesis-INSERT-Cutover.
-    const { count: faelleCount } = await db
-      .from('faelle')
-      .select('id', { count: 'exact', head: true })
-      .eq('claim_id', claimId)
-    expect(faelleCount).toBe(0)
+    // CMM-49 faelle-DROP: faelle ist gedroppt (claim-first Genesis). Die faelle_claim_bridge
+    // (via trg_sync_claims_to_bridge) ist der fall_id->claim_id-Lookup fuer die fall_id-Kinder;
+    // fall_id == claim_id.
     const { data: bridge } = await db
       .from('faelle_claim_bridge')
       .select('fall_id, claim_id')
@@ -226,7 +221,7 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
     await db2.from('vehicle_vorschaeden').delete().eq('claim_id', cid)
     await db2.from('claim_vehicle_involvements').delete().eq('claim_id', cid)
     await db2.from('claim_parties').delete().eq('claim_id', cid)
-    await db2.from('faelle').delete().eq('claim_id', cid)
+    // CMM-49 faelle-DROP: faelle gedroppt — Claim-Delete raeumt die Bridge via ON DELETE CASCADE.
     await db2.from('claims').delete().eq('id', cid)
   }
 
@@ -284,8 +279,8 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
 
 // CMM-49 D2-Teil-2: createClaimForFall claim-first (admin/faelle/anlegen-Pfad).
 // Beweist: createClaimForFall mit frischem fallId (KEINE faelle-Row vorhanden) legt den Claim
-// mit id==fallId an, die Bridge entsteht via trg_sync_claims_to_bridge, der faelle.update-Backref
-// no-oppt mangels Row -> der admin-Genesis ist faelle-frei.
+// mit id==fallId an, die Bridge entsteht via trg_sync_claims_to_bridge -> der admin-Genesis
+// ist faelle-frei (kein faelle.update-Backref mehr; faelle ist gedroppt).
 d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
   let db3: SupabaseClient
   let fallId3: string | null = null
@@ -309,11 +304,8 @@ d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
       schadens_art: 'haftpflicht',
     }, 'manuell_admin')
     expect(claimId).toBe(fallId3) // Identity: claim.id == fallId
-    const { count: fc } = await db3
-      .from('faelle')
-      .select('id', { count: 'exact', head: true })
-      .eq('id', fallId3)
-    expect(fc).toBe(0)
+    // CMM-49 faelle-DROP: faelle ist gedroppt — die Bridge (via trg_sync_claims_to_bridge) traegt
+    // die fall_id->claim_id-Map; der admin-Genesis ist faelle-frei.
     const { data: br } = await db3
       .from('faelle_claim_bridge')
       .select('fall_id, claim_id')
