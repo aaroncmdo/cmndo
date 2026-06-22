@@ -63,18 +63,19 @@ export async function assignPoolLead(fall_id: string, target_sv_id: string): Pro
     return { success: false, error: 'Ziel-SV hat sein Monats-Kontingent erreicht' }
   }
 
-  // Zuweisen: sv_id + status bleiben auf faelle; sv_zugewiesen_am → claims (SSoT).
+  // CMM-49 faelle-DROP: Zuweisung kanonisch auf claims (sv_id + operative_status + sv_zugewiesen_am),
+  // NICHT mehr faelle.{sv_id,status} (reader-frei: v_claim_full liest claims.sv_id/operative_status).
+  // Der faelle->claims sv_id-Sync-Trigger wird fuer diesen Writer damit unnoetig. vcf.id == claim_id.
   const now = new Date().toISOString()
-  const { error: updErr } = await db.from('faelle').update({
-    sv_id: target_sv_id,
-    status: 'sv-zugewiesen',
-  }).eq('id', fall_id)
-  if (updErr) return { success: false, error: `Zuweisung fehlgeschlagen: ${updErr.message}` }
-  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT).
   const claimId = (fall.id as string | null) ?? null
-  if (claimId) {
-    await db.from('claims').update({ sv_zugewiesen_am: now }).eq('id', claimId)
+  if (!claimId) return { success: false, error: 'Kein Claim am Fall' }
+  const claimUpdate: Record<string, unknown> = {
+    sv_id: target_sv_id,
+    operative_status: 'sv-zugewiesen',
+    sv_zugewiesen_am: now,
   }
+  const { error: updErr } = await db.from('claims').update(claimUpdate as never).eq('id', claimId)
+  if (updErr) return { success: false, error: `Zuweisung fehlgeschlagen: ${updErr.message}` }
 
   // Counter erhoehen
   await db.from('sachverstaendige').update({
