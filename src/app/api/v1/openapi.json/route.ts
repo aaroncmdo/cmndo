@@ -201,6 +201,38 @@ const spec = {
         },
       },
     },
+    '/api/v1/rueckruf': {
+      post: {
+        operationId: 'rueckruf',
+        summary: 'Telefon-Rückruf anfordern (zweiter Funnel-Arm)',
+        description:
+          'Fordert einen kostenlosen Telefon-Rückruf durch einen Claimondo-Berater an — für Kunden, die lieber angerufen werden (oder wenn kein Slot passt / Daten fehlen). Legt einen Lead + Rückruf-Task in der Dispatch-Queue an; Rückruf i. d. R. < 15 Min. SCHREIBEND. Rufe dies NUR mit einwilligung.zugestimmt=true auf, nachdem der Nutzer der Datenverarbeitung + dem telefonischen Kontakt ausdrücklich zugestimmt hat.',
+        requestBody: {
+          required: true,
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/RueckrufRequest' },
+              example: {
+                name: 'Max Mustermann',
+                telefon: '+49 151 23456789',
+                schadenart: 'Auffahrunfall',
+                anliegen: 'Bitte um Rückruf zur Schadensregulierung.',
+                plz: '50670',
+                einwilligung: { zugestimmt: true, policy_version: 'mcp-consent-2026-06' },
+              },
+            },
+          },
+        },
+        responses: {
+          '200': {
+            description: 'Rückruf vorgemerkt (Lead + Dispatch-Task angelegt).',
+            content: { 'application/json': { schema: { $ref: '#/components/schemas/RueckrufResponse' } } },
+          },
+          '400': { description: 'Validierung / Einwilligung fehlt (error: einwilligung_erforderlich).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+          '429': { description: 'Rate-Limit überschritten (10/min/IP).', content: { 'application/json': { schema: { $ref: '#/components/schemas/ApiError' } } } },
+        },
+      },
+    },
   },
   components: {
     schemas: {
@@ -375,6 +407,30 @@ const spec = {
           hinweis: { type: 'string' },
         },
         required: ['erkannte_muster', 'befunde', 'einschaetzung', 'naechster_schritt'],
+      },
+      RueckrufRequest: {
+        type: 'object',
+        properties: {
+          name: { type: 'string', description: 'Name des Kunden.' },
+          telefon: { type: 'string', description: 'Telefonnummer für den Rückruf.' },
+          schadenart: { type: 'string', description: 'Optional: Schadenart / Unfalltyp.' },
+          anliegen: { type: 'string', description: 'Optional: kurze Schilderung des Anliegens.' },
+          plz: { type: 'string', pattern: '^\\d{5}$', description: 'Optional: PLZ des Besichtigungsorts.' },
+          ort: { type: 'string', description: 'Optional: Stadt/Adresse, falls keine PLZ bekannt.' },
+          wunschzeit: { type: 'string', format: 'date-time', description: 'Optional: Wunschzeit (ISO-8601). Ohne → schnellstmöglich.' },
+          einwilligung: { $ref: '#/components/schemas/Einwilligung' },
+        },
+        required: ['name', 'telefon', 'einwilligung'],
+      },
+      RueckrufResponse: {
+        type: 'object',
+        properties: {
+          ok: { type: 'boolean' },
+          status: { type: 'string', description: 'rueckruf_angelegt / lead_angelegt.' },
+          wann: { type: 'string', description: 'Wunschzeit (ISO) oder "schnellstmöglich".' },
+          hinweis: { type: 'string' },
+        },
+        required: ['ok', 'status'],
       },
     },
   },
