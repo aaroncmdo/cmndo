@@ -24,6 +24,7 @@ import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher }
 import { track, reservierungConversion, rueckrufConversion } from '../_lib/tracking'
 import { DeadPinSlotStep } from './DeadPinSlotStep'
 import { WunschterminPicker } from './WunschterminPicker'
+import { resolveWerkstattOrt } from './werkstatt-ort'
 import type {
   DeadPinOeffentlich,
   OeffentlichesSvProfil,
@@ -96,6 +97,9 @@ export function FinderWizard({
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
+  // AAR-956 Task 10: Werkstatt-Frage — null=noch nicht beantwortet, 'nein'=eigene Adresse zeigen.
+  // 'ja' führt direkt zum Matching-Step (werkstattGeo als Ort), braucht keinen State.
+  const [werkstattAntwort, setWerkstattAntwort] = useState<'nein' | null>(null)
   // AAR-956 (Aaron 14.06.): Adress-Eingabe als Vollbild-Overlay auf Mobil (Dropdown-Platz).
   const [ortOverlay, setOrtOverlay] = useState(false)
   // Wunschtermin (Aaron 12.06.: „oben angeben") — Berlin-Wall-Clock aus <input datetime-local>,
@@ -144,6 +148,32 @@ export function FinderWizard({
     w.__gfShown = true
     track('gf_shown')
   }, [])
+
+  // AAR-956 Task 10: „Ja, in der Werkstatt" → werkstattGeo als Ort setzen und direkt zu Matching.
+  // Nutzt resolveWerkstattOrt('ja', werkstattGeo, null) + ruft denselben Downstream-Pfad wie
+  // ortGewaehlt() auf, nur ohne GooglePlace-Overhead (kein onSelect-Callback nötig).
+  function ortMitWerkstatt() {
+    if (!werkstattGeo) return
+    const o = resolveWerkstattOrt('ja', werkstattGeo, null)
+    if (!o) return
+    setOrt(o)
+    track('gf_ort_gewaehlt', { quelle: 'werkstatt' })
+    dispatchOrt(o.lat, o.lng)
+    setPhase('termin')
+    setMatching(null)
+    setAuswahl(null)
+    setSelectedSvId(null)
+    setSelectedDeadPinId(null)
+    setMatchLoading(true)
+    const req = ++matchReqRef.current
+    void ladeEmbedMatching({ lat: o.lat, lng: o.lng, wunschterminLokal: wunschterminLokal || null, forceFallback }).then((res) => {
+      if (matchReqRef.current !== req) return
+      setMatching(res)
+      setMatchLoading(false)
+      if (res.kind === 'partner') setSelectedSvId(res.svs[0]?.svId ?? null)
+      else setSelectedDeadPinId(res.deadPins[0]?.deadPinId ?? null)
+    })
+  }
 
   // Step 1 → 2: Ort gewählt → Karte informieren + token-loses Matching laden.
   function ortGewaehlt(p: PlaceResult) {
@@ -306,6 +336,32 @@ export function FinderWizard({
 
       {phase === 'ort' && (
         <div className="flex flex-col gap-4">
+          {/* AAR-956 Task 10: Werkstatt-Frage — nur wenn werkstattId+werkstattGeo gesetzt UND
+              noch keine Antwort gewählt. „Ja" → werkstattGeo als Besichtigungsort + direkt Matching.
+              „Nein" → setzt werkstattAntwort='nein', zeigt danach die normale Orts-Eingabe.
+              Ist werkstattId nicht gesetzt (embed-Pfad), rendert dieser Block NIE. */}
+          {werkstattId && werkstattGeo && werkstattAntwort === null && (
+            <div className="flex flex-col gap-3">
+              <h3 className="text-body font-bold text-claimondo-navy">
+                Steht das Fahrzeug noch bei {werkstattName ?? 'der Werkstatt'}?
+              </h3>
+              <p className="text-[0.8125rem] text-claimondo-shield/80">
+                Wählen Sie, wo wir das Fahrzeug begutachten sollen.
+              </p>
+              <div className="flex flex-col gap-2">
+                <Button variant="navy" fullWidth onClick={ortMitWerkstatt}>
+                  Ja, in der Werkstatt
+                </Button>
+                <Button variant="ghost" fullWidth onClick={() => setWerkstattAntwort('nein')}>
+                  Nein, woanders
+                </Button>
+              </div>
+            </div>
+          )}
+          {/* Normale Orts-Eingabe: immer sichtbar wenn kein werkstattId-Gate greift ODER
+              der Nutzer „Nein, woanders" gewählt hat. */}
+          {(!werkstattId || !werkstattGeo || werkstattAntwort === 'nein') && (
+            <>
           {/* Wunschtermin (optional) — oben, vor dem Ort (Aaron 12.06.). Beeinflusst das
               Slot-Ranking in Schritt 2; leer = nächste freie Termine. */}
           <div>
@@ -367,6 +423,8 @@ export function FinderWizard({
               </div>
             )}
           </div>
+            </>
+          )}
         </div>
       )}
 
