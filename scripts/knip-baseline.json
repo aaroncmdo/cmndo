@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-06-22T14:05:58.112Z",
+  "generatedAt": "2026-06-22T14:38:03.462Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 96,
+  "fileCount": 95,
   "files": [
     "src/app/admin/finance/actions.ts",
     "src/app/admin/sachverstaendige/actions.ts",
@@ -94,7 +94,6 @@
     "src/lib/mapbox/__stubs__/three-stub.ts",
     "src/lib/markNachrichtenGelesen.ts",
     "src/lib/ocr/zb1-fields.ts",
-    "src/lib/start-link/werkstatt-start-url.ts",
     "src/lib/tasks/index.ts",
     "src/lib/tasks/kundeTypen.ts",
     "src/lib/termine/loader.ts",
