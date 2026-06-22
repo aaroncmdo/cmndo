@@ -633,15 +633,17 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     }).eq('id', claim.lead_id as string)
   }
 
-  // Fall: Stammdaten.
-  // CMM-44 SP-B PR2b: vollmacht_signiert_am lebt auf claims (SSoT) — aus dem
-  // faelle-Write entfernt, wird unten im claims-Write gesetzt.
-  await admin.from('faelle').update({
-    kennzeichen: 'K-AS 2014',
-    fahrzeug_hersteller: 'BMW',
-    fahrzeug_modell: '5er',
-    status: 'regulierung',
-  }).eq('id', fallId)
+  // Fall: Smoke-Stammdaten. CMM-49 faelle-DROP: diese Felder sind reader-frei (Reader lesen
+  // vehicles.kennzeichen/hersteller/modell + operative_status); der faelle-Write existiert nur
+  // fuer den Smoke-Reset -> DROP-tolerant gewrappt (no-op nach DROP, wie core.ts:57).
+  try {
+    await admin.from('faelle').update({
+      kennzeichen: 'K-AS 2014',
+      fahrzeug_hersteller: 'BMW',
+      fahrzeug_modell: '5er',
+      status: 'regulierung',
+    }).eq('id', fallId)
+  } catch { /* faelle ggf. gedroppt — Smoke-Reset */ }
 
   // Claim: LexDrive gewaehlt, Phase weiter Richtung VS-Kontakt.
   // Cluster F+G PR-2b: OCR-Werte landen nicht mehr direkt auf claims, sondern
