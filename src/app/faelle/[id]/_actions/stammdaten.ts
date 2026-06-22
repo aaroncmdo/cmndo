@@ -322,6 +322,46 @@ export async function updateFallField(
     return { success: true }
   }
 
+  // CMM-49 Residual-Kanonisierung: halter_* leben kanonisch auf der ist_halter-claim_party ->
+  // personen. v_claim_full.halter_* sourct genau diese Person (halter_p-LATERAL: ist_halter=true,
+  // reihenfolge/created_at). Der Inline-Edit schrieb bisher faelle.halter_* (reader-frei -> der Edit
+  // versickerte = gebrochenes Feld) -> jetzt auf personen routen. Konsistent mit ocr-trigger (#3047,
+  // das halter_geburtsdatum bereits dorthin schreibt). Admin-Client: canEditField() hat oben autorisiert.
+  const HALTER_PERSON_COL: Record<string, string> = {
+    halter_vorname: 'vorname',
+    halter_nachname: 'nachname',
+    halter_strasse: 'adresse_strasse',
+    halter_plz: 'adresse_plz',
+    halter_stadt: 'adresse_ort',
+    halter_email: 'email',
+    halter_telefon: 'telefon',
+    halter_geburtsdatum: 'geburtsdatum',
+  }
+  const halterPersonCol = HALTER_PERSON_COL[field]
+  if (halterPersonCol) {
+    const admin = createAdminClient()
+    const { data: party } = await admin
+      .from('claim_parties')
+      .select('person_id')
+      .eq('claim_id', gateClaimId)
+      .eq('ist_halter', true)
+      .order('reihenfolge', { ascending: true })
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const personId = (party?.person_id as string | null) ?? null
+    if (!personId) {
+      return {
+        success: false,
+        error: 'Kein Halter mit verknuepfter Person — Feld kann nicht gesetzt werden.',
+      }
+    }
+    const { error: pErr } = await admin.from('personen').update({ [halterPersonCol]: normalized }).eq('id', personId)
+    if (pErr) return { success: false, error: pErr.message }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   // CMM-49 Tier-2: gegner_versicherungsnummer/gegner_schadennummer leben in der
   // verursacher-claim_party (versicherungsnummer/versicherungs_aktenzeichen, SSoT).
   // v_claim_full sourct sie von dort (gp-LATERAL, #3004); ein Inline-Edit muss die
