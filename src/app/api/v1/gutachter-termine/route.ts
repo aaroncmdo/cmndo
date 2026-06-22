@@ -70,15 +70,22 @@ export async function GET(req: Request) {
   }
 
   const url = new URL(req.url)
-  const plz = url.searchParams.get('plz')
+  const plzRaw = url.searchParams.get('plz')?.trim() || null
+  const ortRaw = url.searchParams.get('ort')?.trim() || null
   const wunschterminRaw = url.searchParams.get('wunschtermin')
 
-  if (!plz || !/^\d{5}$/.test(plz)) {
+  // Standort flexibel: 5-stellige PLZ ODER Freitext-Ort (Stadt/Adresse). Der Mapbox-
+  // Geocoder nimmt beides — so muss der Kunde die PLZ nicht kennen ("Köln" reicht).
+  const plz = plzRaw && /^\d{5}$/.test(plzRaw) ? plzRaw : null
+  const ort = !plz && ortRaw && ortRaw.length >= 2 && ortRaw.length <= 120 ? ortRaw : null
+  if (!plz && !ort) {
     return NextResponse.json(
-      { error: 'plz required (5-digit German postal code)' },
+      { error: 'plz (5-stellige PLZ) oder ort (Stadt/Adresse) erforderlich' },
       { status: 400, headers: CORS },
     )
   }
+  const geocodeQuery = plz ?? `${ort}, Deutschland`
+
   // Wunschtermin optional; nur ein valides ISO-Datum durchreichen (steuert das
   // Slot-Ranking, kein Hard-Filter), sonst ignorieren.
   let wunschterminIso: string | null = null
@@ -87,7 +94,7 @@ export async function GET(req: Request) {
     if (!Number.isNaN(d.getTime())) wunschterminIso = d.toISOString()
   }
 
-  const cacheKey = `${plz}|${wunschterminIso ?? ''}`
+  const cacheKey = `${geocodeQuery}|${wunschterminIso ?? ''}`
   const now = Date.now()
   const cached = resultCache.get(cacheKey)
   if (cached && now - cached.ts < RESULT_CACHE_TTL_MS) {
@@ -96,9 +103,12 @@ export async function GET(req: Request) {
     })
   }
 
-  const center = await geocodeCached(plz)
+  const center = await geocodeCached(geocodeQuery)
   if (!center) {
-    return NextResponse.json({ error: 'PLZ not found' }, { status: 404, headers: CORS })
+    return NextResponse.json(
+      { error: plz ? 'PLZ not found' : 'Ort nicht gefunden' },
+      { status: 404, headers: CORS },
+    )
   }
 
   const profile = await planeTerminOeffentlich({
@@ -123,11 +133,15 @@ export async function GET(req: Request) {
 
   const payload = {
     plz,
+    ort,
+    standort: center.formatted,
     wunschtermin: wunschterminIso,
     center: { lat: center.lat, lng: center.lng },
     anzahl_gutachter: gutachter.length,
     gutachter,
-    interaktive_karte_url: `${SITE_URL}/gutachter-finden?plz=${plz}`,
+    interaktive_karte_url: plz
+      ? `${SITE_URL}/gutachter-finden?plz=${plz}`
+      : `${SITE_URL}/gutachter-finden?stadt=${encodeURIComponent(ort ?? '')}`,
     buchungs_telefon: PHONE_DISPLAY,
     buchungs_hinweis:
       'Termin buchen aktuell über die interaktive Karte (interaktive_karte_url) oder telefonischen Rückruf (buchungs_telefon). Die gutachter[].id + ein termin.start sind das Buchungs-Handle für den späteren Schaden-melden-Schritt.',
