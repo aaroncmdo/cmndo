@@ -884,11 +884,9 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       }
       if (cpFields.zahlungseingang_am != null) cpFields.status = 'erhalten'
 
-      if (Object.keys(fuFaelle).length > 0) {
-        // CMM-49 faelle-DROP-tolerant: bare await ignoriert den returned error -> nach DROP TABLE
-        // faelle (42P01) kein Crash. fuFaelle-Residual ist reader-frei (Display liest Entities/claims).
-        await db.from('faelle').update(fuFaelle).eq('id', input.fallId)
-      }
+      // CMM-49 faelle-DROP: faelle ist gedroppt — der fuFaelle-Residual-Write entfaellt.
+      // (fuFaelle wird oben weiterhin fuer den claim_payments-Peel gelesen; sein Rest war
+      // schon vor dem DROP reader-frei.)
       if (claimIdForUpdates && Object.keys(fuClaims).length > 0) {
         await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
       }

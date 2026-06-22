@@ -133,19 +133,34 @@ export async function POST(req: NextRequest) {
     // leben jetzt auf claims (SSoT) — ebenfalls über den claims-Embed gelesen.
     // CMM-44 SP-B PR2b: sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am,
     // abtretung_pdf leben auf claims (SSoT) — über claims-Embed gelesen.
-    const { data: fall, error: fallSelErr } = await svc
-      .from('faelle')
-      .select(
-        'id, claim_id, besichtigungsort_adresse, claims:claim_id(kundenbetreuer_id, fahrerflucht, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf)',
-      )
-      .eq('id', fallId)
+    // CMM-49 faelle-DROP: Verify claim-nativ (faelle gedroppt). claim_id via faelle_claim_bridge;
+    // die fruehere faelle-Embed-Spalten sind claims-nativ (kundenbetreuer_*/sa_*/abtretung_*/
+    // fahrerflucht) bzw. via v_claim_full (besichtigungsort_adresse). fall_id == claim_id (Genesis).
+    const { data: bridge } = await svc
+      .from('faelle_claim_bridge')
+      .select('claim_id')
+      .eq('fall_id', fallId)
       .maybeSingle()
-    if (fallSelErr) {
-      stamp(`fall verify select ERR: ${fallSelErr.message}`)
+    claimId = (bridge?.claim_id as string | null) ?? null
+    let fallClaimEmbed: Record<string, unknown> | null = null
+    let fallBesichtigungsort: string | null = null
+    if (claimId) {
+      const { data: claimFields, error: claimSelErr } = await svc
+        .from('claims')
+        .select('kundenbetreuer_id, fahrerflucht, kundenbetreuer_fallback_flag, kundenbetreuer_zugewiesen_am, sa_unterschrieben, sa_unterschrieben_am, abtretung_signiert_am, abtretung_pdf, fall_typ, schadenart')
+        .eq('id', claimId)
+        .maybeSingle()
+      if (claimSelErr) stamp(`claim verify select ERR: ${claimSelErr.message}`)
+      fallClaimEmbed = (claimFields as Record<string, unknown> | null) ?? null
+      claimSnapshot = fallClaimEmbed
+      const { data: vcf } = await svc
+        .from('v_claim_full')
+        .select('besichtigungsort_adresse')
+        .eq('id', claimId)
+        .maybeSingle()
+      fallBesichtigungsort = (vcf?.besichtigungsort_adresse as string | null) ?? null
     }
-    fallSnapshot = (fall as Record<string, unknown> | null) ?? null
-    claimId = (fall?.claim_id as string | null) ?? null
-    const fallClaimEmbed = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    fallSnapshot = fallClaimEmbed
     const fallKbId = (fallClaimEmbed?.kundenbetreuer_id as string | null) ?? null
     const fallFahrerflucht = (fallClaimEmbed?.fahrerflucht as boolean | null) ?? null
     const fallKbZugewiesenAm = (fallClaimEmbed?.kundenbetreuer_zugewiesen_am as string | null) ?? null
@@ -153,17 +168,9 @@ export async function POST(req: NextRequest) {
     const fallSaUnterschriebenAm = (fallClaimEmbed?.sa_unterschrieben_am as string | null) ?? null
     const fallAbtretungSigniertAm = (fallClaimEmbed?.abtretung_signiert_am as string | null) ?? null
     const fallAbtretungPdf = (fallClaimEmbed?.abtretung_pdf as string | null) ?? null
-    if (claimId) {
-      const { data: claim } = await svc
-        .from('claims')
-        .select('id, kundenbetreuer_id, fall_typ, schadenart')
-        .eq('id', claimId)
-        .maybeSingle()
-      claimSnapshot = (claim as Record<string, unknown> | null) ?? null
-    }
 
     checks = {
-      fall_existiert: !!fall,
+      fall_existiert: !!fallClaimEmbed,
       claim_id_gesetzt: !!claimId,
       claim_existiert: !!claimSnapshot,
       kb_id_gesetzt: !!fallKbId,
@@ -178,7 +185,7 @@ export async function POST(req: NextRequest) {
       fahrerflucht_uebernommen: fallFahrerflucht === false,
       // besichtigungsort-Fallback auf unfallort (Lead hatte `unfallort='Berlin'`,
       // keine besichtigungsort_adresse → buildFallInsertFromLead-Fallback greift):
-      besichtigungsort_fallback: fall?.besichtigungsort_adresse === 'Berlin',
+      besichtigungsort_fallback: fallBesichtigungsort === 'Berlin',
     }
   } catch (e) {
     convertErr = e instanceof Error ? e.message : String(e)
@@ -186,12 +193,10 @@ export async function POST(req: NextRequest) {
     if (e instanceof Error && e.stack) console.error('[cmm48-smoke stack]', e.stack)
   } finally {
     stamp('cleanup start')
-    // 7. Cleanup — Reihenfolge wichtig wegen FK-Constraints
+    // 7. Cleanup — claim.id == fallId (Genesis). CMM-49 faelle-DROP: faelle ist gedroppt;
+    // der Claim-Delete raeumt die faelle_claim_bridge via ON DELETE CASCADE mit ab.
     if (fallId) {
-      await svc.from('faelle').delete().eq('id', fallId)
-    }
-    if (claimId) {
-      await svc.from('claims').delete().eq('id', claimId)
+      await svc.from('claims').delete().eq('id', fallId)
     }
     await svc.from('leads').delete().eq('id', leadId)
     stamp('cleanup done')
