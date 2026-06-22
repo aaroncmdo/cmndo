@@ -3,7 +3,6 @@
 // gelten Sonderregeln (siehe Notion-Taxonomie §5.9/§5.10/§5.11).
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { EVENT_MATRIX } from './channel-matrix'
 import type {
   Channel,
@@ -21,19 +20,16 @@ type FallParticipants = {
   adminUserIds: string[]
 }
 
-async function loadFallParticipants(fallId: string): Promise<FallParticipants> {
+async function loadClaimParticipants(claimId: string): Promise<FallParticipants> {
   const supabase = createAdminClient()
 
-  // CMM-49: kunde (geschaedigter_user_id, 0-diff) + sv_id (0-diff) + kundenbetreuer_id
-  // (claims-native) direkt aus claims via resolveClaimId.
-  const foClaimId = await resolveClaimId(supabase, fallId)
-  const { data: fallClaim } = foClaimId
-    ? await supabase
-        .from('claims')
-        .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
-        .eq('id', foClaimId)
-        .maybeSingle()
-    : { data: null }
+  // CMM-49 claim-native: claim_id ist der kanonische Event-Key -> claims direkt lesen (kein
+  // resolveClaimId-fall_id-Umweg mehr; computeRecipients gatet jetzt auf event.claim_id).
+  const { data: fallClaim } = await supabase
+    .from('claims')
+    .select('geschaedigter_user_id, sv_id, kundenbetreuer_id')
+    .eq('id', claimId)
+    .maybeSingle()
 
   let svUserId: string | null = null
   if (fallClaim?.sv_id) {
@@ -45,11 +41,12 @@ async function loadFallParticipants(fallId: string): Promise<FallParticipants> {
     svUserId = sv?.profile_id ?? null
   }
 
-  // Makler mit aktivem Consent auf diesem Fall.
+  // Makler mit aktivem Consent auf diesem Claim. makler_fall_consent ist claim-native gekeyt
+  // (claim_id backfilled) -> direkt auf claim_id matchen statt ueber fall_id.
   const { data: consents } = await supabase
     .from('makler_fall_consent')
     .select('makler:makler(user_id)')
-    .eq('fall_id', fallId)
+    .eq('claim_id', claimId)
     .is('widerrufen_am', null)
 
   const maklerUserIds = (consents ?? [])
@@ -129,8 +126,8 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
       addRecipient(map, empfaengerUserId, empfaengerRolle, channels)
     }
     // Admin-in_app (falls konfiguriert).
-    if (event.fall_id && config.channels.admin?.length) {
-      const p = await loadFallParticipants(event.fall_id)
+    if (event.claim_id && config.channels.admin?.length) {
+      const p = await loadClaimParticipants(event.claim_id)
       for (const adminId of p.adminUserIds) {
         addRecipient(map, adminId, 'admin', config.channels.admin)
       }
@@ -165,12 +162,15 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
   }
 
   // ── Standard-Fan-Out: alle Fall-Beteiligten laut Matrix ─────────────────
-  if (!event.fall_id) {
-    console.warn('[fan-out] event has no fall_id — skipping default fan-out', event.id)
+  // CMM-49 claim-native: gatet auf claim_id (kanonischer Key). emit setzt claim_id immer mit
+  // (resolveClaimId), die Invariante „jeder Fall hat einen Claim" haelt -> aequivalent zum alten
+  // fall_id-Gate, aber robust gegen fall_id=NULL (genau der P0-Dunkel-Bug 02.-20.06.).
+  if (!event.claim_id) {
+    console.warn('[fan-out] event has no claim_id — skipping default fan-out', event.id)
     return []
   }
 
-  const p = await loadFallParticipants(event.fall_id)
+  const p = await loadClaimParticipants(event.claim_id)
 
   if (p.kundeUserId && config.channels.kunde?.length) {
     addRecipient(map, p.kundeUserId, 'kunde', config.channels.kunde)
