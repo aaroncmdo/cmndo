@@ -13,6 +13,7 @@ import {
   ReceiptIcon,
   QrCodeIcon,
   SettingsIcon,
+  ShieldCheckIcon,
   LogOutIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
@@ -40,6 +41,7 @@ const MAKLER_NAV_ITEMS: PortalNavItem[] = [
   { href: '/makler/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
   { href: '/makler/promo', label: 'Promo & QR', icon: QrCodeIcon },
   { href: '/makler/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
+  { href: '/makler/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
 ]
 
 const MAKLER_MOBILE_ITEMS = MAKLER_NAV_ITEMS.slice(0, 4)

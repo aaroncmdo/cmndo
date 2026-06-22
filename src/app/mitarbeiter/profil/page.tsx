@@ -5,6 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import MitarbeiterProfilClient from './MitarbeiterProfilClient'
+import { KontoSicherheitPanel } from '@/components/auth/KontoSicherheitPanel'
 
 export default async function MitarbeiterProfilPage() {
   const supabase = await createClient()
@@ -22,15 +23,20 @@ export default async function MitarbeiterProfilPage() {
   }
 
   return (
-    <MitarbeiterProfilClient
-      email={user.email ?? ''}
-      vorname={profile.vorname ?? ''}
-      nachname={profile.nachname ?? ''}
-      telefon={profile.telefon ?? null}
-      rolle={profile.rolle}
-      avatarUrl={profile.avatar_url ?? null}
-      anzeigename={profile.anzeigename ?? ''}
-      profilbeschreibung={profile.profilbeschreibung ?? ''}
-    />
+    <>
+      <MitarbeiterProfilClient
+        email={user.email ?? ''}
+        vorname={profile.vorname ?? ''}
+        nachname={profile.nachname ?? ''}
+        telefon={profile.telefon ?? null}
+        rolle={profile.rolle}
+        avatarUrl={profile.avatar_url ?? null}
+        anzeigename={profile.anzeigename ?? ''}
+        profilbeschreibung={profile.profilbeschreibung ?? ''}
+      />
+      <div className="w-full px-4 pb-6 max-w-xl mx-auto">
+        <KontoSicherheitPanel />
+      </div>
+    </>
   )
 }
