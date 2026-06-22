@@ -11,26 +11,14 @@ export async function GET(req: NextRequest) {
 
   const pattern = `%${q}%`
 
-  // CMM-44 SP-I2: mandatsnummer lebt auf kanzlei_faelle (1:1 via fall_id) — als Embed fuer
-  // die Anzeige. Der .or('mandatsnummer.ilike')-Filter unten greift weiter auf faelle.mandatsnummer
-  // (additiv vorhanden bis Phase-6); fuer neue Faelle ist die Mandat-Textsuche degradiert (SF-ID,
-  // selten Volltext-gesucht) — Aktennummer-Suche laeuft ueber claims.claim_nummer.
-  // CMM-49 #2688-Fix: kanzlei_faelle.fall_id zeigt jetzt auf bridge -> der direkte
-  // faelle.kanzlei_faelle-Embed brach (PGRST200 -> leere Fall-Suche). Nested in den
-  // claims-Embed gezogen (kanzlei_faelle.claim_id->claims intakt). Der .or(mandatsnummer)-
-  // Filter unten bleibt auf faelle.mandatsnummer (additiv bis Phase-6).
-  const FAELLE_SELECT =
-    'id, status, kennzeichen, lead_id, claims:claim_id(claim_nummer, schadenort_ort, vehicle:vehicle_id(kennzeichen_aktuell), kanzlei_faelle(mandatsnummer))'
-
-  const [faelleRes, leadsRes, svRes, ortClaimsRes, nrClaimsRes, vehKzRes] = await Promise.all([
-    // CMM-44 SP-A2/A3 (Cluster 1): schadenort_ort und claim_nummer leben auf claims
-    // (SSoT) — als Embed fuer die Anzeige geladen. PostgREST .or() kann nicht ueber
-    // Embeds filtern; Schadenort- und Aktennummer-Suche laufen separat (unten).
-    supabase
-      .from('faelle')
-      .select(FAELLE_SELECT)
-      .or(`mandatsnummer.ilike.${pattern},kennzeichen.ilike.${pattern}`)
-      .limit(5),
+  // CMM-49 faelle-DROP: die Fall-Suche ist jetzt komplett claims-nativ (faelle-frei). Match-Quellen
+  // sind alle kanonisch — claims.claim_nummer / claims.schadenort_ort, vehicles.kennzeichen_aktuell,
+  // kanzlei_faelle.mandatsnummer — und liefern claim_ids. Die Anzeige-Daten (inkl. fall_id via Bridge
+  // in der View, kennzeichen aus vehicles, status aus operative_status) kommen aus v_claim_full, das
+  // RLS-gated ist (nur Claims des Users surfacen) und damit die Sichtbarkeits-Grenze der frueheren
+  // faelle-RLS spiegelt. Die alten faelle.{mandatsnummer,kennzeichen,status}-Reads (Legacy/reader-frei,
+  // fuer neue Faelle eh null) entfallen — die Suche wird dadurch fuer neue Faelle eher praeziser.
+  const [leadsRes, svRes, nrClaimsRes, ortClaimsRes, vehKzRes, mandatKfRes] = await Promise.all([
     supabase
       .from('leads')
       .select('id, vorname, nachname, telefon, email, schadens_fall_typ, qualifizierungs_phase')
@@ -40,54 +28,48 @@ export async function GET(req: NextRequest) {
       .from('sachverstaendige')
       .select('id, standort_adresse, gutachter_typ, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email)')
       .limit(5),
-    // CMM-44 SP-A2: Schadenort-Suche via separatem claims-Query (ilike auf
-    // schadenort_ort → claim-IDs), danach faelle.in('claim_id', …).
-    supabase
-      .from('claims')
-      .select('id')
-      .ilike('schadenort_ort', pattern)
-      .limit(5),
-    // CMM-44 SP-A3: Aktennummer-Suche analog — ilike auf claims.claim_nummer.
-    supabase
-      .from('claims')
-      .select('id')
-      .ilike('claim_nummer', pattern)
-      .limit(5),
-    // CMM-50: Kennzeichen lebt auf vehicles (faelle.kennzeichen = Legacy, fuer neue Faelle null).
-    // ilike auf vehicles.kennzeichen_aktuell -> vehicle_ids; die claims.in(vehicle_id)-Query unten
-    // ist der RLS-Gate (nur Claims des Users). Alte Faelle weiter via faelle.kennzeichen (.or oben).
-    supabase
-      .from('vehicles')
-      .select('id')
-      .ilike('kennzeichen_aktuell', pattern)
-      .limit(10),
+    // Aktennummer (claims.claim_nummer) + Schadenort (claims.schadenort_ort) — schon claims-nativ.
+    supabase.from('claims').select('id').ilike('claim_nummer', pattern).limit(5),
+    supabase.from('claims').select('id').ilike('schadenort_ort', pattern).limit(5),
+    // Kennzeichen lebt auf vehicles (kennzeichen_aktuell); die claims.in(vehicle_id)-Query unten gatet RLS.
+    supabase.from('vehicles').select('id').ilike('kennzeichen_aktuell', pattern).limit(10),
+    // Mandatsnummer lebt auf kanzlei_faelle (1:1 pro Claim) — ersetzt die alte faelle.mandatsnummer-Suche.
+    supabase.from('kanzlei_faelle').select('claim_id').ilike('mandatsnummer', pattern).limit(5),
   ])
 
-  // CMM-50: Kennzeichen-Treffer aus vehicles -> claims (RLS-gegatet) -> claim_ids dazu mergen.
+  // Kennzeichen-Treffer aus vehicles -> claims (RLS-Gate: nur Claims des Users).
   const vehicleIds = (vehKzRes.data ?? []).map(v => v.id as string)
   const { data: vehClaims } = vehicleIds.length
     ? await supabase.from('claims').select('id').in('vehicle_id', vehicleIds).limit(10)
     : { data: [] as { id: string }[] }
+
   const matchClaimIds = Array.from(new Set([
-    ...(ortClaimsRes.data ?? []).map(c => c.id as string),
     ...(nrClaimsRes.data ?? []).map(c => c.id as string),
+    ...(ortClaimsRes.data ?? []).map(c => c.id as string),
     ...(vehClaims ?? []).map(c => c.id as string),
+    ...(mandatKfRes.data ?? []).map(k => k.claim_id as string | null).filter((x): x is string => !!x),
   ]))
-  const { data: claimFaelle } = matchClaimIds.length
-    ? await supabase.from('faelle').select(FAELLE_SELECT).in('claim_id', matchClaimIds).limit(10)
-    : { data: [] as NonNullable<typeof faelleRes.data> }
 
-  // Fall-Treffer aus Nummer/Kennzeichen + Schadenort + Aktennummer mergen + dedupen.
-  const faelleSeen = new Set<string>()
-  const faelleMerged: NonNullable<typeof faelleRes.data> = []
-  for (const f of [...(faelleRes.data ?? []), ...(claimFaelle ?? [])]) {
-    if (faelleSeen.has(f.id as string)) continue
-    faelleSeen.add(f.id as string)
-    faelleMerged.push(f)
-    if (faelleMerged.length >= 5) break
-  }
+  // Anzeige-Daten aus v_claim_full (RLS-gated; fall_id kommt via Bridge aus der View).
+  const { data: claimRows } = matchClaimIds.length
+    ? await supabase
+        .from('v_claim_full')
+        .select('id, fall_id, claim_nummer, kennzeichen, schadens_ort, mandatsnummer, fall_status')
+        .in('id', matchClaimIds)
+        .limit(5)
+    : {
+        data: [] as Array<{
+          id: string
+          fall_id: string | null
+          claim_nummer: string | null
+          kennzeichen: string | null
+          schadens_ort: string | null
+          mandatsnummer: string | null
+          fall_status: string | null
+        }>,
+      }
 
-  // Filter SV client-side (join doesn't support ilike on joined table easily)
+  // SV client-seitig filtern (der join unterstuetzt kein ilike auf der joined Tabelle).
   const svFiltered = (svRes.data ?? []).filter(sv => {
     const p = (Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles) as { vorname: string | null; nachname: string | null; email: string | null } | null
     const name = [p?.vorname, p?.nachname].filter(Boolean).join(' ').toLowerCase()
@@ -96,24 +78,15 @@ export async function GET(req: NextRequest) {
   }).slice(0, 5)
 
   return NextResponse.json({
-    faelle: faelleMerged.map(f => {
-      const claim = (Array.isArray(f.claims) ? f.claims[0] : f.claims) as
-        | { claim_nummer: string | null; schadenort_ort: string | null; vehicle: { kennzeichen_aktuell: string | null } | Array<{ kennzeichen_aktuell: string | null }> | null; kanzlei_faelle: { mandatsnummer: string | null } | Array<{ mandatsnummer: string | null }> | null }
-        | null
-      // CMM-49 #2688-Fix: kanzlei_faelle jetzt unter claims genested (s. FAELLE_SELECT).
-      const kf = (Array.isArray(claim?.kanzlei_faelle)
-        ? (claim?.kanzlei_faelle as Array<{ mandatsnummer: string | null }>)[0]
-        : (claim?.kanzlei_faelle as { mandatsnummer: string | null } | null)) ?? null
-      // CMM-50: Kennzeichen aus vehicles (claims.vehicle_id -> vehicles), Fallback auf das
-      // Legacy-faelle.kennzeichen (alte Faelle ohne vehicles-Row).
-      const claimVeh = (Array.isArray(claim?.vehicle) ? claim?.vehicle[0] : claim?.vehicle) as { kennzeichen_aktuell: string | null } | null
-      const kennzeichen = (f.kennzeichen as string | null) ?? claimVeh?.kennzeichen_aktuell ?? null
+    faelle: (claimRows ?? []).map(c => {
+      // id = fall_id (Navigation auf die Fallakte wie bisher); Fallback claim_id fuer die wenigen
+      // claims-nativen Faelle ohne Bridge-Row (Genesis-eingefroren: 2 von 84).
+      const navId = (c.fall_id as string | null) ?? (c.id as string)
       return {
-        id: f.id,
-        // CMM-44 SP-I2 PR2 Label=beides: claim_nummer als primäres Label, mandatsnummer (kanzlei_faelle) als Sekundär-Detail.
-        label: claim?.claim_nummer ?? f.id.slice(0, 8),
-        sub: [kf?.mandatsnummer, kennzeichen, claim?.schadenort_ort].filter(Boolean).join(' · '),
-        status: f.status,
+        id: navId,
+        label: (c.claim_nummer as string | null) ?? navId.slice(0, 8),
+        sub: [c.mandatsnummer, c.kennzeichen, c.schadens_ort].filter(Boolean).join(' · '),
+        status: c.fall_status,
       }
     }),
     leads: (leadsRes.data ?? []).map(l => ({
