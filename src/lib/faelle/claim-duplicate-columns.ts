@@ -135,6 +135,13 @@ export const CLAIM_OWNED_DUPLICATE_COLUMNS = new Set<string>([
   'lead_preis_netto',
   'lead_preis_typ',
   'lead_preis_berechnet_am',
+  // CMM-49 Residual-Kanonisierung 22.06.: 2 uebrige faelle<->claims-Duplikat-Spalten, die der
+  // CMM-48-Dup-Migration entgangen sind. v_claim_full liest c.hat_vorschaeden (claims) -> der
+  // updateFallField-Write fiel reader-frei auf faelle (gebrochenes Vorschaeden-Editing).
+  // vorschaeden_beschreibung ist ebenfalls claims+faelle-Duplikat. Aufnahme routet beide via
+  // splitOrKeepFaelleUpdate auf claims (SSoT); die faelle-Spalten werden reader-frei.
+  'hat_vorschaeden',
+  'vorschaeden_beschreibung',
 ])
 
 /**
