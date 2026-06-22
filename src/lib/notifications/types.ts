@@ -220,6 +220,9 @@ export type NotificationEvent = {
   event_type: EventType
   payload: Record<string, unknown>
   fall_id: string | null
+  // CMM-49: kanonischer Event-Key. fan-out gatet hierauf (claim-native); fall_id bleibt fuer
+  // noch nicht migrierte Konsumenten (Queries/Debug) + den rueckruf-Trigger.
+  claim_id: string | null
   triggered_by_user_id: string | null
   created_at: string
   processed_at: string | null
