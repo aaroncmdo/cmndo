@@ -333,6 +333,16 @@ export async function updateFallField(
   const GEGNER_PARTY_COL: Record<string, string> = {
     gegner_versicherungsnummer: 'versicherungsnummer',
     gegner_schadennummer: 'versicherungs_aktenzeichen',
+    // CMM-49 Residual-Kanonisierung: gegner_kennzeichen / gegner_versicherung (Freitext) /
+    // gegner_fahrzeugtyp leben kanonisch auf der verursacher-Party. v_claim_full liest:
+    //   gegner_kennzeichen  = COALESCE(gveh.kennzeichen_aktuell, gp.kennzeichen)
+    //   gegner_versicherung = COALESCE(gv.name, gp.versicherung_klartext)   [gv via claims.gegner_versicherung_id]
+    //   gegner_fahrzeugtyp  = COALESCE(gveh.bauart, gp.fahrzeugtyp_klartext)
+    // -> die Freitext-Edits auf die Party-Spalten routen (sonst versickern sie reader-frei auf
+    // faelle.gegner_*). gegner_versicherung_id (FK auf versicherungen) bleibt claims-owned (CLUSTER-Map).
+    gegner_kennzeichen: 'kennzeichen',
+    gegner_versicherung: 'versicherung_klartext',
+    gegner_fahrzeugtyp: 'fahrzeugtyp_klartext',
   }
   const gegnerCol = GEGNER_PARTY_COL[field]
   if (gegnerCol) {
@@ -356,11 +366,14 @@ export async function updateFallField(
     } else if (normalized != null) {
       // Option A: keine verursacher-Party vorhanden -> on-demand anlegen (kanonisches Home).
       // Minimal-Insert (claim_id/rolle/quelle Pflicht, Rest default); reihenfolge=2 wie convert.
+      // quelle='manuell_kb': KB/Admin-Edit in der Fallakte. 'stammdaten_edit' war KEIN gueltiger
+      // Wert (claim_parties_quelle_check kennt nur lead_konvertierung/manuell_kb/sv_besichtigung/
+      // airdrop/kunde_self/backfill_*) -> der on-demand-Insert waere am Constraint gecrasht.
       const { error: insErr } = await admin.from('claim_parties').insert({
         claim_id: gateClaimId,
         rolle: 'verursacher',
         reihenfolge: 2,
-        quelle: 'stammdaten_edit',
+        quelle: 'manuell_kb',
         [gegnerCol]: normalized,
       })
       if (insErr) return { success: false, error: insErr.message }
