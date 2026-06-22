@@ -14,6 +14,7 @@ import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-altern
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
 import { planeTermin } from '@/lib/termine/engine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -103,20 +104,52 @@ export async function ladeMatchingFlow(
   const { data: lead } = await admin
     .from('leads')
     .select(
-      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, wunschtermin, disqualifiziert',
+      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, wunschtermin, disqualifiziert',
     )
     .eq('id', leadId)
     .maybeSingle()
   if (!lead) return { ok: false, error: 'Vorgang nicht gefunden.' }
 
-  const lat =
+  let lat =
     (lead.besichtigungsort_lat as number | null) ??
     (lead.fahrzeug_standort_lat as number | null) ??
     null
-  const lng =
+  let lng =
     (lead.besichtigungsort_lng as number | null) ??
     (lead.fahrzeug_standort_lng as number | null) ??
     null
+
+  // AAR-956: Text-Adresse vorhanden, aber keine Coords (z.B. Dispatcher-/Import-Lead oder Upstream
+  // ohne Geocode) → EINMAL server-seitig geocoden + auf besichtigungsort_* persistieren (Cache, kein
+  // Re-Geocode bei jedem Flow-Load, kanonisch fuer die Buchung). So muss der Kunde eine bereits
+  // bekannte Adresse nicht neu eintippen, bevor der Resolver auf ort_abfragen faellt. Non-blocking:
+  // Geocode-Fail (kein Mapbox-Token / kein Treffer) → lat/lng bleiben null → ort_abfragen wie bisher.
+  if (lat == null || lng == null) {
+    const adresse =
+      (lead.besichtigungsort_adresse as string | null) ??
+      (lead.fahrzeug_standort_adresse as string | null) ??
+      null
+    if (adresse) {
+      const geo = await geocodeAdresse(adresse)
+      if (geo) {
+        lat = geo.lat
+        lng = geo.lng
+        try {
+          await admin
+            .from('leads')
+            .update({
+              besichtigungsort_adresse: adresse,
+              besichtigungsort_lat: geo.lat,
+              besichtigungsort_lng: geo.lng,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', leadId)
+        } catch (err) {
+          console.error('[ladeMatchingFlow] Geocode-Persist fehlgeschlagen (nicht kritisch):', err)
+        }
+      }
+    }
+  }
 
   // Picked-SV liegt auf der gfa (leads hat keine SV-Spalte) — Back-Reference.
   const { data: gfa } = await admin
