@@ -106,7 +106,6 @@ async function deleteAllSmoke(db: Db): Promise<number> {
 
 async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
   const idx = SCENARIOS.findIndex((s) => s.key === scenarioKey)
-  const nr = String(idx + 1).padStart(2, '0')
 
   // 1) Lead — abhaengig vom Erfassungsstand
   const sceneIsErfassungVollmachtOffen = scenarioKey === 'erfassung-vollmacht-offen'
@@ -161,35 +160,12 @@ async function seedOne(db: Db, scenarioKey: string): Promise<SeededRow> {
   // CMM-44 SP-A3: claim_nummer ist die kanonische Aktennummer (DB-Trigger).
   const fallNummer = (claim.claim_nummer as string | null) ?? null
 
-  // 3) Fall — wenn nicht reine Erfassung-vor-Abschluss-SA
+  // 3) Fall — wenn nicht reine Erfassung-vor-Abschluss-SA.
+  // CMM-49 faelle-DROP: keine faelle-Row mehr — die faelle_claim_bridge entsteht via
+  // trg_sync_claims_to_bridge beim claims-INSERT oben (fall_id == claim_id). Also fallId == claimId.
   let fallId = ''
   if (!sceneNeedsLeadOnly) {
-    const { data: fall, error: fallErr } = await db.from('faelle').insert({
-      // CMM-49 Step 3 (faelle-Drop-Vorbereitung): faelle.id == claim_id (Identity).
-      // Claim wird oben (@136) zuerst angelegt -> claimId gesetzt. Haelt die Bridge 1:1
-      // unter dem kommenden claims->bridge-Trigger (sonst UNIQUE(claim_id)-Throw beim Smoke).
-      id: claimId,
-      claim_id: claimId,
-      lead_id: leadId,
-      kunde_id: KUNDE_ID,
-      sv_id: SV_ID,
-      // CMM-44 SP-A: kundenbetreuer_id ist DUP-Spalte — nur noch in claims
-      // (oben im claims-Insert via KB_ID gesetzt).
-      // CMM-44 SP-A2 (Cluster 1): schadens_datum/_ort/_plz sind Semantik-
-      // Duplikate — claims (schadentag/schadenort_*) ist SSoT (oben gesetzt).
-      // CMM-44 SP-A3: Aktennummer wird nicht mehr auf faelle gesetzt —
-      // claims.claim_nummer (DB-Trigger) ist kanonisch.
-      // CMM-44 SP-B PR2c: schadens_ursache ins claims-INSERT verschoben (oben).
-      kennzeichen: `B-SMOKE-${nr}`,
-      fahrzeug_hersteller: 'BMW',
-      fahrzeug_modell: 'X3',
-      besichtigungsort_adresse: 'Teststraße 12, 10115 Berlin',
-      // CMM-44 SP-B PR2a: onboarding_complete im claims-INSERT oben gesetzt
-      // (claims = SSoT) — aus dem faelle-INSERT entfernt.
-      status: deriveFallStatus(scenarioKey),
-    }).select('id').single()
-    if (fallErr || !fall) throw new Error(`fall insert: ${fallErr?.message ?? 'kein fall'}`)
-    fallId = fall.id as string
+    fallId = claimId
 
     // 4) Auftraege + Termine
     await seedAuftragArtefakte(db, scenarioKey, fallId, claimId)
@@ -220,13 +196,6 @@ function derivePhaseStatus(key: string): { phase: string; status: string | null;
     default:
       return { phase: '1_neu', work_state: 'dispatch_done', status: null }
   }
-}
-
-function deriveFallStatus(key: string): string {
-  if (key === 'abschluss') return 'abgeschlossen'
-  if (key.startsWith('regulierung')) return 'regulierung'
-  if (key.startsWith('begutachtung')) return 'begutachtung'
-  return 'ersterfassung'
 }
 
 async function seedAuftragArtefakte(

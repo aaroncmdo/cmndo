@@ -633,17 +633,8 @@ export async function smokeResetAufLexDriveVollmachtSigniert(
     }).eq('id', claim.lead_id as string)
   }
 
-  // Fall: Smoke-Stammdaten. CMM-49 faelle-DROP: diese Felder sind reader-frei (Reader lesen
-  // vehicles.kennzeichen/hersteller/modell + operative_status); der faelle-Write existiert nur
-  // fuer den Smoke-Reset -> DROP-tolerant gewrappt (no-op nach DROP, wie core.ts:57).
-  try {
-    await admin.from('faelle').update({
-      kennzeichen: 'K-AS 2014',
-      fahrzeug_hersteller: 'BMW',
-      fahrzeug_modell: '5er',
-      status: 'regulierung',
-    }).eq('id', fallId)
-  } catch { /* faelle ggf. gedroppt — Smoke-Reset */ }
+  // CMM-49 faelle-DROP: faelle ist gedroppt — der Smoke-Reset der Stammdaten (kennzeichen/
+  // fahrzeug_*/status) entfaellt. Reader lesen vehicles + claims.operative_status (SSoT).
 
   // Claim: LexDrive gewaehlt, Phase weiter Richtung VS-Kontakt.
   // Cluster F+G PR-2b: OCR-Werte landen nicht mehr direkt auf claims, sondern
@@ -721,13 +712,11 @@ export async function smokePflichtdokumenteAnlegen(
     const { data } = await admin.from('leads').select('*').eq('id', claim.lead_id as string).maybeSingle()
     lead = (data as Record<string, unknown> | null) ?? null
   }
-  // CMM-49 DEFER (Owner B / Entity): select('*') liest alle faelle-Stammdaten-Spalten fuer
-  // createPflichtdokumenteFromKatalog (kennzeichen/fahrzeug/schadenart = Entity-Felder) →
-  // braucht v_claim_full, nicht claims-direkt. Bleibt bis Entity-Repoint (Smoke-Helper, test-only).
-  const { data: fallRow } = await admin.from('faelle').select('*').eq('id', fallId).maybeSingle()
+  // CMM-49 faelle-DROP: createPflichtdokumenteFromKatalog nutzt den optionalen fall-Parameter
+  // nicht (Katalog-Block ist entfernt; es liest nur lead + fallId) -> kein faelle-Read noetig.
   try {
     const { createPflichtdokumenteFromKatalog } = await import('@/lib/dokumente/create-pflicht')
-    await createPflichtdokumenteFromKatalog(admin as unknown as Parameters<typeof createPflichtdokumenteFromKatalog>[0], fallId, lead, fallRow as Record<string, unknown> | null)
+    await createPflichtdokumenteFromKatalog(admin as unknown as Parameters<typeof createPflichtdokumenteFromKatalog>[0], fallId, lead)
   } catch (err) {
     console.warn('[smokePflichtdokumenteAnlegen] Katalog-Pfad:', err)
   }
