@@ -126,6 +126,8 @@ export default function OcrAutoFillModal({
 
       const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(restUpdate, claimId)
       if (Object.keys(faelleUpdate).length > 0) {
+        // CMM-49 faelle-DROP-tolerant: bare await ignoriert den returned error -> nach DROP TABLE
+        // faelle (42P01) kein Crash. faelleUpdate-Residual ist reader-frei (Display liest Entities/claims).
         await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
       }
       const mergedClaimsUpdate = { ...claimsUpdate, ...cluster1Update }
