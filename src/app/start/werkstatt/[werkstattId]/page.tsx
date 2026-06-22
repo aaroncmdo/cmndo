@@ -16,6 +16,7 @@ import { FinderMap } from '@/app/embed/gutachter-finder/_components/FinderMap'
 import { FinderWizard } from '@/app/embed/gutachter-finder/_components/FinderWizard'
 
 export const dynamic = 'force-dynamic'
+export const metadata = { robots: { index: false, follow: false } }
 
 export default async function WerkstattStartPage({
   params,
@@ -35,7 +36,7 @@ export default async function WerkstattStartPage({
     redirect('/gutachter-finden')
   }
 
-  const adresse = `${werkstatt.adresse_strasse}, ${werkstatt.adresse_plz} ${werkstatt.adresse_ort}`
+  const adresse = [werkstatt.adresse_strasse, werkstatt.adresse_plz, werkstatt.adresse_ort].filter(Boolean).join(', ')
 
   const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
@@ -50,6 +51,11 @@ export default async function WerkstattStartPage({
       ? { lat: werkstatt.lat as number, lng: werkstatt.lng as number }
       : null
 
+  const hasCoords = typeof werkstatt.lat === 'number' && typeof werkstatt.lng === 'number'
+  const werkstattGeo = hasCoords
+    ? { lat: werkstatt.lat as number, lng: werkstatt.lng as number, adresse }
+    : undefined
+
   return (
     <FinderMap
       svLeads={leadPins}
@@ -63,11 +69,7 @@ export default async function WerkstattStartPage({
           forceFallback={false}
           werkstattId={werkstatt.id}
           werkstattName={werkstatt.name}
-          werkstattGeo={{
-            lat: werkstatt.lat as number,
-            lng: werkstatt.lng as number,
-            adresse,
-          }}
+          werkstattGeo={werkstattGeo}
         />
       }
     />
