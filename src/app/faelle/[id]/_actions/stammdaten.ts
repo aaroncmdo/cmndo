@@ -420,8 +420,17 @@ export async function updateFallField(
   )
 
   if (Object.keys(faelleUpdate).length > 0) {
+    // CMM-49 faelle-DROP-tolerant: das Residual (entity-Felder die noch NICHT ent-routet sind —
+    // halter_*/vehicle_*/gegner_name/Kernwerte/besichtigungsort_*/vorschaeden) ist reader-frei
+    // (0 Views lesen faelle; Display liest die Entities/v_claim_full). Der faelle-Write ist fuer
+    // diese Felder also schon heute tot (gebrochenes Inline-Editing) -> nach DROP TABLE faelle
+    // (42P01 / PGRST205 schema-cache) ignorieren statt den Edit zu sprengen; pre-DROP-Fehler (RLS)
+    // bleiben sichtbar. Die kanonische Ent-Routung dieser Residuen (HALTER_PERSON_COL etc.) =
+    // eigener CMM-49-Schritt (fixt das gebrochene Editing), KEIN DROP-Blocker.
     const { error } = await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
-    if (error) return { success: false, error: error.message }
+    if (error && error.code !== '42P01' && error.code !== 'PGRST205') {
+      return { success: false, error: error.message }
+    }
   }
 
   if (claimId && Object.keys(claimsUpdate).length > 0) {
