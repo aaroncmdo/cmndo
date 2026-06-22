@@ -70,6 +70,8 @@ export type GutachterFinderPayload = {
   // statt klassischer Termin-Buchung.
   am_unfallort_flag?: boolean
   aufnahme_fotos?: string[] // Base64-Data-URLs aus dem Foto-Wizard
+  // AAR-956 Werkstatt: vermittelnde Werkstatt (QR-Einstieg), fliesst gfa->lead->claim.
+  werkstatt_id?: string | null
 }
 
 // Extrahiert die Stadt aus einer typischen Adresse:
@@ -274,6 +276,7 @@ export async function erstelleGutachterFinderAnfrage(
         ? new Date().toISOString()
         : null,
       status: 'neu',
+      werkstatt_id: payload.werkstatt_id ?? null,
     })
     .select('id')
     .single()
