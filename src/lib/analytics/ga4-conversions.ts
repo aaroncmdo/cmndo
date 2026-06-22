@@ -16,6 +16,40 @@ import { CONSENT_COOKIE_NAME, parseConsent } from './consent'
 export const SA_SIGNED_VALUE_EUR = 210
 
 /**
+ * Baut das `sa_signed`-Conversion-Event ODER liefert `null`, wenn die SA bereits
+ * unterschrieben war (Dedup an der Quelle: nur beim Uebergang false->true feuern).
+ *
+ * Zwei-Ebenen-Dedup — sa_signed ist das primaere wertbasierte Bidding-Signal in
+ * Google Ads, Doppelzaehlung = Budget-Fehlsteuerung:
+ *   1. `transaction_id` = eindeutige Entity-ID (leadId / anfrageId) → Ads-seitiger
+ *      Bestell-ID-Dedup (wirkt, wenn die Conversion-Action Order-ID-Dedup hat).
+ *   2. `alreadySigned`-Guard → quellseitige Sicherung gegen Re-Entry (Reload,
+ *      Retry, Doppel-Submit, erneuter Aufruf bei bereits unterschriebener SA).
+ *      GA4 dedupt `transaction_id` bei Custom-Events NICHT zuverlaessig → der
+ *      Guard ist der eigentliche Schutz, transaction_id die Zweitsicherung.
+ *
+ * Vorgesehen fuer beide Call-Sites (Flow-Action + Gutachter-Finder), damit das
+ * Wert-Signal nirgends ungededupt feuert. Der Flow-Pfad (signSAandCreateFall)
+ * adoptiert ihn hier; der GF-Pfad (gutachter-finder-actions.ts) folgt separat.
+ */
+export function buildSaSignedEvent(opts: {
+  alreadySigned: boolean
+  leadId: string
+  source: 'flow' | 'gutachter_finder'
+}): Ga4Event | null {
+  if (opts.alreadySigned) return null
+  return {
+    name: 'sa_signed',
+    params: {
+      source: opts.source,
+      value: SA_SIGNED_VALUE_EUR,
+      currency: 'EUR',
+      transaction_id: opts.leadId,
+    },
+  }
+}
+
+/**
  * GA4 client_id aus dem `_ga`-Cookie des aktuellen Requests — aber NUR wenn
  * Tracking-Consent erteilt ist (consent-respektierend). Sonst null.
  * Nur im Request-Kontext nutzbar (Server-Action/Route mit Cookies).
