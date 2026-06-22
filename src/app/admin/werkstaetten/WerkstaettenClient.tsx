@@ -7,8 +7,9 @@ import { WrenchIcon, PlusIcon, KeyIcon } from 'lucide-react'
 import { createWerkstatt } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
-import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { TextField } from '@/components/shared/forms/TextField'
 
 type Werkstatt = {
   id: string
@@ -83,17 +84,18 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     fd.set('lat', adresse.lat !== null ? String(adresse.lat) : '')
     fd.set('lng', adresse.lng !== null ? String(adresse.lng) : '')
 
-    const result = await createWerkstatt(fd)
-    setLoading(false)
-
-    if (!result.ok) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await createWerkstatt(fd)
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      setCreatedCredentials({ email: result.email, password: result.password })
+      toast.success(`Werkstatt angelegt: ${result.email}`)
+      router.refresh()
+    } finally {
+      setLoading(false)
     }
-
-    setCreatedCredentials({ email: result.email, password: result.password })
-    toast.success(`Werkstatt angelegt: ${result.email}`)
-    router.refresh()
   }
 
   return (
@@ -116,7 +118,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
           />
         </div>
 
-        <DataTableContainer variant="plain" className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
+        <DataTableContainer variant="plain" className="bg-white rounded-ios-lg border border-claimondo-border overflow-hidden">
           <Table>
             <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
               <Tr className="border-b border-claimondo-border">
@@ -129,10 +131,9 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
             </Thead>
             <Tbody className="divide-y-0!">
               {werkstaetten.map(w => (
-                <ClickableTr
+                <Tr
                   key={w.id}
-                  className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40!"
-                  onClick={() => router.push(`/admin/werkstaetten/${w.id}`)}
+                  className="border-b border-claimondo-border/50"
                 >
                   <Td>
                     <div className="text-claimondo-navy font-medium">{w.name}</div>
@@ -159,7 +160,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   <Td>
                     <span className="text-claimondo-ondo text-sm">{formatDatum(w.aktiviert_am)}</span>
                   </Td>
-                </ClickableTr>
+                </Tr>
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
@@ -203,34 +204,25 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
             <>
               <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neue Werkstatt</h2>
               <form onSubmit={handleCreate} className="space-y-3">
-                <div>
-                  <label className="text-sm text-claimondo-ondo mb-1 block">Name der Werkstatt</label>
-                  <input
-                    name="name"
-                    required
-                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
-                    placeholder="z.B. Auto-Service Müller GmbH"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-claimondo-ondo mb-1 block">E-Mail (Login)</label>
-                  <input
-                    name="email"
-                    type="email"
-                    required
-                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
-                    placeholder="werkstatt@beispiel.de"
-                  />
-                </div>
-                <div>
-                  <label className="text-sm text-claimondo-ondo mb-1 block">Telefon (optional)</label>
-                  <input
-                    name="telefon"
-                    type="tel"
-                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
-                    placeholder="+49 221 …"
-                  />
-                </div>
+                <TextField
+                  label="Name der Werkstatt"
+                  name="name"
+                  required
+                  placeholder="z.B. Auto-Service Müller GmbH"
+                />
+                <TextField
+                  label="E-Mail (Login)"
+                  name="email"
+                  type="email"
+                  required
+                  placeholder="werkstatt@beispiel.de"
+                />
+                <TextField
+                  label="Telefon (optional)"
+                  name="telefon"
+                  type="tel"
+                  placeholder="+49 221 …"
+                />
                 <div>
                   <label className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
                   <GooglePlaceAutocomplete
@@ -240,21 +232,18 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   />
                   {adresse.lat !== null && (
                     <p className="text-xs text-claimondo-ondo mt-1">
-                      {adresse.strasse}, {adresse.plz} {adresse.ort} — koordinaten gespeichert
+                      {adresse.strasse}, {adresse.plz} {adresse.ort} — Koordinaten gespeichert
                     </p>
                   )}
                 </div>
-                <div>
-                  <label className="text-sm text-claimondo-ondo mb-1 block">Provision (netto, €)</label>
-                  <input
-                    name="provision_betrag_netto"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    defaultValue={150}
-                    className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
-                  />
-                </div>
+                <TextField
+                  label="Provision (netto, €)"
+                  name="provision_betrag_netto"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  defaultValue={150}
+                />
                 <div className="flex gap-3 pt-2">
                   <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>
                     Abbrechen
