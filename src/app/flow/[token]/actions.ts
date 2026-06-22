@@ -12,7 +12,7 @@ import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { getStorageUrl } from '@/lib/storage/url'
-import { trackServerConversion, SA_SIGNED_VALUE_EUR } from '@/lib/analytics/ga4-conversions'
+import { trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 
@@ -591,6 +591,14 @@ export async function signSAandCreateFall(
     .single()
   if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
 
+  // Re-Entry-Dedup: `lead` ist der Pre-Conversion-Snapshot (select('*') oben, VOR
+  // convertLeadToClaim). War die SA schon unterschrieben, ist dies ein Re-Entry
+  // (Reload/Retry/Doppel-Submit/erneuter Aufruf) → kein zweites sa_signed (sonst
+  // Wertinflation im value-based Bidding) und keine doppelte Willkommens-WhatsApp.
+  // convertLeadToClaim selbst ist idempotent (kein zweiter Fall), deckt diese
+  // Side-Effects in signSAandCreateFall aber NICHT ab.
+  const saWasAlreadySigned = lead.sa_unterschrieben === true
+
   // 2. AAR-345: SV-Zuweisung aus gutachter_termine laden — direkt über
   // gutachter_termine.lead_id statt via Legacy-Feld leads.gutachter_termin
   // (der Dispatcher kann den Termin-Eintrag anlegen ohne das Timestamp-Feld
@@ -629,6 +637,7 @@ export async function signSAandCreateFall(
   // Kunden + "Flow abgeschlossen"-WA ans Team (Baileys). Fire-and-forget (VPS-PM2, kein
   // Cold-Kill); ein Baileys-Fail darf die Konversion nie brechen.
   void (async () => {
+    if (saWasAlreadySigned) return // Re-Entry (Reload/Retry): keine doppelte Willkommens-/Team-WA
     try {
       const vorname = ((lead.vorname as string | null) ?? '').trim()
       const nachname = ((lead.nachname as string | null) ?? '').trim()
@@ -875,17 +884,18 @@ export async function signSAandCreateFall(
 
   // GA4 sa_signed-Conversion (fire-and-forget). client_id aus dem gespeicherten
   // leads.ga_client_id — /flow laeuft auf app.* (host-gated, kein gtag/_ga live).
+  // Dedup via buildSaSignedEvent: nur beim Uebergang false->true (saWasAlreadySigned)
+  // + transaction_id=leadId — sa_signed ist das primaere value-based Bidding-Signal.
   void (async () => {
     try {
+      const saEvent = buildSaSignedEvent({ alreadySigned: saWasAlreadySigned, leadId, source: 'flow' })
+      if (!saEvent) return
       const { data: gaRow } = await admin
         .from('leads')
         .select('ga_client_id')
         .eq('id', leadId)
         .maybeSingle()
-      await trackServerConversion(gaRow?.ga_client_id ?? null, {
-        name: 'sa_signed',
-        params: { source: 'flow', value: SA_SIGNED_VALUE_EUR, currency: 'EUR' },
-      })
+      await trackServerConversion(gaRow?.ga_client_id ?? null, saEvent)
     } catch {
       /* fire-and-forget */
     }
