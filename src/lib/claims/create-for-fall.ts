@@ -147,8 +147,9 @@ export async function createClaimForFall(
     return null
   }
 
-  // claim_id auf faelle zurückschreiben
-  await db.from('faelle').update({ claim_id: claim.id }).eq('id', fallId)
+  // claim_id auf faelle zurueckschreiben. CMM-49 faelle-DROP: redundant (faelle_claim_bridge ist
+  // die SSoT-Map, vom Trigger gesetzt) -> DROP-tolerant gewrappt (wie core.ts:57), no-op nach DROP.
+  try { await db.from('faelle').update({ claim_id: claim.id }).eq('id', fallId) } catch { /* faelle ggf. gedroppt */ }
 
   // CMM-49 Tier-2: gegner_versicherungsnummer/-schadennummer leben in der verursacher-
   // claim_party (SSoT), nicht claims.gegner_*. create-for-fall legte bisher KEINE Parties
