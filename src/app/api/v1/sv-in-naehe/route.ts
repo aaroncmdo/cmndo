@@ -91,7 +91,8 @@ export async function GET(req: Request) {
   }
 
   const url = new URL(req.url)
-  const plz = url.searchParams.get('plz')
+  const plzRaw = url.searchParams.get('plz')?.trim() || null
+  const ortRaw = url.searchParams.get('ort')?.trim() || null
   const radiusRaw = parseInt(
     url.searchParams.get('radius') ?? String(RADIUS_DEFAULT),
     10,
@@ -101,17 +102,21 @@ export async function GET(req: Request) {
     Math.max(1, Number.isFinite(radiusRaw) ? radiusRaw : RADIUS_DEFAULT),
   )
 
-  if (!plz || !/^\d{5}$/.test(plz)) {
+  // Standort flexibel: 5-stellige PLZ ODER Freitext-Ort (Stadt/Adresse). Der Mapbox-
+  // Geocoder nimmt beides — der Kunde muss die PLZ nicht kennen ("Köln" reicht).
+  const plz = plzRaw && /^\d{5}$/.test(plzRaw) ? plzRaw : null
+  const ort = !plz && ortRaw && ortRaw.length >= 2 && ortRaw.length <= 120 ? ortRaw : null
+  if (!plz && !ort) {
     return NextResponse.json(
-      { error: 'plz required (5-digit German postal code)' },
+      { error: 'plz (5-stellige PLZ) oder ort (Stadt/Adresse) erforderlich' },
       { status: 400, headers: CORS },
     )
   }
 
-  const center = await geocodeCached(plz)
+  const center = await geocodeCached(plz ?? `${ort}, Deutschland`)
   if (!center) {
     return NextResponse.json(
-      { error: 'PLZ not found' },
+      { error: plz ? 'PLZ not found' : 'Ort nicht gefunden' },
       { status: 404, headers: CORS },
     )
   }
@@ -150,12 +155,18 @@ export async function GET(req: Request) {
   return NextResponse.json(
     {
       plz,
+      ort,
+      standort: center.formatted,
       radius_km: radiusKm,
       center: { lat: center.lat, lng: center.lng },
       anzahl_treffer: sv_liste.length,
       sv_liste,
-      karte_url: `${SITE_URL}/api/v1/karte/${plz}.png`,
-      interaktive_karte_url: `${SITE_URL}/gutachter-finden?plz=${plz}`,
+      karte_url: plz
+        ? `${SITE_URL}/api/v1/karte/${plz}.png`
+        : `${SITE_URL}/api/v1/karte/standort.png?lat=${center.lat}&lng=${center.lng}`,
+      interaktive_karte_url: plz
+        ? `${SITE_URL}/gutachter-finden?plz=${plz}`
+        : `${SITE_URL}/gutachter-finden?stadt=${encodeURIComponent(ort ?? '')}`,
       buchungs_telefon: PHONE_DISPLAY,
       _meta: {
         quelle: 'Claimondo Public API',

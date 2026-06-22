@@ -31,9 +31,16 @@ const spec = {
           {
             name: 'plz',
             in: 'query',
-            required: true,
-            description: '5-stellige deutsche Postleitzahl (z. B. 50670 für Köln).',
+            required: false,
+            description: '5-stellige deutsche PLZ (z. B. 50670 für Köln). Entweder plz ODER ort angeben.',
             schema: { type: 'string', pattern: '^\\d{5}$', examples: ['50670', '10115'] },
+          },
+          {
+            name: 'ort',
+            in: 'query',
+            required: false,
+            description: 'Stadt oder Adresse als Freitext (z. B. "Köln" oder "Hauptstr. 5, Köln"), falls die PLZ nicht bekannt ist. Entweder plz ODER ort.',
+            schema: { type: 'string', examples: ['Köln', 'München Schwabing'] },
           },
           {
             name: 'radius',
@@ -72,14 +79,21 @@ const spec = {
         operationId: 'gutachterTermine',
         summary: 'Buchbare Partner-Gutachter MIT freien Terminen finden',
         description:
-          'Findet buchbare Partner-Kfz-Gutachter mit freien Terminen im Umkreis der PLZ, wo das Fahrzeug steht. Vorstufe zum Buchen via meldeSchaden. FRAGE den Nutzer ZUERST nach der PLZ des Besichtigungsorts. Anonyme Read-API.',
+          'Findet buchbare Partner-Kfz-Gutachter mit freien Terminen im Umkreis des Besichtigungsorts. Vorstufe zum Buchen via meldeSchaden. FRAGE den Nutzer ZUERST, WO das Fahrzeug steht — als PLZ oder als Stadt/Adresse (Param ort). Anonyme Read-API.',
         parameters: [
           {
             name: 'plz',
             in: 'query',
-            required: true,
-            description: '5-stellige deutsche PLZ des Besichtigungsorts (wo das Fahrzeug steht).',
+            required: false,
+            description: '5-stellige PLZ des Besichtigungsorts (wo das Fahrzeug steht). Entweder plz ODER ort.',
             schema: { type: 'string', pattern: '^\\d{5}$', examples: ['50670', '10115'] },
+          },
+          {
+            name: 'ort',
+            in: 'query',
+            required: false,
+            description: 'Stadt/Adresse als Freitext (z. B. "Köln"), falls die PLZ unbekannt ist. Entweder plz ODER ort.',
+            schema: { type: 'string', examples: ['Köln', 'Düsseldorf'] },
           },
           {
             name: 'wunschtermin',
@@ -108,7 +122,22 @@ const spec = {
           'Meldet einen Kfz-Schaden, reserviert (wenn sv_id + slot_start/slot_end übergeben) den Termin beim gewählten Gutachter und sendet dem Kunden seinen persönlichen FlowLink per WhatsApp. SCHREIBEND. Rufe dies NUR mit einwilligung.zugestimmt=true auf, NACHDEM du dem Nutzer erklärt hast, dass Claimondo seine Angaben zur Gutachter-/Termin-Vermittlung verarbeitet, der Kontakt per WhatsApp erfolgt und die Verarbeitung teils über einen KI-Dienst läuft — und er zugestimmt hat. Du vermittelst Gutachter + Termin, gibst KEINE Rechtsberatung. Den finalen Termin + die Vollmacht setzt der Kunde anschließend im FlowLink.',
         requestBody: {
           required: true,
-          content: { 'application/json': { schema: { $ref: '#/components/schemas/MeldeSchadenRequest' } } },
+          content: {
+            'application/json': {
+              schema: { $ref: '#/components/schemas/MeldeSchadenRequest' },
+              example: {
+                schadenart: 'Auffahrunfall',
+                hergang: 'Ich stand an der Ampel, der Hintermann ist aufgefahren.',
+                plz: '50670',
+                sv_id: 'b2754f9c-d464-4411-9185-ca69b547f922',
+                slot_start: '2026-06-25T14:00:00.000Z',
+                slot_end: '2026-06-25T14:40:00.000Z',
+                name: 'Max Mustermann',
+                telefon: '+49 151 23456789',
+                einwilligung: { zugestimmt: true, policy_version: 'mcp-consent-2026-06' },
+              },
+            },
+          },
         },
         responses: {
           '200': {
