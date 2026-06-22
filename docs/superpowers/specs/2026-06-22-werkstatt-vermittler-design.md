@@ -86,11 +86,18 @@ wie SV/Makler) + `aktiviert_am/von` setzen. Server-Action Result-Pattern (`{ ok,
 - **QR** kodiert eine werkstatt-scoped Start-URL `/start/werkstatt/[werkstattId]` (Muster `app/start/[anfrageId]`
   / `start-link`). Im Werkstatt-Portal abrufbar (PNG/SVG, druckbar).
 - Scan → Gutachter-Finder/Anfrage-Flow mit **`werkstatt_id` vorgesetzt**. Die ID fließt kanonisch:
-  **`gfa.werkstatt_id`** (neu) → `issueCanonicalFlowLinkForAnfrage` mappt → **`lead.werkstatt_id`** (neu)
-  → `convertLeadToClaim` mappt → **`claims.werkstatt_id`** (neu, analog dem existierenden `claims.makler_id`).
+  **`gfa.werkstatt_id`** (neu) → Flow-Link-Issuance mappt → **`lead.werkstatt_id`** (neu)
+  → `convertLeadToClaim` mappt → **`claims.werkstatt_id`** (neu).
+- **Präzedenz (verifiziert):** `werkstatt_seit_datum` fließt heute **schon** `lead → claims`
+  (`convert-lead-to-claim.ts:363`, im `claimsInsert`) — die `werkstatt_id`-Spalte und ihr Mapping setzen
+  sich direkt daneben (1-Zeilen-Add). **`claims.makler_id` ist KEIN gültiges Threading-Vorbild:**
+  `leads`/`gfa` haben gar kein `makler_id`, `convertLeadToClaim` setzt es nicht — Makler-Attribution ist
+  **consent-/zuweisungs-basiert (post-hoc)**, nicht lead-getragen. Werkstatt baut die gfa→lead→claim-Kette
+  also **neu** (sie wird nicht von Makler geerbt). `claims.makler_id` taugt nur als Präzedenz dafür, dass
+  eine Vermittler-id-Spalte auf `claims` **legitim** ist.
 - DDL: `ALTER TABLE gutachter_finder_anfragen ADD COLUMN werkstatt_id uuid REFERENCES werkstaetten(id);`
-  (+ leads + claims). issueCanonical/convertLeadToClaim um das 1:1-Mapping ergänzen (wie sie `makler_id`/
-  `zugeordneter_sv_id` schon durchreichen).
+  (+ `leads` + `claims`, je `REFERENCES werkstaetten(id)`). Mapping exakt wie `werkstatt_seit_datum`
+  heute `lead → claims` läuft, plus den neuen gfa→lead-Schritt in der Flow-Link-Issuance.
 
 ## 7. §4 — Provision (150 €/Claim, fällig bei Claim-Erstellung)
 - **`werkstatt_provisionen`-Tabelle** (Muster Makler-Provision): `id, werkstatt_id, claim_id,
@@ -98,9 +105,14 @@ wie SV/Makler) + `aktiviert_am/von` setzen. Server-Action Result-Pattern (`{ ok,
 - **DB-Trigger** `AFTER INSERT ON claims WHEN (NEW.werkstatt_id IS NOT NULL)` → insert `werkstatt_provisionen`
   (`betrag_netto = werkstaetten.provision_betrag_netto`, `status='faellig'`, `faellig_am=now()`). DB-nativ
   + garantiert (wie der Rückruf-Trigger) — die Provision ist **fällig im Moment der Claim-Erstellung**.
+  **Verifiziert:** der claims-INSERT ist der **EINE** kanonische Erstellungspunkt (post-CMM-49-D2: keine
+  faelle-Row mehr, `fall_id == claim_id`) → der Trigger feuert **genau einmal** pro Werkstatt-Claim. Koexistiert
+  mit den 6 Bestands-claims-Triggern (u.a. `trg_sync_claims_to_bridge` = AFTER INSERT, `set_claim_nummer` =
+  BEFORE INSERT) — eigener, eindeutig benannter `trg_werkstatt_provision_on_claim`.
 - **Auszahlung:** `release-werkstatt-provisionen`-Cron (Muster `release-makler-provisionen`): fällige →
   Sammel-Auszahlung an `bank_iban`, `status='ausgezahlt'`. (Storno: Claim storniert → Provision `storniert`.)
-- Dedup: ein offener Provisions-Datensatz pro (werkstatt_id, claim_id) — partieller Unique-Index.
+- Dedup: **ein** Provisions-Datensatz pro `claim_id` (ein Claim = eine Werkstatt = eine Provision) —
+  Unique-Index auf `claim_id`.
 
 ## 8. §5 — Besichtigungsort: Auto (Werkstatt) vs. Kunde
 Nur wenn `lead.werkstatt_id` gesetzt (Werkstatt-Quelle) fügt der FlowLink **einen Schritt** ein:
@@ -124,10 +136,11 @@ bleibt unverändert (gatet auf Coords). Reuse: Werkstatt-Geo liegt schon in `wer
 - Minimal — kein Claim-Edit (Werkstatt sieht nur ihren Vermittlungs-/Provisions-Stand).
 
 ## 10. Reuse-Map
-`werkstaetten` (erweitern) · `geocodeAdresse`+Isochrone-Backfill (Anlage) · `issueCanonicalFlowLink`/
-`convertLeadToClaim` (werkstatt_id-Durchreichung wie makler_id) · Makler-Provisions-/Portal-/Anlage-**Muster**
-(spiegeln) · Besichtigungsort-Resolver (`ladeMatchingFlow`, erweitern) · `repairs`/`werkstatt_seit_datum`
-(Auto-in-Werkstatt) · `portal-nav`-Shell · Rückruf-Trigger-Muster (Provisions-Trigger).
+`werkstaetten` (erweitern) · `geocodeAdresse`+Isochrone-Backfill (Anlage) · Flow-Link-Issuance/
+`convertLeadToClaim` (werkstatt_id-Durchreichung **neu** — Präzedenz `werkstatt_seit_datum` lead→claims,
+**NICHT** makler_id) · Makler-Provisions-/Portal-/Anlage-**Muster** (nur spiegeln, nie Tabelle/Code teilen) ·
+Besichtigungsort-Resolver (`ladeMatchingFlow`, erweitern) · `repairs`/`werkstatt_seit_datum`
+(Auto-in-Werkstatt) · `portal-nav`-Shell · Rückruf-/Bridge-Trigger-Muster (Provisions-Trigger).
 
 ## 11. Testing
 - **vitest:** werkstatt_id-Mapping (gfa→lead→claim); Besichtigungsort-Resolver mit Werkstatt-Geo
@@ -142,16 +155,25 @@ bleibt unverändert (gatet auf Coords). Reuse: Werkstatt-Geo liegt schon in `wer
 |---|---|
 | A | DDL: werkstaetten erweitern + Rolle `werkstatt` + `werkstatt_id` auf gfa/leads/claims + `werkstatt_provisionen` + Trigger (Regel 2). |
 | B | Admin-Anlage (Seite + Action, geocode+isochrone+User+aktivieren). |
-| C | QR + Start-URL `/start/werkstatt/[id]` + werkstatt_id-Durchreichung (issueCanonical/convertLeadToClaim). |
+| C | QR + Start-URL `/start/werkstatt/[id]` + werkstatt_id-Durchreichung (Flow-Link-Issuance gfa→lead + `convert-lead-to-claim.ts:363` lead→claim). |
 | D | Provision: Trigger + `release-werkstatt-provisionen`-Cron (Muster Makler). |
 | E | Besichtigungsort-Schritt „Auto in Werkstatt?" (FlowLink + Resolver-Erweiterung). |
 | F | Werkstatt-Portal `/werkstatt` (QR + Claims + Provisions). |
 Reihenfolge: A → (B, C parallel) → D → E → F.
 
 ## 13. Risiken & Koordination
-- **⚠️ CMM-49-Kollision:** `claims.werkstatt_id` hinzufügen, während die CMM-49-Linie (bca5b079) claims
-  migriert/faelle droppt — **additiv, niedrig-Risiko**, aber die WP-A-Migration mit ihnen abstimmen
-  (Reihenfolge im Migrations-Stream). `claims.makler_id` existiert schon → das Muster ist etabliert.
+- **⚠️ CMM-49-Koordination (verifiziert, Marker `COORDINATION-werkstatt-cmm49.md` gesetzt):** Die CMM-49-Linie
+  (bca5b079) ist **code-komplett für `DROP TABLE faelle CASCADE`** (alle 11 Writer + 2 Reader faelle-frei, 7 PRs),
+  der DROP ist nur noch auf den Prod-Deploy gegated — **sie macht den DROP selbst**. Konsequenzen für Werkstatt:
+  - **Alle `werkstatt_id`-Spalten gehen auf Survivor (`claims`/`leads`/`gfa`) — NIE auf `faelle`.** `faelle.makler_id`
+    + `faelle.werkstatt_seit_datum` sterben mit der Tabelle; Werkstatt hängt an keiner davon. **Kein** faelle-Spiegel
+    (anders als das alte makler_id-Muster). → **keine Migrations-Reihenfolge-Abhängigkeit** zum DROP (orthogonal).
+  - **Echter Soft-Kollisionspunkt = `convert-lead-to-claim.ts`** (1-Zeilen-Add neben `werkstatt_seit_datum:` Z.363):
+    bca5b079 editiert dieses File häufig (CMM-49-Kern). WP-C vor dem Touch: Marker + merge-base-Diff, nicht blind
+    `git diff origin/staging`. Die Insertion ist isoliert (eigene Zeile) → Textkonflikt unwahrscheinlich.
+  - **Provisions-Trigger** muss eine etwaige claims-creation-Umschreibung (fan-out-claim-native) überleben →
+    eigenständiger AFTER-INSERT-Trigger, unabhängig von `trg_sync_claims_to_bridge`.
+  - `claims.makler_id` existiert als Präzedenz, dass eine Vermittler-id-Spalte auf `claims` legitim ist (s. §3).
 - **`ALTER TYPE user_role ADD VALUE`** ist nicht transaktional rückrollbar — in eigener Migration, vor der Nutzung.
 - **QR-Sicherheit:** der Start-Link darf keine PII tragen (nur werkstatt_id, signiert wie start-link HMAC).
 - **Provisions-Storno:** Claim-Storno muss die fällige Provision auf `storniert` setzen (Trigger/State-Machine).
