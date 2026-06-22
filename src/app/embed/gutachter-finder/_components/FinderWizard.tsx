@@ -80,7 +80,20 @@ function fmtWunsch(lokal: string): string {
   )
 }
 
-export function FinderWizard({ forceFallback = false }: { forceFallback?: boolean } = {}) {
+export function FinderWizard({
+  forceFallback = false,
+  werkstattId,
+  werkstattName,
+  werkstattGeo,
+}: {
+  forceFallback?: boolean
+  /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
+   * reserviereEmbedTermin weitergereicht → landet auf dem Lead/Claim.
+   * Task 10 wird werkstattName + werkstattGeo fuer die „Auto bei Werkstatt?"-UI nutzen. */
+  werkstattId?: string
+  werkstattName?: string
+  werkstattGeo?: { lat: number; lng: number; adresse: string }
+} = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
   // AAR-956 (Aaron 14.06.): Adress-Eingabe als Vollbild-Overlay auf Mobil (Dropdown-Platz).
@@ -207,6 +220,7 @@ export function FinderWizard({ forceFallback = false }: { forceFallback?: boolea
         schadentyp: schadentyp ?? 'Sonstiger Schaden',
         ort,
         wunschterminLokal: wunschterminLokal || null,
+        werkstatt_id: werkstattId ?? null,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
