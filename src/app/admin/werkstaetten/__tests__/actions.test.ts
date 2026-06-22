@@ -138,7 +138,7 @@ describe('createWerkstatt', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error).toBeTruthy()
+      expect(result.error).toBe('Nur Admins dürfen Werkstätten anlegen.')
     }
   })
 
@@ -157,7 +157,7 @@ describe('createWerkstatt', () => {
 
     expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error).toBeTruthy()
+      expect(result.error).toBe('Nur Admins dürfen Werkstätten anlegen.')
     }
   })
 
