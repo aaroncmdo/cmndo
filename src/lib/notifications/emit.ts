@@ -25,11 +25,12 @@ export async function emitEvent<T extends EventType>(
       ? ((payload as { fallId: string }).fallId)
       : undefined
 
-  // CMM-49: notification_events ist claim-gekeyt (claim_id). ABER fan-out.ts gatet weiterhin auf
-  // event.fall_id (loadFallParticipants(fall_id) -> resolveClaimId). P0-Hotfix 2026-06-20: fall_id
-  // MUSS mitgeschrieben werden, sonst liefert computeRecipients [] und die gesamte Pipeline ist fuer
-  // alle fall-scoped Events dunkel (war es ~02.-20.06., still completed ohne deliveries). Folge-
-  // Cleanup (CMM-49-Revier): fan-out claim-native lesen, dann kann der fall_id-Write hier wieder weg.
+  // CMM-49: notification_events ist claim-gekeyt (claim_id). fan-out.ts gatet jetzt claim-native auf
+  // event.claim_id (loadClaimParticipants) -> die Pipeline haengt NICHT mehr an fall_id (das war der
+  // P0-Dunkel-Bug 02.-20.06., #3050). claim_id MUSS also gesetzt sein (resolveClaimId unten; die
+  // Invariante „jeder Fall hat einen Claim" haelt). fall_id wird weiter mitgeschrieben fuer noch nicht
+  // claim-native Konsumenten (Queries/Debug) + den rueckruf-Trigger (819dab90); Drop = Folge-Cleanup
+  // nach einem fall_id-Reader-Audit.
   const effectiveFallId = opts?.fallId ?? payloadFallId ?? null
   let claimId: string | null = null
   if (effectiveFallId) {
