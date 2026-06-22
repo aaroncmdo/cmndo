@@ -28,9 +28,10 @@ export const SA_SIGNED_VALUE_EUR = 210
  *      GA4 dedupt `transaction_id` bei Custom-Events NICHT zuverlaessig → der
  *      Guard ist der eigentliche Schutz, transaction_id die Zweitsicherung.
  *
- * Vorgesehen fuer beide Call-Sites (Flow-Action + Gutachter-Finder), damit das
- * Wert-Signal nirgends ungededupt feuert. Der Flow-Pfad (signSAandCreateFall)
- * adoptiert ihn hier; der GF-Pfad (gutachter-finder-actions.ts) folgt separat.
+ * Genutzt von BEIDEN Call-Sites — Flow-Action (signSAandCreateFall) und Gutachter-
+ * Finder (gutachter-finder-actions.ts) — damit das Wert-Signal nirgends ungededupt
+ * feuert. Der Flow-Pfad uebergibt den echten alreadySigned-State (Re-Entry-Schutz);
+ * der GF-Pfad nutzt alreadySigned=false (jeder Submit = neue Anfrage) + anfrageId.
  */
 export function buildSaSignedEvent(opts: {
   alreadySigned: boolean
