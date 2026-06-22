@@ -121,13 +121,6 @@ export type Database = {
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
-          {
-            foreignKeyName: "abrechnung_positionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
         ]
       }
       abrechnung_reminders: {
@@ -390,13 +383,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "admin_termine_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "admin_termine_lead_id_fkey"
@@ -1191,13 +1177,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "auftraege_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "auftraege_sv_id_fkey"
@@ -3526,13 +3505,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "email_log_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "email_log_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -3791,987 +3763,6 @@ export type Database = {
           },
         ]
       }
-      faelle: {
-        Row: {
-          abrechnung_id: string | null
-          abrechnungsart_besprochen: string | null
-          abrechnungsart_besprochen_am: string | null
-          abrechnungsart_notiz: string | null
-          abtretung_pdf: string | null
-          abtretung_signiert_am: string | null
-          anschlussschreiben_am: string | null
-          anschlussschreiben_ocr_am: string | null
-          anschlussschreiben_sendedatum: string | null
-          anschlussschreiben_unterschrift: boolean | null
-          anschlussschreiben_url: string | null
-          as_frist: string | null
-          as_geforderte_summe: number | null
-          as_salesforce_id: string | null
-          as_vs_reaktion_text: string | null
-          as_zuletzt_synced_am: string | null
-          auszahlung_gutachter_betrag: number | null
-          auszahlung_gutachter_eingegangen_am: string | null
-          auszahlung_kunde_betrag: number | null
-          auszahlung_kunde_eingegangen_am: string | null
-          auszahlung_zahlungsweg: string | null
-          bank_name: string | null
-          bankdaten_hinterlegt_am: string | null
-          besichtigung_gestartet_am: string | null
-          besichtigungsort_adresse: string | null
-          besichtigungsort_lat: number | null
-          besichtigungsort_lng: number | null
-          besichtigungsort_notiz: string | null
-          besichtigungsort_place_id: string | null
-          betreuungspaket: Database["public"]["Enums"]["betreuungspaket"] | null
-          bevorzugter_kanal: string | null
-          bic: string | null
-          bkat_unfallart: Database["public"]["Enums"]["bkat_unfallart"] | null
-          cardentity_abfrage_am: string | null
-          cardentity_enriched_at: string | null
-          cardentity_report: Json | null
-          claim_id: string
-          created_at: string | null
-          datenschutz_akzeptiert: boolean | null
-          datenschutz_akzeptiert_am: string | null
-          deaktiviert_am: string | null
-          deaktiviert_grund: string | null
-          deaktiviert_notiz: string | null
-          dispatch_id: string | null
-          dokumente_reminder_whatsapp_letzte_sendung: string | null
-          dokumente_vollstaendig_am_phase: string | null
-          dokumente_vollstaendig_fuer_phase: string | null
-          erstzulassung: string | null
-          eskalation_tag_14_am: string | null
-          eskalation_tag_14_ergebnis: string | null
-          eskalation_tag_14_ergebnis_am: string | null
-          eskalation_tag_14_ergebnis_von: string | null
-          eskalation_tag_21_am: string | null
-          eskalation_tag_21_ergebnis: string | null
-          eskalation_tag_21_ergebnis_am: string | null
-          eskalation_tag_21_ergebnis_von: string | null
-          eskalation_tag_28_am: string | null
-          eskalation_tag_28_ergebnis: string | null
-          eskalation_tag_28_ergebnis_am: string | null
-          eskalation_tag_28_ergebnis_von: string | null
-          eskaliert_am: string | null
-          eskaliert_an_admin_id: string | null
-          eskaliert_grund: string | null
-          fahrzeug_aufbau: string | null
-          fahrzeug_ausstattung: Json | null
-          fahrzeug_baujahr: number | null
-          fahrzeug_fahrbereit: boolean | null
-          fahrzeug_farbe: string | null
-          fahrzeug_hersteller: string | null
-          fahrzeug_modell: string | null
-          fahrzeug_typ: string | null
-          fahrzeugschaden_beschreibung: string | null
-          fallakte_angelegt_am: string | null
-          filmcheck_am: string | null
-          filmcheck_notizen: string | null
-          filmcheck_ok: boolean | null
-          fin_extrahiert_am: string | null
-          fin_quelle: string | null
-          fin_vin: string | null
-          firma_name: string | null
-          gcal_event_id: string | null
-          gegner_anzahl_beteiligte: number | null
-          gegner_fahrzeugtyp: string | null
-          gegner_kennzeichen: string | null
-          gegner_name: string | null
-          gegner_versicherung: string | null
-          gegner_versicherung_anfrage_datum: string | null
-          geschaetzte_fahrdistanz_km: number | null
-          geschaetzte_fahrzeit_min: number | null
-          geschlossen_grund: string | null
-          google_review_gesendet: boolean | null
-          google_review_prompt_gezeigt_am: string | null
-          gutachten_betrag: number | null
-          gutachten_eingegangen_am: string | null
-          gutachten_hochgeladen_am: string | null
-          gutachten_nummer: string | null
-          gutachten_positionen: Json | null
-          gutachten_stundensatz: number | null
-          gutachten_vorhanden: boolean | null
-          gutachter_honorar: number | null
-          guthaben_verrechnet_netto: number
-          halter_email: string | null
-          halter_geburtsdatum: string | null
-          halter_nachname: string | null
-          halter_name: string | null
-          halter_plz: string | null
-          halter_stadt: string | null
-          halter_strasse: string | null
-          halter_telefon: string | null
-          halter_vorname: string | null
-          hat_vorschaeden: boolean | null
-          hsn: string | null
-          iban: string | null
-          id: string
-          interne_notizen: string | null
-          ist_aktiv: boolean | null
-          ist_fahrzeughalter: boolean | null
-          kanzlei_abrechnung_id: string | null
-          kanzlei_ansprechpartner_position: string | null
-          kanzlei_honorar: number | null
-          kanzlei_id: string | null
-          kanzlei_provision_ausgezahlt_am: string | null
-          kanzlei_provision_status: string | null
-          kennzeichen: string | null
-          kennzeichen_buchstaben: string | null
-          kennzeichen_kreis: string | null
-          kennzeichen_suffix: string | null
-          kennzeichen_zahl: string | null
-          ki_geschaetzte_kosten_max: number | null
-          ki_geschaetzte_kosten_min: number | null
-          ki_kalkulation: Json | null
-          ki_kalkulation_am: string | null
-          kilometerstand: number | null
-          klage_uebergeben_am: string | null
-          kontoinhaber: string | null
-          konvertiert_am: string | null
-          kuerzungs_betrag: number | null
-          kunde_adresse: string | null
-          kunde_id: string | null
-          kunde_lat: number | null
-          kunde_lng: number | null
-          kunde_match_via: string | null
-          kunde_nachname: string | null
-          kunde_plz: string | null
-          kunde_stadt: string | null
-          kunde_strasse: string | null
-          kunde_telefon: string | null
-          kunde_vorname: string | null
-          kundenbetreuer_fallback_flag: boolean
-          kundenbetreuer_zugewiesen_am: string | null
-          lackfarbe_code: string | null
-          lead_id: string | null
-          lead_preis_berechnet_am: string | null
-          lead_preis_netto: number | null
-          lead_preis_typ: string | null
-          leasinggeber_informiert: boolean | null
-          leasinggeber_name: string | null
-          lexdrive_case_id: string | null
-          lexdrive_ocr_data: Json | null
-          lexdrive_ocr_received_at: string | null
-          losfahren_erinnerung_gesendet: boolean | null
-          makler_id: string | null
-          mandatsnummer: string | null
-          marketing_provision: number | null
-          marketing_provision_status: string | null
-          marketing_quelle: string | null
-          mietwagen_argumentations_puffer: number
-          mietwagen_kanzlei_informiert: boolean | null
-          mietwagen_kanzlei_informiert_am: string | null
-          mietwagen_limit_grund: string | null
-          mietwagen_limit_tage: number | null
-          mietwagen_rechnung_url: string | null
-          mietwagen_rechnung_vorhanden: boolean
-          mietwagen_seit_datum: string | null
-          mietwagen_vermieter: string | null
-          nachbesichtigung_angefordert_am: string | null
-          nachbesichtigung_ergebnis: string | null
-          nachbesichtigung_konfrontation: boolean | null
-          nachbesichtigung_kunde_termin_eingereicht_am: string | null
-          nachbesichtigung_kunde_termin_vorschlaege: Json | null
-          nachbesichtigung_status: string | null
-          nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null
-          nachbesichtigung_sv_termin_vereinbart_am: string | null
-          nachbesichtigung_termin_datum: string | null
-          no_show_gemeldet_am: string | null
-          notizen: string | null
-          nutzungsausfall_gesamt: number | null
-          nutzungsausfall_tagessatz: number | null
-          ocr_extrahiert_am: string | null
-          ocr_rohdaten: Json | null
-          onboarding_complete: boolean | null
-          organisation_id: string | null
-          prioritaet: string | null
-          re_termin_eskalation_an_kb_am: string | null
-          re_termin_token: string | null
-          re_termin_token_eingelaufen_am: string | null
-          regulierung_am: string | null
-          regulierung_angekuendigt_am: string | null
-          regulierungsweise: string | null
-          reparaturdauer_tage: number | null
-          reparaturkosten: number | null
-          ruege_betrag: number | null
-          ruege_counter: number | null
-          ruege_erhalten_am: string | null
-          ruege_frist_tage: number | null
-          ruege_gesendet_am: string | null
-          ruege_grund: string | null
-          sa_pdf_url: string | null
-          sa_unterschrieben: boolean | null
-          sa_unterschrieben_am: string | null
-          sa_unterschrift_url: string | null
-          schadens_hoehe_netto: number | null
-          schadens_ursache: string | null
-          schlussabrechnung_am: string | null
-          service_typ: string
-          source_channel: string | null
-          source_domain: string | null
-          sprache: string | null
-          status: Database["public"]["Enums"]["fall_status"]
-          status_changed_at: string | null
-          storniert_am: string | null
-          storno_durch_user_id: string | null
-          storno_grund: string | null
-          sv_briefing_generated_at: string | null
-          sv_briefing_model: string | null
-          sv_briefing_struktur: Json | null
-          sv_briefing_text: string | null
-          sv_briefing_version: number
-          sv_id: string | null
-          sv_nachzahlung_netto: number | null
-          sv_notizen_vor_ort: string | null
-          sv_termin_dokument_reminder_gesendet_am: string | null
-          sv_zugewiesen_am: string | null
-          szenario: string | null
-          technische_stellungnahme_beauftragt_am: string | null
-          technische_stellungnahme_freigabe_am: string | null
-          technische_stellungnahme_hochgeladen_am: string | null
-          technische_stellungnahme_notiz_sv: string | null
-          technische_stellungnahme_status: string | null
-          termin_erinnerung_5min_gesendet: boolean | null
-          tsn: string | null
-          unfallmitteilung_status: string | null
-          updated_at: string | null
-          ust_id: string | null
-          vollmacht_geprueft_am: string | null
-          vollmacht_geprueft_von: string | null
-          vollmacht_pdf: string | null
-          vollmacht_pruefung_begruendung: string | null
-          vollmacht_pruefung_status: string | null
-          vollmacht_signiert_am: string | null
-          vollmacht_status: string | null
-          vorschaden_anzahl: number | null
-          vorschaden_erkannt: boolean
-          vorschaden_geprueft: boolean | null
-          vorschaden_letzter_datum: string | null
-          vorschaden_typ_a_ergebnis: Json | null
-          vorschaden_typ_b_bericht: Json | null
-          vorschaden_typ_b_pdf_url: string | null
-          vorschaeden_beschreibung: string | null
-          vs_eskalationsstufe: string | null
-          vs_frist_bis: string | null
-          vs_kuerzung_grund: string | null
-          vs_kuerzungs_typ: string | null
-          vs_quote_akzeptiert_am: string | null
-          vs_quote_betrag_ausgezahlt: number | null
-          vs_quote_grund: string | null
-          vs_quote_prozent: number | null
-          vs_reaktion_am: string | null
-          vs_reaktion_typ: string | null
-          werkstatt_seit_datum: string | null
-          wertminderung: number | null
-          wunschtermin: string | null
-          zahlung_betrag: number | null
-          zahlung_eingegangen_am: string | null
-          zahlung_erwartet_am: string | null
-          zahlungsweg: string | null
-          zb1_status: string | null
-          zeugen_vorhanden: boolean
-        }
-        Insert: {
-          abrechnung_id?: string | null
-          abrechnungsart_besprochen?: string | null
-          abrechnungsart_besprochen_am?: string | null
-          abrechnungsart_notiz?: string | null
-          abtretung_pdf?: string | null
-          abtretung_signiert_am?: string | null
-          anschlussschreiben_am?: string | null
-          anschlussschreiben_ocr_am?: string | null
-          anschlussschreiben_sendedatum?: string | null
-          anschlussschreiben_unterschrift?: boolean | null
-          anschlussschreiben_url?: string | null
-          as_frist?: string | null
-          as_geforderte_summe?: number | null
-          as_salesforce_id?: string | null
-          as_vs_reaktion_text?: string | null
-          as_zuletzt_synced_am?: string | null
-          auszahlung_gutachter_betrag?: number | null
-          auszahlung_gutachter_eingegangen_am?: string | null
-          auszahlung_kunde_betrag?: number | null
-          auszahlung_kunde_eingegangen_am?: string | null
-          auszahlung_zahlungsweg?: string | null
-          bank_name?: string | null
-          bankdaten_hinterlegt_am?: string | null
-          besichtigung_gestartet_am?: string | null
-          besichtigungsort_adresse?: string | null
-          besichtigungsort_lat?: number | null
-          besichtigungsort_lng?: number | null
-          besichtigungsort_notiz?: string | null
-          besichtigungsort_place_id?: string | null
-          betreuungspaket?:
-            | Database["public"]["Enums"]["betreuungspaket"]
-            | null
-          bevorzugter_kanal?: string | null
-          bic?: string | null
-          bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
-          cardentity_abfrage_am?: string | null
-          cardentity_enriched_at?: string | null
-          cardentity_report?: Json | null
-          claim_id: string
-          created_at?: string | null
-          datenschutz_akzeptiert?: boolean | null
-          datenschutz_akzeptiert_am?: string | null
-          deaktiviert_am?: string | null
-          deaktiviert_grund?: string | null
-          deaktiviert_notiz?: string | null
-          dispatch_id?: string | null
-          dokumente_reminder_whatsapp_letzte_sendung?: string | null
-          dokumente_vollstaendig_am_phase?: string | null
-          dokumente_vollstaendig_fuer_phase?: string | null
-          erstzulassung?: string | null
-          eskalation_tag_14_am?: string | null
-          eskalation_tag_14_ergebnis?: string | null
-          eskalation_tag_14_ergebnis_am?: string | null
-          eskalation_tag_14_ergebnis_von?: string | null
-          eskalation_tag_21_am?: string | null
-          eskalation_tag_21_ergebnis?: string | null
-          eskalation_tag_21_ergebnis_am?: string | null
-          eskalation_tag_21_ergebnis_von?: string | null
-          eskalation_tag_28_am?: string | null
-          eskalation_tag_28_ergebnis?: string | null
-          eskalation_tag_28_ergebnis_am?: string | null
-          eskalation_tag_28_ergebnis_von?: string | null
-          eskaliert_am?: string | null
-          eskaliert_an_admin_id?: string | null
-          eskaliert_grund?: string | null
-          fahrzeug_aufbau?: string | null
-          fahrzeug_ausstattung?: Json | null
-          fahrzeug_baujahr?: number | null
-          fahrzeug_fahrbereit?: boolean | null
-          fahrzeug_farbe?: string | null
-          fahrzeug_hersteller?: string | null
-          fahrzeug_modell?: string | null
-          fahrzeug_typ?: string | null
-          fahrzeugschaden_beschreibung?: string | null
-          fallakte_angelegt_am?: string | null
-          filmcheck_am?: string | null
-          filmcheck_notizen?: string | null
-          filmcheck_ok?: boolean | null
-          fin_extrahiert_am?: string | null
-          fin_quelle?: string | null
-          fin_vin?: string | null
-          firma_name?: string | null
-          gcal_event_id?: string | null
-          gegner_anzahl_beteiligte?: number | null
-          gegner_fahrzeugtyp?: string | null
-          gegner_kennzeichen?: string | null
-          gegner_name?: string | null
-          gegner_versicherung?: string | null
-          gegner_versicherung_anfrage_datum?: string | null
-          geschaetzte_fahrdistanz_km?: number | null
-          geschaetzte_fahrzeit_min?: number | null
-          geschlossen_grund?: string | null
-          google_review_gesendet?: boolean | null
-          google_review_prompt_gezeigt_am?: string | null
-          gutachten_betrag?: number | null
-          gutachten_eingegangen_am?: string | null
-          gutachten_hochgeladen_am?: string | null
-          gutachten_nummer?: string | null
-          gutachten_positionen?: Json | null
-          gutachten_stundensatz?: number | null
-          gutachten_vorhanden?: boolean | null
-          gutachter_honorar?: number | null
-          guthaben_verrechnet_netto?: number
-          halter_email?: string | null
-          halter_geburtsdatum?: string | null
-          halter_nachname?: string | null
-          halter_name?: string | null
-          halter_plz?: string | null
-          halter_stadt?: string | null
-          halter_strasse?: string | null
-          halter_telefon?: string | null
-          halter_vorname?: string | null
-          hat_vorschaeden?: boolean | null
-          hsn?: string | null
-          iban?: string | null
-          id?: string
-          interne_notizen?: string | null
-          ist_aktiv?: boolean | null
-          ist_fahrzeughalter?: boolean | null
-          kanzlei_abrechnung_id?: string | null
-          kanzlei_ansprechpartner_position?: string | null
-          kanzlei_honorar?: number | null
-          kanzlei_id?: string | null
-          kanzlei_provision_ausgezahlt_am?: string | null
-          kanzlei_provision_status?: string | null
-          kennzeichen?: string | null
-          kennzeichen_buchstaben?: string | null
-          kennzeichen_kreis?: string | null
-          kennzeichen_suffix?: string | null
-          kennzeichen_zahl?: string | null
-          ki_geschaetzte_kosten_max?: number | null
-          ki_geschaetzte_kosten_min?: number | null
-          ki_kalkulation?: Json | null
-          ki_kalkulation_am?: string | null
-          kilometerstand?: number | null
-          klage_uebergeben_am?: string | null
-          kontoinhaber?: string | null
-          konvertiert_am?: string | null
-          kuerzungs_betrag?: number | null
-          kunde_adresse?: string | null
-          kunde_id?: string | null
-          kunde_lat?: number | null
-          kunde_lng?: number | null
-          kunde_match_via?: string | null
-          kunde_nachname?: string | null
-          kunde_plz?: string | null
-          kunde_stadt?: string | null
-          kunde_strasse?: string | null
-          kunde_telefon?: string | null
-          kunde_vorname?: string | null
-          kundenbetreuer_fallback_flag?: boolean
-          kundenbetreuer_zugewiesen_am?: string | null
-          lackfarbe_code?: string | null
-          lead_id?: string | null
-          lead_preis_berechnet_am?: string | null
-          lead_preis_netto?: number | null
-          lead_preis_typ?: string | null
-          leasinggeber_informiert?: boolean | null
-          leasinggeber_name?: string | null
-          lexdrive_case_id?: string | null
-          lexdrive_ocr_data?: Json | null
-          lexdrive_ocr_received_at?: string | null
-          losfahren_erinnerung_gesendet?: boolean | null
-          makler_id?: string | null
-          mandatsnummer?: string | null
-          marketing_provision?: number | null
-          marketing_provision_status?: string | null
-          marketing_quelle?: string | null
-          mietwagen_argumentations_puffer?: number
-          mietwagen_kanzlei_informiert?: boolean | null
-          mietwagen_kanzlei_informiert_am?: string | null
-          mietwagen_limit_grund?: string | null
-          mietwagen_limit_tage?: number | null
-          mietwagen_rechnung_url?: string | null
-          mietwagen_rechnung_vorhanden?: boolean
-          mietwagen_seit_datum?: string | null
-          mietwagen_vermieter?: string | null
-          nachbesichtigung_angefordert_am?: string | null
-          nachbesichtigung_ergebnis?: string | null
-          nachbesichtigung_konfrontation?: boolean | null
-          nachbesichtigung_kunde_termin_eingereicht_am?: string | null
-          nachbesichtigung_kunde_termin_vorschlaege?: Json | null
-          nachbesichtigung_status?: string | null
-          nachbesichtigung_sv_konfrontation_gewuenscht?: boolean | null
-          nachbesichtigung_sv_termin_vereinbart_am?: string | null
-          nachbesichtigung_termin_datum?: string | null
-          no_show_gemeldet_am?: string | null
-          notizen?: string | null
-          nutzungsausfall_gesamt?: number | null
-          nutzungsausfall_tagessatz?: number | null
-          ocr_extrahiert_am?: string | null
-          ocr_rohdaten?: Json | null
-          onboarding_complete?: boolean | null
-          organisation_id?: string | null
-          prioritaet?: string | null
-          re_termin_eskalation_an_kb_am?: string | null
-          re_termin_token?: string | null
-          re_termin_token_eingelaufen_am?: string | null
-          regulierung_am?: string | null
-          regulierung_angekuendigt_am?: string | null
-          regulierungsweise?: string | null
-          reparaturdauer_tage?: number | null
-          reparaturkosten?: number | null
-          ruege_betrag?: number | null
-          ruege_counter?: number | null
-          ruege_erhalten_am?: string | null
-          ruege_frist_tage?: number | null
-          ruege_gesendet_am?: string | null
-          ruege_grund?: string | null
-          sa_pdf_url?: string | null
-          sa_unterschrieben?: boolean | null
-          sa_unterschrieben_am?: string | null
-          sa_unterschrift_url?: string | null
-          schadens_hoehe_netto?: number | null
-          schadens_ursache?: string | null
-          schlussabrechnung_am?: string | null
-          service_typ?: string
-          source_channel?: string | null
-          source_domain?: string | null
-          sprache?: string | null
-          status?: Database["public"]["Enums"]["fall_status"]
-          status_changed_at?: string | null
-          storniert_am?: string | null
-          storno_durch_user_id?: string | null
-          storno_grund?: string | null
-          sv_briefing_generated_at?: string | null
-          sv_briefing_model?: string | null
-          sv_briefing_struktur?: Json | null
-          sv_briefing_text?: string | null
-          sv_briefing_version?: number
-          sv_id?: string | null
-          sv_nachzahlung_netto?: number | null
-          sv_notizen_vor_ort?: string | null
-          sv_termin_dokument_reminder_gesendet_am?: string | null
-          sv_zugewiesen_am?: string | null
-          szenario?: string | null
-          technische_stellungnahme_beauftragt_am?: string | null
-          technische_stellungnahme_freigabe_am?: string | null
-          technische_stellungnahme_hochgeladen_am?: string | null
-          technische_stellungnahme_notiz_sv?: string | null
-          technische_stellungnahme_status?: string | null
-          termin_erinnerung_5min_gesendet?: boolean | null
-          tsn?: string | null
-          unfallmitteilung_status?: string | null
-          updated_at?: string | null
-          ust_id?: string | null
-          vollmacht_geprueft_am?: string | null
-          vollmacht_geprueft_von?: string | null
-          vollmacht_pdf?: string | null
-          vollmacht_pruefung_begruendung?: string | null
-          vollmacht_pruefung_status?: string | null
-          vollmacht_signiert_am?: string | null
-          vollmacht_status?: string | null
-          vorschaden_anzahl?: number | null
-          vorschaden_erkannt?: boolean
-          vorschaden_geprueft?: boolean | null
-          vorschaden_letzter_datum?: string | null
-          vorschaden_typ_a_ergebnis?: Json | null
-          vorschaden_typ_b_bericht?: Json | null
-          vorschaden_typ_b_pdf_url?: string | null
-          vorschaeden_beschreibung?: string | null
-          vs_eskalationsstufe?: string | null
-          vs_frist_bis?: string | null
-          vs_kuerzung_grund?: string | null
-          vs_kuerzungs_typ?: string | null
-          vs_quote_akzeptiert_am?: string | null
-          vs_quote_betrag_ausgezahlt?: number | null
-          vs_quote_grund?: string | null
-          vs_quote_prozent?: number | null
-          vs_reaktion_am?: string | null
-          vs_reaktion_typ?: string | null
-          werkstatt_seit_datum?: string | null
-          wertminderung?: number | null
-          wunschtermin?: string | null
-          zahlung_betrag?: number | null
-          zahlung_eingegangen_am?: string | null
-          zahlung_erwartet_am?: string | null
-          zahlungsweg?: string | null
-          zb1_status?: string | null
-          zeugen_vorhanden?: boolean
-        }
-        Update: {
-          abrechnung_id?: string | null
-          abrechnungsart_besprochen?: string | null
-          abrechnungsart_besprochen_am?: string | null
-          abrechnungsart_notiz?: string | null
-          abtretung_pdf?: string | null
-          abtretung_signiert_am?: string | null
-          anschlussschreiben_am?: string | null
-          anschlussschreiben_ocr_am?: string | null
-          anschlussschreiben_sendedatum?: string | null
-          anschlussschreiben_unterschrift?: boolean | null
-          anschlussschreiben_url?: string | null
-          as_frist?: string | null
-          as_geforderte_summe?: number | null
-          as_salesforce_id?: string | null
-          as_vs_reaktion_text?: string | null
-          as_zuletzt_synced_am?: string | null
-          auszahlung_gutachter_betrag?: number | null
-          auszahlung_gutachter_eingegangen_am?: string | null
-          auszahlung_kunde_betrag?: number | null
-          auszahlung_kunde_eingegangen_am?: string | null
-          auszahlung_zahlungsweg?: string | null
-          bank_name?: string | null
-          bankdaten_hinterlegt_am?: string | null
-          besichtigung_gestartet_am?: string | null
-          besichtigungsort_adresse?: string | null
-          besichtigungsort_lat?: number | null
-          besichtigungsort_lng?: number | null
-          besichtigungsort_notiz?: string | null
-          besichtigungsort_place_id?: string | null
-          betreuungspaket?:
-            | Database["public"]["Enums"]["betreuungspaket"]
-            | null
-          bevorzugter_kanal?: string | null
-          bic?: string | null
-          bkat_unfallart?: Database["public"]["Enums"]["bkat_unfallart"] | null
-          cardentity_abfrage_am?: string | null
-          cardentity_enriched_at?: string | null
-          cardentity_report?: Json | null
-          claim_id?: string
-          created_at?: string | null
-          datenschutz_akzeptiert?: boolean | null
-          datenschutz_akzeptiert_am?: string | null
-          deaktiviert_am?: string | null
-          deaktiviert_grund?: string | null
-          deaktiviert_notiz?: string | null
-          dispatch_id?: string | null
-          dokumente_reminder_whatsapp_letzte_sendung?: string | null
-          dokumente_vollstaendig_am_phase?: string | null
-          dokumente_vollstaendig_fuer_phase?: string | null
-          erstzulassung?: string | null
-          eskalation_tag_14_am?: string | null
-          eskalation_tag_14_ergebnis?: string | null
-          eskalation_tag_14_ergebnis_am?: string | null
-          eskalation_tag_14_ergebnis_von?: string | null
-          eskalation_tag_21_am?: string | null
-          eskalation_tag_21_ergebnis?: string | null
-          eskalation_tag_21_ergebnis_am?: string | null
-          eskalation_tag_21_ergebnis_von?: string | null
-          eskalation_tag_28_am?: string | null
-          eskalation_tag_28_ergebnis?: string | null
-          eskalation_tag_28_ergebnis_am?: string | null
-          eskalation_tag_28_ergebnis_von?: string | null
-          eskaliert_am?: string | null
-          eskaliert_an_admin_id?: string | null
-          eskaliert_grund?: string | null
-          fahrzeug_aufbau?: string | null
-          fahrzeug_ausstattung?: Json | null
-          fahrzeug_baujahr?: number | null
-          fahrzeug_fahrbereit?: boolean | null
-          fahrzeug_farbe?: string | null
-          fahrzeug_hersteller?: string | null
-          fahrzeug_modell?: string | null
-          fahrzeug_typ?: string | null
-          fahrzeugschaden_beschreibung?: string | null
-          fallakte_angelegt_am?: string | null
-          filmcheck_am?: string | null
-          filmcheck_notizen?: string | null
-          filmcheck_ok?: boolean | null
-          fin_extrahiert_am?: string | null
-          fin_quelle?: string | null
-          fin_vin?: string | null
-          firma_name?: string | null
-          gcal_event_id?: string | null
-          gegner_anzahl_beteiligte?: number | null
-          gegner_fahrzeugtyp?: string | null
-          gegner_kennzeichen?: string | null
-          gegner_name?: string | null
-          gegner_versicherung?: string | null
-          gegner_versicherung_anfrage_datum?: string | null
-          geschaetzte_fahrdistanz_km?: number | null
-          geschaetzte_fahrzeit_min?: number | null
-          geschlossen_grund?: string | null
-          google_review_gesendet?: boolean | null
-          google_review_prompt_gezeigt_am?: string | null
-          gutachten_betrag?: number | null
-          gutachten_eingegangen_am?: string | null
-          gutachten_hochgeladen_am?: string | null
-          gutachten_nummer?: string | null
-          gutachten_positionen?: Json | null
-          gutachten_stundensatz?: number | null
-          gutachten_vorhanden?: boolean | null
-          gutachter_honorar?: number | null
-          guthaben_verrechnet_netto?: number
-          halter_email?: string | null
-          halter_geburtsdatum?: string | null
-          halter_nachname?: string | null
-          halter_name?: string | null
-          halter_plz?: string | null
-          halter_stadt?: string | null
-          halter_strasse?: string | null
-          halter_telefon?: string | null
-          halter_vorname?: string | null
-          hat_vorschaeden?: boolean | null
-          hsn?: string | null
-          iban?: string | null
-          id?: string
-          interne_notizen?: string | null
-          ist_aktiv?: boolean | null
-          ist_fahrzeughalter?: boolean | null
-          kanzlei_abrechnung_id?: string | null
-          kanzlei_ansprechpartner_position?: string | null
-          kanzlei_honorar?: number | null
-          kanzlei_id?: string | null
-          kanzlei_provision_ausgezahlt_am?: string | null
-          kanzlei_provision_status?: string | null
-          kennzeichen?: string | null
-          kennzeichen_buchstaben?: string | null
-          kennzeichen_kreis?: string | null
-          kennzeichen_suffix?: string | null
-          kennzeichen_zahl?: string | null
-          ki_geschaetzte_kosten_max?: number | null
-          ki_geschaetzte_kosten_min?: number | null
-          ki_kalkulation?: Json | null
-          ki_kalkulation_am?: string | null
-          kilometerstand?: number | null
-          klage_uebergeben_am?: string | null
-          kontoinhaber?: string | null
-          konvertiert_am?: string | null
-          kuerzungs_betrag?: number | null
-          kunde_adresse?: string | null
-          kunde_id?: string | null
-          kunde_lat?: number | null
-          kunde_lng?: number | null
-          kunde_match_via?: string | null
-          kunde_nachname?: string | null
-          kunde_plz?: string | null
-          kunde_stadt?: string | null
-          kunde_strasse?: string | null
-          kunde_telefon?: string | null
-          kunde_vorname?: string | null
-          kundenbetreuer_fallback_flag?: boolean
-          kundenbetreuer_zugewiesen_am?: string | null
-          lackfarbe_code?: string | null
-          lead_id?: string | null
-          lead_preis_berechnet_am?: string | null
-          lead_preis_netto?: number | null
-          lead_preis_typ?: string | null
-          leasinggeber_informiert?: boolean | null
-          leasinggeber_name?: string | null
-          lexdrive_case_id?: string | null
-          lexdrive_ocr_data?: Json | null
-          lexdrive_ocr_received_at?: string | null
-          losfahren_erinnerung_gesendet?: boolean | null
-          makler_id?: string | null
-          mandatsnummer?: string | null
-          marketing_provision?: number | null
-          marketing_provision_status?: string | null
-          marketing_quelle?: string | null
-          mietwagen_argumentations_puffer?: number
-          mietwagen_kanzlei_informiert?: boolean | null
-          mietwagen_kanzlei_informiert_am?: string | null
-          mietwagen_limit_grund?: string | null
-          mietwagen_limit_tage?: number | null
-          mietwagen_rechnung_url?: string | null
-          mietwagen_rechnung_vorhanden?: boolean
-          mietwagen_seit_datum?: string | null
-          mietwagen_vermieter?: string | null
-          nachbesichtigung_angefordert_am?: string | null
-          nachbesichtigung_ergebnis?: string | null
-          nachbesichtigung_konfrontation?: boolean | null
-          nachbesichtigung_kunde_termin_eingereicht_am?: string | null
-          nachbesichtigung_kunde_termin_vorschlaege?: Json | null
-          nachbesichtigung_status?: string | null
-          nachbesichtigung_sv_konfrontation_gewuenscht?: boolean | null
-          nachbesichtigung_sv_termin_vereinbart_am?: string | null
-          nachbesichtigung_termin_datum?: string | null
-          no_show_gemeldet_am?: string | null
-          notizen?: string | null
-          nutzungsausfall_gesamt?: number | null
-          nutzungsausfall_tagessatz?: number | null
-          ocr_extrahiert_am?: string | null
-          ocr_rohdaten?: Json | null
-          onboarding_complete?: boolean | null
-          organisation_id?: string | null
-          prioritaet?: string | null
-          re_termin_eskalation_an_kb_am?: string | null
-          re_termin_token?: string | null
-          re_termin_token_eingelaufen_am?: string | null
-          regulierung_am?: string | null
-          regulierung_angekuendigt_am?: string | null
-          regulierungsweise?: string | null
-          reparaturdauer_tage?: number | null
-          reparaturkosten?: number | null
-          ruege_betrag?: number | null
-          ruege_counter?: number | null
-          ruege_erhalten_am?: string | null
-          ruege_frist_tage?: number | null
-          ruege_gesendet_am?: string | null
-          ruege_grund?: string | null
-          sa_pdf_url?: string | null
-          sa_unterschrieben?: boolean | null
-          sa_unterschrieben_am?: string | null
-          sa_unterschrift_url?: string | null
-          schadens_hoehe_netto?: number | null
-          schadens_ursache?: string | null
-          schlussabrechnung_am?: string | null
-          service_typ?: string
-          source_channel?: string | null
-          source_domain?: string | null
-          sprache?: string | null
-          status?: Database["public"]["Enums"]["fall_status"]
-          status_changed_at?: string | null
-          storniert_am?: string | null
-          storno_durch_user_id?: string | null
-          storno_grund?: string | null
-          sv_briefing_generated_at?: string | null
-          sv_briefing_model?: string | null
-          sv_briefing_struktur?: Json | null
-          sv_briefing_text?: string | null
-          sv_briefing_version?: number
-          sv_id?: string | null
-          sv_nachzahlung_netto?: number | null
-          sv_notizen_vor_ort?: string | null
-          sv_termin_dokument_reminder_gesendet_am?: string | null
-          sv_zugewiesen_am?: string | null
-          szenario?: string | null
-          technische_stellungnahme_beauftragt_am?: string | null
-          technische_stellungnahme_freigabe_am?: string | null
-          technische_stellungnahme_hochgeladen_am?: string | null
-          technische_stellungnahme_notiz_sv?: string | null
-          technische_stellungnahme_status?: string | null
-          termin_erinnerung_5min_gesendet?: boolean | null
-          tsn?: string | null
-          unfallmitteilung_status?: string | null
-          updated_at?: string | null
-          ust_id?: string | null
-          vollmacht_geprueft_am?: string | null
-          vollmacht_geprueft_von?: string | null
-          vollmacht_pdf?: string | null
-          vollmacht_pruefung_begruendung?: string | null
-          vollmacht_pruefung_status?: string | null
-          vollmacht_signiert_am?: string | null
-          vollmacht_status?: string | null
-          vorschaden_anzahl?: number | null
-          vorschaden_erkannt?: boolean
-          vorschaden_geprueft?: boolean | null
-          vorschaden_letzter_datum?: string | null
-          vorschaden_typ_a_ergebnis?: Json | null
-          vorschaden_typ_b_bericht?: Json | null
-          vorschaden_typ_b_pdf_url?: string | null
-          vorschaeden_beschreibung?: string | null
-          vs_eskalationsstufe?: string | null
-          vs_frist_bis?: string | null
-          vs_kuerzung_grund?: string | null
-          vs_kuerzungs_typ?: string | null
-          vs_quote_akzeptiert_am?: string | null
-          vs_quote_betrag_ausgezahlt?: number | null
-          vs_quote_grund?: string | null
-          vs_quote_prozent?: number | null
-          vs_reaktion_am?: string | null
-          vs_reaktion_typ?: string | null
-          werkstatt_seit_datum?: string | null
-          wertminderung?: number | null
-          wunschtermin?: string | null
-          zahlung_betrag?: number | null
-          zahlung_eingegangen_am?: string | null
-          zahlung_erwartet_am?: string | null
-          zahlungsweg?: string | null
-          zb1_status?: string | null
-          zeugen_vorhanden?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "claims"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_for_gast"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_full"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_listing"
-            referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_phase"
-            referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_claim_sv"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_faelle_mit_aktuellem_termin"
-            referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "faelle_claim_id_fkey"
-            columns: ["claim_id"]
-            isOneToOne: false
-            referencedRelation: "v_gutachten_werte"
-            referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "faelle_dispatch_id_fkey"
-            columns: ["dispatch_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskalation_tag_14_ergebnis_von_fkey"
-            columns: ["eskalation_tag_14_ergebnis_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskalation_tag_21_ergebnis_von_fkey"
-            columns: ["eskalation_tag_21_ergebnis_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskalation_tag_28_ergebnis_von_fkey"
-            columns: ["eskalation_tag_28_ergebnis_von"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_eskaliert_an_admin_id_fkey"
-            columns: ["eskaliert_an_admin_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_kanzlei_abrechnung_id_fkey"
-            columns: ["kanzlei_abrechnung_id"]
-            isOneToOne: false
-            referencedRelation: "kanzlei_abrechnungen"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_kunde_id_fkey"
-            columns: ["kunde_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_lead_id_fkey"
-            columns: ["lead_id"]
-            isOneToOne: false
-            referencedRelation: "leads"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_makler_id_fkey"
-            columns: ["makler_id"]
-            isOneToOne: false
-            referencedRelation: "makler"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_organisation_id_fkey"
-            columns: ["organisation_id"]
-            isOneToOne: false
-            referencedRelation: "organisationen"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "faelle_sv_id_fkey"
-            columns: ["sv_id"]
-            isOneToOne: false
-            referencedRelation: "sachverstaendige"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       faelle_claim_bridge: {
         Row: {
           claim_id: string
@@ -4954,13 +3945,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "fall_dokumente_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "fall_dokumente_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -5064,13 +4048,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "fall_read_state_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -5499,13 +4476,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "flow_links_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "flow_links_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -5610,13 +4580,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "forderungspositionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -6391,13 +5354,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "gutachter_abrechnungen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "gutachter_abrechnungen_sv_id_fkey"
             columns: ["sv_id"]
             isOneToOne: false
@@ -6509,13 +5465,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "gutachter_abrechnungspositionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -6873,13 +5822,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "gutachter_finder_anfragen_konvertiert_zu_fall_id_fkey"
-            columns: ["konvertiert_zu_fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "gutachter_finder_anfragen_konvertiert_zu_lead_id_fkey"
             columns: ["konvertiert_zu_lead_id"]
             isOneToOne: false
@@ -7023,13 +5965,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "gutachter_mitteilungen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "gutachter_mitteilungen_sv_id_fkey"
@@ -7510,13 +6445,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "gutachter_termine_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "gutachter_termine_kb_id_fkey"
             columns: ["kb_id"]
             isOneToOne: false
@@ -7717,13 +6645,6 @@ export type Database = {
             columns: ["referenz_abrechnung_id"]
             isOneToOne: false
             referencedRelation: "abrechnungen"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "gutschriften_referenz_fall_id_fkey"
-            columns: ["referenz_fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
             referencedColumns: ["id"]
           },
           {
@@ -7950,13 +6871,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "kanzlei_abrechnung_positionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "kanzlei_abrechnung_positionen_kanzlei_abrechnung_id_fkey"
@@ -8187,13 +7101,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "kanzlei_admin_termine_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -8428,13 +7335,6 @@ export type Database = {
             isOneToOne: true
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "kanzlei_faelle_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: true
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -8772,13 +7672,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "kunde_gutachten_requests_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -9602,13 +8495,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "leads_konvertiert_zu_fall_id_fkey"
-            columns: ["konvertiert_zu_fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "leads_kunde_id_fkey"
             columns: ["kunde_id"]
             isOneToOne: false
@@ -9811,13 +8697,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "makler_fall_consent_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "makler_fall_consent_makler_id_fkey"
             columns: ["makler_id"]
             isOneToOne: false
@@ -9944,13 +8823,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "makler_provisionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "makler_provisionen_lead_id_fkey"
@@ -10447,13 +9319,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "nachrichten_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "nachrichten_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -10618,13 +9483,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "notification_events_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -11156,13 +10014,6 @@ export type Database = {
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
-          {
-            foreignKeyName: "parteien_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
         ]
       }
       personen: {
@@ -11358,13 +10209,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "personenschaden_personen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "personenschaden_personen_lead_id_fkey"
             columns: ["lead_id"]
             isOneToOne: false
@@ -11505,13 +10349,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "pflichtdokumente_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "pflichtdokumente_person_id_fkey"
             columns: ["person_id"]
             isOneToOne: false
@@ -11626,13 +10463,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "phase_transitions_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
         ]
       }
@@ -12171,13 +11001,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "qc_checkliste_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: true
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "qc_checkliste_geprueft_von_fkey"
             columns: ["geprueft_von"]
             isOneToOne: false
@@ -12379,13 +11202,6 @@ export type Database = {
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
-          {
-            foreignKeyName: "regulierungs_klassifizierung_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: true
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
         ]
       }
       reklamationen: {
@@ -12493,13 +11309,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "reklamationen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "reklamationen_sv_id_fkey"
@@ -13131,13 +11940,6 @@ export type Database = {
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
-          {
-            foreignKeyName: "schadenspositionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
         ]
       }
       settings: {
@@ -13275,13 +12077,6 @@ export type Database = {
             columns: ["eskalation_task_id"]
             isOneToOne: false
             referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sla_tracking_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
             referencedColumns: ["id"]
           },
         ]
@@ -13837,13 +12632,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "sv_live_location_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "sv_live_location_sv_id_fkey"
             columns: ["sv_id"]
             isOneToOne: true
@@ -14366,13 +13154,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "tasks_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "tasks_gate_task_id_fkey"
             columns: ["gate_task_id"]
             isOneToOne: false
@@ -14676,13 +13457,6 @@ export type Database = {
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
-          {
-            foreignKeyName: "termine_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
         ]
       }
       timeline: {
@@ -14784,13 +13558,6 @@ export type Database = {
             columns: ["erstellt_von"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "timeline_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
             referencedColumns: ["id"]
           },
           {
@@ -15552,13 +14319,6 @@ export type Database = {
             referencedColumns: ["claim_id"]
           },
           {
-            foreignKeyName: "webhook_events_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "webhook_events_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
@@ -15683,13 +14443,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "whatsapp_inbound_messages_matched_fall_id_fkey"
-            columns: ["matched_fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "whatsapp_inbound_messages_matched_lead_id_fkey"
             columns: ["matched_lead_id"]
             isOneToOne: false
@@ -15807,13 +14560,6 @@ export type Database = {
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
           },
-          {
-            foreignKeyName: "zahlungseingaenge_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
-          },
         ]
       }
       zahlungspositionen: {
@@ -15906,13 +14652,6 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "v_gutachten_werte"
             referencedColumns: ["claim_id"]
-          },
-          {
-            foreignKeyName: "zahlungspositionen_fall_id_fkey"
-            columns: ["fall_id"]
-            isOneToOne: false
-            referencedRelation: "faelle"
-            referencedColumns: ["id"]
           },
           {
             foreignKeyName: "zahlungspositionen_zahlung_id_fkey"

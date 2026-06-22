@@ -96,12 +96,9 @@ export async function lehneLeadAb(
   }
 
   // 3. SV-Felder clearen damit Dispatch neu zuweisen kann.
-  // CMM-49 (faelle-Drop-Runway): sv_id + sv_zugewiesen_am claims-direkt (SSoT; claims.id == fall_id).
-  // sv_termin bleibt vorerst faelle (separates Spalten-Retirement, nicht Teil des sv_id-Cutovers).
-  // CMM-44 SP-B PR2a: sv_zugewiesen_am lebt auf claims (SSoT).
-  await db.from('faelle').update({
-    sv_termin: null,
-  }).eq('id', fallId)
+  // CMM-49 faelle-DROP: sv_id + sv_zugewiesen_am claims-direkt (SSoT; claims.id == fall_id).
+  // sv_termin war ein faelle-only-Legacy-Feld (faelle gedroppt) — der Termin-Lifecycle liegt
+  // kanonisch in der Termin-Engine (gutachter_termine, AAR-552); kein faelle-Write mehr.
   const fallClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
   if (fallClaimId) {
     await db.from('claims').update({ sv_id: null, sv_zugewiesen_am: null }).eq('id', fallClaimId)

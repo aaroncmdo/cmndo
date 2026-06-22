@@ -467,24 +467,16 @@ export async function updateFallField(
   // CMM-49 Phase 2b: updated_at NICHT mehr mitschreiben — trigger-redundant
   // (update_faelle_updated_at) + reader-frei. So feuert der faelle-Write nur noch
   // fuer echte faelle-only-Felder; CLAIM_OWNED-Felder gehen ohne faelle-Write auf claims.
-  const { faelleUpdate, claimsUpdate } = splitOrKeepFaelleUpdate(
+  // CMM-49 faelle-DROP: faelle ist gedroppt — nur noch der claims-Anteil wird geschrieben.
+  // Das faelleUpdate-Residual (noch nicht ent-routete Entity-Felder: halter_*/vehicle_*/
+  // gegner_name/besichtigungsort_*/vorschaeden) war schon vor dem DROP reader-frei (0 Views
+  // lesen faelle; Display liest Entities/v_claim_full) — das Inline-Editing dieser Felder ist
+  // bereits heute ein No-op. Die kanonische Ent-Routung (HALTER_PERSON_COL etc. / Vehicle-Tier)
+  // ist ein eigener CMM-49-Schritt und kein DROP-Blocker.
+  const { claimsUpdate } = splitOrKeepFaelleUpdate(
     { [field]: normalized },
     claimId,
   )
-
-  if (Object.keys(faelleUpdate).length > 0) {
-    // CMM-49 faelle-DROP-tolerant: das Residual (entity-Felder die noch NICHT ent-routet sind —
-    // halter_*/vehicle_*/gegner_name/Kernwerte/besichtigungsort_*/vorschaeden) ist reader-frei
-    // (0 Views lesen faelle; Display liest die Entities/v_claim_full). Der faelle-Write ist fuer
-    // diese Felder also schon heute tot (gebrochenes Inline-Editing) -> nach DROP TABLE faelle
-    // (42P01 / PGRST205 schema-cache) ignorieren statt den Edit zu sprengen; pre-DROP-Fehler (RLS)
-    // bleiben sichtbar. Die kanonische Ent-Routung dieser Residuen (HALTER_PERSON_COL etc.) =
-    // eigener CMM-49-Schritt (fixt das gebrochene Editing), KEIN DROP-Blocker.
-    const { error } = await supabase.from('faelle').update(faelleUpdate).eq('id', fallId)
-    if (error && error.code !== '42P01' && error.code !== 'PGRST205') {
-      return { success: false, error: error.message }
-    }
-  }
 
   if (claimId && Object.keys(claimsUpdate).length > 0) {
     const { error: claimErr } = await createAdminClient()
