@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertSvLead } from '@/lib/sv-leads/upsert'
 import { revalidatePath } from 'next/cache'
+import type { SvLeadRow } from './types'
 
 async function requireAdmin(): Promise<{ id: string } | null> {
   const supabase = await createClient()
@@ -72,19 +73,6 @@ export async function createSvLead(
 
   revalidatePath('/admin/sv-leads')
   return { ok: true, id: result.id }
-}
-
-export type SvLeadRow = {
-  id: string
-  name: string
-  firma: string | null
-  ort: string | null
-  plz: string | null
-  ist_aktiv: boolean | null
-  claim_status: string | null
-  konvertiert_zu_sv_id: string | null
-  quelle: string | null
-  aktualisiert_am: string | null
 }
 
 export async function getSvLeads(): Promise<SvLeadRow[]> {

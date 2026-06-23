@@ -4,7 +4,8 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { MapPinIcon, PlusIcon } from 'lucide-react'
-import { createSvLead, type SvLeadRow } from './actions'
+import { createSvLead } from './actions'
+import type { SvLeadRow } from './types'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -20,7 +21,7 @@ const CLAIM_STATUS_LABELS: Record<string, string> = {
 }
 
 const CLAIM_STATUS_COLORS: Record<string, string> = {
-  offen: 'bg-claimondo-bg text-claimondo-ondo',
+  offen: 'bg-info-soft text-info-strong',
   beansprucht_pending: 'bg-warning-soft text-warning-strong',
   beansprucht: 'bg-info-soft text-info-strong',
   konvertiert: 'bg-success-soft text-success-strong',
