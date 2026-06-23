@@ -12,6 +12,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveClaimId } from './get-claim-for-role'
+import { ensurePersonForData } from '@/lib/personen/ensure-person'
 
 export async function createClaimForFall(
   db: SupabaseClient,
@@ -43,6 +44,18 @@ export async function createClaimForFall(
     polizei_vor_ort?: boolean | null
     polizeibericht_status?: string | null
     kunde_id?: string | null
+    // CMM-49: Geschaedigter-Identitaet (admin/faelle/anlegen reicht sie durch) -> geschaedigter-
+    // claim_party + personen-Entitaet (analog convertLeadToClaim). Ohne diese Party fanden
+    // kunde_*/halter_*/ist_fahrzeughalter-Inline-Edits in der Fallakte kein Ziel.
+    anrede?: string | null
+    vorname?: string | null
+    nachname?: string | null
+    email?: string | null
+    telefon?: string | null
+    kunde_strasse?: string | null
+    kunde_plz?: string | null
+    kunde_stadt?: string | null
+    ist_fahrzeughalter?: boolean | null
     gegner_versicherung_id?: string | null
     gegner_versicherungsnummer?: string | null
     gegner_schadennummer?: string | null
@@ -147,14 +160,59 @@ export async function createClaimForFall(
     return null
   }
 
+  // CMM-49: Geschaedigter-Party + personen-Entitaet (analog convertLeadToClaim). create-for-fall
+  // legte bisher KEINE Geschaedigter-Party an -> admin-manuell angelegte Faelle waren "thin"
+  // (kunde_*/halter_*/ist_fahrzeughalter-Inline-Edits in der Fallakte fanden keine Party zum
+  // Schreiben). Nur bei vorhandener Identitaet anlegen (kein leeres Geschaedigter; der reine
+  // Test-/Datenlose-Pfad bleibt unberuehrt). Person via ensurePersonForData (userId=kunde_id ->
+  // Account-Dedup, sonst neue Person). Non-critical: ein Fehlschlag bricht die Claim-Anlage nicht
+  // (claim.id ist schon da), wird aber geloggt. Person-flache Spalten bewusst NICHT geschrieben
+  // (personen = SSoT, claim_parties speichert sie nicht mehr flach — wie convertLeadToClaim).
+  const hatGeschaedigter = !!(
+    source.vorname || source.nachname || source.email || source.telefon || source.kunde_id
+  )
+  if (hatGeschaedigter) {
+    const personRes = await ensurePersonForData({
+      db,
+      userId: source.kunde_id ?? null,
+      snapshot: {
+        anrede: source.anrede ?? null,
+        vorname: source.vorname ?? null,
+        nachname: source.nachname ?? null,
+        email: source.email ?? null,
+        telefon: source.telefon ?? null,
+        mobil: source.telefon ?? null,
+        adresse_strasse: source.kunde_strasse ?? null,
+        adresse_plz: source.kunde_plz ?? null,
+        adresse_ort: source.kunde_stadt ?? null,
+        adresse_land: 'DE',
+      },
+    })
+    if (!personRes.ok) {
+      console.error('[CMM-49] geschaedigter personen-Link (create-for-fall):', personRes.error)
+    }
+    const { error: gpErr } = await db.from('claim_parties').insert({
+      claim_id: claim.id,
+      rolle: 'geschaedigter',
+      reihenfolge: 1,
+      user_id: source.kunde_id ?? null,
+      person_id: personRes.ok ? personRes.personId : null,
+      ist_halter: source.ist_fahrzeughalter ?? true,
+      ist_fahrer: !(source.halter_ungleich_fahrer_flag ?? false),
+      ist_aktiv: true,
+      quelle: 'manuell_kb',
+      created_by_user_id: source.kundenbetreuer_id ?? null,
+    })
+    if (gpErr) console.error('[CMM-49] geschaedigter-Party-Insert (create-for-fall):', gpErr.message)
+  }
+
   // CMM-49 faelle-DROP: kein claim_id-Backlink auf faelle mehr (Tabelle gedroppt). Die
   // faelle_claim_bridge (via trg_sync_claims_to_bridge) ist die SSoT-Map fall_id<->claim_id.
 
   // CMM-49 Tier-2: gegner_versicherungsnummer/-schadennummer leben in der verursacher-
-  // claim_party (SSoT), nicht claims.gegner_*. create-for-fall legte bisher KEINE Parties
-  // an -> verursacher-Party on-demand anlegen wenn Gegner-Daten vorhanden (Option A).
-  // versicherung_id zusaetzlich (wie convert; claims behaelt den FK fuer die gv-Join-View).
-  // Non-critical: ein Fehlschlag bricht die Claim-Anlage nicht (claim.id ist schon da).
+  // claim_party (SSoT), nicht claims.gegner_*. verursacher-Party on-demand anlegen wenn
+  // Gegner-Daten vorhanden (Option A). versicherung_id zusaetzlich (wie convert; claims behaelt
+  // den FK fuer die gv-Join-View). Non-critical: Fehlschlag bricht die Claim-Anlage nicht.
   const hatGegnerDaten = !!(
     source.gegner_versicherungsnummer || source.gegner_schadennummer || source.gegner_versicherung_id
   )
@@ -163,7 +221,9 @@ export async function createClaimForFall(
       claim_id: claim.id,
       rolle: 'verursacher',
       reihenfolge: 2,
-      quelle: 'create_for_fall',
+      // CMM-49: 'manuell_kb' (admin/KB-Anlage). 'create_for_fall' war KEIN gueltiger quelle-Wert
+      // (claim_parties_quelle_check) -> der Insert waere am Constraint gescheitert (23514, latent).
+      quelle: 'manuell_kb',
       versicherung_id: source.gegner_versicherung_id ?? null,
       versicherungsnummer: source.gegner_versicherungsnummer ?? null,
       versicherungs_aktenzeichen: source.gegner_schadennummer ?? null,
