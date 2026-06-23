@@ -252,18 +252,17 @@ export const STAMMDATEN_FIELD_SCHEMA: StammdatenFieldDef[] = [
     // faelle.gegner_schadennummer als Semantik-Duplikat). Display liest claims.
     getValue: (_f, _l, c) => fallToDisplay(c?.gegner_aktenzeichen ?? null),
   },
-  {
-    block: 'gegner', key: 'gegner_versicherung_anfrage_datum', label: 'Grüne-Karte-Anfrage',
-    type: 'date', hint: 'AAR-314: Auslands-KZ',
-    getValue: (f) => dateOnly(f.gegner_versicherung_anfrage_datum),
-  },
+  // CMM-49: gegner_versicherung_anfrage_datum (Grüne-Karte-Anfrage) entfernt — in der Fallakte
+  // vestigial (v_faelle NULLt es hart, kein claims-Home; lebt nur auf leads). Der Edit versickerte
+  // reader-frei -> nicht mehr als editierbares Inline-Feld anbieten.
 
   // ── Vorschäden ───────────────────────────────────────────────────────────
   {
     block: 'vorschaeden', key: 'hat_vorschaeden', label: 'Vorschäden vorhanden?',
     placeholder: 'Ja / Nein',
   },
-  { block: 'vorschaeden', key: 'vorschaden_anzahl', label: 'Anzahl', type: 'number' },
+  // CMM-49: vorschaden_anzahl (abgeleitete Zähl-Aggregation vv.anzahl) ist read-only -> nicht als
+  // editierbares Inline-Feld. Die Anzahl wird read-only im Cardentity-Block angezeigt (Sections.tsx).
   {
     block: 'vorschaeden', key: 'vorschaeden_beschreibung', label: 'Beschreibung',
     type: 'textarea', fullWidth: true,
