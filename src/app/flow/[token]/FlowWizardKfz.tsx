@@ -20,6 +20,7 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { FlowQualiStep } from './FlowQualiStep'
 import { FlowSlotStep, type GebuchterTermin } from './FlowSlotStep'
 import { aendereTerminFlow } from './self-service-actions'
+import { BeratungsterminCard } from './BeratungsterminCard'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { FlowFeststellungStep } from './FlowFeststellungStep'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
@@ -140,6 +141,7 @@ export default function FlowWizardKfz({
   serviceFelder,
   serviceWerte,
   legalDocs,
+  beratungstermin,
 }: {
   token: string
   flowLinkId?: string | null
@@ -165,6 +167,8 @@ export default function FlowWizardKfz({
     datenschutz?: { titel: string; markdown: string }
     agb?: { titel: string; markdown: string }
   }
+  // Auto-Beratungstermin (AAR-956): kb_beratung-Termin des Leads, gerendert als Karte im Abschluss-Step.
+  beratungstermin?: { id: string; startZeit: string; status: string; kbVorname: string | null } | null
 }) {
   const t = useTranslations('flow')
   // t() liefert bei fehlendem Key den Key-Pfad (truthy) statt null — daher has-Guard,
@@ -963,6 +967,10 @@ export default function FlowWizardKfz({
                     {t('step_account.success_text')}
                   </p>
                 </div>
+
+                {beratungstermin && (
+                  <BeratungsterminCard token={token} termin={beratungstermin} />
+                )}
 
                 {/* AAR-956: Kunde ist ohne Termin-Buchung weiter (kein_match/Skip) —
                     Erwartung setzen, dass der Termin nachgelagert vereinbart wird. */}
