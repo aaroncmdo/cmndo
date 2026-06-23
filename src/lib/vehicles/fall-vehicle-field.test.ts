@@ -13,11 +13,11 @@ describe('FALL_VEHICLE_COL', () => {
     expect(FALL_VEHICLE_COL.kilometerstand).toBe('aktueller_kilometerstand')
     expect(FALL_VEHICLE_COL.erstzulassung).toBe('erstzulassung')
     expect(FALL_VEHICLE_COL.fahrzeug_baujahr).toBe('baujahr_monat')
+    expect(FALL_VEHICLE_COL.hsn).toBe('hsn')
+    expect(FALL_VEHICLE_COL.tsn).toBe('tsn')
   })
 
-  it('enthaelt die bewusst deferierten Felder NICHT (Read-Source unbestaetigt/aggregat)', () => {
-    expect(FALL_VEHICLE_COL.hsn).toBeUndefined()
-    expect(FALL_VEHICLE_COL.tsn).toBeUndefined()
+  it('enthaelt die bewusst deferierten Felder NICHT (Aggregat/Name-Split/Value-Format)', () => {
     expect(FALL_VEHICLE_COL.ist_fahrzeughalter).toBeUndefined()
     expect(FALL_VEHICLE_COL.vorschaden_anzahl).toBeUndefined()
     expect(FALL_VEHICLE_COL.gegner_name).toBeUndefined()

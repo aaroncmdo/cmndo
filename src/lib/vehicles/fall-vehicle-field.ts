@@ -18,13 +18,17 @@
 //   kilometerstand     = veh.aktueller_kilometerstand
 //   erstzulassung      = veh.erstzulassung
 //   fahrzeug_baujahr   = EXTRACT(year FROM veh.baujahr_monat)::int   <- Transform unten
+//   hsn                = veh.hsn      (Fallakte getValue: f.hsn ?? lead.hsn -> primaer vehicles)
+//   tsn                = veh.tsn
 //
 // NICHT enthalten (bewusst deferred, eigener Schritt):
-//   hsn/tsn            -> vehicles.hsn/tsn existiert, wird aber NICHT von v_claim_full
-//                         exponiert (Read-Source unbestaetigt) -> erst nach Reader-Klaerung.
-//   ist_fahrzeughalter -> Party-Flag (v_claim_full hat zwei Quellen kunde_p./kcp.) -> mehrdeutig.
+//   ist_fahrzeughalter -> Write-Target = geschaedigter claim_party.ist_halter (v_claim_full
+//                         kcp.ist_halter), ABER Fallakte rendert es als Ja/Nein-Textfeld
+//                         (schema.ts:158, kein type) -> Boolean-Coercion/Value-Format unklar
+//                         -> erst nach UI-Klaerung (kein Raten).
 //   vorschaden_anzahl  -> vv.anzahl-Aggregat (vehicle_vorschaeden) -> nicht direkt schreibbar.
 //   gegner_name        -> COALESCE(firma.name, vorname||' '||nachname) -> Name-Split noetig.
+//   gutachter_honorar  -> faelle-nativ; View+Sections-Repoint noetig (eigene DDL/PR).
 
 export const FALL_VEHICLE_COL: Record<string, string> = {
   fahrzeug_hersteller: 'hersteller',
@@ -37,6 +41,8 @@ export const FALL_VEHICLE_COL: Record<string, string> = {
   kilometerstand: 'aktueller_kilometerstand',
   erstzulassung: 'erstzulassung',
   fahrzeug_baujahr: 'baujahr_monat',
+  hsn: 'hsn',
+  tsn: 'tsn',
 }
 
 /**
