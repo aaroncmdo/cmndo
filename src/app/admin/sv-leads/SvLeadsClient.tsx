@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { MapPinIcon, MailIcon, PlusIcon, UploadIcon } from 'lucide-react'
-import { createSvLead, importSvLeadsAction, sendeSvLeadEinladung, sendeAlleOffenenEinladungen } from './actions'
+import { MapPinIcon, MailIcon, PlusIcon, UploadIcon, RefreshCwIcon } from 'lucide-react'
+import { createSvLead, importSvLeadsAction, sendeSvLeadEinladung, sendeAlleOffenenEinladungen, datSyncAusfuehren } from './actions'
 import type { SvLeadRow } from './types'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
@@ -42,6 +42,9 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [importLoading, setImportLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // DAT-Sync state
+  const [datSyncLoading, setDatSyncLoading] = useState(false)
 
   // Einladungs-State: ladende LeadIds als Set
   const [einladendLeads, setEinladendLeads] = useState<Set<string>>(new Set())
@@ -91,6 +94,22 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
     }
     toast.success('SV-Lead angelegt.')
     setShowDialog(false)
+    router.refresh()
+  }
+
+  async function handleDatSync() {
+    setDatSyncLoading(true)
+    const result = await datSyncAusfuehren()
+    setDatSyncLoading(false)
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    if (result.importiert > 0) {
+      toast.success(`${result.importiert} aus DAT importiert.`)
+    } else {
+      toast.info('DAT-Sync noch nicht verbunden — 0 importiert.')
+    }
     router.refresh()
   }
 
@@ -165,6 +184,15 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
             icon={MapPinIcon}
             actions={
               <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={handleDatSync}
+                  iconLeft={<RefreshCwIcon className="w-4 h-4" />}
+                  loading={datSyncLoading}
+                  disabled={datSyncLoading}
+                >
+                  DAT-Sync ausführen
+                </Button>
                 <Button
                   variant="ghost"
                   onClick={() => setShowImportDialog(true)}

@@ -5,6 +5,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertSvLead } from '@/lib/sv-leads/upsert'
 import { importSvLeads } from '@/lib/sv-leads/bulk-import'
 import { ladeSvLeadEinladung } from '@/lib/sv-leads/claim-einladung'
+import { syncSvLeadsFromSource } from '@/lib/sv-leads/sources/sync'
+import { datStubSource } from '@/lib/sv-leads/sources/dat-stub'
 import { revalidatePath } from 'next/cache'
 import type { SvLeadRow } from './types'
 
@@ -116,6 +118,22 @@ export async function sendeSvLeadEinladung(
   const result = await ladeSvLeadEinladung(leadId)
   revalidatePath('/admin/sv-leads')
   return result
+}
+
+// ─── Task 7: DAT-Sync-Trigger (Admin-only) ──────────────────────────────────
+
+export async function datSyncAusfuehren(): Promise<
+  | { ok: true; importiert: number; fehler: string[] }
+  | { ok: false; error: string }
+> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen den DAT-Sync auslösen.' }
+
+  const result = await syncSvLeadsFromSource(datStubSource)
+  if (!result.ok) return { ok: false, error: result.error }
+
+  revalidatePath('/admin/sv-leads')
+  return { ok: true, importiert: result.importiert, fehler: result.fehler }
 }
 
 export async function sendeAlleOffenenEinladungen(): Promise<
