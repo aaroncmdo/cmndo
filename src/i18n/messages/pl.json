@@ -402,6 +402,9 @@
       "aendern_dispatch_hinweis": "Twój termin jest już potwierdzony — zadzwonimy do Ciebie, aby go przełożyć."
     },
     "step_sa": {
+      "sv_consent_text": "Zgadzam się z postanowieniami o ochronie danych i pouczeniem o odstąpieniu od umowy firmy {firma}.",
+      "sv_consent_datenschutz_link": "Zobacz postanowienia o ochronie danych",
+      "sv_consent_widerruf_link": "Zobacz pouczenie o odstąpieniu",
       "heading": "Podpisz zlecenie",
       "sub": "Swoim podpisem zlecasz Claimondo bezpłatną obsługę Twojej szkody.",
       "summary_label": "Podsumowanie:",
