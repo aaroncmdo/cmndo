@@ -255,27 +255,19 @@ export default async function FlowPage({
   feststellungWerte['polizeibericht_status'] = (lead.polizeibericht_status as string | null) ?? null
 
   // AAR-956 Auto-Beratungstermin: aktiven kb_beratung-Termin des Leads + KB-Vorname laden.
+  // Termin-Engine-Contract: ueber den sanktionierten Dual-Lookup-Helper (findet auch
+  // bezug-native Termine, #2580), nicht direkt mit .eq('lead_id') (CONTRACT.md).
   let beratungstermin: { id: string; startZeit: string; status: string; kbVorname: string | null } | null = null
   {
-    const { data: bt } = await svc
-      .from('gutachter_termine')
-      .select('id, start_zeit, status, assignee_id')
-      .eq('lead_id', leadId)
-      .eq('typ', 'kb_beratung')
-      .in('status', ['reserviert', 'bestaetigt'])
-      .order('start_zeit', { ascending: false })
-      .limit(1)
-      .maybeSingle()
+    const { findeBeratungsterminFuerLead } = await import('@/lib/termine/finde-termin-fuer-lead')
+    const bt = await findeBeratungsterminFuerLead(svc, leadId)
     if (bt) {
       let kbVorname: string | null = null
       if (bt.assignee_id) {
-        const { data: kb } = await svc.from('profiles').select('vorname').eq('id', bt.assignee_id as string).maybeSingle()
+        const { data: kb } = await svc.from('profiles').select('vorname').eq('id', bt.assignee_id).maybeSingle()
         kbVorname = (kb?.vorname as string | null) ?? null
       }
-      beratungstermin = {
-        id: bt.id as string, startZeit: bt.start_zeit as string,
-        status: bt.status as string, kbVorname,
-      }
+      beratungstermin = { id: bt.id, startZeit: bt.start_zeit, status: bt.status, kbVorname }
     }
   }
 

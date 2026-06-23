@@ -575,16 +575,11 @@ async function ladeAktivenBeratungstermin(
   admin: ReturnType<typeof createAdminClient>,
   leadId: string,
 ): Promise<{ id: string; status: string } | null> {
-  const { data: t } = await admin
-    .from('gutachter_termine')
-    .select('id, status')
-    .eq('lead_id', leadId)
-    .eq('typ', 'kb_beratung')
-    .in('status', ['reserviert', 'bestaetigt'])
-    .order('start_zeit', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  return t ? { id: t.id as string, status: t.status as string } : null
+  // Termin-Engine-Contract: gutachter_termine NICHT direkt mit Legacy-Filtern querien —
+  // der sanktionierte Dual-Lookup-Helper (findet auch bezug-native Termine, #2580).
+  const { findeBeratungsterminFuerLead } = await import('@/lib/termine/finde-termin-fuer-lead')
+  const t = await findeBeratungsterminFuerLead(admin, leadId)
+  return t ? { id: t.id, status: t.status } : null
 }
 
 /** „Passt mir" — bestaetigt den Beratungstermin. */

@@ -42,3 +42,31 @@ export async function findeTerminFuerLead(db: SupabaseClient, leadId: string): P
   const neuester = Array.from(byId.values()).sort((a, b) => (a.start_zeit < b.start_zeit ? 1 : -1))[0]
   return neuester ? { id: neuester.id, sv_id: neuester.sv_id } : null
 }
+
+// AAR-956 Auto-Beratungstermin: typ-gefiltertes Pendant fuer den kb_beratung-Termin.
+// Gleicher sanktionierter DUAL-Lookup (lead_id ODER bezug_typ='lead'/bezug_id), liegt bewusst
+// in DIESER (vom termin-engine-contract ausgenommenen) Datei — die /flow-Reader duerfen
+// gutachter_termine nicht direkt mit Legacy-Filtern querien (CONTRACT.md, #2580).
+export type BeratungsterminRow = { id: string; start_zeit: string; status: string; assignee_id: string | null }
+
+const BERATUNG_SELECT = 'id, start_zeit, status, assignee_id'
+
+/**
+ * Juengster AKTIVER (reserviert|bestaetigt) `kb_beratung`-Termin eines Leads, oder null.
+ * DUAL-Lookup wie findeTerminFuerLead, gefiltert auf typ='kb_beratung'. Liefert die
+ * /flow-Anzeige-/Steuer-Felder (id/start_zeit/status/assignee_id).
+ */
+export async function findeBeratungsterminFuerLead(
+  db: SupabaseClient,
+  leadId: string,
+): Promise<BeratungsterminRow | null> {
+  const [bezugRes, legacyRes] = await Promise.all([
+    db.from('gutachter_termine').select(BERATUNG_SELECT).eq('bezug_typ', 'lead').eq('bezug_id', leadId).eq('typ', 'kb_beratung').in('status', AKTIV_STATUS),
+    db.from('gutachter_termine').select(BERATUNG_SELECT).eq('lead_id', leadId).eq('typ', 'kb_beratung').in('status', AKTIV_STATUS),
+  ])
+  const byId = new Map<string, BeratungsterminRow>()
+  for (const r of [...((bezugRes.data ?? []) as BeratungsterminRow[]), ...((legacyRes.data ?? []) as BeratungsterminRow[])]) {
+    if (r?.id) byId.set(r.id, r)
+  }
+  return Array.from(byId.values()).sort((a, b) => (a.start_zeit < b.start_zeit ? 1 : -1))[0] ?? null
+}

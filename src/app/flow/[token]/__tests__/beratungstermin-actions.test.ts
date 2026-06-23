@@ -101,8 +101,9 @@ describe('bestaetigeBeratungsterminFlow', () => {
   it('setzt status auf bestaetigt und gibt ok:true zurueck', async () => {
     primeResponses([
       flowLinkFound('lead-1'),
-      { data: { id: 't1', status: 'reserviert' } }, // ladeAktivenBeratungstermin
-      { data: null, error: null },                   // update().eq() terminal
+      { data: [] },                                                                                          // findeBeratungstermin: bezug-Lookup leer
+      { data: [{ id: 't1', start_zeit: '2026-06-24T08:00:00.000Z', status: 'reserviert', assignee_id: null }] }, // legacy-Lookup
+      { data: null, error: null },                                                                           // update().eq() terminal
     ])
     const r = await bestaetigeBeratungsterminFlow('tok')
     expect(r.ok).toBe(true)
@@ -112,7 +113,8 @@ describe('bestaetigeBeratungsterminFlow', () => {
   it('gibt ok:false wenn kein aktiver Termin vorhanden', async () => {
     primeResponses([
       flowLinkFound('lead-1'),
-      { data: null }, // ladeAktivenBeratungstermin: kein Termin
+      { data: [] }, // findeBeratungstermin: bezug-Lookup leer
+      { data: [] }, // legacy-Lookup leer -> kein Termin
     ])
     const r = await bestaetigeBeratungsterminFlow('tok')
     expect(r.ok).toBe(false)
@@ -128,7 +130,8 @@ describe('bestaetigeBeratungsterminFlow', () => {
   it('gibt ok:false wenn DB-Update einen Fehler liefert', async () => {
     primeResponses([
       flowLinkFound('lead-1'),
-      { data: { id: 't1', status: 'reserviert' } },
+      { data: [] },                                                                                          // bezug-Lookup leer
+      { data: [{ id: 't1', start_zeit: '2026-06-24T08:00:00.000Z', status: 'reserviert', assignee_id: null }] }, // legacy-Lookup
       { data: null, error: { message: 'DB-Fehler' } }, // update failt
     ])
     const r = await bestaetigeBeratungsterminFlow('tok')
@@ -143,8 +146,9 @@ describe('verschiebeBeratungsterminFlow', () => {
   it('berechnet end = start + 30min und updatet status=bestaetigt + verlegung_initiator_kunde=true', async () => {
     primeResponses([
       flowLinkFound('lead-1'),
-      { data: { id: 't1', status: 'reserviert' } }, // ladeAktivenBeratungstermin
-      { data: null, error: null },                   // update terminal
+      { data: [] },                                                                                          // bezug-Lookup leer
+      { data: [{ id: 't1', start_zeit: '2026-06-24T08:00:00.000Z', status: 'reserviert', assignee_id: null }] }, // legacy-Lookup
+      { data: null, error: null },                                                                           // update terminal
     ])
     const neuStart = '2026-06-25T13:00:00.000Z'
     const r = await verschiebeBeratungsterminFlow('tok', neuStart)
@@ -179,7 +183,8 @@ describe('verschiebeBeratungsterminFlow', () => {
   it('gibt ok:false wenn kein aktiver Termin vorhanden', async () => {
     primeResponses([
       flowLinkFound('lead-1'),
-      { data: null }, // kein Termin
+      { data: [] }, // bezug-Lookup leer
+      { data: [] }, // legacy-Lookup leer -> kein Termin
     ])
     const zukunft = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
     const r = await verschiebeBeratungsterminFlow('tok', zukunft)
