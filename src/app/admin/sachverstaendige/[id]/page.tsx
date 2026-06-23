@@ -272,7 +272,7 @@ export default async function SvDetailPage({
                   </span>
                 )}
                 {sv.werbebudget_guthaben_netto != null && Number(sv.werbebudget_guthaben_netto) > 0 && (
-                  <span className="bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded text-[10px] font-medium">
+                  <span className="bg-success-soft text-success-strong px-1.5 py-0.5 rounded text-[10px] font-medium">
                     Werbebudget {Number(sv.werbebudget_guthaben_netto).toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €
                   </span>
                 )}
@@ -285,7 +285,7 @@ export default async function SvDetailPage({
                   const anstehend = heute < von
                   if (!aktiv && !anstehend) return null
                   return (
-                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-amber-50 text-amber-700' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                    <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${aktiv ? 'bg-warning-soft text-warning-strong' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
                       Urlaub {von}–{bis}
                     </span>
                   )
@@ -297,7 +297,7 @@ export default async function SvDetailPage({
                 <div className="text-right">
                   <span className="text-sm font-bold text-claimondo-navy tabular-nums">{genutzt}/{maxFaelle}</span>
                   <div className="w-20 h-1.5 bg-claimondo-bg rounded-full overflow-hidden mt-0.5">
-                    <div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-claimondo-ondo'}`}
+                    <div className={`h-full rounded-full ${pct > 80 ? 'bg-danger' : pct > 50 ? 'bg-warning' : 'bg-claimondo-ondo'}`}
                       style={{ width: `${Math.min(100, pct)}%` }} />
                   </div>
                 </div>
@@ -314,14 +314,14 @@ export default async function SvDetailPage({
                 />
                 {/* KFZ-153: Gutachten-Mängel Warnung */}
                 {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-amber-50 text-amber-600" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-warning-soft text-warning" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
                     {mangelCounts.formal + mangelCounts.inhaltlich} Gutachten-Mängel
                   </span>
                 )}
                 {sv.ist_aktiv ? (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-green-50 text-green-600">Aktiv</span>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-success-soft text-success">Aktiv</span>
                 ) : (
-                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-red-50 text-red-500">Inaktiv</span>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-danger-soft text-danger">Inaktiv</span>
                 )}
               </>
             }
@@ -360,10 +360,10 @@ export default async function SvDetailPage({
         <div className="flex-1 overflow-y-auto p-4 bg-claimondo-bg/30">
           <div className="max-w-4xl mx-auto">
             {verifizierungsData.loadError && (
-              <div className="mb-4 rounded-ios-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+              <div className="mb-4 rounded-ios-xl border border-warning/30 bg-warning-soft px-4 py-3 text-xs text-warning-strong">
                 <p className="font-semibold mb-1">Verifizierungs-Daten teilweise nicht geladen</p>
-                <p className="text-amber-700">{verifizierungsData.loadError}</p>
-                <p className="text-amber-600 mt-1">
+                <p className="text-warning-strong">{verifizierungsData.loadError}</p>
+                <p className="text-warning mt-1">
                   Stammdaten sind weiterhin editierbar (Tab „Stammdaten"). SA-Vorlage + Tier-2-Slots werden nicht angezeigt bis Ursache gefixt ist.
                 </p>
               </div>
@@ -395,25 +395,25 @@ export default async function SvDetailPage({
           <div className="flex-1 overflow-y-auto p-4 space-y-5 min-w-0">
             {/* AAR-717: CalDAV-Verbindungs-Fehler-Banner */}
             {caldavVerbindung?.last_error && (
-              <div className="bg-red-50 border border-red-200 rounded-2xl p-4 flex items-start gap-3">
+              <div className="bg-danger-soft border border-danger/30 rounded-2xl p-4 flex items-start gap-3">
                 <div className="flex-shrink-0 mt-0.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5 text-red-600">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-5 h-5 text-danger">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.67 1.73-3L13.73 4a2 2 0 00-3.46 0L3.2 16c-.77 1.33.19 3 1.73 3z" />
                   </svg>
                 </div>
                 <div className="flex-1 text-sm">
-                  <p className="font-semibold text-red-800">
+                  <p className="font-semibold text-danger-strong">
                     Kalender-Verbindung fehlgeschlagen
                     {caldavVerbindung.last_error_at && (
-                      <span className="text-red-600 font-normal ml-2 text-xs">
+                      <span className="text-danger font-normal ml-2 text-xs">
                         (seit {new Date(caldavVerbindung.last_error_at as string).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
                       </span>
                     )}
                   </p>
-                  <p className="text-red-700 text-xs mt-1">
+                  <p className="text-danger-strong text-xs mt-1">
                     {caldavVerbindung.provider_label ?? 'CalDAV'} — {caldavVerbindung.last_error}
                   </p>
-                  <p className="text-red-600 text-[11px] mt-1">
+                  <p className="text-danger text-[11px] mt-1">
                     Dispatch läuft weiter (fail-open), Termin-Überschneidungen können jedoch nicht geprüft werden bis der SV neu verbindet.
                   </p>
                 </div>
@@ -432,7 +432,7 @@ export default async function SvDetailPage({
                   <p className="text-[10px] text-claimondo-ondo">Max. Kapazität</p>
                 </div>
                 <div>
-                  <p className={`text-2xl font-bold tabular-nums ${pct > 80 ? 'text-red-500' : pct > 50 ? 'text-amber-500' : 'text-claimondo-ondo'}`}>{pct}%</p>
+                  <p className={`text-2xl font-bold tabular-nums ${pct > 80 ? 'text-danger' : pct > 50 ? 'text-warning' : 'text-claimondo-ondo'}`}>{pct}%</p>
                   <p className="text-[10px] text-claimondo-ondo">Auslastung</p>
                 </div>
               </div>
@@ -518,16 +518,16 @@ export default async function SvDetailPage({
                     const overdue = t.faellig_am && new Date(t.faellig_am) < now
                     return (
                       <Link key={t.id} href={t.fall_id ? `/faelle/${t.fall_id}` : '#'}
-                        className={`block px-3 py-2.5 border-b border-claimondo-border hover:bg-claimondo-bg transition-colors ${overdue ? 'bg-red-50/30' : ''}`}>
+                        className={`block px-3 py-2.5 border-b border-claimondo-border hover:bg-claimondo-bg transition-colors ${overdue ? 'bg-danger-soft/30' : ''}`}>
                         <p className="text-xs text-claimondo-navy font-medium truncate">{t.titel}</p>
                         <div className="flex items-center gap-2 mt-0.5 text-[10px]">
                           <span className="text-claimondo-ondo/70 font-mono">{fallNr}</span>
                           {t.faellig_am && (
-                            <span className={overdue ? 'text-red-500 font-semibold' : 'text-claimondo-ondo/70'}>
+                            <span className={overdue ? 'text-danger font-semibold' : 'text-claimondo-ondo/70'}>
                               {new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })}
                             </span>
                           )}
-                          {t.prioritaet === 'kritisch' && <span className="bg-red-50 text-red-500 px-1 rounded font-semibold">!</span>}
+                          {t.prioritaet === 'kritisch' && <span className="bg-danger-soft text-danger px-1 rounded font-semibold">!</span>}
                         </div>
                       </Link>
                     )
