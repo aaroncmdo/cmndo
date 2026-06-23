@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Button } from '@/components/primitives/Button'
 import { WunschterminPicker } from '@/app/embed/gutachter-finder/_components/WunschterminPicker'
 import { bestaetigeBeratungsterminFlow, verschiebeBeratungsterminFlow } from './self-service-actions'
 
@@ -71,40 +72,24 @@ export function BeratungsterminCard({ token, termin }: Props) {
       {!verschieben ? (
         <div className="flex flex-col gap-2 sm:flex-row">
           {status !== 'bestaetigt' && (
-            <button
-              onClick={bestaetigen}
-              disabled={pending}
-              className="inline-flex items-center justify-center min-h-11 px-5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm disabled:opacity-60 transition-colors"
-            >
+            <Button variant="ondo" loading={pending} onClick={bestaetigen}>
               Passt mir
-            </button>
+            </Button>
           )}
-          <button
-            onClick={() => setVerschieben(true)}
-            disabled={pending}
-            className="inline-flex items-center justify-center min-h-11 px-5 rounded-full border border-claimondo-border text-claimondo-navy font-semibold text-sm disabled:opacity-60"
-          >
+          <Button variant="ghost" disabled={pending} onClick={() => setVerschieben(true)}>
             Verschieben
-          </button>
+          </Button>
         </div>
       ) : (
         <div className="flex flex-col gap-3">
           <WunschterminPicker value={neuLokal} onChange={setNeuLokal} />
           <div className="flex gap-2">
-            <button
-              onClick={speichern}
-              disabled={pending || !neuLokal}
-              className="inline-flex items-center justify-center min-h-11 px-5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm disabled:opacity-60 transition-colors"
-            >
+            <Button variant="ondo" loading={pending} disabled={!neuLokal} onClick={speichern}>
               Neuen Termin speichern
-            </button>
-            <button
-              onClick={() => { setVerschieben(false); setNeuLokal('') }}
-              disabled={pending}
-              className="inline-flex items-center justify-center min-h-11 px-5 rounded-full border border-claimondo-border text-claimondo-navy font-semibold text-sm disabled:opacity-60"
-            >
+            </Button>
+            <Button variant="ghost" disabled={pending} onClick={() => { setVerschieben(false); setNeuLokal('') }}>
               Abbrechen
-            </button>
+            </Button>
           </div>
         </div>
       )}

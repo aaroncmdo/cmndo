@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-06-23T20:04:08.318Z",
-  "count": 134,
+  "generatedAt": "2026-06-20T15:46:49.058Z",
+  "count": 133,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -39,7 +39,6 @@
     "src/app/faelle/[id]/_tabs/ProzessTab.tsx",
     "src/app/faelle/[id]/_tabs/UebersichtTab.tsx",
     "src/app/faelle/[id]/error.tsx",
-    "src/app/flow/[token]/BeratungsterminCard.tsx",
     "src/app/flow/[token]/FlowWizardKfz.tsx",
     "src/app/flow/[token]/error.tsx",
     "src/app/flow/signatur/[token]/SignaturPage.tsx",
