@@ -57,16 +57,16 @@ export default function BasicFreigabeRowActions({ svId }: { svId: string }) {
           onChange={e => setAblehnGrund(e.target.value)}
           placeholder="Ablehnungsgrund (mind. 10 Zeichen)"
           rows={2}
-          className="w-full text-[11px] px-2 py-1.5 border border-claimondo-border rounded-ios-md focus:outline-none focus:border-red-400 resize-none"
+          className="w-full text-[11px] px-2 py-1.5 border border-claimondo-border rounded-ios-md focus:outline-none focus:border-danger/40 resize-none"
           autoFocus
         />
-        {fehler && <p className="text-[10px] text-red-700">{fehler}</p>}
+        {fehler && <p className="text-[10px] text-danger-strong">{fehler}</p>}
         <div className="flex gap-1.5">
           <button
             type="button"
             onClick={handleAblehnen}
             disabled={pending || ablehnGrund.trim().length < 10}
-            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-ios-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-ios-md bg-danger text-white hover:bg-danger-strong disabled:opacity-40"
           >
             {pending ? <Loader2Icon className="w-3 h-3 animate-spin" /> : null}
             Bestätigen
@@ -90,7 +90,7 @@ export default function BasicFreigabeRowActions({ svId }: { svId: string }) {
         type="button"
         onClick={handleFreigeben}
         disabled={pending}
-        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-ios-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40 font-medium"
+        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-ios-md bg-success text-white hover:bg-success-strong disabled:opacity-40 font-medium"
       >
         {pending ? (
           <Loader2Icon className="w-3 h-3 animate-spin" />
@@ -103,12 +103,12 @@ export default function BasicFreigabeRowActions({ svId }: { svId: string }) {
         type="button"
         onClick={() => setShowAblehnen(true)}
         disabled={pending}
-        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-ios-md border border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-40 font-medium"
+        className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] rounded-ios-md border border-danger/30 text-danger-strong hover:bg-danger-soft disabled:opacity-40 font-medium"
       >
         <XCircleIcon className="w-3 h-3" />
         Ablehnen
       </button>
-      {fehler && <p className="text-[10px] text-red-700">{fehler}</p>}
+      {fehler && <p className="text-[10px] text-danger-strong">{fehler}</p>}
     </div>
   )
 }

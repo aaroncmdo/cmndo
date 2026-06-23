@@ -153,7 +153,7 @@ export default async function BasicFreigabenPage() {
                     return (
                       <Tr
                         key={sv.id}
-                        className={slaKritisch ? 'bg-amber-50/60' : undefined}
+                        className={slaKritisch ? 'bg-warning-soft/60' : undefined}
                       >
                         <Td>
                           <div className="space-y-0.5">
@@ -181,7 +181,7 @@ export default async function BasicFreigabenPage() {
                           <div className="space-y-0.5">
                             <p className="text-xs text-claimondo-navy">{eingegangen}</p>
                             {slaKritisch && (
-                              <p className="text-[10px] text-amber-700 font-semibold">
+                              <p className="text-[10px] text-warning-strong font-semibold">
                                 &gt; 48h — SLA kritisch
                               </p>
                             )}
