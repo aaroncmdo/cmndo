@@ -25,7 +25,6 @@
 // Alle Fixtures sind ZZ_-getaggt fuer eindeutige Identifizierung.
 
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { randomUUID } from 'node:crypto'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import { convertLeadToClaim } from '../convert-lead-to-claim'
 
@@ -277,66 +276,7 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
   }, 30_000)
 })
 
-// CMM-49 D2-Teil-2: createClaimForFall claim-first (admin/faelle/anlegen-Pfad).
-// Beweist: createClaimForFall mit frischem fallId (KEINE faelle-Row vorhanden) legt den Claim
-// mit id==fallId an, die Bridge entsteht via trg_sync_claims_to_bridge -> der admin-Genesis
-// ist faelle-frei (kein faelle.update-Backref mehr; faelle ist gedroppt).
-d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
-  let db3: SupabaseClient
-  let fallId3: string | null = null
-  let personId3: string | null = null
-
-  beforeAll(() => {
-    db3 = createClient(URL!, KEY!, { auth: { autoRefreshToken: false, persistSession: false } })
-  })
-
-  afterAll(async () => {
-    if (fallId3) {
-      await db3.from('faelle_claim_bridge').delete().eq('claim_id', fallId3)
-      await db3.from('claims').delete().eq('id', fallId3)
-    }
-    // CMM-49: die on-demand angelegte geschaedigter-Person (ensurePersonForData, userId=null) wird
-    // nicht vom claims-CASCADE erfasst (personen = globale Entitaet) -> separat aufraeumen.
-    if (personId3) await db3.from('personen').delete().eq('id', personId3)
-  })
-
-  it('frischer fallId -> Claim id==fallId + Bridge + geschaedigter-Party(+Person), KEINE faelle-Row', async () => {
-    const { createClaimForFall } = await import('../../claims/create-for-fall')
-    fallId3 = randomUUID()
-    const claimId = await createClaimForFall(db3, fallId3, {
-      // CMM-49: mit Geschaedigter-Identitaet -> geschaedigter-Party + personen-Entitaet
-      vorname: 'Erika',
-      nachname: 'Mustermann-CMM49',
-      telefon: '+49 170 1234567',
-      schadens_plz: '50667',
-      schadens_art: 'haftpflicht',
-    }, 'manuell_admin')
-    expect(claimId).toBe(fallId3) // Identity: claim.id == fallId
-    // CMM-49 faelle-DROP: faelle ist gedroppt — die Bridge (via trg_sync_claims_to_bridge) traegt
-    // die fall_id->claim_id-Map; der admin-Genesis ist faelle-frei.
-    const { data: br } = await db3
-      .from('faelle_claim_bridge')
-      .select('fall_id, claim_id')
-      .eq('claim_id', fallId3)
-      .single()
-    expect(br?.fall_id).toBe(fallId3)
-    // CMM-49: createClaimForFall legt die geschaedigter-Party + personen-Entitaet an (nicht mehr thin)
-    // -> kunde_*/halter_*/ist_fahrzeughalter-Edits in der Fallakte finden ihre Party.
-    const { data: gp } = await db3
-      .from('claim_parties')
-      .select('rolle, person_id, ist_halter')
-      .eq('claim_id', fallId3)
-      .eq('rolle', 'geschaedigter')
-      .single()
-    expect(gp?.rolle).toBe('geschaedigter')
-    expect(gp?.ist_halter).toBe(true)
-    expect(gp?.person_id).toBeTruthy()
-    personId3 = (gp?.person_id as string | null) ?? null
-    const { data: person } = await db3
-      .from('personen')
-      .select('nachname')
-      .eq('id', personId3 as string)
-      .single()
-    expect(person?.nachname).toBe('Mustermann-CMM49')
-  }, 20_000)
-})
+// CMM-49 Phase 6: der fruehere D2-Teil-2-Test (createClaimForFall claim-first, admin-Genesis) ist
+// entfallen — createClaimForFall wurde geloescht. admin/faelle/anlegen konvertiert jetzt ueber
+// convertLeadToClaim (kanonisch), dessen claim-first-Genesis + geschaedigter-Party(+Person) die
+// beiden describe-Bloecke oben bereits abdecken.
