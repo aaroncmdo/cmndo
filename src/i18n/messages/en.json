@@ -402,6 +402,9 @@
       "aendern_dispatch_hinweis": "Your appointment is already confirmed — we'll call you briefly to rebook it."
     },
     "step_sa": {
+      "sv_consent_text": "I agree to the data protection terms and the right-of-withdrawal notice of {firma}.",
+      "sv_consent_datenschutz_link": "View data protection terms",
+      "sv_consent_widerruf_link": "View withdrawal notice",
       "heading": "Sign engagement",
       "sub": "With your signature, you instruct Claimondo to handle your claim free of charge.",
       "summary_label": "Summary:",

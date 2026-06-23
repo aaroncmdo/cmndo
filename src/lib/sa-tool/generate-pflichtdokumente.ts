@@ -1,10 +1,15 @@
-// Aaron 2026-04-30: Multi-Doc-SA-Tool. Beim Fall-Anlage werden alle
-// vorhandenen SV-Pflichtdokumente (Sicherungsabtretung ODER
-// Honorarvereinbarung + Datenschutzerklärung + Widerrufsbelehrung)
+// Aaron 2026-04-30: Multi-Doc-SA-Tool. Beim Fall-Anlage werden die
+// signatur-pflichtigen SV-Dokumente (Sicherungsabtretung + Honorarvereinbarung)
 // mit der Kunden-Unterschrift versehen, im Storage abgelegt und in
-// fall_dokumente eingetragen — sichtbar nur für SV / Admin / KB /
-// Kanzlei (NICHT Kunde — der Kunde sieht in seiner Fallakte stattdessen
-// die Claimondo-eigenen Standard-Dokumente).
+// fall_dokumente eingetragen. AAR-360 Follow-up (24.06.): die Sicherungsabtretung
+// ist KUNDENSICHTBAR (der Kunde ist Partei der Abtretung + muss sie sehen); die
+// Honorarvereinbarung bleibt SV-/intern-only (SV / Admin / KB / Kanzlei).
+//
+// AAR-360 Follow-up (23.06.): Datenschutzerklärung + Widerrufsbelehrung des
+// Gutachters werden NICHT mehr mit-signiert — das sind rechtlich Informations-/
+// Belehrungs-Dokumente, keine zu unterschreibenden Verträge. Der Kunde stimmt
+// ihnen im FlowLink per Extra-Häkchen zu (claims.sv_datenschutz_widerruf_zugestimmt_am).
+// Daher nur noch 2 Signatur-Slots (SA + Honorarvereinbarung).
 //
 // Strategie:
 //  - Pro Slot eine `pflichtdokumente`-Row mit status='hochgeladen' oder
@@ -24,18 +29,16 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
+// AAR-360 Follow-up: NUR signatur-pflichtige Dokumente. Datenschutzerklärung +
+// Widerrufsbelehrung sind entkoppelt (Zustimmung via FlowLink-Häkchen, nicht Signatur).
 const PFLICHT_SLOTS = [
   'sv_sicherungsabtretung',
   'sv_honorarvereinbarung',
-  'sv_datenschutzerklaerung',
-  'sv_widerrufsbelehrung',
 ] as const
 
 const SLOT_LABEL: Record<(typeof PFLICHT_SLOTS)[number], string> = {
   sv_sicherungsabtretung: 'Sicherungsabtretung',
   sv_honorarvereinbarung: 'Honorarvereinbarung',
-  sv_datenschutzerklaerung: 'Datenschutzerklärung',
-  sv_widerrufsbelehrung: 'Widerrufsbelehrung',
 }
 
 /** Klick-Editor-Konfig je Slot (admin gepflegt unter /admin/vertraege). */
@@ -459,7 +462,11 @@ async function persistMerged({
       original_filename: dateiName,
       groesse_bytes: outBytes.byteLength,
       mime_type: 'application/pdf',
-      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
+      // AAR-360 Follow-up: Sicherungsabtretung kundensichtbar (Kunde ist Partei); Honorar SV-/intern-only.
+      sichtbar_fuer:
+        slotId === 'sv_sicherungsabtretung'
+          ? ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde']
+          : ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
       beschreibung: `${slotLabel} mit Kunden-Unterschrift (SV ${svId})`,
     })
     .select('id')

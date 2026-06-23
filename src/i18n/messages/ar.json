@@ -402,6 +402,9 @@
       "aendern_dispatch_hinweis": "تم تأكيد موعدك بالفعل — سنتصل بك قريبًا لإعادة الحجز."
     },
     "step_sa": {
+      "sv_consent_text": "أوافق على أحكام حماية البيانات وإشعار الحق في الإلغاء الخاص بشركة {firma}.",
+      "sv_consent_datenschutz_link": "عرض أحكام حماية البيانات",
+      "sv_consent_widerruf_link": "عرض إشعار الإلغاء",
       "heading": "توقيع التكليف",
       "sub": "بتوقيعك، تُكلّف Claimondo بتسوية ضررك بدون تكاليف.",
       "summary_label": "الملخص:",
