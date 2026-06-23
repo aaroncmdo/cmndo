@@ -236,9 +236,9 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             <p className="text-sm text-claimondo-ondo mt-1">
               Welcome-Mail wurde an <strong>{data.email}</strong> versendet (mit Initial-Passwort).
             </p>
-            <div className="mt-4 px-4 py-3 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs">
+            <div className="mt-4 px-4 py-3 rounded-ios-xl bg-warning-soft border border-warning/30 text-warning-strong text-xs">
               <strong>Initial-Passwort (zur Sicherheit auch hier):</strong>
-              <code className="block mt-1 font-mono text-sm bg-white px-2 py-1 rounded border border-amber-300">
+              <code className="block mt-1 font-mono text-sm bg-white px-2 py-1 rounded border border-warning/30">
                 {result.initial_password}
               </code>
               Der SV wird beim ersten Login zur Änderung gezwungen.
@@ -325,7 +325,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                   <p className="mt-1 text-[10px] text-claimondo-ondo/70">Prüfe, ob Email bereits vorhanden…</p>
                 )}
                 {!emailChecking && emailCheck?.success && emailCheck.exists && (
-                  <div className="mt-2 px-3 py-2 rounded-ios-xl bg-amber-50 border border-amber-200 text-amber-700 text-xs flex items-start gap-2">
+                  <div className="mt-2 px-3 py-2 rounded-ios-xl bg-warning-soft border border-warning/30 text-warning-strong text-xs flex items-start gap-2">
                     <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
                     <div className="flex-1">
                       <strong>Email bereits vorhanden.</strong> Rolle: {emailCheck.rolle ?? 'unbekannt'}.
@@ -334,7 +334,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                           {' '}
                           <Link
                             href={`/admin/sachverstaendige/${emailCheck.sv_id}`}
-                            className="underline hover:text-amber-800 font-semibold"
+                            className="underline hover:text-warning-strong font-semibold"
                           >
                             Zum existierenden SV-Profil
                           </Link>
@@ -585,7 +585,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
         )}
 
         {error && (
-          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
             {String(error)}
           </div>
         )}
@@ -619,7 +619,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             {/* AAR-sv-anlegen-step0: Sichtbares Hint welche Pflichtfelder noch fehlen,
                 damit Aaron nicht ratend sucht warum der Button disabled ist. */}
             {step === 0 && !canNext() && missingStep0Fields().length > 0 && (
-              <p className="text-[11px] text-amber-700 mt-1.5 text-center">
+              <p className="text-[11px] text-warning-strong mt-1.5 text-center">
                 Pflichtfeld noch leer: {missingStep0Fields().join(', ')}
               </p>
             )}

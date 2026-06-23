@@ -277,7 +277,7 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
 
   if (!apiKey) {
     return (
-      <div className="p-6 bg-amber-50 border border-amber-200 rounded-ios-xl m-4 text-sm text-amber-800">
+      <div className="p-6 bg-warning-soft border border-warning/30 rounded-ios-xl m-4 text-sm text-warning-strong">
         <strong>Karte nicht verfügbar:</strong> <code>NEXT_PUBLIC_GOOGLE_MAPS_KEY</code> fehlt in den Env-Variablen.
       </div>
     )
@@ -306,10 +306,10 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
             {basicFreigabenCount > 0 && (
               <Link
                 href="/admin/sachverstaendige/basic-freigaben"
-                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-amber-100 text-amber-800 hover:bg-amber-200 border border-amber-300"
+                className="inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-ios-lg bg-warning-soft text-warning-strong hover:bg-warning/25 border border-warning/30"
               >
                 Basic-Freigaben
-                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-600 text-white text-[10px] font-bold">
+                <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-warning text-white text-[10px] font-bold">
                   {basicFreigabenCount > 99 ? '99+' : basicFreigabenCount}
                 </span>
               </Link>
@@ -401,7 +401,7 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
                   </div>
                   <div className="flex flex-col items-end gap-0.5 text-[9px]">
                     {sv.verifiziert && (
-                      <span className="text-emerald-600">✓ verif.</span>
+                      <span className="text-success">✓ verif.</span>
                     )}
                     {(sv.offeneFaelle ?? 0) > 0 && (
                       <span className="text-claimondo-ondo tabular-nums">
@@ -409,7 +409,7 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
                       </span>
                     )}
                     {sv.urlaubVon && (
-                      <span className="text-amber-600">Urlaub</span>
+                      <span className="text-warning">Urlaub</span>
                     )}
                   </div>
                 </div>

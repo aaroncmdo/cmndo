@@ -105,9 +105,9 @@ type StatusBadgeTone = 'green' | 'amber' | 'red' | 'gray'
 
 function StatusBadge({ tone, children }: { tone: StatusBadgeTone; children: React.ReactNode }) {
   const styles: Record<StatusBadgeTone, string> = {
-    green: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
-    amber: 'bg-amber-50 text-amber-700 border border-amber-200',
-    red: 'bg-red-50 text-red-700 border border-red-200',
+    green: 'bg-success-soft text-success-strong border border-success/30',
+    amber: 'bg-warning-soft text-warning-strong border border-warning/30',
+    red: 'bg-danger-soft text-danger-strong border border-danger/30',
     gray: 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border',
   }
   return (
@@ -205,21 +205,21 @@ function BasicFreigabeCard({
   }
 
   return (
-    <section className="border-2 border-amber-300 bg-amber-50/60 rounded-ios-md p-5">
+    <section className="border-2 border-warning/30 bg-warning-soft/60 rounded-ios-md p-5">
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <UserCheckIcon className="w-4 h-4 text-amber-600" />
+          <UserCheckIcon className="w-4 h-4 text-warning" />
           <h2 className="text-sm font-semibold text-claimondo-navy">
             Basic-Selbst-Onboarding — Freigabe
           </h2>
         </div>
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-100 text-amber-700 border border-amber-300">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-warning-soft text-warning-strong border border-warning/30">
           <ClockIcon className="w-3 h-3" />
           Wartet auf Prüfung
         </span>
       </div>
 
-      <div className="mb-4 px-3 py-2.5 rounded-ios-lg bg-white border border-amber-200 text-[11px] space-y-0.5">
+      <div className="mb-4 px-3 py-2.5 rounded-ios-lg bg-white border border-warning/30 text-[11px] space-y-0.5">
         <p className="text-claimondo-ondo">
           <span className="font-semibold text-claimondo-navy">Onboarding-Quelle:</span>{' '}
           {quelleLabel}
@@ -234,7 +234,7 @@ function BasicFreigabeCard({
           type="button"
           onClick={handleFreigeben}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 transition-colors"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50 transition-colors"
         >
           {pending ? <Loader2Icon className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2Icon className="w-3.5 h-3.5" />}
           Profil freischalten
@@ -244,7 +244,7 @@ function BasicFreigabeCard({
             type="button"
             onClick={() => { setShowAblehnen(true); setFehler(null) }}
             disabled={pending}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-ios-lg text-xs font-semibold bg-white text-danger-strong hover:bg-danger-soft border border-danger/30 disabled:opacity-50 transition-colors"
           >
             <XCircleIcon className="w-3.5 h-3.5" />
             Ablehnen
@@ -259,14 +259,14 @@ function BasicFreigabeCard({
             onChange={e => setAblehnGrund(e.target.value)}
             placeholder="Ablehnungsgrund (mind. 10 Zeichen) — wird intern gespeichert."
             rows={3}
-            className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-red-400"
+            className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-danger/40"
           />
           <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleAblehnen}
               disabled={pending || ablehnGrund.trim().length < 10}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-danger text-white hover:bg-danger-strong disabled:opacity-40"
             >
               {pending ? <Loader2Icon className="w-3 h-3 animate-spin" /> : null}
               Ablehnung bestätigen
@@ -284,7 +284,7 @@ function BasicFreigabeCard({
       )}
 
       {fehler && (
-        <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1.5">
+        <p className="mt-2 text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-2 py-1.5">
           {fehler}
         </p>
       )}
@@ -425,7 +425,7 @@ function PflichtdokumenteCard({
                 </p>
               )}
               {d.status === 'abgelehnt' && d.adminNotiz && (
-                <p className="text-[11px] text-red-700 mt-1 italic">Grund: {d.adminNotiz}</p>
+                <p className="text-[11px] text-danger-strong mt-1 italic">Grund: {d.adminNotiz}</p>
               )}
               {d.signedUrl && (
                 <a
@@ -444,14 +444,14 @@ function PflichtdokumenteCard({
                     onChange={(e) => setRejectNotiz(e.target.value)}
                     placeholder="Ablehnungsgrund (min. 10 Zeichen) — wird dem SV als Task angezeigt."
                     rows={2}
-                    className="w-full text-xs px-2 py-1.5 border border-red-200 rounded-ios-md focus:outline-none focus:ring-1 focus:ring-red-400"
+                    className="w-full text-xs px-2 py-1.5 border border-danger/30 rounded-ios-md focus:outline-none focus:ring-1 focus:ring-danger/40"
                   />
                   <div className="flex gap-2">
                     <button
                       type="button"
                       onClick={() => handleZurueckweisen(d.slotId)}
                       disabled={pending}
-                      className="px-2.5 py-1 text-[11px] rounded-ios-md bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+                      className="px-2.5 py-1 text-[11px] rounded-ios-md bg-danger text-white hover:bg-danger-strong disabled:opacity-40"
                     >
                       Ablehnen
                     </button>
@@ -477,7 +477,7 @@ function PflichtdokumenteCard({
                       type="button"
                       onClick={() => handleFreigeben(d.slotId)}
                       disabled={pending}
-                      className="px-2 py-1 text-[11px] rounded-ios-md bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-40"
+                      className="px-2 py-1 text-[11px] rounded-ios-md bg-success text-white hover:bg-success-strong disabled:opacity-40"
                     >
                       Freigeben
                     </button>
@@ -487,7 +487,7 @@ function PflichtdokumenteCard({
                       type="button"
                       onClick={() => setRejectingSlot(d.slotId)}
                       disabled={pending}
-                      className="px-2 py-1 text-[11px] rounded-ios-md border border-red-200 text-red-600 hover:bg-red-50 disabled:opacity-40"
+                      className="px-2 py-1 text-[11px] rounded-ios-md border border-danger/30 text-danger hover:bg-danger-soft disabled:opacity-40"
                     >
                       Ablehnen
                     </button>
@@ -508,7 +508,7 @@ function PflichtdokumenteCard({
       </div>
 
       {fehler && (
-        <p className="mt-3 text-[11px] text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1.5">
+        <p className="mt-3 text-[11px] text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-2 py-1.5">
           {fehler}
         </p>
       )}
@@ -622,7 +622,7 @@ function SaVorlageCard({
           </div>
 
           {saVorlageStatus === 'zurueckgewiesen' && saVorlageAdminNotiz && (
-            <div className="px-3 py-2 rounded-ios-lg bg-red-50 border border-red-200 text-xs text-red-800">
+            <div className="px-3 py-2 rounded-ios-lg bg-danger-soft border border-danger/30 text-xs text-danger-strong">
               <span className="font-semibold">Bisheriger Ablehnungsgrund:</span> {saVorlageAdminNotiz}
             </div>
           )}
@@ -633,7 +633,7 @@ function SaVorlageCard({
                 type="button"
                 onClick={handleFreigeben}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50"
               >
                 <CheckCircle2Icon className="w-3.5 h-3.5" />
                 Freigeben
@@ -642,7 +642,7 @@ function SaVorlageCard({
                 type="button"
                 onClick={() => setShowReject(v => !v)}
                 disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-danger-strong hover:bg-danger-soft border border-danger/30 disabled:opacity-50"
               >
                 <XCircleIcon className="w-3.5 h-3.5" />
                 Zurückweisen
@@ -663,14 +663,14 @@ function SaVorlageCard({
                 type="button"
                 onClick={handleZurueckweisen}
                 disabled={pending || notiz.trim().length < 10}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-danger text-white hover:bg-danger-strong disabled:opacity-40"
               >
                 Ablehnung senden
               </button>
             </div>
           )}
 
-          {fehler && <p className="text-xs text-red-600">{fehler}</p>}
+          {fehler && <p className="text-xs text-danger">{fehler}</p>}
         </div>
       )}
     </section>
@@ -757,9 +757,9 @@ function Tier2Card({
           </div>
         )}
         {verifiziertDatum && (
-          <div className="px-3 py-2 rounded-ios-lg bg-emerald-50 border border-emerald-200">
-            <p className="text-emerald-700">Verifiziert am</p>
-            <p className="font-medium text-emerald-800">{verifiziertDatum}</p>
+          <div className="px-3 py-2 rounded-ios-lg bg-success-soft border border-success/30">
+            <p className="text-success-strong">Verifiziert am</p>
+            <p className="font-medium text-success-strong">{verifiziertDatum}</p>
           </div>
         )}
       </div>
@@ -852,14 +852,14 @@ function Tier2Card({
           type="button"
           onClick={handleFreigeben}
           disabled={pending}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50"
         >
           <CheckCircle2Icon className="w-3.5 h-3.5" />
           Tier-2 komplett freigeben
         </button>
       )}
 
-      {fehler && <p className="text-xs text-red-600 mt-2">{fehler}</p>}
+      {fehler && <p className="text-xs text-danger mt-2">{fehler}</p>}
     </section>
   )
 }
@@ -933,11 +933,11 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
   }
 
   return (
-    <section className={`border rounded-2xl p-5 ${isGesperrt ? 'bg-red-50/50 border-red-200' : 'bg-white border-claimondo-border'}`}>
+    <section className={`border rounded-2xl p-5 ${isGesperrt ? 'bg-danger-soft/50 border-danger/30' : 'bg-white border-claimondo-border'}`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           {isGesperrt ? (
-            <LockIcon className="w-4 h-4 text-red-600" />
+            <LockIcon className="w-4 h-4 text-danger" />
           ) : (
             <UnlockIcon className="w-4 h-4 text-claimondo-ondo" />
           )}
@@ -952,18 +952,18 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
 
       {isGesperrt ? (
         <div className="space-y-3">
-          <div className="px-3 py-2 rounded-ios-lg bg-white border border-red-200 text-xs">
-            <p className="text-red-800">
+          <div className="px-3 py-2 rounded-ios-lg bg-white border border-danger/30 text-xs">
+            <p className="text-danger-strong">
               <span className="font-semibold">Gesperrt seit:</span>{' '}
               {gesperrtSeit ? new Date(gesperrtSeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '—'}
             </p>
-            {gesperrtGrund && <p className="text-red-700 mt-1 whitespace-pre-line"><span className="font-semibold">Grund:</span> {gesperrtGrund}</p>}
+            {gesperrtGrund && <p className="text-danger-strong mt-1 whitespace-pre-line"><span className="font-semibold">Grund:</span> {gesperrtGrund}</p>}
           </div>
           <button
             type="button"
             onClick={handleEntsperren}
             disabled={pending}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-emerald-700 hover:bg-emerald-50 border border-emerald-200 disabled:opacity-50"
+            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-success-strong hover:bg-success-soft border border-success/30 disabled:opacity-50"
           >
             <UnlockIcon className="w-3.5 h-3.5" />
             Entsperren
@@ -976,7 +976,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
               type="button"
               onClick={() => setShowForm(true)}
               disabled={pending}
-              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-red-700 hover:bg-red-50 border border-red-200 disabled:opacity-50"
+              className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-danger-strong hover:bg-danger-soft border border-danger/30 disabled:opacity-50"
             >
               <LockIcon className="w-3.5 h-3.5" />
               SV sperren
@@ -995,7 +995,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
                   type="button"
                   onClick={handleSperren}
                   disabled={pending || grund.trim().length < 10}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-red-600 text-white hover:bg-red-700 disabled:opacity-40"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-danger text-white hover:bg-danger-strong disabled:opacity-40"
                 >
                   <LockIcon className="w-3.5 h-3.5" />
                   Sperren
@@ -1014,7 +1014,7 @@ function SperreCard({ svId, gesperrtSeit, gesperrtGrund }: Props) {
         </div>
       )}
 
-      {fehler && <p className="text-xs text-red-600 mt-2">{fehler}</p>}
+      {fehler && <p className="text-xs text-danger mt-2">{fehler}</p>}
     </section>
   )
 }
@@ -1076,7 +1076,7 @@ function AdminSlotUpload({
         onChange={onChange}
       />
       {error && (
-        <span className="text-[10px] text-red-700 max-w-[200px]">{error}</span>
+        <span className="text-[10px] text-danger-strong max-w-[200px]">{error}</span>
       )}
     </>
   )

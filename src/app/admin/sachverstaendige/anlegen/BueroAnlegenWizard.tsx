@@ -358,9 +358,9 @@ export default function BueroAnlegenWizard({ onSuccess }: {
             erfolglosem Weiter-Klick. Wird auto-versteckt sobald ein Feld
             korrigiert wird (siehe clearFieldError im onChange jeder Field). */}
         {missingFields.length > 0 && (
-          <div className="mb-5 px-4 py-3 rounded-ios-xl bg-red-50 border border-red-200 flex items-start gap-3">
-            <AlertTriangleIcon className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
-            <div className="flex-1 text-sm text-red-700">
+          <div className="mb-5 px-4 py-3 rounded-ios-xl bg-danger-soft border border-danger/30 flex items-start gap-3">
+            <AlertTriangleIcon className="w-5 h-5 text-danger flex-shrink-0 mt-0.5" />
+            <div className="flex-1 text-sm text-danger-strong">
               <p className="font-semibold mb-1">Bitte fülle alle Pflicht-Felder aus:</p>
               <ul className="list-disc list-inside text-xs space-y-0.5">
                 {missingFields.map((m, i) => <li key={i}>{m}</li>)}
@@ -449,7 +449,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     auch als Standort 1 = Hauptbuero verwendet, daher Geo-Pflicht).
                     BUG-94: bei Validation-Fehler roter Border. */}
                 <div className="sm:col-span-2">
-                  <label className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
+                  <label className={`text-xs mb-1.5 block ${fieldErrors.has('bueroAnschrift') ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                     Anschrift Hauptbüro (= Rechnungsadresse) *
                     {bueroAnschriftLat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo gesetzt</span>}
                   </label>
@@ -466,7 +466,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     }}
                     className={`w-full border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 ${
                       fieldErrors.has('bueroAnschrift')
-                        ? 'bg-red-50 border-red-400 focus:ring-red-400'
+                        ? 'bg-danger-soft border-danger/40 focus:ring-danger/40'
                         : 'bg-claimondo-bg border-claimondo-border focus:ring-claimondo-shield'
                     }`}
                   />
@@ -557,7 +557,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                   </div>
                 ) : (
                   <div>
-                    <label className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
+                    <label className={`text-xs mb-1.5 block ${fieldErrors.has(`std-${std.id}-anschrift`) ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                       Anschrift * {std.anschrift_lat !== null && <span className="text-claimondo-ondo ml-2">✓ Geo</span>}
                     </label>
                     <GooglePlaceAutocomplete
@@ -566,7 +566,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                       onSelect={place => { setStandortPlace(std.id, place); clearFieldError(`std-${std.id}-anschrift`) }}
                       className={`w-full border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 ${
                         fieldErrors.has(`std-${std.id}-anschrift`)
-                          ? 'bg-red-50 border-red-400 focus:ring-red-400'
+                          ? 'bg-danger-soft border-danger/40 focus:ring-danger/40'
                           : 'bg-claimondo-bg border-claimondo-border focus:ring-claimondo-shield'
                       }`}
                     />
@@ -717,7 +717,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
         )}
 
         {error && (
-          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
             {error}
           </div>
         )}
