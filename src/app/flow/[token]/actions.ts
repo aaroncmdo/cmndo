@@ -575,6 +575,9 @@ export async function signSAandCreateFall(
   leadId: string,
   signatureUrl: string,
   flowLinkId: string | null,
+  // AAR-360 Follow-up: Zustimmung zu Datenschutz + Widerrufsbelehrung des zugewiesenen Gutachters
+  // (FlowLink-Häkchen, entkoppelt von der SA-Signatur). Default false = kein SV zugewiesen.
+  svDsWiderrufZugestimmt: boolean = false,
 ): Promise<{ ok: true; fallId: string } | { ok: false; error: string }> {
   if (!leadId || !signatureUrl) return { ok: false, error: 'Fehlende Daten für SA-Unterschrift' }
 
@@ -917,10 +920,14 @@ export async function signSAandCreateFall(
   // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am leben auf claims
   // (SSoT) — Write nach claims verschoben (kein faelle-Write mehr).
   if (convClaimId) {
-    await admin.from('claims').update({
+    // AAR-360 Follow-up: Gutachter-Datenschutz/Widerruf-Zustimmung mitschreiben (entkoppelt von der
+    // SA-Signatur). Record-Cast: die Spalte hinkt den generierten Types hinterher (wie operative_status).
+    const claimsSaUpdate: Record<string, unknown> = {
       sa_unterschrieben: true,
       sa_unterschrieben_am: nowIsoSa,
-    }).eq('id', convClaimId)
+    }
+    if (svDsWiderrufZugestimmt) claimsSaUpdate.sv_datenschutz_widerruf_zugestimmt_am = nowIsoSa
+    await admin.from('claims').update(claimsSaUpdate).eq('id', convClaimId)
   }
 
   // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.

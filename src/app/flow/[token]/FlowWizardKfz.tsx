@@ -102,6 +102,9 @@ export type GutachterInfo = {
   googleAktualisiertAm: string | null
   // AAR-956 18.06. (Aaron): Termin-Status fürs Card-Label (reserviert vs. bestätigt).
   terminStatus: string | null
+  // AAR-360 Follow-up: Signed-URLs der SV-Datenschutz/Widerruf-PDFs für das Consent-Häkchen.
+  datenschutzUrl: string | null
+  widerrufUrl: string | null
 }
 
 // CMM-14: 4-Step Flow. Step 'weitere-angaben' (Werkstatt + Schadenfotos)
@@ -310,6 +313,9 @@ export default function FlowWizardKfz({
           googleAnzahl: null,
           googleAktualisiertAm: null,
           terminStatus: 'reserviert', // frisch gebucht (bucheTerminFlow) → immer reserviert
+          // AAR-360 Follow-up: frische Client-Auswahl hat (noch) keine SV-Doc-URLs → Häkchen ohne Links.
+          datenschutzUrl: null,
+          widerrufUrl: null,
         }
       : null)
 
@@ -377,7 +383,8 @@ export default function FlowWizardKfz({
       const publicUrl = uploadRes.url
 
       // 2. Server Action: Fall erstellen
-      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null)
+      // AAR-360 Follow-up: SV-Datenschutz/Widerruf-Zustimmung (nur relevant wenn ein SV zugewiesen ist).
+      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null, gutachterAnzeige ? svRechtsakzeptanz : false)
       if (!result.ok) throw new Error(result.error ?? 'Fehler bei der Beauftragung')
       setFallId(result.fallId)
 
@@ -895,11 +902,44 @@ export default function FlowWizardKfz({
                   </span>
                 </label>
 
+                {/* AAR-360 Follow-up: separates Pflicht-Häkchen für Datenschutz + Widerrufsbelehrung
+                    des zugewiesenen Gutachters (entkoppelt von der SA-Signatur). Nur wenn ein SV
+                    zugewiesen ist. Datenschutz/Widerruf des SV als Links (falls hochgeladen). */}
+                {gutachterAnzeige && (
+                  <label className="flex items-start gap-3 cursor-pointer mb-5">
+                    <input
+                      type="checkbox"
+                      checked={svRechtsakzeptanz}
+                      onChange={e => setSvRechtsakzeptanz(e.target.checked)}
+                      className="mt-0.5 w-5 h-5 rounded border-claimondo-border accent-claimondo-ondo shrink-0"
+                    />
+                    <span className="text-sm text-claimondo-ondo leading-relaxed">
+                      {t('step_sa.sv_consent_text', { firma: gutachterAnzeige.firma ?? gutachterAnzeige.vorname })}
+                      <span className="text-danger"> *</span>
+                      {(gutachterAnzeige.datenschutzUrl || gutachterAnzeige.widerrufUrl) && (
+                        <span className="block text-xs mt-1">
+                          {gutachterAnzeige.datenschutzUrl && (
+                            <a href={gutachterAnzeige.datenschutzUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-claimondo-navy">
+                              {t('step_sa.sv_consent_datenschutz_link')}
+                            </a>
+                          )}
+                          {gutachterAnzeige.datenschutzUrl && gutachterAnzeige.widerrufUrl && ' · '}
+                          {gutachterAnzeige.widerrufUrl && (
+                            <a href={gutachterAnzeige.widerrufUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-claimondo-navy">
+                              {t('step_sa.sv_consent_widerruf_link')}
+                            </a>
+                          )}
+                        </span>
+                      )}
+                    </span>
+                  </label>
+                )}
+
                 {error && <p className="text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-4 py-3 mb-4">{error}</p>}
 
                 <button
                   onClick={handleSignSA}
-                  disabled={!signatureBlob || !saAccepted || submittingSA}
+                  disabled={!signatureBlob || !saAccepted || (!!gutachterAnzeige && !svRechtsakzeptanz) || submittingSA}
                   className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
                 >
                   {submittingSA ? t('step_sa.submitting') : t('step_sa.cta_sign')}

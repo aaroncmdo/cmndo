@@ -539,6 +539,9 @@
       "aendern_dispatch_hinweis": "Ihr Termin ist bereits bestätigt — wir rufen Sie kurz an, um ihn umzubuchen."
     },
     "step_sa": {
+      "sv_consent_text": "Ich stimme den Datenschutzbestimmungen und der Widerrufsbelehrung von {firma} zu.",
+      "sv_consent_datenschutz_link": "Datenschutzbestimmungen ansehen",
+      "sv_consent_widerruf_link": "Widerrufsbelehrung ansehen",
       "heading": "Beauftragung unterzeichnen",
       "sub": "Mit Ihrer Unterschrift beauftragen Sie Claimondo mit der kostenlosen Abwicklung Ihres Schadens.",
       "summary_label": "Zusammenfassung:",
