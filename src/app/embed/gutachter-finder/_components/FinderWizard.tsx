@@ -341,6 +341,17 @@ export function FinderWizard({
 
       {phase === 'ort' && (
         <div className="flex flex-col gap-4">
+          {/* Wunschtermin (optional) — immer oben im Ort-Schritt, VOR der Werkstatt-/Orts-Frage
+              (Aaron 12.06. „oben angeben"). Muss AUCH im Werkstatt-„Ja"-Pfad eingebbar sein, sonst
+              ginge er verloren — ortMitWerkstatt reicht wunschterminLokal an die Engine (Aaron 23.06.).
+              Beeinflusst das Slot-Ranking in Schritt 2; leer = naechste freie Termine. */}
+          <div>
+            <h3 className="text-body font-bold text-claimondo-navy">Ihr Wunschtermin</h3>
+            <p className="mt-0.5 mb-2 text-[0.8125rem] text-claimondo-shield/80">
+              Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
+            </p>
+            <WunschterminPicker value={wunschterminLokal} onChange={setWunschterminLokal} />
+          </div>
           {/* AAR-956 Task 10: Werkstatt-Frage — nur wenn werkstattId+werkstattGeo gesetzt UND
               noch keine Antwort gewählt. „Ja" → werkstattGeo als Besichtigungsort + direkt Matching.
               „Nein" → setzt werkstattAntwort='nein', zeigt danach die normale Orts-Eingabe.
@@ -366,16 +377,6 @@ export function FinderWizard({
           {/* Normale Orts-Eingabe: immer sichtbar wenn kein werkstattId-Gate greift ODER
               der Nutzer „Nein, woanders" gewählt hat. */}
           {(!werkstattId || !werkstattGeo || werkstattAntwort === 'nein') && (
-            <>
-          {/* Wunschtermin (optional) — oben, vor dem Ort (Aaron 12.06.). Beeinflusst das
-              Slot-Ranking in Schritt 2; leer = nächste freie Termine. */}
-          <div>
-            <h3 className="text-body font-bold text-claimondo-navy">Ihr Wunschtermin</h3>
-            <p className="mt-0.5 mb-2 text-[0.8125rem] text-claimondo-shield/80">
-              Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
-            </p>
-            <WunschterminPicker value={wunschterminLokal} onChange={setWunschterminLokal} />
-          </div>
           <div>
             <h3 className="text-body font-bold text-claimondo-navy">Wo steht das Fahrzeug?</h3>
             <p className="mt-0.5 text-[0.8125rem] text-claimondo-shield/80">
@@ -428,7 +429,6 @@ export function FinderWizard({
               </div>
             )}
           </div>
-            </>
           )}
         </div>
       )}
