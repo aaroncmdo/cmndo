@@ -46,6 +46,12 @@ export async function upsertSvLead(
   if (!Number.isFinite(payload.lat) || !Number.isFinite(payload.lng)) {
     return { ok: false, error: 'Standort (lat/lng) ist Pflicht — Adresse konnte nicht geokodiert werden.' }
   }
+  // Nicht-DAT-Leads deduplizieren ueber den partiellen Unique-Index (normalized_name, plz)
+  // WHERE dat_id IS NULL. Ein NULL-plz kollidiert dort nie (NULL != NULL) -> stille Duplikate.
+  // Daher ist plz fuer Nicht-DAT-Leads Pflicht (DAT-Leads deduplizieren ueber dat_id).
+  if (!payload.dat_id?.trim() && !payload.plz?.trim()) {
+    return { ok: false, error: 'PLZ ist für Nicht-DAT-Leads Pflicht (Dedup-Schlüssel).' }
+  }
   const admin = createAdminClient()
   const { data, error } = await admin.rpc('sv_lead_upsert', {
     p: payload as unknown as Record<string, unknown>,

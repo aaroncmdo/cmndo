@@ -199,7 +199,7 @@ describe('createSvLead', () => {
     expect(callArg.paket_umkreis_km).toBe(15)
   })
 
-  it('dat_id ist optional: happy path ohne dat_id moeglich', async () => {
+  it('dat_id ist optional: happy path ohne dat_id moeglich (plz Pflicht fuer Dedup)', async () => {
     mockConfig.authUser = { id: 'admin-id' }
     mockConfig.profileRolle = 'admin'
 
@@ -207,9 +207,10 @@ describe('createSvLead', () => {
     const fd = makeFormData({
       name: 'Nicht-DAT SV',
       adresse: 'Testweg 5, 50667 Koeln',
+      plz: '50667',
       lat: '50.93',
       lng: '6.96',
-      // kein dat_id, kein dat_expert_nr
+      // kein dat_id, kein dat_expert_nr — plz ist Pflicht fuer Nicht-DAT-Dedup
     })
     const result = await createSvLead(fd)
 
