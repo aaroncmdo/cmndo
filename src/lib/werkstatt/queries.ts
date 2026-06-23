@@ -124,24 +124,20 @@ export type WerkstattProvisionRow = {
 export async function getWerkstattProvisionen(werkstattId: string): Promise<WerkstattProvisionRow[]> {
   const supabase = await createClient()
 
+  // claim_nummer liegt denormalisiert auf werkstatt_provisionen (Mig 20260623050718) — RLS-sicher
+  // direkt lesbar; KEIN claims-Join (claims hat keine werkstatt-RLS-Policy -> lieferte sonst null).
   const { data } = await supabase
     .from('werkstatt_provisionen')
     .select(`
       id, betrag_netto_eur, status, trigger_event,
       trigger_at, hold_until, storniert_am, storno_grund, erstellt_am,
-      claim:claim_id(claim_nummer)
+      claim_nummer
     `)
     .eq('werkstatt_id', werkstattId)
     .order('erstellt_am', { ascending: false, nullsFirst: false })
     .limit(200)
 
   return (data ?? []).map((row) => {
-    const claimRaw = (row as unknown as { claim: unknown }).claim
-    const claim = (Array.isArray(claimRaw) ? claimRaw[0] : claimRaw) as
-      | { claim_nummer: string | null }
-      | null
-      | undefined
-
     return {
       id: row.id as string,
       betrag_netto_eur: Number((row as unknown as { betrag_netto_eur: number | null }).betrag_netto_eur ?? 0),
@@ -152,7 +148,7 @@ export async function getWerkstattProvisionen(werkstattId: string): Promise<Werk
       storniert_am: ((row as unknown as { storniert_am: string | null }).storniert_am) ?? null,
       storno_grund: ((row as unknown as { storno_grund: string | null }).storno_grund) ?? null,
       erstellt_am: (row as unknown as { erstellt_am: string }).erstellt_am,
-      claim_nummer: claim?.claim_nummer ?? null,
+      claim_nummer: ((row as unknown as { claim_nummer: string | null }).claim_nummer) ?? null,
     }
   })
 }
