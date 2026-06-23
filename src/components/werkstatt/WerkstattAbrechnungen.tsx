@@ -149,7 +149,7 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
         <Table>
           <Thead>
             <Tr>
-              <Th>Schaden-Nr.</Th>
+              <Th>Fall-Nr.</Th>
               <Th>Betrag</Th>
               <Th>Status</Th>
               <Th>Auslöser</Th>
