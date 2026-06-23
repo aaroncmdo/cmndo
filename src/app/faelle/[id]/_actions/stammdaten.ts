@@ -9,7 +9,8 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ensureVehicleFromFin } from '@/lib/vehicles/ensure-vehicle'
+import { ensureVehicleFromFin, ensureVehicleForClaim } from '@/lib/vehicles/ensure-vehicle'
+import { FALL_VEHICLE_COL, fallVehicleWriteValue } from '@/lib/vehicles/fall-vehicle-field'
 import { revalidatePath } from 'next/cache'
 import { canEditField, type FallakteRolle } from '@/lib/fall/field-permissions'
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
@@ -419,6 +420,28 @@ export async function updateFallField(
       if (insErr) return { success: false, error: insErr.message }
     }
     // normalized == null && keine Party: No-op (keine leere verursacher-Party anlegen).
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
+  // CMM-49 Vehicle-Tier: Fahrzeug-Stammdaten leben kanonisch auf vehicles (via claims.vehicle_id).
+  // v_claim_full sourct sie aus dem veh-LATERAL (z.B. fahrzeug_baujahr = EXTRACT(year FROM
+  // veh.baujahr_monat)); der Inline-Edit schrieb bisher faelle.* (reader-frei -> versickerte).
+  // ensureVehicleForClaim resolved/erzeugt das claim-Fahrzeug; FALL_VEHICLE_COL + fallVehicleWriteValue
+  // (reine, getestete lib-Funktion) liefern Zielspalte + Transform. Admin-Client: canEditField()
+  // hat oben bereits autorisiert.
+  const vehicleCol = FALL_VEHICLE_COL[field]
+  if (vehicleCol) {
+    const admin = createAdminClient()
+    const ensured = await ensureVehicleForClaim({ claimId: gateClaimId, db: admin })
+    if (!ensured.ok) return { success: false, error: ensured.error }
+    const wv = fallVehicleWriteValue(field, normalized)
+    if (!wv.ok) return { success: false, error: wv.error }
+    const { error: vErr } = await admin
+      .from('vehicles')
+      .update({ [vehicleCol]: wv.value })
+      .eq('id', ensured.vehicleId)
+    if (vErr) return { success: false, error: vErr.message }
     revalidatePath(`/faelle/${fallId}`)
     return { success: true }
   }
