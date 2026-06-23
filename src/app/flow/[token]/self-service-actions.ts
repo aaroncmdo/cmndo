@@ -564,6 +564,102 @@ export async function uploadPolizeiberichtFlow(
   return { ok: true }
 }
 
+// ─── Task 2: Beratungstermin-Actions (AAR-956 Auto-Beratungstermin) ─────────
+// Token-basierte Self-Service-Actions fuer den kb_beratung-Termin im /flow.
+// Der Termin wird durch einen DB-Trigger automatisch angelegt (Task 1) und
+// kann vom Kunden hier geladen, bestaetigt oder verschoben werden.
+
+const BERATUNG_DAUER_MIN = 30
+
+/** Laedt den kb_beratung-Termin des Leads (Anzeige im /flow). */
+export async function ladeBeratungsterminFlow(
+  token: string,
+): Promise<{ ok: true; termin: { id: string; startZeit: string; status: string; kbVorname: string | null } | null } | { ok: false; error: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const { data: t } = await admin
+    .from('gutachter_termine')
+    .select('id, start_zeit, status, assignee_id')
+    .eq('lead_id', leadId)
+    .eq('typ', 'kb_beratung')
+    .in('status', ['reserviert', 'bestaetigt'])
+    .order('start_zeit', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (!t) return { ok: true, termin: null }
+  let kbVorname: string | null = null
+  if (t.assignee_id) {
+    const { data: kb } = await admin.from('profiles').select('vorname').eq('id', t.assignee_id as string).maybeSingle()
+    kbVorname = (kb?.vorname as string | null) ?? null
+  }
+  return {
+    ok: true,
+    termin: { id: t.id as string, startZeit: t.start_zeit as string, status: t.status as string, kbVorname },
+  }
+}
+
+async function ladeAktivenBeratungstermin(
+  admin: ReturnType<typeof createAdminClient>,
+  leadId: string,
+): Promise<{ id: string; status: string } | null> {
+  const { data: t } = await admin
+    .from('gutachter_termine')
+    .select('id, status')
+    .eq('lead_id', leadId)
+    .eq('typ', 'kb_beratung')
+    .in('status', ['reserviert', 'bestaetigt'])
+    .order('start_zeit', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  return t ? { id: t.id as string, status: t.status as string } : null
+}
+
+/** „Passt mir" — bestaetigt den Beratungstermin. */
+export async function bestaetigeBeratungsterminFlow(
+  token: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const termin = await ladeAktivenBeratungstermin(admin, leadId)
+  if (!termin) return { ok: false, error: 'Kein Beratungstermin gefunden.' }
+  const { error: updErr } = await admin
+    .from('gutachter_termine')
+    .update({ status: 'bestaetigt' })
+    .eq('id', termin.id)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+/** „Verschieben" — freier In-Place-Move (Kunde ist Koenig, keine Verfuegbarkeitspruefung). */
+export async function verschiebeBeratungsterminFlow(
+  token: string,
+  neuStartIso: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const start = new Date(neuStartIso)
+  if (Number.isNaN(start.getTime())) return { ok: false, error: 'Ungültige Zeit.' }
+  if (start.getTime() < Date.now()) return { ok: false, error: 'Bitte einen Termin in der Zukunft wählen.' }
+  const termin = await ladeAktivenBeratungstermin(admin, leadId)
+  if (!termin) return { ok: false, error: 'Kein Beratungstermin gefunden.' }
+  const end = new Date(start.getTime() + BERATUNG_DAUER_MIN * 60 * 1000)
+  const { error: updErr } = await admin
+    .from('gutachter_termine')
+    .update({
+      start_zeit: start.toISOString(),
+      end_zeit: end.toISOString(),
+      status: 'bestaetigt',
+      verlegung_initiator_kunde: true,
+    })
+    .eq('id', termin.id)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+// ─── Ende Task 2 ────────────────────────────────────────────────────────────
+
 /**
  * AAR-956 16.06. (Aaron): Zeugenaussage-Upload im Flow (Polizei-&-Zeugen-Schritt, nur wenn
  * Zeugen='Ja'). Spiegelt uploadPolizeiberichtFlow — Foto/PDF in fall-dokumente, KEIN OCR.
