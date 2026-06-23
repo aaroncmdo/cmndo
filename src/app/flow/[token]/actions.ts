@@ -1372,35 +1372,11 @@ export async function signSAandCreateFall(
     )
   }
 
-  // AAR-360: SA-Tool — Kunden-Unterschrift auf Gutachter-SA-Vorlage mergen.
-  // Voraussetzungen: SV bereits zugewiesen (svIdFromTermin) UND Vorlage ist
-  // `geprueft` (Check in generateGutachterSA selbst). Fire-and-forget —
-  // wenn der Merge fehlschlägt (keine Vorlage, kein pdf-lib-Fail, Storage-
-  // Fehler), bleibt der Fall trotzdem erstellt. Warnings nur ins Log.
+  // AAR-360 Follow-up (24.06.): Das frühere generateGutachterSA (System 1: Kunden-Unterschrift auf
+  // sachverstaendige.sa_vorlage) ist entfernt — seit AAR-714 vestigial (0 SVs mit sa_vorlage;
+  // Onboarding nutzt DokumenteUploadStep -> pflichtdokumente). Die Gutachter-SA kommt jetzt allein
+  // aus generateGutachterPflichtdokumente (Slot sv_sicherungsabtretung, unten) und ist kundensichtbar.
   if (svIdFromTermin) {
-    slaPromises.push(
-      (async () => {
-        try {
-          const { generateGutachterSA } = await import('@/lib/sa-tool/generate-gutachter-sa')
-          const result = await generateGutachterSA({
-            admin,
-            fallId: fall.id,
-            svId: svIdFromTermin!,
-            kundenVorname: (lead.vorname as string | null) ?? null,
-            kundenNachname: (lead.nachname as string | null) ?? null,
-            kundenSignaturUrl: signatureUrl,
-          })
-          if (!result.success) {
-            if (result.skipped) {
-              console.warn('[AAR-360] SA-Tool Merge übersprungen:', result.error)
-            } else {
-              console.error('[AAR-360] SA-Tool Merge Fehler:', result.error)
-            }
-          }
-        } catch (err) { console.error('[AAR-360] SA-Tool unerwartet:', err) }
-      })()
-    )
-
     // Aaron 2026-04-30: Multi-Doc-Signatur — alle SV-Pflichtdokumente
     // (Sicherungsabtretung / Honorarvereinbarung / Datenschutz / Widerruf)
     // mit Kunden-Unterschrift versehen + claim-zentriert ablegen.
