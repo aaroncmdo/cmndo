@@ -22,6 +22,8 @@ import {
   CLUSTER3_RENAMED_TO_CLAIMS,
 } from '@/lib/faelle/claim-duplicate-columns'
 import { KANZLEI_FAELLE_COLS, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { ensurePersonForData } from '@/lib/personen/ensure-person'
+import { coerceJaNein, splitPersonName } from '@/lib/stammdaten/field-coercion'
 
 /**
  * Allowlist der editierbaren Fall-Felder.
@@ -91,9 +93,8 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'gegner_fahrzeugtyp',
   'gegner_schadennummer',
   'gegner_versicherungsnummer',
-  // Vorschäden
+  // Vorschäden (vorschaden_anzahl = abgeleitete Zaehl-Aggregation vv.anzahl -> read-only, raus)
   'hat_vorschaeden',
-  'vorschaden_anzahl',
   // Besichtigung (DB-verifiziert: Adresse + Lat/Lng/PlaceID)
   // AAR-552 Cluster E: besichtigung_datum ersatzlos entfernt (kein Daten-Konsument).
   'besichtigungsort_adresse',
@@ -126,9 +127,10 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   // Finanzierung/Leasing + Steuer-Status (vorher nur auf leads editierbar):
   'finanzierung_leasing',
   'vorsteuerabzugsberechtigt',
-  // Gegner-Kenntnis + Anfrage-Tracking (Auslandskennzeichen-Workflow):
+  // Gegner-Kenntnis (Auslandskennzeichen-Workflow). gegner_versicherung_anfrage_datum
+  // (Gruene-Karte-Anfrage) ist in der Fallakte vestigial — v_faelle NULLt es hart, kein
+  // claims-Home (lebt nur auf leads) -> der Edit versickerte -> raus aus der Allowlist.
   'gegner_bekannt',
-  'gegner_versicherung_anfrage_datum',
   // Halter-Geburtsdatum + Flag „Halter = Kunde":
   'halter_geburtsdatum',
   'ist_fahrzeughalter',
@@ -184,6 +186,19 @@ const GT_ROUTED_FIELDS = new Set<string>([
   'nachbesichtigung_ergebnis',
 ])
 
+// CMM-49: Ja/Nein-Felder, deren Zielspalte boolean ist (claim_parties.ist_halter +
+// 5 claims-Flags). InlineEditField sendet "Ja"/"Nein" als Text; Postgres castet das
+// nicht nach boolean (22P02) -> updateFallField coerct sie zentral via coerceJaNein,
+// BEVOR sie ihre jeweilige Route nehmen (ist_fahrzeughalter-Branch bzw. claims-Flag).
+const JA_NEIN_BOOLEAN_FIELDS = new Set<string>([
+  'ist_fahrzeughalter',
+  'gegner_bekannt',
+  'fahrerflucht',
+  'auslandskennzeichen',
+  'vorsteuerabzugsberechtigt',
+  'hat_vorschaeden',
+])
+
 // CMM-44 SP-A2 (Cluster 1+2): Semantik-Duplikat-Felder routet updateFallField
 // direkt mit dem neuen claims-Namen auf claims (NICHT ueber splitOrKeepFaelle-
 // Update — der Helper kann nur gleichnamige Spalten). Das Mapping liegt zentral
@@ -227,7 +242,15 @@ export async function updateFallField(
   }
 
   // Null bei leerem String (explizites Löschen)
-  const normalized = typeof value === 'string' && value.trim() === '' ? null : value
+  let normalized: unknown = typeof value === 'string' && value.trim() === '' ? null : value
+
+  // CMM-49: Ja/Nein -> boolean fuer die boolean-Zielfelder (s. JA_NEIN_BOOLEAN_FIELDS).
+  // Danach fliesst der boolean in die jeweilige Route (ist_fahrzeughalter-Branch / claims-Flag).
+  if (JA_NEIN_BOOLEAN_FIELDS.has(field)) {
+    const c = coerceJaNein(normalized)
+    if (!c.ok) return { success: false, error: c.error }
+    normalized = c.value
+  }
 
   // CMM-57: restwert + wiederbeschaffungswert leben seit dem F+G-Cluster in der
   // gutachten-Sub-Tabelle (#1322 hat sie aus faelle gedroppt). Ein Inline-Edit
@@ -363,6 +386,35 @@ export async function updateFallField(
     return { success: true }
   }
 
+  // CMM-49 Residual: ist_fahrzeughalter ("Halter = Kunde?") = das ist_halter-Flag der
+  // geschaedigter-Party. v_faelle/v_claim_full lesen cp_g.ist_halter (rolle='geschaedigter').
+  // Der Inline-Edit schrieb bisher faelle.ist_fahrzeughalter (reader-frei -> versickert) ->
+  // jetzt auf die Party. normalized ist hier bereits via coerceJaNein ein boolean.
+  // Selektion == cp_g (geschaedigter, reihenfolge/created_at wie KUNDE_PERSON_COL).
+  if (field === 'ist_fahrzeughalter') {
+    const admin = createAdminClient()
+    const { data: party } = await admin
+      .from('claim_parties')
+      .select('id')
+      .eq('claim_id', gateClaimId)
+      .eq('rolle', 'geschaedigter')
+      .order('reihenfolge', { ascending: true })
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const partyId = (party?.id as string | null) ?? null
+    if (!partyId) {
+      return { success: false, error: 'Keine geschaedigter-Party — "Halter = Kunde?" kann nicht gesetzt werden.' }
+    }
+    const { error: upErr } = await admin
+      .from('claim_parties')
+      .update({ ist_halter: normalized })
+      .eq('id', partyId)
+    if (upErr) return { success: false, error: upErr.message }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   // CMM-49 Tier-2: gegner_versicherungsnummer/gegner_schadennummer leben in der
   // verursacher-claim_party (versicherungsnummer/versicherungs_aktenzeichen, SSoT).
   // v_claim_full sourct sie von dort (gp-LATERAL, #3004); ein Inline-Edit muss die
@@ -420,6 +472,63 @@ export async function updateFallField(
       if (insErr) return { success: false, error: insErr.message }
     }
     // normalized == null && keine Party: No-op (keine leere verursacher-Party anlegen).
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
+  // CMM-49 Residual: gegner_name lebt kanonisch auf der verursacher-Party -> firmen.name ODER
+  // personen.vorname/nachname. v_claim_full/v_faelle lesen COALESCE(gf.name, gpp.vorname||gpp.nachname).
+  // Freitext-Name -> Firma (wenn die Party eine firma_id hat — sonst maskiert gf.name den Person-Edit),
+  // sonst Person (split). Bisher faelle.gegner_name (reader-frei -> versickert). splitPersonName =
+  // reine, getestete lib-Funktion. Selektion == gp/vp_g (verursacher, reihenfolge/created_at).
+  if (field === 'gegner_name') {
+    const admin = createAdminClient()
+    const { data: party } = await admin
+      .from('claim_parties')
+      .select('id, person_id, firma_id')
+      .eq('claim_id', gateClaimId)
+      .eq('rolle', 'verursacher')
+      .order('reihenfolge', { ascending: true })
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    const firmaId = (party?.firma_id as string | null) ?? null
+    if (firmaId) {
+      const { error } = await admin.from('firmen').update({ name: normalized }).eq('id', firmaId)
+      if (error) return { success: false, error: error.message }
+      revalidatePath(`/faelle/${fallId}`)
+      return { success: true }
+    }
+    const { vorname, nachname } = splitPersonName(normalized as string | null)
+    const personId = (party?.person_id as string | null) ?? null
+    if (personId) {
+      const { error } = await admin.from('personen').update({ vorname, nachname }).eq('id', personId)
+      if (error) return { success: false, error: error.message }
+    } else if (normalized != null) {
+      // Keine Person an der Party -> on-demand anlegen (userId=null => immer neue Person, kein Auto-Merge).
+      const ensured = await ensurePersonForData({ db: admin, userId: null, snapshot: { vorname, nachname } })
+      if (!ensured.ok) return { success: false, error: ensured.error }
+      if (ensured.personId) {
+        if (party?.id) {
+          const { error: linkErr } = await admin
+            .from('claim_parties')
+            .update({ person_id: ensured.personId })
+            .eq('id', party.id as string)
+          if (linkErr) return { success: false, error: linkErr.message }
+        } else {
+          // Keine verursacher-Party -> mit Person anlegen (reihenfolge=2/quelle wie GEGNER_PARTY_COL).
+          const { error: insErr } = await admin.from('claim_parties').insert({
+            claim_id: gateClaimId,
+            rolle: 'verursacher',
+            reihenfolge: 2,
+            quelle: 'manuell_kb',
+            person_id: ensured.personId,
+          })
+          if (insErr) return { success: false, error: insErr.message }
+        }
+      }
+    }
+    // normalized == null && keine Person: No-op (nichts zu loeschen).
     revalidatePath(`/faelle/${fallId}`)
     return { success: true }
   }
