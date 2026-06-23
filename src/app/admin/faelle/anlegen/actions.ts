@@ -1,6 +1,5 @@
 'use server'
 
-import { randomUUID } from 'node:crypto'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createLead } from '@/lib/leads/create-lead'
@@ -84,55 +83,49 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   }
   const lead = { id: created.leadId }
 
-  // 2. (CMM-49 D2) claim-first: KEINE faelle-Row mehr. createClaimForFall legt den Claim
-  //    mit id == fallId (Identity) an; die faelle_claim_bridge kommt vom trg_sync_claims_to_bridge
-  //    (der faelle.update-Backref in createClaimForFall no-oppt mangels Row). Der frühere
-  //    Skelett-faelle-INSERT ({lead_id,status,konvertiert_am}) ist data-lossless: lead_id ->
-  //    claims.lead_id, status -> claims.operative_status='ersterfassung', konvertiert_am ~
-  //    claims.created_at. Schadenort/-art/-ursache/spezifikation schreibt createClaimForFall
-  //    claims-seitig (SSoT). Kein Round-Robin-KB hier — Admin übernimmt selbst.
-  const fallId = randomUUID()
-  let claimNummer: string | null = null
+  // 2. (CMM-49 Phase 6) Kanonische Lead->Claim-Konversion. anlegeFall erzeugt oben einen Lead
+  //    (source_channel='admin-direkt') und konvertiert ihn jetzt ueber denselben kanonischen Pfad
+  //    wie Flow/Dispatch: convertLeadToClaim. Das legt das volle Ecosystem an (claims +
+  //    geschaedigter-Party + personen + faelle_claim_bridge), statt des frueheren "thin"
+  //    createClaimForFall-Claims (der KEINE geschaedigter-Party anlegte -> kunde_*/halter_*/
+  //    ist_fahrzeughalter-Edits in der Fallakte liefen ins Leere). createClaimForFall ist damit
+  //    obsolet + geloescht. KB: convertLeadToClaim nimmt lead.zugewiesen_an (=user.id, rollen-gegated
+  //    auf admin/KB via validate_kundenbetreuer_rolle) bzw. faellt auf Round-Robin zurueck — daher
+  //    KEIN expliziter kundenbetreuerId (ein mitarbeiter-user.id wuerde den Trigger verletzen).
   try {
-    const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
-    const claimId = await createClaimForFall(db, fallId, {
-      // CMM-49: Geschaedigter-Identitaet durchreichen -> createClaimForFall legt die geschaedigter-
-      // claim_party + personen-Entitaet an (sonst thin claim: kunde_*/halter_*/ist_fahrzeughalter-
-      // Edits in der Fallakte ohne Ziel). kundenbetreuer_id = anlegender Admin (Attribution).
-      vorname: data.vorname.trim(),
-      nachname: data.nachname.trim(),
-      telefon: data.telefon.trim(),
-      email: data.email?.trim() || null,
-      kundenbetreuer_id: user.id,
-      schadens_plz: data.schadens_plz,
-      schadens_adresse: data.schadens_adresse ?? null,
-      schadens_ort: data.schadens_ort ?? null,
-      schadens_ursache: data.schadensursache ?? null,
-      schadens_art: data.schadens_art ?? null,
-      spezifikation: data.spezifikation ?? null,
-      lead_id: lead.id,
-    }, 'manuell_admin')
-    if (!claimId) {
-      // Rollback: Lead loeschen (kein Claim -> kein Fall).
+    const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
+    const conv = await convertLeadToClaim({ leadId: lead.id, triggerByUserId: user.id })
+    if (!conv.ok) {
+      // Rollback: Lead loeschen (kein Claim -> kein Fall); convertLeadToClaim hat den Claim bei
+      // einem Folgefehler bereits selbst zurueckgerollt (cleanupAndFail).
       await db.from('leads').delete().eq('id', lead.id)
-      return { success: false, error: 'Fall-Anlage fehlgeschlagen: Claim konnte nicht angelegt werden' }
+      return { success: false, error: `Fall-Anlage fehlgeschlagen: ${conv.error}` }
     }
-    const { data: claim } = await db.from('claims').select('claim_nummer').eq('id', claimId).single()
-    claimNummer = claim?.claim_nummer ?? null
-    // CMM-68: manuelle Anlage hat keine FIN -> FIN-loser vehicles-Stub + claims.vehicle_id,
-    // damit der vehicles-Write-Path auch hier vollstaendig ist (Kennzeichen aus dem Formular).
+    // CMM-49: zwei admin-Form-Felder, die der kanonische lead->claim NICHT aus dem Lead mappt:
+    //   - schadenort_ort: convertLeadToClaim hardcodet schadenort_ort=null (Ort aus PLZ ableitbar)
+    //   - schadens_ursache: wird vom Converter nicht uebernommen (im Flow erst in der Fallakte)
+    // -> hier explizit nachziehen, wenn das Formular sie liefert (sonst No-op). Schadenort-PLZ/
+    //    -Adresse, Schadenart + Spezifikation flossen bereits via den Lead (fahrzeug_standort_*,
+    //    schadens_art, spezifikation).
+    const adminExtras: Record<string, unknown> = {}
+    if (data.schadens_ort?.trim()) adminExtras.schadenort_ort = data.schadens_ort.trim()
+    if (data.schadensursache?.trim()) adminExtras.schadens_ursache = data.schadensursache.trim()
+    if (Object.keys(adminExtras).length > 0) {
+      await db.from('claims').update(adminExtras).eq('id', conv.claimId)
+    }
+    // CMM-68: manuelle Anlage hat keine FIN -> FIN-loser vehicles-Stub + claims.vehicle_id
+    // (Kennzeichen aus dem Formular). convertLeadToClaim legt mangels Lead-FIN kein Fahrzeug an.
     if (data.kennzeichen?.trim()) {
       const { ensureVehicleForClaim } = await import('@/lib/vehicles/ensure-vehicle')
-      const veh = await ensureVehicleForClaim({ claimId, snapshot: { kennzeichen: data.kennzeichen.trim() }, db })
+      const veh = await ensureVehicleForClaim({ claimId: conv.claimId, snapshot: { kennzeichen: data.kennzeichen.trim() }, db })
       if (!veh.ok) console.warn('[CMM-68] vehicles-Stub bei manueller Anlage:', veh.error)
     }
+    revalidatePath('/admin/faelle', 'page')
+    revalidatePath('/dispatch/dashboard', 'page')
+    return { success: true, fall_id: conv.fallId, claim_nummer: conv.claimNummer }
   } catch (err) {
-    console.error('[AAR-811] createClaimForFall (admin-anlegen):', err)
+    console.error('[CMM-49] convertLeadToClaim (admin-anlegen):', err)
     await db.from('leads').delete().eq('id', lead.id)
-    return { success: false, error: 'Fall-Anlage fehlgeschlagen (Claim-Insert)' }
+    return { success: false, error: 'Fall-Anlage fehlgeschlagen (Konversion)' }
   }
-
-  revalidatePath('/admin/faelle', 'page')
-  revalidatePath('/dispatch/dashboard', 'page')
-  return { success: true, fall_id: fallId, claim_nummer: claimNummer }
 }
