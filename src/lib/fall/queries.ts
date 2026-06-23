@@ -146,25 +146,14 @@ export async function getFallById(
   fallId: string,
   select: string = FALL_SELECT_FULL,
 ): Promise<Record<string, unknown> | null> {
+  // CMM-49: v_faelle_mit_aktuellem_termin sourct halter_*/gegner_*/ist_fahrzeughalter seit dem
+  // View-Repoint (Migration 20260623162946 / #3098) selbst aus den Entities (claim_parties/personen/
+  // firmen/vehicles) — der frueher noetige v_claim_full-Merge (#3096) ist damit redundant + entfernt.
   const { data } = await supabase
     .from('v_faelle_mit_aktuellem_termin')
     .select(select)
     .eq('id', fallId)
     .maybeSingle()
   if (!data) return null
-  // CMM-49: v_faelle_mit_aktuellem_termin NULLt die halter_*/gegner_*/ist_fahrzeughalter-Spalten
-  // (die Party-Entity-Migration wurde fuer DIESE View nicht nachgezogen — v_claim_full sourct sie
-  // korrekt aus claim_parties/personen/firmen). Die Writes funktionieren bereits (#3069 halter->
-  // personen, #3070 gegner->party), aber die Fallakte zeigte sie leer. Hier die party-gesourcten
-  // Felder aus v_claim_full nachladen + mergen (id == claim_id, Bridge-Invariante). Kanonischer Fix
-  // = View-Repoint von v_faelle_mit_aktuellem_termin (Follow-up); dieser Merge fixt das Display
-  // ohne DDL am Haupt-Reader.
-  const { data: ent } = await supabase
-    .from('v_claim_full')
-    .select(
-      'halter_vorname, halter_nachname, halter_strasse, halter_plz, halter_stadt, halter_telefon, halter_email, halter_geburtsdatum, halter_name, ist_fahrzeughalter, gegner_name, gegner_kennzeichen, gegner_versicherung, gegner_fahrzeugtyp, firma_name',
-    )
-    .eq('id', fallId)
-    .maybeSingle()
-  return { ...(data as unknown as Record<string, unknown>), ...((ent as unknown as Record<string, unknown> | null) ?? {}) }
+  return data as unknown as Record<string, unknown>
 }
