@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertSvLead } from '@/lib/sv-leads/upsert'
 import { importSvLeads } from '@/lib/sv-leads/bulk-import'
+import { ladeSvLeadEinladung } from '@/lib/sv-leads/claim-einladung'
 import { revalidatePath } from 'next/cache'
 import type { SvLeadRow } from './types'
 
@@ -94,7 +95,7 @@ export async function getSvLeads(): Promise<SvLeadRow[]> {
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('sv_leads')
-    .select('id, name, firma, ort, plz, ist_aktiv, claim_status, konvertiert_zu_sv_id, quelle, aktualisiert_am')
+    .select('id, name, firma, ort, plz, telefon, email, ist_aktiv, claim_status, konvertiert_zu_sv_id, quelle, aktualisiert_am')
     .order('aktualisiert_am', { ascending: false })
     .limit(200)
   if (error) {
@@ -102,4 +103,56 @@ export async function getSvLeads(): Promise<SvLeadRow[]> {
     return []
   }
   return (data ?? []) as SvLeadRow[]
+}
+
+// ─── Task 6: Claim-Einladung (Admin-only, kein Auto-Send) ────────────────────
+
+export async function sendeSvLeadEinladung(
+  leadId: string,
+): Promise<{ ok: true; gesendet: boolean } | { ok: false; error: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Einladungen senden.' }
+
+  const result = await ladeSvLeadEinladung(leadId)
+  revalidatePath('/admin/sv-leads')
+  return result
+}
+
+export async function sendeAlleOffenenEinladungen(): Promise<
+  { ok: true; gesendet: number; uebersprungen: number } | { ok: false; error: string }
+> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Einladungen senden.' }
+
+  const admin = createAdminClient()
+  // Alle offenen Leads mit mindestens einem Kontaktweg laden
+  const { data, error } = await admin
+    .from('sv_leads')
+    .select('id, telefon, email')
+    .eq('claim_status', 'offen')
+    .is('konvertiert_zu_sv_id', null)
+    .or('telefon.not.is.null,email.not.is.null')
+    .order('aktualisiert_am', { ascending: false })
+    .limit(500)
+
+  if (error) {
+    return { ok: false, error: 'Laden der Leads fehlgeschlagen: ' + error.message }
+  }
+
+  const leads = (data ?? []) as { id: string; telefon: string | null; email: string | null }[]
+
+  let gesendet = 0
+  let uebersprungen = 0
+
+  for (const lead of leads) {
+    const result = await ladeSvLeadEinladung(lead.id)
+    if (result.ok && result.gesendet) {
+      gesendet++
+    } else {
+      uebersprungen++
+    }
+  }
+
+  revalidatePath('/admin/sv-leads')
+  return { ok: true, gesendet, uebersprungen }
 }

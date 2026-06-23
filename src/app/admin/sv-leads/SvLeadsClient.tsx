@@ -3,8 +3,8 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { MapPinIcon, PlusIcon, UploadIcon } from 'lucide-react'
-import { createSvLead, importSvLeadsAction } from './actions'
+import { MapPinIcon, MailIcon, PlusIcon, UploadIcon } from 'lucide-react'
+import { createSvLead, importSvLeadsAction, sendeSvLeadEinladung, sendeAlleOffenenEinladungen } from './actions'
 import type { SvLeadRow } from './types'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
@@ -42,6 +42,10 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
   const [showImportDialog, setShowImportDialog] = useState(false)
   const [importLoading, setImportLoading] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Einladungs-State: ladende LeadIds als Set
+  const [einladendLeads, setEinladendLeads] = useState<Set<string>>(new Set())
+  const [bulkEinladenLoading, setBulkEinladenLoading] = useState(false)
 
   const [adresse, setAdresse] = useState<{
     strasse: string
@@ -87,6 +91,41 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
     }
     toast.success('SV-Lead angelegt.')
     setShowDialog(false)
+    router.refresh()
+  }
+
+  async function handleEinladen(leadId: string) {
+    setEinladendLeads(prev => new Set(prev).add(leadId))
+    const result = await sendeSvLeadEinladung(leadId)
+    setEinladendLeads(prev => {
+      const next = new Set(prev)
+      next.delete(leadId)
+      return next
+    })
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    if (result.gesendet) {
+      toast.success('Einladung gesendet.')
+    } else {
+      toast.info('Kein Kontakt vorhanden — Einladung nicht gesendet.')
+    }
+    router.refresh()
+  }
+
+  async function handleAlleEinladen() {
+    setBulkEinladenLoading(true)
+    const result = await sendeAlleOffenenEinladungen()
+    setBulkEinladenLoading(false)
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    const { gesendet, uebersprungen } = result
+    toast.success(
+      `${gesendet} eingeladen, ${uebersprungen} ohne Kontakt übersprungen.`
+    )
     router.refresh()
   }
 
@@ -136,6 +175,15 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                   Bulk-Import (CSV)
                 </Button>
                 <Button
+                  variant="ghost"
+                  onClick={handleAlleEinladen}
+                  iconLeft={<MailIcon className="w-4 h-4" />}
+                  loading={bulkEinladenLoading}
+                  disabled={bulkEinladenLoading}
+                >
+                  Alle offenen einladen
+                </Button>
+                <Button
                   variant="navy"
                   onClick={openDialog}
                   iconLeft={<PlusIcon className="w-4 h-4" />}
@@ -156,6 +204,7 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                 <Th className="text-left text-claimondo-ondo!">Status</Th>
                 <Th className="text-left text-claimondo-ondo!">Quelle</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktualisiert</Th>
+                <Th className="text-left text-claimondo-ondo!">Aktion</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -195,11 +244,25 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                   <Td>
                     <span className="text-claimondo-ondo text-sm">{formatDatum(lead.aktualisiert_am)}</span>
                   </Td>
+                  <Td>
+                    {lead.claim_status === 'offen' && !lead.konvertiert_zu_sv_id && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEinladen(lead.id)}
+                        loading={einladendLeads.has(lead.id)}
+                        disabled={einladendLeads.has(lead.id)}
+                        iconLeft={<MailIcon className="w-3.5 h-3.5" />}
+                      >
+                        Einladen
+                      </Button>
+                    )}
+                  </Td>
                 </Tr>
               ))}
               {svLeads.length === 0 && (
                 <Tr>
-                  <Td colSpan={5} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine SV-Leads vorhanden.
                   </Td>
                 </Tr>
