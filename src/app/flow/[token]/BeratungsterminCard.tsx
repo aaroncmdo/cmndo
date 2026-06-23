@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Button } from '@/components/primitives/Button'
 import { WunschterminPicker } from '@/app/embed/gutachter-finder/_components/WunschterminPicker'
 import { bestaetigeBeratungsterminFlow, verschiebeBeratungsterminFlow } from './self-service-actions'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 type Props = {
   token: string
@@ -19,13 +20,6 @@ function fmt(iso: string): string {
   } catch {
     return iso
   }
-}
-
-// Berlin-Wall-Clock aus <input datetime-local> (WunschterminPicker liefert 'YYYY-MM-DDTHH:mm')
-// als ISO interpretieren — der Picker erzeugt lokale Zeit; wir senden sie als ISO an die Action,
-// die sie als Termin-Zeitpunkt speichert (gleiche Konvention wie der Embed-Wunschtermin).
-function lokalToIso(lokal: string): string {
-  return new Date(lokal).toISOString()
 }
 
 export function BeratungsterminCard({ token, termin }: Props) {
@@ -49,7 +43,7 @@ export function BeratungsterminCard({ token, termin }: Props) {
     if (!neuLokal) return
     setPending(true); setFehler(null)
     try {
-      const iso = lokalToIso(neuLokal)
+      const iso = berlinWallClockToUtc(neuLokal)
       const r = await verschiebeBeratungsterminFlow(token, iso)
       if (!r.ok) { setFehler(r.error ?? 'Fehler'); return }
       setStartZeit(iso); setStatus('bestaetigt'); setVerschieben(false)

@@ -571,33 +571,6 @@ export async function uploadPolizeiberichtFlow(
 
 const BERATUNG_DAUER_MIN = 30
 
-/** Laedt den kb_beratung-Termin des Leads (Anzeige im /flow). */
-export async function ladeBeratungsterminFlow(
-  token: string,
-): Promise<{ ok: true; termin: { id: string; startZeit: string; status: string; kbVorname: string | null } | null } | { ok: false; error: string }> {
-  const { admin, leadId, error } = await resolveFlowLead(token)
-  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
-  const { data: t } = await admin
-    .from('gutachter_termine')
-    .select('id, start_zeit, status, assignee_id')
-    .eq('lead_id', leadId)
-    .eq('typ', 'kb_beratung')
-    .in('status', ['reserviert', 'bestaetigt'])
-    .order('start_zeit', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-  if (!t) return { ok: true, termin: null }
-  let kbVorname: string | null = null
-  if (t.assignee_id) {
-    const { data: kb } = await admin.from('profiles').select('vorname').eq('id', t.assignee_id as string).maybeSingle()
-    kbVorname = (kb?.vorname as string | null) ?? null
-  }
-  return {
-    ok: true,
-    termin: { id: t.id as string, startZeit: t.start_zeit as string, status: t.status as string, kbVorname },
-  }
-}
-
 async function ladeAktivenBeratungstermin(
   admin: ReturnType<typeof createAdminClient>,
   leadId: string,

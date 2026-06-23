@@ -78,7 +78,6 @@ vi.mock('../werkstatt-geo-fallback', () => ({ resolveWerkstattFallbackGeo: vi.fn
 // ─── Import (after mocks) ────────────────────────────────────────────────────
 
 import {
-  ladeBeratungsterminFlow,
   bestaetigeBeratungsterminFlow,
   verschiebeBeratungsterminFlow,
 } from '../self-service-actions'
@@ -94,53 +93,6 @@ beforeEach(() => {
   vi.clearAllMocks()
   responseQueue = []
   updateCalls.length = 0
-})
-
-// ─── ladeBeratungsterminFlow ─────────────────────────────────────────────────
-
-describe('ladeBeratungsterminFlow', () => {
-  it('liefert null wenn kein kb_beratung-Termin existiert', async () => {
-    primeResponses([
-      flowLinkFound('lead-1'), // resolveFlowLead: flow_links.maybeSingle
-      { data: null },          // ladeBeratungsterminFlow: gutachter_termine.maybeSingle
-    ])
-    const r = await ladeBeratungsterminFlow('tok')
-    expect(r).toEqual({ ok: true, termin: null })
-  })
-
-  it('liefert Termin + KB-Vorname wenn Termin existiert und assignee_id gesetzt', async () => {
-    primeResponses([
-      flowLinkFound('lead-1'),
-      { data: { id: 't1', start_zeit: '2026-06-24T08:00:00Z', status: 'reserviert', assignee_id: 'kb-1' } },
-      { data: { vorname: 'Mara' } }, // profiles.maybeSingle fuer KB-Vorname
-    ])
-    const r = await ladeBeratungsterminFlow('tok')
-    expect(r).toMatchObject({
-      ok: true,
-      termin: { id: 't1', startZeit: '2026-06-24T08:00:00Z', status: 'reserviert', kbVorname: 'Mara' },
-    })
-  })
-
-  it('liefert kbVorname=null wenn assignee_id fehlt', async () => {
-    primeResponses([
-      flowLinkFound('lead-1'),
-      { data: { id: 't2', start_zeit: '2026-06-25T09:00:00Z', status: 'bestaetigt', assignee_id: null } },
-      // kein Profile-Lookup (assignee_id ist null)
-    ])
-    const r = await ladeBeratungsterminFlow('tok')
-    if (r.ok) {
-      expect(r.termin?.kbVorname).toBeNull()
-      expect(r.termin?.id).toBe('t2')
-    } else {
-      throw new Error(`Erwartet ok:true, aber ok:false mit error=${r.error}`)
-    }
-  })
-
-  it('gibt ok:false bei leerem Token zurueck', async () => {
-    // leerer Token -> resolveFlowLead gibt sofort Fehler (kein DB-Call)
-    const r = await ladeBeratungsterminFlow('')
-    expect(r.ok).toBe(false)
-  })
 })
 
 // ─── bestaetigeBeratungsterminFlow ──────────────────────────────────────────
