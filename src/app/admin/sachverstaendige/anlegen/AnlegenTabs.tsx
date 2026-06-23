@@ -65,7 +65,7 @@ export default function AnlegenTabs({ onSuccess }: {
               <Icon className="w-4 h-4" />
               {t.label}
               {t.disabled && t.disabledHint && (
-                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-600 font-medium">
+                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-warning-soft text-warning font-medium">
                   {t.disabledHint}
                 </span>
               )}

@@ -83,7 +83,7 @@ export default function WelcomeMailPreviewModal({ open, input, onConfirm, onCanc
           )}
           {error && (
             <div className="p-4">
-              <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+              <div className="px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
                 {error}
               </div>
             </div>

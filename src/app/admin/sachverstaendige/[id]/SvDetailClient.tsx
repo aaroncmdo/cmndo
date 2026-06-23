@@ -259,7 +259,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             {istGesperrt ? (
               <div className="flex items-center justify-between gap-3">
                 <div>
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-red-100 text-red-700 text-[11px] font-medium">
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-danger-soft text-danger-strong text-[11px] font-medium">
                     <LockIcon className="w-3 h-3" /> Gesperrt
                   </span>
                   {sv.gesperrtGrund && (
@@ -271,7 +271,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                   onClick={handleEntsperren}
                   isLoading={sperrePending}
                   loadingText="…"
-                  className="px-3 py-1.5 rounded-ios-lg border border-emerald-500/40 text-emerald-700 text-xs font-semibold hover:bg-emerald-50 disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-ios-lg border border-success/40 text-success-strong text-xs font-semibold hover:bg-success-soft disabled:opacity-40"
                 >
                   <UnlockIcon className="w-3.5 h-3.5 inline mr-1" /> Entsperren
                 </LoadingButton>
@@ -280,11 +280,11 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
               <div className="flex items-center justify-between gap-3">
                 <div>
                   {sv.istAktiv ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[11px] font-medium">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-success-soft text-success-strong text-[11px] font-medium">
                       Aktiv (Portal freigeschaltet)
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-700 text-[11px] font-medium">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[11px] font-medium">
                       Onboarding (Anzahlung ausstehend)
                     </span>
                   )}
@@ -297,7 +297,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                   onClick={() => setShowSperrDialog(true)}
                   isLoading={sperrePending && showSperrDialog}
                   loadingText="…"
-                  className="px-3 py-1.5 rounded-ios-lg border border-red-500/40 text-red-600 text-xs font-semibold hover:bg-red-50 disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-ios-lg border border-danger/40 text-danger text-xs font-semibold hover:bg-danger-soft disabled:opacity-40"
                 >
                   <LockIcon className="w-3.5 h-3.5 inline mr-1" /> Sperren
                 </LoadingButton>
@@ -305,14 +305,14 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
             )}
           </div>
           {showSperrDialog && !istGesperrt && (
-            <div className="mt-2 bg-red-50/50 border border-red-200 rounded-ios-xl px-3 py-2.5 space-y-2">
-              <p className="text-xs font-medium text-red-700">Grund für die Sperre (sichtbar im Admin-Log)</p>
+            <div className="mt-2 bg-danger-soft/50 border border-danger/30 rounded-ios-xl px-3 py-2.5 space-y-2">
+              <p className="text-xs font-medium text-danger-strong">Grund für die Sperre (sichtbar im Admin-Log)</p>
               <input
                 type="text"
                 value={sperrGrund}
                 onChange={(e) => setSperrGrund(e.target.value)}
                 placeholder="z.B. Wiederholte Ablehnungen, Qualitätsmängel..."
-                className="w-full px-3 py-2 text-xs rounded-ios-lg border border-red-200 bg-white focus:outline-none focus:ring-1 focus:ring-red-400"
+                className="w-full px-3 py-2 text-xs rounded-ios-lg border border-danger/30 bg-white focus:outline-none focus:ring-1 focus:ring-danger/40"
                 autoFocus
               />
               <div className="flex items-center gap-2 justify-end">
@@ -328,7 +328,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
                   onClick={handleSperren}
                   isLoading={sperrePending}
                   loadingText="Sperrt…"
-                  className="px-3 py-1.5 rounded-ios-lg bg-red-600 text-white text-xs font-semibold hover:bg-red-700 disabled:opacity-40"
+                  className="px-3 py-1.5 rounded-ios-lg bg-danger text-white text-xs font-semibold hover:bg-danger-strong disabled:opacity-40"
                 >
                   Sperre aktivieren
                 </LoadingButton>
@@ -404,8 +404,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           <textarea name="notizen" defaultValue={sv.notizen} rows={3} className={`${inputCls} resize-none`} placeholder="Interne Notizen ..." />
         </div>
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-        {success && <p className="text-emerald-500 text-sm">Gespeichert! Isochrone wird neu berechnet.</p>}
+        {error && <p className="text-danger text-sm">{error}</p>}
+        {success && <p className="text-success text-sm">Gespeichert! Isochrone wird neu berechnet.</p>}
 
         <LoadingButton
           type="submit"
@@ -443,8 +443,8 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         {resendNotice && (
           <div className={`mt-3 px-3 py-2 rounded-ios-xl text-xs ${
             resendNotice.ok
-              ? 'bg-emerald-50 border border-emerald-200 text-emerald-700'
-              : 'bg-red-50 border border-red-200 text-red-600'
+              ? 'bg-success-soft border border-success/30 text-success-strong'
+              : 'bg-danger-soft border border-danger/30 text-danger'
           }`}>
             {resendNotice.text}
           </div>

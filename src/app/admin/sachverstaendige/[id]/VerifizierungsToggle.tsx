@@ -42,7 +42,7 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
         onClick={toggle}
         disabled={pending}
         title={datum ? `Verifiziert seit ${datum} — klicken zum Zurückziehen` : 'Verifiziert — klicken zum Zurückziehen'}
-        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-colors disabled:opacity-50"
+        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-medium bg-success-soft text-success-strong hover:bg-success/15 transition-colors disabled:opacity-50"
       >
         <BadgeCheckIcon className="w-3 h-3" />
         Verifiziert{datum ? ` · ${datum}` : ''}
@@ -62,7 +62,7 @@ export default function VerifizierungsToggle({ svId, verifiziert, verifiziertAm 
         <ShieldOffIcon className="w-3 h-3" />
         {pending ? 'Speichern…' : 'Nicht verifiziert'}
       </button>
-      {fehler && <span className="text-[10px] text-red-600">{fehler}</span>}
+      {fehler && <span className="text-[10px] text-danger">{fehler}</span>}
     </div>
   )
 }

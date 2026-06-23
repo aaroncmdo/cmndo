@@ -159,10 +159,10 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
 
   if (result) {
     return (
-      <div className="bg-white border border-emerald-200 rounded-2xl p-8">
+      <div className="bg-white border border-success/30 rounded-2xl p-8">
         <div className="flex items-start gap-4">
-          <div className="w-12 h-12 rounded-ios-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2Icon className="w-6 h-6 text-emerald-600" />
+          <div className="w-12 h-12 rounded-ios-xl bg-success-soft flex items-center justify-center flex-shrink-0">
+            <CheckCircle2Icon className="w-6 h-6 text-success" />
           </div>
           <div className="flex-1">
             <h2 className="text-lg font-semibold text-claimondo-navy">{akademieName} angelegt</h2>
@@ -191,12 +191,12 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-emerald-500' : i === step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'
+                i < step ? 'bg-success' : i === step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'
               }`}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-emerald-500' : 'bg-claimondo-border'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-success' : 'bg-claimondo-border'}`} />
               )}
             </div>
           )
@@ -218,7 +218,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
                 <div className="sm:col-span-2">
                   <label className="text-xs text-claimondo-ondo mb-1.5 block">
                     Anschrift *
-                    {anschriftLat !== null && <span className="text-emerald-600 ml-2">✓ Geo gesetzt</span>}
+                    {anschriftLat !== null && <span className="text-success ml-2">✓ Geo gesetzt</span>}
                   </label>
                   <GooglePlaceAutocomplete
                     defaultValue={anschrift}
@@ -365,7 +365,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
         )}
 
         {error && (
-          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
             {error}
           </div>
         )}
