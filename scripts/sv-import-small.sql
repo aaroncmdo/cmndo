@@ -1,3 +1,18 @@
+-- DEPRECATED (2026-06-23): Dieses Script ist NICHT mehr der kanonische Import-Weg.
+--
+-- Es verwendet DELETE+INSERT, was destruktiv ist und alle bestehenden Dedup-Keys
+-- und Anreicherungsfelder vernichtet. Zudem bypasst es die DB-RPC `sv_lead_upsert`,
+-- was Drift gegenueber dem kanonischen Write-Pfad erzeugen kann.
+--
+-- KANONISCHER ERSATZ: Bulk-CSV-Import ueber `importSvLeads` (src/lib/sv-leads/bulk-import.ts)
+-- erreichbar im Admin-Portal unter /admin/sv-leads -> "Bulk-Import (CSV)".
+-- Server-Action: `importSvLeadsAction` (src/app/admin/sv-leads/actions.ts).
+-- Kanonischer Schreibweg: DB-RPC `sv_lead_upsert` via `upsertSvLead`.
+--
+-- Dieses File wird als historische Referenz behalten (Original-Daten vom
+-- excel_import_2026-05-11), darf aber NICHT mehr als aktiver Import-Pfad
+-- verwendet werden.
+
 BEGIN;
 DELETE FROM public.sv_leads;
 INSERT INTO public.sv_leads (name,firma,adresse,plz,ort,lat,lng,quelle,ist_aktiv,warteliste_status,paket_umkreis_km,isochrone_polygon) VALUES ('Ing.-Büro Urbach KG','Ing.-Büro Urbach KG','Heisenbergstr. 17, 50126 Bergheim/Erft','50126','Bergheim/Erft',50.947063,6.62375,'excel_import_2026-05-11',true,'aktiv',25,'{"type":"Polygon","coordinates":[[[6.69675,51.128093],[6.696211,51.100063],[6.66275,51.106588],[6.62575,51.107788],[6.568679,51.104134],[6.537533,51.082846],[6.53105,51.070063],[6.54875,51.051687],[6.54475,51.014288],[6.494858,51.018955],[6.4989,51.047213],[6.420256,51.038569],[6.40575,51.05599],[6.400321,51.039634],[6.42675,51.020529],[6.39426,51.003063],[6.356002,50.989315],[6.342103,50.97571],[6.34075,50.945037],[6.355368,50.912681],[6.39675,50.900522],[6.408904,50.916063],[6.41719,50.894503],[6.44675,50.892386],[6.463819,50.868132],[6.45475,50.844246],[6.47775,50.837727],[6.504355,50.814668],[6.550699,50.809012],[6.580256,50.802557],[6.55968,50.778133],[6.586395,50.788708],[6.61275,50.770413],[6.629451,50.758362],[6.658904,50.770063],[6.661476,50.792063],[6.667742,50.813071],[6.70375,50.814427],[6.71975,50.791173],[6.737207,50.80152],[6.76275,50.790377],[6.807296,50.795063],[6.81775,50.828393],[6.833553,50.85026],[6.831303,50.862063],[6.837422,50.893735],[6.861358,50.909455],[6.856889,50.928063],[6.832131,50.955063],[6.792983,50.97583],[6.82175,50.982344],[6.82675,51.008265],[6.83175,51.019711],[6.83175,51.045261],[6.787962,51.036851],[6.803177,51.062636],[6.807422,51.087735],[6.77209,51.109063],[6.734877,51.085936],[6.744791,51.106063],[6.69675,51.128093]]]}'::jsonb);
