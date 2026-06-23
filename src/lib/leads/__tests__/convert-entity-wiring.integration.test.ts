@@ -284,6 +284,7 @@ d('convert-lead-to-claim Halter-Party (Kunde != Halter, DB-Integration)', () => 
 d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
   let db3: SupabaseClient
   let fallId3: string | null = null
+  let personId3: string | null = null
 
   beforeAll(() => {
     db3 = createClient(URL!, KEY!, { auth: { autoRefreshToken: false, persistSession: false } })
@@ -294,12 +295,19 @@ d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
       await db3.from('faelle_claim_bridge').delete().eq('claim_id', fallId3)
       await db3.from('claims').delete().eq('id', fallId3)
     }
+    // CMM-49: die on-demand angelegte geschaedigter-Person (ensurePersonForData, userId=null) wird
+    // nicht vom claims-CASCADE erfasst (personen = globale Entitaet) -> separat aufraeumen.
+    if (personId3) await db3.from('personen').delete().eq('id', personId3)
   })
 
-  it('frischer fallId -> Claim id==fallId + Bridge, KEINE faelle-Row', async () => {
+  it('frischer fallId -> Claim id==fallId + Bridge + geschaedigter-Party(+Person), KEINE faelle-Row', async () => {
     const { createClaimForFall } = await import('../../claims/create-for-fall')
     fallId3 = randomUUID()
     const claimId = await createClaimForFall(db3, fallId3, {
+      // CMM-49: mit Geschaedigter-Identitaet -> geschaedigter-Party + personen-Entitaet
+      vorname: 'Erika',
+      nachname: 'Mustermann-CMM49',
+      telefon: '+49 170 1234567',
       schadens_plz: '50667',
       schadens_art: 'haftpflicht',
     }, 'manuell_admin')
@@ -312,5 +320,23 @@ d('createClaimForFall claim-first (D2-Teil-2, DB-Integration)', () => {
       .eq('claim_id', fallId3)
       .single()
     expect(br?.fall_id).toBe(fallId3)
+    // CMM-49: createClaimForFall legt die geschaedigter-Party + personen-Entitaet an (nicht mehr thin)
+    // -> kunde_*/halter_*/ist_fahrzeughalter-Edits in der Fallakte finden ihre Party.
+    const { data: gp } = await db3
+      .from('claim_parties')
+      .select('rolle, person_id, ist_halter')
+      .eq('claim_id', fallId3)
+      .eq('rolle', 'geschaedigter')
+      .single()
+    expect(gp?.rolle).toBe('geschaedigter')
+    expect(gp?.ist_halter).toBe(true)
+    expect(gp?.person_id).toBeTruthy()
+    personId3 = (gp?.person_id as string | null) ?? null
+    const { data: person } = await db3
+      .from('personen')
+      .select('nachname')
+      .eq('id', personId3 as string)
+      .single()
+    expect(person?.nachname).toBe('Mustermann-CMM49')
   }, 20_000)
 })

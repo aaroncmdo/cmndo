@@ -96,6 +96,14 @@ export async function anlegeFall(data: AnlegeFallInput): Promise<
   try {
     const { createClaimForFall } = await import('@/lib/claims/create-for-fall')
     const claimId = await createClaimForFall(db, fallId, {
+      // CMM-49: Geschaedigter-Identitaet durchreichen -> createClaimForFall legt die geschaedigter-
+      // claim_party + personen-Entitaet an (sonst thin claim: kunde_*/halter_*/ist_fahrzeughalter-
+      // Edits in der Fallakte ohne Ziel). kundenbetreuer_id = anlegender Admin (Attribution).
+      vorname: data.vorname.trim(),
+      nachname: data.nachname.trim(),
+      telefon: data.telefon.trim(),
+      email: data.email?.trim() || null,
+      kundenbetreuer_id: user.id,
       schadens_plz: data.schadens_plz,
       schadens_adresse: data.schadens_adresse ?? null,
       schadens_ort: data.schadens_ort ?? null,
