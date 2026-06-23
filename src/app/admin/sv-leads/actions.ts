@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { upsertSvLead } from '@/lib/sv-leads/upsert'
+import { importSvLeads } from '@/lib/sv-leads/bulk-import'
 import { revalidatePath } from 'next/cache'
 import type { SvLeadRow } from './types'
 
@@ -73,6 +74,20 @@ export async function createSvLead(
 
   revalidatePath('/admin/sv-leads')
   return { ok: true, id: result.id }
+}
+
+export async function importSvLeadsAction(csvText: string): Promise<
+  | { ok: true; importiert: number; fehler: string[] }
+  | { ok: false; error: string }
+> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen SV-Leads importieren.' }
+
+  const result = await importSvLeads(csvText)
+  if (!result.ok) return { ok: false, error: result.error }
+
+  revalidatePath('/admin/sv-leads')
+  return { ok: true, importiert: result.importiert, fehler: result.fehler }
 }
 
 export async function getSvLeads(): Promise<SvLeadRow[]> {

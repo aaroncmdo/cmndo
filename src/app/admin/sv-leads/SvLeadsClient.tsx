@@ -1,10 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { MapPinIcon, PlusIcon } from 'lucide-react'
-import { createSvLead } from './actions'
+import { MapPinIcon, PlusIcon, UploadIcon } from 'lucide-react'
+import { createSvLead, importSvLeadsAction } from './actions'
 import type { SvLeadRow } from './types'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
@@ -37,6 +37,11 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  // Bulk-Import state
+  const [showImportDialog, setShowImportDialog] = useState(false)
+  const [importLoading, setImportLoading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const [adresse, setAdresse] = useState<{
     strasse: string
@@ -85,6 +90,32 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
     router.refresh()
   }
 
+  async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const text = await file.text()
+    setImportLoading(true)
+    const result = await importSvLeadsAction(text)
+    setImportLoading(false)
+    // Reset file input so dasselbe File erneut hochgeladen werden kann
+    if (fileInputRef.current) fileInputRef.current.value = ''
+    if (!result.ok) {
+      toast.error(result.error)
+      return
+    }
+    const { importiert, fehler } = result
+    if (importiert > 0) {
+      toast.success(`${importiert} SV-Lead${importiert === 1 ? '' : 's'} importiert.${fehler.length > 0 ? ` ${fehler.length} übersprungen.` : ''}`)
+    } else {
+      toast.warning(`0 importiert — ${fehler.length} übersprungen.`)
+    }
+    if (fehler.length > 0) {
+      console.warn('[Bulk-Import] Übersprungene Zeilen:', fehler)
+    }
+    setShowImportDialog(false)
+    router.refresh()
+  }
+
   return (
     <div className="h-full overflow-y-auto py-8">
       <div>
@@ -94,13 +125,24 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
             description={`${svLeads.length} Dead-Pin${svLeads.length === 1 ? '' : 's'}`}
             icon={MapPinIcon}
             actions={
-              <Button
-                variant="navy"
-                onClick={openDialog}
-                iconLeft={<PlusIcon className="w-4 h-4" />}
-              >
-                Neuer Dead-Pin
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowImportDialog(true)}
+                  iconLeft={<UploadIcon className="w-4 h-4" />}
+                  loading={importLoading}
+                  disabled={importLoading}
+                >
+                  Bulk-Import (CSV)
+                </Button>
+                <Button
+                  variant="navy"
+                  onClick={openDialog}
+                  iconLeft={<PlusIcon className="w-4 h-4" />}
+                >
+                  Neuer Dead-Pin
+                </Button>
+              </div>
             }
           />
         </div>
@@ -165,6 +207,35 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
             </Tbody>
           </Table>
         </DataTableContainer>
+
+        <Modal open={showImportDialog} onClose={() => setShowImportDialog(false)} maxWidth={480} ariaLabel="Bulk-Import CSV">
+          <h2 className="text-claimondo-navy font-semibold text-lg mb-2">Bulk-Import (CSV)</h2>
+          <p className="text-claimondo-ondo text-sm mb-4">
+            CSV-Datei mit den Spalten <span className="font-mono text-xs bg-claimondo-bg px-1 rounded">name, firma, adresse, plz, ort, telefon, email, dat_id, dat_expert_nr, qualifikationen, paket_umkreis_km</span> hochladen.
+            Qualifikationen werden durch Semikolon oder Pipe getrennt. Fehlende Koordinaten werden automatisch per Geocoding ergänzt.
+          </p>
+          <div className="mb-4">
+            <label className="text-sm text-claimondo-ondo mb-2 block font-medium">
+              Datei wählen (.csv)
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".csv,text/csv"
+              onChange={handleImportFile}
+              disabled={importLoading}
+              className="block w-full text-sm text-claimondo-navy file:mr-3 file:py-1.5 file:px-3 file:rounded-ios-md file:border-0 file:text-sm file:font-medium file:bg-claimondo-bg file:text-claimondo-navy hover:file:bg-claimondo-border cursor-pointer"
+            />
+          </div>
+          {importLoading && (
+            <p className="text-sm text-claimondo-ondo mt-2">Importiert… bitte warten.</p>
+          )}
+          <div className="flex justify-end pt-2">
+            <Button variant="ghost" onClick={() => setShowImportDialog(false)} disabled={importLoading}>
+              Schließen
+            </Button>
+          </div>
+        </Modal>
 
         <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={520} ariaLabel="Neuer Dead-Pin">
           <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Dead-Pin</h2>
