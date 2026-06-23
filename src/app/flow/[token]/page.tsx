@@ -13,11 +13,38 @@ import { getTranslations } from 'next-intl/server'
 import { resolveFlowLocale } from '@/lib/i18n/resolve-flow-locale'
 import { loadMessages } from '@/i18n/load-messages'
 import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
+import { getStorageUrl } from '@/lib/storage/url'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 // AAR-604: Kein try/catch um JSX-Returns — Next.js fängt Render-Errors via
 // error.tsx (AAR-271) als Error-Boundary. Das umschließende try/catch davor
 // hat 13 Lint-Errors (react-hooks/error-boundaries) produziert und konnte
 // Render-Errors sowieso nicht fangen, da React JSX lazy auswertet.
+
+// AAR-360 Follow-up: SV-Datenschutz + Widerrufsbelehrung als Signed-URLs laden
+// (pflichtdokumente-Slots), damit der Kunde im FlowLink-Häkchen lesen kann, wozu er
+// zustimmt. Non-critical: fehlt ein Dokument -> null (Häkchen ohne toten Link).
+async function loadSvConsentDocUrls(
+  svc: SupabaseClient,
+  svId: string,
+): Promise<{ datenschutzUrl: string | null; widerrufUrl: string | null }> {
+  const { data: rows } = await svc
+    .from('pflichtdokumente')
+    .select('dokument_typ, dokument_url, status')
+    .eq('sv_id', svId)
+    .in('dokument_typ', ['sv_datenschutzerklaerung', 'sv_widerrufsbelehrung'])
+  let datenschutzUrl: string | null = null
+  let widerrufUrl: string | null = null
+  for (const r of rows ?? []) {
+    const status = (r.status as string | null) ?? null
+    const path = (r.dokument_url as string | null) ?? null
+    if (!path || (status !== 'hochgeladen' && status !== 'geprueft')) continue
+    const url = await getStorageUrl(svc, 'fall-dokumente', path)
+    if (r.dokument_typ === 'sv_datenschutzerklaerung') datenschutzUrl = url
+    else if (r.dokument_typ === 'sv_widerrufsbelehrung') widerrufUrl = url
+  }
+  return { datenschutzUrl, widerrufUrl }
+}
 
 export default async function FlowPage({
   params,
@@ -265,6 +292,9 @@ export default async function FlowPage({
     googleAnzahl: number | null
     googleAktualisiertAm: string | null
     terminStatus: string | null
+    // AAR-360 Follow-up: SV-Datenschutz + Widerruf (Signed-URLs) für das Consent-Häkchen
+    datenschutzUrl: string | null
+    widerrufUrl: string | null
   } | null = null
   // CMM-49 sv_id-Drop: FK-Embed sachverstaendige(...) haengt an der zu droppenden
   // sv_id-FK → assignee_id-Lookup (typ-guarded, value-identisch fuer SV-Termine).
@@ -304,6 +334,8 @@ export default async function FlowPage({
     // (nur firmenname) → Fallback auf firmenname statt gutachter=null ("kein_gutachter").
     const anzeigeName = profileRow?.vorname ?? (svReserviert.firmenname as string | null) ?? null
     if (anzeigeName) {
+      // AAR-360 Follow-up: SV-Datenschutz/Widerruf-URLs für das Consent-Häkchen laden.
+      const svDocs = await loadSvConsentDocUrls(svc, terminMitSv!.assignee_id as string)
       gutachter = {
         vorname: anzeigeName,
         avatarUrl: profileRow?.avatar_url ?? null,
@@ -315,6 +347,8 @@ export default async function FlowPage({
         googleAnzahl,
         googleAktualisiertAm,
         terminStatus: (terminMitSv?.status as string | null) ?? null,
+        datenschutzUrl: svDocs.datenschutzUrl,
+        widerrufUrl: svDocs.widerrufUrl,
       }
     }
   }
@@ -352,6 +386,8 @@ export default async function FlowPage({
       }
       const pickName = pr?.vorname ?? (svPick.firmenname as string | null) ?? null
       if (pickName) {
+        // AAR-360 Follow-up: SV-Datenschutz/Widerruf-URLs für das Consent-Häkchen laden.
+        const svDocs = await loadSvConsentDocUrls(svc, chosenSvId)
         gutachter = {
           vorname: pickName,
           avatarUrl: pr?.avatar_url ?? null,
@@ -363,6 +399,8 @@ export default async function FlowPage({
           googleAnzahl: ga,
           googleAktualisiertAm: gaa,
           terminStatus: null, // Wunschtermin = noch kein harter Termin
+          datenschutzUrl: svDocs.datenschutzUrl,
+          widerrufUrl: svDocs.widerrufUrl,
         }
       }
     }

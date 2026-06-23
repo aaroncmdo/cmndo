@@ -575,6 +575,9 @@ export async function signSAandCreateFall(
   leadId: string,
   signatureUrl: string,
   flowLinkId: string | null,
+  // AAR-360 Follow-up: Zustimmung zu Datenschutz + Widerrufsbelehrung des zugewiesenen Gutachters
+  // (FlowLink-Häkchen, entkoppelt von der SA-Signatur). Default false = kein SV zugewiesen.
+  svDsWiderrufZugestimmt: boolean = false,
 ): Promise<{ ok: true; fallId: string } | { ok: false; error: string }> {
   if (!leadId || !signatureUrl) return { ok: false, error: 'Fehlende Daten für SA-Unterschrift' }
 
@@ -917,10 +920,14 @@ export async function signSAandCreateFall(
   // CMM-44 SP-B PR2b: sa_unterschrieben + sa_unterschrieben_am leben auf claims
   // (SSoT) — Write nach claims verschoben (kein faelle-Write mehr).
   if (convClaimId) {
-    await admin.from('claims').update({
+    // AAR-360 Follow-up: Gutachter-Datenschutz/Widerruf-Zustimmung mitschreiben (entkoppelt von der
+    // SA-Signatur). Record-Cast: die Spalte hinkt den generierten Types hinterher (wie operative_status).
+    const claimsSaUpdate: Record<string, unknown> = {
       sa_unterschrieben: true,
       sa_unterschrieben_am: nowIsoSa,
-    }).eq('id', convClaimId)
+    }
+    if (svDsWiderrufZugestimmt) claimsSaUpdate.sv_datenschutz_widerruf_zugestimmt_am = nowIsoSa
+    await admin.from('claims').update(claimsSaUpdate).eq('id', convClaimId)
   }
 
   // AAR-694b: SV-Google-Kalender-Events für alle aktiven Termine syncen.
@@ -1365,35 +1372,11 @@ export async function signSAandCreateFall(
     )
   }
 
-  // AAR-360: SA-Tool — Kunden-Unterschrift auf Gutachter-SA-Vorlage mergen.
-  // Voraussetzungen: SV bereits zugewiesen (svIdFromTermin) UND Vorlage ist
-  // `geprueft` (Check in generateGutachterSA selbst). Fire-and-forget —
-  // wenn der Merge fehlschlägt (keine Vorlage, kein pdf-lib-Fail, Storage-
-  // Fehler), bleibt der Fall trotzdem erstellt. Warnings nur ins Log.
+  // AAR-360 Follow-up (24.06.): Das frühere generateGutachterSA (System 1: Kunden-Unterschrift auf
+  // sachverstaendige.sa_vorlage) ist entfernt — seit AAR-714 vestigial (0 SVs mit sa_vorlage;
+  // Onboarding nutzt DokumenteUploadStep -> pflichtdokumente). Die Gutachter-SA kommt jetzt allein
+  // aus generateGutachterPflichtdokumente (Slot sv_sicherungsabtretung, unten) und ist kundensichtbar.
   if (svIdFromTermin) {
-    slaPromises.push(
-      (async () => {
-        try {
-          const { generateGutachterSA } = await import('@/lib/sa-tool/generate-gutachter-sa')
-          const result = await generateGutachterSA({
-            admin,
-            fallId: fall.id,
-            svId: svIdFromTermin!,
-            kundenVorname: (lead.vorname as string | null) ?? null,
-            kundenNachname: (lead.nachname as string | null) ?? null,
-            kundenSignaturUrl: signatureUrl,
-          })
-          if (!result.success) {
-            if (result.skipped) {
-              console.warn('[AAR-360] SA-Tool Merge übersprungen:', result.error)
-            } else {
-              console.error('[AAR-360] SA-Tool Merge Fehler:', result.error)
-            }
-          }
-        } catch (err) { console.error('[AAR-360] SA-Tool unerwartet:', err) }
-      })()
-    )
-
     // Aaron 2026-04-30: Multi-Doc-Signatur — alle SV-Pflichtdokumente
     // (Sicherungsabtretung / Honorarvereinbarung / Datenschutz / Widerruf)
     // mit Kunden-Unterschrift versehen + claim-zentriert ablegen.

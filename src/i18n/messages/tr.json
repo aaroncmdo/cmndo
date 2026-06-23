@@ -402,6 +402,9 @@
       "aendern_dispatch_hinweis": "Randevunuz zaten onaylandı — yeniden planlamak için sizi kısaca arayacağız."
     },
     "step_sa": {
+      "sv_consent_text": "{firma} firmasının veri koruma hükümlerini ve cayma hakkı bilgilendirmesini kabul ediyorum.",
+      "sv_consent_datenschutz_link": "Veri koruma hükümlerini görüntüle",
+      "sv_consent_widerruf_link": "Cayma hakkı bilgilendirmesini görüntüle",
       "heading": "Görevlendirmeyi imzalayın",
       "sub": "İmzanızla Claimondo'yu hasarınızın ücretsiz olarak yönetilmesi için görevlendirmiş olursunuz.",
       "summary_label": "Özet:",
