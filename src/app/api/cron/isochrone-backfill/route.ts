@@ -25,6 +25,8 @@ import { geocodeAdresse } from '@/lib/mapbox/geocode'
 export const dynamic = 'force-dynamic'
 
 const MAX_PER_RUN = 20
+// sv_leads makes ~2x API calls per row (geocode + isochrone) — own tunable.
+const MAX_SV_LEADS_PER_RUN = 20
 
 /** Wandelt Isochrone-Punkte in ein geschlossenes GeoJSON-Polygon-Array um. */
 function pointsToPolygon(points: Array<{ lat: number; lng: number }>): number[][] {
@@ -105,7 +107,7 @@ export async function GET(request: Request) {
     .select('id, paket_umkreis_km, lat, lng, adresse, plz, ort')
     .eq('ist_aktiv', true)
     .or('isochrone_polygon.is.null,lat.is.null,lng.is.null')
-    .limit(MAX_PER_RUN)
+    .limit(MAX_SV_LEADS_PER_RUN)
 
   let svLeadsBackfilled = 0
   let svLeadsSkipped = 0

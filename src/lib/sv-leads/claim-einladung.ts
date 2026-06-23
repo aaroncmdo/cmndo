@@ -5,7 +5,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { sendEmail } from '@/lib/email/google/client'
-import { render } from '@react-email/render'
 
 // Claim-Link: /sv/registrieren (kein ?lead= — die Seite unterstuetzt den
 // Query-Param noch nicht; der SV sucht sich selbst. Sobald die Seite

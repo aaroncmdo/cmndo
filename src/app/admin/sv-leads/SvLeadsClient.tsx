@@ -86,66 +86,86 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
     fd.set('lat', adresse.lat !== null ? String(adresse.lat) : '')
     fd.set('lng', adresse.lng !== null ? String(adresse.lng) : '')
 
-    const result = await createSvLead(fd)
-    setLoading(false)
-    if (!result.ok) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await createSvLead(fd)
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      toast.success('SV-Lead angelegt.')
+      setShowDialog(false)
+      router.refresh()
+    } catch {
+      toast.error('Anlegen fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setLoading(false)
     }
-    toast.success('SV-Lead angelegt.')
-    setShowDialog(false)
-    router.refresh()
   }
 
   async function handleDatSync() {
     setDatSyncLoading(true)
-    const result = await datSyncAusfuehren()
-    setDatSyncLoading(false)
-    if (!result.ok) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await datSyncAusfuehren()
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      if (result.importiert > 0) {
+        toast.success(`${result.importiert} aus DAT importiert.`)
+      } else {
+        toast.info('DAT-Sync noch nicht verbunden — 0 importiert.')
+      }
+      router.refresh()
+    } catch {
+      toast.error('DAT-Sync fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setDatSyncLoading(false)
     }
-    if (result.importiert > 0) {
-      toast.success(`${result.importiert} aus DAT importiert.`)
-    } else {
-      toast.info('DAT-Sync noch nicht verbunden — 0 importiert.')
-    }
-    router.refresh()
   }
 
   async function handleEinladen(leadId: string) {
     setEinladendLeads(prev => new Set(prev).add(leadId))
-    const result = await sendeSvLeadEinladung(leadId)
-    setEinladendLeads(prev => {
-      const next = new Set(prev)
-      next.delete(leadId)
-      return next
-    })
-    if (!result.ok) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await sendeSvLeadEinladung(leadId)
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      if (result.gesendet) {
+        toast.success('Einladung gesendet.')
+      } else {
+        toast.info('Kein Kontakt vorhanden — Einladung nicht gesendet.')
+      }
+      router.refresh()
+    } catch {
+      toast.error('Einladen fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setEinladendLeads(prev => {
+        const next = new Set(prev)
+        next.delete(leadId)
+        return next
+      })
     }
-    if (result.gesendet) {
-      toast.success('Einladung gesendet.')
-    } else {
-      toast.info('Kein Kontakt vorhanden — Einladung nicht gesendet.')
-    }
-    router.refresh()
   }
 
   async function handleAlleEinladen() {
     setBulkEinladenLoading(true)
-    const result = await sendeAlleOffenenEinladungen()
-    setBulkEinladenLoading(false)
-    if (!result.ok) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await sendeAlleOffenenEinladungen()
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      const { gesendet, uebersprungen } = result
+      toast.success(
+        `${gesendet} eingeladen, ${uebersprungen} ohne Kontakt übersprungen.`
+      )
+      router.refresh()
+    } catch {
+      toast.error('Bulk-Einladen fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setBulkEinladenLoading(false)
     }
-    const { gesendet, uebersprungen } = result
-    toast.success(
-      `${gesendet} eingeladen, ${uebersprungen} ohne Kontakt übersprungen.`
-    )
-    router.refresh()
   }
 
   async function handleImportFile(e: React.ChangeEvent<HTMLInputElement>) {
@@ -153,25 +173,30 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
     if (!file) return
     const text = await file.text()
     setImportLoading(true)
-    const result = await importSvLeadsAction(text)
-    setImportLoading(false)
-    // Reset file input so dasselbe File erneut hochgeladen werden kann
-    if (fileInputRef.current) fileInputRef.current.value = ''
-    if (!result.ok) {
-      toast.error(result.error)
-      return
+    try {
+      const result = await importSvLeadsAction(text)
+      // Reset file input so dasselbe File erneut hochgeladen werden kann
+      if (fileInputRef.current) fileInputRef.current.value = ''
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      const { importiert, fehler } = result
+      if (importiert > 0) {
+        toast.success(`${importiert} SV-Lead${importiert === 1 ? '' : 's'} importiert.${fehler.length > 0 ? ` ${fehler.length} übersprungen.` : ''}`)
+      } else {
+        toast.warning(`0 importiert — ${fehler.length} übersprungen.`)
+      }
+      if (fehler.length > 0) {
+        console.warn('[Bulk-Import] Übersprungene Zeilen:', fehler)
+      }
+      setShowImportDialog(false)
+      router.refresh()
+    } catch {
+      toast.error('Import fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setImportLoading(false)
     }
-    const { importiert, fehler } = result
-    if (importiert > 0) {
-      toast.success(`${importiert} SV-Lead${importiert === 1 ? '' : 's'} importiert.${fehler.length > 0 ? ` ${fehler.length} übersprungen.` : ''}`)
-    } else {
-      toast.warning(`0 importiert — ${fehler.length} übersprungen.`)
-    }
-    if (fehler.length > 0) {
-      console.warn('[Bulk-Import] Übersprungene Zeilen:', fehler)
-    }
-    setShowImportDialog(false)
-    router.refresh()
   }
 
   return (
@@ -189,7 +214,6 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                   onClick={handleDatSync}
                   iconLeft={<RefreshCwIcon className="w-4 h-4" />}
                   loading={datSyncLoading}
-                  disabled={datSyncLoading}
                 >
                   DAT-Sync ausführen
                 </Button>
@@ -198,7 +222,6 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                   onClick={() => setShowImportDialog(true)}
                   iconLeft={<UploadIcon className="w-4 h-4" />}
                   loading={importLoading}
-                  disabled={importLoading}
                 >
                   Bulk-Import (CSV)
                 </Button>
@@ -207,7 +230,6 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                   onClick={handleAlleEinladen}
                   iconLeft={<MailIcon className="w-4 h-4" />}
                   loading={bulkEinladenLoading}
-                  disabled={bulkEinladenLoading}
                 >
                   Alle offenen einladen
                 </Button>
@@ -279,7 +301,6 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
                         size="sm"
                         onClick={() => handleEinladen(lead.id)}
                         loading={einladendLeads.has(lead.id)}
-                        disabled={einladendLeads.has(lead.id)}
                         iconLeft={<MailIcon className="w-3.5 h-3.5" />}
                       >
                         Einladen
