@@ -111,17 +111,17 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         <Link href="/admin/team/incentives" className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy text-xs font-medium rounded-ios-lg transition-colors whitespace-nowrap shrink-0"><GiftIcon className="w-3.5 h-3.5" />Incentives</Link>
       </div>
 
-      {success && <div className="bg-green-50 border border-green-800 rounded-ios-xl p-4 mb-4"><p className="text-green-300 text-sm">{success}</p></div>}
+      {success && <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4 mb-4"><p className="text-success-strong text-sm">{success}</p></div>}
 
       {/* AAR-427: KPI-Banner — wieviele Fälle laufen aktuell im Admin-Fallback-Modus? */}
       {kbFallbackAktiv > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-3 mb-4 flex items-center gap-3">
-          <AlertTriangleIcon className="w-4 h-4 text-amber-500 flex-shrink-0" />
+        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-3 mb-4 flex items-center gap-3">
+          <AlertTriangleIcon className="w-4 h-4 text-warning flex-shrink-0" />
           <div className="flex-1 min-w-0">
-            <p className="text-amber-900 text-sm font-medium">
+            <p className="text-warning-strong text-sm font-medium">
               {kbFallbackAktiv} aktive{kbFallbackAktiv === 1 ? 'r Fall' : ' Fälle'} im KB-Fallback-Modus
             </p>
-            <p className="text-amber-700 text-xs mt-0.5">
+            <p className="text-warning-strong text-xs mt-0.5">
               Diese Fälle werden vorübergehend von einem Admin betreut, weil bei der Konversion kein Kundenbetreuer verfügbar war. Sobald ein KB frei ist, manuell re-assignen.
             </p>
           </div>
@@ -162,14 +162,14 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
                     <Td><div className="text-claimondo-navy font-medium">{name(m)}</div><div className="text-claimondo-ondo text-xs">{m.email}</div></Td>
                     <Td><span className={`px-2 py-0.5 rounded-full text-xs font-medium ${ROLLE_COLORS[m.rolle] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{ROLLE_LABELS[m.rolle] ?? m.rolle}</span></Td>
                     <Td>{m.kategorie ? <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${KAT_COLORS[m.kategorie] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>{KAT_LABELS[m.kategorie] ?? m.kategorie}</span> : <span className="text-claimondo-ondo/70 text-xs">—</span>}</Td>
-                    <Td><div className="flex items-center gap-2"><div className="w-20 h-2 bg-claimondo-bg rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-red-500' : pct > 50 ? 'bg-amber-500' : 'bg-claimondo-ondo'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-xs tabular-nums">{load}/{loadMax}</span></div></Td>
+                    <Td><div className="flex items-center gap-2"><div className="w-20 h-2 bg-claimondo-bg rounded-full overflow-hidden"><div className={`h-full rounded-full ${pct > 80 ? 'bg-danger' : pct > 50 ? 'bg-warning' : 'bg-claimondo-ondo'}`} style={{ width: `${pct}%` }} /></div><span className="text-claimondo-ondo text-xs tabular-nums">{load}/{loadMax}</span></div></Td>
                     <Td>{isD
                       ? <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-amber-400" /><span className="text-claimondo-navy">{leads?.total ?? 0} Leads</span><span className="text-claimondo-ondo/70">·</span><span className="text-green-400">{leads?.konvertiert ?? 0} konv.</span></div>
                       : <div className="flex items-center gap-1.5 text-xs"><ActivityIcon className="w-3.5 h-3.5 text-green-400" /><span className="text-claimondo-navy">{aktive} aktiv</span><span className="text-claimondo-ondo/70">·</span><span className="text-green-400">{abg} abg.</span></div>
                     }</Td>
                     <Td>
                       <div className="flex items-center gap-2">
-                        {m.aktiv === false ? <span className="text-red-400 text-xs">Inaktiv</span> : m.force_password_change ? <span className="text-amber-400 text-xs">Einladung</span> : <span className="text-green-400 text-xs flex items-center gap-1"><ShieldCheckIcon className="w-3 h-3" />Aktiv</span>}
+                        {m.aktiv === false ? <span className="text-danger text-xs">Inaktiv</span> : m.force_password_change ? <span className="text-warning text-xs">Einladung</span> : <span className="text-success text-xs flex items-center gap-1"><ShieldCheckIcon className="w-3 h-3" />Aktiv</span>}
                         {/* AAR-634: „Deaktivieren + Fälle verteilen" nur für aktive KB/LB */}
                         {m.aktiv !== false && (m.rolle === 'kundenbetreuer' || m.rolle === 'dispatch') && (
                           <DeactivateReassignButton mitarbeiterId={m.id} name={name(m)} />
@@ -198,7 +198,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
             <div><label className="text-sm text-claimondo-ondo mb-1 block">Kategorie</label><select name="kategorie" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"><option value="">—</option><option value="dispatch">Dispatch</option><option value="kundenbetreuer">Kundenbetreuer</option><option value="admin">Admin</option><option value="entwicklung">Entwicklung</option></select></div>
           </div>
           <div><label className="text-sm text-claimondo-ondo mb-1 block">Kapazitaet (max. Faelle)</label><input name="kapazitaet_max" type="number" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
+          {error && <p className="text-sm text-danger bg-danger-soft border border-danger/30 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>Abbrechen</Button>
             <Button variant="navy" fullWidth type="submit" disabled={loading}>
@@ -227,7 +227,7 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
             <div><label className="text-sm text-claimondo-ondo mb-1 block">Provision Komplett (netto €)</label><input name="provision_betrag_komplett_netto" type="number" step="0.01" min="0" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
             <div><label className="text-sm text-claimondo-ondo mb-1 block">Provision nur Gutachter (netto €)</label><input name="provision_betrag_nur_gutachter_netto" type="number" step="0.01" min="0" defaultValue={50} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
+          {error && <p className="text-sm text-danger bg-danger-soft border border-danger/30 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" fullWidth onClick={() => setShowMaklerDialog(false)}>Abbrechen</Button>
             <Button variant="navy" fullWidth type="submit" disabled={loading}>
@@ -272,7 +272,7 @@ function DeactivateReassignButton({ mitarbeiterId, name }: { mitarbeiterId: stri
         type="button"
         onClick={handleClick}
         disabled={loading}
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-red-50 text-red-600 hover:bg-red-100 disabled:opacity-50 transition-colors"
+        className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-medium bg-danger-soft text-danger hover:bg-danger/15 disabled:opacity-50 transition-colors"
         title="Deaktivieren + Fälle neu verteilen"
       >
         <PowerIcon className="w-3 h-3" />
