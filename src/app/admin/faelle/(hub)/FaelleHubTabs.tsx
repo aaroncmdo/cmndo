@@ -54,7 +54,7 @@ export default function FaelleHubTabs({
                 className={`inline-flex items-center justify-center min-w-[20px] h-[20px] px-1.5 rounded-full text-[10px] font-semibold ${
                   active
                     ? 'bg-claimondo-navy text-white'
-                    : 'bg-red-100 text-red-700'
+                    : 'bg-danger-soft text-danger-strong'
                 }`}
               >
                 {tab.badge}
