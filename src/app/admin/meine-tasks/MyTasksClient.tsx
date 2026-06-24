@@ -19,17 +19,17 @@ type TaskRow = {
 }
 
 const PRIO_BADGE: Record<string, string> = {
-  dringend: 'bg-red-50 text-red-700',
-  hoch: 'bg-amber-50 text-amber-700',
+  dringend: 'bg-danger-soft text-danger-strong',
+  hoch: 'bg-warning-soft text-warning-strong',
   normal: 'bg-claimondo-bg text-claimondo-ondo',
   niedrig: 'bg-claimondo-bg text-claimondo-ondo/70',
 }
 
 const STATUS_ICON: Record<string, { Icon: typeof CheckCircleIcon; cls: string }> = {
-  offen: { Icon: CircleDotIcon, cls: 'text-amber-500' },
+  offen: { Icon: CircleDotIcon, cls: 'text-warning' },
   'in-bearbeitung': { Icon: ClockIcon, cls: 'text-claimondo-ondo' },
-  erledigt: { Icon: CheckCircleIcon, cls: 'text-emerald-500' },
-  blockiert: { Icon: AlertTriangleIcon, cls: 'text-red-500' },
+  erledigt: { Icon: CheckCircleIcon, cls: 'text-success' },
+  blockiert: { Icon: AlertTriangleIcon, cls: 'text-danger' },
 }
 
 export default function MyTasksClient({
@@ -88,7 +88,7 @@ export default function MyTasksClient({
                 const cfg = STATUS_ICON[t.status] ?? STATUS_ICON.offen
                 const isOverdue = t.faellig_am && new Date(t.faellig_am) < new Date() && t.status !== 'erledigt'
                 return (
-                  <Tr key={t.id} className={`hover:bg-claimondo-bg/50 ${isOverdue ? 'bg-red-50/20' : ''}`}>
+                  <Tr key={t.id} className={`hover:bg-claimondo-bg/50 ${isOverdue ? 'bg-danger-soft/20' : ''}`}>
                     <Td>
                       <button onClick={() => handleStatusChange(t.id, t.status === 'erledigt' ? 'offen' : 'erledigt')} disabled={pending}>
                         <cfg.Icon className={`w-4 h-4 ${cfg.cls}`} />
@@ -111,7 +111,7 @@ export default function MyTasksClient({
                       </StatusBadge>
                     </Td>
                     <Td>
-                      <span className={`text-xs ${isOverdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
+                      <span className={`text-xs ${isOverdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                         {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
                       </span>
                     </Td>
