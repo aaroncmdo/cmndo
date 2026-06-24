@@ -119,12 +119,12 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
 
   if (success) {
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-ios-xl p-6">
+      <div className="bg-success-soft border border-success/30 rounded-ios-xl p-6">
         <div className="flex items-start gap-3">
-          <CheckCircle2Icon className="w-6 h-6 text-emerald-600 flex-shrink-0 mt-0.5" />
+          <CheckCircle2Icon className="w-6 h-6 text-success flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-base font-semibold text-emerald-900">Community {success.name} angelegt</h3>
-            <p className="text-sm text-emerald-700 mt-1">
+            <h3 className="text-base font-semibold text-success-strong">Community {success.name} angelegt</h3>
+            <p className="text-sm text-success-strong mt-1">
               {success.member_count} Mitglied(er) wurden eingeladen. Welcome-Mails versendet.
             </p>
           </div>
@@ -141,12 +141,12 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
           return (
             <div key={s.key} className="flex items-center">
               <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                i < step ? 'bg-emerald-500' : i === step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'
+                i < step ? 'bg-success' : i === step ? 'bg-claimondo-ondo' : 'bg-claimondo-border'
               }`}>
                 <Icon className="w-4 h-4 text-white" />
               </div>
               {i < STEPS.length - 1 && (
-                <div className={`w-8 h-0.5 ${i < step ? 'bg-emerald-500' : 'bg-claimondo-border'}`} />
+                <div className={`w-8 h-0.5 ${i < step ? 'bg-success' : 'bg-claimondo-border'}`} />
               )}
             </div>
           )
@@ -173,7 +173,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
               <label className="text-xs text-claimondo-ondo mb-1.5 block">
                 <MapPinIcon className="w-3 h-3 inline mr-1" />
                 Gebiet-Zentrum *
-                {zentrumLat !== null && <span className="text-emerald-600 ml-2">✓ Geo gesetzt</span>}
+                {zentrumLat !== null && <span className="text-success ml-2">✓ Geo gesetzt</span>}
               </label>
               <GooglePlaceAutocomplete
                 defaultValue={zentrumAnschrift}
@@ -222,7 +222,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                 </div>
               )}
             </div>
-            <label className="flex items-start gap-2.5 cursor-pointer text-sm text-claimondo-navy bg-amber-50 border border-amber-200 rounded-ios-xl p-3">
+            <label className="flex items-start gap-2.5 cursor-pointer text-sm text-claimondo-navy bg-warning-soft border border-warning/30 rounded-ios-xl p-3">
               <input
                 type="checkbox"
                 checked={exklusiv}
@@ -302,7 +302,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                 : `Radius: ${radiusKm} km`} · Max {maxFaelleMonat} Fälle/Monat
             </p>
             {exklusiv && (
-              <p className="text-xs text-amber-700 mt-2"><ShieldCheckIcon className="w-3 h-3 inline mr-1" /> Exklusivität aktiviert</p>
+              <p className="text-xs text-warning-strong mt-2"><ShieldCheckIcon className="w-3 h-3 inline mr-1" /> Exklusivität aktiviert</p>
             )}
             <div className="mt-3 pt-3 border-t border-claimondo-border">
               <p className="text-xs text-claimondo-ondo uppercase mb-2">{mitglieder.length} Mitglied(er)</p>
@@ -316,7 +316,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         </div>
       )}
 
-      {error && <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">{error}</div>}
+      {error && <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">{error}</div>}
 
       <div className="flex items-center gap-3 mt-6">
         {step > 0 ? (
