@@ -99,7 +99,8 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
                 <p className="truncate text-sm text-white/90">{makler.ansprechpartner_vorname}</p>
                 <p className="truncate text-[11px] text-claimondo-light-blue">{email}</p>
               </div>
-              <UpdatesNav variant="dark" />
+              {/* Sidebar-Footer sitzt unten-links → Popover nach oben-rechts. */}
+              <UpdatesNav variant="dark" placement="up-right" />
             </div>
             <form action="/api/auth/logout" method="POST">
               <button
