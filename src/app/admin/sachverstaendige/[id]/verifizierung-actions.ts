@@ -16,10 +16,13 @@ const ADMIN_UPLOADBARE_SLOTS = [
 
 // AAR-359 W6: Admin-Actions für Verifizierungs-Tab.
 //
-// Die 6 Actions bilden den Admin-seitigen Gegenpart zum SV-Upload-Flow:
-// - saVorlageFreigeben / saVorlageZurueckweisen — Tier 1 (Dispatch-Gate)
+// Die Actions bilden den Admin-seitigen Gegenpart zum SV-Upload-Flow:
 // - tier2Freigeben / tier2DokumentNachfordern — Tier 2 (14-Tage-Frist)
 // - svSperren / svEntsperren — separate Sperre (nie automatisch)
+// - pflichtdokumentFreigeben / -Zurueckweisen — Tier-1-Pflichtdokumente (AAR-714)
+//
+// AAR-360: Die Legacy-SA-Vorlage-Actions (saVorlageFreigeben/-Zurueckweisen)
+// wurden entfernt — das Tier-1-Dispatch-Gate läuft über pflichtdokumente.
 //
 // Jede Status-Änderung auto-resolved die zugehörigen Tasks über
 // resolveTasksForEntity('gutachter', svId, ...).
@@ -45,62 +48,6 @@ function revalidateBoth(svId: string) {
   revalidatePath('/admin/aufgaben/alle')
   revalidatePath('/gutachter/verifizierung')
   revalidatePath('/gutachter')
-}
-
-// ─── Tier 1: SA-Vorlage ──────────────────────────────────────────────
-
-export async function saVorlageFreigeben(svId: string): Promise<{ success: boolean; error?: string }> {
-  const auth = await requireAdmin()
-  if (!auth.success) return { success: false, error: auth.error }
-
-  const db = createAdminClient()
-  const { error } = await db
-    .from('sachverstaendige')
-    .update({
-      sa_vorlage_status: 'geprueft',
-      sa_vorlage_geprueft_am: new Date().toISOString(),
-      sa_vorlage_geprueft_von_user_id: auth.userId,
-      sa_vorlage_admin_notiz: null,
-    })
-    .eq('id', svId)
-  if (error) return { success: false, error: `Freigabe fehlgeschlagen: ${error.message}` }
-
-  // Alle offenen sv_dokument_review-Tasks auto-schließen (SA-Freigabe).
-  await resolveTasksForEntity('gutachter', svId, 'SA-Vorlage durch Admin freigegeben')
-
-  revalidateBoth(svId)
-  return { success: true }
-}
-
-export async function saVorlageZurueckweisen(
-  svId: string,
-  notiz: string,
-): Promise<{ success: boolean; error?: string }> {
-  const auth = await requireAdmin()
-  if (!auth.success) return { success: false, error: auth.error }
-
-  const trimmed = (notiz ?? '').trim()
-  if (trimmed.length < 10) {
-    return { success: false, error: 'Ablehnungsgrund muss mindestens 10 Zeichen lang sein.' }
-  }
-
-  const db = createAdminClient()
-  const { error } = await db
-    .from('sachverstaendige')
-    .update({
-      sa_vorlage_status: 'zurueckgewiesen',
-      sa_vorlage_admin_notiz: trimmed,
-      sa_vorlage_geprueft_am: new Date().toISOString(),
-      sa_vorlage_geprueft_von_user_id: auth.userId,
-    })
-    .eq('id', svId)
-  if (error) return { success: false, error: `Zurückweisen fehlgeschlagen: ${error.message}` }
-
-  // Keine Task-Resolution — der Prüfungs-Task bleibt offen bis Re-Upload kommt.
-  // SV-Seite zeigt den Grund im Banner + Re-Upload-Flow über /gutachter/verifizierung.
-
-  revalidateBoth(svId)
-  return { success: true }
 }
 
 // ─── Tier 2: 14-Tage-Verifizierung ───────────────────────────────────
