@@ -199,7 +199,7 @@ export default function PolygonEditor({
 
   if (error) {
     return (
-      <div className="rounded-ios-xl bg-red-50 border border-red-200 p-3 text-xs text-red-700">
+      <div className="rounded-ios-xl bg-danger-soft border border-danger/30 p-3 text-xs text-danger-strong">
         Polygon-Editor konnte nicht geladen werden: {error}
       </div>
     )
@@ -223,7 +223,7 @@ export default function PolygonEditor({
           )}
           {hasPolygon && (
             <button type="button" onClick={handleClear}
-              className="flex items-center gap-1 px-2 py-1 rounded-ios-md bg-red-50 hover:bg-red-100 text-red-600">
+              className="flex items-center gap-1 px-2 py-1 rounded-ios-md bg-danger-soft hover:bg-danger/15 text-danger">
               <Trash2Icon className="w-3 h-3" /> Loeschen
             </button>
           )}
