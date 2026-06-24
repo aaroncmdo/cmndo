@@ -63,9 +63,9 @@ export default function RegelDebugModal({
           </div>
 
           {entry.inkonsistenz && (
-            <div className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2 flex items-start gap-2">
-              <AlertTriangleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-              <p className="text-[11px] text-amber-900">
+            <div className="rounded-ios-lg border border-warning/30 bg-warning-soft px-3 py-2 flex items-start gap-2">
+              <AlertTriangleIcon className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+              <p className="text-[11px] text-warning-strong">
                 {entry.inkonsistenz === 'db_pflicht_ohne_regel'
                   ? 'DB-Row steht auf pflicht=true, aber die Katalog-Regel sagt nicht Pflicht. Vermutlich manuell geändert.'
                   : 'Katalog-Regel sagt Pflicht, aber es existiert noch keine pflichtdokumente-Zeile. Wird beim nächsten Re-Evaluate angelegt.'}

@@ -61,7 +61,7 @@ export function FallActionBar({
   const buttonsRow = (
     <div className="flex items-center gap-2 flex-wrap">
       {result.szenario && (
-        <span className="text-xs bg-amber-50 text-amber-800 rounded px-1.5 py-0.5">
+        <span className="text-xs bg-warning-soft text-warning-strong rounded px-1.5 py-0.5">
           {SZENARIO_LABEL[result.szenario] ?? result.szenario}
         </span>
       )}
@@ -82,7 +82,7 @@ export function FallActionBar({
         <button
           type="button"
           onClick={() => setOverrideOpen(true)}
-          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-ios-md border border-amber-300 bg-amber-50 px-2.5 py-1.5 hover:bg-amber-100 text-amber-900"
+          className="inline-flex items-center gap-1.5 text-xs font-medium rounded-ios-md border border-warning/30 bg-warning-soft px-2.5 py-1.5 hover:bg-warning/15 text-warning-strong"
           title="Status manuell überschreiben (Admin-only, umgeht State-Machine)"
         >
           <AlertTriangleIcon className="w-3.5 h-3.5" />

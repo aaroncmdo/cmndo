@@ -17,6 +17,8 @@ const SOURCE_LABEL: Record<TriggerSource, string> = {
   manual_kunde: 'Kunde',
 }
 
+// Token-Audit-LEAVE: SOURCE_COLOR = Trigger-QUELLE-Identitaet (wer/was hat das Feld gesetzt),
+// KEIN Status — cron-amber / manual_kb-gruen taggen die Quelle, nicht Erfolg/Warnung.
 const SOURCE_COLOR: Record<TriggerSource, string> = {
   manual: 'bg-claimondo-bg text-claimondo-navy',
   webhook: 'bg-claimondo-ondo/[0.10] text-claimondo-navy',
