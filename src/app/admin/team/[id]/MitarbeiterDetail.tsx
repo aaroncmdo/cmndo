@@ -138,7 +138,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               </select>
             </div>
           </div>
-          {msg && <p className={`text-sm px-4 py-2 rounded-ios-xl ${msg === 'Gespeichert' ? 'bg-green-50 text-green-300' : 'bg-red-50 text-red-300'}`}>{msg}</p>}
+          {msg && <p className={`text-sm px-4 py-2 rounded-ios-xl ${msg === 'Gespeichert' ? 'bg-success-soft text-success-strong' : 'bg-danger-soft text-danger-strong'}`}>{msg}</p>}
           <Button
             variant="navy"
             type="submit"
@@ -193,7 +193,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                 </Button>
               </div>
             )}
-            {twilioMsg && <p className={`text-xs mt-2 ${twilioMsg.includes('!') ? 'text-green-600' : 'text-red-500'}`}>{twilioMsg}</p>}
+            {twilioMsg && <p className={`text-xs mt-2 ${twilioMsg.includes('!') ? 'text-success' : 'text-danger'}`}>{twilioMsg}</p>}
           </div>
         )}
 
@@ -256,7 +256,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
               </button>
             </div>
             {twofaMsg && (
-              <p className={`text-xs ${twofaMsg.includes('!') || twofaMsg.includes('entfernt') ? 'text-green-600' : 'text-red-500'}`}>
+              <p className={`text-xs ${twofaMsg.includes('!') || twofaMsg.includes('entfernt') ? 'text-success' : 'text-danger'}`}>
                 {twofaMsg}
               </p>
             )}
