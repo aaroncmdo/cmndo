@@ -106,7 +106,7 @@ export function KanzleiPaketModal({ open, onOpenChange, fallId, phase, subphase 
         </DialogHeader>
 
         {pakete.length === 0 ? (
-          <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <div className="rounded-ios-md border border-warning/30 bg-warning-soft p-3 text-sm text-warning-strong">
             Für die aktuelle Phase sind keine Kanzlei-Pakete definiert. Nutze den Endpoint-Register-Panel
             im Kanzlei-E-Akte-Tab.
           </div>
@@ -215,7 +215,7 @@ function FieldRow({
   const baseLabel = (
     <label className="text-xs font-medium text-claimondo-navy">
       {field.label}
-      {field.required && <span className="text-red-600 ml-0.5">*</span>}
+      {field.required && <span className="text-danger ml-0.5">*</span>}
     </label>
   )
 

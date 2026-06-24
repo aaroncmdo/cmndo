@@ -55,7 +55,7 @@ export function SystemDokumenteBox({ systemDokumente }: SystemDokumenteBoxProps)
           <div key={r.key} className="flex items-center justify-between px-4 py-2.5 gap-2">
             <div className="flex items-center gap-2 min-w-0">
               <FileTextIcon
-                className={`w-4 h-4 shrink-0 ${r.url ? 'text-emerald-500' : 'text-claimondo-ondo/40'}`}
+                className={`w-4 h-4 shrink-0 ${r.url ? 'text-success' : 'text-claimondo-ondo/40'}`}
               />
               <div className="min-w-0">
                 <p className="text-sm text-claimondo-navy truncate">{r.label}</p>

@@ -277,7 +277,7 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
           Admin-only · OCR
         </span>
         {istUeberschrieben && (
-          <span className="text-[10px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-medium">
+          <span className="text-[10px] px-1.5 py-0.5 rounded bg-warning-soft text-warning-strong border border-warning/30 font-medium">
             manuell editiert
           </span>
         )}
@@ -338,12 +338,12 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
       )}
 
       {verarbeitet && fehler && (
-        <div className="flex items-start gap-2 rounded-ios-md border border-amber-200 bg-amber-50 p-2 text-xs text-amber-900">
+        <div className="flex items-start gap-2 rounded-ios-md border border-warning/30 bg-warning-soft p-2 text-xs text-warning-strong">
           <AlertTriangle className="w-4 h-4 shrink-0" />
           <div>
             <p className="font-medium">OCR-Fehler</p>
-            <p className="text-amber-800">{fehler}</p>
-            <p className="text-amber-800 mt-1">
+            <p className="text-warning-strong">{fehler}</p>
+            <p className="text-warning-strong mt-1">
               Bitte „Re-Run" ausloesen oder Werte manuell ueber „Bearbeiten" nachtragen.
             </p>
           </div>
@@ -351,12 +351,12 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
       )}
 
       {error && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-md p-2">
+        <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md p-2">
           {error}
         </p>
       )}
       {saved && (
-        <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-md p-2">
+        <p className="text-xs text-success-strong bg-success-soft border border-success/30 rounded-ios-md p-2">
           Werte gespeichert.
         </p>
       )}
@@ -364,7 +364,7 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
       {(verarbeitet || editMode) && (
         <>
           {data.totalschaden && !editMode && (
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-0.5 text-[11px] font-medium text-red-800 border border-red-200">
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-danger-soft px-2.5 py-0.5 text-[11px] font-medium text-danger-strong border border-danger/30">
               Totalschaden
             </div>
           )}
