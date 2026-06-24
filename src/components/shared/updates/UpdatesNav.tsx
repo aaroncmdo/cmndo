@@ -29,6 +29,14 @@ import { useMitteilungenContext } from '@/components/mitteilungszentrale/Mitteil
 import type { Mitteilung, MitteilungKategorie } from '@/lib/mitteilungen/types'
 
 type Variant = 'dark' | 'light'
+// Öffnungsrichtung des Popovers relativ zum Button:
+//  'down-left' (Default) = unter dem Button, rechtsbündig — für Buttons die
+//      oben-rechts sitzen (Header / fixed Top-Corner-Mounts in Admin/Dispatch/
+//      Kanzlei/Mitarbeiter/Fälle/Kunde-Mobile). Verhalten bleibt unverändert.
+//  'up-right' = über dem Button, linksbündig (spiegelt nach oben + rechts) —
+//      für Buttons die unten-links sitzen (Makler-Sidebar-Footer, Kunde-
+//      Sidebar-Fuß). Sonst liefe das Popover unter den unteren Viewport-Rand.
+type PopoverPlacement = 'down-left' | 'up-right'
 type TabKey = 'aktivitaet' | 'nachrichten' | 'anrufe' | 'kritisch'
 
 const TABS: { key: TabKey; label: string; icon: typeof BellIcon }[] = [
@@ -51,7 +59,13 @@ function fmtRelative(iso: string) {
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }
 
-export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) {
+export default function UpdatesNav({
+  variant = 'dark',
+  placement = 'down-left',
+}: {
+  variant?: Variant
+  placement?: PopoverPlacement
+}) {
   // AAR-892: Context-Hook statt direktem `useMitteilungen()` — Provider
   // mountet die Source einmal pro Layout, beide Mobile+Desktop-Mounts
   // teilen Daten + Realtime-Channel.
@@ -167,6 +181,15 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
       : 'ring-4 ring-claimondo-light-blue/60 animate-pulse'
     : ''
 
+  // Popover-Öffnungsrichtung: 'up-right' spiegelt das Default-Popover nach oben
+  // (bottom-full statt mt-2) UND nach rechts (left-0 statt right-0), damit ein
+  // unten-links sitzender Button nach oben-rechts aufklappt statt unter den
+  // Viewport-Rand. Die Einflug-Animation wird mitgespiegelt (von unten statt
+  // von oben).
+  const popoverUp = placement === 'up-right'
+  const popoverPosClass = popoverUp ? 'left-0 bottom-full mb-2' : 'right-0 mt-2'
+  const popoverEnterY = popoverUp ? 4 : -4
+
   return (
     <div className="relative">
       {/* AAR-725: Backdrop-blur auf Main-Content wenn Popover offen. */}
@@ -200,11 +223,11 @@ export default function UpdatesNav({ variant = 'dark' }: { variant?: Variant }) 
             ref={popoverRef}
             role="dialog"
             aria-label="Updates"
-            initial={{ opacity: 0, scale: 0.96, y: -4 }}
+            initial={{ opacity: 0, scale: 0.96, y: popoverEnterY }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.97, y: -4 }}
+            exit={{ opacity: 0, scale: 0.97, y: popoverEnterY }}
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
-            className="absolute right-0 mt-2 w-[360px] max-w-[92vw] glass-light rounded-ios-lg shadow-ios-lg z-40 overflow-hidden"
+            className={`absolute ${popoverPosClass} w-[360px] max-w-[92vw] glass-light rounded-ios-lg shadow-ios-lg z-40 overflow-hidden`}
           >
           <div className="flex items-center justify-between px-4 py-3 border-b border-white/40">
             <h2 className="text-sm font-semibold text-claimondo-navy">Updates</h2>
