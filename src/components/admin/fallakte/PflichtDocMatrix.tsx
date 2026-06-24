@@ -31,24 +31,24 @@ function statusBadge(entry: PflichtDocMatrixEntry) {
   if (!entry.freigeschaltet) return null
   if (entry.status === 'ok') {
     return {
-      color: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+      color: 'bg-success-soft text-success-strong border-success/30',
       label: 'Geprüft',
     }
   }
   if (entry.status === 'hochgeladen') {
     return {
-      color: 'bg-amber-50 text-amber-700 border-amber-200',
+      color: 'bg-warning-soft text-warning-strong border-warning/30',
       label: 'Hochgeladen',
     }
   }
   if (entry.status === 'nachgereicht') {
     return {
-      color: 'bg-orange-50 text-orange-700 border-orange-200',
+      color: 'bg-warning-soft text-warning-strong border-warning/30',
       label: 'Nachreichen',
     }
   }
   return {
-    color: 'bg-red-50 text-red-600 border-red-200',
+    color: 'bg-danger-soft text-danger border-danger/30',
     label: entry.pflicht ? 'Offen' : 'Optional',
   }
 }
@@ -94,7 +94,7 @@ export default function PflichtDocMatrix({
         </div>
         <div className="flex items-center gap-2">
           {pflichtOffen > 0 && (
-            <span className="text-[10px] font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+            <span className="text-[10px] font-medium text-danger bg-danger-soft border border-danger/30 rounded-full px-2 py-0.5">
               {pflichtOffen} offen
             </span>
           )}
@@ -112,9 +112,9 @@ export default function PflichtDocMatrix({
       </div>
 
       {isAdmin && inkonsistenzen.length > 0 && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-start gap-2">
-          <AlertTriangleIcon className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-          <div className="text-[11px] text-amber-900">
+        <div className="bg-warning-soft border-b border-warning/30 px-4 py-2 flex items-start gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-warning shrink-0 mt-0.5" />
+          <div className="text-[11px] text-warning-strong">
             <strong>{inkonsistenzen.length} Inkonsistenz{inkonsistenzen.length > 1 ? 'en' : ''}:</strong>{' '}
             DB-Status und Katalog-Regel stimmen nicht überein. Details über Klick auf den Slot.
           </div>
@@ -172,7 +172,7 @@ export default function PflichtDocMatrix({
                       <div className="flex items-center gap-1 shrink-0">
                         {e.inkonsistenz && (
                           <AlertTriangleIcon
-                            className="w-3 h-3 text-amber-500"
+                            className="w-3 h-3 text-warning"
                             aria-label={
                               e.inkonsistenz === 'db_pflicht_ohne_regel'
                                 ? 'DB sagt Pflicht, aber Regel nicht'

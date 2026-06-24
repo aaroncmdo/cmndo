@@ -48,9 +48,9 @@ const ICON_BY_NAME: Record<string, typeof FileTextIcon> = {
 
 const SEVERITY_COLOR: Record<FallEventSeverity, string> = {
   info: 'text-claimondo-ondo bg-claimondo-bg',
-  success: 'text-emerald-700 bg-emerald-50',
-  warning: 'text-amber-700 bg-amber-50',
-  error: 'text-red-700 bg-red-50',
+  success: 'text-success-strong bg-success-soft',
+  warning: 'text-warning-strong bg-warning-soft',
+  error: 'text-danger-strong bg-danger-soft',
 }
 
 function pickIcon(e: FallEvent): typeof FileTextIcon {

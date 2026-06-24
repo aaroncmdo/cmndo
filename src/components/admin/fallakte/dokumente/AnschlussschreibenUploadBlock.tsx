@@ -60,7 +60,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
   return (
     <div
       className={`rounded-ios-xl border p-4 ${
-        hasAS ? 'bg-emerald-50 border-emerald-200' : 'bg-amber-50 border-amber-200'
+        hasAS ? 'bg-success-soft border-success/30' : 'bg-warning-soft border-warning/30'
       }`}
     >
       <div className="flex items-center justify-between mb-2">
@@ -89,7 +89,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
               <span className="text-claimondo-ondo">Unterschrift</span>
               <p
                 className={`font-medium ${
-                  fallAS.anschlussschreiben_unterschrift ? 'text-emerald-600' : 'text-amber-600'
+                  fallAS.anschlussschreiben_unterschrift ? 'text-success' : 'text-warning'
                 }`}
               >
                 {fallAS.anschlussschreiben_unterschrift ? 'Erkannt' : 'Nicht erkannt'}
