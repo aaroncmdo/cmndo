@@ -4,9 +4,9 @@ import { ShieldCheckIcon, CheckCircleIcon, ClockIcon, XCircleIcon, AlertTriangle
 import QualiSlotUpload from './QualiSlotUpload'
 import PageHeader from '@/components/shared/PageHeader'
 
-// AAR-359 W5 + AAR-515 v4.1: Verifizierungs-Übersicht für SVs.
-// Read-only — zeigt SA-Vorlage-Status und Tier-2-Frist plus die
-// conditional Tier-2-Slots die sich aus der Quali-Auswahl ergeben:
+// AAR-359 W5 + AAR-515 v4.1 + AAR-360: Verifizierungs-Übersicht für SVs.
+// Read-only — zeigt die Tier-2-Frist plus die conditional Tier-2-Slots
+// die sich aus der Quali-Auswahl ergeben:
 //   - sv_bvsk_mitgliedschaft       (wenn Quali „BVSK-Mitglied")
 //   - sv_ihk_zertifikat            (wenn Quali „IHK-zertifiziert")
 //   - sv_bestellungsurkunde_oebuv  (wenn Quali „Öffentlich bestellt und vereidigt")
@@ -38,7 +38,7 @@ export default async function VerifizierungPage() {
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(
-      'id, sa_vorlage_status, sa_vorlage_hochgeladen_am, sa_vorlage_geprueft_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, verifiziert_am, qualifikationen_neu, gutachter_typ, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer',
+      'id, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, verifiziert_am, qualifikationen_neu, gutachter_typ, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer',
     )
     .eq('profile_id', user.id)
     .maybeSingle()
@@ -188,44 +188,6 @@ export default async function VerifizierungPage() {
           </div>
         }
       />
-
-      {/* Tier 1: SA-Vorlage */}
-      <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-base font-semibold text-[var(--brand-primary)]">Tier 1 — SA-Vorlage</h2>
-            <p className="text-xs text-claimondo-ondo">
-              Pflicht vor Dispatch-Freigabe. Ihre persönliche Schadenaufnahme-Vorlage als PDF.
-            </p>
-          </div>
-          <StatusBadge status={sv.sa_vorlage_status} />
-        </div>
-
-        {sv.sa_vorlage_status === null && (
-          <p className="text-sm text-claimondo-navy bg-claimondo-bg rounded-ios-lg px-3 py-2">
-            Noch nicht hochgeladen. Der Upload erfolgt im Willkommen-Flow nach Abschluss der Anzahlung.
-          </p>
-        )}
-        {sv.sa_vorlage_status === 'ausstehend' && sv.sa_vorlage_hochgeladen_am && (
-          <p className="text-sm text-claimondo-navy bg-warning-soft rounded-ios-lg px-3 py-2">
-            Eingereicht am {formatDatum(sv.sa_vorlage_hochgeladen_am)} — wird vom Admin geprüft.
-          </p>
-        )}
-        {sv.sa_vorlage_status === 'zurueckgewiesen' && (
-          <div className="text-sm bg-danger-soft rounded-ios-lg px-3 py-2 space-y-1">
-            <p className="text-danger-strong font-medium">Zurückgewiesen</p>
-            {sv.sa_vorlage_admin_notiz && (
-              <p className="text-danger text-xs">Grund: {sv.sa_vorlage_admin_notiz}</p>
-            )}
-            <p className="text-danger text-xs">Bitte neu hochladen. Der Re-Upload-Weg kommt in Kürze.</p>
-          </div>
-        )}
-        {sv.sa_vorlage_status === 'geprueft' && (
-          <p className="text-sm text-success-strong bg-success-soft rounded-ios-lg px-3 py-2">
-            Freigegeben am {sv.sa_vorlage_geprueft_am ? formatDatum(sv.sa_vorlage_geprueft_am) : '—'}. Dispatch ist aktiv.
-          </p>
-        )}
-      </section>
 
       {/* Tier 2: 14-Tage-Dokumente */}
       <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">

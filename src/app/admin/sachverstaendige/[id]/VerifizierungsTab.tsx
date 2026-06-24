@@ -16,8 +16,6 @@ import {
   UserCheckIcon,
 } from 'lucide-react'
 import {
-  saVorlageFreigeben,
-  saVorlageZurueckweisen,
   tier2Freigeben,
   tier2DokumentNachfordern,
   svSperren,
@@ -33,12 +31,13 @@ import { useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
-// AAR-359 W6: Admin-Verifizierungs-Tab.
+// AAR-359 W6 / AAR-714 / AAR-360: Admin-Verifizierungs-Tab.
 //
-// Drei Sektionen:
-// 1. Tier 1 (SA-Vorlage) — PDF-Link + Freigabe/Zurückweisen
+// Sektionen:
+// 1. Tier 1 (Pflichtdokumente, AAR-714) — Freigabe/Zurückweisen je Slot
 // 2. Tier 2 (14-Tage-Docs) — Status + Nachfordern + Tier-2-Freigabe
 // 3. Sperre — Toggle mit Pflicht-Grund
+// (Die Legacy-SA-Vorlage-Card wurde mit AAR-360 entfernt.)
 
 // AAR-714: Tier-1-Pflichtdokumente (4 Slots: Sicherungsabtretung ODER
 // Honorarvereinbarung + Datenschutzerklärung + Widerrufsbelehrung). Eines
@@ -82,13 +81,7 @@ type Props = {
   // Paket + Onboarding-Kontext (fuer Basic-Freigabe-Gate)
   paket: string | null
   onboardingQuelle: string | null
-  // Tier 1 Legacy (SA-Vorlage — bleibt bis zum SA-Tool-Rebuild)
-  saVorlageStatus: 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null
-  saVorlageStoragePath: string | null
-  saVorlageSignedUrl: string | null
-  saVorlageAdminNotiz: string | null
-  saVorlageHochgeladenAm: string | null
-  // Tier 1 neu (AAR-714 Pflichtdokumente)
+  // Tier 1 (AAR-714 Pflichtdokumente)
   pflichtdokumente: PflichtdokumentSlot[]
   svVerifiziert: boolean
   // Tier 2
@@ -134,7 +127,6 @@ export default function VerifizierungsTab(props: Props) {
         pflichtdokumente={props.pflichtdokumente}
         svVerifiziert={props.svVerifiziert}
       />
-      <SaVorlageCard {...props} />
       <Tier2Card {...props} />
       <SperreCard {...props} />
     </div>
@@ -532,150 +524,7 @@ function PflichtdokumenteCard({
   )
 }
 
-// ─── Tier 1 ──────────────────────────────────────────────────────────
-
-function SaVorlageCard({
-  svId,
-  saVorlageStatus,
-  saVorlageSignedUrl,
-  saVorlageStoragePath,
-  saVorlageAdminNotiz,
-  saVorlageHochgeladenAm,
-}: Props) {
-  const [pending, startTransition] = useTransition()
-  const [notiz, setNotiz] = useState('')
-  const [showReject, setShowReject] = useState(false)
-  const [fehler, setFehler] = useState<string | null>(null)
-
-  const hochgeladen = Boolean(saVorlageStoragePath)
-  const hochgeladenDatum = saVorlageHochgeladenAm
-    ? new Date(saVorlageHochgeladenAm).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', dateStyle: 'short', timeStyle: 'short' })
-    : null
-
-  function handleFreigeben() {
-    if (!confirm('SA-Vorlage freigeben? Der Dispatch-Gate wird für diesen SV geöffnet.')) return
-    setFehler(null)
-    startTransition(async () => {
-      const res = await saVorlageFreigeben(svId)
-      if (!res.success) setFehler(res.error ?? 'Unbekannter Fehler')
-    })
-  }
-
-  function handleZurueckweisen() {
-    if (notiz.trim().length < 10) {
-      setFehler('Bitte mindestens 10 Zeichen Ablehnungsgrund angeben.')
-      return
-    }
-    setFehler(null)
-    startTransition(async () => {
-      const res = await saVorlageZurueckweisen(svId, notiz)
-      if (!res.success) setFehler(res.error ?? 'Unbekannter Fehler')
-      else {
-        setNotiz('')
-        setShowReject(false)
-      }
-    })
-  }
-
-  let badge: React.ReactNode = <StatusBadge tone="gray">Noch nicht hochgeladen</StatusBadge>
-  if (saVorlageStatus === 'ausstehend') {
-    badge = <StatusBadge tone="amber"><ClockIcon className="w-2.5 h-2.5" />Wartet auf Prüfung</StatusBadge>
-  } else if (saVorlageStatus === 'geprueft') {
-    badge = <StatusBadge tone="green"><CheckCircle2Icon className="w-2.5 h-2.5" />Freigegeben</StatusBadge>
-  } else if (saVorlageStatus === 'zurueckgewiesen') {
-    badge = <StatusBadge tone="red"><XCircleIcon className="w-2.5 h-2.5" />Zurückgewiesen</StatusBadge>
-  }
-
-  return (
-    <section className="glass-light border border-claimondo-border rounded-ios-md p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <FileTextIcon className="w-4 h-4 text-claimondo-ondo" />
-          <h3 className="text-sm font-semibold text-claimondo-navy">Tier 1 — SA-Vorlage (Dispatch-Gate)</h3>
-        </div>
-        {badge}
-      </div>
-
-      {!hochgeladen && (
-        <p className="text-xs text-claimondo-ondo py-3">Der SV hat noch keine SA-Vorlage hochgeladen. Freigabe ist erst nach Upload möglich.</p>
-      )}
-
-      {hochgeladen && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-3">
-            {saVorlageSignedUrl ? (
-              <a
-                href={saVorlageSignedUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium text-claimondo-ondo bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 border border-claimondo-ondo/20"
-              >
-                <FileTextIcon className="w-3.5 h-3.5" />
-                PDF ansehen
-              </a>
-            ) : (
-              <span className="text-xs text-claimondo-ondo/70">PDF-Link konnte nicht generiert werden</span>
-            )}
-            {hochgeladenDatum && (
-              <span className="text-[11px] text-claimondo-ondo">Hochgeladen: {hochgeladenDatum}</span>
-            )}
-          </div>
-
-          {saVorlageStatus === 'zurueckgewiesen' && saVorlageAdminNotiz && (
-            <div className="px-3 py-2 rounded-ios-lg bg-danger-soft border border-danger/30 text-xs text-danger-strong">
-              <span className="font-semibold">Bisheriger Ablehnungsgrund:</span> {saVorlageAdminNotiz}
-            </div>
-          )}
-
-          {saVorlageStatus !== 'geprueft' && (
-            <div className="flex items-center gap-2">
-              <button
-                type="button"
-                onClick={handleFreigeben}
-                disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-success text-white hover:bg-success-strong disabled:opacity-50"
-              >
-                <CheckCircle2Icon className="w-3.5 h-3.5" />
-                Freigeben
-              </button>
-              <button
-                type="button"
-                onClick={() => setShowReject(v => !v)}
-                disabled={pending}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-white text-danger-strong hover:bg-danger-soft border border-danger/30 disabled:opacity-50"
-              >
-                <XCircleIcon className="w-3.5 h-3.5" />
-                Zurückweisen
-              </button>
-            </div>
-          )}
-
-          {showReject && (
-            <div className="space-y-2">
-              <textarea
-                value={notiz}
-                onChange={e => setNotiz(e.target.value)}
-                placeholder="Ablehnungsgrund (min. 10 Zeichen) — wird dem SV im Banner angezeigt."
-                rows={3}
-                className="w-full text-xs px-3 py-2 rounded-ios-lg border border-claimondo-border focus:outline-none focus:border-claimondo-ondo"
-              />
-              <button
-                type="button"
-                onClick={handleZurueckweisen}
-                disabled={pending || notiz.trim().length < 10}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-semibold bg-danger text-white hover:bg-danger-strong disabled:opacity-40"
-              >
-                Ablehnung senden
-              </button>
-            </div>
-          )}
-
-          {fehler && <p className="text-xs text-danger">{fehler}</p>}
-        </div>
-      )}
-    </section>
-  )
-}
+// ─── Tier 1 (AAR-360): SA-Vorlage-Card entfernt — Tier-1 läuft über PflichtdokumenteCard ───
 
 // ─── Tier 2 ──────────────────────────────────────────────────────────
 

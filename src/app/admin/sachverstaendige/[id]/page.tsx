@@ -31,7 +31,7 @@ export default async function SvDetailPage({
   // AAR-659: urlaub_von/bis mitladen — für Header-Badge.
   const { data: sv, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, onboarding_quelle, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, sa_vorlage_status, sa_vorlage_storage_path, sa_vorlage_hochgeladen_am, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
+    .select('id, profile_id, paket, onboarding_quelle, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
     .eq('id', id)
     .single()
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
@@ -117,25 +117,14 @@ export default async function SvDetailPage({
   // wurde angezeigt statt des Verifizierungs-Tabs. Der Support-Bot-Report
   // interpretierte die „Seite neu laden"-Error-Boundary als 404.
   let verifizierungsData: {
-    saVorlageSignedUrl: string | null
     tier2Slots: Tier2Slot[]
     pflichtdokumente: PflichtdokumentSlot[]
     loadError: string | null
-  } = { saVorlageSignedUrl: null, tier2Slots: [], pflichtdokumente: [], loadError: null }
+  } = { tier2Slots: [], pflichtdokumente: [], loadError: null }
 
   if (activeTab === 'verifizierung') {
     try {
       const dbAdmin = createAdminClient()
-
-      // SA-Vorlage Signed URL (5 Min gültig für Admin-Preview)
-      let signedUrl: string | null = null
-      if (sv.sa_vorlage_storage_path) {
-        const { data: sig, error: sigErr } = await dbAdmin.storage
-          .from('fall-dokumente')
-          .createSignedUrl(sv.sa_vorlage_storage_path, 300)
-        if (sigErr) console.warn('[sv-verifizierung] createSignedUrl fehlgeschlagen:', sigErr.message)
-        signedUrl = sig?.signedUrl ?? null
-      }
 
       // Tier-2-Slots aus Katalog + bereits angeforderte pflichtdokumente-Rows
       const [alleSlots, pflichtRes] = await Promise.all([
@@ -234,7 +223,6 @@ export default async function SvDetailPage({
       }
 
       verifizierungsData = {
-        saVorlageSignedUrl: signedUrl,
         tier2Slots,
         pflichtdokumente,
         loadError: null,
@@ -242,7 +230,6 @@ export default async function SvDetailPage({
     } catch (err) {
       console.error('[sv-verifizierung] Tab-Load gescheitert:', err)
       verifizierungsData = {
-        saVorlageSignedUrl: null,
         tier2Slots: [],
         pflichtdokumente: [],
         loadError: err instanceof Error ? err.message : 'Unbekannter Fehler',
@@ -364,7 +351,7 @@ export default async function SvDetailPage({
                 <p className="font-semibold mb-1">Verifizierungs-Daten teilweise nicht geladen</p>
                 <p className="text-warning-strong">{verifizierungsData.loadError}</p>
                 <p className="text-warning mt-1">
-                  Stammdaten sind weiterhin editierbar (Tab „Stammdaten"). SA-Vorlage + Tier-2-Slots werden nicht angezeigt bis Ursache gefixt ist.
+                  Stammdaten sind weiterhin editierbar (Tab „Stammdaten"). Tier-2-Slots + Pflichtdokumente werden nicht angezeigt bis Ursache gefixt ist.
                 </p>
               </div>
             )}
@@ -372,11 +359,6 @@ export default async function SvDetailPage({
               svId={sv.id}
               paket={(sv.paket as string | null) ?? null}
               onboardingQuelle={(sv.onboarding_quelle as string | null) ?? null}
-              saVorlageStatus={(sv.sa_vorlage_status as 'ausstehend' | 'geprueft' | 'zurueckgewiesen' | null) ?? null}
-              saVorlageStoragePath={sv.sa_vorlage_storage_path ?? null}
-              saVorlageSignedUrl={verifizierungsData.saVorlageSignedUrl}
-              saVorlageAdminNotiz={sv.sa_vorlage_admin_notiz ?? null}
-              saVorlageHochgeladenAm={sv.sa_vorlage_hochgeladen_am ?? null}
               verifizierungStatus={(sv.verifizierung_status as 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | null) ?? null}
               verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
               verifiziertAm={sv.verifiziert_am ?? null}

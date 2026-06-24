@@ -37,7 +37,6 @@ export type SvMarker = {
   urlaubVon?: string | null
   urlaubBis?: string | null
   verifiziert?: boolean | null
-  saVorlageStatus?: string | null
   bvskNr?: string | null
   ihkNr?: string | null
   oebuvNr?: string | null
