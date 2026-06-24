@@ -57,13 +57,6 @@ export async function uploadSvPflichtdokument(
     slotId = (formData.get('slot_id') as string | null)?.trim() ?? ''
     const file = formData.get('datei') as File | null
     if (!slotId) return { ok: false, error: 'Kein Slot angegeben' }
-    // AAR-360: sv_sa_vorlage ist ein retired Slot (Review-Subsystem entfernt).
-    // Die dokument_katalog-Row ist aber noch aktiv (Deaktivierung folgt mit dem
-    // Spalten-DROP-Follow-up) — daher hier hart ablehnen, sonst naehme dieser
-    // generische Uploader den toten Slot an und legte eine pflichtdokumente-Row an.
-    if (slotId === 'sv_sa_vorlage') {
-      return { ok: false, error: 'Dieser Dokument-Typ wird nicht mehr verwendet.' }
-    }
     if (!file || file.size === 0) return { ok: false, error: 'Keine Datei ausgewählt' }
 
     const slot = await getKatalogSlot(supabase, slotId)
