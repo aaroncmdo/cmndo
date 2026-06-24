@@ -11555,13 +11555,6 @@ export type Database = {
           qualifikationen_neu: string[]
           rechtsform: string | null
           rolle_in_organisation: string | null
-          sa_vorlage_admin_notiz: string | null
-          sa_vorlage_geprueft_am: string | null
-          sa_vorlage_geprueft_von_user_id: string | null
-          sa_vorlage_hochgeladen_am: string | null
-          sa_vorlage_signatur_konfig: Json | null
-          sa_vorlage_status: string | null
-          sa_vorlage_storage_path: string | null
           schadenarten: string[]
           spezifikationen: string[]
           standort_adresse: string | null
@@ -11659,13 +11652,6 @@ export type Database = {
           qualifikationen_neu?: string[]
           rechtsform?: string | null
           rolle_in_organisation?: string | null
-          sa_vorlage_admin_notiz?: string | null
-          sa_vorlage_geprueft_am?: string | null
-          sa_vorlage_geprueft_von_user_id?: string | null
-          sa_vorlage_hochgeladen_am?: string | null
-          sa_vorlage_signatur_konfig?: Json | null
-          sa_vorlage_status?: string | null
-          sa_vorlage_storage_path?: string | null
           schadenarten?: string[]
           spezifikationen?: string[]
           standort_adresse?: string | null
@@ -11763,13 +11749,6 @@ export type Database = {
           qualifikationen_neu?: string[]
           rechtsform?: string | null
           rolle_in_organisation?: string | null
-          sa_vorlage_admin_notiz?: string | null
-          sa_vorlage_geprueft_am?: string | null
-          sa_vorlage_geprueft_von_user_id?: string | null
-          sa_vorlage_hochgeladen_am?: string | null
-          sa_vorlage_signatur_konfig?: Json | null
-          sa_vorlage_status?: string | null
-          sa_vorlage_storage_path?: string | null
           schadenarten?: string[]
           spezifikationen?: string[]
           standort_adresse?: string | null
@@ -11820,13 +11799,6 @@ export type Database = {
           {
             foreignKeyName: "sachverstaendige_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "sachverstaendige_sa_vorlage_geprueft_von_user_id_fkey"
-            columns: ["sa_vorlage_geprueft_von_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
