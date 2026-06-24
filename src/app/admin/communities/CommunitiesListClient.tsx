@@ -68,7 +68,7 @@ export default function CommunitiesListClient({ communities }: { communities: Co
                   <Td>{c.max_faelle_monat ?? '—'}</Td>
                   <Td>
                     {c.exklusiv ? (
-                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 font-medium">
+                      <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong font-medium">
                         <ShieldCheckIcon className="w-3 h-3" /> Exklusiv
                       </span>
                     ) : (
