@@ -32,6 +32,9 @@ type Event = {
   ts: string
 }
 
+// Token-Audit-LEAVE: EVENT_META = Event-TYP-Identitaet (Aktivitaets-Feed-Kategorie),
+// KEIN Status — die emerald/amber-Toene taggen Event-Typen (Anzahlung/neuer Fall),
+// nicht Erfolg/Warnung. Bewusst nicht auf success/warning migriert (AGENTS.md Typ-Identitaet).
 const EVENT_META: Record<EventType, { icon: typeof UserPlusIcon; bg: string; iconColor: string; label: string }> = {
   sv_neu: { icon: UserPlusIcon, bg: 'bg-claimondo-ondo/10', iconColor: 'text-claimondo-ondo', label: 'Neuer SV' },
   vertrag_signiert: { icon: FileSignatureIcon, bg: 'bg-claimondo-ondo/[0.06]', iconColor: 'text-claimondo-navy', label: 'Vertrag' },
@@ -268,12 +271,12 @@ export default async function WichtigeUpdatesWidget() {
       {/* Welcome-Mail-Versand-Statistik */}
       <div className="px-5 py-2 border-b border-claimondo-border bg-claimondo-bg flex items-center gap-3 text-[11px]">
         <span className="text-claimondo-ondo">Email-Versand 48h:</span>
-        <span className="flex items-center gap-1 text-emerald-600 font-medium">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+        <span className="flex items-center gap-1 text-success font-medium">
+          <span className="w-1.5 h-1.5 rounded-full bg-success" />
           {mails.versendet} versendet
         </span>
-        <span className={`flex items-center gap-1 font-medium ${mails.failed > 0 ? 'text-red-600' : 'text-claimondo-ondo/70'}`}>
-          <span className={`w-1.5 h-1.5 rounded-full ${mails.failed > 0 ? 'bg-red-500' : 'bg-claimondo-border'}`} />
+        <span className={`flex items-center gap-1 font-medium ${mails.failed > 0 ? 'text-danger' : 'text-claimondo-ondo/70'}`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${mails.failed > 0 ? 'bg-danger' : 'bg-claimondo-border'}`} />
           {mails.failed} failed
         </span>
       </div>
