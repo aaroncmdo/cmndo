@@ -102,7 +102,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
       <DialogContent className="sm:max-w-xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-claimondo-navy flex items-center gap-2">
-            <AlertTriangleIcon className="w-5 h-5 text-amber-600" />
+            <AlertTriangleIcon className="w-5 h-5 text-warning" />
             Status manuell überschreiben
           </DialogTitle>
           <DialogDescription>
@@ -112,7 +112,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
           </DialogDescription>
         </DialogHeader>
 
-        <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900 space-y-1">
+        <div className="rounded-ios-md border border-warning/30 bg-warning-soft p-3 text-xs text-warning-strong space-y-1">
           <p className="font-medium">Hinweis: Keine Auto-Side-Effects</p>
           <ul className="list-disc ml-4 space-y-0.5">
             <li>Keine WhatsApp-Benachrichtigung an Kunde/SV</li>
@@ -131,7 +131,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-claimondo-navy">
-            Neuer Status <span className="text-red-600">*</span>
+            Neuer Status <span className="text-danger">*</span>
           </label>
           <select
             value={neuerStatus}
@@ -149,7 +149,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
 
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-claimondo-navy">
-            Begründung <span className="text-red-600">*</span>
+            Begründung <span className="text-danger">*</span>
             <span className="text-claimondo-ondo font-normal ml-1">(min. 10 Zeichen)</span>
           </label>
           <textarea
@@ -162,9 +162,9 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
           <p className="text-xs text-claimondo-ondo">
             {begruendung.trim().length} / min. 10 Zeichen —{' '}
             {begruendungOk ? (
-              <span className="text-emerald-700">ok</span>
+              <span className="text-success-strong">ok</span>
             ) : (
-              <span className="text-amber-700">noch zu kurz</span>
+              <span className="text-warning-strong">noch zu kurz</span>
             )}
           </p>
         </div>
@@ -195,7 +195,7 @@ export function ManualStatusOverrideModal({ open, onOpenChange, fallId, currentS
             type="button"
             onClick={handleSubmit}
             disabled={!canSubmit}
-            className="text-sm rounded-ios-md bg-amber-700 text-white px-3 py-1.5 hover:bg-amber-800 disabled:opacity-50"
+            className="text-sm rounded-ios-md bg-warning text-white px-3 py-1.5 hover:bg-warning-strong disabled:opacity-50"
           >
             {pending ? 'Wird überschrieben …' : 'Status überschreiben'}
           </button>

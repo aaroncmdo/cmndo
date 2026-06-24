@@ -154,11 +154,11 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             const badge =
               v === true
                 ? {
-                    bg: 'bg-emerald-50 border-emerald-200 text-emerald-700',
+                    bg: 'bg-success-soft border-success/30 text-success-strong',
                     txt: 'Ja',
                   }
                 : v === false
-                  ? { bg: 'bg-red-50 border-red-200 text-red-700', txt: 'Nein' }
+                  ? { bg: 'bg-danger-soft border-danger/30 text-danger-strong', txt: 'Nein' }
                   : {
                       bg: 'bg-claimondo-bg border-claimondo-border text-claimondo-ondo',
                       txt: '—',
@@ -201,7 +201,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             type="button"
             onClick={handleBestanden}
             disabled={qcPending}
-            className="px-3 py-1.5 rounded-ios-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-success text-white text-xs font-medium hover:bg-success-strong disabled:opacity-50"
           >
             QC bestanden → Kanzlei übergeben
           </button>
@@ -209,7 +209,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
             type="button"
             onClick={handleNachbesserung}
             disabled={qcPending}
-            className="px-3 py-1.5 rounded-ios-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-warning text-white text-xs font-medium hover:bg-warning-strong disabled:opacity-50"
           >
             Nachbesserung anfordern
           </button>
