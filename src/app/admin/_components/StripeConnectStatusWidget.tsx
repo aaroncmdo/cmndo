@@ -93,7 +93,7 @@ export default async function StripeConnectStatusWidget() {
               </h2>
             </div>
             <span className={`flex items-center gap-1 text-[11px] font-medium px-2 py-0.5 rounded-full ${
-              healthOk ? 'bg-emerald-50 text-emerald-700' : s.failed7d > 0 ? 'bg-red-50 text-red-700' : 'bg-claimondo-bg text-claimondo-ondo'
+              healthOk ? 'bg-success-soft text-success-strong' : s.failed7d > 0 ? 'bg-danger-soft text-danger-strong' : 'bg-claimondo-bg text-claimondo-ondo'
             }`}>
               {healthOk ? (
                 <><CheckCircle2Icon className="w-3 h-3" /> healthy</>
@@ -112,31 +112,31 @@ export default async function StripeConnectStatusWidget() {
                 <p className="text-claimondo-ondo text-xs mb-1">Events (7 Tage)</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{s.total7d}</p>
               </div>
-              <div className="text-center p-3 bg-emerald-50 rounded-ios-xl">
+              <div className="text-center p-3 bg-success-soft rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Erfolgreich</p>
-                <p className="text-emerald-600 text-2xl font-bold tabular-nums">{s.success7d}</p>
+                <p className="text-success text-2xl font-bold tabular-nums">{s.success7d}</p>
               </div>
-              <div className="text-center p-3 bg-red-50 rounded-ios-xl">
+              <div className="text-center p-3 bg-danger-soft rounded-ios-xl">
                 <p className="text-claimondo-ondo text-xs mb-1">Mit Fehler</p>
-                <p className="text-red-600 text-2xl font-bold tabular-nums">{s.failed7d}</p>
+                <p className="text-danger text-2xl font-bold tabular-nums">{s.failed7d}</p>
               </div>
             </div>
 
             {/* Letzte Failed Events */}
             {s.lastFailed.length > 0 && (
               <div className="mb-5">
-                <p className="text-[10px] text-red-600 uppercase tracking-wide font-semibold mb-2">
+                <p className="text-[10px] text-danger uppercase tracking-wide font-semibold mb-2">
                   Letzte fehlgeschlagene Events
                 </p>
                 <ul className="space-y-1.5">
                   {s.lastFailed.map(e => (
-                    <li key={e.id} className="flex items-start gap-2 text-xs bg-red-50 border border-red-100 rounded-ios-lg px-3 py-2">
-                      <AlertTriangleIcon className="w-3.5 h-3.5 text-red-600 flex-shrink-0 mt-0.5" />
+                    <li key={e.id} className="flex items-start gap-2 text-xs bg-danger-soft border border-danger/30 rounded-ios-lg px-3 py-2">
+                      <AlertTriangleIcon className="w-3.5 h-3.5 text-danger flex-shrink-0 mt-0.5" />
                       <div className="flex-1 min-w-0">
-                        <p className="text-red-900 font-medium">{e.event_type}</p>
-                        <p className="text-red-700 text-[11px] truncate" title={e.fehler ?? ''}>{e.fehler}</p>
+                        <p className="text-danger-strong font-medium">{e.event_type}</p>
+                        <p className="text-danger-strong text-[11px] truncate" title={e.fehler ?? ''}>{e.fehler}</p>
                       </div>
-                      <span className="text-[10px] text-red-500 tabular-nums">{fmtTime(e.empfangen_am)}</span>
+                      <span className="text-[10px] text-danger tabular-nums">{fmtTime(e.empfangen_am)}</span>
                     </li>
                   ))}
                 </ul>
@@ -156,7 +156,7 @@ export default async function StripeConnectStatusWidget() {
                         <Tr key={e.id} className="border-b border-claimondo-border">
                           <Td className="!px-0 !py-2">{e.typ ?? 'Anzahlung'}</Td>
                           <Td className="!px-0 !py-2 !text-claimondo-ondo truncate max-w-[280px]">{e.beschreibung ?? '—'}</Td>
-                          <Td className="!px-0 !py-2 text-right !text-emerald-600 font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</Td>
+                          <Td className="!px-0 !py-2 text-right !text-success font-semibold tabular-nums">{fmtEur(Number(e.betrag))}</Td>
                           <Td className="!px-0 !py-2 text-right !text-claimondo-ondo/70 tabular-nums">
                             {e.eingezahlt_am ? new Date(e.eingezahlt_am).toLocaleDateString('de-DE') : '—'}
                           </Td>

@@ -243,13 +243,13 @@ export default async function KritischeUpdatesWidget() {
 
   if (alerts.length === 0) {
     return (
-      <div className="bg-emerald-50 border border-emerald-200 rounded-ios-lg shadow-ios-sm px-5 py-4 flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
-          <CheckCircle2Icon className="w-5 h-5 text-emerald-600" />
+      <div className="bg-success-soft border border-success/30 rounded-ios-lg shadow-ios-sm px-5 py-4 flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-success/15 flex items-center justify-center flex-shrink-0">
+          <CheckCircle2Icon className="w-5 h-5 text-success" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold text-emerald-800">Alles ruhig</p>
-          <p className="text-xs text-emerald-700">Keine kritischen Alerts. Gut so.</p>
+          <p className="text-sm font-semibold text-success-strong">Alles ruhig</p>
+          <p className="text-xs text-success-strong">Keine kritischen Alerts. Gut so.</p>
         </div>
       </div>
     )
@@ -259,35 +259,35 @@ export default async function KritischeUpdatesWidget() {
   const restCount = alerts.length - top3.length
 
   return (
-    <div className="bg-red-50 border border-red-200 rounded-ios-lg shadow-ios-sm overflow-hidden">
-      <div className="px-5 py-3 border-b border-red-200 flex items-center justify-between">
+    <div className="bg-danger-soft border border-danger/30 rounded-ios-lg shadow-ios-sm overflow-hidden">
+      <div className="px-5 py-3 border-b border-danger/30 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-full bg-red-100 flex items-center justify-center">
-            <AlertTriangleIcon className="w-4 h-4 text-red-600" />
+          <div className="w-7 h-7 rounded-full bg-danger/15 flex items-center justify-center">
+            <AlertTriangleIcon className="w-4 h-4 text-danger" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-red-900">Kritische Updates</p>
-            <p className="text-[11px] text-red-700">{alerts.length} {alerts.length === 1 ? 'Alert braucht' : 'Alerts brauchen'} Aufmerksamkeit</p>
+            <p className="text-sm font-semibold text-danger-strong">Kritische Updates</p>
+            <p className="text-[11px] text-danger-strong">{alerts.length} {alerts.length === 1 ? 'Alert braucht' : 'Alerts brauchen'} Aufmerksamkeit</p>
           </div>
         </div>
       </div>
-      <ul className="divide-y divide-red-200">
+      <ul className="divide-y divide-danger/30">
         {top3.map(a => (
           <li key={a.key}>
             <Link
               href={a.href}
-              className="flex items-center gap-3 px-5 py-3 hover:bg-red-100/60 transition-colors"
+              className="flex items-center gap-3 px-5 py-3 hover:bg-danger/15 transition-colors"
             >
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${a.severity === 'kritisch' ? 'bg-red-600' : 'bg-amber-500'}`} />
-              <p className="text-xs text-red-900 flex-1">{a.text}</p>
-              <ArrowRightIcon className="w-3.5 h-3.5 text-red-400" />
+              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${a.severity === 'kritisch' ? 'bg-danger' : 'bg-warning'}`} />
+              <p className="text-xs text-danger-strong flex-1">{a.text}</p>
+              <ArrowRightIcon className="w-3.5 h-3.5 text-danger" />
             </Link>
           </li>
         ))}
       </ul>
       {restCount > 0 && (
-        <div className="px-5 py-2.5 bg-red-100/50 text-center">
-          <p className="text-[11px] text-red-700 font-medium">+ {restCount} weitere Alerts</p>
+        <div className="px-5 py-2.5 bg-danger/15 text-center">
+          <p className="text-[11px] text-danger-strong font-medium">+ {restCount} weitere Alerts</p>
         </div>
       )}
     </div>
