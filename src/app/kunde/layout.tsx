@@ -413,7 +413,8 @@ export default async function KundeLayout({ children }: { children: React.ReactN
               <p className="text-[10px] text-claimondo-light-blue leading-tight">{tDrawer('profilAnsehen')}</p>
             </div>
             <OutboxBadge />
-            <UpdatesNav variant="dark" />
+            {/* Sidebar-Fuß sitzt unten-links → Popover nach oben-rechts. */}
+            <UpdatesNav variant="dark" placement="up-right" />
           </Link>
           <form action="/api/auth/logout" method="POST">
             <button
