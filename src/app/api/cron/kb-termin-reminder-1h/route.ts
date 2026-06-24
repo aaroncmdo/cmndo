@@ -20,9 +20,10 @@ export async function GET(request: Request) {
 
   const { data: termine, error } = await db
     .from('gutachter_termine')
-    .select('id, fall_id, kb_id, start_zeit, kanal, video_link')
+    .select('id, fall_id, lead_id, kb_id, start_zeit, kanal, video_link')
     .eq('typ', 'kb_beratung')
-    .eq('status', 'bestaetigt')
+    // AAR-956: auch 'reserviert' (Auto-Beratungstermin-Default) erinnern, nicht nur bestaetigt.
+    .in('status', ['reserviert', 'bestaetigt'])
     .gte('start_zeit', in45min)
     .lte('start_zeit', in75min)
     .is('reminder_1h_sent_at', null)
@@ -50,9 +51,11 @@ export async function GET(request: Request) {
       ? await db.from('claims').select('lead_id, geschaedigter_user_id').eq('id', claimId).maybeSingle()
       : { data: null }
     const fall = claim ? { lead_id: claim.lead_id, kunde_id: claim.geschaedigter_user_id } : null
+    // AAR-956: lead-gebundener Auto-Beratungstermin (fall_id=NULL, kein Claim) -> direkte lead_id-Spalte als Fallback.
+    const effektiveLeadId = (fall?.lead_id as string | null) ?? (termin.lead_id as string | null)
 
-    if (fall?.lead_id) {
-      const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', fall.lead_id).single()
+    if (effektiveLeadId) {
+      const { data: lead } = await db.from('leads').select('telefon, vorname').eq('id', effektiveLeadId).single()
       if (lead?.telefon) telefon = lead.telefon
       if (lead?.vorname) vorname = lead.vorname
     }
