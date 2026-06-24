@@ -50,6 +50,10 @@ export type ClaimFull = Claim & {
   // Assignment-Felder, die v_claim_full per JOIN faelle.claim_id = claims.id beiträgt.
   sv_id: string | null
   service_typ: string | null
+  // CMM-49: gegner VSNR/Aktenzeichen sind party-sourced — v_claim_full liefert sie
+  // (aus claim_parties/verursacher), die claims-Tabelle (Claim-Basis) hat sie nicht mehr.
+  gegner_versicherungsnummer: string | null
+  gegner_aktenzeichen: string | null
   // Sub-Entities (jsonb_agg → Arrays; nie null, ggf. leer)
   parties: ClaimPartyView[]
   vehicle_involvements: ClaimVehicleInvolvement[]
