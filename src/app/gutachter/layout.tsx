@@ -1,6 +1,5 @@
 import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
-import Link from 'next/link'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import GutachterShell from './GutachterShell'
 
@@ -17,10 +16,10 @@ export default async function GutachterLayout({
   // Der Alt-Spaltenname hatte PostgREST 400 zurückgegeben, sv=null, alle SVs
   // wurden zu /gutachter/willkommen redirected → Portal komplett unbenutzbar.
   // AAR-220: brand_theme + firmenname zusätzlich für Whitelabel-Theme + Logo-alt-Text.
-  // AAR-359 W5: sa_vorlage_* + verifizierung_* + gesperrt_* Felder für
-  // den Verifizierungs-Banner und die Sidebar-Sichtbarkeit.
+  // AAR-359 W5 / AAR-360: verifizierung_* + gesperrt_* Felder für die
+  // Sidebar-Sichtbarkeit (SA-Vorlage-Tier-1 mit AAR-360 entfernt).
   // AAR-512: `gcal_connected` für den generalisierten Onboarding-Banner ergänzt.
-  const svSelect = 'id, logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, sa_vorlage_status, sa_vorlage_admin_notiz, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
+  const svSelect = 'id, logo_url, brand_primary, brand_secondary, brand_theme, firmenname, use_custom_branding, vertrag_unterschrieben, anzahlung_status, standort_lat, standort_lng, ist_aktiv, portal_zugang_freigeschaltet, organisation_id, rolle_in_organisation, ist_parent_account, geloescht_am, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_seit, gesperrt_grund, gcal_connected'
   const { data: sv } = await supabase
     .from('sachverstaendige')
     .select(svSelect)
@@ -33,14 +32,11 @@ export default async function GutachterLayout({
   const showTeam = !!(sv?.ist_parent_account || (sv?.rolle_in_organisation === 'inhaber'))
   const showCommunity = sv?.rolle_in_organisation === 'community_member'
 
-  // AAR-359 W5 / AAR-714: Verifizierungs-Link in Sidebar, solange ein
-  // Verifizierungs-Zustand aktiv bleibt. Legacy-SA-Vorlage (sv_sa_vorlage_*)
-  // gilt nur noch wenn aktiv ausstehend/zurückgewiesen — null ist seit
-  // AAR-714 der Default für neue SVs (die laufen über Pflichtdokumente).
-  const saVorlageOffen =
-    sv?.sa_vorlage_status === 'ausstehend' || sv?.sa_vorlage_status === 'zurueckgewiesen'
+  // AAR-359 W5 / AAR-714 / AAR-360: Verifizierungs-Link in Sidebar, solange
+  // ein Verifizierungs-Zustand aktiv bleibt. Die Legacy-SA-Vorlage (Tier 1)
+  // wurde mit AAR-360 entfernt — der Tier-2-Status ist der einzige Trigger.
   const tier2Offen = sv?.verifizierung_status && sv.verifizierung_status !== 'geprueft'
-  const showVerifizierung = !!(saVorlageOffen || tier2Offen)
+  const showVerifizierung = !!tier2Offen
 
   // Check if this gutachter has been soft-deleted → sign out + redirect
   if (sv?.geloescht_am) {
@@ -113,19 +109,6 @@ export default async function GutachterLayout({
       {sv?.gesperrt_seit && (
         <div className="bg-red-600 border-b border-red-700 px-4 py-2.5 text-center text-xs text-white font-semibold">
           Ihr Account wurde gesperrt{sv.gesperrt_grund ? `: ${sv.gesperrt_grund}` : '.'} Bitte wenden Sie sich an den Support.
-        </div>
-      )}
-      {/* AAR-359 W5: SA-Vorlage zurückgewiesen (rot) — Dispatch-Gate-Blocker. */}
-      {!sv?.gesperrt_seit && sv?.sa_vorlage_status === 'zurueckgewiesen' && (
-        <div className="bg-red-50 border-b border-red-200 px-4 py-2 text-center text-xs text-red-700 font-medium">
-          Ihre SA-Vorlage wurde zurückgewiesen{sv.sa_vorlage_admin_notiz ? `: ${sv.sa_vorlage_admin_notiz}` : ''}. Bitte laden Sie eine korrigierte Version hoch.{' '}
-          <Link href="/gutachter/verifizierung" className="underline font-semibold">Zur Verifizierung</Link>
-        </div>
-      )}
-      {/* AAR-359 W5: SA-Vorlage wird geprüft (gelb). */}
-      {!sv?.gesperrt_seit && sv?.sa_vorlage_status === 'ausstehend' && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-xs text-amber-700 font-medium">
-          Ihre SA-Vorlage wurde hochgeladen und wird vom Admin geprüft. Dispatch wird freigeschaltet, sobald die Freigabe erteilt ist.
         </div>
       )}
       {/* AAR-692: Tier-2-Banner (frist_ueberschritten + ausstehend-Countdown)
