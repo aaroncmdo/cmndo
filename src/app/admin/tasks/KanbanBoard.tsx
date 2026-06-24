@@ -56,6 +56,9 @@ const TYP_LABEL: Record<string, string> = {
   sv_basic_claim_review: 'Basic-Freigabe',
 }
 
+// Token-Audit-LEAVE: TYP_COLOR ist Task-TYP-Identitaet (Kategorie-Palette), KEIN Status.
+// Die green/emerald/amber/yellow-Toene unterscheiden Task-Typen, nicht Erfolg/Warnung —
+// bewusst NICHT auf success/warning migriert (AGENTS.md branding-rules: Typ-Identitaet).
 const TYP_COLOR: Record<string, string> = {
   dispatch: 'bg-claimondo-bg text-claimondo-ondo',
   filmcheck: 'bg-yellow-50 text-yellow-600',
@@ -80,9 +83,9 @@ const TASK_TYPES = [
 
 const COLUMN_HEADER_COLOR: Record<string, string> = {
   offen: 'text-claimondo-light-blue',
-  'in-bearbeitung': 'text-amber-500',
-  erledigt: 'text-green-500',
-  blockiert: 'text-red-500',
+  'in-bearbeitung': 'text-warning',
+  erledigt: 'text-success',
+  blockiert: 'text-danger',
 }
 
 function isOverdue(faelligAm: string | null): boolean {
@@ -308,8 +311,8 @@ export default function KanbanBoard({
         </div>
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-ios-xl p-3 mb-4">
-            <p className="text-red-600 text-sm">{error}</p>
+          <div className="bg-danger-soft border border-danger/30 rounded-ios-xl p-3 mb-4">
+            <p className="text-danger text-sm">{error}</p>
           </div>
         )}
 
@@ -412,7 +415,7 @@ function TaskCard({
   return (
     <div
       className={`bg-white rounded-ios-xl p-4 border transition-colors cursor-grab active:cursor-grabbing ${
-        overdue ? 'border-red-300' : isAutoResolved ? 'border-claimondo-border' : 'border-claimondo-border'
+        overdue ? 'border-danger/30' : isAutoResolved ? 'border-claimondo-border' : 'border-claimondo-border'
       }`}
     >
       <div className="flex items-start justify-between gap-2 mb-2">
@@ -444,7 +447,7 @@ function TaskCard({
       <p className="text-claimondo-navy text-sm font-medium leading-snug mb-2">{task.titel}</p>
 
       {obsoleteHint && (
-        <div className="mb-2 px-2 py-1.5 rounded-ios-md bg-amber-50 border border-amber-200 text-amber-700 text-[10px] leading-tight">
+        <div className="mb-2 px-2 py-1.5 rounded-ios-md bg-warning-soft border border-warning/30 text-warning-strong text-[10px] leading-tight">
           <strong>Eventuell schon erledigt:</strong> {task.auto_resolved_grund}
           <br />
           Schließen oder offen lassen falls du noch dran bist.
@@ -504,7 +507,7 @@ function TaskCard({
         <div className="flex items-center gap-3">
           {task.faellig_am && (
             <span
-              className={`flex items-center gap-1 ${overdue ? 'text-red-600' : 'text-claimondo-ondo'}`}
+              className={`flex items-center gap-1 ${overdue ? 'text-danger' : 'text-claimondo-ondo'}`}
             >
               <svg
                 width="12"
@@ -687,7 +690,7 @@ function NewTaskDialog({
               </select>
             </div>
 
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+            {error && <p className="text-danger text-sm">{error}</p>}
 
             <button
               type="submit"
