@@ -117,13 +117,13 @@ export default async function KanzleiBoard() {
                 <p className="font-medium text-claimondo-navy truncate">{e.event_type}</p>
                 <p className="text-xs text-claimondo-ondo">
                   Fall {e.fall_nr ?? (e.fall_id as string | null)?.slice(0, 8) ?? '—'}
-                  {e.error_message && <span className="text-red-500 ml-2">{e.error_message}</span>}
+                  {e.error_message && <span className="text-danger ml-2">{e.error_message}</span>}
                 </p>
               </div>
               <div className="flex items-center gap-3 flex-shrink-0">
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                  e.status === 'processed' ? 'bg-emerald-100 text-emerald-700' :
-                  e.status === 'error' ? 'bg-red-100 text-red-700' :
+                  e.status === 'processed' ? 'bg-success-soft text-success-strong' :
+                  e.status === 'error' ? 'bg-danger-soft text-danger-strong' :
                   'bg-claimondo-bg text-claimondo-ondo'
                 }`}>{e.status}</span>
                 <span className="text-xs text-claimondo-ondo/70">
@@ -152,8 +152,8 @@ export default async function KanzleiBoard() {
                   <p className="text-xs text-claimondo-ondo">Status: {t.status}</p>
                 </div>
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                  t.prioritaet === 'kritisch' ? 'bg-red-100 text-red-700' :
-                  t.prioritaet === 'dringend' ? 'bg-amber-100 text-amber-700' :
+                  t.prioritaet === 'kritisch' ? 'bg-danger-soft text-danger-strong' :
+                  t.prioritaet === 'dringend' ? 'bg-warning-soft text-warning-strong' :
                   'bg-claimondo-bg text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
               </div>

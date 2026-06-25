@@ -27,10 +27,10 @@ type AbrechnungRow = {
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { label: string; cls: string }> = {
-    offen: { label: 'Offen', cls: 'bg-yellow-100 text-yellow-800' },
+    offen: { label: 'Offen', cls: 'bg-warning-soft text-warning-strong' },
     versendet: { label: 'Versendet', cls: 'bg-claimondo-bg text-claimondo-navy' },
-    bezahlt: { label: 'Bezahlt', cls: 'bg-green-100 text-green-800' },
-    ueberfaellig: { label: 'Ueberfaellig', cls: 'bg-red-100 text-red-800' },
+    bezahlt: { label: 'Bezahlt', cls: 'bg-success-soft text-success-strong' },
+    ueberfaellig: { label: 'Ueberfaellig', cls: 'bg-danger-soft text-danger-strong' },
     storniert: { label: 'Storniert', cls: 'bg-claimondo-bg text-claimondo-ondo' },
   }
   const { label, cls } = map[status] ?? { label: status, cls: 'bg-claimondo-bg text-claimondo-ondo' }
@@ -123,15 +123,15 @@ export default async function KanzleiAbrechnungenPage() {
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Offen</p>
-          <p className="text-2xl font-bold text-yellow-600 mt-1">{offen}</p>
+          <p className="text-2xl font-bold text-warning mt-1">{offen}</p>
         </div>
         <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Bezahlt</p>
-          <p className="text-2xl font-bold text-green-600 mt-1">{bezahlt}</p>
+          <p className="text-2xl font-bold text-success mt-1">{bezahlt}</p>
         </div>
         <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Ueberfaellig</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">{ueberfaellig}</p>
+          <p className="text-2xl font-bold text-danger mt-1">{ueberfaellig}</p>
         </div>
         <div className="bg-white rounded-ios-xl shadow-sm p-4 border">
           <p className="text-xs text-claimondo-ondo uppercase tracking-wider">Offen gesamt</p>
