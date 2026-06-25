@@ -240,7 +240,7 @@ export default function NeuLeadDrawer() {
             />
           </div>
 
-          {error && <p className="text-red-500 text-sm bg-red-50 p-2 rounded">{error}</p>}
+          {error && <p className="text-danger text-sm bg-danger-soft p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 pt-2">
             <Button variant="bare" onClick={() => setOpen(false)} className="flex-1">

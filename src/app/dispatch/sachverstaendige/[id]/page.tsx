@@ -179,13 +179,13 @@ export default async function DispatchSvDetailPage({
             <div>
               <div className="flex items-baseline justify-between mb-1">
                 <p className="text-[10px] text-claimondo-ondo uppercase">Auslastung</p>
-                <p className={`text-xs font-semibold tabular-nums ${auslastungProzent >= 80 ? 'text-red-600' : 'text-claimondo-navy'}`}>
+                <p className={`text-xs font-semibold tabular-nums ${auslastungProzent >= 80 ? 'text-danger' : 'text-claimondo-navy'}`}>
                   {paketFaelleGenutzt} / {paketFaelleGesamt}
                 </p>
               </div>
               <div className="h-1.5 bg-claimondo-bg rounded-full overflow-hidden">
                 <div
-                  className={`h-full rounded-full ${auslastungProzent >= 80 ? 'bg-red-500' : auslastungProzent >= 50 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                  className={`h-full rounded-full ${auslastungProzent >= 80 ? 'bg-danger' : auslastungProzent >= 50 ? 'bg-warning' : 'bg-success'}`}
                   style={{ width: `${Math.min(100, auslastungProzent)}%` }}
                 />
               </div>
@@ -201,17 +201,17 @@ export default async function DispatchSvDetailPage({
             <div className="space-y-1.5 text-xs">
               <div className="flex items-center gap-2">
                 {(svRec.vertrag_unterschrieben as boolean) ? (
-                  <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-500" />
+                  <CheckCircleIcon className="w-3.5 h-3.5 text-success" />
                 ) : (
-                  <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500" />
+                  <AlertTriangleIcon className="w-3.5 h-3.5 text-warning" />
                 )}
                 <span className="text-claimondo-navy">Vertrag {svRec.vertrag_unterschrieben ? 'unterschrieben' : 'offen'}</span>
               </div>
               <div className="flex items-center gap-2">
                 {(svRec.portal_zugang_freigeschaltet as boolean) ? (
-                  <CheckCircleIcon className="w-3.5 h-3.5 text-emerald-500" />
+                  <CheckCircleIcon className="w-3.5 h-3.5 text-success" />
                 ) : (
-                  <AlertTriangleIcon className="w-3.5 h-3.5 text-amber-500" />
+                  <AlertTriangleIcon className="w-3.5 h-3.5 text-warning" />
                 )}
                 <span className="text-claimondo-navy">Portal-Zugang {svRec.portal_zugang_freigeschaltet ? 'frei' : 'gesperrt'}</span>
               </div>

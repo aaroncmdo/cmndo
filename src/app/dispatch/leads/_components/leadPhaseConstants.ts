@@ -17,12 +17,12 @@ export const PHASE_OPTIONS = [
 export const PHASE_BADGES: Record<string, string> = {
   'neu': 'bg-claimondo-bg text-claimondo-ondo',
   'nicht-erreicht': 'bg-claimondo-bg text-claimondo-ondo',
-  'rueckruf': 'bg-amber-100 text-amber-700',
+  'rueckruf': 'bg-warning-soft text-warning-strong',
   'in-qualifizierung': 'bg-claimondo-ondo/[0.10] text-claimondo-navy',
-  'flow-versendet': 'bg-emerald-100 text-emerald-700',
+  'flow-versendet': 'bg-success-soft text-success-strong',
   'sa-ausstehend': 'bg-claimondo-light-blue/[0.20] text-claimondo-navy',
-  'konvertiert': 'bg-green-100 text-green-800',
-  'disqualifiziert': 'bg-red-100 text-red-700',
+  'konvertiert': 'bg-success-soft text-success-strong',
+  'disqualifiziert': 'bg-danger-soft text-danger-strong',
   'kalt': 'bg-claimondo-border text-claimondo-ondo',
 }
 
