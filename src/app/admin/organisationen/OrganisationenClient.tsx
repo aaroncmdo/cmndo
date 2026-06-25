@@ -19,11 +19,11 @@ type OrgRow = {
 }
 
 const STATUS_BADGE: Record<string, { label: string; cls: string; Icon: typeof CheckCircleIcon }> = {
-  aktiv: { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700', Icon: CheckCircleIcon },
-  pending: { label: 'Pending', cls: 'bg-yellow-50 text-yellow-700', Icon: ClockIcon },
+  aktiv: { label: 'Aktiv', cls: 'bg-success-soft text-success-strong', Icon: CheckCircleIcon },
+  pending: { label: 'Pending', cls: 'bg-warning-soft text-warning-strong', Icon: ClockIcon },
   vertrag_unterzeichnet: { label: 'Vertrag', cls: 'bg-claimondo-bg text-claimondo-ondo', Icon: ClockIcon },
-  anzahlung_offen: { label: 'Anzahlung offen', cls: 'bg-amber-50 text-amber-700', Icon: AlertCircleIcon },
-  blockiert: { label: 'Blockiert', cls: 'bg-red-50 text-red-700', Icon: AlertCircleIcon },
+  anzahlung_offen: { label: 'Anzahlung offen', cls: 'bg-warning-soft text-warning-strong', Icon: AlertCircleIcon },
+  blockiert: { label: 'Blockiert', cls: 'bg-danger-soft text-danger-strong', Icon: AlertCircleIcon },
 }
 
 export default function OrganisationenClient({ organisationen }: { organisationen: OrgRow[] }) {
@@ -105,7 +105,7 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                     </Td>
                     <Td>
                       {o.has_stripe ? (
-                        <CreditCardIcon className="w-4 h-4 text-emerald-500" />
+                        <CreditCardIcon className="w-4 h-4 text-success" />
                       ) : (
                         <span className="text-xs text-claimondo-ondo/50">—</span>
                       )}

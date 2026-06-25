@@ -5,8 +5,8 @@ import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/component
 
 const STATUS_COLOR: Record<string, string> = {
   neu: 'bg-claimondo-ondo/5 text-claimondo-ondo',
-  'in-bearbeitung': 'bg-amber-50 text-amber-600',
-  geloest: 'bg-green-50 text-green-600',
+  'in-bearbeitung': 'bg-warning-soft text-warning-strong',
+  geloest: 'bg-success-soft text-success-strong',
   geschlossen: 'bg-claimondo-bg text-claimondo-ondo',
 }
 
