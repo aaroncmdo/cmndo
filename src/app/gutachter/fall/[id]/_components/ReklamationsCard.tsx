@@ -16,18 +16,18 @@ export function ReklamationsCard({ fall, id }: { fall: Fall; id?: string }) {
   return (
     <div
       id={id}
-      className="rounded-2xl border bg-red-50 border-red-200 p-4 sm:p-5 space-y-2"
+      className="rounded-2xl border bg-danger-soft border-danger/30 p-4 sm:p-5 space-y-2"
     >
       <div className="flex items-center gap-2">
-        <AlertCircleIcon className="w-4 h-4 text-red-700" />
-        <p className="text-xs uppercase tracking-wider font-semibold text-red-900">
+        <AlertCircleIcon className="w-4 h-4 text-danger-strong" />
+        <p className="text-xs uppercase tracking-wider font-semibold text-danger-strong">
           Rückfrage offen
         </p>
       </div>
       <p className="text-sm text-claimondo-navy">
         Die Kanzlei oder der Kundenbetreuer hat eine Rückfrage zu deinem Fall.
       </p>
-      <p className="text-xs text-red-800">
+      <p className="text-xs text-danger-strong">
         Bitte beantworte die Rückfrage im Chat oder kontaktiere den Kundenbetreuer.
       </p>
     </div>
