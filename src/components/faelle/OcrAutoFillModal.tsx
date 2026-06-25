@@ -3,28 +3,20 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { XIcon, CheckIcon, SparklesIcon } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { updateFallField } from '@/app/faelle/[id]/_actions/stammdaten'
 import { Modal } from '@/components/primitives/Modal'
-// CMM-44 SP-A: gegner_versicherungsnummer ist eine faelle<->claims-Duplikat-
-// Spalte → claims-Anteil des Updates per Helper abspalten und auf claims
-// schreiben (SSoT). splitOrKeepFaelleUpdate ist eine reine Funktion ohne
-// Server-Deps, daher auch im Client-Bundle nutzbar.
-// CMM-44 SP-A2: CLUSTER1_RENAMED_TO_CLAIMS ist die zentrale Rename-Map
-// (UI-Feldname → claims-Spalte), geteilt mit faelle/_actions/stammdaten.ts.
-import {
-  splitOrKeepFaelleUpdate,
-  CLUSTER1_RENAMED_TO_CLAIMS,
-} from '@/lib/faelle/claim-duplicate-columns'
 
 // KFZ-172 Follow-up: Auto-Fill Modal fuer OCR-extrahierte Daten.
 // Zeigt die erkannten Felder mit Checkboxen, User kann einzeln
-// annehmen/ablehnen/korrigieren. Submit updatet faelle-Stammdaten.
+// annehmen/ablehnen/korrigieren. Submit routet jedes Feld via updateFallField.
 
-// Mapping: OCR-Feld -> Ziel-Spalte (faelle bzw. claims, siehe CLAIMS_COLUMNS)
+// CMM-49: Mapping OCR-Feld -> updateFallField-Feldname. updateFallField ist der
+// kanonische Editor-Pfad, der jedes Feld auf die richtige Entity verteilt
+// (vehicles / halter- bzw. verursacher-Party / gutachten / claims). `column`
+// MUSS daher ein Name aus FALL_EDITABLE_FIELDS sein (NICHT die rohe DB-Spalte):
+// fin->fin_vin, datum->schadens_datum, ort->schadens_adresse.
 const FIELD_MAP: Record<string, { label: string; column: string }> = {
-  fin: { label: 'FIN / VIN', column: 'fin' },
+  fin: { label: 'FIN / VIN', column: 'fin_vin' },
   kennzeichen: { label: 'Kennzeichen', column: 'kennzeichen' },
   // AAR-548 D7: halter_name ist GENERATED (vorname + nachname) — OCR mappt
   // jetzt direkt auf die Einzelfelder. `halter`/`versicherter` werden als
@@ -40,17 +32,9 @@ const FIELD_MAP: Record<string, { label: string; column: string }> = {
   nachname: { label: 'Nachname', column: 'halter_nachname' },
   geburtsdatum: { label: 'Geburtsdatum', column: '' },
   klasse: { label: 'Führerschein-Klasse', column: '' },
-  // CMM-44 SP-A2 (Cluster 1): Semantik-Duplikate — Ziel sind die claims-Spalten
-  // schadentag / schadenort_adresse (SSoT), siehe CLAIMS_COLUMNS unten.
-  datum: { label: 'Unfalldatum', column: 'schadentag' },
-  ort: { label: 'Unfallort', column: 'schadenort_adresse' },
+  datum: { label: 'Unfalldatum', column: 'schadens_datum' },
+  ort: { label: 'Unfallort', column: 'schadens_adresse' },
 }
-
-// CMM-44 SP-A2: claims-Zielspalten der Cluster-1-Semantik-Duplikate — abgeleitet
-// aus der zentralen Rename-Map. FIELD_MAP mappt OCR-Felder bereits direkt auf
-// diese claims-Namen; ein Treffer hier → der Wert geht direkt auf claims (NICHT
-// ueber splitOrKeepFaelleUpdate, dessen gleichnamig-Annahme hier nicht gilt).
-const CLAIMS_COLUMNS = new Set<string>(Object.values(CLUSTER1_RENAMED_TO_CLAIMS))
 
 export type OcrData = Record<string, string | null>
 
@@ -88,70 +72,29 @@ export default function OcrAutoFillModal({
   async function handleSubmit() {
     setSaving(true)
     setFehler(null)
-    const updates: Record<string, string> = {}
+    // CMM-49: jedes ausgewaehlte OCR-Feld ueber den kanonischen Editor-Pfad
+    // updateFallField routen — der verteilt es auf die richtige Entity (vehicles /
+    // halter- bzw. verursacher-Party / gutachten / claims via ensureVehicleForClaim/
+    // Party-Resolver/Cluster-Rename). Frueher schrieb dieses Modal claims direkt und
+    // verwarf den faelle-Residual -> vehicle_*/halter_*/kennzeichen gingen verloren,
+    // und der Direkt-Write umging die Feld-Edit-Locks (canEditField). Single Editor-Pfad.
+    const errors: string[] = []
     for (const [key, checked] of Object.entries(selectedFields)) {
       if (!checked) continue
       const mapping = FIELD_MAP[key]
       if (!mapping?.column) continue
       const val = editedValues[key]
-      if (val) updates[mapping.column] = val
+      if (!val) continue
+      const res = await updateFallField(fallId, mapping.column, val)
+      if (!res.success) errors.push(`${mapping.label}: ${res.error ?? 'Fehler'}`)
     }
-
-    // CMM-49 Tier-2: gegner_versicherungsnummer -> verursacher-Party (SSoT) via
-    // updateFallField (routet auf die Party seit #3009) statt client-seitigem claims-
-    // Write -> ueberlebt den claims.gegner_versicherungsnummer-DROP. Ohne #3009 faellt
-    // updateFallField via splitOrKeep auf claims zurueck (kein Bruch). Single Editor-Pfad.
-    if (updates.gegner_versicherungsnummer !== undefined) {
-      const res = await updateFallField(fallId, 'gegner_versicherungsnummer', updates.gegner_versicherungsnummer)
-      if (!res.success) setFehler(res.error ?? 'Gegner-Versicherungsnummer konnte nicht gespeichert werden.')
-      delete updates.gegner_versicherungsnummer
-    }
-
-    if (Object.keys(updates).length > 0) {
-      const supabase = createClient()
-      // CMM-44 SP-A: claim_id laden, dann Update splitten — Duplikat-Spalten
-      // (z.B. gegner_versicherungsnummer) gehen auf claims (SSoT), restliche
-      // Stammdaten-Felder bleiben auf faelle. Legacy-Faelle ohne claim_id:
-      // splitOrKeepFaelleUpdate behaelt das ganze Update auf faelle.
-      const claimId = await resolveClaimId(supabase, fallId)
-
-      // CMM-44 SP-A2: Cluster-1-Semantik-Duplikate (schadentag/schadenort_adresse)
-      // vorab abspalten — sie gehen direkt mit dem claims-Namen auf claims.
-      const cluster1Update: Record<string, string> = {}
-      const restUpdate: Record<string, string> = {}
-      for (const [col, val] of Object.entries(updates)) {
-        if (CLAIMS_COLUMNS.has(col)) cluster1Update[col] = val
-        else restUpdate[col] = val
-      }
-
-      // CMM-49 faelle-DROP: faelle ist gedroppt — nur noch der claims-Anteil wird geschrieben.
-      // Das faelleUpdate-Residual (noch nicht ent-routete Entity-Felder, z.B. vehicle_*) war
-      // schon vor dem DROP reader-frei; seine kanonische Ent-Routung = eigener Schritt (Vehicle-Tier).
-      const { claimsUpdate } = splitOrKeepFaelleUpdate(restUpdate, claimId)
-      const mergedClaimsUpdate = { ...claimsUpdate, ...cluster1Update }
-      if (claimId && Object.keys(mergedClaimsUpdate).length > 0) {
-        await supabase.from('claims').update(mergedClaimsUpdate).eq('id', claimId)
-      }
-
-      // CMM-44 SP-A2: Schadenort/-datum leben auf claims. Bei einem Fall ohne
-      // verknuepften Claim koennen sie nicht gespeichert werden — den User
-      // darauf hinweisen statt die Werte still zu verwerfen (konsistent zu
-      // updateFallField/updateSchadensAdresse, die hier einen Fehler liefern).
-      if (!claimId && Object.keys(cluster1Update).length > 0) {
-        console.warn(
-          '[OcrAutoFillModal] Cluster-1-Felder verworfen — Fall ohne claim_id:',
-          Object.keys(cluster1Update),
-        )
-        setFehler(
-          'Schadenort/-datum konnten nicht gespeichert werden — der Fall hat keinen verknüpften Claim. Übrige Felder wurden übernommen.',
-        )
-        setSaving(false)
-        router.refresh()
-        return
-      }
-
+    if (errors.length > 0) {
+      setFehler(`Konnte nicht alle Felder speichern — ${errors.join('; ')}`)
+      setSaving(false)
       router.refresh()
+      return
     }
+    router.refresh()
     setSaving(false)
     onClose()
   }
