@@ -106,6 +106,9 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'wiederbeschaffungswert',
   'restwert',
   'wertminderung',
+  // CMM-49: SV-Honorar lebt auf gutachten.gutachten_sv_honorar_netto (faelle-Spalte gedroppt);
+  // routet via GUTACHTEN_FIELD_MAP dorthin (Admin-Override des OCR/AI-Werts).
+  'gutachter_honorar',
   'schadens_hoehe_netto',
   // VS-Status-Felder (AAR-161 W1 neu)
   'vs_kuerzung_grund',
@@ -171,6 +174,9 @@ const GUTACHTEN_FIELD_MAP: Record<string, string> = {
   wiederbeschaffungswert: 'wiederbeschaffungswert',
   reparaturkosten: 'reparaturkosten_netto',
   wertminderung: 'minderwert',
+  // CMM-49: SV-Honorar — Reader v_faelle_mit_aktuellem_termin.gutachter_honorar
+  // == gutachten.gutachten_sv_honorar_netto; Inline-Edit ist Admin-Override (Rename) dorthin.
+  gutachter_honorar: 'gutachten_sv_honorar_netto',
 }
 
 // CMM-49/AAR-552: Felder, deren SSoT der "aktuelle Termin" (gutachter_termine) ist —
