@@ -274,7 +274,7 @@ export default function ProfilClient({
                         />
                       )}
                       {standort.lat != null && (
-                        <p className="text-green-600 text-xs flex items-center gap-1">
+                        <p className="text-success text-xs flex items-center gap-1">
                           <MapPinIcon className="w-3 h-3" />
                           Koordinaten erfasst ({standort.lat.toFixed(4)}, {standort.lng?.toFixed(4)}) — Einsatzgebiet wird neu berechnet
                         </p>
@@ -367,7 +367,7 @@ export default function ProfilClient({
             )}
 
             {error && (
-              <p className="text-red-600 text-sm bg-red-50 border border-red-200 rounded-ios-xl p-3 mt-2">{error}</p>
+              <p className="text-danger text-sm bg-danger-soft border border-danger/30 rounded-ios-xl p-3 mt-2">{error}</p>
             )}
           </SectionCard>
         </form>
@@ -380,7 +380,7 @@ export default function ProfilClient({
           href="/gutachter/einstellungen/kalender"
           className="bg-white rounded-2xl p-4 border border-claimondo-border mt-5 flex items-center gap-3 hover:border-claimondo-ondo transition-colors group"
         >
-          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-green-500' : 'bg-claimondo-light-blue'}`} />
+          <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${googleConnected ? 'bg-success' : 'bg-claimondo-light-blue'}`} />
           <div className="flex-1 min-w-0">
             <p className="text-sm font-medium text-claimondo-navy">
               Kalender: {googleConnected ? 'Google verbunden' : 'Nicht verbunden'}
@@ -663,7 +663,7 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
         onClick={toggle}
         disabled={saving}
         className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
-          active ? 'bg-emerald-500' : 'bg-claimondo-border'
+          active ? 'bg-success' : 'bg-claimondo-border'
         }`}
       >
         <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${
@@ -674,7 +674,7 @@ function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
         {active ? 'Anonym aktiviert' : 'Name sichtbar'}
         {saving && <span className="text-claimondo-ondo/70 text-xs ml-2">speichert...</span>}
       </span>
-      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+      {error && <p className="text-xs text-danger mt-2">{error}</p>}
     </div>
   )
 }
@@ -794,7 +794,7 @@ function SpezSection({
           )
         })}
       </div>
-      {error && <p className="text-xs text-red-600 mt-2">{error}</p>}
+      {error && <p className="text-xs text-danger mt-2">{error}</p>}
     </div>
   )
 }
