@@ -63,10 +63,10 @@ export default function AnlegenFallClient() {
   if (result) {
     return (
       <div className="px-8 py-12 max-w-2xl mx-auto">
-        <div className="bg-white border border-emerald-200 rounded-2xl p-8">
+        <div className="bg-white border border-success/30 rounded-2xl p-8">
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-ios-xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
-              <CheckCircle2Icon className="w-6 h-6 text-emerald-600" />
+            <div className="w-12 h-12 rounded-ios-xl bg-success-soft flex items-center justify-center flex-shrink-0">
+              <CheckCircle2Icon className="w-6 h-6 text-success" />
             </div>
             <div className="flex-1">
               <h2 className="text-lg font-semibold text-claimondo-navy">Fall {result.claim_nummer ?? '(Nummer folgt)'} angelegt</h2>
@@ -178,7 +178,7 @@ export default function AnlegenFallClient() {
         </div>
 
         {error && (
-          <div className="px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger-strong text-sm">
             {error}
           </div>
         )}

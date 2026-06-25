@@ -171,13 +171,13 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                     <div className="flex gap-1">
                       {p.status === 'pending' && p.cpl_actual != null && (
                         <button disabled={pending} onClick={() => handleConfirm(p.id)}
-                          className="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700 hover:bg-emerald-100 disabled:opacity-50">
+                          className="text-xs px-2 py-1 rounded bg-success-soft text-success-strong hover:bg-success/15 disabled:opacity-50">
                           Bestaetigen
                         </button>
                       )}
                       {p.status !== 'paid' && p.status !== 'reversed' && (
                         <button disabled={pending} onClick={() => handleReverse(p.id)}
-                          className="text-xs px-2 py-1 rounded bg-red-50 text-red-700 hover:bg-red-100 disabled:opacity-50">
+                          className="text-xs px-2 py-1 rounded bg-danger-soft text-danger-strong hover:bg-danger/15 disabled:opacity-50">
                           Stornieren
                         </button>
                       )}

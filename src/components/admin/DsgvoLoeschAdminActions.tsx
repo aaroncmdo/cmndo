@@ -59,14 +59,14 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
           type="button"
           onClick={() => setConfirmDirect(true)}
           disabled={pending}
-          className="inline-flex items-center gap-1.5 rounded-full border border-red-200 bg-white px-3.5 py-1.5 text-xs font-semibold text-red-700 transition-all duration-200 hover:bg-red-50 hover:-translate-y-[1px] disabled:opacity-50"
+          className="inline-flex items-center gap-1.5 rounded-full border border-danger/30 bg-white px-3.5 py-1.5 text-xs font-semibold text-danger-strong transition-all duration-200 hover:bg-danger-soft hover:-translate-y-[1px] disabled:opacity-50"
         >
           <FlameIcon width={12} height={12} />
           Direkt ausführen
         </button>
       ) : (
         <div className="flex flex-col items-end gap-1.5">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-red-700">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-danger-strong">
             Sicher? Anonymisierung ist irreversibel.
           </p>
           <div className="flex gap-1.5">
@@ -74,7 +74,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
               type="button"
               onClick={ausfuehren}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 rounded-full bg-red-600 px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(220,38,38,.30)] transition-all duration-200 hover:bg-red-700 hover:-translate-y-[1px] disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 rounded-full bg-danger px-3.5 py-1.5 text-xs font-semibold text-white shadow-[0_4px_12px_rgba(220,38,38,.30)] transition-all duration-200 hover:bg-danger-strong hover:-translate-y-[1px] disabled:opacity-50"
             >
               <FlameIcon width={12} height={12} />
               {pending ? 'läuft …' : 'Ja, ausführen'}
@@ -92,7 +92,7 @@ export default function DsgvoLoeschAdminActions({ auftragId, status }: Props) {
       )}
 
       {error && (
-        <p className="max-w-[200px] text-right text-[10px] text-red-700">
+        <p className="max-w-[200px] text-right text-[10px] text-danger-strong">
           {error}
         </p>
       )}

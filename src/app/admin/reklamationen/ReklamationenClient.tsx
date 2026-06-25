@@ -92,9 +92,9 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
                           className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-xs resize-none focus:outline-none focus:border-claimondo-ondo" rows={2} />
                         <div className="flex gap-2">
                           <button onClick={() => handleEntscheidung(r.id, 'berechtigt')} disabled={loading}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-green-500 rounded-ios-lg hover:bg-green-600 disabled:opacity-50">Berechtigt</button>
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-success rounded-ios-lg hover:bg-success-strong disabled:opacity-50">Berechtigt</button>
                           <button onClick={() => handleEntscheidung(r.id, 'abgelehnt')} disabled={loading || !adminGrund.trim()}
-                            className="px-3 py-1.5 text-xs font-medium text-white bg-red-500 rounded-ios-lg hover:bg-red-600 disabled:opacity-50">Abgelehnt</button>
+                            className="px-3 py-1.5 text-xs font-medium text-white bg-danger rounded-ios-lg hover:bg-danger-strong disabled:opacity-50">Abgelehnt</button>
                           <button onClick={() => setActionId(null)} className="px-3 py-1.5 text-xs text-claimondo-ondo hover:text-claimondo-navy">Abbrechen</button>
                         </div>
                       </div>
