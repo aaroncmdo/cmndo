@@ -184,7 +184,14 @@ export default async function MitarbeiterTermine() {
                 const subject = lead
                   ? `${[lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Lead'}`
                   : fall?.claim_nummer ?? t.titel
-                const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
+                const href =
+                  t.typ === 'kb_beratung'
+                    ? `/mitarbeiter/konsultation/${t.id}`
+                    : lead
+                    ? `/dispatch/leads/${lead.id}`
+                    : fall
+                    ? `/faelle/${fall.id}`
+                    : '#'
                 const overdue = new Date(t.start_zeit) < new Date()
                 return (
                   <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
