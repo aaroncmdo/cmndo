@@ -105,10 +105,10 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
                   </p>
                 </div>
                 <span className={`text-xs font-semibold tracking-[-.005em] px-2.5 py-1 rounded-full flex-shrink-0 ${
-                  r.status === 'offen' ? 'bg-amber-50 text-amber-700 border border-amber-200' :
+                  r.status === 'offen' ? 'bg-warning-soft text-warning-strong border border-warning/30' :
                   r.status === 'in-bearbeitung' ? 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border' :
-                  r.status === 'erledigt' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' :
-                  'bg-red-50 text-red-700 border border-red-200'
+                  r.status === 'erledigt' ? 'bg-success-soft text-success-strong border border-success/30' :
+                  'bg-danger-soft text-danger-strong border border-danger/30'
                 }`}>{r.status}</span>
               </div>
               <p className="text-sm text-claimondo-navy">{r.begruendung}</p>
@@ -175,7 +175,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
               rows={4} className={`${liquidField} resize-none`} required minLength={30} />
           </div>
 
-          {error && <p className="text-sm text-red-500 bg-red-50 p-2 rounded">{error}</p>}
+          {error && <p className="text-sm text-danger bg-danger-soft p-2 rounded">{error}</p>}
 
           <div className="flex gap-2 justify-end">
             <button type="button" onClick={() => setShowDialog(false)}
