@@ -9,7 +9,7 @@ import { SITE_URL } from '@/lib/seo/jsonld'
 export const dynamic = 'force-static'
 
 const spec = {
-  openapi: '3.1.0',
+  openapi: '3.0.3',
   info: {
     title: 'Claimondo Kfz-Gutachter-API (finden · Termine · Schaden melden)',
     description:
@@ -33,14 +33,14 @@ const spec = {
             in: 'query',
             required: false,
             description: '5-stellige deutsche PLZ (z. B. 50670 für Köln). Entweder plz ODER ort angeben.',
-            schema: { type: 'string', pattern: '^\\d{5}$', examples: ['50670', '10115'] },
+            schema: { type: 'string', pattern: '^\\d{5}$', example: '50670' },
           },
           {
             name: 'ort',
             in: 'query',
             required: false,
             description: 'Stadt oder Adresse als Freitext (z. B. "Köln" oder "Hauptstr. 5, Köln"), falls die PLZ nicht bekannt ist. Entweder plz ODER ort.',
-            schema: { type: 'string', examples: ['Köln', 'München Schwabing'] },
+            schema: { type: 'string', example: 'Köln' },
           },
           {
             name: 'radius',
@@ -86,14 +86,14 @@ const spec = {
             in: 'query',
             required: false,
             description: '5-stellige PLZ des Besichtigungsorts (wo das Fahrzeug steht). Entweder plz ODER ort.',
-            schema: { type: 'string', pattern: '^\\d{5}$', examples: ['50670', '10115'] },
+            schema: { type: 'string', pattern: '^\\d{5}$', example: '50670' },
           },
           {
             name: 'ort',
             in: 'query',
             required: false,
             description: 'Stadt/Adresse als Freitext (z. B. "Köln"), falls die PLZ unbekannt ist. Entweder plz ODER ort.',
-            schema: { type: 'string', examples: ['Köln', 'Düsseldorf'] },
+            schema: { type: 'string', example: 'Köln' },
           },
           {
             name: 'wunschtermin',
@@ -252,11 +252,11 @@ const spec = {
           'Ein Treffer. Tier 1 = Partner mit anonymisiertem Profil (nur bei Paket "standard" befüllt); Tier 3 = anonymer Standort-Pin (nur Entfernung).',
         properties: {
           tier: { type: 'integer', enum: [1, 3], description: '1 = Profil-Partner, 3 = anonymer Pin.' },
-          stadt: { type: ['string', 'null'], description: 'Stadt (nur Tier 1, Paket standard).' },
-          vorname_initiale: { type: ['string', 'null'], description: 'Vorname-Initiale, anonymisiert (nur Tier 1).' },
+          stadt: { type: 'string', nullable: true, description: 'Stadt (nur Tier 1, Paket standard).' },
+          vorname_initiale: { type: 'string', nullable: true, description: 'Vorname-Initiale, anonymisiert (nur Tier 1).' },
           spezialisierungen: { type: 'array', items: { type: 'string' }, description: 'Top-3-Spezialisierungen (nur Tier 1).' },
-          bewertung_schnitt: { type: ['number', 'null'], description: 'Durchschnittsbewertung (nur Tier 1).' },
-          bewertung_anzahl: { type: ['integer', 'null'], description: 'Anzahl Bewertungen (nur Tier 1).' },
+          bewertung_schnitt: { type: 'number', nullable: true, description: 'Durchschnittsbewertung (nur Tier 1).' },
+          bewertung_anzahl: { type: 'integer', nullable: true, description: 'Anzahl Bewertungen (nur Tier 1).' },
           entfernung_km: { type: 'number', description: 'Luftlinie zur PLZ-Mitte in km.' },
         },
         required: ['tier', 'entfernung_km'],
@@ -297,10 +297,10 @@ const spec = {
         type: 'object',
         properties: {
           id: { type: 'string', format: 'uuid', description: 'Gutachter-Handle — als sv_id an meldeSchaden weitergeben.' },
-          vorname: { type: ['string', 'null'] },
-          profilbild: { type: ['string', 'null'], format: 'uri' },
-          bewertung_schnitt: { type: ['number', 'null'] },
-          bewertung_anzahl: { type: ['integer', 'null'] },
+          vorname: { type: 'string', nullable: true },
+          profilbild: { type: 'string', nullable: true, format: 'uri' },
+          bewertung_schnitt: { type: 'number', nullable: true },
+          bewertung_anzahl: { type: 'integer', nullable: true },
           entfernung: { type: 'string', description: 'z. B. "ca. 5 km".' },
           ist_top_partner: { type: 'boolean' },
           wunschtermin_frei: { type: 'boolean' },
@@ -312,7 +312,7 @@ const spec = {
         type: 'object',
         properties: {
           plz: { type: 'string' },
-          wunschtermin: { type: ['string', 'null'] },
+          wunschtermin: { type: 'string', nullable: true },
           center: { $ref: '#/components/schemas/LatLng' },
           anzahl_gutachter: { type: 'integer' },
           gutachter: { type: 'array', items: { $ref: '#/components/schemas/GutachterMitTerminen' } },
@@ -370,7 +370,7 @@ const spec = {
         type: 'object',
         properties: {
           schuldfrage: { type: 'string' },
-          schadenart: { type: ['string', 'null'] },
+          schadenart: { type: 'string', nullable: true },
           anspruchslage: { type: 'string', description: 'voll / anteilig / keine_gegen_gegner / unklar.' },
           eigenkosten: { type: 'string' },
           ansprueche: { type: 'array', items: { $ref: '#/components/schemas/Anspruch' } },
@@ -393,7 +393,7 @@ const spec = {
           phrase: { type: 'string', description: 'Die erkannte Versicherer-Formulierung.' },
           bedeutet: { type: 'string', description: 'Was die Formulierung wirklich bedeutet / welche Taktik dahintersteckt.' },
           recht: { type: 'string', description: 'Das tatsächliche Recht des Geschädigten.' },
-          norm: { type: ['string', 'null'], description: 'Rechtsnorm / BGH-Aktenzeichen, falls einschlägig.' },
+          norm: { type: 'string', nullable: true, description: 'Rechtsnorm / BGH-Aktenzeichen, falls einschlägig.' },
         },
         required: ['phrase', 'bedeutet', 'recht'],
       },
