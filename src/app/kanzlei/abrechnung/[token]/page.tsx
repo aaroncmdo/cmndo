@@ -103,9 +103,9 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
                 <p className="text-claimondo-ondo">Diese Rechnung wurde am {abrechnung.bezahlt_am ? new Date(abrechnung.bezahlt_am as string).toLocaleDateString('de-DE') : '—'} bezahlt.</p>
               </div>
             </div>
-            <div className="border rounded-ios-xl p-4 bg-green-50 border-green-200">
-              <p className="text-sm text-green-800">Rechnungsnummer: <strong>{abrechnung.rechnungsnummer}</strong></p>
-              <p className="text-sm text-green-800">Betrag: <strong>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</strong> (brutto)</p>
+            <div className="border rounded-ios-xl p-4 bg-success-soft border-success/30">
+              <p className="text-sm text-success-strong">Rechnungsnummer: <strong>{abrechnung.rechnungsnummer}</strong></p>
+              <p className="text-sm text-success-strong">Betrag: <strong>{Number(abrechnung.endbetrag_brutto).toFixed(2).replace('.', ',')} €</strong> (brutto)</p>
             </div>
           </div>
         </div>
@@ -144,7 +144,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
         )}
 
         {payment === 'success' && (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-4 text-green-800">
+          <div className="bg-success-soft border border-success/30 rounded-2xl p-4 text-success-strong">
             ✅ Zahlung eingegangen! Vielen Dank. Die Bestaetigung erhalten Sie per Email.
           </div>
         )}

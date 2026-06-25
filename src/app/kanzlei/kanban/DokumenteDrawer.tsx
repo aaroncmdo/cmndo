@@ -157,7 +157,7 @@ export default function DokumenteDrawer({
 
         <div className="flex-1 overflow-y-auto px-5 py-4 space-y-4">
           {error && (
-            <div className="rounded-ios-lg bg-red-50 border border-red-200 p-3 text-xs text-red-800">
+            <div className="rounded-ios-lg bg-danger-soft border border-danger/30 p-3 text-xs text-danger-strong">
               Fehler beim Laden: {error}
             </div>
           )}

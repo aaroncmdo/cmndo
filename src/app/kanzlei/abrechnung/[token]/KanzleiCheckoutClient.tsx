@@ -42,7 +42,7 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
     <div className="bg-white rounded-2xl shadow p-6">
       <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">Zahlung</h2>
       {error && (
-        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-ios-lg text-sm text-red-700">
+        <div className="mb-4 p-3 bg-danger-soft border border-danger/30 rounded-ios-lg text-sm text-danger-strong">
           Fehler: {error}
         </div>
       )}
