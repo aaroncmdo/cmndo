@@ -267,6 +267,7 @@ export async function reserviereEmbedTermin(input: {
   ort: { adresse: string; lat: number; lng: number }
   wunschterminLokal?: string | null
   werkstatt_id?: string | null
+  promotion_code_id?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -315,6 +316,16 @@ export async function reserviereEmbedTermin(input: {
     leadId = (flx?.lead_id as string | null) ?? null
   } catch {
     leadId = null
+  }
+
+  // Makler-Vermittlung: Promo-Code des vermittelnden Maklers auf den Lead (Attribution).
+  // convert-lead-to-claim loest promotion_code_id -> makler_id -> claims.makler_id (DB-Trigger -> Provision).
+  if (leadId && input.promotion_code_id) {
+    try {
+      await createAdminClient().from('leads').update({ promotion_code_id: input.promotion_code_id }).eq('id', leadId)
+    } catch (err) {
+      console.error('[reserviereEmbedTermin] promotion_code_id setzen fehlgeschlagen (nicht kritisch):', (err as Error).message)
+    }
   }
 
   // AAR-956: Auto-Rückruf — jede Reservierung erzeugt GENAU EINEN Rückruf-Task beim
