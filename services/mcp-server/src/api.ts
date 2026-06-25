@@ -548,3 +548,71 @@ export function formatDecodeBrief(r: DecodeBriefResult): string {
   lines.push(`**Nächster Schritt:** ${r.naechster_schritt}`, '', `_${r.hinweis}_`)
   return lines.join('\n')
 }
+
+// --- Rückruf anfordern (Write, Consent) -------------------------------------
+// Wrappt POST /api/v1/rueckruf. Der zweite Funnel-Arm neben melde-schaden: ein
+// Berater ruft den Kunden telefonisch zurueck (statt FlowLink). Consent-Pflicht.
+
+export type RueckrufInput = {
+  name: string
+  telefon: string
+  schadenart?: string
+  anliegen?: string
+  plz?: string
+  ort?: string
+  /** Optionale Wunschzeit (ISO-8601). Ohne -> schnellstmoeglich (ASAP). */
+  wunschzeit?: string
+  /** MUSS true sein + NUR nach ausdruecklicher Nutzer-Einwilligung (Datenverarbeitung + Telefon-Kontakt). */
+  einwilligung_erteilt: boolean
+}
+export type RueckrufResult = { ok: boolean; status: string; wann: string; hinweis: string }
+
+/** Fordert einen Telefon-Rueckruf an (Lead + Dispatch-Task). Wirft {@link ClaimondoApiError} bei Fehlern/fehlender Einwilligung. */
+export async function fetchRueckruf(input: RueckrufInput, apiBase: string = DEFAULT_API_BASE): Promise<RueckrufResult> {
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/rueckruf`
+  const body = {
+    name: input.name,
+    telefon: input.telefon,
+    schadenart: input.schadenart,
+    anliegen: input.anliegen,
+    plz: input.plz,
+    ort: input.ort,
+    wunschzeit: input.wunschzeit,
+    einwilligung: { zugestimmt: input.einwilligung_erteilt, policy_version: MCP_CONSENT_POLICY_VERSION },
+  }
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  let res: Response
+  try {
+    res = await fetch(url, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new ClaimondoApiError(`Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`)
+    }
+    throw new ClaimondoApiError(`Netzwerkfehler bei der Anfrage an Claimondo: ${err instanceof Error ? err.message : String(err)}`)
+  } finally {
+    clearTimeout(timer)
+  }
+  const data = (await res.json().catch(() => ({}))) as { ok?: boolean; status?: string; wann?: string; hinweis?: string; error?: string }
+  if (!res.ok || data.ok === false) {
+    if (res.status === 429) throw new ClaimondoApiError('Zu viele Anfragen (Rate-Limit). Bitte kurz warten und erneut versuchen.', 429)
+    if (data.error === 'einwilligung_erforderlich') {
+      throw new ClaimondoApiError(
+        'Einwilligung erforderlich: Der Nutzer muss der Datenverarbeitung + dem telefonischen Kontakt ausdrücklich zustimmen, bevor der Rückruf angefordert wird. Bitte erst die Zustimmung einholen.',
+        400,
+      )
+    }
+    throw new ClaimondoApiError(data.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
+  }
+  return { ok: true, status: data.status ?? 'rueckruf_angelegt', wann: data.wann ?? 'schnellstmöglich', hinweis: data.hinweis ?? '' }
+}
+
+/** Menschenlesbarer Markdown-Report fuer den Rückruf. */
+export function formatRueckruf(r: RueckrufResult): string {
+  return [`# Rückruf angefordert`, '', `**Wann:** ${r.wann}`, '', r.hinweis].join('\n')
+}
