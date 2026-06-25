@@ -23,6 +23,7 @@ import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
+import { findRecentMcpLead } from '@/lib/api-v1/recent-lead-dedup'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 
 export const runtime = 'nodejs'
@@ -105,6 +106,24 @@ export async function POST(req: Request) {
     )
   }
   const input = parsed.data
+
+  // Idempotenz (Retry-Dedup): wiederholt der LLM-Client den Tool-Call (Timeout/Reconnect),
+  // verwenden wir den bereits angelegten Lead wieder, statt einen zweiten Lead + WhatsApp +
+  // Reservierung zu erzeugen. Siehe src/lib/api-v1/recent-lead-dedup.ts.
+  const dup = await findRecentMcpLead(input.telefon)
+  if (dup) {
+    return json(
+      {
+        ok: true,
+        status: 'bereits_angelegt',
+        wiederverwendet: true,
+        kanal: 'none',
+        hinweis:
+          'Diese Schadenmeldung wurde bereits angelegt — der Kunde hat seinen persönlichen FlowLink bereits per WhatsApp erhalten. Bitte nicht erneut senden.',
+      },
+      200,
+    )
+  }
 
   const center = await geocodeAdresse(input.plz)
   if (!center) return json({ ok: false, error: 'PLZ not found' }, 404)

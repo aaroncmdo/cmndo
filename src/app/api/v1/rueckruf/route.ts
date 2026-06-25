@@ -17,6 +17,7 @@ import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 import { upsertReservierungsRueckruf } from '@/lib/embed/reservierungs-rueckruf'
+import { findRecentMcpLead } from '@/lib/api-v1/recent-lead-dedup'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 
 export const runtime = 'nodejs'
@@ -94,6 +95,24 @@ export async function POST(req: Request) {
     )
   }
   const input = parsed.data
+
+  // Idempotenz (Retry-Dedup): wiederholt der LLM-Client den Tool-Call, verwenden wir den
+  // bereits angelegten Rückruf-Lead wieder, statt einen zweiten Lead + Dispatch-Task zu
+  // erzeugen. Siehe src/lib/api-v1/recent-lead-dedup.ts.
+  const dup = await findRecentMcpLead(input.telefon)
+  if (dup) {
+    return json(
+      {
+        ok: true,
+        status: 'bereits_angelegt',
+        wiederverwendet: true,
+        wann: 'schnellstmöglich',
+        hinweis:
+          'Rückruf wurde bereits angefordert — ein Claimondo-Berater meldet sich schnellstmöglich telefonisch. Bitte nicht erneut anfordern.',
+      },
+      200,
+    )
+  }
 
   // Standort optional: PLZ oder Freitext-Ort geocoden (best-effort, non-fatal).
   let lat: number | undefined
