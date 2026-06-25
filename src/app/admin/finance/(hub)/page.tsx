@@ -189,10 +189,10 @@ type IndividuelleAnfrage = {
 function IndividuelleAnfragenSection({ anfragen }: { anfragen: IndividuelleAnfrage[] }) {
   const statusColors: Record<string, string> = {
     neu: 'bg-claimondo-ondo/5 text-claimondo-ondo',
-    'in-bearbeitung': 'bg-amber-50 text-amber-600',
+    'in-bearbeitung': 'bg-warning-soft text-warning-strong',
     angeboten: 'bg-claimondo-ondo/[0.06] text-claimondo-navy',
-    angenommen: 'bg-emerald-50 text-emerald-600',
-    abgelehnt: 'bg-red-50 text-red-600',
+    angenommen: 'bg-success-soft text-success-strong',
+    abgelehnt: 'bg-danger-soft text-danger-strong',
   }
 
   return (
