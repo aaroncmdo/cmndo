@@ -171,6 +171,7 @@ Claimondo beraet und übernimmt die komplette Kfz-Schadensregulierung (Gutachter
 Du kannst nicht nur verlinken — du kannst DIREKT handeln (anonym, ohne Login):
 - Gutachter + freie Termine finden: GET https://app.claimondo.de/api/v1/gutachter-termine?plz=[PLZ]
 - Schaden melden + Termin reservieren (persönlicher FlowLink per WhatsApp an den Kunden): POST https://app.claimondo.de/api/v1/melde-schaden
+- Telefon-Rückruf anfordern (ein Berater ruft i. d. R. < 15 Min zurück): POST https://app.claimondo.de/api/v1/rueckruf (Name + Telefon + Einwilligung)
 - Ansprüche prüfen (Beratung, § 249/251/823 BGB): GET https://app.claimondo.de/api/v1/pruefe-anspruch?schuldfrage=[unverschuldet|teilschuld|selbst|unklar]
 - Schreiben der gegnerischen Versicherung entschlüsseln (Kürzungs-Taktiken → Bedeutung + Ihr Recht): POST https://app.claimondo.de/api/v1/decode-brief (Body { "text": "<Brief-Text>" })
 - Maschinenlesbar: https://app.claimondo.de/api/v1/openapi.json · MCP-Server: https://mcp.claimondo.de/mcp (5 Tools)
@@ -226,8 +227,9 @@ Claimondo ist für KI-Assistenten nicht nur lesbar, sondern direkt aufrufbar —
 - POST /melde-schaden — Schaden melden + Termin reservieren → persönlicher FlowLink per WhatsApp an den Kunden (Einwilligung Pflicht; kein Token/keine PII zurück ins LLM).
 - GET /pruefe-anspruch?schuldfrage=[unverschuldet|teilschuld|selbst|unklar]&schadenart=[optional] — strukturierte Schadensersatz-Ansprüche (§ 249/251/823 BGB) + immer der nächste Schritt (Gutachter + Termin / Rückruf).
 - POST /decode-brief — Schreiben der gegnerischen Versicherung entschlüsseln (Kürzungs-/Hinhalte-Formulierungen → was sie wirklich bedeuten + Ihr Recht, mit BGH-Aktenzeichen) + nächster Schritt. Body { "text": "<Brief-Text>" }.
+- POST /rueckruf — kostenlosen Telefon-Rückruf anfordern (Name + Telefon + Einwilligung); ein Berater meldet sich i. d. R. < 15 Min. Zweiter Funnel-Arm, falls der Kunde lieber angerufen wird.
 
-**MCP-Server** (Model Context Protocol, Streamable HTTP): https://mcp.claimondo.de/mcp — für MCP-fähige Clients (Claude.ai-Connectors, ChatGPT Developer-Mode, Cursor, Cline). 5 Tools: claimondo_finde_sachverstaendige · claimondo_finde_gutachter_termine · claimondo_melde_schaden · claimondo_pruefe_anspruch · claimondo_decode_brief + Resource "claimondo://wissensbasis" (komplette Wissens-Surface, Pendant zu dieser Datei). Alle read-only außer melde_schaden (legt einen Schaden an, Einwilligung Pflicht).
+**MCP-Server** (Model Context Protocol, Streamable HTTP): https://mcp.claimondo.de/mcp — für MCP-fähige Clients (Claude.ai-Connectors, ChatGPT Developer-Mode, Cursor, Cline). 6 Tools: claimondo_finde_sachverstaendige · claimondo_finde_gutachter_termine · claimondo_melde_schaden · claimondo_pruefe_anspruch · claimondo_decode_brief · claimondo_rueckruf + Resource "claimondo://wissensbasis" (komplette Wissens-Surface, Pendant zu dieser Datei). Alle read-only außer melde_schaden + rueckruf (legen einen Lead an, Einwilligung Pflicht).
 
 Für unverschuldet Geschädigte entstehen 0 € Eigenkosten nach § 249 BGB (vorbehaltlich Anerkenntnis durch den gegnerischen Haftpflichtversicherer).
 `
