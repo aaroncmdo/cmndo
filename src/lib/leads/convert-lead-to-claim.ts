@@ -421,6 +421,20 @@ export async function convertLeadToClaim(
   ;(claimsInsert as Record<string, unknown>).werkstatt_id =
     (lead.werkstatt_id as string | null) ?? null
 
+  // Makler-Vermittlung: promotion_code_id -> promotion_codes.makler_id -> claims.makler_id.
+  // DB-Trigger trg_makler_provision_on_bridge legt dann die makler_provisionen-Provision an
+  // (dual-rate je service_typ). Record-Cast wie werkstatt_id (generierte Types laggen die Spalte).
+  let maklerId: string | null = null
+  if (lead.promotion_code_id) {
+    const { data: pc } = await admin
+      .from('promotion_codes')
+      .select('makler_id')
+      .eq('id', lead.promotion_code_id as string)
+      .maybeSingle()
+    maklerId = (pc?.makler_id as string | null) ?? null
+  }
+  ;(claimsInsert as Record<string, unknown>).makler_id = maklerId
+
   const { data: claim, error: claimErr } = await admin
     .from('claims')
     .insert(claimsInsert)
