@@ -27,16 +27,9 @@ import {
 } from 'lucide-react'
 import { useMitteilungenContext } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import type { Mitteilung, MitteilungKategorie } from '@/lib/mitteilungen/types'
+import { resolvePopoverPlacement, type PopoverPlacement } from './popover-placement'
 
 type Variant = 'dark' | 'light'
-// Öffnungsrichtung des Popovers relativ zum Button:
-//  'down-left' (Default) = unter dem Button, rechtsbündig — für Buttons die
-//      oben-rechts sitzen (Header / fixed Top-Corner-Mounts in Admin/Dispatch/
-//      Kanzlei/Mitarbeiter/Fälle/Kunde-Mobile). Verhalten bleibt unverändert.
-//  'up-right' = über dem Button, linksbündig (spiegelt nach oben + rechts) —
-//      für Buttons die unten-links sitzen (Makler-Sidebar-Footer, Kunde-
-//      Sidebar-Fuß). Sonst liefe das Popover unter den unteren Viewport-Rand.
-type PopoverPlacement = 'down-left' | 'up-right'
 type TabKey = 'aktivitaet' | 'nachrichten' | 'anrufe' | 'kritisch'
 
 const TABS: { key: TabKey; label: string; icon: typeof BellIcon }[] = [
@@ -181,14 +174,8 @@ export default function UpdatesNav({
       : 'ring-4 ring-claimondo-light-blue/60 animate-pulse'
     : ''
 
-  // Popover-Öffnungsrichtung: 'up-right' spiegelt das Default-Popover nach oben
-  // (bottom-full statt mt-2) UND nach rechts (left-0 statt right-0), damit ein
-  // unten-links sitzender Button nach oben-rechts aufklappt statt unter den
-  // Viewport-Rand. Die Einflug-Animation wird mitgespiegelt (von unten statt
-  // von oben).
-  const popoverUp = placement === 'up-right'
-  const popoverPosClass = popoverUp ? 'left-0 bottom-full mb-2' : 'right-0 mt-2'
-  const popoverEnterY = popoverUp ? 4 : -4
+  // Popover-Öffnungsrichtung — reine Logik in ./popover-placement (vitest-getestet).
+  const { posClass: popoverPosClass, enterY: popoverEnterY } = resolvePopoverPlacement(placement)
 
   return (
     <div className="relative">
