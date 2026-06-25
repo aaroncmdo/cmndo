@@ -137,7 +137,7 @@ export async function POST(request: Request) {
     }
 
     // Routing der OCR-Werte (kein faelle-Write mehr — s. Bridge-Block + Begruendung unten):
-    //   4 G-Werte (restwert/WBW/nutzungsausfall_tage/totalschaden) -> gutachten via RPC apply_gutachten_ocr;
+    //   5 G-Werte (restwert/WBW/nutzungsausfall_tage/totalschaden/gutachter_honorar) -> gutachten via RPC apply_gutachten_ocr;
     //   schadens_hoehe_netto -> claims (SSoT); fin_vin -> vehicles. Analog lib/ai/gutachten-ocr.ts.
     // CMM-49 faelle-DROP: der faelle-Write war komplett reader-frei -> entfernt. Wir holen nur noch
     // die claim_id aus der Bridge (fall_id == bridge.fall_id) fuer die gutachten-RPC / claims /
@@ -147,10 +147,6 @@ export async function POST(request: Request) {
     //   - nutzungsausfall_tagessatz        : accept-loss (fall-finanzen); canonical = AI-OCR-Feld
     //                                        gutachten_nutzungsausfall_tagessatz_eur.
     //   - reparaturdauer_tage              : reader-frei (nur Test-Seed).
-    //   - gutachter_honorar                : faelle-nativ, aber 0 Views lesen faelle (pg_depend) ->
-    //     Reader gehen ueber v_faelle_mit_aktuellem_termin.gutachter_honorar (NICHT aus faelle).
-    //     ⚠ Folge-Ticket: gutachter_honorar-Kanonisierung (echtes Home + View + Sections-Editor) —
-    //     die Spalte ist heute faelle-nativ + reader-frei = wahrscheinlich gebrochenes Honorar-Feld.
     const { data: bridge } = await admin
       .from('faelle_claim_bridge')
       .select('claim_id')
@@ -167,6 +163,10 @@ export async function POST(request: Request) {
     if (restwert != null) gutachtenWerte.restwert = restwert
     if (nutzungsausfall_tage != null) gutachtenWerte.nutzungsausfall_tage = nutzungsausfall_tage
     if (totalschaden != null) gutachtenWerte.totalschaden = totalschaden
+    // CMM-49: gutachter_honorar kanonisch -> gutachten.gutachten_sv_honorar_netto
+    // (Reader v_faelle_mit_aktuellem_termin.gutachter_honorar liest genau diese Spalte;
+    //  Editor-Override via GUTACHTEN_FIELD_MAP in stammdaten.ts).
+    if (gutachter_honorar != null) gutachtenWerte.gutachten_sv_honorar_netto = gutachter_honorar
 
     // gutachten.gutachten_ocr_manuell_ueberschrieben ist NOT NULL DEFAULT false;
     // apply_gutachten_ocr inserted die Spalte beim Fresh-Row explizit aus
