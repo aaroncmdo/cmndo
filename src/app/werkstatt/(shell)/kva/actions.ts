@@ -6,6 +6,7 @@ import { getWerkstattByUserId } from '@/lib/werkstatt/queries'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 import { extrahiereKvaAusBase64, type KvaOcrResult } from '@/lib/ai/kostenvoranschlag-ocr'
+import type { WerkstattKvaInput } from './types'
 
 export async function extrahiereKvaOcr(
   input: { base64: string; mediaType: string },
@@ -13,25 +14,6 @@ export async function extrahiereKvaOcr(
   await requirePortalAccess(['werkstatt'])
   if (!input?.base64) return { ok: false, error: 'Kein Dokument' }
   return extrahiereKvaAusBase64(input)
-}
-
-export type WerkstattKvaInput = {
-  vorname?: string | null
-  nachname?: string | null
-  email?: string | null
-  telefon?: string | null
-  fahrzeug_hersteller?: string | null
-  fahrzeug_modell?: string | null
-  kennzeichen?: string | null
-  fin?: string | null
-  erstzulassung?: string | null
-  fahrzeug_baujahr?: number | null
-  kostenvoranschlag_netto?: number | null
-  kostenvoranschlag_brutto?: number | null
-  ocrRoh?: unknown
-  kvaBase64?: string | null
-  kvaMediaType?: string | null
-  perWhatsApp?: boolean
 }
 
 export async function erstelleWerkstattLeadAusKva(
@@ -94,5 +76,6 @@ export async function erstelleWerkstattLeadAusKva(
   }
 
   revalidatePath('/werkstatt')
+  revalidatePath('/werkstatt/kva')
   return { ok: true, token: issued.token, leadId: issued.leadId }
 }

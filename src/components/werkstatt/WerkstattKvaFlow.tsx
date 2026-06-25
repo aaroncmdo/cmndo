@@ -14,6 +14,7 @@ import {
 import { Button } from '@/components/primitives'
 import { Card } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
+import { Checkbox } from '@/components/ui/checkbox'
 import { extrahiereKvaOcr, erstelleWerkstattLeadAusKva } from '@/app/werkstatt/(shell)/kva/actions'
 import { qrSvgFuerToken } from '@/app/werkstatt/(shell)/kva/qr-action'
 
@@ -361,11 +362,9 @@ export function WerkstattKvaFlow() {
 
             {telefonGesetzt && (
               <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
+                <Checkbox
                   checked={review.perWhatsApp}
-                  onChange={(e) => set('perWhatsApp', e.target.checked)}
-                  className="h-4 w-4 rounded border-claimondo-border text-claimondo-ondo focus:ring-claimondo-ondo/30"
+                  onCheckedChange={(c) => set('perWhatsApp', c === true)}
                 />
                 <span className="text-body-xs text-claimondo-navy">
                   FlowLink per WhatsApp an den Kunden senden
