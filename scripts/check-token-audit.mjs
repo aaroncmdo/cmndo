@@ -288,7 +288,13 @@ if (accentDelta < 0) {
 // 10.06.2026: 3115 -> 3007 (-108) durch Welle-1 Shared-Layer-Status-Migration
 // (statusLabels.ts STATUS_SLOT_CLASSES + ~22 shared-Components auf success/
 // warning/danger/info-Tokens). SCHADENS_URSACHE + Rating/Action-Hovers = LEAVE.
-const STATUS_BASELINE_OCCURRENCES = 3007
+// 25.06.2026: 3007 -> 1919 (-1088) durch admin-Status-Token-Lane (Batch 1-13,
+// PRs #2675/#3113/#3116/#3121/#3124/#3128/#3131/#3136/#3139/#3142/#3143/#3145/#3146:
+// SV-Verwaltung, Kanban/Tasks, Update-Widgets, Team, fallakte, Communities,
+// Vertraege, SLA, Kanzlei-Pages, Kalender, admin-Tail-Cleanup, finance-(hub)).
+// LEAVE (grandfathered): Data-Viz/Geld (finance -400-Palette, Charts, KPI-Metriken)
+// + Typ-/Rollen-Identitaets-Maps + Delete-Hovers + inline-hex Map-Paint.
+const STATUS_BASELINE_OCCURRENCES = 1919
 const STATUS_RE = /\b(?:bg|text|border|ring|from|to|via|fill|stroke|outline|placeholder|decoration|accent|divide)-(?:green|emerald|red|rose|amber|yellow|orange|lime)-(?:50|100|200|300|400|500|600|700|800|900|950)\b/g
 
 let statusOccurrences = 0
