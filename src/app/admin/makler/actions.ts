@@ -42,8 +42,9 @@ export async function createMakler(
 
   const firma = String(formData.get('firma') ?? '').trim()
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
-  const ansprechpartner_vorname = String(formData.get('ansprechpartner_vorname') ?? '').trim() || null
-  const ansprechpartner_nachname = String(formData.get('ansprechpartner_nachname') ?? '').trim() || null
+  // ansprechpartner_vorname/nachname sind in makler NOT NULL -> nie null setzen.
+  const ansprechpartner_vorname = String(formData.get('ansprechpartner_vorname') ?? '').trim()
+  const ansprechpartner_nachname = String(formData.get('ansprechpartner_nachname') ?? '').trim()
   const telefon = String(formData.get('telefon') ?? '').trim() || null
   const adresse_strasse = String(formData.get('adresse_strasse') ?? '').trim() || null
   const adresse_plz = String(formData.get('adresse_plz') ?? '').trim() || null
@@ -51,7 +52,9 @@ export async function createMakler(
   const provKomplett = Number(formData.get('provision_betrag_komplett_netto') ?? 100) || 100
   const provGutachter = Number(formData.get('provision_betrag_nur_gutachter_netto') ?? 50) || 50
 
-  if (!firma || !email) return { ok: false, error: 'Firma und E-Mail sind Pflicht.' }
+  if (!firma || !email || !ansprechpartner_vorname || !ansprechpartner_nachname) {
+    return { ok: false, error: 'Firma, E-Mail und Ansprechpartner (Vor- und Nachname) sind Pflicht.' }
+  }
 
   const admin = createAdminClient()
   const password = generatePassword()

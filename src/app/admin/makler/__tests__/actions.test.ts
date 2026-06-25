@@ -59,7 +59,7 @@ beforeEach(() => {
 
 describe('createMakler', () => {
   it('happy path: user->profile->makler->promo + ok mit Credentials', async () => {
-    const r = await createMakler(fd({ firma: 'Test GmbH', email: 'A@B.de' }))
+    const r = await createMakler(fd({ firma: 'Test GmbH', email: 'A@B.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
     expect(r.ok).toBe(true)
     if (r.ok) { expect(r.email).toBe('a@b.de'); expect(r.password).toBeTruthy() }
     expect(calls).toEqual(['createUser', 'insert:profiles', 'insert:makler', 'insert:promotion_codes'])
@@ -67,7 +67,7 @@ describe('createMakler', () => {
 
   it('Nicht-Admin -> abgelehnt, kein createUser', async () => {
     adminRolle = 'kunde'
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de' }))
+    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
     expect(r.ok).toBe(false)
     expect(calls).not.toContain('createUser')
   })
@@ -80,7 +80,7 @@ describe('createMakler', () => {
 
   it('profile-Fehler -> deleteUser rollback, ok:false', async () => {
     profileInsertError = { message: 'profile kaputt' }
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de' }))
+    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
     expect(r.ok).toBe(false)
     expect(calls).toContain('deleteUser')
     expect(calls).not.toContain('insert:makler')
@@ -88,7 +88,7 @@ describe('createMakler', () => {
 
   it('makler-Fehler -> profile-delete + deleteUser rollback', async () => {
     maklerInsertResult = { data: null, error: { message: 'makler kaputt' } }
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de' }))
+    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
     expect(r.ok).toBe(false)
     expect(calls).toContain('delete:profiles')
     expect(calls).toContain('deleteUser')
@@ -96,7 +96,7 @@ describe('createMakler', () => {
 
   it('promo-Fehler (non-duplicate) ist non-fatal -> ok:true', async () => {
     promoInsertError = { message: 'irgendwas' }
-    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de' }))
+    const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
     expect(r.ok).toBe(true)
   })
 })

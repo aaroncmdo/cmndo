@@ -176,8 +176,8 @@ export default function MaklerAdminClient({ maklers }: { maklers: Makler[] }) {
                 <TextField label="Firma" name="firma" required placeholder="z.B. Müller Versicherungsmakler GmbH" />
                 <TextField label="E-Mail (Login)" name="email" type="email" required placeholder="makler@beispiel.de" />
                 <div className="grid grid-cols-2 gap-3">
-                  <TextField label="Ansprechpartner Vorname" name="ansprechpartner_vorname" placeholder="Max" />
-                  <TextField label="Nachname" name="ansprechpartner_nachname" placeholder="Müller" />
+                  <TextField label="Ansprechpartner Vorname" name="ansprechpartner_vorname" required placeholder="Max" />
+                  <TextField label="Nachname" name="ansprechpartner_nachname" required placeholder="Müller" />
                 </div>
                 <TextField label="Telefon (optional)" name="telefon" type="tel" placeholder="+49 221 …" />
                 <TextField label="Straße (optional)" name="adresse_strasse" placeholder="Musterstraße 1" />
