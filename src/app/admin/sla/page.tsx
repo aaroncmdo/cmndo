@@ -36,19 +36,19 @@ export default async function SlaMonitoringPage() {
 
       {/* KPI-Boxen */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-red-50 border border-red-200 rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-red-700">
+        <div className="bg-danger-soft border border-danger/30 rounded-ios-xl p-4">
+          <div className="flex items-center gap-2 text-danger-strong">
             <AlertTriangleIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Verletzt</span>
           </div>
-          <p className="text-3xl font-bold text-red-900 mt-2">{breached.length}</p>
+          <p className="text-3xl font-bold text-danger-strong mt-2">{breached.length}</p>
         </div>
-        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-amber-700">
+        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-4">
+          <div className="flex items-center gap-2 text-warning-strong">
             <ClockIcon className="w-5 h-5" />
             <span className="text-xs font-semibold uppercase">Risiko (&lt; 30 Min)</span>
           </div>
-          <p className="text-3xl font-bold text-amber-900 mt-2">{atRisk.length}</p>
+          <p className="text-3xl font-bold text-warning-strong mt-2">{atRisk.length}</p>
         </div>
         <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
           <div className="flex items-center gap-2 text-claimondo-ondo">
@@ -82,7 +82,7 @@ export default async function SlaMonitoringPage() {
               const restMin = Math.round(restMs / 60_000)
               const isBreached = sla.status === 'breached'
               return (
-                <Tr key={sla.id as string} className={isBreached ? 'bg-red-50/40' : ''}>
+                <Tr key={sla.id as string} className={isBreached ? 'bg-danger-soft/40' : ''}>
                   <Td>
                     <Link href={`/faelle/${sla.fall_id}`} className="font-medium text-claimondo-ondo hover:underline">
                       {fallNr}
@@ -92,16 +92,16 @@ export default async function SlaMonitoringPage() {
                   <Td className="text-claimondo-ondo!">
                     {breach.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     {!isBreached && (
-                      <span className={`ml-2 text-xs ${restMin < 30 ? 'text-amber-600 font-medium' : 'text-claimondo-ondo/70'}`}>
+                      <span className={`ml-2 text-xs ${restMin < 30 ? 'text-warning font-medium' : 'text-claimondo-ondo/70'}`}>
                         {restMin > 0 ? `noch ${restMin} Min` : 'überfällig'}
                       </span>
                     )}
                   </Td>
                   <Td>
                     {isBreached ? (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-red-100 text-red-700">Verletzt</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-danger-soft text-danger-strong">Verletzt</span>
                     ) : restMin < 30 ? (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">Risiko</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong">Risiko</span>
                     ) : (
                       <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">Offen</span>
                     )}
