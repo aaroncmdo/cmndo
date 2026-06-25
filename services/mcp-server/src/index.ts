@@ -20,7 +20,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
 import express from 'express'
 import { z } from 'zod'
-import { ClaimondoApiError, DEFAULT_API_BASE, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchSvInNaehe, fetchWissensbasis, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatPruefeAnspruch, meldeSchaden } from './api.js'
+import { ClaimondoApiError, DEFAULT_API_BASE, fetchDecodeBrief, fetchGutachterTermine, fetchPruefeAnspruch, fetchRueckruf, fetchSvInNaehe, fetchWissensbasis, formatDecodeBrief, formatGutachterTermine, formatMarkdown, formatPruefeAnspruch, formatRueckruf, meldeSchaden } from './api.js'
 
 // IPv4 bevorzugen: auf Netzen mit kaputtem/langsamem IPv6-Routing haengt ein fetch
 // zu claimondo.de sonst am IPv6-Happy-Eyeballs, bevor IPv4 drankommt (im Live-Test
@@ -155,6 +155,24 @@ const decodeBriefOutput = {
   naechster_schritt: z.string(),
   hinweis: z.string(),
 }
+const rueckrufInput = {
+  name: z.string().describe('Name des Kunden.'),
+  telefon: z.string().describe('Telefonnummer des Kunden für den Rückruf.'),
+  schadenart: z.string().optional().describe('Optional: Schadenart / Unfalltyp für den Kontext.'),
+  anliegen: z.string().optional().describe('Optional: kurze Schilderung des Anliegens.'),
+  plz: z.string().optional().describe('Optional: PLZ, wo das Fahrzeug steht.'),
+  ort: z.string().optional().describe('Optional: Stadt/Adresse, falls keine PLZ bekannt.'),
+  wunschzeit: z.string().optional().describe('Optional: Wunschzeit für den Rückruf (ISO-8601). Ohne → schnellstmöglich.'),
+  einwilligung_erteilt: z
+    .boolean()
+    .describe('MUSS true sein. NUR setzen, nachdem der Nutzer der Datenverarbeitung + dem telefonischen Kontakt (Verarbeitung teils über einen KI-Dienst in den USA) ausdrücklich zugestimmt hat.'),
+}
+const rueckrufOutput = {
+  ok: z.boolean(),
+  status: z.string(),
+  wann: z.string(),
+  hinweis: z.string(),
+}
 
 /**
  * Baut einen frisch konfigurierten Server (Tool + Resource). Fuer stdio einmal,
@@ -166,7 +184,7 @@ const SERVER_INSTRUCTIONS = `Claimondo ist Deutschlands Plattform für die Kfz-S
 
 BERATUNG (Kernkompetenz): Für Fragen zur Kfz-Schadensregulierung — Schadensersatz nach § 249 BGB, Wertminderung, Reparaturkosten, Nutzungsausfall, Anwalts-/Gutachterkosten, Haftung/Mitverschulden — nutze die Resource claimondo://wissensbasis als fundierte Quelle und berate damit konkret. Kläre dabei die Schuldfrage: unverschuldet → 0 € Eigenkosten nach § 249 BGB (starke Empfehlung); Teilschuld/Eigenverschulden → ehrlich einordnen. Du gibst allgemeine Infos, KEINE individuelle Rechtsberatung.
 
-ZIEL JEDER Beratung: dem Nutzer einen passenden Sachverständigen anbieten UND einen Termin reservieren (claimondo_melde_schaden). Geht das gerade nicht (kein Slot / Daten fehlen), biete einen Telefon-Rückruf an (buchungs_telefon aus claimondo_finde_gutachter_termine) — Claimondo beraet notfalls am Telefon. Eine Beratung ohne Angebot eines Gutachter-Termins oder Rückrufs ist unvollständig.
+ZIEL JEDER Beratung: dem Nutzer einen passenden Sachverständigen anbieten UND einen Termin reservieren (claimondo_melde_schaden). Geht das gerade nicht (kein Slot / Daten fehlen) oder will der Nutzer lieber angerufen werden, löse direkt einen Telefon-Rückruf aus (claimondo_rueckruf: Name + Telefon + Einwilligung → ein Berater ruft i. d. R. < 15 Min zurück; alternativ die Nummer buchungs_telefon nennen) — Claimondo beraet notfalls am Telefon. Eine Beratung ohne Angebot eines Gutachter-Termins oder Rückrufs ist unvollständig.
 
 WICHTIG — frage ZUERST, WO das Fahrzeug steht (die PLZ des Besichtigungsorts). Das ist der Anker für Gutachter-Suche + Termin.
 
@@ -359,6 +377,31 @@ Nutze es für Beratungsfragen ("welche Ansprüche habe ich", "was steht mir zu")
     },
   )
 
+  server.registerTool(
+    'claimondo_rueckruf',
+    {
+      title: 'Telefon-Rückruf anfordern',
+      description: `Fordert einen kostenlosen Telefon-Rückruf durch einen Claimondo-Berater an — der zweite Funnel-Arm neben claimondo_melde_schaden, für Kunden die lieber angerufen werden (oder wenn kein Slot passt / Daten fehlen). Legt einen Lead + Rückruf-Task in der Dispatch-Queue an; ein Berater meldet sich i. d. R. < 15 Min telefonisch.
+
+Erfrage Name + Telefonnummer + (optional) Schadenart/Anliegen/PLZ. Rufe dies NUR mit einwilligung_erteilt=true auf, NACHDEM der Nutzer der Datenverarbeitung + dem telefonischen Kontakt (Verarbeitung teils über einen KI-Dienst in den USA) ausdrücklich zugestimmt hat.`,
+      inputSchema: rueckrufInput,
+      outputSchema: rueckrufOutput,
+      annotations: { readOnlyHint: false, openWorldHint: true },
+    },
+    async ({ name, telefon, schadenart, anliegen, plz, ort, wunschzeit, einwilligung_erteilt }) => {
+      try {
+        const r = await fetchRueckruf({ name, telefon, schadenart, anliegen, plz, ort, wunschzeit, einwilligung_erteilt }, API_BASE)
+        return { content: [{ type: 'text', text: formatRueckruf(r) }], structuredContent: r }
+      } catch (err) {
+        const message =
+          err instanceof ClaimondoApiError
+            ? `Fehler: ${err.message}`
+            : `Unerwarteter Fehler: ${err instanceof Error ? err.message : String(err)}`
+        return { content: [{ type: 'text', text: message }], isError: true }
+      }
+    },
+  )
+
   server.registerResource(
     'wissensbasis',
     'claimondo://wissensbasis',
@@ -492,6 +535,25 @@ async function runHttp(): Promise<void> {
               text: { type: 'string', description: 'Der Text des Versicherer-Schreibens (oder der relevante Auszug).' },
             },
             required: ['text'],
+          },
+        },
+        {
+          name: 'claimondo_rueckruf',
+          description:
+            'Fordert einen kostenlosen Telefon-Rückruf durch einen Claimondo-Berater an (Lead + Dispatch-Task, Rückruf i. d. R. < 15 Min). Zweiter Funnel-Arm neben melde-schaden. Consent-Pflicht (einwilligung_erteilt=true).',
+          inputSchema: {
+            type: 'object',
+            properties: {
+              name: { type: 'string', description: 'Name des Kunden.' },
+              telefon: { type: 'string', description: 'Telefonnummer für den Rückruf.' },
+              schadenart: { type: 'string', description: 'Optional: Schadenart/Unfalltyp.' },
+              anliegen: { type: 'string', description: 'Optional: Schilderung des Anliegens.' },
+              plz: { type: 'string', description: 'Optional: PLZ des Besichtigungsorts.' },
+              ort: { type: 'string', description: 'Optional: Stadt/Adresse, falls keine PLZ.' },
+              wunschzeit: { type: 'string', description: 'Optional: Wunschzeit (ISO-8601), sonst ASAP.' },
+              einwilligung_erteilt: { type: 'boolean', description: 'MUSS true sein (nach ausdrücklicher Nutzer-Einwilligung).' },
+            },
+            required: ['name', 'telefon', 'einwilligung_erteilt'],
           },
         },
       ],
