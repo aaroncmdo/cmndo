@@ -39,7 +39,9 @@ export default async function PromoPage() {
   }
 
   const stats = await getPromoStats(code.id)
-  const landingUrl = `${landingBase()}/?p=${encodeURIComponent(code.code)}`
+  // Makler-Vermittlung: first-party Makler-QR statt des toten Marketing-?p-Links — setzt die
+  // Attribution (promotion_code_id) zuverlaessig auf den Lead (via /start/makler -> reserviereEmbedTermin).
+  const landingUrl = `${landingBase()}/start/makler/${makler.id}`
   const qrSvg = await buildQrSvg(landingUrl)
 
   return (
