@@ -95,9 +95,9 @@ export default function GutachtenUploadBanner({
 
   if (hatGutachten && !istReject && files.length === 0) {
     return (
-      <div className="rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-3 flex items-center gap-3">
-        <CheckIcon className="w-4 h-4 shrink-0 text-emerald-700" />
-        <span className="text-sm font-medium text-emerald-800">Gutachten hochgeladen — QC läuft.</span>
+      <div className="rounded-2xl bg-success-soft border border-success/30 px-4 py-3 flex items-center gap-3">
+        <CheckIcon className="w-4 h-4 shrink-0 text-success-strong" />
+        <span className="text-sm font-medium text-success-strong">Gutachten hochgeladen — QC läuft.</span>
       </div>
     )
   }
@@ -168,14 +168,14 @@ export default function GutachtenUploadBanner({
     })
   }
 
-  const colorBg = istReject ? 'bg-claimondo-ondo/[0.06]' : 'bg-amber-50'
-  const colorBorder = istReject ? 'border-claimondo-ondo/50' : 'border-amber-300'
-  const colorText = istReject ? 'text-claimondo-navy' : 'text-amber-900'
-  const colorTextSub = istReject ? 'text-claimondo-navy' : 'text-amber-800'
-  const colorIcon = istReject ? 'text-claimondo-navy' : 'text-amber-700'
-  const colorDropBorder = istReject ? 'border-claimondo-ondo/50' : 'border-amber-300'
-  const colorDropHover = istReject ? 'hover:bg-claimondo-ondo/[0.06]' : 'hover:bg-amber-50'
-  const colorDropDragOver = istReject ? 'bg-claimondo-ondo/[0.10] border-claimondo-ondo/60' : 'bg-amber-100 border-amber-400'
+  const colorBg = istReject ? 'bg-claimondo-ondo/[0.06]' : 'bg-warning-soft'
+  const colorBorder = istReject ? 'border-claimondo-ondo/50' : 'border-warning/30'
+  const colorText = istReject ? 'text-claimondo-navy' : 'text-warning-strong'
+  const colorTextSub = istReject ? 'text-claimondo-navy' : 'text-warning-strong'
+  const colorIcon = istReject ? 'text-claimondo-navy' : 'text-warning-strong'
+  const colorDropBorder = istReject ? 'border-claimondo-ondo/50' : 'border-warning/30'
+  const colorDropHover = istReject ? 'hover:bg-claimondo-ondo/[0.06]' : 'hover:bg-warning-soft'
+  const colorDropDragOver = istReject ? 'bg-claimondo-ondo/[0.10] border-claimondo-ondo/60' : 'bg-warning/15 border-warning/40'
 
   return (
     <div className={`rounded-2xl ${colorBg} border-2 border-dashed ${colorBorder} px-4 py-5 space-y-3`}>
@@ -228,7 +228,7 @@ export default function GutachtenUploadBanner({
           dragOver ? colorDropDragOver : `bg-white ${colorDropBorder} ${colorDropHover}`
         }`}
       >
-        <UploadCloudIcon className={`w-6 h-6 mx-auto mb-2 ${istReject ? 'text-claimondo-navy' : 'text-amber-600'}`} />
+        <UploadCloudIcon className={`w-6 h-6 mx-auto mb-2 ${istReject ? 'text-claimondo-navy' : 'text-warning'}`} />
         <p className={`text-sm font-medium ${colorText}`}>
           Dateien hierher ziehen oder klicken zum Auswählen
         </p>
@@ -264,27 +264,27 @@ export default function GutachtenUploadBanner({
                   title="Datei löschen"
                 >
                   {hoverIdx === i ? (
-                    <Trash2Icon className="w-3.5 h-3.5 text-red-500 hover:text-red-700 transition-colors" />
+                    <Trash2Icon className="w-3.5 h-3.5 text-danger hover:text-danger-strong transition-colors" />
                   ) : (
-                    <span className="w-2 h-2 rounded-full bg-emerald-500 block" />
+                    <span className="w-2 h-2 rounded-full bg-success block" />
                   )}
                 </button>
               ) : (
                 <span
                   className={`w-2 h-2 rounded-full shrink-0 ${
                     f.status === 'error'
-                      ? 'bg-red-500'
+                      ? 'bg-danger'
                       : f.status === 'deleting'
                         ? 'bg-claimondo-light-blue animate-pulse'
-                        : 'bg-amber-500 animate-pulse'
+                        : 'bg-warning animate-pulse'
                   }`}
                 />
               )}
               <span className={`font-medium truncate flex-1 ${f.status === 'deleting' ? 'text-claimondo-ondo/50 line-through' : 'text-claimondo-navy'}`}>
                 {f.name}
               </span>
-              {f.status === 'error' && <span className="text-red-700">{f.error ?? 'Fehler'}</span>}
-              {f.status === 'done' && !f.storagePath && <CheckIcon className="w-3 h-3 text-emerald-600" />}
+              {f.status === 'error' && <span className="text-danger-strong">{f.error ?? 'Fehler'}</span>}
+              {f.status === 'done' && !f.storagePath && <CheckIcon className="w-3 h-3 text-success" />}
             </li>
           ))}
         </ul>
@@ -312,7 +312,7 @@ export default function GutachtenUploadBanner({
           </Button>
         </div>
       )}
-      {submitError && <p className="text-xs text-red-700">{submitError}</p>}
+      {submitError && <p className="text-xs text-danger-strong">{submitError}</p>}
     </div>
   )
 }
