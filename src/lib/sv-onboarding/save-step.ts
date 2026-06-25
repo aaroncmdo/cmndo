@@ -1,34 +1,31 @@
 'use server'
+
+// CMM-49 Onboarding-Writer-Kanonisierung: SV-Onboarding-Step-Save -> duenner Wrapper ueber
+// saveOnboardingFields (audience='sv'). Die profiles- + sachverstaendige-Handler machen je das
+// SV-Basic-Gate (sachverstaendige.profile_id == user.id + paket='basic') + Whitelist
+// (PROFILE_WHITELIST / SV_WHITELIST, Mass-Assignment-Guard) + write. felder kommen vom WizardClient
+// (DB-geseedete sv-onboarding-Phasen). _finalize/_self bleiben Sache des WizardClient (Router skippt sie).
+
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { saveOnboardingFields } from '@/lib/onboarding/save-onboarding-fields'
 import type { OnboardingFeld } from '@/components/onboarding/types'
-// Pure Whitelist-Helper liegt in einem eigenen Nicht-'use server'-File (sonst Build-Fehler:
-// 'use server' darf nur async Functions exportieren — Sync-Helper/Konstanten nicht).
-import { filterAufWhitelist } from './whitelist'
+import type { OnboardingWriteContext } from '@/lib/onboarding/write-context'
 
 export async function speichereSvOnboardingStep(
-  _phaseKey: string, values: Record<string, unknown>, felder: OnboardingFeld[],
+  _phaseKey: string,
+  values: Record<string, unknown>,
+  felder: OnboardingFeld[],
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser()).data.user
-  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
-  const admin = createAdminClient()
-  const { data: sv } = await admin.from('sachverstaendige').select('id, paket').eq('profile_id', user.id).maybeSingle()
-  if (!sv || sv.paket !== 'basic') return { ok: false, error: 'Kein Basic-Onboarding fuer dieses Konto.' }
-
-  const items = felder
-    .filter((f) => f.db_target && values[f.feld_key] !== undefined)
-    .map((f) => ({ tabelle: f.db_target!.tabelle, spalte: f.db_target!.spalte, value: values[f.feld_key] }))
-  const { sv: svPatch, profile: profilePatch, dropped } = filterAufWhitelist(items)
-  if (dropped.length) console.warn('[sv-onboarding] gedropte Nicht-Whitelist-Felder:', dropped)
-
-  if (Object.keys(svPatch).length) {
-    const { error } = await admin.from('sachverstaendige').update(svPatch).eq('id', sv.id)
-    if (error) { console.error('[sv-onboarding] sv update:', error.message); return { ok: false, error: 'Speichern fehlgeschlagen.' } }
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  const ctx: OnboardingWriteContext = {
+    supabase,
+    user: user ? { id: user.id } : null,
+    audience: 'sv',
   }
-  if (Object.keys(profilePatch).length) {
-    const { error } = await admin.from('profiles').update(profilePatch).eq('id', user.id)
-    if (error) { console.error('[sv-onboarding] profile update:', error.message); return { ok: false, error: 'Speichern fehlgeschlagen.' } }
-  }
+  const r = await saveOnboardingFields(ctx, felder, values)
+  if (!r.ok) return { ok: false, error: r.error }
   return { ok: true }
 }
