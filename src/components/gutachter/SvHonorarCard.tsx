@@ -37,8 +37,8 @@ export function SvHonorarCard({ betrag, eingegangenAm }: Props) {
         <span
           className={`ml-auto text-[10px] font-medium rounded-full px-2 py-0.5 ${
             eingegangen
-              ? 'bg-emerald-50 text-emerald-700'
-              : 'bg-amber-50 text-amber-700'
+              ? 'bg-success-soft text-success-strong'
+              : 'bg-warning-soft text-warning-strong'
           }`}
         >
           {eingegangen ? 'Ausgezahlt' : 'Avisiert'}

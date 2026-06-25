@@ -56,7 +56,7 @@ export default function MeinFallStatusCard(props: Props) {
   return (
     <div className="rounded-2xl bg-white border border-claimondo-border p-5 space-y-4">
       <div className="flex items-start gap-3">
-        <div className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-success text-white flex items-center justify-center flex-shrink-0">
           <CheckCircle2Icon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
@@ -124,7 +124,7 @@ export default function MeinFallStatusCard(props: Props) {
         }
         return (
           <div className="space-y-2">
-            <p className="text-xs text-amber-800 bg-amber-50 border border-amber-200 rounded-ios-lg p-3">
+            <p className="text-xs text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg p-3">
               Aktenzeichen folgt sobald die Kanzlei das Mandat angenommen hat.
               Du erhältst dann hier den Direkt-Link zum Vorgang.
             </p>
@@ -143,11 +143,11 @@ export default function MeinFallStatusCard(props: Props) {
 
       {/* Auszahlungs-Detail */}
       {props.phase === 'auszahlung' && props.svHonorarBetrag != null && (
-        <div className="rounded-ios-xl bg-emerald-50 border border-emerald-200 p-3 flex items-center justify-between">
-          <span className="text-xs text-emerald-700 font-medium flex items-center gap-1.5">
+        <div className="rounded-ios-xl bg-success-soft border border-success/30 p-3 flex items-center justify-between">
+          <span className="text-xs text-success-strong font-medium flex items-center gap-1.5">
             <EuroIcon className="w-3.5 h-3.5" /> Honorar
           </span>
-          <span className="text-sm font-bold text-emerald-900">
+          <span className="text-sm font-bold text-success-strong">
             {fmtEuro(props.svHonorarBetrag)}
           </span>
         </div>

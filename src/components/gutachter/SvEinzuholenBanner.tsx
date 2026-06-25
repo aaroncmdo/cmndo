@@ -23,12 +23,12 @@ export default function SvEinzuholenBanner({
   if (offenePflicht.length === 0) return null
 
   return (
-    <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 h-full">
+    <div className="rounded-2xl bg-warning-soft border border-warning/30 p-4 h-full">
       <div className="flex items-start gap-3">
-        <ClipboardListIcon className="w-5 h-5 text-amber-700 shrink-0 mt-0.5" />
+        <ClipboardListIcon className="w-5 h-5 text-warning-strong shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-amber-900">{title}</p>
-          <p className="text-xs text-amber-800 mt-0.5">
+          <p className="text-sm font-semibold text-warning-strong">{title}</p>
+          <p className="text-xs text-warning-strong mt-0.5">
             Diese Unterlagen sind noch offen — beim Termin mitnehmen oder
             mit dem Kunden klären.
           </p>
