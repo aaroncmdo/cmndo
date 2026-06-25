@@ -210,7 +210,7 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                           {['versendet', 'ueberfaellig'].includes(abr.status) && (
                             <button
                               onClick={() => { setBezahltModal({ id: abr.id, brutto: abr.summe_brutto }); setBezahltBetrag(String(abr.summe_brutto)) }}
-                              className="text-[10px] px-2 py-0.5 rounded bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                              className="text-[10px] px-2 py-0.5 rounded bg-success-soft text-success-strong hover:bg-success/15"
                             >
                               Bezahlt
                             </button>
@@ -220,7 +220,7 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                             <button
                               onClick={() => handleStornieren(abr.id)}
                               disabled={loading === abr.id}
-                              className="text-[10px] px-2 py-0.5 rounded bg-red-50 text-red-500 hover:bg-red-100 disabled:opacity-50"
+                              className="text-[10px] px-2 py-0.5 rounded bg-danger-soft text-danger-strong hover:bg-danger/15 disabled:opacity-50"
                             >
                               Storno
                             </button>
@@ -257,7 +257,7 @@ export default function AbrechnungenSection({ abrechnungen }: Props) {
                   <button
                     onClick={handleBezahlt}
                     disabled={loading === bezahltModal.id}
-                    className="px-3 py-1.5 text-xs bg-emerald-500 text-white rounded-ios-lg hover:bg-emerald-600 disabled:opacity-50"
+                    className="px-3 py-1.5 text-xs bg-success text-white rounded-ios-lg hover:bg-success-strong disabled:opacity-50"
                   >
                     {loading === bezahltModal.id ? 'Speichere...' : 'Bestätigen'}
                   </button>
