@@ -33,6 +33,8 @@ type KalenderTermin = {
 const FARBEN: Record<string, string> = { gutachter: '#4573A2', rueckruf: '#9CA3AF', kunde: '#5DAA80', intern: '#7B7B8A', task: '#f97316', kb_beratung: '#C9A84C' }
 const TYP_LABELS: Record<string, string> = { gutachter: 'Gutachter', rueckruf: 'Rückruf', kunde: 'Kunde', intern: 'Intern', kb_beratung: 'KB-Beratung' }
 const TYP_ICONS: Record<string, typeof CalendarIcon> = { gutachter: CalendarIcon, rueckruf: PhoneIcon, kunde: UsersIcon, intern: CoffeeIcon, kb_beratung: PhoneIcon }
+// Token-Audit-LEAVE: SV_TYP_BADGE = Gutachter-TYP-Identitaet (KFZ/DAT/Akademie/Buero),
+// KEIN Status — orange/gruen taggen den SV-Typ, nicht Warnung/Erfolg.
 const SV_TYP_BADGE: Record<string, { label: string; color: string }> = {
   'kfz-gutachter': { label: 'KFZ', color: 'bg-claimondo-bg text-claimondo-ondo' },
   'dat-gutachter': { label: 'DAT', color: 'bg-orange-100 text-orange-700' },
@@ -354,7 +356,7 @@ export default function KalenderClient({
                       ) : (
                         <Link key={entry.id} href={entry.link ?? '#'}
                           className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate transition-colors ${
-                            entry.overdue ? 'bg-red-50/80 text-red-400' : ''
+                            entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
                           }`}
                           style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` } : { borderLeft: '3px solid #ef4444' }}>
                           <span className="truncate block">{entry.titel}</span>
@@ -499,7 +501,7 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
         {mode === 'edit' && termin && (
           <div className="flex gap-2 mt-4 pt-4 border-t border-claimondo-border">
             <button onClick={() => handleStatusChange('erledigt')} disabled={loading}
-              className="flex-1 py-2 text-xs font-medium text-green-700 bg-green-50 rounded-ios-lg hover:bg-green-100 transition-colors disabled:opacity-50">
+              className="flex-1 py-2 text-xs font-medium text-success-strong bg-success-soft rounded-ios-lg hover:bg-success/15 transition-colors disabled:opacity-50">
               Erledigt
             </button>
             <button onClick={() => handleStatusChange('abgesagt')} disabled={loading}
@@ -513,12 +515,12 @@ function TerminModal({ mode, date, termin, onClose, onSaved }: {
           {mode === 'edit' && (
             confirmDelete ? (
               <button onClick={handleDelete} disabled={loading}
-                className="px-3 py-2.5 text-sm font-medium text-white bg-red-500 rounded-ios-lg hover:bg-red-600 transition-colors disabled:opacity-50">
+                className="px-3 py-2.5 text-sm font-medium text-white bg-danger rounded-ios-lg hover:bg-danger-strong transition-colors disabled:opacity-50">
                 Wirklich löschen?
               </button>
             ) : (
               <button onClick={() => setConfirmDelete(true)}
-                className="px-3 py-2.5 text-sm font-medium text-red-500 bg-red-50 rounded-ios-lg hover:bg-red-100 transition-colors">
+                className="px-3 py-2.5 text-sm font-medium text-danger bg-danger-soft rounded-ios-lg hover:bg-danger/15 transition-colors">
                 Löschen
               </button>
             )
