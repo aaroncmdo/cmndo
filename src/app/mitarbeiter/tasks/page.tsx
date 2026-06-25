@@ -57,8 +57,8 @@ export default async function MitarbeiterTasks({ searchParams }: {
               </div>
               <div className="flex flex-col items-end gap-1 flex-shrink-0">
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                  t.prioritaet === 'kritisch' ? 'bg-red-100 text-red-700' :
-                  t.prioritaet === 'dringend' ? 'bg-amber-100 text-amber-700' :
+                  t.prioritaet === 'kritisch' ? 'bg-danger-soft text-danger-strong' :
+                  t.prioritaet === 'dringend' ? 'bg-warning-soft text-warning-strong' :
                   'bg-claimondo-bg text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
                 <span className="text-xs text-claimondo-ondo/70">
