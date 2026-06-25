@@ -111,9 +111,9 @@ export default function VertragPage() {
   if (loadError) {
     return (
       <div className="flex items-center justify-center h-screen p-6">
-        <div className="bg-white border border-red-200 rounded-ios-xl p-6 max-w-md">
-          <p className="text-sm font-semibold text-red-900">Vertrag konnte nicht geladen werden</p>
-          <p className="text-xs text-red-700 mt-1">{loadError}</p>
+        <div className="bg-white border border-danger/30 rounded-ios-xl p-6 max-w-md">
+          <p className="text-sm font-semibold text-danger-strong">Vertrag konnte nicht geladen werden</p>
+          <p className="text-xs text-danger-strong mt-1">{loadError}</p>
         </div>
       </div>
     )
@@ -125,11 +125,11 @@ export default function VertragPage() {
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-8 space-y-4">
-          <div className="bg-emerald-50 border border-emerald-200 rounded-ios-xl p-4 flex items-start gap-3">
-            <CheckIcon className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-emerald-900">
+          <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4 flex items-start gap-3">
+            <CheckIcon className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-success-strong">
               <p className="font-semibold">Vertrag bereits unterzeichnet</p>
-              <p className="text-xs text-emerald-700 mt-1">
+              <p className="text-xs text-success-strong mt-1">
                 Du hast den Kooperationsvertrag mit der Claimondo GmbH bereits digital signiert.
                 Bei Fragen wende dich an aaron.sprafke@claimondo.de.
               </p>
@@ -186,7 +186,7 @@ export default function VertragPage() {
           <div>
             <p className="text-xs text-claimondo-ondo mb-2">Unterschrift (mit Finger oder Maus zeichnen):</p>
             <canvas ref={canvasRef} className="w-full h-[120px] border-2 border-dashed border-claimondo-border rounded-ios-xl bg-claimondo-bg cursor-crosshair" />
-            {signed && <p className="text-[10px] text-green-600 mt-1">Unterschrift erfasst</p>}
+            {signed && <p className="text-[10px] text-success mt-1">Unterschrift erfasst</p>}
           </div>
 
           <Button variant="navy" size="lg" fullWidth onClick={handleSign} disabled={saving || !accepted || !signed}>

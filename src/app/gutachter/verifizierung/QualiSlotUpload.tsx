@@ -80,7 +80,7 @@ export default function QualiSlotUpload({ slotId, disabled, label = 'Hochladen' 
         )}
       </button>
       {error && (
-        <span className="text-[10px] text-red-600 max-w-[260px] text-right leading-snug">
+        <span className="text-[10px] text-danger max-w-[260px] text-right leading-snug">
           {error}
         </span>
       )}
