@@ -35,7 +35,7 @@ const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 
-const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS.slice(0, 3)
+const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS.slice(0, 4)
 
 export function WerkstattShell({ werkstatt, email, userId, children }: WerkstattShellProps) {
   const initials = werkstatt.name

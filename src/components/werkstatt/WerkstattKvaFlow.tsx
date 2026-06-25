@@ -95,6 +95,13 @@ export function WerkstattKvaFlow() {
     const file = e.target.files?.[0]
     if (!file) return
     setFehler(null)
+
+    if (file.size > 10 * 1024 * 1024) {
+      setFehler('Die Datei ist zu groß — maximal 10 MB.')
+      if (fileRef.current) fileRef.current.value = ''
+      return
+    }
+
     setUploading(true)
 
     const reader = new FileReader()
@@ -218,7 +225,7 @@ export function WerkstattKvaFlow() {
                 ref={fileRef}
                 id="kva-datei"
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png"
+                accept="application/pdf,image/jpeg,image/png,image/webp"
                 className="sr-only"
                 onChange={handleDatei}
                 disabled={uploading}
