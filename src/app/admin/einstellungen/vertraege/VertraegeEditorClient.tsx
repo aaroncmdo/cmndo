@@ -83,7 +83,7 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+          <div className="mb-4 px-4 py-3 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
             {error}
           </div>
         )}
@@ -196,7 +196,7 @@ function VorlageCard({
           />
           Pflicht-Unterschrift erforderlich
         </label>
-        {err && <p className="text-red-600 text-sm mb-2">{err}</p>}
+        {err && <p className="text-danger text-sm mb-2">{err}</p>}
         <div className="flex gap-2">
           <LoadingButton
             onClick={handleSave}
@@ -215,14 +215,14 @@ function VorlageCard({
   }
 
   return (
-    <div className={`bg-white border rounded-2xl p-4 ${vorlage.aktiv ? 'border-green-200' : 'border-claimondo-border'}`}>
+    <div className={`bg-white border rounded-2xl p-4 ${vorlage.aktiv ? 'border-success/30' : 'border-claimondo-border'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-sm font-semibold text-claimondo-navy">{vorlage.titel}</h3>
             <span className="text-xs text-claimondo-ondo/70">v{vorlage.version}</span>
             {vorlage.aktiv ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-green-50 text-green-600 font-medium flex items-center gap-1">
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success-soft text-success font-medium flex items-center gap-1">
                 <CheckCircle2Icon className="w-3 h-3" />
                 Aktiv
               </span>
@@ -247,7 +247,7 @@ function VorlageCard({
                 onClick={onAktivieren}
                 isLoading={isPending}
                 loadingText="..."
-                className="px-3 py-1.5 rounded-ios-lg bg-green-600 hover:bg-green-700 text-white text-xs font-medium disabled:opacity-40"
+                className="px-3 py-1.5 rounded-ios-lg bg-success hover:bg-success-strong text-white text-xs font-medium disabled:opacity-40"
               >
                 Aktivieren
               </LoadingButton>
@@ -258,7 +258,7 @@ function VorlageCard({
               onClick={onDeaktivieren}
               isLoading={isPending}
               loadingText="..."
-              className="px-3 py-1.5 rounded-ios-lg border border-red-200 text-red-600 text-xs hover:bg-red-50 inline-flex items-center gap-1 disabled:opacity-40"
+              className="px-3 py-1.5 rounded-ios-lg border border-danger/30 text-danger text-xs hover:bg-danger-soft inline-flex items-center gap-1 disabled:opacity-40"
             >
               <XCircleIcon className="w-3 h-3" />
               Deaktivieren
@@ -332,7 +332,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
               />
               Pflicht-Unterschrift erforderlich
             </label>
-            {err && <p className="text-red-600 text-sm">{err}</p>}
+            {err && <p className="text-danger text-sm">{err}</p>}
           </div>
           <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
             <Button variant="ghost" onClick={onClose}>
