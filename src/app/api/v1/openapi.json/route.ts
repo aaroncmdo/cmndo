@@ -350,7 +350,8 @@ const spec = {
         type: 'object',
         properties: {
           ok: { type: 'boolean' },
-          status: { type: 'string', description: 'angelegt / angelegt_ohne_versand.' },
+          status: { type: 'string', description: 'angelegt / angelegt_ohne_versand / bereits_angelegt (identische Anfrage erneut gesendet — Retry-Dedup).' },
+          wiederverwendet: { type: 'boolean', description: 'true = identische Anfrage (gleiche Telefonnummer) < 10 Min — bestehender Lead wiederverwendet, kein zweiter Lead/Versand.' },
           reserviert: { type: 'boolean', description: 'true = Termin beim gewählten Gutachter reserviert; sonst weicher Hold.' },
           kanal: { type: 'string', description: 'whatsapp / sms / email / none.' },
           hinweis: { type: 'string' },
@@ -426,7 +427,8 @@ const spec = {
         type: 'object',
         properties: {
           ok: { type: 'boolean' },
-          status: { type: 'string', description: 'rueckruf_angelegt / lead_angelegt.' },
+          status: { type: 'string', description: 'rueckruf_angelegt / lead_angelegt / bereits_angelegt (identische Anfrage erneut gesendet — Retry-Dedup).' },
+          wiederverwendet: { type: 'boolean', description: 'true = identische Anfrage (gleiche Telefonnummer) < 10 Min — bestehender Rückruf-Lead wiederverwendet, kein zweiter Dispatch-Task.' },
           wann: { type: 'string', description: 'Wunschzeit (ISO) oder "schnellstmöglich".' },
           hinweis: { type: 'string' },
         },
