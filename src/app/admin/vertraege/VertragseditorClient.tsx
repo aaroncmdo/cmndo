@@ -62,7 +62,7 @@ export default function VertragseditorClient({
   return (
     <div className="max-w-6xl mx-auto px-4 py-6 space-y-6">
       {loadError && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-3">
+        <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg p-3">
           {loadError}
         </p>
       )}
@@ -269,7 +269,7 @@ function SlotCard({
                 className="absolute inset-0 w-full h-full pointer-events-none"
                 title="PDF Vorschau"
               />
-              {/* Marker */}
+              {/* Marker — bg-red/amber/emerald-500 = Marker-Identitaet (3 distinkte Farben fuer U/D/N), KEIN Status -> Token-Audit-LEAVE */}
               <Marker
                 color="bg-red-500"
                 label="U"
@@ -364,7 +364,7 @@ function SlotCard({
       )}
 
       {error && (
-        <p className="px-4 py-2 text-xs text-red-700 bg-red-50 border-t border-red-200">
+        <p className="px-4 py-2 text-xs text-danger-strong bg-danger-soft border-t border-danger/30">
           {error}
         </p>
       )}
