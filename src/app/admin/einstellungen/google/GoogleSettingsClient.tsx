@@ -35,13 +35,13 @@ export default function GoogleSettingsClient({
       />
 
       {success && (
-        <div className="bg-emerald-50 border border-emerald-200 rounded-ios-lg p-3 flex items-center gap-2 text-sm text-emerald-700">
+        <div className="bg-success-soft border border-success/30 rounded-ios-lg p-3 flex items-center gap-2 text-sm text-success-strong">
           <CheckCircleIcon className="w-4 h-4" />
           Google Konto erfolgreich verbunden.
         </div>
       )}
       {error && (
-        <div className="bg-red-50 border border-red-200 rounded-ios-lg p-3 flex items-start gap-2 text-sm text-red-700">
+        <div className="bg-danger-soft border border-danger/30 rounded-ios-lg p-3 flex items-start gap-2 text-sm text-danger-strong">
           <AlertCircleIcon className="w-4 h-4 flex-shrink-0 mt-0.5" />
           <div>
             <p className="font-medium">Fehler beim Verbinden</p>
@@ -53,7 +53,7 @@ export default function GoogleSettingsClient({
       {isConnected ? (
         <div className="bg-white border border-claimondo-border rounded-ios-xl p-5 space-y-3">
           <div className="flex items-center gap-2">
-            <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
+            <CheckCircleIcon className="w-5 h-5 text-success" />
             <p className="font-medium text-claimondo-navy">Verbunden mit {googleEmail ?? 'Google'}</p>
           </div>
           {connectedAt && (
@@ -68,10 +68,10 @@ export default function GoogleSettingsClient({
             </button>
           ) : (
             <div className="space-y-2">
-              <p className="text-sm text-red-700">Wirklich trennen? Du kannst dann keine Calendar-Termine mehr buchen.</p>
+              <p className="text-sm text-danger-strong">Wirklich trennen? Du kannst dann keine Calendar-Termine mehr buchen.</p>
               <div className="flex gap-2">
                 <button onClick={handleDisconnect} disabled={pending}
-                  className="px-4 py-2 text-sm font-medium bg-red-600 text-white rounded-ios-lg hover:bg-red-700 disabled:opacity-50">
+                  className="px-4 py-2 text-sm font-medium bg-danger text-white rounded-ios-lg hover:bg-danger-strong disabled:opacity-50">
                   {pending ? 'Trenne...' : 'Ja, trennen'}
                 </button>
                 <button onClick={() => setConfirmDisconnect(false)} disabled={pending}

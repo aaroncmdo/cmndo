@@ -48,13 +48,13 @@ export default async function DebugClaimPage({ params }: PageProps) {
           fehlen sind absichtlich nicht selektiert (Need-to-know).
         </p>
         {idResolved && (
-          <p className="mt-1 text-xs text-amber-700">
+          <p className="mt-1 text-xs text-warning-strong">
             URL enthielt eine <code className="font-mono">faelle.id</code> —
             wurde zu <code className="font-mono">claims.id = {claimId}</code> aufgelöst.
           </p>
         )}
         {!claimId && (
-          <p className="mt-1 text-xs text-red-700">
+          <p className="mt-1 text-xs text-danger-strong">
             Keine Claim-ID gefunden — weder in <code>claims</code> noch in <code>faelle</code>.
           </p>
         )}
@@ -69,11 +69,11 @@ export default async function DebugClaimPage({ params }: PageProps) {
           <summary className="cursor-pointer text-sm font-medium text-claimondo-navy">
             Rolle: <span className="font-mono">{rolle}</span>
             {claim ? (
-              <span className="ml-2 text-emerald-700 text-xs">
+              <span className="ml-2 text-success-strong text-xs">
                 ✓ {Object.keys(claim).length} Spalten geladen
               </span>
             ) : (
-              <span className="ml-2 text-red-700 text-xs">✗ kein Claim sichtbar</span>
+              <span className="ml-2 text-danger-strong text-xs">✗ kein Claim sichtbar</span>
             )}
           </summary>
           <pre className="mt-2 max-h-[600px] overflow-auto rounded bg-claimondo-bg p-2 text-[11px] font-mono leading-tight">

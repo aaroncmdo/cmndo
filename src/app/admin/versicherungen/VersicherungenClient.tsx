@@ -206,7 +206,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                   <div className="flex gap-2 pt-3">
                     <button onClick={() => setEditing(true)} className="flex-1 py-2 bg-claimondo-navy text-white rounded-ios-lg text-sm font-medium hover:bg-claimondo-shield">Bearbeiten</button>
                     <button onClick={() => handleToggleActive(selected)}
-                      className={`px-4 py-2 rounded-ios-lg text-sm font-medium ${selected.ist_aktiv ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100'}`}>
+                      className={`px-4 py-2 rounded-ios-lg text-sm font-medium ${selected.ist_aktiv ? 'bg-danger-soft text-danger-strong hover:bg-danger/15' : 'bg-success-soft text-success-strong hover:bg-success/15'}`}>
                       {selected.ist_aktiv ? 'Deaktivieren' : 'Aktivieren'}
                     </button>
                   </div>
