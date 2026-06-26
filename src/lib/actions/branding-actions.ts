@@ -229,7 +229,10 @@ export async function uploadBueroLogo(formData: FormData): Promise<UploadLogoRes
     brand_extracted_at: new Date().toISOString(),
     use_custom_branding: true,
   }).eq('id', organisation_id)
-  if (error) throw new Error(`Org-Update fehlgeschlagen: ${error.message}`)
+  // AAR-800: Result-Object statt throw — der Client-Caller (LogoUploadStep) prueft
+  // nur result.ok ohne try/catch; ein throw hier wuerde als prod-maskierter
+  // Server-Action-Fehler durchschlagen statt sauber via setError angezeigt zu werden.
+  if (error) return { ok: false, error: `Org-Update fehlgeschlagen: ${error.message}` }
 
   // Inhaber-SV bekommt das Logo ebenfalls direkt aufs eigene Profil, damit
   // sein Dashboard sofort gebrandet ist (er triggert ja gerade das Onboarding).
