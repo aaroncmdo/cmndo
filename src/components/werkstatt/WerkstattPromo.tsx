@@ -9,27 +9,16 @@ import {
   QrCodeIcon,
   CopyIcon,
   CheckIcon,
-  DownloadIcon,
   ExternalLinkIcon,
 } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { Card } from '@/components/primitives'
+import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
 
 type Props = {
   startUrl: string
   qrSvg: string
   werkstattName: string
-}
-
-function triggerDownload(blob: Blob, filename: string) {
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
 }
 
 export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
@@ -40,32 +29,6 @@ export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
       setCopied(key)
       setTimeout(() => setCopied((c) => (c === key ? null : c)), 2000)
     })
-  }
-
-  function downloadSvg() {
-    const blob = new Blob([qrSvg], { type: 'image/svg+xml;charset=utf-8' })
-    triggerDownload(blob, `claimondo-werkstatt-qr.svg`)
-  }
-
-  function downloadPng() {
-    const size = 600
-    const img = new Image()
-    const encoded = btoa(unescape(encodeURIComponent(qrSvg)))
-    img.onload = () => {
-      const canvas = document.createElement('canvas')
-      canvas.width = size
-      canvas.height = size
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, size, size)
-      ctx.drawImage(img, 0, 0, size, size)
-      canvas.toBlob((blob) => {
-        if (!blob) return
-        triggerDownload(blob, `claimondo-werkstatt-qr.png`)
-      }, 'image/png')
-    }
-    img.src = `data:image/svg+xml;base64,${encoded}`
   }
 
   return (
@@ -121,24 +84,7 @@ export function WerkstattPromo({ startUrl, qrSvg, werkstattName }: Props) {
                 <QrCodeIcon width={12} height={12} />
                 QR-Code — {werkstattName}
               </p>
-              <div className="flex gap-2">
-                <Button
-                  variant="navy"
-                  size="sm"
-                  onClick={downloadPng}
-                  iconLeft={<DownloadIcon width={12} height={12} />}
-                >
-                  PNG
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={downloadSvg}
-                  iconLeft={<DownloadIcon width={12} height={12} />}
-                >
-                  SVG
-                </Button>
-              </div>
+              <QrCodeDownloadButtons qrSvg={qrSvg} fileBaseName="claimondo-werkstatt-qr" />
             </div>
             <div
               className="flex items-center justify-center p-6 rounded-ios-xl bg-claimondo-bg border border-claimondo-border"

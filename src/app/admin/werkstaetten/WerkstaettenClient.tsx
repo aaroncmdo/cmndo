@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { WrenchIcon, PlusIcon, KeyIcon } from 'lucide-react'
+import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon } from 'lucide-react'
 import { createWerkstatt } from './actions'
+import { werkstattQrSvg } from './qr-action'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { TextField } from '@/components/shared/forms/TextField'
+import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
 
 type Werkstatt = {
   id: string
@@ -45,6 +47,11 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
+
+  // QR-Code-Anzeige pro Werkstatt (regulaerer Kunden-QR /start/werkstatt/<id>)
+  const [qr, setQr] = useState<{ name: string; url: string; svg: string } | null>(null)
+  const [qrLoadingId, setQrLoadingId] = useState<string | null>(null)
+  const [copiedUrl, setCopiedUrl] = useState(false)
 
   // Adress-State fuer GooglePlaceAutocomplete → hidden form fields
   const [adresse, setAdresse] = useState<{
@@ -98,6 +105,32 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     }
   }
 
+  async function openQr(w: Werkstatt) {
+    setQrLoadingId(w.id)
+    try {
+      const res = await werkstattQrSvg(w.id)
+      if (!res.ok) { toast.error(res.error); return }
+      setQr({ name: res.name, url: res.url, svg: res.svg })
+      setCopiedUrl(false)
+    } finally {
+      setQrLoadingId(null)
+    }
+  }
+
+  function copyQrUrl(text: string) {
+    void navigator.clipboard.writeText(text).then(() => {
+      setCopiedUrl(true)
+      setTimeout(() => setCopiedUrl(false), 2000)
+    })
+  }
+
+  function qrFileBase(name: string) {
+    const slug = name.toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    return `claimondo-werkstatt-${slug || 'qr'}-qr`
+  }
+
   return (
     <div className="h-full overflow-y-auto py-8">
       <div>
@@ -127,6 +160,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <Th className="text-left text-claimondo-ondo!">Status</Th>
                 <Th className="text-left text-claimondo-ondo!">Provision (netto)</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
+                <Th className="text-left text-claimondo-ondo!">QR</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -160,11 +194,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   <Td>
                     <span className="text-claimondo-ondo text-sm">{formatDatum(w.aktiviert_am)}</span>
                   </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={qrLoadingId === w.id}
+                      onClick={() => openQr(w)}
+                      iconLeft={<QrCodeIcon className="w-4 h-4" />}
+                    >
+                      QR
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
-                  <Td colSpan={5} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Werkstätten angelegt.
                   </Td>
                 </Tr>
@@ -260,6 +305,44 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 </div>
               </form>
             </>
+          )}
+        </Modal>
+
+        <Modal open={qr !== null} onClose={() => setQr(null)} maxWidth={420} ariaLabel="Werkstatt-QR-Code">
+          {qr && (
+            <div className="space-y-4">
+              <h2 className="text-claimondo-navy font-semibold text-lg">QR-Code — {qr.name}</h2>
+              <p className="text-claimondo-ondo text-sm">
+                Kunden scannen diesen Code und gelangen direkt zum Schadenmelde-Einstieg dieser Werkstatt.
+              </p>
+              <div
+                className="flex items-center justify-center p-6 rounded-ios-xl bg-claimondo-bg border border-claimondo-border"
+                dangerouslySetInnerHTML={{ __html: qr.svg }}
+              />
+              <div>
+                <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">Einstiegs-Link</p>
+                <div className="mt-2 flex items-center gap-2">
+                  <input
+                    readOnly
+                    value={qr.url}
+                    className="flex-1 font-mono text-sm text-claimondo-navy bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2.5 truncate"
+                    onFocus={(e) => e.currentTarget.select()}
+                  />
+                  <Button
+                    variant="navy"
+                    size="sm"
+                    onClick={() => copyQrUrl(qr.url)}
+                    iconLeft={copiedUrl ? <CheckIcon width={14} height={14} /> : <CopyIcon width={14} height={14} />}
+                  >
+                    {copiedUrl ? 'Kopiert' : 'Kopieren'}
+                  </Button>
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-body-xs text-claimondo-ondo">Zum Aushängen / Drucken:</span>
+                <QrCodeDownloadButtons qrSvg={qr.svg} fileBaseName={qrFileBase(qr.name)} />
+              </div>
+            </div>
           )}
         </Modal>
       </div>
