@@ -88,7 +88,7 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto')
+      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
@@ -99,6 +99,8 @@ export default async function FallaktePage({
         schadenort_ort: string | null
         kostenvoranschlag_netto: number | null
         kostenvoranschlag_brutto: number | null
+        werkstatt_id: string | null
+        reparatur_freigegeben_am: string | null
       }>()
     // CMM-49 Tier-2: gegner_aktenzeichen aus v_claim_full (verursacher-Party-
     // sourced via COALESCE party->claims) statt direkt aus claims — ueberlebt den
@@ -114,6 +116,7 @@ export default async function FallaktePage({
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
       claimStammdatenFallback = {
+        id: claimId,
         schadenort_adresse: claimRow.schadenort_adresse ?? null,
         schadenort_plz:     claimRow.schadenort_plz     ?? null,
         schadenort_ort:     claimRow.schadenort_ort     ?? null,
@@ -122,6 +125,9 @@ export default async function FallaktePage({
         // Record-Cast im Consumer (Type-Lag, AGENTS §6).
         kostenvoranschlag_netto:   claimRow.kostenvoranschlag_netto   ?? null,
         kostenvoranschlag_brutto:  claimRow.kostenvoranschlag_brutto  ?? null,
+        // Werkstatt-Reparaturfreigabe (manuell durch Staff): Werkstatt sieht den Status.
+        werkstatt_id:              claimRow.werkstatt_id              ?? null,
+        reparatur_freigegeben_am:  claimRow.reparatur_freigegeben_am  ?? null,
       }
     }
   }
