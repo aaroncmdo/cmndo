@@ -115,12 +115,13 @@ export default async function LocaleLayout({
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID
   const gadsId = process.env.NEXT_PUBLIC_GADS_ID
   const primaryGtagId = ga4Id ?? gadsId
-  // Consent-Default env-steuerbar. Default 'denied' (DSGVO/§25 TDDDG: Opt-in vor
-  // Tracking-Speicher) + Consent Mode v2 Advanced (Modeling). Go-Live auf 'granted'
-  // nur via NEXT_PUBLIC_CONSENT_DEFAULT NACH DSB/Anwalt-Freigabe -> ohne Redeploy
-  // umschalt-/rueckrollbar. docs/conversion-tracking-attribution-runbook.md (A2/B6).
+  // Consent-Default 'granted' — Anwalts-Freigabe + GF-Entscheid (26.06.2026, von
+  // Aaron bestaetigt). Consent Mode v2 Advanced (Modeling, url_passthrough) bleibt
+  // aktiv; das CMP (ConsentManager) dient als Opt-out. Rollback-Valve:
+  // NEXT_PUBLIC_CONSENT_DEFAULT=denied erzwingt denied ohne Redeploy.
+  // docs/conversion-tracking-attribution-runbook.md (A2/B6).
   const consentDefault =
-    process.env.NEXT_PUBLIC_CONSENT_DEFAULT === 'granted' ? 'granted' : 'denied'
+    process.env.NEXT_PUBLIC_CONSENT_DEFAULT === 'denied' ? 'denied' : 'granted'
   const host = (await headers()).get('host')
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId)
   const shouldShowConsent = isMarketingHost(host)

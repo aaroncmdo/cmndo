@@ -6,7 +6,7 @@
 **Liefer-Form:** Code-PR (`claimondo-marketing/`) + dieses Runbook (Konsolen-Schritte für Aaron)
 
 **Entscheidungen (Aaron, 26.06.):**
-1. Consent-Default → `granted` — aber **env-gated**, Go-Live erst nach DSB/Anwalt-Freigabe.
+1. Consent-Default → **granted** (Anwalts-Freigabe 26.06.2026 bestätigt). Env-Rollback-Valve bleibt (`=denied`).
 2. Ads-Bidding → **Leads primär** (generate_lead/Rückruf/qualifizierter Anruf).
 3. Bot-Block **selektiv**: Training-Crawler blocken, AI-Antwort-Crawler erlauben (GEO-Schutz).
 4. Cloudflare-Bot-Defense = Konsolen-Runbook (nicht code-seitig ausführbar).
@@ -64,10 +64,10 @@ Die LP-Forms (`LeadFormClient`/`StadtLeadFormClient`) feuern `generate_lead` ber
 
 ### A2 · Consent-Default `denied → granted`, env-gated  [Task 1]
 
-- Neue Env `NEXT_PUBLIC_CONSENT_DEFAULT` (`denied` | `granted`, **Default `denied`**).
-- `claimondo-marketing/app/[locale]/layout.tsx`: der `gtag('consent','default',{…})`-Block liest die Env und emittiert `granted` für `ad_storage`/`ad_user_data`/`ad_personalization`/`analytics_storage`/`functionality_storage`/`personalization_storage` **nur** wenn `=granted`. `security_storage` bleibt `granted`, `wait_for_update` bleibt.
-- **Merge ändert Prod NICHT** (Default `denied`). **Go-Live** = Env auf dem VPS `=granted` setzen, **erst nach DSB/Anwalt-Freigabe** (siehe B6). **Rollback** = Env zurück auf `denied`, kein Redeploy.
-- **CMP-Caveat:** Das Banner ist aktuell Opt-*in*. Mit granted-Default wird es de-facto Opt-*out* (User kann ablehnen). Das ist der rechtlich exponierte Teil — deshalb das Env-Ventil + Legal-Gate. Eine echte CMP-Opt-out-Reconfig ist eine **Folge-Entscheidung nach Legal**, NICHT in diesem PR.
+- Env `NEXT_PUBLIC_CONSENT_DEFAULT` (`denied` | `granted`, **Default `granted`** — Anwalts-Freigabe 26.06.2026).
+- `claimondo-marketing/app/[locale]/layout.tsx`: der `gtag('consent','default',{…})`-Block emittiert `granted` für `ad_storage`/`ad_user_data`/`ad_personalization`/`analytics_storage`/`functionality_storage`/`personalization_storage`; `security_storage` bleibt `granted`, `wait_for_update` bleibt. Consent Mode v2 Advanced (Modeling, url_passthrough) bleibt aktiv.
+- **Merge + Deploy = Consent granted live in Prod.** **Rollback-Valve:** `NEXT_PUBLIC_CONSENT_DEFAULT=denied` erzwingt `denied` ohne Redeploy.
+- **CMP-Caveat:** Das Banner (ConsentManager) dient nun als **Opt-out** (User kann ablehnen → `categoriesToGcm` setzt denied). Eine Opt-out-gerechte Banner-Textierung ist eine empfohlene **Folge-Politur**, nicht blockierend.
 
 ### A3 · robots.txt — selektiver AI-Crawler-Block  [Task 4-robots]
 
@@ -115,14 +115,14 @@ Google Ads (951-112-7970) → **Tools → Verknüpfte Konten → Google Analytic
 4. GA4-Quelle = korrekte Ads-Kampagne (Name stimmt).
 5. Bot-/(direct)-Anteil nach 1 Woche deutlich gesunken.
 
-### B6 · Legal-Gate für A2 (Consent-Go-Live)
-**Vor** dem Setzen von `NEXT_PUBLIC_CONSENT_DEFAULT=granted` in Prod: DSB/Anwalt-Freigabe einholen (§25 TDDDG verlangt Opt-in **vor** dem Setzen von Tracking-Speicher; granted-by-default ist abmahnexponiert). DPIA empfohlen (Skill `dpia-sentinel` vorhanden). Bis dahin bleibt Prod auf `denied` — die `generate_lead`-Events (A1) liefern über Consent-Mode-Modeling trotzdem Daten.
+### B6 · Legal-Gate für A2 (Consent-Go-Live) — ✅ FREIGEGEBEN (26.06.2026)
+Anwalts-Freigabe liegt vor (von Aaron bestätigt 26.06.2026) → Consent-Default ist im Code auf `granted` gesetzt. **Merge + Deploy schaltet granted-Default live.** Empfehlung weiterhin: DPIA dokumentieren (Skill `dpia-sentinel`) + Banner-Text auf Opt-out-Framing prüfen. Rollback jederzeit via `NEXT_PUBLIC_CONSENT_DEFAULT=denied` (kein Redeploy).
 
 ---
 
 ## Akzeptanzkriterien
 - [ ] **A1:** Home-Hero + /schaden-melden feuern je genau 1× `generate_lead` (GA4 DebugView).
-- [ ] **A2:** Env-Flag steuert den Consent-Default; Default `denied`; `granted` nur bei `NEXT_PUBLIC_CONSENT_DEFAULT=granted`.
+- [ ] **A2:** Consent-Default `granted` (Anwalts-Freigabe); Rollback via `NEXT_PUBLIC_CONSENT_DEFAULT=denied`. Merge+Deploy = granted live.
 - [ ] **A3:** robots.txt blockt CCBot/Bytespider/Google-Extended, erlaubt die AI-Antwort-Bots.
 - [ ] `typecheck` grün; CI-Build grün.
 - [ ] Teil B als Runbook abarbeitbar; B1 als Blocker markiert.
