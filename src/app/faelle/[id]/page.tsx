@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import FallakteShell from './FallakteShell'
+import { NoticeBox } from '@/components/shared/NoticeBox'
 // CMM-33: Zentrale Pflichtdokumente-Section für Admin/KB im DokumenteTab.
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import type { FallakteRolle } from '@/lib/fall/field-permissions'
@@ -870,7 +871,7 @@ export default async function FallaktePage({
         </div>
       )}
       {otherKundeFaelle.length > 0 && (
-        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
+        <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
           <span className="text-warning-strong">
             Dieser Kunde hat {otherKundeFaelle.length} weitere{otherKundeFaelle.length > 1 ? '' : 'n'} aktiven Fall:
           </span>
@@ -886,7 +887,7 @@ export default async function FallaktePage({
               </a>
             ))}
           </div>
-        </div>
+        </NoticeBox>
       )}
       <FallakteShell
         fall={fall as Parameters<typeof FallakteShell>[0]['fall']}

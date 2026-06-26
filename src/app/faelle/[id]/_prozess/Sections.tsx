@@ -37,6 +37,7 @@ import { pushMandatManuell } from '../_actions/push-mandat-manuell'
 import EndpointRegister from '../_components/LexDriveTriggerPanel'
 import InlineEditField from '../_stammdaten/InlineEditField'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { NoticeBox } from '@/components/shared/NoticeBox'
 
 // AAR-frontend-konsolidierung-p1: dünner Adapter — shared SectionCard mit
 // space-y-3-Body wie die bisherige Prozess-Card.
@@ -266,9 +267,9 @@ export function VsReaktionSection() {
             type="textarea"
           />
           {quoteAkzeptiertAm ? (
-            <div className="text-[11px] text-success-strong bg-success-soft border border-success/30 rounded p-2">
+            <NoticeBox tone="success" className="text-[11px] rounded p-2">
               ✓ Quote akzeptiert am {quoteAkzeptiertAm}
-            </div>
+            </NoticeBox>
           ) : (
             <div className="flex flex-wrap gap-2">
               <button
@@ -304,7 +305,7 @@ export function VsReaktionSection() {
               Typ: {KUERZUNGSTYP_LABEL[kuerzungstyp].label}
             </span>
           ) : (
-            <div className="rounded-ios-md border border-danger/30 bg-danger-soft p-2 flex items-start gap-2">
+            <NoticeBox tone="danger" className="rounded-ios-md p-2 flex items-start gap-2">
               <AlertTriangleIcon className="w-4 h-4 text-danger shrink-0 mt-0.5" />
               <div className="flex-1 space-y-1">
                 <p className="text-[11px] font-semibold text-danger-strong">
@@ -317,7 +318,7 @@ export function VsReaktionSection() {
                   placeholder="technisch"
                 />
               </div>
-            </div>
+            </NoticeBox>
           )}
           <div className="flex flex-wrap gap-2">
             {(kuerzungstyp === 'technisch' || kuerzungstyp === 'gemischt') &&
@@ -451,9 +452,9 @@ export function RuegeSection() {
           {counter === 0 ? 'Rüge 1 starten' : 'Rüge 2 starten'}
         </button>
       ) : (
-        <div className="rounded-ios-md bg-danger-soft border border-danger/30 p-3 text-[11px] text-danger-strong">
+        <NoticeBox tone="danger" className="rounded-ios-md p-3 text-[11px]">
           Max. Rüge-Runden erreicht — Klage-Entscheidung erforderlich.
-        </div>
+        </NoticeBox>
       )}
     </ProzessSectionCard>
   )
@@ -633,10 +634,10 @@ export function KlageSection() {
           Fall an LexDrive übergeben
         </button>
       )}
-      <div className="rounded-ios-md bg-danger-soft border border-danger/30 p-3 text-[11px] text-danger-strong">
+      <NoticeBox tone="danger" className="rounded-ios-md p-3 text-[11px]">
         Übergabe-Screen: Termin mit LexDrive-Rechtsberater koordinieren. Kein fixer
         Schwellenwert — die Kanzlei entscheidet individuell ob Klage sinnvoll ist.
-      </div>
+      </NoticeBox>
     </ProzessSectionCard>
   )
 }
