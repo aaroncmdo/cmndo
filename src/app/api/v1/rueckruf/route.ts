@@ -72,6 +72,10 @@ export async function OPTIONS() {
 
 export async function POST(req: Request) {
   const ip = (req.headers.get('x-forwarded-for') ?? '').split(',')[0]?.trim() || 'unknown'
+  // Kanal-Attribution: die echte User-Agent des Aufrufers ('claimondo-mcp-server/<v>' = via
+  // unseren MCP-Server; ChatGPT-/OpenAI-UA = GPT-Action direkt; sonst Direktaufruf) wird unten
+  // in consent_records.user_agent persistiert -> Aggregat-Auswertung der Lead-Quelle.
+  const ua = (req.headers.get('user-agent') ?? '').slice(0, 200) || 'unknown'
   if (rateLimited(ip)) {
     return json({ ok: false, error: 'Rate limit exceeded (10 requests/minute)' }, 429)
   }
@@ -161,7 +165,7 @@ export async function POST(req: Request) {
     await admin.from('consent_records').insert({
       categories: ['mcp_rueckruf', 'telefon_kontakt', 'drittland_llm'],
       policy_version: input.einwilligung.policy_version,
-      user_agent: 'mcp',
+      user_agent: ua,
       created_at: consentTs,
     })
   } catch (err) {

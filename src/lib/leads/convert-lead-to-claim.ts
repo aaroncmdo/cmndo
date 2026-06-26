@@ -420,6 +420,12 @@ export async function convertLeadToClaim(
   // die Provision an). Record-Cast wie operative_status (generierte Types laggen die DB-Spalte).
   ;(claimsInsert as Record<string, unknown>).werkstatt_id =
     (lead.werkstatt_id as string | null) ?? null
+  // AAR Werkstatt-KVA: Werkstatt-Kostenvoranschlag (Schaetzung) auf den Claim snapshotten.
+  // Eigene Spur, NIE schadens_hoehe_netto/gutachten.* (SV-Wert). Record-Cast (Type-Lag, AGENTS §6).
+  ;(claimsInsert as Record<string, unknown>).kostenvoranschlag_netto =
+    (lead.kostenvoranschlag_netto as number | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).kostenvoranschlag_brutto =
+    (lead.kostenvoranschlag_brutto as number | null) ?? null
 
   // Makler-Vermittlung: promotion_code_id -> promotion_codes.makler_id -> claims.makler_id.
   // DB-Trigger trg_makler_provision_on_bridge legt dann die makler_provisionen-Provision an
