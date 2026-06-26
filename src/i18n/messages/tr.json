@@ -4491,8 +4491,7 @@
     "fall": {
       "tabs": {
         "uebersicht": "Genel Bakış",
-        "dokumente": "Belgeler",
-        "chat": "Sohbet"
+        "dokumente": "Belgeler"
       },
       "uebersicht": {
         "fahrzeugUnfall": "Araç ve Kaza",
@@ -4503,28 +4502,6 @@
         "hochgeladen": "Yüklenen Belgeler",
         "leer": "Henüz belge bulunmamaktadır.",
         "fallback": "Belge"
-      },
-      "chat": {
-        "rolle": {
-          "kunde": "Siz",
-          "admin": "Claimondo",
-          "kundenbetreuer": "Temsilciniz",
-          "gutachter": "Bilirkişi",
-          "sachverstaendiger": "Bilirkişi",
-          "system": "Sistem"
-        },
-        "rolleAnzeige": {
-          "kundenbetreuer": "Müşteri Temsilcisi",
-          "gutachter": "Bilirkişi",
-          "admin": "Admin"
-        },
-        "ansprechpartner": "İletişim Kişileriniz",
-        "unbekannt": "Bilinmiyor",
-        "leer": "Henüz mesaj yok. Bize yazın!",
-        "viaWhatsApp": "WhatsApp aracılığıyla",
-        "anhang": "Ek",
-        "platzhalter": "Mesaj yazın...",
-        "fehlerSenden": "Gönderme hatası"
       },
       "gegenvorschlag": {
         "angenommen": "Randevu onaylandı! Bilirkişi bilgilendirilecek.",
@@ -5610,17 +5587,6 @@
       "speichern_laeuft": "Bir saniye, size uygun randevuları arıyoruz …",
       "fehler_speichern": "Adres kaydedilemedi."
     }
-  },
-  "chatSystem": {
-    "terminAbgelehnt": "❌ Bilirkişi {svName}, {terminDatum} tarihli randevuyu reddetti.{hatGrund, select, ja { Gerekçe: \"{grund}\"} other {}}",
-    "terminGegenvorschlag": "📅 {rolle, select, sv {Bilirkişi} other {Müşteri}}{hatName, select, ja { {name}} other {}} yeni bir randevu önerdi: {terminStr}.{hatGrund, select, ja { Gerekçe: \"{grund}\"} other {}}",
-    "welcome": "{fallNummer} numaralı dosya oluşturuldu. Kişisel sohbetinize hoş geldiniz!"
-  },
-  "chatTranslate": {
-    "uebersetzt": "Çevrildi",
-    "originalAnzeigen": "Orijinali göster",
-    "uebersetzungAnzeigen": "Çeviriyi göster",
-    "uebersetze": "Çevriliyor …"
   },
   "gutachter": {
     "feldmodus": {
