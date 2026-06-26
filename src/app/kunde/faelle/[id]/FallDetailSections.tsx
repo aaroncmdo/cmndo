@@ -14,6 +14,8 @@ import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/D
 import { FallIdentityHeader } from '@/components/shared/fall-header'
 // AAR-754 (Phase C): Shared Stammdaten + Kontakte.
 import { StammdatenReadSection } from '@/components/shared/stammdaten'
+// AAR Fallakte-Kanonisierung: kanonische Status/Notice-Box (statt inline bg-X-soft).
+import { NoticeBox } from '@/components/shared/NoticeBox'
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 import { Modal } from '@/components/primitives/Modal'
 // AAR-759 (Phase 1): Mietwagen-Status-Anzeige
@@ -257,9 +259,9 @@ function GegenvorschlagBanner({ fallId, svName, vorgeschlagenesDatum, grund }: {
 
   if (done) {
     return (
-      <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4">
-        <p className="text-sm text-success-strong font-medium">{done}</p>
-      </div>
+      <NoticeBox tone="success" className="rounded-ios-xl p-4">
+        <p className="text-sm font-medium">{done}</p>
+      </NoticeBox>
     )
   }
 
@@ -359,9 +361,9 @@ function SlotAuswahlBanner({
 
   if (done) {
     return (
-      <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4">
-        <p className="text-sm text-success-strong font-medium">{done}</p>
-      </div>
+      <NoticeBox tone="success" className="rounded-ios-xl p-4">
+        <p className="text-sm font-medium">{done}</p>
+      </NoticeBox>
     )
   }
 
