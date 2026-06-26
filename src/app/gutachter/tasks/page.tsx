@@ -89,7 +89,7 @@ export default async function GutachterTasksPage() {
         {/* Tasks */}
         {offeneTasks.length === 0 ? (
           <div className="bg-white border border-claimondo-border rounded-2xl p-12 text-center">
-            <CheckCircle2Icon className="w-10 h-10 text-emerald-500 mx-auto mb-3" />
+            <CheckCircle2Icon className="w-10 h-10 text-success mx-auto mb-3" />
             <p className="text-claimondo-ondo text-sm">Keine offenen Tasks. Alles erledigt!</p>
           </div>
         ) : (

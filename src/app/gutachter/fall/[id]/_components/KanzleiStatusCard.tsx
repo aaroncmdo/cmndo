@@ -174,7 +174,7 @@ export function KanzleiStatusCard({
             )}
             {zahlungLabel && (
               <li className="flex items-start gap-2">
-                <CoinsIcon className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
+                <CoinsIcon className="w-4 h-4 text-success mt-0.5 shrink-0" />
                 <p className="text-claimondo-navy">
                   Zahlungseingang:{' '}
                   <span className="font-medium">{zahlungLabel}</span>
@@ -203,9 +203,9 @@ export function KanzleiStatusCard({
                 <div
                   className={`flex items-center justify-between pt-1.5 border-t border-claimondo-border font-medium ${
                     ton === 'red'
-                      ? 'text-red-700'
+                      ? 'text-danger-strong'
                       : ton === 'amber'
-                        ? 'text-amber-700'
+                        ? 'text-warning-strong'
                         : 'text-claimondo-navy'
                   }`}
                 >
@@ -222,7 +222,7 @@ export function KanzleiStatusCard({
                 </div>
               )}
               {kuerzungsSumme === 0 && fall.zahlung_betrag != null && (
-                <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700 pt-1">
+                <p className="inline-flex items-center gap-1.5 text-xs text-success-strong pt-1">
                   <CheckCircle2Icon className="w-3.5 h-3.5" />
                   Ohne Kürzung reguliert
                 </p>
@@ -240,9 +240,9 @@ export function KanzleiStatusCard({
                 {strukturierteKuerzungen.map((k) => (
                   <li
                     key={k.id}
-                    className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2"
+                    className="rounded-ios-lg border border-warning/30 bg-warning-soft px-3 py-2"
                   >
-                    <div className="flex items-center justify-between text-xs font-medium text-amber-900">
+                    <div className="flex items-center justify-between text-xs font-medium text-warning-strong">
                       <span>{k.bezeichnung || k.typ || 'Position'}</span>
                       <span className="tabular-nums">
                         − {formatEuro(k.betrag_gekuerzt ?? 0)}
@@ -250,7 +250,7 @@ export function KanzleiStatusCard({
                     </div>
                     {k.betrag_gefordert != null &&
                       k.betrag_reguliert != null && (
-                        <p className="text-[11px] text-amber-800 mt-0.5 tabular-nums">
+                        <p className="text-[11px] text-warning-strong mt-0.5 tabular-nums">
                           Gefordert {formatEuro(k.betrag_gefordert)} · Reguliert{' '}
                           {formatEuro(k.betrag_reguliert)}
                         </p>
@@ -269,8 +269,8 @@ export function KanzleiStatusCard({
                 <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo">
                   Kürzungsgrund
                 </p>
-                <div className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2">
-                  <p className="text-xs text-amber-900">
+                <div className="rounded-ios-lg border border-warning/30 bg-warning-soft px-3 py-2">
+                  <p className="text-xs text-warning-strong">
                     {fall.vs_kuerzung_grund}
                   </p>
                 </div>
@@ -310,12 +310,12 @@ export function KanzleiStatusCard({
               )}
               <div className="pt-1.5">
                 {honorarUeberwiesen ? (
-                  <p className="inline-flex items-center gap-1.5 text-xs text-emerald-700 font-medium">
+                  <p className="inline-flex items-center gap-1.5 text-xs text-success-strong font-medium">
                     <CheckCircle2Icon className="w-3.5 h-3.5" />
                     Überwiesen am {fmtDate(abrechnung.abgerechnetAm!)}
                   </p>
                 ) : (
-                  <p className="inline-flex items-center gap-1.5 text-xs text-amber-700 font-medium">
+                  <p className="inline-flex items-center gap-1.5 text-xs text-warning-strong font-medium">
                     <FileTextIcon className="w-3.5 h-3.5" />
                     Auszahlung ausstehend
                   </p>
