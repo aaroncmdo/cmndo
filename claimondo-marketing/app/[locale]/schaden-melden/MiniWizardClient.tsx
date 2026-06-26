@@ -52,9 +52,12 @@ type MiniWizardClientProps = {
   // Digest 2740258766) — der Cookie-Layer hat hier keinen Mehrwert (Cookie
   // wurde NUR für DIESE Anlage gelesen, keine Cross-Session-Attribution).
   initialPromo?: string | null
+  // QR-Kampagnen-Tag aus ?src=<slug> — analog zu initialPromo. Wird als hidden
+  // field mitgeschickt; createLeadFromMiniWizard leitet daraus source_channel ab.
+  initialSrc?: string | null
 }
 
-export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps = {}) {
+export function MiniWizardClient({ initialPromo = null, initialSrc = null }: MiniWizardClientProps = {}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [serverError, setServerError] = useState<string | null>(null)
@@ -77,6 +80,7 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
       nachname: '',
       dsgvo_consent: false as unknown as true,
       promoCode: initialPromo ?? '',
+      src: initialSrc ?? '',
     },
   })
 
@@ -103,6 +107,9 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
           nur per register sichtbar machen, damit RHF den Wert beim Submit
           mitschickt. */}
       <input type="hidden" {...register('promoCode')} />
+      {/* Hidden QR-Kampagnen-Tag aus ?src=<slug> — wie promoCode per RHF beim
+          Submit mitgeschickt; die Server-Action leitet daraus source_channel ab. */}
+      <input type="hidden" {...register('src')} />
       {/* Schuldfrage */}
       <fieldset className="space-y-3">
         <legend className="text-lg font-semibold text-claimondo-navy">

@@ -33,10 +33,14 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SchadenMeldenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ p?: string }>
+  searchParams: Promise<{ p?: string; src?: string }>
 }) {
-  const { p } = await searchParams
+  const { p, src } = await searchParams
   const initialPromo = p && isValidPromoCodeFormat(p) ? p : null
+  // QR-Kampagnen-Tag aus ?src=<slug> (Strassen-/Offline-Aktion) -> via hidden field
+  // an die Server-Action; daraus leitet createLeadFromMiniWizard leads.source_channel
+  // ab. Hier nur durchreichen, strikte Sanitisierung in campaignSourceChannel().
+  const initialSrc = typeof src === 'string' ? src : null
 
   return (
     <div className="min-h-screen bg-claimondo-bg py-10">
@@ -49,7 +53,7 @@ export default async function SchadenMeldenPage({
           />
         </div>
         <div className="rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-md sm:p-8">
-          <MiniWizardClient initialPromo={initialPromo} />
+          <MiniWizardClient initialPromo={initialPromo} initialSrc={initialSrc} />
         </div>
       </div>
     </div>
