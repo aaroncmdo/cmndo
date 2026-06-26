@@ -471,6 +471,30 @@ export const COMMUNICATION_REGISTRY: Record<string, TriggerConfig> = {
     description: 'Monatsabrechnung an SV (mit PDF-Anhang)',
   },
 
+  // SV-Onboarding-Audit: dedizierte Verifizierungs-Reminder-Trigger. Vorher lief
+  // beides faelschlich ueber 'sv_monatsabrechnung' -> Email-Tracking/Template-Label
+  // war falsch (Billing statt Verifizierung). Channel/Recipient identisch (email/sv),
+  // daher reine Label-Korrektur, kein Verhaltens-Change beim Versand.
+  sv_verifizierung_reminder_7d: {
+    trigger_name: 'sv_verifizierung_reminder_7d',
+    channel: 'email',
+    recipient: 'sv',
+    t_number: null,
+    whatsapp_template_name: null,
+    has_attachment: false,
+    description: 'Verifizierung: Halbzeit-Reminder (Tag 7 der 14-Tage-Frist)',
+  },
+
+  sv_verifizierung_frist_abgelaufen: {
+    trigger_name: 'sv_verifizierung_frist_abgelaufen',
+    channel: 'email',
+    recipient: 'sv',
+    t_number: null,
+    whatsapp_template_name: null,
+    has_attachment: false,
+    description: 'Verifizierung: 14-Tage-Frist abgelaufen (Dokumente nachreichen)',
+  },
+
   // ─── Email-only: Kanzlei ─────────────────────────────────────────────────
 
   kanzlei_monatsabrechnung: {
