@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import type { ReactNode, HTMLAttributes } from 'react'
 import { cn } from '@/lib/utils'
 
 // AAR Fallakte-Kanonisierung (2026-06-26): Kanonische Status-/Notice-Box.
@@ -24,6 +24,7 @@ export function NoticeBox({
   icon,
   className,
   children,
+  ...rest
 }: {
   /** Semantischer Status-Ton — bestimmt bg/border/text-Farbe (Token-Foundation). */
   tone?: NoticeTone
@@ -32,9 +33,9 @@ export function NoticeBox({
   /** Layout-Overrides (Padding/Radius/Spacing) — Default: rounded-ios-lg px-3 py-2. */
   className?: string
   children: ReactNode
-}) {
+} & Omit<HTMLAttributes<HTMLDivElement>, 'className' | 'children'>) {
   return (
-    <div className={cn('rounded-ios-lg border px-3 py-2', TONE_CLS[tone], className)}>
+    <div className={cn('rounded-ios-lg border px-3 py-2', TONE_CLS[tone], className)} {...rest}>
       {icon ? (
         <div className="flex items-start gap-2">
           <span className="shrink-0">{icon}</span>
