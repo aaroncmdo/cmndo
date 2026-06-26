@@ -6,6 +6,7 @@ import { CheckCircle2, Phone } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitHomeLead } from './home-lead-action'
+import { trackEvent } from '@/lib/analytics/track-event'
 
 // Hero-Lead-Formular der Hauptseite. Vorher ein rohes
 // <form action="/api/leads/home" method="POST"> -> diese Route existierte nie,
@@ -44,6 +45,10 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         const firstName = name.split(/\s+/)[0] || null
         setError(null)
         setSubmittedName(firstName ?? '')
+        // Conversion-Event (Task 2): Home-Hero-Lead = claimondo_rueckruf-Pfad.
+        // Feuert auch bei Consent=denied (Consent-Mode-Modeling). Siehe
+        // docs/conversion-tracking-attribution-runbook.md (A1).
+        trackEvent('generate_lead', { currency: 'EUR', value: 0, source: 'claimondo-home-hero' })
         form.reset()
       } else {
         setError({ message: result.error ?? t('lead_form.error_fallback'), field: result.field })
