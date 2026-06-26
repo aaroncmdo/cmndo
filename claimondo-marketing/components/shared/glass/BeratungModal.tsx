@@ -7,6 +7,7 @@
 import { useState, useTransition } from 'react'
 import { X, Phone, CheckCircle2 } from 'lucide-react'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
+import { trackEvent } from '@/lib/analytics/track-event'
 
 interface Props {
   open: boolean
@@ -49,6 +50,10 @@ export function BeratungModal({ open, onClose, quelle = 'beratung-modal' }: Prop
       })
       if (result.ok) {
         setStatus('sent')
+        // Conversion-Event: Rückruf-Anfrage = Lead (claimondo_rueckruf). Kein
+        // Server-Event in public-rueckruf → client-seitig; feuert auch bei
+        // Consent=denied (Consent-Mode-Modeling).
+        trackEvent('generate_lead', { currency: 'EUR', value: 0, source: 'beratung-rueckruf' })
       } else {
         setStatus('error')
         setErrorMsg(result.error)
