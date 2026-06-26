@@ -175,6 +175,11 @@ export async function POST(req: Request) {
       )
       .eq('verifiziert', true)
       .eq('ist_aktiv', true)
+      // SV-Onboarding-Audit: gesperrte (aber verifizierte) SVs raus aus der Trust-Zahl
+      // — gesperrt_seit ergaenzt (= applyDispatchableFilter-Konvention). geloescht_am
+      // war schon drin. portal_zugang_freigeschaltet bewusst NICHT ergaenzt: Aaron hat
+      // die Region-Zahl absichtlich grosszuegig getunt (s. Kommentar oben + Tier-3 sv_leads).
+      .is('gesperrt_seit', null)
       .is('geloescht_am', null)
       .not('isochrone_polygon', 'is', null),
     sb
