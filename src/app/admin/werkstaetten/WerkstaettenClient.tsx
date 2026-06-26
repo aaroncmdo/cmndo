@@ -3,9 +3,10 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon } from 'lucide-react'
+import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon } from 'lucide-react'
 import { createWerkstatt } from './actions'
 import { werkstattQrSvg } from './qr-action'
+import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -52,6 +53,12 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   const [qr, setQr] = useState<{ name: string; url: string; svg: string } | null>(null)
   const [qrLoadingId, setQrLoadingId] = useState<string | null>(null)
   const [copiedUrl, setCopiedUrl] = useState(false)
+
+  // Staffelung pro Werkstatt (Meilenstein-Boni)
+  const [staffelFor, setStaffelFor] = useState<Werkstatt | null>(null)
+  const [staffelRows, setStaffelRows] = useState<{ schwelle: string; bonus: string }[]>([])
+  const [staffelLoadingId, setStaffelLoadingId] = useState<string | null>(null)
+  const [staffelSaving, setStaffelSaving] = useState(false)
 
   // Adress-State fuer GooglePlaceAutocomplete → hidden form fields
   const [adresse, setAdresse] = useState<{
@@ -131,6 +138,47 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     return `claimondo-werkstatt-${slug || 'qr'}-qr`
   }
 
+  async function openStaffel(w: Werkstatt) {
+    setStaffelLoadingId(w.id)
+    try {
+      const res = await getWerkstattStaffel(w.id)
+      if (!res.ok) { toast.error(res.error); return }
+      setStaffelRows(res.stufen.map((s) => ({ schwelle: String(s.schwelle), bonus: String(s.bonus_betrag_netto) })))
+      setStaffelFor(w)
+    } finally {
+      setStaffelLoadingId(null)
+    }
+  }
+
+  function addStaffelRow() {
+    setStaffelRows((rows) => [...rows, { schwelle: '', bonus: '' }])
+  }
+
+  function removeStaffelRow(i: number) {
+    setStaffelRows((rows) => rows.filter((_, idx) => idx !== i))
+  }
+
+  function updateStaffelRow(i: number, field: 'schwelle' | 'bonus', val: string) {
+    setStaffelRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, [field]: val } : r)))
+  }
+
+  async function saveStaffel() {
+    if (!staffelFor) return
+    setStaffelSaving(true)
+    try {
+      const stufen = staffelRows
+        .filter((r) => r.schwelle.trim() !== '')
+        .map((r) => ({ schwelle: Number(r.schwelle), bonus_betrag_netto: Number(r.bonus || 0) }))
+      const res = await setWerkstattStaffel(staffelFor.id, stufen)
+      if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
+      toast.success('Staffelung gespeichert.')
+      setStaffelFor(null)
+      router.refresh()
+    } finally {
+      setStaffelSaving(false)
+    }
+  }
+
   return (
     <div className="h-full overflow-y-auto py-8">
       <div>
@@ -161,6 +209,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <Th className="text-left text-claimondo-ondo!">Provision (netto)</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
                 <Th className="text-left text-claimondo-ondo!">QR</Th>
+                <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -205,11 +254,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                       QR
                     </Button>
                   </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={staffelLoadingId === w.id}
+                      onClick={() => openStaffel(w)}
+                      iconLeft={<Layers3Icon className="w-4 h-4" />}
+                    >
+                      Staffel
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
-                  <Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Werkstätten angelegt.
                   </Td>
                 </Tr>
@@ -341,6 +401,74 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               <div className="flex items-center justify-between gap-3">
                 <span className="text-body-xs text-claimondo-ondo">Zum Aushängen / Drucken:</span>
                 <QrCodeDownloadButtons qrSvg={qr.svg} fileBaseName={qrFileBase(qr.name)} />
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        <Modal open={staffelFor !== null} onClose={() => setStaffelFor(null)} maxWidth={520} ariaLabel="Staffelung bearbeiten">
+          {staffelFor && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-claimondo-navy font-semibold text-lg">Staffelung — {staffelFor.name}</h2>
+                <p className="mt-0.5 text-claimondo-ondo text-sm">
+                  Meilenstein-Boni: ab X freigegebenen Vermittlungen ein Einmal-Bonus.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-1 text-xs font-medium text-claimondo-ondo">
+                  <span className="flex-1">ab … Kunden</span>
+                  <span className="flex-1">Bonus (netto, €)</span>
+                  <span className="w-11 shrink-0" />
+                </div>
+                {staffelRows.length === 0 && (
+                  <p className="px-1 text-sm text-claimondo-ondo/70">Noch keine Stufen — füge eine hinzu.</p>
+                )}
+                {staffelRows.map((r, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      inputMode="numeric"
+                      value={r.schwelle}
+                      onChange={(e) => updateStaffelRow(i, 'schwelle', e.target.value)}
+                      placeholder="z.B. 10"
+                      className="flex-1 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy"
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      inputMode="decimal"
+                      value={r.bonus}
+                      onChange={(e) => updateStaffelRow(i, 'bonus', e.target.value)}
+                      placeholder="z.B. 500"
+                      className="flex-1 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      ariaLabel="Stufe entfernen"
+                      onClick={() => removeStaffelRow(i)}
+                      iconLeft={<Trash2Icon width={15} height={15} />}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              <Button variant="ghost" size="sm" onClick={addStaffelRow} iconLeft={<PlusIcon className="w-4 h-4" />}>
+                Stufe hinzufügen
+              </Button>
+
+              <div className="flex gap-3 pt-2">
+                <Button variant="ghost" fullWidth onClick={() => setStaffelFor(null)}>
+                  Abbrechen
+                </Button>
+                <Button variant="navy" fullWidth loading={staffelSaving} onClick={saveStaffel}>
+                  Speichern
+                </Button>
               </div>
             </div>
           )}

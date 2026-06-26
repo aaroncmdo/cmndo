@@ -152,3 +152,49 @@ export async function getWerkstattProvisionen(werkstattId: string): Promise<Werk
     }
   })
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Staffelung (Meilenstein-Boni)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** settled = freigegeben+ausgezahlt (zaehlt fuer Meilensteine), pending = Hinweis. */
+export async function getWerkstattVermittlungsCount(
+  werkstattId: string,
+): Promise<{ settled: number; pending: number }> {
+  const supabase = await createClient()
+  const [settledRes, pendingRes] = await Promise.all([
+    supabase.from('werkstatt_provisionen').select('id', { count: 'exact', head: true })
+      .eq('werkstatt_id', werkstattId).in('status', ['freigegeben', 'ausgezahlt']),
+    supabase.from('werkstatt_provisionen').select('id', { count: 'exact', head: true })
+      .eq('werkstatt_id', werkstattId).eq('status', 'pending'),
+  ])
+  return { settled: settledRes.count ?? 0, pending: pendingRes.count ?? 0 }
+}
+
+export async function getWerkstattStaffelStufen(
+  werkstattId: string,
+): Promise<{ schwelle: number; bonus_betrag_netto: number }[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('werkstatt_staffel_stufen')
+    .select('schwelle, bonus_betrag_netto').eq('werkstatt_id', werkstattId)
+    .order('schwelle', { ascending: true })
+  return (data ?? []).map((r) => ({
+    schwelle: Number((r as unknown as { schwelle: number }).schwelle),
+    bonus_betrag_netto: Number((r as unknown as { bonus_betrag_netto: number }).bonus_betrag_netto),
+  }))
+}
+
+export async function getWerkstattStaffelBoni(
+  werkstattId: string,
+): Promise<{ schwelle: number; bonus_betrag_netto: number; status: string; erstellt_am: string }[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('werkstatt_staffel_bonus')
+    .select('schwelle, bonus_betrag_netto, status, erstellt_am').eq('werkstatt_id', werkstattId)
+    .order('schwelle', { ascending: true })
+  return (data ?? []).map((r) => ({
+    schwelle: Number((r as unknown as { schwelle: number }).schwelle),
+    bonus_betrag_netto: Number((r as unknown as { bonus_betrag_netto: number }).bonus_betrag_netto),
+    status: (r as unknown as { status: string }).status,
+    erstellt_am: (r as unknown as { erstellt_am: string }).erstellt_am,
+  }))
+}

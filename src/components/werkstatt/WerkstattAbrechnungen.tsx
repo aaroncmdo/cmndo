@@ -25,6 +25,7 @@ import { Card } from '@/components/primitives'
 type Props = {
   provisionen: WerkstattProvisionRow[]
   werkstattName: string
+  boniSumme?: number
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -96,7 +97,7 @@ function statusVisual(row: WerkstattProvisionRow): StatusVisual {
   }
 }
 
-export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
+export function WerkstattAbrechnungen({ provisionen, werkstattName, boniSumme = 0 }: Props) {
   const total = provisionen.reduce((s, r) => s + r.betrag_netto_eur, 0)
   const offene = provisionen
     .filter((r) => r.status === 'pending')
@@ -117,7 +118,7 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
       </header>
 
       {/* Zusammenfassung */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card bordered radius="md">
           <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
             Gesamt
@@ -140,6 +141,14 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName }: Props) {
           </p>
           <p className="mt-1 text-heading-sm font-bold text-success-strong">
             {EUR.format(freigegeben)}
+          </p>
+        </Card>
+        <Card bordered radius="md">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
+            Meilenstein-Boni
+          </p>
+          <p className="mt-1 text-heading-sm font-bold text-success-strong">
+            {EUR.format(boniSumme)}
           </p>
         </Card>
       </div>
