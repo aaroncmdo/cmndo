@@ -112,6 +112,15 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Doku-Sichtbarkeits-Drift-Bremse (Audit 26.06.): kunde/sv-uploadbare Katalog-Slots
+      # muessen in DOKUMENT_SICHTBAR_FUER (sichtbarkeit.ts) stehen, sonst admin-only ->
+      # Case-Handler (SV/KB/Kanzlei) sehen die Kunden-Uploads nicht. PR-Gate im Script.
+      - name: Doku-Sichtbarkeit
+        run: node scripts/check-doc-sichtbarkeit.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
