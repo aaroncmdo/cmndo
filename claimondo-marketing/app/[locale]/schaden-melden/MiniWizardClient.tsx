@@ -236,7 +236,7 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
             {...register('email')}
           />
           <p className="mt-1 text-xs text-claimondo-ondo">
-            Sie bekommen direkt nach dem Absenden einen sicheren Login-Link an diese Adresse.
+            Sie bekommen direkt nach dem Absenden einen sicheren Link an diese Adresse.
           </p>
           {errors.email ? (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -285,7 +285,7 @@ export function MiniWizardClient({ initialPromo = null, initialSrc = null }: Min
 
       <div className="flex justify-end">
         <Button type="submit" variant="ondo" disabled={isPending}>
-          {isPending ? 'Wird gesendet …' : 'Login-Link erhalten'}
+          {isPending ? 'Wird gesendet …' : 'Sicheren Link erhalten'}
         </Button>
       </div>
     </form>
