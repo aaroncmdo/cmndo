@@ -85,7 +85,7 @@ export default async function KanzleiKanbanPage() {
         size="lg"
       />
       {error && (
-        <div className="rounded-ios-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+        <div className="rounded-ios-xl border border-danger/30 bg-danger-soft p-4 text-sm text-danger-strong">
           Fehler beim Laden: {error.message}
         </div>
       )}
