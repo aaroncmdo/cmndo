@@ -161,9 +161,9 @@ export default async function AbrechnungPage() {
   // Progress bar color based on utilization
   let progressColor = 'bg-[var(--brand-secondary)]'
   if (auslastungProzent >= 90) {
-    progressColor = 'bg-red-500'
+    progressColor = 'bg-danger'
   } else if (auslastungProzent >= 70) {
-    progressColor = 'bg-amber-500'
+    progressColor = 'bg-warning'
   }
 
   // Einnahmen-Dashboard Daten (KFZ-88)
@@ -466,9 +466,9 @@ export default async function AbrechnungPage() {
                       status === 'hochgeladen' ? 'Hochgeladen' :
                       status === 'freigegeben' ? 'Freigegeben' : status
                     const statusColor =
-                      status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
+                      status === 'beauftragt' ? 'bg-warning-soft text-warning-strong' :
                       status === 'hochgeladen' ? 'bg-claimondo-bg text-claimondo-ondo' :
-                      status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
+                      status === 'freigegeben' ? 'bg-success-soft text-success-strong' :
                       'bg-claimondo-bg text-claimondo-navy'
                     const fmt = (iso: string | null) =>
                       iso
@@ -511,9 +511,9 @@ export default async function AbrechnungPage() {
                   status === 'hochgeladen' ? 'Hochgeladen' :
                   status === 'freigegeben' ? 'Freigegeben' : status
                 const statusColor =
-                  status === 'beauftragt' ? 'bg-amber-50 text-amber-700' :
+                  status === 'beauftragt' ? 'bg-warning-soft text-warning-strong' :
                   status === 'hochgeladen' ? 'bg-claimondo-bg text-claimondo-ondo' :
-                  status === 'freigegeben' ? 'bg-emerald-50 text-emerald-700' :
+                  status === 'freigegeben' ? 'bg-success-soft text-success-strong' :
                   'bg-claimondo-bg text-claimondo-navy'
                 const fmt = (iso: string | null) =>
                   iso

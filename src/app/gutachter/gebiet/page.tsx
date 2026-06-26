@@ -257,8 +257,8 @@ export default function GebietPage() {
   if (loading) return <div className="h-full flex items-center justify-center"><div className="w-6 h-6 border-2 border-[var(--brand-secondary)] border-t-transparent rounded-full animate-spin" /></div>
   if (!svData) return (
     <div className="h-full flex items-center justify-center p-8">
-      <div className="bg-white border border-amber-200 rounded-2xl p-8 text-center max-w-md">
-        <MapPinIcon className="w-10 h-10 text-amber-400 mx-auto mb-3" />
+      <div className="bg-white border border-warning/30 rounded-2xl p-8 text-center max-w-md">
+        <MapPinIcon className="w-10 h-10 text-warning mx-auto mb-3" />
         <p className="text-claimondo-navy font-semibold mb-2">Standort nicht hinterlegt</p>
         <p className="text-claimondo-ondo text-sm mb-4">Bitte hinterlegen Sie Ihren Standort im Profil, damit wir Ihr Einsatzgebiet berechnen können.</p>
         <a href="/gutachter/profil" className="inline-block bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white text-sm font-medium px-6 py-2.5 rounded-ios-xl transition-colors">Zum Profil</a>
@@ -307,8 +307,8 @@ export default function GebietPage() {
               Vorher war der Bereich komplett leer ohne Feedback an den Nutzer. */}
           {mapError && (
             <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg z-20">
-              <div className="max-w-md mx-4 rounded-ios-xl border border-red-200 bg-white p-5 shadow-sm">
-                <p className="text-sm font-semibold text-red-700 mb-1">Karte konnte nicht geladen werden</p>
+              <div className="max-w-md mx-4 rounded-ios-xl border border-danger/30 bg-white p-5 shadow-sm">
+                <p className="text-sm font-semibold text-danger-strong mb-1">Karte konnte nicht geladen werden</p>
                 <p className="text-xs text-claimondo-ondo leading-relaxed">{mapError}</p>
                 <button
                   type="button"
@@ -324,9 +324,9 @@ export default function GebietPage() {
           {/* BUG-90: Fallback-Hinweis wenn Isochrone noch leer ist (z.B.
               direkt nach Anlage / OSRM hat noch nicht durchgerechnet). */}
           {mapReady && svData && (!svData.iso || (Array.isArray(svData.iso) && (svData.iso as { lat: number; lng: number }[]).length === 0)) && (
-            <div className="absolute top-3 right-3 z-10 bg-amber-50/95 backdrop-blur-sm border border-amber-200 rounded-ios-xl p-3 max-w-xs text-xs">
-              <p className="font-semibold text-amber-700">Einsatzgebiet wird berechnet</p>
-              <p className="text-amber-600 mt-0.5">
+            <div className="absolute top-3 right-3 z-10 bg-warning-soft/95 backdrop-blur-sm border border-warning/30 rounded-ios-xl p-3 max-w-xs text-xs">
+              <p className="font-semibold text-warning-strong">Einsatzgebiet wird berechnet</p>
+              <p className="text-warning mt-0.5">
                 Dein Einsatzgebiet wird gerade berechnet. Komm in wenigen Minuten zurück oder lade die Seite neu.
               </p>
             </div>
@@ -494,8 +494,8 @@ function IndividuellesAngebotModal({ svId, onClose }: { svId: string; onClose: (
 
         {sent ? (
           <div className="p-8 text-center">
-            <div className="w-12 h-12 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-3">
-              <SendIcon className="w-6 h-6 text-green-600" />
+            <div className="w-12 h-12 bg-success-soft rounded-full flex items-center justify-center mx-auto mb-3">
+              <SendIcon className="w-6 h-6 text-success" />
             </div>
             <p className="text-claimondo-navy font-semibold mb-1">Anfrage gesendet!</p>
             <p className="text-claimondo-ondo text-sm mb-4">Wir melden uns in Kürze mit einem individuellen Angebot.</p>
