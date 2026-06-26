@@ -9,6 +9,7 @@ import {
   ReceiptIcon,
   LogOutIcon,
   WrenchIcon,
+  FileTextIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
@@ -30,10 +31,11 @@ type WerkstattShellProps = {
 const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt', label: 'Übersicht', icon: LayoutDashboardIcon, exact: true },
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
+  { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileTextIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 
-const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS.slice(0, 3)
+const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS.slice(0, 4)
 
 export function WerkstattShell({ werkstatt, email, userId, children }: WerkstattShellProps) {
   const initials = werkstatt.name

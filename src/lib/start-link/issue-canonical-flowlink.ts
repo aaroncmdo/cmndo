@@ -164,6 +164,10 @@ export async function issueCanonicalFlowLinkForAnfrage(
     // AAR-956 Werkstatt: werkstatt_id durchreichen (gfa->lead). Record-Cast, da die generierten
     // Lead-Types die frische DB-Spalte noch nicht kennen (Type-Regen aufgeschoben, AGENTS.md §6).
     ;(extra as Record<string, unknown>).werkstatt_id = (gfa.werkstatt_id as string | null) ?? null
+    // AAR Werkstatt-KVA: Werkstatt-Kostenvoranschlag durchreichen (gfa->lead). Eigene Spur,
+    // NIE der SV-Gutachten-Wert (claims.schadens_hoehe_netto). Record-Cast wg. Type-Lag (AGENTS §6).
+    ;(extra as Record<string, unknown>).kostenvoranschlag_netto = (gfa.kostenvoranschlag_netto as number | null) ?? null
+    ;(extra as Record<string, unknown>).kostenvoranschlag_brutto = (gfa.kostenvoranschlag_brutto as number | null) ?? null
     const created = await createLead(
       admin,
       {
