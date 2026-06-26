@@ -119,7 +119,7 @@ export function PortalNav({
         key={item.href}
         href={item.href}
         className={`flex items-center gap-2.5 px-3 py-2 rounded-ios-lg text-sm font-medium transition-colors duration-500 ${
-          active ? 'bg-claimondo-shield text-white' : 'text-claimondo-light-blue hover:bg-white/5 hover:text-white'
+          active ? 'bg-claimondo-ondo text-white shadow-sm' : 'text-claimondo-light-blue hover:bg-white/5 hover:text-white'
         }`}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -229,22 +229,22 @@ export function PortalNav({
   }
 
   // light variant — Kanzlei/Mitarbeiter.
-  // 2026-06-26 (Design-Review Aaron): Vorher Floating-Frosted-Weiß
-  // (white 65% + blur) auf hellem claimondo-bg = washed-out, durchsichtig,
-  // kaum Kontrast. Jetzt solide Navy-Sidebar (brand-primary via claimondo-navy)
-  // mit hellblauen Items — bildet zusammen mit dem vorhandenen Navy-Header
-  // (glass-dark) eine durchgehende Navy-Chrome um die helle Content-Fläche,
-  // analog zum Gutachter-Portal. Committed Markenfarbe statt Glassmorphism.
-  // Floating-Toggle wird hier bewusst ignoriert (das Glas WAR das Problem);
-  // data-sidebar-mode="bar" verhindert die Floating-Glass-CSS-Regeln.
+  // 2026-06-26 (Design-Review Aaron): Vorher Floating-Frosted-Weiß (white 65%)
+  // auf hellem claimondo-bg = washed-out, durchsichtig. Jetzt nutzt die light-
+  // Variante dieselben Navy-Glass-Pills wie die dark-Variante (data-sidebar-mode
+  // ="floating" → globale Pill-Regel mit brand-sidebar-bg = navy) + hellblaue
+  // Items. Das Pill-Design BLEIBT (Aaron mag es), ist aber via erhöhter Pill-
+  // Opacity (globals.css 55%→80%) deutlich solider. Bar-Mode = solide Navy-Spalte.
   return (
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
-      data-sidebar-mode="bar"
-      className={`w-56 shrink-0 overflow-y-auto bg-claimondo-navy border-r border-white/10 ${className}`}
+      data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
+      className={`w-56 shrink-0 overflow-y-auto ${
+        floatingMode ? 'bg-transparent py-3 px-3' : 'bg-claimondo-navy border-r border-white/10'
+      } ${className}`}
     >
-      <div className="flex flex-col gap-0.5 p-3">
+      <nav className={`flex flex-col gap-0.5 ${floatingMode ? '' : 'p-3'}`}>
         {sections.map((section, i) => (
           <div
             key={section.label ?? i}
@@ -258,7 +258,7 @@ export function PortalNav({
             {section.items.map(renderLightItem)}
           </div>
         ))}
-      </div>
+      </nav>
     </aside>
   )
 }

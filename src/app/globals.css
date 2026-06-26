@@ -659,7 +659,7 @@ aside[data-sidebar-mode="floating"] > nav {
   /* 2026-05-14 v2: Echtes Glassmorphism — 55% Sidebar-BG (statt 90%) damit der
      backdrop-filter blur den Content/Map dahinter sichtbar weichzeichnet.
      Stärkerer Blur (22px) + inset-highlight für Liquid-Glass-Anmutung. */
-  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 80%, transparent);
   backdrop-filter: saturate(180%) blur(22px);
   -webkit-backdrop-filter: saturate(180%) blur(22px);
   border: 1px solid color-mix(in srgb, white 22%, transparent);
@@ -699,7 +699,7 @@ body[data-sidebar-mode="floating"] aside.kunde-sidebar {
   gap: 12px;
 }
 body[data-sidebar-mode="floating"] aside.kunde-sidebar > * {
-  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
+  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 80%, transparent);
   backdrop-filter: saturate(180%) blur(22px);
   -webkit-backdrop-filter: saturate(180%) blur(22px);
   border: 1px solid color-mix(in srgb, white 22%, transparent);
