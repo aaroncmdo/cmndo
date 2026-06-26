@@ -1,12 +1,15 @@
 'use server'
 
-// Reparaturfreigabe (manuell durch admin/dispatch/KB) — setzt/loescht den
-// claims.reparatur_freigegeben_am-Marker, den die Werkstatt in „Meine Vermittlungen" sieht.
+// Reparaturfreigabe (manuell durch admin/Kundenbetreuer in der Fallakte) — setzt/loescht
+// den claims.reparatur_freigegeben_am-Marker, den die Werkstatt in „Meine Vermittlungen" sieht.
+// Gate = admin/KB: deckt sich mit dem Fallakte-Button (admin/KB) UND der claims-RLS
+// (claims_staff_all_consolidated: is_admin() OR is_kundenbetreuer()-own). Dispatch hat
+// keinen Fallakte-/claims-Write-Pfad -> bewusst NICHT im Gate (sonst silent no-op).
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-const STAFF = ['admin', 'dispatch', 'kundenbetreuer']
+const STAFF = ['admin', 'kundenbetreuer']
 
 async function requireStaff(): Promise<{ id: string } | null> {
   const supabase = await createClient()

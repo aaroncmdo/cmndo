@@ -56,11 +56,19 @@ describe('reparaturFreigeben / reparaturFreigabeZuruecknehmen', () => {
     expect(res.ok).toBe(true)
   })
 
-  it('dispatch -> ok:true (zuruecknehmen)', async () => {
-    mockConfig.authUser = { id: 'd1' }
-    mockConfig.profileRolle = 'dispatch'
+  it('kundenbetreuer -> ok:true (zuruecknehmen)', async () => {
+    mockConfig.authUser = { id: 'kb1' }
+    mockConfig.profileRolle = 'kundenbetreuer'
     const { reparaturFreigabeZuruecknehmen } = await import('../reparatur-freigabe')
     const res = await reparaturFreigabeZuruecknehmen('c-1')
     expect(res.ok).toBe(true)
+  })
+
+  it('dispatch -> ok:false (kein Fallakte-/claims-Write-Pfad)', async () => {
+    mockConfig.authUser = { id: 'd1' }
+    mockConfig.profileRolle = 'dispatch'
+    const { reparaturFreigeben } = await import('../reparatur-freigabe')
+    const res = await reparaturFreigeben('c-1')
+    expect(res.ok).toBe(false)
   })
 })
