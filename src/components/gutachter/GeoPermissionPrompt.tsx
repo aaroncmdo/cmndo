@@ -64,9 +64,9 @@ export function GeoPermissionPrompt({ permission, onRequest }: Props) {
 
   if (permission === 'denied') {
     return (
-      <div className="mb-3 rounded-ios-xl border border-red-200 bg-red-50/80 backdrop-blur-md px-3 py-2 flex items-center gap-2 text-xs">
-        <MapPinOffIcon className="w-4 h-4 text-red-700 shrink-0" />
-        <p className="flex-1 text-red-900 truncate">
+      <div className="mb-3 rounded-ios-xl border border-danger/30 bg-danger-soft/80 backdrop-blur-md px-3 py-2 flex items-center gap-2 text-xs">
+        <MapPinOffIcon className="w-4 h-4 text-danger-strong shrink-0" />
+        <p className="flex-1 text-danger-strong truncate">
           <span className="font-medium">Standort blockiert.</span>{' '}
           <span className="hidden sm:inline">In Browser-Settings für Claimondo wieder erlauben.</span>
           <span className="sm:hidden">Browser-Settings öffnen.</span>
