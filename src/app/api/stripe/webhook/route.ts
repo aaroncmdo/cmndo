@@ -29,22 +29,43 @@ export async function POST(request: Request) {
 
   const db = createAdminClient()
 
-  // Idempotenz: Event nur einmal verarbeiten
-  const { data: existing } = await db.from('stripe_events')
-    .select('id')
-    .eq('stripe_event_id', event.id)
-    .limit(1)
-    .maybeSingle()
-  if (existing) return NextResponse.json({ ok: true, duplicate: true })
-
-  // Event loggen
+  // Idempotenz (SV-Onboarding-Audit): Atomarer Claim statt SELECT-dann-INSERT.
+  // Der UNIQUE(stripe_event_id)-Constraint sorgt dafuer, dass bei gleichzeitiger
+  // Doppel-Zustellung genau EINE Anfrage den Insert gewinnt. WICHTIG: Wir gaten
+  // auf erfolgreiche VERARBEITUNG (verarbeitet=true), nicht auf blosse Existenz —
+  // sonst wuerde ein Event, dessen Verarbeitung beim ersten Versuch fehlschlaegt
+  // (Row liegt schon mit verarbeitet=false), bei jedem Stripe-Retry als "duplicate"
+  // abgewiesen und NIE nachverarbeitet. Folge waere ein bezahlter SV ohne
+  // portal_zugang_freigeschaltet -> vom Gutachter-Layout dauerhaft ausgesperrt.
   const gutachterId = (event.data.object.metadata as Record<string, string>)?.gutachter_id ?? null
-  await db.from('stripe_events').insert({
+  const { error: claimErr } = await db.from('stripe_events').insert({
     stripe_event_id: event.id,
     event_type: event.type,
     sv_id: gutachterId,
     payload: event.data.object,
   })
+  if (claimErr) {
+    // Insert fehlgeschlagen: entweder Unique-Konflikt (Row existiert schon) oder
+    // ein echter DB-Fehler. Unterscheiden anhand der vorhandenen Row.
+    const { data: prior } = await db.from('stripe_events')
+      .select('verarbeitet')
+      .eq('stripe_event_id', event.id)
+      .maybeSingle()
+    if (prior?.verarbeitet) {
+      // Bereits erfolgreich verarbeitet -> echtes Duplikat.
+      return NextResponse.json({ ok: true, duplicate: true })
+    }
+    if (!prior) {
+      // Kein Konflikt -> claimErr war ein echter DB-Fehler. 500 zurueck, damit
+      // Stripe das Event erneut zustellt (statt es still durchlaufen zu lassen).
+      console.error('[KFZ-148] stripe_events Claim-Insert-Fehler (kein Konflikt):', claimErr)
+      return NextResponse.json({ error: 'db' }, { status: 500 })
+    }
+    // prior existiert mit verarbeitet=false -> vorheriger Versuch ist fehlgeschlagen
+    // (oder laeuft gerade konkurrierend). Wir verarbeiten (erneut). Die Handler-
+    // Operationen sind idempotent (UPDATEs setzen Absolutwerte; die Onboarding-
+    // Rechnung ist per partiellem Unique-Index gegen Doppelausstellung geschuetzt).
+  }
 
   try {
     switch (event.type) {

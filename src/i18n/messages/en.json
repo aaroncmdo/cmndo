@@ -5585,7 +5585,10 @@
       "hinweis": "Enter the inspection location — then we'll show you matching expert appointments nearby.",
       "placeholder": "Address of the inspection location",
       "speichern_laeuft": "One moment, we're looking for matching appointments …",
-      "fehler_speichern": "The address could not be saved."
+      "fehler_speichern": "The address could not be saved.",
+      "vorschlag_label": "Is your vehicle at the reported accident location?",
+      "vorschlag_bestaetigen": "Yes, inspect there",
+      "vorschlag_oder": "Or choose a different location:"
     }
   },
   "gutachter": {

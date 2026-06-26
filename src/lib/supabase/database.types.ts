@@ -2571,6 +2571,8 @@ export type Database = {
           sprache: string | null
           status: string | null
           status_changed_at: string | null
+          reparatur_freigegeben_am: string | null
+          reparatur_freigegeben_von: string | null
           sv_datenschutz_widerruf_zugestimmt_am: string | null
           sv_id: string | null
           sv_nachzahlung_netto: number | null
@@ -2755,6 +2757,8 @@ export type Database = {
           sprache?: string | null
           status?: string | null
           status_changed_at?: string | null
+          reparatur_freigegeben_am?: string | null
+          reparatur_freigegeben_von?: string | null
           sv_datenschutz_widerruf_zugestimmt_am?: string | null
           sv_id?: string | null
           sv_nachzahlung_netto?: number | null
@@ -2939,6 +2943,8 @@ export type Database = {
           sprache?: string | null
           status?: string | null
           status_changed_at?: string | null
+          reparatur_freigegeben_am?: string | null
+          reparatur_freigegeben_von?: string | null
           sv_datenschutz_widerruf_zugestimmt_am?: string | null
           sv_id?: string | null
           sv_nachzahlung_netto?: number | null

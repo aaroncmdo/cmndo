@@ -17,6 +17,12 @@ export async function getActiveSVs(
     )
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
+    // SV-Onboarding-Audit: gesperrt/geloescht ergaenzt (= applyDispatchableFilter).
+    // Sperre/Soft-Delete lassen ist_aktiv=true -> sonst erschienen gesperrte/geloeschte
+    // SVs auf der Dispatch-Karte. Reader ist authenticated (admin/dispatch) und darf
+    // diese Spalten filtern (anders als der anon-Finder, dessen Gate in der RLS-Policy sitzt).
+    .is('gesperrt_seit', null)
+    .is('geloescht_am', null)
     .not('standort_lat', 'is', null)
     .not('standort_lng', 'is', null)
 

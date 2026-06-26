@@ -123,7 +123,7 @@ export default async function KundeTerminPage({
   // AAR-423: SV-Branding + Profil laden für Light-Branding und Attribution.
   const { data: svRow } = await db
     .from('sachverstaendige')
-    .select('profile_id, brand_theme, brand_primary, brand_secondary, use_custom_branding, verifiziert_am')
+    .select('profile_id, brand_theme, brand_primary, brand_secondary, use_custom_branding, verifiziert')
     .eq('id', termin.assignee_id)
     .single()
 
@@ -149,7 +149,13 @@ export default async function KundeTerminPage({
   // AAR-branding-rest: Full-Branding (27 Vars) wenn SV verifiziert + Custom-Branding
   // aktiv — der Kunde sieht das volle Whitelabel seines SVs (Aaron-Entscheidung
   // 12.05.). Claimondo-Header (ClaimondoKundenHeader) bleibt als Attribution.
-  const svVerifiziert = !!svRow?.verifiziert_am
+  //
+  // SV-Onboarding-Audit: Branding-Gate auf das kanonische `verifiziert`-Boolean gezogen
+  // (= resolveKundenTheme / kunden-theme.ts Business-Rule), statt `verifiziert_am` —
+  // letzteres wird auch von Tier-2 (tier2Freigeben) gestempelt, ohne `verifiziert` zu
+  // setzen, und konnte so bei einem noch nicht Tier-1-verifizierten SV Whitelabel zeigen,
+  // das das Kunde-Portal (resolveKundenTheme) verweigert. Jetzt konsistent.
+  const svVerifiziert = svRow?.verifiziert === true
   const brandEnabled = svVerifiziert && !!svRow?.use_custom_branding
 
   const brandStyle = brandEnabled
