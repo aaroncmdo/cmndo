@@ -96,10 +96,10 @@ const DOK_LABELS: Record<string, string> = {
 }
 
 const STATUS_CFG: Record<string, { bg: string; text: string; icon: typeof CheckCircle2Icon }> = {
-  ausstehend: { bg: 'bg-amber-50', text: 'text-amber-600', icon: ClockIcon },
-  nachgereicht_angefordert: { bg: 'bg-orange-50', text: 'text-orange-600', icon: BellIcon },
+  ausstehend: { bg: 'bg-warning-soft', text: 'text-warning', icon: ClockIcon },
+  nachgereicht_angefordert: { bg: 'bg-warning-soft', text: 'text-warning', icon: BellIcon },
   hochgeladen: { bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', icon: CheckCircle2Icon },
-  geprueft: { bg: 'bg-emerald-50', text: 'text-emerald-600', icon: CheckCircle2Icon },
+  geprueft: { bg: 'bg-success-soft', text: 'text-success', icon: CheckCircle2Icon },
 }
 
 const KAT_COLORS: Record<string, string> = {
@@ -256,7 +256,7 @@ export default function DokumenteTab({
           </div>
           <div className="h-2 bg-claimondo-border rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-emerald-500' : 'bg-claimondo-ondo'}`}
+              className={`h-full rounded-full transition-all ${pct === 100 ? 'bg-success' : 'bg-claimondo-ondo'}`}
               style={{ width: `${pct}%` }}
             />
           </div>
@@ -335,7 +335,7 @@ export default function DokumenteTab({
                         <button
                           onClick={() => handleNachreichen(dok.id, label)}
                           disabled={nachreichPending}
-                          className="text-[10px] text-orange-600 hover:text-orange-700 font-medium flex items-center gap-1 disabled:opacity-50"
+                          className="text-[10px] text-warning hover:text-warning-strong font-medium flex items-center gap-1 disabled:opacity-50"
                           title='Kunde per WA erinnern — Status wird auf „nachgereicht_angefordert" gesetzt'
                         >
                           <BellIcon className="w-3 h-3" /> Nachreichen

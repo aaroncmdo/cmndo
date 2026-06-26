@@ -115,6 +115,13 @@ export default async function LocaleLayout({
   const ga4Id = process.env.NEXT_PUBLIC_GA4_ID
   const gadsId = process.env.NEXT_PUBLIC_GADS_ID
   const primaryGtagId = ga4Id ?? gadsId
+  // Consent-Default 'granted' — Anwalts-Freigabe + GF-Entscheid (26.06.2026, von
+  // Aaron bestaetigt). Consent Mode v2 Advanced (Modeling, url_passthrough) bleibt
+  // aktiv; das CMP (ConsentManager) dient als Opt-out. Rollback-Valve:
+  // NEXT_PUBLIC_CONSENT_DEFAULT=denied erzwingt denied ohne Redeploy.
+  // docs/conversion-tracking-attribution-runbook.md (A2/B6).
+  const consentDefault =
+    process.env.NEXT_PUBLIC_CONSENT_DEFAULT === 'denied' ? 'denied' : 'granted'
   const host = (await headers()).get('host')
   const shouldLoadGtag = isTrackingHost(host) && Boolean(primaryGtagId)
   const shouldShowConsent = isMarketingHost(host)
@@ -142,12 +149,12 @@ export default async function LocaleLayout({
                 window.dataLayer = window.dataLayer || [];
                 function gtag(){dataLayer.push(arguments);}
                 gtag('consent', 'default', {
-                  ad_storage: 'denied',
-                  ad_user_data: 'denied',
-                  ad_personalization: 'denied',
-                  analytics_storage: 'denied',
-                  functionality_storage: 'denied',
-                  personalization_storage: 'denied',
+                  ad_storage: '${consentDefault}',
+                  ad_user_data: '${consentDefault}',
+                  ad_personalization: '${consentDefault}',
+                  analytics_storage: '${consentDefault}',
+                  functionality_storage: '${consentDefault}',
+                  personalization_storage: '${consentDefault}',
                   security_storage: 'granted',
                   wait_for_update: 500
                 });
