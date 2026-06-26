@@ -5585,7 +5585,10 @@
       "hinweis": "Prosimy podać miejsce oględzin — wówczas pokażemy Państwu pasujące terminy u rzeczoznawców w pobliżu.",
       "placeholder": "Adres miejsca oględzin",
       "speichern_laeuft": "Chwileczkę, szukamy pasujących terminów …",
-      "fehler_speichern": "Nie udało się zapisać adresu."
+      "fehler_speichern": "Nie udało się zapisać adresu.",
+      "vorschlag_label": "Czy Twój pojazd znajduje się w zgłoszonym miejscu wypadku?",
+      "vorschlag_bestaetigen": "Tak, tam dokonać oględzin",
+      "vorschlag_oder": "Lub wybierz inne miejsce:"
     }
   },
   "gutachter": {

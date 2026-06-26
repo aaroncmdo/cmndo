@@ -311,7 +311,7 @@ export default function FlowWizardKfz({
           avatarUrl: gebuchterTermin.svAvatar,
           firma: null,
           terminDatum: gebuchterTermin.startIso,
-          besichtigungsAdresse: besichtigungsAdresse ?? null,
+          besichtigungsAdresse: gebuchterTermin.besichtigungsAdresse ?? besichtigungsAdresse ?? null,
           svTreffpunkt: null,
           googleDurchschnitt: null,
           googleAnzahl: null,
