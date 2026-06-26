@@ -32,7 +32,7 @@ export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichte
       renderBadge={(item) => {
         if (item.href === '/mitarbeiter/nachrichten' && (unreadNachrichten ?? 0) > 0) {
           return (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-red-500 text-white">
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-danger text-white">
               {unreadNachrichten}
             </span>
           )

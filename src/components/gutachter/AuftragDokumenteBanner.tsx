@@ -124,19 +124,19 @@ export default async function AuftragDokumenteBanner({
   if (offen.length === 0) return null
 
   return (
-    <div className="rounded-2xl border border-amber-300 bg-gradient-to-br from-amber-50 to-amber-50/40 p-5 shadow-sm">
-      <div className="flex items-center gap-3 pb-3 border-b border-amber-200/70">
-        <div className="w-10 h-10 rounded-ios-xl bg-amber-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+    <div className="rounded-2xl border border-warning/30 bg-gradient-to-br from-warning-soft to-warning-soft/40 p-5 shadow-sm">
+      <div className="flex items-center gap-3 pb-3 border-b border-warning/30">
+        <div className="w-10 h-10 rounded-ios-xl bg-warning text-white flex items-center justify-center flex-shrink-0 shadow-sm">
           <InboxIcon className="w-5 h-5" />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-base font-semibold text-amber-900">Noch einzuholen</p>
-          <p className="text-xs text-amber-800/90 mt-0.5">
+          <p className="text-base font-semibold text-warning-strong">Noch einzuholen</p>
+          <p className="text-xs text-warning-strong/90 mt-0.5">
             Der Kunde reicht folgende {offen.length === 1 ? 'Unterlage' : 'Unterlagen'} noch nach
             — bis zum Gutachten-Upload.
           </p>
         </div>
-        <span className="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full bg-amber-500 text-white text-sm font-bold shadow-sm">
+        <span className="ml-auto inline-flex items-center justify-center min-w-7 h-7 px-2 rounded-full bg-warning text-white text-sm font-bold shadow-sm">
           {offen.length}
         </span>
       </div>
@@ -146,17 +146,17 @@ export default async function AuftragDokumenteBanner({
             key={a.slot_id}
             className="flex items-start gap-2.5 text-sm text-claimondo-navy"
           >
-            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-amber-500 flex-shrink-0" />
+            <span className="mt-1 w-1.5 h-1.5 rounded-full bg-warning flex-shrink-0" />
             <span className="flex-1 min-w-0">
               <span className="font-medium">{a.label}</span>
               {a.beschreibung && (
-                <span className="block text-xs text-amber-900/70 mt-0.5">
+                <span className="block text-xs text-warning-strong/70 mt-0.5">
                   {a.beschreibung}
                 </span>
               )}
             </span>
             {a.pflicht && (
-              <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-amber-200 text-amber-900 flex-shrink-0">
+              <span className="text-[10px] uppercase font-semibold tracking-wider px-1.5 py-0.5 rounded bg-warning/20 text-warning-strong flex-shrink-0">
                 Pflicht
               </span>
             )}

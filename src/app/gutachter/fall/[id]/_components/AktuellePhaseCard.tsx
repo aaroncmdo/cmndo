@@ -36,13 +36,13 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     title: 'Termin bestätigen oder Gegenvorschlag machen',
     text: 'Der Auftrag liegt frisch bei dir. Schau dir den vorgeschlagenen Termin unten an und bestätige oder schlage eine Alternative vor.',
     cta: 'Termin-Aktionen unten',
-    cssAccent: 'bg-amber-50 border-amber-200 text-amber-900',
+    cssAccent: 'bg-warning-soft border-warning/30 text-warning-strong',
   },
   'termin-bestaetigt': {
     icon: CheckCircle2Icon,
     title: 'Termin bestätigt',
     text: 'Der Besichtigungstermin steht. Vorbereitung: Stammdaten + ZB1 prüfen — am Termintag findest du hier deine Vor-Ort-Checkliste.',
-    cssAccent: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+    cssAccent: 'bg-success-soft border-success/30 text-success-strong',
   },
   'vor-ort': {
     icon: CameraIcon,
@@ -56,7 +56,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     title: 'Gutachten hochladen',
     text: 'Die Besichtigung ist erfolgt. Lade jetzt das fertige Gutachten + Schadenhöhe hoch — typische Bearbeitungszeit: 48h nach Termin.',
     cta: 'Gutachten-Upload unten',
-    cssAccent: 'bg-amber-50 border-amber-200 text-amber-900',
+    cssAccent: 'bg-warning-soft border-warning/30 text-warning-strong',
   },
   'kanzlei-uebergeben': {
     icon: ScaleIcon,
@@ -80,13 +80,13 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     icon: EuroIcon,
     title: 'Zahlung eingegangen',
     text: 'Die Versicherung hat reguliert. Dein Honorar wird in den nächsten Tagen überwiesen.',
-    cssAccent: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+    cssAccent: 'bg-success-soft border-success/30 text-success-strong',
   },
   'honorar-ueberwiesen': {
     icon: CircleCheckBigIcon,
     title: 'Honorar überwiesen',
     text: 'Dein Honorar ist auf deinem Konto. Fall ist für dich abgeschlossen.',
-    cssAccent: 'bg-emerald-50 border-emerald-200 text-emerald-900',
+    cssAccent: 'bg-success-soft border-success/30 text-success-strong',
   },
   abgeschlossen: {
     icon: CircleCheckBigIcon,
@@ -98,7 +98,7 @@ const HINTS: Record<SvSubphase['code'], Hint> = {
     icon: XCircleIcon,
     title: 'Fall storniert',
     text: 'Dieser Fall wurde storniert — keine weiteren Aktionen erforderlich.',
-    cssAccent: 'bg-red-50 border-red-200 text-red-900',
+    cssAccent: 'bg-danger-soft border-danger/30 text-danger-strong',
   },
 }
 

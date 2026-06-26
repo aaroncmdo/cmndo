@@ -28,6 +28,8 @@ export type SvTreffer = {
 /** Normalised result returned by {@link fetchSvInNaehe}. Mirrors the tool's outputSchema. */
 export type SvInNaeheResult = {
   plz: string
+  ort: string | null
+  standort: string
   radius_km: number
   anzahl_treffer: number
   sachverstaendige: SvTreffer[]
@@ -46,7 +48,9 @@ interface RawTreffer {
 }
 
 interface RawResponse {
-  plz?: string
+  plz?: string | null
+  ort?: string | null
+  standort?: string
   radius_km?: number
   anzahl_treffer?: number
   sv_liste?: RawTreffer[]
@@ -68,16 +72,21 @@ export class ClaimondoApiError extends Error {
 }
 
 /**
- * Fetch Kfz-Sachverstaendige near a 5-digit German postal code from the live
- * Claimondo public API. Times out after 15 s, normalises the response, and
- * raises {@link ClaimondoApiError} on any failure (never returns a partial).
+ * Fetch Kfz-Sachverstaendige near a German PLZ OR a free-text city/address from
+ * the live Claimondo public API. Pass either plz or ort (plz wins if both given).
+ * Times out after 30 s, normalises the response, and raises {@link ClaimondoApiError}
+ * on any failure (never returns a partial).
  */
 export async function fetchSvInNaehe(
-  plz: string,
+  plz: string | undefined,
+  ort: string | undefined,
   radius: number,
   apiBase: string = DEFAULT_API_BASE,
 ): Promise<SvInNaeheResult> {
-  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/sv-in-naehe?plz=${encodeURIComponent(plz)}&radius=${radius}`
+  const qs = new URLSearchParams({ radius: String(radius) })
+  if (plz) qs.set('plz', plz)
+  else if (ort) qs.set('ort', ort)
+  const url = `${apiBase.replace(/\/+$/, '')}/api/v1/sv-in-naehe?${qs.toString()}`
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
 
@@ -112,6 +121,8 @@ export async function fetchSvInNaehe(
 function normalise(b: RawResponse): SvInNaeheResult {
   return {
     plz: b.plz ?? '',
+    ort: b.ort ?? null,
+    standort: b.standort ?? '',
     radius_km: b.radius_km ?? 0,
     anzahl_treffer: b.anzahl_treffer ?? b.sv_liste?.length ?? 0,
     sachverstaendige: (b.sv_liste ?? []).map((s) => ({
@@ -130,7 +141,8 @@ function normalise(b: RawResponse): SvInNaeheResult {
 
 /** Human-readable German summary for the markdown response format (user-facing). */
 export function formatMarkdown(r: SvInNaeheResult): string {
-  const lines: string[] = [`# Kfz-Sachverständige im Umkreis von PLZ ${r.plz} (${r.radius_km} km)`, '']
+  const standortLabel = r.plz ? `PLZ ${r.plz}` : r.standort || r.ort || 'der Region'
+  const lines: string[] = [`# Kfz-Sachverständige im Umkreis von ${standortLabel} (${r.radius_km} km)`, '']
 
   if (r.anzahl_treffer === 0) {
     lines.push(
@@ -225,6 +237,8 @@ export type GutachterMitTerminen = {
 
 export type GutachterTermineResult = {
   plz: string
+  ort: string | null
+  standort: string
   wunschtermin: string | null
   anzahl_gutachter: number
   gutachter: GutachterMitTerminen[]
@@ -233,7 +247,9 @@ export type GutachterTermineResult = {
 }
 
 interface RawGutachterTermine {
-  plz?: string
+  plz?: string | null
+  ort?: string | null
+  standort?: string
   wunschtermin?: string | null
   anzahl_gutachter?: number
   gutachter?: GutachterMitTerminen[]
@@ -242,13 +258,17 @@ interface RawGutachterTermine {
   error?: string
 }
 
-/** Fetch buchbare Gutachter + freie Slots zu einer PLZ. Timeout 30 s, wirft {@link ClaimondoApiError}. */
+/** Fetch buchbare Gutachter + freie Slots zu einer PLZ ODER einem Freitext-Ort (plz gewinnt,
+ *  wenn beides gesetzt). Timeout 30 s, wirft {@link ClaimondoApiError}. */
 export async function fetchGutachterTermine(
-  plz: string,
+  plz: string | undefined,
+  ort: string | undefined,
   wunschtermin: string | undefined,
   apiBase: string = DEFAULT_API_BASE,
 ): Promise<GutachterTermineResult> {
-  const qs = new URLSearchParams({ plz })
+  const qs = new URLSearchParams()
+  if (plz) qs.set('plz', plz)
+  else if (ort) qs.set('ort', ort)
   if (wunschtermin) qs.set('wunschtermin', wunschtermin)
   const url = `${apiBase.replace(/\/+$/, '')}/api/v1/gutachter-termine?${qs.toString()}`
   const controller = new AbortController()
@@ -276,7 +296,9 @@ export async function fetchGutachterTermine(
     throw new ClaimondoApiError(body.error ?? `Die Claimondo-API antwortete mit HTTP ${res.status}.`, res.status)
   }
   return {
-    plz: body.plz ?? plz,
+    plz: body.plz ?? plz ?? '',
+    ort: body.ort ?? null,
+    standort: body.standort ?? '',
     wunschtermin: body.wunschtermin ?? null,
     anzahl_gutachter: body.anzahl_gutachter ?? body.gutachter?.length ?? 0,
     gutachter: body.gutachter ?? [],
@@ -302,7 +324,8 @@ function formatSlot(iso: string): string {
 
 /** Menschenlesbare deutsche Zusammenfassung (markdown response_format, user-facing). */
 export function formatGutachterTermine(r: GutachterTermineResult): string {
-  const lines: string[] = [`# Buchbare Kfz-Gutachter + freie Termine — PLZ ${r.plz}`, '']
+  const standortLabel = r.plz ? `PLZ ${r.plz}` : r.standort || r.ort || 'der Region'
+  const lines: string[] = [`# Buchbare Kfz-Gutachter + freie Termine — ${standortLabel}`, '']
   if (r.anzahl_gutachter === 0) {
     lines.push(
       'Aktuell kein Partner-Gutachter mit freien Online-Terminen im Umkreis. Über die interaktive Karte oder den Telefon-Rückruf lässt sich trotzdem ein Termin (i. d. R. < 48 h) organisieren.',

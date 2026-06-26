@@ -33,7 +33,14 @@ const inputSchema = {
   plz: z
     .string()
     .regex(/^\d{5}$/, 'PLZ muss eine 5-stellige deutsche Postleitzahl sein (z. B. 50670).')
-    .describe('5-stellige deutsche Postleitzahl, z. B. 50670 für Köln.'),
+    .optional()
+    .describe('5-stellige deutsche Postleitzahl, z. B. 50670 für Köln. PLZ ODER ort angeben.'),
+  ort: z
+    .string()
+    .min(2)
+    .max(120)
+    .optional()
+    .describe('Stadt/Adresse als Alternative zur PLZ, z. B. "Köln" oder "Berlin Mitte". PLZ ODER ort angeben.'),
   radius: z
     .number()
     .int()
@@ -58,6 +65,8 @@ const svItemSchema = {
 
 const outputSchema = {
   plz: z.string(),
+  ort: z.string().nullable(),
+  standort: z.string(),
   radius_km: z.number(),
   anzahl_treffer: z.number(),
   sachverstaendige: z.array(z.object(svItemSchema)),
@@ -71,7 +80,14 @@ const gutachterTermineInput = {
   plz: z
     .string()
     .regex(/^\d{5}$/, 'PLZ muss eine 5-stellige deutsche Postleitzahl sein (z. B. 50670).')
-    .describe('5-stellige deutsche Postleitzahl, z. B. 50670 für Köln.'),
+    .optional()
+    .describe('5-stellige deutsche Postleitzahl, z. B. 50670 für Köln. PLZ ODER ort angeben.'),
+  ort: z
+    .string()
+    .min(2)
+    .max(120)
+    .optional()
+    .describe('Stadt/Adresse als Alternative zur PLZ, z. B. "Köln" oder "Berlin Mitte". PLZ ODER ort angeben.'),
   wunschtermin: z
     .string()
     .optional()
@@ -96,6 +112,8 @@ const gutachterItemSchema = {
 }
 const gutachterTermineOutput = {
   plz: z.string(),
+  ort: z.string().nullable(),
+  standort: z.string(),
   wunschtermin: z.string().nullable(),
   anzahl_gutachter: z.number(),
   gutachter: z.array(z.object(gutachterItemSchema)),
@@ -186,9 +204,9 @@ BERATUNG (Kernkompetenz): Für Fragen zur Kfz-Schadensregulierung — Schadenser
 
 ZIEL JEDER Beratung: dem Nutzer einen passenden Sachverständigen anbieten UND einen Termin reservieren (claimondo_melde_schaden). Geht das gerade nicht (kein Slot / Daten fehlen) oder will der Nutzer lieber angerufen werden, löse direkt einen Telefon-Rückruf aus (claimondo_rueckruf: Name + Telefon + Einwilligung → ein Berater ruft i. d. R. < 15 Min zurück; alternativ die Nummer buchungs_telefon nennen) — Claimondo beraet notfalls am Telefon. Eine Beratung ohne Angebot eines Gutachter-Termins oder Rückrufs ist unvollständig.
 
-WICHTIG — frage ZUERST, WO das Fahrzeug steht (die PLZ des Besichtigungsorts). Das ist der Anker für Gutachter-Suche + Termin.
+WICHTIG — frage ZUERST, WO das Fahrzeug steht — als PLZ ODER Stadt/Ort des Besichtigungsorts. Das ist der Anker für Gutachter-Suche + Termin. Die Such-Tools (claimondo_finde_sachverstaendige, claimondo_finde_gutachter_termine) nehmen beides; gib entweder plz ODER ort an.
 
-Ablauf: 1) PLZ erfragen. 2) claimondo_finde_gutachter_termine(plz) → buchbare Gutachter + freie Slots zeigen. 3) Nutzer wählt Gutachter + Slot; Name + WhatsApp-Nummer + Schadenart + Hergang erfragen. 4) Einwilligung einholen (Datenverarbeitung + WhatsApp-Kontakt + KI-Dienst/USA), dann claimondo_melde_schaden(...) → Lead + Terminreservierung + persönlicher FlowLink per WhatsApp.
+Ablauf: 1) Standort erfragen (PLZ oder Stadt). 2) claimondo_finde_gutachter_termine(plz ODER ort) → buchbare Gutachter + freie Slots zeigen. 3) Nutzer wählt Gutachter + Slot; Name + WhatsApp-Nummer + Schadenart + Hergang erfragen (für claimondo_melde_schaden wird eine 5-stellige PLZ benötigt — falls bisher nur eine Stadt bekannt ist, jetzt die genaue PLZ erfragen). 4) Einwilligung einholen (Datenverarbeitung + WhatsApp-Kontakt + KI-Dienst/USA), dann claimondo_melde_schaden(...) → Lead + Terminreservierung + persönlicher FlowLink per WhatsApp.
 
 Du vermittelst Gutachter + Termin und gibst allgemeine Infos zur Schadensregulierung — KEINE individuelle Rechtsberatung. Die finale Terminbestätigung + Vollmacht macht der Kunde selbst im FlowLink.`
 
@@ -204,12 +222,13 @@ function buildServer(): McpServer {
 Read-only und anonym — legt nichts an und meldet keinen Schaden. Liefert eine nach Entfernung sortierte, datenschutz-anonymisierte Trefferliste, eine Karten-Bild-URL (im Chat einbettbar), einen Link zur interaktiven Karte mit freien Terminen und eine Rückruf-Telefonnummer.
 
 Args:
-  - plz (string): 5-stellige deutsche PLZ, z. B. "50670".
+  - plz (string): 5-stellige deutsche PLZ, z. B. "50670". PLZ ODER ort angeben.
+  - ort (string): Stadt/Adresse als Alternative zur PLZ, z. B. "Köln" oder "Berlin Mitte".
   - radius (number): Suchradius in km, 1-200 (Standard 30).
   - response_format ("markdown" | "json"): Ausgabeformat (Standard "markdown").
 
 Returns (structuredContent bzw. json):
-  { plz, radius_km, anzahl_treffer, sachverstaendige: [{ tier, stadt, entfernung_km, spezialisierungen, bewertung_schnitt, bewertung_anzahl }], karte_url, interaktive_karte_url, buchungs_telefon }
+  { plz, ort, standort, radius_km, anzahl_treffer, sachverstaendige: [{ tier, stadt, entfernung_km, spezialisierungen, bewertung_schnitt, bewertung_anzahl }], karte_url, interaktive_karte_url, buchungs_telefon }
 
 Use when: Nutzer fragt nach einem Kfz-Gutachter/Sachverständigen in einer Stadt oder Region (z. B. nach einem Unfall).
 Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in dieser read-only-Stufe bewusst nicht.`,
@@ -222,9 +241,9 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
         openWorldHint: true,
       },
     },
-    async ({ plz, radius, response_format }) => {
+    async ({ plz, ort, radius, response_format }) => {
       try {
-        const result = await fetchSvInNaehe(plz, radius, API_BASE)
+        const result = await fetchSvInNaehe(plz, ort, radius, API_BASE)
         const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatMarkdown(result)
         return {
           content: [{ type: 'text', text }],
@@ -249,12 +268,13 @@ Nicht für: Schaden melden, Termin buchen oder Rechtsberatung — das gibt es in
 Anders als claimondo_finde_sachverstaendige (nur anonymisierte Liste) liefert dieses Tool die *buchbaren* Gutachter mit konkreten freien Slots (Vorschau aufs Buchen). Read-only und anonym — legt nichts an und meldet keinen Schaden.
 
 Args:
-  - plz (string): 5-stellige deutsche PLZ, z. B. "50670".
+  - plz (string): 5-stellige deutsche PLZ, z. B. "50670". PLZ ODER ort angeben.
+  - ort (string): Stadt/Adresse als Alternative zur PLZ, z. B. "Köln" oder "Berlin Mitte".
   - wunschtermin (string, optional): Wunschtermin als ISO-8601 (steuert das Slot-Ranking, kein harter Filter).
   - response_format ("markdown" | "json"): Ausgabeformat (Standard "markdown").
 
 Returns (structuredContent bzw. json):
-  { plz, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }] }], interaktive_karte_url, buchungs_telefon }
+  { plz, ort, standort, wunschtermin, anzahl_gutachter, gutachter: [{ id, vorname, profilbild, bewertung_schnitt, bewertung_anzahl, entfernung, ist_top_partner, wunschtermin_frei, termine: [{ start, end, passung }] }], interaktive_karte_url, buchungs_telefon }
 
 Use when: Nutzer will einen Gutachter-Termin sehen/vergleichen (z. B. „wann hat ein Gutachter in 50670 Zeit?").
 Hinweis: gutachter[].id + ein termin.start sind das Buchungs-Handle; die eigentliche Buchung läuft aktuell über die interaktive Karte / Telefon-Rückruf.`,
@@ -267,9 +287,9 @@ Hinweis: gutachter[].id + ein termin.start sind das Buchungs-Handle; die eigentl
         openWorldHint: true,
       },
     },
-    async ({ plz, wunschtermin, response_format }) => {
+    async ({ plz, ort, wunschtermin, response_format }) => {
       try {
-        const result = await fetchGutachterTermine(plz, wunschtermin, API_BASE)
+        const result = await fetchGutachterTermine(plz, ort, wunschtermin, API_BASE)
         const text = response_format === 'json' ? JSON.stringify(result, null, 2) : formatGutachterTermine(result)
         return {
           content: [{ type: 'text', text }],
@@ -470,11 +490,12 @@ async function runHttp(): Promise<void> {
           inputSchema: {
             type: 'object',
             properties: {
-              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670.' },
+              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670. PLZ ODER ort.' },
+              ort: { type: 'string', description: 'Stadt/Adresse als Alternative zur PLZ, z. B. "Köln" oder "Berlin Mitte".' },
               radius: { type: 'integer', minimum: 1, maximum: 200, default: 30, description: 'Suchradius in Kilometern (1–200, Standard 30).' },
               response_format: { type: 'string', enum: ['markdown', 'json'], default: 'markdown', description: 'Ausgabeformat.' },
             },
-            required: ['plz'],
+            required: [],
           },
         },
         {
@@ -484,11 +505,12 @@ async function runHttp(): Promise<void> {
           inputSchema: {
             type: 'object',
             properties: {
-              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670.' },
+              plz: { type: 'string', pattern: '^\\d{5}$', description: '5-stellige deutsche Postleitzahl, z. B. 50670. PLZ ODER ort.' },
+              ort: { type: 'string', description: 'Stadt/Adresse als Alternative zur PLZ, z. B. "Köln" oder "Berlin Mitte".' },
               wunschtermin: { type: 'string', format: 'date-time', description: 'Optionaler Wunschtermin (ISO-8601); steuert das Slot-Ranking.' },
               response_format: { type: 'string', enum: ['markdown', 'json'], default: 'markdown', description: 'Ausgabeformat.' },
             },
-            required: ['plz'],
+            required: [],
           },
         },
         {

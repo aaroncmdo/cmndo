@@ -142,7 +142,7 @@ export default function LeadPreisOverlay({
                 </span>
               </div>
             ) : (
-              <div className="mt-3 flex items-start gap-2 text-[11px] text-amber-700">
+              <div className="mt-3 flex items-start gap-2 text-[11px] text-warning-strong">
                 <InfoIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <span>
                   Bei dieser Honorar-Höhe deckt der Lead-Preis dein Honorar — prüfe ob dein Satz noch marktüblich ist

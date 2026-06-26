@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildVerursacherPartyUpdates } from '@/lib/onboarding/verursacher-party-facts'
 import { resolveOwnedClaimId } from '../resolve-owned-claim'
+import { findVerursacherParty, insertVerursacherParty } from '@/lib/claims/verursacher-party'
 import type { OnboardingTableHandler } from './types'
 
 // CMM-49 Increment 3: Gegner-Fakten aus dem kunde-onboarding -> verursacher-claim_party (SSoT).
@@ -19,20 +20,11 @@ export const claimPartiesHandler: OnboardingTableHandler = {
     if (Object.keys(updates).length === 0) return { ok: true, id: claimId }
 
     const admin = createAdminClient()
-    const { data: party, error: selErr } = await admin
-      .from('claim_parties')
-      .select('id')
-      .eq('claim_id', claimId)
-      .eq('rolle', 'verursacher')
-      .order('reihenfolge', { ascending: true })
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-    if (selErr) return { ok: false, error: selErr.message }
+    const found = await findVerursacherParty(admin, claimId)
+    if (!found.ok) return { ok: false, error: found.error }
 
-    const partyId = ((party as { id?: string } | null)?.id) ?? null
-    if (partyId) {
-      const { error: upErr } = await admin.from('claim_parties').update(updates).eq('id', partyId)
+    if (found.party) {
+      const { error: upErr } = await admin.from('claim_parties').update(updates).eq('id', found.party.id)
       if (upErr) return { ok: false, error: upErr.message }
       return { ok: true, id: claimId }
     }
@@ -40,10 +32,8 @@ export const claimPartiesHandler: OnboardingTableHandler = {
     // Keine verursacher-Party: nur anlegen wenn mind. ein echter Wert kommt (kein leeres Insert).
     const hasValue = Object.values(updates).some((v) => v != null)
     if (hasValue) {
-      const { error: insErr } = await admin
-        .from('claim_parties')
-        .insert({ claim_id: claimId, rolle: 'verursacher', reihenfolge: 2, quelle: 'kunde_self', ...updates })
-      if (insErr) return { ok: false, error: insErr.message }
+      const ins = await insertVerursacherParty(admin, claimId, 'kunde_self', updates)
+      if (!ins.ok) return { ok: false, error: ins.error }
     }
     return { ok: true, id: claimId }
   },

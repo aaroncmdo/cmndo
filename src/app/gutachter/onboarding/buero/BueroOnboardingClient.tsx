@@ -190,12 +190,12 @@ export default function BueroOnboardingClient({
             return (
               <div key={s.key} className="flex items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors ${
-                  i < step ? 'bg-green-600' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-claimondo-bg'
+                  i < step ? 'bg-success' : i === step ? 'bg-[var(--brand-primary)]' : 'bg-claimondo-bg'
                 }`}>
                   <Icon className="w-4 h-4 text-white" />
                 </div>
                 {i < STEPS.length - 1 && (
-                  <div className={`w-8 h-0.5 ${i < step ? 'bg-green-600' : 'bg-claimondo-bg'}`} />
+                  <div className={`w-8 h-0.5 ${i < step ? 'bg-success' : 'bg-claimondo-bg'}`} />
                 )}
               </div>
             )
@@ -256,7 +256,7 @@ export default function BueroOnboardingClient({
                         <label className="text-xs text-claimondo-ondo mb-1.5 block">
                           Anschrift <span className="text-red-400">*</span>
                           {std.lat !== null && std.lng !== null && (
-                            <span className="text-green-600 ml-2">✓ Geo gesetzt</span>
+                            <span className="text-success ml-2">✓ Geo gesetzt</span>
                           )}
                         </label>
                         <GooglePlaceAutocomplete
@@ -266,7 +266,7 @@ export default function BueroOnboardingClient({
                           className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
                         />
                         {std.anschrift && (std.lat === null || std.lng === null) && (
-                          <p className="text-[10px] text-amber-600 mt-1">
+                          <p className="text-[10px] text-warning mt-1">
                             Bitte aus dem Dropdown auswaehlen damit die Geo-Koordinaten gesetzt werden
                           </p>
                         )}
@@ -368,9 +368,9 @@ export default function BueroOnboardingClient({
           {/* SCHRITT 2: Stripe Checkout */}
           {step === 2 && (
             <div className="space-y-4">
-              <div className="bg-green-50 border border-green-200 rounded-ios-xl p-4 flex items-start gap-3">
-                <CheckCircle2Icon className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm text-green-700">
+              <div className="bg-success-soft border border-success/30 rounded-ios-xl p-4 flex items-start gap-3">
+                <CheckCircle2Icon className="w-5 h-5 text-success flex-shrink-0 mt-0.5" />
+                <div className="text-sm text-success-strong">
                   <strong>Vertrag unterzeichnet.</strong> Letzter Schritt: zentrale Anzahlung leisten.
                   Du wirst zu Stripe weitergeleitet.
                 </div>
@@ -389,7 +389,7 @@ export default function BueroOnboardingClient({
           )}
 
           {error && (
-            <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-red-50 border border-red-200 text-red-600 text-sm">
+            <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
               {error}
             </div>
           )}

@@ -23,6 +23,7 @@ import {
 } from '@/lib/faelle/claim-duplicate-columns'
 import { KANZLEI_FAELLE_COLS, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
+import { findVerursacherParty, insertVerursacherParty } from '@/lib/claims/verursacher-party'
 import { coerceJaNein, splitPersonName } from '@/lib/stammdaten/field-coercion'
 
 /**
@@ -446,36 +447,19 @@ export async function updateFallField(
   const gegnerCol = GEGNER_PARTY_COL[field]
   if (gegnerCol) {
     const admin = createAdminClient()
-    const { data: party } = await admin
-      .from('claim_parties')
-      .select('id')
-      .eq('claim_id', gateClaimId)
-      .eq('rolle', 'verursacher')
-      .order('reihenfolge', { ascending: true })
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-    const partyId = (party?.id as string | null) ?? null
-    if (partyId) {
+    const found = await findVerursacherParty(admin, gateClaimId)
+    if (!found.ok) return { success: false, error: found.error }
+    if (found.party) {
       const { error: upErr } = await admin
         .from('claim_parties')
         .update({ [gegnerCol]: normalized })
-        .eq('id', partyId)
+        .eq('id', found.party.id)
       if (upErr) return { success: false, error: upErr.message }
     } else if (normalized != null) {
-      // Option A: keine verursacher-Party vorhanden -> on-demand anlegen (kanonisches Home).
-      // Minimal-Insert (claim_id/rolle/quelle Pflicht, Rest default); reihenfolge=2 wie convert.
-      // quelle='manuell_kb': KB/Admin-Edit in der Fallakte. 'stammdaten_edit' war KEIN gueltiger
-      // Wert (claim_parties_quelle_check kennt nur lead_konvertierung/manuell_kb/sv_besichtigung/
-      // airdrop/kunde_self/backfill_*) -> der on-demand-Insert waere am Constraint gecrasht.
-      const { error: insErr } = await admin.from('claim_parties').insert({
-        claim_id: gateClaimId,
-        rolle: 'verursacher',
-        reihenfolge: 2,
-        quelle: 'manuell_kb',
-        [gegnerCol]: normalized,
-      })
-      if (insErr) return { success: false, error: insErr.message }
+      // Option A: keine verursacher-Party vorhanden -> on-demand anlegen (kanonisches Home; quelle
+      // 'manuell_kb' = KB/Admin-Edit, claim_parties_quelle_check-konform via insertVerursacherParty).
+      const ins = await insertVerursacherParty(admin, gateClaimId, 'manuell_kb', { [gegnerCol]: normalized })
+      if (!ins.ok) return { success: false, error: ins.error }
     }
     // normalized == null && keine Party: No-op (keine leere verursacher-Party anlegen).
     revalidatePath(`/faelle/${fallId}`)
@@ -489,16 +473,10 @@ export async function updateFallField(
   // reine, getestete lib-Funktion. Selektion == gp/vp_g (verursacher, reihenfolge/created_at).
   if (field === 'gegner_name') {
     const admin = createAdminClient()
-    const { data: party } = await admin
-      .from('claim_parties')
-      .select('id, person_id, firma_id')
-      .eq('claim_id', gateClaimId)
-      .eq('rolle', 'verursacher')
-      .order('reihenfolge', { ascending: true })
-      .order('created_at', { ascending: true })
-      .limit(1)
-      .maybeSingle()
-    const firmaId = (party?.firma_id as string | null) ?? null
+    const found = await findVerursacherParty(admin, gateClaimId)
+    if (!found.ok) return { success: false, error: found.error }
+    const party = found.party
+    const firmaId = party?.firma_id ?? null
     if (firmaId) {
       const { error } = await admin.from('firmen').update({ name: normalized }).eq('id', firmaId)
       if (error) return { success: false, error: error.message }
@@ -506,7 +484,7 @@ export async function updateFallField(
       return { success: true }
     }
     const { vorname, nachname } = splitPersonName(normalized as string | null)
-    const personId = (party?.person_id as string | null) ?? null
+    const personId = party?.person_id ?? null
     if (personId) {
       const { error } = await admin.from('personen').update({ vorname, nachname }).eq('id', personId)
       if (error) return { success: false, error: error.message }
@@ -519,18 +497,12 @@ export async function updateFallField(
           const { error: linkErr } = await admin
             .from('claim_parties')
             .update({ person_id: ensured.personId })
-            .eq('id', party.id as string)
+            .eq('id', party.id)
           if (linkErr) return { success: false, error: linkErr.message }
         } else {
-          // Keine verursacher-Party -> mit Person anlegen (reihenfolge=2/quelle wie GEGNER_PARTY_COL).
-          const { error: insErr } = await admin.from('claim_parties').insert({
-            claim_id: gateClaimId,
-            rolle: 'verursacher',
-            reihenfolge: 2,
-            quelle: 'manuell_kb',
-            person_id: ensured.personId,
-          })
-          if (insErr) return { success: false, error: insErr.message }
+          // Keine verursacher-Party -> mit Person anlegen (kanonische Defaults via Helper).
+          const ins = await insertVerursacherParty(admin, gateClaimId, 'manuell_kb', { person_id: ensured.personId })
+          if (!ins.ok) return { success: false, error: ins.error }
         }
       }
     }
