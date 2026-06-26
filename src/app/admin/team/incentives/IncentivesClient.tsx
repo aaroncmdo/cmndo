@@ -12,9 +12,16 @@ type Incentive = {
   id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string
   bedingung: string; wert: number; aktiv: boolean; gueltig_ab: string | null; gueltig_bis: string | null; created_at: string
 }
+// AGENTS.md §Nested-FK: profiles:mitarbeiter_id ist ein to-one-Embed, das supabase je nach
+// Resolution als Objekt ODER 1-Element-Array liefern kann -> bivalent typisieren + normalisieren.
+type ProfileRef = { vorname: string | null; nachname: string | null; email: string | null }
 type Auszahlung = {
   id: string; incentive_id: string; mitarbeiter_id: string; monat: string | null; betrag: number; status: string
-  profiles: { vorname: string | null; nachname: string | null; email: string | null } | null
+  profiles: ProfileRef | ProfileRef[] | null
+}
+function profName(p: ProfileRef | ProfileRef[] | null): string {
+  const x = Array.isArray(p) ? p[0] : p
+  return x ? [x.vorname, x.nachname].filter(Boolean).join(' ') || '—' : '—'
 }
 
 const TYP_LABELS: Record<string, string> = { bonus: 'Bonus', provision: 'Provision', sachleistung: 'Sachleistung', freizeit: 'Freizeit' }
@@ -112,7 +119,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
                   <p className="text-claimondo-ondo text-xs mb-1.5">Auszahlungen ({incAusz.length})</p>
                   {incAusz.slice(0, 3).map(a => (
                     <div key={a.id} className="flex items-center justify-between text-xs py-1">
-                      <span className="text-claimondo-navy">{a.profiles ? [a.profiles.vorname, a.profiles.nachname].filter(Boolean).join(' ') : '—'}</span>
+                      <span className="text-claimondo-navy">{profName(a.profiles)}</span>
                       <div className="flex items-center gap-2">
                         <span className="text-claimondo-ondo">{a.monat}</span>
                         <span className="text-green-400">{fmt(a.betrag)}</span>
