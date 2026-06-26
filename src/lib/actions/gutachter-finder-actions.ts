@@ -109,7 +109,15 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const { data: allRows, error } = await supabase
     .from('sachverstaendige')
     .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
+    // AAR SV-Onboarding-Audit: kanonischer Dispatchable-Gate (vgl. applyDispatchable-
+    // Filter in lib/sv/queries.ts). gesperrt_seit/geloescht_am wurden hier NICHT
+    // gefiltert — Sperren/Soft-Loeschen laesst ist_aktiv=true (das Flag ist fuer den
+    // Onboarding-Flow reserviert), also leakten gesperrte/geloeschte SVs in den
+    // oeffentlichen Gutachter-Finder, wo Kunden sie anklicken + buchen konnten.
     .eq('ist_aktiv', true)
+    .eq('portal_zugang_freigeschaltet', true)
+    .is('gesperrt_seit', null)
+    .is('geloescht_am', null)
     .not('isochrone_polygon', 'is', null)
     .not('standort_lat', 'is', null)
   if (error) return { ok: false, error: error.message }

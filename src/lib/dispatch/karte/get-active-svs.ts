@@ -17,6 +17,11 @@ export async function getActiveSVs(
     )
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
+    // AAR SV-Onboarding-Audit: gesperrt/geloescht ergaenzt (= applyDispatchableFilter)
+    // — sonst erschienen gesperrte/soft-geloeschte SVs (ist_aktiv bleibt true) auf der
+    // Dispatch-Karte. findBestSV gatet bereits korrekt; hier war die Karte inkonsistent.
+    .is('gesperrt_seit', null)
+    .is('geloescht_am', null)
     .not('standort_lat', 'is', null)
     .not('standort_lng', 'is', null)
 
