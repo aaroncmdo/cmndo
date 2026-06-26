@@ -34,33 +34,11 @@ const PATCHES: Record<string, { appendBody?: string; appendFaq?: { q: string; a:
   '/nutzungsausfall': { appendBody: UNKOSTEN_BODY, appendFaq: UNKOSTEN_FAQ },
 }
 
-// A2 (Cowork 2026-06-16): die 4 generierten /hub-sf-*-Hubs gehoeren unter
-// /schadenfreiheitsklasse/<slug> (ihr Breadcrumb nennt SF bereits als Parent). Re-Map
-// rein in der Merge-Schicht -> generierte Datei bleibt diff=0, kein Content-Duplikat;
-// die alte Route faellt aus den Daten (kein Sitemap-/llms-Filter noetig). Alt-URL -> 301
-// via next.config redirects(); die app/hub-sf-*-Ordner sind entfernt. Als 2-Segment-Route
-// joinen die Seiten automatisch die SF-Breadcrumb-/Relations-Gruppe (prefix:schadenfreiheitsklasse).
-const HUB_SF_REMAP: Record<string, string> = {
-  '/hub-sf-anfaenger': '/schadenfreiheitsklasse/anfaenger',
-  '/hub-sf-herausfinden': '/schadenfreiheitsklasse/herausfinden',
-  '/hub-sf-uebertragen-nachteile': '/schadenfreiheitsklasse/uebertragen-nachteile',
-  '/hub-sf-uebertragen-zweitwagen': '/schadenfreiheitsklasse/uebertragen-zweitwagen',
-}
-function remapHubSf(p: RestPage): RestPage {
-  const to = HUB_SF_REMAP[p.route]
-  if (!to) return p
-  return {
-    ...p,
-    route: to,
-    breadcrumb: p.breadcrumb?.map((b) => (b.route === p.route ? { ...b, route: to } : b)),
-  }
-}
-
 // Merge-Schicht: generierte Rest-Pages + manuelle (Vergleiche). manual zuletzt →
 // gewinnt bei Routenkonflikt. NUR GENERIERTE werden via Deep-Transform entnamt
 // (Verkehrsrechts-Partnerkanzlei generisch, Cowork 2026-06-12); manuelle Vergleiche
 // (Claimondo-/UWG-§6-Kontext) bleiben benannt. Anschliessend additive Patches.
-export const restPages: RestPage[] = [...generatedRestPages.map(deepGenerifyContent).map(remapHubSf), ...manualRestPages].map((p) => {
+export const restPages: RestPage[] = [...generatedRestPages.map(deepGenerifyContent), ...manualRestPages].map((p) => {
   const patch = PATCHES[p.route]
   if (!patch) return p
   return {

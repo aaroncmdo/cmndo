@@ -4,8 +4,8 @@ import type { RestPage } from '@/lib/rest-types'
 import { metaTitle } from '@/lib/meta'
 
 // Loader fuer die WP-7-Seiten. Routing-Strategie (kollisionsfrei zu WP-2 `[article]`):
-//  - flache statische Segmente (Pillars + Master-Hubs): route mit genau 1
-//    Pfadsegment → eigener app/<slug>/page.tsx.
+//  - flache statische Segmente (Pillars + Master-Hubs + flache hub-sf): route mit
+//    genau 1 Pfadsegment → eigener app/<slug>/page.tsx.
 //  - [slug]-Resolver unter /schadenfreiheitsklasse, /fahrerflucht, /nutzungsausfall:
 //    route mit 2 Segmenten → app/<parent>/[slug]/page.tsx.
 export * from '@/lib/rest-types'

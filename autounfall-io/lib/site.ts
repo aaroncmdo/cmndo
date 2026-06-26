@@ -29,18 +29,10 @@ export const SITE = {
     name: 'Kitta & Sprafke UG (haftungsbeschränkt)',
     shortName: 'Kitta & Sprafke UG',
     street: 'Hansaring 10',
-    postalCode: '50672',
+    postalCode: '50670',
     city: 'Köln',
     country: 'Deutschland',
-    // Geschäftsführer: Anzeige-String (Impressum „Vertreten durch").
-    managingDirectors: 'Nicolas Kitta, Aaron Benjamin Sprafke',
-    // Geschäftsführer als Person-Liste → Organization founder/employee (JSON-LD).
-    directors: ['Nicolas Kitta', 'Aaron Benjamin Sprafke'],
-    // Handelsregister: HRB 128389, AG Köln (eingetragen 16.06.2026). Gründung der
-    // UG = foundingDate. Eine Quelle für Impressum + Organization-Schema (identifier).
-    registerCourt: 'Amtsgericht Köln',
-    registerNumber: 'HRB 128389',
-    foundingDate: '2026-04-13',
+    managingDirectors: 'Aaron Sprafke, Nicolas Kitta',
     /** Verifizierte, geclaimte Unternehmensprofile (Organization sameAs). Nur real
      *  existierende Profile — kein X/YouTube (nicht angelegt), kein claimondo.de. */
     sameAs: [
@@ -56,10 +48,9 @@ export const SITE = {
     name: 'Verkehrsrechts-Partnerkanzlei',
   },
 
-  // Telefon: au.io-eigene Festnetznr 0221 25906530 (Aaron/LexDrive-Freigabe 12.06.2026,
-  // als au.io-exklusiv bestaetigt 18.06.2026 — KEIN Claimondo-/kfzgutachter-Footprint).
-  // Revert der #2840-Mobilnr 0171, die auf einem inzwischen ueberholten Footprint-Flag beruhte.
-  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0221 25906530',
+  // Telefon: au.io-eigene Mobilnr (Entscheidung Aaron 14.06.2026 — ersetzt die
+  // 0221-Festnetznr, die in .env.example als Claimondo-Footprint geflaggt war).
+  phone: process.env.NEXT_PUBLIC_SITE_PHONE ?? '0171 20289514',
   // Kontakt-Mail team@autounfall.io (LexDrive-Freigabe 12.06.2026). Postfach muss
   // operativ vor Go-Live aktiv sein. Override via NEXT_PUBLIC_SITE_EMAIL.
   contactEmail: process.env.NEXT_PUBLIC_SITE_EMAIL ?? 'team@autounfall.io',

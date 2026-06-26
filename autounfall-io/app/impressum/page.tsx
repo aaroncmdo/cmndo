@@ -10,9 +10,9 @@ export const metadata: Metadata = {
 }
 
 // STANDALONE: ausschliesslich Kitta & Sprafke UG, kein Claimondo-Branding/-Link.
-// Finaler Text, RA Genter freigegeben (16.06.2026); Registerdaten HRB 128389
-// (AG Köln) aus SITE.publisher, KEINE Entwurfs-/Review-Hinweise. Kein
-// EU-OS-Plattform-Link (Plattform zum 20.07.2025 abgeschaltet) → nur VSBG-Erklaerung.
+// Finaler, von LexDrive freigegebener Text (12.06.2026) — 1:1 eingebaut, KEINE
+// Entwurfs-/Review-Hinweise. Kein EU-OS-Plattform-Link (Plattform zum 20.07.2025
+// abgeschaltet) → nur die VSBG-Erklaerung.
 export default function ImpressumPage() {
   const phoneHref = `tel:${SITE.phone.replace(/[^+\d]/g, '')}`
   return (
@@ -42,10 +42,7 @@ export default function ImpressumPage() {
         </p>
 
         <h2>Handelsregister</h2>
-        <p>
-          {SITE.publisher.registerCourt}, {SITE.publisher.registerNumber} (eingetragen am
-          16.06.2026)
-        </p>
+        <p>Amtsgericht Köln — Eintragung in Vorbereitung</p>
 
         <h2>Umsatzsteuer-Identifikationsnummer</h2>
         <p>Umsatzsteuer-Identifikationsnummer gemäß § 27a UStG: in Beantragung</p>

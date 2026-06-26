@@ -19,14 +19,12 @@
   --color-au-ink: #1E293B;
   --color-au-ink-soft: #334155;
   --color-au-ink-muted: #475569;
-  --color-au-ink-faint: #5B6477;   /* gedaempfter Slate · Nav-/Sublabel-Text (Hub-Redesign) */
 
   /* Accent (Brand-Orange) */
   --color-au-amber: #C04920;       /* Accent-strong · textsicher (WCAG AA auf Paper/Weiss) */
   --color-au-amber-soft: #FF7849;  /* Accent · dekorativ (NICHT fuer Text auf hell) */
   --color-au-amber-light: #FED7AA; /* helle Tint · Badges/Backgrounds */
   --color-au-amber-dark: #92400E;  /* textsicher auf paper-warm / Prose-Links (~6.4:1, aus au-base.css) */
-  --color-au-amber-tint: #F6E7DE;  /* weiche Amber-Tint · Icon-Hintergruende (Hub-Redesign) */
 
   /* Paper (Background) */
   --color-au-paper: #FAF7F0;

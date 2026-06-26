@@ -15,8 +15,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${SITE.url}`, lastModified: now, changeFrequency: 'monthly', priority: 1 },
     { url: `${SITE.url}/impressum`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE.url}/datenschutz`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
-    // E-E-A-T: Über-uns-Seite (Redaktion/Methodik/Finanzierung).
-    { url: `${SITE.url}/ueber-uns`, lastModified: now, changeFrequency: 'monthly', priority: 0.5 },
     // WP-6: Lead-Formular (indexierbar — Conversion-Einstieg).
     { url: `${SITE.url}/gutachter-finden`, lastModified: now, changeFrequency: 'monthly', priority: 0.8 },
     // WP-4: interaktive Tools (indexierbar; /unfall-assistance ist noindex → raus).
@@ -49,16 +47,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
   ]
   // WP-7: Pillars + Master-Hubs + SF-Versicherer + nested-Artikel (alle indexierbar).
   // WP-1b: echtes lastModified je Seite (dateModified) statt Build-Zeit.
-  // /vergleich/* (Hub + 8 Details) bewusst NICHT in der Sitemap: noindex
-  // (Footprint-Schutz, Entscheidung Aaron 2026-06-15) — live, aber nicht im Index.
-  const restRoutes: MetadataRoute.Sitemap = getAllRestPages()
-    .filter((p) => !p.route.startsWith('/vergleich'))
-    .map((p) => ({
-      url: `${SITE.url}${p.route}`,
-      lastModified: new Date(p.dateModified),
-      changeFrequency: 'monthly',
-      priority: 0.6,
-    }))
+  const restRoutes: MetadataRoute.Sitemap = getAllRestPages().map((p) => ({
+    url: `${SITE.url}${p.route}`,
+    lastModified: new Date(p.dateModified),
+    changeFrequency: 'monthly',
+    priority: 0.6,
+  }))
   // WP-5: PSEO-Routen erscheinen erst nach dem Flip (PSEO_INDEXABLE).
   const pseoRoutes: MetadataRoute.Sitemap = PSEO_INDEXABLE
     ? getPseoParams().map(({ stadt, typ }) => ({
