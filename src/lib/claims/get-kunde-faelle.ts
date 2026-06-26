@@ -378,21 +378,7 @@ export async function getKundeFaelle(
   return result
 }
 
-/**
- * Konvenienz-Wrapper: lädt einen einzelnen Kunde-Fall per faelle.id.
- * /kunde/faelle/[id]/page.tsx kann das in CMM-28β nutzen.
- */
-export async function getKundeFallById(
-  admin: DbClient,
-  userId: string,
-  email: string | null,
-  fallId: string,
-): Promise<KundeFallView | null> {
-  const list = await getKundeFaelle(admin, userId, email)
-  return list.find((f) => f.id === fallId) ?? null
-}
-
-// ─── Detail-Loader: 1:1-Drop-In für getFallById(FALL_SELECT_KUNDE) ─────────
+// ─── Detail-Loader: 1:1-Drop-In für die fruehere getFallById(FALL_SELECT_KUNDE) ─────────
 // Liest aus claims als Anker, joined faelle (Lifecycle-Bridge),
 // gutachter_termine (jüngster aktiver Termin) und vehicles (über CVI).
 // Output ist ein flaches Record-Objekt mit denselben Spalten-Namen wie
