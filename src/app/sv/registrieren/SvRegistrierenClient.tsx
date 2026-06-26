@@ -97,7 +97,7 @@ function SucheSchritt({
       </div>
 
       {fehler && (
-        <p className="mt-3 text-sm text-red-700">{fehler}</p>
+        <p className="mt-3 text-sm text-danger-strong">{fehler}</p>
       )}
 
       {gesucht && !isPending && (
@@ -243,7 +243,7 @@ function BeanspruchenSchritt({
       </div>
 
       {fehler && (
-        <p className="mt-3 text-sm text-red-700">{fehler}</p>
+        <p className="mt-3 text-sm text-danger-strong">{fehler}</p>
       )}
 
       <div className="mt-5">
@@ -385,7 +385,7 @@ function NeuSchritt({
       </div>
 
       {fehler && (
-        <p className="mt-3 text-sm text-red-700">{fehler}</p>
+        <p className="mt-3 text-sm text-danger-strong">{fehler}</p>
       )}
 
       <div className="mt-5">
@@ -416,10 +416,10 @@ function BestaetigungSchritt({ email, emailSent }: { email: string; emailSent: b
   return (
     <Card p={6} accentColor="success">
       <div className="flex flex-col items-center text-center gap-4 py-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-100">
+        <div className="flex h-14 w-14 items-center justify-center rounded-full bg-success/15">
           <svg
             aria-hidden
-            className="h-7 w-7 text-emerald-600"
+            className="h-7 w-7 text-success"
             fill="none"
             stroke="currentColor"
             strokeWidth={2.5}
