@@ -176,7 +176,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
     <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-claimondo-navy">Endpoint-Register</h3>
-        <StatusBadge colorCls="text-amber-700 bg-amber-50 uppercase">
+        <StatusBadge colorCls="text-warning-strong bg-warning-soft uppercase">
           Manueller Modus
         </StatusBadge>
       </div>
@@ -200,7 +200,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                   onClick={() => { setActiveEvent(ev); setPayload({}) }}
                   className={`flex items-center gap-2 px-3 py-2 text-xs font-medium rounded-ios-lg transition-colors text-left ${
                     done
-                      ? 'text-emerald-700 bg-emerald-50 hover:bg-emerald-100'
+                      ? 'text-success-strong bg-success-soft hover:bg-success/15'
                       : 'text-claimondo-navy bg-claimondo-bg hover:bg-claimondo-ondo hover:text-white'
                   }`}
                 >
@@ -215,7 +215,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
       ))}
 
       {feedback && (
-        <p className={`text-xs px-3 py-2 rounded ${feedback.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+        <p className={`text-xs px-3 py-2 rounded ${feedback.ok ? 'bg-success-soft text-success-strong' : 'bg-danger-soft text-danger-strong'}`}>
           {feedback.msg}
         </p>
       )}

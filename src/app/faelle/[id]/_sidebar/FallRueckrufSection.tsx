@@ -78,12 +78,12 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
   return (
     <div className="bg-white rounded-ios-xl border border-claimondo-border p-3 space-y-2">
       <div className="flex items-center gap-2 text-xs font-semibold text-claimondo-navy">
-        <PhoneCallIcon className="w-3.5 h-3.5 text-amber-400" /> Rückruf
+        <PhoneCallIcon className="w-3.5 h-3.5 text-warning" /> Rückruf
         {isErledigt && (
-          <span className="ml-auto text-[10px] bg-emerald-50 text-emerald-600 px-1.5 py-0.5 rounded-full">Erledigt</span>
+          <span className="ml-auto text-[10px] bg-success-soft text-success-strong px-1.5 py-0.5 rounded-full">Erledigt</span>
         )}
         {hasDatum && inPast && !isErledigt && (
-          <span className="ml-auto text-[10px] bg-red-50 text-red-600 px-1.5 py-0.5 rounded-full font-semibold">Überfällig</span>
+          <span className="ml-auto text-[10px] bg-danger-soft text-danger-strong px-1.5 py-0.5 rounded-full font-semibold">Überfällig</span>
         )}
       </div>
 
@@ -113,14 +113,14 @@ export default function FallRueckrufSection({ fallId }: { fallId: string }) {
           <button
             onClick={handleErledigt}
             disabled={saving}
-            className="flex items-center gap-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white text-[11px] font-medium rounded-ios-lg px-2 py-1.5 transition-colors"
+            className="flex items-center gap-1 bg-success hover:bg-success/90 disabled:opacity-50 text-white text-[11px] font-medium rounded-ios-lg px-2 py-1.5 transition-colors"
           >
             <CheckCircle2Icon className="w-3 h-3" /> Erledigt
           </button>
         )}
       </div>
 
-      {errorMsg && <p className="text-[10px] text-red-600">Fehler: {errorMsg}</p>}
+      {errorMsg && <p className="text-[10px] text-danger">Fehler: {errorMsg}</p>}
     </div>
   )
 }

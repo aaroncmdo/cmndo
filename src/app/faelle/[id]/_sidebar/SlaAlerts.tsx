@@ -86,7 +86,7 @@ export default function SlaAlerts() {
           <div
             key={i}
             className={`rounded-ios-md p-2 border text-[11px] ${
-              a.critical ? 'bg-red-50 border-red-200 text-red-700' : 'bg-amber-50 border-amber-200 text-amber-800'
+              a.critical ? 'bg-danger-soft border-danger/30 text-danger-strong' : 'bg-warning-soft border-warning/30 text-warning-strong'
             }`}
           >
             <div className="flex items-center gap-1 font-medium">

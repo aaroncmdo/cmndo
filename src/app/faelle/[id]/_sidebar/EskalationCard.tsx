@@ -89,9 +89,9 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
       </p>
       {adminId && adminName ? (
         <div className="space-y-2">
-          <div className="rounded-ios-md bg-amber-50 border border-amber-200 px-2.5 py-2">
-            <p className="text-[10px] uppercase tracking-wider text-amber-700">An Admin eskaliert</p>
-            <p className="text-xs font-semibold text-amber-900">{adminName}</p>
+          <div className="rounded-ios-md bg-warning-soft border border-warning/30 px-2.5 py-2">
+            <p className="text-[10px] uppercase tracking-wider text-warning-strong">An Admin eskaliert</p>
+            <p className="text-xs font-semibold text-warning-strong">{adminName}</p>
           </div>
           <button
             type="button"
@@ -115,7 +115,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
           </p>
         </button>
       )}
-      {error && <p className="text-[10px] text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-[10px] text-danger mt-1">{error}</p>}
 
       {open && (
         <div className="fixed inset-0 z-[1100] flex items-center justify-center px-4 py-6">
@@ -164,7 +164,7 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
                           <p className="text-sm font-semibold text-claimondo-navy">{fullName}</p>
                           {a.email && <p className="text-[10px] text-claimondo-ondo">{a.email}</p>}
                         </div>
-                        <CheckIcon className="w-4 h-4 text-emerald-600" />
+                        <CheckIcon className="w-4 h-4 text-success" />
                       </button>
                     )
                   })
