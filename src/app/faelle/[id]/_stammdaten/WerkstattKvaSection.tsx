@@ -28,14 +28,14 @@ export function WerkstattKvaSection() {
       hint="Schätzung, vor SV-Gutachten"
     >
       <div className="flex items-baseline gap-2">
-        <span className="text-lg font-semibold text-claimondo-navy">
+        <span className="text-body font-semibold text-claimondo-navy">
           {kvaFormat.format(betrag)}
         </span>
         {brutto == null && netto != null && (
-          <span className="text-[11px] text-claimondo-ondo/70">(Netto)</span>
+          <span className="text-caption text-claimondo-ondo/70">(Netto)</span>
         )}
       </div>
-      <p className="mt-1 text-[11px] text-claimondo-ondo/70">
+      <p className="mt-1 text-caption text-claimondo-ondo/70">
         Werkstatt-Schätzung — nicht der SV-Gutachtenwert. Getrennte Spur, kein Einfluss auf Schadenshöhe.
       </p>
     </SectionCard>
