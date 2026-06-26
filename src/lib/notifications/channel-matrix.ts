@@ -145,6 +145,17 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin: ['in_app'],
     },
   },
+  // 5.5b Pflicht-Foto-Validierung — DB-Cron cron_pflicht_foto_validation (stuendlich, 12h-Dedup).
+  // Wiederkehrender Reminder: nur in_app (kein WA/Email-Spam bei ~2x/Tag). SV = Gutachten-Owner,
+  // KB/Admin = Aufsicht. claim_id kommt aus dem Payload (fan-out Payload-Fallback).
+  'gutachten.pflicht_fotos_unvollstaendig': {
+    priority: 'normal',
+    channels: {
+      sachverstaendiger: ['in_app'],
+      kundenbetreuer:    ['in_app'],
+      admin:             ['in_app'],
+    },
+  },
   // 5.6 Kanzlei
   'kanzlei.uebergabe': {
     priority: 'normal',
