@@ -4,6 +4,7 @@
 // sehen. Admins/KB/Dispatch sehen via anderer Policies weiterhin alles.
 
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 // CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code/Status-Label.
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import type { ClaimMainPhase, ClaimSubPhase } from '@/lib/claims/lifecycle'
@@ -353,19 +354,51 @@ export async function getMaklerFallDetail(
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,
       wiederbeschaffungswert, restwert, totalschaden,
-      abtretung_signiert_am,
-      kunde:profiles!claims_geschaedigter_user_id_fkey(
-        id, vorname, nachname, email, telefon, adresse, plz, ort
-      )
+      abtretung_signiert_am
     `)
     .eq('id', fallId)
     .maybeSingle()
   if (!fall) return null
 
-  const rawKunde = (fall as { kunde: unknown }).kunde
-  const kunde = (Array.isArray(rawKunde) ? rawKunde[0] : rawKunde) as
-    | FallDetailKunde
-    | null
+  // claim_id fuer Phase-Read + Kunden-Lookup (View exponiert geschaedigter_user_id nicht).
+  const detailClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+
+  // Makler-PII, scope-gestaffelt: den Kunden (geschaedigter) via service-role lesen. Der Makler
+  // hat bewusst KEINE profiles-RLS auf Kunden — ein RLS-Policy-Ansatz fuehrte zu 42P17-Rekursion
+  // (profiles-Policy liest claims, dessen RLS wieder profiles liest). Authz = der oben geprüfte
+  // aktive Consent; Feld-Staffelung in der App: vollzugriff -> voller Kontakt, minimal -> nur
+  // Name (Kontaktfelder werden serverseitig genullt, bevor sie an den Makler gehen). Pattern wie
+  // getClaimPhaseMap (admin-Client, consent-vorgefiltert -> kein Leak).
+  let kunde: FallDetailKunde | null = null
+  if (detailClaimId) {
+    const admin = createAdminClient()
+    const { data: claimRow } = await admin
+      .from('claims')
+      .select('geschaedigter_user_id')
+      .eq('id', detailClaimId)
+      .maybeSingle()
+    const geschaedigterId = (claimRow?.geschaedigter_user_id as string | null) ?? null
+    if (geschaedigterId) {
+      const { data: k } = await admin
+        .from('profiles')
+        .select('id, vorname, nachname, email, telefon, adresse, plz, ort')
+        .eq('id', geschaedigterId)
+        .maybeSingle()
+      if (k) {
+        const full = consent.consent_scope === 'vollzugriff'
+        kunde = {
+          id: k.id,
+          vorname: k.vorname ?? null,
+          nachname: k.nachname ?? null,
+          email: full ? (k.email ?? null) : null,
+          telefon: full ? (k.telefon ?? null) : null,
+          adresse: full ? (k.adresse ?? null) : null,
+          plz: full ? (k.plz ?? null) : null,
+          ort: full ? (k.ort ?? null) : null,
+        }
+      }
+    }
+  }
 
   const { data: provisionRows } = await supabase
     .from('makler_provisionen')
@@ -401,7 +434,7 @@ export async function getMaklerFallDetail(
 
   // CMM-44 MP-4e/MP-8b: abgeleitete 4-Phase via Service-Read (Makler-RLS deckt die
   // v_claim_phase-Join-Tabellen nicht ab). v_claim_phase ist claims-zentrisch -> claims.id.
-  const detailClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
+  // detailClaimId ist oben (fuer den Kunden-Lookup) bereits aus fall.claim_id abgeleitet.
   const phaseCell = detailClaimId ? (await getClaimPhaseMap([detailClaimId])).get(detailClaimId) : undefined
 
   return {
