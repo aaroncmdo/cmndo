@@ -4491,8 +4491,7 @@
     "fall": {
       "tabs": {
         "uebersicht": "Overview",
-        "dokumente": "Documents",
-        "chat": "Chat"
+        "dokumente": "Documents"
       },
       "uebersicht": {
         "fahrzeugUnfall": "Vehicle & accident",
@@ -4503,28 +4502,6 @@
         "hochgeladen": "Uploaded documents",
         "leer": "No documents uploaded yet.",
         "fallback": "Document"
-      },
-      "chat": {
-        "rolle": {
-          "kunde": "You",
-          "admin": "Claimondo",
-          "kundenbetreuer": "Account manager",
-          "gutachter": "Expert",
-          "sachverstaendiger": "Expert",
-          "system": "System"
-        },
-        "rolleAnzeige": {
-          "kundenbetreuer": "Account manager",
-          "gutachter": "Expert",
-          "admin": "Admin"
-        },
-        "ansprechpartner": "Your contacts",
-        "unbekannt": "Unknown",
-        "leer": "No messages yet. Write to us!",
-        "viaWhatsApp": "via WhatsApp",
-        "anhang": "Attachment",
-        "platzhalter": "Write a message...",
-        "fehlerSenden": "Error sending message"
       },
       "gegenvorschlag": {
         "angenommen": "Appointment confirmed! The expert appraiser has been notified.",
@@ -5610,17 +5587,6 @@
       "speichern_laeuft": "One moment, we're looking for matching appointments …",
       "fehler_speichern": "The address could not be saved."
     }
-  },
-  "chatSystem": {
-    "terminAbgelehnt": "❌ Expert {svName} declined the appointment on {terminDatum}.{hatGrund, select, ja { Reason: \"{grund}\"} other {}}",
-    "terminGegenvorschlag": "📅 {rolle, select, sv {The expert} other {The customer}}{hatName, select, ja { {name}} other {}} proposed a new appointment: {terminStr}.{hatGrund, select, ja { Reason: \"{grund}\"} other {}}",
-    "welcome": "Case {fallNummer} has been created. Welcome to your personal chat!"
-  },
-  "chatTranslate": {
-    "uebersetzt": "Translated",
-    "originalAnzeigen": "Show original",
-    "uebersetzungAnzeigen": "Show translation",
-    "uebersetze": "Translating …"
   },
   "gutachter": {
     "feldmodus": {
