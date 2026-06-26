@@ -30,7 +30,7 @@ export default function OfflineStatusBanner() {
   if (counts.dead > 0) {
     return (
       <>
-        <div className="bg-red-600/95 text-white text-xs px-3 py-2 flex items-center gap-2">
+        <div className="bg-danger/95 text-white text-xs px-3 py-2 flex items-center gap-2">
           <AlertTriangleIcon className="w-4 h-4 flex-shrink-0" />
           <span className="flex-1">
             {counts.dead} {counts.dead === 1 ? 'Upload dauerhaft' : 'Uploads dauerhaft'} fehlgeschlagen.
@@ -50,7 +50,7 @@ export default function OfflineStatusBanner() {
 
   if (!online) {
     return (
-      <div className="bg-amber-600/95 text-white text-xs px-3 py-2 flex items-center gap-2">
+      <div className="bg-warning/95 text-white text-xs px-3 py-2 flex items-center gap-2">
         <WifiOffIcon className="w-4 h-4 flex-shrink-0" />
         <span className="flex-1">
           Offline-Modus aktiv
