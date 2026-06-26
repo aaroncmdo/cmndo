@@ -4491,8 +4491,7 @@
     "fall": {
       "tabs": {
         "uebersicht": "Обзор",
-        "dokumente": "Документы",
-        "chat": "Чат"
+        "dokumente": "Документы"
       },
       "uebersicht": {
         "fahrzeugUnfall": "Транспортное средство и ДТП",
@@ -4503,28 +4502,6 @@
         "hochgeladen": "Загруженные документы",
         "leer": "Документов пока нет.",
         "fallback": "Документ"
-      },
-      "chat": {
-        "rolle": {
-          "kunde": "Вы",
-          "admin": "Claimondo",
-          "kundenbetreuer": "Ваш куратор",
-          "gutachter": "Эксперт-оценщик",
-          "sachverstaendiger": "Эксперт-оценщик",
-          "system": "Система"
-        },
-        "rolleAnzeige": {
-          "kundenbetreuer": "Куратор",
-          "gutachter": "Эксперт-оценщик",
-          "admin": "Admin"
-        },
-        "ansprechpartner": "Ваши контактные лица",
-        "unbekannt": "Неизвестно",
-        "leer": "Сообщений пока нет. Напишите нам!",
-        "viaWhatsApp": "via WhatsApp",
-        "anhang": "Вложение",
-        "platzhalter": "Написать сообщение...",
-        "fehlerSenden": "Ошибка при отправке"
       },
       "gegenvorschlag": {
         "angenommen": "Встреча окончательно подтверждена! Эксперт-оценщик уведомлён.",
@@ -5610,17 +5587,6 @@
       "speichern_laeuft": "Один момент, мы подбираем подходящее время …",
       "fehler_speichern": "Не удалось сохранить адрес."
     }
-  },
-  "chatSystem": {
-    "terminAbgelehnt": "❌ Эксперт-оценщик {svName} отклонил приём на {terminDatum}.{hatGrund, select, ja { Причина: \"{grund}\"} other {}}",
-    "terminGegenvorschlag": "📅 {rolle, select, sv {Эксперт-оценщик} other {Клиент}}{hatName, select, ja { {name}} other {}} предложил новый приём: {terminStr}.{hatGrund, select, ja { Причина: \"{grund}\"} other {}}",
-    "welcome": "Дело {fallNummer} создано. Добро пожаловать в Ваш личный чат!"
-  },
-  "chatTranslate": {
-    "uebersetzt": "Переведено",
-    "originalAnzeigen": "Показать оригинал",
-    "uebersetzungAnzeigen": "Показать перевод",
-    "uebersetze": "Перевод …"
   },
   "gutachter": {
     "feldmodus": {

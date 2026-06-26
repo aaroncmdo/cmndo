@@ -4491,8 +4491,7 @@
     "fall": {
       "tabs": {
         "uebersicht": "Przegląd",
-        "dokumente": "Dokumenty",
-        "chat": "Chat"
+        "dokumente": "Dokumenty"
       },
       "uebersicht": {
         "fahrzeugUnfall": "Pojazd i wypadek",
@@ -4503,28 +4502,6 @@
         "hochgeladen": "Przesłane dokumenty",
         "leer": "Brak dokumentów.",
         "fallback": "Dokument"
-      },
-      "chat": {
-        "rolle": {
-          "kunde": "Państwo",
-          "admin": "Claimondo",
-          "kundenbetreuer": "Państwa opiekun",
-          "gutachter": "Rzeczoznawca",
-          "sachverstaendiger": "Rzeczoznawca",
-          "system": "System"
-        },
-        "rolleAnzeige": {
-          "kundenbetreuer": "Opiekun klienta",
-          "gutachter": "Rzeczoznawca",
-          "admin": "Admin"
-        },
-        "ansprechpartner": "Państwa kontakty",
-        "unbekannt": "Nieznany",
-        "leer": "Brak wiadomości. Napisz do nas!",
-        "viaWhatsApp": "przez WhatsApp",
-        "anhang": "Załącznik",
-        "platzhalter": "Napisz wiadomość...",
-        "fehlerSenden": "Błąd podczas wysyłania"
       },
       "gegenvorschlag": {
         "angenommen": "Termin potwierdzony! Rzeczoznawca zostanie poinformowany.",
@@ -5610,17 +5587,6 @@
       "speichern_laeuft": "Chwileczkę, szukamy pasujących terminów …",
       "fehler_speichern": "Nie udało się zapisać adresu."
     }
-  },
-  "chatSystem": {
-    "terminAbgelehnt": "❌ Rzeczoznawca {svName} odrzucił termin w dniu {terminDatum}.{hatGrund, select, ja { Powód: \"{grund}\"} other {}}",
-    "terminGegenvorschlag": "📅 {rolle, select, sv {Rzeczoznawca} other {Klient}}{hatName, select, ja { {name}} other {}} zaproponował nowy termin: {terminStr}.{hatGrund, select, ja { Powód: \"{grund}\"} other {}}",
-    "welcome": "Sprawa {fallNummer} została utworzona. Witamy w Państwa osobistym czacie!"
-  },
-  "chatTranslate": {
-    "uebersetzt": "Przetłumaczono",
-    "originalAnzeigen": "Pokaż oryginał",
-    "uebersetzungAnzeigen": "Pokaż tłumaczenie",
-    "uebersetze": "Tłumaczenie …"
   },
   "gutachter": {
     "feldmodus": {

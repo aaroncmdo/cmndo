@@ -4665,8 +4665,7 @@
       },
       "tabs": {
         "uebersicht": "Übersicht",
-        "dokumente": "Dokumente",
-        "chat": "Chat"
+        "dokumente": "Dokumente"
       },
       "uebersicht": {
         "fahrzeugUnfall": "Fahrzeug & Unfall",
@@ -4677,28 +4676,6 @@
         "hochgeladen": "Hochgeladene Dokumente",
         "leer": "Noch keine Dokumente vorhanden.",
         "fallback": "Dokument"
-      },
-      "chat": {
-        "rolle": {
-          "kunde": "Sie",
-          "admin": "Claimondo",
-          "kundenbetreuer": "Ihr Betreuer",
-          "gutachter": "Gutachter",
-          "sachverstaendiger": "Gutachter",
-          "system": "System"
-        },
-        "rolleAnzeige": {
-          "kundenbetreuer": "Kundenbetreuer",
-          "gutachter": "Gutachter",
-          "admin": "Admin"
-        },
-        "ansprechpartner": "Ihre Ansprechpartner",
-        "unbekannt": "Unbekannt",
-        "leer": "Noch keine Nachrichten. Schreiben Sie uns!",
-        "viaWhatsApp": "via WhatsApp",
-        "anhang": "Anhang",
-        "platzhalter": "Nachricht schreiben...",
-        "fehlerSenden": "Fehler beim Senden"
       },
       "gegenvorschlag": {
         "angenommen": "Termin bestätigt! Der Sachverständige wird informiert.",
@@ -5610,17 +5587,6 @@
       "speichern_laeuft": "Einen Moment, wir suchen passende Termine …",
       "fehler_speichern": "Adresse konnte nicht gespeichert werden."
     }
-  },
-  "chatSystem": {
-    "terminAbgelehnt": "❌ Sachverständiger {svName} hat den Termin am {terminDatum} abgelehnt.{hatGrund, select, ja { Grund: \"{grund}\"} other {}}",
-    "terminGegenvorschlag": "📅 {rolle, select, sv {Sachverständiger} other {Kunde}}{hatName, select, ja { {name}} other {}} hat einen neuen Termin vorgeschlagen: {terminStr}.{hatGrund, select, ja { Grund: \"{grund}\"} other {}}",
-    "welcome": "Fall {fallNummer} wurde erstellt. Willkommen in Ihrem persönlichen Chat!"
-  },
-  "chatTranslate": {
-    "uebersetzt": "Übersetzt",
-    "originalAnzeigen": "Original anzeigen",
-    "uebersetzungAnzeigen": "Übersetzung anzeigen",
-    "uebersetze": "Übersetze …"
   },
   "gutachter": {
     "feldmodus": {
