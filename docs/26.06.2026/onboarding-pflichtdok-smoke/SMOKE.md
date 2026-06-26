@@ -83,15 +83,24 @@ npx vitest run src/lib/dokumente/pflichtdok-konsistenz.test.ts
 `tests/e2e/flows/onboarding-pflichtdok.spec.ts` — public Wizard → Lead → SA →
 Kunde-Onboarding-Doc-Checklist → SV-Upload → KB-Filmcheck → Kanzlei-Sicht.
 
-**Run (staging, alle Rollen):**
+Deckt ab: (1) public `/gutachter-finden` lädt fehlerfrei (Gate = keine uncaught
+JS-Exceptions; Wizard-Vollsubmit ist Map/Geo-abhängig → smoke-vollstrecke), (2)
+**alle Rollen-Portale** (SV/KB/Dispatch/Kanzlei) Login + erreichbar + fehlerfrei.
+
+**Run (staging):**
 ```
-PLAYWRIGHT_BASE_URL=https://app.staging.claimondo.de \
+CI=1 PLAYWRIGHT_BASE_URL=https://app.staging.claimondo.de \
   STAGING_BASIC_USER=aaroncmdo STAGING_BASIC_PASS='<staging-basic-pass>' \
-  TEST_SV_EMAIL=test-sv@claimondo.de TEST_SV_PASSWORD=Test1234! \
-  npx playwright test onboarding-pflichtdok --workers=1
+  npx playwright test onboarding-pflichtdok --project=chromium --workers=1
 ```
-Voraussetzungen: staging erreichbar + Basic-Auth-Pass + Test-Accounts (Test1234!).
-Schreibt gestellte Claims auf die geteilte DB (SMOKE-<RUN_ID>-markiert).
+Voraussetzungen: staging erreichbar + Basic-Auth-Pass + Test-Accounts (Test1234! /
+TestKB2026!). `CI=1` unterdrückt den lokalen dev-webServer (trifft direkt staging).
+
+**Run-Ergebnis 26.06.2026 (gegen app.staging.claimondo.de): 4 passed / 1 skipped (1,2 min)**
+- ✅ `/gutachter-finden` fehlerfrei (0 uncaught JS; 1 benigner Resource-404)
+- ✅ SV-Portal `/gutachter` · ✅ KB-Portal `/mitarbeiter` · ✅ Dispatch `/dispatch` — Login + erreichbar + 0 JS-Exceptions
+- ⏭️ Kanzlei `/kanzlei`: `test-kanzlei@claimondo.de` existiert auf staging NICHT → graceful skip. **Befund: Kanzlei-Test-Account fehlt** (für volle Rollen-Abdeckung seeden).
+- Gate = nur `pageerror` (uncaught JS); benigne Resource-404-console.errors gaten nicht.
 
 ---
 

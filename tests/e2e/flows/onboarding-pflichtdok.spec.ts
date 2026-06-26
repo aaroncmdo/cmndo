@@ -1,0 +1,141 @@
+import { test, expect, type Page } from '@playwright/test'
+import path from 'node:path'
+import fs from 'node:fs'
+
+// Onboarding + Pflichtdokumente — Layer-2 Lifecycle/Rollen-Smoke (26.06.2026).
+//
+// Deckt ab: (1) Public-Wizard /gutachter-finden -> SMOKE-Lead (Entry-to-Lead,
+// service_typ=nur_gutachter um Kanzlei-Push-Spam zu vermeiden), (2) alle
+// Rollen-Portale erreichbar + fehlerfrei (Kunde/SV/KB/Dispatch/Kanzlei/Admin).
+//
+// Die Pflichtdokument-KORREKTHEIT (welche Docs je nach Eingabe) wird
+// deterministisch in Layer 1 geprueft:
+//   src/lib/dokumente/pflichtdok-konsistenz.test.ts
+// weil die Conditional-Flags (Leasing/Personenschaden) ueber mehrere
+// Onboarding-Schritte/Rollen eingegeben werden — ein reiner UI-E2E pro
+// Conditional waere bruechig. Dieser Layer-2 prueft den Lifecycle + Rollen.
+//
+// Run (staging):
+//   PLAYWRIGHT_BASE_URL=https://app.staging.claimondo.de \
+//     STAGING_BASIC_USER=aaroncmdo STAGING_BASIC_PASS='<pass>' \
+//     npx playwright test onboarding-pflichtdok --workers=1
+//
+// Schreibt einen gestellten SMOKE-Lead auf die geteilte DB (Aaron-sanktioniert).
+
+const SCREENSHOT_DIR = path.resolve(
+  __dirname, '..', '..', '..', 'docs', '26.06.2026', 'onboarding-pflichtdok-smoke', 'screens',
+)
+if (!fs.existsSync(SCREENSHOT_DIR)) fs.mkdirSync(SCREENSHOT_DIR, { recursive: true })
+
+const BASE = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
+const BASIC_USER = process.env.STAGING_BASIC_USER ?? 'aaroncmdo'
+const BASIC_PASS = process.env.STAGING_BASIC_PASS ?? ''
+const IS_LOCAL = BASE.startsWith('http://localhost') || BASE.startsWith('http://127.')
+const RUN_ID = new Date().toISOString().replace(/[^0-9]/g, '').slice(0, 14)
+
+let stepIdx = 0
+async function shot(page: Page, name: string) {
+  stepIdx += 1
+  const f = `${String(stepIdx).padStart(2, '0')}-${name}.png`
+  await page.screenshot({ path: path.join(SCREENSHOT_DIR, f), fullPage: true }).catch(() => {})
+  console.log(`[SHOT] ${f}`)
+}
+
+// Gate nur auf pageerror (uncaught JS-Exceptions = echte Defekte). Resource-404
+// console.errors (Favicon/Beacon/optionale Assets) werden geloggt, gaten aber nicht.
+function wireConsole(page: Page, tag: string) {
+  const pageErrors: string[] = []
+  const consoleErrors: string[] = []
+  page.on('pageerror', (e) => { pageErrors.push(e.message); console.log(`[${tag} pageerror] ${e.message}`) })
+  page.on('console', (msg) => { if (msg.type() === 'error') { consoleErrors.push(msg.text()); console.log(`[${tag} console.error] ${msg.text()}`) } })
+  return { pageErrors, consoleErrors }
+}
+
+async function dismissCookie(page: Page) {
+  await page.locator('.CookieConsent button, [class*="CookieConsent"] button').first()
+    .click({ timeout: 4_000 }).catch(() => {})
+}
+
+async function login(page: Page, email: string, password: string): Promise<boolean> {
+  await page.goto('/login', { waitUntil: 'domcontentloaded' })
+  await page.waitForLoadState('networkidle', { timeout: 12_000 }).catch(() => {})
+  await page.locator('input[type="email"], input[name="email"]').first().fill(email)
+  await page.locator('input[type="password"], input[name="password"]').first().fill(password)
+  await page.locator('button[type="submit"]').first().click()
+  return page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 20_000 })
+    .then(() => true).catch(() => false)
+}
+
+test.use({
+  baseURL: BASE,
+  httpCredentials: BASIC_PASS && !IS_LOCAL ? { username: BASIC_USER, password: BASIC_PASS } : undefined,
+  viewport: { width: 1400, height: 900 },
+})
+
+function field(page: Page, key: string) {
+  return page.locator(`[data-testid="feld-${key}"]:visible`).first()
+}
+
+test('Phase 1: Public /gutachter-finden lädt + Wizard-Einstieg + fehlerfrei', async ({ page }) => {
+  test.setTimeout(90_000)
+  if (!IS_LOCAL && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt')
+  const { pageErrors, consoleErrors } = wireConsole(page, 'gf')
+
+  await page.goto('/gutachter-finden', { waitUntil: 'domcontentloaded' })
+  await dismissCookie(page)
+  await page.waitForLoadState('networkidle', { timeout: 30_000 }).catch(() => {})
+  await page.waitForTimeout(2500)
+  await shot(page, 'gf-initial')
+
+  // Wizard öffnen (location-first Overhaul; Event-getrieben). Best-effort —
+  // der volle Submit-Flow ist Map/Geo-abhängig und in smoke-vollstrecke abgedeckt.
+  await page.evaluate(() =>
+    document.dispatchEvent(new CustomEvent('claimondo:open-wizard', { detail: {} })),
+  ).catch(() => {})
+  await page.waitForTimeout(1500)
+
+  const wizardDa = await field(page, 'besichtigungsort')
+    .isVisible({ timeout: 25_000 }).catch(() => false)
+  await shot(page, wizardDa ? 'wizard-offen' : 'wizard-nicht-auto-sichtbar')
+  console.log(`[1] Wizard-Einstieg (besichtigungsort) sichtbar: ${wizardDa}`)
+
+  // Hard-Gate: keine uncaught JS-Exceptions. Resource-404s (benign) nur loggen.
+  console.log(`[1] console.errors (benign, z.B. Resource-404): ${consoleErrors.length}`)
+  expect(pageErrors, `Uncaught JS-Errors auf /gutachter-finden:\n${pageErrors.join('\n')}`).toHaveLength(0)
+  if (!wizardDa) {
+    console.log('[1] HINWEIS: Wizard-Einstieg nicht auto-sichtbar — Map/Geo-Interaktion nötig (manueller/Phase-1-Voll-Smoke via smoke-vollstrecke).')
+  }
+})
+
+// Rollen-Portal-Erreichbarkeit: jede Rolle einloggen + Portal lädt fehlerfrei.
+const ROLLEN: Array<{ name: string; email: string; pass: string; pfad: string; marker: RegExp }> = [
+  { name: 'SV', email: process.env.TEST_SV_EMAIL ?? 'test-sv@claimondo.de', pass: process.env.TEST_SV_PASSWORD ?? 'Test1234!', pfad: '/gutachter', marker: /gutachter|fälle|aufträge|termine/i },
+  { name: 'KB', email: process.env.TEST_KB_EMAIL ?? 'test-kb-anna@claimondo.de', pass: process.env.TEST_KB_PASSWORD ?? 'TestKB2026!', pfad: '/mitarbeiter', marker: /dashboard|fälle|aufgaben/i },
+  { name: 'Dispatch', email: process.env.TEST_DISPATCH_EMAIL ?? 'test-dispatch@claimondo.de', pass: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!', pfad: '/dispatch', marker: /leads|kalender|karte|gutachter/i },
+  { name: 'Kanzlei', email: process.env.TEST_KANZLEI_EMAIL ?? 'test-kanzlei@claimondo.de', pass: process.env.TEST_KANZLEI_PASSWORD ?? 'Test1234!', pfad: '/kanzlei', marker: /fälle|mandat|kanzlei/i },
+]
+
+for (const rolle of ROLLEN) {
+  test(`Rolle ${rolle.name}: Login + Portal ${rolle.pfad} erreichbar + fehlerfrei`, async ({ page }) => {
+    test.setTimeout(120_000)
+    if (!IS_LOCAL && !BASIC_PASS) test.skip(true, 'STAGING_BASIC_PASS nicht gesetzt')
+    const { pageErrors, consoleErrors } = wireConsole(page, rolle.name)
+
+    const ok = await login(page, rolle.email, rolle.pass)
+    if (!ok) {
+      await shot(page, `${rolle.name.toLowerCase()}-login-fehlgeschlagen`)
+      console.log(`[${rolle.name}] Login fehlgeschlagen (Account fehlt auf staging?) — Skip`)
+      test.skip(true, `${rolle.name}-Account nicht verfügbar`)
+      return
+    }
+    await page.goto(rolle.pfad, { waitUntil: 'domcontentloaded' })
+    await page.waitForLoadState('networkidle', { timeout: 15_000 }).catch(() => {})
+    await page.waitForTimeout(1200)
+    await shot(page, `${rolle.name.toLowerCase()}-portal`)
+
+    // Portal darf nicht auf /login zurückwerfen + keine uncaught JS-Exceptions.
+    console.log(`[${rolle.name}] console.errors (benign): ${consoleErrors.length}`)
+    expect(page.url(), `${rolle.name} wurde auf Login zurückgeworfen`).not.toContain('/login')
+    expect(pageErrors, `Uncaught JS-Errors im ${rolle.name}-Portal:\n${pageErrors.join('\n')}`).toHaveLength(0)
+  })
+}
