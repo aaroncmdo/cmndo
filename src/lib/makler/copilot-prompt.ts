@@ -145,7 +145,7 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     admin
       .from('v_gutachten_werte')
       .select(
-        'reparaturkosten_netto, minderwert, nutzungsausfall_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_sv_honorar_netto, wiederbeschaffungswert, restwert, totalschaden',
+        'reparaturkosten_netto, minderwert, nutzungsausfall_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_sv_honorar_netto',
       )
       .eq('claim_id', claimId)
       .maybeSingle(),
@@ -190,9 +190,8 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     wertminderung: numOrNull(gut?.minderwert),
     nutzungsausfall_gesamt: nutzungsausfallGesamt,
     gutachter_honorar: numOrNull(gut?.gutachten_sv_honorar_netto),
-    wiederbeschaffungswert: numOrNull(gut?.wiederbeschaffungswert),
-    restwert: numOrNull(gut?.restwert),
-    totalschaden: (gut?.totalschaden as boolean | null) ?? null,
+    // Datenminimierung (Variante B): wiederbeschaffungswert/restwert/totalschaden
+    // bewusst NICHT in den Makler-Copilot-Kontext — sonst Leak via AI-Antwort.
   }
 
   const phaseCell = phaseMap.get(claimId)
@@ -228,9 +227,6 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   const wertminderung = fall.wertminderung as number | null | undefined
   const nutzungsausfall = fall.nutzungsausfall_gesamt as number | null | undefined
   const gutachterHonorar = fall.gutachter_honorar as number | null | undefined
-  const wbw = fall.wiederbeschaffungswert as number | null | undefined
-  const restwert = fall.restwert as number | null | undefined
-  const istTotal = fall.totalschaden as boolean | null | undefined
 
   const gesamtforderung =
     [reparaturkosten, wertminderung, nutzungsausfall, gutachterHonorar]
@@ -274,8 +270,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   const hasGutachten =
     reparaturkosten != null ||
     wertminderung != null ||
-    gutachterHonorar != null ||
-    wbw != null
+    gutachterHonorar != null
   if (hasGutachten) {
     lines.push('')
     lines.push('GUTACHTEN:')
@@ -283,9 +278,6 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
     lines.push(`- Wertminderung: ${fmtEur(wertminderung)}`)
     lines.push(`- Nutzungsausfall: ${fmtEur(nutzungsausfall)}`)
     lines.push(`- Gutachter-Honorar: ${fmtEur(gutachterHonorar)}`)
-    lines.push(`- Wiederbeschaffungswert: ${fmtEur(wbw)}`)
-    lines.push(`- Restwert: ${fmtEur(restwert)}`)
-    lines.push(`- Totalschaden: ${istTotal ? 'Ja' : 'Nein'}`)
     if (gesamtforderung !== null) {
       lines.push(`- Gesamtforderung (Netto): ${fmtEur(gesamtforderung)}`)
     }

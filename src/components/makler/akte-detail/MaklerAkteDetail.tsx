@@ -438,16 +438,10 @@ function OverviewPanel({
           bodyClassName="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3"
         >
             <InfoRow label="Reparaturkosten" value={fmtEur(fall.reparaturkosten)} />
-            <InfoRow label="Wiederbeschaffungswert" value={fmtEur(fall.wiederbeschaffungswert)} />
             <InfoRow label="Wertminderung" value={fmtEur(fall.wertminderung)} />
-            <InfoRow label="Restwert" value={fmtEur(fall.restwert)} />
             <InfoRow
               label="Nutzungsausfall"
               value={fmtEur(fall.nutzungsausfall_gesamt)}
-            />
-            <InfoRow
-              label="Totalschaden"
-              value={fall.totalschaden ? 'Ja' : 'Nein'}
             />
             <InfoRow
               label="Gutachter-Honorar"
