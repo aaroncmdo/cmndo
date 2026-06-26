@@ -2,7 +2,7 @@
 // Zeigt vermittelte Claims + offene/freigegebene/ausgezahlte Provisions-Summen.
 
 import { redirect } from 'next/navigation'
-import { getWerkstattByUserId, getWerkstattOverview } from '@/lib/werkstatt/queries'
+import { getWerkstattByUserId, getWerkstattOverview, getWerkstattVermittlungsCount, getWerkstattStaffelStufen } from '@/lib/werkstatt/queries'
 import {
   FolderCheckIcon,
   ClockIcon,
@@ -10,6 +10,7 @@ import {
   WalletIcon,
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
+import { WerkstattStaffelCard } from '@/components/werkstatt/WerkstattStaffelCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,11 @@ export default async function WerkstattUebersichtPage() {
   const werkstatt = await getWerkstattByUserId()
   if (!werkstatt) redirect('/login')
 
-  const overview = await getWerkstattOverview(werkstatt.id)
+  const [overview, vermittlung, stufen] = await Promise.all([
+    getWerkstattOverview(werkstatt.id),
+    getWerkstattVermittlungsCount(werkstatt.id),
+    getWerkstattStaffelStufen(werkstatt.id),
+  ])
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
@@ -66,6 +71,12 @@ export default async function WerkstattUebersichtPage() {
           hint="bisherige Gesamtauszahlungen"
         />
       </div>
+
+      <WerkstattStaffelCard
+        settledCount={vermittlung.settled}
+        pendingCount={vermittlung.pending}
+        stufen={stufen}
+      />
 
       <section className="bg-white rounded-ios-md border border-claimondo-border p-5">
         <h2 className="text-heading-sm text-claimondo-navy font-semibold mb-3">
