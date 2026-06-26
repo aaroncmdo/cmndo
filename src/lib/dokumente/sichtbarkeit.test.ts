@@ -27,6 +27,13 @@ describe('sichtbarkeit', () => {
     expect(darfSehen('gutachten', 'dispatch')).toBe(false)
   })
 
+  it('zeugenbericht sichtbar fuer SV/KB/Kanzlei/Kunde (Audit #3 Fix)', () => {
+    expect(darfSehen('zeugenbericht', 'sachverstaendiger')).toBe(true)
+    expect(darfSehen('zeugenbericht', 'kundenbetreuer')).toBe(true)
+    expect(darfSehen('zeugenbericht', 'kanzlei')).toBe(true)
+    expect(darfSehen('zeugenbericht', 'kunde')).toBe(true)
+  })
+
   it('Unbekannter Typ: nur Admin', () => {
     expect(darfSehen('existiert_nicht', 'admin')).toBe(true)
     expect(darfSehen('existiert_nicht', 'sachverstaendiger')).toBe(false)
