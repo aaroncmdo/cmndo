@@ -226,6 +226,17 @@ function mapEventToMitteilung(
       return { titel: 'Gegnerische Partei → Voll-Mitglied', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     case 'claim.einladung_abgelaufen':
       return { titel: 'Gegner-Einladung abgelaufen', inhalt: asString(payload.ablaufGrund) ?? null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    case 'gutachten.pflicht_fotos_unvollstaendig': {
+      // DB-Cron-Event mit snake_case-Payload (claim_id) — der claimId oben liest camelCase.
+      const cId = asString(payload.claim_id) ?? claimId
+      return {
+        titel: 'Pflicht-Fotos fehlen',
+        inhalt: 'Bitte die Übersichtsfotos zum Gutachten nachreichen.',
+        kategorie: 'update',
+        kontext_typ: cId ? 'claim' : kontext.typ,
+        kontext_id: cId ?? kontext.id,
+      }
+    }
     default:
       // Generischer Fallback — Event-Type als Title (lesbar genug:
       // „termin.verlegung_eskalation"), kein Inhalt.
