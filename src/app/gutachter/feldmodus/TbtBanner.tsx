@@ -109,7 +109,7 @@ export default function TbtBanner({
     <div className="absolute top-3 left-3 right-3 z-20 pointer-events-none space-y-2">
       {/* Re-Routing-Pill — schmaler Hinweis über dem Haupt-Banner */}
       {rerouting && (
-        <div className="bg-amber-500/95 backdrop-blur-sm text-white rounded-full shadow-lg px-4 py-1.5 text-xs font-medium flex items-center justify-center gap-2 mx-auto w-fit pointer-events-auto">
+        <div className="bg-warning/95 backdrop-blur-sm text-white rounded-full shadow-lg px-4 py-1.5 text-xs font-medium flex items-center justify-center gap-2 mx-auto w-fit pointer-events-auto">
           <Loader2Icon className="w-3.5 h-3.5 animate-spin" />
           Neue Route wird berechnet …
         </div>

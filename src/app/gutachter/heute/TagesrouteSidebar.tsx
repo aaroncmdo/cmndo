@@ -83,7 +83,7 @@ function JetztPill({ startIso, endIso }: { startIso: string; endIso: string | nu
   const isJetzt = label === 'läuft jetzt' || label === 'jetzt'
   const isPast = label.startsWith('vor ')
   const cls = isJetzt
-    ? 'bg-emerald-100 text-emerald-800 border-emerald-300 animate-pulse'
+    ? 'bg-success-soft text-success-strong border-success/30 animate-pulse'
     : isPast
     ? 'bg-claimondo-border/40 text-claimondo-ondo/70 border-claimondo-border/60'
     : 'bg-claimondo-ondo/10 text-claimondo-navy border-claimondo-ondo/20'
@@ -97,21 +97,21 @@ function JetztPill({ startIso, endIso }: { startIso: string; endIso: string | nu
 function badgeForStatus(status: string): { label: string; cls: string } {
   switch (status) {
     case 'bestaetigt':
-      return { label: 'Bestätigt', cls: 'bg-emerald-50 text-emerald-700' }
+      return { label: 'Bestätigt', cls: 'bg-success-soft text-success-strong' }
     case 'abgeschlossen':
       return { label: 'Abgeschlossen', cls: 'bg-claimondo-bg text-claimondo-ondo' }
     case 'abgelehnt':
-      return { label: 'Abgelehnt', cls: 'bg-red-50 text-red-600' }
+      return { label: 'Abgelehnt', cls: 'bg-danger-soft text-danger-strong' }
     case 'no_show':
-      return { label: 'No-Show', cls: 'bg-amber-50 text-amber-700' }
+      return { label: 'No-Show', cls: 'bg-warning-soft text-warning-strong' }
     case 'reserviert':
       return { label: 'Reserviert', cls: 'bg-claimondo-bg text-claimondo-ondo' }
     case 'verlegung_pending':
-      return { label: 'Verlegung pending', cls: 'bg-amber-50 text-amber-700' }
+      return { label: 'Verlegung pending', cls: 'bg-warning-soft text-warning-strong' }
     case 'verlegt':
       return { label: 'Verlegt', cls: 'bg-claimondo-border/40 text-claimondo-ondo italic' }
     default:
-      return { label: 'Offen', cls: 'bg-amber-50 text-amber-700' }
+      return { label: 'Offen', cls: 'bg-warning-soft text-warning-strong' }
   }
 }
 
@@ -174,7 +174,7 @@ export default function TagesrouteSidebar({
         </div>
         {/* Quick-Stats — Pflicht-Dokumente offen, Anzahl Stops mit Adresse */}
         {offeneDokuTotal > 0 && (
-          <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium bg-amber-50 text-amber-800 border border-amber-200 px-2 py-1 rounded-full">
+          <div className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium bg-warning-soft text-warning-strong border border-warning/30 px-2 py-1 rounded-full">
             <AlertTriangleIcon className="w-3 h-3" />
             <span>{offeneDokuTotal} {offeneDokuTotal === 1 ? 'Pflichtdokument' : 'Pflichtdokumente'} offen</span>
           </div>
@@ -273,13 +273,13 @@ export default function TagesrouteSidebar({
                     {!istVerlegt && <JetztPill startIso={t.start_zeit} endIso={t.end_zeit} />}
                     <StatusBadge colorCls={badge.cls}>{badge.label}</StatusBadge>
                     {pflicht && pflicht.offen > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded-full border border-amber-200">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-warning-soft text-warning-strong px-1.5 py-0.5 rounded-full border border-warning/30">
                         <AlertTriangleIcon className="w-2.5 h-2.5" />
                         {pflicht.offen} Doku offen
                       </span>
                     )}
                     {pflicht && pflicht.offen === 0 && pflicht.gesamt > 0 && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-emerald-50 text-emerald-700 px-1.5 py-0.5 rounded-full border border-emerald-200">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-medium bg-success-soft text-success-strong px-1.5 py-0.5 rounded-full border border-success/30">
                         <CheckCircle2Icon className="w-2.5 h-2.5" />
                         Doku komplett
                       </span>
@@ -347,14 +347,14 @@ export default function TagesrouteSidebar({
 
                   {/* Vorschäden (Cardentity) */}
                   {t.hat_vorschaeden && (t.vorschaden_anzahl ?? 0) > 0 && (
-                    <div className="rounded-ios-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] flex items-start gap-1.5">
-                      <AlertTriangleIcon className="w-3 h-3 text-amber-700 shrink-0 mt-0.5" />
+                    <div className="rounded-ios-md border border-warning/30 bg-warning-soft px-2 py-1.5 text-[11px] flex items-start gap-1.5">
+                      <AlertTriangleIcon className="w-3 h-3 text-warning-strong shrink-0 mt-0.5" />
                       <div>
-                        <p className="font-semibold text-amber-900">
+                        <p className="font-semibold text-warning-strong">
                           {t.vorschaden_anzahl} Vorschaden{t.vorschaden_anzahl === 1 ? '' : '-Einträge'} (Cardentity)
                         </p>
                         {t.vorschaden_letzter_datum && (
-                          <p className="text-amber-800/80">
+                          <p className="text-warning-strong/80">
                             Letzter: {new Date(t.vorschaden_letzter_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
                           </p>
                         )}
@@ -384,8 +384,8 @@ export default function TagesrouteSidebar({
                       schneller Überblick wenn viele Slots vorhanden sind) */}
                   {pflicht && pflicht.gesamt > 0 && t.einzusammelnde_dokumente.length === 0 && (
                     <div className="text-[11px] flex items-center gap-2">
-                      <CheckCircle2Icon className="w-3 h-3 text-emerald-700" />
-                      <span className="text-emerald-700 font-medium">
+                      <CheckCircle2Icon className="w-3 h-3 text-success-strong" />
+                      <span className="text-success-strong font-medium">
                         Alle {pflicht.gesamt} Pflichtdokumente erfüllt
                       </span>
                     </div>
@@ -432,7 +432,7 @@ export default function TagesrouteSidebar({
                         <ExternalLinkIcon className="w-3 h-3" /> Fall öffnen
                       </Link>
                     ) : (
-                      <span className="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg px-2 py-1">
+                      <span className="text-[10px] text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg px-2 py-1">
                         SA ausstehend
                       </span>
                     )}

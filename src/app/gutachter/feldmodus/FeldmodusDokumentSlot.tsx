@@ -37,13 +37,13 @@ type Props = {
 }
 
 const STATUS_BADGE: Record<DokumentSlotStatus, { label: string; className: string }> = {
-  ausstehend: { label: 'Ausstehend', className: 'bg-amber-50 text-amber-700 border-amber-200' },
-  hochgeladen: { label: 'Hochgeladen', className: 'bg-green-50 text-green-700 border-green-200' },
+  ausstehend: { label: 'Ausstehend', className: 'bg-warning-soft text-warning-strong border-warning/30' },
+  hochgeladen: { label: 'Hochgeladen', className: 'bg-success-soft text-success-strong border-success/30' },
   geprueft: { label: 'Geprüft', className: 'bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] border-[var(--brand-secondary)]/30' },
-  abgelehnt: { label: 'Abgelehnt', className: 'bg-red-50 text-red-700 border-red-200' },
+  abgelehnt: { label: 'Abgelehnt', className: 'bg-danger-soft text-danger-strong border-danger/30' },
   nachgereicht_angefordert: {
     label: 'Nachzureichen',
-    className: 'bg-orange-50 text-orange-700 border-orange-200',
+    className: 'bg-warning-soft text-warning-strong border-warning/30',
   },
   optional: { label: 'Optional', className: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' },
 }
@@ -137,9 +137,9 @@ export default function FeldmodusDokumentSlot({
           <FileIcon className="w-3.5 h-3.5 text-[var(--brand-secondary)] flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (
-            <CheckCircle2Icon className="w-3.5 h-3.5 text-green-600 flex-shrink-0" />
+            <CheckCircle2Icon className="w-3.5 h-3.5 text-success flex-shrink-0" />
           ) : localStatus === 'abgelehnt' ? (
-            <AlertTriangleIcon className="w-3.5 h-3.5 text-red-600 flex-shrink-0" />
+            <AlertTriangleIcon className="w-3.5 h-3.5 text-danger flex-shrink-0" />
           ) : null}
         </div>
       )}

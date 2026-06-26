@@ -280,11 +280,11 @@ export default function SvFallakteView({
                   Dokumente
                 </p>
                 {pflichtOffen > 0 ? (
-                  <span className="text-[10px] font-medium text-amber-700">
+                  <span className="text-[10px] font-medium text-warning-strong">
                     {pflichtOffen} Pflicht offen
                   </span>
                 ) : slots.some((s) => s.istPflicht) ? (
-                  <span className="text-[10px] font-medium text-green-700">
+                  <span className="text-[10px] font-medium text-success-strong">
                     Alle Pflicht erledigt
                   </span>
                 ) : null}
@@ -323,7 +323,7 @@ export default function SvFallakteView({
                   Vor-Ort-Notizen
                 </label>
                 {notizenDirty && (
-                  <span className="text-[10px] text-amber-700">
+                  <span className="text-[10px] text-warning-strong">
                     Ungesichert
                   </span>
                 )}

@@ -105,7 +105,7 @@ export default function TagesrouteStartCard({
         {pending ? 'Starte …' : label}
       </button>
       {error && (
-        <p className="text-[11px] text-red-600 mt-2">Fehler: {error}</p>
+        <p className="text-[11px] text-danger mt-2">Fehler: {error}</p>
       )}
     </div>
   )
