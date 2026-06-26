@@ -1,8 +1,8 @@
 ﻿'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { useTranslations, useFormatter, useLocale } from 'next-intl'
-import { CalendarIcon, SendIcon } from 'lucide-react'
+import { useState } from 'react'
+import { useTranslations, useFormatter } from 'next-intl'
+import { CalendarIcon } from 'lucide-react'
 import { terminAnnehmen, terminGegenvorschlag } from '@/lib/actions/termin-actions'
 import { waehleGegenvorschlagSlot } from './actions'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
@@ -23,22 +23,12 @@ import { BelegUploadCard } from '@/components/kunde/beleg-upload'
 
 type Dokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
 type AktiverTermin = { id: string; status: string; start_zeit: string; end_zeit: string; vorgeschlagenes_datum: string | null; gegenvorschlag_von: string | null; gegenvorschlag_grund: string | null; sv_id: string | null; sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null }
-type Nachricht = { id: string; kanal: string; sender_id: string; sender_rolle: string; nachricht: string; hat_anhang: boolean; anhang_url: string | null; created_at: string; template_key?: string | null; template_params?: Record<string, string | number> | null; uebersetzungen?: Record<string, string> | null }
-type ChatTeilnehmer = { user_id: string; rolle: string; vorname: string | null; nachname: string | null; avatar_url?: string | null }
 
 const TABS = [
   { key: 'uebersicht' as const, label: 'Übersicht' },
   { key: 'dokumente' as const, label: 'Dokumente' },
-  { key: 'chat' as const, label: 'Chat' },
 ]
 
-async function markNachrichtenGelesen(_fallId: string): Promise<void> {
-  // Pre-Polish stub — Server-Action wurde im polish-sweep entfernt.
-  // Cleanup: TODO in Folge-PR durch echte mark-read-action ersetzen.
-}
-
-const ROLLE_LABEL: Record<string, string> = { kunde: 'Sie', admin: 'Claimondo', kundenbetreuer: 'Ihr Betreuer', gutachter: 'Gutachter', sachverstaendiger: 'Gutachter', system: 'System' }
-const ROLLE_COLOR: Record<string, string> = { kunde: 'bg-claimondo-ondo', admin: 'bg-claimondo-navy', kundenbetreuer: 'bg-claimondo-shield', gutachter: 'bg-claimondo-shield', sachverstaendiger: 'bg-claimondo-shield', system: 'bg-claimondo-ondo/70' }
 
 function fmt(val: string | null): string {
   if (!val) return ''
@@ -49,13 +39,10 @@ function fmtDateTime(val: string | null): string {
   return new Date(val).toLocaleString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'long', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
 }
 
-// Tab-System entfernt — Übersicht + Dokumente werden direkt
-// untereinander gerendert.
-
 // ─── Main Component ─────────────────────────────────────────────────────────
 
 export default function FallDetailSections({
-  fall, svName, svTelefon, svVerifiziert = false, kbName, dokumente, nachrichten, userId, chatTeilnehmer, aktiverTermin,
+  fall, svName, svTelefon, svVerifiziert = false, kbName, dokumente, aktiverTermin,
 }: {
   fall: Record<string, unknown>
   svName: string | null
@@ -63,12 +50,6 @@ export default function FallDetailSections({
   svVerifiziert?: boolean
   kbName?: string | null
   dokumente: Dokument[]
-  /** @deprecated — Chat ist entfernt, Nachrichten gehen ueber Sidebar */
-  nachrichten?: unknown[]
-  /** @deprecated — userId nur noch fuer Chat genutzt, der ist raus */
-  userId?: string
-  /** @deprecated — Chat-Teilnehmer nicht mehr noetig */
-  chatTeilnehmer?: unknown[]
   aktiverTermin?: AktiverTermin | null
 }) {
   const t = useTranslations('kunde.fall')
@@ -82,16 +63,13 @@ export default function FallDetailSections({
       ? tStatus(statusSlug)
       : statusSlug
     : null
-  const [activeTab, setActiveTab] = useState<'uebersicht' | 'dokumente' | 'chat'>('uebersicht')
+  const [activeTab, setActiveTab] = useState<'uebersicht' | 'dokumente'>('uebersicht')
   return (
     <div>
       {/* Tab-Leiste */}
       <div className="flex bg-white rounded-ios-xl border border-claimondo-border shadow-sm overflow-hidden mb-5">
         {TABS.map(tab => (
-          <button key={tab.key} onClick={() => {
-            setActiveTab(tab.key)
-            if (tab.key === 'chat') markNachrichtenGelesen(fall.id as string)
-          }}
+          <button key={tab.key} onClick={() => setActiveTab(tab.key)}
             className={`flex-1 py-3 text-sm font-medium transition-colors ${
               activeTab === tab.key
                 ? 'bg-claimondo-ondo text-white'
@@ -216,9 +194,6 @@ export default function FallDetailSections({
         </div>
       )}
 
-      {activeTab === 'chat' && (
-        <ChatTab fallId={fall.id as string} nachrichten={(nachrichten ?? []) as Nachricht[]} userId={userId ?? ''} teilnehmer={(chatTeilnehmer ?? []) as ChatTeilnehmer[]} />
-      )}
     </div>
   )
 }
@@ -240,248 +215,6 @@ function InfoRow({ label, value }: { label: string; value: string }) {
       <span className="text-sm text-claimondo-ondo">{label}</span>
       <span className="text-sm text-claimondo-navy font-medium text-right">{value}</span>
     </div>
-  )
-}
-
-// ─── Chat Tab — KFZ-129: Gruppen-Chat mit Teilnehmer-Header ──────────────
-
-function ChatTab({ fallId, nachrichten: initialNachrichten, userId, teilnehmer }: {
-  fallId: string; nachrichten: Nachricht[]; userId: string; teilnehmer: ChatTeilnehmer[]
-}) {
-  const t = useTranslations('kunde.fall')
-  // i18n Phase 1: System-Message-Templates in der Leser-Sprache rendern.
-  const tSys = useTranslations('chatSystem')
-  // i18n Phase 2: maschinelle Übersetzung von Human-Freitext.
-  const tT = useTranslations('chatTranslate')
-  const locale = useLocale()
-  const format = useFormatter()
-  const [messages, setMessages] = useState(initialNachrichten)
-  const [text, setText] = useState('')
-  const [sending, setSending] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const endRef = useRef<HTMLDivElement>(null)
-
-  // Teilnehmer-Map fuer Namen-Lookup
-  const teilnehmerMap = Object.fromEntries(teilnehmer.map(p => [p.user_id, p]))
-
-  function rolleLabel(rolle: string): string {
-    if (rolle in ROLLE_LABEL) return t(`chat.rolle.${rolle}`)
-    return rolle
-  }
-
-  function getSenderName(msg: Nachricht): string {
-    if (msg.sender_id === userId) return t('chat.rolle.kunde')
-    const p = teilnehmerMap[msg.sender_id]
-    if (p) return [p.vorname, p.nachname].filter(Boolean).join(' ') || rolleLabel(p.rolle)
-    return rolleLabel(msg.sender_rolle)
-  }
-
-  useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }) }, [messages])
-
-  async function handleSend(e: React.FormEvent) {
-    e.preventDefault()
-    if (!text.trim()) return
-    setSending(true); setError(null)
-    try {
-      const { sendNachricht } = await import('./actions')
-      const res = await sendNachricht(fallId, text.trim(), 'chat_kb_kunde')
-      if (!res.success) {
-        setError(res.error ?? t('chat.fehlerSenden'))
-      } else {
-        setMessages(prev => [...prev, {
-          id: crypto.randomUUID(), kanal: 'gruppe', sender_id: userId,
-          sender_rolle: 'kunde', nachricht: text.trim(), hat_anhang: false, anhang_url: null,
-          created_at: new Date().toISOString(),
-        }])
-        setText('')
-      }
-    } catch (err) { setError(err instanceof Error ? err.message : t('chat.fehlerSenden')) }
-    finally { setSending(false) }
-  }
-
-  // Andere Teilnehmer (nicht der Kunde selbst)
-  const otherTeilnehmer = teilnehmer.filter(p => p.user_id !== userId)
-
-  return (
-    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm overflow-hidden">
-      {/* KFZ-129: Teilnehmer-Header */}
-      {otherTeilnehmer.length > 0 && (
-        <div className="px-4 py-3 bg-claimondo-navy/5 border-b border-claimondo-border">
-          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">{t('chat.ansprechpartner')}</p>
-          <div className="flex flex-wrap gap-3">
-            {otherTeilnehmer.map(p => {
-              const name = [p.vorname, p.nachname].filter(Boolean).join(' ') || t('chat.unbekannt')
-              const rolleAnzeige = p.rolle === 'kundenbetreuer' ? t('chat.rolleAnzeige.kundenbetreuer') : p.rolle === 'gutachter' ? t('chat.rolleAnzeige.gutachter') : p.rolle === 'admin' ? t('chat.rolleAnzeige.admin') : p.rolle
-              const avatarBg = ROLLE_COLOR[p.rolle] ?? 'bg-claimondo-ondo/70'
-              const initials = [p.vorname?.[0], p.nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
-              return (
-                <div key={p.user_id} className="flex items-center gap-2">
-                  {p.avatar_url ? (
-                    <img src={p.avatar_url} alt={name} className="w-8 h-8 rounded-full object-cover" />
-                  ) : (
-                    <div className={`w-8 h-8 rounded-full ${avatarBg} flex items-center justify-center text-white text-xs font-bold`}>
-                      {initials}
-                    </div>
-                  )}
-                  <div>
-                    <p className="text-sm font-medium text-claimondo-navy">{name}</p>
-                    <p className="text-[10px] text-claimondo-ondo/70">{rolleAnzeige}</p>
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Messages — ein Stream fuer alle */}
-      <div className="space-y-3 p-4 max-h-96 overflow-y-auto">
-        {messages.length === 0 && <p className="text-sm text-claimondo-ondo/70 text-center py-8">{t('chat.leer')}</p>}
-        {messages.map(msg => {
-          const isOwn = msg.sender_id === userId
-          const isSystem = msg.sender_rolle === 'system'
-          const isWhatsApp = msg.kanal === 'whatsapp'
-
-          // KFZ-134: System-Nachrichten zentriert mit eigenem Style
-          if (isSystem) {
-            // i18n Phase 1: template_key in Leser-Sprache rendern; .has()-Guard
-            // verhindert Crash bei unbekanntem Key, nachricht bleibt de-Fallback.
-            const sysText = msg.template_key && tSys.has(msg.template_key)
-              ? tSys(msg.template_key, (msg.template_params ?? {}) as Record<string, string | number>)
-              : msg.nachricht
-            return (
-              <div key={msg.id} className="flex justify-center">
-                <div className="bg-claimondo-bg border border-claimondo-light-blue/30 rounded-ios-xl px-4 py-2 max-w-[85%]">
-                  <p className="text-xs text-claimondo-navy text-center whitespace-pre-wrap">{sysText}</p>
-                  <p className="text-[9px] text-claimondo-ondo/70 text-center mt-1">
-                    {format.dateTime(new Date(msg.created_at), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })}
-                  </p>
-                </div>
-              </div>
-            )
-          }
-
-          const senderName = getSenderName(msg)
-          const bubbleColor = isOwn ? 'bg-claimondo-ondo text-white' : 'bg-claimondo-bg text-claimondo-navy'
-          const lightText = isOwn ? 'text-white/60' : 'text-claimondo-ondo/70'
-
-          return (
-            <div key={msg.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`}>
-              <div className={`max-w-[80%] rounded-2xl px-4 py-2.5 ${bubbleColor}`}>
-                <div className="flex items-center gap-1.5">
-                  <p className={`text-[10px] font-semibold uppercase tracking-wide ${lightText}`}>
-                    {senderName}
-                  </p>
-                  {isWhatsApp && <span className={`text-[9px] ${lightText}`}>{t('chat.viaWhatsApp')}</span>}
-                </div>
-                {/* i18n Phase 2: fremde Freitext-Nachrichten (de) für nicht-de-Leser
-                    übersetzen + Toggle aufs Original. Eigene + System + de unverändert. */}
-                {!isOwn && locale !== 'de' ? (
-                  <UebersetzteNachricht msg={msg} locale={locale} tT={tT} />
-                ) : (
-                  <p className="text-sm whitespace-pre-wrap">{msg.nachricht}</p>
-                )}
-                {msg.hat_anhang && msg.anhang_url && (
-                  <a href={msg.anhang_url} target="_blank" rel="noopener noreferrer"
-                    className={`inline-flex items-center gap-1 mt-1 text-xs underline ${isOwn ? 'text-white/70' : 'text-claimondo-ondo'}`}>
-                    {t('chat.anhang')}
-                  </a>
-                )}
-                <p className={`text-[10px] mt-1 ${lightText}`}>
-                  {format.dateTime(new Date(msg.created_at), { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })}
-                </p>
-              </div>
-            </div>
-          )
-        })}
-        <div ref={endRef} />
-      </div>
-
-      {/* Input */}
-      <div className="p-4 border-t border-claimondo-border">
-        {error && <p className="text-danger text-xs mb-2">{error}</p>}
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input type="text" value={text} onChange={e => setText(e.target.value)}
-            placeholder={t('chat.platzhalter')}
-            // AAR-452: text-base (16px) verhindert iOS-Autozoom beim Fokus
-            className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-4 py-3 text-base text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:border-claimondo-ondo" />
-          <button type="submit" disabled={sending || !text.trim()}
-            className="px-4 py-3 bg-claimondo-ondo hover:bg-claimondo-shield text-white rounded-ios-xl transition-colors disabled:opacity-40 min-h-12 flex items-center justify-center">
-            {sending ? <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <SendIcon className="w-5 h-5" />}
-          </button>
-        </form>
-      </div>
-    </div>
-  )
-}
-
-// ─── i18n Phase 2: übersetzte (fremde) Chat-Nachricht + Toggle aufs Original ──
-//
-// Rendert NUR den Nachrichten-Body + eine dezente Toggle-Zeile; die umgebende
-// Bubble (Sender, Zeit, Anhang) bleibt im ChatTab. Quelle ist immer Deutsch,
-// Ziel = Leser-Locale (≠ de). Wird per key={msg.id} gemountet, sodass der
-// useRef-Guard pro Nachricht genau einen Übersetzungs-Call garantiert.
-function UebersetzteNachricht({ msg, locale, tT }: {
-  msg: Nachricht
-  locale: string
-  tT: (key: string) => string
-}) {
-  const cached = msg.uebersetzungen?.[locale]
-  const [resolvedText, setResolvedText] = useState<string | undefined>(cached)
-  const [showOriginal, setShowOriginal] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [failed, setFailed] = useState(false)
-  const requestedRef = useRef(false)
-
-  useEffect(() => {
-    // Cache-Hit oder schon angefragt → kein (weiterer) Call. Der Ref-Guard
-    // verhindert Doppel-Calls bei Re-Renders / StrictMode-Double-Mount.
-    if (cached || requestedRef.current) return
-    requestedRef.current = true
-    let aktiv = true
-    setLoading(true)
-    ;(async () => {
-      try {
-        const { uebersetzeNachricht } = await import('./actions')
-        const r = await uebersetzeNachricht(msg.id, locale)
-        if (!aktiv) return
-        if (r.ok) setResolvedText(r.text)
-        else setFailed(true)
-      } catch {
-        if (aktiv) setFailed(true)
-      } finally {
-        if (aktiv) setLoading(false)
-      }
-    })()
-    return () => { aktiv = false }
-  }, [msg.id, locale, cached])
-
-  // Was anzeigen: Original-Toggle gewinnt; sonst Übersetzung falls vorhanden,
-  // sonst Fallback auf das Original (z.B. während des Ladens / bei Fehler).
-  const istUebersetzt = !showOriginal && !!resolvedText
-  const body = showOriginal ? msg.nachricht : (resolvedText ?? msg.nachricht)
-
-  return (
-    <>
-      <p className="text-sm whitespace-pre-wrap">{body}</p>
-      <div className="mt-0.5 text-[10px] text-claimondo-ondo/60">
-        {loading && !resolvedText ? (
-          <span>{tT('uebersetze')}</span>
-        ) : istUebersetzt ? (
-          <span>
-            {tT('uebersetzt')}
-            {' · '}
-            <button type="button" onClick={() => setShowOriginal(true)} className="underline">
-              {tT('originalAnzeigen')}
-            </button>
-          </span>
-        ) : resolvedText ? (
-          <button type="button" onClick={() => setShowOriginal(false)} className="underline">
-            {tT('uebersetzungAnzeigen')}
-          </button>
-        ) : null}
-      </div>
-    </>
   )
 }
 

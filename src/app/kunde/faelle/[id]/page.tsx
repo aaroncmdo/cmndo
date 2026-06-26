@@ -204,16 +204,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // beim SV im Auftrag, nur aus Kunden-Sicht.
     const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'kunde')
 
-    // Nachrichten laden (alle Kanaele inkl. Gruppe)
-    const { data: nachrichten } = await admin.from('nachrichten')
-      .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at, template_key, template_params, uebersetzungen')
-      .eq('fall_id', id)
-      .order('created_at', { ascending: true })
-
-    // Chat-Teilnehmer laden
-    const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
-    const chatTeilnehmer = await getChatTeilnehmer(id)
-
     // Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
       .from('gutachter_termine')
@@ -942,9 +932,6 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             svVerifiziert={svVerifiziert}
             kbName={kbName}
             dokumente={dokumente ?? []}
-            nachrichten={nachrichten ?? []}
-            userId={user.id}
-            chatTeilnehmer={chatTeilnehmer}
             aktiverTermin={aktiverTermin}
           />
         </div>
