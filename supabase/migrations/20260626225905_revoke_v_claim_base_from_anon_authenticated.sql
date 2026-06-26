@@ -1,0 +1,12 @@
+-- Security-Fix (wer-sieht-was-Audit 27.06.2026): v_claim_base ist die interne Basis-View
+-- der Claim-Read-Kanonisierung. Sie ist SECURITY DEFINER + owner=postgres (rolbypassrls=true)
+-- -> ein direkter SELECT umgeht die claims-RLS komplett und liefert ALLE Claims inkl.
+-- iban/bic/kunde_email/regulierung_betrag/halter_geburtsdatum. Sie war faelschlich an anon
+-- (der PUBLIC Publishable-Key im Frontend-Bundle!) + authenticated granted -> jeder konnte
+-- alle Claims lesen (live verifiziert: set role anon -> 89 Rows).
+--
+-- 0 Code-Consumer lesen v_claim_base direkt (grep src/ leer); die konsumierenden Layer-Views
+-- (v_claim_full, v_faelle_mit_aktuellem_termin, faelle_sv_view, faelle_kunde_view) lesen sie
+-- als owner postgres und sind vom REVOKE UNBERUEHRT. Schliesst den anon->alle-Claims-Pfad
+-- vollstaendig (anon hat keinen anderen Pfad: kein Grant auf v_claim_full/claims).
+revoke select on public.v_claim_base from anon, authenticated;
