@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitHomeLead } from './home-lead-action'
 import { trackEvent } from '@/lib/analytics/track-event'
+import { setUserData } from '@/lib/analytics/user-data'
 
 // Hero-Lead-Formular der Hauptseite. Vorher ein rohes
 // <form action="/api/leads/home" method="POST"> -> diese Route existierte nie,
@@ -48,6 +49,8 @@ export function HomeLeadFormClient({ id = 'lead-form' }: { id?: string }) {
         // Conversion-Event (Task 2): Home-Hero-Lead = claimondo_rueckruf-Pfad.
         // Feuert auch bei Consent=denied (Consent-Mode-Modeling). Siehe
         // docs/conversion-tracking-attribution-runbook.md (A1).
+        // Enhanced Conversions: vorhandene Form-Daten (gehasht via gtag) für besseres Ads-Matching.
+        setUserData({ name: String(fd.get('name') ?? ''), phone: String(fd.get('phone') ?? '') })
         trackEvent('generate_lead', { currency: 'EUR', value: 0, source: 'claimondo-home-hero' })
         form.reset()
       } else {
