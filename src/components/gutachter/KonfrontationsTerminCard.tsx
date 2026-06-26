@@ -80,13 +80,13 @@ export function KonfrontationsTerminCard({
     <div
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         bestaetigt
-          ? 'bg-emerald-50 border-emerald-200'
+          ? 'bg-success-soft border-success/30'
           : 'bg-claimondo-bg border-claimondo-ondo'
       }`}
     >
       <div className="flex items-center gap-2">
         <UsersIcon
-          className={`w-4 h-4 ${bestaetigt ? 'text-emerald-600' : 'text-claimondo-ondo'}`}
+          className={`w-4 h-4 ${bestaetigt ? 'text-success' : 'text-claimondo-ondo'}`}
         />
         <p className="text-xs uppercase tracking-wider font-semibold">
           Konfrontations-Termin angefragt
@@ -94,7 +94,7 @@ export function KonfrontationsTerminCard({
       </div>
 
       {bestaetigt ? (
-        <p className="text-sm text-emerald-800">
+        <p className="text-sm text-success-strong">
           Termin bestätigt am{' '}
           {new Date(terminVereinbartAm!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
             day: '2-digit',
@@ -146,7 +146,7 @@ export function KonfrontationsTerminCard({
             <div className="space-y-2 rounded-ios-lg bg-white border border-claimondo-border p-3">
               <label className="text-xs font-medium text-claimondo-navy">
                 Grund für die Ablehnung{' '}
-                <span className="text-red-600">*</span>
+                <span className="text-danger">*</span>
                 <span className="text-claimondo-ondo font-normal ml-1">
                   (min. 10 Zeichen — geht an KB + Kunde)
                 </span>
