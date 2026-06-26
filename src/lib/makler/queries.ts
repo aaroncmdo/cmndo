@@ -354,7 +354,7 @@ export async function getMaklerFallDetail(
       nutzungsausfall_gesamt, gutachter_honorar,
       wiederbeschaffungswert, restwert, totalschaden,
       abtretung_signiert_am,
-      kunde:profiles!faelle_kunde_id_fkey(
+      kunde:profiles!claims_geschaedigter_user_id_fkey(
         id, vorname, nachname, email, telefon, adresse, plz, ort
       )
     `)
@@ -565,7 +565,7 @@ export async function getMaklerFaelleList(
       id, claim_id, claim_nummer, service_typ,
       fahrzeug_hersteller, fahrzeug_modell,
       sv_termin, schadens_hoehe_netto, updated_at, created_at,
-      lead:leads(vorname, nachname)
+      lead:leads!lead_id(vorname, nachname)
     `)
     .in('id', fallIds)
   if (filter === 'aktiv') q = q.neq('main_phase', 'abschluss')
@@ -1159,7 +1159,7 @@ export async function getMaklerPrimaryPromoCode(
 export async function getPromoStats(promoCodeId: string): Promise<PromoStats> {
   const supabase = await createClient()
 
-  const [clicksRes, leadsRes, leadIdsRes] = await Promise.all([
+  const [clicksRes, leadsRes, aktenRes] = await Promise.all([
     supabase
       .from('promo_clicks')
       .select('id', { count: 'exact', head: true })
@@ -1168,28 +1168,19 @@ export async function getPromoStats(promoCodeId: string): Promise<PromoStats> {
       .from('leads')
       .select('id', { count: 'exact', head: true })
       .eq('promotion_code_id', promoCodeId),
+    // CMM-49-Fix: Akten = konvertierte Leads dieses Promo-Codes (leads.konvertiert_am gesetzt).
+    // Der fruehere Count via `claims` war fuer die Makler-Rolle RLS-unsichtbar (es gibt keine
+    // makler-SELECT-Policy auf claims) -> strukturell immer 0. leads sind via
+    // promotion_codes.makler_id Makler-sichtbar; konvertiert_am ~= claims.lead_id (live 88 vs 89).
     supabase
       .from('leads')
-      .select('id')
-      .eq('promotion_code_id', promoCodeId),
+      .select('id', { count: 'exact', head: true })
+      .eq('promotion_code_id', promoCodeId)
+      .not('konvertiert_am', 'is', null),
   ])
 
-  const leadIds = (leadIdsRes.data ?? []).map((r) => r.id as string)
-  let aktenCount = 0
-  if (leadIds.length > 0) {
-    // CMM-49: faelle-Count -> claims (lead_id 0-diff) + Bridge-Intersection (claims ⊋ faelle,
-    // nur faelle-backed; value-preserving live verifiziert, transitional bis faelle-DROP).
-    const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
-    const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id)
-    const { count } = await supabase
-      .from('claims')
-      .select('id', { count: 'exact', head: true })
-      .in('lead_id', leadIds)
-      .in('id', faelleClaimIds)
-    aktenCount = count ?? 0
-  }
-
   const leads = leadsRes.count ?? 0
+  const aktenCount = aktenRes.count ?? 0
   const konversion = leads > 0 ? aktenCount / leads : 0
 
   return {
