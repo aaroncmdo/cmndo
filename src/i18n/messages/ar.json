@@ -4491,8 +4491,7 @@
     "fall": {
       "tabs": {
         "uebersicht": "نظرة عامة",
-        "dokumente": "المستندات",
-        "chat": "المحادثة"
+        "dokumente": "المستندات"
       },
       "uebersicht": {
         "fahrzeugUnfall": "المركبة والحادث",
@@ -4503,28 +4502,6 @@
         "hochgeladen": "المستندات المرفوعة",
         "leer": "لا توجد مستندات بعد.",
         "fallback": "مستند"
-      },
-      "chat": {
-        "rolle": {
-          "kunde": "أنتم",
-          "admin": "Claimondo",
-          "kundenbetreuer": "مسؤول حسابكم",
-          "gutachter": "خبير",
-          "sachverstaendiger": "خبير",
-          "system": "النظام"
-        },
-        "rolleAnzeige": {
-          "kundenbetreuer": "مسؤول الحساب",
-          "gutachter": "خبير",
-          "admin": "المشرف"
-        },
-        "ansprechpartner": "جهات الاتصال لديكم",
-        "unbekannt": "غير معروف",
-        "leer": "لا توجد رسائل بعد. راسلونا!",
-        "viaWhatsApp": "عبر WhatsApp",
-        "anhang": "مرفق",
-        "platzhalter": "اكتب رسالتكم...",
-        "fehlerSenden": "خطأ في الإرسال"
       },
       "gegenvorschlag": {
         "angenommen": "تم تأكيد الموعد! سيتم إخطار الخبير.",
@@ -5610,17 +5587,6 @@
       "speichern_laeuft": "لحظة من فضلك، نبحث لك عن مواعيد مناسبة …",
       "fehler_speichern": "تعذّر حفظ العنوان."
     }
-  },
-  "chatSystem": {
-    "terminAbgelehnt": "❌ رفض الخبير {svName} الموعد في {terminDatum}.{hatGrund, select, ja { السبب: \"{grund}\"} other {}}",
-    "terminGegenvorschlag": "📅 {rolle, select, sv {الخبير} other {العميل}}{hatName, select, ja { {name}} other {}} اقترح موعداً جديداً: {terminStr}.{hatGrund, select, ja { السبب: \"{grund}\"} other {}}",
-    "welcome": "تم إنشاء الملف {fallNummer}. مرحباً بك في محادثتك الشخصية!"
-  },
-  "chatTranslate": {
-    "uebersetzt": "تمت الترجمة",
-    "originalAnzeigen": "عرض الأصل",
-    "uebersetzungAnzeigen": "عرض الترجمة",
-    "uebersetze": "جارٍ الترجمة …"
   },
   "gutachter": {
     "feldmodus": {
