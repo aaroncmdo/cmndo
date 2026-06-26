@@ -56,8 +56,8 @@ export default async function MitarbeiterReklamationen() {
                   <Td>{r.grund ?? '—'}</Td>
                   <Td>
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      r.status === 'offen' ? 'bg-amber-100 text-amber-700' :
-                      r.status === 'erledigt' ? 'bg-emerald-100 text-emerald-700' :
+                      r.status === 'offen' ? 'bg-warning-soft text-warning-strong' :
+                      r.status === 'erledigt' ? 'bg-success-soft text-success-strong' :
                       'bg-claimondo-bg text-claimondo-ondo'
                     }`}>{r.status ?? '—'}</span>
                   </Td>

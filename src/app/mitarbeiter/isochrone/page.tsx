@@ -94,7 +94,7 @@ export default async function MitarbeiterIsochronePage() {
         }
       />
 
-      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800">
+      <div className="rounded-ios-xl border border-warning/30 bg-warning-soft px-4 py-3 text-xs text-warning-strong">
         Nur-Lese-Ansicht — alle Änderungen an Fall-Zuweisung oder Isochrone-Polygon erfolgen durch das Admin/Dispatch-Team.
       </div>
 
