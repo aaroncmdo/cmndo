@@ -71,6 +71,7 @@ export default function DispatchLeadForm({
   wunschterminWochentage,
   flowLinks,
   fallId,
+  freigeschalteteSlotIds,
 }: {
   lead: LeadRow
   phasen: OnboardingPhase[]
@@ -84,6 +85,9 @@ export default function DispatchLeadForm({
   flowLinks: DispatchFlowLink[]
   // 3a (Parität 3/3): Fall-ID fürs SA-Konversions-Banner (null = kein Fall geladen).
   fallId: string | null
+  // Pflichtdok-Kanonisierung: server-seitig aus dokument_katalog berechnete
+  // freigeschaltete Slot-IDs (ersetzt client-seitiges berechneErwartung).
+  freigeschalteteSlotIds: string[]
 }) {
   const leadId = lead.id
   const [values, setValues] = useState<Record<string, unknown>>(() => {
@@ -243,7 +247,9 @@ export default function DispatchLeadForm({
       <div id="dokumente-anfordern-card" className="mt-3">
         <DokumenteAnfordernCard
           leadId={leadId}
-          lead={lead}
+          freigeschalteteSlotIds={freigeschalteteSlotIds}
+          zb1Status={(lead.zb1_status as string | null) ?? null}
+          polizeiberichtStatus={(lead.polizeibericht_status as string | null) ?? null}
           zb1HochgeladenAm={(lead.zb1_hochgeladen_am as string | null) ?? null}
           polizeiberichtHochgeladenAm={(lead.polizeibericht_hochgeladen_am as string | null) ?? null}
           telefon={(lead.telefon as string | null) ?? null}

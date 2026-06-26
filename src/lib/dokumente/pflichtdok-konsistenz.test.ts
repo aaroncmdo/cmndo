@@ -1,149 +1,59 @@
-// Smoke / Konsistenz-Test: "Werden die richtigen Pflichtdokumente abgefragt,
-// je nachdem was der Kunde angegeben hat?"
-//
-// Hintergrund (Audit 2026-06-26): Es existieren VIER parallele Definitionen,
-// welche Dokumente erwartet werden, die voneinander abweichen:
-//   1. data-requirements.ts  DOC_DEFINITIONS (8 hardcoded Slots)
-//        -> getOffeneDokumentAnforderungen()  = OPERATIVE Anzeige für
-//           Kunde-Onboarding-Wizard + SV/KB-Fallakte + Banner
-//   2. erwartung.ts          berechneErwartung()  = dokumentierte "SSoT",
-//           genutzt von Dispatch-DokumenteAnfordernCard
-//   3. dokument_katalog (DB) Rule-DSL freigeschaltet_wenn/pflicht_wenn
-//   4. create-pflicht.ts     Supplementär-Block (nur 5 Slots; Katalog-Loop entfernt)
-//
-// Dieser Test sperrt die KONSISTENZ der beiden importierbaren reinen
-// Quellen (1) und (2) gegen die konfigurierte Absicht des Katalogs (3) fest.
-//
-// GRÜNE Tests = Fälle, in denen alle Quellen übereinstimmen (Regressionsschutz).
-// it.fails-Tests = bekannte DRIFTS. Sie sind erwartet-rot → die Suite bleibt
-//   grün UND dokumentiert den Bug. Sobald jemand den Bug fixt, schlägt der
-//   it.fails-Test in "unerwartet grün" um → Signal, das it.fails zu entfernen.
-
+// Smoke: Pflichtdokument-Anzeige leitet aus dokument_katalog (SSoT) ab.
+// Nach der Kanonisierung gibt es nur EINE Quelle -> kein Drift-Vergleich mehr,
+// sondern ein Verhaltens-Regressionstest der Katalog-Ableitung pro Szenario.
 import { describe, it, expect } from 'vitest'
-import { berechneErwartung } from './erwartung'
+import { buildDokumentKontext } from './build-kontext'
 import { getOffeneDokumentAnforderungen } from '../claims/data-requirements'
-import type { ClaimFull } from '../claims/types'
+import type { DokumentKatalogRow } from './katalog'
 
-type Szenario = {
-  personenschaden?: boolean
-  sachschaden?: boolean
-  polizeiVorOrt?: boolean
-  fahrerflucht?: boolean
-  leasing?: boolean
-  zeugen?: boolean
-  zb1Status?: string
-}
-
-// Szenario -> Lead-Datensatz (Vertrag von berechneErwartung).
-function leadFrom(s: Szenario): Parameters<typeof berechneErwartung>[0] {
+function fix(slot_id: string, frei: unknown, pflicht: unknown): DokumentKatalogRow {
   return {
-    zb1_status: s.zb1Status ?? 'offen',
-    polizei_vor_ort: s.polizeiVorOrt ?? false,
-    polizeibericht_pflicht: s.polizeiVorOrt ?? false,
-    fahrerflucht: s.fahrerflucht ?? false,
-    personenschaden_flag: s.personenschaden ?? false,
-    sachschaden_flag: s.sachschaden ?? false,
-    zeugen_vorhanden: s.zeugen ?? false,
-    finanzierung_leasing: s.leasing ? 'leasing' : 'keine',
+    slot_id, label: slot_id, beschreibung: null, kategorie: 'unfall',
+    freigeschaltet_wenn: frei as DokumentKatalogRow['freigeschaltet_wenn'],
+    pflicht_wenn: pflicht as DokumentKatalogRow['pflicht_wenn'],
+    sichtbar_fuer: ['kunde'], anforderbar_von: ['kundenbetreuer'], uploadbar_von: ['kunde'],
+    multi_file: false, akzeptierte_mime_types: ['application/pdf'], max_mb: 10,
+    sort_order: 1, aktiv: true, maps_to_qualifikation: null, steuert_kundensichtbarkeit: false,
   }
 }
+const EQ = (field: string, value: unknown) => ({ op: 'eq', field, value })
+const OR = (...c: unknown[]) => ({ op: 'or', conditions: c })
+const NEQ = (field: string, value: unknown) => ({ op: 'neq', field, value })
+const IN = (field: string, value: unknown[]) => ({ op: 'in', field, value })
+const NOTNULL = (field: string) => ({ op: 'is_not_null', field })
 
-// Szenario -> minimaler Claim (getOffeneDokumentAnforderungen liest nur
-// polizei_vor_ort / hat_personenschaden / hat_sachschaden). convertLeadToClaim
-// mappt personenschaden_flag->hat_personenschaden, sachschaden_flag->hat_sachschaden,
-// polizei_vor_ort 1:1 (convert-lead-to-claim.ts:282-293).
-function claimFrom(s: Szenario): ClaimFull {
-  return {
-    polizei_vor_ort: s.polizeiVorOrt ?? false,
-    hat_personenschaden: s.personenschaden ?? false,
-    hat_sachschaden: s.sachschaden ?? false,
-  } as unknown as ClaimFull
+const KATALOG: DokumentKatalogRow[] = [
+  fix('fahrzeugschein', NEQ('lead.zb1_status', 'bestaetigt'), NEQ('lead.zb1_status', 'bestaetigt')),
+  fix('unfallfotos', null, NOTNULL('lead.id')),
+  fix('schadensfotos', null, NOTNULL('lead.id')),
+  fix('polizeibericht', OR(EQ('lead.polizei_vor_ort', true), EQ('lead.fahrerflucht', true)), OR(EQ('lead.polizei_vor_ort', true), EQ('lead.fahrerflucht', true))),
+  fix('aerztliches_attest', EQ('lead.personenschaden_flag', true), EQ('lead.personenschaden_flag', true)),
+  fix('diagnosebericht', EQ('lead.personenschaden_flag', true), EQ('lead.personenschaden_flag', true)),
+  fix('sachschaden_foto', EQ('lead.sachschaden_flag', true), EQ('lead.sachschaden_flag', true)),
+  fix('freigabe_bank', IN('lead.finanzierung_leasing', ['leasing', 'finanzierung']), IN('lead.finanzierung_leasing', ['leasing', 'finanzierung'])),
+  fix('zeugenbericht', OR(EQ('lead.zeugen_vorhanden', true), EQ('fall.zeugen_vorhanden', true)), OR(EQ('lead.zeugen_vorhanden', true), EQ('fall.zeugen_vorhanden', true))),
+]
+
+type Szenario = { personenschaden?: boolean; sachschaden?: boolean; polizeiVorOrt?: boolean; fahrerflucht?: boolean; leasing?: boolean; zeugen?: boolean; zb1Status?: string }
+function ctxFrom(s: Szenario) {
+  return buildDokumentKontext({
+    claim: { hat_personenschaden: s.personenschaden ?? false, hat_sachschaden: s.sachschaden ?? false, polizei_vor_ort: s.polizeiVorOrt ?? false, fahrerflucht: s.fahrerflucht ?? false, finanzierung_leasing: s.leasing ? 'leasing' : 'keine', zeugen_vorhanden: s.zeugen ?? false },
+    lead: { id: 'smoke-lead', zb1_status: s.zb1Status ?? 'offen' },
+  })
+}
+function pflicht(s: Szenario): Set<string> {
+  return new Set(getOffeneDokumentAnforderungen(KATALOG, ctxFrom(s), []).filter((x) => x.pflicht).map((x) => x.slot_id))
 }
 
-// Pflicht-Slot-IDs aus berechneErwartung (Quelle 2).
-function erwartungPflicht(s: Szenario): Set<string> {
-  return new Set(
-    berechneErwartung(leadFrom(s))
-      .filter((x) => x.pflicht)
-      .map((x) => x.slot_id),
-  )
-}
-
-// Pflicht-Slot-IDs aus der OPERATIVEN Kunde-Anzeige (Quelle 1).
-function dataReqPflicht(s: Szenario): Set<string> {
-  return new Set(
-    getOffeneDokumentAnforderungen(claimFrom(s), [], s.zb1Status ?? 'offen')
-      .filter((x) => x.pflicht)
-      .map((x) => x.slot_id),
-  )
-}
-
-describe('Pflichtdokumente-Konsistenz: erwartung vs. operative Kunde-Anzeige', () => {
-  // ─── GRÜN: konsistente Fälle (Regressionsschutz) ─────────────────────────
-
-  it('Standard-Schaden: fahrzeugschein ist in BEIDEN Quellen Pflicht', () => {
-    expect(erwartungPflicht({}).has('fahrzeugschein')).toBe(true)
-    expect(dataReqPflicht({}).has('fahrzeugschein')).toBe(true)
-  })
-
-  it('Standard-Schaden: Unfallfotos sind in BEIDEN Quellen Pflicht', () => {
-    expect(erwartungPflicht({}).has('unfallfotos')).toBe(true)
-    expect(dataReqPflicht({}).has('unfallfotos')).toBe(true)
-  })
-
-  it('Personenschaden: aerztliches_attest ist in BEIDEN Quellen Pflicht', () => {
-    expect(erwartungPflicht({ personenschaden: true }).has('aerztliches_attest')).toBe(true)
-    expect(dataReqPflicht({ personenschaden: true }).has('aerztliches_attest')).toBe(true)
-  })
-
-  it('Sachschaden: sachschaden_foto ist in BEIDEN Quellen Pflicht', () => {
-    expect(erwartungPflicht({ sachschaden: true }).has('sachschaden_foto')).toBe(true)
-    expect(dataReqPflicht({ sachschaden: true }).has('sachschaden_foto')).toBe(true)
-  })
-
-  it('ZB1 bereits bestätigt: fahrzeugschein ist in BEIDEN Quellen NICHT Pflicht', () => {
-    expect(erwartungPflicht({ zb1Status: 'bestaetigt' }).has('fahrzeugschein')).toBe(false)
-    expect(dataReqPflicht({ zb1Status: 'bestaetigt' }).has('fahrzeugschein')).toBe(false)
-  })
-
-  it('Polizei vor Ort: polizeibericht ist in BEIDEN Quellen Pflicht', () => {
-    expect(erwartungPflicht({ polizeiVorOrt: true }).has('polizeibericht')).toBe(true)
-    expect(dataReqPflicht({ polizeiVorOrt: true }).has('polizeibericht')).toBe(true)
-  })
-
-  // ─── DRIFT (erwartet-rot via it.fails — dokumentiert die Bugs) ────────────
-
-  // DRIFT 1: Leasing/Finanzierung -> freigabe_bank. Katalog = Pflicht +
-  // kunde-uploadbar, berechneErwartung = Pflicht. Aber die operative
-  // Kunde-Anzeige (8-Slot-Hardcode) kennt freigabe_bank NICHT -> Leasing-Kunde
-  // wird im Haupt-Checklist nie zur Bank-/Leasing-Freigabe verpflichtet.
-  it.fails('DRIFT: Leasing -> freigabe_bank fehlt in der operativen Kunde-Anzeige', () => {
-    expect(erwartungPflicht({ leasing: true }).has('freigabe_bank')).toBe(true) // berechneErwartung: korrekt
-    expect(dataReqPflicht({ leasing: true }).has('freigabe_bank')).toBe(true) // operativ: FEHLT -> rot
-  })
-
-  // DRIFT 2: Fahrerflucht ohne Polizei. create-pflicht legt polizeibericht als
-  // Pflicht-Zeile an, aber die operative Anzeige liest fahrerflucht gar nicht
-  // und filtert polizeibericht über polizei_vor_ort (=false) raus.
-  it.fails('DRIFT: Fahrerflucht ohne Polizei -> polizeibericht fehlt in operativer Anzeige', () => {
-    // berechneErwartung erfasst den Fall korrekt:
-    expect(erwartungPflicht({ fahrerflucht: true, polizeiVorOrt: false }).has('polizeibericht')).toBe(true)
-    // operative Anzeige NICHT:
-    expect(dataReqPflicht({ fahrerflucht: true, polizeiVorOrt: false }).has('polizeibericht')).toBe(true)
-  })
-
-  // DRIFT 3: diagnosebericht-Pflicht-Konflikt. berechneErwartung = optional,
-  // operative Anzeige + Katalog = Pflicht. Die zwei Quellen widersprechen sich.
-  it.fails('DRIFT: diagnosebericht-Pflicht widerspricht zwischen den Quellen', () => {
-    const pers: Szenario = { personenschaden: true }
-    expect(erwartungPflicht(pers).has('diagnosebericht')).toBe(dataReqPflicht(pers).has('diagnosebericht'))
-  })
-
-  // DRIFT 4: Zeugen-Slot-ID-Mismatch. berechneErwartung nutzt 'zeugenaussage',
-  // der Katalog 'zeugenbericht' -> derselbe Beleg unter zwei IDs, Diff erwartet<->vorhanden
-  // matcht nie. Hier prüfen wir die Katalog-ID im erwartung-Output.
-  it.fails('DRIFT: Zeugen-Slot heißt in erwartung "zeugenaussage" statt Katalog-"zeugenbericht"', () => {
-    const ids = berechneErwartung(leadFrom({ zeugen: true })).map((x) => x.slot_id)
-    expect(ids).toContain('zeugenbericht')
-  })
+describe('Pflichtdokumente: Katalog-abgeleitete Pflicht-Anzeige', () => {
+  it('Standard: fahrzeugschein Pflicht', () => expect(pflicht({}).has('fahrzeugschein')).toBe(true))
+  it('Standard: unfallfotos Pflicht', () => expect(pflicht({}).has('unfallfotos')).toBe(true))
+  it('ZB1 bestaetigt: fahrzeugschein NICHT Pflicht', () => expect(pflicht({ zb1Status: 'bestaetigt' }).has('fahrzeugschein')).toBe(false))
+  it('Personenschaden: aerztliches_attest Pflicht', () => expect(pflicht({ personenschaden: true }).has('aerztliches_attest')).toBe(true))
+  it('Personenschaden: diagnosebericht Pflicht (Aaron-Entscheid)', () => expect(pflicht({ personenschaden: true }).has('diagnosebericht')).toBe(true))
+  it('Sachschaden: sachschaden_foto Pflicht', () => expect(pflicht({ sachschaden: true }).has('sachschaden_foto')).toBe(true))
+  it('Polizei vor Ort: polizeibericht Pflicht', () => expect(pflicht({ polizeiVorOrt: true }).has('polizeibericht')).toBe(true))
+  it('Fahrerflucht ohne Polizei: polizeibericht Pflicht', () => expect(pflicht({ fahrerflucht: true, polizeiVorOrt: false }).has('polizeibericht')).toBe(true))
+  it('Leasing: freigabe_bank Pflicht', () => expect(pflicht({ leasing: true }).has('freigabe_bank')).toBe(true))
+  it('Zeugen: zeugenbericht Pflicht (Katalog-slot-id, nicht zeugenaussage)', () => expect(pflicht({ zeugen: true }).has('zeugenbericht')).toBe(true))
 })
