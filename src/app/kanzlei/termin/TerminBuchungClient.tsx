@@ -155,7 +155,7 @@ export default function TerminBuchungClient({
 
   if (alleAdminsCount === 0 || verfuegbareAdmins.length === 0) {
     return (
-      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="rounded-ios-xl border border-warning/30 bg-warning-soft p-4 text-sm text-warning-strong">
         Aktuell ist kein Admin für Online-Buchungen verfügbar (kein verbundener
         Google-Kalender). Bitte meldet euch direkt per Mail, bis ein Admin
         seinen Kalender verbindet.
@@ -304,7 +304,7 @@ export default function TerminBuchungClient({
         </div>
 
         {slotKollision && (
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded p-2">
+          <p className="text-xs text-warning-strong bg-warning-soft border border-warning/30 rounded p-2">
             Dieser Slot ist bei dem Admin bereits belegt. Bitte eine andere Zeit wählen.
           </p>
         )}
@@ -313,8 +313,8 @@ export default function TerminBuchungClient({
           <p
             className={`text-xs rounded p-2 break-all ${
               feedback.ok
-                ? 'text-green-800 bg-green-50 border border-green-200'
-                : 'text-red-800 bg-red-50 border border-red-200'
+                ? 'text-success-strong bg-success-soft border border-success/30'
+                : 'text-danger-strong bg-danger-soft border border-danger/30'
             }`}
           >
             {feedback.text}
