@@ -1,6 +1,12 @@
 /**
  * KFZ-191: Seed frische Test-Daten nach DB-Cleanup.
- * Erstellt 2 KB-User + 5 Kunden-User + 5 Leads + 4 Faelle in verschiedenen Phasen.
+ * Erstellt Test-User (KB/Kunde/Kanzlei) + (historisch) Leads/Faelle.
+ *
+ * ⚠️ CMM-49: `faelle` wurde gedroppt (claims = SSoT). Phase 3 (insertFall) +
+ * die faelle-Checks in Phase 4 sind obsolet — auf Ist-Prod (>=5 Leads) skippt
+ * Phase 3 ohnehin und die faelle-Checks error-continue. Phase 2 (ensureUser ->
+ * auth + profiles) funktioniert unveraendert und ist der relevante Teil fuer
+ * neue Rollen-Test-Accounts (z.B. test-kanzlei).
  *
  * Usage: NEXT_PUBLIC_SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx scripts/seed-test-data.ts
  */
@@ -97,6 +103,8 @@ async function main() {
   console.log('--- Phase 2: Test-User ---')
   await ensureUser('test-kb-anna@claimondo.de', 'TestKB2026!', 'Anna', 'Mueller', 'kundenbetreuer', USER_IDS.kbAnna)
   await ensureUser('test-kb-bernd@claimondo.de', 'TestKB2026!', 'Bernd', 'Schmidt', 'kundenbetreuer', USER_IDS.kbBernd)
+  // Kanzlei-Test-Account (fuer Rollen-Smoke /kanzlei — fehlte auf staging, PR #3202).
+  await ensureUser('test-kanzlei@claimondo.de', 'Test1234!', 'Test', 'Kanzlei', 'kanzlei')
   await ensureUser('test-lukas.weber@example.com', 'TestKunde2026!', 'Lukas', 'Weber', 'kunde', USER_IDS.lukas)
   await ensureUser('test-sophie.klein@example.com', 'TestKunde2026!', 'Sophie', 'Klein', 'kunde', USER_IDS.sophie)
   await ensureUser('test-mehmet.yilmaz@example.com', 'TestKunde2026!', 'Mehmet', 'Yilmaz', 'kunde', USER_IDS.mehmet)
@@ -236,6 +244,9 @@ TEST-CREDENTIALS — KFZ-191
 KB-USER (intern):
 test-kb-anna@claimondo.de    | TestKB2026!
 test-kb-bernd@claimondo.de   | TestKB2026!
+
+KANZLEI-USER:
+test-kanzlei@claimondo.de    | Test1234!
 
 KUNDEN-USER:
 test-lukas.weber@example.com    | TestKunde2026!  (Lead, kein Fall)
