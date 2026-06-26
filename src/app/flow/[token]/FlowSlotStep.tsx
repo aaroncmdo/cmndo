@@ -7,7 +7,7 @@
 // AAR-956 §4 / Task 3: fehlt der Besichtigungsort, fragt der Step ihn im Flow ab
 // (GooglePlaceAutocomplete) statt "wir melden uns telefonisch" — danach Resolver erneut.
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
@@ -15,7 +15,7 @@ import { ladeMatchingFlow, bucheTerminFlow, speichereBesichtigungsortFlow } from
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 import { Button } from '@/components/primitives/Button/Button.web'
 
-export type GebuchterTermin = { svVorname: string; svAvatar: string | null; startIso: string }
+export type GebuchterTermin = { svVorname: string; svAvatar: string | null; startIso: string; besichtigungsAdresse?: string | null }
 
 export function FlowSlotStep({
   token,
@@ -51,6 +51,11 @@ export function FlowSlotStep({
   // wenn onSvSelect vorliegt (Embed) — der Default-Set emittiert NICHT (die Karte zeigt den
   // Top-SV beim Ort-Schritt schon), erst die Nutzer-Auswahl re-routet.
   const [selectedSvId, setSelectedSvId] = useState<string | null>(null)
+  // Item 1: Ort-Vorschlag aus unfallort (ladeMatchingFlow) — 1-Klick-Bestaetigung statt Neueingabe.
+  const [vorschlagOrt, setVorschlagOrt] = useState<{ adresse: string; lat: number; lng: number } | null>(null)
+  // Item 3: der im Flow gewaehlte Besichtigungsort -> via onGebucht in den gutachter-Step
+  // (sonst zeigt der die stale, beim Page-Load server-gerenderte Adresse).
+  const besichtigungsAdresseRef = useRef<string | null>(null)
 
   // AAR-956 §4: ein Resolver-Lauf. ortFehlt → Adress-Abfrage im Flow (Task 3),
   // sonst Slot-Auswahl bzw. kein_match. Wiederverwendbar nach dem Ort-Nachreichen.
@@ -64,6 +69,7 @@ export function FlowSlotStep({
           // Ort fehlt ist KEIN Fehler mehr — die Adress-Abfrage IST die Aufloesung.
           // Die telefonisch-Botschaft (r.error) NICHT anzeigen (sonst widerspruechlich).
           setFehler(null)
+          setVorschlagOrt(r.vorschlagOrt ?? null) // Item 1
           setStep('ort_abfragen')
           return
         }
@@ -98,20 +104,21 @@ export function FlowSlotStep({
   }, [token])
 
   // Task 3: Besichtigungsort im Flow nachreichen → speichern → erneut matchen.
-  async function besichtigungsortGewaehlt(ort: PlaceResult) {
+  // Item 3: den gewaehlten Ort merken, damit der gutachter-Step ihn zeigt.
+  async function speichereOrtUndMatch(ort: { adresse: string; lat: number; lng: number }) {
+    besichtigungsAdresseRef.current = ort.adresse
     setOrtSpeichern(true)
     setFehler(null)
-    const r = await speichereBesichtigungsortFlow(token, {
-      adresse: ort.adresse,
-      lat: ort.lat,
-      lng: ort.lng,
-    })
+    const r = await speichereBesichtigungsortFlow(token, ort)
     setOrtSpeichern(false)
     if (!r.ok) {
       setFehler(r.error ?? t('ort.fehler_speichern'))
       return
     }
     await runMatch()
+  }
+  async function besichtigungsortGewaehlt(ort: PlaceResult) {
+    await speichereOrtUndMatch({ adresse: ort.adresse, lat: ort.lat, lng: ort.lng })
   }
 
   async function slotWaehlen(sv: OeffentlichesSvProfil, slot: SlotVorschlag) {
@@ -124,7 +131,7 @@ export function FlowSlotStep({
         setStep('auswahl')
         return
       }
-      onGebucht({ svVorname: sv.vorname, svAvatar: sv.profilbild ?? null, startIso: slot.start })
+      onGebucht({ svVorname: sv.vorname, svAvatar: sv.profilbild ?? null, startIso: slot.start, besichtigungsAdresse: besichtigungsAdresseRef.current })
     } catch {
       setFehler(t('errors.buchung'))
       setStep('auswahl')
@@ -145,6 +152,23 @@ export function FlowSlotStep({
       <div className="max-w-md" data-testid="buchung-ort-abfragen">
         <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">{t('ort.titel')}</h1>
         <p className="text-sm text-claimondo-ondo mb-4">{t('ort.hinweis')}</p>
+        {/* Item 1: Vorschlag aus dem gemeldeten Unfallort — 1-Klick bestaetigen oder unten anders waehlen. */}
+        {vorschlagOrt && (
+          <div className="mb-4 rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-4">
+            <p className="text-xs text-claimondo-ondo mb-1">{t('ort.vorschlag_label')}</p>
+            <p className="text-sm font-medium text-claimondo-navy mb-3">{vorschlagOrt.adresse}</p>
+            <Button
+              variant="ondo"
+              size="md"
+              onClick={() => speichereOrtUndMatch(vorschlagOrt)}
+              disabled={ortSpeichern}
+              data-testid="buchung-ort-vorschlag-bestaetigen"
+            >
+              {t('ort.vorschlag_bestaetigen')}
+            </Button>
+            <p className="mt-3 text-xs text-claimondo-ondo/70">{t('ort.vorschlag_oder')}</p>
+          </div>
+        )}
         <GooglePlaceAutocomplete
           placeholder={t('ort.placeholder')}
           onSelect={besichtigungsortGewaehlt}
