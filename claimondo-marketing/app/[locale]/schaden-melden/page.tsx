@@ -1,27 +1,29 @@
 import type { Metadata } from 'next'
-import PageHeader from '@/components/shared/PageHeader'
-import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
-import { MiniWizardClient } from './MiniWizardClient'
+import { ShieldCheck } from 'lucide-react'
 import { getTranslations } from 'next-intl/server'
-import { localeAlternates } from '@/lib/seo/alternates'
+import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { campaignSourceChannel } from '@/lib/flow/campaign-source'
+import { MiniWizardClient } from './MiniWizardClient'
+import { SheetCard } from '@/components/shared/SheetCard'
+import { LandingTopbar } from '@/components/landing/LandingTopbar'
+import { LandingFooter } from '@/components/landing/LandingFooter'
+import { StickyCallBar } from '@/components/landing/StickyCallBar'
+import { TrustBlock } from '@/components/landing/TrustBlock'
 import { BeratungVereinbarenButton } from '@/components/shared/glass'
+import { localeAlternates } from '@/lib/seo/alternates'
 
-// AAR-904: /schaden-melden ist jetzt direkt der Mini-Wizard.
-// Vorher: Redirect-Stub auf /schaden-melden/schritt-1 (alter 4-Step-Wizard).
-// Aktuell: 4-Felder-Form, Magic-Link per dispatchMagicLink (WA bevorzugt,
-// Email-Fallback).
+// AAR-904: /schaden-melden ist der Mini-Wizard (4 Felder, Magic-Link via
+// dispatchMagicLink, WA bevorzugt + Email-Fallback).
 //
-// 15.05.2026 Promo-Attribution ohne Cookie: PR #1308 (page→setPromoCookie)
-// und PR #1319 (page→prop→MiniWizardClient→useEffect→setPromoCookie) haben
-// versucht, das Cookie-Pattern zu retten. Beide haben CMM-14-Crashes mit
-// "Cookies can only be modified in a Server Action or Route Handler"
-// erzeugt (Sentry NEXTJS-8/9 + Digests 890686022, 2237539019, 2740258766
-// — drei verschiedene Stack-Frames). Diese Iteration entfernt den Cookie-
-// Layer komplett: validated promo als Prop an MiniWizardClient → hidden
-// FormData-Field → createLeadFromMiniWizard liest den Code direkt aus dem
-// Input. Funktional identisch (Cookie wurde NUR für DIESE Anlage gelesen,
-// keine Cross-Session-Attribution), architektonisch sauberer.
+// Design-Angleichung (26.06.): vorher eine nackte Form-Card ohne Marketing-Chrome
+// (kein Topbar/Footer/Hero/Trust) -> wirkte wie eine verwaiste App-Seite. Jetzt
+// strukturgleich zu /check (Topbar, Hero mit Gradient-Ambient + Trust-Badge,
+// SheetCard, Rueckruf-Alternativ, TrustBlock, Footer, StickyCallBar) -> konsistent
+// mit dem Rest der Webseite.
+//
+// Promo-Attribution (15.05.): ?p=<code> -> Prop -> hidden field in MiniWizardClient.
+// Kampagnen-Attribution (26.06.): ?src=<slug> -> source_channel ('kampagne-<slug>'),
+// fuer Self-Service (MiniWizardClient) UND Rueckruf (quelle).
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations('page_meta')
@@ -39,35 +41,71 @@ export default async function SchadenMeldenPage({
 }) {
   const { p, src } = await searchParams
   const initialPromo = p && isValidPromoCodeFormat(p) ? p : null
-  // QR-Kampagnen-Tag aus ?src=<slug> (Strassen-/Offline-Aktion) -> via hidden field
-  // an die Server-Action; daraus leitet createLeadFromMiniWizard leads.source_channel
-  // ab. Hier nur durchreichen, strikte Sanitisierung in campaignSourceChannel().
+  // QR-Kampagnen-Tag aus ?src=<slug> -> via hidden field an die Server-Action
+  // (Self-Service) bzw. als Rueckruf-quelle. Sanitisierung in campaignSourceChannel().
   const initialSrc = typeof src === 'string' ? src : null
-  // Rueckruf-Pfad (Secondary-CTA): traegt denselben Kampagnen-Tag wie der
-  // Self-Service-Lead; ohne ?src -> 'schaden-melden-rueckruf' (statt 'mini_wizard',
-  // weil es ein Rueckruf ist). erstelleOeffentlichenRueckruf nimmt quelle als source_channel.
   const rueckrufQuelle = campaignSourceChannel(initialSrc, 'schaden-melden-rueckruf')
 
   return (
-    <div className="min-h-screen bg-claimondo-bg py-10">
-      <div className="mx-auto max-w-2xl px-4">
-        <div className="mb-6">
-          <PageHeader
-            title="Schaden melden"
-            description="Drei Fragen, dann erhalten Sie per WhatsApp oder E-Mail einen sicheren Login-Link. Dort unterschreiben Sie SA + Vollmacht — wir kümmern uns um den Rest."
-            size="lg"
-          />
-        </div>
-        <div className="rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-md sm:p-8">
-          <MiniWizardClient initialPromo={initialPromo} initialSrc={initialSrc} />
-        </div>
-        <div className="mt-5 flex flex-col items-center gap-2 text-center">
-          <p className="text-sm text-claimondo-shield">
-            Keine Zeit für das Formular? Wir rufen Sie gern zurück.
+    <div className="min-h-screen bg-claimondo-bg">
+      <LandingTopbar authenticatedUser={null} />
+
+      {/* Hero — gleiche Sprache wie /check: Gradient-Ambient + Trust-Badge */}
+      <section className="relative isolate overflow-hidden py-12 text-center sm:py-16">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 -z-10"
+          style={{
+            background: [
+              'radial-gradient(circle at 20% 15%, rgba(123,163,204,0.22), transparent 50%)',
+              'radial-gradient(circle at 85% 35%, rgba(69,115,162,0.14), transparent 45%)',
+            ].join(', '),
+          }}
+        />
+        <div className="mx-auto max-w-2xl px-4 sm:px-6">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
+            <ShieldCheck className="h-4 w-4" aria-hidden />
+            Kostenlos &amp; unverbindlich
+          </div>
+          <h1
+            className="text-balance text-[2.25rem] font-bold leading-[1.05] tracking-[-0.02em] text-claimondo-navy sm:text-5xl"
+            style={{ fontFamily: 'Montserrat, system-ui, sans-serif' }}
+          >
+            Ihren Schaden in wenigen Minuten melden
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-balance text-base text-claimondo-ondo sm:text-lg">
+            Drei kurze Fragen, dann kommt Ihr sicherer Link per WhatsApp oder E-Mail.
+            Den Gutachter-Termin und die Vollmacht erledigen Sie direkt dort, den Rest übernehmen wir.
           </p>
-          <BeratungVereinbarenButton quelle={rueckrufQuelle} label="Lieber zurückrufen lassen" />
         </div>
-      </div>
+      </section>
+
+      {/* Formular */}
+      <section className="pb-12">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6">
+          <SheetCard size="full" padding="md" animateIn={false} className="sm:p-10">
+            <MiniWizardClient initialPromo={initialPromo} initialSrc={initialSrc} />
+          </SheetCard>
+        </div>
+      </section>
+
+      {/* Alternativ: Rückruf statt Self-Service (kampagnen-getaggt via quelle) */}
+      <section className="pb-14">
+        <div className="mx-auto max-w-2xl px-4 sm:px-6">
+          <div className="flex flex-col items-center gap-3 rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-6 text-center">
+            <p className="text-sm text-claimondo-shield">
+              Keine Zeit für das Formular? Lassen Sie sich von einem Berater zurückrufen,
+              meist innerhalb von 15 Minuten.
+            </p>
+            <BeratungVereinbarenButton quelle={rueckrufQuelle} label="Rückruf anfordern" />
+          </div>
+        </div>
+      </section>
+
+      <TrustBlock />
+
+      <LandingFooter />
+      <StickyCallBar quelle={rueckrufQuelle} />
     </div>
   )
 }

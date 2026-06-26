@@ -24,6 +24,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getSfAccessToken } from '@/lib/kanzlei/sf-auth'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { touchClaimRecency } from '@/lib/claims/touch-recency'
+import { createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 
 export type PushMandatResult =
   | { success: true; kanzlei_mandat_id: string | null }
@@ -270,5 +271,43 @@ async function logFailureToTimeline(
     })
   } catch (err) {
     console.error('[AAR-kanzlei-oauth] Timeline-Log fehlgeschlagen:', err)
+  }
+
+  // Aktive KB/Admin-Benachrichtigung. Der File-Header verspricht "+ Notification
+  // beim KB", bisher lief aber NUR der Timeline-Insert -> fehlgeschlagene Pushes
+  // verwaisten still (Audit 27.06.: 13 Faelle, Salesforce-Auth-Domain-Fehler,
+  // 0 recovered/kein Retry). Direkt-Mitteilung (in-app, dringend) wie die
+  // KB-Ops-Alerts (vs-korrespondenz-review / re-termin-eskalation). Best-effort,
+  // blockiert den (ohnehin fire-and-forget) Push nie.
+  try {
+    const { data: bridge } = await db
+      .from('faelle_claim_bridge')
+      .select('claim_id')
+      .eq('fall_id', fallId)
+      .maybeSingle()
+    const claimId = (bridge as { claim_id?: string | null } | null)?.claim_id ?? null
+    const { data: claim } = claimId
+      ? await db.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', claimId).maybeSingle()
+      : { data: null }
+    const kbId = (claim?.kundenbetreuer_id as string | null) ?? null
+    const { data: admins } = await db.from('profiles').select('id').eq('rolle', 'admin')
+    const empfaenger: { id: string; rolle: 'kundenbetreuer' | 'admin' }[] = []
+    if (kbId) empfaenger.push({ id: kbId, rolle: 'kundenbetreuer' })
+    for (const a of admins ?? []) {
+      const aId = a.id as string
+      if (aId && aId !== kbId) empfaenger.push({ id: aId, rolle: 'admin' })
+    }
+    if (empfaenger.length > 0) {
+      await createMitteilungMulti(empfaenger, {
+        kategorie: 'update',
+        titel: 'Mandat-Übergabe an Kanzlei fehlgeschlagen',
+        inhalt: `Fall ${(claim?.claim_nummer as string | null) ?? fallId.slice(0, 8)}: Das Mandat konnte nicht an die Kanzlei übergeben werden. Bitte manuell nachziehen. (${detail.slice(0, 120)})`,
+        kontext_typ: 'fall',
+        kontext_id: fallId,
+        prioritaet: 'dringend',
+      })
+    }
+  } catch (err) {
+    console.error('[AAR-kanzlei-oauth] KB/Admin-Benachrichtigung fehlgeschlagen:', err)
   }
 }
