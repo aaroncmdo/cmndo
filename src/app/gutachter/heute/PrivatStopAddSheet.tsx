@@ -145,7 +145,7 @@ export default function PrivatStopAddSheet({
             </div>
           )}
           {loadError && (
-            <div className="px-4 py-6 text-xs text-red-600">
+            <div className="px-4 py-6 text-xs text-danger">
               {loadError}
             </div>
           )}
@@ -201,7 +201,7 @@ export default function PrivatStopAddSheet({
                     {/* Actions */}
                     <div className="mt-2 ml-7">
                       {alreadyAdded ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700">
+                        <span className="inline-flex items-center gap-1 text-[11px] text-success-strong">
                           <CheckCircle2Icon className="w-3 h-3" /> Schon in Tagesroute
                         </span>
                       ) : ev.location && !showManual ? (

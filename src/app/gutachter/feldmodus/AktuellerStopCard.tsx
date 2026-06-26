@@ -360,12 +360,12 @@ export default function AktuellerStopCard({
 
       {/* Kunde-Tracking-Status */}
       {kundeTracking.angekommenAm ? (
-        <div className="flex items-center gap-2 text-xs font-medium text-emerald-700 bg-emerald-50 rounded-ios-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-success-strong bg-success-soft rounded-ios-lg px-3 py-2">
           <CheckCircle2Icon className="w-4 h-4" />
           Kunde ist vor Ort
         </div>
       ) : kundeTracking.aktiviert ? (
-        <div className="flex items-center gap-2 text-xs font-medium text-amber-800 bg-amber-50 rounded-ios-lg px-3 py-2">
+        <div className="flex items-center gap-2 text-xs font-medium text-warning-strong bg-warning-soft rounded-ios-lg px-3 py-2">
           <CarIcon className="w-4 h-4" />
           Kunde unterwegs
           {kundeTracking.etaMinutes != null && (
@@ -387,18 +387,18 @@ export default function AktuellerStopCard({
 
       {/* Vorschäden-Hinweis (Cardentity-/Vorschadens-Check) */}
       {stop.hat_vorschaeden && (stop.vorschaden_anzahl ?? 0) > 0 && (
-        <div className="rounded-ios-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs flex items-start gap-2">
-          <AlertTriangleIcon className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+        <div className="rounded-ios-lg border border-warning/30 bg-warning-soft px-3 py-2 text-xs flex items-start gap-2">
+          <AlertTriangleIcon className="w-4 h-4 text-warning-strong shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-amber-900">
+            <p className="font-semibold text-warning-strong">
               {stop.vorschaden_anzahl} Vorschaden{stop.vorschaden_anzahl === 1 ? '' : '-Einträge'} bekannt
             </p>
             {stop.vorschaden_letzter_datum && (
-              <p className="text-amber-800 mt-0.5">
+              <p className="text-warning-strong mt-0.5">
                 Letzter Eintrag: {new Date(stop.vorschaden_letzter_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
               </p>
             )}
-            <p className="text-amber-800/80 mt-0.5">
+            <p className="text-warning-strong/80 mt-0.5">
               → Vor Ort prüfen, ob sich die Beschädigungen überschneiden.
             </p>
           </div>
