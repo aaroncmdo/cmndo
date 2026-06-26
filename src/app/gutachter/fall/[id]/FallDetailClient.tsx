@@ -44,6 +44,8 @@ import StammdatenAccordion from '@/components/fall/StammdatenAccordion'
 import { useState } from 'react'
 import { GutachtenCard } from './_components/GutachtenCard'
 import AuftragHeaderPanel from '@/components/gutachter/AuftragHeaderPanel'
+// AAR-559 (C10): SV-Konfrontations-Antwort-Card — re-wire nach CMM-66-Regression.
+import { KonfrontationsTerminCard } from '@/components/gutachter/KonfrontationsTerminCard'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
 import WeitereDokumenteCard from '@/components/gutachter/WeitereDokumenteCard'
 import FallWindowDropzone from '@/components/gutachter/FallWindowDropzone'
@@ -390,6 +392,21 @@ export default function FallDetailClient(props: Props) {
       {props.topServerBlocks && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3 space-y-3">
           {props.topServerBlocks}
+        </div>
+      )}
+
+      {/* AAR-559 (C10): SV-Konfrontations-Antwort (Annehmen/Ablehnen).
+          Re-wire nach CMM-66-Rewrite-Regression — die konfrontation*-Props lagen
+          schon an, der Render fehlte. Der SV oeffnete den per WhatsApp verschickten
+          Portal-Link, fand aber keine Antwort-UI. Card self-gated zusaetzlich intern. */}
+      {props.konfrontationGewuenscht && (
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-3">
+          <KonfrontationsTerminCard
+            fallId={fall.id as string}
+            konfrontationGewuenscht={props.konfrontationGewuenscht}
+            terminVereinbartAm={props.konfrontationTerminVereinbartAm ?? null}
+            terminVorschlaege={props.konfrontationTerminVorschlaege ?? null}
+          />
         </div>
       )}
 
