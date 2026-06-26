@@ -9,12 +9,15 @@
 // Legacy-Felder (zb1_status, polizeibericht_status) werden in der Server-
 // Action gespiegelt, damit der Twilio-Inbound-Webhook weiter funktioniert,
 // wenn der Kunde mit Foto per WA antwortet statt den Link zu nutzen.
+//
+// Pflichtdok-Kanonisierung (Task 7): Slot-Sichtbarkeit kommt jetzt als
+// freigeschalteteSlotIds-Prop vom Server (dokument_katalog SSoT) statt
+// aus berechneErwartung. Zeugenbericht-Slot-ID = 'zeugenbericht' (Katalog).
 
-import { useState, useTransition, useEffect, useMemo } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { triggerDokumenteUploadRequest, saveStammdaten } from '../actions'
 import type { SlotEingabe } from '../_actions/dokumente-anfordern'
-import { berechneErwartung } from '@/lib/dokumente/erwartung'
 import {
   FileTextIcon,
   ShieldAlertIcon,
@@ -36,11 +39,13 @@ import { Button } from '@/components/primitives/Button/Button.web'
 
 type Props = {
   leadId: string
-  // AAR-erwartung: Lead-Datensatz wird durchgereicht — die Card berechnet
-  // ihre Slot-Visibility selbst aus berechneErwartung(lead) statt aus
-  // mehreren bool-Props. Eine Quelle der Wahrheit für „welche Slots
-  // erwartet werden".
-  lead: Record<string, unknown>
+  // Pflichtdok-Kanonisierung: server-seitig aus dokument_katalog berechnete
+  // freigeschaltete Slot-IDs. Steuert Sichtbarkeit der Checkboxen.
+  freigeschalteteSlotIds: string[]
+  // Status-Felder fuer Anfrage-Lifecycle-Badges (kein Slot-Sichtbarkeits-
+  // Bezug — separates Konzept, daher als explizite Props statt lead-Objekt).
+  zb1Status?: string | null
+  polizeiberichtStatus?: string | null
   zb1HochgeladenAm: string | null
   polizeiberichtHochgeladenAm: string | null
   telefon: string | null
@@ -68,7 +73,9 @@ const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon:
 
 export default function DokumenteAnfordernCard({
   leadId,
-  lead,
+  freigeschalteteSlotIds,
+  zb1Status = null,
+  polizeiberichtStatus = null,
   zb1HochgeladenAm,
   polizeiberichtHochgeladenAm,
   telefon,
@@ -78,25 +85,16 @@ export default function DokumenteAnfordernCard({
   schadensfotoUrls,
   sachschadenBeschreibung,
 }: Props) {
-  const zb1Status = (lead.zb1_status as string | null) ?? null
-  const polizeiberichtStatus = (lead.polizeibericht_status as string | null) ?? null
+  // Pflichtdok-Kanonisierung: Slot-Sichtbarkeit aus Katalog (server-seitig berechnet).
+  const freigeschalteteIds = new Set(freigeschalteteSlotIds)
 
-  // AAR-erwartung: Eine Quelle der Wahrheit. Welche Slots der Dispatcher
-  // sieht, ergibt sich aus berechneErwartung(lead) — kein verteiltes
-  // Conditional pro Slot. Override-Toggle weiter unten zeigt zusätzlich
-  // alle möglichen Slots, falls das Lead-Form unvollständig war.
-  const erwartet = useMemo(
-    () => berechneErwartung(lead as Parameters<typeof berechneErwartung>[0]),
-    [lead],
-  )
-  const erwarteteIds = useMemo(() => new Set(erwartet.map((s) => s.slot_id)), [erwartet])
-
-  const zeigePolizeibericht = erwarteteIds.has('polizeibericht')
-  const sichtbarSachschadenFoto_initial = erwarteteIds.has('sachschaden_foto')
-  const sichtbarSachschadenRechnung_initial = erwarteteIds.has('sachschaden_rechnung')
-  const sichtbarAttest_initial = erwarteteIds.has('aerztliches_attest')
-  const sichtbarDiagnose_initial = erwarteteIds.has('diagnosebericht')
-  const sichtbarZeugen_initial = erwarteteIds.has('zeugenaussage')
+  const zeigePolizeibericht = freigeschalteteIds.has('polizeibericht')
+  const sichtbarSachschadenFoto_initial = freigeschalteteIds.has('sachschaden_foto')
+  const sichtbarSachschadenRechnung_initial = freigeschalteteIds.has('sachschaden_rechnung')
+  const sichtbarAttest_initial = freigeschalteteIds.has('aerztliches_attest')
+  const sichtbarDiagnose_initial = freigeschalteteIds.has('diagnosebericht')
+  // Katalog-Slot-ID ist 'zeugenbericht' (nicht 'zeugenaussage' wie in berechneErwartung).
+  const sichtbarZeugen_initial = freigeschalteteIds.has('zeugenbericht')
   // Echter „Anfrage offen"-State aus dokument_upload_anfragen.
   // Wird beim Mount + bei jedem Polling-Tick neu geladen, damit die UI
   // sich nicht durch bloßes Setzen der Checkbox falsch zeigt.

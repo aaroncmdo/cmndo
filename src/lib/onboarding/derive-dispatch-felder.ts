@@ -5,8 +5,8 @@
 // verlieren wuerde:
 //
 //   - polizeibericht_pflicht  (aus polizei_vor_ort)  — frueher saveHardGate.
-//       Steuert den Polizeibericht-Anforder-Button (DokumenteAnfordernCard) + die
-//       Dokument-Erwartung (lib/dokumente/erwartung.ts) + convertLeadToClaim.
+//       Steuert den Polizeibericht-Anforder-Button (DokumenteAnfordernCard) +
+//       Pflichtdok-Katalog-Regeln (lib/dokumente/katalog.ts) + convertLeadToClaim.
 //   - unfallort_kategorie     (aus schadentyp)       — frueher saveSchadentyp.
 //       Fliesst via convertLeadToClaim nach claims.schadenort_kategorie.
 //

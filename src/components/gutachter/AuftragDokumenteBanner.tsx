@@ -15,6 +15,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 
 type DbRow = {
   id: string
@@ -107,7 +109,20 @@ export default async function AuftragDokumenteBanner({
         }
       })
 
-    const anforderungen = getOffeneDokumentAnforderungen(claim, pflichtDocs)
+    const katalogRows = await getAlleSlots(admin)
+    // FIX: Lead vollstaendig laden damit konditionale Katalog-Slots korrekt evaluieren.
+    let lead: Record<string, unknown> | null = null
+    const leadId = (claim as unknown as { lead_id?: string | null }).lead_id
+    if (leadId) {
+      const { data } = await admin
+        .from('leads')
+        .select('id, finanzierung_leasing, gewerbe_flag, vorsteuerabzugsberechtigt, zb1_status, polizei_vor_ort, fahrerflucht, zeugen_vorhanden, halter_ungleich_fahrer_flag, personenschaden_flag, sachschaden_flag')
+        .eq('id', leadId)
+        .maybeSingle()
+      lead = data
+    }
+    const ctx = buildDokumentKontext({ claim, lead })
+    const anforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, pflichtDocs)
     offen = anforderungen
       .filter((a) => a.status !== 'erfuellt')
       .map((a) => ({
