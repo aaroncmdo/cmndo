@@ -5,7 +5,6 @@ import { Header } from '@/components/layout/Header'
 import { Footer } from '@/components/layout/Footer'
 import { Plausible } from '@/components/analytics/Plausible'
 import { ClarityAnalytics } from '@/components/analytics/Clarity'
-import { AhrefsAnalytics } from '@/components/analytics/Ahrefs'
 import { ScrollDepth } from '@/components/analytics/ScrollDepth'
 import { MonikaEmbedSlot } from '@/components/MonikaEmbedSlot'
 import { JsonLd } from '@/components/JsonLd'
@@ -92,7 +91,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <Footer />
         <Plausible />
         <ClarityAnalytics />
-        <AhrefsAnalytics />
         <ScrollDepth />
         <MonikaEmbedSlot />
       </body>

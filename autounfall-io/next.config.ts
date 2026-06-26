@@ -48,27 +48,6 @@ const nextConfig: NextConfig = {
       ],
     }
   },
-
-  // A2 (Cowork 2026-06-16): die 4 alten flachen /hub-sf-*-Routen sind nach
-  // /schadenfreiheitsklasse/<slug> migriert (Re-Map in der Content-Merge-Schicht,
-  // app/hub-sf-*-Ordner entfernt). 301 (dauerhaft) auf die neue Route -> Linkkraft
-  // + Index-Signale ziehen um, alte Bookmarks/Backlinks bleiben funktionsfaehig.
-  async redirects() {
-    return [
-      { source: '/hub-sf-anfaenger', destination: '/schadenfreiheitsklasse/anfaenger', statusCode: 301 },
-      { source: '/hub-sf-herausfinden', destination: '/schadenfreiheitsklasse/herausfinden', statusCode: 301 },
-      {
-        source: '/hub-sf-uebertragen-nachteile',
-        destination: '/schadenfreiheitsklasse/uebertragen-nachteile',
-        statusCode: 301,
-      },
-      {
-        source: '/hub-sf-uebertragen-zweitwagen',
-        destination: '/schadenfreiheitsklasse/uebertragen-zweitwagen',
-        statusCode: 301,
-      },
-    ]
-  },
 }
 
 export default nextConfig

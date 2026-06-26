@@ -21,10 +21,7 @@ export function Footer() {
               Kfz-Unfallschaden — verständlich erklärt.
             </p>
           </div>
-          <nav aria-label="Rechtliches & Unternehmen" className="flex flex-col gap-2 text-sm text-au-surface/80">
-            <Link href="/ueber-uns" className="transition-colors hover:text-au-surface">
-              Über uns
-            </Link>
+          <nav aria-label="Rechtliches" className="flex flex-col gap-2 text-sm text-au-surface/80">
             <Link href="/impressum" className="transition-colors hover:text-au-surface">
               Impressum
             </Link>

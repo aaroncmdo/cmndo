@@ -47,23 +47,6 @@ export default function DatenschutzPage() {
           anonyme Statistiken. Rechtsgrundlage: Art. 6 Abs. 1 lit. f DSGVO.
         </p>
 
-        <h2>Ahrefs Web Analytics</h2>
-        <p>
-          Wir nutzen Ahrefs Web Analytics, einen cookielosen Webanalysedienst der Ahrefs Pte. Ltd.,
-          16 Raffles Quay, #33-03 Hong Leong Building, Singapur 048581 („Ahrefs“). Ahrefs Web
-          Analytics verwendet keine Cookies und legt keine geräteübergreifenden Kennungen an. Zur
-          Reichweitenmessung werden aggregierte, nicht auf einzelne Personen rückführbare
-          Nutzungsdaten (u. a. aufgerufene Seiten, Referrer, ungefährer Standort auf Länderebene,
-          Browser-/Gerätetyp) verarbeitet.
-        </p>
-        <p>
-          Rechtsgrundlage ist unser berechtigtes Interesse an einer statistischen Analyse des
-          Nutzungsverhaltens zur Optimierung unseres Angebots gemäß Art. 6 Abs. 1 lit. f DSGVO. Da
-          Ahrefs seinen Sitz in Singapur — einem Drittland ohne Angemessenheitsbeschluss der
-          EU-Kommission — hat, erfolgt die Übermittlung auf Grundlage der EU-Standardvertragsklauseln
-          (Art. 46 Abs. 2 lit. c DSGVO). Weitere Informationen unter ahrefs.com/legal/privacy-policy.
-        </p>
-
         <h2>4. Heatmaps und Sitzungsanalyse (Microsoft Clarity)</h2>
         <p>
           Wir nutzen Microsoft Clarity (Anbieter: Microsoft Ireland Operations Ltd., Irland;
@@ -106,11 +89,6 @@ export default function DatenschutzPage() {
               <td>Microsoft Ireland Operations Ltd.</td>
               <td>Heatmaps/Sitzungsanalyse (Clarity), Opt-out möglich</td>
               <td>IE / USA (DPF/SCC)</td>
-            </tr>
-            <tr>
-              <td>Ahrefs Pte. Ltd.</td>
-              <td>Webanalyse (cookieless)</td>
-              <td>Singapur (SCC)</td>
             </tr>
           </tbody>
         </table>

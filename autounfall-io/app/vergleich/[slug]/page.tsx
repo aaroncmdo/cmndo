@@ -14,9 +14,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>
 }): Promise<Metadata> {
   const { slug } = await params
-  // noindex (Footprint-Schutz, Entscheidung Aaron 2026-06-15): Seite bleibt live +
-  // crawlbar, aber NICHT im Google-Index. follow=true → interner Linkfluss bleibt.
-  return { ...restMetadata('/vergleich/' + slug), robots: { index: false, follow: true } }
+  return restMetadata('/vergleich/' + slug)
 }
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
