@@ -114,8 +114,8 @@ export default function TeamClient({
       {actionMsg && (
         <div className={`mb-4 px-3 py-2.5 rounded-ios-xl text-sm border ${
           actionMsg.kind === 'success'
-            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-            : 'bg-red-50 border-red-200 text-red-700'
+            ? 'bg-success-soft border-success/30 text-success-strong'
+            : 'bg-danger-soft border-danger/30 text-danger-strong'
         }`}>
           {actionMsg.text}
         </div>
@@ -123,11 +123,11 @@ export default function TeamClient({
 
       {/* KFZ-152 Phase 2+3: Pool-Leads Section (nur fuer Akademie) */}
       {showPoolSection && (
-        <div className="mb-6 bg-white border border-amber-200 rounded-2xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-amber-200 bg-gradient-to-r from-amber-50 to-white flex items-center justify-between">
+        <div className="mb-6 bg-white border border-warning/30 rounded-2xl overflow-hidden">
+          <div className="px-5 py-3 border-b border-warning/30 bg-gradient-to-r from-warning-soft to-white flex items-center justify-between">
             <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-              <InboxIcon className="w-4 h-4 text-amber-600" /> Eingehende Pool-Leads
-              <span className="ml-2 text-xs text-amber-700 font-normal">{poolLeads.length} ohne Zuweisung</span>
+              <InboxIcon className="w-4 h-4 text-warning" /> Eingehende Pool-Leads
+              <span className="ml-2 text-xs text-warning-strong font-normal">{poolLeads.length} ohne Zuweisung</span>
             </h2>
           </div>
           {poolLeads.length === 0 ? (
@@ -148,7 +148,7 @@ export default function TeamClient({
                 </Thead>
                 <Tbody>
                   {poolLeads.map(l => (
-                    <Tr key={l.id} className="hover:bg-amber-50/30">
+                    <Tr key={l.id} className="hover:bg-warning-soft/30">
                       <Td>
                         <div className="font-mono text-xs text-claimondo-navy">{l.claim_nummer}</div>
                         {l.kennzeichen && <div className="text-[10px] text-claimondo-ondo/70 font-mono">{l.kennzeichen}</div>}
@@ -159,7 +159,7 @@ export default function TeamClient({
                       </Td>
                       <Td className="text-xs">
                         {l.spezifikation && <div className="text-[var(--brand-secondary)]">{l.spezifikation}</div>}
-                        {l.schadens_art && <div className="text-amber-700">{l.schadens_art}</div>}
+                        {l.schadens_art && <div className="text-warning-strong">{l.schadens_art}</div>}
                         {!l.spezifikation && !l.schadens_art && <span className="text-claimondo-ondo/70">—</span>}
                       </Td>
                       <Td className="!text-claimondo-ondo/70 text-[10px]">
@@ -226,10 +226,10 @@ export default function TeamClient({
                 {subSvs.map(s => {
                   const name = [s.vorname, s.nachname].filter(Boolean).join(' ') || '—'
                   const isGesperrt = !!s.gesperrt_seit
-                  const status = isGesperrt ? { label: 'Gesperrt', cls: 'bg-red-50 text-red-700' }
+                  const status = isGesperrt ? { label: 'Gesperrt', cls: 'bg-danger-soft text-danger-strong' }
                     : !s.ist_aktiv ? { label: 'Inaktiv', cls: 'bg-claimondo-bg text-claimondo-ondo' }
-                    : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-yellow-50 text-yellow-700' }
-                    : { label: 'Aktiv', cls: 'bg-emerald-50 text-emerald-700' }
+                    : !s.portal_zugang_freigeschaltet ? { label: 'Wartet auf Onboarding', cls: 'bg-warning-soft text-warning-strong' }
+                    : { label: 'Aktiv', cls: 'bg-success-soft text-success-strong' }
                   return (
                     <Tr key={s.id} className={`hover:bg-claimondo-bg/50 ${isGesperrt ? 'opacity-60' : ''}`}>
                       <Td>{name}</Td>
@@ -252,8 +252,8 @@ export default function TeamClient({
                           disabled={pending}
                           className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-ios-md font-medium transition-colors disabled:opacity-40 ${
                             isGesperrt
-                              ? 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
-                              : 'bg-red-50 text-red-700 hover:bg-red-100'
+                              ? 'bg-success-soft text-success-strong hover:bg-success/15'
+                              : 'bg-danger-soft text-danger-strong hover:bg-danger/15'
                           }`}
                         >
                           {isGesperrt ? <><ShieldCheckIcon className="w-3 h-3" /> Entsperren</> : <><ShieldOffIcon className="w-3 h-3" /> Sperren</>}
