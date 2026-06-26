@@ -4,6 +4,8 @@ import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { MiniWizardClient } from './MiniWizardClient'
 import { getTranslations } from 'next-intl/server'
 import { localeAlternates } from '@/lib/seo/alternates'
+import { campaignSourceChannel } from '@/lib/flow/campaign-source'
+import { BeratungVereinbarenButton } from '@/components/shared/glass'
 
 // AAR-904: /schaden-melden ist jetzt direkt der Mini-Wizard.
 // Vorher: Redirect-Stub auf /schaden-melden/schritt-1 (alter 4-Step-Wizard).
@@ -33,10 +35,18 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function SchadenMeldenPage({
   searchParams,
 }: {
-  searchParams: Promise<{ p?: string }>
+  searchParams: Promise<{ p?: string; src?: string }>
 }) {
-  const { p } = await searchParams
+  const { p, src } = await searchParams
   const initialPromo = p && isValidPromoCodeFormat(p) ? p : null
+  // QR-Kampagnen-Tag aus ?src=<slug> (Strassen-/Offline-Aktion) -> via hidden field
+  // an die Server-Action; daraus leitet createLeadFromMiniWizard leads.source_channel
+  // ab. Hier nur durchreichen, strikte Sanitisierung in campaignSourceChannel().
+  const initialSrc = typeof src === 'string' ? src : null
+  // Rueckruf-Pfad (Secondary-CTA): traegt denselben Kampagnen-Tag wie der
+  // Self-Service-Lead; ohne ?src -> 'schaden-melden-rueckruf' (statt 'mini_wizard',
+  // weil es ein Rueckruf ist). erstelleOeffentlichenRueckruf nimmt quelle als source_channel.
+  const rueckrufQuelle = campaignSourceChannel(initialSrc, 'schaden-melden-rueckruf')
 
   return (
     <div className="min-h-screen bg-claimondo-bg py-10">
@@ -49,7 +59,13 @@ export default async function SchadenMeldenPage({
           />
         </div>
         <div className="rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-md sm:p-8">
-          <MiniWizardClient initialPromo={initialPromo} />
+          <MiniWizardClient initialPromo={initialPromo} initialSrc={initialSrc} />
+        </div>
+        <div className="mt-5 flex flex-col items-center gap-2 text-center">
+          <p className="text-sm text-claimondo-shield">
+            Keine Zeit für das Formular? Wir rufen Sie gern zurück.
+          </p>
+          <BeratungVereinbarenButton quelle={rueckrufQuelle} label="Lieber zurückrufen lassen" />
         </div>
       </div>
     </div>
