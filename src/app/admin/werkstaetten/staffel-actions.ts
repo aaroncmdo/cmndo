@@ -67,8 +67,10 @@ export async function setWerkstattStaffel(
       .insert(clean.map((c) => ({ werkstatt_id: werkstattId, schwelle: c.schwelle, bonus_betrag_netto: c.bonus_betrag_netto })))
     if (insErr) return { ok: false, error: insErr.message }
   }
-  // Bereits ueberschrittene neue Stufen sofort vergeben
-  await admin.rpc('award_werkstatt_staffel_boni', { p_werkstatt_id: werkstattId })
+  // Bereits ueberschrittene neue Stufen sofort vergeben. Non-critical: bei Fehler
+  // heilt der Trigger auf werkstatt_provisionen bei der naechsten Statusaenderung.
+  const { error: awardErr } = await admin.rpc('award_werkstatt_staffel_boni', { p_werkstatt_id: werkstattId })
+  if (awardErr) console.error('[staffel] award_werkstatt_staffel_boni RPC fehlgeschlagen:', awardErr.message)
 
   revalidatePath('/admin/werkstaetten')
   return { ok: true }
