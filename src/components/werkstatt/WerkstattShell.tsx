@@ -9,7 +9,7 @@ import {
   ReceiptIcon,
   LogOutIcon,
   WrenchIcon,
-  FileTextIcon,
+  FileUpIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
@@ -31,7 +31,7 @@ type WerkstattShellProps = {
 const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt', label: 'Übersicht', icon: LayoutDashboardIcon, exact: true },
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
-  { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileTextIcon },
+  { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 
