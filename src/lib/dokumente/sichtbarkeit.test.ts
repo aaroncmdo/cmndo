@@ -34,6 +34,14 @@ describe('sichtbarkeit', () => {
     expect(darfSehen('zeugenbericht', 'kunde')).toBe(true)
   })
 
+  it('Pflicht-Docs sichtbar fuer Case-Handler (Audit #3 Klasse, waren admin-only)', () => {
+    expect(darfSehen('diagnosebericht', 'kundenbetreuer')).toBe(true)
+    expect(darfSehen('diagnosebericht', 'kanzlei')).toBe(true)
+    expect(darfSehen('sachschaden_foto', 'sachverstaendiger')).toBe(true)
+    expect(darfSehen('sachschaden_foto', 'kundenbetreuer')).toBe(true)
+    expect(darfSehen('altes_gutachten', 'sachverstaendiger')).toBe(true)
+  })
+
   it('Unbekannter Typ: nur Admin', () => {
     expect(darfSehen('existiert_nicht', 'admin')).toBe(true)
     expect(darfSehen('existiert_nicht', 'sachverstaendiger')).toBe(false)

@@ -103,6 +103,12 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   // 'zeugenaussage' als Alias fuer Alt-Daten + den Request-Slot-Namen.
   zeugenbericht: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   zeugenaussage: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  // Audit #3 (Klasse): weitere kunde/sv-uploadbare Katalog-Slots fehlten hier -> waren
+  // admin-only (Case-Handler sahen die hochgeladenen Docs nicht). Rollen = katalog.sichtbar_fuer.
+  diagnosebericht: ['admin', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  sachschaden_foto: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
+  altes_gutachten: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+  altschaden_fotos: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
 }
 
 type WithTypKategorie = {
