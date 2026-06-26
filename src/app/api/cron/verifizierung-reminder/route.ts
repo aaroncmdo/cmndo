@@ -67,27 +67,31 @@ export async function GET(request: Request) {
       if (email) {
         try {
           const { sendCommunication } = await import('@/lib/communications/send')
-          await sendCommunication('sv_monatsabrechnung', {
+          await sendCommunication('sv_verifizierung_frist_abgelaufen', {
             email,
             vorname,
             subject: 'Verifizierung überfällig — bitte Unterlagen sofort nachreichen',
-            html: `<p>Hallo ${vorname},</p><p>die 14-Tage-Frist für deine Verifizierungs-Dokumente (Berufshaftpflicht, Gewerbeanmeldung, ggf. Bestellungsurkunde) ist abgelaufen.</p><p>Bitte lade die fehlenden Unterlagen umgehend in deinem Portal unter <strong>Verifizierung</strong> hoch, damit wir dir weiterhin Fälle zuweisen können.</p>`,
+            html: `<p>Hallo ${vorname},</p><p>die 14-Tage-Frist für deine Verifizierungs-Dokumente (Berufshaftpflicht, Gewerbeanmeldung, ggf. Bestellungsurkunde) ist abgelaufen.</p><p>Bitte lade die fehlenden Unterlagen umgehend in deinem Portal unter <strong>Verifizierung</strong> hoch, um deine Verifizierung abzuschließen.</p>`,
           })
         } catch (err) { console.error('[AAR-359 W4] SV-Email frist_ueberschritten:', err) }
       }
 
-      // Admin-Task
-      await createLinkedTask({
-        titel: `Verifizierungs-Frist abgelaufen: SV ${vorname}`,
-        beschreibung: `SV ${sv.id.slice(0, 8)} (${vorname}) hat die 14-Tage-Frist für Tier-2-Dokumente überschritten. Bitte prüfen ob Fristverlängerung oder Sperrung.`,
-        typ: 'sv-onboarding',
-        prioritaet: 'kritisch',
-        faellig_am: now,
-        empfaenger_rolle: 'admin',
-        entity_type: 'sv_onboarding',
-        entity_id: sv.id,
-        trigger_event: 'verifizierung_frist_ueberschritten',
-      })
+      // Admin-Task. SV-Onboarding-Audit: in try/catch — wirft createLinkedTask, soll
+      // der Batch NICHT sterben (Status ist oben bereits gesetzt; ein Fehler hier darf
+      // die restlichen SVs dieses Cron-Laufs nicht blockieren).
+      try {
+        await createLinkedTask({
+          titel: `Verifizierungs-Frist abgelaufen: SV ${vorname}`,
+          beschreibung: `SV ${sv.id.slice(0, 8)} (${vorname}) hat die 14-Tage-Frist für Tier-2-Dokumente überschritten. Bitte prüfen ob Fristverlängerung oder Sperrung.`,
+          typ: 'sv-onboarding',
+          prioritaet: 'kritisch',
+          faellig_am: now,
+          empfaenger_rolle: 'admin',
+          entity_type: 'sv_onboarding',
+          entity_id: sv.id,
+          trigger_event: 'verifizierung_frist_ueberschritten',
+        })
+      } catch (err) { console.error('[AAR-359 W4] createLinkedTask frist_ueberschritten:', err) }
 
       fristUeberschritten++
       continue
@@ -99,7 +103,7 @@ export async function GET(request: Request) {
       if (email) {
         try {
           const { sendCommunication } = await import('@/lib/communications/send')
-          await sendCommunication('sv_monatsabrechnung', {
+          await sendCommunication('sv_verifizierung_reminder_7d', {
             email,
             vorname,
             subject: `Erinnerung: Verifizierungs-Dokumente in ${tageNochOffen} Tagen fällig`,
