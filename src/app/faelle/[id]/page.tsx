@@ -870,8 +870,8 @@ export default async function FallaktePage({
         </div>
       )}
       {otherKundeFaelle.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200 rounded-ios-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
-          <span className="text-amber-900">
+        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-2.5 mb-4 flex items-center justify-between text-sm flex-wrap gap-2">
+          <span className="text-warning-strong">
             Dieser Kunde hat {otherKundeFaelle.length} weitere{otherKundeFaelle.length > 1 ? '' : 'n'} aktiven Fall:
           </span>
           <div className="flex gap-2 flex-wrap">
