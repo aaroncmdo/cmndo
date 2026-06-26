@@ -302,9 +302,10 @@ export type FallDetail = {
     wertminderung: number | null
     nutzungsausfall_gesamt: number | null
     gutachter_honorar: number | null
-    wiederbeschaffungswert: number | null
-    restwert: number | null
-    totalschaden: boolean | null
+    // Datenminimierung (Variante B, 26.06.): wiederbeschaffungswert/restwert/
+    // totalschaden bewusst NICHT im Makler-Type. Die Schaden-Bewertung des Kunden
+    // geht einen Vermittler nichts an (Art. 5 DSGVO) — die 3 leben auf gutachten/
+    // v_gutachten_werte; hier absichtlich weggelassen, nicht aus Versehen.
     // CMM-44 SP-B PR2b: abtretung_signiert_am lebt auf claims (SSoT) — die View
     // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
     // (PR1-Repoint), daher flacher View-Read ohne Embed.
@@ -353,7 +354,6 @@ export async function getMaklerFallDetail(
       sv_termin, gutachten_eingegangen_am, kanzlei_uebergeben_am,
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,
-      wiederbeschaffungswert, restwert, totalschaden,
       abtretung_signiert_am
     `)
     .eq('id', fallId)
