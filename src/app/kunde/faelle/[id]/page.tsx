@@ -32,6 +32,8 @@ import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
+// AAR Fallakte-Kanonisierung: kanonische Status/Notice-Box.
+import { NoticeBox } from '@/components/shared/NoticeBox'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
@@ -781,7 +783,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* VS-Kürzung-Hinweis (Brutto-Beträge bewusst nicht gerendert) */}
         {(fall.status as string) === 'vs-kuerzt' && (
-          <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-3 space-y-2">
+          <NoticeBox tone="warning" className="rounded-ios-xl px-4 py-3 space-y-2">
             <div className="flex items-center gap-2">
               <span className="text-warning-strong text-lg">&#9888;</span>
               <p className="text-sm font-semibold text-warning-strong">{t('vsKuerzt.titel')}</p>
@@ -795,25 +797,25 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             <p className="text-[11px] text-warning-strong">
               {t('vsKuerzt.hinweis')}
             </p>
-          </div>
+          </NoticeBox>
         )}
 
         {(fall.status as string) === 'vs-abgelehnt' && (
-          <div className="bg-danger-soft border border-danger/30 rounded-ios-xl px-4 py-3 space-y-1">
+          <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-danger-strong">{t('vsAbgelehnt.titel')}</p>
             <p className="text-xs text-danger-strong">
               {t('vsAbgelehnt.text')}
             </p>
-          </div>
+          </NoticeBox>
         )}
 
         {(fall.status as string) === 'klage' && (
-          <div className="bg-danger-soft border border-danger/30 rounded-ios-xl px-4 py-3 space-y-1">
+          <NoticeBox tone="danger" className="rounded-ios-xl px-4 py-3 space-y-1">
             <p className="text-sm font-semibold text-danger-strong">{t('klage.titel')}</p>
             <p className="text-xs text-danger-strong">
               {t('klage.text')}
             </p>
-          </div>
+          </NoticeBox>
         )}
 
         {/* CMM-28 Konsolidierung: Eine „Meine Kanzlei"-Card statt 3 separaten
@@ -916,11 +918,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             variant="progress-card"
             banner={
               szenario === 'ruegefall' ? (
-                <div className="mt-4 bg-warning-soft border border-warning/30 rounded-ios-xl px-3 py-2">
+                <NoticeBox tone="warning" className="mt-4 rounded-ios-xl px-3 py-2">
                   <p className="text-xs text-warning-strong font-medium">
                     {t('ruegefall.banner')}
                   </p>
-                </div>
+                </NoticeBox>
               ) : null
             }
           />
