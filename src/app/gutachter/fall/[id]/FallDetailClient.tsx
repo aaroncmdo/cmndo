@@ -60,14 +60,6 @@ import { SvToolsCard } from './_components/SvToolsCard'
 // gebunden und zeigte oft "Phase nicht gesetzt"). Ersetzt durch die
 // schlanke WeitereDokumenteCard rechts.
 import type { FallDokumentRow } from '@/components/faelle/FallDokumenteSidebar'
-// CMM-23: BriefingCard wandert nach page.tsx (topServerBlocks).
-import type { GutachterTask } from '@/hooks/useGutachterTasks'
-import type { SvAbrechnungInput } from '@/lib/gutachter/abrechnung'
-// AAR-327: Dokument-Anforderungs-UI (Modal + Liste, wiederverwendbar)
-import AnforderungenListe, {
-  type AnforderungsItem,
-} from '@/components/dokumente/AnforderungenListe'
-import type { AnforderbarerSlot } from '@/components/dokumente/AnforderungsModal'
 // CMM-36: Geo-Tracking
 import { useGeoTracking } from '@/hooks/useGeoTracking'
 import { SvUnterwegsInfo } from '@/components/gutachter/SvUnterwegsInfo'
@@ -124,33 +116,13 @@ type Props = {
   timeline: TimelineEvent[]
   nachrichten: Record<string, unknown>[]
   kundenbetreuer?: Kundenbetreuer
-  chatTeilnehmer?: {
-    user_id: string
-    rolle: string
-    vorname: string | null
-    nachname: string | null
-    avatar_url: string | null
-  }[]
   aktiverTermin?: TerminInfo | null
   fallDokumente?: FallDokumentRow[]
   /** AAR-289: Abrechnungs-Snippet für Subphase-Ableitung (ausgezahlt_am). */
   abrechnungAusgezahltAm?: string | null
-  /** AAR-291: Tasks initial geladen (SSR), Hook refresht via Realtime. */
-  tasks?: GutachterTask[]
-  /** AAR-293: SV-Abrechnung (Honorar/Lead/Netto) für Phase 6.x Card */
-  abrechnung?: SvAbrechnungInput | null
-  /** AAR-327: Katalog-Slots die der SV anfordern darf (serverseitig gefiltert) */
-  anforderbareSlots?: AnforderbarerSlot[]
-  /** AAR-327: Anforderungen die der eingeloggte SV bereits gestellt hat */
-  anforderungenVonMir?: AnforderungsItem[]
   /** AAR-403: Kürzungs-Positionen — CMM-23: nicht mehr in der SV-View
       gerendert; bleibt in den Props für Aufwärtskompatibilität, wird ignoriert. */
   kuerzungen?: Array<{ id: string; typ: string | null; bezeichnung: string | null; betrag_gefordert: number | null; betrag_reguliert: number | null; betrag_gekuerzt: number | null }>
-  /** AAR-399: Katalog-Slots für SV-Upload (merged mit pflichtdokumente-Status) */
-  svSlots?: SvSlotRow[]
-  /** AAR-559 (C10): SV-Honorar (nur SV-Anteil, nie Brutto) */
-  svHonorarBetrag?: number | null
-  svHonorarEingegangenAm?: string | null
   /** AAR-559 (C10): Konfrontations-Wunsch des Kunden (C9) */
   konfrontationGewuenscht?: boolean
   konfrontationTerminVereinbartAm?: string | null
@@ -181,23 +153,6 @@ type Props = {
     nutzungsausfall_tage: number | null
     gutachten_sv_honorar_brutto: number | null
   } | null
-}
-
-/** AAR-399: Lokaler Typ, passt zu DokumentenListe.SlotRow */
-export type SvSlotRow = {
-  id: string | null
-  slotId: string
-  label: string
-  beschreibung: string | null
-  istPflicht: boolean
-  status:
-    | 'ausstehend'
-    | 'hochgeladen'
-    | 'geprueft'
-    | 'abgelehnt'
-    | 'nachgereicht_angefordert'
-    | 'optional'
-  currentFile: { name: string; url?: string | null; size?: number | null } | null
 }
 
 export default function FallDetailClient(props: Props) {

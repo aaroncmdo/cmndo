@@ -25,7 +25,6 @@ import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
-import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-651: Zentrale Fall-Loader-Lib
 import { getFallForSv } from '@/lib/fall/queries'
 
@@ -133,8 +132,7 @@ export default async function GutachterFallPage({
       .order('hochgeladen_am'),
     supabase
       .from('pflichtdokumente')
-      // AAR-327: zusätzlich angefordert_* + begruendung + frist für
-      // AnforderungenListe (SV sieht seine eigenen Anforderungen).
+      // AAR-327: angefordert_* + begruendung + frist (Anforderungs-Metadaten).
       .select('id, dokument_typ, status, pflicht, quelle, dokument_url, hochgeladen_am, created_at, angefordert_von_rolle, angefordert_von_user_id, angefordert_am, begruendung, frist')
       .eq('fall_id', id)
       .order('sort_order', { ascending: true })
@@ -239,22 +237,6 @@ export default async function GutachterFallPage({
     fallDokumente = (fd ?? []) as typeof fallDokumente
   } catch { /* Tabelle kann noch nicht existieren */ }
 
-  // KFZ-129: Chat-Teilnehmer laden
-  const { getChatTeilnehmer } = await import('@/lib/chatGruppe')
-  const chatTeilnehmer = await getChatTeilnehmer(id)
-
-  // AAR-291: Tasks für SV initial laden (Hook refresht via Realtime)
-  const { data: tasksInitial } = await supabase
-    .from('tasks')
-    .select(
-      'id, fall_id, task_typ, titel, beschreibung, status, prioritaet, faellig_am, empfaenger_rolle, created_at, erledigt_am',
-    )
-    .eq('fall_id', id)
-    .in('empfaenger_rolle', ['gutachter', 'sachverstaendiger'])
-    .in('status', ['offen', 'in-bearbeitung'])
-    .order('prioritaet', { ascending: false })
-    .order('faellig_am', { ascending: true, nullsFirst: false })
-
   // KFZ-134: Aktiven gutachter_termine Eintrag laden (admin-client bereits oben)
   // CMM-23: zusätzlich kunde_losgefahren_am, kunde_angekommen_am und
   // durchgefuehrt_am für die Phasen-Bestimmung.
@@ -298,83 +280,7 @@ export default async function GutachterFallPage({
     return new Date(t.start_zeit as string).getTime() + 60 * 60 * 1000 < Date.now()
   })()
 
-  // AAR-327: Katalog-Slots für Dokument-Anforderung (rolle=sachverstaendiger).
-  // Cachelayer: getAlleSlots dedupliziert intern (TTL 5 min), daher ist der
-  // zweite Call praktisch kostenlos.
-  const katalogAlleSlots = await getAlleSlots(supabase)
-  const anforderbareSlots = katalogAlleSlots
-    .filter((s) => s.anforderbar_von.includes('sachverstaendiger'))
-    .map((s) => ({
-      slot_id: s.slot_id,
-      label: s.label,
-      beschreibung: s.beschreibung,
-      kategorie: s.kategorie as string,
-    }))
-  const katalogLabels = new Map(katalogAlleSlots.map((s) => [s.slot_id, s.label]))
 
-  type PflichtRow = {
-    id: string
-    dokument_typ: string
-    status: string
-    frist: string | null
-    begruendung: string | null
-    angefordert_am: string | null
-    angefordert_von_user_id: string | null
-  }
-  const anforderungenVonMir = ((pflichtdokumente ?? []) as unknown as PflichtRow[])
-    .filter((r) => r.angefordert_von_user_id === user.id)
-    .map((r) => ({
-      id: r.id,
-      slot_id: r.dokument_typ,
-      label: katalogLabels.get(r.dokument_typ) ?? r.dokument_typ,
-      status: r.status,
-      frist: r.frist,
-      begruendung: r.begruendung,
-      angefordert_am: r.angefordert_am,
-    }))
-
-  // AAR-399: SV-uploadbare Katalog-Slots + bestehende pflichtdokumente-Status
-  // zu einer SlotRow-Liste mergen für die DokumenteUebersichtCard (DnD-Upload).
-  type PflichtRowFull = {
-    id: string
-    dokument_typ: string
-    status: string | null
-    pflicht: boolean | null
-    dokument_url: string | null
-    hochgeladen_am: string | null
-  }
-  const pflichtFull = (pflichtdokumente ?? []) as unknown as PflichtRowFull[]
-  type SvSlotStatus =
-    | 'ausstehend'
-    | 'hochgeladen'
-    | 'geprueft'
-    | 'abgelehnt'
-    | 'nachgereicht_angefordert'
-    | 'optional'
-  const svSlots = katalogAlleSlots
-    .filter((s) => s.uploadbar_von.includes('sachverstaendiger'))
-    .map((s) => {
-      const match = pflichtFull.find((r) => r.dokument_typ === s.slot_id)
-      const rawStatus = match?.status ?? 'ausstehend'
-      const status: SvSlotStatus = (
-        ['ausstehend', 'hochgeladen', 'geprueft', 'abgelehnt', 'nachgereicht_angefordert', 'optional'].includes(
-          rawStatus,
-        )
-          ? rawStatus
-          : 'ausstehend'
-      ) as SvSlotStatus
-      return {
-        id: match?.id ?? null,
-        slotId: s.slot_id,
-        label: s.label,
-        beschreibung: s.beschreibung,
-        istPflicht: match?.pflicht ?? false,
-        status,
-        currentFile: match?.dokument_url
-          ? { name: s.label, url: match.dokument_url, size: null }
-          : null,
-      }
-    })
 
   // AAR-553: fall_dokumente → Legacy-Shape für FallDetailClient-Konsumenten
   const dokUrlsLegacy = await getStorageUrlBulk(
@@ -675,33 +581,14 @@ export default async function GutachterFallPage({
       lead={lead}
       dokumente={dokumenteLegacy}
       pflichtdokumente={(pflichtdokumente ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['pflichtdokumente']}
-      anforderbareSlots={anforderbareSlots}
-      anforderungenVonMir={anforderungenVonMir}
-      svSlots={svSlots}
       parteien={parteien ?? []}
       timeline={(timeline ?? []) as unknown as Parameters<typeof FallDetailClient>[0]['timeline']}
       nachrichten={nachrichten ?? []}
       kundenbetreuer={kundenbetreuer}
-      chatTeilnehmer={chatTeilnehmer}
       aktiverTermin={aktiverTermin as unknown as Parameters<typeof FallDetailClient>[0]['aktiverTermin']}
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
       abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}
-      tasks={(tasksInitial ?? []) as Parameters<typeof FallDetailClient>[0]['tasks']}
-      abrechnung={
-        abrechnung
-          ? {
-              honorar: (fall as { gutachten_betrag?: number | null }).gutachten_betrag
-                ? Number((fall as { gutachten_betrag?: number | null }).gutachten_betrag)
-                : null,
-              leadpreis: abrechnung.leadpreis ? Number(abrechnung.leadpreis) : null,
-              preistyp: abrechnung.preistyp ?? null,
-              abgerechnetAm: (abrechnung as { abgerechnet_am?: string | null }).abgerechnet_am ?? null,
-            }
-          : null
-      }
-      svHonorarBetrag={svHonorarBetrag}
-      svHonorarEingegangenAm={svHonorarEingegangenAm}
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
