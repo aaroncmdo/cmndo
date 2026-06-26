@@ -119,7 +119,7 @@ export function PortalNav({
         key={item.href}
         href={item.href}
         className={`flex items-center gap-2.5 px-3 py-2 rounded-ios-lg text-sm font-medium transition-colors duration-500 ${
-          active ? 'bg-claimondo-ondo text-white' : 'text-claimondo-ondo hover:bg-claimondo-bg'
+          active ? 'bg-claimondo-shield text-white' : 'text-claimondo-light-blue hover:bg-white/5 hover:text-white'
         }`}
       >
         <item.icon className="w-4 h-4 flex-shrink-0" />
@@ -228,40 +228,30 @@ export function PortalNav({
     )
   }
 
-  // light variant — Kanzlei/Mitarbeiter (Claimondo-Bg statt Navy-Sidebar)
+  // light variant — Kanzlei/Mitarbeiter.
+  // 2026-06-26 (Design-Review Aaron): Vorher Floating-Frosted-Weiß
+  // (white 65% + blur) auf hellem claimondo-bg = washed-out, durchsichtig,
+  // kaum Kontrast. Jetzt solide Navy-Sidebar (brand-primary via claimondo-navy)
+  // mit hellblauen Items — bildet zusammen mit dem vorhandenen Navy-Header
+  // (glass-dark) eine durchgehende Navy-Chrome um die helle Content-Fläche,
+  // analog zum Gutachter-Portal. Committed Markenfarbe statt Glassmorphism.
+  // Floating-Toggle wird hier bewusst ignoriert (das Glas WAR das Problem);
+  // data-sidebar-mode="bar" verhindert die Floating-Glass-CSS-Regeln.
   return (
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
-      data-sidebar-mode={floatingMode ? 'floating-light' : 'bar'}
-      className={`w-56 shrink-0 overflow-y-auto ${
-        floatingMode ? 'bg-transparent p-3 space-y-3' : 'border-r border-claimondo-border bg-white'
-      } ${className}`}
+      data-sidebar-mode="bar"
+      className={`w-56 shrink-0 overflow-y-auto bg-claimondo-navy border-r border-white/10 ${className}`}
     >
-      <div
-        className={`flex flex-col gap-0.5 ${floatingMode ? '' : 'p-3'}`}
-        style={
-          floatingMode
-            ? {
-                backgroundColor: 'color-mix(in srgb, white 65%, transparent)',
-                backdropFilter: 'saturate(180%) blur(22px)',
-                WebkitBackdropFilter: 'saturate(180%) blur(22px)',
-                border: '1px solid color-mix(in srgb, var(--claimondo-border) 70%, transparent)',
-                borderRadius: 18,
-                padding: '12px 14px',
-                boxShadow:
-                  '0 14px 36px color-mix(in srgb, var(--claimondo-navy) 12%, transparent), inset 0 1px 0 rgba(255,255,255,0.75)',
-              }
-            : undefined
-        }
-      >
+      <div className="flex flex-col gap-0.5 p-3">
         {sections.map((section, i) => (
           <div
             key={section.label ?? i}
-            className={!floatingMode && i > 0 ? 'pt-3 mt-3 border-t border-claimondo-border' : ''}
+            className={i > 0 ? 'pt-3 mt-3 border-t border-white/10' : ''}
           >
             {section.label && (
-              <p className="px-3 pt-1 pb-2 text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold">
+              <p className="px-3 pt-1 pb-2 text-[10px] uppercase tracking-wider text-claimondo-light-blue/60 font-semibold">
                 {section.label}
               </p>
             )}
