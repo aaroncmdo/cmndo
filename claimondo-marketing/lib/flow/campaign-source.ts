@@ -23,8 +23,12 @@ const MAX_SLUG_LEN = 40
 /**
  * Leitet den `leads.source_channel` aus dem QR-Kampagnen-Param `?src=` ab.
  *
- * @param rawSrc  Roh-Wert aus der URL (user-kontrolliert) oder null/undefined.
- * @returns       `kampagne-<slug>` bei gueltigem src, sonst `DEFAULT_SOURCE_CHANNEL`.
+ * @param rawSrc    Roh-Wert aus der URL (user-kontrolliert) oder null/undefined.
+ * @param fallback  source_channel ohne / bei unzulaessigem src. Default
+ *                  'mini_wizard' (Self-Service); der Rueckruf-Pfad uebergibt
+ *                  z.B. 'schaden-melden-rueckruf'. Kampagnen-Leads (gueltiger src)
+ *                  bekommen IMMER 'kampagne-<slug>', egal welcher Pfad.
+ * @returns         `kampagne-<slug>` bei gueltigem src, sonst `fallback`.
  *
  * Beispiele:
  *   campaignSourceChannel('strasse-koeln-juni26') === 'kampagne-strasse-koeln-juni26'
@@ -33,13 +37,16 @@ const MAX_SLUG_LEN = 40
  *   campaignSourceChannel(undefined)              === 'mini_wizard'
  *   campaignSourceChannel('!!!')                  === 'mini_wizard'
  */
-export function campaignSourceChannel(rawSrc?: string | null): string {
-  if (!rawSrc) return DEFAULT_SOURCE_CHANNEL
+export function campaignSourceChannel(
+  rawSrc?: string | null,
+  fallback: string = DEFAULT_SOURCE_CHANNEL,
+): string {
+  if (!rawSrc) return fallback
   const slug = rawSrc
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-') // alles Nicht-Slug -> Bindestrich
     .replace(/^-+|-+$/g, '') // fuehrende/abschliessende Bindestriche weg
     .slice(0, MAX_SLUG_LEN)
     .replace(/-+$/g, '') // evtl. durch slice entstandenen Trailing-Dash weg
-  return slug ? `kampagne-${slug}` : DEFAULT_SOURCE_CHANNEL
+  return slug ? `kampagne-${slug}` : fallback
 }
