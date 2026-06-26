@@ -9,6 +9,9 @@ export function buildDokumentKontext(args: { claim?: Row; lead?: Row }): EvalCon
   const c = (args.claim ?? {}) as Record<string, unknown>
   const l = (args.lead ?? {}) as Record<string, unknown>
   return {
+    // schadensfotos/unfallfotos nutzen pflicht_wenn {is_not_null lead.id} = "immer
+    // (sobald ein Lead existiert)". Daher lead.id im Kontext bereitstellen.
+    'lead.id': pick(l.id, c.lead_id),
     'lead.zb1_status': pick(l.zb1_status),
     'lead.polizei_vor_ort': pick(c.polizei_vor_ort, l.polizei_vor_ort),
     'lead.fahrerflucht': pick(c.fahrerflucht, l.fahrerflucht),
