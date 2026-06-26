@@ -116,8 +116,21 @@ export async function getPflichtdokumenteForFall(
       })
 
     // Smart-Filter conditions: polizei_vor_ort, hat_personenschaden, etc.
+    // FIX: Lead vollstaendig laden damit konditionale Katalog-Slots korrekt evaluieren
+    // (finanzierung_leasing, gewerbe_flag, zb1_status, polizei_vor_ort, fahrerflucht,
+    // zeugen_vorhanden, halter_ungleich_fahrer_flag, vorschaden_erkannt etc.)
+    let lead: Record<string, unknown> | null = null
+    const leadId = (claim as Record<string, unknown>).lead_id as string | null
+    if (leadId) {
+      const { data } = await admin
+        .from('leads')
+        .select('id, finanzierung_leasing, gewerbe_flag, vorsteuerabzugsberechtigt, zb1_status, polizei_vor_ort, fahrerflucht, zeugen_vorhanden, halter_ungleich_fahrer_flag, personenschaden_flag, sachschaden_flag')
+        .eq('id', leadId)
+        .maybeSingle()
+      lead = data
+    }
     const katalogRows = await getAlleSlots(admin)
-    const ctx = buildDokumentKontext({ claim, lead: { id: (claim as Record<string, unknown>).lead_id } })
+    const ctx = buildDokumentKontext({ claim, lead })
     const anforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, kundeRelevante)
 
     // Files pro Slot zusammensammeln. Mapping über pflichtdokument_id

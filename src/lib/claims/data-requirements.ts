@@ -68,10 +68,13 @@ export function getOffeneDokumentAnforderungen(
     seen.add(slot.slot_id)
   }
 
-  // Legacy/KB-Pflicht-Rows die (noch) nicht im Katalog stehen — durchreichen.
-  const katalogIds = new Set(katalogRows.map((s) => s.slot_id))
+  // Safety-Net: bestehende Pflicht-DB-Rows immer anzeigen, auch wenn das Katalog-Slot
+  // aktuell nicht freigeschaltet ist (z.B. wegen fehlender Lead-Felder am Claim).
+  // Exklusion katalogIds.has() entfernt: eine vorhandene pflichtdokumente-Row soll
+  // sichtbar bleiben unabhaengig davon ob die Regel aktuell true oder false evaluiert.
+  // seen.has() verhindert Duplikate mit Schleife 1.
   for (const pd of pflichtDocs) {
-    if (seen.has(pd.slot_id) || katalogIds.has(pd.slot_id)) continue
+    if (seen.has(pd.slot_id)) continue
     if (!pd.pflicht) continue
     result.push({
       slot_id: pd.slot_id,

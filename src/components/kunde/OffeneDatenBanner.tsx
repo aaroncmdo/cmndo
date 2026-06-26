@@ -14,6 +14,7 @@
 import Link from 'next/link'
 import { AlertCircleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getOffeneDokumentAnforderungen, countOffenePflicht } from '@/lib/claims/data-requirements'
 import { getPflichtdokumenteStand } from '@/app/kunde/onboarding/actions'
@@ -47,7 +48,19 @@ async function loadOffenCount(): Promise<number | null> {
 
     const pflichtDocs = await getPflichtdokumenteStand(fall.id)
     const katalogRows = await getAlleSlots(supabase)
-    const ctx = buildDokumentKontext({ claim })
+    // FIX: Lead vollstaendig laden damit konditionale Katalog-Slots korrekt evaluieren.
+    const admin = createAdminClient()
+    let lead: Record<string, unknown> | null = null
+    const leadId = (claim as unknown as { lead_id?: string | null }).lead_id
+    if (leadId) {
+      const { data } = await admin
+        .from('leads')
+        .select('id, finanzierung_leasing, gewerbe_flag, vorsteuerabzugsberechtigt, zb1_status, polizei_vor_ort, fahrerflucht, zeugen_vorhanden, halter_ungleich_fahrer_flag, personenschaden_flag, sachschaden_flag')
+        .eq('id', leadId)
+        .maybeSingle()
+      lead = data
+    }
+    const ctx = buildDokumentKontext({ claim, lead })
     const anforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, pflichtDocs)
     return countOffenePflicht(anforderungen)
   } catch (err) {

@@ -25,6 +25,9 @@ export function buildDokumentKontext(args: { claim?: Row; lead?: Row }): EvalCon
     'lead.mietwagen_flag': pick(c.hat_mietwagen, l.mietwagen_flag),
     'lead.nutzungsausfall': pick(c.hat_nutzungsausfall, l.nutzungsausfall),
     'fall.zeugen_vorhanden': pick(c.zeugen_vorhanden),
+    // Die folgenden drei Felder sind SV-/admin-seitige Slots (nicht kunde-uploadbar).
+    // Sie fehlen oft am Claim wenn kein SV-Bearbeitung stattfand — null = nicht
+    // freigeschaltet ist das korrekte Verhalten fuer diese internen Trigger.
     'fall.vorschaden_erkannt': pick(c.vorschaden_erkannt),
     'fall.technische_stellungnahme_status': pick(c.technische_stellungnahme_status),
     'fall.nachbesichtigung_status': pick(c.nachbesichtigung_status),
