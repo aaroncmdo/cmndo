@@ -141,3 +141,32 @@ Anwalts-Freigabe liegt vor (von Aaron bestätigt 26.06.2026) → Consent-Default
 - `docs/dev-ticket-google-tag-status.md` — Tag-Coverage, 503, GA4-Zugriffslücke
 - `docs/dev-ticket-sa-signed-dedup.md` — transaction_id-Dedup
 - Code: `claimondo-marketing/{components/landing/HomeLeadFormClient.tsx, app/[locale]/schaden-melden/MiniWizardClient.tsx, app/[locale]/layout.tsx, app/robots.ts, lib/analytics/track-event.ts (neu)}`
+
+---
+
+## Console-Cheatsheet (exakte Schritte für Aaron)
+
+### B1 — GA4 ↔ Ads verknüpfen (der Blocker)
+Google Ads (951-112-7970) → **Tools → Einrichtung → Verknüpfte Konten → Google Analytics (GA4) & Firebase → „Verknüpfen"** → Property **G-9YF2W9ZP2S (535968769)** wählen → bestätigen → im Dialog **„Website-/App-Conversions importieren / Auto-Tagging" = AN**. (Falls bereits eine andere Property verknüpft ist: zusätzlich verknüpfen, NICHT ersetzen.)
+
+### B2 — Schlüsselereignisse + Import als primär (Leads-primär)
+1. GA4 (G-9YF2W9ZP2S) → **Verwalten → Datenanzeige → Ereignisse** → bei `generate_lead` Schalter **„Als Schlüsselereignis markieren"** AN.
+2. Ads → **Ziele → Conversions → „+ Neue Conversion-Aktion" → Importieren → Google Analytics 4 (Web)** → `generate_lead` → importieren.
+3. Importiertes `generate_lead` öffnen → **„In ‚Conversions' einbeziehen" = Ja** (= primär). Native Dubletten (GA4-`request_submit`, `phone_click`-GA4) → **„Nein"** (sekundär) gegen Doppelzählung (Paare s. `ads-conversion-setup-empfehlung.md`).
+4. `generate_lead` trägt jetzt `source` (`claimondo-home-hero`/`check-anspruch`/`beratung-rueckruf`/`sticky-rueckruf`; Mini-Wizard server-seitig `mini_wizard`) → in GA4 nach `source` segmentierbar.
+
+### B4 — Cloudflare Bot-Defense (Copy-Paste)
+1. **Security → Bots:** „Bot Fight Mode" = An (Super Bot Fight Mode ab Pro: „Definitely automated" = Block, „Verified bots" = Allow). **„Block AI Scrapers and Crawlers" = An.**
+2. **Security → WAF → Custom rules → Create rule** · Action **Managed Challenge** · Expression:
+   ```
+   (http.host in {"claimondo.de" "www.claimondo.de" "kfzgutachter.claimondo.de"})
+   and not cf.client.bot
+   and ip.geoip.asnum in {16509 14618 8075 396982 14061 16276 24940 20473 63949}
+   ```
+   ASN-Ref: 16509/14618=AWS · 8075=Azure · 396982=Google Cloud · 14061=DigitalOcean · 16276=OVH · 24940=Hetzner · 20473=Vultr · 63949=Linode/Akamai. (`not cf.client.bot` nimmt verifizierte Bots wie Googlebot aus; 15169 Google LLC bewusst NICHT gelistet.)
+3. Optional 2. Regel (Managed Challenge): Non-DACH — `(http.host in {Marketing}) and ip.geoip.country ne "DE" and ip.geoip.country ne "AT" and ip.geoip.country ne "CH"`.
+
+## Update — 26.06.2026 (Folge-Arbeiten)
+- **Lead-Tracking-Audit + Fixes → PR #3214:** Mini-Wizard-Doppelzählung behoben (Server-Event kanonisch); Rückruf-Pfade (`BeratungModal` + `StickyCallBar`) feuern jetzt `generate_lead`. → jeder kunden-seitige Lead-Pfad zählt genau 1×.
+- **robots selektiv auf 5 kfz-Cluster-LPs** (CCBot/Bytespider/Google-Extended geblockt) → dieser PR.
+- **/check-Rebuild → PR #3197:** `check_start/step/complete` + `generate_lead(source=check-anspruch)`.
