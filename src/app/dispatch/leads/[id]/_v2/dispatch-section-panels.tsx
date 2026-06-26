@@ -108,6 +108,32 @@ const SEKTION_PANELS: Record<DispatchSectionPanelKey, (ctx: DispatchSectionCtx) 
         />,
       )
     }
+    // Werkstatt-KVA: read-only Anzeige des Kostenvoranschlags (Werkstatt-Schaetzung).
+    // Brutto hat Vorrang; wenn beide null -> nichts rendern (conditional-render).
+    const kvaBrutto = (ctx.lead.kostenvoranschlag_brutto as number | null) ?? null
+    const kvaNetto = (ctx.lead.kostenvoranschlag_netto as number | null) ?? null
+    const kvaBetrag = kvaBrutto ?? kvaNetto
+    if (kvaBetrag !== null) {
+      const kvaFormatiert = new Intl.NumberFormat('de-DE', {
+        style: 'currency',
+        currency: 'EUR',
+      }).format(kvaBetrag)
+      nodes.push(
+        <SectionCard
+          key="werkstatt-kva"
+          title="Kostenvoranschlag (Werkstatt)"
+          subtitle="Schätzung der Werkstatt vor SV-Gutachten — kein Ersatz für den Gutachtenwert"
+        >
+          <p className="text-body font-semibold text-claimondo-navy">
+            {kvaFormatiert}
+          </p>
+          <p className="text-caption text-claimondo-ondo/70 mt-1">
+            {kvaBrutto !== null ? 'Bruttobetrag (inkl. MwSt.)' : 'Nettobetrag (ohne MwSt.)'}
+            {' — '}Schätzung
+          </p>
+        </SectionCard>,
+      )
+    }
     return nodes
   },
   // Fahrzeug: Cardentity-Abruf (manuell, ~15-EUR-Confirm, idempotent).

@@ -33,6 +33,7 @@ import {
   NotizenSection,
   ZeugenKontakteSection,
 } from '../_stammdaten/Sections'
+import { WerkstattKvaSection } from '../_stammdaten/WerkstattKvaSection'
 
 const SECTION_COMPONENTS: Partial<Record<StammdatenSection, () => React.JSX.Element>> = {
   kunde: KundendatenSection,
@@ -257,6 +258,9 @@ export default function UebersichtTab() {
         if (!Comp) return null
         return <Comp key={id} />
       })}
+
+      {/* Werkstatt-KVA: read-only Schätzung (getrennt vom SV-Gutachten-Wert KernwerteSection) */}
+      <WerkstattKvaSection />
 
       {/* AAR-759 Phase 2: Mietwagen — Admin/KB bekommt Edit-Card, andere Rollen read-only */}
       {userRolle === 'admin' || userRolle === 'kundenbetreuer' ? (
