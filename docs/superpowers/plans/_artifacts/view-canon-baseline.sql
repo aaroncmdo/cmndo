@@ -1,0 +1,44 @@
+-- Claim-Read-View-Kanonisierung — Baseline / Reversal-Referenz (Task 1)
+-- Plan: docs/superpowers/plans/2026-06-26-claim-read-view-canonicalization.md
+--
+-- HINWEIS Reversibilität: die verbatim View-Defs werden NICHT hier eingefroren —
+-- sie sind via pg_get_viewdef jederzeit regenerierbar UND eine Now-Snapshot wäre
+-- bis zum (gegateten) Swap-Fenster womöglich veraltet. Stattdessen: unmittelbar VOR
+-- jedem Swap (Task 3/5) die folgenden Snapshots frisch ziehen = die korrekte
+-- Reversal-Referenz für genau diesen Swap. (Defs liegen ohnehin im git-Verlauf.)
+
+-- ── Snapshot-Kommandos (vor jedem Swap frisch ausführen, READ) ─────────────────
+-- select pg_get_viewdef('v_claim_full'::regclass, true);
+-- select pg_get_viewdef('v_faelle_mit_aktuellem_termin'::regclass, true);
+
+-- ── Decision (a): "aktueller Termin" = get_aktueller_gt_termin_id ───────────────
+-- Live-Definition (Stand 2026-06-26, execute_sql-verifiziert):
+--
+--   CREATE OR REPLACE FUNCTION public.get_aktueller_gt_termin_id(p_claim_id uuid)
+--     RETURNS uuid LANGUAGE sql STABLE AS $$
+--     select gt.id from public.gutachter_termine gt
+--     where gt.claim_id = p_claim_id
+--       and gt.status = any (array['bestaetigt','verlegung_pending','reserviert',
+--                                  'durchgefuehrt','gegenvorschlag'])
+--     order by (case gt.status
+--         when 'bestaetigt' then 1 when 'verlegung_pending' then 2
+--         when 'gegenvorschlag' then 3 when 'reserviert' then 4
+--         when 'durchgefuehrt' then 5 else 6 end), gt.start_zeit desc nulls last
+--     limit 1 $$;
+--
+-- BEWERTUNG: fachlich korrekte "aktiver Termin"-Definition — Status-gefiltert
+-- (keine abgesagten/abgelehnten) + Status-Priorität dann Recency. vfmat NUTZT sie
+-- bereits. vcf nutzt heute "neuester per start_zeit" (LATERAL spd_termin) — kann
+-- also einen inaktiven Termin treffen. → Decision (a) ist für vcf Unifikation UND
+-- Bugfix. Bestätigt.
+
+-- ── Welche Decision welche View ändert (Harness-Exempt-Steuerung) ──────────────
+-- Decision (a) (Termin-Wahl)      ändert NUR v_claim_full
+--   (vfmat nutzt get_aktueller_gt_termin_id bereits).
+-- Decision (b) (geschädigter-Ordering reihenfolge,created_at) ändert NUR vfmat
+--   (vcf ordnet bereits reihenfolge,created_at; vfmat ordnete created_at,id).
+-- → Jede View hat genau EIN Decision-Delta. Siehe view-canon-harness.sql.
+
+-- ── Kanonische FROM-Clause für v_claim_base ────────────────────────────────────
+-- Verbatim im Plan (Task 3), abgeleitet als Merge der LATERALs beider Views mit
+-- den Decisions a/b. Hier nicht dupliziert (Single Source = der Plan).
