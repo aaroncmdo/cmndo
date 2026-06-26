@@ -13,6 +13,12 @@ export const DEFAULT_API_BASE = 'https://app.claimondo.de'
 // als ein vorzeitiger Timeout. /llms-full.txt ist mit ~0,5 s unkritisch.
 const REQUEST_TIMEOUT_MS = 30_000
 
+// Distinktive User-Agent fuer alle ausgehenden Requests an die Claimondo-API. Damit kann die
+// REST-Schicht Aufrufe "ueber unseren MCP-Server" von direkten Aufrufen (ChatGPT-GPT-Action,
+// curl) unterscheiden — Grundlage fuer die Kanal-Attribution (consent_records.user_agent bei
+// melde-schaden + rueckruf). Version hier mitziehen, wenn die Server-Version (1.0.0) steigt.
+const MCP_USER_AGENT = 'claimondo-mcp-server/1.0'
+
 /** A single, privacy-anonymised match. tier 1 = profile partner, tier 3 = location pin only. */
 // `type` (not `interface`): the SDK's structuredContent target is an index-signature
 // type ({ [x: string]: unknown }), to which interfaces are not assignable — only type aliases.
@@ -83,7 +89,7 @@ export async function fetchSvInNaehe(
 
   let res: Response
   try {
-    res = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal })
+    res = await fetch(url, { headers: { accept: 'application/json', 'user-agent': MCP_USER_AGENT }, signal: controller.signal })
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       throw new ClaimondoApiError(
@@ -181,7 +187,7 @@ export async function fetchWissensbasis(apiBase: string = DEFAULT_API_BASE): Pro
 
   let res: Response
   try {
-    res = await fetch(url, { headers: { accept: 'text/markdown, text/plain' }, signal: controller.signal })
+    res = await fetch(url, { headers: { accept: 'text/markdown, text/plain', 'user-agent': MCP_USER_AGENT }, signal: controller.signal })
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       throw new ClaimondoApiError(
@@ -255,7 +261,7 @@ export async function fetchGutachterTermine(
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
   let res: Response
   try {
-    res = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal })
+    res = await fetch(url, { headers: { accept: 'application/json', 'user-agent': MCP_USER_AGENT }, signal: controller.signal })
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       throw new ClaimondoApiError(
@@ -383,7 +389,7 @@ export async function meldeSchaden(
   try {
     res = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      headers: { 'content-type': 'application/json', accept: 'application/json', 'user-agent': MCP_USER_AGENT },
       body: JSON.stringify(body),
       signal: controller.signal,
     })
@@ -450,7 +456,7 @@ export async function fetchPruefeAnspruch(
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
   let res: Response
   try {
-    res = await fetch(url, { headers: { accept: 'application/json' }, signal: controller.signal })
+    res = await fetch(url, { headers: { accept: 'application/json', 'user-agent': MCP_USER_AGENT }, signal: controller.signal })
   } catch (err) {
     if (err instanceof Error && err.name === 'AbortError') {
       throw new ClaimondoApiError(`Die Anfrage an Claimondo hat das Zeitlimit (${REQUEST_TIMEOUT_MS / 1000} s) überschritten.`)
@@ -511,7 +517,7 @@ export async function fetchDecodeBrief(text: string, apiBase: string = DEFAULT_A
   try {
     res = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      headers: { 'content-type': 'application/json', accept: 'application/json', 'user-agent': MCP_USER_AGENT },
       body: JSON.stringify({ text }),
       signal: controller.signal,
     })
@@ -586,7 +592,7 @@ export async function fetchRueckruf(input: RueckrufInput, apiBase: string = DEFA
   try {
     res = await fetch(url, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      headers: { 'content-type': 'application/json', accept: 'application/json', 'user-agent': MCP_USER_AGENT },
       body: JSON.stringify(body),
       signal: controller.signal,
     })
