@@ -32,6 +32,7 @@ export async function sendGa4Event(opts: {
   clientId: string
   events: Ga4Event[]
   consentGranted?: boolean
+  userData?: Record<string, unknown> | null
 }): Promise<void> {
   const measurementId = process.env.NEXT_PUBLIC_GA4_ID
   const apiSecret = process.env.GA4_MP_API_SECRET
@@ -49,6 +50,7 @@ export async function sendGa4Event(opts: {
           client_id: opts.clientId,
           events: opts.events,
           consent: { ad_user_data: consent, ad_personalization: consent },
+          ...(opts.userData ? { user_data: opts.userData } : {}),
         }),
       },
     )

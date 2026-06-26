@@ -42,7 +42,8 @@ export async function getConsentedGaClientId(): Promise<string | null> {
 export async function trackServerConversion(
   clientId: string | null | undefined,
   event: Ga4Event,
+  userData?: Record<string, unknown> | null,
 ): Promise<void> {
   if (!clientId) return
-  await sendGa4Event({ clientId, events: [event], consentGranted: true })
+  await sendGa4Event({ clientId, events: [event], consentGranted: true, userData })
 }
