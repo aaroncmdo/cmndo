@@ -5585,7 +5585,10 @@
       "hinweis": "Geben Sie den Besichtigungsort ein — dann zeigen wir Ihnen passende Gutachter-Termine in der Nähe.",
       "placeholder": "Adresse des Besichtigungsorts",
       "speichern_laeuft": "Einen Moment, wir suchen passende Termine …",
-      "fehler_speichern": "Adresse konnte nicht gespeichert werden."
+      "fehler_speichern": "Adresse konnte nicht gespeichert werden.",
+      "vorschlag_label": "Steht Ihr Fahrzeug an der gemeldeten Unfallstelle?",
+      "vorschlag_bestaetigen": "Ja, dort besichtigen",
+      "vorschlag_oder": "Oder anderen Ort wählen:"
     }
   },
   "gutachter": {

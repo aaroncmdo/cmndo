@@ -5585,7 +5585,10 @@
       "hinweis": "Ekspertiz yerini girin — ardından size yakındaki uygun bilirkişi randevularını gösterelim.",
       "placeholder": "Ekspertiz yerinin adresi",
       "speichern_laeuft": "Bir saniye, size uygun randevuları arıyoruz …",
-      "fehler_speichern": "Adres kaydedilemedi."
+      "fehler_speichern": "Adres kaydedilemedi.",
+      "vorschlag_label": "Aracınız bildirilen kaza yerinde mi?",
+      "vorschlag_bestaetigen": "Evet, orada incelensin",
+      "vorschlag_oder": "Veya başka bir yer seçin:"
     }
   },
   "gutachter": {

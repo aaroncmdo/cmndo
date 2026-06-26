@@ -98,14 +98,22 @@ export async function speichereQualiFlow(
  */
 export async function ladeMatchingFlow(
   token: string,
-): Promise<{ ok: boolean; svs?: OeffentlichesSvProfil[]; error?: string; ortFehlt?: boolean }> {
+): Promise<{
+  ok: boolean
+  svs?: OeffentlichesSvProfil[]
+  error?: string
+  ortFehlt?: boolean
+  // Item 1: bei ortFehlt ein Vorschlag aus unfallort_lat/lng — der Kunde bestaetigt
+  // ihn 1-Klick oder waehlt anders (kein silent-use, da Unfallort != Auto-Standort).
+  vorschlagOrt?: { adresse: string; lat: number; lng: number }
+}> {
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
   const { data: lead } = await admin
     .from('leads')
     .select(
-      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, wunschtermin, disqualifiziert, werkstatt_id',
+      'besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, besichtigungsort_adresse, fahrzeug_standort_adresse, unfallort, unfallort_lat, unfallort_lng, wunschtermin, disqualifiziert, werkstatt_id',
     )
     .eq('id', leadId)
     .maybeSingle()
@@ -222,9 +230,20 @@ export async function ladeMatchingFlow(
   if (state.kind === 'ort_abfragen') {
     // Task 3 ersetzt die telefonisch-Botschaft durch eine Adress-Abfrage im Flow;
     // ortFehlt macht den Zustand für den Consumer typsicher unterscheidbar.
+    // Item 1: unfallort als VORSCHLAG mitgeben (NICHT silent als Besichtigungsort gesetzt
+    // — der Unfallort ist i.d.R. nicht der Auto-Standort). Der Kunde bestaetigt 1-Klick
+    // oder waehlt anders. Schaden-melden-Leads geocoden unfallort -> hier liegen Coords vor.
+    const uLat = lead.unfallort_lat as number | null
+    const uLng = lead.unfallort_lng as number | null
+    const uAdr = (lead.unfallort as string | null)?.trim() || null
+    const vorschlagOrt =
+      uLat != null && uLng != null && uAdr
+        ? { adresse: uAdr, lat: Number(uLat), lng: Number(uLng) }
+        : undefined
     return {
       ok: false,
       ortFehlt: true,
+      vorschlagOrt,
       error: 'Uns fehlt noch der Besichtigungsort — wir melden uns telefonisch für die Terminvereinbarung.',
     }
   }
