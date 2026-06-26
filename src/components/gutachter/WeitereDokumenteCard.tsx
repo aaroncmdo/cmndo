@@ -229,7 +229,7 @@ export default function WeitereDokumenteCard({
         />
       </label>
       {error && (
-        <p className="mt-2 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-2">
+        <p className="mt-2 text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg p-2">
           {error}
         </p>
       )}
