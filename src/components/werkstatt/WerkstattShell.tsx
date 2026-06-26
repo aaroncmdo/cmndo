@@ -6,6 +6,7 @@
 import {
   LayoutDashboardIcon,
   QrCodeIcon,
+  HandshakeIcon,
   ReceiptIcon,
   LogOutIcon,
   WrenchIcon,
@@ -32,10 +33,11 @@ const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt', label: 'Übersicht', icon: LayoutDashboardIcon, exact: true },
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
+  { href: '/werkstatt/vermittlungen', label: 'Meine Vermittlungen', icon: HandshakeIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 
-const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS.slice(0, 4)
+const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS
 
 export function WerkstattShell({ werkstatt, email, userId, children }: WerkstattShellProps) {
   const initials = werkstatt.name
