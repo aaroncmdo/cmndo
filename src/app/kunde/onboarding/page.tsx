@@ -13,6 +13,10 @@ import type { ClaimFull } from '@/lib/claims/types'
 // CMM-33: Zentrale PflichtdokumenteSection liest dieselben Slots wie
 // Detail-Page + Banner — gleicher Bucket, identisches Verhalten.
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
+// Pflichtdok-Kanonisierung: vorberechnen auf Server-Seite, als Prop weitergeben.
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
+import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 
 export const dynamic = 'force-dynamic'
 
@@ -184,6 +188,20 @@ export default async function OnboardingPage({
     }
   }
 
+  // Pflichtdok-Kanonisierung: dokAnforderungen server-seitig berechnen und als
+  // Prop weitergeben — der Client (OnboardingWizard) kann getAlleSlots nicht awaiten.
+  let dokAnforderungen: Awaited<ReturnType<typeof getOffeneDokumentAnforderungen>> = []
+  if (claim && fall?.id) {
+    try {
+      const katalogRows = await getAlleSlots(supabase)
+      const ctx = buildDokumentKontext({ claim })
+      dokAnforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, pflichtDocs)
+    } catch (err) {
+      // Non-fatal: Wizard rendert ohne Smart-Filter wenn Katalog nicht geladen werden kann.
+      console.error('[OnboardingPage] dokAnforderungen failed, falling back to empty:', err)
+    }
+  }
+
   try {
     return (
       <OnboardingWizard
@@ -194,6 +212,7 @@ export default async function OnboardingPage({
         pflichtDocs={pflichtDocs}
         pflichtSlots={pflichtSlots}
         freieSlots={freieSlots}
+        dokAnforderungen={dokAnforderungen}
       />
     )
   } catch (err) {

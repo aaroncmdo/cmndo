@@ -17,6 +17,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getOffeneDokumentAnforderungen, countOffenePflicht } from '@/lib/claims/data-requirements'
 import { getPflichtdokumenteStand } from '@/app/kunde/onboarding/actions'
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 
 async function loadOffenCount(): Promise<number | null> {
   try {
@@ -44,7 +46,9 @@ async function loadOffenCount(): Promise<number | null> {
     if (!claim) return null
 
     const pflichtDocs = await getPflichtdokumenteStand(fall.id)
-    const anforderungen = getOffeneDokumentAnforderungen(claim, pflichtDocs)
+    const katalogRows = await getAlleSlots(supabase)
+    const ctx = buildDokumentKontext({ claim })
+    const anforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, pflichtDocs)
     return countOffenePflicht(anforderungen)
   } catch (err) {
     console.error('[OffeneDatenBanner] crashed, hiding banner:', err)

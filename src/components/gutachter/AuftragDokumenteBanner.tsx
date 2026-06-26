@@ -15,6 +15,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getClaimForRole, resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 
 type DbRow = {
   id: string
@@ -107,7 +109,9 @@ export default async function AuftragDokumenteBanner({
         }
       })
 
-    const anforderungen = getOffeneDokumentAnforderungen(claim, pflichtDocs)
+    const katalogRows = await getAlleSlots(admin)
+    const ctx = buildDokumentKontext({ claim })
+    const anforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, pflichtDocs)
     offen = anforderungen
       .filter((a) => a.status !== 'erfuellt')
       .map((a) => ({

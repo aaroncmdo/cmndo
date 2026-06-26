@@ -12,6 +12,8 @@ import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
 import type { PflichtdokumentStand } from '@/app/kunde/onboarding/actions'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import { getStorageUrl } from '@/lib/storage/url'
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 
 type PflichtRow = {
   id: string
@@ -114,7 +116,9 @@ export async function getPflichtdokumenteForFall(
       })
 
     // Smart-Filter conditions: polizei_vor_ort, hat_personenschaden, etc.
-    const anforderungen = getOffeneDokumentAnforderungen(claim, kundeRelevante)
+    const katalogRows = await getAlleSlots(admin)
+    const ctx = buildDokumentKontext({ claim, lead: { id: (claim as Record<string, unknown>).lead_id } })
+    const anforderungen = getOffeneDokumentAnforderungen(katalogRows, ctx, kundeRelevante)
 
     // Files pro Slot zusammensammeln. Mapping über pflichtdokument_id
     // (CMM-21 FK) — Legacy-Files ohne FK werden über dokument_typ matched.
