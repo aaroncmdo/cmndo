@@ -17,6 +17,7 @@ import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
+import { campaignSourceChannel, DEFAULT_SOURCE_CHANNEL } from '@/lib/flow/campaign-source'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
@@ -58,6 +59,11 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     promotionCodeId = await resolvePromoCodeToId(data.promoCode)
   }
 
+  // QR-Kampagnen-Attribution (Strassen-Aktion etc.): ?src=<slug> -> source_channel.
+  // campaignSourceChannel sanitisiert + namespaced ('kampagne-<slug>'); ohne / krummen
+  // src faellt es auf 'mini_wizard' zurueck -> organischer Traffic bleibt identisch.
+  const sourceChannel = campaignSourceChannel(data.src)
+
   const admin = createAdminClient()
 
   // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
@@ -67,7 +73,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   const created = await createLead(
     admin,
     {
-      source_channel: 'mini_wizard',
+      source_channel: sourceChannel,
       status: isDisqualifiziert ? 'disqualifiziert' : 'neu',
       vorname: data.vorname,
       nachname: data.nachname,
@@ -109,7 +115,9 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   const fullName = [data.vorname, data.nachname].filter(Boolean).join(' ') || data.email
   await notifyNewLead({
     leadId: lead.id as string,
-    source: `Mini-Wizard /schaden-melden${isDisqualifiziert ? ' (disqualifiziert)' : ''}`,
+    source: `Mini-Wizard /schaden-melden${isDisqualifiziert ? ' (disqualifiziert)' : ''}${
+      sourceChannel !== DEFAULT_SOURCE_CHANNEL ? ` · ${sourceChannel}` : ''
+    }`,
     name: fullName,
     phone: data.telefon,
     email: data.email,

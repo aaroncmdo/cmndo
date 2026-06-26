@@ -7,6 +7,7 @@
 
 import { useEffect, useState, useTransition } from 'react'
 import { ShieldAlertIcon, XIcon, CheckIcon } from 'lucide-react'
+import { NoticeBox } from '@/components/shared/NoticeBox'
 import {
   listAdminsFuerEskalation,
   eskaliereFallAnAdmin,
@@ -89,10 +90,10 @@ export default function EskalationCard({ fallId, initialAdminId, initialAdminNam
       </p>
       {adminId && adminName ? (
         <div className="space-y-2">
-          <div className="rounded-ios-md bg-warning-soft border border-warning/30 px-2.5 py-2">
+          <NoticeBox tone="warning" className="rounded-ios-md px-2.5 py-2">
             <p className="text-[10px] uppercase tracking-wider text-warning-strong">An Admin eskaliert</p>
             <p className="text-xs font-semibold text-warning-strong">{adminName}</p>
-          </div>
+          </NoticeBox>
           <button
             type="button"
             onClick={handleZuruecknehmen}

@@ -3,7 +3,7 @@
 // Leak-safe: keine PII — nur betrag, status, dates, claim_nummer.
 
 import { redirect } from 'next/navigation'
-import { getWerkstattByUserId, getWerkstattProvisionen } from '@/lib/werkstatt/queries'
+import { getWerkstattByUserId, getWerkstattProvisionen, getWerkstattStaffelBoni } from '@/lib/werkstatt/queries'
 import { WerkstattAbrechnungen } from '@/components/werkstatt/WerkstattAbrechnungen'
 
 export const dynamic = 'force-dynamic'
@@ -12,7 +12,19 @@ export default async function WerkstattAbrechnungenPage() {
   const werkstatt = await getWerkstattByUserId()
   if (!werkstatt) redirect('/login')
 
-  const provisionen = await getWerkstattProvisionen(werkstatt.id)
+  const [provisionen, boni] = await Promise.all([
+    getWerkstattProvisionen(werkstatt.id),
+    getWerkstattStaffelBoni(werkstatt.id),
+  ])
+  const boniSumme = boni
+    .filter((b) => b.status === 'freigegeben' || b.status === 'ausgezahlt')
+    .reduce((s, b) => s + b.bonus_betrag_netto, 0)
 
-  return <WerkstattAbrechnungen provisionen={provisionen} werkstattName={werkstatt.name} />
+  return (
+    <WerkstattAbrechnungen
+      provisionen={provisionen}
+      werkstattName={werkstatt.name}
+      boniSumme={boniSumme}
+    />
+  )
 }

@@ -165,12 +165,18 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
   // CMM-49 claim-native: gatet auf claim_id (kanonischer Key). emit setzt claim_id immer mit
   // (resolveClaimId), die Invariante „jeder Fall hat einen Claim" haelt -> aequivalent zum alten
   // fall_id-Gate, aber robust gegen fall_id=NULL (genau der P0-Dunkel-Bug 02.-20.06.).
-  if (!event.claim_id) {
+  // Payload-Fallback: DB-Cron-Events (z.B. gutachten.pflicht_fotos_unvollstaendig) schreiben die
+  // claim_id NUR in den Payload, nicht in die Spalte -> sonst blieben sie dunkel.
+  const effectiveClaimId =
+    event.claim_id ??
+    (typeof payload.claim_id === 'string' ? payload.claim_id : null) ??
+    (typeof payload.claimId === 'string' ? payload.claimId : null)
+  if (!effectiveClaimId) {
     console.warn('[fan-out] event has no claim_id — skipping default fan-out', event.id)
     return []
   }
 
-  const p = await loadClaimParticipants(event.claim_id)
+  const p = await loadClaimParticipants(effectiveClaimId)
 
   if (p.kundeUserId && config.channels.kunde?.length) {
     addRecipient(map, p.kundeUserId, 'kunde', config.channels.kunde)

@@ -16408,6 +16408,60 @@ export type Database = {
           },
         ]
       }
+      werkstatt_staffel_bonus: {
+        Row: {
+          bonus_betrag_netto: number
+          erstellt_am: string
+          id: string
+          schwelle: number
+          status: string
+          stufe_id: string | null
+          werkstatt_id: string
+        }
+        Insert: {
+          bonus_betrag_netto: number
+          erstellt_am?: string
+          id?: string
+          schwelle: number
+          status?: string
+          stufe_id?: string | null
+          werkstatt_id: string
+        }
+        Update: {
+          bonus_betrag_netto?: number
+          erstellt_am?: string
+          id?: string
+          schwelle?: number
+          status?: string
+          stufe_id?: string | null
+          werkstatt_id?: string
+        }
+        Relationships: []
+      }
+      werkstatt_staffel_stufen: {
+        Row: {
+          bonus_betrag_netto: number
+          created_at: string
+          id: string
+          schwelle: number
+          werkstatt_id: string
+        }
+        Insert: {
+          bonus_betrag_netto: number
+          created_at?: string
+          id?: string
+          schwelle: number
+          werkstatt_id: string
+        }
+        Update: {
+          bonus_betrag_netto?: number
+          created_at?: string
+          id?: string
+          schwelle?: number
+          werkstatt_id?: string
+        }
+        Relationships: []
+      }
       whatsapp_inbound_messages: {
         Row: {
           body: string | null

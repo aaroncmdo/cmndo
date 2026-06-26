@@ -39,6 +39,7 @@ export type EventType =
   // 5.5 Gutachten
   | 'gutachten.fertig'
   | 'gutachten.nachbesserung'
+  | 'gutachten.pflicht_fotos_unvollstaendig'
   // 5.6 Kanzlei
   | 'kanzlei.uebergabe'
   | 'kanzlei.as_gesendet'
@@ -118,6 +119,8 @@ export interface EventPayloads {
   // 5.5
   'gutachten.fertig': { fallId: string; gutachtenId: string; pdfUrl: string }
   'gutachten.nachbesserung': { fallId: string; gutachtenId: string; fehlerListe: string[] }
+  // DB-Cron cron_pflicht_foto_validation emittiert snake_case-Payload (nicht via emitEvent/camelCase).
+  'gutachten.pflicht_fotos_unvollstaendig': { gutachten_id: string; claim_id: string }
   // 5.6
   'kanzlei.uebergabe': { fallId: string; kanzleiKontakt?: string }
   'kanzlei.as_gesendet': { fallId: string; vsName: string; fristTage: 14 }

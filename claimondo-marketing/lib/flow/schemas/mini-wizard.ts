@@ -30,6 +30,10 @@ export const miniWizardSchema = z.object({
   promoCode: z
     .union([z.literal(''), z.string().regex(/^MK-[A-Z0-9]{4}$/, 'Ungültiges Promo-Code-Format')])
     .optional(),
+  // QR-/Offline-Kampagnen-Tag (?src=<slug>). Optional und bewusst LOSE validiert
+  // (nur Laengen-Cap): ein krummer Tag darf NIE die Schadenmeldung blocken. Die
+  // kanonische Sanitisierung + Namespacing passiert in campaignSourceChannel().
+  src: z.string().max(80).optional(),
 })
 
 export type MiniWizardInput = z.infer<typeof miniWizardSchema>

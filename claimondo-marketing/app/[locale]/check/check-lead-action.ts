@@ -24,7 +24,7 @@ const LeadSchema = z.object({
   phone: z.string().regex(/[\+0-9\s\-\(\)]{8,}/, 'Ungültige Telefonnummer'),
   city: z.string().min(2).max(100).trim(),
   // Check-Antworten (optional — der Lead funktioniert auch ohne)
-  schuld: z.enum(['gegner', 'teils', 'unklar']).optional(),
+  schuld: z.enum(['gegner', 'teils', 'unklar', 'selbst']).optional(),
   unfall_her: z.enum(['unter_woche', 'bis_monat', 'ueber_monat']).optional(),
   gutachten: z.enum(['nein', 'versicherung', 'ja']).optional(),
 })
@@ -36,6 +36,7 @@ const SCHULD_LABEL: Record<string, string> = {
   gegner: 'Unfallgegner trägt Schuld',
   teils: 'Teilschuld',
   unklar: 'Schuldfrage unklar',
+  selbst: 'Eigenverschulden / Kasko-Fall',
 }
 const FRIST_LABEL: Record<string, string> = {
   unter_woche: 'Unfall < 1 Woche her',
