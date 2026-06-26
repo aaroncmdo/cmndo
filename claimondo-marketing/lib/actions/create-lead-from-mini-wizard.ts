@@ -18,6 +18,7 @@ import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
 import { isValidPromoCodeFormat } from '@/lib/flow/promo-attribution'
 import { resolvePromoCodeToId } from '@/lib/flow/resolve-promo'
 import { campaignSourceChannel, DEFAULT_SOURCE_CHANNEL } from '@/lib/flow/campaign-source'
+import { pickRoundRobinDispatcher } from '@/lib/leads/pick-dispatcher'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
@@ -69,6 +70,12 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   // GA4-Conversion-Attribution: client_id aus _ga-Cookie (nur bei Consent).
   const gaClientId = await getConsentedGaClientId()
 
+  // Verlaessliche Dispatch-Zuweisung: explizit einen round-robin dispatch-User setzen
+  // (nicht auf den KB-Auto-Trigger verlassen) -> der Lead hat immer einen Owner, den die
+  // Bestaetigungsseite zeigt. Der KB-Trigger ueberschreibt einen gesetzten Owner nicht
+  // (er legt nur seinen kb_beratung-Termin an). null = kein aktiver Dispatcher.
+  const dispatcherId = await pickRoundRobinDispatcher(admin)
+
   // Via zentrale createLead() (Writer-Konsistenz, leads-Audit 15.05.2026).
   const created = await createLead(
     admin,
@@ -90,6 +97,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       disqualifiziert_grund_key: isDisqualifiziert ? 'eigenverantwortung' : null,
       disqualifiziert_am: isDisqualifiziert ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
+      zugewiesen_an: dispatcherId,
     },
   )
 
@@ -273,7 +281,7 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   return {
     success: true,
     leadId: lead.id as string,
-    redirectTo: `/schaden-melden/link-versendet?email=${encodeURIComponent(data.email)}&kanal=${dispatched.kanal}`,
+    redirectTo: `/schaden-melden/link-versendet?lead=${lead.id as string}&email=${encodeURIComponent(data.email)}&kanal=${dispatched.kanal}`,
     kanal: dispatched.kanal === 'whatsapp' ? 'whatsapp' : 'email',
   }
 }
