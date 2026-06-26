@@ -91,15 +91,15 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
       id={id}
       className={`rounded-2xl border p-4 sm:p-5 space-y-3 ${
         hochgeladen
-          ? 'bg-emerald-50 border-emerald-200'
-          : 'bg-amber-50 border-amber-200'
+          ? 'bg-success-soft border-success/30'
+          : 'bg-warning-soft border-warning/30'
       }`}
     >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <FileSignatureIcon
             className={`w-4 h-4 ${
-              hochgeladen ? 'text-emerald-600' : 'text-amber-700'
+              hochgeladen ? 'text-success' : 'text-warning-strong'
             }`}
           />
           <p className="text-xs uppercase tracking-wider font-semibold">
@@ -107,7 +107,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
           </p>
         </div>
         {tage != null && !hochgeladen && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-amber-700">
+          <span className="inline-flex items-center gap-1 text-[11px] text-warning-strong">
             <ClockIcon className="w-3 h-3" />
             seit {tage} {tage === 1 ? 'Tag' : 'Tagen'}
           </span>
@@ -115,7 +115,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
       </div>
 
       {hochgeladen ? (
-        <div className="flex items-center gap-2 text-sm text-emerald-800">
+        <div className="flex items-center gap-2 text-sm text-success-strong">
           <CheckCircle2Icon className="w-4 h-4" />
           {fall.technische_stellungnahme_freigabe_am
             ? `Freigegeben am ${formatDatum(fall.technische_stellungnahme_freigabe_am)}`
@@ -131,7 +131,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
           </p>
 
           <label
-            className={`block w-full cursor-pointer rounded-ios-xl border-2 border-dashed border-amber-300 bg-white hover:border-amber-500 px-4 py-5 text-center transition-colors ${isPending ? 'pointer-events-none opacity-50' : ''}`}
+            className={`block w-full cursor-pointer rounded-ios-xl border-2 border-dashed border-warning/30 bg-white hover:border-warning/50 px-4 py-5 text-center transition-colors ${isPending ? 'pointer-events-none opacity-50' : ''}`}
           >
             {file ? (
               <div className="flex items-center justify-center gap-2">
@@ -145,7 +145,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
               </div>
             ) : (
               <>
-                <UploadCloudIcon className="w-6 h-6 text-amber-600 mx-auto mb-1" />
+                <UploadCloudIcon className="w-6 h-6 text-warning mx-auto mb-1" />
                 <p className="text-xs text-claimondo-ondo">PDF auswählen (max. 20 MB)</p>
               </>
             )}
@@ -164,7 +164,7 @@ export function StellungnahmeCard({ fall, id }: { fall: Fall; id?: string }) {
             rows={2}
             maxLength={500}
             placeholder="Anmerkungen (optional) — z. B. Erläuterung zu UPE-Aufschlägen"
-            className="w-full rounded-ios-lg border border-amber-200 bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+            className="w-full rounded-ios-lg border border-warning/30 bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-warning/40 resize-none"
           />
 
           <Button
