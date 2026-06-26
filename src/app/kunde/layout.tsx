@@ -395,27 +395,31 @@ export default async function KundeLayout({ children }: { children: React.ReactN
             Mobile-Drawer identisch (sidebarCards-Fragment). */}
         {sidebarCards}
 
-        {/* Profil-Klick + Support + Abmelden unten — Updates raus
-            (kommt zurueck wenn B2B). */}
+        {/* Profil-Link + Outbox + Updates unten. WICHTIG: OutboxBadge und
+            UpdatesNav sind interaktive Popover-Trigger und sitzen daher NEBEN
+            dem Profil-<Link> (nicht darin) — sonst bubblet ihr Klick zum <Link>
+            und navigiert nach /kunde/profil statt das Popover zu oeffnen. */}
         <div className="kunde-sidebar-rest mt-auto px-3 pb-4 space-y-1 border-t border-white/10 pt-3 transition-opacity duration-200">
-          <Link
-            href="/kunde/profil"
-            className="flex items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
-          >
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-              style={{ backgroundColor: accentBg }}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/kunde/profil"
+              className="flex flex-1 min-w-0 items-center gap-3 px-3 py-2 rounded-ios-lg hover:bg-white/5 transition-colors"
             >
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-white text-sm font-medium truncate">{displayName}</p>
-              <p className="text-[10px] text-claimondo-light-blue leading-tight">{tDrawer('profilAnsehen')}</p>
-            </div>
-            <OutboxBadge />
+              <div
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
+                style={{ backgroundColor: accentBg }}
+              >
+                {initials}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-white text-sm font-medium truncate">{displayName}</p>
+                <p className="text-[10px] text-claimondo-light-blue leading-tight">{tDrawer('profilAnsehen')}</p>
+              </div>
+            </Link>
             {/* Sidebar-Fuß sitzt unten-links → Popover nach oben-rechts. */}
+            <OutboxBadge />
             <UpdatesNav variant="dark" placement="up-right" />
-          </Link>
+          </div>
           <form action="/api/auth/logout" method="POST">
             <button
               type="submit"
