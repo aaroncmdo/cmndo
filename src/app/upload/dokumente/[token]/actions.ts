@@ -220,7 +220,9 @@ export async function uploadDokumentViaAnfrageToken(
   } else if (slotId === 'diagnosebericht') {
     await insertFallDokument(db, fallId, 'diagnosebericht', path, contentType, buf.length, slot.label)
   } else if (slotId === 'zeugenaussage') {
-    await insertFallDokument(db, fallId, 'zeugenaussage', path, contentType, buf.length, slot.label)
+    // Audit #3: Katalog-Slot heisst 'zeugenbericht' -> als solchen speichern (matcht
+    // getOffeneDokumentAnforderungen + Sichtbarkeits-Map), nicht den Request-Alias 'zeugenaussage'.
+    await insertFallDokument(db, fallId, 'zeugenbericht', path, contentType, buf.length, slot.label)
   } else {
     // sonstiges → fall_dokumente ohne Slot-Mapping (KB ordnet manuell zu)
     await insertFallDokument(db, fallId, 'kunde-nachreichung', path, contentType, buf.length, slot.label)
