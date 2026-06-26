@@ -1,24 +1,24 @@
 'use client'
 
-import { useMemo, useState, useTransition, type FormEvent } from 'react'
+import { useRef, useState, useTransition, type FormEvent } from 'react'
 import Link from 'next/link'
 import { CheckCircle2, ChevronLeft, Phone, ShieldCheck, RotateCcw, Sparkles } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitCheckLead } from './check-lead-action'
+import { trackEvent } from '@/lib/analytics/track-event'
+import { buildCheckResult, type Schuld, type Frist, type Gutachten } from '@/lib/check/result-model'
 
-// Interaktive Anspruchs-Prüfung: 3 Klick-Fragen -> personalisiertes
-// "das steht Ihnen zu" + dynamische Hinweise -> Lead-Formular (submitCheckLead).
-// Die generischen Formular-Strings kommen aus home.lead_form.* (Wiederverwendung,
-// 1 Lead-Pfad im Projekt); der Check-spezifische Text aus check.*.
-
-type Schuld = 'gegner' | 'teils' | 'unklar'
-type Frist = 'unter_woche' | 'bis_monat' | 'ueber_monat'
-type Gutachten = 'nein' | 'versicherung' | 'ja'
+// Interaktive Anspruchs-Prüfung: 3 Klick-Fragen -> antwort-adaptives Ergebnis
+// (result-model.ts, 4 Tiers) -> Lead-Formular (submitCheckLead). Funnel-Tracking
+// via trackEvent (check_start/step/complete + generate_lead).
+// Generische Formular-Strings aus home.lead_form.* (1 Lead-Pfad im Projekt);
+// Check-spezifischer Text aus check.*.
+// Design: docs/superpowers/specs/2026-06-26-check-anspruch-rebuild-design.md
 
 type Answers = { schuld?: Schuld; unfall_her?: Frist; gutachten?: Gutachten }
 
-const ENTITLEMENTS = ['gutachten', 'wertminderung', 'nutzungsausfall', 'anwalt', 'auslagen'] as const
+const RANGE_KEYS = ['range_auslagen', 'range_nutzungsausfall', 'range_wertminderung', 'range_kostenlos'] as const
 
 export function CheckFunnelClient() {
   const t = useTranslations('check')
@@ -29,79 +29,87 @@ export function CheckFunnelClient() {
   const [submittedName, setSubmittedName] = useState<string | null>(null)
   const [error, setError] = useState<{ message: string; field?: 'name' | 'phone' | 'city' } | null>(null)
   const [pending, startTransition] = useTransition()
+  const startedRef = useRef(false)
 
-  const QUESTIONS = useMemo(
-    () =>
-      [
-        {
-          key: 'schuld' as const,
-          label: t('q1_label'),
-          options: [
-            { value: 'gegner', label: t('q1_gegner') },
-            { value: 'teils', label: t('q1_teils') },
-            { value: 'unklar', label: t('q1_unklar') },
-          ],
-        },
-        {
-          key: 'unfall_her' as const,
-          label: t('q2_label'),
-          options: [
-            { value: 'unter_woche', label: t('q2_unter_woche') },
-            { value: 'bis_monat', label: t('q2_bis_monat') },
-            { value: 'ueber_monat', label: t('q2_ueber_monat') },
-          ],
-        },
-        {
-          key: 'gutachten' as const,
-          label: t('q3_label'),
-          options: [
-            { value: 'nein', label: t('q3_nein') },
-            { value: 'versicherung', label: t('q3_versicherung') },
-            { value: 'ja', label: t('q3_ja') },
-          ],
-        },
-      ] as const,
-    [t],
-  )
+  const QUESTIONS = [
+    {
+      key: 'schuld' as const,
+      label: t('q1_label'),
+      options: [
+        { value: 'gegner', label: t('q1_gegner') },
+        { value: 'teils', label: t('q1_teils') },
+        { value: 'unklar', label: t('q1_unklar') },
+        { value: 'selbst', label: t('q1_selbst') },
+      ],
+    },
+    {
+      key: 'unfall_her' as const,
+      label: t('q2_label'),
+      options: [
+        { value: 'unter_woche', label: t('q2_unter_woche') },
+        { value: 'bis_monat', label: t('q2_bis_monat') },
+        { value: 'ueber_monat', label: t('q2_ueber_monat') },
+      ],
+    },
+    {
+      key: 'gutachten' as const,
+      label: t('q3_label'),
+      options: [
+        { value: 'nein', label: t('q3_nein') },
+        { value: 'versicherung', label: t('q3_versicherung') },
+        { value: 'ja', label: t('q3_ja') },
+      ],
+    },
+  ]
 
   function choose(key: keyof Answers, value: string) {
-    setAnswers((a) => ({ ...a, [key]: value }))
-    setStep((s) => Math.min(s + 1, QUESTIONS.length))
-  }
+    const nextAnswers = { ...answers, [key]: value }
+    setAnswers(nextAnswers)
 
-  const insights = useMemo(() => {
-    const out: string[] = []
-    if (answers.gutachten === 'versicherung') out.push(t('insight_versicherung'))
-    if (answers.unfall_her === 'ueber_monat') out.push(t('insight_verjaehrung'))
-    if (answers.schuld === 'teils') out.push(t('insight_teilschuld'))
-    if (answers.schuld === 'unklar') out.push(t('insight_unklar'))
-    return out
-  }, [answers, t])
+    if (!startedRef.current) {
+      trackEvent('check_start')
+      startedRef.current = true
+    }
+    trackEvent('check_step', { question: key, value })
+
+    const nextStep = Math.min(step + 1, QUESTIONS.length)
+    setStep(nextStep)
+    if (nextStep >= QUESTIONS.length) {
+      trackEvent('check_complete', { tier: buildCheckResult(nextAnswers).tier })
+    }
+  }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = event.currentTarget
     const fd = new FormData(form)
-    // Check-Antworten + UTMs mitgeben.
     if (answers.schuld) fd.set('schuld', answers.schuld)
     if (answers.unfall_her) fd.set('unfall_her', answers.unfall_her)
     if (answers.gutachten) fd.set('gutachten', answers.gutachten)
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search)
-      for (const key of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']) {
-        const v = params.get(key)
-        if (v) fd.set(key, v)
+      for (const k of ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content']) {
+        const v = params.get(k)
+        if (v) fd.set(k, v)
       }
     }
     startTransition(async () => {
-      const result = await submitCheckLead(fd)
-      if (result.ok) {
+      const res = await submitCheckLead(fd)
+      if (res.ok) {
         const name = String(fd.get('name') ?? '').trim()
         setError(null)
         setSubmittedName(name.split(/\s+/)[0] || '')
+        // Conversion-Event (Task 2): Lead aus dem Anspruch-Check. Tier mitgeben
+        // fuer Funnel-Analyse. Feuert auch bei Consent=denied (Consent-Mode-Modeling).
+        trackEvent('generate_lead', {
+          currency: 'EUR',
+          value: 0,
+          source: 'check-anspruch',
+          tier: buildCheckResult(answers).tier,
+        })
         form.reset()
       } else {
-        setError({ message: result.error ?? tl('lead_form.error_fallback'), field: result.field })
+        setError({ message: res.error ?? tl('lead_form.error_fallback'), field: res.field })
       }
     })
   }
@@ -111,6 +119,7 @@ export function CheckFunnelClient() {
     setStep(0)
     setSubmittedName(null)
     setError(null)
+    startedRef.current = false
   }
 
   // --- Erfolg ---
@@ -140,6 +149,7 @@ export function CheckFunnelClient() {
   }
 
   const isResult = step >= QUESTIONS.length
+  const result = buildCheckResult(answers)
 
   return (
     <div className="rounded-ios-lg border border-claimondo-border bg-white p-6 shadow-claimondo-lg sm:p-8">
@@ -184,29 +194,44 @@ export function CheckFunnelClient() {
         </div>
       ) : (
         <div>
-          {/* Ergebnis */}
+          {/* Ergebnis — antwort-adaptiv (result-model) */}
           <div className="flex items-center gap-2">
             <Sparkles className="h-5 w-5 text-claimondo-ondo" aria-hidden />
-            <h2 className="text-xl font-bold text-claimondo-navy sm:text-2xl">{t('result_heading')}</h2>
+            <h2 className="text-xl font-bold text-claimondo-navy sm:text-2xl">{t(result.headingKey)}</h2>
           </div>
+          <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{t(result.subKey)}</p>
 
           <ul className="mt-5 space-y-3">
-            {ENTITLEMENTS.map((key) => (
-              <li key={key} className="flex items-start gap-3">
+            {result.positions.map((pos) => (
+              <li key={pos} className="flex items-start gap-3">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 flex-shrink-0 text-emerald-500" aria-hidden />
                 <span className="text-sm leading-relaxed text-claimondo-shield">
-                  <strong className="text-claimondo-navy">{t(`ent_${key}_t`)}</strong> — {t(`ent_${key}_d`)}
+                  <strong className="text-claimondo-navy">{t(`ent_${pos}_t`)}</strong> — {t(`ent_${pos}_d`)}
                 </span>
               </li>
             ))}
           </ul>
 
-          {insights.length > 0 ? (
+          {/* Illustrative €-Größenordnungen (nur bei echtem Gegner-Anspruch) */}
+          {result.showRanges ? (
+            <div className="mt-5 rounded-ios-md border border-claimondo-ondo/25 bg-claimondo-bg p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">{t('ranges_heading')}</p>
+              <ul className="mt-2.5 space-y-1.5">
+                {RANGE_KEYS.map((k) => (
+                  <li key={k} className="text-[13px] leading-relaxed text-claimondo-navy">{t(k)}</li>
+                ))}
+              </ul>
+              <p className="mt-2.5 text-[11px] text-claimondo-shield/70">{t('ranges_disclaimer')}</p>
+            </div>
+          ) : null}
+
+          {/* Dynamische Hinweise */}
+          {result.insightKeys.length > 0 ? (
             <div className="mt-5 space-y-2">
-              {insights.map((line) => (
-                <div key={line} className="flex items-start gap-2.5 rounded-ios-md border border-claimondo-ondo/25 bg-claimondo-bg p-3.5">
+              {result.insightKeys.map((k) => (
+                <div key={k} className="flex items-start gap-2.5 rounded-ios-md border border-claimondo-ondo/25 bg-claimondo-bg p-3.5">
                   <ShieldCheck className="mt-0.5 h-4 w-4 flex-shrink-0 text-claimondo-ondo" aria-hidden />
-                  <p className="text-[13px] font-medium leading-relaxed text-claimondo-navy">{line}</p>
+                  <p className="text-[13px] font-medium leading-relaxed text-claimondo-navy">{t(k)}</p>
                 </div>
               ))}
             </div>
