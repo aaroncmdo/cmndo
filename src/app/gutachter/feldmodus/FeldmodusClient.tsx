@@ -473,12 +473,12 @@ export default function FeldmodusClient({
       {/* GPS-Banner ist Information (Auto-Ankunft deaktiviert), kein
           Critical-Error → Amber statt Red, kompakter (max-w-sm Desktop). */}
       {permissionState === 'denied' && (
-        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-ios-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-ios-xl bg-warning/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Zugriff verweigert — Auto-Ankunft und Live-Tracking deaktiviert.
         </div>
       )}
       {error && permissionState !== 'denied' && !staleSinceMs && (
-        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-ios-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-ios-xl bg-warning/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS-Warnung: {error}
         </div>
       )}
@@ -489,7 +489,7 @@ export default function FeldmodusClient({
           Tiefgarage). Pre-existing GPS-Warnung wird in dem Fall
           unterdrückt — Stale ist die spezifischere Info. */}
       {staleSinceMs != null && permissionState !== 'denied' && (
-        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-ios-xl bg-amber-500/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
+        <div className="absolute top-4 right-4 left-4 md:left-auto md:max-w-sm rounded-ios-xl bg-warning/85 backdrop-blur-md border border-white/30 text-white text-xs px-3 py-2 z-20 shadow-ios-md">
           GPS unsicher — letzte Position vor{' '}
           {staleSinceMs < 60_000
             ? `${Math.round(staleSinceMs / 1000)} s`

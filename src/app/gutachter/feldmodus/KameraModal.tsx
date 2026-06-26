@@ -250,7 +250,7 @@ export default function KameraModal({
               type="button"
               onClick={handleConfirm}
               disabled={isPending}
-              className="flex items-center justify-center gap-2 py-3 rounded-ios-xl bg-green-600 hover:bg-green-700 text-white text-sm font-semibold disabled:opacity-50"
+              className="flex items-center justify-center gap-2 py-3 rounded-ios-xl bg-success hover:bg-success/90 text-white text-sm font-semibold disabled:opacity-50"
             >
               {isPending ? (
                 <Loader2Icon className="w-4 h-4 animate-spin" />

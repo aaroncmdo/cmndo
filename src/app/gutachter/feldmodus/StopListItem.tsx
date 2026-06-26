@@ -26,7 +26,7 @@ export default function StopListItem({ stop, variant }: StopListItemProps) {
     >
       <div className="flex flex-col items-center pt-0.5">
         {erledigt ? (
-          <CheckCircle2Icon className="w-4 h-4 text-emerald-400" />
+          <CheckCircle2Icon className="w-4 h-4 text-success" />
         ) : (
           <CircleIcon className="w-4 h-4 text-claimondo-ondo/70" />
         )}
