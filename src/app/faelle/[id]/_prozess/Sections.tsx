@@ -230,7 +230,7 @@ export function VsReaktionSection() {
 
   return (
     <ProzessSectionCard
-      icon={<ShieldAlertIcon className="w-4 h-4 text-amber-600" />}
+      icon={<ShieldAlertIcon className="w-4 h-4 text-warning" />}
       title="VS-Reaktion"
       subtitle="Reguliert / Kürzt / Quotiert / Ablehnt / Schweigt"
     >
@@ -266,7 +266,7 @@ export function VsReaktionSection() {
             type="textarea"
           />
           {quoteAkzeptiertAm ? (
-            <div className="text-[11px] text-emerald-800 bg-emerald-50 border border-emerald-200 rounded p-2">
+            <div className="text-[11px] text-success-strong bg-success-soft border border-success/30 rounded p-2">
               ✓ Quote akzeptiert am {quoteAkzeptiertAm}
             </div>
           ) : (
@@ -275,7 +275,7 @@ export function VsReaktionSection() {
                 type="button"
                 disabled={pending}
                 onClick={triggerQuoteAkzeptieren}
-                className="px-3 py-1.5 rounded-ios-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-ios-md bg-success text-white text-xs font-medium hover:bg-success/90 disabled:opacity-50"
               >
                 Quote akzeptieren
               </button>
@@ -289,8 +289,8 @@ export function VsReaktionSection() {
 
       {/* Kürzungs-Pfad mit Pflicht-Banner für vs_kuerzungs_typ */}
       {isKuerzt && (
-        <div className="rounded-ios-md border border-amber-200 bg-amber-50 p-3 space-y-2">
-          <h4 className="text-xs font-semibold text-amber-900">VS kürzt</h4>
+        <div className="rounded-ios-md border border-warning/30 bg-warning-soft p-3 space-y-2">
+          <h4 className="text-xs font-semibold text-warning-strong">VS kürzt</h4>
           <InlineEditField
             label="Kürzungs-Grund"
             fieldName="vs_kuerzung_grund"
@@ -304,10 +304,10 @@ export function VsReaktionSection() {
               Typ: {KUERZUNGSTYP_LABEL[kuerzungstyp].label}
             </span>
           ) : (
-            <div className="rounded-ios-md border border-red-300 bg-red-50 p-2 flex items-start gap-2">
-              <AlertTriangleIcon className="w-4 h-4 text-red-600 shrink-0 mt-0.5" />
+            <div className="rounded-ios-md border border-danger/30 bg-danger-soft p-2 flex items-start gap-2">
+              <AlertTriangleIcon className="w-4 h-4 text-danger shrink-0 mt-0.5" />
               <div className="flex-1 space-y-1">
-                <p className="text-[11px] font-semibold text-red-800">
+                <p className="text-[11px] font-semibold text-danger-strong">
                   Kürzungstyp fehlt — bitte ergänzen, damit Stellungnahme-Logik greifen kann.
                 </p>
                 <InlineEditField
@@ -340,7 +340,7 @@ export function VsReaktionSection() {
                     'Rüge 1 ohne Stellungnahme: Paket im Phase-Header unter „Kanzlei-Paket einlesen" → Rüge 1.',
                   )
                 }
-                className="px-3 py-1.5 rounded-ios-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-ios-md bg-warning text-white text-xs font-medium hover:bg-warning/90 disabled:opacity-50"
               >
                 Rüge 1 vorbereiten (ohne Stellungnahme)
               </button>
@@ -401,7 +401,7 @@ export function StellungnahmeSection() {
             type="button"
             disabled={pending}
             onClick={() => trigger(() => freigebeTechnischeStellungnahme(fall.id), 'Freigabe')}
-            className="px-3 py-1.5 rounded-ios-md bg-emerald-600 text-white text-xs font-medium hover:bg-emerald-700 disabled:opacity-50"
+            className="px-3 py-1.5 rounded-ios-md bg-success text-white text-xs font-medium hover:bg-success/90 disabled:opacity-50"
           >
             Freigeben (Kanzlei kann Rüge vorbereiten)
           </button>
@@ -432,7 +432,7 @@ export function RuegeSection() {
   }
   return (
     <ProzessSectionCard
-      icon={<AlertCircleIcon className="w-4 h-4 text-orange-600" />}
+      icon={<AlertCircleIcon className="w-4 h-4 text-warning" />}
       title="Rüge-Prozess"
       subtitle="Max 2 Runden, danach Klage-Entscheidung (rein juristisch oder mit SV-Stellungnahme)"
     >
@@ -446,12 +446,12 @@ export function RuegeSection() {
           type="button"
           disabled={pending}
           onClick={starteRuege}
-          className="px-3 py-1.5 rounded-ios-md bg-orange-600 text-white text-xs font-medium hover:bg-orange-700 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-ios-md bg-warning text-white text-xs font-medium hover:bg-warning/90 disabled:opacity-50"
         >
           {counter === 0 ? 'Rüge 1 starten' : 'Rüge 2 starten'}
         </button>
       ) : (
-        <div className="rounded-ios-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
+        <div className="rounded-ios-md bg-danger-soft border border-danger/30 p-3 text-[11px] text-danger-strong">
           Max. Rüge-Runden erreicht — Klage-Entscheidung erforderlich.
         </div>
       )}
@@ -615,7 +615,7 @@ export function KlageSection() {
   }
   return (
     <ProzessSectionCard
-      icon={<GavelIcon className="w-4 h-4 text-red-600" />}
+      icon={<GavelIcon className="w-4 h-4 text-danger" />}
       title="Klage-Übergabe an LexDrive"
       subtitle='Fall für Claimondo = „abgeschlossen mit Klage" — Kanzlei übernimmt individuell'
     >
@@ -628,12 +628,12 @@ export function KlageSection() {
           type="button"
           disabled={pending}
           onClick={uebergeben}
-          className="px-3 py-1.5 rounded-ios-md bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50"
+          className="px-3 py-1.5 rounded-ios-md bg-danger text-white text-xs font-medium hover:bg-danger/90 disabled:opacity-50"
         >
           Fall an LexDrive übergeben
         </button>
       )}
-      <div className="rounded-ios-md bg-red-50 border border-red-200 p-3 text-[11px] text-red-700">
+      <div className="rounded-ios-md bg-danger-soft border border-danger/30 p-3 text-[11px] text-danger-strong">
         Übergabe-Screen: Termin mit LexDrive-Rechtsberater koordinieren. Kein fixer
         Schwellenwert — die Kanzlei entscheidet individuell ob Klage sinnvoll ist.
       </div>
@@ -656,7 +656,7 @@ export function AuszahlungSection() {
 
   return (
     <ProzessSectionCard
-      icon={<BanknoteIcon className="w-4 h-4 text-green-600" />}
+      icon={<BanknoteIcon className="w-4 h-4 text-success" />}
       title="Auszahlung"
       subtitle="Brutto von VS → Split an Kunde + SV-Honorar. Info-WA an Kunde bei Eingang."
     >

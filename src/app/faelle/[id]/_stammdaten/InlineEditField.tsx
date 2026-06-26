@@ -60,9 +60,9 @@ export default function InlineEditField({
     : status === 'saving'
       ? 'border-claimondo-ondo'
       : status === 'saved'
-        ? 'border-green-300'
+        ? 'border-success/40'
         : status === 'error'
-          ? 'border-red-300'
+          ? 'border-danger/40'
           : 'border-claimondo-border hover:border-claimondo-border focus:border-claimondo-ondo'
 
   const common = {
@@ -80,8 +80,8 @@ export default function InlineEditField({
       <label className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider flex items-center gap-1">
         {label}
         {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
-        {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
-        {status === 'error' && <span className="text-red-500">Fehler</span>}
+        {status === 'saved' && <CheckIcon className="w-3 h-3 text-success" />}
+        {status === 'error' && <span className="text-danger">Fehler</span>}
         {!editable && <span className="text-[9px] text-claimondo-ondo/50 ml-auto">read-only</span>}
       </label>
       {type === 'textarea' ? (

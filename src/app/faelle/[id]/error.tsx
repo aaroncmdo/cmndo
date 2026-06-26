@@ -26,7 +26,7 @@ export default function FallakteError({ error, reset }: { error: Error & { diges
   return (
     <div className="h-full flex items-center justify-center p-8">
       <div className="text-center max-w-3xl w-full">
-        <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 rounded-full bg-danger-soft flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl">!</span>
         </div>
         <h1 className="text-lg font-semibold text-claimondo-navy mb-2">Fehler beim Laden des Falls</h1>
