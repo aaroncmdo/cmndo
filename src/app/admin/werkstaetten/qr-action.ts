@@ -17,7 +17,7 @@ export async function werkstattQrSvg(
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
 
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-  if (profile?.rolle !== 'admin') return { ok: false, error: 'Nur Admins duerfen QR-Codes abrufen.' }
+  if (profile?.rolle !== 'admin') return { ok: false, error: 'Nur Admins dürfen QR-Codes abrufen.' }
 
   const { data: w } = await supabase.from('werkstaetten').select('name').eq('id', werkstattId).single()
   if (!w) return { ok: false, error: 'Werkstatt nicht gefunden.' }
