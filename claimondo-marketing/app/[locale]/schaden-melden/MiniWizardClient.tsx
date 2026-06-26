@@ -12,7 +12,6 @@ import { Checkbox } from '@/components/ui/checkbox'
 import { Button } from '@/components/primitives'
 import { miniWizardSchema, type MiniWizardInput } from '@/lib/flow/schemas/mini-wizard'
 import { createLeadFromMiniWizard } from '@/lib/actions/create-lead-from-mini-wizard'
-import { trackEvent } from '@/lib/analytics/track-event'
 
 // AAR-902 Prototyp: 4-Felder-Mini-Wizard. Eine Seite, kein Step-by-Step.
 // Konzept: docs/14.05.2026/mini-wizard-magic-link-konzept.md Section "Phase 1".
@@ -89,10 +88,9 @@ export function MiniWizardClient({ initialPromo = null }: MiniWizardClientProps 
         toast.error(result.error)
         return
       }
-      // Conversion-Event (Task 2): /schaden-melden-Lead. Feuert auch bei
-      // Consent=denied (Consent-Mode-Modeling). Vor dem Redirect, damit gtag
-      // noch im aktuellen Dokument laeuft. docs/conversion-tracking-attribution-runbook.md (A1).
-      trackEvent('generate_lead', { currency: 'EUR', value: 0, source: 'mini-wizard-schaden-melden' })
+      // generate_lead wird SERVER-seitig in createLeadFromMiniWizard gefeuert
+      // (trackServerConversion, consent-aware + nur qualifizierte Leads) — daher
+      // hier KEIN Client-Event (sonst Doppelzählung + zählt Disqualifizierte mit).
       router.push(result.redirectTo)
     })
   })
