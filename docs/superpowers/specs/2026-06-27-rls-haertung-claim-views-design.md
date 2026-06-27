@@ -96,8 +96,10 @@ Vier SQL-STABLE-SECURITY-DEFINER-Funktionen, jeweils `returns boolean` aus der R
 - `rolle_sieht_regulierung()` → admin/kb/dispatch/kunde/kanzlei
 - `rolle_sieht_gutachtenwerte()` → admin/kb/dispatch/kunde/sv/kanzlei
 
-### 3. View-Anpassung (6 Consumer-Views via CREATE OR REPLACE)
+### 3. View-Anpassung (7 Consumer-Views via CREATE OR REPLACE)
 Pro View: (a) `WHERE claim_sichtbar_fuer_aktuellen_user(<claim_id_spalte>)` anhängen, (b) sensible Spalten via `CASE WHEN rolle_sieht_X() THEN spalte ELSE null END` — **nur wo die View die Spalte führt** (faelle_sv_view/faelle_kunde_view sind teils schon projiziert; Pro-View-Inventar im Plan). `v_claim_base` bleibt roh (revoked, nicht direkt lesbar). Output-Shapes (Spaltennamen/-typen/-reihenfolge) bleiben identisch → 0 Consumer-Rewrites.
+
+**+ `v_claim_parties_safe` (7. View, 27.06. Nachprüfung gefunden):** SECURITY DEFINER (`reloptions=null`) + anon-granted + **kein WHERE** (nur Spalten-Masking via `auth.uid()`-CASE auf nachname/VSNR) → **LIVE-Leak verifiziert: `set role anon` → 91 Party-Rows / 88 Claims** (vorname + claim↔user_id-Mapping exponiert; nachname/firma/VSNR maskiert). Fix = **gleicher Row-Gate** `WHERE claim_sichtbar_fuer_aktuellen_user(claim_id)` (View ist claim_id-keyed). **NICHT** `security_invoker=true` flippen — sie joint `personen` (0 RLS) → würde vorname/nachname für alle nullen (gleiches personen-Problem). Definer behalten + Gate; Spalten-Masking bleibt Bonus.
 
 ### 4. Sekundäre Edits
 - **anon-Leads:** RPC `public.get_lead_for_flow(p_token text) returns leads` (SECURITY DEFINER, gibt nur die Zeile zum Token zurück), `GRANT EXECUTE TO anon`. Breite Policy `Flow anon select leads` entfernen / auf token-gebunden umstellen. `/flow/[token]`-Lead-Read auf die RPC umstellen. *(Flow-Domäne → Koordination.)*
@@ -130,6 +132,16 @@ Pro View: (a) `WHERE claim_sichtbar_fuer_aktuellen_user(<claim_id_spalte>)` anh�
 - `gutachter_termine.assignee_id`-Semantik für KB (profile-id vs. kb-spezifische id) + ob `kb_id`-Spalte existiert.
 - `fall_dokumente` Policy-Split: existierende INSERT/UPDATE-Pfade der SV nicht brechen.
 - Welche der 6 Views haben `security_invoker=false` vs. explizit gesetzt (v_claim_listing hatte `{security_invoker=false}`) — CREATE OR REPLACE erhält reloptions, ggf. explizit mitsetzen.
+
+## Erweiterte anon-Surface-Nachprüfung (27.06., auf Aaron-Nachfrage „auftrag + kanzlei fall")
+
+Vollständiger Sweep aller public-Tabellen/Views mit anon-SELECT-Grant:
+- **`auftraege`:** RLS sound (Policies admin/dispatch/kb/kanzlei via `auth.uid()`); anon-Grant **latent** (kein anon-Policy → RLS denied; fail-closed auch weil anon kein EXECUTE auf `is_claim_user_party`). **Kein Leck.**
+- **Kanzlei-Fall:** kanzlei liest `kanzlei_faelle` + `forderungspositionen` (flach via `is_kanzlei()`, konsistent mit kanzlei=flach). `abrechnungen` (Policy admin/makler/sv, **nicht** kanzlei) + `kanzlei_pakete` (admin/kb/kunde, **nicht** kanzlei) = **Under-Exposure** (Funktionalität, gehört zum Kanzlei-Fall-Workstream [[audit-kanzlei-fall-komplett]] mit tieferen Issues LexDrive/push-mandat). **Kein Leck** — separates Ticket.
+- **4 anon-Views safe:** `v_claim_for_gast`/`v_embed_billing_faellig`/`v_offene_anfragen`/`v_sv_inbox` = alle `security_invoker=true` → laufen als Aufrufer, RLS greift, anon=0 (verifiziert).
+- **`v_claim_parties_safe` = der eine echte Fund** → in Scope (Architektur §3, 7. View).
+- **`gfa_anon_select_recent_window`** (gutachter_finder_anfragen): anon-SELECT auf `source IS NULL AND erstellt_am > now()-5min` → narrow 5-Min-Fenster (PII kürzlicher GFA-Anfragen) — wohl gewollt fürs Embed/Native-GFA-Flow, aber nicht own-/token-scoped. **Flag (Review-Item, eigenes Ticket):** token-scopen analog anon-Leads; braucht Embed-Flow-Verständnis → NICHT in dieser Hardening.
+- **~90 Tabellen** mit anon-Grant + **0 anon-Policy** (Supabase-Default `GRANT SELECT ON ALL TABLES` + RLS-on) = fail-closed, **safe** → **NICHT** mass-revoked (Churn/Risiko ohne Sicherheitsgewinn; RLS ist der echte Gate).
 
 ## Scope-Grenze & Koordination
 
