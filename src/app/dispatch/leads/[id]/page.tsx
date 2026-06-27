@@ -14,6 +14,9 @@ import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 import { computeQualificationStatus } from './_lib/qualification-engine'
 import { ladeLeadTerminGutachter } from '@/lib/dispatch/lade-lead-termin-gutachter'
 import LeadTerminGutachterBanner from './_components/LeadTerminGutachterBanner'
+import { getAlleSlots } from '@/lib/dokumente/katalog'
+import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
+import { evaluateKatalogRule } from '@/lib/dokumente/ruleEvaluator'
 
 export default async function DispatchLeadDetail({
   params,
@@ -93,6 +96,15 @@ export default async function DispatchLeadDetail({
   // Config-getriebene Felder (lead-erfassung, vom Loader nach audience gefiltert).
   const phasen = await ladeFlowPhasen('lead-erfassung', 'dispatcher')
 
+  // Pflichtdok-Kanonisierung (Task 7): freigeschaltete Slot-IDs aus dokument_katalog
+  // berechnen, damit DokumenteAnfordernCard keine berechneErwartung-Fallback mehr braucht.
+  // Nutzt denselben EvalContext wie alle anderen Katalog-Consumer.
+  const katalogRows = await getAlleSlots(supabase)
+  const dokCtx = buildDokumentKontext({ lead: lead as Record<string, unknown> })
+  const freigeschalteteSlotIds = katalogRows
+    .filter((slot) => evaluateKatalogRule(slot.freigeschaltet_wenn, dokCtx))
+    .map((slot) => slot.slot_id)
+
   // Juengste FlowLinks fuers Versand- (P2g) + Status-Panel (P2h).
   // flow_links hat erstellt_am (nicht created_at) -> Alias auf created_at.
   // RLS: flow_links ist default-deny fuer authenticated — die Dispatch-Layer-Auth
@@ -161,6 +173,7 @@ export default async function DispatchLeadDetail({
             : null
         }
         fallId={fallId}
+        freigeschalteteSlotIds={freigeschalteteSlotIds}
       />
     </>
   )

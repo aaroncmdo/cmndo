@@ -24,7 +24,7 @@ import {
   type VorschadenAbrechnungsStatus,
 } from './actions'
 import type { ClaimFull } from '@/lib/claims/types'
-import { getOffeneDokumentAnforderungen } from '@/lib/claims/data-requirements'
+import type { DokumentAnforderung } from '@/lib/claims/data-requirements'
 // CMM-33: Zentrale PflichtdokumenteSection — gleicher Bucket / Component
 // wie Detail-Page + Banner. Ersetzt die alte Per-Slot-Upload-UI im
 // Wizard-Step.
@@ -170,6 +170,7 @@ const STATUS_PHASES = [
 
 export default function OnboardingWizard({
   vorname, fall, claim, termin, pflichtDocs, pflichtSlots = [], freieSlots,
+  dokAnforderungen: dokAnforderungenProp = [],
 }: {
   vorname: string
   fall: Fall | null
@@ -180,6 +181,9 @@ export default function OnboardingWizard({
    *  PflichtdokumenteSection genutzt. */
   pflichtSlots?: PflichtSlotForView[]
   freieSlots: FreierSlot[]
+  /** Pflichtdok-Kanonisierung: vorberechnete Anforderungen vom Server-Parent (page.tsx).
+   *  Ersetzt den alten Client-seitigen getOffeneDokumentAnforderungen-Aufruf. */
+  dokAnforderungen?: DokumentAnforderung[]
 }) {
   const router = useRouter()
   // AAR-125: Deep-Link aus Banner ("Polizeibericht hochladen") springt direkt in Step 3
@@ -240,14 +244,11 @@ export default function OnboardingWizard({
   // AAR-903: currentStep referenziert visibleSteps (gefiltert), nicht STEPS.
   const currentStep = visibleSteps[stepIndex] ?? visibleSteps[0]
 
-  // CMM-21: Smart-Filter — Pflichtdokumente nur zeigen wenn die Bedingung
-  // im Claim erfüllt ist (Polizeibericht nur wenn polizei_vor_ort=true,
-  // Attest nur bei Personenschaden, etc.). Die Anforderungs-Liste mappt
-  // 1:1 auf bestehende pflichtDocs — Slots die nicht relevant sind werden
-  // nicht angezeigt.
-  const dokAnforderungen = claim
-    ? getOffeneDokumentAnforderungen(claim, pflichtDocs)
-    : []
+  // CMM-21 / Pflichtdok-Kanonisierung: Anforderungen kommen jetzt vorberechnet
+  // vom Server-Parent (page.tsx via getAlleSlots + buildDokumentKontext) als
+  // dokAnforderungenProp. Client-seitiger Aufruf von getOffeneDokumentAnforderungen
+  // entfaellt (Client kann getAlleSlots nicht awaiten).
+  const dokAnforderungen = dokAnforderungenProp
   const relevanteSlotIds = new Set(dokAnforderungen.map((a) => a.slot_id))
   const relevantePflichtDocs = claim
     ? pflichtDocs.filter((d) => relevanteSlotIds.has(d.slot_id))
