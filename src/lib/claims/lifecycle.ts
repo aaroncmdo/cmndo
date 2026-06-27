@@ -192,8 +192,43 @@ export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
   return 'abschluss'
 }
 
-export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
-  const { lead, auftraege, kanzleiFall, claimStatus, operativeStatus = null } = input
+// Unified Stepper — globale Sub-Phasen-Progress-Ordnung (monoton ueber die Hauptphasen:
+// erfassung < begutachtung < regulierung < abschluss). "Furthest signal wins": die Phase mit
+// dem hoechsten SUB_ORDER gewinnt. So liftet operative_status einen haengenden Milestone
+// (sv-termin ohne Auftrag -> begutachtung) UND ein bereits gesetzter Milestone (kanzlei_fall)
+// wird NIE von einem zurueckgebliebenen operative_status unter seinen Stand gedrueckt.
+// Terminal-Subs = 15 (hoechste), claims.status-getrieben via Milestone-Kaskade.
+const SUB_ORDER: Record<ClaimSubPhase, number> = {
+  sa_offen: 0,
+  vollmacht_offen: 1,
+  onboarding_offen: 2,
+  termin: 3,
+  besichtigung: 4,
+  gutachten: 5,
+  filmcheck: 6,
+  'qc-pruefung': 7,
+  kanzlei_uebergabe: 8,
+  anschlussschreiben: 9,
+  versicherungskontakt: 10,
+  'vs-kuerzt': 11,
+  'nachbesichtigung-laeuft': 12,
+  nachforderung: 13,
+  auszahlung: 14,
+  erfolgreich_reguliert: 15,
+  storniert: 15,
+  klage_rechtsstreit: 15,
+  verjaehrt: 15,
+  abgelehnt_final: 15,
+  an_externe_kanzlei: 15,
+  termin_durchgefuehrt: 15,
+}
+
+// Milestone-Kaskade (CMM-44 MP-3/MP-8 / CMM-74 b2): Phase aus den Sub-Entity-Feldern
+// (claims.status terminal > Nachbesichtigung > vs-kuerzt > Anschlussschreiben > lexdrive >
+// Status-Regulierung > Kanzlei-Uebergabe-Interim > Erstgutachten > Lead). Bleibt als EIN
+// Kandidat von getClaimLifecycle erhalten — bit-gleich zur SQL-View (Parity-Gate).
+function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
+  const { lead, auftraege, kanzleiFall, claimStatus } = input
 
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
   const sideQuests = auftraege.filter(
@@ -208,37 +243,6 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     return { mainPhase: 'abschluss', subPhase: terminal, aktiveSideQuests: [], aktiverAuftrag: null }
   }
 
-  // ── Unified Stepper (operative_status als kanonische Quelle) ──────────────
-  // Regel 2: claims.status regulierung-signal hebt auf Regulierung, falls operative_status
-  // befuellt aber noch < Regulierung ist (Robustheit). Bei operativeStatus=NULL greift die
-  // bestehende Milestone-Kaskade unten an ihrer Original-Prioritaet (lexdrive > status).
-  const regSignal = claimStatus ? REGULIERUNG_STATUS_SUBSTATE[claimStatus] : undefined
-  const opPhase = operativeStatus ? OPERATIVE_PHASE[operativeStatus] : undefined
-  if (regSignal && opPhase && MAIN_PHASE_INDEX[opPhase.main] < MAIN_PHASE_INDEX.regulierung) {
-    return { mainPhase: 'regulierung', subPhase: regSignal, aktiveSideQuests: sideQuests, aktiverAuftrag: sideQuests[0] ?? null }
-  }
-  // Regel 3: operative_status treibt main+sub (Lead-Sub fuer Erfassung, claims.status-Ergebnis
-  // fuer Abschluss, Auftrag-Verfeinerung filmcheck/qc innerhalb Begutachtung).
-  if (opPhase) {
-    let resolved: ClaimSubPhase = opPhase.sub
-    if (opPhase.main === 'erfassung') {
-      resolved = leadSubphase(lead)
-    } else if (opPhase.main === 'abschluss' && operativeStatus !== 'storniert') {
-      const term2 = claimStatus ? ABSCHLUSS_SUBSTATE[claimStatus] : undefined
-      resolved = term2 ?? 'erfolgreich_reguliert'
-    } else if (opPhase.main === 'begutachtung' && opPhase.sub === 'gutachten' && erstgutachten) {
-      if (erstgutachten.filmcheck_ok === true) resolved = 'qc-pruefung'
-      else if (erstgutachten.gutachten_url) resolved = 'filmcheck'
-    }
-    return {
-      mainPhase: opPhase.main,
-      subPhase: resolved,
-      aktiveSideQuests: sideQuests,
-      aktiverAuftrag: opPhase.main === 'begutachtung' ? erstgutachten : (sideQuests[0] ?? null),
-    }
-  }
-
-  // ── Fallback (operative_status NULL/unbekannt): bestehende Milestone-Kaskade ──
   // ── CMM-74 b2 (v_claim_phase-Parity) ── operative Regulierungs-Sub-Phasen, die VOR
   // dem lexdrive-Eintritt greifen. Reihenfolge bitgleich zur View: nb.active > vs-kuerzt >
   // anschlussschreiben(pre-lexdrive). Vor diesen steht nur der terminal-Abschluss (oben).
@@ -337,6 +341,50 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     aktiveSideQuests: [],
     aktiverAuftrag: null,
   }
+}
+
+// Unified Stepper: operative_status -> Lifecycle-Kandidat. Erfassung-Sub aus Lead-Feldern,
+// Abschluss-Sub aus claims.status (sonst erfolgreich_reguliert), Begutachtung-'gutachten'
+// via Auftrag (filmcheck_ok/gutachten_url) verfeinert.
+function operativeLifecycle(
+  input: ClaimLifecycleInput,
+  opPhase: { main: ClaimMainPhase; sub: ClaimSubPhase },
+): ClaimLifecycle {
+  const { lead, auftraege, claimStatus, operativeStatus } = input
+  const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
+  const sideQuests = auftraege.filter(
+    (a) => (a.typ === 'nachbesichtigung' || a.typ === 'stellungnahme') && a.status !== 'abgeschlossen',
+  )
+  let resolved: ClaimSubPhase = opPhase.sub
+  if (opPhase.main === 'erfassung') {
+    resolved = leadSubphase(lead)
+  } else if (opPhase.main === 'abschluss' && operativeStatus !== 'storniert') {
+    resolved = (claimStatus ? ABSCHLUSS_SUBSTATE[claimStatus] : undefined) ?? 'erfolgreich_reguliert'
+  } else if (opPhase.main === 'begutachtung' && opPhase.sub === 'gutachten' && erstgutachten) {
+    if (erstgutachten.filmcheck_ok === true) resolved = 'qc-pruefung'
+    else if (erstgutachten.gutachten_url) resolved = 'filmcheck'
+  }
+  return {
+    mainPhase: opPhase.main,
+    subPhase: resolved,
+    aktiveSideQuests: sideQuests,
+    aktiverAuftrag: opPhase.main === 'begutachtung' ? erstgutachten : (sideQuests[0] ?? null),
+  }
+}
+
+// Unified Stepper (Aaron, "ein Stepper am Claim"): EINE kanonische Phase aus DB-Feldern je
+// nach Befuellung. Nimmt den WEITESTEN von zwei Kandidaten — operative_status (Engine-Cursor)
+// und Milestone-Kaskade (Sub-Entity-Felder) — gemessen am globalen SUB_ORDER. Behebt sowohl
+// haengende Milestones (operative liftet, ~56 "Erfassung-Haenger") als auch zurueckgebliebene
+// operative_status (Milestone liftet, z.B. kanzlei_fall ohne Cursor-Advance). Terminal
+// (claims.status) steckt in der Milestone-Kaskade (Sub-Order 15) + strikte > Regel -> terminal
+// gewinnt. Output-Taxonomie unveraendert -> Konsumenten + SQL-Spiegel v_claim_phase bit-gleich.
+export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
+  const milestone = milestoneLifecycle(input)
+  const opPhase = input.operativeStatus ? OPERATIVE_PHASE[input.operativeStatus] : undefined
+  if (!opPhase) return milestone
+  const operative = operativeLifecycle(input, opPhase)
+  return SUB_ORDER[operative.subPhase] > SUB_ORDER[milestone.subPhase] ? operative : milestone
 }
 
 export function getMainPhaseIndex(p: ClaimMainPhase): number {

@@ -406,9 +406,11 @@ describe('getClaimLifecycle — Fallback', () => {
   })
 })
 
-// Unified Stepper: operative_status ist die kanonische Phasen-Quelle (wenn befuellt).
-// Bei operativeStatus=NULL/undefined greift die bestehende Milestone-Kaskade (Backward-Compat).
-describe('getClaimLifecycle — operative_status als kanonische Quelle (Unified Stepper)', () => {
+// Unified Stepper (Aaron, "ein Stepper am Claim"): getClaimLifecycle nimmt den WEITESTEN von
+// zwei Kandidaten — operative_status (Engine-Cursor) und Milestone-Kaskade (Sub-Entity-Felder)
+// — gemessen am globalen SUB_ORDER. operativeStatus liftet haengende Milestones; ein bereits
+// gesetzter Milestone (kanzlei_fall) wird NIE von einem zurueckgebliebenen operative gedrueckt.
+describe('getClaimLifecycle — Unified Stepper (furthest-signal-wins)', () => {
   const lead = { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true }
   it('sv-termin -> begutachtung/termin (auch OHNE erstgutachten-Auftrag — behebt Erfassung-Haenger)', () => {
     const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin' })
@@ -459,6 +461,28 @@ describe('getClaimLifecycle — operative_status als kanonische Quelle (Unified 
     const r = getClaimLifecycle({ lead, auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })], kanzleiFall: null, operativeStatus: null })
     expect(r.mainPhase).toBe('begutachtung')
     expect(r.subPhase).toBe('termin')
+  })
+  it('Milestone gewinnt ueber zurueckgebliebenen operative_status: kanzlei_fall + operative=ersterfassung -> kanzlei_uebergabe (KEINE Regression)', () => {
+    // Live-Befund (27.06.): 7 Claims mit operative=ersterfassung haben einen kanzlei_fall
+    // (Cursor nie advanced). Furthest-wins haelt sie auf begutachtung/kanzlei_uebergabe statt
+    // sie auf erfassung zurueckzudruecken (was operative-primary getan haette).
+    const r = getClaimLifecycle({
+      lead: { sa_unterschrieben: true, vollmacht_signiert_am: null, onboarding_complete: null },
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }), // ohne lexdrive_case_id
+      operativeStatus: 'ersterfassung',
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('kanzlei_uebergabe')
+  })
+  it('Begutachtung-Milestone (Auftrag mit gutachten_url -> filmcheck) gewinnt ueber operative=sv-termin', () => {
+    // operative sagt termin(3); Auftrag-Milestone hat gutachten_url -> filmcheck(6). Furthest -> filmcheck.
+    const r = getClaimLifecycle({
+      lead, kanzleiFall: null, operativeStatus: 'sv-termin',
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten', gutachten_url: 'https://x' })],
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('filmcheck')
   })
 })
 
