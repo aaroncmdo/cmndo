@@ -15,6 +15,18 @@ Folge der Divergenz (live verifiziert 27.06.): Fälle mit `operative_status='sv-
 
 **Eine kanonische Quelle: `operative_status` treibt die Phase**, abgeleitet **deterministisch aus DB-Feldern je nach Befüllung** (robust gegen jeden Datenstand). `claims.status` wird auf seine echte Achse reduziert: **das terminale Ergebnis** (nur im Abschluss). **Die Output-Taxonomie (main_phase/sub_phase-Werte) bleibt unverändert** → die 40+ Konsumenten bleiben unangetastet; nur die *Ableitung* dreht.
 
+## ⭐ Refinement (27.06., nach Live-Shadow-Diff) — furthest-signal-wins statt operative-primary
+
+Der Shadow-Diff gegen alle 89 Live-Claims deckte einen Asymmetrie-Fall auf: **7 Claims mit `operative_status='ersterfassung'` haben einen `kanzlei_fall`** (Engine-Cursor nie advanced, Milestone aber gesetzt). Reines operative-primary (Kaskade unten) hätte sie von begutachtung → **erfassung zurückgedrückt** — falsche Richtung. Genauso sind 56 Claims `operative` *voraus* (sv-termin ohne Auftrag). Beide Signale sind „Feld-Befüllung"; das **weiter fortgeschrittene** gewinnt.
+
+**Modell:** `getClaimLifecycle = max(milestoneLifecycle, operativeLifecycle)` gemessen an einem **globalen `SUB_ORDER`** (monoton: erfassung < begutachtung < regulierung < abschluss; Terminal-Subs = 15). Eigenschaften:
+- `operative` liftet hängende Milestones (56 „Erfassung-Hänger" → begutachtung).
+- Milestone liftet zurückgebliebene `operative` (die 7 bleiben begutachtung/kanzlei_uebergabe — **0 Regression**).
+- **Terminal** (`claims.status`) steckt in der Milestone-Kaskade (Sub-Order 15) + strikte `>`-Tiebreak → terminal gewinnt immer.
+- **Reg-Signal** (`in_kommunikation_vs`/`abgelehnt`) ist Teil der Milestone-Kaskade → automatisch subsumiert (kein separates Regel-2 nötig).
+
+**Live verifiziert (89 Claims):** ändert EXAKT die 56 Hänger (sv-termin×55 + gutachten-eingegangen×1, `vollmacht_offen`→`termin`/`gutachten`), 0 Änderung auf den anderen 82+7. Die Mapping-Tabelle + Lead-Sub unten bleiben gültig (sie sind der `operativeLifecycle`-Kandidat); die Kaskade unten ist der `milestoneLifecycle`-Kandidat. Migration `20260627205747_v_claim_phase_unified_stepper_furthest_wins`.
+
 ## Die Ableitung — priorisierte Feld-Kaskade
 
 Deterministisch, top-down (erste passende Regel gewinnt):
