@@ -1777,7 +1777,7 @@
     "erfolg": {
       "heading": "Termin bestätigt!",
       "sub": "{sv_vorname} kommt zum gewählten Termin zu Ihnen.",
-      "magic_link_heading": "E-Mail mit Login-Link verschickt",
+      "magic_link_heading": "E-Mail mit sicherem Link verschickt",
       "magic_link_sub": "Klicken Sie den Link in der Mail an {email} — Sie landen direkt in Ihrem Portal mit dem angelegten Fall, dem Termin und allen Unterlagen.",
       "email_hint": "Sie erhalten in Kürze eine Bestätigung per E-Mail. Ihr Gutachter meldet sich vorab telefonisch.",
       "zb1_heading": "Fahrzeug bestätigen — 1 Klick",
@@ -2699,7 +2699,7 @@
       "termin": "Termin direkt buchen",
       "schnellanfrage": "Schnell-Anfrage",
       "hinweis_termin": "Sie wählen jetzt direkt einen Termin mit Ihrem Sachverständigen. Im nächsten Schritt unterschreiben Sie SA + Vollmacht.",
-      "hinweis_schnellanfrage": "Wir senden Ihnen einen sicheren Login-Link per E-Mail. Sie melden sich ohne Passwort an und buchen den Termin später in Ruhe."
+      "hinweis_schnellanfrage": "Wir senden Ihnen einen sicheren Link per E-Mail. Sie melden sich ohne Passwort an und buchen den Termin später in Ruhe."
     },
     "wizard_fehler_laden": "Wizard-Konfiguration konnte nicht geladen werden",
     "wizard_keine_phasen": "Keine Phasen für Flow „{flowKey}“ konfiguriert."
