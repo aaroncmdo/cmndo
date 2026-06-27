@@ -406,6 +406,62 @@ describe('getClaimLifecycle — Fallback', () => {
   })
 })
 
+// Unified Stepper: operative_status ist die kanonische Phasen-Quelle (wenn befuellt).
+// Bei operativeStatus=NULL/undefined greift die bestehende Milestone-Kaskade (Backward-Compat).
+describe('getClaimLifecycle — operative_status als kanonische Quelle (Unified Stepper)', () => {
+  const lead = { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true }
+  it('sv-termin -> begutachtung/termin (auch OHNE erstgutachten-Auftrag — behebt Erfassung-Haenger)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin' })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('termin')
+  })
+  it('gutachten-eingegangen -> begutachtung/gutachten', () => {
+    expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'gutachten-eingegangen' }).subPhase).toBe('gutachten')
+  })
+  it('Begutachtung-Sub via Auftrag verfeinert: gutachten-eingegangen + filmcheck_ok -> qc-pruefung', () => {
+    const r = getClaimLifecycle({
+      lead, kanzleiFall: null, operativeStatus: 'gutachten-eingegangen',
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten', gutachten_url: 'https://x', filmcheck_ok: true })],
+    })
+    expect(r.subPhase).toBe('qc-pruefung')
+  })
+  it('anschlussschreiben -> regulierung/anschlussschreiben', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'anschlussschreiben' })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('anschlussschreiben')
+  })
+  it('zahlung-eingegangen -> regulierung/auszahlung (kein Auto-Abschluss)', () => {
+    expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'zahlung-eingegangen' }).mainPhase).toBe('regulierung')
+  })
+  it('operative Erfassung-Bucket -> Lead-Sub (ersterfassung + Vollmacht signiert -> onboarding_offen)', () => {
+    expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'ersterfassung' }).subPhase).toBe('onboarding_offen')
+  })
+  it('operative=abgeschlossen + claimStatus reguliert_vollstaendig -> abschluss/erfolgreich_reguliert', () => {
+    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'abgeschlossen', claimStatus: 'reguliert_vollstaendig' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('erfolgreich_reguliert')
+  })
+  it('terminal claimStatus schlaegt operative_status (storniert ueberschreibt sv-termin)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin', claimStatus: 'storniert' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('storniert')
+  })
+  it('reg-signal (in_kommunikation_vs) hebt operative=sv-termin auf Regulierung', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin', claimStatus: 'in_kommunikation_vs' })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+  it('reg-signal greift NICHT zurueck wenn operative bereits >= regulierung (auszahlung bleibt)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'zahlung-eingegangen', claimStatus: 'abgelehnt' })
+    expect(r.subPhase).toBe('auszahlung')
+  })
+  it('operativeStatus NULL -> bestehende Milestone-Kaskade (Backward-Compat: aktiver Erstgutachten -> begutachtung)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })], kanzleiFall: null, operativeStatus: null })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('termin')
+  })
+})
+
 // CMM-44 MP-4c: Guards die rohe v_claim_phase-Strings (main_phase/sub_phase) sicher
 // in die getypten ClaimMainPhase/ClaimSubPhase casten — die Listen/Kanban-Reader
 // lesen die View als string, buildClaimPhasePipeline braucht aber die echten Typen.

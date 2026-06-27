@@ -87,6 +87,8 @@ export type ClaimLifecycleInput = {
   kanzleiFall: KanzleiFallRow | null
   /** CMM-44 MP-3 (B-11): claims.status — Quelle der terminalen abschluss-Substates. */
   claimStatus?: string | null
+  /** Unified Stepper: claims.operative_status — kanonische Phasen-Quelle (wenn befuellt). */
+  operativeStatus?: string | null
 }
 
 const MAIN_PHASE_INDEX: Record<ClaimMainPhase, number> = {
@@ -149,6 +151,39 @@ const REGULIERUNG_STATUS_SUBSTATE: Record<string, ClaimSubPhase> = {
   abgelehnt: 'nachforderung',
 }
 
+// Unified Stepper: operative_status (claims-Engine-Cursor) -> (main, sub). Kanonische
+// Phasen-Quelle. Erfassung-Sub kommt aus Lead-Feldern, Abschluss-Sub aus claims.status,
+// Begutachtung-Sub wird via Auftrag (filmcheck_ok/gutachten_url) verfeinert.
+const OPERATIVE_PHASE: Record<string, { main: ClaimMainPhase; sub: ClaimSubPhase }> = {
+  ersterfassung: { main: 'erfassung', sub: 'sa_offen' },
+  onboarding: { main: 'erfassung', sub: 'onboarding_offen' },
+  'sv-gesucht': { main: 'erfassung', sub: 'vollmacht_offen' },
+  'sv-zugewiesen': { main: 'begutachtung', sub: 'termin' },
+  'sv-termin': { main: 'begutachtung', sub: 'termin' },
+  besichtigung: { main: 'begutachtung', sub: 'besichtigung' },
+  'begutachtung-laeuft': { main: 'begutachtung', sub: 'gutachten' },
+  'gutachten-eingegangen': { main: 'begutachtung', sub: 'gutachten' },
+  filmcheck: { main: 'begutachtung', sub: 'filmcheck' },
+  'qc-pruefung': { main: 'begutachtung', sub: 'qc-pruefung' },
+  'kanzlei-uebergeben': { main: 'begutachtung', sub: 'kanzlei_uebergabe' },
+  anschlussschreiben: { main: 'regulierung', sub: 'anschlussschreiben' },
+  regulierung: { main: 'regulierung', sub: 'versicherungskontakt' },
+  'regulierung-laeuft': { main: 'regulierung', sub: 'versicherungskontakt' },
+  'vs-kuerzt': { main: 'regulierung', sub: 'vs-kuerzt' },
+  'nachbesichtigung-laeuft': { main: 'regulierung', sub: 'nachbesichtigung-laeuft' },
+  'vs-abgelehnt': { main: 'regulierung', sub: 'nachforderung' },
+  klage: { main: 'regulierung', sub: 'nachforderung' },
+  'zahlung-eingegangen': { main: 'regulierung', sub: 'auszahlung' },
+  abgeschlossen: { main: 'abschluss', sub: 'erfolgreich_reguliert' },
+  storniert: { main: 'abschluss', sub: 'storniert' },
+}
+
+function leadSubphase(lead: ClaimLifecycleInput['lead']): ClaimSubPhase {
+  if (lead?.vollmacht_signiert_am) return 'onboarding_offen'
+  if (lead?.sa_unterschrieben) return 'vollmacht_offen'
+  return 'sa_offen'
+}
+
 /** Innerhalb welcher Hauptphase lebt diese Subphase? */
 export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
   if (sub === 'sa_offen' || sub === 'vollmacht_offen' || sub === 'onboarding_offen') return 'erfassung'
@@ -158,7 +193,7 @@ export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
 }
 
 export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
-  const { lead, auftraege, kanzleiFall, claimStatus } = input
+  const { lead, auftraege, kanzleiFall, claimStatus, operativeStatus = null } = input
 
   const erstgutachten = auftraege.find((a) => a.typ === 'erstgutachten') ?? null
   const sideQuests = auftraege.filter(
@@ -173,6 +208,37 @@ export function getClaimLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     return { mainPhase: 'abschluss', subPhase: terminal, aktiveSideQuests: [], aktiverAuftrag: null }
   }
 
+  // ── Unified Stepper (operative_status als kanonische Quelle) ──────────────
+  // Regel 2: claims.status regulierung-signal hebt auf Regulierung, falls operative_status
+  // befuellt aber noch < Regulierung ist (Robustheit). Bei operativeStatus=NULL greift die
+  // bestehende Milestone-Kaskade unten an ihrer Original-Prioritaet (lexdrive > status).
+  const regSignal = claimStatus ? REGULIERUNG_STATUS_SUBSTATE[claimStatus] : undefined
+  const opPhase = operativeStatus ? OPERATIVE_PHASE[operativeStatus] : undefined
+  if (regSignal && opPhase && MAIN_PHASE_INDEX[opPhase.main] < MAIN_PHASE_INDEX.regulierung) {
+    return { mainPhase: 'regulierung', subPhase: regSignal, aktiveSideQuests: sideQuests, aktiverAuftrag: sideQuests[0] ?? null }
+  }
+  // Regel 3: operative_status treibt main+sub (Lead-Sub fuer Erfassung, claims.status-Ergebnis
+  // fuer Abschluss, Auftrag-Verfeinerung filmcheck/qc innerhalb Begutachtung).
+  if (opPhase) {
+    let resolved: ClaimSubPhase = opPhase.sub
+    if (opPhase.main === 'erfassung') {
+      resolved = leadSubphase(lead)
+    } else if (opPhase.main === 'abschluss' && operativeStatus !== 'storniert') {
+      const term2 = claimStatus ? ABSCHLUSS_SUBSTATE[claimStatus] : undefined
+      resolved = term2 ?? 'erfolgreich_reguliert'
+    } else if (opPhase.main === 'begutachtung' && opPhase.sub === 'gutachten' && erstgutachten) {
+      if (erstgutachten.filmcheck_ok === true) resolved = 'qc-pruefung'
+      else if (erstgutachten.gutachten_url) resolved = 'filmcheck'
+    }
+    return {
+      mainPhase: opPhase.main,
+      subPhase: resolved,
+      aktiveSideQuests: sideQuests,
+      aktiverAuftrag: opPhase.main === 'begutachtung' ? erstgutachten : (sideQuests[0] ?? null),
+    }
+  }
+
+  // ── Fallback (operative_status NULL/unbekannt): bestehende Milestone-Kaskade ──
   // ── CMM-74 b2 (v_claim_phase-Parity) ── operative Regulierungs-Sub-Phasen, die VOR
   // dem lexdrive-Eintritt greifen. Reihenfolge bitgleich zur View: nb.active > vs-kuerzt >
   // anschlussschreiben(pre-lexdrive). Vor diesen steht nur der terminal-Abschluss (oben).
