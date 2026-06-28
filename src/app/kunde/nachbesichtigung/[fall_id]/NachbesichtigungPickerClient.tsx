@@ -114,7 +114,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
               <button
                 type="button"
                 onClick={() => removeSlot(idx)}
-                className="shrink-0 rounded-ios-md border border-claimondo-border bg-white px-2 py-2 text-claimondo-ondo/70 hover:text-red-600 hover:border-red-200"
+                className="shrink-0 rounded-ios-md border border-claimondo-border bg-white px-2 py-2 text-claimondo-ondo/70 hover:text-danger hover:border-danger/30"
                 aria-label={t('nachbesichtigungPicker.entfernenAria')}
               >
                 <XIcon className="w-4 h-4" />
