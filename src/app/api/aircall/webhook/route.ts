@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { recordFailedOperation, markOperationResolved } from '@/lib/reliability/dead-letter'
 
 export const dynamic = 'force-dynamic'
 
@@ -174,8 +175,22 @@ export async function POST(request: Request) {
     }
   } catch (err) {
     console.error(`[KFZ-143] Webhook ${eventType} Fehler:`, err)
+    // Reliability-Sweep: ins Dead-Letter + 500 -> Aircall retryt (alle DB-Ops sind idempotent:
+    // upsert/update auf aircall_call_id). Bei dauerhaftem Fehler eskaliert der recovery-monitor.
+    // Vorher: 200 trotz Fehler -> kein Retry -> stiller Call-Tracking-Datenverlust.
+    await recordFailedOperation({
+      operationType: 'aircall_webhook',
+      dedupKey: `aircall_webhook:${aircallId}:${eventType}`,
+      entityType: 'call',
+      entityId: aircallId,
+      payload: { event_type: eventType },
+      error: String(err),
+    })
+    return NextResponse.json({ error: 'processing_failed' }, { status: 500 })
   }
 
+  // Erfolg: einen etwaigen frueheren Dead-Letter-Eintrag dieses (Call, Event) aufloesen.
+  await markOperationResolved(`aircall_webhook:${aircallId}:${eventType}`)
   // Aircall erwartet schnelle Antwort
   return NextResponse.json({ ok: true })
 }
