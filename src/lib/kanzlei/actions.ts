@@ -14,6 +14,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireRole } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createClient } from '@/lib/supabase/server'
 import { sendEmail } from '@/lib/email/google/client'
 import { emitEvent } from '@/lib/notifications/emit'
 import { markClaimAsAnExterneKanzlei } from '@/lib/claims/endzustand-actions'
@@ -82,7 +83,8 @@ export async function setKanzleiWunsch(input: {
   // regulierung) einen Paket-Versand triggern. claim_sichtbar_fuer_aktuellen_user grantet
   // kunde nur den eigenen Claim, Staff alle.
   {
-    const { data: darf } = await auth.supabase.rpc('claim_sichtbar_fuer_aktuellen_user', { p_claim_id: input.claim_id })
+    const sb = await createClient()
+    const { data: darf } = await sb.rpc('claim_sichtbar_fuer_aktuellen_user', { p_claim_id: input.claim_id })
     if (!darf) return { ok: false, error: 'Nicht berechtigt' }
   }
 
