@@ -191,12 +191,11 @@ export function PortalNav({
               paddingBottom: floatingMode ? 8 : 'calc(8px + env(safe-area-inset-bottom))',
               ...(floatingMode
                 ? {
-                    backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 55%, transparent)',
-                    backdropFilter: 'saturate(180%) blur(22px)',
-                    WebkitBackdropFilter: 'saturate(180%) blur(22px)',
-                    border: '1px solid color-mix(in srgb, white 22%, transparent)',
+                    // 2026-06-28: solide statt 55%-Glas (analog Desktop-Sidebar #3258).
+                    backgroundColor: 'var(--brand-sidebar-bg, #0D1B3E)',
+                    border: '1px solid color-mix(in srgb, white 8%, transparent)',
                     boxShadow:
-                      '0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 45%, transparent), inset 0 1px 0 color-mix(in srgb, white 25%, transparent)',
+                      '0 8px 28px color-mix(in srgb, var(--brand-sidebar-bg, #0D1B3E) 22%, transparent), inset 0 1px 0 color-mix(in srgb, white 8%, transparent)',
                     marginBottom: 'env(safe-area-inset-bottom)',
                   }
                 : {}),

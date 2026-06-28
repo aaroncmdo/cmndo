@@ -715,13 +715,11 @@ body[data-sidebar-mode="floating"] aside.kunde-sidebar > nav {
   overflow-y: auto;
 }
 
-/* Mobile-Header (Gutachter + Kunde): im Floating-Mode auch als Glass-Bar mit
-   bottom-rounded statt klassischem opaken Header. Hebt sich von der darunter-
-   liegenden Content-Bar ab, statt sie zu „abschließen". */
+/* Mobile-Header (Gutachter + Kunde): im Floating-Mode eine bottom-rounded Bar, die
+   sich von der darunterliegenden Content-Bar abhebt. 2026-06-28: solide statt
+   60%-Glas — konsistent mit der soliden Sidebar (#3258), nicht mehr ausgewaschen. */
 body[data-sidebar-mode="floating"] header.glass-branded {
-  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 60%, transparent) !important;
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background-color: var(--brand-sidebar-bg) !important;
 }
 
 /* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
