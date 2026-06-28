@@ -43,11 +43,11 @@ export default async function KundeAbschlussCard({
   const t = await getTranslations('abschluss')
 
   return (
-    <div className="rounded-2xl border-2 border-emerald-200 bg-emerald-50/60 p-5 space-y-4">
+    <div className="rounded-2xl border-2 border-success/30 bg-success-soft p-5 space-y-4">
       <div className="flex items-start gap-3">
-        <CheckCircle2Icon className="w-6 h-6 text-emerald-600 shrink-0 mt-0.5" />
+        <CheckCircle2Icon className="w-6 h-6 text-success shrink-0 mt-0.5" />
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] uppercase tracking-wider text-emerald-700 font-semibold">
+          <p className="text-[10px] uppercase tracking-wider text-success-strong font-semibold">
             {t('badge')}
           </p>
           <h2 className="text-lg font-bold text-claimondo-navy mt-0.5">
@@ -82,9 +82,9 @@ export default async function KundeAbschlussCard({
 
         <Link
           href={`/kunde/faelle/${fallId}#chat?reklamation=1`}
-          className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-amber-400 rounded-ios-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
+          className="inline-flex items-center justify-center gap-2 bg-white border border-claimondo-border hover:border-warning/40 rounded-ios-xl px-3 py-2.5 text-sm font-medium text-claimondo-navy transition-colors"
         >
-          <AlertCircleIcon className="w-4 h-4 text-amber-600" />
+          <AlertCircleIcon className="w-4 h-4 text-warning-strong" />
           {t('reklamation')}
         </Link>
 
