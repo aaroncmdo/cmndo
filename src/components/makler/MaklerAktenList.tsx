@@ -282,7 +282,7 @@ const PHASE_PILL_COLOR: Record<ClaimMainPhase, string> = {
   erfassung: 'bg-claimondo-bg text-claimondo-ondo',
   begutachtung: 'bg-claimondo-ondo/10 text-claimondo-navy',
   regulierung: 'bg-claimondo-navy/10 text-claimondo-navy',
-  abschluss: 'bg-emerald-50 text-emerald-700',
+  abschluss: 'bg-success-soft text-success-strong',
 }
 function PhasePill({ akte }: { akte: MaklerAkteRow }) {
   return (
@@ -297,7 +297,7 @@ function PhasePill({ akte }: { akte: MaklerAkteRow }) {
 function MinimalBadge() {
   return (
     <span
-      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-amber-100 text-amber-700"
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-warning/15 text-warning-strong"
       title="Minimal-Consent — nur Basis-Infos sichtbar"
     >
       <LockIcon width={10} height={10} />

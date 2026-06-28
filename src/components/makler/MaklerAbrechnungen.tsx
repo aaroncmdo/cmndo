@@ -94,7 +94,7 @@ function statusVisual(row: MaklerProvisionRow): {
   if (status === 'freigegeben') {
     return {
       label: 'Freigegeben',
-      className: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+      className: 'bg-success-soft text-success-strong border border-success/30',
       icon: <CheckCircle2Icon width={12} height={12} />,
     }
   }
@@ -108,7 +108,7 @@ function statusVisual(row: MaklerProvisionRow): {
   if (status === 'storniert') {
     return {
       label: 'Storniert',
-      className: 'bg-red-50 text-red-700 border border-red-200',
+      className: 'bg-danger-soft text-danger-strong border border-danger/30',
       icon: <XCircleIcon width={12} height={12} />,
       tooltip: row.storno_grund ?? undefined,
     }
@@ -123,7 +123,7 @@ function statusVisual(row: MaklerProvisionRow): {
         : `Ausstehend (noch ${rest} ${rest === 1 ? 'Tag' : 'Tage'})`
   return {
     label,
-    className: 'bg-orange-50 text-orange-700 border border-orange-200',
+    className: 'bg-warning-soft text-warning-strong border border-warning/30',
     icon: <ClockIcon width={12} height={12} />,
   }
 }
@@ -376,14 +376,14 @@ function SummaryCard({
 }) {
   const toneMap: Record<typeof tone, { bg: string; fg: string; border: string }> = {
     orange: {
-      bg: 'bg-orange-50',
-      fg: 'text-orange-700',
-      border: 'border-orange-200',
+      bg: 'bg-warning-soft',
+      fg: 'text-warning-strong',
+      border: 'border-warning/30',
     },
     green: {
-      bg: 'bg-emerald-50',
-      fg: 'text-emerald-700',
-      border: 'border-emerald-200',
+      bg: 'bg-success-soft',
+      fg: 'text-success-strong',
+      border: 'border-success/30',
     },
     navy: {
       bg: 'bg-claimondo-navy/5',
