@@ -112,6 +112,16 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # RLS-Haertung (27.06.2026): Claim-View-Gate-Drift-Bremse. Stellt sicher, dass die
+      # 7 Claim-Read-Views row-gegatet bleiben (claim_sichtbar_fuer_aktuellen_user) und
+      # keine anon-lesbar wird. Backing-RPC audit_claim_view_gates(). Siehe
+      # scripts/check-claim-view-rls.mjs + docs/superpowers/specs/2026-06-27-rls-haertung-claim-views-design.md.
+      - name: Claim-View-RLS
+        run: node scripts/check-claim-view-rls.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
