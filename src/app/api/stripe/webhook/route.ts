@@ -541,6 +541,14 @@ export async function POST(request: Request) {
   } catch (err) {
     console.error(`[KFZ-148] Stripe Webhook ${event.type}:`, err)
     await db.from('stripe_events').update({ fehler: String(err) }).eq('stripe_event_id', event.id)
+    // Reliability-Sweep (vervollstaendigt #3232): 500 statt 200 zurueckgeben, damit Stripe
+    // das Event ERNEUT zustellt. Der Idempotenz-Block oben gatet auf verarbeitet=false und
+    // verarbeitet beim Retry sauber nach (UPDATEs setzen Absolutwerte, die Onboarding-Rechnung
+    // ist per Unique-Index gegen Doppelausstellung geschuetzt -> Retry ist sicher). Mit 200
+    // wuerde Stripe NIE retryen -> der Reprocess-Pfad feuerte nie -> ein bezahlter SV bliebe
+    // bei einem transienten Verarbeitungsfehler (z.B. DB-Blip beim portal_zugang-UPDATE) doch
+    // dauerhaft ausgesperrt (genau die Strand-Konstellation, die #3232 schliessen sollte).
+    return NextResponse.json({ error: 'processing_failed' }, { status: 500 })
   }
 
   return NextResponse.json({ ok: true })
