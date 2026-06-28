@@ -1,9 +1,14 @@
-'use server'
-
+// Write-Path-Audit (28.06.): KEINE 'use server'-Direktive. ablehnTermin ist eine
+// INTERNE Lib-Funktion (createAdminClient → RLS-Bypass, deaktiviert SVs, Auto-Dispatch).
+// Mit 'use server' war sie als eigenständiger Endpoint HTTP-exponiert → jeder konnte mit
+// beliebiger terminId Termine ablehnen + SVs deaktivieren. Der einzige Aufrufer
+// (gutachter/kalender/actions.ts → ablehnTerminAction) prüft Login + SV-Ownership und
+// importiert diese Funktion regulär — daher ist sie hier bewusst ohne 'use server'.
 import { createAdminClient } from '@/lib/supabase/admin'
 
 /**
- * KFZ-192: SV lehnt einen Termin ab.
+ * KFZ-192: SV lehnt einen Termin ab. INTERNE Funktion — Autorisierung MUSS beim
+ * Aufrufer erfolgen (siehe ablehnTerminAction: Login + assignee_id-Ownership).
  * Prüft 24h-Fenster (final_verbindlich_ab), setzt status='abgelehnt',
  * inkrementiert ablehnungen_30_tage, erstellt Admin-Task.
  */

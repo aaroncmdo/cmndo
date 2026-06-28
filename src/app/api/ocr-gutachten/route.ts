@@ -54,6 +54,16 @@ function extractField(text: string, patterns: RegExp[]): string | null {
 
 export async function POST(request: Request) {
   try {
+    // Write-Path-Audit (28.06.): interner Server-to-Server-Endpoint (vom gutachter/fall-
+    // Action nach Gutachten-Upload getriggert). Vorher 0 Auth → anon konnte Gutachten-/
+    // Claim-Finanzwerte (schadens_hoehe_netto, restwert, WBW, …) auf JEDE fall_id schreiben
+    // (createAdminClient/RLS-Bypass) + eine beliebige pdf_url serverseitig fetchen (SSRF).
+    // Jetzt Bearer-CRON_SECRET-Gate (der Caller sendet ihn).
+    const authHeader = request.headers.get('authorization') ?? ''
+    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
+    }
+
     const { fall_id, pdf_url } = await request.json()
     if (!fall_id) {
       return NextResponse.json({ error: 'fall_id erforderlich' }, { status: 400 })
