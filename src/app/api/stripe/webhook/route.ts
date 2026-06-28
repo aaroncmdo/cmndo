@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { recordFailedOperation, markOperationResolved } from '@/lib/reliability/dead-letter'
 
 export const dynamic = 'force-dynamic'
 
@@ -538,16 +539,31 @@ export async function POST(request: Request) {
 
     // Als verarbeitet markieren
     await db.from('stripe_events').update({ verarbeitet: true }).eq('stripe_event_id', event.id)
+    // Reliability-Sweep: ein etwaiger Dead-Letter-Eintrag aus einem frueheren
+    // fehlgeschlagenen Versuch dieses Events ist jetzt aufgeloest.
+    await markOperationResolved(`stripe_webhook:${event.id}`)
   } catch (err) {
     console.error(`[KFZ-148] Stripe Webhook ${event.type}:`, err)
     await db.from('stripe_events').update({ fehler: String(err) }).eq('stripe_event_id', event.id)
-    // Reliability-Sweep (vervollstaendigt #3232): 500 statt 200 zurueckgeben, damit Stripe
-    // das Event ERNEUT zustellt. Der Idempotenz-Block oben gatet auf verarbeitet=false und
-    // verarbeitet beim Retry sauber nach (UPDATEs setzen Absolutwerte, die Onboarding-Rechnung
-    // ist per Unique-Index gegen Doppelausstellung geschuetzt -> Retry ist sicher). Mit 200
-    // wuerde Stripe NIE retryen -> der Reprocess-Pfad feuerte nie -> ein bezahlter SV bliebe
-    // bei einem transienten Verarbeitungsfehler (z.B. DB-Blip beim portal_zugang-UPDATE) doch
-    // dauerhaft ausgesperrt (genau die Strand-Konstellation, die #3232 schliessen sollte).
+    // Reliability-Sweep: ins zentrale Dead-Letter, damit ein nach Stripes Retry-Fenster
+    // weiterhin nicht verarbeitetes Event vom recovery-monitor-Cron an einen Admin eskaliert
+    // wird (statt stumm mit verarbeitet=false liegenzubleiben). Bei erfolgreicher
+    // (Nach-)Verarbeitung loest markOperationResolved oben den Eintrag wieder auf.
+    await recordFailedOperation({
+      operationType: 'stripe_webhook',
+      dedupKey: `stripe_webhook:${event.id}`,
+      entityType: gutachterId ? 'sv' : null,
+      entityId: gutachterId,
+      payload: { event_type: event.type },
+      error: String(err),
+      escalateAfterMinutes: 12 * 60, // 12h Grace: Stripe retryt noch, aber ein dauerhaft
+      //                                ausgesperrter bezahlter SV wird zeitnah eskaliert.
+    })
+    // 500 statt 200 zurueckgeben, damit Stripe das Event ERNEUT zustellt. Der Idempotenz-Block
+    // oben gatet auf verarbeitet=false und verarbeitet beim Retry sauber nach (UPDATEs setzen
+    // Absolutwerte, die Onboarding-Rechnung ist per Unique-Index gegen Doppelausstellung
+    // geschuetzt -> Retry ist sicher). Mit 200 wuerde Stripe NIE retryen -> der Reprocess-Pfad
+    // feuerte nie -> ein bezahlter SV bliebe bei einem transienten Fehler doch ausgesperrt.
     return NextResponse.json({ error: 'processing_failed' }, { status: 500 })
   }
 

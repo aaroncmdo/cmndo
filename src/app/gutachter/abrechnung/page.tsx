@@ -232,8 +232,8 @@ export default async function AbrechnungPage() {
           {/* Anzahlung (Initial-Wert, KEIN Live-Stand) — ARCH-1 POLISH Befund 2 */}
           <SectionCard className="p-6">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 rounded-ios-xl bg-emerald-50 flex items-center justify-center">
-                <WalletIcon className="w-5 h-5 text-emerald-400" />
+              <div className="w-10 h-10 rounded-ios-xl bg-success-soft flex items-center justify-center">
+                <WalletIcon className="w-5 h-5 text-success" />
               </div>
               <div>
                 <p className="text-claimondo-ondo text-sm font-medium">Anzahlung</p>
@@ -568,7 +568,7 @@ export default async function AbrechnungPage() {
                   {einzahlungen!.map(e => (
                     <Tr key={e.id} className="border-b border-claimondo-border/50">
                       <Td>
-                        <span className="px-2 py-0.5 rounded-ios-md text-xs font-medium bg-emerald-50 text-emerald-400">
+                        <span className="px-2 py-0.5 rounded-ios-md text-xs font-medium bg-success-soft text-success">
                           {e.typ === 'anzahlung' ? 'Anzahlung' : e.typ === 'nachzahlung' ? 'Nachzahlung' : 'Paketwechsel'}
                         </span>
                       </Td>

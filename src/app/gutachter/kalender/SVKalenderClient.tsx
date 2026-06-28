@@ -516,7 +516,7 @@ export default function SVKalenderClient({
                         className="w-24 bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--brand-secondary)]"
                       />
                       {gegSlots.length > 1 && (
-                        <button onClick={() => setGegSlots(prev => prev.filter((_, i) => i !== idx))} className="text-claimondo-ondo/70 hover:text-red-500 text-xs px-1">✕</button>
+                        <button onClick={() => setGegSlots(prev => prev.filter((_, i) => i !== idx))} className="text-claimondo-ondo/70 hover:text-danger text-xs px-1">✕</button>
                       )}
                     </div>
                   ))}

@@ -338,7 +338,7 @@ export default function GebietPage() {
               <p className="font-semibold text-claimondo-navy text-[11px]">Gebiet-Statistiken</p>
               <div className="flex justify-between"><span className="text-claimondo-ondo">Ihr Gebiet:</span><span className="text-claimondo-navy font-medium">{areaKm2.toFixed(0)} km²</span></div>
               <div className="flex justify-between"><span className="text-claimondo-ondo">Nachbar-SV:</span><span className="text-claimondo-navy font-medium">{touchingNeighbors.length}</span></div>
-              <div className="flex justify-between"><span className="text-claimondo-ondo">Überlappung:</span><span className="text-amber-600 font-medium">~{overlapPct}%</span></div>
+              <div className="flex justify-between"><span className="text-claimondo-ondo">Überlappung:</span><span className="text-warning font-medium">~{overlapPct}%</span></div>
               {previewPaket && (
                 <div className="flex justify-between border-t border-claimondo-border pt-1 mt-1">
                   <span className="text-[var(--brand-secondary)]">Upgrade-Fläche:</span>
@@ -399,7 +399,7 @@ export default function GebietPage() {
                 <p className="text-[9px] text-claimondo-ondo">Nachbar-SV</p>
               </div>
               <div className="bg-claimondo-bg rounded-ios-lg p-2 text-center">
-                <p className="text-sm font-bold text-amber-600">~{overlapPct}%</p>
+                <p className="text-sm font-bold text-warning">~{overlapPct}%</p>
                 <p className="text-[9px] text-claimondo-ondo">Überlappung</p>
               </div>
             </div>
@@ -419,13 +419,13 @@ export default function GebietPage() {
                   <div key={key} className={`border rounded-ios-xl p-3 mb-2 transition-colors ${isPreview ? 'border-[var(--brand-secondary)] bg-[var(--brand-secondary)]/10' : 'border-claimondo-border hover:border-[var(--brand-secondary)]/30'}`}>
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-semibold text-claimondo-navy">{info.name}</p>
-                      {key === 'pro' && <span className="text-[9px] bg-green-50 text-green-600 px-1.5 py-0.5 rounded-full">Empfohlen</span>}
+                      {key === 'pro' && <span className="text-[9px] bg-success-soft text-success px-1.5 py-0.5 rounded-full">Empfohlen</span>}
                     </div>
                     <p className="text-[10px] text-claimondo-ondo mb-1">{info.faelle} Fälle · {info.radius_km}km · {info.preis}€/Mo</p>
-                    <div className="bg-amber-50 border border-amber-200 rounded-ios-lg px-2.5 py-1.5 mb-2">
+                    <div className="bg-warning-soft border border-warning/30 rounded-ios-lg px-2.5 py-1.5 mb-2">
                       <p className="text-[10px] text-claimondo-ondo">Neue Anzahlung: <span className="font-medium">{neueAnzahlung.toLocaleString('de-DE')}€</span></p>
                       <p className="text-[10px] text-claimondo-ondo">Bereits bezahlt: <span className="font-medium">{alteAnzahlung.toLocaleString('de-DE')}€</span></p>
-                      <p className="text-xs font-bold text-amber-700 mt-0.5">Differenz: {differenz.toLocaleString('de-DE')}€</p>
+                      <p className="text-xs font-bold text-warning-strong mt-0.5">Differenz: {differenz.toLocaleString('de-DE')}€</p>
                     </div>
                     <div className="flex gap-1.5">
                       <button onClick={() => { setPreviewPaket(isPreview ? null : key); setLayers(p => ({ ...p, vorschau: true })) }}
