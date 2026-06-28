@@ -18,6 +18,8 @@
 //   - auftraege: alle auftraege per claim_id, ORDER reihenfolge ASC.
 //   - kanzleiFall: kanzlei_faelle per claim_id (UNIQUE, maybeSingle).
 //   - claimStatus: claims.status (terminaler abschluss).
+//   - operativeStatus: claims.operative_status (Unified Stepper: operative-Kandidat,
+//     furthest-signal-wins ggue der Milestone-Kaskade — mirror getClaimLifecycleForClaim).
 //
 // Usage:  node scripts/probe-claim-phase-parity.mjs
 // Exit 0 = 0 Divergenzen (Parity haelt). Exit 1 = Divergenz / Fehler (CI-Gate-tauglich).
@@ -69,7 +71,7 @@ console.log('== CMM-44 Parity-Probe: v_claim_phase (SQL) vs getClaimLifecycle (T
 
 // ── Bulk-Reads (claims-zentrisch, pool-schonend) ─────────────────────────────
 const LIM = 'limit=100000'
-const claims = fetchAll(`claims?select=id,status,lead_id&${LIM}`)
+const claims = fetchAll(`claims?select=id,status,lead_id,operative_status&${LIM}`)
 const auftraege = fetchAll(`auftraege?select=claim_id,typ,status,reihenfolge&order=reihenfolge.asc&${LIM}`)
 const kanzleiFaelle = fetchAll(`kanzlei_faelle?select=claim_id,status,ausgezahlt_am,lexdrive_case_id&${LIM}`)
 const viewRows = fetchAll(`v_claim_phase?select=claim_id,main_phase,sub_phase&${LIM}`)
@@ -127,7 +129,7 @@ for (const c of claims) {
   const claimAuftraege = auftraegeByClaim.get(c.id) ?? []
   const kanzleiFall = kanzleiByClaim.get(c.id) ?? null
 
-  const ts = getClaimLifecycle({ lead, auftraege: claimAuftraege, kanzleiFall, claimStatus: c.status ?? null })
+  const ts = getClaimLifecycle({ lead, auftraege: claimAuftraege, kanzleiFall, claimStatus: c.status ?? null, operativeStatus: c.operative_status ?? null })
   verglichen++
 
   if (ts.mainPhase !== view.main_phase || ts.subPhase !== view.sub_phase) {
