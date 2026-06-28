@@ -33,10 +33,31 @@ function pointInPolygon(point: { lat: number; lng: number }, polygon: { lat: num
 export async function POST(request: Request) {
   const supabase = await createClient()
 
-  // Auth
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) {
-    return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
+  // Write-Path-Audit (28.06.): Autorisierung. Vorher reichte JEDER Login (nur getUser) →
+  // Privilege-Escalation: Kunde/Makler/Werkstatt konnten einen SV zuweisen (admin-client-
+  // Write, RLS-Bypass) + Leadpreis abziehen + Notification-Chain triggern.
+  // (a) Interner Auto-Dispatch (z.B. nach SV-Ablehnung) ruft server-to-server mit
+  //     Bearer CRON_SECRET (kein User-Cookie). (b) Sonst: eingeloggter Staff.
+  // NB Follow-up: die nachfolgenden Reads laufen über den RLS-Client `supabase` — beim
+  // internen (user-losen) Aufruf liefern sie 0 Rows; damit der Auto-Dispatch voll greift,
+  // müssten die Reads im internen Pfad auf admin-client umgestellt werden (separater Fix;
+  // bisher war der interne Aufruf ohnehin 401 → keine Regression).
+  const authHeader = request.headers.get('authorization') ?? ''
+  const isInternal =
+    !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`
+  if (!isInternal) {
+    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!user) {
+      return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
+    }
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('rolle')
+      .eq('id', user.id)
+      .single()
+    if (!['admin', 'dispatch', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 })
+    }
   }
 
   // Body

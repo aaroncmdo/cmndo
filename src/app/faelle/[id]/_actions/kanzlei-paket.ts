@@ -211,6 +211,15 @@ export async function recordZahlung(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // Write-Path-Audit (28.06.): Rollen-Guard (analog saveKanzleiAnsprechpartner CMM-48 PR-D).
+  // Schreibt claims.regulierungs_betrag via admin-client (RLS-Bypass) → nur admin/kb dürfen.
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { success: false, error: 'Nur Admin und Kundenbetreuer dürfen Zahlungen erfassen' }
+    }
+  }
+
   // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
   // (SSoT). Legacy-Fall ohne claim_id sauber abfangen statt zu werfen.
   const betragClaimId = await resolveClaimId(supabase, fallId)
@@ -312,6 +321,15 @@ export async function erfasseZahlungseingang(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // Write-Path-Audit (28.06.): Rollen-Guard. Schreibt claims.regulierungs_betrag +
+  // claim_payments via admin-client (RLS-Bypass) → nur admin/kb.
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { success: false, error: 'Nur Admin und Kundenbetreuer dürfen Zahlungseingänge erfassen' }
+    }
+  }
+
   // CMM-49: zahlungseingaenge + zahlungspositionen sind claim-gekeyt; interim
   // faelle.claim_id-Lookup einmal oben (P4-TODO: claimId aus Caller threaden).
   // Wird auch im claims/claim_payments-Reroute-Block unten wiederverwendet.
@@ -402,6 +420,15 @@ export async function saveRegulierungsKlassifizierung(fallId: string, data: {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  // Write-Path-Audit (28.06.): Rollen-Guard für die Regulierungs-Klassifizierung (Finanz-
+  // Status). RLS-Client, aber defense-in-depth konsistent zu den anderen Zahlungs-Actions.
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { success: false, error: 'Nur Admin und Kundenbetreuer berechtigt' }
+    }
+  }
 
   const { error } = await supabase
     .from('regulierungs_klassifizierung')

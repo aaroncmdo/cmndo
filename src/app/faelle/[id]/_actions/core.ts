@@ -74,6 +74,15 @@ export async function deactivateFall(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // Write-Path-Audit (28.06.): Rollen-Guard — Fall-Deaktivierung (claims.ist_aktiv via
+  // admin-client) ist eine Staff-Aktion (analog deleteFall oben).
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { success: false, error: 'Nur Admin und Kundenbetreuer dürfen Fälle deaktivieren' }
+    }
+  }
+
   const now = new Date().toISOString()
   // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
   // CMM-49 (faelle-Drop): updateObj enthaelt nur CLAIM_OWNED-Spalten -> faelleUpdate
@@ -110,6 +119,14 @@ export async function reactivateFall(
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
+
+  // Write-Path-Audit (28.06.): Rollen-Guard — Reaktivierung (claims.ist_aktiv via admin-client).
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { success: false, error: 'Nur Admin und Kundenbetreuer dürfen Fälle reaktivieren' }
+    }
+  }
 
   // CMM-44 SP-B PR2a: ist_aktiv/deaktiviert_* leben jetzt auf claims (SSoT).
   // CMM-49 (faelle-Drop): nur CLAIM_OWNED-Spalten -> toter {updated_at}-faelle-Spiegel-
