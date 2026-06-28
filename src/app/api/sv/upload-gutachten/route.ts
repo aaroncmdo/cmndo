@@ -62,6 +62,9 @@ export async function POST(req: NextRequest) {
     }
 
     // fall_dokumente-Eintrag (für Listen-Sicht & Kanzleipaket-Bündelung)
+    // Write-Path-Audit (28.06.): sichtbar_fuer schloss kunde + SV aus, obwohl beide ihr
+    // Gutachten sehen müssen (Map: gutachten = admin/kb/sv/kunde/kanzlei). Kanonisch setzen.
+    const { sichtbarFuerFuerTyp } = await import('@/lib/dokumente/sichtbarkeit')
     await db.from('fall_dokumente').insert({
       fall_id: auftrag.fall_id,
       dokument_typ: istHauptgutachten ? 'gutachten' : 'gutachten_anlage',
@@ -70,7 +73,7 @@ export async function POST(req: NextRequest) {
       groesse_bytes: file.size,
       kategorie: 'gutachten',
       quelle: 'sv-upload',
-      sichtbar_fuer: ['kundenbetreuer', 'kanzlei', 'admin'],
+      sichtbar_fuer: sichtbarFuerFuerTyp('gutachten'),
       uploaded_by_sv: true,
       hochgeladen_am: new Date().toISOString(),
     })

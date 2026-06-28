@@ -323,6 +323,9 @@ async function insertFallDokument(
   label: string,
 ): Promise<void> {
   if (!fallId) return  // Kein Fall (noch in Dispatch-Phase) → nur leads-Mirror reicht
+  // Write-Path-Audit (28.06.): sichtbar_fuer pro Typ setzen — sonst DB-Default
+  // ['admin','kundenbetreuer'] → der hochladende Kunde + SV/Kanzlei sehen den Doc nicht.
+  const { sichtbarFuerFuerTyp } = await import('@/lib/dokumente/sichtbarkeit')
   await db.from('fall_dokumente').insert({
     fall_id: fallId,
     dokument_typ: dokumentTyp,
@@ -331,6 +334,7 @@ async function insertFallDokument(
     mime_type: contentType,
     groesse_bytes: groesse,
     uploaded_by_kunde: true,
+    sichtbar_fuer: sichtbarFuerFuerTyp(dokumentTyp) ?? sichtbarFuerFuerTyp('sonstiges'),
     beschreibung: label,
     hochgeladen_am: new Date().toISOString(),
   })

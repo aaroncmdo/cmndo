@@ -143,3 +143,14 @@ export function darfSehen(typ: string, rolle: Rolle): boolean {
   if (!erlaubt) return rolle === 'admin'
   return erlaubt.includes(rolle)
 }
+
+/**
+ * Write-Path-Pendant zu getSichtbarFuerRolle/darfSehen: kanonische sichtbar_fuer-Rollenliste
+ * für einen Dokument-Typ — beim fall_dokumente-Insert setzen, damit der Doc den richtigen
+ * Rollen sichtbar ist. Sonst greift der DB-Default ['admin','kundenbetreuer'] → der
+ * hochladende Kunde/SV/Kanzlei sieht sein eigenes Dokument NICHT (DB-RLS prüft sichtbar_fuer,
+ * fällt nicht auf die Code-Map zurück). Ohne Treffer: undefined → Caller-Fallback.
+ */
+export function sichtbarFuerFuerTyp(typ: string): Rolle[] | undefined {
+  return DOKUMENT_SICHTBAR_FUER[typ]
+}

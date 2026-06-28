@@ -123,16 +123,20 @@ export async function POST(req: NextRequest) {
     }
 
     // Create fall_dokumente row
+    // Write-Path-Audit (28.06.): dateiname + url existieren NICHT auf fall_dokumente -> der
+    // Insert failte (Route 500te bei jedem Upload). Korrekt: original_filename; url entfernt.
+    // + sichtbar_fuer pro Typ (sonst DB-Default admin/kb-only -> SV sieht eigenen Upload nicht).
+    const { sichtbarFuerFuerTyp } = await import('@/lib/dokumente/sichtbarkeit')
     const { data: dokRow, error: dokErr } = await db
       .from('fall_dokumente')
       .insert({
         fall_id: fallId,
         dokument_typ: dokumentTyp,
-        dateiname: file.name,
+        original_filename: file.name,
         storage_path: storagePath,
-        url: publicUrl,
         uploaded_by_sv: true,
         uploaded_by_kunde: false,
+        sichtbar_fuer: sichtbarFuerFuerTyp(dokumentTyp) ?? sichtbarFuerFuerTyp('sonstiges'),
         ocr_result: ocrResult,
         discrepancy_flag: discrepancyFlag,
         ...(schadenPosition ? { schaden_position: schadenPosition } : {}),

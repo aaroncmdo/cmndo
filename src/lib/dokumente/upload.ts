@@ -48,6 +48,10 @@ export async function uploadFallDokument(
     return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
   }
 
+  // Write-Path-Audit (28.06.): sichtbar_fuer pro Typ setzen (sonst DB-Default admin/kb-only →
+  // SV/Kunde/Kanzlei sehen den hochgeladenen Doc nicht; DB-RLS prüft sichtbar_fuer).
+  const { sichtbarFuerFuerTyp } = await import('@/lib/dokumente/sichtbarkeit')
+
   // DB-Eintrag
   const { data: row, error: insertErr } = await supabase
     .from('fall_dokumente')
@@ -60,6 +64,7 @@ export async function uploadFallDokument(
       original_filename: file.name,
       mime_type: file.type,
       groesse_bytes: file.size,
+      sichtbar_fuer: sichtbarFuerFuerTyp(dokumentTyp) ?? sichtbarFuerFuerTyp('sonstiges'),
       ocr_status: file.type === 'application/pdf' || file.type.startsWith('image/') ? 'pending' : 'skipped',
       hochgeladen_von_user_id: user.id,
     })
