@@ -65,7 +65,7 @@ export function ZeugenKontakteEditor({
           Zeugen-Kontaktdaten
         </p>
         {status === 'saving' && <LoaderIcon className="w-3 h-3 text-claimondo-ondo animate-spin" />}
-        {status === 'saved' && <CheckIcon className="w-3 h-3 text-green-500" />}
+        {status === 'saved' && <CheckIcon className="w-3 h-3 text-success" />}
       </div>
       {kontakte.map((k, i) => (
         <div key={i} className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 p-2 rounded-ios-lg bg-claimondo-bg">
@@ -105,7 +105,7 @@ export function ZeugenKontakteEditor({
             <button
               type="button"
               onClick={() => removeKontakt(i)}
-              className="text-[10px] text-red-600 hover:underline col-span-full text-left"
+              className="text-[10px] text-danger hover:underline col-span-full text-left"
             >
               Entfernen
             </button>

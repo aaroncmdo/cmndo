@@ -91,7 +91,7 @@ export default async function DispatchRueckrufe({
                   {/* AAR-724: Roter Punkt für noch nicht gesehene Rückrufe. */}
                   {!t.gesehen_am && (
                     <span
-                      className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                      className="inline-block w-2 h-2 rounded-full bg-danger shrink-0"
                       aria-label="Neu, noch nicht angesehen"
                     />
                   )}
@@ -106,7 +106,7 @@ export default async function DispatchRueckrufe({
                   {lead.telefon && (
                     <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                   )}
-                  <span className={isOverdue ? 'text-red-600 font-medium' : ''}>
+                  <span className={isOverdue ? 'text-danger font-medium' : ''}>
                     {new Date(t.start_zeit).toLocaleString('de-DE', {
                       day: '2-digit',
                       month: '2-digit',

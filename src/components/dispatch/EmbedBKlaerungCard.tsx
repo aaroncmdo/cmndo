@@ -57,9 +57,9 @@ export default function EmbedBKlaerungCard({ items }: { items: KlaerungItem[] })
     <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
       <div className="px-5 py-4 border-b border-claimondo-navy/[0.06]">
         <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-          <CalendarClockIcon className="w-4 h-4 text-amber-600" />
+          <CalendarClockIcon className="w-4 h-4 text-warning" />
           Ungeklärte Gutachter-Termine
-          <span className="ml-auto bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">
+          <span className="ml-auto bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">
             {items.length}
           </span>
         </h2>

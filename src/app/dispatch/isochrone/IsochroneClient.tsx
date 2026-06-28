@@ -141,11 +141,11 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
               )}
 
               {!pending && error && (
-                <p className="px-5 py-6 text-xs text-red-700 bg-red-50">{error}</p>
+                <p className="px-5 py-6 text-xs text-danger-strong bg-danger-soft">{error}</p>
               )}
 
               {!pending && suggestions && suggestions.length === 0 && !error && (
-                <p className="px-5 py-6 text-xs text-amber-800 bg-amber-50">
+                <p className="px-5 py-6 text-xs text-warning-strong bg-warning-soft">
                   Keine SVs in Reichweite. Prüfe Kontingent, Urlaubs-Status oder Isochrone-Polygone der SVs.
                 </p>
               )}
@@ -168,7 +168,7 @@ export default function IsochroneClient({ leads }: { leads: LeadOption[] }) {
                       <span className="text-xs text-claimondo-ondo">{s.paket}</span>
                       <span className="text-xs tabular-nums">{s.distanzKm.toFixed(1)} km</span>
                       <span className="text-xs tabular-nums font-semibold">{s.score.toFixed(1)}</span>
-                      <span className={`text-xs tabular-nums ${s.kontingentFrei <= 2 ? 'text-red-600 font-semibold' : 'text-claimondo-navy'}`}>
+                      <span className={`text-xs tabular-nums ${s.kontingentFrei <= 2 ? 'text-danger font-semibold' : 'text-claimondo-navy'}`}>
                         {s.kontingentFrei}
                       </span>
                       <div className="flex flex-wrap gap-1">

@@ -115,28 +115,28 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
           </div>
         )}
         <div className="flex items-center gap-1.5 col-span-2">
-          <FileSignatureIcon className={`w-3.5 h-3.5 shrink-0 ${anfrage.sa_unterzeichnet_am ? 'text-green-600' : 'text-amber-500'}`} />
+          <FileSignatureIcon className={`w-3.5 h-3.5 shrink-0 ${anfrage.sa_unterzeichnet_am ? 'text-success' : 'text-warning'}`} />
           {anfrage.sa_unterzeichnet_am ? (
-            <span className="text-green-700">SA unterzeichnet am {formatDatum(anfrage.sa_unterzeichnet_am)}</span>
+            <span className="text-success-strong">SA unterzeichnet am {formatDatum(anfrage.sa_unterzeichnet_am)}</span>
           ) : (
-            <span className="text-amber-600 font-medium">SA noch nicht unterzeichnet</span>
+            <span className="text-warning font-medium">SA noch nicht unterzeichnet</span>
           )}
         </div>
       </div>
 
       {/* Entwurf-Banner — Wizard nicht abgeschlossen, nur Telefon vorhanden */}
       {lokalerStatus === 'entwurf' && (
-        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-orange-50 border border-orange-200 flex items-center gap-2">
-          <PhoneIcon className="w-4 h-4 text-orange-600 shrink-0" />
-          <span className="text-xs font-semibold text-orange-800">Wizard abgebrochen — bitte anrufen und Daten aufnehmen</span>
+        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-warning-soft border border-warning/30 flex items-center gap-2">
+          <PhoneIcon className="w-4 h-4 text-warning shrink-0" />
+          <span className="text-xs font-semibold text-warning-strong">Wizard abgebrochen — bitte anrufen und Daten aufnehmen</span>
         </div>
       )}
 
       {/* Anruf-Banner für Lead-Fallback — SV muss manuell kontaktiert werden */}
       {anfrage.matching_typ === 'lead_fallback' && lokalerStatus !== 'sv_kontaktiert' && lokalerStatus !== 'termin_bestaetigt' && lokalerStatus !== 'abgeschlossen' && (
-        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-amber-50 border border-amber-200 flex items-center gap-2">
-          <AlertCircleIcon className="w-4 h-4 text-amber-600 shrink-0" />
-          <span className="text-xs font-semibold text-amber-800">DAT-SV — bitte manuell anrufen!</span>
+        <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-warning-soft border border-warning/30 flex items-center gap-2">
+          <AlertCircleIcon className="w-4 h-4 text-warning shrink-0" />
+          <span className="text-xs font-semibold text-warning-strong">DAT-SV — bitte manuell anrufen!</span>
         </div>
       )}
 
@@ -173,7 +173,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
           </button>
           <button
             onClick={() => wechsleStatus('termin_bestaetigt')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-green-700 border border-green-600 hover:bg-green-600 hover:text-white px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-success-strong border border-success/30 hover:bg-success hover:text-white px-3 py-1.5 rounded-full transition-colors"
           >
             <CheckCircleIcon className="w-3.5 h-3.5" />
             Termin bestätigt
@@ -231,10 +231,10 @@ export default function GutachterFinderUebersichtClient({
             className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-colors ${
               filter === tab.key
                 ? tab.key === 'anruf'
-                  ? 'bg-amber-500 text-white'
+                  ? 'bg-warning text-white'
                   : 'bg-claimondo-navy text-white'
                 : tab.key === 'anruf' && anrufNoetig.length > 0
-                ? 'bg-amber-50 text-amber-700 border border-amber-300 hover:bg-amber-100'
+                ? 'bg-warning-soft text-warning-strong border border-warning/30 hover:bg-warning-soft'
                 : 'bg-white text-claimondo-navy border border-claimondo-border hover:bg-claimondo-bg'
             }`}
           >

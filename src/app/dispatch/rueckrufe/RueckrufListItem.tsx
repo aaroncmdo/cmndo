@@ -55,7 +55,7 @@ export default function RueckrufListItem({ terminId, startZeit, notizen, isNew, 
           <div className="flex items-center gap-2">
             {isNew && (
               <span
-                className="inline-block w-2 h-2 rounded-full bg-red-500 shrink-0"
+                className="inline-block w-2 h-2 rounded-full bg-danger shrink-0"
                 aria-label="Neu, noch nicht angesehen"
               />
             )}
@@ -77,7 +77,7 @@ export default function RueckrufListItem({ terminId, startZeit, notizen, isNew, 
             <button
               type="button"
               onClick={() => setOpen(true)}
-              className={`flex items-center gap-1 hover:underline ${isOverdue ? 'text-red-600 font-medium' : ''}`}
+              className={`flex items-center gap-1 hover:underline ${isOverdue ? 'text-danger font-medium' : ''}`}
             >
               <CalendarClockIcon className="w-3.5 h-3.5 shrink-0" />
               {new Date(startZeit).toLocaleString('de-DE', {
