@@ -29,6 +29,15 @@ export async function updateFallStatus(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
 
+  // Write-Path-Audit (28.06.): Rollen-Guard — Status-Transition via state-machine (claims-
+  // Write) ist eine Staff-Aktion, vorher fehlte der Check (jeder Login konnte sie auslösen).
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'dispatch', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { ok: false, error: 'Nicht berechtigt' }
+    }
+  }
+
   // KFZ-153: Block status change to regulierung/abgeschlossen without Klassifizierung
   if (newStatus === 'regulierung' || newStatus === 'abgeschlossen') {
     const { data: klassifizierung } = await serviceClient
@@ -352,6 +361,14 @@ export async function updateLeadStatus(
   const svc = createServiceClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  // Write-Path-Audit (28.06.): Rollen-Guard — triggert Lead→Fall-Konversion, Staff-Aktion.
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'dispatch', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { ok: false, error: 'Nicht berechtigt' }
+    }
+  }
 
   const now = new Date().toISOString()
 

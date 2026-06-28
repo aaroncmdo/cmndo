@@ -244,6 +244,15 @@ export async function eskalation(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
+  // Write-Path-Audit (28.06.): Rollen-Guard — Eskalation schreibt kanzlei_faelle via
+  // admin-client (KB-Prozess-Aktion); die anderen Prozess-Actions sind geguardet, diese war's nicht.
+  {
+    const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+    if (!['admin', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+      return { success: false, error: 'Nur Admin und Kundenbetreuer dürfen eskalieren' }
+    }
+  }
+
   const stufeKey = stufe.toLowerCase()
   // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1 per Claim). Manuelle
   // Eskalation -> upsertKanzleiFall via Admin-Client. Claim-lose Legacy-Faelle: skip.
