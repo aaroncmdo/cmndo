@@ -155,15 +155,17 @@ async function main() {
   const svId = emailZuId['test-sv@claimondo.de']
   const kundeId = emailZuId['test-kunde@claimondo.de']
 
-  // --- 1. Fälle der Test-User ermitteln (für kaskadierte Löschungen) -----
-  const { data: faelle } = await db
-    .from('faelle')
+  // --- 1. Claims + Leads der Test-User ermitteln (claim-native; `faelle` ist seit
+  //        CMM-49 GEDROPPT — claims ist die SSoT, fall_id == claim_id). -----------
+  // SV-Seite: claims.sv_id referenziert sachverstaendige.id (NICHT profile.id) — erst die
+  // sachverstaendige-Rows der Test-SV-Profile aufloesen. Kunde-Seite: claims via lead_id der
+  // Test-Kunde-Leads (claims hat kein kunde_id; der Kunde haengt am Lead).
+  const { data: svRows } = await db
+    .from('sachverstaendige')
     .select('id')
-    .or(`kunde_id.in.(${userIds.join(',')}),sv_id.in.(${userIds.join(',')})`)
-  const fallIds = (faelle ?? []).map(f => f.id)
-  log(`Fälle gefunden: ${fallIds.length}`)
+    .in('profile_id', userIds)
+  const svSachvIds = (svRows ?? []).map(s => s.id)
 
-  // --- 2. Leads der Test-User ermitteln -----------------------------------
   const { data: leads } = await db
     .from('leads')
     .select('id')
@@ -171,56 +173,58 @@ async function main() {
   const leadIds = (leads ?? []).map(l => l.id)
   log(`Leads gefunden: ${leadIds.length}`)
 
-  // --- 3. Tabelleninhalt leeren (Reihenfolge: erst Kinder, dann Eltern) --
+  const claimOrFilter = []
+  if (svSachvIds.length > 0) claimOrFilter.push(`sv_id.in.(${svSachvIds.join(',')})`)
+  if (leadIds.length > 0) claimOrFilter.push(`lead_id.in.(${leadIds.join(',')})`)
+  let claimIds = []
+  if (claimOrFilter.length > 0) {
+    const { data: claims } = await db.from('claims').select('id').or(claimOrFilter.join(','))
+    claimIds = (claims ?? []).map(c => c.id)
+  }
+  log(`Claims gefunden: ${claimIds.length}`)
 
-  // Dokumente (FK auf Auftrag / Fall)
-  if (fallIds.length > 0) {
-    await leereTabellePerFallIds('dokumente', 'fall_id', fallIds)
-    await leereTabellePerFallIds('timeline', 'fall_id', fallIds)
-    await leereTabellePerFallIds('gutachter_termine', 'fall_id', fallIds)
-    await leereTabellePerFallIds('sla_tracking', 'fall_id', fallIds)
-    await leereTabellePerFallIds('webhook_events', 'fall_id', fallIds)
-    await leereTabellePerFallIds('vs_korrespondenz', 'fall_id', fallIds)
-    await leereTabellePerFallIds('task_reminders', 'fall_id', fallIds)
-    await leereTabellePerFallIds('tasks', 'fall_id', fallIds)
-    await leereTabellePerFallIds('nachrichten', 'fall_id', fallIds)
-    await leereTabellePerFallIds('email_log', 'fall_id', fallIds)
-    await leereTabellePerFallIds('fall_read_state', 'fall_id', fallIds)
-    await leereTabellePerFallIds('fall_summaries', 'fall_id', fallIds)
-    await leereTabellePerFallIds('fall_dokumente', 'fall_id', fallIds)
-    await leereTabellePerFallIds('gutachten_fotos', 'fall_id', fallIds)
-    await leereTabellePerFallIds('gutachten_positionen', 'fall_id', fallIds)
-    await leereTabellePerFallIds('phase_transitions', 'fall_id', fallIds)
-    await leereTabellePerFallIds('kanzlei_faelle', 'fall_id', fallIds)
-    await leereTabellePerFallIds('qc_checkliste', 'fall_id', fallIds)
+  // --- 2. Kind-Tabellen leeren — claim_id-nativ (praktisch alle Kind-Tabellen tragen
+  //        claim_id; KEIN FK auf das gedroppte faelle -> explizit vor claims loeschen.
+  //        task_reminders/claim_parties/claim_vehicle_involvements CASCADEn via FK). --
+  if (claimIds.length > 0) {
+    for (const tabelle of [
+      'timeline', 'gutachter_termine', 'sla_tracking', 'webhook_events', 'vs_korrespondenz',
+      'tasks', 'nachrichten', 'email_log', 'fall_read_state', 'fall_summaries', 'fall_dokumente',
+      'gutachten_fotos', 'gutachten_positionen', 'phase_transitions', 'kanzlei_faelle', 'qc_checkliste',
+    ]) {
+      await leereTabellePerFallIds(tabelle, 'claim_id', claimIds)
+    }
   }
 
-  // Aufträge (per User-IDs)
-  const { data: auftraege } = await db
-    .from('auftraege')
-    .select('id')
-    .in('sv_id', userIds)
-  const auftragIds = (auftraege ?? []).map(a => a.id)
-  log(`Aufträge gefunden: ${auftragIds.length}`)
+  // Auftraege (claim-nativ) + deren Kinder
+  let auftragIds = []
+  if (claimIds.length > 0) {
+    const { data: auftraege } = await db.from('auftraege').select('id').in('claim_id', claimIds)
+    auftragIds = (auftraege ?? []).map(a => a.id)
+  }
+  log(`Auftraege gefunden: ${auftragIds.length}`)
   if (auftragIds.length > 0) {
     await leereTabellePerFallIds('pflichtdokumente', 'auftrag_id', auftragIds)
     await leereTabellePerFallIds('dokument_upload_anfragen', 'auftrag_id', auftragIds)
+    await leereTabellePerFallIds('auftraege', 'id', auftragIds)
   }
-  await leereTabellePerUserId('auftraege', 'sv_id', userIds)
 
-  // Fälle
-  if (fallIds.length > 0) {
+  // --- 3. Claims + Bridge loeschen (claims = SSoT; claim_parties/_vehicle_involvements
+  //        CASCADEn via FK auf claims). Bridge zuerst (claim_id-FK-Kind). ------------
+  if (claimIds.length > 0) {
+    await leereTabellePerFallIds('faelle_claim_bridge', 'claim_id', claimIds)
     const { error, count } = await db
-      .from('faelle')
+      .from('claims')
       .delete({ count: 'exact' })
-      .in('id', fallIds)
-    if (error) log(`WARNUNG faelle: ${error.message}`)
-    else log(`faelle geleert: ${count ?? '?'} rows`)
+      .in('id', claimIds)
+    if (error) log(`WARNUNG claims: ${error.message}`)
+    else log(`claims geleert: ${count ?? '?'} rows`)
   }
 
   // Leads und abhängige Tabellen
   if (leadIds.length > 0) {
     await leereTabellePerFallIds('lead_historie', 'lead_id', leadIds)
+    await leereTabellePerFallIds('gutachter_termine', 'lead_id', leadIds)
     await leereTabellePerFallIds('nachrichten', 'lead_id', leadIds)
     await leereTabellePerFallIds('email_log', 'lead_id', leadIds)
     await leereTabellePerFallIds('provisionen_maik', 'lead_id', leadIds)
