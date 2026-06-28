@@ -40,12 +40,6 @@ interface MitteilungExtras {
   grund?: string  // AAR-91
 }
 
-const DRINGEND_TYPEN: MitteilungTyp[] = [
-  'vorschaden_warnung',
-  'qc_nachbesserung',
-  're_termin_kundenwahl', // CMM-41: SV soll schnell entscheiden
-]
-
 /**
  * Erstellt eine Gutachter-Mitteilung.
  * Verwendet den Admin-Client (service role) da RLS Inserts fuer
@@ -62,6 +56,13 @@ export async function createGutachterMitteilung(
   const { titel, nachricht } = buildMessage(typ, extras)
   const link = fall_id ? `/gutachter/fall/${fall_id}` : null
 
+  // BUG-FIX: `dringend` ist KEINE Spalte von gutachter_mitteilungen (Schema: id, sv_id,
+  // fall_id, typ, titel, nachricht, gelesen, link, created_at, claim_id). Der fruehere Insert
+  // mit `dringend` schlug bei JEDEM Aufruf mit 42703 fehl (nur geloggt, nicht geworfen) -> die
+  // Tabelle blieb dauerhaft leer -> SVs bekamen ueber ~10 Event-Typen (neuer_auftrag,
+  // termin_bestaetigt, qc_*, kanzlei_*, re_termin_kundenwahl, auftrag_storniert ...) NIE eine
+  // In-App-Mitteilung, und die Posteingang-Badge im Gutachter-Portal zeigte strukturell immer 0.
+  // Kein Reader nutzt `dringend` (nur Task-Prioritaeten heissen so) -> Feld entfernt statt Spalte anzulegen.
   const { error } = await supabase.from('gutachter_mitteilungen').insert({
     sv_id,
     fall_id,
@@ -69,7 +70,6 @@ export async function createGutachterMitteilung(
     titel,
     nachricht,
     gelesen: false,
-    dringend: DRINGEND_TYPEN.includes(typ),
     link,
   })
 
