@@ -402,10 +402,15 @@ export async function convertLeadToClaim(
     // den CHECK-Constraint verletzt. Erlaubte Werte:
     //   partnerkanzlei | eigene_kanzlei | keine_kanzlei |
     //   noch_unentschieden | nicht_gefragt
-    // 'nicht_gefragt' ist der korrekte Initial-Wert — der Wunsch wird
-    // später vom Dispatcher (am Telefon) oder vom Kunden im Portal
-    // (KanzleiWunschModal) gesetzt.
-    kanzlei_wunsch: 'nicht_gefragt',
+    // Komplettservice = LexDrive IMMER (Aaron): komplett -> 'partnerkanzlei'
+    // automatisch; im Flow/Lead wird NICHT mehr nach einer anderen Kanzlei
+    // gefragt. Auf Claim-Ebene kann der Kunde im Portal (KanzleiWunschModal)
+    // aktiv auf eine eigene Kanzlei wechseln. nur_gutachter -> 'nicht_gefragt'
+    // (keine Claimondo-Kanzlei; der Kunde reguliert selbst).
+    kanzlei_wunsch:
+      ((lead.service_typ as string | null) ?? 'komplett') === 'komplett'
+        ? 'partnerkanzlei'
+        : 'nicht_gefragt',
   }
 
   // CMM-74 b2: operative_status (Engine-Cursor, claims=SSoT) initial = faelle.status-Initialwert
