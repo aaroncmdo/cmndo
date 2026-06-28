@@ -199,7 +199,7 @@ export default function KameraModal({
         {error ? (
           <div className="max-w-md p-6 text-center text-white/90 space-y-3">
             <p className="text-sm">Kamera-Zugriff nicht möglich:</p>
-            <p className="text-xs text-red-300">{error}</p>
+            <p className="text-xs text-danger">{error}</p>
             <p className="text-xs text-white/70">
               Bitte Kamera-Berechtigung in den Browser-Einstellungen erlauben
               oder Datei über „Hochladen" auswählen.

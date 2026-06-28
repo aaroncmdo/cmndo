@@ -12,8 +12,8 @@ import {
 import PageHeader from '@/components/shared/PageHeader'
 
 const PRIO_COLORS: Record<string, string> = {
-  kritisch: 'bg-red-50 text-red-300 border-red-800',
-  dringend: 'bg-amber-50 text-amber-300 border-amber-800',
+  kritisch: 'bg-danger-soft text-danger-strong border-danger/30',
+  dringend: 'bg-warning-soft text-warning-strong border-warning/30',
   normal: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border',
 }
 
@@ -78,9 +78,9 @@ export default async function GutachterTasksPage() {
 
         {/* Warnungen */}
         {ueberfaellige.length > 0 && (
-          <div className="bg-red-50/50 border border-red-800/50 rounded-2xl p-4 flex items-center gap-3">
-            <AlertTriangleIcon className="w-5 h-5 text-red-400 shrink-0" />
-            <p className="text-red-300 text-sm">
+          <div className="bg-danger-soft/50 border border-danger/30 rounded-2xl p-4 flex items-center gap-3">
+            <AlertTriangleIcon className="w-5 h-5 text-danger shrink-0" />
+            <p className="text-danger-strong text-sm">
               {ueberfaellige.length} {ueberfaellige.length === 1 ? 'Task ist' : 'Tasks sind'} ueberfaellig!
             </p>
           </div>
@@ -101,7 +101,7 @@ export default async function GutachterTasksPage() {
                 <div
                   key={task.id}
                   className={`bg-white border rounded-2xl p-4 ${
-                    dl?.overdue ? 'border-red-800/60' : 'border-claimondo-border'
+                    dl?.overdue ? 'border-danger/30' : 'border-claimondo-border'
                   }`}
                 >
                   <div className="flex items-start gap-3">
@@ -126,7 +126,7 @@ export default async function GutachterTasksPage() {
                           </Link>
                         )}
                         {dl && (
-                          <span className={`flex items-center gap-1 ${dl.overdue ? 'text-red-400' : 'text-claimondo-ondo'}`}>
+                          <span className={`flex items-center gap-1 ${dl.overdue ? 'text-danger' : 'text-claimondo-ondo'}`}>
                             <ClockIcon className="w-3 h-3" />
                             {dl.text}
                           </span>

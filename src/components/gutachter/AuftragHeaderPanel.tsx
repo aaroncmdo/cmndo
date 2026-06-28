@@ -190,7 +190,7 @@ export default function AuftragHeaderPanel({
     <div
       className={
         istVerlegungPending
-          ? 'rounded-2xl bg-amber-50 border-2 border-amber-400 overflow-hidden'
+          ? 'rounded-2xl bg-warning-soft border-2 border-warning/30 overflow-hidden'
           : 'rounded-2xl bg-claimondo-navy/[0.06] border border-claimondo-navy/15 backdrop-blur-sm overflow-hidden'
       }
     >
@@ -210,9 +210,9 @@ export default function AuftragHeaderPanel({
                   <div
                     className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${
                       istVerlegungWarn
-                        ? 'bg-amber-500 text-white ring-2 ring-amber-300'
+                        ? 'bg-warning text-white ring-2 ring-warning/20'
                         : isDone
-                          ? 'bg-emerald-500 text-white'
+                          ? 'bg-success text-white'
                           : istQc
                             ? 'bg-claimondo-navy text-white ring-2 ring-claimondo-ondo/50'
                             : isCurrent
@@ -225,13 +225,13 @@ export default function AuftragHeaderPanel({
                   <p
                     className={`text-sm font-semibold whitespace-nowrap ${
                       istVerlegungWarn
-                        ? 'text-amber-700'
+                        ? 'text-warning-strong'
                         : istQc
                           ? 'text-claimondo-navy'
                           : isCurrent
                             ? 'text-claimondo-navy'
                             : isDone
-                              ? 'text-emerald-700'
+                              ? 'text-success-strong'
                               : 'text-claimondo-ondo/60'
                     }`}
                   >
@@ -239,13 +239,13 @@ export default function AuftragHeaderPanel({
                   </p>
                 </div>
                 {i < PHASES.length - 1 && (
-                  <div className={`flex-1 h-px mx-4 ${isDone ? 'bg-emerald-300' : 'bg-claimondo-navy/15'}`} />
+                  <div className={`flex-1 h-px mx-4 ${isDone ? 'bg-success/30' : 'bg-claimondo-navy/15'}`} />
                 )}
               </React.Fragment>
             )
           })}
           {fallPhase && (
-            <span className="ml-auto pl-4 text-xs uppercase tracking-wider font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-1.5 whitespace-nowrap">
+            <span className="ml-auto pl-4 text-xs uppercase tracking-wider font-semibold text-success-strong bg-success-soft border border-success/30 rounded-full px-3 py-1.5 whitespace-nowrap">
               {FALL_PHASE_LABEL[fallPhase]}
             </span>
           )}
@@ -256,12 +256,12 @@ export default function AuftragHeaderPanel({
           alle anderen Sektionen (Termin-Navi, Briefing, Pflichtliste, Verlegungs-
           Hinweis) werden ausgeblendet, weil sie in dem Moment irrelevant sind. */}
       {phase === 'besichtigung' && (
-        <div className="border-t border-claimondo-navy/10 px-6 py-3.5 bg-emerald-50">
+        <div className="border-t border-claimondo-navy/10 px-6 py-3.5 bg-success-soft">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 border border-emerald-300 flex items-center justify-center shrink-0">
-              <MapPinIcon className="w-4 h-4 text-emerald-700" />
+            <div className="w-8 h-8 rounded-full bg-success-soft border border-success/30 flex items-center justify-center shrink-0">
+              <MapPinIcon className="w-4 h-4 text-success-strong" />
             </div>
-            <p className="text-sm font-semibold text-emerald-900">
+            <p className="text-sm font-semibold text-success-strong">
               Besichtigung läuft
             </p>
           </div>
@@ -274,18 +274,18 @@ export default function AuftragHeaderPanel({
           only angezeigt — kein Navigation/Termin-Block daneben, weil der
           Termin noch nicht final bestätigt ist. */}
       {termin && istVerlegungPending && (
-        <div className="border-t-2 border-amber-400 bg-amber-50 px-6 py-3.5">
+        <div className="border-t-2 border-warning/30 bg-warning-soft px-6 py-3.5">
           <div className="flex items-start gap-3 mb-3">
-            <div className="w-8 h-8 rounded-full bg-amber-100 border border-amber-300 flex items-center justify-center shrink-0">
-              <ClockIcon className="w-4 h-4 text-amber-700" />
+            <div className="w-8 h-8 rounded-full bg-warning-soft border border-warning/30 flex items-center justify-center shrink-0">
+              <ClockIcon className="w-4 h-4 text-warning-strong" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-amber-900">
+              <p className="text-sm font-semibold text-warning-strong">
                 {istKundeInitiator
                   ? 'Kunde möchte verlegen — bitte bestätigen'
                   : 'Verlegung beantragt — Bestätigung ausstehend'}
               </p>
-              <p className="text-xs text-amber-800 mt-0.5">
+              <p className="text-xs text-warning mt-0.5">
                 {istKundeInitiator
                   ? 'Der Kunde hat einen neuen Termin vorgeschlagen. Bestätige oder lehne ab — solange wartet der Original-Termin.'
                   : 'Der Kunde wurde benachrichtigt. Bei Nicht-Reaktion eskalieren wir 48h vor dem Original-Termin automatisch an den Kundenbetreuer.'}
@@ -294,8 +294,8 @@ export default function AuftragHeaderPanel({
           </div>
           {/* Termin-Daten — read-only bei SV-Initiator, mit Buttons bei Kunde-Initiator */}
           {fmt && (
-            <div className="rounded-ios-xl bg-white border-2 border-amber-300 p-3 ml-11">
-              <p className="text-[10px] uppercase tracking-wider text-amber-700 font-semibold mb-1">
+            <div className="rounded-ios-xl bg-white border-2 border-warning/30 p-3 ml-11">
+              <p className="text-[10px] uppercase tracking-wider text-warning-strong font-semibold mb-1">
                 Vorgeschlagener neuer Termin
               </p>
               <p className="text-sm font-semibold text-claimondo-navy">
@@ -309,7 +309,7 @@ export default function AuftragHeaderPanel({
                   <button
                     onClick={() => setModal('ablehnen')}
                     disabled={loading}
-                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-ios-lg text-sm font-medium text-red-700 bg-white border border-red-200 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 rounded-ios-lg text-sm font-medium text-danger-strong bg-white border border-danger/30 hover:bg-danger-soft transition-colors disabled:opacity-50"
                   >
                     <XCircleIcon className="w-4 h-4" />
                     Ablehnen
@@ -384,7 +384,7 @@ export default function AuftragHeaderPanel({
                 <>
                   <button
                     onClick={() => setModal('ablehnen')}
-                    className="inline-flex items-center gap-1.5 rounded-ios-lg border border-red-200 bg-white text-red-600 hover:bg-red-50 text-sm font-medium px-3 py-1.5 transition-colors"
+                    className="inline-flex items-center gap-1.5 rounded-ios-lg border border-danger/30 bg-white text-danger hover:bg-danger-soft text-sm font-medium px-3 py-1.5 transition-colors"
                   >
                     <XCircleIcon className="w-3.5 h-3.5" />
                     Ablehnen
@@ -430,10 +430,10 @@ export default function AuftragHeaderPanel({
 
           {/* Vor Ort einzusammeln — gelb eingefasst zur Hervorhebung */}
           {offenePflicht.length > 0 && (
-            <div className="flex flex-col rounded-ios-xl border border-dashed border-amber-300 bg-amber-50 p-3">
+            <div className="flex flex-col rounded-ios-xl border border-dashed border-warning/30 bg-warning-soft p-3">
               <div className="flex items-center gap-2 mb-2">
-                <ClipboardListIcon className="w-4 h-4 text-amber-700" />
-                <p className="text-xs font-semibold uppercase tracking-wider text-amber-900">
+                <ClipboardListIcon className="w-4 h-4 text-warning-strong" />
+                <p className="text-xs font-semibold uppercase tracking-wider text-warning-strong">
                   Vor Ort einzusammeln
                 </p>
               </div>
@@ -442,7 +442,7 @@ export default function AuftragHeaderPanel({
                   <li key={slot.slot_id} className="text-sm text-claimondo-navy">
                     <span className="font-medium">{slot.label}</span>
                     {slot.beschreibung && (
-                      <span className="text-xs text-amber-900">
+                      <span className="text-xs text-warning-strong">
                         {' — '}
                         {slot.beschreibung}
                       </span>
@@ -476,7 +476,7 @@ export default function AuftragHeaderPanel({
           <button
             onClick={handleAblehnen}
             disabled={loading}
-            className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-red-500 hover:bg-red-600 transition-colors disabled:opacity-50"
+            className="flex-1 py-2.5 rounded-ios-lg text-sm font-medium text-white bg-danger hover:bg-danger/90 transition-colors disabled:opacity-50"
           >
             {loading ? 'Wird abgelehnt…' : 'Ja, ablehnen'}
           </button>

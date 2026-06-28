@@ -178,7 +178,7 @@ export default function EmbedSiteWizard({
       </div>
 
       {error && (
-        <div className="rounded-ios-lg border border-red-200 bg-red-50 px-4 py-2 text-sm text-red-700">{error}</div>
+        <div className="rounded-ios-lg border border-danger/30 bg-danger-soft px-4 py-2 text-sm text-danger-strong">{error}</div>
       )}
 
       {/* STEP 0 — Basis & Domains */}
@@ -247,7 +247,7 @@ export default function EmbedSiteWizard({
                 </p>
                 <p className="text-xs text-claimondo-ondo mt-1">Eigenes Theme + Dispatch-Qualifizierung.</p>
                 {!svVerifiziert && (
-                  <p className="text-xs font-medium text-amber-700 mt-1.5">
+                  <p className="text-xs font-medium text-warning-strong mt-1.5">
                     Erst nach deiner Verifizierung durch Claimondo freigeschaltet.
                   </p>
                 )}
@@ -296,7 +296,7 @@ export default function EmbedSiteWizard({
                     checked={form.agb_akzeptiert}
                     onCheckedChange={(c) => patch({ agb_akzeptiert: c === true })}
                   />
-                  <span className={fieldErrors.has('agb_akzeptiert') ? 'text-red-700' : ''}>
+                  <span className={fieldErrors.has('agb_akzeptiert') ? 'text-danger-strong' : ''}>
                     Ich akzeptiere die Kooperations-AGB ({MONIKA_AGB_VERSION}) — 70 € pro vereinbartem Termin.
                   </span>
                 </label>
@@ -433,7 +433,7 @@ function TrackingStatus({ status, at, error }: { status: string | null; at: stri
   const ok = /^2\d\d$/.test(status)
   const when = at ? new Date(at).toLocaleString('de-DE', { timeZone: 'Europe/Berlin' }) : ''
   return (
-    <span className={ok ? 'text-emerald-600' : 'text-red-600'}>
+    <span className={ok ? 'text-success' : 'text-danger'}>
       {ok ? '✓' : '✗'} {status}
       {when ? ` · ${when}` : ''}
       {!ok && error ? ` · ${error}` : ''}

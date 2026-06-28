@@ -57,7 +57,7 @@ export default function BesichtigungAbschliessenButton({
   return (
     <div className="space-y-2">
       {confirming && (
-        <p className="text-[11px] text-amber-200">
+        <p className="text-[11px] text-warning">
           Es sind noch {pflichtOffen}{' '}
           {pflichtOffen === 1 ? 'Pflichtdokument' : 'Pflichtdokumente'} offen.
           Erneut tippen zum Bestätigen oder neben dem Button tippen zum
