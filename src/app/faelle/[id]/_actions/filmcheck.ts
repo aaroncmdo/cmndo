@@ -59,37 +59,50 @@ export async function saveFilmcheck(
     console.warn(`[CMM-44 SP-H] fall ${fallId} ohne claim_id — filmcheck_* skip`)
   }
 
-  // KFZ-202: Status via State-Machine
-  await transitionFallStatus(fallId, 'kanzlei-uebergeben')
-
-  // CMM-49: claims-direkt statt faelle-Embed (claimId via resolveClaimId oben)
-  let fallNr = fallId.slice(0, 8)
+  // service_typ-Gate (Aaron): nur 'komplett' wird an die Kanzlei uebergeben.
+  // 'nur_gutachter' hat kein Mandat -> kein Kanzlei-Handoff (Status-Transition,
+  // Kanzlei-Mails, Anschlussschreiben-Task, kanzlei_uebergabe-Communication).
+  // checkFallAutoPhase (unten) progressed den Claim regulaer. Default true, damit
+  // Faelle ohne aufloesbare claim_id das bisherige Verhalten behalten.
+  let istKomplett = true
   if (claimId) {
-    const { data: claimInfo } = await supabase.from('claims').select('claim_nummer').eq('id', claimId).single()
-    if (claimInfo?.claim_nummer) fallNr = claimInfo.claim_nummer
-  }
-  const { data: kanzleiUsers } = await supabase.from('profiles').select('email').eq('rolle', 'kanzlei')
-  for (const k of kanzleiUsers ?? []) {
-    if (k.email) emailFilmcheckBestanden(k.email, fallNr).catch(() => {})
+    const { data: claimSvc } = await supabase.from('claims').select('service_typ').eq('id', claimId).single()
+    istKomplett = (claimSvc?.service_typ as string | null) !== 'nur_gutachter'
   }
 
-  // KFZ-137: Kanzlei Auftragszusammenfassung
-  try {
-    const { sendKanzleiAuftragszusammenfassung } = await import('@/lib/email/google/flows')
-    for (const k of kanzleiUsers ?? []) {
-      if (k.email) await sendKanzleiAuftragszusammenfassung(fallId, k.email)
+  if (istKomplett) {
+    // KFZ-202: Status via State-Machine
+    await transitionFallStatus(fallId, 'kanzlei-uebergeben')
+
+    // CMM-49: claims-direkt statt faelle-Embed (claimId via resolveClaimId oben)
+    let fallNr = fallId.slice(0, 8)
+    if (claimId) {
+      const { data: claimInfo } = await supabase.from('claims').select('claim_nummer').eq('id', claimId).single()
+      if (claimInfo?.claim_nummer) fallNr = claimInfo.claim_nummer
     }
-  } catch (err) { console.error('[KFZ-137] Kanzlei-Email fehlgeschlagen:', err) }
+    const { data: kanzleiUsers } = await supabase.from('profiles').select('email').eq('rolle', 'kanzlei')
+    for (const k of kanzleiUsers ?? []) {
+      if (k.email) emailFilmcheckBestanden(k.email, fallNr).catch(() => {})
+    }
 
-  await supabase.from('tasks').insert({
-    fall_id: fallId,
-    typ: 'kanzlei-anschlussschreiben',
-    titel: 'Anschlussschreiben an Kanzlei senden',
-    beschreibung: 'Automatisch erstellt nach abgeschlossenem Filmcheck.',
-    status: 'offen',
-  })
+    // KFZ-137: Kanzlei Auftragszusammenfassung
+    try {
+      const { sendKanzleiAuftragszusammenfassung } = await import('@/lib/email/google/flows')
+      for (const k of kanzleiUsers ?? []) {
+        if (k.email) await sendKanzleiAuftragszusammenfassung(fallId, k.email)
+      }
+    } catch (err) { console.error('[KFZ-137] Kanzlei-Email fehlgeschlagen:', err) }
 
-  sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
+    await supabase.from('tasks').insert({
+      fall_id: fallId,
+      typ: 'kanzlei-anschlussschreiben',
+      titel: 'Anschlussschreiben an Kanzlei senden',
+      beschreibung: 'Automatisch erstellt nach abgeschlossenem Filmcheck.',
+      status: 'offen',
+    })
+
+    sendFallCommunication(fallId, 'kanzlei_uebergabe').catch(() => {})
+  }
 
   // CMM-49: claims-direkt (sv_id + claim_nummer claim-native)
   if (claimId) {
