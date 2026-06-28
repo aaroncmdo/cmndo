@@ -18,6 +18,8 @@
 import { requireRole } from '@/lib/auth/guards'
 import { revalidatePath } from 'next/cache'
 import { buildZuweisungPatch } from './werkstatt-vermittlung-patch'
+import { findWerkstaetten } from '@/lib/werkstatt/finder'
+import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 
 export type VermittleWerkstattInput = {
   target: 'lead' | 'claim'
@@ -125,4 +127,82 @@ export async function vermittleWerkstatt(
     revalidatePath(`/faelle/${input.id}`)
   }
   return { ok: true }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Phase 1, Task 5a: nahe Partner-Werkstaetten zu einem Lead/Claim laden.
+// Standort-Anker (Design §Claim-Standort): Lead -> besichtigungsort_lat/lng,
+// sonst unfallort_lat/lng, sonst kunde_plz/halter_plz (identisch zur Dispatch-
+// Karte, src/lib/dispatch/karte/triage-leads.ts). Claim -> schadenort_lat/lng,
+// sonst schadenort_plz. findWerkstaetten rankt nach Distanz (Haversine) bzw.
+// faellt bei nur-PLZ auf Name-Sortierung zurueck.
+
+export type GetWerkstaettenNahInput = {
+  target: 'lead' | 'claim'
+  id: string
+}
+
+export async function getWerkstaettenNah(
+  input: GetWerkstaettenNahInput,
+): Promise<
+  | { ok: true; werkstaetten: WerkstattFinderRow[] }
+  | { ok: false; error: string }
+> {
+  // Read-Path-Haertung: gleiche Rollen wie die Mutation (dispatch/admin).
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { ok: false, error: guard.error }
+  const { supabase } = guard
+
+  let lat: number | undefined
+  let lng: number | undefined
+  let plz: string | undefined
+
+  if (input.target === 'lead') {
+    const { data: lead } = await supabase
+      .from('leads')
+      .select(
+        'besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_plz, halter_plz',
+      )
+      .eq('id', input.id)
+      .maybeSingle()
+    const l = (lead ?? null) as {
+      besichtigungsort_lat: number | null
+      besichtigungsort_lng: number | null
+      unfallort_lat: number | null
+      unfallort_lng: number | null
+      kunde_plz: string | null
+      halter_plz: string | null
+    } | null
+    if (l) {
+      if (l.besichtigungsort_lat != null && l.besichtigungsort_lng != null) {
+        lat = l.besichtigungsort_lat
+        lng = l.besichtigungsort_lng
+      } else if (l.unfallort_lat != null && l.unfallort_lng != null) {
+        lat = l.unfallort_lat
+        lng = l.unfallort_lng
+      }
+      plz = l.kunde_plz ?? l.halter_plz ?? undefined
+    }
+  } else {
+    const { data: claim } = await supabase
+      .from('claims')
+      .select('schadenort_lat, schadenort_lng, schadenort_plz')
+      .eq('id', input.id)
+      .maybeSingle()
+    const c = (claim ?? null) as {
+      schadenort_lat: number | null
+      schadenort_lng: number | null
+      schadenort_plz: string | null
+    } | null
+    if (c) {
+      if (c.schadenort_lat != null && c.schadenort_lng != null) {
+        lat = c.schadenort_lat
+        lng = c.schadenort_lng
+      }
+      plz = c.schadenort_plz ?? undefined
+    }
+  }
+
+  const werkstaetten = await findWerkstaetten({ lat, lng, plz, limit: 12 })
+  return { ok: true, werkstaetten }
 }
