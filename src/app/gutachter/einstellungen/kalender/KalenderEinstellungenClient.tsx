@@ -91,7 +91,7 @@ export default function KalenderEinstellungenClient({
             </p>
           </div>
           {googleConnected ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-soft text-success-strong text-xs font-medium border border-success/30">
               <CheckCircle2Icon className="w-3 h-3" />
               verbunden
             </span>
@@ -134,12 +134,12 @@ export default function KalenderEinstellungenClient({
           </div>
           {caldav ? (
             caldav.lastError ? (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-50 text-red-700 text-xs font-medium border border-red-200">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-danger-soft text-danger-strong text-xs font-medium border border-danger/30">
                 <AlertCircleIcon className="w-3 h-3" />
                 Fehler
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-medium border border-emerald-200">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-soft text-success-strong text-xs font-medium border border-success/30">
                 <CheckCircle2Icon className="w-3 h-3" />
                 verbunden
               </span>
@@ -165,7 +165,7 @@ export default function KalenderEinstellungenClient({
               </p>
             )}
             {caldav.lastError && (
-              <div className="mt-2 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2 text-red-700">
+              <div className="mt-2 bg-danger-soft border border-danger/30 rounded-ios-lg px-3 py-2 text-danger-strong">
                 <p className="font-medium">Verbindungs-Fehler</p>
                 <p className="text-[11px] mt-0.5">{caldav.lastError}</p>
                 <p className="text-[11px] mt-1">Bitte neu verbinden — das behebt die meisten Probleme.</p>
@@ -197,7 +197,7 @@ export default function KalenderEinstellungenClient({
               type="button"
               onClick={handleDisconnectCaldav}
               disabled={disconnecting}
-              className="inline-flex items-center gap-1.5 text-xs font-medium text-red-600 hover:text-red-700 disabled:opacity-40"
+              className="inline-flex items-center gap-1.5 text-xs font-medium text-danger hover:text-danger-strong disabled:opacity-40"
             >
               <TrashIcon className="w-3 h-3" />
               {disconnecting ? 'Trenne …' : 'Verbindung trennen'}
@@ -206,7 +206,7 @@ export default function KalenderEinstellungenClient({
         </div>
 
         {error && (
-          <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2">
+          <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg px-3 py-2">
             {error}
           </p>
         )}

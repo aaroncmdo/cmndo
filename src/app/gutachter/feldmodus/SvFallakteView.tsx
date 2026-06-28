@@ -213,7 +213,7 @@ export default function SvFallakteView({
 
       <div className="flex-1 overflow-y-auto">
         {loadError ? (
-          <div className="p-4 text-xs text-red-300 bg-red-900/30 m-4 rounded-ios-lg">
+          <div className="p-4 text-xs text-danger bg-danger-soft/30 m-4 rounded-ios-lg">
             {loadError}
           </div>
         ) : loading && !fall ? (

@@ -240,7 +240,7 @@ export default function BueroOnboardingClient({
                           <button
                             type="button"
                             onClick={() => removeStandort(std.id)}
-                            className="text-claimondo-ondo/50 hover:text-red-400 p-0.5"
+                            className="text-claimondo-ondo/50 hover:text-danger p-0.5"
                           >
                             <TrashIcon className="w-3.5 h-3.5" />
                           </button>
@@ -254,7 +254,7 @@ export default function BueroOnboardingClient({
                       />
                       <div>
                         <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                          Anschrift <span className="text-red-400">*</span>
+                          Anschrift <span className="text-danger">*</span>
                           {std.lat !== null && std.lng !== null && (
                             <span className="text-success ml-2">✓ Geo gesetzt</span>
                           )}
@@ -339,7 +339,7 @@ export default function BueroOnboardingClient({
 
               <div>
                 <label className="text-xs text-claimondo-ondo mb-1.5 block">
-                  Unterschrift <span className="text-red-400">*</span>
+                  Unterschrift <span className="text-danger">*</span>
                 </label>
                 <SignaturePadInput
                   value={signaturePng}
@@ -457,7 +457,7 @@ function Field({
         required ? (
           <>
             {label}
-            <span className="ml-0.5 text-red-500">*</span>
+            <span className="ml-0.5 text-danger">*</span>
           </>
         ) : (
           label
