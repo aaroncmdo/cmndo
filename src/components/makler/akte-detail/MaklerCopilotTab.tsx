@@ -171,8 +171,8 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           </p>
         </div>
         {kontextLoaded ? (
-          <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full bg-emerald-500/20 text-emerald-100 border border-emerald-400/30">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+          <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full bg-success/20 text-success-soft border border-success/30">
+            <span className="w-1.5 h-1.5 rounded-full bg-success" />
             Fall-Kontext geladen
           </span>
         ) : null}
@@ -228,7 +228,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
       </div>
 
       {errorMsg ? (
-        <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-xs text-red-700">
+        <div className="px-4 py-2 bg-danger-soft border-t border-danger/30 text-xs text-danger-strong">
           {errorMsg}
         </div>
       ) : null}

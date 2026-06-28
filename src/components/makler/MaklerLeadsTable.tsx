@@ -281,18 +281,18 @@ function LeadStatusBadge({
 function ConsentBadge({ label }: { label: ConsentLabel }) {
   const cfg: Record<ConsentLabel, { bg: string; text: string; label: string }> = {
     vollzugriff: {
-      bg: 'bg-emerald-600/10',
-      text: 'text-emerald-700',
+      bg: 'bg-success/10',
+      text: 'text-success-strong',
       label: 'Vollzugriff',
     },
     minimal: {
-      bg: 'bg-amber-100',
-      text: 'text-amber-700',
+      bg: 'bg-warning/15',
+      text: 'text-warning-strong',
       label: 'Minimal',
     },
     widerrufen: {
-      bg: 'bg-red-100',
-      text: 'text-red-700',
+      bg: 'bg-danger/15',
+      text: 'text-danger-strong',
       label: 'Widerrufen',
     },
     kein_account: {

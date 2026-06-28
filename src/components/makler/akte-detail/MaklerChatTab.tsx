@@ -307,7 +307,7 @@ export function MaklerChatTab({ fallId, currentUserId, initialMessages }: Props)
 
       {/* Error */}
       {errorMsg ? (
-        <div className="px-4 py-2 bg-red-50 border-t border-red-200 text-xs text-red-700">
+        <div className="px-4 py-2 bg-danger-soft border-t border-danger/30 text-xs text-danger-strong">
           {errorMsg}
         </div>
       ) : null}

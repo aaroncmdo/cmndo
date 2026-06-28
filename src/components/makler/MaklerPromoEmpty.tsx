@@ -7,7 +7,7 @@ export function MaklerPromoEmpty({ firma }: { firma: string }) {
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="bg-white rounded-ios-md border border-claimondo-border p-8 text-center space-y-4">
-        <span className="inline-flex items-center justify-center w-14 h-14 rounded-ios-md bg-orange-50 text-orange-600 border border-orange-200">
+        <span className="inline-flex items-center justify-center w-14 h-14 rounded-ios-md bg-warning-soft text-warning-strong border border-warning/30">
           <QrCodeIcon width={24} height={24} />
         </span>
         <h1 className="text-lg font-bold text-claimondo-navy">
