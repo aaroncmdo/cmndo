@@ -49,14 +49,17 @@ export async function getClaimLifecycleForClaim(
   // AAR-939: service_typ -> ClaimLifecycle.serviceTyp, damit Stepper/Pipeline die
   // Regulierungs-Phase fuer nur_gutachter ausblenden (kein Regulierungs-Tail).
   let serviceTyp: string | null = null
+  // Unified Stepper: operative_status ist die kanonische Phasen-Quelle fuer getClaimLifecycle.
+  let operativeStatus: string | null = null
   if (claimId) {
     const { data: claim } = await admin
       .from('claims')
-      .select('status, lead_id, service_typ')
+      .select('status, lead_id, service_typ, operative_status')
       .eq('id', claimId)
       .maybeSingle()
     claimStatus = (claim?.status as string | null) ?? null
     serviceTyp = (claim?.service_typ as string | null) ?? null
+    operativeStatus = (claim?.operative_status as string | null) ?? null
     if (claim?.lead_id) {
       const { data: leadRow } = await admin
         .from('leads')
@@ -81,7 +84,7 @@ export async function getClaimLifecycleForClaim(
   return {
     // AAR-939: serviceTyp anhaengen (getClaimLifecycle bleibt rein -> Parity zu
     // v_claim_phase unberuehrt; nur ein Render-Sicht-Filter fuer die Phasen).
-    lifecycle: { ...getClaimLifecycle({ lead, auftraege, kanzleiFall, claimStatus }), serviceTyp },
+    lifecycle: { ...getClaimLifecycle({ lead, auftraege, kanzleiFall, claimStatus, operativeStatus }), serviceTyp },
     auftraege,
     kanzleiFall,
   }
