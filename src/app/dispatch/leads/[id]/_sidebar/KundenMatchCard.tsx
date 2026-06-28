@@ -82,23 +82,23 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
 
   return (
     <>
-      <div className={`rounded-ios-xl px-3 py-3 ${matchedId ? 'bg-emerald-50 border border-emerald-200' : 'bg-amber-50 border border-amber-200'}`}>
+      <div className={`rounded-ios-xl px-3 py-3 ${matchedId ? 'bg-success-soft border border-success/30' : 'bg-warning-soft border border-warning/30'}`}>
         <div className="flex items-center gap-2 mb-2">
           {matchedId ? (
-            <UserCheckIcon className="w-4 h-4 text-emerald-700" />
+            <UserCheckIcon className="w-4 h-4 text-success-strong" />
           ) : (
-            <UsersIcon className="w-4 h-4 text-amber-700" />
+            <UsersIcon className="w-4 h-4 text-warning-strong" />
           )}
-          <p className={`text-xs font-semibold ${matchedId ? 'text-emerald-800' : 'text-amber-800'}`}>
+          <p className={`text-xs font-semibold ${matchedId ? 'text-success-strong' : 'text-warning-strong'}`}>
             {matchedId ? 'Bestehender Kunde verknüpft' : `Bestehender Kunde gefunden (${matches.length})`}
           </p>
         </div>
         {matchedCandidate ? (
           <div className="space-y-1.5">
-            <p className="text-xs text-emerald-900">
+            <p className="text-xs text-success-strong">
               <strong>{[matchedCandidate.vorname, matchedCandidate.nachname].filter(Boolean).join(' ') || matchedCandidate.email}</strong>
               {matchedCandidate.faelle.length > 0 && (
-                <span className="text-emerald-700"> · {matchedCandidate.faelle.length} bisheriger Fall</span>
+                <span className="text-success-strong/80"> · {matchedCandidate.faelle.length} bisheriger Fall</span>
               )}
             </p>
             <div className="flex gap-2">
@@ -106,7 +106,7 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
                 type="button"
                 onClick={() => setOpen(true)}
                 disabled={pending}
-                className="text-[11px] text-emerald-700 hover:text-emerald-900 underline disabled:opacity-50"
+                className="text-[11px] text-success-strong hover:text-success underline disabled:opacity-50"
               >
                 Anders zuordnen
               </button>
@@ -114,7 +114,7 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
                 type="button"
                 onClick={handleUnlink}
                 disabled={pending}
-                className="text-[11px] text-emerald-700 hover:text-emerald-900 underline disabled:opacity-50"
+                className="text-[11px] text-success-strong hover:text-success underline disabled:opacity-50"
               >
                 Verknüpfung lösen
               </button>
@@ -122,7 +122,7 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
           </div>
         ) : (
           <>
-            <p className="text-[11px] text-amber-900 mb-2 leading-snug">
+            <p className="text-[11px] text-warning-strong mb-2 leading-snug">
               E-Mail oder Telefonnummer treffen mit bestehenden Kunden zusammen.
               Ist es derselbe Kunde?
             </p>
@@ -130,14 +130,14 @@ export default function KundenMatchCard({ leadId, initialMatchedKundeId }: Props
               type="button"
               onClick={() => setOpen(true)}
               disabled={pending}
-              className="w-full inline-flex items-center justify-center gap-1.5 rounded-ios-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold py-1.5 disabled:opacity-50"
+              className="w-full inline-flex items-center justify-center gap-1.5 rounded-ios-lg bg-warning hover:bg-warning/90 text-white text-xs font-semibold py-1.5 disabled:opacity-50"
             >
               <UsersIcon className="w-3.5 h-3.5" />
               Kandidaten ansehen
             </button>
           </>
         )}
-        {error && <p className="text-[10px] text-red-700 mt-1">{error}</p>}
+        {error && <p className="text-[10px] text-danger-strong mt-1">{error}</p>}
       </div>
 
       {open && (
@@ -221,7 +221,7 @@ function KandidatCard({
   return (
     <div
       className={`rounded-ios-xl border bg-white px-4 py-3 ${
-        isSelected ? 'border-emerald-400 ring-2 ring-emerald-200' : 'border-claimondo-border'
+        isSelected ? 'border-success ring-2 ring-success/20' : 'border-claimondo-border'
       }`}
     >
       <div className="flex items-start gap-3">
@@ -234,7 +234,7 @@ function KandidatCard({
             {match.match_basis.map((b) => (
               <span
                 key={b}
-                className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold"
+                className="text-[10px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-warning-soft text-warning-strong font-semibold"
               >
                 Treffer: {matchLabel[b]}
               </span>
@@ -295,7 +295,7 @@ function KandidatCard({
           disabled={pending || isSelected}
           className={`inline-flex items-center gap-1.5 rounded-ios-lg text-xs font-semibold px-3 py-1.5 disabled:opacity-50 ${
             isSelected
-              ? 'bg-emerald-600 text-white cursor-default'
+              ? 'bg-success text-white cursor-default'
               : 'bg-claimondo-navy hover:bg-claimondo-navy/90 text-white'
           }`}
         >
