@@ -84,14 +84,17 @@ export async function GET(request: Request) {
       // CMM-44 SP-D PR2a: besichtigungsort_adresse aus gutachter_termine (aktueller Termin, SSoT).
       const terminClaimId = termin.claim_id as string | null
       let fallClaim: { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null } | null = null
+      let claimLeadId: string | null = null
       let aktTerminAdresse: { besichtigungsort_adresse: string | null } | null = null
       if (terminClaimId) {
+        // BUG-FIX (claim-native Termine): auch claims.lead_id mitladen -> Kunde-Telefon-Fallback unten.
         const { data: claimRow } = await supabase
           .from('claims')
-          .select('schadenort_adresse, schadenort_plz, schadenort_ort')
+          .select('lead_id, schadenort_adresse, schadenort_plz, schadenort_ort')
           .eq('id', terminClaimId)
           .maybeSingle()
         fallClaim = claimRow
+        claimLeadId = (claimRow?.lead_id as string | null) ?? null
         const { data: at } = await supabase
           .from('gutachter_termine')
           .select('besichtigungsort_adresse')
@@ -128,13 +131,18 @@ export async function GET(request: Request) {
       }
       const svName = [svVorname, svNachname].filter(Boolean).join(' ') || 'Sachverständiger'
 
-      // Kunde-Daten laden
+      // Kunde-Daten laden. BUG-FIX (claim-native): termin.lead_id ist bei claim-nativen
+      // Terminen NULL — die Telefonnummer liegt aber weiterhin am Lead, den der CLAIM
+      // mitfuehrt (claims.lead_id). Vorher fiel die Kunde-Aufloesung hier durch -> der
+      // Reminder schlug mit "Keine Telefonnummer" fehl (18 von 26 Termin-Reminder-Fails;
+      // Kunden bekamen keine Besichtigungs-Erinnerung -> No-Shows). Fallback auf claims.lead_id.
+      const effectiveLeadId = termin.lead_id ?? claimLeadId
       let kundeVorname = '', kundeNachname = '', kundeTelefon: string | null = null
-      if (termin.lead_id) {
+      if (effectiveLeadId) {
         const { data: lead } = await supabase
           .from('leads')
           .select('vorname, nachname, telefon')
-          .eq('id', termin.lead_id)
+          .eq('id', effectiveLeadId)
           .single()
         if (lead) {
           kundeVorname = lead.vorname || ''
