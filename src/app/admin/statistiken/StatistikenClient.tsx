@@ -731,8 +731,8 @@ export default function StatistikenClient({
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="text-sm font-medium text-claimondo-navy pr-2">{b.beschreibung}</h4>
                         <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full whitespace-nowrap ${
-                          b.statusColor === 'green' ? 'bg-green-100 text-green-700' :
-                          b.statusColor === 'amber' ? 'bg-amber-100 text-amber-700' :
+                          b.statusColor === 'green' ? 'bg-success-soft text-success-strong' :
+                          b.statusColor === 'amber' ? 'bg-warning-soft text-warning-strong' :
                           b.statusColor === 'blue' ? 'bg-claimondo-ondo/10 text-claimondo-ondo' :
                           'bg-claimondo-bg text-claimondo-ondo'
                         }`}>
@@ -765,7 +765,7 @@ export default function StatistikenClient({
                       {b.eigenerWert != null && (
                         <div className="h-2 bg-claimondo-border rounded-full overflow-hidden">
                           <div className={`h-full rounded-full transition-all ${
-                            b.statusColor === 'green' ? 'bg-green-500' : b.statusColor === 'amber' ? 'bg-amber-500' : 'bg-claimondo-ondo'
+                            b.statusColor === 'green' ? 'bg-success' : b.statusColor === 'amber' ? 'bg-warning' : 'bg-claimondo-ondo'
                           }`} style={{ width: `${Math.min(Math.max((b.eigenerWert / Number(b.branchen_wert)) * 50, 5), 100)}%` }} />
                         </div>
                       )}
@@ -784,12 +784,12 @@ export default function StatistikenClient({
                       {b.statusColor === 'amber' && WAS_TUN_TIPS[b.metrik] && (
                         <div className="mt-2">
                           <button onClick={() => setWasTunOpen(wasTunOpen === b.metrik ? null : b.metrik)}
-                            className="text-[10px] text-amber-600 hover:text-amber-700 font-medium">
+                            className="text-[10px] text-warning hover:text-warning-strong font-medium">
                             {wasTunOpen === b.metrik ? 'Schließen' : 'Was tun?'}
                           </button>
                           {wasTunOpen === b.metrik && (
-                            <div className="mt-1.5 bg-amber-50 border border-amber-200 rounded-ios-lg p-2">
-                              <p className="text-[11px] text-amber-800 leading-relaxed">{WAS_TUN_TIPS[b.metrik]}</p>
+                            <div className="mt-1.5 bg-warning-soft border border-warning/30 rounded-ios-lg p-2">
+                              <p className="text-[11px] text-warning-strong leading-relaxed">{WAS_TUN_TIPS[b.metrik]}</p>
                             </div>
                           )}
                         </div>

@@ -255,7 +255,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
               <div className="flex items-center justify-between">
                 <span className="text-xs font-semibold text-claimondo-ondo">Mitglied {idx + 1}</span>
                 {mitglieder.length > 1 && (
-                  <button type="button" onClick={() => removeMember(m.id)} className="text-claimondo-ondo/50 hover:text-red-400 p-0.5">
+                  <button type="button" onClick={() => removeMember(m.id)} className="text-claimondo-ondo/50 hover:text-danger p-0.5">
                     <TrashIcon className="w-3.5 h-3.5" />
                   </button>
                 )}

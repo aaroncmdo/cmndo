@@ -104,7 +104,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
                     <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-claimondo-bg text-claimondo-ondo">{KAT_LABELS[inc.kategorie] ?? inc.kategorie}</span>
                   </div>
                 </div>
-                <button onClick={() => handleToggle(inc.id, inc.aktiv)} disabled={toggling === inc.id} className="text-green-400 hover:text-green-300 transition-colors">
+                <button onClick={() => handleToggle(inc.id, inc.aktiv)} disabled={toggling === inc.id} className="text-success hover:text-success/90 transition-colors">
                   <ToggleRightIcon className="w-6 h-6" />
                 </button>
               </div>
@@ -123,7 +123,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
                       <div className="flex items-center gap-2">
                         <span className="text-claimondo-ondo">{a.monat}</span>
                         <span className="text-green-400">{fmt(a.betrag)}</span>
-                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${a.status === 'ausgezahlt' ? 'bg-green-50 text-green-300' : a.status === 'genehmigt' ? 'bg-claimondo-ondo/5 text-claimondo-light-blue' : 'bg-claimondo-bg text-claimondo-ondo'}`}>{a.status}</span>
+                        <span className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${a.status === 'ausgezahlt' ? 'bg-success-soft text-success-strong' : a.status === 'genehmigt' ? 'bg-claimondo-ondo/5 text-claimondo-light-blue' : 'bg-claimondo-bg text-claimondo-ondo'}`}>{a.status}</span>
                       </div>
                     </div>
                   ))}
@@ -173,7 +173,7 @@ export default function IncentivesClient({ incentives, auszahlungen }: {
             <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig ab</label><input name="gueltig_ab" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
             <div><label className="text-sm text-claimondo-ondo mb-1 block">Gueltig bis</label><input name="gueltig_bis" type="date" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
           </div>
-          {error && <p className="text-sm text-red-600 bg-red-50 border border-red-200 px-4 py-3 rounded-ios-xl">{error}</p>}
+          {error && <p className="text-sm text-danger bg-danger-soft border border-danger/30 px-4 py-3 rounded-ios-xl">{error}</p>}
           <div className="flex gap-3 pt-2">
             <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>Abbrechen</Button>
             <Button variant="navy" fullWidth type="submit" disabled={loading}>
