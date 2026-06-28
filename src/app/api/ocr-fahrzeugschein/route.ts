@@ -18,6 +18,16 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'datei_url oder image_base64 erforderlich' }, { status: 400 })
     }
 
+    // Write-Path-Audit (28.06.): Auth-Gate VOR dem fetch(datei_url) (SSRF-Vektor) + dem
+    // admin-client-vehicles-Write. War vorher 0 Auth → anon konnte OCR auf jede fall_id
+    // triggern, eine beliebige URL serverseitig fetchen + Fahrzeugdaten schreiben. Die Caller
+    // sind Browser-Fetches (kunde-Onboarding, SV-Tools) → User-Cookie vorhanden.
+    const supabase = await createClient()
+    const ocrUser = (await supabase.auth.getUser())?.data?.user ?? null
+    if (!ocrUser) {
+      return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
+    }
+
     // ─── Step 1: Get image as base64 ────────────────────────────────────────
     let base64Image = image_base64 ?? ''
     if (!base64Image && datei_url) {
@@ -56,7 +66,6 @@ export async function POST(request: Request) {
     // -> entfernt. Wir holen nur noch die claim_id aus der Bridge (fall_id == bridge.fall_id) fuer
     // die claims/vehicles-Writes unten -> Route ist faelle-frei (DROP-Enabler). Das extrahierte
     // Halter-Feld bleibt im Timeline-Eintrag (Step 5) human-readable sichtbar.
-    const supabase = await createClient()
     const { data: bridge } = await supabase
       .from('faelle_claim_bridge')
       .select('claim_id')
