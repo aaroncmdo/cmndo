@@ -122,7 +122,7 @@ export default function FeldmodusDokumentSlot({
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-[var(--brand-primary)] truncate">{slotLabel}</p>
             {istPflicht && (
-              <span className="text-[10px] font-semibold text-red-600 uppercase">Pflicht</span>
+              <span className="text-[10px] font-semibold text-danger uppercase">Pflicht</span>
             )}
           </div>
           {beschreibung && <p className="text-xs text-claimondo-ondo mt-0.5">{beschreibung}</p>}

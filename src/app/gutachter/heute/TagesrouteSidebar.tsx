@@ -481,7 +481,7 @@ export default function TagesrouteSidebar({
                     <button
                       type="button"
                       onClick={() => onRemovePrivatStop(p.id)}
-                      className="text-claimondo-ondo/60 hover:text-red-600 p-1"
+                      className="text-claimondo-ondo/60 hover:text-danger p-1"
                       title="Privat-Stop entfernen"
                       aria-label="Privat-Stop entfernen"
                     >

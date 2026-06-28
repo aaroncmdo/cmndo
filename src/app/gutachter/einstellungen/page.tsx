@@ -95,9 +95,9 @@ export default async function EinstellungenPage() {
           const Icon = item.icon
           const toneClass =
             item.statusTone === 'green'
-              ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+              ? 'bg-success-soft text-success-strong border-success/30'
               : item.statusTone === 'amber'
-                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                ? 'bg-warning-soft text-warning-strong border-warning/30'
                 : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
           return (
             <Link

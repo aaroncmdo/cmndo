@@ -111,15 +111,15 @@ export default function StellungnahmeClient({
       />
 
       {/* Kontext: Kürzungs-Positionen */}
-      <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4 space-y-3">
+      <div className="rounded-2xl border border-warning/30 bg-warning-soft p-4 space-y-3">
         <div className="flex items-start gap-2">
-          <AlertTriangleIcon className="w-4 h-4 text-amber-600 mt-0.5 shrink-0" />
+          <AlertTriangleIcon className="w-4 h-4 text-warning mt-0.5 shrink-0" />
           <div>
-            <p className="text-sm font-semibold text-amber-900">
+            <p className="text-sm font-semibold text-warning-strong">
               Die Kanzlei hat eine Stellungnahme zu den VS-Kürzungen angefordert
               {beauftragAm ? ` (${formatDatum(beauftragAm)})` : ''}.
             </p>
-            <p className="text-xs text-amber-800 mt-0.5">
+            <p className="text-xs text-warning mt-0.5">
               Bitte lade deine technische Stellungnahme als PDF hoch und erläutere
               kurz deine Einschätzung zu den strittigen Positionen.
             </p>
@@ -128,13 +128,13 @@ export default function StellungnahmeClient({
 
         {hasKuerzungen ? (
           <div className="space-y-1.5">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-warning-strong">
               Kürzungs-Positionen der VS
             </p>
             {kuerzungen.map((k) => (
               <div
                 key={k.id}
-                className="flex items-start justify-between gap-2 bg-white rounded-ios-lg px-3 py-2 border border-amber-100 text-sm"
+                className="flex items-start justify-between gap-2 bg-white rounded-ios-lg px-3 py-2 border border-warning/30 text-sm"
               >
                 <div className="min-w-0">
                   <p className="font-medium text-claimondo-navy truncate">
@@ -155,15 +155,15 @@ export default function StellungnahmeClient({
               </div>
             ))}
             {totalGekuerzt > 0 && (
-              <div className="flex justify-between items-center px-3 py-1.5 bg-amber-100 rounded-ios-lg">
-                <p className="text-xs font-semibold text-amber-900">Gesamt gekürzt</p>
+              <div className="flex justify-between items-center px-3 py-1.5 bg-warning-soft rounded-ios-lg">
+                <p className="text-xs font-semibold text-warning-strong">Gesamt gekürzt</p>
                 <p className="text-sm font-bold text-red-700">− {formatEURausEuro(totalGekuerzt)}</p>
               </div>
             )}
           </div>
         ) : vsKuerzungGrund ? (
-          <div className="bg-white rounded-ios-lg px-3 py-2 border border-amber-100 text-sm text-claimondo-navy">
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-amber-700 mb-1">
+          <div className="bg-white rounded-ios-lg px-3 py-2 border border-warning/30 text-sm text-claimondo-navy">
+            <p className="text-[11px] font-semibold uppercase tracking-wider text-warning-strong mb-1">
               Kürzungs-Grund
             </p>
             <p>{vsKuerzungGrund}</p>
@@ -181,7 +181,7 @@ export default function StellungnahmeClient({
         {/* Datei-Auswahl */}
         <div className="space-y-1">
           <label className="text-sm font-semibold text-claimondo-navy">
-            Stellungnahme hochladen <span className="text-red-500">*</span>
+            Stellungnahme hochladen <span className="text-danger">*</span>
           </label>
           <button
             type="button"
@@ -215,7 +215,7 @@ export default function StellungnahmeClient({
             onChange={handlePick}
           />
           {fileError && (
-            <p className="text-xs text-red-600">{fileError}</p>
+            <p className="text-xs text-danger">{fileError}</p>
           )}
         </div>
 
@@ -253,7 +253,7 @@ export default function StellungnahmeClient({
 
         {/* Fehler-Anzeige */}
         {submitError && (
-          <div className="flex items-start gap-2 rounded-ios-xl bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-800">
+          <div className="flex items-start gap-2 rounded-ios-xl bg-danger-soft border border-danger/30 px-4 py-3 text-sm text-danger-strong">
             <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
             {submitError}
           </div>

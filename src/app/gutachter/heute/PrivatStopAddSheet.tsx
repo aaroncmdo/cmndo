@@ -181,7 +181,7 @@ export default function PrivatStopAddSheet({
                             {ev.source}
                           </span>
                           {ev.bereitsTermin && (
-                            <span className="text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                            <span className="text-[10px] text-success-strong bg-success-soft border border-success/30 px-1.5 py-0.5 rounded">
                               SV-Termin
                             </span>
                           )}
