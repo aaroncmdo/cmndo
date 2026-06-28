@@ -217,13 +217,15 @@ export default function KundeKbChat({
             bubbleCls = 'bg-gradient-to-br from-claimondo-navy to-[var(--brand-primary-hover)] text-white rounded-[18px] rounded-br-md shadow-sm'
           } else if (sender?.rolle === 'kb') {
             bubbleCls = 'bg-claimondo-ondo/12 text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
-            accentColor = '#4573A2'
+            accentColor = 'var(--brand-secondary, #4573A2)'
           } else if (sender?.rolle === 'sv') {
-            bubbleCls = 'bg-emerald-50 text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
+            // SV-Bubble: success-soft (brand-harmonisiert) statt raw emerald; Avatar bleibt
+            // SV-Rollen-Gruen als Rollen-Identitaet (kein Markenton).
+            bubbleCls = 'bg-success-soft text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm'
             accentColor = '#059669'
           } else {
             bubbleCls = 'bg-white text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm border border-claimondo-border/50'
-            accentColor = '#7BA3CC'
+            accentColor = 'var(--brand-accent, #7BA3CC)'
           }
           const initials = sender
             ? sender.name

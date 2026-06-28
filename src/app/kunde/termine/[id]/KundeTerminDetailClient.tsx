@@ -284,7 +284,7 @@ export default function KundeTerminDetailClient({
               <div className="flex items-center gap-2 flex-wrap">
                 <p className="text-base font-semibold text-claimondo-navy truncate">{sv.name}</p>
                 {sv.verifiziert && (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5">
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider text-success-strong bg-success-soft border border-success/30 rounded-full px-2 py-0.5">
                     <ShieldCheckIcon className="w-2.5 h-2.5" />
                     {t('detail.verifiziert')}
                   </span>

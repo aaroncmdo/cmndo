@@ -60,8 +60,8 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
           className="absolute inset-0"
           style={{
             background: [
-              'radial-gradient(65% 55% at 85% 0%, rgba(123,163,204,.10), transparent 65%)',
-              'radial-gradient(55% 65% at 0% 100%, rgba(69,115,162,.06), transparent 70%)',
+              'radial-gradient(65% 55% at 85% 0%, color-mix(in srgb, var(--brand-accent, #7BA3CC) 10%, transparent), transparent 65%)',
+              'radial-gradient(55% 65% at 0% 100%, color-mix(in srgb, var(--brand-secondary, #4573A2) 6%, transparent), transparent 70%)',
             ].join(', '),
           }}
         />

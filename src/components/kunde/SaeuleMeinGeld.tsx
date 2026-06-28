@@ -57,14 +57,14 @@ export default function SaeuleMeinGeld({ fallId, status, schadens_hoehe_netto, t
   return (
     <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-4">
       <div className="flex items-center gap-2">
-        <BanknoteIcon className="w-5 h-5 text-emerald-600" />
+        <BanknoteIcon className="w-5 h-5 text-success" />
         <h2 className="text-sm font-semibold text-claimondo-navy">{t('heading')}</h2>
       </div>
 
       {totalschaden && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2">
-          <AlertTriangleIcon className="w-4 h-4 text-red-600 shrink-0" />
-          <p className="text-xs text-red-700 font-medium">{t('totalschadenBadge')}</p>
+        <div className="flex items-center gap-2 bg-danger-soft border border-danger/30 rounded-ios-lg px-3 py-2">
+          <AlertTriangleIcon className="w-4 h-4 text-danger shrink-0" />
+          <p className="text-xs text-danger-strong font-medium">{t('totalschadenBadge')}</p>
         </div>
       )}
 
