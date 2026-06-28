@@ -77,6 +77,15 @@ export async function setKanzleiWunsch(input: {
   const auth = await requireRole(['admin', 'kundenbetreuer', 'kunde', 'dispatch'])
   if (!auth.success) return { ok: false, error: auth.error }
 
+  // Write-Path-Audit (28.06., 2. Pass): Ownership — requireRole erlaubt kunde, aber ohne
+  // Ownership könnte ein Kunde mit FREMDER claim_id den Kanzlei-Wunsch setzen + (in Phase
+  // regulierung) einen Paket-Versand triggern. claim_sichtbar_fuer_aktuellen_user grantet
+  // kunde nur den eigenen Claim, Staff alle.
+  {
+    const { data: darf } = await auth.supabase.rpc('claim_sichtbar_fuer_aktuellen_user', { p_claim_id: input.claim_id })
+    if (!darf) return { ok: false, error: 'Nicht berechtigt' }
+  }
+
   if (input.wunsch === 'eigene_kanzlei') {
     const k = input.eigene_kanzlei
     if (!k?.name?.trim()) {

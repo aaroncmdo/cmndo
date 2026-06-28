@@ -623,6 +623,13 @@ export async function updateSchadensAdresse(
   const claimId = await resolveClaimId(supabase, fallId)
   if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
 
+  // Write-Path-Audit (28.06., 2. Pass): Ownership — vorher nur getUser → fremder Schadenort
+  // (admin-client-Write) editierbar. claim_sichtbar_fuer_aktuellen_user: kunde=eigener, Staff=alle.
+  {
+    const { data: darf } = await supabase.rpc('claim_sichtbar_fuer_aktuellen_user', { p_claim_id: claimId })
+    if (!darf) return { success: false, error: 'Nicht berechtigt' }
+  }
+
   const { error } = await createAdminClient()
     .from('claims')
     .update({
@@ -658,6 +665,15 @@ export async function saveFinVin(
   const cleaned = finVin.trim().toUpperCase()
   if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(cleaned)) {
     return { success: false, error: 'Ungültige FIN. Muss 17 alphanumerische Zeichen lang sein.' }
+  }
+
+  // Write-Path-Audit (28.06., 2. Pass): Ownership — vorher nur getUser → fremde FIN setzbar
+  // (admin-client vehicles-Write + claims.vehicle_id-Link). kunde=eigener Claim, Staff=alle.
+  {
+    const finClaimId = await resolveClaimId(supabase, fallId)
+    if (!finClaimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const { data: darf } = await supabase.rpc('claim_sichtbar_fuer_aktuellen_user', { p_claim_id: finClaimId })
+    if (!darf) return { success: false, error: 'Nicht berechtigt' }
   }
 
   // CMM-50 Phase-B (Write-Retire): Die FIN gehoert auf vehicles (SSoT) — KEIN faelle.fin_vin-Write

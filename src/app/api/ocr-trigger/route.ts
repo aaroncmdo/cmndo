@@ -33,6 +33,18 @@ export async function POST(request: Request) {
 
   if (!dok) return NextResponse.json({ error: 'Dokument nicht gefunden' }, { status: 404 })
 
+  // Write-Path-Audit (28.06., 2. Pass): Ownership — vorher reichte irgendein Login → fremde
+  // Dokumente OCR-bar. Nur wer den Fall des Dokuments sehen darf (kunde=eigener, Staff/SV), darf triggern.
+  if (dok.fall_id) {
+    const { data: ocrBridge } = await supabase
+      .from('faelle_claim_bridge').select('claim_id').eq('fall_id', dok.fall_id).maybeSingle()
+    const ocrClaimId = (ocrBridge as { claim_id?: string | null } | null)?.claim_id ?? null
+    if (ocrClaimId) {
+      const { data: darfSehen } = await supabase.rpc('claim_sichtbar_fuer_aktuellen_user', { p_claim_id: ocrClaimId })
+      if (!darfSehen) return NextResponse.json({ error: 'Nicht berechtigt' }, { status: 403 })
+    }
+  }
+
   // Status auf processing
   await db.from('fall_dokumente').update({ ocr_status: 'processing' }).eq('id', dokumentId)
 
