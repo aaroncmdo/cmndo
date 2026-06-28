@@ -214,7 +214,9 @@ export async function uploadGutachten(
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
   fetch(`${baseUrl}/api/ocr-gutachten`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    // Write-Path-Audit (28.06.): /api/ocr-gutachten ist jetzt Bearer-CRON_SECRET-gegated
+    // (war vorher anon-offen). Dieser server-seitige Trigger sendet den Secret mit.
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.CRON_SECRET ?? ''}` },
     body: JSON.stringify({ fall_id: fallId, pdf_url: pdfUrl }),
   }).catch(() => {})
 
