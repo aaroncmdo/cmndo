@@ -78,6 +78,21 @@ export async function bucheRueckrufFuerLead(
     /* non-critical */
   }
 
+  // Dedup: den redundanten KB-Auto-Beratungstermin dieses Leads stornieren — der Kunde
+  // hat jetzt AKTIV einen Rueckruf gewaehlt (sonst zwei Anrufe: KB-Auto-Termin +
+  // Kunden-Rueckruf). Best-effort, non-critical (der Rueckruf ist schon gebucht). Bucht
+  // der Kunde NICHTS, bleibt der KB-Auto-Termin als Safety-Net bestehen.
+  try {
+    await admin
+      .from('gutachter_termine')
+      .update({ status: 'storniert', cancelled_at: new Date().toISOString() })
+      .eq('lead_id', leadId)
+      .eq('typ', 'kb_beratung')
+      .in('status', ['reserviert', 'bestaetigt', 'verlegt', 'verlegung_pending'])
+  } catch {
+    /* non-critical */
+  }
+
   revalidatePath('/dispatch/dashboard')
   revalidatePath('/dispatch/rueckrufe')
   revalidatePath('/dispatch/leads')
