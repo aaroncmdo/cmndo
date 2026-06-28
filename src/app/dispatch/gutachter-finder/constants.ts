@@ -15,13 +15,13 @@ export type GutachterFinderStatus =
   | 'storniert'
 
 export const STATUS_LABEL: Record<string, { label: string; color: string }> = {
-  entwurf: { label: 'Offen — anrufen', color: 'bg-orange-100 text-orange-800' },
-  neu: { label: 'Neu', color: 'bg-amber-100 text-amber-800' },
+  entwurf: { label: 'Offen — anrufen', color: 'bg-warning-soft text-warning-strong' },
+  neu: { label: 'Neu', color: 'bg-warning-soft text-warning-strong' },
   in_bearbeitung: { label: 'In Bearbeitung', color: 'bg-claimondo-ondo/20 text-claimondo-navy' },
   sv_kontaktiert: { label: 'SV kontaktiert', color: 'bg-claimondo-ondo/10 text-claimondo-ondo' },
-  termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-green-100 text-green-700' },
+  termin_bestaetigt: { label: 'Termin bestätigt', color: 'bg-success-soft text-success-strong' },
   abgeschlossen: { label: 'Abgeschlossen', color: 'bg-claimondo-bg text-claimondo-ondo' },
-  storniert: { label: 'Storniert', color: 'bg-red-50 text-red-500' },
+  storniert: { label: 'Storniert', color: 'bg-danger-soft text-danger' },
 }
 
 export const STATUS_FALLBACK = {

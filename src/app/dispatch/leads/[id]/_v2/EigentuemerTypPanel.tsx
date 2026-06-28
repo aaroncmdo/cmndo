@@ -83,26 +83,26 @@ export function EigentuemerTypPanel({
       </div>
 
       {error && (
-        <p className="mt-2 text-[11px] text-red-600">{error}</p>
+        <p className="mt-2 text-[11px] text-danger">{error}</p>
       )}
 
       {fl === 'leasing' && (
-        <div className="mt-2 rounded-ios-md bg-amber-50 border border-amber-200 p-2 space-y-1">
-          <p className="text-[11px] font-semibold text-amber-900">
+        <div className="mt-2 rounded-ios-md bg-warning-soft border border-warning/30 p-2 space-y-1">
+          <p className="text-[11px] font-semibold text-warning-strong">
             Gesprächshilfe bei Leasing
           </p>
-          <p className="text-[10px] text-amber-800 italic">
+          <p className="text-[10px] text-warning-strong italic">
             „Falls Sie Fragen wegen Ihrer Leasingbank haben — das klären wir nach dem Gutachten gemeinsam. Sie müssen jetzt nichts tun."
           </p>
         </div>
       )}
 
       {fl === 'finanzierung' && (
-        <div className="mt-2 rounded-ios-md bg-amber-50 border border-amber-200 p-2 space-y-1">
-          <p className="text-[11px] font-semibold text-amber-900">
+        <div className="mt-2 rounded-ios-md bg-warning-soft border border-warning/30 p-2 space-y-1">
+          <p className="text-[11px] font-semibold text-warning-strong">
             Gesprächshilfe bei Finanzierung
           </p>
-          <p className="text-[10px] text-amber-800 italic">
+          <p className="text-[10px] text-warning-strong italic">
             „Bei finanziertem Fahrzeug informieren wir Sie nach dem Gutachten über die nächsten Schritte."
           </p>
         </div>

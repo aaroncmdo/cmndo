@@ -39,10 +39,10 @@ const UNFALLART_LABEL: Record<string, string> = {
 }
 
 const SCHULD_LABEL: Record<string, { label: string; cls: string }> = {
-  gegner_klar: { label: 'Gegner klar schuldig', cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-  gegner_wahrscheinlich: { label: 'Gegner wahrscheinlich schuldig', cls: 'bg-green-50 text-green-700 border-green-200' },
-  geteilt: { label: 'Geteilte Schuld', cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  kunde_verdacht: { label: '⚠ Kunde-Verdacht', cls: 'bg-red-50 text-red-700 border-red-200' },
+  gegner_klar: { label: 'Gegner klar schuldig', cls: 'bg-success-soft text-success-strong border-success/30' },
+  gegner_wahrscheinlich: { label: 'Gegner wahrscheinlich schuldig', cls: 'bg-success-soft text-success-strong border-success/30' },
+  geteilt: { label: 'Geteilte Schuld', cls: 'bg-warning-soft text-warning-strong border-warning/30' },
+  kunde_verdacht: { label: '⚠ Kunde-Verdacht', cls: 'bg-danger-soft text-danger-strong border-danger/30' },
 }
 
 export default function BkatAnalysePanel({
@@ -151,14 +151,14 @@ export default function BkatAnalysePanel({
       )}
 
       {result && !result.success && (
-        <div className="flex items-start gap-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded-ios-lg p-3">
+        <div className="flex items-start gap-2 text-sm text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg p-3">
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
           <span>{result.error ?? 'Analyse fehlgeschlagen'}</span>
         </div>
       )}
 
       {data && data.source === 'keine_daten' && (
-        <div className="flex items-start gap-2 text-sm text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg p-3">
+        <div className="flex items-start gap-2 text-sm text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg p-3">
           <AlertTriangleIcon className="w-4 h-4 mt-0.5 shrink-0" />
           <span>
             Keine eindeutige Klassifikation möglich — Unfallhergang zu kurz
@@ -191,7 +191,7 @@ export default function BkatAnalysePanel({
                 {/* 2026-05-11: Manueller Uebernehmen-Button entfernt — Auto-Save in analyze() macht das schon. */}
               </div>
               {autoSaved && (
-                <span className="inline-flex items-center gap-1 text-[10px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-2 py-0.5 font-medium">
+                <span className="inline-flex items-center gap-1 text-[10px] text-success-strong bg-success-soft border border-success/30 rounded-full px-2 py-0.5 font-medium">
                   <CheckCircleIcon className="w-3 h-3" />
                   Automatisch übernommen
                 </span>
@@ -203,12 +203,12 @@ export default function BkatAnalysePanel({
             <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo mb-1">
               TBNR-Kandidaten ({data.vorschlaege.length})
               {data.source !== 'ocr' && (
-                <span className="ml-2 normal-case tracking-normal text-amber-700">
+                <span className="ml-2 normal-case tracking-normal text-warning-strong">
                   — nicht gespeichert (Polizei nicht vor Ort)
                 </span>
               )}
               {data.source === 'ocr' && polizeiVorOrt && (
-                <span className="ml-2 normal-case tracking-normal text-emerald-700">
+                <span className="ml-2 normal-case tracking-normal text-success-strong">
                   — bestätigt aus Polizeibericht
                 </span>
               )}

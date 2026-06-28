@@ -109,17 +109,17 @@ export function DispatchStatusPanel({
   return (
     <div className="mt-3 max-w-3xl space-y-3">
       {alarm && (
-        <div className="rounded-ios-xl border border-red-200 bg-red-50 p-4 space-y-2">
+        <div className="rounded-ios-xl border border-danger/30 bg-danger-soft p-4 space-y-2">
           <div className="flex items-center gap-2">
-            <AlertTriangleIcon className="w-4 h-4 text-red-600" />
-            <p className="text-sm font-semibold text-red-800">Inaktiv seit 2h+</p>
+            <AlertTriangleIcon className="w-4 h-4 text-danger" />
+            <p className="text-sm font-semibold text-danger-strong">Inaktiv seit 2h+</p>
           </div>
-          <p className="text-xs text-red-600">
+          <p className="text-xs text-danger">
             Token-Link noch nicht geöffnet — Kunde {vorname} {nachname} jetzt anrufen.
           </p>
           {telefon && (
             <div className="flex items-center gap-2 pt-1">
-              <PhoneButton nummer={telefon} variant="inline" className="text-xs text-red-700 underline" />
+              <PhoneButton nummer={telefon} variant="inline" className="text-xs text-danger-strong underline" />
               <PhoneButton nummer={telefon} mode="aircall" variant="iconOnly" leadId={leadId} />
             </div>
           )}
@@ -147,9 +147,9 @@ export function DispatchStatusPanel({
               <span
                 className={`absolute -left-3 flex h-6 w-6 items-center justify-center rounded-full ring-4 ring-white ${
                   s.state === 'done'
-                    ? 'bg-green-500 text-white'
+                    ? 'bg-success text-white'
                     : s.state === 'warning'
-                      ? 'bg-red-500 text-white'
+                      ? 'bg-danger text-white'
                       : s.state === 'disabled'
                         ? 'bg-claimondo-bg text-claimondo-ondo/50'
                         : 'bg-claimondo-border text-claimondo-ondo/70'
@@ -160,7 +160,7 @@ export function DispatchStatusPanel({
               <p
                 className={`text-sm font-medium ${
                   s.state === 'warning'
-                    ? 'text-red-700'
+                    ? 'text-danger-strong'
                     : s.state === 'disabled'
                       ? 'text-claimondo-ondo/70'
                       : 'text-claimondo-navy'

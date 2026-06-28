@@ -138,7 +138,7 @@ function DispatcherAvatar({
     return (
       <span
         title={`Zugewiesen an ${label}`}
-        className={`relative inline-block ${dims} overflow-hidden rounded-full ring-1 ring-emerald-300`}
+        className={`relative inline-block ${dims} overflow-hidden rounded-full ring-1 ring-success/20`}
       >
         <Image
           src={profile.avatar_url}
@@ -154,7 +154,7 @@ function DispatcherAvatar({
   return (
     <span
       title={`Zugewiesen an ${label}`}
-      className={`inline-flex ${dims} items-center justify-center rounded-full bg-emerald-100 font-bold text-emerald-700 ring-1 ring-emerald-300`}
+      className={`inline-flex ${dims} items-center justify-center rounded-full bg-success-soft font-bold text-success-strong ring-1 ring-success/20`}
     >
       {dispatcherInitials(profile)}
     </span>
@@ -166,25 +166,25 @@ function DispatcherAvatar({
 // qualifizierungs_phase (Funnel-Schritt). Terminal-/Warnzustände bekommen
 // Farbe, der Normalfall 'neu' bleibt unmarkiert (Redundanz zur Phase vermeiden).
 const STATUS_BADGES: Record<string, string> = {
-  rueckruf: 'bg-amber-50 text-amber-600',
+  rueckruf: 'bg-warning-soft text-warning',
   'quali-offen': 'bg-claimondo-bg text-claimondo-ondo',
   'flow-gesendet': 'bg-claimondo-ondo/10 text-claimondo-ondo',
-  umgewandelt: 'bg-green-100 text-green-700',
-  'umgewandelt-sv': 'bg-green-100 text-green-700',
-  disqualifiziert: 'bg-red-50 text-red-600',
+  umgewandelt: 'bg-success-soft text-success-strong',
+  'umgewandelt-sv': 'bg-success-soft text-success-strong',
+  disqualifiziert: 'bg-danger-soft text-danger',
   kalt: 'bg-claimondo-bg text-claimondo-ondo/60',
 }
 
 function waPill(verfuegbar: boolean | null, telefon: string | null): { label: string; cls: string } | null {
   if (!telefon) return null
-  if (verfuegbar === true) return { label: '📱 WA', cls: 'bg-emerald-100 text-emerald-700' }
+  if (verfuegbar === true) return { label: '📱 WA', cls: 'bg-success-soft text-success-strong' }
   if (verfuegbar === false) return { label: '📵', cls: 'bg-claimondo-bg text-claimondo-ondo/50' }
-  return { label: '⏳ WA?', cls: 'bg-amber-50 text-amber-600' }
+  return { label: '⏳ WA?', cls: 'bg-warning-soft text-warning' }
 }
 
 function flowLinkBadge(offen: boolean | null, abgeschlossen: boolean | null): { label: string; cls: string } {
-  if (abgeschlossen) return { label: 'Abgeschlossen', cls: 'bg-green-100 text-green-700' }
-  if (offen) return { label: 'Offen', cls: 'bg-amber-100 text-amber-700' }
+  if (abgeschlossen) return { label: 'Abgeschlossen', cls: 'bg-success-soft text-success-strong' }
+  if (offen) return { label: 'Offen', cls: 'bg-warning-soft text-warning-strong' }
   return { label: '—', cls: 'text-claimondo-ondo/50' }
 }
 
@@ -339,7 +339,7 @@ export default function LeadsViewToggle({
           <div
             role="status"
             aria-live="polite"
-            className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-900"
+            className="inline-flex items-center gap-1.5 rounded-full border border-success/30 bg-success-soft px-3 py-1.5 text-xs font-semibold text-success-strong"
           >
             <BellIcon className="h-3.5 w-3.5" aria-hidden />
             {newCount === 1
@@ -398,7 +398,7 @@ function ListView({
                   key={lead.id}
                   className={`transition-colors ${
                     highlightIds.has(lead.id)
-                      ? 'bg-emerald-50/70 ring-2 ring-emerald-300 hover:bg-emerald-50'
+                      ? 'bg-success-soft/70 ring-2 ring-success/20 hover:bg-success-soft'
                       : 'hover:bg-claimondo-navy/[0.03]'
                   }`}
                 >
@@ -520,7 +520,7 @@ function KanbanView({
                     href={`/dispatch/leads/${lead.id}`}
                     className={`block rounded-2xl border p-3 transition-all duration-200 hover:-translate-y-[1px] hover:shadow-[0_2px_6px_rgba(15,30,68,.05)] ${
                       highlightIds.has(lead.id)
-                        ? 'border-emerald-300 bg-emerald-50/70 ring-2 ring-emerald-300'
+                        ? 'border-success/30 bg-success-soft/70 ring-2 ring-success/20'
                         : 'border-claimondo-navy/[0.08] bg-white hover:border-claimondo-ondo'
                     }`}
                   >

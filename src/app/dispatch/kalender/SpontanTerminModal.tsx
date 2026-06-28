@@ -203,13 +203,13 @@ export default function SpontanTerminModal({
             />
             {geocoding && <p className="text-[11px] text-claimondo-ondo">Geocodiere …</p>}
             {!geocoding && geocode && (
-              <div className="flex items-start gap-1.5 text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1">
+              <div className="flex items-start gap-1.5 text-[11px] text-success-strong bg-success-soft border border-success/30 rounded px-2 py-1">
                 <MapPinIcon className="w-3 h-3 mt-0.5 shrink-0" />
                 <span>{geocode.label}</span>
               </div>
             )}
             {!geocoding && adresse.length >= 5 && !geocode && (
-              <div className="flex items-start gap-1.5 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1">
+              <div className="flex items-start gap-1.5 text-[11px] text-warning-strong bg-warning-soft border border-warning/30 rounded px-2 py-1">
                 <AlertTriangleIcon className="w-3 h-3 mt-0.5 shrink-0" />
                 <span>Adresse nicht gefunden — Lead wird ohne Koordinaten angelegt.</span>
               </div>
@@ -277,21 +277,21 @@ export default function SpontanTerminModal({
                             <p className="font-medium text-claimondo-navy truncate">
                               {v.name}
                               {v.belegt && (
-                                <span className="ml-1.5 text-[9px] text-red-600 font-semibold">BELEGT</span>
+                                <span className="ml-1.5 text-[9px] text-danger font-semibold">BELEGT</span>
                               )}
                               {!v.belegt && v.unerreichbar && (
-                                <span className="ml-1.5 text-[9px] text-amber-700 font-semibold">UNERREICHBAR</span>
+                                <span className="ml-1.5 text-[9px] text-warning-strong font-semibold">UNERREICHBAR</span>
                               )}
                             </p>
                             {v.standort && (
                               <p className="text-claimondo-ondo/70 truncate text-[10px]">{v.standort}</p>
                             )}
                             {v.unerreichbar && v.unerreichbarGrund && (
-                              <p className="text-amber-700 text-[10px] truncate">{v.unerreichbarGrund}</p>
+                              <p className="text-warning-strong text-[10px] truncate">{v.unerreichbarGrund}</p>
                             )}
                           </div>
                           <div className="text-right shrink-0">
-                            <p className={`font-semibold ${ausserhalb ? 'text-amber-700' : 'text-claimondo-navy'}`}>
+                            <p className={`font-semibold ${ausserhalb ? 'text-warning-strong' : 'text-claimondo-navy'}`}>
                               {v.etaMinuten != null
                                 ? `${v.etaMinuten} min`
                                 : `${v.distanzKm.toFixed(1)} km`}
@@ -300,7 +300,7 @@ export default function SpontanTerminModal({
                               {v.etaMinuten != null
                                 ? `${v.distanzKm.toFixed(1)} km`
                                 : 'ETA n/a'}
-                              {ausserhalb && <span className="text-amber-700"> · außerh. Radius</span>}
+                              {ausserhalb && <span className="text-warning-strong"> · außerh. Radius</span>}
                             </p>
                           </div>
                         </button>
@@ -357,7 +357,7 @@ export default function SpontanTerminModal({
           </Section>
 
           {error && (
-            <div className="flex items-start gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded p-2">
+            <div className="flex items-start gap-1.5 text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded p-2">
               <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>

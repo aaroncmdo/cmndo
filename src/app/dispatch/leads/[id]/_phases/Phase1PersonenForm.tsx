@@ -149,20 +149,20 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
       {drafts.map((d, idx) => (
         <div
           key={d.id ?? `new-${idx}`}
-          className="bg-white border border-red-200 rounded-ios-lg p-3 space-y-2"
+          className="bg-white border border-danger/30 rounded-ios-lg p-3 space-y-2"
         >
           <div className="flex items-center gap-2">
-            <UserIcon className="w-3.5 h-3.5 text-red-600" />
-            <span className="text-[11px] font-semibold text-red-900">
+            <UserIcon className="w-3.5 h-3.5 text-danger" />
+            <span className="text-[11px] font-semibold text-danger-strong">
               Person {idx + 1}
               {!d.persisted && (
-                <span className="ml-1 text-[10px] text-amber-700">(ungespeichert)</span>
+                <span className="ml-1 text-[10px] text-warning-strong">(ungespeichert)</span>
               )}
             </span>
             <button
               type="button"
               onClick={() => removeRow(idx)}
-              className="ml-auto p-1 rounded hover:bg-red-50 text-red-600"
+              className="ml-auto p-1 rounded hover:bg-danger-soft text-danger"
               title="Person entfernen"
             >
               <Trash2Icon className="w-3.5 h-3.5" />
@@ -238,8 +238,8 @@ export default function Phase1PersonenForm({ leadId }: { leadId: string }) {
         <div
           className={`text-[11px] px-2 py-1 rounded ${
             toast === 'Gespeichert' || toast === 'Gelöscht'
-              ? 'bg-green-50 text-green-700'
-              : 'bg-amber-50 text-amber-800'
+              ? 'bg-success-soft text-success-strong'
+              : 'bg-warning-soft text-warning-strong'
           }`}
         >
           {toast}
