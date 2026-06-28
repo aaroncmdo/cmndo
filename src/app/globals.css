@@ -656,23 +656,25 @@ p, li, blockquote, article, .prose {
    → zwei sichtbare blaue Streifen am Viewport-Rand. */
 aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]),
 aside[data-sidebar-mode="floating"] > nav {
-  /* 2026-05-14 v2: Echtes Glassmorphism — 55% Sidebar-BG (statt 90%) damit der
-     backdrop-filter blur den Content/Map dahinter sichtbar weichzeichnet.
-     Stärkerer Blur (22px) + inset-highlight für Liquid-Glass-Anmutung. */
-  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
-  backdrop-filter: saturate(180%) blur(22px);
-  -webkit-backdrop-filter: saturate(180%) blur(22px);
-  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  /* 2026-06-28: Solide Pills statt Glassmorphism. Das 55%-Glas wirkte ueber dem
+     flachen, hellen Portal-BG (admin/dispatch/kunde — kein Map/Content dahinter)
+     blass/durchscheinend (Aaron). var(--brand-sidebar-bg) bleibt brand-aware:
+     Default = Claimondo-Navy, Whitelabel = SV-Markenfarbe — jetzt SOLIDE, also
+     Branding sogar praesenter. „Schweben" kommt aus Radius + Border + weichem
+     Schatten, nicht aus Transparenz; das ist auch fuer die Nav-Lesbarkeit besser.
+     (Gutachter-Sidebar nutzt eigene Inline-Styles mit solider Basis — unberuehrt.) */
+  background-color: var(--brand-sidebar-bg);
+  border: 1px solid color-mix(in srgb, white 8%, transparent);
   border-radius: 18px;
   padding: 12px 14px;
   box-shadow:
-    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+    0 8px 28px color-mix(in srgb, var(--brand-sidebar-bg) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
 }
 aside[data-sidebar-mode="floating"] > div:not([class*="absolute"]) {
   /* Eigene Border-Logik der ursprünglichen Cards (border-b etc.) zurücknehmen. */
-  border-bottom: 1px solid color-mix(in srgb, white 22%, transparent) !important;
-  border-top: 1px solid color-mix(in srgb, white 22%, transparent) !important;
+  border-bottom: 1px solid color-mix(in srgb, white 8%, transparent) !important;
+  border-top: 1px solid color-mix(in srgb, white 8%, transparent) !important;
 }
 aside[data-sidebar-mode="floating"] > nav {
   flex: 1 1 auto;
@@ -699,15 +701,14 @@ body[data-sidebar-mode="floating"] aside.kunde-sidebar {
   gap: 12px;
 }
 body[data-sidebar-mode="floating"] aside.kunde-sidebar > * {
-  background-color: color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent);
-  backdrop-filter: saturate(180%) blur(22px);
-  -webkit-backdrop-filter: saturate(180%) blur(22px);
-  border: 1px solid color-mix(in srgb, white 22%, transparent);
+  /* 2026-06-28: solide statt 55%-Glas — analog zur Haupt-Pill-Regel oben. */
+  background-color: var(--brand-sidebar-bg);
+  border: 1px solid color-mix(in srgb, white 8%, transparent);
   border-radius: 18px;
   padding: 12px 14px;
   box-shadow:
-    0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent),
-    inset 0 1px 0 color-mix(in srgb, white 25%, transparent);
+    0 8px 28px color-mix(in srgb, var(--brand-sidebar-bg) 22%, transparent),
+    inset 0 1px 0 color-mix(in srgb, white 8%, transparent);
 }
 body[data-sidebar-mode="floating"] aside.kunde-sidebar > nav {
   flex: 1 1 auto;
