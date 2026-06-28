@@ -7,11 +7,13 @@
 // Spalten (laut Feedback Aaron 21.04.2026):
 //   Fall-Nr · Kunde · Aktuelle Phase · Letzte Änderung · Mandatsnummer · Status
 //
-// Click auf Row → /kanzlei/fall/[id] (Read-only-Fallakte, kommt in PR 2b).
+// Read-only Liste — keine Detail-Navigation. Das /kanzlei/fall/[id]-Portal wurde
+// bewusst NICHT gebaut (In-House-Modell, keine Kanzlei-Login-Detailseite — siehe
+// Kanzlei-Strecke-Investigation 28.06.). Zeilen sind daher nicht klickbar; sonst
+// liefen alle Klicks ins 404.
 
 import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
-import { FolderOpenIcon, ArrowRightIcon } from 'lucide-react'
+import { FolderOpenIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -113,7 +115,6 @@ export default async function KanzleiDashboardPage() {
                   <Th className="!font-semibold">Status</Th>
                   <Th className="!font-semibold">Mandat-Nr</Th>
                   <Th className="!font-semibold">Letzte Änderung</Th>
-                  <Th className="w-10" />
                 </Tr>
               </Thead>
               <Tbody className="!divide-y-0">
@@ -130,12 +131,7 @@ export default async function KanzleiDashboardPage() {
                       className="border-t border-claimondo-border hover:bg-claimondo-bg transition-colors"
                     >
                       <Td className="font-mono text-[12px]">
-                        <Link
-                          href={`/kanzlei/fall/${fallId}`}
-                          className="hover:underline"
-                        >
-                          {f.claim_nummer ?? fallId.slice(0, 8)}
-                        </Link>
+                        {f.claim_nummer ?? fallId.slice(0, 8)}
                       </Td>
                       <Td>{kunde}</Td>
                       <Td className="font-mono text-[12px]">
@@ -153,11 +149,6 @@ export default async function KanzleiDashboardPage() {
                       </Td>
                       <Td className="!text-claimondo-ondo text-xs">
                         {formatDate(f.created_at)}
-                      </Td>
-                      <Td className="!text-claimondo-ondo/70">
-                        <Link href={`/kanzlei/fall/${fallId}`} aria-label="Öffnen">
-                          <ArrowRightIcon className="w-4 h-4" />
-                        </Link>
                       </Td>
                     </Tr>
                   )
