@@ -538,17 +538,25 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // ungeklaertem nur_gutachter-Termin (weder durchgefuehrt noch No-Show/Ablehnung,
     // Claim nicht terminal, kein offener Dispatcher-Klaerungs-Task). Eng gegated,
     // damit der Banner bei Bestandsdaten / komplett-Claims nicht faelschlich erscheint.
-    let terminCheckBanner: React.ComponentProps<typeof KundeTerminCheckBanner> | null = null
+    // Claim service_typ + Terminal-Status (claim-nativ; fall traegt service_typ
+    // nicht direkt). Component-Scope, weil sowohl der TerminCheck-Banner als auch
+    // die Kanzlei-Cards unten service_typ-abhaengig sind (Aaron: gewaehltes Paket).
+    let istNurGutachter = false
+    let claimTerminal = false
     if (fall.claim_id) {
       const { data: claimSvc } = await admin
         .from('claims')
         .select('service_typ, status')
         .eq('id', fall.claim_id as string)
         .maybeSingle()
-      const istNurGutachter = (claimSvc?.service_typ as string | null) === 'nur_gutachter'
-      const claimTerminal = (CLAIM_TERMINAL_STATUSES as readonly string[]).includes(
+      istNurGutachter = (claimSvc?.service_typ as string | null) === 'nur_gutachter'
+      claimTerminal = (CLAIM_TERMINAL_STATUSES as readonly string[]).includes(
         (claimSvc?.status as string | null) ?? '',
       )
+    }
+
+    let terminCheckBanner: React.ComponentProps<typeof KundeTerminCheckBanner> | null = null
+    if (fall.claim_id) {
       if (istNurGutachter && !claimTerminal) {
         const { data: staleTermin } = await admin
           .from('gutachter_termine')
@@ -822,23 +830,28 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             Cards (SaeuleMeinAnwalt + MeineKanzleiCard + KanzleiAnsprechpartnerBlock).
             Anwalt-Mandatstyp und Vollmacht-Status sind in MeineKanzleiCard
             integriert (vollmachtSigniertAm-Prop). */}
-        <MeineKanzleiCard
-          kanzlei={kanzleiRow}
-          ansprechpartner={{
-            name: (fall.kanzlei_ansprechpartner_name as string | null) ?? null,
-            position: null,
-            email: claimExtra?.kanzlei_ansprechpartner_email ?? null,
-            telefon: claimExtra?.kanzlei_ansprechpartner_telefon ?? null,
-          }}
-          vollmachtSigniertAm={fall.vollmacht_signiert_am as string | null}
-          uebergebenAm={claimExtra?.kanzlei_uebergeben_am ?? null}
-        />
+        {/* service_typ-Gate: Kanzlei/Vollmacht haengt am gewaehlten Paket.
+            nur_gutachter hat kein Mandat -> keine Kanzlei-Card (statt sich nur
+            auf die hatKanzlei-Datenlage zu verlassen). */}
+        {!istNurGutachter && (
+          <MeineKanzleiCard
+            kanzlei={kanzleiRow}
+            ansprechpartner={{
+              name: (fall.kanzlei_ansprechpartner_name as string | null) ?? null,
+              position: null,
+              email: claimExtra?.kanzlei_ansprechpartner_email ?? null,
+              telefon: claimExtra?.kanzlei_ansprechpartner_telefon ?? null,
+            }}
+            vollmachtSigniertAm={fall.vollmacht_signiert_am as string | null}
+            uebergebenAm={claimExtra?.kanzlei_uebergeben_am ?? null}
+          />
+        )}
 
         {/* 13.05.2026 Restore: Kanzlei-Pfad-Wahl. Switch je nach
             claim.kanzlei_wunsch (Komplettservice / eigene Kanzlei / selbst
             einreichen / Frage). Bei partnerkanzlei rendert die Card null.
             (CMM-32 Polish, #416) */}
-        {fall.claim_id && (
+        {fall.claim_id && !istNurGutachter && (
           <KanzleiPfadCard
             claimId={fall.claim_id as string}
             kanzleiWunsch={(fall.kanzlei_wunsch as React.ComponentProps<typeof KanzleiPfadCard>['kanzleiWunsch']) ?? null}
