@@ -406,6 +406,86 @@ describe('getClaimLifecycle — Fallback', () => {
   })
 })
 
+// Unified Stepper (Aaron, "ein Stepper am Claim"): getClaimLifecycle nimmt den WEITESTEN von
+// zwei Kandidaten — operative_status (Engine-Cursor) und Milestone-Kaskade (Sub-Entity-Felder)
+// — gemessen am globalen SUB_ORDER. operativeStatus liftet haengende Milestones; ein bereits
+// gesetzter Milestone (kanzlei_fall) wird NIE von einem zurueckgebliebenen operative gedrueckt.
+describe('getClaimLifecycle — Unified Stepper (furthest-signal-wins)', () => {
+  const lead = { sa_unterschrieben: true, vollmacht_signiert_am: TS, onboarding_complete: true }
+  it('sv-termin -> begutachtung/termin (auch OHNE erstgutachten-Auftrag — behebt Erfassung-Haenger)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin' })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('termin')
+  })
+  it('gutachten-eingegangen -> begutachtung/gutachten', () => {
+    expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'gutachten-eingegangen' }).subPhase).toBe('gutachten')
+  })
+  it('Begutachtung-Sub via Auftrag verfeinert: gutachten-eingegangen + filmcheck_ok -> qc-pruefung', () => {
+    const r = getClaimLifecycle({
+      lead, kanzleiFall: null, operativeStatus: 'gutachten-eingegangen',
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten', gutachten_url: 'https://x', filmcheck_ok: true })],
+    })
+    expect(r.subPhase).toBe('qc-pruefung')
+  })
+  it('anschlussschreiben -> regulierung/anschlussschreiben', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'anschlussschreiben' })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('anschlussschreiben')
+  })
+  it('zahlung-eingegangen -> regulierung/auszahlung (kein Auto-Abschluss)', () => {
+    expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'zahlung-eingegangen' }).mainPhase).toBe('regulierung')
+  })
+  it('operative Erfassung-Bucket -> Lead-Sub (ersterfassung + Vollmacht signiert -> onboarding_offen)', () => {
+    expect(getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'ersterfassung' }).subPhase).toBe('onboarding_offen')
+  })
+  it('operative=abgeschlossen + claimStatus reguliert_vollstaendig -> abschluss/erfolgreich_reguliert', () => {
+    const r = getClaimLifecycle({ lead: null, auftraege: [], kanzleiFall: null, operativeStatus: 'abgeschlossen', claimStatus: 'reguliert_vollstaendig' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('erfolgreich_reguliert')
+  })
+  it('terminal claimStatus schlaegt operative_status (storniert ueberschreibt sv-termin)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin', claimStatus: 'storniert' })
+    expect(r.mainPhase).toBe('abschluss')
+    expect(r.subPhase).toBe('storniert')
+  })
+  it('reg-signal (in_kommunikation_vs) hebt operative=sv-termin auf Regulierung', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'sv-termin', claimStatus: 'in_kommunikation_vs' })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+  it('reg-signal greift NICHT zurueck wenn operative bereits >= regulierung (auszahlung bleibt)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [], kanzleiFall: null, operativeStatus: 'zahlung-eingegangen', claimStatus: 'abgelehnt' })
+    expect(r.subPhase).toBe('auszahlung')
+  })
+  it('operativeStatus NULL -> bestehende Milestone-Kaskade (Backward-Compat: aktiver Erstgutachten -> begutachtung)', () => {
+    const r = getClaimLifecycle({ lead, auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'termin' })], kanzleiFall: null, operativeStatus: null })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('termin')
+  })
+  it('Milestone gewinnt ueber zurueckgebliebenen operative_status: kanzlei_fall + operative=ersterfassung -> kanzlei_uebergabe (KEINE Regression)', () => {
+    // Live-Befund (27.06.): 7 Claims mit operative=ersterfassung haben einen kanzlei_fall
+    // (Cursor nie advanced). Furthest-wins haelt sie auf begutachtung/kanzlei_uebergabe statt
+    // sie auf erfassung zurueckzudruecken (was operative-primary getan haette).
+    const r = getClaimLifecycle({
+      lead: { sa_unterschrieben: true, vollmacht_signiert_am: null, onboarding_complete: null },
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt' }), // ohne lexdrive_case_id
+      operativeStatus: 'ersterfassung',
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('kanzlei_uebergabe')
+  })
+  it('Begutachtung-Milestone (Auftrag mit gutachten_url -> filmcheck) gewinnt ueber operative=sv-termin', () => {
+    // operative sagt termin(3); Auftrag-Milestone hat gutachten_url -> filmcheck(6). Furthest -> filmcheck.
+    const r = getClaimLifecycle({
+      lead, kanzleiFall: null, operativeStatus: 'sv-termin',
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'gutachten', gutachten_url: 'https://x' })],
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('filmcheck')
+  })
+})
+
 // CMM-44 MP-4c: Guards die rohe v_claim_phase-Strings (main_phase/sub_phase) sicher
 // in die getypten ClaimMainPhase/ClaimSubPhase casten — die Listen/Kanban-Reader
 // lesen die View als string, buildClaimPhasePipeline braucht aber die echten Typen.
