@@ -110,7 +110,7 @@ export default async function MitarbeiterDashboard() {
           <section className="bg-white rounded-ios-lg shadow-ios-md">
             <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
               <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-                <PhoneCallIcon className="w-4 h-4 text-amber-500" />
+                <PhoneCallIcon className="w-4 h-4 text-warning" />
                 Offene Rückrufe
               </h2>
               <Link href="/mitarbeiter/termine" className="text-xs text-claimondo-ondo hover:underline">Alle</Link>
@@ -130,7 +130,7 @@ export default async function MitarbeiterDashboard() {
                     <div className="flex items-center justify-between">
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
-                        <p className={`text-xs ${overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'}`}>
+                        <p className={`text-xs ${overdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                           {new Date(r.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                           {overdue && ' (überfällig)'}
                         </p>
@@ -220,8 +220,8 @@ export default async function MitarbeiterDashboard() {
             <div key={t.id} className="px-4 py-3 flex items-center justify-between text-sm">
               <div className="flex items-center gap-2 min-w-0">
                 <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                  t.prioritaet === 'kritisch' ? 'bg-red-100 text-red-700' :
-                  t.prioritaet === 'dringend' ? 'bg-amber-100 text-amber-700' :
+                  t.prioritaet === 'kritisch' ? 'bg-danger-soft text-danger-strong' :
+                  t.prioritaet === 'dringend' ? 'bg-warning-soft text-warning-strong' :
                   'bg-claimondo-bg text-claimondo-ondo'
                 }`}>{t.prioritaet}</span>
                 <span className="truncate text-claimondo-navy">{t.titel}</span>
