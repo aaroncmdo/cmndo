@@ -7,7 +7,8 @@
 --   (3) Freigabe erteilt -> Task erledigt           (trg_reparatur_freigabe_task_resolve)
 --   (4) Freigabe zurueckgenommen -> Task wieder offen
 --   (5) NULL-KB -> Task an empfaenger_rolle='admin' (NULL-KB-Fallback)
---   (6) Eskalations-Cron -> KB-Nudge bei ueberfaelligem Task (cron_reparatur_freigabe_eskalation)
+--   (6) Eskalations-Cron Stage 1 -> KB-Nudge bei ueberfaelligem Task (cron_reparatur_freigabe_eskalation)
+--   (6b) Eskalations-Cron Stage 2 -> Admin-Nudge wenn >2 Tage nach Eskalation noch offen
 --   (7) Nicht-werkstatt-Claim -> KEIN Task
 --   (8) Status-RPC -> 'freigabe_ausstehend' bei fertigem, nicht-freigegebenem Gutachten
 --
@@ -19,7 +20,7 @@
 --   - via psql:           psql "$DATABASE_URL" -f supabase/smoke/reparatur_freigabe.sql
 --
 -- Erwartetes RAISE-Ergebnis:
---   created=1 dup=1 resolved=1 reopened=1 nullkb_rolle=admin nudge=1 nonwerk=0 status=freigabe_ausstehend
+--   created=1 dup=1 resolved=1 reopened=1 nullkb_rolle=admin nudge=1 admin_nudge>=1 nonwerk=0 status=freigabe_ausstehend
 -- ============================================================================
 DO $$
 DECLARE
@@ -28,7 +29,7 @@ DECLARE
   v_werk2 uuid;        -- werkstatt-Claim #2 (NULL-KB-Fallback)
   v_nonwerk uuid;      -- Nicht-werkstatt-Claim
   v_werk_user uuid;    -- user_id der Werkstatt von #1 (fuer RPC-Impersonation)
-  c_created int; c_dup int; c_resolved int; c_reopened int; c_nonwerk int; v_nudge int;
+  c_created int; c_dup int; c_resolved int; c_reopened int; c_nonwerk int; v_nudge int; v_admin_nudge int;
   v_nullkb_rolle text; v_status text;
 BEGIN
   SELECT sv_id INTO v_sv FROM public.gutachten WHERE sv_id IS NOT NULL LIMIT 1;
@@ -74,6 +75,13 @@ BEGIN
   SELECT count(*) INTO v_nudge FROM public.mitteilungen
    WHERE kontext_id=v_werk1 AND titel='Reparaturfreigabe überfällig';
 
+  -- (6b) Stage 2: eskaliert_am zurueckdatieren -> Admin-Nudge (>2 Tage offen)
+  UPDATE public.tasks SET eskaliert_am=now() - interval '3 days'
+   WHERE claim_id=v_werk1 AND task_code='reparatur_freigabe';
+  PERFORM public.cron_reparatur_freigabe_eskalation();
+  SELECT count(*) INTO v_admin_nudge FROM public.mitteilungen
+   WHERE kontext_id=v_werk1 AND titel='Reparaturfreigabe weiter offen';
+
   -- (7) Nicht-werkstatt -> KEIN Task
   INSERT INTO public.gutachten (claim_id, sv_id, status, fertiggestellt_am) VALUES (v_nonwerk, v_sv, 'final', now());
   SELECT count(*) INTO c_nonwerk FROM public.tasks WHERE claim_id=v_nonwerk AND task_code='reparatur_freigabe';
@@ -82,6 +90,6 @@ BEGIN
   PERFORM set_config('request.jwt.claims', json_build_object('sub', v_werk_user)::text, true);
   SELECT status INTO v_status FROM public.get_werkstatt_vermittlungen() WHERE claim_id=v_werk1;
 
-  RAISE EXCEPTION 'SMOKE created=% dup=% resolved=% reopened=% nullkb_rolle=% nudge=% nonwerk=% status=% (exp 1/1/1/1/admin/1/0/freigabe_ausstehend)',
-    c_created, c_dup, c_resolved, c_reopened, v_nullkb_rolle, v_nudge, c_nonwerk, v_status;
+  RAISE EXCEPTION 'SMOKE created=% dup=% resolved=% reopened=% nullkb_rolle=% nudge=% admin_nudge=% nonwerk=% status=% (exp 1/1/1/1/admin/1/>=1/0/freigabe_ausstehend)',
+    c_created, c_dup, c_resolved, c_reopened, v_nullkb_rolle, v_nudge, v_admin_nudge, c_nonwerk, v_status;
 END $$;

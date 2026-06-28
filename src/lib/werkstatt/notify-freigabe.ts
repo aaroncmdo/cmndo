@@ -77,10 +77,21 @@ export async function notifyWerkstattReparaturfreigabe(claimId: string): Promise
   }
 }
 
+// Lead-/Werkstatt-Daten sind extern befuellt (OCR / Public-QR-Flow) -> vor HTML-Interpolation
+// escapen (Repo-Muster, identisch zu src/lib/leads/notify-new-lead.ts).
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+}
+
 function buildFreigabeEmailHtml(werkstattName: string | null, fallLabel: string, fahrzeug: string | null): string {
-  const anrede = werkstattName ? `Hallo ${werkstattName}-Team,` : 'Hallo,'
+  const anrede = werkstattName ? `Hallo ${escapeHtml(werkstattName)}-Team,` : 'Hallo,'
   const fahrzeugLine = fahrzeug
-    ? `<p style="margin:0 0 8px;color:#4b5563;font-size:14px;">Fahrzeug: ${fahrzeug}</p>`
+    ? `<p style="margin:0 0 8px;color:#4b5563;font-size:14px;">Fahrzeug: ${escapeHtml(fahrzeug)}</p>`
     : ''
   return `
   <div style="font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#0D1B3E;">
@@ -89,7 +100,7 @@ function buildFreigabeEmailHtml(werkstattName: string | null, fallLabel: string,
     </div>
     <div style="padding:24px;background:#ffffff;border:1px solid #e5e7eb;border-top:none;border-radius:0 0 12px 12px;">
       <p style="margin:0 0 16px;">${anrede}</p>
-      <p style="margin:0 0 8px;">das Gutachten ist abgeschlossen und die Reparatur für <strong>${fallLabel}</strong> wurde freigegeben.</p>
+      <p style="margin:0 0 8px;">das Gutachten ist abgeschlossen und die Reparatur für <strong>${escapeHtml(fallLabel)}</strong> wurde freigegeben.</p>
       ${fahrzeugLine}
       <p style="margin:16px 0;">Sie können jetzt mit der Reparatur beginnen.</p>
       <a href="${APP_URL}/werkstatt/vermittlungen" style="display:inline-block;background:#0D1B3E;color:#ffffff;text-decoration:none;padding:12px 20px;border-radius:8px;font-weight:600;">Zu meinen Vermittlungen</a>
