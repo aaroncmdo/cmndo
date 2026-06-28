@@ -11,6 +11,10 @@ const MAP: Record<WerkstattVermittlungStatus, { label: string; className: string
     label: 'Beauftragt',
     className: 'bg-info-soft text-info-strong border border-info/20',
   },
+  freigabe_ausstehend: {
+    label: 'Freigabe ausstehend',
+    className: 'bg-warning-soft text-warning-strong border border-warning/20',
+  },
   reparatur_freigegeben: {
     label: 'Reparatur freigegeben',
     className: 'bg-success-soft text-success-strong border border-success/20',

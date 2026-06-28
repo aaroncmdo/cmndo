@@ -26,6 +26,10 @@ export function WerkstattKvaSection() {
   const betrag = brutto ?? netto
   const claimId = rec?.id as string | undefined
   const freigegebenAm = (rec?.reparatur_freigegeben_am as string | null) ?? null
+  const freigegebenVonName = (rec?.reparatur_freigegeben_von_name as string | null) ?? null
+  const freigabeDatum = freigegebenAm
+    ? new Date(freigegebenAm).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    : ''
 
   // Nur fuer werkstatt-vermittelte Faelle (oder wenn ein KVA-Betrag vorliegt).
   if (!werkstattId && betrag == null) return null
@@ -66,10 +70,15 @@ export function WerkstattKvaSection() {
 
       <div className="mt-3 border-t border-claimondo-border pt-3">
         {freigegebenAm ? (
-          <div className="flex items-center justify-between gap-2">
-            <span className="inline-flex items-center gap-1.5 text-body-sm font-medium text-success-strong">
-              <CheckCircle2Icon className="w-4 h-4" /> Reparatur freigegeben
-            </span>
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex flex-col gap-0.5">
+              <span className="inline-flex items-center gap-1.5 text-body-sm font-medium text-success-strong">
+                <CheckCircle2Icon className="w-4 h-4" /> Reparatur freigegeben
+              </span>
+              <span className="text-caption text-claimondo-ondo/70">
+                {freigegebenVonName ? `von ${freigegebenVonName} ` : ''}am {freigabeDatum}
+              </span>
+            </div>
             {istStaff && (
               <Button variant="ghost" size="sm" loading={saving} onClick={() => setFreigabe(false)}>
                 Zurücknehmen

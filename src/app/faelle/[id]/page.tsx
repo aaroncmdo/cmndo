@@ -88,7 +88,7 @@ export default async function FallaktePage({
     // CMM-44 MP-6c: claims.phase gedroppt — aus dem Select entfernt.
     const { data: claimRow } = await supabase
       .from('claims')
-      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am')
+      .select('status, work_state, kanzlei_wunsch, schadenort_adresse, schadenort_plz, schadenort_ort, kostenvoranschlag_netto, kostenvoranschlag_brutto, werkstatt_id, reparatur_freigegeben_am, reparatur_freigegeben_von')
       .eq('id', claimId)
       .maybeSingle<{
         status: string | null
@@ -101,6 +101,7 @@ export default async function FallaktePage({
         kostenvoranschlag_brutto: number | null
         werkstatt_id: string | null
         reparatur_freigegeben_am: string | null
+        reparatur_freigegeben_von: string | null
       }>()
     // CMM-49 Tier-2: gegner_aktenzeichen aus v_claim_full (verursacher-Party-
     // sourced via COALESCE party->claims) statt direkt aus claims — ueberlebt den
@@ -115,6 +116,17 @@ export default async function FallaktePage({
     claimStatus        = claimRow?.status ?? claimRow?.work_state ?? null
     claimKanzleiWunsch = claimRow?.kanzlei_wunsch ?? null
     if (claimRow) {
+      // Werkstatt-Reparaturfreigabe: Name des freigebenden Staff aufloesen
+      // (kein FK auf reparatur_freigegeben_von -> separater Lookup, nur wenn gesetzt).
+      let freigegebenVonName: string | null = null
+      if (claimRow.reparatur_freigegeben_von) {
+        const { data: vonProfil } = await supabase
+          .from('profiles')
+          .select('vorname, nachname')
+          .eq('id', claimRow.reparatur_freigegeben_von)
+          .maybeSingle<{ vorname: string | null; nachname: string | null }>()
+        freigegebenVonName = [vonProfil?.vorname, vonProfil?.nachname].filter(Boolean).join(' ') || null
+      }
       claimStammdatenFallback = {
         id: claimId,
         schadenort_adresse: claimRow.schadenort_adresse ?? null,
@@ -128,6 +140,8 @@ export default async function FallaktePage({
         // Werkstatt-Reparaturfreigabe (manuell durch Staff): Werkstatt sieht den Status.
         werkstatt_id:              claimRow.werkstatt_id              ?? null,
         reparatur_freigegeben_am:  claimRow.reparatur_freigegeben_am  ?? null,
+        reparatur_freigegeben_von:      claimRow.reparatur_freigegeben_von ?? null,
+        reparatur_freigegeben_von_name: freigegebenVonName,
       }
     }
   }

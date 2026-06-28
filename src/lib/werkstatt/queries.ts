@@ -203,7 +203,7 @@ export async function getWerkstattStaffelBoni(
 // Meine Vermittlungen (KVA-Leads + Funnel-Status) — leak-safe via SECURITY-DEFINER-RPC
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type WerkstattVermittlungStatus = 'eingegangen' | 'beauftragt' | 'reparatur_freigegeben' | 'storniert'
+export type WerkstattVermittlungStatus = 'eingegangen' | 'beauftragt' | 'freigabe_ausstehend' | 'reparatur_freigegeben' | 'storniert'
 
 export type WerkstattVermittlung = {
   lead_id: string

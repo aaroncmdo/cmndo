@@ -6,6 +6,9 @@ export type KontextTyp = 'fall' | 'lead' | 'auftrag' | 'termin' | 'abrechnung' |
 // AAR-720: makler + dispatch ergänzt — beide haben user_role-Enum-
 // Einträge und jeweils eigene UI/Portal-Routen. Vorher konnten Mitteilungen
 // nicht an Makler-User geroutet werden, obwohl /makler/* existiert.
+// werkstatt ergänzt (Werkstatt-Vermittler-Portal, AAR-956 WP-B): Reparaturfreigabe-
+// Benachrichtigung an den Werkstatt-User. route_url wird explizit gesetzt (autoRouteUrl
+// deckt 'fall'/'claim' für werkstatt nicht ab), roleToPath kennt 'werkstatt' bereits.
 export type EmpfaengerRolle =
   | 'admin'
   | 'dispatch'
@@ -14,6 +17,7 @@ export type EmpfaengerRolle =
   | 'kanzlei'
   | 'kunde'
   | 'makler'
+  | 'werkstatt'
 
 export interface Mitteilung {
   id: string

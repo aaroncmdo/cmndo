@@ -8,6 +8,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { notifyWerkstattReparaturfreigabe } from '@/lib/werkstatt/notify-freigabe'
 
 const STAFF = ['admin', 'kundenbetreuer']
 
@@ -29,6 +30,13 @@ export async function reparaturFreigeben(claimId: string): Promise<{ ok: boolean
     .update({ reparatur_freigegeben_am: new Date().toISOString(), reparatur_freigegeben_von: staff.id })
     .eq('id', claimId)
   if (error) return { ok: false, error: error.message }
+  // Non-critical: Werkstatt aktiv benachrichtigen (in-app Glocke + E-Mail). Ein Sende-Fehler
+  // darf den Status-Update nicht brechen (Status ist bereits committed).
+  try {
+    await notifyWerkstattReparaturfreigabe(claimId)
+  } catch (err) {
+    console.error('[reparaturFreigeben] Werkstatt-Benachrichtigung fehlgeschlagen:', err)
+  }
   revalidatePath(`/faelle/${claimId}`)
   return { ok: true }
 }
