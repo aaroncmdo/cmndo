@@ -360,15 +360,30 @@ export async function cancelSvTerminForLead(
   // AAR-134: 'abgelehnt' mit drin — Dispatcher kann roten Card-Termin schließen.
   // AAR-956 (Spec-Erweiterung): identische bezug-Blindheit wie der Rebook-Cancel oben —
   // ein bezug-nativer Self-Service-Termin muss beim Dispatcher-Cancel ebenfalls weg.
-  const { error } = await supabase
+  const { data: storniert, error } = await supabase
     .from('gutachter_termine')
     .update({ status: 'storniert' })
     .or(`lead_id.eq.${leadId},and(bezug_typ.eq.lead,bezug_id.eq.${leadId})`)
     .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'abgelehnt'])
+    .select('fall_id')
 
   if (error) return { success: false, error: error.message }
 
   revalidatePath(`/dispatch/leads/${leadId}`)
+  // Termin-Propagation: ist der Lead bereits konvertiert (storniertes Termin trägt eine
+  // fall_id), die Claim-Portale mit-revalidieren — sonst sehen Kunde/SV/KB/Admin den Storno
+  // stale. Spiegelt revalidateFallPaths der kanonischen Verlegungs-Engine
+  // (src/lib/actions/termin-verlegung-actions.ts); bewusst inline statt cross-File-Export
+  // (jenes ist ein 'use server'-File). Bei reinem Lead-Termin (fall_id NULL) ein No-op.
+  for (const fallId of new Set(
+    (storniert ?? []).map((t) => t.fall_id).filter(Boolean) as string[],
+  )) {
+    revalidatePath(`/kunde/faelle/${fallId}`)
+    revalidatePath(`/gutachter/fall/${fallId}`)
+    revalidatePath(`/faelle/${fallId}`)
+    revalidatePath(`/mitarbeiter/faelle/${fallId}`)
+    revalidatePath('/admin/faelle')
+  }
   return { success: true }
 }
 
