@@ -7,6 +7,7 @@ import { render } from '@react-email/render'
 import { KanzleiMagicLinkAbrechnungEmail, subject as magicLinkSubject } from '@/lib/email/google/templates/KanzleiMagicLinkAbrechnung'
 import { generateAndUploadKanzleiAbrechnungPdf, generateKanzleiAbrechnungPdf } from './generate-pdf'
 import type { KanzleiPdfData } from './generate-pdf'
+import { istAbrechenbarerKanzleiClaim, type AbrechnungsClaim } from './eligibility'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
 const BETRAG_PRO_VOLLMACHT_NETTO = 150
@@ -14,11 +15,10 @@ const BETRAG_PRO_VOLLMACHT_NETTO = 150
 /**
  * KFZ-188: Generiert Kanzlei-Monatsabrechnungen fuer alle aktiven Kanzleien.
  *
- * Prueft Claims WHERE:
- *   - vollmacht_status = 'unterschrieben'
- *   - kanzlei_provision_status = 'berechtigt'
- *   - kanzlei_abrechnung_id IS NULL
- *   - vollmacht_signiert_am liegt im Zielmonat
+ * Prueft Claims WHERE (live-signal-basiert, s. eligibility.ts):
+ *   - service_typ = 'komplett' + kanzlei_faelle.mandatsnummer gesetzt (echtes Mandat)
+ *   - claim_payments.zahlungseingang_am gesetzt (Zahlung eingegangen -> Provision faellig)
+ *   - kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet)
  *
  * Pro Kanzlei mit >= 1 Fall:
  *   - Berechnet Netto/MwSt/Brutto
@@ -38,11 +38,9 @@ export async function erstelleKanzleiAbrechnung(
 }> {
   const db = createAdminClient()
 
-  // Monatsgrenzen berechnen
-  const startDatum = new Date(Date.UTC(jahr, monat - 1, 1))
-  const endeDatum = new Date(Date.UTC(jahr, monat, 0, 23, 59, 59))
-  const startStr = startDatum.toISOString().slice(0, 10)
-  const endeStr = endeDatum.toISOString().slice(0, 10)
+  // monat/jahr = Abrechnungs-Periode (Label + Idempotenz-Dedup pro Kanzlei/Monat).
+  // KEIN vollmacht_signiert_am-Monatsfenster mehr (s. Eligibility-Kommentar unten):
+  // abgerechnet werden alle bezahlten, noch nicht abgerechneten Mandate dieser Kanzlei.
 
   // AAR-948: Serie CMNDO-K-{YYYY}-{MM}-{NNN} jetzt atomar + lückenlos via
   // rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
@@ -82,40 +80,29 @@ export async function erstelleKanzleiAbrechnung(
         continue
       }
 
-      // Berechtigte Claims laden.
-      // CMM-49 Reader-Sweep: Anker auf claims (faelle-frei, ueberlebt den faelle-DROP).
-      // vollmacht_signiert_am/vollmacht_status (CMM-44 SP-B), kanzlei_abrechnung_id (SP-J),
-      // kanzlei_honorar + kanzlei_provision_status (CMM-61) leben alle auf claims (SSoT) →
-      // direkt selektieren statt ueber den frueheren faelle->claims-!inner-Embed.
-      // kanzlei_faelle(fall_id, kanzlei_id): kanzlei_id fuer die Kanzlei-Zuordnung,
-      // fall_id (native Spalte, 0-null verifiziert) fuer die fall_id-gekeyten
-      // kanzlei_abrechnung_positionen + leads (KEIN claim_id->fall_id-Reverse).
-      // claim_nummer = altes faelle.fall_nr (0-diff). claim.id = altes claim_id.
-      // SP-B/SP-J-Filter (vollmacht_status/-fenster, abrechnung_id IS NULL) in App-Code.
+      // Abrechenbare Claims laden — Eligibility live-signal-basiert (s. eligibility.ts).
+      // Kanzlei-Strecke-Investigation 28.06.: die alten Filter waren alle tot →
+      // 0 Abrechnungen je. kanzlei_provision_status='berechtigt' (89/89 'offen'),
+      // vollmacht_status='unterschrieben' (0/89) und das vollmacht_signiert_am-Monatsfenster
+      // (passt nie zum spaeten Zahlungseingang) durch LIVE-Signale ersetzt:
+      // mandatsnummer (echtes Mandat) + claim_payments.zahlungseingang_am (Zahlung) +
+      // kanzlei_abrechnung_id IS NULL (Idempotenz). claim_nummer = altes faelle.fall_nr.
+      // fall_id aus kanzlei_faelle (native, fuer positionen + leads-Lookup).
       const { data: claimsRaw, error: claimsErr } = await db
         .from('claims')
-        .select('id, claim_nummer, kanzlei_faelle(fall_id, kanzlei_id), vollmacht_signiert_am, vollmacht_status, kanzlei_abrechnung_id, kanzlei_honorar')
-        .eq('kanzlei_provision_status', 'berechtigt')
-      const berechtigteClaims = (claimsRaw ?? []).filter((c) => {
-        // CMM-44 SP-I6: Kanzlei-Zuordnung aus dem kanzlei_faelle-Embed (Array-normalisiert).
-        const kf = Array.isArray((c as { kanzlei_faelle?: unknown }).kanzlei_faelle)
-          ? (c as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
-          : (c as { kanzlei_faelle?: unknown }).kanzlei_faelle
-        if (((kf as { kanzlei_id?: string | null } | null)?.kanzlei_id) !== kanzlei.id) return false
-        // SP-J-Filter: kanzlei_abrechnung_id IS NULL (noch nicht abgerechnet).
-        if ((c as { kanzlei_abrechnung_id?: string | null }).kanzlei_abrechnung_id != null) return false
-        // SP-B-Filter: vollmacht_status + vollmacht_signiert_am-Fenster.
-        if ((c.vollmacht_status as string | null) !== 'unterschrieben') return false
-        const vam = (c.vollmacht_signiert_am as string | null) ?? null
-        if (!vam) return false
-        return vam >= startStr && vam <= endeStr + 'T23:59:59'
-      })
+        .select('id, claim_nummer, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(zahlungseingang_am, status)')
+        .eq('service_typ', 'komplett')
+        .is('kanzlei_abrechnung_id', null)
 
       if (claimsErr) {
         console.error(`[KFZ-188] claims Query fuer ${kanzlei.id}:`, claimsErr.message)
         fehler++
         continue
       }
+
+      const berechtigteClaims = (claimsRaw ?? []).filter((c) =>
+        istAbrechenbarerKanzleiClaim(c as unknown as AbrechnungsClaim, kanzlei.id),
+      )
 
       if (!berechtigteClaims?.length) {
         uebersprungen++
