@@ -18,14 +18,42 @@ import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { triggerSV05 } from '@/lib/gutachterTasking'
 import { createNotification } from '@/lib/notifications'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { can } from '@/lib/permissions/helpers'
+import {
+  qcChecklisteVollstaendig,
+  fehlendeQcFelder,
+  QC_FIELD_LABELS,
+  type QcCheckValues,
+} from '@/lib/qc/checkliste-validation'
+
+// Filmcheck-Audit 29.06.2026: serverseitiges Rollen-Gate fuer ALLE QC-Actions.
+// Vorher pruefte jede Action nur "eingeloggt ja/nein" -> jeder authentifizierte
+// User konnte (fuer einen sichtbaren Claim) das QC-Gate selbst bestehen + den
+// Kanzlei-Handoff ausloesen. Gated jetzt auf can(rolle, 'dokumente.qc') = admin + KB
+// (matrix.ts). Liefert die userId fuer geprueft_von/erstellt_von.
+async function requireQcBerechtigung(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .maybeSingle()
+  if (!can((profile?.rolle as string | null) ?? null, 'dokumente.qc')) {
+    return { ok: false, error: 'Keine Berechtigung für die QC-Prüfung' }
+  }
+  return { ok: true, userId: user.id }
+}
 
 export async function saveFilmcheck(
   fallId: string,
   notizen: string,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const auth = await requireQcBerechtigung(supabase)
+  if (!auth.ok) return { success: false, error: auth.error }
 
   // CMM-44 SP-I2: mandatsnummer-Generierung entfernt — claim_nummer ist die kanonische Fallnummer.
   // Die Kanzlei-Mandat-ID (Salesforce) kommt via mandatsnummer_vergeben-Webhook in kanzlei_faelle.
@@ -129,8 +157,8 @@ export async function upsertQcCheckliste(
   checks: Record<string, boolean | string | null>,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const auth = await requireQcBerechtigung(supabase)
+  if (!auth.ok) return { success: false, error: auth.error }
 
   // CMM-49: qc_checkliste claim-nativ filtern; Insert behaelt fall_id (Trigger derive_claim_id fuellt claim_id)
   const claimId = await resolveClaimId(supabase, fallId)
@@ -159,8 +187,8 @@ export async function qcBestanden(
   kommentar: string,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const auth = await requireQcBerechtigung(supabase)
+  if (!auth.ok) return { success: false, error: auth.error }
 
   // CMM-49: claim-nativ
   const claimId = await resolveClaimId(supabase, fallId)
@@ -169,22 +197,31 @@ export async function qcBestanden(
   const now = new Date().toISOString()
   const { data: existing } = await supabase
     .from('qc_checkliste')
-    .select('id')
+    .select(
+      'id, gutachten_vorhanden, gutachten_vollstaendig, fin_17_zeichen, schadenspositionen_erfasst, fotos_ausreichend, sa_vorhanden, vollmacht_vorhanden, kundendaten_vollstaendig, vorschaeden_beruecksichtigt',
+    )
     .eq('claim_id', claimId)
     .single()
+
+  // Filmcheck-Audit 29.06.2026: Gate haerten — vor der Kanzlei-Uebergabe muessen ALLE
+  // Pflicht-Checks affirmativ auf true stehen (Nein/ungeprueft blockt). Die UI upsertet
+  // den Checklisten-Stand direkt vor diesem Call; defense-in-depth weist auch einen
+  // unvollstaendigen Direkt-Call ab. Verhindert Rubber-Stamping des QC-Gates.
+  if (!existing || !qcChecklisteVollstaendig(existing as unknown as QcCheckValues)) {
+    const offen = fehlendeQcFelder((existing ?? {}) as unknown as QcCheckValues)
+      .map((f) => QC_FIELD_LABELS[f])
+      .join(', ')
+    return { success: false, error: `Bitte erst alle Pflicht-Checks bestätigen. Offen: ${offen}` }
+  }
 
   const qcData = {
     status: 'bestanden',
     kommentar: kommentar || null,
-    geprueft_von: user.id,
+    geprueft_von: auth.userId,
     geprueft_am: now,
   }
 
-  if (existing) {
-    await supabase.from('qc_checkliste').update(qcData).eq('claim_id', claimId)
-  } else {
-    await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...qcData })
-  }
+  await supabase.from('qc_checkliste').update(qcData).eq('claim_id', claimId)
 
   // Trigger Filmcheck-Flow (State-Machine + Mails + Tasks)
   const filmcheckResult = await saveFilmcheck(fallId, kommentar)
@@ -209,8 +246,8 @@ export async function qcNachbesserung(
   kommentar: string,
 ): Promise<{ success: boolean; error?: string }> {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const auth = await requireQcBerechtigung(supabase)
+  if (!auth.ok) return { success: false, error: auth.error }
 
   // CMM-49: claim-nativ
   const claimId = await resolveClaimId(supabase, fallId)
@@ -226,7 +263,7 @@ export async function qcNachbesserung(
   const qcData = {
     status: 'nachbesserung',
     kommentar: kommentar || null,
-    geprueft_von: user.id,
+    geprueft_von: auth.userId,
     geprueft_am: now,
   }
 
@@ -234,6 +271,29 @@ export async function qcNachbesserung(
     await supabase.from('qc_checkliste').update(qcData).eq('claim_id', claimId)
   } else {
     await supabase.from('qc_checkliste').insert({ fall_id: fallId, ...qcData })
+  }
+
+  // Filmcheck-Audit 29.06.2026: Reject-Marker auf den aktuellen Auftrag setzen
+  // (vereinheitlicht mit weiseGutachtenZurueck/qc.ts). Damit zeigt der SV-Banner die
+  // Rueckweisung UND gutachtenAbgeben erkennt den korrigierten Re-Upload (warReject)
+  // -> der KB wird automatisch re-benachrichtigt (Loop geschlossen, s. qc.ts).
+  // filmcheck_ok=false = "geprueft + nicht bestanden" (vs. null = nie geprueft).
+  const { data: aktAuftragNb } = await supabase
+    .from('auftraege')
+    .select('id')
+    .eq('claim_id', claimId)
+    .order('reihenfolge', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+  if (aktAuftragNb) {
+    await supabase
+      .from('auftraege')
+      .update({
+        filmcheck_ok: false,
+        zurueckgewiesen_am: now,
+        zurueckweisung_grund: kommentar || 'Nachbesserung angefordert',
+      })
+      .eq('id', aktAuftragNb.id)
   }
 
   // CMM-49: claims-direkt (sv_id + claim_nummer claim-native)
@@ -266,7 +326,7 @@ export async function qcNachbesserung(
     typ: 'system',
     titel: 'QC nicht bestanden — Nachbesserung angefordert',
     beschreibung: kommentar || null,
-    erstellt_von: user.id,
+    erstellt_von: auth.userId,
   })
 
   if (claimInfo?.sv_id) {
@@ -286,7 +346,10 @@ export async function qcNachbesserung(
     ).catch(() => {})
   }
 
-  sendFallCommunication(fallId, 'nachbesserung_gutachten').catch(() => {})
+  // Filmcheck-Audit 29.06.2026: KEINE Kunden-WhatsApp bei Nachbesserung mehr — das
+  // Event 'nachbesserung_gutachten' war auf Template 'gutachten_fertig' (recipient
+  // kunde) verdrahtet -> der Kunde bekam "Gutachten fertig", obwohl es zur Korrektur
+  // zurueckging. QC-Iterationen sind ein interner SV<->KB-Loop (kein Kunden-Signal).
 
   if (svProfileId) {
     triggerSV05(fallId, svProfileId, kommentar || 'Nachbesserung erforderlich').catch(() => {})

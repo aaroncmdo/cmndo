@@ -15,6 +15,7 @@ import {
   qcNachbesserung,
   upsertQcCheckliste,
 } from '../../../../app/faelle/[id]/_actions'
+import { qcChecklisteVollstaendig } from '@/lib/qc/checkliste-validation'
 
 // AAR-170: die 9 Prüf-Felder entsprechen 1:1 den Spalten in `qc_checkliste`
 // (information_schema-verifiziert).
@@ -65,6 +66,9 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
   const [qcKommentar, setQcKommentar] = useState<string>(qcCheckliste?.kommentar ?? '')
   const [qcPending, startQcTransition] = useTransition()
   const qcStatus = qcCheckliste?.status ?? null
+  // Filmcheck-Audit 29.06.2026: "Bestanden" erst freigeben, wenn alle Pflicht-Checks
+  // auf "Ja" stehen (Server-Action erzwingt es zusaetzlich hart).
+  const alleChecksOk = qcChecklisteVollstaendig(qcState)
 
   function toggleQc(key: string) {
     setQcState((prev) => ({
@@ -200,7 +204,8 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
           <button
             type="button"
             onClick={handleBestanden}
-            disabled={qcPending}
+            disabled={qcPending || !alleChecksOk}
+            title={alleChecksOk ? undefined : 'Erst alle Pflicht-Checks auf „Ja" setzen'}
             className="px-3 py-1.5 rounded-ios-md bg-success text-white text-xs font-medium hover:bg-success-strong disabled:opacity-50"
           >
             QC bestanden → Kanzlei übergeben
@@ -218,6 +223,11 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
           Klick auf ein Feld zykelt zwischen — / Ja / Nein. Bestanden speichert
           automatisch + löst Filmcheck-Flow aus (Kanzlei-Paket, AS-Sendedatum).
         </p>
+        {!alleChecksOk && (
+          <p className="text-[10px] text-warning-strong">
+            Kanzlei-Übergabe gesperrt, bis alle Pflicht-Checks auf „Ja" stehen.
+          </p>
+        )}
       </div>
     </div>
   )
