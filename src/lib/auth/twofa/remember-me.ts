@@ -70,32 +70,11 @@ export async function createRememberToken(
   return { success: true }
 }
 
-export async function validateRememberToken(userId: string): Promise<boolean> {
-  const cookieStore = await cookies()
-  const cookie = cookieStore.get(COOKIE_NAME)?.value
-  if (!cookie) return false
-
-  const [cookieUserId, rawToken] = cookie.split(':')
-  if (cookieUserId !== userId || !rawToken) return false
-
-  const tokenHash = hashToken(rawToken)
-  const db = createAdminClient()
-
-  const { data } = await db
-    .from('auth_remember_tokens')
-    .select('id, expires_at')
-    .eq('user_id', userId)
-    .eq('token_hash', tokenHash)
-    .is('revoked_am', null)
-    .single()
-
-  if (!data || new Date(data.expires_at) < new Date()) return false
-
-  // Update last_used_at
-  await db.from('auth_remember_tokens').update({ last_used_at: new Date().toISOString() }).eq('id', data.id)
-
-  return true
-}
+// AAR-auth-haertung: validateRememberToken (Edge-sichere Validierung) lebt jetzt
+// in @/lib/auth/twofa/validate-remember-token und wird von der Middleware
+// genutzt. Die fruehere next/headers + node:crypto-Variante hier war totcode
+// (0 Aufrufer) UND edge-untauglich (Middleware konnte sie nie aufrufen) — genau
+// deshalb prüfte die Middleware das Cookie nur auf Existenz (2FA-Bypass).
 
 export async function revokeRememberToken(tokenId: string): Promise<void> {
   const db = createAdminClient()

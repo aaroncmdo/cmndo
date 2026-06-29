@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { serverSignOut } from '@/lib/auth/logout'
 import {
   MapIcon,
   MapPinIcon,
@@ -319,9 +320,11 @@ export default function GutachterShell({
   }, [loadBadges])
 
   async function handleLogout() {
-    const supabase = createClient()
-    await supabase.auth.signOut()
-    window.location.href = '/login'
+    // AAR-auth-haertung: ueber die Server-Action ausloggen — sie widerruft das
+    // Trusted-Device-Token (DB + httpOnly-Cookie claimondo_remember), was der
+    // client-seitige signOut nicht kann (httpOnly-Cookie ist fuer JS unsichtbar).
+    const { redirectTo } = await serverSignOut()
+    window.location.href = redirectTo
   }
 
   function isActive(href: string) {
