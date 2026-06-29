@@ -27,6 +27,15 @@ export type OperativeSignals = {
   anschlussschreibenVorhanden: boolean
   /** claim_payments.zahlungseingang_am gesetzt (Zahlung eingegangen) */
   zahlungEingegangen: boolean
+  // --- Kanzlei-Fakten (KB-gepflegt; ab kanzlei-uebergeben) ---
+  /** kanzlei_faelle.vs_reaktion_typ — Reaktion der gegnerischen Versicherung */
+  vsReaktionTyp: 'voll' | 'gekuerzt' | 'abgelehnt' | null
+  /** kanzlei_faelle.regulierung_am gesetzt */
+  regulierungVorhanden: boolean
+  /** kanzlei_faelle.klage_uebergeben_am gesetzt */
+  klageVorhanden: boolean
+  /** claims.abgeschlossen_am gesetzt (KB markiert Abschluss explizit) */
+  abgeschlossenVorhanden: boolean
 }
 
 /**
@@ -58,11 +67,37 @@ export function computeNextOperativePhase(status: string, s: OperativeSignals): 
     case 'filmcheck':
       // HALB-AUTOMATIK-GRENZE: KB macht den Handoff via saveFilmcheck. Kein Auto-Sprung.
       return null
+    // --- Kanzlei-Strecke (KB-Fakt-getrieben, ab kanzlei-uebergeben) ---
     case 'kanzlei-uebergeben':
       return s.anschlussschreibenVorhanden ? 'anschlussschreiben' : null
     case 'anschlussschreiben':
+      // VS-Reaktion verzweigt. Klage hat Vorrang (furthest). Alle Ziele sind gueltige
+      // FALL_STATUS_TRANSITIONS-Uebergaenge von anschlussschreiben.
+      if (s.klageVorhanden) return 'klage'
+      if (s.vsReaktionTyp === 'abgelehnt') return 'vs-abgelehnt'
+      if (s.vsReaktionTyp === 'gekuerzt') return 'vs-kuerzt'
+      if (s.regulierungVorhanden || s.vsReaktionTyp === 'voll') return 'regulierung-laeuft'
+      return null
+    case 'regulierung-laeuft':
+      if (s.klageVorhanden) return 'klage'
+      if (s.zahlungEingegangen) return 'zahlung-eingegangen'
+      return null
     case 'regulierung':
-      return s.zahlungEingegangen ? 'abgeschlossen' : null
+      // Legacy/dispatch-gesetzt: FALL erlaubt von 'regulierung' KEINE direkte klage.
+      if (s.zahlungEingegangen) return 'zahlung-eingegangen'
+      if (s.abgeschlossenVorhanden) return 'abgeschlossen'
+      return null
+    case 'vs-kuerzt':
+      if (s.klageVorhanden) return 'klage'
+      if (s.regulierungVorhanden) return 'regulierung-laeuft'
+      return null
+    case 'vs-abgelehnt':
+      return s.klageVorhanden ? 'klage' : null
+    case 'klage':
+      return s.abgeschlossenVorhanden ? 'abgeschlossen' : null
+    case 'zahlung-eingegangen':
+      // KB schliesst explizit ab (abgeschlossen_am) — kein Auto-Close auf Zahlung.
+      return s.abgeschlossenVorhanden ? 'abgeschlossen' : null
     default:
       return null
   }

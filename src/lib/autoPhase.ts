@@ -57,7 +57,7 @@ export async function checkFallAutoPhase(fallId: string) {
 
   const { data: claim } = await svc
     .from('claims')
-    .select('operative_status, service_typ, sv_id, kundenbetreuer_id')
+    .select('operative_status, service_typ, sv_id, kundenbetreuer_id, abgeschlossen_am')
     .eq('id', claimId)
     .single()
   const status = (claim?.operative_status as string | null) ?? null
@@ -69,17 +69,32 @@ export async function checkFallAutoPhase(fallId: string) {
       .not('fertiggestellt_am', 'is', null).limit(1).maybeSingle(),
     svc.from('gutachter_termine').select('id').eq('claim_id', claimId)
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt']).limit(1).maybeSingle(),
-    svc.from('kanzlei_faelle').select('anschlussschreiben_am').eq('claim_id', claimId).maybeSingle(),
+    svc.from('kanzlei_faelle')
+      .select('anschlussschreiben_am, vs_reaktion_typ, regulierung_am, klage_uebergeben_am')
+      .eq('claim_id', claimId).maybeSingle(),
     getCurrentClaimPayment(svc, claimId),
   ])
+  const kf = kanzleiRes.data as {
+    anschlussschreiben_am?: string | null
+    vs_reaktion_typ?: string | null
+    regulierung_am?: string | null
+    klage_uebergeben_am?: string | null
+  } | null
+  const vsTyp = kf?.vs_reaktion_typ
+  const vsReaktionTyp: OperativeSignals['vsReaktionTyp'] =
+    vsTyp === 'voll' || vsTyp === 'gekuerzt' || vsTyp === 'abgelehnt' ? vsTyp : null
 
   const signals: OperativeSignals = {
     hasSvId: !!(claim.sv_id as string | null),
     hasTermin: !!terminRes.data,
     gutachtenFertig: !!(gutachtenRes.data as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am,
     istKomplett: (claim.service_typ as string | null) === 'komplett',
-    anschlussschreibenVorhanden: !!(kanzleiRes.data as { anschlussschreiben_am?: string | null } | null)?.anschlussschreiben_am,
+    anschlussschreibenVorhanden: !!kf?.anschlussschreiben_am,
     zahlungEingegangen: !!currentPayment?.zahlungseingang_am,
+    vsReaktionTyp,
+    regulierungVorhanden: !!kf?.regulierung_am,
+    klageVorhanden: !!kf?.klage_uebergeben_am,
+    abgeschlossenVorhanden: !!(claim.abgeschlossen_am as string | null),
   }
 
   // Task-Empfaenger einmal aufloesen (aendern sich im Loop nicht).
