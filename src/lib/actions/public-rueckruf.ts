@@ -20,6 +20,7 @@ export type RueckrufInput = {
   standortPlz?: string | null
   standortOrt?: string | null
   notiz?: string | null
+  serviceTyp?: string | null
   // Optionaler Owner (Round-Robin-Dispatcher) — sonst erster Dispatch-User.
   zugewiesenAn?: string | null
 }
@@ -76,6 +77,7 @@ export async function erstelleOeffentlichenRueckruf(
       ...(input.standortPlz ? { fahrzeug_standort_plz: input.standortPlz } : {}),
       ...(input.standortOrt ? { fahrzeug_standort_adresse: input.standortOrt } : {}),
       ...(input.notiz ? { notiz: input.notiz } : {}),
+      ...(input.serviceTyp ? { service_typ: input.serviceTyp } : {}),
     },
   )
   if (!created.ok) {

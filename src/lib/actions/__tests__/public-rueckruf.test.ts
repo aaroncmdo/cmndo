@@ -26,7 +26,7 @@ describe('erstelleOeffentlichenRueckruf — Makler-Attribution + Standort', () =
     const res = await erstelleOeffentlichenRueckruf({
       name: 'Max Mustermann', telefon: '+4915112345678', quelle: 'makler-anfrage',
       promotionCodeId: 'promo-1', standortPlz: '50667', standortOrt: 'Koeln',
-      notiz: 'Parkschaden', zugewiesenAn: 'disp-9',
+      notiz: 'Parkschaden', zugewiesenAn: 'disp-9', serviceTyp: 'nur_gutachter',
     })
     expect(res.ok).toBe(true)
     const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
@@ -35,6 +35,7 @@ describe('erstelleOeffentlichenRueckruf — Makler-Attribution + Standort', () =
     expect(extra.fahrzeug_standort_adresse).toBe('Koeln')
     expect(extra.notiz).toBe('Parkschaden')
     expect(extra.zugewiesen_an).toBe('disp-9')
+    expect(extra.service_typ).toBe('nur_gutachter')
   })
 
   it('ohne promotionCodeId bleibt promotion_code_id unset (Marketing-Caller unveraendert)', async () => {

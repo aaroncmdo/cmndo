@@ -25,11 +25,12 @@ export function NeueAnfrageDrawer() {
   const [rueckrufZeit, setRueckrufZeit] = useState('')
   const [notiz, setNotiz] = useState('')
   const [consent, setConsent] = useState(false)
+  const [serviceTyp, setServiceTyp] = useState<'komplett' | 'nur_gutachter'>('komplett')
 
   function reset() {
     setVorname(''); setNachname(''); setTelefon(''); setEmail('')
     setPlz(''); setOrt(''); setStandortOffen(false); setAusgang('rueckruf'); setRueckrufZeit('')
-    setNotiz(''); setConsent(false)
+    setNotiz(''); setConsent(false); setServiceTyp('komplett')
   }
 
   function submit() {
@@ -46,6 +47,7 @@ export function NeueAnfrageDrawer() {
         standortOrt: ort || null,
         notiz: notiz || null,
         kundeEinwilligung: consent,
+        serviceTyp,
         ausgang,
         rueckrufStartZeit: ausgang === 'rueckruf' && rueckrufZeit ? new Date(rueckrufZeit).toISOString() : null,
       })
@@ -56,13 +58,13 @@ export function NeueAnfrageDrawer() {
     })
   }
 
-  const ausgangOption = (key: MaklerAnfrageAusgang, titel: string, sub: string) => (
+  const selectCard = (selected: boolean, onSelect: () => void, titel: string, sub: string, group: string) => (
     <label
       className={`flex cursor-pointer flex-col rounded-ios-md border p-3 text-sm transition ${
-        ausgang === key ? 'border-claimondo-ondo bg-claimondo-ondo/10' : 'border-claimondo-border'
+        selected ? 'border-claimondo-ondo bg-claimondo-ondo/10' : 'border-claimondo-border'
       }`}
     >
-      <input type="radio" name="makler-anfrage-ausgang" className="sr-only" checked={ausgang === key} onChange={() => setAusgang(key)} />
+      <input type="radio" name={group} className="sr-only" checked={selected} onChange={onSelect} />
       <span className="font-semibold text-claimondo-navy">{titel}</span>
       <span className="mt-0.5 text-xs text-claimondo-shield">{sub}</span>
     </label>
@@ -110,10 +112,18 @@ export function NeueAnfrageDrawer() {
           />
 
           <div className="space-y-2">
+            <span className="text-xs font-semibold text-claimondo-shield">Paket</span>
+            <div className="grid grid-cols-2 gap-3">
+              {selectCard(serviceTyp === 'komplett', () => setServiceTyp('komplett'), 'Komplett', 'Anwalt + Gutachten', 'makler-anfrage-paket')}
+              {selectCard(serviceTyp === 'nur_gutachter', () => setServiceTyp('nur_gutachter'), 'Nur Gutachten', 'Ohne Anwalt', 'makler-anfrage-paket')}
+            </div>
+          </div>
+
+          <div className="space-y-2">
             <span className="text-xs font-semibold text-claimondo-shield">Wie soll es weitergehen?</span>
             <div className="grid grid-cols-2 gap-3">
-              {ausgangOption('rueckruf', '📞 Rückruf buchen', 'Unser Team ruft den Kunden an.')}
-              {ausgangOption('flowlink', '📲 Link an Kunden senden', 'Kunde wählt Gutachter & Termin selbst.')}
+              {selectCard(ausgang === 'rueckruf', () => setAusgang('rueckruf'), '📞 Rückruf buchen', 'Unser Team ruft den Kunden an.', 'makler-anfrage-ausgang')}
+              {selectCard(ausgang === 'flowlink', () => setAusgang('flowlink'), '📲 Link an Kunden senden', 'Kunde wählt Gutachter & Termin selbst.', 'makler-anfrage-ausgang')}
             </div>
             {ausgang === 'rueckruf' ? (
               <TextField

@@ -29,6 +29,8 @@ export type MaklerAnfrageInput = {
   notiz?: string | null
   /** Makler bestaetigt, dass der Kunde mit der Kontaktaufnahme einverstanden ist (DSGVO-Basis). */
   kundeEinwilligung: boolean
+  /** Paket — default 'komplett' (LexDrive/abrechnungsstaerker). Kunde/Flow kann verfeinern. */
+  serviceTyp?: 'komplett' | 'nur_gutachter'
   ausgang: MaklerAnfrageAusgang
   rueckrufStartZeit?: string | null
 }
@@ -36,6 +38,40 @@ export type MaklerAnfrageInput = {
 export type MaklerAnfrageResult =
   | { ok: true; leadId: string; ausgang: MaklerAnfrageAusgang; token?: string; terminId?: string; warnung?: string }
   | { ok: false; error: string }
+
+// Telefon auf eine vergleichbare Form normalisieren (Dedup ist formatierungs-tolerant).
+function normTel(t: string | null): string {
+  let s = (t ?? '').replace(/[^\d+]/g, '')
+  if (s.startsWith('00')) s = '+' + s.slice(2)
+  else if (s.startsWith('0')) s = '+49' + s.slice(1)
+  else if (s && !s.startsWith('+')) s = '+' + s
+  return s
+}
+
+const TERMINALE_LEAD_STATUS = new Set(['umgewandelt', 'umgewandelt-sv', 'disqualifiziert', 'kalt'])
+
+// Dedup: existiert fuer denselben Makler (promo) bereits eine OFFENE Anfrage mit dieser
+// Nummer? -> Doppel-Lead vermeiden (Doppel-Submit / versehentliche Neu-Anlage). Terminale
+// Leads (konvertiert/disqualifiziert/kalt) blocken NICHT (echter neuer Fall ist erlaubt).
+async function findeOffenenDuplikat(
+  admin: ReturnType<typeof createAdminClient>,
+  promoId: string,
+  telefon: string,
+): Promise<string | null> {
+  const norm = normTel(telefon)
+  if (!norm) return null
+  const { data } = await admin
+    .from('leads')
+    .select('id, telefon, status')
+    .eq('promotion_code_id', promoId)
+    .order('created_at', { ascending: false })
+    .limit(50)
+  for (const l of (data ?? []) as Array<{ id: string; telefon: string | null; status: string | null }>) {
+    if (TERMINALE_LEAD_STATUS.has(l.status ?? '')) continue
+    if (normTel(l.telefon) === norm) return l.id
+  }
+  return null
+}
 
 export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<MaklerAnfrageResult> {
   // 1. Auth-Gate: eingeloggter, aktiver Makler.
@@ -72,6 +108,12 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   const promo = await getOrCreateMaklerPromoCode(admin, makler.id)
   if (!promo) return { ok: false, error: 'Promo-Code konnte nicht ermittelt/angelegt werden. Bitte Admin kontaktieren.' }
 
+  // 4b. Dedup: schon eine offene Anfrage dieses Maklers mit dieser Nummer? -> kein Doppel-Lead.
+  const duplikatId = await findeOffenenDuplikat(admin, promo.id, telefon)
+  if (duplikatId) {
+    return { ok: false, error: 'Für diese Telefonnummer haben Sie bereits eine offene Anfrage — sie steht in Ihrer Lead-Liste.' }
+  }
+
   // 5. Dispatcher (Berater) — Round-Robin fuer BEIDE Zweige.
   const dispatcherId = await pickRoundRobinDispatcher(admin)
 
@@ -105,6 +147,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       standortPlz,
       standortOrt,
       notiz,
+      serviceTyp: input.serviceTyp ?? 'komplett',
       zugewiesenAn: dispatcherId,
     })
     if (!res.ok) return { ok: false, error: res.error }
@@ -119,7 +162,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
     { source_channel: 'makler-anfrage', status: 'neu', vorname, nachname, telefon, email },
     {
       promotion_code_id: promo.id,
-      service_typ: 'komplett',
+      service_typ: input.serviceTyp ?? 'komplett',
       qualifizierungs_phase: 'erstkontakt',
       zugewiesen_an: dispatcherId,
       sprache: await getLocaleCookie(),

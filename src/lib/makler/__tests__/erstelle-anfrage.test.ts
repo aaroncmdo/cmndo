@@ -17,10 +17,14 @@ vi.mock('@/lib/start-link/send-flowlink-multichannel', () => ({ sendFlowLinkMult
 vi.mock('@/lib/actions/public-rueckruf', () => ({ erstelleOeffentlichenRueckruf: (i: unknown) => rueckrufMock(i) }))
 vi.mock('@/lib/leads/notify-new-lead', () => ({ notifyNewLead: vi.fn().mockResolvedValue(undefined) }))
 vi.mock('@/lib/i18n/locale-cookie', () => ({ getLocaleCookie: vi.fn().mockResolvedValue('de') }))
+let leadsDedupResult: unknown[] = []
 const adminMock = {
   from: vi.fn((table: string) => {
     if (table === 'timeline') return { insert: timelineInsertMock }
     if (table === 'mitteilungen') return { insert: mitteilungInsertMock }
+    if (table === 'leads') {
+      return { select: () => ({ eq: () => ({ order: () => ({ limit: () => Promise.resolve({ data: leadsDedupResult }) }) }) }) }
+    }
     return { insert: vi.fn().mockResolvedValue({ error: null }) }
   }),
 }
@@ -41,6 +45,7 @@ beforeEach(() => {
   rueckrufMock.mockReset().mockResolvedValue({ ok: true, leadId: 'lead-r', terminId: 'termin-1' })
   timelineInsertMock.mockReset().mockResolvedValue({ error: null })
   mitteilungInsertMock.mockReset().mockResolvedValue({ error: null })
+  leadsDedupResult = []
 })
 
 describe('erstelleMaklerAnfrage', () => {
@@ -83,6 +88,28 @@ describe('erstelleMaklerAnfrage', () => {
     await erstelleMaklerAnfrage({ ...baseInput, notiz: 'Parkschaden, will schnell', ausgang: 'flowlink' })
     const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
     expect(extra.notiz).toBe('Parkschaden, will schnell')
+  })
+
+  it('service_typ default komplett, nur_gutachter wird durchgereicht', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
+    expect((createLeadMock.mock.calls[0][2] as Record<string, unknown>).service_typ).toBe('komplett')
+    createLeadMock.mockClear()
+    await erstelleMaklerAnfrage({ ...baseInput, serviceTyp: 'nur_gutachter', ausgang: 'flowlink' })
+    expect((createLeadMock.mock.calls[0][2] as Record<string, unknown>).service_typ).toBe('nur_gutachter')
+  })
+
+  it('Dedup: offene Anfrage mit gleicher Nummer (formatierungs-tolerant) -> Fehler, kein Lead', async () => {
+    leadsDedupResult = [{ id: 'existing', telefon: '015112345678', status: 'neu' }] // 0151… == +49151…
+    const res = await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
+    expect(res.ok).toBe(false)
+    expect(createLeadMock).not.toHaveBeenCalled()
+  })
+
+  it('Dedup: terminaler Bestands-Lead blockt NICHT (neuer Fall erlaubt)', async () => {
+    leadsDedupResult = [{ id: 'old', telefon: '+4915112345678', status: 'umgewandelt' }]
+    const res = await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
+    expect(res.ok).toBe(true)
+    expect(createLeadMock).toHaveBeenCalled()
   })
 
   it('rueckruf: delegiert mit promotionCodeId + Round-Robin-Dispatcher, kein eigener createLead', async () => {
