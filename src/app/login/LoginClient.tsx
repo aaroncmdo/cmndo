@@ -7,8 +7,8 @@ import { createClient } from '@/lib/supabase/client'
 import { MailIcon, SmartphoneIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
-import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue } from '@/lib/auth/safe-continue'
+import { finalisierePhoneLogin } from './actions'
 
 // Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
 // Server-Action-Ausfuehrung sichtbar ist (BUG-88).
@@ -66,15 +66,16 @@ export default function LoginClient({
       const supabase = createClient()
       const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
       if (error) throw error
-      // Check role and redirect
-      const user = (await supabase.auth.getUser())?.data?.user ?? null
-      if (user) {
-        // Update auth_provider
-        await supabase.from('profiles').update({ auth_provider: 'phone', force_password_change: false }).eq('id', user.id)
-        const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-        // AAR-login-embed: validiertes continue hat Vorrang (Phone-Login hat kein 2FA-Hop).
-        window.location.href = safeContinue(continueUrl) ?? roleToPath(profile?.rolle as string | null | undefined)
+      // AAR-auth-haertung (Befund I): Profil-Write (auth_provider +
+      // force_password_change) serverseitig + error-checked statt ungeprueft auf
+      // dem Browser-Client. finalisierePhoneLogin liefert das Redirect-Ziel.
+      const result = await finalisierePhoneLogin()
+      if (!result.ok) {
+        setPhoneError(result.error)
+        return
       }
+      // AAR-login-embed: validiertes continue hat Vorrang (Phone-Login hat kein 2FA-Hop).
+      window.location.href = safeContinue(continueUrl) ?? result.redirectTo
     } catch (err) {
       setPhoneError(err instanceof Error ? err.message : 'Code ungueltig')
     } finally {
