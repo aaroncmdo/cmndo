@@ -55,7 +55,7 @@ export async function requirePortalAccess(
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .select('rolle, vorname, nachname')
+    .select('rolle, vorname, nachname, force_password_change, auth_provider')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -65,6 +65,17 @@ export async function requirePortalAccess(
   }
   if (!profile) {
     redirect('/login?error=Kein+Profil')
+  }
+
+  // AAR-auth-haertung (Befund D): force_password_change pro Request erzwingen,
+  // nicht nur im Login-Action. Sonst behaelt ein User, dem das Flag mid-session
+  // gesetzt wurde (z.B. Admin-Reset / Leak-Rotation), Portal-Zugang bis zum
+  // naechsten Login. /passwort-aendern liegt ausserhalb der Portal-Layouts ->
+  // kein Loop. Nur Email-Auth (Google-User haben kein Passwort). Greift vor dem
+  // Rollen-Check, analog zum Login-Action.
+  const authProvider = (profile.auth_provider as string | null) ?? 'email'
+  if (profile.force_password_change && authProvider === 'email') {
+    redirect('/passwort-aendern')
   }
 
   const rolle = profile.rolle as UserRolle
