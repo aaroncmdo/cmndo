@@ -11,6 +11,7 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "smoke": "node scripts/smoke.mjs",
+    "feed:freshness": "node scripts/feed-freshness.mjs",
     "test": "vitest run"
   },
   "dependencies": {

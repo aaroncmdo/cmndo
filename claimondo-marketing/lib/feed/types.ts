@@ -13,6 +13,7 @@ export type FeedAssetType =
   | 'Spoke'
   | 'Decoder'
   | 'Sachverständige'
+  | 'Versicherer'
   | 'Stadt'
   | 'Strategic'
 

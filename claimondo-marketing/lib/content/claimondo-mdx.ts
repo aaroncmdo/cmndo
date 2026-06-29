@@ -162,6 +162,29 @@ export function metaDescriptionFromSnippet(snippet: string, max = 155): string {
   return `${trimmed}…`
 }
 
+/**
+ * Stabiler Fallback-Stand für Assets ohne (oder mit kaputtem) `last_modified`.
+ * Bewusst ein fixes Vergangenheitsdatum statt `new Date()`: ein build-zeitliches
+ * `new Date()` würde so ein Asset bei JEDER ISR-Regeneration (6 h) als
+ * „frischestes" Item an die Spitze des News-Feeds heben (falsches Freshness-Signal,
+ * pubDate wandert ohne Content-Change) — und ein ungültiges Datum würde via
+ * `.toISOString()` (render-json) den JSON-Feed mit einer RangeError zum 500 bringen.
+ */
+const ASSET_DATE_FALLBACK = new Date('2024-01-01T00:00:00Z')
+
+function parseLastModified(raw: unknown, filePath: string): Date {
+  if (typeof raw !== 'string' || raw.trim() === '') {
+    console.warn(`[claimondo-mdx] ${filePath}: last_modified fehlt — Fallback-Stand genutzt`)
+    return ASSET_DATE_FALLBACK
+  }
+  const d = new Date(raw.trim())
+  if (Number.isNaN(d.getTime())) {
+    console.warn(`[claimondo-mdx] ${filePath}: last_modified "${raw}" ungueltig — Fallback-Stand genutzt`)
+    return ASSET_DATE_FALLBACK
+  }
+  return d
+}
+
 function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
   const dir = path.join(CONTENT_ROOT, folder)
   if (!fs.existsSync(dir)) return []
@@ -176,8 +199,7 @@ function readOneFolder(folder: ClaimondoAsset['folder']): ClaimondoAsset[] {
       const frontmatterUrl = typeof meta.url === 'string' ? meta.url : ''
       const urlPath = frontmatterUrl ||
         (folder === 'cornerstones' ? `/${slug}` : `/${folder}/${slug}`)
-      const last = typeof meta.last_modified === 'string' ? meta.last_modified : ''
-      const lastModified = last ? new Date(last) : new Date()
+      const lastModified = parseLastModified(meta.last_modified, filePath)
       return {
         url: urlPath,
         filePath,
@@ -295,6 +317,7 @@ const CLUSTER_LABELS: Record<string, string> = {
   H6: 'Standard-Unfall-Szenarien (Auffahrunfall, Vorfahrt, Rotlicht, Spurwechsel, Linksabbieger, Parkplatz, Türöffnen, Wenden, Überholen, Wildunfall, Glatteis)',
   H7: 'Komplexe Konstellationen (Fahrerflucht, Verkehrsopferhilfe, Auslandsunfall, Schwarzfahrt, Anhänger, Produkthaftung, mehrere Schädiger, Dritte Beteiligte, Kasko)',
   SV: 'Sachverständige & Verbände (BVSK, DEKRA, GTÜ/KÜS/TÜV, ZKF, IfS, ZAK, IHK-öbV, Prüfdienstleister)',
+  'PILLAR-D': 'Versicherer-Profile (Schadenregulierung & Prüfdienstleister)',
 }
 
 export function clusterLabel(cluster: string): string {
