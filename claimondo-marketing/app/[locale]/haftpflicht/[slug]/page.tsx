@@ -104,7 +104,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             <ConversionAnchorBlock variant="spoke" />
             <InlineCheckCta />
             <RelatedAssets current={a} />
-            <ArticleComments articleSlug={slug} />
+            <ArticleComments articleSlug={`haftpflicht/${slug}`} />
           </article>
         </div>
         <SpokeCtaBand />

@@ -102,7 +102,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
           <ConversionAnchorBlock variant="decoder" />
           <RelatedAssets current={a} />
-          <ArticleComments articleSlug={slug} />
+          <ArticleComments articleSlug={`decoder/${slug}`} />
         </article>
       </main>
       <LandingFooter />

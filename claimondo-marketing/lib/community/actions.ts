@@ -15,7 +15,7 @@ export async function requestCommentLogin(
   const email = String(formData.get('email') ?? '').trim().toLowerCase()
   const slug = String(formData.get('slug') ?? '')
   if (!isEmail(email)) return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse eingeben.' }
-  const next = slug ? `/haftpflicht/${slug}` : '/'
+  const next = slug ? `/${slug}` : '/'
   const supabase = await createClient()
   const { error } = await supabase.auth.signInWithOtp({
     email,
@@ -58,6 +58,6 @@ export async function submitComment(
     .from('article_comments')
     .insert({ author_id: auth.user.id, article_slug: slug, body })
   if (error) return { ok: false, error: 'Kommentar konnte nicht gespeichert werden.' }
-  revalidatePath(`/haftpflicht/${slug}`)
+  revalidatePath(`/${slug}`)
   return { ok: true }
 }
