@@ -37,8 +37,8 @@ function statusBadge(status: string, frist: string | null): {
   if (overdue) {
     return {
       icon: AlertTriangleIcon,
-      bg: 'bg-red-50 border-red-200',
-      text: 'text-red-600',
+      bg: 'bg-danger-soft border-danger/30',
+      text: 'text-danger',
       labelTxt: 'Überfällig',
       overdue: true,
     }
@@ -48,8 +48,8 @@ function statusBadge(status: string, frist: string | null): {
     case 'geprueft':
       return {
         icon: CheckCircle2Icon,
-        bg: 'bg-emerald-50 border-emerald-200',
-        text: 'text-emerald-600',
+        bg: 'bg-success-soft border-success/30',
+        text: 'text-success',
         labelTxt: status === 'geprueft' ? 'Geprüft' : 'Erhalten',
       }
     case 'abgelehnt':
@@ -62,15 +62,15 @@ function statusBadge(status: string, frist: string | null): {
     case 'nachgereicht_angefordert':
       return {
         icon: ClockIcon,
-        bg: 'bg-orange-50 border-orange-200',
-        text: 'text-orange-600',
+        bg: 'bg-warning-soft border-warning/30',
+        text: 'text-warning',
         labelTxt: 'Erinnert',
       }
     default:
       return {
         icon: ClockIcon,
-        bg: 'bg-amber-50 border-amber-200',
-        text: 'text-amber-600',
+        bg: 'bg-warning-soft border-warning/30',
+        text: 'text-warning',
         labelTxt: 'Ausstehend',
       }
   }
@@ -127,7 +127,7 @@ export default function AnforderungenListe({
                     {a.frist && (
                       <span
                         className={`text-[10px] tabular-nums ${
-                          cfg.overdue ? 'text-red-600 font-medium' : 'text-claimondo-ondo'
+                          cfg.overdue ? 'text-danger font-medium' : 'text-claimondo-ondo'
                         }`}
                       >
                         Frist: {new Date(a.frist).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}
