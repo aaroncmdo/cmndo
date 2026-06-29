@@ -212,4 +212,62 @@ describe('convertLeadToClaim', () => {
     const geschaedigter = parties.find((p) => p.rolle === 'geschaedigter')
     expect(geschaedigter?.person_id).toBe('person-1')
   })
+
+  it('Task 6: propagiert reparatur_werkstatt_* vom Lead auf den Claim-Insert', async () => {
+    primeResponses([
+      {
+        data: {
+          id: 'lead-rw',
+          schadens_art: 'haftpflicht',
+          gegner_bekannt: false,
+          vorname: 'Max',
+          nachname: 'Muster',
+          // Dispatcher-Werkstatt-Zuweisung am Lead:
+          reparatur_werkstatt_id: 'werkstatt-7',
+          reparatur_werkstatt_zugewiesen_am: '2026-06-29T08:00:00.000Z',
+          reparatur_werkstatt_zugewiesen_von: 'dispatcher-1',
+          reparatur_werkstatt_quelle: 'dispatcher',
+        },
+      }, // 1 leads select (load + Idempotenz)
+      { data: [] }, // 2 profiles select (KB Round-Robin -> keine -> null)
+      { data: { id: 'claim-rw', claim_nummer: 'CLM-RW' } }, // 3 claims insert
+      { data: { id: 'person-2' } }, // 4 personen insert (geschädigter)
+      { data: null }, // 5 claim_parties insert
+      { data: null }, // 6 faelle_claim_bridge upsert
+      { data: null }, // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-rw' })
+    expect(r.ok).toBe(true)
+
+    const claimInsert = operations.find((o) => o.table === 'claims' && o.op === 'insert')
+    expect(claimInsert).toBeTruthy()
+    const payload = claimInsert!.payload as Record<string, unknown>
+    expect(payload.reparatur_werkstatt_id).toBe('werkstatt-7')
+    expect(payload.reparatur_werkstatt_zugewiesen_am).toBe('2026-06-29T08:00:00.000Z')
+    expect(payload.reparatur_werkstatt_zugewiesen_von).toBe('dispatcher-1')
+    expect(payload.reparatur_werkstatt_quelle).toBe('dispatcher')
+  })
+
+  it('Task 6: setzt reparatur_werkstatt_* auf null wenn der Lead keine Werkstatt hat', async () => {
+    primeResponses([
+      { data: { id: 'lead-norw', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
+      { data: [] },
+      { data: { id: 'claim-norw', claim_nummer: 'CLM-NORW' } },
+      { data: { id: 'person-3' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-norw' })
+    expect(r.ok).toBe(true)
+
+    const claimInsert = operations.find((o) => o.table === 'claims' && o.op === 'insert')
+    const payload = claimInsert!.payload as Record<string, unknown>
+    expect(payload.reparatur_werkstatt_id).toBeNull()
+    expect(payload.reparatur_werkstatt_quelle).toBeNull()
+  })
 })
