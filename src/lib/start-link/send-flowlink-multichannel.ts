@@ -21,6 +21,9 @@ export async function sendFlowLinkMultiChannelCore(
   kanal: 'whatsapp' | 'sms' | 'email',
   actorId: string,
   telefonOverride?: string | null,
+  // Optionaler Vorspann (z.B. Makler-Vermittlungs-Kontext) — nur fuer den Plain-Link
+  // (kein Termin); das Termin-Template ist ein fixes WA-Template ohne freien Text.
+  introText?: string | null,
 ): Promise<{ success: boolean; error?: string; token?: string }> {
   const { data: lead } = await db
     .from('leads')
@@ -82,9 +85,10 @@ export async function sendFlowLinkMultiChannelCore(
       } else {
         const { sendWhatsAppText } = await import('@/lib/whatsapp/baileys-client')
         const greet = vornameVal ? `Hallo ${vornameVal}` : 'Hallo'
+        const intro = introText ? `${introText}\n\n` : ''
         const sent = await sendWhatsAppText(
           waTelefon,
-          `${greet}, hier geht es zu Ihrer Schadensregulierung bei Claimondo:\n\n${flowUrl}\n\nMit wenigen Klicks buchen Sie Ihren Gutachter-Termin und schließen ab.`,
+          `${intro}${greet}, hier geht es zu Ihrer Schadensregulierung bei Claimondo:\n\n${flowUrl}\n\nMit wenigen Klicks buchen Sie Ihren Gutachter-Termin und schließen ab.`,
         )
         if (!sent.ok) return { success: false, error: sent.error ?? 'WhatsApp-Versand fehlgeschlagen' }
       }
@@ -105,7 +109,7 @@ export async function sendFlowLinkMultiChannelCore(
     if (!normalTo.startsWith('+')) normalTo = '+' + normalTo
     const body = terminTextMoeglich
       ? `Hallo ${vornameVal}, Ihr Schadenportal ist bereit. Termin mit ${svVorname} ${svNachname} am ${datum} ${uhrzeit}. Portal öffnen: ${flowUrl}`
-      : `Hallo ${vornameVal}, hier geht es zu Ihrer Schadensregulierung bei Claimondo: ${flowUrl}`
+      : `${introText ? introText + ' ' : ''}Hallo ${vornameVal}, hier geht es zu Ihrer Schadensregulierung bei Claimondo: ${flowUrl}`
     const params = new URLSearchParams()
     params.set('From', smsFrom); params.set('To', normalTo); params.set('Body', body)
     const resp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`, {

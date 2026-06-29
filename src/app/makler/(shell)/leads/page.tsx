@@ -5,6 +5,7 @@ import { UserCheckIcon } from 'lucide-react'
 import { getCurrentMakler, getMaklerLeadsWithConsent } from '@/lib/makler/queries'
 import { MaklerLeadsTable } from '@/components/makler/MaklerLeadsTable'
 import PageHeader from '@/components/shared/PageHeader'
+import { NeueAnfrageDrawer } from './NeueAnfrageDrawer'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,11 +17,14 @@ export default async function MaklerLeadsPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 space-y-6">
-      <PageHeader
-        title="Leads"
-        description="Ihre Leads mit Consent-Status und Schnellzugriff auf die Akte"
-        icon={UserCheckIcon}
-      />
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <PageHeader
+          title="Leads"
+          description="Ihre Leads mit Consent-Status und Schnellzugriff auf die Akte"
+          icon={UserCheckIcon}
+        />
+        <NeueAnfrageDrawer />
+      </div>
 
       <MaklerLeadsTable leads={leads} />
     </div>
