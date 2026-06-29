@@ -166,6 +166,26 @@ export async function gutachtenAbgeben(
         erstellt_von: user.id,
       })
     } catch { /* non-critical */ }
+
+    // Filmcheck-Audit 29.06.2026: Loop schliessen — beim korrigierten Re-Upload den
+    // KB automatisch re-benachrichtigen (vorher nur Timeline -> KB musste pollen).
+    // Frischer QC-Task (dedup via task_code, + Reminder-Kaskade) + Phase-Re-Derive.
+    // Deckt BEIDE Reject-Pfade ab (weiseGutachtenZurueck + qcNachbesserung, die jetzt
+    // beide auftraege.zurueckgewiesen_am setzen -> warReject feuert).
+    try {
+      const { data: claimRow } = await db
+        .from('claims')
+        .select('kundenbetreuer_id')
+        .eq('id', claimId)
+        .maybeSingle()
+      const kbId = (claimRow?.kundenbetreuer_id as string | null) ?? null
+      const { triggerQcTask } = await import('@/lib/tasking')
+      await triggerQcTask(auftrag.fall_id as string, kbId)
+      const { checkFallAutoPhase } = await import('@/lib/autoPhase')
+      checkFallAutoPhase(auftrag.fall_id as string).catch(() => {})
+    } catch (err) {
+      console.warn('[gutachtenAbgeben] KB-Re-Arm nach Nachbesserung fehlgeschlagen:', err)
+    }
   } else {
     try {
       await db.from('timeline').insert({
