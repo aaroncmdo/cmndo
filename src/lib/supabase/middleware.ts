@@ -1,6 +1,8 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { entscheideMfaGate, hatVerifiziertenFaktor } from '@/lib/auth/mfa-gate'
+import { validateRememberToken } from '@/lib/auth/twofa/validate-remember-token'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 // BUG-83 Befund 7: gleiche Konstante wie in server.ts.
 const REMEMBER_COOKIE_NAME = 'cm_remember'
@@ -118,14 +120,40 @@ export async function updateSession(request: NextRequest) {
 
     // KFZ-184/AAR-111: 2FA-Check ZUERST (vor dem Admin-Rollen-Check), sonst
     // umgehen Admin-User den 2FA-Flow solange sie unter /admin/* bleiben.
-    const decision = entscheideMfaGate({
+    const gateBasis = {
       isOn2faPage: request.nextUrl.pathname === '/login/2fa',
       isGoogleUser: user.app_metadata?.provider === 'google',
       isGutachterPath: request.nextUrl.pathname.startsWith('/gutachter'),
       aalCurrent,
       hasVerifiedFactor: hatVerifiziertenFaktor(user.factors),
-      hasRememberToken: !!request.cookies.get('claimondo_remember')?.value,
-    })
+    }
+
+    // AAR-auth-haertung: Trusted-Device wird VALIDIERT, nicht nur auf Existenz
+    // geprueft. Vorher liess `!!request.cookies.get('claimondo_remember')` jeden
+    // beliebigen Cookie-Wert die 2FA umgehen (validateRememberToken war
+    // totcode). Jetzt: Hash gegen auth_remember_tokens + User-Bindung +
+    // revoked_am + Ablauf. DB-Hit nur, wenn ohne Token ueberhaupt eine
+    // Challenge faellig waere (bei aal2 / kein Faktor / Bypass-Pfad: 0 DB-Calls).
+    const rememberCookie = request.cookies.get('claimondo_remember')?.value
+    let hasRememberToken = false
+    if (
+      rememberCookie &&
+      entscheideMfaGate({ ...gateBasis, hasRememberToken: false }) === 'challenge'
+    ) {
+      try {
+        hasRememberToken = await validateRememberToken(
+          rememberCookie,
+          user.id,
+          createAdminClient(),
+        )
+      } catch (err) {
+        // Fail-closed: bei DB-/Validierungsfehler KEIN Bypass -> 2FA-Challenge.
+        console.error('[middleware] validateRememberToken fehlgeschlagen:', err)
+        hasRememberToken = false
+      }
+    }
+
+    const decision = entscheideMfaGate({ ...gateBasis, hasRememberToken })
 
     if (decision === 'challenge') {
       response = NextResponse.redirect(externalUrl(request, '/login/2fa'))

@@ -51,7 +51,8 @@ export default async function MitarbeiterLayout({
       </header>
       <div className="flex">
         <MitarbeiterNav unreadNachrichten={unread} />
-        <main className="flex-1 px-4 py-6 md:w-[96%] md:mx-auto md:px-0">{children}</main>
+        {/* pb-24 mobile: Platz fuer die Mobile-Bottom-Nav (md:hidden); ab md zurueck auf py-6. */}
+        <main className="flex-1 px-4 py-6 pb-24 md:w-[96%] md:mx-auto md:px-0 md:pb-6">{children}</main>
       </div>
       {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen,
           damit KB Chats genauso anpinnen + parallel offen halten kann. */}

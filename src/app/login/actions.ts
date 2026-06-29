@@ -68,7 +68,10 @@ export async function login(formData: FormData) {
     await supabase.auth.signInWithPassword({ email, password })
 
   if (signInError) {
-    redirect(`/login?error=${encodeURIComponent(signInError.message)}`)
+    // AAR-auth-haertung (Befund G): rohe Supabase-Fehlermeldung nicht an den
+    // User durchreichen — generisch anzeigen, Detail nur ins Server-Log.
+    console.error('[login] signInWithPassword fehlgeschlagen:', signInError.message)
+    redirect('/login?error=E-Mail+oder+Passwort+ist+falsch')
   }
 
   const user = signInData.user
@@ -83,8 +86,9 @@ export async function login(formData: FormData) {
     .single()
 
   if (profileError) {
+    // AAR-auth-haertung (Befund G): DB-Fehlerdetail nur ins Log, nicht in die URL.
     console.error('Profile query failed:', profileError.message, '| User:', user.id)
-    redirect(`/login?error=${encodeURIComponent('Profil konnte nicht geladen werden: ' + profileError.message)}`)
+    redirect('/login?error=Profil+konnte+nicht+geladen+werden')
   }
 
   if (!profile?.rolle) {
@@ -146,4 +150,38 @@ export async function login(formData: FormData) {
   revalidatePath(targetPath, 'page')
   // AAR-login-embed: validiertes continue hat Vorrang (kein 2FA -> direkt hier).
   redirect(cont ?? targetPath)
+}
+
+/**
+ * AAR-auth-haertung (Befund I): Finalisiert den Phone-OTP-Login serverseitig.
+ * Vorher schrieb LoginClient auth_provider + force_password_change direkt auf
+ * dem Browser-Client OHNE Error-Check (stilles Scheitern -> ein Phone-User
+ * konnte faelschlich auf /passwort-aendern landen). Jetzt serverseitig mit
+ * Result-Object; der Caller (LoginClient) ruft es direkt nach verifyOtp auf.
+ */
+export async function finalisierePhoneLogin(): Promise<
+  { ok: true; redirectTo: string } | { ok: false; error: string }
+> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet. Bitte erneut anmelden.' }
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ auth_provider: 'phone', force_password_change: false })
+    .eq('id', user.id)
+  if (updateError) {
+    console.error('[finalisierePhoneLogin] profiles update fehlgeschlagen:', updateError.message)
+    return { ok: false, error: 'Profil konnte nicht aktualisiert werden. Bitte erneut versuchen.' }
+  }
+
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('rolle')
+    .eq('id', user.id)
+    .single()
+
+  return { ok: true, redirectTo: roleToPath(profile?.rolle as string | null | undefined) }
 }

@@ -7,6 +7,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import { revokeAllTokens } from '@/lib/auth/twofa/remember-me'
 
 /**
  * Server-Side Logout: meldet den User via Supabase ab und gibt die
@@ -22,6 +23,18 @@ import { createClient } from '@/lib/supabase/server'
  */
 export async function serverSignOut(): Promise<{ redirectTo: string }> {
   const supabase = await createClient()
+  // AAR-auth-haertung: Trusted-Device-Token VOR signOut widerrufen — sonst
+  // ueberlebt der claimondo_remember-Cookie + DB-Token den Logout und skippt
+  // beim naechsten Login die 2FA. revokeAllTokens markiert die DB-Tokens als
+  // revoked (die Middleware lehnt sie dann ab) UND loescht das httpOnly-Cookie.
+  try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+    if (user) await revokeAllTokens(user.id)
+  } catch (err) {
+    console.error('[serverSignOut] revokeAllTokens fehlgeschlagen:', err)
+  }
   try {
     await supabase.auth.signOut()
   } catch {

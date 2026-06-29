@@ -8,6 +8,8 @@ const sendCoreMock = vi.fn()
 const rueckrufMock = vi.fn()
 const timelineInsertMock = vi.fn()
 const mitteilungInsertMock = vi.fn()
+const adminTerminInsertMock = vi.fn()
+const leadsUpdateMock = vi.fn()
 
 vi.mock('@/lib/makler/queries', () => ({ getCurrentMakler: () => getCurrentMaklerMock() }))
 vi.mock('@/lib/makler/promo-code', () => ({ getOrCreateMaklerPromoCode: (...a: unknown[]) => getPromoMock(...a) }))
@@ -22,8 +24,12 @@ const adminMock = {
   from: vi.fn((table: string) => {
     if (table === 'timeline') return { insert: timelineInsertMock }
     if (table === 'mitteilungen') return { insert: mitteilungInsertMock }
+    if (table === 'admin_termine') return { insert: adminTerminInsertMock }
     if (table === 'leads') {
-      return { select: () => ({ eq: () => ({ order: () => ({ limit: () => Promise.resolve({ data: leadsDedupResult }) }) }) }) }
+      return {
+        select: () => ({ eq: () => ({ order: () => ({ limit: () => Promise.resolve({ data: leadsDedupResult }) }) }) }),
+        update: () => ({ eq: () => leadsUpdateMock() }),
+      }
     }
     return { insert: vi.fn().mockResolvedValue({ error: null }) }
   }),
@@ -45,6 +51,8 @@ beforeEach(() => {
   rueckrufMock.mockReset().mockResolvedValue({ ok: true, leadId: 'lead-r', terminId: 'termin-1' })
   timelineInsertMock.mockReset().mockResolvedValue({ error: null })
   mitteilungInsertMock.mockReset().mockResolvedValue({ error: null })
+  adminTerminInsertMock.mockReset().mockResolvedValue({ error: null })
+  leadsUpdateMock.mockReset().mockResolvedValue({ error: null })
   leadsDedupResult = []
 })
 
@@ -57,7 +65,7 @@ describe('erstelleMaklerAnfrage', () => {
     expect(extra.qualifizierungs_phase).toBe('erstkontakt')
     const base = createLeadMock.mock.calls[0][1] as Record<string, unknown>
     expect(base.status).toBe('neu')
-    expect(base.source_channel).toBe('makler-anfrage')
+    expect(base.source_channel).toBe('makler-anfrage-flowlink')
   })
 
   it('flowlink: Versand-Kaskade startet mit WhatsApp + Makler-Kontext im introText', async () => {
@@ -76,11 +84,13 @@ describe('erstelleMaklerAnfrage', () => {
     expect(res.ok).toBe(true)
   })
 
-  it('flowlink: alle Kanaele scheitern -> ok mit warnung + Dispatcher-Mitteilung', async () => {
+  it('flowlink: alle Kanaele scheitern -> Auto-Rueckruf (admin_termine + Status) + Mitteilung', async () => {
     sendCoreMock.mockReset().mockResolvedValue({ success: false })
     const res = await erstelleMaklerAnfrage({ ...baseInput, email: 'e@x.de', ausgang: 'flowlink' })
     expect(res.ok).toBe(true)
     if (res.ok) expect(res.warnung).toBeTruthy()
+    expect(adminTerminInsertMock).toHaveBeenCalled()
+    expect(leadsUpdateMock).toHaveBeenCalled()
     expect(mitteilungInsertMock).toHaveBeenCalled()
   })
 
@@ -118,7 +128,7 @@ describe('erstelleMaklerAnfrage', () => {
     const arg = rueckrufMock.mock.calls[0][0] as Record<string, unknown>
     expect(arg.promotionCodeId).toBe('promo-1')
     expect(arg.zugewiesenAn).toBe('disp-1')
-    expect(arg.quelle).toBe('makler-anfrage')
+    expect(arg.quelle).toBe('makler-anfrage-rueckruf')
     expect(createLeadMock).not.toHaveBeenCalled()
     expect(res.ok).toBe(true)
   })

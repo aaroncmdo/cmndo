@@ -10,6 +10,7 @@ export default function KanzleiNav() {
     <PortalNav
       variant="light"
       ariaLabel="Kanzlei-Navigation"
+      className="hidden md:flex md:flex-col"
       sections={[{
         items: [
           { href: '/kanzlei/mandate', label: 'Mandate', icon: LayoutDashboardIcon },

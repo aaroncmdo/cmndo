@@ -142,7 +142,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       email,
       startZeit: input.rueckrufStartZeit ?? null,
       nachricht: notiz,
-      quelle: 'makler-anfrage',
+      quelle: 'makler-anfrage-rueckruf',
       promotionCodeId: promo.id,
       standortPlz,
       standortOrt,
@@ -159,7 +159,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   // 6b. FLOWLINK: kanonische Lead-Anlage (status='neu'/phase='erstkontakt') + kanonischer Sender.
   const created = await createLead(
     admin,
-    { source_channel: 'makler-anfrage', status: 'neu', vorname, nachname, telefon, email },
+    { source_channel: 'makler-anfrage-flowlink', status: 'neu', vorname, nachname, telefon, email },
     {
       promotion_code_id: promo.id,
       service_typ: input.serviceTyp ?? 'komplett',
@@ -203,15 +203,37 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   revalidatePath('/makler/leads')
 
   if (!sent.success) {
-    // Zustell-Fehlschlag: actionable Mitteilung an den Dispatcher (Loop schliessen).
+    // Zustell-Fehlschlag: Lead auf Rückruf herabstufen, damit das Team den Kunden AKTIV
+    // anruft (statt nur passiver Mitteilung) — admin_termine + Status + Dispatcher-Mitteilung.
+    const start = new Date(Date.now() + 5 * 60_000).toISOString()
+    const ende = new Date(Date.now() + 35 * 60_000).toISOString()
+    try {
+      await admin.from('admin_termine').insert({
+        typ: 'rueckruf',
+        titel: `Rückruf (Link nicht zustellbar): ${vorname} ${nachname}`.trim(),
+        beschreibung: `Makler-Anfrage (${maklerFirma}) — FlowLink-Versand fehlgeschlagen, Kunde bitte anrufen.${notiz ? `\nNotiz: ${notiz}` : ''}`,
+        start_zeit: start,
+        end_zeit: ende,
+        status: 'offen',
+        lead_id: leadId,
+        erstellt_von: dispatcherId ?? maklerUserId,
+        erinnerung_min_vorher: 10,
+      })
+      await admin
+        .from('leads')
+        .update({ status: 'rueckruf', qualifizierungs_phase: 'rueckruf', updated_at: new Date().toISOString() })
+        .eq('id', leadId)
+    } catch (err) {
+      console.error('[erstelleMaklerAnfrage] Send-Fail Auto-Rückruf:', err)
+    }
     try {
       if (dispatcherId) {
         await admin.from('mitteilungen').insert({
           empfaenger_id: dispatcherId,
           empfaenger_rolle: 'dispatch',
           kategorie: 'anruf',
-          titel: 'Makler-Anfrage: Link nicht zustellbar',
-          inhalt: `${vorname} ${nachname} (${telefon}) — bitte manuell kontaktieren.`,
+          titel: 'Makler-Anfrage: Link nicht zustellbar — als Rückruf eingeplant',
+          inhalt: `${vorname} ${nachname} (${telefon}) — bitte anrufen.`,
           prioritaet: 'hoch',
           icon: '⚠️',
           route_url: `/dispatch/leads/${leadId}`,
@@ -224,7 +246,7 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       ok: true,
       leadId,
       ausgang: 'flowlink',
-      warnung: 'Lead angelegt, aber der Link konnte nicht zugestellt werden — das Team kümmert sich.',
+      warnung: 'Link konnte nicht zugestellt werden — als Rückruf eingeplant, das Team ruft den Kunden an.',
     }
   }
   return { ok: true, leadId, ausgang: 'flowlink', token: sent.token }
