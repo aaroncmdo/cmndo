@@ -23,11 +23,11 @@ export function DispatchSaBanner({
   if (!saUnterschrieben) return null
 
   return (
-    <div className="mb-4 max-w-3xl rounded-ios-xl border border-amber-200 bg-amber-50 px-4 py-3 flex items-start gap-3">
-      <span className="text-amber-600 text-lg leading-none mt-0.5">ℹ</span>
+    <div className="mb-4 max-w-3xl rounded-ios-xl border border-warning/30 bg-warning-soft px-4 py-3 flex items-start gap-3">
+      <span className="text-warning text-lg leading-none mt-0.5">ℹ</span>
       <div className="flex-1 text-sm">
-        <p className="font-semibold text-amber-900">Lead ist konvertiert</p>
-        <p className="text-amber-800 mt-0.5">
+        <p className="font-semibold text-warning-strong">Lead ist konvertiert</p>
+        <p className="text-warning-strong mt-0.5">
           Stammdaten-Änderungen jetzt in der Fallakte machen — Lead-Daten sind als
           Snapshot eingefroren.
         </p>

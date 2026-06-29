@@ -114,23 +114,23 @@ export function DispatchFlowlinkPanel({
       </p>
 
       {!telefon && (
-        <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
-          <AlertTriangleIcon className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-amber-800">
+        <div className="flex items-start gap-2 rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2">
+          <AlertTriangleIcon className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+          <p className="text-[11px] text-warning-strong">
             Keine Telefonnummer hinterlegt — kein Versand per WhatsApp/SMS möglich.
           </p>
         </div>
       )}
       {!email && (
-        <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
-          <AlertTriangleIcon className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-amber-800">Keine E-Mail hinterlegt — kein Versand per E-Mail möglich.</p>
+        <div className="flex items-start gap-2 rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2">
+          <AlertTriangleIcon className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+          <p className="text-[11px] text-warning-strong">Keine E-Mail hinterlegt — kein Versand per E-Mail möglich.</p>
         </div>
       )}
       {emailIsSv && (
-        <div className="flex items-start gap-2 rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2">
-          <AlertTriangleIcon className="h-3.5 w-3.5 text-amber-600 mt-0.5 shrink-0" />
-          <p className="text-[11px] text-amber-800">
+        <div className="flex items-start gap-2 rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2">
+          <AlertTriangleIcon className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+          <p className="text-[11px] text-warning-strong">
             Diese E-Mail gehört einem Sachverständigen — beim FlowLink würde er einen Zweit-Account anlegen
             statt sich einzuloggen.
           </p>
@@ -176,7 +176,7 @@ export function DispatchFlowlinkPanel({
       {status && (
         <div
           className={`rounded-ios-lg px-3 py-2 text-xs ${
-            status.ok ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'
+            status.ok ? 'bg-success-soft text-success-strong' : 'bg-danger-soft text-danger-strong'
           }`}
         >
           {status.kanal}: {status.text}
@@ -200,7 +200,7 @@ export function DispatchFlowlinkPanel({
             >
               Portal öffnen
             </a>
-            {latest.fall_id && <span className="ml-1 text-emerald-600">· zu Fall konvertiert</span>}
+            {latest.fall_id && <span className="ml-1 text-success">· zu Fall konvertiert</span>}
           </p>
         </div>
       )}

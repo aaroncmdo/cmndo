@@ -110,8 +110,8 @@ export default async function DispatchLeads({
           href="/dispatch/leads?filter=abbrecher"
           className={`px-3 py-1.5 rounded-full text-xs font-medium leading-tight text-center transition-colors ${
             istAbbrecherFilter
-              ? 'bg-amber-500 text-white'
-              : 'bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100'
+              ? 'bg-warning text-white'
+              : 'bg-warning-soft border border-warning/30 text-warning-strong hover:bg-warning-soft'
           }`}
         >
           Abbrecher{typeof abbrecherCount === 'number' ? ` (${abbrecherCount})` : ''}

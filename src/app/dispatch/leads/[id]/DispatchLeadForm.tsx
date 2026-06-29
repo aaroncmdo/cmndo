@@ -284,10 +284,10 @@ function SaveIndicator({ status, errorMsg }: { status: SaveStatus; errorMsg: str
   if (status === 'saving')
     return <span className="text-xs font-medium text-claimondo-ondo shrink-0 mt-1">Speichert …</span>
   if (status === 'saved')
-    return <span className="text-xs font-medium text-emerald-600 shrink-0 mt-1">Gespeichert ✓</span>
+    return <span className="text-xs font-medium text-success shrink-0 mt-1">Gespeichert ✓</span>
   if (status === 'error')
     return (
-      <span className="text-xs font-medium text-red-600 shrink-0 mt-1" title={errorMsg ?? undefined}>
+      <span className="text-xs font-medium text-danger shrink-0 mt-1" title={errorMsg ?? undefined}>
         Fehler beim Speichern
       </span>
     )

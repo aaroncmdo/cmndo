@@ -224,16 +224,16 @@ export default function RueckrufTerminPanel({
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <PhoneCallIcon className="w-4 h-4 text-amber-500 shrink-0" />
+        <PhoneCallIcon className="w-4 h-4 text-warning shrink-0" />
         <span className="text-sm font-semibold text-claimondo-navy">Rückruftermin</span>
         {loading && <Loader2Icon className="w-3.5 h-3.5 text-claimondo-ondo/60 animate-spin ml-auto" />}
         {!loading && terminStatus === 'erledigt' && (
-          <span className="ml-auto text-[10px] font-semibold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">
+          <span className="ml-auto text-[10px] font-semibold bg-success-soft text-success-strong px-2 py-0.5 rounded-full">
             Erledigt
           </span>
         )}
         {!loading && terminStatus === 'offen' && inPast && (
-          <span className="ml-auto text-[10px] font-semibold bg-red-100 text-red-700 px-2 py-0.5 rounded-full">
+          <span className="ml-auto text-[10px] font-semibold bg-danger-soft text-danger-strong px-2 py-0.5 rounded-full">
             Überfällig
           </span>
         )}
@@ -275,8 +275,8 @@ export default function RueckrufTerminPanel({
         >
           {pending ? 'Speichert …' : 'Termin speichern'}
         </Button>
-        {saved && <span className="text-xs text-emerald-600 font-medium">Gespeichert ✓</span>}
-        {error && <span className="text-xs text-red-600">{error}</span>}
+        {saved && <span className="text-xs text-success font-medium">Gespeichert ✓</span>}
+        {error && <span className="text-xs text-danger">{error}</span>}
       </div>
 
       <div className="border-t border-claimondo-border" />
@@ -291,7 +291,7 @@ export default function RueckrufTerminPanel({
           <button
             onClick={() => setErledigenOffen(true)}
             disabled={pending || loading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-ios-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-ios-xl bg-success hover:bg-success/90 text-white text-sm font-medium disabled:opacity-50 transition-colors"
           >
             <CheckCircle2Icon className="w-3.5 h-3.5" />
             Rückruf erledigt
@@ -311,8 +311,8 @@ export default function RueckrufTerminPanel({
                   onClick={() => setErgebnis('erreicht')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors border ${
                     ergebnis === 'erreicht'
-                      ? 'bg-emerald-600 text-white border-emerald-600'
-                      : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-emerald-50'
+                      ? 'bg-success text-white border-success'
+                      : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-success-soft'
                   }`}
                 >
                   <PhoneIncomingIcon className="w-3 h-3" />
@@ -322,8 +322,8 @@ export default function RueckrufTerminPanel({
                   onClick={() => setErgebnis('nicht_erreicht')}
                   className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors border ${
                     ergebnis === 'nicht_erreicht'
-                      ? 'bg-red-600 text-white border-red-600'
-                      : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-red-50'
+                      ? 'bg-danger text-white border-danger'
+                      : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-danger-soft'
                   }`}
                 >
                   <PhoneOffIcon className="w-3 h-3" />
@@ -416,8 +416,8 @@ export default function RueckrufTerminPanel({
                   : CalendarClockIcon
                 const iconColor = isAnruf
                   ? h.status === 'erreicht'
-                    ? 'text-emerald-600'
-                    : 'text-red-500'
+                    ? 'text-success'
+                    : 'text-danger'
                   : 'text-claimondo-ondo/50'
 
                 let badgeText: string
@@ -425,21 +425,21 @@ export default function RueckrufTerminPanel({
                 if (isAnruf) {
                   if (h.status === 'erreicht') {
                     badgeText = 'Erreicht'
-                    badgeClass = 'bg-emerald-100 text-emerald-800'
+                    badgeClass = 'bg-success-soft text-success-strong'
                   } else {
                     badgeText = 'Nicht erreicht'
-                    badgeClass = 'bg-red-100 text-red-700'
+                    badgeClass = 'bg-danger-soft text-danger-strong'
                   }
                 } else {
                   if (h.status === 'erledigt') {
                     badgeText = 'Termin erledigt'
-                    badgeClass = 'bg-emerald-100 text-emerald-800'
+                    badgeClass = 'bg-success-soft text-success-strong'
                   } else if (h.status === 'abgesagt') {
                     badgeText = 'Termin abgesagt'
-                    badgeClass = 'bg-red-100 text-red-700'
+                    badgeClass = 'bg-danger-soft text-danger-strong'
                   } else {
                     badgeText = 'Termin'
-                    badgeClass = 'bg-amber-100 text-amber-700'
+                    badgeClass = 'bg-warning-soft text-warning-strong'
                   }
                 }
 
