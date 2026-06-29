@@ -428,7 +428,7 @@ function TaskCard({
         </span>
         <button
           onClick={() => onDelete(task.id)}
-          className="text-claimondo-ondo/50 hover:text-red-500 transition-colors p-0.5 -mr-1 -mt-0.5"
+          className="text-claimondo-ondo/50 hover:text-danger transition-colors p-0.5 -mr-1 -mt-0.5"
           title="Löschen"
         >
           <svg

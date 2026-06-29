@@ -78,7 +78,7 @@ export default async function SaeumigeSvsPage() {
             </Thead>
             <Tbody>
               {rows.map((r) => {
-                const stufe = r.tage_ueberfaellig >= 28 ? 'red-400' : r.tage_ueberfaellig >= 21 ? 'amber-400' : 'amber-300'
+                const stufe = r.tage_ueberfaellig >= 28 ? 'danger' : r.tage_ueberfaellig >= 21 ? 'warning-strong' : 'warning'
                 return (
                   <Tr key={r.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
                     <Td className="px-4 font-mono text-xs">{r.abrechnungs_nr}</Td>
