@@ -28,6 +28,8 @@ export function stadtToFeedItem(s: Stadt): FeedItem {
       `PLZ-Bereich: ${s.plzPrefix}`,
       `Bundesland: ${s.bundesland}`,
     ],
-    sortKey: `4-${s.name}`,
+    // sortKey-Prefix '5-' haelt Stadt im Katalog hinter den Versicherer-Hubs
+    // (FOLDER_RANK 4 in asset-feed-item.ts).
+    sortKey: `5-${s.name}`,
   }
 }

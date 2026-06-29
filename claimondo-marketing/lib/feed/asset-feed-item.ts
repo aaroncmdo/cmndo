@@ -10,8 +10,8 @@ const FOLDER_RANK: Record<ClaimondoAsset['folder'], number> = {
   decoder: 2,
   sachverstaendige: 3,
   // Versicherer-Hubs (Pillar D) haben einen eigenen Loader (getVersicherer) und
-  // fliessen aktuell NICHT in getAllAssets/den Katalog-Feed; der Rank haelt nur
-  // das exhaustive Record type-vollstaendig (Sprint 1).
+  // werden in den Katalog-Feed gespeist (katalog-items.ts) — Rank 4, vor den
+  // Stadt-Items (die ihren sortKey-Prefix '5-' in stadt-feed-item.ts tragen).
   versicherer: 4,
 }
 
@@ -23,6 +23,8 @@ function assetTypeOf(a: ClaimondoAsset): FeedAssetType {
       return 'Decoder'
     case 'sachverstaendige':
       return 'Sachverständige'
+    case 'versicherer':
+      return 'Versicherer'
     default:
       return 'Spoke'
   }
