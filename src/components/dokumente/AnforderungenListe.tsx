@@ -38,7 +38,7 @@ function statusBadge(status: string, frist: string | null): {
     return {
       icon: AlertTriangleIcon,
       bg: 'bg-danger-soft border-danger/30',
-      text: 'text-danger',
+      text: 'text-danger-strong',
       labelTxt: 'Überfällig',
       overdue: true,
     }
@@ -49,7 +49,7 @@ function statusBadge(status: string, frist: string | null): {
       return {
         icon: CheckCircle2Icon,
         bg: 'bg-success-soft border-success/30',
-        text: 'text-success',
+        text: 'text-success-strong',
         labelTxt: status === 'geprueft' ? 'Geprüft' : 'Erhalten',
       }
     case 'abgelehnt':
@@ -63,14 +63,14 @@ function statusBadge(status: string, frist: string | null): {
       return {
         icon: ClockIcon,
         bg: 'bg-warning-soft border-warning/30',
-        text: 'text-warning',
+        text: 'text-warning-strong',
         labelTxt: 'Erinnert',
       }
     default:
       return {
         icon: ClockIcon,
         bg: 'bg-warning-soft border-warning/30',
-        text: 'text-warning',
+        text: 'text-warning-strong',
         labelTxt: 'Ausstehend',
       }
   }
@@ -127,7 +127,7 @@ export default function AnforderungenListe({
                     {a.frist && (
                       <span
                         className={`text-[10px] tabular-nums ${
-                          cfg.overdue ? 'text-danger font-medium' : 'text-claimondo-ondo'
+                          cfg.overdue ? 'text-danger-strong font-medium' : 'text-claimondo-ondo'
                         }`}
                       >
                         Frist: {new Date(a.frist).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}

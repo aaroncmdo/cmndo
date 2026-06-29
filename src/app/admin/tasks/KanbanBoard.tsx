@@ -8,7 +8,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { createTask, updateTaskStatus, deleteTask } from './actions'
 import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
@@ -277,38 +277,50 @@ export default function KanbanBoard({
     }
   }
 
+  // Layout-Audit-Fix (2026-06-29): Im /admin/aufgaben-Hub liefert das Hub-Layout
+  // bereits die Tab-Leiste -> hier KEIN redundanter "Tasks"-PageHeader + kein
+  // eigener max-w-Cap (sonst Doppel-Header + nicht-buendig zur Tab-Leiste).
+  // Die Actions (Filter + Neuer Task) bleiben in einer schlanken Zeile.
+  const pathname = usePathname()
+  const inHub = (pathname ?? '').startsWith('/admin/aufgaben')
+  const headerActions = (
+    <>
+      <label className="flex items-center gap-2 text-xs text-claimondo-ondo cursor-pointer select-none">
+        <input
+          type="checkbox"
+          checked={showAutoResolved}
+          onChange={(e) => setShowAutoResolved(e.target.checked)}
+          className="rounded border-claimondo-border"
+        />
+        Auto-erledigte anzeigen
+      </label>
+      <button
+        onClick={() => setDialogOpen(true)}
+        className="px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-ios-xl transition-colors"
+      >
+        + Neuer Task
+      </button>
+    </>
+  )
+
   return (
-    <div className="h-full overflow-y-auto px-4 py-8">
-      <div className="max-w-[1400px] mx-auto">
-        <div className="mb-6">
-          <PageHeader
-            title="Tasks"
-            description={`${localTasks.length} von ${tasks.length} Aufgaben${
-              tasks.length !== linked.length
-                ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
-                : ''
-            }`}
-            actions={
-              <>
-                <label className="flex items-center gap-2 text-xs text-claimondo-ondo cursor-pointer select-none">
-                  <input
-                    type="checkbox"
-                    checked={showAutoResolved}
-                    onChange={(e) => setShowAutoResolved(e.target.checked)}
-                    className="rounded border-claimondo-border"
-                  />
-                  Auto-erledigte anzeigen
-                </label>
-                <button
-                  onClick={() => setDialogOpen(true)}
-                  className="px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-ios-xl transition-colors"
-                >
-                  + Neuer Task
-                </button>
-              </>
-            }
-          />
-        </div>
+    <div className={`h-full overflow-y-auto ${inHub ? 'px-4 md:px-6 py-4' : 'px-4 py-8'}`}>
+      <div className={inHub ? '' : 'max-w-[1400px] mx-auto'}>
+        {inHub ? (
+          <div className="mb-4 flex flex-wrap items-center justify-end gap-3">{headerActions}</div>
+        ) : (
+          <div className="mb-6">
+            <PageHeader
+              title="Tasks"
+              description={`${localTasks.length} von ${tasks.length} Aufgaben${
+                tasks.length !== linked.length
+                  ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
+                  : ''
+              }`}
+              actions={headerActions}
+            />
+          </div>
+        )}
 
         {error && (
           <div className="bg-danger-soft border border-danger/30 rounded-ios-xl p-3 mb-4">

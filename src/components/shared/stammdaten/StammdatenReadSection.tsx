@@ -297,7 +297,7 @@ export function StammdatenReadSection({
 
       {zeigeHalter && (
         <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
-          <UserIcon className="w-4 h-4 text-warning mt-0.5 shrink-0" />
+          <UserIcon className="w-4 h-4 text-warning-strong mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0 text-xs">
             <p className="text-claimondo-ondo">{t('halterAbweichend')}</p>
             {halterName && (

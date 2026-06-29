@@ -132,7 +132,7 @@ export default function DokumenteZuordnungsModal({
                 Zuordnen zu
               </label>
               {slots.length === 0 ? (
-                <p className="text-xs text-warning flex items-center gap-1">
+                <p className="text-xs text-warning-strong flex items-center gap-1">
                   <AlertCircleIcon className="w-3.5 h-3.5" />
                   Keine zuordenbaren Slots verfügbar.
                 </p>

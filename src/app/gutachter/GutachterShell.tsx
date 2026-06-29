@@ -95,7 +95,6 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       // CMM-17: 'Mein Gebiet' aus Nav entfernt — Aaron-Spec, kommt später als
       // eigenes Feature-Ticket zurück.
       { href: '/gutachter/vertrag', label: 'Vertrag', icon: FileSignatureIcon },
-      { href: '/gutachter/abrechnung', label: 'Abrechnung', icon: ReceiptIcon },
       { href: '/gutachter/statistiken', label: 'Statistiken', icon: BarChart3Icon, beta: true },
       { href: '/gutachter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
     ],
@@ -165,7 +164,11 @@ export default function GutachterShell({
   // Verwaltung). Verifizierung steht ganz oben weil Pre-Aktiv-Pfad, dann
   // Vertrag/Abrechnung/Statistik/Reklamation, dann Team/Community.
   const NAV_SECTIONS: NavSection[] = NAV_SECTIONS_BASE.map(sec => {
-    if (sec.title !== 'Geschäft') return sec
+    // Fix (Layout-Audit 2026-06-29): Die Sektion heisst 'Verwaltung', nicht
+    // 'Geschäft' (2026-05-07 umbenannt, aber dieser Conditional blieb auf
+    // 'Geschäft' stehen) -> Verifizierung/Team/Community wurden NIE eingehängt.
+    // Jetzt korrekt auf 'Verwaltung' gematcht.
+    if (sec.title !== 'Verwaltung') return sec
     const before: NavItem[] = []
     if (showVerifizierung) before.push({ href: '/gutachter/verifizierung', label: 'Verifizierung', icon: ShieldCheckIcon })
     const after: NavItem[] = []

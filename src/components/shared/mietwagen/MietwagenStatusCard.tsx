@@ -138,7 +138,7 @@ export function MietwagenStatusCard({ rolle, fall, className = '' }: Props) {
       <div className="border-t border-claimondo-border pt-3 flex items-start gap-2 text-xs">
         <ReceiptIcon
           className={`w-3.5 h-3.5 mt-0.5 shrink-0 ${
-            fall.mietwagen_rechnung_vorhanden ? 'text-success' : 'text-warning'
+            fall.mietwagen_rechnung_vorhanden ? 'text-success-strong' : 'text-warning-strong'
           }`}
         />
         <div className="flex-1">
