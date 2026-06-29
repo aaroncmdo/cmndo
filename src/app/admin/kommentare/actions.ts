@@ -9,7 +9,7 @@ async function setStatus(id: string, status: 'approved' | 'rejected' | 'hidden')
   const db = createAdminClient()
   const { error } = await db
     .from('article_comments')
-    .update({ status, moderated_at: new Date().toISOString() })
+    .update({ status, moderated_at: new Date().toISOString(), report_count: 0 })
     .eq('id', id)
   if (error) return { ok: false, error: error.message }
   revalidatePath('/admin/kommentare')

@@ -81,3 +81,15 @@ export async function submitComment(
   revalidatePath(`/${slug}`)
   return { ok: true }
 }
+
+// Meldefunktion (Notice-and-Takedown, DSA/TMG): login-pflichtig, bumpt report_count via
+// eng gescopter SECURITY-DEFINER-RPC. Kein Service-Role-Client in dieser oeffentlichen Action.
+export async function reportComment(commentId: string): Promise<{ ok: boolean; error?: string }> {
+  if (!commentId) return { ok: false, error: 'Kommentar fehlt.' }
+  const supabase = await createClient()
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return { ok: false, error: 'Bitte zuerst anmelden, um einen Kommentar zu melden.' }
+  const { error } = await supabase.rpc('report_comment', { p_comment_id: commentId })
+  if (error) return { ok: false, error: 'Meldung konnte nicht gespeichert werden.' }
+  return { ok: true }
+}

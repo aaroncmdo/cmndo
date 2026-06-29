@@ -1,5 +1,6 @@
 import { listApprovedComments, getAuthState } from '@/lib/community/comments'
 import { CommentForm } from './CommentForm'
+import { ReportButton } from './ReportButton'
 import { jsonLdScript } from '@/lib/seo/jsonld'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
@@ -35,7 +36,10 @@ export async function ArticleComments({ articleSlug }: { articleSlug: string }) 
         )}
         {comments.map((c) => (
           <li key={c.id} className="rounded-ios-md border border-claimondo-border bg-white p-4">
-            <div className="text-[0.8125rem] font-semibold text-claimondo-navy">{c.username}</div>
+            <div className="flex items-start justify-between gap-3">
+              <div className="text-[0.8125rem] font-semibold text-claimondo-navy">{c.username}</div>
+              <ReportButton commentId={c.id} isLoggedIn={state.isLoggedIn} />
+            </div>
             <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-claimondo-shield">{c.body}</p>
           </li>
         ))}
