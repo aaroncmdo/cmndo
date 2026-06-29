@@ -6,6 +6,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
@@ -1061,6 +1062,12 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         processed_at: new Date().toISOString(),
       }).eq('id', eventRecord.id)
     }
+
+    // Konsistenz-Loop (29.06.): nach jedem LexDrive-Event die Phase aus den jetzt aktualisierten
+    // Fakten neu ableiten + Kanzlei-Daten-Task syncen — macht den (imperativen) Event-Pfad mit dem
+    // KB-Fakt-Pfad konsistent (operative_status == derive(facts)). Fire-and-forget: ein
+    // Derive-Hiccup darf das erfolgreich verarbeitete Event nicht als failed markieren.
+    checkFallAutoPhase(input.fallId).catch(() => {})
 
     return { success: true, eventRecordId: eventRecord?.id }
   } catch (err) {
