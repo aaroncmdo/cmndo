@@ -119,6 +119,29 @@ namespaced Quell-Wert; freitext-Spalte, kein Enum — kein Schema-Change).
   fragt beim Rückruf nach. Konsistent zu `issue-canonical-flowlink.ts:148–153`.
 - `service_typ='komplett'`, `zugewiesen_an=dispatcherId`, `sprache` aus Locale-Cookie.
 
+### Kunde-Journey: kollisionsfrei (lead-gekeyt, KEIN zweiter Lead)
+Es gibt **zwei „Finder"** in der App — der Makler-Lead darf nur in den lead-gekeyten:
+- **Öffentlicher Map-Finder** (`/start/makler/[maklerId]`, `/embed/gutachter-finder` →
+  `reserviereEmbedTermin`) — **erzeugt einen Lead**. Den Kunden hierhin schicken = **zweiter Lead =
+  Kollision + Attributions-Split**. **NICHT verwenden.**
+- **Kanonische `/flow/[token]`-Strecke** — **lead-gekeyt, erzeugt KEINEN Lead**. Der Sender
+  `sendFlowLinkMultiChannelCore` verschickt genau diesen Link (`send-flowlink-multichannel.ts:41`,
+  `flowUrl = .../flow/${token}`).
+
+Verifiziert (`flow/[token]/page.tsx`): die Strecke löst den **bestehenden** Lead über
+`flow_links.lead_id` auf (Z. 113), lädt ihn (`select('*')`, Z. 165) und operiert darauf —
+**keine gfa-Abfrage, keine Lead-Anlage**. Der Gutachter-Finder-Schritt (SV-Matching + Slot) läuft
+**im** Wizard (`FlowSlotStep`, `needsBooking=true` für einen termin-losen Lead) und bucht via
+`bucheTerminFlow(bezug={typ:'lead', id:leadId})` auf den **bestehenden** Makler-Lead.
+`signSAandCreateFall` konvertiert genau diesen einen Lead → Claim (mit `promotion_code_id`
+→ `makler_id`).
+
+→ **Ein Lead** vom Makler-Submit bis zur Provision. Strukturell identisch zum produktiv bewährten
+Dispatcher-Pfad (`createManualLead` → FlowLink → `/flow`) für gfa-lose Leads. Kein zweiter Lead,
+kein Attributions-Split. (Dass der Kunde den Map-Finder separat über die Makler-Promo-URL anstößt
+und so ein Parallel-Lead entsteht, ist vorbestehendes Dedup-Thema — beide tragen denselben
+Promo-Code, die Abrechnung bleibt korrekt; siehe „Außerhalb des Scopes".)
+
 ### UI — Drawer auf `/makler/leads`
 Neue Client-Komponente `src/app/makler/(shell)/leads/NeueAnfrageDrawer.tsx` + Trigger-Button
 („+ Neue Anfrage") im `PageHeader` der Leads-Seite. Komponenten aus dem bestehenden Set
