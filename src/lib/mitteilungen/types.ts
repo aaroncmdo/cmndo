@@ -14,6 +14,7 @@ export type EmpfaengerRolle =
   | 'kanzlei'
   | 'kunde'
   | 'makler'
+  | 'werkstatt'
 
 export interface Mitteilung {
   id: string
