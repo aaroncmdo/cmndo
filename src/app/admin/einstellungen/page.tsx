@@ -1,7 +1,7 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, SettingsIcon, UsersIcon } from 'lucide-react'
+import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, SettingsIcon, UsersIcon, Trash2Icon, SparklesIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 
 // Fix: /admin/einstellungen hatte keine page.tsx, nur Sub-Ordner → 404.
@@ -38,6 +38,22 @@ const SECTIONS = [
     icon: UsersIcon,
     title: 'Personen-Dubletten',
     description: 'Mögliche Dubletten im Personen-Register ansehen (nur Ansicht, kein Merge).',
+    iconBg: 'bg-claimondo-ondo/10',
+    iconColor: 'text-claimondo-ondo',
+  },
+  {
+    href: '/admin/datenschutz/loeschauftraege',
+    icon: Trash2Icon,
+    title: 'DSGVO-Löschaufträge',
+    description: 'Eingegangene Lösch-Anfragen (Art. 17 DSGVO) ansehen und bearbeiten.',
+    iconBg: 'bg-danger-soft',
+    iconColor: 'text-danger-strong',
+  },
+  {
+    href: '/admin/statistiken/ki-usage',
+    icon: SparklesIcon,
+    title: 'KI-Nutzung & Kosten',
+    description: 'Übersicht der KI-Aufrufe und -Kosten (Claude/OCR) der letzten Tage.',
     iconBg: 'bg-claimondo-ondo/10',
     iconColor: 'text-claimondo-ondo',
   },
