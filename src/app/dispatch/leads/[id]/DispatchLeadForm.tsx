@@ -171,7 +171,11 @@ export default function DispatchLeadForm({
     // gegen tatsaechliche Header-Hoehe im Task-11-Smoke verifizieren (ggf. top-[56px]).
     <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
       <main className="flex-1 min-w-0 px-4 sm:px-6 py-6">
-      <div className="mb-4 flex items-start justify-between gap-3">
+      {/* md:pr-36 lg:pr-0 — dieser Header ist ein eigenes div (kein PageHeader), die
+          #3320-Regel `.has-corner-pill [data-page-header]` greift hier also nicht. Bei
+          md..lg ist <main> volle Breite (flex-col) -> SaveIndicator laege sonst unter
+          der fixen UpdatesNav-Pill; ab lg ist main die linke Spalte und klart die Pill. */}
+      <div className="mb-4 flex items-start justify-between gap-3 md:pr-36 lg:pr-0">
         <div>
           <h1 className="text-2xl font-bold text-claimondo-navy">{titel}</h1>
           <p className="text-sm text-claimondo-ondo/70 mt-0.5">Lead-Erfassung — config-getrieben (v2)</p>
