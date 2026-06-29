@@ -154,12 +154,12 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
             <h2 className="text-sm font-semibold text-claimondo-navy">Schutzbrief / SA</h2>
           </div>
           {anfrage.sa_unterzeichnet_am ? (
-            <div className="flex items-center gap-2 text-sm text-green-700">
+            <div className="flex items-center gap-2 text-sm text-success-strong">
               <CheckCircleIcon className="w-4 h-4" />
               Unterzeichnet am {formatDatum(anfrage.sa_unterzeichnet_am)}
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-sm text-amber-600 font-medium">
+            <div className="flex items-center gap-2 text-sm text-warning font-medium">
               <ClockIcon className="w-4 h-4" />
               Noch nicht unterzeichnet
             </div>
@@ -216,7 +216,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
               )}
               <button
                 onClick={() => wechsleStatus('termin_bestaetigt')}
-                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-green-700 border border-green-600 hover:bg-green-600 hover:text-white px-4 py-2.5 rounded-ios-sm transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-success-strong border border-success/30 hover:bg-success hover:text-white px-4 py-2.5 rounded-ios-sm transition-colors"
               >
                 <CheckCircleIcon className="w-4 h-4" />
                 Termin bestätigt
@@ -230,7 +230,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
               </button>
               <button
                 onClick={() => wechsleStatus('storniert')}
-                className="w-full flex items-center justify-center gap-2 text-xs text-red-500 hover:text-red-700 px-4 py-1.5 transition-colors"
+                className="w-full flex items-center justify-center gap-2 text-xs text-danger hover:text-danger-strong px-4 py-1.5 transition-colors"
               >
                 Stornieren
               </button>
@@ -240,12 +240,12 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
 
         {/* Lead-Fallback — prominenter Anruf-Block */}
         {anfrage.matching_typ === 'lead_fallback' && (
-          <section className="bg-amber-50 border-2 border-amber-300 rounded-ios-lg p-4">
+          <section className="bg-warning-soft border-2 border-warning/30 rounded-ios-lg p-4">
             <div className="flex items-center gap-2 mb-3">
-              <PhoneIcon className="w-4 h-4 text-amber-700" />
-              <h2 className="text-sm font-semibold text-amber-800">Manueller Anruf erforderlich</h2>
+              <PhoneIcon className="w-4 h-4 text-warning-strong" />
+              <h2 className="text-sm font-semibold text-warning-strong">Manueller Anruf erforderlich</h2>
             </div>
-            <p className="text-xs text-amber-700 mb-3 leading-relaxed">
+            <p className="text-xs text-warning-strong mb-3 leading-relaxed">
               Kein Claimondo-SV in diesem Gebiet verfügbar. Der zugeordnete DAT-Expert muss
               telefonisch kontaktiert werden — Terminbestätigung liegt beim Dispatcher.
             </p>
@@ -253,7 +253,7 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
             {svTelefon && (
               <a
                 href={`tel:${svTelefon}`}
-                className="flex items-center justify-center gap-2 w-full text-sm font-semibold text-white bg-amber-600 hover:bg-amber-700 px-4 py-2.5 rounded-ios-sm transition-colors"
+                className="flex items-center justify-center gap-2 w-full text-sm font-semibold text-white bg-warning hover:bg-warning/90 px-4 py-2.5 rounded-ios-sm transition-colors"
               >
                 <PhoneIcon className="w-4 h-4" />
                 {svTelefon} anrufen
@@ -262,13 +262,13 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
             {svEmail && (
               <a
                 href={`mailto:${svEmail}`}
-                className="flex items-center justify-center gap-2 w-full mt-2 text-sm text-amber-700 border border-amber-300 hover:bg-amber-100 px-4 py-2 rounded-ios-sm transition-colors"
+                className="flex items-center justify-center gap-2 w-full mt-2 text-sm text-warning-strong border border-warning/30 hover:bg-warning-soft px-4 py-2 rounded-ios-sm transition-colors"
               >
                 <MailIcon className="w-4 h-4" />
                 E-Mail senden
               </a>
             )}
-            <p className="mt-3 text-[10px] text-amber-600">
+            <p className="mt-3 text-[10px] text-warning">
               Wunschtermin: <strong>{anfrage.wunschtermin ? new Date(anfrage.wunschtermin).toLocaleString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '—'}</strong>
             </p>
           </section>

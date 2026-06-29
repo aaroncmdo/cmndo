@@ -28,8 +28,8 @@ const PHASEN: Phase[] = [
   // AAR-176 P2-E: Q3 ist seit AAR-138 Polizei-vor-Ort, nicht mehr Haftpflicht.
   { von: 120, bis: 240, kurz: '2:00 – 4:00', label: 'Q1 Hergang + Aufklärung, Q2 Schaden, Q3 Polizei.', bg: 'bg-claimondo-light-blue/[0.15]', border: 'border-claimondo-light-blue/40', text: 'text-claimondo-navy' },
   { von: 240, bis: 300, kurz: '4:00 – 5:00', label: 'Nutzenversprechen + SV-Termin vormerken.', bg: 'bg-claimondo-ondo/[0.10]', border: 'border-claimondo-ondo/30', text: 'text-claimondo-ondo' },
-  { von: 300, bis: 420, kurz: '5:00 – 7:00', label: 'Daten erfassen (Name, Tel, Kennzeichen, Schadentyp, Hergang).', bg: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-800' },
-  { von: 420, bis: 480, kurz: '7:00 – 8:00', label: 'FlowLink senden + Abschluss.', bg: 'bg-green-50', border: 'border-green-200', text: 'text-green-800' },
+  { von: 300, bis: 420, kurz: '5:00 – 7:00', label: 'Daten erfassen (Name, Tel, Kennzeichen, Schadentyp, Hergang).', bg: 'bg-warning-soft', border: 'border-warning/30', text: 'text-warning-strong' },
+  { von: 420, bis: 480, kurz: '7:00 – 8:00', label: 'FlowLink senden + Abschluss.', bg: 'bg-success-soft', border: 'border-success/30', text: 'text-success-strong' },
 ]
 
 function formatTime(sekunden: number): string {
@@ -120,7 +120,7 @@ export default function GespraechsleitfadenTimer({
         <div className="flex-1 space-y-0.5">
           <p className="text-xs text-claimondo-navy">
             Gespräch beendet — Dauer <strong className="font-mono">{formatTime(dauerSekunden ?? sekunden)}</strong>
-            {(dauerSekunden ?? sekunden) > 480 && <span className="text-red-600 ml-1">(überzogen)</span>}
+            {(dauerSekunden ?? sekunden) > 480 && <span className="text-danger ml-1">(überzogen)</span>}
           </p>
           {/* AAR-189: Nach dem Beenden weiß der MA sonst nicht was als
               nächstes ansteht. Kompakter Pfeil-Hinweis auf Phase 5 + Versand. */}
@@ -133,16 +133,16 @@ export default function GespraechsleitfadenTimer({
   }
 
   return (
-    <div className={`border rounded-ios-xl p-4 space-y-3 ${istUeberzogen ? 'bg-red-50 border-red-300' : 'bg-white border-claimondo-border'}`}>
+    <div className={`border rounded-ios-xl p-4 space-y-3 ${istUeberzogen ? 'bg-danger-soft border-danger/30' : 'bg-white border-claimondo-border'}`}>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <ClockIcon className={`w-4 h-4 ${istUeberzogen ? 'text-red-600' : 'text-green-600'} animate-pulse`} />
-          <span className={`text-lg font-mono font-bold ${istUeberzogen ? 'text-red-700' : 'text-claimondo-navy'}`}>
+          <ClockIcon className={`w-4 h-4 ${istUeberzogen ? 'text-danger' : 'text-success'} animate-pulse`} />
+          <span className={`text-lg font-mono font-bold ${istUeberzogen ? 'text-danger-strong' : 'text-claimondo-navy'}`}>
             {formatTime(sekunden)}
           </span>
           <span className="text-xs text-claimondo-ondo/70">/ 08:00</span>
           {istUeberzogen && (
-            <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
+            <span className="text-[10px] bg-danger-soft text-danger-strong px-2 py-0.5 rounded-full font-semibold uppercase tracking-wide">
               Überzogen
             </span>
           )}
@@ -155,7 +155,7 @@ export default function GespraechsleitfadenTimer({
 
       <div className="w-full h-1.5 bg-claimondo-bg rounded-full overflow-hidden">
         <div
-          className={`h-full transition-all duration-1000 ${istUeberzogen ? 'bg-red-500' : 'bg-claimondo-ondo'}`}
+          className={`h-full transition-all duration-1000 ${istUeberzogen ? 'bg-danger' : 'bg-claimondo-ondo'}`}
           style={{ width: `${progressPct}%` }}
         />
       </div>
@@ -170,7 +170,7 @@ export default function GespraechsleitfadenTimer({
       )}
 
       {istUeberzogen && (
-        <p className="text-[11px] text-red-700 italic">
+        <p className="text-[11px] text-danger-strong italic">
           Gespräch dauert länger als 8 Minuten — Abschluss jetzt aktiv einleiten oder Rückruf vereinbaren.
         </p>
       )}
@@ -188,7 +188,7 @@ export default function GespraechsleitfadenTimer({
               <p className="flex items-center gap-2">
                 <ClockIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                 Dauer: <strong className="font-mono">{formatTime(sekunden)}</strong>
-                {sekunden > 480 && <span className="text-red-600">(überzogen)</span>}
+                {sekunden > 480 && <span className="text-danger">(überzogen)</span>}
               </p>
               <p className="text-[11px] text-claimondo-ondo border-t border-claimondo-border pt-2">
                 Prüfe vor dem Beenden: Ist Phase 1 (Qualifizierung) komplett? Ist ein SV reserviert?
@@ -201,7 +201,7 @@ export default function GespraechsleitfadenTimer({
                 </p>
               )}
               {summaryError && (
-                <p className="text-[11px] text-red-700 bg-red-50 border border-red-200 rounded p-2">
+                <p className="text-[11px] text-danger-strong bg-danger-soft border border-danger/30 rounded p-2">
                   Beenden fehlgeschlagen: {summaryError}
                 </p>
               )}

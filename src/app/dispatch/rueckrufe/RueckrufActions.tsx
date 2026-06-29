@@ -44,7 +44,7 @@ export default function RueckrufActions({
     return (
       <div className="flex items-center gap-2 shrink-0">
         {toast && (
-          <span className={`text-[10px] font-medium ${toast === 'OK' ? 'text-emerald-600' : 'text-red-600'}`}>
+          <span className={`text-[10px] font-medium ${toast === 'OK' ? 'text-success' : 'text-danger'}`}>
             {toast}
           </span>
         )}
@@ -74,8 +74,8 @@ export default function RueckrufActions({
           onClick={() => setErgebnis('erreicht')}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium border transition-colors ${
             ergebnis === 'erreicht'
-              ? 'bg-emerald-600 text-white border-emerald-600'
-              : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-emerald-50'
+              ? 'bg-success text-white border-success'
+              : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-success-soft'
           }`}
         >
           <PhoneIncomingIcon className="w-3 h-3" />
@@ -85,8 +85,8 @@ export default function RueckrufActions({
           onClick={() => setErgebnis('nicht_erreicht')}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium border transition-colors ${
             ergebnis === 'nicht_erreicht'
-              ? 'bg-red-600 text-white border-red-600'
-              : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-red-50'
+              ? 'bg-danger text-white border-danger'
+              : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-danger-soft'
           }`}
         >
           <PhoneOffIcon className="w-3 h-3" />
@@ -131,9 +131,9 @@ export default function RueckrufActions({
           <XIcon className="w-3.5 h-3.5" />
         </button>
         {toast && toast !== 'OK' && (
-          <span className="text-[10px] text-red-600">{toast}</span>
+          <span className="text-[10px] text-danger">{toast}</span>
         )}
-        {anrufVersuche >= 1 && <span className="text-[9px] text-red-500 ml-1">({anrufVersuche}/2)</span>}
+        {anrufVersuche >= 1 && <span className="text-[9px] text-danger ml-1">({anrufVersuche}/2)</span>}
       </div>
     </div>
   )
