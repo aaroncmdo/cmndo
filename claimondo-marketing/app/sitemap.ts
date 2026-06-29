@@ -284,6 +284,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority: 0.95,
       alternates: { languages: langAlternates('/unfall-was-tun-als-geschaedigter') },
     },
+    // Wissens-Hub — lesbare Uebersicht aller Wissens-Assets (menschliche Twin-Seite
+    // der Feeds). de-only (Body deutsch -> canonical de), daher ohne Locale-Alternates.
+    {
+      url: `${SITE_URL}/wissen`,
+      lastModified: now,
+      changeFrequency: 'weekly' as const,
+      priority: 0.9,
+    },
+
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({
       url: `${SITE_URL}${a.url}`,
