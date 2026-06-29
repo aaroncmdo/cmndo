@@ -1616,6 +1616,10 @@
       {
         "href": "/ratgeber",
         "label": "Alle Ratgeber-Themen"
+      },
+      {
+        "href": "/wissen",
+        "label": "Wissens-Übersicht"
       }
     ],
     "gutachter_menu": [

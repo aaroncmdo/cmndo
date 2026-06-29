@@ -109,6 +109,11 @@ export function LandingFooter() {
                   Ratgeber
                 </Link>
               </li>
+              <li>
+                <Link href="/wissen" className="transition-colors hover:text-white">
+                  Wissens-Übersicht
+                </Link>
+              </li>
               {/* Doc 35 Fix 3: Pillar-C entwaisen — /sachverstaendige hatte null
                   eingehende interne Links. */}
               <li>

@@ -6,8 +6,13 @@ import type { FeedItem } from './types'
  * Strategic-Pages, die als App-Routen (nicht als MDX-Asset) leben und daher nicht
  * über den claimondo-mdx-Loader laufen. Hardcoded im Feed-Generator (geo-feeds-spec §4).
  *
- * pubDate = Live-Datum der GEO-Sprint-Pages (AAR-938, gemerged ~25.05.2026), damit sie
- * im News-Feed als jüngste Items oben erscheinen. sortKey '-1-S-…' → im Katalog ganz vorne.
+ * pubDate = „inhaltlich geprueft / aktuell zum Stand"-Datum (zuletzt 29.06.2026), damit die
+ * Evergreen-Strategic-Pages im News-Feed als juengste Items oben erscheinen. sortKey
+ * '-1-S-…' → im Katalog ganz vorne.
+ *
+ * ACHTUNG (Redaktion): Das Bumpen dieses Datums BEHAUPTET, der Inhalt sei zum Stand aktuell.
+ * Vorher verifizieren — v.a. ob LG Bremen 9 O 1720/24 weiterhin „nicht rechtskraeftig" ist
+ * und der Plattform-Vergleich stimmt. Nur Datum hochsetzen ohne Inhalts-Check = Fake-Freshness.
  */
 export const STRATEGIC_PAGES: FeedItem[] = [
   {
@@ -15,7 +20,7 @@ export const STRATEGIC_PAGES: FeedItem[] = [
       'Kfz-Gutachter-Vermittlungsportale im Vergleich — Claimondo, Neogutachter, Unfallpaten & Unfallgiganten',
     link: `${SITE_URL}/kfz-gutachter/vermittlungsportale-vergleich`,
     guid: `${SITE_URL}/kfz-gutachter/vermittlungsportale-vergleich`,
-    pubDate: new Date('2026-05-25'),
+    pubDate: new Date('2026-06-29'),
     assetType: 'Strategic',
     categories: ['Strategische Wissens-Pages', 'Strategic'],
     author: DEFAULT_AUTHOR,
@@ -34,7 +39,7 @@ export const STRATEGIC_PAGES: FeedItem[] = [
     title: '„Online-Kfz-Gutachten" — was rechtlich erlaubt ist und was nicht (LG Bremen 2026)',
     link: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
     guid: `${SITE_URL}/kfz-gutachter/online-kfz-gutachten`,
-    pubDate: new Date('2026-05-25'),
+    pubDate: new Date('2026-06-29'),
     assetType: 'Strategic',
     categories: ['Strategische Wissens-Pages', 'Strategic'],
     author: DEFAULT_AUTHOR,

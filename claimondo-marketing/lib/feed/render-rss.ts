@@ -27,6 +27,9 @@ export interface RssChannelMeta {
   description: string
   /** z. B. '/feed.xml' — für den <atom:link rel="self">. */
   selfPath: string
+  /** RSS <ttl> in Minuten (Refresh-Hinweis für Reader). Default 360 (6 h) = News;
+   *  Katalog übergibt 1440 (24 h) passend zu seinem `revalidate`. */
+  ttlMinutes?: number
 }
 
 export function renderRssFeed(meta: RssChannelMeta, items: FeedItem[]): string {
@@ -59,7 +62,7 @@ ${categories}
     <description>${escapeXml(meta.description)}</description>
     <language>de-DE</language>
     <lastBuildDate>${lastBuild}</lastBuildDate>
-    <ttl>360</ttl>
+    <ttl>${meta.ttlMinutes ?? 360}</ttl>
     <image>
       <url>${SITE_URL}/og-default.png</url>
       <title>${escapeXml(meta.title)}</title>
