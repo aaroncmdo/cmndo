@@ -12,6 +12,7 @@ import { SvFinderSection } from './sections/SvFinderSection'
 import { SchadensreportSection } from './sections/SchadensreportSection'
 import { FaqSection } from './sections/FaqSection'
 import { BottomCtaSection } from './sections/BottomCtaSection'
+import { WissensRatgeberSection } from './sections/WissensRatgeberSection'
 
 type Props = {
   authenticatedUser: AuthenticatedUser | null
@@ -42,6 +43,7 @@ export async function LandingPage({ authenticatedUser }: Props) {
         <MenschenSection />
         <SvFinderSection />
         <SchadensreportSection />
+        <WissensRatgeberSection />
         <FaqSection />
         <BottomCtaSection />
         <LandingFooter />

@@ -15,10 +15,12 @@ export default async function MitarbeiterTasks({ searchParams }: {
 
   const { status = 'offen' } = await searchParams
 
+  // Dashboard-Audit (29.06.): eigene ODER unassigned KB-Broadcast-Tasks (empfaenger_rolle=
+  // 'kundenbetreuer', zugewiesen_an=NULL) — vorher nur zugewiesen_an=user, KB-Tasks unsichtbar.
   let query = supabase
     .from('tasks')
     .select('id, titel, beschreibung, fall_id, status, prioritaet, faellig_am, created_at')
-    .eq('zugewiesen_an', user.id)
+    .or(`zugewiesen_an.eq.${user.id},and(empfaenger_rolle.eq.kundenbetreuer,zugewiesen_an.is.null)`)
     .order('faellig_am', { ascending: true, nullsFirst: false })
 
   if (status !== 'alle') query = query.eq('status', status)

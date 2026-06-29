@@ -109,8 +109,13 @@ export default function KundeTermineClient({
     return cells
   }, [month])
 
-  const kommend = termine.filter(tr => new Date(tr.start_zeit) >= now && tr.status !== 'abgelehnt')
-  const vergangen = termine.filter(tr => new Date(tr.start_zeit) < now || tr.status === 'abgelehnt' || tr.status === 'abgeschlossen')
+  // Geist-Defense (Schicht 2): superseded/abgesagte Termine NIE listen — robust gegen
+  // cancelled_at-Drift (das Feld ist als "inaktiv"-Signal unzuverlaessig; s. verlege-Geist-Fix in
+  // state-transitions.ts). 'abgelehnt'/'abgeschlossen' bleiben bewusst als Historie sichtbar.
+  const VERSTECKTE_STATUS = new Set(['verschoben', 'verlegt', 'storniert', 'abgesagt'])
+  const sichtbar = termine.filter(tr => !VERSTECKTE_STATUS.has(tr.status))
+  const kommend = sichtbar.filter(tr => new Date(tr.start_zeit) >= now && tr.status !== 'abgelehnt')
+  const vergangen = sichtbar.filter(tr => new Date(tr.start_zeit) < now || tr.status === 'abgelehnt' || tr.status === 'abgeschlossen')
 
   function prevMonth() { setMonth(m => new Date(m.getFullYear(), m.getMonth() - 1, 1)); setSelectedKey(null) }
   function nextMonth() { setMonth(m => new Date(m.getFullYear(), m.getMonth() + 1, 1)); setSelectedKey(null) }

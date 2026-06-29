@@ -122,6 +122,18 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # RLS-Haertung Schritt 2 (rls-safety-net 29.06.2026): Tabellen-RLS-Leak-Check. Pendant zum
+      # Claim-View-RLS-Check, aber fuer die TABELLEN-Schicht (RLS-Policies statt View-Gates).
+      # Tabellen-RLS kann NICHT via DB-Funktion getestet werden (postgres/service_role bypassen RLS;
+      # SET ROLE geht nicht in SECURITY DEFINER) -> echter Nobody-User (eingeloggt, besitzt nichts)
+      # muss aus jeder Claim-Tabelle 0 Zeilen sehen. Siehe scripts/check-claim-table-rls.mjs.
+      - name: Claim-Table-RLS
+        run: node scripts/check-claim-table-rls.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:

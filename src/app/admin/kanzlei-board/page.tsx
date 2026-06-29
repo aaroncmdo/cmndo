@@ -12,13 +12,30 @@ export const dynamic = 'force-dynamic'
 export default async function KanzleiBoard() {
   const db = await createClient()
 
-  // 1. Zugewiesene Kanzleien (parteien.rolle = kanzlei)
-  const { data: kanzleiParteien } = await db
-    .from('parteien')
-    .select('id, fall_id, name, email, telefon, created_at, faelle(claims:claim_id(claim_nummer), status, kennzeichen)')
-    .eq('rolle', 'kanzlei')
-    .order('created_at', { ascending: false })
+  // 1. Zugewiesene Kanzleien — FIX (Dashboard-Audit 29.06.): vorher parteien.rolle='kanzlei'
+  // (Enum partei_rolle kennt kein 'kanzlei' -> 22P02 Runtime-Error) + faelle(...)-Embed (Tabelle
+  // faelle gedroppt -> PGRST200). Korrekte Quelle = kanzlei_faelle (claim_id/kanzlei_id/status).
+  // Claim-/Kanzlei-Infos via separate Lookups (keine unverifizierten PostgREST-Embeds).
+  const { data: kanzleiFaelle } = await db
+    .from('kanzlei_faelle')
+    .select('id, claim_id, fall_id, status, mandatsnummer, erstellt_am, kanzlei_id')
+    .order('erstellt_am', { ascending: false })
     .limit(50)
+
+  const kfClaimIds = Array.from(new Set((kanzleiFaelle ?? []).map(k => k.claim_id).filter((x): x is string => !!x)))
+  const kfKanzleiIds = Array.from(new Set((kanzleiFaelle ?? []).map(k => k.kanzlei_id).filter((x): x is string => !!x)))
+  const claimMap = new Map<string, { claim_nummer: string | null; kennzeichen: string | null }>()
+  const kanzleiMap = new Map<string, { name: string | null; email: string | null; ansprechpartner: string | null }>()
+  if (kfClaimIds.length > 0) {
+    // v_claim_full ist claims-anchored: id = Claim-ID (es gibt KEINE claim_id-Spalte). Join-Test
+    // (admin-JWT) bestaetigt: vcf.id = kanzlei_faelle.claim_id matcht alle 14 Kanzlei-Faelle.
+    const { data } = await db.from('v_claim_full').select('id, claim_nummer, kennzeichen').in('id', kfClaimIds)
+    for (const c of data ?? []) claimMap.set(c.id as string, { claim_nummer: c.claim_nummer as string | null, kennzeichen: c.kennzeichen as string | null })
+  }
+  if (kfKanzleiIds.length > 0) {
+    const { data } = await db.from('kanzleien').select('id, name, email, ansprechpartner').in('id', kfKanzleiIds)
+    for (const k of data ?? []) kanzleiMap.set(k.id as string, { name: k.name as string | null, email: k.email as string | null, ansprechpartner: k.ansprechpartner as string | null })
+  }
 
   // 2. LexDrive Webhook-History (source = lexdrive)
   const { data: webhookEvents } = await db
@@ -47,7 +64,7 @@ export default async function KanzleiBoard() {
 
       {/* KPI */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <StatCard size="sm" icon={ScaleIcon} tone="ondo" label="Aktive Kanzlei-Parteien" value={kanzleiParteien?.length ?? 0} />
+        <StatCard size="sm" icon={ScaleIcon} tone="ondo" label="Kanzlei-Fälle" value={kanzleiFaelle?.length ?? 0} />
         <StatCard size="sm" icon={MailIcon} tone="ondo" label="LexDrive-Events" value={webhookEvents?.length ?? 0} />
         <StatCard size="sm" icon={AlertCircleIcon} tone="warning" label="Offene LexDrive-Tasks" value={lexdriveTasks?.length ?? 0} />
       </div>
@@ -69,35 +86,38 @@ export default async function KanzleiBoard() {
               </Tr>
             </Thead>
             <Tbody>
-              {(kanzleiParteien ?? []).map(p => {
-                type ClaimJoin = { claim_nummer: string | null } | { claim_nummer: string | null }[] | null
-                const fallJoin = p.faelle as unknown as { claims: ClaimJoin; status: string | null; kennzeichen: string | null } | { claims: ClaimJoin; status: string | null; kennzeichen: string | null }[] | null
-                const fall = Array.isArray(fallJoin) ? fallJoin[0] : fallJoin
-                const claim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+              {(kanzleiFaelle ?? []).map(kf => {
+                const claim = kf.claim_id ? claimMap.get(kf.claim_id as string) : undefined
+                const kanzlei = kf.kanzlei_id ? kanzleiMap.get(kf.kanzlei_id as string) : undefined
+                const linkId = (kf.fall_id ?? kf.claim_id) as string | null
                 return (
-                  <Tr key={p.id}>
+                  <Tr key={kf.id}>
                     <Td>
-                      <Link href={`/faelle/${p.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
-                        {claim?.claim_nummer ?? (p.fall_id as string).slice(0, 8)}
-                      </Link>
-                      {fall?.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{fall.kennzeichen}</p>}
+                      {linkId ? (
+                        <Link href={`/faelle/${linkId}`} className="text-claimondo-ondo hover:underline font-medium">
+                          {claim?.claim_nummer ?? linkId.slice(0, 8)}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-claimondo-navy">{claim?.claim_nummer ?? '—'}</span>
+                      )}
+                      {claim?.kennzeichen && <p className="text-xs text-claimondo-ondo/70">{claim.kennzeichen}</p>}
                     </Td>
-                    <Td>{p.name ?? '—'}</Td>
+                    <Td>{kanzlei?.name ?? '—'}</Td>
                     <Td className="!text-claimondo-ondo text-xs">
-                      {p.email ?? '—'}<br />
-                      {p.telefon ?? ''}
+                      {kanzlei?.ansprechpartner ?? '—'}<br />
+                      {kanzlei?.email ?? ''}
                     </Td>
                     <Td>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-navy">{fall?.status ?? '—'}</span>
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-navy">{kf.status ?? '—'}</span>
                     </Td>
                     <Td className="text-xs !text-claimondo-ondo/70">
-                      {p.created_at ? new Date(p.created_at).toLocaleDateString('de-DE') : '—'}
+                      {kf.erstellt_am ? new Date(kf.erstellt_am as string).toLocaleDateString('de-DE') : '—'}
                     </Td>
                   </Tr>
                 )
               })}
-              {(!kanzleiParteien || kanzleiParteien.length === 0) && (
-                <Tr><Td colSpan={5} className="py-8 text-center !text-claimondo-ondo/70 text-sm">Keine Kanzleien zugewiesen</Td></Tr>
+              {(!kanzleiFaelle || kanzleiFaelle.length === 0) && (
+                <Tr><Td colSpan={5} className="py-8 text-center !text-claimondo-ondo/70 text-sm">Keine Kanzlei-Fälle</Td></Tr>
               )}
             </Tbody>
           </Table>

@@ -103,23 +103,23 @@ export function SupportChat({ userName }: { userName?: string | null }) {
             const isCreated = m.role === 'ticket_created'
             return (
               <div key={i} className="flex justify-start">
-                <div className="max-w-[90%] w-full bg-emerald-50 border border-emerald-200 rounded-ios-xl px-3 py-2.5 text-sm space-y-2">
+                <div className="max-w-[90%] w-full bg-success-soft border border-success/30 rounded-ios-xl px-3 py-2.5 text-sm space-y-2">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2Icon className="w-4 h-4 text-emerald-600 mt-0.5 shrink-0" />
-                    <div className="text-emerald-900 whitespace-pre-wrap">{m.text}</div>
+                    <CheckCircle2Icon className="w-4 h-4 text-success-strong mt-0.5 shrink-0" />
+                    <div className="text-success-strong whitespace-pre-wrap">{m.text}</div>
                   </div>
                   {m.url ? (
                     <a
                       href={m.url}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex items-center gap-1 text-xs font-medium text-emerald-800 hover:text-emerald-900 underline"
+                      className="inline-flex items-center gap-1 text-xs font-medium text-success-strong hover:text-success-strong underline"
                     >
                       {isCreated ? m.identifier : `Kommentar zu ${m.identifier}`} öffnen
                       <ExternalLinkIcon className="w-3 h-3" />
                     </a>
                   ) : (
-                    <span className="text-xs text-emerald-800">{isCreated ? m.identifier : `Kommentar zu ${m.identifier}`}</span>
+                    <span className="text-xs text-success-strong">{isCreated ? m.identifier : `Kommentar zu ${m.identifier}`}</span>
                   )}
                 </div>
               </div>
@@ -138,7 +138,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
 
         {error && (
           <div className="flex justify-start">
-            <div className="max-w-[90%] bg-amber-50 border border-amber-200 rounded-ios-xl px-3 py-2 text-xs text-amber-900 flex items-start gap-2">
+            <div className="max-w-[90%] bg-warning-soft border border-warning/30 rounded-ios-xl px-3 py-2 text-xs text-warning-strong flex items-start gap-2">
               <XCircleIcon className="w-4 h-4 mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
@@ -164,7 +164,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                   <p className="text-[11px] text-claimondo-ondo truncate">Screenshot angefügt</p>
                 </div>
               ) : screenshotError ? (
-                <p className="text-[11px] text-amber-700">{screenshotError}</p>
+                <p className="text-[11px] text-warning-strong">{screenshotError}</p>
               ) : (
                 <p className="text-[11px] text-claimondo-ondo">Kein Screenshot</p>
               )}
@@ -183,7 +183,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 <button
                   type="button"
                   onClick={clearScreenshot}
-                  className="text-[11px] text-claimondo-ondo hover:text-red-600"
+                  className="text-[11px] text-claimondo-ondo hover:text-danger-strong"
                 >
                   entfernen
                 </button>

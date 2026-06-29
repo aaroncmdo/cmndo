@@ -62,7 +62,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
       <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
           <div className="flex items-center gap-2 text-claimondo-navy">
-            <AlertTriangleIcon className="w-5 h-5 text-red-600" />
+            <AlertTriangleIcon className="w-5 h-5 text-danger-strong" />
             <h2 className="text-sm font-semibold">Dauerhaft fehlgeschlagene Uploads</h2>
           </div>
           <button
@@ -81,7 +81,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
           ) : (
             <ul className="space-y-3">
               {items.map((item) => (
-                <li key={item.id} className="rounded-ios-lg border border-red-100 bg-red-50/50 px-3 py-2">
+                <li key={item.id} className="rounded-ios-lg border border-danger/30 bg-danger-soft/50 px-3 py-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium text-claimondo-navy truncate">{item.file_name}</p>
@@ -89,7 +89,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                         Fall: {item.fall_id.slice(0, 8)}… · {item.dokument_typ} · {item.retry_count} Versuche
                       </p>
                       {item.last_error && (
-                        <p className="text-[11px] text-red-700 mt-1 break-words">{item.last_error}</p>
+                        <p className="text-[11px] text-danger-strong mt-1 break-words">{item.last_error}</p>
                       )}
                     </div>
                     <div className="flex gap-1 flex-shrink-0">
@@ -105,7 +105,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
                         type="button"
                         disabled={busy === item.id}
                         onClick={() => handleDelete(item)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md border border-red-200 text-red-700 text-[11px] hover:bg-red-50 disabled:opacity-50"
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-ios-md border border-danger/30 text-danger-strong text-[11px] hover:bg-danger-soft disabled:opacity-50"
                       >
                         <Trash2Icon className="w-3 h-3" /> Verwerfen
                       </button>

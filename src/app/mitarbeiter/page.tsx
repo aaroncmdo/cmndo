@@ -25,11 +25,13 @@ export default async function MitarbeiterDashboard() {
     .order('fall_created_at', { ascending: false })
     .limit(8)
 
-  // Offene Tasks
+  // Offene Tasks — Dashboard-Audit (29.06.): vorher nur zugewiesen_an=user -> rollen-adressierte
+  // KB-Tasks (empfaenger_rolle='kundenbetreuer', zugewiesen_an=NULL = Team-Queue) waren unsichtbar.
+  // Jetzt: eigene ODER unassigned KB-Broadcast-Tasks.
   const { data: tasks, count: tasksCount } = await supabase
     .from('tasks')
     .select('id, titel, fall_id, prioritaet, faellig_am, created_at', { count: 'exact' })
-    .eq('zugewiesen_an', user.id)
+    .or(`zugewiesen_an.eq.${user.id},and(empfaenger_rolle.eq.kundenbetreuer,zugewiesen_an.is.null)`)
     .eq('status', 'offen')
     .order('faellig_am', { ascending: true, nullsFirst: false })
     .limit(8)

@@ -71,6 +71,11 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
     .from('gutachter_termine')
     .update({
       status: altNeuStatus,
+      // Geist-Fix: terminales 'verschoben' (Kunde-Sofort-Reschedule) MUSS cancelled_at setzen —
+      // analog zum SV-Accept (entscheideVerlegung). Ohne das erscheint der alte Termin in
+      // cancelled_at-gefilterten Listen (z.B. /kunde/termine) als Geist neben dem neuen Slot.
+      // 'verlegt' (SV-Propose) bleibt aktiv/blockiert bis zur Entscheidung -> KEIN cancelled_at.
+      ...(altNeuStatus === 'verschoben' ? { cancelled_at: new Date().toISOString() } : {}),
       verlegung_grund: input.grund ?? null,
       ...(input.initiatorKunde ? { verlegung_initiator_kunde: true } : {}),
     })
@@ -103,10 +108,11 @@ export async function verlege(terminId: string, input: VerlegeInput): Promise<Ve
     .select('id')
     .single()
   if (insErr || !neu) {
-    // Rollback alt
+    // Rollback alt — cancelled_at mit zuruecksetzen: alt war vor verlege aktiv (cancelled_at=null),
+    // beim 'verschoben'-Pfad haben wir es oben gesetzt -> hier wieder nullen, sonst Geist nach Fail.
     await db
       .from('gutachter_termine')
-      .update({ status: alt.status as string, verlegung_grund: null })
+      .update({ status: alt.status as string, verlegung_grund: null, cancelled_at: null })
       .eq('id', alt.id)
     if (insErr?.code === '23P01') return { ok: false, error: 'Neuer Slot belegt', code: 'belegt' }
     return { ok: false, error: insErr?.message ?? 'Insert fehlgeschlagen', code: 'db' }

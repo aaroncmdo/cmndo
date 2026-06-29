@@ -9,7 +9,7 @@ import {
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon,
+  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -27,6 +27,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   { href: '/admin/embed-billing', label: 'Embed-Billing', icon: ReceiptIcon },
   { href: '/admin/embed-sites', label: 'Embed-Sites', icon: Code2Icon },
+  { href: '/admin/marketing', label: 'Marketing', icon: Share2Icon },
   { href: '/admin/werkstaetten', label: 'Werkstätten', icon: WrenchIcon },
   { href: '/admin/makler', label: 'Makler', icon: HandshakeIcon },
   { href: '/admin/sv-leads', label: 'SV-Leads', icon: MapPinIcon },
@@ -77,7 +78,7 @@ export default function AdminNav({
               <span className="text-white">Claim</span>
               <span className="text-claimondo-light-blue">ondo</span>
             </span>
-            <TasksPill userId={userId} href="/admin/meine-tasks" initialCount={meineTasksCount ?? 0} />
+            <TasksPill userId={userId} href="/admin/aufgaben/meine" initialCount={meineTasksCount ?? 0} />
           </div>
           <p className="text-xs mt-0.5 text-claimondo-light-blue">{email}</p>
         </>

@@ -62,6 +62,19 @@ export default async function DispatchLeads({
   const { data: leads } = await query
   const activePhase = istAbbrecherFilter ? '' : (params.phase ?? '')
 
+  // FIX (Dashboard-Audit 29.06.): die Liste ist auf 200 begrenzt -> leads.length unterzaehlte
+  // "X Ergebnisse" sobald >200 Leads matchten. Exakte Gesamtzahl passend zum aktiven Filter.
+  let countQuery = supabase.from('leads').select('id', { count: 'exact', head: true })
+  if (istAbbrecherFilter) {
+    countQuery = countQuery
+      .eq('flow_link_geoeffnet', true)
+      .eq('flow_link_abgeschlossen', false)
+      .neq('status', 'disqualifiziert')
+  } else if (params.phase) {
+    countQuery = countQuery.eq('qualifizierungs_phase', params.phase)
+  }
+  const { count: gesamtCount } = await countQuery
+
   // AAR-956: Single-Source Termin + Gutachter pro Lead (v_lead_termin_gutachter)
   // batch nachladen — gibt dem Dispatcher in der Liste auf einen Blick, ob ein
   // Lead schon einen Termin und/oder einen Gutachter hat (Self-Service-Leads

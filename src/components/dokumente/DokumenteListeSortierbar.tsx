@@ -113,7 +113,7 @@ export default function DokumenteListeSortierbar({
             </>
           ) : (
             <>
-              <CheckIcon className="w-3 h-3 text-emerald-500" /> Auto-Save
+              <CheckIcon className="w-3 h-3 text-success-strong" /> Auto-Save
             </>
           )}
         </span>

@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon, BriefcaseIcon } from 'lucide-react'
-import { createMitarbeiter, createMakler, deactivateKbWithReassign } from './actions'
+import { UserPlusIcon, UsersIcon, ShieldCheckIcon, TrophyIcon, GiftIcon, ActivityIcon, AlertTriangleIcon, PowerIcon } from 'lucide-react'
+import { createMitarbeiter, deactivateKbWithReassign } from './actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, ClickableTr, Th, Td } from '@/components/shared/DataTable'
@@ -35,7 +35,6 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
 }) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
-  const [showMaklerDialog, setShowMaklerDialog] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
@@ -58,23 +57,6 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
     finally { setLoading(false) }
   }
 
-  // W2.1/AAR-949: Makler-Anlage (eigene Server-Action — legt Auth-User + profiles
-  // rolle=makler + makler-Row an, sodass der Makler direkt ins /makler-Portal kommt).
-  async function handleCreateMakler(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault(); setError(null); setSuccess(null); setLoading(true)
-    try {
-      const fd = new FormData(e.currentTarget)
-      const r = await createMakler(fd)
-      if (!r.success) {
-        setError(r.error)
-        return
-      }
-      setSuccess(`Makler ${r.email} eingeladen. Passwort: ${r.password}`)
-      setShowMaklerDialog(false); router.refresh()
-    } catch (err) { setError(err instanceof Error ? err.message : 'Fehler') }
-    finally { setLoading(false) }
-  }
-
   const name = (m: Mitarbeiter) => [m.vorname, m.nachname].filter(Boolean).join(' ') || '—'
 
   return (
@@ -86,13 +68,6 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
           icon={UsersIcon}
           actions={
             <div className="flex gap-2">
-              <Button
-                variant="ondo"
-                onClick={() => { setShowMaklerDialog(true); setError(null); setSuccess(null) }}
-                iconLeft={<BriefcaseIcon className="w-4 h-4" />}
-              >
-                Neuer Makler
-              </Button>
               <Button
                 variant="navy"
                 onClick={() => { setShowDialog(true); setError(null); setSuccess(null) }}
@@ -208,34 +183,6 @@ export default function TeamClient({ mitarbeiter, leadsByUser, aktiveFaelleByUse
         </form>
       </Modal>
 
-      {/* W2.1/AAR-949: Makler-Anlage — eigenes Modal, da Makler andere Felder
-          brauchen (Firma/Ansprechpartner/Provision statt Kategorie/Kapazitaet). */}
-      <Modal open={showMaklerDialog} onClose={() => setShowMaklerDialog(false)} maxWidth={480} ariaLabel="Neuer Makler">
-        <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Makler</h2>
-        <form onSubmit={handleCreateMakler} className="space-y-3">
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">Firma</label><input name="firma" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Ansprechpartner Vorname</label><input name="ansprechpartner_vorname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Ansprechpartner Nachname</label><input name="ansprechpartner_nachname" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          </div>
-          <div><label className="text-sm text-claimondo-ondo mb-1 block">E-Mail</label><input name="email" type="email" required className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Telefon (optional)</label><input name="telefon" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">IHK-Nummer (optional)</label><input name="ihk_nummer" className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Provision Komplett (netto €)</label><input name="provision_betrag_komplett_netto" type="number" step="0.01" min="0" defaultValue={100} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-            <div><label className="text-sm text-claimondo-ondo mb-1 block">Provision nur Gutachter (netto €)</label><input name="provision_betrag_nur_gutachter_netto" type="number" step="0.01" min="0" defaultValue={50} className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield" /></div>
-          </div>
-          {error && <p className="text-sm text-danger bg-danger-soft border border-danger/30 px-4 py-3 rounded-ios-xl">{error}</p>}
-          <div className="flex gap-3 pt-2">
-            <Button variant="ghost" fullWidth onClick={() => setShowMaklerDialog(false)}>Abbrechen</Button>
-            <Button variant="navy" fullWidth type="submit" disabled={loading}>
-              {loading ? 'Erstelle...' : 'Erstellen'}
-            </Button>
-          </div>
-        </form>
-      </Modal>
     </div></div>
   )
 }

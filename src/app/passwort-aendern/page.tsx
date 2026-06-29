@@ -1,11 +1,10 @@
 ﻿'use client'
 
 import { useState } from 'react'
-import { createClient } from '@/lib/supabase/client'
 import { KeyIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
-import { roleToPath } from '@/lib/auth/role-redirect'
+import { setzeNeuesPasswort } from './actions'
 
 export default function PasswortAendernPage() {
   const [password, setPassword] = useState('')
@@ -27,34 +26,16 @@ export default function PasswortAendernPage() {
     }
 
     setLoading(true)
-    try {
-      const supabase = createClient()
-
-      // Update password
-      const { error: updateError } = await supabase.auth.updateUser({ password })
-      if (updateError) throw updateError
-
-      // Get current user
-      const user = (await supabase.auth.getUser())?.data?.user ?? null
-      if (user) {
-        // Set force_password_change to false
-        await supabase
-          .from('profiles')
-          .update({ force_password_change: false })
-          .eq('id', user.id)
-      }
-
-      // Redirect based on role
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('rolle')
-        .eq('id', user!.id)
-        .single()
-
-      window.location.href = roleToPath(profile?.rolle as string | null | undefined)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Ändern des Passworts')
-    } finally {
+    // Server-Action: updateUser + force_password_change serverseitig. Der
+    // frueher genutzte Browser-Client warf hier "Auth session missing"
+    // (Cookie-Propagation-Race nach dem Login-Redirect).
+    const result = await setzeNeuesPasswort(password)
+    if (result.ok) {
+      // Hard-Navigation vermeidet die RSC-Soft-Nav-Race mit den frisch
+      // rotierten Auth-Cookies (CMM-14). Spinner bleibt bis zum Seitenwechsel.
+      window.location.href = result.redirectTo
+    } else {
+      setError(result.error)
       setLoading(false)
     }
   }
@@ -80,8 +61,8 @@ export default function PasswortAendernPage() {
 
         <div className="bg-white rounded-ios-lg p-8 shadow-sheet">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-ios-md bg-amber-50 flex items-center justify-center">
-              <KeyIcon className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-ios-md bg-warning-soft flex items-center justify-center">
+              <KeyIcon className="w-5 h-5 text-warning" />
             </div>
             <div>
               <p className="text-claimondo-navy font-medium text-sm">Neues Passwort setzen</p>
@@ -123,7 +104,7 @@ export default function PasswortAendernPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center">
+              <p className="text-sm text-danger-strong rounded-ios-md bg-danger-soft border border-danger/30 px-4 py-3 text-center">
                 {error}
               </p>
             )}

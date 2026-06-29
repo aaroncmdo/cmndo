@@ -251,7 +251,7 @@ export function TaskAnlegenModal({
           )}
 
           {error && (
-            <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-ios-md p-2">
+            <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md p-2">
               {error}
             </p>
           )}

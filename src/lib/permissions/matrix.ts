@@ -51,6 +51,11 @@ const ADMIN_CAPS = new Set<PermissionCapability>([
 const KB_CAPS = new Set<PermissionCapability>([
   // KB ist Daily-Driver aber ohne destruktive Actions und ohne Abrechnung-Approve
   'dokumente.request',
+  // Filmcheck-Audit 29.06.2026: KB ist der Daily-Driver der QC-Pruefung (Filmcheck) —
+  // war faelschlich nur admin-cap, obwohl das Design "QC durch KB" ist. Gated jetzt
+  // die QC-Server-Actions (qcBestanden/qcNachbesserung/saveFilmcheck/upsertQcCheckliste).
+  'dokumente.qc',
+  'dokumente.filmcheck',
   'tasks.create_for_other',
   'tasks.view_team',
   'stammdaten.edit_kanzlei_felder',

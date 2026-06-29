@@ -383,7 +383,10 @@ export default function StatistikenClient({
       : null
 
     // Konversionsrate Lead → Fall
-    const faelleMitLead = filtered.filter(f => f.lead_id).length
+    // FIX (Dashboard-Audit 29.06.): Zaehler all-time (faelle) statt windowed (filtered), damit er
+    // zum all-time-Nenner totalLeads passt. Vorher: windowed/all-time = bedeutungslos (schrumpfte
+    // je enger der Zeitraum). Beide Seiten jetzt all-time -> echte Lead->Fall-Konversion.
+    const faelleMitLead = faelle.filter(f => f.lead_id).length
     const konversionPct = totalLeads > 0 ? Math.round((faelleMitLead / totalLeads) * 1000) / 10 : null
 
     const metrikMap: Record<string, number | null> = {

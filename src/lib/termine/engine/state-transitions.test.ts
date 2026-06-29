@@ -63,6 +63,7 @@ describe('verlege', () => {
     const calls = (db as { calls: Array<Record<string, unknown>> }).calls
     const altUpd = calls.find((c) => 'update' in c)!.update as Record<string, unknown>
     expect(altUpd.status).toBe('verlegt')
+    expect(altUpd.cancelled_at).toBeUndefined() // SV-Propose: alt bleibt blockiert (verlegt), NICHT gecancelt
     const ins = calls.find((c) => 'insert' in c)!.insert as Record<string, unknown>
     expect(ins.status).toBe('verlegung_pending')
     expect(ins.verlegung_quelle_id).toBe('alt')
@@ -81,6 +82,7 @@ describe('verlege', () => {
     const calls = (db as { calls: Array<Record<string, unknown>> }).calls
     const altUpd = calls.find((c) => 'update' in c)!.update as Record<string, unknown>
     expect(altUpd.status).toBe('verschoben')
+    expect(altUpd.cancelled_at).toBeTypeOf('string') // Geist-Fix: terminales 'verschoben' MUSS cancelled_at setzen (sonst Geist in cancelled_at-gefilterten Listen)
     expect(altUpd.verlegung_initiator_kunde).toBe(true)
   })
   it('alt nicht aktiv -> Fehler', async () => {
@@ -99,6 +101,21 @@ describe('verlege', () => {
     const r = await verlege('alt', { neuVon: 'a', neuBis: 'b', db: db as never })
     expect(r.ok).toBe(false)
     if (!r.ok) expect(r.code).toBe('belegt')
+  })
+  it('kunde-koenig Rollback nullt cancelled_at bei Insert-Fail', async () => {
+    const db = makeDb([
+      { data: { id: 'alt', assignee_id: 's', assignee_typ: 'sachverstaendiger', status: 'bestaetigt' }, error: null },
+      { data: [{ id: 'alt' }], error: null },
+      { data: null, error: { code: '23P01', message: 'exclusion' } }, // insert kollidiert
+      { data: null, error: null }, // rollback update
+    ])
+    const r = await verlege('alt', { neuVon: 'a', neuBis: 'b', neuerStatus: 'bestaetigt', db: db as never })
+    expect(r.ok).toBe(false)
+    const calls = (db as { calls: Array<Record<string, unknown>> }).calls
+    const updates = calls.filter((c) => 'update' in c).map((c) => c.update as Record<string, unknown>)
+    // Rollback (2. update) setzt Status zurueck UND nullt das gesetzte cancelled_at -> kein Geist nach Fail
+    expect(updates[1].status).toBe('bestaetigt')
+    expect(updates[1].cancelled_at).toBe(null)
   })
 })
 

@@ -36,7 +36,7 @@ export function AdminEinzugFehlgeschlagenEmail(props: Props) {
         <InfoRow label="Betrag" value={fmtEuro(props.betragBrutto)} />
         <InfoRow label="Fehler" value={props.fehlerGrund} />
 
-        <Button href={`${APP_URL}/admin/abrechnungen`}>Zum Admin-Panel: Abrechnungen</Button>
+        <Button href={`${APP_URL}/admin/finance/abrechnungen`}>Zum Admin-Panel: Abrechnungen</Button>
 
         <Paragraph>Dein Claimondo-Team</Paragraph>
       </Card>
