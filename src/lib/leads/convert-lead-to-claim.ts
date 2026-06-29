@@ -446,6 +446,17 @@ export async function convertLeadToClaim(
   }
   ;(claimsInsert as Record<string, unknown>).makler_id = maklerId
 
+  // Reparatur-Werkstatt: Dispatcher-Zuweisung am Lead -> Claim uebernehmen (Record-Cast wg. Type-Lag).
+  // Der Lead wird via select('*') geladen (s.o.), die reparatur_werkstatt_*-Spalten kommen also mit.
+  ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_id =
+    (lead.reparatur_werkstatt_id as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_zugewiesen_am =
+    (lead.reparatur_werkstatt_zugewiesen_am as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_zugewiesen_von =
+    (lead.reparatur_werkstatt_zugewiesen_von as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_quelle =
+    (lead.reparatur_werkstatt_quelle as string | null) ?? null
+
   const { data: claim, error: claimErr } = await admin
     .from('claims')
     .insert(claimsInsert)

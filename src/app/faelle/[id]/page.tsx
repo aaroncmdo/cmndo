@@ -57,6 +57,8 @@ import { projectNextEvents } from '@/lib/claims/timeline-projection'
 import { getActiveKanzleiPaket, getPartnerKanzleiSettings, isKanzleiPaketPending } from '@/lib/kanzlei/queries'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { KanzleiAnsprechpartnerBlock } from '@/components/shared/claims'
+// Task 7: Reparatur-Werkstatt-Vermittlung (dispatch/admin) — Panel aus dem Dispatch-Lead-Detail wiederverwendet.
+import WerkstattVermittlungPanel from '@/app/dispatch/leads/[id]/WerkstattVermittlungPanel'
 
 export default async function FallaktePage({
   params,
@@ -141,6 +143,34 @@ export default async function FallaktePage({
     .eq('id', user.id)
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
+
+  // Task 7: aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel
+  // (nur dispatch/admin). reparatur_werkstatt_id ist wegen Type-Lag noch nicht in
+  // den generierten Types -> Select-String-Cast + separater Name-Read (analog
+  // Lead-Seite). Liest am Claim (claims.id), NICHT an der fall-Route-id.
+  let currentReparaturWerkstatt: { id: string; name: string } | null = null
+  if (claimId && (userRolle === 'dispatch' || userRolle === 'admin')) {
+    const adminW = createAdminClient()
+    const { data: cwRow } = await adminW
+      .from('claims')
+      .select('reparatur_werkstatt_id' as 'id')
+      .eq('id', claimId)
+      .maybeSingle<{ reparatur_werkstatt_id: string | null }>()
+    const repWerkstattId = cwRow?.reparatur_werkstatt_id ?? null
+    if (repWerkstattId) {
+      const { data: wRow } = await adminW
+        .from('werkstaetten')
+        .select('id, name')
+        .eq('id', repWerkstattId)
+        .maybeSingle()
+      if (wRow) {
+        currentReparaturWerkstatt = {
+          id: wRow.id as string,
+          name: (wRow.name as string | null) ?? 'Werkstatt',
+        }
+      }
+    }
+  }
 
   // AAR-843: Timeline + Future-Projection laden (nach userRolle-Auflösung,
   // weil RLS via security_invoker auf der View die Auth braucht).
@@ -874,6 +904,17 @@ export default async function FallaktePage({
       {kanzleiBlockData && (
         <div className={kanzleiBlockData.variant === 'prominent' ? 'mb-4' : 'mb-4 max-w-md'}>
           <KanzleiAnsprechpartnerBlock {...kanzleiBlockData} />
+        </div>
+      )}
+      {/* Task 7: Reparatur-Werkstatt vermitteln (nur dispatch/admin). Gleiches
+          Panel wie im Dispatch-Lead-Detail, hier mit target='claim' (claimId). */}
+      {claimId && (userRolle === 'dispatch' || userRolle === 'admin') && (
+        <div className="mb-4 max-w-md">
+          <WerkstattVermittlungPanel
+            target="claim"
+            id={claimId}
+            currentWerkstatt={currentReparaturWerkstatt}
+          />
         </div>
       )}
       {otherKundeFaelle.length > 0 && (
