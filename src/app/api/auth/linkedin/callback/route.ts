@@ -18,7 +18,7 @@ export async function GET(request: Request) {
 
     const admin = createAdminClient()
     await admin.from('linkedin_oauth_tokens').delete().neq('id', '00000000-0000-0000-0000-000000000000')
-    await admin.from('linkedin_oauth_tokens').insert({
+    const { error: insertErr } = await admin.from('linkedin_oauth_tokens').insert({
       organization_urn: orgUrn,
       access_token: tok.accessToken,
       refresh_token: tok.refreshToken,
@@ -26,6 +26,7 @@ export async function GET(request: Request) {
       scope: tok.scope,
       connected_by: user.id,
     })
+    if (insertErr) return NextResponse.redirect(new URL(`/admin/marketing/linkedin?error=${encodeURIComponent(insertErr.message)}`, request.url))
     return NextResponse.redirect(new URL('/admin/marketing/linkedin?connected=1', request.url))
   } catch (e) {
     return NextResponse.redirect(new URL(`/admin/marketing/linkedin?error=${encodeURIComponent((e as Error).message)}`, request.url))

@@ -13,5 +13,6 @@ describe('buildAuthorizeUrl', () => {
     expect(url.searchParams.get('state')).toBe('xyz')
     expect(url.searchParams.get('scope')).toContain('w_organization_social')
     expect(url.searchParams.get('response_type')).toBe('code')
+    expect(url.searchParams.get('redirect_uri')).toBe('https://app.claimondo.de/api/auth/linkedin/callback')
   })
 })

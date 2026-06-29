@@ -22,7 +22,10 @@ export async function exchangeCode(code: string) {
   const res = await fetch('https://www.linkedin.com/oauth/v2/accessToken', {
     method: 'POST', headers: { 'content-type': 'application/x-www-form-urlencoded' }, body: p,
   })
-  if (!res.ok) throw new Error(`Token-Tausch fehlgeschlagen: ${res.status}`)
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({} as { error_description?: string }))
+    throw new Error(`Token-Tausch fehlgeschlagen: ${res.status} ${body.error_description ?? ''}`.trim())
+  }
   const j = await res.json() as { access_token: string; refresh_token?: string; expires_in: number; scope?: string }
   return { accessToken: j.access_token, refreshToken: j.refresh_token ?? null, expiresIn: j.expires_in, scope: j.scope ?? null }
 }
@@ -33,7 +36,10 @@ export async function fetchAdminOrgUrn(token: string): Promise<string | null> {
     'https://api.linkedin.com/rest/organizationAcls?q=roleAssignee&role=ADMINISTRATOR&state=APPROVED',
     { headers: { Authorization: `Bearer ${token}`, 'LinkedIn-Version': '202505', 'X-Restli-Protocol-Version': '2.0.0' } },
   )
-  if (!res.ok) return null
+  if (!res.ok) {
+    console.error('[linkedin] fetchAdminOrgUrn status', res.status)
+    return null
+  }
   const j = await res.json() as { elements?: Array<{ organizationalTarget?: string }> }
   return j.elements?.[0]?.organizationalTarget ?? null
 }

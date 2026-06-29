@@ -21,7 +21,8 @@ export async function GET(request: Request) {
   }
 
   const admin = createAdminClient()
-  const { data: seenRows } = await admin.from('linkedin_posts').select('feed_guid')
+  const { data: seenRows, error: seenErr } = await admin.from('linkedin_posts').select('feed_guid')
+  if (seenErr) return NextResponse.json({ ok: false, error: seenErr.message }, { status: 500 })
   const seen = new Set((seenRows ?? []).map((r: { feed_guid: string }) => r.feed_guid))
 
   const next = selectNextUnposted(items, seen)
@@ -33,7 +34,7 @@ export async function GET(request: Request) {
     composed_text, status: 'entwurf', author_urn: authorUrn, scheduled_for: new Date().toISOString(),
   })
   // UNIQUE(feed_guid) guards against a race double-insert.
-  if (error && !error.message.includes('duplicate')) {
+  if (error && error.code !== '23505' && !error.message.includes('duplicate')) {
     return NextResponse.json({ ok: false, error: error.message }, { status: 500 })
   }
   return NextResponse.json({ ok: true, drafted: next.guid })
