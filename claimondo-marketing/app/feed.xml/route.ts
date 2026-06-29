@@ -1,11 +1,13 @@
 import { renderRssFeed } from '@/lib/feed/render-rss'
 import { getNewsFeedItems } from '@/lib/feed/news-items'
+import { assertFeedFrontmatterValid } from '@/lib/feed/validate'
 
 // News-Feed (RSS 2.0): „Was ist neu" — 30 zuletzt aktualisierte Wissens-Assets.
 export const dynamic = 'force-static'
 export const revalidate = 21600 // 6 h
 
 export function GET() {
+  assertFeedFrontmatterValid()
   const rss = renderRssFeed(
     {
       title: 'Claimondo — Aktuelle Wissens-Updates Kfz-Schadensregulierung',

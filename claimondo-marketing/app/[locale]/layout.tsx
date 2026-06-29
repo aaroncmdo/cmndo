@@ -59,6 +59,19 @@ export const metadata: Metadata = {
   alternates: {
     canonical: SITE_URL,
     ...buildLanguageAlternates('/'),
+    // Feed-Autodiscovery (geo-feeds-spec §9): macht die GEO-Feeds fuer Browser,
+    // RSS-Reader (Feedly) + Crawler ueber <link rel="alternate"> auffindbar.
+    // Vorher waren sie NUR in llms.txt verlinkt (allein der AI-Crawler-Pfad).
+    types: {
+      'application/rss+xml': [
+        { url: '/feed.xml', title: 'Claimondo — Aktuelle Wissens-Updates' },
+        { url: '/feed/katalog.xml', title: 'Claimondo — Wissens-Katalog' },
+      ],
+      'application/feed+json': [
+        { url: '/feed.json', title: 'Claimondo — Aktuelle Wissens-Updates (JSON Feed)' },
+        { url: '/feed/katalog.json', title: 'Claimondo — Wissens-Katalog (JSON Feed)' },
+      ],
+    },
   },
   openGraph: {
     type: 'website',

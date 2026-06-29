@@ -5,13 +5,13 @@ import { SITE_URL } from '@/lib/seo/jsonld'
  * Items — Personal-Authority-Aufbau, siehe geo-feeds-spec §5).
  *
  * Bewusst KEIN E-Mail-Feld in der RSS-Ausgabe (Spam-Harvesting-Schutz) — RSS nutzt
- * nur <dc:creator> mit dem Namen. `url` zeigt vorerst auf die Hauptseite; eine
- * dedizierte Author-Hub-Page /autor/aaron-sprafke ist Folge-Backlog.
+ * nur <dc:creator> mit dem Namen. `url` zeigt auf die Author-Hub-Page
+ * /autor/aaron-sprafke (Person-Schema, E-E-A-T) statt auf die Hauptseite.
  */
 export const AUTHORS = {
   'aaron-sprafke': {
     name: 'Aaron Sprafke',
-    url: SITE_URL,
+    url: `${SITE_URL}/autor/aaron-sprafke`,
     sameAs: 'https://www.linkedin.com/in/aaronsprafke/',
   },
 } as const
