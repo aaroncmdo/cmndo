@@ -1,5 +1,6 @@
 // AAR-92: Maik-Provisionen Admin-UI
 import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import ProvisionenClient from './ProvisionenClient'
 
 export const dynamic = 'force-dynamic'
@@ -11,6 +12,13 @@ export default async function ProvisionenMaikPage({ searchParams }: {
   const aktMonat = monat ?? new Date().toISOString().slice(0, 7)
 
   const db = await createClient()
+  // Dashboard-Audit (29.06.): Page hatte keinen Rollen-Guard (anders als die Schwester-Seiten).
+  // provisionen_maik-RLS erlaubt auch kundenbetreuer/dispatch Lesezugriff -> ohne Guard koennten
+  // sie die Maik-Provisionen einsehen. Admin-Gate wie bei saeumige-svs / per-sv-balance.
+  const user = (await db.auth.getUser())?.data?.user ?? null
+  if (!user) redirect('/login')
+  const { data: profile } = await db.from('profiles').select('rolle').eq('id', user.id).single()
+  if (profile?.rolle !== 'admin') redirect('/')
 
   const { data: provisionen } = await db
     .from('provisionen_maik')

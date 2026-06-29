@@ -2,12 +2,18 @@
 
 // AAR-92: Maik-Provisionen Server Actions
 import { createClient } from '@/lib/supabase/server'
+import { requireRole } from '@/lib/auth/guards'
 import { revalidatePath } from 'next/cache'
 
+// Dashboard-Audit (29.06.): Diese Mutationen hatten nur eine `if (!user)`-Pruefung, keinen
+// Rollen-Guard. Da provisionen_maik-RLS auch kundenbetreuer/dispatch das Schreiben erlaubt,
+// konnten Nicht-Admins confirm/pay/reverse aufrufen. requireRole(['admin']) schliesst das
+// (Defense-in-Depth; eine RLS-Verschaerfung auf admin-only waere ein separater Migration-Follow-up).
+
 export async function setCpl(provisionId: string, cpl: number): Promise<{ success: boolean; error?: string }> {
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error ?? 'Nicht berechtigt' }
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   if (cpl < 0) return { success: false, error: 'CPL muss >= 0 sein' }
 
@@ -22,9 +28,9 @@ export async function setCpl(provisionId: string, cpl: number): Promise<{ succes
 }
 
 export async function confirmProvision(provisionId: string): Promise<{ success: boolean; error?: string }> {
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error ?? 'Nicht berechtigt' }
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('provisionen_maik')
@@ -46,9 +52,9 @@ export async function confirmProvision(provisionId: string): Promise<{ success: 
 export async function markMonthAsPaid(
   monat: string,
 ): Promise<{ success: boolean; count: number; error?: string }> {
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, count: 0, error: guard.error ?? 'Nicht berechtigt' }
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, count: 0, error: 'Nicht angemeldet' }
 
   const now = new Date().toISOString()
   const { data, error } = await supabase
@@ -64,9 +70,9 @@ export async function markMonthAsPaid(
 }
 
 export async function reverseProvision(provisionId: string, grund: string): Promise<{ success: boolean; error?: string }> {
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { success: false, error: guard.error ?? 'Nicht berechtigt' }
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const { error } = await supabase
     .from('provisionen_maik')
