@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { SITE_URL } from '@/lib/seo/jsonld'
 import { revalidatePath } from 'next/cache'
 import { validateUsername } from './username'
+import { containsLink } from './spam'
 
 function isEmail(s: string): boolean {
   return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)
@@ -54,6 +55,25 @@ export async function submitComment(
   const supabase = await createClient()
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return { ok: false, error: 'Bitte zuerst anmelden.' }
+
+  // Anti-Spam: Rate-Limit (max 5 Kommentare/Stunde pro User) + Links nur fuer freigeschaltete Nutzer.
+  // Beides RLS-konform: der User darf seine eigenen Kommentare/sein Profil lesen.
+  const since = new Date(Date.now() - 3_600_000).toISOString()
+  const { count } = await supabase
+    .from('article_comments')
+    .select('id', { count: 'exact', head: true })
+    .eq('author_id', auth.user.id)
+    .gte('created_at', since)
+  if ((count ?? 0) >= 5) return { ok: false, error: 'Zu viele Kommentare in kurzer Zeit — bitte später erneut.' }
+  if (containsLink(body)) {
+    const { data: prof } = await supabase
+      .from('community_profiles')
+      .select('trusted')
+      .eq('user_id', auth.user.id)
+      .maybeSingle()
+    if (!prof?.trusted) return { ok: false, error: 'Links sind erst nach Freischaltung deines Kontos möglich.' }
+  }
+
   const { error } = await supabase
     .from('article_comments')
     .insert({ author_id: auth.user.id, article_slug: slug, body })
