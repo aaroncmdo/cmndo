@@ -24,12 +24,19 @@ import type {
 } from '@/lib/mitteilungen/types'
 import type { EventType } from '../types'
 
-const ROLE_MAP: Record<string, EmpfaengerRolle> = {
+// #updates-rebuild Phase 1: alle 9 Profil-Rollen gemappt (vorher fehlten
+// dispatch/kanzlei/werkstatt -> leere Bells). leadbearbeiter = toter Enum-Wert
+// des Dispatchers (0 Code/User) -> Alias auf dispatch. Exportiert fuer Tests.
+export const ROLE_MAP: Record<string, EmpfaengerRolle> = {
   kunde: 'kunde',
   sachverstaendiger: 'sachverstaendiger',
   makler: 'makler',
   kundenbetreuer: 'kundenbetreuer',
   admin: 'admin',
+  dispatch: 'dispatch',
+  kanzlei: 'kanzlei',
+  werkstatt: 'werkstatt',
+  leadbearbeiter: 'dispatch',
 }
 
 const PRIO_MAP: Record<string, MitteilungPrioritaet> = {
