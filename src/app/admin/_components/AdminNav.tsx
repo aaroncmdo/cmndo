@@ -9,7 +9,7 @@ import {
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, MapPinIcon, HandshakeIcon,
+  WrenchIcon, MapPinIcon, HandshakeIcon, Share2Icon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -27,6 +27,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   { href: '/admin/embed-billing', label: 'Embed-Billing', icon: ReceiptIcon },
   { href: '/admin/embed-sites', label: 'Embed-Sites', icon: Code2Icon },
+  { href: '/admin/marketing', label: 'Marketing', icon: Share2Icon },
   { href: '/admin/werkstaetten', label: 'Werkstätten', icon: WrenchIcon },
   { href: '/admin/makler', label: 'Makler', icon: HandshakeIcon },
   { href: '/admin/sv-leads', label: 'SV-Leads', icon: MapPinIcon },
