@@ -76,7 +76,7 @@ export function MaklerLeadsTable({ leads }: Props) {
       <EmptyState
         icon={UserPlusIcon}
         title="Noch keine Leads"
-        description="Sobald Kunden über Ihren Promo-Code einen Schaden melden, erscheinen sie hier. Teilen Sie Ihren QR-Code, um den ersten Lead zu erzeugen."
+        description="Legen Sie über »+ Neue Anfrage« direkt einen Kunden an — oder teilen Sie Ihren QR-Code, damit Kunden selbst einen Schaden melden."
         action={{ label: 'Promo-Code teilen', href: '/makler/promo' }}
       />
     )
