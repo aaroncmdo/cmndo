@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { exchangeCode, fetchAdminOrgUrn } from '@/lib/linkedin/oauth'
@@ -6,6 +7,13 @@ import { exchangeCode, fetchAdminOrgUrn } from '@/lib/linkedin/oauth'
 export async function GET(request: Request) {
   const { user } = await requirePortalAccess(['admin']) // redirects if not admin
   const url = new URL(request.url)
+  const jar = await cookies()
+  const expectedState = jar.get('li_oauth_state')?.value
+  const gotState = url.searchParams.get('state')
+  if (!expectedState || !gotState || expectedState !== gotState) {
+    return NextResponse.redirect(new URL('/admin/marketing/linkedin?error=state_mismatch', request.url))
+  }
+  jar.delete('li_oauth_state')
   const code = url.searchParams.get('code')
   if (!code) return NextResponse.redirect(new URL('/admin/marketing/linkedin?error=no_code', request.url))
 

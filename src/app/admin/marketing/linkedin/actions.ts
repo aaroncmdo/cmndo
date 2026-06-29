@@ -3,6 +3,7 @@
 
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getValidLinkedInToken } from '@/lib/linkedin/token'
@@ -36,15 +37,32 @@ export async function freigebenUndPosten(id: string): Promise<{ ok: boolean; err
   if (!row) return { ok: false, error: 'Entwurf nicht gefunden.' }
   if (row.status === 'veroeffentlicht') return { ok: false, error: 'Bereits veröffentlicht.' }
 
+  const now = new Date().toISOString()
+  // Atomic claim: only one caller transitions entwurf -> veroeffentlicht.
+  const { data: claimed } = await admin
+    .from('linkedin_posts')
+    .update({ status: 'veroeffentlicht', freigegeben_von: user.id, freigegeben_am: now, fehler: null })
+    .eq('id', id)
+    .eq('status', 'entwurf')
+    .select('id')
+  if (!claimed || claimed.length === 0) {
+    revalidatePath(QUEUE_PATH)
+    return { ok: false, error: 'Entwurf wird bereits verarbeitet oder ist nicht mehr offen.' }
+  }
+
   const tok = await getValidLinkedInToken()
-  if (!tok.ok) return { ok: false, error: tok.error }
+  if (!tok.ok) {
+    // release the claim so it can be retried
+    await admin.from('linkedin_posts').update({ status: 'entwurf', freigegeben_von: null, freigegeben_am: null }).eq('id', id)
+    revalidatePath(QUEUE_PATH)
+    return { ok: false, error: tok.error }
+  }
 
   const publisher = new PostsApiPublisher(tok.token)
   const res = await publisher.publish({
     authorUrn: row.author_urn, text: row.composed_text, link: row.feed_url,
     title: row.title, description: row.excerpt ?? '',
   })
-
   if (!res.ok) {
     await admin.from('linkedin_posts').update({ status: 'fehlgeschlagen', fehler: res.error }).eq('id', id)
     await alertAdmins('LinkedIn-Post fehlgeschlagen', `„${row.title}" konnte nicht veröffentlicht werden: ${res.error}`)
@@ -52,11 +70,8 @@ export async function freigebenUndPosten(id: string): Promise<{ ok: boolean; err
     return { ok: false, error: res.error }
   }
 
-  await admin.from('linkedin_posts').update({
-    status: 'veroeffentlicht', linkedin_post_urn: res.postUrn,
-    published_at: new Date().toISOString(), freigegeben_von: user.id, freigegeben_am: new Date().toISOString(),
-    fehler: null,
-  }).eq('id', id)
+  const { error: urnErr } = await admin.from('linkedin_posts').update({ linkedin_post_urn: res.postUrn, published_at: now }).eq('id', id)
+  if (urnErr) console.error('[linkedin] post live but URN persist failed:', urnErr.message) // never log tokens
   revalidatePath(QUEUE_PATH)
   return { ok: true }
 }
@@ -92,5 +107,8 @@ export async function linkedInTrennen(): Promise<{ ok: boolean; error?: string }
 
 export async function startLinkedInConnect(): Promise<void> {
   await requirePortalAccess(['admin'])
-  redirect(buildAuthorizeUrl('claimondo-linkedin'))
+  const state = crypto.randomUUID()
+  const jar = await cookies()
+  jar.set('li_oauth_state', state, { httpOnly: true, secure: true, sameSite: 'lax', path: '/', maxAge: 600 })
+  redirect(buildAuthorizeUrl(state))
 }
