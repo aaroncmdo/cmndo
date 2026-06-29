@@ -6,36 +6,45 @@ const pickDispatcherMock = vi.fn()
 const createLeadMock = vi.fn()
 const sendCoreMock = vi.fn()
 const rueckrufMock = vi.fn()
+const timelineInsertMock = vi.fn()
+const mitteilungInsertMock = vi.fn()
 
-vi.mock('@/lib/makler/queries', () => ({
-  getCurrentMakler: () => getCurrentMaklerMock(),
-  getMaklerPrimaryPromoCode: (id: string) => getPromoMock(id),
-}))
+vi.mock('@/lib/makler/queries', () => ({ getCurrentMakler: () => getCurrentMaklerMock() }))
+vi.mock('@/lib/makler/promo-code', () => ({ getOrCreateMaklerPromoCode: (...a: unknown[]) => getPromoMock(...a) }))
 vi.mock('@/lib/start-link/pick-dispatcher', () => ({ pickRoundRobinDispatcher: () => pickDispatcherMock() }))
 vi.mock('@/lib/leads/create-lead', () => ({ createLead: (...a: unknown[]) => createLeadMock(...a) }))
 vi.mock('@/lib/start-link/send-flowlink-multichannel', () => ({ sendFlowLinkMultiChannelCore: (...a: unknown[]) => sendCoreMock(...a) }))
 vi.mock('@/lib/actions/public-rueckruf', () => ({ erstelleOeffentlichenRueckruf: (i: unknown) => rueckrufMock(i) }))
 vi.mock('@/lib/leads/notify-new-lead', () => ({ notifyNewLead: vi.fn().mockResolvedValue(undefined) }))
 vi.mock('@/lib/i18n/locale-cookie', () => ({ getLocaleCookie: vi.fn().mockResolvedValue('de') }))
-vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: () => ({}) }))
+const adminMock = {
+  from: vi.fn((table: string) => {
+    if (table === 'timeline') return { insert: timelineInsertMock }
+    if (table === 'mitteilungen') return { insert: mitteilungInsertMock }
+    return { insert: vi.fn().mockResolvedValue({ error: null }) }
+  }),
+}
+vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: () => adminMock }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
 import { erstelleMaklerAnfrage } from '../erstelle-anfrage'
 
 const MAKLER = { id: 'mk-1', user_id: 'user-1', firma: 'Muster Makler', ansprechpartner_vorname: 'Max', status: 'aktiv', erstellt_am: '2026-01-01' }
-const baseInput = { vorname: 'Erika', nachname: 'Beispiel', telefon: '+4915112345678' }
+const baseInput = { vorname: 'Erika', nachname: 'Beispiel', telefon: '+4915112345678', kundeEinwilligung: true }
 
 beforeEach(() => {
   getCurrentMaklerMock.mockReset().mockResolvedValue(MAKLER)
-  getPromoMock.mockReset().mockResolvedValue({ id: 'promo-1', code: 'MK-TEST', aktiv: true })
+  getPromoMock.mockReset().mockResolvedValue({ id: 'promo-1', code: 'MK-TEST' })
   pickDispatcherMock.mockReset().mockResolvedValue('disp-1')
   createLeadMock.mockReset().mockResolvedValue({ ok: true, leadId: 'lead-1' })
   sendCoreMock.mockReset().mockResolvedValue({ success: true, token: 'tok-1' })
   rueckrufMock.mockReset().mockResolvedValue({ ok: true, leadId: 'lead-r', terminId: 'termin-1' })
+  timelineInsertMock.mockReset().mockResolvedValue({ error: null })
+  mitteilungInsertMock.mockReset().mockResolvedValue({ error: null })
 })
 
 describe('erstelleMaklerAnfrage', () => {
-  it('flowlink: setzt promotion_code_id (Attribution) + Lifecycle erstkontakt', async () => {
+  it('flowlink: setzt promotion_code_id (Attribution) + Lifecycle erstkontakt/neu', async () => {
     const res = await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
     expect(res.ok).toBe(true)
     const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
@@ -46,9 +55,10 @@ describe('erstelleMaklerAnfrage', () => {
     expect(base.source_channel).toBe('makler-anfrage')
   })
 
-  it('flowlink: Versand-Kaskade startet mit WhatsApp', async () => {
+  it('flowlink: Versand-Kaskade startet mit WhatsApp + Makler-Kontext im introText', async () => {
     await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
     expect(sendCoreMock.mock.calls[0][2]).toBe('whatsapp')
+    expect(String(sendCoreMock.mock.calls[0][5])).toContain('Muster Makler')
   })
 
   it('flowlink: WA-Fail -> SMS -> Email', async () => {
@@ -61,29 +71,49 @@ describe('erstelleMaklerAnfrage', () => {
     expect(res.ok).toBe(true)
   })
 
-  it('flowlink: alle Kanaele scheitern -> ok mit warnung, Lead bleibt', async () => {
+  it('flowlink: alle Kanaele scheitern -> ok mit warnung + Dispatcher-Mitteilung', async () => {
     sendCoreMock.mockReset().mockResolvedValue({ success: false })
     const res = await erstelleMaklerAnfrage({ ...baseInput, email: 'e@x.de', ausgang: 'flowlink' })
     expect(res.ok).toBe(true)
     if (res.ok) expect(res.warnung).toBeTruthy()
+    expect(mitteilungInsertMock).toHaveBeenCalled()
   })
 
-  it('rueckruf: delegiert an erstelleOeffentlichenRueckruf mit promotionCodeId, kein eigener createLead', async () => {
+  it('flowlink: Makler-Notiz landet auf dem Lead (leads.notiz)', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, notiz: 'Parkschaden, will schnell', ausgang: 'flowlink' })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.notiz).toBe('Parkschaden, will schnell')
+  })
+
+  it('rueckruf: delegiert mit promotionCodeId + Round-Robin-Dispatcher, kein eigener createLead', async () => {
     const res = await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'rueckruf', rueckrufStartZeit: null })
     expect(rueckrufMock).toHaveBeenCalledTimes(1)
     const arg = rueckrufMock.mock.calls[0][0] as Record<string, unknown>
     expect(arg.promotionCodeId).toBe('promo-1')
+    expect(arg.zugewiesenAn).toBe('disp-1')
     expect(arg.quelle).toBe('makler-anfrage')
     expect(createLeadMock).not.toHaveBeenCalled()
     expect(res.ok).toBe(true)
   })
 
-  it('Fremd-Attribution unmoeglich: Promo aus makler.id, nicht aus Input', async () => {
+  it('Einwilligungs-Nachweis wird als Timeline-Eintrag protokolliert', async () => {
     await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
-    expect(getPromoMock).toHaveBeenCalledWith('mk-1')
+    expect(timelineInsertMock).toHaveBeenCalled()
   })
 
-  it('kein Promo-Code -> Fehler, kein Lead', async () => {
+  it('fehlende Einwilligung -> Fehler, kein Lead', async () => {
+    const res = await erstelleMaklerAnfrage({ ...baseInput, kundeEinwilligung: false, ausgang: 'flowlink' })
+    expect(res.ok).toBe(false)
+    expect(createLeadMock).not.toHaveBeenCalled()
+    expect(rueckrufMock).not.toHaveBeenCalled()
+  })
+
+  it('Fremd-Attribution unmoeglich: Promo aus makler.id, nicht aus Input', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
+    expect(getPromoMock.mock.calls[0][1]).toBe('mk-1')
+  })
+
+  it('kein Promo-Code (get-or-create scheitert) -> Fehler, kein Lead', async () => {
     getPromoMock.mockResolvedValue(null)
     const res = await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
     expect(res.ok).toBe(false)

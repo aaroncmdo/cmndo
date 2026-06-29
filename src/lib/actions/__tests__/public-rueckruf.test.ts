@@ -22,16 +22,19 @@ import { erstelleOeffentlichenRueckruf } from '../public-rueckruf'
 describe('erstelleOeffentlichenRueckruf — Makler-Attribution + Standort', () => {
   beforeEach(() => { createLeadMock.mockReset(); createLeadMock.mockResolvedValue({ ok: true, leadId: 'lead-1' }) })
 
-  it('reicht promotionCodeId + Standort an createLead-extra durch', async () => {
+  it('reicht promotionCodeId + Standort + Notiz + zugewiesenAn an createLead-extra durch', async () => {
     const res = await erstelleOeffentlichenRueckruf({
       name: 'Max Mustermann', telefon: '+4915112345678', quelle: 'makler-anfrage',
       promotionCodeId: 'promo-1', standortPlz: '50667', standortOrt: 'Koeln',
+      notiz: 'Parkschaden', zugewiesenAn: 'disp-9',
     })
     expect(res.ok).toBe(true)
     const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
     expect(extra.promotion_code_id).toBe('promo-1')
     expect(extra.fahrzeug_standort_plz).toBe('50667')
     expect(extra.fahrzeug_standort_adresse).toBe('Koeln')
+    expect(extra.notiz).toBe('Parkschaden')
+    expect(extra.zugewiesen_an).toBe('disp-9')
   })
 
   it('ohne promotionCodeId bleibt promotion_code_id unset (Marketing-Caller unveraendert)', async () => {

@@ -7,7 +7,8 @@
 // fuer Writes; Auth-Gate user-scoped via getCurrentMakler. Komponiert nur bestehende Infra.
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getCurrentMakler, getMaklerPrimaryPromoCode } from '@/lib/makler/queries'
+import { getCurrentMakler } from '@/lib/makler/queries'
+import { getOrCreateMaklerPromoCode } from '@/lib/makler/promo-code'
 import { createLead } from '@/lib/leads/create-lead'
 import { pickRoundRobinDispatcher } from '@/lib/start-link/pick-dispatcher'
 import { sendFlowLinkMultiChannelCore } from '@/lib/start-link/send-flowlink-multichannel'
@@ -25,6 +26,9 @@ export type MaklerAnfrageInput = {
   email?: string | null
   standortPlz?: string | null
   standortOrt?: string | null
+  notiz?: string | null
+  /** Makler bestaetigt, dass der Kunde mit der Kontaktaufnahme einverstanden ist (DSGVO-Basis). */
+  kundeEinwilligung: boolean
   ausgang: MaklerAnfrageAusgang
   rueckrufStartZeit?: string | null
 }
@@ -38,10 +42,14 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   const makler = await getCurrentMakler()
   if (!makler || makler.status !== 'aktiv') return { ok: false, error: 'Kein aktiver Makler-Zugang.' }
   if (!makler.user_id) return { ok: false, error: 'Makler ohne User-Account.' }
+  const maklerFirma = makler.firma
+  const maklerUserId = makler.user_id
 
-  // 2. Attribution: eigener Promo-Code (Fremd-Attribution unmoeglich — aus makler.id).
-  const promo = await getMaklerPrimaryPromoCode(makler.id)
-  if (!promo) return { ok: false, error: 'Kein aktiver Promo-Code hinterlegt. Bitte Admin kontaktieren.' }
+  // 2. Einwilligung (DSGVO-Basis fuer die Kontaktaufnahme des Dritten — der Makler
+  //    initiiert, der Kunde hat selbst nichts angeklickt).
+  if (input.kundeEinwilligung !== true) {
+    return { ok: false, error: 'Bitte die Einwilligung des Kunden zur Kontaktaufnahme bestaetigen.' }
+  }
 
   // 3. Validierung.
   const vorname = input.vorname?.trim() ?? ''
@@ -50,33 +58,62 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
   const email = input.email?.trim() || null
   const standortPlz = input.standortPlz?.trim() || null
   const standortOrt = input.standortOrt?.trim() || null
+  const notiz = input.notiz?.trim() || null
   if (vorname.length < 1 || nachname.length < 1) return { ok: false, error: 'Vor- und Nachname erforderlich.' }
   if (telefon.length < 5) return { ok: false, error: 'Telefonnummer erforderlich.' }
   if (input.ausgang === 'flowlink' && !telefon && !email) {
     return { ok: false, error: 'Fuer den Link-Versand wird Telefon oder Email benoetigt.' }
   }
 
-  // 4a. RUECKRUF (Default): bestehende Rueckruf-Infra (Lead status/phase='rueckruf' + admin_termine
-  //     + Mitteilungen + Team-Notify + Kunde-WA), additiv um promotionCodeId + Standort erweitert.
+  const admin = createAdminClient()
+
+  // 4. Attribution: eigener Promo-Code (get-or-create -> Attribution scheitert nie an
+  //    fehlendem Code; Fremd-Attribution unmoeglich, weil aus makler.id abgeleitet).
+  const promo = await getOrCreateMaklerPromoCode(admin, makler.id)
+  if (!promo) return { ok: false, error: 'Promo-Code konnte nicht ermittelt/angelegt werden. Bitte Admin kontaktieren.' }
+
+  // 5. Dispatcher (Berater) — Round-Robin fuer BEIDE Zweige.
+  const dispatcherId = await pickRoundRobinDispatcher(admin)
+
+  // Einwilligungs-Nachweis als Timeline-Eintrag (Audit-Trail, kein Schema-Change).
+  async function protokolliereEinwilligung(leadId: string) {
+    try {
+      await admin.from('timeline').insert({
+        lead_id: leadId,
+        fall_id: null,
+        typ: 'system',
+        titel: 'Einwilligung zur Kontaktaufnahme bestätigt',
+        beschreibung: `Makler ${maklerFirma} hat bestätigt, dass der Kunde mit der Kontaktaufnahme durch Claimondo einverstanden ist.`,
+        erstellt_von: maklerUserId,
+      })
+    } catch (err) {
+      console.error('[erstelleMaklerAnfrage] Einwilligungs-Timeline:', err)
+    }
+  }
+
+  // 6a. RUECKRUF (Default): bestehende Rueckruf-Infra (Lead status/phase='rueckruf' + admin_termine
+  //     + Mitteilungen + Team-Notify + Kunde-WA), additiv um Promo/Standort/Notiz/Round-Robin erweitert.
   if (input.ausgang === 'rueckruf') {
     const res = await erstelleOeffentlichenRueckruf({
       name: `${vorname} ${nachname}`.trim(),
       telefon,
       email,
       startZeit: input.rueckrufStartZeit ?? null,
+      nachricht: notiz,
       quelle: 'makler-anfrage',
       promotionCodeId: promo.id,
       standortPlz,
       standortOrt,
+      notiz,
+      zugewiesenAn: dispatcherId,
     })
     if (!res.ok) return { ok: false, error: res.error }
+    await protokolliereEinwilligung(res.leadId)
     revalidatePath('/makler/leads')
     return { ok: true, leadId: res.leadId, ausgang: 'rueckruf', terminId: res.terminId }
   }
 
-  // 4b. FLOWLINK: kanonische Lead-Anlage (status='neu'/phase='erstkontakt') + kanonischer Sender.
-  const admin = createAdminClient()
-  const dispatcherId = await pickRoundRobinDispatcher(admin)
+  // 6b. FLOWLINK: kanonische Lead-Anlage (status='neu'/phase='erstkontakt') + kanonischer Sender.
   const created = await createLead(
     admin,
     { source_channel: 'makler-anfrage', status: 'neu', vorname, nachname, telefon, email },
@@ -86,22 +123,24 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       qualifizierungs_phase: 'erstkontakt',
       zugewiesen_an: dispatcherId,
       sprache: await getLocaleCookie(),
+      ...(notiz ? { notiz } : {}),
       ...(standortPlz ? { fahrzeug_standort_plz: standortPlz } : {}),
       ...(standortOrt ? { fahrzeug_standort_adresse: standortOrt } : {}),
     },
   )
   if (!created.ok) return { ok: false, error: created.error }
   const leadId = created.leadId
+  await protokolliereEinwilligung(leadId)
 
-  // Versand-Kaskade WhatsApp -> SMS -> Email. Der Core mintet den Token (idempotent) UND
-  // setzt selbst status='flow-gesendet'/qualifizierungs_phase='flow-versendet'.
-  const actorId = makler.user_id
+  // Versand-Kaskade WhatsApp -> SMS -> Email mit Makler-Vermittlungs-Kontext im Text
+  // (Vertrauen/Conversion). Der Core mintet den Token UND setzt selbst flow-gesendet/flow-versendet.
+  const introText = `Ihr Versicherungsmakler ${maklerFirma} hat Sie an Claimondo vermittelt.`
   let sent: { success: boolean; error?: string; token?: string } = { success: false }
-  if (telefon) sent = await sendFlowLinkMultiChannelCore(admin, leadId, 'whatsapp', actorId)
-  if (!sent.success && telefon) sent = await sendFlowLinkMultiChannelCore(admin, leadId, 'sms', actorId)
-  if (!sent.success && email) sent = await sendFlowLinkMultiChannelCore(admin, leadId, 'email', actorId)
+  if (telefon) sent = await sendFlowLinkMultiChannelCore(admin, leadId, 'whatsapp', maklerUserId, null, introText)
+  if (!sent.success && telefon) sent = await sendFlowLinkMultiChannelCore(admin, leadId, 'sms', maklerUserId, null, introText)
+  if (!sent.success && email) sent = await sendFlowLinkMultiChannelCore(admin, leadId, 'email', maklerUserId, null, introText)
 
-  // Team-Notify (non-critical).
+  // Team-Notify (non-critical) inkl. Makler-Notiz.
   try {
     await notifyNewLead({
       leadId,
@@ -109,19 +148,40 @@ export async function erstelleMaklerAnfrage(input: MaklerAnfrageInput): Promise<
       name: `${vorname} ${nachname}`.trim(),
       phone: telefon,
       email,
-      extraFields: [{ label: 'Makler', value: makler.firma }],
+      extraFields: [
+        { label: 'Makler', value: maklerFirma },
+        ...(notiz ? [{ label: 'Makler-Notiz', value: notiz }] : []),
+      ],
     })
   } catch (err) {
     console.error('[erstelleMaklerAnfrage] notifyNewLead:', err)
   }
 
   revalidatePath('/makler/leads')
+
   if (!sent.success) {
+    // Zustell-Fehlschlag: actionable Mitteilung an den Dispatcher (Loop schliessen).
+    try {
+      if (dispatcherId) {
+        await admin.from('mitteilungen').insert({
+          empfaenger_id: dispatcherId,
+          empfaenger_rolle: 'dispatch',
+          kategorie: 'anruf',
+          titel: 'Makler-Anfrage: Link nicht zustellbar',
+          inhalt: `${vorname} ${nachname} (${telefon}) — bitte manuell kontaktieren.`,
+          prioritaet: 'hoch',
+          icon: '⚠️',
+          route_url: `/dispatch/leads/${leadId}`,
+        })
+      }
+    } catch (err) {
+      console.error('[erstelleMaklerAnfrage] Send-Fail-Mitteilung:', err)
+    }
     return {
       ok: true,
       leadId,
       ausgang: 'flowlink',
-      warnung: 'Lead angelegt, aber der Link konnte nicht zugestellt werden — das Team kuemmert sich.',
+      warnung: 'Lead angelegt, aber der Link konnte nicht zugestellt werden — das Team kümmert sich.',
     }
   }
   return { ok: true, leadId, ausgang: 'flowlink', token: sent.token }

@@ -19,6 +19,9 @@ export type RueckrufInput = {
   promotionCodeId?: string | null
   standortPlz?: string | null
   standortOrt?: string | null
+  notiz?: string | null
+  // Optionaler Owner (Round-Robin-Dispatcher) — sonst erster Dispatch-User.
+  zugewiesenAn?: string | null
 }
 
 // Rückruf-Anfrage von einer öffentlichen Marketing-Seite.
@@ -45,7 +48,7 @@ export async function erstelleOeffentlichenRueckruf(
   if (!dispatchUser || dispatchUser.length === 0) {
     return { ok: false, error: 'Aktuell ist kein Dispatch-Mitarbeiter erreichbar.' }
   }
-  const erstellerId = dispatchUser[0].id
+  const erstellerId = input.zugewiesenAn ?? dispatchUser[0].id
 
   // Name split: "Max Mustermann" → vorname="Max", nachname="Mustermann"
   const parts = name.split(/\s+/)
@@ -72,6 +75,7 @@ export async function erstelleOeffentlichenRueckruf(
       ...(input.promotionCodeId ? { promotion_code_id: input.promotionCodeId } : {}),
       ...(input.standortPlz ? { fahrzeug_standort_plz: input.standortPlz } : {}),
       ...(input.standortOrt ? { fahrzeug_standort_adresse: input.standortOrt } : {}),
+      ...(input.notiz ? { notiz: input.notiz } : {}),
     },
   )
   if (!created.ok) {

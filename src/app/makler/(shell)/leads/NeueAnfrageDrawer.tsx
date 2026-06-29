@@ -23,15 +23,19 @@ export function NeueAnfrageDrawer() {
   const [ort, setOrt] = useState('')
   const [ausgang, setAusgang] = useState<MaklerAnfrageAusgang>('rueckruf') // Default = Rueckruf
   const [rueckrufZeit, setRueckrufZeit] = useState('')
+  const [notiz, setNotiz] = useState('')
+  const [consent, setConsent] = useState(false)
 
   function reset() {
     setVorname(''); setNachname(''); setTelefon(''); setEmail('')
     setPlz(''); setOrt(''); setStandortOffen(false); setAusgang('rueckruf'); setRueckrufZeit('')
+    setNotiz(''); setConsent(false)
   }
 
   function submit() {
     if (!vorname.trim() || !nachname.trim()) { toast.error('Vor- und Nachname erforderlich'); return }
     if (telefon.trim().length < 5) { toast.error('Telefonnummer erforderlich'); return }
+    if (!consent) { toast.error('Bitte die Einwilligung des Kunden bestätigen'); return }
     startTransition(async () => {
       const res = await erstelleMaklerAnfrage({
         vorname,
@@ -40,6 +44,8 @@ export function NeueAnfrageDrawer() {
         email: email || null,
         standortPlz: plz || null,
         standortOrt: ort || null,
+        notiz: notiz || null,
+        kundeEinwilligung: consent,
         ausgang,
         rueckrufStartZeit: ausgang === 'rueckruf' && rueckrufZeit ? new Date(rueckrufZeit).toISOString() : null,
       })
@@ -96,6 +102,13 @@ export function NeueAnfrageDrawer() {
             </div>
           ) : null}
 
+          <TextField
+            label="Notiz für den Berater (optional)"
+            value={notiz}
+            onChange={(e) => setNotiz(e.target.value)}
+            placeholder="z. B. Parkschaden, möchte schnell, spricht wenig Deutsch …"
+          />
+
           <div className="space-y-2">
             <span className="text-xs font-semibold text-claimondo-shield">Wie soll es weitergehen?</span>
             <div className="grid grid-cols-2 gap-3">
@@ -112,6 +125,16 @@ export function NeueAnfrageDrawer() {
               />
             ) : null}
           </div>
+
+          <label className="flex cursor-pointer items-start gap-2 rounded-ios-md bg-claimondo-bg p-3 text-xs text-claimondo-shield">
+            <input
+              type="checkbox"
+              checked={consent}
+              onChange={(e) => setConsent(e.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-claimondo-ondo"
+            />
+            <span>Der Kunde ist mit der Kontaktaufnahme durch Claimondo einverstanden. *</span>
+          </label>
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="ghost" onClick={() => setOpen(false)} disabled={pending}>Abbrechen</Button>
