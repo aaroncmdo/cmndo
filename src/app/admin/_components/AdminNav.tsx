@@ -77,7 +77,7 @@ export default function AdminNav({
               <span className="text-white">Claim</span>
               <span className="text-claimondo-light-blue">ondo</span>
             </span>
-            <TasksPill userId={userId} href="/admin/meine-tasks" initialCount={meineTasksCount ?? 0} />
+            <TasksPill userId={userId} href="/admin/aufgaben/meine" initialCount={meineTasksCount ?? 0} />
           </div>
           <p className="text-xs mt-0.5 text-claimondo-light-blue">{email}</p>
         </>
