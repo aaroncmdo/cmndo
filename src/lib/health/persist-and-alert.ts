@@ -123,10 +123,9 @@ export async function persistAndAlert(
         // 6b. In-App Mitteilung.
         if (adminEmpfaenger.length > 0) {
           try {
-            // MitteilungPrioritaet: 'normal' | 'hoch' | 'dringend'
-            // 'kritisch' existiert nicht im Typ — nutze 'dringend' fuer crit/error.
-            const prioritaet =
-              result.status === 'crit' || result.status === 'error' ? 'dringend' : 'dringend'
+            // MitteilungPrioritaet: 'normal' | 'hoch' | 'dringend' ('kritisch' existiert nicht).
+            // Staffelung (Spec §5.2): warn → 'hoch', crit/error → 'dringend'.
+            const prioritaet = result.status === 'warn' ? 'hoch' : 'dringend'
             await createMitteilungMulti(adminEmpfaenger, {
               kategorie: 'update',
               prioritaet,
