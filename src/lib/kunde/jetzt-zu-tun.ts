@@ -310,17 +310,22 @@ export function getKundenJetztZuTun(
   // sa_unterschrieben ist die Service-Vereinbarung (anderes Dokument), nicht
   // die LexDrive-Vollmacht → wird hier bewusst NICHT als Proxy genutzt.
   const brauchtVollmacht = fall.kanzlei_wunsch === 'partnerkanzlei'
+  // Variante B (Aaron): LexDrive verwaltet die Vollmacht — der Kunde unterschreibt
+  // sie NICHT bei uns, sondern in der WhatsApp, die LexDrive ihm schickt. "Erledigt"
+  // ist sie, wenn LexDrive sie bestaetigt (vollmacht_status='bestaetigt' via
+  // /api/lexdrive/vollmacht-confirm). vollmacht_signiert_am bleibt als Legacy-Pfad.
   const vollmachtErledigt =
     !!fall.vollmacht_signiert_am ||
-    fall.vollmacht_status === 'unterschrieben'
+    fall.vollmacht_status === 'unterschrieben' ||
+    fall.vollmacht_status === 'bestaetigt'
   if (brauchtVollmacht && !vollmachtErledigt) {
     return {
       state: 'vollmacht-unterschreiben',
       prioritaet: 'hoch',
-      titel: 'Vollmacht bestätigen',
+      titel: 'Vollmacht unterschreiben',
       beschreibung:
-        'Damit LexDrive mit der Versicherung verhandeln darf, brauchen wir Ihre digitale Vollmacht.',
-      cta: { label: 'Jetzt bestätigen', href: fallHref },
+        'Ihre Partnerkanzlei LexDrive schickt Ihnen die Vollmacht per WhatsApp. Bitte unterschreiben Sie sie dort — danach übernimmt LexDrive die Verhandlung mit der Versicherung.',
+      cta: null,
       variant: 'default',
       severity: 'warning',
       i18n: {
