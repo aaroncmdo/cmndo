@@ -78,7 +78,7 @@ export default async function AbrechnungPage() {
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
   const { data: completedFaelleRaw } = await supabase
     .from('claims')
-    .select('id, lead_id, created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am)')
+    .select('id, lead_id, created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am, gutachten_sv_honorar_netto)')
     .eq('sv_id', sv.id)
   // CMM-49 T1.2 (CMM-72): abgeleitete Phase je Claim (ersetzt den fall_status-Scope).
   const abrPhaseMap = await getClaimPhaseMap(
@@ -183,13 +183,25 @@ export default async function AbrechnungPage() {
       : (fall as { gutachten?: unknown }).gutachten
     return (g as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
   }
+  // FIX (Dashboard-Audit 29.06.): SV-Honorar = gutachten.gutachten_sv_honorar_netto (echtes
+  // Honorar, z.B. 980/850 EUR). Vorher: gesamt_schadensbetrag * 0.12 — ein Schaetzwert auf einem
+  // Feld, das in der Praxis NULL ist, sodass das Einnahmen-Dashboard durchweg 0 EUR anzeigte.
+  function getSvHonorar(fall: CompletedFall): number | null {
+    const g = Array.isArray((fall as { gutachten?: unknown }).gutachten)
+      ? ((fall as { gutachten: unknown[] }).gutachten)[0]
+      : (fall as { gutachten?: unknown }).gutachten
+    const v = (g as { gutachten_sv_honorar_netto?: number | null } | null)?.gutachten_sv_honorar_netto
+    return v != null ? Number(v) : null
+  }
   // CMM-49 T1.2 (CMM-72): Honorar eingegangen/offen aus abgeleiteter Phase statt faelle.status.
   // Aaron 01.06.: zahlung-eingegangen = AKTIV/laufend → "Honorar offen" bis final reguliert.
-  // eingegangen = sub_phase 'erfolgreich_reguliert' (final); offen = main_phase != 'abschluss' (mit betrag).
-  const faelleAbgerechnet = (completedFaelle ?? []).filter(f => getGutachtenBetrag(f) != null).length
-  const totalEingegangen = (completedFaelle ?? []).filter(f => f.subPhase === 'erfolgreich_reguliert').reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0) // ~12% Gutachterhonorar
-  const totalOffen = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getGutachtenBetrag(f) != null).reduce((s, f) => s + (getGutachtenBetrag(f) ?? 0) * 0.12, 0)
-  const faelleOffen = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getGutachtenBetrag(f) != null).length
+  // eingegangen = sub_phase 'erfolgreich_reguliert' (final); offen = main_phase != 'abschluss'.
+  const eingegangenFaelle = (completedFaelle ?? []).filter(f => f.subPhase === 'erfolgreich_reguliert' && getSvHonorar(f) != null)
+  const offeneHonorarFaelle = (completedFaelle ?? []).filter(f => f.mainPhase !== 'abschluss' && getSvHonorar(f) != null)
+  const totalEingegangen = eingegangenFaelle.reduce((s, f) => s + (getSvHonorar(f) ?? 0), 0)
+  const totalOffen = offeneHonorarFaelle.reduce((s, f) => s + (getSvHonorar(f) ?? 0), 0)
+  const faelleEingegangen = eingegangenFaelle.length
+  const faelleOffen = offeneHonorarFaelle.length
 
   return (
     <div className="h-full flex flex-col">
@@ -213,7 +225,7 @@ export default async function AbrechnungPage() {
           <div className="bg-white border border-green-200 rounded-ios-xl p-4 text-center">
             <p className="text-2xl font-bold text-green-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen)}</p>
             <p className="text-[10px] text-claimondo-ondo mt-1">Eingegangen</p>
-            <p className="text-[9px] text-claimondo-ondo/70">{faelleAbgerechnet} Fälle</p>
+            <p className="text-[9px] text-claimondo-ondo/70">{faelleEingegangen} Fälle</p>
           </div>
           <div className="bg-white border border-amber-200 rounded-ios-xl p-4 text-center">
             <p className="text-2xl font-bold text-amber-600">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalOffen)}</p>
@@ -223,7 +235,7 @@ export default async function AbrechnungPage() {
           <div className="bg-white border border-[var(--brand-secondary)]/20 rounded-ios-xl p-4 text-center">
             <p className="text-2xl font-bold text-[var(--brand-secondary)]">{new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(totalEingegangen - totalLeadpreise)}</p>
             <p className="text-[10px] text-claimondo-ondo mt-1">Netto-Verdienst</p>
-            <p className="text-[9px] text-claimondo-ondo/70">Ø {faelleAbgerechnet > 0 ? Math.round(totalEingegangen / faelleAbgerechnet) : 0}€/Fall</p>
+            <p className="text-[9px] text-claimondo-ondo/70">Ø {faelleEingegangen > 0 ? Math.round(totalEingegangen / faelleEingegangen) : 0}€/Fall</p>
           </div>
         </div>
 

@@ -132,7 +132,7 @@ export default function DokumenteZuordnungsModal({
                 Zuordnen zu
               </label>
               {slots.length === 0 ? (
-                <p className="text-xs text-amber-600 flex items-center gap-1">
+                <p className="text-xs text-warning flex items-center gap-1">
                   <AlertCircleIcon className="w-3.5 h-3.5" />
                   Keine zuordenbaren Slots verfügbar.
                 </p>
@@ -171,7 +171,7 @@ export default function DokumenteZuordnungsModal({
             </div>
 
             {error && (
-              <div className="rounded-ios-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+              <div className="rounded-ios-md bg-danger-soft border border-danger/30 px-3 py-2 text-xs text-danger-strong flex items-start gap-2">
                 <AlertCircleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>

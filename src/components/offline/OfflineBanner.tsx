@@ -88,7 +88,7 @@ export default function OfflineBanner() {
 
   if (!isOnline) {
     return (
-      <div className="fixed top-0 inset-x-0 z-[60] bg-amber-500 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
+      <div className="fixed top-0 inset-x-0 z-[60] bg-warning text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
         <WifiOffIcon className="w-4 h-4" />
         Offline-Modus aktiv — Daten werden lokal gespeichert und hochgeladen sobald du wieder online bist.
       </div>
@@ -107,7 +107,7 @@ export default function OfflineBanner() {
 
   if (reconnect.phase === 'done') {
     return (
-      <div className="fixed top-0 inset-x-0 z-[60] bg-green-600 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
+      <div className="fixed top-0 inset-x-0 z-[60] bg-success text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
         <CheckCircle2Icon className="w-4 h-4" />
         {reconnect.synced > 0
           ? `${reconnect.synced} ${reconnect.synced === 1 ? 'Upload erfolgreich' : 'Uploads erfolgreich'} synchronisiert.`
@@ -118,7 +118,7 @@ export default function OfflineBanner() {
 
   if (reconnect.phase === 'failed') {
     return (
-      <div className="fixed top-0 inset-x-0 z-[60] bg-red-600 text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
+      <div className="fixed top-0 inset-x-0 z-[60] bg-danger text-white px-4 py-2 flex items-center justify-center gap-2 text-sm font-medium shadow-lg">
         <WifiOffIcon className="w-4 h-4" />
         {reconnect.failed}{' '}
         {reconnect.failed === 1 ? 'Upload konnte' : 'Uploads konnten'} nicht synchronisiert werden — bitte später erneut versuchen.

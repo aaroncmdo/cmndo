@@ -128,7 +128,7 @@ export function TotpEnrollCard() {
         ) : totp ? (
           <>
             <p className="text-xs text-claimondo-ondo flex items-center gap-1.5">
-              <CheckCircle2Icon className="w-3.5 h-3.5 text-emerald-600" />
+              <CheckCircle2Icon className="w-3.5 h-3.5 text-success" />
               Eingerichtet — wird beim Login bevorzugt.
             </p>
             <button
@@ -231,12 +231,12 @@ export function TotpEnrollCard() {
             )}
 
             {error && (
-              <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-ios-md p-2">
+              <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md p-2">
                 {error}
               </p>
             )}
             {success && (
-              <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-md p-2">
+              <p className="text-xs text-success-strong bg-success-soft border border-success/30 rounded-ios-md p-2">
                 {success}
               </p>
             )}
@@ -287,7 +287,7 @@ export function TotpEnrollCard() {
               danach nur noch per Passwort geschützt.
             </p>
             {error && (
-              <p className="mt-3 text-xs text-red-600 bg-red-50 border border-red-200 rounded-ios-md p-2">
+              <p className="mt-3 text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md p-2">
                 {error}
               </p>
             )}
@@ -305,7 +305,7 @@ export function TotpEnrollCard() {
               type="button"
               onClick={removeTotp}
               disabled={pending}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-md bg-red-600 text-white text-xs font-medium hover:bg-red-700 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-md bg-danger text-white text-xs font-medium hover:bg-danger/90 disabled:opacity-50"
             >
               {pending && <LoaderIcon className="w-3 h-3 animate-spin" />}
               Entfernen

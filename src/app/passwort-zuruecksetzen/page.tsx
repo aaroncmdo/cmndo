@@ -111,8 +111,8 @@ export default function PasswortZuruecksetzenPage() {
 
           {phase === 'expired' && (
             <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-ios-md bg-amber-50 flex items-center justify-center mb-4">
-                <AlertTriangleIcon className="w-7 h-7 text-amber-500" />
+              <div className="w-14 h-14 mx-auto rounded-ios-md bg-warning-soft flex items-center justify-center mb-4">
+                <AlertTriangleIcon className="w-7 h-7 text-warning" />
               </div>
               <p className="text-claimondo-navy font-semibold text-base mb-2">Link abgelaufen</p>
               <p className="text-claimondo-ondo text-sm leading-relaxed mb-4">
@@ -130,8 +130,8 @@ export default function PasswortZuruecksetzenPage() {
 
           {phase === 'success' && (
             <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-ios-md bg-emerald-50 flex items-center justify-center mb-4">
-                <CheckCircle2Icon className="w-7 h-7 text-emerald-500" />
+              <div className="w-14 h-14 mx-auto rounded-ios-md bg-success-soft flex items-center justify-center mb-4">
+                <CheckCircle2Icon className="w-7 h-7 text-success" />
               </div>
               <p className="text-claimondo-navy font-semibold text-base mb-2">
                 Passwort erfolgreich geändert
@@ -186,7 +186,7 @@ export default function PasswortZuruecksetzenPage() {
                 </div>
 
                 {error && (
-                  <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center">
+                  <p className="text-sm text-danger-strong rounded-ios-md bg-danger-soft border border-danger/30 px-4 py-3 text-center">
                     {error}
                   </p>
                 )}

@@ -21,11 +21,14 @@ async function loadStats() {
       .gte('created_at', sinceIso),
 
     supabase
-      // CMM-49 P1: Faelle-aus-Leads direkt aus claims (SSoT) — created_at + lead_id auf claims.
-      .from('claims')
+      // FIX (Dashboard-Audit 29.06.): Kohorten-konsistente Konversion. Zaehler = Leads, die im
+      // selben 30d-Fenster erstellt UND zu einem Claim konvertiert wurden (konvertiert_zu_claim_id).
+      // Vorher: claims(created_at in 30d) / leads(created_at in 30d) — verschiedene Kohorten, da ein
+      // Claim aus einem aelteren Lead stammen kann -> die Quote konnte >100% werden.
+      .from('leads')
       .select('id', { count: 'exact', head: true })
       .gte('created_at', sinceIso)
-      .not('lead_id', 'is', null),
+      .not('konvertiert_zu_claim_id', 'is', null),
 
     supabase
       .from('abrechnungen')
