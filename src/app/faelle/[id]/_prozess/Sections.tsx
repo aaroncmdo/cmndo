@@ -35,6 +35,7 @@ import { triggerLexDriveEventManually } from '../lexdrive-actions'
 import { triggerKonfrontationFromAdmin } from '../_actions/konfrontation-trigger'
 import { pushMandatManuell } from '../_actions/push-mandat-manuell'
 import EndpointRegister from '../_components/LexDriveTriggerPanel'
+import KanzleiNaechsterSchritt from '../_components/KanzleiNaechsterSchritt'
 import InlineEditField from '../_stammdaten/InlineEditField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { NoticeBox } from '@/components/shared/NoticeBox'
@@ -151,7 +152,11 @@ export function KanzleiEakteSection() {
         </div>
       )}
       {canTrigger && (
-        <div className="pt-2">
+        <div className="space-y-3 pt-2">
+          <KanzleiNaechsterSchritt
+            fallId={fall.id}
+            currentStatus={(fall.operative_status as string | null) ?? null}
+          />
           <EndpointRegister fallId={fall.id} />
         </div>
       )}

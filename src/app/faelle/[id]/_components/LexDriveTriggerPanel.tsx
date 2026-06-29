@@ -6,7 +6,7 @@
 import { useState, useTransition } from 'react'
 import {
   CheckCircleIcon, FileTextIcon, AlertTriangleIcon, EuroIcon,
-  ClockIcon, GavelIcon, XCircleIcon, ScaleIcon, EyeIcon, CircleIcon, XIcon,
+  ClockIcon, XCircleIcon, ScaleIcon, EyeIcon, CircleIcon, XIcon,
   HandshakeIcon, FilmIcon, UsersIcon, PhoneIcon, UploadIcon, ShieldAlertIcon,
   type LucideIcon,
 } from 'lucide-react'
@@ -42,18 +42,14 @@ const EVENT_GROUPS: { label: string; events: EventDef[] }[] = [
   {
     label: 'Anspruchsschreiben',
     events: [
-      { id: 'as_versendet', label: 'AS versendet', icon: FileTextIcon, fields: ['datum'] },
       { id: 'mahnung_versendet', label: 'Mahnung versendet', icon: AlertTriangleIcon, fields: ['datum'] },
     ],
   },
   {
     label: 'VS-Reaktion',
     events: [
-      { id: 'vs_reguliert_voll', label: 'VS reguliert voll', icon: CheckCircleIcon, fields: ['datum', 'betrag'] },
-      { id: 'vs_kuerzt', label: 'VS kürzt', icon: AlertTriangleIcon, fields: ['datum', 'vs_kuerzungs_typ', 'kuerzungs_betrag', 'anerkannt_betrag', 'grund'] },
       { id: 'vs_quotiert', label: 'VS quotiert', icon: HandshakeIcon, fields: ['datum', 'vs_quote_prozent', 'vs_quote_grund'] },
       { id: 'vs_quote_akzeptiert', label: 'VS-Quote akzeptiert', icon: CheckCircleIcon, fields: ['datum', 'beschreibung'] },
-      { id: 'vs_ablehnung', label: 'VS lehnt ab', icon: XCircleIcon, fields: ['datum', 'grund'] },
       { id: 'vs_fristverlaengerung', label: 'VS Fristverlängerung', icon: ClockIcon, fields: ['frist_bis'] },
       { id: 'vs_nachbesichtigung_angefordert', label: 'VS Nachbesichtigung angef.', icon: EyeIcon, fields: ['datum'] },
       { id: 'vs_nachbesichtigung_ergebnis', label: 'Nachbesichtigung Ergebnis', icon: EyeIcon, fields: ['datum', 'beschreibung'] },
@@ -94,11 +90,7 @@ const EVENT_GROUPS: { label: string; events: EventDef[] }[] = [
   {
     label: 'Zahlung + Klage',
     events: [
-      { id: 'regulierung_angekuendigt', label: 'Regulierung angekündigt', icon: CheckCircleIcon, fields: ['datum'] },
-      { id: 'zahlung_eingegangen', label: 'Zahlung eingegangen', icon: EuroIcon, fields: ['datum', 'betrag', 'zahlungsweg'] },
       { id: 'auszahlung_split_eingegangen', label: 'Auszahlung-Split eingegangen', icon: EuroIcon, fields: ['auszahlung_kunde_betrag', 'auszahlung_kunde_eingegangen_am', 'auszahlung_gutachter_eingegangen_am', 'zahlungsweg'] },
-      { id: 'klage_eingereicht', label: 'Klage eingereicht', icon: GavelIcon, fields: ['datum'] },
-      { id: 'fall_geschlossen', label: 'Fall geschlossen', icon: CheckCircleIcon, fields: ['datum', 'grund'] },
     ],
   },
 ]
@@ -182,9 +174,10 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
       </div>
 
       <p className="text-xs text-claimondo-ondo leading-relaxed">
-        Bis die LexDrive-Webhook-Integration live ist: alle Events hier manuell auslösen. Trigger-Logik
-        (Status, Felder, WhatsApp, Mitteilungen, Timeline) ist identisch zum Webhook. ✓ = Event wurde
-        bereits verarbeitet, ⏳ = offen.
+        Die Meilensteine (Anschlussschreiben, VS-Reaktion, Regulierung, Klage, Zahlung, Abschluss)
+        werden über die „Nächster Schritt"-Karte oben erfasst — die Phase leitet sich daraus ab. Hier
+        zusätzlich die Sonder-/Detail-Ereignisse (Rügen, Fristen, Eskalation, Konfrontation, …).
+        ✓ = bereits verarbeitet, ⏳ = offen.
       </p>
 
       {EVENT_GROUPS.map(group => (
