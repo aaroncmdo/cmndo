@@ -292,6 +292,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly' as const,
       priority: 0.9,
     },
+    // Author-Hub (E-E-A-T / GEO) — Person-Schema-Seite des Default-Feed-Authors.
+    {
+      url: `${SITE_URL}/autor/aaron-sprafke`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.6,
+    },
 
     // Cornerstones (Pillar-B Handbuch + Persona-Ratgeber)
     ...getCornerstones().map((a) => ({

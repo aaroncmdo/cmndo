@@ -24,11 +24,15 @@ let _checked = false
  * In `next dev` (NODE_ENV !== 'production') wird auch strukturell nur geloggt,
  * damit ein WIP-Draft die lokale Entwicklung nicht blockt. Memoisiert → läuft 1×.
  */
-export function assertFeedFrontmatterValid(): void {
-  if (_checked) return
-  _checked = true
+export interface FeedFrontmatterIssues {
+  /** Build-brechende Fehler (kein excerpt / keyFacts ausserhalb 3–6). */
+  structural: string[]
+  /** Nicht-brechende Laengen-Hinweise. */
+  warnings: string[]
+}
 
-  const assets: ClaimondoAsset[] = [...getAllAssets(), ...getVersicherer()]
+/** Reine, testbare Pruefung — sammelt Issues ohne Seiteneffekte (vgl. validate.test.ts). */
+export function collectFeedFrontmatterIssues(assets: ClaimondoAsset[]): FeedFrontmatterIssues {
   const structural: string[] = []
   const warnings: string[] = []
 
@@ -49,6 +53,15 @@ export function assertFeedFrontmatterValid(): void {
       }
     }
   }
+
+  return { structural, warnings }
+}
+
+export function assertFeedFrontmatterValid(): void {
+  if (_checked) return
+  _checked = true
+
+  const { structural, warnings } = collectFeedFrontmatterIssues([...getAllAssets(), ...getVersicherer()])
 
   if (warnings.length > 0) {
     console.warn(`[feed-validate] ${warnings.length} Laengen-Hinweis(e):\n${warnings.join('\n')}`)
