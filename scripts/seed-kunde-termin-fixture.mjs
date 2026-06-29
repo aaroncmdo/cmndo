@@ -75,6 +75,37 @@ async function main() {
     .maybeSingle()
   if (!claim) { console.error(`[FEHLER] kein onboarding-fertiger Claim für ${KUNDE_EMAIL}`); process.exit(1) }
 
+  // 1b. Geschädigten-Party sicherstellen — DIE zweite Bedingung der gutachter_termine-Kunde-RLS:
+  //     `gutachter_termine_kunde_select_consolidated` = (claim_id IS NOT NULL) AND is_claim_user_party(claim_id),
+  //     und is_claim_user_party = EXISTS(claim_parties WHERE user_id=auth.uid() AND ist_aktiv=true).
+  //     Dünne Seed-Claims haben nur `claims.geschaedigter_user_id` (Spalte), KEINE claim_parties-Zeile →
+  //     der Kunde sieht seine Termine NICHT, obwohl er „Eigentümer" ist. convertLeadToClaim legt die Zeile
+  //     an (Schritt 4); für hand-geseedete Claims hier nachziehen.
+  const { data: party } = await db
+    .from('claim_parties')
+    .select('id, ist_aktiv')
+    .eq('claim_id', claim.id)
+    .eq('rolle', 'geschaedigter')
+    .eq('user_id', kunde.id)
+    .maybeSingle()
+  if (!party) {
+    const { error: pErr } = await db.from('claim_parties').insert({
+      claim_id: claim.id,
+      rolle: 'geschaedigter',
+      user_id: kunde.id,
+      ist_aktiv: true,
+      reihenfolge: 1,
+      quelle: 'lead_konvertierung',
+    })
+    if (pErr) { console.error('[FEHLER] Geschädigten-Party-Insert:', pErr.message); process.exit(1) }
+    console.log(`[seed] Geschädigten-Party angelegt (user_id=${kunde.id}) -> is_claim_user_party=true`)
+  } else if (!party.ist_aktiv) {
+    await db.from('claim_parties').update({ ist_aktiv: true }).eq('id', party.id)
+    console.log(`[seed] Geschädigten-Party reaktiviert (ist_aktiv=true)`)
+  } else {
+    console.log(`[seed] Geschädigten-Party bereits aktiv: ${party.id}`)
+  }
+
   // 2. Bridge-fall_id (== claim_id für moderne Claims) — DIE Spalte, die das Kunde-Portal filtert
   const { data: bridge } = await db
     .from('faelle_claim_bridge')
