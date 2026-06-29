@@ -9,6 +9,7 @@ import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { AssetHero } from '@/components/content/AssetHero'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
+import { ArticleComments } from '@/components/community/ArticleComments'
 import { ContentJsonLd } from '@/components/content/ContentJsonLd'
 import { FaqStems } from '@/components/content/FaqStems'
 import { VrBaitBlock } from '@/components/content/VrBaitBlock'
@@ -101,6 +102,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <VrBaitBlock items={VR_BAIT_MAPPING[a.slug] ?? []} />
           <ConversionAnchorBlock variant="decoder" />
           <RelatedAssets current={a} />
+          <ArticleComments articleSlug={slug} />
         </article>
       </main>
       <LandingFooter />

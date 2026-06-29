@@ -8,6 +8,7 @@ import { MdxLanguageBanner } from '@/components/content/MdxLanguageBanner'
 import { AssetHero } from '@/components/content/AssetHero'
 import { TableOfContents } from '@/components/content/TableOfContents'
 import { RelatedAssets } from '@/components/content/RelatedAssets'
+import { ArticleComments } from '@/components/community/ArticleComments'
 import { InlineCheckCta } from '@/components/content/InlineCheckCta'
 import { ConversionAnchorBlock } from '@/components/content/ConversionAnchorBlock'
 import { SpokeCtaBand } from '@/components/content/SpokeCtaBand'
@@ -103,6 +104,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
             <ConversionAnchorBlock variant="spoke" />
             <InlineCheckCta />
             <RelatedAssets current={a} />
+            <ArticleComments articleSlug={slug} />
           </article>
         </div>
         <SpokeCtaBand />
