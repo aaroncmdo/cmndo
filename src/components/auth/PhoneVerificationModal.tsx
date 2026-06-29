@@ -78,8 +78,8 @@ export default function PhoneVerificationModal({
         <div className="px-5 py-4">
           {done ? (
             <div className="text-center py-4">
-              <CheckCircleIcon className="w-8 h-8 text-emerald-500 mx-auto mb-2" />
-              <p className="text-sm text-emerald-700 font-medium">Telefon verifiziert!</p>
+              <CheckCircleIcon className="w-8 h-8 text-success mx-auto mb-2" />
+              <p className="text-sm text-success-strong font-medium">Telefon verifiziert!</p>
             </div>
           ) : step === 'phone' ? (
             <div className="space-y-3">
@@ -89,7 +89,7 @@ export default function PhoneVerificationModal({
                 placeholder="+49 163 1234567"
                 className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
-              {error && <p className="text-xs text-red-600">{error}</p>}
+              {error && <p className="text-xs text-danger">{error}</p>}
               <button onClick={handleSendCode} disabled={pending}
                 className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
                 {pending ? 'Wird gesendet...' : 'Code senden'}
@@ -104,7 +104,7 @@ export default function PhoneVerificationModal({
                 placeholder="000000" autoFocus
                 className="w-full text-center text-xl font-mono tracking-[0.4em] bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
               />
-              {error && <p className="text-xs text-red-600">{error}</p>}
+              {error && <p className="text-xs text-danger">{error}</p>}
               <button onClick={handleVerify} disabled={pending || code.length !== 6}
                 className="w-full py-2.5 rounded-ios-xl bg-claimondo-shield text-white text-sm font-semibold disabled:opacity-50">
                 {pending ? 'Wird geprüft...' : 'Verifizieren'}
