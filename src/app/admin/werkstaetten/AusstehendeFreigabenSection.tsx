@@ -40,7 +40,7 @@ export function AusstehendeFreigabenSection({ rows }: { rows: AusstehendeFreigab
               <Th>Kundenbetreuer</Th>
               <Th>fällig</Th>
               <Th>Status</Th>
-              <Th> </Th>
+              <Th><span className="sr-only">Aktion</span></Th>
             </Tr>
           </Thead>
           <Tbody>
