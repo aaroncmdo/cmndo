@@ -101,3 +101,38 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 Crontab ändern: `ssh root@212.132.119.110` → `crontab -e`. Nach jeder Änderung **diese Datei
 nachziehen** (sonst driftet der versionierte Abzug). `cron-call.sh` liegt unter
 `/usr/local/bin/cron-call.sh` (nicht im Repo — sollte ebenfalls versioniert werden).
+
+## Audit-Addendum 2026-06-29 (Cron-Route ↔ Crontab-Diff)
+
+Diff der **58** existierenden `src/app/api/cron/*/route.ts` gegen den 2026-06-20-Snapshot oben,
+ergänzt um DB-Evidenz. Der Snapshot driftet — Punkte unten auf dem **Live-VPS** gegenprüfen.
+
+### A) Route existiert, steht NICHT im Snapshot → potenziell dormant
+- **`slot-ttl-cleanup` — BESTÄTIGT DORMANT (DB-Evidenz).** 58 `gutachter_finder_anfragen` haben
+  ein gesetztes `reservierter_slot_von` älter als 30 Min (älteste **2026-05-12**, 47 Tage). Der
+  Cleanup setzt dieses Feld nach Freigabe auf `null` (`route.ts:64`) — wäre er gelaufen, wären sie
+  geräumt. Der File-Kommentar sagt „alle 5 Minuten". Aktueller Slot-Impact gering (0
+  `gutachter_termine` in `reserviert` — die Termine wurden über andere Pfade aufgelöst, es bleibt
+  Anfrage-Residue), **aber unter Buchungs-Last blockiert ausbleibendes Cleanup Slots.**
+  → **`*/5 * * * *` nachtragen.** Optional: die 58 Residue-Anfragen einmalig `reservierter_slot_*=null`.
+- **`recovery-monitor`** — neu (Dead-Letter-Framework, PR #3273). Braucht `0,15,30,45 * * * *`,
+  sonst eskaliert der Dead-Letter-Monitor nie. (Schon in der #3273-Übergabe vermerkt.)
+- **`stripe-reconcile`, `sv-mahnung-saeumnis`, `case-billing-batch`, `kb-beratung-anlage-notify`,
+  `refresh-feeds`, `termin-morgen-erinnerung`** — nicht im Snapshot. Prüfen ob (a) seit 2026-06-20
+  ergänzt, (b) bewusst aus, (c) vergessen. Hinweise: `sv-mahnung-saeumnis` moot solange 0
+  SV-Abrechnungen; `termin-morgen-erinnerung` evtl. redundant zu `send-reminders` (24h);
+  `stripe-reconcile` unkritisch (`stripe_events` 0 stranded).
+
+### B) Crontab referenziert eine NICHT existierende Route → toter 404
+- **`whatsapp-erinnerungen`** (Crontab oben, `*/30`) — es gibt **kein**
+  `src/app/api/cron/whatsapp-erinnerungen/route.ts` (repo-verifiziert). Der `*/30`-Call trifft 404
+  und tut nichts. → **Zeile aus der Crontab entfernen.** Folge für **Audit-Note #1**: das
+  „Triple-Reminder-Duplikat" ist real nur ein **Double** — `send-reminders` (claim-native
+  Telefon-Fix PR #3277) + `termin-erinnerungen`. Das Double-Send-Risiko bleibt; Konsolidierung auf
+  einen Reminder-Cron bleibt offen (eigene Task, kein Quick-Fix — die Dedup-Semantik divergiert).
+
+### Konsequenz
+Beleg für **Audit-Note #3** (keine Cron-Observability): `slot-ttl-cleanup` ist 47 Tage unbemerkt
+nicht gelaufen. Ein Run-Logging in `cron-call.sh` (Exit/Result → Audit-Tabelle, oder die neue
+`failed_async_operations`-Infra aus #3273) ist der eigentliche Hebel gegen diese Klasse.
+
