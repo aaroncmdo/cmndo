@@ -1,6 +1,7 @@
 // src/lib/linkedin/__tests__/token.test.ts
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { isExpired } from '../token'
+import type { LinkedInTokenRow } from '../types'
 
 // ---- mock admin client ----
 let mockUpdatePayload: Record<string, unknown> | null = null
@@ -33,7 +34,7 @@ const mockAdmin = {
 vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: () => mockAdmin }))
 
 // ---- shared token row fixtures ----
-const EXPIRED_ROW = {
+const EXPIRED_ROW: LinkedInTokenRow = {
   id: 'row-1',
   organization_urn: 'urn:li:organization:99',
   access_token: 'old-access',
@@ -43,17 +44,17 @@ const EXPIRED_ROW = {
   connected_by: null,
 }
 
-const NO_REFRESH_ROW = {
+const NO_REFRESH_ROW: LinkedInTokenRow = {
   ...EXPIRED_ROW,
   refresh_token: null,
 }
 
-const VALID_ROW = {
+const VALID_ROW: LinkedInTokenRow = {
   ...EXPIRED_ROW,
   expires_at: '2099-01-01T00:00:00Z', // far future
 }
 
-let mockTokenRow: typeof EXPIRED_ROW | null = EXPIRED_ROW
+let mockTokenRow: LinkedInTokenRow | null = EXPIRED_ROW
 
 // ---- stub fetch ----
 function makeOkFetch(newAccessToken = 'new-access-token') {
