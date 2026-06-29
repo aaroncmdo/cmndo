@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
 import { kannGutachtenAbgeben } from './abgabe-berechtigung'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
+import { brauchtKanzleiHandoff } from '@/lib/kanzlei/handoff-guard'
 
 async function getKbOrAdmin() {
   const supabase = await createClient()
@@ -53,7 +54,7 @@ export async function gibKanzleipaketFrei(
 
   const { data: auftrag } = await db
     .from('auftraege')
-    .select('id, fall_id, gutachten_url, gutachten_final_freigegeben, status')
+    .select('id, fall_id, sv_id, gutachten_url, gutachten_final_freigegeben, status')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
@@ -88,6 +89,43 @@ export async function gibKanzleipaketFrei(
         status: 'versicherungskontakt',
       })
     if (kErr) return { ok: false, error: kErr.message }
+  }
+
+  // Filmcheck-Audit 29.06.2026: operativen Kanzlei-Handoff ausloesen — die eigentliche
+  // Lifecycle-Startung. gibKanzleipaketFrei schrieb bisher nur kanzlei_faelle + auftrag,
+  // advancte aber operative_status NICHT -> die operative_status-gegateten Kanzlei-Portale
+  // (mandate/kanban) sahen den Fall NIE + die Strecke (anschlussschreiben/regulierung)
+  // startete nie. Jetzt identisch zu qcBestanden via saveFilmcheck. Idempotent via
+  // brauchtKanzleiHandoff (kein Doppel-Handoff falls der KB auch QC-bestanden klickt).
+  try {
+    const handoffClaimId = await resolveClaimId(db, auftrag.fall_id as string)
+    if (handoffClaimId) {
+      const { data: handoffClaim } = await db
+        .from('claims')
+        .select('operative_status, service_typ')
+        .eq('id', handoffClaimId)
+        .maybeSingle()
+      if (
+        brauchtKanzleiHandoff(
+          handoffClaim?.operative_status as string | null,
+          handoffClaim?.service_typ as string | null,
+        )
+      ) {
+        // gutachten-Signal sicherstellen (falls der Upload-Pfad es nicht setzte), bis
+        // filmcheck cascaden, dann der Handoff filmcheck -> kanzlei-uebergeben (+ Mails/AS).
+        if (auftrag.sv_id) {
+          await db.from('gutachten').upsert(
+            { claim_id: handoffClaimId, sv_id: auftrag.sv_id as string, fertiggestellt_am: new Date().toISOString() },
+            { onConflict: 'claim_id' },
+          )
+        }
+        await checkFallAutoPhase(auftrag.fall_id as string)
+        const { saveFilmcheck } = await import('@/app/faelle/[id]/_actions/filmcheck')
+        await saveFilmcheck(auftrag.fall_id as string, '')
+      }
+    }
+  } catch (err) {
+    console.warn('[gibKanzleipaketFrei] operativer Kanzlei-Handoff fehlgeschlagen:', err)
   }
 
   revalidatePath(`/faelle/${auftrag.fall_id}`)
