@@ -168,7 +168,7 @@ function SaveButton({ state }: { state: SaveState }) {
 function SaveFeedback({ state }: { state: SaveState }) {
   if (state.status === 'success') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-lg px-2.5 py-1">
+      <span className="inline-flex items-center gap-1.5 text-xs text-success-strong bg-success-soft border border-success/30 rounded-ios-lg px-2.5 py-1">
         <CheckCircle2Icon width={12} height={12} />
         Gespeichert
       </span>
@@ -176,7 +176,7 @@ function SaveFeedback({ state }: { state: SaveState }) {
   }
   if (state.status === 'error') {
     return (
-      <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-2.5 py-1">
+      <span className="inline-flex items-center gap-1.5 text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg px-2.5 py-1">
         <AlertTriangleIcon width={12} height={12} />
         {state.msg ?? 'Fehler'}
       </span>
@@ -379,7 +379,7 @@ function BankCard({ profile }: { profile: MaklerFullProfile }) {
           placeholder="DE89 3704 0044 0532 0130 00"
         />
         {ibanTouched ? (
-          <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-ios-lg px-3 py-2 inline-flex items-start gap-2">
+          <p className="text-xs text-warning-strong bg-warning-soft border border-warning/30 rounded-ios-lg px-3 py-2 inline-flex items-start gap-2">
             <AlertTriangleIcon width={12} height={12} className="mt-0.5 shrink-0" />
             Die neue IBAN wird für alle ausstehenden Auszahlungen verwendet.
           </p>
@@ -554,7 +554,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                     <span
                       className={`inline-flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-full ${
                         c.consent_scope === 'vollzugriff'
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                          ? 'bg-success-soft text-success-strong border border-success/30'
                           : 'bg-claimondo-bg text-claimondo-ondo border border-claimondo-border'
                       }`}
                     >
@@ -570,7 +570,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                       type="button"
                       onClick={() => setConfirmId(c.id)}
                       disabled={pendingId === c.id}
-                      className="inline-flex items-center gap-1.5 px-3 h-8 rounded-ios-lg bg-red-50 border border-red-200 text-red-700 text-xs font-semibold hover:bg-red-100 disabled:opacity-50"
+                      className="inline-flex items-center gap-1.5 px-3 h-8 rounded-ios-lg bg-danger-soft border border-danger/30 text-danger-strong text-xs font-semibold hover:bg-danger/15 disabled:opacity-50"
                     >
                       {pendingId === c.id ? (
                         <Loader2Icon width={12} height={12} className="animate-spin" />
@@ -588,7 +588,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
       )}
 
       {error ? (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-3 py-2 mt-3 inline-flex items-start gap-2">
+        <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg px-3 py-2 mt-3 inline-flex items-start gap-2">
           <AlertTriangleIcon width={12} height={12} className="mt-0.5 shrink-0" />
           {error}
         </p>
@@ -603,7 +603,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
         {confirmId ? (
           <>
             <div className="flex items-start gap-3">
-              <span className="shrink-0 w-10 h-10 rounded-full bg-red-100 text-red-700 flex items-center justify-center">
+              <span className="shrink-0 w-10 h-10 rounded-full bg-danger/15 text-danger-strong flex items-center justify-center">
                 <AlertTriangleIcon width={18} height={18} />
               </span>
               <div className="flex-1">
@@ -629,7 +629,7 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
                 type="button"
                 onClick={() => doRevoke(confirmId)}
                 disabled={pendingId !== null}
-                className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50"
+                className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-danger text-white text-sm font-semibold hover:bg-danger/90 disabled:opacity-50"
               >
                 {pendingId ? (
                   <Loader2Icon width={14} height={14} className="animate-spin" />
@@ -758,16 +758,16 @@ function AccountLoeschenCard({
     `Hallo Claimondo-Team,\n\nich möchte meinen Makler-Account löschen lassen.\n\nFirma: ${firma ?? '-'}\nEmail: ${email ?? '-'}\n\nBitte bestätigen Sie den DSGVO-Löschauftrag.\n\nViele Grüße`,
   )
   return (
-    <section className="bg-white rounded-ios-md border border-red-200 overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-red-100 bg-red-50/50">
-        <span className="shrink-0 w-9 h-9 rounded-ios-xl bg-red-100 text-red-700 border border-red-200 flex items-center justify-center">
+    <section className="bg-white rounded-ios-md border border-danger/30 overflow-hidden">
+      <div className="flex items-start gap-3 px-5 py-4 border-b border-danger/20 bg-danger-soft/50">
+        <span className="shrink-0 w-9 h-9 rounded-ios-xl bg-danger/15 text-danger-strong border border-danger/30 flex items-center justify-center">
           <Trash2Icon width={16} height={16} />
         </span>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-red-900">
+          <h2 className="text-sm font-semibold text-danger-strong">
             Account löschen
           </h2>
-          <p className="text-xs text-red-700 mt-0.5">
+          <p className="text-xs text-danger-strong mt-0.5">
             DSGVO-konforme Löschung auf Anfrage — irreversibel.
           </p>
         </div>
@@ -780,7 +780,7 @@ function AccountLoeschenCard({
         </p>
         <a
           href={`mailto:info@claimondo.de?subject=${subject}&body=${body}`}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-danger text-white text-sm font-semibold hover:bg-danger/90"
         >
           <Trash2Icon width={14} height={14} />
           Account-Löschung anfragen

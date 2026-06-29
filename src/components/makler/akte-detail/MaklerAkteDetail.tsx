@@ -193,7 +193,7 @@ export function MaklerAkteDetail({
           label="Consent"
           value="Vollzugriff"
           icon={<ShieldCheckIcon width={16} height={16} />}
-          valueClass="text-emerald-700"
+          valueClass="text-success-strong"
         />
         <QuickStat
           label="Fall seit"
@@ -541,7 +541,7 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
                 <CheckCircle2Icon
                   width={18}
                   height={18}
-                  className="text-emerald-600 bg-white"
+                  className="text-success bg-white"
                 />
               ) : e.kind === 'current' ? (
                 <CircleDotIcon

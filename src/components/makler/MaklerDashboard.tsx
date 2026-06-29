@@ -184,7 +184,7 @@ function ActivityBadge({ kind }: { kind: 'lead' | 'provision' }) {
   const cfg =
     kind === 'lead'
       ? { label: 'Lead', bg: 'bg-claimondo-ondo' }
-      : { label: 'Provision', bg: 'bg-emerald-600' }
+      : { label: 'Provision', bg: 'bg-success' }
   return (
     <span
       className={`shrink-0 mt-0.5 inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium text-white ${cfg.bg}`}
