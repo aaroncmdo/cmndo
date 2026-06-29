@@ -10,6 +10,7 @@ import { emailGutachtenEingegangen } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { berechneLeadpreis } from '@/lib/leadpreis'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
 import { getStorageUrl } from '@/lib/storage/url'
@@ -92,6 +93,12 @@ export async function uploadGutachten(
   try {
     await transitionFallStatus(fallId, 'gutachten-eingegangen', { user_id: user.id })
   } catch { /* Transition evtl. nicht erlaubt wenn Status schon weiter */ }
+
+  // Kanzlei-Strecke-Investigation 28.06.: Auto-Advance anstossen, sobald das Gutachten da
+  // ist — komplett-Faelle wandern damit gutachten-eingegangen -> filmcheck (KB-QC-Queue).
+  // Ohne diesen Trigger lief checkFallAutoPhase an dieser Stelle nie (kein Caller), die
+  // Kanzlei-Strecke war damit nicht erreichbar. Fire-and-forget (non-critical).
+  checkFallAutoPhase(fallId).catch(() => {})
 
   // SV-Name fuer Timeline + Task
   const { data: svProfile } = await supabase.from('profiles').select('vorname, nachname').eq('id', user.id).single()
