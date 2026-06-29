@@ -62,7 +62,7 @@ export default function PageHeader({
 
   if (align === 'center') {
     return (
-      <div className="flex flex-col items-center text-center gap-2">
+      <div className="flex flex-col items-center text-center gap-2" data-page-header>
         {leadingSlot}
         <div className="flex items-center gap-2 justify-center">
           {LucideIconRef ? (
@@ -81,7 +81,7 @@ export default function PageHeader({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3">
+    <div className="flex items-center justify-between gap-3" data-page-header>
       <div className="flex items-center gap-3 min-w-0 flex-1">
         {leadingSlot}
         <div className="flex flex-col gap-1 min-w-0">
