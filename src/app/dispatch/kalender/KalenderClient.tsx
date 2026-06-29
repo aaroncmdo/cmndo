@@ -320,7 +320,58 @@ export default function KalenderClient({
         </div>
       )}
 
-      <div className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
+      {/* Mobile-Agenda (md:hidden) — das 5-Spalten-Zeitgrid ist auf 375px unlesbar.
+          Listet je Wochentag die Termine (SV-Farbe + Zeit); das Desktop-Grid bleibt unveraendert. */}
+      <div className="md:hidden space-y-3">
+        {days.map((d) => {
+          const dayKey = isoDate(d)
+          const dayStart = new Date(d)
+          dayStart.setHours(HOUR_START, 0, 0, 0)
+          const dayTermine = (terminesByDay.get(dayKey) ?? [])
+            .filter((t) => t.svId && svColorMap.get(t.svId))
+            .slice()
+            .sort((a, b) => new Date(a.startZeit).getTime() - new Date(b.startZeit).getTime())
+          return (
+            <div key={dayKey} className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
+              <div className="px-3 py-2 border-b border-claimondo-border bg-claimondo-bg/50">
+                <span className="text-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
+                  {fmtDateLabel(d)}
+                </span>
+              </div>
+              {dayTermine.length === 0 ? (
+                <p className="px-3 py-3 text-xs text-claimondo-ondo/60">Keine Termine</p>
+              ) : (
+                <div className="divide-y divide-claimondo-border/50">
+                  {dayTermine.map((termin) => {
+                    const col = svColorMap.get(termin.svId!)!
+                    const block = terminToBlock(termin, dayStart)
+                    return (
+                      <button
+                        key={termin.id}
+                        type="button"
+                        onClick={() => navigateToTermin(termin)}
+                        className="w-full flex items-stretch gap-2.5 px-3 py-2.5 text-left hover:bg-claimondo-bg/50 transition-colors"
+                        style={{ opacity: termin.status === 'reserviert' ? 0.75 : 1 }}
+                      >
+                        <span className="w-1 self-stretch rounded-full shrink-0" style={{ backgroundColor: col.bg }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-claimondo-navy truncate">{block.timeLabel}</p>
+                          <p className="text-[11px] text-claimondo-ondo truncate">
+                            {block.label}
+                            {termin.status ? ` · ${STATUS_LABEL[termin.status] ?? termin.status}` : ''}
+                          </p>
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+          )
+        })}
+      </div>
+
+      <div className="hidden md:block rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
         <div className="grid" style={{ gridTemplateColumns: '60px repeat(5, 1fr)' }}>
           {/* Header */}
           <div className="border-b border-claimondo-border bg-claimondo-bg/50" />
