@@ -106,22 +106,6 @@ export async function resolveBrandingFromFlowToken(token: string): Promise<Kunde
   return resolveBrandingFromLeadId(db, fl.lead_id as string)
 }
 
-/** Branding aus einer faelle.id (Signatur-Route /flow/signatur/[token]). */
-export async function resolveBrandingFromFallId(fallId: string): Promise<KundenThemeResult> {
-  if (!fallId) return FALLBACK
-  const db = createAdminClient()
-  // CMM-49 (faelle-Drop-Runway): sv_id via Bridge->claims statt .from('faelle'). sv_id 0-diff.
-  const { data: bridgeRow } = await db
-    .from('faelle_claim_bridge')
-    .select('claims:claim_id(sv_id)')
-    .eq('fall_id', fallId)
-    .maybeSingle()
-  const cRaw = (bridgeRow as { claims?: unknown } | null)?.claims
-  const svId = ((Array.isArray(cRaw) ? cRaw[0] : cRaw) as { sv_id?: string | null } | null | undefined)?.sv_id ?? null
-  if (!svId) return FALLBACK
-  return resolveBrandingFromSvId(db, svId)
-}
-
 // ── Email-Branding ──────────────────────────────────────────────────────────
 // Schlankerer Shape für die Email-Templates (react-email): nur die Werte die
 // EmailLayout/Heading/Button brauchen. null = kein Brand greift → Claimondo.

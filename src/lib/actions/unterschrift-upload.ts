@@ -2,23 +2,21 @@
 
 // RLS-Phase-1 #4 Batch 4 — Signatur-Server-Action-Refactor.
 //
-// Bisher haben FlowWizardKfz + SignaturPage Unterschrift-Blobs direkt
-// mit dem Anon-Key in den `unterschriften`-Bucket gepusht. Das war die
-// direkte Anon-Write-Lücke aus dem Live-RLS-Audit (HIGH #4).
+// Bisher hat FlowWizardKfz Unterschrift-Blobs direkt mit dem Anon-Key in
+// den `unterschriften`-Bucket gepusht. Das war die direkte Anon-Write-Lücke
+// aus dem Live-RLS-Audit (HIGH #4).
 //
-// Beide Clients rufen jetzt diese Server-Actions auf. Upload läuft mit
+// Der Client ruft jetzt diese Server-Action auf. Upload läuft mit
 // createAdminClient (service_role) — der Anon-Write auf `unterschriften`
 // kann mit Schritt D entfernt werden, ohne die Strecke zu brechen.
 //
 // Validierung:
 //  - uploadFlowSignatur: Token muss in flow_links existieren und aktiv sein.
-//  - uploadFallSignatur: Fall-ID muss in faelle existieren.
 //
-// Beide Actions liefern die URL via getStorageUrl, sodass Flag-on signed-URLs
+// Die Action liefert die URL via getStorageUrl, sodass Flag-on signed-URLs
 // generiert und Flag-off Public-URLs zurückgibt (heute-Verhalten).
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl } from '@/lib/storage/url'
 
 type UploadResult =
@@ -77,62 +75,4 @@ export async function uploadFlowSignatur(
   const url = await getStorageUrl(admin, 'unterschriften', path)
   if (!url) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
   return { ok: true, url }
-}
-
-/**
- * Lädt Abtretungs- oder Vollmachts-Unterschrift für einen existierenden Fall.
- * Pfad: `{fallId}/{kind}_{ts}.png`
- */
-export async function uploadFallSignatur(
-  fallId: string,
-  base64DataUrl: string,
-  kind: 'abtretung' | 'vollmacht',
-): Promise<UploadResult> {
-  if (!fallId) return { ok: false, error: 'Fall-ID fehlt' }
-  if (kind !== 'abtretung' && kind !== 'vollmacht') {
-    return { ok: false, error: 'Ungültiger Signatur-Typ' }
-  }
-
-  const admin = createAdminClient()
-  // CMM-49: Existenz-Check via resolveClaimId (Bridge/claims) statt faelle.
-  const sigClaimId = await resolveClaimId(admin, fallId)
-  if (!sigClaimId) return { ok: false, error: 'Fall nicht gefunden' }
-
-  const decoded = decodeDataUrl(base64DataUrl)
-  if (!decoded) return { ok: false, error: 'Ungültige oder zu große Bilddaten' }
-
-  const path = `${fallId}/${kind}_${Date.now()}.png`
-  const { error: upErr } = await admin.storage
-    .from('unterschriften')
-    .upload(path, decoded.bytes, { contentType: decoded.mime, upsert: false })
-  if (upErr) return { ok: false, error: upErr.message }
-
-  const url = await getStorageUrl(admin, 'unterschriften', path)
-  if (!url) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
-  return { ok: true, url }
-}
-
-/**
- * CMM-44 SP-B PR2b: Schreibt die Signatur-URLs + Timestamps auf claims (SSoT).
- * Die faelle-Spalten abtretung_pdf/vollmacht_pdf/abtretung_signiert_am/
- * vollmacht_signiert_am sind tot (Drop in Phase 6) — claims ist der einzige
- * Schreibpfad. SignaturPage ruft das statt eines faelle-Writes auf.
- */
-export async function signaturClaimsWrite(
-  fallId: string,
-  abtretungUrl: string,
-  vollmachtUrl: string,
-  now: string,
-): Promise<{ ok: boolean; error?: string }> {
-  const admin = createAdminClient()
-  const claimId = await resolveClaimId(admin, fallId)
-  if (!claimId) return { ok: false, error: 'Fall hat keinen verknüpften Claim' }
-  const { error } = await admin.from('claims').update({
-    abtretung_pdf: abtretungUrl,
-    vollmacht_pdf: vollmachtUrl,
-    abtretung_signiert_am: now,
-    vollmacht_signiert_am: now,
-  }).eq('id', claimId)
-  if (error) return { ok: false, error: error.message }
-  return { ok: true }
 }
