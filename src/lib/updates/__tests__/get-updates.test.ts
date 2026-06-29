@@ -36,6 +36,18 @@ describe('getUpdates', () => {
     expect(items.map(i => i.id)).toEqual(['d1', 'n1'])
   })
 
+  it('RPC-Zeile mit modus=info (z.B. offener Lead) landet im Info-Bucket, nicht Action', async () => {
+    h.state.rpc = [
+      { id: 'lead1', typ: 'event', modus: 'info', prioritaet: 'normal', titel: 'Lead: X', inhalt: 'neu', kontext_typ: 'lead', kontext_id: 'l1', source: 'offener_lead', created_at: '2026-06-29T12:00:00Z' },
+      { id: 'act1', typ: 'call', modus: 'action', prioritaet: 'hoch', titel: 'Rueckruf', inhalt: null, kontext_typ: 'rueckruf', kontext_id: 'r1', source: 'offener_rueckruf', created_at: '2026-06-29T11:00:00Z' },
+    ]
+    const items = await getUpdates(h.db as never, 'u1', 'dispatch')
+    expect(items.find(i => i.id === 'act1')?.modus).toBe('action')
+    expect(items.find(i => i.id === 'lead1')?.modus).toBe('info')
+    // Action steht vor Info im gemergten Array
+    expect(items.findIndex(i => i.id === 'act1')).toBeLessThan(items.findIndex(i => i.id === 'lead1'))
+  })
+
   it('Anruf-Mitteilung (kategorie=anruf) -> Info-Item mit typ=call (Anrufe-Filter greift)', async () => {
     h.state.info = [
       { id: 'call1', kategorie: 'anruf', titel: 'Verpasster Anruf', inhalt: null, kontext_typ: null, kontext_id: null, route_url: null, prioritaet: 'normal', created_at: '2026-06-29T09:00:00Z' },
