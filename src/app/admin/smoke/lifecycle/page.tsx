@@ -83,7 +83,7 @@ export default async function SmokeLifecyclePage() {
       </div>
 
       {loadError && (
-        <div className="rounded-ios-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+        <div className="rounded-ios-xl border border-danger/30 bg-danger-soft p-3 text-xs text-danger-strong">
           <p className="font-semibold">Loader-Fehler:</p>
           <code className="font-mono break-all">{loadError}</code>
         </div>
@@ -93,7 +93,7 @@ export default async function SmokeLifecyclePage() {
         <form action={seedAction}>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-ios-md bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-4 py-2"
+            className="inline-flex items-center gap-2 rounded-ios-md bg-success hover:bg-success/90 text-white text-sm font-semibold px-4 py-2"
           >
             <PlayIcon className="w-4 h-4" /> Seed alle Szenarien
           </button>
@@ -101,7 +101,7 @@ export default async function SmokeLifecyclePage() {
         <form action={resetAction}>
           <button
             type="submit"
-            className="inline-flex items-center gap-2 rounded-ios-md bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2"
+            className="inline-flex items-center gap-2 rounded-ios-md bg-danger hover:bg-danger/90 text-white text-sm font-semibold px-4 py-2"
           >
             <RefreshCcwIcon className="w-4 h-4" /> Reset alle Smoke-Fälle
           </button>
@@ -160,14 +160,14 @@ export default async function SmokeLifecyclePage() {
         </Table>
       </DataTableContainer>
 
-      <div className="rounded-ios-xl border border-amber-200 bg-amber-50 p-4 text-xs text-amber-900 max-w-3xl">
+      <div className="rounded-ios-xl border border-warning/30 bg-warning-soft p-4 text-xs text-warning-strong max-w-3xl">
         <p className="font-semibold mb-1">Test-Identitäten</p>
         <ul className="space-y-0.5">
           <li>· Kunde: Aaron Sprafke · <code className="font-mono">aaron.sprafke+kunde15@claimondo.de</code></li>
           <li>· KB: Anna Weber · <code className="font-mono">kb@claimondo.de</code></li>
           <li>· SV: Test-Aaron Test-Sprafke · <code className="font-mono">aaron.sprafke@claimondo.de</code></li>
         </ul>
-        <p className="mt-2 text-[11px] text-amber-800/80">
+        <p className="mt-2 text-[11px] text-warning-strong/80">
           Reset rekonstruiert die Daten in einem klaren Zustand —
           empfohlen vor jeder Smoke-Runde.
         </p>

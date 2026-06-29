@@ -24,9 +24,9 @@ type Eintrag = {
 }
 
 const STATUS_LABEL: Record<Eintrag['status'], { label: string; bg: string; text: string }> = {
-  anzahlung_offen: { label: 'Anzahlung offen', bg: 'bg-amber-50', text: 'text-amber-700' },
-  rechnung_ueberfaellig: { label: 'Rechnung ueberfaellig', bg: 'bg-red-50', text: 'text-red-700' },
-  einzug_failed: { label: 'Einzug failed', bg: 'bg-red-100', text: 'text-red-700' },
+  anzahlung_offen: { label: 'Anzahlung offen', bg: 'bg-warning-soft', text: 'text-warning-strong' },
+  rechnung_ueberfaellig: { label: 'Rechnung ueberfaellig', bg: 'bg-danger-soft', text: 'text-danger-strong' },
+  einzug_failed: { label: 'Einzug failed', bg: 'bg-danger-soft', text: 'text-danger-strong' },
 }
 
 function fmtEur(n: number): string {
@@ -129,7 +129,7 @@ export default async function AusstehendeZahlungenWidget() {
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden flex flex-col h-full">
       <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <EuroIcon className="w-4 h-4 text-amber-600" />
+          <EuroIcon className="w-4 h-4 text-warning" />
           <h2 className="text-sm font-semibold text-claimondo-navy">Ausstehende Zahlungen</h2>
           {total > 0 && (
             <SharedStatusBadge tone="warning">{total} offen</SharedStatusBadge>
@@ -141,8 +141,8 @@ export default async function AusstehendeZahlungenWidget() {
       <div className="flex-1 overflow-y-auto">
         {rows.length === 0 ? (
           <div className="p-8 text-center">
-            <div className="w-10 h-10 mx-auto bg-emerald-50 rounded-full flex items-center justify-center mb-2">
-              <EuroIcon className="w-5 h-5 text-emerald-600" />
+            <div className="w-10 h-10 mx-auto bg-success-soft rounded-full flex items-center justify-center mb-2">
+              <EuroIcon className="w-5 h-5 text-success" />
             </div>
             <p className="text-xs text-claimondo-ondo">Keine offenen Forderungen.</p>
           </div>

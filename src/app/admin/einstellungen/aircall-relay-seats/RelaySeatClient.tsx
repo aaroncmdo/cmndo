@@ -93,7 +93,7 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
                     {seat.aktiv ? 'Deaktivieren' : 'Aktivieren'}
                   </button>
                   <button onClick={() => handleDelete(seat.id)}
-                    className="text-claimondo-ondo/70 hover:text-red-500 transition-colors">
+                    className="text-claimondo-ondo/70 hover:text-danger transition-colors">
                     <Trash2Icon className="w-4 h-4" />
                   </button>
                 </div>
