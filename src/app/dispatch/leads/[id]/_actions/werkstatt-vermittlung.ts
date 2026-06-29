@@ -65,15 +65,30 @@ export async function vermittleWerkstatt(
       telefon: string | null
     } | null
 
-    // Kunden-Account je nach Ziel: Lead -> kunde_id, Claim -> geschaedigter_user_id.
+    // Kunden-Account (fuer In-App) + Kontakt (fuer WhatsApp/Email).
+    // Lead: kunde_id + Kontakt DIREKT aus dem Lead — ein frischer Lead hat oft KEINEN
+    // Account, ist dann nur ueber lead.telefon/email erreichbar. Claim:
+    // geschaedigter_user_id + Kontakt aus dem Profil des Geschaedigten.
     let kundeUserId: string | null = null
+    let kundeKontakt: { vorname: string | null; telefon: string | null; email: string | null } = {
+      vorname: null,
+      telefon: null,
+      email: null,
+    }
     if (input.target === 'lead') {
       const { data: lead } = await supabase
         .from('leads')
-        .select('kunde_id')
+        .select('kunde_id, vorname, telefon, email')
         .eq('id', input.id)
         .maybeSingle()
-      kundeUserId = (lead as { kunde_id: string | null } | null)?.kunde_id ?? null
+      const l = (lead ?? null) as {
+        kunde_id: string | null
+        vorname: string | null
+        telefon: string | null
+        email: string | null
+      } | null
+      kundeUserId = l?.kunde_id ?? null
+      kundeKontakt = { vorname: l?.vorname ?? null, telefon: l?.telefon ?? null, email: l?.email ?? null }
     } else {
       const { data: claim } = await supabase
         .from('claims')
@@ -81,15 +96,30 @@ export async function vermittleWerkstatt(
         .eq('id', input.id)
         .maybeSingle()
       kundeUserId = (claim as { geschaedigter_user_id: string | null } | null)?.geschaedigter_user_id ?? null
+      if (kundeUserId) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('vorname, telefon, email')
+          .eq('id', kundeUserId)
+          .maybeSingle()
+        const p = (profile ?? null) as {
+          vorname: string | null
+          telefon: string | null
+          email: string | null
+        } | null
+        kundeKontakt = { vorname: p?.vorname ?? null, telefon: p?.telefon ?? null, email: p?.email ?? null }
+      }
     }
 
-    // Kunde nur benachrichtigen, wenn ein Account existiert (vor der Konversion
-    // hat ein frischer Lead oft noch keinen kunde_id). In-App-Mitteilung im
-    // Kunde-Portal; der Kanal-Versand (WhatsApp/Email) folgt separat.
+    const adresse = w
+      ? [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')]
+          .filter(Boolean)
+          .join(', ')
+      : ''
+
+    // (a) In-App-Mitteilung — nur wenn ein Account existiert (vor der Konversion
+    // hat ein frischer Lead oft noch keinen kunde_id; dann greift nur (b)).
     if (kundeUserId && w?.name) {
-      const adresse = [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')]
-        .filter(Boolean)
-        .join(', ')
       const inhalt = [
         `Deine Werkstatt: ${w.name}`,
         adresse ? `Adresse: ${adresse}` : null,
@@ -108,13 +138,22 @@ export async function vermittleWerkstatt(
         kontext_id: input.id,
       })
     }
-    // TODO Kanal-Versand: WhatsApp/Email an den Kunden ("Deine Werkstatt: …")
-    // ueber sendCommunication/sendNachricht, sobald ein Template existiert.
-    //
-    // TODO Werkstatt-Notify ("Neuer Reparaturauftrag"): createMitteilung
-    // unterstuetzt empfaenger_rolle 'werkstatt' (noch) NICHT (EmpfaengerRolle in
-    // src/lib/mitteilungen/types.ts). Sobald die Rolle dort + im Werkstatt-Portal
-    // eine Inbox hat, hier die Werkstatt (werkstaetten.user_id) benachrichtigen.
+
+    // (b) Kanal-Versand WhatsApp + Email an den Kunden — der EINZIGE Kanal fuer
+    // Leads ohne Portal-Account. Jeder Kanal ist im Helper non-critical gekapselt.
+    if (w?.name && (kundeKontakt.telefon || kundeKontakt.email)) {
+      const { notifyKundeWerkstattVermittlung } = await import('@/lib/werkstatt/notify-kunde-vermittlung')
+      await notifyKundeWerkstattVermittlung({
+        kunde: kundeKontakt,
+        werkstatt: { name: w.name, adresse, telefon: w.telefon },
+        fallId: input.target === 'claim' ? input.id : null,
+      })
+    }
+
+    // TODO Werkstatt-Notify ("Neuer Reparaturauftrag"): sobald cfefdf75s #3263
+    // (EmpfaengerRolle 'werkstatt' in src/lib/mitteilungen/types.ts + Werkstatt-
+    // Portal-Inbox) in staging ist, hier die Werkstatt (werkstaetten.user_id) via
+    // createMitteilung benachrichtigen — analog notify-freigabe.ts.
   } catch (err) {
     console.warn('[vermittleWerkstatt] Benachrichtigung fehlgeschlagen (non-fatal):', err)
   }
