@@ -72,6 +72,7 @@ export default function DispatchLeadForm({
   flowLinks,
   fallId,
   freigeschalteteSlotIds,
+  currentWerkstatt,
 }: {
   lead: LeadRow
   phasen: OnboardingPhase[]
@@ -88,6 +89,8 @@ export default function DispatchLeadForm({
   // Pflichtdok-Kanonisierung: server-seitig aus dokument_katalog berechnete
   // freigeschaltete Slot-IDs (ersetzt client-seitiges berechneErwartung).
   freigeschalteteSlotIds: string[]
+  // Task 5: aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel.
+  currentWerkstatt: { id: string; name: string } | null
 }) {
   const leadId = lead.id
   const [values, setValues] = useState<Record<string, unknown>>(() => {
@@ -214,6 +217,7 @@ export default function DispatchLeadForm({
                         aktiverTermin,
                         wunschterminIso,
                         wunschterminWochentage,
+                        currentWerkstatt,
                       })
                     ) : (
                       <FieldRenderer

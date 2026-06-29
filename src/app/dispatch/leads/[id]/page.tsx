@@ -155,6 +155,23 @@ export default async function DispatchLeadDetail({
     lead.cardentity_abfrage_am = fallRow.cardentity_abfrage_am ?? null
   }
 
+  // Task 5c: aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel.
+  // reparatur_werkstatt_id steckt bereits im `lead` (select('*')), ist aber wegen
+  // Type-Lag noch nicht typisiert -> Record-Cast. Name separat nachladen.
+  const reparaturWerkstattId =
+    ((lead as Record<string, unknown>).reparatur_werkstatt_id as string | null) ?? null
+  let currentWerkstatt: { id: string; name: string } | null = null
+  if (reparaturWerkstattId) {
+    const { data: wRow } = await admin
+      .from('werkstaetten')
+      .select('id, name')
+      .eq('id', reparaturWerkstattId)
+      .maybeSingle()
+    if (wRow) {
+      currentWerkstatt = { id: wRow.id as string, name: (wRow.name as string | null) ?? 'Werkstatt' }
+    }
+  }
+
   return (
     <>
       <LeadRealtimeRefresh leadId={id} watchTermine />
@@ -174,6 +191,7 @@ export default async function DispatchLeadDetail({
         }
         fallId={fallId}
         freigeschalteteSlotIds={freigeschalteteSlotIds}
+        currentWerkstatt={currentWerkstatt}
       />
     </>
   )
