@@ -70,7 +70,7 @@ export function VersichererSelect({
         <span className="flex items-center gap-1">
           {selected ? (
             <X
-              className="h-4 w-4 cursor-pointer text-claimondo-ondo/70 hover:text-red-500"
+              className="h-4 w-4 cursor-pointer text-claimondo-ondo/70 hover:text-danger"
               role="button"
               aria-label="Auswahl entfernen"
               onClick={(e) => {

@@ -86,7 +86,7 @@ export default function BriefingStrukturSections({
           <SparklesIcon className="w-3.5 h-3.5" />
           Struktur
           {localGeneratedBy === 'fallback' && (
-            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-700 text-[9px] font-medium normal-case tracking-normal">
+            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-warning-soft text-warning-strong text-[9px] font-medium normal-case tracking-normal">
               Fallback
             </span>
           )}
@@ -135,7 +135,7 @@ export default function BriefingStrukturSections({
 
           {current.hinweise.length > 0 && (
             <section>
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-emerald-700 mb-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-success-strong mb-1">
                 <CheckCircle2Icon className="w-3.5 h-3.5" />
                 Hinweise
               </div>
@@ -149,7 +149,7 @@ export default function BriefingStrukturSections({
 
           {current.warnungen.length > 0 && (
             <section>
-              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-amber-700 mb-1">
+              <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-warning-strong mb-1">
                 <AlertTriangleIcon className="w-3.5 h-3.5" />
                 Achtung
               </div>

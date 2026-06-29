@@ -152,11 +152,11 @@ export default function StammdatenAccordion({
                     Fahrbereit
                   </span>
                   {fahrbereit ? (
-                    <span className="inline-flex items-center gap-1 text-sm text-emerald-700">
+                    <span className="inline-flex items-center gap-1 text-sm text-success-strong">
                       <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-sm text-red-700">
+                    <span className="inline-flex items-center gap-1 text-sm text-danger-strong">
                       <XCircleIcon className="w-3.5 h-3.5" /> Nein
                     </span>
                   )}
