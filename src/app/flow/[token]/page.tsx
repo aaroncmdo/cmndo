@@ -267,10 +267,13 @@ export default async function FlowPage({
       if (v !== undefined) feststellungWerte[feld.feld_key] = v
     }
   }
-  // Service-/Kanzlei-Felder (service_typ + kanzlei_wunsch) + Werte fuer den SA-/POS-Step.
+  // Service-Feld (service_typ) + Werte fuer den SA-/POS-Step. kanzlei_wunsch wird
+  // im Flow/Lead NICHT mehr gefragt (Aaron): Komplettservice = LexDrive immer;
+  // convert-lead-to-claim setzt komplett -> 'partnerkanzlei'. Die Kanzlei-Wahl
+  // (eigene Kanzlei) lebt nur auf Claim-Ebene (KanzleiWunschModal im Portal).
   const serviceFelder = allKundeConfig
     .flatMap((p) => p.felder)
-    .filter((f) => f.feld_key === 'service_typ' || f.feld_key === 'kanzlei_wunsch')
+    .filter((f) => f.feld_key === 'service_typ')
   const serviceWerte: Record<string, unknown> = {}
   for (const f of serviceFelder) {
     const v = leseFeldWert(f.db_target?.spalte)
