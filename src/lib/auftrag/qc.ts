@@ -9,6 +9,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
+import { kannGutachtenAbgeben } from './abgabe-berechtigung'
+import { checkFallAutoPhase } from '@/lib/autoPhase'
 
 async function getKbOrAdmin() {
   const supabase = await createClient()
@@ -119,6 +121,20 @@ export async function gutachtenAbgeben(
     return { ok: false, error: 'Auftrag ist bereits final freigegeben' }
   }
 
+  // Filmcheck-Audit 29.06.2026: Ownership-Gate — die Action advanced jetzt die Phase
+  // (s.u.), darf also nicht mehr von jedem auth. User aufrufbar sein. Erlaubt: der SV
+  // DIESES Auftrags + admin/KB.
+  const { data: abgProfile } = await db.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+  const abgRolle = (abgProfile?.rolle as string | null) ?? null
+  let eigeneSvId: string | null = null
+  if (abgRolle === 'sachverstaendiger') {
+    const { data: svRow } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).maybeSingle()
+    eigeneSvId = (svRow?.id as string | null) ?? null
+  }
+  if (!kannGutachtenAbgeben({ rolle: abgRolle, eigeneSvId, auftragSvId: auftrag.sv_id as string | null })) {
+    return { ok: false, error: 'Keine Berechtigung' }
+  }
+
   // Auftrag-zu-Claim-Pfad ermitteln
   const claimId = await resolveClaimId(db, auftrag.fall_id as string)
   if (!claimId) return { ok: false, error: 'Claim nicht gefunden' }
@@ -155,6 +171,19 @@ export async function gutachtenAbgeben(
     .eq('id', auftragId)
   if (aErr) return { ok: false, error: aErr.message }
 
+  // Filmcheck-Audit 29.06.2026: gutachten-Signal (fertiggestellt_am) setzen. Der CMM-32-
+  // Abgabe-Pfad schrieb bisher NUR auftraege.gutachten_url/status -> checkFallAutoPhase
+  // (keyed auf gutachten.fertiggestellt_am, autoPhase.ts) sah das Gutachten nie -> der
+  // Claim advancte nicht -> filmcheck/Kanzlei-Strecke unerreichbar (Legacy uploadGutachten
+  // setzt das Signal korrekt). Non-fatal: Reconcile-Cron (#3310) ist der Backstop.
+  if (auftrag.sv_id) {
+    const { error: gErr } = await db.from('gutachten').upsert(
+      { claim_id: claimId, sv_id: auftrag.sv_id as string, fertiggestellt_am: new Date().toISOString() },
+      { onConflict: 'claim_id' },
+    )
+    if (gErr) console.warn('[gutachtenAbgeben] gutachten-Signal (fertiggestellt_am) fehlgeschlagen:', gErr.message)
+  }
+
   // Timeline-Eintrag + KB-Mitteilung wenn Re-Submit nach Reject
   if (warReject) {
     try {
@@ -181,8 +210,6 @@ export async function gutachtenAbgeben(
       const kbId = (claimRow?.kundenbetreuer_id as string | null) ?? null
       const { triggerQcTask } = await import('@/lib/tasking')
       await triggerQcTask(auftrag.fall_id as string, kbId)
-      const { checkFallAutoPhase } = await import('@/lib/autoPhase')
-      checkFallAutoPhase(auftrag.fall_id as string).catch(() => {})
     } catch (err) {
       console.warn('[gutachtenAbgeben] KB-Re-Arm nach Nachbesserung fehlgeschlagen:', err)
     }
@@ -197,6 +224,12 @@ export async function gutachtenAbgeben(
       })
     } catch { /* non-critical */ }
   }
+
+  // Filmcheck-Audit 29.06.2026: Auto-Advance fuer ALLE Abgaben (fresh + Re-Submit) —
+  // Cascade sv-termin -> begutachtung-laeuft -> gutachten-eingegangen -> (komplett)
+  // filmcheck. Nutzt das oben gesetzte fertiggestellt_am-Signal. Awaited, damit der
+  // revalidatePath den advancten Status sieht.
+  await checkFallAutoPhase(auftrag.fall_id as string).catch(() => {})
 
   revalidatePath(`/faelle/${auftrag.fall_id}`)
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
