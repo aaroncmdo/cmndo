@@ -228,7 +228,7 @@ export default function TwoFaClient({
           )}
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-ios-md px-3 py-2 text-red-700 text-xs mb-4">
+            <div className="bg-danger-soft border border-danger/30 rounded-ios-md px-3 py-2 text-danger-strong text-xs mb-4">
               {error}
             </div>
           )}

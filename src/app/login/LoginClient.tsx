@@ -221,7 +221,7 @@ export default function LoginClient({
                 />
               </div>
               {phoneError && (
-                <p className="text-sm text-red-400 rounded-ios-md bg-red-50/50 border border-red-200 px-4 py-3">{phoneError}</p>
+                <p className="text-sm text-danger rounded-ios-md bg-danger-soft/50 border border-danger/30 px-4 py-3">{phoneError}</p>
               )}
               <LoadingButton
                 onClick={handlePhoneSend}
@@ -248,7 +248,7 @@ export default function LoginClient({
                 />
               </div>
               {phoneError && (
-                <p className="text-sm text-red-400 rounded-ios-md bg-red-50/50 border border-red-200 px-4 py-3">{phoneError}</p>
+                <p className="text-sm text-danger rounded-ios-md bg-danger-soft/50 border border-danger/30 px-4 py-3">{phoneError}</p>
               )}
               <LoadingButton
                 onClick={handlePhoneVerify}
@@ -285,7 +285,7 @@ export default function LoginClient({
             {googleLoading ? 'Weiterleitung …' : 'Mit Google anmelden'}
           </button>
           {googleError && (
-            <p className="text-sm text-red-400 rounded-ios-md bg-red-50/50 border border-red-200 px-4 py-3">{googleError}</p>
+            <p className="text-sm text-danger rounded-ios-md bg-danger-soft/50 border border-danger/30 px-4 py-3">{googleError}</p>
           )}
         </div>
       )}

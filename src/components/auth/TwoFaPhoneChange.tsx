@@ -196,12 +196,12 @@ export function TwoFaPhoneChange({
               )}
 
               {error && (
-                <p className="text-xs text-red-600 bg-red-50 border border-red-200 rounded-ios-md p-2">
+                <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md p-2">
                   {error}
                 </p>
               )}
               {success && (
-                <p className="text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-md p-2">
+                <p className="text-xs text-success-strong bg-success-soft border border-success/30 rounded-ios-md p-2">
                   {success}
                 </p>
               )}

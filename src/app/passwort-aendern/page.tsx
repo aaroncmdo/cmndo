@@ -80,8 +80,8 @@ export default function PasswortAendernPage() {
 
         <div className="bg-white rounded-ios-lg p-8 shadow-sheet">
           <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-ios-md bg-amber-50 flex items-center justify-center">
-              <KeyIcon className="w-5 h-5 text-amber-400" />
+            <div className="w-10 h-10 rounded-ios-md bg-warning-soft flex items-center justify-center">
+              <KeyIcon className="w-5 h-5 text-warning" />
             </div>
             <div>
               <p className="text-claimondo-navy font-medium text-sm">Neues Passwort setzen</p>
@@ -123,7 +123,7 @@ export default function PasswortAendernPage() {
             </div>
 
             {error && (
-              <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center">
+              <p className="text-sm text-danger-strong rounded-ios-md bg-danger-soft border border-danger/30 px-4 py-3 text-center">
                 {error}
               </p>
             )}
