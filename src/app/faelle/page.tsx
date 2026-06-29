@@ -111,7 +111,7 @@ export default async function FaelleListPage() {
       </div>
 
       {error ? (
-        <div className="rounded-ios-md border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+        <div className="rounded-ios-md border border-danger/30 bg-danger-soft p-4 text-sm text-danger-strong">
           Fehler beim Laden: {error.message}
         </div>
       ) : listing.length === 0 ? (

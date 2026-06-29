@@ -241,7 +241,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
               <div key={field}>
                 <label className="text-xs font-medium text-claimondo-navy mb-1 block">
                   {FIELD_LABELS[field]}
-                  {field === 'vs_kuerzungs_typ' && <span className="text-red-500 ml-1">*</span>}
+                  {field === 'vs_kuerzungs_typ' && <span className="text-danger ml-1">*</span>}
                 </label>
                 {field === 'vs_kuerzungs_typ' ? (
                   <div className="flex gap-2">
