@@ -169,7 +169,7 @@ export default function EigeneKanzleiPaketCard({
       </div>
 
       {error && (
-        <p className="text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-md px-2 py-1">
+        <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-md px-2 py-1">
           {error}
         </p>
       )}
