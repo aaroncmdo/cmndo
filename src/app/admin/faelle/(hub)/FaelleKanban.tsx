@@ -117,12 +117,14 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
       </div>
 
       {/* Board: 4 abgeleitete Hauptphasen-Spalten (read-only, kein Drag). */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex', gap: 4, padding: '0 8px 8px 8px', minHeight: 0 }}>
-        <div style={{ display: 'flex', gap: 8, height: '100%', overflowX: 'auto', flex: 1 }}>
+      {/* Mobile: Spalten gestapelt (Board scrollt vertikal); md+: 4 Spalten nebeneinander
+          (Original-Verhalten via md:-Prefixe — h-full, overflow-x-auto, interner Spalten-Scroll). */}
+      <div className="flex-1 flex gap-1 px-2 pb-2 min-h-0 overflow-y-auto md:overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-2 md:h-full flex-1 md:overflow-x-auto">
           {COLUMNS.map(col => {
             const items = byColumn[col.key] ?? []
             return (
-              <div key={col.key} style={{ flex: 1, minWidth: 220, height: '100%', display: 'flex', flexDirection: 'column' }}>
+              <div key={col.key} className="flex flex-col md:flex-1 md:min-w-[220px] md:h-full">
                 {/* Column header: 28px */}
                 <div className="flex items-center gap-1 px-1 flex-shrink-0" style={{ height: 28 }}>
                   <span className={`text-[11px] font-medium tracking-wider uppercase ${col.color}`}>{col.label}</span>
@@ -130,8 +132,8 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
                 </div>
                 <div className={`h-px ${col.bg} opacity-40 flex-shrink-0`} />
 
-                {/* Column body: scrollable */}
-                <div style={{ flex: 1, overflowY: 'auto', padding: 4, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {/* Column body: md+ intern scrollbar, mobil natuerliche Hoehe (Board scrollt). */}
+                <div className="flex flex-col gap-1 p-1 md:flex-1 md:overflow-y-auto">
                   {items.map((fall) => (
                     <FallCard key={fall.id} fall={fall} onRefresh={() => router.refresh()} />
                   ))}
