@@ -365,63 +365,58 @@ async function main() {
           const db2 = helpers.getServiceDb()
           const fixtures = helpers.loadFixtureIds() ?? {}
 
-          // Claim = SSoT: erst faelle by lead_id, dann claims by lead_id, sonst Workaround anlegen
-          const { data: fallRow } = await db2.from('faelle').select('id').eq('lead_id', leadId).maybeSingle()
-          let resolvedFallId = fallRow?.id ?? null
+          // Claim = SSoT (CMM-49: faelle GEDROPPT, fall_id == claim_id). KEIN faelle-Zugriff
+          // mehr — claims by lead_id, sonst minimalen Workaround-Claim anlegen.
+          let { data: claimRow } = await db2.from('claims').select('id').eq('lead_id', leadId).maybeSingle()
 
-          if (!resolvedFallId) {
-            // Prüfe ob claim bereits existiert
-            let { data: claimRow } = await db2.from('claims').select('id').eq('lead_id', leadId).maybeSingle()
-
-            if (!claimRow) {
-              // Claim = SSoT: minimalen Claim aus Lead-Daten anlegen (Smoke-Workaround)
-              const { data: leadData } = await db2
-                .from('leads')
-                .select('unfalldatum, schadentyp')
-                .eq('id', leadId)
-                .maybeSingle()
-              const { data: newClaim, error: claimErr } = await db2
-                .from('claims')
-                .insert({
-                  lead_id: leadId,
-                  schadentag: leadData?.unfalldatum ?? new Date().toISOString().slice(0, 10),
-                  schadenart: 'haftpflicht',
-                  status: 'dispatch_done',
-                  created_via: 'lead_konvertierung',
-                })
-                .select('id')
-                .single()
-              if (claimErr) {
-                console.log(`[Orchestrator] Claim-Insert fehlgeschlagen: ${claimErr.message}`)
-              } else {
-                claimRow = newClaim
-                console.log(`[Orchestrator] Claim angelegt (SSoT-Workaround): ${claimRow.id}`)
-              }
+          if (!claimRow) {
+            // minimalen Claim aus Lead-Daten anlegen (Smoke-Workaround)
+            const { data: leadData } = await db2
+              .from('leads')
+              .select('unfalldatum, schadentyp')
+              .eq('id', leadId)
+              .maybeSingle()
+            const { data: newClaim, error: claimErr } = await db2
+              .from('claims')
+              .insert({
+                lead_id: leadId,
+                schadentag: leadData?.unfalldatum ?? new Date().toISOString().slice(0, 10),
+                schadenart: 'haftpflicht',
+                status: 'dispatch_done',
+                created_via: 'lead_konvertierung',
+              })
+              .select('id')
+              .single()
+            if (claimErr) {
+              console.log(`[Orchestrator] Claim-Insert fehlgeschlagen: ${claimErr.message}`)
+            } else {
+              claimRow = newClaim
+              console.log(`[Orchestrator] Claim angelegt (SSoT-Workaround): ${claimRow.id}`)
             }
+          }
 
-            if (claimRow?.id) {
-              // Fallakte mit claim_id anlegen
-              const { data: newFall, error: fallErr } = await db2
-                .from('faelle')
-                // CMM-49 Step 3: faelle.id == claim_id (Identity) — sonst Bridge-Fan-out / UNIQUE(claim_id)-Throw post-Step-4
-                .insert({ id: claimRow.id, lead_id: leadId, claim_id: claimRow.id, status: 'sv-termin' })
-                .select('id')
-                .single()
-              if (fallErr) {
-                console.log(`[Orchestrator] Fall-Insert fehlgeschlagen: ${fallErr.message}`)
-                // Fallback: faelle by claim_id suchen (Trigger hat ggf. bereits angelegt)
-                const { data: fallByClaimRow } = await db2.from('faelle').select('id').eq('claim_id', claimRow.id).maybeSingle()
-                resolvedFallId = fallByClaimRow?.id ?? null
-              } else {
-                resolvedFallId = newFall.id
-                // gutachter_termine.fall_id aktualisieren
-                const { data: termin } = await db2.from('gutachter_termine').select('id').eq('lead_id', leadId).order('created_at', { ascending: false }).limit(1).maybeSingle()
-                if (termin) {
-                  await db2.from('gutachter_termine').update({ fall_id: resolvedFallId }).eq('id', termin.id)
-                }
-              }
-              console.log(`[Orchestrator] Claim SSoT: claim_id=${claimRow.id} → fall_id=${resolvedFallId}`)
+          // CMM-49: fall_id == claim_id (Identity). Die Bridge legt der trg_sync_claims_to_bridge
+          // (AFTER INSERT claims) an — KEINE faelle-Row. Der frühere faelle-Insert hier crashte
+          // seit dem faelle-DROP (42P01) → der fall_id-Update lief NIE → der SV-Termin blieb im
+          // Kunde-Portal UNSICHTBAR: /kunde/termine filtert gutachter_termine auf fall_id (via
+          // v_claim_full.fall_id == bridge.fall_id == claim_id), NICHT auf claim_id. Darum den
+          // Termin hier claim-nativ verdrahten: fall_id UND claim_id == claimId.
+          let resolvedFallId = claimRow?.id ?? null
+          if (resolvedFallId) {
+            const { data: termin } = await db2
+              .from('gutachter_termine')
+              .select('id')
+              .eq('lead_id', leadId)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle()
+            if (termin) {
+              await db2
+                .from('gutachter_termine')
+                .update({ fall_id: resolvedFallId, claim_id: resolvedFallId })
+                .eq('id', termin.id)
             }
+            console.log(`[Orchestrator] Claim SSoT (claim-nativ): claim_id == fall_id = ${resolvedFallId}`)
           }
 
           const { data: svProfileRow } = await db2.from('profiles').select('id').eq('email', 'test-sv@claimondo.de').maybeSingle()
