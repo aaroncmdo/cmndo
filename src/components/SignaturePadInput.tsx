@@ -12,7 +12,7 @@ import { RotateCcwIcon } from 'lucide-react'
  * signature_pad.fromDataURL() wieder ins Canvas gerendert. Davor: Canvas war
  * nach Step-Zurueck leer, obwohl der Parent-State die Unterschrift noch hatte.
  *
- * Pattern aus src/app/flow/signatur/[token]/SignaturPage.tsx generalisiert.
+ * Pattern aus dem urspruenglichen Signatur-Flow generalisiert.
  */
 export default function SignaturePadInput({
   value,
