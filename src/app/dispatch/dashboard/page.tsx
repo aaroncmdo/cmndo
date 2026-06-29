@@ -69,8 +69,8 @@ export default async function DispatchDashboard() {
 
   const stats = [
     { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', href: '/dispatch/leads' },
-    { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, color: 'text-amber-600', bg: 'bg-amber-50', href: '/dispatch/rueckrufe' },
-    { label: 'FlowLinks versendet', value: flowLinksRes.count ?? 0, icon: LinkIcon, color: 'text-emerald-600', bg: 'bg-emerald-50', href: '/dispatch/leads' },
+    { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, color: 'text-warning', bg: 'bg-warning-soft', href: '/dispatch/rueckrufe' },
+    { label: 'FlowLinks versendet', value: flowLinksRes.count ?? 0, icon: LinkIcon, color: 'text-success', bg: 'bg-success-soft', href: '/dispatch/leads' },
   ]
 
   const tasks = myTasksRes.data ?? []
@@ -174,10 +174,10 @@ export default async function DispatchDashboard() {
       <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
         <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
           <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4 text-amber-600" />
+            <PhoneIcon className="w-4 h-4 text-warning" />
             Rückrufe-Timeline
             {kommendeRueckrufe.length > 0 && (
-              <span className="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              <span className="bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">
                 {kommendeRueckrufe.length}
               </span>
             )}
@@ -202,10 +202,10 @@ export default async function DispatchDashboard() {
                   className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors"
                 >
                   {!r.gesehen_am && (
-                    <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" aria-label="Neu" />
+                    <span className="w-2 h-2 rounded-full bg-danger shrink-0" aria-label="Neu" />
                   )}
                   <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-ios-lg py-1.5 ${
-                    isOverdue ? 'bg-red-50 text-red-700' : 'bg-amber-50 text-amber-800'
+                    isOverdue ? 'bg-danger-soft text-danger-strong' : 'bg-warning-soft text-warning-strong'
                   }`}>
                     <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>
                     <span className="text-sm font-bold">{uhrzeit}</span>
@@ -220,7 +220,7 @@ export default async function DispatchDashboard() {
                     )}
                   </div>
                   {isOverdue && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-red-700 bg-red-50 px-2 py-0.5 rounded-full shrink-0">
+                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
                       <AlertCircleIcon className="w-3 h-3" />
                       Überfällig
                     </span>
@@ -275,7 +275,7 @@ export default async function DispatchDashboard() {
               <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
               Offene Dispatch-Tasks
               {tasks.length > 0 && (
-                <span className="ml-auto bg-amber-100 text-amber-700 text-[10px] font-bold px-2 py-0.5 rounded-full">{tasks.length}</span>
+                <span className="ml-auto bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">{tasks.length}</span>
               )}
             </h2>
           </div>

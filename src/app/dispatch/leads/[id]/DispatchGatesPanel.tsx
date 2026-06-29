@@ -75,13 +75,13 @@ export default function DispatchGatesPanel({ values, lead }: { values: Vals; lea
   return (
     <div className="mb-4 flex flex-col gap-2 max-w-3xl">
       {manuellDisqualifiziert && (
-        <div className="rounded-ios-lg bg-red-50 border border-red-200 px-3 py-2 text-sm font-semibold text-red-700">
+        <div className="rounded-ios-lg bg-danger-soft border border-danger/30 px-3 py-2 text-sm font-semibold text-danger-strong">
           Manuell disqualifiziert
         </div>
       )}
 
       {warnings.map((w, i) => (
-        <div key={i} className="rounded-ios-lg bg-amber-50 border border-amber-200 px-3 py-2 text-sm text-amber-900">
+        <div key={i} className="rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2 text-sm text-warning-strong">
           <span className="font-semibold">Achtung:</span> {w}
         </div>
       ))}
@@ -92,7 +92,7 @@ export default function DispatchGatesPanel({ values, lead }: { values: Vals; lea
           <span className="font-semibold text-claimondo-navy">
             Vollständigkeit: {qual.completedCount}/8
           </span>
-          <span className={qual.canSendFlowLink ? 'text-emerald-600 font-medium' : 'text-claimondo-ondo/60'}>
+          <span className={qual.canSendFlowLink ? 'text-success font-medium' : 'text-claimondo-ondo/60'}>
             {qual.canSendFlowLink ? 'Flowlink-bereit ✓' : 'Flowlink: noch offen'}
           </span>
         </div>

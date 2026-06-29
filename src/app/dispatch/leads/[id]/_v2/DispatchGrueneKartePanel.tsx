@@ -50,7 +50,7 @@ export function DispatchGrueneKartePanel({
       </p>
 
       {angefragtAm ? (
-        <div className="flex items-center gap-2 rounded-ios-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-700">
+        <div className="flex items-center gap-2 rounded-ios-lg border border-success/30 bg-success-soft px-3 py-2 text-xs text-success-strong">
           <CheckCircleIcon className="h-4 w-4 shrink-0" />
           Grüne Karte angefragt am {formatDatum(angefragtAm)} — KB-Reminder läuft (+10 Tage).
         </div>
@@ -66,7 +66,7 @@ export function DispatchGrueneKartePanel({
         </Button>
       )}
 
-      {error && <p className="mt-2 text-xs text-red-600">{error}</p>}
+      {error && <p className="mt-2 text-xs text-danger">{error}</p>}
     </SectionCard>
   )
 }

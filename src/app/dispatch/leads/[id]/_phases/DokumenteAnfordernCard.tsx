@@ -64,10 +64,10 @@ type Props = {
 type SonstigesEintrag = { id: number; label: string }
 
 const STATUS_UI: Record<string, { label: string; bg: string; text: string; icon: typeof CheckCircle2Icon }> = {
-  gesendet: { label: 'Anfrage gesendet — warte auf Foto', bg: 'bg-amber-50 border-amber-200', text: 'text-amber-700', icon: ClockIcon },
+  gesendet: { label: 'Anfrage gesendet — warte auf Foto', bg: 'bg-warning-soft border-warning/30', text: 'text-warning-strong', icon: ClockIcon },
   geoeffnet: { label: 'Kunde hat Anfrage geöffnet', bg: 'bg-claimondo-bg border-claimondo-border', text: 'text-claimondo-ondo', icon: ClockIcon },
-  hochgeladen: { label: 'Foto eingegangen', bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: CheckCircle2Icon },
-  fehlgeschlagen: { label: 'Upload fehlgeschlagen — manuell nacharbeiten', bg: 'bg-red-50 border-red-200', text: 'text-red-700', icon: AlertCircleIcon },
+  hochgeladen: { label: 'Foto eingegangen', bg: 'bg-success-soft border-success/30', text: 'text-success-strong', icon: CheckCircle2Icon },
+  fehlgeschlagen: { label: 'Upload fehlgeschlagen — manuell nacharbeiten', bg: 'bg-danger-soft border-danger/30', text: 'text-danger-strong', icon: AlertCircleIcon },
   abgelehnt: { label: 'Manuelle Erfassung gewählt', bg: 'bg-claimondo-bg border-claimondo-border', text: 'text-claimondo-ondo', icon: XCircleIcon },
 }
 
@@ -472,7 +472,7 @@ export default function DokumenteAnfordernCard({
                 <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                 <span className="text-xs font-semibold text-claimondo-navy">Unfallfotos</span>
                 {fotosCount > 0 && (
-                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-green-50 text-green-700 font-medium">
+                  <span className="text-[9px] px-1.5 py-0.5 rounded bg-success-soft text-success-strong font-medium">
                     {fotosCount} Foto{fotosCount === 1 ? '' : 's'} eingegangen
                   </span>
                 )}
@@ -490,7 +490,7 @@ export default function DokumenteAnfordernCard({
               unklar = Haiku hat „Schaden nicht eindeutig erkennbar" geliefert.
               erfolg = Haiku hat eine Schadenbeschreibung geschrieben. */}
           {unfallfotosAnalyseStatus === 'warte' && (
-            <div className="mt-2 flex items-center gap-2 text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+            <div className="mt-2 flex items-center gap-2 text-[11px] text-warning-strong bg-warning-soft border border-warning/30 rounded px-2 py-1.5">
               <ClockIcon className="w-3 h-3 shrink-0" />
               <span>Anfrage gesendet — warte auf Fotos vom Kunden …</span>
             </div>
@@ -502,7 +502,7 @@ export default function DokumenteAnfordernCard({
             </div>
           )}
           {unfallfotosAnalyseStatus === 'unklar' && (
-            <div className="mt-2 flex items-start gap-2 text-[11px] text-amber-800 bg-amber-50 border border-amber-200 rounded px-2 py-1.5">
+            <div className="mt-2 flex items-start gap-2 text-[11px] text-warning-strong bg-warning-soft border border-warning/30 rounded px-2 py-1.5">
               <AlertCircleIcon className="w-3 h-3 shrink-0 mt-0.5" />
               <span>
                 Schaden auf Foto nicht eindeutig erkennbar — Schadenbeschreibung
@@ -511,11 +511,11 @@ export default function DokumenteAnfordernCard({
             </div>
           )}
           {unfallfotosAnalyseStatus === 'erfolg' && (
-            <div className="mt-2 flex items-start gap-2 text-[11px] text-green-800 bg-green-50 border border-green-200 rounded px-2 py-1.5">
+            <div className="mt-2 flex items-start gap-2 text-[11px] text-success-strong bg-success-soft border border-success/30 rounded px-2 py-1.5">
               <CheckCircle2Icon className="w-3 h-3 shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="font-medium">Analyse erfolgreich — Schadenbeschreibung gefüllt.</p>
-                <p className="text-green-700 mt-0.5 line-clamp-2">{haikuBeschreibung}</p>
+                <p className="text-success-strong mt-0.5 line-clamp-2">{haikuBeschreibung}</p>
               </div>
             </div>
           )}
@@ -559,7 +559,7 @@ export default function DokumenteAnfordernCard({
                   <div className="flex items-center gap-1.5">
                     <CameraIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                     <span className="text-xs font-semibold text-claimondo-navy">Fotos des Sachschadens</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">Sachschaden</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning-soft text-warning-strong font-medium">Sachschaden</span>
                   </div>
                   <p className="text-[10px] text-claimondo-ondo mt-0.5">
                     Fotos des beschädigten Gegenstands (z. B. Handy, Brille, Kleidung).
@@ -579,7 +579,7 @@ export default function DokumenteAnfordernCard({
                   <div className="flex items-center gap-1.5">
                     <ReceiptIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                     <span className="text-xs font-semibold text-claimondo-navy">Rechnung / Kostenvoranschlag Sachschaden</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 font-medium">Sachschaden</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-warning-soft text-warning-strong font-medium">Sachschaden</span>
                   </div>
                   <p className="text-[10px] text-claimondo-ondo mt-0.5">
                     Reparaturrechnung oder Kostenvoranschlag für den beschädigten Gegenstand.
@@ -605,7 +605,7 @@ export default function DokumenteAnfordernCard({
                   <div className="flex items-center gap-1.5">
                     <StethoscopeIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                     <span className="text-xs font-semibold text-claimondo-navy">Ärztliches Attest</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Personenschaden</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-danger-soft text-danger-strong font-medium">Personenschaden</span>
                   </div>
                   <p className="text-[10px] text-claimondo-ondo mt-0.5">
                     Ärztliche Bescheinigung über Verletzungen infolge des Unfalls.
@@ -625,7 +625,7 @@ export default function DokumenteAnfordernCard({
                   <div className="flex items-center gap-1.5">
                     <FileTextIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
                     <span className="text-xs font-semibold text-claimondo-navy">Diagnosebericht / Befundbericht</span>
-                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-red-50 text-red-700 font-medium">Personenschaden</span>
+                    <span className="text-[9px] px-1.5 py-0.5 rounded bg-danger-soft text-danger-strong font-medium">Personenschaden</span>
                   </div>
                   <p className="text-[10px] text-claimondo-ondo mt-0.5">
                     Ärztlicher Befundbericht oder Entlassungsbericht aus der Klinik.
@@ -687,7 +687,7 @@ export default function DokumenteAnfordernCard({
             <button
               type="button"
               onClick={() => removeSonstiges(s.id)}
-              className="text-claimondo-ondo/70 hover:text-red-600"
+              className="text-claimondo-ondo/70 hover:text-danger"
               title="Entfernen"
             >
               <XIcon className="w-4 h-4" />
@@ -728,7 +728,7 @@ export default function DokumenteAnfordernCard({
               onClick={() => setKanal('sms')}
               disabled={!telefon}
               className={`flex flex-col items-center gap-1 px-2 py-2 rounded-ios-lg text-[11px] font-medium transition-colors ${
-                kanal === 'sms' ? 'bg-amber-500 text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
+                kanal === 'sms' ? 'bg-warning text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:bg-claimondo-bg'
               } disabled:opacity-40`}
             >
               <PhoneIcon className="w-4 h-4" />
@@ -758,7 +758,7 @@ export default function DokumenteAnfordernCard({
             {pending ? 'Sende ...' : 'Anfrage senden'}
           </Button>
           {feedback && (
-            <p className={`text-[11px] ${feedback.ok ? 'text-green-700' : 'text-red-600'}`}>
+            <p className={`text-[11px] ${feedback.ok ? 'text-success-strong' : 'text-danger'}`}>
               {feedback.text}
             </p>
           )}

@@ -55,7 +55,7 @@ export function DispatchChecklistPanel({ phasen, values }: { phasen: OnboardingP
           <div key={s.titel} className="text-xs">
             <div className="flex items-center gap-1.5 font-medium text-claimondo-navy">
               {s.fehlend.length === 0 ? (
-                <CheckCircle2Icon className="h-3.5 w-3.5 text-emerald-600" />
+                <CheckCircle2Icon className="h-3.5 w-3.5 text-success" />
               ) : (
                 <CircleIcon className="h-3.5 w-3.5 text-claimondo-ondo/40" />
               )}
