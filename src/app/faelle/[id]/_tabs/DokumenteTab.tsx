@@ -120,6 +120,10 @@ type DokumenteTabProps = {
   dokumente: Dokument[]
   fallAS: FallAS
   qcCheckliste: QcCheckliste | null
+  /** Filmcheck #7: auto-vorbefuellte QC-Checks aus Falldaten (KB kann ueberschreiben). */
+  qcAutoChecks?: Record<string, boolean>
+  /** Filmcheck #7: Gutachten-PDF-URL fuer die Evidenz-Verlinkung in der QC-Karte. */
+  qcGutachtenUrl?: string | null
   anforderbareSlots: AnforderbarerSlot[]
   anforderungenVonMir: AnforderungsItem[]
   rolleLabel: string
@@ -142,6 +146,8 @@ export default function DokumenteTab({
   dokumente,
   fallAS,
   qcCheckliste,
+  qcAutoChecks,
+  qcGutachtenUrl,
   anforderbareSlots,
   anforderungenVonMir,
   rolleLabel,
@@ -521,7 +527,7 @@ export default function DokumenteTab({
       </div>
 
       {/* AAR-170/AAR-755: QC-Checkliste (extrahiert) */}
-      <QcChecklisteBlock fallId={fallId} qcCheckliste={qcCheckliste} />
+      <QcChecklisteBlock fallId={fallId} qcCheckliste={qcCheckliste} autoChecks={qcAutoChecks} gutachtenUrl={qcGutachtenUrl} />
     </div>
   )
 }
