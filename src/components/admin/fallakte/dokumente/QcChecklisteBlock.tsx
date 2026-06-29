@@ -8,7 +8,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ClipboardCheckIcon } from 'lucide-react'
+import { ClipboardCheckIcon, FileTextIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   qcBestanden,
@@ -52,14 +52,20 @@ const QC_FIELDS: { key: keyof QcCheckliste; label: string }[] = [
 type Props = {
   fallId: string
   qcCheckliste: QcCheckliste | null
+  /** Filmcheck #7: aus Falldaten auto-vorbefuellte Checks (KB-Wert gewinnt). */
+  autoChecks?: Record<string, boolean>
+  /** Filmcheck #7: Gutachten-PDF zur Inline-Pruefung. */
+  gutachtenUrl?: string | null
 }
 
-export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
+export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl }: Props) {
   const router = useRouter()
   const [qcState, setQcState] = useState<Record<string, boolean | null>>(() => {
     const init: Record<string, boolean | null> = {}
     for (const { key } of QC_FIELDS) {
-      init[key as string] = (qcCheckliste?.[key] as boolean | null | undefined) ?? null
+      // Filmcheck #7: gespeicherter KB-Wert gewinnt, sonst Auto-Ableitung, sonst offen.
+      const saved = qcCheckliste?.[key] as boolean | null | undefined
+      init[key as string] = saved ?? autoChecks?.[key as string] ?? null
     }
     return init
   })
@@ -152,6 +158,24 @@ export function QcChecklisteBlock({ fallId, qcCheckliste }: Props) {
         )}
       </div>
       <div className="p-4 space-y-4">
+        {gutachtenUrl && (
+          <a
+            href={gutachtenUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-between px-3 py-2 rounded-ios-lg border border-claimondo-ondo/30 bg-claimondo-ondo/[0.06] text-xs font-medium text-claimondo-navy hover:border-claimondo-ondo"
+          >
+            <span className="flex items-center gap-2">
+              <FileTextIcon className="w-3.5 h-3.5" /> Gutachten öffnen (zur Prüfung)
+            </span>
+            <span className="text-claimondo-ondo">↗</span>
+          </a>
+        )}
+        {autoChecks && Object.keys(autoChecks).length > 0 && (
+          <p className="text-[10px] text-claimondo-ondo/70">
+            Einige Felder sind aus den Falldaten vorbefüllt — bitte prüfen, die offenen („—") selbst beurteilen.
+          </p>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
           {QC_FIELDS.map(({ key, label }) => {
             const v = qcState[key as string]

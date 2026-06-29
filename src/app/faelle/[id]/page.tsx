@@ -17,6 +17,7 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 // AAR-433 (Child 4 AAR-429): KB Phase-State-Audit oberhalb der Tabs
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
+import { berechneQcAutoChecks } from '@/lib/qc/auto-checks'
 import RegulierungCard from '@/components/kb/RegulierungCard'
 // 13.05.2026 Restore (8f088031-Merge + 693f97f8-ts-cleanup): 3 Cards
 // silent rausgefallen — siehe docs/13.05.26/TICKET-cmm28-followup-admin-kb-fallakte.md
@@ -729,6 +730,9 @@ export default async function FallaktePage({
   })
 
   // CMM-32e: Vollständigkeits-Check-Card-Daten für KB/Admin
+  // Filmcheck #7: auto-vorbefuellte QC-Checks + Gutachten-PDF fuer die QC-Karte (KB/Admin).
+  let qcAutoChecks: Record<string, boolean> = {}
+  let qcGutachtenUrl: string | null = null
   let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
@@ -794,6 +798,14 @@ export default async function FallaktePage({
         vorhanden: p.status === 'hochgeladen' || p.status === 'geprueft',
         pflicht: !!p.pflicht,
       }))
+      // Filmcheck #7: QC-Checks aus Falldaten vorbefuellen (gutachten_vorhanden/sa/vollmacht).
+      // vorschaden_geprueft ist in page.tsx nicht geladen -> Phase 1b. PDF = Hauptgutachten.
+      qcAutoChecks = berechneQcAutoChecks({
+        gutachtenUrlVorhanden: !!erstgutachten.gutachten_url,
+        vorschaedenGeprueft: null,
+        pflichtItems: pflichtItemsList,
+      })
+      qcGutachtenUrl = haupt?.url ?? null
       qcCardProps = {
         auftragId: erstgutachten.id,
         hatGutachten: !!erstgutachten.gutachten_url,
@@ -970,6 +982,9 @@ export default async function FallaktePage({
           },
           // AAR-170: QC-Checkliste direkt im Dokumente-Tab (vorher im Monolithen)
           qcCheckliste: (qcCheckliste ?? null) as Parameters<typeof FallakteShell>[0]['dokumenteTabProps']['qcCheckliste'],
+          // Filmcheck #7: auto-vorbefuellte Checks + Gutachten-PDF zur Pruefung
+          qcAutoChecks,
+          qcGutachtenUrl,
           // AAR-327: Dokument-Anforderungs-UI
           anforderbareSlots,
           anforderungenVonMir,
