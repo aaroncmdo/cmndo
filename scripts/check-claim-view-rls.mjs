@@ -137,16 +137,17 @@ for (const r of data) {
   const { data: leaking, error: eL } = await callRpc('audit_claim_views_leaking_to_nobody')
   if (eL) { console.error('❌ RPC audit_claim_views_leaking_to_nobody fehlgeschlagen:', eL.message); process.exit(1) }
   for (const r of (leaking ?? [])) problems.push(`empirischer Leak: ${r.view_name} zeigt einem Nobody-User ${r.nobody_sieht_zeilen} Zeilen → Gate fehlt/fehlerhaft.`)
-  // Identity-Cross-Compare (Schritt 2b): pro Rolle (kunde/sv/kb) mit bekanntem eigenem Claim X +
-  // fremdem Claim Y — POSITIV X sichtbar (faengt Unter-Exposure/Geist) + NEGATIV Y unsichtbar (Leak).
-  // Faengt GENAU die Klassen, die der Nobody-Leak-Check NICHT faengt (Geist) bzw. nur grob.
+  // Identity-Cross-Compare (Schritt 2b): pro Rolle (alle 8: kunde/sv/kb/kanzlei/makler/werkstatt +
+  // admin/dispatch positiv-only) mit bekanntem eigenem Claim X + fremdem Claim Y — POSITIV X sichtbar
+  // (faengt Unter-Exposure/Geist) + NEGATIV Y unsichtbar (Leak). Faengt GENAU die Klassen, die der
+  // Nobody-Leak-Check NICHT faengt (Geist) bzw. nur grob.
   const { data: ident, error: eI } = await callRpc('audit_claim_view_identity')
   if (eI) { console.error('❌ RPC audit_claim_view_identity fehlgeschlagen:', eI.message); process.exit(1) }
   for (const r of (ident ?? [])) problems.push(`Identity-Cross-Compare [${r.rolle}/${r.view_name}]: ${r.befund}`)
 }
 
 if (problems.length === 0) {
-  console.log(`✓ ${data.length} bekannte Claim-Views row-gegatet + 0 anon-Lecks + 0 ungated/leakende Views + Identity-Cross-Compare (kunde/sv/kb) sauber.`)
+  console.log(`✓ ${data.length} bekannte Claim-Views row-gegatet + 0 anon-Lecks + 0 ungated/leakende Views + Identity-Cross-Compare (8 Rollen) sauber.`)
   process.exit(0)
 }
 
