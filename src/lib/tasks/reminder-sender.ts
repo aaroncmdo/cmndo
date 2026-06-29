@@ -52,10 +52,13 @@ function buildMessage(typ: string, task: TaskRow): string {
   return `Erinnerung${label}: "${titel}".`
 }
 
-async function sendSystemMessage(fallId: string | null, message: string): Promise<void> {
-  if (!fallId) return
+// Kanal-Handler liefern `true` wenn tatsaechlich zugestellt wurde, `false` bei einem
+// Soft-Skip (Empfaenger hat fuer diesen Kanal keinen Kontakt / Task hat keinen fall_id).
+// Ein echter Send-Fehler (Kanal sollte zustellen, warf aber) wird geworfen.
+async function sendSystemMessage(fallId: string | null, message: string): Promise<boolean> {
+  if (!fallId) return false
   const db = createAdminClient()
-  await db.from('nachrichten').insert({
+  const { error } = await db.from('nachrichten').insert({
     fall_id: fallId,
     kanal: 'system',
     sender_id: null,
@@ -63,23 +66,28 @@ async function sendSystemMessage(fallId: string | null, message: string): Promis
     nachricht: message,
     hat_anhang: false,
   })
+  if (error) throw new Error(`nachrichten-insert: ${error.message}`)
+  return true
 }
 
-async function sendWhatsAppForTask(profile: ProfileRow | null, message: string): Promise<void> {
-  if (!profile?.telefon) throw new Error('Keine Telefonnummer für Empfänger')
+async function sendWhatsAppForTask(profile: ProfileRow | null, message: string): Promise<boolean> {
+  // Kein Telefon = Kanal fuer diesen Empfaenger nicht zustellbar (Soft-Skip, KEIN harter Fehler).
+  // Interne Task-Empfaenger (Mitarbeiter) haben oft keine WhatsApp-Nummer -> system/email traegt.
+  if (!profile?.telefon) return false
   const { sendWhatsApp } = await import('@/lib/whatsapp')
   const result = await sendWhatsApp(profile.telefon, message)
   if (!result.success) {
     throw new Error(result.error ?? 'WhatsApp-Send fehlgeschlagen')
   }
+  return true
 }
 
 async function sendEmailForTask(
   profile: ProfileRow | null,
   task: TaskRow,
   message: string,
-): Promise<void> {
-  if (!profile?.email) throw new Error('Keine Email-Adresse für Empfänger')
+): Promise<boolean> {
+  if (!profile?.email) return false // Soft-Skip: Empfaenger ohne Email -> Kanal nicht zustellbar.
   const { sendEmail } = await import('@/lib/email/google/client')
   const subject = `Task-Erinnerung: ${task.titel ?? 'Task'}`
   const html = `<p>${message.replace(/\n/g, '<br/>')}</p>${
@@ -93,6 +101,7 @@ async function sendEmailForTask(
     empfaengerTyp: 'admin',
     fallId: task.fall_id ?? null,
   })
+  return true
 }
 
 export async function sendTaskReminder(reminderId: string): Promise<void> {
@@ -132,37 +141,66 @@ export async function sendTaskReminder(reminderId: string): Promise<void> {
   const message = buildMessage(reminder.reminder_typ, task)
   const channels = reminder.kanal.split('+').map(c => c.trim()).filter(Boolean)
 
-  const errors: string[] = []
+  const errors: string[] = [] // harte Fehler (Kanal sollte zustellen, warf aber)
+  const skipped: string[] = [] // Soft-Skips (kein Kontakt / kein fall_id) -> kein Fehler
+  let delivered = 0 // Anzahl tatsaechlich zugestellter Kanaele
   for (const channel of channels) {
     try {
+      let ok = false
       if (channel === 'system') {
-        await sendSystemMessage(task.fall_id, message)
+        ok = await sendSystemMessage(task.fall_id, message)
       } else if (channel === 'whatsapp') {
-        await sendWhatsAppForTask(profile, message)
+        ok = await sendWhatsAppForTask(profile, message)
       } else if (channel === 'email') {
-        await sendEmailForTask(profile, task, message)
+        ok = await sendEmailForTask(profile, task, message)
       } else {
         errors.push(`Unbekannter Kanal: ${channel}`)
+        continue
       }
+      if (ok) delivered++
+      else skipped.push(channel)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       errors.push(`${channel}: ${msg}`)
     }
   }
 
-  if (errors.length > 0) {
+  const notes = [...skipped.map(c => `${c}: uebersprungen (kein Kontakt)`), ...errors]
+
+  // Last-Resort-Email-Fallback: kam KEIN konfigurierter Kanal durch (z.B. fall-loser Task ->
+  // system nicht zustellbar + Mitarbeiter ohne WhatsApp-Nummer), der Empfaenger hat aber eine
+  // Email -> per Email zustellen. Eine interne Task-Erinnerung soll den Bearbeiter erreichen,
+  // statt still als failed zu verpuffen. Greift nur als letzter Ausweg (delivered === 0) und
+  // nur wenn Email nicht ohnehin schon konfigurierter Kanal war (sonst wurde sie oben versucht).
+  if (delivered === 0 && !channels.includes('email') && profile?.email) {
+    try {
+      if (await sendEmailForTask(profile, task, message)) {
+        delivered++
+        notes.push('email-fallback: zugestellt')
+      }
+    } catch (err) {
+      notes.push(`email-fallback: ${err instanceof Error ? err.message : String(err)}`)
+    }
+  }
+
+  // Zustell-Semantik: solange MINDESTENS EIN Kanal zugestellt hat, gilt der Reminder als
+  // versendet. `failed` NUR wenn KEIN Kanal durchkam (alte Logik: ein WA-no-phone -> ganzer
+  // Reminder failed, obwohl system/email zustellten). Soft-Skips + harte Fehler -> `fehler`.
+  const note = notes.join(' | ') || null
+
+  if (delivered > 0) {
+    await db
+      .from('task_reminders')
+      .update({ status: 'sent', versendet_am: new Date().toISOString(), fehler: note })
+      .eq('id', reminder.id)
+  } else {
     await db
       .from('task_reminders')
       .update({
         status: 'failed',
         versuche: (reminder.versuche ?? 0) + 1,
-        fehler: errors.join(' | '),
+        fehler: note ?? 'Kein zustellbarer Kanal',
       })
-      .eq('id', reminder.id)
-  } else {
-    await db
-      .from('task_reminders')
-      .update({ status: 'sent', versendet_am: new Date().toISOString() })
       .eq('id', reminder.id)
   }
 }
