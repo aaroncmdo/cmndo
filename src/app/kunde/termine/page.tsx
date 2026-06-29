@@ -53,6 +53,10 @@ export default async function KundeTermine() {
       .select('id, start_zeit, status, typ, kanal, fall_id, ablehnen_token')
       .in('fall_id', fallIds)
       .is('cancelled_at', null)
+      // Geist-Defense: superseded/abgesagte Status serverseitig ausschliessen (cancelled_at allein
+      // ist unzuverlaessig — 23 Live-Zeilen verletzten die Invariante terminal=>cancelled_at).
+      // 'abgeschlossen'/'abgelehnt' bleiben fuer Historie/Transparenz im KundeTermineClient.
+      .not('status', 'in', '(verschoben,verlegt,storniert,abgesagt)')
       .order('start_zeit', { ascending: false })
     termine = (data ?? []) as TerminRow[]
   }
