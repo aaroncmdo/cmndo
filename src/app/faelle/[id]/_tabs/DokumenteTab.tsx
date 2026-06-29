@@ -297,7 +297,7 @@ export default function DokumenteTab({
                   <Icon className={`w-4 h-4 ${cfg.text} shrink-0`} />
                   <span className="text-sm text-claimondo-navy truncate">{label}</span>
                   {dok.pflicht && (
-                    <span className="text-[9px] text-red-400 font-medium">Pflicht</span>
+                    <span className="text-[9px] text-danger font-medium">Pflicht</span>
                   )}
                 </div>
                 <div className="flex items-center gap-2 shrink-0">
