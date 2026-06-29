@@ -136,3 +136,33 @@ Beleg für **Audit-Note #3** (keine Cron-Observability): `slot-ttl-cleanup` ist 
 nicht gelaufen. Ein Run-Logging in `cron-call.sh` (Exit/Result → Audit-Tabelle, oder die neue
 `failed_async_operations`-Infra aus #3273) ist der eigentliche Hebel gegen diese Klasse.
 
+## Stand 2026-06-29 — Audit umgesetzt (Live-VPS)
+
+> Überholt teilweise den 2026-06-20-Abzug oben + das Addendum. Per `paramiko` (Aaron-autorisiert,
+> kein SSH-Key vorhanden) auf den Live-VPS angewendet + verifiziert. Backup:
+> `/root/crontab-backup-2026-06-29-104801.txt` (Rollback: `crontab <backup>`).
+
+### Umgesetzt
+- **`slot-ttl-cleanup`** → `*/5 * * * *` nachgetragen. HTTP 2xx verifiziert; **räumte die 58 hängenden
+  Slot-Reservierungen (älteste 47 d) sofort: 58 → 0**.
+- **`recovery-monitor`** (Dead-Letter #3273) → `0,15,30,45 * * * *` nachgetragen. HTTP 2xx; clean No-op
+  (`failed_async_operations` leer).
+- **KORREKTUR `whatsapp-erinnerungen`:** war auf dem Live-VPS **bereits auskommentiert** (Disable
+  2026-06-20, Grund „Doppel-WA") — NICHT der oben/im Addendum angenommene aktive `*/30`-404-Call.
+  Der 2026-06-20-Abzug oben zeigt die Zeile noch aktiv (Snapshot wurde kurz vor dem Disable gezogen).
+  Zeile bleibt als dokumentierter Disabled-Kommentar stehen. Der reale Double-Send läuft über
+  `send-reminders` + `termin-erinnerungen` (s. Reminder-Double-Send-Analyse), nicht über diesen.
+- Crontab jetzt **67 Zeilen**.
+
+### Empfehlung für die 6 ungeplanten Routen (Aaron-Entscheid — alle live NICHT eingeplant)
+Zweck (Header) + DB-Evidenz geprüft:
+
+| Route | Empfehlung | Begründung |
+|---|---|---|
+| `case-billing-batch` | **schedulen** `0 17 * * *` | Billing-Backstop (AAR-924). DB: **1 Fall billable mit `lead_preis_netto=NULL`** = verpasstes Billing → Revenue-Gap. `processCaseBilling` idempotent. |
+| `stripe-reconcile` | **schedulen** `0 6 * * *` | Read-only Payment-Drift-Report (AAR-929 Ph1), Anti-Spam (still bei 0 Drift). Risikolos. |
+| `sv-mahnung-saeumnis` | **schedulen** `0 8 * * *` | SV-Mahnstufen 14/21/28 d (AAR-927). DB: 0 SV-Abrechnungen → jetzt No-op, korrekt sobald SV-Billing live. |
+| `kb-beratung-anlage-notify` | schedulen `*/10 * * * *` (niedrige Prio) | Vormerk-Email für `kb_beratung`-Termine (AAR-956). DB: 0 pending → No-op jetzt. ⚠ aar-956-Zone, abstimmen. |
+| `refresh-feeds` | optional `0 6 * * *` | GEO-Feed-Warming + IndexNow. Low-Impact (No-op solange `/feed*`-Routen fehlen). |
+| `termin-morgen-erinnerung` | **NICHT schedulen** | Redundant zu `send-reminders` `kunde_morgen` (beide 07:00 Berlin, Kunde-Morgen-WA) → würde den Double-Send verschärfen. Gehört in die Reminder-Konsolidierung, nicht standalone. |
+
