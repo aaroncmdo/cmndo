@@ -5109,8 +5109,8 @@
       "cta": "Termin öffnen"
     },
     "vollmachtUnterschreiben": {
-      "titel": "Vollmacht bestätigen",
-      "beschreibung": "Damit LexDrive mit der Versicherung verhandeln darf, brauchen wir Ihre digitale Vollmacht.",
+      "titel": "Vollmacht unterschreiben",
+      "beschreibung": "Ihre Partnerkanzlei LexDrive schickt Ihnen die Vollmacht per WhatsApp. Bitte unterschreiben Sie sie dort — danach übernimmt LexDrive die Verhandlung mit der Versicherung.",
       "cta": "Jetzt bestätigen"
     },
     "vsAntwortAbwarten": {
