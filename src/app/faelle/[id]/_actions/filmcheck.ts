@@ -25,6 +25,7 @@ import {
   QC_FIELD_LABELS,
   type QcCheckValues,
 } from '@/lib/qc/checkliste-validation'
+import { kanzleiHandoffBereitsErfolgt } from '@/lib/kanzlei/handoff-guard'
 
 // Filmcheck-Audit 29.06.2026: serverseitiges Rollen-Gate fuer ALLE QC-Actions.
 // Vorher pruefte jede Action nur "eingeloggt ja/nein" -> jeder authentifizierte
@@ -93,12 +94,18 @@ export async function saveFilmcheck(
   // checkFallAutoPhase (unten) progressed den Claim regulaer. Default true, damit
   // Faelle ohne aufloesbare claim_id das bisherige Verhalten behalten.
   let istKomplett = true
+  let opStatus: string | null = null
   if (claimId) {
-    const { data: claimSvc } = await supabase.from('claims').select('service_typ').eq('id', claimId).single()
+    const { data: claimSvc } = await supabase.from('claims').select('service_typ, operative_status').eq('id', claimId).single()
     istKomplett = (claimSvc?.service_typ as string | null) !== 'nur_gutachter'
+    opStatus = (claimSvc?.operative_status as string | null) ?? null
   }
 
-  if (istKomplett) {
+  // Idempotenz (Filmcheck-Audit 29.06.2026): beide KB-Approve-Buttons (qcBestanden +
+  // gibKanzleipaketFrei) routen durch saveFilmcheck. Handoff nur wenn noch nicht
+  // uebergeben — sonst wuerfe transitionFallStatus (kanzlei-uebergeben -> kanzlei-
+  // uebergeben ist kein gueltiger Uebergang) bei einem zweiten Klick.
+  if (istKomplett && !kanzleiHandoffBereitsErfolgt(opStatus)) {
     // KFZ-202: Status via State-Machine
     await transitionFallStatus(fallId, 'kanzlei-uebergeben')
 
