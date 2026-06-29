@@ -113,9 +113,10 @@ function EntwurfCard({ post }: { post: LinkedInPostRow }) {
         value={text}
         onChange={(e) => setText(e.target.value)}
         rows={8}
+        aria-label="Post-Text bearbeiten"
         className="w-full rounded-ios-md border border-claimondo-border p-3 text-body-sm"
       />
-      <p className="text-body-xs text-claimondo-slate truncate">{post.feed_url}</p>
+      <p title={post.feed_url} className="text-body-xs text-claimondo-slate truncate">{post.feed_url}</p>
       <div className="flex flex-wrap gap-2">
         <Button
           variant="ghost"
@@ -129,7 +130,7 @@ function EntwurfCard({ post }: { post: LinkedInPostRow }) {
           loading={pending}
           onClick={() => run(() => freigebenUndPosten(post.id), 'Veröffentlicht')}
         >
-          Freigeben &amp; posten
+          Freigeben & posten
         </Button>
         <Button
           variant="bare"
