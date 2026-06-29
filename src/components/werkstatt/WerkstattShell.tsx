@@ -17,6 +17,7 @@ import UpdatesNav from '@/components/shared/updates'
 import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import TasksPill from '@/components/shared/TasksPill'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
+import { WERKSTATT_ROUTES } from '@/lib/werkstatt/routes'
 
 type WerkstattShellProps = {
   werkstatt: {
@@ -34,7 +35,7 @@ const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
   { href: '/werkstatt/vermittlungen', label: 'Meine Vermittlungen', icon: HandshakeIcon },
-  { href: '/werkstatt/auftraege', label: 'Reparatur-Aufträge', icon: WrenchIcon },
+  { href: WERKSTATT_ROUTES.auftraege, label: 'Reparatur-Aufträge', icon: WrenchIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 
