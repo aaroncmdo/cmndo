@@ -722,6 +722,19 @@ body[data-sidebar-mode="floating"] header.glass-branded {
   background-color: var(--brand-sidebar-bg) !important;
 }
 
+/* AAR-911 v2 (2026-06-29 Layout-Audit): Die fixe Corner-Pill (UpdatesNav/Outbox,
+   `fixed top-3 right-4`) sitzt nur in Dispatch/Admin/Fallakte. Vorher opferte
+   `<main md:pr-36>` die VOLLE Höhe (144px tote rechte Spalte) nur damit die
+   PageHeader-Actions nicht unter die Pill geraten. Stattdessen halten wir jetzt
+   nur die PageHeader-Action-Zeile selbst rechts frei — der Body (Tabellen, Grids,
+   Karten) gewinnt die volle Breite zurück. Scoped via `.has-corner-pill` (auf den
+   3 Layout-`<main>`) → kein Effekt in pill-losen Portalen (Gutachter/Kunde/Makler). */
+@media (min-width: 768px) {
+  .has-corner-pill [data-page-header] {
+    padding-right: 9rem; /* == md:pr-36, nur auf der Header-Zeile statt full-height */
+  }
+}
+
 /* 2026-05-14: Elegante Brand-Transition nach Theme-Save. Wird via
    `[data-brand-transition="on"]` auf <body> aktiviert (gesetzt durch
    BrandingEditor.handleSave + ein Sentinel auf der ziel-Seite). Alle
