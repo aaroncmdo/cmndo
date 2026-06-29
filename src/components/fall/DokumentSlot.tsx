@@ -135,7 +135,7 @@ export default function DokumentSlot({
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-claimondo-navy truncate">{slotLabel}</p>
             {istPflicht && (
-              <span className="text-[10px] font-semibold text-danger uppercase">Pflicht</span>
+              <span className="text-[10px] font-semibold text-danger-strong uppercase">Pflicht</span>
             )}
           </div>
           {beschreibung && <p className="text-xs text-claimondo-ondo mt-0.5">{beschreibung}</p>}
@@ -150,9 +150,9 @@ export default function DokumentSlot({
           <FileIcon className="w-3.5 h-3.5 text-claimondo-ondo flex-shrink-0" />
           <span className="truncate flex-1">{localFile!.name}</span>
           {localStatus === 'hochgeladen' || localStatus === 'geprueft' ? (
-            <CheckCircle2Icon className="w-3.5 h-3.5 text-success flex-shrink-0" />
+            <CheckCircle2Icon className="w-3.5 h-3.5 text-success-strong flex-shrink-0" />
           ) : localStatus === 'abgelehnt' ? (
-            <AlertTriangleIcon className="w-3.5 h-3.5 text-danger flex-shrink-0" />
+            <AlertTriangleIcon className="w-3.5 h-3.5 text-danger-strong flex-shrink-0" />
           ) : null}
         </div>
       )}

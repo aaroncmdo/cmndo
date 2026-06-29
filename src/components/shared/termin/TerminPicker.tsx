@@ -74,7 +74,7 @@ export function TerminPicker({
         : 'Dein Termin ist verbindlich reserviert. Wir senden dir eine Bestätigung per Email und WhatsApp.'
     return (
       <div className="rounded-ios-md border border-claimondo-border bg-white p-6 text-center">
-        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success">
+        <div className="mx-auto mb-3 inline-flex h-12 w-12 items-center justify-center rounded-full bg-success-soft text-success-strong">
           <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
           </svg>

@@ -24,9 +24,9 @@ export type StatCardTone =
 const ICON_BG: Record<StatCardTone, string> = {
   navy: 'bg-claimondo-navy/[0.06] text-claimondo-navy',
   ondo: 'bg-claimondo-ondo/10 text-claimondo-ondo',
-  success: 'bg-success-soft text-success',
-  warning: 'bg-warning-soft text-warning',
-  danger: 'bg-danger-soft text-danger',
+  success: 'bg-success-soft text-success-strong',
+  warning: 'bg-warning-soft text-warning-strong',
+  danger: 'bg-danger-soft text-danger-strong',
   neutral: 'bg-claimondo-bg text-claimondo-shield',
 }
 

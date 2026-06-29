@@ -8,8 +8,8 @@ import { PhaseStatusDot } from './PhaseStatusDot'
 
 const STATE_ICON_COLOR: Record<string, string> = {
   active: 'text-claimondo-ondo',
-  done: 'text-success',
-  blocked: 'text-danger',
+  done: 'text-success-strong',
+  blocked: 'text-danger-strong',
   skipped: 'text-claimondo-light-blue',
   upcoming: 'text-claimondo-light-blue',
 }
