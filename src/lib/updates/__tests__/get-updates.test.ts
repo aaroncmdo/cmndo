@@ -7,7 +7,7 @@ const h = vi.hoisted(() => {
   const db = {
     rpc: (_fn: string, _args: unknown) => Promise.resolve({ data: state.rpc, error: null }),
     from: () => ({
-      select: () => ({ eq: () => ({ eq: () => ({ order: () => ({ limit: () =>
+      select: () => ({ eq: () => ({ in: () => ({ order: () => ({ limit: () =>
         Promise.resolve({ data: state.info, error: null }) }) }) }) }),
     }),
   }
@@ -34,5 +34,15 @@ describe('getUpdates', () => {
     ]
     const items = await getUpdates(h.db as never, 'u1', 'admin')
     expect(items.map(i => i.id)).toEqual(['d1', 'n1'])
+  })
+
+  it('Anruf-Mitteilung (kategorie=anruf) -> Info-Item mit typ=call (Anrufe-Filter greift)', async () => {
+    h.state.info = [
+      { id: 'call1', kategorie: 'anruf', titel: 'Verpasster Anruf', inhalt: null, kontext_typ: null, kontext_id: null, route_url: null, prioritaet: 'normal', created_at: '2026-06-29T09:00:00Z' },
+      { id: 'upd1', kategorie: 'update', titel: 'Aktivitaet', inhalt: null, kontext_typ: 'claim', kontext_id: 'c1', route_url: '/x', prioritaet: 'normal', created_at: '2026-06-29T08:00:00Z' },
+    ]
+    const items = await getUpdates(h.db as never, 'u1', 'dispatch')
+    expect(items.find(i => i.id === 'call1')).toMatchObject({ modus: 'info', typ: 'call', source: 'anruf' })
+    expect(items.find(i => i.id === 'upd1')).toMatchObject({ modus: 'info', typ: 'event', source: 'info' })
   })
 })
