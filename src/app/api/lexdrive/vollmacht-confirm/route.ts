@@ -68,6 +68,11 @@ export async function POST(req: NextRequest) {
     vollmacht_geprueft_von: body.geprueft_von ?? 'lexdrive',
     vollmacht_pruefung_status: body.status,
     vollmacht_pruefung_begruendung: body.begruendung ?? null,
+    // Variante B (Aaron): LexDrive verwaltet die Vollmacht. Bei 'akzeptiert' ist
+    // sie verbindlich -> vollmacht_status='bestaetigt' (raeumt den "Vollmacht
+    // ausstehend"-Prompt im Kunde-Portal ab + advanciert den Claim). Bei
+    // abgelehnt/nachfrage bleibt der Status + es entsteht ein KB-Task (unten).
+    ...(body.status === 'akzeptiert' ? { vollmacht_status: 'bestaetigt' } : {}),
   }).eq('id', claimId)
   if (claimUpdErr) {
     console.error('[vollmacht-confirm] claims update:', claimUpdErr.message)
