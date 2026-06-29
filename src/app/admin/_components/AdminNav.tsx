@@ -9,7 +9,7 @@ import {
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, MapPinIcon, HandshakeIcon,
+  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
@@ -34,6 +34,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/vertraege', label: 'Vertragseditor', icon: FileSignatureIcon },
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
   { href: '/admin/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
+  { href: '/admin/health', label: 'Pipeline-Health', icon: ActivityIcon },
 ]
 
 const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/kalender', '/admin/sachverstaendige']
