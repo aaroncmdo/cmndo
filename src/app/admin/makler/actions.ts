@@ -7,6 +7,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { generatePromoCode } from '@/lib/makler/promo-code'
 
 function generatePassword(length = 14): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
@@ -15,15 +16,6 @@ function generatePassword(length = 14): string {
   crypto.getRandomValues(array)
   for (let i = 0; i < length; i++) password += chars[array[i] % chars.length]
   return password + 'A1!'
-}
-
-function generatePromoCode(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
-  let s = ''
-  const array = new Uint8Array(8)
-  crypto.getRandomValues(array)
-  for (let i = 0; i < 8; i++) s += chars[array[i] % chars.length]
-  return 'MK-' + s
 }
 
 async function requireAdmin(): Promise<{ id: string } | null> {
