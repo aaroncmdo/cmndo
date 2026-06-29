@@ -105,7 +105,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
               <div key={i} className="flex justify-start">
                 <div className="max-w-[90%] w-full bg-success-soft border border-success/30 rounded-ios-xl px-3 py-2.5 text-sm space-y-2">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2Icon className="w-4 h-4 text-success mt-0.5 shrink-0" />
+                    <CheckCircle2Icon className="w-4 h-4 text-success-strong mt-0.5 shrink-0" />
                     <div className="text-success-strong whitespace-pre-wrap">{m.text}</div>
                   </div>
                   {m.url ? (
@@ -183,7 +183,7 @@ export function SupportChat({ userName }: { userName?: string | null }) {
                 <button
                   type="button"
                   onClick={clearScreenshot}
-                  className="text-[11px] text-claimondo-ondo hover:text-danger"
+                  className="text-[11px] text-claimondo-ondo hover:text-danger-strong"
                 >
                   entfernen
                 </button>

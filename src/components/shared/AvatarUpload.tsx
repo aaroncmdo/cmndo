@@ -112,7 +112,7 @@ export default function AvatarUpload({ currentUrl, initials, size = 'md', onChan
             type="button"
             onClick={handleRemove}
             disabled={isPending}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-claimondo-ondo text-xs hover:text-danger transition-colors disabled:opacity-50"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-claimondo-ondo text-xs hover:text-danger-strong transition-colors disabled:opacity-50"
           >
             <Trash2Icon className="w-3.5 h-3.5" />
             Entfernen

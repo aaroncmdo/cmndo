@@ -248,7 +248,7 @@ function SlotCard({
         }}
       />
 
-      {error && <p className="text-xs text-danger mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger-strong mt-1">{error}</p>}
 
       {slot.files.length > 0 && (
         <div className="mt-2 space-y-1">
@@ -378,14 +378,14 @@ export default function PflichtdokumenteSection({
           className="w-full text-left rounded-2xl bg-warning-soft border border-warning/30 p-4 hover:bg-warning-soft/60 hover:border-warning/30 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <AlertCircleIcon className="w-5 h-5 text-warning shrink-0" />
+            <AlertCircleIcon className="w-5 h-5 text-warning-strong shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-semibold text-warning-strong">{title ?? headline}</p>
               <p className="text-xs text-warning-strong mt-0.5">
                 {t('bannerHint')}
               </p>
             </div>
-            <ChevronRightIcon className="w-5 h-5 text-warning shrink-0" />
+            <ChevronRightIcon className="w-5 h-5 text-warning-strong shrink-0" />
           </div>
         </button>
         {renderPopover(title ?? t('titel'))}

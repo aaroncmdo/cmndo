@@ -62,7 +62,7 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
       <div className="flex flex-col overflow-hidden" style={{ maxHeight: 'calc(100vh - 64px)' }}>
         <div className="flex items-center justify-between px-5 py-3 border-b border-claimondo-border">
           <div className="flex items-center gap-2 text-claimondo-navy">
-            <AlertTriangleIcon className="w-5 h-5 text-danger" />
+            <AlertTriangleIcon className="w-5 h-5 text-danger-strong" />
             <h2 className="text-sm font-semibold">Dauerhaft fehlgeschlagene Uploads</h2>
           </div>
           <button
