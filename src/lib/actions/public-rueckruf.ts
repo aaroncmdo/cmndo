@@ -15,6 +15,10 @@ export type RueckrufInput = {
   startZeit?: string | null    // ISO-Timestamp wenn Modal eine konkrete Zeit liefert
   nachricht?: string | null
   quelle: string
+  // Makler-Anfrage (makler-anfrage): Attribution + optionaler Standort-Prefill.
+  promotionCodeId?: string | null
+  standortPlz?: string | null
+  standortOrt?: string | null
 }
 
 // Rückruf-Anfrage von einer öffentlichen Marketing-Seite.
@@ -65,6 +69,9 @@ export async function erstelleOeffentlichenRueckruf(
       qualifizierungs_phase: 'rueckruf',
       zugewiesen_an: erstellerId,
       sprache: await getLocaleCookie(),
+      ...(input.promotionCodeId ? { promotion_code_id: input.promotionCodeId } : {}),
+      ...(input.standortPlz ? { fahrzeug_standort_plz: input.standortPlz } : {}),
+      ...(input.standortOrt ? { fahrzeug_standort_adresse: input.standortOrt } : {}),
     },
   )
   if (!created.ok) {
