@@ -28,7 +28,7 @@ function DiagPage({ stage, error }: { stage: string; error: unknown }) {
   return (
     <div className="min-h-screen bg-claimondo-bg flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-xl rounded-ios-md bg-claimondo-card border border-claimondo-border shadow-claimondo-md p-8 text-center">
-        <div className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-rose-100 text-rose-700 text-2xl">
+        <div className="mx-auto mb-5 inline-flex h-12 w-12 items-center justify-center rounded-full bg-danger-soft text-danger-strong text-2xl">
           ⚠
         </div>
         <h1 className="text-claimondo-navy text-xl font-bold mb-2">

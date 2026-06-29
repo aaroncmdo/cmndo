@@ -361,7 +361,7 @@ export default function TerminSectionCard({ termin, gegenueber }: TerminSectionP
             type="button"
             onClick={handleAbsagen}
             disabled={absagenPending}
-            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-red-300 px-3 text-xs font-medium text-red-600 disabled:opacity-60 hover:bg-red-50"
+            className="inline-flex min-h-[44px] items-center gap-1 rounded-ios-sm border border-danger/30 px-3 text-xs font-medium text-danger disabled:opacity-60 hover:bg-danger-soft"
           >
             {absagenPending ? t('wirdAbgesagt') : t('absagen')}
           </button>
