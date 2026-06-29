@@ -39,9 +39,9 @@ export default function OutboxBadge() {
   if (count === 0) return null
 
   const STATUS_ICON = {
-    pending: <ClockIcon className="w-3.5 h-3.5 text-warning" />,
+    pending: <ClockIcon className="w-3.5 h-3.5 text-warning-strong" />,
     uploading: <RefreshCwIcon className="w-3.5 h-3.5 text-claimondo-ondo animate-spin" />,
-    failed: <AlertCircleIcon className="w-3.5 h-3.5 text-danger" />,
+    failed: <AlertCircleIcon className="w-3.5 h-3.5 text-danger-strong" />,
     // AAR-388: Dead-Letter — 10 Retries fehlgeschlagen
     dead: <AlertTriangleIcon className="w-3.5 h-3.5 text-danger-strong" />,
   }
@@ -77,7 +77,7 @@ export default function OutboxBadge() {
                     <p className="text-[10px] text-claimondo-ondo/70">{(item.file_size / 1024).toFixed(0)} KB — {item.dokument_typ}</p>
                   </div>
                   {item.status === 'failed' && (
-                    <span className="text-[9px] text-danger">{item.last_error?.slice(0, 30)}</span>
+                    <span className="text-[9px] text-danger-strong">{item.last_error?.slice(0, 30)}</span>
                   )}
                 </div>
               ))

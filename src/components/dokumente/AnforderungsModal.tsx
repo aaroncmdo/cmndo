@@ -107,7 +107,7 @@ export default function AnforderungsModal({
               Welches Dokument brauchen Sie?
             </label>
             {slots.length === 0 ? (
-              <p className="text-xs text-warning flex items-center gap-1">
+              <p className="text-xs text-warning-strong flex items-center gap-1">
                 <AlertCircleIcon className="w-3.5 h-3.5" />
                 Keine Dokumente verfügbar, die Ihre Rolle anfordern darf.
               </p>
@@ -145,7 +145,7 @@ export default function AnforderungsModal({
             />
             <p
               className={`mt-1 text-[10px] tabular-nums ${
-                begruendungValid ? 'text-claimondo-ondo/70' : 'text-warning'
+                begruendungValid ? 'text-claimondo-ondo/70' : 'text-warning-strong'
               }`}
             >
               {begruendungChars}/20 Zeichen min.

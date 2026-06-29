@@ -59,7 +59,7 @@ export default async function UeberfaelligeTasks({
   return (
     <div className="bg-danger-soft/50 border border-danger/30 rounded-2xl p-4 mb-6">
       <div className="flex items-center gap-2 mb-3">
-        <AlertTriangleIcon className="w-4 h-4 text-danger" />
+        <AlertTriangleIcon className="w-4 h-4 text-danger-strong" />
         <h3 className="text-sm font-semibold text-danger-strong">
           Überfällige Tasks ({items.length})
         </h3>
@@ -82,7 +82,7 @@ export default async function UeberfaelligeTasks({
               )}
               <div className="min-w-0 flex-1">
                 <p className="text-danger-strong text-sm truncate">{task.titel}</p>
-                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-danger/70">
+                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-danger-strong/70">
                   <span>
                     {overdueDays === 0
                       ? 'Heute fällig'
@@ -95,7 +95,7 @@ export default async function UeberfaelligeTasks({
                         href={`/faelle/${task.fall_id}`}
                         target="_blank"
                         rel="noopener"
-                        className="text-danger hover:text-danger-strong"
+                        className="text-danger-strong hover:text-danger-strong"
                       >
                         {task.claim_nummer}
                       </Link>
