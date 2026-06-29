@@ -1,0 +1,33 @@
+import { NextResponse } from 'next/server'
+import { requirePortalAccess } from '@/lib/auth/portal-guard'
+import { createAdminClient } from '@/lib/supabase/admin'
+import { exchangeCode, fetchAdminOrgUrn } from '@/lib/linkedin/oauth'
+
+export async function GET(request: Request) {
+  const { user } = await requirePortalAccess(['admin']) // redirects if not admin
+  const url = new URL(request.url)
+  const code = url.searchParams.get('code')
+  if (!code) return NextResponse.redirect(new URL('/admin/marketing/linkedin?error=no_code', request.url))
+
+  try {
+    const tok = await exchangeCode(code)
+    const orgUrn = (process.env.LINKEDIN_ORG_ID
+      ? (process.env.LINKEDIN_ORG_ID.startsWith('urn:') ? process.env.LINKEDIN_ORG_ID : `urn:li:organization:${process.env.LINKEDIN_ORG_ID}`)
+      : await fetchAdminOrgUrn(tok.accessToken)) ?? ''
+    if (!orgUrn) return NextResponse.redirect(new URL('/admin/marketing/linkedin?error=no_org', request.url))
+
+    const admin = createAdminClient()
+    await admin.from('linkedin_oauth_tokens').delete().neq('id', '00000000-0000-0000-0000-000000000000')
+    await admin.from('linkedin_oauth_tokens').insert({
+      organization_urn: orgUrn,
+      access_token: tok.accessToken,
+      refresh_token: tok.refreshToken,
+      expires_at: new Date(Date.now() + tok.expiresIn * 1000).toISOString(),
+      scope: tok.scope,
+      connected_by: user.id,
+    })
+    return NextResponse.redirect(new URL('/admin/marketing/linkedin?connected=1', request.url))
+  } catch (e) {
+    return NextResponse.redirect(new URL(`/admin/marketing/linkedin?error=${encodeURIComponent((e as Error).message)}`, request.url))
+  }
+}
