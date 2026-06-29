@@ -79,7 +79,7 @@ function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['s
   const t = useTranslations('pflichtdok')
   if (status === 'erfuellt') {
     return (
-      <StatusBadge colorCls="bg-emerald-50 text-emerald-700 uppercase tracking-wider">
+      <StatusBadge colorCls="bg-success-soft text-success-strong uppercase tracking-wider">
         <CheckCircle2Icon className="w-3 h-3" />
         {t('badgeHochgeladen')}
       </StatusBadge>
@@ -94,7 +94,7 @@ function PflichtStatusBadge({ status, pflicht }: { status: PflichtSlotForView['s
     )
   }
   return (
-    <StatusBadge colorCls="bg-amber-50 text-amber-700 uppercase tracking-wider">
+    <StatusBadge colorCls="bg-warning-soft text-warning-strong uppercase tracking-wider">
       <CircleDotIcon className="w-3 h-3" />
       {pflicht ? t('badgePflichtOffen') : t('badgeOffen')}
     </StatusBadge>
@@ -174,7 +174,7 @@ function SlotCard({
 
   const isErfuellt = slot.status === 'erfuellt'
   const containerClass = isErfuellt
-    ? 'rounded-ios-xl border border-emerald-200 bg-emerald-50/40 p-3'
+    ? 'rounded-ios-xl border border-success/30 bg-success-soft/40 p-3'
     : 'rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-3'
 
   return (
@@ -183,7 +183,7 @@ function SlotCard({
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-claimondo-navy">
             {slot.label}
-            {slot.pflicht && <span className="ml-1 text-amber-700">*</span>}
+            {slot.pflicht && <span className="ml-1 text-warning-strong">*</span>}
           </p>
           {slot.beschreibung && (
             <p className="text-xs text-claimondo-ondo mt-0.5">{slot.beschreibung}</p>
@@ -248,7 +248,7 @@ function SlotCard({
         }}
       />
 
-      {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+      {error && <p className="text-xs text-danger mt-1">{error}</p>}
 
       {slot.files.length > 0 && (
         <div className="mt-2 space-y-1">
@@ -375,17 +375,17 @@ export default function PflichtdokumenteSection({
         <button
           type="button"
           onClick={() => setPopoverOpen(true)}
-          className="w-full text-left rounded-2xl bg-amber-50 border border-amber-200 p-4 hover:bg-amber-100/60 hover:border-amber-300 transition-colors"
+          className="w-full text-left rounded-2xl bg-warning-soft border border-warning/30 p-4 hover:bg-warning-soft/60 hover:border-warning/30 transition-colors"
         >
           <div className="flex items-center gap-3">
-            <AlertCircleIcon className="w-5 h-5 text-amber-600 shrink-0" />
+            <AlertCircleIcon className="w-5 h-5 text-warning shrink-0" />
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-amber-900">{title ?? headline}</p>
-              <p className="text-xs text-amber-800 mt-0.5">
+              <p className="text-sm font-semibold text-warning-strong">{title ?? headline}</p>
+              <p className="text-xs text-warning-strong mt-0.5">
                 {t('bannerHint')}
               </p>
             </div>
-            <ChevronRightIcon className="w-5 h-5 text-amber-600 shrink-0" />
+            <ChevronRightIcon className="w-5 h-5 text-warning shrink-0" />
           </div>
         </button>
         {renderPopover(title ?? t('titel'))}
