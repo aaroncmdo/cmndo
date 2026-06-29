@@ -85,7 +85,7 @@ function ErrorMessage({ error }: { error: string | undefined }) {
   const message = normalizeLoginError(error)
   if (!message) return null
   return (
-    <p className="text-sm text-red-600 rounded-ios-md bg-red-50 border border-red-200 px-4 py-3 text-center mt-4">
+    <p className="text-sm text-danger-strong rounded-ios-md bg-danger-soft border border-danger/30 px-4 py-3 text-center mt-4">
       {message}
     </p>
   )

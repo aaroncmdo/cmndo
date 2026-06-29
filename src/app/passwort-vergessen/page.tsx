@@ -91,8 +91,8 @@ export default function PasswortVergessenPage() {
             </>
           ) : (
             <div className="text-center">
-              <div className="w-14 h-14 mx-auto rounded-ios-md bg-emerald-50 flex items-center justify-center mb-4">
-                <CheckCircle2Icon className="w-7 h-7 text-emerald-500" />
+              <div className="w-14 h-14 mx-auto rounded-ios-md bg-success-soft flex items-center justify-center mb-4">
+                <CheckCircle2Icon className="w-7 h-7 text-success" />
               </div>
               <p className="text-claimondo-navy font-semibold text-base mb-2">E-Mail ist unterwegs</p>
               <p className="text-claimondo-ondo text-sm leading-relaxed">
