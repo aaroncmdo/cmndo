@@ -41,7 +41,14 @@ export function computeNextOperativePhase(status: string, s: OperativeSignals): 
     case 'sv-zugewiesen':
       return s.hasTermin ? 'sv-termin' : null
     case 'sv-termin':
+      // sv-termin -> gutachten-eingegangen ist KEIN gueltiger Direkt-Uebergang
+      // (FALL_STATUS_TRANSITIONS erlaubt von sv-termin nur besichtigung/begutachtung-laeuft).
+      // Wenn das Gutachten da ist, der Status aber auf sv-termin haengt (SV hat kein
+      // "losgefahren"/begutachtung getriggert), ueber begutachtung-laeuft aufholen —
+      // checkFallAutoPhase cascadet im Loop weiter bis gutachten-eingegangen -> filmcheck.
+      return s.gutachtenFertig ? 'begutachtung-laeuft' : null
     case 'besichtigung':
+    case 'begutachtung-laeuft':
       return s.gutachtenFertig ? 'gutachten-eingegangen' : null
     case 'gutachten-eingegangen':
       // KERN-FIX: komplett-gated (nicht zirkulaer ueber filmcheck_ok). nur_gutachter bleibt

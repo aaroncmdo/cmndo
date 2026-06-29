@@ -23,11 +23,16 @@ describe('computeNextOperativePhase', () => {
   it('sv-zugewiesen + Termin -> sv-termin', () => {
     expect(computeNextOperativePhase('sv-zugewiesen', sig({ hasTermin: true }))).toBe('sv-termin')
   })
-  it('sv-termin + Gutachten fertig -> gutachten-eingegangen', () => {
-    expect(computeNextOperativePhase('sv-termin', sig({ gutachtenFertig: true }))).toBe('gutachten-eingegangen')
+  // sv-termin -> gutachten-eingegangen ist KEIN gueltiger Direkt-Uebergang (FALL_STATUS_TRANSITIONS).
+  // Aufholen ueber begutachtung-laeuft; checkFallAutoPhase cascadet im Loop weiter.
+  it('sv-termin + Gutachten fertig -> begutachtung-laeuft (gueltiger Zwischenschritt)', () => {
+    expect(computeNextOperativePhase('sv-termin', sig({ gutachtenFertig: true }))).toBe('begutachtung-laeuft')
   })
   it('besichtigung + Gutachten fertig -> gutachten-eingegangen', () => {
     expect(computeNextOperativePhase('besichtigung', sig({ gutachtenFertig: true }))).toBe('gutachten-eingegangen')
+  })
+  it('begutachtung-laeuft + Gutachten fertig -> gutachten-eingegangen', () => {
+    expect(computeNextOperativePhase('begutachtung-laeuft', sig({ gutachtenFertig: true }))).toBe('gutachten-eingegangen')
   })
 
   // KERN-FIX: gutachten-eingegangen -> filmcheck nur fuer komplett (war zirkulaer ueber
@@ -68,5 +73,30 @@ describe('computeNextOperativePhase', () => {
     // ersterfassung mit ALLEN Signalen -> trotzdem nur sv-zugewiesen (ein Schritt pro Call)
     const all = sig({ hasSvId: true, hasTermin: true, gutachtenFertig: true, istKomplett: true, zahlungEingegangen: true })
     expect(computeNextOperativePhase('ersterfassung', all)).toBe('sv-zugewiesen')
+  })
+
+  // Kaskaden-Simulation (= der Loop in checkFallAutoPhase): wendet die Decision wiederholt an.
+  // Beweist (a) nur GUELTIGE Uebergaenge, (b) Terminierung, (c) Stopp an der Halb-Automatik-Grenze.
+  function kaskade(start: string, s: OperativeSignals): string[] {
+    const seq: string[] = []
+    let cur = start
+    for (let i = 0; i < 12; i++) {
+      const next = computeNextOperativePhase(cur, s)
+      if (!next || next === cur) break
+      seq.push(next)
+      cur = next
+    }
+    return seq
+  }
+
+  it('Kaskade sv-termin komplett -> begutachtung-laeuft -> gutachten-eingegangen -> filmcheck (STOPP, auch mit Zahlung)', () => {
+    // zahlungEingegangen bewusst true: beweist, dass die Kaskade NICHT ueber filmcheck
+    // hinaus zu abgeschlossen springt (Halb-Automatik-Grenze, KB macht den Handoff).
+    expect(kaskade('sv-termin', sig({ gutachtenFertig: true, istKomplett: true, zahlungEingegangen: true })))
+      .toEqual(['begutachtung-laeuft', 'gutachten-eingegangen', 'filmcheck'])
+  })
+  it('Kaskade nur_gutachter stoppt bei gutachten-eingegangen (keine Kanzlei-Strecke)', () => {
+    expect(kaskade('sv-termin', sig({ gutachtenFertig: true, istKomplett: false })))
+      .toEqual(['begutachtung-laeuft', 'gutachten-eingegangen'])
   })
 })

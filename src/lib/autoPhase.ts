@@ -82,30 +82,44 @@ export async function checkFallAutoPhase(fallId: string) {
     zahlungEingegangen: !!currentPayment?.zahlungseingang_am,
   }
 
-  const newStatus = computeNextOperativePhase(status, signals)
-  if (!newStatus || newStatus === status) return
-
-  // KFZ-202: State-Machine statt direktem Update.
-  try {
-    await transitionFallStatus(fallId, newStatus)
-  } catch {
-    // Transition nicht erlaubt — autoPhase ueberspringt.
-    return
-  }
-
-  // Tasks fuer die neue Phase.
+  // Task-Empfaenger einmal aufloesen (aendern sich im Loop nicht).
   const kbId = claim.kundenbetreuer_id as string | null
   const svId = claim.sv_id as string | null
-  if (newStatus === 'sv-zugewiesen' && svId) {
-    triggerGutachterTerminTask(fallId, svId).catch(() => {})
-  }
-  if (newStatus === 'filmcheck') {
-    // KB-QC-Task am filmcheck-Eintritt. Die Kanzlei-Paket-/AS-Tasks fuer den Handoff
-    // erstellt qcBestanden (filmcheck.ts) — autoPhase springt bewusst NICHT nach
-    // kanzlei-uebergeben (Halb-automatik-Grenze, Aaron 28.06.).
-    triggerQcTask(fallId, kbId).catch(() => {})
-  }
-  if (newStatus === 'abgeschlossen') {
-    triggerArchivierungTask(fallId, kbId).catch(() => {})
+
+  // Cascade: pro Aufruf so weit aufholen, wie die (stabilen) Signale erlauben — ein Claim
+  // kann mehrere Hops zurueckliegen. Beispiel: SV laedt das Gutachten hoch ohne vorher
+  // "losgefahren"/begutachtung getriggert zu haben -> Claim haengt auf sv-termin, muss aber
+  // ueber begutachtung-laeuft -> gutachten-eingegangen -> filmcheck. computeNextOperativePhase
+  // emittiert nur GUELTIGE, streng vorwaerts gerichtete Uebergaenge -> der Loop terminiert;
+  // der Iterations-Guard ist nur ein Backstop. Stoppt an der Halb-Automatik-Grenze
+  // (filmcheck -> null) — den Kanzlei-Handoff macht KB via saveFilmcheck.
+  let cur = status
+  for (let i = 0; i < 12; i++) {
+    const next = computeNextOperativePhase(cur, signals)
+    if (!next || next === cur) break
+
+    // KFZ-202: State-Machine statt direktem Update.
+    try {
+      await transitionFallStatus(fallId, next)
+    } catch {
+      // Ungueltiger Uebergang — Cascade stoppen.
+      break
+    }
+
+    // Tasks fuer die neue Phase.
+    if (next === 'sv-zugewiesen' && svId) {
+      triggerGutachterTerminTask(fallId, svId).catch(() => {})
+    }
+    if (next === 'filmcheck') {
+      // KB-QC-Task am filmcheck-Eintritt. Die Kanzlei-Paket-/AS-Tasks fuer den Handoff
+      // erstellt qcBestanden (filmcheck.ts) — autoPhase springt bewusst NICHT nach
+      // kanzlei-uebergeben (Halb-automatik-Grenze, Aaron 28.06.).
+      triggerQcTask(fallId, kbId).catch(() => {})
+    }
+    if (next === 'abgeschlossen') {
+      triggerArchivierungTask(fallId, kbId).catch(() => {})
+    }
+
+    cur = next
   }
 }
