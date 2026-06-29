@@ -54,7 +54,7 @@ export async function vermittleWerkstatt(
     // Werkstatt-Stammdaten fuer die Kunden-Nachricht laden.
     const { data: werkstatt } = await supabase
       .from('werkstaetten')
-      .select('name, adresse_strasse, adresse_plz, adresse_ort, telefon')
+      .select('name, adresse_strasse, adresse_plz, adresse_ort, telefon, email, user_id')
       .eq('id', input.werkstattId)
       .maybeSingle()
     const w = (werkstatt ?? null) as {
@@ -63,6 +63,8 @@ export async function vermittleWerkstatt(
       adresse_plz: string | null
       adresse_ort: string | null
       telefon: string | null
+      email: string | null
+      user_id: string | null
     } | null
 
     // Kunden-Account (fuer In-App) + Kontakt (fuer WhatsApp/Email).
@@ -150,10 +152,36 @@ export async function vermittleWerkstatt(
       })
     }
 
-    // TODO Werkstatt-Notify ("Neuer Reparaturauftrag"): sobald cfefdf75s #3263
-    // (EmpfaengerRolle 'werkstatt' in src/lib/mitteilungen/types.ts + Werkstatt-
-    // Portal-Inbox) in staging ist, hier die Werkstatt (werkstaetten.user_id) via
-    // createMitteilung benachrichtigen — analog notify-freigabe.ts.
+    // (c) Werkstatt-Notify (Email): die zugewiesene Werkstatt erfaehrt vom neuen
+    // Reparaturauftrag. Recipient: werkstaetten.email, sonst profiles.email via user_id.
+    // Bewusst EMAIL-ONLY — die In-App-Variante (createMitteilung empfaenger_rolle
+    // 'werkstatt' + Werkstatt-Portal-Inbox) haengt an #3263; sobald das in staging ist,
+    // hier zusaetzlich die In-App-Mitteilung ausloesen (analog notify-freigabe.ts).
+    // Aaron-Kanal-Entscheid: Werkstatt = In-App + Email, KEIN WhatsApp.
+    if (w?.name) {
+      let werkstattEmail = w.email
+      if (!werkstattEmail && w.user_id) {
+        const { data: wp } = await supabase
+          .from('profiles')
+          .select('email')
+          .eq('id', w.user_id)
+          .maybeSingle()
+        werkstattEmail = (wp as { email: string | null } | null)?.email ?? null
+      }
+      if (werkstattEmail) {
+        const { notifyWerkstattNeuerAuftrag } = await import('@/lib/werkstatt/notify-werkstatt-auftrag')
+        // Portal-Link auf die zugewiesenen Reparatur-Auftraege (cfefdf75 #3263:
+        // /werkstatt/auftraege). Merge-Reihenfolge #3263 -> dieser Branch, damit die
+        // Seite existiert.
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+        await notifyWerkstattNeuerAuftrag({
+          werkstatt: { email: werkstattEmail, name: w.name },
+          kunde: { name: kundeKontakt.vorname },
+          portalUrl: `${appUrl}/werkstatt/auftraege`,
+          fallId: input.target === 'claim' ? input.id : null,
+        })
+      }
+    }
   } catch (err) {
     console.warn('[vermittleWerkstatt] Benachrichtigung fehlgeschlagen (non-fatal):', err)
   }
