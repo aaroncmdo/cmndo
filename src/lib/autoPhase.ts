@@ -3,6 +3,7 @@ import { triggerGutachterTerminTask, triggerQcTask, triggerArchivierungTask } fr
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { getCurrentClaimPayment } from '@/lib/faelle/claim-payments'
 import { computeNextOperativePhase, type OperativeSignals } from '@/lib/autophase-decision'
+import { syncKanzleiDatenTask } from '@/lib/kanzlei/kanzlei-daten-task'
 
 /**
  * Check if a lead should automatically move to a new phase based on its data.
@@ -137,4 +138,8 @@ export async function checkFallAutoPhase(fallId: string) {
 
     cur = next
   }
+
+  // KB/Admin „immer auffordern" (Aaron 29.06.): Task fuer den naechsten fehlenden Kanzlei-Fakt
+  // syncen (anlegen/auto-schliessen je nach aktueller Phase). Non-critical — Worklist + Reminder.
+  await syncKanzleiDatenTask(fallId, cur, kbId).catch(() => {})
 }
