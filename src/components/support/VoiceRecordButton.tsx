@@ -58,7 +58,7 @@ export function VoiceRecordButton({
       >
         {icon} {label}
       </button>
-      {error && <p className="text-[10px] text-amber-700 max-w-[280px]">{error}</p>}
+      {error && <p className="text-[10px] text-warning-strong max-w-[280px]">{error}</p>}
     </div>
   )
 }

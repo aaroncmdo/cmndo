@@ -182,7 +182,7 @@ export default function MultiChannelChat({
               <Icon className="w-4 h-4" style={{ color: c.color }} />
               <span className="text-sm font-medium">{c.label}</span>
               {unread > 0 && (
-                <span className="bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                <span className="bg-danger text-white text-[10px] font-bold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
                   {unread}
                 </span>
               )}

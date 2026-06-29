@@ -302,7 +302,7 @@ export function NotificationPreferencesForm({
           </label>
         </div>
         {quietStart && !quietEnd ? (
-          <p className="mt-2 text-xs text-amber-700">Bitte auch „Bis"-Zeit setzen.</p>
+          <p className="mt-2 text-xs text-warning-strong">Bitte auch „Bis"-Zeit setzen.</p>
         ) : null}
       </section>
 
@@ -408,13 +408,13 @@ export function NotificationPreferencesForm({
           Speichern
         </button>
         {saveState.status === 'success' ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-ios-lg px-2.5 py-1">
+          <span className="inline-flex items-center gap-1.5 text-xs text-success-strong bg-success-soft border border-success/30 rounded-ios-lg px-2.5 py-1">
             <CheckCircle2Icon width={12} height={12} />
             Gespeichert
           </span>
         ) : null}
         {saveState.status === 'error' ? (
-          <span className="inline-flex items-center gap-1.5 text-xs text-red-700 bg-red-50 border border-red-200 rounded-ios-lg px-2.5 py-1">
+          <span className="inline-flex items-center gap-1.5 text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg px-2.5 py-1">
             <AlertTriangleIcon width={12} height={12} />
             {saveState.msg ?? 'Fehler'}
           </span>
