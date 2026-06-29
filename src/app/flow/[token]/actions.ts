@@ -8,6 +8,7 @@ import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
 import { normalizeToLocale } from '@/i18n/locale-source'
 import { createPflichtdokumenteFromKatalog } from '@/lib/dokumente/create-pflicht'
+import { generateInitialPassword } from '@/lib/auth/generate-initial-password'
 import { emitEvent } from '@/lib/notifications/emit'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
@@ -295,7 +296,7 @@ export async function createKundeAccount(
 
   try {
     const admin = createAdminClient()
-    const password = generatePassword()
+    const password = generateInitialPassword(16)
     const normalizedEmail = email.trim().toLowerCase()
 
     // 1. Idempotenz: Falls der Fall schon mit einem Kunden verknüpft ist
@@ -1563,14 +1564,6 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   )
 }
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
-
-function generatePassword(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
-  let pw = ''
-  for (let i = 0; i < 12; i++) {
-    pw += chars[Math.floor(Math.random() * chars.length)]
-  }
-  return pw
-}
+// Initial-Passwort-Generator: siehe @/lib/auth/generate-initial-password
+// (CSPRNG, bias-frei) — ersetzt die fruehere Math.random()-Variante.
 

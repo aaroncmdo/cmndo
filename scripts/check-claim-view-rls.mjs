@@ -18,6 +18,21 @@
 
 import { createClient } from '@supabase/supabase-js'
 import { execSync } from 'node:child_process'
+import { readFileSync, existsSync } from 'node:fs'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+// .env.local laden falls vorhanden (lokal lauffaehig); CI-Env hat Vorrang (if-not-set).
+;(function ladeEnv() {
+  const p = join(dirname(fileURLToPath(import.meta.url)), '..', '.env.local')
+  if (!existsSync(p)) return
+  for (const line of readFileSync(p, 'utf-8').split('\n')) {
+    const t = line.trim(); if (!t || t.startsWith('#')) continue
+    const i = t.indexOf('='); if (i < 0) continue
+    const k = t.slice(0, i).trim()
+    if (!(k in process.env)) process.env[k] = t.slice(i + 1).trim().replace(/^["']|["']$/g, '')
+  }
+})()
 
 // PR-Gate: nur bei supabase/**- oder *.sql-Aenderungen (View-/Funktions-DDL) laufen
 // (Pool-Schonung; Gate-Drift entsteht nur durch SQL). Bei push/lokal immer.
@@ -61,14 +76,14 @@ function isTransient(err) {
   )
 }
 
-async function callRpc() {
+async function callRpc(fnName) {
   let lastError = null
   for (let attempt = 0; attempt <= RETRY_DELAYS_MS.length; attempt++) {
     const controller = new AbortController()
     const timer = setTimeout(() => controller.abort(), PER_ATTEMPT_TIMEOUT_MS)
     let data = null, error = null
     try {
-      ;({ data, error } = await supabase.rpc('audit_claim_view_gates').abortSignal(controller.signal))
+      ;({ data, error } = await supabase.rpc(fnName).abortSignal(controller.signal))
     } catch (e) { error = e } finally { clearTimeout(timer) }
     if (!error) return { data, error: null }
     lastError = error
@@ -86,7 +101,7 @@ async function callRpc() {
 const GATE_BEARING = ['v_claim_base', 'v_claim_phase', 'v_claim_listing', 'v_claim_parties_safe']
 const LAYER = ['v_claim_full', 'v_faelle_mit_aktuellem_termin', 'faelle_sv_view', 'faelle_kunde_view']
 
-const { data, error } = await callRpc()
+const { data, error } = await callRpc('audit_claim_view_gates')
 if (error) {
   console.error('❌ RPC audit_claim_view_gates fehlgeschlagen:', error.message)
   if (isTransient(error)) {
@@ -108,8 +123,31 @@ for (const r of data) {
   if (LAYER.includes(r.view_name) && !r.references_base && !r.has_gate) problems.push(`Layer ungated: ${r.view_name} referenziert v_claim_base nicht mehr → Gate verloren.`)
 }
 
+// Dynamische Ergaenzung (rls-safety-net 29.06.): der 7-View-Check oben ist HARTKODIERT
+// (GATE_BEARING + LAYER) — genau die Luecke, durch die v_claim_timeline + v_gutachten_werte
+// rutschten (Definer-Views OHNE Gate, an authenticated granted, NICHT im 7-Set; beide GEFIXT
+// in Migration 20260629153151). Diese 2 Audit-Fns entdecken JEDE solche View dynamisch:
+//   audit_ungated_definer_views()         = statisch (Profil: definer + app-grant + kein Gate)
+//   audit_claim_views_leaking_to_nobody() = empirisch (Nobody-User sieht >0 Zeilen; faengt auch
+//                                           fehlerhaft gegatete Views)
+{
+  const { data: ungated, error: eU } = await callRpc('audit_ungated_definer_views')
+  if (eU) { console.error('❌ RPC audit_ungated_definer_views fehlgeschlagen:', eU.message); process.exit(1) }
+  for (const r of (ungated ?? [])) problems.push(`ungated-Definer-View: ${r.view_name} (granted: ${r.app_grants}) → Gate claim_sichtbar_fuer_aktuellen_user(claim_id) ergaenzen oder anon/auth-Grant entfernen.`)
+  const { data: leaking, error: eL } = await callRpc('audit_claim_views_leaking_to_nobody')
+  if (eL) { console.error('❌ RPC audit_claim_views_leaking_to_nobody fehlgeschlagen:', eL.message); process.exit(1) }
+  for (const r of (leaking ?? [])) problems.push(`empirischer Leak: ${r.view_name} zeigt einem Nobody-User ${r.nobody_sieht_zeilen} Zeilen → Gate fehlt/fehlerhaft.`)
+  // Identity-Cross-Compare (Schritt 2b): pro Rolle (alle 8: kunde/sv/kb/kanzlei/makler/werkstatt +
+  // admin/dispatch positiv-only) mit bekanntem eigenem Claim X + fremdem Claim Y — POSITIV X sichtbar
+  // (faengt Unter-Exposure/Geist) + NEGATIV Y unsichtbar (Leak). Faengt GENAU die Klassen, die der
+  // Nobody-Leak-Check NICHT faengt (Geist) bzw. nur grob.
+  const { data: ident, error: eI } = await callRpc('audit_claim_view_identity')
+  if (eI) { console.error('❌ RPC audit_claim_view_identity fehlgeschlagen:', eI.message); process.exit(1) }
+  for (const r of (ident ?? [])) problems.push(`Identity-Cross-Compare [${r.rolle}/${r.view_name}]: ${r.befund}`)
+}
+
 if (problems.length === 0) {
-  console.log(`✓ Alle ${data.length} Claim-Views row-gegatet (v_claim_base + Standalone) + 0 anon-Lecks.`)
+  console.log(`✓ ${data.length} bekannte Claim-Views row-gegatet + 0 anon-Lecks + 0 ungated/leakende Views + Identity-Cross-Compare (8 Rollen) sauber.`)
   process.exit(0)
 }
 

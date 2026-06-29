@@ -4,9 +4,11 @@ import { Table, Thead, Tr, Th, Td, DataTableContainer } from '@/components/share
 
 // KFZ-155: Lead-Preise Verteilung — wieviel Umsatz pro Lead-Preis-Kategorie.
 //
-// Aus gutachter_abrechnungen aggregiert:
-//   - preistyp ('paket' / 'einzel') × leadpreis (numerisch)
-// Wir bucketen die leadpreise (z.B. <100, 100-200, 200-400, 400+).
+// CMM-44/CMM-49: Lead-Preis lebt auf claims (SSoT: lead_preis_netto/lead_preis_typ/
+// lead_preis_berechnet_am). Die alte `gutachter_abrechnungen`-Quelle war faktisch leer
+// (gleicher Audit-Befund wie das "Leadkosten-Monat"-Widget, AAR-928, das schon migriert
+// wurde — dieses Widget wurde dabei vergessen). Wir bucketen lead_preis_netto
+// (z.B. <100, 100-200, 200-400, 400+), Typ = lead_preis_typ.
 
 function fmtEur(n: number): string {
   return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -26,19 +28,20 @@ async function loadVerteilung() {
   const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
 
   const { data: rows } = await supabase
-    .from('gutachter_abrechnungen')
-    .select('leadpreis, preistyp, abgerechnet_am')
-    .gte('abgerechnet_am', ninetyDaysAgo)
+    .from('claims')
+    .select('lead_preis_netto, lead_preis_typ, lead_preis_berechnet_am')
+    .gte('lead_preis_berechnet_am', ninetyDaysAgo)
+    .not('lead_preis_netto', 'is', null)
 
   const buckets: Bucket[] = BUCKETS.map(b => ({ ...b, anzahl: 0, summe: 0 }))
   const typBreakdown: Record<string, { anzahl: number; summe: number }> = {}
   let total = 0
 
   for (const r of rows ?? []) {
-    const preis = Number(r.leadpreis ?? 0)
+    const preis = Number(r.lead_preis_netto ?? 0)
     if (!preis) continue
     total += preis
-    const typ = r.preistyp || 'unbekannt'
+    const typ = r.lead_preis_typ || 'unbekannt'
     typBreakdown[typ] = typBreakdown[typ] ?? { anzahl: 0, summe: 0 }
     typBreakdown[typ].anzahl++
     typBreakdown[typ].summe += preis
@@ -74,7 +77,7 @@ export default async function LeadPreiseVerteilungWidget() {
 
           {data.count === 0 ? (
             <p className="text-xs text-claimondo-ondo text-center py-6">
-              Keine abgerechneten Leads in den letzten 90 Tagen.
+              Keine Leads mit Lead-Preis in den letzten 90 Tagen.
             </p>
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
