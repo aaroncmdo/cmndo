@@ -642,6 +642,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           svVerifiziert={svVerifiziert}
         />
 
+        {/* AAR Layout-Audit (2026-06-29): 2-Spalten Master/Detail — links der
+            zeitkritische Fortschritts-/Status-Strang, rechts eine sticky Sidebar
+            mit Kanzlei + Geld. Nutzt die Desktop-Breite statt Full-Width-Stretch
+            und kürzt die Seite. */}
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-5 lg:items-start">
+          <div className="space-y-5 min-w-0">
+
         {/* 13.05.2026 Restore: Google-Bewertungs-Prompt — nach durchgeführtem
             SV-Termin, einmalig, nur wenn SV eine google_place_id hat.
             (CMM-29/30/31/43) */}
@@ -825,6 +832,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             </p>
           </NoticeBox>
         )}
+          </div>
+
+          {/* Rechte Sidebar — Kanzlei + Geld (sticky). */}
+          <aside className="space-y-5 mt-5 lg:mt-0 lg:sticky lg:top-4 self-start">
 
         {/* CMM-28 Konsolidierung: Eine „Meine Kanzlei"-Card statt 3 separaten
             Cards (SaeuleMeinAnwalt + MeineKanzleiCard + KanzleiAnsprechpartnerBlock).
@@ -851,7 +862,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             claim.kanzlei_wunsch (Komplettservice / eigene Kanzlei / selbst
             einreichen / Frage). Bei partnerkanzlei rendert die Card null.
             (CMM-32 Polish, #416) */}
-        {fall.claim_id && !istNurGutachter && (
+        {!!fall.claim_id && !istNurGutachter && (
           <KanzleiPfadCard
             claimId={fall.claim_id as string}
             kanzleiWunsch={(fall.kanzlei_wunsch as React.ComponentProps<typeof KanzleiPfadCard>['kanzleiWunsch']) ?? null}
@@ -873,9 +884,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           <KundeAusfallEntschaedigungCard {...ausfallProps} />
         )}
 
-        {/* 2-Säulen Layout (Geld + Betreuer) — Anwalt-Säule entfällt durch
-            Konsolidierung in MeineKanzleiCard. */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Geld + Betreuer — in der 360px-Sidebar gestapelt (1-Spalte). */}
+        <div className="grid grid-cols-1 gap-4">
           <SaeuleMeinGeld
             fallId={fall.id as string}
             status={(fall.status as string) ?? ''}
@@ -898,6 +908,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             kbAvatarUrl={kbAvatarUrl}
             kbBeschreibung={kbBeschreibung}
           />
+        </div>
+          </aside>
         </div>
 
         {/* Opt-in Gutachten-Weiterleitung — nur sichtbar wenn Gutachten vorliegt */}

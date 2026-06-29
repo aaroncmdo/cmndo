@@ -271,17 +271,17 @@ function KanzleiProvisionSection({
         <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border flex items-center justify-between">
             <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
-              Kanzlei-Provision (150&euro; / Vollmacht)
+              Potenzielle Kanzlei-Provision
             </h2>
             <StatusBadge colorCls="text-claimondo-navy bg-claimondo-ondo/[0.06]">
-              Nur mandatstyp: kanzlei-claimondo
+              komplett-Mandate (potenziell, vor Vollmacht) · 150 &euro; / Mandat
             </StatusBadge>
           </div>
 
           <div className="p-5">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
               <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
-                <p className="text-claimondo-ondo text-xs mb-1">Vollmachten gesamt</p>
+                <p className="text-claimondo-ondo text-xs mb-1">Potenzielle Mandate</p>
                 <p className="text-claimondo-navy text-2xl font-bold tabular-nums">{vollmachtenGesamt}</p>
               </div>
               <div className="text-center p-3 bg-claimondo-bg rounded-ios-xl">
@@ -300,7 +300,7 @@ function KanzleiProvisionSection({
 
             {letzteVollmachten.length > 0 && (
               <div className="border-t border-claimondo-border pt-4">
-                <p className="text-xs text-claimondo-ondo font-medium mb-2">Letzte Vollmachten (Kanzlei)</p>
+                <p className="text-xs text-claimondo-ondo font-medium mb-2">Komplett-Mandate (potenziell)</p>
                 <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
                   {letzteVollmachten.map(v => (
                     <div key={v.id} className="flex items-center justify-between px-3 py-2 bg-claimondo-bg rounded-ios-lg text-xs">
@@ -712,22 +712,25 @@ export default async function FinancePage() {
     .select('betrag')
   const gutachterAnzahlungenGesamt = (allEinzahlungen ?? []).reduce((s, e) => s + Number(e.betrag), 0)
 
-  // ── Kanzlei-Provision: 150€ pro unterschriebene Vollmacht (mandatstyp=kanzlei-claimondo) ──
-  // AAR-583 (N6): leads.vollmacht_unterschrieben gedroppt — Filter auf vollmacht_signiert_am IS NOT NULL.
+  // ── Potenzielle Kanzlei-Provision: 150€ je komplett-Mandat (Dashboard-Audit 29.06.) ──
+  // Vorher: leads.mandatstyp='kanzlei-claimondo' + leads.vollmacht_signiert_am — beide Felder
+  // live 0 (Lead-Level nie befuellt). Die Welt ist claim-level: service_typ='komplett' = die
+  // Partner-Kanzlei-Strecke. Bis die komplett->Vollmacht-Signatur-Strecke steht (Koord 876a45e8),
+  // zeigen wir die aktiven komplett-Mandate als POTENZIELLE Kanzlei-Mandate (150€ je Mandat).
   const [{ data: kanzleiVollmachtenGesamt }, { data: kanzleiVollmachtenMonat }] = await Promise.all([
     supabase
-      .from('leads')
-      .select('id, vorname, nachname, vollmacht_datum, created_at')
-      .not('vollmacht_signiert_am', 'is', null)
-      .eq('mandatstyp', 'kanzlei-claimondo')
-      .order('vollmacht_datum', { ascending: false }),
+      .from('v_claim_full')
+      .select('id, claim_nummer, kunde_vorname, kunde_nachname, sa_unterschrieben_am, fall_created_at')
+      .eq('service_typ', 'komplett')
+      .eq('ist_aktiv', true)
+      .order('fall_created_at', { ascending: false }),
     supabase
-      .from('leads')
+      .from('v_claim_full')
       .select('id')
-      .not('vollmacht_signiert_am', 'is', null)
-      .eq('mandatstyp', 'kanzlei-claimondo')
-      .gte('vollmacht_datum', monatStart)
-      .lte('vollmacht_datum', monatEnde),
+      .eq('service_typ', 'komplett')
+      .eq('ist_aktiv', true)
+      .gte('fall_created_at', monatStart)
+      .lte('fall_created_at', monatEnde),
   ])
 
   const kanzleiVollmachtenTotal = (kanzleiVollmachtenGesamt ?? []).length
@@ -772,7 +775,7 @@ export default async function FinancePage() {
               <span className="bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">MRR {new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(mrr)}</span>
               <span className="bg-claimondo-ondo/5 text-claimondo-ondo px-2 py-0.5 rounded-full">{(aktiveSvs ?? []).length} SVs</span>
               {kanzleiVollmachtenDiesenMonat > 0 && (
-                <span className="bg-claimondo-ondo/[0.06] text-claimondo-navy px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Vollmachten</span>
+                <span className="bg-claimondo-ondo/[0.06] text-claimondo-navy px-2 py-0.5 rounded-full">{kanzleiVollmachtenDiesenMonat} Mandate</span>
               )}
             </div>
           }
@@ -812,10 +815,10 @@ export default async function FinancePage() {
         vollmachtenMonat={kanzleiVollmachtenDiesenMonat}
         provisionGesamt={kanzleiProvisionGesamt}
         provisionMonat={kanzleiProvisionMonat}
-        letzteVollmachten={(kanzleiVollmachtenGesamt ?? []).slice(0, 20).map(l => ({
-          id: l.id,
-          name: `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '\u2014',
-          datum: l.vollmacht_datum ? new Date(l.vollmacht_datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : l.created_at ? new Date(l.created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '\u2014',
+        letzteVollmachten={(kanzleiVollmachtenGesamt ?? []).slice(0, 20).map(c => ({
+          id: c.id,
+          name: `${c.kunde_vorname ?? ''} ${c.kunde_nachname ?? ''}`.trim() || (c.claim_nummer ?? '\u2014'),
+          datum: c.sa_unterschrieben_am ? new Date(c.sa_unterschrieben_am).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : c.fall_created_at ? new Date(c.fall_created_at).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) : '\u2014',
         }))}
       />
       <GutachterAbrechnungen svRows={svRows} gutachterAnzahlungenGesamt={gutachterAnzahlungenGesamt} />
