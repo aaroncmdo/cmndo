@@ -39,18 +39,18 @@ export default function OutboxBadge() {
   if (count === 0) return null
 
   const STATUS_ICON = {
-    pending: <ClockIcon className="w-3.5 h-3.5 text-amber-500" />,
+    pending: <ClockIcon className="w-3.5 h-3.5 text-warning" />,
     uploading: <RefreshCwIcon className="w-3.5 h-3.5 text-claimondo-ondo animate-spin" />,
-    failed: <AlertCircleIcon className="w-3.5 h-3.5 text-red-500" />,
+    failed: <AlertCircleIcon className="w-3.5 h-3.5 text-danger" />,
     // AAR-388: Dead-Letter — 10 Retries fehlgeschlagen
-    dead: <AlertTriangleIcon className="w-3.5 h-3.5 text-red-700" />,
+    dead: <AlertTriangleIcon className="w-3.5 h-3.5 text-danger-strong" />,
   }
 
   return (
     <div className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 border border-amber-200 rounded-ios-lg text-xs font-medium text-amber-700 hover:bg-amber-100 transition-colors"
+        className="flex items-center gap-1.5 px-2.5 py-1.5 bg-warning-soft border border-warning/30 rounded-ios-lg text-xs font-medium text-warning-strong hover:bg-warning/15 transition-colors"
       >
         <CloudUploadIcon className="w-3.5 h-3.5" />
         {count} {count === 1 ? 'Foto wartet' : 'Fotos warten'}
@@ -77,7 +77,7 @@ export default function OutboxBadge() {
                     <p className="text-[10px] text-claimondo-ondo/70">{(item.file_size / 1024).toFixed(0)} KB — {item.dokument_typ}</p>
                   </div>
                   {item.status === 'failed' && (
-                    <span className="text-[9px] text-red-500">{item.last_error?.slice(0, 30)}</span>
+                    <span className="text-[9px] text-danger">{item.last_error?.slice(0, 30)}</span>
                   )}
                 </div>
               ))

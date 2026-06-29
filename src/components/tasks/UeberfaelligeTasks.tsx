@@ -57,10 +57,10 @@ export default async function UeberfaelligeTasks({
   }))
 
   return (
-    <div className="bg-red-50/50 border border-red-800/50 rounded-2xl p-4 mb-6">
+    <div className="bg-danger-soft/50 border border-danger/30 rounded-2xl p-4 mb-6">
       <div className="flex items-center gap-2 mb-3">
-        <AlertTriangleIcon className="w-4 h-4 text-red-400" />
-        <h3 className="text-sm font-semibold text-red-300">
+        <AlertTriangleIcon className="w-4 h-4 text-danger" />
+        <h3 className="text-sm font-semibold text-danger-strong">
           Überfällige Tasks ({items.length})
         </h3>
       </div>
@@ -72,17 +72,17 @@ export default async function UeberfaelligeTasks({
           return (
             <div
               key={task.id}
-              className="flex items-center gap-3 bg-red-50/40 rounded-ios-xl px-3 py-2.5"
+              className="flex items-center gap-3 bg-danger-soft/40 rounded-ios-xl px-3 py-2.5"
             >
               {task.prioritaet === 'kritisch' && (
-                <span className="shrink-0 bg-red-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">!</span>
+                <span className="shrink-0 bg-danger text-white text-[9px] font-bold px-1.5 py-0.5 rounded">!</span>
               )}
               {task.prioritaet === 'dringend' && (
-                <span className="shrink-0 bg-amber-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">!!</span>
+                <span className="shrink-0 bg-warning text-white text-[9px] font-bold px-1.5 py-0.5 rounded">!!</span>
               )}
               <div className="min-w-0 flex-1">
-                <p className="text-red-200 text-sm truncate">{task.titel}</p>
-                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-red-400/70">
+                <p className="text-danger-strong text-sm truncate">{task.titel}</p>
+                <div className="flex items-center gap-2 mt-0.5 text-[11px] text-danger/70">
                   <span>
                     {overdueDays === 0
                       ? 'Heute fällig'
@@ -90,12 +90,12 @@ export default async function UeberfaelligeTasks({
                   </span>
                   {task.claim_nummer && (
                     <>
-                      <span className="text-red-800">·</span>
+                      <span className="text-danger-strong">·</span>
                       <Link
                         href={`/faelle/${task.fall_id}`}
                         target="_blank"
                         rel="noopener"
-                        className="text-red-400 hover:text-red-300"
+                        className="text-danger hover:text-danger-strong"
                       >
                         {task.claim_nummer}
                       </Link>

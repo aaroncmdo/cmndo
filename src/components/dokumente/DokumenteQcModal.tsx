@@ -155,7 +155,7 @@ export default function DokumenteQcModal({
             )}
 
             {error && (
-              <div className="rounded-ios-md bg-red-50 border border-red-200 px-3 py-2 text-xs text-red-700 flex items-start gap-2">
+              <div className="rounded-ios-md bg-danger-soft border border-danger/30 px-3 py-2 text-xs text-danger-strong flex items-start gap-2">
                 <AlertCircleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -178,7 +178,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={() => setMode('ablehnen')}
                 disabled={pending || !doc}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-orange-700 bg-white border border-orange-200 rounded-ios-md hover:bg-orange-50 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-warning-strong bg-white border border-warning/30 rounded-ios-md hover:bg-warning-soft disabled:opacity-50"
               >
                 <XCircleIcon className="w-3.5 h-3.5" />
                 Ablehnen + Neu anfordern
@@ -187,7 +187,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={handleAccept}
                 disabled={pending || !doc}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-emerald-600 rounded-ios-md hover:bg-emerald-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-success rounded-ios-md hover:bg-success/90 disabled:opacity-50"
               >
                 {pending ? (
                   <Loader2Icon className="w-3 h-3 animate-spin" />
@@ -215,7 +215,7 @@ export default function DokumenteQcModal({
                 type="button"
                 onClick={handleReject}
                 disabled={pending || !doc || begruendung.trim().length < 10}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-orange-600 rounded-ios-md hover:bg-orange-700 disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-white bg-warning rounded-ios-md hover:bg-warning/90 disabled:opacity-50"
               >
                 {pending && <Loader2Icon className="w-3 h-3 animate-spin" />}
                 Ablehnung senden

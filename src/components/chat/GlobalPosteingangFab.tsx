@@ -255,7 +255,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                     {view === 'new' ? 'Neuer Chat' : 'Posteingang'}
                   </span>
                   {view === 'inbox' && totalUnread > 0 && (
-                    <DropletBadge count={totalUnread} colorCls="bg-red-500 text-white" size={18} />
+                    <DropletBadge count={totalUnread} colorCls="bg-danger text-white" size={18} />
                   )}
                   <button
                     type="button"
@@ -303,7 +303,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
                         </div>
                         <div className="flex flex-col items-end gap-1.5 shrink-0">
                           {thread.unreadCount > 0 && (
-                            <DropletBadge count={thread.unreadCount} colorCls="bg-red-500 text-white" size={18} />
+                            <DropletBadge count={thread.unreadCount} colorCls="bg-danger text-white" size={18} />
                           )}
                           <span className="opacity-0 group-hover:opacity-100 p-1 transition-all" title="Chat anheften">
                             <ExternalLinkIcon className="w-3.5 h-3.5 text-claimondo-ondo" />
@@ -398,7 +398,7 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
             <InboxIcon className="w-5 h-5" />
             {totalUnread > 0 && (
               <span className="absolute -top-1 -right-1 pointer-events-none">
-                <DropletBadge count={totalUnread} colorCls="bg-red-500 text-white" size={20} />
+                <DropletBadge count={totalUnread} colorCls="bg-danger text-white" size={20} />
               </span>
             )}
           </motion.button>
