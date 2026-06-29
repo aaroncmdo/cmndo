@@ -34,6 +34,7 @@ const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
   { href: '/werkstatt/vermittlungen', label: 'Meine Vermittlungen', icon: HandshakeIcon },
+  { href: '/werkstatt/auftraege', label: 'Reparatur-Aufträge', icon: WrenchIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 

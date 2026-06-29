@@ -6,6 +6,7 @@ import { WrenchIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import type { AusstehendeFreigabe } from '@/lib/werkstatt/ausstehende-freigaben'
+import { FreigebenButton } from './FreigebenButton'
 
 const eur = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })
 const fmtDate = (iso: string | null) =>
@@ -53,12 +54,15 @@ export function AusstehendeFreigabenSection({ rows }: { rows: AusstehendeFreigab
                 <Td>{fmtDate(row.faellig_am)}</Td>
                 <Td><StatusBadge row={row} /></Td>
                 <Td>
-                  <Link
-                    href={`/faelle/${row.fall_id ?? row.claim_id}`}
-                    className="text-body-sm font-medium text-claimondo-ondo hover:underline"
-                  >
-                    Öffnen
-                  </Link>
+                  <div className="flex items-center justify-end gap-3">
+                    <FreigebenButton claimId={row.claim_id} />
+                    <Link
+                      href={`/faelle/${row.fall_id ?? row.claim_id}`}
+                      className="text-body-sm font-medium text-claimondo-ondo hover:underline"
+                    >
+                      Öffnen
+                    </Link>
+                  </div>
                 </Td>
               </Tr>
             ))}
