@@ -283,7 +283,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               <div key={s.id} className="border border-claimondo-border rounded-ios-xl p-4 space-y-3">
                 <div className="flex items-center justify-between">
                   <span className="text-xs font-semibold text-claimondo-ondo">Mitglied {idx + 1}</span>
-                  <button type="button" onClick={() => removeSubSv(s.id)} className="text-claimondo-ondo/50 hover:text-red-400 p-0.5">
+                  <button type="button" onClick={() => removeSubSv(s.id)} className="text-claimondo-ondo/50 hover:text-danger p-0.5">
                     <TrashIcon className="w-3.5 h-3.5" />
                   </button>
                 </div>

@@ -530,7 +530,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
                     <button
                       type="button"
                       onClick={() => removeStandort(std.id)}
-                      className="text-claimondo-ondo/50 hover:text-red-400 p-0.5"
+                      className="text-claimondo-ondo/50 hover:text-danger p-0.5"
                     >
                       <TrashIcon className="w-3.5 h-3.5" />
                     </button>
