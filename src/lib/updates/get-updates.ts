@@ -13,7 +13,9 @@ export async function getUpdates(
   userId: string,
   rolle: string,
 ): Promise<UpdateItem[]> {
-  // Schicht A: abgeleitete Action-Items
+  // Schicht A: abgeleitete Action-Items. Hinweis: get_updates_action leitet die
+  // ECHTE Rolle intern aus auth.uid()->profiles ab (leak-safe). p_rolle ist nur
+  // informativ und steuert KEINE Sichtbarkeit -- nicht fuer Security darauf verlassen.
   const { data: actionRows } = await db.rpc('get_updates_action', { p_rolle: rolle })
   const actions: UpdateItem[] = (actionRows ?? []).map((r: Record<string, unknown>) => ({
     id: r.id as string,
