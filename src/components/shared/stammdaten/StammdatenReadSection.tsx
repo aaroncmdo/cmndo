@@ -216,12 +216,12 @@ export function StammdatenReadSection({
                   </span>
                 )}
                 {leasing && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-warning-soft text-warning-strong border border-warning/30">
                     {t('leasing')}{leasinggeber ? `: ${leasinggeber}` : ''}
                   </span>
                 )}
                 {finanzierung && (
-                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-warning-soft text-warning-strong border border-warning/30">
                     {t('finanzierung')}{finanzierungsgeber ? `: ${finanzierungsgeber}` : ''}
                   </span>
                 )}
@@ -297,7 +297,7 @@ export function StammdatenReadSection({
 
       {zeigeHalter && (
         <div className="flex items-start gap-3 pt-3 border-t border-claimondo-border">
-          <UserIcon className="w-4 h-4 text-amber-500 mt-0.5 shrink-0" />
+          <UserIcon className="w-4 h-4 text-warning mt-0.5 shrink-0" />
           <div className="flex-1 min-w-0 text-xs">
             <p className="text-claimondo-ondo">{t('halterAbweichend')}</p>
             {halterName && (

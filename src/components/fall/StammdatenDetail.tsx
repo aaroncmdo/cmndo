@@ -186,11 +186,11 @@ function FahrzeugDetail({ data }: { data: StammdatenAccordionData }) {
           label="Fahrbereit"
           value={
             fahrbereit === true ? (
-              <span className="inline-flex items-center gap-1 text-emerald-700">
+              <span className="inline-flex items-center gap-1 text-success-strong">
                 <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
               </span>
             ) : fahrbereit === false ? (
-              <span className="inline-flex items-center gap-1 text-red-700">
+              <span className="inline-flex items-center gap-1 text-danger-strong">
                 <XCircleIcon className="w-3.5 h-3.5" /> Nein
               </span>
             ) : null
@@ -362,7 +362,7 @@ function UnfallDetail({ data }: { data: StammdatenAccordionData }) {
         label="Polizei"
         value={
           polizei === true ? (
-            <span className="inline-flex items-center gap-1 text-emerald-700">
+            <span className="inline-flex items-center gap-1 text-success-strong">
               <CheckCircle2Icon className="w-3.5 h-3.5" /> Aufgenommen
             </span>
           ) : polizei === false ? (
@@ -400,11 +400,11 @@ function SchadenDetail({ data }: { data: StammdatenAccordionData }) {
         label="Fahrbereit"
         value={
           fahrbereit === true ? (
-            <span className="inline-flex items-center gap-1 text-emerald-700">
+            <span className="inline-flex items-center gap-1 text-success-strong">
               <CheckCircle2Icon className="w-3.5 h-3.5" /> Ja
             </span>
           ) : fahrbereit === false ? (
-            <span className="inline-flex items-center gap-1 text-red-700">
+            <span className="inline-flex items-center gap-1 text-danger-strong">
               <XCircleIcon className="w-3.5 h-3.5" /> Nein
             </span>
           ) : null
