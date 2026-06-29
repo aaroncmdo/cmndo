@@ -62,7 +62,8 @@ export default async function KanzleiLayout({
       </header>
       <div className="flex flex-1 min-h-0 relative z-10">
         <KanzleiNav />
-        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 md:px-8 py-6">
+        {/* pb-24 mobile: Platz fuer die Mobile-Bottom-Nav (md:hidden); ab md zurueck auf py-6. */}
+        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
           {children}
         </main>
       </div>
