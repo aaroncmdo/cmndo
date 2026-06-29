@@ -7,6 +7,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
 import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export default async function DispatchDashboard() {
   const supabase = await createClient()
@@ -17,8 +18,11 @@ export default async function DispatchDashboard() {
   // sichergestellt — daher hier admin-Client für die Count-Query.
   const admin = createAdminClient()
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
+  // FIX (Dashboard-Audit 29.06., analog AAR-958): echte Berlin-Tagesgrenze statt setHours(0,0,0,0)
+  // (= Server-lokal = UTC auf Vercel -> "heute" war am Tagesrand 1-2h schief). berlinWallClockToUtc
+  // ist das etablierte Helfer-Pattern (sv-reminder.ts/verlegung-vorschlaege.ts).
+  const berlinDateStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
+  const todayStart = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`))
 
   // Parallel queries
   const [newLeadsRes, openRueckrufeRes, flowLinksRes, myTasksRes, recentLeadsRes, kommendeRueckrufeRes] = await Promise.all([

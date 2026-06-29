@@ -158,17 +158,19 @@ async function loadAlerts(): Promise<Alert[]> {
     console.error('[KFZ-155] Inactive-SV check failed:', err)
   }
 
-  // 2. Faelle in Reklamation
+  // 2. Offene Reklamationen
   try {
-    // CMM-49 P1: direkt aus claims (SSoT) — operative_status auf claims; Zweistufen-Count entfällt.
+    // FIX (Dashboard-Audit 29.06.): operative_status='reklamation' ist kein gueltiger
+    // operative_status-Wert -> der Alert feuerte nie. Reklamationen leben in der
+    // reklamationen-Tabelle (status='offen', SoT) — von dort zaehlen.
     const { count: reklamation } = await supabase
-      .from('claims')
+      .from('reklamationen')
       .select('id', { count: 'exact', head: true })
-      .eq('operative_status', 'reklamation')
+      .eq('status', 'offen')
     if ((reklamation ?? 0) > 0) {
       alerts.push({
         key: 'reklamation',
-        text: `${reklamation} Faelle in Reklamation`,
+        text: `${reklamation} offene Reklamationen`,
         href: '/admin/faelle/reklamationen',
         severity: 'warnung',
       })
