@@ -22,6 +22,10 @@ const ITEMS: PortalNavItem[] = [
   { href: '/mitarbeiter/profil', label: 'Mein Profil', icon: UserIcon },
 ]
 
+// Primaer-Items fuer die Mobile-Bottom-Nav (4 + "Mehr" -> volle ITEMS-Liste im Sheet).
+const MOBILE_HREFS = ['/mitarbeiter', '/mitarbeiter/faelle', '/mitarbeiter/termine', '/mitarbeiter/nachrichten']
+const MOBILE_ITEMS = MOBILE_HREFS.map((h) => ITEMS.find((i) => i.href === h)!).filter(Boolean)
+
 export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichten?: number }) {
   return (
     <PortalNav
@@ -29,6 +33,7 @@ export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichte
       ariaLabel="Mitarbeiter-Navigation"
       className="hidden md:flex md:flex-col min-h-[calc(100vh-60px)]"
       sections={[{ items: ITEMS }]}
+      mobileItems={MOBILE_ITEMS}
       renderBadge={(item) => {
         if (item.href === '/mitarbeiter/nachrichten' && (unreadNachrichten ?? 0) > 0) {
           return (
