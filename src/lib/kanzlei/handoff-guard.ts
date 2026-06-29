@@ -31,3 +31,13 @@ export function brauchtKanzleiHandoff(
   if (!operativeStatus) return false
   return !HANDOFF_ERLEDIGT_ODER_TERMINAL.has(operativeStatus)
 }
+
+/**
+ * True wenn der Claim den Kanzlei-Handoff bereits hinter sich hat ODER terminal ist.
+ * Idempotenz-Guard fuer saveFilmcheck: beide KB-Approve-Buttons (qcBestanden +
+ * gibKanzleipaketFrei) routen durch saveFilmcheck — ohne diesen Check wuerfe ein
+ * zweiter Klick transitionFallStatus (kanzlei-uebergeben -> kanzlei-uebergeben ungueltig).
+ */
+export function kanzleiHandoffBereitsErfolgt(operativeStatus: string | null | undefined): boolean {
+  return !!operativeStatus && HANDOFF_ERLEDIGT_ODER_TERMINAL.has(operativeStatus)
+}

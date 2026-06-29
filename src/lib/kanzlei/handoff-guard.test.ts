@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { brauchtKanzleiHandoff } from './handoff-guard'
+import { brauchtKanzleiHandoff, kanzleiHandoffBereitsErfolgt } from './handoff-guard'
 
 // Filmcheck-Audit 29.06.2026: gibKanzleipaketFrei (qc.ts) schrieb nur kanzlei_faelle +
 // auftrag, advancte aber operative_status NICHT -> der Fall tauchte in den (operative_
@@ -32,5 +32,22 @@ describe('brauchtKanzleiHandoff', () => {
   it('null/unbekannt -> false', () => {
     expect(brauchtKanzleiHandoff(null, 'komplett')).toBe(false)
     expect(brauchtKanzleiHandoff('filmcheck', null)).toBe(false)
+  })
+})
+
+describe('kanzleiHandoffBereitsErfolgt (Idempotenz-Guard fuer saveFilmcheck)', () => {
+  it('uebergeben/weiter/terminal -> true (Handoff ueberspringen)', () => {
+    for (const s of ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'zahlung-eingegangen', 'abgeschlossen', 'storniert']) {
+      expect(kanzleiHandoffBereitsErfolgt(s)).toBe(true)
+    }
+  })
+  it('vor dem Handoff (filmcheck/qc-pruefung/frueher) -> false (Handoff erlaubt)', () => {
+    for (const s of ['filmcheck', 'qc-pruefung', 'gutachten-eingegangen', 'sv-termin']) {
+      expect(kanzleiHandoffBereitsErfolgt(s)).toBe(false)
+    }
+  })
+  it('null -> false', () => {
+    expect(kanzleiHandoffBereitsErfolgt(null)).toBe(false)
+    expect(kanzleiHandoffBereitsErfolgt(undefined)).toBe(false)
   })
 })
