@@ -168,6 +168,12 @@ export const TIMELINE_EVENT_DISPLAY: Record<string, EventDisplay> = {
     labelInternal: () => 'Reparatur abgeschlossen',
     labelKunde:    () => 'Reparatur abgeschlossen',
   },
+  // Werkstatt-Reparaturfreigabe (intern, Admin/KB-Historie — sichtbar_fuer_kunde=false in der View)
+  'reparatur.freigegeben': {
+    icon: CheckCircleIcon, tone: 'success', kategorie: 'reparatur',
+    labelInternal: () => 'Reparatur für Werkstatt freigegeben',
+    labelKunde:    () => 'Reparatur freigegeben',
+  },
 
   // ── VS-Korrespondenz ────────────────────────────────────────────────────
   'vs.brief_versendet': {
