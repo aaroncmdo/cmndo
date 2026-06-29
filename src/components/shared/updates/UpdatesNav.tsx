@@ -1,48 +1,40 @@
-﻿'use client'
+'use client'
 
-// AAR-725: Globale Updates-Nav. Ersetzt MitteilungszentralePanel /
-// NotificationBell in allen 6 Portalen außer Kunde.
-//
-// Zustände:
-//   - leer → grauer Button
-//   - offen → navy gefüllt + Counter
-//   - kritisch (>=1 prioritaet='dringend' offen) → rot gefüllt + Counter
-// Realtime-INSERT → 1× kurzes Aufleuchten.
-//
-// Click-Toggle: öffnet/schließt Popover mit 4 Tabs
-// (Aktivität / Nachrichten / Anrufe / Kritisch). Outside-Click + ESC +
-// Navigation schließen. Task-Kategorie ist deprecated (AAR-723 Pill).
+// AAR-725 / #updates-rebuild Phase 3: Globale Updates-Nav.
+// DB-getriebenes Modell (useUpdates): Badge = offene Action-Items; Popover trennt
+// "Braucht dich" (Action) von "Verlauf" (Info) + Typ-Filter. "Alles gesehen" setzt
+// NUR den Info-Read-Marker — Action-Items loesen sich ueber ihren DB-State auf.
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
 import {
   BellIcon,
-  AlertTriangleIcon,
-  MessageCircleIcon,
   ActivityIcon,
+  MessageCircleIcon,
   PhoneIcon,
+  ClipboardListIcon,
   CheckIcon,
   XIcon,
 } from 'lucide-react'
-import { useMitteilungenContext } from '@/components/mitteilungszentrale/MitteilungenProvider'
-import type { Mitteilung, MitteilungKategorie } from '@/lib/mitteilungen/types'
+import { useUpdates } from './useUpdates'
+import { filterByTyp, type TypFilter } from '@/lib/updates/split'
+import type { UpdateItem } from '@/lib/updates/types'
 import { resolvePopoverPlacement, type PopoverPlacement } from './popover-placement'
 
 type Variant = 'dark' | 'light'
-type TabKey = 'aktivitaet' | 'nachrichten' | 'anrufe' | 'kritisch'
 
-const TABS: { key: TabKey; label: string; icon: typeof BellIcon }[] = [
-  { key: 'aktivitaet', label: 'Aktivität', icon: ActivityIcon },
-  { key: 'nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
-  { key: 'anrufe', label: 'Anrufe', icon: PhoneIcon },
-  { key: 'kritisch', label: 'Kritisch', icon: AlertTriangleIcon },
+const TYP_CHIPS: { key: TypFilter; label: string; icon: typeof BellIcon }[] = [
+  { key: 'alle', label: 'Alle', icon: BellIcon },
+  { key: 'event', label: 'Aktivität', icon: ActivityIcon },
+  { key: 'message', label: 'Nachrichten', icon: MessageCircleIcon },
+  { key: 'call', label: 'Anrufe', icon: PhoneIcon },
+  { key: 'task', label: 'Aufgaben', icon: ClipboardListIcon },
 ]
 
 function fmtRelative(iso: string) {
   const d = new Date(iso)
-  const diffMs = Date.now() - d.getTime()
-  const diffMin = Math.floor(diffMs / 60000)
+  const diffMin = Math.floor((Date.now() - d.getTime()) / 60000)
   if (diffMin < 1) return 'jetzt'
   if (diffMin < 60) return `vor ${diffMin} Min`
   const h = Math.floor(diffMin / 60)
@@ -52,6 +44,10 @@ function fmtRelative(iso: string) {
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
 }
 
+function typIcon(typ: UpdateItem['typ']): string {
+  return typ === 'task' ? '✅' : typ === 'message' ? '💬' : typ === 'call' ? '📞' : '🔔'
+}
+
 export default function UpdatesNav({
   variant = 'dark',
   placement = 'down-left',
@@ -59,55 +55,32 @@ export default function UpdatesNav({
   variant?: Variant
   placement?: PopoverPlacement
 }) {
-  // AAR-892: Context-Hook statt direktem `useMitteilungen()` — Provider
-  // mountet die Source einmal pro Layout, beide Mobile+Desktop-Mounts
-  // teilen Daten + Realtime-Channel.
-  const { items, markAsRead } = useMitteilungenContext()
+  const { actionItems, infoItems, actionCount, newInfoCount, markSeen } = useUpdates()
   const [open, setOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState<TabKey>('aktivitaet')
+  const [typFilter, setTypFilter] = useState<TypFilter>('alle')
+  const [showVerlauf, setShowVerlauf] = useState(false)
   const [flashing, setFlashing] = useState(false)
   const popoverRef = useRef<HTMLDivElement | null>(null)
   const buttonRef = useRef<HTMLButtonElement | null>(null)
-  // AAR-725: Previous unread-count um Flash nur bei ECHTEM Zuwachs für DIESEN
-  // User zu triggern. `lastInsertTick` des Hooks schlägt auch bei fremden
-  // Inserts aus — davor schütz die Diff-Logik hier.
-  const prevUnreadRef = useRef<number | null>(null)
+  const prevActionRef = useRef<number | null>(null)
   const pathname = usePathname()
   const router = useRouter()
 
-  // AAR-725: „task"-Kategorie ist deprecated (AAR-723 Pill). Alles andere
-  // wird angezeigt.
-  const relevant = useMemo(
-    () => items.filter(m => m.kategorie !== ('task' as MitteilungKategorie)),
-    [items],
-  )
-  const unreadRelevant = useMemo(() => relevant.filter(m => !m.gelesen), [relevant])
-  const unreadTotal = unreadRelevant.length
-  const kritischUnread = useMemo(
-    () => unreadRelevant.filter(m => m.prioritaet === 'dringend'),
-    [unreadRelevant],
-  )
-  const hasKritisch = kritischUnread.length > 0
+  const hasKritisch = actionItems.some(i => i.prioritaet === 'dringend')
 
-  // Flash nur wenn der Unread-Count für diesen User GESTIEGEN ist — nicht
-  // bei initialem Mount (prevUnreadRef === null) und nicht wenn ein fremder
-  // mitteilungen-INSERT nur unseren Counter-Tick hochgezogen hat ohne Effekt
-  // auf uns.
+  // Flash nur bei ECHTEM Anstieg der offenen Action-Items.
   useEffect(() => {
-    const current = unreadTotal
-    if (prevUnreadRef.current !== null && current > prevUnreadRef.current) {
+    if (prevActionRef.current !== null && actionCount > prevActionRef.current) {
       setFlashing(true)
       const t = setTimeout(() => setFlashing(false), 1000)
-      prevUnreadRef.current = current
+      prevActionRef.current = actionCount
       return () => clearTimeout(t)
     }
-    prevUnreadRef.current = current
-  }, [unreadTotal])
+    prevActionRef.current = actionCount
+  }, [actionCount])
 
-  // AAR-725: Auto-Close bei Navigation.
-  useEffect(() => {
-    setOpen(false)
-  }, [pathname])
+  // Auto-Close bei Navigation.
+  useEffect(() => { setOpen(false) }, [pathname])
 
   // Outside-Click + ESC.
   useEffect(() => {
@@ -117,9 +90,7 @@ export default function UpdatesNav({
       if (popoverRef.current?.contains(t) || buttonRef.current?.contains(t)) return
       setOpen(false)
     }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setOpen(false)
-    }
+    function onKey(e: KeyboardEvent) { if (e.key === 'Escape') setOpen(false) }
     document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
@@ -128,37 +99,27 @@ export default function UpdatesNav({
     }
   }, [open])
 
-  const filtered = useMemo(() => {
-    if (activeTab === 'kritisch') return relevant.filter(m => m.prioritaet === 'dringend')
-    const mapping: Record<Exclude<TabKey, 'kritisch'>, MitteilungKategorie> = {
-      aktivitaet: 'update',
-      nachrichten: 'nachricht',
-      anrufe: 'anruf',
-    }
-    return relevant.filter(m => m.kategorie === mapping[activeTab as Exclude<TabKey, 'kritisch'>])
-  }, [relevant, activeTab])
+  const filteredAction = useMemo(() => filterByTyp(actionItems, typFilter), [actionItems, typFilter])
+  const filteredInfo = useMemo(() => filterByTyp(infoItems, typFilter), [infoItems, typFilter])
 
-  const tabCount = (key: TabKey): number => {
-    if (key === 'kritisch') return kritischUnread.length
-    const mapping: Record<Exclude<TabKey, 'kritisch'>, MitteilungKategorie> = {
-      aktivitaet: 'update',
-      nachrichten: 'nachricht',
-      anrufe: 'anruf',
-    }
-    return unreadRelevant.filter(m => m.kategorie === mapping[key as Exclude<TabKey, 'kritisch'>]).length
+  function toggle() {
+    const next = !open
+    setOpen(next)
+    // Beim Oeffnen Info als gesehen markieren (Action-Items bleiben unberuehrt).
+    if (next && newInfoCount > 0) void markSeen()
   }
 
-  async function jumpTo(m: Mitteilung) {
-    if (!m.gelesen) await markAsRead(m.id)
+  function jumpTo(m: UpdateItem) {
     setOpen(false)
-    if (m.route_url) router.push(m.route_url)
+    if (m.routeUrl) router.push(m.routeUrl)
   }
 
-  // Button-Farben
+  const { posClass: popoverPosClass, enterY: popoverEnterY } = resolvePopoverPlacement(placement)
+
   let buttonClass = ''
   if (hasKritisch) {
     buttonClass = 'bg-danger hover:bg-danger/90 text-white'
-  } else if (unreadTotal > 0) {
+  } else if (actionCount > 0) {
     buttonClass = variant === 'dark'
       ? 'bg-claimondo-shield hover:bg-claimondo-navy text-white'
       : 'bg-claimondo-navy hover:bg-claimondo-shield text-white'
@@ -174,33 +135,29 @@ export default function UpdatesNav({
       : 'ring-4 ring-claimondo-light-blue/60 animate-pulse'
     : ''
 
-  // Popover-Öffnungsrichtung — reine Logik in ./popover-placement (vitest-getestet).
-  const { posClass: popoverPosClass, enterY: popoverEnterY } = resolvePopoverPlacement(placement)
-
   return (
     <div className="relative">
-      {/* AAR-725: Backdrop-blur auf Main-Content wenn Popover offen. */}
       {open && (
-        <div
-          className="fixed inset-0 z-30 backdrop-blur-sm bg-black/10 pointer-events-none"
-          aria-hidden
-        />
+        <div className="fixed inset-0 z-30 backdrop-blur-sm bg-black/10 pointer-events-none" aria-hidden />
       )}
 
       <button
         ref={buttonRef}
-        onClick={() => setOpen(o => !o)}
+        onClick={toggle}
         aria-expanded={open}
         aria-haspopup="dialog"
-        aria-label={unreadTotal > 0 ? `Updates (${unreadTotal} neu)` : 'Updates'}
+        aria-label={actionCount > 0 ? `Updates (${actionCount} offen)` : 'Updates'}
         className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold transition-all ${buttonClass} ${flashClass}`}
       >
         <BellIcon className="w-3.5 h-3.5" />
         <span>Updates</span>
-        {unreadTotal > 0 && (
+        {actionCount > 0 && (
           <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-white/95 text-danger">
-            {unreadTotal > 99 ? '99+' : unreadTotal}
+            {actionCount > 99 ? '99+' : actionCount}
           </span>
+        )}
+        {actionCount === 0 && newInfoCount > 0 && (
+          <span className="w-1.5 h-1.5 rounded-full bg-claimondo-light-blue" aria-label="Neue Aktivität" />
         )}
       </button>
 
@@ -216,101 +173,103 @@ export default function UpdatesNav({
             transition={{ type: 'spring', stiffness: 400, damping: 28 }}
             className={`absolute ${popoverPosClass} w-[360px] max-w-[92vw] glass-light rounded-ios-lg shadow-ios-lg z-40 overflow-hidden`}
           >
-          <div className="flex items-center justify-between px-4 py-3 border-b border-white/40">
-            <h2 className="text-sm font-semibold text-claimondo-navy">Updates</h2>
-            <button
-              onClick={() => setOpen(false)}
-              className="p-1 -mr-1 text-claimondo-ondo hover:text-claimondo-navy"
-              aria-label="Schließen"
-            >
-              <XIcon className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="flex border-b border-claimondo-border">
-            {TABS.map(t => {
-              const c = tabCount(t.key)
-              const active = activeTab === t.key
-              const isKritisch = t.key === 'kritisch'
-              return (
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/40">
+              <h2 className="text-sm font-semibold text-claimondo-navy">Updates</h2>
+              <div className="flex items-center gap-2">
+                {newInfoCount > 0 && (
+                  <button
+                    onClick={() => void markSeen()}
+                    className="inline-flex items-center gap-1 text-[11px] text-claimondo-ondo hover:text-claimondo-navy"
+                    title="Alles als gesehen markieren"
+                  >
+                    <CheckIcon className="w-3.5 h-3.5" /> Alles gesehen
+                  </button>
+                )}
                 <button
-                  key={t.key}
-                  onClick={() => setActiveTab(t.key)}
-                  className={`flex-1 flex flex-col items-center gap-0.5 px-2 py-2 text-[11px] font-medium transition-colors ${
-                    active
-                      ? isKritisch
-                        ? 'text-danger border-b-2 border-danger bg-danger-soft/30'
-                        : 'text-claimondo-navy border-b-2 border-claimondo-ondo bg-claimondo-ondo/5'
-                      : 'text-claimondo-ondo hover:text-claimondo-navy'
-                  }`}
+                  onClick={() => setOpen(false)}
+                  className="p-1 -mr-1 text-claimondo-ondo hover:text-claimondo-navy"
+                  aria-label="Schließen"
                 >
-                  <div className="flex items-center gap-1">
-                    <t.icon className="w-3.5 h-3.5" />
-                    <span>{t.label}</span>
-                    {c > 0 && (
-                      <span className={`inline-flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full text-[9px] font-bold ${
-                        isKritisch ? 'bg-danger text-white' : 'bg-claimondo-ondo text-white'
-                      }`}>
-                        {c > 99 ? '99+' : c}
-                      </span>
-                    )}
-                  </div>
+                  <XIcon className="w-4 h-4" />
                 </button>
-              )
-            })}
-          </div>
-
-          <div className="max-h-[400px] overflow-y-auto">
-            {filtered.length === 0 ? (
-              <div className="px-6 py-10 text-center">
-                <BellIcon className="w-8 h-8 mx-auto text-claimondo-ondo/50 mb-2" />
-                <p className="text-xs text-claimondo-ondo/70">Keine Einträge in dieser Kategorie</p>
               </div>
-            ) : (
-              filtered.map(m => (
-                <div
-                  key={m.id}
-                  className={`border-b border-claimondo-border px-4 py-3 transition-colors ${
-                    m.gelesen ? 'bg-white' : 'bg-claimondo-ondo/5'
-                  }`}
-                >
-                  <div className="flex items-start gap-2.5">
-                    <span className="text-base shrink-0">{m.icon ?? '🔔'}</span>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-start justify-between gap-2">
-                        <button
-                          onClick={() => jumpTo(m)}
-                          className="text-left flex-1 min-w-0"
-                        >
-                          <p className={`text-xs leading-snug ${m.gelesen ? 'text-claimondo-ondo' : 'text-claimondo-navy font-semibold'} truncate`}>
-                            {m.prioritaet === 'dringend' && (
-                              <span className="inline-block mr-1 text-danger" aria-label="Kritisch">●</span>
-                            )}
-                            {m.titel}
-                          </p>
-                          {m.inhalt && (
-                            <p className="text-[11px] text-claimondo-ondo line-clamp-2 mt-0.5">{m.inhalt}</p>
+            </div>
+
+            <div className="flex gap-1 px-3 py-2 border-b border-claimondo-border overflow-x-auto">
+              {TYP_CHIPS.map(c => {
+                const active = typFilter === c.key
+                return (
+                  <button
+                    key={c.key}
+                    onClick={() => setTypFilter(c.key)}
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors ${
+                      active ? 'bg-claimondo-navy text-white' : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
+                    }`}
+                  >
+                    <c.icon className="w-3 h-3" /> {c.label}
+                  </button>
+                )
+              })}
+            </div>
+
+            <div className="max-h-[400px] overflow-y-auto">
+              <div className="px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-danger">
+                Braucht dich
+              </div>
+              {filteredAction.length === 0 ? (
+                <div className="px-4 pb-3 text-xs text-claimondo-ondo/70">Nichts offen — alles erledigt. ✓</div>
+              ) : (
+                filteredAction.map(m => (
+                  <button
+                    key={`a-${m.id}`}
+                    onClick={() => jumpTo(m)}
+                    className="w-full text-left border-b border-claimondo-border px-4 py-2.5 hover:bg-claimondo-ondo/5 transition-colors"
+                  >
+                    <div className="flex items-start gap-2.5">
+                      <span className="text-base shrink-0">{typIcon(m.typ)}</span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs leading-snug text-claimondo-navy font-semibold truncate">
+                          {m.prioritaet === 'dringend' && (
+                            <span className="inline-block mr-1 text-danger" aria-label="Kritisch">●</span>
                           )}
-                          <p className="text-[10px] text-claimondo-ondo/70 mt-1">{fmtRelative(m.created_at)}</p>
-                        </button>
-                        {!m.gelesen && (
-                          <button
-                            onClick={() => markAsRead(m.id)}
-                            className="shrink-0 p-1 text-claimondo-ondo/70 hover:text-success"
-                            aria-label="Als gelesen markieren"
-                            title="Als gelesen markieren"
-                          >
-                            <CheckIcon className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                          {m.titel}
+                        </p>
+                        {m.inhalt && <p className="text-[11px] text-claimondo-ondo line-clamp-2 mt-0.5">{m.inhalt}</p>}
+                        <p className="text-[10px] text-claimondo-ondo/70 mt-1">{fmtRelative(m.createdAt)}</p>
                       </div>
                     </div>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
+                  </button>
+                ))
+              )}
 
+              {filteredInfo.length > 0 && (
+                <>
+                  <button
+                    onClick={() => setShowVerlauf(v => !v)}
+                    className="w-full text-left px-4 pt-3 pb-1 text-[11px] font-semibold uppercase tracking-wide text-claimondo-ondo hover:text-claimondo-navy"
+                  >
+                    Verlauf ({filteredInfo.length}) {showVerlauf ? '▾' : '▸'}
+                  </button>
+                  {showVerlauf &&
+                    filteredInfo.map(m => (
+                      <button
+                        key={`i-${m.id}`}
+                        onClick={() => jumpTo(m)}
+                        className="w-full text-left border-b border-claimondo-border px-4 py-2.5 bg-white hover:bg-claimondo-bg transition-colors"
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-base shrink-0 opacity-70">{typIcon(m.typ)}</span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs leading-snug text-claimondo-ondo truncate">{m.titel}</p>
+                            {m.inhalt && <p className="text-[11px] text-claimondo-ondo/80 line-clamp-2 mt-0.5">{m.inhalt}</p>}
+                            <p className="text-[10px] text-claimondo-ondo/60 mt-1">{fmtRelative(m.createdAt)}</p>
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                </>
+              )}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
