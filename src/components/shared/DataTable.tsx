@@ -13,6 +13,7 @@
 // Caller-Sache (die Regel betrifft die Tabelle, nicht das responsive Layout).
 
 import { cn } from '@/lib/utils'
+import Link from 'next/link'
 import type {
   HTMLAttributes,
   TableHTMLAttributes,
@@ -32,18 +33,43 @@ export function DataTableContainer({
   children,
   variant = 'card',
   className,
+  mobileCards,
+  mobileBreakpoint = 'md',
 }: {
   children: ReactNode
   variant?: 'card' | 'plain'
   className?: string
+  /**
+   * Mobile-Karten-Fallback (AAR Mobile-Audit 06/2026): wird UNTERHALB des Breakpoints
+   * statt der (horizontal scrollenden) Tabelle gezeigt. Der Caller mappt dieselben
+   * Daten zu Karten — idealerweise via {@link DataTableMobileCard}. Ohne diese Prop
+   * bleibt das Verhalten unveraendert (Tabelle + overflow-x-auto).
+   */
+  mobileCards?: ReactNode
+  /** Breakpoint ab dem die Tabelle (statt der Karten) erscheint. Default 'md' (768px). */
+  mobileBreakpoint?: 'sm' | 'md'
 }) {
+  const cardShell =
+    variant === 'card' && 'rounded-ios-md border border-claimondo-border bg-white overflow-hidden'
+
+  if (mobileCards) {
+    // Vollstaendige Klassen-Literale (kein interpoliertes Fragment) -> Tailwind-JIT erfasst sie.
+    const tableVis = mobileBreakpoint === 'sm' ? 'hidden sm:block' : 'hidden md:block'
+    const cardsVis = mobileBreakpoint === 'sm' ? 'sm:hidden' : 'md:hidden'
+    return (
+      <>
+        <div className={cn(tableVis, cardShell, className)}>
+          <div className="overflow-x-auto">{children}</div>
+        </div>
+        <div className={cn(cardsVis, cardShell)}>
+          <div className="divide-y divide-claimondo-border/60">{mobileCards}</div>
+        </div>
+      </>
+    )
+  }
+
   return (
-    <div
-      className={cn(
-        variant === 'card' && 'rounded-ios-md border border-claimondo-border bg-white overflow-hidden',
-        className,
-      )}
-    >
+    <div className={cn(cardShell, className)}>
       <div className="overflow-x-auto">{children}</div>
     </div>
   )
@@ -81,4 +107,38 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
 
 export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return <td className={cn('px-4 py-3 text-claimondo-navy', className)} {...props} />
+}
+
+/**
+ * Konsistente Mobile-Karten-Zeile fuer den `mobileCards`-Slot des
+ * {@link DataTableContainer}. Rendert als Link (href), Button (onClick) oder
+ * statischer Block. Die Karten-Liste (border + divide) liefert der Container.
+ */
+export function DataTableMobileCard({
+  href,
+  onClick,
+  className,
+  children,
+}: {
+  href?: string
+  onClick?: () => void
+  className?: string
+  children: ReactNode
+}) {
+  const cls = cn('block px-4 py-3 transition-colors', (href || onClick) && 'hover:bg-claimondo-bg/40', className)
+  if (href) {
+    return (
+      <Link href={href} className={cls}>
+        {children}
+      </Link>
+    )
+  }
+  if (onClick) {
+    return (
+      <button type="button" onClick={onClick} className={cn(cls, 'w-full text-left')}>
+        {children}
+      </button>
+    )
+  }
+  return <div className={cls}>{children}</div>
 }
