@@ -7,8 +7,12 @@ import { Table, Thead, Tr, Th, Td, DataTableContainer } from '@/components/share
 // CMM-44/CMM-49: Lead-Preis lebt auf claims (SSoT: lead_preis_netto/lead_preis_typ/
 // lead_preis_berechnet_am). Die alte `gutachter_abrechnungen`-Quelle war faktisch leer
 // (gleicher Audit-Befund wie das "Leadkosten-Monat"-Widget, AAR-928, das schon migriert
-// wurde — dieses Widget wurde dabei vergessen). Wir bucketen lead_preis_netto
-// (z.B. <100, 100-200, 200-400, 400+), Typ = lead_preis_typ.
+// wurde — dieses Widget wurde dabei vergessen). Wir bucketen lead_preis_netto.
+//
+// Bucket-Grenzen folgen dem echten Pricing-Modell (leadpreis = f(schadenhoehe),
+// getLeadPriceFromTable): HARTER Floor von 200 EUR (min), Stufen bis ~1081 EUR (Max-Stufe).
+// Frueher <100/100-200 — beide unmoeglich wegen des 200-EUR-Floors → tote Buckets. Jetzt
+// ist der Floor (haeufigster Fall) eine eigene Kategorie, der Rest deckt die echte Spanne ab.
 
 function fmtEur(n: number): string {
   return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -17,10 +21,10 @@ function fmtEur(n: number): string {
 type Bucket = { label: string; min: number; max: number; anzahl: number; summe: number }
 
 const BUCKETS: Omit<Bucket, 'anzahl' | 'summe'>[] = [
-  { label: 'unter 100 EUR', min: 0, max: 100 },
-  { label: '100 - 200 EUR', min: 100, max: 200 },
-  { label: '200 - 400 EUR', min: 200, max: 400 },
-  { label: 'ueber 400 EUR', min: 400, max: Infinity },
+  { label: '200 EUR (Minimum)', min: 0, max: 201 },
+  { label: '201 - 400 EUR', min: 201, max: 401 },
+  { label: '401 - 700 EUR', min: 401, max: 701 },
+  { label: 'über 700 EUR', min: 701, max: Infinity },
 ]
 
 async function loadVerteilung() {
