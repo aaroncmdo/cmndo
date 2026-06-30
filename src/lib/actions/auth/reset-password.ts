@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
+import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
 
 /**
  * BUG-84: Passwort-Reset Backend.
@@ -53,8 +54,11 @@ export async function requestPasswordReset(
 export async function confirmPasswordReset(
   neuesPasswort: string,
 ): Promise<{ success: boolean; error?: string }> {
-  if (!neuesPasswort || neuesPasswort.length < 8) {
-    return { success: false, error: 'Passwort muss mindestens 8 Zeichen lang sein.' }
+  // AAR-auth-haertung (Befund J): zentrale Policy — >=12 Zeichen + HIBP-Breach-
+  // Check (k-anonymity, fail-open). Loest die fruehere >=8-Inline-Pruefung ab.
+  const policy = await pruefePasswortStaerke(neuesPasswort)
+  if (!policy.ok) {
+    return { success: false, error: policy.error }
   }
 
   const supabase = await createClient()
