@@ -45,7 +45,8 @@ export async function ArticleComments({ articleSlug }: { articleSlug: string }) 
         ))}
       </ul>
       <p className="mt-4 text-[0.75rem] text-claimondo-shield/70">
-        Kommentare geben die Meinung der Verfasser:innen wieder, nicht die von Claimondo. Sie werden vor Veröffentlichung geprüft.
+        Kommentare geben die Meinung der Verfasser:innen wieder, nicht die von Claimondo. Sie werden vor Veröffentlichung geprüft — es gelten unsere{' '}
+        <a href="/kommentar-regeln" className="underline hover:text-claimondo-shield">Kommentar-Regeln</a>.
       </p>
     </section>
   )

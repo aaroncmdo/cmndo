@@ -50,7 +50,14 @@ export function CommentForm({ slug, isLoggedIn, hasUsername }: { slug: string; i
         </>
       )}
       {stage === 'comment' && (
-        <textarea name="body" required maxLength={2000} rows={3} placeholder="Deinen Kommentar schreiben …" className={input} />
+        <>
+          <textarea name="body" required maxLength={2000} rows={3} placeholder="Deinen Kommentar schreiben …" className={input} />
+          <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/70">
+            Bitte beachte die{' '}
+            <a href="/kommentar-regeln" className="underline hover:text-claimondo-shield">Kommentar-Regeln</a>{' '}
+            — keine sensiblen oder fremden personenbezogenen Daten.
+          </p>
+        </>
       )}
       {error && <p className="text-[0.8125rem] text-danger-strong">{error}</p>}
       <button type="submit" disabled={pending} className={btn}>
