@@ -41,6 +41,20 @@ export default async function KommentarModerationPage() {
         {rows.length} ausstehende{reported.length > 0 ? ` · ${reported.length} gemeldete` : ''} Kommentare.
       </p>
 
+      <details className="mt-4 rounded-ios-md border border-claimondo-border bg-white p-4 text-sm text-claimondo-shield">
+        <summary className="cursor-pointer font-semibold text-claimondo-navy">Moderations-Leitfaden — wann ablehnen?</summary>
+        <ul className="mt-3 list-disc space-y-1 pl-5">
+          <li><strong>Gesundheits-/Verletzungsdaten</strong> (über sich oder Dritte) — Art. 9, immer ablehnen.</li>
+          <li><strong>Daten Dritter</strong>: Klarnamen + Vorwürfe, Kennzeichen, Adressen, Telefonnummern.</li>
+          <li><strong>Namentliche Anschuldigungen</strong> gegen Werkstatt/Gutachter/Versicherer/Mitarbeitende (üble Nachrede).</li>
+          <li><strong>Konkreter Rechtsrat</strong> an Dritte (RDG).</li>
+          <li><strong>Beleidigung/Hetze/Diskriminierung</strong>, strafbare Inhalte.</li>
+          <li><strong>Spam/Werbung/Links</strong> von nicht freigeschalteten Konten.</li>
+          <li><strong>Identitätstäuschung</strong> (Username gibt Claimondo/Anwalt/Behörde vor) → zusätzlich sperren.</li>
+        </ul>
+        <p className="mt-2">Gemeldete Kommentare zeitnah prüfen (Notice-and-Takedown). Im Zweifel ablehnen. Unklare Rechtsfälle an Aaron/Anwalt eskalieren. Voller Leitfaden: <span className="font-mono text-xs">docs/2026-06-30-artikel-kommentare-moderations-leitfaden.md</span></p>
+      </details>
+
       {reported.length > 0 && (
         <section className="mt-5">
           <h2 className="text-sm font-semibold text-danger-strong">Gemeldete Kommentare (bereits öffentlich)</h2>
