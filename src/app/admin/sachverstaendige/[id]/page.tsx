@@ -371,10 +371,10 @@ export default async function SvDetailPage({
           </div>
         </div>
       ) : (
-      <div className="flex-1 overflow-hidden">
-        <div className="h-full max-w-6xl mx-auto flex">
+      <div className="flex-1 overflow-y-auto md:overflow-hidden">
+        <div className="md:h-full max-w-6xl mx-auto flex flex-col md:flex-row">
           {/* LEFT: Edit Form */}
-          <div className="flex-1 overflow-y-auto p-4 space-y-5 min-w-0">
+          <div className="flex-1 md:overflow-y-auto p-4 space-y-5 min-w-0">
             {/* AAR-717: CalDAV-Verbindungs-Fehler-Banner */}
             {caldavVerbindung?.last_error && (
               <div className="bg-danger-soft border border-danger/30 rounded-2xl p-4 flex items-start gap-3">
@@ -451,8 +451,8 @@ export default async function SvDetailPage({
             />
           </div>
 
-          {/* RIGHT: Offene Fälle + Tasks Panel */}
-          <div className="w-[340px] flex-shrink-0 border-l border-claimondo-border overflow-y-auto p-4 space-y-4 bg-claimondo-bg/30">
+          {/* RIGHT: Offene Fälle + Tasks Panel — mobil unter dem Formular (Top-Border statt Left). */}
+          <div className="w-full md:w-[340px] md:flex-shrink-0 border-t md:border-t-0 md:border-l border-claimondo-border md:overflow-y-auto p-4 space-y-4 bg-claimondo-bg/30">
             {/* Offene Fälle */}
             <div className="bg-white border border-claimondo-border rounded-ios-xl overflow-hidden">
               <div className="px-3 py-2 border-b border-claimondo-border">

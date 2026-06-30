@@ -12,7 +12,7 @@ function leadName(lead: UnlocalizedLead): string {
 export default function UnlocalizedSidebar({ leads }: { leads: UnlocalizedLead[] }) {
   if (leads.length === 0) return null
   return (
-    <div className="absolute right-3 top-3 z-10 max-h-[60vh] w-72 overflow-y-auto rounded-ios-md bg-white/95 p-3 shadow-ios-md backdrop-blur">
+    <div className="absolute right-3 top-16 sm:top-3 z-10 max-h-[40vh] sm:max-h-[60vh] w-64 sm:w-72 max-w-[calc(100vw-1.5rem)] overflow-y-auto rounded-ios-md bg-white/95 p-3 shadow-ios-md backdrop-blur">
       <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-claimondo-shield">
         Nicht lokalisierbar ({leads.length})
       </div>

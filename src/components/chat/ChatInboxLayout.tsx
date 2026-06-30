@@ -9,7 +9,7 @@
 // Renderer rein.
 
 import { useState, type ReactNode } from 'react'
-import { UserIcon, SearchIcon, MessageCircleIcon } from 'lucide-react'
+import { UserIcon, SearchIcon, MessageCircleIcon, ChevronLeftIcon } from 'lucide-react'
 import { DropletBadge } from '@/components/primitives'
 import { formatInboxTime } from '@/lib/chat/inbox-time'
 
@@ -64,8 +64,9 @@ export default function ChatInboxLayout({
 
   return (
     <div className="h-full flex min-h-0">
-      {/* Sidebar */}
-      <aside className="w-80 border-r border-claimondo-border flex flex-col bg-white shrink-0">
+      {/* Sidebar — mobil Master/Detail: Liste voll-breit; sobald ein Thread aktiv
+          ist, blendet sie aus (md+ immer sichtbar als Spalte). */}
+      <aside className={`${activeId ? 'hidden md:flex' : 'flex'} w-full md:w-80 border-r border-claimondo-border flex-col bg-white md:shrink-0`}>
         <div className="px-4 py-3 border-b border-claimondo-border sticky top-0 bg-white z-10">
           {/* h2, nicht h1 — die Seite hat ihren Page-H1 schon über PageHeader.
               Sidebar-Header ist semantisch ein Section-Header. (Re-Fix von #489,
@@ -135,10 +136,19 @@ export default function ChatInboxLayout({
         </div>
       </aside>
 
-      {/* Detail-Panel */}
-      <main className="flex-1 min-w-0 min-h-0 overflow-hidden bg-claimondo-bg flex flex-col">
+      {/* Detail-Panel — mobil nur sichtbar wenn ein Thread aktiv ist (+ Zurueck-Button). */}
+      <main className={`${activeId ? 'flex' : 'hidden md:flex'} flex-1 min-w-0 min-h-0 overflow-hidden bg-claimondo-bg flex-col`}>
         {activeId ? (
-          <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
+          <>
+            <button
+              type="button"
+              onClick={() => setActiveId(null)}
+              className="md:hidden flex items-center gap-1 px-4 py-2.5 text-sm font-medium text-claimondo-ondo border-b border-claimondo-border bg-white shrink-0"
+            >
+              <ChevronLeftIcon className="w-4 h-4" /> Zurück zur Liste
+            </button>
+            <div className="flex-1 min-h-0 p-4 overflow-y-auto">{renderDetail(activeId)}</div>
+          </>
         ) : (
           <div className="flex-1 flex items-center justify-center text-center px-4">
             <div>
