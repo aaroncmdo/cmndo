@@ -85,7 +85,7 @@ export default async function DispatchRueckrufe({
           if (!lead) return null
           const isOverdue = new Date(t.start_zeit).getTime() < Date.now()
           return (
-            <div key={t.id} className="flex items-center gap-4 px-5 py-4">
+            <div key={t.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4">
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   {/* AAR-724: Roter Punkt für noch nicht gesehene Rückrufe. */}
@@ -102,7 +102,7 @@ export default async function DispatchRueckrufe({
                     {lead.vorname} {lead.nachname}
                   </Link>
                 </div>
-                <div className="flex items-center gap-3 mt-1 text-xs text-claimondo-ondo">
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-claimondo-ondo">
                   {lead.telefon && (
                     <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
                   )}
