@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { einladungEmailHtml } from '@/lib/auth/invite-email'
 import { revalidatePath } from 'next/cache'
 
 function generatePassword(length = 12): string {
@@ -72,13 +73,37 @@ export async function createMitarbeiter(
   // Audit-Fix #8: sendCommunication darf den Mitarbeiter-Anlage-Flow nicht
   // abbrechen wenn Twilio/SMTP ausfaellt — User ist schon in der DB. Admin
   // bekommt Email+Passwort als Return-Wert und kann manuell weitergeben.
+  // AAR-auth-haertung (Befund F): Recovery-Magic-Link statt Klartext-Passwort
+  // in der Mail (Email = geloggter/weiterleitbarer Kanal). Der Eingeladene setzt
+  // sein eigenes Passwort; force_password_change=true bleibt als Fallback.
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+  let magicLink: string | null = null
+  try {
+    const { data: linkData, error: linkErr } = await admin.auth.admin.generateLink({
+      type: 'recovery',
+      email,
+      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+    })
+    if (linkErr || !linkData?.properties?.action_link) {
+      console.error('[createMitarbeiter] Magic-Link-Generierung fehlgeschlagen:', linkErr?.message)
+    } else {
+      magicLink = linkData.properties.action_link
+    }
+  } catch (err) {
+    console.error('[createMitarbeiter] Magic-Link-Sub-Op fehlgeschlagen:', err)
+  }
   try {
     await sendCommunication('mitarbeiter_einladung', {
       email,
       vorname,
       subject: 'Einladung zu Claimondo',
-      html: `<p>Hallo ${vorname},</p><p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p><p>E-Mail: <strong>${email}</strong></p><p>Einmalpasswort: <strong>${password}</strong></p><p><a href="${appUrl}/login">Jetzt einloggen</a></p>`,
+      html: einladungEmailHtml({
+        vorname,
+        email,
+        introHtml: `<p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p>`,
+        magicLink,
+        appUrl,
+      }),
     })
   } catch (err) {
     console.error('[createMitarbeiter] Einladungs-Email fehlgeschlagen:', err)
