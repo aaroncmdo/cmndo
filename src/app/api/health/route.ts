@@ -14,11 +14,11 @@ export async function GET() {
   const checks: Record<string, 'ok' | 'fail' | 'skipped'> = {}
 
   // Supabase
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  )
   try {
-    const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
     const { error } = await supabase.from('profiles').select('id').limit(1)
     checks.supabase = error ? 'fail' : 'ok'
   } catch {
@@ -41,6 +41,26 @@ export async function GET() {
 
   // Email
   checks.email = process.env.RESEND_API_KEY ? 'ok' : 'skipped'
+
+  // Pipeline-Health-Freshness: jüngster health_check_runs-Eintrag < 2h → ok, sonst fail
+  // Leer (noch kein Cron-Lauf) = fail bis der erste Lauf eintrifft.
+  try {
+    const { data } = await supabase
+      .from('health_check_runs')
+      .select('run_at')
+      .order('run_at', { ascending: false })
+      .limit(1)
+    if (
+      data?.[0]?.run_at &&
+      Date.now() - new Date(data[0].run_at).getTime() < 2 * 3600 * 1000
+    ) {
+      checks.pipeline_health = 'ok'
+    } else {
+      checks.pipeline_health = 'fail'
+    }
+  } catch {
+    checks.pipeline_health = 'fail'
+  }
 
   const allOk = Object.values(checks).every(v => v === 'ok' || v === 'skipped')
 
