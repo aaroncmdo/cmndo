@@ -39,9 +39,11 @@ export default async function PromoPage() {
   }
 
   const stats = await getPromoStats(code.id)
-  // Makler-Vermittlung: first-party Makler-QR statt des toten Marketing-?p-Links — setzt die
-  // Attribution (promotion_code_id) zuverlaessig auf den Lead (via /start/makler -> reserviereEmbedTermin).
-  const landingUrl = `${landingBase()}/start/makler/${makler.id}`
+  // Makler-Vermittlung: Makler-QR/-Link zeigt auf die gebrandete Hub-Landeseite
+  // claimondo.de/m/[Promo-Code] (Finder + Anspruch-Check, beide makler-attribuiert via
+  // promotion_code_id). Promo-Code statt makler.id = sauberer Slug UND behebt den /start/makler-404
+  // (die Route lebt in der App, nicht auf der Marketing-Domain, auf die landingBase() zeigt).
+  const landingUrl = `${landingBase()}/m/${code.code}`
   const qrSvg = await buildQrSvg(landingUrl)
 
   return (
