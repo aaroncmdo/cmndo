@@ -25,7 +25,7 @@ import {
   QC_FIELD_LABELS,
   type QcCheckValues,
 } from '@/lib/qc/checkliste-validation'
-import { kanzleiHandoffBereitsErfolgt } from '@/lib/kanzlei/handoff-guard'
+import { kanzleiHandoffBereitsErfolgt, kanzleiHandoffMoeglich } from '@/lib/kanzlei/handoff-guard'
 
 // Filmcheck-Audit 29.06.2026: serverseitiges Rollen-Gate fuer ALLE QC-Actions.
 // Vorher pruefte jede Action nur "eingeloggt ja/nein" -> jeder authentifizierte
@@ -106,6 +106,19 @@ export async function saveFilmcheck(
   // uebergeben — sonst wuerfe transitionFallStatus (kanzlei-uebergeben -> kanzlei-
   // uebergeben ist kein gueltiger Uebergang) bei einem zweiten Klick.
   if (istKomplett && !kanzleiHandoffBereitsErfolgt(opStatus)) {
+    // Robustheit (Filmcheck-Audit 01.07.2026): 'kanzlei-uebergeben' ist laut State-Machine
+    // nur aus 'filmcheck'/'qc-pruefung' gueltig. Ein komplett-Claim, der noch davorhaengt
+    // (z.B. 'begutachtung-laeuft' — Gutachten noch nicht abgegeben), wuerfe sonst in
+    // transitionFallStatus einen ungueltigen Uebergang -> rohe 500 statt sauberem Toast.
+    // Defense-in-depth: das QC-Gate in qcBestanden blockt den Regelfall schon vorher.
+    if (!kanzleiHandoffMoeglich(opStatus)) {
+      return {
+        success: false,
+        error:
+          'Der Fall ist noch nicht im Filmcheck — die Übergabe an die Kanzlei ist erst nach vollständigem Gutachten möglich.',
+      }
+    }
+
     // KFZ-202: Status via State-Machine
     await transitionFallStatus(fallId, 'kanzlei-uebergeben')
 
