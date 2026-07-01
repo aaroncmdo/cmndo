@@ -1,7 +1,7 @@
 # SV-Leadpreis Billing-Flow — Konsolidierungs-Design
 
 **Datum:** 2026-07-01
-**Status:** DRAFT — wartet auf Aaron-Entscheidung (4 Punkte, s. u. §5)
+**Status:** APPROVED (Aaron 01.07.2026) — alle 4 Entscheidungen = Empfehlung; Leitprinzip: "immer die kanonische Quelle nehmen". Bereit fuer Implementierungsplan (writing-plans).
 **Kontext-Auslöser:** Aaron-Challenge "schadenhöhe gegen gutachter-abrechnung bzgl leadpreistabelle" (30.06.). Die Algorithmus-Divergenz wurde in PR #3357 behoben; diese Spec adressiert den dabei aufgedeckten **größeren** Befund: mehrere parallel verdrahtete SV-Guthaben-Abzüge.
 **Verwandt:** PR #3357 (Algorithmus-Konsolidierung `leadpreis.ts` → `getLeadPriceFromTable`), PR #3337 (`LeadPreiseVerteilungWidget` → `claims.lead_preis_netto`), AAR-924 (`processCaseBilling` + `case-billing-batch`), AAR-925 (`monatsabrechnung` deprecated), KFZ-149, CMM-44/49.
 
@@ -89,26 +89,28 @@ Diese Ziel-Architektur ist die **Empfehlung**; die vier Punkte unten sind die St
 
 ---
 
-## 5. Offene Entscheidungen (Aaron entscheidet beim Review)
+## 5. Entscheidungen (Aaron 01.07.2026: überall Empfehlung / "immer die kanonische Quelle")
 
-### D1 — Zeitpunkt: Wann wird der SV belastet?
-- **(a) Bei Zuweisung** (heute #1) — früh; Risiko: SV lehnt ab / Fall storniert → Refund-Dance.
-- **(b) Bei Gutachten-Upload** (heute #2) — mittel; SV hat Arbeit geleistet.
-- **(c) Bei Fall-Fortschritt/Abschluss via `case-billing-batch`** (heute #3) — spät, idempotent, fair. **← Empfehlung.**
+Leitprinzip Aaron: **immer die kanonische Quelle nehmen.** Damit sind alle 4 Punkte auf die `processCaseBilling`-Variante (Mechanismus #3, AAR-924) festgelegt und die zwei Rückfragen kanonisch aufgelöst.
 
-### D2 — Schadenhöhe-Quelle für die Bepreisung
-- **(a)** `claims.regulierungs_betrag`
-- **(b)** `gutachten.gesamt_schadensbetrag`
-- **(c)** `claims.schadens_hoehe_netto ?? gutachten.gesamt_schadensbetrag` (Netto-RK, was #3 nutzt). **← Empfehlung** (das Pricing-Modell ist als f(Netto-Reparaturkosten) definiert).
+### D1 — Zeitpunkt: Wann wird der SV belastet? → **✓ (c)**
+- (a) Bei Zuweisung (heute #1) — früh; Risiko: SV lehnt ab / Fall storniert → Refund-Dance.
+- (b) Bei Gutachten-Upload (heute #2) — mittel.
+- **(c) Bei Fall-Fortschritt/Abschluss via `case-billing-batch` (heute #3) — ENTSCHIEDEN.** Idempotent, kanonisch.
 
-### D3 — Guthaben-Modell
-- **(a) Voller Leadpreis-Abzug** vom Guthaben (heute #1/#2).
-- **(b) MIN(150)-Abzug + `sv_nachzahlung`** (heute #3) — Guthaben = Werbebudget-Puffer, Rest wird nachberechnet. **← Empfehlung** (aktuelles kanonisches Modell). *Bestätigen: ist die 150-€-Deckel-Regel gewollt/aktuell?*
+### D2 — Schadenhöhe-Quelle für die Bepreisung → **✓ (c)**
+- (a) `claims.regulierungs_betrag`
+- (b) `gutachten.gesamt_schadensbetrag`
+- **(c) `claims.schadens_hoehe_netto ?? gutachten.gesamt_schadensbetrag` (Netto-RK, was #3 nutzt) — ENTSCHIEDEN.** Das Pricing-Modell ist als f(Netto-Reparaturkosten) definiert.
 
-### D4 — Ledger / SV-Portal-Sicht
-- **(a)** `gutachter_abrechnungen` als SSoT behalten (Reader bleiben).
-- **(b)** `claims.lead_preis_*` als SSoT; `gutachter_abrechnungen` retiren, Reader umstellen. **← Empfehlung.**
-- **(c)** `claims` als SSoT **+** `gutachter_abrechnungen` als abgeleiteter Anzeige-View (SV-Portal braucht evtl. eine Pro-Fall-Ledger-Darstellung inkl. Refunds, die claims allein nicht 1:1 liefert). *Unterfrage: braucht das SV-Portal eine eigene Ledger-/Refund-Historie, oder reicht `claims.lead_preis_netto` + `sv_nachzahlung_netto`?*
+### D3 — Guthaben-Modell → **✓ (b)**
+- (a) Voller Leadpreis-Abzug vom Guthaben (heute #1/#2).
+- **(b) MIN(150)-Abzug + `sv_nachzahlung` (heute #3) — ENTSCHIEDEN.** Guthaben = Werbebudget-Puffer; die 150-€-Deckel-Regel bleibt (kanonisches processCaseBilling-Modell, Aaron: kanonische Quelle).
+
+### D4 — Ledger / SV-Portal-Sicht → **✓ (b)**
+- (a) `gutachter_abrechnungen` als SSoT behalten.
+- **(b) `claims.lead_preis_*` als SSoT; `gutachter_abrechnungen` retiren, Reader umstellen — ENTSCHIEDEN.** SV-Portal liest die kanonischen claims-Felder (`lead_preis_netto`, `lead_preis_typ`, `sv_nachzahlung_netto`, `guthaben_verrechnet_netto`); Refund/Storno-Historie ergibt sich aus dem `revert-case-billing`-Pfad (claims-basiert). Kein separater `gutachter_abrechnungen`-Ledger mehr.
+  - **Impl-Auflage:** Der Plan muss vor dem Retiren verifizieren, dass die SV-Portal-Abrechnungsübersicht + Admin-Analytics alle heute aus `gutachter_abrechnungen` gezogenen Werte (Leadpreis pro Fall, Monat, Refund-Zustand) aus `claims` rekonstruieren können. Falls eine reine Anzeige-Historie fehlt, wird sie als abgeleitete View **auf** claims gebaut (nicht als paralleler Write-Ledger).
 
 ---
 
