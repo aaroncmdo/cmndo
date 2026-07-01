@@ -6,7 +6,7 @@ import { emailSvZugewiesen } from '@/lib/email'
 import { haversineKm } from '@/lib/gps/geofence'
 // AAR-87: nachgelagerte Trigger
 import { triggerGutachterTerminTask } from '@/lib/tasking'
-import { triggerSV01, deductLeadpreis } from '@/lib/gutachterTasking'
+import { triggerSV01 } from '@/lib/gutachterTasking'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
@@ -469,14 +469,11 @@ export async function POST(request: Request) {
         }
       }
 
-      // Lead-Preis vom SV-Guthaben abziehen
-      // AAR-719: Silent-Catch hier war kritisch — ohne Leadpreis-Abzug würde
-      // ein SV Fälle „umsonst" bekommen. Jetzt wenigstens im Log sichtbar.
-      if (fallFullClaim?.regulierungs_betrag) {
-        deductLeadpreis(bestSv.id, fallId, Number(fallFullClaim.regulierungs_betrag), fallFullClaim?.claim_nummer ?? fallId.slice(0, 8)).catch((err) => {
-          console.error('[sv-zuweisung] deductLeadpreis für SV', bestSv.id, 'Fall', fallId, 'fehlgeschlagen —', err instanceof Error ? err.message : err)
-        })
-      }
+      // Leadpreis-Abzug entfernt (Billing-Konsolidierung 2026-07-01): der SV wird
+      // NICHT mehr bei Zuweisung belastet. Der Abzug laeuft ausschliesslich ueber
+      // processCaseBilling (State-Machine-Hook @ gutachten-eingegangen, AAR-924) —
+      // idempotent, MIN(150)-Guthaben-Modell, claims-SSoT. Behebt den frueheren
+      // Dreifach-Abzug (Zuweisung + Gutachten-Upload + Cron).
     }
   }
 
