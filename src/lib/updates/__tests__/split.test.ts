@@ -46,4 +46,7 @@ describe('routeForKontext', () => {
     expect(routeForKontext('claim', null, 'kunde')).toBeNull()
     expect(routeForKontext(null, 'x', 'kunde')).toBeNull()
   })
+  it('rueckruf-Kontext -> dispatch-Callback-Queue mit open-Param', () => {
+    expect(routeForKontext('rueckruf', 'term1', 'dispatch')).toBe('/dispatch/rueckrufe?open=term1')
+  })
 })

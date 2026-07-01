@@ -45,5 +45,6 @@ export function routeForKontext(
     }
   }
   if (kontextTyp === 'lead') return `/dispatch/leads/${kontextId}`
+  if (kontextTyp === 'rueckruf') return `/dispatch/rueckrufe?open=${kontextId}`
   return null
 }
