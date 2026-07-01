@@ -60,7 +60,7 @@ export async function ladeFotoUrls(sessionToken: string): Promise<string[]> {
 
 export async function speichereVisionResult(sessionToken: string, vision: VisionResult): Promise<void> {
   const db = createAdminClient()
-  await db
+  const { error } = await db
     .from('anspruch_schaetzungen')
     .update({
       vision_result: vision,
@@ -68,6 +68,7 @@ export async function speichereVisionResult(sessionToken: string, vision: Vision
       schweregrad: vision.schweregrad,
     })
     .eq('session_token', sessionToken)
+  if (error) console.error('[anspruch/session] speichereVisionResult failed:', error.message)
 }
 
 export async function speicherePositionen(
@@ -79,13 +80,15 @@ export async function speicherePositionen(
   positionen: AnspruchPosition[],
 ): Promise<void> {
   const db = createAdminClient()
-  await db
+  const { error } = await db
     .from('anspruch_schaetzungen')
     .update({ erkanntes_segment: segment, schweregrad, fahrbereit, ez_jahr: ezJahr, positionen })
     .eq('session_token', sessionToken)
+  if (error) console.error('[anspruch/session] speicherePositionen failed:', error.message)
 }
 
 export async function promoteSessionAufLead(sessionToken: string, leadId: string): Promise<void> {
   const db = createAdminClient()
-  await db.from('anspruch_schaetzungen').update({ lead_id: leadId }).eq('session_token', sessionToken)
+  const { error } = await db.from('anspruch_schaetzungen').update({ lead_id: leadId }).eq('session_token', sessionToken)
+  if (error) console.error('[anspruch/session] promoteSessionAufLead failed:', error.message)
 }
