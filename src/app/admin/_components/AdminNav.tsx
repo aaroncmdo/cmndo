@@ -9,7 +9,7 @@ import {
   CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon,
+  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
   NewspaperIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
@@ -35,6 +35,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/sv-leads', label: 'SV-Leads', icon: MapPinIcon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/vertraege', label: 'Vertragseditor', icon: FileSignatureIcon },
+  { href: '/admin/kommentare', label: 'Kommentare', icon: MessageSquareIcon },
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
   { href: '/admin/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
   { href: '/admin/health', label: 'Pipeline-Health', icon: ActivityIcon },

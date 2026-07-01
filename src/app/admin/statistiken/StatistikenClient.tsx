@@ -126,6 +126,7 @@ export default function StatistikenClient({
   userId,
   leaderboard,
   totalLeads,
+  konvertierteLeads,
 }: {
   faelle: StatistikFall[]
   klassifizierungen: StatistikKlassifizierung[]
@@ -135,6 +136,7 @@ export default function StatistikenClient({
   userId: string
   leaderboard: { sv_id: string; faelle_count: number; umsatz_netto: number; rang: number }[]
   totalLeads: number
+  konvertierteLeads: number
 }) {
   const [zeitraum, setZeitraum] = useState(90)
   const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'dispatch')
@@ -383,11 +385,10 @@ export default function StatistikenClient({
       : null
 
     // Konversionsrate Lead → Fall
-    // FIX (Dashboard-Audit 29.06.): Zaehler all-time (faelle) statt windowed (filtered), damit er
-    // zum all-time-Nenner totalLeads passt. Vorher: windowed/all-time = bedeutungslos (schrumpfte
-    // je enger der Zeitraum). Beide Seiten jetzt all-time -> echte Lead->Fall-Konversion.
-    const faelleMitLead = faelle.filter(f => f.lead_id).length
-    const konversionPct = totalLeads > 0 ? Math.round((faelleMitLead / totalLeads) * 1000) / 10 : null
+    // FIX (Dashboard-Audit 29.06. + Kanon-Follow-up 01.07.): Zaehler = konvertierte Leads
+    // (leads.konvertiert_zu_claim_id, all-time) — gleiche Entitaet wie der all-time-Nenner totalLeads.
+    // Vorher: faelle.filter(lead_id) (claims-Seite) mischte Entitaeten (Claims vs Leads) -> leichter Drift.
+    const konversionPct = totalLeads > 0 ? Math.round((konvertierteLeads / totalLeads) * 1000) / 10 : null
 
     const metrikMap: Record<string, number | null> = {
       avg_bearbeitungsdauer_tage: avgBearbeitungsdauer,
@@ -470,7 +471,7 @@ export default function StatistikenClient({
 
       return { ...b, eigenerWert, statusLabel, statusColor, datenpunkte: totalFaelle, trend: calcTrend(b.metrik), insight }
     })
-  }, [filtered, filteredKlass, faelle, benchmarks, months, totalLeads, svNameMap])
+  }, [filtered, filteredKlass, faelle, benchmarks, months, totalLeads, konvertierteLeads, svNameMap])
 
   // ─── Render ───────────────────────────────────────────────────────────────
 

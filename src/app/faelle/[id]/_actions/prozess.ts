@@ -74,7 +74,12 @@ export async function requestTechnischeStellungnahme(
   // faelle->claims-Sync-Trigger feuert NICHT bei einem reinen updated_at-Write
   // (updated_at ist nicht in dessen UPDATE OF-Spaltenliste), daher expliziter
   // claims-Bump statt Drop.
-  const claimId = await resolveClaimId(db, fallId)
+  // AAR-auth-haertung (Write-Path-IDOR): claim_id via RLS-Client aufloesen (nicht
+  // admin) — scoped RLS den KB auf eigene/unassigned Claims; ein fremder Claim
+  // resolved zu null -> hard-fail (Muster wie eskalation). Danach sind die
+  // admin-Writes ok (Ownership durch die RLS-Aufloesung verifiziert).
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden oder kein Zugriff' }
 
   const stellungnahmeErr = await writeAuftragSpH(db, claimId, {
     technische_stellungnahme_status: 'beauftragt',
@@ -112,7 +117,12 @@ export async function freigebeTechnischeStellungnahme(
   // auftraege.
   // CMM-65: claim_id nur noch LESEN; updated_at-Bump wandert von faelle auf
   // claims (SSoT) — siehe requestTechnischeStellungnahme.
-  const claimId = await resolveClaimId(db, fallId)
+  // AAR-auth-haertung (Write-Path-IDOR): claim_id via RLS-Client aufloesen (nicht
+  // admin) — scoped RLS den KB auf eigene/unassigned Claims; ein fremder Claim
+  // resolved zu null -> hard-fail (Muster wie eskalation). Danach sind die
+  // admin-Writes ok (Ownership durch die RLS-Aufloesung verifiziert).
+  const claimId = await resolveClaimId(supabase, fallId)
+  if (!claimId) return { success: false, error: 'Fall nicht gefunden oder kein Zugriff' }
 
   const freigabeErr = await writeAuftragSpH(db, claimId, {
     technische_stellungnahme_status: 'freigegeben',
@@ -142,18 +152,17 @@ export async function startRuege(
   const auth = await requireKb(supabase)
   if ('error' in auth) return { success: false, error: auth.error }
 
-  const db = createAdminClient()
   // CMM-44 SP-I5: ruege_counter + ruege_gesendet_am leben auf kanzlei_faelle (1:1 per Claim).
-  // CMM-49 (faelle-Drop + #2688-REVERSE-Embed-Fix): der frühere faelle.kanzlei_faelle(...)-Embed
-  // lief über die kanzlei_faelle.fall_id->faelle-FK, die #2688 auf die Bridge repointete -> PGRST200
-  // (Action war broken). claim_id via Bridge, ruege_counter direkt aus kanzlei_faelle (claim_id-keyed).
-  const { data: bridgeRow } = await db
+  // AAR-auth-haertung (Write-Path-IDOR): Bridge via RLS-Client aufloesen (Ownership-Gate)
+  // — ein fremder Claim liefert unter RLS 0 Zeilen -> hard-fail. Writes danach via admin.
+  const { data: bridgeRow } = await supabase
     .from('faelle_claim_bridge')
     .select('claim_id')
     .eq('fall_id', fallId)
     .maybeSingle()
   const ruegeClaimId = (bridgeRow as { claim_id?: string | null } | null)?.claim_id ?? null
-  if (!ruegeClaimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+  if (!ruegeClaimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft oder kein Zugriff' }
+  const db = createAdminClient()
   const { data: ruegeKf } = await db
     .from('kanzlei_faelle')
     .select('ruege_counter')
@@ -196,6 +205,13 @@ export async function uebergebeFallKlage(
   const auth = await requireKb(supabase)
   if ('error' in auth) return { success: false, error: auth.error }
 
+  // AAR-auth-haertung (Write-Path-IDOR): Ownership VOR der Status-Transition
+  // verifizieren — claim_id via RLS-Client; ein fremder Claim resolved zu null ->
+  // hard-fail, sonst zwingt ein Nicht-Eigentuemer den Fall auf 'klage' (+ externe
+  // LexDrive-Klage-Mail). Vorher lief transitionFallStatus ungegated zuerst.
+  const fallClaimId = await resolveClaimId(supabase, fallId)
+  if (!fallClaimId) return { success: false, error: 'Fall nicht gefunden oder kein Zugriff' }
+
   const db = createAdminClient()
   const now = new Date().toISOString()
 
@@ -210,18 +226,11 @@ export async function uebergebeFallKlage(
     }
   }
 
-  // CMM-44 SP-B PR2a: geschlossen_grund lebt auf claims (SSoT).
-  // CMM-65: transitionFallStatus() hat den Status (inkl. claims-Write) bereits
-  // gesetzt; wir setzen geschlossen_grund + updated_at auf claims (SSoT). Der
-  // fruehere faelle.updated_at-Write stirbt mit dem Phase-6-DROP und entfaellt —
-  // dieser claims-Write bumpt claims.updated_at (moddatetime + expliziter Wert).
-  const fallClaimId = await resolveClaimId(db, fallId)
-  if (fallClaimId) {
-    await db.from('claims').update({
-      geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
-      updated_at: now,
-    }).eq('id', fallClaimId)
-  }
+  // CMM-44 SP-B PR2a: geschlossen_grund lebt auf claims (SSoT). fallClaimId von oben.
+  await db.from('claims').update({
+    geschlossen_grund: grund ?? 'Klage-Übergabe an LexDrive',
+    updated_at: now,
+  }).eq('id', fallClaimId)
 
   await db.from('timeline').insert({
     fall_id: fallId,

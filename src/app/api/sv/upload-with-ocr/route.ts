@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     // das Select-Feld sv_id war dead (nur Existenz-Check) → gedroppt.
     const { data: termin } = await db
       .from('gutachter_termine')
-      .select('id')
+      .select('id, fall_id')
       .eq('id', terminId)
       .eq('typ', 'sv_begutachtung')
       .eq('assignee_id', sv.id)
@@ -43,6 +43,15 @@ export async function POST(req: NextRequest) {
       .single()
 
     if (!termin) return NextResponse.json({ error: 'Termin nicht gefunden' }, { status: 404 })
+
+    // Security (Write-Path-Audit 2026-07-01, F4): terminId ist SV-owned verifiziert,
+    // aber fallId war ein unabhaengiges Formfeld -> ein SV mit irgendeinem eigenen
+    // Termin konnte ein OCR-Dokument (discrepancy_flag, KB/Kanzlei/Admin-sichtbar) auf
+    // einen FREMDEN Claim pflanzen. Der verifizierte Termin muss zum uebergebenen Fall
+    // gehoeren. Siehe docs/2026-07-01-claim-write-path-authorization-audit.md.
+    if (!termin.fall_id || termin.fall_id !== fallId) {
+      return NextResponse.json({ error: 'Termin gehoert nicht zu diesem Fall' }, { status: 403 })
+    }
 
     // Upload to Supabase Storage
     const fileBuffer = await file.arrayBuffer()

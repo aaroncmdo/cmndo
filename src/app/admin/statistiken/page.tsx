@@ -198,6 +198,13 @@ export default async function StatistikenPage() {
     .from('leads')
     .select('id', { count: 'exact', head: true })
 
+  // Kanon-Follow-up (01.07.): konvertierte Leads (leads.konvertiert_zu_claim_id) als Konversions-
+  // Zaehler — gleiche Entitaet wie der Nenner leadsCount (vorher claims-seitig faelle.filter(lead_id)).
+  const { count: konvertierteLeadsCount } = await adminClient
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .not('konvertiert_zu_claim_id', 'is', null)
+
   // Community leaderboard data if needed
   let leaderboard: { sv_id: string; faelle_count: number; umsatz_netto: number; rang: number }[] = []
   if (rolle === 'community_member' && orgId) {
@@ -219,6 +226,7 @@ export default async function StatistikenPage() {
       userId={user.id}
       leaderboard={leaderboard}
       totalLeads={leadsCount ?? 0}
+      konvertierteLeads={konvertierteLeadsCount ?? 0}
     />
   )
 }
