@@ -6,7 +6,7 @@ import { assertFeedFrontmatterValid } from '@/lib/feed/validate'
 export const dynamic = 'force-static'
 export const revalidate = 21600 // 6 h
 
-export function GET() {
+export async function GET() {
   assertFeedFrontmatterValid()
   const rss = renderRssFeed(
     {
@@ -15,7 +15,7 @@ export function GET() {
         'Neueste Wissens-Assets von Claimondo zur Kfz-Haftpflicht-Schadensregulierung — Cornerstones, Glossar-Spokes, Versicherer-Brief-Decoder und Sachverständigen-Verbände.',
       selfPath: '/feed.xml',
     },
-    getNewsFeedItems(),
+    await getNewsFeedItems(),
   )
   return new Response(rss, {
     status: 200,
