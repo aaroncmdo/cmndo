@@ -734,6 +734,8 @@ export type WillkommenSvParams = {
   kontingent: number
   radius_km: number
   anzahlung_betrag_eur: number
+  /** @deprecated AAR-auth-haertung (F): nicht mehr im Mail-Body — sendWillkommenSv
+   * generiert stattdessen einen Recovery-Magic-Link. Param bleibt fuer Caller-Kompat. */
   initial_password: string
   organisation_name?: string | null
   rolle_in_organisation?: string | null
@@ -746,6 +748,27 @@ export type WillkommenSvParams = {
  * Caller-Verantwortung: nur einmal pro SV-Anlage aufrufen (kein Dedup hier).
  */
 export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void> {
+  // AAR-auth-haertung (Befund F): Recovery-Magic-Link statt Klartext-Passwort im
+  // Mail-Body. params.initial_password wird NICHT mehr versendet (der Account
+  // wird weiterhin damit angelegt + in der Admin-UI angezeigt). Jeder Send
+  // generiert einen frischen Link — auch der resend-welcome-Pfad.
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+  let magicLink: string | null = null
+  try {
+    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
+      type: 'recovery',
+      email: params.to,
+      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+    })
+    if (linkErr || !linkData?.properties?.action_link) {
+      console.error('[sendWillkommenSv] Magic-Link-Generierung fehlgeschlagen:', linkErr?.message)
+    } else {
+      magicLink = linkData.properties.action_link
+    }
+  } catch (err) {
+    console.error('[sendWillkommenSv] Magic-Link-Sub-Op fehlgeschlagen:', err)
+  }
+
   const props = {
     anrede: params.anrede,
     titel: params.titel,
@@ -755,7 +778,7 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
     kontingent: params.kontingent,
     radius_km: params.radius_km,
     anzahlung_betrag_eur: params.anzahlung_betrag_eur,
-    initial_password: params.initial_password,
+    magicLink,
     organisation_name: params.organisation_name ?? null,
     rolle_in_organisation: params.rolle_in_organisation ?? null,
     von_admin_name: params.von_admin_name,

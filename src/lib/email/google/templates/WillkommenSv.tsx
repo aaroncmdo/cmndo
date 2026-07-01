@@ -19,7 +19,8 @@ type Props = {
   radius_km: number
   anzahlung_betrag_eur: number
   login_url?: string
-  initial_password: string
+  // AAR-auth-haertung (Befund F): Recovery-Magic-Link statt Klartext-Passwort.
+  magicLink?: string | null
   organisation_name?: string | null
   rolle_in_organisation?: string | null
   von_admin_name?: string  // Name des Admins der angelegt hat (Aaron / Nicolas)
@@ -74,13 +75,16 @@ export function WillkommenSvEmail(props: Props) {
 
         <Heading>Nächste Schritte</Heading>
         <Paragraph>
-          <strong>1.</strong> Logge dich ein mit deiner Email-Adresse (an die diese Mail geschickt wurde) und dem Initial-Passwort unten:
+          <strong>1.</strong> Setze über den Button unten dein persönliches Passwort und melde dich mit deiner Email-Adresse (an die diese Mail geschickt wurde) an:
         </Paragraph>
         <div style={{ backgroundColor: email.color.surface, borderRadius: email.radius.md, padding: `${email.space(3)} ${email.space(4)}`, margin: `${email.space(3)} 0` }}>
           <InfoRow label="Login-Adresse" value={loginUrl} />
-          <InfoRow label="Initial-Passwort" value={<span style={{ fontFamily: 'monospace' }}>{props.initial_password}</span>} />
         </div>
-        <Note>Beim ersten Login wirst du dein Passwort ändern müssen.</Note>
+        {props.magicLink ? (
+          <Note>Der Link zum Passwort-Setzen ist aus Sicherheitsgründen zeitlich begrenzt gültig. Ist er abgelaufen, nutze „Passwort vergessen" auf der Login-Seite.</Note>
+        ) : (
+          <Note>Klicke auf der Login-Seite auf „Passwort vergessen", um dein Passwort zu setzen.</Note>
+        )}
 
         <Paragraph>
           <strong>2.</strong> Du siehst deine vollständigen Konditionen, kannst den Vertrag unterzeichnen und die Anzahlung leisten.
@@ -98,7 +102,7 @@ export function WillkommenSvEmail(props: Props) {
           </Paragraph>
         )}
 
-        <Button href={loginUrl}>Jetzt einloggen</Button>
+        <Button href={props.magicLink ?? loginUrl}>{props.magicLink ? 'Passwort setzen & einloggen' : 'Jetzt einloggen'}</Button>
 
         <Paragraph>
           Bei Fragen erreichst du uns unter <strong>aaron.sprafke@claimondo.de</strong>.

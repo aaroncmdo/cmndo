@@ -348,6 +348,15 @@ export async function transitionFallStatus(
     if (newStatus === 'gutachten-eingegangen') {
       await completeSla(fallId, 'gutachten_upload')
     }
+    // Filmcheck-Audit 29.06.2026: QC-SLA — Uhr startet am filmcheck-Eintritt, stoppt
+    // am Kanzlei-Handoff. checkAndEscalateBreaches (Cron) erzeugt bei Breach generisch
+    // einen kritischen Eskalations-Task -> stuck-in-filmcheck wird endlich sichtbar.
+    if (newStatus === 'filmcheck') {
+      await startSla(fallId, 'qc_filmcheck')
+    }
+    if (newStatus === 'kanzlei-uebergeben') {
+      await completeSla(fallId, 'qc_filmcheck')
+    }
   } catch (err) { console.error('[AAR-85] SLA Status-Hook:', err) }
 
   // AAR-431: Kanzlei-SLA-Tracking
