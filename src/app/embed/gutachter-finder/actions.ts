@@ -47,6 +47,8 @@ export type EmbedBuchungInput = {
   zugeordneter_sv_lead_id?: string | null
   matching_typ?: string | null
   werkstatt_id?: string | null
+  /** Anspruch-pruefen: Session-ID der Schaetzung (Fotos + Inputs), wird beim Promoter auf Lead uebertragen. */
+  schaetzungSessionId?: string | null
 }
 
 export async function starteEmbedBuchung(
@@ -68,6 +70,7 @@ export async function starteEmbedBuchung(
     zugeordneter_sv_lead_id: input.zugeordneter_sv_lead_id ?? undefined,
     matching_typ: input.matching_typ ?? undefined,
     werkstatt_id: input.werkstatt_id ?? undefined,
+    schaetzung_session_id: input.schaetzungSessionId ?? null,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -268,6 +271,7 @@ export async function reserviereEmbedTermin(input: {
   wunschterminLokal?: string | null
   werkstatt_id?: string | null
   promotion_code_id?: string | null
+  schaetzungSessionId?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -301,6 +305,7 @@ export async function reserviereEmbedTermin(input: {
     zugeordneter_sv_lead_id: input.auswahl?.kind === 'deadpin' ? input.auswahl.deadPinId : null,
     matching_typ: input.auswahl?.kind ?? null,
     werkstatt_id: input.werkstatt_id ?? null,
+    schaetzungSessionId: input.schaetzungSessionId ?? null,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token

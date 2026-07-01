@@ -195,6 +195,31 @@ export async function issueCanonicalFlowLinkForAnfrage(
       .eq('id', anfrageId)
   }
 
+  // Anspruch-pruefen Carry-over: Fotos + Inputs + Schaetzung auf den Lead ziehen.
+  if (gfa.schaetzung_session_id) {
+    try {
+      const { data: sess } = await admin
+        .from('anspruch_schaetzungen')
+        .select('foto_pfade, fahrbereit, ez_jahr, vision_result')
+        .eq('id', gfa.schaetzung_session_id)
+        .maybeSingle()
+      if (sess) {
+        const pfade = Array.isArray(sess.foto_pfade) ? (sess.foto_pfade as string[]) : []
+        const vision = sess.vision_result as { beschreibung?: string } | null
+        await admin.from('leads').update({
+          schadensfoto_urls: pfade,
+          fahrzeug_fahrbereit: sess.fahrbereit,
+          erstzulassung: sess.ez_jahr ? String(sess.ez_jahr) : null,
+          fahrzeugschaden_beschreibung: vision?.beschreibung ?? null,
+          schaden_sichtbar: pfade.length > 0,
+        }).eq('id', leadId)
+        await admin.from('anspruch_schaetzungen').update({ lead_id: leadId }).eq('id', gfa.schaetzung_session_id)
+      }
+    } catch (err) {
+      console.error('[anspruch] carry-over failed', err)
+    }
+  }
+
   // 2. flow_links (idempotent, EINE Quelle): lead-gekeyter Core — reuse gültigen
   //    Link, sonst neu. Derselbe Schreibweg wie die Dispatcher-Sends (ein Lead = ein Link).
   const flRes = await ensureCanonicalFlowLinkForLead(leadId, {
