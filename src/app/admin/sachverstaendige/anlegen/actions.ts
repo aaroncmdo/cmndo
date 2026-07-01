@@ -115,6 +115,37 @@ function paketKonfig(paket: AnlegePaket, override?: {
   }
 }
 
+// ─── Rollback-Helper (Gutachter-Onboarding-Audit #2) ───────────────────────
+// Die Anlage-Actions sind KEIN echter DB-Transaktions-Block (Supabase-REST, kein
+// BEGIN/COMMIT) — sie kompensieren Fehler mit manuellen Rollback-Deletes. Diese
+// Helper checken den Fehler des Rollback-Deletes SELBST und loggen einen
+// ORPHAN-Marker (statt ihn zu verschlucken), damit ein verwaister auth.user /
+// profiles-Eintrag bei Rollback-Fail auffindbar bleibt (kein stiller Orphan).
+
+type AdminDb = ReturnType<typeof createAdminClient>
+
+async function rollbackAuthUser(adminDb: AdminDb, userId: string, kontext: string): Promise<void> {
+  const { error } = await adminDb.auth.admin.deleteUser(userId)
+  if (error) {
+    console.error(`[SV-Anlage] ORPHAN auth.user ${userId} — Rollback-Delete fehlgeschlagen (${kontext}), bitte manuell pruefen:`, error.message)
+  }
+}
+
+async function rollbackProfil(adminDb: AdminDb, profileId: string, kontext: string): Promise<void> {
+  const { error } = await adminDb.from('profiles').delete().eq('id', profileId)
+  if (error) {
+    console.error(`[SV-Anlage] ORPHAN profiles ${profileId} — Rollback-Delete fehlgeschlagen (${kontext}), bitte manuell pruefen:`, error.message)
+  }
+}
+
+// Generischer Rollback-Delete (organisationen / sachverstaendige / gebiet_*).
+async function loggeDbRollback(op: PromiseLike<{ error: { message?: string } | null }>, was: string): Promise<void> {
+  const { error } = await op
+  if (error) {
+    console.error(`[SV-Anlage] ORPHAN — Rollback fehlgeschlagen (${was}), bitte manuell pruefen:`, error.message)
+  }
+}
+
 // ─── Action 1: anlegeSv (Solo) ─────────────────────────────────────────────
 
 export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boolean; error?: string; sv_id?: string; profile_id?: string; initial_password?: string }> {
@@ -166,7 +197,7 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
   })
   if (profileErr) {
     // Rollback auth user
-    await adminDb.auth.admin.deleteUser(authUser.user.id)
+    await rollbackAuthUser(adminDb, authUser.user.id, 'solo: profiles-Insert fehlgeschlagen')
     return { success: false, error: `Profil fehlgeschlagen: ${profileErr.message}` }
   }
 
@@ -214,8 +245,8 @@ export async function anlegeSv(data: AnlegeSvFormData): Promise<{ success: boole
 
   if (svErr || !svRow) {
     // Rollback profile + auth
-    await adminDb.from('profiles').delete().eq('id', authUser.user.id)
-    await adminDb.auth.admin.deleteUser(authUser.user.id)
+    await rollbackProfil(adminDb, authUser.user.id, 'solo: sachverstaendige-Insert fehlgeschlagen')
+    await rollbackAuthUser(adminDb, authUser.user.id, 'solo: sachverstaendige-Insert fehlgeschlagen')
     return { success: false, error: `SV-Eintrag fehlgeschlagen: ${svErr?.message}` }
   }
 
@@ -354,7 +385,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     twofa_email_aktiviert: false,
   })
   if (inhaberProfileErr) {
-    await adminDb.auth.admin.deleteUser(inhaberUserId)
+    await rollbackAuthUser(adminDb, inhaberUserId, 'buero: Inhaber-profiles-Insert fehlgeschlagen')
     return { success: false, error: `Inhaber-Profil fehlgeschlagen: ${inhaberProfileErr.message}` }
   }
 
@@ -384,8 +415,8 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   }).select('id').single()
 
   if (orgErr || !orgRow) {
-    await adminDb.from('profiles').delete().eq('id', inhaberUserId)
-    await adminDb.auth.admin.deleteUser(inhaberUserId)
+    await rollbackProfil(adminDb, inhaberUserId, 'buero: organisationen-Insert fehlgeschlagen')
+    await rollbackAuthUser(adminDb, inhaberUserId, 'buero: organisationen-Insert fehlgeschlagen')
     return { success: false, error: `Org-Anlage fehlgeschlagen: ${orgErr?.message}` }
   }
   const organisationId = orgRow.id
@@ -409,9 +440,9 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
   }).select('id').single()
 
   if (inhaberSvErr || !inhaberSvRow) {
-    await adminDb.from('organisationen').delete().eq('id', organisationId)
-    await adminDb.from('profiles').delete().eq('id', inhaberUserId)
-    await adminDb.auth.admin.deleteUser(inhaberUserId)
+    await loggeDbRollback(adminDb.from('organisationen').delete().eq('id', organisationId), 'buero: Inhaber-SV-Fail (org)')
+    await rollbackProfil(adminDb, inhaberUserId, 'buero: Inhaber-sachverstaendige-Insert fehlgeschlagen')
+    await rollbackAuthUser(adminDb, inhaberUserId, 'buero: Inhaber-sachverstaendige-Insert fehlgeschlagen')
     return { success: false, error: `Inhaber-SV fehlgeschlagen: ${inhaberSvErr?.message}` }
   }
 
@@ -436,6 +467,19 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
     welcomeMailSent.add(data.inhaber_email)
   }
 
+  // Gutachter-Onboarding-Audit #2: zentraler Sub-Loop-Rollback — räumt alle
+  // bisher angelegten Sub-User + Inhaber + Org auf, mit ORPHAN-Logging.
+  const rollbackBuero = async (kontext: string): Promise<void> => {
+    for (const uid of createdAuthUserIds) {
+      await rollbackProfil(adminDb, uid, kontext)
+      await rollbackAuthUser(adminDb, uid, kontext)
+    }
+    await loggeDbRollback(adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId), `${kontext} (sachverstaendige)`)
+    await loggeDbRollback(adminDb.from('organisationen').delete().eq('id', organisationId), `${kontext} (org)`)
+    await rollbackProfil(adminDb, inhaberUserId, kontext)
+    await rollbackAuthUser(adminDb, inhaberUserId, kontext)
+  }
+
   for (const std of data.sub_standorte) {
     const subCfg = paketKonfig(std.paket)
     let subUserId: string
@@ -454,15 +498,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       })
 
       if (subAuthErr || !subAuth?.user) {
-        // Rollback alles bisher angelegte
-        for (const uid of createdAuthUserIds) {
-          await adminDb.from('profiles').delete().eq('id', uid)
-          await adminDb.auth.admin.deleteUser(uid)
-        }
-        await adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId)
-        await adminDb.from('organisationen').delete().eq('id', organisationId)
-        await adminDb.from('profiles').delete().eq('id', inhaberUserId)
-        await adminDb.auth.admin.deleteUser(inhaberUserId)
+        await rollbackBuero(`buero: Sub-Auth fehlgeschlagen (${std.sub_email})`)
         return { success: false, error: `Sub-Auth fehlgeschlagen fuer ${std.sub_email}: ${subAuthErr?.message}` }
       }
       subUserId = subAuth.user.id
@@ -470,7 +506,7 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       emailToUserId.set(std.sub_email, subUserId)
 
       // Sub profile (nur einmal pro unique Email)
-      await adminDb.from('profiles').insert({
+      const { error: subProfileErr } = await adminDb.from('profiles').insert({
         id: subUserId,
         email: std.sub_email,
         rolle: 'sachverstaendiger',
@@ -480,12 +516,16 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
         nachname: std.sub_nachname,
         force_password_change: true,
       })
+      if (subProfileErr) {
+        await rollbackBuero(`buero: Sub-profiles-Insert fehlgeschlagen (${std.sub_email})`)
+        return { success: false, error: `Sub-Profil fehlgeschlagen fuer ${std.sub_email}: ${subProfileErr.message}` }
+      }
     }
 
     // 5c. Sub sachverstaendige (immer ein neuer Eintrag, auch wenn Email wiederverwendet)
     // KFZ-154 Cleanup: nur noch qualifikationen_neu + spezifikationen + schadenarten.
     const subQual = std.qualifikationen ?? []
-    const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
+    const { data: subSvRow, error: subSvErr } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'mitarbeiter',
@@ -512,7 +552,11 @@ export async function anlegeBuero(data: AnlegeBueroFormData): Promise<{
       ist_parent_account: false,
         partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
-    if (subSvRow) subSvIds.push(subSvRow.id)
+    if (subSvErr || !subSvRow) {
+      await rollbackBuero(`buero: Sub-sachverstaendige-Insert fehlgeschlagen (${std.sub_email})`)
+      return { success: false, error: `Sub-SV fehlgeschlagen fuer ${std.sub_email}: ${subSvErr?.message}` }
+    }
+    subSvIds.push(subSvRow.id)
   }
 
   // 6. Welcome-Mails (fire & forget)
@@ -666,7 +710,7 @@ export async function anlegeSubSv(params: {
     twofa_email_aktiviert: false,
   })
   if (profileErr) {
-    await adminDb.auth.admin.deleteUser(subUserId)
+    await rollbackAuthUser(adminDb, subUserId, 'sub-sv: profiles-Insert fehlgeschlagen')
     return { success: false, error: `Profil fehlgeschlagen: ${profileErr.message}` }
   }
 
@@ -701,8 +745,8 @@ export async function anlegeSubSv(params: {
   }).select('id').single()
 
   if (svErr || !svRow) {
-    await adminDb.from('profiles').delete().eq('id', subUserId)
-    await adminDb.auth.admin.deleteUser(subUserId)
+    await rollbackProfil(adminDb, subUserId, 'sub-sv: sachverstaendige-Insert fehlgeschlagen')
+    await rollbackAuthUser(adminDb, subUserId, 'sub-sv: sachverstaendige-Insert fehlgeschlagen')
     return { success: false, error: `SV-Eintrag fehlgeschlagen: ${svErr?.message}` }
   }
 
@@ -832,7 +876,7 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
     twofa_email_aktiviert: false,
   })
   if (verwProfileErr) {
-    await adminDb.auth.admin.deleteUser(verwalterUserId)
+    await rollbackAuthUser(adminDb, verwalterUserId, 'akademie: Verwalter-profiles-Insert fehlgeschlagen')
     return { success: false, error: `Verwalter-Profil fehlgeschlagen: ${verwProfileErr.message}` }
   }
 
@@ -866,8 +910,8 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   }).select('id').single()
 
   if (orgErr || !orgRow) {
-    await adminDb.from('profiles').delete().eq('id', verwalterUserId)
-    await adminDb.auth.admin.deleteUser(verwalterUserId)
+    await rollbackProfil(adminDb, verwalterUserId, 'akademie: organisationen-Insert fehlgeschlagen')
+    await rollbackAuthUser(adminDb, verwalterUserId, 'akademie: organisationen-Insert fehlgeschlagen')
     return { success: false, error: `Akademie-Anlage fehlgeschlagen: ${orgErr?.message}` }
   }
   const organisationId = orgRow.id
@@ -898,9 +942,9 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   }).select('id').single()
 
   if (verwSvErr || !verwSvRow) {
-    await adminDb.from('organisationen').delete().eq('id', organisationId)
-    await adminDb.from('profiles').delete().eq('id', verwalterUserId)
-    await adminDb.auth.admin.deleteUser(verwalterUserId)
+    await loggeDbRollback(adminDb.from('organisationen').delete().eq('id', organisationId), 'akademie: Verwalter-SV-Fail (org)')
+    await rollbackProfil(adminDb, verwalterUserId, 'akademie: Verwalter-sachverstaendige-Insert fehlgeschlagen')
+    await rollbackAuthUser(adminDb, verwalterUserId, 'akademie: Verwalter-sachverstaendige-Insert fehlgeschlagen')
     return { success: false, error: `Verwalter-SV fehlgeschlagen: ${verwSvErr?.message}` }
   }
 
@@ -909,6 +953,18 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
   const createdAuthIds: string[] = []
   const emailToUserId = new Map<string, string>()
   emailToUserId.set(data.verwalter_email, verwalterUserId)
+
+  // Gutachter-Onboarding-Audit #2: zentraler Sub-Loop-Rollback (ORPHAN-Logging).
+  const rollbackAkademie = async (kontext: string): Promise<void> => {
+    for (const uid of createdAuthIds) {
+      await rollbackProfil(adminDb, uid, kontext)
+      await rollbackAuthUser(adminDb, uid, kontext)
+    }
+    await loggeDbRollback(adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId), `${kontext} (sachverstaendige)`)
+    await loggeDbRollback(adminDb.from('organisationen').delete().eq('id', organisationId), `${kontext} (org)`)
+    await rollbackProfil(adminDb, verwalterUserId, kontext)
+    await rollbackAuthUser(adminDb, verwalterUserId, kontext)
+  }
 
   for (const sub of data.sub_svs) {
     const subCfg = paketKonfig(sub.paket)
@@ -923,21 +979,14 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
         user_metadata: { force_password_change: true, von_admin: auth.user_id, rolle: 'akademie_sub' },
       })
       if (subAuthErr || !subAuth?.user) {
-        for (const uid of createdAuthIds) {
-          await adminDb.from('profiles').delete().eq('id', uid)
-          await adminDb.auth.admin.deleteUser(uid)
-        }
-        await adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId)
-        await adminDb.from('organisationen').delete().eq('id', organisationId)
-        await adminDb.from('profiles').delete().eq('id', verwalterUserId)
-        await adminDb.auth.admin.deleteUser(verwalterUserId)
+        await rollbackAkademie(`akademie: Sub-Auth fehlgeschlagen (${sub.email})`)
         return { success: false, error: `Sub-SV-Auth fehlgeschlagen fuer ${sub.email}: ${subAuthErr?.message}` }
       }
       subUserId = subAuth.user.id
       createdAuthIds.push(subUserId)
       emailToUserId.set(sub.email, subUserId)
 
-      await adminDb.from('profiles').insert({
+      const { error: subProfileErr } = await adminDb.from('profiles').insert({
         id: subUserId,
         email: sub.email,
         rolle: 'sachverstaendiger',
@@ -948,9 +997,13 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
         telefon: sub.telefon || null,
         force_password_change: true,
       })
+      if (subProfileErr) {
+        await rollbackAkademie(`akademie: Sub-profiles-Insert fehlgeschlagen (${sub.email})`)
+        return { success: false, error: `Sub-Profil fehlgeschlagen fuer ${sub.email}: ${subProfileErr.message}` }
+      }
     }
 
-    const { data: subSvRow } = await adminDb.from('sachverstaendige').insert({
+    const { data: subSvRow, error: subSvErr } = await adminDb.from('sachverstaendige').insert({
       profile_id: subUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'akademie_sub',
@@ -976,7 +1029,11 @@ export async function anlegeAkademie(data: AnlegeAkademieFormData): Promise<{
       ist_parent_account: false,
         partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
-    if (subSvRow) subSvIds.push(subSvRow.id)
+    if (subSvErr || !subSvRow) {
+      await rollbackAkademie(`akademie: Sub-sachverstaendige-Insert fehlgeschlagen (${sub.email})`)
+      return { success: false, error: `Sub-SV fehlgeschlagen fuer ${sub.email}: ${subSvErr?.message}` }
+    }
+    subSvIds.push(subSvRow.id)
   }
 
   // 6. Welcome-Mails
@@ -1152,6 +1209,18 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
   const createdAuthIds: string[] = []
   const initialPasswords: Record<string, string> = {}
 
+  // Gutachter-Onboarding-Audit #2: zentraler Member-Loop-Rollback (ORPHAN-Logging).
+  // Community-Org hat keinen eigenen Auth-User (Org zuerst angelegt) -> nur Members + Gebiet + Org.
+  const rollbackCommunity = async (kontext: string): Promise<void> => {
+    for (const uid of createdAuthIds) {
+      await rollbackProfil(adminDb, uid, kontext)
+      await rollbackAuthUser(adminDb, uid, kontext)
+    }
+    await loggeDbRollback(adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId), `${kontext} (sachverstaendige)`)
+    await loggeDbRollback(adminDb.from('gebiet_exklusivitaeten').delete().eq('organisation_id', organisationId), `${kontext} (gebiet)`)
+    await loggeDbRollback(adminDb.from('organisationen').delete().eq('id', organisationId), `${kontext} (org)`)
+  }
+
   for (const m of data.mitglieder) {
     if (!initialPasswords[m.email]) initialPasswords[m.email] = randomPassword(16)
     const cfg = paketKonfig(m.paket)
@@ -1163,20 +1232,13 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
       user_metadata: { force_password_change: true, von_admin: auth.user_id, rolle: 'community_member' },
     })
     if (memAuthErr || !memAuth?.user) {
-      // Rollback
-      for (const uid of createdAuthIds) {
-        await adminDb.from('profiles').delete().eq('id', uid)
-        await adminDb.auth.admin.deleteUser(uid)
-      }
-      await adminDb.from('sachverstaendige').delete().eq('organisation_id', organisationId)
-      await adminDb.from('gebiet_exklusivitaeten').delete().eq('organisation_id', organisationId)
-      await adminDb.from('organisationen').delete().eq('id', organisationId)
+      await rollbackCommunity(`community: Mitglied-Auth fehlgeschlagen (${m.email})`)
       return { success: false, error: `Mitglied-Auth fehlgeschlagen fuer ${m.email}: ${memAuthErr?.message}` }
     }
     const memUserId = memAuth.user.id
     createdAuthIds.push(memUserId)
 
-    await adminDb.from('profiles').insert({
+    const { error: memProfileErr } = await adminDb.from('profiles').insert({
       id: memUserId,
       email: m.email,
       rolle: 'sachverstaendiger',
@@ -1187,8 +1249,12 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
       telefon: m.telefon || null,
       force_password_change: true,
     })
+    if (memProfileErr) {
+      await rollbackCommunity(`community: Mitglied-profiles-Insert fehlgeschlagen (${m.email})`)
+      return { success: false, error: `Mitglied-Profil fehlgeschlagen fuer ${m.email}: ${memProfileErr.message}` }
+    }
 
-    const { data: memSvRow } = await adminDb.from('sachverstaendige').insert({
+    const { data: memSvRow, error: memSvErr } = await adminDb.from('sachverstaendige').insert({
       profile_id: memUserId,
       organisation_id: organisationId,
       rolle_in_organisation: 'community_member',
@@ -1211,7 +1277,11 @@ export async function anlegeCommunity(data: AnlegeCommunityFormData): Promise<{
       ist_parent_account: false,
         partner_seit: new Date().toISOString().slice(0, 10),
     }).select('id').single()
-    if (memSvRow) memberSvIds.push(memSvRow.id)
+    if (memSvErr || !memSvRow) {
+      await rollbackCommunity(`community: Mitglied-sachverstaendige-Insert fehlgeschlagen (${m.email})`)
+      return { success: false, error: `Mitglied-SV fehlgeschlagen fuer ${m.email}: ${memSvErr?.message}` }
+    }
+    memberSvIds.push(memSvRow.id)
   }
 
   // 4. Welcome-Mails
