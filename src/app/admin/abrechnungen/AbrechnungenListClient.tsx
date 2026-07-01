@@ -9,7 +9,7 @@ import { retryEinzug, markBezahlt, stornoAbrechnung, reIssueAbrechnung } from '.
 import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer, DataTableMobileCard } from '@/components/shared/DataTable'
 
 // KFZ-149 Hund-D: Listing aller SV-Monatsabrechnungen mit Filter,
 // Detail-Modal, manuellem Retry und Manuell-bezahlt Button.
@@ -218,10 +218,39 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       )}
 
       {/* Table */}
-      <DataTableContainer variant="plain" className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
-        {filtered.length === 0 ? (
-          <div className="p-12 text-center text-sm text-claimondo-ondo">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
-        ) : (
+      {filtered.length === 0 ? (
+        <div className="glass-light border border-claimondo-border rounded-ios-md p-12 text-center text-sm text-claimondo-ondo">Keine Eintraege im Filter <strong>{FILTER_TABS.find(t => t.key === filter)?.label}</strong>.</div>
+      ) : (
+        <DataTableContainer
+          variant="plain"
+          className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden"
+          mobileCards={filtered.map(r => {
+            const badge = statusBadge(r)
+            return (
+              <DataTableMobileCard
+                key={r.id}
+                onClick={() => { setSelected(r); setConfirmMarkBezahlt(false); setBezahltNotiz('') }}
+              >
+                <div className="flex items-start justify-between gap-2 mb-1.5">
+                  <div className="min-w-0">
+                    <p className="font-mono text-xs text-claimondo-navy truncate">{r.abrechnungs_nr}</p>
+                    <p className="text-sm text-claimondo-navy truncate">{r.empfaenger_name ?? '—'}</p>
+                  </div>
+                  <span className="text-sm font-semibold text-claimondo-navy tabular-nums shrink-0">{fmtEur(r.summe_brutto)}</span>
+                </div>
+                <div className="flex items-center justify-between gap-2">
+                  <StatusBadge colorCls={`${badge.bg} ${badge.text}`} size="sm">
+                    <span className={`w-1.5 h-1.5 rounded-full ${badge.dot}`} />
+                    {badge.label}
+                  </StatusBadge>
+                  <span className="text-[11px] text-claimondo-ondo shrink-0">
+                    {r.bezahlt_am ? `bezahlt ${fmtDate(r.bezahlt_am)}` : `fällig ${fmtDate(r.faellig_am)}`}
+                  </span>
+                </div>
+              </DataTableMobileCard>
+            )
+          })}
+        >
           <Table>
             <Thead className="!text-[10px] !tracking-wide">
               <Tr>
@@ -269,8 +298,8 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
               })}
             </Tbody>
           </Table>
-        )}
-      </DataTableContainer>
+        </DataTableContainer>
+      )}
 
       {/* Detail Modal */}
       <Modal open={selected !== null} onClose={() => setSelected(null)} noPadding hideCloseButton maxWidth={672} ariaLabel="Abrechnung-Detail">

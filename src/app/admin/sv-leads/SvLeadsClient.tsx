@@ -8,7 +8,7 @@ import { createSvLead, importSvLeadsAction, sendeSvLeadEinladung, sendeAlleOffen
 import type { SvLeadRow } from './types'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
-import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td, DataTableMobileCard } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { TextField } from '@/components/shared/forms/TextField'
 
@@ -245,7 +245,51 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
           />
         </div>
 
-        <DataTableContainer variant="plain" className="bg-white rounded-ios-lg border border-claimondo-border overflow-hidden">
+        <DataTableContainer
+          variant="plain"
+          className="bg-white rounded-ios-lg border border-claimondo-border overflow-hidden"
+          mobileCards={svLeads.length === 0 ? (
+            <div className="p-12 text-center text-sm text-claimondo-ondo">Noch keine SV-Leads vorhanden.</div>
+          ) : svLeads.map(lead => (
+            <DataTableMobileCard key={lead.id}>
+              <div className="flex items-start justify-between gap-2 mb-1.5">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium text-claimondo-navy truncate">{lead.name}</p>
+                  {lead.firma && <p className="text-xs text-claimondo-ondo truncate">{lead.firma}</p>}
+                  <p className="text-xs text-claimondo-ondo mt-0.5">{lead.ort ?? '—'}{lead.plz ? ` · ${lead.plz}` : ''}</p>
+                </div>
+                <div className="shrink-0">
+                  {lead.claim_status ? (
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${CLAIM_STATUS_COLORS[lead.claim_status] ?? 'bg-claimondo-bg text-claimondo-navy'}`}>
+                      {CLAIM_STATUS_LABELS[lead.claim_status] ?? lead.claim_status}
+                    </span>
+                  ) : (
+                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${lead.ist_aktiv ? 'bg-success-soft text-success-strong' : 'bg-claimondo-bg text-claimondo-ondo'}`}>
+                      {lead.ist_aktiv ? 'Aktiv' : 'Inaktiv'}
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[11px] text-claimondo-ondo truncate">
+                  {lead.quelle ?? '—'} · {formatDatum(lead.aktualisiert_am)}
+                  {lead.konvertiert_zu_sv_id ? ' · SV konvertiert' : ''}
+                </span>
+                {lead.claim_status === 'offen' && !lead.konvertiert_zu_sv_id && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEinladen(lead.id)}
+                    loading={einladendLeads.has(lead.id)}
+                    iconLeft={<MailIcon className="w-3.5 h-3.5" />}
+                  >
+                    Einladen
+                  </Button>
+                )}
+              </div>
+            </DataTableMobileCard>
+          ))}
+        >
           <Table>
             <Thead className="bg-transparent! text-sm! normal-case! tracking-normal!">
               <Tr className="border-b border-claimondo-border">
