@@ -23,11 +23,18 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 
 /**
  * Filter für SVs die Fälle bekommen dürfen.
+ *   - verifiziert=true (Dokumente geprüft — Angleich ans Karten-Gate, s.u.)
  *   - portal_zugang_freigeschaltet=true (Anzahlung durch, Portal offen)
  *   - ist_aktiv=true (technisch aktiv — wird vom Stripe-Webhook zusammen mit
  *     portal_zugang_freigeschaltet gesetzt, siehe /api/stripe/webhook/route.ts)
  *   - gesperrt_seit IS NULL (kein Admin-Block)
  *   - geloescht_am IS NULL (nicht gelöscht)
+ *
+ * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
+ * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
+ * nur auf portal_zugang -> ein bezahlter-aber-unverifizierter SV war buchbar,
+ * aber unsichtbar auf der Karte (und die Engine wies unvetteten SVs Fälle zu).
+ * Jetzt gilt: "auf der Karte gelistet" == "durch die Engine buchbar".
  *
  * Wird in findBestSV + gutachter-matching + sv-zuweisung genutzt.
  */
@@ -37,6 +44,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 // für ein brauchbares Generic-Constraint — der Consumer castet selbst.
 export function applyDispatchableFilter(q: any): any {
   return q
+    .eq('verifiziert', true)
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
     .is('gesperrt_seit', null)
