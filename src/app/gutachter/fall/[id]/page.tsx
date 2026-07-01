@@ -146,11 +146,11 @@ export default async function GutachterFallPage({
       .select('id, typ, titel, beschreibung, erstellt_von, metadata, created_at')
       .eq('fall_id', id)
       .order('created_at', { ascending: false }),
-    // Billing-Konsolidierung 2026-07-01: Leadpreis aus claims-SSoT (lead_preis_netto/-typ/
-      // -berechnet_am, processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
+    // Billing-Konsolidierung 2026-07-01: Leadpreis aus claims-SSoT (lead_preis_netto/-typ,
+      // processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
       supabase
       .from('claims')
-      .select('lead_preis_netto, lead_preis_typ, lead_preis_berechnet_am')
+      .select('lead_preis_netto, lead_preis_typ')
       .eq('id', id)
       .eq('sv_id', sv.id)
       .maybeSingle(),
@@ -590,7 +590,7 @@ export default async function GutachterFallPage({
       aktiverTermin={aktiverTermin as unknown as Parameters<typeof FallDetailClient>[0]['aktiverTermin']}
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
-      abrechnungAusgezahltAm={(abrechnung as { lead_preis_berechnet_am?: string | null } | null)?.lead_preis_berechnet_am ?? null}
+      abrechnungAusgezahltAm={null}
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}
