@@ -17,6 +17,7 @@ import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { convertLeadToFall, type ConvertResult } from '@/lib/leads/convert-lead-to-fall'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
+import { staffMayMutateClaim } from './_helpers/staff-claim-scope'
 
 // ─── Fall Status ────────────────────────────────────────────────────────────
 
@@ -33,8 +34,22 @@ export async function updateFallStatus(
   // Write) ist eine Staff-Aktion, vorher fehlte der Check (jeder Login konnte sie auslösen).
   {
     const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
-    if (!['admin', 'dispatch', 'kundenbetreuer'].includes((profile?.rolle as string) ?? '')) {
+    const rolle = (profile?.rolle as string | null) ?? null
+    if (!['admin', 'dispatch', 'kundenbetreuer'].includes(rolle ?? '')) {
       return { ok: false, error: 'Nicht berechtigt' }
+    }
+    // Write-Path-Audit F6 (01.07.): KB darf nur eigene (oder unassigned) Claims transitionen —
+    // spiegelt die claims-RLS-Write-Policy. admin/dispatch bleiben global (Routing-Rolle).
+    // transitionFallStatus schreibt via admin-client (RLS-Bypass), daher greift der Guard hier.
+    if (rolle === 'kundenbetreuer') {
+      const { data: claimRow } = await serviceClient
+        .from('v_claim_full')
+        .select('kundenbetreuer_id')
+        .eq('fall_id', fallId)
+        .maybeSingle()
+      if (!staffMayMutateClaim({ rolle, claimKbId: (claimRow?.kundenbetreuer_id as string | null) ?? null, userId: user.id })) {
+        return { ok: false, error: 'Nicht berechtigt (fremder Fall)' }
+      }
     }
   }
 
@@ -369,6 +384,9 @@ export async function updateLeadStatus(
       return { ok: false, error: 'Nicht berechtigt' }
     }
   }
+  // Write-Path-Audit F6 (01.07.): BEWUSST kein per-Lead-Ownership-Scoping. Leads sind ein
+  // geteilter Dispatch-Pool (round-robin, unassigned pickup) — ein zugewiesen_an-Guard wuerde den
+  // Pool-Workflow brechen. Das per-KB-Ownership-Scoping gilt nur fuer claims (updateFallStatus).
 
   const now = new Date().toISOString()
 
