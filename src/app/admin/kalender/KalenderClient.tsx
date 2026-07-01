@@ -319,8 +319,79 @@ export default function KalenderClient({
           </div>
         </div>
 
-        {/* Calendar grid */}
-        <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
+        {/* Mobile-Agenda (md:hidden) — die grid-cols-7-Ansicht ist auf 375px unlesbar.
+            Listet je Tag mit Terminen die Eintraege; das Desktop-Grid bleibt unveraendert. */}
+        <div className="md:hidden space-y-3">
+          {calendarDays.every((d) => getEntriesForDay(d).length === 0 || (viewMode === 'month' && !isSameMonth(d, currentDate))) ? (
+            <div className="glass-light border border-claimondo-border rounded-ios-md p-6 text-center text-sm text-claimondo-ondo">
+              Keine Termine in diesem Zeitraum.
+            </div>
+          ) : (
+            calendarDays.map((day, i) => {
+              if (viewMode === 'month' && !isSameMonth(day, currentDate)) return null
+              const dayEntries = getEntriesForDay(day)
+                .slice()
+                .sort((a, b) => new Date(a.start).getTime() - new Date(b.start).getTime())
+              if (dayEntries.length === 0) return null
+              const todayFlag = isToday(day)
+              return (
+                <div key={i} className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
+                  <div className={`flex items-center justify-between px-3 py-2 border-b border-claimondo-border ${todayFlag ? 'bg-claimondo-navy/[0.04]' : ''}`}>
+                    <span className="text-sm font-semibold text-claimondo-navy">
+                      {format(day, 'EEEE, d. MMMM', { locale: de })}
+                    </span>
+                    {todayFlag && (
+                      <span className="text-[10px] font-medium text-white bg-claimondo-navy px-1.5 py-0.5 rounded-full">Heute</span>
+                    )}
+                  </div>
+                  <div className="divide-y divide-claimondo-border/50">
+                    {dayEntries.map((entry) => {
+                      const isAdminTermin = ['rueckruf', 'kunde', 'intern'].includes(entry.typ)
+                      const inner = (
+                        <>
+                          <span
+                            className={`w-1 self-stretch rounded-full shrink-0 ${entry.overdue ? 'bg-danger' : ''}`}
+                            style={entry.overdue ? undefined : { backgroundColor: entry.farbe }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <span className={`block text-sm truncate ${entry.overdue ? 'text-danger font-medium' : 'text-claimondo-navy'}`}>
+                              {entry.titel}
+                            </span>
+                            {(entry.gutachterName ?? entry.fallNummer) && (
+                              <span className="block text-[11px] text-claimondo-ondo truncate">
+                                {entry.gutachterName ?? entry.fallNummer}
+                              </span>
+                            )}
+                          </div>
+                        </>
+                      )
+                      return isAdminTermin ? (
+                        <button
+                          key={entry.id}
+                          onClick={() => setModal({ mode: 'edit', termin: entry })}
+                          className="w-full flex items-stretch gap-2.5 px-3 py-2.5 text-left hover:bg-claimondo-bg/50 transition-colors"
+                        >
+                          {inner}
+                        </button>
+                      ) : (
+                        <Link
+                          key={entry.id}
+                          href={entry.link ?? '#'}
+                          className="flex items-stretch gap-2.5 px-3 py-2.5 hover:bg-claimondo-bg/50 transition-colors"
+                        >
+                          {inner}
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </div>
+              )
+            })
+          )}
+        </div>
+
+        {/* Calendar grid (Desktop) */}
+        <div className="hidden md:block glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
           <div className="grid grid-cols-7 border-b border-claimondo-border">
             {WEEKDAYS.map(d => (
               <div key={d} className="px-2 py-2.5 text-center text-claimondo-ondo text-xs font-medium">{d}</div>
