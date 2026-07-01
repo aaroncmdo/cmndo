@@ -4,6 +4,7 @@ import {
   getSachverstaendige,
   getVersicherer,
 } from '@/lib/content/claimondo-mdx'
+import { getPublishedArtikel, mapArtikelToFeedItem } from '@/lib/wissen/db-articles'
 import { assetToFeedItem } from './asset-feed-item'
 import type { FeedItem } from './types'
 
@@ -34,9 +35,12 @@ export interface WissenData {
  * und 87 Stadt-Seiten werden NICHT inline gelistet (zu viele) sondern als
  * Hub-Verweis ausgegeben — ihre eigenen Hubs (/haftpflicht, /kfz-gutachter)
  * existieren bereits.
+ *
+ * Zusaetzlich werden veroeffentlichte DB-Artikel (wissen_artikel) als eigene
+ * Gruppe vorangestellt, damit Besucher neue Redaktions-Artikel browsen koennen.
  */
-export function getWissenData(): WissenData {
-  const gruppen: WissenGroup[] = [
+export async function getWissenData(): Promise<WissenData> {
+  const mdxGruppen: WissenGroup[] = [
     {
       key: 'cornerstone',
       label: 'Ratgeber & Grundlagen',
@@ -62,6 +66,25 @@ export function getWissenData(): WissenData {
       items: getSachverstaendige().map(assetToFeedItem),
     },
   ].filter((g) => g.items.length > 0)
+
+  // getPublishedArtikel braucht einen Next.js-Request-Scope (cookies()).
+  // Im Vitest-Kontext (kein Request-Scope) faellt es auf [] zurueck statt zu werfen.
+  const dbArtikel = await getPublishedArtikel().catch(() => [])
+  const redaktionItems = dbArtikel.map(mapArtikelToFeedItem)
+
+  const gruppen: WissenGroup[] = [
+    ...(redaktionItems.length > 0
+      ? [
+          {
+            key: 'redaktion',
+            label: 'Neu aus der Redaktion',
+            hint: 'Aktuell veröffentlichte Beiträge aus unserer Redaktion — praxisnahe Analysen und Tipps rund um den Kfz-Schaden.',
+            items: redaktionItems,
+          },
+        ]
+      : []),
+    ...mdxGruppen,
+  ]
 
   const weiterstoebern: WissenHubLink[] = [
     {
