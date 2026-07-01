@@ -18,7 +18,7 @@ export default async function DispatchLeads({
   const supabase = await createClient()
 
   // AAR-956 Self-Service #4: Abbrecher-Filter. Leads, die den FlowLink geoeffnet,
-  // aber nicht abgeschlossen haben (status != disqualifiziert). Der Dispatcher
+  // aber nicht abgeschlossen haben (status nicht disqualifiziert/kalt). Der Dispatcher
   // ruft sie an (alle Daten inkl. Mail liegen vor). Eigene Filter-Dimension,
   // orthogonal zu den Phase-Chips; sortiert nach letzter Aktivitaet (updated_at).
   const istAbbrecherFilter = params.filter === 'abbrecher'
@@ -50,7 +50,7 @@ export default async function DispatchLeads({
     query = query
       .eq('flow_link_geoeffnet', true)
       .eq('flow_link_abgeschlossen', false)
-      .neq('status', 'disqualifiziert')
+      .not('status', 'in', '("disqualifiziert","kalt")')
       .order('updated_at', { ascending: false })
   } else {
     query = query.order('created_at', { ascending: false })
@@ -75,7 +75,7 @@ export default async function DispatchLeads({
     .select('id', { count: 'exact', head: true })
     .eq('flow_link_geoeffnet', true)
     .eq('flow_link_abgeschlossen', false)
-    .neq('status', 'disqualifiziert')
+    .not('status', 'in', '("disqualifiziert","kalt")')
 
   return (
     <div className="py-6 space-y-4">
