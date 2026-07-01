@@ -8,6 +8,12 @@ export type SlaTyp =
   | 'termin_bestaetigung'
   | 'besichtigung'
   | 'gutachten_upload'
+  // Filmcheck-Audit 29.06.2026: qc_filmcheck war im sla_tracking-CHECK-Constraint
+  // schema-reserviert, aber nie verdrahtet -> stuck-in-filmcheck eskalierte nie
+  // (nur der 2h-QC-Task + generische task-eskalation). Jetzt: start am filmcheck-
+  // Eintritt, complete am kanzlei-uebergeben (state-machine.ts). checkAndEscalate-
+  // Breaches (Cron) eskaliert generisch -> kein Cron-Change noetig.
+  | 'qc_filmcheck'
 
 // Frist in Minuten ab started_at
 export const SLA_FRIST_MIN: Record<SlaTyp, number> = {
@@ -15,6 +21,7 @@ export const SLA_FRIST_MIN: Record<SlaTyp, number> = {
   termin_bestaetigung: 60,
   besichtigung: 48 * 60,
   gutachten_upload: 24 * 60,
+  qc_filmcheck: 4 * 60,
 }
 
 export const SLA_LABEL: Record<SlaTyp, string> = {
@@ -22,6 +29,7 @@ export const SLA_LABEL: Record<SlaTyp, string> = {
   termin_bestaetigung: 'Termin-Bestaetigung (1 Std)',
   besichtigung: 'Besichtigung (48 Std)',
   gutachten_upload: 'Gutachten-Upload (24 Std)',
+  qc_filmcheck: 'Filmcheck / QC (4 Std)',
 }
 
 /**

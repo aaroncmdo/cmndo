@@ -263,6 +263,16 @@ export async function gutachtenAbgeben(
     } catch { /* non-critical */ }
   }
 
+  // OCR-Konsolidierung (Filmcheck #7 Phase 2c): OCR der WORKING-Pipeline (lib/ai/
+  // gutachten-ocr) hier vorziehen. Bisher lief sie NUR via manuellem KB-Re-Run -> faktisch
+  // nie automatisch; der AAR-838-Edge-Function-Pfad ist ein toter Skeleton (0 Caller,
+  // engine_not_implemented). Idempotent (skip wenn schon verarbeitet); force=warReject bei
+  // Nachbesserung (Gutachten geaendert). Fire-and-forget -> blockt die SV-Abgabe nicht.
+  // Macht die OCR-Werte VOR der QC verfuegbar (Voraussetzung fuer die QC-Evidenz, Phase 3).
+  import('@/lib/ai/gutachten-ocr')
+    .then(({ extractGutachtenAndSaveToClaim }) => extractGutachtenAndSaveToClaim(auftragId, { force: warReject }))
+    .catch((err) => console.warn('[gutachtenAbgeben] OCR-Vorzieh-Trigger fehlgeschlagen:', err))
+
   // Filmcheck-Audit 29.06.2026: Auto-Advance fuer ALLE Abgaben (fresh + Re-Submit) —
   // Cascade sv-termin -> begutachtung-laeuft -> gutachten-eingegangen -> (komplett)
   // filmcheck. Nutzt das oben gesetzte fertiggestellt_am-Signal. Awaited, damit der
