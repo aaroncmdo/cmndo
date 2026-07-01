@@ -77,6 +77,19 @@ export async function setKanzleiWunsch(input: {
   const auth = await requireRole(['admin', 'kundenbetreuer', 'kunde', 'dispatch'])
   if (!auth.success) return { ok: false, error: auth.error }
 
+  // AAR-auth-haertung (Write-Path-IDOR): Ownership via RLS-Read gaten — vorher nur
+  // Rollen-Gate; ein kunde konnte per fremder claim_id den kanzlei_wunsch fremder
+  // Claims setzen + (in Regulierung) das Auto-Paket-Senden fremder Fall-Daten
+  // ausloesen. RLS auf claims scoped jede Rolle auf ihre sichtbaren Claims
+  // (kunde=eigene/party, KB=assigned+unassigned, dispatch=eigene Leads, admin=alle);
+  // kein Zugriff -> reject. Muster wie applyKanzleiPaket.
+  const { data: sichtbarerClaim } = await auth.supabase
+    .from('claims')
+    .select('id')
+    .eq('id', input.claim_id)
+    .maybeSingle()
+  if (!sichtbarerClaim) return { ok: false, error: 'Claim nicht gefunden oder kein Zugriff' }
+
   if (input.wunsch === 'eigene_kanzlei') {
     const k = input.eigene_kanzlei
     if (!k?.name?.trim()) {
