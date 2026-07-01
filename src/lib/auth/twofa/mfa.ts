@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { pruefe2faSperre, registriere2faVerify } from './verify-rate-limit'
 
 // AAR-939: Duenne Wrapper um supabase.auth.mfa (Phone-Faktor). Result-Object-
 // Pattern (kein throw) — siehe AGENTS.md §Server-Actions. Die SMS-Zustellung
@@ -115,7 +116,37 @@ export async function verifyPhoneFaktor(
   if (sauber.length !== 6) {
     return { ok: false, error: 'Bitte den 6-stelligen Code eingeben' }
   }
+
+  // AAR-auth-haertung (Befund H): App-seitiges Lockout gegen Code-Brute-Force,
+  // Defense-in-depth ueber GoTrues Provider-Rate-Limit. FAIL-OPEN — ein
+  // Limiter-Fehler darf den Login NIE blockieren.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) {
+    try {
+      const sperre = await pruefe2faSperre(createAdminClient(), user.id)
+      if (sperre.gesperrt) {
+        return {
+          ok: false,
+          error: 'Zu viele Fehlversuche. Bitte in einigen Minuten erneut versuchen.',
+        }
+      }
+    } catch (err) {
+      console.error('[AAR-939] 2FA-Sperre-Check fehlgeschlagen (fail-open):', err)
+    }
+  }
+
   const { error } = await supabase.auth.mfa.verify({ factorId, challengeId, code: sauber })
+
+  if (user) {
+    try {
+      await registriere2faVerify(createAdminClient(), user.id, !error)
+    } catch (err) {
+      console.error('[AAR-939] 2FA-Versuch-Verbuchung fehlgeschlagen (fail-open):', err)
+    }
+  }
+
   if (error) {
     return { ok: false, error: uebersetzeMfaFehler(error.message) }
   }
