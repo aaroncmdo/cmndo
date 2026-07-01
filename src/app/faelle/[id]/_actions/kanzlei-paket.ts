@@ -174,14 +174,19 @@ export async function setAnschlussschreibenDatum(
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
-  // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1). 'vs-01' = Start der
-  // VS-Eskalations-Stufenleiter beim AS-Versand. Kanzlei-Pfad-Action (Caller-autorisiert)
-  // -> Admin-Client. Claim-lose Legacy-Faelle: skip (Spalte stirbt in Phase 6).
-  const asClaimId = await resolveClaimId(supabase, fallId)
-  if (asClaimId) {
-    const kfRes = await upsertKanzleiFall(createAdminClient(), asClaimId, { vs_eskalationsstufe: 'vs-01' })
-    if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
+  // AAR-auth-haertung (Write-Path-IDOR): (1) Rollen-Gate (nur KB/Admin) — vorher
+  // konnte JEDER eingeloggte User die Aktion triggern. (2) Ownership: claim_id via
+  // RLS-Client + hard-fail VOR transitionFallStatus, sonst forcierte ein Nicht-
+  // Eigentuemer den Fall auf 'anschlussschreiben' (+ Notifs/SLA/VS-Mitteilung).
+  const { data: rolleRow } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
+  if (!['admin', 'kundenbetreuer'].includes((rolleRow?.rolle as string) ?? '')) {
+    return { success: false, error: 'Nur KB/Admin dürfen diese Aktion ausführen' }
   }
+  const asClaimId = await resolveClaimId(supabase, fallId)
+  if (!asClaimId) return { success: false, error: 'Fall nicht gefunden oder kein Zugriff' }
+
+  const kfRes = await upsertKanzleiFall(createAdminClient(), asClaimId, { vs_eskalationsstufe: 'vs-01' })
+  if (!kfRes.ok) return { success: false, error: kfRes.error ?? 'kanzlei_faelle Update fehlgeschlagen' }
 
   // KFZ-202: Status via State-Machine (setzt anschlussschreiben_am + Timeline)
   await transitionFallStatus(fallId, 'anschlussschreiben', { user_id: user.id })
