@@ -16,7 +16,7 @@ export type SvPerformance = {
 
 /**
  * Performance-Metriken pro Sachverständiger.
- * Berechnet aus: gutachter_termine (Übernahme/Ablehnung), faelle (Umsatz), gutachter_abrechnungen (Leadpreis).
+ * Berechnet aus: gutachter_termine (Übernahme/Ablehnung), faelle (Umsatz), claims.lead_preis_netto (Leadpreis).
  */
 export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
   items: SvPerformance[]
@@ -94,9 +94,9 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
       }
     }
 
-    // Leadpreis
-    const { data: abr } = await db.from('gutachter_abrechnungen').select('leadpreis').eq('sv_id', sv.id)
-    const leadpreisGesamt = abr?.reduce((sum, a) => sum + (Number(a.leadpreis) || 0), 0) ?? 0
+    // Leadpreis aus claims-SSoT (Billing-Konsolidierung 2026-07-01, processCaseBilling)
+    const { data: abr } = await db.from('claims').select('lead_preis_netto').eq('sv_id', sv.id).not('lead_preis_netto', 'is', null)
+    const leadpreisGesamt = abr?.reduce((sum, a) => sum + (Number(a.lead_preis_netto) || 0), 0) ?? 0
 
     items.push({
       svId: sv.id,
@@ -116,6 +116,6 @@ export async function getSvPerformanceList(filter?: AnalyticsFilter): Promise<{
 
   return {
     items,
-    berechnetAus: 'gutachter_termine (Übernahme/Ablehnung), faelle (Umsatz, Bearbeitungszeit), gutachter_abrechnungen (Leadpreis)',
+    berechnetAus: 'gutachter_termine (Übernahme/Ablehnung), faelle (Umsatz, Bearbeitungszeit), claims.lead_preis_netto (Leadpreis)',
   }
 }

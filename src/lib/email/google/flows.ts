@@ -308,32 +308,43 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
 
 // ─── 3. SV Abrechnung ──────────────────────────────────────────────────────
 
-export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
+export async function sendSvAbrechnung(fallId: string): Promise<void> {
   const db = admin()
-  const { data: abr } = await db.from('gutachter_abrechnungen').select('sv_id, fall_id, schadenhoehe, leadpreis, preistyp').eq('id', abrechnungId).single()
-  if (!abr) return
+  // Billing-Konsolidierung 2026-07-01: Leadpreis/Schadenhoehe aus claims-SSoT
+  // (processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db.from('claims')
+    .select('sv_id, claim_nummer, lead_preis_netto, lead_preis_typ, schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim?.sv_id || claim.lead_preis_netto == null) return
 
-  // CMM-49: claim_nummer claims-direkt (faelle-frei).
-  const claimId = await resolveClaimId(db, abr.fall_id)
-  const { data: fallClaim } = claimId
-    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
-    : { data: null }
+  const g = Array.isArray((claim as { gutachten?: unknown }).gutachten)
+    ? ((claim as { gutachten: unknown[] }).gutachten)[0]
+    : (claim as { gutachten?: unknown }).gutachten
+  const schadenhoehe = Number(
+    (g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
+      ?? claim.schadens_hoehe_netto
+      ?? 0,
+  )
+  const leadpreis = Number(claim.lead_preis_netto)
 
-  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', abr.sv_id).single()
+  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', claim.sv_id).single()
   if (!sv?.profile_id) return
   const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
   if (!svProfile?.email) throw new Error('Keine Email-Adresse für SV')
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
-    fallNummer: fallClaim?.claim_nummer ?? '—',
+    fallNummer: claim.claim_nummer ?? '—',
     positionen: [
-      { bezeichnung: 'Schadenshöhe', betrag: fmtCurrency(Number(abr.schadenhoehe)) },
-      { bezeichnung: `Leadpreis (${abr.preistyp ?? 'einzel'})`, betrag: fmtCurrency(Number(abr.leadpreis)) },
+      { bezeichnung: 'Schadenshöhe', betrag: fmtCurrency(schadenhoehe) },
+      { bezeichnung: `Leadpreis (${claim.lead_preis_typ ?? 'einzel'})`, betrag: fmtCurrency(leadpreis) },
     ],
-    gesamtbetrag: fmtCurrency(Number(abr.leadpreis)),
+    gesamtbetrag: fmtCurrency(leadpreis),
     zahlungsHinweis: 'Der Betrag wird mit Ihrem Guthaben verrechnet. Details finden Sie im Portal.',
-    abrechnungId,
+    abrechnungId: claimId,
   }
 
   const html = await render(SvAbrechnungEmail(props))
@@ -341,7 +352,7 @@ export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
     to: svProfile.email,
     subject: svAbrechnungSubject(props),
     html,
-    fallId: abr.fall_id,
+    fallId,
     empfaengerTyp: 'sv',
     template: 'sv_abrechnung',
   })
