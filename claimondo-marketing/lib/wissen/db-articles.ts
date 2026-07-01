@@ -1,0 +1,105 @@
+import { createClient } from '@/lib/supabase/server'
+import { DEFAULT_AUTHOR } from '@/lib/feed/authors'
+import type { FeedItem } from '@/lib/feed/types'
+
+/**
+ * Stabiler Fallback-Stand fuer DB-Artikel ohne last_modified oder veroeffentlicht_am.
+ * Bewusst ein fixes Vergangenheitsdatum statt build-zeitlichem new Date() —
+ * gleiche Begruendung wie ASSET_DATE_FALLBACK in claimondo-mdx.ts:
+ * ein wandernder pubDate ohne Content-Change verfaelscht den News-Feed.
+ */
+const ARTIKEL_DATE_FALLBACK = new Date('2024-01-01T00:00:00Z')
+
+export type WissenArtikel = {
+  id: string
+  slug: string
+  title: string
+  body: string
+  excerpt: string | null
+  key_facts: string[]
+  meta_description: string | null
+  primary_keyword: string | null
+  cluster: string | null
+  artikel_typ: string | null
+  last_modified: string | null // date column -> YYYY-MM-DD string
+  veroeffentlicht_am: string | null // timestamptz -> ISO string
+  author: string
+}
+
+const SELECT_COLUMNS =
+  'id,slug,title,body,excerpt,key_facts,meta_description,primary_keyword,cluster,artikel_typ,last_modified,veroeffentlicht_am,author'
+
+/**
+ * Einen veroeffentlichten Artikel per Slug laden (anon-Client, RLS-gated).
+ * Gibt null zurueck wenn kein Artikel mit status='veroeffentlicht' und dem Slug existiert.
+ */
+export async function getPublishedArtikelBySlug(slug: string): Promise<WissenArtikel | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('wissen_artikel')
+    .select(SELECT_COLUMNS)
+    .eq('slug', slug)
+    .eq('status', 'veroeffentlicht')
+    .maybeSingle()
+  if (error) {
+    console.error('[wissen] getPublishedArtikelBySlug error:', error.message)
+    return null
+  }
+  return data as WissenArtikel | null
+}
+
+/**
+ * Alle veroeffentlichten Artikel, neueste zuerst (nach last_modified desc, dann veroeffentlicht_am desc).
+ */
+export async function getPublishedArtikel(): Promise<WissenArtikel[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('wissen_artikel')
+    .select(SELECT_COLUMNS)
+    .eq('status', 'veroeffentlicht')
+    .order('last_modified', { ascending: false })
+    .order('veroeffentlicht_am', { ascending: false })
+  if (error) {
+    console.error('[wissen] getPublishedArtikel error:', error.message)
+    return []
+  }
+  return (data ?? []) as WissenArtikel[]
+}
+
+/**
+ * WissenArtikel -> FeedItem (pure, kein DB-Call, direkt testbar).
+ * pubDate-Hierarchie: last_modified > veroeffentlicht_am > ARTIKEL_DATE_FALLBACK.
+ * link = relativer Pfad /wissen/<slug> (kein SITE_URL-Prefix; Feed-Consumer addiert ggf. Domain).
+ */
+export function mapArtikelToFeedItem(a: WissenArtikel): FeedItem {
+  const link = `/wissen/${a.slug}`
+
+  let pubDate: Date = ARTIKEL_DATE_FALLBACK
+  if (a.last_modified) {
+    const d = new Date(a.last_modified)
+    if (!Number.isNaN(d.getTime())) pubDate = d
+  } else if (a.veroeffentlicht_am) {
+    const d = new Date(a.veroeffentlicht_am)
+    if (!Number.isNaN(d.getTime())) pubDate = d
+  }
+
+  const categories = [
+    a.cluster ?? '',
+    a.artikel_typ ?? 'Wissen',
+  ].filter(Boolean)
+
+  const sortKey = `6-wissen-${a.cluster ?? ''}-${a.title}`
+
+  return {
+    title: a.title,
+    link,
+    guid: link,
+    pubDate,
+    assetType: 'Spoke',
+    categories,
+    author: a.author && a.author in { 'aaron-sprafke': true } ? a.author : DEFAULT_AUTHOR,
+    excerpt: a.excerpt ?? '',
+    keyFacts: a.key_facts ?? [],
+    sortKey,
+  }
+}
