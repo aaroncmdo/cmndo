@@ -87,6 +87,7 @@ export function FinderWizard({
   werkstattName,
   werkstattGeo,
   promotionCodeId,
+  schaetzungSessionId,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -97,6 +98,8 @@ export function FinderWizard({
   werkstattGeo?: { lat: number; lng: number; adresse: string }
   /** Makler-Vermittlung: Promo-Code-ID des vermittelnden Maklers → reserviereEmbedTermin → lead.promotion_code_id. */
   promotionCodeId?: string | null
+  /** Anspruch-pruefen: Session-Token der Schaetzung → reserviereEmbedTermin → Lead-Verknuepfung. */
+  schaetzungSessionId?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -260,6 +263,7 @@ export function FinderWizard({
         wunschterminLokal: wunschterminLokal || null,
         werkstatt_id: werkstattId ?? null,
         promotion_code_id: promotionCodeId ?? null,
+        schaetzungSessionId: schaetzungSessionId ?? null,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
