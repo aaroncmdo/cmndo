@@ -44,8 +44,10 @@ export default function PasswortZuruecksetzenPage() {
     e.preventDefault()
     setError(null)
 
-    if (password.length < 8) {
-      setError('Passwort muss mindestens 8 Zeichen lang sein.')
+    // AAR-auth-haertung (Befund J): Client-UX-Hinweis; serverseitig ist
+    // pruefePasswortStaerke autoritativ (>=12 + HIBP-Breach-Check).
+    if (password.length < 12) {
+      setError('Passwort muss mindestens 12 Zeichen lang sein.')
       return
     }
     if (password !== confirm) {
@@ -148,7 +150,7 @@ export default function PasswortZuruecksetzenPage() {
                 </div>
                 <div>
                   <p className="text-claimondo-navy font-medium text-sm">Neues Passwort setzen</p>
-                  <p className="text-claimondo-ondo text-xs">Mindestens 8 Zeichen</p>
+                  <p className="text-claimondo-ondo text-xs">Mindestens 12 Zeichen</p>
                 </div>
               </div>
 
@@ -161,9 +163,9 @@ export default function PasswortZuruecksetzenPage() {
                     id="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Mindestens 8 Zeichen"
+                    placeholder="Mindestens 12 Zeichen"
                     required
-                    minLength={8}
+                    minLength={12}
                     autoComplete="new-password"
                     className="w-full px-4 py-3.5 rounded-ios-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-claimondo-ondo/60 text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
                   />
@@ -179,7 +181,7 @@ export default function PasswortZuruecksetzenPage() {
                     onChange={(e) => setConfirm(e.target.value)}
                     placeholder="Passwort wiederholen"
                     required
-                    minLength={8}
+                    minLength={12}
                     autoComplete="new-password"
                     className="w-full px-4 py-3.5 rounded-ios-md border-[1.5px] border-transparent bg-claimondo-navy/[0.06] text-claimondo-navy placeholder:text-claimondo-ondo/60 text-base tracking-[-.01em] transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)] hover:bg-claimondo-navy/[0.08] focus:outline-none focus:bg-white focus:border-claimondo-ondo focus:shadow-focus-ondo"
                   />
