@@ -2,9 +2,12 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 
 /**
- * ARCH-1 Phase 1 (2026-04-09): Self-Service-Onboarding entfaellt.
+ * Legacy-Redirect-Stub (ARCH-1 Phase 1, 2026-04-09).
  *
- * Diese Page ist nur noch eine Redirect-Logik:
+ * Diese Page enthaelt selbst KEIN Onboarding mehr — der aktive Flow liegt in
+ * /gutachter/willkommen (bezahlter Admin-Pfad UND der Basic-Self-Service, der
+ * spaeter zurueckkam). Diese Page ist nur noch eine Redirect-Logik fuer
+ * Bestands-Bookmarks/-Links auf /gutachter/onboarding:
  * - Kein SV-Eintrag → /login mit Fehler ("Aaron muss Account anlegen")
  * - vom_admin_angelegt + kein Vertrag → /gutachter/willkommen
  * - Vertrag unterzeichnet, noch nicht bezahlt → /gutachter/willkommen?step=stripe
