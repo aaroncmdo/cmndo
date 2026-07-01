@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
 
 // AAR-auth-haertung: Passwort-Wechsel als Server-Action.
 //
@@ -17,16 +18,15 @@ import { roleToPath } from '@/lib/auth/role-redirect'
 // deterministisch. Gleiches Muster wie confirmPasswordReset (reset-password.ts)
 // und die CMM-14-Loesung in login-after-flow.
 
-const MIN_PASSWORT_LAENGE = 8
-
 export async function setzeNeuesPasswort(
   neuesPasswort: string,
 ): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
-  if (!neuesPasswort || neuesPasswort.length < MIN_PASSWORT_LAENGE) {
-    return {
-      ok: false,
-      error: `Passwort muss mindestens ${MIN_PASSWORT_LAENGE} Zeichen lang sein.`,
-    }
+  // Staerke-Pruefung (>= 12 Zeichen + HIBP-Breach-Check) an die zentrale Policy
+  // delegiert — identisch zu confirmPasswordReset (reset-password.ts). Die
+  // Policy deckt leere/zu-kurze Eingaben selbst ab (guard vor dem HIBP-Fetch).
+  const policy = await pruefePasswortStaerke(neuesPasswort)
+  if (!policy.ok) {
+    return { ok: false, error: policy.error }
   }
 
   const supabase = await createClient()
