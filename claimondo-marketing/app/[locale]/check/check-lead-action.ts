@@ -5,6 +5,7 @@ import { headers } from 'next/headers'
 import { revalidatePath } from 'next/cache'
 import { createServiceClient } from '@/lib/supabase/server'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
+import { resolveMaklerByPromoCode } from '@/lib/makler/resolve-promo'
 
 // Lead-Server-Action für die interaktive Anspruchs-Prüfung (/check).
 // Spiegelt submitHomeLead (components/landing/home-lead-action.ts): anfragen-Zeile
@@ -123,6 +124,21 @@ export async function submitCheckLead(
       error:
         'Übermittlung erhalten — Verarbeitung läuft. Wir melden uns auch ohne Sofort-Bestätigung.',
       anfrageId: anfrage.id,
+    }
+  }
+
+  // Makler-Hub-Attribution (Leg 2): wenn der Hub-Link ?m=<Promo-Code> mitgab, den Lead
+  // dem Makler zuordnen. Post-convert UPDATE — anfragen + convert_anfrage_zu_lead tragen
+  // keine promotion_code_id (DB-verifiziert). Best-effort: ein Fail darf den Lead nicht brechen.
+  const maklerCode = String(formData.get('m') ?? '').trim()
+  if (maklerCode) {
+    try {
+      const target = await resolveMaklerByPromoCode(sb, maklerCode)
+      if (target) {
+        await sb.from('leads').update({ promotion_code_id: target.promotionCodeId }).eq('id', String(leadId))
+      }
+    } catch (err) {
+      console.error('[check] Makler-Attribution fehlgeschlagen (nicht kritisch):', (err as Error).message)
     }
   }
 
