@@ -7,13 +7,12 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
 const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
-  rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-warning-soft text-warning-strong border-warning/30' },
+  kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-success-soft text-success-strong border-success/30' },
   intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
 }
@@ -150,29 +149,30 @@ export default async function MitarbeiterTermine() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Meine Termine" description="Rückrufe und Kundentermine, die dir zugewiesen sind." size="lg" />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Termine</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Rückrufe und Kundentermine, die dir zugewiesen sind.</p>
+      </div>
 
       {groups.size === 0 && (
-        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
-          <p className="text-sm text-claimondo-ondo/70">Keine offenen Termine</p>
+        <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-16 text-center text-body-sm text-claimondo-ondo/70">
+          Keine offenen Termine
         </div>
       )}
 
       {Array.from(groups.entries()).map(([day, rows]) => {
         const isToday = day === nowIso.slice(0, 10)
         return (
-          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
-            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })}
-                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
+          <section key={day} className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
+            <div className="flex items-center justify-between border-b border-claimondo-border px-4 py-3">
+              <h2 className="flex items-center gap-2 text-heading-sm text-claimondo-navy">
+                <span className="capitalize">
+                  {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                </span>
+                {isToday && <span className="rounded-full bg-claimondo-navy px-2 py-0.5 text-caption text-white">Heute</span>}
               </h2>
-              <span className="text-xs text-claimondo-ondo">{rows?.length ?? 0}</span>
+              <span className="text-body-sm text-claimondo-ondo">{rows?.length ?? 0}</span>
             </div>
             <div className="divide-y divide-claimondo-border">
               {(rows ?? []).map((t) => {
@@ -194,24 +194,20 @@ export default async function MitarbeiterTermine() {
                     : '#'
                 const overdue = new Date(t.start_zeit) < new Date()
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${meta.cls}`}>
-                        <Icon className="w-3 h-3" />
-                        {meta.label}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy truncate">{subject}</p>
-                        <p className={`text-xs ${overdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
-                          {formatBerlin(t.start_zeit, { hour: '2-digit', minute: '2-digit' })}
-                          {t.notizen && ` · ${t.notizen}`}
-                          {overdue && ' (überfällig)'}
-                        </p>
-                      </div>
-                      {lead?.telefon && (
-                        <span className="text-xs text-claimondo-ondo/70 hidden sm:block">{lead.telefon}</span>
-                      )}
+                  <Link key={t.id} href={href} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
+                    <span className={`flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-caption font-medium ${meta.cls}`}>
+                      <Icon className="h-3 w-3" />
+                      {meta.label}
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-body-sm font-medium text-claimondo-navy">{subject}</p>
+                      <p className={`truncate text-body-xs ${overdue ? 'font-medium text-danger' : 'text-claimondo-ondo'}`}>
+                        {formatBerlin(t.start_zeit, { hour: '2-digit', minute: '2-digit' })}
+                        {t.notizen && ` · ${t.notizen}`}
+                        {overdue && ' (überfällig)'}
+                      </p>
                     </div>
+                    {lead?.telefon && <span className="hidden shrink-0 text-body-xs text-claimondo-ondo/70 sm:block">{lead.telefon}</span>}
                   </Link>
                 )
               })}

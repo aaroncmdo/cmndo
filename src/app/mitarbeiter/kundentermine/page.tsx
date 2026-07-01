@@ -9,7 +9,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { CalendarIcon, UsersIcon, MapPinIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -133,33 +132,30 @@ export default async function MitarbeiterKundentermine() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Kundentermine"
-        description="SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Terminänderungen erfolgen im Fall."
-        size="lg"
-      />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Kundentermine</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Änderungen erfolgen im Fall.</p>
+      </div>
 
       {groups.size === 0 && (
-        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
-          <p className="text-sm text-claimondo-ondo/70">Keine anstehenden Kundentermine</p>
+        <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-16 text-center text-body-sm text-claimondo-ondo/70">
+          Keine anstehenden Kundentermine
         </div>
       )}
 
       {Array.from(groups.entries()).map(([day, rows]) => {
         const isToday = day === nowIso.slice(0, 10)
         return (
-          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
-            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })}
-                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
+          <section key={day} className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
+            <div className="flex items-center justify-between border-b border-claimondo-border px-4 py-3">
+              <h2 className="flex items-center gap-2 text-heading-sm text-claimondo-navy">
+                <span className="capitalize">
+                  {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: '2-digit' })}
+                </span>
+                {isToday && <span className="rounded-full bg-claimondo-navy px-2 py-0.5 text-caption text-white">Heute</span>}
               </h2>
-              <span className="text-xs text-claimondo-ondo">{rows?.length ?? 0}</span>
+              <span className="text-body-sm text-claimondo-ondo">{rows?.length ?? 0}</span>
             </div>
             <div className="divide-y divide-claimondo-border">
               {(rows ?? []).map((t) => {
@@ -170,35 +166,30 @@ export default async function MitarbeiterKundentermine() {
                 const svName = svProfileId ? svNameMap[svProfileId] ?? 'SV' : 'SV'
                 const href = fall ? `/faelle/${fall.id}` : '#'
                 return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/20">
-                        <CalendarIcon className="w-3 h-3" />
-                        SV-Termin
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy truncate">
-                          {fallClaim?.claim_nummer ?? '—'} · {kundeName}
-                        </p>
-                        <p className="text-xs text-claimondo-ondo flex items-center gap-1 flex-wrap">
-                          <span>
-                            {new Date(t.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                          <UsersIcon className="w-3 h-3 text-claimondo-ondo/70" />
-                          <span>{svName}</span>
-                          {t.adresse && (
-                            <>
-                              <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
-                              <span className="truncate">{t.adresse}</span>
-                            </>
-                          )}
-                        </p>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70">{t.status}</span>
+                  <Link key={t.id} href={href} className="flex items-center gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
+                    <span className="flex shrink-0 items-center gap-1 rounded-full border border-claimondo-ondo/20 bg-claimondo-ondo/10 px-2 py-0.5 text-caption font-medium text-claimondo-ondo">
+                      <CalendarIcon className="h-3 w-3" />
+                      SV-Termin
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-body-sm font-medium text-claimondo-navy">
+                        {fallClaim?.claim_nummer ?? '—'} · {kundeName}
+                      </p>
+                      <p className="flex flex-wrap items-center gap-1 text-body-xs text-claimondo-ondo">
+                        <span className="tabular-nums">
+                          {new Date(t.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}
+                        </span>
+                        <UsersIcon className="h-3 w-3 text-claimondo-ondo/70" />
+                        <span>{svName}</span>
+                        {t.adresse && (
+                          <>
+                            <MapPinIcon className="h-3 w-3 text-claimondo-ondo/70" />
+                            <span className="truncate">{t.adresse}</span>
+                          </>
+                        )}
+                      </p>
                     </div>
+                    <span className="shrink-0 text-caption uppercase text-claimondo-ondo/70">{t.status}</span>
                   </Link>
                 )
               })}
