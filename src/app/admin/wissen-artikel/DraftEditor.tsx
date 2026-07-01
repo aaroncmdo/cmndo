@@ -140,6 +140,13 @@ export default function DraftEditor({ draft }: { draft: DraftRow }) {
           />
         </div>
 
+        {/* Pflicht-Hinweis vor Freigabe: Zitate pruefen (Smoke-Befund: KI kann BGH-Az raten) */}
+        <div className="rounded-ios-md bg-warning-soft px-3 py-2.5 text-[11px] leading-relaxed text-warning-strong">
+          <strong>Vor der Freigabe prüfen:</strong> Alle <strong>BGH-Aktenzeichen</strong> und Rechtsaussagen auf
+          Richtigkeit kontrollieren — die KI kann Aktenzeichen falsch angeben. §§ und Fakten stichprobenartig
+          verifizieren. Der Artikel erscheint öffentlich unter „Aaron Sprafke" — die Byline verpflichtet.
+        </div>
+
         {/* Aktions-Buttons */}
         <div className="flex items-center gap-3 pt-2 border-t border-claimondo-border">
           <Button
