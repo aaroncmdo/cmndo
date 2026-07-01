@@ -12,6 +12,7 @@ import { redirect } from 'next/navigation'
 import { ladeNoetigePhasen } from '@/lib/onboarding/load-needed-phases'
 import { WizardClient } from '@/components/onboarding/WizardClient'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,6 +52,16 @@ export default async function OnboardingDetailsPage({
         </div>
       </div>
     )
+  }
+
+  // Sicherheit (rls-safety-net): fallId kann aus dem user-kontrollierten URL-Query (?fall_id=)
+  // stammen. ladeNoetigePhasen liest via admin-client (RLS umgangen) Claim-/Lead-/Fahrzeug-PII —
+  // ohne dieses Ownership-Gate koennte ein eingeloggter Kunde via ?fall_id=<fremde-id> fremde
+  // Falldaten lesen (IDOR). assertKundeOwnsFall deckt geschaedigter_user_id ∪ claim_parties ∪ lead.email.
+  const { createAdminClient: createOwnershipAdmin } = await import('@/lib/supabase/admin')
+  const ownership = await assertKundeOwnsFall(createOwnershipAdmin(), user.id, user.email ?? null, fallId)
+  if (!ownership.ok) {
+    redirect('/kunde')
   }
 
   const wizardState = await ladeNoetigePhasen(fallId, 'kunde-onboarding')

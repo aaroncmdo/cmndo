@@ -18,6 +18,54 @@ import {
 
 type Result = { success: boolean; error?: string }
 
+// Sicherheit (rls-safety-net / App-Guard-Audit 2b-iii Write-Half): die feldmodus-Mutationen schreiben
+// gutachter_termine via admin-client (RLS umgangen) per terminId. Server-Actions sind von JEDEM
+// eingeloggten User aufrufbar — ohne diesen Guard koennte jeder fremde Termine als angekommen/
+// abgeschlossen markieren + falsche Kunde-„SV angekommen"-Notifications ausloesen (Write-IDOR).
+// Multi-SV-korrekt: ein User kann mehrere sachverstaendige-Rows haben (Buero + Sub-Standorte) ->
+// assignee_id muss in der Menge der eigenen sv-ids liegen.
+async function svIdsForUser(): Promise<string[] | null> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return null
+  const admin = createAdminClient()
+  const { data: svRows } = await admin.from('sachverstaendige').select('id').eq('profile_id', user.id)
+  return (svRows ?? []).map((r) => r.id as string)
+}
+
+async function assertSvOwnsTermin(terminId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const svIds = await svIdsForUser()
+  if (svIds === null) return { ok: false, error: 'Nicht angemeldet' }
+  if (svIds.length === 0) return { ok: false, error: 'Kein SV-Profil' }
+  const admin = createAdminClient()
+  const { data: termin } = await admin
+    .from('gutachter_termine')
+    .select('id')
+    .eq('id', terminId)
+    .eq('assignee_typ', 'sachverstaendiger')
+    .in('assignee_id', svIds)
+    .maybeSingle()
+  if (!termin) return { ok: false, error: 'Termin nicht zugeordnet' }
+  return { ok: true }
+}
+
+// pauseFokusmodus nimmt nur sessionId (kein terminId) -> eigener Session-Owner-Guard
+// (sv_tages_session.sv_id muss in den eigenen sv-ids liegen).
+async function assertSvOwnsSession(sessionId: string): Promise<{ ok: true } | { ok: false; error: string }> {
+  const svIds = await svIdsForUser()
+  if (svIds === null) return { ok: false, error: 'Nicht angemeldet' }
+  if (svIds.length === 0) return { ok: false, error: 'Kein SV-Profil' }
+  const admin = createAdminClient()
+  const { data: sess } = await admin
+    .from('sv_tages_session')
+    .select('id')
+    .eq('id', sessionId)
+    .in('sv_id', svIds)
+    .maybeSingle()
+  if (!sess) return { ok: false, error: 'Session nicht zugeordnet' }
+  return { ok: true }
+}
+
 /**
  * „Losfahren zum Stop" — setzt status='en_route', triggert WA an Kunden,
  * generiert Tracking-Token. Delegiert an triggerSvLosgefahren (KFZ-179).
@@ -26,6 +74,8 @@ export async function startStop(
   sessionId: string,
   terminId: string,
 ): Promise<Result & { token?: string; etaMinutes?: number }> {
+  const guard = await assertSvOwnsTermin(terminId)
+  if (!guard.ok) return { success: false, error: guard.error }
   const res = await triggerSvLosgefahren(terminId)
   if (!res.success) return { success: false, error: res.error ?? 'Losfahren fehlgeschlagen' }
 
@@ -49,6 +99,8 @@ export async function markSvVorOrt(
   lng: number,
   via: 'geofence' | 'manuell',
 ): Promise<Result> {
+  const guard = await assertSvOwnsTermin(terminId)
+  if (!guard.ok) return { success: false, error: guard.error }
   const mappedVia: 'gps' | 'manual_swipe' = via === 'geofence' ? 'gps' : 'manual_swipe'
   const res = await markArrival({ termin_id: terminId, lat, lng, via: mappedVia })
   if (!res.success) return { success: false, error: res.error ?? 'Ankunft fehlgeschlagen' }
@@ -87,6 +139,8 @@ export async function markBesichtigungGestartet(
   terminId: string,
   via: 'beide_angekommen' | 'termin_uhrzeit',
 ): Promise<Result> {
+  const guard = await assertSvOwnsTermin(terminId)
+  if (!guard.ok) return { success: false, error: guard.error }
   const admin = createAdminClient()
   const nowIso = new Date().toISOString()
 
@@ -151,6 +205,8 @@ export async function completeAndAdvance(
   sessionId: string,
   terminId: string,
 ): Promise<Result & { nextTerminId?: string | null }> {
+  const guard = await assertSvOwnsTermin(terminId)
+  if (!guard.ok) return { success: false, error: guard.error }
   const admin = createAdminClient()
   await admin
     .from('gutachter_termine')
@@ -173,6 +229,8 @@ export async function completeAndAdvance(
  * danach zurück nach /gutachter/heute, der Fortsetzen-Button greift dort.
  */
 export async function pauseFokusmodus(sessionId: string): Promise<Result> {
+  const guard = await assertSvOwnsSession(sessionId)
+  if (!guard.ok) return { success: false, error: guard.error }
   const res = await pauseTagesSession(sessionId)
   if (!res) return { success: false, error: 'Pausieren fehlgeschlagen' }
   revalidatePath('/gutachter/feldmodus')
@@ -193,9 +251,8 @@ export async function exitArrivedToRoute(
   sessionId: string,
   terminId: string,
 ): Promise<Result> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const guard = await assertSvOwnsTermin(terminId)
+  if (!guard.ok) return { success: false, error: guard.error }
   const admin = createAdminClient()
   const { error: sessErr } = await admin
     .from('sv_tages_session')
