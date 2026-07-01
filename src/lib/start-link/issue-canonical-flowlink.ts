@@ -31,6 +31,7 @@ import { sendPlainSms } from '@/lib/whatsapp/send-sms-plain'
 import { sendMiniWizardMagicLink } from '@/lib/email/google/flows'
 import { ensureCanonicalFlowLinkForLead } from './ensure-flowlink-for-lead'
 import { persistFlowLinkVersand } from './persist-flowlink-versand'
+import { getStorageUrl } from '@/lib/storage/url'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 
@@ -206,14 +207,20 @@ export async function issueCanonicalFlowLinkForAnfrage(
       if (sess) {
         const pfade = Array.isArray(sess.foto_pfade) ? (sess.foto_pfade as string[]) : []
         const vision = sess.vision_result as { beschreibung?: string } | null
-        await admin.from('leads').update({
-          schadensfoto_urls: pfade,
+        // Blocker 2a fix: resolve bare storage paths to full fall-dokumente public URLs.
+        // leads.schadensfoto_urls convention = FULL public URLs; consumers render <img src>.
+        const urls = (await Promise.all(pfade.map((p) => getStorageUrl(admin, 'fall-dokumente', p))))
+          .filter((u): u is string => Boolean(u))
+        const { error: leadErr } = await admin.from('leads').update({
+          schadensfoto_urls: urls,
           fahrzeug_fahrbereit: sess.fahrbereit,
           erstzulassung: sess.ez_jahr ? String(sess.ez_jahr) : null,
           fahrzeugschaden_beschreibung: vision?.beschreibung ?? null,
-          schaden_sichtbar: pfade.length > 0,
+          schaden_sichtbar: urls.length > 0,
         }).eq('id', leadId)
-        await admin.from('anspruch_schaetzungen').update({ lead_id: leadId }).eq('id', gfa.schaetzung_session_id)
+        if (leadErr) console.error('[anspruch] carry-over leads.update failed:', leadErr.message)
+        const { error: sessErr } = await admin.from('anspruch_schaetzungen').update({ lead_id: leadId }).eq('id', gfa.schaetzung_session_id)
+        if (sessErr) console.error('[anspruch] carry-over session.update failed:', sessErr.message)
       }
     } catch (err) {
       console.error('[anspruch] carry-over failed', err)
