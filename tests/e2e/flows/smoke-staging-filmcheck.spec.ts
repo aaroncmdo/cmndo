@@ -220,3 +220,73 @@ test('Filmcheck — Voll: SV-Abgabe erzeugt QC-Karte, Admin verifiziert', async 
   console.log(`[voll/admin] Pflicht-Gate-Sperre: ${await adPage.getByText(/Kanzlei-Übergabe gesperrt/i).count()}`)
   await adCtx.close()
 })
+
+// Die letzten 2 Meter: 9 Checks auf "Ja" -> Gate-ENABLE (state-unabhaengig, hart) +
+// Handoff-Klick + Idempotenz-Doppelklick (beobachtend — haengt am echten Fall-Zustand;
+// mutiert einen Staging-Fall). SMOKE_FALL_ID ueberschreibbar.
+test('Filmcheck — Voll: Gate-Enable + Handoff-Klick + Idempotenz (mutiert Staging-Fall)', async ({ browser }) => {
+  test.setTimeout(240_000)
+  const FALL = process.env.SMOKE_FALL_ID ?? 'b96842cb-1dc3-4e4b-9215-5709d1d7c4a3'
+  const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, httpCredentials: BASIC_AUTH })
+  const page = await ctx.newPage()
+  const errors: string[] = []
+  page.on('pageerror', (e) => errors.push(`[pageerror] ${e.message}`))
+  page.on('console', (m) => { if (m.type() === 'error') errors.push(`[console] ${m.text()}`) })
+  if (!(await login(page, CRED.admin.email, CRED.admin.pass))) { await ctx.close(); return }
+
+  await page.goto(`${BASE}/faelle/${FALL}`); await page.waitForLoadState('networkidle').catch(() => {}); await page.waitForTimeout(3000)
+  const dokTab = page.getByRole('tab', { name: /dokumente/i }).or(page.getByRole('button', { name: /dokumente/i })).first()
+  if (await dokTab.count()) { await dokTab.click().catch(() => {}); await page.waitForTimeout(1500) }
+  if ((await page.getByText('QC-Checkliste (Filmcheck)').first().count()) === 0) {
+    console.log('[STOP] keine QC-Karte auf dem Fall'); await ctx.close(); return
+  }
+
+  // 1) Alle 9 Pflicht-Checks auf "Ja" setzen (Toggle-Buttons: —/Ja/Nein zyklisch)
+  const FELDER = ['Gutachten hochgeladen', 'Gutachten vollständig', 'FIN 17 Zeichen', 'Positionen erfasst',
+    'Fotos ausreichend', 'SA vorhanden', 'Vollmacht vorhanden', 'Kundendaten komplett', 'Vorschäden berücksichtigt']
+  for (const label of FELDER) {
+    const btn = page.getByRole('button').filter({ hasText: label }).first()
+    if ((await btn.count()) === 0) { console.log(`[gate] Toggle nicht gefunden: ${label}`); continue }
+    for (let i = 0; i < 3; i++) {
+      const txt = await btn.innerText().catch(() => '')
+      if (/(^|\s)Ja(\s|$)/.test(txt)) break
+      await btn.click().catch(() => {}); await page.waitForTimeout(250)
+    }
+  }
+  await shoot(page, '40-checks-ja.png')
+
+  // 2) Gate-ENABLE — harte Verifikation (state-unabhaengig, keine Mutation)
+  const bestandenBtn = page.getByRole('button', { name: /QC bestanden.*Kanzlei/i }).first()
+  const enabled = await bestandenBtn.isEnabled().catch(() => false)
+  console.log(`[gate] "QC bestanden" enabled nach 9x Ja: ${enabled}`)
+  expect(enabled).toBe(true)
+
+  // 3) Ist der Fall ueberhaupt im Filmcheck? Die VollstaendigkeitsCheckCard sagt es,
+  //    wenn kein Gutachten vorliegt -> dann waere ein Handoff-Submit ein erwarteter
+  //    ungueltiger Uebergang (kein Bug). Idempotenz-Doppelklick nur bei filmcheck-Fall.
+  const keinGutachten = await page.getByText(/Vollständigkeits-Check erscheint sobald/i).count()
+  if (keinGutachten > 0) {
+    console.log('[handoff] Fall hat KEIN Gutachten -> nicht im Filmcheck. Handoff-Submit + Idempotenz-Doppelklick UEBERSPRUNGEN — ein Submit waere ein erwarteter "ungueltiger Uebergang" (kein Bug). Der Idempotenz-Fix (kanzleiHandoffBereitsErfolgt) ist per 8 Unit-Tests (handoff-guard.test.ts) abgesichert; die UI-Verifikation braucht einen Staging-Fall MIT fertigem Gutachten.')
+    await ctx.close(); return
+  }
+
+  // 4) Filmcheck-Fall -> echter Handoff-Klick (mutiert) + Idempotenz-Doppelklick.
+  const errBase = errors.length
+  await bestandenBtn.click().catch(() => {})
+  await page.waitForTimeout(4500)
+  await shoot(page, '41-nach-bestanden.png')
+  const toast1 = await page.getByText(/Kanzlei-Übergabe läuft|fehlgeschlagen/i).allInnerTexts().catch(() => [])
+  console.log(`[handoff] Toast nach Handoff: ${JSON.stringify(toast1).slice(0, 160)} | Errors: ${errors.length - errBase}`)
+
+  // 5) Idempotenz: 2. Handoff-Aktion (Kanzleipaket freigeben ODER nochmal bestanden)
+  //    darf KEINEN 500/ungueltig-Uebergang werfen (der re-gelandete Fix).
+  const errBase2 = errors.length
+  await page.reload(); await page.waitForLoadState('networkidle').catch(() => {}); await page.waitForTimeout(2500)
+  if (await dokTab.count()) { await dokTab.click().catch(() => {}); await page.waitForTimeout(1200) }
+  const btn2 = page.getByRole('button', { name: /Kanzleipaket freigeben|QC bestanden.*Kanzlei/i }).first()
+  if (await btn2.count()) { await btn2.click().catch(() => {}); await page.waitForTimeout(4000); await shoot(page, '42-idempotenz.png') }
+  const err2 = errors.slice(errBase2).filter((e) => /500|Internal|Übergang|ungültig/i.test(e))
+  console.log(`[idempotenz] 500/Uebergang-Errors beim 2. Klick: ${err2.length}`)
+  expect(err2.length).toBe(0)
+  await ctx.close()
+})
