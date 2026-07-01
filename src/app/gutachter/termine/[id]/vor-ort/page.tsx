@@ -52,18 +52,18 @@ export default async function VorOrtPage({ params }: { params: Promise<{ id: str
   // Dokumente die Kunde bereits hochgeladen hat
   const { data: kundeDokumente } = await db
     .from('fall_dokumente')
-    .select('id, dokument_typ, dateiname, erstellt_am, discrepancy_flag')
+    .select('id, dokument_typ, original_filename, hochgeladen_am, discrepancy_flag')
     .eq('fall_id', termin.fall_id)
     .eq('uploaded_by_kunde', true)
-    .order('erstellt_am', { ascending: false })
+    .order('hochgeladen_am', { ascending: false })
 
   // SV-Dokumente
   const { data: svDokumente } = await db
     .from('fall_dokumente')
-    .select('id, dokument_typ, dateiname, erstellt_am, discrepancy_flag')
+    .select('id, dokument_typ, original_filename, hochgeladen_am, discrepancy_flag')
     .eq('fall_id', termin.fall_id)
     .eq('uploaded_by_sv', true)
-    .order('erstellt_am', { ascending: false })
+    .order('hochgeladen_am', { ascending: false })
 
   const fahrzeug = [fall?.fahrzeug_hersteller, fall?.fahrzeug_modell].filter(Boolean).join(' ')
 
@@ -79,15 +79,15 @@ export default async function VorOrtPage({ params }: { params: Promise<{ id: str
       kundeDokumente={(kundeDokumente ?? []).map(d => ({
         id: String(d.id),
         dokument_typ: String(d.dokument_typ ?? ''),
-        dateiname: d.dateiname ? String(d.dateiname) : null,
-        erstellt_am: String(d.erstellt_am),
+        dateiname: d.original_filename ? String(d.original_filename) : null,
+        erstellt_am: String(d.hochgeladen_am),
         discrepancy_flag: Boolean(d.discrepancy_flag),
       }))}
       svDokumente={(svDokumente ?? []).map(d => ({
         id: String(d.id),
         dokument_typ: String(d.dokument_typ ?? ''),
-        dateiname: d.dateiname ? String(d.dateiname) : null,
-        erstellt_am: String(d.erstellt_am),
+        dateiname: d.original_filename ? String(d.original_filename) : null,
+        erstellt_am: String(d.hochgeladen_am),
         discrepancy_flag: Boolean(d.discrepancy_flag),
       }))}
       alreadyDone={!!termin.durchgefuehrt_am}
