@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
 import type { PlzGeoRow, RawTerminForKarte, TerminPin, UnlocalizedLead } from './types'
 import { resolveTerminGeo } from './resolve-termin-geo'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 // Schema-Hinweis: sachverstaendige hat KEIN vorname/nachname — wir joinen
 // über profile_id → profiles. Lead-Felder + besichtigungsort_lat/lng liegen
@@ -10,9 +11,12 @@ export async function getTermineToday(
   supabase: SupabaseClient<Database>,
   plzMap: Map<string, PlzGeoRow>,
 ): Promise<{ pins: TerminPin[]; unlocalized: UnlocalizedLead[] }> {
-  const now = new Date()
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString()
-  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).toISOString()
+  // Berlin-Tagesgrenze statt Server-lokal (= UTC auf Vercel -> "heute" war am
+  // Tagesrand 1-2h schief). Analog dispatch/dashboard (#3317, AAR-958):
+  // berlinWallClockToUtc ist das etablierte Helfer-Pattern.
+  const berlinDateStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
+  const startOfDay = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`)).toISOString()
+  const endOfDay = new Date(berlinWallClockToUtc(`${berlinDateStr}T23:59:59`)).toISOString()
 
   const { data, error } = await supabase
     .from('gutachter_termine')
