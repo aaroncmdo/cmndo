@@ -50,6 +50,9 @@ function parseVision(text: string): VisionResult | null {
     if (!(SEGMENTE as readonly string[]).includes(o.segment)) o.segment = 'mittelklasse'
     if (!['leicht', 'mittel', 'schwer'].includes(o.schweregrad)) o.schweregrad = 'mittel'
     if (typeof o.geschaetzte_kosten_min !== 'number' || typeof o.geschaetzte_kosten_max !== 'number') return null
+    if (!Array.isArray(o.beschaedigte_teile)) o.beschaedigte_teile = []
+    else o.beschaedigte_teile = o.beschaedigte_teile.filter((t: unknown) => typeof t === 'string')
+    if (typeof o.beschreibung !== 'string') o.beschreibung = ''
     return o as VisionResult
   } catch {
     return null
