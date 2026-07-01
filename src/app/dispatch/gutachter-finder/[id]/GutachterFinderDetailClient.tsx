@@ -44,7 +44,7 @@ type Anfrage = {
   sa_unterzeichnet_am: string | null
   status: string
   erstellt_am: string
-  fall_id: string | null
+  konvertiert_zu_lead_id: string | null
   sv_id: string | null
   sv_name: string | null
   sv_telefon: string | null
@@ -177,15 +177,15 @@ export default function GutachterFinderDetailClient({ anfrage }: { anfrage: Anfr
           )}
         </section>
 
-        {/* Fall-Link falls vorhanden */}
-        {anfrage.fall_id && (
+        {/* Lead-Link falls die Anfrage konvertiert wurde */}
+        {anfrage.konvertiert_zu_lead_id && (
           <section className="bg-claimondo-bg border border-claimondo-border rounded-ios-lg p-4">
-            <p className="text-xs text-claimondo-ondo font-semibold uppercase tracking-wider mb-1">Verknüpfte Fallakte</p>
+            <p className="text-xs text-claimondo-ondo font-semibold uppercase tracking-wider mb-1">Verknüpfter Lead</p>
             <a
-              href={`/dispatch/leads/${anfrage.fall_id}`}
+              href={`/dispatch/leads/${anfrage.konvertiert_zu_lead_id}`}
               className="text-sm font-semibold text-claimondo-navy hover:text-claimondo-ondo transition-colors"
             >
-              Fall #{anfrage.fall_id.slice(0, 8)} öffnen →
+              Lead #{anfrage.konvertiert_zu_lead_id.slice(0, 8)} öffnen →
             </a>
           </section>
         )}

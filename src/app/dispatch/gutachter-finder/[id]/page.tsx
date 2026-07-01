@@ -23,7 +23,7 @@ type RawAnfrage = {
   sa_unterzeichnet_am: string | null
   status: string
   erstellt_am: string
-  fall_id: string | null
+  konvertiert_zu_lead_id: string | null
   zugeordneter_sv: {
     id: string
     firmenname: string | null
@@ -45,7 +45,7 @@ export default async function GutachterFinderDetailPage({
     .select(`
       id, vorname, nachname, email, telefon, kennzeichen, fahrzeug_beschreibung,
       schadentyp, schadenort, schadenort_lat, schadenort_lng, wunschtermin, matching_typ,
-      sa_signatur_data_url, sa_unterzeichnet_am, status, erstellt_am, fall_id,
+      sa_signatur_data_url, sa_unterzeichnet_am, status, erstellt_am, konvertiert_zu_lead_id,
       zugeordneter_sv:sachverstaendige(
         id, firmenname,
         profiles!sachverstaendige_profile_id_fkey(anzeigename, telefon)
