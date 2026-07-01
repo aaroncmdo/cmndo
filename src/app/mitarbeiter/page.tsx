@@ -1,22 +1,54 @@
-﻿// AAR-61: Mitarbeiter-Portal Dashboard
+// AAR-61: Mitarbeiter-Portal Dashboard
+// KB-Redesign 07/2026 ("Der Tag auf einen Blick"): Greeting + Dringlichkeits-Zeile,
+// verbundene StatBar statt 6 gleicher Boxen, 2-Spalten (Arbeit links, "Anstehend"-
+// Glance rechts) das mobil nach oben kippt. Datenschicht 1:1 erhalten.
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
-import { StatCard } from '@/components/shared/StatCard'
+import { StatBar } from '@/components/shared/StatBar'
+import { Panel } from '@/components/shared/Panel'
 import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
+import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
+
+type NestedFall = { id: string; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null
+function normFall(raw: unknown): NestedFall {
+  const f = Array.isArray(raw) ? (raw[0] ?? null) : (raw as NestedFall)
+  return f
+}
+function fallNummer(f: NestedFall): string | null {
+  const c = Array.isArray(f?.claims) ? f?.claims[0] : f?.claims
+  return c?.claim_nummer ?? null
+}
+
+type SchedItem = {
+  id: string
+  timeIso: string
+  label: string
+  meta: string
+  href: string
+  overdue: boolean
+  kind: 'rueckruf' | 'termin' | 'beratung'
+}
+
+function fmtTime(iso: string) {
+  return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })
+}
+function fmtDay(iso: string) {
+  return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', timeZone: 'Europe/Berlin' })
+}
 
 export default async function MitarbeiterDashboard() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
+  const { data: profile } = await supabase.from('profiles').select('vorname').eq('id', user.id).maybeSingle()
+  const vorname = (profile?.vorname as string | null) ?? null
+
   // CMM-47 B-Rest: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id (für /faelle/[id]-Link), fall_created_at statt created_at.
-  // CMM-49 T1.2-d: Badge liest sub_phase (abgeleitete Phase, v_claim_phase) statt legacy fall_status.
   const { data: faelle, count: faelleCount } = await supabase
     .from('v_claim_full')
     .select('fall_id, claim_nummer, sub_phase, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
@@ -25,9 +57,7 @@ export default async function MitarbeiterDashboard() {
     .order('fall_created_at', { ascending: false })
     .limit(8)
 
-  // Offene Tasks — Dashboard-Audit (29.06.): vorher nur zugewiesen_an=user -> rollen-adressierte
-  // KB-Tasks (empfaenger_rolle='kundenbetreuer', zugewiesen_an=NULL = Team-Queue) waren unsichtbar.
-  // Jetzt: eigene ODER unassigned KB-Broadcast-Tasks.
+  // Offene Tasks — eigene ODER unassigned KB-Broadcast-Tasks (Dashboard-Audit 29.06.).
   const { data: tasks, count: tasksCount } = await supabase
     .from('tasks')
     .select('id, titel, fall_id, prioritaet, faellig_am, created_at', { count: 'exact' })
@@ -36,25 +66,21 @@ export default async function MitarbeiterDashboard() {
     .order('faellig_am', { ascending: true, nullsFirst: false })
     .limit(8)
 
-  // Unread Nachrichten count
   const { count: unreadCount } = await supabase
     .from('nachrichten')
     .select('id', { count: 'exact', head: true })
     .eq('gelesen', false)
     .neq('sender_id', user.id)
 
-  // Reklamationen (offen) — versuche Tabelle, wenn nicht vorhanden ueberspringen
   let reklamationenCount = 0
   try {
-    const { count } = await supabase
-      .from('reklamationen')
-      .select('id', { count: 'exact', head: true })
-      .eq('status', 'offen')
+    const { count } = await supabase.from('reklamationen').select('id', { count: 'exact', head: true }).eq('status', 'offen')
     reklamationenCount = count ?? 0
   } catch { /* Tabelle evtl. nicht vorhanden */ }
 
   // AAR-637 + AAR-640: Rückrufe, Admin-Termine UND KB-Beratungen
   const nowIso = new Date().toISOString()
+  const nowMs = Date.now()
   const [rueckrufR, termineR, kbR] = await Promise.all([
     supabase
       .from('admin_termine')
@@ -75,7 +101,6 @@ export default async function MitarbeiterDashboard() {
       .gte('start_zeit', nowIso)
       .order('start_zeit', { ascending: true })
       .limit(5),
-    // AAR-640: KB-Beratungen dieses Mitarbeiters
     supabase
       .from('gutachter_termine')
       .select('id, start_zeit, kanal, fall_id, fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer))')
@@ -91,154 +116,178 @@ export default async function MitarbeiterDashboard() {
   const meineAdminTermine = termineR.data ?? []
   const meineKbTermine = kbR.data ?? []
   const meineTermineAnzahl = meineAdminTermine.length + meineKbTermine.length
+  const overdueRueckrufe = meineRueckrufe.filter((r) => new Date(r.start_zeit as string).getTime() < nowMs).length
+
+  // "Anstehend" — Rückrufe + Termine + KB-Beratungen zu EINER zeit-sortierten Liste (überfällige zuerst).
+  const schedule: SchedItem[] = []
+  for (const r of meineRueckrufe) {
+    const leadRaw = r.lead as unknown
+    const lead = Array.isArray(leadRaw) ? (leadRaw[0] ?? null) : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
+    const fall = normFall(r.fall)
+    const name = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') : fallNummer(fall) ?? (r.titel as string)
+    schedule.push({
+      id: `r-${r.id}`,
+      timeIso: r.start_zeit as string,
+      label: name || 'Rückruf',
+      meta: lead?.telefon ?? 'Rückruf',
+      href: lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#',
+      overdue: new Date(r.start_zeit as string).getTime() < nowMs,
+      kind: 'rueckruf',
+    })
+  }
+  for (const t of meineAdminTermine) {
+    const fall = normFall(t.fall)
+    schedule.push({
+      id: `t-${t.id}`,
+      timeIso: t.start_zeit as string,
+      label: (t.titel as string) || 'Termin',
+      meta: [fallNummer(fall), t.typ].filter(Boolean).join(' · '),
+      href: fall ? `/faelle/${fall.id}` : '#',
+      overdue: false,
+      kind: 'termin',
+    })
+  }
+  for (const k of meineKbTermine) {
+    const fall = normFall(k.fall)
+    schedule.push({
+      id: `k-${k.id}`,
+      timeIso: k.start_zeit as string,
+      label: 'KB-Beratung',
+      meta: [fallNummer(fall), k.kanal].filter(Boolean).join(' · '),
+      href: fall ? `/faelle/${fall.id}` : '#',
+      overdue: false,
+      kind: 'beratung',
+    })
+  }
+  schedule.sort((a, b) => new Date(a.timeIso).getTime() - new Date(b.timeIso).getTime())
+  const scheduleTop = schedule.slice(0, 8)
+
+  const dateStr = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Berlin' })
+
+  // Dringlichkeits-Zeile
+  const seg: { t: string; danger?: boolean }[] = []
+  if (meineRueckrufe.length) seg.push({ t: `${meineRueckrufe.length} ${meineRueckrufe.length === 1 ? 'Rückruf' : 'Rückrufe'}` })
+  if (overdueRueckrufe) seg.push({ t: `${overdueRueckrufe} überfällig`, danger: true })
+  if (tasksCount) seg.push({ t: `${tasksCount} ${tasksCount === 1 ? 'Task' : 'Tasks'}` })
+  if (unreadCount) seg.push({ t: `${unreadCount} ungelesen` })
+
+  const dotFor = (kind: SchedItem['kind']) =>
+    kind === 'rueckruf' ? 'bg-warning' : kind === 'beratung' ? 'bg-success' : 'bg-claimondo-ondo'
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Mitarbeiter-Dashboard" description="Übersicht über Ihre Fälle, Tasks und Nachrichten." size="lg" />
-
-      {/* KPI-Boxen */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-        <StatCard size="sm" icon={FolderOpenIcon} label="Aktive Fälle" value={faelleCount ?? 0} href="/mitarbeiter/faelle" tone="ondo" />
-        <StatCard size="sm" icon={CheckSquareIcon} label="Offene Tasks" value={tasksCount ?? 0} href="/mitarbeiter/tasks" tone="ondo" />
-        <StatCard size="sm" icon={PhoneCallIcon} label="Rückrufe" value={meineRueckrufe.length} href="/mitarbeiter/termine" tone="warning" />
-        <StatCard size="sm" icon={CalendarIcon} label="Termine" value={meineTermineAnzahl} href="/mitarbeiter/termine" tone="ondo" />
-        <StatCard size="sm" icon={MessageCircleIcon} label="Ungelesen" value={unreadCount ?? 0} href="/mitarbeiter/nachrichten" tone="success" />
-        <StatCard size="sm" icon={AlertCircleIcon} label="Reklamationen" value={reklamationenCount} href="/mitarbeiter/reklamationen" tone="warning" />
+    <div className="space-y-5">
+      {/* Greeting + Dringlichkeits-Zeile */}
+      <div>
+        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">
+            Guten Tag{vorname ? `, ${vorname}` : ''}
+          </h1>
+          <p className="text-body-sm font-medium capitalize text-claimondo-ondo">{dateStr}</p>
+        </div>
+        <p className="mt-1 text-body-sm text-claimondo-ondo">
+          {seg.length ? (
+            seg.map((s, i) => (
+              <span key={i}>
+                {i > 0 ? <span className="text-claimondo-ondo/50"> · </span> : null}
+                <span className={s.danger ? 'font-semibold text-danger-strong' : undefined}>{s.t}</span>
+              </span>
+            ))
+          ) : (
+            'Alles im grünen Bereich — nichts Dringendes.'
+          )}
+        </p>
       </div>
 
-      {/* Rückrufe + kommende Termine */}
-      {(meineRueckrufe.length > 0 || meineAdminTermine.length > 0 || meineKbTermine.length > 0) && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <section className="bg-white rounded-ios-lg shadow-ios-md">
-            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-                <PhoneCallIcon className="w-4 h-4 text-warning" />
-                Offene Rückrufe
-              </h2>
-              <Link href="/mitarbeiter/termine" className="text-xs text-claimondo-ondo hover:underline">Alle</Link>
-            </div>
-            <div className="divide-y divide-claimondo-border">
-              {meineRueckrufe.map((r) => {
-                const leadRaw = r.lead as unknown
-                const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
-                const fallRaw = r.fall as unknown
-                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null)
-                const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-                const name = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') : fallClaim?.claim_nummer ?? r.titel
-                const href = lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#'
-                const overdue = new Date(r.start_zeit) < new Date()
-                return (
-                  <Link key={r.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
-                        <p className={`text-xs ${overdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
-                          {new Date(r.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                          {overdue && ' (überfällig)'}
-                        </p>
-                      </div>
-                      {lead?.telefon && (
-                        <span className="text-xs text-claimondo-ondo/70 ml-2">{lead.telefon}</span>
+      {/* Metrik-Leiste */}
+      <StatBar
+        items={[
+          { label: 'Aktive Fälle', value: faelleCount ?? 0, icon: FolderOpenIcon, href: '/mitarbeiter/faelle' },
+          { label: 'Offene Tasks', value: tasksCount ?? 0, icon: CheckSquareIcon, href: '/mitarbeiter/tasks' },
+          { label: 'Rückrufe', value: meineRueckrufe.length, icon: PhoneCallIcon, href: '/mitarbeiter/termine', tone: overdueRueckrufe ? 'warning' : 'default' },
+          { label: 'Termine', value: meineTermineAnzahl, icon: CalendarIcon, href: '/mitarbeiter/termine' },
+          { label: 'Ungelesen', value: unreadCount ?? 0, icon: MessageCircleIcon, href: '/mitarbeiter/nachrichten' },
+          { label: 'Reklamationen', value: reklamationenCount, icon: AlertCircleIcon, href: '/mitarbeiter/reklamationen', tone: reklamationenCount ? 'danger' : 'default' },
+        ]}
+      />
+
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-start">
+        {/* Anstehend — mobil zuerst (Zeitkritisches), auf lg die rechte Spalte */}
+        <div className="lg:order-2">
+          <Panel title="Anstehend" icon={<CalendarIcon className="h-4 w-4 text-claimondo-ondo" />} actionLabel="Kalender →" actionHref="/mitarbeiter/termine">
+            {scheduleTop.length === 0 ? (
+              <p className="px-4 py-8 text-center text-body-sm text-claimondo-ondo/70">Keine Rückrufe oder Termine</p>
+            ) : (
+              scheduleTop.map((s) => (
+                <Link key={s.id} href={s.href} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
+                  <div className="w-11 shrink-0 text-right">
+                    <div className={cn('text-body-sm font-semibold leading-tight tabular-nums', s.overdue ? 'text-danger-strong' : 'text-claimondo-navy')}>
+                      {fmtTime(s.timeIso)}
+                    </div>
+                    <div className="text-body-xs text-claimondo-ondo/70">{fmtDay(s.timeIso)}</div>
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-body-sm font-medium text-claimondo-navy">{s.label}</p>
+                    <p className={cn('truncate text-body-xs', s.overdue ? 'font-medium text-danger' : 'text-claimondo-ondo')}>
+                      {s.overdue ? 'überfällig · ' : ''}{s.meta}
+                    </p>
+                  </div>
+                  <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', dotFor(s.kind))} />
+                </Link>
+              ))
+            )}
+          </Panel>
+        </div>
+
+        {/* Arbeit — Fälle + Tasks */}
+        <div className="space-y-5 lg:order-1">
+          <Panel title="Meine Fälle" count={faelleCount ?? 0} actionLabel="Alle anzeigen →" actionHref="/mitarbeiter/faelle">
+            {(faelle ?? []).length === 0 ? (
+              <p className="px-4 py-8 text-center text-body-sm text-claimondo-ondo/70">Keine aktiven Fälle</p>
+            ) : (
+              (faelle ?? []).map((f) => (
+                <Link key={f.fall_id as string} href={`/faelle/${f.fall_id}`} className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
+                  <div className="min-w-0">
+                    <p className="truncate font-mono text-body-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
+                    <p className="truncate text-body-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
+                  </div>
+                  <span className="shrink-0 rounded-full bg-claimondo-bg px-2.5 py-0.5 text-body-xs font-medium text-claimondo-ondo">
+                    {SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}
+                  </span>
+                </Link>
+              ))
+            )}
+          </Panel>
+
+          <Panel title="Offene Tasks" count={tasksCount ?? 0} actionLabel="Alle anzeigen →" actionHref="/mitarbeiter/tasks">
+            {(tasks ?? []).length === 0 ? (
+              <p className="px-4 py-8 text-center text-body-sm text-claimondo-ondo/70">Keine offenen Tasks</p>
+            ) : (
+              (tasks ?? []).map((t) => (
+                <div key={t.id} className="flex items-center justify-between gap-3 px-4 py-3">
+                  <div className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className={cn(
+                        'shrink-0 rounded px-1.5 py-0.5 text-caption font-bold',
+                        t.prioritaet === 'kritisch'
+                          ? 'bg-danger-soft text-danger-strong'
+                          : t.prioritaet === 'dringend'
+                            ? 'bg-warning-soft text-warning-strong'
+                            : 'bg-claimondo-bg text-claimondo-ondo',
                       )}
-                    </div>
-                  </Link>
-                )
-              })}
-              {meineRueckrufe.length === 0 && (
-                <p className="px-4 py-8 text-sm text-claimondo-ondo/70 text-center">Keine offenen Rückrufe</p>
-              )}
-            </div>
-          </section>
-
-          <section className="bg-white rounded-ios-lg shadow-ios-md">
-            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-                <CalendarIcon className="w-4 h-4 text-claimondo-ondo" />
-                Kommende Termine
-              </h2>
-              <Link href="/mitarbeiter/termine" className="text-xs text-claimondo-ondo hover:underline">Alle</Link>
-            </div>
-            <div className="divide-y divide-claimondo-border">
-              {meineAdminTermine.map((t) => {
-                const fallRaw = t.fall as unknown
-                const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { id: string; claims: { claim_nummer: string | null } | { claim_nummer: string | null }[] | null } | null)
-                const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-                const href = fall ? `/faelle/${fall.id}` : '#'
-                return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy truncate">{t.titel}</p>
-                        <p className="text-xs text-claimondo-ondo">
-                          {new Date(t.start_zeit).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
-                          {fallClaim?.claim_nummer ? ` · ${fallClaim.claim_nummer}` : ''}
-                        </p>
-                      </div>
-                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{t.typ}</span>
-                    </div>
-                  </Link>
-                )
-              })}
-              {meineTermineAnzahl === 0 && (
-                <p className="px-4 py-8 text-sm text-claimondo-ondo/70 text-center">Keine kommenden Termine</p>
-              )}
-            </div>
-          </section>
-        </div>
-      )}
-
-      {/* Faelle-Liste */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md">
-        <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-claimondo-navy">Meine aktiven Fälle</h2>
-          <Link href="/mitarbeiter/faelle" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
-        </div>
-        <div className="divide-y divide-claimondo-border">
-          {(faelle ?? []).map(f => (
-            <Link key={f.fall_id as string} href={`/faelle/${f.fall_id}`} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
-                  <p className="text-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
+                    >
+                      {t.prioritaet}
+                    </span>
+                    <span className="truncate text-body-sm text-claimondo-navy">{t.titel}</span>
+                  </div>
+                  <span className="shrink-0 text-body-xs text-claimondo-ondo/70">
+                    {t.faellig_am ? new Date(t.faellig_am as string).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
+                  </span>
                 </div>
-                <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">{SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}</span>
-              </div>
-            </Link>
-          ))}
-          {(!faelle || faelle.length === 0) && (
-            <p className="px-4 py-8 text-sm text-claimondo-ondo/70 text-center">Keine aktiven Fälle</p>
-          )}
+              ))
+            )}
+          </Panel>
         </div>
-      </section>
-
-      {/* Tasks-Liste */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md">
-        <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-claimondo-navy">Meine offenen Tasks</h2>
-          <Link href="/mitarbeiter/tasks" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
-        </div>
-        <div className="divide-y divide-claimondo-border">
-          {(tasks ?? []).map(t => (
-            <div key={t.id} className="px-4 py-3 flex items-center justify-between text-sm">
-              <div className="flex items-center gap-2 min-w-0">
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${
-                  t.prioritaet === 'kritisch' ? 'bg-danger-soft text-danger-strong' :
-                  t.prioritaet === 'dringend' ? 'bg-warning-soft text-warning-strong' :
-                  'bg-claimondo-bg text-claimondo-ondo'
-                }`}>{t.prioritaet}</span>
-                <span className="truncate text-claimondo-navy">{t.titel}</span>
-              </div>
-              <span className="text-xs text-claimondo-ondo/70 flex-shrink-0 ml-2">
-                {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
-              </span>
-            </div>
-          ))}
-          {(!tasks || tasks.length === 0) && (
-            <p className="px-4 py-8 text-sm text-claimondo-ondo/70 text-center">Keine offenen Tasks</p>
-          )}
-        </div>
-      </section>
+      </div>
     </div>
   )
 }
-
