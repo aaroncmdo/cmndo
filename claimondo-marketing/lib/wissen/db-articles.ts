@@ -3,6 +3,23 @@ import { DEFAULT_AUTHOR } from '@/lib/feed/authors'
 import type { FeedItem } from '@/lib/feed/types'
 
 /**
+ * Merged mdxItems + dbItems, sortiert nach pubDate desc, dedupiert nach guid.
+ * Pure Hilfsfunktion (kein DB-Call) — direkt testbar.
+ * Dedupe-Strategie: erster Treffer gewinnt (mdxItems haben Vorrang bei Kollision).
+ */
+export function mergeAndSortItems(mdxItems: FeedItem[], dbItems: FeedItem[]): FeedItem[] {
+  const seen = new Set<string>()
+  const result: FeedItem[] = []
+  for (const item of [...mdxItems, ...dbItems]) {
+    if (!seen.has(item.guid)) {
+      seen.add(item.guid)
+      result.push(item)
+    }
+  }
+  return result.sort((a, b) => b.pubDate.getTime() - a.pubDate.getTime())
+}
+
+/**
  * Stabiler Fallback-Stand fuer DB-Artikel ohne last_modified oder veroeffentlicht_am.
  * Bewusst ein fixes Vergangenheitsdatum statt build-zeitlichem new Date() —
  * gleiche Begruendung wie ASSET_DATE_FALLBACK in claimondo-mdx.ts:

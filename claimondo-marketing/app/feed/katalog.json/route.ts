@@ -6,7 +6,7 @@ import { assertFeedFrontmatterValid } from '@/lib/feed/validate'
 export const dynamic = 'force-static'
 export const revalidate = 86400 // 24 h
 
-export function GET() {
+export async function GET() {
   assertFeedFrontmatterValid()
   const feed = renderJsonFeed(
     {
@@ -15,7 +15,7 @@ export function GET() {
         'Vollständiges Wissens-Inventar von Claimondo: alle Cornerstones, Glossar-Spokes, Versicherer-Brief-Decoder, Sachverständigen-Verbände, Versicherer-Profile und Stadt-Seiten zur Kfz-Haftpflicht-Schadensregulierung.',
       feedPath: '/feed/katalog.json',
     },
-    getKatalogFeedItems(),
+    await getKatalogFeedItems(),
   )
   return new Response(JSON.stringify(feed), {
     status: 200,

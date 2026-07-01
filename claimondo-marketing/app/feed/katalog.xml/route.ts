@@ -7,7 +7,7 @@ import { assertFeedFrontmatterValid } from '@/lib/feed/validate'
 export const dynamic = 'force-static'
 export const revalidate = 86400 // 24 h
 
-export function GET() {
+export async function GET() {
   assertFeedFrontmatterValid()
   const rss = renderRssFeed(
     {
@@ -17,7 +17,7 @@ export function GET() {
       selfPath: '/feed/katalog.xml',
       ttlMinutes: 1440, // 24 h — passend zu revalidate (News nutzt Default 360)
     },
-    getKatalogFeedItems(),
+    await getKatalogFeedItems(),
   )
   return new Response(rss, {
     status: 200,
