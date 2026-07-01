@@ -20,6 +20,7 @@ import {
 import { getPublishedArtikelBySlug } from '@/lib/wissen/db-articles'
 import { SITE_URL, WHATSAPP_HREF, articleSchema } from '@/lib/seo/jsonld'
 import { FOUNDER_AARON_NAME } from '@/lib/seo/brand-constants'
+import { ArticleComments } from '@/components/community/ArticleComments'
 
 const WA = WHATSAPP_HREF
 
@@ -130,11 +131,11 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <TableOfContents headings={headings} />
           <article>
             <MarkdownRenderer body={cleaned} />
+            <ArticleComments articleSlug={`wissen/${slug}`} />
           </article>
         </div>
         <SpokeCtaBand />
       </main>
-      {/* TODO nach artikel-kommentare-Merge: <ArticleComments articleSlug={`wissen/${slug}`} /> */}
       <LandingFooter />
       <StickyCallBar quelle={`Wissen: ${slug}`} whatsappHref={WA} />
     </div>
