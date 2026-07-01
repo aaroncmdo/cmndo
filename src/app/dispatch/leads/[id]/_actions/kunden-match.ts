@@ -6,8 +6,8 @@
 // damit beim Convert faelle.kunde_id korrekt gesetzt wird (statt einem
 // neuen Onboarding-Account).
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireRole } from '@/lib/auth/guards'
 import { revalidatePath } from 'next/cache'
 
 export type KundenMatch = {
@@ -38,9 +38,13 @@ function normalizeTel(tel: string | null | undefined): string | null {
 export async function findKundenMatches(
   leadId: string,
 ): Promise<{ ok: true; matches: KundenMatch[] } | { ok: false; error: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  // AAR-auth-haertung (Write-Path-IDOR): admin-client umgeht RLS — vorher nur
+  // `if (!user)`, jeder eingeloggte User konnte ueber eine beliebige leadId
+  // fremde Kunden-PII lesen bzw. Claim-Ownership kapern (leads.kunde_id ->
+  // claims.geschaedigter_user_id beim Convert). Dispatch/KB/Admin sind see-all
+  // -> das Rollen-Gate ist der korrekte Schutz.
+  const guard = await requireRole(['admin', 'dispatch', 'kundenbetreuer'])
+  if (!guard.success) return { ok: false, error: guard.error }
 
   const admin = createAdminClient()
 
@@ -184,9 +188,13 @@ export async function linkLeadToExistingKunde(
   leadId: string,
   kundeUserId: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  // AAR-auth-haertung (Write-Path-IDOR): admin-client umgeht RLS — vorher nur
+  // `if (!user)`, jeder eingeloggte User konnte ueber eine beliebige leadId
+  // fremde Kunden-PII lesen bzw. Claim-Ownership kapern (leads.kunde_id ->
+  // claims.geschaedigter_user_id beim Convert). Dispatch/KB/Admin sind see-all
+  // -> das Rollen-Gate ist der korrekte Schutz.
+  const guard = await requireRole(['admin', 'dispatch', 'kundenbetreuer'])
+  if (!guard.success) return { ok: false, error: guard.error }
 
   const admin = createAdminClient()
   const { error } = await admin
@@ -202,9 +210,13 @@ export async function linkLeadToExistingKunde(
 export async function unlinkLeadKunde(
   leadId: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+  // AAR-auth-haertung (Write-Path-IDOR): admin-client umgeht RLS — vorher nur
+  // `if (!user)`, jeder eingeloggte User konnte ueber eine beliebige leadId
+  // fremde Kunden-PII lesen bzw. Claim-Ownership kapern (leads.kunde_id ->
+  // claims.geschaedigter_user_id beim Convert). Dispatch/KB/Admin sind see-all
+  // -> das Rollen-Gate ist der korrekte Schutz.
+  const guard = await requireRole(['admin', 'dispatch', 'kundenbetreuer'])
+  if (!guard.success) return { ok: false, error: guard.error }
 
   const admin = createAdminClient()
   const { error } = await admin
