@@ -1,6 +1,26 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient as createAnonClient } from '@supabase/supabase-js'
 import { DEFAULT_AUTHOR } from '@/lib/feed/authors'
 import type { FeedItem } from '@/lib/feed/types'
+
+// Cookie-loser Anon-Client fuer OEFFENTLICHE Wissen-Artikel. Feed/Hub lesen nur
+// veroeffentlichte Artikel (RLS-gated via Anon-Key) und brauchen keinen User-Context.
+// Bewusst NICHT der cookie-basierte @/lib/supabase/server-Client: der wuerde in den
+// force-static Feed-Routen cookies() lesen. Cookie-los = build-zeit-sicher fuer
+// statische Generierung; RLS erzwingt weiterhin status='veroeffentlicht'.
+// Lazy: erst beim ersten Query instanziieren (nicht beim Import) — sonst wirft
+// createAnonClient in Test-/Build-Kontexten ohne gesetzte Env-Vars schon beim
+// Modul-Load, und die pure-Funktionen (mapArtikelToFeedItem) waeren nicht mehr importierbar.
+let _anon: ReturnType<typeof createAnonClient> | null = null
+function anonClient() {
+  if (!_anon) {
+    _anon = createAnonClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false, autoRefreshToken: false } },
+    )
+  }
+  return _anon
+}
 
 /**
  * Merged mdxItems + dbItems, sortiert nach pubDate desc, dedupiert nach guid.
@@ -51,8 +71,7 @@ const SELECT_COLUMNS =
  * Gibt null zurueck wenn kein Artikel mit status='veroeffentlicht' und dem Slug existiert.
  */
 export async function getPublishedArtikelBySlug(slug: string): Promise<WissenArtikel | null> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data, error } = await anonClient()
     .from('wissen_artikel')
     .select(SELECT_COLUMNS)
     .eq('slug', slug)
@@ -69,8 +88,7 @@ export async function getPublishedArtikelBySlug(slug: string): Promise<WissenArt
  * Alle veroeffentlichten Artikel, neueste zuerst (nach last_modified desc, dann veroeffentlicht_am desc).
  */
 export async function getPublishedArtikel(): Promise<WissenArtikel[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
+  const { data, error } = await anonClient()
     .from('wissen_artikel')
     .select(SELECT_COLUMNS)
     .eq('status', 'veroeffentlicht')
@@ -114,7 +132,7 @@ export function mapArtikelToFeedItem(a: WissenArtikel): FeedItem {
     pubDate,
     assetType: 'Spoke',
     categories,
-    author: a.author && a.author in { 'aaron-sprafke': true } ? a.author : DEFAULT_AUTHOR,
+    author: a.author || DEFAULT_AUTHOR,
     excerpt: a.excerpt ?? '',
     keyFacts: a.key_facts ?? [],
     sortKey,
