@@ -82,19 +82,26 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
 }> {
   const db = getDb()
 
-  // SV-Kosten aus gutachter_abrechnungen
-  let svQuery = db.from('gutachter_abrechnungen').select('id, fall_id, sv_id, leadpreis, monat')
-  if (filter.startDate) svQuery = svQuery.gte('created_at', filter.startDate)
-  if (filter.endDate) svQuery = svQuery.lte('created_at', filter.endDate)
+  // SV-Kosten aus claims.lead_preis_netto (Billing-Konsolidierung 2026-07-01, SSoT —
+  // processCaseBilling; loest die retirete gutachter_abrechnungen-Tabelle ab). Service-Client
+  // (getDb) -> claims-Tabelle direkt (RLS-Bypass; die Definer-View liefert unter service_role 0).
+  // fall_id fuer den Drilldown-Link via faelle_claim_bridge (claims.id != fall_id post-CMM-49).
+  let svQuery = db.from('claims').select('id, sv_id, lead_preis_netto, lead_preis_berechnet_am, faelle_claim_bridge(fall_id)').not('lead_preis_netto', 'is', null)
+  if (filter.startDate) svQuery = svQuery.gte('lead_preis_berechnet_am', filter.startDate)
+  if (filter.endDate) svQuery = svQuery.lte('lead_preis_berechnet_am', filter.endDate)
   const { data: svAbr } = await svQuery
 
-  const svKosten = svAbr?.reduce((sum, a) => sum + (Number(a.leadpreis) || 0), 0) ?? 0
-  const svDrillDown = (svAbr ?? []).map(a => ({
-    id: a.fall_id ?? a.id,
-    label: `SV-Abr. ${a.monat ?? ''}`,
-    betrag: Number(a.leadpreis) || 0,
-    link: a.fall_id ? `/faelle/${a.fall_id}` : undefined,
-  }))
+  const svKosten = svAbr?.reduce((sum, a) => sum + (Number(a.lead_preis_netto) || 0), 0) ?? 0
+  const svDrillDown = (svAbr ?? []).map(a => {
+    const bridge = Array.isArray(a.faelle_claim_bridge) ? a.faelle_claim_bridge[0] : a.faelle_claim_bridge
+    const fallId = (bridge as { fall_id?: string | null } | null)?.fall_id ?? a.id
+    return {
+      id: fallId,
+      label: `SV-Abr. ${a.lead_preis_berechnet_am ? new Date(a.lead_preis_berechnet_am).toISOString().slice(0, 7) : ''}`,
+      betrag: Number(a.lead_preis_netto) || 0,
+      link: `/faelle/${fallId}`,
+    }
+  })
 
   // Kanzlei-Kosten aus claims.kanzlei_honorar (CMM-61: kanzlei_honorar lebt jetzt
   // claims-nativ; claim-globaler Finanz-Aggregat -> from('claims'), created_at-Filter direkt).
@@ -116,7 +123,7 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
     svKosten, kanzleiKosten, marketingKosten,
     gesamt: svKosten + kanzleiKosten + marketingKosten,
     svDrillDown,
-    berechnetAus: 'SV: gutachter_abrechnungen.leadpreis | Kanzlei: claims.kanzlei_honorar | Marketing: claims.marketing_provision',
+    berechnetAus: 'SV: claims.lead_preis_netto | Kanzlei: claims.kanzlei_honorar | Marketing: claims.marketing_provision',
   }
 }
 
