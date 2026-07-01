@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { requireRole } from '@/lib/auth/guards'
 
 export type EmailSvCheckResult =
   | { isSv: false }
@@ -15,6 +16,12 @@ export type EmailSvCheckResult =
  * mitgelöscht hatte (war an die _phases gekoppelt).
  */
 export async function checkEmailIsSv(email: string): Promise<EmailSvCheckResult> {
+  // AAR-auth-haertung (Write-Path-IDOR): vorher KEIN Auth-Guard -> unauth
+  // Email-Enumeration-Oracle (ist <email> ein SV?). Jetzt Dispatch/KB/Admin only,
+  // fail-closed auf {isSv:false}.
+  const guard = await requireRole(['admin', 'dispatch', 'kundenbetreuer'])
+  if (!guard.success) return { isSv: false }
+
   const normalized = email.trim().toLowerCase()
   if (!normalized || !normalized.includes('@')) return { isSv: false }
 
