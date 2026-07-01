@@ -1,9 +1,9 @@
-﻿// AAR-68: Mitarbeiter Reklamationen — gefiltert auf KB-Faelle
+// AAR-68: Mitarbeiter Reklamationen — KB-Redesign 07/2026 (mobile-first Row-Liste;
+// Datenschicht 1:1: KB-Faelle -> reklamationen).
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import PageHeader from '@/components/shared/PageHeader'
-import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,70 +12,69 @@ export default async function MitarbeiterReklamationen() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // CMM-47 B-Rest: faelle → v_claim_full (fall_id statt id; reklamationen.fall_id-FK braucht faelle.id).
-  const { data: faelle } = await supabase
-    .from('v_claim_full')
-    .select('fall_id, claim_nummer, kennzeichen')
-    .eq('kundenbetreuer_id', user.id)
+  const { data: faelle } = await supabase.from('v_claim_full').select('fall_id, claim_nummer, kennzeichen').eq('kundenbetreuer_id', user.id)
+  const fallIds = (faelle ?? []).map((f) => f.fall_id as string)
+  const fallMap = new Map((faelle ?? []).map((f) => [f.fall_id as string, f]))
 
-  const fallIds = (faelle ?? []).map(f => f.fall_id as string)
-  const fallMap = new Map((faelle ?? []).map(f => [f.fall_id as string, f]))
-
-  const { data: reklamationen } = fallIds.length > 0 ? await supabase
-    .from('reklamationen')
-    .select('id, fall_id, grund, begruendung, status, eingereicht_am, frist_bis, bearbeitet_am')
-    .in('fall_id', fallIds)
-    .order('eingereicht_am', { ascending: false })
-  : { data: [] }
+  const { data: reklamationen } = fallIds.length > 0
+    ? await supabase
+        .from('reklamationen')
+        .select('id, fall_id, grund, begruendung, status, eingereicht_am, frist_bis, bearbeitet_am')
+        .in('fall_id', fallIds)
+        .order('eingereicht_am', { ascending: false })
+    : { data: [] }
+  const list = reklamationen ?? []
 
   return (
-    <div className="space-y-4">
-      <PageHeader title="Reklamationen" description="Reklamationen zu Ihren Fällen." size="lg" />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Reklamationen</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Reklamationen zu Ihren Fällen, neueste zuerst.</p>
+      </div>
 
-      <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
-        <Table>
-          <Thead className="!tracking-normal">
-            <Tr>
-              <Th className="!py-2">Fall</Th>
-              <Th className="!py-2">Grund</Th>
-              <Th className="!py-2">Status</Th>
-              <Th className="!py-2">Eingereicht</Th>
-              <Th className="!py-2">Frist</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {(reklamationen ?? []).map(r => {
+      <div className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
+        {list.length === 0 ? (
+          <p className="px-4 py-16 text-center text-body-sm text-claimondo-ondo/70">Keine Reklamationen</p>
+        ) : (
+          <div className="divide-y divide-claimondo-border">
+            {list.map((r) => {
               const fall = fallMap.get(r.fall_id as string)
               return (
-                <Tr key={r.id} className="hover:bg-claimondo-bg">
-                  <Td>
-                    <Link href={`/faelle/${r.fall_id}`} className="text-claimondo-ondo hover:underline font-medium">
+                <Link
+                  key={r.id}
+                  href={`/faelle/${r.fall_id}`}
+                  className="flex flex-col gap-2 px-4 py-3.5 transition-colors hover:bg-claimondo-bg sm:flex-row sm:items-center sm:gap-4"
+                >
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-mono text-body-sm font-medium text-claimondo-navy">
                       {fall?.claim_nummer ?? (r.fall_id as string).slice(0, 8)}
-                    </Link>
-                  </Td>
-                  <Td>{r.grund ?? '—'}</Td>
-                  <Td>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                      r.status === 'offen' ? 'bg-warning-soft text-warning-strong' :
-                      r.status === 'erledigt' ? 'bg-success-soft text-success-strong' :
-                      'bg-claimondo-bg text-claimondo-ondo'
-                    }`}>{r.status ?? '—'}</span>
-                  </Td>
-                  <Td className="!text-claimondo-ondo text-xs">
-                    {r.eingereicht_am ? new Date(r.eingereicht_am).toLocaleDateString('de-DE') : '—'}
-                  </Td>
-                  <Td className="!text-claimondo-ondo text-xs">
-                    {r.frist_bis ? new Date(r.frist_bis).toLocaleDateString('de-DE') : '—'}
-                  </Td>
-                </Tr>
+                    </p>
+                    <p className="truncate text-body-xs text-claimondo-ondo">{r.grund ?? '—'}</p>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-4">
+                    <span
+                      className={cn(
+                        'shrink-0 rounded-full px-2.5 py-0.5 text-body-xs font-medium',
+                        r.status === 'offen'
+                          ? 'bg-warning-soft text-warning-strong'
+                          : r.status === 'erledigt'
+                            ? 'bg-success-soft text-success-strong'
+                            : 'bg-claimondo-bg text-claimondo-ondo',
+                      )}
+                    >
+                      {r.status ?? '—'}
+                    </span>
+                    <span className="shrink-0 whitespace-nowrap text-body-xs tabular-nums text-claimondo-ondo/70">
+                      {r.eingereicht_am ? new Date(r.eingereicht_am as string).toLocaleDateString('de-DE') : '—'}
+                      {r.frist_bis ? ` · Frist ${new Date(r.frist_bis as string).toLocaleDateString('de-DE')}` : ''}
+                    </span>
+                  </div>
+                </Link>
               )
             })}
-            {(!reklamationen || reklamationen.length === 0) && (
-              <Tr><Td colSpan={5} className="!py-12 text-center !text-claimondo-ondo/70 text-sm">Keine Reklamationen</Td></Tr>
-            )}
-          </Tbody>
-        </Table>
-      </DataTableContainer>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
