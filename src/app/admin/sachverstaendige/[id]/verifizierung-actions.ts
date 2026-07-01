@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
@@ -404,7 +405,49 @@ export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; 
 
   const db = createAdminClient()
 
-  // Schritt 1: alle 5 Freigabe-Flags atomar setzen.
+  // Gutachter-Onboarding-Audit #3: Go-Live-Geo-Guard. Die Freigabe macht den SV
+  // map-sichtbar (Karten-RLS: isochrone_polygon + lat/lng NOT NULL) UND dispatchbar
+  // (Matching: Isochrone deckt Schadenort). Fehlt Geo, waere der SV zwar "frei",
+  // wuerde aber 0 Leads treffen (self-reg geocodet lat/lng nur best-effort und
+  // berechnet NIE eine Isochrone). Darum: ohne Koordinaten blocken, fehlende
+  // Isochrone aus den Koordinaten nachberechnen.
+  const { data: sv, error: readErr } = await db
+    .from('sachverstaendige')
+    .select('standort_lat, standort_lng, paket_umkreis_km, isochrone_polygon')
+    .eq('id', svId)
+    .maybeSingle()
+  if (readErr) return { success: false, error: `SV konnte nicht geladen werden: ${readErr.message}` }
+  if (!sv) return { success: false, error: 'Sachverständiger nicht gefunden.' }
+
+  if (sv.standort_lat == null || sv.standort_lng == null) {
+    return {
+      success: false,
+      error:
+        'Freigabe nicht möglich: Dem Gutachter fehlen Standort-Koordinaten. Bitte zuerst die Adresse (via Google Places) nachtragen — sonst ist er auf der Karte unsichtbar und nicht buchbar.',
+    }
+  }
+
+  // Fehlende Isochrone nachberechnen, damit der SV nach der Freigabe wirklich
+  // sichtbar + dispatchbar ist. Schlägt die Berechnung fehl -> blocken (nicht
+  // stillschweigend "frei ohne Einsatzgebiet"), Admin kann später erneut freigeben.
+  const geoPatch: Record<string, unknown> = {}
+  if (sv.isochrone_polygon == null) {
+    const radiusKm = sv.paket_umkreis_km ?? 25
+    try {
+      const polygon = await calculateIsochrone(Number(sv.standort_lat), Number(sv.standort_lng), radiusKm)
+      if (!polygon.length) throw new Error('leeres Polygon')
+      geoPatch.isochrone_polygon = polygon
+    } catch (err) {
+      console.error('[gibBasicSvFrei] Isochrone-Nachberechnung fehlgeschlagen:', err)
+      return {
+        success: false,
+        error:
+          'Freigabe nicht möglich: Das Einsatzgebiet (Isochrone) konnte nicht berechnet werden. Bitte später erneut versuchen.',
+      }
+    }
+  }
+
+  // Schritt 1: alle 5 Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
   const { error: svErr } = await db
     .from('sachverstaendige')
     .update({
@@ -413,6 +456,7 @@ export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; 
       verifiziert_am: new Date().toISOString(),
       ist_aktiv: true,
       portal_zugang_freigeschaltet: true,
+      ...geoPatch,
     })
     .eq('id', svId)
   if (svErr) return { success: false, error: `Freigabe fehlgeschlagen: ${svErr.message}` }
