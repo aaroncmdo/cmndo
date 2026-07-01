@@ -97,6 +97,9 @@ export default async function GutachterFallPage({
   const hatNeueKundeVerlegung = zuletztGesehenIds.length > 0
 
   // Fetch all related data in parallel
+  // Leadpreis-Claim aufloesen: Route-Param id ist die fall_id (Bridge) != claims.id.
+  const lpClaimId = await resolveClaimId(admin, id)
+
   const [
     { data: lead },
     { data: dokumente },
@@ -147,13 +150,17 @@ export default async function GutachterFallPage({
       .eq('fall_id', id)
       .order('created_at', { ascending: false }),
     // Billing-Konsolidierung 2026-07-01: Leadpreis aus claims-SSoT (lead_preis_netto/-typ,
-      // processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
-      supabase
-      .from('claims')
-      .select('lead_preis_netto, lead_preis_typ')
-      .eq('id', id)
-      .eq('sv_id', sv.id)
-      .maybeSingle(),
+      // processCaseBilling) via Admin-Client — der SV hat keine RLS auf die claims-Tabelle (liest
+      // sonst ueber Definer-Views), daher admin + resolveClaimId (lpClaimId oben), weil der
+      // Route-Param id die fall_id (Bridge) ist != claims.id (Prod: 78/94 verschieden).
+      lpClaimId
+        ? admin
+            .from('claims')
+            .select('lead_preis_netto, lead_preis_typ')
+            .eq('id', lpClaimId)
+            .eq('sv_id', sv.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
     supabase
       .from('nachrichten')
       .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
