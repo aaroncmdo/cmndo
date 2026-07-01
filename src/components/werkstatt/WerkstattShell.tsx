@@ -91,7 +91,8 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
                 <p className="truncate text-sm text-white/90">{werkstatt.name}</p>
                 <p className="truncate text-body-xs text-claimondo-light-blue">{email}</p>
               </div>
-              <UpdatesNav variant="dark" />
+              {/* Sidebar-Footer sitzt unten-links → Popover nach oben-rechts. */}
+              <UpdatesNav variant="dark" placement="up-right" />
             </div>
             <form action="/api/auth/logout" method="POST">
               <button
