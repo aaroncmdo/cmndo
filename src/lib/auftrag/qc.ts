@@ -303,13 +303,41 @@ export async function loescheGutachtenDokument(
 
   const { data: auftrag } = await db
     .from('auftraege')
-    .select('id, fall_id, gutachten_final_freigegeben')
+    .select('id, fall_id, sv_id, gutachten_final_freigegeben')
     .eq('id', auftragId)
     .maybeSingle()
   if (!auftrag) return { ok: false, error: 'Auftrag nicht gefunden' }
   if (auftrag.gutachten_final_freigegeben) {
     return { ok: false, error: 'Auftrag ist bereits freigegeben' }
   }
+
+  // Security (Write-Path-Audit 2026-07-01, F5): vorher genuegte ein beliebiger
+  // eingeloggter User + irgendein nicht-finalisierter auftragId, um via frei
+  // waehlbarem storagePath JEDE Datei im fall-dokumente-Bucket zu loeschen (+ Row
+  // soft-deleten). Jetzt: (1) Rollen-/Ownership-Gate wie gutachtenAbgeben (SV DIESES
+  // Auftrags ODER admin/KB), (2) storagePath muss an ein fall_dokumente-Row am fall des
+  // Auftrags gebunden sein. Siehe docs/2026-07-01-claim-write-path-authorization-audit.md.
+  const { data: berProfile } = await db.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+  const berRolle = (berProfile?.rolle as string | null) ?? null
+  let eigeneSvId: string | null = null
+  if (berRolle === 'sachverstaendiger') {
+    const { data: svRow } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).maybeSingle()
+    eigeneSvId = (svRow?.id as string | null) ?? null
+  }
+  if (!kannGutachtenAbgeben({ rolle: berRolle, eigeneSvId, auftragSvId: auftrag.sv_id as string | null })) {
+    return { ok: false, error: 'Keine Berechtigung' }
+  }
+
+  // storagePath an den fall des Auftrags binden — sonst koennte ein berechtigter SV
+  // ueber einen fremden storagePath Objekte anderer Faelle loeschen.
+  const { data: dok } = await db
+    .from('fall_dokumente')
+    .select('id')
+    .eq('storage_path', storagePath)
+    .eq('fall_id', auftrag.fall_id)
+    .is('geloescht_am', null)
+    .maybeSingle()
+  if (!dok) return { ok: false, error: 'Dokument gehoert nicht zu diesem Auftrag' }
 
   const { error: storageErr } = await db.storage
     .from('fall-dokumente')
@@ -320,8 +348,7 @@ export async function loescheGutachtenDokument(
   await db
     .from('fall_dokumente')
     .update({ geloescht_am: now })
-    .eq('storage_path', storagePath)
-    .is('geloescht_am', null)
+    .eq('id', dok.id)
 
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
   return { ok: true }
