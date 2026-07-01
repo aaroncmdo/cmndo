@@ -8,7 +8,6 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import IsochroneClient from '@/app/dispatch/isochrone/IsochroneClient'
-import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -78,23 +77,19 @@ export default async function MitarbeiterIsochronePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Gebiets-Übersicht"
-        size="lg"
-        description={
-          <>
-            Wähle einen deiner betreuten Fälle, um die grundsätzlich geeigneten SVs im Fahrzeit-Umkreis zu sehen.
-            Reservierung + Zuweisung erfolgen im{' '}
-            <Link href="/dispatch/isochrone" className="text-claimondo-ondo hover:underline">
-              Dispatch-Portal
-            </Link>
-            .
-          </>
-        }
-      />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Gebiets-Übersicht</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+          Wähle einen deiner betreuten Fälle, um die grundsätzlich geeigneten SVs im Fahrzeit-Umkreis zu sehen. Reservierung + Zuweisung erfolgen im{' '}
+          <Link href="/dispatch/isochrone" className="text-claimondo-ondo underline hover:text-claimondo-navy">
+            Dispatch-Portal
+          </Link>
+          .
+        </p>
+      </div>
 
-      <div className="rounded-ios-xl border border-warning/30 bg-warning-soft px-4 py-3 text-xs text-warning-strong">
+      <div className="rounded-ios-md border border-warning/30 bg-warning-soft px-4 py-3 text-body-xs text-warning-strong">
         Nur-Lese-Ansicht — alle Änderungen an Fall-Zuweisung oder Isochrone-Polygon erfolgen durch das Admin/Dispatch-Team.
       </div>
 
