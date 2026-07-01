@@ -8,7 +8,6 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
-import { getLeadPriceFromTable } from '@/lib/abrechnung/calculate-lead-price'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { createNotification } from '@/lib/notifications'
@@ -175,45 +174,24 @@ export async function uploadGutachten(
     ).catch(() => {})
   }
 
-  // ── Automatische Abrechnung ──────────────────────────────────────────────
+  // ── SV-Kapazitaets-Counter ────────────────────────────────────────────────
+  // Billing entfernt (Konsolidierung 2026-07-01): Leadpreis-Berechnung,
+  // gutachter_abrechnungen-Insert und Guthaben-Abzug laufen jetzt ausschliesslich
+  // ueber processCaseBilling (State-Machine-Hook @ gutachten-eingegangen, AAR-924 —
+  // idempotent, MIN(150)-Guthaben-Modell, claims-SSoT). Behebt den frueheren
+  // Dreifach-Abzug (Zuweisung + Gutachten-Upload + Cron).
+  // Der paket_faelle_genutzt-Increment BLEIBT: das ist der SV-Kapazitaets-/Dispatch-
+  // Counter (sv-zuweisung Load-Balancing + Admin/Team-Anzeige), KEIN Billing.
   const { data: svData } = await supabase
     .from('sachverstaendige')
-    .select('id, werbebudget_guthaben_netto, paket_faelle_genutzt, paket_faelle_gesamt')
+    .select('paket_faelle_genutzt')
     .eq('id', sv.id)
     .single()
 
   if (svData) {
-    const hatPaket = (svData.paket_faelle_genutzt ?? 0) < (svData.paket_faelle_gesamt ?? 0)
-    // CMM-44: Leadpreis aus der kanonischen DB-Tabelle (leadpreise_tabelle, naechste-Stufe) —
-    // dieselbe Quelle wie process-case-billing. Ersetzt die fruehere hardcoded/interpolierte
-    // berechneLeadpreis-Tabelle (geloescht), damit SV-Vorschau == tatsaechliche Abrechnung.
-    const { betrag_netto: leadpreis, typ: preistyp } = await getLeadPriceFromTable(betrag, hatPaket)
-    const guthabenVorher = Number(svData.werbebudget_guthaben_netto ?? 0)
-    const guthabenNachher = guthabenVorher - leadpreis
-    const monat = new Date().toISOString().slice(0, 7) // YYYY-MM
-
-    // Abrechnungseintrag erstellen
-    await supabase.from('gutachter_abrechnungen').insert({
-      sv_id: sv.id,
-      fall_id: fallId,
-      schadenhoehe: betrag,
-      leadpreis,
-      preistyp,
-      guthaben_vorher: guthabenVorher,
-      guthaben_nachher: guthabenNachher,
-      monat,
-    })
-
-    // AAR-239: Guthaben-Spalte heißt werbebudget_guthaben_netto (nicht
-    // 'guthaben') — der SELECT oben liest korrekt, aber das UPDATE
-    // schrieb auf die nicht-existierende 'guthaben'-Spalte → silent fail,
-    // SV-Abrechnung zeigte immer Ursprungs-Guthaben.
     await supabase
       .from('sachverstaendige')
-      .update({
-        werbebudget_guthaben_netto: guthabenNachher,
-        paket_faelle_genutzt: (svData.paket_faelle_genutzt ?? 0) + 1,
-      })
+      .update({ paket_faelle_genutzt: (svData.paket_faelle_genutzt ?? 0) + 1 })
       .eq('id', sv.id)
   }
 

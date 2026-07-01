@@ -120,15 +120,15 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   let svLeadpreis: number | null = null
   let svPreistyp: string | null = null
   if (claim.sv_id) {
-    const { data: abr } = await db.from('gutachter_abrechnungen')
-      .select('leadpreis, preistyp')
-      .eq('fall_id', fallId)
-      .eq('sv_id', claim.sv_id)
-      .limit(1)
+    // Billing-Konsolidierung 2026-07-01: Leadpreis aus claims-SSoT (lead_preis_netto/-typ,
+    // processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
+    const { data: cLead } = await db.from('claims')
+      .select('lead_preis_netto, lead_preis_typ')
+      .eq('id', claimId)
       .maybeSingle()
-    if (abr) {
-      svLeadpreis = Number(abr.leadpreis) || null
-      svPreistyp = abr.preistyp
+    if (cLead?.lead_preis_netto != null) {
+      svLeadpreis = Number(cLead.lead_preis_netto) || null
+      svPreistyp = cLead.lead_preis_typ
       svHonorar = svLeadpreis
     }
   }
