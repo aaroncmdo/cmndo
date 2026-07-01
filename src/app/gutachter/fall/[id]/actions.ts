@@ -8,7 +8,7 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
-import { berechneLeadpreis } from '@/lib/leadpreis'
+import { getLeadPriceFromTable } from '@/lib/abrechnung/calculate-lead-price'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { createNotification } from '@/lib/notifications'
@@ -184,7 +184,10 @@ export async function uploadGutachten(
 
   if (svData) {
     const hatPaket = (svData.paket_faelle_genutzt ?? 0) < (svData.paket_faelle_gesamt ?? 0)
-    const leadpreis = berechneLeadpreis(betrag, hatPaket)
+    // CMM-44: Leadpreis aus der kanonischen DB-Tabelle (leadpreise_tabelle, naechste-Stufe) —
+    // dieselbe Quelle wie process-case-billing. Ersetzt die fruehere hardcoded/interpolierte
+    // berechneLeadpreis-Tabelle (geloescht), damit SV-Vorschau == tatsaechliche Abrechnung.
+    const { betrag_netto: leadpreis, typ: preistyp } = await getLeadPriceFromTable(betrag, hatPaket)
     const guthabenVorher = Number(svData.werbebudget_guthaben_netto ?? 0)
     const guthabenNachher = guthabenVorher - leadpreis
     const monat = new Date().toISOString().slice(0, 7) // YYYY-MM
@@ -195,7 +198,7 @@ export async function uploadGutachten(
       fall_id: fallId,
       schadenhoehe: betrag,
       leadpreis,
-      preistyp: hatPaket ? 'paket' : 'einzel',
+      preistyp,
       guthaben_vorher: guthabenVorher,
       guthaben_nachher: guthabenNachher,
       monat,
