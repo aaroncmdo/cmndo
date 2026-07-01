@@ -240,11 +240,11 @@ export async function updateFallStatus(
         }
       }
 
-      // Refund
-      try {
-        const { refundLeadpreis } = await import('@/lib/gutachterTasking')
-        refundLeadpreis(stornoSvId, fallId, stornoClaimNummer ?? fallId.slice(0, 8)).catch(() => {})
-      } catch { /* */ }
+      // Refund entfernt (Billing-Konsolidierung 2026-07-01): der Storno-Refund
+      // laeuft ueber die State-Machine (transitionFallStatus('storniert') ->
+      // AAR-926 revertCaseBilling, claims-basiert, respektiert
+      // STORNO_GRUENDE_OHNE_REVERT). Die fruehere gutachter_abrechnungen-
+      // Gegenbuchung war eine Doppel-Buchung.
     }
 
     // Phase 2c: Kanzlei-Email wenn schon übergeben
