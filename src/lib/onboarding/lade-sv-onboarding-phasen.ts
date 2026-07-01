@@ -2,7 +2,8 @@
 // Laedt die DB-Phasen fuer flow_key='sv-onboarding', bestimmt den
 // Prefill-Status aus sachverstaendige + profiles + sv_kalender_verbindungen
 // und filtert bereits vollstaendig gefuellte Pflicht-Phasen heraus (Skip-logic).
-// Reiner Server-Loader (kein 'use server' -- wird aus /sv/onboarding/page.tsx aufgerufen).
+// Reiner Server-Loader (kein 'use server') -- wird aus /gutachter/willkommen/page.tsx
+// aufgerufen (der frueher hier genannte Pfad /sv/onboarding existiert nicht).
 
 import { getLocale } from 'next-intl/server'
 import { createClient } from '@/lib/supabase/server'
