@@ -38,6 +38,17 @@ function extractAmount(text: string, keyword: string): number | null {
 
 export async function POST(req: NextRequest) {
   try {
+    // Security (Write-Path-Audit 2026-07-01, F2): Bearer-CRON_SECRET-Gate.
+    // Vorher 0 Auth -> anon konnte forderungspositionen (juristische Anspruchspositionen:
+    // Reparatur, Wertminderung, Anwaltskosten ...) auf JEDE fall_id schreiben
+    // (createServiceClient/RLS-Bypass) + eine beliebige pdf_url serverseitig fetchen (SSRF).
+    // Analog zur bereits gehaerteten Schwester-Route /api/ocr-gutachten.
+    // Siehe docs/2026-07-01-claim-write-path-authorization-audit.md.
+    const authHeader = req.headers.get('authorization') ?? ''
+    if (!process.env.CRON_SECRET || authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ error: 'Nicht autorisiert' }, { status: 401 })
+    }
+
     const body = await req.json()
     const { fall_id, pdf_url, quelle } = body as { fall_id: string; pdf_url: string; quelle: string }
 
