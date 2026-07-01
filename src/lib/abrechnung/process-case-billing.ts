@@ -1,5 +1,10 @@
-'use server'
-
+// Security (Write-Path-Audit 2026-07-01, F3): bewusst KEIN 'use server'.
+// Diese Funktion mutiert via admin-client (RLS-bypass) und darf NICHT als
+// RPC-Endpoint exponiert werden — sonst kann jeder authenticated User sie direkt
+// mit beliebiger fallId aufrufen (Billing/Werbebudget-Mutation auf fremdem Claim).
+// Alle Caller sind server-seitig (cron case-billing-batch, state-machine-Hook);
+// die Guards leben dort.
+// Siehe docs/2026-07-01-claim-write-path-authorization-audit.md.
 import { createAdminClient } from '@/lib/supabase/admin'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
