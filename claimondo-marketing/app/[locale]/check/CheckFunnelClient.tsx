@@ -92,6 +92,9 @@ export function CheckFunnelClient() {
         const v = params.get(k)
         if (v) fd.set(k, v)
       }
+      // Makler-Hub-Attribution: ?m=<Promo-Code> aus der Hub-URL (/m/[code] -> /check?m=) mitschicken.
+      const maklerCode = params.get('m')
+      if (maklerCode) fd.set('m', maklerCode)
     }
     startTransition(async () => {
       const res = await submitCheckLead(fd)
