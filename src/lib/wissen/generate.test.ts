@@ -6,7 +6,7 @@ describe('buildSystemPrompt', () => {
     const p = buildSystemPrompt({ titel: 'Nutzungsausfall' })
     expect(p).toMatch(/RDG|Handlungsempfehlung/)
     expect(p).toMatch(/BGH/)
-    expect(p).toMatch(/Erfinde NIE/)
+    expect(p).toMatch(/absolut sicher|erfundenes/)
     expect(p).toMatch(/keine Rechtsberatung/)
   })
 })
