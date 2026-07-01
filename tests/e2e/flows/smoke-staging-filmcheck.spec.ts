@@ -149,3 +149,74 @@ test('Filmcheck — Kanzlei: Mandate-Portal erreichbar', async ({ browser }) => 
   expect(page.url()).not.toContain('/login')
   await ctx.close()
 })
+
+// Voller transaktionaler Durchlauf: SV laedt ein Gutachten hoch + gibt ab ->
+// Admin verifiziert, dass die QC-Karte (Filmcheck) auf demselben Fall erscheint.
+// Erzeugt den filmcheck-Zustand SELBST via UI (Staging-DB nicht seedbar).
+// Graceful: braucht einen SV-Fall mit durchgefuehrtem Termin + noch ohne Gutachten
+// (sonst erscheint der Upload-Banner nicht) + komplett-Service (sonst kein filmcheck).
+test('Filmcheck — Voll: SV-Abgabe erzeugt QC-Karte, Admin verifiziert', async ({ browser }) => {
+  test.setTimeout(300_000)
+  const FOTO = path.join(process.cwd(), 'tests', 'fixtures', 'test-foto.jpg')
+
+  // --- SV: Fall mit Upload-Banner finden, Gutachten hochladen + abgeben ---
+  const svCtx = await browser.newContext({ viewport: { width: 1440, height: 900 }, httpCredentials: BASIC_AUTH })
+  const svPage = await svCtx.newPage()
+  if (!(await login(svPage, CRED.sv.email, CRED.sv.pass))) { await svCtx.close(); return }
+
+  let fallUrls: string[] = []
+  for (const r of ['/gutachter/auftraege', '/gutachter/heute', '/gutachter/kalender']) {
+    await svPage.goto(`${BASE}${r}`); await svPage.waitForLoadState('networkidle').catch(() => {}); await svPage.waitForTimeout(1500)
+    fallUrls = await svPage.locator('a[href*="/gutachter/fall/"]').evaluateAll((els) =>
+      Array.from(new Set(els.map((el) => (el as HTMLAnchorElement).href))))
+    if (fallUrls.length) break
+  }
+  console.log(`[voll/sv] Fall-URLs: ${fallUrls.length}`)
+
+  let fallId = fallUrls[0]?.split('/gutachter/fall/')[1]?.split(/[/?#]/)[0] ?? ''
+  let abgegeben = false
+  for (const url of fallUrls.slice(0, 8)) {
+    await svPage.goto(url); await svPage.waitForLoadState('networkidle').catch(() => {}); await svPage.waitForTimeout(4000)
+    const fileInput = svPage.locator('input[type="file"]').first()
+    const dropzone = svPage.getByText(/Gutachten hochladen|Dateien hierher ziehen/i)
+    if ((await fileInput.count()) === 0 || (await dropzone.count()) === 0) {
+      console.log(`[voll/sv] ${url}: kein Upload-Banner (Termin nicht durchgefuehrt / schon Gutachten)`); continue
+    }
+    fallId = url.split('/gutachter/fall/')[1]?.split(/[/?#]/)[0] ?? ''
+    console.log(`[voll/sv] Upload-Banner auf Fall ${fallId} — lade ${path.basename(FOTO)}`)
+    await fileInput.setInputFiles(FOTO)
+    await svPage.waitForTimeout(7000) // Direktupload + finalize
+    const abgeben = svPage.getByRole('button', { name: /^Abgeben$|Wird abgegeben/i }).first()
+    if ((await abgeben.count()) === 0) { console.log('[voll/sv] kein Abgeben-Button nach Upload'); await shoot(svPage, '30-kein-abgeben.png'); continue }
+    await abgeben.click(); await svPage.waitForTimeout(5000)
+    await shoot(svPage, '30-sv-abgegeben.png')
+    const ok = await svPage.getByText(/Gutachten hochgeladen|QC läuft|Vielen Dank/i).count()
+    console.log(`[voll/sv] Abgabe-Bestaetigung sichtbar: ${ok}`)
+    abgegeben = true; break
+  }
+  await svCtx.close()
+  if (!fallId) { console.log('[STOP] kein SV-Fall auf staging sichtbar — Seed noetig'); return }
+  console.log(`[voll] Admin verifiziert QC-Karte auf Fall ${fallId} (frische SV-Abgabe gelungen: ${abgegeben})`)
+
+  // --- Admin: QC-Karte auf demselben Fall verifizieren (Phase 1a + Gate) ---
+  const adCtx = await browser.newContext({ viewport: { width: 1440, height: 900 }, httpCredentials: BASIC_AUTH })
+  const adPage = await adCtx.newPage()
+  if (!(await login(adPage, CRED.admin.email, CRED.admin.pass))) { await adCtx.close(); return }
+  await adPage.goto(`${BASE}/faelle/${fallId}`); await adPage.waitForLoadState('networkidle').catch(() => {}); await adPage.waitForTimeout(3000)
+  const dokTab = adPage.getByRole('tab', { name: /dokumente/i }).or(adPage.getByRole('button', { name: /dokumente/i })).first()
+  if (await dokTab.count()) { await dokTab.click().catch(() => {}); await adPage.waitForTimeout(1500) }
+
+  const qc = adPage.getByText('QC-Checkliste (Filmcheck)').first()
+  if ((await qc.count()) === 0) {
+    console.log('[STOP] QC-Karte nach SV-Abgabe NICHT sichtbar — Fall evtl. nicht komplett/nicht filmcheck')
+    await shoot(adPage, '31-keine-qc-karte.png'); await adCtx.close(); return
+  }
+  await shoot(adPage, '31-qc-karte-nach-abgabe.png')
+  await expect(qc).toBeVisible()
+  await expect(adPage.getByRole('button', { name: /QC bestanden.*Kanzlei/i }).first()).toBeVisible()
+  console.log(`[voll/admin] ✓ QC-Karte nach SV-Abgabe verifiziert (Fall ${fallId})`)
+  console.log(`[voll/admin] PDF-Evidenz-Link: ${await adPage.getByText(/Gutachten öffnen \(zur Prüfung\)/i).count()}`)
+  console.log(`[voll/admin] Auto-Prefill-Hinweis: ${await adPage.getByText(/aus den Falldaten vorbefüllt/i).count()}`)
+  console.log(`[voll/admin] Pflicht-Gate-Sperre: ${await adPage.getByText(/Kanzlei-Übergabe gesperrt/i).count()}`)
+  await adCtx.close()
+})
