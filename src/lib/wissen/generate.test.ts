@@ -11,25 +11,36 @@ describe('buildSystemPrompt', () => {
   })
 })
 
-describe('parseDraft', () => {
+describe('parseDraft (2-Teile-Format: Metadaten-JSON + ===BODY=== + Markdown)', () => {
   it('akzeptiert vollstaendigen Draft', () => {
-    const r = parseDraft(
-      JSON.stringify({
-        slug: 'x-y',
-        title: 'T',
-        excerpt: 'e'.repeat(120),
-        keyFacts: ['a', 'b', 'c'],
-        metaDescription: 'm',
-        primaryKeyword: 'k',
-        cluster: 'H3',
-        body: '# T\n\n> **Kurz erklaert:** ...',
-      }),
-    )
-    expect(r.ok).toBe(true)
+    const meta = JSON.stringify({
+      slug: 'x-y',
+      title: 'T',
+      excerpt: 'e'.repeat(120),
+      keyFacts: ['a', 'b', 'c'],
+      metaDescription: 'm',
+      primaryKeyword: 'k',
+      cluster: 'H3',
+    })
+    const raw = meta + '\n===BODY===\n# T\n\n> **Kurz erklaert:** ' + 'Fliesstext. '.repeat(20)
+    expect(parseDraft(raw).ok).toBe(true)
   })
 
-  it('lehnt fehlende Felder ab (kein throw)', () => {
+  it('lehnt fehlenden BODY-Marker ab (kein throw)', () => {
     expect(parseDraft('{"title":"T"}').ok).toBe(false)
     expect(parseDraft('nicht json').ok).toBe(false)
+  })
+
+  it('lehnt kaputtes Metadaten-JSON ab (kein throw)', () => {
+    expect(parseDraft('kaputt ===BODY=== ' + 'x'.repeat(150)).ok).toBe(false)
+  })
+
+  it('akzeptiert einen Body mit ungeschuetzten Anfuehrungszeichen (Kern-Fix)', () => {
+    const meta = JSON.stringify({
+      slug: 'a-b', title: 'T', excerpt: 'e'.repeat(120), keyFacts: ['a'],
+      metaDescription: 'm', primaryKeyword: 'k', cluster: 'H3',
+    })
+    const body = '# Titel\n\nDer "Restwert" ist entscheidend — Zitat: "so das Gericht".\n' + 'Mehr Text. '.repeat(20)
+    expect(parseDraft(meta + '\n===BODY===\n' + body).ok).toBe(true)
   })
 })
