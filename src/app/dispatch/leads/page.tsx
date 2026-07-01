@@ -69,7 +69,7 @@ export default async function DispatchLeads({
     countQuery = countQuery
       .eq('flow_link_geoeffnet', true)
       .eq('flow_link_abgeschlossen', false)
-      .neq('status', 'disqualifiziert')
+      .not('status', 'in', '("disqualifiziert","kalt")')
   } else if (params.phase) {
     countQuery = countQuery.eq('qualifizierungs_phase', params.phase)
   }
