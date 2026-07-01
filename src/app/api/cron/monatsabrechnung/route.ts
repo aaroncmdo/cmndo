@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServiceClient } from '@/lib/supabase/server'
-import { berechneLeadpreis } from '@/lib/leadpreis'
+import { getLeadPriceFromTable } from '@/lib/abrechnung/calculate-lead-price'
 
 /**
  * @deprecated AAR-925: System A wird abgeloest durch /api/cron/abrechnung-erstellen.
@@ -60,8 +60,9 @@ export async function GET(req: NextRequest) {
     for (const fall of faelle) {
       const schaden = Number(fall.schadens_hoehe_netto) || 0
       const istImPaket = paketCount + einzelCount < kontingent
-      const preis = berechneLeadpreis(schaden, istImPaket)
-      const typ = istImPaket ? 'paket' : 'einzel'
+      // CMM-44: kanonische DB-Tabelle (leadpreise_tabelle, naechste-Stufe), gleiche Quelle
+      // wie process-case-billing — ersetzt hardcoded/interpolierte berechneLeadpreis (geloescht).
+      const { betrag_netto: preis, typ } = await getLeadPriceFromTable(schaden, istImPaket)
 
       if (istImPaket) { paketCount++; summePaket += preis } else { einzelCount++; summeEinzel += preis }
 
