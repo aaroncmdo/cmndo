@@ -16,8 +16,12 @@ import { isRelevantB2B } from '@/lib/wissen/crawl/relevance'
 import { generateArtikelDraft } from '@/lib/wissen/generate'
 import { validateForAutoPublish } from '@/lib/wissen/validate'
 
-const CRAWL_CAP = 10 // Maximale neue Themen pro Lauf
-const GENERATE_LIMIT = 3 // Maximale neue Artikel pro Lauf
+const CRAWL_CAP = 12 // Maximale neue Themen pro Lauf (global)
+const PER_SOURCE_CAP = 3 // Maximale neue Themen pro Quelle/Lauf — verhindert, dass eine
+// breite Quelle (z.B. allg. Rechtsnews) das Crawl-Budget frisst und Kfz-Feeds verhungern.
+const GENERATE_LIMIT = 3 // Maximale ERZEUGTE Artikel pro Lauf
+const ATTEMPT_CAP = 12 // Maximale KI-Generierungs-Versuche/Lauf (Kosten-/Zeitgrenze), auch wenn
+// einzelne Themen vom KI-Relevanz-Backstop als nicht_relevant abgelehnt werden.
 
 export async function runB2BPipeline(): Promise<{
   ok: boolean
@@ -42,6 +46,7 @@ export async function runB2BPipeline(): Promise<{
 
     for (const source of B2B_CRAWL_SOURCES) {
       if (newThemenThisRun >= CRAWL_CAP) break
+      let sourceCount = 0
 
       let items
       try {
@@ -52,7 +57,7 @@ export async function runB2BPipeline(): Promise<{
       }
 
       for (const item of items) {
-        if (newThemenThisRun >= CRAWL_CAP) break
+        if (newThemenThisRun >= CRAWL_CAP || sourceCount >= PER_SOURCE_CAP) break
 
         const hash = sourceHash(item.link)
 
@@ -95,6 +100,7 @@ export async function runB2BPipeline(): Promise<{
 
         crawled++
         newThemenThisRun++
+        sourceCount++
       }
     }
 
@@ -143,10 +149,15 @@ export async function runB2BPipeline(): Promise<{
       )
     }
 
-    // Schritt 3: Kandidaten ohne Artikel filtern, auf GENERATE_LIMIT begrenzen.
-    const themen = (kandidaten ?? []).filter((t) => !belegteSet.has(t.id)).slice(0, GENERATE_LIMIT)
+    // Schritt 3: Kandidaten ohne Artikel durchgehen, bis GENERATE_LIMIT Artikel ERZEUGT sind
+    // (nicht nur GENERATE_LIMIT Versuche) — sonst nullen ein paar vom KI-Backstop abgelehnte
+    // (nicht_relevant) Themen den ganzen Lauf. ATTEMPT_CAP begrenzt die KI-Calls pro Lauf.
+    const kandidatenOffen = (kandidaten ?? []).filter((t) => !belegteSet.has(t.id))
+    let attempts = 0
 
-    for (const thema of themen ?? []) {
+    for (const thema of kandidatenOffen) {
+      if (generated >= GENERATE_LIMIT || attempts >= ATTEMPT_CAP) break
+      attempts++
       // AI-Draft generieren
       const r = await generateArtikelDraft(
         {
