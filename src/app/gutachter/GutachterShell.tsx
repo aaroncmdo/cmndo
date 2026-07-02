@@ -247,7 +247,7 @@ export default function GutachterShell({
 
   // AAR-370: Badge-Counter für Sidebar-Items.
   // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
-  // - posteingang: ungelesene gutachter_mitteilungen + ungelesene nachrichten
+  // - posteingang: ungelesene mitteilungen + ungelesene nachrichten
   //   gemeinsam als aggregierter Counter (Tabs Mitteilungen + Nachrichten).
   const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number; neueTermine: number }>({
     auftraege: 0,
@@ -279,11 +279,12 @@ export default function GutachterShell({
       .eq('gutachten_final_freigegeben', false)
       .eq('status', 'termin')
 
-    // Posteingang Tab 1: ungelesene System-Mitteilungen über alle SV-Rows.
+    // Posteingang Tab 1: ungelesene System-Mitteilungen (Phase 5: kanonische
+    // `mitteilungen`, empfaenger = User-id, statt der retireten gutachter_mitteilungen).
     const { count: mitteilungenCount } = await supabase
-      .from('gutachter_mitteilungen')
+      .from('mitteilungen')
       .select('id', { count: 'exact', head: true })
-      .in('sv_id', svIds)
+      .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
     // Posteingang Tab 2: ungelesene Chat-Nachrichten.
@@ -316,7 +317,7 @@ export default function GutachterShell({
       .channel('gutachter-sidebar-badges')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mitteilungen' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
       .subscribe()
     return () => { supabase.removeChannel(channel) }

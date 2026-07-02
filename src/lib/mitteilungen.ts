@@ -1,6 +1,8 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { createMitteilung } from '@/lib/mitteilungen/create-mitteilung'
+import { classifyGutachterMitteilung } from '@/lib/mitteilungen/gutachter-mitteilung-classify'
 
 type MitteilungTyp =
   | 'neuer_auftrag'
@@ -41,9 +43,14 @@ interface MitteilungExtras {
 }
 
 /**
- * Erstellt eine Gutachter-Mitteilung.
- * Verwendet den Admin-Client (service role) da RLS Inserts fuer
- * normale User blockiert.
+ * Benachrichtigt einen Sachverstaendigen. Phase 5: schreibt in die KANONISCHE
+ * `mitteilungen` (empfaenger = SV-profile_id, kategorie='update') statt in die
+ * retirete `gutachter_mitteilungen`. `typ` steuert via classifyGutachterMitteilung:
+ * derived Action-Source deckt -> drop (nicht materialisieren); sonst Info +
+ * Prioritaet. Signatur unveraendert -> 0 Caller-Churn.
+ *
+ * WICHTIG: `sv_id` ist die sachverstaendige.id; `mitteilungen.empfaenger_id`
+ * braucht die profile_id (User-id, wie getUpdates/GutachterShell filtern) -> Lookup.
  */
 export async function createGutachterMitteilung(
   sv_id: string,
@@ -51,31 +58,31 @@ export async function createGutachterMitteilung(
   fall_id: string | null,
   extras: MitteilungExtras = {},
 ) {
-  const supabase = createAdminClient()
+  const routing = classifyGutachterMitteilung(typ)
+  if (routing.action === 'drop') return // derived Action-Source deckt diesen typ ab
+
+  const admin = createAdminClient()
+  const { data: sv, error: svErr } = await admin
+    .from('sachverstaendige')
+    .select('profile_id')
+    .eq('id', sv_id)
+    .single()
+  if (svErr || !sv?.profile_id) {
+    console.error('[createGutachterMitteilung] profile_id-Lookup fehlgeschlagen:', svErr?.message, { sv_id, typ })
+    return
+  }
 
   const { titel, nachricht } = buildMessage(typ, extras)
-  const link = fall_id ? `/gutachter/fall/${fall_id}` : null
-
-  // BUG-FIX: `dringend` ist KEINE Spalte von gutachter_mitteilungen (Schema: id, sv_id,
-  // fall_id, typ, titel, nachricht, gelesen, link, created_at, claim_id). Der fruehere Insert
-  // mit `dringend` schlug bei JEDEM Aufruf mit 42703 fehl (nur geloggt, nicht geworfen) -> die
-  // Tabelle blieb dauerhaft leer -> SVs bekamen ueber ~10 Event-Typen (neuer_auftrag,
-  // termin_bestaetigt, qc_*, kanzlei_*, re_termin_kundenwahl, auftrag_storniert ...) NIE eine
-  // In-App-Mitteilung, und die Posteingang-Badge im Gutachter-Portal zeigte strukturell immer 0.
-  // Kein Reader nutzt `dringend` (nur Task-Prioritaeten heissen so) -> Feld entfernt statt Spalte anzulegen.
-  const { error } = await supabase.from('gutachter_mitteilungen').insert({
-    sv_id,
-    fall_id,
-    typ,
+  await createMitteilung({
+    empfaenger_id: sv.profile_id,
+    empfaenger_rolle: 'sachverstaendiger',
+    kategorie: 'update',
     titel,
-    nachricht,
-    gelesen: false,
-    link,
+    inhalt: nachricht,
+    kontext_typ: 'fall',
+    kontext_id: fall_id ?? undefined,
+    prioritaet: routing.prioritaet,
   })
-
-  if (error) {
-    console.error('[Mitteilung] Fehler:', error.message, { sv_id, typ, fall_id })
-  }
 }
 
 function buildMessage(
