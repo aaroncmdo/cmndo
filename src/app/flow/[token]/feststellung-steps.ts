@@ -24,6 +24,9 @@ export const FESTSTELLUNG_STEPS: FeststellungMicroStep[] = [
   { kind: 'felder', id: 'unfalltyp', kapitel: 'Schaden', titel: 'Was für ein Unfall war es?', feldKeys: ['schadentyp', 'schadentyp_freitext'] },
   { kind: 'felder', id: 'hergang', kapitel: 'Schaden', titel: 'Wie ist es passiert?', sub: 'Schildere den Hergang so ausführlich wie möglich — Richtung, Tempo, Ampel/Vorfahrt, wer war wo. Daraus erstellen wir die präzise Unfallskizze.', feldKeys: ['unfallhergang', 'schaden_sichtbar'] },
   { kind: 'felder', id: 'folgeschaeden', kapitel: 'Schaden', titel: 'Verletzte oder weitere Schäden?', feldKeys: ['personenschaden_flag', 'sachschaden_flag', 'sachschaden_beschreibung'] },
+  // Reparaturwunsch (Abrechnungs-Intent) + Rueckfrage "hast du eine Werkstatt?" (conditional)
+  // + Extern-Name (conditional). Felder liegen in onboarding_felder (audience 'beide').
+  { kind: 'felder', id: 'reparatur', kapitel: 'Schaden', titel: 'Reparatur oder Auszahlung?', feldKeys: ['reparaturwunsch', 'reparatur_vermittlung_status', 'reparatur_werkstatt_extern'] },
   // ② Unfall
   { kind: 'felder', id: 'wann_wo', kapitel: 'Unfall', titel: 'Wann und wo?', feldKeys: ['unfalldatum', 'unfall_uhrzeit', 'unfallort'] },
   // AAR-956 16.06. (Aaron): "Polizei & Zeugen" — der Polizeibericht-Upload ist hier INLINE

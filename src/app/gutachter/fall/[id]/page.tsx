@@ -12,6 +12,10 @@ import FallDetailClient from './FallDetailClient'
 // CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
+import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
+import { findReparaturWerkstaettenForTarget } from '@/lib/werkstatt/vermittlung-server'
+import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import { WerkstattVermittelnCard } from './_components/WerkstattVermittelnCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
@@ -351,6 +355,23 @@ export default async function GutachterFallPage({
     : { data: null }
   const noShowCount = (fallClaimRow?.kunde_no_show_count as number | null) ?? 0
 
+  // Reparatur-Werkstatt-Vermittlung (Gutachter im Auftrag): Gate + 5 naechste Partner.
+  // Nur wenn Reparatur gewuenscht + noch keine Werkstatt hinterlegt (brauchtWerkstattVermittlung).
+  let werkstattVermittlung: { fallId: string; werkstaetten: WerkstattFinderRow[] } | null = null
+  if (noShowClaimId) {
+    const { data: rwGate } = await admin
+      .from('claims')
+      .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status')
+      .eq('id', noShowClaimId)
+      .maybeSingle()
+    if (rwGate && brauchtWerkstattVermittlung(rwGate as BedarfRow)) {
+      werkstattVermittlung = {
+        fallId: id,
+        werkstaetten: await findReparaturWerkstaettenForTarget({ target: 'claim', id: noShowClaimId }),
+      }
+    }
+  }
+
   // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
   // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
   // ob die Pipeline die Geld-Zahlen korrekt erkannt hat.
@@ -565,6 +586,12 @@ export default async function GutachterFallPage({
           lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
           svHonorarBetrag={svHonorarBetrag}
           svHonorarEingegangenAm={svHonorarEingegangenAm}
+        />
+      )}
+      {werkstattVermittlung && (
+        <WerkstattVermittelnCard
+          fallId={werkstattVermittlung.fallId}
+          werkstaetten={werkstattVermittlung.werkstaetten}
         />
       )}
     </>
