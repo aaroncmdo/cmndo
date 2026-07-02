@@ -3,11 +3,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
-// Soft-Launch-Schalter: false = nur Partner/Admin posten; Public liest + kommentiert.
-// Auf true setzen nach DSB-OK (DPIA-Erweiterung abgeschlossen).
-// NICHT exportieren — Konstanten aus 'use server'-Files sind im Client-Bundle undefined (AAR-664).
-const PUBLIC_POST_ENABLED = false
-
 /**
  * Bereinigt Postgres-Exception-Messages: entfernt technische Prefixe wie
  * "ERROR:  " oder "P0001: " damit die deutsche Nachricht direkt angezeigt wird.
@@ -27,24 +22,11 @@ export async function createCommunityPost(
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return { ok: false, error: 'Bitte zuerst anmelden.' }
 
-  if (!PUBLIC_POST_ENABLED) {
-    // Pruefe ob Partner oder Admin — nur diese duerfen bei Soft-Launch posten.
-    // Einfachste Heuristik: Profil in profiles mit nicht-leerem firma-Feld = Partner,
-    // oder is_admin() via RPC. Kein Profil = public.
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('firma')
-      .eq('id', auth.user.id)
-      .maybeSingle()
-    const isPartner = !!((profileData as { firma?: string } | null)?.firma?.trim())
-    // Admin-Check via RPC
-    const { data: isAdminData } = await supabase.rpc('is_admin', { uid: auth.user.id })
-    const isAdmin = !!isAdminData
-    if (!isPartner && !isAdmin) {
-      return { ok: false, error: 'Beitraege aktuell nur fuer Partner' }
-    }
-  }
-
+  // Soft-Launch- + Partner/Admin-Gating passiert AUSSCHLIESSLICH in der RPC
+  // create_community_post (v_public_posts_enabled + _community_author = Single Source
+  // of Truth). NICHT hier duplizieren: die fruehere Action-Heuristik driftete
+  // (profiles.firma ist leer; is_admin() nimmt keine Argumente) und sperrte echte
+  // Partner + Admins aus. Die RPC liefert bereits die passende deutsche Fehlermeldung.
   const { error } = await supabase.rpc('create_community_post', {
     p_body: body,
     p_tags: tags,
