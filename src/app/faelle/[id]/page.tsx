@@ -18,6 +18,7 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
 import { berechneQcAutoChecks } from '@/lib/qc/auto-checks'
+import { berechneGutachtenAnomalien, type GutachtenAnomalie } from '@/lib/qc/anomalien'
 import RegulierungCard from '@/components/kb/RegulierungCard'
 // 13.05.2026 Restore (8f088031-Merge + 693f97f8-ts-cleanup): 3 Cards
 // silent rausgefallen — siehe docs/13.05.26/TICKET-cmm28-followup-admin-kb-fallakte.md
@@ -745,6 +746,8 @@ export default async function FallaktePage({
     gesamt_schadensbetrag: number | null
     totalschaden: boolean | null
   } | null = null
+  // Filmcheck (02.07.): geflaggte Widersprueche in den OCR-Werten (Pruef-Hinweise).
+  let qcAnomalien: GutachtenAnomalie[] = []
   let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
@@ -895,6 +898,18 @@ export default async function FallaktePage({
             totalschaden: gutOcr.totalschaden,
           }
         : null
+      // Filmcheck (02.07.): Anomalien aus den flachen OCR-Werten + FIN (aus v_claim_full).
+      // Jede Regel feuert nur bei non-null Inputs -> ohne gutOcr bleibt die Liste leer.
+      if (gutOcr) {
+        qcAnomalien = berechneGutachtenAnomalien({
+          reparaturkosten_netto: gutOcr.reparaturkosten_netto,
+          wiederbeschaffungswert: gutOcr.wiederbeschaffungswert,
+          restwert: gutOcr.restwert,
+          minderwert: gutOcr.minderwert,
+          totalschaden: gutOcr.totalschaden,
+          gutachten_fin: vcfQc?.fin_vin ?? null,
+        })
+      }
       qcGutachtenUrl = haupt?.url ?? null
       qcCardProps = {
         auftragId: erstgutachten.id,
@@ -1079,6 +1094,8 @@ export default async function FallaktePage({
           qcGutachtenUrl,
           // Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB im Filmcheck
           qcOcrWerte,
+          // Filmcheck (02.07.): geflaggte Widersprueche in den OCR-Werten (Pruef-Hinweise)
+          qcAnomalien,
           // AAR-327: Dokument-Anforderungs-UI
           anforderbareSlots,
           anforderungenVonMir,
