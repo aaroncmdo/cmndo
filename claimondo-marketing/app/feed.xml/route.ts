@@ -4,7 +4,7 @@ import { assertFeedFrontmatterValid } from '@/lib/feed/validate'
 
 // News-Feed (RSS 2.0): „Was ist neu" — 30 zuletzt aktualisierte Wissens-Assets.
 export const dynamic = 'force-static'
-export const revalidate = 21600 // 6 h
+export const revalidate = 3600 // 1 h — neue Redaktions-Artikel schneller im Feed
 
 export async function GET() {
   assertFeedFrontmatterValid()
@@ -21,7 +21,7 @@ export async function GET() {
     status: 200,
     headers: {
       'content-type': 'application/rss+xml; charset=utf-8',
-      'cache-control': 'public, max-age=3600, s-maxage=21600',
+      'cache-control': 'public, max-age=3600, s-maxage=3600',
     },
   })
 }
