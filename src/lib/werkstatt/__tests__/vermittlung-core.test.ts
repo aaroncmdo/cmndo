@@ -41,4 +41,16 @@ describe('buildZuweisungPatch', () => {
     expect(p.reparatur_vermittlung_status).toBe('vermittelt')
     expect(typeof p.reparatur_werkstatt_zugewiesen_am).toBe('string')
   })
+
+  it('accountloser Kunde (userId=null) -> zugewiesen_von=null, NICHT "" (uuid-Cast-Fehler)', () => {
+    const p = buildZuweisungPatch('w1', null, 'kunde')
+    expect(p.reparatur_werkstatt_zugewiesen_von).toBeNull()
+    expect(p.reparatur_werkstatt_quelle).toBe('kunde')
+    expect(p.reparatur_vermittlung_status).toBe('vermittelt')
+  })
+
+  it('leerer String als userId -> ebenfalls null (defensiv)', () => {
+    const p = buildZuweisungPatch('w1', '', 'kunde')
+    expect(p.reparatur_werkstatt_zugewiesen_von).toBeNull()
+  })
 })
