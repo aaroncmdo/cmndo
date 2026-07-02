@@ -39,7 +39,7 @@ describe('berechneQcAutoChecks', () => {
     expect('vorschaeden_beruecksichtigt' in berechneQcAutoChecks({ gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] })).toBe(false)
   })
 
-  it('ohne Phase-1b-Quellen bleiben fin/kundendaten offen; gutachten_vollstaendig/fotos/positionen immer offen', () => {
+  it('ohne Phase-1b/3-Quellen bleiben fin/kundendaten/positionen offen; gutachten_vollstaendig/fotos immer offen', () => {
     const r = berechneQcAutoChecks({ gutachtenUrlVorhanden: true, vorschaedenGeprueft: true, pflichtItems: [P('sa_vollmacht', true)] })
     for (const offen of ['fin_17_zeichen', 'kundendaten_vollstaendig', 'gutachten_vollstaendig', 'fotos_ausreichend', 'schadenspositionen_erfasst']) {
       expect(offen in r).toBe(false)
@@ -99,5 +99,49 @@ describe('berechneQcAutoChecks', () => {
       'kundendaten_vollstaendig' in
         berechneQcAutoChecks({ gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] }),
     ).toBe(false)
+  })
+
+  // Phase 3 (02.07., Aaron-DEFAULT): schadenspositionen_erfasst = true wenn EINDEUTIG
+  // Positionen vorliegen — >=1 schadenspositionen-Zeile ODER gutachten.positionen ein
+  // nicht-leeres Array. Beides leer/loadbar -> false. Quelle GAR NICHT uebergeben
+  // (nicht ableitbar) -> Feld bleibt offen (KB-Urteil). Datei-Philosophie:
+  // ein falsches Auto-Haekchen ist schlimmer als keins.
+  it('schadenspositionen_erfasst: >=1 schadenspositionen-Zeile -> true', () => {
+    const base = { gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] }
+    expect(berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 3, gutachtenPositionen: null } }).schadenspositionen_erfasst).toBe(true)
+    // auch genau 1 Zeile reicht
+    expect(berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 1, gutachtenPositionen: null } }).schadenspositionen_erfasst).toBe(true)
+  })
+
+  it('schadenspositionen_erfasst: gutachten.positionen non-empty array -> true', () => {
+    const base = { gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] }
+    expect(
+      berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 0, gutachtenPositionen: [{ pos: 'Stossstange' }] } }).schadenspositionen_erfasst,
+    ).toBe(true)
+  })
+
+  it('schadenspositionen_erfasst: beide Quellen leer -> false (loadbar aber keine Positionen)', () => {
+    const base = { gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] }
+    expect(berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 0, gutachtenPositionen: null } }).schadenspositionen_erfasst).toBe(false)
+    // leeres Array zaehlt NICHT als erfasst
+    expect(berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 0, gutachtenPositionen: [] } }).schadenspositionen_erfasst).toBe(false)
+  })
+
+  it('schadenspositionen_erfasst: Quelle GAR NICHT uebergeben -> Feld bleibt offen (absent)', () => {
+    expect(
+      'schadenspositionen_erfasst' in
+        berechneQcAutoChecks({ gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] }),
+    ).toBe(false)
+  })
+
+  it('schadenspositionen_erfasst: gutachtenPositionen kein Array (Objekt/Muell) -> nur Count zaehlt', () => {
+    const base = { gutachtenUrlVorhanden: true, vorschaedenGeprueft: null, pflichtItems: [] }
+    // Nicht-Array als positionen (defensiv) -> nur der Count entscheidet
+    expect(
+      berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 0, gutachtenPositionen: { foo: 'bar' } as unknown } }).schadenspositionen_erfasst,
+    ).toBe(false)
+    expect(
+      berechneQcAutoChecks({ ...base, positionen: { schadenspositionenCount: 2, gutachtenPositionen: { foo: 'bar' } as unknown } }).schadenspositionen_erfasst,
+    ).toBe(true)
   })
 })

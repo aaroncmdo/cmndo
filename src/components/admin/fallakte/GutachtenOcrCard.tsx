@@ -332,8 +332,8 @@ export default function GutachtenOcrCard({ data }: { data: GutachtenOcrCardData 
 
       {!verarbeitet && (
         <p className="text-xs text-claimondo-ondo">
-          Noch keine OCR-Auswertung — wird nach QC-Freigabe automatisch
-          generiert.
+          Noch keine OCR-Auswertung — wird automatisch bei der
+          Gutachten-Abgabe des Sachverständigen generiert (vor dem Filmcheck).
         </p>
       )}
 
