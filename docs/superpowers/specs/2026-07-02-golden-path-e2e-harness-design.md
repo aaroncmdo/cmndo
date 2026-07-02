@@ -1,7 +1,7 @@
 # Golden-Path E2E-Harness — Design
 
 **Datum:** 2026-07-02
-**Status:** APPROVED (Aaron 2026-07-02: Design + Trade-off „Testdaten kurz in Prod mit hartem Cleanup" freigegeben)
+**Status:** APPROVED (Aaron 2026-07-02: Design + Trade-off „Testdaten kurz in Prod mit hartem Cleanup" freigegeben; + Nachforderung „muss fuer alle Rollen funktionieren" → §4b Rollen-Abdeckung ergaenzt)
 **Auslöser:** Funnel-Diagnose (Prod, 02.07.): 389 Leads → 93 konvertiert → 94 Claims → **84 mit SV** → **nur 2 Gutachten** → **0 Regulierung / 0 Abschluss**. Die hintere Funnel-Hälfte (Gutachten → Kanzlei → Regulierung → Abschluss) ist in Prod **nie e2e durchgelaufen**. Deckt sich mit vielen Session-Befunden (gebaut, nie durchgelaufen).
 
 ## 1. Zweck & Umfang
@@ -70,6 +70,28 @@ Jede Stufe ist **isoliert** (eigene drive+assert), sodass der Report exakt zeigt
 2. **Dedizierter Test-SV** (`ist_aktiv=false`, `@claimondo.test`) — SV-Mitteilungen gehen an eine Test-Adresse; der inaktive SV ist aus dem Dispatch-Matching ausgeschlossen.
 3. **Keine reale Kanzlei-Bindung** am Test-Claim → die Kanzlei-Email bei `kanzlei-uebergeben` findet keinen realen Empfänger (kein Versand).
 4. **Impl-Auflage (Plan/Build):** Vor dem ersten Prod-Lauf JEDEN Side-Effect-Pfad der getriebenen Transitions lesen und verifizieren, dass er für die Test-Entity zu einem Test-Empfänger oder No-Op auflöst. **Falls ein Pfad einen realen Empfänger treffen würde, MUSS ein Test-Daten-Guard ergänzt werden** (analog `pushMandat`) — oder der Harness stoppt vor dieser Transition (partieller Golden-Path) statt zu senden. Comms-Safety schlägt Vollständigkeit.
+
+## 4b. Rollen-Abdeckung & Per-Rollen-Sichtbarkeits-Assertion
+
+Der Admin-getriebene Pipeline-Lauf beweist, dass der **Zustand** fortschreitet — aber er umgeht die **Rollen-Ebene** (Auth + RLS-Sichtbarkeit). Um „funktioniert fuer alle Rollen" zu beweisen, assertet der Harness nach den relevanten Stufen zusaetzlich, dass die **zustaendige Rolle ihren Fall via die gegateten Claim-Views SEHEN kann**. Das faengt genau die wahrscheinliche Ursache der 84→2-Klippe: ein zugewiesener SV, der seinen Fall RLS-bedingt gar nicht sieht → kann kein Gutachten liefern.
+
+**Funnel-Rollen (verifiziert gegen `user_role`-Enum):** `kunde`, `dispatch`, `sachverstaendiger`, `kundenbetreuer`, `kanzlei`, `admin`. (`leadbearbeiter`/`makler`/`werkstatt` = adjazent, nicht im Kern-Golden-Path.)
+
+**Mechanismus:** kleiner SECURITY-DEFINER-Helper `golden_path_claim_visible_for(p_claim_id uuid, p_user_id uuid) RETURNS boolean` (via Migration) — setzt `request.jwt.claims` (`sub`=p_user_id, `role`=authenticated) lokal + gibt `claim_sichtbar_fuer_aktuellen_user(p_claim_id)` zurueck. Repliziert das etablierte JWT-Sim-Muster aus dem RLS-Safety-Net (#3334, `audit_claim_view_identity`). Der Harness ruft ihn via `admin.rpc` pro Rolle-Test-User. **Verifiziert vorab:** Gate-Funktion + gegatete Views (`v_claim_full`/`v_faelle_mit_aktuellem_termin`/…) existieren.
+
+**Per-Stage-Rollen-Assertion:**
+| Stufe | Rolle | Assertion |
+|---|---|---|
+| Claim erzeugt | `kunde` (geschaedigter_user_id) | sieht eigenen Claim (positiv) |
+| SV-Zuweisung | `sachverstaendiger` (Test-SV-User) | **sieht zugewiesenen Fall** — Kern-Hypothese der Klippe |
+| durchgehend | `kundenbetreuer` (kundenbetreuer_id) | sieht betreuten Claim |
+| durchgehend | `dispatch` + `admin` | sehen Claim (breit) |
+| Kanzlei-Stufe (komplett) | `kanzlei` | sieht Mandats-Claim |
+| Gegenprobe (einmal) | fremder Test-User | sieht Claim **NICHT** (Negativ-Assertion) |
+
+Die **Negativ-Assertion** (ein fremder Nutzer darf den Claim NICHT sehen) haelt das Gate ehrlich (kein Ueber-Exposure). Fehlt einer Rolle die Sicht auf ihre Stufe → der Report markiert genau **Rolle + Stufe** als Bruch.
+
+**Bewusst NICHT in Scope:** per-Rollen-**Write**-Autorisierung (darf die Rolle ihre Aktion ausfuehren?) — das deckt der separate Claim-Write-Path-Audit ab; der Golden-Path treibt Writes via Admin-lib + assertet Rollen-**Sicht**.
 
 ## 5. Test-Entities & Cleanup
 
