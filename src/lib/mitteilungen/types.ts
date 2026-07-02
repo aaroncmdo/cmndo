@@ -1,6 +1,8 @@
 // AAR-229 W2: Zentrale Mitteilungs-Typen.
 
-export type MitteilungKategorie = 'update' | 'task' | 'nachricht' | 'anruf'
+// Phase 5: 'task' retired — Tasks werden abgeleitet (get_updates_action), nicht
+// als Mitteilung materialisiert.
+export type MitteilungKategorie = 'update' | 'nachricht' | 'anruf'
 export type MitteilungPrioritaet = 'normal' | 'hoch' | 'dringend'
 export type KontextTyp = 'fall' | 'lead' | 'auftrag' | 'termin' | 'abrechnung' | 'nachricht' | 'claim'
 // AAR-720: makler + dispatch ergänzt — beide haben user_role-Enum-

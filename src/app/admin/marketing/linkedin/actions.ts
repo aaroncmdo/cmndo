@@ -21,7 +21,7 @@ async function alertAdmins(titel: string, inhalt: string) {
       const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
       await createMitteilungMulti(
         admins.map((a: { id: string }) => ({ id: a.id, rolle: 'admin' as const })),
-        { kategorie: 'task', titel, inhalt, route_url: QUEUE_PATH, icon: 'bell', prioritaet: 'normal' },
+        { kategorie: 'update', titel, inhalt, route_url: QUEUE_PATH, icon: 'bell', prioritaet: 'normal' },
       )
     }
   } catch (e) {
