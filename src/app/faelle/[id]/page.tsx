@@ -686,7 +686,10 @@ export default async function FallaktePage({
           .in('status', ['offen', 'in-bearbeitung']),
         admin
           .from('sla_tracking')
-          .select('fall_id, target_rolle, blocker_rolle, blocker_grund, status, breach_at, phase, blocker_seit')
+          // blocker_seit existiert nicht auf sla_tracking (Spaltenfehler -> Query warf ->
+          // KB-Phasen-Audit-Card verschwand still). started_at (= SLA-/Blocker-Start) ist
+          // die kanonische "blockt seit"-Quelle -> als blocker_seit aliasen (Consumer unveraendert).
+          .select('fall_id, target_rolle, blocker_rolle, blocker_grund, status, breach_at, phase, blocker_seit:started_at')
           .eq('claim_id', claimId)
           .in('status', ['pending', 'breached']),
         getStepperState(id),
