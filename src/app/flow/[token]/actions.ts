@@ -1265,16 +1265,15 @@ export async function signSAandCreateFall(
             '6': terminLink,
           })
 
-          // Mitteilung im Gutachter-Portal
-          await admin.from('gutachter_mitteilungen').insert({
-            // CMM-49 (sv_id-Drop): Wert aus terminRow.assignee_id; gutachter_mitteilungen.sv_id
-            // ist Fremd-Tabelle (eigene Spalte, bleibt) — value-identisch.
-            sv_id: terminRow.assignee_id,
-            typ: 'termin_bestaetigt',
-            titel: `Neuer Termin: ${datum} ${uhrzeit}`,
-            nachricht: `Besichtigung bei ${kundeName} in ${adresse}. Kennzeichen: ${lead.kennzeichen || '—'}.`,
-            dringend: true,
-            link: `/gutachter/fall/${fall.id}`,
+          // Mitteilung im Gutachter-Portal (Phase 5: kanonische mitteilungen via
+          // Helper. Der fruehere Raw-Insert mit `dringend` failte silent — 42703
+          // keine Spalte — die SV-Termin-Notif kam also nie an; jetzt repariert.)
+          const { createGutachterMitteilung } = await import('@/lib/mitteilungen')
+          await createGutachterMitteilung(terminRow.assignee_id, 'termin_bestaetigt', fall.id, {
+            datum,
+            uhrzeit,
+            kunde_name: kundeName,
+            adresse,
           })
         }
       }
