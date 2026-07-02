@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getStorageUrl } from '@/lib/storage/url'
 import type { AnspruchPosition, Schweregrad, Segment, VisionResult } from './types'
 
 const BUCKET = 'fall-dokumente'
@@ -54,8 +53,13 @@ export async function ladeFotoUrls(sessionToken: string): Promise<string[]> {
   const db = createAdminClient()
   const row = await ladeSession(db, sessionToken)
   const pfade = Array.isArray(row?.foto_pfade) ? (row!.foto_pfade as string[]) : []
-  const urls = await Promise.all(pfade.map((p) => getStorageUrl(db, BUCKET, p, { context: 'ui' })))
-  return urls.filter((u): u is string => Boolean(u))
+  const signed = await Promise.all(
+    pfade.map(async (p) => {
+      const { data } = await db.storage.from(BUCKET).createSignedUrl(p, 300)
+      return data?.signedUrl ?? null
+    }),
+  )
+  return signed.filter((u): u is string => Boolean(u))
 }
 
 export async function speichereVisionResult(sessionToken: string, vision: VisionResult): Promise<void> {
