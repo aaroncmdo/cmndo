@@ -80,7 +80,7 @@ export async function GET(request: Request) {
     const created = await createMitteilung({
       empfaenger_id: fall.kundenbetreuer_id as string,
       empfaenger_rolle: 'kundenbetreuer',
-      kategorie: 'task',
+      kategorie: 'update',
       titel: 'Re-Termin: Kunde reagiert nicht',
       inhalt: `Fall ${fallNummer}${kundenname ? ` (${kundenname})` : ''}: Der Kunde hat seit 48h nicht auf die Re-Termin-Einladung reagiert. Bitte direkt kontaktieren — sonst storniert der Cron in 3 Werktagen.`,
       kontext_typ: 'fall',

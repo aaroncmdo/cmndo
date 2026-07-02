@@ -65,7 +65,6 @@ function autoRouteUrl(
 function autoIcon(kategorie: MitteilungKategorie, kontextTyp?: KontextTyp): string {
   if (kategorie === 'anruf') return '📞'
   if (kategorie === 'nachricht') return '💬'
-  if (kategorie === 'task') return '📌'
   if (kontextTyp === 'fall' || kontextTyp === 'claim') return '📁'
   if (kontextTyp === 'lead') return '📋'
   if (kontextTyp === 'termin') return '📅'
