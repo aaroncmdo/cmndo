@@ -51,6 +51,19 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
     }
   }
 
+  // Soft-Stage: erfasst das Ergebnis, wirft aber NICHT. Fuer diagnostische Checks (Rollen-
+  // Sicht), die die admin-getriebene Pipeline nicht blocken sollen — so sammelt der Harness
+  // ALLE Bruchstellen statt beim ersten abzubrechen.
+  const softStage = async (name: string, fn: () => Promise<string>): Promise<void> => {
+    const t0 = performance.now()
+    try {
+      const detail = await fn()
+      stages.push({ stage: name, ok: true, detail, ms: Math.round(performance.now() - t0) })
+    } catch (err) {
+      stages.push({ stage: name, ok: false, detail: err instanceof Error ? err.message : String(err), ms: Math.round(performance.now() - t0) })
+    }
+  }
+
   // Eine Status-Transition treiben + verifizieren (Cursor = claims.operative_status).
   const driveTo = (target: string) =>
     stage(`status:${target}`, async () => {
@@ -92,8 +105,8 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
     })
 
     // §4b Rollen-Sicht: Kunde sieht eigenen Claim (positiv) + fremder User NICHT (negativ).
-    await stage('rolle:kunde-sicht', () => assertVisible(admin, claimId!, fx.kundeUserId, 'kunde', true))
-    await stage('rolle:fremd-negativ', () => assertVisible(admin, claimId!, '00000000-0000-0000-0000-000000000000', 'fremd', false))
+    await softStage('rolle:kunde-sicht', () => assertVisible(admin, claimId!, fx.kundeUserId, 'kunde', true))
+    await softStage('rolle:fremd-negativ', () => assertVisible(admin, claimId!, '00000000-0000-0000-0000-000000000000', 'fremd', false))
 
     await stage('sv-zuweisung', async () => {
       await setSvIdForFall(admin, fallId!, fx.svId)
@@ -104,8 +117,8 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
 
     // §4b Rollen-Sicht nach Zuweisung: der zugewiesene SV MUSS seinen Fall sehen (Kern-
     // Hypothese der 84->2-Klippe: SV sieht Fall nicht -> liefert kein Gutachten) + der betreuende KB.
-    await stage('rolle:sv-sicht', () => assertVisible(admin, claimId!, fx.svUserId, 'sv', true))
-    await stage('rolle:kb-sicht', () => assertVisible(admin, claimId!, fx.kbUserId, 'kb', true))
+    await softStage('rolle:sv-sicht', () => assertVisible(admin, claimId!, fx.svUserId, 'sv', true))
+    await softStage('rolle:kb-sicht', () => assertVisible(admin, claimId!, fx.kbUserId, 'kb', true))
 
     // Initial-Status (i.d.R. 'ersterfassung') -> 'sv-zugewiesen', falls noch nicht dort
     // (ersterfassung -> sv-zugewiesen ist im FALL_STATUS_TRANSITIONS-Graph gueltig).
