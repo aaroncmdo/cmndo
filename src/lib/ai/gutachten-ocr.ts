@@ -1,6 +1,15 @@
-// Gutachten-OCR-Pipeline. Wird nach QC-Freigabe (gibKanzleipaketFrei)
-// fire-and-forget gestartet und extrahiert die wesentlichen Werte aus
+// Gutachten-OCR-Pipeline. Wird seit Filmcheck-Inkrement 2c fire-and-forget in
+// gutachtenAbgeben (lib/auftrag/qc.ts) gestartet — VOR der QC, nicht mehr nach
+// QC-Freigabe (gibKanzleipaketFrei) — und extrahiert die wesentlichen Werte aus
 // dem Gutachten-PDF — schreibt sie als claim-SSoT auf die claims-Zeile.
+//
+// Robustheit (Filmcheck-Haertung 2026-07-02): Das PDF wird als base64 im
+// Request mitgesendet (Bytes selbst aus dem Storage geladen), nicht per
+// source:{type:'url'} an Anthropic delegiert. Grund: sobald STORAGE_USE_SIGNED_URLS
+// aktiv ist, ist auftraege.gutachten_url eine signed-URL mit 1h-TTL — die waere
+// zum spaeteren OCR-Zeitpunkt evtl. abgelaufen. base64 ist TTL- und
+// Fetchbarkeit-unabhaengig. URL-Pfad bleibt als Fallback (Lookup/Download-Fail
+// oder >~28 MB Anthropic-base64-Limit).
 //
 // Erweiterte Auslese (CMM-32 Walkthrough): 9 Kernfelder + 5 Cluster
 // (A Fahrzeug, B Vorschaeden, C Reparatur, D Mietwagen, E SV-Meta).
@@ -199,6 +208,45 @@ export async function extractGutachtenAndSaveToClaim(
     bestehendeWerte = (data ?? {}) as Record<string, unknown>
   }
 
+  // Filmcheck-Haertung 2026-07-02: PDF-Bytes selbst laden -> als base64 senden,
+  // damit die OCR nicht von externer Fetchbarkeit + signed-URL-TTL abhaengt.
+  // Spiegelt den fall_dokumente-Lookup aus gutachtenAbgeben (qc.ts): juengstes
+  // gutachten/gutachten_anlage unter claims/<claimId>/gutachten/<auftragId>/.
+  // Faellt auf den bestehenden url-Pfad zurueck, wenn Lookup/Download scheitert
+  // oder die Datei groesser als das Anthropic-base64-Limit (~28 MB Rohbytes,
+  // ~32 MB base64) ist — kein Regressionsrisiko gegenueber dem alten url-Pfad.
+  const MAX_BASE64_BYTES = 28 * 1024 * 1024
+  let pdfBase64: string | null = null
+  try {
+    const { data: docs } = await admin
+      .from('fall_dokumente')
+      .select('storage_path, dokument_typ, hochgeladen_am')
+      .eq('fall_id', auftrag.fall_id as string)
+      .in('dokument_typ', ['gutachten', 'gutachten_anlage'])
+      .like('storage_path', `claims/${claimId}/gutachten/${auftragId}/%`)
+      .is('geloescht_am', null)
+      .order('hochgeladen_am', { ascending: false })
+      .limit(1)
+    const storagePath = (docs as Array<{ storage_path: string | null }> | null)?.[0]?.storage_path ?? null
+    if (storagePath) {
+      const { data: blob, error: dlErr } = await admin.storage
+        .from('fall-dokumente')
+        .download(storagePath)
+      if (!dlErr && blob) {
+        const buf = Buffer.from(await blob.arrayBuffer())
+        if (buf.byteLength <= MAX_BASE64_BYTES) {
+          pdfBase64 = buf.toString('base64')
+        } else {
+          console.warn(
+            `[gutachten-ocr] PDF ${buf.byteLength} bytes > ${MAX_BASE64_BYTES} — nutze url-Fallback`,
+          )
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('[gutachten-ocr] base64-Vorbereitung fehlgeschlagen, url-Fallback:', err)
+  }
+
   try {
     const client = new Anthropic({ apiKey })
     const response = await client.messages.create({
@@ -211,10 +259,16 @@ export async function extractGutachtenAndSaveToClaim(
           content: [
             {
               type: 'document',
-              source: {
-                type: 'url',
-                url: auftrag.gutachten_url as string,
-              },
+              source: pdfBase64
+                ? {
+                    type: 'base64',
+                    media_type: 'application/pdf',
+                    data: pdfBase64,
+                  }
+                : {
+                    type: 'url',
+                    url: auftrag.gutachten_url as string,
+                  },
             },
             {
               type: 'text',
