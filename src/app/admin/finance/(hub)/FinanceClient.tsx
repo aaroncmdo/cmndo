@@ -10,8 +10,8 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts'
-import { TrendingUpIcon, FolderIcon, CalculatorIcon, PercentIcon } from 'lucide-react'
-import { StatCard } from '@/components/shared/StatCard'
+import { TrendingUpIcon, FolderIcon, CalculatorIcon, PercentIcon, UsersIcon } from 'lucide-react'
+import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -57,41 +57,22 @@ export default function FinanceClient({
   chartData,
   tabellenDaten,
 }: Props) {
+  // Redesign 07/2026: 4 StatCards -> verbundene StatBar (Flagship-Muster). aktiveSvCount
+  // war nur ein MRR-hint -> jetzt eigene Metrik "Aktive SVs". Chart + Tabelle unveraendert.
+  const stats: StatBarItem[] = [
+    { label: 'MRR', value: eur(mrr), icon: TrendingUpIcon, tone: 'success' },
+    { label: 'Aktive SVs', value: String(aktiveSvCount), icon: UsersIcon },
+    { label: 'Aktive Fälle', value: String(aktiveFaelle), icon: FolderIcon },
+    { label: 'Ø Fallwert', value: eur(avgFallwert), icon: CalculatorIcon },
+    { label: 'Provision', value: eur(provisionMonat), icon: PercentIcon },
+  ]
+
   return (
     <div className="py-8">
       <div>
 
-        {/* KPI Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
-          <StatCard
-            label="MRR"
-            value={eur(mrr)}
-            hint={`${aktiveSvCount} aktive SVs`}
-            icon={TrendingUpIcon}
-            tone="success"
-          />
-          <StatCard
-            label="Aktive Fälle"
-            value={String(aktiveFaelle)}
-            hint="Diesen Monat"
-            icon={FolderIcon}
-            tone="navy"
-          />
-          <StatCard
-            label="Ø Fallwert"
-            value={eur(avgFallwert)}
-            hint="Regulierungsbetrag"
-            icon={CalculatorIcon}
-            tone="ondo"
-          />
-          <StatCard
-            label="Provision"
-            value={eur(provisionMonat)}
-            hint="10 % — dieser Monat"
-            icon={PercentIcon}
-            tone="ondo"
-          />
-        </div>
+        {/* KPI-Leiste — 5 verbundene Metriken (ex 4 StatCards) */}
+        <StatBar items={stats} className="mb-8" />
 
         {/* AAR-153: Sub-Navigation innerhalb Finanzen. Die „Maik-Provisionen"-
             Seite hängt jetzt unter /admin/finance statt als eigener Nav-Eintrag
@@ -104,13 +85,13 @@ export default function FinanceClient({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">
+                <p className="text-caption text-claimondo-ondo/70 uppercase tracking-wider">
                   Partner-Provisionen
                 </p>
-                <h3 className="text-base font-semibold text-claimondo-navy mt-0.5">
+                <h3 className="text-heading-sm font-semibold text-claimondo-navy mt-0.5">
                   Maik-Provisionen verwalten
                 </h3>
-                <p className="text-xs text-claimondo-ondo mt-1">
+                <p className="text-body-xs text-claimondo-ondo mt-1">
                   Monatsübersicht je Lead: 150&nbsp;€ minus tatsächlicher CPL.
                   Status offen / bezahlt.
                 </p>
@@ -126,13 +107,13 @@ export default function FinanceClient({
           >
             <div className="flex items-start justify-between gap-3">
               <div>
-                <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wider">
+                <p className="text-caption text-claimondo-ondo/70 uppercase tracking-wider">
                   Kanzlei-Abrechnungen
                 </p>
-                <h3 className="text-base font-semibold text-claimondo-navy mt-0.5">
+                <h3 className="text-heading-sm font-semibold text-claimondo-navy mt-0.5">
                   LexDrive-Monatsabrechnung
                 </h3>
-                <p className="text-xs text-claimondo-ondo mt-1">
+                <p className="text-body-xs text-claimondo-ondo mt-1">
                   Pauschalen pro abgeschlossenem Fall, Rechnungen an die
                   Partnerkanzlei versenden.
                 </p>
@@ -146,7 +127,7 @@ export default function FinanceClient({
 
         {/* Chart */}
         <div className="glass-light border border-claimondo-border rounded-ios-md p-5 mb-8">
-          <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">
+          <h2 className="text-body-sm font-semibold text-claimondo-ondo uppercase tracking-wider mb-4">
             Fälle pro Monat
           </h2>
           <div className="h-64">
@@ -191,14 +172,14 @@ export default function FinanceClient({
         {/* Tabelle */}
         <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border">
-            <h2 className="text-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
+            <h2 className="text-body-sm font-semibold text-claimondo-ondo uppercase tracking-wider">
               Letzte abgeschlossene Fälle
             </h2>
           </div>
 
           {tabellenDaten.length === 0 ? (
             <div className="p-12 text-center">
-              <p className="text-claimondo-ondo/70 text-sm">Noch keine abgeschlossenen Fälle.</p>
+              <p className="text-claimondo-ondo/70 text-body-sm">Noch keine abgeschlossenen Fälle.</p>
             </div>
           ) : (
             <>
@@ -222,25 +203,25 @@ export default function FinanceClient({
                             href={`/faelle/${row.id}`}
                             target="_blank"
                             rel="noopener"
-                            className="text-claimondo-light-blue hover:text-claimondo-light-blue font-mono text-xs"
+                            className="text-claimondo-light-blue hover:text-claimondo-light-blue font-mono text-body-xs"
                           >
                             {row.claim_nummer ?? row.id.slice(0, 8)}
                           </Link>
                         </Td>
                         <Td className="px-5">{row.kunde}</Td>
                         <Td className="px-5 text-right tabular-nums">{eur(row.betrag)}</Td>
-                        <Td className="px-5 !text-emerald-400 text-right tabular-nums">{eur(row.provision)}</Td>
-                        <Td className="px-5 !text-claimondo-ondo text-right text-xs">{fmtDate(row.datum)}</Td>
+                        <Td className="px-5 !text-success-strong text-right tabular-nums">{eur(row.provision)}</Td>
+                        <Td className="px-5 !text-claimondo-ondo text-right text-body-xs">{fmtDate(row.datum)}</Td>
                       </Tr>
                     ))}
                   </Tbody>
                   <tfoot>
                     <tr className="border-t border-claimondo-border">
-                      <td colSpan={2} className="px-5 py-3 text-claimondo-ondo text-sm font-medium">Gesamt</td>
-                      <td className="px-5 py-3 text-claimondo-navy text-right tabular-nums font-semibold text-sm">
+                      <td colSpan={2} className="px-5 py-3 text-claimondo-ondo text-body-sm font-medium">Gesamt</td>
+                      <td className="px-5 py-3 text-claimondo-navy text-right tabular-nums font-semibold text-body-sm">
                         {eur(tabellenDaten.reduce((s, r) => s + r.betrag, 0))}
                       </td>
-                      <td className="px-5 py-3 text-emerald-400 text-right tabular-nums font-semibold text-sm">
+                      <td className="px-5 py-3 text-success-strong text-right tabular-nums font-semibold text-body-sm">
                         {eur(tabellenDaten.reduce((s, r) => s + r.provision, 0))}
                       </td>
                       <td />
@@ -261,16 +242,16 @@ export default function FinanceClient({
                   >
                     <div className="flex items-start justify-between mb-1">
                       <div>
-                        <span className="text-claimondo-light-blue font-mono text-xs">
+                        <span className="text-claimondo-light-blue font-mono text-body-xs">
                           {row.claim_nummer ?? row.id.slice(0, 8)}
                         </span>
-                        <p className="text-claimondo-navy text-sm mt-0.5">{row.kunde}</p>
+                        <p className="text-claimondo-navy text-body-sm mt-0.5">{row.kunde}</p>
                       </div>
-                      <span className="text-claimondo-navy text-sm font-semibold tabular-nums">{eur(row.betrag)}</span>
+                      <span className="text-claimondo-navy text-body-sm font-semibold tabular-nums">{eur(row.betrag)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-xs">
+                    <div className="flex items-center justify-between text-body-xs">
                       <span className="text-claimondo-ondo">{fmtDate(row.datum)}</span>
-                      <span className="text-emerald-400 tabular-nums">+{eur(row.provision)}</span>
+                      <span className="text-success-strong tabular-nums">+{eur(row.provision)}</span>
                     </div>
                   </Link>
                 ))}
