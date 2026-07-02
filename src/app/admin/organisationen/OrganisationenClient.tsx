@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { Building2Icon, GraduationCapIcon, CreditCardIcon, CheckCircleIcon, ClockIcon, AlertCircleIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
@@ -33,33 +32,32 @@ export default function OrganisationenClient({ organisationen }: { organisatione
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
-      <PageHeader
-        title="Organisationen"
-        description="Alle Büros und Akademien. Communities haben einen eigenen Bereich."
-        icon={Building2Icon}
-        actions={
-          <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-xs font-medium">
-            {(['alle', 'buero', 'akademie'] as const).map(f => (
-              <button key={f} type="button" onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 rounded-ios-lg transition-colors capitalize ${
-                  filter === f ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
-                }`}>
-                {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
-              </button>
-            ))}
-          </div>
-        }
-      />
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">Organisationen</h1>
+          <p className="mt-0.5 text-body-sm text-claimondo-ondo">Alle Büros und Akademien. Communities haben einen eigenen Bereich.</p>
+        </div>
+        <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-body-xs font-medium">
+          {(['alle', 'buero', 'akademie'] as const).map(f => (
+            <button key={f} type="button" onClick={() => setFilter(f)}
+              className={`px-3 py-1.5 rounded-ios-lg transition-colors capitalize ${
+                filter === f ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
+              }`}>
+              {f === 'alle' ? `Alle (${organisationen.length})` : f === 'buero' ? `Büros (${organisationen.filter(o => o.typ === 'buero').length})` : `Akademien (${organisationen.filter(o => o.typ === 'akademie').length})`}
+            </button>
+          ))}
+        </div>
+      </div>
 
-      <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
+      <div className="bg-white border border-claimondo-border rounded-ios-lg overflow-hidden">
         {filtered.length === 0 ? (
           <div className="p-12 text-center">
             <Building2Icon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-3" />
-            <p className="text-sm text-claimondo-ondo">Keine Organisationen gefunden.</p>
+            <p className="text-body-sm text-claimondo-ondo">Keine Organisationen gefunden.</p>
           </div>
         ) : (
           <Table>
-            <Thead className="text-[10px]! tracking-wide!">
+            <Thead className="text-caption! tracking-wide!">
               <Tr>
                 <Th className="text-left">Organisation</Th>
                 <Th className="text-left">Typ</Th>
@@ -90,11 +88,11 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                     <Td>
                       {o.verwalter_name ? (
                         <div>
-                          <div className="text-xs text-claimondo-navy">{o.verwalter_name}</div>
-                          {o.verwalter_email && <div className="text-[10px] text-claimondo-ondo/70">{o.verwalter_email}</div>}
+                          <div className="text-body-xs text-claimondo-navy">{o.verwalter_name}</div>
+                          {o.verwalter_email && <div className="text-caption text-claimondo-ondo/70">{o.verwalter_email}</div>}
                         </div>
                       ) : (
-                        <span className="text-xs text-claimondo-ondo/70">—</span>
+                        <span className="text-body-xs text-claimondo-ondo/70">—</span>
                       )}
                     </Td>
                     <Td className="text-right font-medium">{o.member_count}</Td>
@@ -107,10 +105,10 @@ export default function OrganisationenClient({ organisationen }: { organisatione
                       {o.has_stripe ? (
                         <CreditCardIcon className="w-4 h-4 text-success" />
                       ) : (
-                        <span className="text-xs text-claimondo-ondo/50">—</span>
+                        <span className="text-body-xs text-claimondo-ondo/50">—</span>
                       )}
                     </Td>
-                    <Td className="text-xs text-claimondo-ondo!">
+                    <Td className="text-body-xs text-claimondo-ondo!">
                       {new Date(o.created_at).toLocaleDateString('de-DE')}
                     </Td>
                   </Tr>

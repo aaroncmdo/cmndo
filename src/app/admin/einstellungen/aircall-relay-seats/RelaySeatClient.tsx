@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { PlusIcon, Trash2Icon, PhoneIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
@@ -54,21 +53,19 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
   return (
     <div className="h-full overflow-y-auto py-6">
       <div>
-        <div className="mb-5">
-          <PageHeader
-            title="Aircall Relay-Seats"
-            description="Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)"
-            actions={
-              <button onClick={() => setShowAdd(true)}
-                className="flex items-center gap-1.5 px-3 py-2 bg-claimondo-ondo text-white text-xs font-medium rounded-ios-lg hover:bg-claimondo-shield transition-colors">
-                <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
-              </button>
-            }
-          />
+        <div className="mb-5 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-heading-lg font-bold text-claimondo-navy">Aircall Relay-Seats</h1>
+            <p className="mt-0.5 text-body-sm text-claimondo-ondo">Dedizierte Aircall-User für Bridge-Vermittlung (Kunde ↔ SV)</p>
+          </div>
+          <button onClick={() => setShowAdd(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-claimondo-ondo text-white text-body-xs font-medium rounded-ios-lg hover:bg-claimondo-shield transition-colors">
+            <PlusIcon className="w-3.5 h-3.5" /> Seat hinzufügen
+          </button>
         </div>
 
         <div className="bg-warning-soft border border-warning/30 rounded-ios-xl px-4 py-3 mb-5">
-          <p className="text-xs text-warning-strong">Ein Relay-Seat kann immer nur EINEN aktiven Bridge-Call haben. Für parallele Bridge-Calls müssen mehrere Seats angelegt sein.</p>
+          <p className="text-body-xs text-warning-strong">Ein Relay-Seat kann immer nur EINEN aktiven Bridge-Call haben. Für parallele Bridge-Calls müssen mehrere Seats angelegt sein.</p>
         </div>
 
         <div className="space-y-3">
@@ -80,8 +77,8 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
                     <PhoneIcon className={`w-4 h-4 ${seat.belegt ? 'text-danger' : seat.aktiv ? 'text-success' : 'text-claimondo-ondo/70'}`} />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-claimondo-navy">{seat.bezeichnung}</p>
-                    <p className="text-xs text-claimondo-ondo">{seat.aircall_user_email} · User {seat.aircall_user_id} · Nummer {seat.aircall_number_id}</p>
+                    <p className="text-body-sm font-medium text-claimondo-navy">{seat.bezeichnung}</p>
+                    <p className="text-body-xs text-claimondo-ondo">{seat.aircall_user_email} · User {seat.aircall_user_id} · Nummer {seat.aircall_number_id}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -89,7 +86,7 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
                     {seat.belegt ? 'Belegt' : seat.aktiv ? 'Frei' : 'Inaktiv'}
                   </StatusBadge>
                   <button onClick={() => toggleAktiv(seat.id, seat.aktiv)}
-                    className="text-xs text-claimondo-ondo hover:underline">
+                    className="text-body-xs text-claimondo-ondo hover:underline">
                     {seat.aktiv ? 'Deaktivieren' : 'Aktivieren'}
                   </button>
                   <button onClick={() => handleDelete(seat.id)}
@@ -101,29 +98,29 @@ export default function RelaySeatClient({ seats: initialSeats }: { seats: Seat[]
             </div>
           ))}
           {seats.length === 0 && (
-            <p className="text-center text-claimondo-ondo/70 text-sm py-8">Noch keine Relay-Seats konfiguriert.</p>
+            <p className="text-center text-claimondo-ondo/70 text-body-sm py-8">Noch keine Relay-Seats konfiguriert.</p>
           )}
         </div>
 
         {/* Add Modal */}
         <Modal open={showAdd} onClose={() => setShowAdd(false)} maxWidth={384} ariaLabel="Relay-Seat hinzufügen">
-          <h3 className="text-lg font-semibold text-claimondo-navy mb-4">Relay-Seat hinzufügen</h3>
+          <h3 className="text-heading-sm font-semibold text-claimondo-navy mb-4">Relay-Seat hinzufügen</h3>
           <div className="space-y-3">
             <input value={form.bezeichnung} onChange={e => setForm(p => ({ ...p, bezeichnung: e.target.value }))} placeholder="Bezeichnung (z.B. Bridge 1)"
-              className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+              className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-body-sm focus:outline-none focus:border-claimondo-ondo" />
             <input value={form.aircall_user_email} onChange={e => setForm(p => ({ ...p, aircall_user_email: e.target.value }))} placeholder="Aircall User Email"
-              className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+              className="w-full border border-claimondo-border rounded-ios-lg px-3 py-2 text-body-sm focus:outline-none focus:border-claimondo-ondo" />
             <div className="grid grid-cols-2 gap-2">
               <input value={form.aircall_user_id} onChange={e => setForm(p => ({ ...p, aircall_user_id: e.target.value }))} placeholder="Aircall User ID" type="number"
-                className="border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+                className="border border-claimondo-border rounded-ios-lg px-3 py-2 text-body-sm focus:outline-none focus:border-claimondo-ondo" />
               <input value={form.aircall_number_id} onChange={e => setForm(p => ({ ...p, aircall_number_id: e.target.value }))} placeholder="Aircall Number ID" type="number"
-                className="border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm focus:outline-none focus:border-claimondo-ondo" />
+                className="border border-claimondo-border rounded-ios-lg px-3 py-2 text-body-sm focus:outline-none focus:border-claimondo-ondo" />
             </div>
           </div>
           <div className="flex gap-2 mt-4">
-            <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 text-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-ios-lg hover:bg-claimondo-border">Abbrechen</button>
+            <button onClick={() => setShowAdd(false)} className="flex-1 py-2.5 text-body-sm font-medium text-claimondo-ondo bg-claimondo-bg rounded-ios-lg hover:bg-claimondo-border">Abbrechen</button>
             <button onClick={handleAdd} disabled={saving || !form.bezeichnung || !form.aircall_user_id}
-              className="flex-1 py-2.5 text-sm font-medium text-white bg-claimondo-ondo rounded-ios-lg hover:bg-claimondo-shield disabled:opacity-50">
+              className="flex-1 py-2.5 text-body-sm font-medium text-white bg-claimondo-ondo rounded-ios-lg hover:bg-claimondo-shield disabled:opacity-50">
               {saving ? '...' : 'Hinzufügen'}
             </button>
           </div>

@@ -123,8 +123,8 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         <div className="flex items-start gap-3">
           <CheckCircle2Icon className="w-6 h-6 text-success flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="text-base font-semibold text-success-strong">Community {success.name} angelegt</h3>
-            <p className="text-sm text-success-strong mt-1">
+            <h3 className="text-heading-sm font-semibold text-success-strong">Community {success.name} angelegt</h3>
+            <p className="text-body-sm text-success-strong mt-1">
               {success.member_count} Mitglied(er) wurden eingeladen. Welcome-Mails versendet.
             </p>
           </div>
@@ -153,24 +153,24 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         })}
       </div>
 
-      <h2 className="text-lg font-semibold text-claimondo-navy mb-5">{STEPS[step].label}</h2>
+      <h2 className="text-heading-sm font-semibold text-claimondo-navy mb-5">{STEPS[step].label}</h2>
 
       {step === 0 && (
         <div className="space-y-5">
           <div className="grid grid-cols-1 gap-3">
             <Field label="Community-Name *" value={name} onChange={setName} placeholder="z.B. Bayern Süd" />
             <div>
-              <label className="text-xs text-claimondo-ondo mb-1.5 block">Beschreibung (optional)</label>
+              <label className="text-body-xs text-claimondo-ondo mb-1.5 block">Beschreibung (optional)</label>
               <textarea
                 value={beschreibung}
                 onChange={e => setBeschreibung(e.target.value)}
                 rows={2}
                 placeholder="Worum geht es in dieser Community?"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-y"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo resize-y"
               />
             </div>
             <div>
-              <label className="text-xs text-claimondo-ondo mb-1.5 block">
+              <label className="text-body-xs text-claimondo-ondo mb-1.5 block">
                 <MapPinIcon className="w-3 h-3 inline mr-1" />
                 Gebiet-Zentrum *
                 {zentrumLat !== null && <span className="text-success ml-2">✓ Geo gesetzt</span>}
@@ -185,13 +185,13 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                   setZentrumLng(place.lng)
                   setZentrumPlaceId(place.place_id)
                 }}
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo"
               />
             </div>
 
             {/* KFZ-152 Phase 3 Follow-up: Circle-vs-Polygon Toggle */}
             <div>
-              <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-xs font-medium mb-2">
+              <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-body-xs font-medium mb-2">
                 <button type="button" onClick={() => setGebietMode('circle')}
                   className={`px-3 py-1.5 rounded-ios-lg transition-colors ${
                     gebietMode === 'circle' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo hover:text-claimondo-navy'
@@ -222,7 +222,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
                 </div>
               )}
             </div>
-            <label className="flex items-start gap-2.5 cursor-pointer text-sm text-claimondo-navy bg-warning-soft border border-warning/30 rounded-ios-xl p-3">
+            <label className="flex items-start gap-2.5 cursor-pointer text-body-sm text-claimondo-navy bg-warning-soft border border-warning/30 rounded-ios-xl p-3">
               <input
                 type="checkbox"
                 checked={exklusiv}
@@ -232,7 +232,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
               <span>
                 <strong className="flex items-center gap-1.5"><ShieldCheckIcon className="w-4 h-4" /> Exklusivität aktivieren</strong>
                 <br />
-                <span className="text-xs text-claimondo-ondo">
+                <span className="text-body-xs text-claimondo-ondo">
                   In diesem Gebiet dürfen KEINE anderen SVs (Solo, Büro, andere Community) angelegt werden.
                 </span>
               </span>
@@ -244,16 +244,16 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
       {step === 1 && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-xs text-claimondo-ondo">Mindestens 1 Mitglied. Jeder bekommt eigenen Login + eigene Anzahlung.</p>
+            <p className="text-body-xs text-claimondo-ondo">Mindestens 1 Mitglied. Jeder bekommt eigenen Login + eigene Anzahlung.</p>
             <button type="button" onClick={addMember}
-              className="flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 text-claimondo-ondo text-xs font-medium">
+              className="flex items-center gap-1 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo/5 hover:bg-claimondo-ondo/10 text-claimondo-ondo text-body-xs font-medium">
               <PlusIcon className="w-3.5 h-3.5" /> Mitglied
             </button>
           </div>
           {mitglieder.map((m, idx) => (
             <div key={m.id} className="border border-claimondo-border rounded-ios-xl p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-claimondo-ondo">Mitglied {idx + 1}</span>
+                <span className="text-body-xs font-semibold text-claimondo-ondo">Mitglied {idx + 1}</span>
                 {mitglieder.length > 1 && (
                   <button type="button" onClick={() => removeMember(m.id)} className="text-claimondo-ondo/50 hover:text-danger p-0.5">
                     <TrashIcon className="w-3.5 h-3.5" />
@@ -271,15 +271,15 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
               </div>
               <Field label="Telefon" type="tel" value={m.telefon} onChange={v => updateMember(m.id, 'telefon', v)} />
               <div>
-                <label className="text-xs text-claimondo-ondo mb-1.5 block">Paket</label>
+                <label className="text-body-xs text-claimondo-ondo mb-1.5 block">Paket</label>
                 <div className="grid grid-cols-3 gap-2">
                   {(['standard', 'pro', 'premium'] as const).map(p => (
                     <button key={p} type="button" onClick={() => updateMember(m.id, 'paket', p)}
-                      className={`px-3 py-2 rounded-ios-lg border text-xs transition-colors ${
+                      className={`px-3 py-2 rounded-ios-lg border text-body-xs transition-colors ${
                         m.paket === p ? 'border-claimondo-ondo bg-claimondo-ondo/5 text-claimondo-ondo font-semibold' : 'border-claimondo-border text-claimondo-ondo hover:border-claimondo-border'
                       }`}>
                       <div className="capitalize">{p}</div>
-                      <div className="text-[10px] mt-0.5 opacity-70">{PAKET_KONFIG[p].kontingent} F · {PAKET_KONFIG[p].preis_anzahlung_eur}€</div>
+                      <div className="text-caption mt-0.5 opacity-70">{PAKET_KONFIG[p].kontingent} F · {PAKET_KONFIG[p].preis_anzahlung_eur}€</div>
                     </button>
                   ))}
                 </div>
@@ -291,23 +291,23 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
 
       {step === 2 && (
         <div className="space-y-4">
-          <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 text-sm">
-            <p className="text-xs text-claimondo-ondo uppercase mb-2">Community</p>
+          <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 text-body-sm">
+            <p className="text-body-xs text-claimondo-ondo uppercase mb-2">Community</p>
             <p className="text-claimondo-navy"><strong>{name}</strong></p>
-            {beschreibung && <p className="text-xs text-claimondo-ondo mt-1">{beschreibung}</p>}
-            <p className="text-xs text-claimondo-ondo mt-2">Zentrum: {zentrumAnschrift}</p>
-            <p className="text-xs text-claimondo-ondo">
+            {beschreibung && <p className="text-body-xs text-claimondo-ondo mt-1">{beschreibung}</p>}
+            <p className="text-body-xs text-claimondo-ondo mt-2">Zentrum: {zentrumAnschrift}</p>
+            <p className="text-body-xs text-claimondo-ondo">
               {gebietMode === 'polygon' && polygon
                 ? `Polygon: ${polygon.length} Eckpunkte`
                 : `Radius: ${radiusKm} km`} · Max {maxFaelleMonat} Fälle/Monat
             </p>
             {exklusiv && (
-              <p className="text-xs text-warning-strong mt-2"><ShieldCheckIcon className="w-3 h-3 inline mr-1" /> Exklusivität aktiviert</p>
+              <p className="text-body-xs text-warning-strong mt-2"><ShieldCheckIcon className="w-3 h-3 inline mr-1" /> Exklusivität aktiviert</p>
             )}
             <div className="mt-3 pt-3 border-t border-claimondo-border">
-              <p className="text-xs text-claimondo-ondo uppercase mb-2">{mitglieder.length} Mitglied(er)</p>
+              <p className="text-body-xs text-claimondo-ondo uppercase mb-2">{mitglieder.length} Mitglied(er)</p>
               {mitglieder.map((m, i) => (
-                <div key={m.id} className="text-xs text-claimondo-navy mb-1">
+                <div key={m.id} className="text-body-xs text-claimondo-navy mb-1">
                   <strong>{i + 1}.</strong> {m.vorname} {m.nachname} ({m.email}) — {m.paket}
                 </div>
               ))}
@@ -316,18 +316,18 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         </div>
       )}
 
-      {error && <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">{error}</div>}
+      {error && <div className="mt-4 px-3 py-2.5 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-body-sm">{error}</div>}
 
       <div className="flex items-center gap-3 mt-6">
         {step > 0 ? (
           <button type="button" onClick={() => setStep(step - 1)} disabled={pending}
-            className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40">
+            className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-body-sm hover:bg-claimondo-bg disabled:opacity-40">
             Zurück
           </button>
         ) : (
           onCancel && (
             <button type="button" onClick={onCancel} disabled={pending}
-              className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg disabled:opacity-40">
+              className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-body-sm hover:bg-claimondo-bg disabled:opacity-40">
               Abbrechen
             </button>
           )
@@ -335,7 +335,7 @@ export default function CommunityAnlegenWizard({ onSuccess, onCancel }: {
         <button type="button"
           onClick={() => { if (step < STEPS.length - 1) setStep(step + 1); else handleSubmit() }}
           disabled={pending || !canNext()}
-          className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-semibold transition-colors disabled:opacity-40">
+          className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-body-sm font-semibold transition-colors disabled:opacity-40">
           {pending ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Community anlegen + Welcome-Mails senden'}
         </button>
       </div>
@@ -357,9 +357,9 @@ function Field({
 function NumField({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
   return (
     <div>
-      <label className="text-xs text-claimondo-ondo mb-1.5 block">{label}</label>
+      <label className="text-body-xs text-claimondo-ondo mb-1.5 block">{label}</label>
       <input type="number" value={value} onChange={e => onChange(Number(e.target.value) || 0)}
-        className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
+        className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo" />
     </div>
   )
 }

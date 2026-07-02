@@ -34,7 +34,7 @@ export default async function MitarbeiterProfilPage() {
         anzeigename={profile.anzeigename ?? ''}
         profilbeschreibung={profile.profilbeschreibung ?? ''}
       />
-      <div className="w-full px-4 pb-6 max-w-xl mx-auto">
+      <div className="mt-5 max-w-3xl pb-6">
         <KontoSicherheitPanel />
       </div>
     </>

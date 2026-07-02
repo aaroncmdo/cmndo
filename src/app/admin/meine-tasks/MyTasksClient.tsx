@@ -3,10 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalLinkIcon, ClipboardListIcon } from 'lucide-react'
+import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalLinkIcon } from 'lucide-react'
 import { updateManualTaskStatus } from '@/lib/tasks/manual-actions'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
 // KFZ-175: Meine-Tasks Client — Tabs Zugewiesen/Erstellt.
@@ -51,13 +50,14 @@ export default function MyTasksClient({
 
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto space-y-6">
-      <PageHeader
-        title="Meine Tasks"
-        description={`${assigned.length} offen zugewiesen, ${created.length} von dir erstellt`}
-        icon={ClipboardListIcon}
-      />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Tasks</h1>
+          <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${assigned.length} offen zugewiesen, ${created.length} von dir erstellt`}</p>
+        </div>
+      </div>
 
-      <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-xs font-medium">
+      <div className="inline-flex bg-claimondo-bg rounded-ios-xl p-0.5 text-body-xs font-medium">
         <button onClick={() => setTab('assigned')}
           className={`px-4 py-1.5 rounded-ios-lg transition-colors ${tab === 'assigned' ? 'bg-white text-claimondo-shield shadow' : 'text-claimondo-ondo'}`}>
           Mir zugewiesen ({assigned.length})
@@ -70,10 +70,10 @@ export default function MyTasksClient({
 
       <div className="glass-light border border-claimondo-border rounded-ios-md overflow-hidden">
         {tasks.length === 0 ? (
-          <div className="p-12 text-center text-sm text-claimondo-ondo/70">Keine Tasks in dieser Ansicht.</div>
+          <div className="p-12 text-center text-body-sm text-claimondo-ondo/70">Keine Tasks in dieser Ansicht.</div>
         ) : (
           <Table>
-            <Thead className="text-[10px]! tracking-wide!">
+            <Thead className="text-caption! tracking-wide!">
               <Tr>
                 <Th className="w-10"></Th>
                 <Th className="text-left">Task</Th>
@@ -100,7 +100,7 @@ export default function MyTasksClient({
                     </Td>
                     <Td>
                       {t.fall_id && t.claim_nummer && (
-                        <Link href={`/faelle/${t.fall_id}`} className="text-claimondo-ondo hover:underline text-xs flex items-center gap-1">
+                        <Link href={`/faelle/${t.fall_id}`} className="text-claimondo-ondo hover:underline text-body-xs flex items-center gap-1">
                           {t.claim_nummer} <ExternalLinkIcon className="w-3 h-3" />
                         </Link>
                       )}
@@ -111,13 +111,13 @@ export default function MyTasksClient({
                       </StatusBadge>
                     </Td>
                     <Td>
-                      <span className={`text-xs ${isOverdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
+                      <span className={`text-body-xs ${isOverdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
                         {t.faellig_am ? new Date(t.faellig_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' }) : '—'}
                       </span>
                     </Td>
                     <Td>
                       <select value={t.status} onChange={e => handleStatusChange(t.id, e.target.value)} disabled={pending}
-                        className="text-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-1 focus:outline-none">
+                        className="text-body-xs bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-2 py-1 focus:outline-none">
                         <option value="offen">Offen</option>
                         <option value="in-bearbeitung">In Bearbeitung</option>
                         <option value="erledigt">Erledigt</option>
