@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 import { htmlToPlainText } from '@/lib/email/plain-text'
+import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
 
 // Google Workspace Limit: 2000 Mails/Tag pro User
 const transporter = nodemailer.createTransport({
@@ -35,6 +36,20 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     console.warn(`[email] from-Override ignoriert: "${opts.from}" → nutze env RESEND_FROM/GMAIL_SMTP_FROM`)
   }
   const from = process.env.GMAIL_SMTP_FROM || 'Claimondo <noreply@claimondo.de>'
+  // Side-Effect-Gate (Prod-Smoke): dry-run unterdrueckt den Send, test-recipient leitet um.
+  // Default (SIDE_EFFECT_MODE unset) = live -> unveraendert.
+  {
+    const realTo = Array.isArray(opts.to) ? opts.to.join(', ') : opts.to
+    const se = resolveSideEffectRecipient('email', realTo || '')
+    if (se.suppress) {
+      console.warn(`[side-effect:${se.mode}] Email UNTERDRUECKT -> "${realTo}" subject="${opts.subject}"`)
+      return { messageId: `side-effect-suppressed-${Date.now()}` }
+    }
+    if (se.mode === 'test-recipient' && se.recipient !== realTo) {
+      console.warn(`[side-effect:test-recipient] Email UMLEITUNG "${realTo}" -> ${se.recipient}`)
+      opts = { ...opts, to: se.recipient }
+    }
+  }
   const admin = createAdminClient()
   // CMM-49: email_log ist claim-gekeyt; interim faelle.claim_id-Lookup aus opts.fallId
   // (P4-TODO: claimId aus dem sendEmail-Caller-Kontext threaden statt fall_id).
