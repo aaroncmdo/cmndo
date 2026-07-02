@@ -1,0 +1,67 @@
+'use client'
+import { useState } from 'react'
+import { berechneAnspruch } from '../actions'
+import { SEGMENTE, SEGMENT_LABEL, type AnspruchSpanne, type Segment, type VisionResult } from '@/lib/anspruch/types'
+import { Button } from '@/components/primitives'
+
+export function AnspruchEinschaetzungStep({
+  sessionToken, vision, onFertig,
+}: { sessionToken: string; vision: VisionResult; onFertig: (s: AnspruchSpanne) => void }) {
+  const [segment, setSegment] = useState<Segment>(vision.segment)
+  const [fahrbereit, setFahrbereit] = useState<boolean | null>(null)
+  const [ezJahr, setEzJahr] = useState<string>('')
+  const [busy, setBusy] = useState(false)
+  const [fehler, setFehler] = useState<string | null>(null)
+
+  async function weiter() {
+    if (fahrbereit === null) { setFehler('Bitte angeben, ob das Fahrzeug fahrbereit ist'); return }
+    setBusy(true); setFehler(null)
+    const jahr = ezJahr.trim() ? Number(ezJahr.trim()) : null
+    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: Number.isFinite(jahr as number) ? jahr : null })
+    setBusy(false)
+    if (r.ok) onFertig(r.spanne)
+    else setFehler(r.error)
+  }
+
+  return (
+    <div className="space-y-5">
+      <div>
+        <h2 className="text-heading-sm font-bold text-claimondo-navy">Erkannt: {vision.beschaedigte_teile.join(', ')}</h2>
+        <p className="text-body-sm text-claimondo-shield">{vision.beschreibung}</p>
+      </div>
+
+      <div>
+        <p className="mb-2 text-body-sm font-medium text-claimondo-navy">Fahrzeugklasse</p>
+        <div className="flex flex-wrap gap-2">
+          {SEGMENTE.map((s) => (
+            <button key={s} type="button" onClick={() => setSegment(s)}
+              className={`rounded-ios-sm border px-3 py-1.5 text-body-sm ${segment === s ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>
+              {SEGMENT_LABEL[s]}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <p className="mb-2 text-body-sm font-medium text-claimondo-navy">Ist Ihr Fahrzeug noch fahrbereit?</p>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => setFahrbereit(true)}
+            className={`flex-1 rounded-ios-sm border px-3 py-2 text-body-sm ${fahrbereit === true ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>Ja, fahrbereit</button>
+          <button type="button" onClick={() => setFahrbereit(false)}
+            className={`flex-1 rounded-ios-sm border px-3 py-2 text-body-sm ${fahrbereit === false ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>Nein, nicht fahrbereit</button>
+        </div>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-body-sm font-medium text-claimondo-navy">Erstzulassung (Jahr)</label>
+        <input inputMode="numeric" value={ezJahr} onChange={(e) => setEzJahr(e.target.value.replace(/\D/g, '').slice(0, 4))}
+          placeholder="z. B. 2021"
+          className="w-full rounded-ios-sm border border-claimondo-border px-3 py-2 text-body text-claimondo-navy" />
+        <p className="mt-1 text-caption text-claimondo-shield">Für die Einschätzung der Wertminderung. Optional.</p>
+      </div>
+
+      {fehler ? <p className="text-body-sm text-danger-strong">{fehler}</p> : null}
+      <Button onClick={weiter} loading={busy} className="w-full">Anspruch anzeigen</Button>
+    </div>
+  )
+}
