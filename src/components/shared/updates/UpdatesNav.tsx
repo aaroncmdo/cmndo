@@ -8,45 +8,16 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import {
-  BellIcon,
-  ActivityIcon,
-  MessageCircleIcon,
-  PhoneIcon,
-  ClipboardListIcon,
-  CheckIcon,
-  XIcon,
-} from 'lucide-react'
+import { BellIcon, CheckIcon, XIcon } from 'lucide-react'
 import { useUpdates } from './useUpdates'
 import { filterByTyp, type TypFilter } from '@/lib/updates/split'
 import type { UpdateItem } from '@/lib/updates/types'
 import { resolvePopoverPlacement, type PopoverPlacement } from './popover-placement'
+import { TYP_CHIPS } from './update-item-shared'
+import { UpdateItem as UpdateItemRow } from './UpdateItem'
+import { isOperativeUpdatesRole } from '@/lib/updates/updates-page-access'
 
 type Variant = 'dark' | 'light'
-
-const TYP_CHIPS: { key: TypFilter; label: string; icon: typeof BellIcon }[] = [
-  { key: 'alle', label: 'Alle', icon: BellIcon },
-  { key: 'event', label: 'Aktivität', icon: ActivityIcon },
-  { key: 'message', label: 'Nachrichten', icon: MessageCircleIcon },
-  { key: 'call', label: 'Anrufe', icon: PhoneIcon },
-  { key: 'task', label: 'Aufgaben', icon: ClipboardListIcon },
-]
-
-function fmtRelative(iso: string) {
-  const d = new Date(iso)
-  const diffMin = Math.floor((Date.now() - d.getTime()) / 60000)
-  if (diffMin < 1) return 'jetzt'
-  if (diffMin < 60) return `vor ${diffMin} Min`
-  const h = Math.floor(diffMin / 60)
-  if (h < 24) return `vor ${h} Std`
-  const days = Math.floor(h / 24)
-  if (days < 7) return `vor ${days} Tg`
-  return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit' })
-}
-
-function typIcon(typ: UpdateItem['typ']): string {
-  return typ === 'task' ? '✅' : typ === 'message' ? '💬' : typ === 'call' ? '📞' : '🔔'
-}
 
 export default function UpdatesNav({
   variant = 'dark',
@@ -55,7 +26,7 @@ export default function UpdatesNav({
   variant?: Variant
   placement?: PopoverPlacement
 }) {
-  const { actionItems, infoItems, actionCount, newInfoCount, markSeen } = useUpdates()
+  const { actionItems, infoItems, actionCount, newInfoCount, markSeen, rolle } = useUpdates()
   const [open, setOpen] = useState(false)
   const [typFilter, setTypFilter] = useState<TypFilter>('alle')
   const [showVerlauf, setShowVerlauf] = useState(false)
@@ -220,25 +191,7 @@ export default function UpdatesNav({
                 <div className="px-4 pb-3 text-xs text-claimondo-ondo/70">Nichts offen — alles erledigt. ✓</div>
               ) : (
                 filteredAction.map(m => (
-                  <button
-                    key={`a-${m.id}`}
-                    onClick={() => jumpTo(m)}
-                    className="w-full text-left border-b border-claimondo-border px-4 py-2.5 hover:bg-claimondo-ondo/5 transition-colors"
-                  >
-                    <div className="flex items-start gap-2.5">
-                      <span className="text-base shrink-0">{typIcon(m.typ)}</span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs leading-snug text-claimondo-navy font-semibold truncate">
-                          {m.prioritaet === 'dringend' && (
-                            <span className="inline-block mr-1 text-danger" aria-label="Kritisch">●</span>
-                          )}
-                          {m.titel}
-                        </p>
-                        {m.inhalt && <p className="text-[11px] text-claimondo-ondo line-clamp-2 mt-0.5">{m.inhalt}</p>}
-                        <p className="text-[10px] text-claimondo-ondo/70 mt-1">{fmtRelative(m.createdAt)}</p>
-                      </div>
-                    </div>
-                  </button>
+                  <UpdateItemRow key={`a-${m.id}`} item={m} variant="action" onClick={jumpTo} />
                 ))
               )}
 
@@ -252,24 +205,20 @@ export default function UpdatesNav({
                   </button>
                   {showVerlauf &&
                     filteredInfo.map(m => (
-                      <button
-                        key={`i-${m.id}`}
-                        onClick={() => jumpTo(m)}
-                        className="w-full text-left border-b border-claimondo-border px-4 py-2.5 bg-white hover:bg-claimondo-bg transition-colors"
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <span className="text-base shrink-0 opacity-70">{typIcon(m.typ)}</span>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-xs leading-snug text-claimondo-ondo truncate">{m.titel}</p>
-                            {m.inhalt && <p className="text-[11px] text-claimondo-ondo/80 line-clamp-2 mt-0.5">{m.inhalt}</p>}
-                            <p className="text-[10px] text-claimondo-ondo/60 mt-1">{fmtRelative(m.createdAt)}</p>
-                          </div>
-                        </div>
-                      </button>
+                      <UpdateItemRow key={`i-${m.id}`} item={m} variant="info" onClick={jumpTo} />
                     ))}
                 </>
               )}
             </div>
+
+            {isOperativeUpdatesRole(rolle) && (
+              <button
+                onClick={() => { setOpen(false); router.push('/updates') }}
+                className="w-full text-center px-4 py-2.5 border-t border-white/40 text-[11px] font-medium text-claimondo-ondo hover:text-claimondo-navy hover:bg-white/40 transition-colors"
+              >
+                Alle anzeigen →
+              </button>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
