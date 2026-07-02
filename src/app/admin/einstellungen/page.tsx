@@ -1,8 +1,7 @@
 ﻿import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, SettingsIcon, UsersIcon, Trash2Icon, SparklesIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
+import { FileSignatureIcon, CalendarIcon, PhoneIcon, ArrowRightIcon, UsersIcon, Trash2Icon, SparklesIcon } from 'lucide-react'
 
 // Fix: /admin/einstellungen hatte keine page.tsx, nur Sub-Ordner → 404.
 // Jetzt Landing-Page mit Kacheln zu den existierenden Unter-Bereichen.
@@ -22,16 +21,16 @@ const SECTIONS = [
     icon: CalendarIcon,
     title: 'Google-Integration',
     description: 'OAuth-Verbindung mit Google Calendar + Meet für Kundenbetreuer.',
-    iconBg: 'bg-emerald-50',
-    iconColor: 'text-emerald-600',
+    iconBg: 'bg-success-soft',
+    iconColor: 'text-success-strong',
   },
   {
     href: '/admin/einstellungen/aircall-relay-seats',
     icon: PhoneIcon,
     title: 'Aircall Relay-Seats',
     description: 'Aircall-Telefon-Seats für Kundenbetreuer verwalten.',
-    iconBg: 'bg-amber-50',
-    iconColor: 'text-amber-600',
+    iconBg: 'bg-warning-soft',
+    iconColor: 'text-warning-strong',
   },
   {
     href: '/admin/personen-dubletten',
@@ -73,11 +72,12 @@ export default async function EinstellungenPage() {
 
   return (
     <div className="max-w-4xl mx-auto py-6 px-4 space-y-6">
-      <PageHeader
-        title="Einstellungen"
-        description="System-Konfiguration und Integrationen."
-        icon={SettingsIcon}
-      />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">Einstellungen</h1>
+          <p className="mt-0.5 text-body-sm text-claimondo-ondo">System-Konfiguration und Integrationen.</p>
+        </div>
+      </div>
 
       <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
         {SECTIONS.map((s) => {
@@ -86,18 +86,18 @@ export default async function EinstellungenPage() {
             <Link
               key={s.href}
               href={s.href}
-              className="group bg-white border border-claimondo-border rounded-2xl p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
+              className="group bg-white border border-claimondo-border rounded-ios-lg p-5 hover:border-claimondo-ondo hover:shadow-sm transition-all"
             >
               <div className="flex items-start gap-3">
                 <div className={`w-10 h-10 rounded-ios-xl ${s.iconBg} flex items-center justify-center shrink-0`}>
                   <Icon className={`w-5 h-5 ${s.iconColor}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1 text-sm font-semibold text-claimondo-navy">
+                  <div className="flex items-center gap-1 text-body-sm font-semibold text-claimondo-navy">
                     {s.title}
                     <ArrowRightIcon className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
-                  <p className="text-xs text-claimondo-ondo mt-1 leading-relaxed">{s.description}</p>
+                  <p className="text-body-xs text-claimondo-ondo mt-1 leading-relaxed">{s.description}</p>
                 </div>
               </div>
             </Link>

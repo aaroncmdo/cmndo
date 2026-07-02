@@ -4,7 +4,6 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircle2Icon, XCircleIcon, PlusIcon, FileTextIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
-import PageHeader from '@/components/shared/PageHeader'
 import { Button } from '@/components/primitives/Button'
 import { Modal } from '@/components/primitives/Modal'
 import { TextField as SharedTextField } from '@/components/shared/forms'
@@ -66,39 +65,37 @@ export default function VertraegeEditorClient({ vorlagen }: { vorlagen: Vorlage[
     <div className="h-full overflow-y-auto py-8">
       <div>
         {/* Header */}
-        <div className="mb-6">
-          <PageHeader
-            title="Vertragsvorlagen"
-            description="Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren."
-            actions={
-              <Button
-                variant="navy"
-                onClick={() => setCreateOpen(true)}
-                iconLeft={<PlusIcon className="w-4 h-4" />}
-              >
-                Neue Vorlage
-              </Button>
-            }
-          />
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-heading-lg font-bold text-claimondo-navy">Vertragsvorlagen</h1>
+            <p className="mt-0.5 text-body-sm text-claimondo-ondo">Pro Typ darf nur eine Vorlage aktiv sein. Aktive Vorlagen können nicht editiert werden — neue Version anlegen + aktivieren.</p>
+          </div>
+          <Button
+            variant="navy"
+            onClick={() => setCreateOpen(true)}
+            iconLeft={<PlusIcon className="w-4 h-4" />}
+          >
+            Neue Vorlage
+          </Button>
         </div>
 
         {error && (
-          <div className="mb-4 px-4 py-3 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-sm">
+          <div className="mb-4 px-4 py-3 rounded-ios-xl bg-danger-soft border border-danger/30 text-danger text-body-sm">
             {error}
           </div>
         )}
 
         {/* Gruppen pro typ */}
         {Object.keys(grouped).length === 0 && (
-          <div className="bg-white border border-dashed border-claimondo-border rounded-2xl p-12 text-center">
+          <div className="bg-white border border-dashed border-claimondo-border rounded-ios-lg p-12 text-center">
             <FileTextIcon className="w-10 h-10 text-claimondo-ondo/50 mx-auto mb-3" />
-            <p className="text-claimondo-ondo text-sm">Noch keine Vertragsvorlagen.</p>
+            <p className="text-claimondo-ondo text-body-sm">Noch keine Vertragsvorlagen.</p>
           </div>
         )}
 
         {Object.entries(grouped).map(([typ, list]) => (
           <div key={typ} className="mb-8">
-            <h2 className="text-sm font-semibold text-claimondo-navy mb-3 uppercase tracking-wide">{typ}</h2>
+            <h2 className="text-body-sm font-semibold text-claimondo-navy mb-3 uppercase tracking-wide">{typ}</h2>
             <div className="space-y-2">
               {list.map(v => (
                 <VorlageCard
@@ -173,21 +170,21 @@ function VorlageCard({
 
   if (isEditing) {
     return (
-      <div className="bg-white border-2 border-claimondo-shield rounded-2xl p-5">
+      <div className="bg-white border-2 border-claimondo-shield rounded-ios-lg p-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
           <Field label="Titel" value={titel} onChange={setTitel} />
           <Field label="Version" value={version} onChange={setVersion} />
         </div>
         <div className="mb-3">
-          <label className="text-xs text-claimondo-ondo mb-1.5 block">Inhalt (HTML)</label>
+          <label className="text-body-xs text-claimondo-ondo mb-1.5 block">Inhalt (HTML)</label>
           <textarea
             value={inhalt}
             onChange={e => setInhalt(e.target.value)}
             rows={14}
-            className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+            className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
           />
         </div>
-        <label className="flex items-center gap-2 text-sm text-claimondo-navy mb-3 cursor-pointer">
+        <label className="flex items-center gap-2 text-body-sm text-claimondo-navy mb-3 cursor-pointer">
           <input
             type="checkbox"
             checked={pflicht}
@@ -196,13 +193,13 @@ function VorlageCard({
           />
           Pflicht-Unterschrift erforderlich
         </label>
-        {err && <p className="text-danger text-sm mb-2">{err}</p>}
+        {err && <p className="text-danger text-body-sm mb-2">{err}</p>}
         <div className="flex gap-2">
           <LoadingButton
             onClick={handleSave}
             isLoading={saving}
             loadingText="Speichern..."
-            className="px-4 py-2 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium disabled:opacity-40"
+            className="px-4 py-2 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-body-sm font-medium disabled:opacity-40"
           >
             Speichern
           </LoadingButton>
@@ -215,24 +212,24 @@ function VorlageCard({
   }
 
   return (
-    <div className={`bg-white border rounded-2xl p-4 ${vorlage.aktiv ? 'border-success/30' : 'border-claimondo-border'}`}>
+    <div className={`bg-white border rounded-ios-lg p-4 ${vorlage.aktiv ? 'border-success/30' : 'border-claimondo-border'}`}>
       <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-sm font-semibold text-claimondo-navy">{vorlage.titel}</h3>
-            <span className="text-xs text-claimondo-ondo/70">v{vorlage.version}</span>
+            <h3 className="text-body-sm font-semibold text-claimondo-navy">{vorlage.titel}</h3>
+            <span className="text-body-xs text-claimondo-ondo/70">v{vorlage.version}</span>
             {vorlage.aktiv ? (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-success-soft text-success font-medium flex items-center gap-1">
+              <span className="text-caption px-2 py-0.5 rounded-full bg-success-soft text-success font-medium flex items-center gap-1">
                 <CheckCircle2Icon className="w-3 h-3" />
                 Aktiv
               </span>
             ) : (
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo font-medium">
+              <span className="text-caption px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo font-medium">
                 Inaktiv
               </span>
             )}
           </div>
-          <p className="text-xs text-claimondo-ondo">
+          <p className="text-body-xs text-claimondo-ondo">
             Erstellt {new Date(vorlage.created_at).toLocaleDateString('de-DE')}
             {vorlage.aktiv && ` · Aktiv seit ${new Date(vorlage.gueltig_ab).toLocaleDateString('de-DE')}`}
           </p>
@@ -247,7 +244,7 @@ function VorlageCard({
                 onClick={onAktivieren}
                 isLoading={isPending}
                 loadingText="..."
-                className="px-3 py-1.5 rounded-ios-lg bg-success hover:bg-success-strong text-white text-xs font-medium disabled:opacity-40"
+                className="px-3 py-1.5 rounded-ios-lg bg-success hover:bg-success-strong text-white text-body-xs font-medium disabled:opacity-40"
               >
                 Aktivieren
               </LoadingButton>
@@ -258,7 +255,7 @@ function VorlageCard({
               onClick={onDeaktivieren}
               isLoading={isPending}
               loadingText="..."
-              className="px-3 py-1.5 rounded-ios-lg border border-danger/30 text-danger text-xs hover:bg-danger-soft inline-flex items-center gap-1 disabled:opacity-40"
+              className="px-3 py-1.5 rounded-ios-lg border border-danger/30 text-danger text-body-xs hover:bg-danger-soft inline-flex items-center gap-1 disabled:opacity-40"
             >
               <XCircleIcon className="w-3 h-3" />
               Deaktivieren
@@ -305,7 +302,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
       <div className="max-h-[90vh] overflow-y-auto">
           <div className="px-5 py-4 border-b border-claimondo-border">
             <h2 className="text-claimondo-navy font-semibold">Neue Vertragsvorlage</h2>
-            <p className="text-claimondo-ondo text-xs mt-1">Wird inaktiv angelegt — Aktivieren in der Liste.</p>
+            <p className="text-claimondo-ondo text-body-xs mt-1">Wird inaktiv angelegt — Aktivieren in der Liste.</p>
           </div>
           <div className="p-5 space-y-3">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -314,16 +311,16 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
               <Field label="Version" value={version} onChange={setVersion} placeholder="z.B. 1.0" />
             </div>
             <div>
-              <label className="text-xs text-claimondo-ondo mb-1.5 block">Inhalt (HTML)</label>
+              <label className="text-body-xs text-claimondo-ondo mb-1.5 block">Inhalt (HTML)</label>
               <textarea
                 value={inhalt}
                 onChange={e => setInhalt(e.target.value)}
                 rows={16}
                 placeholder="<p>Vertragstext...</p>"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm font-mono text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               />
             </div>
-            <label className="flex items-center gap-2 text-sm text-claimondo-navy cursor-pointer">
+            <label className="flex items-center gap-2 text-body-sm text-claimondo-navy cursor-pointer">
               <input
                 type="checkbox"
                 checked={pflicht}
@@ -332,7 +329,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
               />
               Pflicht-Unterschrift erforderlich
             </label>
-            {err && <p className="text-danger text-sm">{err}</p>}
+            {err && <p className="text-danger text-body-sm">{err}</p>}
           </div>
           <div className="px-5 py-4 border-t border-claimondo-border flex gap-2 justify-end">
             <Button variant="ghost" onClick={onClose}>
@@ -342,7 +339,7 @@ function CreateDialog({ onClose, onCreated }: { onClose: () => void; onCreated: 
               onClick={handleCreate}
               isLoading={saving}
               loadingText="Wird erstellt..."
-              className="px-4 py-2 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium disabled:opacity-40"
+              className="px-4 py-2 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-body-sm font-medium disabled:opacity-40"
             >
               Erstellen
             </LoadingButton>
