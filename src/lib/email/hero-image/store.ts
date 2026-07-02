@@ -12,6 +12,10 @@ const BUCKET = 'email-hero'
 // Vorab-Asset als Hintergrund-Basis (geblurrt im Compose). Austauschbar gegen ein
 // dediziertes "Autowelt"-Foto, sobald vorhanden.
 const BASE_ASSET = ['public', 'brand', 'hero-unfall-mann.png']
+// Cache-Key des Blur-Heros OHNE Auto — eine gemeinsame Datei für alle Kunden.
+// Der verschwommene Marken-Hero (Basis-Asset + Navy/Glow-Overlay) braucht kein
+// imagin; nur das eingebettete Fahrzeug-Rendering braucht den Customer-Key.
+const BASE_HERO_KEY = 'base-hero.jpg'
 const HERO_W = 1200
 const HERO_H = 640
 
@@ -41,10 +45,14 @@ export function heroCacheKey(fz: Fahrzeug): string {
  */
 export async function getOrCreateHeroImageUrl(db: SupabaseClient, fz: Fahrzeug): Promise<string | null> {
   try {
-    if (!imaginLive()) return null
-    if (!fz.hersteller?.trim()) return null
-
-    const key = heroCacheKey(fz)
+    // Das personalisierte Fahrzeug-Rendering braucht imagin (Prod-Customer-Key)
+    // UND einen bekannten Hersteller. Der verschwommene Marken-Hero (Basis +
+    // Navy/Glow) NICHT — er wird IMMER gebacken, damit jede Kunden-Mail den
+    // Marken-Hero statt des flachen Navy-Fallbacks bekommt. Ohne Auto teilen
+    // sich alle Kunden EINE Basis-Datei (BASE_HERO_KEY), mit Auto gibt es je
+    // Fahrzeug-Variante eine eigene Datei (heroCacheKey).
+    const withCar = imaginLive() && !!fz.hersteller?.trim()
+    const key = withCar ? heroCacheKey(fz) : BASE_HERO_KEY
     const storage = db.storage.from(BUCKET)
     const publicUrl = storage.getPublicUrl(key).data.publicUrl
 
@@ -52,8 +60,10 @@ export async function getOrCreateHeroImageUrl(db: SupabaseClient, fz: Fahrzeug):
     const { data: existing } = await storage.list('', { search: key, limit: 1 })
     if (existing?.some((o) => o.name === key)) return publicUrl
 
-    // Generieren: Basis (fs) + Fahrzeug (imagin) → composeHero → Upload.
-    const carUrl = buildImaginUrl({ hersteller: fz.hersteller, modell: fz.modell, lackfarbe: fz.lackfarbe, baujahr: null })
+    // Generieren: Basis (fs) immer, Fahrzeug (imagin) nur wenn withCar → composeHero → Upload.
+    const carUrl = withCar
+      ? buildImaginUrl({ hersteller: fz.hersteller, modell: fz.modell, lackfarbe: fz.lackfarbe, baujahr: null })
+      : null
     const [base, car] = await Promise.all([
       readFile(join(process.cwd(), ...BASE_ASSET)),
       carUrl ? fetchImageBuffer(carUrl) : Promise.resolve(null),
