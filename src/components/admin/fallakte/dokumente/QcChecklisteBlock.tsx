@@ -8,7 +8,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ClipboardCheckIcon, FileTextIcon } from 'lucide-react'
+import { ClipboardCheckIcon, FileTextIcon, AlertTriangleIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   qcBestanden,
@@ -16,6 +16,8 @@ import {
   upsertQcCheckliste,
 } from '../../../../app/faelle/[id]/_actions'
 import { qcChecklisteVollstaendig } from '@/lib/qc/checkliste-validation'
+// Filmcheck QC-Anomalie-Erkennung: reine (server-import-freie) Logik, hier nur der Typ.
+import type { GutachtenAnomalie } from '@/lib/qc/anomalien'
 
 // AAR-170: die 9 Prüf-Felder entsprechen 1:1 den Spalten in `qc_checkliste`
 // (information_schema-verifiziert).
@@ -73,12 +75,18 @@ type Props = {
   gutachtenUrl?: string | null
   /** Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB (keine Edit-Rechte). */
   qcOcrWerte?: QcOcrWerte | null
+  /**
+   * Filmcheck QC-Anomalien (02.07.): geflaggte Widersprueche in den OCR-Werten. Leer/
+   * undefined -> kein Pruef-Hinweise-Block. Berechnet in page.tsx via
+   * berechneGutachtenAnomalien().
+   */
+  qcAnomalien?: GutachtenAnomalie[]
 }
 
 const formatEuro = (n: number | null) =>
   n == null ? '–' : n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
 
-export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl, qcOcrWerte }: Props) {
+export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl, qcOcrWerte, qcAnomalien }: Props) {
   const router = useRouter()
   const [qcState, setQcState] = useState<Record<string, boolean | null>>(() => {
     const init: Record<string, boolean | null> = {}
@@ -192,6 +200,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
           </a>
         )}
         <QcOcrWerteBlock werte={qcOcrWerte} />
+        <QcAnomalienBlock anomalien={qcAnomalien} />
         {autoChecks && Object.keys(autoChecks).length > 0 && (
           <p className="text-[10px] text-claimondo-ondo/70">
             Einige Felder sind aus den Falldaten vorbefüllt — bitte prüfen, die offenen („—") selbst beurteilen.
@@ -316,6 +325,39 @@ function QcOcrWerteBlock({ werte }: { werte?: QcOcrWerte | null }) {
           </div>
         )}
       </dl>
+    </div>
+  )
+}
+
+/**
+ * Filmcheck QC-Anomalien (02.07.): flaggt Widersprueche in den OCR-Werten, damit der KB
+ * WARNUNGEN prueft statt blind abzuhaken. warnung -> danger-Tokens, hinweis -> warning-
+ * Tokens. Rendert nichts, wenn keine Anomalien vorliegen (kein leerer Kasten).
+ */
+function QcAnomalienBlock({ anomalien }: { anomalien?: GutachtenAnomalie[] }) {
+  if (!anomalien || anomalien.length === 0) return null
+  return (
+    <div className="rounded-ios-lg border border-warning/40 bg-warning-soft/50 p-3">
+      <p className="text-[10px] uppercase tracking-wider text-warning-strong font-semibold mb-2 flex items-center gap-1.5">
+        <AlertTriangleIcon className="w-3 h-3" /> Prüf-Hinweise ({anomalien.length})
+      </p>
+      <ul className="space-y-1.5">
+        {anomalien.map((a) => {
+          const cls =
+            a.schwere === 'warnung'
+              ? 'bg-danger-soft border-danger/30 text-danger-strong'
+              : 'bg-warning-soft border-warning/30 text-warning-strong'
+          return (
+            <li
+              key={a.code}
+              className={`flex items-start gap-2 px-2.5 py-1.5 rounded-ios-md border text-xs ${cls}`}
+            >
+              <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <span>{a.text}</span>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }
