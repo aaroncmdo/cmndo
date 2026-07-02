@@ -31,6 +31,19 @@ export type QcAutoInput = {
   vorschaedenGeprueft: boolean | null
   /** Pflichtdok-Status pro Slot (aus page.tsx pflichtItems). */
   pflichtItems: ReadonlyArray<PflichtItem>
+  /** Phase 1b: v_claim_full.fin_vin. null/undefined = unbekannt -> fin_17_zeichen bleibt offen. */
+  finVin?: string | null
+  /**
+   * Phase 1b: Kundendaten aus v_claim_full (Ansprechpartner-Person + Kontakt) + die
+   * Besichtigungsadresse. Fehlt das Objekt -> kundendaten_vollstaendig bleibt offen.
+   */
+  kundendaten?: {
+    vorname?: string | null
+    nachname?: string | null
+    email?: string | null
+    telefon?: string | null
+    besichtigungsadresse?: string | null
+  }
 }
 
 /**
@@ -46,6 +59,22 @@ export function berechneQcAutoChecks(input: QcAutoInput): Partial<Record<QcField
   // Nur ableiten wenn der Vorschaden-Check tatsaechlich bewertet wurde.
   if (input.vorschaedenGeprueft != null) {
     out.vorschaeden_beruecksichtigt = input.vorschaedenGeprueft
+  }
+  // Phase 1b (02.07.): FIN nur ableiten wenn vorhanden (null = unbekannt = KB-Urteil,
+  // kein Falsch-Haekchen). Eine gueltige FIN/VIN hat exakt 17 Zeichen.
+  if (input.finVin != null) {
+    out.fin_17_zeichen = input.finVin.trim().length === 17
+  }
+  // Phase 1b (02.07., Aaron): kundendaten_vollstaendig = Ansprechpartner/Person (vorname +
+  // nachname — bei einer Firma der Ansprechpartner) UND Kontakt (email ODER telefon) UND
+  // Besichtigungsadresse. Die Kunde-Anschrift ist bewusst NICHT verlangt (Aaron: die
+  // Besichtigungsadresse ist das Wichtige, nicht die Anschrift des Kunden).
+  if (input.kundendaten) {
+    const k = input.kundendaten
+    const hasAnsprechpartner = !!(k.vorname?.trim() && k.nachname?.trim())
+    const hasKontakt = !!(k.email?.trim() || k.telefon?.trim())
+    const hasBesichtigung = !!k.besichtigungsadresse?.trim()
+    out.kundendaten_vollstaendig = hasAnsprechpartner && hasKontakt && hasBesichtigung
   }
   return out
 }
