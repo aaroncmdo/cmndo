@@ -43,47 +43,12 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
   const admin = createAdminClient()
   const locale = await getLocale()
 
-  // ─── 1. sachverstaendige-Snapshot ────────────────────────────────────
-  // basic_onboarding_abgeschlossen_am kommt aus Task-6-Migration; kann noch
-  // nicht im generierten Supabase-Typen enthalten sein -> as any-Cast.
-  const { data: sv } = await admin
-    .from('sachverstaendige')
-    .select(
-      'id, paket, standort_adresse, standort_plz, standort_lat, standort_lng, bvsk_mitgliedsnummer, dat_nummer, basic_onboarding_abgeschlossen_am',
-    )
-    .eq('profile_id', user.id)
-    .maybeSingle()
-
-  if (!sv || (sv as Record<string, unknown>).paket !== 'basic') return null
-
-  // ─── 2. profiles-Snapshot ────────────────────────────────────────────
-  const { data: profile } = await admin
-    .from('profiles')
-    .select('avatar_url, profilbeschreibung, twofa_telefon_verifiziert_am, google_connected_at')
-    .eq('id', user.id)
-    .maybeSingle()
-
-  // ─── 3. Kalender-Verbindungen pruefen ────────────────────────────────
-  const { data: caldav } = await admin
-    .from('sv_kalender_verbindungen')
-    .select('id')
-    .eq('sv_id', (sv as Record<string, unknown>).id as string)
-    .limit(1)
-
-  const gcal = !!profile?.google_connected_at
-  const hasCaldav = Array.isArray(caldav) && caldav.length > 0
-
-  // ─── 4. Prefill-Map ──────────────────────────────────────────────────
-  // Beide Datensaetze flach kopieren; abgeleitete Felder ergaenzen.
-  const prefilled: Record<string, unknown> = {
-    ...flachKopie(sv as Record<string, unknown>),
-    ...flachKopie((profile ?? {}) as Record<string, unknown>),
-    // Abgeleitete Keys fuer die Wizard-Feld-Skip-Pruefung:
-    phone_verified: profile?.twofa_telefon_verifiziert_am ?? null,
-    kalender_connected: gcal || hasCaldav ? 'true' : null,
-  }
-
-  // ─── 5. Phasen + Felder aus DB laden ─────────────────────────────────
+  // ─── 1. Phasen + Felder aus DB laden (ZUERST — fuer DB-getriebenen Prefill) ──
+  // Die zu ladenden sachverstaendige-/profiles-Spalten werden aus den Feld-
+  // db_targets abgeleitet (nicht hartkodiert). So wird JEDES Feld, das auf eine
+  // echte Spalte zeigt und dort Daten hat, als "haben wir schon" erkannt (Phase
+  // skippt / Feld prefillt) — auch kuenftige Felder, ohne diese Liste manuell
+  // nachzupflegen. Das ist DB-Getriebenheit statt kuratierter Spaltenliste.
   const { data: phasenRows } = await admin
     .from('onboarding_phasen')
     .select(`
@@ -96,12 +61,63 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
     .eq('flow_key', 'sv-onboarding')
     .order('reihenfolge', { ascending: true })
 
+  const alleFelder = (phasenRows ?? []).flatMap((p) =>
+    Array.isArray(p.onboarding_felder) ? p.onboarding_felder : [],
+  ) as Array<{ db_target: unknown }>
+  const { sachverstaendige: svDbCols, profiles: profDbCols } = sammlePrefillSpalten(alleFelder)
+
+  // Fixe Logik-Spalten + abgeleitete Quell-Spalten (kein db_target) + Feld-db_target-Spalten.
+  const svSelect = [
+    ...new Set(['id', 'paket', 'basic_onboarding_abgeschlossen_am', ...svDbCols]),
+  ].join(', ')
+  const profSelect = [
+    ...new Set(['twofa_telefon_verifiziert_am', 'google_connected_at', ...profDbCols]),
+  ].join(', ')
+
+  // ─── 2. sachverstaendige-Snapshot (DB-getrieben selektiert) ──────────
+  const { data: sv } = await admin
+    .from('sachverstaendige')
+    .select(svSelect)
+    .eq('profile_id', user.id)
+    .maybeSingle()
+
+  if (!sv || (sv as unknown as Record<string, unknown>).paket !== 'basic') return null
+
+  // ─── 3. profiles-Snapshot (DB-getrieben selektiert) ──────────────────
+  const { data: profile } = await admin
+    .from('profiles')
+    .select(profSelect)
+    .eq('id', user.id)
+    .maybeSingle()
+
+  const profileRec = (profile ?? null) as unknown as Record<string, unknown> | null
+
+  // ─── 4. Kalender-Verbindungen pruefen ────────────────────────────────
+  const { data: caldav } = await admin
+    .from('sv_kalender_verbindungen')
+    .select('id')
+    .eq('sv_id', (sv as unknown as Record<string, unknown>).id as string)
+    .limit(1)
+
+  const gcal = !!profileRec?.google_connected_at
+  const hasCaldav = Array.isArray(caldav) && caldav.length > 0
+
+  // ─── 5. Prefill-Map ──────────────────────────────────────────────────
+  // Beide Datensaetze flach kopieren; abgeleitete Felder ergaenzen.
+  const prefilled: Record<string, unknown> = {
+    ...flachKopie(sv as unknown as Record<string, unknown>),
+    ...flachKopie((profileRec ?? {}) as Record<string, unknown>),
+    // Abgeleitete Keys fuer die Wizard-Feld-Skip-Pruefung:
+    phone_verified: profileRec?.twofa_telefon_verifiziert_am ?? null,
+    kalender_connected: gcal || hasCaldav ? 'true' : null,
+  }
+
   if (!phasenRows) {
     return {
       phasen: [],
       prefilledValues: prefilled,
-      svId: (sv as Record<string, unknown>).id as string,
-      abgeschlossen: !!((sv as Record<string, unknown>).basic_onboarding_abgeschlossen_am),
+      svId: (sv as unknown as Record<string, unknown>).id as string,
+      abgeschlossen: !!((sv as unknown as Record<string, unknown>).basic_onboarding_abgeschlossen_am),
       totalDefinedPhases: 0,
       skippedPhases: 0,
     }
@@ -146,7 +162,7 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
           // optionen damit das Widget sie im Client-Context hat.
           if (f.typ === 'calendar-connect') {
             optionen = [
-              { value: 'svId', label: (sv as Record<string, unknown>).id as string },
+              { value: 'svId', label: (sv as unknown as Record<string, unknown>).id as string },
               { value: 'gcal', label: String(gcal) },
               { value: 'caldav', label: String(hasCaldav) },
             ]
@@ -279,11 +295,33 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
   return {
     phasen,
     prefilledValues: prefilled,
-    svId: (sv as Record<string, unknown>).id as string,
-    abgeschlossen: !!((sv as Record<string, unknown>).basic_onboarding_abgeschlossen_am),
+    svId: (sv as unknown as Record<string, unknown>).id as string,
+    abgeschlossen: !!((sv as unknown as Record<string, unknown>).basic_onboarding_abgeschlossen_am),
     totalDefinedPhases: phasenRows.length,
     skippedPhases: skipped,
   }
+}
+
+/**
+ * DB-getrieben: sammelt die zu ladenden Prefill-Spalten je Tabelle aus den
+ * Feld-db_targets. Nur echte Tabellen (sachverstaendige/profiles) -- Sentinels
+ * (_self/_finalize/_termin) haben keine ladbare Spalte und werden uebersprungen.
+ * Exportiert fuer den Unit-Test.
+ */
+export function sammlePrefillSpalten(
+  felder: Array<{ db_target: unknown }>,
+): { sachverstaendige: string[]; profiles: string[] } {
+  const sv = new Set<string>()
+  const prof = new Set<string>()
+  for (const f of felder) {
+    const dt = f.db_target as { tabelle?: string; spalte?: string } | null
+    const spalte = dt?.spalte
+    if (!spalte) continue
+    if (dt?.tabelle === 'sachverstaendige') sv.add(spalte)
+    else if (dt?.tabelle === 'profiles') prof.add(spalte)
+    // andere Tabellen / Sentinels (_self/_finalize/_termin) -> ignorieren
+  }
+  return { sachverstaendige: [...sv], profiles: [...prof] }
 }
 
 // Flacht ein DB-Objekt ab und laesst null/undefined/'' heraus
