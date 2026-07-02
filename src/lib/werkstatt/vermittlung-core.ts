@@ -37,13 +37,15 @@ export function brauchtWerkstattVermittlung(row: BedarfRow): boolean {
  */
 export function buildZuweisungPatch(
   werkstattId: string,
-  userId: string,
+  userId: string | null,
   quelle: VermittlungQuelle,
 ): Record<string, unknown> {
   return {
     reparatur_werkstatt_id: werkstattId,
     reparatur_werkstatt_zugewiesen_am: new Date().toISOString(),
-    reparatur_werkstatt_zugewiesen_von: userId,
+    // uuid-Spalte: accountloser Kunde (Flow-Token, kein Login) hat keine userId ->
+    // null schreiben, NIEMALS '' (leerer String wirft "invalid input syntax for type uuid").
+    reparatur_werkstatt_zugewiesen_von: userId || null,
     reparatur_werkstatt_quelle: quelle,
     reparatur_vermittlung_status: 'vermittelt',
   }
