@@ -42,7 +42,7 @@ export async function deleteFall(fallId: string): Promise<{ success: boolean; er
       const tables = [
         'lead_historie', 'pflichtdokumente', 'qc_checkliste', 'forderungspositionen',
         'zahlungseingaenge', 'technische_probleme', 'gutachter_abrechnungspositionen',
-        'gutachter_abrechnungen', 'gutachter_termine', 'gutachter_mitteilungen',
+        'gutachter_termine', 'gutachter_mitteilungen',
         'benachrichtigungen', 'timeline', 'tasks', 'nachrichten', 'fall_dokumente',
         'termine', 'flow_links',
       ]
