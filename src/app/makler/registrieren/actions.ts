@@ -1,7 +1,7 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { sendMaklerWelcome } from '@/lib/email/google/flows'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
 import { anlegeMaklerKern } from '@/lib/makler/anlege-makler'
 
@@ -96,13 +96,14 @@ export async function registriereMaklerSelf(
     console.error('[registriereMaklerSelf] Promo-Read fehlgeschlagen (non-critical):', err)
   }
 
-  // 6. Passwort-Setzen-Email (Supabase-Recovery) — non-critical. Konto ist bereits aktiv +
-  //    Landeseite live; der Makler setzt sein Passwort und loggt sich ins Portal ein.
+  // 6. Branded Welcome-Email — Kundennutzen-Framing + Empfehlungs-Landeseite + Recovery-
+  //    Magic-Link zum Passwort-Setzen (non-critical). Konto ist bereits aktiv + Landeseite live.
   try {
-    const supabase = await createClient()
-    await supabase.auth.resetPasswordForEmail(email)
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+    const landeseiteUrl = code ? `${base}/m/${code}` : base
+    await sendMaklerWelcome({ to: email, firma, vorname, landeseiteUrl })
   } catch (err) {
-    console.error('[registriereMaklerSelf] Passwort-Email fehlgeschlagen (non-critical):', err)
+    console.error('[registriereMaklerSelf] Welcome-Email fehlgeschlagen (non-critical):', err)
   }
 
   // 7. Awareness-Notification an Admins — KEIN Gate (offener Signup), nur Sichtbarkeit/

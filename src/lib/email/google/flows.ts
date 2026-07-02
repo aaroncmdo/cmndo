@@ -27,6 +27,7 @@ import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from 
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
+import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates/MaklerWelcome'
 
 const admin = () => createAdminClient()
 
@@ -840,6 +841,56 @@ export async function sendWillkommenSvAnBuero(params: WillkommenSvAnBueroParams)
     fallId: null,
     empfaengerTyp: 'sv',
     template: 'arch1_willkommen_sv_an_buero',
+  })
+}
+
+// ─── Makler-Aktivierung: Welcome-Mail an selbst-registrierten Makler ─────────
+
+export type MaklerWelcomeParams = {
+  to: string
+  firma: string
+  vorname: string
+  landeseiteUrl: string
+}
+
+/**
+ * Welcome-Mail an einen selbst-registrierten Makler (Makler-Aktivierung).
+ * Enthaelt die Empfehlungs-Landeseite + einen Recovery-Magic-Link zum Passwort-Setzen
+ * (AAR-auth-haertung: kein Klartext-Passwort). Best-effort — der Caller wickelt den
+ * Aufruf in try/catch, damit ein Mail-Fail die Registrierung nicht bricht.
+ */
+export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<void> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+  let magicLink: string | null = null
+  try {
+    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
+      type: 'recovery',
+      email: params.to,
+      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+    })
+    if (linkErr || !linkData?.properties?.action_link) {
+      console.error('[sendMaklerWelcome] Magic-Link-Generierung fehlgeschlagen:', linkErr?.message)
+    } else {
+      magicLink = linkData.properties.action_link
+    }
+  } catch (err) {
+    console.error('[sendMaklerWelcome] Magic-Link-Sub-Op fehlgeschlagen:', err)
+  }
+
+  const props = {
+    firma: params.firma,
+    vorname: params.vorname,
+    landeseiteUrl: params.landeseiteUrl,
+    magicLink,
+  }
+  const html = await render(MaklerWelcomeEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: maklerWelcomeSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'makler',
+    template: 'makler_welcome',
   })
 }
 

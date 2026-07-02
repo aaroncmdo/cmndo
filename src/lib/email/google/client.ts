@@ -26,7 +26,7 @@ type SendEmailOpts = {
   /** @deprecated Wird ignoriert — alle Sends gehen von RESEND_FROM/GMAIL_SMTP_FROM. */
   from?: string
   fallId?: string | null
-  empfaengerTyp?: 'kunde' | 'sv' | 'kanzlei' | 'admin'
+  empfaengerTyp?: 'kunde' | 'sv' | 'kanzlei' | 'admin' | 'makler'
   template?: string
 }
 

@@ -4,6 +4,7 @@ import { useState, useTransition, type ChangeEvent } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/primitives'
 import { registriereMaklerSelf } from './actions'
+import { ShareTools } from '@/components/makler/ShareTools'
 
 type FormState = {
   firma: string
@@ -73,6 +74,14 @@ export function MaklerRegistrierenClient() {
             >
               {url.replace(/^https?:\/\//, '')}
             </a>
+          </div>
+        ) : null}
+        {success.code ? (
+          <div className="mt-5 text-left">
+            <p className="mb-2 text-center text-sm font-semibold text-claimondo-navy">
+              Teilen Sie Ihren Link — so gewinnen Sie sofort Kunden:
+            </p>
+            <ShareTools code={success.code} firma={form.firma} variant="quick" />
           </div>
         ) : null}
         <div className="mt-6">
