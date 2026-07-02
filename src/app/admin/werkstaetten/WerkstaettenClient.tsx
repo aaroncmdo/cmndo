@@ -3,8 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon } from 'lucide-react'
-import { createWerkstatt } from './actions'
+import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon, MailIcon } from 'lucide-react'
+import { createWerkstatt, sendWerkstattLoginMail } from './actions'
 import { werkstattQrSvg } from './qr-action'
 import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
 import PageHeader from '@/components/shared/PageHeader'
@@ -47,7 +47,9 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string; werkstattId: string } | null>(null)
+  const [loginMailLoadingId, setLoginMailLoadingId] = useState<string | null>(null)
+  const [dialogMailSending, setDialogMailSending] = useState(false)
 
   // QR-Code-Anzeige pro Werkstatt (regulaerer Kunden-QR /start/werkstatt/<id>)
   const [qr, setQr] = useState<{ name: string; url: string; svg: string } | null>(null)
@@ -104,11 +106,34 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
         toast.error(result.error)
         return
       }
-      setCreatedCredentials({ email: result.email, password: result.password })
+      setCreatedCredentials({ email: result.email, password: result.password, werkstattId: result.werkstattId })
       toast.success(`Werkstatt angelegt: ${result.email}`)
       router.refresh()
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function sendLoginMail(w: Werkstatt) {
+    setLoginMailLoadingId(w.id)
+    try {
+      const res = await sendWerkstattLoginMail(w.id)
+      if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
+      toast.success(`Login-Mail gesendet an ${w.email ?? 'die Werkstatt'}`)
+    } finally {
+      setLoginMailLoadingId(null)
+    }
+  }
+
+  async function sendDialogLoginMail() {
+    if (!createdCredentials) return
+    setDialogMailSending(true)
+    try {
+      const res = await sendWerkstattLoginMail(createdCredentials.werkstattId, createdCredentials.password)
+      if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
+      toast.success(`Login-Mail gesendet an ${createdCredentials.email}`)
+    } finally {
+      setDialogMailSending(false)
     }
   }
 
@@ -210,6 +235,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
                 <Th className="text-left text-claimondo-ondo!">QR</Th>
                 <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
+                <Th className="text-left text-claimondo-ondo!">Login-Mail</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -265,11 +291,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                       Staffel
                     </Button>
                   </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={loginMailLoadingId === w.id}
+                      onClick={() => sendLoginMail(w)}
+                      iconLeft={<MailIcon className="w-4 h-4" />}
+                    >
+                      Senden
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
-                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={8} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Werkstätten angelegt.
                   </Td>
                 </Tr>
@@ -301,7 +338,16 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               <p className="text-xs text-claimondo-ondo">
                 Das Passwort wird dem Nutzer beim ersten Login zur Änderung aufgefordert.
               </p>
-              <Button variant="navy" fullWidth onClick={() => { setCreatedCredentials(null); setShowDialog(false) }}>
+              <Button
+                variant="navy"
+                fullWidth
+                loading={dialogMailSending}
+                onClick={sendDialogLoginMail}
+                iconLeft={<MailIcon className="w-4 h-4" />}
+              >
+                Login-Mail an Werkstatt senden
+              </Button>
+              <Button variant="ghost" fullWidth onClick={() => { setCreatedCredentials(null); setShowDialog(false) }}>
                 Schließen
               </Button>
             </div>
