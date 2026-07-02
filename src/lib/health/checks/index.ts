@@ -5,6 +5,7 @@
 import type { HealthCheck } from '@/lib/health/types'
 import { funnelStuckClaimsCheck } from './funnel-stuck-claims'
 import { funnelStalledFlowCheck } from './funnel-stalled-flow'
+import { stuckPartnerAccountsCheck } from './stuck-partner-accounts'
 import { slotsStaleReservationsCheck } from './slots-stale-reservations'
 import { remindersOverdueCheck } from './reminders-overdue'
 import { emailFailureRateCheck } from './email-failure-rate'
@@ -14,6 +15,7 @@ import { configRequiredEnvCheck } from './config-required-env'
 export const ALL_CHECKS: HealthCheck[] = [
   funnelStuckClaimsCheck,
   funnelStalledFlowCheck,
+  stuckPartnerAccountsCheck,
   slotsStaleReservationsCheck,
   remindersOverdueCheck,
   emailFailureRateCheck,
