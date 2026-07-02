@@ -1,6 +1,5 @@
 ﻿import AdminNav from './_components/AdminNav'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -28,7 +27,7 @@ export default async function AdminLayout({
     .in('status', ['offen', 'in-bearbeitung'])
 
   return (
-    <MitteilungenProvider>
+    <>
     <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphärische Hintergrund-Spotlights — identisch mit Login-Page */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
@@ -74,6 +73,6 @@ export default async function AdminLayout({
       </div>
       <GlobalPosteingangFab currentUserId={user.id} />
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }
