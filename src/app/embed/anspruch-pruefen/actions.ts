@@ -46,7 +46,15 @@ export async function ladeSchadenfoto(
 
 function parseVision(text: string): VisionResult | null {
   try {
-    const o = JSON.parse(text)
+    let t = text.trim()
+    const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/i)
+    if (fence) t = fence[1].trim()
+    if (!t.startsWith('{')) {
+      const s = t.indexOf('{')
+      const e = t.lastIndexOf('}')
+      if (s !== -1 && e !== -1 && e > s) t = t.slice(s, e + 1)
+    }
+    const o = JSON.parse(t)
     if (!(SEGMENTE as readonly string[]).includes(o.segment)) o.segment = 'mittelklasse'
     if (!['leicht', 'mittel', 'schwer'].includes(o.schweregrad)) o.schweregrad = 'mittel'
     if (typeof o.geschaetzte_kosten_min !== 'number' || typeof o.geschaetzte_kosten_max !== 'number') return null
@@ -83,7 +91,10 @@ export async function analysiereSchaden(
     void logAiUsage({ endpoint: 'anspruch-pruefen/analyse', model: AI_MODELS.vision_lead, usage: response.usage })
     const text = response.content.find((b) => b.type === 'text')?.text ?? '{}'
     const vision = parseVision(text)
-    if (!vision) return { ok: false, error: 'Analyse fehlgeschlagen' }
+    if (!vision) {
+      console.error('[anspruch] parseVision returned null; raw model head:', text.slice(0, 400))
+      return { ok: false, error: 'Analyse fehlgeschlagen' }
+    }
     await speichereVisionResult(sessionToken, vision)
     return { ok: true, vision }
   } catch (err) {
