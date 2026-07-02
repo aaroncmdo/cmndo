@@ -137,6 +137,8 @@ Falls tsc danach an bestehenden Record-Casts meckert: nicht „reparieren", die 
 
 ## Phase 1 — Erfassung (Config, kein Formular-Code)
 
+> **Korrektur (Ausfuehrung 02.07.):** Die Config-Zeilen erscheinen SOFORT im **Dispatcher**-Formular (DispatchLeadForm rendert alle sektion-Felder generisch). Im **Kunde-Flow** dagegen rendert `feststellung-steps.ts` nur explizit gelistete `feldKeys` pro Micro-Step → die Sichtbarkeit von `reparaturwunsch` im Flow braucht einen Ein-Zeilen-Eintrag in `feststellung-steps.ts` (aar-956-hot). Dieser Eintrag ist nach **Phase 7 Task 7.3** verschoben (dort ist der Flow-/Rebase-Kollisionsraum ohnehin). Phase 1 selbst bleibt kollisionsfrei.
+
 ### Task 1.1: Die 3 `onboarding_felder`-Zeilen (Migration)
 
 **Files:**
@@ -839,6 +841,21 @@ Expected: gruen.
 git add src/app/flow/[token]/FlowWerkstattStep.tsx src/app/flow/[token]/FlowWizardKfz.tsx
 git commit -m "feat(flow): Kunde-Werkstatt-Step (5 naechste, gegated, ueberspringbar)"
 ```
+
+---
+
+### Task 7.3: `reparaturwunsch` im Kunde-Flow sichtbar (feststellung-steps.ts)
+
+**Files:** Modify `src/app/flow/[token]/feststellung-steps.ts`
+
+- [ ] **Step 1:** Am Ende des Kapitels „Schaden" (nach `folgeschaeden`) einen Micro-Step ergaenzen (gegen die dann-aktuelle FESTSTELLUNG_STEPS-Struktur nach Rebase):
+```ts
+{ kind: 'felder', id: 'reparatur', kapitel: 'Schaden', titel: 'Reparatur oder Auszahlung?', feldKeys: ['reparaturwunsch', 'reparatur_vermittlung_status', 'reparatur_werkstatt_extern'] },
+```
+Der Step ist automatisch sichtbar, sobald >=1 seiner Felder in der Config liegt (die 3 Zeilen aus Phase 1); `computeActiveFeststellungSteps` + `meetsCondition` regeln `conditional_on` (Rueckfrage nur bei `reparatur`, extern nur bei `eigene`).
+
+- [ ] **Step 2: Build** `npm run build` → gruen.
+- [ ] **Step 3: Commit** `feat(flow): reparaturwunsch-Frage im Kunde-Feststellung-Flow sichtbar`
 
 ---
 
