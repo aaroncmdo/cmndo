@@ -76,3 +76,29 @@ export async function uploadFlowSignatur(
   if (!url) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
   return { ok: true, url }
 }
+
+/**
+ * Persistiert die vom Gutachter im Onboarding gezeichnete Unterschrift als seine
+ * wiederverwendbare Signatur (`sachverstaendige.unterschrift_url`).
+ * Pfad: `sv/{svId}/unterschrift_{ts}.png`. Kein Fall-/Token-Kontext noetig — der
+ * Aufrufer (signSvVertrag) hat den eingeloggten SV bereits verifiziert.
+ */
+export async function uploadSvUnterschrift(
+  svId: string,
+  base64DataUrl: string,
+): Promise<UploadResult> {
+  if (!svId) return { ok: false, error: 'SV-ID fehlt' }
+  const decoded = decodeDataUrl(base64DataUrl)
+  if (!decoded) return { ok: false, error: 'Ungültige oder zu große Bilddaten' }
+
+  const admin = createAdminClient()
+  const path = `sv/${svId}/unterschrift_${Date.now()}.png`
+  const { error: upErr } = await admin.storage
+    .from('unterschriften')
+    .upload(path, decoded.bytes, { contentType: decoded.mime, upsert: false })
+  if (upErr) return { ok: false, error: upErr.message }
+
+  const url = await getStorageUrl(admin, 'unterschriften', path)
+  if (!url) return { ok: false, error: 'URL-Generierung fehlgeschlagen' }
+  return { ok: true, url }
+}

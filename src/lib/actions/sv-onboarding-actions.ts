@@ -76,11 +76,27 @@ export async function signSvVertrag({
     })
   }
 
-  // 3. Status updaten — vertrag_unterschrieben + Zeitstempel
+  // 3. Status updaten — vertrag_unterschrieben + Zeitstempel (+ unterschrift_url).
+  //    Zuerst die gezeichnete Signatur als wiederverwendbare Unterschrift des
+  //    Gutachters persistieren (sachverstaendige.unterschrift_url) — "der
+  //    Gutachter setzt sein Unterschriftenfeld selbst" (Aaron 02.07.). Best-
+  //    effort: ein fehlgeschlagener Upload bricht den Vertrags-Flow NICHT, das
+  //    Vertrag-PDF ist bereits erstellt.
+  let unterschriftUrl: string | null = null
+  try {
+    const { uploadSvUnterschrift } = await import('@/lib/actions/unterschrift-upload')
+    const sig = await uploadSvUnterschrift(sv.id, signaturePngDataUri)
+    if (sig.ok) unterschriftUrl = sig.url
+    else console.error('[signSvVertrag] Unterschrift-Upload:', sig.error)
+  } catch (err) {
+    console.error('[signSvVertrag] Unterschrift-Upload throw:', err)
+  }
+
   await db.from('sachverstaendige').update({
     onboarding_status: 'vertrag_unterzeichnet',
     vertrag_unterschrieben: true,
     vertrag_unterschrieben_am: new Date().toISOString(),
+    ...(unterschriftUrl ? { unterschrift_url: unterschriftUrl } : {}),
   }).eq('id', sv.id)
 
   // 4. Welcome-Email mit PDF-Anhang (fire & forget)
@@ -138,6 +154,49 @@ export async function startStripeCheckout(): Promise<{ clientSecret: string; ses
   } catch (err) {
     return { error: err instanceof Error ? err.message : 'Stripe-Fehler' }
   }
+}
+
+/**
+ * SV-Onboarding: Gutscheincode statt Stripe-Anzahlung einloesen.
+ *
+ * Ein gueltiger Code (istGueltigerGutschein, server-only) ueberspringt den
+ * Anzahlungs-Schritt und schaltet den SV frei — spiegelt EXAKT die 4 Felder,
+ * die der Stripe-Webhook nach erfolgreicher Anzahlung setzt (api/stripe/webhook:
+ * onboarding_status='bezahlt', portal_zugang_freigeschaltet, ist_aktiv,
+ * anzahlung_status='bezahlt'). Verifizierung (Tier 2) bleibt unberuehrt — der
+ * Code deckt nur das Deposit-Gate, nicht die Dokumenten-Pruefung.
+ */
+export async function einloeseGutscheincode(
+  code: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'Kein SV-Profil' }
+
+  const { istGueltigerGutschein } = await import('@/lib/onboarding/gutschein')
+  if (!istGueltigerGutschein(code)) {
+    return { ok: false, error: 'Ungültiger Gutscheincode' }
+  }
+
+  const db = createAdminClient()
+  const { error } = await db
+    .from('sachverstaendige')
+    .update({
+      onboarding_status: 'bezahlt',
+      portal_zugang_freigeschaltet: true,
+      ist_aktiv: true,
+      anzahlung_status: 'bezahlt',
+    })
+    .eq('id', sv.id)
+  if (error) return { ok: false, error: `Freischaltung fehlgeschlagen: ${error.message}` }
+
+  revalidatePath('/gutachter/willkommen')
+  revalidatePath('/gutachter')
+  revalidatePath('/admin/sachverstaendige', 'page')
+  return { ok: true }
 }
 
 /**

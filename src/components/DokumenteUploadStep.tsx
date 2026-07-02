@@ -101,7 +101,14 @@ export default function DokumenteUploadStep({ initialSlots, onDone }: Props) {
         const fd = new FormData()
         fd.append('slot_id', slotId)
         fd.append('datei', file)
-        await uploadSvPflichtdokument(fd)
+        // uploadSvPflichtdokument liefert ein Result-Object (kein throw bei
+        // fachlichen Fehlern). Vorher wurde das ignoriert -> ein Server-Fehler
+        // wurde faelschlich als "hochgeladen" angezeigt. Jetzt: ok pruefen.
+        const result = await uploadSvPflichtdokument(fd)
+        if (!result.ok) {
+          setError(result.error)
+          return
+        }
         setSlot(slotId, { slotId, status: 'hochgeladen', adminNotiz: null })
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Upload fehlgeschlagen')
