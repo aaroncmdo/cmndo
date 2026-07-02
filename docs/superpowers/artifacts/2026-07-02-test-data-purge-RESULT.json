@@ -1,0 +1,17 @@
+{
+  "operation": "test-data-purge",
+  "date": "2026-07-02",
+  "note": "Ergebnis-Summary. Voller Ziel-ID-Snapshot (69 T1-Claims/Falls/Leads + 5 T2): siehe 2026-07-02-test-data-purge-manifest.json (dessen 'errors'-Array = historischer Run 1, ueber die Laeufe geloest).",
+  "scope": "T1 (Claims an Test-SV-Accounts) + T2 (unkonvertierte reine Test-Leads); Hard-Delete; Recency-Guard 72h auf created_at; Fixture-Accounts behalten; T3 (~234 interne @claimondo.de-Leads) bewusst ausgeschlossen.",
+  "result": {
+    "claims_before": 94, "claims_after": 17,
+    "test_sv_claims_before": 82, "test_sv_claims_after": 4,
+    "leads_before": 391, "leads_after": 303,
+    "real_claims": 13, "real_claims_mit_echtem_sv": 3
+  },
+  "remaining_test_sv_claims": "4 (nur 'Smoke SV', created 2026-06-29..07-01, recency-geschuetzt; nightly Janitor raeumt sie sobald >72h).",
+  "verified_zero_real_customers": true,
+  "steady_state_confirmed": "finaler Dry-Run: 0 deletable, 4 recency-protected, 0 errors",
+  "hardening_across_runs": "delete_fall_komplett ist post-CMM-49 fuer bridge-gemappte Claims (fall_id != claim_id) unzuverlaessig -> direkter Bridge/Claim/Lead-Delete + vollstaendiges NO_ACTION-Dep-Modell (auftraege, fall_dokumente, gutachter_finder_anfragen konvertiert_zu_fall_id+_lead_id, gutschriften, Abrechnungs-Positionen, ...). Recency-Guard von greatest(created,updated) auf created_at korrigiert (Lead-Delete SET-NULLt claims.lead_id -> bumpte updated_at -> falsch 'recent').",
+  "design": "docs/superpowers/specs/2026-07-02-test-data-purge-design.md"
+}
