@@ -91,12 +91,21 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
       return `claim=${claimId} status=${data.operative_status ?? 'NULL'}`
     })
 
+    // §4b Rollen-Sicht: Kunde sieht eigenen Claim (positiv) + fremder User NICHT (negativ).
+    await stage('rolle:kunde-sicht', () => assertVisible(admin, claimId!, fx.kundeUserId, 'kunde', true))
+    await stage('rolle:fremd-negativ', () => assertVisible(admin, claimId!, '00000000-0000-0000-0000-000000000000', 'fremd', false))
+
     await stage('sv-zuweisung', async () => {
       await setSvIdForFall(admin, fallId!, fx.svId)
       const { data } = await admin.from('claims').select('sv_id').eq('id', claimId!).single()
       if (data?.sv_id !== fx.svId) throw new Error(`sv_id nicht gesetzt (ist ${data?.sv_id ?? 'NULL'})`)
       return `sv_id=${fx.svId}`
     })
+
+    // §4b Rollen-Sicht nach Zuweisung: der zugewiesene SV MUSS seinen Fall sehen (Kern-
+    // Hypothese der 84->2-Klippe: SV sieht Fall nicht -> liefert kein Gutachten) + der betreuende KB.
+    await stage('rolle:sv-sicht', () => assertVisible(admin, claimId!, fx.svUserId, 'sv', true))
+    await stage('rolle:kb-sicht', () => assertVisible(admin, claimId!, fx.kbUserId, 'kb', true))
 
     // Initial-Status (i.d.R. 'ersterfassung') -> 'sv-zugewiesen', falls noch nicht dort
     // (ersterfassung -> sv-zugewiesen ist im FALL_STATUS_TRANSITIONS-Graph gueltig).
@@ -163,6 +172,22 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
  * Findet golden-path-Leads (source_channel-Marker) -> ihre Claims -> fall_id via Bridge
  * -> delete_fall_komplett; dann die Leads.
  */
+/**
+ * §4b Rollen-Sicht: prueft via JWT-Sim-Helper (Migration 20260702100933), ob p_user_id den
+ * Claim unter RLS saehe. Die generierten Types wurden bewusst nicht regeneriert (Regel 2) ->
+ * gezielter rpc-Cast auf diese eine Health-Helper-Funktion.
+ */
+async function assertVisible(admin: Db, claimId: string, userId: string, label: string, expected: boolean): Promise<string> {
+  const rpc = admin.rpc as unknown as (
+    fn: 'golden_path_claim_visible_for',
+    args: { p_claim_id: string; p_user_id: string },
+  ) => Promise<{ data: boolean | null; error: { message: string } | null }>
+  const { data, error } = await rpc('golden_path_claim_visible_for', { p_claim_id: claimId, p_user_id: userId })
+  if (error) throw new Error(`visibility-rpc (${label}): ${error.message}`)
+  if (Boolean(data) !== expected) throw new Error(`${label}: sichtbar=${data}, erwartet ${expected}`)
+  return `${label}=${data}`
+}
+
 async function preCleanup(admin: Db): Promise<void> {
   const { data: gpLeads } = await admin.from('leads').select('id').eq('source_channel', LEAD_MARKER)
   const leadIds = (gpLeads ?? []).map((l) => l.id as string)

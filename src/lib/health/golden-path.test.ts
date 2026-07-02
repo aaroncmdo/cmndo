@@ -27,4 +27,9 @@ describe('golden-path core', () => {
   it('nutzt @claimondo.test-Kontakt (Comms-Safety)', () => {
     expect(src).toMatch(/@claimondo\.test/)
   })
+  it('assertet Per-Rollen-Sichtbarkeit + Negativ-Gegenprobe (§4b)', () => {
+    expect(src).toMatch(/golden_path_claim_visible_for/)
+    expect(src).toMatch(/rolle:sv-sicht/)
+    expect(src).toMatch(/fremd-negativ/)
+  })
 })
