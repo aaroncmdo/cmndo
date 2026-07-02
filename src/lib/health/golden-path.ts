@@ -99,6 +99,10 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
       fallId = r.fallId
       claimId = await resolveClaimId(admin, fallId!)
       if (!claimId) throw new Error('claimId nicht aufloesbar')
+      // Test-Kunde als Geschaedigten verknuepfen — damit die kunde-Sicht-Assertion valide ist.
+      // Der per-Lauf-Lead hat keinen Kunde-Account -> geschaedigter_user_id waere sonst NULL,
+      // und der Fixture-Kunde saehe den Claim korrekt NICHT (er waere nicht der Geschaedigte).
+      await admin.from('claims').update({ geschaedigter_user_id: fx.kundeUserId }).eq('id', claimId)
       const { data } = await admin.from('claims').select('operative_status').eq('id', claimId).single()
       if (!data) throw new Error('Claim nach Konvertierung nicht gefunden')
       return `claim=${claimId} status=${data.operative_status ?? 'NULL'}`
@@ -167,10 +171,7 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
     /* Fehler ist bereits als Stage-Result erfasst; finally raeumt auf */
   } finally {
     try {
-      if (fallId || claimId) {
-        await admin.rpc('delete_fall_komplett', { p_fall_id: fallId, p_claim_id: claimId })
-      }
-      if (leadId) await admin.from('leads').delete().eq('id', leadId)
+      await cleanupOne(admin, fallId, claimId, leadId)
       cleanedUp = true
     } catch (err) {
       stages.push({ stage: 'cleanup', ok: false, detail: err instanceof Error ? err.message : String(err), ms: 0 })
@@ -181,35 +182,56 @@ export async function runGoldenPath(): Promise<GoldenPathReport> {
 }
 
 /**
- * Idempotentes Pre-Cleanup: entfernt Reste eines evtl. abgebrochenen Vorlaufs.
- * Findet golden-path-Leads (source_channel-Marker) -> ihre Claims -> fall_id via Bridge
- * -> delete_fall_komplett; dann die Leads.
- */
-/**
  * §4b Rollen-Sicht: prueft via JWT-Sim-Helper (Migration 20260702100933), ob p_user_id den
  * Claim unter RLS saehe. Die generierten Types wurden bewusst nicht regeneriert (Regel 2) ->
  * gezielter rpc-Cast auf diese eine Health-Helper-Funktion.
  */
 async function assertVisible(admin: Db, claimId: string, userId: string, label: string, expected: boolean): Promise<string> {
-  const rpc = admin.rpc as unknown as (
-    fn: 'golden_path_claim_visible_for',
-    args: { p_claim_id: string; p_user_id: string },
-  ) => Promise<{ data: boolean | null; error: { message: string } | null }>
-  const { data, error } = await rpc('golden_path_claim_visible_for', { p_claim_id: claimId, p_user_id: userId })
+  // WICHTIG: admin.rpc DIREKT aufrufen (this-Bindung erhalten). Ein `const rpc = admin.rpc`
+  // koppelt die Methode von der Client-Instanz ab -> this=undefined -> "reading 'rest'"-Crash.
+  // golden_path_claim_visible_for ist nicht in den generierten Types (Regel 2, kein Regen)
+  // -> Argument-Cast auf never + Ergebnis-Cast auf die bekannte Shape.
+  const { data, error } = (await admin.rpc(
+    'golden_path_claim_visible_for' as never,
+    { p_claim_id: claimId, p_user_id: userId } as never,
+  )) as { data: boolean | null; error: { message: string } | null }
   if (error) throw new Error(`visibility-rpc (${label}): ${error.message}`)
   if (Boolean(data) !== expected) throw new Error(`${label}: sichtbar=${data}, erwartet ${expected}`)
   return `${label}=${data}`
 }
 
+/**
+ * Raeumt einen Lauf idempotent auf: Claim (delete_fall_komplett, fall_id-scoped) + die
+ * lead_id-verknuepften NO_ACTION-Reste, die die Pipeline erzeugt (gutachter_termine/tasks
+ * mit NO_ACTION-FK auf leads) + den Lead. Der leads.delete-Error wird geprueft (Supabase
+ * wirft nicht) — sonst blieben Reste stumm liegen (erster Prod-Lauf 02.07. fing das).
+ */
+async function cleanupOne(admin: Db, fallId: string | null, claimId: string | null, leadId: string | null): Promise<void> {
+  if (fallId || claimId) {
+    await admin.rpc('delete_fall_komplett', { p_fall_id: fallId, p_claim_id: claimId })
+  }
+  if (leadId) {
+    await admin.from('gutachter_termine').delete().eq('lead_id', leadId)
+    await admin.from('tasks').delete().eq('lead_id', leadId)
+    const { error } = await admin.from('leads').delete().eq('id', leadId)
+    if (error) throw new Error(`leads.delete (${leadId}): ${error.message}`)
+  }
+}
+
+/**
+ * Idempotentes Pre-Cleanup: entfernt Reste evtl. abgebrochener Vorlaeufe (Marker
+ * leads.source_channel='golden_path' -> Claim via Bridge -> cleanupOne).
+ */
 async function preCleanup(admin: Db): Promise<void> {
   const { data: gpLeads } = await admin.from('leads').select('id').eq('source_channel', LEAD_MARKER)
-  const leadIds = (gpLeads ?? []).map((l) => l.id as string)
-  if (leadIds.length === 0) return
-  const { data: gpClaims } = await admin.from('claims').select('id').in('lead_id', leadIds)
-  for (const c of gpClaims ?? []) {
-    const cid = c.id as string
-    const { data: bridge } = await admin.from('faelle_claim_bridge').select('fall_id').eq('claim_id', cid).maybeSingle()
-    await admin.rpc('delete_fall_komplett', { p_fall_id: (bridge?.fall_id as string | null) ?? null, p_claim_id: cid })
+  for (const l of gpLeads ?? []) {
+    const lid = l.id as string
+    const { data: gpClaims } = await admin.from('claims').select('id').eq('lead_id', lid)
+    for (const c of gpClaims ?? []) {
+      const cid = c.id as string
+      const { data: bridge } = await admin.from('faelle_claim_bridge').select('fall_id').eq('claim_id', cid).maybeSingle()
+      await cleanupOne(admin, (bridge?.fall_id as string | null) ?? cid, cid, null)
+    }
+    await cleanupOne(admin, null, null, lid)
   }
-  await admin.from('leads').delete().in('id', leadIds)
 }
