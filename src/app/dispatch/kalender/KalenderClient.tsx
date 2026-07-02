@@ -213,9 +213,9 @@ export default function KalenderClient({
     <div className="py-4 px-4 md:px-6 space-y-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-xl font-semibold text-claimondo-navy">Kalender</h1>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">Kalender</h1>
           {/* suppressHydrationWarning: fmtDateLabel nutzt toLocaleDateString — UTC vs. Berlin → #418 */}
-          <p className="text-xs text-claimondo-ondo" suppressHydrationWarning>
+          <p className="text-body-xs text-claimondo-ondo" suppressHydrationWarning>
             KW {getWeekNumber(weekStart)} · {fmtDateLabel(weekStart)} – {fmtDateLabel(addDays(weekStart, 4))}
           </p>
         </div>
@@ -272,19 +272,19 @@ export default function KalenderClient({
       {filterOpen && (
         <div className="rounded-ios-xl border border-claimondo-border bg-white p-3 space-y-2">
           <div className="flex items-center justify-between">
-            <p className="text-xs font-medium text-claimondo-navy">Sichtbare Sachverständige</p>
+            <p className="text-body-xs font-medium text-claimondo-navy">Sichtbare Sachverständige</p>
             <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setVisibleSvs(new Set(svList.map((s) => s.id)))}
-                className="text-[11px] text-claimondo-ondo hover:underline"
+                className="text-body-xs text-claimondo-ondo hover:underline"
               >
                 Alle
               </button>
               <button
                 type="button"
                 onClick={() => setVisibleSvs(new Set())}
-                className="text-[11px] text-claimondo-ondo hover:underline"
+                className="text-body-xs text-claimondo-ondo hover:underline"
               >
                 Keine
               </button>
@@ -299,7 +299,7 @@ export default function KalenderClient({
                   key={sv.id}
                   type="button"
                   onClick={() => toggleSv(sv.id)}
-                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-opacity ${
+                  className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-body-xs font-medium border transition-opacity ${
                     active ? 'opacity-100' : 'opacity-40'
                   }`}
                   style={{
@@ -334,12 +334,12 @@ export default function KalenderClient({
           return (
             <div key={dayKey} className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden">
               <div className="px-3 py-2 border-b border-claimondo-border bg-claimondo-bg/50">
-                <span className="text-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
+                <span className="text-body-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
                   {fmtDateLabel(d)}
                 </span>
               </div>
               {dayTermine.length === 0 ? (
-                <p className="px-3 py-3 text-xs text-claimondo-ondo/60">Keine Termine</p>
+                <p className="px-3 py-3 text-body-xs text-claimondo-ondo/60">Keine Termine</p>
               ) : (
                 <div className="divide-y divide-claimondo-border/50">
                   {dayTermine.map((termin) => {
@@ -355,8 +355,8 @@ export default function KalenderClient({
                       >
                         <span className="w-1 self-stretch rounded-full shrink-0" style={{ backgroundColor: col.bg }} />
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium text-claimondo-navy truncate">{block.timeLabel}</p>
-                          <p className="text-[11px] text-claimondo-ondo truncate">
+                          <p className="text-body-sm font-medium text-claimondo-navy truncate">{block.timeLabel}</p>
+                          <p className="text-body-xs text-claimondo-ondo truncate">
                             {block.label}
                             {termin.status ? ` · ${STATUS_LABEL[termin.status] ?? termin.status}` : ''}
                           </p>
@@ -381,14 +381,14 @@ export default function KalenderClient({
               className="border-b border-l border-claimondo-border bg-claimondo-bg/50 px-2 py-2 text-center"
             >
               {/* suppressHydrationWarning: toLocaleDateString UTC vs. Europe/Berlin → React #418 */}
-              <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
+              <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo" suppressHydrationWarning>
                 {d.toLocaleDateString('de-DE', { weekday: 'short' })}
               </p>
               {/* 14.05.26: suppressHydrationWarning auch hier — d.getDate()/
                   getMonth() sind TZ-abhängig (Node UTC vs. Browser
                   Europe/Berlin). Vor diesem Fix triggerte das React #418
                   beim Hydrate des Dispatch-Kalender-Headers. */}
-              <p className="text-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
+              <p className="text-body-sm font-semibold text-claimondo-navy" suppressHydrationWarning>
                 {String(d.getDate()).padStart(2, '0')}.{String(d.getMonth() + 1).padStart(2, '0')}
               </p>
             </div>
@@ -399,7 +399,7 @@ export default function KalenderClient({
             {Array.from({ length: HOUR_END - HOUR_START + 1 }, (_, i) => HOUR_START + i).map((h) => (
               <div
                 key={h}
-                className="absolute right-1 text-[10px] text-claimondo-ondo"
+                className="absolute right-1 text-caption text-claimondo-ondo"
                 style={{ top: (h - HOUR_START) * 12 * SLOT_PX - 6 }}
               >
                 {String(h).padStart(2, '0')}:00
@@ -460,7 +460,7 @@ export default function KalenderClient({
                       key={termin.id}
                       type="button"
                       onClick={() => navigateToTermin(termin)}
-                      className="absolute rounded-ios-md text-left text-[10px] leading-tight overflow-hidden hover:ring-2 hover:ring-claimondo-navy transition-shadow shadow-sm"
+                      className="absolute rounded-ios-md text-left text-caption leading-tight overflow-hidden hover:ring-2 hover:ring-claimondo-navy transition-shadow shadow-sm"
                       style={{
                         top: block.topPx + 1,
                         height: Math.max(block.heightPx - 2, 18),
