@@ -56,6 +56,8 @@ import {
   type QcCheckliste,
   type QcOcrWerte,
 } from '@/components/admin/fallakte/dokumente'
+// Filmcheck QC-Anomalie-Erkennung: reine (server-import-freie) Logik, hier nur der Typ.
+import type { GutachtenAnomalie } from '@/lib/qc/anomalien'
 // CMM-33: Zentrale Pflichtdokumente-Section als Übersicht oben im Tab.
 import PflichtdokumenteSection, {
   type PflichtSlotForView,
@@ -127,6 +129,8 @@ type DokumenteTabProps = {
   qcGutachtenUrl?: string | null
   /** Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB im Filmcheck. */
   qcOcrWerte?: QcOcrWerte | null
+  /** Filmcheck (02.07.): geflaggte Widersprueche in den OCR-Werten (Pruef-Hinweise). */
+  qcAnomalien?: GutachtenAnomalie[]
   anforderbareSlots: AnforderbarerSlot[]
   anforderungenVonMir: AnforderungsItem[]
   rolleLabel: string
@@ -152,6 +156,7 @@ export default function DokumenteTab({
   qcAutoChecks,
   qcGutachtenUrl,
   qcOcrWerte,
+  qcAnomalien,
   anforderbareSlots,
   anforderungenVonMir,
   rolleLabel,
@@ -531,7 +536,7 @@ export default function DokumenteTab({
       </div>
 
       {/* AAR-170/AAR-755: QC-Checkliste (extrahiert) */}
-      <QcChecklisteBlock fallId={fallId} qcCheckliste={qcCheckliste} autoChecks={qcAutoChecks} gutachtenUrl={qcGutachtenUrl} qcOcrWerte={qcOcrWerte} />
+      <QcChecklisteBlock fallId={fallId} qcCheckliste={qcCheckliste} autoChecks={qcAutoChecks} gutachtenUrl={qcGutachtenUrl} qcOcrWerte={qcOcrWerte} qcAnomalien={qcAnomalien} />
     </div>
   )
 }
