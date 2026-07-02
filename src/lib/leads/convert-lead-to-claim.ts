@@ -457,6 +457,14 @@ export async function convertLeadToClaim(
   ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_quelle =
     (lead.reparatur_werkstatt_quelle as string | null) ?? null
 
+  // Reparaturwunsch (Intent) + operativer Vermittlungs-Status + Extern-Werkstatt: Lead -> Claim.
+  ;(claimsInsert as Record<string, unknown>).reparaturwunsch =
+    (lead.reparaturwunsch as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).reparatur_vermittlung_status =
+    (lead.reparatur_vermittlung_status as string | null) ?? 'offen'
+  ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_extern =
+    (lead.reparatur_werkstatt_extern as string | null) ?? null
+
   const { data: claim, error: claimErr } = await admin
     .from('claims')
     .insert(claimsInsert)
