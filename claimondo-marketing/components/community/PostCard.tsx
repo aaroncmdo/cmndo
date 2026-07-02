@@ -1,0 +1,166 @@
+'use client'
+import { useState, useTransition } from 'react'
+import Link from 'next/link'
+import type { FeedEntry, CommentRow } from '@/lib/community/community-queries'
+import { reportCommunityTarget } from '@/lib/community/community-actions'
+import { loadPostThread } from '@/lib/community/thread-loader'
+import { LikeButton } from './LikeButton'
+import { PostComments } from './PostComments'
+
+const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
+
+interface PostCardProps {
+  entry: FeedEntry
+  isLoggedIn: boolean
+  hasUsername: boolean
+}
+
+export function PostCard({ entry, isLoggedIn, hasUsername }: PostCardProps) {
+  const [expanded, setExpanded] = useState(false)
+  const [thread, setThread] = useState<{
+    top: CommentRow[]
+    repliesByParent: Record<string, CommentRow[]>
+  } | null>(null)
+  const [threadPending, startThread] = useTransition()
+  const [reported, setReported] = useState(false)
+  const [reportPending, startReport] = useTransition()
+
+  function handleExpand() {
+    if (expanded) {
+      setExpanded(false)
+      return
+    }
+    setExpanded(true)
+    if (thread === null && entry.kind === 'post') {
+      startThread(async () => {
+        const result = await loadPostThread(entry.id)
+        setThread(result)
+      })
+    }
+  }
+
+  function handleReport() {
+    const kind = entry.kind === 'post' ? 'post' : 'wissen'
+    startReport(async () => {
+      await reportCommunityTarget(kind, entry.id)
+      setReported(true)
+    })
+  }
+
+  const isArtikel = entry.kind === 'artikel'
+  const bodyPreview =
+    entry.body.length > 200 ? entry.body.slice(0, 200).trimEnd() + ' …' : entry.body
+
+  return (
+    <article className="rounded-ios-md border border-claimondo-border bg-white p-4 transition-shadow hover:shadow-claimondo-sm">
+      {/* Header — Autor + Redaktion-Badge + Datum */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs font-semibold text-claimondo-navy">{entry.authorDisplay}</span>
+        {entry.isRedaktion && (
+          <span className="rounded-ios-sm bg-claimondo-navy px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-white">
+            Redaktion
+          </span>
+        )}
+        <span className="ml-auto text-[0.65rem] text-claimondo-shield/50">
+          {new Date(entry.createdAt).toLocaleDateString('de-DE')}
+        </span>
+      </div>
+
+      {/* Tags */}
+      {entry.tags.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1">
+          {entry.tags.map((tag) => (
+            <span
+              key={tag}
+              className="rounded-ios-sm bg-claimondo-bg px-1.5 py-0.5 text-[0.65rem] font-medium text-claimondo-shield"
+            >
+              {tag}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Title (nur Artikel) */}
+      {isArtikel && entry.title ? (
+        entry.slug ? (
+          <Link
+            href={`/wissen/${entry.slug}`}
+            className="mt-2 block font-semibold leading-snug text-claimondo-navy transition-colors hover:text-claimondo-ondo"
+            style={HEAD_FONT}
+          >
+            {entry.title}
+          </Link>
+        ) : (
+          <p className="mt-2 font-semibold leading-snug text-claimondo-navy" style={HEAD_FONT}>
+            {entry.title}
+          </p>
+        )
+      ) : null}
+
+      {/* Body-Preview */}
+      <p className="mt-2 text-sm leading-relaxed text-claimondo-shield">{bodyPreview}</p>
+
+      {/* Footer — Likes + Kommentare + Melden */}
+      <div className="mt-3 flex flex-wrap items-center gap-3">
+        <LikeButton
+          targetKind={isArtikel ? 'wissen' : 'post'}
+          targetId={entry.id}
+          initialCount={entry.likeCount}
+          isLoggedIn={isLoggedIn}
+        />
+
+        <button
+          type="button"
+          onClick={handleExpand}
+          disabled={threadPending}
+          className="inline-flex items-center gap-1 rounded-ios-sm px-2 py-1 text-xs text-claimondo-shield/70 transition hover:bg-claimondo-bg hover:text-claimondo-shield disabled:opacity-50"
+        >
+          <svg
+            aria-hidden="true"
+            width="13"
+            height="13"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          {entry.commentCount > 0 ? `${entry.commentCount} Kommentar${entry.commentCount === 1 ? '' : 'e'}` : 'Kommentieren'}
+          {expanded ? ' ▲' : ' ▼'}
+        </button>
+
+        {reported ? (
+          <span className="ml-auto text-[0.7rem] text-claimondo-shield/50">Gemeldet — danke.</span>
+        ) : (
+          <button
+            type="button"
+            onClick={handleReport}
+            disabled={reportPending}
+            className="ml-auto text-[0.7rem] text-claimondo-shield/50 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
+          >
+            Melden
+          </button>
+        )}
+      </div>
+
+      {/* Thread (nur Posts, aufgeklappt) */}
+      {expanded && entry.kind === 'post' && (
+        <>
+          {threadPending || thread === null ? (
+            <p className="mt-3 text-xs text-claimondo-shield/60">Lade Kommentare …</p>
+          ) : (
+            <PostComments
+              postId={entry.id}
+              initialThread={thread}
+              isLoggedIn={isLoggedIn}
+              hasUsername={hasUsername}
+            />
+          )}
+        </>
+      )}
+    </article>
+  )
+}
