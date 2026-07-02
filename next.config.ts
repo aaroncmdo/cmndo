@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
   // module '@napi-rs/canvas'". Als serverExternalPackage laeuft pdf-parse als
   // echtes node_modules-Modul; sein require('@napi-rs/canvas') loest normal auf.
   serverExternalPackages: ['pdf-parse'],
+  // SV-Onboarding-Doku-Upload (uploadSvPflichtdokument / uploadSaVorlage) erlaubt
+  // 15 MB PDFs/Scans. Server-Actions capen den Request-Body per Default bei 1 MB
+  // -> jede Datei > 1 MB warf einen Framework-Fehler VOR dem Action-Code, der
+  // User sah "Upload fehlgeschlagen". Limit auf 20 MB (15 MB Datei + Multipart-
+  // Overhead) angehoben; Bucket fall-dokumente erlaubt bis 50 MB. Next 16:
+  // serverActions liegt unter experimental (config-shared.d.ts:634).
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
   // Doc-45-Perf-Nachzug: AVIF zusaetzlich zu WebP fuer next/image. AVIF ist
   // ~20-30% kleiner als WebP bei Foto-Heros (LP-Hero-PNGs 670-690 KB Quelle)
   // -> kleinerer LCP-Transfer auf ~95 % der Browser. Trade-off: erstmaliges
