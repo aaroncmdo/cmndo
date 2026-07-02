@@ -736,6 +736,15 @@ export default async function FallaktePage({
   // Filmcheck #7: auto-vorbefuellte QC-Checks + Gutachten-PDF fuer die QC-Karte (KB/Admin).
   let qcAutoChecks: Record<string, boolean> = {}
   let qcGutachtenUrl: string | null = null
+  // Filmcheck Phase 3 (P3a): read-only OCR-Kern-Werte fuer den KB im Filmcheck.
+  let qcOcrWerte: {
+    reparaturkosten_netto: number | null
+    restwert: number | null
+    wiederbeschaffungswert: number | null
+    minderwert: number | null
+    gesamt_schadensbetrag: number | null
+    totalschaden: boolean | null
+  } | null = null
   let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
@@ -814,6 +823,20 @@ export default async function FallaktePage({
         vorschaden_geprueft: boolean | null
       }
       let vcfQc: VcfQcRow | null = null
+      // Filmcheck Phase 3 (P3a/P3b): flache OCR-Kern-Werte + gutachten.positionen (jsonb)
+      // aus der ALTEN/kanonischen Pipeline (gutachten claim-keyed) + Anzahl der
+      // schadenspositionen-Zeilen — beides via adminCli, analog den Doc-Reads hier.
+      type GutOcrRow = {
+        reparaturkosten_netto: number | null
+        restwert: number | null
+        wiederbeschaffungswert: number | null
+        minderwert: number | null
+        gesamt_schadensbetrag: number | null
+        totalschaden: boolean | null
+        positionen: unknown
+      }
+      let gutOcr: GutOcrRow | null = null
+      let schadenspositionenCount: number | null = null
       if (claimId) {
         const { data: vcfQcData } = await adminCli
           .from('v_claim_full')
@@ -823,6 +846,19 @@ export default async function FallaktePage({
           .eq('id', claimId)
           .maybeSingle<VcfQcRow>()
         vcfQc = vcfQcData ?? null
+        const { data: gutOcrData } = await adminCli
+          .from('gutachten')
+          .select(
+            'reparaturkosten_netto, restwert, wiederbeschaffungswert, minderwert, gesamt_schadensbetrag, totalschaden, positionen',
+          )
+          .eq('claim_id', claimId)
+          .maybeSingle<GutOcrRow>()
+        gutOcr = gutOcrData ?? null
+        const { count: spCount } = await adminCli
+          .from('schadenspositionen')
+          .select('id', { count: 'exact', head: true })
+          .eq('claim_id', claimId)
+        schadenspositionenCount = spCount ?? 0
       }
       qcAutoChecks = berechneQcAutoChecks({
         gutachtenUrlVorhanden: !!erstgutachten.gutachten_url,
@@ -836,7 +872,29 @@ export default async function FallaktePage({
           telefon: vcfQc?.kunde_telefon ?? null,
           besichtigungsadresse: vcfQc?.besichtigungsort_adresse ?? null,
         },
+        // P3b: nur uebergeben wenn die Quellen ladbar waren (claimId vorhanden) ->
+        // dann wird schadenspositionen_erfasst abgeleitet, sonst bleibt es KB-Urteil.
+        ...(claimId
+          ? {
+              positionen: {
+                schadenspositionenCount: schadenspositionenCount ?? 0,
+                gutachtenPositionen: gutOcr?.positionen ?? null,
+              },
+            }
+          : {}),
       })
+      // P3a: read-only OCR-Werte an die QC-Karte (graceful — QcOcrWerteBlock rendert
+      // nichts, wenn alle Werte null sind).
+      qcOcrWerte = gutOcr
+        ? {
+            reparaturkosten_netto: gutOcr.reparaturkosten_netto,
+            restwert: gutOcr.restwert,
+            wiederbeschaffungswert: gutOcr.wiederbeschaffungswert,
+            minderwert: gutOcr.minderwert,
+            gesamt_schadensbetrag: gutOcr.gesamt_schadensbetrag,
+            totalschaden: gutOcr.totalschaden,
+          }
+        : null
       qcGutachtenUrl = haupt?.url ?? null
       qcCardProps = {
         auftragId: erstgutachten.id,
@@ -1019,6 +1077,8 @@ export default async function FallaktePage({
           // Filmcheck #7: auto-vorbefuellte Checks + Gutachten-PDF zur Pruefung
           qcAutoChecks,
           qcGutachtenUrl,
+          // Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB im Filmcheck
+          qcOcrWerte,
           // AAR-327: Dokument-Anforderungs-UI
           anforderbareSlots,
           anforderungenVonMir,
