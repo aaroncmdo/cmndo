@@ -33,6 +33,18 @@ describe('purge-test-data — Sicherheits-Invarianten', () => {
     expect(lib).toMatch(/errors\.push\(`claims\.delete/)
   })
 
+  it('hat einen Safety-Cap (MAX_AUTO_DELETE) der bei zu vielen Zielen OHNE Loeschung abbricht', () => {
+    expect(lib).toMatch(/MAX_AUTO_DELETE/)
+    expect(lib).toMatch(/capExceeded = true/)
+    expect(lib).toMatch(/total > MAX_AUTO_DELETE/)
+  })
+
+  it('Route meldet Cap/Fehler an Dead-Letter (nur bei echten Laeufen)', () => {
+    expect(route).toMatch(/recordFailedOperation/)
+    expect(route).toMatch(/markOperationResolved/)
+    expect(route).toMatch(/if \(!dryRun\)/)
+  })
+
   it('Route ist CRON_SECRET-gated und dryRun-default (Delete nur mit Confirm-Token)', () => {
     expect(route).toMatch(/CRON_SECRET/)
     expect(route).toMatch(/401/)

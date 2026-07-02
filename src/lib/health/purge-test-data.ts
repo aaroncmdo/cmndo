@@ -15,6 +15,13 @@ type Db = ReturnType<typeof createAdminClient>
 
 const RECENCY_MS = 72 * 60 * 60 * 1000
 
+// Safety-Cap fuer den UNBEAUFSICHTIGTEN nightly Cron: findet ein Lauf mehr als so viele Ziele,
+// wird NICHTS geloescht (Abbruch + Dead-Letter-Alert). Schuetzt vor Runaway durch Fehlkonfig
+// (z.B. ein echter SV faelschlich ist_testaccount=true -> hunderte echte Claims). Steady-State
+// = wenige Smoke-Reste/Tag; ein Ausschlag darueber signalisiert ein Problem, kein Routine-Cleanup.
+// Ein legitimer grosser Einmal-Cleanup laeuft supervised (Konstante temporaer anheben).
+const MAX_AUTO_DELETE = 25
+
 // T2 = unkonvertierte reine Test-Leads. Suffixe sind unzweideutig Test (null echte Kunden):
 const T2_EMAIL_SUFFIXES = ['@claimondo.test', '@example.com', '@claimondo-test.de']
 
@@ -60,6 +67,7 @@ export type PurgeManifest = {
   t2: PurgeT2[]
   skipped: { t1Recency: number; t2Recency: number }
   deleted: { claims: number; leads: number }
+  capExceeded: boolean
   errors: string[]
 }
 
@@ -188,10 +196,21 @@ export async function purgeTestData(opts: { dryRun: boolean }): Promise<PurgeMan
     t2: derived.t2,
     skipped: derived.skipped,
     deleted: { claims: 0, leads: 0 },
+    capExceeded: false,
     errors: [],
   }
 
   if (opts.dryRun) return manifest
+
+  // Safety-Cap: unerwartet viele Ziele -> NICHTS loeschen, ueber Dead-Letter eskalieren.
+  const total = derived.t1.length + derived.t2.length
+  if (total > MAX_AUTO_DELETE) {
+    manifest.capExceeded = true
+    manifest.errors.push(
+      `Safety-Cap: ${total} Ziele (> ${MAX_AUTO_DELETE}) — Abbruch OHNE Loeschung. Ungewoehnlich viele Test-Ziele deuten auf Fehlkonfig (echter SV mit ist_testaccount=true?) — manuell pruefen.`,
+    )
+    return manifest
+  }
 
   for (const t of derived.t1) {
     const claimOk = await deleteClaim(admin, t, manifest.errors)
