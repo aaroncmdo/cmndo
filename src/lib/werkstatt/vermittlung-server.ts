@@ -203,9 +203,23 @@ async function notifyAfterAssign(
     })
   }
 
-  // (c) Werkstatt-Notify (Email). Recipient: werkstaetten.email, sonst profiles.email.
-  // Die In-App-Werkstatt-Mitteilung (empfaenger_rolle 'werkstatt' + Portal-Inbox)
-  // kommt in Phase 6 dazu (braucht die Rollen-Erweiterung + die /werkstatt/auftraege-Seite).
+  // (c) Werkstatt-Notify: In-App-Mitteilung (empfaenger_rolle 'werkstatt' — die Rolle ist
+  // in staging bereits vorhanden) + Email. Die dedizierte Portal-Inbox-Seite
+  // (/werkstatt/auftraege, RPC get_werkstatt_reparatur_auftraege ist bereits in der DB)
+  // liefert der werkstatt-freigabe-followups-Branch; hier bewusst NICHT dupliziert.
+  if (w.user_id) {
+    const { createMitteilung } = await import('@/lib/mitteilungen/create-mitteilung')
+    await createMitteilung({
+      empfaenger_id: w.user_id,
+      empfaenger_rolle: 'werkstatt',
+      kategorie: 'update',
+      titel: 'Neuer Reparaturauftrag',
+      inhalt:
+        'Dir wurde über Claimondo ein Reparaturauftrag zugewiesen. Der Kunde meldet sich zur Terminabstimmung bei Dir.',
+      kontext_typ: input.target === 'claim' ? 'fall' : 'lead',
+      kontext_id: input.id,
+    })
+  }
   let werkstattEmail = w.email
   if (!werkstattEmail && w.user_id) {
     const { data: wp } = await admin.from('profiles').select('email').eq('id', w.user_id).maybeSingle()
