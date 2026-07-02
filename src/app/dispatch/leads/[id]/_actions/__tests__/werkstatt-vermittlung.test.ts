@@ -17,10 +17,11 @@ vi.mock('@/lib/werkstatt/vermittlung-server', () => ({
 }))
 
 let guardOk = true
+let guardRolle = 'dispatch'
 vi.mock('@/lib/auth/guards', () => ({
   requireRole: vi.fn(async () =>
     guardOk
-      ? { success: true, user: { id: 'dispatcher-user-9', rolle: 'dispatch' } }
+      ? { success: true, user: { id: 'dispatcher-user-9', rolle: guardRolle } }
       : { success: false, error: 'Rolle "kunde" nicht berechtigt', user: null },
   ),
 }))
@@ -33,6 +34,7 @@ beforeEach(() => {
   assignMock.mockResolvedValue({ ok: true })
   revalidateMock.mockClear()
   guardOk = true
+  guardRolle = 'dispatch'
 })
 
 describe('vermittleWerkstatt', () => {
@@ -75,5 +77,13 @@ describe('vermittleWerkstatt', () => {
     const r = await vermittleWerkstatt({ target: 'lead', id: 'lead-1', werkstattId: 'w-1' })
     expect(r.ok).toBe(false)
     expect(assignMock).not.toHaveBeenCalled()
+  })
+
+  it('attribuiert quelle=kb wenn ein Kundenbetreuer vermittelt', async () => {
+    guardRolle = 'kundenbetreuer'
+    const { vermittleWerkstatt } = await import('../werkstatt-vermittlung')
+    const r = await vermittleWerkstatt({ target: 'claim', id: 'claim-9', werkstattId: 'w-9' })
+    expect(r.ok).toBe(true)
+    expect(assignMock).toHaveBeenCalledWith(expect.objectContaining({ quelle: 'kb', actorUserId: 'dispatcher-user-9' }))
   })
 })

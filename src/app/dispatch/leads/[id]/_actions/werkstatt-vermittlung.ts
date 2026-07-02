@@ -13,6 +13,7 @@ import {
   findReparaturWerkstaettenForTarget,
 } from '@/lib/werkstatt/vermittlung-server'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import type { VermittlungQuelle } from '@/lib/werkstatt/vermittlung-core'
 
 export type VermittleWerkstattInput = {
   target: 'lead' | 'claim'
@@ -23,15 +24,18 @@ export type VermittleWerkstattInput = {
 export async function vermittleWerkstatt(
   input: VermittleWerkstattInput,
 ): Promise<{ ok: boolean; error?: string }> {
-  // Write-Path-Haertung: nur dispatch/admin duerfen vermitteln.
-  const guard = await requireRole(['dispatch', 'admin'])
+  // Write-Path-Haertung: dispatch/admin/kundenbetreuer duerfen vermitteln (in der
+  // geteilten Fallakte auch KB "im Auftrag" — falls der Gutachter es nicht gemacht hat).
+  const guard = await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
   if (!guard.success) return { ok: false, error: guard.error }
+  // quelle nach tatsaechlicher Rolle attribuieren (KB -> 'kb', sonst 'dispatcher').
+  const quelle: VermittlungQuelle = guard.user.rolle === 'kundenbetreuer' ? 'kb' : 'dispatcher'
 
   const res = await assignReparaturWerkstatt({
     target: input.target,
     id: input.id,
     werkstattId: input.werkstattId,
-    quelle: 'dispatcher',
+    quelle,
     actorUserId: guard.user.id,
   })
   if (!res.ok) return res
@@ -54,8 +58,8 @@ export type GetWerkstaettenNahInput = {
 export async function getWerkstaettenNah(
   input: GetWerkstaettenNahInput,
 ): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
-  // Read-Path-Haertung: gleiche Rollen wie die Mutation (dispatch/admin).
-  const guard = await requireRole(['dispatch', 'admin'])
+  // Read-Path-Haertung: gleiche Rollen wie die Mutation (dispatch/admin/kundenbetreuer).
+  const guard = await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
   if (!guard.success) return { ok: false, error: guard.error }
   const werkstaetten = await findReparaturWerkstaettenForTarget({ target: input.target, id: input.id })
   return { ok: true, werkstaetten }

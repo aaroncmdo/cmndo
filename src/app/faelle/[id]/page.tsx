@@ -145,12 +145,12 @@ export default async function FallaktePage({
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
 
-  // Task 7: aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel
-  // (nur dispatch/admin). reparatur_werkstatt_id ist wegen Type-Lag noch nicht in
+  // Aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel
+  // (dispatch/admin/KB). reparatur_werkstatt_id ist wegen Type-Lag noch nicht in
   // den generierten Types -> Select-String-Cast + separater Name-Read (analog
   // Lead-Seite). Liest am Claim (claims.id), NICHT an der fall-Route-id.
   let currentReparaturWerkstatt: { id: string; name: string } | null = null
-  if (claimId && (userRolle === 'dispatch' || userRolle === 'admin')) {
+  if (claimId && (userRolle === 'dispatch' || userRolle === 'admin' || userRolle === 'kundenbetreuer')) {
     const adminW = createAdminClient()
     const { data: cwRow } = await adminW
       .from('claims')
@@ -921,9 +921,11 @@ export default async function FallaktePage({
           <KanzleiAnsprechpartnerBlock {...kanzleiBlockData} />
         </div>
       )}
-      {/* Task 7: Reparatur-Werkstatt vermitteln (nur dispatch/admin). Gleiches
-          Panel wie im Dispatch-Lead-Detail, hier mit target='claim' (claimId). */}
-      {claimId && (userRolle === 'dispatch' || userRolle === 'admin') && (
+      {/* Reparatur-Werkstatt vermitteln (dispatch/admin/KB — im Auftrag des Kunden,
+          falls der Gutachter es noch nicht gemacht hat). Gleiches Panel wie im
+          Dispatch-Lead-Detail, hier target='claim' (claimId). quelle wird serverseitig
+          aus der Rolle abgeleitet (KB -> 'kb'). Gate: reparatur_werkstatt_id NULL. */}
+      {claimId && (userRolle === 'dispatch' || userRolle === 'admin' || userRolle === 'kundenbetreuer') && (
         <div className="mb-4 max-w-md">
           <WerkstattVermittlungPanel
             target="claim"
