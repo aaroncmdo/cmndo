@@ -2,14 +2,23 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import RueckrufActions from './RueckrufActions'
 import { RueckrufeRealtimeRefresher } from './RueckrufeRealtimeRefresher'
+import { RueckrufDeepLinkScroll } from './RueckrufDeepLinkScroll'
 import PhoneButton from '@/components/shared/PhoneButton'
-import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
-import { PhoneOffIcon } from 'lucide-react'
+import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { PhoneOffIcon, PhoneCallIcon } from 'lucide-react'
 
 // AAR-637: Rückrufe aus admin_termine (typ='rueckruf') lesen statt aus
 // leads.rueckruf_*. Die Legacy-Spalten wurden gedroppt. Admin-Kalender-
 // Rückrufe und Dispatch-Rückrufe sind jetzt dieselbe Liste.
+//
+// Redesign (02.07.): flache Liste -> Rückruf-Queue. Überfällige oben in einem
+// eskalierten danger-Band, Kommende relativ nach Tag gruppiert (Heute/Morgen/
+// Wochentag) als Zeit-Rail-Liste mit "Als Nächstes"-Marker — spiegelt die
+// "Zeitplan"-Sprache aus mitarbeiter/termine. Datenschicht (Query + AAR-724
+// mark-seen) unverändert; Zeiten jetzt Berlin-TZ (formatBerlin) statt naked
+// toLocaleString (runtime-TZ-abhängig).
 
 type RueckrufRow = {
   id: string
@@ -36,8 +45,11 @@ export default async function DispatchRueckrufe({
 }: {
   searchParams?: Promise<{ open?: string }>
 }) {
+  // Deep-Link aus Notifications/Dashboard/Finder: ?open=<admin_termine.id>
+  // fokussiert die betroffene Rückruf-Zeile (Highlight via Server-Ring +
+  // sanftes Scroll via Client-Sidekick RueckrufDeepLinkScroll).
   const sp = (await searchParams) ?? {}
-  const openParam = sp.open ?? null
+  const openId = sp.open ?? null
   const supabase = await createClient()
 
   const { data: raw } = await supabase
@@ -71,73 +83,175 @@ export default async function DispatchRueckrufe({
     }
   }
 
-  return (
-    <div className="py-6 space-y-4">
-      <RueckrufeRealtimeRefresher />
-      <PageHeader
-        title="Rückrufe"
-        actions={<span className="text-sm text-claimondo-ondo">{termine.length} offen</span>}
-      />
+  // ── Präsentation: nur Rückrufe mit Lead; Überfällige abtrennen; Rest relativ nach Tag ──
+  const rows = termine.filter(
+    (t): t is RueckrufRow & { lead: NonNullable<RueckrufRow['lead']> } => !!t.lead,
+  )
+  const now = Date.now()
+  const berlinDay = (iso: string) =>
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Europe/Berlin',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit',
+    }).format(new Date(iso))
+  const todayKey = berlinDay(new Date(now).toISOString())
+  const tomorrowKey = berlinDay(new Date(now + 86_400_000).toISOString())
 
-      <div className="bg-white rounded-ios-lg shadow-ios-md divide-y divide-claimondo-border">
-        {termine.map((t) => {
-          const lead = t.lead
-          if (!lead) return null
-          const isOverdue = new Date(t.start_zeit).getTime() < Date.now()
-          return (
-            <div key={t.id} className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 px-5 py-4">
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  {/* AAR-724: Roter Punkt für noch nicht gesehene Rückrufe. */}
-                  {!t.gesehen_am && (
-                    <span
-                      className="inline-block w-2 h-2 rounded-full bg-danger shrink-0"
-                      aria-label="Neu, noch nicht angesehen"
-                    />
-                  )}
-                  <Link
-                    href={`/dispatch/leads/${lead.id}`}
-                    className="text-sm font-medium text-claimondo-navy hover:text-claimondo-ondo"
-                  >
-                    {lead.vorname} {lead.nachname}
-                  </Link>
-                </div>
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-xs text-claimondo-ondo">
-                  {lead.telefon && (
-                    <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
-                  )}
-                  <span className={isOverdue ? 'text-danger font-medium' : ''}>
-                    {new Date(t.start_zeit).toLocaleString('de-DE', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                    {isOverdue && ' (überfällig)'}
-                  </span>
-                  {t.notizen && (
-                    <span className="text-claimondo-ondo/70 truncate max-w-[200px]">{t.notizen}</span>
-                  )}
-                </div>
-                <div className="flex items-center gap-3 mt-1 text-[10px] text-claimondo-ondo/70">
-                  <span>Versuche: {lead.anruf_versuche ?? 0}</span>
-                  {lead.letzter_anruf_am && (
-                    <span>
-                      Letzter: {new Date(lead.letzter_anruf_am).toLocaleDateString('de-DE')} (
-                      {lead.letzter_anruf_status ?? '?'})
-                    </span>
-                  )}
-                </div>
-              </div>
+  const overdue = rows.filter((t) => new Date(t.start_zeit).getTime() < now)
+  const upcoming = rows.filter((t) => new Date(t.start_zeit).getTime() >= now)
+  // "Als Nächstes" = dringendstes Item: ältester Überfälliger, sonst nächster Anstehender.
+  const nextId = overdue[0]?.id ?? upcoming[0]?.id ?? null
+  const ungesehenCount = rows.filter((t) => !t.gesehen_am).length
 
-              <RueckrufActions leadId={lead.id} anrufVersuche={lead.anruf_versuche ?? 0} />
+  const dayGroups: { key: string; rows: typeof rows }[] = []
+  for (const t of upcoming) {
+    const k = berlinDay(t.start_zeit)
+    const last = dayGroups[dayGroups.length - 1]
+    if (last && last.key === k) last.rows.push(t)
+    else dayGroups.push({ key: k, rows: [t] })
+  }
+  const dayLabel = (key: string) => {
+    if (key === todayKey) return 'Heute'
+    if (key === tomorrowKey) return 'Morgen'
+    return new Date(key + 'T12:00:00').toLocaleDateString('de-DE', {
+      weekday: 'long',
+      day: '2-digit',
+      month: 'long',
+    })
+  }
+
+  const stats: StatBarItem[] = [
+    { label: 'Offen', value: rows.length, icon: PhoneCallIcon },
+    { label: 'Überfällig', value: overdue.length, tone: overdue.length ? 'danger' : 'default' },
+    { label: 'Ungesehen', value: ungesehenCount, tone: ungesehenCount ? 'warning' : 'default' },
+  ]
+
+  // Eine Rückruf-Zeile: Zeit-Rail links (tabular), Node + Inhalt, Aktion rechts.
+  // KEIN Full-Row-Link (die Zeile enthält interaktive Aktionen) — nur der Name linkt.
+  function RueckrufZeile(t: (typeof rows)[number]) {
+    const lead = t.lead
+    const isOverdue = new Date(t.start_zeit).getTime() < now
+    const isFocus = t.id === openId
+    const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Lead'
+    return (
+      <div
+        key={t.id}
+        id={`rueckruf-${t.id}`}
+        className={`flex flex-col gap-2.5 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 ${
+          isFocus ? 'bg-claimondo-ondo/[0.06] ring-1 ring-inset ring-claimondo-ondo/30' : ''
+        }`}
+      >
+        <div className="flex min-w-0 flex-1 items-stretch gap-3 sm:gap-4">
+          {/* Zeit-Rail */}
+          <div className="flex w-12 shrink-0 flex-col items-end pt-px text-right">
+            <span
+              className={`text-body-sm font-semibold tabular-nums ${
+                isOverdue ? 'text-danger-strong' : 'text-claimondo-navy'
+              }`}
+            >
+              {formatBerlin(t.start_zeit, { hour: '2-digit', minute: '2-digit' })}
+            </span>
+            {isOverdue && (
+              <span className="text-caption tabular-nums text-danger/70">
+                {formatBerlin(t.start_zeit, { day: '2-digit', month: '2-digit' })}
+              </span>
+            )}
+          </div>
+          {/* Node + Inhalt */}
+          <div className="min-w-0 flex-1 border-l border-claimondo-border pl-3 sm:pl-4">
+            <div className="flex flex-wrap items-center gap-1.5">
+              {/* AAR-724: Roter Punkt für noch nicht gesehene Rückrufe. */}
+              {!t.gesehen_am && (
+                <span
+                  className="h-2 w-2 shrink-0 rounded-full bg-danger"
+                  aria-label="Neu, noch nicht angesehen"
+                />
+              )}
+              <Link
+                href={`/dispatch/leads/${lead.id}`}
+                className="truncate text-body-sm font-medium text-claimondo-navy hover:text-claimondo-ondo"
+              >
+                {name}
+              </Link>
+              {t.id === nextId && (
+                <span className="rounded-full bg-claimondo-navy px-2 py-0.5 text-caption font-medium text-white">
+                  Als Nächstes
+                </span>
+              )}
             </div>
-          )
-        })}
-        {termine.length === 0 && (
-          <EmptyState icon={PhoneOffIcon} title="Keine offenen Rückrufe" />
-        )}
+            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-body-xs text-claimondo-ondo">
+              {lead.telefon && (
+                <PhoneButton nummer={lead.telefon} variant="inline" label={lead.telefon} />
+              )}
+              {isOverdue && <span className="font-medium text-danger">überfällig</span>}
+              <span>Versuche: {lead.anruf_versuche ?? 0}</span>
+              {lead.letzter_anruf_am && (
+                <span className="text-claimondo-ondo/70">
+                  Letzter: {new Date(lead.letzter_anruf_am).toLocaleDateString('de-DE')}
+                  {lead.letzter_anruf_status ? ` (${lead.letzter_anruf_status})` : ''}
+                </span>
+              )}
+            </div>
+            {t.notizen && (
+              <p className="mt-0.5 truncate text-body-xs text-claimondo-ondo/70">{t.notizen}</p>
+            )}
+          </div>
+        </div>
+        {/* Aktion — mobil unter der Zeile (eine Instanz), Desktop rechts */}
+        <div className="shrink-0 sm:self-center">
+          <RueckrufActions leadId={lead.id} anrufVersuche={lead.anruf_versuche ?? 0} />
+        </div>
       </div>
+    )
+  }
+
+  return (
+    <div className="space-y-5 py-6">
+      <RueckrufeRealtimeRefresher />
+      {openId && <RueckrufDeepLinkScroll targetId={openId} />}
+
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Rückrufe</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+          Rückrufe, die auf einen Anruf warten — überfällige zuerst.
+        </p>
+      </div>
+
+      {rows.length > 0 && <StatBar items={stats} />}
+
+      {rows.length === 0 && <EmptyState icon={PhoneOffIcon} title="Keine offenen Rückrufe" />}
+
+      {/* Überfällig — abgetrennt + priorisiert */}
+      {overdue.length > 0 && (
+        <section className="overflow-hidden rounded-ios-md border border-danger/30 bg-white">
+          <div className="flex items-center justify-between border-b border-danger/20 bg-danger-soft/50 px-4 py-2.5">
+            <h2 className="text-heading-sm font-semibold text-danger-strong">Überfällig</h2>
+            <span className="text-body-sm font-medium text-danger-strong">{overdue.length}</span>
+          </div>
+          <div className="divide-y divide-claimondo-border">{overdue.map(RueckrufZeile)}</div>
+        </section>
+      )}
+
+      {/* Kommende Rückrufe — relativ nach Tag */}
+      {dayGroups.map((g) => {
+        const isToday = g.key === todayKey
+        return (
+          <section
+            key={g.key}
+            className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white"
+          >
+            <div className="flex items-center justify-between border-b border-claimondo-border px-4 py-2.5">
+              <h2 className="flex items-center gap-2 text-heading-sm capitalize text-claimondo-navy">
+                <span className={isToday ? 'font-semibold' : ''}>{dayLabel(g.key)}</span>
+                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-claimondo-ondo" aria-hidden />}
+              </h2>
+              <span className="text-body-sm text-claimondo-ondo">{g.rows.length}</span>
+            </div>
+            <div className="divide-y divide-claimondo-border">{g.rows.map(RueckrufZeile)}</div>
+          </section>
+        )
+      })}
     </div>
   )
 }
