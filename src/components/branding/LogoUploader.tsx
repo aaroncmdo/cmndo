@@ -47,19 +47,26 @@ export default function LogoUploader({ logoUrl, uploading, onFile, onClear, disa
     setBgError(null)
     setRemovingBg(true)
     try {
-      // Lazy-Import damit das 25-MB-Model-Bundle erst beim ersten Click geladen
-      // wird (vorher: zero impact auf Initial-Page-Load).
-      const { removeBackground } = await import('@imgly/background-removal')
       // Aktuelles Logo als Blob ziehen — kann eine Supabase-Storage-URL sein.
       const resp = await fetch(logoUrl, { mode: 'cors' })
       if (!resp.ok) throw new Error(`Konnte Logo nicht laden (HTTP ${resp.status})`)
       const sourceBlob = await resp.blob()
-      // On-device ML — Output ist ein PNG mit transparenten Pixeln.
-      const cleanedBlob = await removeBackground(sourceBlob)
-      // Als Datei verpacken und durch den normalen Upload-Pfad jagen
-      // (re-extract der Farben passiert dann automatisch in BrandingEditor).
-      const file = new File([cleanedBlob], 'logo-transparent.png', { type: 'image/png' })
-      onFile(file)
+      const sourceFile = new File([sourceBlob], 'logo.png', { type: sourceBlob.type || 'image/png' })
+      // 2026-07-02: Geguardet — imgly (isnet) schneidet text-lastige Logos oft
+      // zu stark aus. Der Guard (logo-bg-cleanup.ts) misst das und verwirft ein
+      // Over-Cut-Ergebnis, statt ein zerstoertes Logo hochzuladen. Lazy-Import
+      // damit das ~25-MB-Model erst beim ersten Click geladen wird.
+      const { removeLogoBackgroundGuarded } = await import('@/lib/branding/logo-bg-cleanup')
+      const res = await removeLogoBackgroundGuarded(sourceFile)
+      if (res.method === 'imgly') {
+        // Sauberer Cut -> durch den normalen Upload-Pfad jagen (re-extract der
+        // Farben passiert dann automatisch in BrandingEditor).
+        onFile(res.file)
+      } else {
+        // Kein sauberer Cut moeglich (text-lastiges / bereits transparentes Logo)
+        // -> Logo bleibt unveraendert, damit nichts zerschnitten wird.
+        setBgError('Hintergrund konnte nicht sauber entfernt werden — bei text-lastigen Logos passiert das. Dein Logo bleibt unverändert.')
+      }
     } catch (err) {
       setBgError(err instanceof Error ? err.message : 'Hintergrund-Entfernung fehlgeschlagen')
     } finally {
