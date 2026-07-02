@@ -14,7 +14,6 @@ import {
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import TasksPill from '@/components/shared/TasksPill'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
@@ -45,7 +44,7 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
     : (email?.substring(0, 2).toUpperCase() ?? 'WS')
 
   return (
-    <MitteilungenProvider>
+    <>
     <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphaerische Hintergrund-Spotlights */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
@@ -129,6 +128,6 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
         </main>
       </div>
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }

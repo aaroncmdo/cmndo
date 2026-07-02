@@ -18,7 +18,6 @@ import {
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import TasksPill from '@/components/shared/TasksPill'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
@@ -52,7 +51,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
     : (email?.substring(0, 2).toUpperCase() ?? 'MA')
 
   return (
-    <MitteilungenProvider>
+    <>
     <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphärische Hintergrund-Spotlights — identisch mit Admin-Layout */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
@@ -137,6 +136,6 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
         </main>
       </div>
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }
