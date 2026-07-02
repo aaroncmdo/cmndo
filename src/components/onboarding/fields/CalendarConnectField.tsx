@@ -8,9 +8,8 @@ export function CalendarConnectField({ feld, onChange }: {
 }) {
   const router = useRouter()
   const opt = (k: string) => feld.optionen?.find((o) => o.value === k)?.label ?? ''
-  const svId = opt('svId')
   return (
-    <KalenderConnectStep svId={svId} gcalConnected={opt('gcal') === 'true'} caldavConnected={opt('caldav') === 'true'}
+    <KalenderConnectStep gcalConnected={opt('gcal') === 'true'} caldavConnected={opt('caldav') === 'true'}
       onDone={() => { onChange(new Date().toISOString()); router.refresh() }} />
   )
 }
