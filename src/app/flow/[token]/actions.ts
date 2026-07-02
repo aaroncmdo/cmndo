@@ -966,6 +966,29 @@ export async function signSAandCreateFall(
     ),
   )
 
+  // CalDAV-Paritaet zum gegateten Google-Sync oben: der /flow-Confirm schrieb bisher NUR
+  // Google, CalDAV (Apple/Fastmail) fehlte. Das Datenschutz-Gate MUSS mit — bei 'nur_gutachter'
+  // ist die SA verbindlich (jetzt syncen); 'komplett' erst in confirmVollmacht (vor Vollmacht
+  // KEIN externer Event, sonst pre-Mandat-Leak). Non-critical, fire-and-forget.
+  if ((lead.service_typ ?? 'komplett') === 'nur_gutachter') {
+    void (async () => {
+      const { data: caldavTermine } = await admin
+        .from('gutachter_termine')
+        .select('id')
+        .eq('fall_id', fall.id)
+        .eq('assignee_typ', 'sachverstaendiger')
+        .in('status', ['bestaetigt', 'reserviert'])
+      const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+      for (const t of caldavTermine ?? []) {
+        await syncSvTerminToCalDav(t.id as string).catch((err) =>
+          console.warn('[signSAandCreateFall] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
+        )
+      }
+    })().catch((err) =>
+      console.warn('[signSAandCreateFall] CalDAV-Sync:', err instanceof Error ? err.message : err),
+    )
+  }
+
   // AAR-229 W4: SA-Unterschrift Mitteilung an Admin + SV
   try {
     const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
@@ -1585,6 +1608,15 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEventsForFall }) =>
     syncSvCalendarEventsForFall(fallId).catch((err) =>
       console.warn('[confirmVollmacht] syncSvCalendarEventsForFall:', err instanceof Error ? err.message : err),
+    ),
+  )
+
+  // CalDAV-Paritaet: bei 'komplett' war die Vollmacht der finale Gate-Trigger — jetzt ist das
+  // Datenschutz-Gate erfuellt, also den bestaetigten Termin auch in den CalDAV-Kalender
+  // (Apple/Fastmail) schreiben. Non-critical, fire-and-forget.
+  import('@/lib/kalender/caldav/sv-termin-sync').then(({ syncSvTerminToCalDav }) =>
+    syncSvTerminToCalDav(termin.id).catch((err) =>
+      console.warn('[confirmVollmacht] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
     ),
   )
 }
