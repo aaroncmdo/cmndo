@@ -72,6 +72,8 @@ export type GutachterFinderPayload = {
   aufnahme_fotos?: string[] // Base64-Data-URLs aus dem Foto-Wizard
   // AAR-956 Werkstatt: vermittelnde Werkstatt (QR-Einstieg), fliesst gfa->lead->claim.
   werkstatt_id?: string | null
+  // Anspruch-pruefen: Session-ID der Schaetzung (Fotos + Inputs), wird beim Promoter auf Lead uebertragen.
+  schaetzung_session_id?: string | null
 }
 
 // Extrahiert die Stadt aus einer typischen Adresse:
@@ -277,6 +279,7 @@ export async function erstelleGutachterFinderAnfrage(
         : null,
       status: 'neu',
       werkstatt_id: payload.werkstatt_id ?? null,
+      schaetzung_session_id: payload.schaetzung_session_id ?? null,
     })
     .select('id')
     .single()
