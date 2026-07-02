@@ -29,12 +29,13 @@ export default async function KanzleiKanbanPage() {
   // claims.created_at sortieren + anzeigen (immer vorhanden). supabase-js kann nicht nach
   // eingebetteter to-one-Spalte ordnen -> flachziehen + clientseitig created_at-desc.
   // CMM-49 (faelle-Drop-Runway): Anker von .from('faelle') auf claims-zentrisch (Bridge+vcf).
-  // 1) RLS-Scope: faelle_claim_bridge-RLS spiegelt faelle-RLS exakt (service_typ='komplett'
-  //    AND rolle='kanzlei') -> gleiche komplett-Sichtbarkeit fuer die Kanzlei.
+  // 1) RLS-Scope: faelle_claim_bridge-RLS (Definer-Gate claim_sichtbar_fuer_aktuellen_user, #3445)
+  //    grantet kanzlei bereits NUR komplett-Claims. KEIN claims-Inner-Join fuer den komplett-Filter:
+  //    claims ist fuer kanzlei nicht SELECT-bar -> !inner wuerde alles wegfiltern -> Empty-State.
+  //    Filter lebt in Schritt 2 auf v_claim_full (kanzlei-lesbar via Gate).
   const { data: scopeRows, error: scopeErr } = await supabase
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id!inner(service_typ)')
-    .eq('claims.service_typ', 'komplett')
+    .select('claim_id')
   const scopedClaimIds = (scopeRows ?? []).map((r) => r.claim_id as string)
   // 2) Display via v_claim_full (DEFINER; nur fuer die autorisierten claim_ids -> leak-safe; div=0).
   type KanzleiVcfRow = {
@@ -47,6 +48,7 @@ export default async function KanzleiKanbanPage() {
         .from('v_claim_full')
         .select('id, fall_id, claim_nummer, kunde_vorname, kunde_nachname, kennzeichen, operative_status, created_at, mandatsnummer')
         .in('id', scopedClaimIds)
+        .eq('service_typ', 'komplett')
     : { data: [], error: null }
   const error = scopeErr ?? vcfErr
   const faelle = ((vcfRaw ?? []) as unknown as KanzleiVcfRow[])
