@@ -23,6 +23,7 @@ import { aendereTerminFlow } from './self-service-actions'
 import { BeratungsterminCard } from './BeratungsterminCard'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { FlowFeststellungStep } from './FlowFeststellungStep'
+import { FlowWerkstattStep } from './FlowWerkstattStep'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
@@ -112,7 +113,7 @@ export type GutachterInfo = {
 // wurde rausgenommen — Foto-Upload + Werkstatt-Erfassung gehören ins
 // Onboarding nach Magic-Link-Login, nicht in den FlowLink.
 // AAR-956 §3a: quali + termin nur im incomplete-Pfad (termin-loser Lead).
-type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'termin' | 'gutachter' | 'sa' | 'account'
+type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'werkstatt' | 'termin' | 'gutachter' | 'sa' | 'account'
 
 // STEPS + stepIndexById sind jetzt komponenten-lokal (dynamisch je needsBooking).
 
@@ -134,6 +135,7 @@ export default function FlowWizardKfz({
   lead,
   gutachter,
   needsBooking,
+  needsWerkstatt,
   terminPending,
   besichtigungsAdresse,
   feststellungPhasen,
@@ -151,6 +153,9 @@ export default function FlowWizardKfz({
   // via CANONICAL_FLOWLINK_ENABLED). besichtigungsAdresse speist die gutachter-
   // Anzeige nach Client-seitiger Reservierung.
   needsBooking?: boolean
+  // Reparaturwunsch/Werkstatt: server-gegated (CANONICAL_FLOWLINK_ENABLED + brauchtWerkstatt-
+  // Vermittlung am Lead). Beim Mount gecappt (initialNeedsWerkstatt) wie needsBooking/hatFeststellung.
+  needsWerkstatt?: boolean
   // AAR-956 16.06. (Aaron Wunschtermin-Modell): kein harter Termin, aber gewählter SV +
   // Wunschtermin → Gutachter-Step zeigt den Wunschtermin als "wird bestätigt" (kein Re-Pick).
   terminPending?: boolean
@@ -278,11 +283,15 @@ export default function FlowWizardKfz({
   // — sonst fällt der ①-Step aus STEPS, sobald der Kunde den Hergang submittet (feststellungPhasen→[]
   // beim RSC-Re-Render, da unfallhergang dann gefüllt) → Stale-Step-Index. Session-stabil halten.
   const [initialHatFeststellung] = useState(hatFeststellung)
+  // Werkstatt-Step-Praesenz beim Mount cappen (wie initialNeedsBooking/initialHatFeststellung),
+  // damit STEPS mid-Flow nicht schrumpft/waechst -> keine Stale-Step-Index-Spruenge.
+  const [initialNeedsWerkstatt] = useState(needsWerkstatt === true)
   const STEPS: { id: StepId; label: string }[] = istIncomplete
     ? [
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
         ...(qualiPending ? [{ id: 'quali' as StepId, label: 'Schuldfrage' }] : []),
         ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
+        ...(initialNeedsWerkstatt ? [{ id: 'werkstatt' as StepId, label: 'Werkstatt' }] : []),
         { id: 'termin', label: 'Termin' },
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
@@ -294,6 +303,7 @@ export default function FlowWizardKfz({
         // feststellungNeeded). ②Quali+③Slot bleiben weg (Termin steht).
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
         ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
+        ...(initialNeedsWerkstatt ? [{ id: 'werkstatt' as StepId, label: 'Werkstatt' }] : []),
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
         { id: 'account', label: 'Konto' },
@@ -784,6 +794,12 @@ export default function FlowWizardKfz({
             {/* CMM-14: Step 'weitere-angaben' (Werkstatt + Fotos) entfernt —
                 Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
                 Magic-Link-Login, nicht in den FlowLink. */}
+
+            {/* Reparaturwunsch/Werkstatt: Kunde waehlt eine Partner-Werkstatt (5 naechste).
+                Ueberspringbar; onWeiter -> naechster Step (termin/gutachter/sa je nach Pfad). */}
+            {currentStep.id === 'werkstatt' && (
+              <FlowWerkstattStep token={token} onWeiter={() => setStepIndex(stepIndex + 1)} />
+            )}
 
             {/* ═══ SCHRITT 4: SA UNTERSCHREIBEN ═══ */}
             {currentStep.id === 'sa' && (

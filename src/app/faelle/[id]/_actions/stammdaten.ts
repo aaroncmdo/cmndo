@@ -145,6 +145,10 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'vorschaeden_beschreibung',
   // Werkstatt-Kontext:
   'werkstatt_seit_datum',
+  // Reparaturwunsch (Intent) + operativer Vermittlungs-Status (Reparaturwunsch-Feature):
+  'reparaturwunsch',
+  'reparatur_vermittlung_status',
+  'reparatur_werkstatt_extern',
   // Kundensprache für Portal-Übersetzungen (war bisher nur über Lead-Edit):
   'sprache',
   // Zeugen-Kontaktdaten (JSONB-Array):
