@@ -77,6 +77,15 @@ export async function buildAndSendKanzleiEmail(fallId: string): Promise<{
     }
   }
 
+  // Comms-Safety (Testdaten / Golden-Path-Harness): keine echte LexDrive-Email fuer
+  // Test-Faelle — analog dem Safety-Net in pushMandatToKanzlei. Der Empfaenger ist hier
+  // HARDCODED (LEXDRIVE_EMAIL = echte Inbox), also wuerde ein Testfall sonst eine echte
+  // "Neuer Fall"-Email ausloesen. Erkannt an der @claimondo.test-Kunden-Email.
+  const custEmailLc = (kunde?.email ?? '').toLowerCase()
+  if (custEmailLc.endsWith('@claimondo.test') || custEmailLc.includes('golden-path')) {
+    return { success: false, error: 'skipped: Testdaten (@claimondo.test) — kein LexDrive-Send' }
+  }
+
   // Pflichtdokumente laden — Gutachten, Vollmacht, Sicherungsabtretung, Polizeibericht
   const { data: dokumente } = await db
     .from('fall_dokumente')
