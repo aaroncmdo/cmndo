@@ -29,7 +29,7 @@ async function requireAdmin(): Promise<{ id: string } | null> {
 
 export async function createWerkstatt(
   formData: FormData,
-): Promise<{ ok: true; email: string; password: string } | { ok: false; error: string }> {
+): Promise<{ ok: true; email: string; password: string; werkstattId: string } | { ok: false; error: string }> {
   const adminUser = await requireAdmin()
   if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Werkstätten anlegen.' }
 
@@ -129,5 +129,59 @@ export async function createWerkstatt(
   }
 
   revalidatePath('/admin/werkstaetten')
-  return { ok: true, email, password }
+  return { ok: true, email, password, werkstattId: w.id }
+}
+
+export async function sendWerkstattLoginMail(
+  werkstattId: string,
+  knownPassword?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Login-Mails senden.' }
+
+  const admin = createAdminClient()
+  const { data: w, error: wErr } = await admin
+    .from('werkstaetten')
+    .select('id, name, email, user_id')
+    .eq('id', werkstattId)
+    .maybeSingle()
+  if (wErr || !w) return { ok: false, error: wErr?.message ?? 'Werkstatt nicht gefunden.' }
+  if (!w.email) return { ok: false, error: 'Werkstatt hat keine E-Mail-Adresse.' }
+  if (!w.user_id) return { ok: false, error: 'Werkstatt hat keinen Login-Account.' }
+
+  // Passwort-Logik (kein Clobber): knownPassword > frisch (nur wenn nie eingeloggt) > null.
+  let einmalpasswort: string | null = knownPassword ?? null
+  if (!einmalpasswort) {
+    const { data: prof } = await admin
+      .from('profiles')
+      .select('force_password_change')
+      .eq('id', w.user_id)
+      .maybeSingle()
+    if (prof?.force_password_change === true) {
+      const pw = generatePassword()
+      const { error: authErr } = await admin.auth.admin.updateUserById(w.user_id, {
+        password: pw,
+        user_metadata: { force_password_change: true },
+      })
+      if (authErr) return { ok: false, error: `Passwort-Reset fehlgeschlagen: ${authErr.message}` }
+      await admin.from('profiles').update({ force_password_change: true }).eq('id', w.user_id)
+      einmalpasswort = pw
+    }
+  }
+
+  try {
+    const { sendWillkommenWerkstatt } = await import('@/lib/email/google/flows')
+    await sendWillkommenWerkstatt({
+      to: w.email,
+      werkstattName: w.name ?? 'Ihre Werkstatt',
+      einmalpasswort,
+    })
+  } catch (err) {
+    console.error('[sendWerkstattLoginMail] Versand fehlgeschlagen:', err)
+    const msg = err instanceof Error ? err.message : 'E-Mail-Versand fehlgeschlagen'
+    return { ok: false, error: msg }
+  }
+
+  revalidatePath('/admin/werkstaetten')
+  return { ok: true }
 }
