@@ -16,6 +16,7 @@ export type MaklerRow = {
   ansprechpartner_vorname: string
   status: string
   erstellt_am: string
+  onboarding_abgeschlossen: boolean
 }
 
 /** Holt die Makler-Row für den eingeloggten User (oder null). */
@@ -25,7 +26,7 @@ export async function getCurrentMakler(): Promise<MaklerRow | null> {
   if (!user) return null
   const { data } = await supabase
     .from('makler')
-    .select('id, user_id, firma, ansprechpartner_vorname, status, erstellt_am')
+    .select('id, user_id, firma, ansprechpartner_vorname, status, erstellt_am, onboarding_abgeschlossen')
     .eq('user_id', user.id)
     .maybeSingle()
   return data

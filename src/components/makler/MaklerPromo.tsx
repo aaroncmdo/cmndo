@@ -20,6 +20,7 @@ import {
   TrendingUpIcon,
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
+import { ShareTools } from '@/components/makler/ShareTools'
 import type { PromoStats } from '@/lib/makler/queries'
 
 type Props = {
@@ -278,6 +279,18 @@ export function MaklerPromo({ code, landingUrl, qrSvg, stats, firma }: Props) {
                   </>
                 )}
               </button>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
+            <p className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">
+              Für Ihre Kanäle
+            </p>
+            <p className="mt-1 text-xs text-claimondo-shield">
+              E-Mail-Signatur und Website-Einbindung — für dauerhafte Sichtbarkeit ohne Aufwand.
+            </p>
+            <div className="mt-3">
+              <ShareTools code={code} firma={firma} variant="passive" />
             </div>
           </div>
 
