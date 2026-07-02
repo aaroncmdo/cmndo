@@ -6,7 +6,6 @@ import {
   isValidPolygon,
   extractStadt,
   firstInitial,
-  isTestAccount,
   sample,
   isValidPlaceId,
   type GutachterProfilPublic,
@@ -27,11 +26,11 @@ import {
 // Privacy-Pattern matcht ladeAktiveSVs (gutachter-finder-actions.ts):
 // nur paket='standard' zeigt Initial/Stadt/Avatar/Reviews, alle
 // anderen Pakete laufen zwar in den Count ein, sind aber anonym.
-// Test-Accounts (Firmenname enthält test/smoke/demo) werden raus-
-// gefiltert.
+// Test-Accounts werden per ist_testaccount-Flag serverseitig aus der Query
+// gefiltert (Befund #6 — kein firmenname-ILIKE mehr).
 //
 // Helper (pointInRing, isValidPolygon, extractStadt, firstInitial,
-// isTestAccount, sample, isValidPlaceId) leben in ./_lib.ts — pure
+// sample, isValidPlaceId) leben in ./_lib.ts — pure
 // functions damit sie unit-testbar sind. Diese Route bleibt der
 // Glue-Layer (Fetch, DB-Queries, Min-Loading-Delay).
 
@@ -175,6 +174,9 @@ export async function POST(req: Request) {
       )
       .eq('verifiziert', true)
       .eq('ist_aktiv', true)
+      // Gutachter-Onboarding-Audit (Befund #6): Test-Accounts per DB-Flag raus
+      // (ersetzt die firmenname-ILIKE isTestAccount, die vorher im Loop lief).
+      .eq('ist_testaccount', false)
       // SV-Onboarding-Audit: gesperrte (aber verifizierte) SVs raus aus der Trust-Zahl
       // — gesperrt_seit ergaenzt. geloescht_am war schon drin. portal_zugang bewusst
       // NICHT: Aaron hat die Region-Zahl absichtlich grosszuegig getunt (s.o. + Tier-3 sv_leads).
@@ -208,9 +210,8 @@ export async function POST(req: Request) {
     )
   }
 
-  // 3. Point-in-Polygon für jede Isochrone. Wir filtern auch Test-Accounts
-  //    raus, damit "Test Aaron Gutachter GmbH" weder in den Count noch in
-  //    den Profile-Stack rutscht.
+  // 3. Point-in-Polygon für jede Isochrone. Test-Accounts sind bereits per
+  //    ist_testaccount-Flag aus der Query gefallen.
   const point: [number, number] = [lng, lat]
   let count = 0
   let skipped = 0
@@ -221,7 +222,6 @@ export async function POST(req: Request) {
       skipped++
       continue
     }
-    if (isTestAccount(row.firmenname as string | null)) continue
     if (!pointInRing(point, poly.coordinates[0])) continue
     count++
     if (row.paket === 'standard' && row.profile_id) {

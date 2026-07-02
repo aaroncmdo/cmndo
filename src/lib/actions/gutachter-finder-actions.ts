@@ -95,17 +95,6 @@ function firstInitial(name: string | null | undefined): string | null {
   return trimmed.length > 0 ? trimmed.charAt(0).toUpperCase() : null
 }
 
-// Aaron-Smoke 14.05.2026: "Test Aaron Gutachter GmbH" + "Smoke SV" sind
-// interne Demo-Accounts die NICHT auf der Marketing-Karte erscheinen sollen
-// (Customer sieht sonst "Sachverständiger in Köln Test" o.ä. — peinlich +
-// verfälscht den Marker-Count). Heuristik: Firmenname enthält Test/Smoke/Demo
-// als Wort-Token. Kein DB-Flag (yet) — wenn ein echter SV namens "Testfeld
-// Gutachter GmbH" reinkommt, müssen wir auf ist_test-Spalte upgraden.
-function isTestAccount(firmenname: string | null | undefined): boolean {
-  if (!firmenname) return false
-  return /\b(test|smoke|demo)\b/i.test(firmenname)
-}
-
 export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } | { ok: false; error: string }> {
   // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
   // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
@@ -120,8 +109,9 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
 }
 
 export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
-  // Read 1 (anon-RLS): Geo + paket + spezifikationen + firmenname (NUR für
-  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht).
+  // Read 1 (anon-RLS): Geo + paket + spezifikationen. Test-Accounts filtert die
+  // anon-RLS bereits per ist_testaccount-Flag (Befund #6) — kein firmenname-Read
+  // + keine App-seitige ILIKE-Heuristik mehr.
   //
   // KEIN .eq('ist_aktiv', true): `ist_aktiv` ist NICHT in den anon-Spalten-Grants
   // (anon-Leak-Fix granted nur 9 Map-Spalten). Ein Filter darauf wirft als anon
@@ -133,13 +123,11 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const supabase = await createClient()
   const { data: allRows, error } = await supabase
     .from('sachverstaendige')
-    .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
+    .select('id,paket,profile_id,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
     .not('isochrone_polygon', 'is', null)
     .not('standort_lat', 'is', null)
   if (error) return { ok: false, error: error.message }
-  // Test-Accounts ("Test Aaron Gutachter GmbH", "Smoke SV") server-side filtern
-  // — firmenname verlässt diese Function nie.
-  const rows = (allRows ?? []).filter((r) => !isTestAccount(r.firmenname as string | null))
+  const rows = allRows ?? []
   if (rows.length === 0) return { ok: true, data: [] }
 
   // Read 2 (Service-Role): Vorname-Initiale + Google-Reviews + Profil-Anreicherung.
