@@ -28,5 +28,5 @@ describe('sendWillkommenWerkstatt', () => {
     expect(arg.template).toBe('willkommen_werkstatt')
     expect(arg.html).toContain('PwA1!')
     expect(arg.html).toContain('Test-Werkstatt')
-  })
+  }, 20000) // dynamischer import('../flows') laedt den vollen Template-Graph -> Default-5s reicht nicht
 })
