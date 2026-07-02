@@ -78,12 +78,21 @@ export async function confirmPasswordReset(
     return { success: false, error: updateError.message }
   }
 
-  // force_password_change zurücksetzen — der User hat aktiv ein neues
-  // Passwort gewählt, also gilt das nicht mehr als "Initial-Passwort".
-  await supabase
+  // force_password_change zurücksetzen — der User hat aktiv ein neues Passwort
+  // gewählt. GARANTIERT via Service-Role + Fehler-Check (analog setzeNeuesPasswort):
+  // bleibt das Flag still true, landet der User beim naechsten Login erneut auf
+  // /passwort-aendern (stiller Loop-Trap).
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const { error: flagError } = await createAdminClient()
     .from('profiles')
     .update({ force_password_change: false })
     .eq('id', user.id)
+  if (flagError) {
+    return {
+      success: false,
+      error: 'Passwort wurde gesetzt, aber das Profil konnte nicht aktualisiert werden. Bitte erneut einloggen.',
+    }
+  }
 
   return { success: true }
 }

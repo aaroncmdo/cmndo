@@ -26,6 +26,7 @@ const getUserMock = vi.fn()
 const updateUserMock = vi.fn()
 const profilesUpdateEq = vi.fn()
 const profilesSelectSingle = vi.fn()
+const adminUpdateSelect = vi.fn()
 const pruefePasswortStaerkeMock = vi.fn()
 
 vi.mock('@/lib/supabase/server', () => ({
@@ -39,6 +40,16 @@ vi.mock('@/lib/supabase/server', () => ({
       select: () => ({ eq: () => ({ single: () => profilesSelectSingle() }) }),
     }),
   })),
+}))
+
+// C2-Härtung: force_password_change wird GARANTIERT via Service-Role geräumt
+// (nicht dem User-RLS-Client). Deshalb hier createAdminClient mocken.
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => ({
+    from: () => ({
+      update: (vals: unknown) => ({ eq: () => ({ select: () => adminUpdateSelect(vals) }) }),
+    }),
+  }),
 }))
 
 vi.mock('@/lib/auth/password-policy', () => ({
@@ -67,6 +78,12 @@ beforeEach(() => {
   )
   profilesSelectSingle.mockReset().mockImplementation(() =>
     Promise.resolve({ data: state.rolle ? { rolle: state.rolle } : null, error: null }),
+  )
+  adminUpdateSelect.mockReset().mockImplementation(() =>
+    Promise.resolve({
+      data: state.flagUpdateError ? null : [{ id: 'u-1' }],
+      error: state.flagUpdateError,
+    }),
   )
   pruefePasswortStaerkeMock.mockReset().mockImplementation(() =>
     Promise.resolve(
@@ -127,7 +144,7 @@ describe('setzeNeuesPasswort', () => {
     expect(res.ok).toBe(true)
     if (res.ok) expect(res.redirectTo).toBe(roleToPath('sachverstaendiger'))
     expect(updateUserMock).toHaveBeenCalledWith({ password: 'einLangesSicheresPasswort' })
-    expect(profilesUpdateEq).toHaveBeenCalledWith({ force_password_change: false })
+    expect(adminUpdateSelect).toHaveBeenCalledWith({ force_password_change: false })
   })
 
   it('Happy Path ohne Profil-Rolle nutzt roleToPath-Fallback', async () => {
