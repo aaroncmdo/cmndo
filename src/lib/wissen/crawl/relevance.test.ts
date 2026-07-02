@@ -97,4 +97,23 @@ describe('isRelevantB2B', () => {
     }
     expect(isRelevantB2B(item)).toBe(false)
   })
+
+  // --- Ausschluss-Filter (E2E-Diagnostik 02.07.): Motorsport/Event + Personen-Unfallversicherung
+  // matchen zwar einen Kfz-Anker (küs/unfall), sind aber themenfremd. ---
+
+  it('gibt false fuer Motorsport trotz Kfz-Anker (KÜS-Rennteam)', () => {
+    const item = {
+      title: 'Manthey: Podium am Lausitzring',
+      summary: 'Das KÜS-Team feiert einen Podiumsplatz im GT-Rennsport.',
+    }
+    expect(isRelevantB2B(item)).toBe(false)
+  })
+
+  it('gibt false fuer Personen-Unfallversicherung (kein Kfz-Unfall)', () => {
+    const item = {
+      title: 'Unfallversicherer: Diese Anbieter werden haeufig weiterempfohlen',
+      summary: 'Vergleich privater Unfallversicherung — Leistungen und Beitraege im Ueberblick.',
+    }
+    expect(isRelevantB2B(item)).toBe(false)
+  })
 })

@@ -16,11 +16,9 @@
 // ersetzt (verkehrsunfall/verkehrsrecht, schadengutacht, unfallschaden, schadenregulier).
 // Zweite Sicherung ist der KI-Backstop im B2B-Prompt (NICHT_RELEVANT). Kurze/mehrdeutige
 // Terme (auto, dat, huk) sind hart begrenzt (\b...\b).
-const KFZ_RELEVANCE_REGEX = new RegExp(
-  [
+export const KFZ_RELEVANCE_TERMS: string[] = [
     '\\bkfz\\b',
     '\\bautos?\\b', // auto, autos — NICHT automatisch, autonom
-    '\\bautohaus\\w*',
     '\\bautomobil\\w*',
     '\\bfahrzeug\\w*',
     '\\bpkw\\b',
@@ -42,10 +40,12 @@ const KFZ_RELEVANCE_REGEX = new RegExp(
     '\\bwerkstatt\\w*',
     '\\bwerkstätten\\b',
     '\\breparatur\\w*',
-    '\\bkasko\\w*',
-    '\\bhaftpflicht\\w*',
-    '\\bversicher\\w*', // Versicherer/Versicherung — Versicherung ist eine gewaehlte Kategorie
+    '\\bkasko\\w*', // deckt Kasko/Teilkasko/Vollkasko/Kaskoschaden ab
     '\\bschadenregulier\\w*',
+    // Entfernt (E2E-Diagnostik 02.07., FP-Rate gg. KI-Ground-Truth): 'versicher\\w*' (91% FP —
+    // Versicherungs-Feeds sind fast nur Nicht-Kfz Leben/Rente/Makler), 'autohaus\\w*' (80% FP —
+    // Haendler-Business != Schaden), 'haftpflicht\\w*' (100% FP — allg. Haftpflicht). Echte
+    // Kfz-Versicherungs-/Kasko-/Haftpflicht-Schaeden matchen weiter via kfz/kasko/unfall/schaden-Komposita.
     '\\bmietwagen\\b',
     '\\bdekra\\b',
     '\\bgtü\\b',
@@ -54,16 +54,41 @@ const KFZ_RELEVANCE_REGEX = new RegExp(
     '\\baudatex\\b',
     '\\bdat\\b', // Deutsche Automobil Treuhand — kurz, daher hard-bounded
     '\\bhuk\\b', // HUK-Coburg — kurz, daher hard-bounded
-  ].join('|'),
-  'i',
-)
+]
+
+const KFZ_RELEVANCE_REGEX = new RegExp(KFZ_RELEVANCE_TERMS.join('|'), 'i')
+
+// AUSSCHLUSS-Terme (E2E-Diagnostik 02.07.): klar themenfremde Motorsport-/Renn-/Event-/
+// Sponsoring-News, die zwar einen Kfz-Anker (kfz, fahrzeug, küs) enthalten, aber nichts mit
+// Schadenregulierung/Gutachten zu tun haben. Die KÜS-/Hersteller-Feeds sind voll davon
+// (KÜS ist Titelpartner des Manthey-Rennteams). Ein Treffer hier -> sofort irrelevant.
+export const KFZ_EXCLUSION_TERMS: string[] = [
+  '\\brennsport\\w*',
+  '\\bmotorsport\\w*',
+  '\\brennstrecke\\w*',
+  '\\brennwagen\\w*',
+  '\\blausitzring\\b',
+  '\\bzandvoort\\b',
+  '\\bnürburgring\\b',
+  '\\bhockenheim\\w*',
+  '\\bdtm\\b',
+  '\\bformel\\s?[1-4e]\\b',
+  '\\bpodium\\b',
+  '\\bqualifying\\b',
+  '\\bpole[- ]?position\\b',
+  '\\bspecial olympics\\b',
+  '\\bmanthey\\b', // KÜS-Rennteam-Partner — dominiert den KÜS-Feed
+  '\\bunfallversicher\\w*', // Personen-Unfallversicherung (Versicherungs-Feeds) != Kfz-Unfall
+]
+const KFZ_EXCLUSION_REGEX = new RegExp(KFZ_EXCLUSION_TERMS.join('|'), 'i')
 
 /**
- * Gibt true zurueck wenn Titel+Summary mindestens einen Kfz-/Schaden-/
- * Versicherungs-Fachbegriff enthalten und das Item damit fuer die
- * B2B-Content-Pipeline relevant ist.
+ * Gibt true zurueck wenn Titel+Summary mindestens einen Kfz-Schaden-Fachbegriff enthalten
+ * UND keinen Ausschluss-Term (Motorsport/Event). Ist die grobe Vorfilterung; die feine
+ * Relevanz-Entscheidung trifft der KI-Backstop im B2B-Prompt (NICHT_RELEVANT).
  */
 export function isRelevantB2B(item: { title: string; summary: string }): boolean {
   const text = `${item.title} ${item.summary}`
+  if (KFZ_EXCLUSION_REGEX.test(text)) return false
   return KFZ_RELEVANCE_REGEX.test(text)
 }
