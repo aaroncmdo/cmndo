@@ -1089,7 +1089,6 @@ export default function WillkommenClient({
           {/* AAR-242: Kalender-Step nach Stripe-Anzahlung */}
           {currentKey === 'kalender' && r !== 'sub_mitarbeiter' && (
             <KalenderConnectStep
-              svId={sv.id}
               gcalConnected={sv.gcal_connected}
               caldavConnected={sv.caldav_connected}
               onDone={() => {

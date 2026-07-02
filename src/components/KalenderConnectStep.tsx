@@ -4,24 +4,22 @@
 // AAR-717: Apple Calendar (CalDAV) aktiviert — eigener Connect-Modal-Flow
 // mit App-Passwort-Eingabe (OAuth gibt's bei Apple nicht).
 // Microsoft ist weiter Platzhalter — AAR-715.
-// Opt-Out setzt kalender_typ='keiner'.
+// Opt-Out = kein Kalender (keine Persistenz mehr noetig; die alten
+// kalender_typ/kalender_sync_aktiv-Spalten wurden entfernt).
 
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { CalendarIcon, CheckCircle2Icon, InfoIcon } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { LoadingButton } from '@/components/ui/loading-button'
 import CalDavConnectModal from '@/components/CalDavConnectModal'
 
 type Provider = 'google' | 'microsoft' | 'apple' | 'keiner'
 
 export default function KalenderConnectStep({
-  svId,
   gcalConnected,
   caldavConnected = false,
   onDone,
 }: {
-  svId: string
   gcalConnected: boolean
   caldavConnected?: boolean
   onDone: () => void
@@ -41,16 +39,10 @@ export default function KalenderConnectStep({
   }
 
   function chooseOptOut() {
+    // Opt-Out = kein Kalender. Nichts mehr zu persistieren (die alten
+    // kalender_typ/kalender_sync_aktiv-Spalten wurden entfernt) — direkt weiter.
     setError(null)
-    startTransition(async () => {
-      const supabase = createClient()
-      const { error: updErr } = await supabase
-        .from('sachverstaendige')
-        .update({ kalender_typ: 'keiner', kalender_sync_aktiv: false })
-        .eq('id', svId)
-      if (updErr) { setError(updErr.message); return }
-      onDone()
-    })
+    startTransition(() => { onDone() })
   }
 
   // AAR-717: Wenn irgendein Kalender verbunden ist → weiter.
