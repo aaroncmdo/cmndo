@@ -27,6 +27,7 @@ import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from 
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
+import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from './templates/WillkommenWerkstatt'
 
 const admin = () => createAdminClient()
 
@@ -803,6 +804,51 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
     fallId: null,
     empfaengerTyp: 'sv',
     template: 'arch1_willkommen_sv',
+  })
+}
+
+/**
+ * Login-/Willkommens-Mail an eine Werkstatt. Generiert einen Recovery-Magic-Link
+ * (Passwort-Setzen) und rendert — wenn uebergeben — zusaetzlich das Einmalpasswort.
+ * Caller (sendWerkstattLoginMail) entscheidet ueber das Passwort (kein Clobber).
+ */
+export async function sendWillkommenWerkstatt(params: {
+  to: string
+  werkstattName: string
+  einmalpasswort: string | null
+}): Promise<void> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+  let magicLink: string | null = null
+  try {
+    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
+      type: 'recovery',
+      email: params.to,
+      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+    })
+    if (linkErr || !linkData?.properties?.action_link) {
+      console.error('[sendWillkommenWerkstatt] Magic-Link fehlgeschlagen:', linkErr?.message)
+    } else {
+      magicLink = linkData.properties.action_link
+    }
+  } catch (err) {
+    console.error('[sendWillkommenWerkstatt] Magic-Link-Sub-Op fehlgeschlagen:', err)
+  }
+
+  const props = {
+    werkstattName: params.werkstattName,
+    email: params.to,
+    loginUrl: `${appUrl}/login`,
+    magicLink,
+    einmalpasswort: params.einmalpasswort,
+  }
+  const html = await render(WillkommenWerkstattEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: willkommenWerkstattSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'werkstatt',
+    template: 'willkommen_werkstatt',
   })
 }
 
