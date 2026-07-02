@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { getAnspruchVorschauFuerFall } from '@/lib/anspruch/get-anspruch-vorschau-fuer-fall'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
@@ -24,6 +25,7 @@ import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
 import { LeadAblehnenCard } from './_components/LeadAblehnenCard'
+import { AnspruchVorschauCard } from './_components/AnspruchVorschauCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
@@ -103,6 +105,10 @@ export default async function GutachterFallPage({
   // Fetch all related data in parallel
   // Leadpreis-Claim aufloesen: Route-Param id ist die fall_id (Bridge) != claims.id.
   const lpClaimId = await resolveClaimId(admin, id)
+
+  // KI-Vorschaetzung (Anspruch-pruefen-Tool) fuer den SV — read-only. Admin-Client NACH dem
+  // getFallForSv-Ownership-Gate (Defense-in-Depth wie AAR-771; anspruch_schaetzungen ist RLS-deny-all).
+  const anspruchVorschau = lpClaimId ? await getAnspruchVorschauFuerFall(admin, lpClaimId) : null
 
   const [
     { data: lead },
@@ -594,6 +600,7 @@ export default async function GutachterFallPage({
           werkstaetten={werkstattVermittlung.werkstaetten}
         />
       )}
+      {anspruchVorschau && <AnspruchVorschauCard vorschau={anspruchVorschau} />}
     </>
   )
 
