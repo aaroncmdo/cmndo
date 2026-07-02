@@ -412,7 +412,7 @@ export default function FlowWizardKfz({
     setError(null)
     try {
       // AAR-308/309: createKundeAccount wirft NIE — sauberes Result-Object.
-      const result = await createKundeAccount(fallId, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
+      const result = await createKundeAccount(fallId, token, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
       if (!result.success) {
         // CMM-14 Debug: alert damit der User die Meldung sicher sieht.
         if (typeof window !== 'undefined') {
