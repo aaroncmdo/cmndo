@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { sendWhatsAppText } from './whatsapp/baileys-client'
+import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
 
 // ─── WhatsApp-Versand (Baileys, VPS-Worker) ──────────────────────────────────
 // 2026-06-02: Twilio-WhatsApp vollstaendig entfernt — alle ausgehenden WhatsApp-
@@ -14,6 +15,18 @@ export async function sendWhatsApp(to: string, message: string): Promise<{ succe
   else if (cleanTo.startsWith('0')) cleanTo = '+49' + cleanTo.slice(1)
   else if (!cleanTo.startsWith('+')) cleanTo = '+49' + cleanTo
   if (cleanTo.length < 7) return { success: false, error: 'Keine gültige Telefonnummer' }
+
+  // Side-Effect-Gate (Prod-Smoke): dry-run unterdrueckt den Send, test-recipient leitet um.
+  // Default (SIDE_EFFECT_MODE unset) = live -> unveraendert.
+  const se = resolveSideEffectRecipient('whatsapp', cleanTo)
+  if (se.suppress) {
+    console.warn(`[side-effect:${se.mode}] WhatsApp UNTERDRUECKT -> ${cleanTo}: "${message.slice(0, 60)}"`)
+    return { success: true, sid: 'side-effect-suppressed' }
+  }
+  if (se.mode === 'test-recipient' && se.recipient !== cleanTo) {
+    console.warn(`[side-effect:test-recipient] WhatsApp UMLEITUNG ${cleanTo} -> ${se.recipient}`)
+    cleanTo = se.recipient
+  }
 
   const result = await sendWhatsAppText(cleanTo, message)
   if (result.ok) return { success: true, sid: result.messageId ?? undefined }
