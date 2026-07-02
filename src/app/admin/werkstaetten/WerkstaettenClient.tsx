@@ -328,6 +328,11 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   type="tel"
                   placeholder="+49 221 …"
                 />
+                <TextField
+                  label="Ansprechpartner / Geschäftsführer (optional)"
+                  name="ansprechpartner_name"
+                  placeholder="z.B. Max Mustermann"
+                />
                 <div>
                   <label className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
                   <GooglePlaceAutocomplete
