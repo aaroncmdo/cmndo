@@ -47,11 +47,27 @@ export type EmbedBuchungInput = {
   zugeordneter_sv_lead_id?: string | null
   matching_typ?: string | null
   werkstatt_id?: string | null
+  /** Anspruch-pruefen: Session-ID der Schaetzung (Fotos + Inputs), wird beim Promoter auf Lead uebertragen. */
+  schaetzungSessionId?: string | null
 }
 
 export async function starteEmbedBuchung(
   input: EmbedBuchungInput,
 ): Promise<{ ok: true; token: string; anfrageId: string } | { ok: false; error: string }> {
+  // Blocker 1 fix: schaetzungSessionId is the session_token (anon-visible), but
+  // gutachter_finder_anfragen.schaetzung_session_id is a FK to anspruch_schaetzungen(id).
+  // Resolve token -> row id here using service-role (anspruch_schaetzungen is RLS deny-all).
+  let schaetzungId: string | null = null
+  if (input.schaetzungSessionId) {
+    const svc = createAdminClient()
+    const { data: sess } = await svc
+      .from('anspruch_schaetzungen')
+      .select('id')
+      .eq('session_token', input.schaetzungSessionId)
+      .maybeSingle()
+    schaetzungId = sess?.id ?? null
+  }
+
   // 1) gfa (Anfrage) anlegen — Ort landet auf schadenort_* (→ lead.fahrzeug_standort_*).
   const gfa = await erstelleGutachterFinderAnfrage({
     vorname: input.vorname,
@@ -68,6 +84,8 @@ export async function starteEmbedBuchung(
     zugeordneter_sv_lead_id: input.zugeordneter_sv_lead_id ?? undefined,
     matching_typ: input.matching_typ ?? undefined,
     werkstatt_id: input.werkstatt_id ?? undefined,
+    // Use the resolved row id (not the session_token) — FK to anspruch_schaetzungen(id).
+    schaetzung_session_id: schaetzungId,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -268,6 +286,7 @@ export async function reserviereEmbedTermin(input: {
   wunschterminLokal?: string | null
   werkstatt_id?: string | null
   promotion_code_id?: string | null
+  schaetzungSessionId?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -301,6 +320,7 @@ export async function reserviereEmbedTermin(input: {
     zugeordneter_sv_lead_id: input.auswahl?.kind === 'deadpin' ? input.auswahl.deadPinId : null,
     matching_typ: input.auswahl?.kind ?? null,
     werkstatt_id: input.werkstatt_id ?? null,
+    schaetzungSessionId: input.schaetzungSessionId ?? null,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token

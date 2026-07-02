@@ -23,7 +23,7 @@ export const metadata: Metadata = {
 export default async function GutachterFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string; schaetzung?: string }>
 }) {
   const sp = await searchParams
 
@@ -41,6 +41,9 @@ export default async function GutachterFinderEmbedPage({
     Number.isFinite(latN) && Number.isFinite(lngN) ? { lat: latN, lng: lngN } : null
   const zoomN = sp.zoom ? Number(sp.zoom) : NaN
   const initialZoom = Number.isFinite(zoomN) ? zoomN : undefined
+
+  // Anspruch-pruefen handoff: schaetzung=<sessionToken> → FinderWizard verknuepft Buchung mit Schaetzung.
+  const schaetzung = typeof sp.schaetzung === 'string' ? sp.schaetzung : undefined
 
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
@@ -70,7 +73,7 @@ export default async function GutachterFinderEmbedPage({
         initialCenter={initialCenter}
         initialZoom={initialZoom}
         forceFallback={sp.fallback === '1'}
-        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
+        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} schaetzungSessionId={schaetzung} />}
       />
     </>
   )
