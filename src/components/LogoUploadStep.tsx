@@ -62,28 +62,20 @@ export default function LogoUploadStep({ variant, organisationId, onDone }: Prop
 
     setUploading(true)
     try {
-      // 2026-05-14: Auto-BG-Remove auch hier (genau wie im BrandingEditor).
-      // Logo wird transparent — wirkt auf jeder Brand-Farbe gut. SVG + Mini-
-      // Files überspringen.
+      // 2026-07-02: Geguardeter Auto-BG-Remove. imgly (isnet) schneidet bei
+      // Text-/Wortmarken-Logos oft zu viel weg -> der Guard misst das und faellt
+      // deterministisch aufs Original zurueck (Server-Chroma-Key in uploadSvLogo
+      // raeumt dann soliden BG). SVG + Mini-Files werden im Guard uebersprungen.
+      // Der Fallback ist ein NORMALER, korrekter Pfad -> kein UI-Error mehr.
       let uploadFile = file
-      const isVector = file.type === 'image/svg+xml'
-      const isTiny = file.size < 5 * 1024
-      if (!isVector && !isTiny) {
-        try {
-          console.info('[onboarding-branding] removing background…')
-          const mod = await import('@imgly/background-removal')
-          const cleaned = await mod.removeBackground(file)
-          console.info('[onboarding-branding] cleaned size=', cleaned.size)
-          uploadFile = new File(
-            [cleaned],
-            file.name.replace(/\.[^.]+$/, '') + '-clean.png',
-            { type: 'image/png' },
-          )
-        } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err)
-          console.error('[onboarding-branding] BG-Remove fehlgeschlagen:', err)
-          setError(`Hintergrund-Entfernung übersprungen: ${msg.slice(0, 120)}. Original-Logo wird hochgeladen.`)
-        }
+      try {
+        const { removeLogoBackgroundGuarded } = await import('@/lib/branding/logo-bg-cleanup')
+        const res = await removeLogoBackgroundGuarded(file)
+        uploadFile = res.file
+        console.info('[onboarding-branding] bg-cleanup:', res.method, '-', res.reason)
+      } catch (err) {
+        // Guard wirft nie — defensiver Catch. Original geht hoch, Server raeumt soliden BG.
+        console.error('[onboarding-branding] BG-Cleanup unerwartet fehlgeschlagen:', err)
       }
 
       const fd = new FormData()
