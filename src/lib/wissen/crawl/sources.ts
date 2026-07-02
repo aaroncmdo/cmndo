@@ -1,5 +1,7 @@
-// Live-URLs werden im Prod-Smoke verifiziert; tote/teure Feeds werden zur Laufzeit
-// uebersprungen (crawlSource -> []).
+// Quell-Feeds fuer die B2B-Content-Pipeline. Alle URLs am 2026-07-02 live gegen
+// den echten Feed verifiziert (HTTP 200 + parsebares RSS/Atom mit Items). Tote/teure
+// Feeds werden zur Laufzeit uebersprungen (crawlSource -> []) — neue Quellen einfach
+// hier ergaenzen. robots.txt/ToS beachten; RSS ist zur Syndication gedacht.
 
 export type CrawlSource = {
   name: string
@@ -9,21 +11,15 @@ export type CrawlSource = {
 }
 
 export const B2B_CRAWL_SOURCES: CrawlSource[] = [
-  // recht — Rechts- und Urteilsnachrichten
+  // recht — Rechtsprechung / Urteilsnachrichten (Verkehrs-/Schadenrecht)
   {
-    name: 'LTO Recht',
+    name: 'Rechtslupe',
     category: 'recht',
     kind: 'rss',
-    url: 'https://www.lto.de/rss/nachrichten/',
-  },
-  {
-    name: 'Bundesgerichtshof Pressemitteilungen',
-    category: 'recht',
-    kind: 'rss',
-    url: 'https://www.bundesgerichtshof.de/SiteGlobals/Functions/RSSFeed/ZP_RSSNewsfeed/ZP_RSSNewsfeed.xml',
+    url: 'https://www.rechtslupe.de/feed',
   },
 
-  // versicherung — Branchen- und Marktthemen
+  // versicherung — Versicherungs- und Makler-Branchennews
   {
     name: 'Versicherungsbote',
     category: 'versicherung',
@@ -31,37 +27,31 @@ export const B2B_CRAWL_SOURCES: CrawlSource[] = [
     url: 'https://www.versicherungsbote.de/feed/',
   },
   {
-    name: 'KFZ-Betrieb Versicherung',
+    name: 'AssCompact',
     category: 'versicherung',
     kind: 'rss',
-    url: 'https://www.kfz-betrieb.vogel.de/rss/themen/versicherungen/',
+    url: 'https://www.asscompact.de/rss.xml',
+  },
+  {
+    name: 'Pfefferminzia',
+    category: 'versicherung',
+    kind: 'rss',
+    url: 'https://www.pfefferminzia.de/feed/',
   },
 
-  // sv_verband — Sachverstaendigen-Verbaende und Prueforganisationen
+  // sv_verband — Prueforganisationen / Sachverstaendigen-Umfeld
   {
-    name: 'DEKRA Presse',
+    name: 'KÜS',
     category: 'sv_verband',
     kind: 'rss',
-    url: 'https://www.dekra.de/de/presse/pressemitteilungen/rss/',
-  },
-  {
-    name: 'GTU Presse',
-    category: 'sv_verband',
-    kind: 'rss',
-    url: 'https://www.gtue.de/rss.xml',
+    url: 'https://www.kues.de/rss',
   },
 
-  // werkstatt — Kfz-Werkstatt-Fachpresse
+  // werkstatt — Kfz-Betrieb / Werkstatt-Fachpresse
   {
-    name: 'KFZ-Betrieb Werkstatt',
+    name: 'kfz-betrieb',
     category: 'werkstatt',
     kind: 'rss',
-    url: 'https://www.kfz-betrieb.vogel.de/rss/themen/werkstatt/',
-  },
-  {
-    name: 'Autohaus Online',
-    category: 'werkstatt',
-    kind: 'rss',
-    url: 'https://www.autohaus.de/rss',
+    url: 'https://www.kfz-betrieb.vogel.de/rss.xml',
   },
 ]
