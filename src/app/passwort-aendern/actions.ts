@@ -44,14 +44,19 @@ export async function setzeNeuesPasswort(
     return { ok: false, error: updateError.message }
   }
 
-  // force_password_change zuruecksetzen — der Fehler MUSS geprueft werden.
-  // Schlaegt der Write fehl (z.B. RLS) und bleibt das Flag true, landet der
-  // User beim naechsten Login erneut auf /passwort-aendern (stiller Loop).
-  const { error: flagError } = await supabase
+  // force_password_change zuruecksetzen — GARANTIERT via Service-Role (nicht dem
+  // User-RLS-Client) + Row-Count-Check. Schlaegt der Clear still fehl (RLS-Aenderung,
+  // Session-Edge, 0-Row-Match) und bleibt das Flag true, landet der User beim
+  // naechsten Login erneut auf /passwort-aendern (stiller Loop-Trap — genau das,
+  // was einen frisch angelegten SV aussperrt). Service-Role (eigene Row, kein RLS)
+  // + .select()-Row-Count schliessen die Falle aus.
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const { data: flagRows, error: flagError } = await createAdminClient()
     .from('profiles')
     .update({ force_password_change: false })
     .eq('id', user.id)
-  if (flagError) {
+    .select('id')
+  if (flagError || !flagRows || flagRows.length === 0) {
     return {
       ok: false,
       error:
