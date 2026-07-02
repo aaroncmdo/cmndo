@@ -16,6 +16,7 @@ export function useUpdates() {
   const supabase = useMemo(() => createClient(), [])
   const channelId = useId()
   const [items, setItems] = useState<UpdateItem[]>([])
+  const [rolle, setRolle] = useState('')
   const [lastSeen, setLastSeen] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -28,6 +29,7 @@ export function useUpdates() {
       .eq('id', user.id)
       .single()
     const rolle = (profile?.rolle as string) ?? ''
+    setRolle(rolle)
     setLastSeen((profile?.updates_last_seen_at as string | null) ?? null)
     const result = await getUpdates(supabase, user.id, rolle)
     // Action-Items kriegen ihre Route rollen-bewusst aus dem Kontext.
@@ -66,5 +68,5 @@ export function useUpdates() {
 
   const split = useMemo(() => splitUpdates(items, lastSeen), [items, lastSeen])
 
-  return { ...split, items, lastSeen, loading, reload: load, markSeen }
+  return { ...split, items, rolle, lastSeen, loading, reload: load, markSeen }
 }
