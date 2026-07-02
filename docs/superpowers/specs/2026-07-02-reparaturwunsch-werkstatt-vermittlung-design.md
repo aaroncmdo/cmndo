@@ -23,7 +23,7 @@ Es existiert bereits eine **Werkstatt-Vermittlung Phase 1 (Dispatcher-only)**, l
 1. `reparaturwunsch` (Abrechnungs-Intent) — existiert nirgends.
 2. `reparatur_vermittlung_status` + `reparatur_werkstatt_extern` (eigene-Werkstatt-Modellierung).
 3. Kunde waehlt Werkstatt **im FlowLink** (war "Phase 2" der alten Spec, nie gebaut).
-4. **Gutachter** + **KB/Admin** koennen im Auftrag des Kunden vermitteln (neue Trigger/quelle).
+4. **Gutachter** + **KB/Admin** koennen im Auftrag des Kunden **aus unserem Partner-Pool** vermitteln (neue Trigger/quelle).
 5. Hartes Gate: Picker nur wenn Reparatur gewuenscht **und** noch keine Werkstatt hinterlegt.
 6. Partner bekommen den Auftrag "in ihr System" (Portal-Inbox + In-App + Email).
 
@@ -179,6 +179,10 @@ Der bestehende Dispatcher-`vermittleWerkstatt` wird **darauf refactored** (Boy-S
 
 Gutachter-Koordinaten: `fall.besichtigungsort_lat/lng` liegen bereits am geladenen Objekt (`getFallForSv` nutzt `select('*')` auf `v_faelle_mit_aktuellem_termin`, die die Coords exponiert) — die Card kann `findReparaturWerkstaettenForTarget` direkt aufrufen.
 
+### Gutachter vermittelt im Auftrag (aus unserem Partner-Pool)
+
+Der Gutachter waehlt **ausschliesslich aus unserem Partner-Pool** (`findReparaturWerkstaettenForTarget` -> `findWerkstaetten`, `status='aktiv'`) — auf der Gutachter-Oberflaeche gibt es **keinen** Extern-/Eigen-Werkstatt-Pfad (der ist nur der Kunden-Selbstauskunft "ich habe schon eine Werkstatt" vorbehalten). Der Gutachter handelt **im Auftrag des Kunden**: er bespricht die Reparatur vor Ort und platziert die Partner-Werkstatt fuer ihn. Festgehalten wird das ueber `reparatur_werkstatt_quelle='gutachter'` + `reparatur_werkstatt_zugewiesen_von = <SV-user_id>`; der Kunde wird **immer** benachrichtigt (Transparenz — die Vermittlung geschah in seinem Namen). Kein separates Einwilligungs-Artefakt fuer MVP (der Kunde hat Claimondo mit der Regulierung beauftragt; die Benachrichtigung ist die Transparenz-Schicht — ein expliziter Consent-Gate waere ein Follow-up). Dieselbe "im Auftrag"-Semantik gilt fuer Dispatcher/KB, wenn der Gutachter es (noch) nicht gemacht hat — das Gate (`reparatur_werkstatt_id IS NULL`) sorgt dafuer, dass nur die erste Vermittlung greift, egal welche Rolle zuerst waehlt.
+
 ### Kunde-Flow-Step (Surface 4 — einziger kollisionsbehafteter Teil)
 
 Neue Komponente `src/app/flow/[token]/FlowWerkstattStep.tsx` (Vorbild `FlowSlotStep.tsx`): laedt 5 Werkstaetten via `ladeWerkstaettenFlow` (Anker = Lead-`besichtigungsort_lat/lng` mit Fallback; `GooglePlaceAutocomplete`-Nachreichung wenn Coords fehlen), rendert `WerkstattFinder`, `onSelect` -> `waehleWerkstattFlow`.
@@ -216,6 +220,7 @@ Beim Vermitteln (`assignReparaturWerkstatt`), alle als non-critical try/catch (T
 
 - **Kunde:** WhatsApp + Email (`notifyKundeWerkstattVermittlung`) + In-App (nur bei Account).
 - **Werkstatt:** In-App-Inbox-Mitteilung (neu) + Email (`notifyWerkstattNeuerAuftrag`).
+- **Kunde-Notify-Wording:** wenn `quelle != 'kunde'` (Gutachter/Dispatcher/KB haben **im Auftrag** vermittelt), kommuniziert der Text, dass die Werkstatt **fuer den Kunden** vermittelt wurde (z.B. "Dein Gutachter hat fuer dich die Werkstatt X organisiert") — Transparenz + Bestaetigungs-Charakter. `assignReparaturWerkstatt` bekommt die `quelle` bereits als Parameter, kann das Wording also ableiten.
 
 ---
 
