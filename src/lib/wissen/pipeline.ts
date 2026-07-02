@@ -12,6 +12,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { B2B_CRAWL_SOURCES } from '@/lib/wissen/crawl/sources'
 import { crawlSource, sourceHash } from '@/lib/wissen/crawl/index'
+import { isRelevantB2B } from '@/lib/wissen/crawl/relevance'
 import { generateArtikelDraft } from '@/lib/wissen/generate'
 import { validateForAutoPublish } from '@/lib/wissen/validate'
 
@@ -54,6 +55,9 @@ export async function runB2BPipeline(): Promise<{
         if (newThemenThisRun >= CRAWL_CAP) break
 
         const hash = sourceHash(item.link)
+
+        // Relevanz-Filter: themenfremde Items (Medienrecht, Steuern, ...) ueberspringen
+        if (!isRelevantB2B({ title: item.title, summary: item.summary })) continue
 
         // Deduplizieren: existiert dieser Hash bereits?
         const { data: existing, error: checkErr } = await supabase
@@ -98,42 +102,49 @@ export async function runB2BPipeline(): Promise<{
     // Phase 2+3: Generate, Validate, Insert Artikel
     // -----------------------------------------------------------------------
 
-    // Bis zu GENERATE_LIMIT freigegbene b2b-Themen ohne Artikel laden.
-    // Zwei-Schritt-Query: erst alle thema_ids mit Artikel laden, dann ausschliessen
-    // (PostgREST unterstuetzt keine SQL-Subqueries im .not()-Filter).
-    const { data: belegteThemen, error: belegteErr } = await supabase
-      .from('wissen_artikel')
-      .select('thema_id')
-      .not('thema_id', 'is', null)
-
-    if (belegteErr) {
-      console.error('[b2b-pipeline] Belegte-Themen-Query fehlgeschlagen:', belegteErr.message)
-      return { ok: true, crawled, generated, published, review }
-    }
-
-    const belegteIds = (belegteThemen ?? [])
-      .map((r: { thema_id: string | null }) => r.thema_id)
-      .filter((id): id is string => id !== null)
-
-    let themenQuery = supabase
+    // Schritt 1: Kandidaten-Themen laden (neueste zuerst, bounded auf 20).
+    // "Newest first" stellt sicher, dass frisch gecrawlte Themen vorne stehen.
+    const { data: kandidaten, error: themenErr } = await supabase
       .from('wissen_themen')
       .select('id, titel, kurzbrief, primary_keyword, cluster, artikel_typ, source_url')
       .eq('audience', 'b2b')
       .eq('status', 'freigegeben')
-      .order('created_at', { ascending: true })
-      .limit(GENERATE_LIMIT + belegteIds.length) // Ueberschuss um nach Filter genug zu haben
-
-    if (belegteIds.length > 0) {
-      themenQuery = themenQuery.not('id', 'in', `(${belegteIds.join(',')})`)
-    }
-
-    const { data: alleThemen, error: themenErr } = await themenQuery
-    const themen = (alleThemen ?? []).slice(0, GENERATE_LIMIT)
+      .order('created_at', { ascending: false })
+      .limit(20)
 
     if (themenErr) {
       console.error('[b2b-pipeline] Themen-Query fehlgeschlagen:', themenErr.message)
       return { ok: true, crawled, generated, published, review }
     }
+
+    // Schritt 2: Belegte Themen-IDs nur aus dem Kandidaten-Set abfragen (IN-list <= 20).
+    // Scoped-Query verhindert unbounded SELECT auf wissen_artikel.
+    // Der Normalfall (status='entwurf_erstellt' nach Artikel-Insert) schirmt doppeltes
+    // Verarbeiten schon im .eq('status','freigegeben')-Filter ab; diese Set-Pruefung
+    // sichert den seltenen Fehlerfall ab (Status-Update fehlgeschlagen).
+    const kandidatenIds = (kandidaten ?? []).map((t) => t.id)
+
+    let belegteSet = new Set<string>()
+    if (kandidatenIds.length > 0) {
+      const { data: belegteThemen, error: belegteErr } = await supabase
+        .from('wissen_artikel')
+        .select('thema_id')
+        .in('thema_id', kandidatenIds)
+
+      if (belegteErr) {
+        console.error('[b2b-pipeline] Belegte-Themen-Query fehlgeschlagen:', belegteErr.message)
+        return { ok: true, crawled, generated, published, review }
+      }
+
+      belegteSet = new Set(
+        (belegteThemen ?? [])
+          .map((r: { thema_id: string | null }) => r.thema_id)
+          .filter((id): id is string => id !== null),
+      )
+    }
+
+    // Schritt 3: Kandidaten ohne Artikel filtern, auf GENERATE_LIMIT begrenzen.
+    const themen = (kandidaten ?? []).filter((t) => !belegteSet.has(t.id)).slice(0, GENERATE_LIMIT)
 
     for (const thema of themen ?? []) {
       // AI-Draft generieren
@@ -186,7 +197,8 @@ export async function runB2BPipeline(): Promise<{
       let insertResult = await insertArtikel(draft.slug)
 
       if (insertResult.error?.code === '23505') {
-        insertResult = await insertArtikel(`${draft.slug}-2`)
+        // Slug-Suffix: Laenge auf max. 80 Zeichen kappen (Constraint ^[a-z0-9-]{3,80}$).
+        insertResult = await insertArtikel(`${draft.slug.slice(0, 78)}-2`)
       }
 
       if (insertResult.error) {

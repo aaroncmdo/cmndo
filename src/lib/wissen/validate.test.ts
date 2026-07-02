@@ -126,4 +126,20 @@ describe('validateForAutoPublish', () => {
       reason: 'az_review',
     })
   })
+
+  it('Az-Regex erkennt arabischen Straf-Senat (1 StR 12/20)', () => {
+    const body = makeValidBody('Vgl. 1 StR 12/20 zum Vorsatz. ')
+    expect(validateForAutoPublish({ body })).toEqual({
+      autopublish: false,
+      reason: 'az_review',
+    })
+  })
+
+  it('Az-Regex erkennt Buchstaben-Suffix-Senat (VIa ZR 1/23)', () => {
+    const body = makeValidBody('Das Urteil VIa ZR 1/23 ist massgeblich. ')
+    expect(validateForAutoPublish({ body })).toEqual({
+      autopublish: false,
+      reason: 'az_review',
+    })
+  })
 })
