@@ -6,11 +6,12 @@ import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
 import { STATUS_LABEL, STATUS_FALLBACK } from './constants'
 import EmptyState from '@/components/shared/EmptyState'
+import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 
 function StatusBadge({ status }: { status: string }) {
   const cfg = STATUS_LABEL[status] ?? { label: status, color: STATUS_FALLBACK.color }
   return (
-    <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${cfg.color}`}>
+    <span className={`inline-flex items-center gap-1 text-caption font-semibold px-2 py-0.5 rounded-full ${cfg.color}`}>
       {cfg.label}
     </span>
   )
@@ -62,14 +63,14 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
             <UserIcon className="w-4 h-4 text-claimondo-light-blue" />
           </div>
           <div className="min-w-0">
-            <p className="text-sm font-semibold text-claimondo-navy truncate">
+            <p className="text-body-sm font-semibold text-claimondo-navy truncate">
               {anfrage.vorname} {anfrage.nachname}
             </p>
-            <p className="text-xs text-claimondo-ondo/70 truncate">{anfrage.email}</p>
+            <p className="text-body-xs text-claimondo-ondo/70 truncate">{anfrage.email}</p>
             {anfrage.telefon && (
               <a
                 href={`tel:${anfrage.telefon}`}
-                className="text-xs text-claimondo-ondo hover:underline"
+                className="text-body-xs text-claimondo-ondo hover:underline"
               >
                 {anfrage.telefon}
               </a>
@@ -79,16 +80,16 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           <StatusBadge status={lokalerStatus} />
           {anfrage.source && HERKUNFT_LABEL[anfrage.source] && (
-            <span className={`inline-flex items-center text-[10px] font-semibold px-2 py-0.5 rounded-full ${HERKUNFT_LABEL[anfrage.source].color}`}>
+            <span className={`inline-flex items-center text-caption font-semibold px-2 py-0.5 rounded-full ${HERKUNFT_LABEL[anfrage.source].color}`}>
               {HERKUNFT_LABEL[anfrage.source].label}
             </span>
           )}
-          <span className="text-[10px] text-claimondo-ondo/70">{formatDatum(anfrage.erstellt_am)}</span>
+          <span className="text-caption text-claimondo-ondo/70">{formatDatum(anfrage.erstellt_am)}</span>
         </div>
       </div>
 
       {/* Details */}
-      <div className="px-4 pb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs">
+      <div className="px-4 pb-3 grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-xs">
         <div className="flex items-center gap-1.5 text-claimondo-ondo col-span-2">
           <PenSquareIcon className="w-3.5 h-3.5 text-claimondo-ondo shrink-0" />
           <span className="font-medium">{anfrage.schadentyp}</span>
@@ -128,7 +129,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
       {lokalerStatus === 'entwurf' && (
         <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-warning-soft border border-warning/30 flex items-center gap-2">
           <PhoneIcon className="w-4 h-4 text-warning shrink-0" />
-          <span className="text-xs font-semibold text-warning-strong">Wizard abgebrochen — bitte anrufen und Daten aufnehmen</span>
+          <span className="text-body-xs font-semibold text-warning-strong">Wizard abgebrochen — bitte anrufen und Daten aufnehmen</span>
         </div>
       )}
 
@@ -136,22 +137,22 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
       {anfrage.matching_typ === 'lead_fallback' && lokalerStatus !== 'sv_kontaktiert' && lokalerStatus !== 'termin_bestaetigt' && lokalerStatus !== 'abgeschlossen' && (
         <div className="mx-4 mb-2 px-3 py-2 rounded-ios-sm bg-warning-soft border border-warning/30 flex items-center gap-2">
           <AlertCircleIcon className="w-4 h-4 text-warning shrink-0" />
-          <span className="text-xs font-semibold text-warning-strong">DAT-SV — bitte manuell anrufen!</span>
+          <span className="text-body-xs font-semibold text-warning-strong">DAT-SV — bitte manuell anrufen!</span>
         </div>
       )}
 
       {/* SV-Block — zeigt wen wir anrufen müssen */}
       {svName && (
         <div className="mx-4 mb-3 px-3 py-2.5 rounded-ios-sm bg-claimondo-bg border border-claimondo-border">
-          <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-semibold mb-1">
+          <p className="text-caption uppercase tracking-wider text-claimondo-ondo font-semibold mb-1">
             {anfrage.matching_typ === 'lead_fallback' ? 'DAT-Expert (extern — anrufen!)' : 'Zugeordneter Sachverständiger'}
           </p>
           <div className="flex items-center justify-between gap-2">
-            <p className="text-sm font-semibold text-claimondo-navy">{svName}</p>
+            <p className="text-body-sm font-semibold text-claimondo-navy">{svName}</p>
             {svTelefon && (
               <a
                 href={`tel:${svTelefon}`}
-                className="flex items-center gap-1.5 text-xs font-semibold text-white bg-claimondo-ondo hover:bg-claimondo-shield px-3 py-1.5 rounded-full transition-colors"
+                className="flex items-center gap-1.5 text-body-xs font-semibold text-white bg-claimondo-ondo hover:bg-claimondo-shield px-3 py-1.5 rounded-full transition-colors"
               >
                 <PhoneIcon className="w-3.5 h-3.5" />
                 {svTelefon}
@@ -166,21 +167,21 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
         <div className="px-4 pb-4 flex flex-wrap gap-2">
           <button
             onClick={() => wechsleStatus('sv_kontaktiert')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-claimondo-ondo border border-claimondo-ondo hover:bg-claimondo-ondo hover:text-white px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-body-xs font-semibold text-claimondo-ondo border border-claimondo-ondo hover:bg-claimondo-ondo hover:text-white px-3 py-1.5 rounded-full transition-colors"
           >
             <PhoneIcon className="w-3.5 h-3.5" />
             SV kontaktiert
           </button>
           <button
             onClick={() => wechsleStatus('termin_bestaetigt')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-success-strong border border-success/30 hover:bg-success hover:text-white px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-body-xs font-semibold text-success-strong border border-success/30 hover:bg-success hover:text-white px-3 py-1.5 rounded-full transition-colors"
           >
             <CheckCircleIcon className="w-3.5 h-3.5" />
             Termin bestätigt
           </button>
           <button
             onClick={() => wechsleStatus('abgeschlossen')}
-            className="flex items-center gap-1.5 text-xs text-claimondo-ondo border border-claimondo-border hover:bg-claimondo-bg px-3 py-1.5 rounded-full transition-colors"
+            className="flex items-center gap-1.5 text-body-xs text-claimondo-ondo border border-claimondo-border hover:bg-claimondo-bg px-3 py-1.5 rounded-full transition-colors"
           >
             <ClockIcon className="w-3.5 h-3.5" />
             Abschließen
@@ -205,19 +206,23 @@ export default function GutachterFinderUebersichtClient({
   // "Offen" = verwertbarer Arbeitsvorrat: offener Status UND mit Kontakt (Aaron
   // 31.05.: "Dispatch sieht alle verwertbaren Anfragen"). Kontaktlose Funnel-
   // Entwürfe (kein Telefon/Email) fallen raus — der "Alle"-Tab zeigt weiter alles.
+  const istOffenVorrat = (a: GutachterFinderAnfrage) =>
+    hatKontakt(a) &&
+    (a.status === 'entwurf' || a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert')
+
   const sichtbare =
-    filter === 'offen'
-      ? anfragen.filter(
-          (a) =>
-            hatKontakt(a) &&
-            (a.status === 'entwurf' || a.status === 'neu' || a.status === 'in_bearbeitung' || a.status === 'sv_kontaktiert'),
-        )
-      : filter === 'anruf'
-      ? anrufNoetig
-      : anfragen
+    filter === 'offen' ? anfragen.filter(istOffenVorrat) : filter === 'anruf' ? anrufNoetig : anfragen
+
+  const stats: StatBarItem[] = [
+    { label: 'Offen', value: anfragen.filter(istOffenVorrat).length, icon: InboxIcon },
+    { label: 'Anruf nötig', value: anrufNoetig.length, icon: PhoneIcon, tone: anrufNoetig.length ? 'warning' : 'default' },
+    { label: 'Abgeschlossen', value: anfragen.filter((a) => a.status === 'abgeschlossen').length, icon: CheckCircleIcon },
+  ]
 
   return (
     <div className="space-y-4">
+      <StatBar items={stats} />
+
       {/* Filter-Tabs */}
       <div className="flex flex-wrap gap-2">
         {([
@@ -228,7 +233,7 @@ export default function GutachterFinderUebersichtClient({
           <button
             key={tab.key}
             onClick={() => setFilter(tab.key)}
-            className={`text-sm font-semibold px-4 py-1.5 rounded-full transition-colors ${
+            className={`text-body-sm font-semibold px-4 py-1.5 rounded-full transition-colors ${
               filter === tab.key
                 ? tab.key === 'anruf'
                   ? 'bg-warning text-white'
