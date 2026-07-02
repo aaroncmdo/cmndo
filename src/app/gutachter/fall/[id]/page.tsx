@@ -581,8 +581,8 @@ export default async function GutachterFallPage({
         <MeinFallStatusCard
           phase={svPhase}
           geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
-          gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
-          gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
+          gutachtenUrl={erstgutachtenAuftrag?.gutachten_url ?? null}
+          gutachtenFreigegebenAm={(fall.gutachten_eingegangen_am as string | null) ?? null}
           lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
           svHonorarBetrag={svHonorarBetrag}
           svHonorarEingegangenAm={svHonorarEingegangenAm}
