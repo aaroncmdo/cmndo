@@ -76,4 +76,25 @@ describe('isRelevantB2B', () => {
     }
     expect(isRelevantB2B(item)).toBe(false)
   })
+
+  // --- E2E-Smoke-Regressionen (02.07.): "verkehr"/"gutacht" als breite Terme
+  // erzeugten diese False-Positives; jetzt nur noch Kfz-spezifische Komposita. ---
+
+  it('gibt false fuer "Verkehrsverbot" (Tabakrecht, kein Verkehrsunfall)', () => {
+    const item = {
+      title: 'Verkehrsverbot fuer Wasserpfeifentabak: Zusatzstoffdefinition',
+      summary:
+        'Ein Stoff ist nach dem TabakerzG als Zusatzstoff einzustufen, wenn er dem Tabakerzeugnis planmaessig beigefuegt wird.',
+    }
+    expect(isRelevantB2B(item)).toBe(false)
+  })
+
+  it('gibt false fuer "Gutachterausschuss" (Immobilienbewertung, kein Kfz-Gutachten)', () => {
+    const item = {
+      title: 'Immobilienbewertung fuer die Erbschaft- und Schenkungsteuer und der Gutachterausschuss',
+      summary:
+        'Nach dem BewG duerfen Finanzgerichte die vom Gutachterausschuss mitgeteilten Vergleichspreise im Vergleichswertverfahren zugrunde legen.',
+    }
+    expect(isRelevantB2B(item)).toBe(false)
+  })
 })

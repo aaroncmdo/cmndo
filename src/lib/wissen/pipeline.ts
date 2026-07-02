@@ -160,6 +160,11 @@ export async function runB2BPipeline(): Promise<{
       )
 
       if (!r.ok) {
+        // KI-Relevanz-Backstop: themenfremdes Thema ablehnen, damit es nicht taeglich
+        // neu generiert (und wieder abgelehnt) wird.
+        if (r.error === 'nicht_relevant') {
+          await supabase.from('wissen_themen').update({ status: 'abgelehnt' }).eq('id', thema.id)
+        }
         console.error(`[b2b-pipeline] generateArtikelDraft fehlgeschlagen (thema ${thema.id}):`, r.error)
         continue
       }

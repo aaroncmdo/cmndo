@@ -86,6 +86,12 @@ export function buildB2BSystemPrompt(input: ThemaInput): string {
     'Du schreibst einen Fach-Artikel fuer claimondo.de (Kfz-Schadenregulierung, Branchenthemen).',
     'ZIELGRUPPE: Fach-Leser: Kfz-Sachverständige, Rechtsanwälte/Kanzleien, Kfz-Werkstätten und Versicherungsmakler',
     '  — kollegialer Fachton, KEIN Geschädigten-Du. Keine Erklärungen für Laien.',
+    'RELEVANZ-CHECK (ZUERST): Dieser Dienst behandelt AUSSCHLIESSLICH die Kfz-Schadenregulierung und ihr',
+    '  Branchenumfeld (Verkehrsunfall, Fahrzeugbewertung/Gutachten, Reparatur/Werkstatt, Kfz-Versicherung,',
+    '  einschlägige Rechtsprechung/Gesetze, SV-/Prüf-/Makler-Branche). Wenn der Kurzbrief NICHT in dieses',
+    '  Feld gehört (z.B. allgemeine Politik, Tabak-/Steuer-/Immobilien-/Medien-/Strafrecht ohne Kfz-Bezug,',
+    '  reine Lebens-/Kranken-/Rentenversicherung), dann antworte AUSSCHLIESSLICH mit dem einzelnen Wort',
+    '  NICHT_RELEVANT (kein JSON, kein Body, sonst nichts).',
     'HAUS-STIL: H1-Titel; direkt danach ein Blockquote "> **Kurz zusammengefasst:** ..." (40-60 Wörter);',
     '  danach ## Sektionen; eine ## Häufige Fragen Sektion (je **Frage?** + Antwort); Deutsch mit korrekten Umlauten.',
     'FAKTENGRUNDLAGE: Nutze den Kurzbrief als Faktengrundlage. Verfasse eine EIGENSTÄNDIGE Zusammenfassung/Analyse',
@@ -234,6 +240,11 @@ export async function generateArtikelDraft(
 
     const firstBlock = response.content[0]
     const raw = firstBlock && firstBlock.type === 'text' ? firstBlock.text : ''
+    // KI-Relevanz-Backstop (nur B2B): faengt Keyword-Filter-False-Positives, bevor
+    // ein themenfremder Artikel entsteht. Das Modell antwortet mit NICHT_RELEVANT.
+    if (audience === 'b2b' && /^\s*NICHT_RELEVANT\b/i.test(raw)) {
+      return { ok: false, error: 'nicht_relevant' }
+    }
     return parseDraft(raw)
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
