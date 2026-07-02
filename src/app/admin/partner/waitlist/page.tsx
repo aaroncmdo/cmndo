@@ -34,8 +34,8 @@ export default async function WaitlistPage() {
   return (
     <div className="p-4 md:p-6">
       <header className="mb-6">
-        <h1 className="text-2xl font-bold text-claimondo-navy">Gutachter-Warteliste</h1>
-        <p className="mt-1 text-sm text-claimondo-ondo">
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Gutachter-Warteliste</h1>
+        <p className="mt-1 text-body-sm text-claimondo-ondo">
           Eingehende Bewerbungen über gutachter.claimondo.de —{' '}
           <span className="font-semibold text-claimondo-navy">{list.length}</span> Einträge.
         </p>
