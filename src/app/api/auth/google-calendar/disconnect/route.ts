@@ -20,11 +20,10 @@ export async function POST() {
     google_connected_at: null,
   }).eq('id', user.id)
 
-  // UI-Flag-Mirror + Legacy-Spalten clearen
+  // UI-Flag-Mirror clearen (gcal_connected). Die Legacy-Token-Spalten
+  // gcal_access_token/refresh_token/gcal_token_expiry werden nicht mehr
+  // angefasst (tot, per Migration entfernt — Tokens leben in profiles.google_*).
   await svc.from('sachverstaendige').update({
-    gcal_access_token: null,
-    gcal_refresh_token: null,
-    gcal_token_expiry: null,
     gcal_connected: false,
   }).eq('profile_id', user.id)
 
