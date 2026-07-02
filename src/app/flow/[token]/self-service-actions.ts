@@ -16,6 +16,11 @@ import { planeTermin } from '@/lib/termine/engine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
+import {
+  assignReparaturWerkstatt,
+  findReparaturWerkstaettenForTarget,
+} from '@/lib/werkstatt/vermittlung-server'
+import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -400,6 +405,43 @@ export async function speichereBesichtigungsortFlow(
     })
     .eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+/**
+ * Reparaturwunsch/Werkstatt: die 5 naechsten Partner-Werkstaetten zum Flow-Lead laden.
+ * Token-scoped (resolveFlowLead) — kein Client-leadId.
+ */
+export async function ladeWerkstaettenFlow(
+  token: string,
+): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
+  const { leadId, error } = await resolveFlowLead(token)
+  if (!leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId })
+  return { ok: true, werkstaetten }
+}
+
+/**
+ * Kunde waehlt im Flow eine Partner-Werkstatt (quelle='kunde'). Token-scoped: schreibt NUR
+ * die zum Token gehoerende Lead-Zeile (leadId aus resolveFlowLead, NIE aus Client-Input) —
+ * verhindert Ownership-Hijack (vgl. F1-Flow-Token-Binding-Haertung).
+ */
+export async function waehleWerkstattFlow(
+  token: string,
+  werkstattId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!werkstattId) return { ok: false, error: 'Keine Werkstatt gewählt.' }
+  const { leadId, error } = await resolveFlowLead(token)
+  if (!leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const res = await assignReparaturWerkstatt({
+    target: 'lead',
+    id: leadId,
+    werkstattId,
+    quelle: 'kunde',
+    actorUserId: null,
+  })
+  if (!res.ok) return res
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }

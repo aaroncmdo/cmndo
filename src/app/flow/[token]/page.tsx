@@ -1,6 +1,7 @@
 ﻿import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
 // AAR-316 W2: Sprach-Banner für nicht-deutsche Kunden
@@ -236,6 +237,13 @@ export default async function FlowPage({
   const feststellungNeeded =
     process.env.CANONICAL_FLOWLINK_ENABLED === 'true' && !lead.unfallhergang
 
+  // Reparaturwunsch/Werkstatt: Picker-Step nur wenn Reparatur gewuenscht + noch KEINE
+  // Werkstatt hinterlegt (brauchtWerkstattVermittlung). lead via select('*') -> Felder zur
+  // Laufzeit da (Type-Lag: as unknown as BedarfRow). Der Wizard capped es beim Mount.
+  const needsWerkstatt =
+    process.env.CANONICAL_FLOWLINK_ENABLED === 'true' &&
+    brauchtWerkstattVermittlung(lead as unknown as BedarfRow)
+
   // Besichtigungsort im FlowWizard Schritt 2: primär besichtigungsort_adresse
   // (Dispatch setzt den konkreten Inspektions-Ort), Fallback fahrzeug_standort,
   // letzter Ausweg unfallort. Eine Quelle für gutachter-Prop + §3a-Anzeige.
@@ -464,6 +472,7 @@ export default async function FlowPage({
           flowLinkId={flowLinkId}
           gutachter={gutachter}
           needsBooking={needsBooking}
+          needsWerkstatt={needsWerkstatt}
           terminPending={terminPending}
           besichtigungsAdresse={besichtigungsAdresse}
           feststellungPhasen={feststellungPhasen}
