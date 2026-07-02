@@ -1,30 +1,21 @@
-import PageHeader from '@/components/shared/PageHeader'
 import { ladeGutachterFinderAnfragen } from './actions'
 import GutachterFinderUebersichtClient from './GutachterFinderUebersichtClient'
 
+// Redesign (02.07.): PageHeader -> inline Header + StatBar-At-a-Glance im Client.
+// Die dringenden DAT-SV-Anrufe (matching_typ=lead_fallback) waren nur im Tab
+// versteckt — StatBar toned sie jetzt sichtbar. Datenschicht (Loader) unveraendert.
 export default async function DispatchGutachterFinderPage() {
   const result = await ladeGutachterFinderAnfragen()
   const anfragen = result.ok ? result.data : []
 
-  const offen = anfragen.filter((a) => a.status === 'neu' || a.status === 'in_bearbeitung')
-  // entwurf = nie abgeschickte Kunden-Entwuerfe (Gros der Zeilen) — nicht als
-  // "abgeschlossen" zaehlen; eigener Bucket. abgeschlossen = terminale Nicht-Entwurf-Status.
-  const entwuerfe = anfragen.filter((a) => a.status === 'entwurf')
-  const abgeschlossen = anfragen.filter(
-    (a) => a.status !== 'neu' && a.status !== 'in_bearbeitung' && a.status !== 'entwurf',
-  )
-
   return (
-    <div className="py-6 space-y-6">
-      <PageHeader
-        title="Gutachter-Finder"
-        actions={
-          <span className="text-sm text-claimondo-ondo">
-            {offen.length} offen · {abgeschlossen.length} abgeschlossen
-            {entwuerfe.length > 0 && ` · ${entwuerfe.length} Entwürfe`}
-          </span>
-        }
-      />
+    <div className="py-6 space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Gutachter-Finder</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+          Finder-Anfragen — verwertbare zuerst, DAT-SV-Anrufe markiert.
+        </p>
+      </div>
       <GutachterFinderUebersichtClient anfragen={anfragen} />
     </div>
   )
