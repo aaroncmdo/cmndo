@@ -801,12 +801,41 @@ export default async function FallaktePage({
         vorhanden: p.status === 'hochgeladen' || p.status === 'geprueft',
         pflicht: !!p.pflicht,
       }))
-      // Filmcheck #7: QC-Checks aus Falldaten vorbefuellen (gutachten_vorhanden/sa/vollmacht).
-      // vorschaden_geprueft ist in page.tsx nicht geladen -> Phase 1b. PDF = Hauptgutachten.
+      // Filmcheck #7 / Phase 1b (02.07.): QC-Checks aus Falldaten vorbefuellen. FIN +
+      // Kundendaten (Ansprechpartner + Kontakt) + Besichtigungsadresse + Vorschaden-Status
+      // claim-nativ aus v_claim_full (via adminCli, analog den Doc-Reads hier). PDF = Hauptgutachten.
+      type VcfQcRow = {
+        fin_vin: string | null
+        kunde_vorname: string | null
+        kunde_nachname: string | null
+        kunde_email: string | null
+        kunde_telefon: string | null
+        besichtigungsort_adresse: string | null
+        vorschaden_geprueft: boolean | null
+      }
+      let vcfQc: VcfQcRow | null = null
+      if (claimId) {
+        const { data: vcfQcData } = await adminCli
+          .from('v_claim_full')
+          .select(
+            'fin_vin, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, besichtigungsort_adresse, vorschaden_geprueft',
+          )
+          .eq('id', claimId)
+          .maybeSingle<VcfQcRow>()
+        vcfQc = vcfQcData ?? null
+      }
       qcAutoChecks = berechneQcAutoChecks({
         gutachtenUrlVorhanden: !!erstgutachten.gutachten_url,
-        vorschaedenGeprueft: null,
+        vorschaedenGeprueft: vcfQc?.vorschaden_geprueft ?? null,
         pflichtItems: pflichtItemsList,
+        finVin: vcfQc?.fin_vin ?? null,
+        kundendaten: {
+          vorname: vcfQc?.kunde_vorname ?? null,
+          nachname: vcfQc?.kunde_nachname ?? null,
+          email: vcfQc?.kunde_email ?? null,
+          telefon: vcfQc?.kunde_telefon ?? null,
+          besichtigungsadresse: vcfQc?.besichtigungsort_adresse ?? null,
+        },
       })
       qcGutachtenUrl = haupt?.url ?? null
       qcCardProps = {
