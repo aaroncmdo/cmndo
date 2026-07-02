@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
+import { effektiveBezugIds } from '@/lib/termine/effektive-bezug-ids'
 import HeuteClient from './HeuteClient'
 import type { TagesroutePflichtStat } from './TagesrouteSidebar'
 import { listPrivatStopsForDate } from './private-stops-actions'
@@ -130,7 +131,10 @@ export default async function HeutePage() {
   // fall_id), sonst sieht der SV den Termin bis zur SA-Unterschrift nicht.
   const { data: termine } = await supabase
     .from('gutachter_termine')
-    .select('id, fall_id, lead_id, start_zeit, end_zeit, status, gesehen_am')
+    // AAR-956/CMM-49: bezug_typ/bezug_id mitladen — bezug-native Termine (Engine
+    // schreibt fall_id/lead_id NULL) sonst ohne auflösbaren Auftrag. Siehe
+    // effektiveBezugIds + engine/CONTRACT.md §Datenmodell.
+    .select('id, fall_id, lead_id, start_zeit, end_zeit, status, gesehen_am, bezug_typ, bezug_id')
     // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
@@ -231,9 +235,12 @@ export default async function HeutePage() {
   const leadIdsFromFaelle = [...fallMap.values()]
     .map((f) => f.lead_id)
     .filter(Boolean) as string[]
+  // AAR-956/CMM-49: bezug-native Lead-Termine (lead_id NULL, bezug_typ='lead')
+  // via effektiveBezugIds mitnehmen — sonst bleibt der Auftrag leer ("—"/Provisorisch).
   const leadIdsFromTermine = (termine ?? [])
-    .filter((t) => !t.fall_id && t.lead_id)
-    .map((t) => t.lead_id as string)
+    .filter((t) => !t.fall_id)
+    .map((t) => effektiveBezugIds(t).leadId)
+    .filter((id): id is string => !!id)
   const leadIds = Array.from(new Set([...leadIdsFromFaelle, ...leadIdsFromTermine]))
   const leadMap = new Map<string, Record<string, unknown>>()
   if (leadIds.length) {
@@ -330,7 +337,8 @@ export default async function HeutePage() {
   const weatherEntries = await Promise.all(
     (termine ?? []).map(async (t) => {
       const fall = t.fall_id ? fallMap.get(t.fall_id as string) : null
-      const lead = t.lead_id ? leadMap.get(t.lead_id as string) : null
+      const effLeadId = effektiveBezugIds(t).leadId
+      const lead = effLeadId ? leadMap.get(effLeadId) : null
       const lat =
         (fall?.besichtigungsort_lat as number | null) ??
         (lead?.besichtigungsort_lat as number | null) ??
@@ -425,9 +433,10 @@ export default async function HeutePage() {
       | { schadenort_adresse: string | null; schadenort_plz: string | null; schadenort_ort: string | null; claim_nummer: string | null; szenario: string | null }
       | null
       | undefined
-    const leadIdResolved = (fall?.lead_id as string | null) ?? (t.lead_id as string | null) ?? null
+    const eff = effektiveBezugIds(t)
+    const leadIdResolved = (fall?.lead_id as string | null) ?? eff.leadId ?? null
     const lead = leadIdResolved ? leadMap.get(leadIdResolved) : null
-    const preFlowlink = !fall && !!t.lead_id
+    const preFlowlink = !fall && !!eff.leadId
     // Besichtigungsort/Fahrzeug: Fall bevorzugt, sonst aus Lead (pre-flowlink)
     const besichtigungAdresse =
       (fall?.besichtigungsort_adresse as string) ?? (lead?.besichtigungsort_adresse as string) ?? null
@@ -440,7 +449,7 @@ export default async function HeutePage() {
     return {
       id: t.id as string,
       fall_id: (t.fall_id ?? '') as string,
-      lead_id: (t.lead_id as string | null) ?? null,
+      lead_id: (t.lead_id as string | null) ?? eff.leadId ?? null,
       pre_flowlink: preFlowlink,
       start_zeit: t.start_zeit as string,
       end_zeit: (t.end_zeit as string) ?? null,
