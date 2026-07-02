@@ -1,5 +1,4 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import PageHeader from '@/components/shared/PageHeader'
 import { LinkedInQueueClient } from './LinkedInQueueClient'
 import type { LinkedInPostRow } from '@/lib/linkedin/types'
 
@@ -19,7 +18,12 @@ export default async function LinkedInQueuePage() {
 
   return (
     <div className="space-y-6 py-6">
-      <PageHeader title="LinkedIn" description="Auto-Posting Freigabe-Queue" />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">LinkedIn</h1>
+          <p className="mt-0.5 text-body-sm text-claimondo-ondo">Auto-Posting Freigabe-Queue</p>
+        </div>
+      </div>
       <LinkedInQueueClient
         posts={(posts ?? []) as LinkedInPostRow[]}
         connection={
