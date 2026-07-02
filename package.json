@@ -25,6 +25,7 @@
     "check:i18n": "node scripts/i18n/check-complete.mjs",
     "check:i18n-render": "node scripts/i18n/check-render.mjs",
     "test": "vitest run",
+    "smoke:db": "node scripts/prod-db-smoke.mjs",
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
