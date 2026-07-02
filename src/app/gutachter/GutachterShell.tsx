@@ -25,7 +25,6 @@ import {
   ShieldCheckIcon,
 } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
 import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
@@ -336,7 +335,7 @@ export default function GutachterShell({
   }
 
   return (
-    <MitteilungenProvider>
+    <>
     <div
       /* 2026-05-14 Mobile-Cockpit: BG bleibt brand-primary nur auf lg+ (rahmt
          die Desktop-Card-Sidebar). Auf Mobile setzen wir bg-claimondo-bg —
@@ -701,6 +700,6 @@ export default function GutachterShell({
       {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
       {!isFeldmodus && <SVSpotlight />}
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }

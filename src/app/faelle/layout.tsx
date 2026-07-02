@@ -19,7 +19,6 @@ import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -137,7 +136,7 @@ export default async function FaelleLayout({
     .in('status', ['offen', 'in-bearbeitung'])
 
   return (
-    <MitteilungenProvider>
+    <>
     <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <Spotlight />
       <AdminNav
@@ -165,6 +164,6 @@ export default async function FaelleLayout({
         </main>
       </div>
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }
