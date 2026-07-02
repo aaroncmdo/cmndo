@@ -1,7 +1,6 @@
 import { redirect } from 'next/navigation'
 import { UsersIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { getPersonDupeCandidates, type PersonDupeSignal } from '@/lib/personen/dupe-candidates'
@@ -34,11 +33,14 @@ export default async function PersonenDublettenPage() {
 
   return (
     <div className="max-w-5xl mx-auto py-6 px-4 space-y-6">
-      <PageHeader
-        title="Personen-Dubletten"
-        description="Mögliche Dubletten-Kandidaten aus dem Personen-Register — nur zur Ansicht (kein Zusammenführen)."
-        icon={UsersIcon}
-      />
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">Personen-Dubletten</h1>
+          <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+            Mögliche Dubletten-Kandidaten aus dem Personen-Register — nur zur Ansicht (kein Zusammenführen).
+          </p>
+        </div>
+      </div>
 
       {candidates.length === 0 ? (
         <EmptyState
@@ -62,16 +64,16 @@ export default async function PersonenDublettenPage() {
                 {candidates.map((c) => (
                   <Tr key={`${c.person_a_id}-${c.person_b_id}-${c.signal}`}>
                     <Td>{SIGNAL_LABEL[c.signal] ?? c.signal}</Td>
-                    <Td className="font-mono text-xs">{c.match_value ?? '—'}</Td>
+                    <Td className="font-mono text-body-xs">{c.match_value ?? '—'}</Td>
                     <Td>
                       <div className="text-claimondo-navy">{c.person_a_name ?? '— ohne Name —'}</div>
-                      <div className="text-xs text-claimondo-ondo">
+                      <div className="text-body-xs text-claimondo-ondo">
                         {c.person_a_has_account ? 'mit Account · ' : ''}seit {fmtDate(c.person_a_created)}
                       </div>
                     </Td>
                     <Td>
                       <div className="text-claimondo-navy">{c.person_b_name ?? '— ohne Name —'}</div>
-                      <div className="text-xs text-claimondo-ondo">
+                      <div className="text-body-xs text-claimondo-ondo">
                         {c.person_b_has_account ? 'mit Account · ' : ''}seit {fmtDate(c.person_b_created)}
                       </div>
                     </Td>
@@ -80,7 +82,7 @@ export default async function PersonenDublettenPage() {
               </Tbody>
             </Table>
           </DataTableContainer>
-          <p className="text-xs text-claimondo-ondo">
+          <p className="text-body-xs text-claimondo-ondo">
             {candidates.length} Kandidaten-Paar(e). Zusammenführen (Hard-Merge) ist bewusst noch nicht aktiv — diese Liste dient der Sichtbarkeit.
           </p>
         </>
