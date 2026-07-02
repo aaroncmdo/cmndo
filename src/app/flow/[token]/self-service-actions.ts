@@ -16,6 +16,7 @@ import { planeTermin } from '@/lib/termine/engine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
+import { resolveWunschterminIso } from './wunschtermin'
 import {
   assignReparaturWerkstatt,
   findReparaturWerkstaettenForTarget,
@@ -388,6 +389,7 @@ export async function aendereTerminFlow(
 export async function speichereBesichtigungsortFlow(
   token: string,
   ort: { adresse: string; lat: number; lng: number },
+  wunschterminLokal?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   if (!ort || typeof ort.lat !== 'number' || typeof ort.lng !== 'number') {
     return { ok: false, error: 'Bitte wählen Sie eine Adresse aus den Vorschlägen.' }
@@ -395,15 +397,26 @@ export async function speichereBesichtigungsortFlow(
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  const { error: updErr } = await admin
-    .from('leads')
-    .update({
-      besichtigungsort_adresse: ort.adresse,
-      besichtigungsort_lat: ort.lat,
-      besichtigungsort_lng: ort.lng,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', leadId)
+  const update: {
+    besichtigungsort_adresse: string
+    besichtigungsort_lat: number
+    besichtigungsort_lng: number
+    updated_at: string
+    wunschtermin?: string | null
+  } = {
+    besichtigungsort_adresse: ort.adresse,
+    besichtigungsort_lat: ort.lat,
+    besichtigungsort_lng: ort.lng,
+    updated_at: new Date().toISOString(),
+  }
+  // AAR-956: optionaler Wunschtermin aus dem /flow-Slot-Step (Berlin-Wall-Clock -> UTC-ISO).
+  // Nur setzen, wenn der Caller den Parameter uebergibt (undefined = alte Caller, unberuehrt).
+  // ladeMatchingFlow liest lead.wunschtermin und rankt die Slots danach.
+  if (wunschterminLokal !== undefined) {
+    update.wunschtermin = resolveWunschterminIso(wunschterminLokal)
+  }
+
+  const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
   revalidatePath('/dispatch/leads')
   return { ok: true }
