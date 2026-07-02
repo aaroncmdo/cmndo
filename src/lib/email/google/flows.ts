@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { sendEmail } from './client'
 import { render } from '@react-email/render'
@@ -115,10 +116,9 @@ export async function sendKundeWelcome(
   }
   if (!kundeEmail) throw new Error('Keine Email-Adresse für Kunden')
 
-  // Versicherung
-  let versicherung = '—'
-  const { data: partei } = await db.from('parteien').select('versicherung_name').eq('fall_id', fallId).eq('rolle', 'gegner').limit(1).maybeSingle()
-  if (partei?.versicherung_name) versicherung = partei.versicherung_name
+  // Versicherung — SSoT: kanonische Gegner-Versicherung aus v_claim_full
+  // (loest das tote parteien/rolle='gegner'-Read ab, s. resolveGegnerVersicherung).
+  const versicherung = (await resolveGegnerVersicherung(db, { fallId })).name ?? '—'
 
   // SV-Name
   let svName: string | null = null
@@ -278,10 +278,8 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
     }
   }
 
-  // Versicherung
-  let versicherung = '—'
-  const { data: partei } = await db.from('parteien').select('versicherung_name').eq('fall_id', fallId).eq('rolle', 'gegner').limit(1).maybeSingle()
-  if (partei?.versicherung_name) versicherung = partei.versicherung_name
+  // Versicherung — SSoT via v_claim_full (loest totes parteien/rolle='gegner'-Read ab).
+  const versicherung = (await resolveGegnerVersicherung(db, { fallId })).name ?? '—'
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
@@ -473,14 +471,10 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
   }
 
-  // Versicherung + Schadennummer
-  let versicherung = '—'
-  let schadennummer = '—'
-  const { data: partei } = await db.from('parteien').select('versicherung_name, versicherung_nr').eq('fall_id', fallId).eq('rolle', 'gegner').limit(1).maybeSingle()
-  if (partei) {
-    versicherung = partei.versicherung_name ?? '—'
-    schadennummer = partei.versicherung_nr ?? '—'
-  }
+  // Versicherung + Schadennummer — SSoT via v_claim_full (loest totes parteien-Read ab).
+  const gegnerVers = await resolveGegnerVersicherung(db, { fallId })
+  const versicherung = gegnerVers.name ?? '—'
+  const schadennummer = gegnerVers.nummer ?? '—'
 
   // AAR-kanzlei-portal PR 5: Fall-Dokumente laden für Attachments + Download-
   // Links. Strategie:
