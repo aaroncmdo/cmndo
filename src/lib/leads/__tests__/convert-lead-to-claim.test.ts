@@ -270,4 +270,47 @@ describe('convertLeadToClaim', () => {
     expect(payload.reparatur_werkstatt_id).toBeNull()
     expect(payload.reparatur_werkstatt_quelle).toBeNull()
   })
+
+  it('propagiert reparaturwunsch + vermittlung_status + extern vom Lead auf den Claim-Insert', async () => {
+    primeResponses([
+      { data: { id: 'lead-rwu', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster',
+                reparaturwunsch: 'reparatur', reparatur_vermittlung_status: 'eigene', reparatur_werkstatt_extern: 'Karosserie Müller' } },
+      { data: [] },
+      { data: { id: 'claim-rwu', claim_nummer: 'CLM-RWU' } },
+      { data: { id: 'person-9' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-rwu' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.reparaturwunsch).toBe('reparatur')
+    expect(payload.reparatur_vermittlung_status).toBe('eigene')
+    expect(payload.reparatur_werkstatt_extern).toBe('Karosserie Müller')
+  })
+
+  it('setzt reparaturwunsch=null + vermittlung_status default offen wenn der Lead keinen hat', async () => {
+    primeResponses([
+      { data: { id: 'lead-def', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
+      { data: [] },
+      { data: { id: 'claim-def', claim_nummer: 'CLM-DEF' } },
+      { data: { id: 'person-10' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-def' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.reparaturwunsch).toBeNull()
+    expect(payload.reparatur_vermittlung_status).toBe('offen')
+    expect(payload.reparatur_werkstatt_extern).toBeNull()
+  })
 })
