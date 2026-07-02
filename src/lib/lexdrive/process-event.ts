@@ -481,7 +481,7 @@ async function sendKbMitteilung(
   await createMitteilung({
     empfaenger_id: claim.kundenbetreuer_id,
     empfaenger_rolle: 'kundenbetreuer',
-    kategorie: 'task',
+    kategorie: 'update',
     titel,
     inhalt,
     kontext_typ: 'fall',
@@ -526,7 +526,7 @@ async function sendSvKonfrontationsAnfrage(
   await createMitteilung({
     empfaenger_id: claim.sv_id,
     empfaenger_rolle: 'sachverstaendiger',
-    kategorie: 'task',
+    kategorie: 'update',
     titel: 'Konfrontations-Begleitung angefragt',
     inhalt:
       `Der Kunde wünscht deine Begleitung bei der Nachbesichtigung am ${terminLabel}. ` +
