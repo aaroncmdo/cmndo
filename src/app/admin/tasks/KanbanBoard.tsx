@@ -12,7 +12,6 @@ import { useRouter, usePathname } from 'next/navigation'
 import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-pangea/dnd'
 import { createTask, updateTaskStatus, deleteTask } from './actions'
 import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
-import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 
 type Task = {
@@ -285,7 +284,7 @@ export default function KanbanBoard({
   const inHub = (pathname ?? '').startsWith('/admin/aufgaben')
   const headerActions = (
     <>
-      <label className="flex items-center gap-2 text-xs text-claimondo-ondo cursor-pointer select-none">
+      <label className="flex items-center gap-2 text-body-xs text-claimondo-ondo cursor-pointer select-none">
         <input
           type="checkbox"
           checked={showAutoResolved}
@@ -296,7 +295,7 @@ export default function KanbanBoard({
       </label>
       <button
         onClick={() => setDialogOpen(true)}
-        className="px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-medium rounded-ios-xl transition-colors"
+        className="px-4 py-2 bg-claimondo-shield hover:bg-claimondo-ondo text-white text-body-sm font-medium rounded-ios-xl transition-colors"
       >
         + Neuer Task
       </button>
@@ -309,22 +308,24 @@ export default function KanbanBoard({
         {inHub ? (
           <div className="mb-4 flex flex-wrap items-center justify-end gap-3">{headerActions}</div>
         ) : (
-          <div className="mb-6">
-            <PageHeader
-              title="Tasks"
-              description={`${localTasks.length} von ${tasks.length} Aufgaben${
-                tasks.length !== linked.length
-                  ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
-                  : ''
-              }`}
-              actions={headerActions}
-            />
+          <div className="mb-6 flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-heading-lg font-bold text-claimondo-navy">Tasks</h1>
+              <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+                {`${localTasks.length} von ${tasks.length} Aufgaben${
+                  tasks.length !== linked.length
+                    ? ` (${tasks.length - linked.length} ohne Objekt-Bezug ausgeblendet)`
+                    : ''
+                }`}
+              </p>
+            </div>
+            {headerActions}
           </div>
         )}
 
         {error && (
           <div className="bg-danger-soft border border-danger/30 rounded-ios-xl p-3 mb-4">
-            <p className="text-danger text-sm">{error}</p>
+            <p className="text-danger text-body-sm">{error}</p>
           </div>
         )}
 
@@ -336,11 +337,11 @@ export default function KanbanBoard({
                 <div key={col.key} className="min-w-0">
                   <div className="flex items-center gap-2 mb-3 px-1">
                     <span
-                      className={`text-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-claimondo-ondo'}`}
+                      className={`text-body-sm font-semibold ${COLUMN_HEADER_COLOR[col.key] ?? 'text-claimondo-ondo'}`}
                     >
                       {col.label}
                     </span>
-                    <span className="text-claimondo-ondo/70 text-xs font-medium bg-claimondo-bg px-2 py-0.5 rounded-full">
+                    <span className="text-claimondo-ondo/70 text-body-xs font-medium bg-claimondo-bg px-2 py-0.5 rounded-full">
                       {colTasks.length}
                     </span>
                   </div>
@@ -356,7 +357,7 @@ export default function KanbanBoard({
                       >
                         {colTasks.length === 0 && (
                           <div className="rounded-ios-xl border border-dashed border-claimondo-border p-6 text-center">
-                            <p className="text-claimondo-ondo/70 text-xs">Keine Tasks</p>
+                            <p className="text-claimondo-ondo/70 text-body-xs">Keine Tasks</p>
                           </div>
                         )}
                         {colTasks.map((task, i) => (
@@ -432,7 +433,7 @@ function TaskCard({
     >
       <div className="flex items-start justify-between gap-2 mb-2">
         <span
-          className={`px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${
+          className={`px-2 py-0.5 rounded-full text-caption font-medium whitespace-nowrap ${
             TYP_COLOR[task.typ] ?? 'bg-claimondo-bg text-claimondo-navy'
           }`}
         >
@@ -456,10 +457,10 @@ function TaskCard({
         </button>
       </div>
 
-      <p className="text-claimondo-navy text-sm font-medium leading-snug mb-2">{task.titel}</p>
+      <p className="text-claimondo-navy text-body-sm font-medium leading-snug mb-2">{task.titel}</p>
 
       {obsoleteHint && (
-        <div className="mb-2 px-2 py-1.5 rounded-ios-md bg-warning-soft border border-warning/30 text-warning-strong text-[10px] leading-tight">
+        <div className="mb-2 px-2 py-1.5 rounded-ios-md bg-warning-soft border border-warning/30 text-warning-strong text-caption leading-tight">
           <strong>Eventuell schon erledigt:</strong> {task.auto_resolved_grund}
           <br />
           Schließen oder offen lassen falls du noch dran bist.
@@ -468,7 +469,7 @@ function TaskCard({
 
       {isAutoResolved && (
         <div
-          className="mb-2 inline-flex items-center gap-1 text-[10px] text-claimondo-ondo/70"
+          className="mb-2 inline-flex items-center gap-1 text-caption text-claimondo-ondo/70"
           title={`Automatisch erledigt am ${task.auto_resolved_am ? new Date(task.auto_resolved_am).toLocaleString('de-DE') : ''} weil ${task.auto_resolved_grund ?? ''}`}
         >
           <svg
@@ -511,11 +512,11 @@ function TaskCard({
             d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
           />
         </svg>
-        <span className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70">{link.kind}:</span>
-        <span className="text-xs font-medium truncate">{link.label}</span>
+        <span className="text-caption uppercase tracking-wider text-claimondo-ondo/70">{link.kind}:</span>
+        <span className="text-body-xs font-medium truncate">{link.label}</span>
       </Link>
 
-      <div className="flex items-center justify-between gap-2 text-xs">
+      <div className="flex items-center justify-between gap-2 text-body-xs">
         <div className="flex items-center gap-3">
           {task.faellig_am && (
             <span
@@ -622,11 +623,11 @@ function NewTaskDialog({
 
           <form onSubmit={handleSubmit} className="p-5 space-y-4">
             <div>
-              <label className="block text-claimondo-ondo text-sm mb-1.5">Typ</label>
+              <label className="block text-claimondo-ondo text-body-sm mb-1.5">Typ</label>
               <select
                 name="typ"
                 required
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               >
                 <option value="">Bitte wählen...</option>
                 {TASK_TYPES.map((t) => (
@@ -638,11 +639,11 @@ function NewTaskDialog({
             </div>
 
             <div>
-              <label className="block text-claimondo-ondo text-sm mb-1.5">Fall</label>
+              <label className="block text-claimondo-ondo text-body-sm mb-1.5">Fall</label>
               <select
                 name="fall_id"
                 required
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               >
                 <option value="">Fall auswählen...</option>
                 {faelle.map((f) => (
@@ -654,44 +655,44 @@ function NewTaskDialog({
             </div>
 
             <div>
-              <label className="block text-claimondo-ondo text-sm mb-1.5">Titel</label>
+              <label className="block text-claimondo-ondo text-body-sm mb-1.5">Titel</label>
               <input
                 type="text"
                 name="titel"
                 required
                 placeholder="Aufgabe beschreiben..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               />
             </div>
 
             <div>
-              <label className="block text-claimondo-ondo text-sm mb-1.5">
+              <label className="block text-claimondo-ondo text-body-sm mb-1.5">
                 Beschreibung (optional)
               </label>
               <textarea
                 name="beschreibung"
                 rows={3}
                 placeholder="Details..."
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-shield resize-none"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-claimondo-shield resize-none"
               />
             </div>
 
             <div>
-              <label className="block text-claimondo-ondo text-sm mb-1.5">Fällig am (optional)</label>
+              <label className="block text-claimondo-ondo text-body-sm mb-1.5">Fällig am (optional)</label>
               <input
                 type="date"
                 name="faellig_am"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               />
             </div>
 
             <div>
-              <label className="block text-claimondo-ondo text-sm mb-1.5">
+              <label className="block text-claimondo-ondo text-body-sm mb-1.5">
                 Zugewiesen an (optional)
               </label>
               <select
                 name="zugewiesen_an"
-                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+                className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2.5 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
               >
                 <option value="">Nicht zugewiesen</option>
                 {admins.map((a) => (
@@ -702,12 +703,12 @@ function NewTaskDialog({
               </select>
             </div>
 
-            {error && <p className="text-danger text-sm">{error}</p>}
+            {error && <p className="text-danger text-body-sm">{error}</p>}
 
             <button
               type="submit"
               disabled={submitting}
-              className="w-full py-3 rounded-ios-xl text-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+              className="w-full py-3 rounded-ios-xl text-body-sm font-semibold bg-claimondo-shield hover:bg-claimondo-ondo text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed"
             >
               {submitting ? 'Wird erstellt...' : 'Task erstellen'}
             </button>
