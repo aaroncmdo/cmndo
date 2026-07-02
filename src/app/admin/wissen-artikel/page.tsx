@@ -11,6 +11,7 @@ import ThemaForm from './ThemaForm'
 import DraftEditor from './DraftEditor'
 import ThemaActions from './ThemaActions'
 import GenerateDraftButton from './GenerateDraftButton'
+import CrawlArtikelActions from './CrawlArtikelActions'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,6 +41,15 @@ export default async function WissenArtikelPage() {
     .order('created_at', { ascending: false })
     .limit(20)
 
+  // Auto-veroeffentlichte Crawl-Artikel laden (veroeffentlicht + quelle=crawl), neueste zuerst
+  const { data: crawlArtikelRaw } = await admin
+    .from('wissen_artikel')
+    .select('id, title, slug, quelle, status, veroeffentlicht_am, created_at')
+    .eq('status', 'veroeffentlicht')
+    .eq('quelle', 'crawl')
+    .order('veroeffentlicht_am', { ascending: false })
+    .limit(50)
+
   const themen = (themenRaw ?? []) as Array<{
     id: string
     titel: string
@@ -62,6 +72,16 @@ export default async function WissenArtikelPage() {
     primary_keyword: string | null
     cluster: string | null
     status: string
+    created_at: string
+  }>
+
+  const crawlArtikel = (crawlArtikelRaw ?? []) as Array<{
+    id: string
+    title: string
+    slug: string
+    quelle: string
+    status: string
+    veroeffentlicht_am: string | null
     created_at: string
   }>
 
@@ -178,6 +198,54 @@ export default async function WissenArtikelPage() {
               <DraftEditor key={draft.id} draft={draft} />
             ))}
           </div>
+        )}
+      </SectionCard>
+
+      {/* Sektion: Auto-veröffentlichte Crawl-Artikel */}
+      <SectionCard
+        title="Auto-veröffentlichte Crawl-Artikel"
+        subtitle="Vom B2B-Feed automatisch veröffentlichte Artikel — bei Bedarf zurückziehen"
+      >
+        {crawlArtikel.length === 0 ? (
+          <p className="text-sm text-claimondo-ondo/70 py-4 text-center">
+            Keine auto-veröffentlichten Crawl-Artikel vorhanden.
+          </p>
+        ) : (
+          <DataTableContainer>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th>Titel</Th>
+                  <Th>Slug</Th>
+                  <Th>Veröffentlicht am</Th>
+                  <Th>Aktionen</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {crawlArtikel.map(artikel => (
+                  <Tr key={artikel.id}>
+                    <Td>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{artikel.title}</span>
+                        <span className="inline-flex items-center rounded-ios-sm bg-claimondo-bg border border-claimondo-border px-1.5 py-0.5 text-[10px] font-medium text-claimondo-ondo whitespace-nowrap">
+                          Auto-veröffentlicht (Crawl)
+                        </span>
+                      </div>
+                    </Td>
+                    <Td className="font-mono text-xs text-claimondo-ondo">{artikel.slug}</Td>
+                    <Td className="text-xs">
+                      {artikel.veroeffentlicht_am
+                        ? new Date(artikel.veroeffentlicht_am).toLocaleDateString('de-DE')
+                        : new Date(artikel.created_at).toLocaleDateString('de-DE')}
+                    </Td>
+                    <Td>
+                      <CrawlArtikelActions artikelId={artikel.id} />
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
         )}
       </SectionCard>
     </div>

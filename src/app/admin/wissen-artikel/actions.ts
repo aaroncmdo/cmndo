@@ -278,3 +278,29 @@ export async function rejectArtikel(
   revalidatePath('/admin/wissen-artikel')
   return { ok: true }
 }
+
+// ---------------------------------------------------------------------------
+// zuruckziehenArtikel — veroeffentlichten Crawl-Artikel zurueckziehen (veroeffentlicht -> archiviert)
+// ---------------------------------------------------------------------------
+
+export async function zuruckziehenArtikel(
+  id: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const guard = await requireRole(['admin'])
+  if (!guard.success) return { ok: false, error: guard.error }
+
+  const supabase = createAdminClient()
+
+  const { error } = await supabase
+    .from('wissen_artikel')
+    .update({
+      status: 'archiviert',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', id)
+
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/wissen-artikel')
+  return { ok: true }
+}
