@@ -11,6 +11,9 @@
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { createAdminClient } from '@/lib/supabase/admin'
+// AAR-956 TZ-Fix: Google-Payload braucht Berlin-Wall-Clock (ohne Offset) statt
+// UTC-toISOString() + timeZone — sonst 2h-Sommer-Versatz (siehe timezone.ts).
+import { toBerlinWallClock, GOOGLE_CALENDAR_TIMEZONE } from '@/lib/google-calendar/timezone'
 
 type TerminShape = {
   id: string
@@ -188,8 +191,8 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         requestBody: {
           summary: title,
           description: descriptionLines.join('\n'),
-          start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-          end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
           location: t.adresse ?? undefined,
         },
       })
@@ -205,8 +208,8 @@ export async function syncSvCalendarEvent(terminId: string): Promise<void> {
         requestBody: {
           summary: title,
           description: descriptionLines.join('\n'),
-          start: { dateTime: startDate.toISOString(), timeZone: 'Europe/Berlin' },
-          end: { dateTime: endDate.toISOString(), timeZone: 'Europe/Berlin' },
+          start: { dateTime: toBerlinWallClock(startDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+          end: { dateTime: toBerlinWallClock(endDate.toISOString()), timeZone: GOOGLE_CALENDAR_TIMEZONE },
           location: t.adresse ?? undefined,
           reminders: {
             useDefault: false,
