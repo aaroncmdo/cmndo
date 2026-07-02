@@ -27,8 +27,14 @@ const kundeWelcomeProps = {
   loginInfo: { magicLink: 'https://app.claimondo.de/auth/magic/2f7a9e1c4b6d80a3f5e2c1b9d7406a8e', email: 'max.mustermann@example.de', password: 'Höhle-Birke-42!' },
   brand: null,
   locale: 'de',
+  // imagin off (Prod-Default) → kein inline VehicleCard-Render; der Blur-Marken-Hero
+  // (unten) ist das, was Kunden aktuell bekommen. Mit imagin live käme hier zusätzlich
+  // die imagin-URL des Kundenfahrzeugs rein.
   fahrzeugBildUrl: null,
-  heroBildUrl: null,
+  // Echter gebackener Blur-Hero aus dem email-hero-Bucket (composeHero: Basis-Asset +
+  // Navy/Glow), damit die Preview den Hero im vollen Email-Kontext zeigt. In Prod backt
+  // der erste Welcome die geteilte base-hero.jpg; dieses Bild ist byte-identisch dazu.
+  heroBildUrl: 'https://paizkjajbuxxksdoycev.supabase.co/storage/v1/object/public/email-hero/bmw_x5_x.jpg',
   berater: { name: 'Sandra Köhler', photoUrl: null, contact: 'WhatsApp · 0221 9876543' },
 }
 
