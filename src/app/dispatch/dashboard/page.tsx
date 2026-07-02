@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon, InboxIcon, CheckCircleIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
-import PageHeader from '@/components/shared/PageHeader'
+import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import EmptyState from '@/components/shared/EmptyState'
 import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
@@ -70,12 +70,6 @@ export default async function DispatchDashboard() {
       .order('start_zeit', { ascending: true })
       .limit(12),
   ])
-
-  const stats = [
-    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', href: '/dispatch/leads' },
-    { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, color: 'text-warning', bg: 'bg-warning-soft', href: '/dispatch/rueckrufe' },
-    { label: 'FlowLinks versendet', value: flowLinksRes.count ?? 0, icon: LinkIcon, color: 'text-success', bg: 'bg-success-soft', href: '/dispatch/leads' },
-  ]
 
   const tasks = myTasksRes.data ?? []
   const recentLeads = recentLeadsRes.data ?? []
@@ -155,27 +149,49 @@ export default async function DispatchDashboard() {
     return `${Math.floor(h / 24)}d`
   }
 
-  return (
-    <div className="py-6 space-y-6">
-      <PageHeader title="Dispatch Dashboard" size="lg" />
+  const { data: profile } = await supabase.from('profiles').select('vorname').eq('id', user.id).maybeSingle()
+  const vorname = (profile?.vorname as string | null) ?? null
+  const dateStr = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Berlin' })
+  const overdueRueckrufe = kommendeRueckrufe.filter((r) => r.lead && new Date(r.start_zeit).getTime() < Date.now()).length
+  const seg: { t: string; danger?: boolean }[] = []
+  if (overdueRueckrufe) seg.push({ t: `${overdueRueckrufe} ${overdueRueckrufe === 1 ? 'überfälliger Rückruf' : 'überfällige Rückrufe'}`, danger: true })
+  if (newLeadsRes.count) seg.push({ t: `${newLeadsRes.count} ${newLeadsRes.count === 1 ? 'neuer Lead' : 'neue Leads'} heute` })
+  if (tasks.length) seg.push({ t: `${tasks.length} ${tasks.length === 1 ? 'offener Task' : 'offene Tasks'}` })
+  const statBarItems: StatBarItem[] = [
+    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, href: '/dispatch/leads' },
+    { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, href: '/dispatch/rueckrufe', tone: (openRueckrufeRes.count ?? 0) > 0 ? 'warning' : 'default' },
+    { label: 'FlowLinks heute', value: flowLinksRes.count ?? 0, icon: LinkIcon, href: '/dispatch/leads', tone: 'success' },
+    { label: 'Offene Tasks', value: tasks.length, icon: ClockIcon },
+  ]
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06] p-5 flex items-center gap-4 hover:-translate-y-[1px] hover:shadow-sheet transition-all duration-200">
-            <div className={`w-11 h-11 rounded-ios-lg ${s.bg} flex items-center justify-center`}>
-              <s.icon className={`w-5 h-5 ${s.color}`} />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-claimondo-navy">{s.value}</p>
-              <p className="text-xs text-claimondo-ondo">{s.label}</p>
-            </div>
-          </Link>
-        ))}
+  return (
+    <div className="py-6 space-y-5">
+      {/* Greeting + Dringlichkeits-Zeile (Redesign 07/2026 — konsistent mit KB/Admin-Dashboard) */}
+      <div>
+        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">
+            Guten Tag{vorname ? `, ${vorname}` : ''}
+          </h1>
+          <p className="text-body-sm font-medium capitalize text-claimondo-ondo">{dateStr}</p>
+        </div>
+        <p className="mt-1 text-body-sm text-claimondo-ondo">
+          {seg.length ? (
+            seg.map((s, i) => (
+              <span key={i}>
+                {i > 0 ? <span className="text-claimondo-ondo/50"> · </span> : null}
+                <span className={s.danger ? 'font-semibold text-danger-strong' : undefined}>{s.t}</span>
+              </span>
+            ))
+          ) : (
+            'Alles im grünen Bereich — nichts Dringendes.'
+          )}
+        </p>
       </div>
 
+      <StatBar items={statBarItems} />
+
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
-      <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
+      <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
         <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
           <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
             <PhoneIcon className="w-4 h-4 text-warning" />
@@ -246,7 +262,7 @@ export default async function DispatchDashboard() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
-        <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
+        <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
           <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
             <h2 className="text-sm font-semibold text-claimondo-navy">Neueste Leads</h2>
             <Link href="/dispatch/leads" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
@@ -273,7 +289,7 @@ export default async function DispatchDashboard() {
         </div>
 
         {/* Meine Tasks */}
-        <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
+        <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
           <div className="px-5 py-4 border-b border-claimondo-navy/[0.06]">
             <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
               <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
