@@ -191,7 +191,11 @@ export default function WeatherBanner({ standortLat, standortLng, trailingSlot, 
   const todayHourly = weather.hourly?.[todayKey]?.filter((h) => h.hour >= 8 && h.hour <= 18) ?? []
   const tomorrowDaily = weather.daily?.[1] ?? null
 
-  const base = `relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white overflow-hidden shadow-sm`
+  // Bugfix (Gutachter-Updates-Glocke): overflow-hidden am Outer-Container schnitt
+  // das absolut positionierte Popover der trailingSlot-Glocke ab ("abgeschnitten /
+  // hinter Wrapper"). Nur clippen, wenn KEIN interaktiver Slot da ist — die Wetter-
+  // Effekte clippen sich ohnehin selbst (eigene `absolute inset-0 overflow-hidden`).
+  const base = `relative flex-shrink-0 px-4 py-2.5 flex items-center gap-4 bg-gradient-to-r ${wGrad(weather.code)} text-white ${trailingSlot ? '' : 'overflow-hidden'} shadow-sm`
   return (
     <div
       className={
