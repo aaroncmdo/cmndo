@@ -9,6 +9,9 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Hoisted holder to capture the werkstaetten insert payload (happy-path assertion).
+const h = vi.hoisted(() => ({ werkstattInsert: null as Record<string, unknown> | null }))
+
 // ─── Mock: next/cache (revalidatePath is a no-op in tests) ──────────────────
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
@@ -86,9 +89,17 @@ vi.mock('@/lib/supabase/admin', () => ({
       }
       if (table === 'werkstaetten') {
         return {
-          insert: vi.fn().mockReturnThis(),
+          // Capture the insert payload so tests can assert individual fields
+          // (e.g. ansprechpartner_name) are threaded through to the DB row.
+          insert: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+            h.werkstattInsert = payload
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              single: vi.fn().mockResolvedValue({ data: { id: 'w-1' }, error: null }),
+            }
+          }),
           update: vi.fn().mockReturnThis(),
-          select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({ data: { id: 'w-1' }, error: null }),
         }
@@ -119,6 +130,7 @@ beforeEach(() => {
     profileRolle: null,
     adminCreateUserError: null,
   }
+  h.werkstattInsert = null
   vi.clearAllMocks()
 })
 
@@ -215,5 +227,27 @@ describe('createWerkstatt', () => {
     if (!result.ok) {
       expect(result.error).toContain('Pflicht')
     }
+  })
+
+  it('übernimmt ansprechpartner_name in den werkstaetten-Insert', async () => {
+    mockConfig.authUser = { id: 'admin-user-id' }
+    mockConfig.profileRolle = 'admin'
+
+    const { createWerkstatt } = await import('../actions')
+    const fd = makeFormData({
+      name: 'Muster-Werkstatt',
+      email: 'werkstatt@example.com',
+      adresse_strasse: 'Musterstr. 1',
+      adresse_plz: '44135',
+      adresse_ort: 'Dortmund',
+      lat: '51.5',
+      lng: '7.0',
+      ansprechpartner_name: 'Max Muster',
+    })
+    const result = await createWerkstatt(fd)
+
+    expect(result.ok).toBe(true)
+    expect(h.werkstattInsert).not.toBeNull()
+    expect(h.werkstattInsert).toMatchObject({ ansprechpartner_name: 'Max Muster' })
   })
 })
