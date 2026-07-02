@@ -49,6 +49,21 @@ const QC_FIELDS: { key: keyof QcCheckliste; label: string }[] = [
   { key: 'vorschaeden_beruecksichtigt', label: 'Vorschäden berücksichtigt' },
 ]
 
+/**
+ * Filmcheck Phase 3 (P3a): read-only-Kurzansicht der per OCR aus dem Gutachten
+ * extrahierten Kern-Werte. KB prueft die Zahlen direkt beim Abhaken; Editieren
+ * bleibt der admin-only GutachtenOcrCard vorbehalten. Alle Felder null -> nichts
+ * rendern (historisch 0 OCR-Laeufe).
+ */
+export type QcOcrWerte = {
+  reparaturkosten_netto: number | null
+  restwert: number | null
+  wiederbeschaffungswert: number | null
+  minderwert: number | null
+  gesamt_schadensbetrag: number | null
+  totalschaden: boolean | null
+}
+
 type Props = {
   fallId: string
   qcCheckliste: QcCheckliste | null
@@ -56,9 +71,14 @@ type Props = {
   autoChecks?: Record<string, boolean>
   /** Filmcheck #7: Gutachten-PDF zur Inline-Pruefung. */
   gutachtenUrl?: string | null
+  /** Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB (keine Edit-Rechte). */
+  qcOcrWerte?: QcOcrWerte | null
 }
 
-export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl }: Props) {
+const formatEuro = (n: number | null) =>
+  n == null ? '–' : n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+
+export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl, qcOcrWerte }: Props) {
   const router = useRouter()
   const [qcState, setQcState] = useState<Record<string, boolean | null>>(() => {
     const init: Record<string, boolean | null> = {}
@@ -171,6 +191,7 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
             <span className="text-claimondo-ondo">↗</span>
           </a>
         )}
+        <QcOcrWerteBlock werte={qcOcrWerte} />
         {autoChecks && Object.keys(autoChecks).length > 0 && (
           <p className="text-[10px] text-claimondo-ondo/70">
             Einige Felder sind aus den Falldaten vorbefüllt — bitte prüfen, die offenen („—") selbst beurteilen.
@@ -253,6 +274,48 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
           </p>
         )}
       </div>
+    </div>
+  )
+}
+
+/**
+ * Filmcheck Phase 3 (P3a): read-only OCR-Kern-Werte im Filmcheck. Nur zur Ansicht
+ * fuer den KB — Editieren bleibt der admin-only GutachtenOcrCard vorbehalten.
+ * Rendert nichts, wenn alle Werte null sind (historisch 0 OCR-Laeufe).
+ */
+function QcOcrWerteBlock({ werte }: { werte?: QcOcrWerte | null }) {
+  if (!werte) return null
+  const eurFelder: { key: keyof QcOcrWerte; label: string }[] = [
+    { key: 'reparaturkosten_netto', label: 'Reparaturkosten netto' },
+    { key: 'wiederbeschaffungswert', label: 'Wiederbeschaffungswert' },
+    { key: 'restwert', label: 'Restwert' },
+    { key: 'minderwert', label: 'Minderwert' },
+    { key: 'gesamt_schadensbetrag', label: 'Gesamt-Schadensbetrag' },
+  ]
+  const hatEur = eurFelder.some((f) => werte[f.key] != null)
+  const hatTotalschaden = werte.totalschaden != null
+  // Alle Werte null -> nichts rendern (kein leerer Kasten).
+  if (!hatEur && !hatTotalschaden) return null
+
+  return (
+    <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg/60 p-3">
+      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">
+        Gutachten-Werte (aus OCR · nur Ansicht)
+      </p>
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+        {eurFelder.map((f) => (
+          <div key={f.key} className="flex items-center justify-between gap-2">
+            <dt className="text-claimondo-ondo/80">{f.label}</dt>
+            <dd className="text-claimondo-navy font-medium text-right">{formatEuro(werte[f.key] as number | null)}</dd>
+          </div>
+        ))}
+        {hatTotalschaden && (
+          <div className="flex items-center justify-between gap-2">
+            <dt className="text-claimondo-ondo/80">Totalschaden</dt>
+            <dd className="text-claimondo-navy font-medium text-right">{werte.totalschaden ? 'Ja' : 'Nein'}</dd>
+          </div>
+        )}
+      </dl>
     </div>
   )
 }

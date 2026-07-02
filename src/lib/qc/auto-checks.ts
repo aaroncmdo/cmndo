@@ -3,8 +3,10 @@
 // Reine Logik (server-import-frei). Leitet die SICHER aus vorhandenen Daten
 // berechenbaren QC-Checks ab, damit der KB beim Filmcheck nicht blind abnickt.
 // Bewusst nur die eindeutigen Felder — Rest bleibt undefined (= KB-Urteil); ein
-// falsches Auto-Haekchen waere schlimmer als keins. fin/kundendaten (Quelle unklar)
-// + OCR-abhaengige (Positionen) folgen in spaeteren Phasen (s. Spec 2026-06-29).
+// falsches Auto-Haekchen waere schlimmer als keins. Phase 1b: fin + kundendaten.
+// Phase 3: schadenspositionen_erfasst (schadenspositionen-Zeilen ODER gutachten.
+// positionen). gutachten_vollstaendig/fotos_ausreichend bleiben KB-Urteil (s. Spec
+// 2026-06-29).
 
 import type { QcFieldKey } from './checkliste-validation'
 
@@ -44,6 +46,17 @@ export type QcAutoInput = {
     telefon?: string | null
     besichtigungsadresse?: string | null
   }
+  /**
+   * Phase 3: Positionen-Quellen fuer schadenspositionen_erfasst. Nur uebergeben, wenn
+   * die Quellen tatsaechlich geladen wurden -> dann wird abgeleitet. Fehlt das Objekt
+   * (nicht ladbar) -> Feld bleibt offen (KB-Urteil).
+   *   schadenspositionenCount — Anzahl Zeilen der schadenspositionen-Tabelle fuer den Claim.
+   *   gutachtenPositionen     — gutachten.positionen (jsonb); als Array = Positionsliste.
+   */
+  positionen?: {
+    schadenspositionenCount: number
+    gutachtenPositionen: unknown
+  }
 }
 
 /**
@@ -75,6 +88,16 @@ export function berechneQcAutoChecks(input: QcAutoInput): Partial<Record<QcField
     const hasKontakt = !!(k.email?.trim() || k.telefon?.trim())
     const hasBesichtigung = !!k.besichtigungsadresse?.trim()
     out.kundendaten_vollstaendig = hasAnsprechpartner && hasKontakt && hasBesichtigung
+  }
+  // Phase 3 (02.07., Aaron-DEFAULT): schadenspositionen_erfasst nur ableiten wenn die
+  // Quellen geladen wurden. true = EINDEUTIG Positionen vorhanden (>=1 schadenspositionen-
+  // Zeile ODER gutachten.positionen ein nicht-leeres Array); sonst false. Nicht-Array in
+  // positionen wird defensiv ignoriert (dann entscheidet nur der Zeilen-Count).
+  if (input.positionen) {
+    const p = input.positionen
+    const hatGutachtenPositionen =
+      Array.isArray(p.gutachtenPositionen) && p.gutachtenPositionen.length > 0
+    out.schadenspositionen_erfasst = p.schadenspositionenCount > 0 || hatGutachtenPositionen
   }
   return out
 }

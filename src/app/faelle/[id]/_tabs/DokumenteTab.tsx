@@ -54,6 +54,7 @@ import {
   type SystemDokumenteProps,
   type FallAS,
   type QcCheckliste,
+  type QcOcrWerte,
 } from '@/components/admin/fallakte/dokumente'
 // CMM-33: Zentrale Pflichtdokumente-Section als Übersicht oben im Tab.
 import PflichtdokumenteSection, {
@@ -124,6 +125,8 @@ type DokumenteTabProps = {
   qcAutoChecks?: Record<string, boolean>
   /** Filmcheck #7: Gutachten-PDF-URL fuer die Evidenz-Verlinkung in der QC-Karte. */
   qcGutachtenUrl?: string | null
+  /** Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB im Filmcheck. */
+  qcOcrWerte?: QcOcrWerte | null
   anforderbareSlots: AnforderbarerSlot[]
   anforderungenVonMir: AnforderungsItem[]
   rolleLabel: string
@@ -148,6 +151,7 @@ export default function DokumenteTab({
   qcCheckliste,
   qcAutoChecks,
   qcGutachtenUrl,
+  qcOcrWerte,
   anforderbareSlots,
   anforderungenVonMir,
   rolleLabel,
@@ -527,7 +531,7 @@ export default function DokumenteTab({
       </div>
 
       {/* AAR-170/AAR-755: QC-Checkliste (extrahiert) */}
-      <QcChecklisteBlock fallId={fallId} qcCheckliste={qcCheckliste} autoChecks={qcAutoChecks} gutachtenUrl={qcGutachtenUrl} />
+      <QcChecklisteBlock fallId={fallId} qcCheckliste={qcCheckliste} autoChecks={qcAutoChecks} gutachtenUrl={qcGutachtenUrl} qcOcrWerte={qcOcrWerte} />
     </div>
   )
 }
