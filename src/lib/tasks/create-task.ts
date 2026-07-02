@@ -128,26 +128,10 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
     }
   }
 
-  // AAR-229 W4: Mitteilung bei Task-Erstellung an den Empfänger.
-  if (data?.id && finalEmpfaengerUserId) {
-    // AAR-229 Audit: empfaenger_rolle kann admin/kundenbetreuer/dispatch/
-    // sachverstaendiger/kanzlei/kunde sein — alle sind valide EmpfaengerRolle-
-    // Werte für mitteilungen. Cast auf den Union-Type statt nur admin|SV.
-    const rolleValue = (params.empfaenger_rolle ?? 'admin') as
-      'admin' | 'dispatch' | 'kundenbetreuer' | 'sachverstaendiger' | 'kanzlei' | 'kunde'
-    import('@/lib/mitteilungen/create-mitteilung')
-      .then(({ createMitteilung }) => createMitteilung({
-        empfaenger_id: finalEmpfaengerUserId,
-        empfaenger_rolle: rolleValue,
-        kategorie: 'task',
-        titel: params.titel,
-        inhalt: params.beschreibung ?? undefined,
-        kontext_typ: 'fall',
-        kontext_id: params.fall_id ?? undefined,
-        prioritaet: params.prioritaet === 'kritisch' ? 'dringend' : 'normal',
-      }))
-      .catch(err => console.error('[AAR-229] createMitteilung fehlgeschlagen:', err))
-  }
+  // Phase 5: Kein kategorie='task'-Mitteilungs-Spiegel mehr. Der Task wird via
+  // get_updates_action/offene_aufgabe ABGELEITET (aus zugewiesen_an /
+  // empfaenger_user_id) und erscheint dadurch in der Bell — die materialisierte
+  // Mitteilung war ein redundanter Doppel-Eintrag.
 
   // AAR-723: Timeline-Eintrag wenn Auto-Assign gegriffen hat. Macht die
   // Zuweisungs-Entscheidung in der Fallakte nachvollziehbar — inkl. Hinweis

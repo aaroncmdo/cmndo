@@ -18,7 +18,7 @@ export function useMitteilungen() {
   // `postgres_changes` callbacks after `subscribe()`" + Error-Boundary.
   const channelId = useId()
   const [items, setItems] = useState<Mitteilung[]>([])
-  const [counts, setCounts] = useState<Counts>({ update: 0, task: 0, nachricht: 0, anruf: 0 })
+  const [counts, setCounts] = useState<Counts>({ update: 0, nachricht: 0, anruf: 0 })
   const [loading, setLoading] = useState(true)
 
   const load = useCallback(async () => {
@@ -41,7 +41,7 @@ export function useMitteilungen() {
 
     setItems((data ?? []) as Mitteilung[])
 
-    const c: Counts = { update: 0, task: 0, nachricht: 0, anruf: 0 }
+    const c: Counts = { update: 0, nachricht: 0, anruf: 0 }
     for (const row of countData ?? []) {
       const k = row.kategorie as MitteilungKategorie
       if (k in c) c[k]++
@@ -62,7 +62,7 @@ export function useMitteilungen() {
     return () => { supabase.removeChannel(channel) }
   }, [supabase, load, channelId])
 
-  const totalUnread = counts.update + counts.task + counts.nachricht + counts.anruf
+  const totalUnread = counts.update + counts.nachricht + counts.anruf
 
   const markAsRead = useCallback(async (id: string) => {
     await supabase.from('mitteilungen').update({ gelesen: true, gelesen_am: new Date().toISOString() }).eq('id', id)
@@ -75,7 +75,7 @@ export function useMitteilungen() {
     if (!ids.length) return
     await supabase.from('mitteilungen').update({ gelesen: true, gelesen_am: new Date().toISOString() }).in('id', ids)
     setItems(prev => prev.map(m => ({ ...m, gelesen: true })))
-    setCounts({ update: 0, task: 0, nachricht: 0, anruf: 0 })
+    setCounts({ update: 0, nachricht: 0, anruf: 0 })
   }, [supabase, items])
 
   return { items, counts, totalUnread, loading, markAsRead, markAllAsRead }

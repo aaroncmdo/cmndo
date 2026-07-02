@@ -132,7 +132,7 @@ export async function GET(request: Request) {
     const created = await createMitteilung({
       empfaenger_id: kbId,
       empfaenger_rolle: 'kundenbetreuer',
-      kategorie: 'task',
+      kategorie: 'update',
       titel: 'VS-Stand anfragen',
       inhalt,
       kontext_typ: 'fall',

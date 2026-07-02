@@ -163,7 +163,7 @@ export async function uploadSvPflichtdokument(
         await createMitteilungMulti(
           admins.map((a) => ({ id: a.id, rolle: 'admin' as const })),
           {
-            kategorie: 'task',
+            kategorie: 'update',
             titel: `${slot.label} von ${svName}`,
             inhalt: 'Bitte im SV-Verifizierungs-Tab prüfen und freigeben.',
             route_url: `/admin/sachverstaendige/${svId}?tab=verifizierung`,
