@@ -279,15 +279,25 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view laden.
-    // Nur noch für AuszahlungCard genutzt — Eskalations-Tag-Felder kommen
-    // mit, werden aber nicht mehr gerendert (CMM-28 Cleanup).
+    // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view — jetzt nur noch
+    // der Zahlungsweg. auszahlung_kunde_betrag/_eingegangen_am waren in der View
+    // hardcoded NULL (keine eigene Spalte); kanonische Quelle siehe kanzleiPayout unten.
     const { data: kundeView } = await supabase
       .from('faelle_kunde_view')
-      .select(
-        'auszahlung_kunde_betrag, auszahlung_kunde_eingegangen_am, auszahlung_zahlungsweg',
-      )
+      .select('auszahlung_zahlungsweg')
       .eq('id', id)
+      .maybeSingle()
+
+    // AAR-558 Follow-up (Aaron 02.07.): Netto-Kunden-Auszahlbetrag ist keine eigene
+    // Spalte — im komplett/Kanzlei-Pfad ist die kanonische SSoT kanzlei_faelle:
+    // vs_quote_betrag_ausgezahlt = "Quote ausgezahlt" (der Netto-Betrag AN den Kunden,
+    // Aaron-bestätigt) + ausgezahlt_am = Auszahl-Datum. Admin-Client fuer den bereits
+    // ownership-verifizierten Fall (Muster wie claims/v_gutachten_werte unten).
+    // nur_gutachter hat kein kanzlei_faelle -> null -> Karte bleibt aus (VS zahlt direkt).
+    const { data: kanzleiPayout } = await admin
+      .from('kanzlei_faelle')
+      .select('vs_quote_betrag_ausgezahlt, ausgezahlt_am')
+      .eq('fall_id', id)
       .maybeSingle()
 
     // 13.05.2026 Restore: claim-Row + fall-Extras für die im 8f088031-Merge
@@ -790,8 +800,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-558 (C9): Auszahlungs-Card — nur Netto-Kunden-Anteil. */}
         {kundeView && (
           <AuszahlungCard
-            betrag={(kundeView.auszahlung_kunde_betrag as number | null) ?? null}
-            eingegangenAm={(kundeView.auszahlung_kunde_eingegangen_am as string | null) ?? null}
+            betrag={(kanzleiPayout?.vs_quote_betrag_ausgezahlt as number | null) ?? null}
+            eingegangenAm={(kanzleiPayout?.ausgezahlt_am as string | null) ?? null}
             zahlungsweg={(kundeView.auszahlung_zahlungsweg as string | null) ?? null}
           />
         )}
