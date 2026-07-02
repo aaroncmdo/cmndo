@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getTagesSession } from '@/lib/sv/tages-session'
+import { effektiveBezugIds, type TerminBezugRow } from '@/lib/termine/effektive-bezug-ids'
 import FeldmodusClient from './FeldmodusClient'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
 
@@ -122,7 +123,9 @@ export default async function FeldmodusPage() {
   const { data: termine } = await admin
     .from('gutachter_termine')
     .select(
-      'id, fall_id, start_zeit, status, losgefahren_am, sv_angekommen_am, abschluss_zeit',
+      // AAR-956/CMM-49: lead_id + bezug_typ/bezug_id für bezug-native Termine
+      // (Engine schreibt fall_id/lead_id NULL) — sonst leerer Stop ohne Kunde.
+      'id, fall_id, lead_id, bezug_typ, bezug_id, start_zeit, status, losgefahren_am, sv_angekommen_am, abschluss_zeit',
     )
     .in('id', terminIds)
     // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
@@ -211,9 +214,16 @@ export default async function FeldmodusPage() {
   }
 
   // Leads laden
-  const leadIds = [...fallMap.values()]
+  // AAR-956/CMM-49: Leads aus den Fällen UND direkt aus bezug-nativen Terminen
+  // (ohne fall_id) laden — sonst zeigt der Stop keinen Kunden.
+  const leadIdsFromFaelle = [...fallMap.values()]
     .map((f) => f.lead_id)
     .filter(Boolean) as string[]
+  const leadIdsFromTermine = [...terminById.values()]
+    .filter((t) => !t.fall_id)
+    .map((t) => effektiveBezugIds(t as TerminBezugRow).leadId)
+    .filter((id): id is string => !!id)
+  const leadIds = Array.from(new Set([...leadIdsFromFaelle, ...leadIdsFromTermine]))
   const leadMap = new Map<
     string,
     { vorname: string | null; nachname: string | null; telefon: string | null }
@@ -293,9 +303,14 @@ export default async function FeldmodusPage() {
       const t = terminById.get(id)
       if (!t) return null
       const fall = fallMap.get(t.fall_id as string)
+      // AAR-956/CMM-49: Lead aus dem Fall ODER (bezug-nativ, ohne Fall) direkt aus
+      // dem Termin via effektiveBezugIds — sonst bleibt der Stop-Kunde leer.
+      const effLeadId = effektiveBezugIds(t as TerminBezugRow).leadId
       const lead = fall?.lead_id
         ? leadMap.get(fall.lead_id as string)
-        : null
+        : effLeadId
+          ? leadMap.get(effLeadId)
+          : null
       // CMM-44 SP-A2 (Cluster 1): schadenort_* aus dem claims-Embed.
       // CMM-44 SP-B PR2a: szenario ebenfalls aus dem claims-Embed.
       const fallClaim = (Array.isArray(fall?.claims) ? fall.claims[0] : fall?.claims) as
