@@ -1,8 +1,10 @@
 'use client'
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import type { CommentRow } from '@/lib/community/community-queries'
 import { createCommunityComment, reportCommunityTarget } from '@/lib/community/community-actions'
 import { requestCommentLogin, ensureUsername } from '@/lib/community/actions'
+import { loadThread } from '@/lib/community/thread-loader'
 
 // ---------------------------------------------------------------------------
 // Magic-Link-Auth helper (identisch mit CommentForm-Pattern)
@@ -10,11 +12,13 @@ import { requestCommentLogin, ensureUsername } from '@/lib/community/actions'
 type Stage = 'email' | 'username' | 'comment' | 'sent'
 
 function MagicLinkGate({
+  startStage,
   onAuthenticated,
 }: {
+  startStage: Stage
   onAuthenticated: () => void
 }) {
-  const [stage, setStage] = useState<Stage>('email')
+  const [stage, setStage] = useState<Stage>(startStage)
   const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
 
@@ -73,7 +77,7 @@ function MagicLinkGate({
         <>
           <input name="username" required placeholder="Nutzername (3–24 Zeichen)" className={input} />
           <label className="flex items-start gap-2 text-[0.7rem] text-claimondo-shield">
-            <input type="checkbox" name="consent" className="mt-0.5" />
+            <input type="checkbox" name="consent" required className="mt-0.5" />
             <span>
               Ich bin einverstanden, dass mein Nutzername und Kommentar gespeichert und öffentlich
               angezeigt werden.
@@ -97,15 +101,17 @@ function CommentItem({
   replies,
   isLoggedIn,
   hasUsername,
-  postId,
-  onNewReply,
+  targetId,
+  targetKind,
+  onAfterSubmit,
 }: {
   comment: CommentRow
   replies: CommentRow[]
   isLoggedIn: boolean
   hasUsername: boolean
-  postId: string
-  onNewReply: (parentId: string, reply: CommentRow) => void
+  targetId: string
+  targetKind: 'post' | 'wissen'
+  onAfterSubmit: () => void
 }) {
   const [showReply, setShowReply] = useState(false)
   const [replyBody, setReplyBody] = useState('')
@@ -117,28 +123,22 @@ function CommentItem({
     if (!replyBody.trim()) return
     setError(null)
     start(async () => {
-      const r = await createCommunityComment('post', postId, replyBody.trim(), comment.id)
+      const r = await createCommunityComment(targetKind, targetId, replyBody.trim(), comment.id)
       if (!r.ok) {
         setError(r.error ?? 'Fehler beim Antworten.')
       } else {
-        const newReply: CommentRow = {
-          id: `opt-${Date.now()}`,
-          authorDisplay: '…',
-          body: replyBody.trim(),
-          parentId: comment.id,
-          createdAt: new Date().toISOString(),
-        }
-        onNewReply(comment.id, newReply)
         setReplyBody('')
         setShowReply(false)
+        await onAfterSubmit()
       }
     })
   }
 
   function reportItem() {
     start(async () => {
-      await reportCommunityTarget('comment', comment.id)
-      setReported(true)
+      const r = await reportCommunityTarget('comment', comment.id)
+      if (r.ok) setReported(true)
+      else setError(r.error ?? 'Melden fehlgeschlagen.')
     })
   }
 
@@ -238,18 +238,21 @@ function CommentItem({
 // PostComments — Haupt-Export
 // ---------------------------------------------------------------------------
 interface PostCommentsProps {
-  postId: string
+  targetId: string
+  targetKind: 'post' | 'wissen'
   initialThread: { top: CommentRow[]; repliesByParent: Record<string, CommentRow[]> }
   isLoggedIn: boolean
   hasUsername: boolean
 }
 
 export function PostComments({
-  postId,
+  targetId,
+  targetKind,
   initialThread,
   isLoggedIn,
   hasUsername,
 }: PostCommentsProps) {
+  const router = useRouter()
   const [top, setTop] = useState<CommentRow[]>(initialThread.top)
   const [repliesByParent, setRepliesByParent] = useState<Record<string, CommentRow[]>>(
     initialThread.repliesByParent,
@@ -258,30 +261,23 @@ export function PostComments({
   const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
 
-  function addReply(parentId: string, reply: CommentRow) {
-    setRepliesByParent((prev) => ({
-      ...prev,
-      [parentId]: [...(prev[parentId] ?? []), reply],
-    }))
+  async function refreshThread() {
+    const t = await loadThread(targetKind, targetId)
+    setTop(t.top)
+    setRepliesByParent(t.repliesByParent)
+    router.refresh()
   }
 
   function submitTopLevel() {
     if (!newBody.trim()) return
     setError(null)
     start(async () => {
-      const r = await createCommunityComment('post', postId, newBody.trim())
+      const r = await createCommunityComment(targetKind, targetId, newBody.trim())
       if (!r.ok) {
         setError(r.error ?? 'Fehler beim Kommentieren.')
       } else {
-        const optimistic: CommentRow = {
-          id: `opt-${Date.now()}`,
-          authorDisplay: '…',
-          body: newBody.trim(),
-          parentId: null,
-          createdAt: new Date().toISOString(),
-        }
-        setTop((prev) => [...prev, optimistic])
         setNewBody('')
+        await refreshThread()
       }
     })
   }
@@ -295,9 +291,9 @@ export function PostComments({
     <div className="mt-3 border-t border-claimondo-border/50 pt-3">
       {/* Comment form — Magic-Link for non-logged-in */}
       {!isLoggedIn ? (
-        <MagicLinkGate onAuthenticated={() => {}} />
+        <MagicLinkGate startStage="email" onAuthenticated={() => router.refresh()} />
       ) : !hasUsername ? (
-        <MagicLinkGate onAuthenticated={() => {}} />
+        <MagicLinkGate startStage="username" onAuthenticated={() => router.refresh()} />
       ) : (
         <div className="mb-3 space-y-2">
           <textarea
@@ -327,8 +323,9 @@ export function PostComments({
               replies={repliesByParent[c.id] ?? []}
               isLoggedIn={isLoggedIn}
               hasUsername={hasUsername}
-              postId={postId}
-              onNewReply={addReply}
+              targetId={targetId}
+              targetKind={targetKind}
+              onAfterSubmit={refreshThread}
             />
           ))}
         </ul>

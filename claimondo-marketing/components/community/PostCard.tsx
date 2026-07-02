@@ -3,7 +3,7 @@ import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import type { FeedEntry, CommentRow } from '@/lib/community/community-queries'
 import { reportCommunityTarget } from '@/lib/community/community-actions'
-import { loadPostThread } from '@/lib/community/thread-loader'
+import { loadThread } from '@/lib/community/thread-loader'
 import { LikeButton } from './LikeButton'
 import { PostComments } from './PostComments'
 
@@ -13,9 +13,10 @@ interface PostCardProps {
   entry: FeedEntry
   isLoggedIn: boolean
   hasUsername: boolean
+  likedKeys: string[]
 }
 
-export function PostCard({ entry, isLoggedIn, hasUsername }: PostCardProps) {
+export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCardProps) {
   const [expanded, setExpanded] = useState(false)
   const [thread, setThread] = useState<{
     top: CommentRow[]
@@ -24,6 +25,10 @@ export function PostCard({ entry, isLoggedIn, hasUsername }: PostCardProps) {
   const [threadPending, startThread] = useTransition()
   const [reported, setReported] = useState(false)
   const [reportPending, startReport] = useTransition()
+  const [reportError, setReportError] = useState<string | null>(null)
+
+  const isArtikel = entry.kind === 'artikel'
+  const targetKind: 'post' | 'wissen' = isArtikel ? 'wissen' : 'post'
 
   function handleExpand() {
     if (expanded) {
@@ -31,23 +36,20 @@ export function PostCard({ entry, isLoggedIn, hasUsername }: PostCardProps) {
       return
     }
     setExpanded(true)
-    if (thread === null && entry.kind === 'post') {
+    if (thread === null) {
       startThread(async () => {
-        const result = await loadPostThread(entry.id)
-        setThread(result)
+        setThread(await loadThread(targetKind, entry.id))
       })
     }
   }
 
   function handleReport() {
-    const kind = entry.kind === 'post' ? 'post' : 'wissen'
     startReport(async () => {
-      await reportCommunityTarget(kind, entry.id)
-      setReported(true)
+      const r = await reportCommunityTarget(targetKind, entry.id)
+      if (r.ok) setReported(true)
+      else setReportError(r.error ?? 'Melden fehlgeschlagen.')
     })
   }
-
-  const isArtikel = entry.kind === 'artikel'
   const bodyPreview =
     entry.body.length > 200 ? entry.body.slice(0, 200).trimEnd() + ' …' : entry.body
 
@@ -103,10 +105,11 @@ export function PostCard({ entry, isLoggedIn, hasUsername }: PostCardProps) {
       {/* Footer — Likes + Kommentare + Melden */}
       <div className="mt-3 flex flex-wrap items-center gap-3">
         <LikeButton
-          targetKind={isArtikel ? 'wissen' : 'post'}
+          targetKind={targetKind}
           targetId={entry.id}
           initialCount={entry.likeCount}
           isLoggedIn={isLoggedIn}
+          initialLiked={likedKeys.includes(`${targetKind}:${entry.id}`)}
         />
 
         <button
@@ -135,25 +138,31 @@ export function PostCard({ entry, isLoggedIn, hasUsername }: PostCardProps) {
         {reported ? (
           <span className="ml-auto text-[0.7rem] text-claimondo-shield/50">Gemeldet — danke.</span>
         ) : (
-          <button
-            type="button"
-            onClick={handleReport}
-            disabled={reportPending}
-            className="ml-auto text-[0.7rem] text-claimondo-shield/50 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
-          >
-            Melden
-          </button>
+          <span className="ml-auto inline-flex flex-col items-end gap-0.5">
+            <button
+              type="button"
+              onClick={handleReport}
+              disabled={reportPending}
+              className="text-[0.7rem] text-claimondo-shield/50 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
+            >
+              Melden
+            </button>
+            {reportError && (
+              <span className="text-[0.7rem] text-danger-strong">{reportError}</span>
+            )}
+          </span>
         )}
       </div>
 
-      {/* Thread (nur Posts, aufgeklappt) */}
-      {expanded && entry.kind === 'post' && (
+      {/* Thread (aufgeklappt) */}
+      {expanded && (
         <>
           {threadPending || thread === null ? (
             <p className="mt-3 text-xs text-claimondo-shield/60">Lade Kommentare …</p>
           ) : (
             <PostComments
-              postId={entry.id}
+              targetKind={targetKind}
+              targetId={entry.id}
               initialThread={thread}
               isLoggedIn={isLoggedIn}
               hasUsername={hasUsername}

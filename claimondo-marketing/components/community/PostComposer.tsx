@@ -1,5 +1,6 @@
 'use client'
 import { useState, useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { createCommunityPost } from '@/lib/community/community-actions'
 import { requestCommentLogin, ensureUsername } from '@/lib/community/actions'
 import { B2B_TAGS } from '@/lib/community/tags'
@@ -17,6 +18,7 @@ interface PostComposerProps {
 }
 
 export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
+  const router = useRouter()
   const initial: Stage = !isLoggedIn ? 'email' : !hasUsername ? 'username' : 'compose'
   const [stage, setStage] = useState<Stage>(initial)
   const [body, setBody] = useState('')
@@ -52,7 +54,10 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
     start(async () => {
       const r = await createCommunityPost(body.trim(), selectedTags)
       if (r.ok) {
+        setBody('')
+        setSelectedTags([])
         setStage('posted')
+        router.refresh()
       } else {
         setError(r.error ?? 'Fehler beim Veröffentlichen.')
       }
@@ -86,7 +91,10 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
             run(requestCommentLogin, fd, () => setStage('sent'))
           } else if (stage === 'username') {
             const fd = new FormData(e.currentTarget)
-            run(ensureUsername, fd, () => setStage('compose'))
+            run(ensureUsername, fd, () => {
+              setStage('compose')
+              router.refresh()
+            })
           }
         }}
       >
@@ -115,7 +123,7 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               className={input}
             />
             <label className="flex items-start gap-2 text-[0.75rem] text-claimondo-shield">
-              <input type="checkbox" name="consent" className="mt-0.5" />
+              <input type="checkbox" name="consent" required className="mt-0.5" />
               <span>
                 Ich bin einverstanden, dass mein Nutzername und meine Beiträge gespeichert und
                 öffentlich angezeigt werden.

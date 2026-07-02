@@ -9,9 +9,10 @@ interface CommunityFeedClientProps {
   entries: FeedEntry[]
   isLoggedIn: boolean
   hasUsername: boolean
+  likedKeys: string[]
 }
 
-export function CommunityFeedClient({ entries, isLoggedIn, hasUsername }: CommunityFeedClientProps) {
+export function CommunityFeedClient({ entries, isLoggedIn, hasUsername, likedKeys }: CommunityFeedClientProps) {
   const [activeTag, setActiveTag] = useState<string | null>(null)
 
   const filtered = useMemo(() => {
@@ -66,7 +67,7 @@ export function CommunityFeedClient({ entries, isLoggedIn, hasUsername }: Commun
         <ul className="space-y-4">
           {filtered.map((entry) => (
             <li key={`${entry.kind}-${entry.id}`}>
-              <PostCard entry={entry} isLoggedIn={isLoggedIn} hasUsername={hasUsername} />
+              <PostCard entry={entry} isLoggedIn={isLoggedIn} hasUsername={hasUsername} likedKeys={likedKeys} />
             </li>
           ))}
         </ul>

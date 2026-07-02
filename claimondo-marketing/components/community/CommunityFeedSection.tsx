@@ -1,4 +1,4 @@
-import { getCommunityFeed } from '@/lib/community/community-queries'
+import { getCommunityFeed, getUserLikedKeys } from '@/lib/community/community-queries'
 import { getAuthState } from '@/lib/community/comments'
 import { CommunityFeedClient } from './CommunityFeedClient'
 
@@ -9,6 +9,7 @@ const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 // padding/max-width-Konventionen. Laedt Daten parallel (Feed + Auth-State).
 export async function CommunityFeedSection() {
   const [entries, authState] = await Promise.all([getCommunityFeed(), getAuthState()])
+  const likedKeys = authState.isLoggedIn ? await getUserLikedKeys(entries) : []
 
   // Zeige die Sektion auch bei leerem Feed — der PostComposer ist fuer Partner sichtbar.
   return (
@@ -39,6 +40,7 @@ export async function CommunityFeedSection() {
             entries={entries}
             isLoggedIn={authState.isLoggedIn}
             hasUsername={!!authState.username}
+            likedKeys={likedKeys}
           />
         </div>
 

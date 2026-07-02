@@ -1,4 +1,5 @@
 import { createClient as createAnonClient } from '@supabase/supabase-js'
+import { createClient } from '@/lib/supabase/server'
 
 // Cookie-loser Anon-Client fuer OEFFENTLICHE Community-/Wissen-Daten.
 // Gleiche Begruendung wie db-articles.ts: build-zeit-sicher fuer force-static-Routen,
@@ -225,28 +226,31 @@ export async function getCommunityFeed(tag?: string): Promise<FeedEntry[]> {
 }
 
 // ---------------------------------------------------------------------------
-// getPostThread
+// getThread
 // ---------------------------------------------------------------------------
 
 /**
- * Laedt alle sichtbaren Kommentare fuer einen Community-Post und splittet
+ * Laedt alle sichtbaren Kommentare fuer einen Post oder Wissen-Artikel und splittet
  * sie in top-level (parent_id=null) und Replies (gruppiert nach parent_id).
  * Nur 1 Reply-Ebene gemaess MVP-Scope.
  */
-export async function getPostThread(postId: string): Promise<{
+export async function getThread(
+  targetKind: 'post' | 'wissen',
+  targetId: string,
+): Promise<{
   top: CommentRow[]
   repliesByParent: Record<string, CommentRow[]>
 }> {
   const { data, error } = await anonClient()
     .from('community_comments')
     .select('id, author_display, body, parent_id, created_at')
-    .eq('target_kind', 'post')
-    .eq('target_id', postId)
+    .eq('target_kind', targetKind)
+    .eq('target_id', targetId)
     .eq('status', 'sichtbar')
     .order('created_at', { ascending: true })
 
   if (error) {
-    console.error('[community] getPostThread error:', error.message)
+    console.error('[community] getThread error:', error.message)
     return { top: [], repliesByParent: {} }
   }
 
@@ -278,4 +282,37 @@ export async function getPostThread(postId: string): Promise<{
   }
 
   return { top, repliesByParent }
+}
+
+// ---------------------------------------------------------------------------
+// getUserLikedKeys
+// ---------------------------------------------------------------------------
+
+/**
+ * Laedt die Like-Keys des eingeloggten Users fuer alle Eintraege im Feed.
+ * Nutzt den Cookie-basierten User-Client (nicht den Anon-Client), da
+ * user_id benoetigt wird. Gibt Strings der Form `kind:id` zurueck.
+ */
+export async function getUserLikedKeys(entries: FeedEntry[]): Promise<string[]> {
+  const supabase = await createClient()
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return []
+
+  const allIds = entries.map((e) => e.id)
+  if (allIds.length === 0) return []
+
+  const { data, error } = await supabase
+    .from('community_likes')
+    .select('target_kind, target_id')
+    .eq('user_id', auth.user.id)
+    .in('target_id', allIds)
+
+  if (error) {
+    console.error('[community] getUserLikedKeys error:', error.message)
+    return []
+  }
+
+  return (data ?? []).map(
+    (row: { target_kind: string; target_id: string }) => `${row.target_kind}:${row.target_id}`,
+  )
 }

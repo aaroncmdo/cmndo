@@ -7,11 +7,12 @@ interface LikeButtonProps {
   targetId: string
   initialCount: number
   isLoggedIn: boolean
+  initialLiked?: boolean
 }
 
-export function LikeButton({ targetKind, targetId, initialCount, isLoggedIn }: LikeButtonProps) {
+export function LikeButton({ targetKind, targetId, initialCount, isLoggedIn, initialLiked }: LikeButtonProps) {
   const [count, setCount] = useState(initialCount)
-  const [liked, setLiked] = useState(false)
+  const [liked, setLiked] = useState(initialLiked ?? false)
   const [error, setError] = useState<string | null>(null)
   const [pending, start] = useTransition()
 
