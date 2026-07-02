@@ -5,7 +5,11 @@ import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { AnswerCapsule } from '@/components/landing/AnswerCapsule'
-import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY, CONTACT_EMAIL } from '@/lib/seo/jsonld'
+import { serviceSchema, breadcrumbsSchema, jsonLdScript, MAKLER_LANDING_URL, GUTACHTER_LANDING_URL, PHONE_DISPLAY } from '@/lib/seo/jsonld'
+
+// Makler-Self-Registrierung (App-Domain) — ersetzt die mailto-Sackgasse durch einen
+// echten, messbaren Funnel (Saeule B). Cross-Lane-Link via NEXT_PUBLIC_EMBED_ORIGIN.
+const REGISTRIEREN_URL = `${process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'}/makler/registrieren`
 
 export const metadata: Metadata = {
   title: 'Makler Partner werden — Kfz-Schäden direkt vermitteln',
@@ -138,10 +142,10 @@ export default function MaklerPartnerWerdenPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Makler-Partnerschaft%20anfragen`}
+              href={REGISTRIEREN_URL}
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
-              Partnerschaft anfragen
+              Jetzt kostenlos registrieren
               <ChevronRight className="h-5 w-5" />
             </a>
             <a
@@ -337,11 +341,11 @@ export default function MaklerPartnerWerdenPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a
-              href={`mailto:${CONTACT_EMAIL}?subject=Makler-Partnerschaft%20anfragen`}
+              href={REGISTRIEREN_URL}
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               <Handshake className="h-5 w-5" />
-              {CONTACT_EMAIL}
+              Jetzt kostenlos registrieren
             </a>
             <a
               href="tel:+4922125906530"

@@ -250,6 +250,10 @@ function isPublicPath(pathname: string): boolean {
     '/ersteinschaetzung',
     '/beratung-anfragen',
     '/makler/partner-werden',
+    // Saeule B: oeffentliche Makler-Selbst-Registrierung — anon MUSS rein, sonst
+    // 307 -> /login (analog '/sv' fuer /sv/registrieren). SPEZIFISCHER Pfad, NICHT
+    // '/makler' (das wuerde via startsWith das ganze Portal oeffnen = Auth-Bypass).
+    '/makler/registrieren',
     // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt
     // hinter den Auth-Guard rutscht:
     '/vorteile',
