@@ -22,6 +22,10 @@ vi.mock('@/lib/isochrone/calculate-isochrone', () => ({
   calculateIsochrone: vi.fn().mockResolvedValue([]),
 }))
 
+// ─── Mock: Email-Flow (dynamischer Import in sendWerkstattLoginMail) ──────────
+const flow = vi.hoisted(() => ({ sendWillkommenWerkstatt: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/email/google/flows', () => ({ sendWillkommenWerkstatt: flow.sendWillkommenWerkstatt }))
+
 // ─── Supabase mock state ─────────────────────────────────────────────────────
 // We maintain a simple queue for server-client responses (auth.getUser + profiles.select)
 // and a separate flag for the admin client.
@@ -29,6 +33,7 @@ type MockConfig = {
   authUser: { id: string } | null
   profileRolle: string | null
   adminCreateUserError?: { message: string } | null
+  werkstattForcePwChange?: boolean
 }
 
 let mockConfig: MockConfig = {
@@ -77,6 +82,7 @@ vi.mock('@/lib/supabase/admin', () => ({
           return { data: { user: { id: 'new-werkstatt-user-id' } }, error: null }
         }),
         deleteUser: vi.fn().mockResolvedValue({ error: null }),
+        updateUserById: vi.fn().mockResolvedValue({ data: {}, error: null }),
       },
     },
     from: vi.fn().mockImplementation((table: string) => {
@@ -84,7 +90,12 @@ vi.mock('@/lib/supabase/admin', () => ({
         return {
           insert: vi.fn().mockResolvedValue({ data: null, error: null }),
           delete: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockImplementation(async () => ({
+            data: { force_password_change: mockConfig.werkstattForcePwChange ?? false }, error: null,
+          })),
         }
       }
       if (table === 'werkstaetten') {
@@ -100,8 +111,12 @@ vi.mock('@/lib/supabase/admin', () => ({
             }
           }),
           update: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({ data: { id: 'w-1' }, error: null }),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { id: 'w-1', name: 'Test-Werkstatt', email: 'w@example.com', user_id: 'wk-user-1' }, error: null,
+          }),
         }
       }
       return {
@@ -249,5 +264,49 @@ describe('createWerkstatt', () => {
     expect(result.ok).toBe(true)
     expect(h.werkstattInsert).not.toBeNull()
     expect(h.werkstattInsert).toMatchObject({ ansprechpartner_name: 'Max Muster' })
+  })
+})
+
+describe('sendWerkstattLoginMail', () => {
+  it('gibt ok:false zurück wenn nicht Admin', async () => {
+    mockConfig.authUser = { id: 'u' }
+    mockConfig.profileRolle = 'dispatch'
+    const { sendWerkstattLoginMail } = await import('../actions')
+    const res = await sendWerkstattLoginMail('w-1')
+    expect(res.ok).toBe(false)
+  })
+
+  it('force_password_change=true → resettet Passwort + ruft Flow mit Passwort', async () => {
+    mockConfig.authUser = { id: 'admin' }
+    mockConfig.profileRolle = 'admin'
+    mockConfig.werkstattForcePwChange = true
+    const { sendWerkstattLoginMail } = await import('../actions')
+    const res = await sendWerkstattLoginMail('w-1')
+    expect(res.ok).toBe(true)
+    expect(flow.sendWillkommenWerkstatt).toHaveBeenCalledTimes(1)
+    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as { einmalpasswort: string | null }
+    expect(typeof arg.einmalpasswort).toBe('string')
+  })
+
+  it('force_password_change=false, ohne knownPassword → Flow mit einmalpasswort=null', async () => {
+    mockConfig.authUser = { id: 'admin' }
+    mockConfig.profileRolle = 'admin'
+    mockConfig.werkstattForcePwChange = false
+    const { sendWerkstattLoginMail } = await import('../actions')
+    const res = await sendWerkstattLoginMail('w-1')
+    expect(res.ok).toBe(true)
+    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as { einmalpasswort: string | null }
+    expect(arg.einmalpasswort).toBeNull()
+  })
+
+  it('knownPassword → nutzt es (kein Reset)', async () => {
+    mockConfig.authUser = { id: 'admin' }
+    mockConfig.profileRolle = 'admin'
+    mockConfig.werkstattForcePwChange = false
+    const { sendWerkstattLoginMail } = await import('../actions')
+    const res = await sendWerkstattLoginMail('w-1', 'DialogPwA1!')
+    expect(res.ok).toBe(true)
+    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as { einmalpasswort: string | null }
+    expect(arg.einmalpasswort).toBe('DialogPwA1!')
   })
 })
