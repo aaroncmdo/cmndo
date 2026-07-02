@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives/Button'
 import PhoneButton from '@/components/shared/PhoneButton'
-import PageHeader from '@/components/shared/PageHeader'
 import { WunschterminPicker } from '@/app/embed/gutachter-finder/_components/WunschterminPicker'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { sendeKonsultationsFlowLink, protokolliereKonsultation } from './actions'
@@ -86,10 +85,13 @@ export function KonsultationCockpit({ termin, lead, flowLink }: Props) {
 
   return (
     <div className="space-y-5">
-      <PageHeader title="Beratungstermin" description={`Konsultation mit ${name}`} size="lg" />
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Beratungstermin</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Konsultation mit {name}</p>
+      </div>
 
       {/* Kunde-Karte */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md p-5 space-y-3">
+      <section className="rounded-ios-md border border-claimondo-border bg-white p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="text-body font-semibold text-claimondo-navy">{name}</p>
@@ -110,7 +112,7 @@ export function KonsultationCockpit({ termin, lead, flowLink }: Props) {
       </section>
 
       {/* Stand */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md p-5 space-y-2">
+      <section className="rounded-ios-md border border-claimondo-border bg-white p-5 space-y-2">
         <p className="text-caption uppercase tracking-wider text-claimondo-ondo">Stand</p>
         <p className="text-body-sm text-claimondo-navy">
           {(lead?.qualifizierungs_phase && PHASE_LABEL[lead.qualifizierungs_phase]) || lead?.qualifizierungs_phase || lead?.status || 'Unbekannt'}
@@ -125,7 +127,7 @@ export function KonsultationCockpit({ termin, lead, flowLink }: Props) {
       </section>
 
       {/* Termin-Info */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md p-5">
+      <section className="rounded-ios-md border border-claimondo-border bg-white p-5">
         <p className="text-caption uppercase tracking-wider text-claimondo-ondo mb-1">Termin</p>
         <p className="text-body font-semibold text-claimondo-navy">{fmt(startZeit)}</p>
         <p className="text-body-sm text-claimondo-ondo">
@@ -134,7 +136,7 @@ export function KonsultationCockpit({ termin, lead, flowLink }: Props) {
       </section>
 
       {/* Aktion: FlowLink erneut senden */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md p-5 space-y-3">
+      <section className="rounded-ios-md border border-claimondo-border bg-white p-5 space-y-3">
         <p className="text-caption uppercase tracking-wider text-claimondo-ondo">FlowLink erneut senden</p>
         <p className="text-body-sm text-claimondo-ondo">Der Kunde schließt den Flow selbst ab (Termin, Auftrag, alles Weitere).</p>
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -145,7 +147,7 @@ export function KonsultationCockpit({ termin, lead, flowLink }: Props) {
       </section>
 
       {/* Aktion: Ergebnis loggen */}
-      <section className="bg-white rounded-ios-lg shadow-ios-md p-5 space-y-3">
+      <section className="rounded-ios-md border border-claimondo-border bg-white p-5 space-y-3">
         <p className="text-caption uppercase tracking-wider text-claimondo-ondo">Gesprächsergebnis</p>
         <div className="flex flex-wrap gap-2">
           {(['durchgefuehrt', 'nicht_erreicht', 'verschoben'] as KonsultationDisposition[]).map((d) => (

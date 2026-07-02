@@ -2,7 +2,6 @@
 
 import Link from 'next/link'
 import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon, PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
@@ -34,22 +33,23 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   const myRank = leaderboard.findIndex(l => l.id === userId) + 1
 
   return (
-    <div className="py-8"><div>
+    <div><div>
       <div className="mb-6">
-        <PageHeader title="Meine Performance" description={`${name} · ${monatLabel}`} icon={BarChart3Icon} />
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Performance</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">{name} · {monatLabel}</p>
       </div>
 
       {/* ─── TAGES-TIMELINE (KFZ-41) ──────────────────────── */}
       {timeline && timeline.length > 0 && (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mb-6">
+        <div className="bg-white rounded-ios-md border border-claimondo-border p-5 mb-6">
           {/* Tages-Zusammenfassung */}
           {tagesSummary && (
             <div className="flex items-center gap-4 mb-4 pb-3 border-b border-claimondo-border">
               <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-claimondo-shield" />Heute</h2>
               <div className="flex gap-3 text-xs">
                 <span className="text-claimondo-shield font-medium">{tagesSummary.termine} Termine</span>
-                <span className="text-amber-400 font-medium">{tagesSummary.offeneTasks} Tasks</span>
-                {tagesSummary.ueberfaellig > 0 && <span className="text-red-400 font-semibold">{tagesSummary.ueberfaellig} überfällig</span>}
+                <span className="text-warning-strong font-medium">{tagesSummary.offeneTasks} Tasks</span>
+                {tagesSummary.ueberfaellig > 0 && <span className="text-danger-strong font-semibold">{tagesSummary.ueberfaellig} überfällig</span>}
               </div>
             </div>
           )}
@@ -86,7 +86,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
       )}
 
       {timeline && timeline.length === 0 && tagesSummary && (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mb-6 text-center">
+        <div className="bg-white rounded-ios-md border border-claimondo-border p-5 mb-6 text-center">
           <CalendarIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
           <p className="text-claimondo-ondo text-sm">Keine Termine oder Tasks für heute</p>
         </div>
@@ -108,13 +108,13 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Leaderboard meiner Kategorie */}
-        <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
+        <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border">
             <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><TrophyIcon className="w-4 h-4 text-amber-400" />{stats.isDispatch ? 'Dispatch' : 'Kundenbetreuer'}-Ranking</h2>
           </div>
           <div className="divide-y divide-claimondo-border/50">
             {leaderboard.map((entry, i) => (
-              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-claimondo-ondo/10 border-l-2 border-claimondo-ondo' : ''}`}>
+              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-claimondo-ondo/10' : ''}`}>
                 <div className="flex items-center gap-3">
                   <span className={`text-sm font-bold w-6 ${i < 3 ? MEDAL[i] : 'text-claimondo-ondo'}`}>{i + 1}</span>
                   <span className={`text-sm ${entry.id === userId ? 'text-claimondo-navy font-semibold' : 'text-claimondo-navy'}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
@@ -127,7 +127,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
         </div>
 
         {/* Erreichbare Incentives */}
-        <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
+        <div className="bg-white rounded-ios-md border border-claimondo-border overflow-hidden">
           <div className="px-5 py-4 border-b border-claimondo-border">
             <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-claimondo-ondo" />Erreichbare Incentives</h2>
           </div>
@@ -149,7 +149,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
 
       {/* Performance-Verlauf */}
       {performanceHistory.length > 0 && (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mt-6">
+        <div className="bg-white rounded-ios-md border border-claimondo-border p-5 mt-6">
           <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-3">Monatsvergleich</h3>
           <DataTableContainer variant="plain">
             <Table>
@@ -179,7 +179,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
 
 function KPI({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
   return (
-    <div className="bg-white border border-claimondo-border rounded-2xl p-4">
+    <div className="bg-white border border-claimondo-border rounded-ios-md p-4">
       <div className="flex items-center gap-2 mb-1">{icon}<span className="text-claimondo-ondo text-xs">{label}</span></div>
       <div className="text-xl font-bold text-claimondo-navy">{value}</div>
     </div>
