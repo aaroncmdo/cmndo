@@ -121,8 +121,8 @@ export default async function AdminDashboardPage() {
   // Dringlichkeits-Zeile — nur Handlungs-Bedarf; ueberfaellig/kritisch in danger.
   const seg: { t: string; danger?: boolean }[] = []
   if (kpis.pendingQc) seg.push({ t: `${kpis.pendingQc} Gutachten → QC`, danger: true })
-  if (kpis.saeumigeCount) seg.push({ t: `${kpis.saeumigeCount} säumige SVs`, danger: true })
-  if (kpis.neueFaelleHeute) seg.push({ t: `${kpis.neueFaelleHeute} neue Fälle heute` })
+  if (kpis.saeumigeCount) seg.push({ t: `${kpis.saeumigeCount} ${kpis.saeumigeCount === 1 ? 'säumiger SV' : 'säumige SVs'}`, danger: true })
+  if (kpis.neueFaelleHeute) seg.push({ t: `${kpis.neueFaelleHeute} ${kpis.neueFaelleHeute === 1 ? 'neuer Fall' : 'neue Fälle'} heute` })
   if (kpis.ausstehendGesamt > 0) seg.push({ t: `${fmtEur(kpis.ausstehendGesamt)} ausstehend` })
 
   const stats: StatBarItem[] = [
