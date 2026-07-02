@@ -284,6 +284,8 @@ export async function loginAfterFlowFormAction(formData: FormData) {
  */
 export async function createKundeAccount(
   fallId: string,
+  // F1 (Account-Hijack-Schutz): Flow-Token der [token]-Route. MUSS zu diesem Fall gehoeren.
+  flowToken: string,
   email: string,
   vorname: string,
   nachname: string,
@@ -293,18 +295,32 @@ export async function createKundeAccount(
     return { success: false, error: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' }
   }
   if (!fallId) return { success: false, error: 'Fall-ID fehlt.' }
+  if (!flowToken) return { success: false, error: 'Nicht autorisiert.' }
 
   try {
     const admin = createAdminClient()
     const password = generateInitialPassword(16)
     const normalizedEmail = email.trim().toLowerCase()
 
+    // F1 (Account-Hijack-Schutz): der Flow-Token MUSS zu diesem Fall gehoeren —
+    // sonst koennte ein Angreifer mit fremder fallId sich zum Geschaedigten machen
+    // oder via Idempotenz-Pfad unten ein fremdes Kunden-Passwort resetten. Bindung
+    // ueber den Lead: token -> flow_links.lead_id (Backward-Compat: token IST die
+    // lead_id, kein flow_link) -> muss claims.lead_id (v_claim_full) des Falls matchen.
+    // Prod-verifiziert 02.07.: 25/25 konvertierte flow_links haben lead_id == claims.lead_id.
+    const { data: flowBind } = await admin
+      .from('flow_links').select('lead_id').eq('token', flowToken).maybeSingle()
+    const boundLeadId = flowBind?.lead_id ?? flowToken
+    // Idempotenz-Read (zugleich Binding-Quelle): kunde_id + lead_id des Falls.
+    const { data: existingFall } = await admin
+      .from('v_claim_full').select('kunde_id, lead_id').eq('fall_id', fallId).maybeSingle()
+    if (!existingFall || existingFall.lead_id !== boundLeadId) {
+      return { success: false, error: 'Konto konnte nicht erstellt werden (nicht autorisiert).' }
+    }
     // 1. Idempotenz: Falls der Fall schon mit einem Kunden verknüpft ist
     //    (Browser-Reload nach SA-Unterschrift), nur Passwort refreshen.
     //    Defensive Check: kunde_id muss tatsächlich auf einen rolle='kunde'-
     //    Account zeigen, sonst nicht anfassen.
-    const { data: existingFall } = await admin
-      .from('v_claim_full').select('kunde_id').eq('fall_id', fallId).maybeSingle()
     if (existingFall?.kunde_id) {
       const { data: linkedProfile } = await admin
         .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
@@ -594,6 +610,16 @@ export async function signSAandCreateFall(
     .eq('id', leadId)
     .single()
   if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
+
+  // F1: wenn ein flowLinkId beansprucht wird, MUSS er zu diesem Lead gehoeren —
+  // sonst konvertiert ein Angreifer fremde Leads bzw. stempelt einen fremden
+  // flow_link (Update unten ~:1118) mit dieser fallId. flowLinkId=null = Backward-
+  // Compat-Pfad (Token wird direkt als lead_id genutzt, kein flow_link) -> nichts zu binden.
+  if (flowLinkId) {
+    const { data: flBind } = await admin
+      .from('flow_links').select('id').eq('id', flowLinkId).eq('lead_id', leadId).maybeSingle()
+    if (!flBind) return { ok: false, error: 'Nicht autorisiert' }
+  }
 
   // Re-Entry-Dedup: `lead` ist der Pre-Conversion-Snapshot (select('*') oben, VOR
   // convertLeadToClaim). War die SA schon unterschrieben, ist dies ein Re-Entry
