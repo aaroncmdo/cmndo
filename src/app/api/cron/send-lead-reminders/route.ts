@@ -36,7 +36,7 @@ export async function GET(request: Request) {
   // Kohorten-Helper: Lädt Kandidaten für ein bestimmtes Reminder-Fenster.
   // Filter:
   //   - status='neu' und disqualifiziert=false (noch offen)
-  //   - source_channel='self_service' (nicht für Makler-generierte Leads)
+  //   - source_channel NOT IN (makler-anfrage,manuell) - alle Akquise-Channels nurtueren, nur menschl.-betreute raus
   //   - reminder_N_sent_at IS NULL (nicht schon versendet)
   //   - created_at <= before (alt genug für diese Stufe)
   //   - keine Faelle mit lead_id = lead.id (nicht konvertiert)
@@ -49,7 +49,7 @@ export async function GET(request: Request) {
       .select('id, email, vorname, reminder_token, source_channel')
       .eq('status', 'neu')
       .eq('disqualifiziert', false)
-      .eq('source_channel', 'self_service')
+      .not('source_channel', 'in', '(makler-anfrage,manuell)') // Nurture alle kundengetriebenen Akquise-Channels; nur makler/manuell (menschl. Follow-up) raus. Timeout unten ist channel-agnostisch.
       .is(reminderField, null)
       .lte('created_at', before.toISOString())
       .not('email', 'is', null)
