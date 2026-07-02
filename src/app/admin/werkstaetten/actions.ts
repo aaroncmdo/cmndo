@@ -43,6 +43,7 @@ export async function createWerkstatt(
   const lat = latRaw !== null && latRaw !== '' ? Number(latRaw) : null
   const lng = lngRaw !== null && lngRaw !== '' ? Number(lngRaw) : null
   const telefon = String(formData.get('telefon') ?? '').trim() || null
+  const ansprechpartner_name = String(formData.get('ansprechpartner_name') ?? '').trim() || null
   const provision = Number(formData.get('provision_betrag_netto') ?? 150) || 150
 
   if (!name || !email || lat === null || lng === null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
@@ -89,6 +90,7 @@ export async function createWerkstatt(
     adresse_plz,
     adresse_ort,
     telefon,
+    ansprechpartner_name,
     email,
     lat,
     lng,
