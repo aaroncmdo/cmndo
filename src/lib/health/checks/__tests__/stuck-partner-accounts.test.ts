@@ -1,5 +1,29 @@
 import { describe, it, expect } from 'vitest'
-import { stuckPartnerAccountsCheck } from '../stuck-partner-accounts'
+import { stuckPartnerAccountsCheck, PARTNER_ROLLEN } from '../stuck-partner-accounts'
+
+// Gueltige user_role-Enum-Werte (Prod-DB paizkjajbuxxksdoycev, verifiziert 2026-07-03).
+// PARTNER_ROLLEN wird per Supabase .in('rolle', …) direkt gegen dieses Enum gefiltert;
+// ein Wert, den das Enum nicht kennt, laesst Postgres die GESAMTE Query mit
+// "invalid input value for enum user_role" abweisen -> der Check erroret still
+// (real passiert am 03.07. mit dem Nicht-Enum-Wert 'mitarbeiter').
+const VALID_USER_ROLES = [
+  'kunde',
+  'sachverstaendiger',
+  'admin',
+  'kanzlei',
+  'leadbearbeiter',
+  'dispatch',
+  'kundenbetreuer',
+  'makler',
+  'werkstatt',
+]
+
+describe('PARTNER_ROLLEN Enum-Integritaet', () => {
+  it('enthaelt ausschliesslich gueltige user_role-Enum-Werte (sonst wirft die .in()-Query)', () => {
+    const ungueltig = PARTNER_ROLLEN.filter((r) => !VALID_USER_ROLES.includes(r))
+    expect(ungueltig).toEqual([])
+  })
+})
 
 // Chainbarer, awaitbarer Supabase-Query-Mock: from().select().eq().in().lt().not()
 // -> Promise({ data, error }). Reihenfolge-robust (jede Methode gibt chain zurueck).

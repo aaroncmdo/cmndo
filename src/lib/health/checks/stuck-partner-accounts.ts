@@ -13,13 +13,16 @@
 import type { HealthCheck, CheckResult } from '@/lib/health/types'
 
 // Rollen mit Passwort-Portal-Login (Kunde nutzt Magic-Link -> ausgeschlossen;
-// admin/dispatch werden anders angelegt).
-const PARTNER_ROLLEN: string[] = [
+// admin/dispatch werden anders angelegt). MUSS ausschliesslich gueltige user_role-
+// Enum-Werte enthalten — .in('rolle', …) castet jeden Eintrag zum Enum, ein
+// unbekannter Wert laesst Postgres die GESAMTE Query mit "invalid input value for
+// enum user_role" abweisen (der Check erroret dann still). Exportiert fuer den
+// Enum-Integritaets-Test.
+export const PARTNER_ROLLEN: string[] = [
   'werkstatt',
   'sachverstaendiger',
   'makler',
   'kundenbetreuer',
-  'mitarbeiter',
 ]
 const STUCK_ALTER_H = 48
 const CRIT_AB = 5
