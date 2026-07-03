@@ -9,6 +9,8 @@ import { useTranslations } from 'next-intl'
 import { toast } from 'sonner'
 import { PlusIcon, XIcon } from 'lucide-react'
 import { submitNachbesichtigungsTermine } from './actions'
+import { Button } from '@/components/primitives/Button'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 interface Slot {
   datum: string
@@ -82,7 +84,7 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
   }
 
   return (
-    <div className="bg-white rounded-ios-xl border border-claimondo-border shadow-sm p-5 space-y-5">
+    <SectionCard className="rounded-ios-xl shadow-sm" bodyClassName="space-y-5">
       {/* Slot-Liste */}
       <div className="space-y-3">
         <p className="text-sm font-semibold text-claimondo-navy">{t('nachbesichtigungPicker.vorschlaegeHeading')}</p>
@@ -180,15 +182,10 @@ export default function NachbesichtigungPickerClient({ fallId, initialKonfrontat
       </div>
 
       <div className="pt-2">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={pending}
-          className="w-full rounded-ios-md bg-claimondo-navy text-white px-3 py-2.5 text-sm font-medium hover:bg-[var(--brand-primary-hover)] disabled:opacity-50 transition-colors"
-        >
-          {pending ? t('nachbesichtigungPicker.submitting') : t('nachbesichtigungPicker.submit')}
-        </button>
+        <Button variant="navy" fullWidth onClick={handleSubmit} loading={pending}>
+          {t('nachbesichtigungPicker.submit')}
+        </Button>
       </div>
-    </div>
+    </SectionCard>
   )
 }
