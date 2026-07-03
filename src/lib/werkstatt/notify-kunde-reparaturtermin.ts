@@ -9,6 +9,7 @@
 // werkstatt-RLS-Policy — der regulaere Session-Client liefert 0 Zeilen).
 
 import { sendEmail } from '@/lib/email/google/client'
+import { createNotification } from '@/lib/notifications'
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 function escapeHtml(s: string): string {
@@ -33,9 +34,26 @@ export type ReparaturterminEreignis = 'bestaetigt' | 'anruf_erbeten' | 'abgelehn
 
 export type NotifyKundeReparaturterminDeps = {
   sendEmail: typeof sendEmail
+  createNotification: typeof createNotification
 }
 
-const defaultDeps: NotifyKundeReparaturterminDeps = { sendEmail }
+const defaultDeps: NotifyKundeReparaturterminDeps = { sendEmail, createNotification }
+
+// In-App-Texte je Ereignis (nutzersichtbar — echte Umlaute).
+const INAPP_TEXT: Record<ReparaturterminEreignis, { titel: string; text: string }> = {
+  bestaetigt: {
+    titel: 'Reparaturtermin bestätigt',
+    text: 'Deine Werkstatt hat den vorgeschlagenen Termin bestätigt.',
+  },
+  anruf_erbeten: {
+    titel: 'Werkstatt meldet sich',
+    text: 'Deine Werkstatt möchte den Termin telefonisch mit dir abstimmen.',
+  },
+  abgelehnt: {
+    titel: 'Reparaturtermin abgelehnt',
+    text: 'Deine Werkstatt konnte den vorgeschlagenen Termin nicht annehmen.',
+  },
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // HTML-Builder (rein, testbar)
@@ -111,8 +129,8 @@ export async function notifyKundeReparaturtermin(
     svc: SupabaseClient
   },
   deps: NotifyKundeReparaturterminDeps = defaultDeps,
-): Promise<{ email: boolean }> {
-  const result = { email: false }
+): Promise<{ email: boolean; inApp: boolean }> {
+  const result = { email: false, inApp: false }
 
   // Kontaktdaten des Kunden via Service-Role lesen
   const { data: claim } = await args.svc
@@ -122,6 +140,24 @@ export async function notifyKundeReparaturtermin(
     .maybeSingle()
 
   if (!claim) return result
+
+  // In-App-Benachrichtigung (nur bei Kunde-Account; unabhaengig von der Email; non-fatal).
+  // Accountlose Leads bekommen nur die Email (Lead-Fallback unten).
+  if (claim.geschaedigter_user_id) {
+    try {
+      const { titel, text } = INAPP_TEXT[args.ereignis]
+      await deps.createNotification(
+        claim.geschaedigter_user_id as string,
+        'reparatur_termin',
+        titel,
+        text,
+        `/kunde/faelle/${args.claimId}`,
+      )
+      result.inApp = true
+    } catch (err) {
+      console.warn('[notifyKundeReparaturtermin] In-App fehlgeschlagen (non-fatal):', err)
+    }
+  }
 
   // Versuch 1: Profil des eingeloggten Kunden
   let vorname: string | null = null

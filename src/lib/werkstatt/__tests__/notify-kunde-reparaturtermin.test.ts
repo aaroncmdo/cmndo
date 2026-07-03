@@ -113,9 +113,14 @@ function makeSupaMock(overrides: {
 
 function makeDeps(over?: Partial<NotifyKundeReparaturterminDeps>) {
   const mail = vi.fn().mockResolvedValue({ messageId: 'm' })
+  const notify = vi.fn().mockResolvedValue(undefined)
   return {
-    d: { sendEmail: over?.sendEmail ?? mail } as NotifyKundeReparaturterminDeps,
+    d: {
+      sendEmail: over?.sendEmail ?? mail,
+      createNotification: over?.createNotification ?? notify,
+    } as NotifyKundeReparaturterminDeps,
     mail,
+    notify,
   }
 }
 
@@ -125,7 +130,7 @@ describe('notifyKundeReparaturtermin', () => {
       claim: { geschaedigter_user_id: 'uid-1', lead_id: null },
       profil: { vorname: 'Lisa', email: 'lisa@example.com' },
     })
-    const { d, mail } = makeDeps()
+    const { d, mail, notify } = makeDeps()
     const r = await notifyKundeReparaturtermin(
       { claimId: 'c-1', ereignis: 'bestaetigt', bestaetigterTermin: null, svc },
       d,
@@ -133,7 +138,11 @@ describe('notifyKundeReparaturtermin', () => {
     expect(mail).toHaveBeenCalledTimes(1)
     expect(mail.mock.calls[0][0].to).toBe('lisa@example.com')
     expect(mail.mock.calls[0][0].template).toBe('reparaturtermin_bestaetigt')
-    expect(r).toEqual({ email: true })
+    // In-App an den Kunde-Account (uid-1), mit Deep-Link auf die Fallakte.
+    expect(notify).toHaveBeenCalledTimes(1)
+    expect(notify.mock.calls[0][0]).toBe('uid-1')
+    expect(notify.mock.calls[0][4]).toBe('/kunde/faelle/c-1')
+    expect(r).toEqual({ email: true, inApp: true })
   })
 
   it('faellt auf Lead-Email zurueck wenn kein Profil', async () => {
@@ -141,7 +150,7 @@ describe('notifyKundeReparaturtermin', () => {
       claim: { geschaedigter_user_id: null, lead_id: 'l-1' },
       lead: { vorname: 'Max', email: 'max@example.com' },
     })
-    const { d, mail } = makeDeps()
+    const { d, mail, notify } = makeDeps()
     const r = await notifyKundeReparaturtermin(
       { claimId: 'c-1', ereignis: 'anruf_erbeten', bestaetigterTermin: null, svc },
       d,
@@ -149,18 +158,21 @@ describe('notifyKundeReparaturtermin', () => {
     expect(mail).toHaveBeenCalledTimes(1)
     expect(mail.mock.calls[0][0].to).toBe('max@example.com')
     expect(mail.mock.calls[0][0].template).toBe('reparaturtermin_anruf_erbeten')
-    expect(r).toEqual({ email: true })
+    // Accountloser Lead (geschaedigter_user_id=null) -> keine In-App, nur Email.
+    expect(notify).not.toHaveBeenCalled()
+    expect(r).toEqual({ email: true, inApp: false })
   })
 
   it('gibt {email:false} zurueck wenn kein Claim gefunden', async () => {
     const svc = makeSupaMock({ claim: null })
-    const { d, mail } = makeDeps()
+    const { d, mail, notify } = makeDeps()
     const r = await notifyKundeReparaturtermin(
       { claimId: 'c-1', ereignis: 'abgelehnt', bestaetigterTermin: null, svc },
       d,
     )
     expect(mail).not.toHaveBeenCalled()
-    expect(r).toEqual({ email: false })
+    expect(notify).not.toHaveBeenCalled()
+    expect(r).toEqual({ email: false, inApp: false })
   })
 
   it('gibt {email:false} zurueck wenn keine Email-Adresse', async () => {
@@ -168,13 +180,15 @@ describe('notifyKundeReparaturtermin', () => {
       claim: { geschaedigter_user_id: 'uid-1', lead_id: null },
       profil: { vorname: 'Anna', email: null },
     })
-    const { d, mail } = makeDeps()
+    const { d, mail, notify } = makeDeps()
     const r = await notifyKundeReparaturtermin(
       { claimId: 'c-1', ereignis: 'bestaetigt', bestaetigterTermin: null, svc },
       d,
     )
     expect(mail).not.toHaveBeenCalled()
-    expect(r).toEqual({ email: false })
+    // In-App feuert trotzdem (Account vorhanden, unabhaengig von der Email).
+    expect(notify).toHaveBeenCalledTimes(1)
+    expect(r).toEqual({ email: false, inApp: true })
   })
 
   it('ist non-fatal bei Email-Fehler', async () => {
@@ -183,11 +197,16 @@ describe('notifyKundeReparaturtermin', () => {
       profil: { vorname: 'Lisa', email: 'lisa@example.com' },
     })
     const mail = vi.fn().mockRejectedValue(new Error('SMTP down'))
-    const d = { sendEmail: mail as unknown as NotifyKundeReparaturterminDeps['sendEmail'] }
+    const notify = vi.fn().mockResolvedValue(undefined)
+    const d = {
+      sendEmail: mail as unknown as NotifyKundeReparaturterminDeps['sendEmail'],
+      createNotification: notify as unknown as NotifyKundeReparaturterminDeps['createNotification'],
+    }
     const r = await notifyKundeReparaturtermin(
       { claimId: 'c-1', ereignis: 'bestaetigt', bestaetigterTermin: null, svc },
       d,
     )
-    expect(r).toEqual({ email: false })
+    // Email non-fatal fehlgeschlagen, In-App dennoch gesetzt (Account vorhanden).
+    expect(r).toEqual({ email: false, inApp: true })
   })
 })
