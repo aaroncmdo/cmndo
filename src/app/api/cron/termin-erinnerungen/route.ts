@@ -1,13 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 
 /**
- * Cron-Route: Termin-Erinnerungen (stuendlich)
- * - 24h vorher: WhatsApp an Kunden
- * - 2h vorher: WhatsApp an Kunden
+ * Cron-Route: Termin-Pflichtdokumente-Check (stuendlich)
  * - 48h vorher: Pflichtdokumente-Check, Erinnerung wenn Docs fehlen
+ *
+ * Reminder-Konsolidierung (2026-07-03): Die 24h- + 2h-Kunden-WhatsApp-Reminder
+ * wurden hier ENTFERNT — sie liefen doppelt zur queue-basierten send-reminders
+ * (termin_reminders: kunde_24h/kunde_morgen/kunde_1h) mit divergentem Dedup.
+ * send-reminders ist jetzt alleiniger Sender aller Kunden-/SV-Termin-Reminder;
+ * diese Route macht nur noch den 48h-Pflichtdokumente-Check.
  */
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -17,8 +20,6 @@ export async function GET(request: Request) {
 
   const supabase = createAdminClient()
   const now = new Date()
-  let sent24h = 0
-  let sent2h = 0
   let sent48hDocs = 0
 
   // ─── 48h Pflichtdokumente-Check ────────────────────────────────────────
@@ -106,65 +107,9 @@ export async function GET(request: Request) {
     sent48hDocs++
   }
 
-  // ─── 24h Erinnerung ────────────────────────────────────────────────────
-  const in23h = new Date(now.getTime() + 23 * 60 * 60 * 1000).toISOString()
-  const in25h = new Date(now.getTime() + 25 * 60 * 60 * 1000).toISOString()
-
-  const { data: termine24h } = await supabase
-    .from('gutachter_termine')
-    .select('id, fall_id, start_zeit')
-    .gte('start_zeit', in23h)
-    .lte('start_zeit', in25h)
-    .eq('status', 'bestaetigt')
-    .eq('erinnerung_24h_gesendet', false)
-
-  for (const termin of termine24h ?? []) {
-    if (!termin.fall_id) continue
-
-    const startZeit = new Date(termin.start_zeit)
-    await sendFallCommunication(termin.fall_id, 'reminder_24h', {
-      termin_uhrzeit: startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-      '3': startZeit.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-    })
-
-    await supabase
-      .from('gutachter_termine')
-      .update({ erinnerung_24h_gesendet: true })
-      .eq('id', termin.id)
-
-    sent24h++
-  }
-
-  // ─── 2h Erinnerung ─────────────────────────────────────────────────────
-  const in90min = new Date(now.getTime() + 90 * 60 * 1000).toISOString()
-  const in150min = new Date(now.getTime() + 150 * 60 * 1000).toISOString()
-
-  const { data: termine2h } = await supabase
-    .from('gutachter_termine')
-    .select('id, fall_id, start_zeit')
-    .gte('start_zeit', in90min)
-    .lte('start_zeit', in150min)
-    .eq('status', 'bestaetigt')
-    .eq('erinnerung_2h_gesendet', false)
-
-  for (const termin of termine2h ?? []) {
-    if (!termin.fall_id) continue
-
-    await sendFallCommunication(termin.fall_id, 'reminder_2h')
-
-    await supabase
-      .from('gutachter_termine')
-      .update({ erinnerung_2h_gesendet: true })
-      .eq('id', termin.id)
-
-    sent2h++
-  }
-
   return NextResponse.json({
     ok: true,
     sent_48h_docs: sent48hDocs,
-    sent_24h: sent24h,
-    sent_2h: sent2h,
     checked_at: now.toISOString(),
   })
 }

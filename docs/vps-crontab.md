@@ -18,7 +18,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 
 # ─── KRITISCH ───
 */5  * * * *  cron-call.sh /api/cron/dispatch-lead-alert
-*/5  * * * *  cron-call.sh /api/cron/send-reminders            # ⚠ Reminder-Dup #1 (s.u.)
+*/5  * * * *  cron-call.sh /api/cron/send-reminders            # Kunden-/SV-Termin-Reminder — ALLEINIGER Sender ab 2026-07-03 (s.u.)
 */5  * * * *  cron-call.sh /api/cron/gutachter-erinnerungen
 */10 * * * *  cron-call.sh /api/notifications/process          # Notification-Worker (Pipeline)
 */15 * * * *  cron-call.sh /api/cron/caldav-healthcheck
@@ -26,7 +26,7 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 */15 * * * *  cron-call.sh /api/cron/kb-termin-reminder-1h
 */30 * * * *  cron-call.sh /api/cron/verlegung-eskalation      # einzige emitEvent-Cron
 */30 * * * *  cron-call.sh /api/cron/whatsapp-erinnerungen     # ⚠ Reminder-Dup #2
-0    * * * *  cron-call.sh /api/cron/termin-erinnerungen       # ⚠ Reminder-Dup #3
+0    * * * *  cron-call.sh /api/cron/termin-erinnerungen       # nur noch 48h-Pflichtdokumente-Check ab 2026-07-03 (s.u.)
 0    * * * *  cron-call.sh /api/cron/re-termin-eskalation
 0    8 * * *  cron-call.sh /api/cron/vs-timer
 0  */6 * * *  cron-call.sh /api/cron/fall-abschluss
@@ -164,5 +164,25 @@ Zweck (Header) + DB-Evidenz geprüft:
 | `sv-mahnung-saeumnis` | **schedulen** `0 8 * * *` | SV-Mahnstufen 14/21/28 d (AAR-927). DB: 0 SV-Abrechnungen → jetzt No-op, korrekt sobald SV-Billing live. |
 | `kb-beratung-anlage-notify` | schedulen `*/10 * * * *` (niedrige Prio) | Vormerk-Email für `kb_beratung`-Termine (AAR-956). DB: 0 pending → No-op jetzt. ⚠ aar-956-Zone, abstimmen. |
 | `refresh-feeds` | optional `0 6 * * *` | GEO-Feed-Warming + IndexNow. Low-Impact (No-op solange `/feed*`-Routen fehlen). |
-| `termin-morgen-erinnerung` | **NICHT schedulen** | Redundant zu `send-reminders` `kunde_morgen` (beide 07:00 Berlin, Kunde-Morgen-WA) → würde den Double-Send verschärfen. Gehört in die Reminder-Konsolidierung, nicht standalone. |
+| `termin-morgen-erinnerung` | **GELÖSCHT 2026-07-03** | War der 3. Morgen-Sender (redundant zu `send-reminders` `kunde_morgen`). Nie geschedult (`erinnerung_morgen_gesendet`=0) → Footgun. Im Rahmen der Reminder-Konsolidierung entfernt (s.u.). |
+
+## Stand 2026-07-03 — Reminder-Konsolidierung umgesetzt (Code, kein Schedule-Change)
+
+> Löst **Audit-Note #1** (Reminder-Double-Send) auf. Branch `kitta/reminder-consolidation`, PR gegen `staging`.
+
+**Problem (prod-belegt):** `send-reminders` (`*/5`, Queue `termin_reminders`) und `termin-erinnerungen`
+(stündlich, Flag-Scan) sendeten BEIDE die `reminder_24h`- + `reminder_2h`-Kunden-WhatsApps für denselben
+Termin mit divergentem Dedup (`termin_reminders.status` vs. `gutachter_termine.erinnerung_*_gesendet`)
+→ doppelte WA. DB-Evidenz: 5× `kunde_1h`→`reminder_2h` (Queue) + 8× `erinnerung_2h_gesendet` (Scan) überlappend.
+
+**Fix (Option „Queue als Single-Source", Aaron-Entscheid):**
+- `send-reminders` ist jetzt **alleiniger Sender** aller Kunden-/SV-Termin-Reminder. Neuer Reminder-Typ
+  **`kunde_24h`** (24h vor Termin, event-driven aus der Queue) ergänzt `kunde_morgen` (07:00) + `kunde_1h`
+  (1h) + `sv_route`. Migration `20260703212349` (CHECK um `kunde_24h` erweitert).
+- `termin-erinnerungen` macht **nur noch den 48h-Pflichtdokumente-Check** (24h/2h-Kunden-Sends entfernt).
+- `termin-morgen-erinnerung` **gelöscht** (Footgun beseitigt).
+
+**Kein Crontab-Schedule-Change nötig:** `send-reminders` (`*/5`) + `termin-erinnerungen` (stündlich) bleiben
+beide geplant — nur ihr Verhalten ändert sich per Deploy. `whatsapp-erinnerungen` war bereits 2026-06-20 disabled.
+**Nach Deploy verifizieren:** 1 Termin buchen → genau 1× je Reminder-Touchpoint (24h / morgens / 1h), keine Doppel-WA.
 
