@@ -12,6 +12,7 @@ import {
   TrendingUpIcon,
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
+import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
 import type { DashboardData } from '@/lib/makler/queries'
 
 type Props = {
@@ -21,6 +22,8 @@ type Props = {
     ansprechpartner_vorname: string
   }
   data: DashboardData
+  zeigeErsteVermittlungCard: boolean
+  promoCode: string | null
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -45,7 +48,7 @@ function relativeFromNow(iso: string): string {
   return RELATIVE.format(-months, 'month')
 }
 
-export function MaklerDashboard({ makler, data }: Props) {
+export function MaklerDashboard({ makler, data, zeigeErsteVermittlungCard, promoCode }: Props) {
   const { stats, activity } = data
 
   return (
@@ -57,6 +60,11 @@ export function MaklerDashboard({ makler, data }: Props) {
         </h1>
         <p className="text-sm text-claimondo-ondo mt-1">Ihre Makler-Übersicht</p>
       </header>
+
+      {/* Erste-Vermittlung-Prompt: einmalig nach der ersten erfolgreichen Vermittlung */}
+      {zeigeErsteVermittlungCard && promoCode ? (
+        <ErsteVermittlungCard code={promoCode} firma={makler.firma} />
+      ) : null}
 
       {/* Stat-Grid */}
       <section
