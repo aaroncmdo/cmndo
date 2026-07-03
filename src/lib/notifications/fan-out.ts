@@ -132,7 +132,7 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
         addRecipient(map, adminId, 'admin', config.channels.admin)
       }
     }
-    return flatten(map, selfNotifyUserId(event))
+    return applyTestAccountGuard(flatten(map, selfNotifyUserId(event)))
   }
 
   // 5.11 Makler-Events: Nur der spezifische Makler (maklerId aus Payload) + Admin.
@@ -158,7 +158,7 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
         addRecipient(map, a.id as string, 'admin', config.channels.admin)
       }
     }
-    return flatten(map, selfNotifyUserId(event))
+    return applyTestAccountGuard(flatten(map, selfNotifyUserId(event)))
   }
 
   // ── Standard-Fan-Out: alle Fall-Beteiligten laut Matrix ─────────────────
@@ -198,7 +198,7 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
     }
   }
 
-  return flatten(map, selfNotifyUserId(event))
+  return applyTestAccountGuard(flatten(map, selfNotifyUserId(event)))
 }
 
 function flatten(
@@ -211,4 +211,43 @@ function flatten(
     out.push({ userId, role: entry.role, channels: Array.from(entry.channels) })
   }
   return out
+}
+
+// ── Send-Isolation: Test-Accounts nie extern benachrichtigen ────────────────
+// Root-Cause 03.07. ("der Gutachter bekommt Nachrichten aus den Tests"): 6 Test-SVs
+// (sachverstaendige.ist_testaccount) haben ECHTE Telefon/Email — der Fan-out berechnete sie als
+// Empfaenger mit WA/Email/Push-Kanaelen, und die Send-Clients senden real, sobald SIDE_EFFECT_MODE
+// AUS ist (Normalbetrieb). Guard: Test-SVs bekommen NUR in_app (harmlose Bell), NIE einen externen
+// Kanal. Persistent + unabhaengig von der ENV (defense-in-depth zu SIDE_EFFECT_MODE in whatsapp.ts /
+// email/google/client.ts). Kunden-Test-Isolation braucht ein eigenes Marker-Feld -> Follow-up.
+
+/** Pure: strippt externe Kanaele (WA/Email/Push) fuer Test-SV-Empfaenger, behaelt nur in_app. */
+export function stripTestAccountExternalChannels(
+  recipients: Recipient[],
+  testSvProfileIds: Set<string>,
+): Recipient[] {
+  if (!testSvProfileIds.size) return recipients
+  return recipients
+    .map((r) =>
+      r.role === 'sachverstaendiger' && testSvProfileIds.has(r.userId)
+        ? { ...r, channels: r.channels.filter((c): c is Channel => c === 'in_app') }
+        : r,
+    )
+    .filter((r) => r.channels.length > 0)
+}
+
+/** Laedt die Test-SV-profile_ids unter den Empfaengern + wendet den Guard an. */
+async function applyTestAccountGuard(recipients: Recipient[]): Promise<Recipient[]> {
+  const svIds = recipients.filter((r) => r.role === 'sachverstaendiger').map((r) => r.userId)
+  if (svIds.length === 0) return recipients
+  const supabase = createAdminClient()
+  const { data } = await supabase
+    .from('sachverstaendige')
+    .select('profile_id')
+    .in('profile_id', svIds)
+    .eq('ist_testaccount', true)
+  const testIds = new Set(
+    (data ?? []).map((s) => s.profile_id as string | null).filter((id): id is string => !!id),
+  )
+  return stripTestAccountExternalChannels(recipients, testIds)
 }
