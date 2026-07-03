@@ -161,10 +161,12 @@ Der Helper liegt in `src/lib/werkstatt/` (client-safe, kein `'use server'`), dam
 
 **Ort:** `src/app/flow/[token]/FlowWerkstattStep.tsx` (gehört #3433 / Session 1069c2a2 — **additiv** anfassen, s. §8).
 
-**Ablauf:** Nachdem der Kunde eine Werkstatt gewählt hat und `assignReparaturWerkstatt` erfolgreich war, erscheint **im selben Step** (kein neuer Wizard-Step — die `FlowWizardKfz`-STEPS-Array wird von aar-956-Sessions bearbeitet und **nicht** angefasst):
+**Ablauf:** Sobald für den Lead eine Werkstatt **hinterlegt** ist — egal ob der Kunde sie gerade im Flow gewählt hat (`assignReparaturWerkstatt` erfolgreich) ODER sie bereits vorbelegt war (Dispatcher-Vorbelegung / wiederkehrender Lead) — erscheint **im selben Step** (kein neuer Wizard-Step — die `FlowWizardKfz`-STEPS-Array bleibt **unberührt**) die Wunschtermin-Eingabe **mit Anzeige der hinterlegten Werkstatt**:
 
-> „Wann möchtest du dein Fahrzeug in die Werkstatt bringen? (optional)"
+> „Dein Fahrzeug wird zu **[Werkstatt-Name]** gebracht. Wann möchtest du es hinbringen? (optional)"
 > `<WunschterminPicker>` + Button „Wunschtermin vorschlagen" + Link „Überspringen".
+
+- **Anzeige der hinterlegten Werkstatt:** Name (+ Ort) werden aus der bereits gesetzten `reparatur_werkstatt_id` aufgelöst und angezeigt — der Kunde sieht, für welche Werkstatt er einen Termin vorschlägt. Bei **vorbelegter** Werkstatt muss der Kunde **nicht** neu wählen; die Wunschtermin-Eingabe steht trotzdem zur Verfügung (Gate = „`reparatur_werkstatt_id` gesetzt", nicht „gerade eben gewählt").
 
 - Reuse: `WunschterminPicker` aus `src/app/embed/gutachter-finder/_components/WunschterminPicker.tsx` (liefert lokale Berlin-Wandzeit) und `resolveWunschterminIso` aus `src/app/flow/[token]/wunschtermin.ts` (Berlin-Wandzeit → UTC-ISO) — **read-only** wiederverwendet, keine Änderung an diesen Files.
 - Neue Server-Action in `src/app/flow/[token]/self-service-actions.ts` (additiv):
@@ -293,7 +295,7 @@ Jeweils `apply_migration` → `list_migrations` (getrackte Version ablesen) → 
 
 - [ ] `reparatur_termine` + RLS + `leads.reparatur_wunschtermin` prod-live (Plugin-getrackt, Files == Version).
 - [ ] `reparaturTerminPhase` rein + getestet.
-- [ ] Flow: Picker nach Werkstatt-Wahl → `leads.reparatur_wunschtermin` (optional, Token-gebunden).
+- [ ] Flow: Picker bei **hinterlegter** Werkstatt (frische Wahl ODER vorbelegt) mit Anzeige des Werkstatt-Namens → `leads.reparatur_wunschtermin` (optional, Token-gebunden).
 - [ ] Conversion legt `reparatur_termine` (angefragt) an, wenn Wunschtermin gesetzt.
 - [ ] `v_werkstatt_auftrag` liefert den aktiven Termin additiv.
 - [ ] `/werkstatt/auftraege` zeigt Termin + **Bestätigen/Anrufen/Ablehnen**, RLS-gegated, mit Kunden-Notify (best-effort).
