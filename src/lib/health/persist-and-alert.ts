@@ -47,17 +47,35 @@ export async function persistAndAlert(
 
       const last = lastRows?.[0] ?? null
 
+      // 1b. Letzten TATSAECHLICHEN Alert-Zeitpunkt lesen (juengste Zeile mit
+      // alerted_at gesetzt). NICHT last.alerted_at nehmen: der vorige Lauf kann
+      // korrekt still gewesen sein (alerted_at=null), obwohl ein frueherer Lauf
+      // < 24h alarmierte. Sonst kippt sustainedCrit im 2-Stunden-Takt (jeder 2.
+      // Lauf) statt taeglich zu re-alertieren -> Alert-Spam (Prod-Fund 03.07.).
+      const { data: lastAlertRows } = await ctx.supabase
+        .from('health_check_runs')
+        .select('alerted_at')
+        .eq('check_id', check.id)
+        .not('alerted_at', 'is', null)
+        .order('alerted_at', { ascending: false })
+        .limit(1)
+      const lastAlertedAt = (lastAlertRows?.[0]?.alerted_at as string | null | undefined) ?? null
+
       // 2. Verschlechterung pruefen.
       const lastStatusRank = STATUS_RANK[(last?.status as keyof typeof STATUS_RANK) ?? 'ok'] ?? 0
       const currentRank = STATUS_RANK[result.status]
       const worse = currentRank > lastStatusRank
 
-      // 3. Anhaltend CRIT (taeglich re-alertieren).
+      // 3. Anhaltend CRIT (hoechstens taeglich re-alertieren). Der erste Alert einer
+      // CRIT-Phase kommt aus `worse` (ok/warn -> crit); dieser Zweig ist NUR die
+      // Tages-Erinnerung: re-alertieren, wenn der letzte echte Alert > 24h her ist.
+      // Nie alarmiert (lastAlertedAt == null) -> hier NICHT alarmieren (das erledigt
+      // `worse` beim Statuswechsel).
       const sustainedCrit =
         result.status === 'crit' &&
         last?.status === 'crit' &&
-        (last.alerted_at == null ||
-          Date.now() - new Date(last.alerted_at).getTime() > TWENTY_FOUR_HOURS_MS)
+        lastAlertedAt != null &&
+        Date.now() - new Date(lastAlertedAt).getTime() > TWENTY_FOUR_HOURS_MS
 
       const shouldAlert = worse || sustainedCrit
 
