@@ -27,6 +27,12 @@ import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 
 const DEFAULT_FENSTER_TAGE = 28
+// AAR-369: Soft-Boost fuer Fach-Spezialisierung — ein SV, dessen Spezifikationen die
+// Fall-Spezifikation enthalten, bekommt +N Score. >= SCORE_BUCKET (5, matching-score.ts)
+// damit der Bonus die Rangfolge wirklich verschiebt. KEIN harter Filter — Geo (Isochrone),
+// Paket-Kontingent und Verfuegbarkeit bleiben die primaeren Gates; Spezialisierung ist der
+// entscheidende Tie-Break unter aehnlich passenden SVs.
+const SPEZ_MATCH_BONUS = 8
 
 export interface FindeBestePersonInput {
   schadenort: { lat: number; lng: number }
@@ -85,6 +91,7 @@ interface SvRow {
   standort_lng: number | null
   isochrone_polygon: unknown
   paket_umkreis_km: number | null
+  spezifikationen: string[] | null
   paket_faelle_gesamt: number | null
   paket_faelle_genutzt: number | null
   offene_faelle: number | null
@@ -123,7 +130,7 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
   // DEFERRED Extension-Point: hier später rolle_in_organisation-Whitelist +
   // gebiet_exklusivitaeten-Isochron-Intersection einhängen (live 0 Daten → YAGNI).
   let query = db.from('sachverstaendige').select(
-    'id, profile_id, paket, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, '
+    'id, profile_id, paket, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, '
     + 'paket_faelle_gesamt, paket_faelle_genutzt, offene_faelle, ablehnungen_30_tage, '
     + 'urlaub_von, urlaub_bis, partner_seit, created_at, '
     + 'profiles!sachverstaendige_profile_id_fkey(vorname, nachname)',
@@ -136,6 +143,25 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
     (sv) => !exclude.has(sv.id) && sv.standort_lat != null && sv.standort_lng != null,
   )
   if (pool.length === 0) return { ok: false, code: 'kein_kandidat', error: 'Keine buchbaren SVs im Pool' }
+
+  // AAR-369: Fall-Spezifikation (best-effort) fuer den Spezialisierungs-Soft-Boost laden.
+  // bezug.id ist i.d.R. ein claim_id (direkt) oder ein fall_id (via faelle_claim_bridge).
+  // Kein Boost wenn nicht ladbar (z.B. Lead-basiertes Matching ohne Claim) → voll
+  // rueckwaerts-kompatibel; die Gebiets-/Slot-Logik bleibt unberuehrt.
+  let fallSpezifikation: string | null = null
+  try {
+    const { data: cDirect } = await db.from('claims').select('spezifikation').eq('id', bezug.id).maybeSingle()
+    fallSpezifikation = (cDirect?.spezifikation as string | null) ?? null
+    if (!fallSpezifikation) {
+      const { data: bridge } = await db
+        .from('faelle_claim_bridge')
+        .select('claims:claim_id(spezifikation)')
+        .eq('fall_id', bezug.id)
+        .maybeSingle()
+      const c = Array.isArray(bridge?.claims) ? bridge?.claims[0] : bridge?.claims
+      fallSpezifikation = ((c as { spezifikation: string | null } | null | undefined)?.spezifikation) ?? null
+    }
+  } catch { /* Boost entfaellt */ }
 
   // 2. Gebiet-Filter (NUR Isochrone — Aaron 12.06.: „nur über die Isochrone, wir brauchen den
   //    Radius nicht") + Kontingent — billige Geo/Logik VOR Mapbox. Der frühere Umkreis-Radius-
@@ -173,10 +199,16 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
     const ablehnungen30d = Number(sv.ablehnungen_30_tage) || 0
     const etaVomBueroMin = etaArr[i] ?? null
     const stickyBonus = stickyAssigneeId && sv.id === stickyAssigneeId ? 1000 : 0
-    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm }) + stickyBonus
+    // AAR-369: Spezialisierungs-Soft-Boost — SV-Spezifikationen enthalten die Fall-Spezifikation.
+    const spezBonus =
+      fallSpezifikation && Array.isArray(sv.spezifikationen) && sv.spezifikationen.includes(fallSpezifikation)
+        ? SPEZ_MATCH_BONUS
+        : 0
+    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm }) + stickyBonus + spezBonus
     const profile = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
     const reasons = [...g.reasons, `Paket: ${paket}`]
     if (etaVomBueroMin != null) reasons.push(`${etaVomBueroMin} min Fahrt vom Büro`)
+    if (spezBonus > 0) reasons.push(`Fachgebiet passt (${fallSpezifikation})`)
     if (stickyBonus > 0) reasons.unshift('Bekannter SV (Sticky)')
     return {
       assignee: { typ: 'sachverstaendiger', id: sv.id },
