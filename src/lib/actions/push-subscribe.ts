@@ -65,3 +65,15 @@ export async function unregisterPushSubscription(
   }
   return { success: true }
 }
+
+/**
+ * VAPID-Public-Key fuer den Client. MUSS server-seitig gelesen werden: im
+ * Client-Bundle waere process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY der build-inlined
+ * Wert (beim Build abwesend => undefined). Diese Server-Action liest ihn zur
+ * Laufzeit. Der Public-Key ist bewusst oeffentlich (geht ohnehin an den Browser)
+ * -> kein Auth-Gate. Liefert null, wenn Push serverseitig nicht konfiguriert ist.
+ */
+export async function getVapidPublicKey(): Promise<string | null> {
+  const key = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY
+  return key && key.trim().length > 0 ? key.trim() : null
+}
