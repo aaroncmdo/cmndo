@@ -18,60 +18,107 @@ const VALID_USER_ROLES = [
   'werkstatt',
 ]
 
-describe('PARTNER_ROLLEN Enum-Integritaet', () => {
-  it('enthaelt ausschliesslich gueltige user_role-Enum-Werte (sonst wirft die .in()-Query)', () => {
-    const ungueltig = PARTNER_ROLLEN.filter((r) => !VALID_USER_ROLES.includes(r))
-    expect(ungueltig).toEqual([])
-  })
-})
+type Prof = { id: string; email: string | null; rolle: string; created_at: string | null }
 
-// Chainbarer, awaitbarer Supabase-Query-Mock: from().select().eq().in().lt().not()
-// -> Promise({ data, error }). Reihenfolge-robust (jede Methode gibt chain zurueck).
-function mockCtx(result: { data?: unknown[] | null; error?: { message: string } | null }) {
-  const p = Promise.resolve({ data: result.data ?? null, error: result.error ?? null })
+// Mock: profiles-Query (chainbar: from().select().eq().in().lt().not() -> Promise)
+// PLUS auth.admin.getUserById(id) fuer den Login-Status. loginAt bildet id -> last_sign_in_at
+// ab; fehlt eine id, gilt sie als NIE eingeloggt (last_sign_in_at=null).
+function mockCtx(opts: {
+  profiles?: Prof[] | null
+  profilesError?: { message: string } | null
+  loginAt?: Record<string, string | null>
+  getUserByIdError?: { message: string } | null
+}) {
+  const p = Promise.resolve({ data: opts.profiles ?? null, error: opts.profilesError ?? null })
   const chain: Record<string, unknown> = {}
   for (const m of ['select', 'eq', 'in', 'lt', 'not']) chain[m] = () => chain
   chain.then = p.then.bind(p)
   chain.catch = p.catch.bind(p)
   chain.finally = p.finally.bind(p)
-  return { supabase: { from: () => chain } } as unknown as Parameters<typeof stuckPartnerAccountsCheck.run>[0]
+  return {
+    supabase: {
+      from: () => chain,
+      auth: {
+        admin: {
+          getUserById: async (id: string) => ({
+            data: { user: { id, last_sign_in_at: opts.loginAt?.[id] ?? null } },
+            error: opts.getUserByIdError ?? null,
+          }),
+        },
+      },
+    },
+  } as unknown as Parameters<typeof stuckPartnerAccountsCheck.run>[0]
 }
 
+const P = (id: string, rolle: string, email = `${id}@x.de`): Prof => ({
+  id,
+  email,
+  rolle,
+  created_at: '2026-06-01T00:00:00Z',
+})
+
 describe('stuckPartnerAccountsCheck', () => {
-  it('ok wenn keine Partner haengen', async () => {
-    const res = await stuckPartnerAccountsCheck.run(mockCtx({ data: [] }))
+  it('ok wenn keine Kandidaten', async () => {
+    const res = await stuckPartnerAccountsCheck.run(mockCtx({ profiles: [] }))
     expect(res.status).toBe('ok')
     expect(res.metric).toBe(0)
   })
 
-  it('warn bei wenigen stuck Partnern — mit Rollen-Breakdown + sampleIds (Emails)', async () => {
-    const rows = [
-      { id: 'a', email: 'w1@x.de', rolle: 'werkstatt', created_at: '2026-06-01T00:00:00Z' },
-      { id: 'b', email: 'sv1@x.de', rolle: 'sachverstaendiger', created_at: '2026-06-01T00:00:00Z' },
-    ]
-    const res = await stuckPartnerAccountsCheck.run(mockCtx({ data: rows }))
+  it('ok wenn ALLE Kandidaten sich schon eingeloggt haben (last_sign_in_at gesetzt -> kein Stuck)', async () => {
+    const profiles = [P('a', 'werkstatt'), P('b', 'sachverstaendiger')]
+    const res = await stuckPartnerAccountsCheck.run(
+      mockCtx({ profiles, loginAt: { a: '2026-06-02T10:00:00Z', b: '2026-06-03T10:00:00Z' } }),
+    )
+    expect(res.status).toBe('ok')
+    expect(res.metric).toBe(0)
+  })
+
+  it('flaggt NUR nie-eingeloggte Kandidaten (gemischt: 1 von 3 eingeloggt -> metric 2)', async () => {
+    const profiles = [P('a', 'werkstatt'), P('b', 'werkstatt'), P('c', 'makler')]
+    const res = await stuckPartnerAccountsCheck.run(
+      mockCtx({ profiles, loginAt: { b: '2026-06-05T10:00:00Z' } }), // nur b hat sich eingeloggt
+    )
+    expect(res.status).toBe('warn')
+    expect(res.metric).toBe(2)
+    expect(res.sampleIds).toEqual(['a@x.de', 'c@x.de'])
+  })
+
+  it('warn bei wenigen nie-eingeloggten Partnern — mit Rollen-Breakdown + sampleIds (Emails)', async () => {
+    const profiles = [P('a', 'werkstatt', 'w1@x.de'), P('b', 'sachverstaendiger', 'sv1@x.de')]
+    const res = await stuckPartnerAccountsCheck.run(mockCtx({ profiles }))
     expect(res.status).toBe('warn')
     expect(res.metric).toBe(2)
     expect(res.detail).toContain('werkstatt')
     expect(res.sampleIds).toEqual(['w1@x.de', 'sv1@x.de'])
   })
 
-  it('crit ab 5 stuck Partnern — sampleIds auf 5 gekappt', async () => {
-    const rows = Array.from({ length: 6 }, (_, i) => ({
-      id: String(i),
-      email: `w${i}@x.de`,
-      rolle: 'werkstatt',
-      created_at: '2026-06-01T00:00:00Z',
-    }))
-    const res = await stuckPartnerAccountsCheck.run(mockCtx({ data: rows }))
+  it('crit ab 5 nie-eingeloggten Partnern — sampleIds auf 5 gekappt', async () => {
+    const profiles = Array.from({ length: 6 }, (_, i) => P(String(i), 'werkstatt', `w${i}@x.de`))
+    const res = await stuckPartnerAccountsCheck.run(mockCtx({ profiles }))
     expect(res.status).toBe('crit')
     expect(res.metric).toBe(6)
     expect(res.sampleIds).toHaveLength(5)
   })
 
-  it('error-Status bei DB-Fehler', async () => {
-    const res = await stuckPartnerAccountsCheck.run(mockCtx({ data: null, error: { message: 'boom' } }))
+  it('error-Status bei DB-Fehler der profiles-Query', async () => {
+    const res = await stuckPartnerAccountsCheck.run(mockCtx({ profiles: null, profilesError: { message: 'boom' } }))
     expect(res.status).toBe('error')
     expect(res.detail).toContain('boom')
+  })
+
+  it('getUserById-Fehler fuer einen Kandidaten -> defensiv NICHT flaggen (kein Fehlalarm)', async () => {
+    const profiles = [P('a', 'werkstatt')]
+    const res = await stuckPartnerAccountsCheck.run(
+      mockCtx({ profiles, getUserByIdError: { message: 'auth down' } }),
+    )
+    expect(res.status).toBe('ok')
+    expect(res.metric).toBe(0)
+  })
+})
+
+describe('PARTNER_ROLLEN Enum-Integritaet', () => {
+  it('enthaelt ausschliesslich gueltige user_role-Enum-Werte (sonst wirft die .in()-Query)', () => {
+    const ungueltig = PARTNER_ROLLEN.filter((r) => !VALID_USER_ROLES.includes(r))
+    expect(ungueltig).toEqual([])
   })
 })
