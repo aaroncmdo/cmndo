@@ -186,3 +186,25 @@ Termin mit divergentem Dedup (`termin_reminders.status` vs. `gutachter_termine.e
 beide geplant — nur ihr Verhalten ändert sich per Deploy. `whatsapp-erinnerungen` war bereits 2026-06-20 disabled.
 **Nach Deploy verifizieren:** 1 Termin buchen → genau 1× je Reminder-Touchpoint (24h / morgens / 1h), keine Doppel-WA.
 
+## Stand 2026-07-03 — `pipeline-health` nachgetragen (Live-VPS)
+
+> Per `paramiko` (Aaron-autorisiert, root) auf den Live-VPS angewendet + verifiziert. Backup:
+> `/root/crontab-backup-pipeline-health-2026-07-03-174753.txt` (Rollback: `crontab <backup>`).
+
+**Befund** (Silent-Dead-Feature-Audit): `health_check_runs = 0` — die Pipeline-Observability (#3327,
+gebaut + gemergt, Konsument-Dashboard `/admin/health` vorhanden) lief **NIE**, weil **kein Crontab-Eintrag
+existierte**. → die App-weite Silent-Failure-Wache war AUS (jeder stille Pipeline-Ausfall blieb unbemerkt).
+
+**Umgesetzt:** nachgetragen —
+```cron
+0    *  * * *  cron-call.sh /api/cron/pipeline-health  # Pipeline-Observability #3327
+```
+Crontab **81 → 82 Zeilen**. Deps vorab verifiziert: `log_cron_job_run`-RPC existiert, `health_check_runs`-
+Spalten passen zu `persistAndAlert`, `cron-call.sh`-Wrapper durch 60+ andere Crons bewiesen, Endpoint
+code-korrekt (Bearer `CRON_SECRET`).
+
+**Erstlauf-Hinweis:** beim ersten Lauf (kein ok-Vorlauf) alarmiert JEDER nicht-ok-Check die Admins
+(Email + In-App). Read-only-Replikat vorab: `webhook-inbound-silent` = **crit (50 Tage LexDrive-Inbound-
+Stille)** → der Cron surfaced ab Lauf 1 echte, bislang unsichtbare Probleme an die 3 realen Admins (gewollt —
+das ist der Zweck der Observability).
+
