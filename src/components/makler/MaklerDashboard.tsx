@@ -121,8 +121,15 @@ export function MaklerDashboard({ makler, data }: Props) {
                       ) : (
                         <>
                           <p className="text-sm text-claimondo-navy">
-                            Provision {EUR.format(a.betrag_netto_eur)}{' '}
-                            <span className="text-claimondo-ondo">— {a.status}</span>
+                            {a.kunde_name ? (
+                              <>
+                                <strong>{a.kunde_name}</strong> ist Kunde geworden ·{' '}
+                              </>
+                            ) : null}
+                            {EUR.format(a.betrag_netto_eur)}{' '}
+                            <span className="text-claimondo-ondo">
+                              — {a.status === 'pending' ? 'vorgemerkt' : a.status}
+                            </span>
                           </p>
                           <p className="text-xs text-claimondo-ondo mt-0.5">
                             {relativeFromNow(a.timestamp)}

@@ -228,8 +228,11 @@ export function buildPushPayload(event: NotificationEvent, role: Role): PushPayl
         url,
         tag,
       }
-    case 'makler.lead_eingegangen':
-      return { title: 'Neuer Lead', body: 'Ein neuer Lead wurde Ihnen zugewiesen.', url, tag }
+    case 'makler.lead_eingegangen': {
+      const kn = s(payload.kundeName, '')
+      const be = payload.betragEur as number | undefined
+      return { title: kn ? `${kn} ist Kunde geworden 🎉` : 'Neuer Lead über Ihren Link', body: be ? `${be.toFixed(2)} € sind für Sie vorgemerkt.` : 'Ein Kontakt ist über Ihren Empfehlungs-Link Kunde geworden.', url, tag }
+    }
     case 'makler.provision_status':
       return {
         title: 'Provisions-Update',

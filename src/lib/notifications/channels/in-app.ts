@@ -188,8 +188,11 @@ function mapEventToMitteilung(
       return { titel: 'Dokument fehlt', inhalt: asString(payload.anforderungText) ?? asString(payload.dokumentTyp) ?? null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     case 'dokument.hochgeladen':
       return { titel: 'Dokument hochgeladen', inhalt: asString(payload.typ) ?? null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
-    case 'makler.lead_eingegangen':
-      return { titel: 'Neuer Lead eingegangen', inhalt: asString(payload.promoCode) ? `Promo: ${asString(payload.promoCode)}` : null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    case 'makler.lead_eingegangen': {
+      const kn = asString(payload.kundeName)
+      const be = asNumber(payload.betragEur)
+      return { titel: kn ? `${kn} ist Kunde geworden` : 'Neuer Lead über Ihren Link', inhalt: be ? `${be} € vorgemerkt` : (asString(payload.promoCode) ? `Promo: ${asString(payload.promoCode)}` : null), kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    }
     case 'makler.provision_status': {
       const st = asString(payload.status)
       const betrag = asNumber(payload.betragEur)
