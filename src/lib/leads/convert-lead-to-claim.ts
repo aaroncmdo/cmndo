@@ -143,13 +143,17 @@ export async function convertLeadToClaim(
     })
     if (veh.ok) resolvedVehicleId = veh.vehicleId
     else console.warn('[CMM-50.0] vehicles-Upsert bei Konversion fehlgeschlagen:', veh.error)
-  } else if (!resolvedVehicleId && (
+  }
+  // CMM-fix: Kennzeichen-Stub-Fallback greift jetzt auch, wenn der FIN-Pfad KEIN Fahrzeug ergab
+  // (Fake/Tippfehler-FIN oder Lookup down) — sonst gingen die Fahrzeugdaten verloren (nicht db-driven).
+  // Der !resolvedVehicleId-Guard verhindert Doppelanlage bei erfolgreicher FIN.
+  if (!resolvedVehicleId && (
     lead.kennzeichen || lead.fahrzeug_hersteller || lead.fahrzeug_modell ||
     lead.fahrzeug_farbe || lead.lackfarbe_code || lead.hsn || lead.tsn ||
     lead.fahrzeug_baujahr || lead.erstzulassung || lead.kilometerstand ||
     lead.kennzeichen_buchstaben || lead.fahrzeug_ausstattung
   )) {
-    // CMM-68/CMM-50: kein FIN, aber IRGENDEIN Fahrzeugdatum -> FIN-loser Stub, damit ALLE
+    // CMM-68/CMM-50: kein (erfolgreicher) FIN, aber IRGENDEIN Fahrzeugdatum -> FIN-loser Stub, damit ALLE
     // Fahrzeugdaten unbedingt auf vehicles landen (Vorbedingung dafuer, dass der faelle-INSERT
     // die vehicle-Cols verlustfrei NICHT mehr schreibt). claims.vehicle_id wird gesetzt; die FIN
     // kommt spaeter (ZB1) und dedupliziert via ensureVehicleFromFin (ein Fahrzeug, mehrere Claims).
