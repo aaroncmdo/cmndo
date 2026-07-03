@@ -8,7 +8,7 @@ import { rankWerkstaetten, type WerkstattFinderRow } from '../finder'
 const ORIGIN = { lat: 52.520008, lng: 13.404954 }
 
 // Hilfs-Builder: minimaler Row-Shape ohne distanz_km (die wird annotiert).
-type RawRow = Omit<WerkstattFinderRow, 'distanz_km'>
+type RawRow = Omit<WerkstattFinderRow, 'distanz_km' | 'passt'>
 
 function row(over: Partial<RawRow> & Pick<RawRow, 'id'>): RawRow {
   return {
@@ -20,6 +20,7 @@ function row(over: Partial<RawRow> & Pick<RawRow, 'id'>): RawRow {
     lat: over.lat ?? null,
     lng: over.lng ?? null,
     status: over.status ?? 'aktiv',
+    faehigkeiten: over.faehigkeiten ?? null,
     ...over,
   }
 }
@@ -76,5 +77,43 @@ describe('rankWerkstaetten', () => {
 
     expect(result).toHaveLength(1)
     expect(result[0].id).toBe('aktiv')
+  })
+})
+
+// SP1 Task 4: Kategorie-Matching (passt-Flag + Sortierung)
+const base = (over: Partial<{ id: string; faehigkeiten: string[] | null; lat: number; lng: number }>) => ({
+  id: over.id ?? 'w', name: over.id ?? 'W', adresse_strasse: null, adresse_plz: null,
+  adresse_ort: null, telefon: null, lat: over.lat ?? 50.9, lng: over.lng ?? 6.9,
+  status: 'aktiv', faehigkeiten: over.faehigkeiten ?? null,
+})
+const ORIGIN_KOELN = { lat: 50.94, lng: 6.96 } // Koeln
+
+describe('rankWerkstaetten + Kategorie', () => {
+  it('ohne kategorie: reine Distanz-Sortierung (Regression)', () => {
+    const nah = base({ id: 'nah', lat: 50.94, lng: 6.96 })
+    const fern = base({ id: 'fern', lat: 52.5, lng: 13.4 })
+    const r = rankWerkstaetten([fern, nah], ORIGIN_KOELN)
+    expect(r.map((x) => x.id)).toEqual(['nah', 'fern'])
+    expect(r[0].passt).toBe(true)
+  })
+  it('faehigkeiten leer = Vollservice -> passt=true', () => {
+    const r = rankWerkstaetten([base({ id: 'voll', faehigkeiten: [] })], ORIGIN_KOELN, 'karosserie')
+    expect(r[0].passt).toBe(true)
+  })
+  it('kategorie nicht in faehigkeiten -> passt=false, hinter passenden', () => {
+    const glas = base({ id: 'glas', faehigkeiten: ['glas'], lat: 50.94, lng: 6.96 })
+    const voll = base({ id: 'voll', faehigkeiten: ['karosserie', 'lackierung'], lat: 51.2, lng: 6.8 })
+    const r = rankWerkstaetten([glas, voll], ORIGIN_KOELN, 'karosserie')
+    expect(r.map((x) => x.id)).toEqual(['voll', 'glas'])
+    expect(r.find((x) => x.id === 'glas')!.passt).toBe(false)
+  })
+  it('alle unpassend -> Liste trotzdem nicht leer', () => {
+    const r = rankWerkstaetten([base({ id: 'glas', faehigkeiten: ['glas'] })], ORIGIN_KOELN, 'karosserie')
+    expect(r).toHaveLength(1)
+    expect(r[0].passt).toBe(false)
+  })
+  it("kategorie 'unbekannt' -> kein Filter (alle passt=true)", () => {
+    const r = rankWerkstaetten([base({ id: 'glas', faehigkeiten: ['glas'] })], ORIGIN_KOELN, 'unbekannt')
+    expect(r[0].passt).toBe(true)
   })
 })
