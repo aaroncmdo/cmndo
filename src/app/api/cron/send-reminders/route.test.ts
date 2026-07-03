@@ -87,3 +87,25 @@ describe('send-reminders — claim-native Kunde-Telefon (#3277)', () => {
     expect(h.state.updateCalls).toHaveLength(0)
   })
 })
+
+describe('send-reminders — kunde_24h (Reminder-Konsolidierung)', () => {
+  // kunde_24h ist der neue 24h-vorher-Reminder aus der Queue (loest den
+  // doppelten termin-erinnerungen-Scan ab). Muss ueber den reminder_24h-Trigger
+  // an die Kunde-Telefonnummer gehen und die Zeile auf sent setzen.
+  it('kunde_24h -> reminder_24h-Trigger an Kunde-Telefon -> status=sent', async () => {
+    h.state.q = [
+      { data: [{ id: 'rem24', termin_id: 'tm24', reminder_typ: 'kunde_24h', empfaenger: 'kunde', geplant_fuer: '2026-07-01T09:00:00Z', status: 'pending', versuche: 0 }] }, // termin_reminders-Liste
+      { data: { id: 'tm24', assignee_id: 'sv1', fall_id: 'f1', lead_id: 'lead-1', claim_id: 'c1', start_zeit: '2026-07-02T10:00:00Z', end_zeit: '2026-07-02T11:00:00Z', status: 'bestaetigt' } }, // gutachter_termine
+      { data: { lead_id: 'lead-1', schadenort_adresse: 'Strasse 1', schadenort_plz: '12345', schadenort_ort: 'Berlin' } }, // claims
+      { data: { besichtigungsort_adresse: 'Werkstatt 5' } }, // aktueller Termin-Adresse
+      { data: { id: 'sv1', profile_id: 'psv1', standort_lat: null, standort_lng: null } }, // sachverstaendige
+      { data: { vorname: 'Sven', nachname: 'V', telefon: '+4915100000000' } }, // sv-profile
+      { data: { vorname: 'Kim', nachname: 'K', telefon: '+4917100000000' } }, // leads (Kunde)
+      { error: null }, // finale termin_reminders-update
+    ]
+    await GET(req())
+    expect(h.sendCommunication).toHaveBeenCalledTimes(1)
+    expect(h.sendCommunication).toHaveBeenCalledWith('reminder_24h', expect.objectContaining({ telefon: '+4917100000000' }))
+    expect(lastUpdate()).toMatchObject({ status: 'sent' })
+  })
+})
