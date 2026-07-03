@@ -88,12 +88,12 @@ describe('syncTerminToExternalCalendar — Orchestrierung (Fake-Provider, kein I
     expect(r.results.fake).toBe('created')
   })
 
-  it('nicht-SV assignee → skip (Provider nicht aufgerufen)', async () => {
+  it('assignee-generisch: kundenbetreuer-Termin wird NICHT am Orchestrator geskippt (Provider entscheidet via Resolver)', async () => {
     let called = false
     const spy: KalenderProvider = { name: 'fake', upsert: async () => { called = true; return 'created' }, remove: async () => 'updated' }
-    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin({ ...aktiverTermin, assignee_typ: 'kanzlei' }), providers: [spy] })
-    expect(r.results.fake).toBe('skip')
-    expect(called).toBe(false)
+    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin({ ...aktiverTermin, assignee_typ: 'kundenbetreuer', assignee_id: 'p-kb' }), providers: [spy] })
+    expect(called).toBe(true)
+    expect(r.results.fake).toBe('created')
   })
 
   it('nicht-aktiver Status → skip', async () => {
