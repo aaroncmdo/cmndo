@@ -1,5 +1,5 @@
 // AAR-872: Aggregator fuer Privat-Events des SV an einem bestimmten Datum.
-// Vereinheitlicht Google-Calendar (primary) und CalDAV (sv_kalender_verbindungen)
+// Vereinheitlicht Google-Calendar (primary) und CalDAV (kalender_verbindungen)
 // in einen `PrivateCalendarEvent`-Array. Wird vom „Stop hinzufuegen"-Sheet
 // genutzt, damit der SV einen Privat-Termin als Tagesroute-Stop addet.
 //

@@ -7,7 +7,7 @@
 //            klickt „Verbinden testen" → server-side CalDAV-Login.
 //            Bei Erfolg bekommen wir eine Kalender-Liste.
 //   Phase 2: User wählt seinen Hauptkalender, klickt „Speichern"
-//            → server-side Upsert in sv_kalender_verbindungen.
+//            → server-side Upsert in kalender_verbindungen (SP2a, profil-gekeyt).
 
 import { useState, useTransition } from 'react'
 import { XIcon, ExternalLinkIcon, CheckCircle2Icon, AlertCircleIcon, CalendarIcon } from 'lucide-react'

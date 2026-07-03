@@ -5,7 +5,7 @@ import { runCaldavHealthcheck } from '@/lib/kalender/caldav/healthcheck'
 //
 // Schedule (vercel.json): */15 * * * *  — alle 15 Minuten
 //
-// Pingt jede aktive sv_kalender_verbindungen.provider='caldav'-Row, setzt
+// Pingt jede aktive kalender_verbindungen.provider='caldav'-Row, setzt
 // bei Fehler last_error + erstellt einmalig Admin- + SV-Task, bei Erfolg
 // resettet last_error und schließt offene Tasks.
 //
