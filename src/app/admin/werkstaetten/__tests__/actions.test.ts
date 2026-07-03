@@ -267,6 +267,19 @@ describe('createWerkstatt', () => {
   })
 })
 
+describe('setWerkstattFaehigkeiten', () => {
+  it('gibt ok:false zurück wenn nicht Admin', async () => {
+    mockConfig.authUser = { id: 'u' }; mockConfig.profileRolle = 'dispatch'
+    const { setWerkstattFaehigkeiten } = await import('../actions')
+    expect((await setWerkstattFaehigkeiten('w-1', ['glas'])).ok).toBe(false)
+  })
+  it('admin -> ok:true', async () => {
+    mockConfig.authUser = { id: 'a' }; mockConfig.profileRolle = 'admin'
+    const { setWerkstattFaehigkeiten } = await import('../actions')
+    expect((await setWerkstattFaehigkeiten('w-1', ['karosserie','lackierung'])).ok).toBe(true)
+  })
+})
+
 describe('sendWerkstattLoginMail', () => {
   it('gibt ok:false zurück wenn nicht Admin', async () => {
     mockConfig.authUser = { id: 'u' }
