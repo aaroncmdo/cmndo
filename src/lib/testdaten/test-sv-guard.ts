@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { istInterneIdentitaet } from './interne-identitaet'
+import { istInterneIdentitaet, istInterneEmail, letzte9Ziffern } from './interne-identitaet'
 
 // Test-SV-Guard: verhindert an genau EINEM Buchungs-Chokepoint (reserviere()), dass
 //   - ein interner/Test-Lead einen ECHTEN Sachverstaendigen bucht (der gemeldete Vorfall), und
@@ -69,5 +69,31 @@ export async function pruefeTestSvKonsistenz(
   } catch (err) {
     console.warn('[test-sv-guard] Identitaets-Lookup fehlgeschlagen, lasse Buchung durch:', err)
     return { blockieren: false }
+  }
+}
+
+/**
+ * Reverse-Lookup Telefon -> interne/Test-Identitaet: sucht leads + profiles per Telefon
+ * (letzte 9 Ziffern, 9-stelliger Match -> Kollision vernachlaessigbar) und prueft, ob eine
+ * davon eine interne Email hat. Fuer den Send-Client-Guard (sendWhatsApp), wo nur ein Telefon
+ * vorliegt. Fail-open: Lookup-Fehler ODER zu kurze Nummer -> false (senden, nie faelschlich
+ * eine echte Kundennachricht unterdruecken).
+ */
+export async function istInternesTelefon(telefonE164: string, db?: SupabaseClient): Promise<boolean> {
+  try {
+    const digits = letzte9Ziffern(telefonE164)
+    if (!digits) return false
+    // Client-Erzeugung INNERHALB des try — ein createAdminClient-Fehler (z.B. fehlende Env
+    // im Test) darf den Send nie brechen (fail-open).
+    const client: SupabaseClient = db ?? (await import('@/lib/supabase/admin')).createAdminClient()
+    const [profRes, leadRes] = await Promise.all([
+      client.from('profiles').select('email, telefon').ilike('telefon', `%${digits}%`),
+      client.from('leads').select('email, telefon').ilike('telefon', `%${digits}%`),
+    ])
+    const kandidaten = [...(profRes.data ?? []), ...(leadRes.data ?? [])]
+    return kandidaten.some((k) => istInterneEmail((k as { email?: string | null }).email))
+  } catch (err) {
+    console.warn('[send-isolation] istInternesTelefon Lookup-Fehler, lasse Send durch:', err)
+    return false
   }
 }
