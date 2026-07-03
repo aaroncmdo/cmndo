@@ -21,6 +21,7 @@ import {
   assignReparaturWerkstatt,
   findReparaturWerkstaettenForTarget,
 } from '@/lib/werkstatt/vermittlung-server'
+import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 
 /**
@@ -445,8 +446,28 @@ export async function waehleWerkstattFlow(
   werkstattId: string,
 ): Promise<{ ok: boolean; error?: string }> {
   if (!werkstattId) return { ok: false, error: 'Keine Werkstatt gewählt.' }
-  const { leadId, error } = await resolveFlowLead(token)
-  if (!leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  // Gate/Idempotenz: nur zuweisen, wenn der Lead wirklich eine Vermittlung braucht
+  // (Reparatur-Intent, noch keine Werkstatt, Status offen). Verhindert Assign bei
+  // falschem Intent + Re-Assign-Overwrite. Die UI zeigt den Picker ohnehin nur so.
+  const { data: leadRow } = await admin
+    .from('leads')
+    .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status')
+    .eq('id', leadId)
+    .maybeSingle()
+  if (!leadRow || !brauchtWerkstattVermittlung(leadRow as BedarfRow)) {
+    return { ok: false, error: 'Für diesen Vorgang ist keine Werkstatt-Auswahl möglich.' }
+  }
+
+  // Nur eine der tatsächlich angebotenen (5 nächsten aktiven Partner) zulassen — ein
+  // manipulierter Request darf keine beliebige Werkstatt setzen.
+  const angeboten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId })
+  if (!angeboten.some((w) => w.id === werkstattId)) {
+    return { ok: false, error: 'Bitte wählen Sie eine der angebotenen Werkstätten.' }
+  }
+
   const res = await assignReparaturWerkstatt({
     target: 'lead',
     id: leadId,
