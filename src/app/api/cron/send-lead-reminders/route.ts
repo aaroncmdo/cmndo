@@ -32,6 +32,7 @@ export async function GET(request: Request) {
   const h2 = new Date(now.getTime() - 2 * 60 * 60 * 1000)
   const h24 = new Date(now.getTime() - 24 * 60 * 60 * 1000)
   const h72 = new Date(now.getTime() - 72 * 60 * 60 * 1000)
+  const h168 = new Date(now.getTime() - 168 * 60 * 60 * 1000)
 
   // Kohorten-Helper: Lädt Kandidaten für ein bestimmtes Reminder-Fenster.
   // Filter:
@@ -42,7 +43,7 @@ export async function GET(request: Request) {
   //   - keine Faelle mit lead_id = lead.id (nicht konvertiert)
   async function candidates(
     before: Date,
-    reminderField: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at',
+    reminderField: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at' | 'reminder_4_sent_at',
   ): Promise<Candidate[]> {
     const { data, error } = await supabase
       .from('leads')
@@ -95,10 +96,11 @@ export async function GET(request: Request) {
       }))
   }
 
-  const [cohort1, cohort2, cohort3] = await Promise.all([
+  const [cohort1, cohort2, cohort3, cohort4] = await Promise.all([
     candidates(h2, 'reminder_1_sent_at'),
     candidates(h24, 'reminder_2_sent_at'),
     candidates(h72, 'reminder_3_sent_at'),
+    candidates(h168, 'reminder_4_sent_at'),
   ])
 
   let sent = 0
@@ -106,8 +108,8 @@ export async function GET(request: Request) {
 
   async function processStep(
     lead: Candidate,
-    step: 1 | 2 | 3,
-    field: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at',
+    step: 1 | 2 | 3 | 4,
+    field: 'reminder_1_sent_at' | 'reminder_2_sent_at' | 'reminder_3_sent_at' | 'reminder_4_sent_at',
   ) {
     const ok = await sendLeadReminderEmail(lead, step)
     if (!ok) {
@@ -131,18 +133,19 @@ export async function GET(request: Request) {
   for (const l of cohort1) await processStep(l, 1, 'reminder_1_sent_at')
   for (const l of cohort2) await processStep(l, 2, 'reminder_2_sent_at')
   for (const l of cohort3) await processStep(l, 3, 'reminder_3_sent_at')
+  for (const l of cohort4) await processStep(l, 4, 'reminder_4_sent_at')
 
   // AAR-1488: 7-Tage-Timeout im selben Tick — vorher die Disqualifikations-
   // Kandidaten holen damit wir nach der RPC eine Notification an Dispatcher
   // schicken koennen. Pre-Fetch + post-RPC-Notification statt RPC-Return-
   // Type aendern (RETURNS void bleibt — Migration vermieden).
-  const sevenDaysAgoIso = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const tenDaysAgoIso = new Date(now.getTime() - 10 * 24 * 60 * 60 * 1000).toISOString()
   const { data: expiredCandidates } = await supabase
     .from('leads')
     .select('id, vorname, nachname, source_channel, created_at')
     .eq('status', 'neu')
     .eq('disqualifiziert', false)
-    .lt('created_at', sevenDaysAgoIso)
+    .lt('created_at', tenDaysAgoIso)
     .limit(200)
 
   const { error: rpcErr } = await supabase.rpc('mark_expired_leads')
@@ -165,8 +168,8 @@ export async function GET(request: Request) {
       if (dispatcher && dispatcher.length > 0) {
         const count = expiredCandidates.length
         const titel = count === 1
-          ? '1 Lead nach 7 Tagen auto-disqualifiziert'
-          : `${count} Leads nach 7 Tagen auto-disqualifiziert`
+          ? '1 Lead nach 10 Tagen auto-disqualifiziert'
+          : `${count} Leads nach 10 Tagen auto-disqualifiziert`
         const sampleNames = expiredCandidates
           .slice(0, 5)
           .map((l) => {
@@ -204,6 +207,7 @@ export async function GET(request: Request) {
       r1: cohort1.length,
       r2: cohort2.length,
       r3: cohort3.length,
+      r4: cohort4.length,
     },
     expired_rpc: rpcErr ? 'error' : 'ok',
     expired_count: expiredCandidates?.length ?? 0,
