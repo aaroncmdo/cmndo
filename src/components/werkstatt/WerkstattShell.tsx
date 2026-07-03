@@ -5,6 +5,7 @@
 
 import {
   LayoutDashboardIcon,
+  ClipboardListIcon,
   QrCodeIcon,
   HandshakeIcon,
   ReceiptIcon,
@@ -30,6 +31,7 @@ type WerkstattShellProps = {
 
 const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt', label: 'Übersicht', icon: LayoutDashboardIcon, exact: true },
+  { href: '/werkstatt/auftraege', label: 'Aufträge', icon: ClipboardListIcon },
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
   { href: '/werkstatt/vermittlungen', label: 'Meine Vermittlungen', icon: HandshakeIcon },
