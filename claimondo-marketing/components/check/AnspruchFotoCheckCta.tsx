@@ -3,6 +3,7 @@
 import { useTranslations } from 'next-intl'
 import { Camera, ChevronRight } from 'lucide-react'
 import { buildFotoCheckUrl } from '@/lib/check/foto-check-url'
+import { trackEvent } from '@/lib/analytics/track-event'
 
 const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
 
@@ -31,6 +32,7 @@ export function AnspruchFotoCheckCta() {
           <a
             href={href}
             data-tracking="cta-check-foto-tool"
+            onClick={() => trackEvent('check_foto_cta_click')}
             className="mt-4 inline-flex items-center gap-2 rounded-full bg-white px-6 py-3 text-sm font-bold text-claimondo-navy transition hover:bg-claimondo-bg"
           >
             {t('foto_check.button')}
