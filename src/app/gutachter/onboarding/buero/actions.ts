@@ -171,7 +171,7 @@ export async function signBueroVertrag(params: {
     const { BueroSubSvEinladungEmail, subject: bueroSubject } = await import('@/lib/email/google/templates/BueroSubSvEinladung')
     const { data: profile } = await db.from('profiles').select('email, vorname').eq('id', user.id).single()
     if (profile?.email) {
-      const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+      const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
       const props = {
         vorname: profile.vorname ?? null,
         bueroName: org.name,

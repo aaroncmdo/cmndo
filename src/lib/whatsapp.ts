@@ -297,7 +297,7 @@ export async function sendStatusWhatsApp(
     }
 
     // Build portal link
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://cmndo.vercel.app')
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
     const portalLink = `${appUrl}/kunde`
 
     // Build context

@@ -9,7 +9,7 @@ import { generateAndUploadKanzleiAbrechnungPdf, generateKanzleiAbrechnungPdf } f
 import type { KanzleiPdfData } from './generate-pdf'
 import { istAbrechenbarerKanzleiClaim, type AbrechnungsClaim } from './eligibility'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
 const BETRAG_PRO_VOLLMACHT_NETTO = 150
 
 /**

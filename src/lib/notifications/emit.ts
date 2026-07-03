@@ -59,7 +59,6 @@ export async function emitEvent<T extends EventType>(
   const baseUrl =
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_URL ??
-    process.env.VERCEL_URL ??
     'http://localhost:3000'
 
   const fullUrl = baseUrl.startsWith('http') ? baseUrl : `https://${baseUrl}`
