@@ -1,5 +1,8 @@
 import type { Metadata } from 'next'
 import { MaklerRegistrierenClient } from './MaklerRegistrierenClient'
+import { getGesellschaftOptions } from '@/lib/makler/gesellschaft'
+
+export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'Makler-Partner werden | Claimondo',
@@ -8,7 +11,8 @@ export const metadata: Metadata = {
     'Sofort startklar mit Ihrer eigenen Empfehlungs-Landeseite für Ihre Kunden.',
 }
 
-export default function MaklerRegistrierenPage() {
+export default async function MaklerRegistrierenPage() {
+  const { versicherungen, maklerpools } = await getGesellschaftOptions()
   return (
     <div className="min-h-screen bg-claimondo-bg">
       <div className="mx-auto max-w-2xl px-4 py-12 sm:px-6 sm:py-16">
@@ -26,7 +30,7 @@ export default function MaklerRegistrierenPage() {
             Kostenlos registrieren — sofort startklar mit Ihrer eigenen Empfehlungs-Landeseite.
           </p>
         </div>
-        <MaklerRegistrierenClient />
+        <MaklerRegistrierenClient versicherungen={versicherungen} maklerpools={maklerpools} />
       </div>
     </div>
   )
