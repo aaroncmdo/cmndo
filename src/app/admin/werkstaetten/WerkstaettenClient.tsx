@@ -9,6 +9,7 @@ import { werkstattQrSvg } from './qr-action'
 import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
+import { Chip } from '@/components/ui/Chip'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { TextField } from '@/components/shared/forms/TextField'
@@ -469,24 +470,19 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                     {FAEHIGKEITEN_OPTIONS.map((opt) => {
                       const active = createFaehigkeiten.includes(opt.value)
                       return (
-                        <button
+                        <Chip
                           key={opt.value}
-                          type="button"
+                          variant={active ? 'selected' : 'default'}
                           onClick={() => toggleCreateFaehigkeit(opt.value)}
-                          className={`px-3 py-1.5 rounded-ios-lg text-sm border transition-colors ${
-                            active
-                              ? 'bg-claimondo-navy text-white border-claimondo-navy'
-                              : 'bg-claimondo-bg text-claimondo-navy border-claimondo-border hover:border-claimondo-navy/50'
-                          }`}
                         >
                           {opt.label}
-                        </button>
+                        </Chip>
                       )
                     })}
                   </div>
-                  {/* Hidden checkboxes so FormData.getAll('faehigkeiten') liefert die Auswahl */}
+                  {/* Hidden inputs so FormData.getAll('faehigkeiten') liefert die Auswahl */}
                   {createFaehigkeiten.map((v) => (
-                    <input key={v} type="checkbox" name="faehigkeiten" value={v} defaultChecked hidden readOnly />
+                    <input key={v} type="hidden" name="faehigkeiten" value={v} />
                   ))}
                 </div>
                 <div className="flex gap-3 pt-2">
@@ -560,18 +556,13 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 {FAEHIGKEITEN_OPTIONS.map((opt) => {
                   const active = faehigkeitenSelected.includes(opt.value)
                   return (
-                    <button
+                    <Chip
                       key={opt.value}
-                      type="button"
+                      variant={active ? 'selected' : 'default'}
                       onClick={() => toggleFaehigkeit(opt.value)}
-                      className={`px-3 py-1.5 rounded-ios-lg text-sm border transition-colors ${
-                        active
-                          ? 'bg-claimondo-navy text-white border-claimondo-navy'
-                          : 'bg-claimondo-bg text-claimondo-navy border-claimondo-border hover:border-claimondo-navy/50'
-                      }`}
                     >
                       {opt.label}
-                    </button>
+                    </Chip>
                   )
                 })}
               </div>
