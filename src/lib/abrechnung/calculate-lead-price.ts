@@ -1,6 +1,7 @@
 'use server'
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { FINANCE } from '@/lib/finance/constants'
 
 /**
  * KFZ-149 Block C: Lead-Preis aus DB-Tabelle berechnen.
@@ -17,7 +18,7 @@ export async function getLeadPriceFromTable(
     .order('schadenhoehe_bis_netto', { ascending: true })
 
   if (!tabelle?.length) {
-    return { betrag_netto: 200, typ: ist_im_kontingent ? 'paket' : 'einzel', matched_grenze: 0 }
+    return { betrag_netto: FINANCE.LEAD_PREIS_MIN_NETTO, typ: ist_im_kontingent ? 'paket' : 'einzel', matched_grenze: 0 }
   }
 
   // Finde nächsthöheren oder exakten Eintrag

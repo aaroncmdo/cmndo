@@ -10,7 +10,7 @@ import type { KanzleiPdfData } from './generate-pdf'
 import { istAbrechenbarerKanzleiClaim, type AbrechnungsClaim } from './eligibility'
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
-const BETRAG_PRO_VOLLMACHT_NETTO = 150
+const BETRAG_PRO_VOLLMACHT_NETTO = FINANCE.KANZLEI_PROVISION_NETTO
 
 /**
  * KFZ-188: Generiert Kanzlei-Monatsabrechnungen fuer alle aktiven Kanzleien.
