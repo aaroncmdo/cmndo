@@ -30,6 +30,10 @@ export type MaklerAnlageInput = {
   provisionKomplett: number
   provisionGutachter: number
   aktiviertVon: string | null // admin user-id, oder null beim Self-Signup
+  // Makler-Gesellschaft: entweder versicherungsgebunden (versicherungId) ODER frei (maklerpoolId).
+  // Der Typ wird aus dem gesetzten FK abgeleitet; beide null = (noch) nicht zugeordnet.
+  versicherungId?: string | null
+  maklerpoolId?: string | null
 }
 
 export type MaklerAnlageResult =
@@ -87,6 +91,8 @@ export async function anlegeMaklerKern(
       status: 'aktiv',
       aktiviert_am: new Date().toISOString(),
       aktiviert_von: input.aktiviertVon,
+      versicherung_id: input.versicherungId ?? null,
+      maklerpool_id: input.maklerpoolId ?? null,
       user_id: userId,
     })
     .select('id')

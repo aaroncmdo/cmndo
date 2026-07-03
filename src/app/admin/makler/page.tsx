@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import MaklerAdminClient from './MaklerAdminClient'
+import { getGesellschaftOptions } from '@/lib/makler/gesellschaft'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,5 +23,13 @@ export default async function MaklerAdminPage() {
     )
     .order('aktiviert_am', { ascending: false })
 
-  return <MaklerAdminClient maklers={(maklers ?? []) as never} />
+  const { versicherungen, maklerpools } = await getGesellschaftOptions()
+
+  return (
+    <MaklerAdminClient
+      maklers={(maklers ?? []) as never}
+      versicherungen={versicherungen}
+      maklerpools={maklerpools}
+    />
+  )
 }
