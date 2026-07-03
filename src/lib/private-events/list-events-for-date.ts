@@ -72,16 +72,10 @@ async function fetchCaldavEvents(
 ): Promise<PrivateCalendarEvent[]> {
   try {
     const db = createAdminClient()
-    const { data: sv } = await db
-      .from('sachverstaendige')
-      .select('id')
-      .eq('profile_id', profileId)
-      .maybeSingle()
-    if (!sv) return []
     const { data: verb } = await db
-      .from('sv_kalender_verbindungen')
+      .from('kalender_verbindungen')
       .select('server_url, username, password_encrypted, calendar_url')
-      .eq('sv_id', sv.id as string)
+      .eq('profile_id', profileId)
       .eq('provider', 'caldav')
       .maybeSingle()
     if (!verb) return []

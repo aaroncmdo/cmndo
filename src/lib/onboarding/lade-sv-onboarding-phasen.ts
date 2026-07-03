@@ -94,9 +94,10 @@ export async function ladeSvOnboardingPhasen(): Promise<SvOnboardingState | null
 
   // ─── 4. Kalender-Verbindungen pruefen ────────────────────────────────
   const { data: caldav } = await admin
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .select('id')
-    .eq('sv_id', (sv as unknown as Record<string, unknown>).id as string)
+    .eq('profile_id', user.id)
+    .eq('provider', 'caldav')
     .limit(1)
 
   const gcal = !!profileRec?.google_connected_at

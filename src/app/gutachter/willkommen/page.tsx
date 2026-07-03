@@ -141,9 +141,9 @@ export default async function GutachterWillkommenPage({
   // Connect-Flag gcal_connected auf sachverstaendige. Entweder ein Google-
   // OAuth-Link oder eine CalDAV-Verbindung reicht als „Kalender verbunden".
   const { data: caldavRow } = await supabase
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .select('id')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .eq('provider', 'caldav')
     .maybeSingle()
   const caldavConnected = !!caldavRow

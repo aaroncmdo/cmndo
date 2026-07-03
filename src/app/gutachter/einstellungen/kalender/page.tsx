@@ -31,9 +31,9 @@ export default async function KalenderEinstellungenPage() {
     .maybeSingle()
 
   const { data: caldavRow } = await supabase
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .select('id, provider_label, username, calendar_display_name, connected_at, last_sync_at, last_error, last_error_at')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .eq('provider', 'caldav')
     .maybeSingle()
 

@@ -32,9 +32,9 @@ export default async function EinstellungenPage() {
   if (!sv) redirect('/gutachter/willkommen')
 
   const { data: caldavRow } = await supabase
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .select('id, last_error')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .eq('provider', 'caldav')
     .maybeSingle()
 
