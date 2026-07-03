@@ -81,6 +81,11 @@ export default function KalenderClient({
   const [gutachterSearch, setGutachterSearch] = useState('')
   const [serverTermine, setServerTermine] = useState<KalenderTermin[]>([])
   const [modal, setModal] = useState<{ mode: 'create' | 'edit'; date?: Date; termin?: KalenderTermin } | null>(null)
+  // Hydration-Guard: die Kalender-Ansicht haengt von new Date()/isToday ab (currentDate +
+  // Tages-Highlight) -> SSR (Server-TZ) und Client (Berlin) koennen abweichen -> React #418
+  // (Live-Smoke 03.07. /admin/kalender). Erst nach Mount rendern; SSR + erster Client-Render
+  // zeigen identisch das Skeleton, danach die echte Ansicht.
+  const [mounted, setMounted] = useState(false)
 
   // Load filter from localStorage
   useEffect(() => {
@@ -88,6 +93,9 @@ export default function KalenderClient({
     setTypFilter(saved.typFilter)
     setGutachterIds(saved.gutachterIds)
   }, [])
+
+  // Nach Mount: Hydration-Guard freigeben (s. mounted-State oben).
+  useEffect(() => { setMounted(true) }, [])
 
   // Save filter changes
   useEffect(() => { saveFilter(typFilter, gutachterIds) }, [typFilter, gutachterIds])
@@ -200,6 +208,17 @@ export default function KalenderClient({
   }
 
   const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+
+  if (!mounted) {
+    return (
+      <div className="h-full overflow-y-auto py-6">
+        <div className="animate-pulse space-y-4" aria-hidden>
+          <div className="h-8 w-48 bg-claimondo-bg rounded-ios-lg" />
+          <div className="h-[70vh] bg-claimondo-bg rounded-ios-lg" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto py-6">
