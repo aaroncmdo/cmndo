@@ -67,7 +67,9 @@ function mapEventToMitteilung(
   const fallId = asString(payload.fallId)
   const leadId = asString(payload.leadId)
   const terminId = asString(payload.terminId)
-  const claimId = asString(payload.claimId)
+  // DB-Cron-Events (pflicht_fotos, mietwagen.*, verjaehrung_naht) liefern claim_id in snake_case —
+  // sonst bliebe der Kontext leer und die Staff-Bell haette keine Klick-Route auf den Claim.
+  const claimId = asString(payload.claimId) ?? asString(payload.claim_id)
 
   // Kontext-Priorisierung (Variante C, 2026-05-07):
   // Wenn claimId im Payload — speichern wir claim als SSoT. autoRouteUrl
@@ -147,6 +149,19 @@ function mapEventToMitteilung(
       return { titel: 'SV vor Ort', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
     case 'termin.sv_abgeschlossen':
       return { titel: 'Termin abgeschlossen', inhalt: null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    // 5.12b DB-Cron-Events (Notif-Emission-Audit 03.07.) — snake_case-Payload, Staff-Bell (KB/Admin).
+    case 'mietwagen.lange_anmietung': {
+      const tage = asNumber(payload.tage)
+      return { titel: 'Mietwagen: lange Anmietung', inhalt: asString(payload.message) ?? (tage ? `Seit ${tage} Tagen ohne Rechnung` : null), kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    }
+    case 'mietwagen.sla_verstossen': {
+      const tage = asNumber(payload.tage_bisher)
+      return { titel: 'Mietwagen: Erstattungslimit überschritten', inhalt: tage ? `${tage} Tage angemietet — über dem erstattbaren Limit` : null, kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    }
+    case 'claim.verjaehrung_naht': {
+      const tage = asNumber(payload.tage_bis_verjaehrt)
+      return { titel: 'Verjährung naht', inhalt: tage ? `Noch ${tage} Tage bis zur Verjährung — Frist prüfen` : 'Verjährungsfrist rückt näher', kategorie: 'update', kontext_typ: kontext.typ, kontext_id: kontext.id }
+    }
     case 'termin.verlegung_vorgeschlagen': {
       const sv = asString(payload.svVorname) ?? 'Der SV'
       const neu = `${asString(payload.neuesDatum) ?? ''} ${asString(payload.neuesUhrzeit) ?? ''}`.trim()

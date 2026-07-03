@@ -63,6 +63,15 @@ export type EventType =
   | 'mietwagen.rechnung_ausstehend'
   | 'mietwagen.abgabe_naht'
   | 'mietwagen.ueber_limit'
+  // 5.12b DB-Cron-emittiert (Notif-Emission-Audit 03.07.): diese 3 werden DIREKT von scheduled+aktiven
+  //       DB-Crons in notification_events geschrieben (cron_mietwagen_lange_anmietung 9:20,
+  //       cron_mietwagen_sla_tracking 9:15, cron_verjaehrungs_warner 9:30 taeglich) — snake_case-Payload,
+  //       analog gutachten.pflicht_fotos_unvollstaendig. Waren NICHT in dieser Union -> fan-out fand keine
+  //       EVENT_MATRIX -> stille Nicht-Zustellung sobald sie feuern (0 rows bisher, Crons aber live). Jetzt
+  //       getrackt + staff-in_app-geroutet (Verjaehrung = rechtlich kritisch, KB/Admin muessen es sehen).
+  | 'mietwagen.lange_anmietung'
+  | 'mietwagen.sla_verstossen'
+  | 'claim.verjaehrung_naht'
   // 5.13 Airdrop / Gegner-Einladung (AAR-814)
   | 'claim.gegner_eingeladen'
   | 'claim.gegner_hat_geoeffnet'
@@ -144,6 +153,10 @@ export interface EventPayloads {
   'mietwagen.rechnung_ausstehend': { fallId: string; seit_tage: number }
   'mietwagen.abgabe_naht': { fallId: string; tage_rest: number; limit_datum: string }
   'mietwagen.ueber_limit': { fallId: string; tage_ueber: number; limit_datum: string }
+  // 5.12b DB-Cron (snake_case-Payload; claim_id via fan-out Payload-Fallback, kein fallId)
+  'mietwagen.lange_anmietung': { mietwagen_id: string; claim_id: string; tage: number; message?: string }
+  'mietwagen.sla_verstossen': { mietwagen_id: string; claim_id: string; tage_bisher: number }
+  'claim.verjaehrung_naht': { claim_id: string; vehicle_id: string | null; verjaehrt_am: string; tage_bis_verjaehrt: number }
   // 5.13 Airdrop (AAR-814)
   'claim.gegner_eingeladen': { claimId: string; invitationId: string; invitedVia: string; expiresAt: string }
   'claim.gegner_hat_geoeffnet': { claimId: string; invitationId: string; openedAt: string }

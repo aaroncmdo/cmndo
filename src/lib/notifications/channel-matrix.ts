@@ -276,6 +276,22 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin: ['in_app'],
     },
   },
+  // 5.12b DB-Cron-emittierte Events (Notif-Emission-Audit 03.07.): STAFF-only in_app — BEWUSST keine
+  // Kunde/SV-Sends (interne Ops-/Legal-Warnungen; KB/Admin kontaktieren dann selbst). Diese 3 Events
+  // werden von scheduled+aktiven DB-Crons geschrieben, fehlten aber in der Matrix -> fan-out konnte sie
+  // nicht zustellen. Fixt genau das (send-sicher, kein externer Kanal).
+  'mietwagen.lange_anmietung': {
+    priority: 'normal',
+    channels: { kundenbetreuer: ['in_app'], admin: ['in_app'] },
+  },
+  'mietwagen.sla_verstossen': {
+    priority: 'urgent',
+    channels: { kundenbetreuer: ['in_app'], admin: ['in_app'] },
+  },
+  'claim.verjaehrung_naht': {
+    priority: 'urgent',
+    channels: { kundenbetreuer: ['in_app'], admin: ['in_app'] },
+  },
   // 5.13 Airdrop (AAR-814)
   'claim.gegner_eingeladen': {
     priority: 'normal',
