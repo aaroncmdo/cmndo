@@ -16,7 +16,7 @@ import { Modal } from '@/components/primitives/Modal'
 import {
   testCaldavConnection,
   saveCaldavConnection,
-} from '@/app/gutachter/einstellungen/kalender/caldav-actions'
+} from '@/lib/kalender/connect/caldav-connect-actions'
 import { CALDAV_PROVIDERS, type CalDavProviderId } from '@/lib/kalender/caldav/provider-presets'
 
 type Calendar = { url: string; displayName: string; ctag?: string | null }

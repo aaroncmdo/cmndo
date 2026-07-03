@@ -11,7 +11,7 @@ import {
   RefreshCwIcon,
 } from 'lucide-react'
 import CalDavConnectModal from '@/components/CalDavConnectModal'
-import { disconnectCaldav } from './caldav-actions'
+import { disconnectCaldav } from '@/lib/kalender/connect/caldav-connect-actions'
 import PageHeader from '@/components/shared/PageHeader'
 
 type CalDavState = {
