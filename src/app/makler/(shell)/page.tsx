@@ -19,5 +19,17 @@ export default async function MaklerDashboardPage() {
 
   const data = await getMaklerDashboardData(makler.id)
 
-  return <MaklerDashboard makler={makler} data={data} />
+  // Erste-Vermittlung-Prompt: einmalig, sobald der Makler >=1 Vermittlung hat und die Card
+  // noch nicht weggeklickt wurde. Trigger hier beim Dashboard-Load (keine Kopplung an
+  // convert-lead-to-claim). Dismiss setzt vermittlung_prompt_gesehen -> danach nie wieder.
+  const zeigeErsteVermittlungCard = data.hatVermittlung && !makler.vermittlung_prompt_gesehen
+
+  return (
+    <MaklerDashboard
+      makler={makler}
+      data={data}
+      zeigeErsteVermittlungCard={zeigeErsteVermittlungCard}
+      promoCode={data.promoCode}
+    />
+  )
 }
