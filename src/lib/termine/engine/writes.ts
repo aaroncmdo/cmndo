@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Assignee, BezugTyp } from './types'
 import { pruefeBelegungStrict } from './belegung'
 import { RESERVIERUNG_TTL_MIN } from './constants'
+import { pruefeTestSvKonsistenz } from '@/lib/testdaten/test-sv-guard'
 
 export type TerminTyp = 'sv_begutachtung' | 'kb_beratung' | 'konfrontation'
 export type Quelle = 'dispatch' | 'self_service' | 'manuell'
@@ -18,7 +19,7 @@ export interface ReserviereInput {
 }
 export type ReserviereResult =
   | { ok: true; terminId: string; reserviertBis: string }
-  | { ok: false; error: string; code: 'belegt' | 'db' }
+  | { ok: false; error: string; code: 'belegt' | 'db' | 'test_guard' }
 
 /** assignee → passende Legacy-FK-Spalte (Dual-Write fuer Phase-3-Lesbarkeit). kanzlei = keine. */
 export function assigneeLegacyPatch(a: Assignee): Record<string, string> {
@@ -39,6 +40,16 @@ export function assigneeLegacyPatch(a: Assignee): Record<string, string> {
 export async function reserviere(input: ReserviereInput): Promise<ReserviereResult> {
   const { assignee, von, bis, quelle, typ = 'sv_begutachtung', bezug, ttlMin = RESERVIERUNG_TTL_MIN } = input
   const db: SupabaseClient = input.db ?? (await import('@/lib/supabase/admin')).createAdminClient()
+
+  // Test-SV-Guard: interne/Test-Buchungen duerfen keinen ECHTEN Sachverstaendigen erreichen
+  // (und umgekehrt kein echter Kunde einen Test-SV). Fail-open bei Lookup-Fehlern. Siehe
+  // src/lib/testdaten/test-sv-guard.ts (Vorfall 2026-07-03: echter SV bekam Test-Termine).
+  if (assignee.typ === 'sachverstaendiger') {
+    const guard = await pruefeTestSvKonsistenz(db, assignee.id, bezug)
+    if (guard.blockieren) {
+      return { ok: false, error: guard.grund ?? 'Test-Guard: Buchung blockiert.', code: 'test_guard' }
+    }
+  }
 
   const pre = await pruefeBelegungStrict(assignee, von, bis, db)
   if (!pre.ok) return { ok: false, error: pre.error, code: 'db' }
