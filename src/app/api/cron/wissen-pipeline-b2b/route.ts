@@ -1,6 +1,10 @@
 import { runB2BPipeline } from '@/lib/wissen/pipeline'
 
 export const dynamic = 'force-dynamic'
+// Die Pipeline generiert bis zu ATTEMPT_CAP KI-Artikel pro Lauf und kann ~1-2 Min dauern.
+// Ohne maxDuration wuerde der Serverless-Default-Timeout (Vercel 60s) den Cron abbrechen.
+// 300 = Plattform-Max, gleiche Konvention wie die andere langlaufende Route sync-external-calendars.
+export const maxDuration = 300
 
 /**
  * B2B Content-Pipeline Cron-Route.
