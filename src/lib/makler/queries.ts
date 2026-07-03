@@ -17,6 +17,7 @@ export type MaklerRow = {
   status: string
   erstellt_am: string
   onboarding_abgeschlossen: boolean
+  vermittlung_prompt_gesehen: boolean
 }
 
 /** Holt die Makler-Row für den eingeloggten User (oder null). */
@@ -26,7 +27,7 @@ export async function getCurrentMakler(): Promise<MaklerRow | null> {
   if (!user) return null
   const { data } = await supabase
     .from('makler')
-    .select('id, user_id, firma, ansprechpartner_vorname, status, erstellt_am, onboarding_abgeschlossen')
+    .select('id, user_id, firma, ansprechpartner_vorname, status, erstellt_am, onboarding_abgeschlossen, vermittlung_prompt_gesehen')
     .eq('user_id', user.id)
     .maybeSingle()
   return data
@@ -732,6 +733,10 @@ export type DashboardData = {
     konversion: number
   }
   activity: DashboardActivityItem[]
+  /** Makler hat >=1 erfolgreiche Vermittlung (>=1 Provision) — steuert die Erste-Vermittlung-Card. */
+  hatVermittlung: boolean
+  /** Primaerer Promo-Code des Maklers (fuer ShareTools in der Erste-Vermittlung-Card); null wenn keiner. */
+  promoCode: string | null
 }
 
 /**
@@ -748,11 +753,13 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
   // Promo-Code-IDs einmal auflösen, dann als IN-Liste wiederverwenden.
+  // `code` zusaetzlich fuer die Erste-Vermittlung-Card (ShareTools braucht den Code-Slug).
   const { data: promoRows } = await supabase
     .from('promotion_codes')
-    .select('id')
+    .select('id, code')
     .eq('makler_id', maklerId)
   const promoIds = (promoRows ?? []).map((p) => p.id)
+  const promoCode = (promoRows ?? [])[0]?.code ?? null
 
   // Wenn keine Promo-Codes existieren → alle lead-basierten Queries sind leer
   // und müssen nicht gefeuert werden.
@@ -766,6 +773,7 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
     provReleasedRes,
     activityLeadsRes,
     activityProvRes,
+    provTotalRes,
   ] = await Promise.all([
     hasPromos
       ? supabase
@@ -818,6 +826,12 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       .eq('makler_id', maklerId)
       .order('trigger_at', { ascending: false })
       .limit(5),
+    // Erste-Vermittlung-Signal: hat der Makler >=1 Provision (= mind. eine erfolgreiche
+    // Vermittlung)? RLS-sicher (Makler liest eigene Provisionen). head+count = billig.
+    supabase
+      .from('makler_provisionen')
+      .select('id', { count: 'exact', head: true })
+      .eq('makler_id', maklerId),
   ])
 
   const monatPending = (provPendingRes.data ?? []).reduce(
@@ -833,6 +847,7 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
   const totalLeads = leadsTotalRes.count ?? 0
   const aktiveAkten = faelleRes.count ?? 0
   const konversion = totalLeads > 0 ? aktiveAkten / totalLeads : 0
+  const hatVermittlung = (provTotalRes.count ?? 0) >= 1
 
   // Activity-Merge: Leads + Provisionen nach Timestamp DESC, Top 10
   const leadsActivity: DashboardActivityItem[] = (activityLeadsRes.data ?? []).map(
@@ -886,6 +901,8 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       konversion,
     },
     activity,
+    hatVermittlung,
+    promoCode,
   }
 }
 

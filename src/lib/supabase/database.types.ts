@@ -10444,6 +10444,7 @@ export type Database = {
           notification_preferences: Json | null
           onboarding_abgeschlossen: boolean
           provision_aktiv: boolean
+          vermittlung_prompt_gesehen: boolean
           provision_betrag_komplett_netto: number
           provision_betrag_nur_gutachter_netto: number
           status: string
@@ -10474,6 +10475,7 @@ export type Database = {
           notification_preferences?: Json | null
           onboarding_abgeschlossen?: boolean
           provision_aktiv?: boolean
+          vermittlung_prompt_gesehen?: boolean
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
           status?: string
@@ -10504,6 +10506,7 @@ export type Database = {
           notification_preferences?: Json | null
           onboarding_abgeschlossen?: boolean
           provision_aktiv?: boolean
+          vermittlung_prompt_gesehen?: boolean
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
           status?: string
