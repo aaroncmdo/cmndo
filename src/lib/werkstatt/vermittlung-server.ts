@@ -89,7 +89,7 @@ export async function assignReparaturWerkstatt(
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = createAdminClient()
   const table = input.target === 'lead' ? 'leads' : 'claims'
-  const patch = buildZuweisungPatch(input.werkstattId, input.actorUserId ?? '', input.quelle)
+  const patch = buildZuweisungPatch(input.werkstattId, input.actorUserId, input.quelle)
   const { error } = await admin.from(table).update(patch as never).eq('id', input.id)
   if (error) return { ok: false, error: error.message }
 
