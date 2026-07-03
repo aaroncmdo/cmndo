@@ -1,4 +1,5 @@
 ﻿import { createClient } from '@/lib/supabase/server'
+import { FINANCE } from '@/lib/finance/constants'
 import { redirect } from 'next/navigation'
 import { TagIcon } from 'lucide-react'
 import { getGutachterForUser } from '@/lib/gutachter'
@@ -79,7 +80,7 @@ export default async function LeadpreisePage() {
             </Table>
           </DataTableContainer>
           <div className="px-4 py-3 bg-claimondo-bg border-t border-claimondo-border">
-            <p className="text-[10px] text-claimondo-ondo/70">{tabelle?.length ?? 0} Einträge · Alle Preise netto zzgl. 19% MwSt</p>
+            <p className="text-[10px] text-claimondo-ondo/70">{tabelle?.length ?? 0} Einträge · Alle Preise netto zzgl. {FINANCE.MWST_PROZENT}% MwSt</p>
           </div>
         </div>
       </div>
