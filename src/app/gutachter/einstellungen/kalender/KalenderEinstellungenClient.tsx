@@ -13,6 +13,7 @@ import {
 import CalDavConnectModal from '@/components/CalDavConnectModal'
 import { disconnectCaldav } from './caldav-actions'
 import PageHeader from '@/components/shared/PageHeader'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 type CalDavState = {
   id: string
@@ -161,7 +162,7 @@ export default function KalenderEinstellungenClient({
             )}
             {caldav.lastSyncAt && (
               <p className="text-[11px] text-claimondo-ondo/70">
-                Letzter Check: {new Date(caldav.lastSyncAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })}
+                Letzter Check: {formatBerlin(caldav.lastSyncAt, { dateStyle: 'short', timeStyle: 'short' })}
               </p>
             )}
             {caldav.lastError && (
