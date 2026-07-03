@@ -40,6 +40,7 @@ import { resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { parseUhrzeit } from '@/lib/format/zeit'
 import type { ClaimInsert } from '@/lib/claims/types'
+import { emitEvent } from '@/lib/notifications/emit'
 
 export type ConvertLeadToClaimInput = {
   leadId: string
@@ -436,13 +437,15 @@ export async function convertLeadToClaim(
   // DB-Trigger trg_makler_provision_on_bridge legt dann die makler_provisionen-Provision an
   // (dual-rate je service_typ). Record-Cast wie werkstatt_id (generierte Types laggen die Spalte).
   let maklerId: string | null = null
+  let maklerPromoCode: string | null = null
   if (lead.promotion_code_id) {
     const { data: pc } = await admin
       .from('promotion_codes')
-      .select('makler_id')
+      .select('makler_id, code')
       .eq('id', lead.promotion_code_id as string)
       .maybeSingle()
     maklerId = (pc?.makler_id as string | null) ?? null
+    maklerPromoCode = (pc?.code as string | null) ?? null
   }
   ;(claimsInsert as Record<string, unknown>).makler_id = maklerId
 
@@ -820,6 +823,38 @@ export async function convertLeadToClaim(
     // Hier kein Cleanup — Claim und Fall sind valide, nur das Lead-Update
     // hat versagt. Caller bekommt success=true mit warning im Log.
     console.error('[convertLeadToClaim] leads-Update fehlgeschlagen:', leadUpdErr)
+  }
+
+  // Makler-Value-Loop: den Vermittler benachrichtigen, dass sein Kontakt Kunde geworden ist
+  // (+ vorgemerkte Provision). Best-effort — darf die Konvertierung nie brechen. Das Event ist
+  // maklerId-getargetet (fan-out nutzt payload.maklerId direkt, kein Consent noetig). Die Provision
+  // hat der trg_makler_provision_on_bridge (via claim-insert) bereits angelegt -> betragEur lesbar.
+  if (maklerId) {
+    try {
+      const kundeName = [lead.vorname as string | null, lead.nachname as string | null]
+        .filter(Boolean)
+        .join(' ')
+        .trim()
+      const { data: prov } = await admin
+        .from('makler_provisionen')
+        .select('betrag_netto_eur')
+        .eq('fall_id', fallId)
+        .eq('makler_id', maklerId)
+        .order('trigger_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      const betragEur =
+        prov?.betrag_netto_eur != null ? Number(prov.betrag_netto_eur) : undefined
+      await emitEvent('makler.lead_eingegangen', {
+        leadId: input.leadId,
+        maklerId,
+        promoCode: maklerPromoCode ?? '',
+        kundeName: kundeName || undefined,
+        betragEur,
+      })
+    } catch (err) {
+      console.error('[convertLeadToClaim] makler.lead_eingegangen emit fehlgeschlagen (non-critical):', err)
+    }
   }
 
   return {
