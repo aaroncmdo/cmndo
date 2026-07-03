@@ -25,26 +25,43 @@ const LEER: KontextFelder = {
   kundeName: null, kundeTelefon: null, schadenortAdresse: null, fallId: null,
 }
 
-/** Event-Titel: Fahrzeug (+Kennzeichen) — Ort · Claim-Nr. Pure. */
-export function buildSummary(f: KontextFelder, location: string | null): string {
+// Termin-Typen, die eine (telefonische/Video-)Beratung sind statt einer SV-Vor-Ort-Besichtigung.
+// Default (nicht enthalten) = Besichtigung — bewahrt das deployte SV-Framing fuer sv_begutachtung
+// + Legacy-null. Kuenftige Beratungs-Typen (Kanzlei/Werkstatt, SP3/4) werden hier additiv ergaenzt.
+const BERATUNGS_TYPEN = new Set(['kb_beratung'])
+function istBeratung(typ: string | null | undefined): boolean {
+  return typ != null && BERATUNGS_TYPEN.has(typ)
+}
+
+/**
+ * Event-Titel. Besichtigung (SV, vor Ort): Fahrzeug (+Kennzeichen) — Ort · Claim-Nr.
+ * Beratung (KB, telefonisch/Video): "Beratungstermin — {Kunde}" · Claim-Nr, ohne Vor-Ort-Ort. Pure.
+ */
+export function buildSummary(f: KontextFelder, location: string | null, typ?: string | null): string {
+  const ref = f.claimNummer ? ` · ${f.claimNummer}` : ''
+  if (istBeratung(typ)) {
+    const head = f.kundeName ? `Beratungstermin — ${f.kundeName}` : 'Beratungstermin'
+    return `${head}${ref}`.trim()
+  }
   const auto = [f.fahrzeugHersteller, f.fahrzeugModell].filter(Boolean).join(' ')
   const kennz = f.kennzeichen ? ` (${f.kennzeichen})` : ''
   const head = auto ? `${auto}${kennz}` : 'Schadenbesichtigung'
   const ort = location ?? f.schadenortAdresse ?? ''
-  const ref = f.claimNummer ? ` · ${f.claimNummer}` : ''
   return `${head}${ort ? ' — ' + ort : ''}${ref}`.trim()
 }
 
 /** Event-Beschreibung (Kunde/Telefon/Fahrzeug/Adresse/Fallakte-Link). Pure. */
-export function buildDescription(f: KontextFelder, location: string | null, appUrl: string): string {
-  const lines: string[] = ['Claimondo-Auftrag — Schadenbesichtigung', '']
+export function buildDescription(f: KontextFelder, location: string | null, appUrl: string, typ?: string | null): string {
+  const beratung = istBeratung(typ)
+  const lines: string[] = [beratung ? 'Claimondo — Beratungstermin' : 'Claimondo-Auftrag — Schadenbesichtigung', '']
   if (f.kundeName) lines.push(`Kunde: ${f.kundeName}`)
   if (f.kundeTelefon) lines.push(`Telefon: ${f.kundeTelefon}`)
   if (f.kennzeichen) lines.push(`Kennzeichen: ${f.kennzeichen}`)
   const auto = [f.fahrzeugHersteller, f.fahrzeugModell].filter(Boolean).join(' ')
   if (auto) lines.push(`Fahrzeug: ${auto}`)
   const adresse = location ?? f.schadenortAdresse
-  if (adresse) lines.push(`Adresse: ${adresse}`)
+  // Beratung ist telefonisch/Video → keine Vor-Ort-Adresse (waere im KB-Kalender irrefuehrend).
+  if (!beratung && adresse) lines.push(`Adresse: ${adresse}`)
   if (f.fallId) {
     lines.push('')
     lines.push(`Fallakte: ${appUrl}/gutachter/fall/${f.fallId}`)
@@ -146,6 +163,7 @@ export async function resolveTerminKontext(
     besichtigungsort_adresse: string | null
     claim_id?: string | null
     lead_id?: string | null
+    typ?: string | null
   },
   db: SupabaseClient,
 ): Promise<TerminKontext> {
@@ -180,8 +198,8 @@ export async function resolveTerminKontext(
   }
   const location = termin.besichtigungsort_adresse ?? felder.schadenortAdresse ?? null
   return {
-    summary: buildSummary(felder, location),
-    description: buildDescription(felder, location, appUrl),
+    summary: buildSummary(felder, location, termin.typ ?? null),
+    description: buildDescription(felder, location, appUrl, termin.typ ?? null),
     location: location ?? undefined,
   }
 }

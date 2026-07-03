@@ -20,6 +20,7 @@ export interface TerminSyncRow {
   start_zeit: string
   end_zeit: string
   status: string
+  typ: string | null
   bezug_typ: string | null
   bezug_id: string | null
   claim_id: string | null
@@ -44,7 +45,7 @@ export interface SyncResult {
 }
 
 const SYNC_SELECT =
-  'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, bezug_typ, bezug_id, claim_id, lead_id, ' +
+  'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, typ, bezug_typ, bezug_id, claim_id, lead_id, ' +
   'besichtigungsort_adresse, google_event_id, google_calendar_id, caldav_object_url, caldav_event_uid'
 const AKTIV_STATUS = ['reserviert', 'bestaetigt', 'verlegung_pending']
 
