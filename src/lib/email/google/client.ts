@@ -4,6 +4,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resend, isResendAvailable } from '@/lib/email/resend-client'
 import { htmlToPlainText } from '@/lib/email/plain-text'
 import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
+import { nurExterneEmpfaenger } from '@/lib/testdaten/interne-identitaet'
 
 // Google Workspace Limit: 2000 Mails/Tag pro User
 const transporter = nodemailer.createTransport({
@@ -48,6 +49,20 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     if (se.mode === 'test-recipient' && se.recipient !== realTo) {
       console.warn(`[side-effect:test-recipient] Email UMLEITUNG "${realTo}" -> ${se.recipient}`)
       opts = { ...opts, to: se.recipient }
+    }
+    // Send-Isolation (2026-07-03): im Live-Modus interne/Test-Empfaenger (@claimondo.de etc.)
+    // nie real anmailen — letzte Verteidigungslinie neben dem Booking-Guard. NUR live, damit
+    // test-recipient (bewusste Umleitung an Test-Inbox) nicht faelschlich unterdrueckt wird.
+    if (se.mode === 'live') {
+      const empfaenger = Array.isArray(opts.to) ? opts.to : [opts.to]
+      const externe = nurExterneEmpfaenger(empfaenger)
+      if (externe.length === 0) {
+        console.warn(`[send-isolation] Email an rein interne/Test-Adresse(n) unterdrueckt: "${empfaenger.join(', ')}" subject="${opts.subject}"`)
+        return { messageId: `internal-recipient-suppressed-${Date.now()}` }
+      }
+      if (externe.length !== empfaenger.length) {
+        opts = { ...opts, to: externe }
+      }
     }
   }
   const admin = createAdminClient()

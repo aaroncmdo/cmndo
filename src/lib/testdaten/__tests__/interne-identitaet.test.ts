@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { istInterneEmail, istInterneIdentitaet } from '../interne-identitaet'
+import { istInterneEmail, istInterneIdentitaet, nurExterneEmpfaenger, letzte9Ziffern } from '../interne-identitaet'
 
 // Regression-Guard fuer den Test-SV-Guard (2026-07-03): interne/Test-Leads duerfen NIE
 // einen echten Sachverstaendigen buchen/benachrichtigen. Firmendomain @claimondo.de = intern
@@ -54,5 +54,38 @@ describe('istInterneIdentitaet — Email ODER Platzhalter-Name', () => {
   it('echter Kunde mit echtem Namen ist nicht intern', () => {
     expect(istInterneIdentitaet('anja.harig@icloud.com', 'Anja Harig')).toBe(false)
     expect(istInterneIdentitaet(null, null)).toBe(false)
+  })
+})
+
+describe('nurExterneEmpfaenger — interne/Test-Adressen rausfiltern (Send-Guard)', () => {
+  it('leert bei rein internen Empfaengern', () => {
+    expect(nurExterneEmpfaenger('aaron.sprafke@claimondo.de')).toEqual([])
+    expect(nurExterneEmpfaenger(['info@claimondo.de', 'smoke@claimondo.test'])).toEqual([])
+  })
+  it('behaelt echte externe Empfaenger', () => {
+    expect(nurExterneEmpfaenger('anja.harig@icloud.com')).toEqual(['anja.harig@icloud.com'])
+  })
+  it('filtert gemischt auf externe', () => {
+    expect(nurExterneEmpfaenger(['aaron.sprafke@claimondo.de', 'kunde@gmail.com'])).toEqual(['kunde@gmail.com'])
+  })
+  it('ignoriert leere Eintraege', () => {
+    expect(nurExterneEmpfaenger(['', 'kunde@gmail.com'])).toEqual(['kunde@gmail.com'])
+  })
+})
+
+describe('letzte9Ziffern — robuste Telefon-Normalisierung', () => {
+  it('extrahiert die letzten 9 Ziffern formatunabhaengig', () => {
+    expect(letzte9Ziffern('+491735633541')).toBe('735633541')
+    expect(letzte9Ziffern('+49 173 5633541')).toBe('735633541')
+    expect(letzte9Ziffern('0173 5633541')).toBe('735633541')
+  })
+  it('matcht malformte und korrekte Schreibweise auf dieselben 9 Ziffern', () => {
+    // Anja: gespeichert "+49016093388133" vs korrekt "+4916093388133"
+    expect(letzte9Ziffern('+49016093388133')).toBe(letzte9Ziffern('+4916093388133'))
+  })
+  it('leer bei zu wenigen Ziffern / leerer Eingabe', () => {
+    expect(letzte9Ziffern('123')).toBe('')
+    expect(letzte9Ziffern('')).toBe('')
+    expect(letzte9Ziffern(null)).toBe('')
   })
 })
