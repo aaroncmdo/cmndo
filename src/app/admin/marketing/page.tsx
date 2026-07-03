@@ -18,6 +18,15 @@ export default function MarketingPage() {
           </p>
         </SectionCard>
       </Link>
+      <Link href="/admin/marketing/lead-reaktivierung" className="block">
+        <SectionCard className="hover:bg-claimondo-bg/60 transition-colors">
+          <h2 className="text-heading-sm font-semibold text-claimondo-navy">Lead-Reaktivierung</h2>
+          <p className="text-body-sm text-claimondo-slate mt-1">
+            Erreichbare, kalt gewordene Leads mit einer einmaligen „Schadenmeldung abschließen"-Mail
+            reaktivieren.
+          </p>
+        </SectionCard>
+      </Link>
     </div>
   )
 }
