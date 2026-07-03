@@ -31,7 +31,7 @@ Fachliches Matching: der Kunde gibt bei Reparaturwunsch die physische Schadenska
 
 Ein neues `onboarding_felder`-Feld `schadenskategorie` — **exakt gespiegelt nach `reparaturwunsch`** (verifizierte Vorlage):
 - `typ = 'toggle-cards'`, `audience = 'beide'`, `sektion = 'schaden'`, `pflicht = false`
-- `phase_id = '50ff9d42-5a40-421a-857e-a12b0b202f72'` (Schaden-Phase), `reihenfolge = 145` (direkt nach reparaturwunsch=140)
+- **`phase_id` DYNAMISCH auflösen** im INSERT via `(select id from onboarding_phasen where flow_key='lead-erfassung' and phase_key='schaden')` — **NIE hardcoden!** (Lehre 1069c2a2 / Commit c4bfe730a: hardcodetes `phase_id` bricht Supabase-Preview + `db reset`, weil `onboarding_phasen`-ids per-Environment random via `gen_random_uuid` sind → FK-Verletzung auf frischer DB.) Verifiziert: die schaden-Phase = `(lead-erfassung, schaden)`. `reihenfolge = 145` (nach reparaturwunsch=140).
 - `label = 'Was ist an deinem Fahrzeug beschädigt?'`
 - `optionen = [{label:'Karosserie / Blech', value:'karosserie'}, {label:'Lackierung / Kratzer', value:'lackierung'}, {label:'Mechanik / Motor', value:'mechanik'}, {label:'Glas', value:'glas'}, {label:'Weiß ich nicht', value:'unbekannt'}]`
 - `db_target = {tabelle:'leads', spalte:'schadenskategorie'}`
@@ -66,7 +66,11 @@ Ein neues `onboarding_felder`-Feld `schadenskategorie` — **exakt gespiegelt na
 
 ## Koordination
 
-⚠️ **`finder.ts`, `vermittlung-server.ts`, `convert-lead-to-claim.ts` gehören Session 1069c2a2** (#3433 Reparaturwunsch-Werkstatt-Vermittlung). Alle meine Änderungen dort sind **strikt additiv** (optionaler `kategorie`-Param mit Default-alt-Verhalten; eine neue Carry-over-Zeile; `faehigkeiten` mitselektieren) — kein bestehendes Verhalten geändert. Marker + additive Diffs; falls 1069c2a2 dieselben Files parallel anfasst, atomar committen + rebasen.
+⚠️ **`finder.ts`, `vermittlung-server.ts`, `convert-lead-to-claim.ts` gehören Session 1069c2a2** (#3433, **bereits auf main/prod deployed** inkl. Fix-PR #3498). Alle meine Änderungen dort sind **strikt additiv** (optionaler `kategorie`-Param mit Default-alt-Verhalten; eine neue Carry-over-Zeile; `faehigkeiten` mitselektieren) — kein bestehendes Verhalten geändert. Gegen die echten aktuellen Files verifiziert (rankWerkstaetten pur/status-Filter/Distanz-Sort; SELECT_COLS ohne faehigkeiten; findReparaturWerkstaettenForTarget → findWerkstaetten limit 5).
+
+**Direkte Koordinationsnotiz von 1069c2a2 (aus ihrem Marker):**
+- Der Branch ist off staging → **enthält deren #3498-Fix**: `buildZuweisungPatch(userId: string | null)` schreibt `userId || null` in die uuid-Spalte. **NIEMALS `?? ''` wieder einbauen** (das war ihr launch-brechender uuid-Crash für accountlose Kunden).
+- Die Gate-Erweiterung `brauchtWerkstattVermittlung` um `'fiktiv'` (für die fiktive-Abrechnung-Vermittlung) = **SP4**, NICHT SP1. Dabei die `vermittlung-core`-Tests (9/9) um den fiktiv-Case ergänzen.
 
 ## Out of Scope (spätere Sub-Projekte)
 
