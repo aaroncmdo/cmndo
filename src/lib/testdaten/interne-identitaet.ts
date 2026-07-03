@@ -48,3 +48,19 @@ export function istInterneIdentitaet(
   if (name && PLATZHALTER_NAME.test(name)) return true
   return false
 }
+
+/** Filtert eine Empfaenger-Liste (string | string[]) auf die NICHT-internen Adressen. */
+export function nurExterneEmpfaenger(to: string | string[]): string[] {
+  const list = Array.isArray(to) ? to : [to]
+  return list.filter((r): r is string => !!r && !istInterneEmail(r))
+}
+
+/**
+ * Letzte 9 Ziffern einer Telefonnummer (formatunabhaengig) — robuster Match-Key gegen
+ * Schreibweisen (+49 / 0049 / 0-Praefix / Leerzeichen). Leerer String bei < 9 Ziffern
+ * (zu kurz -> kein verlaesslicher Match, lieber nicht suppressen).
+ */
+export function letzte9Ziffern(telefon: string | null | undefined): string {
+  const digits = (telefon ?? '').replace(/[^0-9]/g, '')
+  return digits.length >= 9 ? digits.slice(-9) : ''
+}
