@@ -250,18 +250,20 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin: ['in_app'],
     },
   },
-  // 5.11 Makler
-  // Kein admin-CC: Admins bekommen fuer JEDE Conversion bereits "Neuer Fall"
-  // (Fall-Erstellungs-Pfad) -> ein zweiter, makler-gerahmter Bell ("X ist Kunde
-  // geworden / 100 EUR vorgemerkt") ist redundant + die "vorgemerkt"-Copy ist die
-  // private Provision des MAKLERS, nicht des Admins. Das Event ist rein makler-facing.
+  // 5.11 Makler — beide Events sind rein makler-facing (KEIN admin-CC).
+  //  - lead_eingegangen: Admins bekommen fuer JEDE Conversion bereits "Neuer Fall"
+  //    (Fall-Erstellungs-Pfad) -> der makler-gerahmte Bell ("X ist Kunde geworden /
+  //    100 EUR vorgemerkt") waere redundant + makler-privat.
+  //  - provision_status: die Admin-Bell ("Provision freigegeben / 100 EUR") hat KEINEN
+  //    Kontext (kein Makler-Name, kein Fall) -> nutzloser Noise (im Prod-Smoke bestaetigt).
+  // Admins nutzen die Makler-Provision-Admin-View fuer die Finanzsicht (voller Kontext).
   'makler.lead_eingegangen': {
     priority: 'normal',
     channels: { makler: ['web_push', 'email', 'in_app'] },
   },
   'makler.provision_status': {
     priority: 'normal',
-    channels: { makler: ['web_push', 'email', 'in_app'], admin: ['in_app'] },
+    channels: { makler: ['web_push', 'email', 'in_app'] },
   },
   // 5.12 Mietwagen / Nutzungsausfall (AAR-759)
   'mietwagen.rechnung_ausstehend': {
