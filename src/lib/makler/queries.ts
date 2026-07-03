@@ -720,6 +720,7 @@ export type DashboardActivityItem =
       betrag_netto_eur: number
       status: string
       fall_id: string | null
+      kunde_name: string | null
     }
 
 export type DashboardData = {
@@ -805,7 +806,15 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       : Promise.resolve({ data: [], error: null }),
     supabase
       .from('makler_provisionen')
-      .select('id, betrag_netto_eur, status, trigger_at, fall_id')
+      .select(`
+        id, betrag_netto_eur, status, trigger_at, fall_id,
+        fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+          claims:claim_id(
+            leads:lead_id(vorname, nachname),
+            kunde:geschaedigter_user_id(vorname, nachname)
+          )
+        )
+      `)
       .eq('makler_id', maklerId)
       .order('trigger_at', { ascending: false })
       .limit(5),
@@ -835,16 +844,34 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       status: l.status,
     }),
   )
-  const provActivity: DashboardActivityItem[] = (activityProvRes.data ?? []).map(
-    (p) => ({
+  const provActivity: DashboardActivityItem[] = (activityProvRes.data ?? []).map((p) => {
+    // Value-Loop-Story: Kunden-/Lead-Name aus dem Nested-Embed (Array|Objekt je Cardinality
+    // normalisieren, AGENTS §6). kunde (geschaedigter) hat Vorrang, sonst der Lead-Name.
+    const fallRaw = (p as { fall?: unknown }).fall
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] : fallRaw
+    const claimRaw = (fall as { claims?: unknown } | null | undefined)?.claims
+    const claim = Array.isArray(claimRaw) ? claimRaw[0] : claimRaw
+    const nameOf = (raw: unknown): string | null => {
+      const o = (Array.isArray(raw) ? raw[0] : raw) as
+        | { vorname?: string | null; nachname?: string | null }
+        | null
+        | undefined
+      const n = [o?.vorname, o?.nachname].filter(Boolean).join(' ').trim()
+      return n.length > 0 ? n : null
+    }
+    const kunde_name =
+      nameOf((claim as { kunde?: unknown } | null | undefined)?.kunde) ??
+      nameOf((claim as { leads?: unknown } | null | undefined)?.leads)
+    return {
       kind: 'provision' as const,
       id: p.id,
       timestamp: p.trigger_at,
       betrag_netto_eur: Number(p.betrag_netto_eur ?? 0),
       status: p.status,
       fall_id: p.fall_id,
-    }),
-  )
+      kunde_name,
+    }
+  })
 
   const activity = [...leadsActivity, ...provActivity]
     .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))

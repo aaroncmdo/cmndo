@@ -138,7 +138,7 @@ export interface EventPayloads {
   'dokument.hochgeladen': { fallId: string; dokumentId: string; typ: string; uploadedByUserId: string }
   'nachricht.received': { fallId: string; nachrichtId: string; senderUserId: string; senderRolle: string; inhaltPreview: string }
   // 5.11
-  'makler.lead_eingegangen': { leadId: string; maklerId: string; promoCode: string }
+  'makler.lead_eingegangen': { leadId: string; maklerId: string; promoCode: string; kundeName?: string; betragEur?: number }
   'makler.provision_status': { fallId: string; provisionId: string; maklerId: string; status: 'freigegeben' | 'storniert'; betragEur: number; grund?: string }
   // 5.12 Mietwagen (AAR-759)
   'mietwagen.rechnung_ausstehend': { fallId: string; seit_tage: number }

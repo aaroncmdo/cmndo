@@ -92,11 +92,14 @@ function buildTemplate(
         html: `${greet}<p>Wir haben die Auszahlung${betrag ? ` von ${betrag.toFixed(2)} €` : ''} veranlasst. Die Gutschrift auf Ihrem Konto ist${tage ? ` in ca. ${tage} Werktagen` : ' in Kürze'} zu erwarten.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
       }
     }
-    case 'makler.lead_eingegangen':
+    case 'makler.lead_eingegangen': {
+      const kunde = payload.kundeName as string | undefined
+      const betrag = payload.betragEur as number | undefined
       return {
-        subject: 'Neuer Lead eingegangen',
-        html: `${greet}<p>Über Ihren Partnerlink ist ein neuer Lead eingegangen. Wir haben mit der Bearbeitung begonnen.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
+        subject: kunde ? `${kunde} ist über Ihren Empfehlungs-Link Kunde geworden` : 'Neuer Lead über Ihren Empfehlungs-Link',
+        html: `${greet}<p>🎉 ${kunde ? `<strong>${kunde}</strong> ist` : 'Ein neuer Kontakt ist'} über Ihren Empfehlungs-Link Kunde geworden${betrag ? ` — <strong>${betrag.toFixed(2)} €</strong> sind für Sie vorgemerkt` : ''}. Wir kümmern uns ab jetzt um alles Weitere.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
       }
+    }
     case 'makler.provision_status': {
       const status = payload.status as string | undefined
       const betrag = payload.betragEur as number | undefined
