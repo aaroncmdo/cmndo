@@ -1,4 +1,5 @@
 ﻿import { createAdminClient } from '@/lib/supabase/admin'
+import { FINANCE } from '@/lib/finance/constants'
 import { createKanzleiCheckoutSession } from '@/lib/stripe/kanzlei-checkout'
 import KanzleiCheckoutClient from './KanzleiCheckoutClient'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -192,7 +193,7 @@ export default async function KanzleiAbrechnungPage({ params, searchParams }: Pa
               <span>{Number(abrechnung.endbetrag_netto).toFixed(2).replace('.', ',')} €</span>
             </div>
             <div className="flex justify-between text-sm text-claimondo-ondo">
-              <span>MwSt. 19 %</span>
+              <span>MwSt. {FINANCE.MWST_PROZENT} %</span>
               <span>{Number(abrechnung.mwst_betrag).toFixed(2).replace('.', ',')} €</span>
             </div>
             <div className="flex justify-between font-bold text-lg text-claimondo-navy pt-2 border-t">

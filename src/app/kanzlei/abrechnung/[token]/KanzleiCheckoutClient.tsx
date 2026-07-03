@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { FINANCE } from '@/lib/finance/constants'
 
 interface Props {
   abrechnungId: string
@@ -50,7 +51,7 @@ export default function KanzleiCheckoutClient({ abrechnungId, token, endbetragBr
         <div>
           <p className="text-claimondo-ondo text-sm">Gesamtbetrag</p>
           <p className="text-2xl font-bold text-claimondo-navy">{endbetragBrutto.toFixed(2).replace('.', ',')} €</p>
-          <p className="text-xs text-claimondo-ondo/70">inkl. 19 % MwSt.</p>
+          <p className="text-xs text-claimondo-ondo/70">inkl. {FINANCE.MWST_PROZENT} % MwSt.</p>
         </div>
         <button
           onClick={handleCheckout}
