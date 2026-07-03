@@ -169,13 +169,13 @@ export function MaklerDashboard({ makler, data }: Props) {
       {/* Tipp des Monats */}
       <section aria-label="Tipp des Monats">
         <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-shield mb-2">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
             Tipp des Monats
           </p>
           <h3 className="text-lg font-semibold mb-2">
             QR-Code auf dem Beratungsgespräch zeigen
           </h3>
-          <p className="text-sm text-claimondo-shield leading-relaxed">
+          <p className="text-sm text-claimondo-ondo leading-relaxed">
             Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
             direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
             Leads wie Makler die nur per E-Mail verteilen. Der QR führt
