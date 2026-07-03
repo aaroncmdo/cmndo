@@ -251,9 +251,13 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     },
   },
   // 5.11 Makler
+  // Kein admin-CC: Admins bekommen fuer JEDE Conversion bereits "Neuer Fall"
+  // (Fall-Erstellungs-Pfad) -> ein zweiter, makler-gerahmter Bell ("X ist Kunde
+  // geworden / 100 EUR vorgemerkt") ist redundant + die "vorgemerkt"-Copy ist die
+  // private Provision des MAKLERS, nicht des Admins. Das Event ist rein makler-facing.
   'makler.lead_eingegangen': {
     priority: 'normal',
-    channels: { makler: ['web_push', 'email', 'in_app'], admin: ['in_app'] },
+    channels: { makler: ['web_push', 'email', 'in_app'] },
   },
   'makler.provision_status': {
     priority: 'normal',
