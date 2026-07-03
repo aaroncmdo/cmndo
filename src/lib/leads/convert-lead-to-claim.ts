@@ -467,6 +467,9 @@ export async function convertLeadToClaim(
     (lead.reparatur_vermittlung_status as string | null) ?? 'offen'
   ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_extern =
     (lead.reparatur_werkstatt_extern as string | null) ?? null
+  // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
+  ;(claimsInsert as Record<string, unknown>).schadenskategorie =
+    (lead.schadenskategorie as string | null) ?? null
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')
