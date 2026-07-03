@@ -11,6 +11,7 @@ import { remindersOverdueCheck } from './reminders-overdue'
 import { emailFailureRateCheck } from './email-failure-rate'
 import { webhookInboundSilentCheck } from './webhook-inbound-silent'
 import { configRequiredEnvCheck } from './config-required-env'
+import { kanzleiTenancyScopingCheck } from './kanzlei-tenancy-scoping'
 
 export const ALL_CHECKS: HealthCheck[] = [
   funnelStuckClaimsCheck,
@@ -21,4 +22,5 @@ export const ALL_CHECKS: HealthCheck[] = [
   emailFailureRateCheck,
   webhookInboundSilentCheck,
   configRequiredEnvCheck,
+  kanzleiTenancyScopingCheck,
 ]
