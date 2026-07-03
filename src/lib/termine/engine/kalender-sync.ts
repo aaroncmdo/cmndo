@@ -1,8 +1,7 @@
-// P2.5 — syncTerminToExternalCalendar: assignee-generische externe-Kalender-Sync-Op.
-// Generalisiert die zwei SV-/fall-gekoppelten sv-termin-sync (Google + CalDAV) zu einer
-// Engine-Op ueber ein KalenderProvider-Interface. SV-only konkret (andere assignee-Typen
-// → 'skip'). fail-soft je Provider (non-critical Sub-Op). NICHT verdrahtet (Phase-3-Repoint).
-// Die alten sv-termin-sync.ts bleiben bis dahin (kein Doppel-Send).
+// syncTerminToExternalCalendar: assignee-generische externe-Kalender-Sync-Op (Google + CalDAV)
+// ueber ein KalenderProvider-Interface. SP1 (2026-07): assignee-generisch via resolveAssigneeProfileId
+// → jeder assignee_typ, der auf ein Profil mit Verbindung aufloest (SV, kundenbetreuer, …). Google
+// via profiles.google_*, CalDAV via kalender_verbindungen. fail-soft je Provider (non-critical Sub-Op).
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { google } from 'googleapis'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
@@ -10,6 +9,7 @@ import { GOOGLE_CALENDAR_TIMEZONE, toBerlinWallClock } from '@/lib/google-calend
 import { CalDavError, createCalendarEvent, updateCalendarEvent, deleteCalendarEvent } from '@/lib/kalender/caldav/client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { resolveTerminKontext, type TerminKontext } from './kalender-kontext'
+import { resolveAssigneeProfileId } from './assignee-profile'
 
 export type SyncStatus = 'created' | 'updated' | 'skip' | 'error'
 
@@ -20,6 +20,7 @@ export interface TerminSyncRow {
   start_zeit: string
   end_zeit: string
   status: string
+  typ: string | null
   bezug_typ: string | null
   bezug_id: string | null
   claim_id: string | null
@@ -44,21 +45,15 @@ export interface SyncResult {
 }
 
 const SYNC_SELECT =
-  'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, bezug_typ, bezug_id, claim_id, lead_id, ' +
+  'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, typ, bezug_typ, bezug_id, claim_id, lead_id, ' +
   'besichtigungsort_adresse, google_event_id, google_calendar_id, caldav_object_url, caldav_event_uid'
 const AKTIV_STATUS = ['reserviert', 'bestaetigt', 'verlegung_pending']
-
-async function svProfileId(db: SupabaseClient, svId: string): Promise<string | null> {
-  const { data } = await db.from('sachverstaendige').select('profile_id').eq('id', svId).maybeSingle()
-  return (data?.profile_id as string | null) ?? null
-}
 
 // ─── Google ──────────────────────────────────────────────────────────────
 export const googleProvider: KalenderProvider = {
   name: 'google',
   async upsert(termin, kontext, db) {
-    if (termin.assignee_typ !== 'sachverstaendiger' || !termin.assignee_id) return 'skip'
-    const profileId = await svProfileId(db, termin.assignee_id)
+    const profileId = await resolveAssigneeProfileId(db, termin.assignee_typ, termin.assignee_id)
     if (!profileId) return 'skip'
     const auth = await getGoogleOAuthClientForUser(profileId)
     if (!auth) return 'skip'
@@ -83,8 +78,8 @@ export const googleProvider: KalenderProvider = {
     return 'created'
   },
   async remove(termin, db) {
-    if (termin.assignee_typ !== 'sachverstaendiger' || !termin.assignee_id || !termin.google_event_id) return 'skip'
-    const profileId = await svProfileId(db, termin.assignee_id)
+    if (!termin.google_event_id) return 'skip'
+    const profileId = await resolveAssigneeProfileId(db, termin.assignee_typ, termin.assignee_id)
     if (!profileId) return 'skip'
     const auth = await getGoogleOAuthClientForUser(profileId)
     if (!auth) return 'skip'
@@ -103,11 +98,11 @@ export const googleProvider: KalenderProvider = {
 // ─── CalDAV ──────────────────────────────────────────────────────────────
 type CalDavConn = { server_url: string; username: string; password_encrypted: string; calendar_url: string | null }
 
-async function caldavConn(db: SupabaseClient, svId: string): Promise<CalDavConn | null> {
+async function caldavConn(db: SupabaseClient, profileId: string): Promise<CalDavConn | null> {
   const { data } = await db
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .select('server_url, username, password_encrypted, calendar_url')
-    .eq('sv_id', svId)
+    .eq('profile_id', profileId)
     .eq('provider', 'caldav')
     .maybeSingle()
   if (!data || !data.calendar_url) return null
@@ -117,8 +112,9 @@ async function caldavConn(db: SupabaseClient, svId: string): Promise<CalDavConn 
 export const caldavProvider: KalenderProvider = {
   name: 'caldav',
   async upsert(termin, kontext, db) {
-    if (termin.assignee_typ !== 'sachverstaendiger' || !termin.assignee_id) return 'skip'
-    const conn = await caldavConn(db, termin.assignee_id)
+    const profileId = await resolveAssigneeProfileId(db, termin.assignee_typ, termin.assignee_id)
+    if (!profileId) return 'skip'
+    const conn = await caldavConn(db, profileId)
     if (!conn || !conn.calendar_url) return 'skip'
     const password = decrypt(conn.password_encrypted)
     const creds = { serverUrl: conn.server_url, username: conn.username, password }
@@ -145,17 +141,19 @@ export const caldavProvider: KalenderProvider = {
       // rethrow → der aeussere Sync-Loop loggt + setzt results['caldav']='error'.
       if (err instanceof CalDavError && err.code === 'auth_failed') {
         await db
-          .from('sv_kalender_verbindungen')
+          .from('kalender_verbindungen')
           .update({ last_error: 'Login fehlgeschlagen — App-Passwort prüfen', last_error_at: new Date().toISOString() })
-          .eq('sv_id', termin.assignee_id)
+          .eq('profile_id', profileId)
           .eq('provider', 'caldav')
       }
       throw err
     }
   },
   async remove(termin, db) {
-    if (termin.assignee_typ !== 'sachverstaendiger' || !termin.assignee_id || !termin.caldav_object_url) return 'skip'
-    const conn = await caldavConn(db, termin.assignee_id)
+    if (!termin.caldav_object_url) return 'skip'
+    const profileId = await resolveAssigneeProfileId(db, termin.assignee_typ, termin.assignee_id)
+    if (!profileId) return 'skip'
+    const conn = await caldavConn(db, profileId)
     if (!conn) return 'skip'
     const password = decrypt(conn.password_encrypted)
     await deleteCalendarEvent({ creds: { serverUrl: conn.server_url, username: conn.username, password }, objectUrl: termin.caldav_object_url })
@@ -188,7 +186,6 @@ export async function syncTerminToExternalCalendar(
   const providers = opts?.providers ?? DEFAULT_PROVIDERS
   const termin = await ladeTermin(db, terminId)
   if (!termin) return { ok: false, results: {}, error: 'Termin nicht gefunden' }
-  if (termin.assignee_typ !== 'sachverstaendiger') return { ok: true, results: alleSkip(providers) }
   if (!AKTIV_STATUS.includes(termin.status)) return { ok: true, results: alleSkip(providers) }
 
   const kontext = await resolveTerminKontext(termin, db)
