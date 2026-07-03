@@ -1,0 +1,50 @@
+// SSoT: erkennt interne/Test-Identitaeten (Leads/Kunden), damit Test-/interne Buchungen
+// NIE einen echten Sachverstaendigen erreichen (buchen ODER benachrichtigen) — und umgekehrt.
+//
+// Hintergrund (2026-07-03): Der einzige echte aktive SV (UnfallSafe/Koeln) bekam laufend
+// Test-Termine + Nachrichten, weil die Gruender den Live-Funnel mit ihren eigenen
+// @claimondo.de-Adressen (aaron.sprafke@, info@) testen und das Matching keinen
+// Testdaten-Filter hatte. Deshalb zaehlt die FIRMENDOMAIN @claimondo.de hier bewusst als
+// "intern" (Aaron-Entscheid).
+//
+// ACHTUNG — NICHT verwechseln mit dem Test-ACCOUNT-Filter in
+// src/lib/start-link/pick-dispatcher.ts: dort ist dispatch@claimondo.de ein ECHTER interner
+// Dispatcher (kein Test). Hier geht es um die Identitaet eines LEADS/Kunden — und ein Lead
+// mit @claimondo.de ist niemals ein echter externer Kunde, sondern intern/Test.
+
+// Firmen- + Test-Domains: ein Lead mit dieser Domain ist nie ein echter externer Kunde.
+const INTERNE_DOMAINS = new Set(['claimondo.de', 'claimondo.test', 'claimondo-test.de'])
+
+// Test-/Smoke-/E2E-Marker als BEGRENZTES Token (an Wortgrenze) — verhindert False-Positives
+// wie "testarossa@ferrari.de", "contest@web.de" oder "qadir@gmail.com".
+const TEST_MARKER = /(^|[.+_-])(test|smoke|e2e)([.+_@-]|$)/i
+
+// Offensichtliche Platzhalter-Namen (Formular-Fuellungen), auch bei externer Email.
+const PLATZHALTER_NAME = /mustermann|max\s+muster|test\s*test/i
+
+function domainVon(email: string): string | null {
+  const at = email.lastIndexOf('@')
+  if (at < 0) return null
+  return email.slice(at + 1)
+}
+
+/** true, wenn die Email zu einer internen/Test-Identitaet gehoert (Firmendomain oder Test-Marker). */
+export function istInterneEmail(email: string | null | undefined): boolean {
+  if (!email) return false
+  const e = email.trim().toLowerCase()
+  const domain = domainVon(e)
+  if (!domain) return false
+  if (INTERNE_DOMAINS.has(domain)) return true
+  if (TEST_MARKER.test(e)) return true
+  return false
+}
+
+/** true, wenn Email ODER Name auf eine interne/Test-Identitaet hindeutet. */
+export function istInterneIdentitaet(
+  email?: string | null,
+  name?: string | null,
+): boolean {
+  if (istInterneEmail(email)) return true
+  if (name && PLATZHALTER_NAME.test(name)) return true
+  return false
+}
