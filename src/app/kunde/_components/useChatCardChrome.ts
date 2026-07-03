@@ -13,7 +13,7 @@ import { useKundeUnreadByKanal } from './useKundeUnreadByKanal'
 export function useChatCardChrome(
   storeKey: Exclude<ActiveContact, null>,
   currentUserId: string | null,
-  kanal: string,
+  kanal: Parameters<typeof useKundeUnreadByKanal>[1],
 ): { chatOpen: boolean; setChatOpen: (open: boolean) => void; unread: number } {
   const active = useActiveContactStore((s) => s.active)
   const setActive = useActiveContactStore((s) => s.setActive)
@@ -50,6 +50,9 @@ export function useChatCardChrome(
         aside.removeAttribute('data-chat-open')
       }
     }
+    // setChatOpen ist bewusst nicht in den Deps: es wird pro Render neu erzeugt,
+    // ein Einschluss wuerde den Effekt bei jedem Render neu aufsetzen.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chatOpen])
 
   return { chatOpen, setChatOpen, unread }
