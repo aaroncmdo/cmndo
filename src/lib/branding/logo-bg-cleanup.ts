@@ -16,8 +16,7 @@
 
 import {
   decideImglyOvercut,
-  detectSolidBackground,
-  nonBackgroundRatio,
+  estimateForegroundReference,
   opaqueRatio,
 } from './logo-bg-detect'
 
@@ -64,14 +63,11 @@ export async function removeLogoBackgroundGuarded(file: File): Promise<LogoClean
   if (file.type === 'image/svg+xml') return { file, method: 'skipped', reason: 'vector' }
   if (file.size < TINY_BYTES) return { file, method: 'skipped', reason: 'tiny' }
 
-  // 1) Vordergrund-Referenz aus dem ORIGINAL messen (nur wenn solider BG erkennbar).
+  // 1) Retention-Referenz aus dem ORIGINAL messen (3-Wege: alpha / solid-bg / none).
   let foregroundRatioBefore: number | null = null
   try {
     const before = await toImageData(file)
-    const bg = detectSolidBackground(before.data, before.width, before.height, 4)
-    if (bg) {
-      foregroundRatioBefore = nonBackgroundRatio(before.data, before.width, before.height, 4, bg)
-    }
+    foregroundRatioBefore = estimateForegroundReference(before.data, before.width, before.height, 4).ref
   } catch {
     // Messfehler -> konservativ null (kein Ratio-Urteil, nur Floor greift spaeter).
     foregroundRatioBefore = null
