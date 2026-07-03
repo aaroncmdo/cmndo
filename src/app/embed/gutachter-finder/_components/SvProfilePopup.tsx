@@ -163,6 +163,13 @@ export function SvProfileInhalt({ sv, gross = false }: { sv: AktiverSVPublic; gr
         </Section>
       )}
 
+      {/* AAR-369: Selbstgeschriebener Profiltext (Bio) — SV-eigenes Trust-Signal. */}
+      {sv.profilbeschreibung && (
+        <p className="text-body-sm italic leading-relaxed text-claimondo-navy/70">
+          „{sv.profilbeschreibung}"
+        </p>
+      )}
+
       <p className="text-[0.75rem] leading-relaxed text-claimondo-shield/60">
         Den passenden Gutachter wählt das System anhand Ihres Schadenorts.
       </p>

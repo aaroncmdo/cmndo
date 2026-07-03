@@ -478,7 +478,11 @@ export default function ProfilClient({
         )}
         {/* AAR-956: Google-Business-Profil verknüpfen — schaltet die echte
             Sterne-Bewertung im Gutachter-Finder frei (Places API). */}
-        <GoogleBusinessFeld />
+        {/* Fix: erst nach Maps-Load mounten — sonst laedt das Places-Widget die
+            Maps-JS-API ein ZWEITES Mal (Race mit dem lazyOnload-<Script> oben) →
+            "included multiple times"-Konsolen-Fehler. mapsReady gated (wie das
+            Standort-Feld). */}
+        {mapsReady && <GoogleBusinessFeld />}
         {/* KFZ-139: Branding Section */}
         <BrandingSection svId={sv.id} />
         {/* AAR-500 N5: Benachrichtigungs-Präferenzen */}
