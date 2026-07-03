@@ -28,10 +28,11 @@ export async function findReparaturWerkstaettenForTarget(
   let lng: number | undefined
   let plz: string | undefined
 
+  let kategorie: string | null | undefined
   if (input.target === 'lead') {
     const { data } = await admin
       .from('leads')
-      .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_plz, halter_plz')
+      .select('besichtigungsort_lat, besichtigungsort_lng, unfallort_lat, unfallort_lng, kunde_plz, halter_plz, schadenskategorie')
       .eq('id', input.id)
       .maybeSingle()
     const l = (data ?? null) as {
@@ -41,6 +42,7 @@ export async function findReparaturWerkstaettenForTarget(
       unfallort_lng: number | null
       kunde_plz: string | null
       halter_plz: string | null
+      schadenskategorie: string | null
     } | null
     if (l) {
       if (l.besichtigungsort_lat != null && l.besichtigungsort_lng != null) {
@@ -51,17 +53,19 @@ export async function findReparaturWerkstaettenForTarget(
         lng = l.unfallort_lng
       }
       plz = l.kunde_plz ?? l.halter_plz ?? undefined
+      kategorie = l.schadenskategorie
     }
   } else {
     const { data } = await admin
       .from('claims')
-      .select('schadenort_lat, schadenort_lng, schadenort_plz')
+      .select('schadenort_lat, schadenort_lng, schadenort_plz, schadenskategorie')
       .eq('id', input.id)
       .maybeSingle()
     const c = (data ?? null) as {
       schadenort_lat: number | null
       schadenort_lng: number | null
       schadenort_plz: string | null
+      schadenskategorie: string | null
     } | null
     if (c) {
       if (c.schadenort_lat != null && c.schadenort_lng != null) {
@@ -69,10 +73,11 @@ export async function findReparaturWerkstaettenForTarget(
         lng = c.schadenort_lng
       }
       plz = c.schadenort_plz ?? undefined
+      kategorie = c.schadenskategorie
     }
   }
 
-  return findWerkstaetten({ lat, lng, plz, limit: 5 })
+  return findWerkstaetten({ lat, lng, plz, kategorie, limit: 5 })
 }
 
 /**

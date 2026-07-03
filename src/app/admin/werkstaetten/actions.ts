@@ -27,6 +27,23 @@ async function requireAdmin(): Promise<{ id: string } | null> {
   return p?.rolle === 'admin' ? { id: user.id } : null
 }
 
+// Internal vocab — NOT exported (Client-Bundle macht undefined daraus, AAR-664)
+const FAEHIGKEITEN_VALUES = ['karosserie', 'lackierung', 'mechanik', 'glas', 'smart_repair'] as const
+
+export async function setWerkstattFaehigkeiten(
+  werkstattId: string,
+  faehigkeiten: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Fähigkeiten setzen.' }
+  const clean = faehigkeiten.filter((f) => (FAEHIGKEITEN_VALUES as readonly string[]).includes(f))
+  const admin = createAdminClient()
+  const { error } = await admin.from('werkstaetten').update({ faehigkeiten: clean }).eq('id', werkstattId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/admin/werkstaetten')
+  return { ok: true }
+}
+
 export async function createWerkstatt(
   formData: FormData,
 ): Promise<{ ok: true; email: string; password: string; werkstattId: string } | { ok: false; error: string }> {
@@ -45,6 +62,7 @@ export async function createWerkstatt(
   const telefon = String(formData.get('telefon') ?? '').trim() || null
   const ansprechpartner_name = String(formData.get('ansprechpartner_name') ?? '').trim() || null
   const provision = Number(formData.get('provision_betrag_netto') ?? 150) || 150
+  const faehigkeiten = formData.getAll('faehigkeiten').map(String).filter((f) => (FAEHIGKEITEN_VALUES as readonly string[]).includes(f))
 
   if (!name || !email || lat === null || lng === null || !Number.isFinite(lat) || !Number.isFinite(lng)) {
     return { ok: false, error: 'Name, E-Mail und Standort sind Pflicht.' }
@@ -100,6 +118,7 @@ export async function createWerkstatt(
     status: 'aktiv',
     aktiviert_am: new Date().toISOString(),
     aktiviert_von: adminUser.id,
+    ...(faehigkeiten.length > 0 ? { faehigkeiten } : {}),
   }).select('id').single()
 
   if (wErr || !w) {
