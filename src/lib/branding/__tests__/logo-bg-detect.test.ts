@@ -4,6 +4,7 @@ import {
   nonBackgroundRatio,
   opaqueRatio,
   decideImglyOvercut,
+  estimateForegroundReference,
 } from '../logo-bg-detect'
 
 // RGBA-Testbilder von Hand bauen (kein Canvas noetig -> die Kern-Logik ist
@@ -123,5 +124,35 @@ describe('decideImglyOvercut', () => {
   it('Grenzfall: retention knapp ueber Threshold zaehlt NICHT als overcut', () => {
     // 0.12 / 0.20 = 0.60 >= 0.55 minRetention -> ok (nicht overcut)
     expect(decideImglyOvercut({ foregroundRatioBefore: 0.2, opaqueRatioAfter: 0.12 }).overcut).toBe(false)
+  })
+})
+
+describe('estimateForegroundReference (3-Wege Retention-Referenz)', () => {
+  it('basis=alpha: Original hat schon Transparenz -> Referenz = opaker Anteil', () => {
+    const w = 8, h = 8
+    const d = img(w, h, [0, 0, 0, 0]) // komplett transparent
+    // 8 opake Pixel in der Mitte (Ecken bleiben transparent)
+    for (const [x, y] of [[3, 3], [4, 3], [3, 4], [4, 4], [3, 5], [4, 5], [3, 6], [4, 6]] as const) {
+      setPx(d, w, x, y, [0, 0, 0, 255])
+    }
+    const r = estimateForegroundReference(d, w, h, 4)
+    expect(r.basis).toBe('alpha')
+    expect(r.ref).toBeCloseTo(8 / 64, 5)
+  })
+
+  it('basis=solid-bg: weisser BG -> Referenz = nonBackgroundRatio', () => {
+    const w = 8, h = 8
+    const d = img(w, h, [255, 255, 255, 255])
+    for (const [x, y] of [[3, 3], [4, 3], [3, 4], [4, 4]] as const) setPx(d, w, x, y, [0, 0, 0, 255])
+    const r = estimateForegroundReference(d, w, h, 4)
+    expect(r.basis).toBe('solid-bg')
+    expect(r.ref).toBeCloseTo(4 / 64, 5)
+  })
+
+  it('basis=none: opaker nicht-solider (bunter) BG -> kein Urteil (null)', () => {
+    const d = img(8, 8, [50, 80, 200, 255]) // uniform blau, opak
+    const r = estimateForegroundReference(d, 8, 8, 4)
+    expect(r.basis).toBe('none')
+    expect(r.ref).toBeNull()
   })
 })
