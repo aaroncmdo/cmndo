@@ -469,6 +469,40 @@ export async function weiseGutachtenZurueck(
     console.warn('[weiseGutachtenZurueck] Task fehlgeschlagen:', err)
   }
 
+  // Notif-Emission-Audit 03.07. (Kat-A-Aktivierung, nach Send-Isolation): der SV bekam bei einer
+  // Nachbesserung bisher NUR die In-App-Bell (createGutachterMitteilung oben) + Task — NICHT den
+  // Multi-Channel-Fan-out (WhatsApp/Push/Email), den EVENT_MATRIX['gutachten.nachbesserung'] fuer den
+  // SV vorsieht. Das Event war voll definiert (Matrix+Templates+Prefs) aber nirgends emittiert. Jetzt
+  // additiv nachgezogen: SV-Matrix hat KEIN in_app -> keine Doppel-Bell mit der Legacy-Mitteilung
+  // (Kunde/Admin bekommen ein leises in_app laut Matrix). Test-/interne SV werden am Send-Client
+  // (istInternesTelefon/istInterneEmail) + im fan-out (ist_testaccount) unterdrueckt. Non-blocking.
+  try {
+    const claimIdForEvent = await resolveClaimId(db, auftrag.fall_id as string)
+    let gutachtenId = auftragId
+    if (claimIdForEvent) {
+      const { data: gaRow } = await db
+        .from('gutachten')
+        .select('id')
+        .eq('claim_id', claimIdForEvent)
+        .maybeSingle()
+      if (gaRow?.id) gutachtenId = gaRow.id as string
+    }
+    const fehlerListe = [
+      grund.trim(),
+      ...((abgelehnteDoks ?? [])
+        .map((d) => d.kommentar?.trim())
+        .filter((k): k is string => !!k)),
+    ]
+    const { emitEvent } = await import('@/lib/notifications/emit')
+    await emitEvent(
+      'gutachten.nachbesserung',
+      { fallId: auftrag.fall_id as string, gutachtenId, fehlerListe },
+      { fallId: auftrag.fall_id as string, triggeredBy: auth.user.id },
+    )
+  } catch (err) {
+    console.warn('[weiseGutachtenZurueck] gutachten.nachbesserung-Event fehlgeschlagen:', err)
+  }
+
   revalidatePath(`/faelle/${auftrag.fall_id}`)
   revalidatePath(`/gutachter/fall/${auftrag.fall_id}`)
   revalidatePath(`/kunde/faelle/${auftrag.fall_id}`)
