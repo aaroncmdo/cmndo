@@ -6,7 +6,9 @@ import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConsta
 import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import EmptyState from '@/components/shared/EmptyState'
 import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
+import FestgefahreneFaelleCard from '@/components/dispatch/FestgefahreneFaelleCard'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
+import { ladeFestgefahreneFaelle } from '@/lib/sla/festgefahrene-faelle'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export default async function DispatchDashboard() {
@@ -142,6 +144,12 @@ export default async function DispatchDashboard() {
       startZeit: klaerungTerminMap.get(t.entity_id as string) ?? null,
     }))
 
+  // Festgefahrene Faelle (Aaron 03.07., Option B): Claims mit verletzter SLA, die
+  // operativ haengen (kein Gutachter zugewiesen / Termin unbestaetigt). Diese
+  // kritischen Signale sah Dispatch bisher NIRGENDS (nur /admin/sla als flache
+  // Tabelle) — die roh-`sla_breach`-Tasks werden von keiner UI gerendert.
+  const festgefahrene = await ladeFestgefahreneFaelle()
+
   function timeSince(d: string): string {
     const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000)
     if (h < 1) return `${Math.floor((Date.now() - new Date(d).getTime()) / 60000)}m`
@@ -154,6 +162,7 @@ export default async function DispatchDashboard() {
   const dateStr = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Berlin' })
   const overdueRueckrufe = kommendeRueckrufe.filter((r) => r.lead && new Date(r.start_zeit).getTime() < Date.now()).length
   const seg: { t: string; danger?: boolean }[] = []
+  if (festgefahrene.length) seg.push({ t: `${festgefahrene.length} festgefahrene ${festgefahrene.length === 1 ? 'Fall' : 'Fälle'}`, danger: true })
   if (overdueRueckrufe) seg.push({ t: `${overdueRueckrufe} ${overdueRueckrufe === 1 ? 'überfälliger Rückruf' : 'überfällige Rückrufe'}`, danger: true })
   if (newLeadsRes.count) seg.push({ t: `${newLeadsRes.count} ${newLeadsRes.count === 1 ? 'neuer Lead' : 'neue Leads'} heute` })
   if (tasks.length) seg.push({ t: `${tasks.length} ${tasks.length === 1 ? 'offener Task' : 'offene Tasks'}` })
@@ -189,6 +198,10 @@ export default async function DispatchDashboard() {
       </div>
 
       <StatBar items={statBarItems} />
+
+      {/* Festgefahrene Fälle (Aaron 03.07., Option B): SLA-verletzte Claims, die
+          operativ haengen — prominent oben, jede Zeile klickbar in die Lead-Maske. */}
+      {festgefahrene.length > 0 && <FestgefahreneFaelleCard items={festgefahrene} />}
 
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
       <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
@@ -300,14 +313,24 @@ export default async function DispatchDashboard() {
             </h2>
           </div>
           <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
-            {tasks.map((task) => (
-              <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+            {tasks.map((task) => {
+              const leadId = leadIdForTask(task)
+              const inner = (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
                   <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE') : ''}</p>
                 </div>
-              </div>
-            ))}
+              )
+              return leadId ? (
+                <Link key={task.id} href={`/dispatch/leads/${leadId}`} className="px-5 py-3 flex items-center gap-3 hover:bg-claimondo-navy/[0.03] transition-colors">
+                  {inner}
+                </Link>
+              ) : (
+                <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+                  {inner}
+                </div>
+              )
+            })}
             {tasks.length === 0 && (
               <EmptyState icon={CheckCircleIcon} title="Keine offenen Tasks" variant="compact" />
             )}
