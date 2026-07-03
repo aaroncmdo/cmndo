@@ -18,7 +18,12 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
   'fall.created': {
     priority: 'normal',
     channels: {
-      kunde: ['whatsapp', 'email', 'in_app'],
+      // Dual-System-Dedup (Notif-Konsolidierung Phase 1, 03.07.): der Kunde bekommt „Fall eroeffnet"
+      // schon vom Legacy-sendFallCommunication('fall_eroeffnet') (Kunde-WA+Email) — co-located im
+      // selben signSAandCreateFall (flow/[token]/actions.ts). fall.created wird NUR von dort emittiert,
+      // dieser Legacy-Send feuert also IMMER mit -> hier nur noch in_app (Bell), sonst 2x „Fall eroeffnet".
+      // Bei einer echten Legacy->Event-Konsolidierung (Phase 3) hier extern zurueck + Legacy-Call raus.
+      kunde: ['in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],
     },
