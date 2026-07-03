@@ -105,7 +105,13 @@
     "restart": "Start over",
     "alternativ_text": "Prefer to talk directly? We're here for you.",
     "alternativ_cta": "Report your claim online",
-    "trust_heading": "What you can rely on"
+    "trust_heading": "What you can rely on",
+    "foto_check": {
+      "heading": "What is your damage actually worth?",
+      "text": "Upload a photo of your damage and get a concrete, non-binding estimate of your claims in under a minute — free of charge.",
+      "button": "Check damage by photo"
+    },
+    "lead_heading_alt": "Prefer a call? Request a callback"
   },
   "not_found": {
     "heading": "This page doesn't exist (anymore).",
