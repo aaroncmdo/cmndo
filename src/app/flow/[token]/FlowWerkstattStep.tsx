@@ -60,10 +60,7 @@ export function FlowWerkstattStep({ token, onWeiter }: { token: string; onWeiter
 
   // SP2 Task 3: Wunschtermin speichern und dann weitergehen.
   function onWunschterminVorschlagen() {
-    if (!wunschtermin) {
-      toast.error('Bitte wähle ein Datum und eine Uhrzeit.')
-      return
-    }
+    // Button ist bei leerem Wunschtermin disabled (s. u.) — kein zusaetzlicher Guard noetig.
     startWunschterminTransition(async () => {
       const result = await speichereReparaturWunschterminFlow(token, wunschtermin)
       if (!result.ok) {
