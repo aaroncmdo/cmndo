@@ -238,3 +238,65 @@ export async function getWerkstattVermittlungen(): Promise<WerkstattVermittlung[
     reparatur_freigegeben_am: (r.reparatur_freigegeben_am as string | null) ?? null,
   }))
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Auftraege — self-scoped via v_werkstatt_auftrag (SECURITY-DEFINER-View mit Gate
+// is_werkstatt_for_claim). Zeigt Gutachter + Besichtigungstermin + Fahrzeug (das,
+// was die Werkstatt zum Koordinieren braucht) — anders als die KVA-Funnel-Liste
+// "Meine Vermittlungen". KEIN neuer RPC: die View IST der SSoT + RLS-gegatet.
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type WerkstattAuftrag = {
+  claim_id: string
+  claim_nummer: string | null
+  richtung: string | null
+  vermittlung_status: string | null
+  operative_status: string | null
+  fahrzeug_hersteller: string | null
+  fahrzeug_modell: string | null
+  kennzeichen: string | null
+  schadenart: string | null
+  reparaturwunsch: string | null
+  gutachter_firmenname: string | null
+  besichtigung_start: string | null
+  besichtigung_ort: string | null
+  besichtigung_status: string | null
+  provision_betrag_netto: number | null
+  provision_status: string | null
+}
+
+/** Self-scoped Auftrags-Liste via v_werkstatt_auftrag (RLS-Gate in der View). */
+export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('v_werkstatt_auftrag')
+    .select(`
+      claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
+      fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
+      gutachter_firmenname, besichtigung_start, besichtigung_ort, besichtigung_status,
+      provision_betrag_netto, provision_status
+    `)
+    .order('besichtigung_start', { ascending: false, nullsFirst: false })
+  if (error) {
+    console.error('[werkstatt] getWerkstattAuftraege:', error.message)
+    return []
+  }
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
+    claim_id: r.claim_id as string,
+    claim_nummer: (r.claim_nummer as string | null) ?? null,
+    richtung: (r.richtung as string | null) ?? null,
+    vermittlung_status: (r.vermittlung_status as string | null) ?? null,
+    operative_status: (r.operative_status as string | null) ?? null,
+    fahrzeug_hersteller: (r.fahrzeug_hersteller as string | null) ?? null,
+    fahrzeug_modell: (r.fahrzeug_modell as string | null) ?? null,
+    kennzeichen: (r.kennzeichen as string | null) ?? null,
+    schadenart: (r.schadenart as string | null) ?? null,
+    reparaturwunsch: (r.reparaturwunsch as string | null) ?? null,
+    gutachter_firmenname: (r.gutachter_firmenname as string | null) ?? null,
+    besichtigung_start: (r.besichtigung_start as string | null) ?? null,
+    besichtigung_ort: (r.besichtigung_ort as string | null) ?? null,
+    besichtigung_status: (r.besichtigung_status as string | null) ?? null,
+    provision_betrag_netto: r.provision_betrag_netto != null ? Number(r.provision_betrag_netto) : null,
+    provision_status: (r.provision_status as string | null) ?? null,
+  }))
+}
