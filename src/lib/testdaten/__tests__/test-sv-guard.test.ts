@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { entscheideTestSvGuard, pruefeTestSvKonsistenz } from '../test-sv-guard'
+import { entscheideTestSvGuard, pruefeTestSvKonsistenz, istInternesTelefon } from '../test-sv-guard'
 
 // Der Guard sitzt in reserviere() (der einen Buchungs-Chokepoint) und verhindert, dass
 // eine interne/Test-Buchung einen echten SV erreicht (und umgekehrt ein echter Kunde einen
@@ -69,5 +69,39 @@ describe('pruefeTestSvKonsistenz — bezug-Aufloesung + fail-open', () => {
     const db = { from() { throw new Error('db down') } } as unknown as SupabaseClient
     const res = await pruefeTestSvKonsistenz(db, 'sv-1', { typ: 'lead', id: 'lead-1' })
     expect(res.blockieren).toBe(false)
+  })
+})
+
+// Fake fuer .select().ilike() -> Array-Rueckgabe (istInternesTelefon)
+function fakeDbList(handlers: Record<string, Array<Record<string, unknown>>>): SupabaseClient {
+  const builder = (table: string): unknown => ({
+    select: () => builder(table),
+    ilike: async () => ({ data: handlers[table] ?? [], error: null }),
+  })
+  return { from: (table: string) => builder(table) } as unknown as SupabaseClient
+}
+
+describe('istInternesTelefon — Telefon-Reverse-Lookup (Send-Guard)', () => {
+  it('true wenn ein Lead/Profile mit dem Telefon eine interne Email hat', async () => {
+    const db = fakeDbList({
+      profiles: [],
+      leads: [{ email: 'aaron.sprafke@claimondo.de', telefon: '+491735633541' }],
+    })
+    expect(await istInternesTelefon('+491735633541', db)).toBe(true)
+  })
+  it('false bei echtem externen Kunden', async () => {
+    const db = fakeDbList({
+      profiles: [{ email: 'anja.harig@icloud.com', telefon: '+491600000000' }],
+      leads: [],
+    })
+    expect(await istInternesTelefon('+491600000000', db)).toBe(false)
+  })
+  it('false bei zu kurzer Nummer (kein Lookup-Versuch)', async () => {
+    const db = fakeDbList({ profiles: [], leads: [] })
+    expect(await istInternesTelefon('123', db)).toBe(false)
+  })
+  it('fail-open bei Lookup-Fehler', async () => {
+    const db = { from() { throw new Error('db down') } } as unknown as SupabaseClient
+    expect(await istInternesTelefon('+491735633541', db)).toBe(false)
   })
 })
