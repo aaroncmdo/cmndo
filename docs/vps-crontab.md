@@ -166,3 +166,21 @@ Zweck (Header) + DB-Evidenz geprüft:
 | `refresh-feeds` | optional `0 6 * * *` | GEO-Feed-Warming + IndexNow. Low-Impact (No-op solange `/feed*`-Routen fehlen). |
 | `termin-morgen-erinnerung` | **NICHT schedulen** | Redundant zu `send-reminders` `kunde_morgen` (beide 07:00 Berlin, Kunde-Morgen-WA) → würde den Double-Send verschärfen. Gehört in die Reminder-Konsolidierung, nicht standalone. |
 
+## Stand 2026-07-03 — `wissen-pipeline-b2b` scharfgeschaltet (Live-VPS)
+
+Per `paramiko` (Aaron-autorisiert, kein SSH-Key) auf den Live-VPS angewendet + verifiziert.
+Backup vorher: `/root/crontab-backup-2026-07-03-182609.txt` (Rollback: `crontab <backup>`).
+
+- **`wissen-pipeline-b2b`** → **`0 4 * * *`** nachgetragen (B2B Content-Pipeline, PR #3476, live seit 02.07.).
+  `cron-call.sh` setzt `Bearer $CRON_SECRET` + trifft `127.0.0.1:3000`. Der Lauf crawlt B2B-Quellen,
+  verfasst per Claude Original-Fachartikel, validiert (§§/Länge/Disclaimer/kein-Az) + Relevanz-Doppelgate,
+  und auto-veröffentlicht 0–3 Kfz-Schaden-Artikel in den B2B-Feed. Vorher end-to-end prod-gesmoked
+  (headless: 8/9 Themen vom Relevanz-Backstop abgelehnt, 1 on-topic BGH-Mietwagen-Artikel live).
+- Crontab jetzt **85 Zeilen** (vorher 82). Kritische Crons + der parallel ergänzte `pipeline-health`
+  verifiziert intakt.
+- **Hinweis:** App ist self-hosted (127.0.0.1:3000, pm2) — die `maxDuration = 300`-Config der Route
+  (PR #3505) ist für den self-hosted-Betrieb **wirkungslos** (nur Vercel/Serverless werten sie aus).
+  Harmlos + future-proof, funktional aber nicht nötig; kann geschlossen werden.
+- **Empfehlung:** Auto-veröffentlichte Crawl-Artikel gelegentlich im Admin (`/admin/wissen-artikel`,
+  „Auto-veröffentlicht (Crawl)") sichten; fehlerhafte per „Zurückziehen" (→ archiviert) offline nehmen.
+
