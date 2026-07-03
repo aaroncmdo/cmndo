@@ -24,6 +24,8 @@ export async function registriereMaklerSelf(
   const telefon = String(formData.get('telefon') ?? '').trim() || null
   const adressePlz = String(formData.get('adresse_plz') ?? '').trim() || null
   const adresseOrt = String(formData.get('adresse_ort') ?? '').trim() || null
+  const versicherungId = String(formData.get('versicherung_id') ?? '').trim() || null
+  const maklerpoolId = String(formData.get('maklerpool_id') ?? '').trim() || null
   const einwilligung =
     formData.get('einwilligung') === 'on' || formData.get('einwilligung') === 'true'
 
@@ -70,6 +72,8 @@ export async function registriereMaklerSelf(
     provisionKomplett: 100,
     provisionGutachter: 50,
     aktiviertVon: null,
+    versicherungId,
+    maklerpoolId,
   })
   if (!result.ok) {
     // M1: keine rohen DB-Fehler an den oeffentlichen Client.

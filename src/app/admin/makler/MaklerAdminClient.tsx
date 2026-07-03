@@ -9,6 +9,9 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { UsersIcon, PlusIcon, KeyIcon } from 'lucide-react'
 import { createMakler } from './actions'
+import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
+
+type GesellschaftOption = { id: string; name: string }
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -39,14 +42,26 @@ function formatDatum(iso: string | null) {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-export default function MaklerAdminClient({ maklers }: { maklers: Makler[] }) {
+export default function MaklerAdminClient({
+  maklers,
+  versicherungen,
+  maklerpools,
+}: {
+  maklers: Makler[]
+  versicherungen: GesellschaftOption[]
+  maklerpools: GesellschaftOption[]
+}) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
+  const [versicherungId, setVersicherungId] = useState<string | null>(null)
+  const [maklerpoolId, setMaklerpoolId] = useState<string | null>(null)
 
   function openDialog() {
     setCreatedCredentials(null)
+    setVersicherungId(null)
+    setMaklerpoolId(null)
     setShowDialog(true)
   }
 
@@ -54,6 +69,8 @@ export default function MaklerAdminClient({ maklers }: { maklers: Makler[] }) {
     e.preventDefault()
     setLoading(true)
     const fd = new FormData(e.currentTarget)
+    if (versicherungId) fd.set('versicherung_id', versicherungId)
+    if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
     try {
       const result = await createMakler(fd)
       if (!result.ok) {
@@ -188,6 +205,19 @@ export default function MaklerAdminClient({ maklers }: { maklers: Makler[] }) {
                 <div className="grid grid-cols-2 gap-3">
                   <TextField label="Provision komplett (€)" name="provision_betrag_komplett_netto" type="number" step="0.01" min="0" defaultValue={100} />
                   <TextField label="Provision nur Gutachter (€)" name="provision_betrag_nur_gutachter_netto" type="number" step="0.01" min="0" defaultValue={50} />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-claimondo-ondo mb-1">Gesellschaft</p>
+                  <GesellschaftSelect
+                    versicherungen={versicherungen}
+                    maklerpools={maklerpools}
+                    versicherungId={versicherungId}
+                    maklerpoolId={maklerpoolId}
+                    onChange={({ versicherungId: v, maklerpoolId: p }) => {
+                      setVersicherungId(v)
+                      setMaklerpoolId(p)
+                    }}
+                  />
                 </div>
                 <div className="flex gap-3 pt-2">
                   <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>Abbrechen</Button>
