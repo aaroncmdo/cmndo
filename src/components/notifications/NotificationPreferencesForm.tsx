@@ -13,6 +13,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { BellIcon, MoonIcon, CheckCircle2Icon, AlertTriangleIcon, Loader2Icon, SaveIcon } from 'lucide-react'
 import { updateNotificationPreferences } from '@/lib/actions/notification-preferences'
 import type { Channel, EventType } from '@/lib/notifications/types'
+import { PushToggle } from './PushToggle'
 
 type Role = 'kunde' | 'sachverstaendiger' | 'makler' | 'kundenbetreuer' | 'admin'
 
@@ -260,7 +261,10 @@ export function NotificationPreferencesForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
+      {/* Browser-Push-Opt-in (per Geraet/Browser) — separat vom Praeferenz-Submit. */}
+      <PushToggle />
+      <form onSubmit={handleSubmit} className="space-y-6">
       {/* Ruhezeiten */}
       <section>
         <div className="flex items-center gap-2 mb-2">
@@ -421,6 +425,7 @@ export function NotificationPreferencesForm({
         ) : null}
       </div>
     </form>
+    </div>
   )
 }
 
