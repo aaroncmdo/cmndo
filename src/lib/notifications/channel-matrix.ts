@@ -136,7 +136,11 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
   'gutachten.fertig': {
     priority: 'normal',
     channels: {
-      kunde: ['whatsapp', 'email', 'web_push'],
+      // Dual-System-Dedup (Konsolidierung Phase 1): der Kunde bekommt „Gutachten fertig" schon vom
+      // Legacy-sendFallCommunication('gutachten_fertig') (Kunde-WA) — co-located im selben Upload-
+      // Finalize (gutachter/fall/[id]/actions.ts:262 + emit :268). gutachten.fertig emittiert NUR von
+      // dort -> Legacy deckt Kunde-extern immer -> hier nur in_app, sonst 2x „Gutachten fertig".
+      kunde: ['in_app'],
       sachverstaendiger: ['in_app'],
       makler: ['web_push', 'in_app'],
       admin: ['in_app'],

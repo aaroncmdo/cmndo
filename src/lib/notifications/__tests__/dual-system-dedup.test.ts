@@ -11,4 +11,8 @@ describe('Dual-System-Dedup — kunde bleibt in_app fuer legacy-gedeckte Events'
   it('fall.created: kunde bekommt NUR in_app (fall_eroeffnet-Legacy sendet Kunde-WA/Email)', () => {
     expect(EVENT_MATRIX['fall.created'].channels.kunde).toEqual(['in_app'])
   })
+
+  it('gutachten.fertig: kunde bekommt NUR in_app (gutachten_fertig-Legacy sendet Kunde-WA)', () => {
+    expect(EVENT_MATRIX['gutachten.fertig'].channels.kunde).toEqual(['in_app'])
+  })
 })
