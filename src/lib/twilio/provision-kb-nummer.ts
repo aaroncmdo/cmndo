@@ -3,7 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // KFZ-182 Phase A: Twilio-Nummer pro Kundenbetreuer provisionieren.
 // ACHTUNG: Kostet ~1€/Monat pro Nummer. Nur manuell pro Profile via Admin-Button.
 
-const WEBHOOK_URL = 'https://cmndo.vercel.app/api/twilio/inbound-kb-whatsapp'
+const WEBHOOK_URL = 'https://app.claimondo.de/api/twilio/inbound-kb-whatsapp'
 
 export async function provisionKbNummer(
   profileId: string,
