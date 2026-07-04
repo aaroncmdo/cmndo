@@ -13,7 +13,13 @@
 // mit @claimondo.de ist niemals ein echter externer Kunde, sondern intern/Test.
 
 // Firmen- + Test-Domains: ein Lead mit dieser Domain ist nie ein echter externer Kunde.
-const INTERNE_DOMAINS = new Set(['claimondo.de', 'claimondo.test', 'claimondo-test.de'])
+// + RFC-2606-Test-Domains (example.*) und lex-drive.com (Related-Company, Gruender-Tests) —
+// Prod-Audit 04.07.2026: diese Test-Leads rutschten sonst als "extern" durch (False-Negatives).
+const INTERNE_DOMAINS = new Set([
+  'claimondo.de', 'claimondo.test', 'claimondo-test.de',
+  'example.com', 'example.org', 'example.net', 'example.de',
+  'lex-drive.com',
+])
 
 // Test-/Smoke-/E2E-Marker als BEGRENZTES Token (an Wortgrenze) — verhindert False-Positives
 // wie "testarossa@ferrari.de", "contest@web.de" oder "qadir@gmail.com".
