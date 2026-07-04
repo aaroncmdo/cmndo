@@ -13,6 +13,7 @@ import KundeKbChat from './KundeKbChat'
 import ChatCardShell from './ChatCardShell'
 import { useChatCardChrome } from './useChatCardChrome'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { toInitials } from '@/components/shared/KundeAvatar'
 
 type Props = {
   vorname: string | null
@@ -90,14 +91,7 @@ export default function GutachterCard({
     <>
       <div className="flex -space-x-2 shrink-0">
         {teilnehmer.slice(0, 4).map((p, idx) => {
-          const ini =
-            p.name
-              .split(' ')
-              .map((w) => w[0])
-              .filter(Boolean)
-              .slice(0, 2)
-              .join('')
-              .toUpperCase() || '?'
+          const ini = toInitials(p.name) || '?'
           return (
             <div
               key={idx}
