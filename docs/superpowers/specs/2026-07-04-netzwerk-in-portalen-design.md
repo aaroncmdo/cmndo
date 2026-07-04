@@ -220,11 +220,14 @@ mutierende Action `revalidatePath('/gutachter/netzwerk' | '/makler/netzwerk' | '
 ## 11 · Deployment / Risiken / Koordination
 
 - **Basis:** Worktree `.claude/worktrees/netzwerk-in-portalen`, Branch `kitta/netzwerk-in-portalen` off `origin/main`.
-- ⚠️ **Staging-Lag:** `community_*`-Tabellen + RPCs sind auf **main+Prod**, **nicht** auf staging. Ein PR
-  gegen staging würde auf der Staging-DB zur Laufzeit brechen (Feed-Read/RPC-Call). **Merge-Target vor
-  Implementierung mit Aaron klären** — Optionen: (a) gegen einen main-basierten Integrationsbranch, (b)
-  zuerst die community-Migrationen nach staging bringen, (c) Feature-Flag/Guard bis staging nachzieht.
-  → **Offener Punkt §13.**
+- ✅ **Merge-Target = `staging`** (Aaron 2026-07-04): Regel-1-konform; die **Merge-Session** promotet
+  staging→main→prod. Supabase-Preview ist ohnehin systemisch rot → kein Verlust. Feature ist auf **Prod
+  sofort korrekt** (0 Migration; community-Tabellen dort via main live).
+  - **Feature-Commits atomar halten** → Merge-Session übernimmt nur die Feature-Commits, nicht die main↔staging-Differenz.
+  - **Graceful Guard:** `feed.ts` + Widget fangen „relation does not exist" (`42P01`) ab → Empty-State statt 500,
+    falls einer noch-nicht-migrierten Staging-DB community-Tabellen fehlen.
+  - **„Migrationen müssen funktionieren":** 0 neue Migration; bestehende community-Migrationsfiles reisen aus main
+    mit und applien sauber (prod-verifiziert) — werden **nicht** angefasst (kein Twin-Drift, Regel 2).
 - ⚠️ **Werkstatt-Koordination:** 2 Sessions arbeiten am Werkstatt-Portal (`werkstatt-qr-pool`,
   aar-956 „Aufträge/Vermittlungen-View"). Meine Änderungen: 1 Nav-Item (`WerkstattShell.tsx`),
   `page.tsx` (Widget-Swap), `promo/page.tsx` (Explainer-Umzug). Kleine Konfliktfläche → **Werkstatt zuletzt**,
@@ -243,5 +246,6 @@ mutierende Action `revalidatePath('/gutachter/netzwerk' | '/makler/netzwerk' | '
 
 ## 13 · Offene Punkte
 
-1. **Merge-Target / Staging-Lag** (§11) — vor Implementierung entscheiden.
+1. ✅ **Merge-Target = `staging`** (Aaron 2026-07-04, s. §11); Merge-Session promotet, Feature-Commits atomar,
+   Graceful Guard gegen `42P01`. Erledigt.
 2. Mobile-Reichweite SV (Overflow „Mehr") — nice-to-have, im Plan bestätigen.
