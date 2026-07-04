@@ -21,6 +21,11 @@ function findeBand(segment: Segment, alter: number, heuristik: WbwHeuristikBand[
   return kandidaten.find((b) => alter <= b.alterBisJahre) ?? kandidaten[kandidaten.length - 1] ?? null
 }
 
+function mittleresBand(segment: Segment, heuristik: WbwHeuristikBand[]): WbwHeuristikBand | null {
+  const k = heuristik.filter((b) => b.segment === segment).sort((a, b) => a.alterBisJahre - b.alterBisJahre)
+  return k[Math.floor((k.length - 1) / 2)] ?? null
+}
+
 function clamp(n: number, lo: number, hi: number): number {
   return Math.max(lo, Math.min(hi, n))
 }
@@ -31,7 +36,7 @@ export function plausibilisiereWbw(
   alterJahre: number | null,
   heuristik: WbwHeuristikBand[],
 ): WbwErgebnis {
-  const band = findeBand(segment, alterJahre ?? 99, heuristik)
+  const band = alterJahre != null ? findeBand(segment, alterJahre, heuristik) : mittleresBand(segment, heuristik)
   const hMin = band?.wbwMinEur ?? 0
   const hMax = band?.wbwMaxEur ?? 0
   const rFaktor = band?.restwertFaktor ?? 0.25
