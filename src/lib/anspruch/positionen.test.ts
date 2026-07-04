@@ -88,4 +88,38 @@ describe('berechneAnspruchsSpanne', () => {
     expect(gk.gedecktDurchGegner).toBe(true)
     expect(gk.minEur).toBeNull()
   })
+
+  // --- Totalschaden-Zonen ---
+
+  it('Zone A: ohne WBW kein Totalschaden-Block', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, wbwMinEur: null, wbwMaxEur: null, restwertMinEur: null, restwertMaxEur: null },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden).toBeUndefined()
+  })
+
+  it('Zone C: Reparatur > 130% WBW -> reparaturWeg null, guenstiger totalschaden', () => {
+    // reparaturMitte = (18000+32000)/2 = 25000; wbwMitte = (15000+21000)/2 = 18000
+    // verhaeltnis = 25000/18000 = 1.389 > 1.3 -> Zone C
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden).toBeDefined()
+    expect(s.totalschaden!.reparaturWeg).toBeNull()
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThan(0)
+  })
+
+  it('Zone B: 90-130% WBW -> beide Wege, Wertminderung im Reparatur-Weg', () => {
+    // reparaturMitte = (20000+26000)/2 = 23000; wbwMitte = (22000+28000)/2 = 25000
+    // verhaeltnis = 23000/25000 = 0.92 >= 0.9 und <= 1.3 -> Zone B
+    // alter = 2026 - 2023 = 3 -> Faktor { alterBisJahre: 5, faktorMin: 0.05, faktorMax: 0.15 } -> wertminderung applies
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 20000, reparaturMaxEur: 26000, ezJahr: 2023, wbwMinEur: 22000, wbwMaxEur: 28000, restwertMinEur: 6000, restwertMaxEur: 8000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.reparaturWeg).not.toBeNull()
+    expect(s.totalschaden!.reparaturWeg!.positionen.some((p) => p.typ === 'wertminderung')).toBe(true)
+  })
 })

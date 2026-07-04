@@ -1,6 +1,6 @@
 import type {
-  AnspruchConfig, AnspruchPosition, AnspruchSpanne, Segment, SegmentSatz,
-  SchaetzInput, WertminderungFaktor,
+  AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Segment, SegmentSatz,
+  SchaetzInput, TotalschadenInfo, WertminderungFaktor,
 } from './types'
 
 function runde(n: number): number {
@@ -96,5 +96,42 @@ export function berechneAnspruchsSpanne(
   const gesamtMinEur = runde(summierbar.reduce((s, p) => s + (p.minEur as number), 0))
   const gesamtMaxEur = runde(summierbar.reduce((s, p) => s + (p.maxEur as number), 0))
 
-  return { positionen, gesamtMinEur, gesamtMaxEur, hinweise }
+  // --- Totalschaden-Zonen (nur wenn WBW vorhanden) ---
+  let totalschaden: TotalschadenInfo | undefined
+  const wbwMitte = input.wbwMinEur != null && input.wbwMaxEur != null ? (input.wbwMinEur + input.wbwMaxEur) / 2 : null
+  if (wbwMitte != null && wbwMitte > 0) {
+    const verhaeltnis = reparaturMitte / wbwMitte
+    if (verhaeltnis >= config.totalschadenSchwelleProzent) {
+      const restMin = input.restwertMinEur ?? 0
+      const restMax = input.restwertMaxEur ?? 0
+      const dauer = config.wiederbeschaffungsdauerTage
+      const satz = saetze[input.segment]
+      // Totalschaden-Weg: WBW - Restwert + Nutzungsausfall (Wiederbeschaffungsdauer) + Auslagenpauschale
+      const tsPositionen: AnspruchPosition[] = [
+        { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(input.wbwMinEur! - restMax), maxEur: runde(input.wbwMaxEur! - restMin) },
+        { typ: 'nutzungsausfall', label: 'Nutzungsausfall (Wiederbeschaffung)', minEur: runde(satz.tagessatzMinEur * dauer.min), maxEur: runde(satz.tagessatzMaxEur * dauer.max), hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage` },
+        { typ: 'kostenpauschale', label: 'Auslagenpauschale', minEur: config.kostenpauschaleEur, maxEur: config.kostenpauschaleEur },
+      ]
+      const tsMin = runde(tsPositionen.reduce((s, p) => s + (p.minEur ?? 0), 0))
+      const tsMax = runde(tsPositionen.reduce((s, p) => s + (p.maxEur ?? 0), 0))
+      const totalschadenWeg: AnspruchWeg = { titel: 'Totalschaden abrechnen', positionen: tsPositionen, summeMinEur: tsMin, summeMaxEur: tsMax }
+
+      // Reparatur-Weg nur bis 130% WBW (Zone B). Enthaelt die schon berechneten Zone-A-Positionen (inkl. Wertminderung).
+      const bis130 = verhaeltnis <= config.reparaturGrenzeProzent
+      const reparaturWeg: AnspruchWeg | null = bis130
+        ? { titel: 'Reparieren & Fahrzeug behalten', positionen, summeMinEur: gesamtMinEur, summeMaxEur: gesamtMaxEur }
+        : null
+
+      const guenstiger: 'reparatur' | 'totalschaden' =
+        reparaturWeg && reparaturWeg.summeMaxEur >= tsMax ? 'reparatur' : 'totalschaden'
+
+      totalschaden = {
+        wbwMinEur: input.wbwMinEur!, wbwMaxEur: input.wbwMaxEur!,
+        restwertMinEur: restMin, restwertMaxEur: restMax,
+        reparaturWeg, totalschadenWeg, reparaturBis130Moeglich: bis130, guenstiger,
+      }
+    }
+  }
+
+  return { positionen, gesamtMinEur, gesamtMaxEur, hinweise, ...(totalschaden ? { totalschaden } : {}) }
 }
