@@ -27,6 +27,7 @@ import {
   AlertCircleIcon,
   ClockIcon,
 } from 'lucide-react'
+import { TerminStatusBadge } from '@/components/shared/TerminStatusBadge'
 
 type Termin = {
   id: string
@@ -214,12 +215,12 @@ export default function KundeTerminDetailClient({
               {uhrzeit}{endzeit ? ` – ${endzeit}` : ''} {t('detail.uhrSuffix')}
             </p>
           </div>
-          <span
-            className={`shrink-0 inline-flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-full border ${status.cls}`}
-          >
-            <StatusIcon className="w-3 h-3" />
-            {statusLabel}
-          </span>
+          <TerminStatusBadge
+            status={termin.status}
+            label={statusLabel}
+            icon={<StatusIcon className="w-3 h-3" />}
+            className="shrink-0"
+          />
         </div>
 
         {fall.claim_nummer && (
