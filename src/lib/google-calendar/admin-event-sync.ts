@@ -48,6 +48,11 @@ export async function syncAdminTerminCalendarEvent(terminId: string): Promise<vo
     .then((m) => m.syncAdminTerminToCalDav(terminId))
     .catch(() => {})
 
+  // SP5d: Outlook (Graph) parallel — owner-gated + fail-soft, dormant bis Azure.
+  await import('@/lib/microsoft/admin-event-sync')
+    .then((m) => m.syncAdminTerminToOutlook(terminId))
+    .catch(() => {})
+
   const shouldDelete =
     t.status === 'erledigt' || t.status === 'abgesagt' || t.status === 'storniert'
   const shouldUpsert = !shouldDelete && t.status === 'offen' && !!t.zugewiesen_an
