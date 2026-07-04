@@ -14,6 +14,7 @@ import {
   syncTerminToExternalCalendar,
   entferneTerminAusExternemKalender,
   caldavProvider,
+  outlookProvider,
 } from './engine/kalender-sync'
 
 /** true = Google-Meet-Link (Google gehoert dem Meet-Pfad). Jitsi/null/leer = false. Pure. */
@@ -31,7 +32,9 @@ export async function syncKbTerminOut(terminId: string): Promise<void> {
       .eq('id', terminId)
       .maybeSingle()
     const meet = istMeetVideo((data?.video_link as string | null) ?? null)
-    await syncTerminToExternalCalendar(terminId, meet ? { providers: [caldavProvider] } : undefined)
+    // Meet-Video: Google gehoert dem Meet-Pfad -> nur CalDAV + Outlook (andere Kalender als
+    // das Meet-auf-Google). Sonst alle Default-Provider (google + caldav + outlook).
+    await syncTerminToExternalCalendar(terminId, meet ? { providers: [caldavProvider, outlookProvider] } : undefined)
   } catch (err) {
     console.error('[kb-termin-sync] OUT fehlgeschlagen fuer', terminId, err instanceof Error ? err.message : err)
   }
