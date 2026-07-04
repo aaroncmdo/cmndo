@@ -24,34 +24,43 @@ export async function GET(request: Request) {
     .is('storniert_am', null)
 
   let storniert = 0
+  let fehler = 0
 
   for (const fall of faelle ?? []) {
-    const gemeldet = new Date(fall.no_show_gemeldet_am)
-    // 5 Werktage berechnen
-    let werktage = 0
-    const check = new Date(gemeldet)
-    while (werktage < 5) {
-      check.setDate(check.getDate() + 1)
-      const day = check.getDay()
-      if (day !== 0 && day !== 6) werktage++
+    // Partial-batch-Schutz: ein Fall in ungueltigem Status laesst transitionFallStatus
+    // werfen — ohne per-Iteration-try/catch wuerde das den ganzen Lauf abbrechen und
+    // alle nachfolgenden No-Shows still liegen lassen (Route 500t vor NextResponse).
+    try {
+      const gemeldet = new Date(fall.no_show_gemeldet_am)
+      // 5 Werktage berechnen
+      let werktage = 0
+      const check = new Date(gemeldet)
+      while (werktage < 5) {
+        check.setDate(check.getDate() + 1)
+        const day = check.getDay()
+        if (day !== 0 && day !== 6) werktage++
+      }
+
+      if (new Date() < check) continue // Frist noch nicht um
+
+      // CMM-40: Kunde hat ueber Re-Termin-Link einen Slot vorgeschlagen → kein Storno
+      if (fall.re_termin_token_eingelaufen_am) continue
+
+      // Prüfen ob zwischenzeitlich ein neuer Termin eingetragen wurde
+      if (fall.sv_termin && new Date(fall.sv_termin) > gemeldet) continue // Neuer Termin existiert
+
+      // Storno durchführen
+      await transitionFallStatus(fall.id, 'storniert', { grund: 'storno_kunde_no_show' })
+      await revertCaseBilling(fall.id, 'storno_kunde_no_show', 'system')
+
+      // KFZ-151: Auto-Resolve aller offenen Case-Tasks (z.B. "Ersatztermin vermitteln")
+      await resolveTasksForEntity('case', fall.id, 'No-Show via Cron finalisiert')
+      storniert++
+    } catch (err) {
+      fehler++
+      console.error(`[KFZ-150 no-show] Fall ${fall.id} übersprungen:`, err instanceof Error ? err.message : err)
     }
-
-    if (new Date() < check) continue // Frist noch nicht um
-
-    // CMM-40: Kunde hat ueber Re-Termin-Link einen Slot vorgeschlagen → kein Storno
-    if (fall.re_termin_token_eingelaufen_am) continue
-
-    // Prüfen ob zwischenzeitlich ein neuer Termin eingetragen wurde
-    if (fall.sv_termin && new Date(fall.sv_termin) > gemeldet) continue // Neuer Termin existiert
-
-    // Storno durchführen
-    await transitionFallStatus(fall.id, 'storniert', { grund: 'storno_kunde_no_show' })
-    await revertCaseBilling(fall.id, 'storno_kunde_no_show', 'system')
-
-    // KFZ-151: Auto-Resolve aller offenen Case-Tasks (z.B. "Ersatztermin vermitteln")
-    await resolveTasksForEntity('case', fall.id, 'No-Show via Cron finalisiert')
-    storniert++
   }
 
-  return NextResponse.json({ ok: true, storniert })
+  return NextResponse.json({ ok: true, storniert, fehler })
 }

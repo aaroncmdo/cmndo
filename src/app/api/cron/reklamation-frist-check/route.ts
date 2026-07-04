@@ -24,10 +24,21 @@ export async function GET(request: Request) {
     .lt('frist_bis', now)
 
   for (const r of abgelaufen ?? []) {
-    await db.from('reklamationen').update({ status: 'auto_abgelehnt_frist', bearbeitet_am: now }).eq('id', r.id)
+    const { error: updErr } = await db.from('reklamationen').update({ status: 'auto_abgelehnt_frist', bearbeitet_am: now }).eq('id', r.id)
+    if (updErr) {
+      // Status-Write ungeprueft war ein stiller Verlust — bei DB-Fehler nicht weiter
+      // (kein resolveTasks/Email fuer eine Reklamation, die noch 'eingereicht' ist).
+      console.error(`[KFZ-150 rekla] Status-Update ${r.id} fehlgeschlagen:`, updErr.message)
+      continue
+    }
 
-    // KFZ-151: Auto-Resolve aller offenen Tasks zu dieser Reklamation
-    await resolveTasksForEntity('reklamation', r.id, 'Reklamation auto-abgelehnt: Frist abgelaufen')
+    // KFZ-151: Auto-Resolve aller offenen Tasks (Partial-batch-Schutz: throw hier darf
+    // nicht die restlichen abgelaufenen Reklamationen des Laufs abbrechen).
+    try {
+      await resolveTasksForEntity('reklamation', r.id, 'Reklamation auto-abgelehnt: Frist abgelaufen')
+    } catch (err) {
+      console.error(`[KFZ-150 rekla] resolveTasks ${r.id} fehlgeschlagen:`, err instanceof Error ? err.message : err)
+    }
 
     // Email an SV
     try {
@@ -70,15 +81,20 @@ export async function GET(request: Request) {
       .maybeSingle()
 
     if (!existingTask) {
-      await createLinkedTask({
-        fall_id: r.fall_id,
-        titel: 'Überfällige Reklamation bearbeiten (3-Werktage-Frist §7)',
-        typ: 'reklamation',
-        prioritaet: 'dringend',
-        faellig_am: new Date(),
-        entity_type: 'reklamation',
-        entity_id: r.id,
-      })
+      // Partial-batch-Schutz: createLinkedTask-throw darf den Lauf nicht abbrechen.
+      try {
+        await createLinkedTask({
+          fall_id: r.fall_id,
+          titel: 'Überfällige Reklamation bearbeiten (3-Werktage-Frist §7)',
+          typ: 'reklamation',
+          prioritaet: 'dringend',
+          faellig_am: new Date(),
+          entity_type: 'reklamation',
+          entity_id: r.id,
+        })
+      } catch (err) {
+        console.error(`[KFZ-150 rekla] Überfällig-Task ${r.id} fehlgeschlagen:`, err instanceof Error ? err.message : err)
+      }
     }
   }
 
