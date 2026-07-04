@@ -8,7 +8,6 @@ import type { AbrechnungDescriptor } from '@/lib/abrechnung/create-abrechnung'
 export const ONBOARDING_DESCRIPTOR: AbrechnungDescriptor = {
   zielTabelle: 'sv_onboarding_rechnungen',
   positionenTabelle: null,
-  positionsFkSpalte: null,
   ustSatz: 19,
   nummer: (kontext) => {
     const jahr = (kontext.jahr as number) ?? new Date().getFullYear()

@@ -17,7 +17,7 @@ function fakeDb(inserts: Record<string, unknown[]>) {
   } as any
 }
 const desc: AbrechnungDescriptor = {
-  zielTabelle: 'abrechnungen', positionenTabelle: 'abrechnung_positionen', positionsFkSpalte: 'abrechnung_id',
+  zielTabelle: 'abrechnungen', positionenTabelle: 'abrechnung_positionen',
   nummer: () => ({ serie: 'CMNDO-05', jahr: 2026, format: (j, n) => `CMNDO-${j}-05-${String(n).padStart(4, '0')}` }),
   buildHeaderRow: (b) => ({ empfaenger_typ: 'sv', abrechnungs_nr: b.nummer, summe_netto: b.nettoCent / 100, ust_betrag: b.ustCent / 100, summe_brutto: b.bruttoCent / 100 }),
   buildPositionRow: (p, id) => ({ abrechnung_id: id, betrag_netto: (p.betrag_netto_cent as number) / 100 }),

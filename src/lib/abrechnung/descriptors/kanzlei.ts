@@ -23,7 +23,6 @@ import { FINANCE } from '@/lib/finance/constants'
 export const KANZLEI_DESCRIPTOR: AbrechnungDescriptor = {
   zielTabelle: 'kanzlei_abrechnungen',
   positionenTabelle: 'kanzlei_abrechnung_positionen',
-  positionsFkSpalte: 'kanzlei_abrechnung_id',
   ustSatz: 19,
 
   nummer: (kontext) => {

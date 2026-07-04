@@ -7,7 +7,6 @@ export interface AbrechnungInput { positionen: Array<{ betrag_netto_cent: number
 export interface AbrechnungDescriptor {
   zielTabelle: string
   positionenTabelle: string | null
-  positionsFkSpalte: string | null
   ustSatz?: number
   nummer: (kontext: Record<string, unknown>) => { serie: string; jahr: number; format: (jahr: number, lfdNr: number) => string }
   buildHeaderRow: (b: BerechneteBetraege, positionen: AbrechnungInput['positionen'], kontext: Record<string, unknown>) => Record<string, unknown>

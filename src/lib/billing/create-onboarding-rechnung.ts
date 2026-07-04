@@ -150,22 +150,36 @@ export async function createOnboardingRechnung(
     const rechnungsNr = abrResult.nummer
     const { nettoCent: netto_cent_db, ustCent: ust_cent, bruttoCent: brutto_cent, ustSatz: ust_satz_pct } = abrResult.betraege
 
-    // 6. PDF generieren + uploaden (now we have the real rechnungs_nr)
-    const { pdf_buffer, storage_path } = await generateAndUploadOnboardingRechnungPdf({
-      konfig,
-      rechnungs_nr: rechnungsNr,
-      rechnungs_datum: ctx.bezahlt_am,
-      leistungs_datum: ctx.bezahlt_am,
-      typ: ctx.typ,
-      paket: ctx.paket ?? null,
-      kontingent: ctx.kontingent,
-      empfaenger,
-      netto_cent: netto_cent_db,
-      ust_cent,
-      brutto_cent,
-      ust_satz_pct,
-      stripe_bezahlt_am: ctx.bezahlt_am,
-    })
+    // 6. PDF generieren + uploaden (now we have the real rechnungs_nr).
+    //    Compensating delete: if PDF generation throws, remove the just-created row
+    //    so a re-trigger does not produce a second numbered invoice for one payment.
+    let pdf_buffer: Buffer
+    let storage_path: string | null
+    try {
+      ;({ pdf_buffer, storage_path } = await generateAndUploadOnboardingRechnungPdf({
+        konfig,
+        rechnungs_nr: rechnungsNr,
+        rechnungs_datum: ctx.bezahlt_am,
+        leistungs_datum: ctx.bezahlt_am,
+        typ: ctx.typ,
+        paket: ctx.paket ?? null,
+        kontingent: ctx.kontingent,
+        empfaenger,
+        netto_cent: netto_cent_db,
+        ust_cent,
+        brutto_cent,
+        ust_satz_pct,
+        stripe_bezahlt_am: ctx.bezahlt_am,
+      }))
+    } catch (pdfErr) {
+      // Compensating delete: row was committed, but PDF failed — remove it so
+      // a re-trigger allocates a fresh number rather than leaving an orphan row.
+      await db.from('sv_onboarding_rechnungen').delete().eq('id', abrResult.id)
+      return {
+        success: false,
+        error: `PDF-Generierung fehlgeschlagen (Rechnung ${rechnungsNr} zurueckgerollt): ${pdfErr instanceof Error ? pdfErr.message : String(pdfErr)}`,
+      }
+    }
 
     // 7. Patch pdf_storage_path onto the inserted row (the PDF path was unknown at insert time)
     if (storage_path) {

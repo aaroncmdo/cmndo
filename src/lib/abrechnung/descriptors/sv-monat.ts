@@ -17,7 +17,6 @@ import { centToEur } from '@/lib/billing/calculate-ust'
 export const SV_MONAT_DESCRIPTOR: AbrechnungDescriptor = {
   zielTabelle: 'abrechnungen',
   positionenTabelle: 'abrechnung_positionen',
-  positionsFkSpalte: 'abrechnung_id',
   ustSatz: 19,
 
   nummer: (kontext) => {

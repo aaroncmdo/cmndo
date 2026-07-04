@@ -12,7 +12,6 @@ import { centToEur } from '@/lib/billing/calculate-ust'
 export const EMBED_DESCRIPTOR: AbrechnungDescriptor = {
   zielTabelle: 'abrechnungen',
   positionenTabelle: 'embed_abrechnung_positionen',
-  positionsFkSpalte: 'abrechnung_id',
   ustSatz: 19,
 
   nummer: (kontext) => {

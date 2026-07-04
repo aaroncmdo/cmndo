@@ -15,7 +15,6 @@ import { centToEur } from '@/lib/billing/calculate-ust'
 export const MARKETING_DESCRIPTOR: AbrechnungDescriptor = {
   zielTabelle: 'abrechnungen',
   positionenTabelle: null,
-  positionsFkSpalte: null,
   ustSatz: 19,
 
   nummer: (kontext) => {
@@ -78,7 +77,6 @@ export const MARKETING_DESCRIPTOR: AbrechnungDescriptor = {
 export const KANZLEI_A_DESCRIPTOR: AbrechnungDescriptor = {
   zielTabelle: 'abrechnungen',
   positionenTabelle: null,
-  positionsFkSpalte: null,
   ustSatz: 19,
 
   nummer: (kontext) => {
