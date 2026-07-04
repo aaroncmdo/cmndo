@@ -38,7 +38,7 @@ export default async function WerkstattPromoPage() {
           </h2>
           <ol className="space-y-2 text-body-sm text-claimondo-navy list-decimal list-inside">
             <li>
-              Hängen Sie den unten stehenden QR-Code in Ihrem Betrieb aus.
+              Hängen Sie den oben gezeigten QR-Code in Ihrem Betrieb aus.
             </li>
             <li>
               Kunden scannen den Code und melden ihren Schaden digital über Claimondo.
