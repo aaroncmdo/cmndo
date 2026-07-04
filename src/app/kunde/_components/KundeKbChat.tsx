@@ -18,6 +18,7 @@ import {
   markKundeChatMessagesRead,
   type KundeChatKanal,
 } from './kb-chat-actions'
+import { toInitials } from '@/components/shared/KundeAvatar'
 
 type Nachricht = {
   id: string
@@ -227,15 +228,7 @@ export default function KundeKbChat({
             bubbleCls = 'bg-white text-claimondo-navy rounded-[18px] rounded-bl-md shadow-sm border border-claimondo-border/50'
             accentColor = 'var(--brand-accent, #7BA3CC)'
           }
-          const initials = sender
-            ? sender.name
-                .split(' ')
-                .map((w) => w[0])
-                .filter(Boolean)
-                .slice(0, 2)
-                .join('')
-                .toUpperCase() || '?'
-            : '?'
+          const initials = toInitials(sender?.name) || '?'
           return (
             <div key={m.id} className={`flex items-end gap-2 ${ownMessage ? 'justify-end' : 'justify-start'}`}>
               {!ownMessage && (
