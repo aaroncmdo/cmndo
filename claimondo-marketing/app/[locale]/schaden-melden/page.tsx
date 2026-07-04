@@ -7,7 +7,6 @@ import { MiniWizardClient } from './MiniWizardClient'
 import { SheetCard } from '@/components/shared/SheetCard'
 import { LandingTopbar } from '@/components/landing/LandingTopbar'
 import { LandingFooter } from '@/components/landing/LandingFooter'
-import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { BeratungVereinbarenButton } from '@/components/shared/glass'
 import { localeAlternates } from '@/lib/seo/alternates'
@@ -18,8 +17,12 @@ import { localeAlternates } from '@/lib/seo/alternates'
 // Design-Angleichung (26.06.): vorher eine nackte Form-Card ohne Marketing-Chrome
 // (kein Topbar/Footer/Hero/Trust) -> wirkte wie eine verwaiste App-Seite. Jetzt
 // strukturgleich zu /check (Topbar, Hero mit Gradient-Ambient + Trust-Badge,
-// SheetCard, Rueckruf-Alternativ, TrustBlock, Footer, StickyCallBar) -> konsistent
+// SheetCard, Rueckruf-Alternativ, TrustBlock, Footer) -> konsistent
 // mit dem Rest der Webseite.
+//
+// UX-Audit (04.07.): StickyCallBar HIER entfernt — auf der Konversions-Formularseite
+// konkurrierte die Sticky-Bar (rivalisierendes "Gutachter finden" + lautes "Sofort
+// anrufen") mit dem Formular-Absenden. Rueckruf-Lifeline bleibt inline (BeratungVereinbaren).
 //
 // Promo-Attribution (15.05.): ?p=<code> -> Prop -> hidden field in MiniWizardClient.
 // Kampagnen-Attribution (26.06.): ?src=<slug> -> source_channel ('kampagne-<slug>'),
@@ -105,7 +108,6 @@ export default async function SchadenMeldenPage({
       <TrustBlock />
 
       <LandingFooter />
-      <StickyCallBar quelle={rueckrufQuelle} />
     </div>
   )
 }
