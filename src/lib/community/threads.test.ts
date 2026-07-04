@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { rankTopComments, type CommentRow } from './threads'
 
 const c = (id: string, likeCount: number, createdAt: string, parentId: string | null = null): CommentRow => ({
-  id, authorDisplay: 'A', authorKind: 'partner', isRedaktion: false, body: id, parentId, createdAt, likeCount,
+  id, authorDisplay: 'A', authorKind: 'partner', isRedaktion: false, body: id, parentId, createdAt, likeCount, likedByMe: false,
 })
 
 describe('rankTopComments', () => {

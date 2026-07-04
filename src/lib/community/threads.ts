@@ -3,7 +3,7 @@ import type { FeedEntry } from './feed'
 
 export type CommentRow = {
   id: string; authorDisplay: string; authorKind: string; isRedaktion: boolean
-  body: string; parentId: string | null; createdAt: string; likeCount: number
+  body: string; parentId: string | null; createdAt: string; likeCount: number; likedByMe: boolean
 }
 export type CommentPreview = { comment: CommentRow; topReply: CommentRow | null; replyCount: number }
 
@@ -32,10 +32,10 @@ export function rankTopComments(
 const mapRow = (r: {
   id: string; author_display: string; author_kind: string; body: string
   parent_id: string | null; created_at: string
-}, likeCount: number): CommentRow => ({
+}, likeCount: number, likedByMe: boolean): CommentRow => ({
   id: r.id, authorDisplay: r.author_display, authorKind: r.author_kind,
   isRedaktion: r.author_kind === 'admin', body: r.body, parentId: r.parent_id,
-  createdAt: r.created_at, likeCount,
+  createdAt: r.created_at, likeCount, likedByMe,
 })
 
 async function loadCommentLikeCounts(
@@ -49,6 +49,23 @@ async function loadCommentLikeCounts(
   const m: Record<string, number> = {}
   for (const r of (data ?? []) as Array<{ target_id: string }>) m[r.target_id] = (m[r.target_id] ?? 0) + 1
   return m
+}
+
+async function loadUserCommentLikes(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  commentIds: string[],
+): Promise<Set<string>> {
+  if (!commentIds.length) return new Set()
+  const { data: auth } = await supabase.auth.getUser()
+  if (!auth.user) return new Set()
+  const { data, error } = await supabase
+    .from('community_likes').select('target_id')
+    .eq('user_id', auth.user.id).eq('target_kind', 'comment').in('target_id', commentIds)
+  if (error) {
+    if (error.code !== '42P01') console.error('[netzwerk] loadUserCommentLikes:', error.message)
+    return new Set()
+  }
+  return new Set((data ?? []).map((r: { target_id: string }) => r.target_id))
 }
 
 export async function getThread(
@@ -68,11 +85,14 @@ export async function getThread(
   const rows = (data ?? []) as Array<{
     id: string; author_display: string; author_kind: string; body: string; parent_id: string | null; created_at: string
   }>
-  const likeCounts = await loadCommentLikeCounts(supabase, rows.map(r => r.id))
+  const [likeCounts, userLikes] = await Promise.all([
+    loadCommentLikeCounts(supabase, rows.map(r => r.id)),
+    loadUserCommentLikes(supabase, rows.map(r => r.id)),
+  ])
   const top: CommentRow[] = []
   const repliesByParent: Record<string, CommentRow[]> = {}
   for (const r of rows) {
-    const mapped = mapRow(r, likeCounts[r.id] ?? 0)
+    const mapped = mapRow(r, likeCounts[r.id] ?? 0, userLikes.has(r.id))
     if (r.parent_id === null) top.push(mapped)
     else (repliesByParent[r.parent_id] ??= []).push(mapped)
   }
@@ -100,7 +120,10 @@ export async function getTopCommentsPreview(
     id: string; target_kind: string; target_id: string; author_display: string
     author_kind: string; body: string; parent_id: string | null; created_at: string
   }>
-  const likeCounts = await loadCommentLikeCounts(supabase, rows.map(r => r.id))
+  const [likeCounts, userLikes] = await Promise.all([
+    loadCommentLikeCounts(supabase, rows.map(r => r.id)),
+    loadUserCommentLikes(supabase, rows.map(r => r.id)),
+  ])
 
   // Gruppiere pro Feed-Key (kind:id). target_kind 'wissen' -> Feed-kind 'artikel'.
   const feedKind = (tk: string) => (tk === 'wissen' ? 'artikel' : 'post')
@@ -108,7 +131,7 @@ export async function getTopCommentsPreview(
   for (const r of rows) {
     const key = `${feedKind(r.target_kind)}:${r.target_id}`
     ;(grouped[key] ??= { top: [], repliesByParent: {} })
-    const mapped = mapRow(r, likeCounts[r.id] ?? 0)
+    const mapped = mapRow(r, likeCounts[r.id] ?? 0, userLikes.has(r.id))
     if (r.parent_id === null) grouped[key].top.push(mapped)
     else (grouped[key].repliesByParent[r.parent_id] ??= []).push(mapped)
   }

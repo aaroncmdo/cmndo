@@ -30,7 +30,7 @@ export function TopComments(props: {
             targetKind="comment"
             targetId={p.comment.id}
             initialCount={p.comment.likeCount}
-            initiallyLiked={false}
+            initiallyLiked={p.comment.likedByMe}
           />
 
           {/* Top-Antwort eingerückt */}
@@ -42,7 +42,7 @@ export function TopComments(props: {
                 {p.topReply.isRedaktion && <Badge tone="info" size="sm">Redaktion</Badge>}
               </div>
               <p className="mt-0.5 text-body-xs text-claimondo-shield">{p.topReply.body}</p>
-              <LikeButton targetKind="comment" targetId={p.topReply.id} initialCount={p.topReply.likeCount} initiallyLiked={false} />
+              <LikeButton targetKind="comment" targetId={p.topReply.id} initialCount={p.topReply.likeCount} initiallyLiked={p.topReply.likedByMe} />
             </div>
           )}
 

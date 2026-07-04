@@ -51,7 +51,7 @@ function ReplyRow({
         {reply.body}
       </p>
       <div className="mt-1.5 flex items-center gap-3">
-        <LikeButton targetKind="comment" targetId={reply.id} initialCount={reply.likeCount} initiallyLiked={false} />
+        <LikeButton targetKind="comment" targetId={reply.id} initialCount={reply.likeCount} initiallyLiked={reply.likedByMe} />
         {!showReply && (
           <button
             type="button"
@@ -133,7 +133,7 @@ function CommentItem({
           {comment.body}
         </p>
         <div className="mt-2 flex items-center gap-3">
-          <LikeButton targetKind="comment" targetId={comment.id} initialCount={comment.likeCount} initiallyLiked={false} />
+          <LikeButton targetKind="comment" targetId={comment.id} initialCount={comment.likeCount} initiallyLiked={comment.likedByMe} />
           {!showReply && (
             <button
               type="button"
