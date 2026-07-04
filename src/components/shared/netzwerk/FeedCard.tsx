@@ -1,10 +1,13 @@
 'use client'
 
+import { useState, useTransition } from 'react'
+import { toast } from 'sonner'
 import type { FeedEntry } from '@/lib/community/feed'
 import type { CommentPreview } from '@/lib/community/threads'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Badge } from '@/components/primitives'
 import Avatar from '@/components/shared/Avatar'
+import { melden } from '@/lib/community/actions'
 import { LikeButton } from './LikeButton'
 import { TopComments } from './TopComments'
 
@@ -36,6 +39,17 @@ export type FeedCardProps = {
 
 export function FeedCard({ entry, liked, previews }: FeedCardProps) {
   const targetKind = entry.kind === 'artikel' ? 'wissen' : 'post'
+
+  const [reported, setReported] = useState(false)
+  const [pending, startReport] = useTransition()
+
+  function reportPost() {
+    startReport(async () => {
+      const res = await melden('post', entry.id)
+      if (res.ok) setReported(true)
+      else toast.error(res.error ?? 'Fehler')
+    })
+  }
 
   // Kopfzeile als SectionCard-Slot (icon-Prop nimmt ReactNode)
   const headSlot = (
@@ -84,13 +98,27 @@ export function FeedCard({ entry, liked, previews }: FeedCardProps) {
       )}
 
       {/* Interaktionszeile */}
-      <div className="mt-3">
+      <div className="mt-3 flex items-center gap-3">
         <LikeButton
           targetKind={targetKind}
           targetId={entry.id}
           initialCount={entry.likeCount}
           initiallyLiked={liked}
         />
+        {entry.kind === 'post' && (
+          reported ? (
+            <span className="text-body-xs text-claimondo-shield/50">Gemeldet — danke.</span>
+          ) : (
+            <button
+              type="button"
+              onClick={reportPost}
+              disabled={pending}
+              className="text-body-xs text-claimondo-shield/50 underline-offset-2 hover:text-claimondo-shield hover:underline disabled:opacity-50"
+            >
+              Melden
+            </button>
+          )
+        )}
       </div>
 
       {/* Kommentar-Vorschau + Eingabe */}
