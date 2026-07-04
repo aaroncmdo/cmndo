@@ -39,7 +39,7 @@ export function FeedCard({ entry, liked, previews }: FeedCardProps) {
 
   // Kopfzeile als SectionCard-Slot (icon-Prop nimmt ReactNode)
   const headSlot = (
-    <div className="flex items-center gap-2 flex-wrap">
+    <div className="flex items-center gap-2 flex-wrap w-full">
       <Avatar url={null} name={entry.authorDisplay} size="sm" />
       <span className="text-body-sm font-semibold text-claimondo-navy leading-none">
         {entry.authorDisplay}
