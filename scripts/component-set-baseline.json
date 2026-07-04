@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-03T20:56:23.876Z",
-  "count": 129,
+  "generatedAt": "2026-07-04T08:16:41.641Z",
+  "count": 128,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -62,7 +62,6 @@
     "src/app/kunde/faelle/[id]/kalender/page.tsx",
     "src/app/kunde/faelle/[id]/page.tsx",
     "src/app/kunde/nachbesichtigung/NachbesichtigungClient.tsx",
-    "src/app/kunde/nachbesichtigung/[fall_id]/NachbesichtigungPickerClient.tsx",
     "src/app/kunde/nachbesichtigung/page.tsx",
     "src/app/kunde/onboarding/OnboardingWizard.tsx",
     "src/app/kunde/profil/KundeProfilForm.tsx",
