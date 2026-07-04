@@ -7,8 +7,9 @@ import {
   Building2Icon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon, AlertTriangleIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { anlegeBuero } from './actions'
-import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
+import { PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, type AnlegePaket, type AnlegeBueroFormData } from './constants'
 import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
 
 // ARCH-1 Phase 2 (BLOCK C): 3-Step Buero-Anlegen Wizard fuer den Admin.
@@ -147,11 +148,11 @@ export default function BueroAnlegenWizard({ onSuccess }: {
     if (!inhaberNachname.trim()) { missing.push('Nachname'); fields.add('inhaberNachname') }
     if (!inhaberEmail.trim()) { missing.push('Email'); fields.add('inhaberEmail') }
     if (!inhaberTelefon.trim()) { missing.push('Telefon'); fields.add('inhaberTelefon') }
-    if (!bueroName.trim()) { missing.push('Buero-Name'); fields.add('bueroName') }
+    if (!bueroName.trim()) { missing.push('Büro-Name'); fields.add('bueroName') }
     if (!bueroRechtsform.trim()) { missing.push('Rechtsform'); fields.add('bueroRechtsform') }
     if (!bueroSteuernummer.trim()) { missing.push('Steuernummer'); fields.add('bueroSteuernummer') }
     if (bueroAnschriftLat === null || bueroAnschriftLng === null) {
-      missing.push('Hauptbuero-Anschrift (mit Geo)')
+      missing.push('Hauptbüro-Anschrift (mit Geo)')
       fields.add('bueroAnschrift')
     }
     return { missing, fields }
@@ -166,7 +167,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
     }
     standorte.forEach((s, idx) => {
       const istHauptbuero = idx === 0
-      const labelPrefix = istHauptbuero ? 'Hauptbuero' : `Standort ${idx + 1}`
+      const labelPrefix = istHauptbuero ? 'Hauptbüro' : `Standort ${idx + 1}`
       // BUG-94: Im Hauptbuero mit Inhaber-Mitarbeiter-Checkbox sind die
       // Mitarbeiter-Felder readonly + kommen vom Inhaber. Nicht erneut pruefen.
       const skipMitarbeiter = istHauptbuero && inhaberIstHauptbueroMitarbeiter
@@ -230,7 +231,7 @@ export default function BueroAnlegenWizard({ onSuccess }: {
       if (!istLeer) return prev
       next[0] = {
         ...hb,
-        name: 'Hauptbuero',
+        name: 'Hauptbüro',
         anschrift: bueroAnschrift,
         anschrift_lat: bueroAnschriftLat,
         anschrift_lng: bueroAnschriftLng,
@@ -733,14 +734,15 @@ export default function BueroAnlegenWizard({ onSuccess }: {
               Zurück
             </button>
           )}
-          <button
+          <LoadingButton
             type="button"
             onClick={handleNext}
-            disabled={saving}
+            isLoading={saving}
+            loadingText="Wird angelegt..."
             className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-40"
           >
-            {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Büro anlegen + Welcome-Mails senden'}
-          </button>
+            {step < STEPS.length - 1 ? 'Weiter' : 'Büro anlegen + Welcome-Mails senden'}
+          </LoadingButton>
         </div>
       </div>
     </div>
