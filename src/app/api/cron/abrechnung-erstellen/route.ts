@@ -169,7 +169,39 @@ export async function GET(request: Request) {
     // (4-stellig); Individual- + Org-Sammelpfad teilen die Serie → monatsweit
     // eindeutig & kollisionsfrei.
     const monatPad = String(monat).padStart(2, '0')
-    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    const abrClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
+
+    // Doppel-Rechnungs-Schutz: existiert fuer diesen SV in diesem Monat schon eine
+    // (nicht stornierte) Individual-Rechnung, hat ein vorheriger Lauf sie angelegt,
+    // aber die claims.abrechnung_id-Markierung ist (crash/transient) fehlgeschlagen.
+    // Dann die orphan-Claims an die bestehende Rechnung haengen statt eine 2. zu
+    // erzeugen. Serie `CMNDO-{jahr}-{MM}-` schliesst die embed-Serie `CMNDO-EMB-` aus.
+    const { data: bestehend } = await db.from('abrechnungen')
+      .select('id')
+      .eq('empfaenger_typ', 'sv')
+      .eq('empfaenger_id', sv.id)
+      .like('abrechnungs_nr', `CMNDO-${jahr}-${monatPad}-%`)
+      .neq('status', 'storniert')
+      .limit(1)
+      .maybeSingle()
+    if (bestehend) {
+      if (abrClaimIds.length > 0) {
+        await db.from('claims').update({ abrechnung_id: bestehend.id }).in('id', abrClaimIds)
+      }
+      console.warn(`[KFZ-149] SV ${sv.id}: bestehende Monatsrechnung gefunden — ${abrClaimIds.length} Claim(s) nachverknuepft (keine 2. Rechnung).`)
+      continue
+    }
+
+    // Rechnungsnummer atomar + lueckenlos (AAR-948). nextRechnungsNrRaw wirft bei
+    // Counter-Fehler -> try/catch, sonst bricht ein Fehler den ganzen Lauf (alle
+    // weiteren SVs) ab (partial-batch).
+    let lfdNr: number
+    try {
+      lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    } catch (err) {
+      console.error(`[KFZ-149] Rechnungs-Nr fuer SV ${sv.id} fehlgeschlagen, uebersprungen:`, err instanceof Error ? err.message : err)
+      continue
+    }
     const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
 
     // Faelligkeitsdatum: 14. des Folgemonats
@@ -237,14 +269,14 @@ export async function GET(request: Request) {
       })
     }
 
-    // Faelle markieren als abgerechnet.
-    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die
-    // claim_ids schreiben. Moderne Billing-Faelle haben immer einen Claim
-    // (lead_preis_netto-Flow setzt ihn voraus); claimlose Legacy-Faelle kommen
-    // hier nicht vor.
-    const abrClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
+    // Faelle markieren als abgerechnet (abrClaimIds oben schon berechnet).
+    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die claim_ids
+    // schreiben. Fehler pruefen: schlaegt die Markierung fehl, existiert die Rechnung
+    // aber die Claims sind NICHT verknuepft -> der Dedup-Guard oben verknuepft sie beim
+    // naechsten Lauf nach (verhindert die 2. Rechnung), hier nur sichtbar loggen.
     if (abrClaimIds.length > 0) {
-      await db.from('claims').update({ abrechnung_id: abr.id }).in('id', abrClaimIds)
+      const { error: markErr } = await db.from('claims').update({ abrechnung_id: abr.id }).in('id', abrClaimIds)
+      if (markErr) console.error(`[KFZ-149] SV ${sv.id}: claims.abrechnung_id-Markierung fehlgeschlagen (Rechnung ${abr.id}):`, markErr.message)
     }
 
     // Email an SV
@@ -295,10 +327,34 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Rechnungsnummer — atomar via rechnungs_nr_counter, dieselbe Serie
-    // (`CMNDO-{MM}`) wie der Individual-Pfad → monatsweit eindeutig & lückenlos (AAR-948).
+    // Rechnungsnummer — atomar via rechnungs_nr_counter, dieselbe Serie (AAR-948).
     const monatPad = String(monat).padStart(2, '0')
-    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+
+    // Doppel-Rechnungs-Schutz (wie Individual-Pfad): bestehende Org-Sammelrechnung
+    // fuer diesen Monat -> orphan-Claims nachverknuepfen statt eine 2. zu erzeugen.
+    const { data: bestehendOrg } = await db.from('abrechnungen')
+      .select('id')
+      .eq('empfaenger_typ', 'sv')
+      .eq('empfaenger_id', orgId)
+      .like('abrechnungs_nr', `CMNDO-${jahr}-${monatPad}-%`)
+      .neq('status', 'storniert')
+      .limit(1)
+      .maybeSingle()
+    if (bestehendOrg) {
+      if (acc.claim_ids.length > 0) {
+        await db.from('claims').update({ abrechnung_id: bestehendOrg.id }).in('id', acc.claim_ids)
+      }
+      console.warn(`[KFZ-152] Org ${orgId}: bestehende Sammelrechnung gefunden — ${acc.claim_ids.length} Claim(s) nachverknuepft (keine 2. Rechnung).`)
+      continue
+    }
+
+    let lfdNr: number
+    try {
+      lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
+    } catch (err) {
+      console.error(`[KFZ-152] Rechnungs-Nr fuer Org ${orgId} fehlgeschlagen, uebersprungen:`, err instanceof Error ? err.message : err)
+      continue
+    }
     const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
 
     const faellig = new Date(jahr, monat, 14)
@@ -331,11 +387,10 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Faelle markieren.
-    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die
-    // gesammelten claim_ids schreiben (Sammelrechnung-Faelle sind claim-verknuepft).
+    // Faelle markieren (Fehler-Check wie Individual-Pfad; Dedup-Guard oben recovert).
     if (acc.claim_ids.length > 0) {
-      await db.from('claims').update({ abrechnung_id: abr.id }).in('id', acc.claim_ids)
+      const { error: markErr } = await db.from('claims').update({ abrechnung_id: abr.id }).in('id', acc.claim_ids)
+      if (markErr) console.error(`[KFZ-152] Org ${orgId}: claims.abrechnung_id-Markierung fehlgeschlagen (Rechnung ${abr.id}):`, markErr.message)
     }
 
     // Welcome-Mail an Verwalter
