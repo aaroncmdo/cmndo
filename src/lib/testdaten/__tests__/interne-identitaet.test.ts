@@ -18,6 +18,15 @@ describe('istInterneEmail — Firmendomain + Test-Marker', () => {
     expect(istInterneEmail('max.fresh@claimondo-test.de')).toBe(true)
   })
 
+  // Prod-Audit 04.07.: diese Test-Leads rutschten als "extern" durch (False-Negatives).
+  it('erkennt RFC-Test-Domains (example.*) + lex-drive.com als intern', () => {
+    expect(istInterneEmail('prodtest-dedup@example.de')).toBe(true)
+    expect(istInterneEmail('foo@example.com')).toBe(true)
+    expect(istInterneEmail('bar@example.org')).toBe(true)
+    expect(istInterneEmail('baz@example.net')).toBe(true)
+    expect(istInterneEmail('Aaron.Sprafke@lex-drive.com')).toBe(true)
+  })
+
   it('erkennt test/smoke/e2e-Marker auf Fremd-Domains als intern', () => {
     expect(istInterneEmail('test-user@example.com')).toBe(true)
     expect(istInterneEmail('e2e-runner@gmail.com')).toBe(true)
