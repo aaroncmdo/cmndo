@@ -89,9 +89,11 @@ async function main() {
       try {
         const { syncSvTerminToGoogle } = await import('@/lib/google-calendar/sv-termin-sync')
         const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+        const { syncSvTerminToOutlook } = await import('@/lib/microsoft/sv-termin-sync')
         await Promise.all([
           syncSvTerminToGoogle(tid, fallId),
           syncSvTerminToCalDav(tid, fallId),
+          syncSvTerminToOutlook(tid, fallId),
         ])
         console.log(`  OK   ${ref}`)
         stats.gutachter.ok++

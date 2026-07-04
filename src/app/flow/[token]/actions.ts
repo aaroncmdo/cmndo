@@ -984,6 +984,13 @@ export async function signSAandCreateFall(
           console.warn('[signSAandCreateFall] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
         )
       }
+      // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
+      const { syncSvTerminToOutlook } = await import('@/lib/microsoft/sv-termin-sync')
+      for (const t of caldavTermine ?? []) {
+        await syncSvTerminToOutlook(t.id as string).catch((err) =>
+          console.warn('[signSAandCreateFall] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
+        )
+      }
     })().catch((err) =>
       console.warn('[signSAandCreateFall] CalDAV-Sync:', err instanceof Error ? err.message : err),
     )
@@ -1617,6 +1624,12 @@ export async function confirmVollmacht(fallId: string): Promise<void> {
   import('@/lib/kalender/caldav/sv-termin-sync').then(({ syncSvTerminToCalDav }) =>
     syncSvTerminToCalDav(termin.id).catch((err) =>
       console.warn('[confirmVollmacht] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
+    ),
+  )
+  // SP5b: Outlook (Graph) parallel — no-op ohne MS-Verbindung/dormant.
+  import('@/lib/microsoft/sv-termin-sync').then(({ syncSvTerminToOutlook }) =>
+    syncSvTerminToOutlook(termin.id).catch((err) =>
+      console.warn('[confirmVollmacht] syncSvTerminToOutlook:', err instanceof Error ? err.message : err),
     ),
   )
 }

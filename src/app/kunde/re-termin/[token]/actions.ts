@@ -145,6 +145,14 @@ export async function waehleReTerminSlot(
           console.error('[sv-termin-sync] CalDAV Re-Termin-Slot:', err)
         }
       })(),
+      (async () => {
+        try {
+          const { syncSvTerminToOutlook } = await import('@/lib/microsoft/sv-termin-sync')
+          await syncSvTerminToOutlook(tid, fid)
+        } catch (err) {
+          console.error('[sv-termin-sync] Outlook Re-Termin-Slot:', err)
+        }
+      })(),
     ])
   }
 

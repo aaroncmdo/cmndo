@@ -487,6 +487,14 @@ export async function acceptGegenvorschlag(
           console.error('[sv-termin-sync] CalDAV Dispatch-Gegenvorschlag:', err)
         }
       })(),
+      (async () => {
+        try {
+          const { syncSvTerminToOutlook } = await import('@/lib/microsoft/sv-termin-sync')
+          await syncSvTerminToOutlook(terminId, fallId)
+        } catch (err) {
+          console.error('[sv-termin-sync] Outlook Dispatch-Gegenvorschlag:', err)
+        }
+      })(),
     ])
   }
 
