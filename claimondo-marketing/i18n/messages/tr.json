@@ -105,7 +105,13 @@
     "restart": "Yeniden başla",
     "alternativ_text": "Doğrudan konuşmayı mı tercih edersiniz? Buradayız.",
     "alternativ_cta": "Hasarı çevrimiçi bildir",
-    "trust_heading": "Güvenebilecekleriniz"
+    "trust_heading": "Güvenebilecekleriniz",
+    "foto_check": {
+      "heading": "Hasarınız gerçekte ne kadar değerinde?",
+      "text": "Hasarınızın bir fotoğrafını yükleyin ve bir dakikadan kısa sürede taleplerinizin somut, bağlayıcı olmayan bir tahminini ücretsiz alın.",
+      "button": "Hasarı fotoğrafla kontrol et"
+    },
+    "lead_heading_alt": "Telefonu mu tercih edersiniz? Geri arama talep edin"
   },
   "not_found": {
     "heading": "Bu sayfa (artık) yok.",
