@@ -4,6 +4,27 @@ import { defineConfig, devices } from '@playwright/test'
 
 export default defineConfig({
   testDir: './tests/e2e',
+  // Manuelle Live-Smokes laufen NICHT in CI (`npx playwright test`): sie sind gegen
+  // app.claimondo.de strukturell unmoeglich — hardcodeter *.staging.claimondo.de-Host
+  // (+ nginx-Basic-Auth), hardcodetes localhost:3001, Abhaengigkeit von dev-only
+  // /api/dev/lookup-token (404 auf Prod), oder sie schreiben echte Leads in die Prod-DB.
+  // Weiterhin manuell fahrbar via `npx playwright test <datei> --headed` (jede hat einen
+  // `// Run:`-Header). Siehe .github/workflows/ci.yml (e2e = nur post-merge).
+  testIgnore: [
+    'staging-clickthrough.spec.ts',
+    'kunde-auth-setup.spec.ts',
+    'flows/audit-gutachter-finder-screens.spec.ts',
+    'flows/smoke-caldav-status.spec.ts',
+    'flows/smoke-caldav-freebusy.spec.ts',
+    'flows/smoke-google-bewertungen-staging.spec.ts',
+    'flows/smoke-staging-live.spec.ts',
+    'flows/smoke-staging-vollstaendig.spec.ts',
+    'flows/smoke-staging-sv-termin-verlegen.spec.ts',
+    'flows/smoke-cmm65-kunde-realtime.spec.ts',
+    'flows/smoke-final-startseite.spec.ts',
+    'flows/smoke-final-vollstaendig.spec.ts',
+    'flows/smoke-mini-wizard-strecke.spec.ts',
+  ],
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,
