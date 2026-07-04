@@ -13,7 +13,9 @@ import {
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
 import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
+import { MaklerPipelineCard } from '@/components/makler/MaklerPipelineCard'
 import type { DashboardData } from '@/lib/makler/queries'
+import type { MaklerPipeline } from '@/lib/makler/pipeline'
 
 type Props = {
   makler: {
@@ -22,6 +24,7 @@ type Props = {
     ansprechpartner_vorname: string
   }
   data: DashboardData
+  pipeline: MaklerPipeline
   zeigeErsteVermittlungCard: boolean
   promoCode: string | null
 }
@@ -48,7 +51,7 @@ function relativeFromNow(iso: string): string {
   return RELATIVE.format(-months, 'month')
 }
 
-export function MaklerDashboard({ makler, data, zeigeErsteVermittlungCard, promoCode }: Props) {
+export function MaklerDashboard({ makler, data, pipeline, zeigeErsteVermittlungCard, promoCode }: Props) {
   const { stats, activity } = data
 
   return (
@@ -98,6 +101,10 @@ export function MaklerDashboard({ makler, data, zeigeErsteVermittlungCard, promo
           hint="Leads → Akten"
         />
       </section>
+
+      {/* Vertriebs-Pipeline: All-Time-Funnel (Leads → Vermittelt → Ausgezahlt) +
+          Geld-Pipeline (abrechenbar/ausgezahlt) — ergaenzt die Monats-KPIs oben. */}
+      <MaklerPipelineCard offeneLeads={stats.offeneLeads} pipeline={pipeline} />
 
       {/* Activity + Schnellaktionen als 2-col auf Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
