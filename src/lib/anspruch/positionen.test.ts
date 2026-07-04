@@ -22,6 +22,9 @@ const CONFIG: AnspruchConfig = {
   abschleppMinEur: 150,
   abschleppMaxEur: 350,
   dauerTage: { leicht: { min: 2, max: 4 }, mittel: { min: 5, max: 9 }, schwer: { min: 10, max: 21 } },
+  totalschadenSchwelleProzent: 0.9,
+  reparaturGrenzeProzent: 1.3,
+  wiederbeschaffungsdauerTage: { min: 10, max: 14 },
 }
 const base: SchaetzInput = {
   reparaturMinEur: 900, reparaturMaxEur: 1800, schweregrad: 'mittel',
@@ -84,5 +87,102 @@ describe('berechneAnspruchsSpanne', () => {
     const gk = r.positionen.find((p) => p.typ === 'gutachterkosten')!
     expect(gk.gedecktDurchGegner).toBe(true)
     expect(gk.minEur).toBeNull()
+  })
+
+  // --- Totalschaden-Zonen ---
+
+  it('Zone A: ohne WBW kein Totalschaden-Block', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, wbwMinEur: null, wbwMaxEur: null, restwertMinEur: null, restwertMaxEur: null },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden).toBeUndefined()
+  })
+
+  it('Zone C: Reparatur > 130% WBW -> reparaturWeg null, guenstiger totalschaden', () => {
+    // reparaturMitte = (18000+32000)/2 = 25000; wbwMitte = (15000+21000)/2 = 18000
+    // verhaeltnis = 25000/18000 = 1.389 > 1.3 -> Zone C
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden).toBeDefined()
+    expect(s.totalschaden!.reparaturWeg).toBeNull()
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThan(0)
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(11030)  // 10500 Fahrzeugschaden + 500 NA + 30 Pauschale
+    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(18856)  // 18000 + 826 + 30
+    expect(s.totalschaden!.guenstiger).toBe('totalschaden')
+    // gutachterkosten muss im TS-Weg vorhanden sein (gegner-getragen, null)
+    const gk = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'gutachterkosten')
+    expect(gk).toBeDefined()
+    expect(gk!.gedecktDurchGegner).toBe(true)
+    expect(gk!.minEur).toBeNull()
+  })
+
+  it('Totalschaden nicht fahrbereit: abschleppkosten im TS-Weg, Summe steigt um 150/350', () => {
+    // Gleiche Zone-C-Inputs wie oben, aber fahrbereit: false
+    const s = berechneAnspruchsSpanne(
+      { ...base, fahrbereit: false, reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const tw = s.totalschaden!.totalschadenWeg
+    expect(tw.positionen.some((p) => p.typ === 'abschleppkosten')).toBe(true)
+    const abschl = tw.positionen.find((p) => p.typ === 'abschleppkosten')!
+    expect(abschl.minEur).toBe(150)   // CONFIG.abschleppMinEur
+    // fahrbereit=true hatte 11030/18856; fahrbereit=false addiert 150/350
+    expect(tw.summeMinEur).toBe(11180) // 10500 + 500 + 150 + 30
+    expect(tw.summeMaxEur).toBe(19206) // 18000 + 826 + 350 + 30
+  })
+
+  it('Zone B: 90-130% WBW -> beide Wege, Wertminderung im Reparatur-Weg', () => {
+    // reparaturMitte = (20000+26000)/2 = 23000; wbwMitte = (22000+28000)/2 = 25000
+    // verhaeltnis = 23000/25000 = 0.92 >= 0.9 und <= 1.3 -> Zone B
+    // alter = 2026 - 2023 = 3 -> Faktor { alterBisJahre: 5, faktorMin: 0.05, faktorMax: 0.15 } -> wertminderung applies
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 20000, reparaturMaxEur: 26000, ezJahr: 2023, wbwMinEur: 22000, wbwMaxEur: 28000, restwertMinEur: 6000, restwertMaxEur: 8000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.reparaturWeg).not.toBeNull()
+    expect(s.totalschaden!.reparaturWeg!.positionen.some((p) => p.typ === 'wertminderung')).toBe(true)
+    expect(s.totalschaden!.reparaturWeg!.summeMinEur).toBe(21180)   // reparatur 20000 + WM 1150 + Pauschale 30
+    expect(s.totalschaden!.reparaturWeg!.summeMaxEur).toBe(29480)   // 26000 + 3450 + 30
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(14530) // 14000 + 500 + 30
+    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(22856) // 22000 + 826 + 30
+    // reparaturMitte 23000 < wbwMitte 25000 -> kein 130%-Hinweis
+    expect(s.totalschaden!.hinweisReparatur).toBeUndefined()
+    // midpoint: reparaturMitte (21180+29480)/2 = 25330 >= tsMitte (14530+22856)/2 = 18693 -> 'reparatur'
+    expect(s.totalschaden!.guenstiger).toBe('reparatur')
+  })
+
+  it('Zone B mit Reparatur > WBW: 130%-Hinweis gesetzt', () => {
+    // reparaturMitte = (26000+28000)/2 = 27000; wbwMitte = (22000+28000)/2 = 25000
+    // verhaeltnis = 27000/25000 = 1.08 >= 0.9 und <= 1.3 -> Zone B, aber Reparatur ueber WBW
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 26000, reparaturMaxEur: 28000, ezJahr: 2023, wbwMinEur: 22000, wbwMaxEur: 28000, restwertMinEur: 6000, restwertMaxEur: 8000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.reparaturWeg).not.toBeNull()
+    expect(s.totalschaden!.hinweisReparatur).toBeDefined()
+    expect(s.totalschaden!.hinweisReparatur).toContain('130')
+  })
+
+  it('Zone B ohne Reparatur > WBW: kein 130%-Hinweis', () => {
+    // reparaturMitte = (20000+26000)/2 = 23000; wbwMitte = (22000+28000)/2 = 25000 -> reparaturMitte < wbwMitte
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 20000, reparaturMaxEur: 26000, ezJahr: 2023, wbwMinEur: 22000, wbwMaxEur: 28000, restwertMinEur: 6000, restwertMaxEur: 8000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.hinweisReparatur).toBeUndefined()
+  })
+
+  it('Totalschaden: Restwert > WBW -> Fahrzeugschaden auf 0 gefloort (nie negativ)', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 20000, reparaturMaxEur: 20000, wbwMinEur: 10000, wbwMaxEur: 12000, restwertMinEur: 11000, restwertMaxEur: 13000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const fz = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'reparatur')!
+    expect(fz.minEur).toBe(0)        // max(0, 10000 - 13000)
+    expect(fz.maxEur).toBe(1000)     // max(0, 12000 - 11000)
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThanOrEqual(0)
   })
 })
