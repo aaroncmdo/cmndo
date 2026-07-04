@@ -98,13 +98,6 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       disqualifiziert_am: isDisqualifiziert ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
       zugewiesen_an: dispatcherId,
-      // Compliance (UX-Audit #3): der dsgvo_consent-Haken wurde bisher NUR validiert
-      // (miniWizardSchema z.literal(true)), aber NIE persistiert -> dsgvo_zustimmung_am
-      // blieb NULL, obwohl der Kunde zugestimmt hat. Jetzt Timestamp setzen wie die
-      // Schwester-Lead-Erzeuger (autounfall-io actions.ts:113, embed anfrage-columns.ts:90,
-      // api/v1/melde-schaden). Consent ist hier per Schema garantiert (safeParse oben).
-      // Schliesst die Nachweisbarkeits-Luecke (Art. 7 DSGVO: Einwilligung war nie geloggt).
-      dsgvo_zustimmung_am: new Date().toISOString(),
     },
   )
 
@@ -115,6 +108,22 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
     }
   }
   const lead = { id: created.leadId }
+
+  // Compliance (UX-Audit #3): dsgvo_consent-Haken persistieren (war bisher nur validiert,
+  // nie geloggt -> dsgvo_zustimmung_am blieb NULL; Art.-7-DSGVO-Nachweisbarkeit). Separater
+  // Update + `as never`, weil der Marketing-Build STALE database.types hat: die generierten
+  // leads-Insert/Update-Types kennen dsgvo_zustimmung_am (noch) nicht, obwohl DB + App-Types
+  // die Spalte haben -> der Deploy-Typecheck brach sonst ("does not exist in type 'LeadExtra'";
+  // die CI-`build` deckt den Marketing-Build NICHT ab, nur der Deploy). Type-Lag-Cast wie in der
+  // App. Consent ist per Schema (safeParse oben) garantiert. Non-fatal.
+  try {
+    await admin
+      .from('leads')
+      .update({ dsgvo_zustimmung_am: new Date().toISOString() } as never)
+      .eq('id', lead.id as string)
+  } catch (err) {
+    console.error('[mini-wizard] dsgvo_zustimmung_am persist fehlgeschlagen (non-fatal):', err)
+  }
 
   // GA4: client_id auf dem Lead speichern (fuer spaetere flowlink_sent/sa_signed)
   // + generate_lead feuern (nur qualifizierte Leads, fire-and-forget).
