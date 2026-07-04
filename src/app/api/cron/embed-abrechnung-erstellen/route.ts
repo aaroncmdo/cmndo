@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FINANCE } from '@/lib/finance/constants'
+import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 
 export const dynamic = 'force-dynamic'
 
@@ -152,15 +153,40 @@ export async function GET(request: Request) {
     const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
     if (summeNetto <= 0) continue
 
-    // Rechnungsnummer CMNDO-EMB-YYYY-MM-NNN (eigener Prefix -> keine Lead-Kollision).
-    const { count: existing } = await db
+    // Doppel-Rechnungs-Schutz: existiert fuer diesen SV in diesem Monat schon eine
+    // (nicht stornierte) Embed-Rechnung, hat ein vorheriger Lauf sie angelegt, aber die
+    // gfa-Markierung ist (crash/transient) fehlgeschlagen -> orphan-Anfragen an die
+    // bestehende Rechnung haengen statt eine 2. zu erzeugen.
+    const anfrageIds = rows.map((r) => r.anfrage_id)
+    const { data: bestehend } = await db
       .from('abrechnungen')
-      .select('id', { count: 'exact', head: true })
-      .like('abrechnungs_nr', 'CMNDO-EMB-%')
-      .gte('abrechnungs_zeitraum_start', monthStartDate)
-      .lte('abrechnungs_zeitraum_ende', monthEndDate)
-    const nr = String((existing ?? 0) + 1).padStart(3, '0')
-    const abrechnungsNr = `CMNDO-EMB-${jahr}-${monatPad}-${nr}`
+      .select('id')
+      .eq('empfaenger_typ', 'sv')
+      .eq('empfaenger_id', sv.id)
+      .like('abrechnungs_nr', `CMNDO-EMB-${jahr}-${monatPad}-%`)
+      .neq('status', 'storniert')
+      .limit(1)
+      .maybeSingle()
+    if (bestehend) {
+      await db
+        .from('gutachter_finder_anfragen')
+        .update({ abrechnung_id: bestehend.id, abgerechnet_am: new Date().toISOString(), abrechnung_sv_id: svId })
+        .in('id', anfrageIds)
+      console.warn(`[AAR-939 embed-billing] SV ${svId}: bestehende Embed-Rechnung gefunden — ${anfrageIds.length} Anfrage(n) nachverknuepft (keine 2. Rechnung).`)
+      continue
+    }
+
+    // Rechnungsnummer CMNDO-EMB-YYYY-MM-NNN — atomar + lueckenlos via rechnungs_nr_counter
+    // (AAR-948, eigene Serie `CMNDO-EMB-{MM}`) statt race-anfaelligem COUNT (zwei
+    // Laeufe/Retry konnten dieselbe Nr. vergeben). nextRechnungsNrRaw wirft -> try/catch.
+    let lfdNr: number
+    try {
+      lfdNr = await nextRechnungsNrRaw(`CMNDO-EMB-${monatPad}`, jahr)
+    } catch (err) {
+      console.error(`[AAR-939 embed-billing] Rechnungs-Nr fuer SV ${svId} fehlgeschlagen, uebersprungen:`, err instanceof Error ? err.message : err)
+      continue
+    }
+    const abrechnungsNr = `CMNDO-EMB-${jahr}-${monatPad}-${String(lfdNr).padStart(3, '0')}`
 
     // Abrechnungs-Kopf (kfz141-Schema, empfaenger_typ='sv').
     const { data: abr, error: abrErr } = await db
@@ -205,16 +231,17 @@ export async function GET(request: Request) {
     }
 
     // Anfragen als abgerechnet markieren + abrechnung_sv_id einfrieren (Freeze zum
-    // Pay-Zeitpunkt, Contract #2 — entkoppelt Billing von spaeterem embed_site-Wechsel).
-    const ids = rows.map((r) => r.anfrage_id)
-    await db
+    // Pay-Zeitpunkt, Contract #2). anfrageIds oben schon berechnet. Fehler pruefen:
+    // schlaegt die Markierung fehl, faengt der Dedup-Guard es beim naechsten Lauf ab.
+    const { error: markErr } = await db
       .from('gutachter_finder_anfragen')
       .update({
         abrechnung_id: abr.id,
         abgerechnet_am: new Date().toISOString(),
         abrechnung_sv_id: svId,
       })
-      .in('id', ids)
+      .in('id', anfrageIds)
+    if (markErr) console.error(`[AAR-939 embed-billing] SV ${svId}: gfa-Markierung fehlgeschlagen (Rechnung ${abr.id}):`, markErr.message)
 
     // Email an SV (non-fatal — bricht den Status-Write nicht).
     try {
