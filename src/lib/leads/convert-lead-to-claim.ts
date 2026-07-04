@@ -730,6 +730,30 @@ export async function convertLeadToClaim(
     )
   }
 
+  // ─── SP2 Task 4: reparatur_termine-Row anlegen (non-fatal) ──────────────
+  // Bedingung: Lead hat sowohl eine Reparatur-Werkstatt (reparatur_werkstatt_id)
+  // als auch einen Wunschtermin (reparatur_wunschtermin, im Flow gesetzt, Task 3).
+  // status='angefragt' — die Werkstatt bestaetigt/ruft an/lehnt ab im naechsten Schritt.
+  // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
+  {
+    const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
+    const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
+    if (rwtWerkstattId && rwtWunschtermin) {
+      const { error: rtErr } = await admin
+        .from('reparatur_termine')
+        .insert({
+          claim_id: claimId,
+          werkstatt_id: rwtWerkstattId,
+          wunschtermin: rwtWunschtermin,
+          status: 'angefragt',
+          erstellt_von: input.triggerByUserId ?? null,
+        })
+      if (rtErr) {
+        console.error('[SP2 T4] reparatur_termine-Insert fehlgeschlagen (non-fatal):', rtErr.message)
+      }
+    }
+  }
+
   // ─── Schritt 5: claim_vehicle_involvements ──────────────────────────────
   // Wir legen ein Involvement für das geschädigte Fahrzeug an, sofern eine
   // vehicle_id aufgelöst werden konnte (CMM-50.0: propagiert oder frisch
