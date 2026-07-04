@@ -119,7 +119,7 @@ export function berechneAnspruchsSpanne(
       // Reparatur-Weg nur bis 130% WBW (Zone B). Enthaelt die schon berechneten Zone-A-Positionen (inkl. Wertminderung).
       const bis130 = verhaeltnis <= config.reparaturGrenzeProzent
       const reparaturWeg: AnspruchWeg | null = bis130
-        ? { titel: 'Reparieren & Fahrzeug behalten', positionen, summeMinEur: gesamtMinEur, summeMaxEur: gesamtMaxEur }
+        ? { titel: 'Reparieren & Fahrzeug behalten', positionen: [...positionen], summeMinEur: gesamtMinEur, summeMaxEur: gesamtMaxEur }
         : null
 
       const guenstiger: 'reparatur' | 'totalschaden' =

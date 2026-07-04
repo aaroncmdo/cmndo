@@ -109,6 +109,9 @@ describe('berechneAnspruchsSpanne', () => {
     expect(s.totalschaden).toBeDefined()
     expect(s.totalschaden!.reparaturWeg).toBeNull()
     expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThan(0)
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(11030)  // 10500 Fahrzeugschaden + 500 NA + 30 Pauschale
+    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(18856)  // 18000 + 826 + 30
+    expect(s.totalschaden!.guenstiger).toBe('totalschaden')
   })
 
   it('Zone B: 90-130% WBW -> beide Wege, Wertminderung im Reparatur-Weg', () => {
@@ -121,5 +124,10 @@ describe('berechneAnspruchsSpanne', () => {
     )
     expect(s.totalschaden!.reparaturWeg).not.toBeNull()
     expect(s.totalschaden!.reparaturWeg!.positionen.some((p) => p.typ === 'wertminderung')).toBe(true)
+    expect(s.totalschaden!.reparaturWeg!.summeMinEur).toBe(21180)   // reparatur 20000 + WM 1150 + Pauschale 30
+    expect(s.totalschaden!.reparaturWeg!.summeMaxEur).toBe(29480)   // 26000 + 3450 + 30
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(14530) // 14000 + 500 + 30
+    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(22856) // 22000 + 826 + 30
+    expect(s.totalschaden!.guenstiger).toBe('reparatur')            // 29480 >= 22856
   })
 })
