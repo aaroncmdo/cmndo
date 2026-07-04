@@ -66,6 +66,7 @@ export type TotalschadenInfo = {
   totalschadenWeg: AnspruchWeg
   reparaturBis130Moeglich: boolean
   guenstiger: 'reparatur' | 'totalschaden'
+  hinweisReparatur?: string
 }
 
 export type AnspruchSpanne = {

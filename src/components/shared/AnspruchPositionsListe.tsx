@@ -50,7 +50,7 @@ export function AnspruchPositionsListe({
       {spanne.hinweise.map((h) => (
         <p key={h} className="mt-2 text-caption text-claimondo-shield">{h}</p>
       ))}
-      <p className="mt-2 text-caption text-claimondo-shield">{disclaimer}</p>
+      {disclaimer ? <p className="mt-2 text-caption text-claimondo-shield">{disclaimer}</p> : null}
     </div>
   )
 }

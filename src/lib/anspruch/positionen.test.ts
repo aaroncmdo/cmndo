@@ -148,7 +148,31 @@ describe('berechneAnspruchsSpanne', () => {
     expect(s.totalschaden!.reparaturWeg!.summeMaxEur).toBe(29480)   // 26000 + 3450 + 30
     expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(14530) // 14000 + 500 + 30
     expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(22856) // 22000 + 826 + 30
-    expect(s.totalschaden!.guenstiger).toBe('reparatur')            // 29480 >= 22856
+    // reparaturMitte 23000 < wbwMitte 25000 -> kein 130%-Hinweis
+    expect(s.totalschaden!.hinweisReparatur).toBeUndefined()
+    // midpoint: reparaturMitte (21180+29480)/2 = 25330 >= tsMitte (14530+22856)/2 = 18693 -> 'reparatur'
+    expect(s.totalschaden!.guenstiger).toBe('reparatur')
+  })
+
+  it('Zone B mit Reparatur > WBW: 130%-Hinweis gesetzt', () => {
+    // reparaturMitte = (26000+28000)/2 = 27000; wbwMitte = (22000+28000)/2 = 25000
+    // verhaeltnis = 27000/25000 = 1.08 >= 0.9 und <= 1.3 -> Zone B, aber Reparatur ueber WBW
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 26000, reparaturMaxEur: 28000, ezJahr: 2023, wbwMinEur: 22000, wbwMaxEur: 28000, restwertMinEur: 6000, restwertMaxEur: 8000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.reparaturWeg).not.toBeNull()
+    expect(s.totalschaden!.hinweisReparatur).toBeDefined()
+    expect(s.totalschaden!.hinweisReparatur).toContain('130')
+  })
+
+  it('Zone B ohne Reparatur > WBW: kein 130%-Hinweis', () => {
+    // reparaturMitte = (20000+26000)/2 = 23000; wbwMitte = (22000+28000)/2 = 25000 -> reparaturMitte < wbwMitte
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 20000, reparaturMaxEur: 26000, ezJahr: 2023, wbwMinEur: 22000, wbwMaxEur: 28000, restwertMinEur: 6000, restwertMaxEur: 8000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.hinweisReparatur).toBeUndefined()
   })
 
   it('Totalschaden: Restwert > WBW -> Fahrzeugschaden auf 0 gefloort (nie negativ)', () => {

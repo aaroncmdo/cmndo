@@ -124,13 +124,22 @@ export function berechneAnspruchsSpanne(
         ? { titel: 'Reparieren & Fahrzeug behalten', positionen: [...positionen], summeMinEur: gesamtMinEur, summeMaxEur: gesamtMaxEur }
         : null
 
+      const reparaturMitteWeg = reparaturWeg ? (reparaturWeg.summeMinEur + reparaturWeg.summeMaxEur) / 2 : null
+      const tsMitte = (tsMin + tsMax) / 2
       const guenstiger: 'reparatur' | 'totalschaden' =
-        reparaturWeg && reparaturWeg.summeMaxEur >= tsMax ? 'reparatur' : 'totalschaden'
+        reparaturMitteWeg != null && reparaturMitteWeg >= tsMitte ? 'reparatur' : 'totalschaden'
+
+      // 130%-Hinweis: Reparaturkosten uebersteigen WBW, aber Weg ist noch moeglich (Zone B, bis130=true)
+      const hinweisReparatur: string | undefined =
+        bis130 && reparaturMitte > wbwMitte
+          ? 'Reparaturkosten über dem Wiederbeschaffungswert (bis 130 %) werden nur erstattet, wenn fachgerecht repariert wird und Sie das Fahrzeug mindestens 6 Monate weiter nutzen.'
+          : undefined
 
       totalschaden = {
         wbwMinEur: input.wbwMinEur!, wbwMaxEur: input.wbwMaxEur!,
         restwertMinEur: restMin, restwertMaxEur: restMax,
         reparaturWeg, totalschadenWeg, reparaturBis130Moeglich: bis130, guenstiger,
+        ...(hinweisReparatur ? { hinweisReparatur } : {}),
       }
     }
   }

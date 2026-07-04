@@ -1,7 +1,7 @@
 'use client'
 import type { AnspruchSpanne, AnspruchWeg } from '@/lib/anspruch/types'
 import { AnspruchPositionsListe } from '@/components/shared/AnspruchPositionsListe'
-import { Button, Badge } from '@/components/primitives'
+import { Button } from '@/components/primitives'
 
 /** Adapter: baut aus einem AnspruchWeg eine minimale AnspruchSpanne für AnspruchPositionsListe */
 function wegZuSpanne(weg: AnspruchWeg): AnspruchSpanne {
@@ -32,34 +32,32 @@ export function AnspruchSummaryStep({
           <p className="text-body-sm text-claimondo-shield">
             Bei diesem Schaden liegt möglicherweise ein{' '}
             <strong className="text-claimondo-navy">wirtschaftlicher Totalschaden</strong>{' '}
-            vor. Ihre Optionen:
+            vor. Sie haben zwei Wege — welcher für Sie gilt, klärt Ihr Gutachter verbindlich.
           </p>
 
-          {/* Wege in der Reihenfolge: guenstiger zuerst */}
-          {[
-            totalschaden.guenstiger === 'totalschaden' ? totalschaden.totalschadenWeg : totalschaden.reparaturWeg,
-            totalschaden.guenstiger === 'totalschaden' ? totalschaden.reparaturWeg : totalschaden.totalschadenWeg,
-          ]
+          {/* Stabile Reihenfolge: Reparatur-Weg zuerst (wenn vorhanden), dann Totalschaden-Weg */}
+          {[totalschaden.reparaturWeg, totalschaden.totalschadenWeg]
             .filter((weg): weg is AnspruchWeg => weg !== null)
             .map((weg) => {
-              const istGuenstiger =
-                (totalschaden.guenstiger === 'totalschaden' && weg === totalschaden.totalschadenWeg) ||
-                (totalschaden.guenstiger === 'reparatur' && weg === totalschaden.reparaturWeg)
+              const istReparaturWeg = weg === totalschaden.reparaturWeg
               return (
                 <div key={weg.titel} className="space-y-1">
-                  {istGuenstiger ? (
-                    <div className="flex items-center gap-2">
-                      <Badge tone="success">günstiger für Sie</Badge>
-                    </div>
-                  ) : null}
                   <AnspruchPositionsListe
                     spanne={wegZuSpanne(weg)}
                     titel={weg.titel}
                     gesamtLabel="Summe"
+                    disclaimer=""
                   />
+                  {istReparaturWeg && totalschaden.hinweisReparatur ? (
+                    <p className="text-caption text-claimondo-shield">{totalschaden.hinweisReparatur}</p>
+                  ) : null}
                 </div>
               )
             })}
+
+          <p className="text-caption text-claimondo-shield">
+            Unverbindliche Ersteinschätzung anhand Ihrer Fotos. Den verbindlichen Anspruch ermittelt Ihr Gutachter.
+          </p>
         </div>
       ) : (
         <AnspruchPositionsListe spanne={spanne} />
