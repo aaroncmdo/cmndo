@@ -9,10 +9,11 @@ import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSour
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
-import { svPinsFC, isochroneFC } from './geo'
+import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC } from './geo'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
-import type { SvLiveOps } from '@/lib/live-ops'
+import TerminPopup from './TerminPopup'
+import type { SvLiveOps, TerminPin } from '@/lib/live-ops'
 
 // ------------------------------------------------------------------ Props
 
@@ -28,6 +29,26 @@ const SRC_ISOS = 'lo-isos'
 const LAYER_SVS = 'lo-svs-circle'
 const LAYER_ISOS_FILL = 'lo-isos-fill'
 const LAYER_ISOS_LINE = 'lo-isos-line'
+
+const SRC_TERMINE = 'lo-termine'
+const LAYER_TERMINE = 'lo-termine-circle'
+
+const SRC_ROUTEN = 'lo-routen'
+const LAYER_ROUTEN = 'lo-routen-line'
+
+const SRC_TAGESROUTEN = 'lo-tagesrouten'
+const LAYER_TAGESROUTEN = 'lo-tagesrouten-line'
+
+// Termin-Status-Farben via match-Expression (raw hex ok — Token-Audit-Skip-Header oben)
+const TERMIN_STATUS_COLOR_EXPR = [
+  'match',
+  ['get', 'status'],
+  'bestaetigt', '#22c55e',
+  'reserviert', '#f59e0b',
+  'unterwegs', '#3b82f6',
+  'losgefahren', '#3b82f6',
+  /* default */ '#94a3b8',
+] as unknown as mapboxgl.Expression
 
 // Typ-Farben via match-Expression (raw hex ist ok — Token-Audit-Skip-Header oben)
 const TYP_COLOR_EXPR = [
@@ -70,6 +91,12 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
     svsRef.current = data.svs
   }, [data.svs])
 
+  // Stabile Referenz auf aktuelle data.termine fuer Klick-Handler-Closures
+  const termineRef = useRef<TerminPin[]>(data.termine)
+  useEffect(() => {
+    termineRef.current = data.termine
+  }, [data.termine])
+
   const handleRetry = useCallback(() => {
     setError(null)
     setReady(false)
@@ -100,6 +127,34 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
 
       const popup = new mapboxgl.Popup({ offset: 12, closeButton: true })
         .setLngLat(lngLat)
+        .setDOMContent(container)
+        .addTo(map)
+
+      popup.on('close', () => {
+        root.unmount()
+        popupRootsRef.current.delete(root)
+      })
+    },
+    [role],
+  )
+
+  // ------ openTerminPopup: analog zu openSvPopup
+
+  const openTerminPopup = useCallback(
+    (terminId: string) => {
+      const map = mapRef.current
+      if (!map) return
+      const termin = termineRef.current.find((t) => t.id === terminId)
+      if (!termin) return
+
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      popupRootsRef.current.add(root)
+
+      root.render(<TerminPopup termin={termin} role={role} />)
+
+      const popup = new mapboxgl.Popup({ offset: 12, closeButton: true })
+        .setLngLat([termin.lng, termin.lat])
         .setDOMContent(container)
         .addTo(map)
 
@@ -251,6 +306,87 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
       // ─── Live-Auto-Marker ──────────────────────────────────────────────
       buildCarMarkers(map, svsRef.current)
 
+      // ─── Termin-Pins ───────────────────────────────────────────────────
+      map.addSource(SRC_TERMINE, {
+        type: 'geojson',
+        data: terminPinsFC(termineRef.current),
+      })
+
+      map.addLayer({
+        id: LAYER_TERMINE,
+        type: 'circle',
+        source: SRC_TERMINE,
+        paint: {
+          'circle-color': TERMIN_STATUS_COLOR_EXPR,
+          'circle-radius': 5,
+          'circle-stroke-color': '#ffffff',
+          'circle-stroke-width': 1.5,
+        },
+      })
+
+      // Klick auf Termin-Pin → Popup
+      map.on(
+        'click',
+        LAYER_TERMINE,
+        (e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] }) => {
+          const feature = e.features?.[0]
+          if (!feature) return
+          const terminId = feature.properties?.__id as string
+          openTerminPopup(terminId)
+        },
+      )
+
+      map.on('mouseenter', LAYER_TERMINE, () => {
+        map.getCanvas().style.cursor = 'pointer'
+      })
+      map.on('mouseleave', LAYER_TERMINE, () => {
+        map.getCanvas().style.cursor = ''
+      })
+
+      // ─── Unterwegs-Routen-Layer ─────────────────────────────────────────
+      map.addSource(SRC_ROUTEN, {
+        type: 'geojson',
+        data: routenFC(data.routen),
+      })
+
+      map.addLayer({
+        id: LAYER_ROUTEN,
+        type: 'line',
+        source: SRC_ROUTEN,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+        },
+        paint: {
+          'line-color': '#0D1B3E',
+          'line-width': 3,
+          'line-opacity': 0.6,
+        },
+      })
+
+      // ─── Tagesrouten-Layer (default: unsichtbar, wird in Task 6 getoggelt) ──
+      map.addSource(SRC_TAGESROUTEN, {
+        type: 'geojson',
+        data: tagesroutenFC(data.tagesrouten),
+      })
+
+      map.addLayer({
+        id: LAYER_TAGESROUTEN,
+        type: 'line',
+        source: SRC_TAGESROUTEN,
+        layout: {
+          'line-cap': 'round',
+          'line-join': 'round',
+          visibility: 'none',
+        },
+        paint: {
+          'line-color': '#94a3b8',
+          'line-width': 2,
+          'line-opacity': 0.7,
+          'line-dasharray': [2, 2],
+        },
+      })
+
       setReady(true)
     })
 
@@ -293,6 +429,31 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
     clearCarMarkers()
     buildCarMarkers(map, data.svs)
   }, [data.svs, ready, clearCarMarkers, buildCarMarkers])
+
+  // ------ Rebuild-Effect: Termine-Source bei Daten-Aenderung updaten
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !ready) return
+
+    if (map.getSource(SRC_TERMINE)) {
+      (map.getSource(SRC_TERMINE) as GeoJSONSource).setData(terminPinsFC(data.termine))
+    }
+  }, [data.termine, ready])
+
+  // ------ Rebuild-Effect: Routen-Sources bei Daten-Aenderung updaten
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !ready) return
+
+    if (map.getSource(SRC_ROUTEN)) {
+      (map.getSource(SRC_ROUTEN) as GeoJSONSource).setData(routenFC(data.routen))
+    }
+    if (map.getSource(SRC_TAGESROUTEN)) {
+      (map.getSource(SRC_TAGESROUTEN) as GeoJSONSource).setData(tagesroutenFC(data.tagesrouten))
+    }
+  }, [data.routen, data.tagesrouten, ready])
 
   // ------ Hover-Sync: Car-Marker-Zoom bei gesetztem hoveredSvId
 

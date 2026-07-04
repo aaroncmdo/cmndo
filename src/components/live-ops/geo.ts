@@ -8,7 +8,7 @@
  * WICHTIG: GeoJSON-Koordinaten sind immer [lng, lat] (nicht [lat, lng])!
  */
 
-import type { SvLiveOps, TerminPin, DeadPin } from '@/lib/live-ops'
+import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute } from '@/lib/live-ops'
 
 /**
  * SV-Standort-Pins. SVs ohne standortLat/Lng werden gefiltert.
@@ -84,6 +84,57 @@ export function deadPinsFC(pins: DeadPin[]): GeoJSON.FeatureCollection {
         quelle: dp.quelle,
       },
     })),
+  }
+}
+
+/**
+ * Unterwegs-Routen: jede UnterwegsRoute → LineString-Feature.
+ * Routen mit weniger als 2 Koordinaten werden gefiltert.
+ */
+export function routenFC(routen: UnterwegsRoute[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: routen
+      .filter((r) => r.coords.length >= 2)
+      .map((r) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: r.coords,
+        },
+        properties: {
+          __type: 'route',
+          svId: r.svId,
+        },
+      })),
+  }
+}
+
+/**
+ * Tagesrouten: jede TagesRoute → LineString-Feature aus stops (reihenfolge-sortiert).
+ * Routen mit weniger als 2 Stops werden gefiltert.
+ */
+export function tagesroutenFC(tagesrouten: TagesRoute[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: tagesrouten
+      .map((tr) => {
+        const sorted = [...tr.stops].sort((a, b) => a.reihenfolge - b.reihenfolge)
+        return { tr, sorted }
+      })
+      .filter(({ sorted }) => sorted.length >= 2)
+      .map(({ tr, sorted }) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: sorted.map((s) => [s.lng, s.lat]),
+        },
+        properties: {
+          __type: 'tagesroute',
+          svId: tr.svId,
+          svName: tr.svName,
+        },
+      })),
   }
 }
 

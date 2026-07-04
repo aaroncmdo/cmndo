@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { SvLiveOps, TerminPin, DeadPin } from '@/lib/live-ops'
-import { svPinsFC, terminPinsFC, deadPinsFC, isochroneFC } from './geo'
+import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute } from '@/lib/live-ops'
+import { svPinsFC, terminPinsFC, deadPinsFC, isochroneFC, routenFC, tagesroutenFC } from './geo'
 
 // --- Fixtures ---
 
@@ -154,6 +154,109 @@ describe('deadPinsFC', () => {
     expect(f.properties?.__type).toBe('deadpin')
     expect(f.properties?.status).toBe('warm')
     expect(f.properties?.quelle).toBe('manual')
+  })
+})
+
+const makeRoute = (overrides: Partial<UnterwegsRoute> = {}): UnterwegsRoute => ({
+  svId: 'sv-1',
+  coords: [
+    [13.405, 52.52],
+    [13.41, 52.525],
+  ],
+  ...overrides,
+})
+
+const makeTagesRoute = (overrides: Partial<TagesRoute> = {}): TagesRoute => ({
+  svId: 'sv-1',
+  svName: 'Hans Muster',
+  stops: [
+    { terminId: 't-1', lat: 52.52, lng: 13.405, startZeit: '2026-07-04T09:00:00Z', reihenfolge: 1 },
+    { terminId: 't-2', lat: 52.53, lng: 13.41, startZeit: '2026-07-04T11:00:00Z', reihenfolge: 2 },
+  ],
+  ...overrides,
+})
+
+// --- routenFC ---
+
+describe('routenFC', () => {
+  it('maps one UnterwegsRoute to one LineString feature', () => {
+    const r = makeRoute()
+    const fc = routenFC([r])
+    expect(fc.type).toBe('FeatureCollection')
+    expect(fc.features).toHaveLength(1)
+    const f = fc.features[0]
+    expect(f.geometry.type).toBe('LineString')
+    const coords = (f.geometry as GeoJSON.LineString).coordinates
+    expect(coords).toEqual(r.coords)
+  })
+
+  it('sets __type and svId on properties', () => {
+    const r = makeRoute({ svId: 'sv-42' })
+    const f = routenFC([r]).features[0]
+    expect(f.properties?.__type).toBe('route')
+    expect(f.properties?.svId).toBe('sv-42')
+  })
+
+  it('drops routes with fewer than 2 coords', () => {
+    const empty = makeRoute({ coords: [] })
+    const single = makeRoute({ coords: [[13.0, 52.0]] })
+    expect(routenFC([empty]).features).toHaveLength(0)
+    expect(routenFC([single]).features).toHaveLength(0)
+  })
+
+  it('returns empty FC for empty array', () => {
+    expect(routenFC([]).features).toHaveLength(0)
+  })
+})
+
+// --- tagesroutenFC ---
+
+describe('tagesroutenFC', () => {
+  it('maps one TagesRoute with 2 stops to one LineString feature', () => {
+    const tr = makeTagesRoute()
+    const fc = tagesroutenFC([tr])
+    expect(fc.type).toBe('FeatureCollection')
+    expect(fc.features).toHaveLength(1)
+    const f = fc.features[0]
+    expect(f.geometry.type).toBe('LineString')
+    const coords = (f.geometry as GeoJSON.LineString).coordinates
+    // [lng, lat] reihenfolge, sorted by reihenfolge
+    expect(coords[0]).toEqual([13.405, 52.52])
+    expect(coords[1]).toEqual([13.41, 52.53])
+  })
+
+  it('sorts stops by reihenfolge', () => {
+    const tr = makeTagesRoute({
+      stops: [
+        { terminId: 't-2', lat: 52.53, lng: 13.41, startZeit: '2026-07-04T11:00:00Z', reihenfolge: 2 },
+        { terminId: 't-1', lat: 52.52, lng: 13.405, startZeit: '2026-07-04T09:00:00Z', reihenfolge: 1 },
+      ],
+    })
+    const f = tagesroutenFC([tr]).features[0]
+    const coords = (f.geometry as GeoJSON.LineString).coordinates
+    expect(coords[0]).toEqual([13.405, 52.52])
+    expect(coords[1]).toEqual([13.41, 52.53])
+  })
+
+  it('sets __type, svId and svName on properties', () => {
+    const tr = makeTagesRoute({ svId: 'sv-7', svName: 'Maria Gutachterin' })
+    const f = tagesroutenFC([tr]).features[0]
+    expect(f.properties?.__type).toBe('tagesroute')
+    expect(f.properties?.svId).toBe('sv-7')
+    expect(f.properties?.svName).toBe('Maria Gutachterin')
+  })
+
+  it('drops tagesrouten with fewer than 2 stops', () => {
+    const empty = makeTagesRoute({ stops: [] })
+    const single = makeTagesRoute({
+      stops: [{ terminId: 't-1', lat: 52.52, lng: 13.405, startZeit: '2026-07-04T09:00:00Z', reihenfolge: 1 }],
+    })
+    expect(tagesroutenFC([empty]).features).toHaveLength(0)
+    expect(tagesroutenFC([single]).features).toHaveLength(0)
+  })
+
+  it('returns empty FC for empty array', () => {
+    expect(tagesroutenFC([]).features).toHaveLength(0)
   })
 })
 
