@@ -81,8 +81,13 @@ export default function PageHeader({
   }
 
   return (
-    <div className="flex items-center justify-between gap-3" data-page-header>
-      <div className="flex items-center gap-3 min-w-0 flex-1">
+    // Mobil gestapelt (Titel volle Breite -> kein Truncate wenn actions breit sind,
+    // z.B. Liste/Kalender-Toggle auf /kunde/termine), ab sm einreihig wie gehabt.
+    <div
+      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
+      data-page-header
+    >
+      <div className="flex items-center gap-3 min-w-0 sm:flex-1">
         {leadingSlot}
         <div className="flex flex-col gap-1 min-w-0">
           <div className="flex items-center gap-2 min-w-0">
