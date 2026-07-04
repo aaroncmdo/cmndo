@@ -10444,11 +10444,15 @@ export type Database = {
           notification_preferences: Json | null
           onboarding_abgeschlossen: boolean
           provision_aktiv: boolean
+          vermittlung_prompt_gesehen: boolean
           provision_betrag_komplett_netto: number
           provision_betrag_nur_gutachter_netto: number
           status: string
           telefon: string | null
           user_id: string | null
+          versicherung_id: string | null
+          maklerpool_id: string | null
+          ust_id: string | null
         }
         Insert: {
           adresse_ort?: string | null
@@ -10472,11 +10476,15 @@ export type Database = {
           notification_preferences?: Json | null
           onboarding_abgeschlossen?: boolean
           provision_aktiv?: boolean
+          vermittlung_prompt_gesehen?: boolean
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
           status?: string
           telefon?: string | null
           user_id?: string | null
+          versicherung_id?: string | null
+          maklerpool_id?: string | null
+          ust_id?: string | null
         }
         Update: {
           adresse_ort?: string | null
@@ -10500,11 +10508,36 @@ export type Database = {
           notification_preferences?: Json | null
           onboarding_abgeschlossen?: boolean
           provision_aktiv?: boolean
+          vermittlung_prompt_gesehen?: boolean
           provision_betrag_komplett_netto?: number
           provision_betrag_nur_gutachter_netto?: number
           status?: string
           telefon?: string | null
           user_id?: string | null
+          versicherung_id?: string | null
+          maklerpool_id?: string | null
+          ust_id?: string | null
+        }
+        Relationships: []
+      }
+      maklerpools: {
+        Row: {
+          aktiv: boolean
+          erstellt_am: string
+          id: string
+          name: string
+        }
+        Insert: {
+          aktiv?: boolean
+          erstellt_am?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          aktiv?: boolean
+          erstellt_am?: string
+          id?: string
+          name?: string
         }
         Relationships: []
       }

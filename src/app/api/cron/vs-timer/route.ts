@@ -63,10 +63,16 @@ export async function GET(request: Request) {
     // Skip if no change
     if (neueStufe === (fall.vs_eskalationsstufe ?? 'vs-01')) continue
 
-    // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1 per Claim).
-    // Non-fatal (Cron) — Fehler loggen, Eskalations-Task/Timeline laufen trotzdem.
+    // CMM-44 SP-I3: vs_eskalationsstufe lebt auf kanzlei_faelle (1:1 per Claim). Die
+    // persistierte Stufe GATED die Seiteneffekte: schlaegt der Write fehl, wird NICHT
+    // eskaliert — sonst geht die WhatsApp (inkl. Klageankuendigung tag28) raus, aber
+    // vs_eskalationsstufe bleibt alt (Skip-Guard oben haengt daran) -> naechster Lauf
+    // feuert dieselbe Eskalation erneut = Doppel-Drohung an den Kunden. Retry naechster Lauf.
     const kfRes = await upsertKanzleiFall(supabase, (fall.id as string | null) ?? null, { vs_eskalationsstufe: neueStufe })
-    if (!kfRes.ok) console.error('[vs-timer] kanzlei_faelle vs_eskalationsstufe update:', kfRes.error)
+    if (!kfRes.ok) {
+      console.error('[vs-timer] kanzlei_faelle vs_eskalationsstufe-Write fehlgeschlagen, Fall übersprungen:', kfRes.error)
+      continue
+    }
 
     // Get the stufe definition
     const stufeDef = STUFEN.find(s => s.key === neueStufe)

@@ -2,6 +2,7 @@
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { FINANCE } from '@/lib/finance/constants'
 // Alias: die exportierte Server-Action in dieser Datei heißt selbst `createLead`.
 import { createLead as insertLeadRow } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
@@ -344,7 +345,7 @@ export async function createLead(data: {
     await supabase.from('provisionen_maik').insert({
       lead_id: leadId,
       monat,
-      basis_provision: 150.00,
+      basis_provision: FINANCE.CPA_MARKETING_NETTO,
       source_channel: data.source_channel,
       status: 'pending',
     }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })

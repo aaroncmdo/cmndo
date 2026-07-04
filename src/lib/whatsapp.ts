@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { sendWhatsAppText } from './whatsapp/baileys-client'
 import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
+import { istInternesTelefon } from '@/lib/testdaten/test-sv-guard'
 
 // ─── WhatsApp-Versand (Baileys, VPS-Worker) ──────────────────────────────────
 // 2026-06-02: Twilio-WhatsApp vollstaendig entfernt — alle ausgehenden WhatsApp-
@@ -26,6 +27,14 @@ export async function sendWhatsApp(to: string, message: string): Promise<{ succe
   if (se.mode === 'test-recipient' && se.recipient !== cleanTo) {
     console.warn(`[side-effect:test-recipient] WhatsApp UMLEITUNG ${cleanTo} -> ${se.recipient}`)
     cleanTo = se.recipient
+  }
+
+  // Send-Isolation (2026-07-03): im Live-Modus keine WhatsApp an interne/Test-Telefone
+  // (Reverse-Lookup leads/profiles -> interne Email). Fail-open (nie eine echte Nachricht
+  // brechen). NUR live, damit test-recipient (Umleitung an Test-Nummer) intakt bleibt.
+  if (se.mode === 'live' && (await istInternesTelefon(cleanTo))) {
+    console.warn(`[send-isolation] WhatsApp an internes/Test-Telefon ${cleanTo} unterdrueckt`)
+    return { success: true, sid: 'internal-recipient-suppressed' }
   }
 
   const result = await sendWhatsAppText(cleanTo, message)

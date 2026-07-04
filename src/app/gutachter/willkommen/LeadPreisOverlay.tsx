@@ -6,6 +6,7 @@
 // Gutachter-Honorar abgezogen wurde.
 
 import { useMemo, useState } from 'react'
+import { FINANCE } from '@/lib/finance/constants'
 import { XIcon, CalculatorIcon, InfoIcon, TrendingUpIcon } from 'lucide-react'
 import { Modal } from '@/components/primitives/Modal'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -206,7 +207,7 @@ export default function LeadPreisOverlay({
                 </Table>
               </DataTableContainer>
               <div className="px-4 py-2 bg-claimondo-bg border-t border-claimondo-border">
-                <p className="text-[10px] text-claimondo-ondo/70">Alle Preise netto zzgl. 19% MwSt</p>
+                <p className="text-[10px] text-claimondo-ondo/70">Alle Preise netto zzgl. {FINANCE.MWST_PROZENT}% MwSt</p>
               </div>
             </div>
           </section>

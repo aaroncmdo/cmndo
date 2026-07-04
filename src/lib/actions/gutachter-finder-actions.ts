@@ -32,6 +32,8 @@ export type AktiverSVPublic = {
   /** Vorname des SV — NUR bei aktiven, verifizierten Partnern öffentlich gezeigt (Aaron 12.06.).
    * Kein Nachname. Dead-Pins (sv_leads) bleiben anonym (eigener DeadPinProfilePopup). */
   vorname: string | null
+  /** AAR-369: Selbstgeschriebener Profiltext (Bio) — oeffentliches Trust-Signal. */
+  profilbeschreibung: string | null
   stadt: string | null
   // Anonyme Trust-Signale (Profil-Anreicherung, AAR-956 WS2-Glass). KEINE Identitaet:
   // gutachter_typ + Umkreis + Qualifikationen + Specs + Schadenarten + Credential-
@@ -156,6 +158,9 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const svIds = rows.map((r) => r.id as string)
 
   const vornameByProfileId = new Map<string, string | null>()
+  // AAR-369: Anzeigename (Vorrang vor Vorname) + Profiltext (Bio) fuer den Finder.
+  const anzeigenameByProfileId = new Map<string, string | null>()
+  const beschreibungByProfileId = new Map<string, string | null>()
   const bewertungByProfileId = new Map<string, { durchschnitt: number; anzahl: number }>()
   type SvEnrich = {
     gutachter_typ: string | null
@@ -169,7 +174,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
 
   const admin = createAdminClient()
   const [profilesRes, bewRes, enrichRes] = await Promise.all([
-    admin.from('profiles').select('id,vorname').in('id', profileIds),
+    admin.from('profiles').select('id,vorname,anzeigename,profilbeschreibung').in('id', profileIds),
     admin
       .from('google_bewertungen_cache')
       .select('profile_id,durchschnitt,anzahl_bewertungen')
@@ -182,7 +187,11 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       .in('id', svIds),
   ])
   if (profilesRes.data) {
-    for (const p of profilesRes.data) vornameByProfileId.set(p.id, p.vorname)
+    for (const p of profilesRes.data as Array<{ id: string; vorname: string | null; anzeigename: string | null; profilbeschreibung: string | null }>) {
+      vornameByProfileId.set(p.id, p.vorname)
+      anzeigenameByProfileId.set(p.id, p.anzeigename ?? null)
+      beschreibungByProfileId.set(p.id, p.profilbeschreibung ?? null)
+    }
   }
   if (bewRes.data) {
     for (const b of bewRes.data) {
@@ -213,6 +222,8 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const mapped: AktiverSVPublic[] = rows.map((r) => {
     const profileId = r.profile_id as string | null
     const vorname = profileId ? vornameByProfileId.get(profileId) ?? null : null
+    // AAR-369: Anzeigename hat Vorrang vor Vorname fuer die oeffentliche Anzeige.
+    const anzeigeName = (profileId ? anzeigenameByProfileId.get(profileId) ?? null : null) || vorname
     const bew = profileId ? bewertungByProfileId.get(profileId) : undefined
     const specsAll = Array.isArray(r.spezifikationen) ? (r.spezifikationen as string[]) : []
     const enrich = enrichBySvId.get(r.id as string)
@@ -222,8 +233,8 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       standort_lng: Number(r.standort_lng),
       isochrone_polygon: r.isochrone_polygon,
       paket: r.paket,
-      vorname_initiale: firstInitial(vorname),
-      vorname: (vorname ?? '').trim() || null,
+      vorname_initiale: firstInitial(anzeigeName),
+      vorname: (anzeigeName ?? '').trim() || null,
       stadt: extractStadt(r.standort_adresse as string | null),
       gutachter_typ: enrich?.gutachter_typ ?? null,
       umkreis_km: enrich?.umkreis_km ?? null,
@@ -235,6 +246,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       mitgliedschaften: enrich?.mitgliedschaften ?? [],
       bewertungs_durchschnitt: bew ? bew.durchschnitt : null,
       bewertungs_anzahl: bew ? bew.anzahl : null,
+      profilbeschreibung: profileId ? beschreibungByProfileId.get(profileId) ?? null : null,
     }
   })
 

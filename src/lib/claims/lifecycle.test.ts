@@ -39,7 +39,9 @@ function mkKanzlei(p: Partial<KanzleiFallRow> & Pick<KanzleiFallRow, 'status'>):
     id: p.id ?? 'kf-1',
     fall_id: p.fall_id ?? 'fall-1',
     status: p.status,
-    vs_kontakt_am: p.vs_kontakt_am ?? TS,
+    // Aaron 03.07.: vs_kontakt_am ist jetzt ein Regulierungs-Signal → Default null (opt-in),
+    // damit Interim-/Begutachtungs-Cases ohne explizites VS-Kontakt-Datum predictable bleiben.
+    vs_kontakt_am: p.vs_kontakt_am ?? null,
     ausgezahlt_am: p.ausgezahlt_am ?? null,
     erstellt_am: p.erstellt_am ?? TS,
     updated_at: p.updated_at ?? TS,
@@ -393,6 +395,60 @@ describe('getClaimLifecycle — CMM-74 b2: operative Sub-Phasen (+5, v_claim_pha
     expect(mainPhaseOf('vs-kuerzt')).toBe('regulierung')
     expect(mainPhaseOf('anschlussschreiben')).toBe('regulierung')
     expect(mainPhaseOf('nachbesichtigung-laeuft')).toBe('regulierung')
+  })
+})
+
+// Aaron 03.07.: DATA-DRIVEN Regulierung — die KB-nativen Aktionen (kanzleiVsKontaktErfasst →
+// kf.vs_kontakt_am; kanzleiAuszahlungEingegangen → kf.status='auszahlung'/ausgezahlt_am) treiben
+// die Phase jetzt OHNE lexdrive_case_id. Vorher gated hinter LexDrive (B-10). Bitgleich zur
+// v_claim_phase-Migration 20260703161208.
+describe('getClaimLifecycle — data-driven Regulierung ohne LexDrive (Aaron 03.07.)', () => {
+  it('regulierung/versicherungskontakt bei kf.vs_kontakt_am (KB-VS-Kontakt), OHNE lexdrive', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', vs_kontakt_am: TS }),
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('versicherungskontakt')
+  })
+
+  it('regulierung/auszahlung bei kf.status=auszahlung, OHNE lexdrive', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', vs_kontakt_am: null }),
+    })
+    expect(r.mainPhase).toBe('regulierung')
+    expect(r.subPhase).toBe('auszahlung')
+  })
+
+  it('regulierung/auszahlung bei kf.ausgezahlt_am gesetzt, OHNE lexdrive', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', ausgezahlt_am: TS, vs_kontakt_am: null }),
+    })
+    expect(r.subPhase).toBe('auszahlung')
+  })
+
+  it('Interim bleibt kanzlei_uebergabe OHNE Regulierungs-Signal (kein vs_kontakt_am/auszahlung/lexdrive)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [mkAuftrag({ typ: 'erstgutachten', status: 'abgeschlossen' })],
+      kanzleiFall: mkKanzlei({ status: 'versicherungskontakt', vs_kontakt_am: null }),
+    })
+    expect(r.mainPhase).toBe('begutachtung')
+    expect(r.subPhase).toBe('kanzlei_uebergabe')
+  })
+
+  it('Auszahlung (data-driven) schlaegt vs_kontakt_am (weiteste Regulierungs-Sub-Phase)', () => {
+    const r = getClaimLifecycle({
+      lead: null,
+      auftraege: [],
+      kanzleiFall: mkKanzlei({ status: 'auszahlung', vs_kontakt_am: TS }),
+    })
+    expect(r.subPhase).toBe('auszahlung')
   })
 })
 

@@ -143,13 +143,17 @@ export async function convertLeadToClaim(
     })
     if (veh.ok) resolvedVehicleId = veh.vehicleId
     else console.warn('[CMM-50.0] vehicles-Upsert bei Konversion fehlgeschlagen:', veh.error)
-  } else if (!resolvedVehicleId && (
+  }
+  // CMM-fix: Kennzeichen-Stub-Fallback greift jetzt auch, wenn der FIN-Pfad KEIN Fahrzeug ergab
+  // (Fake/Tippfehler-FIN oder Lookup down) — sonst gingen die Fahrzeugdaten verloren (nicht db-driven).
+  // Der !resolvedVehicleId-Guard verhindert Doppelanlage bei erfolgreicher FIN.
+  if (!resolvedVehicleId && (
     lead.kennzeichen || lead.fahrzeug_hersteller || lead.fahrzeug_modell ||
     lead.fahrzeug_farbe || lead.lackfarbe_code || lead.hsn || lead.tsn ||
     lead.fahrzeug_baujahr || lead.erstzulassung || lead.kilometerstand ||
     lead.kennzeichen_buchstaben || lead.fahrzeug_ausstattung
   )) {
-    // CMM-68/CMM-50: kein FIN, aber IRGENDEIN Fahrzeugdatum -> FIN-loser Stub, damit ALLE
+    // CMM-68/CMM-50: kein (erfolgreicher) FIN, aber IRGENDEIN Fahrzeugdatum -> FIN-loser Stub, damit ALLE
     // Fahrzeugdaten unbedingt auf vehicles landen (Vorbedingung dafuer, dass der faelle-INSERT
     // die vehicle-Cols verlustfrei NICHT mehr schreibt). claims.vehicle_id wird gesetzt; die FIN
     // kommt spaeter (ZB1) und dedupliziert via ensureVehicleFromFin (ein Fahrzeug, mehrere Claims).
@@ -467,6 +471,9 @@ export async function convertLeadToClaim(
     (lead.reparatur_vermittlung_status as string | null) ?? 'offen'
   ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_extern =
     (lead.reparatur_werkstatt_extern as string | null) ?? null
+  // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
+  ;(claimsInsert as Record<string, unknown>).schadenskategorie =
+    (lead.schadenskategorie as string | null) ?? null
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')
@@ -721,6 +728,30 @@ export async function convertLeadToClaim(
     return cleanupAndFail(
       `claim_parties-Insert fehlgeschlagen: ${partiesErr.message}`,
     )
+  }
+
+  // ─── SP2 Task 4: reparatur_termine-Row anlegen (non-fatal) ──────────────
+  // Bedingung: Lead hat sowohl eine Reparatur-Werkstatt (reparatur_werkstatt_id)
+  // als auch einen Wunschtermin (reparatur_wunschtermin, im Flow gesetzt, Task 3).
+  // status='angefragt' — die Werkstatt bestaetigt/ruft an/lehnt ab im naechsten Schritt.
+  // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
+  {
+    const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
+    const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
+    if (rwtWerkstattId && rwtWunschtermin) {
+      const { error: rtErr } = await admin
+        .from('reparatur_termine')
+        .insert({
+          claim_id: claimId,
+          werkstatt_id: rwtWerkstattId,
+          wunschtermin: rwtWunschtermin,
+          status: 'angefragt',
+          erstellt_von: input.triggerByUserId ?? null,
+        })
+      if (rtErr) {
+        console.error('[SP2 T4] reparatur_termine-Insert fehlgeschlagen (non-fatal):', rtErr.message)
+      }
+    }
   }
 
   // ─── Schritt 5: claim_vehicle_involvements ──────────────────────────────

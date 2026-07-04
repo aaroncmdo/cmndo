@@ -113,7 +113,7 @@ export default function ChatInboxLayout({
                         <p className="text-sm font-medium text-claimondo-navy truncate">
                           {t.title}
                         </p>
-                        <span className="text-[10px] text-claimondo-ondo/70 shrink-0">
+                        <span suppressHydrationWarning className="text-[10px] text-claimondo-ondo/70 shrink-0">
                           {formatInboxTime(t.lastAt)}
                         </span>
                       </div>

@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { renderToBuffer } from '@react-pdf/renderer'
 import { KanzleiPaketPDF, type KanzleiPaketData } from '@/lib/pdf/kanzlei-paket'
 import { getStorageUrl } from '@/lib/storage/url'
+import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
 
 export async function GET(
   _req: NextRequest,
@@ -51,10 +52,12 @@ export async function GET(
     : Promise.resolve({ data: null })
 
   // Load related data in parallel
+  // CMM-49: parteien-Tabelle ist leer (post-CMM-49). Gegner-Daten kommen aus
+  // v_claim_full (gegner_name) + resolveGegnerVersicherung (SSoT).
   const [
     { data: positionen },
     { data: dokumente },
-    { data: parteien },
+    { data: vcfGegner },
     leadResult,
     svResult,
     { data: claimRow },
@@ -72,9 +75,11 @@ export async function GET(
       .eq('fall_id', id)
       .is('geloescht_am', null)
       .is('abgelehnt_am', null),
-    supabase.from('parteien')
-      .select('rolle, name, versicherung_name, versicherung_nr, telefon, email')
-      .eq('fall_id', id),
+    // CMM-49: parteien leer — gegner_name aus v_claim_full (SSoT).
+    supabase.from('v_claim_full')
+      .select('gegner_name')
+      .eq('fall_id', id)
+      .maybeSingle(),
     fallLeadId
       ? supabase.from('leads').select('vorname, nachname, email, telefon').eq('id', fallLeadId).single()
       : Promise.resolve({ data: null }),
@@ -92,17 +97,18 @@ export async function GET(
     if (p) svName = `${(p as { vorname?: string }).vorname ?? ''} ${(p as { nachname?: string }).nachname ?? ''}`.trim() || null
   }
 
-  // Build geschaedigter from lead or parteien
-  const geschaedigterPartei = (parteien ?? []).find(p => p.rolle === 'geschaedigter')
-  const geschaedigter = geschaedigterPartei
-    ? { name: geschaedigterPartei.name, email: geschaedigterPartei.email, telefon: geschaedigterPartei.telefon }
-    : leadResult.data
-      ? { name: `${leadResult.data.vorname ?? ''} ${leadResult.data.nachname ?? ''}`.trim(), email: leadResult.data.email, telefon: leadResult.data.telefon }
-      : null
+  // Build geschaedigter from lead (parteien-Tabelle ist post-CMM-49 leer —
+  // geschaedigter-Partei war ohnehin immer ein Lead-Fallback).
+  const geschaedigter = leadResult.data
+    ? { name: `${leadResult.data.vorname ?? ''} ${leadResult.data.nachname ?? ''}`.trim(), email: leadResult.data.email, telefon: leadResult.data.telefon }
+    : null
 
-  const schaedigerPartei = (parteien ?? []).find(p => p.rolle === 'schaediger')
-  const schaediger = schaedigerPartei
-    ? { name: schaedigerPartei.name, versicherung: schaedigerPartei.versicherung_name, versicherungNr: schaedigerPartei.versicherung_nr, telefon: schaedigerPartei.telefon, email: schaedigerPartei.email }
+  // CMM-49: Gegner-Versicherung aus v_claim_full + resolveGegnerVersicherung (SSoT).
+  // parteien.rolle='schaediger' war post-CMM-49 immer leer → Gegner war immer '—'.
+  const gegnerVers = await resolveGegnerVersicherung(supabase, { fallId: id })
+  const gegnerName = (vcfGegner?.gegner_name as string | null) ?? null
+  const schaediger = (gegnerName ?? gegnerVers.name)
+    ? { name: gegnerName ?? '', versicherung: gegnerVers.name, versicherungNr: gegnerVers.nummer, telefon: null, email: null }
     : null
 
   // PDF wird der Kanzlei per Email zugestellt — die Doku-Links müssen mehrere

@@ -8,10 +8,7 @@ import {
   bestaetigeBesichtigungsortViaToken,
   korrigiereBesichtigungsortViaToken,
 } from './actions'
-
-// AAR-423: Brand-aware Primary-Akzente via CSS-Vars mit Claimondo-Fallbacks.
-const brandPrimary = 'var(--brand-primary, #0D1B3E)'
-const brandPrimaryHover = 'var(--brand-primary-hover, #1A2A55)'
+import { Button } from '@/components/primitives/Button'
 
 type State = 'idle' | 'correcting' | 'done'
 
@@ -101,26 +98,23 @@ export default function BesichtigungsortCheck({
         ) : (
           <div className="space-y-2">
             {error && <p className="text-xs text-danger">{error}</p>}
-            <button
-              type="button"
+            <Button
+              variant="navy"
+              fullWidth
               onClick={handleBestaetigen}
-              disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 text-white rounded-ios-xl py-3 text-sm font-semibold transition-colors disabled:opacity-50"
-              style={{ backgroundColor: brandPrimary }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = brandPrimaryHover)}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = brandPrimary)}
+              loading={isPending}
+              iconLeft={<CheckCircleIcon className="w-4 h-4" />}
             >
-              <CheckCircleIcon className="w-4 h-4" />
               {t('jaStimmt')}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              fullWidth
               onClick={() => setState('correcting')}
               disabled={isPending}
-              className="w-full flex items-center justify-center gap-2 bg-white hover:bg-claimondo-bg text-claimondo-navy border border-claimondo-border rounded-ios-xl py-2.5 text-sm font-medium transition-colors disabled:opacity-50"
             >
               {t('korrigieren')}
-            </button>
+            </Button>
           </div>
         )}
       </div>

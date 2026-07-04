@@ -150,7 +150,8 @@ export async function planeTermin(input: PlaneTerminInput): Promise<PlaneTerminR
       const bis = new Date(new Date(von).getTime() + dauerMin * 60_000).toISOString()
       const res = await reserviere({ assignee: input.assignee, von, bis, quelle: input.quelle, typ: terminTyp(input), bezug: input.bezug, db })
       if (res.ok) return { ok: true, kind: 'gebucht', terminId: res.terminId, assignee: input.assignee, von, bis, reserviertBis: res.reserviertBis }
-      return { ok: false, code: res.code, error: res.error }
+      // test_guard -> 'db' mappen (analog matching.ts); der beschreibende Grund reist in res.error.
+      return { ok: false, code: res.code === 'test_guard' ? 'db' : res.code, error: res.error }
     }
     const slots = await slotsFuerAssignee(input.assignee, schadenort, wunschzeit, vonIso, bisIso, db)
     return {

@@ -3,6 +3,7 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { FINANCE } from '@/lib/finance/constants'
 
 // ─── Types ──────────────────────────────────────────────────────────────────
 
@@ -163,7 +164,7 @@ function KanzleiAbrechnungPDF({ data }: { data: KanzleiPdfData }) {
             <Text style={s.summenValue}>{fmtEur(data.nettoGesamt)}</Text>
           </View>
           <View style={s.summenRow}>
-            <Text style={s.summenLabel}>MwSt. 19 %</Text>
+            <Text style={s.summenLabel}>MwSt. {FINANCE.MWST_PROZENT} %</Text>
             <Text style={s.summenValue}>{fmtEur(data.mwstBetrag)}</Text>
           </View>
           <View style={s.summenTotal}>

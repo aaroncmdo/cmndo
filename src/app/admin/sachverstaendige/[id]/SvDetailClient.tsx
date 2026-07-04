@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { toast } from 'sonner'
 import { updateSvProfile, resendWelcomeMail } from './actions'
-import { deactivateGutachter, reactivateGutachter } from '../_karte/actions'
+import { svSperren, svEntsperren } from './verifizierung-actions'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { MapPinIcon, MailIcon, LockIcon, UnlockIcon, IdCardIcon } from 'lucide-react'
 import { LoadingButton } from '@/components/ui/loading-button'
@@ -78,37 +78,35 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
   }
 
   function handleSperren() {
-    if (!sperrGrund.trim() || sperrGrund.trim().length < 5) {
-      toast.error('Bitte Sperr-Grund angeben (min. 5 Zeichen)')
+    if (!sperrGrund.trim() || sperrGrund.trim().length < 10) {
+      toast.error('Bitte Sperr-Grund angeben (min. 10 Zeichen)')
       return
     }
     startSperreTransition(async () => {
-      try {
-        await deactivateGutachter(sv.id, sperrGrund.trim())
-        toast.success('Sachverständiger gesperrt')
-        setShowSperrDialog(false)
-        setSperrGrund('')
-        router.refresh()
-      } catch (err) {
-        toast.error('Sperren fehlgeschlagen', {
-          description: err instanceof Error ? err.message : 'Unbekannter Fehler',
-        })
+      // Kanonischer Sperr-Pfad: svSperren (setzt gesperrt_* + ist_aktiv=false +
+      // Legacy deaktiviert_*). Result-Object statt try/catch.
+      const res = await svSperren(sv.id, sperrGrund.trim())
+      if (!res.success) {
+        toast.error('Sperren fehlgeschlagen', { description: res.error ?? 'Unbekannter Fehler' })
+        return
       }
+      toast.success('Sachverständiger gesperrt')
+      setShowSperrDialog(false)
+      setSperrGrund('')
+      router.refresh()
     })
   }
 
   function handleEntsperren() {
     if (!window.confirm('Sperre aufheben? Der Sachverständige bekommt danach wieder Fälle.')) return
     startSperreTransition(async () => {
-      try {
-        await reactivateGutachter(sv.id)
-        toast.success('Sperre aufgehoben')
-        router.refresh()
-      } catch (err) {
-        toast.error('Entsperren fehlgeschlagen', {
-          description: err instanceof Error ? err.message : 'Unbekannter Fehler',
-        })
+      const res = await svEntsperren(sv.id)
+      if (!res.success) {
+        toast.error('Entsperren fehlgeschlagen', { description: res.error ?? 'Unbekannter Fehler' })
+        return
       }
+      toast.success('Sperre aufgehoben')
+      router.refresh()
     })
   }
 
@@ -161,30 +159,29 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
     setSaving(true)
     setError(null)
     setSuccess(false)
-    try {
-      const formData = new FormData(e.currentTarget)
-      // Inject standort data into FormData
-      formData.set('standort_adresse', standort.adresse)
-      formData.set('standort_plz', standort.plz)
-      formData.set('standort_lat', standort.lat != null ? String(standort.lat) : '')
-      formData.set('standort_lng', standort.lng != null ? String(standort.lng) : '')
-      formData.set('standort_place_id', standort.place_id)
-      // AAR SV-Konsolidierung: Qualifikations-/Spezifikations-Arrays + Nummern
-      formData.set('qualifikationen_neu', JSON.stringify(qualifikationen))
-      formData.set('spezifikationen', JSON.stringify(spezifikationen))
-      formData.set('schadenarten', JSON.stringify(schadenarten))
-      formData.set('bvsk_mitgliedsnummer', bvskNr.trim())
-      formData.set('ihk_zertifikat_nummer', ihkNr.trim())
-      formData.set('oebuv_bestellungsnummer', oebuvNr.trim())
-      await updateSvProfile(sv.id, sv.profileId, formData)
-      setSuccess(true)
-      router.refresh()
-      setTimeout(() => setSuccess(false), 3000)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
-    } finally {
-      setSaving(false)
+    const formData = new FormData(e.currentTarget)
+    // Inject standort data into FormData
+    formData.set('standort_adresse', standort.adresse)
+    formData.set('standort_plz', standort.plz)
+    formData.set('standort_lat', standort.lat != null ? String(standort.lat) : '')
+    formData.set('standort_lng', standort.lng != null ? String(standort.lng) : '')
+    formData.set('standort_place_id', standort.place_id)
+    // AAR SV-Konsolidierung: Qualifikations-/Spezifikations-Arrays + Nummern
+    formData.set('qualifikationen_neu', JSON.stringify(qualifikationen))
+    formData.set('spezifikationen', JSON.stringify(spezifikationen))
+    formData.set('schadenarten', JSON.stringify(schadenarten))
+    formData.set('bvsk_mitgliedsnummer', bvskNr.trim())
+    formData.set('ihk_zertifikat_nummer', ihkNr.trim())
+    formData.set('oebuv_bestellungsnummer', oebuvNr.trim())
+    const res = await updateSvProfile(sv.id, sv.profileId, formData)
+    setSaving(false)
+    if (!res.ok) {
+      setError(res.error ?? 'Fehler beim Speichern')
+      return
     }
+    setSuccess(true)
+    router.refresh()
+    setTimeout(() => setSuccess(false), 3000)
   }
 
   const inputCls = 'w-full bg-white border border-claimondo-border rounded-ios-xl px-4 py-2.5 text-claimondo-navy text-sm placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo'
@@ -251,8 +248,9 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
         </div>
 
         {/* AAR SV-Audit-Konsolidierung: Status ist jetzt READ-ONLY + Sperr-Toggle.
-            ist_aktiv wird nur vom Stripe-Webhook gesteuert. Admin-Blockierung
-            läuft über gesperrt_seit (deactivateGutachter / reactivateGutachter). */}
+            ist_aktiv wird primär vom Stripe-Webhook gesteuert. Admin-Blockierung
+            läuft über svSperren / svEntsperren (gesperrt_seit + ist_aktiv + Legacy
+            deaktiviert_* — kanonischer Pfad, identisch zum Verifizierungs-Tab). */}
         <div>
           <label className="block text-claimondo-ondo text-xs mb-1">Status</label>
           <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-4 py-2.5 text-sm">

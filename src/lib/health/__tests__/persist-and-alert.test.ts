@@ -27,6 +27,10 @@ function makeResult(status: CheckResult['status'], detail = 'Testdetail'): Check
  */
 function makeSupabaseStub(opts: {
   lastRun: { status: string; alerted_at: string | null } | null
+  // Juengster TATSAECHLICHER Alert-Zeitpunkt (chain 2: eq().not().order().limit()).
+  // Bewusst getrennt von lastRun.alerted_at: der letzte Lauf kann korrekt NICHT
+  // alarmiert haben (alerted_at=null), obwohl ein frueherer Lauf < 24h alarmierte.
+  lastAlertedAt?: string | null
   admins?: Array<{ id: string; email: string }>
   insertSpy?: ReturnType<typeof vi.fn>
 }) {
@@ -39,6 +43,8 @@ function makeSupabaseStub(opts: {
   })
 
   const insertSpy = opts.insertSpy ?? vi.fn().mockResolvedValue({ data: null, error: null })
+  const lastRunData = () => makeLimitStub(opts.lastRun ? [opts.lastRun] : [])
+  const lastAlertData = () => makeLimitStub(opts.lastAlertedAt ? [{ alerted_at: opts.lastAlertedAt }] : [])
 
   return {
     from: (table: string) => {
@@ -46,9 +52,15 @@ function makeSupabaseStub(opts: {
         return {
           select: (_cols: string) => ({
             eq: (_col: string, _val: string) => ({
+              // Chain 1 (letzter Lauf): eq().order().limit()
               order: (_col2: string, _opts: unknown) => ({
-                limit: (_n: number) =>
-                  Promise.resolve(makeLimitStub(opts.lastRun ? [opts.lastRun] : [])),
+                limit: (_n: number) => Promise.resolve(lastRunData()),
+              }),
+              // Chain 2 (letzter tatsaechlicher Alert): eq().not().order().limit()
+              not: (_col2: string, _op: string, _val2: unknown) => ({
+                order: (_col3: string, _opts2: unknown) => ({
+                  limit: (_n: number) => Promise.resolve(lastAlertData()),
+                }),
               }),
             }),
           }),
@@ -143,6 +155,7 @@ describe('persistAndAlert', () => {
     const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
     const supabase = makeSupabaseStub({
       lastRun: { status: 'crit', alerted_at: recentAlerted },
+      lastAlertedAt: recentAlerted,
       insertSpy,
     })
     const check = makeCheck('funnel-stuck-claims')
@@ -169,6 +182,7 @@ describe('persistAndAlert', () => {
     const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
     const supabase = makeSupabaseStub({
       lastRun: { status: 'crit', alerted_at: oldAlerted },
+      lastAlertedAt: oldAlerted,
       insertSpy,
     })
     const check = makeCheck('funnel-stuck-claims')
@@ -184,6 +198,33 @@ describe('persistAndAlert', () => {
     expect(createMitteilungMulti).toHaveBeenCalledOnce()
     expect(recordFailedOperation).toHaveBeenCalledOnce()
     expect(markOperationResolved).not.toHaveBeenCalled()
+  })
+
+  // -------------------------------------------------------------------------
+  // 3b. crit→crit, vorheriger Lauf hat NICHT alarmiert (alerted_at=null), aber der
+  //     juengste TATSAECHLICHE Alert war <24h: KEIN Re-Alert.
+  //     Regression fuer den 2-Stunden-Takt-Bug: sustainedCrit pruefte last.alerted_at,
+  //     das nach einem stillen Lauf null ist -> alarmierte jeden 2. Lauf statt taeglich.
+  // -------------------------------------------------------------------------
+  it('crit→crit, letzter Lauf still (alerted_at=null) aber juengster Alert <24h: KEIN Re-Alert', async () => {
+    const recentAlerted = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString() // vor 2h alarmiert
+    const insertSpy = vi.fn().mockResolvedValue({ data: null, error: null })
+    const supabase = makeSupabaseStub({
+      lastRun: { status: 'crit', alerted_at: null }, // vorheriger Lauf war korrekt still
+      lastAlertedAt: recentAlerted, // aber vor 2h wurde tatsaechlich alarmiert
+      insertSpy,
+    })
+    const check = makeCheck('funnel-stuck-claims')
+    const result = makeResult('crit', 'immer noch crit')
+
+    await persistAndAlert({ supabase }, [{ check, result }], deps())
+
+    // Kein Re-Alert: der letzte echte Alert ist erst 2h her (<24h).
+    const insertArg = insertSpy.mock.calls[0][0]
+    expect(insertArg.alerted_at).toBeNull()
+    expect(sendEmail).not.toHaveBeenCalled()
+    expect(createMitteilungMulti).not.toHaveBeenCalled()
+    expect(recordFailedOperation).not.toHaveBeenCalled()
   })
 
   // -------------------------------------------------------------------------
@@ -297,6 +338,11 @@ describe('persistAndAlert', () => {
               eq: () => ({
                 order: () => ({
                   limit: () => Promise.resolve({ data: [], error: null }),
+                }),
+                not: () => ({
+                  order: () => ({
+                    limit: () => Promise.resolve({ data: [], error: null }),
+                  }),
                 }),
               }),
             }),

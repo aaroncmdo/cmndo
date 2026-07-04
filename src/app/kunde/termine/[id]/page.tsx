@@ -7,6 +7,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getSvKontakt } from '@/lib/kunde/get-kontakt'
 import { redirect, notFound } from 'next/navigation'
 import KundeTerminDetailClient from './KundeTerminDetailClient'
 
@@ -65,34 +66,12 @@ export default async function KundeTerminDetailPage({
     }
   }
 
-  // SV-Profil + verifiziert-Badge
-  let svName: string | null = null
-  let svTelefon: string | null = null
-  let svAvatarUrl: string | null = null
-  let svVerifiziert = false
-  if (termin.assignee_id) {
-    const { data: sv } = await admin
-      .from('sachverstaendige')
-      .select('profile_id, verifizierung_status')
-      .eq('id', termin.assignee_id)
-      .single()
-    if (sv?.profile_id) {
-      const { data: p } = await admin
-        .from('profiles')
-        .select('vorname, nachname, telefon, anzeigename, avatar_url')
-        .eq('id', sv.profile_id)
-        .single()
-      if (p) {
-        svName =
-          (p.anzeigename as string | null) ||
-          [p.vorname, p.nachname].filter(Boolean).join(' ') ||
-          null
-        svTelefon = (p.telefon as string | null) ?? null
-        svAvatarUrl = (p.avatar_url as string | null) ?? null
-      }
-    }
-    svVerifiziert = sv?.verifizierung_status === 'geprueft'
-  }
+  // SV-Profil + verifiziert-Badge (geteilter get-kontakt-Loader statt inline sachverstaendige->profiles-Join)
+  const svK = await getSvKontakt(admin, termin.assignee_id ?? null)
+  const svName: string | null = svK ? svK.anzeigename || svK.name : null
+  const svTelefon: string | null = svK?.telefon ?? null
+  const svAvatarUrl: string | null = svK?.avatarUrl ?? null
+  const svVerifiziert = svK?.verifiziert ?? false
 
   const fahrzeug = [fall.fahrzeug_hersteller, fall.fahrzeug_modell].filter(Boolean).join(' ') || null
   const adresse =

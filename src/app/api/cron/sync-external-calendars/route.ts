@@ -25,10 +25,10 @@ export async function GET(request: Request) {
     const errors = results.filter((r) => r.error)
 
     if (errors.length > 0) {
-      console.warn('[sync-calendars] Fehler bei', errors.length, 'SVs:', errors.map((e) => `${e.svId}(${e.source}): ${e.error}`).join(', '))
+      console.warn('[sync-calendars] Fehler bei', errors.length, 'Profilen:', errors.map((e) => `${e.profileId}(${e.source}): ${e.error}`).join(', '))
     }
 
-    console.info(`[sync-calendars] ${results.length} SVs, +${inserted} -${deleted} in ${Date.now() - started}ms`)
+    console.info(`[sync-calendars] ${results.length} Profile, +${inserted} -${deleted} in ${Date.now() - started}ms`)
 
     return NextResponse.json({
       ok: true,

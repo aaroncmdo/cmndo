@@ -144,6 +144,34 @@ export function opaqueRatio(
 }
 
 /**
+ * Bestimmt die Retention-Referenz (der "Vordergrund vorher"-Wert) fuer den
+ * Over-Cut-Guard aus dem ORIGINAL — 3-Wege, damit imgly-Erosion in beiden
+ * realen Upload-Formen gefangen wird:
+ *
+ * - `alpha`: das Original hat schon Transparenz (Ecke alpha<200) -> Referenz =
+ *   dessen opaker Anteil. Faengt "imgly erodiert ein bereits sauberes Logo".
+ * - `solid-bg`: solider near-white/black/light BG erkannt -> Referenz =
+ *   nonBackgroundRatio (Logo-Flaeche gegen den soliden BG).
+ * - `none`: opaker, nicht-solider BG (Foto/Gradient) -> KEIN Urteil (null),
+ *   dort ist imgly genuin noetig und darf viel entfernen.
+ */
+export function estimateForegroundReference(
+  data: Pixels,
+  width: number,
+  height: number,
+  channels: number,
+): { ref: number | null; basis: 'alpha' | 'solid-bg' | 'none' } {
+  if (width < 5 || height < 5) return { ref: null, basis: 'none' }
+  const corners = sampleCornerColors(data, width, height, channels)
+  if (corners.some((c) => c.a < 200)) {
+    return { ref: opaqueRatio(data, width, height, channels), basis: 'alpha' }
+  }
+  const bg = detectSolidBackground(data, width, height, channels)
+  if (bg) return { ref: nonBackgroundRatio(data, width, height, channels, bg), basis: 'solid-bg' }
+  return { ref: null, basis: 'none' }
+}
+
+/**
  * Entscheidet ob imgly zu viel weggeschnitten hat.
  *
  * - `opaqueRatioAfter` < absoluteFloor -> Ergebnis quasi leer (Logo weg) -> Over-Cut.

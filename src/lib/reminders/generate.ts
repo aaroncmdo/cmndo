@@ -53,6 +53,12 @@ export async function generateReminderForTermin(terminId: string): Promise<void>
   }
 
   const startZeit = new Date(termin.start_zeit)
+  const now = new Date()
+
+  // 0. kunde_24h — start_zeit - 24h. Nur wenn dieser Zeitpunkt noch in der
+  //    Zukunft liegt; bei kurzfristigen Buchungen (<24h vorher) entfaellt die
+  //    24h-Erinnerung — der Kunde bekommt dann kunde_morgen + kunde_1h.
+  const kunde24h = new Date(startZeit.getTime() - 24 * 60 * 60 * 1000)
 
   // 1. kunde_morgen — 07:00 Europe/Berlin am Termintag
   const kundeMorgen = berlinDateAt(startZeit, 7, 0)
@@ -71,6 +77,16 @@ export async function generateReminderForTermin(terminId: string): Promise<void>
 
   // Reminder-Einträge upserten
   const reminders: Array<{ termin_id: string; empfaenger: string; reminder_typ: string; geplant_fuer: string; status: string; versuche: number }> = [
+    ...(kunde24h.getTime() > now.getTime()
+      ? [{
+          termin_id: terminId,
+          empfaenger: 'kunde',
+          reminder_typ: 'kunde_24h',
+          geplant_fuer: kunde24h.toISOString(),
+          status: 'pending',
+          versuche: 0,
+        }]
+      : []),
     {
       termin_id: terminId,
       empfaenger: 'kunde',

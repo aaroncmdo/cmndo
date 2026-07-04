@@ -16,7 +16,7 @@ export default async function WerkstaettenPage() {
 
   const { data: werkstaetten } = await supabase
     .from('werkstaetten')
-    .select('id, name, adresse_ort, adresse_plz, status, provision_betrag_netto, aktiviert_am, email, telefon')
+    .select('id, name, adresse_ort, adresse_plz, status, provision_betrag_netto, aktiviert_am, email, telefon, faehigkeiten')
     .order('aktiviert_am', { ascending: false })
 
   return (

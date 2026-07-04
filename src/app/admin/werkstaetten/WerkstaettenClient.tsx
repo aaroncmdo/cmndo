@@ -4,15 +4,25 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon, MailIcon } from 'lucide-react'
-import { createWerkstatt, sendWerkstattLoginMail } from './actions'
+import { createWerkstatt, sendWerkstattLoginMail, setWerkstattFaehigkeiten } from './actions'
 import { werkstattQrSvg } from './qr-action'
 import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
+import { Chip } from '@/components/ui/Chip'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { TextField } from '@/components/shared/forms/TextField'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
+
+// Label-Map im Client (NICHT aus actions.ts importieren — Client-Bundle macht undefined daraus, AAR-664)
+const FAEHIGKEITEN_OPTIONS: { value: string; label: string }[] = [
+  { value: 'karosserie', label: 'Karosserie / Blech' },
+  { value: 'lackierung', label: 'Lackierung / Kratzer' },
+  { value: 'mechanik', label: 'Mechanik / Motor' },
+  { value: 'glas', label: 'Glas' },
+  { value: 'smart_repair', label: 'Smart-Repair' },
+]
 
 type Werkstatt = {
   id: string
@@ -24,6 +34,7 @@ type Werkstatt = {
   aktiviert_am: string | null
   email: string | null
   telefon: string | null
+  faehigkeiten: string[] | null
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -56,6 +67,14 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   const [qrLoadingId, setQrLoadingId] = useState<string | null>(null)
   const [copiedUrl, setCopiedUrl] = useState(false)
 
+  // Fähigkeiten-Editor pro Werkstatt
+  const [faehigkeitenFor, setFaehigkeitenFor] = useState<Werkstatt | null>(null)
+  const [faehigkeitenSelected, setFaehigkeitenSelected] = useState<string[]>([])
+  const [faehigkeitenSaving, setFaehigkeitenSaving] = useState(false)
+
+  // Fähigkeiten-Auswahl im Create-Dialog
+  const [createFaehigkeiten, setCreateFaehigkeiten] = useState<string[]>([])
+
   // Staffelung pro Werkstatt (Meilenstein-Boni)
   const [staffelFor, setStaffelFor] = useState<Werkstatt | null>(null)
   const [staffelRows, setStaffelRows] = useState<{ schwelle: string; bonus: string }[]>([])
@@ -86,6 +105,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   function openDialog() {
     setAdresse({ strasse: '', plz: '', ort: '', lat: null, lng: null, display: '' })
     setCreatedCredentials(null)
+    setCreateFaehigkeiten([])
     setShowDialog(true)
   }
 
@@ -204,6 +224,37 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     }
   }
 
+  function openFaehigkeiten(w: Werkstatt) {
+    setFaehigkeitenSelected(w.faehigkeiten ?? [])
+    setFaehigkeitenFor(w)
+  }
+
+  function toggleFaehigkeit(value: string) {
+    setFaehigkeitenSelected((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+
+  function toggleCreateFaehigkeit(value: string) {
+    setCreateFaehigkeiten((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
+  }
+
+  async function saveFaehigkeiten() {
+    if (!faehigkeitenFor) return
+    setFaehigkeitenSaving(true)
+    try {
+      const res = await setWerkstattFaehigkeiten(faehigkeitenFor.id, faehigkeitenSelected)
+      if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
+      toast.success('Fähigkeiten gespeichert.')
+      setFaehigkeitenFor(null)
+      router.refresh()
+    } finally {
+      setFaehigkeitenSaving(false)
+    }
+  }
+
   return (
     <div className="h-full overflow-y-auto py-8">
       <div>
@@ -235,6 +286,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
                 <Th className="text-left text-claimondo-ondo!">QR</Th>
                 <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
+                <Th className="text-left text-claimondo-ondo!">Fähigkeiten</Th>
                 <Th className="text-left text-claimondo-ondo!">Login-Mail</Th>
               </Tr>
             </Thead>
@@ -295,6 +347,16 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                     <Button
                       size="sm"
                       variant="ghost"
+                      onClick={() => openFaehigkeiten(w)}
+                      iconLeft={<WrenchIcon className="w-4 h-4" />}
+                    >
+                      {(w.faehigkeiten && w.faehigkeiten.length > 0) ? `${w.faehigkeiten.length} / 5` : 'Alle'}
+                    </Button>
+                  </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
                       loading={loginMailLoadingId === w.id}
                       onClick={() => sendLoginMail(w)}
                       iconLeft={<MailIcon className="w-4 h-4" />}
@@ -306,7 +368,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
-                  <Td colSpan={8} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={9} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Werkstätten angelegt.
                   </Td>
                 </Tr>
@@ -400,6 +462,29 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   min="0"
                   defaultValue={150}
                 />
+                <div>
+                  <label className="text-sm text-claimondo-ondo mb-2 block">
+                    Fähigkeiten (optional — leer = Vollservice)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {FAEHIGKEITEN_OPTIONS.map((opt) => {
+                      const active = createFaehigkeiten.includes(opt.value)
+                      return (
+                        <Chip
+                          key={opt.value}
+                          variant={active ? 'selected' : 'default'}
+                          onClick={() => toggleCreateFaehigkeit(opt.value)}
+                        >
+                          {opt.label}
+                        </Chip>
+                      )
+                    })}
+                  </div>
+                  {/* Hidden inputs so FormData.getAll('faehigkeiten') liefert die Auswahl */}
+                  {createFaehigkeiten.map((v) => (
+                    <input key={v} type="hidden" name="faehigkeiten" value={v} />
+                  ))}
+                </div>
                 <div className="flex gap-3 pt-2">
                   <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>
                     Abbrechen
@@ -452,6 +537,47 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               <div className="flex items-center justify-between gap-3">
                 <span className="text-body-xs text-claimondo-ondo">Zum Aushängen / Drucken:</span>
                 <QrCodeDownloadButtons qrSvg={qr.svg} fileBaseName={qrFileBase(qr.name)} />
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        <Modal open={faehigkeitenFor !== null} onClose={() => setFaehigkeitenFor(null)} maxWidth={480} ariaLabel="Fähigkeiten bearbeiten">
+          {faehigkeitenFor && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-claimondo-navy font-semibold text-lg">Fähigkeiten — {faehigkeitenFor.name}</h2>
+                <p className="mt-0.5 text-claimondo-ondo text-sm">
+                  Leer lassen = Werkstatt bietet Vollservice an.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2">
+                {FAEHIGKEITEN_OPTIONS.map((opt) => {
+                  const active = faehigkeitenSelected.includes(opt.value)
+                  return (
+                    <Chip
+                      key={opt.value}
+                      variant={active ? 'selected' : 'default'}
+                      onClick={() => toggleFaehigkeit(opt.value)}
+                    >
+                      {opt.label}
+                    </Chip>
+                  )
+                })}
+              </div>
+
+              {faehigkeitenSelected.length === 0 && (
+                <p className="text-xs text-claimondo-ondo/70">Keine Fähigkeiten gewählt — gilt als Vollservice.</p>
+              )}
+
+              <div className="flex gap-3 pt-2">
+                <Button variant="ghost" fullWidth onClick={() => setFaehigkeitenFor(null)}>
+                  Abbrechen
+                </Button>
+                <Button variant="navy" fullWidth loading={faehigkeitenSaving} onClick={saveFaehigkeiten}>
+                  Speichern
+                </Button>
               </div>
             </div>
           )}

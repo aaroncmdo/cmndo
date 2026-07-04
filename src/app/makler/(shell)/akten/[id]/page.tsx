@@ -6,7 +6,6 @@ import { notFound, redirect } from 'next/navigation'
 import {
   getCurrentMakler,
   getMaklerFallDetail,
-  getDocumentSignedUrls,
   getFallChat,
 } from '@/lib/makler/queries'
 import { createClient } from '@/lib/supabase/server'
@@ -17,7 +16,7 @@ export const dynamic = 'force-dynamic'
 type Props = {
   params: Promise<{ id: string }>
   searchParams: Promise<{
-    tab?: 'overview' | 'timeline' | 'documents' | 'chat' | 'copilot'
+    tab?: 'overview' | 'timeline' | 'chat' | 'copilot'
   }>
 }
 
@@ -43,15 +42,11 @@ export default async function MaklerAkteDetailPage({
     data: { user },
   } = await supabase.auth.getUser()
 
-  const [signedUrls, chatMessages] = await Promise.all([
-    getDocumentSignedUrls(detail.documents),
-    getFallChat(id),
-  ])
+  const chatMessages = await getFallChat(id)
 
   return (
     <MaklerAkteDetail
       detail={detail}
-      signedUrls={signedUrls}
       initialTab={tab}
       makler={makler}
       currentUserId={user?.id ?? ''}

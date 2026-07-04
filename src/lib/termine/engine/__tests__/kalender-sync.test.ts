@@ -31,6 +31,36 @@ describe('buildDescription', () => {
   })
 })
 
+describe('buildSummary — Beratungs- vs. Besichtigungs-Framing (typ)', () => {
+  it('kb_beratung mit Kunde → "Beratungstermin — {Kunde}" statt Schadenbesichtigung', () => {
+    const s = buildSummary({ ...LEER, kundeName: 'Max M', claimNummer: 'CL-1' }, null, 'kb_beratung')
+    expect(s).toBe('Beratungstermin — Max M · CL-1')
+  })
+  it('kb_beratung ohne Kunde → "Beratungstermin"', () => {
+    expect(buildSummary(LEER, null, 'kb_beratung')).toBe('Beratungstermin')
+  })
+  it('kb_beratung haengt keinen Vor-Ort-Ort an (telefonisch/Video)', () => {
+    const s = buildSummary({ ...LEER, kundeName: 'Max M' }, 'Domkloster 4, Köln', 'kb_beratung')
+    expect(s).toBe('Beratungstermin — Max M')
+  })
+  it('sv_begutachtung bleibt Fahrzeug-Framing (kein Regress am deployten SV-Sync)', () => {
+    const s = buildSummary({ ...LEER, fahrzeugHersteller: 'VW', fahrzeugModell: 'Golf', kennzeichen: 'K-AB 123' }, 'Köln', 'sv_begutachtung')
+    expect(s).toBe('VW Golf (K-AB 123) — Köln')
+  })
+  it('ohne typ (Legacy) unveraendert Schadenbesichtigung', () => {
+    expect(buildSummary(LEER, null)).toBe('Schadenbesichtigung')
+  })
+})
+
+describe('buildDescription — Beratungs-Framing', () => {
+  it('kb_beratung → erste Zeile "Claimondo — Beratungstermin", keine Vor-Ort-Adresse', () => {
+    const d = buildDescription({ ...LEER, kundeName: 'Max M', kundeTelefon: '0151', schadenortAdresse: 'Köln' }, null, 'https://app.test', 'kb_beratung')
+    expect(d).toContain('Claimondo — Beratungstermin')
+    expect(d).toContain('Kunde: Max M')
+    expect(d).not.toContain('Adresse:')
+  })
+})
+
 describe('resolveTerminKontext', () => {
   function stubDb(rows: Record<string, unknown>): SupabaseClient {
     return {
@@ -56,6 +86,13 @@ describe('resolveTerminKontext', () => {
     const k = await resolveTerminKontext({ bezug_typ: null, bezug_id: null, besichtigungsort_adresse: null }, db)
     expect(k.summary).toBe('Schadenbesichtigung')
     expect(k.location).toBeUndefined()
+  })
+
+  it('kb_beratung-Termin (typ) → Beratungstermin-Summary mit Kunde', async () => {
+    const db = stubDb({ leads: { vorname: 'Max', nachname: 'M', telefon: '0151' } })
+    const k = await resolveTerminKontext({ bezug_typ: 'lead', bezug_id: 'l1', besichtigungsort_adresse: null, typ: 'kb_beratung' }, db)
+    expect(k.summary).toContain('Beratungstermin')
+    expect(k.summary).toContain('Max M')
   })
 })
 
@@ -88,12 +125,12 @@ describe('syncTerminToExternalCalendar — Orchestrierung (Fake-Provider, kein I
     expect(r.results.fake).toBe('created')
   })
 
-  it('nicht-SV assignee → skip (Provider nicht aufgerufen)', async () => {
+  it('assignee-generisch: kundenbetreuer-Termin wird NICHT am Orchestrator geskippt (Provider entscheidet via Resolver)', async () => {
     let called = false
     const spy: KalenderProvider = { name: 'fake', upsert: async () => { called = true; return 'created' }, remove: async () => 'updated' }
-    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin({ ...aktiverTermin, assignee_typ: 'kanzlei' }), providers: [spy] })
-    expect(r.results.fake).toBe('skip')
-    expect(called).toBe(false)
+    const r = await syncTerminToExternalCalendar('t1', { db: stubDbMitTermin({ ...aktiverTermin, assignee_typ: 'kundenbetreuer', assignee_id: 'p-kb' }), providers: [spy] })
+    expect(called).toBe(true)
+    expect(r.results.fake).toBe('created')
   })
 
   it('nicht-aktiver Status → skip', async () => {

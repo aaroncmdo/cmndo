@@ -43,6 +43,9 @@ export async function createMakler(
   const adresse_ort = String(formData.get('adresse_ort') ?? '').trim() || null
   const provKomplett = Number(formData.get('provision_betrag_komplett_netto') ?? 100) || 100
   const provGutachter = Number(formData.get('provision_betrag_nur_gutachter_netto') ?? 50) || 50
+  // Makler-Gesellschaft: versicherungsgebunden (versicherung_id) ODER frei (maklerpool_id).
+  const versicherung_id = String(formData.get('versicherung_id') ?? '').trim() || null
+  const maklerpool_id = String(formData.get('maklerpool_id') ?? '').trim() || null
 
   if (!firma || !email || !ansprechpartner_vorname || !ansprechpartner_nachname) {
     return { ok: false, error: 'Firma, E-Mail und Ansprechpartner (Vor- und Nachname) sind Pflicht.' }
@@ -94,6 +97,8 @@ export async function createMakler(
     status: 'aktiv',
     aktiviert_am: new Date().toISOString(),
     aktiviert_von: adminUser.id,
+    versicherung_id,
+    maklerpool_id,
     user_id: userId,
   }).select('id').single()
 

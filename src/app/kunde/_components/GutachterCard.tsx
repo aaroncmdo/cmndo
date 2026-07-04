@@ -1,18 +1,19 @@
 'use client'
 
 // Kunde-Sidebar-Card fuer den zugewiesenen Sachverstaendigen.
-// Chat oeffnet ein Gruppenchat-Modal — Kunde + SV chatten direkt, der KB
+// Chat oeffnet ein Gruppenchat-Modal - Kunde + SV chatten direkt, der KB
 // liest mit (kanal='gruppenchat') und kann jederzeit eingreifen.
-// Pin-Pattern + Glass-Modal sind identisch zur KundenbetreuerCard.
+//
+// Card-/Modal-Chrome (Trigger, Backdrop, popFromCard, ESC/Scroll/z-index) liegt in
+// ChatCardShell + useChatCardChrome - geteilt mit der KundenbetreuerCard.
 
-import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { useTranslations } from 'next-intl'
-import { PhoneIcon, MessageSquareIcon, XIcon } from 'lucide-react'
 import KundeKbChat from './KundeKbChat'
-import { useActiveContactStore } from './useActiveContactStore'
-import { useKundeUnreadByKanal } from './useKundeUnreadByKanal'
+import ChatCardShell from './ChatCardShell'
+import { useChatCardChrome } from './useChatCardChrome'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { toInitials } from '@/components/shared/KundeAvatar'
 
 type Props = {
   vorname: string | null
@@ -25,30 +26,29 @@ type Props = {
   googleAktualisiertAm?: string | null
   /** Akzent-Farbe der Sidebar (Brand-Primary mit Fallback) */
   accentBg: string
-  /** Single-Fall-ID — Default-Fall im Fall-Bezug-Picker */
+  /** Single-Fall-ID - Default-Fall im Fall-Bezug-Picker */
   fallId: string | null
   /** Kunde-User-ID */
   currentUserId: string | null
-  /** SV-User-ID (profile_id) — Empfaenger des gruppenchat-Inserts */
+  /** SV-User-ID (profile_id) - Empfaenger des gruppenchat-Inserts */
   svUserId: string | null
-  /** KB-User-ID — als zusaetzlicher Sender im Realtime-Filter (KB liest mit) */
+  /** KB-User-ID - als zusaetzlicher Sender im Realtime-Filter (KB liest mit) */
   kbUserId: string | null
-  /** KB-Anzeigename — fuer Bubble-Label im Gruppenchat */
+  /** KB-Anzeigename - fuer Bubble-Label im Gruppenchat */
   kbName?: string | null
-  /** KB-Avatar — fuer Mini-Avatar neben KB-Bubbles im Gruppenchat */
+  /** KB-Avatar - fuer Mini-Avatar neben KB-Bubbles im Gruppenchat */
   kbAvatarUrl?: string | null
   /** Eskalierter Admin (zusaetzlicher Sender im Gruppenchat) */
   adminUserId?: string | null
   adminName?: string | null
   adminAvatarUrl?: string | null
-  /** Alle Faelle des Kunden — fuer Fall-Bezug-Picker */
+  /** Alle Faelle des Kunden - fuer Fall-Bezug-Picker */
   fallOptions: Array<{ id: string; claim_nummer: string | null }>
 }
 
 export default function GutachterCard({
   vorname,
   nachname,
-  telefon,
   avatarUrl,
   googleDurchschnitt,
   googleAnzahl,
@@ -66,240 +66,113 @@ export default function GutachterCard({
   fallOptions,
 }: Props) {
   const t = useTranslations('kunde.shell')
-  const active = useActiveContactStore((s) => s.active)
-  const setActive = useActiveContactStore((s) => s.setActive)
-  const chatOpen = active === 'sv'
-  const { count: unreadGruppe, reset: resetGruppeUnread } = useKundeUnreadByKanal(currentUserId, 'gruppenchat')
-  const setChatOpen = (open: boolean) => {
-    if (open) resetGruppeUnread()
-    setActive(open ? 'sv' : null)
-  }
-  const cardRef = useRef<HTMLDivElement>(null)
-  const [cardRect, setCardRect] = useState<{ top: number; bottom: number; right: number } | null>(null)
-
-  useEffect(() => {
-    if (!chatOpen) return
-    function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') setChatOpen(false)
-    }
-    document.body.style.overflow = 'hidden'
-    document.addEventListener('keydown', onKey)
-    const measure = () => {
-      const r = cardRef.current?.getBoundingClientRect()
-      if (r) setCardRect({ top: r.top, bottom: r.bottom, right: r.right })
-    }
-    const aside = document.querySelector('aside.kunde-sidebar') as HTMLElement | null
-    let originalZ = ''
-    if (aside) {
-      originalZ = aside.style.zIndex
-      aside.style.zIndex = '1102'
-      aside.setAttribute('data-chat-open', 'true')
-    }
-    return () => {
-      document.body.style.overflow = ''
-      document.removeEventListener('keydown', onKey)
-      if (aside) {
-        aside.style.zIndex = originalZ
-        aside.removeAttribute('data-chat-open')
-      }
-    }
-  }, [chatOpen])
+  const { chatOpen, setChatOpen, unread } = useChatCardChrome('sv', currentUserId, 'gruppenchat')
 
   const name = [vorname, nachname].filter(Boolean).join(' ') || t('svCard.fallbackName')
   const initials =
     [vorname?.[0], nachname?.[0]].filter(Boolean).join('').toUpperCase() || '?'
 
-  return (
-    <div
-      ref={cardRef}
-      className="mb-2 mx-3 rounded-ios-xl border bg-white/[0.04] border-white/10 hover:bg-white/10 transition-colors duration-200 relative z-[1102]"
-    >
-      <button
-        type="button"
-        onClick={() => {
-          if (currentUserId && svUserId) setChatOpen(true)
-        }}
-        disabled={!currentUserId || !svUserId}
-        className="w-full px-3 py-2.5 text-left flex flex-col gap-1.5 disabled:cursor-not-allowed"
-        aria-label={t('svCard.chatOeffnenAria', { name })}
-      >
-        <p
-          className={`text-[9px] uppercase tracking-wider leading-tight ${
-            chatOpen ? 'text-claimondo-ondo' : 'text-claimondo-light-blue'
-          }`}
-        >
-          {t('svCard.ihrGutachter')}
-        </p>
-        <div className="flex items-center gap-2.5">
-          <div className="relative shrink-0">
+  const canChat = !!currentUserId && !!svUserId
+
+  // Modal-Header: gestapelte Avatare aller Teilnehmer + Gruppenchat-Titel.
+  // Teilnehmer-Akzentfarben ueber var(--brand-*) (branden mit dem SV-Portal-Theme,
+  // Fallback = Claimondo-Ton) statt hardcoded Hex.
+  type Participant = { name: string; avatar: string | null; bg: string }
+  const teilnehmer: Participant[] = [{ name, avatar: avatarUrl, bg: accentBg }]
+  if (kbUserId && kbName) {
+    teilnehmer.push({ name: kbName, avatar: kbAvatarUrl ?? null, bg: 'var(--brand-secondary, #4573A2)' })
+  }
+  if (adminUserId && adminName) {
+    teilnehmer.push({ name: adminName, avatar: adminAvatarUrl ?? null, bg: 'var(--brand-warning, #F59E0B)' })
+  }
+  const namen = teilnehmer.map((p) => p.name.split(' ')[0]).join(', ')
+
+  const modalHeader = (
+    <>
+      <div className="flex -space-x-2 shrink-0">
+        {teilnehmer.slice(0, 4).map((p, idx) => {
+          const ini = toInitials(p.name) || '?'
+          return (
             <div
-              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white"
-              style={{ backgroundColor: accentBg }}
+              key={idx}
+              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white border-2 border-white/85"
+              style={{ backgroundColor: p.bg, zIndex: teilnehmer.length - idx }}
             >
-              {avatarUrl ? (
-                <Image src={avatarUrl} alt={name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
+              {p.avatar ? (
+                <Image src={p.avatar} alt={p.name} width={36} height={36} className="w-full h-full object-cover" unoptimized />
               ) : (
-                initials
+                ini
               )}
             </div>
-            {unreadGruppe > 0 && (
-              <span
-                className="absolute -top-1 -right-1 inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full bg-danger text-white text-[10px] font-bold leading-none ring-2 ring-claimondo-navy"
-                aria-label={t('svCard.ungeleseneAria', { count: unreadGruppe })}
-              >
-                {unreadGruppe > 99 ? '99+' : unreadGruppe}
-              </span>
-            )}
-          </div>
-          <div className="flex-1 min-w-0">
-            <p
-              className={`text-sm font-semibold truncate leading-tight ${
-                chatOpen ? 'text-claimondo-navy' : 'text-white'
-              }`}
-            >
-              {name}
-            </p>
-            <p
-              className={`text-[10px] leading-tight mt-0.5 ${
-                chatOpen ? 'text-claimondo-ondo' : 'text-claimondo-light-blue'
-              }`}
-            >
-              {t('svCard.sachverstaendiger')}
-            </p>
-            {googleDurchschnitt != null && googleAnzahl != null && (
-              <div className="mt-1">
-                <GoogleBewertungBadge
-                  durchschnitt={googleDurchschnitt}
-                  anzahl={googleAnzahl}
-                  zuletztAktualisiert={googleAktualisiertAm ?? null}
-                  size="sm"
-                />
-              </div>
-            )}
-          </div>
-        </div>
-      </button>
+          )
+        })}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold text-claimondo-navy leading-tight">{t('svCard.gruppenchat')}</p>
+        <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5 truncate">
+          {t('svCard.gruppenchatMit', { namen })}
+        </p>
+      </div>
+    </>
+  )
 
-      {chatOpen && currentUserId && svUserId && (
-        <div role="dialog" aria-modal="true" aria-label={t('svCard.gruppenchat')} className="fixed inset-0 z-[1100]">
-          <div
-            onClick={() => setChatOpen(false)}
-            className="absolute inset-0 bg-claimondo-navy/30 backdrop-blur-sm"
-            aria-hidden="true"
-          />
-          <div
-            className="absolute md:left-64 md:ml-3 left-3 right-3 bottom-3 md:right-auto md:w-[400px] h-[min(640px,calc(100vh-2rem))] flex flex-col gap-2 animate-[popFromCard_240ms_cubic-bezier(0.2,0.9,0.3,1.2)]"
-            style={{
-              transformOrigin: 'bottom left',
-              ...(typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
-                ? {
-                    top: `calc(50vh - 320px)`,
-                    bottom: 'auto',
-                  }
-                : {}),
-            }}
-          >
-            <button
-              type="button"
-              onClick={() => setChatOpen(false)}
-              aria-label={t('svCard.chatSchliessenAria')}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/40 hover:bg-white/60 text-claimondo-navy inline-flex items-center justify-center transition-colors"
-            >
-              <XIcon className="w-4 h-4" />
-            </button>
-            {/* Header-Card: gestackte Avatare aller Teilnehmer + Gruppenchat-Titel */}
-            <div className="px-2 pt-2 shrink-0">
-              <div className="glass-panel rounded-2xl px-3 py-2.5 flex items-center gap-2.5">
-                {(() => {
-                  type Participant = { name: string; avatar: string | null; bg: string }
-                  const teilnehmer: Participant[] = [
-                    { name, avatar: avatarUrl, bg: accentBg },
-                  ]
-                  if (kbUserId && kbName) {
-                    teilnehmer.push({ name: kbName, avatar: kbAvatarUrl ?? null, bg: '#4573A2' })
-                  }
-                  if (adminUserId && adminName) {
-                    teilnehmer.push({ name: adminName, avatar: adminAvatarUrl ?? null, bg: '#F59E0B' })
-                  }
-                  const namen = teilnehmer.map((p) => p.name.split(' ')[0]).join(', ')
-                  return (
-                    <>
-                      <div className="flex -space-x-2 shrink-0">
-                        {teilnehmer.slice(0, 4).map((p, idx) => {
-                          const ini =
-                            p.name
-                              .split(' ')
-                              .map((w) => w[0])
-                              .filter(Boolean)
-                              .slice(0, 2)
-                              .join('')
-                              .toUpperCase() || '?'
-                          return (
-                            <div
-                              key={idx}
-                              className="w-9 h-9 rounded-full overflow-hidden flex items-center justify-center text-xs font-bold text-white border-2 border-white/85"
-                              style={{ backgroundColor: p.bg, zIndex: teilnehmer.length - idx }}
-                            >
-                              {p.avatar ? (
-                                <Image
-                                  src={p.avatar}
-                                  alt={p.name}
-                                  width={36}
-                                  height={36}
-                                  className="w-full h-full object-cover"
-                                  unoptimized
-                                />
-                              ) : (
-                                ini
-                              )}
-                            </div>
-                          )
-                        })}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-semibold text-claimondo-navy leading-tight">{t('svCard.gruppenchat')}</p>
-                        <p className="text-[10px] text-claimondo-ondo leading-tight mt-0.5 truncate">
-                          {t('svCard.gruppenchatMit', { namen })}
-                        </p>
-                      </div>
-                    </>
-                  )
-                })()}
-              </div>
-            </div>
-            <div className="flex-1 min-h-0">
-              <KundeKbChat
-                currentUserId={currentUserId}
-                partnerUserId={svUserId}
-                additionalSenderIds={[
-                  ...(kbUserId ? [kbUserId] : []),
-                  ...(adminUserId ? [adminUserId] : []),
-                ]}
-                kanal="gruppenchat"
-                fallOptions={fallOptions}
-                defaultFallId={fallId}
-                placeholder={t('svCard.chatPlaceholder')}
-                senderLabels={{
-                  [svUserId]: { name, rolle: 'sv', avatarUrl },
-                  ...(kbUserId && kbName
-                    ? { [kbUserId]: { name: kbName, rolle: 'kb' as const, avatarUrl: kbAvatarUrl ?? null } }
-                    : {}),
-                  ...(adminUserId && adminName
-                    ? { [adminUserId]: { name: adminName, rolle: 'kb' as const, avatarUrl: adminAvatarUrl ?? null } }
-                    : {}),
-                }}
-              />
-            </div>
-          </div>
-          <style jsx>{`
-            @keyframes popFromCard {
-              0% { opacity: 0; transform: scale(0.4) translateY(20px); }
-              60% { opacity: 1; }
-              100% { opacity: 1; transform: scale(1) translateY(0); }
-            }
-          `}</style>
-        </div>
+  const sublineExtra =
+    googleDurchschnitt != null && googleAnzahl != null ? (
+      <div className="mt-1">
+        <GoogleBewertungBadge
+          durchschnitt={googleDurchschnitt}
+          anzahl={googleAnzahl}
+          zuletztAktualisiert={googleAktualisiertAm ?? null}
+          size="sm"
+        />
+      </div>
+    ) : undefined
+
+  return (
+    <ChatCardShell
+      open={chatOpen && canChat}
+      onOpen={() => {
+        if (canChat) setChatOpen(true)
+      }}
+      onClose={() => setChatOpen(false)}
+      triggerDisabled={!canChat}
+      eyebrow={t('svCard.ihrGutachter')}
+      name={name}
+      initials={initials}
+      avatarUrl={avatarUrl}
+      accentBg={accentBg}
+      unread={unread}
+      subline={t('svCard.sachverstaendiger')}
+      sublineExtra={sublineExtra}
+      triggerAriaLabel={t('svCard.chatOeffnenAria', { name })}
+      unreadAriaLabel={t('svCard.ungeleseneAria', { count: unread })}
+      modalAriaLabel={t('svCard.gruppenchat')}
+      closeAriaLabel={t('svCard.chatSchliessenAria')}
+      modalHeader={modalHeader}
+    >
+      {currentUserId && svUserId && (
+        <KundeKbChat
+          currentUserId={currentUserId}
+          partnerUserId={svUserId}
+          additionalSenderIds={[
+            ...(kbUserId ? [kbUserId] : []),
+            ...(adminUserId ? [adminUserId] : []),
+          ]}
+          kanal="gruppenchat"
+          fallOptions={fallOptions}
+          defaultFallId={fallId}
+          placeholder={t('svCard.chatPlaceholder')}
+          senderLabels={{
+            [svUserId]: { name, rolle: 'sv', avatarUrl },
+            ...(kbUserId && kbName
+              ? { [kbUserId]: { name: kbName, rolle: 'kb' as const, avatarUrl: kbAvatarUrl ?? null } }
+              : {}),
+            ...(adminUserId && adminName
+              ? { [adminUserId]: { name: adminName, rolle: 'kb' as const, avatarUrl: adminAvatarUrl ?? null } }
+              : {}),
+          }}
+        />
       )}
-    </div>
+    </ChatCardShell>
   )
 }
