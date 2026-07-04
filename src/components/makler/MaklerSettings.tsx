@@ -245,6 +245,7 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
         ansprechpartner_vorname: String(fd.get('ansprechpartner_vorname') ?? ''),
         ansprechpartner_nachname: String(fd.get('ansprechpartner_nachname') ?? ''),
         ihk_nummer: String(fd.get('ihk_nummer') ?? ''),
+        ust_id: String(fd.get('ust_id') ?? ''),
         telefon: String(fd.get('telefon') ?? ''),
         adresse_strasse: String(fd.get('adresse_strasse') ?? ''),
         adresse_plz: String(fd.get('adresse_plz') ?? ''),
@@ -290,6 +291,12 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
           label="IHK-Nummer"
           name="ihk_nummer"
           defaultValue={profile.ihk_nummer}
+        />
+        <Input
+          label="USt-IdNr. (für Ihre Provisions-Rechnung)"
+          name="ust_id"
+          defaultValue={profile.ust_id}
+          placeholder="DE123456789"
         />
         <Input
           label="Email"
