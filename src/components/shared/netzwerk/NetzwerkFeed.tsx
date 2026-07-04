@@ -91,11 +91,15 @@ export function NetzwerkFeed({ portal: _portal, entries, likedKeys, previewsByKe
       <PostComposer />
 
       {/* Feed-Liste oder EmptyState */}
-      {entries.length === 0 ? (
+      {sorted.length === 0 ? (
         <EmptyState
           icon={MessagesSquareIcon}
-          title="Noch keine Beiträge"
-          description="Sei der Erste und starte den fachlichen Austausch im Netzwerk."
+          title={entries.length === 0 ? 'Noch keine Beiträge' : 'Keine Beiträge in dieser Kategorie'}
+          description={
+            entries.length === 0
+              ? 'Sei der Erste und starte den fachlichen Austausch im Netzwerk.'
+              : 'Für diesen Tag gibt es noch keine Beiträge.'
+          }
         />
       ) : (
         <div className="space-y-4">
