@@ -76,6 +76,10 @@ export type GutachterFinderPayload = {
   werkstatt_id?: string | null
   // Anspruch-pruefen: Session-ID der Schaetzung (Fotos + Inputs), wird beim Promoter auf Lead uebertragen.
   schaetzung_session_id?: string | null
+  // Anspruch-pruefen (Aaron 04.07.): Erstzulassungs-Jahr nativ auf die GFA, damit die EZ
+  // ueber gfa.fahrzeug_baujahr -> lead.fahrzeug_baujahr -> vehicles kanonisch mitfliesst
+  // (2. Pfad neben dem anspruch_schaetzungen-Side-Lookup in issue-canonical-flowlink).
+  fahrzeug_baujahr?: number | null
 }
 
 // Extrahiert die Stadt aus einer typischen Adresse:
@@ -292,6 +296,7 @@ export async function erstelleGutachterFinderAnfrage(
       status: 'neu',
       werkstatt_id: payload.werkstatt_id ?? null,
       schaetzung_session_id: payload.schaetzung_session_id ?? null,
+      fahrzeug_baujahr: payload.fahrzeug_baujahr ?? null,
     })
     .select('id')
     .single()

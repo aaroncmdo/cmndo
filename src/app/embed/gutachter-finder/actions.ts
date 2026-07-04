@@ -58,14 +58,16 @@ export async function starteEmbedBuchung(
   // gutachter_finder_anfragen.schaetzung_session_id is a FK to anspruch_schaetzungen(id).
   // Resolve token -> row id here using service-role (anspruch_schaetzungen is RLS deny-all).
   let schaetzungId: string | null = null
+  let ezJahr: number | null = null
   if (input.schaetzungSessionId) {
     const svc = createAdminClient()
     const { data: sess } = await svc
       .from('anspruch_schaetzungen')
-      .select('id')
+      .select('id, ez_jahr')
       .eq('session_token', input.schaetzungSessionId)
       .maybeSingle()
     schaetzungId = sess?.id ?? null
+    ezJahr = sess?.ez_jahr ?? null
   }
 
   // 1) gfa (Anfrage) anlegen — Ort landet auf schadenort_* (→ lead.fahrzeug_standort_*).
@@ -86,6 +88,9 @@ export async function starteEmbedBuchung(
     werkstatt_id: input.werkstatt_id ?? undefined,
     // Use the resolved row id (not the session_token) — FK to anspruch_schaetzungen(id).
     schaetzung_session_id: schaetzungId,
+    // Harden EZ carry (Aaron 04.07.): EZ-Jahr nativ auf die GFA -> gfa.fahrzeug_baujahr ->
+    // lead.fahrzeug_baujahr -> vehicles (2. kanonischer Pfad neben dem Session-Side-Lookup).
+    fahrzeug_baujahr: ezJahr ?? undefined,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
