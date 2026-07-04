@@ -3,8 +3,7 @@ import type { LiveOpsScope, LeadPin } from './types'
 
 // Geo-Aufloesungs-Hilfsfunktion:
 // Leads haben besichtigungsort_lat/lng (Wunschort), unfallort_lat/lng,
-// und als Fallback kunde_plz + plz_geo. Entspricht der Geo-Strategie
-// aus src/lib/dispatch/karte/triage-leads.ts.
+// und als Fallback kunde_plz + plz_geo.
 
 type RawLead = {
   id: string

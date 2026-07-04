@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-04T13:37:12.579Z",
+  "generatedAt": "2026-07-04T14:24:11.415Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 63,
+  "fileCount": 60,
   "files": [
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
@@ -37,9 +37,6 @@
     "src/lib/branding/resolve-theme.ts",
     "src/lib/claimondo-colors.ts",
     "src/lib/claims/anspruch.ts",
-    "src/lib/dispatch/karte/get-active-svs.ts",
-    "src/lib/dispatch/karte/get-karte-snapshot.ts",
-    "src/lib/dispatch/karte/get-termine-today.ts",
     "src/lib/external-brand-colors.ts",
     "src/lib/faelle/mark-read-action.ts",
     "src/lib/faelle/unread-counts.ts",
