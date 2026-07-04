@@ -402,12 +402,12 @@ export default function FlowWizardKfz({
 
       // 2. Server Action: Fall erstellen
       // AAR-360 Follow-up: SV-Datenschutz/Widerruf-Zustimmung (nur relevant wenn ein SV zugewiesen ist).
-      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null, gutachterAnzeige ? svRechtsakzeptanz : false)
+      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null, gutachterAnzeige ? svRechtsakzeptanz : false, token)
       if (!result.ok) throw new Error(result.error ?? 'Fehler bei der Beauftragung')
       setFallId(result.fallId)
 
       // 3. SA-PDF generieren (Background, non-blocking)
-      generateSAPdf(result.fallId, lead.id, publicUrl).catch(() => {})
+      generateSAPdf(result.fallId, lead.id, publicUrl, token).catch(() => {})
 
       // AAR-99 + AAR-305: Nach SA → Account-Step (dynamisch per ID)
       setStepIndex(stepIndexById('account'))
@@ -1064,7 +1064,7 @@ export default function FlowWizardKfz({
                 // Korrigierte Stammdaten speichern
                 if (editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email) {
                   try {
-                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail })
+                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail }, token)
                     setAccountEmail(editEmail)
                   } catch { /* weiter trotzdem */ }
                 }
