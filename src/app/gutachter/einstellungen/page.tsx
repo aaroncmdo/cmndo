@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import PageHeader from '@/components/shared/PageHeader'
+import KartenAnzeigeToggle from './KartenAnzeigeToggle'
 
 // AAR-720: Einstellungen-Hub. Sammel-Page für alle konfigurierbaren
 // Bereiche des SV-Portals — startet mit Kalender + Profil, wird nach
@@ -142,6 +143,9 @@ export default async function EinstellungenPage() {
             </Link>
           )
         })}
+        {/* Direkt-Toggle (kein Sub-Page-Link): steuert das Gebiets-Polygon im
+            Heute-Hub via LocalStorage. War gebaut aber nie im Hub gerendert. */}
+        <KartenAnzeigeToggle />
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">
