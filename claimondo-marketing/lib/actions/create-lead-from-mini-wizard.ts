@@ -98,6 +98,13 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
       disqualifiziert_am: isDisqualifiziert ? new Date().toISOString() : null,
       promotion_code_id: promotionCodeId,
       zugewiesen_an: dispatcherId,
+      // Compliance (UX-Audit #3): der dsgvo_consent-Haken wurde bisher NUR validiert
+      // (miniWizardSchema z.literal(true)), aber NIE persistiert -> dsgvo_zustimmung_am
+      // blieb NULL, obwohl der Kunde zugestimmt hat. Jetzt Timestamp setzen wie die
+      // Schwester-Lead-Erzeuger (autounfall-io actions.ts:113, embed anfrage-columns.ts:90,
+      // api/v1/melde-schaden). Consent ist hier per Schema garantiert (safeParse oben).
+      // Schliesst die Nachweisbarkeits-Luecke (Art. 7 DSGVO: Einwilligung war nie geloggt).
+      dsgvo_zustimmung_am: new Date().toISOString(),
     },
   )
 
