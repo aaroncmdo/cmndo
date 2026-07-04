@@ -30,6 +30,27 @@ const ICON_BG: Record<StatCardTone, string> = {
   neutral: 'bg-claimondo-bg text-claimondo-shield',
 }
 
+const TONE_TEXT: Record<StatCardTone, string> = {
+  navy: 'text-claimondo-navy',
+  ondo: 'text-claimondo-ondo',
+  success: 'text-success-strong',
+  warning: 'text-warning-strong',
+  danger: 'text-danger-strong',
+  neutral: 'text-claimondo-navy',
+}
+
+// Voll-getoente Alert-KPI-Variante (filled): getoenter Card-Hintergrund + Border + Zahl
+// (statt weiss + navy). Fuer prominente Status-Kacheln wie SLA "Verletzt" — bewahrt die
+// Alert-Prominenz, die ein neutrales StatCard neutralisieren wuerde.
+const TONE_FILL_CARD: Record<StatCardTone, string> = {
+  navy: 'border-claimondo-navy/20 bg-claimondo-navy/[0.04]',
+  ondo: 'border-claimondo-ondo/20 bg-claimondo-ondo/5',
+  success: 'border-success/30 bg-success-soft',
+  warning: 'border-warning/30 bg-warning-soft',
+  danger: 'border-danger/30 bg-danger-soft',
+  neutral: 'border-claimondo-border bg-claimondo-bg',
+}
+
 export type StatCardClientProps = {
   label: string
   value: string | number
@@ -38,6 +59,8 @@ export type StatCardClientProps = {
    * mit der passenden iconSize-Class vor und reicht es als ReactNode hier rein). */
   iconNode?: ReactNode
   tone?: StatCardTone
+  /** Voll-getoente Alert-Variante: getoenter Card-Hintergrund + Zahl (fuer prominente Status-KPIs). */
+  filled?: boolean
   /** Zusatzzeile unter dem Wert (z. B. „bezahlte Rechnungen") */
   hint?: ReactNode
   /** Macht die Kachel zu einem Link */
@@ -52,6 +75,7 @@ export function StatCardClient({
   value,
   iconNode,
   tone = 'neutral',
+  filled = false,
   hint,
   href,
   size = 'md',
@@ -63,9 +87,9 @@ export function StatCardClient({
 
   const body = (
     <div
-      className={`rounded-ios-md border border-claimondo-border bg-white ${pad} shadow-ios-sm ${
-        href ? 'transition-shadow hover:shadow-ios-md' : ''
-      } ${className ?? ''}`}
+      className={`rounded-ios-md border ${pad} shadow-ios-sm ${
+        filled ? TONE_FILL_CARD[tone] : 'border-claimondo-border bg-white'
+      } ${href ? 'transition-shadow hover:shadow-ios-md' : ''} ${className ?? ''}`}
     >
       <div className="mb-2 flex items-center justify-between gap-3">
         <p className="min-w-0 truncate text-[10px] font-semibold uppercase tracking-[0.14em] text-claimondo-ondo">
@@ -73,13 +97,13 @@ export function StatCardClient({
         </p>
         {iconNode ? (
           <span
-            className={`flex flex-shrink-0 items-center justify-center rounded-full ${iconBox} ${ICON_BG[tone]}`}
+            className={`flex flex-shrink-0 items-center justify-center rounded-full ${iconBox} ${filled ? `bg-white ${TONE_TEXT[tone]}` : ICON_BG[tone]}`}
           >
             {iconNode}
           </span>
         ) : null}
       </div>
-      <p className={`${valueCls} font-bold tabular-nums text-claimondo-navy`}>{value}</p>
+      <p className={`${valueCls} font-bold tabular-nums ${filled ? TONE_TEXT[tone] : 'text-claimondo-navy'}`}>{value}</p>
       {hint != null ? (
         <p className="mt-1 text-[10px] text-claimondo-ondo/80">{hint}</p>
       ) : null}
