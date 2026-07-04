@@ -26,6 +26,8 @@ import {
   bestaetigeReparaturtermin,
   erbitteRueckruf,
   lehneReparaturterminAb,
+  resendeKundenLink,
+  oeffneKundenFlow,
 } from '@/app/werkstatt/(shell)/auftraege/actions'
 
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -264,6 +266,49 @@ function ReparaturterminSektion({ auftrag }: ReparaturterminSektionProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// AuftragAktionen — nachtraegliche Aktionen (P2): Kunden-Link resenden + Flow oeffnen
+// ─────────────────────────────────────────────────────────────────────────────
+
+function AuftragAktionen({ claimId }: { claimId: string }) {
+  const [resendLaden, setResendLaden] = useState(false)
+  const [flowLaden, setFlowLaden] = useState(false)
+
+  async function handleResend() {
+    setResendLaden(true)
+    const r = await resendeKundenLink(claimId)
+    setResendLaden(false)
+    if (!r.ok) {
+      toast.error(r.error ?? 'Versand fehlgeschlagen')
+      return
+    }
+    toast.success(`Link erneut gesendet (${r.kanal === 'whatsapp' ? 'WhatsApp' : 'E-Mail'}).`)
+  }
+
+  async function handleFlow() {
+    setFlowLaden(true)
+    const r = await oeffneKundenFlow(claimId)
+    setFlowLaden(false)
+    if (!r.ok) {
+      toast.error(r.error ?? 'Flow konnte nicht geöffnet werden')
+      return
+    }
+    // Neuer Tab — die Werkstatt behaelt ihr Portal offen, waehrend sie den Kunden-Flow durchgeht.
+    window.open(r.url, '_blank', 'noopener,noreferrer')
+  }
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-2">
+      <Button variant="ghost" size="sm" loading={resendLaden} disabled={flowLaden} onClick={handleResend}>
+        Link erneut senden
+      </Button>
+      <Button variant="ghost" size="sm" loading={flowLaden} disabled={resendLaden} onClick={handleFlow}>
+        Flow öffnen
+      </Button>
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Haupt-Komponente
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -442,6 +487,8 @@ export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
                       )}
                       {/* SP2 Task 6: Reparaturtermin-Sektion */}
                       <ReparaturterminSektion auftrag={a} />
+                      {/* P2: nachtraegliche Aktionen (Link resenden / Flow oeffnen) */}
+                      <AuftragAktionen claimId={a.claim_id} />
                     </Td>
                     <Td className="text-body-sm">
                       <div className="text-claimondo-navy">{fahrzeugText(a)}</div>
