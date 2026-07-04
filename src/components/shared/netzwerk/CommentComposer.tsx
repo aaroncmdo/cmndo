@@ -1,5 +1,5 @@
 'use client'
-import { useState, useTransition } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives'
@@ -13,6 +13,7 @@ export function CommentComposer(props: {
   onDone?: () => void
 }) {
   const [body, setBody] = useState(props.mention ? `@${props.mention} ` : '')
+  useEffect(() => { setBody(props.mention ? `@${props.mention} ` : '') }, [props.mention])
   const [pending, start] = useTransition()
   const router = useRouter()
 
