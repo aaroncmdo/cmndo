@@ -2,7 +2,8 @@
 
 // AAR-491 (M9): Promo & QR-Code Client-Komponente. Code + Landing-Link
 // (Copy-Buttons), QR-Code-Downloads (SVG + PNG), Share (WhatsApp/Email/
-// Copy), Tracking-Stats-Kacheln, Landing-Preview-iframe.
+// Copy), Tracking-Stats-Kacheln, Landing-Preview (Click-to-open, kein iframe —
+// claimondo.de blockt Cross-Subdomain-Embed via X-Frame-Options: sameorigin).
 
 import { useMemo, useState } from 'react'
 import {
@@ -308,12 +309,24 @@ export function MaklerPromo({ code, landingUrl, qrSvg, stats, firma }: Props) {
                 In neuem Tab <ExternalLinkIcon width={12} height={12} />
               </a>
             </div>
-            <iframe
-              src={landingUrl}
-              title="Landing-Vorschau"
-              loading="lazy"
-              className="w-full h-[420px] bg-white"
-            />
+            {/* Kein iframe: claimondo.de setzt X-Frame-Options: sameorigin -> Cross-
+                Subdomain-Embed wird geblockt (leere Vorschau + Konsolenfehler).
+                Stattdessen Click-to-open — oeffnet die echte Landeseite im neuen Tab. */}
+            <a
+              href={landingUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex min-h-[220px] w-full flex-col items-center justify-center gap-2.5 bg-claimondo-bg px-6 py-10 text-center transition-colors hover:bg-claimondo-bg/60"
+            >
+              <span className="flex h-12 w-12 items-center justify-center rounded-full bg-claimondo-navy/10 transition-colors group-hover:bg-claimondo-navy/15">
+                <ExternalLinkIcon width={20} height={20} className="text-claimondo-navy" />
+              </span>
+              <span className="text-sm font-medium text-claimondo-navy">Deine Landeseite ansehen</span>
+              <span className="max-w-xs text-xs text-claimondo-ondo">
+                So sehen deine Kunden die Seite. Sie öffnet in einem neuen Tab — eine eingebettete
+                Vorschau ist aus Sicherheitsgründen nicht möglich.
+              </span>
+            </a>
           </div>
         </section>
       </div>
