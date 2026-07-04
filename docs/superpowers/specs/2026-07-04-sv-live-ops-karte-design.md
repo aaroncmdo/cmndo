@@ -150,4 +150,20 @@ Jeder Chunk = eigener `writing-plans`-Durchlauf + PR gegen staging.
 - **Dispatch-Karte-Vollersatz (Aaron 04.07.):** `/dispatch/karte` (`DispatchKarteClient`) wird **komplett** durch `<LiveOpsMap role="dispatch">` ersetzt. Voraussetzung: `<LiveOpsMap>` muss ein **Superset** aller bestehenden Dispatch-Layer sein — insbesondere den **Leads-Layer** (eingehende Kunden-Anfragen zur SV-Platzierung) inkl. Cluster + Zuweisen-Aktion mitbringen, sonst Regression. `DispatchKarteClient` + dessen Loader/Popups werden erst **nach** dem Cross-Rollen-Smoke gelöscht (Chunk 3).
 - **Kollision:** Parallele Sessions bauen werkstatt/makler-Views (nicht diese Lane), aber `/dispatch/karte` + `sv_leads` + `@/lib/mapbox/*` sind geteilt → Touch-Marker pflegen.
 - **Performance:** viele SVs × Isochrone-Polygone × Realtime — Layer-Toggles + Viewport-Filter als Entlastung; Isochrone ggf. nur für sichtbaren Viewport laden.
-- **`sv_live_location`-Upsert-Quelle:** falls kein Trigger existiert, muss position-batch/trackPosition den Upsert selbst machen — in Chunk 1 verifizieren.
+- **`sv_live_location`-Upsert-Quelle:** ~~falls kein Trigger existiert~~ → **gelöst in Chunk 1** per DB-Trigger `trg_sync_live_location` (Migration 20260704113153).
+
+---
+
+## Anhang: Mobile-`/api/sv/*`-Audit (Chunk 1, 04.07.)
+
+Aarons „audite die API für die mobilen … funktional?" — Bestandsaufnahme der SV-Mobile-Endpoints:
+
+| Endpoint | Zweck | Status |
+|----------|-------|--------|
+| `/api/sv/position-batch` | Batch-GPS (≤50, Offline-Outbox, AAR-388) | funktional; schrieb NUR `sv_live_position` (Roh) → jetzt via Trigger auch `sv_live_location` (aktuelle Position) |
+| `/api/sv/live-position` | Einzel-GPS-Push | dito (Trigger greift für beide Insert-Pfade) |
+| `/api/sv/arrived` | SV markiert Ankunft am Termin | funktional |
+| `/api/sv/upload-gutachten` (+ `/finalize`) | Gutachten-Upload | funktional |
+| `/api/sv/upload-with-ocr` | Upload + OCR | funktional |
+
+**Kern-Befund:** Die Tracking-Pipeline war **eingeschlafen** — die GPS-Endpoints schrieben nur den Roh-Feed `sv_live_position` (letzte echten Daten 08.05.), **nie** die „aktuelle Position" `sv_live_location`, die Karte + Realtime lesen. **Chunk-1-Task-1** (Sync-Trigger) schließt das DB-getrieben. `heading` (für Auto-Rotation) wird von `sv_live_position` akzeptiert, aber die Mobile-App **sendet es nicht** (0 Zeilen mit heading) → **Follow-up Mobile-App**, nicht Backend.
