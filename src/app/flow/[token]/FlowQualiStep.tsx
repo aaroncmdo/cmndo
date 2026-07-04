@@ -1,14 +1,16 @@
 'use client'
 
-// AAR-956 §3a: Quali-Step im /flow (termin-loser Lead). Reuse QualiOptionen +
-// lead-gekeyte speichereQualiFlow. Eigenverschulden → Kasko-Endansicht (kein Termin);
-// sonst → onWeiter (Wizard advanced zum Slot-Step).
+// AAR-956 §3a + SP-B1: Quali-Step im /flow. gegner/unklar wie bisher. eigenverantwortung
+// oeffnet eine Versicherungs-Folgefrage -> kasko (KaskoEndansicht) oder selbstzahler
+// (Hinweis; die Werkstatt-Strecke folgt in SP-B2). QualiOptionen bleibt unberuehrt.
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { QualiOptionen } from '@/components/self-service/QualiOptionen'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { speichereQualiFlow } from './self-service-actions'
+
+type Phase = 'frage' | 'versicherung' | 'sende' | 'abbruch' | 'selbstzahler' | 'fehler'
 
 export function FlowQualiStep({
   token,
@@ -22,26 +24,29 @@ export function FlowQualiStep({
   onSchuldfrage?: (v: string) => void
 }) {
   const t = useTranslations('selfService')
-  const [phase, setPhase] = useState<'frage' | 'sende' | 'abbruch' | 'fehler'>('frage')
+  const [phase, setPhase] = useState<Phase>('frage')
   const [fehler, setFehler] = useState<string | null>(null)
 
-  async function waehle(value: string) {
+  async function sende(schuldfrage: string, ueberEigeneVersicherung?: boolean) {
     setPhase('sende')
     setFehler(null)
     try {
-      const r = await speichereQualiFlow(token, value)
+      const r = await speichereQualiFlow(token, schuldfrage, ueberEigeneVersicherung)
       if (!r.ok) {
         setPhase('fehler')
         setFehler(r.error ?? t('errors.allgemein'))
+        return
+      }
+      if (r.abrechnungsweg === 'selbstzahler') {
+        setPhase('selbstzahler')
         return
       }
       if (r.ergebnis === 'abbruch') {
         setPhase('abbruch')
         return
       }
-      // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden, damit die
-      // feststellung-values sie kennt (conditional_on={schuldfrage:gegner} fuer die gegner-Felder).
-      onSchuldfrage?.(value)
+      // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden.
+      onSchuldfrage?.(schuldfrage)
       onWeiter()
     } catch {
       setPhase('fehler')
@@ -49,7 +54,31 @@ export function FlowQualiStep({
     }
   }
 
+  function waehle(value: string) {
+    // eigenverantwortung -> Versicherungs-Folgefrage (kasko vs selbstzahler). Sonst direkt senden.
+    if (value === 'eigenverantwortung') {
+      setPhase('versicherung')
+      return
+    }
+    void sende(value)
+  }
+
   if (phase === 'abbruch') return <KaskoEndansicht />
+
+  if (phase === 'selbstzahler') {
+    return (
+      <div className="max-w-md text-center">
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">
+          Alles klar — wir helfen dir bei der Reparatur
+        </h1>
+        <p className="text-claimondo-navy/70">
+          Du trägst den Schaden selbst. Im nächsten Schritt findest du eine passende Werkstatt in deiner
+          Nähe und stimmst direkt einen Termin ab.
+        </p>
+      </div>
+    )
+  }
+
   if (phase === 'fehler') {
     return (
       <div className="max-w-md text-center">
@@ -57,5 +86,39 @@ export function FlowQualiStep({
       </div>
     )
   }
+
+  if (phase === 'versicherung') {
+    return (
+      <div className="max-w-md w-full">
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2 text-center">
+          Kannst du den Schaden über eine eigene Kaskoversicherung regulieren?
+        </h1>
+        <p className="text-claimondo-navy/60 text-sm mb-6 text-center">
+          Voll- oder Teilkasko, über die du den Schaden abrechnen könntest.
+        </p>
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            data-testid="quali-versicherung-ja"
+            onClick={() => void sende('eigenverantwortung', true)}
+            className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
+          >
+            <span className="block font-semibold text-claimondo-navy">Ja, ich habe eine Kaskoversicherung</span>
+            <span className="block text-sm text-claimondo-navy/60">Wir zeigen dir, wie du dort meldest.</span>
+          </button>
+          <button
+            type="button"
+            data-testid="quali-versicherung-nein"
+            onClick={() => void sende('eigenverantwortung', false)}
+            className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
+          >
+            <span className="block font-semibold text-claimondo-navy">Nein, ich zahle die Reparatur selbst</span>
+            <span className="block text-sm text-claimondo-navy/60">Wir finden dir eine passende Werkstatt.</span>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   return <QualiOptionen vorname={vorname} disabled={phase === 'sende'} onWaehle={waehle} />
 }

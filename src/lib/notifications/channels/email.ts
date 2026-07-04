@@ -5,13 +5,26 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email/google/client'
+import { buildEmailRecipients } from './email-recipients'
 import type { ChannelHandler } from './types'
 import type { EventType } from '../types'
 
-async function lookupEmail(userId: string): Promise<string | null> {
+// Empfaenger-Profil in EINEM Query: primaere Email + optionale Zweitadresse
+// (AAR-703, zweit_email) + Vorname fuer die Anrede.
+async function lookupRecipient(
+  userId: string,
+): Promise<{ email: string | null; zweitEmail: string | null; vorname: string }> {
   const db = createAdminClient()
-  const { data } = await db.from('profiles').select('email').eq('id', userId).maybeSingle()
-  return (data?.email as string | null) ?? null
+  const { data } = await db
+    .from('profiles')
+    .select('email, zweit_email, vorname')
+    .eq('id', userId)
+    .maybeSingle()
+  return {
+    email: (data?.email as string | null) ?? null,
+    zweitEmail: (data?.zweit_email as string | null) ?? null,
+    vorname: (data?.vorname as string | null) ?? '',
+  }
 }
 
 type EmailTemplate = { subject: string; html: string }
@@ -193,25 +206,20 @@ function buildTemplate(
 }
 
 export const emailHandler: ChannelHandler = async (input) => {
-  const email = await lookupEmail(input.recipientUserId)
-  if (!email) {
+  const { email, zweitEmail, vorname } = await lookupRecipient(input.recipientUserId)
+  // AAR-703: primaere + optionale zweite Kontakt-Adresse (der Kunde traegt sie
+  // selbst im Profil ein). Leer -> kein Empfaenger, skip.
+  const recipients = buildEmailRecipients(email, zweitEmail)
+  if (recipients.length === 0) {
     return { success: false, skipReason: 'no_email_for_recipient' }
   }
-
-  const db = createAdminClient()
-  const { data: profile } = await db
-    .from('profiles')
-    .select('vorname')
-    .eq('id', input.recipientUserId)
-    .maybeSingle()
-  const vorname = (profile?.vorname as string | null) ?? ''
 
   const fallId = (input.payload.fallId ?? input.event.fall_id) as string | undefined
   const { subject, html } = buildTemplate(input.eventType, input.payload, vorname)
 
   try {
     const result = await sendEmail({
-      to: email,
+      to: recipients,
       subject,
       html,
       fallId: fallId ?? null,

@@ -1237,6 +1237,7 @@ export type MaklerFullProfile = {
   ansprechpartner_vorname: string | null
   ansprechpartner_nachname: string | null
   ihk_nummer: string | null
+  ust_id: string | null
   email: string | null
   telefon: string | null
   adresse_strasse: string | null
@@ -1290,7 +1291,7 @@ export async function getMaklerFullProfile(
   const { data } = await supabase
     .from('makler')
     .select(
-      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
+      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, ust_id, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
     )
     .eq('id', maklerId)
     .maybeSingle()
@@ -1303,6 +1304,7 @@ export async function getMaklerFullProfile(
     ansprechpartner_nachname:
       (data.ansprechpartner_nachname as string | null) ?? null,
     ihk_nummer: (data.ihk_nummer as string | null) ?? null,
+    ust_id: (data.ust_id as string | null) ?? null,
     email: (data.email as string | null) ?? null,
     telefon: (data.telefon as string | null) ?? null,
     adresse_strasse: (data.adresse_strasse as string | null) ?? null,
@@ -1399,4 +1401,83 @@ export async function getMaklerAktiveConsents(
       kunde_name: kundeName,
     }
   })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Provisions-Rechnung — Daten fuer die herunterladbare Makler-Rechnung
+// (freigegebene = abrechenbare Provisionen als Positionen + Aussteller-Stammdaten).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type MaklerRechnungPositionen = {
+  makler: { firma: string; adresse: string; ustId: string | null; iban: string | null; bic: string | null; kontoinhaber: string | null }
+  positionen: { nr: number; datum: string; fallNr: string; kundeName: string; betragNetto: number }[]
+  nettoGesamt: number
+}
+
+export async function getMaklerRechnungData(maklerId: string): Promise<MaklerRechnungPositionen | null> {
+  const supabase = await createClient()
+  const { data: m } = await supabase
+    .from('makler')
+    .select('firma, adresse_strasse, adresse_plz, adresse_ort, ust_id, bank_iban, bank_bic, bank_kontoinhaber')
+    .eq('id', maklerId)
+    .maybeSingle()
+  if (!m) return null
+
+  // Freigegebene Provisionen = abrechenbar. Namen via bewaehrtem Nested-Embed (wie Dashboard-Activity).
+  const { data: provs } = await supabase
+    .from('makler_provisionen')
+    .select(`
+      id, betrag_netto_eur, trigger_at,
+      fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+        claims:claim_id(
+          claim_nummer,
+          leads:lead_id(vorname, nachname),
+          kunde:geschaedigter_user_id(vorname, nachname)
+        )
+      )
+    `)
+    .eq('makler_id', maklerId)
+    .eq('status', 'freigegeben')
+    .order('trigger_at', { ascending: true })
+
+  const DATE = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const nameOf = (raw: unknown): string | null => {
+    const o = (Array.isArray(raw) ? raw[0] : raw) as { vorname?: string | null; nachname?: string | null } | null | undefined
+    const n = [o?.vorname, o?.nachname].filter(Boolean).join(' ').trim()
+    return n.length > 0 ? n : null
+  }
+  const positionen = (provs ?? []).map((p, i) => {
+    const fallRaw = (p as { fall?: unknown }).fall
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] : fallRaw
+    const claimRaw = (fall as { claims?: unknown } | null | undefined)?.claims
+    const claim = Array.isArray(claimRaw) ? claimRaw[0] : claimRaw
+    const kundeName =
+      nameOf((claim as { kunde?: unknown } | null | undefined)?.kunde) ??
+      nameOf((claim as { leads?: unknown } | null | undefined)?.leads) ??
+      'Vermittlung'
+    return {
+      nr: i + 1,
+      datum: p.trigger_at ? DATE.format(new Date(p.trigger_at as string)) : '—',
+      fallNr: ((claim as { claim_nummer?: string | null } | null | undefined)?.claim_nummer) ?? '—',
+      kundeName,
+      betragNetto: Number(p.betrag_netto_eur ?? 0),
+    }
+  })
+  const nettoGesamt = positionen.reduce((sum, p) => sum + p.betragNetto, 0)
+  const adresse = [m.adresse_strasse, [m.adresse_plz, m.adresse_ort].filter(Boolean).join(' ')]
+    .filter((z) => z && z.trim().length > 0)
+    .join('\n')
+
+  return {
+    makler: {
+      firma: m.firma,
+      adresse,
+      ustId: m.ust_id ?? null,
+      iban: m.bank_iban ?? null,
+      bic: m.bank_bic ?? null,
+      kontoinhaber: m.bank_kontoinhaber ?? null,
+    },
+    positionen,
+    nettoGesamt,
+  }
 }

@@ -18,7 +18,7 @@ if (-not $line) {
 }
 $Secret = ($line.Line -split '=', 2)[1].Trim()
 
-$Url = 'https://cmndo.vercel.app/api/webhooks/lexdrive'
+$Url = 'https://app.claimondo.de/api/webhooks/lexdrive'
 
 # Body EXAKT so wie Sertac ihn schickt
 $Body = '{"datum":"2026-04-23T00:00:00.000Z","fall_nr":"TEST-2026-04-23-b3f0702d","event_id":"ld-evt-selftest-001","event_type":"vollmacht_bestaetigt"}'

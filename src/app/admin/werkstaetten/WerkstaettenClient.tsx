@@ -6,6 +6,8 @@ import { toast } from 'sonner'
 import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon, MailIcon } from 'lucide-react'
 import { createWerkstatt, sendWerkstattLoginMail, setWerkstattFaehigkeiten } from './actions'
 import { werkstattQrSvg } from './qr-action'
+import { weiseQrPoolCodeZu } from './qr-pool-actions'
+import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
 import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
@@ -59,6 +61,8 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string; werkstattId: string } | null>(null)
+  const [dialogQrToken, setDialogQrToken] = useState<string | null>(null)
+  const [dialogQrLaden, setDialogQrLaden] = useState(false)
   const [loginMailLoadingId, setLoginMailLoadingId] = useState<string | null>(null)
   const [dialogMailSending, setDialogMailSending] = useState(false)
 
@@ -155,6 +159,19 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     } finally {
       setDialogMailSending(false)
     }
+  }
+
+  async function handleDialogQrZuweisung(token: string) {
+    if (!createdCredentials) return
+    setDialogQrLaden(true)
+    const res = await weiseQrPoolCodeZu(createdCredentials.werkstattId, token)
+    setDialogQrLaden(false)
+    if (!res.ok) {
+      toast.error(res.error ?? 'QR-Zuweisung fehlgeschlagen')
+      return
+    }
+    setDialogQrToken(token)
+    toast.success(`QR-Code ${token} zugewiesen.`)
   }
 
   async function openQr(w: Werkstatt) {
@@ -264,13 +281,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
             description={`${werkstaetten.length} Partnerwerk${werkstaetten.length === 1 ? 'statt' : 'stätten'}`}
             icon={WrenchIcon}
             actions={
-              <Button
-                variant="navy"
-                onClick={openDialog}
-                iconLeft={<PlusIcon className="w-4 h-4" />}
-              >
-                Neue Werkstatt
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/admin/werkstaetten/qr-pool')}
+                  iconLeft={<QrCodeIcon className="w-4 h-4" />}
+                >
+                  QR-Code-Pool
+                </Button>
+                <Button
+                  variant="navy"
+                  onClick={openDialog}
+                  iconLeft={<PlusIcon className="w-4 h-4" />}
+                >
+                  Neue Werkstatt
+                </Button>
+              </div>
             }
           />
         </div>
@@ -409,7 +435,35 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               >
                 Login-Mail an Werkstatt senden
               </Button>
-              <Button variant="ghost" fullWidth onClick={() => { setCreatedCredentials(null); setShowDialog(false) }}>
+
+              <div className="border-t border-claimondo-border pt-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <QrCodeIcon className="w-4 h-4 text-claimondo-ondo" />
+                  <h3 className="text-claimondo-navy font-semibold text-sm">QR-Code zuweisen (optional)</h3>
+                </div>
+                {dialogQrToken ? (
+                  <p className="text-body-sm text-success-strong">
+                    QR-Code <span className="font-mono">{dialogQrToken}</span> zugewiesen.
+                  </p>
+                ) : (
+                  <>
+                    <p className="text-body-xs text-claimondo-ondo">
+                      Scanne einen vorgedruckten Pool-QR oder gib den Code ein — er wird dieser Werkstatt zugewiesen.
+                    </p>
+                    <PoolQrScanner onToken={handleDialogQrZuweisung} disabled={dialogQrLaden} />
+                  </>
+                )}
+              </div>
+
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => {
+                  setCreatedCredentials(null)
+                  setDialogQrToken(null)
+                  setShowDialog(false)
+                }}
+              >
                 Schließen
               </Button>
             </div>

@@ -45,9 +45,6 @@ function normaliseEventOptOuts(value: unknown): Partial<Record<EventType, Channe
 
 /**
  * Lädt Preferences des Users. Kein Record → alle Default-Werte (opt-in).
- * Bei Makler-Usern werden existierende Email-Opt-Outs aus makler.notification_preferences
- * als schwacher Fallback berücksichtigt (wenn N5-Table leer, Makler hat Email-Opt-Out
- * für einen Key → wir tragen Email als event_opt_outs für den passenden Event-Typ ein).
  */
 export async function loadPreferences(userId: string): Promise<NotificationPreferences> {
   const supabase = createAdminClient()
@@ -69,43 +66,7 @@ export async function loadPreferences(userId: string): Promise<NotificationPrefe
     }
   }
 
-  const fallback = await loadMaklerEmailFallback(userId)
-  return {
-    user_id: userId,
-    ...DEFAULT_PREFS,
-    event_opt_outs: fallback,
-  }
-}
-
-/**
- * Makler-Fallback: Liest die alten boolean-Flags aus makler.notification_preferences
- * (AAR-492) und mapped sie auf N5-event_opt_outs (Email) wenn der Flag false ist.
- */
-async function loadMaklerEmailFallback(userId: string): Promise<Partial<Record<EventType, Channel[]>>> {
-  const supabase = createAdminClient()
-  const { data: makler } = await supabase
-    .from('makler')
-    .select('notification_preferences')
-    .eq('user_id', userId)
-    .maybeSingle()
-
-  const prefs = makler?.notification_preferences as Record<string, unknown> | null | undefined
-  if (!prefs || typeof prefs !== 'object') return {}
-
-  const optOuts: Partial<Record<EventType, Channel[]>> = {}
-  // neuer_lead → makler.lead_eingegangen
-  if (prefs.neuer_lead === false) {
-    optOuts['makler.lead_eingegangen'] = ['email']
-  }
-  // kanzlei_uebergabe → kanzlei.uebergabe
-  if (prefs.kanzlei_uebergabe === false) {
-    optOuts['kanzlei.uebergabe'] = ['email']
-  }
-  // provision_freigegeben → makler.provision_status
-  if (prefs.provision_freigegeben === false) {
-    optOuts['makler.provision_status'] = ['email']
-  }
-  return optOuts
+  return { user_id: userId, ...DEFAULT_PREFS }
 }
 
 /**

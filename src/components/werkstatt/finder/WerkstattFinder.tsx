@@ -6,6 +6,7 @@
 
 import { Card, Button } from '@/components/primitives'
 import EmptyState from '@/components/shared/EmptyState'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 
 type Props = {
@@ -48,6 +49,11 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading }:
     )
   }
 
+  // "Passt zu deinem Schaden"-Badge nur zeigen, wenn die Liste unterscheidet
+  // (einige passen, andere nicht) — sonst ist der Badge auf allen sinnlos
+  // (passt=true ist Default bei fehlender Schadenskategorie / Vollservice).
+  const zeigeBadge = werkstaetten.some((w) => w.passt) && werkstaetten.some((w) => !w.passt)
+
   return (
     <ul className="space-y-3">
       {werkstaetten.map((w) => {
@@ -68,6 +74,13 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading }:
                   <p className="font-semibold text-claimondo-navy truncate">
                     {w.name}
                   </p>
+                  {zeigeBadge && w.passt ? (
+                    <div className="mt-1">
+                      <StatusBadge tone="success" size="xs">
+                        Passt zu deinem Schaden
+                      </StatusBadge>
+                    </div>
+                  ) : null}
                   {adresse ? (
                     <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
                       {adresse}

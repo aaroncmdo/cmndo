@@ -13,16 +13,15 @@ import { saveRueckruf } from './_actions/rueckruf'
 import { markRueckrufErledigtMitErgebnis } from '@/app/dispatch/rueckrufe/actions'
 import {
   PhoneCallIcon,
-  CheckCircle2Icon,
   ArrowRightIcon,
   HistoryIcon,
   Loader2Icon,
   CalendarClockIcon,
   PhoneIncomingIcon,
   PhoneMissedIcon,
-  PhoneOffIcon,
 } from 'lucide-react'
 import { Button } from '@/components/primitives/Button/Button.web'
+import { RueckrufErledigenForm } from '@/components/shared/rueckruf/RueckrufErledigenForm'
 
 export type RueckrufInitialData = {
   startZeit?: string | null
@@ -82,12 +81,6 @@ export default function RueckrufTerminPanel({
   const [loading, setLoading] = useState(false)
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  // Erledigen-Flow
-  const [erledigenOffen, setErledigenOffen] = useState(false)
-  const [ergebnis, setErgebnis] = useState<'erreicht' | 'nicht_erreicht'>('erreicht')
-  const [ergebnisNotiz, setErgebnisNotiz] = useState('')
-  const [folgetermin, setFolgetermin] = useState('')
 
   const loadVerlauf = useCallback(async () => {
     const supabase = createClient()
@@ -195,29 +188,6 @@ export default function RueckrufTerminPanel({
     })
   }
 
-  async function handleErledigenAbschicken() {
-    setError(null)
-    startTransition(async () => {
-      const r = await markRueckrufErledigtMitErgebnis(
-        leadId,
-        ergebnis,
-        ergebnisNotiz || null,
-        ergebnis === 'nicht_erreicht' && folgetermin ? new Date(folgetermin).toISOString() : null,
-      )
-      if (r.ok) {
-        setErledigenOffen(false)
-        setErgebnisNotiz('')
-        setFolgetermin('')
-        if (ergebnis === 'nicht_erreicht') setAnrufVersuche((v) => v + 1)
-        await load()
-        router.refresh()
-        if (ergebnis === 'erreicht') onActionDone?.()
-      } else {
-        setError(r.error ?? 'Fehler')
-      }
-    })
-  }
-
   const inPast = !!datum && new Date(datum) < new Date()
 
   return (
@@ -281,106 +251,24 @@ export default function RueckrufTerminPanel({
 
       <div className="border-t border-claimondo-border" />
 
-      {/* Rückruf erledigen */}
+      {/* Rückruf erledigen — geteilter Flow (RueckrufErledigenForm) */}
       <div>
         <p className="text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo mb-2">
           Anruf durchgeführt
         </p>
-
-        {!erledigenOffen ? (
-          <button
-            onClick={() => setErledigenOffen(true)}
-            disabled={pending || loading}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-ios-xl bg-success hover:bg-success/90 text-white text-sm font-medium disabled:opacity-50 transition-colors"
-          >
-            <CheckCircle2Icon className="w-3.5 h-3.5" />
-            Rückruf erledigt
-            {anrufVersuche > 0 && (
-              <span className="text-[10px] bg-white/20 px-1.5 py-0.5 rounded-full ml-1">
-                {anrufVersuche} Versuch{anrufVersuche !== 1 ? 'e' : ''}
-              </span>
-            )}
-          </button>
-        ) : (
-          <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-3 space-y-3">
-            {/* Ergebnis */}
-            <div>
-              <p className="text-[11px] font-medium text-claimondo-ondo mb-1.5">Ergebnis</p>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setErgebnis('erreicht')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors border ${
-                    ergebnis === 'erreicht'
-                      ? 'bg-success text-white border-success'
-                      : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-success-soft'
-                  }`}
-                >
-                  <PhoneIncomingIcon className="w-3 h-3" />
-                  Erreicht
-                </button>
-                <button
-                  onClick={() => setErgebnis('nicht_erreicht')}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors border ${
-                    ergebnis === 'nicht_erreicht'
-                      ? 'bg-danger text-white border-danger'
-                      : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-danger-soft'
-                  }`}
-                >
-                  <PhoneOffIcon className="w-3 h-3" />
-                  Nicht erreicht
-                </button>
-              </div>
-            </div>
-
-            {/* Notiz */}
-            <div>
-              <label className="text-[11px] font-medium text-claimondo-ondo block mb-1">
-                Notiz (Gesprächsinhalt / Ergebnis)
-              </label>
-              <textarea
-                value={ergebnisNotiz}
-                onChange={(e) => setErgebnisNotiz(e.target.value)}
-                rows={2}
-                placeholder="z.B. Kunde bestätigt Termin am Freitag …"
-                className="w-full bg-white border border-claimondo-border text-claimondo-navy text-xs rounded-ios-lg px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/40 resize-none"
-              />
-            </div>
-
-            {/* Folgetermin nur wenn nicht erreicht */}
-            {ergebnis === 'nicht_erreicht' && (
-              <div>
-                <label className="text-[11px] font-medium text-claimondo-ondo block mb-1">
-                  Nächsten Rückruf planen (optional)
-                </label>
-                <input
-                  type="datetime-local"
-                  value={folgetermin}
-                  onChange={(e) => setFolgetermin(e.target.value)}
-                  className="w-full bg-white border border-claimondo-border text-claimondo-navy text-xs rounded-ios-lg px-2.5 py-2 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="ondo"
-                size="sm"
-                onClick={handleErledigenAbschicken}
-                disabled={pending}
-              >
-                {pending ? 'Speichert …' : 'Speichern'}
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => { setErledigenOffen(false); setErgebnisNotiz(''); setFolgetermin('') }}
-                disabled={pending}
-              >
-                Abbrechen
-              </Button>
-            </div>
-          </div>
-        )}
+        <RueckrufErledigenForm
+          variant="panel"
+          anrufVersuche={anrufVersuche}
+          onSubmit={(ergebnis, ergebnisNotiz, folgeterminIso) =>
+            markRueckrufErledigtMitErgebnis(leadId, ergebnis, ergebnisNotiz, folgeterminIso)
+          }
+          onDone={(ergebnis) => {
+            if (ergebnis === 'nicht_erreicht') setAnrufVersuche((v) => v + 1)
+            void load()
+            router.refresh()
+            if (ergebnis === 'erreicht') onActionDone?.()
+          }}
+        />
       </div>
 
       {/* Dispatch fortsetzen */}

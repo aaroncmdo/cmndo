@@ -513,17 +513,12 @@ export async function POST(request: Request) {
             }
           } catch (err) { console.error('[AAR-401] Solo Rechnung/Mail:', err) }
 
-          // Admin-Notification
-          try {
-            const { data: admins } = await db.from('profiles').select('telefon').eq('rolle', 'admin')
-            const { sendCommunication } = await import('@/lib/communications/send')
-            for (const a of admins ?? []) {
-              if (a.telefon) await sendCommunication('admin_einzug_failed', {
-                telefon: a.telefon,
-                '1': svId.slice(0, 8),
-              })
-            }
-          } catch { /* */ }
+          // (2026-07-04, Reliability-Sweep) Der frueher hier feuernde
+          // admin_einzug_failed-Alert wurde ENTFERNT: das ist ein FEHLSCHLAG-Trigger
+          // (channel=email, "Stripe-Einzug fehlgeschlagen"), lief aber im Solo-ANZAHLUNG-
+          // ERFOLG-Zweig UND via telefon (Kanal-Mismatch) -> Falschalarm an Admins bei
+          // JEDER erfolgreichen Anzahlung. Copy-Paste-Rest (Buero/Akademie-Zweige
+          // notifizieren hier bewusst gar nicht; ein echter "SV aktiviert"-Trigger existiert nicht).
 
           // BUG-92: Admin-Listing/Karte revalidieren — analog Buero-Branch.
           try {

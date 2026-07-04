@@ -234,10 +234,10 @@ export async function uploadGutachten(
   }
 
   // OCR-Auslesung des Gutachten-PDFs triggern
-  // AAR-240: Production-Fallback cmndo.vercel.app statt localhost — in
+  // AAR-240: Production-Fallback app.claimondo.de statt localhost — in
   // Serverless-Functions ohne NEXT_PUBLIC_APP_URL würde localhost einen
   // ECONNREFUSED geben.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
   fetch(`${baseUrl}/api/ocr-gutachten`, {
     method: 'POST',
     // Write-Path-Audit (28.06.): /api/ocr-gutachten ist jetzt Bearer-CRON_SECRET-gegated

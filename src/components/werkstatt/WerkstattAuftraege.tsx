@@ -18,6 +18,7 @@ import {
   bestaetigeReparaturtermin,
   erbitteRueckruf,
   lehneReparaturterminAb,
+  oeffneGutachtenPdf,
 } from '@/app/werkstatt/(shell)/auftraege/actions'
 
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -31,6 +32,7 @@ import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 // ─────────────────────────────────────────────────────────────────────────────
 
 const EUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
+const EUR2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })
 const DATETIME = new Intl.DateTimeFormat('de-DE', {
   day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin',
 })
@@ -267,6 +269,83 @@ function ReparaturterminSektion({ auftrag }: ReparaturterminSektionProps) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// GutachtenSektion — Kennzahlen + PDF-Download (SP3 Task 3)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
+  const [pdfLaden, setPdfLaden] = useState(false)
+
+  if (!auftrag.gutachten_fertiggestellt_am) return null
+
+  async function handlePdf() {
+    setPdfLaden(true)
+    // Fenster synchron im Klick-Gesture oeffnen (Popup-Blocker-sicher), dann URL setzen.
+    const win = window.open('', '_blank')
+    const result = await oeffneGutachtenPdf(auftrag.claim_id)
+    setPdfLaden(false)
+    if (!result.ok) {
+      win?.close()
+      toast.error(result.error ?? 'PDF konnte nicht geöffnet werden')
+      return
+    }
+    if (win) win.location.href = result.url
+    else window.open(result.url, '_blank')
+  }
+
+  const kennzahlen: Array<{ label: string; value: number | null }> = [
+    { label: 'Reparaturkosten (brutto)', value: auftrag.gutachten_reparaturkosten_brutto },
+    { label: 'Minderwert', value: auftrag.gutachten_minderwert },
+    { label: 'Restwert', value: auftrag.gutachten_restwert },
+    { label: 'Wiederbeschaffungswert', value: auftrag.gutachten_wiederbeschaffungswert },
+  ]
+  const sichtbar = kennzahlen.filter((k) => k.value != null)
+
+  return (
+    <SectionCard title="Gutachten" className="mt-3">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-body-xs text-claimondo-ondo">
+            vom{' '}
+            {formatBerlin(auftrag.gutachten_fertiggestellt_am, {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            })}
+          </span>
+          {auftrag.gutachten_totalschaden === true && (
+            <StatusBadge tone="warning" size="xs">Totalschaden</StatusBadge>
+          )}
+        </div>
+
+        {sichtbar.length > 0 && (
+          <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5">
+            {sichtbar.map((k) => (
+              <div key={k.label} className="flex flex-col">
+                <dt className="text-body-xs text-claimondo-ondo">{k.label}</dt>
+                <dd className="text-body-sm font-medium text-claimondo-navy tabular-nums">
+                  {EUR2.format(k.value as number)}
+                </dd>
+              </div>
+            ))}
+          </dl>
+        )}
+        {auftrag.gutachten_reparaturkosten_netto != null && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Reparaturkosten netto: {EUR2.format(auftrag.gutachten_reparaturkosten_netto)}
+          </p>
+        )}
+
+        <div className="pt-1">
+          <Button variant="ghost" size="sm" loading={pdfLaden} onClick={handlePdf}>
+            Gutachten-PDF öffnen
+          </Button>
+        </div>
+      </div>
+    </SectionCard>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Haupt-Komponente
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -318,6 +397,8 @@ export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
                     )}
                     {/* SP2 Task 6: Reparaturtermin-Sektion */}
                     <ReparaturterminSektion auftrag={a} />
+                    {/* SP3 Task 3: Gutachten-Sektion */}
+                    <GutachtenSektion auftrag={a} />
                   </Td>
                   <Td className="text-body-sm">
                     <div className="text-claimondo-navy">{fahrzeugText(a)}</div>

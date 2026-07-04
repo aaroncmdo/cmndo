@@ -6,6 +6,7 @@ import { AI_MODELS } from '@/lib/ai/models'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import { ladeAnspruchRates } from '@/lib/anspruch/rates'
 import { berechneAnspruchsSpanne } from '@/lib/anspruch/positionen'
+import { plausibilisiereWbw } from '@/lib/anspruch/wbw'
 import {
   erstelleSession, ladeFotoInSession, ladeFotoUrls,
   speichereVisionResult, speicherePositionen,
@@ -20,9 +21,13 @@ const VISION_SYSTEM = `Du bist ein KFZ-Schadensexperte fuer den deutschen Markt.
   "segment": "kleinwagen" | "kompakt" | "mittelklasse" | "oberklasse" | "suv" | "transporter",
   "geschaetzte_kosten_min": number,
   "geschaetzte_kosten_max": number,
+  "wiederbeschaffungswert_min": number,
+  "wiederbeschaffungswert_max": number,
+  "restwert_min": number,
+  "restwert_max": number,
   "beschreibung": "string"
 }
-Schaetze Reparaturkosten als realistische BRUTTO-Spanne (deutsche Werkstattpreise). "segment" = Fahrzeugklasse aus dem sichtbaren Fahrzeug. Sei konservativ; bei Unsicherheit breitere Spanne.`
+Schaetze Reparaturkosten als realistische BRUTTO-Spanne (deutsche Werkstattpreise). "segment" = Fahrzeugklasse aus dem sichtbaren Fahrzeug. "wiederbeschaffungswert" = geschaetzter aktueller Marktwert des Fahrzeugs (Wiederbeschaffung) in EUR; "restwert" = geschaetzter Wert des beschaedigten Fahrzeugs. Beide als BRUTTO-Spanne. Sei konservativ; bei Unsicherheit breitere Spanne.`
 
 const ALLOWED = new Set(['image/jpeg', 'image/png', 'image/webp'])
 const MAX_BYTES = 10 * 1024 * 1024
@@ -61,6 +66,10 @@ function parseVision(text: string): VisionResult | null {
     if (!Array.isArray(o.beschaedigte_teile)) o.beschaedigte_teile = []
     else o.beschaedigte_teile = o.beschaedigte_teile.filter((t: unknown) => typeof t === 'string')
     if (typeof o.beschreibung !== 'string') o.beschreibung = ''
+    o.wiederbeschaffungswert_min = typeof o.wiederbeschaffungswert_min === 'number' ? o.wiederbeschaffungswert_min : null
+    o.wiederbeschaffungswert_max = typeof o.wiederbeschaffungswert_max === 'number' ? o.wiederbeschaffungswert_max : null
+    o.restwert_min = typeof o.restwert_min === 'number' ? o.restwert_min : null
+    o.restwert_max = typeof o.restwert_max === 'number' ? o.restwert_max : null
     return o as VisionResult
   } catch {
     return null
@@ -116,7 +125,12 @@ export async function berechneAnspruch(
   const vision = row?.vision_result as VisionResult | null
   if (!vision) return { ok: false, error: 'Keine Analyse vorhanden' }
 
-  const { saetze, faktoren, config } = await ladeAnspruchRates()
+  const { saetze, faktoren, config, wbwHeuristik } = await ladeAnspruchRates()
+  const alter = eingabe.ezJahr != null ? new Date().getFullYear() - eingabe.ezJahr : null
+  const wbw = plausibilisiereWbw(
+    { wiederbeschaffungswert_min: vision.wiederbeschaffungswert_min, wiederbeschaffungswert_max: vision.wiederbeschaffungswert_max, restwert_min: vision.restwert_min, restwert_max: vision.restwert_max },
+    eingabe.segment, alter, wbwHeuristik,
+  )
   const spanne = berechneAnspruchsSpanne(
     {
       reparaturMinEur: vision.geschaetzte_kosten_min,
@@ -126,6 +140,10 @@ export async function berechneAnspruch(
       fahrbereit: eingabe.fahrbereit,
       ezJahr: eingabe.ezJahr,
       aktuellesJahr: new Date().getFullYear(),
+      wbwMinEur: wbw.wbwMin,
+      wbwMaxEur: wbw.wbwMax,
+      restwertMinEur: wbw.restwertMin,
+      restwertMaxEur: wbw.restwertMax,
     },
     saetze, faktoren, config,
   )
