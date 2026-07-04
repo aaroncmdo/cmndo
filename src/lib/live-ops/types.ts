@@ -45,6 +45,8 @@ export type TerminPin = {
   lng: number
   adresse: string
   claimNummer: string
+  /** UUID des verknuepften Falls (faelle.id) — null bei reinen Lead-Terminen ohne Fall */
+  fallId: string | null
 }
 
 export type DeadPin = {

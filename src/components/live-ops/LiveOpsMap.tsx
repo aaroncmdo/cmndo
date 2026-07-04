@@ -51,6 +51,8 @@ const LAYER_DEADPINS = 'lo-deadpins-circle'
 
 const SRC_LEADS = 'lo-leads'
 const LAYER_LEADS = 'lo-leads-circle'
+const LAYER_LEADS_CLUSTER = 'lo-leads-cluster'
+const LAYER_LEADS_CLUSTER_COUNT = 'lo-leads-cluster-count'
 
 // Lead-Status-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property)
 const LEAD_STATUS_COLOR_EXPR = [
@@ -68,6 +70,7 @@ const DEADPIN_STATUS_COLOR_EXPR = [
   'match',
   ['get', 'status'],
   'offen', '#94a3b8',
+  'beansprucht_pending', '#f59e0b',
   'beansprucht', '#f59e0b',
   'konvertiert', '#22c55e',
   'abgelehnt', '#ef4444',
@@ -202,7 +205,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           routen: [LAYER_ROUTEN],
           tagesrouten: [LAYER_TAGESROUTEN],
           deadpins: [LAYER_DEADPINS],
-          leads: [LAYER_LEADS],
+          leads: [LAYER_LEADS, LAYER_LEADS_CLUSTER, LAYER_LEADS_CLUSTER_COUNT],
         }
         for (const layerId of layerIds[key]) {
           if (map.getLayer(layerId)) {
@@ -578,17 +581,81 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         })
       }
 
-      // ─── Lead-Pins (nur fuer admin + dispatch) ─────────────────────────
+      // ─── Lead-Pins (nur fuer admin + dispatch) — mit Cluster ──────────
       if (role !== 'kundenbetreuer') {
         map.addSource(SRC_LEADS, {
           type: 'geojson',
           data: leadsFC(leadsRef.current),
+          cluster: true,
+          clusterMaxZoom: 8,
+          clusterRadius: 50,
         })
 
+        // Cluster-Circle-Layer
+        map.addLayer({
+          id: LAYER_LEADS_CLUSTER,
+          type: 'circle',
+          source: SRC_LEADS,
+          filter: ['has', 'point_count'],
+          paint: {
+            'circle-color': '#f59e0b',
+            'circle-radius': [
+              'step',
+              ['get', 'point_count'],
+              16, 10, 22, 50, 28,
+            ],
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 2,
+            'circle-opacity': 0.9,
+          },
+        })
+
+        // Cluster-Count-Label
+        map.addLayer({
+          id: LAYER_LEADS_CLUSTER_COUNT,
+          type: 'symbol',
+          source: SRC_LEADS,
+          filter: ['has', 'point_count'],
+          layout: {
+            'text-field': '{point_count_abbreviated}',
+            'text-size': 11,
+            'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          },
+          paint: {
+            'text-color': '#ffffff',
+          },
+        })
+
+        // Klick auf Cluster → reinzoomen
+        map.on(
+          'click',
+          LAYER_LEADS_CLUSTER,
+          (e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] }) => {
+            const feature = e.features?.[0]
+            if (!feature) return
+            const clusterId = feature.properties?.cluster_id as number
+            const source = map.getSource(SRC_LEADS) as GeoJSONSource
+            source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+              if (err || typeof zoom !== 'number') return
+              const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+              map.easeTo({ center: coords, zoom })
+            })
+          },
+        )
+
+        map.on('mouseenter', LAYER_LEADS_CLUSTER, () => {
+          map.getCanvas().style.cursor = 'pointer'
+        })
+        map.on('mouseleave', LAYER_LEADS_CLUSTER, () => {
+          map.getCanvas().style.cursor = ''
+        })
+
+        // Einzel-Lead-Pin (unclustered)
         map.addLayer({
           id: LAYER_LEADS,
           type: 'circle',
           source: SRC_LEADS,
+          filter: ['!', ['has', 'point_count']],
           paint: {
             'circle-color': LEAD_STATUS_COLOR_EXPR,
             'circle-radius': 6,
@@ -598,7 +665,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           },
         })
 
-        // Klick auf Lead-Pin → Popup
+        // Klick auf Einzel-Lead-Pin → Popup
         map.on(
           'click',
           LAYER_LEADS,

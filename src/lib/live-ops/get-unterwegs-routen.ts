@@ -1,14 +1,16 @@
 import { getLiveOpsSvs } from './get-live-svs'
 import { fetchDrivingRoute } from '@/lib/mapbox/directions'
-import type { UnterwegsRoute, LiveOpsScope } from './types'
+import type { UnterwegsRoute, LiveOpsScope, SvLiveOps } from './types'
 
 /**
  * SVs die gerade unterwegs sind (car.mode !== 'none', Positions- und Zielkoords bekannt)
  * -> echte Fahrtroute via Mapbox Directions API.
  * Bei Fehler pro SV: SV ueberspringen (kein throw).
+ *
+ * @param preloadedSvs - optional: bereits geladene SVs (verhindert doppelten getLiveOpsSvs-Aufruf)
  */
-export async function getUnterwegsRouten(scope: LiveOpsScope): Promise<UnterwegsRoute[]> {
-  const svs = await getLiveOpsSvs(scope)
+export async function getUnterwegsRouten(scope: LiveOpsScope, preloadedSvs?: SvLiveOps[]): Promise<UnterwegsRoute[]> {
+  const svs = preloadedSvs ?? await getLiveOpsSvs(scope)
 
   const unterwegs = svs.filter(
     (sv) =>

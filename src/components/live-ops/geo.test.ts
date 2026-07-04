@@ -41,6 +41,7 @@ const makeTermin = (overrides: Partial<TerminPin> = {}): TerminPin => ({
   lng: 11.576,
   adresse: 'Musterstr. 1, 80331 Muenchen',
   claimNummer: 'CLM-2026-00001',
+  fallId: 'fall-uuid-1',
   ...overrides,
 })
 
@@ -125,12 +126,19 @@ describe('terminPinsFC', () => {
     expect(coords[1]).toBe(t.lat)
   })
 
-  it('sets __id, __type and status on properties', () => {
-    const t = makeTermin({ id: 't-42', status: 'vorgeschlagen' })
+  it('sets __id, __type, status and fallId on properties', () => {
+    const t = makeTermin({ id: 't-42', status: 'vorgeschlagen', fallId: 'fall-abc' })
     const f = terminPinsFC([t]).features[0]
     expect(f.properties?.__id).toBe('t-42')
     expect(f.properties?.__type).toBe('termin')
     expect(f.properties?.status).toBe('vorgeschlagen')
+    expect(f.properties?.fallId).toBe('fall-abc')
+  })
+
+  it('passes fallId=null for lead-only Termine', () => {
+    const t = makeTermin({ fallId: null })
+    const f = terminPinsFC([t]).features[0]
+    expect(f.properties?.fallId).toBeNull()
   })
 })
 

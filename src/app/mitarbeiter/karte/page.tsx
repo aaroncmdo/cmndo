@@ -20,10 +20,11 @@ export default async function MitarbeiterKartePage() {
   const { user } = await requirePortalAccess(['kundenbetreuer', 'admin'])
 
   const scope = await resolveLiveOpsScope('kundenbetreuer', user.id)
-  const [svs, termine, routen, tagesrouten, deadPins, leads] = await Promise.all([
-    getLiveOpsSvs(scope),
+  // svs zuerst awaiten, dann als preloadedSvs an getUnterwegsRouten uebergeben (spart doppelten DB-Call)
+  const svs = await getLiveOpsSvs(scope)
+  const [termine, routen, tagesrouten, deadPins, leads] = await Promise.all([
     getOffeneTermine(scope),
-    getUnterwegsRouten(scope),
+    getUnterwegsRouten(scope, svs),
     getTagesrouten(scope),
     getDeadPins(scope),
     getLeads(scope),

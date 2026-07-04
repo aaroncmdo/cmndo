@@ -137,11 +137,15 @@ export default function SvPopup({ sv, role }: SvPopupProps) {
         </div>
       )}
 
-      {/* Link — nur fuer admin/dispatch sichtbar */}
+      {/* Links — nur fuer admin/dispatch sichtbar */}
       {(role === 'admin' || role === 'dispatch') && (
-        <div style={{ marginTop: 2 }}>
+        <div style={{ marginTop: 2, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <a
-            href={`/admin/sachverstaendige/${sv.id}`}
+            href={
+              role === 'dispatch'
+                ? `/dispatch/sachverstaendige/${sv.id}`
+                : `/admin/sachverstaendige/${sv.id}`
+            }
             style={{
               fontSize: 11,
               color: 'var(--brand-secondary, #4573A2)',
@@ -151,6 +155,19 @@ export default function SvPopup({ sv, role }: SvPopupProps) {
           >
             SV öffnen →
           </a>
+          {role === 'dispatch' && (
+            <a
+              href={`/dispatch/kalender?sv_id=${sv.id}&mode=create`}
+              style={{
+                fontSize: 11,
+                color: 'var(--brand-secondary, #4573A2)',
+                textDecoration: 'underline',
+                fontWeight: 500,
+              }}
+            >
+              Termin einplanen →
+            </a>
+          )}
         </div>
       )}
     </div>

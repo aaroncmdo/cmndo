@@ -274,7 +274,7 @@ function PinDetail({ pin, onBack, role }: PinDetailProps) {
 
 // ─── Status-Filter-Typ ───────────────────────────────────────────────────────
 
-type FilterStatus = 'alle' | 'offen' | 'beansprucht' | 'konvertiert' | 'abgelehnt'
+type FilterStatus = 'alle' | 'offen' | 'beansprucht' | 'beansprucht_pending' | 'konvertiert' | 'abgelehnt'
 
 // ─── Haupt-Drawer ────────────────────────────────────────────────────────────
 
@@ -439,7 +439,7 @@ export default function DeadPinDrawer({
 
               {/* Status-Filter */}
               <div className="flex gap-1.5 flex-wrap mb-4">
-                {(['alle', 'offen', 'beansprucht', 'konvertiert', 'abgelehnt'] as FilterStatus[]).map((s) => (
+                {(['alle', 'offen', 'beansprucht_pending', 'beansprucht', 'konvertiert', 'abgelehnt'] as FilterStatus[]).map((s) => (
                   <button
                     key={s}
                     type="button"

@@ -57,6 +57,7 @@ export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
         kundeName: t.kundeName,
         startZeit: t.startZeit,
         claimNummer: t.claimNummer,
+        fallId: t.fallId,
       },
     })),
   }

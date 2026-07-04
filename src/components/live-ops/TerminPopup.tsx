@@ -112,11 +112,11 @@ export default function TerminPopup({ termin, role }: TerminPopupProps) {
         </div>
       )}
 
-      {/* Fall öffnen — nur für admin/dispatch/kb */}
-      {kannFallOeffnen && termin.claimNummer && (
+      {/* Fall öffnen — nur für admin/dispatch/kb, nur wenn fallId bekannt (kein Link bei reinen Lead-Terminen) */}
+      {kannFallOeffnen && termin.fallId && (
         <div style={{ marginTop: 2 }}>
           <a
-            href={`/faelle/${termin.claimNummer}`}
+            href={`/faelle/${termin.fallId}`}
             style={{
               fontSize: 11,
               color: 'var(--brand-secondary, #4573A2)',

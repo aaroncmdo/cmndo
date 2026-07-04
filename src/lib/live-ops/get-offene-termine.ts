@@ -75,6 +75,12 @@ export async function getOffeneTermine(scope: LiveOpsScope): Promise<TerminPin[]
     query = query.in('assignee_id', scope.svIds)
   }
 
+  // KB: nur Termine aus eigenen Faellen — verhindert, dass geteilte SVs Termine anderer KBs zeigen
+  if (scope.fallIds !== 'all') {
+    if (scope.fallIds.length === 0) return []
+    query = query.in('fall_id', scope.fallIds)
+  }
+
   const { data, error } = await query
   if (error) {
     console.error('[getOffeneTermine] gutachter_termine query failed', error)
@@ -146,6 +152,7 @@ export async function getOffeneTermine(scope: LiveOpsScope): Promise<TerminPin[]
       lng,
       adresse: '',
       claimNummer: claim?.claim_nummer ?? '',
+      fallId: raw.fall_id ?? null,
     })
   }
 

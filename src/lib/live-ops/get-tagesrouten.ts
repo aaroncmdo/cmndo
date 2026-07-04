@@ -5,6 +5,7 @@ import type { TagesRoute, LiveOpsScope } from './types'
 type StopRow = {
   id: string
   assignee_id: string | null
+  fall_id: string | null
   start_zeit: string
   besichtigungsort_lat: number | null
   besichtigungsort_lng: number | null
@@ -35,7 +36,7 @@ export async function getTagesrouten(scope: LiveOpsScope): Promise<TagesRoute[]>
   let query = supabase
     .from('gutachter_termine')
     .select(
-      'id, assignee_id, start_zeit, besichtigungsort_lat, besichtigungsort_lng, gps_lat_ankunft, gps_lng_ankunft',
+      'id, assignee_id, fall_id, start_zeit, besichtigungsort_lat, besichtigungsort_lng, gps_lat_ankunft, gps_lng_ankunft',
     )
     .eq('assignee_typ', 'sachverstaendiger')
     .gte('start_zeit', startOfDay)
@@ -45,6 +46,12 @@ export async function getTagesrouten(scope: LiveOpsScope): Promise<TagesRoute[]>
 
   if (scope.svIds !== 'all') {
     query = query.in('assignee_id', scope.svIds)
+  }
+
+  // KB: nur Termine aus eigenen Faellen — verhindert, dass geteilte SVs Tagesrouten anderer KBs zeigen
+  if (scope.fallIds !== 'all') {
+    if (scope.fallIds.length === 0) return []
+    query = query.in('fall_id', scope.fallIds)
   }
 
   const { data, error } = await query

@@ -43,10 +43,11 @@ export default async function SachverstaendigeHubPage() {
 
   // Live-Ops-Loader (role-scoped)
   const scope = await resolveLiveOpsScope('admin', user.id)
-  const [svs, termine, routen, tagesrouten, deadPins, leads] = await Promise.all([
-    getLiveOpsSvs(scope),
+  // svs zuerst awaiten, dann als preloadedSvs an getUnterwegsRouten uebergeben (spart doppelten DB-Call)
+  const svs = await getLiveOpsSvs(scope)
+  const [termine, routen, tagesrouten, deadPins, leads] = await Promise.all([
     getOffeneTermine(scope),
-    getUnterwegsRouten(scope),
+    getUnterwegsRouten(scope, svs),
     getTagesrouten(scope),
     getDeadPins(scope),
     getLeads(scope),
