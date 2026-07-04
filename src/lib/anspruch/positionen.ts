@@ -1,6 +1,6 @@
 import type {
-  AnspruchConfig, AnspruchPosition, AnspruchSpanne, Segment, SegmentSatz,
-  SchaetzInput, WertminderungFaktor,
+  AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Segment, SegmentSatz,
+  SchaetzInput, TotalschadenInfo, WertminderungFaktor,
 } from './types'
 
 function runde(n: number): number {
@@ -96,5 +96,53 @@ export function berechneAnspruchsSpanne(
   const gesamtMinEur = runde(summierbar.reduce((s, p) => s + (p.minEur as number), 0))
   const gesamtMaxEur = runde(summierbar.reduce((s, p) => s + (p.maxEur as number), 0))
 
-  return { positionen, gesamtMinEur, gesamtMaxEur, hinweise }
+  // --- Totalschaden-Zonen (nur wenn WBW vorhanden) ---
+  let totalschaden: TotalschadenInfo | undefined
+  const wbwMitte = input.wbwMinEur != null && input.wbwMaxEur != null ? (input.wbwMinEur + input.wbwMaxEur) / 2 : null
+  if (wbwMitte != null && wbwMitte > 0) {
+    const verhaeltnis = reparaturMitte / wbwMitte
+    if (verhaeltnis >= config.totalschadenSchwelleProzent) {
+      const restMin = input.restwertMinEur ?? 0
+      const restMax = input.restwertMaxEur ?? 0
+      const dauer = config.wiederbeschaffungsdauerTage
+      const satz = saetze[input.segment]
+      // Totalschaden-Weg: WBW - Restwert + Nutzungsausfall (Wiederbeschaffungsdauer) + (Abschlepp wenn nicht fahrbereit) + SV-Kosten + Auslagenpauschale
+      const tsPositionen: AnspruchPosition[] = [
+        { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(Math.max(0, input.wbwMinEur! - restMax)), maxEur: runde(Math.max(0, input.wbwMaxEur! - restMin)) },
+        { typ: 'nutzungsausfall', label: 'Nutzungsausfall (Wiederbeschaffung)', minEur: runde(satz.tagessatzMinEur * dauer.min), maxEur: runde(satz.tagessatzMaxEur * dauer.max), hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage` },
+        ...(!input.fahrbereit ? [{ typ: 'abschleppkosten' as const, label: 'Abschleppkosten', minEur: config.abschleppMinEur, maxEur: config.abschleppMaxEur }] : []),
+        { typ: 'gutachterkosten', label: 'Sachverständigenkosten', minEur: null, maxEur: null, gedecktDurchGegner: true, hinweis: 'Bei klarer Haftung trägt die gegnerische Versicherung diese Kosten.' },
+        { typ: 'kostenpauschale', label: 'Auslagenpauschale', minEur: config.kostenpauschaleEur, maxEur: config.kostenpauschaleEur },
+      ]
+      const tsMin = runde(tsPositionen.reduce((s, p) => s + (p.minEur ?? 0), 0))
+      const tsMax = runde(tsPositionen.reduce((s, p) => s + (p.maxEur ?? 0), 0))
+      const totalschadenWeg: AnspruchWeg = { titel: 'Totalschaden abrechnen', positionen: tsPositionen, summeMinEur: tsMin, summeMaxEur: tsMax }
+
+      // Reparatur-Weg nur bis 130% WBW (Zone B). Enthaelt die schon berechneten Zone-A-Positionen (inkl. Wertminderung).
+      const bis130 = verhaeltnis <= config.reparaturGrenzeProzent
+      const reparaturWeg: AnspruchWeg | null = bis130
+        ? { titel: 'Reparieren & Fahrzeug behalten', positionen: [...positionen], summeMinEur: gesamtMinEur, summeMaxEur: gesamtMaxEur }
+        : null
+
+      const reparaturMitteWeg = reparaturWeg ? (reparaturWeg.summeMinEur + reparaturWeg.summeMaxEur) / 2 : null
+      const tsMitte = (tsMin + tsMax) / 2
+      const guenstiger: 'reparatur' | 'totalschaden' =
+        reparaturMitteWeg != null && reparaturMitteWeg >= tsMitte ? 'reparatur' : 'totalschaden'
+
+      // 130%-Hinweis: Reparaturkosten uebersteigen WBW, aber Weg ist noch moeglich (Zone B, bis130=true)
+      const hinweisReparatur: string | undefined =
+        bis130 && reparaturMitte > wbwMitte
+          ? 'Reparaturkosten über dem Wiederbeschaffungswert (bis 130 %) werden nur erstattet, wenn fachgerecht repariert wird und Sie das Fahrzeug mindestens 6 Monate weiter nutzen.'
+          : undefined
+
+      totalschaden = {
+        wbwMinEur: input.wbwMinEur!, wbwMaxEur: input.wbwMaxEur!,
+        restwertMinEur: restMin, restwertMaxEur: restMax,
+        reparaturWeg, totalschadenWeg, reparaturBis130Moeglich: bis130, guenstiger,
+        ...(hinweisReparatur ? { hinweisReparatur } : {}),
+      }
+    }
+  }
+
+  return { positionen, gesamtMinEur, gesamtMaxEur, hinweise, ...(totalschaden ? { totalschaden } : {}) }
 }
