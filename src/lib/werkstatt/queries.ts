@@ -263,6 +263,12 @@ export type WerkstattAuftrag = {
   besichtigung_status: string | null
   provision_betrag_netto: number | null
   provision_status: string | null
+  // SP2 Task 5 — Reparaturtermin-Spalten (additiv, aus v_werkstatt_auftrag)
+  reparatur_termin_id: string | null
+  reparatur_termin_status: string | null
+  reparatur_wunschtermin: string | null
+  reparatur_bestaetigter_termin: string | null
+  reparatur_absage_grund: string | null
 }
 
 /** Self-scoped Auftrags-Liste via v_werkstatt_auftrag (RLS-Gate in der View). */
@@ -274,7 +280,9 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
       claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
       fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
       gutachter_firmenname, besichtigung_start, besichtigung_ort, besichtigung_status,
-      provision_betrag_netto, provision_status
+      provision_betrag_netto, provision_status,
+      reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
+      reparatur_bestaetigter_termin, reparatur_absage_grund
     `)
     .order('besichtigung_start', { ascending: false, nullsFirst: false })
   if (error) {
@@ -298,5 +306,11 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
     besichtigung_status: (r.besichtigung_status as string | null) ?? null,
     provision_betrag_netto: r.provision_betrag_netto != null ? Number(r.provision_betrag_netto) : null,
     provision_status: (r.provision_status as string | null) ?? null,
+    // SP2 Task 5 — Reparaturtermin-Spalten
+    reparatur_termin_id: (r.reparatur_termin_id as string | null) ?? null,
+    reparatur_termin_status: (r.reparatur_termin_status as string | null) ?? null,
+    reparatur_wunschtermin: (r.reparatur_wunschtermin as string | null) ?? null,
+    reparatur_bestaetigter_termin: (r.reparatur_bestaetigter_termin as string | null) ?? null,
+    reparatur_absage_grund: (r.reparatur_absage_grund as string | null) ?? null,
   }))
 }

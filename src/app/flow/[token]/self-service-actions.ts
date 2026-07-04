@@ -792,3 +792,38 @@ export async function speichereZb1KorrekturFlow(
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }
+
+// ─── SP2 Task 3: Reparatur-Wunschtermin im Flow ─────────────────────────────
+
+/**
+ * SP2 Task 3: Kunden-Wunschtermin fuer die Reparatur speichern (optional).
+ * Erscheint im FlowWerkstattStep sobald eine Werkstatt hinterlegt ist.
+ * Schreibt leads.reparatur_wunschtermin (timestamptz, UTC).
+ * Token-scoped via resolveFlowLead — kein Client-leadId vertraut.
+ */
+export async function speichereReparaturWunschterminFlow(
+  token: string,
+  wunschterminLokal: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!token || !wunschterminLokal) {
+    return { ok: false, error: 'Token und Wunschtermin sind erforderlich.' }
+  }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Ungültiger Link.' }
+
+  let utc: string | null
+  try {
+    utc = resolveWunschterminIso(wunschterminLokal)
+  } catch {
+    return { ok: false, error: 'Ungültiger Wunschtermin.' }
+  }
+  if (!utc) return { ok: false, error: 'Ungültiger Wunschtermin.' }
+
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({ reparatur_wunschtermin: utc })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath(`/flow/${token}`)
+  return { ok: true }
+}
