@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-04T12:46:16.741Z",
+  "generatedAt": "2026-07-04T12:55:07.375Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 65,
+  "fileCount": 68,
   "files": [
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
@@ -22,7 +22,10 @@
     "src/components/gutachter/SvHonorarCard.tsx",
     "src/components/legal/LegalDocPage.tsx",
     "src/components/live-ops/DeadPinDrawer.tsx",
+    "src/components/live-ops/LayerPanel.tsx",
     "src/components/live-ops/LiveOpsMap.tsx",
+    "src/components/live-ops/SidebarList.tsx",
+    "src/components/live-ops/StatBar.tsx",
     "src/components/live-ops/SvPopup.tsx",
     "src/components/live-ops/TerminPopup.tsx",
     "src/components/live-ops/types.ts",

@@ -2,25 +2,30 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSource } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
-import type { LiveOpsData } from './types'
+import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
 import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC } from './geo'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
 import TerminPopup from './TerminPopup'
 import DeadPinDrawer from './DeadPinDrawer'
+import StatBar from './StatBar'
+import LayerPanel from './LayerPanel'
+import SidebarList from './SidebarList'
 import type { SvLiveOps, TerminPin } from '@/lib/live-ops'
+import { createClient } from '@/lib/supabase/client'
 
 // ------------------------------------------------------------------ Props
 
 export interface LiveOpsMapProps {
   role: LiveOpsRole
   data: LiveOpsData
+  onRefresh?: () => void
 }
 
 // ------------------------------------------------------------------ Layer-IDs
@@ -76,9 +81,26 @@ const TYP_COLOR_EXPR = [
   /* default */ '#4573A2',
 ] as unknown as mapboxgl.Expression
 
+// ------------------------------------------------------------------ Default Layer/Filter State
+
+const DEFAULT_LAYERS: LayerState = {
+  svs: true,
+  autos: true,
+  termine: true,
+  routen: true,
+  tagesrouten: false,
+  deadpins: true,
+}
+
+const DEFAULT_FILTER: FilterState = {
+  typ: 'alle',
+  nurVerifiziert: false,
+  nurUnterwegs: false,
+}
+
 // ------------------------------------------------------------------ Component
 
-export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
+export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMap | null>(null)
 
@@ -86,6 +108,10 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
   const [error, setError] = useState<string | null>(null)
   // retryKey wird bei Retry inkrementiert → loest useEffect-Re-Mount aus
   const [retryKey, setRetryKey] = useState(0)
+
+  // Layer + Filter (Task 6)
+  const [layers, setLayers] = useState<LayerState>(DEFAULT_LAYERS)
+  const [filter, setFilter] = useState<FilterState>(DEFAULT_FILTER)
 
   // Hover-Sync (fuer Sidebar-Task 6)
   const [hoveredSvId, setHoveredSvId] = useState<string | null>(null)
@@ -117,10 +143,64 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
     termineRef.current = data.termine
   }, [data.termine])
 
+  // Stabile Referenz auf onRefresh fuer Realtime-Handler
+  const onRefreshRef = useRef(onRefresh)
+  useEffect(() => {
+    onRefreshRef.current = onRefresh
+  }, [onRefresh])
+
+  // Gefilterte SVs fuer Sidebar + Layer-Daten
+  const filteredSvs = useMemo<SvLiveOps[]>(() => {
+    return data.svs.filter((sv) => {
+      if (filter.typ !== 'alle' && sv.typ !== filter.typ) return false
+      if (filter.nurVerifiziert && !sv.verifiziert) return false
+      if (filter.nurUnterwegs && sv.car.mode === 'none') return false
+      return true
+    })
+  }, [data.svs, filter])
+
   const handleRetry = useCallback(() => {
     setError(null)
     setReady(false)
     setRetryKey((k) => k + 1)
+  }, [])
+
+  // ------ Layer-Toggle: setzt Mapbox-Layer-Visibility + Car-Marker display
+
+  const handleLayerToggle = useCallback((key: LayerKey) => {
+    setLayers((prev) => {
+      const on = !prev[key]
+      const map = mapRef.current
+      if (map) {
+        // Layer-Keys → Mapbox-Layer-IDs
+        const layerIds: Record<LayerKey, string[]> = {
+          svs: [LAYER_SVS, LAYER_ISOS_FILL, LAYER_ISOS_LINE],
+          autos: [], // Car-Marker werden per display-Style getoggelt
+          termine: [LAYER_TERMINE],
+          routen: [LAYER_ROUTEN],
+          tagesrouten: [LAYER_TAGESROUTEN],
+          deadpins: [LAYER_DEADPINS],
+        }
+        for (const layerId of layerIds[key]) {
+          if (map.getLayer(layerId)) {
+            map.setLayoutProperty(layerId, 'visibility', on ? 'visible' : 'none')
+          }
+        }
+        // Car-Marker (kein Layer, sondern DOM-Marker)
+        if (key === 'autos') {
+          carMarkersRef.current.forEach((marker) => {
+            marker.getElement().style.display = on ? '' : 'none'
+          })
+        }
+      }
+      return { ...prev, [key]: on }
+    })
+  }, [])
+
+  // ------ Filter-Update
+
+  const handleFilter = useCallback((f: Partial<FilterState>) => {
+    setFilter((prev) => ({ ...prev, ...f }))
   }, [])
 
   // ------ openSvPopup: createRoot + mapboxgl.Popup
@@ -472,6 +552,8 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
   }, [retryKey])
 
   // ------ Rebuild-Effect: bei Daten-Aenderung Sources updaten + Marker neu bauen
+  // Hinweis: filteredSvs kapselt data.svs + filter -> dieser Effect triggert bei
+  // beidem und bleibt die einzige Source fuer SV-Source + Car-Marker.
 
   useEffect(() => {
     const map = mapRef.current
@@ -479,16 +561,21 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
 
     // Source-Data updaten (kein doppeltes addSource/addLayer — guarde per getSource)
     if (map.getSource(SRC_SVS)) {
-      (map.getSource(SRC_SVS) as GeoJSONSource).setData(svPinsFC(data.svs))
+      ;(map.getSource(SRC_SVS) as GeoJSONSource).setData(svPinsFC(filteredSvs))
     }
     if (map.getSource(SRC_ISOS)) {
-      (map.getSource(SRC_ISOS) as GeoJSONSource).setData(isochroneFC(data.svs))
+      ;(map.getSource(SRC_ISOS) as GeoJSONSource).setData(isochroneFC(filteredSvs))
     }
 
-    // Car-Marker: alte entfernen, neue aufbauen
+    // Car-Marker: alte entfernen, neue aufbauen (nur gefilterte SVs)
     clearCarMarkers()
-    buildCarMarkers(map, data.svs)
-  }, [data.svs, ready, clearCarMarkers, buildCarMarkers])
+    buildCarMarkers(map, filteredSvs)
+
+    // Layer-Visibility fuer autos nach Rebuild sicherstellen
+    carMarkersRef.current.forEach((marker) => {
+      marker.getElement().style.display = layers.autos ? '' : 'none'
+    })
+  }, [filteredSvs, ready, clearCarMarkers, buildCarMarkers, layers.autos])
 
   // ------ Rebuild-Effect: Termine-Source bei Daten-Aenderung updaten
 
@@ -525,6 +612,26 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
       (map.getSource(SRC_DEADPINS) as GeoJSONSource).setData(deadPinsFC(data.deadPins))
     }
   }, [data.deadPins, ready])
+
+  // ------ Realtime: Supabase-Kanal fuer sv_live_location-Aenderungen
+
+  useEffect(() => {
+    const supabase = createClient()
+    const channel = supabase
+      .channel('live-ops-positions')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'sv_live_location' },
+        () => {
+          onRefreshRef.current?.()
+        },
+      )
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [])
 
   // ------ Anlege-Modus: Cursor + Klick-Handler fuer Koordinaten-Setzung
 
@@ -615,8 +722,31 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
         </div>
       )}
 
-      {/* hoveredSvId wird in Task 6 von SidebarList konsumiert */}
-      {/* data + role werden in Task 4+ fuer weitere Layer genutzt */}
+      {/* StatBar — oben zentriert */}
+      {ready && (
+        <StatBar data={data} />
+      )}
+
+      {/* LayerPanel — links */}
+      {ready && (
+        <LayerPanel
+          layers={layers}
+          onToggle={handleLayerToggle}
+          filter={filter}
+          onFilter={handleFilter}
+        />
+      )}
+
+      {/* SidebarList — rechts */}
+      {ready && (
+        <SidebarList
+          svs={filteredSvs}
+          termine={data.termine}
+          hoveredSvId={hoveredSvId}
+          onHover={setHoveredSvId}
+          onSelect={openSvPopup}
+        />
+      )}
 
       {/* Dead-Pin-Drawer (nur fuer admin + dispatch) */}
       {role !== 'kundenbetreuer' && (

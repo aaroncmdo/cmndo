@@ -33,3 +33,12 @@ export type LayerKey =
  * Visibility-State fuer alle Layer.
  */
 export type LayerState = Record<LayerKey, boolean>
+
+/**
+ * Filter-State fuer LayerPanel.
+ */
+export type FilterState = {
+  typ: string           // 'alle' | 'kfz' | 'dat' | 'akademie' | 'buero'
+  nurVerifiziert: boolean
+  nurUnterwegs: boolean
+}
