@@ -23,17 +23,15 @@ import {
 import type {
   MaklerFullProfile,
   AktiveConsentRow,
-  NotificationPreferences,
 } from '@/lib/makler/queries'
 import {
   updateMaklerProfil,
   updateMaklerBank,
   changeMaklerPasswort,
   revokeMaklerConsent,
-  updateMaklerNotificationPrefs,
 } from '@/lib/actions/makler-settings'
-// AAR-500 N5: neue Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-/Event-
-// Opt-Outs). Ersetzt nicht die bestehenden Email-Flags unten — wirkt zusätzlich.
+// AAR-500 N5: Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-/Event-Opt-Outs).
+// Seit die alte M10-Email-Flag-Card entfernt wurde die EINZIGE Benachrichtigungs-UI.
 import {
   NotificationPreferencesForm,
   type NotificationPreferencesFormValue,
@@ -90,7 +88,6 @@ export function MaklerSettings({
       <BankCard profile={profile} />
       <PasswortCard />
       <ConsentsCard consents={consents} />
-      <NotificationsCard prefs={profile.notification_preferences} />
       {notificationPrefs ? (
         <NotificationPreferencesCard initial={notificationPrefs} />
       ) : null}
@@ -646,81 +643,12 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
   )
 }
 
-// ── 5. Benachrichtigungen ──────────────────────────────────────────────────
+// (M10-Email-Flag-Card entfernt 04.07. — die 5 Boolean-Toggles waren doppelt
+// zur N5-Kanäle/Ruhezeiten-Card bzw. hatten kein Backend (monats_abrechnung/
+// woechentlicher_report). Benachrichtigungen laufen jetzt ausschliesslich über
+// NotificationPreferencesCard oben.)
 
-const NOTIF_LABELS: Array<{ key: keyof NotificationPreferences; label: string; hint?: string }> = [
-  { key: 'neuer_lead', label: 'Neuer Lead via Promo-Code' },
-  { key: 'kanzlei_uebergabe', label: 'Fall erreicht Kanzlei-Übergabe' },
-  { key: 'provision_freigegeben', label: 'Provision freigegeben' },
-  { key: 'monats_abrechnung', label: 'Monatliche Abrechnungs-Zusammenfassung' },
-  {
-    key: 'woechentlicher_report',
-    label: 'Wöchentlicher Report',
-    hint: 'Optional, Opt-In',
-  },
-]
-
-function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
-  const [local, setLocal] = useState<NotificationPreferences>(prefs)
-  const [state, setState] = useState<SaveState>({ status: 'idle' })
-  const [isPending, startTransition] = useTransition()
-
-  function toggle(key: keyof NotificationPreferences) {
-    setLocal((p) => ({ ...p, [key]: !p[key] }))
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setState({ status: 'saving' })
-    startTransition(async () => {
-      const res = await updateMaklerNotificationPrefs(local)
-      if (res.success) {
-        setState({ status: 'success' })
-        setTimeout(() => setState({ status: 'idle' }), 2500)
-      } else {
-        setState({ status: 'error', msg: res.error })
-      }
-    })
-  }
-
-  return (
-    <SettingsSectionCard
-      icon={<BellIcon width={16} height={16} />}
-      title="Benachrichtigungen"
-      subtitle="Welche Emails möchten Sie erhalten?"
-    >
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="space-y-2">
-          {NOTIF_LABELS.map((n) => (
-            <label
-              key={n.key}
-              className="flex items-start gap-3 p-3 rounded-ios-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={local[n.key]}
-                onChange={() => toggle(n.key)}
-                className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-navy focus:ring-claimondo-ondo/40"
-              />
-              <div className="flex-1">
-                <p className="text-sm text-claimondo-navy">{n.label}</p>
-                {n.hint ? (
-                  <p className="text-xs text-claimondo-shield">{n.hint}</p>
-                ) : null}
-              </div>
-            </label>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 pt-2">
-          <SaveButton state={{ status: isPending ? 'saving' : state.status }} />
-          <SaveFeedback state={state} />
-        </div>
-      </form>
-    </SettingsSectionCard>
-  )
-}
-
-// ── 6. Logout ───────────────────────────────────────────────────────────────
+// ── Logout ──────────────────────────────────────────────────────────────────
 
 function LogoutCard() {
   return (

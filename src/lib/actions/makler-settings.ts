@@ -8,10 +8,7 @@
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import {
-  getCurrentMakler,
-  type NotificationPreferences,
-} from '@/lib/makler/queries'
+import { getCurrentMakler } from '@/lib/makler/queries'
 import { revalidatePath } from 'next/cache'
 
 export type ActionResult = { success: true } | { success: false; error: string }
@@ -194,35 +191,9 @@ export async function revokeMaklerConsent(
   return { success: true }
 }
 
-// ── Benachrichtigungs-Präferenzen ──────────────────────────────────────────
-
-const notificationSchema = z.object({
-  neuer_lead: z.boolean(),
-  kanzlei_uebergabe: z.boolean(),
-  provision_freigegeben: z.boolean(),
-  monats_abrechnung: z.boolean(),
-  woechentlicher_report: z.boolean(),
-})
-
-export async function updateMaklerNotificationPrefs(
-  prefs: NotificationPreferences,
-): Promise<ActionResult> {
-  const parsed = notificationSchema.safeParse(prefs)
-  if (!parsed.success) {
-    return { success: false, error: 'Ungültige Präferenzen' }
-  }
-  const makler = await getCurrentMakler()
-  if (!makler) return { success: false, error: 'Nicht angemeldet' }
-
-  const supabase = await createClient()
-  const { error } = await supabase
-    .from('makler')
-    .update({ notification_preferences: parsed.data })
-    .eq('id', makler.id)
-  if (error) return { success: false, error: error.message }
-  revalidatePath('/makler/einstellungen')
-  return { success: true }
-}
+// (updateMaklerNotificationPrefs + notificationSchema entfernt 04.07. — die alte
+// M10-Email-Flag-Card ist weg. Benachrichtigungs-Präferenzen laufen ausschliesslich
+// über notification_preferences (N5) via updateNotificationPreferences.)
 
 // ── Account-Löschung-Anfrage (DSGVO) ────────────────────────────────────────
 // Das tatsächliche Löschen läuft manuell durch den Admin — hier loggen wir
