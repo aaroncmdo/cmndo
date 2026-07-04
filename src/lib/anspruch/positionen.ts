@@ -106,10 +106,12 @@ export function berechneAnspruchsSpanne(
       const restMax = input.restwertMaxEur ?? 0
       const dauer = config.wiederbeschaffungsdauerTage
       const satz = saetze[input.segment]
-      // Totalschaden-Weg: WBW - Restwert + Nutzungsausfall (Wiederbeschaffungsdauer) + Auslagenpauschale
+      // Totalschaden-Weg: WBW - Restwert + Nutzungsausfall (Wiederbeschaffungsdauer) + (Abschlepp wenn nicht fahrbereit) + SV-Kosten + Auslagenpauschale
       const tsPositionen: AnspruchPosition[] = [
         { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(Math.max(0, input.wbwMinEur! - restMax)), maxEur: runde(Math.max(0, input.wbwMaxEur! - restMin)) },
         { typ: 'nutzungsausfall', label: 'Nutzungsausfall (Wiederbeschaffung)', minEur: runde(satz.tagessatzMinEur * dauer.min), maxEur: runde(satz.tagessatzMaxEur * dauer.max), hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage` },
+        ...(!input.fahrbereit ? [{ typ: 'abschleppkosten' as const, label: 'Abschleppkosten', minEur: config.abschleppMinEur, maxEur: config.abschleppMaxEur }] : []),
+        { typ: 'gutachterkosten', label: 'Sachverständigenkosten', minEur: null, maxEur: null, gedecktDurchGegner: true, hinweis: 'Bei klarer Haftung trägt die gegnerische Versicherung diese Kosten.' },
         { typ: 'kostenpauschale', label: 'Auslagenpauschale', minEur: config.kostenpauschaleEur, maxEur: config.kostenpauschaleEur },
       ]
       const tsMin = runde(tsPositionen.reduce((s, p) => s + (p.minEur ?? 0), 0))

@@ -112,6 +112,26 @@ describe('berechneAnspruchsSpanne', () => {
     expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(11030)  // 10500 Fahrzeugschaden + 500 NA + 30 Pauschale
     expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(18856)  // 18000 + 826 + 30
     expect(s.totalschaden!.guenstiger).toBe('totalschaden')
+    // gutachterkosten muss im TS-Weg vorhanden sein (gegner-getragen, null)
+    const gk = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'gutachterkosten')
+    expect(gk).toBeDefined()
+    expect(gk!.gedecktDurchGegner).toBe(true)
+    expect(gk!.minEur).toBeNull()
+  })
+
+  it('Totalschaden nicht fahrbereit: abschleppkosten im TS-Weg, Summe steigt um 150/350', () => {
+    // Gleiche Zone-C-Inputs wie oben, aber fahrbereit: false
+    const s = berechneAnspruchsSpanne(
+      { ...base, fahrbereit: false, reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const tw = s.totalschaden!.totalschadenWeg
+    expect(tw.positionen.some((p) => p.typ === 'abschleppkosten')).toBe(true)
+    const abschl = tw.positionen.find((p) => p.typ === 'abschleppkosten')!
+    expect(abschl.minEur).toBe(150)   // CONFIG.abschleppMinEur
+    // fahrbereit=true hatte 11030/18856; fahrbereit=false addiert 150/350
+    expect(tw.summeMinEur).toBe(11180) // 10500 + 500 + 150 + 30
+    expect(tw.summeMaxEur).toBe(19206) // 18000 + 826 + 350 + 30
   })
 
   it('Zone B: 90-130% WBW -> beide Wege, Wertminderung im Reparatur-Weg', () => {
