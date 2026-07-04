@@ -159,16 +159,31 @@ export async function POST(request: Request) {
         const utterances = (callData.utterances ?? []) as Array<{ speaker?: string; text?: string; start_time?: number; end_time?: number }>
         const { data: call } = await db.from('calls').select('id').eq('aircall_call_id', aircallId).single()
         if (call && utterances.length > 0) {
-          await db.from('call_transcription_utterances').insert(
-            utterances.map(u => ({
-              call_id: call.id,
-              aircall_call_id: aircallId,
-              speaker: u.speaker ?? null,
-              text: u.text ?? '',
-              start_time: u.start_time ?? null,
-              end_time: u.end_time ?? null,
-            }))
+          // Idempotenz: Aircall kann dasselbe utterances-Event erneut zustellen
+          // (at-least-once / Retry nach 500) -> ohne Dedup entstehen doppelte
+          // Transkript-Zeilen. Kein DB-Unique-Constraint vorhanden -> App-Dedup gegen
+          // die bestehenden Utterances dieses Calls per (start_time|speaker|text).
+          const { data: vorhanden } = await db.from('call_transcription_utterances')
+            .select('start_time, speaker, text')
+            .eq('call_id', call.id)
+          const gesehen = new Set(
+            (vorhanden ?? []).map((v) => `${v.start_time ?? ''}|${v.speaker ?? ''}|${v.text ?? ''}`),
           )
+          const neu = utterances.filter(
+            (u) => !gesehen.has(`${u.start_time ?? ''}|${u.speaker ?? ''}|${u.text ?? ''}`),
+          )
+          if (neu.length > 0) {
+            await db.from('call_transcription_utterances').insert(
+              neu.map(u => ({
+                call_id: call.id,
+                aircall_call_id: aircallId,
+                speaker: u.speaker ?? null,
+                text: u.text ?? '',
+                start_time: u.start_time ?? null,
+                end_time: u.end_time ?? null,
+              }))
+            )
+          }
         }
         break
       }
