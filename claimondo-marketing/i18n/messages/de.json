@@ -105,7 +105,13 @@
     "restart": "Neu starten",
     "alternativ_text": "Lieber direkt sprechen? Wir sind für Sie da.",
     "alternativ_cta": "Schaden online melden",
-    "trust_heading": "Worauf Sie sich verlassen können"
+    "trust_heading": "Worauf Sie sich verlassen können",
+    "foto_check": {
+      "heading": "Wie viel ist Ihr Schaden konkret wert?",
+      "text": "Laden Sie ein Foto Ihres Schadens hoch und erhalten Sie in unter einer Minute eine konkrete, unverbindliche Einschätzung Ihrer Ansprüche — kostenlos.",
+      "button": "Schaden per Foto prüfen"
+    },
+    "lead_heading_alt": "Lieber persönlich? Rückruf anfordern"
   },
   "not_found": {
     "heading": "Diese Seite gibt es nicht (mehr).",

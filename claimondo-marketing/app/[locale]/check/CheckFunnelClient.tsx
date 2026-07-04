@@ -8,6 +8,7 @@ import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitCheckLead } from './check-lead-action'
 import { trackEvent } from '@/lib/analytics/track-event'
 import { buildCheckResult, type Schuld, type Frist, type Gutachten } from '@/lib/check/result-model'
+import { AnspruchFotoCheckCta } from '@/components/check/AnspruchFotoCheckCta'
 
 // Interaktive Anspruchs-Prüfung: 3 Klick-Fragen -> antwort-adaptives Ergebnis
 // (result-model.ts, 4 Tiers) -> Lead-Formular (submitCheckLead). Funnel-Tracking
@@ -228,6 +229,9 @@ export function CheckFunnelClient() {
             </div>
           ) : null}
 
+          {/* Foto-Check-Verkettung: prominenter Upgrade-Pfad, nur bei echtem Anspruch */}
+          {result.showRanges ? <AnspruchFotoCheckCta /> : null}
+
           {/* Dynamische Hinweise */}
           {result.insightKeys.length > 0 ? (
             <div className="mt-5 space-y-2">
@@ -244,7 +248,9 @@ export function CheckFunnelClient() {
 
           {/* Lead-Formular */}
           <div className="mt-6 border-t border-claimondo-border pt-6">
-            <h3 className="text-lg font-bold text-claimondo-navy">{t('lead_heading')}</h3>
+            <h3 className={result.showRanges ? 'text-base font-semibold text-claimondo-shield' : 'text-lg font-bold text-claimondo-navy'}>
+              {result.showRanges ? t('lead_heading_alt') : t('lead_heading')}
+            </h3>
             <p className="mt-1 text-sm text-claimondo-shield/80">{t('lead_sub')}</p>
             <form onSubmit={handleSubmit} noValidate data-tracking="lead-form-check" className="mt-4 space-y-3">
               <Field name="name" label={tl('lead_form.field_name_label')} placeholder={tl('lead_form.field_name_placeholder')} type="text" autoComplete="name" required disabled={pending} errorMessage={error?.field === 'name' ? error.message : undefined} />
