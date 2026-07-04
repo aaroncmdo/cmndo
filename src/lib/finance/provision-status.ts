@@ -11,13 +11,36 @@ export const PROVISION_TABELLEN = [
 
 export type ProvisionTabelle = (typeof PROVISION_TABELLEN)[number]
 
-const META = {
+// Per-ledger status/storno vocabulary verified against database.types.ts:
+//   makler_provisionen     → status: freigegeben/storniert; HAS storniert_am + storno_grund
+//   werkstatt_provisionen  → status: freigegeben/storniert; HAS storniert_am + storno_grund
+//   makler_staffel_bonus   → status: freigegeben/storniert; NO storniert_am / storno_grund
+//   werkstatt_staffel_bonus→ status: freigegeben/storniert; NO storniert_am / storno_grund
+//   provisionen_maik       → status: pending/confirmed/paid/reversed; HAS reversed_grund (NO storniert_am)
+type LedgerMeta = {
+  betrag: string
+  partner: string
+  fk: string
+  partnerFlag: string
+  paidStatus: string
+  paidCol?: string
+  releaseStatus: string
+  stornoStatus: string
+  stornoCol?: string
+  grundCol?: string
+}
+
+const META: Record<ProvisionTabelle, LedgerMeta> = {
   makler_provisionen: {
     betrag: 'betrag_netto_eur',
     partner: 'makler',
     fk: 'makler_id',
     partnerFlag: 'ist_kleinunternehmer',
     paidStatus: 'ausgezahlt',
+    releaseStatus: 'freigegeben',
+    stornoStatus: 'storniert',
+    stornoCol: 'storniert_am',
+    grundCol: 'storno_grund',
   },
   werkstatt_provisionen: {
     betrag: 'betrag_netto_eur',
@@ -26,6 +49,10 @@ const META = {
     partnerFlag: 'ist_kleinunternehmer',
     paidStatus: 'ausgezahlt',
     paidCol: 'ausgezahlt_am',
+    releaseStatus: 'freigegeben',
+    stornoStatus: 'storniert',
+    stornoCol: 'storniert_am',
+    grundCol: 'storno_grund',
   },
   provisionen_maik: {
     betrag: 'netto_provision',
@@ -34,6 +61,10 @@ const META = {
     partnerFlag: 'ist_kleinunternehmer',
     paidStatus: 'paid',
     paidCol: 'paid_at',
+    releaseStatus: 'confirmed',
+    stornoStatus: 'reversed',
+    // no stornoCol — provisionen_maik has no storniert_am equivalent
+    grundCol: 'reversed_grund',
   },
   makler_staffel_bonus: {
     betrag: 'bonus_betrag_netto',
@@ -41,6 +72,9 @@ const META = {
     fk: 'makler_id',
     partnerFlag: 'ist_kleinunternehmer',
     paidStatus: 'ausgezahlt',
+    releaseStatus: 'freigegeben',
+    stornoStatus: 'storniert',
+    // no stornoCol/grundCol — makler_staffel_bonus has no storno timestamp/reason cols
   },
   werkstatt_staffel_bonus: {
     betrag: 'bonus_betrag_netto',
@@ -48,31 +82,40 @@ const META = {
     fk: 'werkstatt_id',
     partnerFlag: 'ist_kleinunternehmer',
     paidStatus: 'ausgezahlt',
+    releaseStatus: 'freigegeben',
+    stornoStatus: 'storniert',
+    // no stornoCol/grundCol — werkstatt_staffel_bonus has no storno timestamp/reason cols
   },
 } as const
 
-/** Setzt Status -> 'freigegeben'. */
+/** Setzt Status -> releaseStatus (freigegeben / confirmed je nach Ledger). */
 export async function freigebenProvision(
   db: SupabaseClient<any>,
   tabelle: ProvisionTabelle,
   id: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await db.from(tabelle).update({ status: 'freigegeben' }).eq('id', id)
+  const meta = META[tabelle]
+  const { error } = await db.from(tabelle).update({ status: meta.releaseStatus }).eq('id', id)
   if (error) return { ok: false, error: error.message }
   return { ok: true }
 }
 
-/** Setzt Status -> 'storniert', storniert_am=now, storno_grund=grund. */
+/** Setzt Status -> stornoStatus; setzt stornoCol=now und grundCol=grund nur wenn die Spalte existiert. */
 export async function storniereProvision(
   db: SupabaseClient<any>,
   tabelle: ProvisionTabelle,
   id: string,
   grund: string,
 ): Promise<{ ok: boolean; error?: string }> {
-  const { error } = await db
-    .from(tabelle)
-    .update({ status: 'storniert', storniert_am: new Date().toISOString(), storno_grund: grund })
-    .eq('id', id)
+  const meta = META[tabelle]
+  const patch: Record<string, unknown> = { status: meta.stornoStatus }
+  if (meta.stornoCol) {
+    patch[meta.stornoCol] = new Date().toISOString()
+  }
+  if (meta.grundCol) {
+    patch[meta.grundCol] = grund
+  }
+  const { error } = await db.from(tabelle).update(patch).eq('id', id)
   if (error) return { ok: false, error: error.message }
   return { ok: true }
 }

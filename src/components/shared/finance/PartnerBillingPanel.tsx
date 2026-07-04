@@ -97,8 +97,12 @@ function ZeilenAktionen({ row }: { row: PartnerBillingRow }) {
     return <span className="text-xs text-claimondo-ondo/50">—</span>
   }
 
+  // Forderungs-Aktionen (Als bezahlt / Einzug erneut / Stornieren) sind nur fuer
+  // quelle_tabelle='abrechnungen' (SV-Monatsabrechnung) implementiert.
+  // kanzlei_abrechnungen und sv_onboarding_rechnungen haben eigene Flows — hier read-only.
   const istForderungAktiv =
     richtung === 'forderung' &&
+    quelle_tabelle === 'abrechnungen' &&
     (status_norm === 'offen' || status_norm === 'faellig' || status_norm === 'fehlgeschlagen')
 
   const istAuszahlungGehalten = richtung === 'auszahlung' && status_norm === 'gehalten'
@@ -124,7 +128,7 @@ function ZeilenAktionen({ row }: { row: PartnerBillingRow }) {
         </Button>
       )}
 
-      {istForderungAktiv && quelle_tabelle === 'abrechnungen' && (
+      {istForderungAktiv && (
         <Button
           size="sm"
           variant="ghost"
