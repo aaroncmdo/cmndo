@@ -125,5 +125,13 @@ export function verifyWebhookSignature(payload: string, signature: string): bool
   const secret = process.env.AIRCALL_WEBHOOK_TOKEN
   if (!secret) return false
   const expected = crypto.createHmac('sha256', secret).update(payload).digest('hex')
-  return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))
+  const sigBuf = Buffer.from(signature)
+  const expBuf = Buffer.from(expected)
+  // crypto.timingSafeEqual wirft RangeError bei ungleicher Buffer-Laenge. Eine
+  // falsch-lange (attacker-kontrollierte) Signatur ist ohnehin ungueltig -> Laengen-
+  // Check zuerst + return false, statt den Throw bis in die (pre-try) Webhook-Route
+  // durchschlagen zu lassen (dort wuerde er einen uncaught 500 + Aircall-Retry-Sturm
+  // ausloesen statt eines sauberen 401).
+  if (sigBuf.length !== expBuf.length) return false
+  return crypto.timingSafeEqual(sigBuf, expBuf)
 }
