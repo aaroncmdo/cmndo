@@ -14,7 +14,11 @@ describe('plausibilisiereWbw', () => {
   })
   it('klemmt Vision-Ausreisser auf den Korridor', () => {
     const r = plausibilisiereWbw({ wiederbeschaffungswert_min: 90000, wiederbeschaffungswert_max: 120000, restwert_min: null, restwert_max: null }, 'mittelklasse', 3, H)
-    expect(r.wbwMax).toBeLessThanOrEqual(32000 * 1.6); expect(r.quelle).toBe('vision-geklemmt')
+    // Beide Vision-Werte (90000/120000) liegen UEBER dem Korridor -> beide klemmen auf hi.
+    // (Der lo-Floor 12000 = 20000*0.6 wird nur von einem Unterschreiter erreicht, den dieser Fall nicht liefert.)
+    expect(r.wbwMin).toBe(51200)   // clamped to hi = 32000 * 1.6
+    expect(r.wbwMax).toBe(51200)   // clamped to hi = 32000 * 1.6
+    expect(r.quelle).toBe('vision-geklemmt')
   })
   it('faellt auf Heuristik zurueck wenn Vision keinen WBW liefert', () => {
     const r = plausibilisiereWbw({ wiederbeschaffungswert_min: null, wiederbeschaffungswert_max: null, restwert_min: null, restwert_max: null }, 'mittelklasse', 3, H)
