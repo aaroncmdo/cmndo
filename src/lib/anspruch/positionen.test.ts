@@ -22,6 +22,9 @@ const CONFIG: AnspruchConfig = {
   abschleppMinEur: 150,
   abschleppMaxEur: 350,
   dauerTage: { leicht: { min: 2, max: 4 }, mittel: { min: 5, max: 9 }, schwer: { min: 10, max: 21 } },
+  totalschadenSchwelleProzent: 0.9,
+  reparaturGrenzeProzent: 1.3,
+  wiederbeschaffungsdauerTage: { min: 10, max: 14 },
 }
 const base: SchaetzInput = {
   reparaturMinEur: 900, reparaturMaxEur: 1800, schweregrad: 'mittel',
