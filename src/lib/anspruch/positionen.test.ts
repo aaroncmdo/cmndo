@@ -130,4 +130,15 @@ describe('berechneAnspruchsSpanne', () => {
     expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(22856) // 22000 + 826 + 30
     expect(s.totalschaden!.guenstiger).toBe('reparatur')            // 29480 >= 22856
   })
+
+  it('Totalschaden: Restwert > WBW -> Fahrzeugschaden auf 0 gefloort (nie negativ)', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 20000, reparaturMaxEur: 20000, wbwMinEur: 10000, wbwMaxEur: 12000, restwertMinEur: 11000, restwertMaxEur: 13000 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const fz = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'reparatur')!
+    expect(fz.minEur).toBe(0)        // max(0, 10000 - 13000)
+    expect(fz.maxEur).toBe(1000)     // max(0, 12000 - 11000)
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThanOrEqual(0)
+  })
 })

@@ -108,7 +108,7 @@ export function berechneAnspruchsSpanne(
       const satz = saetze[input.segment]
       // Totalschaden-Weg: WBW - Restwert + Nutzungsausfall (Wiederbeschaffungsdauer) + Auslagenpauschale
       const tsPositionen: AnspruchPosition[] = [
-        { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(input.wbwMinEur! - restMax), maxEur: runde(input.wbwMaxEur! - restMin) },
+        { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(Math.max(0, input.wbwMinEur! - restMax)), maxEur: runde(Math.max(0, input.wbwMaxEur! - restMin)) },
         { typ: 'nutzungsausfall', label: 'Nutzungsausfall (Wiederbeschaffung)', minEur: runde(satz.tagessatzMinEur * dauer.min), maxEur: runde(satz.tagessatzMaxEur * dauer.max), hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage` },
         { typ: 'kostenpauschale', label: 'Auslagenpauschale', minEur: config.kostenpauschaleEur, maxEur: config.kostenpauschaleEur },
       ]
