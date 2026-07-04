@@ -31,3 +31,7 @@ export function statusBadgeView(
     iconKey: def.iconKey,
   }
 }
+
+export function isKnownStatus(domain: DomainName, code: string | null | undefined): boolean {
+  return !!(code && DOMAINS[domain]?.[code])
+}
