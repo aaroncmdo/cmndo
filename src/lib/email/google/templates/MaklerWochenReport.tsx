@@ -26,6 +26,8 @@ type Props = {
   freigegebenAnzahl: number
   freigegebenSummeLabel: string
   staffel: StaffelProps | null
+  /** One-Click-Abmelde-Link (null → kein sichtbarer Link, z.B. wenn Secret fehlt). */
+  optOutUrl: string | null
 }
 
 export function subject(p: Props) {
@@ -34,7 +36,6 @@ export function subject(p: Props) {
 
 export function MaklerWochenReportEmail(props: Props) {
   const dashboardUrl = `${APP_URL}/makler`
-  const einstellungenUrl = `${APP_URL}/makler/einstellungen`
 
   const vermittlungenValue =
     props.neueVermittlungen > 0 && props.neueVermittlungenSummeLabel
@@ -86,11 +87,16 @@ export function MaklerWochenReportEmail(props: Props) {
         <Button href={dashboardUrl}>Zum Dashboard</Button>
 
         <Note>
-          Diesen Wochenreport können Sie jederzeit in Ihren{' '}
-          <a href={einstellungenUrl} style={{ color: email.color.navy, textDecoration: 'underline' }}>
-            Einstellungen
-          </a>{' '}
-          deaktivieren.
+          Sie erhalten diesen Wochenreport als Claimondo-Partner.
+          {props.optOutUrl ? (
+            <>
+              {' '}
+              <a href={props.optOutUrl} style={{ color: email.color.navy, textDecoration: 'underline' }}>
+                Hier abmelden
+              </a>
+              .
+            </>
+          ) : null}
         </Note>
       </Card>
       <Footer />

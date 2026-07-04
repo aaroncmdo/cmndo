@@ -8,8 +8,9 @@
 //     Fenster-Spalte, wie in den Dashboard-Queries).
 //
 // Der DB-Fetch (buildMaklerWochenReport) delegiert die Skip-/Shaping-Logik an das
-// pure verdichteWochenReport — das ist der getestete Seam. Opt-in laeuft ueber
-// notification_preferences.woechentlicher_report (Default false → Opt-in).
+// pure verdichteWochenReport — das ist der getestete Seam. Versand ist DEFAULT-ON
+// (Bestandspartner-Konto-Digest); Abmeldung ueber den One-Click-Link in der Mail
+// setzt makler.wochenreport_abgemeldet_am (ladeWochenReportEmpfaenger filtert das).
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
@@ -174,22 +175,20 @@ export async function buildMaklerWochenReport(
 }
 
 /**
- * Laedt alle Makler mit aktiviertem Wochenreport-Opt-in (+ vorhandener E-Mail).
- * Opt-in = notification_preferences.woechentlicher_report === true (Default false).
- * Makler-Count ist klein → load-all + JS-Filter genuegt.
+ * Laedt alle Report-Empfaenger (default-on Modell): jeder Makler mit E-Mail, der
+ * sich NICHT abgemeldet hat (wochenreport_abgemeldet_am IS NULL). Abmeldung laeuft
+ * ueber den One-Click-Link in der Mail (kein Opt-in-Toggle mehr — das erreichte
+ * praktisch niemanden). Makler-Count ist klein → load-all + JS-Filter genuegt.
  */
 export async function ladeWochenReportEmpfaenger(
   db: SupabaseClient,
 ): Promise<MaklerReportEmpfaenger[]> {
   const { data } = await db
     .from('makler')
-    .select('id, email, firma, ansprechpartner_vorname, notification_preferences')
+    .select('id, email, firma, ansprechpartner_vorname')
+    .is('wochenreport_abgemeldet_am', null)
 
   return (data ?? [])
-    .filter((m) => {
-      const prefs = (m.notification_preferences ?? null) as Record<string, unknown> | null
-      return !!prefs && prefs.woechentlicher_report === true
-    })
     .filter((m) => typeof m.email === 'string' && m.email.length > 0)
     .map((m) => ({
       id: m.id as string,

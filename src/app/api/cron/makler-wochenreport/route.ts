@@ -41,6 +41,7 @@ export async function GET(request: Request) {
       }
       await sendMaklerWochenReport({
         to: makler.email,
+        maklerId: makler.id,
         vorname: makler.vorname,
         firma: makler.firma,
         zeitraumStart: start,

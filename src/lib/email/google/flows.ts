@@ -32,6 +32,7 @@ import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates
 import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from './templates/WillkommenWerkstatt'
 import { MaklerWochenReportEmail, subject as maklerWochenReportSubject } from './templates/MaklerWochenReport'
 import type { MaklerWochenReportData } from '@/lib/makler/wochenreport'
+import { wochenreportOptOutUrl } from '@/lib/makler/wochenreport-optout'
 
 const admin = () => createAdminClient()
 
@@ -944,6 +945,7 @@ export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<vo
 
 export type MaklerWochenReportParams = {
   to: string
+  maklerId: string
   vorname: string
   firma: string
   zeitraumStart: Date
@@ -954,6 +956,7 @@ export type MaklerWochenReportParams = {
 export async function sendMaklerWochenReport(params: MaklerWochenReportParams): Promise<void> {
   const { data } = params
   const zeitraumLabel = `${fmtDate(params.zeitraumStart.toISOString())} – ${fmtDate(params.zeitraumEnde.toISOString())}`
+  const optOutUrl = wochenreportOptOutUrl(params.maklerId)
 
   const staffel = data.staffel
     ? {
@@ -975,6 +978,7 @@ export async function sendMaklerWochenReport(params: MaklerWochenReportParams): 
     freigegebenAnzahl: data.freigegebenAnzahl,
     freigegebenSummeLabel: fmtCurrency(data.freigegebenSumme),
     staffel,
+    optOutUrl,
   }
 
   const html = await render(MaklerWochenReportEmail(props))
@@ -985,6 +989,7 @@ export async function sendMaklerWochenReport(params: MaklerWochenReportParams): 
     fallId: null,
     empfaengerTyp: 'makler',
     template: 'makler_wochenreport',
+    listUnsubscribe: optOutUrl ?? undefined,
   })
 }
 

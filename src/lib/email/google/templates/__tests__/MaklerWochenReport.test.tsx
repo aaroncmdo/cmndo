@@ -13,6 +13,7 @@ const BASE = {
   freigegebenAnzahl: 3,
   freigegebenSummeLabel: '450,00 EUR',
   staffel: { settledCount: 3, nochBis: 2, bonusLabel: '100,00 EUR', alleErreicht: false },
+  optOutUrl: 'https://app.claimondo.de/abmelden/makler-wochenreport/m-1?sig=deadbeef',
 }
 
 describe('MaklerWochenReportEmail', () => {
@@ -27,7 +28,13 @@ describe('MaklerWochenReportEmail', () => {
     expect(html).toContain('450,00 EUR')
     expect(html).toContain('300,00 EUR')
     expect(html).toContain('Zum Dashboard')
-    expect(html).toContain('Einstellungen') // Opt-out-Hinweis
+    expect(html).toContain('Hier abmelden') // One-Click-Opt-out
+    expect(html).toContain('abmelden/makler-wochenreport/m-1')
+  })
+
+  it('ohne optOutUrl → kein Abmelde-Link (degradiert sauber)', async () => {
+    const html = await render(MaklerWochenReportEmail({ ...BASE, optOutUrl: null }))
+    expect(html).not.toContain('Hier abmelden')
   })
 
   it('zeigt die Staffel-Sektion wenn Stufen konfiguriert sind', async () => {
