@@ -185,10 +185,12 @@ export async function setzePartnerUstStatus(
 
 /**
  * Laedt alle Billing-Zeilen + Aggregat + USt-Flag eines einzelnen Partners.
- * Wird vom Admin-Drawer in Makler- und Werkstatt-Listen on-demand aufgerufen.
+ * Wird vom Admin-Drawer in Makler-, Werkstatt-, Marketing- und Kanzlei-Listen on-demand aufgerufen.
+ *
+ * Fuer 'kanzlei': kein ist_kleinunternehmer (Forderungs-Partner, immer 19% USt) → null.
  */
 export async function ladePartnerBilling(
-  partnerTyp: 'makler' | 'werkstatt' | 'marketing',
+  partnerTyp: 'makler' | 'werkstatt' | 'marketing' | 'kanzlei',
   partnerId: string,
 ): Promise<
   | { ok: true; rows: import('@/lib/finance/partner-billing').PartnerBillingRow[]; aggregat: import('@/lib/finance/partner-billing').PartnerBillingAggregat; istKleinunternehmer: boolean | null }
@@ -197,23 +199,28 @@ export async function ladePartnerBilling(
   const auth = await requireAdmin()
   if (!auth.ok) return auth
 
-  const TABLE_MAP = {
-    makler: 'makler',
-    werkstatt: 'werkstaetten',
-    marketing: 'marketing_partner',
-  } as const
+  let istKleinunternehmer: boolean | null = null
 
-  const table = TABLE_MAP[partnerTyp]
-  const admin = createAdminClient()
+  // Kanzlei ist Forderungs-Partner ohne ist_kleinunternehmer-Spalte → skip
+  if (partnerTyp !== 'kanzlei') {
+    const TABLE_MAP = {
+      makler: 'makler',
+      werkstatt: 'werkstaetten',
+      marketing: 'marketing_partner',
+    } as const
 
-  // ist_kleinunternehmer per Migration in Branch angelegt — Typen folgen beim Merge-Regen
-  const { data } = await admin
-    .from(table)
-    .select('ist_kleinunternehmer')
-    .eq('id', partnerId)
-    .single()
-  const istKleinunternehmer =
-    (data as { ist_kleinunternehmer: boolean | null } | null)?.ist_kleinunternehmer ?? null
+    const table = TABLE_MAP[partnerTyp]
+    const admin = createAdminClient()
+
+    // ist_kleinunternehmer per Migration in Branch angelegt — Typen folgen beim Merge-Regen
+    const { data } = await admin
+      .from(table)
+      .select('ist_kleinunternehmer')
+      .eq('id', partnerId)
+      .single()
+    istKleinunternehmer =
+      (data as { ist_kleinunternehmer: boolean | null } | null)?.ist_kleinunternehmer ?? null
+  }
 
   const { getPartnerBilling } = await import('@/lib/finance/partner-billing')
 
