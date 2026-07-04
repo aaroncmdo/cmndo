@@ -258,6 +258,8 @@ export type WerkstattAuftrag = {
   schadenart: string | null
   reparaturwunsch: string | null
   gutachter_firmenname: string | null
+  gutachten_fertiggestellt_am: string | null
+  gutachten_totalschaden: boolean | null
   besichtigung_start: string | null
   besichtigung_ort: string | null
   besichtigung_status: string | null
@@ -279,7 +281,8 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
     .select(`
       claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
       fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
-      gutachter_firmenname, besichtigung_start, besichtigung_ort, besichtigung_status,
+      gutachter_firmenname, gutachten_fertiggestellt_am, gutachten_totalschaden,
+      besichtigung_start, besichtigung_ort, besichtigung_status,
       provision_betrag_netto, provision_status,
       reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
       reparatur_bestaetigter_termin, reparatur_absage_grund
@@ -301,6 +304,8 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
     schadenart: (r.schadenart as string | null) ?? null,
     reparaturwunsch: (r.reparaturwunsch as string | null) ?? null,
     gutachter_firmenname: (r.gutachter_firmenname as string | null) ?? null,
+    gutachten_fertiggestellt_am: (r.gutachten_fertiggestellt_am as string | null) ?? null,
+    gutachten_totalschaden: (r.gutachten_totalschaden as boolean | null) ?? null,
     besichtigung_start: (r.besichtigung_start as string | null) ?? null,
     besichtigung_ort: (r.besichtigung_ort as string | null) ?? null,
     besichtigung_status: (r.besichtigung_status as string | null) ?? null,

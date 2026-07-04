@@ -7,12 +7,20 @@
 // Aktions-Buttons Bestätigen / Anrufen / Ablehnen). Additiv — bestehende
 // Auftrags-Darstellung bleibt unverändert.
 
-import { useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useMemo, useState, useTransition } from 'react'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
 import type { WerkstattAuftrag } from '@/lib/werkstatt/queries'
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
+import {
+  werkstattAuftragPhase,
+  WERKSTATT_PHASE_ORDER,
+  WERKSTATT_PHASE_META,
+  richtungLabel,
+  reparaturwunschLabel,
+  operativeStatusLabel,
+} from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import {
   bestaetigeReparaturtermin,
@@ -24,6 +32,7 @@ import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/component
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Button, Modal } from '@/components/primitives'
+import { Chip, ChipRow } from '@/components/ui/Chip'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -45,20 +54,8 @@ function fahrzeugText(a: WerkstattAuftrag): string {
   return parts.length ? parts.join(' ') : '–'
 }
 
-const RICHTUNG_LABEL: Record<string, string> = {
-  vermittelt: 'Vermittelt',
-  inbound: 'Eigener Kunde',
-}
-
-const OP_STATUS_LABEL: Record<string, string> = {
-  ersterfassung: 'In Erfassung',
-  'sv-termin': 'Gutachter-Termin',
-}
-
-function opStatusLabel(s: string | null): string {
-  if (!s) return '–'
-  return OP_STATUS_LABEL[s] ?? s.charAt(0).toUpperCase() + s.slice(1).replace(/[-_]/g, ' ')
-}
+// RICHTUNG_LABEL / operative_status-Label / reparaturwunsch-Label leben jetzt in
+// @/lib/werkstatt/werkstatt-auftrag-phase (geteilt + normalisiert, testbar).
 
 // ton → StatusBadge-tone-Mapping (Token-basiert, keine raw Status-Scales)
 const TON_TO_BADGE_TONE: Record<'neutral' | 'info' | 'success' | 'warning', StatusBadgeTone> = {
@@ -275,15 +272,139 @@ type Props = {
   werkstattName: string
 }
 
+type RichtungFilter = 'alle' | 'inbound' | 'vermittelt'
+
 export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+
+  // Filter-State aus der URL-Query (teilbar + refresh-stabil).
+  const richtungFilter = (searchParams.get('richtung') as RichtungFilter | null) ?? 'alle'
+  const statusFilter = useMemo(
+    () => new Set((searchParams.get('status') ?? '').split(',').filter(Boolean)),
+    [searchParams],
+  )
+  const wunschFilter = useMemo(
+    () => new Set((searchParams.get('wunsch') ?? '').split(',').filter(Boolean)),
+    [searchParams],
+  )
+
+  function updateParam(key: string, value: string | null) {
+    const params = new URLSearchParams(searchParams.toString())
+    if (value) params.set(key, value)
+    else params.delete(key)
+    const qs = params.toString()
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false })
+  }
+
+  function toggleInSet(key: string, current: Set<string>, value: string) {
+    const next = new Set(current)
+    if (next.has(value)) next.delete(value)
+    else next.add(value)
+    updateParam(key, Array.from(next).join(','))
+  }
+
+  // Client-seitige Filterung (Liste ist klein — kein Server-Roundtrip).
+  const gefiltert = useMemo(
+    () =>
+      auftraege.filter((a) => {
+        if (richtungFilter !== 'alle' && a.richtung !== richtungFilter) return false
+        if (statusFilter.size > 0 && !statusFilter.has(werkstattAuftragPhase(a).key)) return false
+        if (wunschFilter.size > 0 && (!a.reparaturwunsch || !wunschFilter.has(a.reparaturwunsch)))
+          return false
+        return true
+      }),
+    [auftraege, richtungFilter, statusFilter, wunschFilter],
+  )
+
+  // Counts fuer die Chip-Anzeige (ueber alle Auftraege).
+  const { phaseCounts, richtungCounts, wunschStats } = useMemo(() => {
+    const phaseMap = new Map<string, number>()
+    const wunsch = new Map<string, number>()
+    let inbound = 0
+    let vermittelt = 0
+    for (const a of auftraege) {
+      const key = werkstattAuftragPhase(a).key
+      phaseMap.set(key, (phaseMap.get(key) ?? 0) + 1)
+      if (a.reparaturwunsch) wunsch.set(a.reparaturwunsch, (wunsch.get(a.reparaturwunsch) ?? 0) + 1)
+      if (a.richtung === 'inbound') inbound++
+      else if (a.richtung === 'vermittelt') vermittelt++
+    }
+    return { phaseCounts: phaseMap, richtungCounts: { inbound, vermittelt }, wunschStats: wunsch }
+  }, [auftraege])
+
+  const hatFilter = richtungFilter !== 'alle' || statusFilter.size > 0 || wunschFilter.size > 0
+
   return (
-    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
       <header>
         <h1 className="text-heading-md text-claimondo-navy font-bold">Aufträge</h1>
         <p className="text-body text-claimondo-ondo mt-0.5">
           Ihre Aufträge für {werkstattName} — mit Gutachter und Besichtigungstermin.
         </p>
       </header>
+
+      {/* Filterbubble — Richtung (Single) + Status/Reparaturwunsch (Multi). URL-State. */}
+      {auftraege.length > 0 && (
+        <div className="space-y-2">
+          <ChipRow>
+            <Chip
+              variant={richtungFilter === 'alle' ? 'selected' : 'default'}
+              count={auftraege.length}
+              onClick={() => updateParam('richtung', null)}
+            >
+              Alle
+            </Chip>
+            <Chip
+              variant={richtungFilter === 'inbound' ? 'selected' : 'default'}
+              count={richtungCounts.inbound}
+              onClick={() => updateParam('richtung', 'inbound')}
+            >
+              Meine Vermittlungen
+            </Chip>
+            <Chip
+              variant={richtungFilter === 'vermittelt' ? 'selected' : 'default'}
+              count={richtungCounts.vermittelt}
+              onClick={() => updateParam('richtung', 'vermittelt')}
+            >
+              Aufträge
+            </Chip>
+          </ChipRow>
+
+          <ChipRow>
+            {WERKSTATT_PHASE_ORDER.map((key) => {
+              const count = phaseCounts.get(key) ?? 0
+              if (count === 0 && !statusFilter.has(key)) return null
+              return (
+                <Chip
+                  key={key}
+                  variant={statusFilter.has(key) ? 'selected' : 'default'}
+                  count={count}
+                  onClick={() => toggleInSet('status', statusFilter, key)}
+                >
+                  {WERKSTATT_PHASE_META[key].label}
+                </Chip>
+              )
+            })}
+            {[...wunschStats.keys()].map((w) => (
+              <Chip
+                key={`wunsch-${w}`}
+                variant={wunschFilter.has(w) ? 'selected' : 'default'}
+                count={wunschStats.get(w) ?? 0}
+                onClick={() => toggleInSet('wunsch', wunschFilter, w)}
+              >
+                {reparaturwunschLabel(w)}
+              </Chip>
+            ))}
+            {hatFilter && (
+              <Chip variant="ghost" onClick={() => router.replace(pathname, { scroll: false })}>
+                Zurücksetzen
+              </Chip>
+            )}
+          </ChipRow>
+        </div>
+      )}
 
       <DataTableContainer>
         <Table>
@@ -299,59 +420,62 @@ export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
             </Tr>
           </Thead>
           <Tbody>
-            {auftraege.length === 0 ? (
+            {gefiltert.length === 0 ? (
               <Tr>
                 <Td colSpan={7} className="text-center text-claimondo-ondo py-8">
-                  Noch keine Aufträge vorhanden. Sobald Ihnen ein Auftrag zugewiesen wird,
-                  erscheinen hier Fahrzeug, Gutachter und Besichtigungstermin.
+                  {auftraege.length === 0
+                    ? 'Noch keine Aufträge vorhanden. Sobald Ihnen ein Auftrag zugewiesen wird, erscheinen hier Fahrzeug, Gutachter und Besichtigungstermin.'
+                    : 'Keine Aufträge für diese Filter. Setzen Sie die Filter zurück, um alle zu sehen.'}
                 </Td>
               </Tr>
             ) : (
-              auftraege.map((a) => (
-                <Tr key={a.claim_id}>
-                  <Td>
-                    <div className="text-claimondo-navy font-medium">{a.claim_nummer ?? '–'}</div>
-                    {a.richtung && (
-                      <div className="text-claimondo-ondo text-xs">
-                        {RICHTUNG_LABEL[a.richtung] ?? a.richtung}
+              gefiltert.map((a) => {
+                const phase = werkstattAuftragPhase(a)
+                const opLabel = operativeStatusLabel(a.operative_status)
+                const wunsch = reparaturwunschLabel(a.reparaturwunsch)
+                return (
+                  <Tr key={a.claim_id}>
+                    <Td>
+                      <div className="text-claimondo-navy font-medium">{a.claim_nummer ?? '–'}</div>
+                      {a.richtung && (
+                        <div className="text-claimondo-ondo text-xs">{richtungLabel(a.richtung)}</div>
+                      )}
+                      {/* SP2 Task 6: Reparaturtermin-Sektion */}
+                      <ReparaturterminSektion auftrag={a} />
+                    </Td>
+                    <Td className="text-body-sm">
+                      <div className="text-claimondo-navy">{fahrzeugText(a)}</div>
+                      {a.kennzeichen && (
+                        <div className="text-claimondo-ondo text-xs font-mono">{a.kennzeichen}</div>
+                      )}
+                    </Td>
+                    <Td className="text-body-sm">
+                      <div className="text-claimondo-navy">{a.schadenart ?? '–'}</div>
+                      {wunsch && <div className="text-claimondo-ondo text-xs">{wunsch}</div>}
+                    </Td>
+                    <Td className="text-body-sm text-claimondo-navy">
+                      {a.gutachter_firmenname ?? '–'}
+                    </Td>
+                    <Td className="text-body-sm">
+                      <div className="text-claimondo-navy">{fmtTermin(a.besichtigung_start)}</div>
+                      {a.besichtigung_ort && (
+                        <div className="text-claimondo-ondo text-xs">{a.besichtigung_ort}</div>
+                      )}
+                    </Td>
+                    <Td>
+                      <div className="flex flex-col items-start gap-1">
+                        <StatusBadge tone={phase.ton} size="xs">
+                          {phase.label}
+                        </StatusBadge>
+                        {opLabel && <span className="text-claimondo-ondo text-xs">{opLabel}</span>}
                       </div>
-                    )}
-                    {/* SP2 Task 6: Reparaturtermin-Sektion */}
-                    <ReparaturterminSektion auftrag={a} />
-                  </Td>
-                  <Td className="text-body-sm">
-                    <div className="text-claimondo-navy">{fahrzeugText(a)}</div>
-                    {a.kennzeichen && (
-                      <div className="text-claimondo-ondo text-xs font-mono">{a.kennzeichen}</div>
-                    )}
-                  </Td>
-                  <Td className="text-body-sm">
-                    <div className="text-claimondo-navy">{a.schadenart ?? '–'}</div>
-                    {a.reparaturwunsch && (
-                      <div className="text-claimondo-ondo text-xs">{a.reparaturwunsch}</div>
-                    )}
-                  </Td>
-                  <Td className="text-body-sm text-claimondo-navy">
-                    {a.gutachter_firmenname ?? '–'}
-                  </Td>
-                  <Td className="text-body-sm">
-                    <div className="text-claimondo-navy">{fmtTermin(a.besichtigung_start)}</div>
-                    {a.besichtigung_ort && (
-                      <div className="text-claimondo-ondo text-xs">{a.besichtigung_ort}</div>
-                    )}
-                  </Td>
-                  <Td>
-                    {a.operative_status && (
-                      <span className="inline-flex items-center rounded-full bg-claimondo-bg px-2.5 py-1 text-body-xs font-semibold text-claimondo-navy">
-                        {opStatusLabel(a.operative_status)}
-                      </span>
-                    )}
-                  </Td>
-                  <Td className="tabular-nums text-body-sm text-claimondo-navy">
-                    {a.provision_betrag_netto != null ? EUR.format(a.provision_betrag_netto) : '–'}
-                  </Td>
-                </Tr>
-              ))
+                    </Td>
+                    <Td className="tabular-nums text-body-sm text-claimondo-navy">
+                      {a.provision_betrag_netto != null ? EUR.format(a.provision_betrag_netto) : '–'}
+                    </Td>
+                  </Tr>
+                )
+              })
             )}
           </Tbody>
         </Table>
