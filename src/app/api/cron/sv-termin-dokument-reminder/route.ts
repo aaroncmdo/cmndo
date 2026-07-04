@@ -97,7 +97,7 @@ export async function GET(request: Request) {
     )
     const labels = slotIds.map(id => labelMap.get(id) ?? id).join(', ')
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
     const uploadLink = `${appUrl}/kunde/onboarding?step=dokumente`
 
     try {

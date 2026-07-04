@@ -9,6 +9,7 @@ import { stuckPartnerAccountsCheck } from './stuck-partner-accounts'
 import { slotsStaleReservationsCheck } from './slots-stale-reservations'
 import { remindersOverdueCheck } from './reminders-overdue'
 import { emailFailureRateCheck } from './email-failure-rate'
+import { twilioSendFailuresCheck } from './twilio-send-failures'
 import { webhookInboundSilentCheck } from './webhook-inbound-silent'
 import { configRequiredEnvCheck } from './config-required-env'
 import { kanzleiTenancyScopingCheck } from './kanzlei-tenancy-scoping'
@@ -20,6 +21,7 @@ export const ALL_CHECKS: HealthCheck[] = [
   slotsStaleReservationsCheck,
   remindersOverdueCheck,
   emailFailureRateCheck,
+  twilioSendFailuresCheck,
   webhookInboundSilentCheck,
   configRequiredEnvCheck,
   kanzleiTenancyScopingCheck,

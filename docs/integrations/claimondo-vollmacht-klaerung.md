@@ -57,7 +57,7 @@ Payload gemäß §7:
 
 | Punkt | Umsetzung |
 |---|---|
-| Endpoint | `https://cmndo-staging.vercel.app/api/webhooks/lexdrive` (Staging, via Custom Metadata konfiguriert — Prod-URL wird einfach umgeschrieben, kein Code-Change) |
+| Endpoint | `https://app.staging.claimondo.de/api/webhooks/lexdrive` (Staging, via Custom Metadata konfiguriert — Prod-URL wird einfach umgeschrieben, kein Code-Change) |
 | HTTP-Method | `POST` |
 | Content-Type | `application/json` |
 | Auth | HMAC-SHA256, Header `X-Lexdrive-Signature: sha256=<hex>` |
@@ -202,7 +202,7 @@ Falls ihr wollt, dass wir einen **separaten** Prod-Secret pflegen (Rotation spä
 
 ### Vorschlag für den E2E-Staging-Test
 
-1. Ihr stellt euren Outbound-Trigger auf unsere Staging-URL um: `https://<STAGING-PREVIEW>.vercel.app/api/webhooks/lexdrive` (genaue URL schicke ich dir, Sertac, separat per Mail).
+1. Ihr stellt euren Outbound-Trigger auf unsere Staging-URL um: `https://app.staging.claimondo.de/api/webhooks/lexdrive` (genaue URL schicke ich dir, Sertac, separat per Mail).
 2. Wir legen bei uns einen Test-Fall mit `service_typ='komplett'` an → unser Outbound-Push geht an eure Partial2-Sandbox (ist bestätigt funktionsfähig, 201-Response + `mandat_id` erhalten, Test lief am 2026-04-23).
 3. Ihr simuliert die Kunden-WA-Signatur und feuert `vollmacht_bestaetigt` zurück.
 4. Ich verifiziere bei uns in der Fallakte + `webhook_events`-Tabelle, dass alles durchgerutscht ist.

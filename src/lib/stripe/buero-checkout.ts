@@ -2,7 +2,7 @@ import type Stripe from 'stripe'
 import { stripe } from './client'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
 
 /**
  * KFZ-152: Stripe Customer fuer ein Buero anlegen oder bestehenden holen.

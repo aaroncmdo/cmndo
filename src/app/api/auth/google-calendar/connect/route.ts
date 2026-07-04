@@ -4,7 +4,7 @@ export async function GET(req: NextRequest) {
   const clientId = process.env.GOOGLE_CLIENT_ID
   // AAR-160: Production-Fallback statt localhost (Serverless ECONNREFUSED).
   const redirectUri = process.env.GOOGLE_CALENDAR_REDIRECT_URI ||
-    `${process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'}/api/auth/google-calendar/callback`
+    `${process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'}/api/auth/google-calendar/callback`
 
   if (!clientId) return NextResponse.json({ error: 'GOOGLE_CLIENT_ID nicht konfiguriert' }, { status: 500 })
 
