@@ -10,6 +10,7 @@ import { CalDavError, createCalendarEvent, updateCalendarEvent, deleteCalendarEv
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { resolveTerminKontext, type TerminKontext } from './kalender-kontext'
 import { resolveAssigneeProfileId } from './assignee-profile'
+import { getMicrosoftAccessTokenForUser } from '@/lib/microsoft/graph-client'
 
 export type SyncStatus = 'created' | 'updated' | 'skip' | 'error'
 
@@ -30,6 +31,7 @@ export interface TerminSyncRow {
   google_calendar_id: string | null
   caldav_object_url: string | null
   caldav_event_uid: string | null
+  ms_event_id: string | null
 }
 
 export interface KalenderProvider {
@@ -46,7 +48,7 @@ export interface SyncResult {
 
 const SYNC_SELECT =
   'id, assignee_typ, assignee_id, start_zeit, end_zeit, status, typ, bezug_typ, bezug_id, claim_id, lead_id, ' +
-  'besichtigungsort_adresse, google_event_id, google_calendar_id, caldav_object_url, caldav_event_uid'
+  'besichtigungsort_adresse, google_event_id, google_calendar_id, caldav_object_url, caldav_event_uid, ms_event_id'
 const AKTIV_STATUS = ['reserviert', 'bestaetigt', 'verlegung_pending']
 
 // ─── Google ──────────────────────────────────────────────────────────────
@@ -162,7 +164,62 @@ export const caldavProvider: KalenderProvider = {
   },
 }
 
-const DEFAULT_PROVIDERS: KalenderProvider[] = [googleProvider, caldavProvider]
+// ─── Microsoft Outlook (Graph) ───────────────────────────────────────────────
+// SP5b: Mirror von googleProvider, raw fetch gegen Graph /me/events. Env-gated ueber
+// getMicrosoftAccessTokenForUser (kein MS-Token -> skip; dormant bis Azure). ms_event_id =
+// Idempotenz-Anker (wie google_event_id). Non-OK -> throw (Orchestrator faengt per-Provider).
+export const outlookProvider: KalenderProvider = {
+  name: 'outlook',
+  async upsert(termin, kontext, db) {
+    const profileId = await resolveAssigneeProfileId(db, termin.assignee_typ, termin.assignee_id)
+    if (!profileId) return 'skip'
+    const token = await getMicrosoftAccessTokenForUser(profileId)
+    if (!token) return 'skip'
+    const eventBody: Record<string, unknown> = {
+      subject: kontext.summary,
+      body: { contentType: 'text', content: kontext.description },
+      start: { dateTime: toBerlinWallClock(termin.start_zeit), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+      end: { dateTime: toBerlinWallClock(termin.end_zeit), timeZone: GOOGLE_CALENDAR_TIMEZONE },
+    }
+    if (kontext.location) eventBody.location = { displayName: kontext.location }
+    if (termin.ms_event_id) {
+      const resp = await fetch(`https://graph.microsoft.com/v1.0/me/events/${termin.ms_event_id}`, {
+        method: 'PATCH',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(eventBody),
+      })
+      if (!resp.ok) throw new Error(`graph events.update ${resp.status}`)
+      return 'updated'
+    }
+    const resp = await fetch('https://graph.microsoft.com/v1.0/me/events', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(eventBody),
+    })
+    if (!resp.ok) throw new Error(`graph events.insert ${resp.status}`)
+    const created = (await resp.json()) as { id?: string }
+    if (created.id) {
+      await db.from('gutachter_termine').update({ ms_event_id: created.id }).eq('id', termin.id)
+    }
+    return 'created'
+  },
+  async remove(termin, db) {
+    if (!termin.ms_event_id) return 'skip'
+    const profileId = await resolveAssigneeProfileId(db, termin.assignee_typ, termin.assignee_id)
+    if (!profileId) return 'skip'
+    const token = await getMicrosoftAccessTokenForUser(profileId)
+    if (!token) return 'skip'
+    const resp = await fetch(`https://graph.microsoft.com/v1.0/me/events/${termin.ms_event_id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    if (!resp.ok && resp.status !== 404) throw new Error(`graph events.delete ${resp.status}`)
+    await db.from('gutachter_termine').update({ ms_event_id: null }).eq('id', termin.id)
+    return 'updated'
+  },
+}
+
+const DEFAULT_PROVIDERS: KalenderProvider[] = [googleProvider, caldavProvider, outlookProvider]
 
 async function ladeTermin(db: SupabaseClient, terminId: string): Promise<TerminSyncRow | null> {
   const { data } = await db.from('gutachter_termine').select(SYNC_SELECT).eq('id', terminId).maybeSingle()
