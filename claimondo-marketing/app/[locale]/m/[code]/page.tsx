@@ -25,8 +25,14 @@ export async function generateMetadata({
   const title = `Kfz-Schaden regulieren mit ${target.firma} | Claimondo`
   const description = `${target.firma} empfiehlt Claimondo: unabhängigen Kfz-Gutachter in Ihrer Nähe finden, Termin buchen und Ihren Anspruch prüfen. Unverschuldet? Die Regulierung ist für Sie kostenlos (§ 249 BGB).`
   const url = `${SITE_URL}/m/${code}`
+  // Share-/Link-Vorschau: das frueher hier hardcodierte /og-default.png existiert nicht (404)
+  // -> kaputtes Vorschaubild beim Teilen. Wir nutzen den funktionierenden dynamischen
+  // OG-Generator (app/opengraph-image.tsx, liefert 200 image/png).
+  const ogImage = `${SITE_URL}/opengraph-image`
   return {
-    title,
+    // absolute: sonst haengt das Layout-Template ('%s | Claimondo') ein zweites
+    // "| Claimondo" an -> "... | Claimondo | Claimondo".
+    title: { absolute: title },
     description,
     alternates: { canonical: url },
     robots: { index: true, follow: true },
@@ -37,7 +43,14 @@ export async function generateMetadata({
       url,
       title,
       description,
-      images: [{ url: '/og-default.png', width: 1200, height: 630, alt: title }],
+      images: [{ url: ogImage, width: 1200, height: 630, alt: title }],
+    },
+    // Makler-spezifische Twitter/X-Karte (sonst greift das generische Layout-Default).
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: [ogImage],
     },
   }
 }
