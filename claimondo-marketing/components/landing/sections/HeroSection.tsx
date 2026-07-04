@@ -139,6 +139,17 @@ export async function HeroSection() {
                 {t('hero.cta_primary')}
                 <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
               </Link>
+              {/* UX-Audit #2: den DIREKTEN Online-Melde-Pfad (/schaden-melden Mini-Wizard) above-the-fold
+                  sichtbar machen — vorher erst ganz unten (BottomCtaSection). Prominente Sekundaer-CTA
+                  (dicker Outline, unter dem soliden Finder-Primary, ueber den Ghost-Kontakt-CTAs). */}
+              <Link
+                href="/schaden-melden"
+                data-tracking="hero-schaden-melden"
+                className="group inline-flex items-center gap-2 rounded-full border-2 border-white bg-white/10 px-7 py-4 text-base font-bold text-white backdrop-blur-sm transition-all hover:bg-white hover:text-claimondo-navy"
+              >
+                {t('bottom_cta.cta_online')}
+                <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" aria-hidden />
+              </Link>
               <a
                 href={`tel:${PHONE_E164}`}
                 className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/10 px-6 py-3.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
