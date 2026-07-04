@@ -74,8 +74,9 @@ Supabase-Channel auf `sv_live_location` (+ ggf. `gutachter_termine`-Status) nach
 | Routen (Unterwegs) | an | `upsertRouteLayer` SV→Ziel | — |
 | Tagesrouten | **aus** | dünne Polyline je SV, Stops nummeriert | Stop → TerminPopup |
 | Dead-Pins | an | Akquise-Pin (Status-Farbe) | DeadPinDrawer (volle Verwaltung) |
+| **Leads** *(role-scoped: Dispatch/Admin)* | an (Dispatch) | Kunden-Anfrage-Pin + Cluster | LeadPopup → SV zuweisen |
 
-Farb-Hex nur in Mapbox-Paint/Marker (legitim, `// Token-Audit-Skip`-Header, AAR-198).
+Farb-Hex nur in Mapbox-Paint/Marker (legitim, `// Token-Audit-Skip`-Header, AAR-198). Der **Leads-Layer** ist role-scoped und existiert v. a. für die `/dispatch/karte`-Vollersetzung (s. §12) — bestehende Dispatch-Leads/-Popups/-Cluster müssen 1:1 abgedeckt sein.
 
 ---
 
@@ -146,7 +147,7 @@ Jeder Chunk = eigener `writing-plans`-Durchlauf + PR gegen staging.
 
 ## 12 · Offene Punkte / Risiken
 
-- **Dispatch-Karte-Konsolidierung:** `/dispatch/karte` (`DispatchKarteClient`) hat eigene Leads/Termine-Layer. Chunk 3 muss prüfen, ob voll ersetzen oder die neuen Layer additiv einhängen (Regressions-Risiko). Ggf. Dispatch zunächst additiv, Vollersatz später.
+- **Dispatch-Karte-Vollersatz (Aaron 04.07.):** `/dispatch/karte` (`DispatchKarteClient`) wird **komplett** durch `<LiveOpsMap role="dispatch">` ersetzt. Voraussetzung: `<LiveOpsMap>` muss ein **Superset** aller bestehenden Dispatch-Layer sein — insbesondere den **Leads-Layer** (eingehende Kunden-Anfragen zur SV-Platzierung) inkl. Cluster + Zuweisen-Aktion mitbringen, sonst Regression. `DispatchKarteClient` + dessen Loader/Popups werden erst **nach** dem Cross-Rollen-Smoke gelöscht (Chunk 3).
 - **Kollision:** Parallele Sessions bauen werkstatt/makler-Views (nicht diese Lane), aber `/dispatch/karte` + `sv_leads` + `@/lib/mapbox/*` sind geteilt → Touch-Marker pflegen.
 - **Performance:** viele SVs × Isochrone-Polygone × Realtime — Layer-Toggles + Viewport-Filter als Entlastung; Isochrone ggf. nur für sichtbaren Viewport laden.
 - **`sv_live_location`-Upsert-Quelle:** falls kein Trigger existiert, muss position-batch/trackPosition den Upsert selbst machen — in Chunk 1 verifizieren.
