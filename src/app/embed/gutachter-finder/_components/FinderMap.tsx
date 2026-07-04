@@ -234,7 +234,10 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  // Aaron 04.07.: das Anfrage-Bottom-Sheet startet auf Mobil kosmetisch AUSGEFAHREN
+  // (default expanded, ueberall — Embed / /start/makler / /start/werkstatt). Der Nutzer
+  // sieht sofort die Anfrage-CTA; einklappen (Peek) geht per Chevron/Drag.
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(true)
   // AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) statt engem Pin-Popup.
   const [sheetSv, setSheetSv] = useState<AktiverSVPublic | null>(null)
   // AAR-956 (Aaron 14.06.): Touch-Start-Y fürs Drag-to-toggle des Anfrage-Bottom-Sheets.
@@ -947,7 +950,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         {wizardSlot}
       </div>
 
-      {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen).
+      {/* Mobile Bottom-Sheet (AUSGEFAHREN by default — Aaron 04.07.; einklappen per Chevron/Drag).
           AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
       {/* Mobile Bottom-Sheet — AAR-956 (Aaron 14.06.): EINE Glass-Fläche (leicht transparent +
           backdrop-blur), draggable, nur der Chevron als Affordance. Grab-Strich + „Anfrage
