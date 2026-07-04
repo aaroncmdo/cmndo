@@ -23,6 +23,7 @@ import {
   ClipboardListIcon,
   FileSignatureIcon,
   ShieldCheckIcon,
+  MessagesSquareIcon,
 } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
 import OutboxBadge from '@/components/offline/OutboxBadge'
@@ -75,6 +76,7 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon, badgeKey: 'auftraege' },
       { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
       { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon, badgeKey: 'neueTermine' },
+      { href: '/gutachter/netzwerk', label: 'Netzwerk', icon: MessagesSquareIcon },
     ],
   },
   // AAR-727: Kommunikations-Sektion entfällt — der GlobalPosteingangFab
