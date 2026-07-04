@@ -5,6 +5,7 @@ import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon, InboxIcon, 
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
 import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import EmptyState from '@/components/shared/EmptyState'
+import { Panel } from '@/components/shared/Panel'
 import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
 import FestgefahreneFaelleCard from '@/components/dispatch/FestgefahreneFaelleCard'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
@@ -204,84 +205,67 @@ export default async function DispatchDashboard() {
       {festgefahrene.length > 0 && <FestgefahreneFaelleCard items={festgefahrene} />}
 
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
-      <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
-        <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4 text-warning" />
-            Rückrufe-Timeline
-            {kommendeRueckrufe.length > 0 && (
-              <span className="bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">
-                {kommendeRueckrufe.length}
-              </span>
-            )}
-          </h2>
-          <Link href="/dispatch/rueckrufe" className="text-xs text-claimondo-ondo hover:underline">
-            Alle anzeigen
-          </Link>
-        </div>
-        <ul className="divide-y divide-claimondo-navy/[0.06] max-h-[320px] overflow-y-auto">
-          {kommendeRueckrufe.map((r) => {
-            const lead = r.lead
-            if (!lead) return null
-            const start = new Date(r.start_zeit)
-            const isOverdue = start.getTime() < Date.now()
-            const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
-            const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-            const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-            return (
-              <li key={r.id}>
-                <Link
-                  href={`/dispatch/rueckrufe?open=${r.id}`}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors"
-                >
-                  {!r.gesehen_am && (
-                    <span className="w-2 h-2 rounded-full bg-danger shrink-0" aria-label="Neu" />
-                  )}
-                  <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-ios-lg py-1.5 ${
-                    isOverdue ? 'bg-danger-soft text-danger-strong' : 'bg-warning-soft text-warning-strong'
-                  }`}>
-                    <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>
-                    <span className="text-sm font-bold">{uhrzeit}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
-                    {lead.telefon && (
-                      <p className="text-xs text-claimondo-ondo truncate">{lead.telefon}</p>
-                    )}
-                    {r.notizen && (
-                      <p className="text-[11px] text-claimondo-ondo/70 truncate">{r.notizen}</p>
-                    )}
-                  </div>
-                  {isOverdue && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
-                      <AlertCircleIcon className="w-3 h-3" />
-                      Überfällig
-                    </span>
-                  )}
-                </Link>
-              </li>
-            )
-          })}
-          {kommendeRueckrufe.length === 0 && (
-            <li className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">
-              Keine offenen Rückrufe
-            </li>
-          )}
-        </ul>
-      </div>
+      <Panel
+        title="Rückrufe-Timeline"
+        icon={<PhoneIcon className="w-4 h-4 text-warning" />}
+        count={kommendeRueckrufe.length || undefined}
+        actionLabel="Alle anzeigen"
+        actionHref="/dispatch/rueckrufe"
+        bodyClassName="max-h-[320px] overflow-y-auto"
+      >
+        {kommendeRueckrufe.map((r) => {
+          const lead = r.lead
+          if (!lead) return null
+          const start = new Date(r.start_zeit)
+          const isOverdue = start.getTime() < Date.now()
+          const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
+          const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+          const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+          return (
+            <Link
+              key={r.id}
+              href={`/dispatch/rueckrufe?open=${r.id}`}
+              className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors"
+            >
+              {!r.gesehen_am && (
+                <span className="w-2 h-2 rounded-full bg-danger shrink-0" aria-label="Neu" />
+              )}
+              <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-ios-lg py-1.5 ${
+                isOverdue ? 'bg-danger-soft text-danger-strong' : 'bg-warning-soft text-warning-strong'
+              }`}>
+                <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>
+                <span className="text-sm font-bold">{uhrzeit}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
+                {lead.telefon && (
+                  <p className="text-xs text-claimondo-ondo truncate">{lead.telefon}</p>
+                )}
+                {r.notizen && (
+                  <p className="text-[11px] text-claimondo-ondo/70 truncate">{r.notizen}</p>
+                )}
+              </div>
+              {isOverdue && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
+                  <AlertCircleIcon className="w-3 h-3" />
+                  Überfällig
+                </span>
+              )}
+            </Link>
+          )
+        })}
+        {kommendeRueckrufe.length === 0 && (
+          <EmptyState icon={PhoneIcon} title="Keine offenen Rückrufe" variant="compact" />
+        )}
+      </Panel>
 
       {/* AAR-939: Ungeklärte embed-B/nur_gutachter-Termine auflösen (SV-No-Show / durchgeführt). */}
       {klaerungItems.length > 0 && <EmbedBKlaerungCard items={klaerungItems} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
-        <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
-          <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-claimondo-navy">Neueste Leads</h2>
-            <Link href="/dispatch/leads" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
-          </div>
-          <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
-            {recentLeads.map((lead) => (
+        <Panel title="Neueste Leads" actionLabel="Alle anzeigen" actionHref="/dispatch/leads" bodyClassName="max-h-[400px] overflow-y-auto">
+          {recentLeads.map((lead) => (
               <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-claimondo-navy truncate">
@@ -295,25 +279,19 @@ export default async function DispatchDashboard() {
                 <span className="text-[10px] text-claimondo-ondo/70 whitespace-nowrap">{timeSince(lead.created_at)}</span>
               </Link>
             ))}
-            {recentLeads.length === 0 && (
-              <EmptyState icon={InboxIcon} title="Keine Leads vorhanden" variant="compact" />
-            )}
-          </div>
-        </div>
+          {recentLeads.length === 0 && (
+            <EmptyState icon={InboxIcon} title="Keine Leads vorhanden" variant="compact" />
+          )}
+        </Panel>
 
         {/* Meine Tasks */}
-        <div className="bg-white rounded-ios-lg shadow-claimondo-md border border-claimondo-navy/[0.06]">
-          <div className="px-5 py-4 border-b border-claimondo-navy/[0.06]">
-            <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-              <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
-              Offene Dispatch-Tasks
-              {tasks.length > 0 && (
-                <span className="ml-auto bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">{tasks.length}</span>
-              )}
-            </h2>
-          </div>
-          <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
-            {tasks.map((task) => {
+        <Panel
+          title="Offene Dispatch-Tasks"
+          icon={<ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />}
+          count={tasks.length || undefined}
+          bodyClassName="max-h-[400px] overflow-y-auto"
+        >
+          {tasks.map((task) => {
               const leadId = leadIdForTask(task)
               const inner = (
                 <div className="flex-1 min-w-0">
@@ -334,8 +312,7 @@ export default async function DispatchDashboard() {
             {tasks.length === 0 && (
               <EmptyState icon={CheckCircleIcon} title="Keine offenen Tasks" variant="compact" />
             )}
-          </div>
-        </div>
+        </Panel>
       </div>
     </div>
   )
