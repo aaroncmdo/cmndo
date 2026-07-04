@@ -3,7 +3,12 @@
 // werden parallel via getMaklerDashboardData geladen.
 
 import { redirect } from 'next/navigation'
-import { getCurrentMakler, getMaklerDashboardData } from '@/lib/makler/queries'
+import {
+  getCurrentMakler,
+  getMaklerDashboardData,
+  getMaklerVermittlungsCount,
+  getMaklerStaffelStufen,
+} from '@/lib/makler/queries'
 import { MaklerDashboard } from '@/components/makler/MaklerDashboard'
 
 export const dynamic = 'force-dynamic'
@@ -17,7 +22,11 @@ export default async function MaklerDashboardPage() {
   // Weiche steht hier in der Dashboard-Page (nicht im Layout) -> kein Loop mit /makler/willkommen.
   if (!makler.onboarding_abgeschlossen) redirect('/makler/willkommen')
 
-  const data = await getMaklerDashboardData(makler.id)
+  const [data, vermittlungsCount, staffelStufen] = await Promise.all([
+    getMaklerDashboardData(makler.id),
+    getMaklerVermittlungsCount(makler.id),
+    getMaklerStaffelStufen(makler.id),
+  ])
 
   // Erste-Vermittlung-Prompt: einmalig, sobald der Makler >=1 Vermittlung hat und die Card
   // noch nicht weggeklickt wurde. Trigger hier beim Dashboard-Load (keine Kopplung an
@@ -30,6 +39,9 @@ export default async function MaklerDashboardPage() {
       data={data}
       zeigeErsteVermittlungCard={zeigeErsteVermittlungCard}
       promoCode={data.promoCode}
+      staffelSettled={vermittlungsCount.settled}
+      staffelPending={vermittlungsCount.pending}
+      staffelStufen={staffelStufen}
     />
   )
 }

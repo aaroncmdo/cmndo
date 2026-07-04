@@ -1442,3 +1442,52 @@ export async function getMaklerAktiveConsents(
     }
   })
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Staffelung (Meilenstein-Boni) — 1:1 gespiegelt vom Werkstatt-System
+// (src/lib/werkstatt/queries.ts). Metrik = Anzahl freigegebener/ausgezahlter
+// Provisionen (settled); der DB-Trigger trg_award_makler_staffel vergibt bei
+// genau diesem Count. RLS: Makler liest eigene Zeilen (mss_/msb_makler_read).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** settled = freigegeben+ausgezahlt (zaehlt fuer Meilensteine), pending = Hinweis. */
+export async function getMaklerVermittlungsCount(
+  maklerId: string,
+): Promise<{ settled: number; pending: number }> {
+  const supabase = await createClient()
+  const [settledRes, pendingRes] = await Promise.all([
+    supabase.from('makler_provisionen').select('id', { count: 'exact', head: true })
+      .eq('makler_id', maklerId).in('status', ['freigegeben', 'ausgezahlt']),
+    supabase.from('makler_provisionen').select('id', { count: 'exact', head: true })
+      .eq('makler_id', maklerId).eq('status', 'pending'),
+  ])
+  return { settled: settledRes.count ?? 0, pending: pendingRes.count ?? 0 }
+}
+
+export async function getMaklerStaffelStufen(
+  maklerId: string,
+): Promise<{ schwelle: number; bonus_betrag_netto: number }[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('makler_staffel_stufen')
+    .select('schwelle, bonus_betrag_netto').eq('makler_id', maklerId)
+    .order('schwelle', { ascending: true })
+  return (data ?? []).map((r) => ({
+    schwelle: Number(r.schwelle),
+    bonus_betrag_netto: Number(r.bonus_betrag_netto),
+  }))
+}
+
+export async function getMaklerStaffelBoni(
+  maklerId: string,
+): Promise<{ schwelle: number; bonus_betrag_netto: number; status: string; erstellt_am: string }[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('makler_staffel_bonus')
+    .select('schwelle, bonus_betrag_netto, status, erstellt_am').eq('makler_id', maklerId)
+    .order('schwelle', { ascending: true })
+  return (data ?? []).map((r) => ({
+    schwelle: Number(r.schwelle),
+    bonus_betrag_netto: Number(r.bonus_betrag_netto),
+    status: r.status,
+    erstellt_am: r.erstellt_am,
+  }))
+}
