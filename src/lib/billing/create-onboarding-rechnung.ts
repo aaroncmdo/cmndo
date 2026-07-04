@@ -1,11 +1,12 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getAktuelleRechnungsKonfig } from './get-rechnungs-konfig'
-import { generateRechnungsNr } from './generate-rechnungs-nr'
-import { calculateUst, eurToCent } from './calculate-ust'
+import { eurToCent } from './calculate-ust'
 import {
   generateAndUploadOnboardingRechnungPdf,
   type OnboardingRechnungData,
 } from '@/lib/pdf/onboarding-rechnung'
+import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
+import { ONBOARDING_DESCRIPTOR } from '@/lib/abrechnung/descriptors/onboarding'
 
 /**
  * AAR-401: Orchestrator für Setup-Anzahlungs-Rechnung.
@@ -101,69 +102,100 @@ export async function createOnboardingRechnung(
       return { success: false, error: 'Empfänger-Daten konnten nicht geladen werden' }
     }
 
-    // 3. Rechnungs-Nr.
-    const rechnungsNr = await generateRechnungsNr('CM-ONB', ctx.bezahlt_am.getFullYear())
-
-    // 4. USt-Breakdown
+    // 3. USt-Breakdown (cent) — needed for PDF before DB-insert
     const netto_cent = eurToCent(ctx.netto_euro)
-    const { ust_cent, brutto_cent, ust_satz_pct } = calculateUst(netto_cent, 19)
 
-    // 5. PDF generieren + uploaden
-    const { pdf_buffer, storage_path } = await generateAndUploadOnboardingRechnungPdf({
-      konfig,
-      rechnungs_nr: rechnungsNr,
-      rechnungs_datum: ctx.bezahlt_am,
-      leistungs_datum: ctx.bezahlt_am,
-      typ: ctx.typ,
+    // 4. PDF generieren + uploaden (needs nummer placeholder; real nr inserted below)
+    //    We need rechnungs_nr for the PDF — so we allocate via createAbrechnung first,
+    //    then pass the storage_path back through kontext for the buildHeaderRow.
+    //    To keep PDF generation after number allocation, we split into two steps:
+    //    a) allocate via createAbrechnung with pdf_storage_path=null (placeholder),
+    //    b) generate PDF using the allocated nummer,
+    //    c) update pdf_storage_path separately.
+    //
+    //    Alternatively, generate PDF first with a "to-be-determined" path and patch after.
+    //    Current design: generate PDF AFTER createAbrechnung to get the real nummer.
+
+    const datumIso = ctx.bezahlt_am.toISOString().slice(0, 10)
+    const kontext: Record<string, unknown> = {
+      jahr: ctx.bezahlt_am.getFullYear(),
+      sv_id: ctx.sv_id ?? null,
+      organisation_id: ctx.organisation_id ?? null,
+      rechnungs_datum: datumIso,
+      leistungs_datum: datumIso,
       paket: ctx.paket ?? null,
-      kontingent: ctx.kontingent,
-      empfaenger,
-      netto_cent,
-      ust_cent,
-      brutto_cent,
-      ust_satz_pct,
-      stripe_bezahlt_am: ctx.bezahlt_am,
+      stripe_payment_intent_id: ctx.stripe_payment_intent_id ?? null,
+      stripe_session_id: ctx.stripe_session_id ?? null,
+      pdf_storage_path: null,         // filled in via patch after PDF upload
+      typ: ctx.typ,
+      rechnungssteller: konfig.rechnungssteller,
+      rechnungs_konfiguration_id: konfig.id,
+      konfig_version: konfig.version,
+    }
+
+    // 5. DB-Insert via canonical createAbrechnung (allocates Rechnungs-Nr. atomically)
+    const abrResult = await createAbrechnung(db, ONBOARDING_DESCRIPTOR, {
+      positionen: [{ betrag_netto_cent: netto_cent }],
+      kontext,
     })
 
-    // 6. DB-Insert
-    const { data: inserted, error: insertErr } = await db
-      .from('sv_onboarding_rechnungen')
-      .insert({
-        sv_id: ctx.sv_id ?? null,
-        organisation_id: ctx.organisation_id ?? null,
+    if (!abrResult.ok) {
+      return { success: false, error: abrResult.error }
+    }
+    if (!abrResult.erstellt) {
+      // dedup path — should not occur here (no pruefeBestehend), but guard anyway
+      return { success: false, error: 'Rechnung existiert bereits (unerwartet)' }
+    }
+
+    const rechnungsNr = abrResult.nummer
+    const { nettoCent: netto_cent_db, ustCent: ust_cent, bruttoCent: brutto_cent, ustSatz: ust_satz_pct } = abrResult.betraege
+
+    // 6. PDF generieren + uploaden (now we have the real rechnungs_nr).
+    //    Compensating delete: if PDF generation throws, remove the just-created row
+    //    so a re-trigger does not produce a second numbered invoice for one payment.
+    let pdf_buffer: Buffer
+    let storage_path: string | null
+    try {
+      ;({ pdf_buffer, storage_path } = await generateAndUploadOnboardingRechnungPdf({
+        konfig,
         rechnungs_nr: rechnungsNr,
-        rechnungs_datum: ctx.bezahlt_am.toISOString().slice(0, 10),
-        leistungs_datum: ctx.bezahlt_am.toISOString().slice(0, 10),
+        rechnungs_datum: ctx.bezahlt_am,
+        leistungs_datum: ctx.bezahlt_am,
+        typ: ctx.typ,
         paket: ctx.paket ?? null,
-        netto_cent,
+        kontingent: ctx.kontingent,
+        empfaenger,
+        netto_cent: netto_cent_db,
         ust_cent,
         brutto_cent,
         ust_satz_pct,
-        stripe_payment_intent_id: ctx.stripe_payment_intent_id ?? null,
-        stripe_session_id: ctx.stripe_session_id ?? null,
-        pdf_storage_path: storage_path,
-        typ: ctx.typ,
-        rechnungssteller: konfig.rechnungssteller,
-        rechnungs_konfiguration_id: konfig.id,
-        konfig_version: konfig.version,
-      })
-      .select('id')
-      .single()
-
-    if (insertErr || !inserted) {
+        stripe_bezahlt_am: ctx.bezahlt_am,
+      }))
+    } catch (pdfErr) {
+      // Compensating delete: row was committed, but PDF failed — remove it so
+      // a re-trigger allocates a fresh number rather than leaving an orphan row.
+      await db.from('sv_onboarding_rechnungen').delete().eq('id', abrResult.id)
       return {
         success: false,
-        error: `sv_onboarding_rechnungen insert fehlgeschlagen: ${insertErr?.message ?? 'leer'}`,
+        error: `PDF-Generierung fehlgeschlagen (Rechnung ${rechnungsNr} zurueckgerollt): ${pdfErr instanceof Error ? pdfErr.message : String(pdfErr)}`,
       }
+    }
+
+    // 7. Patch pdf_storage_path onto the inserted row (the PDF path was unknown at insert time)
+    if (storage_path) {
+      await db
+        .from('sv_onboarding_rechnungen')
+        .update({ pdf_storage_path: storage_path })
+        .eq('id', abrResult.id)
     }
 
     return {
       success: true,
-      rechnung_id: inserted.id,
+      rechnung_id: abrResult.id,
       rechnungs_nr: rechnungsNr,
       pdf_buffer,
       pdf_storage_path: storage_path,
-      netto_cent,
+      netto_cent: netto_cent_db,
       ust_cent,
       brutto_cent,
     }
