@@ -182,6 +182,10 @@ export default function FlowWizardKfz({
     t.has(key as Parameters<typeof t.has>[0]) ? t(key as Parameters<typeof t>[0]) : fallback
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
+  // Zusammenfassung-Weiter: statt disabled (toter Button ohne Grund) -> bei offenem
+  // Pflichtpunkt aktiv hinweisen (Highlight + Scroll auf den Datenschutz-Block).
+  const [zeigeWeiterHinweis, setZeigeWeiterHinweis] = useState(false)
+  const datenschutzRef = useRef<HTMLDivElement>(null)
   // SV-Schritt: Akzeptanz Widerrufsbelehrung + Datenschutz des SVs (Pflicht
   // bevor „Weiter" zum SA-Step). Modale für die zwei Texte.
   const [svRechtsakzeptanz, setSvRechtsakzeptanz] = useState(false)
@@ -564,7 +568,14 @@ export default function FlowWizardKfz({
                 </div>
 
                 {/* Datenschutz */}
-                <div className="border-t border-claimondo-border pt-5">
+                <div
+                  ref={datenschutzRef}
+                  className={`border-t border-claimondo-border pt-5 transition-all duration-200 ${
+                    zeigeWeiterHinweis && !datenschutz
+                      ? 'ring-2 ring-danger ring-offset-2 bg-danger-soft rounded-ios-md'
+                      : ''
+                  }`}
+                >
                   <label className="flex items-start gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -1043,6 +1054,13 @@ export default function FlowWizardKfz({
           <div className="pt-4">
             <button
               onClick={async () => {
+                // Pflichtpunkt offen -> nicht still als toter Button blockieren, sondern aktiv
+                // hinweisen: Highlight + Scroll auf den Datenschutz-Block (Conversion-Fix).
+                if (!datenschutz || !editVorname || !editNachname) {
+                  setZeigeWeiterHinweis(true)
+                  datenschutzRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  return
+                }
                 // Korrigierte Stammdaten speichern
                 if (editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email) {
                   try {
@@ -1052,7 +1070,6 @@ export default function FlowWizardKfz({
                 }
                 setStepIndex(stepIndex + 1) // → nächster Step (quali/termin/gutachter je nach Pfad)
               }}
-              disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
               {t('common.weiter')}
