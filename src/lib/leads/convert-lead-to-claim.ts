@@ -474,6 +474,9 @@ export async function convertLeadToClaim(
   // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
   ;(claimsInsert as Record<string, unknown>).schadenskategorie =
     (lead.schadenskategorie as string | null) ?? null
+  // SP-B1: Abrechnungsweg (haftpflicht/kasko/selbstzahler) Lead -> Claim (SSoT). Record-Cast wg. Type-Lag.
+  ;(claimsInsert as Record<string, unknown>).abrechnungsweg =
+    (lead.abrechnungsweg as string | null) ?? null
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')

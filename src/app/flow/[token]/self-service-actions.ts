@@ -8,7 +8,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
+import { qualiFlowOutcome } from '@/lib/self-service/quali-flow-outcome'
 import { matchAndSlots, planeTerminOeffentlich, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
@@ -52,44 +52,49 @@ async function resolveFlowLead(token: string): Promise<{
 
 /**
  * Selbst-Quali (Schuldfrage) für den Flow-Lead. Policy identisch zu /anfrage
- * speichereQuali: nur Eigenverschulden disqualifiziert (KEIN Termin).
+ * SP-B1: qualiFlowOutcome-Router -> haftpflicht/kasko/selbstzahler (Details im Helfer).
  */
 export async function speichereQualiFlow(
   token: string,
   schuldfrage: string,
-): Promise<{ ok: boolean; ergebnis?: 'weiter' | 'abbruch'; error?: string }> {
+  ueberEigeneVersicherung?: boolean,
+): Promise<{ ok: boolean; ergebnis?: 'weiter' | 'abbruch'; abrechnungsweg?: string | null; error?: string }> {
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  const ergebnis = bewerteSchuldfrage(schuldfrage)
+  const outcome = qualiFlowOutcome(schuldfrage, ueberEigeneVersicherung ?? null)
   const nowIso = new Date().toISOString()
 
-  if (ergebnis === 'abbruch') {
+  if (outcome.disqualifizieren) {
     const { error: updErr } = await admin
       .from('leads')
       .update({
         schuldfrage,
+        // SP-B1: abrechnungsweg-Record (kasko). leads.abrechnungsweg type-lagged -> Cast unten.
+        abrechnungsweg: outcome.abrechnungsweg,
         disqualifiziert: true,
         disqualifiziert_am: nowIso,
         disqualifiziert_grund_key: 'eigenverschulden',
         disqualifiziert_grund:
           'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
         status: 'disqualifiziert',
-      })
+      } as never)
       .eq('id', leadId)
     if (updErr) return { ok: false, error: updErr.message }
     revalidatePath('/dispatch/leads')
-    return { ok: true, ergebnis: 'abbruch' }
+    return { ok: true, ergebnis: 'abbruch', abrechnungsweg: outcome.abrechnungsweg }
   }
 
   const update: Record<string, unknown> = { schuldfrage }
-  if (ergebnis === 'weiter_mit_flag') {
+  if (outcome.abrechnungsweg) update.abrechnungsweg = outcome.abrechnungsweg
+  if (outcome.reparaturwunsch) update.reparaturwunsch = outcome.reparaturwunsch
+  if (outcome.ergebnis === 'weiter_mit_flag') {
     update.notiz = `[Self-Service] Schuldfrage „${schuldfrage}" — Dispatcher-Review empfohlen.`
   }
   const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
   revalidatePath('/dispatch/leads')
-  return { ok: true, ergebnis: 'weiter' }
+  return { ok: true, ergebnis: 'weiter', abrechnungsweg: outcome.abrechnungsweg }
 }
 
 /**
