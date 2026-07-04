@@ -40,7 +40,6 @@ GitHub-Action `backup.yml` sind **separate** Scheduler und hier NICHT enthalten.
 45  *  * * *  cron-call.sh /api/cron/send-lead-reminders
 0   7  * * *  cron-call.sh /api/cron/abrechnung-reminder
 0   7  * * *  cron-call.sh /api/cron/sv-termin-dokument-reminder
-10  8  * * *  cron-call.sh /api/cron/zahlungspruefung
 20  8  * * *  cron-call.sh /api/cron/abrechnung-einzug
 5   10 * * *  cron-call.sh /api/cron/sa-reminder
 0   10 * * *  cron-call.sh /api/cron/vollmacht-reminder
