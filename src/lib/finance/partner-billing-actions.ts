@@ -182,3 +182,45 @@ export async function setzePartnerUstStatus(
   revalidatePath('/admin/finance/partner-abrechnungen')
   return { ok: true }
 }
+
+/**
+ * Laedt alle Billing-Zeilen + Aggregat + USt-Flag eines einzelnen Partners.
+ * Wird vom Admin-Drawer in Makler- und Werkstatt-Listen on-demand aufgerufen.
+ */
+export async function ladePartnerBilling(
+  partnerTyp: 'makler' | 'werkstatt' | 'marketing',
+  partnerId: string,
+): Promise<
+  | { ok: true; rows: import('@/lib/finance/partner-billing').PartnerBillingRow[]; aggregat: import('@/lib/finance/partner-billing').PartnerBillingAggregat; istKleinunternehmer: boolean | null }
+  | { ok: false; error: string }
+> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth
+
+  const TABLE_MAP = {
+    makler: 'makler',
+    werkstatt: 'werkstaetten',
+    marketing: 'marketing_partner',
+  } as const
+
+  const table = TABLE_MAP[partnerTyp]
+  const admin = createAdminClient()
+
+  // ist_kleinunternehmer per Migration in Branch angelegt — Typen folgen beim Merge-Regen
+  const { data } = await admin
+    .from(table)
+    .select('ist_kleinunternehmer')
+    .eq('id', partnerId)
+    .single()
+  const istKleinunternehmer =
+    (data as { ist_kleinunternehmer: boolean | null } | null)?.ist_kleinunternehmer ?? null
+
+  const { getPartnerBilling } = await import('@/lib/finance/partner-billing')
+
+  try {
+    const { rows, aggregat } = await getPartnerBilling({ partnerTyp, partnerId })
+    return { ok: true, rows, aggregat, istKleinunternehmer }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
+  }
+}
