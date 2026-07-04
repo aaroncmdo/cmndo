@@ -269,6 +269,16 @@ export type WerkstattAuftrag = {
   reparatur_wunschtermin: string | null
   reparatur_bestaetigter_termin: string | null
   reparatur_absage_grund: string | null
+  // SP3 Task 2 — Gutachten-Kennzahlen (additiv, aus v_werkstatt_auftrag).
+  // HINWEIS: gutachten_bericht_pdf_url wird NICHT an den Client gereicht —
+  // bleibt server-only; die oeffneGutachtenPdf-Action liest ihn frisch.
+  gutachten_fertiggestellt_am: string | null
+  gutachten_reparaturkosten_netto: number | null
+  gutachten_reparaturkosten_brutto: number | null
+  gutachten_minderwert: number | null
+  gutachten_restwert: number | null
+  gutachten_wiederbeschaffungswert: number | null
+  gutachten_totalschaden: boolean | null
 }
 
 /** Self-scoped Auftrags-Liste via v_werkstatt_auftrag (RLS-Gate in der View). */
@@ -282,7 +292,9 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
       gutachter_firmenname, besichtigung_start, besichtigung_ort, besichtigung_status,
       provision_betrag_netto, provision_status,
       reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
-      reparatur_bestaetigter_termin, reparatur_absage_grund
+      reparatur_bestaetigter_termin, reparatur_absage_grund,
+      gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
+      gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden
     `)
     .order('besichtigung_start', { ascending: false, nullsFirst: false })
   if (error) {
@@ -312,5 +324,13 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
     reparatur_wunschtermin: (r.reparatur_wunschtermin as string | null) ?? null,
     reparatur_bestaetigter_termin: (r.reparatur_bestaetigter_termin as string | null) ?? null,
     reparatur_absage_grund: (r.reparatur_absage_grund as string | null) ?? null,
+    // SP3 Task 2 — Gutachten-Kennzahlen (PDF-Pfad bleibt server-only)
+    gutachten_fertiggestellt_am: (r.gutachten_fertiggestellt_am as string | null) ?? null,
+    gutachten_reparaturkosten_netto: r.gutachten_reparaturkosten_netto != null ? Number(r.gutachten_reparaturkosten_netto) : null,
+    gutachten_reparaturkosten_brutto: r.gutachten_reparaturkosten_brutto != null ? Number(r.gutachten_reparaturkosten_brutto) : null,
+    gutachten_minderwert: r.gutachten_minderwert != null ? Number(r.gutachten_minderwert) : null,
+    gutachten_restwert: r.gutachten_restwert != null ? Number(r.gutachten_restwert) : null,
+    gutachten_wiederbeschaffungswert: r.gutachten_wiederbeschaffungswert != null ? Number(r.gutachten_wiederbeschaffungswert) : null,
+    gutachten_totalschaden: r.gutachten_totalschaden != null ? Boolean(r.gutachten_totalschaden) : null,
   }))
 }
