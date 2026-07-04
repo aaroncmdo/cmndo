@@ -153,6 +153,7 @@ export function MaklerDashboard({ makler, data, zeigeErsteVermittlungCard, promo
         </section>
 
         <section aria-label="Schnellaktionen" className="space-y-4">
+          <h2 className="text-base font-semibold text-claimondo-navy">Hier klicken</h2>
           <QuickAction
             href="/makler/promo"
             label="Promo-Code teilen"
