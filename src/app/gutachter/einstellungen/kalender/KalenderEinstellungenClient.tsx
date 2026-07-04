@@ -12,11 +12,15 @@ export default function KalenderEinstellungenClient({
   svId: _svId,
   googleConnected,
   googleEmail,
+  microsoftConnected,
+  microsoftEmail,
   caldav,
 }: {
   svId: string
   googleConnected: boolean
   googleEmail: string | null
+  microsoftConnected: boolean
+  microsoftEmail: string | null
   caldav: CalDavState | null
 }) {
   return (
@@ -35,6 +39,8 @@ export default function KalenderEinstellungenClient({
       <KalenderConnectPanel
         googleConnected={googleConnected}
         googleEmail={googleEmail}
+        microsoftConnected={microsoftConnected}
+        microsoftEmail={microsoftEmail}
         caldav={caldav}
         returnPath="/gutachter/einstellungen/kalender"
       />

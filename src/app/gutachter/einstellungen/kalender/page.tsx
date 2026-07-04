@@ -26,7 +26,7 @@ export default async function KalenderEinstellungenPage() {
   // Callback-Flow AAR-242), nicht auf sachverstaendige.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('google_email')
+    .select('google_email, ms_connected_at, ms_email')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -42,6 +42,8 @@ export default async function KalenderEinstellungenPage() {
       svId={sv.id}
       googleConnected={!!sv.gcal_connected}
       googleEmail={(profile?.google_email as string | null) ?? null}
+      microsoftConnected={!!profile?.ms_connected_at}
+      microsoftEmail={(profile?.ms_email as string | null) ?? null}
       caldav={
         caldavRow
           ? {

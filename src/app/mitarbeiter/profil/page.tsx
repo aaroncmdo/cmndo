@@ -16,7 +16,7 @@ export default async function MitarbeiterProfilPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('rolle, vorname, nachname, telefon, anzeigename, avatar_url, profilbeschreibung, google_connected_at, google_email')
+    .select('rolle, vorname, nachname, telefon, anzeigename, avatar_url, profilbeschreibung, google_connected_at, google_email, ms_connected_at, ms_email')
     .eq('id', user.id)
     .single()
 
@@ -63,6 +63,8 @@ export default async function MitarbeiterProfilPage() {
         <KalenderConnectPanel
           googleConnected={!!profile.google_connected_at}
           googleEmail={(profile.google_email as string | null) ?? null}
+          microsoftConnected={!!profile.ms_connected_at}
+          microsoftEmail={(profile.ms_email as string | null) ?? null}
           caldav={caldavState}
           returnPath="/mitarbeiter/profil"
         />

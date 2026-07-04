@@ -31,11 +31,15 @@ export type CalDavState = {
 export default function KalenderConnectPanel({
   googleConnected,
   googleEmail,
+  microsoftConnected,
+  microsoftEmail,
   caldav,
   returnPath,
 }: {
   googleConnected: boolean
   googleEmail: string | null
+  microsoftConnected: boolean
+  microsoftEmail: string | null
   caldav: CalDavState | null
   returnPath: string
 }) {
@@ -61,6 +65,10 @@ export default function KalenderConnectPanel({
 
   function handleConnectGoogle() {
     window.location.href = '/api/auth/google/connect?return=' + encodeURIComponent(returnPath)
+  }
+
+  function handleConnectMicrosoft() {
+    window.location.href = '/api/auth/microsoft/connect?return=' + encodeURIComponent(returnPath)
   }
 
   return (
@@ -102,6 +110,48 @@ export default function KalenderConnectPanel({
             <>
               <PlusIcon className="w-3 h-3" />
               Google Calendar verbinden
+            </>
+          )}
+        </button>
+      </section>
+
+      {/* Microsoft Outlook */}
+      <section className="bg-white border border-claimondo-border rounded-2xl p-5 space-y-3">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-claimondo-navy">Microsoft Outlook</h2>
+            <p className="text-xs text-claimondo-ondo">
+              OAuth — Claimondo liest Verfügbarkeit aus deinem Outlook- / Microsoft-365-Konto.
+            </p>
+          </div>
+          {microsoftConnected ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success-soft text-success-strong text-xs font-medium border border-success/30">
+              <CheckCircle2Icon className="w-3 h-3" />
+              verbunden
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-claimondo-bg text-claimondo-ondo text-xs font-medium">
+              nicht verbunden
+            </span>
+          )}
+        </div>
+        {microsoftConnected && microsoftEmail && (
+          <p className="text-xs text-claimondo-ondo">{microsoftEmail}</p>
+        )}
+        <button
+          type="button"
+          onClick={handleConnectMicrosoft}
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy"
+        >
+          {microsoftConnected ? (
+            <>
+              <RefreshCwIcon className="w-3 h-3" />
+              Anderes Microsoft-Konto verbinden
+            </>
+          ) : (
+            <>
+              <PlusIcon className="w-3 h-3" />
+              Microsoft Outlook verbinden
             </>
           )}
         </button>
