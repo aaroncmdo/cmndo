@@ -13,9 +13,14 @@ const PAKET_KM: Record<string, number> = {
   premium: 70, 'premium-50': 70,
 }
 
-export async function updateSvProfile(svId: string, profileId: string, formData: FormData) {
+export async function updateSvProfile(
+  svId: string,
+  profileId: string,
+  formData: FormData,
+): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
+  // Auth-Guard darf werfen (Pre-Condition, kein Form-Fehler).
   if (!user) throw new Error('Nicht angemeldet')
 
   const vorname = (formData.get('vorname') as string)?.trim() || null
@@ -23,10 +28,10 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
   const telefon = (formData.get('telefon') as string)?.trim() || null
   const paket = formData.get('paket') as string
   const maxFaelle = parseInt(formData.get('paket_faelle_gesamt') as string) || 10
-  // AAR SV-Audit-Konsolidierung: ist_aktiv wird NICHT mehr hier gesetzt.
-  // Das Flag ist reserviert für den Onboarding-Flow (Stripe-Webhook setzt true
-  // nach Anzahlung). Admin-Sperre läuft über deactivateGutachter/reactivateGutachter
-  // in karte/actions.ts → schreibt gesperrt_seit statt ist_aktiv.
+  // AAR SV-Audit-Konsolidierung: ist_aktiv wird NICHT hier gesetzt.
+  // Das Flag steuert der Onboarding-Flow (Stripe-Webhook setzt true nach
+  // Anzahlung). Admin-Sperre läuft über svSperren/svEntsperren
+  // (verifizierung-actions.ts) → schreibt gesperrt_seit + Legacy deaktiviert_*.
   const notizen = (formData.get('notizen') as string)?.trim() || null
   const googlePlaceId = (formData.get('google_place_id') as string)?.trim() || null
 
@@ -73,7 +78,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
     .update({ vorname, nachname, telefon, google_place_id: googlePlaceId })
     .eq('id', profileId)
 
-  if (profileErr) throw new Error(`Profil-Update fehlgeschlagen: ${profileErr.message}`)
+  if (profileErr) return { ok: false, error: `Profil-Update fehlgeschlagen: ${profileErr.message}` }
 
   // Update sachverstaendige (OHNE ist_aktiv — siehe oben)
   const svUpdate: Record<string, unknown> = {
@@ -101,7 +106,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
     .update(svUpdate)
     .eq('id', svId)
 
-  if (svErr) throw new Error(`SV-Update fehlgeschlagen: ${svErr.message}`)
+  if (svErr) return { ok: false, error: `SV-Update fehlgeschlagen: ${svErr.message}` }
 
   // Isochrone neu berechnen wenn Koordinaten vorhanden
   if (standortLat != null && standortLng != null && !isNaN(standortLat) && !isNaN(standortLng)) {
@@ -119,6 +124,7 @@ export async function updateSvProfile(svId: string, profileId: string, formData:
 
   revalidatePath(`/admin/sachverstaendige/${svId}`)
   revalidatePath('/admin/sachverstaendige')
+  return { ok: true }
 }
 
 // BUG-90: calculateIsochrone wurde nach src/lib/isochrone/calculate-isochrone.ts

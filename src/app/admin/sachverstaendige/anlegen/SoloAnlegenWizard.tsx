@@ -14,7 +14,7 @@ import IsochronePreviewMap from '@/components/maps/IsochronePreviewMap'
 import { anlegeSv, checkEmailExists, type CheckEmailExistsResult } from './actions'
 import WelcomeMailPreviewModal from './WelcomeMailPreviewModal'
 import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
-import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
+import { PAKET_KONFIG, paketAnzahlung, paketKontingent, QUALIFIKATIONEN, SPEZIFIKATIONEN, ANREDE_OPTIONEN, TITEL_OPTIONEN, type AnlegePaket, type GutachterTyp, type AnlegeSvFormData } from './constants'
 import QualiNummernFelder from './QualiNummernFelder'
 
 // ARCH-1 Phase 2 (BLOCK C): 4-Step Solo-Anlegen Wizard fuer den Admin.

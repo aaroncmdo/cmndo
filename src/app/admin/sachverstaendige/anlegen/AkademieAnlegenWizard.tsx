@@ -7,11 +7,12 @@ import {
   GraduationCapIcon, UsersIcon, CheckCircle2Icon, MailIcon, PlusIcon, TrashIcon,
 } from 'lucide-react'
 import GooglePlaceAutocomplete from '@/components/GooglePlaceAutocomplete'
+import { LoadingButton } from '@/components/ui/loading-button'
 import { anlegeAkademie } from './actions'
 import { TextField as SharedTextField, SelectField as SharedSelectField } from '@/components/shared/forms'
 import {
   PAKET_KONFIG, paketAnzahlung, ANREDE_OPTIONEN, TITEL_OPTIONEN,
-  QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN,
+  QUALIFIKATIONEN, SPEZIFIKATIONEN,
   type AnlegePaket, type AnlegeAkademieFormData,
 } from './constants'
 
@@ -377,12 +378,14 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               Zurück
             </button>
           )}
-          <button type="button"
+          <LoadingButton type="button"
             onClick={() => { if (step < STEPS.length - 1) setStep(step + 1); else handleSubmit() }}
-            disabled={saving || !canNext()}
+            disabled={!canNext()}
+            isLoading={saving}
+            loadingText="Wird angelegt..."
             className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-ondo hover:bg-claimondo-shield text-white text-sm font-semibold transition-colors disabled:opacity-40">
-            {saving ? 'Wird angelegt...' : step < STEPS.length - 1 ? 'Weiter' : 'Akademie anlegen + Welcome-Mails senden'}
-          </button>
+            {step < STEPS.length - 1 ? 'Weiter' : 'Akademie anlegen + Welcome-Mails senden'}
+          </LoadingButton>
         </div>
       </div>
     </div>
