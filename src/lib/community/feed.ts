@@ -73,14 +73,18 @@ export async function getNetzwerkFeed(
   const postIds = postRows.map(r => r.id)
   if (artikelIds.length + postIds.length === 0) return []
 
-  const [{ data: artikelLikes }, { data: postLikes }] = await Promise.all([
-    artikelIds.length ? supabase.from('community_likes').select('target_id').eq('target_kind', 'wissen').in('target_id', artikelIds) : Promise.resolve({ data: [] }),
-    postIds.length ? supabase.from('community_likes').select('target_id').eq('target_kind', 'post').in('target_id', postIds) : Promise.resolve({ data: [] }),
+  const [{ data: artikelLikes, error: errAlikes }, { data: postLikes, error: errPlikes }] = await Promise.all([
+    artikelIds.length ? supabase.from('community_likes').select('target_id').eq('target_kind', 'wissen').in('target_id', artikelIds) : Promise.resolve({ data: [], error: null }),
+    postIds.length ? supabase.from('community_likes').select('target_id').eq('target_kind', 'post').in('target_id', postIds) : Promise.resolve({ data: [], error: null }),
   ])
-  const [{ data: artikelComments }, { data: postComments }] = await Promise.all([
-    artikelIds.length ? supabase.from('community_comments').select('target_id').eq('target_kind', 'wissen').eq('status', 'sichtbar').in('target_id', artikelIds) : Promise.resolve({ data: [] }),
-    postIds.length ? supabase.from('community_comments').select('target_id').eq('target_kind', 'post').eq('status', 'sichtbar').in('target_id', postIds) : Promise.resolve({ data: [] }),
+  if (errAlikes) console.error('[netzwerk] feed artikelLikes:', errAlikes.message)
+  if (errPlikes) console.error('[netzwerk] feed postLikes:', errPlikes.message)
+  const [{ data: artikelComments, error: errAcoms }, { data: postComments, error: errPcoms }] = await Promise.all([
+    artikelIds.length ? supabase.from('community_comments').select('target_id').eq('target_kind', 'wissen').eq('status', 'sichtbar').in('target_id', artikelIds) : Promise.resolve({ data: [], error: null }),
+    postIds.length ? supabase.from('community_comments').select('target_id').eq('target_kind', 'post').eq('status', 'sichtbar').in('target_id', postIds) : Promise.resolve({ data: [], error: null }),
   ])
+  if (errAcoms) console.error('[netzwerk] feed artikelComments:', errAcoms.message)
+  if (errPcoms) console.error('[netzwerk] feed postComments:', errPcoms.message)
 
   const aLike = countById(artikelLikes as Array<{ target_id: string }> | null)
   const pLike = countById(postLikes as Array<{ target_id: string }> | null)
@@ -112,7 +116,7 @@ export async function getUserLikedKeys(entries: FeedEntry[]): Promise<string[]> 
   if (!ids.length) return []
   const { data, error } = await supabase
     .from('community_likes').select('target_kind, target_id')
-    .eq('user_id', auth.user.id).in('target_id', ids)
+    .eq('user_id', auth.user.id).in('target_kind', ['wissen', 'post']).in('target_id', ids)
   if (isMissingRelation(error)) return []
   if (error) { console.error('[netzwerk] likedKeys:', error.message); return [] }
   return (data ?? []).map((r: { target_kind: string; target_id: string }) => `${r.target_kind}:${r.target_id}`)
