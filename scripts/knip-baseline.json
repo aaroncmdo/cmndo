@@ -1,13 +1,12 @@
 {
   "generatedAt": "2026-06-26T14:26:47.959Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 78,
+  "fileCount": 77,
   "files": [
     "src/app/admin/finance/actions.ts",
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
     "src/app/dispatch/rueckrufe/RueckrufListItem.tsx",
-    "src/app/flow/[token]/onboarding-extra-actions.ts",
     "src/app/gutachter/auftraege/AuftraegeGrid.tsx",
     "src/app/gutachter/einstellungen/KartenAnzeigeToggle.tsx",
     "src/app/gutachter/faelle/FaelleFilterBar.tsx",
