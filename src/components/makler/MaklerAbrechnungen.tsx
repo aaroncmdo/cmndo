@@ -198,15 +198,28 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
             Provisions-Historie, Monats-Übersicht und Auszahlungen
           </p>
         </div>
-        <button
-          type="button"
-          onClick={() => exportCsv(rowsForMonth, currentMonth)}
-          disabled={rowsForMonth.length === 0}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          <DownloadIcon width={14} height={14} />
-          CSV-Export
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Provisions-Rechnung: PDF ueber die freigegebenen (abrechenbaren) Provisionen,
+              vorausgefuellt; fehlende USt-IdNr/Bank sind im PDF als Platzhalter markiert. */}
+          <a
+            href="/api/makler/rechnung"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-claimondo-navy text-sm font-semibold text-white hover:bg-claimondo-shield"
+          >
+            <ReceiptIcon width={14} height={14} />
+            Rechnung herunterladen
+          </a>
+          <button
+            type="button"
+            onClick={() => exportCsv(rowsForMonth, currentMonth)}
+            disabled={rowsForMonth.length === 0}
+            className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <DownloadIcon width={14} height={14} />
+            CSV-Export
+          </button>
+        </div>
       </header>
 
       {/* Summary-Cards */}
