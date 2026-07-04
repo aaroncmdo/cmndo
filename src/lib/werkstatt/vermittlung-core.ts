@@ -16,14 +16,16 @@ export type BedarfRow = {
 }
 
 /**
- * Picker sichtbar? Nur wenn Reparatur gewuenscht, noch KEINE Partner-Werkstatt
- * vermittelt, KEIN Inbound-QR-Werkstatt (dann hat der Kunde faktisch schon eine)
- * und der operative Status offen ist. reparatur_werkstatt_id IS NULL dominiert:
- * sobald vermittelt, bleibt der Picker ueberall verborgen.
+ * Picker sichtbar? Wenn Reparatur ODER fiktive Abrechnung gewuenscht (SP4d: der
+ * Kunde kann auch bei fiktiver Abrechnung eine Werkstatt suchen — z.B. guenstiger
+ * reparieren + Differenz behalten), noch KEINE Partner-Werkstatt vermittelt, KEIN
+ * Inbound-QR-Werkstatt (dann hat der Kunde faktisch schon eine) und der operative
+ * Status offen ist. reparatur_werkstatt_id IS NULL dominiert: sobald vermittelt,
+ * bleibt der Picker ueberall verborgen.
  */
 export function brauchtWerkstattVermittlung(row: BedarfRow): boolean {
   return (
-    row.reparaturwunsch === 'reparatur' &&
+    (row.reparaturwunsch === 'reparatur' || row.reparaturwunsch === 'fiktiv') &&
     row.reparatur_werkstatt_id == null &&
     row.werkstatt_id == null &&
     (row.reparatur_vermittlung_status ?? 'offen') === 'offen'
