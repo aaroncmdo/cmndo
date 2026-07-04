@@ -264,13 +264,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
             description={`${werkstaetten.length} Partnerwerk${werkstaetten.length === 1 ? 'statt' : 'stätten'}`}
             icon={WrenchIcon}
             actions={
-              <Button
-                variant="navy"
-                onClick={openDialog}
-                iconLeft={<PlusIcon className="w-4 h-4" />}
-              >
-                Neue Werkstatt
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/admin/werkstaetten/qr-pool')}
+                  iconLeft={<QrCodeIcon className="w-4 h-4" />}
+                >
+                  QR-Code-Pool
+                </Button>
+                <Button
+                  variant="navy"
+                  onClick={openDialog}
+                  iconLeft={<PlusIcon className="w-4 h-4" />}
+                >
+                  Neue Werkstatt
+                </Button>
+              </div>
             }
           />
         </div>
