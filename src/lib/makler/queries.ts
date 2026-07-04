@@ -237,16 +237,6 @@ export type TimelineEvent = {
   meta?: string
 }
 
-export type FallDetailDocument = {
-  id: string
-  dokument_typ: string
-  original_filename: string | null
-  mime_type: string | null
-  groesse_bytes: number | null
-  hochgeladen_am: string | null
-  storage_path: string | null
-}
-
 export type FallDetailProvision = {
   id: string
   betrag_netto_eur: number
@@ -315,7 +305,6 @@ export type FallDetail = {
   }
   kunde: FallDetailKunde | null
   provision: FallDetailProvision | null
-  documents: FallDetailDocument[]
   timeline: TimelineEvent[]
 }
 
@@ -420,14 +409,9 @@ export async function getMaklerFallDetail(
       }
     : null
 
-  const { data: documents } = await supabase
-    .from('fall_dokumente')
-    .select(
-      'id, dokument_typ, original_filename, mime_type, groesse_bytes, hochgeladen_am, storage_path',
-    )
-    .eq('fall_id', fallId)
-    .is('geloescht_am', null)
-    .order('hochgeladen_am', { ascending: false })
+  // Datenschutz-Entscheid (Aaron 04.07.): Makler sehen KEINE Kundendokumente (Vermittler-
+  // Datenminimierung). Frueher wurde hier fall_dokumente gelesen — es gibt aber keine
+  // Makler-RLS-Policy, der Read lieferte immer 0 (leerer Tab). Feature entfernt.
 
   const timeline = buildTimelineForFall(
     fall as unknown as FallDetail['fall'],
@@ -448,7 +432,6 @@ export async function getMaklerFallDetail(
     } as unknown as FallDetail['fall'],
     kunde,
     provision,
-    documents: (documents ?? []) as FallDetailDocument[],
     timeline,
   }
 }
@@ -510,31 +493,6 @@ function buildTimelineForFall(
   // Sort ascending, mark latest non-future „done" als „current"
   events.sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1))
   return events
-}
-
-/**
- * Erzeugt Signed-URLs für alle Dokumente eines Falls. Supabase Storage
- * Bucket: `fall-dokumente` (siehe Admin-Settings).
- */
-export async function getDocumentSignedUrls(
-  docs: FallDetailDocument[],
-): Promise<Record<string, string | null>> {
-  if (docs.length === 0) return {}
-  const supabase = await createClient()
-  const result: Record<string, string | null> = {}
-  await Promise.all(
-    docs.map(async (d) => {
-      if (!d.storage_path) {
-        result[d.id] = null
-        return
-      }
-      const { data } = await supabase.storage
-        .from('fall-dokumente')
-        .createSignedUrl(d.storage_path, 3600)
-      result[d.id] = data?.signedUrl ?? null
-    }),
-  )
-  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
