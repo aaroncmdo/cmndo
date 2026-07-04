@@ -3,7 +3,8 @@
 // mit der Kunden-Unterschrift versehen, im Storage abgelegt und in
 // fall_dokumente eingetragen. AAR-360 Follow-up (24.06.): die Sicherungsabtretung
 // ist KUNDENSICHTBAR (der Kunde ist Partei der Abtretung + muss sie sehen); die
-// Honorarvereinbarung bleibt SV-/intern-only (SV / Admin / KB / Kanzlei).
+// Honorarvereinbarung ist EBENFALLS kundensichtbar (Aaron 04.07.: der Kunde muss
+// alles sehen, was er beim Gutachter unterschreibt). Alle 4 sind kunden- + SV-sichtbar.
 //
 // AAR-360 Follow-up (23.06.): Datenschutzerklärung + Widerrufsbelehrung des
 // Gutachters werden NICHT mehr mit-signiert — das sind rechtlich Informations-/
@@ -52,13 +53,17 @@ const SLOT_LABEL: Record<(typeof PFLICHT_SLOTS)[number], string> = {
   sv_datenschutzerklaerung: 'Datenschutzerklärung',
 }
 
-// Slots, deren signiertes PDF der Kunde sehen darf (Partei bzw. Belehrungs-
-// empfaenger). Honorarvereinbarung ist bewusst NICHT dabei (SV-/intern-only).
-export const KUNDEN_VERTRAG_SLOTS = new Set<string>([
-  'sv_sicherungsabtretung',
-  'sv_widerrufsbelehrung',
-  'sv_datenschutzerklaerung',
-])
+// Aaron 04.07.: ALLE vom Kunden mit-signierten SV-Dokumente sind kunden-sichtbar —
+// der Kunde ist Unterzeichner + Partei und muss alles sehen, was er beim Gutachter
+// unterschreibt (inkl. Honorarvereinbarung). Der Generator erzeugt ausschliesslich
+// kunden-signierte Dokumente, daher gilt diese Sichtbarkeit fuer jeden PFLICHT_SLOT.
+export const SIGNIERT_SICHTBAR_FUER: readonly string[] = [
+  'admin',
+  'kundenbetreuer',
+  'sachverstaendiger',
+  'kanzlei',
+  'kunde',
+]
 
 /** Klick-Editor-Konfig je Slot (admin gepflegt unter /admin/vertraege). */
 type KlickKonfig = {
@@ -481,11 +486,9 @@ async function persistMerged({
       original_filename: dateiName,
       groesse_bytes: outBytes.byteLength,
       mime_type: 'application/pdf',
-      // Aaron 04.07.: Kunden-Vertraege (SA + Widerruf + Datenschutz) sind kunden-
-      // UND SV-sichtbar; Honorarvereinbarung bleibt SV-/intern-only (kein 'kunde').
-      sichtbar_fuer: KUNDEN_VERTRAG_SLOTS.has(slotId)
-        ? ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde']
-        : ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
+      // Aaron 04.07.: alle mit-signierten Dokumente (inkl. Honorarvereinbarung) sind
+      // kunden- UND SV-sichtbar — der Kunde muss alles sehen, was er unterschreibt.
+      sichtbar_fuer: [...SIGNIERT_SICHTBAR_FUER],
       beschreibung: `${slotLabel} mit Kunden-Unterschrift (SV ${svId})`,
     })
     .select('id')
