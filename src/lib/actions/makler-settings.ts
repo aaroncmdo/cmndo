@@ -23,6 +23,7 @@ const profilSchema = z.object({
   ansprechpartner_vorname: z.string().trim().min(1).max(50),
   ansprechpartner_nachname: z.string().trim().min(1).max(50),
   ihk_nummer: z.string().trim().max(50).optional().nullable(),
+  ust_id: z.string().trim().max(30).optional().nullable().or(z.literal('')),
   telefon: z
     .string()
     .trim()
