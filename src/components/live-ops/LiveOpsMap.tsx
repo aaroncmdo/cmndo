@@ -9,15 +9,16 @@ import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSour
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
-import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC } from './geo'
+import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC } from './geo'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
 import TerminPopup from './TerminPopup'
+import LeadPopup from './LeadPopup'
 import DeadPinDrawer from './DeadPinDrawer'
 import StatBar from './StatBar'
 import LayerPanel from './LayerPanel'
 import SidebarList from './SidebarList'
-import type { SvLiveOps, TerminPin } from '@/lib/live-ops'
+import type { SvLiveOps, TerminPin, LeadPin } from '@/lib/live-ops'
 import { createClient } from '@/lib/supabase/client'
 
 // ------------------------------------------------------------------ Props
@@ -47,6 +48,20 @@ const LAYER_TAGESROUTEN = 'lo-tagesrouten-line'
 
 const SRC_DEADPINS = 'lo-deadpins'
 const LAYER_DEADPINS = 'lo-deadpins-circle'
+
+const SRC_LEADS = 'lo-leads'
+const LAYER_LEADS = 'lo-leads-circle'
+
+// Lead-Status-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property)
+const LEAD_STATUS_COLOR_EXPR = [
+  'match',
+  ['get', 'status'],
+  'neu', '#f59e0b',
+  'offen', '#f59e0b',
+  'aktiv', '#3b82f6',
+  'in_bearbeitung', '#3b82f6',
+  /* default */ '#94a3b8',
+] as unknown as mapboxgl.Expression
 
 // Dead-Pin-Status-Farben via match-Expression (raw hex ok — Token-Audit-Skip-Header oben)
 const DEADPIN_STATUS_COLOR_EXPR = [
@@ -90,6 +105,7 @@ const DEFAULT_LAYERS: LayerState = {
   routen: true,
   tagesrouten: false,
   deadpins: true,
+  leads: true,
 }
 
 const DEFAULT_FILTER: FilterState = {
@@ -143,6 +159,12 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     termineRef.current = data.termine
   }, [data.termine])
 
+  // Stabile Referenz auf aktuelle data.leads fuer Klick-Handler-Closures
+  const leadsRef = useRef<LeadPin[]>(data.leads)
+  useEffect(() => {
+    leadsRef.current = data.leads
+  }, [data.leads])
+
   // Stabile Referenz auf onRefresh fuer Realtime-Handler
   const onRefreshRef = useRef(onRefresh)
   useEffect(() => {
@@ -180,6 +202,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           routen: [LAYER_ROUTEN],
           tagesrouten: [LAYER_TAGESROUTEN],
           deadpins: [LAYER_DEADPINS],
+          leads: [LAYER_LEADS],
         }
         for (const layerId of layerIds[key]) {
           if (map.getLayer(layerId)) {
@@ -255,6 +278,34 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
 
       const popup = new mapboxgl.Popup({ offset: 12, closeButton: true })
         .setLngLat([termin.lng, termin.lat])
+        .setDOMContent(container)
+        .addTo(map)
+
+      popup.on('close', () => {
+        root.unmount()
+        popupRootsRef.current.delete(root)
+      })
+    },
+    [role],
+  )
+
+  // ------ openLeadPopup: analog zu openTerminPopup
+
+  const openLeadPopup = useCallback(
+    (leadId: string, coords: [number, number]) => {
+      const map = mapRef.current
+      if (!map) return
+      const lead = leadsRef.current.find((l) => l.id === leadId)
+      if (!lead) return
+
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      popupRootsRef.current.add(root)
+
+      root.render(<LeadPopup lead={lead} role={role} />)
+
+      const popup = new mapboxgl.Popup({ offset: 12, closeButton: true })
+        .setLngLat(coords)
         .setDOMContent(container)
         .addTo(map)
 
@@ -527,6 +578,47 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         })
       }
 
+      // ─── Lead-Pins (nur fuer admin + dispatch) ─────────────────────────
+      if (role !== 'kundenbetreuer') {
+        map.addSource(SRC_LEADS, {
+          type: 'geojson',
+          data: leadsFC(leadsRef.current),
+        })
+
+        map.addLayer({
+          id: LAYER_LEADS,
+          type: 'circle',
+          source: SRC_LEADS,
+          paint: {
+            'circle-color': LEAD_STATUS_COLOR_EXPR,
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1.5,
+            'circle-opacity': 0.85,
+          },
+        })
+
+        // Klick auf Lead-Pin → Popup
+        map.on(
+          'click',
+          LAYER_LEADS,
+          (e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] }) => {
+            const feature = e.features?.[0]
+            if (!feature) return
+            const leadId = feature.properties?.__id as string
+            const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
+            openLeadPopup(leadId, coords)
+          },
+        )
+
+        map.on('mouseenter', LAYER_LEADS, () => {
+          map.getCanvas().style.cursor = 'pointer'
+        })
+        map.on('mouseleave', LAYER_LEADS, () => {
+          map.getCanvas().style.cursor = ''
+        })
+      }
+
       setReady(true)
     })
 
@@ -612,6 +704,17 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       (map.getSource(SRC_DEADPINS) as GeoJSONSource).setData(deadPinsFC(data.deadPins))
     }
   }, [data.deadPins, ready])
+
+  // ------ Rebuild-Effect: Leads bei Daten-Aenderung updaten
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !ready) return
+
+    if (map.getSource(SRC_LEADS)) {
+      (map.getSource(SRC_LEADS) as GeoJSONSource).setData(leadsFC(data.leads))
+    }
+  }, [data.leads, ready])
 
   // ------ Realtime: Supabase-Kanal fuer sv_live_location-Aenderungen
 

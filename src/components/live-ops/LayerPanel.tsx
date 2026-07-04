@@ -23,6 +23,7 @@ const LAYER_LABELS: Record<LayerKey, string> = {
   routen: 'Routen',
   tagesrouten: 'Tagesrouten',
   deadpins: 'Dead-Pins',
+  leads: 'Leads',
 }
 
 const LAYER_KEYS: LayerKey[] = [
@@ -32,6 +33,7 @@ const LAYER_KEYS: LayerKey[] = [
   'routen',
   'tagesrouten',
   'deadpins',
+  'leads',
 ]
 
 const TYP_OPTIONS = [

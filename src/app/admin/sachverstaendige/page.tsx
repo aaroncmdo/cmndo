@@ -14,6 +14,7 @@ import {
   getUnterwegsRouten,
   getTagesrouten,
   getDeadPins,
+  getLeads,
 } from '@/lib/live-ops'
 import AdminLiveOpsClient from './AdminLiveOpsClient'
 
@@ -42,12 +43,13 @@ export default async function SachverstaendigeHubPage() {
 
   // Live-Ops-Loader (role-scoped)
   const scope = await resolveLiveOpsScope('admin', user.id)
-  const [svs, termine, routen, tagesrouten, deadPins] = await Promise.all([
+  const [svs, termine, routen, tagesrouten, deadPins, leads] = await Promise.all([
     getLiveOpsSvs(scope),
     getOffeneTermine(scope),
     getUnterwegsRouten(scope),
     getTagesrouten(scope),
     getDeadPins(scope),
+    getLeads(scope),
   ])
 
   return (
@@ -85,7 +87,7 @@ export default async function SachverstaendigeHubPage() {
 
       {/* Karte — flex-1 + min-h-0 gibt der LiveOpsMap (h-full) eine definierte Höhe */}
       <div className="flex-1 min-h-0">
-        <AdminLiveOpsClient data={{ svs, termine, routen, tagesrouten, deadPins }} />
+        <AdminLiveOpsClient data={{ svs, termine, routen, tagesrouten, deadPins, leads }} />
       </div>
     </div>
   )

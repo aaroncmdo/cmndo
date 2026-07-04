@@ -74,3 +74,14 @@ export type TagesRoute = {
     reihenfolge: number
   }[]
 }
+
+export type LeadPin = {
+  id: string
+  name: string
+  status: string
+  lat: number
+  lng: number
+  ort: string | null
+  kanal: string | null
+  erstelltAm: string
+}

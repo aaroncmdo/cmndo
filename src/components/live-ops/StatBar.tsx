@@ -54,6 +54,7 @@ export default function StatBar({ data }: StatBarProps) {
   const unterwegs = data.svs.filter((sv) => sv.car.mode !== 'none').length
   const offeneTermine = data.termine.length
   const deadPins = data.deadPins.length
+  const leads = data.leads.length
 
   return (
     <div
@@ -111,6 +112,17 @@ export default function StatBar({ data }: StatBarProps) {
       />
 
       <StatItem label="Dead-Pins" value={deadPins} />
+
+      <div
+        style={{
+          width: 1,
+          height: 28,
+          backgroundColor: tokens.cssColors.border,
+          flexShrink: 0,
+        }}
+      />
+
+      <StatItem label="Leads" value={leads} />
     </div>
   )
 }

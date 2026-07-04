@@ -4,6 +4,7 @@ import type {
   DeadPin,
   UnterwegsRoute,
   TagesRoute,
+  LeadPin,
 } from '@/lib/live-ops'
 
 /**
@@ -16,10 +17,11 @@ export type LiveOpsData = {
   routen: UnterwegsRoute[]
   tagesrouten: TagesRoute[]
   deadPins: DeadPin[]
+  leads: LeadPin[]
 }
 
 /**
- * Die 6 togglbaren Karten-Layer.
+ * Die 7 togglbaren Karten-Layer.
  */
 export type LayerKey =
   | 'svs'
@@ -28,6 +30,7 @@ export type LayerKey =
   | 'routen'
   | 'tagesrouten'
   | 'deadpins'
+  | 'leads'
 
 /**
  * Visibility-State fuer alle Layer.

@@ -8,7 +8,7 @@
  * WICHTIG: GeoJSON-Koordinaten sind immer [lng, lat] (nicht [lat, lng])!
  */
 
-import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute } from '@/lib/live-ops'
+import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute, LeadPin } from '@/lib/live-ops'
 
 /**
  * SV-Standort-Pins. SVs ohne standortLat/Lng werden gefiltert.
@@ -135,6 +135,31 @@ export function tagesroutenFC(tagesrouten: TagesRoute[]): GeoJSON.FeatureCollect
           svName: tr.svName,
         },
       })),
+  }
+}
+
+/**
+ * Lead-Pins fuer die LiveOps-Karte (offene, lokalisierte Leads).
+ */
+export function leadsFC(leads: LeadPin[]): GeoJSON.FeatureCollection {
+  return {
+    type: 'FeatureCollection',
+    features: leads.map((lead) => ({
+      type: 'Feature' as const,
+      geometry: {
+        type: 'Point' as const,
+        coordinates: [lead.lng, lead.lat],
+      },
+      properties: {
+        __id: lead.id,
+        __type: 'lead',
+        status: lead.status,
+        name: lead.name,
+        ort: lead.ort,
+        kanal: lead.kanal,
+        erstelltAm: lead.erstelltAm,
+      },
+    })),
   }
 }
 

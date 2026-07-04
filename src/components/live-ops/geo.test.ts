@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute } from '@/lib/live-ops'
-import { svPinsFC, terminPinsFC, deadPinsFC, isochroneFC, routenFC, tagesroutenFC } from './geo'
+import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute, LeadPin } from '@/lib/live-ops'
+import { svPinsFC, terminPinsFC, deadPinsFC, isochroneFC, routenFC, tagesroutenFC, leadsFC } from './geo'
 
 // --- Fixtures ---
 
@@ -257,6 +257,47 @@ describe('tagesroutenFC', () => {
 
   it('returns empty FC for empty array', () => {
     expect(tagesroutenFC([]).features).toHaveLength(0)
+  })
+})
+
+// --- leadsFC ---
+
+const makeLead = (overrides: Partial<LeadPin> = {}): LeadPin => ({
+  id: 'lead-1',
+  name: 'Anna Muster',
+  status: 'neu',
+  lat: 48.137,
+  lng: 11.576,
+  ort: 'München',
+  kanal: 'self_service',
+  erstelltAm: '2026-07-04T08:00:00Z',
+  ...overrides,
+})
+
+describe('leadsFC', () => {
+  it('maps one LeadPin to one Point feature with lng-first coords', () => {
+    const lead = makeLead()
+    const fc = leadsFC([lead])
+    expect(fc.type).toBe('FeatureCollection')
+    expect(fc.features).toHaveLength(1)
+    const f = fc.features[0]
+    expect(f.type).toBe('Feature')
+    expect(f.geometry.type).toBe('Point')
+    const coords = (f.geometry as GeoJSON.Point).coordinates
+    expect(coords[0]).toBe(lead.lng)
+    expect(coords[1]).toBe(lead.lat)
+  })
+
+  it('sets __id, __type and status on properties', () => {
+    const lead = makeLead({ id: 'lead-42', status: 'aktiv' })
+    const f = leadsFC([lead]).features[0]
+    expect(f.properties?.__id).toBe('lead-42')
+    expect(f.properties?.__type).toBe('lead')
+    expect(f.properties?.status).toBe('aktiv')
+  })
+
+  it('returns empty FC for empty array', () => {
+    expect(leadsFC([]).features).toHaveLength(0)
   })
 })
 
