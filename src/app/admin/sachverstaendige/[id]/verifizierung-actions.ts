@@ -193,6 +193,12 @@ export async function svSperren(
       gesperrt_grund: trimmed,
       gesperrt_von_user_id: auth.userId,
       ist_aktiv: false,
+      // Legacy-Felder mitschreiben — sie werden weiterhin gelesen
+      // (dispatch/sachverstaendige/page.tsx zeigt deaktiviert_grund/-am;
+      // konfrontations-dispatch-lite prueft deaktiviert_am != null als „gesperrt").
+      // svSperren ist damit der EINE kanonische Sperr-Pfad (= deactivateGutachter).
+      deaktiviert_grund: trimmed,
+      deaktiviert_am: new Date().toISOString(),
     })
     .eq('id', svId)
   if (error) return { success: false, error: `Sperren fehlgeschlagen: ${error.message}` }
@@ -213,6 +219,9 @@ export async function svEntsperren(svId: string): Promise<{ success: boolean; er
       gesperrt_grund: null,
       gesperrt_von_user_id: null,
       ist_aktiv: true,
+      // Legacy-Felder analog nullen (s. svSperren).
+      deaktiviert_grund: null,
+      deaktiviert_am: null,
     })
     .eq('id', svId)
   if (error) return { success: false, error: `Entsperren fehlgeschlagen: ${error.message}` }
@@ -343,28 +352,25 @@ export async function dokumenteAlleFreigeben(
   const byType = new Map<string, string>()
   for (const r of rows ?? []) byType.set(r.dokument_typ as string, (r.status as string) ?? '')
 
-  const hatAbtretungOk = PFLICHT_ABTRETUNG.some((s) => {
-    const st = byType.get(s)
-    return st === 'hochgeladen' || st === 'geprueft'
-  })
+  // Sammel-Freigabe verlangt echte Einzel-Reviews: nur bereits 'geprueft'-Rows
+  // zaehlen als „alle ok". Ein bloss 'hochgeladen'-Dokument reicht NICHT — sonst
+  // koennte der Admin verifiziert=true setzen ohne jedes Dokument angesehen zu haben.
+  const hatAbtretungOk = PFLICHT_ABTRETUNG.some((s) => byType.get(s) === 'geprueft')
   if (!hatAbtretungOk) {
-    return { success: false, error: 'Sicherungsabtretung oder Honorarvereinbarung fehlt.' }
+    return {
+      success: false,
+      error: 'Sicherungsabtretung oder Honorarvereinbarung muss zuerst einzeln geprüft (freigegeben) werden.',
+    }
   }
   for (const s of PFLICHT_SINGLE) {
-    const st = byType.get(s)
-    if (st !== 'hochgeladen' && st !== 'geprueft') {
-      return { success: false, error: `Pflichtdokument fehlt: ${s}.` }
+    if (byType.get(s) !== 'geprueft') {
+      return { success: false, error: `Pflichtdokument noch nicht geprüft: ${s}.` }
     }
   }
 
-  // Alle vorhandenen hochgeladen/geprueft-Rows auf 'geprueft' setzen.
-  const { error: updErr } = await db
-    .from('pflichtdokumente')
-    .update({ status: 'geprueft' })
-    .eq('sv_id', svId)
-    .in('dokument_typ', [...PFLICHT_ABTRETUNG, ...PFLICHT_SINGLE] as unknown as string[])
-    .in('status', ['hochgeladen', 'geprueft'])
-  if (updErr) return { success: false, error: `Dokumenten-Freigabe fehlgeschlagen: ${updErr.message}` }
+  // Alle relevanten Rows sind bereits 'geprueft' (s.o.) — nichts mehr umzustellen.
+  // (Frueher wurden hier 'hochgeladen'-Rows auf 'geprueft' gehoben; das umging
+  // das Einzel-Review und ist jetzt entfernt.)
 
   const { error: svErr } = await db
     .from('sachverstaendige')
