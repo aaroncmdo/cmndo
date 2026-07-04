@@ -232,7 +232,7 @@ async function notifyAfterAssign(
   }
   if (werkstattEmail) {
     const { notifyWerkstattNeuerAuftrag } = await import('@/lib/werkstatt/notify-werkstatt-auftrag')
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
     await notifyWerkstattNeuerAuftrag({
       werkstatt: { email: werkstattEmail, name: w.name },
       kunde: { name: kundeKontakt.vorname },

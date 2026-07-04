@@ -209,7 +209,7 @@ export async function proxy(request: NextRequest) {
     return await updateSession(request)
   }
 
-  // ─── localhost / Vercel-Previews / *.staging.claimondo.de ─────────────
+  // ─── localhost / *.staging.claimondo.de ─────────────
   return await updateSession(request)
 }
 

@@ -118,7 +118,7 @@ export async function GET(request: Request) {
         if (lead?.telefon) {
           try {
             const { sendCommunication } = await import('@/lib/communications/send')
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
             await sendCommunication('dokumente_nachreichen', {
               telefon: lead.telefon,
               vorname: lead.vorname ?? 'Kunde',

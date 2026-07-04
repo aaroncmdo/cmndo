@@ -75,7 +75,7 @@ export async function uploadFallDokument(
 
   // KFZ-172 Phase 3: OCR triggern (fire & forget, async)
   if (file.type === 'application/pdf' || file.type.startsWith('image/')) {
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000'
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
     fetch(`${baseUrl}/api/ocr-trigger`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

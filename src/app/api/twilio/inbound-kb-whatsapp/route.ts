@@ -16,7 +16,7 @@ export async function POST(req: Request) {
   const formData = new URLSearchParams(body)
 
   // Issue #1477 (Lead-Audit P0): Sig-Verify in allen Envs aktiv (vorher nur
-  // production), URL aus NEXT_PUBLIC_APP_URL (vorher hardcoded cmndo.vercel.app
+  // production), URL aus NEXT_PUBLIC_APP_URL (vorher hardcoded app.claimondo.de
   // → bei VPS-Routing immer Sig-Mismatch).
   const sig = req.headers.get('x-twilio-signature')
   if (!validateTwilioSignature(sig, twilioCallbackUrl(ROUTE_PATH), formData)) {

@@ -19,7 +19,7 @@
 //   node scripts/screenshot-feldmodus.mjs
 //   FELDMODUS_EMAIL=aaron.sprafke@claimondo.de \
 //   FELDMODUS_PASSWORD=… \
-//   FELDMODUS_BASE_URL=https://cmndo.vercel.app \
+//   FELDMODUS_BASE_URL=https://app.claimondo.de \
 //   FELDMODUS_VIEWPORT=mobile \
 //   node scripts/screenshot-feldmodus.mjs
 //
