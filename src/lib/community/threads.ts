@@ -92,6 +92,8 @@ export async function getTopCommentsPreview(
     artikelIds.length ? supabase.from('community_comments').select('id, target_kind, target_id, author_display, author_kind, body, parent_id, created_at').eq('target_kind', 'wissen').eq('status', 'sichtbar').in('target_id', artikelIds) : Promise.resolve({ data: [], error: null }),
     postIds.length ? supabase.from('community_comments').select('id, target_kind, target_id, author_display, author_kind, body, parent_id, created_at').eq('target_kind', 'post').eq('status', 'sichtbar').in('target_id', postIds) : Promise.resolve({ data: [], error: null }),
   ])
+  if (aErr && !isMissingRelation(aErr)) console.error('[netzwerk] getTopCommentsPreview (wissen):', aErr.message)
+  if (pErr && !isMissingRelation(pErr)) console.error('[netzwerk] getTopCommentsPreview (post):', pErr.message)
   if (isMissingRelation(aErr) || isMissingRelation(pErr)) return {}
 
   const rows = [...(aData ?? []), ...(pData ?? [])] as Array<{
