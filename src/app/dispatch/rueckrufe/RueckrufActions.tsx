@@ -1,9 +1,12 @@
-﻿'use client'
+'use client'
 
-import { useTransition, useState } from 'react'
+// Compact-Wrapper um den geteilten RueckrufErledigenForm — inline in der
+// dispatch/rueckrufe-Liste (lead-scoped). Der Erledigen-Flow (Ergebnis/Notiz/
+// Folgetermin) lebt jetzt in @/components/shared/rueckruf/RueckrufErledigenForm
+// und wird auch vom vollen RueckrufTerminPanel genutzt.
+
 import { markRueckrufErledigtMitErgebnis } from './actions'
-import { CheckCircle2Icon, PhoneIncomingIcon, PhoneOffIcon, XIcon } from 'lucide-react'
-import { Button } from '@/components/primitives/Button/Button.web'
+import { RueckrufErledigenForm } from '@/components/shared/rueckruf/RueckrufErledigenForm'
 
 export default function RueckrufActions({
   leadId,
@@ -12,129 +15,13 @@ export default function RueckrufActions({
   leadId: string
   anrufVersuche: number
 }) {
-  const [pending, startTransition] = useTransition()
-  const [offen, setOffen] = useState(false)
-  const [ergebnis, setErgebnis] = useState<'erreicht' | 'nicht_erreicht'>('erreicht')
-  const [notiz, setNotiz] = useState('')
-  const [folgetermin, setFolgetermin] = useState('')
-  const [toast, setToast] = useState('')
-
-  function abschicken() {
-    startTransition(async () => {
-      const r = await markRueckrufErledigtMitErgebnis(
-        leadId,
-        ergebnis,
-        notiz || null,
-        ergebnis === 'nicht_erreicht' && folgetermin ? new Date(folgetermin).toISOString() : null,
-      )
-      if (r.ok) {
-        setOffen(false)
-        setNotiz('')
-        setFolgetermin('')
-        setToast('OK')
-        setTimeout(() => setToast(''), 1500)
-      } else {
-        setToast(r.error ?? 'Fehler')
-        setTimeout(() => setToast(''), 3000)
-      }
-    })
-  }
-
-  if (!offen) {
-    return (
-      <div className="flex items-center gap-2 shrink-0">
-        {toast && (
-          <span className={`text-[10px] font-medium ${toast === 'OK' ? 'text-success' : 'text-danger'}`}>
-            {toast}
-          </span>
-        )}
-        <Button
-          variant="success"
-          size="sm"
-          disabled={pending}
-          onClick={() => setOffen(true)}
-          iconLeft={<CheckCircle2Icon className="w-3.5 h-3.5" />}
-        >
-          Rückruf erledigt
-          {anrufVersuche > 0 && (
-            <span className="text-[9px] bg-white/20 px-1 rounded ml-0.5">
-              {anrufVersuche}×
-            </span>
-          )}
-        </Button>
-      </div>
-    )
-  }
-
   return (
-    <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-3 space-y-2.5 w-full sm:w-72">
-      {/* Ergebnis */}
-      <div className="flex gap-2">
-        <button
-          onClick={() => setErgebnis('erreicht')}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium border transition-colors ${
-            ergebnis === 'erreicht'
-              ? 'bg-success text-white border-success'
-              : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-success-soft'
-          }`}
-        >
-          <PhoneIncomingIcon className="w-3 h-3" />
-          Erreicht
-        </button>
-        <button
-          onClick={() => setErgebnis('nicht_erreicht')}
-          className={`flex items-center gap-1 px-3 py-1.5 rounded-ios-lg text-xs font-medium border transition-colors ${
-            ergebnis === 'nicht_erreicht'
-              ? 'bg-danger text-white border-danger'
-              : 'bg-white text-claimondo-navy border-claimondo-border hover:bg-danger-soft'
-          }`}
-        >
-          <PhoneOffIcon className="w-3 h-3" />
-          Nicht erreicht
-        </button>
-      </div>
-
-      {/* Notiz */}
-      <input
-        type="text"
-        value={notiz}
-        onChange={(e) => setNotiz(e.target.value)}
-        placeholder="Kurze Notiz zum Gespräch …"
-        className="w-full bg-white border border-claimondo-border text-claimondo-navy text-[11px] rounded-ios-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo placeholder-claimondo-ondo/40"
-      />
-
-      {/* Folgetermin */}
-      {ergebnis === 'nicht_erreicht' && (
-        <input
-          type="datetime-local"
-          value={folgetermin}
-          onChange={(e) => setFolgetermin(e.target.value)}
-          title="Nächsten Rückruf planen (optional)"
-          className="w-full bg-white border border-claimondo-border text-claimondo-navy text-[11px] rounded-ios-lg px-2.5 py-1.5 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo"
-        />
-      )}
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ondo"
-          size="sm"
-          onClick={abschicken}
-          disabled={pending}
-        >
-          {pending ? '…' : 'Speichern'}
-        </Button>
-        <button
-          onClick={() => { setOffen(false); setNotiz(''); setFolgetermin('') }}
-          disabled={pending}
-          className="p-1.5 rounded-ios-lg border border-claimondo-border text-claimondo-navy hover:bg-white disabled:opacity-50 transition-colors"
-          aria-label="Abbrechen"
-        >
-          <XIcon className="w-3.5 h-3.5" />
-        </button>
-        {toast && toast !== 'OK' && (
-          <span className="text-[10px] text-danger">{toast}</span>
-        )}
-        {anrufVersuche >= 1 && <span className="text-[9px] text-danger ml-1">({anrufVersuche}/2)</span>}
-      </div>
-    </div>
+    <RueckrufErledigenForm
+      variant="compact"
+      anrufVersuche={anrufVersuche}
+      onSubmit={(ergebnis, notiz, folgeterminIso) =>
+        markRueckrufErledigtMitErgebnis(leadId, ergebnis, notiz, folgeterminIso)
+      }
+    />
   )
 }
