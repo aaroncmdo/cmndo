@@ -13,18 +13,28 @@ export async function POST(request: Request) {
   const body = await request.text()
   const sig = request.headers.get('stripe-signature') ?? ''
 
-  // Signatur-Verifizierung
+  // Signatur-Verifizierung — FAIL-CLOSED.
+  // Der fruehere else-Zweig (JSON.parse(body) ohne Secret ODER ohne Signatur) war
+  // fail-open und schon durch WEGLASSEN des stripe-signature-Headers ausnutzbar
+  // (sig='' -> Bedingung false -> ungeprueft): ein Angreifer konnte forged
+  // checkout.session.completed senden und SVs/Orgs freischalten bzw. auf 'bezahlt'
+  // setzen. In Prod wird ein Event OHNE gueltiges Secret+Signatur jetzt abgelehnt.
   let event: { id: string; type: string; data: { object: Record<string, unknown> } }
   try {
     if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
       const { stripe } = await import('@/lib/stripe/client')
       const verified = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
       event = verified as unknown as typeof event
-    } else {
+    } else if (process.env.NODE_ENV !== 'production') {
+      // DEV-only: lokal ohne Secret/Stripe-CLI. NIE in Prod (s.o.).
+      console.warn('[KFZ-148] Stripe Webhook UNVERIFIZIERT verarbeitet (nur non-prod).')
       event = JSON.parse(body)
+    } else {
+      console.error('[KFZ-148] Stripe Webhook: Secret oder Signatur fehlt in Prod — abgelehnt (fail-closed).')
+      return NextResponse.json({ error: 'Signatur erforderlich' }, { status: 400 })
     }
   } catch (err) {
-    console.error('[KFZ-148] Stripe Webhook Signatur-Fehler:', err)
+    console.error('[KFZ-148] Stripe Webhook Signatur-/Body-Fehler:', err)
     return NextResponse.json({ error: 'Signatur ungültig' }, { status: 400 })
   }
 
