@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { FINANCE } from '@/lib/finance/constants'
-import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
+import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
+import { EMBED_DESCRIPTOR } from '@/lib/abrechnung/descriptors/embed'
+import { eurToCent } from '@/lib/billing/calculate-ust'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,10 +22,8 @@ export const dynamic = 'force-dynamic'
  * empfaenger_typ='sv', kfz141-Schema) + embed_abrechnung_positionen + Email, friert
  * abrechnung_sv_id ein und markiert die Anfrage als abgerechnet.
  *
- * Kein Reuse von abrechnungen-generator.ts: dort sind Marketing/Kanzlei-Strecken
- * mit eigenem Nummernkreis (CL-YYYY-MM-TYP), status='entwurf' und ohne
- * Positionen-Audit-Table — hier eigener Nummernkreis (CMNDO-EMB), status='versendet'
- * + embed_abrechnung_positionen. Andere Domaene, keine geteilte Kopf-Logik.
+ * Refactored AAR-kanonische-abrechnung: Compute+Nummer+Header-Insert+Positionen-Insert+Mark
+ * delegiert an createAbrechnung() + EMBED_DESCRIPTOR. Eligibility-Read + Send unveraendert.
  *
  * VPS-Crontab (KEIN vercel.json): 0 18 28-31 * * mit Self-Check ob letzter Tag.
  *
@@ -131,12 +130,14 @@ export async function GET(request: Request) {
     const empfaengerName =
       [profile.vorname, profile.nachname].filter(Boolean).join(' ') || 'Sachverstaendiger'
 
-    // Positionen + Summen. Leistungsdatum = Terminzeit (Vermittlung erbracht).
+    // Positionen fuer createAbrechnung: betrag_netto_cent + alle Felder fuer buildPositionRow.
+    const anfrageIds = rows.map((r) => r.anfrage_id)
     const positionen = rows.map((r, i) => {
       const einzelNetto = Number(r.betrag_netto ?? 70)
       const kundeName = [r.vorname, r.nachname].filter(Boolean).join(' ') || 'Anfrage'
       const leistungsdatum = r.termin_end_zeit ?? r.erstellt_am
       return {
+        betrag_netto_cent: eurToCent(einzelNetto),
         position_nr: i + 1,
         anfrage_id: r.anfrage_id,
         termin_id: r.termin_id ?? null,
@@ -145,103 +146,41 @@ export async function GET(request: Request) {
         datum: leistungsdatum ? new Date(leistungsdatum).toISOString().slice(0, 10) : null,
         kunde_name: kundeName,
         schadentyp: r.schadentyp ?? null,
-        einzelpreis_netto: einzelNetto,
       }
     })
-    const summeNetto = positionen.reduce((s, p) => s + p.einzelpreis_netto, 0)
-    const ustBetrag = Math.round(((summeNetto * FINANCE.MWST_PROZENT) / 100) * 100) / 100
-    const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
-    if (summeNetto <= 0) continue
 
-    // Doppel-Rechnungs-Schutz: existiert fuer diesen SV in diesem Monat schon eine
-    // (nicht stornierte) Embed-Rechnung, hat ein vorheriger Lauf sie angelegt, aber die
-    // gfa-Markierung ist (crash/transient) fehlgeschlagen -> orphan-Anfragen an die
-    // bestehende Rechnung haengen statt eine 2. zu erzeugen.
-    const anfrageIds = rows.map((r) => r.anfrage_id)
-    const { data: bestehend } = await db
-      .from('abrechnungen')
-      .select('id')
-      .eq('empfaenger_typ', 'sv')
-      .eq('empfaenger_id', sv.id)
-      .like('abrechnungs_nr', `CMNDO-EMB-${jahr}-${monatPad}-%`)
-      .neq('status', 'storniert')
-      .limit(1)
-      .maybeSingle()
-    if (bestehend) {
-      await db
-        .from('gutachter_finder_anfragen')
-        .update({ abrechnung_id: bestehend.id, abgerechnet_am: new Date().toISOString(), abrechnung_sv_id: svId })
-        .in('id', anfrageIds)
+    const summeNettoCent = positionen.reduce((s, p) => s + p.betrag_netto_cent, 0)
+    if (summeNettoCent <= 0) continue
+
+    const kontext: Record<string, unknown> = {
+      sv_id: svId,
+      sv_db_id: sv.id,
+      empfaenger_email: profile.email,
+      empfaenger_name: empfaengerName,
+      jahr,
+      monatPad,
+      abrechnungs_zeitraum_start: monthStartDate,
+      abrechnungs_zeitraum_ende: monthEndDate,
+      faellig_am: faelligAmIso,
+      versand_datum: now.toISOString(),
+      anfrage_ids: anfrageIds,
+    }
+
+    // Compute + Nummer-Allokation + Header-Insert + Positionen-Insert + Markierung
+    // delegiert an createAbrechnung() + EMBED_DESCRIPTOR.
+    const result = await createAbrechnung(db, EMBED_DESCRIPTOR, { positionen, kontext })
+
+    if (!result.ok) {
+      console.error(`[AAR-939 embed-billing] SV ${svId}: createAbrechnung fehlgeschlagen:`, result.error)
+      continue
+    }
+    if (!result.erstellt) {
+      // Doppel-Rechnungs-Dedup: pruefeBestehend hat Nachverknuepfung erledigt.
       console.warn(`[AAR-939 embed-billing] SV ${svId}: bestehende Embed-Rechnung gefunden — ${anfrageIds.length} Anfrage(n) nachverknuepft (keine 2. Rechnung).`)
       continue
     }
 
-    // Rechnungsnummer CMNDO-EMB-YYYY-MM-NNN — atomar + lueckenlos via rechnungs_nr_counter
-    // (AAR-948, eigene Serie `CMNDO-EMB-{MM}`) statt race-anfaelligem COUNT (zwei
-    // Laeufe/Retry konnten dieselbe Nr. vergeben). nextRechnungsNrRaw wirft -> try/catch.
-    let lfdNr: number
-    try {
-      lfdNr = await nextRechnungsNrRaw(`CMNDO-EMB-${monatPad}`, jahr)
-    } catch (err) {
-      console.error(`[AAR-939 embed-billing] Rechnungs-Nr fuer SV ${svId} fehlgeschlagen, uebersprungen:`, err instanceof Error ? err.message : err)
-      continue
-    }
-    const abrechnungsNr = `CMNDO-EMB-${jahr}-${monatPad}-${String(lfdNr).padStart(3, '0')}`
-
-    // Abrechnungs-Kopf (kfz141-Schema, empfaenger_typ='sv').
-    const { data: abr, error: abrErr } = await db
-      .from('abrechnungen')
-      .insert({
-        empfaenger_typ: 'sv',
-        empfaenger_id: sv.id,
-        empfaenger_email: profile.email,
-        empfaenger_name: empfaengerName,
-        abrechnungs_nr: abrechnungsNr,
-        abrechnungs_zeitraum_start: monthStartDate,
-        abrechnungs_zeitraum_ende: monthEndDate,
-        positionen,
-        summe_netto: summeNetto,
-        ust_satz: 19.0,
-        ust_betrag: ustBetrag,
-        summe_brutto: summeBrutto,
-        faellig_am: faelligAmIso,
-        status: 'versendet',
-        versand_datum: new Date().toISOString(),
-        notiz: `Monika-Embed Vermittlungsentgelt: ${positionen.length} faellige Termine (Variante B, auto-faellig nach Terminzeit).`,
-      })
-      .select('id')
-      .single()
-
-    if (abrErr || !abr) {
-      console.error(`[AAR-939 embed-billing] Abrechnung ${svId}:`, abrErr?.message)
-      continue
-    }
-
-    // Positionen-Audit-Trail. UNIQUE(anfrage_id) verhindert Doppel-Abrechnung.
-    for (const p of positionen) {
-      const { error: posErr } = await db.from('embed_abrechnung_positionen').insert({
-        abrechnung_id: abr.id,
-        embed_site_id: p.embed_site_id,
-        anfrage_id: p.anfrage_id,
-        termin_id: p.termin_id,
-        einzelpreis_eur: p.einzelpreis_netto,
-        leistung_text: `Monika-Vermittlung: ${p.kunde_name}${p.schadentyp ? ` (${p.schadentyp})` : ''}`,
-      })
-      if (posErr) console.error(`[AAR-939 embed-billing] Position ${p.anfrage_id}:`, posErr.message)
-    }
-
-    // Anfragen als abgerechnet markieren + abrechnung_sv_id einfrieren (Freeze zum
-    // Pay-Zeitpunkt, Contract #2). anfrageIds oben schon berechnet. Fehler pruefen:
-    // schlaegt die Markierung fehl, faengt der Dedup-Guard es beim naechsten Lauf ab.
-    const { error: markErr } = await db
-      .from('gutachter_finder_anfragen')
-      .update({
-        abrechnung_id: abr.id,
-        abgerechnet_am: new Date().toISOString(),
-        abrechnung_sv_id: svId,
-      })
-      .in('id', anfrageIds)
-    if (markErr) console.error(`[AAR-939 embed-billing] SV ${svId}: gfa-Markierung fehlgeschlagen (Rechnung ${abr.id}):`, markErr.message)
+    const { id: abrId, nummer: abrechnungsNr, betraege } = result
 
     // Email an SV (non-fatal — bricht den Status-Write nicht).
     try {
@@ -254,7 +193,7 @@ export async function GET(request: Request) {
         vorname: profile.vorname ?? null,
         abrechnungsNr,
         monat: `${monatPad}/${jahr}`,
-        betragBrutto: summeBrutto,
+        betragBrutto: betraege.bruttoCent / 100,
         faelligAm: faelligAm.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }),
       }
       const html = await render(SvMonatsabrechnungVersandEmail(props))
@@ -268,6 +207,7 @@ export async function GET(request: Request) {
       console.error('[AAR-939 embed-billing] Abrechnungs-Email:', err)
     }
 
+    console.log(`[AAR-939 embed-billing] SV ${svId}: Rechnung ${abrechnungsNr} (${abrId}) erstellt, markiertOk=${result.markiertOk}`)
     created++
   }
 
