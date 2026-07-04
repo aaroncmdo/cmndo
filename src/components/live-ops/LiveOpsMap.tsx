@@ -9,10 +9,11 @@ import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSour
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
-import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC } from './geo'
+import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC } from './geo'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
 import TerminPopup from './TerminPopup'
+import DeadPinDrawer from './DeadPinDrawer'
 import type { SvLiveOps, TerminPin } from '@/lib/live-ops'
 
 // ------------------------------------------------------------------ Props
@@ -38,6 +39,20 @@ const LAYER_ROUTEN = 'lo-routen-line'
 
 const SRC_TAGESROUTEN = 'lo-tagesrouten'
 const LAYER_TAGESROUTEN = 'lo-tagesrouten-line'
+
+const SRC_DEADPINS = 'lo-deadpins'
+const LAYER_DEADPINS = 'lo-deadpins-circle'
+
+// Dead-Pin-Status-Farben via match-Expression (raw hex ok — Token-Audit-Skip-Header oben)
+const DEADPIN_STATUS_COLOR_EXPR = [
+  'match',
+  ['get', 'status'],
+  'offen', '#94a3b8',
+  'beansprucht', '#f59e0b',
+  'konvertiert', '#22c55e',
+  'abgelehnt', '#ef4444',
+  /* default */ '#94a3b8',
+] as unknown as mapboxgl.Expression
 
 // Termin-Status-Farben via match-Expression (raw hex ok — Token-Audit-Skip-Header oben)
 const TERMIN_STATUS_COLOR_EXPR = [
@@ -74,6 +89,11 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
 
   // Hover-Sync (fuer Sidebar-Task 6)
   const [hoveredSvId, setHoveredSvId] = useState<string | null>(null)
+
+  // Dead-Pin-Drawer-State
+  const [openDeadPinId, setOpenDeadPinId] = useState<string | null>(null)
+  const [deadPinAnlegeModus, setDeadPinAnlegeModus] = useState(false)
+  const [neuerDeadPinCoord, setNeuerDeadPinCoord] = useState<{ lng: number; lat: number } | null>(null)
 
   // Verhindert, dass der Fehlerfall bei HMR-Reload falsch ausloest.
   const mountedRef = useRef(false)
@@ -387,6 +407,46 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
         },
       })
 
+      // ─── Dead-Pin-Layer (nur fuer admin + dispatch) ─────────────────────
+      if (role !== 'kundenbetreuer') {
+        map.addSource(SRC_DEADPINS, {
+          type: 'geojson',
+          data: deadPinsFC(data.deadPins),
+        })
+
+        map.addLayer({
+          id: LAYER_DEADPINS,
+          type: 'circle',
+          source: SRC_DEADPINS,
+          paint: {
+            'circle-color': DEADPIN_STATUS_COLOR_EXPR,
+            'circle-radius': 6,
+            'circle-stroke-color': '#ffffff',
+            'circle-stroke-width': 1.5,
+            'circle-opacity': 0.75,
+          },
+        })
+
+        // Klick auf Dead-Pin → Drawer oeffnen
+        map.on(
+          'click',
+          LAYER_DEADPINS,
+          (e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] }) => {
+            const feature = e.features?.[0]
+            if (!feature) return
+            const pinId = feature.properties?.__id as string
+            setOpenDeadPinId(pinId)
+          },
+        )
+
+        map.on('mouseenter', LAYER_DEADPINS, () => {
+          map.getCanvas().style.cursor = 'pointer'
+        })
+        map.on('mouseleave', LAYER_DEADPINS, () => {
+          map.getCanvas().style.cursor = ''
+        })
+      }
+
       setReady(true)
     })
 
@@ -455,6 +515,47 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
     }
   }, [data.routen, data.tagesrouten, ready])
 
+  // ------ Rebuild-Effect: Dead-Pins bei Daten-Aenderung updaten
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !ready) return
+
+    if (map.getSource(SRC_DEADPINS)) {
+      (map.getSource(SRC_DEADPINS) as GeoJSONSource).setData(deadPinsFC(data.deadPins))
+    }
+  }, [data.deadPins, ready])
+
+  // ------ Anlege-Modus: Cursor + Klick-Handler fuer Koordinaten-Setzung
+
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !ready) return
+
+    if (!deadPinAnlegeModus) {
+      map.getCanvas().style.cursor = ''
+      return
+    }
+
+    map.getCanvas().style.cursor = 'crosshair'
+
+    function handleMapClick(e: mapboxgl.MapMouseEvent) {
+      const { lng, lat } = e.lngLat
+      setNeuerDeadPinCoord({ lng, lat })
+      setDeadPinAnlegeModus(false)
+      setOpenDeadPinId(null)
+      // Cursor zuruecksetzen
+      if (mapRef.current) mapRef.current.getCanvas().style.cursor = ''
+    }
+
+    map.once('click', handleMapClick)
+
+    return () => {
+      map.off('click', handleMapClick)
+      map.getCanvas().style.cursor = ''
+    }
+  }, [deadPinAnlegeModus, ready])
+
   // ------ Hover-Sync: Car-Marker-Zoom bei gesetztem hoveredSvId
 
   useEffect(() => {
@@ -516,6 +617,24 @@ export default function LiveOpsMap({ role, data }: LiveOpsMapProps) {
 
       {/* hoveredSvId wird in Task 6 von SidebarList konsumiert */}
       {/* data + role werden in Task 4+ fuer weitere Layer genutzt */}
+
+      {/* Dead-Pin-Drawer (nur fuer admin + dispatch) */}
+      {role !== 'kundenbetreuer' && (
+        <DeadPinDrawer
+          pins={data.deadPins}
+          openId={openDeadPinId}
+          onClose={() => {
+            setOpenDeadPinId(null)
+            setNeuerDeadPinCoord(null)
+          }}
+          role={role}
+          neuerCoord={neuerDeadPinCoord}
+          onAnlegeModus={(on) => {
+            setDeadPinAnlegeModus(on)
+            if (!on) setNeuerDeadPinCoord(null)
+          }}
+        />
+      )}
     </div>
   )
 }
