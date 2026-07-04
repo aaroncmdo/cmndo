@@ -1,6 +1,6 @@
 {
   "generatedAt": "2026-07-04T08:16:41.641Z",
-  "count": 128,
+  "count": 127,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -13,7 +13,7 @@
     "src/app/admin/nachrichten/NachrichtenInboxClient.tsx",
     "src/app/admin/partner/waitlist/WaitlistTable.tsx",
     "src/app/admin/sachverstaendige/[id]/VerifizierungsTab.tsx",
-    "src/app/admin/sachverstaendige/_karte/KarteHubClient.tsx",
+
     "src/app/admin/sachverstaendige/anlegen/AkademieAnlegenWizard.tsx",
     "src/app/admin/sachverstaendige/anlegen/BueroAnlegenWizard.tsx",
     "src/app/admin/sachverstaendige/anlegen/SoloAnlegenWizard.tsx",
