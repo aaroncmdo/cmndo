@@ -23,6 +23,48 @@
 
 ---
 
+## ⚠️ Schema-Verifikation (2026-07-05) — VERBINDLICH (überschreibt anderslautenden Task-Code)
+
+Vor Ausführung wurde das Schema gegen Prod (`paizkjajbuxxksdoycev`) verifiziert. **Diese Korrekturen gelten und schlagen den ursprünglichen Task-Code:**
+
+**(1) KEINE `v_claim_*`-Views im Orchestrator.** `v_claim_full`/`v_claim_phase` sind auth-gated (`auth.uid()`) und liefern für `service_role` (Cron ohne User) **0 Zeilen** (verifiziert: `claims`=20, `v_claim_full`=0, `v_claim_phase`=0). Der Orchestrator liest **ausschließlich Basis-Tabellen**.
+
+**(2) Exakte Quellen (alle service_role-lesbar):**
+- `claims` (by `id`): `id, status, operative_status, work_state, vehicle_id, updated_at, status_changed_at, created_at, ist_aktiv, abgeschlossen_am, prioritaet, fahrzeugschaden_beschreibung, sachschaden_beschreibung, hergang_kunde_text, kundenbetreuer_id, sv_id`
+- `vehicles` (by `claims.vehicle_id`): `hersteller` (best-effort Fahrzeug-Name)
+- `timeline` (Aktivität + Kurzverlauf): `.select('titel, created_at').or('claim_id.eq.<id>,fall_id.eq.<id>').order('created_at',{ascending:false}).limit(8)` — Timestamp ist **`created_at`**
+- `tasks` (offene Tasks): `.select('titel, empfaenger_rolle, faellig_am').eq('fall_id', <claimId>).eq('status','offen')` — `fall_id` == `claims.id` (verifiziert)
+- `cron_jobs_audit` (Health): Timestamp **`started_at`**, plus `status`, `error_message`, `job_name`
+
+**(3) `isStagnant`-Signatur (Task 2) — phase-frei; Test entsprechend anpassen:**
+```typescript
+export const STAGNATION = { tageSchwelle: 5 } as const
+export function isStagnant(
+  row: { istAktiv: boolean; abgeschlossenAm: string | null; letzteAktivitaetAm: string | null },
+  now: Date,
+): boolean {
+  if (!row.istAktiv || row.abgeschlossenAm) return false
+  if (!row.letzteAktivitaetAm) return true
+  return (now.getTime() - new Date(row.letzteAktivitaetAm).getTime()) / 86400000 >= STAGNATION.tageSchwelle
+}
+```
+(Terminale-Phasen-Liste entfällt — Terminierung kommt aus `ist_aktiv`/`abgeschlossen_am`.)
+
+**(4) Cron-Kandidaten-Query (Task 7) — Basis-Tabelle:**
+```sql
+select c.id, c.updated_at,
+  (select max(t.created_at) from timeline t where t.claim_id = c.id or t.fall_id = c.id) as last_activity
+from claims c
+where c.ist_aktiv = true and c.abgeschlossen_am is null
+```
+Pro Zeile `isStagnant({ istAktiv:true, abgeschlossenAm:null, letzteAktivitaetAm: last_activity ?? updated_at }, new Date())` → nur für stagnierende `buildClaimContext` + `reviewClaim`. Cron loggt am Ende `cron_jobs_audit` mit `job_name='claim-orchestrator'` (für Task 9).
+
+**(5) `ClaimContext.phase`** bleibt im Typ, befüllt aus `claims.operative_status ?? claims.status` (kein gated View). `summarizeClaimForPrompt` unverändert.
+
+Betroffen: Tasks 2, 3, 6, 7, 9 (gegen diese Quellen schreiben). Tasks 1, 4, 5, 8 unverändert (FK `claims(id)` gültig; `tasks.fall_id==claims.id` für Task 8 bestätigt).
+
+---
+
 ## File Structure
 
 **Neu:**
