@@ -64,6 +64,7 @@ type DrawerData = {
   aggregat: PartnerBillingAggregat
   istKleinunternehmer: boolean | null
   steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
+  gutschriftLedgerKeys: string[]
 }
 
 export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Werkstatt[] }) {
@@ -87,7 +88,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     startDrawerTransition(async () => {
       const r = await ladePartnerBilling('werkstatt', w.id)
       if (r.ok) {
-        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer, steuerdaten: r.steuerdaten })
+        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer, steuerdaten: r.steuerdaten, gutschriftLedgerKeys: r.gutschriftLedgerKeys })
       } else {
         toast.error(r.error)
         setOpenPartnerId(null)
@@ -772,6 +773,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <PartnerBillingPanel
                   rows={drawerData.rows}
                   aggregat={drawerData.aggregat}
+                  gutschriftLedgerKeys={drawerData.gutschriftLedgerKeys}
                   ustToggle={{
                     partnerTyp: 'werkstatt',
                     partnerId: openPartnerId,

@@ -18,6 +18,12 @@ export interface PartnerBillingPanelProps {
     current: boolean | null
   }
   /**
+   * Liste von "ledger_tabelle:ledger_id"-Keys fuer die eine Gutschrift-PDF existiert.
+   * Wird von ladePartnerBilling befuellt. Erledigt-Auszahlungszeilen mit passendem Key
+   * zeigen einen "Gutschrift ↓"-Download-Button statt "—".
+   */
+  gutschriftLedgerKeys?: string[]
+  /**
    * Wenn gesetzt, erscheint eine "Steuerdaten des Partners"-Card nach dem USt-Toggle.
    * makler ist bereits vollstaendig → readOnly=true zeigt Felder nur an.
    */

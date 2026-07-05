@@ -7,7 +7,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react'
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
-import { setzePartnerUstStatus, setzePartnerSteuerdaten } from '@/lib/finance/partner-billing-actions'
+import { setzePartnerUstStatus, setzePartnerSteuerdaten, getPartnerGutschriftDownloadUrl } from '@/lib/finance/partner-billing-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { Button } from '@/components/primitives/Button'
@@ -48,6 +48,8 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [editing, setEditing] = useState<Record<string, string>>({})
+  const [gutschriftPending, startGutschriftTransition] = useTransition()
+  const [gutschriftFehler, setGutschriftFehler] = useState<Record<string, string>>({})
 
   // USt-Toggle fuer Maik
   const [maikUstPending, startMaikUstTransition] = useTransition()
@@ -116,6 +118,18 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
       const r = await markMonthAsPaid(monat)
       if (!r.success && r.error) window.alert(`Fehler: ${r.error}`)
       else router.refresh()
+    })
+  }
+
+  function handleGutschriftDownload(provisionId: string) {
+    setGutschriftFehler((prev) => { const next = { ...prev }; delete next[provisionId]; return next })
+    startGutschriftTransition(async () => {
+      const res = await getPartnerGutschriftDownloadUrl('marketing_provisionen', provisionId)
+      if (res.ok) {
+        window.open(res.url, '_blank')
+      } else {
+        setGutschriftFehler((prev) => ({ ...prev, [provisionId]: res.error }))
+      }
     })
   }
 
@@ -301,7 +315,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
                     {p.reversed_grund && <p className="text-[10px] text-claimondo-ondo/70 mt-0.5">{p.reversed_grund}</p>}
                   </Td>
                   <Td>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap items-center">
                       {p.status === 'pending' && p.cpl_actual != null && (
                         <button disabled={pending} onClick={() => handleConfirm(p.id)}
                           className="text-xs px-2 py-1 rounded bg-success-soft text-success-strong hover:bg-success/15 disabled:opacity-50">
@@ -313,6 +327,21 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
                           className="text-xs px-2 py-1 rounded bg-danger-soft text-danger-strong hover:bg-danger/15 disabled:opacity-50">
                           Stornieren
                         </button>
+                      )}
+                      {p.status === 'paid' && (
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          loading={gutschriftPending}
+                          onClick={() => handleGutschriftDownload(p.id)}
+                        >
+                          Gutschrift ↓
+                        </Button>
+                      )}
+                      {gutschriftFehler[p.id] && (
+                        <span className="ml-1 rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">
+                          {gutschriftFehler[p.id]}
+                        </span>
                       )}
                     </div>
                   </Td>

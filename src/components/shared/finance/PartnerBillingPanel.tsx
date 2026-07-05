@@ -22,6 +22,7 @@ import {
   storniere,
   setzePartnerUstStatus,
   setzePartnerSteuerdaten,
+  getPartnerGutschriftDownloadUrl,
 } from '@/lib/finance/partner-billing-actions'
 import type { PartnerBillingRow } from '@/lib/finance/partner-billing'
 import type { PartnerBillingPanelProps } from './PartnerBillingPanel.types'
@@ -78,7 +79,13 @@ function AktionMeldung({ ok, error }: { ok: boolean; error?: string }) {
 }
 
 /** Aktions-Buttons einer einzelnen Zeile. */
-function ZeilenAktionen({ row }: { row: PartnerBillingRow }) {
+function ZeilenAktionen({
+  row,
+  gutschriftLedgerKeys,
+}: {
+  row: PartnerBillingRow
+  gutschriftLedgerKeys: string[]
+}) {
   const [isPending, startTransition] = useTransition()
   const [meldung, setMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
 
@@ -92,10 +99,39 @@ function ZeilenAktionen({ row }: { row: PartnerBillingRow }) {
 
   const { richtung, status_norm, quelle_tabelle, quelle_id, ust_status_bekannt } = row
 
+  const hatGutschrift =
+    richtung === 'auszahlung' &&
+    status_norm === 'erledigt' &&
+    gutschriftLedgerKeys.includes(`${quelle_tabelle}:${quelle_id}`)
+
   const zeigeKeinAktion =
     status_norm === 'erledigt' || status_norm === 'storniert'
 
   if (zeigeKeinAktion) {
+    if (hatGutschrift) {
+      return (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="ghost"
+            loading={isPending}
+            onClick={() =>
+              fuehreAus(async () => {
+                const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id)
+                if (res.ok) {
+                  window.open(res.url, '_blank')
+                  return { ok: true }
+                }
+                return { ok: false, error: res.error }
+              })
+            }
+          >
+            Gutschrift ↓
+          </Button>
+          {meldung && !meldung.ok && <AktionMeldung {...meldung} />}
+        </div>
+      )
+    }
     return <span className="text-xs text-claimondo-ondo/50">—</span>
   }
 
@@ -213,6 +249,7 @@ export function PartnerBillingPanel({
   showPartnerColumn = false,
   ustToggle,
   steuerdaten,
+  gutschriftLedgerKeys = [],
 }: PartnerBillingPanelProps) {
   const [ustPending, startUstTransition] = useTransition()
   const [ustMeldung, setUstMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
@@ -374,7 +411,7 @@ export function PartnerBillingPanel({
                       </StatusBadge>
                     </Td>
                     <Td className="px-4">
-                      <ZeilenAktionen row={row} />
+                      <ZeilenAktionen row={row} gutschriftLedgerKeys={gutschriftLedgerKeys} />
                     </Td>
                   </Tr>
                 )
