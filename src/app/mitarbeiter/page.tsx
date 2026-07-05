@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
 import { StatBar } from '@/components/shared/StatBar'
 import { Panel } from '@/components/shared/Panel'
-import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
+import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -250,9 +250,7 @@ export default async function MitarbeiterDashboard() {
                     <p className="truncate font-mono text-body-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
                     <p className="truncate text-body-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-claimondo-bg px-2.5 py-0.5 text-body-xs font-medium text-claimondo-ondo">
-                    {SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}
-                  </span>
+                  <FallPhaseBadge subPhase={f.sub_phase} size="sm" className="shrink-0" />
                 </Link>
               ))
             )}
