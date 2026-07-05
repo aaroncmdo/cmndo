@@ -86,4 +86,5 @@ export type LeadPin = {
   ort: string | null
   kanal: string | null
   erstelltAm: string
+  hasActiveTermin: boolean
 }

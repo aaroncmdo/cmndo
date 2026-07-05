@@ -279,6 +279,7 @@ const makeLead = (overrides: Partial<LeadPin> = {}): LeadPin => ({
   ort: 'München',
   kanal: 'self_service',
   erstelltAm: '2026-07-04T08:00:00Z',
+  hasActiveTermin: false,
   ...overrides,
 })
 
