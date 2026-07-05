@@ -4,6 +4,7 @@ import { auszahlenProvision, freigebenProvision, storniereProvision } from './pr
 // ─── Mocks for downstream modules ────────────────────────────────────────────
 vi.mock('./partner-gutschrift', () => ({
   erstellePartnerGutschrift: vi.fn(),
+  versendePartnerGutschrift: vi.fn(async () => ({ ok: true })),
 }))
 vi.mock('./partner-gutschrift-pdf', () => ({
   generateAndUploadPartnerGutschriftPdf: vi.fn(),

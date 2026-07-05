@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeProvisionUst } from './partner-billing-ust'
-import { erstellePartnerGutschrift } from './partner-gutschrift'
+import { erstellePartnerGutschrift, versendePartnerGutschrift } from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
 
 export const PROVISION_TABELLEN = [
@@ -265,6 +265,9 @@ export async function auszahlenProvision(
   }
   const { error: statusErr } = await db.from(tabelle).update(statusPatch).eq('id', id)
   if (statusErr) return { ok: false, error: statusErr.message }
+
+  // Non-fatal: Gutschrift-Versand darf den erfolgreichen Payout nicht brechen.
+  try { await versendePartnerGutschrift(db, gutschriftRow.id) } catch { /* non-fatal */ }
 
   return { ok: true }
 }

@@ -8,6 +8,120 @@ const PARTNER_TABLE: Record<string, string> = {
   marketing: 'marketing_partner',
 }
 
+/**
+ * Laedt die Gutschrift-Zeile, downloadet das PDF aus Storage, versendet es als
+ * Email-Anhang an den Partner und markiert die Zeile als versendet.
+ *
+ * Non-fatal: gibt immer ein Result-Object zurueck, wirft nie.
+ * sendEmail kann werfen — der try/catch haelt das fest.
+ */
+export async function versendePartnerGutschrift(
+  db: SupabaseClient<any>,
+  gutschriftId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  try {
+    // Step 1 — Zeile laden
+    const { data: row, error: rowErr } = await db
+      .from('partner_gutschriften')
+      .select('*')
+      .eq('id', gutschriftId)
+      .single()
+
+    if (rowErr || !row) {
+      return { ok: false, error: 'Gutschrift nicht gefunden' }
+    }
+
+    // Step 2 — Idempotenz: bereits versendet → OK ohne erneuten Versand
+    if (row.status === 'versendet') {
+      return { ok: true }
+    }
+
+    // Step 3 — PDF muss vorhanden sein
+    if (!row.pdf_storage_path) {
+      return { ok: false, error: 'Gutschrift-PDF fehlt' }
+    }
+
+    // Step 4 — Empfaenger-Email aus Partner-Tabelle laden
+    const TABLE: Record<string, string> = {
+      makler: 'makler',
+      werkstatt: 'werkstaetten',
+      marketing: 'marketing_partner',
+    }
+    const partnerTable = TABLE[row.partner_typ as string]
+    const { data: partnerData, error: partnerErr } = await db
+      .from(partnerTable)
+      .select('email')
+      .eq('id', row.partner_id)
+      .single()
+
+    if (partnerErr || !partnerData || !partnerData.email) {
+      return { ok: false, error: 'Keine Empfaenger-Email' }
+    }
+    const email: string = partnerData.email
+
+    // Step 5 — PDF aus Storage herunterladen
+    const { data: file } = await db.storage
+      .from('onboarding-rechnungen')
+      .download(row.pdf_storage_path)
+
+    if (!file) {
+      return { ok: false, error: 'PDF-Download fehlgeschlagen' }
+    }
+    const buf = Buffer.from(await file.arrayBuffer())
+
+    // Step 6 — Template rendern und Email versenden (dynamic imports)
+    const { render } = await import('@react-email/render')
+    const { PartnerGutschriftEmail, subject } = await import(
+      '@/lib/email/google/templates/PartnerGutschrift'
+    )
+    const props = {
+      empfaengerName: (row.empfaenger_snapshot as any)?.name ?? 'Partner',
+      gutschriftNr: row.gutschrift_nr as string,
+      betrag:
+        new Intl.NumberFormat('de-DE', {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        }).format(row.betrag_brutto as number) + ' €',
+      datum: new Date(row.erstellt_am as string).toLocaleDateString('de-DE', {
+        timeZone: 'Europe/Berlin',
+      }),
+    }
+    const html = await render(PartnerGutschriftEmail(props))
+    const { sendEmail } = await import('@/lib/email/google/client')
+    const empfTyp = ({ makler: 'makler', werkstatt: 'werkstatt', marketing: 'admin' } as const)[
+      row.partner_typ as 'makler' | 'werkstatt' | 'marketing'
+    ]
+    try {
+      await sendEmail({
+        to: email,
+        subject: subject(props),
+        html,
+        empfaengerTyp: empfTyp,
+        template: 'partner_gutschrift',
+        attachments: [
+          {
+            filename: `Gutschrift-${row.gutschrift_nr}.pdf`,
+            content: buf,
+            contentType: 'application/pdf',
+          },
+        ],
+      })
+    } catch (err) {
+      return { ok: false, error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen' }
+    }
+
+    // Step 7 — Als versendet markieren
+    await db
+      .from('partner_gutschriften')
+      .update({ status: 'versendet', versendet_am: new Date().toISOString() })
+      .eq('id', gutschriftId)
+
+    return { ok: true }
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
+  }
+}
+
 export async function erstellePartnerGutschrift(
   db: SupabaseClient<any>,
   p: {

@@ -8,9 +8,13 @@ vi.mock('@/lib/billing/get-rechnungs-konfig', () => ({
   getAktuelleRechnungsKonfig: vi.fn(),
 }))
 
+// --- mocks for versendePartnerGutschrift ---
+vi.mock('@react-email/render', () => ({ render: vi.fn(async () => '<html>') }))
+vi.mock('@/lib/email/google/client', () => ({ sendEmail: vi.fn() }))
+
 import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 import { getAktuelleRechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
-import { erstellePartnerGutschrift } from './partner-gutschrift'
+import { erstellePartnerGutschrift, versendePartnerGutschrift } from './partner-gutschrift'
 
 const mockNextNr = vi.mocked(nextRechnungsNrRaw)
 const mockKonfig = vi.mocked(getAktuelleRechnungsKonfig)
@@ -409,5 +413,160 @@ describe('erstellePartnerGutschrift', () => {
     expect(aussteller.zahlungsempfaenger_name).toBe(konfig.zahlungsempfaenger_name)
     expect(aussteller.zahlungsempfaenger_bic).toBe(konfig.zahlungsempfaenger_bic)
     expect(aussteller.zahlungsempfaenger_bank).toBe(konfig.zahlungsempfaenger_bank)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// versendePartnerGutschrift
+// ─────────────────────────────────────────────────────────────────────────────
+
+const GUTSCHRIFT_NR = 'CMNDO-GS-2026-00042'
+
+/** Builds a fake db that handles all paths needed by versendePartnerGutschrift. */
+function makeVersendDb(opts: {
+  gutschriftRow: Record<string, unknown> | null
+  partnerEmail?: string | null
+  downloadData?: { arrayBuffer: () => Promise<ArrayBuffer> } | null
+  statusUpdateError?: { message: string } | null
+}) {
+  const statusUpdates: Record<string, unknown>[] = []
+
+  const db = {
+    _statusUpdates: statusUpdates,
+    from: (table: string) => {
+      if (table === 'partner_gutschriften') {
+        return {
+          select: (_cols: string) => ({
+            eq: (_col: string, _val: string) => ({
+              single: () =>
+                Promise.resolve({ data: opts.gutschriftRow, error: opts.gutschriftRow ? null : { message: 'not found' } }),
+            }),
+          }),
+          update: (patch: Record<string, unknown>) => {
+            statusUpdates.push(patch)
+            return {
+              eq: () => Promise.resolve({ error: opts.statusUpdateError ?? null }),
+            }
+          },
+        }
+      }
+      // Partner tables (makler / werkstaetten / marketing_partner)
+      return {
+        select: (_cols: string) => ({
+          eq: (_col: string, _val: string) => ({
+            single: () =>
+              Promise.resolve({
+                data: opts.partnerEmail !== undefined ? { email: opts.partnerEmail } : null,
+                error: opts.partnerEmail !== undefined ? null : { message: 'not found' },
+              }),
+          }),
+        }),
+      }
+    },
+    storage: {
+      from: (_bucket: string) => ({
+        download: (_path: string) =>
+          Promise.resolve({
+            data: opts.downloadData !== undefined
+              ? opts.downloadData
+              : { arrayBuffer: async () => new ArrayBuffer(8) },
+            error: null,
+          }),
+      }),
+    },
+  }
+  return db as any
+}
+
+const CANNED_GUTSCHRIFT = {
+  id: 'gs-uuid-1',
+  status: 'erstellt',
+  pdf_storage_path: 'partner-gutschriften/2026/CMNDO-GS-2026-00042.pdf',
+  gutschrift_nr: GUTSCHRIFT_NR,
+  betrag_brutto: 178.5,
+  erstellt_am: '2026-07-05T10:00:00.000Z',
+  partner_typ: 'makler',
+  partner_id: 'makler-1',
+  empfaenger_snapshot: { name: 'Test Makler GmbH' },
+}
+
+describe('versendePartnerGutschrift', () => {
+  // We need to get the mocked sendEmail reference.
+  // Dynamic import mocks: vi.mock('@/lib/email/google/client') is hoisted, so
+  // we can grab the mock by static import of the mocked module inside vitest.
+  let sendEmailMock: ReturnType<typeof vi.fn>
+
+  beforeEach(async () => {
+    vi.clearAllMocks()
+    const clientMod = await import('@/lib/email/google/client')
+    sendEmailMock = vi.mocked(clientMod.sendEmail)
+  })
+
+  it('happy: calls sendEmail with PDF attachment and marks status versendet', async () => {
+    const db = makeVersendDb({
+      gutschriftRow: CANNED_GUTSCHRIFT,
+      partnerEmail: 'makler@example.de',
+    })
+
+    const result = await versendePartnerGutschrift(db, 'gs-uuid-1')
+
+    expect(result).toEqual({ ok: true })
+    // sendEmail must have been called once
+    expect(sendEmailMock).toHaveBeenCalledTimes(1)
+    const callArgs = sendEmailMock.mock.calls[0][0] as Record<string, unknown>
+    // Attachment must be present with correct filename
+    const attachments = callArgs.attachments as Array<{ filename: string }>
+    expect(attachments).toHaveLength(1)
+    expect(attachments[0].filename).toBe(`Gutschrift-${GUTSCHRIFT_NR}.pdf`)
+    // Status update to versendet must have been issued
+    expect(db._statusUpdates).toHaveLength(1)
+    expect(db._statusUpdates[0]).toMatchObject({ status: 'versendet' })
+    expect((db._statusUpdates[0] as Record<string, unknown>).versendet_am).toBeDefined()
+  })
+
+  it('already sent: skips sendEmail and returns {ok:true} (idempotent)', async () => {
+    const db = makeVersendDb({
+      gutschriftRow: { ...CANNED_GUTSCHRIFT, status: 'versendet' },
+      partnerEmail: 'makler@example.de',
+    })
+
+    const result = await versendePartnerGutschrift(db, 'gs-uuid-1')
+
+    expect(result).toEqual({ ok: true })
+    expect(sendEmailMock).not.toHaveBeenCalled()
+    expect(db._statusUpdates).toHaveLength(0)
+  })
+
+  it('missing pdf: returns {ok:false, error: /PDF/} without calling sendEmail', async () => {
+    const db = makeVersendDb({
+      gutschriftRow: { ...CANNED_GUTSCHRIFT, pdf_storage_path: null },
+      partnerEmail: 'makler@example.de',
+    })
+
+    const result = await versendePartnerGutschrift(db, 'gs-uuid-1')
+
+    expect(result.ok).toBe(false)
+    if (result.ok) throw new Error('expected failure')
+    expect(result.error).toMatch(/PDF/i)
+    expect(sendEmailMock).not.toHaveBeenCalled()
+  })
+
+  it('sendEmail throws: returns {ok:false} without marking versendet, does NOT throw', async () => {
+    sendEmailMock.mockRejectedValueOnce(new Error('SMTP-Verbindungsfehler'))
+    const db = makeVersendDb({
+      gutschriftRow: CANNED_GUTSCHRIFT,
+      partnerEmail: 'makler@example.de',
+    })
+
+    // Must not throw — non-fatal
+    const result = await versendePartnerGutschrift(db, 'gs-uuid-1')
+
+    expect(result.ok).toBe(false)
+    if (result.ok) throw new Error('expected failure')
+    // No status→versendet update should have been issued
+    const versendetUpdates = db._statusUpdates.filter(
+      (p: Record<string, unknown>) => p.status === 'versendet',
+    )
+    expect(versendetUpdates).toHaveLength(0)
   })
 })
