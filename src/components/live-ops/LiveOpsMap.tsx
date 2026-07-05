@@ -9,12 +9,13 @@ import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSour
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
-import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC } from './geo'
+import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
 import TerminPopup from './TerminPopup'
 import LeadPopup from './LeadPopup'
 import DeadPinDrawer from './DeadPinDrawer'
+import AssignFromMapDrawer from './AssignFromMapDrawer'
 import StatBar from './StatBar'
 import LayerPanel from './LayerPanel'
 import SidebarList from './SidebarList'
@@ -53,6 +54,11 @@ const SRC_LEADS = 'lo-leads'
 const LAYER_LEADS = 'lo-leads-circle'
 const LAYER_LEADS_CLUSTER = 'lo-leads-cluster'
 const LAYER_LEADS_CLUSTER_COUNT = 'lo-leads-cluster-count'
+
+const SRC_CAND = 'lo-cand-halo'
+const LAYER_CAND = 'lo-cand-halo-circle'
+const SRC_ASSIGN_LINE = 'lo-assign-line'
+const LAYER_ASSIGN_LINE = 'lo-assign-line-line'
 
 // Lead-Status-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property)
 const LEAD_STATUS_COLOR_EXPR = [
@@ -139,6 +145,11 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
   const [openDeadPinId, setOpenDeadPinId] = useState<string | null>(null)
   const [deadPinAnlegeModus, setDeadPinAnlegeModus] = useState(false)
   const [neuerDeadPinCoord, setNeuerDeadPinCoord] = useState<{ lng: number; lat: number } | null>(null)
+
+  // Assign-from-Map-State
+  const [assignLeadId, setAssignLeadId] = useState<string | null>(null)
+  const [candidateSvIds, setCandidateSvIds] = useState<string[]>([])
+  const [previewSvId, setPreviewSvId] = useState<string | null>(null)
 
   // Verhindert, dass der Fehlerfall bei HMR-Reload falsch ausloest.
   const mountedRef = useRef(false)
@@ -305,12 +316,15 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       const root = createRoot(container)
       popupRootsRef.current.add(root)
 
-      root.render(<LeadPopup lead={lead} role={role} />)
-
       const popup = new mapboxgl.Popup({ offset: 12, closeButton: true })
         .setLngLat(coords)
         .setDOMContent(container)
         .addTo(map)
+
+      root.render(<LeadPopup lead={lead} role={role} onAssign={(lId) => {
+        setAssignLeadId(lId)
+        popup.remove()
+      }} />)
 
       popup.on('close', () => {
         root.unmount()
@@ -684,6 +698,47 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         map.on('mouseleave', LAYER_LEADS, () => {
           map.getCanvas().style.cursor = ''
         })
+
+        // ─── Kandidaten-Halo-Layer (Assign-from-Map) ───────────────────────
+        map.addSource(SRC_CAND, {
+          type: 'geojson',
+          data: candidateHaloFC([], []),
+        })
+
+        map.addLayer({
+          id: LAYER_CAND,
+          type: 'circle',
+          source: SRC_CAND,
+          paint: {
+            'circle-radius': 16,
+            'circle-color': 'rgba(0,0,0,0)',
+            'circle-stroke-color': '#4573A2',
+            'circle-stroke-width': 3,
+            'circle-opacity': 0.9,
+          },
+        })
+
+        // ─── Verbindungslinie (Assign-from-Map) ────────────────────────────
+        map.addSource(SRC_ASSIGN_LINE, {
+          type: 'geojson',
+          data: assignLineFC(null, null),
+        })
+
+        map.addLayer({
+          id: LAYER_ASSIGN_LINE,
+          type: 'line',
+          source: SRC_ASSIGN_LINE,
+          layout: {
+            'line-cap': 'round',
+            'line-join': 'round',
+          },
+          paint: {
+            'line-color': '#4573A2',
+            'line-width': 2,
+            'line-opacity': 0.8,
+            'line-dasharray': [2, 1],
+          },
+        })
       }
 
       setReady(true)
@@ -782,6 +837,27 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       (map.getSource(SRC_LEADS) as GeoJSONSource).setData(leadsFC(data.leads))
     }
   }, [data.leads, ready])
+
+  // ------ Rebuild-Effect: Kandidaten-Halos bei candidateSvIds-Aenderung updaten
+
+  useEffect(() => {
+    const map = mapRef.current
+    const src = map?.getSource(SRC_CAND) as GeoJSONSource | undefined
+    if (src) src.setData(candidateHaloFC(data.svs, candidateSvIds))
+  }, [candidateSvIds, data.svs])
+
+  // ------ Rebuild-Effect: Verbindungslinie bei Hover-SV/Assign-Lead-Aenderung updaten
+
+  useEffect(() => {
+    const map = mapRef.current
+    const src = map?.getSource(SRC_ASSIGN_LINE) as GeoJSONSource | undefined
+    if (!src) return
+    const sv = data.svs.find((s) => s.id === previewSvId)
+    const lead = leadsRef.current.find((l) => l.id === assignLeadId)
+    const from = sv?.standortLat != null && sv.standortLng != null ? [sv.standortLng, sv.standortLat] as [number, number] : null
+    const to = lead ? [lead.lng, lead.lat] as [number, number] : null
+    src.setData(assignLineFC(from, to))
+  }, [previewSvId, assignLeadId, data.svs])
 
   // ------ Realtime: Supabase-Kanal fuer sv_live_location-Aenderungen
 
@@ -933,6 +1009,18 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             setDeadPinAnlegeModus(on)
             if (!on) setNeuerDeadPinCoord(null)
           }}
+        />
+      )}
+
+      {/* Assign-from-Map-Drawer (nur fuer admin + dispatch, wenn Lead ausgewaehlt) */}
+      {assignLeadId && (
+        <AssignFromMapDrawer
+          leadId={assignLeadId}
+          leadName={leadsRef.current.find((l) => l.id === assignLeadId)?.name ?? 'Lead'}
+          onCandidates={setCandidateSvIds}
+          onPreviewSv={setPreviewSvId}
+          onAssigned={() => { setAssignLeadId(null); setCandidateSvIds([]); setPreviewSvId(null); onRefresh?.() }}
+          onClose={() => { setAssignLeadId(null); setCandidateSvIds([]); setPreviewSvId(null) }}
         />
       )}
     </div>
