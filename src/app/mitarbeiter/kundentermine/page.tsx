@@ -157,10 +157,11 @@ export default async function MitarbeiterKundentermine() {
     const svProfileId = t.assignee_typ === 'sachverstaendiger' && t.assignee_id ? svProfileMap.get(t.assignee_id) ?? null : null
     const kundeName = fallClaim?.lead_id ? leadNameMap[fallClaim.lead_id] ?? 'Kunde' : 'Kunde'
     const svName = svProfileId ? svNameMap[svProfileId] ?? 'SV' : 'SV'
-    const href = fall ? `/faelle/${fall.id}` : '#'
+    const href = fall ? `/faelle/${fall.id}` : null
     const status = STATUS_META[t.status] ?? { label: t.status, cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' }
-    return (
-      <Link key={t.id} href={href} className="flex items-stretch gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg sm:gap-4">
+    // Ziel-loser SV-Termin (kein fall, Pre-FlowLink-Direktbuchung) -> nicht-klickbar statt totem href='#'.
+    const zeile = (
+      <>
         {/* Zeit-Rail */}
         <div className="flex w-12 shrink-0 flex-col items-end pt-px text-right">
           <span className="text-body-sm font-semibold tabular-nums text-claimondo-navy">{fmtTime(t.start_zeit)}</span>
@@ -185,7 +186,16 @@ export default async function MitarbeiterKundentermine() {
             )}
           </p>
         </div>
+      </>
+    )
+    return href ? (
+      <Link key={t.id} href={href} className="flex items-stretch gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg sm:gap-4">
+        {zeile}
       </Link>
+    ) : (
+      <div key={t.id} className="flex items-stretch gap-3 px-4 py-3 sm:gap-4">
+        {zeile}
+      </div>
     )
   }
 

@@ -392,14 +392,23 @@ export default function KalenderClient({
                         >
                           {inner}
                         </button>
-                      ) : (
+                      ) : entry.link ? (
                         <Link
                           key={entry.id}
-                          href={entry.link ?? '#'}
+                          href={entry.link}
                           className="flex items-stretch gap-2.5 px-3 py-2.5 hover:bg-claimondo-bg/50 transition-colors"
                         >
                           {inner}
                         </Link>
+                      ) : (
+                        // Fix: ziel-loser Termin (bezug-nativer SV-Eigentermin / claim-lose Beratung
+                        // ohne fall_id) -> nicht-klickbar statt totem href='#'.
+                        <div
+                          key={entry.id}
+                          className="flex items-stretch gap-2.5 px-3 py-2.5"
+                        >
+                          {inner}
+                        </div>
                       )
                     })}
                   </div>
@@ -443,8 +452,8 @@ export default function KalenderClient({
                           style={{ backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` }}>
                           <span className="truncate block">{entry.titel}</span>
                         </button>
-                      ) : (
-                        <Link key={entry.id} href={entry.link ?? '#'}
+                      ) : entry.link ? (
+                        <Link key={entry.id} href={entry.link}
                           className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate transition-colors ${
                             entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
                           }`}
@@ -454,6 +463,18 @@ export default function KalenderClient({
                             <span className="text-[9px] opacity-70 truncate block">{entry.gutachterName}</span>
                           )}
                         </Link>
+                      ) : (
+                        // Fix: ziel-loser Termin -> nicht-klickbar statt totem href='#'.
+                        <div key={entry.id}
+                          className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate ${
+                            entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
+                          }`}
+                          style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` } : { borderLeft: '3px solid #ef4444' }}>
+                          <span className="truncate block">{entry.titel}</span>
+                          {entry.gutachterName && viewMode === 'week' && (
+                            <span className="text-[9px] opacity-70 truncate block">{entry.gutachterName}</span>
+                          )}
+                        </div>
                       )
                     })}
                     {dayEntries.length > (viewMode === 'week' ? 10 : 3) && (
