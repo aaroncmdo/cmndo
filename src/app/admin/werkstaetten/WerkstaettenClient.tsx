@@ -63,6 +63,7 @@ type DrawerData = {
   rows: PartnerBillingRow[]
   aggregat: PartnerBillingAggregat
   istKleinunternehmer: boolean | null
+  steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
 }
 
 export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Werkstatt[] }) {
@@ -86,7 +87,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     startDrawerTransition(async () => {
       const r = await ladePartnerBilling('werkstatt', w.id)
       if (r.ok) {
-        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer })
+        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer, steuerdaten: r.steuerdaten })
       } else {
         toast.error(r.error)
         setOpenPartnerId(null)
@@ -775,6 +776,12 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                     partnerTyp: 'werkstatt',
                     partnerId: openPartnerId,
                     current: drawerData.istKleinunternehmer,
+                  }}
+                  steuerdaten={{
+                    partnerTyp: 'werkstatt',
+                    partnerId: openPartnerId,
+                    current: drawerData.steuerdaten ?? { ust_id: null, adresse_strasse: null, adresse_plz: null, adresse_ort: null },
+                    readOnly: false,
                   }}
                 />
               )}

@@ -148,6 +148,53 @@ export async function storniere(
 }
 
 /**
+ * Speichert Steuerdaten eines Partners (ust_id + Adresse) fuer die Gutschrift-Erstellung.
+ * Schreibt auf makler / werkstaetten / marketing_partner.
+ *
+ * Neue Spalten via Migration in diesem Branch — Typen folgen beim Merge-Regen (Regel 2).
+ * Payload daher als `never` gecastet.
+ */
+export async function setzePartnerSteuerdaten(
+  partnerTyp: 'makler' | 'werkstatt' | 'marketing',
+  partnerId: string,
+  daten: { ust_id?: string; adresse_strasse?: string; adresse_plz?: string; adresse_ort?: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth
+
+  const TABLE_MAP = {
+    makler: 'makler',
+    werkstatt: 'werkstaetten',
+    marketing: 'marketing_partner',
+  } as const
+
+  const updateObj: Record<string, string | null> = {}
+  if ('ust_id' in daten) updateObj.ust_id = daten.ust_id?.trim() || null
+  if ('adresse_strasse' in daten) updateObj.adresse_strasse = daten.adresse_strasse?.trim() || null
+  if ('adresse_plz' in daten) updateObj.adresse_plz = daten.adresse_plz?.trim() || null
+  if ('adresse_ort' in daten) updateObj.adresse_ort = daten.adresse_ort?.trim() || null
+
+  if (Object.keys(updateObj).length === 0) {
+    return { ok: false, error: 'Keine Daten' }
+  }
+
+  const table = TABLE_MAP[partnerTyp]
+  const admin = createAdminClient()
+
+  const { error } = await admin
+    .from(table)
+    .update(updateObj as never)
+    .eq('id', partnerId)
+
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/werkstaetten')
+  revalidatePath('/admin/finance/provisionen')
+  return { ok: true }
+}
+
+/**
  * Setzt den USt-Status eines Partners (Kleinunternehmer ja/nein).
  * Schreibt ist_kleinunternehmer auf makler / werkstaetten / marketing_partner.
  *
@@ -193,15 +240,22 @@ export async function ladePartnerBilling(
   partnerTyp: 'makler' | 'werkstatt' | 'marketing' | 'kanzlei',
   partnerId: string,
 ): Promise<
-  | { ok: true; rows: import('@/lib/finance/partner-billing').PartnerBillingRow[]; aggregat: import('@/lib/finance/partner-billing').PartnerBillingAggregat; istKleinunternehmer: boolean | null }
+  | {
+      ok: true
+      rows: import('@/lib/finance/partner-billing').PartnerBillingRow[]
+      aggregat: import('@/lib/finance/partner-billing').PartnerBillingAggregat
+      istKleinunternehmer: boolean | null
+      steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
+    }
   | { ok: false; error: string }
 > {
   const auth = await requireAdmin()
   if (!auth.ok) return auth
 
   let istKleinunternehmer: boolean | null = null
+  let steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null = null
 
-  // Kanzlei ist Forderungs-Partner ohne ist_kleinunternehmer-Spalte → skip
+  // Kanzlei ist Forderungs-Partner ohne Steuerdaten-Spalten → skip
   if (partnerTyp !== 'kanzlei') {
     const TABLE_MAP = {
       makler: 'makler',
@@ -212,21 +266,30 @@ export async function ladePartnerBilling(
     const table = TABLE_MAP[partnerTyp]
     const admin = createAdminClient()
 
-    // ist_kleinunternehmer per Migration in Branch angelegt — Typen folgen beim Merge-Regen
+    // Spalten per Migration in Branch angelegt — Typen folgen beim Merge-Regen
     const { data } = await admin
       .from(table)
-      .select('ist_kleinunternehmer')
+      .select('ist_kleinunternehmer, ust_id, adresse_strasse, adresse_plz, adresse_ort')
       .eq('id', partnerId)
       .single()
-    istKleinunternehmer =
-      (data as { ist_kleinunternehmer: boolean | null } | null)?.ist_kleinunternehmer ?? null
+    const row = data as {
+      ist_kleinunternehmer: boolean | null
+      ust_id: string | null
+      adresse_strasse: string | null
+      adresse_plz: string | null
+      adresse_ort: string | null
+    } | null
+    istKleinunternehmer = row?.ist_kleinunternehmer ?? null
+    steuerdaten = row
+      ? { ust_id: row.ust_id, adresse_strasse: row.adresse_strasse, adresse_plz: row.adresse_plz, adresse_ort: row.adresse_ort }
+      : null
   }
 
   const { getPartnerBilling } = await import('@/lib/finance/partner-billing')
 
   try {
     const { rows, aggregat } = await getPartnerBilling({ partnerTyp, partnerId })
-    return { ok: true, rows, aggregat, istKleinunternehmer }
+    return { ok: true, rows, aggregat, istKleinunternehmer, steuerdaten }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
   }

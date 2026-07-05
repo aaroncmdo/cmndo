@@ -7,11 +7,12 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react'
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
-import { setzePartnerUstStatus } from '@/lib/finance/partner-billing-actions'
+import { setzePartnerUstStatus, setzePartnerSteuerdaten } from '@/lib/finance/partner-billing-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
 import { Button } from '@/components/primitives/Button'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { TextField } from '@/components/shared/forms/TextField'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { PROVISION_STATUS_COLORS, PROVISION_STATUS_LABELS } from '@/lib/statusLabels'
 
@@ -35,8 +36,12 @@ type Props = {
   monat: string
   months: string[]
   kpi: { total: number; pending: number; confirmed: number; sumPending: number; sumConfirmed: number }
-  /** Maik-marketing_partner-Zeile fuer USt-Toggle. null wenn Tabelle leer. */
-  maik: { id: string; istKleinunternehmer: boolean | null } | null
+  /** Maik-marketing_partner-Zeile fuer USt-Toggle + Steuerdaten. null wenn Tabelle leer. */
+  maik: {
+    id: string
+    istKleinunternehmer: boolean | null
+    steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null }
+  } | null
 }
 
 export default function ProvisionenClient({ provisionen, monat, months, kpi, maik }: Props) {
@@ -56,6 +61,28 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
       const result = await setzePartnerUstStatus('marketing', maik.id, value)
       setMaikUstMeldung(result)
       if (result.ok) setMaikUstAktuell(value)
+    })
+  }
+
+  // Steuerdaten fuer Maik
+  const [maikStUstId, setMaikStUstId] = useState(maik?.steuerdaten?.ust_id ?? '')
+  const [maikStStrasse, setMaikStStrasse] = useState(maik?.steuerdaten?.adresse_strasse ?? '')
+  const [maikStPlz, setMaikStPlz] = useState(maik?.steuerdaten?.adresse_plz ?? '')
+  const [maikStOrt, setMaikStOrt] = useState(maik?.steuerdaten?.adresse_ort ?? '')
+  const [maikSteuerdatenPending, startMaikSteuerdatenTransition] = useTransition()
+  const [maikSteuerdatenMeldung, setMaikSteuerdatenMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
+
+  function handleMaikSteuerdatenSpeichern() {
+    if (!maik) return
+    setMaikSteuerdatenMeldung(null)
+    startMaikSteuerdatenTransition(async () => {
+      const result = await setzePartnerSteuerdaten('marketing', maik.id, {
+        ust_id: maikStUstId,
+        adresse_strasse: maikStStrasse,
+        adresse_plz: maikStPlz,
+        adresse_ort: maikStOrt,
+      })
+      setMaikSteuerdatenMeldung(result)
     })
   }
 
@@ -168,6 +195,55 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
                 ? <span className="rounded-ios-sm bg-success-soft px-2 py-0.5 text-xs text-success-strong">Gespeichert</span>
                 : <span className="rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">{maikUstMeldung.error ?? 'Fehler'}</span>
             )}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Steuerdaten Maik */}
+      {maik && (
+        <SectionCard title="Steuerdaten des Partners">
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <TextField
+                label="USt-IdNr."
+                value={maikStUstId}
+                onChange={(e) => setMaikStUstId(e.target.value)}
+                placeholder="DE123456789"
+              />
+              <TextField
+                label="Straße"
+                value={maikStStrasse}
+                onChange={(e) => setMaikStStrasse(e.target.value)}
+                placeholder="Musterstraße 1"
+              />
+              <TextField
+                label="PLZ"
+                value={maikStPlz}
+                onChange={(e) => setMaikStPlz(e.target.value)}
+                placeholder="50667"
+              />
+              <TextField
+                label="Ort"
+                value={maikStOrt}
+                onChange={(e) => setMaikStOrt(e.target.value)}
+                placeholder="Köln"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                size="sm"
+                variant="navy"
+                loading={maikSteuerdatenPending}
+                onClick={handleMaikSteuerdatenSpeichern}
+              >
+                Speichern
+              </Button>
+              {maikSteuerdatenMeldung && (
+                maikSteuerdatenMeldung.ok
+                  ? <span className="rounded-ios-sm bg-success-soft px-2 py-0.5 text-xs text-success-strong">Gespeichert</span>
+                  : <span className="rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">{maikSteuerdatenMeldung.error ?? 'Fehler'}</span>
+              )}
+            </div>
           </div>
         </SectionCard>
       )}
