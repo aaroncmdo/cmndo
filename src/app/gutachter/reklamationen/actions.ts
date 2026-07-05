@@ -33,6 +33,19 @@ export async function createReklamation(data: {
     .maybeSingle()
   if (!svData) return { success: false, error: 'Kein SV-Account gefunden' }
 
+  // IDOR-Guard: der SV muss DIESEM Fall zugewiesen sein — sonst koennte jeder eingeloggte SV
+  // Reklamationen + KB/Admin-Notifications + Timeline-Eintraege gegen FREMDE Faelle erzeugen
+  // (die RLS-Insert-Policy `sv_insert` gated nur sv_id=eigene, NICHT die fall/claim-Zuordnung).
+  // CMM-49: claim (sv_id/kundenbetreuer_id/claim_nummer) claims-direkt (SSoT) via resolveClaimId.
+  const admin = createAdminClient()
+  const reklClaimId = await resolveClaimId(admin, data.fallId)
+  const { data: fallClaim } = reklClaimId
+    ? await admin.from('claims').select('sv_id, kundenbetreuer_id, claim_nummer').eq('id', reklClaimId).maybeSingle()
+    : { data: null }
+  if (!fallClaim || fallClaim.sv_id !== svData.id) {
+    return { success: false, error: 'Nicht fuer diesen Fall autorisiert' }
+  }
+
   const { data: reklamation, error } = await supabase
     .from('reklamationen')
     .insert({
@@ -49,13 +62,7 @@ export async function createReklamation(data: {
 
   if (error) return { success: false, error: error.message }
 
-  // Benachrichtigungen via Admin-Client
-  // CMM-49: kundenbetreuer_id + claim_nummer claims-direkt (SSoT) via resolveClaimId.
-  const admin = createAdminClient()
-  const reklClaimId = await resolveClaimId(admin, data.fallId)
-  const { data: fallClaim } = reklClaimId
-    ? await admin.from('claims').select('kundenbetreuer_id, claim_nummer').eq('id', reklClaimId).maybeSingle()
-    : { data: null }
+  // Benachrichtigungen via Admin-Client (fallClaim + admin oben schon geladen/erstellt).
 
   if (fallClaim?.kundenbetreuer_id) {
     await createNotification(
