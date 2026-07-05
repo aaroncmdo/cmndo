@@ -32,7 +32,7 @@ const logger = pino({ level: process.env.LOG_LEVEL ?? 'info' })
 const PORT = Number(process.env.BAILEYS_PORT ?? 3055)
 const AUTH_TOKEN = process.env.BAILEYS_AUTH_TOKEN ?? ''
 const AUTH_DIR = process.env.BAILEYS_AUTH_DIR ?? './auth_info_baileys'
-const NEXT_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cmndo.vercel.app'
+const NEXT_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://app.claimondo.de'
 const CRON_SECRET = process.env.CRON_SECRET ?? ''
 
 let sock = null

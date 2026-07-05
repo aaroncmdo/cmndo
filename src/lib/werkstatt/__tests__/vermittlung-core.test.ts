@@ -11,8 +11,11 @@ describe('brauchtWerkstattVermittlung', () => {
   it('true bei reparatur + keine Werkstatt + offen', () => {
     expect(brauchtWerkstattVermittlung(base)).toBe(true)
   })
-  it('false bei fiktiv / unentschieden / null', () => {
-    for (const w of ['fiktiv', 'unentschieden', null]) {
+  it('true bei fiktiv (SP4d: Werkstatt-Suche auch bei fiktiver Abrechnung — Aaron-Direktive)', () => {
+    expect(brauchtWerkstattVermittlung({ ...base, reparaturwunsch: 'fiktiv' })).toBe(true)
+  })
+  it('false bei unentschieden / null', () => {
+    for (const w of ['unentschieden', null]) {
       expect(brauchtWerkstattVermittlung({ ...base, reparaturwunsch: w })).toBe(false)
     }
   })

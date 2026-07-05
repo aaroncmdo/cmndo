@@ -1,11 +1,12 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { AnspruchConfig, Schweregrad, Segment, SegmentSatz, WertminderungFaktor } from './types'
+import type { AnspruchConfig, Schweregrad, Segment, SegmentSatz, WertminderungFaktor, WbwHeuristikBand } from './types'
 import { SEGMENTE } from './types'
 
 export type AnspruchRates = {
   saetze: Record<Segment, SegmentSatz>
   faktoren: WertminderungFaktor[]
   config: AnspruchConfig
+  wbwHeuristik: WbwHeuristikBand[]
 }
 
 function num(map: Record<string, number>, key: string, fallback: number): number {
@@ -14,10 +15,11 @@ function num(map: Record<string, number>, key: string, fallback: number): number
 
 export async function ladeAnspruchRates(): Promise<AnspruchRates> {
   const db = createAdminClient()
-  const [saetzeRes, faktorenRes, configRes] = await Promise.all([
+  const [saetzeRes, faktorenRes, configRes, wbwRes] = await Promise.all([
     db.from('nutzungsausfall_segment_saetze').select('segment, tagessatz_min_eur, tagessatz_max_eur'),
     db.from('wertminderung_alter_faktoren').select('alter_bis_jahre, faktor_min, faktor_max'),
     db.from('anspruch_config').select('key, wert'),
+    db.from('wbw_segment_alter').select('segment, alter_bis_jahre, wbw_min_eur, wbw_max_eur, restwert_faktor'),
   ])
 
   const saetze = {} as Record<Segment, SegmentSatz>
@@ -52,7 +54,21 @@ export async function ladeAnspruchRates(): Promise<AnspruchRates> {
       mittel: { min: num(cfg, 'dauer_mittel_min_tage', 5), max: num(cfg, 'dauer_mittel_max_tage', 9) },
       schwer: { min: num(cfg, 'dauer_schwer_min_tage', 10), max: num(cfg, 'dauer_schwer_max_tage', 21) },
     } as Record<Schweregrad, { min: number; max: number }>,
+    totalschadenSchwelleProzent: num(cfg, 'totalschaden_schwelle_prozent', 90) / 100,
+    reparaturGrenzeProzent: num(cfg, 'reparatur_grenze_prozent', 130) / 100,
+    wiederbeschaffungsdauerTage: {
+      min: num(cfg, 'wiederbeschaffungsdauer_min_tage', 10),
+      max: num(cfg, 'wiederbeschaffungsdauer_max_tage', 14),
+    },
   }
 
-  return { saetze, faktoren, config }
+  const wbwHeuristik: WbwHeuristikBand[] = (wbwRes.data ?? []).map((r) => ({
+    segment: r.segment as Segment,
+    alterBisJahre: Number(r.alter_bis_jahre),
+    wbwMinEur: Number(r.wbw_min_eur),
+    wbwMaxEur: Number(r.wbw_max_eur),
+    restwertFaktor: Number(r.restwert_faktor),
+  }))
+
+  return { saetze, faktoren, config, wbwHeuristik }
 }

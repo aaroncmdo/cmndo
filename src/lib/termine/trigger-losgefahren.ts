@@ -81,7 +81,7 @@ export async function triggerSvLosgefahren(
   }).eq('id', terminId)
 
   // WhatsApp an Kunden
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
   const trackingUrl = `${appUrl}/kunde/termin/${token}`
 
   if (kundeTelefon) {

@@ -1,150 +1,121 @@
-// TDD-Tests fuer webhook-inbound-silent Health-Check.
+// TDD-Tests fuer webhook-inbound-silent Health-Check (generalisiert, Multi-Channel).
 // Spec: docs/superpowers/plans/2026-06-29-pipeline-observability.md §Task4
-// Kein echter DB-Zugriff — Fake-CheckCtx mit Supabase-Stub.
+// + 03.07.2026 Vercel-Cleanup-Follow-up: nach dem VPS-Umzug koennen partner-seitige
+//   Webhook-URLs auf der toten cmndo.vercel.app-Domain haengen -> ein toter Kanal
+//   soll automatisch auffallen. Monitort jetzt LexDrive + Matelso + Aircall.
 //
-// Der Check liest webhook_events:
-//   .select('created_at').order('created_at',{ascending:false}).limit(1)
-//   -> 0 oder 1 Zeile; JS berechnet:
-//      tageSeitLetztem = rows.length ? (now - rows[0].created_at) / 86400000 : null
-// Schwellen:
-//   null (nie)  -> crit
-//   > 30 Tage   -> crit
-//   > 7 Tage    -> warn
-//   sonst       -> ok
+// Kernlogik `evaluateWebhookSilence` ist rein (kein DB) und wird direkt getestet;
+// run() fetcht pro Kanal die letzte created_at aus der jeweiligen Landing-Tabelle.
 
 import { describe, it, expect } from 'vitest'
 import type { CheckCtx } from '@/lib/health/types'
-import { webhookInboundSilentCheck } from '../webhook-inbound-silent'
+import {
+  webhookInboundSilentCheck,
+  evaluateWebhookSilence,
+  type ChannelSilence,
+} from '../webhook-inbound-silent'
 
-// ---------------------------------------------------------------------------
-// Hilfsfunktion: erzeugt einen ISO-String, der `ageTage` Tage in der Vergangenheit liegt.
-// ---------------------------------------------------------------------------
 function daysAgoIso(ageTage: number): string {
   return new Date(Date.now() - ageTage * 86_400_000).toISOString()
 }
 
-// ---------------------------------------------------------------------------
-// Stub-Factory: liefert CheckCtx, deren supabase.from('webhook_events')
-// entweder 0 Zeilen (keinEintrag=true) oder 1 Zeile mit dem angegebenen Alter zurueckgibt.
-// ---------------------------------------------------------------------------
-function makeCtx(tageSeitLetztem: number | null): CheckCtx {
-  const rows: { created_at: string }[] =
-    tageSeitLetztem === null ? [] : [{ created_at: daysAgoIso(tageSeitLetztem) }]
+const ch = (label: string, tage: number | null, warnTage = 7, critTage = 30): ChannelSilence => ({
+  id: label.toLowerCase(),
+  label,
+  tage,
+  warnTage,
+  critTage,
+})
 
+// ── Reine Kernlogik ────────────────────────────────────────────────────────
+describe('evaluateWebhookSilence (rein)', () => {
+  it('ok wenn alle Kanaele frisch sind', () => {
+    const r = evaluateWebhookSilence([ch('LexDrive', 2), ch('Matelso', 1, 14, 45), ch('Aircall', 0, 14, 45)])
+    expect(r.status).toBe('ok')
+  })
+
+  it('crit dominiert: ein Kanal ueber critTage => overall crit', () => {
+    const r = evaluateWebhookSilence([ch('LexDrive', 31), ch('Matelso', 1, 14, 45)])
+    expect(r.status).toBe('crit')
+    expect(r.detail).toContain('LexDrive')
+  })
+
+  it('warn wenn ein Kanal zwischen warn und crit liegt (kein crit)', () => {
+    const r = evaluateWebhookSilence([ch('LexDrive', 14), ch('Matelso', 1, 14, 45)])
+    expect(r.status).toBe('warn')
+  })
+
+  it('nie empfangen (null) => warn (prüfen ob konfiguriert), nicht crit', () => {
+    const r = evaluateWebhookSilence([ch('Aircall', null, 14, 45)])
+    expect(r.status).toBe('warn')
+    expect(r.detail).toMatch(/nie/i)
+  })
+
+  it('Grenzen: genau critTage => warn, > critTage => crit', () => {
+    expect(evaluateWebhookSilence([ch('X', 30)]).status).toBe('warn')
+    expect(evaluateWebhookSilence([ch('X', 31)]).status).toBe('crit')
+  })
+
+  it('Grenzen: genau warnTage => ok, > warnTage => warn', () => {
+    expect(evaluateWebhookSilence([ch('X', 7)]).status).toBe('ok')
+    expect(evaluateWebhookSilence([ch('X', 8)]).status).toBe('warn')
+  })
+
+  it('detail listet ALLE Kanaele + metric = Anzahl nicht-ok', () => {
+    const r = evaluateWebhookSilence([ch('LexDrive', 31), ch('Matelso', null, 14, 45), ch('Aircall', 0, 14, 45)])
+    expect(r.detail).toContain('LexDrive')
+    expect(r.detail).toContain('Matelso')
+    expect(r.detail).toContain('Aircall')
+    expect(r.metric).toBe(2) // LexDrive crit + Matelso nie
+  })
+})
+
+// ── run() gegen Multi-Table-Stub ────────────────────────────────────────────
+function makeCtx(perTable: Record<string, number | null>, errorMessage?: string): CheckCtx {
   const supabase = {
     from(table: string) {
-      if (table !== 'webhook_events') {
-        throw new Error(`unerwartete Tabelle: ${table}`)
-      }
-      // Simuliert: .select('created_at').order(...).limit(1) -> 0 oder 1 Zeile
-      return {
-        select: (_cols: string) => ({
-          order: (_col: string, _opts: unknown) => ({
+      const build = (rows: unknown[]) => ({
+        select: (_c: string) => ({
+          order: (_col: string, _o: unknown) => ({
             limit: (_n: number) =>
-              Promise.resolve({ data: rows, error: null }),
+              errorMessage
+                ? Promise.resolve({ data: null, error: { message: errorMessage } })
+                : Promise.resolve({ data: rows, error: null }),
           }),
         }),
-      }
+      })
+      const tage = perTable[table]
+      return build(tage == null ? [] : [{ created_at: daysAgoIso(tage) }])
     },
   } as unknown as CheckCtx['supabase']
-  return { supabase }
+  return { supabase } as unknown as CheckCtx
 }
 
-function makeErrCtx(errorMessage: string): CheckCtx {
-  const supabase = {
-    from(_table: string) {
-      return {
-        select: (_cols: string) => ({
-          order: (_col: string, _opts: unknown) => ({
-            limit: (_n: number) =>
-              Promise.resolve({ data: null, error: { message: errorMessage } }),
-          }),
-        }),
-      }
-    },
-  } as unknown as CheckCtx['supabase']
-  return { supabase }
-}
-
-describe('webhookInboundSilentCheck', () => {
-  it('hat korrekte id und category', () => {
+describe('webhookInboundSilentCheck.run', () => {
+  it('id/category korrekt', () => {
     expect(webhookInboundSilentCheck.id).toBe('webhook-inbound-silent')
     expect(webhookInboundSilentCheck.category).toBe('sends')
   })
 
-  it('liefert crit wenn noch nie ein Webhook empfangen wurde (null)', async () => {
-    const ctx = makeCtx(null)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('crit')
-    expect(result.detail).toMatch(/nie|never|Noch nie/i)
+  it('crit wenn LexDrive > 30 Tage still (auch wenn Rest frisch)', async () => {
+    const r = await webhookInboundSilentCheck.run(makeCtx({ webhook_events: 31, matelso_calls: 1, aircall_calls: 1 }))
+    expect(r.status).toBe('crit')
+    expect(r.detail).toContain('LexDrive')
   })
 
-  it('liefert crit wenn letztes Webhook > 30 Tage her', async () => {
-    const ctx = makeCtx(31)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('crit')
+  it('ok wenn alle Kanaele frisch', async () => {
+    const r = await webhookInboundSilentCheck.run(makeCtx({ webhook_events: 2, matelso_calls: 3, aircall_calls: 1 }))
+    expect(r.status).toBe('ok')
   })
 
-  it('liefert crit bei genau 31 Tagen (> 30)', async () => {
-    const ctx = makeCtx(31)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('crit')
-    expect(result.detail).toContain('LexDrive')
+  it('warn wenn ein Kanal nie empfangen hat', async () => {
+    const r = await webhookInboundSilentCheck.run(makeCtx({ webhook_events: 2, matelso_calls: null, aircall_calls: 2 }))
+    expect(r.status).toBe('warn')
   })
 
-  it('liefert warn bei genau 30 Tagen (Grenzfall: nicht > 30 aber > 7)', async () => {
-    const ctx = makeCtx(30)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('warn')
-  })
-
-  it('liefert warn wenn letztes Webhook > 7 Tage her', async () => {
-    const ctx = makeCtx(14)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('warn')
-    expect(result.detail).toContain('LexDrive')
-  })
-
-  it('liefert warn bei genau 8 Tagen (> 7)', async () => {
-    const ctx = makeCtx(8)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('warn')
-  })
-
-  it('liefert ok wenn letztes Webhook <= 7 Tage her', async () => {
-    const ctx = makeCtx(3)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('ok')
-  })
-
-  it('liefert ok bei genau 7 Tagen (Grenzfall: nicht > 7)', async () => {
-    const ctx = makeCtx(7)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('ok')
-  })
-
-  it('liefert ok bei 0 Tagen (sehr aktuell)', async () => {
-    const ctx = makeCtx(0)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('ok')
-  })
-
-  it('detail enthaelt Tage-Angabe wenn Webhook-Eintrag vorhanden', async () => {
-    const ctx = makeCtx(14)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.detail).toMatch(/14|Tage/i)
-  })
-
-  it('liefert metric mit Tage-Wert bei vorhandenem Eintrag', async () => {
-    const ctx = makeCtx(10)
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(typeof result.metric).toBe('number')
-  })
-
-  it('liefert error bei DB-Fehler', async () => {
-    const ctx = makeErrCtx('connection refused')
-    const result = await webhookInboundSilentCheck.run(ctx)
-    expect(result.status).toBe('error')
-    expect(result.detail).toContain('connection refused')
+  it('error bei DB-Fehler', async () => {
+    const r = await webhookInboundSilentCheck.run(makeCtx({}, 'connection refused'))
+    expect(r.status).toBe('error')
+    expect(r.detail).toContain('connection refused')
   })
 })

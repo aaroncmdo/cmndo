@@ -3,6 +3,7 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { assertLeadBoundToToken } from '@/lib/flow/assert-lead-bound'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
@@ -66,8 +67,12 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
 export async function updateLeadStammdaten(
   leadId: string,
   data: { vorname?: string; nachname?: string; telefon?: string; email?: string; unfall_konstellation?: string; gegner_anzahl_beteiligte?: string; gegner_fahrzeugtyp?: string },
-) {
+  // IDOR-Guard: der Flow-Token, gegen den die leadId gebunden wird (sonst koennte ein
+  // Caller mit fremder leadId beliebige Lead-PII ueberschreiben).
+  token: string | null,
+): Promise<{ success: boolean; error?: string }> {
   const admin = createAdminClient()
+  if (!(await assertLeadBoundToToken(admin, token, leadId))) return { success: false, error: 'Nicht autorisiert' }
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.vorname !== undefined) update.vorname = data.vorname
   if (data.nachname !== undefined) update.nachname = data.nachname
@@ -77,7 +82,8 @@ export async function updateLeadStammdaten(
   if (data.unfall_konstellation !== undefined) update.unfall_konstellation = data.unfall_konstellation
   if (data.gegner_anzahl_beteiligte !== undefined) update.gegner_anzahl_beteiligte = parseInt(data.gegner_anzahl_beteiligte) || 1
   if (data.gegner_fahrzeugtyp !== undefined) update.gegner_fahrzeugtyp = data.gegner_fahrzeugtyp
-  await admin.from('leads').update(update).eq('id', leadId)
+  const { error } = await admin.from('leads').update(update).eq('id', leadId)
+  return error ? { success: false, error: error.message } : { success: true }
 }
 
 /**
@@ -87,8 +93,11 @@ export async function generateSAPdf(
   fallId: string,
   leadId: string,
   signatureUrl: string,
+  // IDOR-Guard: Flow-Token zum Binden der leadId (sonst Info-Disclosure fremder Lead-PII).
+  token: string | null,
 ): Promise<{ pdfUrl: string }> {
   const admin = createAdminClient()
+  if (!(await assertLeadBoundToToken(admin, token, leadId))) return { pdfUrl: '' }
 
   // Lead-Daten laden
   const { data: lead } = await admin.from('leads').select('vorname, nachname, email, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_standort_adresse').eq('id', leadId).single()
@@ -595,6 +604,8 @@ export async function signSAandCreateFall(
   // AAR-360 Follow-up: Zustimmung zu Datenschutz + Widerrufsbelehrung des zugewiesenen Gutachters
   // (FlowLink-Häkchen, entkoppelt von der SA-Signatur). Default false = kein SV zugewiesen.
   svDsWiderrufZugestimmt: boolean = false,
+  // IDOR-Guard: Flow-Token zum Binden der leadId (schliesst den flowLinkId=null-Bypass).
+  token: string | null = null,
 ): Promise<{ ok: true; fallId: string } | { ok: false; error: string }> {
   if (!leadId || !signatureUrl) return { ok: false, error: 'Fehlende Daten für SA-Unterschrift' }
 
@@ -611,15 +622,12 @@ export async function signSAandCreateFall(
     .single()
   if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
 
-  // F1: wenn ein flowLinkId beansprucht wird, MUSS er zu diesem Lead gehoeren —
-  // sonst konvertiert ein Angreifer fremde Leads bzw. stempelt einen fremden
-  // flow_link (Update unten ~:1118) mit dieser fallId. flowLinkId=null = Backward-
-  // Compat-Pfad (Token wird direkt als lead_id genutzt, kein flow_link) -> nichts zu binden.
-  if (flowLinkId) {
-    const { data: flBind } = await admin
-      .from('flow_links').select('id').eq('id', flowLinkId).eq('lead_id', leadId).maybeSingle()
-    if (!flBind) return { ok: false, error: 'Nicht autorisiert' }
-  }
+  // F1 (IDOR-Guard, jetzt token-basiert): die leadId MUSS zum Flow-Token gehoeren — sonst
+  // konvertiert ein Angreifer fremde Leads bzw. stempelt einen fremden flow_link (Update
+  // unten ~:1118) mit dieser fallId. Frueher nur `if (flowLinkId)` -> der Backward-Compat-
+  // Pfad (flowLinkId=null) uebersprang die Bindung = Bypass. assertLeadBoundToToken deckt
+  // beide Pfade ab (canonical via flow_links.token, backward-compat via token==lead_id).
+  if (!(await assertLeadBoundToToken(admin, token, leadId))) return { ok: false, error: 'Nicht autorisiert' }
 
   // Re-Entry-Dedup: `lead` ist der Pre-Conversion-Snapshot (select('*') oben, VOR
   // convertLeadToClaim). War die SA schon unterschrieben, ist dies ein Re-Entry

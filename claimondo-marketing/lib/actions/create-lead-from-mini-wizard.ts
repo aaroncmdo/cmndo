@@ -110,12 +110,13 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   const lead = { id: created.leadId }
 
   // Compliance (UX-Audit #3): dsgvo_consent-Haken persistieren (war bisher nur validiert,
-  // nie geloggt -> dsgvo_zustimmung_am blieb NULL; Art.-7-DSGVO-Nachweisbarkeit). Separater
-  // Update + `as never`, weil der Marketing-Build STALE database.types hat: die generierten
-  // leads-Insert/Update-Types kennen dsgvo_zustimmung_am (noch) nicht, obwohl DB + App-Types
-  // die Spalte haben -> der Deploy-Typecheck brach sonst ("does not exist in type 'LeadExtra'";
-  // die CI-`build` deckt den Marketing-Build NICHT ab, nur der Deploy). Type-Lag-Cast wie in der
-  // App. Consent ist per Schema (safeParse oben) garantiert. Non-fatal.
+  // nie geloggt -> Art.-7-DSGVO-Nachweisbarkeit). Die Spalte leads.dsgvo_zustimmung_am wurde
+  // mit Migration 20260704113818 ergaenzt (spiegelt anfragen/gutachter_finder_anfragen, die
+  // dritte Intake-Tabelle hatte sie nie). `as never`, weil die generierten Marketing-database.types
+  // die frische Spalte noch nicht kennen (Type-Lag; Regen aufgeschoben) -> ohne Cast braeche der
+  // Deploy-Typecheck ("does not exist in type 'LeadUpdate'"; die CI-`build` deckt den Marketing-
+  // Build NICHT ab, nur der Deploy). Type-Lag-Cast wie in der App. Consent ist per Schema
+  // (safeParse oben) garantiert. Non-fatal.
   try {
     await admin
       .from('leads')

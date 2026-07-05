@@ -1,9 +1,9 @@
-﻿// AAR-410 / AAR-769 Phase 3 / AAR-782: Zentrale Fall-Status-Badge-Primitive.
-// Zieht Label + Farben aus FALL_STATUS_LABELS/FALL_STATUS_COLORS in
-// src/lib/statusLabels.ts. Die Map liefert pro Status Light-Bg-Klassen
-// aus 7 Token-Slots (neutral/active/pending/done/success/warning/danger).
+// AAR-410 / AAR-769 Phase 3 / AAR-782: Zentrale Fall-Status-Badge-Primitive.
+// W1: Label + Slot-Farbe kommen jetzt aus der zentralen @/lib/status-Registry
+// (fall-status Domain). Verhalten byte-identisch zur Legacy-Ableitung aus
+// FALL_STATUS_LABELS/FALL_STATUS_COLORS — bewiesen in fall-status.parity.test.ts.
 
-import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
+import { statusLabel, statusSlotClass, resolveStatus, isKnownStatus } from '@/lib/status'
 
 type Size = 'xs' | 'sm' | 'md'
 
@@ -19,10 +19,20 @@ export interface FallStatusBadgeProps {
   className?: string
 }
 
-export default function FallStatusBadge({ status, size = 'sm', className = '' }: FallStatusBadgeProps) {
+/** Reine Label+Farb-Ableitung (Pure-Seam für den Parity-Test). */
+export function fallStatusBadgeParts(status: string | null | undefined): { label: string; color: string } {
   const code = status ?? ''
-  const label = FALL_STATUS_LABELS[code] ?? code ?? '—'
-  const color = FALL_STATUS_COLORS[code] ?? 'bg-claimondo-bg text-claimondo-navy border-claimondo-border'
+  const known = isKnownStatus('fall-status', code)
+  return {
+    label: known ? statusLabel('fall-status', code) : code,
+    color: known
+      ? statusSlotClass(resolveStatus('fall-status', code).slot)
+      : 'bg-claimondo-bg text-claimondo-navy border-claimondo-border',
+  }
+}
+
+export default function FallStatusBadge({ status, size = 'sm', className = '' }: FallStatusBadgeProps) {
+  const { label, color } = fallStatusBadgeParts(status)
   return (
     <span
       className={`inline-flex items-center rounded-full font-medium whitespace-nowrap ${SIZE_CLASSES[size]} ${color} ${className}`}

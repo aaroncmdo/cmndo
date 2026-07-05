@@ -15,9 +15,14 @@ export function AnspruchEinschaetzungStep({
 
   async function weiter() {
     if (fahrbereit === null) { setFehler('Bitte angeben, ob das Fahrzeug fahrbereit ist'); return }
-    setBusy(true); setFehler(null)
+    const currentYear = new Date().getFullYear()
     const jahr = ezJahr.trim() ? Number(ezJahr.trim()) : null
-    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: Number.isFinite(jahr as number) ? jahr : null })
+    if (jahr === null || !Number.isFinite(jahr) || jahr < 1980 || jahr > currentYear + 1) {
+      setFehler('Bitte eine gültige Erstzulassung angeben (z. B. 2021)')
+      return
+    }
+    setBusy(true); setFehler(null)
+    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: jahr })
     setBusy(false)
     if (r.ok) onFertig(r.spanne)
     else setFehler(r.error)
@@ -57,7 +62,7 @@ export function AnspruchEinschaetzungStep({
         <input inputMode="numeric" value={ezJahr} onChange={(e) => setEzJahr(e.target.value.replace(/\D/g, '').slice(0, 4))}
           placeholder="z. B. 2021"
           className="w-full rounded-ios-sm border border-claimondo-border px-3 py-2 text-body text-claimondo-navy" />
-        <p className="mt-1 text-caption text-claimondo-shield">Für die Einschätzung der Wertminderung. Optional.</p>
+        <p className="mt-1 text-caption text-claimondo-shield">Für die Wertermittlung Ihres Fahrzeugs — bitte angeben.</p>
       </div>
 
       {fehler ? <p className="text-body-sm text-danger-strong">{fehler}</p> : null}

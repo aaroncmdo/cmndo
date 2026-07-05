@@ -10452,6 +10452,8 @@ export type Database = {
           user_id: string | null
           versicherung_id: string | null
           maklerpool_id: string | null
+          ust_id: string | null
+          wochenreport_abgemeldet_am: string | null
         }
         Insert: {
           adresse_ort?: string | null
@@ -10483,6 +10485,8 @@ export type Database = {
           user_id?: string | null
           versicherung_id?: string | null
           maklerpool_id?: string | null
+          ust_id?: string | null
+          wochenreport_abgemeldet_am?: string | null
         }
         Update: {
           adresse_ort?: string | null
@@ -10514,6 +10518,8 @@ export type Database = {
           user_id?: string | null
           versicherung_id?: string | null
           maklerpool_id?: string | null
+          ust_id?: string | null
+          wochenreport_abgemeldet_am?: string | null
         }
         Relationships: []
       }

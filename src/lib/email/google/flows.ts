@@ -30,6 +30,9 @@ import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from 
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
 import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates/MaklerWelcome'
 import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from './templates/WillkommenWerkstatt'
+import { MaklerWochenReportEmail, subject as maklerWochenReportSubject } from './templates/MaklerWochenReport'
+import type { MaklerWochenReportData } from '@/lib/makler/wochenreport'
+import { wochenreportOptOutUrl } from '@/lib/makler/wochenreport-optout'
 
 const admin = () => createAdminClient()
 
@@ -931,6 +934,62 @@ export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<vo
     fallId: null,
     empfaengerTyp: 'makler',
     template: 'makler_welcome',
+  })
+}
+
+// ─── Makler Wochenreport ─────────────────────────────────────────────────
+// Scheduled Digest (Cron makler-wochenreport), KEIN N5-Event: eine geplante
+// Zusammenfassung wie die kanzlei_monats_abrechnung, direkt per E-Mail.
+// Opt-in = notification_preferences.woechentlicher_report. Best-effort — der
+// Cron wickelt den Aufruf pro Makler in try/catch.
+
+export type MaklerWochenReportParams = {
+  to: string
+  maklerId: string
+  vorname: string
+  firma: string
+  zeitraumStart: Date
+  zeitraumEnde: Date
+  data: MaklerWochenReportData
+}
+
+export async function sendMaklerWochenReport(params: MaklerWochenReportParams): Promise<void> {
+  const { data } = params
+  const zeitraumLabel = `${fmtDate(params.zeitraumStart.toISOString())} – ${fmtDate(params.zeitraumEnde.toISOString())}`
+  const optOutUrl = wochenreportOptOutUrl(params.maklerId)
+
+  const staffel = data.staffel
+    ? {
+        settledCount: data.settledCount,
+        nochBis: data.staffel.naechste ? data.staffel.naechste.schwelle - data.settledCount : null,
+        bonusLabel: data.staffel.naechste ? fmtCurrency(data.staffel.naechste.bonus_betrag_netto) : null,
+        alleErreicht: data.staffel.alleErreicht,
+      }
+    : null
+
+  const props = {
+    vorname: params.vorname,
+    firma: params.firma,
+    zeitraumLabel,
+    neueLeads: data.neueLeads,
+    neueVermittlungen: data.neueVermittlungen,
+    neueVermittlungenSummeLabel: data.neueVermittlungenSumme > 0 ? fmtCurrency(data.neueVermittlungenSumme) : null,
+    offeneLeads: data.offeneLeads,
+    freigegebenAnzahl: data.freigegebenAnzahl,
+    freigegebenSummeLabel: fmtCurrency(data.freigegebenSumme),
+    staffel,
+    optOutUrl,
+  }
+
+  const html = await render(MaklerWochenReportEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: maklerWochenReportSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'makler',
+    template: 'makler_wochenreport',
+    listUnsubscribe: optOutUrl ?? undefined,
   })
 }
 
