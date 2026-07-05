@@ -46,6 +46,7 @@ import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
+import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -938,6 +939,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             werkstatt={werkstattData}
             termin={reparaturTermin}
           />
+        )}
+
+        {/* SP-C1: Werkstatt-Finder - Reparatur-Claim OHNE hinterlegte Werkstatt. */}
+        {!reparaturWerkstattId && claimExtra?.reparaturwunsch === 'reparatur' && (
+          <WerkstattFinderCard claimId={fall.claim_id as string} />
         )}
 
         {/* 13.05.2026 Restore: Mietwagen-/Nutzungsausfall-Card (XOR). Render
