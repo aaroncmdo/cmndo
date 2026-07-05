@@ -73,6 +73,13 @@ jobs:
       - name: Component-Set-Ratchet
         run: npm run check:component-set -- --ratchet
 
+      # Status-Registry-Drift-Bremse (Ratchet): blockt NEUE inline Status-/Farb-Maps
+      # + Status-Farb-Ternaries ggue. scripts/status-registry-baseline.json. Neuer Code
+      # nutzt @/lib/status (resolveStatus/statusSlotClass/<StatusBadge domain=.../>).
+      # Skip via `// status-registry-skip:`-Header. Siehe AGENTS.md §status-registry.
+      - name: Status-Registry-Ratchet
+        run: npm run check:status-registry -- --ratchet
+
       # Termin-Engine-Contract-Drift-Bremse (Ratchet): blockt NEUE direkte
       # Legacy-Filter (.eq('lead_id')/.eq('sv_id')) auf gutachter_termine
       # ausserhalb engine/* ggue. scripts/termin-engine-contract-baseline.json
