@@ -12,9 +12,9 @@ import {
   toClaimMainPhase,
   toClaimSubPhase,
   MAIN_PHASE_LABEL,
-  SUBPHASE_LABEL,
   type ClaimMainPhase,
 } from '@/lib/claims/lifecycle'
+import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 import { deleteFall, deactivateFall } from '@/app/faelle/[id]/_actions'
 import { Modal } from '@/components/primitives/Modal'
 
@@ -268,7 +268,7 @@ function FallCard({ fall, onRefresh }: { fall: Fall; onRefresh: () => void }) {
             {fall.schadens_fall_typ && <span className="bg-claimondo-ondo/5 text-claimondo-ondo text-[9px] px-1 py-0.5 rounded">{SF_SHORT[fall.schadens_fall_typ] ?? fall.schadens_fall_typ}</span>}
             {/* CMM-44 MP-4c: abschluss-Substate-Chip (storniert / erfolgreich reguliert / Klage / verjährt) */}
             {mainPhase === 'abschluss' && (
-              <span className="bg-claimondo-navy/10 text-claimondo-navy text-[9px] px-1 py-0.5 rounded font-medium">{SUBPHASE_LABEL[subPhase]}</span>
+              <FallPhaseBadge subPhase={subPhase} size="xs" />
             )}
           </div>
           {(fall.betreuer_name || fall.sv_name) && (

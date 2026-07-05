@@ -62,7 +62,7 @@ export function AnspruchEinschaetzungStep({
         <input inputMode="numeric" value={ezJahr} onChange={(e) => setEzJahr(e.target.value.replace(/\D/g, '').slice(0, 4))}
           placeholder="z. B. 2021"
           className="w-full rounded-ios-sm border border-claimondo-border px-3 py-2 text-body text-claimondo-navy" />
-        <p className="mt-1 text-caption text-claimondo-shield">Für die Wertermittlung Ihres Fahrzeugs — bitte angeben.</p>
+        <p className="mt-1 text-caption text-claimondo-shield">Für die Wertermittlung Ihres Fahrzeugs (Pflichtfeld).</p>
       </div>
 
       {fehler ? <p className="text-body-sm text-danger-strong">{fehler}</p> : null}

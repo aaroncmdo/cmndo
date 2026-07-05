@@ -220,15 +220,20 @@ function Row({ r, dispatchLinks, onRueckrufClick }: { r: Normalized; dispatchLin
     )
   }
 
+  // Ziel-loser Termin (kein fall + kein dispatch-faehiger lead) -> nicht-klickbar statt totem href='#'.
   const href = r.fallId
     ? `/faelle/${r.fallId}`
-    : r.leadId
-      ? (dispatchLinks ? `/dispatch/leads/${r.leadId}` : '#')
-      : '#'
+    : r.leadId && dispatchLinks
+      ? `/dispatch/leads/${r.leadId}`
+      : null
 
-  return (
+  return href ? (
     <Link href={href} className="flex items-center gap-2 px-3 py-2 hover:bg-claimondo-bg transition-colors">
       {inner}
     </Link>
+  ) : (
+    <div className="flex items-center gap-2 px-3 py-2">
+      {inner}
+    </div>
   )
 }

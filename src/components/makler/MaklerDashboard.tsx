@@ -13,7 +13,9 @@ import {
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
 import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
+import { MaklerStaffelCard } from '@/components/makler/MaklerStaffelCard'
 import { MaklerPipelineCard } from '@/components/makler/MaklerPipelineCard'
+import type { StaffelStufe } from '@/lib/werkstatt/staffel'
 import type { DashboardData } from '@/lib/makler/queries'
 import type { MaklerPipeline } from '@/lib/makler/pipeline'
 
@@ -27,6 +29,9 @@ type Props = {
   pipeline: MaklerPipeline
   zeigeErsteVermittlungCard: boolean
   promoCode: string | null
+  staffelSettled: number
+  staffelPending: number
+  staffelStufen: StaffelStufe[]
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -51,7 +56,16 @@ function relativeFromNow(iso: string): string {
   return RELATIVE.format(-months, 'month')
 }
 
-export function MaklerDashboard({ makler, data, pipeline, zeigeErsteVermittlungCard, promoCode }: Props) {
+export function MaklerDashboard({
+  makler,
+  data,
+  pipeline,
+  zeigeErsteVermittlungCard,
+  promoCode,
+  staffelSettled,
+  staffelPending,
+  staffelStufen,
+}: Props) {
   const { stats, activity } = data
 
   return (
@@ -181,6 +195,13 @@ export function MaklerDashboard({ makler, data, pipeline, zeigeErsteVermittlungC
           />
         </section>
       </div>
+
+      {/* Staffelung: Meilenstein-Fortschritt (rendert null, solange keine Stufen konfiguriert sind) */}
+      <MaklerStaffelCard
+        settledCount={staffelSettled}
+        pendingCount={staffelPending}
+        stufen={staffelStufen}
+      />
 
       {/* Tipp des Monats */}
       <section aria-label="Tipp des Monats">

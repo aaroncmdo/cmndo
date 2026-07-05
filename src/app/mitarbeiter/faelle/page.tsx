@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
+import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 
 export const dynamic = 'force-dynamic'
 
@@ -51,9 +51,7 @@ export default async function MitarbeiterFaelle() {
                     <p className="truncate text-body-xs text-claimondo-ondo">{meta}</p>
                   </div>
                   <div className="flex items-center justify-between gap-3 sm:justify-end sm:gap-4">
-                    <span className="shrink-0 rounded-full bg-claimondo-bg px-2.5 py-0.5 text-body-xs font-medium text-claimondo-ondo">
-                      {SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}
-                    </span>
+                    <FallPhaseBadge subPhase={f.sub_phase} size="sm" className="shrink-0" />
                     <span className="shrink-0 whitespace-nowrap text-body-xs tabular-nums text-claimondo-ondo/70">
                       {f.fall_created_at ? new Date(f.fall_created_at as string).toLocaleDateString('de-DE') : '—'}
                     </span>

@@ -187,10 +187,11 @@ export default async function MitarbeiterTermine() {
         ? `/dispatch/leads/${lead.id}`
         : fall
         ? `/faelle/${fall.id}`
-        : '#'
+        : null
     const isOverdue = new Date(t.start_zeit) < now
-    return (
-      <Link key={t.id} href={href} className="group flex items-stretch gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg sm:gap-4">
+    // Ziel-loser Termin (kein lead + kein fall, non-KB) -> nicht-klickbar statt totem href='#'.
+    const zeile = (
+      <>
         {/* Zeit-Rail */}
         <div className="flex w-12 shrink-0 flex-col items-end pt-px text-right">
           <span className={`text-body-sm font-semibold tabular-nums ${isOverdue ? 'text-danger-strong' : 'text-claimondo-navy'}`}>
@@ -226,7 +227,16 @@ export default async function MitarbeiterTermine() {
         {lead?.telefon && (
           <span className="hidden shrink-0 self-center text-body-xs text-claimondo-ondo/70 sm:block">{lead.telefon}</span>
         )}
+      </>
+    )
+    return href ? (
+      <Link key={t.id} href={href} className="group flex items-stretch gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg sm:gap-4">
+        {zeile}
       </Link>
+    ) : (
+      <div key={t.id} className="group flex items-stretch gap-3 px-4 py-3 sm:gap-4">
+        {zeile}
+      </div>
     )
   }
 

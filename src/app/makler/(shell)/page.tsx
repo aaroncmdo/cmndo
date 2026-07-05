@@ -3,7 +3,12 @@
 // werden parallel via getMaklerDashboardData geladen.
 
 import { redirect } from 'next/navigation'
-import { getCurrentMakler, getMaklerDashboardData } from '@/lib/makler/queries'
+import {
+  getCurrentMakler,
+  getMaklerDashboardData,
+  getMaklerVermittlungsCount,
+  getMaklerStaffelStufen,
+} from '@/lib/makler/queries'
 import { getMaklerPipeline } from '@/lib/makler/pipeline'
 import { createClient } from '@/lib/supabase/server'
 import { MaklerDashboard } from '@/components/makler/MaklerDashboard'
@@ -21,9 +26,11 @@ export default async function MaklerDashboardPage() {
   if (!makler.onboarding_abgeschlossen) redirect('/makler/willkommen')
 
   const supabase = await createClient()
-  const [data, pipeline] = await Promise.all([
+  const [data, pipeline, vermittlungsCount, staffelStufen] = await Promise.all([
     getMaklerDashboardData(makler.id),
     getMaklerPipeline(supabase, makler.id),
+    getMaklerVermittlungsCount(makler.id),
+    getMaklerStaffelStufen(makler.id),
   ])
 
   // Erste-Vermittlung-Prompt: einmalig, sobald der Makler >=1 Vermittlung hat und die Card
@@ -39,6 +46,9 @@ export default async function MaklerDashboardPage() {
         pipeline={pipeline}
         zeigeErsteVermittlungCard={zeigeErsteVermittlungCard}
         promoCode={data.promoCode}
+        staffelSettled={vermittlungsCount.settled}
+        staffelPending={vermittlungsCount.pending}
+        staffelStufen={staffelStufen}
       />
       <div className="mt-6"><NetzwerkWidget portal="makler" /></div>
     </>

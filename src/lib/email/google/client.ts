@@ -29,6 +29,8 @@ type SendEmailOpts = {
   fallId?: string | null
   empfaengerTyp?: 'kunde' | 'sv' | 'kanzlei' | 'admin' | 'makler' | 'werkstatt'
   template?: string
+  /** One-Click-Abmelde-URL → List-Unsubscribe-Header (UWG/Gmail-Bulk-Anforderung). */
+  listUnsubscribe?: string
 }
 
 export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: string }> {
@@ -128,6 +130,12 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
             filename: a.filename,
             content: Buffer.isBuffer(a.content) ? a.content : Buffer.from(a.content),
           })),
+          headers: opts.listUnsubscribe
+            ? {
+                'List-Unsubscribe': `<${opts.listUnsubscribe}>`,
+                'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
+              }
+            : undefined,
         })
 
         const messageId = result.data?.id ?? `resend-${Date.now()}`

@@ -8,7 +8,7 @@ import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
 import { StatBar } from '@/components/shared/StatBar'
 import { Panel } from '@/components/shared/Panel'
-import { SUBPHASE_LABEL, toClaimSubPhase } from '@/lib/claims/lifecycle'
+import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 import { cn } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
@@ -28,7 +28,7 @@ type SchedItem = {
   timeIso: string
   label: string
   meta: string
-  href: string
+  href: string | null // null = kein valides Ziel (verwaister Rueckruf/Termin) -> nicht-klickbar
   overdue: boolean
   kind: 'rueckruf' | 'termin' | 'beratung'
 }
@@ -130,7 +130,7 @@ export default async function MitarbeiterDashboard() {
       timeIso: r.start_zeit as string,
       label: name || 'Rückruf',
       meta: lead?.telefon ?? 'Rückruf',
-      href: lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : '#',
+      href: lead ? `/dispatch/leads/${lead.id}` : fall ? `/faelle/${fall.id}` : null,
       overdue: new Date(r.start_zeit as string).getTime() < nowMs,
       kind: 'rueckruf',
     })
@@ -142,7 +142,8 @@ export default async function MitarbeiterDashboard() {
       timeIso: t.start_zeit as string,
       label: (t.titel as string) || 'Termin',
       meta: [fallNummer(fall), t.typ].filter(Boolean).join(' · '),
-      href: fall ? `/faelle/${fall.id}` : '#',
+      // Fix: lead-Fallback, falls kein Fall (kunde/intern-Termin mit lead_id).
+      href: fall ? `/faelle/${fall.id}` : t.lead_id ? `/dispatch/leads/${t.lead_id}` : null,
       overdue: false,
       kind: 'termin',
     })
@@ -154,7 +155,9 @@ export default async function MitarbeiterDashboard() {
       timeIso: k.start_zeit as string,
       label: 'KB-Beratung',
       meta: [fallNummer(fall), k.kanal].filter(Boolean).join(' · '),
-      href: fall ? `/faelle/${fall.id}` : '#',
+      // Fix: KB-Beratung oeffnet das Konsultations-Cockpit (per Termin-id, immer valide),
+      // nicht die Fallakte — konsistent zu mitarbeiter/termine + funktioniert fuer claim-lose Leads.
+      href: `/mitarbeiter/konsultation/${k.id}`,
       overdue: false,
       kind: 'beratung',
     })
@@ -217,23 +220,35 @@ export default async function MitarbeiterDashboard() {
             {scheduleTop.length === 0 ? (
               <p className="px-4 py-8 text-center text-body-sm text-claimondo-ondo/70">Keine Rückrufe oder Termine</p>
             ) : (
-              scheduleTop.map((s) => (
-                <Link key={s.id} href={s.href} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
-                  <div className="w-11 shrink-0 text-right">
-                    <div className={cn('text-body-sm font-semibold leading-tight tabular-nums', s.overdue ? 'text-danger-strong' : 'text-claimondo-navy')}>
-                      {fmtTime(s.timeIso)}
+              scheduleTop.map((s) => {
+                const inner = (
+                  <>
+                    <div className="w-11 shrink-0 text-right">
+                      <div className={cn('text-body-sm font-semibold leading-tight tabular-nums', s.overdue ? 'text-danger-strong' : 'text-claimondo-navy')}>
+                        {fmtTime(s.timeIso)}
+                      </div>
+                      <div className="text-body-xs text-claimondo-ondo/70">{fmtDay(s.timeIso)}</div>
                     </div>
-                    <div className="text-body-xs text-claimondo-ondo/70">{fmtDay(s.timeIso)}</div>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-body-sm font-medium text-claimondo-navy">{s.label}</p>
+                      <p className={cn('truncate text-body-xs', s.overdue ? 'font-medium text-danger' : 'text-claimondo-ondo')}>
+                        {s.overdue ? 'überfällig · ' : ''}{s.meta}
+                      </p>
+                    </div>
+                    <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', dotFor(s.kind))} />
+                  </>
+                )
+                // Ziel-loser Rueckruf/Termin (kein lead + kein fall) -> nicht-klickbar statt totem href='#'.
+                return s.href ? (
+                  <Link key={s.id} href={s.href} className="flex items-start gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
+                    {inner}
+                  </Link>
+                ) : (
+                  <div key={s.id} className="flex items-start gap-3 px-4 py-3">
+                    {inner}
                   </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-body-sm font-medium text-claimondo-navy">{s.label}</p>
-                    <p className={cn('truncate text-body-xs', s.overdue ? 'font-medium text-danger' : 'text-claimondo-ondo')}>
-                      {s.overdue ? 'überfällig · ' : ''}{s.meta}
-                    </p>
-                  </div>
-                  <span className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', dotFor(s.kind))} />
-                </Link>
-              ))
+                )
+              })
             )}
           </Panel>
         </div>
@@ -250,9 +265,7 @@ export default async function MitarbeiterDashboard() {
                     <p className="truncate font-mono text-body-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
                     <p className="truncate text-body-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
                   </div>
-                  <span className="shrink-0 rounded-full bg-claimondo-bg px-2.5 py-0.5 text-body-xs font-medium text-claimondo-ondo">
-                    {SUBPHASE_LABEL[toClaimSubPhase(f.sub_phase)]}
-                  </span>
+                  <FallPhaseBadge subPhase={f.sub_phase} size="sm" className="shrink-0" />
                 </Link>
               ))
             )}
