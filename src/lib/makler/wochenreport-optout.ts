@@ -40,5 +40,7 @@ export function wochenreportOptOutUrl(maklerId: string): string | null {
   const sig = signWochenreportOptOut(maklerId)
   if (!sig) return null
   const base = (process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de').replace(/\/$/, '')
-  return `${base}/abmelden/makler-wochenreport/${maklerId}?sig=${sig}`
+  // NICHT '/abmelden/...': app.claimondo.de/abmelden/* wird per Infra-301 auf die
+  // Marketing-Domain umgeleitet (dort 404 = tote Zone). Eigener App-Pfad (publicPath).
+  return `${base}/wochenreport-abmelden/${maklerId}?sig=${sig}`
 }
