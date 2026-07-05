@@ -5,6 +5,7 @@
 // fall_id). Wird nach SA-Unterschrift in flow/[token]/actions.ts via fall_id
 // upgegradet.
 
+import { requireRole } from '@/lib/auth/guards'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { SvSuggestion } from './types'
@@ -109,9 +110,11 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
   suggestions?: SvSuggestion[]
   error?: string
 }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  // kundenbetreuer ist eingeschlossen: /mitarbeiter/isochrone (IsochroneClient)
+  // ruft diese Action auf — KB-Portal hat requirePortalAccess(['kundenbetreuer','admin']).
+  const guard = await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const supabase = guard.supabase
 
   const { data: lead } = await supabase
     .from('leads')
@@ -166,9 +169,9 @@ export async function reserveSvTerminForLead(
   startIso: string,
   durationMin: number = TERMIN_DAUER_MIN,
 ): Promise<{ success: boolean; terminId?: string; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const supabase = guard.supabase
 
   const startDate = new Date(startIso)
   if (Number.isNaN(startDate.getTime())) return { success: false, error: 'Ungültiges Startdatum' }
@@ -353,9 +356,9 @@ export async function reserveSvTerminForLead(
 export async function cancelSvTerminForLead(
   leadId: string,
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const supabase = guard.supabase
 
   // AAR-134: 'abgelehnt' mit drin — Dispatcher kann roten Card-Termin schließen.
   // AAR-956 (Spec-Erweiterung): identische bezug-Blindheit wie der Rebook-Cancel oben —
@@ -392,9 +395,10 @@ export async function acceptGegenvorschlag(
   terminId: string,
   slotIndex: number,
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const supabase = guard.supabase
+  const user = guard.user
 
   // CMM-44 SP-D PR2a: besichtigungsort_lat/lng aus gutachter_termine selbst (SSoT).
   const { data: termin } = await supabase
@@ -578,9 +582,9 @@ export async function getNextFreeSlotsForSv(
   slotDauerMin: number = TERMIN_DAUER_MIN,
   opts?: NextFreeSlotsOpts,
 ): Promise<{ success: boolean; slots?: SlotCandidate[]; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const supabase = guard.supabase
 
   const now = new Date()
   const inZwoelfWochen = new Date(now.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
@@ -750,6 +754,10 @@ export async function getSvSuggestionsWithSlots(
   suggestions?: Array<SvSuggestion & { slots: SlotCandidate[] }>
   error?: string
 }> {
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const supabase = guard.supabase
+
   const slotsPerSv = opts?.slotsPerSv ?? 3
   const maxSvs = opts?.maxSvs ?? 3
   const slotDauer = opts?.slotDauerMin ?? TERMIN_DAUER_MIN
@@ -763,7 +771,6 @@ export async function getSvSuggestionsWithSlots(
 
   // Wunschtermin + Wochentage aus leads laden — gleicher Payload den
   // SvDispatchPanel bereits kennt, aber hier zentral gebündelt.
-  const supabase = await createClient()
   const { data: lead } = await supabase
     .from('leads')
     .select('wunschtermin, wunschtermin_wochentage')
