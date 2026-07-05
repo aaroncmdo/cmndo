@@ -16,6 +16,38 @@ import { TextField } from '@/components/shared/forms/TextField'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { PROVISION_STATUS_COLORS, PROVISION_STATUS_LABELS } from '@/lib/statusLabels'
 
+// Fix 2: Per-Zeile Loading-State fuer Gutschrift-Download — verhindert dass
+// alle Zeilen gleichzeitig laden wenn eine geklickt wird.
+function MaikGutschriftButton({ provisionId }: { provisionId: string }) {
+  const [pending, startTransition] = useTransition()
+  const [fehler, setFehler] = useState<string | null>(null)
+
+  function handleClick() {
+    setFehler(null)
+    startTransition(async () => {
+      const res = await getPartnerGutschriftDownloadUrl('provisionen_maik', provisionId)
+      if (res.ok) {
+        window.open(res.url, '_blank')
+      } else {
+        setFehler(res.error)
+      }
+    })
+  }
+
+  return (
+    <>
+      <Button size="sm" variant="ghost" loading={pending} onClick={handleClick}>
+        Gutschrift ↓
+      </Button>
+      {fehler && (
+        <span className="ml-1 rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">
+          {fehler}
+        </span>
+      )}
+    </>
+  )
+}
+
 type Provision = {
   id: string
   lead_id: string
@@ -48,8 +80,6 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [editing, setEditing] = useState<Record<string, string>>({})
-  const [gutschriftPending, startGutschriftTransition] = useTransition()
-  const [gutschriftFehler, setGutschriftFehler] = useState<Record<string, string>>({})
 
   // USt-Toggle fuer Maik
   const [maikUstPending, startMaikUstTransition] = useTransition()
@@ -118,18 +148,6 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
       const r = await markMonthAsPaid(monat)
       if (!r.success && r.error) window.alert(`Fehler: ${r.error}`)
       else router.refresh()
-    })
-  }
-
-  function handleGutschriftDownload(provisionId: string) {
-    setGutschriftFehler((prev) => { const next = { ...prev }; delete next[provisionId]; return next })
-    startGutschriftTransition(async () => {
-      const res = await getPartnerGutschriftDownloadUrl('marketing_provisionen', provisionId)
-      if (res.ok) {
-        window.open(res.url, '_blank')
-      } else {
-        setGutschriftFehler((prev) => ({ ...prev, [provisionId]: res.error }))
-      }
     })
   }
 
@@ -329,19 +347,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi, mai
                         </button>
                       )}
                       {p.status === 'paid' && (
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          loading={gutschriftPending}
-                          onClick={() => handleGutschriftDownload(p.id)}
-                        >
-                          Gutschrift ↓
-                        </Button>
-                      )}
-                      {gutschriftFehler[p.id] && (
-                        <span className="ml-1 rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">
-                          {gutschriftFehler[p.id]}
-                        </span>
+                        <MaikGutschriftButton provisionId={p.id} />
                       )}
                     </div>
                   </Td>
