@@ -276,13 +276,15 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           id: 'coverage-partners-fill',
           type: 'fill',
           source: 'coverage-partners',
-          paint: { 'fill-color': COL_PARTNER, 'fill-opacity': 0.16 },
+          paint: { 'fill-color': COL_PARTNER, 'fill-opacity': 0.18 },
         })
         map.addLayer({
           id: 'coverage-partners-outline',
           type: 'line',
           source: 'coverage-partners',
-          paint: { 'line-color': COL_PARTNER, 'line-width': 1.5, 'line-opacity': 0.5 },
+          // Definierte Kante -> der starke Partner-Kern hebt sich klar von der weichen
+          // Dead-Pin-Reichweite ab (die zwei Tiers werden unterscheidbarer).
+          paint: { 'line-color': COL_PARTNER, 'line-width': 2.5, 'line-opacity': 0.7 },
         })
       }
 
