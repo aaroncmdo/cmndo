@@ -73,7 +73,7 @@ function formatEur(euro: number): string {
 function fmtDate(iso: string): string {
   const d = new Date(iso)
   return d.toLocaleDateString('de-DE', {
-    timeZone: 'UTC',
+    timeZone: 'Europe/Berlin',
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

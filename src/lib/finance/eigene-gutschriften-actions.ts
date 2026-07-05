@@ -10,10 +10,11 @@ import type { EigeneGutschrift } from '@/components/shared/finance/PartnerGutsch
 export async function getEigeneGutschriften(): Promise<EigeneGutschrift[]> {
   const supabase = await createClient()
   // RLS pg_partner_self_read -> nur eigene Zeilen; kein expliziter partner-Filter noetig.
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('partner_gutschriften')
     .select('id, gutschrift_nr, betrag_brutto, erstellt_am, status')
     .order('erstellt_am', { ascending: false })
+  if (error) console.error('[eigene-gutschriften] Laden fehlgeschlagen:', error.message)
   return (data ?? []) as EigeneGutschrift[]
 }
 

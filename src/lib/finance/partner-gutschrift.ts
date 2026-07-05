@@ -42,12 +42,7 @@ export async function versendePartnerGutschrift(
     }
 
     // Step 4 — Empfaenger-Email aus Partner-Tabelle laden
-    const TABLE: Record<string, string> = {
-      makler: 'makler',
-      werkstatt: 'werkstaetten',
-      marketing: 'marketing_partner',
-    }
-    const partnerTable = TABLE[row.partner_typ as string]
+    const partnerTable = PARTNER_TABLE[row.partner_typ as string]
     const { data: partnerData, error: partnerErr } = await db
       .from(partnerTable)
       .select('email')
