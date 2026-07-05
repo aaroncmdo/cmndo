@@ -2,12 +2,15 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { recordFailedOperation, markOperationResolved } from '@/lib/reliability/dead-letter'
+import { meldePartnerZahlungsproblem, resolvePartnerFromStripe } from '@/lib/stripe/zahlungsproblem-alert'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * KFZ-148: Stripe Webhook Endpoint.
- * Verarbeitet checkout.session.completed, payment_intent.payment_failed.
+ * Verarbeitet checkout.session.completed, payment_intent.payment_failed,
+ * charge.refunded, charge.dispute.created, payment_intent.canceled.
+ * Letztere drei feuern nur Admin-Alerts (kein automatischer Zugangs-/Budget-Entzug).
  */
 export async function POST(request: Request) {
   const body = await request.text()
@@ -537,6 +540,71 @@ export async function POST(request: Request) {
           await db.from('sachverstaendige').update({
             onboarding_status: 'anzahlung_offen',
           }).eq('id', meta.gutachter_id)
+        }
+        break
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object
+        const meta = (charge.metadata ?? {}) as Record<string, string>
+        const piId = typeof charge.payment_intent === 'string' ? charge.payment_intent : null
+        const betragCent = Number((charge as any).amount_refunded ?? (charge as any).amount ?? 0)
+        const grund = (charge as any).refunds?.data?.[0]?.reason ?? null
+        const stripeRef = String((charge as any).id)
+        try {
+          const partner = await resolvePartnerFromStripe(db, meta, piId)
+          await meldePartnerZahlungsproblem({
+            art: 'refund',
+            ...partner,
+            betragCent,
+            grund,
+            stripeRef,
+          })
+        } catch (alertErr) {
+          console.error('[KFZ-148] charge.refunded Alert-Fehler (non-fatal):', alertErr)
+        }
+        break
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object
+        const piId = typeof (dispute as any).payment_intent === 'string' ? (dispute as any).payment_intent : null
+        const betragCent = Number((dispute as any).amount ?? 0)
+        const grund = String((dispute as any).reason ?? '')
+        const stripeRef = String((dispute as any).id)
+        try {
+          const partner = await resolvePartnerFromStripe(db, {}, piId)
+          await meldePartnerZahlungsproblem({
+            art: 'dispute',
+            ...partner,
+            betragCent,
+            grund,
+            stripeRef,
+          })
+        } catch (alertErr) {
+          console.error('[KFZ-148] charge.dispute.created Alert-Fehler (non-fatal):', alertErr)
+        }
+        break
+      }
+
+      case 'payment_intent.canceled': {
+        const pi = event.data.object
+        const meta = ((pi as any).metadata ?? {}) as Record<string, string>
+        const piId = String((pi as any).id)
+        const betragCent = Number((pi as any).amount ?? 0)
+        const grund = String((pi as any).cancellation_reason ?? '')
+        const stripeRef = piId
+        try {
+          const partner = await resolvePartnerFromStripe(db, meta, piId)
+          await meldePartnerZahlungsproblem({
+            art: 'canceled',
+            ...partner,
+            betragCent,
+            grund,
+            stripeRef,
+          })
+        } catch (alertErr) {
+          console.error('[KFZ-148] payment_intent.canceled Alert-Fehler (non-fatal):', alertErr)
         }
         break
       }
