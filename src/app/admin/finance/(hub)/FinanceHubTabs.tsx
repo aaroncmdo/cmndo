@@ -13,6 +13,7 @@ const TABS = [
   { href: '/admin/finance/per-sv-balance', label: 'Per-SV Balance' },
   { href: '/admin/finance/kanzlei', label: 'Kanzlei-Abr.' },
   { href: '/admin/finance/provisionen', label: 'Provisionen' },
+  { href: '/admin/finance/partner-abrechnungen', label: 'Partner-Abr.' },
 ]
 
 export default function FinanceHubTabs() {
