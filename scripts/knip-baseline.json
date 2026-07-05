@@ -1,13 +1,11 @@
 {
-  "generatedAt": "2026-07-04T14:24:11.415Z",
+  "generatedAt": "2026-07-05T05:01:58.219Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 60,
+  "fileCount": 56,
   "files": [
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
-    "src/app/dispatch/rueckrufe/RueckrufListItem.tsx",
     "src/app/gutachter/auftraege/AuftraegeGrid.tsx",
-    "src/app/gutachter/einstellungen/KartenAnzeigeToggle.tsx",
     "src/app/gutachter/faelle/FaelleFilterBar.tsx",
     "src/app/gutachter/feldmodus/RerouteToast.tsx",
     "src/app/gutachter/profil/actions.ts",
