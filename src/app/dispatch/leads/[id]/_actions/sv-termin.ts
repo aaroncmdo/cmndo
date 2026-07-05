@@ -105,17 +105,17 @@ async function findStickySvForLead(
   return null
 }
 
-export async function listSvSuggestionsForLead(leadId: string): Promise<{
-  success: boolean
-  suggestions?: SvSuggestion[]
-  error?: string
-}> {
-  // kundenbetreuer ist eingeschlossen: /mitarbeiter/isochrone (IsochroneClient)
-  // ruft diese Action auf — KB-Portal hat requirePortalAccess(['kundenbetreuer','admin']).
-  const guard = await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
-  if (!guard.success) return { success: false, error: guard.error }
-  const supabase = guard.supabase
-
+/**
+ * Un-geguardeter Kern der SV-Vorschlags-Query. Nimmt einen bereits
+ * authentifizierten supabase-Client als Param — der Guard passiert im
+ * exportierten Wrapper (listSvSuggestionsForLead) bzw. beim einzigen internen
+ * Caller (getSvSuggestionsWithSlots, der selbst geguarded ist). So macht der
+ * Drawer-Load nicht 2+N requireAuth-Round-Trips (je getUser + profiles-SELECT).
+ */
+async function listSvSuggestionsCore(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  leadId: string,
+): Promise<{ success: boolean; suggestions?: SvSuggestion[]; error?: string }> {
   const { data: lead } = await supabase
     .from('leads')
     .select('besichtigungsort_lat, besichtigungsort_lng, fahrzeug_standort_lat, fahrzeug_standort_lng, unfallort_lat, unfallort_lng, kunde_lat, kunde_lng, wunschtermin, kunde_id, email, telefon, halter_email, halter_telefon')
@@ -161,6 +161,18 @@ export async function listSvSuggestionsForLead(leadId: string): Promise<{
   )
 
   return { success: true, suggestions: candidates as SvSuggestion[] }
+}
+
+export async function listSvSuggestionsForLead(leadId: string): Promise<{
+  success: boolean
+  suggestions?: SvSuggestion[]
+  error?: string
+}> {
+  // kundenbetreuer ist eingeschlossen: /mitarbeiter/isochrone (IsochroneClient)
+  // ruft diese Action auf — KB-Portal hat requirePortalAccess(['kundenbetreuer','admin']).
+  const guard = await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
+  if (!guard.success) return { success: false, error: guard.error }
+  return listSvSuggestionsCore(guard.supabase, leadId)
 }
 
 export async function reserveSvTerminForLead(
@@ -576,16 +588,20 @@ export type NextFreeSlotsOpts = {
   leadId?: string | null
 }
 
-export async function getNextFreeSlotsForSv(
+/**
+ * Un-geguardeter Kern der Slot-Berechnung. Nimmt einen bereits
+ * authentifizierten supabase-Client als Param — der Guard passiert im
+ * exportierten Wrapper (getNextFreeSlotsForSv) bzw. beim internen Caller
+ * (getSvSuggestionsWithSlots, selbst geguarded). Vermeidet N requireAuth-
+ * Round-Trips beim Drawer-Load (ein Slot-Fetch je Kandidaten-SV).
+ */
+async function nextFreeSlotsCore(
+  supabase: Awaited<ReturnType<typeof createClient>>,
   svId: string,
   count: number = 3,
   slotDauerMin: number = TERMIN_DAUER_MIN,
   opts?: NextFreeSlotsOpts,
 ): Promise<{ success: boolean; slots?: SlotCandidate[]; error?: string }> {
-  const guard = await requireRole(['dispatch', 'admin'])
-  if (!guard.success) return { success: false, error: guard.error }
-  const supabase = guard.supabase
-
   const now = new Date()
   const inZwoelfWochen = new Date(now.getTime() + 12 * 7 * 24 * 60 * 60 * 1000)
 
@@ -726,6 +742,17 @@ export async function getNextFreeSlotsForSv(
   return { success: true, slots: sorted.slice(0, count) }
 }
 
+export async function getNextFreeSlotsForSv(
+  svId: string,
+  count: number = 3,
+  slotDauerMin: number = TERMIN_DAUER_MIN,
+  opts?: NextFreeSlotsOpts,
+): Promise<{ success: boolean; slots?: SlotCandidate[]; error?: string }> {
+  const guard = await requireRole(['dispatch', 'admin'])
+  if (!guard.success) return { success: false, error: guard.error }
+  return nextFreeSlotsCore(guard.supabase, svId, count, slotDauerMin, opts)
+}
+
 function classify(
   slotStart: Date,
   wunschtermin: Date | null,
@@ -754,6 +781,11 @@ export async function getSvSuggestionsWithSlots(
   suggestions?: Array<SvSuggestion & { slots: SlotCandidate[] }>
   error?: string
 }> {
+  // EIN Guard für den ganzen Roundtrip. Die inneren Aufrufe gehen an die
+  // un-geguardeten Cores (nicht die geguardeten Exporte) — sonst 2+N
+  // requireAuth-Round-Trips pro Drawer-Load. Sicher: [dispatch,admin] ⊆ der
+  // list-Rollen-Menge; der KB-Only-Pfad läuft weiter über den exportierten
+  // listSvSuggestionsForLead mit eigenem Guard (/mitarbeiter/isochrone).
   const guard = await requireRole(['dispatch', 'admin'])
   if (!guard.success) return { success: false, error: guard.error }
   const supabase = guard.supabase
@@ -762,7 +794,7 @@ export async function getSvSuggestionsWithSlots(
   const maxSvs = opts?.maxSvs ?? 3
   const slotDauer = opts?.slotDauerMin ?? TERMIN_DAUER_MIN
 
-  const basisResult = await listSvSuggestionsForLead(leadId)
+  const basisResult = await listSvSuggestionsCore(supabase, leadId)
   if (!basisResult.success) {
     return { success: false, error: basisResult.error ?? 'SV-Suche fehlgeschlagen' }
   }
@@ -783,7 +815,7 @@ export async function getSvSuggestionsWithSlots(
   const top = basis.slice(0, maxSvs)
   const slotsPerCandidate = await Promise.all(
     top.map(async (cand) => {
-      const r = await getNextFreeSlotsForSv(cand.svId, slotsPerSv, slotDauer, {
+      const r = await nextFreeSlotsCore(supabase, cand.svId, slotsPerSv, slotDauer, {
         wunschterminIso,
         wunschterminWochentage,
         prioritizeAroundWunschtermin: true,
