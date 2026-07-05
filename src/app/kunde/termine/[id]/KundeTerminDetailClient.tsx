@@ -346,11 +346,14 @@ export default function KundeTerminDetailClient({
         </div>
       )}
 
-      {/* Termin verwalten (Token-Flow) */}
+      {/* Termin verwalten / Gegenvorschlag beantworten → Fall-Kalender (Verwaltungs-Flaeche).
+          Fix: zeigte vorher auf die Live-Tracking-Route (/kunde/termin/[token]), die nur den
+          kunden_tracking_token akzeptiert — der bei reserviert/gegenvorschlag ~immer null ist
+          (lazy erst bei "SV losgefahren") → Fallback ablehnen_token matchte nie → 404. */}
       {termin.ablehnen_token &&
         (termin.status === 'reserviert' || termin.status === 'gegenvorschlag') && (
           <Link
-            href={`/kunde/termin/${termin.kunden_tracking_token ?? termin.ablehnen_token}`}
+            href={`/kunde/faelle/${fall.id}/kalender`}
             className="block rounded-2xl border border-warning/30 bg-warning-soft p-4 hover:bg-warning/15 transition-colors text-warning-strong text-sm"
           >
             {termin.status === 'gegenvorschlag' && termin.gegenvorschlag_von === 'sv'
