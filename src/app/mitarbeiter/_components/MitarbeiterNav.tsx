@@ -5,7 +5,7 @@
 import {
   LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon, CalendarIcon,
   MessageCircleIcon, BarChart3Icon, AlertCircleIcon, UserIcon,
-  MapIcon, UsersRoundIcon,
+  MapIcon, UsersRoundIcon, MapPinnedIcon,
 } from 'lucide-react'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
@@ -15,6 +15,7 @@ const ITEMS: PortalNavItem[] = [
   { href: '/mitarbeiter/tasks', label: 'Tasks', icon: CheckSquareIcon },
   { href: '/mitarbeiter/termine', label: 'Termine', icon: CalendarIcon },
   { href: '/mitarbeiter/kundentermine', label: 'Kundentermine', icon: UsersRoundIcon },
+  { href: '/mitarbeiter/karte', label: 'Karte', icon: MapPinnedIcon },
   { href: '/mitarbeiter/isochrone', label: 'Gebiet', icon: MapIcon },
   { href: '/mitarbeiter/nachrichten', label: 'Nachrichten', icon: MessageCircleIcon },
   { href: '/mitarbeiter/reklamationen', label: 'Reklamationen', icon: AlertCircleIcon },
