@@ -13,7 +13,10 @@ import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 /** Ownership-Check via Kunde-RLS + "noch keine Werkstatt". */
 async function assertOwnerOhneWerkstatt(
   claimId: string,
-): Promise<{ ok: true; userId: string } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; userId: string; center: { lat: number; lng: number } | null }
+  | { ok: false; error: string }
+> {
   const supabase = await createClient()
   const {
     data: { user },
@@ -21,26 +24,39 @@ async function assertOwnerOhneWerkstatt(
   if (!user) return { ok: false, error: 'Nicht angemeldet.' }
   const { data: claim } = await supabase
     .from('claims')
-    .select('id, reparatur_werkstatt_id')
+    .select('id, reparatur_werkstatt_id, schadenort_lat, schadenort_lng')
     .eq('id', claimId)
     .maybeSingle()
   if (!claim) return { ok: false, error: 'Vorgang nicht gefunden.' }
-  if ((claim as { reparatur_werkstatt_id: string | null }).reparatur_werkstatt_id) {
+  const c = claim as {
+    reparatur_werkstatt_id: string | null
+    schadenort_lat: number | null
+    schadenort_lng: number | null
+  }
+  if (c.reparatur_werkstatt_id) {
     return { ok: false, error: 'Es ist bereits eine Werkstatt hinterlegt.' }
   }
-  return { ok: true, userId: user.id }
+  // Karten-Center (SP-C2) aus dem Schadenort — Kunde liest es via Owner-RLS.
+  const center =
+    c.schadenort_lat != null && c.schadenort_lng != null
+      ? { lat: Number(c.schadenort_lat), lng: Number(c.schadenort_lng) }
+      : null
+  return { ok: true, userId: user.id, center }
 }
 
 /** Die naechsten aktiven Partner-Werkstaetten zum Schadenort des Claims. */
 export async function ladeWerkstaettenFuerClaim(
   claimId: string,
-): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; werkstaetten: WerkstattFinderRow[]; center: { lat: number; lng: number } | null }
+  | { ok: false; error: string }
+> {
   if (!claimId) return { ok: false, error: 'Claim-ID fehlt.' }
   const owner = await assertOwnerOhneWerkstatt(claimId)
   if (!owner.ok) return { ok: false, error: owner.error }
   const { findReparaturWerkstaettenForTarget } = await import('@/lib/werkstatt/vermittlung-server')
   const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'claim', id: claimId })
-  return { ok: true, werkstaetten }
+  return { ok: true, werkstaetten, center: owner.center }
 }
 
 /** Kunde waehlt eine Werkstatt fuer seinen Reparatur-Claim (quelle='kunde'). */

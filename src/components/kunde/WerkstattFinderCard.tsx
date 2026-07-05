@@ -1,17 +1,17 @@
 'use client'
 
-// SP-C1 — Werkstatt-Finder-Card fuer die Kunde-Fallakte. Erscheint bei einem
+// SP-C1/C2 — Werkstatt-Finder-Card fuer die Kunde-Fallakte. Erscheint bei einem
 // Reparatur-Claim OHNE hinterlegte Werkstatt: laedt die naechsten Partner-Werkstaetten
-// und laesst den Kunden eine waehlen (assignReparaturWerkstatt quelle='kunde'). Danach
-// uebernimmt die bestehende WerkstattCard (Wunschtermin). SP-C2 ersetzt die Liste
-// durch eine Mapbox-Karte auf denselben Actions.
+// + den Schadenort und laesst den Kunden auf einer Karte (+ Liste) eine waehlen
+// (assignReparaturWerkstatt quelle='kunde'). Danach uebernimmt die bestehende
+// WerkstattCard (Wunschtermin).
 
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { WrenchIcon } from 'lucide-react'
 
-import { WerkstattFinder } from '@/components/werkstatt/finder/WerkstattFinder'
+import { WerkstattFinderMap } from '@/components/kunde/WerkstattFinderMap'
 import { Card } from '@/components/primitives'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import {
@@ -22,6 +22,7 @@ import {
 export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
   const router = useRouter()
   const [werkstaetten, setWerkstaetten] = useState<WerkstattFinderRow[] | null>(null)
+  const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [isPending, startTransition] = useTransition()
 
@@ -29,7 +30,12 @@ export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
     let alive = true
     ladeWerkstaettenFuerClaim(claimId).then((r) => {
       if (!alive) return
-      setWerkstaetten(r.ok ? r.werkstaetten : [])
+      if (r.ok) {
+        setWerkstaetten(r.werkstaetten)
+        setCenter(r.center)
+      } else {
+        setWerkstaetten([])
+      }
     })
     return () => {
       alive = false
@@ -59,8 +65,9 @@ export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
           Wähle eine Partner-Werkstatt in deiner Nähe für die Reparatur. Sie meldet sich danach zur
           Terminabstimmung bei dir.
         </p>
-        <WerkstattFinder
+        <WerkstattFinderMap
           werkstaetten={werkstaetten ?? []}
+          center={center}
           onSelect={handleSelect}
           selectedId={selectedId}
           loading={werkstaetten === null || isPending}
