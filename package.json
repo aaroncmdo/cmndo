@@ -13,6 +13,7 @@
     "typecheck:embed": "tsc -p src/embed/monika/tsconfig.json",
     "typecheck:embed:login": "tsc -p src/embed/login/tsconfig.json",
     "check:component-set": "node scripts/check-component-set.mjs",
+    "check:status-registry": "node scripts/check-status-registry.mjs",
     "check:termin-engine-contract": "node scripts/check-termin-engine-contract.mjs",
     "check:knip": "node scripts/check-knip.mjs",
     "check:tailwind-arbitrary": "node scripts/check-tailwind-arbitrary.mjs",

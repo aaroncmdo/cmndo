@@ -278,6 +278,20 @@ CI fährt `npm run check:component-set -- --ratchet`. Es blockt **neue** handger
 Design/Plan: `docs/superpowers/specs/2026-05-28-component-set-ratchet-design.md` + `docs/superpowers/plans/2026-05-28-component-set-ratchet.md`.
 <!-- END:claimondo-component-set -->
 
+<!-- BEGIN:claimondo-status-registry -->
+# Status-Registry-Gate (Ratchet)
+
+Status-/Phasen-Badges ziehen Label + Farbe aus der zentralen getypten Registry `src/lib/status/` (`resolveStatus`/`statusLabel`/`statusSlotClass` + `<StatusBadge domain=.../>` / `<FallStatusBadge>` / `<FallPhaseBadge>`). Farbe = einer der 7 Token-Slots (`neutral/active/pending/done/success/warning/danger`), nie roh — branded via `var(--brand-*)`, token-audit-safe. Rollen-Varianten via `labelByRole` (verallgemeinert das alte `labelKunde`).
+
+CI fährt `npm run check:status-registry -- --ratchet`. Es blockt **NEUE** inline Status-/Farb-Maps (`const STATUS_COLORS = {…}`, `PHASE_PILL_COLOR`, `*_BADGE`, `*_CLS`) + Status-Farb-Ternaries (`status === 'x' ? 'bg-…'`) in `src/app/**` + `src/components/**` (ohne `ui/primitives/shared` — dort leben die sanktionierten Badge-Komponenten) gegen `scripts/status-registry-baseline.json`. Bestand (41 grandfathered) wird per **Boy-Scout** abgebaut: Consumer auf die Registry migrieren + Baseline mit `npm run check:status-registry -- --update-baseline` senken. Lokal (ohne Flag) `--warn` (exit 0).
+
+**Skip** (echte Nicht-Status-Farben — Chart-/Kategorie-Palette, Kanal-Identität): `// status-registry-skip: <grund>`-Header am File-Anfang. Pure-Logik: `scripts/lib/status-registry-scan.mjs`.
+
+**Nur COLOR-Logik gegatet** — reine Label-Maps (`Record<code,string>` ohne Farbe) sind erlaubt (Labels ≠ Branding). Zentrale Maps (`src/lib/statusLabels.ts`, `src/lib/status/*`, `src/components/shared/claims/*`) liegen ausserhalb des Scans = bewusst exempt.
+
+Design: `docs/superpowers/specs/2026-07-04-status-badge-registry-design.md`.
+<!-- END:claimondo-status-registry -->
+
 <!-- BEGIN:dead-code-gate -->
 # Dead-Code-Gate (knip)
 
