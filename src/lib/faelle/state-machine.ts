@@ -48,6 +48,19 @@ export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
   'storniert': [],
 }
 
+/**
+ * Pure Vorab-Check: ist der Uebergang from->to laut FALL_STATUS_TRANSITIONS gueltig?
+ * Fuer Pre-Checks (z.B. den fall_geschlossen-All-or-Nothing-Guard in process-event.ts),
+ * ohne die volle transitionFallStatus-DB-Logik auszufuehren. from=null/unbekannt -> false.
+ */
+export function istGueltigerFallUebergang(
+  from: string | null | undefined,
+  to: string,
+): boolean {
+  if (!from) return false
+  return (FALL_STATUS_TRANSITIONS[from] ?? []).includes(to)
+}
+
 export async function transitionFallStatus(
   fallId: string,
   newStatus: string,
