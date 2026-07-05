@@ -254,6 +254,11 @@ function isPublicPath(pathname: string): boolean {
     // 307 -> /login (analog '/sv' fuer /sv/registrieren). SPEZIFISCHER Pfad, NICHT
     // '/makler' (das wuerde via startsWith das ganze Portal oeffnen = Auth-Bypass).
     '/makler/registrieren',
+    // Makler-Wochenreport One-Click-Abmeldung (public, Token in der URL). BEWUSST
+    // NICHT unter '/abmelden' — app.claimondo.de/abmelden/* wird auf Infra-Ebene
+    // per 301 auf claimondo.de (Marketing) umgeleitet, wo es 404t (tote Zone, trifft
+    // auch den Winback-Link). Darum ein eigener App-Pfad, der nicht wegge-301't wird.
+    '/wochenreport-abmelden',
     // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt
     // hinter den Auth-Guard rutscht:
     '/vorteile',
