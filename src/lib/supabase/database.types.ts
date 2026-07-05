@@ -1235,6 +1235,7 @@ export type Database = {
           positionen: Json | null
           schweregrad: string | null
           session_token: string
+          totalschaden: Json | null
           vision_result: Json | null
         }
         Insert: {
@@ -1248,6 +1249,7 @@ export type Database = {
           positionen?: Json | null
           schweregrad?: string | null
           session_token: string
+          totalschaden?: Json | null
           vision_result?: Json | null
         }
         Update: {
@@ -1261,6 +1263,7 @@ export type Database = {
           positionen?: Json | null
           schweregrad?: string | null
           session_token?: string
+          totalschaden?: Json | null
           vision_result?: Json | null
         }
         Relationships: [
