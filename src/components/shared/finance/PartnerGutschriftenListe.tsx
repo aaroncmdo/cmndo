@@ -38,8 +38,10 @@ const DATE_FORMAT = new Intl.DateTimeFormat('de-DE', {
   timeZone: 'Europe/Berlin',
 })
 
+// betrag_brutto ist in Euro gespeichert (erstellePartnerGutschrift: bruttoCent/100),
+// wie im PartnerBillingPanel/PDF — NICHT nochmal durch 100 teilen.
 function fmtBetrag(n: number): string {
-  return EUR_FORMAT.format(n / 100)
+  return EUR_FORMAT.format(n)
 }
 
 function fmtDatum(iso: string): string {
