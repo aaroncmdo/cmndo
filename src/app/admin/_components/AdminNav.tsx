@@ -10,7 +10,7 @@ import {
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
   WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
-  NewspaperIcon, NetworkIcon, LifeBuoyIcon,
+  NewspaperIcon, NetworkIcon, LifeBuoyIcon, UserPlusIcon,
 } from 'lucide-react'
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
@@ -25,6 +25,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
+  { href: '/admin/partner-leads', label: 'Partner-Leads', icon: UserPlusIcon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   { href: '/admin/embed-billing', label: 'Embed-Billing', icon: ReceiptIcon },
   { href: '/admin/embed-sites', label: 'Embed-Sites', icon: Code2Icon },
