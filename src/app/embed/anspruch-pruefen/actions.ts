@@ -147,6 +147,6 @@ export async function berechneAnspruch(
     },
     saetze, faktoren, config,
   )
-  await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.positionen)
+  await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.positionen, spanne.totalschaden)
   return { ok: true, spanne }
 }

@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { AnspruchPosition, Schweregrad, Segment, VisionResult } from './types'
+import type { AnspruchPosition, Schweregrad, Segment, TotalschadenInfo, VisionResult } from './types'
 
 const BUCKET = 'fall-dokumente'
 const MAX_FOTOS = 8
@@ -82,11 +82,12 @@ export async function speicherePositionen(
   fahrbereit: boolean,
   ezJahr: number | null,
   positionen: AnspruchPosition[],
+  totalschaden?: TotalschadenInfo,
 ): Promise<void> {
   const db = createAdminClient()
   const { error } = await db
     .from('anspruch_schaetzungen')
-    .update({ erkanntes_segment: segment, schweregrad, fahrbereit, ez_jahr: ezJahr, positionen })
+    .update({ erkanntes_segment: segment, schweregrad, fahrbereit, ez_jahr: ezJahr, positionen, totalschaden: totalschaden ?? null })
     .eq('session_token', sessionToken)
   if (error) console.error('[anspruch/session] speicherePositionen failed:', error.message)
 }

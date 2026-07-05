@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
-import type { AnspruchPosition, AnspruchSpanne, Schweregrad } from './types'
+import type { AnspruchPosition, AnspruchSpanne, Schweregrad, TotalschadenInfo } from './types'
 
 /**
  * KI-Vorschaetzung (aus dem Anspruch-pruefen-Tool) fuer die SV-Fallakte laden.
@@ -32,7 +32,7 @@ export async function getAnspruchVorschauFuerFall(
 
   const { data: sess } = await admin
     .from('anspruch_schaetzungen')
-    .select('vision_result, positionen, erkanntes_segment, schweregrad, fahrbereit, ez_jahr')
+    .select('vision_result, positionen, erkanntes_segment, schweregrad, fahrbereit, ez_jahr, totalschaden')
     .eq('lead_id', leadId)
     .order('erstellt_am', { ascending: false })
     .limit(1)
@@ -56,7 +56,13 @@ export async function getAnspruchVorschauFuerFall(
     : []
 
   return {
-    spanne: { positionen, gesamtMinEur, gesamtMaxEur, hinweise: [] },
+    spanne: {
+      positionen,
+      gesamtMinEur,
+      gesamtMaxEur,
+      hinweise: [],
+      ...(sess.totalschaden ? { totalschaden: sess.totalschaden as unknown as TotalschadenInfo } : {}),
+    },
     beschaedigteTeile,
     schweregrad: (sess.schweregrad as Schweregrad | null) ?? null,
     segment: sess.erkanntes_segment ?? null,
