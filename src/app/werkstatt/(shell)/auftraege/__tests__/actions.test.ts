@@ -19,6 +19,16 @@ vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 vi.mock('@/lib/werkstatt/notify-kunde-reparaturtermin', () => ({
   notifyKundeReparaturtermin: h.notify,
 }))
+// P2-Actions (resendeKundenLink/oeffneKundenFlow) ziehen diese server-only-Module ins
+// actions.ts (via start-link/ensure-flowlink-for-lead). Diese Tests rufen sie nie —
+// die Stubs verhindern nur den 'server-only'-Import im Test-Import-Graph.
+vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: vi.fn() }))
+vi.mock('@/lib/start-link/ensure-flowlink-for-lead', () => ({
+  ensureCanonicalFlowLinkForLead: vi.fn(),
+}))
+vi.mock('@/lib/start-link/send-flowlink-multichannel', () => ({
+  sendFlowLinkMultiChannelCore: vi.fn(),
+}))
 vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn().mockResolvedValue({
     from: vi.fn(() => ({
