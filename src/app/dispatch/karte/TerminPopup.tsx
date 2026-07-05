@@ -31,7 +31,7 @@ function uhrzeit(iso: string): string {
 
 export default function TerminPopup({ pin }: { pin: TerminPin }) {
   const detailHref = pin.fall_id
-    ? `/admin/faelle/${pin.fall_id}`
+    ? `/faelle/${pin.fall_id}`
     : pin.lead_id
       ? `/dispatch/leads/${pin.lead_id}`
       : null
