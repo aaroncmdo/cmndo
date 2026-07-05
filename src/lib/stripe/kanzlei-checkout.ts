@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 import { createAdminClient } from '@/lib/supabase/admin'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
 
 /**
  * KFZ-188: Stripe Checkout Session fuer Kanzlei-Monatsabrechnung erstellen.

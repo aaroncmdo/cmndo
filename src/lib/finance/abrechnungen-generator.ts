@@ -1,24 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
-import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
-
-function fmtCurrency(val: number): string {
-  return new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(val) + ' €'
-}
-
-// ─── Abrechnungsnummer ─────────────────────────────────────────────────────
-
-// AAR-948: Serie CL-{YYYY}-{MM}-{TYP}-{NNN} jetzt atomar + lückenlos via
-// rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
-// race-anfälligem inline-LIKE-MAX. Monat + Typ stecken im serie-Key, damit der
-// Zähler pro Monat und Serie zurücksetzt — ohne Schema-Änderung am Counter.
-async function naechsteNummer(
-  monat: string, // YYYY-MM
-  typ: 'MARKETING' | 'KANZLEI',
-): Promise<string> {
-  const [jahrStr, monatStr] = monat.split('-')
-  const nr = await nextRechnungsNrRaw(`CL-${typ}-${monatStr}`, parseInt(jahrStr))
-  return `CL-${monat}-${typ}-${String(nr).padStart(3, '0')}`
-}
+import { eurToCent } from '@/lib/billing/calculate-ust'
+import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
+import { MARKETING_DESCRIPTOR, KANZLEI_A_DESCRIPTOR } from '@/lib/abrechnung/descriptors/marketing'
 
 // ─── Zeitraum Helpers ──────────────────────────────────────────────────────
 
@@ -49,24 +32,8 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
   const maikName = process.env.MARKETING_MAIK_NAME || 'Maik (Marketing)'
 
   if (!maikEmail) {
-    console.warn('[abrechnungen] MARKETING_MAIK_EMAIL nicht gesetzt — Marketing-Abrechnung übersprungen')
+    console.warn('[abrechnungen] MARKETING_MAIK_EMAIL nicht gesetzt — Marketing-Abrechnung uebersprungen')
     return null
-  }
-
-  // Idempotenz: schon eine Abrechnung für diesen Monat?
-  const { data: existing } = await supabase
-    .from('abrechnungen')
-    .select('id')
-    .eq('empfaenger_typ', 'marketing')
-    .eq('abrechnungs_zeitraum_start', start)
-    .eq('abrechnungs_zeitraum_ende', ende)
-    .neq('status', 'storniert')
-    .limit(1)
-    .maybeSingle()
-
-  if (existing) {
-    console.log(`[abrechnungen] Marketing-Abrechnung für ${monat} existiert bereits: ${existing.id}`)
-    return { abrechnungId: existing.id }
   }
 
   // Alle Leads mit unterschriebener Vollmacht im Monat.
@@ -83,15 +50,14 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
     return null
   }
 
-  // Für jeden Lead: Fall laden (claim_nummer für die Positions-Beschreibung).
-  const positionen: Position[] = []
+  // Fuer jeden Lead: Fall laden (claim_nummer fuer die Positions-Beschreibung).
+  const positionen_jsonb: Position[] = []
   const { FINANCE } = await import('@/lib/finance/constants')
   const CPA = FINANCE.CPA_MARKETING_NETTO
 
   for (const lead of leads) {
     // CMM-49 P1: Anker faelle -> claims geflippt. claims hat lead_id + claim_nummer direkt
-    // (kein faelle-Umweg/Embed mehr). fall.id ist jetzt die claim.id — als Positions-fall_id
-    // unten resolveClaimId-kompatibel (/faelle/${id} akzeptiert claim.id).
+    // (kein faelle-Umweg/Embed mehr). fall.id ist jetzt die claim.id.
     const { data: fall } = await supabase
       .from('claims')
       .select('id, claim_nummer')
@@ -102,49 +68,45 @@ export async function generiereMarketingAbrechnung(monat: string): Promise<{ abr
     const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
     const fallNr = fall?.claim_nummer || '—'
 
-    positionen.push({
+    positionen_jsonb.push({
       fall_id: fall?.id ?? null,
-      beschreibung: `CPA für Fall ${fallNr} — ${name} (SA ${new Date(lead.vollmacht_datum!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })})`,
+      beschreibung: `CPA fuer Fall ${fallNr} — ${name} (SA ${new Date(lead.vollmacht_datum!).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })})`,
       betrag_netto: CPA,
       betrag_brutto: Math.round(CPA * (1 + FINANCE.MWST_PROZENT / 100) * 100) / 100,
     })
   }
 
-  if (positionen.length === 0) return null
+  if (positionen_jsonb.length === 0) return null
 
-  const summeNetto = positionen.reduce((s, p) => s + p.betrag_netto, 0)
-  const ustSatz = 19
-  const ustBetrag = Math.round(summeNetto * ustSatz / 100 * 100) / 100
-  const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
+  // createAbrechnung-Positionen: jede Position hat betrag_netto_cent fuer den Cent-Pfad.
+  const positionen = positionen_jsonb.map(() => ({
+    betrag_netto_cent: eurToCent(CPA),
+  }))
 
-  const abrechnungsNr = await naechsteNummer(monat, 'MARKETING')
+  const kontext: Record<string, unknown> = {
+    monat,
+    empfaenger_email: maikEmail,
+    empfaenger_name: maikName,
+    abrechnungs_zeitraum_start: start,
+    abrechnungs_zeitraum_ende: ende,
+    // JSONB Display-Detail unveraendert mitgeben
+    positionen_jsonb,
+  }
 
-  const { data: abr, error } = await supabase
-    .from('abrechnungen')
-    .insert({
-      empfaenger_typ: 'marketing',
-      empfaenger_email: maikEmail,
-      empfaenger_name: maikName,
-      abrechnungs_nr: abrechnungsNr,
-      abrechnungs_zeitraum_start: start,
-      abrechnungs_zeitraum_ende: ende,
-      positionen,
-      summe_netto: summeNetto,
-      ust_satz: ustSatz,
-      ust_betrag: ustBetrag,
-      summe_brutto: summeBrutto,
-      status: 'entwurf',
-    })
-    .select('id')
-    .single()
+  const result = await createAbrechnung(supabase, MARKETING_DESCRIPTOR, { positionen, kontext })
 
-  if (error || !abr) {
-    console.error('[abrechnungen] Marketing-Insert fehlgeschlagen:', error?.message)
+  if (!result.ok) {
+    console.error('[abrechnungen] Marketing-Insert fehlgeschlagen:', result.error)
     return null
   }
 
-  console.log(`[abrechnungen] Marketing-Abrechnung ${abrechnungsNr} generiert: ${positionen.length} Positionen, ${fmtCurrency(summeBrutto)} brutto`)
-  return { abrechnungId: abr.id }
+  if (!result.erstellt) {
+    console.log(`[abrechnungen] Marketing-Abrechnung fuer ${monat} existiert bereits: ${result.bestehendeId}`)
+    return { abrechnungId: result.bestehendeId }
+  }
+
+  console.log(`[abrechnungen] Marketing-Abrechnung ${result.nummer} generiert: ${positionen.length} Positionen`)
+  return { abrechnungId: result.id }
 }
 
 // ─── Kanzlei-Abrechnungen ─────────────────────────────────────────────────
@@ -155,9 +117,9 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
   const { start, ende } = monatRange(monat)
   const results: Array<{ kanzleiId: string; abrechnungId: string }> = []
 
-  // Alle im Monat abgeschlossenen Fälle mit Kanzlei.
+  // Alle im Monat abgeschlossenen Faelle mit Kanzlei.
   // CMM-44 SP-A: kanzlei_ansprechpartner_name/email liegen auf claims (SSoT).
-  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag (SSoT).
+  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag -> claims.regulierungs_betrag (SSoT).
   // CMM-44 SP-I3: regulierung_am lebt auf kanzlei_faelle (1:1) — Filter auf
   // regulierung_am ist via Embed nicht moeglich, daher liest die Query aus
   // v_faelle_mit_aktuellem_termin. Die View hat alle gebrauchten Felder flach
@@ -172,7 +134,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
     .lte('regulierung_am', `${ende}T23:59:59`)
 
   if (!faelleRaw?.length) {
-    console.log(`[abrechnungen] Keine abgeschlossenen Kanzlei-Fälle im Monat ${monat}`)
+    console.log(`[abrechnungen] Keine abgeschlossenen Kanzlei-Faelle im Monat ${monat}`)
     return results
   }
 
@@ -200,24 +162,8 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
   for (const [kanzleiEmail, kanzleiFaelle] of grouped) {
     const kanzleiName = kanzleiFaelle[0].kanzlei_ansprechpartner_name || 'Kanzlei'
 
-    // Idempotenz
-    const { data: existing } = await supabase
-      .from('abrechnungen')
-      .select('id')
-      .eq('empfaenger_typ', 'kanzlei')
-      .eq('empfaenger_email', kanzleiEmail)
-      .eq('abrechnungs_zeitraum_start', start)
-      .eq('abrechnungs_zeitraum_ende', ende)
-      .neq('status', 'storniert')
-      .limit(1)
-      .maybeSingle()
-
-    if (existing) {
-      results.push({ kanzleiId: kanzleiEmail, abrechnungId: existing.id })
-      continue
-    }
-
-    const positionen: Position[] = []
+    // JSONB Position-Objekte (Display-Detail, unveraendert)
+    const positionen_jsonb: Position[] = []
     for (const fall of kanzleiFaelle) {
       const honorar = Number(fall.kanzlei_honorar ?? FINANCE.KANZLEI_PROVISION_NETTO)
 
@@ -232,7 +178,7 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
         if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
       }
 
-      positionen.push({
+      positionen_jsonb.push({
         fall_id: fall.id,
         beschreibung: `Honorar Fall ${fall.claim_nummer ?? fall.id.slice(0, 8)} — ${kundeName}`,
         betrag_netto: honorar,
@@ -240,39 +186,35 @@ export async function generiereKanzleiAbrechnungen(monat: string): Promise<Array
       })
     }
 
-    const summeNetto = positionen.reduce((s, p) => s + p.betrag_netto, 0)
-    const ustSatz = 19
-    const ustBetrag = Math.round(summeNetto * ustSatz / 100 * 100) / 100
-    const summeBrutto = Math.round((summeNetto + ustBetrag) * 100) / 100
+    // createAbrechnung-Positionen: betrag_netto_cent pro Position (Cent-Pfad)
+    const positionen = kanzleiFaelle.map((fall) => ({
+      betrag_netto_cent: eurToCent(Number(fall.kanzlei_honorar ?? FINANCE.KANZLEI_PROVISION_NETTO)),
+    }))
 
-    const abrechnungsNr = await naechsteNummer(monat, 'KANZLEI')
+    const kontext: Record<string, unknown> = {
+      monat,
+      empfaenger_email: kanzleiEmail,
+      empfaenger_name: kanzleiName,
+      abrechnungs_zeitraum_start: start,
+      abrechnungs_zeitraum_ende: ende,
+      // JSONB Display-Detail unveraendert mitgeben
+      positionen_jsonb,
+    }
 
-    const { data: abr, error } = await supabase
-      .from('abrechnungen')
-      .insert({
-        empfaenger_typ: 'kanzlei',
-        empfaenger_email: kanzleiEmail,
-        empfaenger_name: kanzleiName,
-        abrechnungs_nr: abrechnungsNr,
-        abrechnungs_zeitraum_start: start,
-        abrechnungs_zeitraum_ende: ende,
-        positionen,
-        summe_netto: summeNetto,
-        ust_satz: ustSatz,
-        ust_betrag: ustBetrag,
-        summe_brutto: summeBrutto,
-        status: 'entwurf',
-      })
-      .select('id')
-      .single()
+    const result = await createAbrechnung(supabase, KANZLEI_A_DESCRIPTOR, { positionen, kontext })
 
-    if (error || !abr) {
-      console.error(`[abrechnungen] Kanzlei-Insert fehlgeschlagen für ${kanzleiEmail}:`, error?.message)
+    if (!result.ok) {
+      console.error(`[abrechnungen] Kanzlei-Insert fehlgeschlagen fuer ${kanzleiEmail}:`, result.error)
       continue
     }
 
-    console.log(`[abrechnungen] Kanzlei-Abrechnung ${abrechnungsNr} für ${kanzleiName}: ${positionen.length} Positionen, ${fmtCurrency(summeBrutto)} brutto`)
-    results.push({ kanzleiId: kanzleiEmail, abrechnungId: abr.id })
+    if (!result.erstellt) {
+      results.push({ kanzleiId: kanzleiEmail, abrechnungId: result.bestehendeId })
+      continue
+    }
+
+    console.log(`[abrechnungen] Kanzlei-Abrechnung ${result.nummer} fuer ${kanzleiName}: ${positionen.length} Positionen`)
+    results.push({ kanzleiId: kanzleiEmail, abrechnungId: result.id })
   }
 
   return results

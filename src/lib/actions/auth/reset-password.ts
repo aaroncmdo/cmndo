@@ -25,10 +25,10 @@ export async function requestPasswordReset(
   const supabase = await createClient()
 
   // Origin aus Request-Headern bauen, damit lokale Dev-Sessions den
-  // localhost-Link bekommen und Production den cmndo.vercel.app-Link.
+  // localhost-Link bekommen und Production den app.claimondo.de-Link.
   const h = await headers()
   const proto = h.get('x-forwarded-proto') ?? 'https'
-  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'cmndo.vercel.app'
+  const host = h.get('x-forwarded-host') ?? h.get('host') ?? 'app.claimondo.de'
   const origin = `${proto}://${host}`
 
   try {

@@ -1,13 +1,17 @@
 ﻿'use client'
 
 // AAR-92: Maik-Provisionen Client UI mit Inline-CPL + Confirm/Reverse
+// Task-11: USt-Status-Toggle fuer Maik (marketing_partner).
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react'
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
+import { setzePartnerUstStatus } from '@/lib/finance/partner-billing-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
+import { Button } from '@/components/primitives/Button'
+import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { PROVISION_STATUS_COLORS, PROVISION_STATUS_LABELS } from '@/lib/statusLabels'
 
@@ -31,12 +35,29 @@ type Props = {
   monat: string
   months: string[]
   kpi: { total: number; pending: number; confirmed: number; sumPending: number; sumConfirmed: number }
+  /** Maik-marketing_partner-Zeile fuer USt-Toggle. null wenn Tabelle leer. */
+  maik: { id: string; istKleinunternehmer: boolean | null } | null
 }
 
-export default function ProvisionenClient({ provisionen, monat, months, kpi }: Props) {
+export default function ProvisionenClient({ provisionen, monat, months, kpi, maik }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [editing, setEditing] = useState<Record<string, string>>({})
+
+  // USt-Toggle fuer Maik
+  const [maikUstPending, startMaikUstTransition] = useTransition()
+  const [maikUstMeldung, setMaikUstMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
+  const [maikUstAktuell, setMaikUstAktuell] = useState<boolean | null>(maik?.istKleinunternehmer ?? null)
+
+  function handleMaikUstToggle(value: boolean) {
+    if (!maik) return
+    setMaikUstMeldung(null)
+    startMaikUstTransition(async () => {
+      const result = await setzePartnerUstStatus('marketing', maik.id, value)
+      setMaikUstMeldung(result)
+      if (result.ok) setMaikUstAktuell(value)
+    })
+  }
 
   function handleSetCpl(id: string) {
     const val = parseFloat(editing[id])
@@ -114,6 +135,42 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
         <StatCard size="sm" icon={CheckCircle2Icon} tone="success" label="Bestätigt" value={`${kpi.confirmed} (${kpi.sumConfirmed.toFixed(2)}€)`} />
         <StatCard size="sm" icon={WalletIcon} tone="ondo" label="Auszahlbar" value={`${kpi.sumConfirmed.toFixed(2)}€`} />
       </div>
+
+      {/* USt-Status Maik */}
+      {maik && (
+        <SectionCard title="USt-Status Maik">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-claimondo-navy">
+              {maikUstAktuell === true
+                ? 'Aktuell: USt-pflichtig'
+                : maikUstAktuell === false
+                  ? 'Aktuell: Kleinunternehmer'
+                  : 'Aktuell: Unbekannt'}
+            </span>
+            <Button
+              size="sm"
+              variant={maikUstAktuell === true ? 'ghost' : 'navy'}
+              loading={maikUstPending}
+              onClick={() => handleMaikUstToggle(true)}
+            >
+              USt-pflichtig
+            </Button>
+            <Button
+              size="sm"
+              variant={maikUstAktuell === false ? 'ghost' : 'navy'}
+              loading={maikUstPending}
+              onClick={() => handleMaikUstToggle(false)}
+            >
+              Kleinunternehmer
+            </Button>
+            {maikUstMeldung && (
+              maikUstMeldung.ok
+                ? <span className="rounded-ios-sm bg-success-soft px-2 py-0.5 text-xs text-success-strong">Gespeichert</span>
+                : <span className="rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">{maikUstMeldung.error ?? 'Fehler'}</span>
+            )}
+          </div>
+        </SectionCard>
+      )}
 
       {/* Tabelle */}
       <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md">

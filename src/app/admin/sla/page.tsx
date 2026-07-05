@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
 import { SLA_LABEL, type SlaTyp } from '@/lib/sla/tracker'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import { StatCard } from '@/components/shared/StatCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,29 +36,11 @@ export default async function SlaMonitoringPage() {
         </div>
       </div>
 
-      {/* KPI-Boxen */}
+      {/* KPI-Boxen — shared StatCard (filled = getoente Alert-Kachel) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-danger-soft border border-danger/30 rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-danger-strong">
-            <AlertTriangleIcon className="w-5 h-5" />
-            <span className="text-body-xs font-semibold uppercase">Verletzt</span>
-          </div>
-          <p className="text-3xl font-bold text-danger-strong mt-2">{breached.length}</p>
-        </div>
-        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-warning-strong">
-            <ClockIcon className="w-5 h-5" />
-            <span className="text-body-xs font-semibold uppercase">Risiko (&lt; 30 Min)</span>
-          </div>
-          <p className="text-3xl font-bold text-warning-strong mt-2">{atRisk.length}</p>
-        </div>
-        <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-claimondo-ondo">
-            <CheckCircleIcon className="w-5 h-5" />
-            <span className="text-body-xs font-semibold uppercase">Offen</span>
-          </div>
-          <p className="text-3xl font-bold text-claimondo-navy mt-2">{pending.length}</p>
-        </div>
+        <StatCard filled tone="danger" icon={AlertTriangleIcon} label="Verletzt" value={breached.length} />
+        <StatCard filled tone="warning" icon={ClockIcon} label="Risiko (< 30 Min)" value={atRisk.length} />
+        <StatCard filled tone="neutral" icon={CheckCircleIcon} label="Offen" value={pending.length} />
       </div>
 
       {/* Tabelle */}

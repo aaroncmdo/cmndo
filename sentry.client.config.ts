@@ -11,6 +11,6 @@ if (process.env.NEXT_PUBLIC_SENTRY_DSN) {
       'ResizeObserver loop limit exceeded',
       'NetworkError when attempting to fetch',
     ],
-    tracePropagationTargets: ['cmndo.vercel.app', 'claimondo.de'],
+    tracePropagationTargets: ['app.claimondo.de', 'claimondo.de'],
   })
 }

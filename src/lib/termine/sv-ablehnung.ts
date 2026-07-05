@@ -121,7 +121,7 @@ export async function ablehnTermin(terminId: string, grund: string) {
     const fallId = termin.fall_id as string | null
     if (fallId) {
       // Trigger SV-Zuweisung API intern (gleicher Zeitslot)
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
       const resp = await fetch(`${appUrl}/api/sv-zuweisung`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${process.env.CRON_SECRET}` },

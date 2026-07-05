@@ -21,18 +21,3 @@ export async function nextRechnungsNrRaw(serie: string, jahr: number): Promise<n
   return Number(data)
 }
 
-/**
- * AAR-416: Setup-Anzahlungs-/Monatsabrechnungs-Nr. im Schema
- * `{serie}-{YYYY}-{NNNNN}` (5-stellig, pro Jahr zurückgesetzt).
- *
- * Serien:
- *   - `CM-ONB` → Setup-Anzahlungs-Rechnungen (AAR-401)
- *   - `CMNDO`  → Monatsabrechnung (KFZ-149, mit Monat-Suffix anders)
- */
-export async function generateRechnungsNr(
-  serie: 'CM-ONB' | 'CMNDO',
-  jahr: number = new Date().getFullYear(),
-): Promise<string> {
-  const laufendeNr = await nextRechnungsNrRaw(serie, jahr)
-  return `${serie}-${jahr}-${String(laufendeNr).padStart(5, '0')}`
-}

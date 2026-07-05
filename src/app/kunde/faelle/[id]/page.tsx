@@ -44,6 +44,7 @@ import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
+import WerkstattCard from '@/components/kunde/WerkstattCard'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -318,6 +319,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       minderwert: number | null
       wiederbeschaffungswert: number | null
       restwert: number | null
+      // SP4a Task 4: Werkstatt-Vermittlung
+      reparatur_werkstatt_id: string | null
     } | null = null
     if (fall.claim_id) {
       // Cluster F+G PR-2: Split in 2 Queries — claims für Kanzlei-Felder (Nicht-F+G),
@@ -325,7 +328,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparatur_werkstatt_id')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
@@ -351,8 +354,34 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           minderwert: cxView?.minderwert != null ? Number(cxView.minderwert) : null,
           wiederbeschaffungswert: cxView?.wiederbeschaffungswert != null ? Number(cxView.wiederbeschaffungswert) : null,
           restwert: cxView?.restwert != null ? Number(cxView.restwert) : null,
+          // SP4a Task 4: Werkstatt-Vermittlung
+          reparatur_werkstatt_id: (cxClaim?.reparatur_werkstatt_id as string | null) ?? null,
         }
       }
+    }
+
+    // SP4a Task 4: Werkstatt-Stammdaten + aktiver Reparaturtermin.
+    // Ownership ist durch getKundeFallDetailRecord bereits verifiziert.
+    // Admin-Client konsistent mit allen anderen page.tsx-Reads.
+    let werkstattData: { name: string; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null; telefon: string | null } | null = null
+    let reparaturTermin: { id: string; status: string; wunschtermin: string | null; bestaetigter_termin: string | null; absage_grund: string | null } | null = null
+    const reparaturWerkstattId = claimExtra?.reparatur_werkstatt_id ?? null
+    if (reparaturWerkstattId) {
+      const { data: w } = await admin
+        .from('werkstaetten')
+        .select('name, adresse_strasse, adresse_plz, adresse_ort, telefon')
+        .eq('id', reparaturWerkstattId)
+        .maybeSingle()
+      werkstattData = w as typeof werkstattData
+      const { data: t } = await admin
+        .from('reparatur_termine')
+        .select('id, status, wunschtermin, bestaetigter_termin, absage_grund')
+        .eq('claim_id', fall.claim_id as string)
+        .neq('status', 'storniert')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      reparaturTermin = t as typeof reparaturTermin
     }
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
@@ -882,6 +911,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             kanzleiUebergebenAm={claimExtra?.kanzlei_uebergeben_am ?? null}
             gutachtenFreigegeben={gutachtenFreigegebenFuerSummary}
             gutachtenUrl={gutachtenUrlAusBucket}
+          />
+        )}
+
+        {/* SP4a Task 4: Werkstatt-Card — nur bei hinterlegter Werkstatt. */}
+        {werkstattData && (
+          <WerkstattCard
+            claimId={fall.claim_id as string}
+            werkstatt={werkstattData}
+            termin={reparaturTermin}
           />
         )}
 

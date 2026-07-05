@@ -157,7 +157,7 @@ Schadenshergang · Gegner-Daten · VS-Policennr · Polizei-Az · Gutachten · Fo
 ## 3. Endpoint (2): Inbound `POST /api/webhooks/lexdrive`
 
 **Von:** Kanzlei → Claimondo
-**URL:** `https://cmndo.vercel.app/api/webhooks/lexdrive` (Prod) / `https://cmndo-staging.vercel.app/api/webhooks/lexdrive` (Staging)
+**URL:** `https://app.claimondo.de/api/webhooks/lexdrive` (Prod) / `https://app.staging.claimondo.de/api/webhooks/lexdrive` (Staging)
 **Auth:** HMAC-SHA256 Header (siehe §4)
 
 ### Request-Header
@@ -522,7 +522,7 @@ Salesforce-typische Fallen:
 
 ### 9.6 Testing
 
-- **Sandbox** zeigt auf Claimondo-Staging-URL (`https://cmndo-staging.vercel.app/api/webhooks/lexdrive`)
+- **Sandbox** zeigt auf Claimondo-Staging-URL (`https://app.staging.claimondo.de/api/webhooks/lexdrive`)
 - **Apex-Tests** mit `HttpCalloutMock` für Outbound, `Test.startTest()`/`Test.stopTest()` für Queueable-Assertions
 - **End-to-End-Smoke-Test** durchlaufen:
   1. Claimondo-Staging sendet `POST /mandate` → SF-Sandbox legt `Mandat__c` an

@@ -4,7 +4,7 @@
 //
 // Verwendung:
 //   MSYS_NO_PATHCONV=1 node scripts/check-console-errors.mjs /gutachter/feldmodus
-//   MSYS_NO_PATHCONV=1 node scripts/check-console-errors.mjs /gutachter/feldmodus --base=https://cmndo.vercel.app
+//   MSYS_NO_PATHCONV=1 node scripts/check-console-errors.mjs /gutachter/feldmodus --base=https://app.claimondo.de
 //   MSYS_NO_PATHCONV=1 node scripts/check-console-errors.mjs /gutachter/feldmodus --wait=8000
 //
 // Output: stdout — gefilterte Errors + Warnings + Failed-Requests.
@@ -13,7 +13,7 @@ import { chromium } from 'playwright'
 
 const BASE_URL = (process.argv.find((a) => a.startsWith('--base='))?.split('=')[1])
   ?? process.env.SCREENSHOT_BASE_URL
-  ?? 'https://cmndo.vercel.app'
+  ?? 'https://app.claimondo.de'
 const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
 const WAIT_MS = parseInt(process.argv.find((a) => a.startsWith('--wait='))?.split('=')[1] ?? '6000', 10)
 

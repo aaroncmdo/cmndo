@@ -22,6 +22,8 @@ export type StatCardProps = {
   value: string | number
   icon?: LucideIcon
   tone?: StatCardTone
+  /** Voll-getoente Alert-Variante: getoenter Card-Hintergrund + Zahl (fuer prominente Status-KPIs). */
+  filled?: boolean
   /** Zusatzzeile unter dem Wert (z. B. „bezahlte Rechnungen") */
   hint?: ReactNode
   /** Macht die Kachel zu einem Link */
@@ -36,6 +38,7 @@ export function StatCard({
   value,
   icon: IconRef,
   tone = 'neutral',
+  filled = false,
   hint,
   href,
   size = 'md',
@@ -50,6 +53,7 @@ export function StatCard({
       value={value}
       iconNode={iconNode}
       tone={tone}
+      filled={filled}
       hint={hint}
       href={href}
       size={size}

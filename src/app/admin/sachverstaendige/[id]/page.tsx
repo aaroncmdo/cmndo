@@ -5,11 +5,14 @@ import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
 import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
+import AbrechnungsTab from './AbrechnungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { getPartnerBilling } from '@/lib/finance/partner-billing'
+import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
 type SvSearchParams = { tab?: string }
 
@@ -22,7 +25,7 @@ export default async function SvDetailPage({
 }) {
   const { id } = await params
   const sp = (await searchParams) ?? {}
-  const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : 'stammdaten'
+  const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : sp.tab === 'abrechnungen' ? 'abrechnungen' : 'stammdaten'
   const supabase = await createClient()
 
   // AAR-659: profiles-Embed mit FK-Hint (Follow-up zu AAR-657 — die Stelle
@@ -237,6 +240,15 @@ export default async function SvDetailPage({
     }
   }
 
+  // Abrechnungs-Tab-Daten (nur wenn aktiv — spart Query sonst)
+  let abrechnungsRows: PartnerBillingRow[] = []
+  let abrechnungsAggregat: PartnerBillingAggregat = { perStatus: {}, perPartnerTyp: {}, hat_unbekannten_ust_status: false }
+  if (activeTab === 'abrechnungen') {
+    const result = await getPartnerBilling({ partnerTyp: 'sv', partnerId: id })
+    abrechnungsRows = result.rows
+    abrechnungsAggregat = result.aggregat
+  }
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
@@ -339,11 +351,23 @@ export default async function SvDetailPage({
           >
             Verifizierung
           </Link>
+          <Link
+            href={`/admin/sachverstaendige/${id}?tab=abrechnungen`}
+            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+              activeTab === 'abrechnungen'
+                ? 'border-claimondo-ondo text-claimondo-shield'
+                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
+            }`}
+          >
+            Abrechnungen
+          </Link>
         </div>
       </div>
 
       {/* ── Tab-Content ──────────────────────────────────────────── */}
-      {activeTab === 'verifizierung' ? (
+      {activeTab === 'abrechnungen' ? (
+        <AbrechnungsTab rows={abrechnungsRows} aggregat={abrechnungsAggregat} />
+      ) : activeTab === 'verifizierung' ? (
         <div className="flex-1 overflow-y-auto p-4 bg-claimondo-bg/30">
           <div className="max-w-4xl mx-auto">
             {verifizierungsData.loadError && (
