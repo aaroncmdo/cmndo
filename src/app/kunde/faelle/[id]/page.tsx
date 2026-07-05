@@ -37,6 +37,7 @@ import { NoticeBox } from '@/components/shared/NoticeBox'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
+import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
@@ -319,6 +320,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       minderwert: number | null
       wiederbeschaffungswert: number | null
       restwert: number | null
+      reparaturkosten_netto: number | null
+      reparaturwunsch: string | null
       // SP4a Task 4: Werkstatt-Vermittlung
       reparatur_werkstatt_id: string | null
     } | null = null
@@ -328,13 +331,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparatur_werkstatt_id')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
           .from('v_gutachten_werte')
           .select(
-            'totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
+            'totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
           )
           .eq('claim_id', fall.claim_id as string)
           .maybeSingle(),
@@ -351,9 +354,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           gutachten_nutzungsausfall_tagessatz_eur: (cxView?.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
           gutachten_mietwagen_tagessatz_eur: (cxView?.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
           reparaturkosten_brutto: cxView?.reparaturkosten_brutto != null ? Number(cxView.reparaturkosten_brutto) : null,
+          reparaturkosten_netto: cxView?.reparaturkosten_netto != null ? Number(cxView.reparaturkosten_netto) : null,
           minderwert: cxView?.minderwert != null ? Number(cxView.minderwert) : null,
           wiederbeschaffungswert: cxView?.wiederbeschaffungswert != null ? Number(cxView.wiederbeschaffungswert) : null,
           restwert: cxView?.restwert != null ? Number(cxView.restwert) : null,
+          reparaturwunsch: (cxClaim?.reparaturwunsch as string | null) ?? null,
           // SP4a Task 4: Werkstatt-Vermittlung
           reparatur_werkstatt_id: (cxClaim?.reparatur_werkstatt_id as string | null) ?? null,
         }
@@ -832,6 +837,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             betrag={(kanzleiPayout?.vs_quote_betrag_ausgezahlt as number | null) ?? null}
             eingegangenAm={(kanzleiPayout?.ausgezahlt_am as string | null) ?? null}
             zahlungsweg={(kundeView.auszahlung_zahlungsweg as string | null) ?? null}
+          />
+        )}
+
+        {/* SP4c: Fiktive-Abrechnung-Card — voraussichtliche Auszahlung auf Gutachten-Basis
+            (nur wenn der Kunde die fiktive Abrechnung gewählt hat). */}
+        {claimExtra?.reparaturwunsch === 'fiktiv' && (
+          <FiktiveAbrechnungCard
+            reparaturkostenNetto={claimExtra.reparaturkosten_netto}
+            minderwert={claimExtra.minderwert}
+            totalschaden={claimExtra.totalschaden}
+            wiederbeschaffungswert={claimExtra.wiederbeschaffungswert}
+            restwert={claimExtra.restwert}
           />
         )}
 
