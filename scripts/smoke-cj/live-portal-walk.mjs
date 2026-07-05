@@ -45,7 +45,7 @@ console.log(`✓ Fall: ${fall.id} (status=${fall.status})`)
 console.log(`✓ Kunde-User: ${fall.kunde_id}`)
 console.log(`✓ Lead-Email: ${lead.email}`)
 
-// 2. Password setzen (Magic-Link redirect ist auf cmndo.vercel.app fehl-
+// 2. Password setzen (Magic-Link redirect ist auf app.claimondo.de fehl-
 //    konfiguriert in Supabase Site URL — eigener Bug, separater Fix-PR).
 //    Workaround: service-role setzt Password, Walker loggt sich klassisch ein.
 const NEW_PW = 'SmokeWalk1234!'

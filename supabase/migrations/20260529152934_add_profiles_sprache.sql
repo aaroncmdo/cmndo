@@ -5,6 +5,15 @@
 ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS sprache text;
 
+-- 2026-07-04: idempotent gemacht (DROP IF EXISTS vor ADD). Der Constraint ist bereits in der
+-- Baseline 00000000000000 (Stand 2026-05-30, pg_dump) enthalten; die frische Supabase-Preview
+-- wendet Baseline + diese Migration an -> ohne DROP warf das ADD SQLSTATE 42710 "already exists"
+-- und brach die Preview jedes Migrations-PRs (systemisches Rauschen, nicht feature-spezifisch).
+-- Prod unveraendert: Constraint existiert dort korrekt, die Migration wird NICHT neu appliziert;
+-- Dateiname == getrackte Version bleibt -> kein Twin-Drift (AGENTS.md Regel 2). Ergebnis identisch.
+ALTER TABLE public.profiles
+  DROP CONSTRAINT IF EXISTS profiles_sprache_check;
+
 ALTER TABLE public.profiles
   ADD CONSTRAINT profiles_sprache_check
   CHECK (sprache IS NULL OR sprache IN ('de','en','tr','ar','ru','pl'));

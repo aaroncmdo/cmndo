@@ -3,13 +3,16 @@
 // mit der Kunden-Unterschrift versehen, im Storage abgelegt und in
 // fall_dokumente eingetragen. AAR-360 Follow-up (24.06.): die Sicherungsabtretung
 // ist KUNDENSICHTBAR (der Kunde ist Partei der Abtretung + muss sie sehen); die
-// Honorarvereinbarung bleibt SV-/intern-only (SV / Admin / KB / Kanzlei).
+// Honorarvereinbarung ist EBENFALLS kundensichtbar (Aaron 04.07.: der Kunde muss
+// alles sehen, was er beim Gutachter unterschreibt). Alle 4 sind kunden- + SV-sichtbar.
 //
 // AAR-360 Follow-up (23.06.): Datenschutzerklärung + Widerrufsbelehrung des
 // Gutachters werden NICHT mehr mit-signiert — das sind rechtlich Informations-/
 // Belehrungs-Dokumente, keine zu unterschreibenden Verträge. Der Kunde stimmt
 // ihnen im FlowLink per Extra-Häkchen zu (claims.sv_datenschutz_widerruf_zugestimmt_am).
-// Daher nur noch 2 Signatur-Slots (SA + Honorarvereinbarung).
+// UEBERHOLT (Aaron 04.07.): wieder 4 Signatur-Slots — s. PFLICHT_SLOTS unten.
+// Widerruf + Datenschutz werden erneut mit-signiert (Kunde signiert alle vier mit
+// derselben Unterschrift; das Haekchen bleibt als zusaetzlicher Nachweis).
 //
 // Strategie:
 //  - Pro Slot eine `pflichtdokumente`-Row mit status='hochgeladen' oder
@@ -31,15 +34,36 @@ import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 // AAR-360 Follow-up: NUR signatur-pflichtige Dokumente. Datenschutzerklärung +
 // Widerrufsbelehrung sind entkoppelt (Zustimmung via FlowLink-Häkchen, nicht Signatur).
-const PFLICHT_SLOTS = [
+// Aaron 04.07.: alle vier SV-Rechtsdokumente werden mit der Kunden-Unterschrift
+// versehen (Widerruf + Datenschutz zurueck von Haekchen-only auf Signatur). Der
+// Generator merged nur Slots, fuer die der SV eine Vorlage (pflichtdokumente-Row,
+// status hochgeladen/geprueft, dokument_url gesetzt) hat — SVs ohne Widerruf-/
+// Datenschutz-Vorlage ueberspringen die neuen Slots stillschweigend (skipped).
+export const PFLICHT_SLOTS = [
   'sv_sicherungsabtretung',
   'sv_honorarvereinbarung',
+  'sv_widerrufsbelehrung',
+  'sv_datenschutzerklaerung',
 ] as const
 
 const SLOT_LABEL: Record<(typeof PFLICHT_SLOTS)[number], string> = {
   sv_sicherungsabtretung: 'Sicherungsabtretung',
   sv_honorarvereinbarung: 'Honorarvereinbarung',
+  sv_widerrufsbelehrung: 'Widerrufsbelehrung',
+  sv_datenschutzerklaerung: 'Datenschutzerklärung',
 }
+
+// Aaron 04.07.: ALLE vom Kunden mit-signierten SV-Dokumente sind kunden-sichtbar —
+// der Kunde ist Unterzeichner + Partei und muss alles sehen, was er beim Gutachter
+// unterschreibt (inkl. Honorarvereinbarung). Der Generator erzeugt ausschliesslich
+// kunden-signierte Dokumente, daher gilt diese Sichtbarkeit fuer jeden PFLICHT_SLOT.
+export const SIGNIERT_SICHTBAR_FUER: readonly string[] = [
+  'admin',
+  'kundenbetreuer',
+  'sachverstaendiger',
+  'kanzlei',
+  'kunde',
+]
 
 /** Klick-Editor-Konfig je Slot (admin gepflegt unter /admin/vertraege). */
 type KlickKonfig = {
@@ -462,11 +486,9 @@ async function persistMerged({
       original_filename: dateiName,
       groesse_bytes: outBytes.byteLength,
       mime_type: 'application/pdf',
-      // AAR-360 Follow-up: Sicherungsabtretung kundensichtbar (Kunde ist Partei); Honorar SV-/intern-only.
-      sichtbar_fuer:
-        slotId === 'sv_sicherungsabtretung'
-          ? ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde']
-          : ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei'],
+      // Aaron 04.07.: alle mit-signierten Dokumente (inkl. Honorarvereinbarung) sind
+      // kunden- UND SV-sichtbar — der Kunde muss alles sehen, was er unterschreibt.
+      sichtbar_fuer: [...SIGNIERT_SICHTBAR_FUER],
       beschreibung: `${slotLabel} mit Kunden-Unterschrift (SV ${svId})`,
     })
     .select('id')

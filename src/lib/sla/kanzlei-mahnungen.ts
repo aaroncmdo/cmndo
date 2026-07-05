@@ -173,7 +173,7 @@ export async function sendKanzleiMahnung(
     kbEmail = kb?.email ?? null
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
   const portalUrl = `${appUrl}/kanzlei/faelle/${fall.id}`
   const kuerzungBetrag = fall.kuerzungs_betrag
     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fall.kuerzungs_betrag))

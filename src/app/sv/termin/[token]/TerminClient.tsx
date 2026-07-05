@@ -8,7 +8,7 @@ import { terminAblehnen, terminGegenvorschlag, terminAnnehmen } from '@/lib/acti
 
 type View = 'overview' | 'ablehnen' | 'gegenvorschlag' | 'done'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
 
 export default function TerminClient({ termin, token }: { termin: TerminData; token: string }) {
   const [view, setView] = useState<View>('overview')

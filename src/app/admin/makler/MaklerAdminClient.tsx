@@ -4,19 +4,22 @@
 // DataTable + TextField + createdCredentials-Pattern), aber: plain Adress-Felder (kein Geo/Isochrone),
 // dual-rate, und handleCreate MIT try/catch (WerkstaettenClient hat hier einen Silent-Swallow-Bug).
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { UsersIcon, PlusIcon, KeyIcon, Layers3Icon, Trash2Icon } from 'lucide-react'
+import { UsersIcon, PlusIcon, KeyIcon, Layers3Icon, Trash2Icon, ReceiptIcon } from 'lucide-react'
 import { createMakler } from './actions'
 import { getMaklerStaffel, setMaklerStaffel } from './staffel-actions'
+import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
 
 type GesellschaftOption = { id: string; name: string }
 import PageHeader from '@/components/shared/PageHeader'
-import { Button, Modal } from '@/components/primitives'
+import { Button, Modal, CloseButton } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { TextField } from '@/components/shared/forms/TextField'
+import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
+import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
 type Makler = {
   id: string
@@ -41,6 +44,12 @@ const STATUS_COLORS: Record<string, string> = {
 function formatDatum(iso: string | null) {
   if (!iso) return '—'
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+}
+
+type DrawerData = {
+  rows: PartnerBillingRow[]
+  aggregat: PartnerBillingAggregat
+  istKleinunternehmer: boolean | null
 }
 
 export default function MaklerAdminClient({
@@ -108,6 +117,30 @@ export default function MaklerAdminClient({
     }
   }
 
+  // Billing-Drawer
+  const [openPartnerId, setOpenPartnerId] = useState<string | null>(null)
+  const [drawerData, setDrawerData] = useState<DrawerData | null>(null)
+  const [drawerPending, startDrawerTransition] = useTransition()
+
+  function openBillingDrawer(m: Makler) {
+    setDrawerData(null)
+    setOpenPartnerId(m.id)
+    startDrawerTransition(async () => {
+      const r = await ladePartnerBilling('makler', m.id)
+      if (r.ok) {
+        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer })
+      } else {
+        toast.error(r.error)
+        setOpenPartnerId(null)
+      }
+    })
+  }
+
+  function closeDrawer() {
+    setOpenPartnerId(null)
+    setDrawerData(null)
+  }
+
   function openDialog() {
     setCreatedCredentials(null)
     setVersicherungId(null)
@@ -163,6 +196,7 @@ export default function MaklerAdminClient({
                 <Th className="text-left text-claimondo-ondo!">Provision (komplett / nur Gutachter)</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
                 <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
+                <Th className="text-left text-claimondo-ondo!">Abrechnung</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -208,11 +242,22 @@ export default function MaklerAdminClient({
                       Staffel
                     </Button>
                   </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={drawerPending && openPartnerId === m.id}
+                      onClick={() => openBillingDrawer(m)}
+                      iconLeft={<ReceiptIcon className="w-4 h-4" />}
+                    >
+                      Abrechnung
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {maklers.length === 0 && (
                 <Tr>
-                  <Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Makler angelegt.
                   </Td>
                 </Tr>
@@ -337,6 +382,38 @@ export default function MaklerAdminClient({
             </div>
           )}
         </Modal>
+
+        {/* Billing-Drawer */}
+        {openPartnerId && (
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-claimondo-navy/40"
+            onClick={closeDrawer}
+          >
+            <div
+              className="relative w-full max-w-3xl bg-white h-full overflow-y-auto p-6 rounded-l-ios-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CloseButton onPress={closeDrawer} />
+              <h2 className="text-claimondo-navy font-semibold text-lg mb-6 pr-12">
+                {maklers.find((m) => m.id === openPartnerId)?.firma ?? 'Makler'} — Abrechnung
+              </h2>
+              {drawerPending && !drawerData && (
+                <p className="text-claimondo-ondo text-sm">Wird geladen…</p>
+              )}
+              {drawerData && (
+                <PartnerBillingPanel
+                  rows={drawerData.rows}
+                  aggregat={drawerData.aggregat}
+                  ustToggle={{
+                    partnerTyp: 'makler',
+                    partnerId: openPartnerId,
+                    current: drawerData.istKleinunternehmer,
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

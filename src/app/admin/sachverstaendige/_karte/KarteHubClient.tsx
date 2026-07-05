@@ -1,3 +1,5 @@
+// Token-Audit-Skip: SV-Typ-Map-Marker-Farben (AAR-198) + Google-Maps-Symbol-Navy — Maps-Symbol-Props akzeptieren kein var().
+//   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
 // AAR-690: Karten-Rückbau. Google Maps statt Mapbox-3D. Ein Pin pro SV am
@@ -10,6 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { SearchIcon } from 'lucide-react'
+import ErrorState from '@/components/shared/ErrorState'
 
 // ─── Types (Shape bleibt kompatibel zur page.tsx-Query) ─────────────────────
 
@@ -41,27 +44,6 @@ export type SvMarker = {
   ihkNr?: string | null
   oebuvNr?: string | null
   notizen?: string | null
-}
-
-export type CommunityMarker = {
-  id: string
-  name: string
-  exklusiv: boolean
-  maxFaelle: number | null
-  lat: number | null
-  lng: number | null
-  isochrone?: GeoPolygon
-  einsatzKm?: number | null
-}
-
-export type OrgMarker = {
-  id: string
-  name: string
-  typ: 'buero' | 'akademie'
-  lat: number | null
-  lng: number | null
-  isochrone?: GeoPolygon
-  einsatzKm?: number | null
 }
 
 // ─── Typ-Farben (Pin + Isochrone in derselben Farbe pro Gutachter-Typ) ──────
@@ -144,8 +126,6 @@ function polygonOptions(color: string, hovered: boolean): google.maps.PolygonOpt
 
 type Props = {
   svs: SvMarker[]
-  communities?: CommunityMarker[]
-  organisationen?: OrgMarker[]
   /** Anzahl ausstehender Basic-Freigaben — fuer den Queue-Link im Header */
   basicFreigabenCount?: number
 }
@@ -158,8 +138,11 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
   const markersRef = useRef<globalThis.Map<string, google.maps.Marker>>(new globalThis.Map())
   const polygonsRef = useRef<globalThis.Map<string, google.maps.Polygon>>(new globalThis.Map())
   const [mapReady, setMapReady] = useState(false)
+  const [mapError, setMapError] = useState<Error | null>(null)
   const [hoveredSvId, setHoveredSvId] = useState<string | null>(null)
   const [search, setSearch] = useState('')
+  // Retry-Trigger: Inkrementieren re-runt den Init-Effect (loadMaps erneut).
+  const [initAttempt, setInitAttempt] = useState(0)
 
   // AAR-691: Klick auf Pin oder Listen-Item navigiert zur SV-Detail-URL.
   // Die Intercepting-Route (@drawer/(.)[id]) fängt die Navigation ab und
@@ -184,11 +167,30 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
       )
     : visibleSvs
 
+  // ─── Overlay-Teardown (Marker + Polygone samt Listenern freigeben) ──────
+  // Google Maps hat KEIN `map.remove()` (anders als Mapbox). Aufräumen heißt:
+  // jedes Overlay via `setMap(null)` von der Karte lösen, seine Event-Listener
+  // per `clearInstanceListeners` entfernen und die Ref-Maps leeren. Sonst
+  // akkumulieren Overlays + Closure-Referenzen bei jedem Rebuild/Unmount.
+  const clearOverlays = () => {
+    markersRef.current.forEach((m) => {
+      google.maps.event.clearInstanceListeners(m)
+      m.setMap(null)
+    })
+    markersRef.current.clear()
+    polygonsRef.current.forEach((p) => {
+      google.maps.event.clearInstanceListeners(p)
+      p.setMap(null)
+    })
+    polygonsRef.current.clear()
+  }
+
   // ─── Map initialisieren ─────────────────────────────────────────────────
 
   useEffect(() => {
     if (!apiKey || !containerRef.current || mapRef.current) return
     let cancelled = false
+    setMapError(null)
     loadMaps(apiKey).then(() => {
       if (cancelled || !containerRef.current || mapRef.current) return
       mapRef.current = new google.maps.Map(containerRef.current, {
@@ -203,9 +205,25 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
         ],
       })
       setMapReady(true)
-    }).catch(() => { /* silent */ })
-    return () => { cancelled = true }
-  }, [apiKey])
+    }).catch((err: unknown) => {
+      if (cancelled) return
+      console.error('[KarteHubClient] Maps-Init fehlgeschlagen:', err)
+      setMapError(err instanceof Error ? err : new Error('Karte konnte nicht geladen werden'))
+    })
+    // Unmount-Teardown: Overlays + deren Listener freigeben, Map-Instanz-
+    // Listener lösen und mapRef nullen, damit ein Re-Mount die Karte frisch
+    // aufbaut (der Init-Guard `mapRef.current` würde sonst blockieren).
+    return () => {
+      cancelled = true
+      clearOverlays()
+      if (mapRef.current && typeof google !== 'undefined' && google.maps?.event) {
+        google.maps.event.clearInstanceListeners(mapRef.current)
+      }
+      mapRef.current = null
+      setMapReady(false)
+    }
+    // initAttempt in den Deps: Retry-Button re-initialisiert die Karte.
+  }, [apiKey, initAttempt])
 
   // ─── Pins + Polygone aufbauen ───────────────────────────────────────────
 
@@ -213,10 +231,8 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
     if (!mapRef.current || !mapReady) return
     const map = mapRef.current
 
-    markersRef.current.forEach((m) => m.setMap(null))
-    markersRef.current.clear()
-    polygonsRef.current.forEach((p) => p.setMap(null))
-    polygonsRef.current.clear()
+    // Alte Overlays inkl. ihrer Listener freigeben, bevor neu aufgebaut wird.
+    clearOverlays()
 
     if (visibleSvs.length === 0) return
 
@@ -329,7 +345,30 @@ export default function KarteHubClient({ svs, basicFreigabenCount = 0 }: Props) 
             </Link>
           </div>
         </div>
-        <div ref={containerRef} className="flex-1 min-h-[400px]" />
+        {/* Karten-Container bleibt immer gemountet (Ref-Target für Init +
+            Retry); Lade-/Fehler-Zustände liegen als Overlay darüber. */}
+        <div className="relative flex-1 min-h-[400px]">
+          <div ref={containerRef} className="absolute inset-0" />
+          {mapError && (
+            <div className="absolute inset-0 flex items-center justify-center bg-claimondo-bg p-4">
+              <ErrorState
+                title="Karte konnte nicht geladen werden"
+                description="Die Google-Maps-Karte ließ sich nicht initialisieren. Bitte prüfe die Internetverbindung und versuche es erneut."
+                error={mapError}
+                retry={() => {
+                  setMapError(null)
+                  setInitAttempt((n) => n + 1)
+                }}
+              />
+            </div>
+          )}
+          {!mapError && !mapReady && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-claimondo-bg text-claimondo-ondo">
+              <div className="w-8 h-8 rounded-full border-2 border-claimondo-border border-t-claimondo-ondo animate-spin" />
+              <p className="text-xs">Karte wird geladen …</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Rechte Spalte: Liste */}

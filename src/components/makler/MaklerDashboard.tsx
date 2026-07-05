@@ -14,8 +14,10 @@ import {
 import { StatCard } from '@/components/shared/StatCard'
 import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
 import { MaklerStaffelCard } from '@/components/makler/MaklerStaffelCard'
+import { MaklerPipelineCard } from '@/components/makler/MaklerPipelineCard'
 import type { StaffelStufe } from '@/lib/werkstatt/staffel'
 import type { DashboardData } from '@/lib/makler/queries'
+import type { MaklerPipeline } from '@/lib/makler/pipeline'
 
 type Props = {
   makler: {
@@ -24,6 +26,7 @@ type Props = {
     ansprechpartner_vorname: string
   }
   data: DashboardData
+  pipeline: MaklerPipeline
   zeigeErsteVermittlungCard: boolean
   promoCode: string | null
   staffelSettled: number
@@ -56,6 +59,7 @@ function relativeFromNow(iso: string): string {
 export function MaklerDashboard({
   makler,
   data,
+  pipeline,
   zeigeErsteVermittlungCard,
   promoCode,
   staffelSettled,
@@ -112,6 +116,10 @@ export function MaklerDashboard({
         />
       </section>
 
+      {/* Vertriebs-Pipeline: All-Time-Funnel (Leads → Vermittelt → Ausgezahlt) +
+          Geld-Pipeline (abrechenbar/ausgezahlt) — ergaenzt die Monats-KPIs oben. */}
+      <MaklerPipelineCard offeneLeads={stats.offeneLeads} pipeline={pipeline} />
+
       {/* Activity + Schnellaktionen als 2-col auf Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section aria-label="Aktivität" className="lg:col-span-2">
@@ -166,6 +174,7 @@ export function MaklerDashboard({
         </section>
 
         <section aria-label="Schnellaktionen" className="space-y-4">
+          <h2 className="text-base font-semibold text-claimondo-navy">Hier klicken</h2>
           <QuickAction
             href="/makler/promo"
             label="Promo-Code teilen"

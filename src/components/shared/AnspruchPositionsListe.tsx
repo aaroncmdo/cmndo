@@ -6,15 +6,20 @@ function eur(n: number): string {
 
 export function AnspruchPositionsListe({
   spanne,
+  titel,
   gesamtLabel = 'Ihr möglicher Anspruch',
   disclaimer = 'Unverbindliche Ersteinschätzung anhand Ihrer Fotos. Den verbindlichen Anspruch ermittelt Ihr Gutachter.',
 }: {
   spanne: AnspruchSpanne
+  titel?: string
   gesamtLabel?: string
   disclaimer?: string
 }) {
   return (
     <div className="rounded-ios-lg border border-claimondo-border bg-white p-4">
+      {titel ? (
+        <p className="mb-3 text-body font-semibold text-claimondo-navy">{titel}</p>
+      ) : null}
       <ul className="divide-y divide-claimondo-border">
         {spanne.positionen.map((p) => (
           <li key={p.typ} className="flex items-start justify-between gap-3 py-3">
@@ -45,7 +50,7 @@ export function AnspruchPositionsListe({
       {spanne.hinweise.map((h) => (
         <p key={h} className="mt-2 text-caption text-claimondo-shield">{h}</p>
       ))}
-      <p className="mt-2 text-caption text-claimondo-shield">{disclaimer}</p>
+      {disclaimer ? <p className="mt-2 text-caption text-claimondo-shield">{disclaimer}</p> : null}
     </div>
   )
 }

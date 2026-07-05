@@ -137,7 +137,7 @@ export async function GET(request: Request) {
               const { data: lead } = await db.from('leads').select('vorname, telefon').eq('id', fallFull.lead_id).single()
               if (lead?.telefon) {
                 const { sendCommunication } = await import('@/lib/communications/send')
-                const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+                const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
                 await sendCommunication('dokumente_nachreichen', {
                   telefon: lead.telefon,
                   vorname: lead.vorname ?? 'Kunde',

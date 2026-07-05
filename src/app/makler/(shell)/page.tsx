@@ -9,6 +9,8 @@ import {
   getMaklerVermittlungsCount,
   getMaklerStaffelStufen,
 } from '@/lib/makler/queries'
+import { getMaklerPipeline } from '@/lib/makler/pipeline'
+import { createClient } from '@/lib/supabase/server'
 import { MaklerDashboard } from '@/components/makler/MaklerDashboard'
 
 export const dynamic = 'force-dynamic'
@@ -22,8 +24,10 @@ export default async function MaklerDashboardPage() {
   // Weiche steht hier in der Dashboard-Page (nicht im Layout) -> kein Loop mit /makler/willkommen.
   if (!makler.onboarding_abgeschlossen) redirect('/makler/willkommen')
 
-  const [data, vermittlungsCount, staffelStufen] = await Promise.all([
+  const supabase = await createClient()
+  const [data, pipeline, vermittlungsCount, staffelStufen] = await Promise.all([
     getMaklerDashboardData(makler.id),
+    getMaklerPipeline(supabase, makler.id),
     getMaklerVermittlungsCount(makler.id),
     getMaklerStaffelStufen(makler.id),
   ])
@@ -37,6 +41,7 @@ export default async function MaklerDashboardPage() {
     <MaklerDashboard
       makler={makler}
       data={data}
+      pipeline={pipeline}
       zeigeErsteVermittlungCard={zeigeErsteVermittlungCard}
       promoCode={data.promoCode}
       staffelSettled={vermittlungsCount.settled}

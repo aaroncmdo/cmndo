@@ -46,7 +46,7 @@ export async function fetchBlitzerInBbox(
 
   try {
     const res = await fetch(url, {
-      // Atudo prüft Referer leicht; cmndo.vercel.app wird akzeptiert
+      // Atudo prüft Referer leicht; app.claimondo.de wird akzeptiert
       // (im Browser setzt der UA den Referer eh automatisch).
       cache: 'no-store',
     })
