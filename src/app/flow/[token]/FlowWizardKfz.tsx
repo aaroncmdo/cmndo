@@ -602,6 +602,11 @@ export default function FlowWizardKfz({
                 vorname={editVorname || lead.vorname || null}
                 onSchuldfrage={setSchuldfrageWahl}
                 onWeiter={() => setStepIndex(stepIndex + 1)}
+                onSelbstzahler={(claimId) => {
+                  // SP-B2: partieller Selbstzahler-Claim existiert -> wie SA-Pfad in den Account-Step.
+                  setFallId(claimId)
+                  setStepIndex(stepIndexById('account'))
+                }}
               />
             )}
 
