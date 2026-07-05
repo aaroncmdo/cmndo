@@ -289,7 +289,8 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
     .select(`
       claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
       fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
-      gutachter_firmenname, besichtigung_start, besichtigung_ort, besichtigung_status,
+      gutachter_firmenname,
+      besichtigung_start, besichtigung_ort, besichtigung_status,
       provision_betrag_netto, provision_status,
       reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
       reparatur_bestaetigter_termin, reparatur_absage_grund,
