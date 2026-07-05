@@ -265,6 +265,36 @@ describe('auszahlenProvision', () => {
     )
     expect(statusPatch?.status).toBe('ausgezahlt')
   })
+
+  it('pre-existing Gutschrift (pdf_storage_path null) + PDF-Fehler: Zeile NICHT geloescht, kein status:paid, {ok:false}', async () => {
+    // Pre-check returns an EXISTING row (justCreated stays false) with pdf_storage_path: null
+    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({
+      ok: false,
+      error: 'Storage upload fehlgeschlagen',
+    })
+
+    const db = richFakeDb({
+      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      // Existing row found by pre-check; pdf_storage_path is null → PDF generation will be attempted
+      gutschriftenPrecheckData: CANNED_GUTSCHRIFT_ROW, // pdf_storage_path: null
+    })
+    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+
+    // erstellePartnerGutschrift must NOT have been called — row already existed
+    expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
+
+    // The pre-existing row must NOT be deleted (binding invariant: never delete a pre-existing row)
+    expect(db._deleteCalledWith()).toBeNull()
+
+    // No status→paid update must have been issued
+    const statusPatches = db._ledgerUpdates.filter(
+      (p: Record<string, unknown>) => 'status' in p,
+    )
+    expect(statusPatches).toHaveLength(0)
+
+    // Overall result must be failure
+    expect(r.ok).toBe(false)
+  })
 })
 
 describe('storniereProvision', () => {

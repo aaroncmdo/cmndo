@@ -249,7 +249,12 @@ export async function auszahlenProvision(
       if (justCreated) await db.from('partner_gutschriften').delete().eq('id', gutschriftRow.id)
       return { ok: false, error: pdf.error }
     }
-    await db.from('partner_gutschriften').update({ pdf_storage_path: pdf.pdfPath }).eq('id', gutschriftRow.id)
+    const { error: patchErr } = await db
+      .from('partner_gutschriften')
+      .update({ pdf_storage_path: pdf.pdfPath })
+      .eq('id', gutschriftRow.id)
+    // do NOT delete — row+PDF are valid; retry re-patches via the pre-check
+    if (patchErr) return { ok: false, error: patchErr.message }
   }
 
   // Step 5 — Status auf paid setzen (letzter Ledger-Write; nur erreichbar wenn Gutschrift + PDF vorhanden)
