@@ -1,14 +1,15 @@
 'use client'
 
-// AAR-956 §3a + SP-B1: Quali-Step im /flow. gegner/unklar wie bisher. eigenverantwortung
+// AAR-956 §3a + SP-B1/B2: Quali-Step im /flow. gegner/unklar wie bisher. eigenverantwortung
 // oeffnet eine Versicherungs-Folgefrage -> kasko (KaskoEndansicht) oder selbstzahler
-// (Hinweis; die Werkstatt-Strecke folgt in SP-B2). QualiOptionen bleibt unberuehrt.
+// (SP-B2: partieller Claim via erzeugeSelbstzahlerClaim -> onSelbstzahler -> Account-Step/Portal).
+// QualiOptionen bleibt unberuehrt.
 
 import { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { QualiOptionen } from '@/components/self-service/QualiOptionen'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
-import { speichereQualiFlow } from './self-service-actions'
+import { speichereQualiFlow, erzeugeSelbstzahlerClaim } from './self-service-actions'
 
 type Phase = 'frage' | 'versicherung' | 'sende' | 'abbruch' | 'selbstzahler' | 'fehler'
 
@@ -17,11 +18,13 @@ export function FlowQualiStep({
   vorname,
   onWeiter,
   onSchuldfrage,
+  onSelbstzahler,
 }: {
   token: string
   vorname: string | null
   onWeiter: () => void
   onSchuldfrage?: (v: string) => void
+  onSelbstzahler?: (claimId: string) => void
 }) {
   const t = useTranslations('selfService')
   const [phase, setPhase] = useState<Phase>('frage')
@@ -38,7 +41,15 @@ export function FlowQualiStep({
         return
       }
       if (r.abrechnungsweg === 'selbstzahler') {
+        // SP-B2: partiellen Claim erzeugen, dann via onSelbstzahler in den Account-Step (Portal).
         setPhase('selbstzahler')
+        const claimRes = await erzeugeSelbstzahlerClaim(token)
+        if (!claimRes.ok) {
+          setPhase('fehler')
+          setFehler(claimRes.error)
+          return
+        }
+        onSelbstzahler?.(claimRes.claimId)
         return
       }
       if (r.ergebnis === 'abbruch') {
@@ -68,13 +79,8 @@ export function FlowQualiStep({
   if (phase === 'selbstzahler') {
     return (
       <div className="max-w-md text-center">
-        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">
-          Alles klar — wir helfen dir bei der Reparatur
-        </h1>
-        <p className="text-claimondo-navy/70">
-          Du trägst den Schaden selbst. Im nächsten Schritt findest du eine passende Werkstatt in deiner
-          Nähe und stimmst direkt einen Termin ab.
-        </p>
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">Wir richten deinen Vorgang ein…</h1>
+        <p className="text-claimondo-navy/70">Gleich findest du eine passende Werkstatt in deiner Nähe.</p>
       </div>
     )
   }
