@@ -376,8 +376,8 @@ describe('erstellePartnerGutschrift', () => {
     expect(db._insertedRows).toHaveLength(0)
   })
 
-  // Aussteller snapshot populated correctly from konfig
-  it('populates aussteller_snapshot from RechnungsKonfig', async () => {
+  // Aussteller snapshot populated correctly from konfig (full RechnungsKonfig after step 0)
+  it('populates aussteller_snapshot from RechnungsKonfig (full konfig including geschaeftsfuehrer/hrb)', async () => {
     const db = makeDb({
       partnerData: {
         firma: 'Snap Test Makler',
@@ -394,14 +394,19 @@ describe('erstellePartnerGutschrift', () => {
     const row = db._insertedRows[0] as Record<string, unknown>
     const aussteller = row.aussteller_snapshot as Record<string, unknown>
     const konfig = makeKonfig()
+    // Core billing fields
     expect(aussteller.firmenname).toBe(konfig.firmenname)
+    expect(aussteller.zahlungsempfaenger_iban).toBe(konfig.zahlungsempfaenger_iban)
+    // Full konfig now includes geschaeftsfuehrer and hrb (may be null in mock, but key must exist)
+    expect('geschaeftsfuehrer' in aussteller).toBe(true)
+    expect('hrb' in aussteller).toBe(true)
+    // Other key fields still present
     expect(aussteller.strasse).toBe(konfig.strasse)
     expect(aussteller.plz).toBe(konfig.plz)
     expect(aussteller.ort).toBe(konfig.ort)
     expect(aussteller.steuernummer).toBe(konfig.steuernummer)
     expect(aussteller.ust_id).toBe(konfig.ust_id)
     expect(aussteller.zahlungsempfaenger_name).toBe(konfig.zahlungsempfaenger_name)
-    expect(aussteller.zahlungsempfaenger_iban).toBe(konfig.zahlungsempfaenger_iban)
     expect(aussteller.zahlungsempfaenger_bic).toBe(konfig.zahlungsempfaenger_bic)
     expect(aussteller.zahlungsempfaenger_bank).toBe(konfig.zahlungsempfaenger_bank)
   })

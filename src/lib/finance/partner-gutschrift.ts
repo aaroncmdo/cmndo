@@ -87,18 +87,9 @@ export async function erstellePartnerGutschrift(
       return { ok: false, error: (err as Error).message }
     }
 
-    const aussteller_snapshot = {
-      firmenname: konfig.firmenname,
-      strasse: konfig.strasse,
-      plz: konfig.plz,
-      ort: konfig.ort,
-      steuernummer: konfig.steuernummer,
-      ust_id: konfig.ust_id,
-      zahlungsempfaenger_name: konfig.zahlungsempfaenger_name,
-      zahlungsempfaenger_iban: konfig.zahlungsempfaenger_iban,
-      zahlungsempfaenger_bic: konfig.zahlungsempfaenger_bic,
-      zahlungsempfaenger_bank: konfig.zahlungsempfaenger_bank,
-    }
+    // Store the full konfig as the aussteller snapshot so AbsenderHeaderBlock
+    // gets all fields (geschaeftsfuehrer/hrb) — a frozen legal snapshot must be complete.
+    const aussteller_snapshot = konfig
 
     // 5. Insert
     const row = {
