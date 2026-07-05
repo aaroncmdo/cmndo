@@ -6,7 +6,7 @@
 // reserveSvTerminForLead. Meldet der Karte per Callbacks welche SVs hervorgehoben
 // werden sollen (onCandidates) und welcher gerade gehovert wird (onPreviewSv).
 
-import { useState, useEffect, useTransition } from 'react'
+import { useState, useEffect, useCallback, useRef, useTransition } from 'react'
 import { CalendarCheckIcon, MapPinIcon, XIcon } from 'lucide-react'
 import { Drawer, Button } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -257,13 +257,20 @@ export default function AssignFromMapDrawer({
   const [bestaetigung, setBestaetigung] = useState<BestaetigungState | null>(null)
   const [pending, startTransition] = useTransition()
 
-  // ── Laden beim Mount ───────────────────────────────────────────────────────
-  useEffect(() => {
+  // mountedRef: verhindert State-Updates + spuriösen onCandidates-Callback, wenn
+  // der Drawer schließt während getSvSuggestionsWithSlots noch läuft. Ohne den
+  // Guard würde das späte .then() onCandidates(...) NACH dem Cleanup onCandidates([])
+  // feuern → Kandidaten leuchten auf der Karte nach dem Schließen nach.
+  const mountedRef = useRef(true)
+
+  // ── Ladelogik (Mount + Retry teilen sich dieselbe geguardete Funktion) ─────
+  const reload = useCallback(() => {
     setLoading(true)
     setError(null)
 
     getSvSuggestionsWithSlots(leadId, { slotsPerSv: 3, maxSvs: 3, slotDauerMin: 45 })
       .then((r) => {
+        if (!mountedRef.current) return
         if (r.success) {
           const s = r.suggestions ?? []
           setSuggestions(s)
@@ -273,12 +280,23 @@ export default function AssignFromMapDrawer({
         }
       })
       .catch((e: unknown) => {
-        setError(String(e))
+        if (mountedRef.current) {
+          setError(e instanceof Error ? e.message : 'SV-Suche fehlgeschlagen')
+        }
       })
-      .finally(() => setLoading(false))
+      .finally(() => {
+        if (mountedRef.current) setLoading(false)
+      })
+  }, [leadId, onCandidates])
 
-    // Cleanup beim Unmount: Karte-Hervorhebungen zurücksetzen
+  // ── Laden beim Mount + Cleanup beim Unmount ────────────────────────────────
+  useEffect(() => {
+    mountedRef.current = true
+    reload()
+
     return () => {
+      // Cleanup: keine State-Updates mehr zulassen, Karte-Hervorhebungen zurücksetzen.
+      mountedRef.current = false
       onCandidates([])
       onPreviewSv(null)
     }
@@ -383,22 +401,7 @@ export default function AssignFromMapDrawer({
               <button
                 type="button"
                 className="mt-3 text-body-sm text-claimondo-navy underline"
-                onClick={() => {
-                  setLoading(true)
-                  setError(null)
-                  getSvSuggestionsWithSlots(leadId, { slotsPerSv: 3, maxSvs: 3, slotDauerMin: 45 })
-                    .then((r) => {
-                      if (r.success) {
-                        const s = r.suggestions ?? []
-                        setSuggestions(s)
-                        onCandidates(s.map((x) => x.svId))
-                      } else {
-                        setError(r.error ?? 'SV-Suche fehlgeschlagen')
-                      }
-                    })
-                    .catch((e: unknown) => setError(String(e)))
-                    .finally(() => setLoading(false))
-                }}
+                onClick={reload}
               >
                 Erneut versuchen
               </button>
