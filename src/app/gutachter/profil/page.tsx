@@ -53,7 +53,10 @@ export default async function ProfilPage() {
       // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee_id/assignee_typ
       .eq('assignee_id', sv.id)
       .eq('assignee_typ', 'sachverstaendiger')
-      .eq('status', 'vorschlag')
+      // FIX (Status-Enum-Audit 05.07.): gutachter_termine.status hat kein 'vorschlag'
+      // -> .eq war immer leer, SV sah nie offene Vorschlaege. SV-actionable =
+      // reserviert (Slot awaiting Bestaetigung) + gegenvorschlag (vgl. sv/termin canAct).
+      .in('status', ['reserviert', 'gegenvorschlag'])
       .order('start_zeit', { ascending: true })
     pendingTermine = termine ?? []
   }
