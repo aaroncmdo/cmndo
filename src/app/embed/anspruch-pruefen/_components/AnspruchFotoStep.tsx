@@ -33,7 +33,7 @@ export function AnspruchFotoStep({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div>
         <h2 className="text-heading-sm font-bold text-claimondo-navy">Schaden fotografieren</h2>
         <p className="text-body-sm text-claimondo-shield">
@@ -43,7 +43,7 @@ export function AnspruchFotoStep({
 
       <label className="flex cursor-pointer items-center justify-center rounded-ios-md border border-dashed border-claimondo-border bg-claimondo-bg px-4 py-8 text-body text-claimondo-navy">
         <input type="file" accept="image/*" capture="environment" multiple className="hidden" onChange={onFile} disabled={busy} />
-        {anzahl > 0 ? `${anzahl} Foto(s) hinzugefügt — weitere hinzufügen` : 'Fotos aufnehmen oder auswählen'}
+        {anzahl > 0 ? `${anzahl} Foto(s) hinzugefügt · weitere hinzufügen` : 'Fotos aufnehmen oder auswählen'}
       </label>
 
       {fehler ? <p className="text-body-sm text-danger-strong">{fehler}</p> : null}
