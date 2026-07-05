@@ -1,4 +1,5 @@
 import { AnspruchPositionsListe } from '@/components/shared/AnspruchPositionsListe'
+import { AnspruchTotalschadenWege } from '@/components/shared/AnspruchTotalschadenWege'
 import { SEGMENT_LABEL } from '@/lib/anspruch/types'
 import type { AnspruchVorschau } from '@/lib/anspruch/get-anspruch-vorschau-fuer-fall'
 
@@ -15,7 +16,7 @@ export function AnspruchVorschauCard({ vorschau }: { vorschau: AnspruchVorschau 
     <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg p-4">
       <h3 className="text-heading-sm font-bold text-claimondo-navy">KI-Vorschätzung des Kunden</h3>
       <p className="mt-1 text-caption text-claimondo-shield">
-        Automatische Ersteinschätzung aus den vom Kunden hochgeladenen Schadenfotos — unverbindlich, ersetzt nicht Ihr Gutachten.
+        Automatische Ersteinschätzung aus den vom Kunden hochgeladenen Schadenfotos. Unverbindlich, ersetzt nicht Ihr Gutachten.
       </p>
 
       <div className="mt-3 space-y-1 text-body-sm text-claimondo-navy">
@@ -39,13 +40,25 @@ export function AnspruchVorschauCard({ vorschau }: { vorschau: AnspruchVorschau 
         )}
       </div>
 
-      <div className="mt-3">
-        <AnspruchPositionsListe
-          spanne={vorschau.spanne}
-          gesamtLabel="Möglicher Anspruch des Kunden"
-          disclaimer="Vom System erzeugte KI-Ersteinschätzung des Kunden — unverbindlich, ersetzt nicht Ihr Gutachten."
-        />
-      </div>
+      {vorschau.spanne.totalschaden ? (
+        <div className="mt-3 space-y-3">
+          <p className="text-body-sm text-claimondo-shield">
+            Möglicher wirtschaftlicher Totalschaden. Der Kunde hat zwei Wege:
+          </p>
+          <AnspruchTotalschadenWege totalschaden={vorschau.spanne.totalschaden} />
+          <p className="text-caption text-claimondo-shield">
+            Vom System erzeugte KI-Ersteinschätzung des Kunden. Unverbindlich, ersetzt nicht Ihr Gutachten.
+          </p>
+        </div>
+      ) : (
+        <div className="mt-3">
+          <AnspruchPositionsListe
+            spanne={vorschau.spanne}
+            gesamtLabel="Möglicher Anspruch des Kunden"
+            disclaimer="Vom System erzeugte KI-Ersteinschätzung des Kunden. Unverbindlich, ersetzt nicht Ihr Gutachten."
+          />
+        </div>
+      )}
     </div>
   )
 }
