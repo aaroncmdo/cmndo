@@ -1013,7 +1013,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       )}
 
       {/* Assign-from-Map-Drawer (nur fuer admin + dispatch, wenn Lead ausgewaehlt) */}
-      {assignLeadId && (
+      {assignLeadId && (role === 'admin' || role === 'dispatch') && (
         <AssignFromMapDrawer
           leadId={assignLeadId}
           leadName={leadsRef.current.find((l) => l.id === assignLeadId)?.name ?? 'Lead'}
