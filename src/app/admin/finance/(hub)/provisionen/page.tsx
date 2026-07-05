@@ -1,5 +1,7 @@
 // AAR-92: Maik-Provisionen Admin-UI
+// Task-11: marketing_partner Maik-Zeile server-seitig laden, USt-Toggle an Client weitergeben.
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ProvisionenClient from './ProvisionenClient'
 
@@ -26,6 +28,15 @@ export default async function ProvisionenMaikPage({ searchParams }: {
     .eq('monat', aktMonat)
     .order('created_at', { ascending: false })
 
+  // Maik-marketing_partner-Zeile fuer USt-Toggle laden (admin-Client, Spalte in Branch neu)
+  const adminDb = createAdminClient()
+  const { data: maikRaw } = await adminDb
+    .from('marketing_partner' as never)
+    .select('id, ist_kleinunternehmer')
+    .limit(1)
+    .single()
+  const maik = maikRaw as { id: string; ist_kleinunternehmer: boolean | null } | null
+
   // KPIs
   const total = provisionen?.length ?? 0
   const pending = provisionen?.filter(p => p.status === 'pending').length ?? 0
@@ -47,6 +58,7 @@ export default async function ProvisionenMaikPage({ searchParams }: {
       monat={aktMonat}
       months={months}
       kpi={{ total, pending, confirmed, sumPending, sumConfirmed }}
+      maik={maik ? { id: maik.id, istKleinunternehmer: maik.ist_kleinunternehmer } : null}
     />
   )
 }

@@ -14,10 +14,10 @@ import {
 import DokumenteDrawer from './DokumenteDrawer'
 import {
   MAIN_PHASE_LABEL,
-  SUBPHASE_LABEL,
   type ClaimMainPhase,
   type ClaimSubPhase,
 } from '@/lib/claims/lifecycle'
+import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 
 export type KanbanKarte = {
   id: string
@@ -186,9 +186,7 @@ function KanbanCard({
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
         {/* CMM-44 MP-4d: aktueller Substate (z.B. Versicherungskontakt / Storniert) */}
-        <span className="text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded font-medium">
-          {SUBPHASE_LABEL[karte.subPhase]}
-        </span>
+        <FallPhaseBadge subPhase={karte.subPhase} size="sm" />
         {karte.kennzeichen && (
           <span className="font-mono text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded">
             {karte.kennzeichen}

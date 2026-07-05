@@ -98,6 +98,30 @@ export async function speichereQualiFlow(
 }
 
 /**
+ * SP-B2: Selbstzahler-Abschluss. Erzeugt aus dem Flow-Lead den PARTIELLEN Claim
+ * (kein SV/Gutachten/SA) via convertLeadToClaim ohne svIdFromTermin/signatureUrl.
+ * Nur wenn der Lead als Selbstzahler qualifiziert ist (abrechnungsweg='selbstzahler',
+ * SP-B1). Idempotent (convertLeadToClaim). Account-Step + Portal folgen im Wizard.
+ */
+export async function erzeugeSelbstzahlerClaim(
+  token: string,
+): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  // Defensive: nur echte Selbstzahler-Vorgaenge. abrechnungsweg ist type-lagged -> select('*')+Cast.
+  const { data: leadRow } = await admin.from('leads').select('*').eq('id', leadId).maybeSingle()
+  const abrechnungsweg = (leadRow as Record<string, unknown> | null)?.abrechnungsweg as string | null | undefined
+  if (abrechnungsweg !== 'selbstzahler') return { ok: false, error: 'Kein Selbstzahler-Vorgang.' }
+
+  const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
+  const conv = await convertLeadToClaim({ leadId })
+  if (!conv.ok) return { ok: false, error: conv.error }
+  revalidatePath('/dispatch/leads')
+  return { ok: true, claimId: conv.claimId }
+}
+
+/**
  * SV-Matching für den Flow-Lead — kundensichere OeffentlichesSvProfil-Projektion.
  * AAR-956 §4: die Verzweigung (Ort-Gate / Fixer / global) kommt jetzt aus der EINEN
  * Resolver-Quelle `resolveFlowTerminState` statt inline. Das GLOBALE Matching nutzt

@@ -4,18 +4,22 @@
 // DataTable + TextField + createdCredentials-Pattern), aber: plain Adress-Felder (kein Geo/Isochrone),
 // dual-rate, und handleCreate MIT try/catch (WerkstaettenClient hat hier einen Silent-Swallow-Bug).
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { UsersIcon, PlusIcon, KeyIcon } from 'lucide-react'
+import { UsersIcon, PlusIcon, KeyIcon, Layers3Icon, Trash2Icon, ReceiptIcon } from 'lucide-react'
 import { createMakler } from './actions'
+import { getMaklerStaffel, setMaklerStaffel } from './staffel-actions'
+import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
 
 type GesellschaftOption = { id: string; name: string }
 import PageHeader from '@/components/shared/PageHeader'
-import { Button, Modal } from '@/components/primitives'
+import { Button, Modal, CloseButton } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { TextField } from '@/components/shared/forms/TextField'
+import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
+import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
 type Makler = {
   id: string
@@ -42,6 +46,12 @@ function formatDatum(iso: string | null) {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
+type DrawerData = {
+  rows: PartnerBillingRow[]
+  aggregat: PartnerBillingAggregat
+  istKleinunternehmer: boolean | null
+}
+
 export default function MaklerAdminClient({
   maklers,
   versicherungen,
@@ -57,6 +67,79 @@ export default function MaklerAdminClient({
   const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
   const [versicherungId, setVersicherungId] = useState<string | null>(null)
   const [maklerpoolId, setMaklerpoolId] = useState<string | null>(null)
+
+  // Staffelung pro Makler (Meilenstein-Boni) — gespiegelt von WerkstaettenClient
+  const [staffelFor, setStaffelFor] = useState<Makler | null>(null)
+  const [staffelRows, setStaffelRows] = useState<{ schwelle: string; bonus: string }[]>([])
+  const [staffelLoadingId, setStaffelLoadingId] = useState<string | null>(null)
+  const [staffelSaving, setStaffelSaving] = useState(false)
+
+  async function openStaffel(m: Makler) {
+    setStaffelLoadingId(m.id)
+    try {
+      const res = await getMaklerStaffel(m.id)
+      if (!res.ok) {
+        toast.error(res.error)
+        return
+      }
+      setStaffelRows(res.stufen.map((s) => ({ schwelle: String(s.schwelle), bonus: String(s.bonus_betrag_netto) })))
+      setStaffelFor(m)
+    } finally {
+      setStaffelLoadingId(null)
+    }
+  }
+  function addStaffelRow() {
+    setStaffelRows((rows) => [...rows, { schwelle: '', bonus: '' }])
+  }
+  function removeStaffelRow(i: number) {
+    setStaffelRows((rows) => rows.filter((_, idx) => idx !== i))
+  }
+  function updateStaffelRow(i: number, field: 'schwelle' | 'bonus', val: string) {
+    setStaffelRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, [field]: val } : r)))
+  }
+  async function saveStaffel() {
+    if (!staffelFor) return
+    setStaffelSaving(true)
+    try {
+      const stufen = staffelRows
+        .filter((r) => r.schwelle.trim() !== '')
+        .map((r) => ({ schwelle: Number(r.schwelle), bonus_betrag_netto: Number(r.bonus || 0) }))
+      const res = await setMaklerStaffel(staffelFor.id, stufen)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      toast.success('Staffelung gespeichert.')
+      setStaffelFor(null)
+      router.refresh()
+    } finally {
+      setStaffelSaving(false)
+    }
+  }
+
+  // Billing-Drawer
+  const [openPartnerId, setOpenPartnerId] = useState<string | null>(null)
+  const [drawerData, setDrawerData] = useState<DrawerData | null>(null)
+  const [drawerPending, startDrawerTransition] = useTransition()
+
+  function openBillingDrawer(m: Makler) {
+    setDrawerData(null)
+    setOpenPartnerId(m.id)
+    startDrawerTransition(async () => {
+      const r = await ladePartnerBilling('makler', m.id)
+      if (r.ok) {
+        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer })
+      } else {
+        toast.error(r.error)
+        setOpenPartnerId(null)
+      }
+    })
+  }
+
+  function closeDrawer() {
+    setOpenPartnerId(null)
+    setDrawerData(null)
+  }
 
   function openDialog() {
     setCreatedCredentials(null)
@@ -112,6 +195,8 @@ export default function MaklerAdminClient({
                 <Th className="text-left text-claimondo-ondo!">Status</Th>
                 <Th className="text-left text-claimondo-ondo!">Provision (komplett / nur Gutachter)</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
+                <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
+                <Th className="text-left text-claimondo-ondo!">Abrechnung</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -146,11 +231,33 @@ export default function MaklerAdminClient({
                   <Td>
                     <span className="text-claimondo-ondo text-sm">{formatDatum(m.aktiviert_am)}</span>
                   </Td>
+                  <Td>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      loading={staffelLoadingId === m.id}
+                      onClick={() => openStaffel(m)}
+                      iconLeft={<Layers3Icon className="w-4 h-4" />}
+                    >
+                      Staffel
+                    </Button>
+                  </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={drawerPending && openPartnerId === m.id}
+                      onClick={() => openBillingDrawer(m)}
+                      iconLeft={<ReceiptIcon className="w-4 h-4" />}
+                    >
+                      Abrechnung
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {maklers.length === 0 && (
                 <Tr>
-                  <Td colSpan={5} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Makler angelegt.
                   </Td>
                 </Tr>
@@ -227,6 +334,86 @@ export default function MaklerAdminClient({
             </>
           )}
         </Modal>
+
+        <Modal open={staffelFor !== null} onClose={() => setStaffelFor(null)} maxWidth={520} ariaLabel="Staffelung bearbeiten">
+          {staffelFor && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-claimondo-navy font-semibold text-lg">Staffelung — {staffelFor.firma}</h2>
+                <p className="mt-0.5 text-claimondo-ondo text-sm">
+                  Meilenstein-Boni: ab X freigegebenen Vermittlungen ein Einmal-Bonus.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-center gap-2 px-1 text-xs font-medium text-claimondo-ondo">
+                  <span className="flex-1">ab … Vermittlungen</span>
+                  <span className="flex-1">Bonus (netto, €)</span>
+                  <span className="w-11 shrink-0" />
+                </div>
+                {staffelRows.length === 0 && (
+                  <p className="px-1 text-sm text-claimondo-ondo/70">Noch keine Stufen — füge eine hinzu.</p>
+                )}
+                {staffelRows.map((r, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="number" min="1" step="1" inputMode="numeric" value={r.schwelle}
+                      onChange={(e) => updateStaffelRow(i, 'schwelle', e.target.value)} placeholder="z.B. 10"
+                      className="flex-1 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy"
+                    />
+                    <input
+                      type="number" min="0" step="0.01" inputMode="decimal" value={r.bonus}
+                      onChange={(e) => updateStaffelRow(i, 'bonus', e.target.value)} placeholder="z.B. 500"
+                      className="flex-1 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy"
+                    />
+                    <Button
+                      variant="ghost" size="icon" ariaLabel="Stufe entfernen"
+                      onClick={() => removeStaffelRow(i)} iconLeft={<Trash2Icon width={15} height={15} />}
+                    />
+                  </div>
+                ))}
+              </div>
+              <Button variant="ghost" size="sm" onClick={addStaffelRow} iconLeft={<PlusIcon className="w-4 h-4" />}>
+                Stufe hinzufügen
+              </Button>
+              <div className="flex gap-3 pt-2">
+                <Button variant="ghost" fullWidth onClick={() => setStaffelFor(null)}>Abbrechen</Button>
+                <Button variant="navy" fullWidth loading={staffelSaving} onClick={saveStaffel}>Speichern</Button>
+              </div>
+            </div>
+          )}
+        </Modal>
+
+        {/* Billing-Drawer */}
+        {openPartnerId && (
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-claimondo-navy/40"
+            onClick={closeDrawer}
+          >
+            <div
+              className="relative w-full max-w-3xl bg-white h-full overflow-y-auto p-6 rounded-l-ios-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CloseButton onPress={closeDrawer} />
+              <h2 className="text-claimondo-navy font-semibold text-lg mb-6 pr-12">
+                {maklers.find((m) => m.id === openPartnerId)?.firma ?? 'Makler'} — Abrechnung
+              </h2>
+              {drawerPending && !drawerData && (
+                <p className="text-claimondo-ondo text-sm">Wird geladen…</p>
+              )}
+              {drawerData && (
+                <PartnerBillingPanel
+                  rows={drawerData.rows}
+                  aggregat={drawerData.aggregat}
+                  ustToggle={{
+                    partnerTyp: 'makler',
+                    partnerId: openPartnerId,
+                    current: drawerData.istKleinunternehmer,
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

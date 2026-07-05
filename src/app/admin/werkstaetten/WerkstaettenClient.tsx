@@ -1,21 +1,24 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon, MailIcon } from 'lucide-react'
+import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon, MailIcon, ReceiptIcon } from 'lucide-react'
 import { createWerkstatt, sendWerkstattLoginMail, setWerkstattFaehigkeiten } from './actions'
 import { werkstattQrSvg } from './qr-action'
 import { weiseQrPoolCodeZu } from './qr-pool-actions'
 import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
 import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
+import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import PageHeader from '@/components/shared/PageHeader'
-import { Button, Modal } from '@/components/primitives'
+import { Button, Modal, CloseButton } from '@/components/primitives'
 import { Chip } from '@/components/ui/Chip'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { TextField } from '@/components/shared/forms/TextField'
 import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
+import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
+import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
 // Label-Map im Client (NICHT aus actions.ts importieren — Client-Bundle macht undefined daraus, AAR-664)
 const FAEHIGKEITEN_OPTIONS: { value: string; label: string }[] = [
@@ -56,6 +59,12 @@ function formatDatum(iso: string | null) {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
+type DrawerData = {
+  rows: PartnerBillingRow[]
+  aggregat: PartnerBillingAggregat
+  istKleinunternehmer: boolean | null
+}
+
 export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Werkstatt[] }) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
@@ -65,6 +74,30 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   const [dialogQrLaden, setDialogQrLaden] = useState(false)
   const [loginMailLoadingId, setLoginMailLoadingId] = useState<string | null>(null)
   const [dialogMailSending, setDialogMailSending] = useState(false)
+
+  // Billing-Drawer
+  const [openPartnerId, setOpenPartnerId] = useState<string | null>(null)
+  const [drawerData, setDrawerData] = useState<DrawerData | null>(null)
+  const [drawerPending, startDrawerTransition] = useTransition()
+
+  function openBillingDrawer(w: Werkstatt) {
+    setDrawerData(null)
+    setOpenPartnerId(w.id)
+    startDrawerTransition(async () => {
+      const r = await ladePartnerBilling('werkstatt', w.id)
+      if (r.ok) {
+        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer })
+      } else {
+        toast.error(r.error)
+        setOpenPartnerId(null)
+      }
+    })
+  }
+
+  function closeDrawer() {
+    setOpenPartnerId(null)
+    setDrawerData(null)
+  }
 
   // QR-Code-Anzeige pro Werkstatt (regulaerer Kunden-QR /start/werkstatt/<id>)
   const [qr, setQr] = useState<{ name: string; url: string; svg: string } | null>(null)
@@ -314,6 +347,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
                 <Th className="text-left text-claimondo-ondo!">Fähigkeiten</Th>
                 <Th className="text-left text-claimondo-ondo!">Login-Mail</Th>
+                <Th className="text-left text-claimondo-ondo!">Abrechnung</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -390,11 +424,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                       Senden
                     </Button>
                   </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={drawerPending && openPartnerId === w.id}
+                      onClick={() => openBillingDrawer(w)}
+                      iconLeft={<ReceiptIcon className="w-4 h-4" />}
+                    >
+                      Abrechnung
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
-                  <Td colSpan={9} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={10} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Werkstätten angelegt.
                   </Td>
                 </Tr>
@@ -704,6 +749,38 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
             </div>
           )}
         </Modal>
+
+        {/* Billing-Drawer */}
+        {openPartnerId && (
+          <div
+            className="fixed inset-0 z-50 flex justify-end bg-claimondo-navy/40"
+            onClick={closeDrawer}
+          >
+            <div
+              className="relative w-full max-w-3xl bg-white h-full overflow-y-auto p-6 rounded-l-ios-lg"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <CloseButton onPress={closeDrawer} />
+              <h2 className="text-claimondo-navy font-semibold text-lg mb-6 pr-12">
+                {werkstaetten.find((w) => w.id === openPartnerId)?.name ?? 'Werkstatt'} — Abrechnung
+              </h2>
+              {drawerPending && !drawerData && (
+                <p className="text-claimondo-ondo text-sm">Wird geladen…</p>
+              )}
+              {drawerData && (
+                <PartnerBillingPanel
+                  rows={drawerData.rows}
+                  aggregat={drawerData.aggregat}
+                  ustToggle={{
+                    partnerTyp: 'werkstatt',
+                    partnerId: openPartnerId,
+                    current: drawerData.istKleinunternehmer,
+                  }}
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

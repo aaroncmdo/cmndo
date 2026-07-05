@@ -306,13 +306,11 @@ function TerminCard({
   // AAR-698: Karte komplett klickbar → Termin-Detail-View.
   // KB-Beratungstermine haben eine andere Detail-Logik und bleiben vorerst
   // bei „Zum Fall" (Beratungs-Detail kommt in eigenem Ticket).
-  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : '#') : `/kunde/termine/${termin.id}`
-
-  return (
-    <Link
-      href={targetHref}
-      className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-claimondo-ondo/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
-    >
+  // KB-Beratung ohne Fall hat (noch) kein Ziel -> nicht-klickbar statt totem href='#'
+  // (Beratungs-Detail kommt in eigenem Ticket; SV-Termine gehen zur Detail-View).
+  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : null) : `/kunde/termine/${termin.id}`
+  const cardClass = `block bg-white rounded-2xl border border-claimondo-border p-4 transition ${targetHref ? 'hover:border-claimondo-ondo/40 hover:shadow-sm' : ''} ${muted ? 'opacity-90' : ''}`
+  const cardInner = (
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-ios-xl bg-[var(--brand-secondary-soft)] flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-claimondo-ondo" />
@@ -342,10 +340,19 @@ function TerminCard({
                   : <><PhoneIcon className="w-3 h-3 inline" /> {t('card.vorOrtTermin')}</>}
               </span>
             )}
-            <span className="text-claimondo-ondo font-medium ml-auto">{t('card.detailsOeffnen')}</span>
+            {targetHref && <span className="text-claimondo-ondo font-medium ml-auto">{t('card.detailsOeffnen')}</span>}
           </div>
         </div>
       </div>
+  )
+
+  return targetHref ? (
+    <Link href={targetHref} className={cardClass}>
+      {cardInner}
     </Link>
+  ) : (
+    <div className={cardClass}>
+      {cardInner}
+    </div>
   )
 }
