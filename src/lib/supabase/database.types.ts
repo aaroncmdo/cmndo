@@ -10916,6 +10916,83 @@ export type Database = {
           },
         ]
       }
+      makler_staffel_bonus: {
+        Row: {
+          bonus_betrag_netto: number
+          erstellt_am: string
+          id: string
+          makler_id: string
+          schwelle: number
+          status: string
+          stufe_id: string | null
+        }
+        Insert: {
+          bonus_betrag_netto: number
+          erstellt_am?: string
+          id?: string
+          makler_id: string
+          schwelle: number
+          status?: string
+          stufe_id?: string | null
+        }
+        Update: {
+          bonus_betrag_netto?: number
+          erstellt_am?: string
+          id?: string
+          makler_id?: string
+          schwelle?: number
+          status?: string
+          stufe_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "makler_staffel_bonus_makler_id_fkey"
+            columns: ["makler_id"]
+            isOneToOne: false
+            referencedRelation: "makler"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "makler_staffel_bonus_stufe_id_fkey"
+            columns: ["stufe_id"]
+            isOneToOne: false
+            referencedRelation: "makler_staffel_stufen"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      makler_staffel_stufen: {
+        Row: {
+          bonus_betrag_netto: number
+          created_at: string
+          id: string
+          makler_id: string
+          schwelle: number
+        }
+        Insert: {
+          bonus_betrag_netto: number
+          created_at?: string
+          id?: string
+          makler_id: string
+          schwelle: number
+        }
+        Update: {
+          bonus_betrag_netto?: number
+          created_at?: string
+          id?: string
+          makler_id?: string
+          schwelle?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "makler_staffel_stufen_makler_id_fkey"
+            columns: ["makler_id"]
+            isOneToOne: false
+            referencedRelation: "makler"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       matelso_calls: {
         Row: {
           claim_id: string | null
