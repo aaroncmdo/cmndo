@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
@@ -587,8 +588,15 @@ export default async function GutachterFallPage({
           <p className="text-sm font-semibold text-warning-strong">Stellungnahme angefordert</p>
           <p className="text-xs text-warning-strong mt-1">
             Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
-            Bitte über den Chat mit dem Betreuer abstimmen.
+            Stimme dich bei Bedarf über den Chat mit dem Betreuer ab und reiche deine
+            Stellungnahme anschließend hier ein.
           </p>
+          <Link
+            href={`/gutachter/fall/${id}/stellungnahme`}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            Stellungnahme einreichen →
+          </Link>
         </div>
       )}
       {nachbesichtigungAktiv && (
