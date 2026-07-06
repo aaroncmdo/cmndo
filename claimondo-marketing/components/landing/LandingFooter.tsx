@@ -153,6 +153,11 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
+                <Link href="https://app.claimondo.de/werkstatt-partner-werden" className="transition-colors hover:text-white">
+                  Werkstatt werden
+                </Link>
+              </li>
+              <li>
                 <Link href="https://app.claimondo.de/login" className="transition-colors hover:text-white">
                   {t('partner.login')}
                 </Link>
