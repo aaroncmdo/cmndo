@@ -14,6 +14,7 @@ import {
 } from '../_actions/unfallskizze'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { UnfallskizzeEditor } from './UnfallskizzeEditor'
+import { sanitizeSvg } from '@/lib/unfallskizze/sanitize-svg'
 
 export function UnfallskizzeCard({
   leadId,
@@ -127,7 +128,7 @@ export function UnfallskizzeCard({
         <div className="space-y-2">
           <div
             className="rounded-ios-xl border border-claimondo-border bg-white overflow-hidden"
-            dangerouslySetInnerHTML={{ __html: svg }}
+            dangerouslySetInnerHTML={{ __html: sanitizeSvg(svg) }}
           />
           {generiertAm && (
             <p className="text-[10px] text-claimondo-ondo/70">
