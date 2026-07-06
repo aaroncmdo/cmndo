@@ -254,6 +254,11 @@ function isPublicPath(pathname: string): boolean {
     // 307 -> /login (analog '/sv' fuer /sv/registrieren). SPEZIFISCHER Pfad, NICHT
     // '/makler' (das wuerde via startsWith das ganze Portal oeffnen = Auth-Bypass).
     '/makler/registrieren',
+    // Slice D: oeffentlicher Werkstatt-"Partner werden"-Antrag — anon MUSS rein,
+    // sonst 307 -> /login. Erzeugt nur einen partner_leads-Prospect (kein Account,
+    // Werkstatt-self_signup=false). SPEZIFISCHER root-naher Pfad, NICHT '/werkstatt'
+    // (das ist ein auth-gatetes Portal-Layout — startsWith wuerde es oeffnen).
+    '/werkstatt-partner-werden',
     // Makler-Wochenreport One-Click-Abmeldung (public, Token in der URL). BEWUSST
     // NICHT unter '/abmelden' — app.claimondo.de/abmelden/* wird auf Infra-Ebene
     // per 301 auf claimondo.de (Marketing) umgeleitet, wo es 404t (tote Zone, trifft
