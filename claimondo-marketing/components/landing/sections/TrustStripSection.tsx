@@ -1,6 +1,6 @@
 // Generischer Trust-Strip (4-Spalten KPI-Reihe) für alle Premium-Pages.
 // Pendant-Pattern auf Hauptseite, Stadt-Pages, /vorteile, /wie-es-funktioniert,
-// /faq, /ueber-uns, /schadensreport-2026, /ersteinschaetzung.
+// /faq, /ueber-uns, /schadensreport-2026, /check.
 //
 // AAR-UWG-Fix 14.05.2026: optionale `methodikNote` erlaubt Konsumenten,
 // einen Methodik-Hinweis zu aggregierten Kennzahlen einzublenden — Pflicht

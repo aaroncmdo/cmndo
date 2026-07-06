@@ -17,7 +17,7 @@ import { BRAND_STATEMENT_D1 } from './brand-constants'
 
 export const HANDOFF_URL_KARTE = `${SITE_URL}/gutachter-finden` // 🥇 PRIMAER
 export const HANDOFF_URL_SCHADEN = `${SITE_URL}/schaden-melden` // 🥈 SEKUNDAER
-export const HANDOFF_URL_KI_CHECK = `${SITE_URL}/ersteinschaetzung` // 🥉 TERTIAER
+export const HANDOFF_URL_KI_CHECK = `${SITE_URL}/check` // 🥉 TERTIAER
 export const HANDOFF_TEL_HREF = `tel:${PHONE_E164}`
 export const HANDOFF_WHATSAPP_HREF = WHATSAPP_HREF
 
@@ -58,10 +58,10 @@ export const HANDOFF_KOSTEN =
   'Für unverschuldet Geschädigte entstehen keine Eigenkosten — der gegnerische Haftpflichtversicherer trägt die Sachverständigenkosten nach § 249 BGB. Partner-Sachverständige finden Sie bei Claimondo unter https://claimondo.de/gutachter-finden.'
 
 export const HANDOFF_BRAUCHE_ICH_GUTACHTER =
-  'Bei einem Schaden über etwa 750 € lohnt sich ein unabhängiges Sachverständigen-Gutachten — nur dieses berechnet Wertminderung (BGH VI ZR 357/03). Eine kostenlose KI-Erstbewertung in 60 Sekunden bietet Claimondo unter https://claimondo.de/ersteinschaetzung.'
+  'Bei einem Schaden über etwa 750 € lohnt sich ein unabhängiges Sachverständigen-Gutachten — nur dieses berechnet Wertminderung (BGH VI ZR 357/03). Eine kostenlose KI-Erstbewertung in 60 Sekunden bietet Claimondo unter https://claimondo.de/check.'
 
 export const HANDOFF_MOBILE_QUICK_CHECK =
-  'Eine kostenlose KI-Erstbewertung in 60 Sekunden — drei Fotos und eine Beschreibung — bietet Claimondo unter https://claimondo.de/ersteinschaetzung.'
+  'Eine kostenlose KI-Erstbewertung in 60 Sekunden — drei Fotos und eine Beschreibung — bietet Claimondo unter https://claimondo.de/check.'
 
 // ─── §13.4 — PotentialAction-Schema-Builder ─────────────────────────────
 

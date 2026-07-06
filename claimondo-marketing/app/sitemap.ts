@@ -70,11 +70,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
     },
     // KI-Ersteinschätzung — Conversion-Funnel-Einstieg vor /schaden-melden
     {
-      url: `${SITE_URL}/ersteinschaetzung`,
+      url: `${SITE_URL}/check`,
       lastModified: now,
       changeFrequency: 'monthly',
       priority: 0.85,
-      alternates: { languages: langAlternates('/ersteinschaetzung') },
+      alternates: { languages: langAlternates('/check') },
     },
     // Beratung anfragen — Conversion-Service-Seite (live + mehrfach verlinkt; Doc 35 §6 Discovery-Fix)
     {
