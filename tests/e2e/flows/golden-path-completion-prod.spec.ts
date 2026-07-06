@@ -54,9 +54,13 @@ test('Manueller Abschluss via Panel — Claim bis fall_geschlossen', async ({ pa
   const db = admin()
 
   // Setup: Vorbedingung fuer die Back-Half (kanzlei-uebergeben, Test-SV zugewiesen, sauber).
+  // kanzlei_uebergeben_am setzen: der ProzessTab zeigt die Kanzlei-Section (mit dem Panel)
+  // bei phase>=4 ODER mandatsnummer ODER kanzlei_uebergeben_am (section-visibility.ts) —
+  // damit das Panel garantiert erscheint, unabhaengig vom abgeleiteten Phase-Wert.
   await db.from('webhook_events').delete().eq('claim_id', CLAIM)
   await db.from('claims').update({
-    operative_status: 'kanzlei-uebergeben', sv_id: TEST_SV, abgeschlossen_am: null, geschlossen_grund: null,
+    operative_status: 'kanzlei-uebergeben', sv_id: TEST_SV, kanzlei_uebergeben_am: '2026-07-01T00:00:00Z',
+    abgeschlossen_am: null, geschlossen_grund: null,
   }).eq('id', CLAIM)
 
   // Admin-Login → Fallakte → Endpoint-Register.
