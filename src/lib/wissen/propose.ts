@@ -97,13 +97,33 @@ export function parseProposedTopics(
   return { ok: true, data }
 }
 
-export function dedupeTopics(proposed: ProposedTopic[], coveredKeywords: string[]): ProposedTopic[] {
-  const seen = new Set(coveredKeywords.map(normalizeKeyword))
+/** Titel -> Slug fuer Dedup: lowercased, Umlaute aufgeloest, nur a-z0-9 mit Bindestrichen. */
+export function slugifyTitle(titel: string): string {
+  return titel
+    .toLowerCase()
+    .replace(/ä/g, 'ae')
+    .replace(/ö/g, 'oe')
+    .replace(/ü/g, 'ue')
+    .replace(/ß/g, 'ss')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+}
+
+// Hard-Dedup gegen bereits Abgedecktes: droppt Vorschlaege mit kollidierendem primary_keyword
+// ODER Titel-Slug (Spec) — plus interne Duplikate. Ergaenzt die Soft-Avoidance im Prompt.
+export function dedupeTopics(
+  proposed: ProposedTopic[],
+  covered: { keywords: string[]; titles: string[] },
+): ProposedTopic[] {
+  const seenKw = new Set(covered.keywords.map(normalizeKeyword))
+  const seenTitle = new Set(covered.titles.map(slugifyTitle))
   const out: ProposedTopic[] = []
   for (const t of proposed) {
-    const k = normalizeKeyword(t.primary_keyword)
-    if (!k || seen.has(k)) continue
-    seen.add(k)
+    const kw = normalizeKeyword(t.primary_keyword)
+    const ts = slugifyTitle(t.titel)
+    if (!kw || seenKw.has(kw) || (ts !== '' && seenTitle.has(ts))) continue
+    seenKw.add(kw)
+    if (ts !== '') seenTitle.add(ts)
     out.push(t)
   }
   return out
@@ -128,7 +148,7 @@ export async function proposeGapTopics(
     const raw = firstBlock && firstBlock.type === 'text' ? firstBlock.text : ''
     const parsed = parseProposedTopics(raw)
     if (!parsed.ok) return parsed
-    return { ok: true, data: dedupeTopics(parsed.data, covered.keywords) }
+    return { ok: true, data: dedupeTopics(parsed.data, covered) }
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     return { ok: false, error: `Anthropic-API-Fehler: ${msg}` }

@@ -3,7 +3,7 @@
 // Verantwortlich fuer:
 //   1. Crawlen aller B2B_CRAWL_SOURCES (RSS-Feeds)
 //   2. Deduplication via source_hash in wissen_themen
-//   3. Getierte AI-Generierung (Crawl -> Manuell -> Evergreen) mit Tages-Boden
+//   3. Getierte AI-Generierung (Crawl -> Manuell -> Evergreen) mit garantiertem Tages-Boden
 //   4. Validierungs-Gate (validateForAutoPublish) -> auto-publish oder in_review
 //
 // Evergreen-Autopilot: reicht der frische Crawl nicht fuer den Tages-Boden, fuellt
@@ -32,10 +32,11 @@ import {
 const CRAWL_CAP = 12 // Maximale neue Themen pro Lauf (global)
 const PER_SOURCE_CAP = 3 // Maximale neue Themen pro Quelle/Lauf — verhindert, dass eine
 // breite Quelle (z.B. allg. Rechtsnews) das Crawl-Budget frisst und Kfz-Feeds verhungern.
-const DAILY_MAX = 3 // Maximale ERZEUGTE Artikel pro Lauf (Deckel)
+const DAILY_MAX = 3 // Maximale PUBLIZIERTE Artikel pro Lauf (Deckel)
 const DAILY_MIN = 2 // Garantierter Tages-Boden — via Evergreen aufgefuellt, falls Crawl/Manuell nicht reichen.
-const ATTEMPT_CAP = 12 // Maximale KI-Generierungs-Versuche/Lauf (Kosten-/Zeitgrenze), auch wenn
-// einzelne Themen vom KI-Relevanz-Backstop als nicht_relevant abgelehnt werden.
+const CRAWL_ATTEMPT_CAP = 6 // KI-Versuche fuer tagesaktuelle Crawl+Manuell-Themen (Kosten-/Zeitgrenze).
+const EVERGREEN_ATTEMPT_CAP = 6 // Eigenes KI-Budget fuer den Evergreen-Boden — unabhaengig von Phase 2a,
+// damit in_review-Artikel aus 2a den garantierten Boden nicht aushungern (Gesamt-Budget = 12, wie zuvor).
 const EVERGREEN_TARGET = 6 // Vorrats-Queue voraus (>= DAILY_MIN) — haelt das Veto-Fenster im Admin offen.
 
 type Db = ReturnType<typeof createAdminClient>
@@ -70,7 +71,7 @@ async function ladeCovered(supabase: Db): Promise<{ titles: string[]; keywords: 
   return { titles, keywords }
 }
 
-// Proponiert `count` Evergreen-Themen (coverage-aware) und legt sie als ai_gap/freigegeben an.
+// Proponiert bis zu `count` Evergreen-Themen (coverage-aware) und legt sie als ai_gap/freigegeben an.
 // Gibt die neu angelegten Zeilen zurueck (fuer den Evergreen-Pool des laufenden Laufs).
 async function proposeUndInsert(supabase: Db, count: number): Promise<PlanThema[]> {
   if (count <= 0) return []
@@ -81,7 +82,7 @@ async function proposeUndInsert(supabase: Db, count: number): Promise<PlanThema[
     return []
   }
   const inserted: PlanThema[] = []
-  for (const topic of r.data) {
+  for (const topic of r.data.slice(0, count)) {
     const { data, error } = await supabase
       .from('wissen_themen')
       .insert({
@@ -104,6 +105,84 @@ async function proposeUndInsert(supabase: Db, count: number): Promise<PlanThema[
     if (data) inserted.push(data as PlanThema)
   }
   return inserted
+}
+
+// Generiert einen Draft fuer EIN Thema, validiert und speichert ihn. Reused von Phase 2a + 2b.
+// Rueckgabe = Outcome; der Caller zaehlt die Counter (published/review) je nach Ergebnis.
+async function generiereUndSpeichere(
+  supabase: Db,
+  thema: PlanThema,
+): Promise<'published' | 'review' | 'rejected' | 'error'> {
+  const r = await generateArtikelDraft(
+    {
+      titel: thema.titel,
+      kurzbrief: thema.kurzbrief ?? undefined,
+      primary_keyword: thema.primary_keyword ?? undefined,
+      cluster: thema.cluster ?? undefined,
+      artikel_typ: thema.artikel_typ ?? undefined,
+    },
+    'b2b',
+  )
+
+  if (!r.ok) {
+    // KI-Relevanz-Backstop: themenfremdes Thema ablehnen, damit es nicht taeglich neu generiert wird.
+    if (r.error === 'nicht_relevant') {
+      await supabase.from('wissen_themen').update({ status: 'abgelehnt' }).eq('id', thema.id)
+    }
+    console.error(`[b2b-pipeline] generateArtikelDraft fehlgeschlagen (thema ${thema.id}):`, r.error)
+    return 'rejected'
+  }
+
+  const draft = r.data
+  const v = validateForAutoPublish({ body: draft.body })
+  const now = new Date().toISOString()
+  const artikelStatus = v.autopublish ? 'veroeffentlicht' : 'in_review'
+  const artikelQuelle = articleQuelleForThema(thema.quelle)
+
+  // Artikel einfuegen — bei Slug-Kollision (23505) einmal mit '-2' Suffix retry
+  async function insertArtikel(slug: string): Promise<{ error: { code: string; message: string } | null }> {
+    return supabase.from('wissen_artikel').insert({
+      thema_id: thema.id,
+      slug,
+      title: draft.title,
+      body: draft.body,
+      excerpt: draft.excerpt,
+      key_facts: draft.keyFacts,
+      meta_description: draft.metaDescription,
+      primary_keyword: draft.primaryKeyword,
+      cluster: draft.cluster,
+      tags: draft.tags,
+      audience: 'b2b',
+      quelle: artikelQuelle,
+      source_url: thema.source_url,
+      author: 'claimondo-redaktion',
+      ai_model: draft.ai_model,
+      ai_generated: true,
+      status: artikelStatus,
+      veroeffentlicht_am: v.autopublish ? now : null,
+    })
+  }
+
+  let insertResult = await insertArtikel(draft.slug)
+  if (insertResult.error?.code === '23505') {
+    // Slug-Suffix: Laenge auf max. 80 Zeichen kappen (Constraint ^[a-z0-9-]{3,80}$).
+    insertResult = await insertArtikel(`${draft.slug.slice(0, 78)}-2`)
+  }
+  if (insertResult.error) {
+    console.error(`[b2b-pipeline] Artikel-Insert fehlgeschlagen (thema ${thema.id}):`, insertResult.error.message)
+    return 'error'
+  }
+
+  // Thema-Status aktualisieren — non-critical (kein Abbruch bei Fehler)
+  const { error: themaUpdateErr } = await supabase
+    .from('wissen_themen')
+    .update({ status: 'entwurf_erstellt' })
+    .eq('id', thema.id)
+  if (themaUpdateErr) {
+    console.error(`[b2b-pipeline] Thema-Status-Update fehlgeschlagen (thema ${thema.id}):`, themaUpdateErr.message)
+  }
+
+  return v.autopublish ? 'published' : 'review'
 }
 
 export async function runB2BPipeline(): Promise<{
@@ -188,7 +267,7 @@ export async function runB2BPipeline(): Promise<{
     }
 
     // -----------------------------------------------------------------------
-    // Phase 2: Generate (getiert Crawl -> Manuell -> Evergreen, mit Tages-Boden)
+    // Phase 2: Generate (getiert Crawl -> Manuell -> Evergreen, mit garantiertem Tages-Boden)
     // -----------------------------------------------------------------------
 
     // Kandidaten-Themen laden (freigegeben, b2b, bounded auf 40).
@@ -241,99 +320,37 @@ export async function runB2BPipeline(): Promise<{
       evergreenPool = [...evergreenPool, ...neu]
     }
 
-    const order = orderCandidates({ crawl: crawlPool, manuell: manuellPool, evergreen: evergreenPool })
-
-    let attempts = 0
-    for (const thema of order) {
-      if (generated >= DAILY_MAX || attempts >= ATTEMPT_CAP) break
-      // Evergreen nur bis zum Tages-Boden ziehen (nicht ueberpublizieren); Crawl/Manuell laufen bis DAILY_MAX.
-      if (shouldStopEvergreen(thema.quelle, published, DAILY_MIN)) break
-      attempts++
-
-      const r = await generateArtikelDraft(
-        {
-          titel: thema.titel,
-          kurzbrief: thema.kurzbrief ?? undefined,
-          primary_keyword: thema.primary_keyword ?? undefined,
-          cluster: thema.cluster ?? undefined,
-          artikel_typ: thema.artikel_typ ?? undefined,
-        },
-        'b2b',
-      )
-
-      if (!r.ok) {
-        // KI-Relevanz-Backstop: themenfremdes Thema ablehnen, damit es nicht taeglich neu generiert wird.
-        if (r.error === 'nicht_relevant') {
-          await supabase.from('wissen_themen').update({ status: 'abgelehnt' }).eq('id', thema.id)
-        }
-        console.error(`[b2b-pipeline] generateArtikelDraft fehlgeschlagen (thema ${thema.id}):`, r.error)
-        continue
-      }
-
-      const draft = r.data
-      const v = validateForAutoPublish({ body: draft.body })
-
-      const now = new Date().toISOString()
-      const artikelStatus = v.autopublish ? 'veroeffentlicht' : 'in_review'
-      const artikelQuelle = articleQuelleForThema(thema.quelle)
-
-      // Artikel einfuegen — bei Slug-Kollision (23505) einmal mit '-2' Suffix retry
-      async function insertArtikel(slug: string): Promise<{ error: { code: string; message: string } | null }> {
-        return supabase.from('wissen_artikel').insert({
-          thema_id: thema.id,
-          slug,
-          title: draft.title,
-          body: draft.body,
-          excerpt: draft.excerpt,
-          key_facts: draft.keyFacts,
-          meta_description: draft.metaDescription,
-          primary_keyword: draft.primaryKeyword,
-          cluster: draft.cluster,
-          tags: draft.tags,
-          audience: 'b2b',
-          quelle: artikelQuelle,
-          source_url: thema.source_url,
-          author: 'claimondo-redaktion',
-          ai_model: draft.ai_model,
-          ai_generated: true,
-          status: artikelStatus,
-          veroeffentlicht_am: v.autopublish ? now : null,
-        })
-      }
-
-      let insertResult = await insertArtikel(draft.slug)
-
-      if (insertResult.error?.code === '23505') {
-        // Slug-Suffix: Laenge auf max. 80 Zeichen kappen (Constraint ^[a-z0-9-]{3,80}$).
-        insertResult = await insertArtikel(`${draft.slug.slice(0, 78)}-2`)
-      }
-
-      if (insertResult.error) {
-        console.error(
-          `[b2b-pipeline] Artikel-Insert fehlgeschlagen (thema ${thema.id}):`,
-          insertResult.error.message,
-        )
-        continue
-      }
-
-      generated++
-      if (v.autopublish) {
+    // Phase 2a: Crawl + Manuell (tagesaktuell) — opportunistisch bis DAILY_MAX publiziert.
+    const order2a = orderCandidates({ crawl: crawlPool, manuell: manuellPool, evergreen: [] })
+    let crawlAttempts = 0
+    for (const thema of order2a) {
+      if (published >= DAILY_MAX || crawlAttempts >= CRAWL_ATTEMPT_CAP) break
+      crawlAttempts++
+      const outcome = await generiereUndSpeichere(supabase, thema)
+      if (outcome === 'published') {
         published++
-      } else {
+        generated++
+      } else if (outcome === 'review') {
         review++
+        generated++
       }
+    }
 
-      // Thema-Status aktualisieren — non-critical (kein Abbruch bei Fehler)
-      const { error: themaUpdateErr } = await supabase
-        .from('wissen_themen')
-        .update({ status: 'entwurf_erstellt' })
-        .eq('id', thema.id)
-
-      if (themaUpdateErr) {
-        console.error(
-          `[b2b-pipeline] Thema-Status-Update fehlgeschlagen (thema ${thema.id}):`,
-          themaUpdateErr.message,
-        )
+    // Phase 2b: Evergreen-Boden — GARANTIERT bis published >= DAILY_MIN, mit eigenem Budget.
+    // Unabhaengig von Phase 2a: in_review-Artikel aus 2a duerfen den Boden nicht aushungern.
+    let evergreenAttempts = 0
+    for (const thema of evergreenPool) {
+      if (published >= DAILY_MAX || evergreenAttempts >= EVERGREEN_ATTEMPT_CAP) break
+      // Evergreen nur bis zum Tages-Boden ziehen (nicht ueberpublizieren).
+      if (shouldStopEvergreen(thema.quelle, published, DAILY_MIN)) break
+      evergreenAttempts++
+      const outcome = await generiereUndSpeichere(supabase, thema)
+      if (outcome === 'published') {
+        published++
+        generated++
+      } else if (outcome === 'review') {
+        review++
+        generated++
       }
     }
 

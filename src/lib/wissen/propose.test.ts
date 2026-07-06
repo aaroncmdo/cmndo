@@ -3,6 +3,7 @@ import {
   buildProposeSystemPrompt,
   buildProposeUserMessage,
   normalizeKeyword,
+  slugifyTitle,
   parseProposedTopics,
   dedupeTopics,
   type ProposedTopic,
@@ -63,12 +64,31 @@ describe('parseProposedTopics', () => {
   })
 })
 
+describe('slugifyTitle', () => {
+  it('loest Umlaute auf und normalisiert Sonderzeichen', () => {
+    expect(slugifyTitle('Merkantile Wertminderung — Größe & Fehler!')).toBe(
+      'merkantile-wertminderung-groesse-fehler',
+    )
+  })
+})
+
 describe('dedupeTopics', () => {
-  it('droppt Kollisionen (case-insensitive) und interne Duplikate', () => {
-    const out = dedupeTopics([topic('Wertminderung'), topic('neu'), topic('neu')], ['wertminderung'])
+  it('droppt Keyword-Kollisionen (case-insensitive) und interne Duplikate', () => {
+    const out = dedupeTopics([topic('Wertminderung'), topic('neu'), topic('neu')], {
+      keywords: ['wertminderung'],
+      titles: [],
+    })
     expect(out.map((t) => t.primary_keyword)).toEqual(['neu'])
   })
+  it('droppt Titel-Kollisionen (Slug) auch bei neuem Keyword', () => {
+    const kollision = { ...topic('neues-kw'), titel: 'Merkantile Wertminderung korrekt ermitteln' }
+    const out = dedupeTopics([kollision], {
+      keywords: [],
+      titles: ['Merkantile Wertminderung korrekt ermitteln!'],
+    })
+    expect(out).toHaveLength(0)
+  })
   it('droppt leere Keywords', () => {
-    expect(dedupeTopics([{ ...topic(''), primary_keyword: '' }], [])).toHaveLength(0)
+    expect(dedupeTopics([{ ...topic(''), primary_keyword: '' }], { keywords: [], titles: [] })).toHaveLength(0)
   })
 })
