@@ -12,7 +12,13 @@ type Profile = {
   force_password_change?: boolean | null
   auth_provider?: string | null
 }
-let state: { user: { id: string; email: string } | null; profile: Profile | null }
+type MockUser = {
+  id: string
+  email: string
+  app_metadata?: { provider?: string }
+  factors?: { status: string; factor_type?: string }[]
+}
+let state: { user: MockUser | null; profile: Profile | null }
 
 const getUserMock = vi.fn()
 const maybeSingleMock = vi.fn()
@@ -36,7 +42,14 @@ import { requirePortalAccess } from './portal-guard'
 
 beforeEach(() => {
   state = {
-    user: { id: 'u-1', email: 'a@b.de' },
+    // Default: interne Rolle MIT verifiziertem Faktor + kein Google — damit die
+    // force_password_change-Tests nicht von der F3-2FA-Pflicht abgelenkt werden.
+    user: {
+      id: 'u-1',
+      email: 'a@b.de',
+      app_metadata: {},
+      factors: [{ status: 'verified', factor_type: 'phone' }],
+    },
     profile: { rolle: 'admin', vorname: 'A', nachname: 'B', force_password_change: false, auth_provider: 'email' },
   }
   getUserMock.mockReset().mockImplementation(() =>
@@ -79,5 +92,31 @@ describe('requirePortalAccess — bestehende Guards (Regression)', () => {
   it('force_password_change hat Vorrang vor dem Rollen-Redirect', async () => {
     state.profile = { rolle: 'kunde', vorname: 'K', nachname: 'U', force_password_change: true, auth_provider: 'email' }
     await expect(requirePortalAccess(['admin'])).rejects.toThrow('REDIRECT:/passwort-aendern')
+  })
+})
+
+describe('requirePortalAccess — 2FA-Pflicht interne Rollen (F3)', () => {
+  it('leitet interne Rolle OHNE verifizierten Faktor auf /login/2fa', async () => {
+    state.user!.factors = []
+    await expect(requirePortalAccess(['admin'])).rejects.toThrow('REDIRECT:/login/2fa')
+  })
+
+  it('laesst interne Rolle MIT verifiziertem Faktor durch', async () => {
+    const res = await requirePortalAccess(['admin'])
+    expect(res.profile.rolle).toBe('admin')
+  })
+
+  it('Google-Auth ist befreit (kein 2FA-Redirect trotz fehlendem Faktor)', async () => {
+    state.user!.factors = []
+    state.user!.app_metadata = { provider: 'google' }
+    const res = await requirePortalAccess(['admin'])
+    expect(res.profile.rolle).toBe('admin')
+  })
+
+  it('nicht-Pflicht-Rolle (kunde) ohne Faktor wird NICHT gegated', async () => {
+    state.profile = { rolle: 'kunde', vorname: 'K', nachname: 'U', force_password_change: false, auth_provider: 'email' }
+    state.user!.factors = []
+    const res = await requirePortalAccess(['kunde'])
+    expect(res.profile.rolle).toBe('kunde')
   })
 })
