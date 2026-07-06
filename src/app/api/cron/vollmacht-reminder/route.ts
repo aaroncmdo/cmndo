@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { reminderStufeNachAlter } from '@/lib/cron/reminder-stufe'
 
 /**
  * KFZ-192: Vollmacht-Reminder Cron.
@@ -68,11 +69,14 @@ export async function GET(request: Request) {
     const ageMs = now.getTime() - createdAt.getTime()
     const ageDays = ageMs / (1000 * 60 * 60 * 24)
 
-    const isDay1 = ageDays >= 1 && ageDays < 2
-    const isDay3 = ageDays >= 3 && ageDays < 4
-    const isDay7Plus = ageDays >= 7
-
-    if (!isDay1 && !isDay3 && !isDay7Plus) continue
+    // AAR (06.07. Cron-Hunt): Nachhol-Fenster statt fester [1,2)/[3,4)-Fenster — sonst
+    // wird eine Reminder-Stufe bei ausgefallenem/verspaetetem Cron-Lauf dauerhaft
+    // uebersprungen. Der Timeline-Idempotenz-Check unten verhindert weiter Doppel-Sends.
+    const stufe = reminderStufeNachAlter(ageDays, 3, 7)
+    if (stufe === null) continue
+    const isDay1 = stufe === 'stufe1'
+    const isDay3 = stufe === 'stufe2'
+    const isDay7Plus = stufe === 'stufe3'
 
     // Idempotenz-Check via Timeline
     const reminderTyp = isDay7Plus ? 'vollmacht_task' : isDay3 ? 'vollmacht_reminder_2' : 'vollmacht_reminder_1'
