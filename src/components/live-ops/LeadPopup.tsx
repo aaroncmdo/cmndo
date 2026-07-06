@@ -60,9 +60,10 @@ function kanalLabel(kanal: string | null): string | null {
 export interface LeadPopupProps {
   lead: LeadPin
   role: string
+  onAssign?: (leadId: string) => void
 }
 
-export default function LeadPopup({ lead, role }: LeadPopupProps) {
+export default function LeadPopup({ lead, role, onAssign }: LeadPopupProps) {
   const kannLeadOeffnen = role === 'admin' || role === 'dispatch'
   const kanal = kanalLabel(lead.kanal)
 
@@ -125,6 +126,23 @@ export default function LeadPopup({ lead, role }: LeadPopupProps) {
           >
             Lead öffnen →
           </a>
+        </div>
+      )}
+
+      {/* SV zuweisen */}
+      {kannLeadOeffnen && onAssign && !lead.hasActiveTermin && (
+        <div style={{ marginTop: 4 }}>
+          <button
+            type="button"
+            onClick={() => onAssign(lead.id)}
+            style={{
+              fontSize: 11, fontWeight: 600, cursor: 'pointer',
+              color: '#ffffff', background: 'var(--brand-primary, #0D1B3E)',
+              border: 'none', borderRadius: 8, padding: '4px 10px',
+            }}
+          >
+            SV zuweisen
+          </button>
         </div>
       )}
     </div>
