@@ -100,13 +100,29 @@ async function setEndzustandFields(
   guardStatus: readonly string[],
 ): Promise<{ ok: boolean; error?: string }> {
   const admin = createAdminClient()
+  const now = new Date().toISOString()
+  // Abschluss-Konvergenz: bei einem TERMINALEN Endzustand (in ENDZUSTAENDE) zusaetzlich
+  // operative_status + abgeschlossen_am (beide auf claims) mitschreiben. Sonst divergieren die
+  // zwei Phasen-Engines: v_claim_phase leitet "abschluss" aus claims.status-terminal ab (zeigt
+  // geschlossen), aber der subphase-resolver (FallActionBar) gatet Phase 9 auf abgeschlossen_am
+  // (resolver.ts:214) = NULL -> aktive Phase, UND der "aktive Faelle"-Filter (operative_status
+  // NOT IN abgeschlossen/storniert) zeigt den Fall weiter als aktiv. Der Endzustand-Grund bleibt in
+  // claims.status erhalten (reguliert_vollstaendig/abgelehnt_final/klage_rechtsstreit/...). Nicht-
+  // terminale (in_kommunikation_vs, abgelehnt einfach) sind NICHT in ENDZUSTAENDE -> bleiben aktiv.
+  // 'abgeschlossen'/'storniert' sind fall_status-enum-gueltig (kein v_claim_base-Cast-Bruch).
+  const neuerStatus = fields.status
+  const abschluss: Record<string, unknown> =
+    typeof neuerStatus === 'string' && (ENDZUSTAENDE as readonly string[]).includes(neuerStatus)
+      ? { operative_status: neuerStatus === 'storniert' ? 'storniert' : 'abgeschlossen', abgeschlossen_am: now }
+      : {}
   // Atomar: nur updaten wenn aktueller Status nicht bereits final
   const { data, error } = await admin
     .from('claims')
     .update({
       ...fields,
+      ...abschluss,
       endzustand_gesetzt_durch_user_id: user.id,
-      endzustand_gesetzt_am:            new Date().toISOString(),
+      endzustand_gesetzt_am:            now,
       endzustand_grund:                 grund,
     })
     .eq('id', claimId)
