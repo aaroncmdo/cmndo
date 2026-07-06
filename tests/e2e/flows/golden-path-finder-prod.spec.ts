@@ -92,11 +92,37 @@ async function deaktiviereTestSv(db: ReturnType<typeof admin>) {
   if (error) console.error('[golden-finder] Test-SV deaktivieren fehlgeschlagen:', error.message)
 }
 
+// Test-Buchungen (gfa/Lead/Termin/flow_link) der Smoke-Laeufe wieder entfernen — FK-sichere
+// Reihenfolge, best-effort. Haelt /dispatch sauber: die internen @claimondo.de-Buchungen sind
+// dank #3709 zwar unbenachrichtigt, sollen aber nicht als Test-Leads liegen bleiben.
+async function cleanupTestBookings(db: ReturnType<typeof admin>) {
+  try {
+    const { data: leads } = await db.from('leads').select('id').ilike('email', 'e2e-finder-%@claimondo.de')
+    const leadIds = (leads ?? []).map((l) => l.id as string)
+    const { data: gfas } = await db.from('gutachter_finder_anfragen').select('id, termin_id').ilike('email', 'e2e-finder-%@claimondo.de')
+    const gfaIds = (gfas ?? []).map((g) => g.id as string)
+    const terminIds = (gfas ?? []).map((g) => g.termin_id).filter(Boolean) as string[]
+    if (gfaIds.length) await db.from('gutachter_finder_anfragen').delete().in('id', gfaIds)
+    if (leadIds.length) await db.from('flow_links').delete().in('lead_id', leadIds)
+    if (leadIds.length) await db.from('gutachter_termine').delete().in('lead_id', leadIds) // SV-Termin referenziert lead_id -> blockiert sonst den lead-delete
+    if (terminIds.length) await db.from('termine').delete().in('id', terminIds)
+    if (leadIds.length) {
+      const { error: le } = await db.from('leads').delete().in('id', leadIds)
+      if (le) console.error('[golden-finder] leads-delete Fehler:', JSON.stringify(le))
+    }
+    console.log(`[golden-finder] cleanup versucht: ${gfaIds.length} gfa, ${terminIds.length} Termine, ${leadIds.length} Leads`)
+  } catch (err) {
+    console.error('[golden-finder] cleanupTestBookings best-effort:', (err as Error).message)
+  }
+}
+
 test.beforeAll(async () => {
   await aktiviereTestSv(admin())
 })
 test.afterAll(async () => {
-  await deaktiviereTestSv(admin())
+  const db = admin()
+  await deaktiviereTestSv(db)
+  await cleanupTestBookings(db)
 })
 
 // Fuehrt die Buchungs-Strecke im gegebenen Root (Page = Top-Level, FrameLocator = iframe) bis zum
@@ -184,8 +210,10 @@ for (const entry of ENTRIES) {
 
 // Crash-Recovery: nur deaktivieren (falls ein abgebrochener Lauf den SV aktiv liess).
 //   RESET_FINDER_TEST_SV=1 RUN_GOLDEN_PATH_PROD=1 npx playwright test golden-path-finder-prod -g reset
-test('reset — Test-SV deaktivieren (Crash-Recovery)', async () => {
-  test.skip(!process.env.RESET_FINDER_TEST_SV, 'set RESET_FINDER_TEST_SV=1 um nur zu deaktivieren')
-  await deaktiviereTestSv(admin())
-  console.log('[golden-finder] Test-SV deaktiviert (reset)')
+test('reset — Test-SV deaktivieren + Test-Buchungen purgen (Crash-Recovery)', async () => {
+  test.skip(!process.env.RESET_FINDER_TEST_SV, 'set RESET_FINDER_TEST_SV=1 um zu deaktivieren+purgen')
+  const db = admin()
+  await deaktiviereTestSv(db)
+  await cleanupTestBookings(db)
+  console.log('[golden-finder] Test-SV deaktiviert + Test-Buchungen entfernt (reset)')
 })
