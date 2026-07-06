@@ -5,11 +5,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
+import { MAPBOX_STYLE_STREETS } from '@/lib/mapbox/styles'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSource } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
 import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
+import { fetchDrivingRoute } from '@/lib/mapbox/directions'
+import { computeCoverageGaps } from '@/lib/live-ops/coverage'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
 import TerminPopup from './TerminPopup'
@@ -40,6 +43,7 @@ const LAYER_ISOS_LINE = 'lo-isos-line'
 
 const SRC_TERMINE = 'lo-termine'
 const LAYER_TERMINE = 'lo-termine-circle'
+const LAYER_TERMINE_ETA = 'lo-termine-eta-label'
 
 const SRC_ROUTEN = 'lo-routen'
 const LAYER_ROUTEN = 'lo-routen-line'
@@ -60,15 +64,20 @@ const LAYER_CAND = 'lo-cand-halo-circle'
 const SRC_ASSIGN_LINE = 'lo-assign-line'
 const LAYER_ASSIGN_LINE = 'lo-assign-line-line'
 
-// Lead-Status-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property)
+// Lead-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property).
+// Reihenfolge: Abdeckungsluecke (rot) hat Vorrang vor Status-Farbe.
 const LEAD_STATUS_COLOR_EXPR = [
-  'match',
-  ['get', 'status'],
-  'neu', '#f59e0b',
-  'offen', '#f59e0b',
-  'aktiv', '#3b82f6',
-  'in_bearbeitung', '#3b82f6',
-  /* default */ '#94a3b8',
+  'case',
+  ['==', ['get', '__gap'], 1], '#ef4444',
+  // kein Lücken-Lead → Status-Farbe
+  ['match',
+    ['get', 'status'],
+    'neu', '#f59e0b',
+    'offen', '#f59e0b',
+    'aktiv', '#3b82f6',
+    'in_bearbeitung', '#3b82f6',
+    /* default */ '#94a3b8',
+  ],
 ] as unknown as mapboxgl.Expression
 
 // Dead-Pin-Status-Farben via match-Expression (raw hex ok — Token-Audit-Skip-Header oben)
@@ -195,6 +204,12 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     })
   }, [data.svs, filter])
 
+  // Abdeckungsluecken: Lead-IDs ohne deckende SV-Isochrone (alle SVs, ungefiltert)
+  const gapIds = useMemo(
+    () => computeCoverageGaps(data.leads, data.svs),
+    [data.leads, data.svs],
+  )
+
   const handleRetry = useCallback(() => {
     setError(null)
     setReady(false)
@@ -212,7 +227,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         const layerIds: Record<LayerKey, string[]> = {
           svs: [LAYER_SVS, LAYER_ISOS_FILL, LAYER_ISOS_LINE],
           autos: [], // Car-Marker werden per display-Style getoggelt
-          termine: [LAYER_TERMINE],
+          termine: [LAYER_TERMINE, LAYER_TERMINE_ETA],
           routen: [LAYER_ROUTEN],
           tagesrouten: [LAYER_TAGESROUTEN],
           deadpins: [LAYER_DEADPINS],
@@ -389,7 +404,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: MAPBOX_STYLE_STREETS,
       center: [10.45, 51.16],
       zoom: 5.4,
       attributionControl: false,
@@ -415,7 +430,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         source: SRC_ISOS,
         paint: {
           'fill-color': TYP_COLOR_EXPR,
-          'fill-opacity': 0.1,
+          'fill-opacity': 0.18,
         },
       })
 
@@ -425,8 +440,8 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         source: SRC_ISOS,
         paint: {
           'line-color': TYP_COLOR_EXPR,
-          'line-width': 1.5,
-          'line-opacity': 0.5,
+          'line-width': 2,
+          'line-opacity': 0.7,
         },
       })
 
@@ -488,7 +503,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           'circle-color': TERMIN_STATUS_COLOR_EXPR,
           'circle-radius': 5,
           'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 1.5,
+          'circle-stroke-width': 2,
         },
       })
 
@@ -511,6 +526,26 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         map.getCanvas().style.cursor = ''
       })
 
+      // ─── ETA-Label an Termin-Pins (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint) ──
+      map.addLayer({
+        id: LAYER_TERMINE_ETA,
+        type: 'symbol',
+        source: SRC_TERMINE,
+        filter: ['has', 'etaMin'],
+        layout: {
+          'text-field': ['concat', ['to-string', ['get', 'etaMin']], ' min'],
+          'text-size': 10,
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-offset': [0, -1.4],
+          'text-anchor': 'bottom',
+        },
+        paint: {
+          'text-color': '#0D1B3E',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.5,
+        },
+      })
+
       // ─── Unterwegs-Routen-Layer ─────────────────────────────────────────
       map.addSource(SRC_ROUTEN, {
         type: 'geojson',
@@ -527,7 +562,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         },
         paint: {
           'line-color': '#0D1B3E',
-          'line-width': 3,
+          'line-width': 4,
           'line-opacity': 0.6,
         },
       })
@@ -549,7 +584,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         },
         paint: {
           'line-color': '#94a3b8',
-          'line-width': 2,
+          'line-width': 3,
           'line-opacity': 0.7,
           'line-dasharray': [2, 2],
         },
@@ -570,7 +605,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-color': DEADPIN_STATUS_COLOR_EXPR,
             'circle-radius': 6,
             'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 1.5,
+            'circle-stroke-width': 2,
             'circle-opacity': 0.75,
           },
         })
@@ -599,7 +634,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       if (role !== 'kundenbetreuer') {
         map.addSource(SRC_LEADS, {
           type: 'geojson',
-          data: leadsFC(leadsRef.current),
+          data: leadsFC(leadsRef.current, gapIds),
           cluster: true,
           clusterMaxZoom: 8,
           clusterRadius: 50,
@@ -674,7 +709,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-color': LEAD_STATUS_COLOR_EXPR,
             'circle-radius': 6,
             'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 1.5,
+            'circle-stroke-width': 2,
             'circle-opacity': 0.85,
           },
         })
@@ -827,16 +862,16 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     }
   }, [data.deadPins, ready])
 
-  // ------ Rebuild-Effect: Leads bei Daten-Aenderung updaten
+  // ------ Rebuild-Effect: Leads bei Daten-Aenderung oder Abdeckungsluecken updaten
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !ready) return
 
     if (map.getSource(SRC_LEADS)) {
-      (map.getSource(SRC_LEADS) as GeoJSONSource).setData(leadsFC(data.leads))
+      (map.getSource(SRC_LEADS) as GeoJSONSource).setData(leadsFC(data.leads, gapIds))
     }
-  }, [data.leads, ready])
+  }, [data.leads, gapIds, ready])
 
   // ------ Rebuild-Effect: Kandidaten-Halos bei candidateSvIds-Aenderung updaten
 
@@ -847,6 +882,10 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
   }, [candidateSvIds, data.svs])
 
   // ------ Rebuild-Effect: Verbindungslinie bei Hover-SV/Assign-Lead-Aenderung updaten
+  // V2: setzt sofort eine gerade Linie (Sofort-Feedback), holt dann async die
+  // echte Fahrroute via fetchDrivingRoute. AbortController pro Effekt-Lauf damit
+  // ein Hover-Wechsel den alten Fetch canceled. Bei Abort/Fehler bleibt die
+  // gerade Linie sichtbar (kein Throw ins UI).
 
   useEffect(() => {
     const map = mapRef.current
@@ -856,7 +895,18 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     const lead = leadsRef.current.find((l) => l.id === assignLeadId)
     const from = sv?.standortLat != null && sv.standortLng != null ? [sv.standortLng, sv.standortLat] as [number, number] : null
     const to = lead ? [lead.lng, lead.lat] as [number, number] : null
-    src.setData(assignLineFC(from, to))
+    src.setData(assignLineFC(from, to)) // Sofort: gerade Linie
+    if (!from || !to) return
+    const ctrl = new AbortController()
+    fetchDrivingRoute(from, to, { signal: ctrl.signal })
+      .then((r) => {
+        const s = mapRef.current?.getSource(SRC_ASSIGN_LINE) as GeoJSONSource | undefined
+        if (s && r.primary?.coords?.length) {
+          s.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates: r.primary.coords }, properties: {} }] })
+        }
+      })
+      .catch(() => {}) // Abort/Fehler: gerade Linie bleibt
+    return () => ctrl.abort()
   }, [previewSvId, assignLeadId, data.svs])
 
   // ------ Realtime: Supabase-Kanal fuer sv_live_location-Aenderungen
@@ -970,7 +1020,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
 
       {/* StatBar — oben zentriert */}
       {ready && (
-        <StatBar data={data} />
+        <StatBar data={data} coverageGaps={gapIds.size} />
       )}
 
       {/* LayerPanel — links */}
