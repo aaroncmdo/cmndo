@@ -23,7 +23,13 @@ export default async function ProfilPage() {
   const { data: bridgeRows } = await supabase.from('faelle_claim_bridge').select('claim_id')
   const faelleClaimIds = (bridgeRows ?? []).map((b) => b.claim_id)
 
-  const [{ data: profile }, sv, faelleResult, bewertungRes] = await Promise.all([
+  // FIX (Dashboard-Metrik-Audit 06.07.): getGutachterForUser VOR die Promise.all gezogen,
+  // damit der Faelle-Count auf sv.id filtern kann. Vorher .eq('sv_id', user.id) — aber
+  // claims.sv_id referenziert sachverstaendige.id, NICHT die auth user.id -> der Count war
+  // IMMER 0 ("Zugewiesene Faelle gesamt: 0" fuer JEDEN SV, egal wie viele Faelle).
+  const sv = await getGutachterForUser(supabase, user.id, 'id, paket, gebiet_plz, ist_aktiv, paket_faelle_gesamt, offene_faelle, qualifikationen_neu, spezifikationen, schadenarten, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, firmenname, rechtsform, steuernummer, ust_id, hrb, rolle_in_organisation, community_anonym')
+
+  const [{ data: profile }, faelleResult, bewertungRes] = await Promise.all([
     supabase
       .from('profiles')
       // AAR-344: twofa_telefon für „Nummer ändern"-Komponente
@@ -31,11 +37,10 @@ export default async function ProfilPage() {
       .select('anrede, titel, vorname, nachname, telefon, rolle, twofa_telefon, avatar_url, anzeigename, profilbeschreibung')
       .eq('id', user.id)
       .single(),
-    getGutachterForUser(supabase, user.id, 'id, paket, gebiet_plz, ist_aktiv, paket_faelle_gesamt, offene_faelle, qualifikationen_neu, spezifikationen, schadenarten, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, firmenname, rechtsform, steuernummer, ust_id, hrb, rolle_in_organisation, community_anonym'),
     supabase
       .from('claims')
       .select('id', { count: 'exact', head: true })
-      .eq('sv_id', user.id)
+      .eq('sv_id', sv?.id ?? '00000000-0000-0000-0000-000000000000')
       .in('id', faelleClaimIds),
     supabase
       .from('google_bewertungen_cache')
