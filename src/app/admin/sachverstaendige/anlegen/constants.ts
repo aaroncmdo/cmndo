@@ -15,8 +15,6 @@ export const PAKET_KONFIG: Record<Exclude<AnlegePaket, 'individuell'>, { konting
   premium: { kontingent: PAKETE.premium.faelle, radius_km: PAKETE.premium.radius_km, preis_anzahlung_eur: PAKETE.premium.preis, label: PAKETE.premium.name },
 }
 
-export const ANZAHLUNG_PRO_FALL = 150
-
 export function paketAnzahlung(paket: AnlegePaket, override?: number): number {
   if (paket === 'individuell') return override ?? 0
   return PAKET_KONFIG[paket].preis_anzahlung_eur

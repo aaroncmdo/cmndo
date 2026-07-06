@@ -45,12 +45,18 @@ export async function POST(request: Request) {
   const authHeader = request.headers.get('authorization') ?? ''
   const isInternal =
     !!process.env.CRON_SECRET && authHeader === `Bearer ${process.env.CRON_SECRET}`
+  // AAR (06.07. E2E-Hunt): interner Auto-Dispatch (Bearer CRON_SECRET, user-los) MUSS
+  // ueber den Admin-Client lesen — sonst liefern die RLS-gegateten Reads (faelle_claim_bridge
+  // etc.) 0 Zeilen -> 404 -> nach SV-Ablehnung wird NIE ein Ersatz-SV zugewiesen (nur ein
+  // manueller Fallback-Task). Der eingeloggte Staff-Pfad bleibt auf dem RLS-Client
+  // (db === supabase), behaelt also exakt die Case-Visibility des Users.
+  const db = isInternal ? createAdminClient() : supabase
   if (!isInternal) {
-    const user = (await supabase.auth.getUser())?.data?.user ?? null
+    const user = (await db.auth.getUser())?.data?.user ?? null
     if (!user) {
       return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
     }
-    const { data: profile } = await supabase
+    const { data: profile } = await db
       .from('profiles')
       .select('rolle')
       .eq('id', user.id)
@@ -80,7 +86,7 @@ export async function POST(request: Request) {
   // (Policy faelle_claim_bridge_select_consolidated spiegelt faelle's Case-Access exakt
   // -> gleiche Sichtbarkeit; bridge.fall_id == faelle.id, 1:1). sv_id aus claims.sv_id
   // (SSoT, div=0 vs faelle.sv_id).
-  const { data: fall, error: fallErr } = await supabase
+  const { data: fall, error: fallErr } = await db
     .from('faelle_claim_bridge')
     .select('fall_id, claim_id, claims:claim_id(sv_id, spezifikation, schadenort_plz, schadenart)')
     .eq('fall_id', fallId)
@@ -101,7 +107,7 @@ export async function POST(request: Request) {
   }
 
   // 2. PLZ-Koordinaten des Schadens laden
-  const { data: schadenGeo } = await supabase
+  const { data: schadenGeo } = await db
     .from('plz_geo')
     .select('lat, lng')
     .eq('plz', fallSchadenPlz)
@@ -114,7 +120,7 @@ export async function POST(request: Request) {
   if (schadenGeo) {
     try {
       const { checkExklusivitaet } = await import('@/lib/dispatch/exklusivitaet')
-      const ex = await checkExklusivitaet(supabase, Number(schadenGeo.lat), Number(schadenGeo.lng))
+      const ex = await checkExklusivitaet(db, Number(schadenGeo.lat), Number(schadenGeo.lng))
       if (ex.exklusiv) {
         exklusivOrgId = ex.organisation_id
         console.log(`[KFZ-152] Lead ${fallId} im exklusiven Gebiet von Community ${ex.community_name} (org=${ex.organisation_id})`)
@@ -127,7 +133,7 @@ export async function POST(request: Request) {
   // 3. Alle dispatchbaren SVs laden — einheitlicher Filter aus lib/sv/queries.
   // AAR SV-Audit-Konsolidierung: gesperrt_seit + geloescht_am waren hier
   // bisher nicht gefiltert. Jetzt via applyDispatchableFilter konsistent.
-  const svBaseQuery = supabase
+  const svBaseQuery = db
     .from('sachverstaendige')
     .select('id, partner_seit, offene_faelle, paket_faelle_gesamt, paket_faelle_genutzt, standort_lat, standort_lng, isochrone_polygon, paket_umkreis_km, spezifikationen, schadenarten, organisation_id, rolle_in_organisation')
   let svQuery = applyDispatchableFilter(svBaseQuery)
@@ -262,7 +268,7 @@ export async function POST(request: Request) {
   // faelle. Org-Pool-Zweig setzt sv_zugewiesen_am auf null → claims-Write nötig.
   const now = new Date().toISOString()
   // Claim-ID fuer claims-Write holen.
-  const fallClaimId = await resolveClaimId(supabase, fallId)
+  const fallClaimId = await resolveClaimId(db, fallId)
 
   // CMM-44 SP-B PR2a: sv_zugewiesen_am → claims (SSoT).
   // CMM-74: faelle.status-Write retired — operative_status (Engine-Cursor, claims=SSoT) traegt
@@ -281,7 +287,7 @@ export async function POST(request: Request) {
   // spiegelt nach faelle.sv_id). Nur im Nicht-Org-Pool-Zweig — Org-Pool laesst
   // sv_id unveraendert (wie bisher).
   if (!orgPool) {
-    await setSvIdForFall(supabase, fallId, bestSv.id)
+    await setSvIdForFall(db, fallId, bestSv.id)
   }
 
   if (updateErr) {
@@ -302,7 +308,7 @@ export async function POST(request: Request) {
 
     // Fallback: direktes Update wenn RPC nicht existiert
     if (svUpdateErr) {
-      await supabase
+      await db
         .from('sachverstaendige')
         .update({ offene_faelle: (bestSv.offene_faelle ?? 0) + 1 })
         .eq('id', bestSv.id)
@@ -320,7 +326,7 @@ export async function POST(request: Request) {
     // CMM-49 (faelle-Drop-Runway): Anker auf faelle_claim_bridge statt .from('faelle')
     // (gleiche RLS-Sichtbarkeit). lead_id aus claims.lead_id (SSoT, div=0). Das frühere
     // sv_id-Select war vestigial (nirgends gelesen — Zuweisung nutzt bestSv.id) -> weg.
-    const { data: fallFull } = await supabase
+    const { data: fallFull } = await db
       .from('faelle_claim_bridge')
       .select('fall_id, claim_id, claims:claim_id(lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
       .eq('fall_id', fallId)
@@ -347,7 +353,7 @@ export async function POST(request: Request) {
       // wunschtermin: aus dem neuesten Termin (falls vorhanden), sonst aus leads
       let wunschtermin: string | null = null
       if (fallFull.claim_id) {
-        const { data: neuestTermin } = await supabase
+        const { data: neuestTermin } = await db
           .from('gutachter_termine')
           .select('wunschtermin')
           .eq('claim_id', fallFull.claim_id)
@@ -357,7 +363,7 @@ export async function POST(request: Request) {
         wunschtermin = (neuestTermin?.wunschtermin as string | null) ?? null
       }
       if (!wunschtermin && fallFullLeadId) {
-        const { data: leadWt } = await supabase
+        const { data: leadWt } = await db
           .from('leads')
           .select('wunschtermin')
           .eq('id', fallFullLeadId)
@@ -373,14 +379,14 @@ export async function POST(request: Request) {
       // Kunde-Daten + Adresse fuer Trigger
       let kundeName = ''
       if (fallFullLeadId) {
-        const { data: lead } = await supabase.from('leads').select('vorname, nachname').eq('id', fallFullLeadId).single()
+        const { data: lead } = await db.from('leads').select('vorname, nachname').eq('id', fallFullLeadId).single()
         kundeName = [lead?.vorname, lead?.nachname].filter(Boolean).join(' ')
       }
       const adresse = [fallFullClaim?.schadenort_adresse, fallFullClaim?.schadenort_plz, fallFullClaim?.schadenort_ort].filter(Boolean).join(', ') || ''
 
       // SV-01 Task + In-App Notification (braucht profile_id)
       // Telefon mitladen fuer die WhatsApp-Benachrichtigung weiter unten.
-      const { data: svProfileData } = await supabase
+      const { data: svProfileData } = await db
         .from('sachverstaendige')
         .select('profile_id, profiles!sachverstaendige_profile_id_fkey(telefon)')
         .eq('id', bestSv.id)
@@ -478,7 +484,7 @@ export async function POST(request: Request) {
   }
 
   // 8. SV-Profil laden für Response
-  const { data: svProfile } = await supabase
+  const { data: svProfile } = await db
     .from('sachverstaendige')
     .select('id, paket, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, telefon, email)')
     .eq('id', bestSv.id)
@@ -493,15 +499,15 @@ export async function POST(request: Request) {
       // CMM-44 SP-A3: Aktennummer kommt aus claims.claim_nummer.
       // CMM-49 (faelle-Drop-Runway): claim_nummer + schadenort_* + lead_id faelle-frei
       // via claims (ein Read statt zusätzlichem faelle.lead_id-Read).
-      const zuwClaimId = await resolveClaimId(supabase, fallId)
+      const zuwClaimId = await resolveClaimId(db, fallId)
       const { data: fallDataClaim } = zuwClaimId
-        ? await supabase.from('claims').select('lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort').eq('id', zuwClaimId).maybeSingle()
+        ? await db.from('claims').select('lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort').eq('id', zuwClaimId).maybeSingle()
         : { data: null }
 
       let kundenName = '—'
       const emailLeadId = (fallDataClaim?.lead_id as string | null) ?? null
       if (emailLeadId) {
-        const { data: lead } = await supabase
+        const { data: lead } = await db
           .from('leads')
           .select('vorname, nachname')
           .eq('id', emailLeadId)
