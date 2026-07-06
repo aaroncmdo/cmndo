@@ -1235,6 +1235,7 @@ export type Database = {
           positionen: Json | null
           schweregrad: string | null
           session_token: string
+          totalschaden: Json | null
           vision_result: Json | null
         }
         Insert: {
@@ -1248,6 +1249,7 @@ export type Database = {
           positionen?: Json | null
           schweregrad?: string | null
           session_token: string
+          totalschaden?: Json | null
           vision_result?: Json | null
         }
         Update: {
@@ -1261,6 +1263,7 @@ export type Database = {
           positionen?: Json | null
           schweregrad?: string | null
           session_token?: string
+          totalschaden?: Json | null
           vision_result?: Json | null
         }
         Relationships: [
@@ -12402,6 +12405,102 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      partner_leads: {
+        Row: {
+          aktualisiert_am: string
+          ansprechpartner_nachname: string | null
+          ansprechpartner_vorname: string | null
+          email: string
+          erstellt_am: string
+          firma: string | null
+          id: string
+          konvertiert_am: string | null
+          konvertiert_durch: string | null
+          konvertiert_zu_partner_id: string | null
+          konvertiert_zu_user_id: string | null
+          notiz: string | null
+          ort: string | null
+          plz: string | null
+          rolle: string
+          rollen_details: Json
+          source_channel: string
+          status: string
+          telefon: string | null
+          zugewiesen_an: string | null
+        }
+        Insert: {
+          aktualisiert_am?: string
+          ansprechpartner_nachname?: string | null
+          ansprechpartner_vorname?: string | null
+          email: string
+          erstellt_am?: string
+          firma?: string | null
+          id?: string
+          konvertiert_am?: string | null
+          konvertiert_durch?: string | null
+          konvertiert_zu_partner_id?: string | null
+          konvertiert_zu_user_id?: string | null
+          notiz?: string | null
+          ort?: string | null
+          plz?: string | null
+          rolle: string
+          rollen_details?: Json
+          source_channel?: string
+          status?: string
+          telefon?: string | null
+          zugewiesen_an?: string | null
+        }
+        Update: {
+          aktualisiert_am?: string
+          ansprechpartner_nachname?: string | null
+          ansprechpartner_vorname?: string | null
+          email?: string
+          erstellt_am?: string
+          firma?: string | null
+          id?: string
+          konvertiert_am?: string | null
+          konvertiert_durch?: string | null
+          konvertiert_zu_partner_id?: string | null
+          konvertiert_zu_user_id?: string | null
+          notiz?: string | null
+          ort?: string | null
+          plz?: string | null
+          rolle?: string
+          rollen_details?: Json
+          source_channel?: string
+          status?: string
+          telefon?: string | null
+          zugewiesen_an?: string | null
+        }
+        Relationships: []
+      }
+      partner_rollen_policy: {
+        Row: {
+          aktualisiert_am: string
+          auto_konvertieren: boolean
+          braucht_review: boolean
+          braucht_zahlung: boolean
+          rolle: string
+          self_signup_erlaubt: boolean
+        }
+        Insert: {
+          aktualisiert_am?: string
+          auto_konvertieren?: boolean
+          braucht_review?: boolean
+          braucht_zahlung?: boolean
+          rolle: string
+          self_signup_erlaubt?: boolean
+        }
+        Update: {
+          aktualisiert_am?: string
+          auto_konvertieren?: boolean
+          braucht_review?: boolean
+          braucht_zahlung?: boolean
+          rolle?: string
+          self_signup_erlaubt?: boolean
+        }
+        Relationships: []
       }
       personen: {
         Row: {

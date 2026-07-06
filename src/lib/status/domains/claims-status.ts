@@ -16,4 +16,6 @@ export const CLAIMS_STATUS_DEFS: Record<string, StatusDef> = {
   verjaehrt:            { label: 'Verjährt', slot: 'neutral', iconKey: 'clock', isEndzustand: true },
   an_externe_kanzlei_uebergeben: { label: 'An externe Kanzlei', labelByRole: { kunde: 'An deine Kanzlei übergeben' }, slot: 'done', iconKey: 'scale', isEndzustand: true },
   storniert:            { label: 'Storniert', labelByRole: { kunde: 'Gestoppt' }, slot: 'neutral', iconKey: 'pause-circle', isEndzustand: true },
+  // AAR-939: embed-B/nur_gutachter Terminal (von close-nur-gutachter-termin.ts geschrieben).
+  termin_durchgefuehrt: { label: 'Termin durchgeführt', slot: 'success', iconKey: 'check-circle', isEndzustand: true },
 }

@@ -35,7 +35,7 @@ describe('wochenreport-optout Token', () => {
 
   it('URL enthaelt maklerId, sig + Abmelde-Pfad', () => {
     const url = wochenreportOptOutUrl(id)
-    expect(url).toContain('/abmelden/makler-wochenreport/makler-abc-123')
+    expect(url).toContain('/wochenreport-abmelden/makler-abc-123')
     expect(url).toContain('sig=')
   })
 })

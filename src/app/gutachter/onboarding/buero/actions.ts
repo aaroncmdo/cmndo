@@ -214,6 +214,19 @@ export async function startBueroStripeCheckout(organisationId: string): Promise<
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' }
 
+  // IDOR-Guard: User muss Verwalter (hauptansprechpartner) dieser Organisation sein — analog
+  // startAkademieStripeCheckout. Ohne den Check konnte jeder eingeloggte User fuer eine FREMDE
+  // Org Checkout ausloesen, deren onboarding_status auf 'anzahlung_offen' biegen + einen
+  // Stripe-Customer auf ihr anlegen (State-Change-IDOR, OWASP A01).
+  const adminDb = createAdminClient()
+  const { data: org } = await adminDb.from('organisationen')
+    .select('hauptansprechpartner_user_id, typ')
+    .eq('id', organisationId)
+    .maybeSingle()
+  if (!org || org.typ !== 'buero' || org.hauptansprechpartner_user_id !== user.id) {
+    return { error: 'Keine Berechtigung' }
+  }
+
   try {
     const { createBueroCheckoutSession } = await import('@/lib/stripe/buero-checkout')
     return await createBueroCheckoutSession(organisationId)

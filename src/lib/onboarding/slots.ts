@@ -187,7 +187,9 @@ export async function bestaetigeSlot(
 
   const { error: terminErr } = await supabase
     .from('gutachter_termine')
-    .update({ status: 'geplant' })
+    // FIX (Status-Enum-Audit 05.07.): 'geplant' ist KEIN gueltiger gutachter_termine.status
+    // (CHECK) -> Update warf 400. reserviert -> bestaetigt ist der Confirm-Uebergang.
+    .update({ status: 'bestaetigt' })
     .eq('id', terminId)
     .eq('status', 'reserviert')
 

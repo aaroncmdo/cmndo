@@ -101,6 +101,20 @@ async function callRpc(fnName) {
 const GATE_BEARING = ['v_claim_base', 'v_claim_phase', 'v_claim_listing', 'v_claim_parties_safe']
 const LAYER = ['v_claim_full', 'v_faelle_mit_aktuellem_termin', 'faelle_sv_view', 'faelle_kunde_view']
 
+// Bekannt-sichere Nicht-Claim-Definer-Views: row-gegatet ueber OWNERSHIP (auth.uid()-Werkstatt),
+// NICHT ueber die Claim-Gate-Funktionen, die audit_ungated_definer_views() per Substring erkennt
+// (claim_sichtbar / is_werkstatt_for_claim / v_claim_base …). Sie sind kein Claim-Read-Pfad, daher
+// ist keine dieser Funktionen anwendbar -> der STATISCHE Heuristik-Check flaggt sie als False-Positive,
+// obwohl sie korrekt row-gegatet + anon-revoked sind (empirisch prod-verifiziert: Fremd-User = 0 Zeilen).
+// Nur der statische Check wird fuer diese EXAKT benannten Views unterdrueckt; die empirischen Checks
+// (Nobody-Leak + Identity-Cross-Compare) laufen weiter, und jede Umbenennung faellt sofort zurueck ins Netz.
+const OWNERSHIP_GATED_SAFE = new Set([
+  // v_werkstatt_lead — Leads-View (kein Claim): WHERE werkstatt_id IN
+  //   (SELECT id FROM werkstaetten WHERE user_id = auth.uid()) AND konvertiert_zu_claim_id IS NULL.
+  //   Migrationen 20260705183655 (create) + 20260706094930 (schadentyp). anon REVOKED, authenticated SELECT.
+  'v_werkstatt_lead',
+])
+
 const { data, error } = await callRpc('audit_claim_view_gates')
 if (error) {
   console.error('❌ RPC audit_claim_view_gates fehlgeschlagen:', error.message)
@@ -133,7 +147,10 @@ for (const r of data) {
 {
   const { data: ungated, error: eU } = await callRpc('audit_ungated_definer_views')
   if (eU) { console.error('❌ RPC audit_ungated_definer_views fehlgeschlagen:', eU.message); process.exit(1) }
-  for (const r of (ungated ?? [])) problems.push(`ungated-Definer-View: ${r.view_name} (granted: ${r.app_grants}) → Gate claim_sichtbar_fuer_aktuellen_user(claim_id) ergaenzen oder anon/auth-Grant entfernen.`)
+  for (const r of (ungated ?? [])) {
+    if (OWNERSHIP_GATED_SAFE.has(r.view_name)) continue // verifizierte Nicht-Claim-Ownership-View (s.o.)
+    problems.push(`ungated-Definer-View: ${r.view_name} (granted: ${r.app_grants}) → Gate claim_sichtbar_fuer_aktuellen_user(claim_id) ergaenzen oder anon/auth-Grant entfernen.`)
+  }
   const { data: leaking, error: eL } = await callRpc('audit_claim_views_leaking_to_nobody')
   if (eL) { console.error('❌ RPC audit_claim_views_leaking_to_nobody fehlgeschlagen:', eL.message); process.exit(1) }
   for (const r of (leaking ?? [])) problems.push(`empirischer Leak: ${r.view_name} zeigt einem Nobody-User ${r.nobody_sieht_zeilen} Zeilen → Gate fehlt/fehlerhaft.`)

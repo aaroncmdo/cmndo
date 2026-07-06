@@ -11,7 +11,7 @@ import {
   erstelleSession, ladeFotoInSession, ladeFotoUrls,
   speichereVisionResult, speicherePositionen,
 } from '@/lib/anspruch/session'
-import { SEGMENTE, type AnspruchSpanne, type Segment, type VisionResult } from '@/lib/anspruch/types'
+import { SEGMENTE, type AnspruchSpanne, type Ersatzfahrzeug, type Schuldform, type Segment, type VisionResult } from '@/lib/anspruch/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const VISION_SYSTEM = `Du bist ein KFZ-Schadensexperte fuer den deutschen Markt. Antworte IMMER als valides JSON mit exakt diesem Schema, ohne weiteren Text:
@@ -114,7 +114,7 @@ export async function analysiereSchaden(
 
 export async function berechneAnspruch(
   sessionToken: string,
-  eingabe: { segment: Segment; fahrbereit: boolean; ezJahr: number | null },
+  eingabe: { segment: Segment; fahrbereit: boolean; ezJahr: number | null; schuld: Schuldform; ersatzfahrzeug: Ersatzfahrzeug },
 ): Promise<{ ok: true; spanne: AnspruchSpanne } | { ok: false; error: string }> {
   const db = createAdminClient()
   const { data: row } = await db
@@ -140,6 +140,8 @@ export async function berechneAnspruch(
       fahrbereit: eingabe.fahrbereit,
       ezJahr: eingabe.ezJahr,
       aktuellesJahr: new Date().getFullYear(),
+      schuld: eingabe.schuld,
+      ersatzfahrzeug: eingabe.ersatzfahrzeug,
       wbwMinEur: wbw.wbwMin,
       wbwMaxEur: wbw.wbwMax,
       restwertMinEur: wbw.restwertMin,
@@ -147,6 +149,6 @@ export async function berechneAnspruch(
     },
     saetze, faktoren, config,
   )
-  await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.positionen)
+  await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.schuld, spanne.positionen, spanne.totalschaden)
   return { ok: true, spanne }
 }
