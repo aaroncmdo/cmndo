@@ -185,8 +185,16 @@ export async function convertLeadToClaim(
   // NICHT als KB durchschlagen. Gegate auf source_channel (nicht service_typ),
   // damit NATIVE nur_gutachter-Faelle ihren KB wie gehabt behalten.
   const istEmbedB = (lead.source_channel as string | null) === 'monika_embed'
+  // Selbstzahler (abrechnungsweg='selbstzahler'): reiner Self-Service-Reparatur-
+  // Vorgang OHNE SV/Gutachten/Regulierung -> kein Kundenbetreuer noetig (analog
+  // embed-B; Aaron 06.07.). Sonst bindet der Round-Robin KB-Kapazitaet fuer einen
+  // Fall ohne KB-Arbeit. Null-KB ist downstream-safe: das Kunde-Portal gatet die
+  // KB-Anzeige auf fall.kundenbetreuer_id, embed-B liefert bereits KB-lose Claims.
+  // abrechnungsweg ist type-lagged -> Record-Cast (AGENTS.md §6).
+  const istSelbstzahler =
+    ((lead as Record<string, unknown>).abrechnungsweg as string | null) === 'selbstzahler'
   let kundenbetreuerId: string | null = input.kundenbetreuerId ?? null
-  if (!istEmbedB && !kundenbetreuerId) {
+  if (!istEmbedB && !istSelbstzahler && !kundenbetreuerId) {
     // AAR-956: lead.zugewiesen_an NUR als KB uebernehmen, wenn die Rolle KB-faehig
     // ist. Beim kanonischen Self-Service-Lead (/start) ist zugewiesen_an der
     // DISPATCHER (pickRoundRobinDispatcher) — der claims-Trigger
