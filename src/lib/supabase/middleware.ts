@@ -42,11 +42,12 @@ export async function updateSession(request: NextRequest) {
   // Collect cookies that need to be set on the response
   const cookiesToUpdate: { name: string; value: string; options: Record<string, unknown> }[] = []
 
-  // BUG-83 Befund 7: User-Wahl "Angemeldet bleiben" wird in cm_remember
-  // gespeichert. Bei Refresh-Token-Rotation respektiert die Middleware
-  // diese Wahl, sonst wuerden Session-Cookies versehentlich zu langlebigen
-  // werden sobald supabase einen Token rotiert.
-  const remember = request.cookies.get(REMEMBER_COOKIE_NAME)?.value !== '0'
+  // BUG-83 Befund 7 / F7 (AAR-audit-2fa): "Angemeldet bleiben" in cm_remember.
+  // Opt-in: fehlender/leerer Marker ⇒ NICHT persistent (Session-Cookie); nur
+  // explizit "1" haelt die Auth-Cookies langlebig. Vorher (`!== '0'`) war der
+  // Default versehentlich persistent. Bei Refresh-Token-Rotation respektiert die
+  // Middleware diese Wahl.
+  const remember = request.cookies.get(REMEMBER_COOKIE_NAME)?.value === '1'
 
   // AAR-login-loop: gleiche Domain-Logik wie in server.ts — alle Auth-Cookies
   // auf .claimondo.de setzen damit claimondo.de ↔ app.claimondo.de teilen.
@@ -123,7 +124,6 @@ export async function updateSession(request: NextRequest) {
     const gateBasis = {
       isOn2faPage: request.nextUrl.pathname === '/login/2fa',
       isGoogleUser: user.app_metadata?.provider === 'google',
-      isGutachterPath: request.nextUrl.pathname.startsWith('/gutachter'),
       aalCurrent,
       hasVerifiedFactor: hatVerifiziertenFaktor(user.factors),
     }
@@ -166,7 +166,9 @@ export async function updateSession(request: NextRequest) {
         response = NextResponse.next({ request: { headers: requestHeaders } })
       }
     } else {
-      // 2FA OK (oder /login/2fa selbst / Google / Gutachter / kein Faktor) → durchlassen
+      // 2FA OK (oder /login/2fa selbst / Google / kein Faktor) → durchlassen.
+      // F2 (AAR-audit-2fa): /gutachter ist NICHT mehr befreit — SV mit Faktor
+      // wird oben gechallenged (Enforcement folgt dem Faktor, nicht dem Pfad).
       response = NextResponse.next({ request: { headers: requestHeaders } })
     }
   }

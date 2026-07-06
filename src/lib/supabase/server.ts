@@ -23,9 +23,11 @@ export async function createClient(options: { remember?: boolean } = {}) {
   // im Layout, in Server-Components, in beliebigen Server-Actions) die
   // urspruenglich beim Login gewaehlte Persistenz und middleware
   // ueberschreibt sie nicht versehentlich.
+  // F7 (AAR-audit-2fa): Opt-in — fehlender/leerer Marker ⇒ Session-Cookie
+  // (nicht 1-Jahr-persistent). Vorher (`!== '0'`) war der Default persistent.
   const remember = options.remember !== undefined
     ? options.remember
-    : cookieStore.get(REMEMBER_COOKIE_NAME)?.value !== '0'
+    : cookieStore.get(REMEMBER_COOKIE_NAME)?.value === '1'
 
   // AAR-login-loop: Auth-Cookies müssen für alle *.claimondo.de-Subdomains
   // gelten — ohne Domain-Scope werden Cookies nur für die aktuelle Domain
