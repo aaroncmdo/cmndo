@@ -5,7 +5,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import { MAPBOX_STYLE_STREETS } from '@/lib/mapbox/styles'
+import { MAPBOX_STYLE_STANDARD } from '@/lib/mapbox/styles'
+import { getMapboxLightPreset } from '@/lib/mapbox/light-preset'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSource } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
@@ -404,10 +405,23 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: MAPBOX_STYLE_STREETS,
+      style: MAPBOX_STYLE_STANDARD,
       center: [10.45, 51.16],
       zoom: 5.4,
+      pitch: 45,
       attributionControl: false,
+    })
+
+    // 3D-Standard-Style Konfiguration — analog TagesrouteMap.
+    // Auf 'style.load' (nicht 'load') weil Standard-Style Config-Properties
+    // erst nach dem Style-Load gesetzt werden koennen.
+    map.on('style.load', () => {
+      try {
+        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
+        map.setConfigProperty('basemap', 'show3dObjects', true)
+        map.setConfigProperty('basemap', 'showPlaceLabels', true)
+        map.setConfigProperty('basemap', 'showRoadLabels', true)
+      } catch { /* noop — Standard-Style noch nicht bereit */ }
     })
 
     map.addControl(
@@ -428,22 +442,24 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         id: LAYER_ISOS_FILL,
         type: 'fill',
         source: SRC_ISOS,
+        slot: 'middle',
         paint: {
           'fill-color': TYP_COLOR_EXPR,
           'fill-opacity': 0.18,
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       map.addLayer({
         id: LAYER_ISOS_LINE,
         type: 'line',
         source: SRC_ISOS,
+        slot: 'middle',
         paint: {
           'line-color': TYP_COLOR_EXPR,
           'line-width': 2,
           'line-opacity': 0.7,
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       // ─── SV-Pin-Layer ──────────────────────────────────────────────────
       map.addSource(SRC_SVS, {
@@ -455,13 +471,14 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         id: LAYER_SVS,
         type: 'circle',
         source: SRC_SVS,
+        slot: 'top',
         paint: {
           'circle-color': TYP_COLOR_EXPR,
           'circle-radius': 7,
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 2,
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       // Klick auf SV-Pin → Popup
       map.on(
@@ -499,13 +516,14 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         id: LAYER_TERMINE,
         type: 'circle',
         source: SRC_TERMINE,
+        slot: 'top',
         paint: {
           'circle-color': TERMIN_STATUS_COLOR_EXPR,
           'circle-radius': 5,
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 2,
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       // Klick auf Termin-Pin → Popup
       map.on(
@@ -531,6 +549,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         id: LAYER_TERMINE_ETA,
         type: 'symbol',
         source: SRC_TERMINE,
+        slot: 'top',
         filter: ['has', 'etaMin'],
         layout: {
           'text-field': ['concat', ['to-string', ['get', 'etaMin']], ' min'],
@@ -544,7 +563,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           'text-halo-color': '#ffffff',
           'text-halo-width': 1.5,
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       // ─── Unterwegs-Routen-Layer ─────────────────────────────────────────
       map.addSource(SRC_ROUTEN, {
@@ -556,6 +575,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         id: LAYER_ROUTEN,
         type: 'line',
         source: SRC_ROUTEN,
+        slot: 'middle',
         layout: {
           'line-cap': 'round',
           'line-join': 'round',
@@ -565,7 +585,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           'line-width': 4,
           'line-opacity': 0.6,
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       // ─── Tagesrouten-Layer (default: unsichtbar, wird in Task 6 getoggelt) ──
       map.addSource(SRC_TAGESROUTEN, {
@@ -577,6 +597,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         id: LAYER_TAGESROUTEN,
         type: 'line',
         source: SRC_TAGESROUTEN,
+        slot: 'middle',
         layout: {
           'line-cap': 'round',
           'line-join': 'round',
@@ -588,7 +609,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           'line-opacity': 0.7,
           'line-dasharray': [2, 2],
         },
-      })
+      } as Parameters<typeof map.addLayer>[0])
 
       // ─── Dead-Pin-Layer (nur fuer admin + dispatch) ─────────────────────
       if (role !== 'kundenbetreuer') {
@@ -601,6 +622,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           id: LAYER_DEADPINS,
           type: 'circle',
           source: SRC_DEADPINS,
+          slot: 'top',
           paint: {
             'circle-color': DEADPIN_STATUS_COLOR_EXPR,
             'circle-radius': 6,
@@ -608,7 +630,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-stroke-width': 2,
             'circle-opacity': 0.75,
           },
-        })
+        } as Parameters<typeof map.addLayer>[0])
 
         // Klick auf Dead-Pin → Drawer oeffnen
         map.on(
@@ -645,6 +667,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           id: LAYER_LEADS_CLUSTER,
           type: 'circle',
           source: SRC_LEADS,
+          slot: 'top',
           filter: ['has', 'point_count'],
           paint: {
             'circle-color': '#f59e0b',
@@ -657,13 +680,14 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-stroke-width': 2,
             'circle-opacity': 0.9,
           },
-        })
+        } as Parameters<typeof map.addLayer>[0])
 
         // Cluster-Count-Label
         map.addLayer({
           id: LAYER_LEADS_CLUSTER_COUNT,
           type: 'symbol',
           source: SRC_LEADS,
+          slot: 'top',
           filter: ['has', 'point_count'],
           layout: {
             'text-field': '{point_count_abbreviated}',
@@ -673,7 +697,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           paint: {
             'text-color': '#ffffff',
           },
-        })
+        } as Parameters<typeof map.addLayer>[0])
 
         // Klick auf Cluster → reinzoomen
         map.on(
@@ -704,6 +728,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           id: LAYER_LEADS,
           type: 'circle',
           source: SRC_LEADS,
+          slot: 'top',
           filter: ['!', ['has', 'point_count']],
           paint: {
             'circle-color': LEAD_STATUS_COLOR_EXPR,
@@ -712,7 +737,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-stroke-width': 2,
             'circle-opacity': 0.85,
           },
-        })
+        } as Parameters<typeof map.addLayer>[0])
 
         // Klick auf Einzel-Lead-Pin → Popup
         map.on(
@@ -744,6 +769,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           id: LAYER_CAND,
           type: 'circle',
           source: SRC_CAND,
+          slot: 'top',
           paint: {
             'circle-radius': 16,
             'circle-color': 'rgba(0,0,0,0)',
@@ -751,7 +777,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-stroke-width': 3,
             'circle-opacity': 0.9,
           },
-        })
+        } as Parameters<typeof map.addLayer>[0])
 
         // ─── Verbindungslinie (Assign-from-Map) ────────────────────────────
         map.addSource(SRC_ASSIGN_LINE, {
@@ -763,6 +789,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           id: LAYER_ASSIGN_LINE,
           type: 'line',
           source: SRC_ASSIGN_LINE,
+          slot: 'middle',
           layout: {
             'line-cap': 'round',
             'line-join': 'round',
@@ -773,7 +800,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'line-opacity': 0.8,
             'line-dasharray': [2, 1],
           },
-        })
+        } as Parameters<typeof map.addLayer>[0])
       }
 
       setReady(true)
