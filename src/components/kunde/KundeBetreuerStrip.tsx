@@ -19,6 +19,9 @@ type Props = {
   svAvatarUrl?: string | null
   svBeschreibung?: string | null
   svVerifiziert?: boolean
+  /** Sub-Projekt 3 (entdoppelt): KB lebt in SaeuleMeinBetreuer (Sidebar, reicher —
+   *  Chat + Termin + Telefon). nurSv -> hier nur noch die SV-Trust-Card rendern. */
+  nurSv?: boolean
 }
 
 async function BetreuerCard({
@@ -75,6 +78,19 @@ async function BetreuerCard({
 }
 
 export default function KundeBetreuerStrip(props: Props) {
+  const svCard = (
+    <BetreuerCard
+      rolle="sachverstaendiger"
+      icon={HardHatIcon}
+      name={props.svName}
+      avatarUrl={props.svAvatarUrl ?? null}
+      beschreibung={props.svBeschreibung ?? null}
+      verifiziert={props.svVerifiziert}
+      fallId={props.fallId}
+    />
+  )
+  // Sub-Projekt 3: KB entdoppelt (lebt in SaeuleMeinBetreuer) -> nur SV-Trust-Card.
+  if (props.nurSv) return svCard
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       <BetreuerCard
@@ -85,15 +101,7 @@ export default function KundeBetreuerStrip(props: Props) {
         beschreibung={props.kbBeschreibung ?? null}
         fallId={props.fallId}
       />
-      <BetreuerCard
-        rolle="sachverstaendiger"
-        icon={HardHatIcon}
-        name={props.svName}
-        avatarUrl={props.svAvatarUrl ?? null}
-        beschreibung={props.svBeschreibung ?? null}
-        verifiziert={props.svVerifiziert}
-        fallId={props.fallId}
-      />
+      {svCard}
     </div>
   )
 }
