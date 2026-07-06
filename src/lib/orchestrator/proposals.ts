@@ -20,7 +20,8 @@ export async function persistProposals(claimId: string, modell: string, drafts: 
       payload: d.payload, begruendung: d.begruendung, modell, dedupe_key: dedupeKey(claimId, d),
     })
     if (!error) count++
-    else if (!error.message.includes('duplicate key')) console.error('[orchestrator] persist failed:', error.message)
+    // 23505 = unique_violation (Dedup-Kollision, erwartet) — still ueberspringen; alles andere loggen.
+    else if (error.code !== '23505' && !error.message.includes('duplicate key')) console.error('[orchestrator] persist failed:', error.message)
   }
   return count
 }

@@ -35,10 +35,11 @@ export function extractProposalsFromToolUse(content: Anthropic.ContentBlock[]): 
  * Wirft nie — alle Fehler werden intern gefangen.
  */
 export async function reviewClaim(ctx: ClaimContext): Promise<number> {
-  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
   const model = AI_MODELS.claim_orchestrator
   let res: Anthropic.Message
   try {
+    // Konstruktor im try: fehlt ANTHROPIC_API_KEY, wirft er — dann sauber 0 statt unhandled.
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
     res = await client.messages.create({
       model,
       max_tokens: 1024,

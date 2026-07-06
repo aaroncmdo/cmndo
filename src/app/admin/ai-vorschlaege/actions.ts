@@ -40,10 +40,13 @@ export async function annehmenVorschlag(
   const db = createAdminClient()
   const { data: p } = await db
     .from('ai_claim_proposals')
-    .select('claim_id, vorschlag_typ, ziel_rolle, payload')
+    .select('claim_id, vorschlag_typ, ziel_rolle, payload, status')
     .eq('id', id)
     .maybeSingle()
   if (!p) return { ok: false, error: 'Vorschlag nicht gefunden' }
+  // Idempotenz: nur offene Vorschlaege annehmen — verhindert Doppel-Task bei
+  // Doppelklick oder Aktion auf einer stale Liste.
+  if (p.status !== 'offen') return { ok: false, error: 'Vorschlag bereits bearbeitet' }
 
   // Nur 'task'-Vorschlaege erzeugen echte Tasks; escalation/next_step werden als 'bearbeitet' markiert.
   if (p.vorschlag_typ === 'task') {
