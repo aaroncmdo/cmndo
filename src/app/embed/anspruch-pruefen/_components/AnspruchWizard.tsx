@@ -27,7 +27,12 @@ export function AnspruchWizard() {
     return () => { aktiv = false }
   }, [])
 
-  if (!sessionToken) return <div className="p-6 text-center text-body-sm text-claimondo-shield">Wird geladen…</div>
+  if (!sessionToken) return (
+    <div className="flex flex-col items-center p-8 text-center">
+      <span className="mb-3 h-6 w-6 animate-spin rounded-full border-2 border-claimondo-border border-t-claimondo-navy" aria-hidden />
+      <p className="text-body-sm text-claimondo-shield">Wird geladen …</p>
+    </div>
+  )
 
   function zumFinder() {
     if (!sessionToken) return
@@ -69,7 +74,11 @@ export function AnspruchWizard() {
       </div>
 
       {phase === 'foto' && (
-        <AnspruchFotoStep sessionToken={sessionToken} onWeiter={(v) => { setVision(v); setPhase('einschaetzung') }} />
+        <AnspruchFotoStep
+          sessionToken={sessionToken}
+          onWeiter={(v) => { setVision(v); setPhase('einschaetzung') }}
+          onOhneAnalyse={zumFinder}
+        />
       )}
       {phase === 'einschaetzung' && vision && (
         <AnspruchEinschaetzungStep sessionToken={sessionToken} vision={vision} onFertig={(s) => { setSpanne(s); setPhase('summary') }} />
