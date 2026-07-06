@@ -1,8 +1,9 @@
 'use client'
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button } from '@/components/primitives/Button'
+import { SectionCard } from '@/components/shared/SectionCard'
 import type { AiProposal } from '@/lib/orchestrator/types'
 import { annehmenVorschlag, verwerfenVorschlag } from './actions'
 
@@ -35,7 +36,24 @@ export function AiVorschlaegeClient({
 }: {
   vorschlaege: AiProposal[]
 }) {
-  const [pending, start] = useTransition()
+  // Per-Zeile Pending: nur der gerade bearbeitete Vorschlag laedt/disabled,
+  // die anderen Zeilen bleiben klickbar.
+  const [pendingId, setPendingId] = useState<string | null>(null)
+  const [, startTransition] = useTransition()
+
+  const run = (
+    id: string,
+    action: () => Promise<{ ok: boolean; error?: string }>,
+    okMsg: string,
+  ) => {
+    setPendingId(id)
+    startTransition(async () => {
+      const r = await action()
+      if (r.ok) toast.success(okMsg)
+      else toast.error(r.error ?? 'Fehler')
+      setPendingId(null)
+    })
+  }
 
   if (!vorschlaege.length) {
     return (
@@ -55,10 +73,7 @@ export function AiVorschlaegeClient({
         {vorschlaege.length} offener{vorschlaege.length !== 1 ? 'e' : ''} Vorschlag{vorschlaege.length !== 1 ? 'e' : ''}
       </p>
       {vorschlaege.map((v) => (
-        <div
-          key={v.id}
-          className="bg-white rounded-ios-xl border border-claimondo-border p-4 space-y-2"
-        >
+        <SectionCard key={v.id} bodyClassName="space-y-2">
           {/* Typ + Zielrolle */}
           <div className="flex items-center gap-2">
             <span className="text-caption uppercase text-claimondo-ondo font-semibold">
@@ -95,39 +110,21 @@ export function AiVorschlaegeClient({
             <Button
               variant="navy"
               size="sm"
-              loading={pending}
-              onClick={() =>
-                start(async () => {
-                  const r = await annehmenVorschlag(v.id)
-                  if (r.ok) {
-                    toast.success('Vorschlag angenommen')
-                  } else {
-                    toast.error(r.error ?? 'Fehler beim Annehmen')
-                  }
-                })
-              }
+              loading={pendingId === v.id}
+              onClick={() => run(v.id, () => annehmenVorschlag(v.id), 'Vorschlag angenommen')}
             >
               Annehmen
             </Button>
             <Button
               variant="ghost"
               size="sm"
-              loading={pending}
-              onClick={() =>
-                start(async () => {
-                  const r = await verwerfenVorschlag(v.id)
-                  if (r.ok) {
-                    toast.success('Vorschlag verworfen')
-                  } else {
-                    toast.error(r.error ?? 'Fehler beim Verwerfen')
-                  }
-                })
-              }
+              loading={pendingId === v.id}
+              onClick={() => run(v.id, () => verwerfenVorschlag(v.id), 'Vorschlag verworfen')}
             >
               Verwerfen
             </Button>
           </div>
-        </div>
+        </SectionCard>
       ))}
     </div>
   )
