@@ -5,6 +5,7 @@
 import { redirect } from 'next/navigation'
 import { getWerkstattByUserId, getWerkstattProvisionen, getWerkstattStaffelBoni } from '@/lib/werkstatt/queries'
 import { WerkstattAbrechnungen } from '@/components/werkstatt/WerkstattAbrechnungen'
+import { getEigeneGutschriften } from '@/lib/finance/eigene-gutschriften-actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,9 +13,10 @@ export default async function WerkstattAbrechnungenPage() {
   const werkstatt = await getWerkstattByUserId()
   if (!werkstatt) redirect('/login')
 
-  const [provisionen, boni] = await Promise.all([
+  const [provisionen, boni, gutschriften] = await Promise.all([
     getWerkstattProvisionen(werkstatt.id),
     getWerkstattStaffelBoni(werkstatt.id),
+    getEigeneGutschriften(),
   ])
   const boniSumme = boni
     .filter((b) => b.status === 'freigegeben' || b.status === 'ausgezahlt')
@@ -25,6 +27,7 @@ export default async function WerkstattAbrechnungenPage() {
       provisionen={provisionen}
       werkstattName={werkstatt.name}
       boniSumme={boniSumme}
+      gutschriften={gutschriften}
     />
   )
 }

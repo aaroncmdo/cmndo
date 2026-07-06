@@ -7,11 +7,12 @@ import { logAiUsage } from '@/lib/ai/usage-log'
 import { ladeAnspruchRates } from '@/lib/anspruch/rates'
 import { berechneAnspruchsSpanne } from '@/lib/anspruch/positionen'
 import { plausibilisiereWbw } from '@/lib/anspruch/wbw'
+import { plausibilisiereReparaturKosten } from '@/lib/anspruch/vision-guards'
 import {
   erstelleSession, ladeFotoInSession, ladeFotoUrls,
   speichereVisionResult, speicherePositionen,
 } from '@/lib/anspruch/session'
-import { SEGMENTE, type AnspruchSpanne, type Segment, type VisionResult } from '@/lib/anspruch/types'
+import { SEGMENTE, type AnspruchSpanne, type Ersatzfahrzeug, type Schuldform, type Segment, type VisionResult } from '@/lib/anspruch/types'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 const VISION_SYSTEM = `Du bist ein KFZ-Schadensexperte fuer den deutschen Markt. Antworte IMMER als valides JSON mit exakt diesem Schema, ohne weiteren Text:
@@ -63,6 +64,10 @@ function parseVision(text: string): VisionResult | null {
     if (!(SEGMENTE as readonly string[]).includes(o.segment)) o.segment = 'mittelklasse'
     if (!['leicht', 'mittel', 'schwer'].includes(o.schweregrad)) o.schweregrad = 'mittel'
     if (typeof o.geschaetzte_kosten_min !== 'number' || typeof o.geschaetzte_kosten_max !== 'number') return null
+    // Sanity-Guard: halluzinierte / invertierte Reparaturkosten auf plausible Grenzen klemmen
+    const kosten = plausibilisiereReparaturKosten(o.geschaetzte_kosten_min, o.geschaetzte_kosten_max)
+    o.geschaetzte_kosten_min = kosten.min
+    o.geschaetzte_kosten_max = kosten.max
     if (!Array.isArray(o.beschaedigte_teile)) o.beschaedigte_teile = []
     else o.beschaedigte_teile = o.beschaedigte_teile.filter((t: unknown) => typeof t === 'string')
     if (typeof o.beschreibung !== 'string') o.beschreibung = ''
@@ -114,7 +119,7 @@ export async function analysiereSchaden(
 
 export async function berechneAnspruch(
   sessionToken: string,
-  eingabe: { segment: Segment; fahrbereit: boolean; ezJahr: number | null },
+  eingabe: { segment: Segment; fahrbereit: boolean; ezJahr: number | null; schuld: Schuldform; ersatzfahrzeug: Ersatzfahrzeug },
 ): Promise<{ ok: true; spanne: AnspruchSpanne } | { ok: false; error: string }> {
   const db = createAdminClient()
   const { data: row } = await db
@@ -140,6 +145,8 @@ export async function berechneAnspruch(
       fahrbereit: eingabe.fahrbereit,
       ezJahr: eingabe.ezJahr,
       aktuellesJahr: new Date().getFullYear(),
+      schuld: eingabe.schuld,
+      ersatzfahrzeug: eingabe.ersatzfahrzeug,
       wbwMinEur: wbw.wbwMin,
       wbwMaxEur: wbw.wbwMax,
       restwertMinEur: wbw.restwertMin,
@@ -147,6 +154,6 @@ export async function berechneAnspruch(
     },
     saetze, faktoren, config,
   )
-  await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.positionen)
+  await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.schuld, spanne.positionen, spanne.totalschaden)
   return { ok: true, spanne }
 }

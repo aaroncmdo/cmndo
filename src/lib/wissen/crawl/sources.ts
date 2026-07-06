@@ -39,6 +39,15 @@ export const B2B_CRAWL_SOURCES: CrawlSource[] = [
     url: 'https://www.rechtslupe.de/feed',
   },
 
+  // recht — spezialisierter Kfz-Schaden-/SV-Rechtsprechungs-Blog (Totalschaden, Restwert, Grundhonorar,
+  // Sachverstaendigen-Recht — sehr hohe Kfz-Schaden-Trefferquote; 2026-07-06 live verifiziert, 12 Items on-topic).
+  {
+    name: 'Captain-HUK',
+    category: 'recht',
+    kind: 'rss',
+    url: 'https://www.captain-huk.de/feed/',
+  },
+
   // versicherung — Versicherungs- und Makler-Branchennews (breit; KI-Backstop filtert Nicht-Kfz)
   {
     name: 'Versicherungsbote',

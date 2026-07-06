@@ -9,6 +9,7 @@ import {
   getMaklerAbrechnungsData,
 } from '@/lib/makler/queries'
 import { MaklerAbrechnungen } from '@/components/makler/MaklerAbrechnungen'
+import { getEigeneGutschriften } from '@/lib/finance/eigene-gutschriften-actions'
 
 type Props = { searchParams: Promise<{ month?: string }> }
 
@@ -19,6 +20,9 @@ export default async function AbrechnungenPage({ searchParams }: Props) {
   const makler = await getCurrentMakler()
   if (!makler) redirect('/login')
 
-  const data = await getMaklerAbrechnungsData(makler.id, month)
-  return <MaklerAbrechnungen data={data} />
+  const [data, gutschriften] = await Promise.all([
+    getMaklerAbrechnungsData(makler.id, month),
+    getEigeneGutschriften(),
+  ])
+  return <MaklerAbrechnungen data={data} gutschriften={gutschriften} />
 }

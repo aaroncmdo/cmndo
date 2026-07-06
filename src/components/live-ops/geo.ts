@@ -42,13 +42,8 @@ export function svPinsFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
 export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
-    features: termine.map((t) => ({
-      type: 'Feature' as const,
-      geometry: {
-        type: 'Point' as const,
-        coordinates: [t.lng, t.lat],
-      },
-      properties: {
+    features: termine.map((t) => {
+      const props: Record<string, unknown> = {
         __id: t.id,
         __type: 'termin',
         status: t.status,
@@ -58,8 +53,20 @@ export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
         startZeit: t.startZeit,
         claimNummer: t.claimNummer,
         fallId: t.fallId,
-      },
-    })),
+      }
+      // etaMin nur setzen wenn vorhanden — Layer-Filter ['has','etaMin'] greift sonst nicht
+      if (t.etaMin != null) {
+        props.etaMin = t.etaMin
+      }
+      return {
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [t.lng, t.lat],
+        },
+        properties: props,
+      }
+    }),
   }
 }
 
@@ -141,8 +148,10 @@ export function tagesroutenFC(tagesrouten: TagesRoute[]): GeoJSON.FeatureCollect
 
 /**
  * Lead-Pins fuer die LiveOps-Karte (offene, lokalisierte Leads).
+ * gapIds: optionale Menge von Lead-IDs ohne deckende SV-Isochrone.
+ * Abwaertskompatibel — bestehende Aufrufer ohne gapIds erhalten __gap=0.
  */
-export function leadsFC(leads: LeadPin[]): GeoJSON.FeatureCollection {
+export function leadsFC(leads: LeadPin[], gapIds?: Set<string>): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: leads.map((lead) => ({
@@ -159,8 +168,59 @@ export function leadsFC(leads: LeadPin[]): GeoJSON.FeatureCollection {
         ort: lead.ort,
         kanal: lead.kanal,
         erstelltAm: lead.erstelltAm,
+        __gap: gapIds?.has(lead.id) ? 1 : 0,
       },
     })),
+  }
+}
+
+/**
+ * Kandidaten-Halos fuer die Assign-from-Map-Interaktion.
+ * Nur SVs die in candidateIds enthalten sind UND einen gueltigen Standort haben.
+ */
+export function candidateHaloFC(svs: SvLiveOps[], candidateIds: string[]): GeoJSON.FeatureCollection {
+  const set = new Set(candidateIds)
+  return {
+    type: 'FeatureCollection',
+    features: svs
+      .filter((s) => set.has(s.id) && s.standortLat != null && s.standortLng != null)
+      .map((s) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [s.standortLng as number, s.standortLat as number],
+        },
+        properties: {
+          __id: s.id,
+          __type: 'candidate',
+          svId: s.id,
+        },
+      })),
+  }
+}
+
+/**
+ * Verbindungslinie vom geklickten Lead zum gewaehlten SV-Kandidaten.
+ * Gibt 0 Features zurueck wenn from oder to fehlen (null).
+ * Koordinaten sind immer [lng, lat].
+ */
+export function assignLineFC(
+  from: [number, number] | null,
+  to: [number, number] | null,
+): GeoJSON.FeatureCollection {
+  if (!from || !to) return { type: 'FeatureCollection', features: [] }
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature' as const,
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: [from, to],
+        },
+        properties: {},
+      },
+    ],
   }
 }
 

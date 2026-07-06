@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
@@ -128,23 +129,36 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
 }
 
 export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
-  // Read 1 (anon-RLS): Geo + paket + spezifikationen + firmenname (NUR für
-  // Test-Account-Filter — wird NICHT in den Public-Typ weitergereicht).
+  // Read 1: Geo + paket + spezifikationen + firmenname (firmenname NUR für den
+  // Test-Account-Filter — verlässt die Function nie).
   //
-  // KEIN .eq('ist_aktiv', true): `ist_aktiv` ist NICHT in den anon-Spalten-Grants
-  // (anon-Leak-Fix granted nur 9 Map-Spalten). Ein Filter darauf wirft als anon
-  // "permission denied for table sachverstaendige" und killt den GESAMTEN Read
-  // → 0 SVs auf der Karte (nur sv_lead-Dead-Pins). Die anon-RLS-Policy
-  // `sachverstaendige_anon_select_map_ready` erzwingt ist_aktiv=true +
-  // verifiziert=true + geloescht_am IS NULL ohnehin server-seitig — der App-Filter
-  // war redundant. isochrone_polygon + standort_lat SIND granted → Filter ok.
-  const supabase = await createClient()
-  const { data: allRows, error } = await supabase
+  // AAR-956 (05.07.): Läuft über den Service-Role-Client mit EXPLIZITEM map-ready-
+  // Filter statt über den RLS-Client. Grund: die map-ready-Sichtbarkeit war per RLS
+  // NUR an `anon` gegrantet (sachverstaendige_anon_select_map_ready). Ein eingeloggter
+  // Nicht-Admin (Kunde/Makler/Werkstatt/Kanzlei/fremder SV) bekam die restriktive
+  // authenticated-Policy (admin/dispatch ODER eigene Zeile) → 0 Partner auf der Karte
+  // + Route/Abdeckung brach ab. Service-Role ist auth-unabhängig (anon, Kunde, Admin
+  // sehen dieselbe öffentliche Menge). Read 2 nutzt ohnehin schon Service-Role; die
+  // Privacy-Grenze ist die Projektion unten (kein Firmenname/Adresse/Kontakt verlässt
+  // die Function), NICHT die DB-Rolle. Das explizite Prädikat spiegelt die anon-RLS-
+  // Policy `sachverstaendige_anon_select_map_ready` 1:1 → anon-Ergebnis unverändert.
+  const admin = createAdminClient()
+  const { data: allRows, error } = await admin
     .from('sachverstaendige')
     .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
-    .not('isochrone_polygon', 'is', null)
+    .eq('verifiziert', true)
+    .eq('ist_aktiv', true)
+    .eq('portal_zugang_freigeschaltet', true)
+    .eq('ist_testaccount', false)
+    .is('geloescht_am', null)
+    .is('gesperrt_seit', null)
     .not('standort_lat', 'is', null)
-  if (error) return { ok: false, error: error.message }
+    .not('standort_lng', 'is', null)
+    .not('isochrone_polygon', 'is', null)
+  if (error) {
+    console.error('[ladeAktiveSVs] Partner-Read fehlgeschlagen:', error.message)
+    return { ok: false, error: error.message }
+  }
   // Test-Accounts ("Test Aaron Gutachter GmbH", "Smoke SV") server-side filtern
   // — firmenname verlässt diese Function nie.
   const rows = (allRows ?? []).filter((r) => !isTestAccount(r.firmenname as string | null))
@@ -176,7 +190,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   }
   const enrichBySvId = new Map<string, SvEnrich>()
 
-  const admin = createAdminClient()
+  // `admin` (Service-Role) wird bereits in Read 1 erzeugt und hier wiederverwendet.
   const [profilesRes, bewRes, enrichRes] = await Promise.all([
     admin.from('profiles').select('id,vorname,anzeigename,profilbeschreibung').in('id', profileIds),
     admin
@@ -305,6 +319,12 @@ export async function erstelleGutachterFinderAnfrage(
 
   const anfrageId = data.id
 
+  // Send-Isolation (interne-identitaet.ts): interne/Test-Anfragen (@claimondo.de, Test-Marker im
+  // Namen/Email) loesen KEINEN Dispatch-Task + KEINE Team-WhatsApp aus — sonst spammen die
+  // Gruender-Live-Tests das Team (dokumentierter Dauer-Fall). Der gfa/Lead entsteht trotzdem,
+  // der Buchungspfad bleibt e2e-testbar.
+  const intern = istInterneIdentitaet(payload.email, `${payload.vorname} ${payload.nachname}`)
+
   // GA4-Conversions (fire-and-forget, consent-respektierend via gaClientId).
   // generate_lead immer; sa_signed wenn die SA direkt im Wizard unterzeichnet wurde.
   void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder' } })
@@ -393,7 +413,7 @@ export async function erstelleGutachterFinderAnfrage(
       icon: '📞',
     }))
 
-    if (mitteilungen.length > 0) {
+    if (mitteilungen.length > 0 && !intern) {
       await admin.from('mitteilungen').insert(mitteilungen)
     }
   } catch (taskErr) {
@@ -423,7 +443,7 @@ export async function erstelleGutachterFinderAnfrage(
     ]
       .filter(Boolean)
       .join('\n')
-    await notifyTeamWhatsApp(teamText)
+    if (!intern) await notifyTeamWhatsApp(teamText)
   } catch (waErr) {
     console.error('[AAR-956] Team-WA (Gutachter-Finder) fehlgeschlagen:', waErr)
   }

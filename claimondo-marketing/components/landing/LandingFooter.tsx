@@ -85,11 +85,6 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/ersteinschaetzung" className="transition-colors hover:text-white">
-                  {t('product.einschaetzung')}
-                </Link>
-              </li>
-              <li>
                 <Link href="/beratung-anfragen" className="transition-colors hover:text-white">
                   {t('product.beratung')}
                 </Link>
@@ -150,6 +145,11 @@ export function LandingFooter() {
               <li>
                 <Link href="https://makler.claimondo.de" className="transition-colors hover:text-white">
                   {t('partner.makler')}
+                </Link>
+              </li>
+              <li>
+                <Link href="https://app.claimondo.de/werkstatt-partner-werden" className="transition-colors hover:text-white">
+                  Werkstatt werden
                 </Link>
               </li>
               <li>

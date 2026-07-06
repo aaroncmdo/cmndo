@@ -392,4 +392,54 @@ describe('convertLeadToClaim', () => {
     const rtInsert = operations.find((o) => o.table === 'reparatur_termine' && o.op === 'insert')
     expect(rtInsert).toBeUndefined()
   })
+
+  // ─── KB-Skip fuer Selbstzahler (Aaron 06.07.) ────────────────────────────
+  it('KB-Skip: Selbstzahler-Lead bekommt KEINEN Kundenbetreuer (Round-Robin uebersprungen)', async () => {
+    // abrechnungsweg='selbstzahler' -> reiner Reparatur-Vorgang ohne SV/Regulierung
+    // -> kein KB (analog embed-B). Der KB-Round-Robin (profiles-Select) faellt weg,
+    // die Response-Sequenz hat daher ein Element WENIGER als der Normalpfad.
+    primeResponses([
+      { data: { id: 'lead-sz', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'selbstzahler' } }, // 1 leads select
+      { data: { id: 'claim-sz', claim_nummer: 'CLM-SZ' } }, // 2 claims insert (KEIN profiles-Select davor)
+      { data: { id: 'person-sz' } },                         // 3 personen insert
+      { data: null },                                        // 4 claim_parties insert
+      { data: null },                                        // 5 faelle_claim_bridge upsert
+      { data: null },                                        // 6 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-sz' })
+    expect(r.ok).toBe(true)
+
+    // Round-Robin uebersprungen -> gar kein profiles-Select.
+    expect(operations.filter((o) => o.table === 'profiles')).toHaveLength(0)
+
+    // claims-Insert traegt kundenbetreuer_id = null + abrechnungsweg durchgereicht.
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.kundenbetreuer_id).toBeNull()
+    expect(payload.abrechnungsweg).toBe('selbstzahler')
+    if (r.ok) expect(r.kundenbetreuerId).toBeNull()
+  })
+
+  it('KB-Skip: Nicht-Selbstzahler (haftpflicht) durchlaeuft den KB-Round-Robin weiterhin', async () => {
+    // Kontrast/Regressions-Guard: ohne abrechnungsweg='selbstzahler' MUSS das
+    // profiles-Select (Round-Robin) wie gehabt laufen. Leerer Betreuer-Pool ->
+    // KB null, aber der Select findet statt.
+    primeResponses([
+      { data: { id: 'lead-hp', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
+      { data: [] },                                          // 2 profiles select (Round-Robin -> leer)
+      { data: { id: 'claim-hp', claim_nummer: 'CLM-HP' } }, // 3 claims insert
+      { data: { id: 'person-hp' } },                         // 4 personen insert
+      { data: null },                                        // 5 claim_parties insert
+      { data: null },                                        // 6 faelle_claim_bridge upsert
+      { data: null },                                        // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-hp' })
+    expect(r.ok).toBe(true)
+
+    // Round-Robin lief -> mindestens ein profiles-Select.
+    expect(operations.filter((o) => o.table === 'profiles').length).toBeGreaterThanOrEqual(1)
+  })
 })

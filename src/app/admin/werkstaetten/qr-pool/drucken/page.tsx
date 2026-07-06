@@ -6,6 +6,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { DruckenButton } from './DruckenButton'
+import { QrCodeDownloads, BulkDownloads } from '@/components/werkstatt/QrPoolDownload'
 
 export const dynamic = 'force-dynamic'
 
@@ -44,7 +45,8 @@ export default async function QrPoolDruckenPage({
 
   return (
     <div className="p-6">
-      <div className="mb-5 flex items-center gap-3 print:hidden">
+      <div className="mb-5 flex flex-wrap items-center gap-3 print:hidden">
+        <BulkDownloads tokens={items.map((i) => i.token)} />
         <DruckenButton />
         <span className="text-body-sm text-claimondo-ondo">{items.length} Codes</span>
       </div>
@@ -59,6 +61,9 @@ export default async function QrPoolDruckenPage({
             >
               <div dangerouslySetInnerHTML={{ __html: it.svg }} />
               <span className="font-mono text-sm text-claimondo-navy">{it.token}</span>
+              <div className="mt-1 print:hidden">
+                <QrCodeDownloads token={it.token} />
+              </div>
             </div>
           ))}
         </div>

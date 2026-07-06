@@ -1,7 +1,8 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon, InboxIcon } from 'lucide-react'
+import Link from 'next/link'
+import { PhoneIcon, CheckCircleIcon, ClockIcon, PenSquareIcon, UserIcon, MapPinIcon, CalendarIcon, FileSignatureIcon, AlertCircleIcon, InboxIcon, ArrowRightIcon } from 'lucide-react'
 import type { GutachterFinderAnfrage } from './actions'
 import { aktualisiereAnfrageStatus } from './actions'
 import { STATUS_LABEL, STATUS_FALLBACK } from './constants'
@@ -164,7 +165,7 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
 
       {/* Aktions-Buttons */}
       {istOffen && (
-        <div className="px-4 pb-4 flex flex-wrap gap-2">
+        <div className="px-4 pb-3 flex flex-wrap gap-2">
           <button
             onClick={() => wechsleStatus('sv_kontaktiert')}
             className="flex items-center gap-1.5 text-body-xs font-semibold text-claimondo-ondo border border-claimondo-ondo hover:bg-claimondo-ondo hover:text-white px-3 py-1.5 rounded-full transition-colors"
@@ -188,6 +189,18 @@ function AnfrageKarte({ anfrage }: { anfrage: GutachterFinderAnfrage }) {
           </button>
         </div>
       )}
+
+      {/* Route-Reachability-Audit 06.07.: Die Detail-Ansicht (/dispatch/gutachter-finder/[id])
+          war nur per direkter URL erreichbar — die Karte verlinkte nie darauf, obwohl das
+          Detail sogar einen "Zurueck zur Uebersicht"-Link hat. Discreter Footer-Link (bewusst
+          NICHT die ganze Karte als <a>, sonst nesten tel:-Links + Aktions-Buttons im Anchor). */}
+      <Link
+        href={`/dispatch/gutachter-finder/${anfrage.id}`}
+        className="flex items-center justify-center gap-1 border-t border-claimondo-border px-4 py-2.5 text-body-xs font-medium text-claimondo-ondo hover:bg-claimondo-bg hover:text-claimondo-navy transition-colors"
+      >
+        Details ansehen
+        <ArrowRightIcon className="w-3.5 h-3.5" />
+      </Link>
     </div>
   )
 }

@@ -5,12 +5,13 @@
 // Auszahlungs-Mitteilungen.
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
-import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { transitionFallStatus, istGueltigerFallUebergang } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { ALLOWED_STATUS_VALUES } from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -702,6 +703,33 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     if (existing) return { success: true, skipped: true }
   }
 
+  // AAR-108: fall_geschlossen ALL-OR-NOTHING. transitionFallStatus (unten) wirft bei einem
+  // Abschluss aus nicht-terminalem operative_status und wird im try/catch geschluckt — der
+  // updates-Builder schriebe abgeschlossen_am/geschlossen_grund aber trotzdem => Halb-
+  // Schliessung (abgeschlossen_am gesetzt, status offen). Da die Writes NICHT in einer
+  // Transaktion laufen, hier ein Pre-Check VOR allen Writes: ist der Abschluss aus dem
+  // aktuellen operative_status ueberhaupt zulaessig? Sonst NICHTS schreiben + klaren Fehler.
+  if (input.eventType === 'fall_geschlossen' && input.fallId) {
+    const { data: opRow } = await db
+      .from('faelle_claim_bridge')
+      .select('claims:claim_id(operative_status)')
+      .eq('fall_id', input.fallId)
+      .maybeSingle()
+    const opRel = (opRow as {
+      claims?:
+        | { operative_status?: string | null }
+        | { operative_status?: string | null }[]
+        | null
+    } | null)?.claims
+    const opStatus = (Array.isArray(opRel) ? opRel[0] : opRel)?.operative_status ?? null
+    if (!istGueltigerFallUebergang(opStatus, 'abgeschlossen')) {
+      return {
+        success: false,
+        error: `Fall kann aus Status "${opStatus ?? 'unbekannt'}" nicht geschlossen werden — erst Regulierung/Zahlung abschließen.`,
+      }
+    }
+  }
+
   const eventId = input.externalEventId ?? `manual-${input.fallId}-${input.eventType}-${Date.now()}`
   // AAR-540: source='manual_admin' schreibt user_id (AAR-557 C8-Spalte)
   const source = input.source === 'manual' ? 'manual_admin' : 'lexdrive'
@@ -776,7 +804,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // faelle.status, nicht operative_status -> der Engine-Cursor zog beim Override nicht
       // mit; jetzt korrekt. status ist nicht CLAIM_OWNED -> landet in ovFaelle, hier umgehaengt.
       if ('status' in ovFaelle) {
-        if (claimIdForUpdates) ovClaims.operative_status = ovFaelle.status
+        // Defense-in-Depth: NUR enum-gueltige fall_status nach operative_status. operative_status ist
+        // text, aber v_claim_base castet ::fall_status -> ein enum-fremder Wert wirft bei JEDEM Read
+        // (Fallakte + alle Portale) 'invalid input value for enum' und macht die Akte unlesbar bis
+        // manueller DB-Fix. ALLOWED_STATUS_VALUES ist die kuratierte enum-gueltige Menge.
+        const s = ovFaelle.status
+        if (claimIdForUpdates && typeof s === 'string' && (ALLOWED_STATUS_VALUES as readonly string[]).includes(s)) {
+          ovClaims.operative_status = s
+        } else if (claimIdForUpdates) {
+          console.error(`[process-event] manual_status_override: ungueltiger operative_status "${String(s)}" verworfen (nicht in ALLOWED_STATUS_VALUES)`)
+        }
         delete ovFaelle.status
       }
       // ovFaelle ist danach leer (status -> operative_status; updated_at trigger-redundant
