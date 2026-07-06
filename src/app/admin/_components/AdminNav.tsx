@@ -6,13 +6,13 @@
 
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
-  CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
+  CarFrontIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
   WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
   NewspaperIcon, NetworkIcon, LifeBuoyIcon,
 } from 'lucide-react'
-import { SupportButton } from '@/components/support/SupportButton'
+import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
 import { AdminNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
@@ -92,26 +92,12 @@ export default function AdminNav({
         </>
       }
       footerSlot={
-        <>
-          <SupportButton userName={email} rolle="admin" />
-          <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-claimondo-ondo text-white">
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/80 truncate">{email}</p>
-            </div>
-          </div>
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
-            >
-              <LogOutIcon style={{ width: 17, height: 17 }} />
-              Abmelden
-            </button>
-          </form>
-        </>
+        <PortalUserFooter
+          rolle="admin"
+          supportUserName={email}
+          initials={initials}
+          primaryText={email}
+        />
       }
     />
   )
