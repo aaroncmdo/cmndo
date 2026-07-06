@@ -25,6 +25,7 @@ import {
 } from '@/lib/sv-matching-modul'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
@@ -311,6 +312,11 @@ export async function reserviereEmbedTermin(input: {
   }
   const requestModus = wunschterminIso != null
 
+  // Send-Isolation (interne-identitaet.ts): interne/Test-Bucher (@claimondo.de, Test-Marker) loesen
+  // keine Team-/Dispatcher-Benachrichtigung (Rueckruf-Task, Kunde-/Team-WhatsApp) aus. Lead + Termin
+  // entstehen trotzdem -> der Buchungspfad bleibt e2e-testbar, ohne echtes Personal zu stoeren.
+  const intern = istInterneIdentitaet(input.email, `${input.vorname} ${input.nachname}`)
+
   // 1) Lead + Token (idempotent; Lead bekommt Round-Robin-Dispatcher + Flowlink-WA an den Kunden).
   const res = await starteEmbedBuchung({
     vorname: input.vorname,
@@ -357,7 +363,8 @@ export async function reserviereEmbedTermin(input: {
   // Dispatcher (auch bei 0-Verfügbarkeit, auswahl=null). Non-critical: bricht die
   // Reservierung nie. Die Danke-Seite (bucheRueckrufBeimDispatcher) aktualisiert
   // später DIESELBE Zeile via Upsert (kein zweiter Rückruf). ASAP-Hinweis (now+5min).
-  if (leadId) {
+  // Send-Isolation: interne/Test-Bucher erzeugen keinen Dispatcher-Rueckruf-Task.
+  if (leadId && !intern) {
     try {
       await upsertReservierungsRueckruf({
         leadId,
@@ -393,14 +400,14 @@ export async function reserviereEmbedTermin(input: {
     if (!b.ok && !requestModus) {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
-    void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
+    if (!intern) void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
     const gutachter = await ladeGutachterProfil(input.auswahl.svId)
     return { ok: true, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher, gutachter }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
-  void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
+  if (!intern) void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
   return { ok: true, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher, gutachter: null }
 }
 
