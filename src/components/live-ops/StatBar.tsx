@@ -7,6 +7,8 @@ import type { LiveOpsData } from './types'
 
 export interface StatBarProps {
   data: LiveOpsData
+  /** Anzahl offener Leads ohne deckende SV-Isochrone. Nur anzeigen wenn > 0. */
+  coverageGaps?: number
 }
 
 // ------------------------------------------------------------------ Stat-Item
@@ -49,7 +51,7 @@ function StatItem({ label, value }: { label: string; value: number }) {
 
 // ------------------------------------------------------------------ Component
 
-export default function StatBar({ data }: StatBarProps) {
+export default function StatBar({ data, coverageGaps = 0 }: StatBarProps) {
   const live = data.svs.filter((sv) => sv.car.mode === 'live').length
   const unterwegs = data.svs.filter((sv) => sv.car.mode !== 'none').length
   const offeneTermine = data.termine.length
@@ -123,6 +125,50 @@ export default function StatBar({ data }: StatBarProps) {
       />
 
       <StatItem label="Leads" value={leads} />
+
+      {coverageGaps > 0 && (
+        <>
+          <div
+            style={{
+              width: 1,
+              height: 28,
+              backgroundColor: tokens.cssColors.border,
+              flexShrink: 0,
+            }}
+          />
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 2,
+              paddingLeft: tokens.spacing[3],
+              paddingRight: tokens.spacing[3],
+            }}
+          >
+            <span
+              style={{
+                fontSize: tokens.typo.headingSm.size,
+                fontWeight: 700,
+                lineHeight: 1,
+                color: 'var(--brand-danger, #ef4444)',
+              }}
+            >
+              {coverageGaps}
+            </span>
+            <span
+              style={{
+                fontSize: tokens.typo.caption.size,
+                fontWeight: 500,
+                color: 'var(--brand-danger, #ef4444)',
+                whiteSpace: 'nowrap',
+              }}
+            >
+              Abdeckungslücken
+            </span>
+          </div>
+        </>
+      )}
     </div>
   )
 }

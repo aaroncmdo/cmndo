@@ -11,6 +11,7 @@ import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
 import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
+import { computeCoverageGaps } from '@/lib/live-ops/coverage'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
 import TerminPopup from './TerminPopup'
@@ -61,15 +62,20 @@ const LAYER_CAND = 'lo-cand-halo-circle'
 const SRC_ASSIGN_LINE = 'lo-assign-line'
 const LAYER_ASSIGN_LINE = 'lo-assign-line-line'
 
-// Lead-Status-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property)
+// Lead-Farben (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property).
+// Reihenfolge: Abdeckungsluecke (rot) hat Vorrang vor Status-Farbe.
 const LEAD_STATUS_COLOR_EXPR = [
-  'match',
-  ['get', 'status'],
-  'neu', '#f59e0b',
-  'offen', '#f59e0b',
-  'aktiv', '#3b82f6',
-  'in_bearbeitung', '#3b82f6',
-  /* default */ '#94a3b8',
+  'case',
+  ['==', ['get', '__gap'], 1], '#ef4444',
+  // kein Lücken-Lead → Status-Farbe
+  ['match',
+    ['get', 'status'],
+    'neu', '#f59e0b',
+    'offen', '#f59e0b',
+    'aktiv', '#3b82f6',
+    'in_bearbeitung', '#3b82f6',
+    /* default */ '#94a3b8',
+  ],
 ] as unknown as mapboxgl.Expression
 
 // Dead-Pin-Status-Farben via match-Expression (raw hex ok — Token-Audit-Skip-Header oben)
@@ -195,6 +201,12 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       return true
     })
   }, [data.svs, filter])
+
+  // Abdeckungsluecken: Lead-IDs ohne deckende SV-Isochrone (alle SVs, ungefiltert)
+  const gapIds = useMemo(
+    () => computeCoverageGaps(data.leads, data.svs),
+    [data.leads, data.svs],
+  )
 
   const handleRetry = useCallback(() => {
     setError(null)
@@ -600,7 +612,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       if (role !== 'kundenbetreuer') {
         map.addSource(SRC_LEADS, {
           type: 'geojson',
-          data: leadsFC(leadsRef.current),
+          data: leadsFC(leadsRef.current, gapIds),
           cluster: true,
           clusterMaxZoom: 8,
           clusterRadius: 50,
@@ -828,16 +840,16 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     }
   }, [data.deadPins, ready])
 
-  // ------ Rebuild-Effect: Leads bei Daten-Aenderung updaten
+  // ------ Rebuild-Effect: Leads bei Daten-Aenderung oder Abdeckungsluecken updaten
 
   useEffect(() => {
     const map = mapRef.current
     if (!map || !ready) return
 
     if (map.getSource(SRC_LEADS)) {
-      (map.getSource(SRC_LEADS) as GeoJSONSource).setData(leadsFC(data.leads))
+      (map.getSource(SRC_LEADS) as GeoJSONSource).setData(leadsFC(data.leads, gapIds))
     }
-  }, [data.leads, ready])
+  }, [data.leads, gapIds, ready])
 
   // ------ Rebuild-Effect: Kandidaten-Halos bei candidateSvIds-Aenderung updaten
 
@@ -971,7 +983,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
 
       {/* StatBar — oben zentriert */}
       {ready && (
-        <StatBar data={data} />
+        <StatBar data={data} coverageGaps={gapIds.size} />
       )}
 
       {/* LayerPanel — links */}
