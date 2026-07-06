@@ -1,17 +1,9 @@
-// Werkstatt-Portal: „Meine Vermittlungen" — leak-safe Liste der eigenen KVA-Leads
-// mit Funnel-Status (via self-scoped SECURITY-DEFINER-RPC get_werkstatt_vermittlungen).
+// „Meine Vermittlungen" wurde in „Aufträge" vereint — die Auftragsansicht hat den
+// Richtungs-Filter „Meine Vermittlungen" (inbound) / „Aufträge" (vermittelt). Diese
+// Route redirectet dorthin, damit alte Bookmarks/Links weiter funktionieren.
 
 import { redirect } from 'next/navigation'
-import { getWerkstattByUserId, getWerkstattVermittlungen } from '@/lib/werkstatt/queries'
-import { WerkstattVermittlungen } from '@/components/werkstatt/WerkstattVermittlungen'
 
-export const dynamic = 'force-dynamic'
-
-export default async function WerkstattVermittlungenPage() {
-  const werkstatt = await getWerkstattByUserId()
-  if (!werkstatt) redirect('/login')
-
-  const vermittlungen = await getWerkstattVermittlungen()
-
-  return <WerkstattVermittlungen vermittlungen={vermittlungen} werkstattName={werkstatt.name} />
+export default function WerkstattVermittlungenRedirect() {
+  redirect('/werkstatt/auftraege')
 }

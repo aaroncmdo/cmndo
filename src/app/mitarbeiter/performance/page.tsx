@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import PerformanceClient from './PerformanceClient'
 import UeberfaelligeTasks from '@/components/tasks/UeberfaelligeTasks'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export default async function MitarbeiterPerformancePage() {
   const supabase = await createClient()
@@ -60,8 +61,10 @@ export default async function MitarbeiterPerformancePage() {
   const monatLabel = now.toLocaleString('de-DE', { timeZone: 'Europe/Berlin', month: 'long' }) + ' ' + now.getFullYear()
 
   // Heute-Timeline: Termine + Tasks fuer heute
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString()
-  const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString()
+  // FIX (Dashboard-Metrik-Audit 06.07.): Berlin-Tagesgrenze (new Date(y,m,d) = UTC auf Vercel).
+  const berlinDateStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
+  const todayStart = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`)).toISOString()
+  const todayEnd = new Date(new Date(todayStart).getTime() + 24 * 60 * 60 * 1000).toISOString()
 
   const [{ data: heuteTermine }, { data: heuteTasks }, { data: heuteGutachterTermine }] = await Promise.all([
     supabase.from('termine')

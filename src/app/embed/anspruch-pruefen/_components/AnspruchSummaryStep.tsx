@@ -1,22 +1,22 @@
 'use client'
-import type { AnspruchSpanne, AnspruchWeg } from '@/lib/anspruch/types'
+import type { AnspruchSpanne } from '@/lib/anspruch/types'
 import { AnspruchPositionsListe } from '@/components/shared/AnspruchPositionsListe'
+import { AnspruchTotalschadenWege } from '@/components/shared/AnspruchTotalschadenWege'
+import { schuldBotschaft } from '@/lib/anspruch/darstellung'
 import { Button } from '@/components/primitives'
 
-/** Adapter: baut aus einem AnspruchWeg eine minimale AnspruchSpanne für AnspruchPositionsListe */
-function wegZuSpanne(weg: AnspruchWeg): AnspruchSpanne {
-  return {
-    positionen: weg.positionen,
-    gesamtMinEur: weg.summeMinEur,
-    gesamtMaxEur: weg.summeMaxEur,
-    hinweise: [],
-  }
-}
+const TON_KLASSE = {
+  erfolg: { box: 'bg-success-soft', titel: 'text-success-strong' },
+  neutral: { box: 'bg-claimondo-bg', titel: 'text-claimondo-navy' },
+  warnung: { box: 'bg-warning-soft', titel: 'text-warning-strong' },
+} as const
 
 export function AnspruchSummaryStep({
   spanne, onBeauftragen,
 }: { spanne: AnspruchSpanne; onBeauftragen: () => void }) {
   const { totalschaden } = spanne
+  const botschaft = schuldBotschaft(spanne.schuld)
+  const ton = TON_KLASSE[botschaft.ton]
 
   return (
     <div className="space-y-5">
@@ -35,25 +35,7 @@ export function AnspruchSummaryStep({
             vor. Sie haben zwei Wege. Welcher für Sie gilt, klärt Ihr Gutachter verbindlich.
           </p>
 
-          {/* Stabile Reihenfolge: Reparatur-Weg zuerst (wenn vorhanden), dann Totalschaden-Weg */}
-          {[totalschaden.reparaturWeg, totalschaden.totalschadenWeg]
-            .filter((weg): weg is AnspruchWeg => weg !== null)
-            .map((weg) => {
-              const istReparaturWeg = weg === totalschaden.reparaturWeg
-              return (
-                <div key={weg.titel} className="space-y-1">
-                  <AnspruchPositionsListe
-                    spanne={wegZuSpanne(weg)}
-                    titel={weg.titel}
-                    gesamtLabel="Summe"
-                    disclaimer=""
-                  />
-                  {istReparaturWeg && totalschaden.hinweisReparatur ? (
-                    <p className="text-caption text-claimondo-shield">{totalschaden.hinweisReparatur}</p>
-                  ) : null}
-                </div>
-              )
-            })}
+          <AnspruchTotalschadenWege totalschaden={totalschaden} schuld={spanne.schuld} />
 
           <p className="text-caption text-claimondo-shield">
             Unverbindliche Ersteinschätzung anhand Ihrer Fotos. Den verbindlichen Anspruch ermittelt Ihr Gutachter.
@@ -63,11 +45,9 @@ export function AnspruchSummaryStep({
         <AnspruchPositionsListe spanne={spanne} />
       )}
 
-      <div className="rounded-ios-md bg-claimondo-bg p-3">
-        <p className="text-body-sm font-medium text-claimondo-navy">Kasko-Fall? Versicherungsschein bereithalten.</p>
-        <p className="mt-0.5 text-caption text-claimondo-shield">
-          Bei selbst verursachtem Schaden regulieren Sie über Ihre eigene Kasko. Bei einem unverschuldeten Unfall zahlt die gegnerische Versicherung.
-        </p>
+      <div className={`rounded-ios-md p-4 ${ton.box}`}>
+        <p className={`text-heading-sm font-bold ${ton.titel}`}>{botschaft.titel}</p>
+        <p className="mt-1 text-body-sm text-claimondo-shield">{botschaft.beleg}</p>
       </div>
 
       <Button onClick={onBeauftragen} className="w-full">Gutachter beauftragen</Button>

@@ -74,7 +74,8 @@ export default async function MitarbeiterDashboard() {
 
   let reklamationenCount = 0
   try {
-    const { count } = await supabase.from('reklamationen').select('id', { count: 'exact', head: true }).eq('status', 'offen')
+    // FIX (Status-Enum-Audit 05.07.): reklamationen.status kennt kein 'offen' -> Count war immer 0.
+    const { count } = await supabase.from('reklamationen').select('id', { count: 'exact', head: true }).in('status', ['eingereicht', 'pruefung'])
     reklamationenCount = count ?? 0
   } catch { /* Tabelle evtl. nicht vorhanden */ }
 

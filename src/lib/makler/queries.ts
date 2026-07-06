@@ -737,7 +737,8 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       ? supabase
           .from('leads')
           .select('id', { count: 'exact', head: true })
-          .in('status', ['neu', 'qualifiziert'])
+          // FIX (Status-Enum-Audit 05.07.): 'qualifiziert' ∉ lead_status-Enum -> 'quali-offen' (wie spontan.ts).
+          .in('status', ['neu', 'quali-offen'])
           .in('promotion_code_id', promoIds)
       : Promise.resolve({ data: null, count: 0, error: null }),
     hasPromos

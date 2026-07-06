@@ -30,6 +30,22 @@ vi.mock('@/lib/supabase/server', () => {
   }
 })
 
+// requireRole mocken: die Slot-Zeit-Logik ist der Testgegenstand, nicht der
+// Authz-Guard. Seit M2 ruft getNextFreeSlotsForSv requireRole → requireAuth,
+// das supabase.from('profiles')…maybeSingle() macht; der createClient-Mock
+// liefert kein Profil → Guard schlägt fehl → Slot-Logik liefe nie. Der Mock
+// gibt einen dispatch-User + denselben Query-Mock-Client zurück.
+vi.mock('@/lib/auth/guards', async () => {
+  const { createClient } = await import('@/lib/supabase/server')
+  return {
+    requireRole: async () => ({
+      success: true,
+      user: { id: 'u', email: null, rolle: 'dispatch', vorname: 'T', nachname: 'T' },
+      supabase: await createClient(),
+    }),
+  }
+})
+
 import { getNextFreeSlotsForSv } from './sv-termin'
 
 describe('getNextFreeSlotsForSv — Berlin-Slot-Zeiten (AAR-958 TZ-Fix)', () => {

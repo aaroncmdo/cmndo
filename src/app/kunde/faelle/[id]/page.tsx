@@ -24,7 +24,6 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -46,6 +45,7 @@ import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
+import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -54,6 +54,7 @@ import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
 import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
 import { EMBED_B_KLAERUNG_TASK_TYP, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
+import SelbstzahlerReparaturStepper from '@/components/kunde/SelbstzahlerReparaturStepper'
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
@@ -324,6 +325,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       reparaturwunsch: string | null
       // SP4a Task 4: Werkstatt-Vermittlung
       reparatur_werkstatt_id: string | null
+      // SP-D: Abrechnungsweg fuer den Selbstzahler-Reparatur-Stepper
+      abrechnungsweg: string | null
     } | null = null
     if (fall.claim_id) {
       // Cluster F+G PR-2: Split in 2 Queries — claims für Kanzlei-Felder (Nicht-F+G),
@@ -331,7 +334,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, abrechnungsweg')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
@@ -361,6 +364,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           reparaturwunsch: (cxClaim?.reparaturwunsch as string | null) ?? null,
           // SP4a Task 4: Werkstatt-Vermittlung
           reparatur_werkstatt_id: (cxClaim?.reparatur_werkstatt_id as string | null) ?? null,
+          // SP-D: abrechnungsweg ist type-lagged -> Record-Cast beim Lesen.
+          abrechnungsweg: ((cxClaim as Record<string, unknown> | null)?.abrechnungsweg as string | null) ?? null,
         }
       }
     }
@@ -684,6 +689,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           svAvatarUrl={svAvatarUrl}
           svBeschreibung={svBeschreibung}
           svVerifiziert={svVerifiziert}
+          nurSv
         />
 
         {/* AAR Layout-Audit (2026-06-29): 2-Spalten Master/Detail — links der
@@ -734,6 +740,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 kundeVorname: kundeVorname ?? null,
               }
             : null
+          // SP-D: Selbstzahler bekommen die reduzierte Reparatur-Strecke (Schaden -> Werkstatt
+          // -> Termin -> Reparatur) statt des SV/Gutachten/Regulierungs-Steppers.
+          if (claimExtra?.abrechnungsweg === 'selbstzahler') {
+            return (
+              <SelbstzahlerReparaturStepper
+                hatWerkstatt={!!reparaturWerkstattId}
+                terminStatus={(reparaturTermin as { status: string } | null)?.status ?? null}
+                abgeschlossen={claimLifecycle.mainPhase === 'abschluss'}
+              />
+            )
+          }
           return (
             <ClaimStepper
               lifecycle={claimLifecycle}
@@ -940,6 +957,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
+        {/* SP-C1: Werkstatt-Finder - Reparatur-Claim OHNE hinterlegte Werkstatt. */}
+        {!reparaturWerkstattId && claimExtra?.reparaturwunsch === 'reparatur' && (
+          <WerkstattFinderCard claimId={fall.claim_id as string} />
+        )}
+
         {/* 13.05.2026 Restore: Mietwagen-/Nutzungsausfall-Card (XOR). Render
             nur wenn Gutachten OCR-verarbeitet + Schadenstyp klar. Pre-merge
             war diese Card als ausfallSlot in den ClaimStepper eingehängt;
@@ -999,23 +1021,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* Fortschritt + Fall-Details */}
-        <div className="grid md:grid-cols-2 gap-5">
-          <FallPhasenPanel
-            lifecycle={claimLifecycle}
-            fallId={fall.id as string}
-            rolle="kunde"
-            variant="progress-card"
-            banner={
-              szenario === 'ruegefall' ? (
-                <NoticeBox tone="warning" className="mt-4 rounded-ios-xl px-3 py-2">
-                  <p className="text-xs text-warning-strong font-medium">
-                    {t('ruegefall.banner')}
-                  </p>
-                </NoticeBox>
-              ) : null
-            }
-          />
+        {/* Fortschritt + Fall-Details — Sub-Projekt 3: "Mein Fortschritt"-Duplikat
+            (FallPhasenPanel progress-card) entfernt; der ClaimStepper oben ist die
+            kanonische Fortschritts-Anzeige. Der Ruegefall-Banner bleibt standalone. */}
+        <div className="space-y-5">
+          {szenario === 'ruegefall' ? (
+            <NoticeBox tone="warning" className="rounded-ios-xl px-3 py-2">
+              <p className="text-xs text-warning-strong font-medium">{t('ruegefall.banner')}</p>
+            </NoticeBox>
+          ) : null}
 
           <FallDetailSections
             fall={fall as Record<string, unknown>}

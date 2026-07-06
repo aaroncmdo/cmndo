@@ -16,19 +16,24 @@ function num(map: Record<string, number>, key: string, fallback: number): number
 export async function ladeAnspruchRates(): Promise<AnspruchRates> {
   const db = createAdminClient()
   const [saetzeRes, faktorenRes, configRes, wbwRes] = await Promise.all([
-    db.from('nutzungsausfall_segment_saetze').select('segment, tagessatz_min_eur, tagessatz_max_eur'),
+    // select('*') statt Spaltenliste: mietwagen_*-Spalten (Migration 20260706095717) fehlen noch in
+    // den generierten Typen; '*' umgeht die Select-String-Typpruefung, mietwagen wird unten defensiv gelesen.
+    db.from('nutzungsausfall_segment_saetze').select('*'),
     db.from('wertminderung_alter_faktoren').select('alter_bis_jahre, faktor_min, faktor_max'),
     db.from('anspruch_config').select('key, wert'),
     db.from('wbw_segment_alter').select('segment, alter_bis_jahre, wbw_min_eur, wbw_max_eur, restwert_faktor'),
   ])
 
   const saetze = {} as Record<Segment, SegmentSatz>
-  for (const seg of SEGMENTE) saetze[seg] = { tagessatzMinEur: 0, tagessatzMaxEur: 0 }
+  for (const seg of SEGMENTE) saetze[seg] = { tagessatzMinEur: 0, tagessatzMaxEur: 0, mietwagenMinEur: 0, mietwagenMaxEur: 0 }
   for (const row of saetzeRes.data ?? []) {
     if ((SEGMENTE as readonly string[]).includes(row.segment)) {
+      const mw = row as { mietwagen_min_eur?: number | null; mietwagen_max_eur?: number | null }
       saetze[row.segment as Segment] = {
         tagessatzMinEur: Number(row.tagessatz_min_eur),
         tagessatzMaxEur: Number(row.tagessatz_max_eur),
+        mietwagenMinEur: Number(mw.mietwagen_min_eur ?? 0),
+        mietwagenMaxEur: Number(mw.mietwagen_max_eur ?? 0),
       }
     }
   }
@@ -60,6 +65,8 @@ export async function ladeAnspruchRates(): Promise<AnspruchRates> {
       min: num(cfg, 'wiederbeschaffungsdauer_min_tage', 10),
       max: num(cfg, 'wiederbeschaffungsdauer_max_tage', 14),
     },
+    verbringungEur: num(cfg, 'verbringung_eur', 130),
+    ummeldungEur: num(cfg, 'ummeldung_eur', 75),
   }
 
   const wbwHeuristik: WbwHeuristikBand[] = (wbwRes.data ?? []).map((r) => ({

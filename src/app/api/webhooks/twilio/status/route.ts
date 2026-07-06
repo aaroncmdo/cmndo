@@ -6,18 +6,29 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { validateTwilioSignature, twilioCallbackUrl } from '@/lib/twilio/validate-signature'
 
 export const dynamic = 'force-dynamic'
 
 const EMPTY_TWIML = '<Response/>'
+const ROUTE_PATH = '/api/webhooks/twilio/status'
 
 export async function POST(req: NextRequest) {
   try {
-    const formData = await req.formData()
-    const messageSid = String(formData.get('MessageSid') ?? '')
-    const status = String(formData.get('MessageStatus') ?? '').toLowerCase()
-    const errorCode = formData.get('ErrorCode') ? String(formData.get('ErrorCode')) : null
-    const to = String(formData.get('To') ?? '')
+    // A08: Twilio-Signatur ueber den ROHEN Body verifizieren, BEVOR wir handeln — sonst
+    // kann jeder per gefaelschtem MessageStatus=failed&To=whatsapp:+49... den
+    // bevorzugter_kanal fremder Telefonnummern auf 'sms' kippen (unauth State-Mutation +
+    // twilio_status_events-Pollution). Muster wie die Schwester-Route twilio/inbound.
+    const bodyText = await req.text()
+    const formParams = new URLSearchParams(bodyText)
+    const sig = req.headers.get('x-twilio-signature')
+    if (!validateTwilioSignature(sig, twilioCallbackUrl(ROUTE_PATH), formParams)) {
+      return new NextResponse('Forbidden', { status: 403 })
+    }
+    const messageSid = String(formParams.get('MessageSid') ?? '')
+    const status = String(formParams.get('MessageStatus') ?? '').toLowerCase()
+    const errorCode = formParams.get('ErrorCode') ? String(formParams.get('ErrorCode')) : null
+    const to = String(formParams.get('To') ?? '')
 
     // Nur echte Failures interessieren uns hier — sent/delivered ignorieren.
     if (status !== 'failed' && status !== 'undelivered') {
@@ -67,7 +78,7 @@ export async function POST(req: NextRequest) {
         error_code: errorCode,
         to_phone: phoneE164,
         was_whatsapp: isWhatsApp,
-        raw: Object.fromEntries(formData.entries()),
+        raw: Object.fromEntries(formParams.entries()),
       })
     } catch {
       // Tabelle nicht zwingend — wir loggen dann eben nur in stdout.

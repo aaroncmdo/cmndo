@@ -30,6 +30,7 @@ export type ClaimStatus =
   | 'verjaehrt'
   | 'an_externe_kanzlei_uebergeben'
   | 'storniert'
+  | 'termin_durchgefuehrt'
 
 type ClaimStatusMapping = {
   /** Kurz, Admin-/Fach-Sprache */
@@ -49,6 +50,16 @@ export const CLAIM_STATUS: Record<ClaimStatus, ClaimStatusMapping> = {
     tone:         'info',
     icon:         PlayCircleIcon,
     isEndzustand: false,
+  },
+  // AAR-939: embed-B / nur_gutachter Terminal — SV hat den Termin durchgeführt
+  // (Gutachten off-platform, kein Regulierungs-Tail). Wird von close-nur-gutachter-
+  // termin.ts auf claims.status geschrieben; fehlte hier -> Badge zeigte den Rohcode.
+  termin_durchgefuehrt: {
+    label:        'Termin durchgeführt',
+    labelKunde:   'Termin durchgeführt',
+    tone:         'success',
+    icon:         CheckCircleIcon,
+    isEndzustand: true,
   },
   in_bearbeitung: {
     label:        'In Bearbeitung',
