@@ -1,12 +1,16 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { ClockIcon, CalendarIcon, UserIcon } from 'lucide-react'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export default async function TageskalenderWidget() {
   const supabase = await createClient()
-  const today = new Date()
-  const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString()
-  const todayEnd = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23, 59, 59).toISOString()
+  // FIX (Dashboard-Metrik-Audit 06.07.): echte Berlin-Tagesgrenze statt new Date(y,m,d)
+  // (= Server-lokal = UTC auf Vercel -> "heute" war am Tagesrand 1-2h schief; analog
+  // dispatch/dashboard-Fix). berlinWallClockToUtc = etabliertes Helfer-Pattern.
+  const berlinDateStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
+  const todayStart = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`)).toISOString()
+  const todayEnd = new Date(berlinWallClockToUtc(`${berlinDateStr}T23:59:59`)).toISOString()
 
   // Alle Termine für heute
   const [{ data: termine }, { data: svTermine }] = await Promise.all([
@@ -41,7 +45,10 @@ export default async function TageskalenderWidget() {
     })),
   ].sort((a, b) => a.zeit.localeCompare(b.zeit))
 
-  const nowMinutes = today.getHours() * 60 + today.getMinutes()
+  // Aktuelle Berlin-Uhrzeit in Minuten (fuer den "Jetzt"-Marker) — konsistent zur Berlin-Tagesgrenze.
+  const berlinTime = new Date().toLocaleTimeString('en-GB', { timeZone: 'Europe/Berlin', hour12: false })
+  const [berlinH, berlinM] = berlinTime.split(':').map(Number)
+  const nowMinutes = berlinH * 60 + berlinM
 
   return (
     <div className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
