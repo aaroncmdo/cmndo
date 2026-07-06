@@ -8,6 +8,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { generatePromoCode } from '@/lib/makler/promo-code'
+import { sendMaklerWelcome } from '@/lib/email/google/flows'
 
 function generatePassword(length = 14): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
@@ -110,18 +111,31 @@ export async function createMakler(
 
   // 4) Default Promo-Code (MK-xxxx) — der vermittelnde Identifier (Attribution via leads.promotion_code_id).
   //    Non-fatal: der Makler steht; ein Code kann nachgezogen werden. Retry bei Unique-Kollision.
-  let promoOk = false
-  for (let i = 0; i < 3 && !promoOk; i++) {
+  let promoCode: string | null = null
+  for (let i = 0; i < 3 && !promoCode; i++) {
+    const code = generatePromoCode()
     const { error: pcErr } = await admin.from('promotion_codes').insert({
       makler_id: m.id,
-      code: generatePromoCode(),
+      code,
       aktiv: true,
     })
-    if (!pcErr) promoOk = true
+    if (!pcErr) promoCode = code
     else if (!/duplicate|unique/i.test(pcErr.message)) {
       console.error('[createMakler] Promo-Code-Anlage fehlgeschlagen (non-fatal):', pcErr.message)
       break
     }
+  }
+
+  // Willkommens-/Login-Email an den Makler — analog zum Self-Signup (registriereMaklerSelf):
+  // Kundennutzen-Framing + Empfehlungs-Landeseite + Recovery-Magic-Link zum Passwort-Setzen.
+  // Best-effort (non-critical): der Makler steht auch ohne Mail; das Passwort bleibt als
+  // Fallback im Ergebnis fuer den Admin.
+  try {
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+    const landeseiteUrl = promoCode ? `${base}/m/${promoCode}` : base
+    await sendMaklerWelcome({ to: email, firma, vorname: ansprechpartner_vorname, landeseiteUrl })
+  } catch (err) {
+    console.error('[createMakler] Welcome-Email fehlgeschlagen (non-critical):', err)
   }
 
   revalidatePath('/admin/makler')
