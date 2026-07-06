@@ -24,7 +24,6 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -690,6 +689,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           svAvatarUrl={svAvatarUrl}
           svBeschreibung={svBeschreibung}
           svVerifiziert={svVerifiziert}
+          nurSv
         />
 
         {/* AAR Layout-Audit (2026-06-29): 2-Spalten Master/Detail — links der
@@ -1021,23 +1021,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* Fortschritt + Fall-Details */}
-        <div className="grid md:grid-cols-2 gap-5">
-          <FallPhasenPanel
-            lifecycle={claimLifecycle}
-            fallId={fall.id as string}
-            rolle="kunde"
-            variant="progress-card"
-            banner={
-              szenario === 'ruegefall' ? (
-                <NoticeBox tone="warning" className="mt-4 rounded-ios-xl px-3 py-2">
-                  <p className="text-xs text-warning-strong font-medium">
-                    {t('ruegefall.banner')}
-                  </p>
-                </NoticeBox>
-              ) : null
-            }
-          />
+        {/* Fortschritt + Fall-Details — Sub-Projekt 3: "Mein Fortschritt"-Duplikat
+            (FallPhasenPanel progress-card) entfernt; der ClaimStepper oben ist die
+            kanonische Fortschritts-Anzeige. Der Ruegefall-Banner bleibt standalone. */}
+        <div className="space-y-5">
+          {szenario === 'ruegefall' ? (
+            <NoticeBox tone="warning" className="rounded-ios-xl px-3 py-2">
+              <p className="text-xs text-warning-strong font-medium">{t('ruegefall.banner')}</p>
+            </NoticeBox>
+          ) : null}
 
           <FallDetailSections
             fall={fall as Record<string, unknown>}
