@@ -154,7 +154,16 @@ test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ p
     .maybeSingle()
   expect(gfa?.zugeordneter_sv_id, 'gfa dem Test-SV zugeordnet').toBe(TEST_SV)
   expect(gfa?.matching_typ, 'Partner-Matching (nicht Dead-Pin)').toBe('partner')
-  console.log(`[golden-finder] gfa ${gfa?.id} -> Test-SV ${TEST_SV}, Termin ${gfa?.termin_id} ✓`)
+
+  // Send-Isolation (PR #3709): der interne @claimondo.de-Bucher darf KEINEN Dispatch-Task
+  // ausgeloest haben — verifiziert, dass der Test das Team nicht stoert. (Gruen erst nach
+  // Deploy von #3709; davor legt Prod noch den Task an -> das ist dann die RED-Baseline.)
+  const { data: tasks } = await db
+    .from('mitteilungen')
+    .select('id')
+    .eq('route_url', `/dispatch/gutachter-finder/${gfa?.id}`)
+  expect(tasks?.length ?? 0, 'interne Buchung -> kein Dispatch-Task (Send-Isolation #3709)').toBe(0)
+  console.log(`[golden-finder] gfa ${gfa?.id} -> Test-SV ${TEST_SV}, Termin ${gfa?.termin_id}, 0 Team-Tasks ✓`)
 })
 
 // Crash-Recovery: nur deaktivieren (falls ein abgebrochener Lauf den SV aktiv liess).
