@@ -6,7 +6,7 @@ import { GoogleReviews } from '@/components/shared/GoogleReviews'
 // Jetzt eigene, auf der Home-Flagship-Bar gebaute KPI-Band-Version: Bass-Zahlen +
 // Treble-Labels, luftiges Rhythmus (section-audit §7). Die generische
 // TrustStripSection bleibt unveraendert fuer die 7 anderen Pages (Stadt, /vorteile,
-// /wie-es-funktioniert, /faq, /ueber-uns, /schadensreport, /ersteinschaetzung).
+// /wie-es-funktioniert, /faq, /ueber-uns, /schadensreport, /check).
 //
 // KPIs + Methodik 1:1 aus home.kpis / home.kpi_methodik (real + UWG-konform mit
 // Quellen-Fussnote, §9). Google-Reviews-Slot (Task E1) ist markiert — wird erst mit

@@ -51,6 +51,13 @@ const nextConfig: NextConfig = {
         destination: 'https://app.claimondo.de/api/v1/openapi.json',
         permanent: true,
       },
+      {
+        // /ersteinschaetzung -> /check: die alte statische KI-Seite wurde vom
+        // interaktiven /check-Funnel abgeloest (Aaron 06.07.). 301 fuer Bookmarks/SEO.
+        source: '/ersteinschaetzung',
+        destination: '/check',
+        permanent: true,
+      },
     ]
   },
 }
