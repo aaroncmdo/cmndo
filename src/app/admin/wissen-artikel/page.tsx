@@ -41,12 +41,12 @@ export default async function WissenArtikelPage() {
     .order('created_at', { ascending: false })
     .limit(20)
 
-  // Auto-veroeffentlichte Crawl-Artikel laden (veroeffentlicht + quelle=crawl), neueste zuerst
+  // Auto-veroeffentlichte Artikel laden (veroeffentlicht + quelle crawl|ai_gap), neueste zuerst
   const { data: crawlArtikelRaw } = await admin
     .from('wissen_artikel')
     .select('id, title, slug, quelle, status, veroeffentlicht_am, created_at')
     .eq('status', 'veroeffentlicht')
-    .eq('quelle', 'crawl')
+    .in('quelle', ['crawl', 'ai_gap'])
     .order('veroeffentlicht_am', { ascending: false })
     .limit(50)
 
@@ -167,7 +167,7 @@ export default async function WissenArtikelPage() {
                       </Td>
                       <Td>{t.primary_keyword ?? '—'}</Td>
                       <Td>{t.cluster ?? '—'}</Td>
-                      <Td className="text-xs">{t.quelle === 'manuell' ? 'Manuell' : 'AI-Gap'}</Td>
+                      <Td className="text-xs">{t.quelle === 'manuell' ? 'Manuell' : t.quelle === 'crawl' ? 'Crawl' : 'KI-Evergreen'}</Td>
                       <Td>
                         <GenerateDraftButton themaId={t.id} />
                       </Td>
@@ -203,12 +203,12 @@ export default async function WissenArtikelPage() {
 
       {/* Sektion: Auto-veröffentlichte Crawl-Artikel */}
       <SectionCard
-        title="Auto-veröffentlichte Crawl-Artikel"
-        subtitle="Vom B2B-Feed automatisch veröffentlichte Artikel — bei Bedarf zurückziehen"
+        title="Auto-veröffentlichte Artikel"
+        subtitle="Vom B2B-Feed automatisch veröffentlicht (Crawl + KI-Evergreen) — bei Bedarf zurückziehen"
       >
         {crawlArtikel.length === 0 ? (
           <p className="text-sm text-claimondo-ondo/70 py-4 text-center">
-            Keine auto-veröffentlichten Crawl-Artikel vorhanden.
+            Keine auto-veröffentlichten Artikel vorhanden.
           </p>
         ) : (
           <DataTableContainer>
@@ -228,7 +228,7 @@ export default async function WissenArtikelPage() {
                       <div className="flex items-center gap-2">
                         <span className="font-medium">{artikel.title}</span>
                         <span className="inline-flex items-center rounded-ios-sm bg-claimondo-bg border border-claimondo-border px-1.5 py-0.5 text-[10px] font-medium text-claimondo-ondo whitespace-nowrap">
-                          Auto-veröffentlicht (Crawl)
+                          {artikel.quelle === 'ai_gap' ? 'KI-Evergreen' : 'Auto-veröffentlicht (Crawl)'}
                         </span>
                       </div>
                     </Td>
