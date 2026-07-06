@@ -77,17 +77,21 @@ export async function processCaseBilling(fallId: string): Promise<{
   const nachzahlung = leadPreis - guthabenAbzug
   const guthabenNeu = currentGuthaben - guthabenAbzug
 
-  // Atomares Update: Guthaben dekrementieren
-  if (guthabenAbzug > 0) {
-    await db.from('sachverstaendige')
-      .update({ werbebudget_guthaben_netto: guthabenNeu })
-      .eq('id', claim.sv_id)
-  }
-
-  // Billing-Felder schreiben. CMM-44 SP-J/Phase 3: lead_preis_*, guthaben_verrechnet_netto,
-  // sv_nachzahlung_netto sind alle claims-SSoT (CLAIM_OWNED) → splitOrKeepFaelleUpdate routet
-  // sie auf claims (faelleUpdate bleibt leer). claimId via resolveClaimId immer gesetzt.
-  // CMM-49 (faelle-Drop): pcbFaelle war immer leer (alle Billing-Felder CLAIM_OWNED) -> toter faelle-Spiegel-Write entfernt.
+  // AAR (06.07. Bug-Audit): Reihenfolge + Atomaritaet gegen Doppel-Abzug.
+  // FRUEHER: Guthaben wurde ZUERST dekrementiert, der Idempotenz-Marker
+  // (lead_preis_netto) DANACH geschrieben. Schlug der 2. Write fehl, blieb
+  // lead_preis_netto NULL, und der Reconcile-Batch-Cron `case-billing-batch`
+  // (Filter lead_preis_netto IS NULL) zog beim naechsten Lauf ERNEUT ab -> SV
+  // verlor mehrfach bis 150 EUR (gleiche Klasse wie das einzug_versucht_am-Leak).
+  // JETZT: der Marker-Write ist der ATOMARE Latch (UPDATE ... WHERE
+  // lead_preis_netto IS NULL RETURNING id) und laeuft ZUERST; das Guthaben wird
+  // NUR dekrementiert, wenn DIESER Lauf den Latch gewonnen hat. Ein
+  // paralleler/erneuter Lauf trifft 0 Zeilen -> kein 2. Abzug. Worst-Case dreht
+  // sich zu "SV einmal zu wenig belastet" (Marker gesetzt, Guthaben nicht) statt
+  // Doppel-Verlust — reconcilebar und SV-guenstig.
+  //
+  // Billing-Felder sind alle claims-SSoT (CLAIM_OWNED) -> splitOrKeepFaelleUpdate
+  // routet sie auf claims (faelleUpdate bleibt leer). claimId via resolveClaimId immer gesetzt.
   const { claimsUpdate: pcbClaims } = splitOrKeepFaelleUpdate(
     {
       lead_preis_netto: leadPreis,
@@ -98,8 +102,21 @@ export async function processCaseBilling(fallId: string): Promise<{
     },
     claimId,
   )
-  if (Object.keys(pcbClaims).length > 0) {
-    await db.from('claims').update(pcbClaims).eq('id', claimId)
+  if (Object.keys(pcbClaims).length === 0) return null
+  const { data: latched, error: latchErr } = await db.from('claims')
+    .update(pcbClaims)
+    .eq('id', claimId)
+    .is('lead_preis_netto', null)
+    .select('id')
+  // Latch verloren (0 Zeilen) oder Fehler -> ein anderer Lauf hat bereits abgerechnet
+  // (oder tut es gerade); NICHT (nochmal) das Guthaben abziehen.
+  if (latchErr || !latched || latched.length === 0) return null
+
+  // Guthaben dekrementieren — erst NACH gewonnenem Latch.
+  if (guthabenAbzug > 0) {
+    await db.from('sachverstaendige')
+      .update({ werbebudget_guthaben_netto: guthabenNeu })
+      .eq('id', claim.sv_id)
   }
 
   console.log(`[KFZ-149] Case ${fallId}: Lead-Preis=${leadPreis} (${typ}), Guthaben-Abzug=${guthabenAbzug}, Nachzahlung=${nachzahlung}, Guthaben-Neu=${guthabenNeu}`)
