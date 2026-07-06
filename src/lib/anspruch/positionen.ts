@@ -1,5 +1,5 @@
 import type {
-  AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Schuldform, Segment, SegmentSatz,
+  AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Ersatzfahrzeug, Schuldform, Segment, SegmentSatz,
   SchaetzInput, TotalschadenInfo, WertminderungFaktor,
 } from './types'
 
@@ -19,6 +19,27 @@ function anwaltskostenPosition(): AnspruchPosition {
   }
 }
 
+// Ersatzfahrzeug waehrend Reparatur/Wiederbeschaffung: Nutzungsausfall (Geld) ODER Mietwagen ODER nichts.
+// Rechtlich ein Entweder-oder -> genau eine Position (oder keine).
+function ersatzfahrzeugPosition(
+  ersatzfahrzeug: Ersatzfahrzeug,
+  satz: SegmentSatz,
+  dauer: { min: number; max: number },
+  labelSuffix: string,
+): AnspruchPosition | null {
+  if (ersatzfahrzeug === 'keins') return null
+  const istMietwagen = ersatzfahrzeug === 'mietwagen'
+  const tagesMin = istMietwagen ? satz.mietwagenMinEur : satz.tagessatzMinEur
+  const tagesMax = istMietwagen ? satz.mietwagenMaxEur : satz.tagessatzMaxEur
+  return {
+    typ: istMietwagen ? 'mietwagen' : 'nutzungsausfall',
+    label: `${istMietwagen ? 'Mietwagen' : 'Nutzungsausfall'}${labelSuffix}`,
+    minEur: runde(tagesMin * dauer.min),
+    maxEur: runde(tagesMax * dauer.max),
+    hinweis: `${tagesMin}–${tagesMax} €/Tag × ${dauer.min}–${dauer.max} Tage`,
+  }
+}
+
 function findeFaktor(alter: number, faktoren: WertminderungFaktor[]): WertminderungFaktor | null {
   const sortiert = [...faktoren].sort((a, b) => a.alterBisJahre - b.alterBisJahre)
   return sortiert.find((f) => alter <= f.alterBisJahre) ?? null
@@ -34,6 +55,7 @@ export function berechneAnspruchsSpanne(
   const hinweise: string[] = []
   const schuld: Schuldform = input.schuld ?? 'unverschuldet'
   const gegnerHaftet = schuld !== 'selbst'
+  const ersatzfahrzeug: Ersatzfahrzeug = input.ersatzfahrzeug ?? 'nutzungsausfall'
   const reparaturMitte = (input.reparaturMinEur + input.reparaturMaxEur) / 2
 
   // 1) Reparaturkosten — immer
@@ -44,17 +66,10 @@ export function berechneAnspruchsSpanne(
     maxEur: runde(input.reparaturMaxEur),
   })
 
-  // 2) Nutzungsausfall — nur wenn nicht fahrbereit
+  // 2) Ersatzfahrzeug (Nutzungsausfall ODER Mietwagen) — nur wenn nicht fahrbereit
   if (!input.fahrbereit) {
-    const satz = saetze[input.segment]
-    const dauer = config.dauerTage[input.schweregrad]
-    positionen.push({
-      typ: 'nutzungsausfall',
-      label: 'Nutzungsausfall',
-      minEur: runde(satz.tagessatzMinEur * dauer.min),
-      maxEur: runde(satz.tagessatzMaxEur * dauer.max),
-      hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage`,
-    })
+    const ef = ersatzfahrzeugPosition(ersatzfahrzeug, saetze[input.segment], config.dauerTage[input.schweregrad], '')
+    if (ef) positionen.push(ef)
   }
 
   // 3) Wertminderung — nur jung + Substanz + ueber Schwelle
@@ -76,6 +91,17 @@ export function berechneAnspruchsSpanne(
     }
   } else if (reparaturMitte < config.bagatelleSchwelleEur || input.schweregrad === 'leicht') {
     hinweise.push('Bei rein kosmetischen Schäden (Bagatelle) ist die Wertminderung meist gering oder entfällt.')
+  }
+
+  // 3b) Verbringungskosten — nur bei nennenswerter Reparatur (Transport zur Lackiererei), Fixbetrag
+  if (reparaturMitte >= config.bagatelleSchwelleEur) {
+    positionen.push({
+      typ: 'verbringung',
+      label: 'Verbringungskosten',
+      minEur: config.verbringungEur,
+      maxEur: config.verbringungEur,
+      hinweis: 'Transport zwischen Werkstatt und Lackiererei',
+    })
   }
 
   // 4) Sachverstaendigenkosten — immer, getragen von Gegnerversicherung (nicht in Gesamt)
@@ -123,14 +149,16 @@ export function berechneAnspruchsSpanne(
       const restMax = input.restwertMaxEur ?? 0
       const dauer = config.wiederbeschaffungsdauerTage
       const satz = saetze[input.segment]
-      // Totalschaden-Weg: WBW - Restwert + Nutzungsausfall (Wiederbeschaffungsdauer) + (Abschlepp wenn nicht fahrbereit) + SV-Kosten + Auslagenpauschale
+      const efTs = ersatzfahrzeugPosition(ersatzfahrzeug, satz, dauer, ' (Wiederbeschaffung)')
+      // Totalschaden-Weg: WBW - Restwert + Ersatzfahrzeug (Wiederbeschaffungsdauer) + (Abschlepp wenn nicht fahrbereit) + SV-Kosten + Auslagenpauschale + Ummeldung
       const tsPositionen: AnspruchPosition[] = [
         { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(Math.max(0, input.wbwMinEur! - restMax)), maxEur: runde(Math.max(0, input.wbwMaxEur! - restMin)) },
-        { typ: 'nutzungsausfall', label: 'Nutzungsausfall (Wiederbeschaffung)', minEur: runde(satz.tagessatzMinEur * dauer.min), maxEur: runde(satz.tagessatzMaxEur * dauer.max), hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage` },
+        ...(efTs ? [efTs] : []),
         ...(!input.fahrbereit ? [{ typ: 'abschleppkosten' as const, label: 'Abschleppkosten', minEur: config.abschleppMinEur, maxEur: config.abschleppMaxEur }] : []),
         { typ: 'gutachterkosten', label: 'Sachverständigenkosten', minEur: null, maxEur: null, gedecktDurchGegner: true, hinweis: 'Bei klarer Haftung trägt die gegnerische Versicherung diese Kosten.' },
         ...(gegnerHaftet ? [anwaltskostenPosition()] : []),
         { typ: 'kostenpauschale', label: 'Auslagenpauschale', minEur: config.kostenpauschaleEur, maxEur: config.kostenpauschaleEur },
+        { typ: 'ummeldung', label: 'An- und Abmeldung', minEur: config.ummeldungEur, maxEur: config.ummeldungEur, hinweis: 'Wrack abmelden, Ersatzfahrzeug anmelden' },
       ]
       const tsMin = runde(tsPositionen.reduce((s, p) => s + (p.minEur ?? 0), 0))
       const tsMax = runde(tsPositionen.reduce((s, p) => s + (p.maxEur ?? 0), 0))

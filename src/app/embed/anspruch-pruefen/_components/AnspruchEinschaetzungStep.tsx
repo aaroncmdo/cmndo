@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
 import { berechneAnspruch } from '../actions'
-import { SEGMENTE, SEGMENT_LABEL, SCHULDFORMEN, SCHULD_LABEL, type AnspruchSpanne, type Schuldform, type Segment, type VisionResult } from '@/lib/anspruch/types'
+import { SEGMENTE, SEGMENT_LABEL, SCHULDFORMEN, SCHULD_LABEL, ERSATZFAHRZEUG_OPTIONEN, ERSATZFAHRZEUG_LABEL, type AnspruchSpanne, type Ersatzfahrzeug, type Schuldform, type Segment, type VisionResult } from '@/lib/anspruch/types'
 import { Button } from '@/components/primitives'
 
 // Kurzvorschau des Regulierungswegs je Schuldform (rechts neben dem Label).
@@ -17,6 +17,7 @@ export function AnspruchEinschaetzungStep({
   const [segment, setSegment] = useState<Segment>(vision.segment)
   const [schuld, setSchuld] = useState<Schuldform>('unverschuldet')
   const [fahrbereit, setFahrbereit] = useState<boolean | null>(null)
+  const [ersatzfahrzeug, setErsatzfahrzeug] = useState<Ersatzfahrzeug>('nutzungsausfall')
   const [ezJahr, setEzJahr] = useState<string>('')
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -30,7 +31,7 @@ export function AnspruchEinschaetzungStep({
       return
     }
     setBusy(true); setFehler(null)
-    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: jahr, schuld })
+    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: jahr, schuld, ersatzfahrzeug })
     setBusy(false)
     if (r.ok) onFertig(r.spanne)
     else setFehler(r.error)
@@ -77,6 +78,20 @@ export function AnspruchEinschaetzungStep({
             className={`flex-1 rounded-ios-sm border px-3 py-2 text-body-sm ${fahrbereit === false ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>Nein, nicht fahrbereit</button>
         </div>
       </div>
+
+      {fahrbereit === false ? (
+        <div>
+          <p className="mb-2 text-body-sm font-medium text-claimondo-navy">Ersatzfahrzeug während der Reparatur?</p>
+          <div className="flex flex-col gap-2">
+            {ERSATZFAHRZEUG_OPTIONEN.map((e) => (
+              <button key={e} type="button" onClick={() => setErsatzfahrzeug(e)}
+                className={`rounded-ios-sm border px-3 py-2 text-left text-body-sm ${ersatzfahrzeug === e ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>
+                {ERSATZFAHRZEUG_LABEL[e]}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div>
         <label className="mb-1 block text-body-sm font-medium text-claimondo-navy">Erstzulassung (Jahr)</label>
