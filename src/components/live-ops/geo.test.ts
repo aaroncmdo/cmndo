@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute, LeadPin } from '@/lib/live-ops'
-import { svPinsFC, terminPinsFC, deadPinsFC, isochroneFC, routenFC, tagesroutenFC, leadsFC } from './geo'
+import { svPinsFC, terminPinsFC, deadPinsFC, isochroneFC, routenFC, tagesroutenFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
 
 // --- Fixtures ---
 
@@ -279,6 +279,7 @@ const makeLead = (overrides: Partial<LeadPin> = {}): LeadPin => ({
   ort: 'München',
   kanal: 'self_service',
   erstelltAm: '2026-07-04T08:00:00Z',
+  hasActiveTermin: false,
   ...overrides,
 })
 
@@ -333,5 +334,65 @@ describe('isochroneFC', () => {
     const fc = isochroneFC([svWith, svWithout])
     expect(fc.features).toHaveLength(1)
     expect(fc.features[0].properties?.__id).toBe('sv-a')
+  })
+})
+
+// --- candidateHaloFC ---
+
+describe('candidateHaloFC', () => {
+  it('nimmt nur Kandidaten mit standort, [lng,lat]', () => {
+    const svs = [
+      { id: 's1', standortLat: 52, standortLng: 13 },
+      { id: 's2', standortLat: 48, standortLng: 11 },
+      { id: 's3', standortLat: null, standortLng: null },
+    ] as any
+    const fc = candidateHaloFC(svs, ['s1', 's3'])
+    expect(fc.features).toHaveLength(1) // s1 (s3 ohne standort raus, s2 kein Kandidat)
+    expect(fc.features[0].geometry).toMatchObject({ type: 'Point', coordinates: [13, 52] })
+    expect(fc.features[0].properties?.__id).toBe('s1')
+    expect(fc.features[0].properties?.__type).toBe('candidate')
+  })
+
+  it('gibt leere FC zurueck wenn candidateIds leer', () => {
+    const svs = [makeSv({ id: 'sv-1' })]
+    expect(candidateHaloFC(svs, []).features).toHaveLength(0)
+  })
+
+  it('gibt leere FC zurueck fuer leere SV-Liste', () => {
+    expect(candidateHaloFC([], ['sv-1']).features).toHaveLength(0)
+  })
+
+  it('setzt __type candidate und svId auf properties', () => {
+    const sv = makeSv({ id: 'sv-99', standortLat: 51.5, standortLng: 7.0 })
+    const f = candidateHaloFC([sv], ['sv-99']).features[0]
+    expect(f.properties?.__type).toBe('candidate')
+    expect(f.properties?.svId).toBe('sv-99')
+  })
+})
+
+// --- assignLineFC ---
+
+describe('assignLineFC', () => {
+  it('baut 1 LineString aus 2 Punkten', () => {
+    const fc = assignLineFC([13, 52], [14, 53])
+    expect(fc.features).toHaveLength(1)
+    expect(fc.features[0].geometry).toMatchObject({ type: 'LineString', coordinates: [[13, 52], [14, 53]] })
+  })
+
+  it('leer wenn from fehlt', () => {
+    expect(assignLineFC(null, [14, 53]).features).toHaveLength(0)
+  })
+
+  it('leer wenn to fehlt', () => {
+    expect(assignLineFC([13, 52], null).features).toHaveLength(0)
+  })
+
+  it('leer wenn beide fehlen', () => {
+    expect(assignLineFC(null, null).features).toHaveLength(0)
+  })
+
+  it('FeatureCollection-Typ gesetzt', () => {
+    const fc = assignLineFC([13, 52], [14, 53])
+    expect(fc.type).toBe('FeatureCollection')
   })
 })
