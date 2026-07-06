@@ -42,13 +42,8 @@ export function svPinsFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
 export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
-    features: termine.map((t) => ({
-      type: 'Feature' as const,
-      geometry: {
-        type: 'Point' as const,
-        coordinates: [t.lng, t.lat],
-      },
-      properties: {
+    features: termine.map((t) => {
+      const props: Record<string, unknown> = {
         __id: t.id,
         __type: 'termin',
         status: t.status,
@@ -58,8 +53,20 @@ export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
         startZeit: t.startZeit,
         claimNummer: t.claimNummer,
         fallId: t.fallId,
-      },
-    })),
+      }
+      // etaMin nur setzen wenn vorhanden — Layer-Filter ['has','etaMin'] greift sonst nicht
+      if (t.etaMin != null) {
+        props.etaMin = t.etaMin
+      }
+      return {
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [t.lng, t.lat],
+        },
+        properties: props,
+      }
+    }),
   }
 }
 

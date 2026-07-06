@@ -42,6 +42,7 @@ const LAYER_ISOS_LINE = 'lo-isos-line'
 
 const SRC_TERMINE = 'lo-termine'
 const LAYER_TERMINE = 'lo-termine-circle'
+const LAYER_TERMINE_ETA = 'lo-termine-eta-label'
 
 const SRC_ROUTEN = 'lo-routen'
 const LAYER_ROUTEN = 'lo-routen-line'
@@ -225,7 +226,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         const layerIds: Record<LayerKey, string[]> = {
           svs: [LAYER_SVS, LAYER_ISOS_FILL, LAYER_ISOS_LINE],
           autos: [], // Car-Marker werden per display-Style getoggelt
-          termine: [LAYER_TERMINE],
+          termine: [LAYER_TERMINE, LAYER_TERMINE_ETA],
           routen: [LAYER_ROUTEN],
           tagesrouten: [LAYER_TAGESROUTEN],
           deadpins: [LAYER_DEADPINS],
@@ -522,6 +523,26 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       })
       map.on('mouseleave', LAYER_TERMINE, () => {
         map.getCanvas().style.cursor = ''
+      })
+
+      // ─── ETA-Label an Termin-Pins (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint) ──
+      map.addLayer({
+        id: LAYER_TERMINE_ETA,
+        type: 'symbol',
+        source: SRC_TERMINE,
+        filter: ['has', 'etaMin'],
+        layout: {
+          'text-field': ['concat', ['to-string', ['get', 'etaMin']], ' min'],
+          'text-size': 10,
+          'text-font': ['DIN Offc Pro Medium', 'Arial Unicode MS Bold'],
+          'text-offset': [0, -1.4],
+          'text-anchor': 'bottom',
+        },
+        paint: {
+          'text-color': '#0D1B3E',
+          'text-halo-color': '#ffffff',
+          'text-halo-width': 1.5,
+        },
       })
 
       // ─── Unterwegs-Routen-Layer ─────────────────────────────────────────

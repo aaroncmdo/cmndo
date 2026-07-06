@@ -47,6 +47,8 @@ export type TerminPin = {
   claimNummer: string
   /** UUID des verknuepften Falls (faelle.id) — null bei reinen Lead-Terminen ohne Fall */
   fallId: string | null
+  /** Fahrzeit SV-Standort → Termin in Minuten (null = kein Standort oder Matrix-Fehler) */
+  etaMin: number | null
 }
 
 export type DeadPin = {
