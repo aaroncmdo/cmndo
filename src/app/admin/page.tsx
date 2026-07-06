@@ -9,6 +9,7 @@ import WichtigeUpdatesWidget from './_components/WichtigeUpdatesWidget'
 import DashboardStats from './_components/DashboardStats'
 import TageskalenderWidget from './_components/TageskalenderWidget'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
+import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 // KFZ-155 -> Redesign 07/2026 ("Der Tag auf einen Blick"): PageHeader -> Greeting +
 // Dringlichkeits-Zeile; die 6 KpiCards (StatCard-Grid) -> verbundene StatBar. loadKpis
@@ -28,7 +29,10 @@ async function loadKpis() {
   const supabase = await createClient()
 
   const now = new Date()
-  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).toISOString()
+  // FIX (Dashboard-Metrik-Audit 06.07.): echte Berlin-Tagesgrenze fuer "neue Faelle heute"
+  // (new Date(y,m,d) = Server-lokal = UTC auf Vercel -> am Tagesrand 1-2h schief).
+  const berlinDateStr = new Date().toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
+  const todayStart = new Date(berlinWallClockToUtc(`${berlinDateStr}T00:00:00`)).toISOString()
   const monatStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
   const monatEnde = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999).toISOString()
 
