@@ -13,6 +13,7 @@ import {
   SettingsIcon,
   WrenchIcon,
   FileUpIcon,
+  MessagesSquareIcon,
   InboxIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
@@ -38,6 +39,7 @@ const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
+  { href: '/werkstatt/netzwerk', label: 'Netzwerk', icon: MessagesSquareIcon },
 ]
 
 const WERKSTATT_MOBILE_ITEMS = WERKSTATT_NAV_ITEMS
