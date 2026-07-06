@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { convertPartnerLead } from '@/lib/partner/convert-partner-lead'
 import { revalidatePath } from 'next/cache'
 import type { PartnerRolle } from '@/lib/partner/policy'
+import type { PartnerCsvLead } from '@/lib/partner/csv-import'
 
 const VERTRIEB_ROLLEN = ['admin', 'dispatch', 'leadbearbeiter']
 const PARTNER_ROLLEN: PartnerRolle[] = ['sachverstaendiger', 'werkstatt', 'makler']
@@ -291,4 +292,60 @@ export async function konvertierePartnerLead(
 
   revalidatePath('/admin/partner-leads')
   return { ok: true, userId: result.userId, partnerId: result.partnerId }
+}
+
+/**
+ * Bulk-Import geparster CSV-Leads fuer EINE Rolle (Slice C). Die Zeilen werden
+ * clientseitig aus dem CSV gemappt (mapCsvZuLeads) und hier nur noch validiert +
+ * gebuendelt eingefuegt. status='neu', source_channel='csv_import', einstufung=null,
+ * zugewiesen_an=staff.id. E-Mail wird (falls vorhanden) auf lowercase normalisiert
+ * und leer → null. Zeilen ohne firma werden defensiv verworfen (Client filtert
+ * bereits, aber der Server vertraut dem Input nicht).
+ */
+export async function importCsvLeads(
+  rolle: string,
+  leads: PartnerCsvLead[],
+): Promise<{ ok: true; angelegt: number } | { ok: false; error: string }> {
+  const staff = await requireVertriebStaff()
+  if (!staff) return { ok: false, error: 'Nur Vertriebs-Team darf importieren.' }
+
+  const r = (rolle ?? '').trim()
+  if (!PARTNER_ROLLEN.includes(r as PartnerRolle)) {
+    return { ok: false, error: 'Bitte eine gültige Rolle wählen (SV, Werkstatt oder Makler).' }
+  }
+  if (!Array.isArray(leads) || leads.length === 0) {
+    return { ok: false, error: 'Keine importierbaren Zeilen gefunden.' }
+  }
+
+  const rows = leads
+    .filter((l) => (l?.firma ?? '').trim().length > 0)
+    .map((l) => {
+      const email = (l.email ?? '').trim().toLowerCase()
+      return {
+        rolle: r,
+        status: 'neu',
+        source_channel: 'csv_import',
+        einstufung: null,
+        firma: l.firma.trim(),
+        ansprechpartner_vorname: (l.ansprechpartner_vorname ?? '').trim() || null,
+        ansprechpartner_nachname: (l.ansprechpartner_nachname ?? '').trim() || null,
+        email: email || null,
+        telefon: (l.telefon ?? '').trim() || null,
+        plz: (l.plz ?? '').trim() || null,
+        ort: (l.ort ?? '').trim() || null,
+        rollen_details: l.rollen_details ?? {},
+        zugewiesen_an: staff.id,
+      }
+    })
+
+  if (rows.length === 0) {
+    return { ok: false, error: 'Keine gültigen Zeilen (Firma fehlt überall).' }
+  }
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.from('partner_leads').insert(rows).select('id')
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/partner-leads')
+  return { ok: true, angelegt: data?.length ?? rows.length }
 }

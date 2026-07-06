@@ -18,6 +18,7 @@ import {
   ArrowRightLeft,
   Flame,
   MoreHorizontal,
+  Upload,
   type LucideIcon,
 } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
@@ -42,7 +43,9 @@ import {
   updatePartnerLead,
   konvertierePartnerLead,
   protokolliereAktivitaet,
+  importCsvLeads,
 } from './actions'
+import { parseCsv, mapCsvZuLeads, type PartnerCsvLead } from '@/lib/partner/csv-import'
 import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow } from './types'
 import {
   PARTNER_LEAD_STATUS,
@@ -141,6 +144,7 @@ export default function PartnerLeadsClient({
   const [statusFilter, setStatusFilter] = useState<'alle' | PartnerLeadStatus>('alle')
   const [einstufungFilter, setEinstufungFilter] = useState<EinstufungFilter>('alle')
   const [showCreate, setShowCreate] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [detailId, setDetailId] = useState<string | null>(null)
 
   const filtered = useMemo(
@@ -173,13 +177,22 @@ export default function PartnerLeadsClient({
           description={`Vertriebs-Pipeline für Sachverständige, Werkstätten & Makler — ${leads.length} Prospect${leads.length === 1 ? '' : 's'}`}
           icon={HandshakeIcon}
           actions={
-            <Button
-              variant="navy"
-              onClick={() => setShowCreate(true)}
-              iconLeft={<PlusIcon className="w-4 h-4" />}
-            >
-              Neuer Prospect
-            </Button>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="ghost"
+                onClick={() => setShowImport(true)}
+                iconLeft={<Upload className="w-4 h-4" />}
+              >
+                CSV importieren
+              </Button>
+              <Button
+                variant="navy"
+                onClick={() => setShowCreate(true)}
+                iconLeft={<PlusIcon className="w-4 h-4" />}
+              >
+                Neuer Prospect
+              </Button>
+            </div>
           }
         />
       </div>
@@ -357,6 +370,15 @@ export default function PartnerLeadsClient({
         }}
       />
 
+      <ImportCsvModal
+        open={showImport}
+        onClose={() => setShowImport(false)}
+        onImported={() => {
+          setShowImport(false)
+          router.refresh()
+        }}
+      />
+
       <DetailDrawer
         key={detailId ?? 'none'}
         lead={detailLead}
@@ -465,6 +487,203 @@ function CreateProspectModal({
           </Button>
         </div>
       </form>
+    </Modal>
+  )
+}
+
+// ─── CSV-Import-Modal ─────────────────────────────────────────────────────────
+
+// Erwartete (flexibel gemappte) Spalten fuer die Hinweis-Zeile im Modal.
+const CSV_ERWARTETE_SPALTEN = 'Firma, E-Mail, Telefon, Vorname, Nachname, PLZ, Ort'
+
+// Vorschau-Zustand nach dem Datei-Parsen (clientseitig, vor dem Import).
+type CsvVorschau = {
+  dateiName: string
+  valide: PartnerCsvLead[]
+  uebersprungen: number
+}
+
+function ImportCsvModal({
+  open,
+  onClose,
+  onImported,
+}: {
+  open: boolean
+  onClose: () => void
+  onImported: () => void
+}) {
+  const [rolle, setRolle] = useState<PartnerRolle>('sachverstaendiger')
+  const [vorschau, setVorschau] = useState<CsvVorschau | null>(null)
+  const [parseFehler, setParseFehler] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
+
+  function reset() {
+    setVorschau(null)
+    setParseFehler(null)
+    setImporting(false)
+  }
+
+  function handleClose() {
+    reset()
+    onClose()
+  }
+
+  async function handleDatei(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setParseFehler(null)
+    setVorschau(null)
+    try {
+      const text = await file.text()
+      const { header, rows } = parseCsv(text)
+      if (header.length === 0) {
+        setParseFehler('Die Datei enthält keine erkennbare Kopfzeile.')
+        return
+      }
+      const { valide, uebersprungen } = mapCsvZuLeads(header, rows, rolle)
+      if (valide.length === 0) {
+        setParseFehler(
+          uebersprungen > 0
+            ? `Keine gültigen Zeilen — allen ${uebersprungen} Zeilen fehlt die Spalte „Firma".`
+            : 'Keine Datenzeilen gefunden. Erwartete Spalten: ' + CSV_ERWARTETE_SPALTEN + '.',
+        )
+        return
+      }
+      setVorschau({ dateiName: file.name, valide, uebersprungen })
+    } catch {
+      setParseFehler('Datei konnte nicht gelesen werden — bitte eine gültige CSV-Datei wählen.')
+    }
+  }
+
+  async function handleImport() {
+    if (!vorschau) return
+    setImporting(true)
+    try {
+      const result = await importCsvLeads(rolle, vorschau.valide)
+      if (!result.ok) {
+        toast.error(result.error)
+        return
+      }
+      toast.success(`${result.angelegt} Lead${result.angelegt === 1 ? '' : 's'} importiert.`)
+      reset()
+      onImported()
+    } catch {
+      toast.error('Import fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setImporting(false)
+    }
+  }
+
+  const vorschauZeilen = vorschau?.valide.slice(0, 5) ?? []
+
+  return (
+    <Modal open={open} onClose={handleClose} maxWidth={640} ariaLabel="CSV importieren">
+      <h2 className="text-claimondo-navy font-semibold text-lg mb-1">CSV importieren</h2>
+      <p className="text-sm text-claimondo-ondo mb-4">
+        Leads aus einer CSV-Datei für die gewählte Rolle anlegen.
+      </p>
+
+      <div className="space-y-3">
+        <SelectField
+          label="Rolle"
+          value={rolle}
+          onChange={(e) => {
+            setRolle(e.target.value as PartnerRolle)
+            // Rolle beeinflusst nur den Insert (nicht das Mapping) — Vorschau bleibt gueltig.
+          }}
+          options={ROLLE_KEYS.map((r) => ({ value: r, label: PARTNER_ROLLE_LABELS[r] }))}
+        />
+
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="csv-datei"
+            className="text-xs font-semibold text-claimondo-shield"
+          >
+            CSV-Datei
+          </label>
+          <input
+            id="csv-datei"
+            type="file"
+            accept=".csv,text/csv"
+            onChange={handleDatei}
+            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy file:mr-3 file:rounded-ios-sm file:border-0 file:bg-claimondo-navy file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:cursor-pointer focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+          />
+          <span className="text-xs text-claimondo-shield">
+            Erkannte Spalten (flexibel, deutsch/englisch): {CSV_ERWARTETE_SPALTEN}. Nur Zeilen mit
+            Firma werden importiert.
+          </span>
+        </div>
+
+        {parseFehler && (
+          <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-xs text-danger-strong">
+            {parseFehler}
+          </div>
+        )}
+
+        {vorschau && (
+          <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
+            <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+              <span className="font-medium text-claimondo-navy">{vorschau.dateiName}</span>
+              <span className="text-success-strong">
+                {vorschau.valide.length} valide{vorschau.valide.length === 1 ? 'r Lead' : ' Leads'}
+              </span>
+              {vorschau.uebersprungen > 0 && (
+                <span className="text-warning-strong">
+                  {vorschau.uebersprungen} übersprungen (keine Firma)
+                </span>
+              )}
+            </div>
+            <div className="overflow-x-auto">
+              <Table className="text-xs">
+                <Thead className="bg-transparent! normal-case! tracking-normal! text-claimondo-ondo!">
+                  <Tr className="border-b border-claimondo-border">
+                    <Th className="px-0! py-1.5! pr-3! font-semibold">Firma</Th>
+                    <Th className="px-0! py-1.5! pr-3! font-semibold">Ansprechpartner</Th>
+                    <Th className="px-0! py-1.5! pr-3! font-semibold">E-Mail</Th>
+                    <Th className="px-0! py-1.5! font-semibold">Ort</Th>
+                  </Tr>
+                </Thead>
+                <Tbody className="divide-y-0!">
+                  {vorschauZeilen.map((l, i) => (
+                    <Tr key={i} className="border-b border-claimondo-border/40">
+                      <Td className="px-0! py-1.5! pr-3!">{l.firma}</Td>
+                      <Td className="px-0! py-1.5! pr-3! text-claimondo-ondo!">
+                        {[l.ansprechpartner_vorname, l.ansprechpartner_nachname]
+                          .filter(Boolean)
+                          .join(' ') || '—'}
+                      </Td>
+                      <Td className="px-0! py-1.5! pr-3! text-claimondo-ondo!">{l.email ?? '—'}</Td>
+                      <Td className="px-0! py-1.5! text-claimondo-ondo!">
+                        {[l.plz, l.ort].filter(Boolean).join(' ') || '—'}
+                      </Td>
+                    </Tr>
+                  ))}
+                </Tbody>
+              </Table>
+            </div>
+            {vorschau.valide.length > vorschauZeilen.length && (
+              <p className="mt-2 text-xs text-claimondo-shield">
+                … und {vorschau.valide.length - vorschauZeilen.length} weitere.
+              </p>
+            )}
+          </div>
+        )}
+
+        <div className="flex gap-3 pt-2">
+          <Button variant="ghost" fullWidth onClick={handleClose} type="button">
+            Abbrechen
+          </Button>
+          <Button
+            variant="navy"
+            fullWidth
+            onClick={handleImport}
+            loading={importing}
+            disabled={importing || !vorschau || vorschau.valide.length === 0}
+          >
+            {vorschau ? `${vorschau.valide.length} importieren` : 'Importieren'}
+          </Button>
+        </div>
+      </div>
     </Modal>
   )
 }
