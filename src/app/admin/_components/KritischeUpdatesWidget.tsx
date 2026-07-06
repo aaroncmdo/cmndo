@@ -160,13 +160,14 @@ async function loadAlerts(): Promise<Alert[]> {
 
   // 2. Offene Reklamationen
   try {
-    // FIX (Dashboard-Audit 29.06.): operative_status='reklamation' ist kein gueltiger
-    // operative_status-Wert -> der Alert feuerte nie. Reklamationen leben in der
-    // reklamationen-Tabelle (status='offen', SoT) — von dort zaehlen.
+    // FIX (Status-Enum-Audit 05.07.): reklamationen.status kennt KEIN 'offen'
+    // (DEFAULT 'eingereicht'; gueltige Werte eingereicht/pruefung/berechtigt/abgelehnt).
+    // Der .eq('status','offen')-Count war IMMER 0 -> der Alert feuerte nie. Offen =
+    // noch nicht entschieden = eingereicht/pruefung (wie admin/faelle/(hub)/layout).
     const { count: reklamation } = await supabase
       .from('reklamationen')
       .select('id', { count: 'exact', head: true })
-      .eq('status', 'offen')
+      .in('status', ['eingereicht', 'pruefung'])
     if ((reklamation ?? 0) > 0) {
       alerts.push({
         key: 'reklamation',

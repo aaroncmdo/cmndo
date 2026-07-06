@@ -132,7 +132,8 @@ export async function buildMaklerWochenReport(
             .from('leads')
             .select('id', { count: 'exact', head: true })
             .in('promotion_code_id', promoIds)
-            .in('status', ['neu', 'qualifiziert']) as unknown as Promise<CountRes>)
+            // FIX (Status-Enum-Audit 05.07.): 'qualifiziert' ∉ lead_status -> 'quali-offen'.
+            .in('status', ['neu', 'quali-offen']) as unknown as Promise<CountRes>)
         : leerCount,
       db
         .from('makler_provisionen')
