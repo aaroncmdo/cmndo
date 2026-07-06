@@ -51,7 +51,7 @@ export async function stelleLoeschAntrag(grund?: string): Promise<Result> {
 
   if (error || !data) return { ok: false, error: error?.message ?? 'Insert fehlgeschlagen' }
 
-  revalidatePath('/kunde/einstellungen')
+  revalidatePath('/kunde/profil') // Sub-Projekt 4: Settings konsolidiert nach /kunde/profil
   return { ok: true, auftragId: data.id as string }
 }
 
@@ -179,6 +179,6 @@ export async function storniereLoeschAntrag(auftragId: string): Promise<Result> 
     .in('status', ['eingereicht', 'bestaetigt']) // nicht aus 'ausgefuehrt'
 
   if (error) return { ok: false, error: error.message }
-  revalidatePath('/kunde/einstellungen')
+  revalidatePath('/kunde/profil') // Sub-Projekt 4: Settings konsolidiert nach /kunde/profil
   return { ok: true, auftragId }
 }
