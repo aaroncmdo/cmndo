@@ -1,14 +1,23 @@
 'use client'
 import { useState } from 'react'
 import { berechneAnspruch } from '../actions'
-import { SEGMENTE, SEGMENT_LABEL, type AnspruchSpanne, type Segment, type VisionResult } from '@/lib/anspruch/types'
+import { SEGMENTE, SEGMENT_LABEL, SCHULDFORMEN, SCHULD_LABEL, ERSATZFAHRZEUG_OPTIONEN, ERSATZFAHRZEUG_LABEL, type AnspruchSpanne, type Ersatzfahrzeug, type Schuldform, type Segment, type VisionResult } from '@/lib/anspruch/types'
 import { Button } from '@/components/primitives'
+
+// Kurzvorschau des Regulierungswegs je Schuldform (rechts neben dem Label).
+const SCHULD_HINT: Record<Schuldform, string> = {
+  unverschuldet: 'Gegner zahlt',
+  teilschuld: 'anteilig',
+  selbst: 'über Ihre Kasko',
+}
 
 export function AnspruchEinschaetzungStep({
   sessionToken, vision, onFertig,
 }: { sessionToken: string; vision: VisionResult; onFertig: (s: AnspruchSpanne) => void }) {
   const [segment, setSegment] = useState<Segment>(vision.segment)
+  const [schuld, setSchuld] = useState<Schuldform>('unverschuldet')
   const [fahrbereit, setFahrbereit] = useState<boolean | null>(null)
+  const [ersatzfahrzeug, setErsatzfahrzeug] = useState<Ersatzfahrzeug>('nutzungsausfall')
   const [ezJahr, setEzJahr] = useState<string>('')
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -22,7 +31,7 @@ export function AnspruchEinschaetzungStep({
       return
     }
     setBusy(true); setFehler(null)
-    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: jahr })
+    const r = await berechneAnspruch(sessionToken, { segment, fahrbereit, ezJahr: jahr, schuld, ersatzfahrzeug })
     setBusy(false)
     if (r.ok) onFertig(r.spanne)
     else setFehler(r.error)
@@ -33,6 +42,19 @@ export function AnspruchEinschaetzungStep({
       <div>
         <h2 className="text-heading-sm font-bold text-claimondo-navy">Erkannt: {vision.beschaedigte_teile.join(', ')}</h2>
         <p className="text-body-sm text-claimondo-shield">{vision.beschreibung}</p>
+      </div>
+
+      <div>
+        <p className="mb-2 text-body-sm font-medium text-claimondo-navy">Wer hat den Unfall verursacht?</p>
+        <div className="flex flex-col gap-2">
+          {SCHULDFORMEN.map((s) => (
+            <button key={s} type="button" onClick={() => setSchuld(s)}
+              className={`flex items-center justify-between rounded-ios-sm border px-3 py-2 text-left ${schuld === s ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>
+              <span className="text-body-sm font-medium">{SCHULD_LABEL[s]}</span>
+              <span className={`text-caption ${schuld === s ? 'text-white/80' : 'text-claimondo-shield'}`}>{SCHULD_HINT[s]}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>
@@ -56,6 +78,20 @@ export function AnspruchEinschaetzungStep({
             className={`flex-1 rounded-ios-sm border px-3 py-2 text-body-sm ${fahrbereit === false ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>Nein, nicht fahrbereit</button>
         </div>
       </div>
+
+      {fahrbereit === false ? (
+        <div>
+          <p className="mb-2 text-body-sm font-medium text-claimondo-navy">Ersatzfahrzeug während der Reparatur?</p>
+          <div className="flex flex-col gap-2">
+            {ERSATZFAHRZEUG_OPTIONEN.map((e) => (
+              <button key={e} type="button" onClick={() => setErsatzfahrzeug(e)}
+                className={`rounded-ios-sm border px-3 py-2 text-left text-body-sm ${ersatzfahrzeug === e ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>
+                {ERSATZFAHRZEUG_LABEL[e]}
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       <div>
         <label className="mb-1 block text-body-sm font-medium text-claimondo-navy">Erstzulassung (Jahr)</label>

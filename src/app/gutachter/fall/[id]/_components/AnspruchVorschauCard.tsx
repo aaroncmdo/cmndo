@@ -45,7 +45,7 @@ export function AnspruchVorschauCard({ vorschau }: { vorschau: AnspruchVorschau 
           <p className="text-body-sm text-claimondo-shield">
             Möglicher wirtschaftlicher Totalschaden. Der Kunde hat zwei Wege:
           </p>
-          <AnspruchTotalschadenWege totalschaden={vorschau.spanne.totalschaden} />
+          <AnspruchTotalschadenWege totalschaden={vorschau.spanne.totalschaden} schuld={vorschau.spanne.schuld} />
           <p className="text-caption text-claimondo-shield">
             Vom System erzeugte KI-Ersteinschätzung des Kunden. Unverbindlich, ersetzt nicht Ihr Gutachten.
           </p>

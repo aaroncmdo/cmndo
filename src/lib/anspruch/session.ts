@@ -1,6 +1,12 @@
 import { randomUUID } from 'node:crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
-import type { AnspruchPosition, Schweregrad, Segment, TotalschadenInfo, VisionResult } from './types'
+import type { Database } from '@/lib/supabase/database.types'
+import type { AnspruchPosition, Schuldform, Schweregrad, Segment, TotalschadenInfo, VisionResult } from './types'
+
+// schuld-Spalte existiert in der DB (Migration 20260706085339); die generierten Supabase-Typen
+// hinken noch hinterher (Regen aufgeschoben — database.types.ts wird parallel von anderen Sessions
+// bearbeitet). Lokale Typ-Erweiterung haelt die Feldpruefung auf allen bekannten Spalten intakt.
+type AnspruchUpdate = Database['public']['Tables']['anspruch_schaetzungen']['Update'] & { schuld?: string | null }
 
 const BUCKET = 'fall-dokumente'
 const MAX_FOTOS = 8
@@ -81,13 +87,15 @@ export async function speicherePositionen(
   schweregrad: Schweregrad,
   fahrbereit: boolean,
   ezJahr: number | null,
+  schuld: Schuldform,
   positionen: AnspruchPosition[],
   totalschaden?: TotalschadenInfo,
 ): Promise<void> {
   const db = createAdminClient()
+  const patch: AnspruchUpdate = { erkanntes_segment: segment, schweregrad, fahrbereit, ez_jahr: ezJahr, schuld, positionen, totalschaden: totalschaden ?? null }
   const { error } = await db
     .from('anspruch_schaetzungen')
-    .update({ erkanntes_segment: segment, schweregrad, fahrbereit, ez_jahr: ezJahr, positionen, totalschaden: totalschaden ?? null })
+    .update(patch)
     .eq('session_token', sessionToken)
   if (error) console.error('[anspruch/session] speicherePositionen failed:', error.message)
 }
