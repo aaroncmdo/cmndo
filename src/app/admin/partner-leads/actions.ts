@@ -11,6 +11,11 @@ import { convertPartnerLead } from '@/lib/partner/convert-partner-lead'
 import { revalidatePath } from 'next/cache'
 import type { PartnerRolle } from '@/lib/partner/policy'
 import type { PartnerCsvLead } from '@/lib/partner/csv-import'
+import {
+  sendMaklerWelcome,
+  sendWillkommenWerkstatt,
+  sendSvBasicClaimLink,
+} from '@/lib/email/google/flows'
 
 const VERTRIEB_ROLLEN = ['admin', 'dispatch', 'leadbearbeiter']
 const PARTNER_ROLLEN: PartnerRolle[] = ['sachverstaendiger', 'werkstatt', 'makler']
@@ -278,17 +283,45 @@ export async function konvertierePartnerLead(
   const admin = createAdminClient()
   const { data: lead, error: loadErr } = await admin
     .from('partner_leads')
-    .select('email')
+    .select('rolle, firma, ansprechpartner_vorname, email')
     .eq('id', id)
     .maybeSingle()
   if (loadErr) return { ok: false, error: loadErr.message }
   if (!lead) return { ok: false, error: 'Prospect nicht gefunden.' }
-  if (!(lead.email as string | null)?.trim()) {
+  const email = (lead.email as string | null)?.trim()
+  if (!email) {
     return { ok: false, error: 'E-Mail fehlt — bitte erst Kontakt ergänzen, dann konvertieren.' }
   }
 
   const result = await convertPartnerLead(id, { durchUserId: staff.id })
   if (!result.ok) return { ok: false, error: result.error }
+
+  // Login-/Willkommens-Mail an den frisch konvertierten Partner (best-effort, non-critical).
+  // Ohne sie haette der neue Account zwar Random-PW + force_password_change, aber KEINEN
+  // Weg hinein. Die rollen-spezifischen Welcome-Flows generieren jeweils selbst einen
+  // Recovery-Magic-Link (Passwort-Setzen). Ein Send-Fehler bricht die Konvertierung nicht.
+  try {
+    const rolle = lead.rolle as string
+    const firma = ((lead.firma as string | null) ?? '').trim()
+    const vorname = ((lead.ansprechpartner_vorname as string | null) ?? '').trim()
+    if (rolle === 'makler') {
+      const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+      await sendMaklerWelcome({ to: email, firma, vorname, landeseiteUrl: base })
+    } else if (rolle === 'werkstatt') {
+      await sendWillkommenWerkstatt({ to: email, werkstattName: firma, einmalpasswort: null })
+    } else if (rolle === 'sachverstaendiger') {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const { data: linkData } = await admin.auth.admin.generateLink({
+        type: 'recovery',
+        email,
+        options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+      })
+      const actionUrl = linkData?.properties?.action_link
+      if (actionUrl) await sendSvBasicClaimLink({ to: email, vorname: vorname || null, actionUrl })
+    }
+  } catch (err) {
+    console.error('[konvertierePartnerLead] Login-Willkommens-Mail fehlgeschlagen (non-critical):', err)
+  }
 
   revalidatePath('/admin/partner-leads')
   return { ok: true, userId: result.userId, partnerId: result.partnerId }
