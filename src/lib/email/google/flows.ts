@@ -847,6 +847,10 @@ export async function sendWillkommenWerkstatt(params: {
     fallId: null,
     empfaengerTyp: 'werkstatt',
     template: 'willkommen_werkstatt',
+    // Admin-getriggerte Login-Mail an die Werkstatt selbst -> Send-Isolation umgehen, sonst
+    // erreicht der Zugang nie interne/Gruender-Testadressen (@claimondo.de). Der interne
+    // Empfaenger ist hier die gewollte Zielperson, kein Bystander-SV.
+    allowInternalRecipient: true,
   })
 }
 
