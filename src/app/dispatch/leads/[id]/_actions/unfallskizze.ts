@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { generateUnfallskizze } from '@/lib/unfallskizze/generate'
+import { sanitizeSvg } from '@/lib/unfallskizze/sanitize-svg'
 
 export async function generateAndSaveUnfallskizze(
   leadId: string,
@@ -101,10 +102,14 @@ export async function saveEditedUnfallskizze(
   if (svg.length > 200_000) return { success: false, error: 'SVG zu groß' }
   if (!svg.trim().startsWith('<svg')) return { success: false, error: 'Ungültiges SVG' }
 
+  // Editor-Input ist untrusted (SVG-String kommt aus dem Client) -> XSS-sanitizen,
+  // bevor er persistiert + via dangerouslySetInnerHTML in Staff-Sessions rendert.
+  const cleanSvg = sanitizeSvg(svg)
+
   const { error } = await supabase
     .from('leads')
     .update({
-      unfallskizze_svg: svg,
+      unfallskizze_svg: cleanSvg,
       unfallskizze_bestaetigt: false, // Edit → erneute Freigabe nötig
     })
     .eq('id', leadId)

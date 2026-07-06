@@ -7,6 +7,7 @@
 
 import { AI_MODELS } from '@/lib/ai/models'
 import { getAnthropicVisionClient } from '@/lib/ai/vision/client'
+import { sanitizeSvg } from './sanitize-svg'
 
 export type UnfallskizzeInput = {
   unfallhergang: string | null
@@ -95,5 +96,7 @@ export async function generateUnfallskizze(
 function extractSvg(text: string): string | null {
   const match = text.match(/<svg[\s\S]*?<\/svg>/i)
   if (!match) return null
-  return match[0].trim()
+  // LLM-Output ist untrusted (Prompt-Injection via unfallhergang) -> XSS-sanitizen,
+  // bevor das SVG persistiert + via dangerouslySetInnerHTML in Staff-Sessions rendert.
+  return sanitizeSvg(match[0].trim())
 }
