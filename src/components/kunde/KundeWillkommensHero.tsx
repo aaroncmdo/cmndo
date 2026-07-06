@@ -59,7 +59,7 @@ export default async function KundeWillkommensHero({ vorname }: { vorname: strin
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
             <Link
-              href="/schaden-melden/schritt-1"
+              href="/kunde/schaden-melden"
               className="inline-flex items-center gap-2 bg-white text-claimondo-navy hover:bg-claimondo-bg rounded-ios-xl px-5 py-3 text-sm font-semibold shadow-md transition-colors"
             >
               {t('schadenMelden')}

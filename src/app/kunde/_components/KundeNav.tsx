@@ -3,7 +3,8 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon } from 'lucide-react'
+// #2 (Flotte, CarIcon) + #1 (Schaden melden, PlusCircleIcon) beim Rebase zusammengefuehrt.
+import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon, PlusCircleIcon } from 'lucide-react'
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
@@ -34,6 +35,11 @@ export default function KundeNav({
 }) {
   const pathname = usePathname()
   const t = useTranslations('kunde.shell')
+  // Sub-Projekt 1 (Kunde-Portal 1+): prominenter "Schaden melden"-Einstieg — auf
+  // jeder Kunde-Seite erreichbar. Label reuse aus kundeHero (existiert in allen 6
+  // Locales) → kein neuer i18n-Key noetig.
+  const tHero = useTranslations('kundeHero')
+  const SCHADEN_HREF = '/kunde/schaden-melden'
   const NAV_ITEMS = buildNavItems(singleFallId, t)
   const MOBILE_ITEMS = [
     NAV_ITEMS[0]!,
@@ -53,6 +59,15 @@ export default function KundeNav({
   if (mobile) {
     return (
       <>
+        <Link
+          href={SCHADEN_HREF}
+          className={`flex flex-col items-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-2 text-center leading-tight transition-colors duration-500 ${
+            isActive(SCHADEN_HREF) ? 'text-white' : 'text-claimondo-light-blue hover:text-white'
+          }`}
+        >
+          <PlusCircleIcon className="w-5 h-5" />
+          <span className="text-[10px] font-medium">{tHero('schadenMelden')}</span>
+        </Link>
         {MOBILE_ITEMS.map(item => {
           const active = isActive(item.href, item.exact)
           return (
@@ -72,6 +87,16 @@ export default function KundeNav({
   // Desktop: Sidebar Nav
   return (
     <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
+      {/* Sub-Projekt 1: prominenter "Schaden melden"-CTA (accent), immer erreichbar. */}
+      <Link
+        href={SCHADEN_HREF}
+        className={`mt-3 mb-1 flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm font-semibold transition-colors duration-500 ${
+          isActive(SCHADEN_HREF) ? 'bg-white text-claimondo-navy' : 'bg-claimondo-ondo text-white hover:bg-claimondo-ondo/90'
+        }`}
+      >
+        <PlusCircleIcon style={{ width: 17, height: 17 }} />
+        {tHero('schadenMelden')}
+      </Link>
       <p className="text-[10px] uppercase tracking-wider text-claimondo-light-blue px-3 pt-4 pb-2">{t('nav.heading')}</p>
       {NAV_ITEMS.map(item => {
         const active = isActive(item.href, item.exact)
