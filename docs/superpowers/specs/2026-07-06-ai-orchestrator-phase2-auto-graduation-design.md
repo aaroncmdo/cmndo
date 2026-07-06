@@ -153,13 +153,14 @@ P2a+P2b sind gefahrlos mergebar (nichts auto). P2c ist ein bewusster Betriebssch
 
 ---
 
-## 10 · Offene Entscheidungen (Review mit Aaron)
+## 10 · Entscheidungen (2026-07-06 mit Aaron festgelegt — „das passt")
 
-1. **Schwelle:** Quote ≥ 0.80 + ≥ 30 Entscheidungen — passt, oder konservativer (0.85/50)?
-2. **Fenster:** letzte 30 Entscheidungen vs. letzte 60 Tage — welche Basis für die Quote?
-3. **Regressions-Trigger:** bad_rate > 0.30 über letzte 20 Auto-Tasks — passt die Schärfe?
-4. **Rate-Cap:** max N Auto-Tasks/Lauf — Zahl? (Vorschlag: 10.)
-5. **„Schlechter Auto-Task"-Definition:** welche `tasks`-Endzustände zählen als Regression (storniert/gelöscht — welche noch)? Beim Bau gegen echtes tasks-Schema festzurren.
+Alle Defaults bestätigt und für den Bau verbindlich:
+1. **Schwelle:** Quote ≥ 0.80 **UND** ≥ 30 Entscheidungen ✔
+2. **Fenster:** letzte 30 Entscheidungen (je typ×rolle) ✔
+3. **Regressions-Trigger:** bad_rate > 0.30 über die letzten 20 Auto-Tasks → Auto-Revert ✔
+4. **Rate-Cap:** max 10 Auto-Tasks pro Lauf ✔
+5. **„Schlechter Auto-Task":** storniert/gelöscht — die genaue Menge der `tasks`-Endzustände wird beim Bau gegen das echte tasks-Schema festgezurrt ✔
 
 ---
 
