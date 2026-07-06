@@ -41,6 +41,12 @@ function detailString(details: Record<string, unknown>, key: string): string | n
   return typeof v === 'string' && v.trim().length > 0 ? v.trim() : null
 }
 
+/** Liest ein optionales Number-Feld aus rollenDetails (sonst null). */
+function detailNumber(details: Record<string, unknown>, key: string): number | null {
+  const v = details[key]
+  return typeof v === 'number' && Number.isFinite(v) ? v : null
+}
+
 export async function anlegePartnerKern(
   admin: AdminClient,
   rolle: PartnerRolle,
@@ -81,22 +87,37 @@ export async function anlegePartnerKern(
   let partnerId: string
   switch (rolle) {
     case 'makler': {
+      // Makler-spezifische Optionalfelder aus rollenDetails: nur setzen wenn vorhanden,
+      // damit convertPartnerLead-Makler (ohne diese Details) die DB-Defaults behaelt.
+      // createMakler liefert dual-rate Provision + Gesellschaft + Strasse hierueber.
+      const maklerInsert: Record<string, unknown> = {
+        firma: input.firma,
+        ansprechpartner_vorname: input.ansprechpartnerVorname,
+        ansprechpartner_nachname: input.ansprechpartnerNachname,
+        email: input.email,
+        telefon: input.telefon,
+        adresse_plz: input.plz,
+        adresse_ort: input.ort,
+        provision_aktiv: true,
+        status: 'aktiv',
+        aktiviert_am: new Date().toISOString(),
+        aktiviert_von: input.aktiviertVon,
+        user_id: userId,
+      }
+      const maklerStrasse = detailString(input.rollenDetails, 'adresse_strasse')
+      if (maklerStrasse) maklerInsert.adresse_strasse = maklerStrasse
+      const maklerVersId = detailString(input.rollenDetails, 'versicherung_id')
+      if (maklerVersId) maklerInsert.versicherung_id = maklerVersId
+      const maklerPoolId = detailString(input.rollenDetails, 'maklerpool_id')
+      if (maklerPoolId) maklerInsert.maklerpool_id = maklerPoolId
+      const provKomplett = detailNumber(input.rollenDetails, 'provision_betrag_komplett_netto')
+      if (provKomplett !== null) maklerInsert.provision_betrag_komplett_netto = provKomplett
+      const provGutachter = detailNumber(input.rollenDetails, 'provision_betrag_nur_gutachter_netto')
+      if (provGutachter !== null) maklerInsert.provision_betrag_nur_gutachter_netto = provGutachter
+
       const { data: m, error: mErr } = await admin
         .from('makler')
-        .insert({
-          firma: input.firma,
-          ansprechpartner_vorname: input.ansprechpartnerVorname,
-          ansprechpartner_nachname: input.ansprechpartnerNachname,
-          email: input.email,
-          telefon: input.telefon,
-          adresse_plz: input.plz,
-          adresse_ort: input.ort,
-          provision_aktiv: true,
-          status: 'aktiv',
-          aktiviert_am: new Date().toISOString(),
-          aktiviert_von: input.aktiviertVon,
-          user_id: userId,
-        })
+        .insert(maklerInsert)
         .select('id')
         .single()
       if (mErr || !m) {
