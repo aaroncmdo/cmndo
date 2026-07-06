@@ -40,9 +40,9 @@ const MAKLER_NAV_ITEMS: PortalNavItem[] = [
   { href: '/makler/akten', label: 'Akten', icon: FolderOpenIcon },
   { href: '/makler/abrechnungen', label: 'Abrechnungen', icon: ReceiptIcon },
   { href: '/makler/promo', label: 'Promo & QR', icon: QrCodeIcon },
+  { href: '/makler/netzwerk', label: 'Netzwerk', icon: MessagesSquareIcon },
   { href: '/makler/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
   { href: '/makler/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
-  { href: '/makler/netzwerk', label: 'Netzwerk', icon: MessagesSquareIcon },
 ]
 
 const MAKLER_MOBILE_ITEMS = MAKLER_NAV_ITEMS.slice(0, 4)
