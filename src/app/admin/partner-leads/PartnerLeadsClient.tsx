@@ -9,7 +9,17 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { PlusIcon, HandshakeIcon } from 'lucide-react'
+import {
+  PlusIcon,
+  HandshakeIcon,
+  Phone,
+  StickyNote,
+  Mail,
+  ArrowRightLeft,
+  Flame,
+  MoreHorizontal,
+  type LucideIcon,
+} from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -31,22 +41,61 @@ import {
   createPartnerLead,
   updatePartnerLead,
   konvertierePartnerLead,
+  protokolliereAktivitaet,
 } from './actions'
-import type { PartnerLeadRow, StaffOption } from './types'
+import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow } from './types'
 import {
   PARTNER_LEAD_STATUS,
   PARTNER_LEAD_STATUS_LABELS,
   PARTNER_LEAD_STATUS_COLORS,
+  PARTNER_LEAD_EINSTUFUNG,
+  PARTNER_LEAD_EINSTUFUNG_LABELS,
+  PARTNER_LEAD_EINSTUFUNG_COLORS,
+  PARTNER_AKTIVITAET_MANUELL,
+  PARTNER_AKTIVITAET_TYP_LABELS,
   PARTNER_ROLLE_LABELS,
   PARTNER_SOURCE_CHANNEL_LABELS,
   type PartnerLeadStatus,
+  type PartnerLeadEinstufung,
+  type PartnerAktivitaetTyp,
 } from './types'
 import type { PartnerRolle } from '@/lib/partner/policy'
 
 const ROLLE_KEYS: PartnerRolle[] = ['sachverstaendiger', 'werkstatt', 'makler']
 
+// Einstufungs-Filter: die drei Werte + explizit "uneingestuft" (einstufung null).
+type EinstufungFilter = 'alle' | PartnerLeadEinstufung | 'uneingestuft'
+
+// Icon je Aktivitaets-Typ (Timeline).
+const AKTIVITAET_ICON: Record<PartnerAktivitaetTyp, LucideIcon> = {
+  anruf: Phone,
+  notiz: StickyNote,
+  email: Mail,
+  status_aenderung: ArrowRightLeft,
+  einstufung: Flame,
+  sonstiges: MoreHorizontal,
+}
+
 function formatDatum(iso: string | null) {
   if (!iso) return '—'
+  return new Date(iso).toLocaleDateString('de-DE', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  })
+}
+
+// Relatives Datum fuer die Timeline ("vor 3 Std.", "gestern", sonst Datum).
+function formatRelativ(iso: string): string {
+  const then = new Date(iso).getTime()
+  const diffMin = Math.round((Date.now() - then) / 60000)
+  if (diffMin < 1) return 'gerade eben'
+  if (diffMin < 60) return `vor ${diffMin} Min.`
+  const diffStd = Math.round(diffMin / 60)
+  if (diffStd < 24) return `vor ${diffStd} Std.`
+  const diffTage = Math.round(diffStd / 24)
+  if (diffTage === 1) return 'gestern'
+  if (diffTage < 7) return `vor ${diffTage} Tagen`
   return new Date(iso).toLocaleDateString('de-DE', {
     day: '2-digit',
     month: '2-digit',
@@ -59,7 +108,7 @@ function staffName(staff: StaffOption[], id: string | null): string {
   return staff.find((s) => s.id === id)?.name ?? '—'
 }
 
-function StatusPill({ status }: { status: PartnerLeadStatus }) {
+function LeadStatusPill({ status }: { status: PartnerLeadStatus }) {
   return (
     <StatusBadge colorCls={PARTNER_LEAD_STATUS_COLORS[status]}>
       {PARTNER_LEAD_STATUS_LABELS[status] ?? status}
@@ -67,16 +116,30 @@ function StatusPill({ status }: { status: PartnerLeadStatus }) {
   )
 }
 
+function EinstufungPill({ einstufung }: { einstufung: PartnerLeadEinstufung | null }) {
+  if (!einstufung) {
+    return <span className="text-xs text-claimondo-shield">Uneingestuft</span>
+  }
+  return (
+    <StatusBadge colorCls={PARTNER_LEAD_EINSTUFUNG_COLORS[einstufung]}>
+      {PARTNER_LEAD_EINSTUFUNG_LABELS[einstufung]}
+    </StatusBadge>
+  )
+}
+
 export default function PartnerLeadsClient({
   leads,
   staff,
+  aktivitaeten,
 }: {
   leads: PartnerLeadRow[]
   staff: StaffOption[]
+  aktivitaeten: PartnerLeadAktivitaetRow[]
 }) {
   const router = useRouter()
   const [rolleFilter, setRolleFilter] = useState<'alle' | PartnerRolle>('alle')
   const [statusFilter, setStatusFilter] = useState<'alle' | PartnerLeadStatus>('alle')
+  const [einstufungFilter, setEinstufungFilter] = useState<EinstufungFilter>('alle')
   const [showCreate, setShowCreate] = useState(false)
   const [detailId, setDetailId] = useState<string | null>(null)
 
@@ -85,12 +148,22 @@ export default function PartnerLeadsClient({
       leads.filter(
         (l) =>
           (rolleFilter === 'alle' || l.rolle === rolleFilter) &&
-          (statusFilter === 'alle' || l.status === statusFilter),
+          (statusFilter === 'alle' || l.status === statusFilter) &&
+          (einstufungFilter === 'alle' ||
+            (einstufungFilter === 'uneingestuft'
+              ? !l.einstufung
+              : l.einstufung === einstufungFilter)),
       ),
-    [leads, rolleFilter, statusFilter],
+    [leads, rolleFilter, statusFilter, einstufungFilter],
   )
 
   const detailLead = detailId ? leads.find((l) => l.id === detailId) ?? null : null
+
+  // Aktivitaeten des offenen Leads (bereits neueste-zuerst aus page.tsx sortiert).
+  const detailAktivitaeten = useMemo(
+    () => (detailId ? aktivitaeten.filter((a) => a.partner_lead_id === detailId) : []),
+    [aktivitaeten, detailId],
+  )
 
   return (
     <div className="h-full overflow-y-auto py-8">
@@ -145,6 +218,32 @@ export default function PartnerLeadsClient({
             </Chip>
           ))}
         </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">Einstufung</span>
+          <Chip
+            variant={einstufungFilter === 'alle' ? 'selected' : 'default'}
+            onClick={() => setEinstufungFilter('alle')}
+          >
+            Alle
+          </Chip>
+          {PARTNER_LEAD_EINSTUFUNG.map((e) => (
+            <Chip
+              key={e}
+              variant={einstufungFilter === e ? 'selected' : 'default'}
+              count={leads.filter((l) => l.einstufung === e).length}
+              onClick={() => setEinstufungFilter(e)}
+            >
+              {PARTNER_LEAD_EINSTUFUNG_LABELS[e]}
+            </Chip>
+          ))}
+          <Chip
+            variant={einstufungFilter === 'uneingestuft' ? 'selected' : 'default'}
+            count={leads.filter((l) => !l.einstufung).length}
+            onClick={() => setEinstufungFilter('uneingestuft')}
+          >
+            Uneingestuft
+          </Chip>
+        </div>
       </div>
 
       <DataTableContainer
@@ -165,8 +264,9 @@ export default function PartnerLeadsClient({
                       {PARTNER_ROLLE_LABELS[lead.rolle]} · {lead.ort ?? '—'}
                     </p>
                   </div>
-                  <div className="shrink-0">
-                    <StatusPill status={lead.status} />
+                  <div className="shrink-0 flex flex-col items-end gap-1">
+                    <LeadStatusPill status={lead.status} />
+                    {lead.einstufung && <EinstufungPill einstufung={lead.einstufung} />}
                   </div>
                 </div>
                 <div className="flex items-center justify-between gap-2">
@@ -189,6 +289,7 @@ export default function PartnerLeadsClient({
               <Th className="text-left text-claimondo-ondo!">Firma</Th>
               <Th className="text-left text-claimondo-ondo!">Rolle</Th>
               <Th className="text-left text-claimondo-ondo!">Status</Th>
+              <Th className="text-left text-claimondo-ondo!">Einstufung</Th>
               <Th className="text-left text-claimondo-ondo!">Quelle</Th>
               <Th className="text-left text-claimondo-ondo!">Zugewiesen an</Th>
               <Th className="text-left text-claimondo-ondo!">Erstellt</Th>
@@ -218,7 +319,10 @@ export default function PartnerLeadsClient({
                   <span className="text-claimondo-navy text-sm">{PARTNER_ROLLE_LABELS[lead.rolle]}</span>
                 </Td>
                 <Td>
-                  <StatusPill status={lead.status} />
+                  <LeadStatusPill status={lead.status} />
+                </Td>
+                <Td>
+                  <EinstufungPill einstufung={lead.einstufung} />
                 </Td>
                 <Td>
                   <span className="text-claimondo-ondo text-sm">
@@ -235,7 +339,7 @@ export default function PartnerLeadsClient({
             ))}
             {filtered.length === 0 && (
               <Tr>
-                <Td colSpan={6} className="py-12! text-center text-claimondo-ondo!">
+                <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
                   Keine Prospects im aktuellen Filter.
                 </Td>
               </Tr>
@@ -257,6 +361,7 @@ export default function PartnerLeadsClient({
         key={detailId ?? 'none'}
         lead={detailLead}
         staff={staff}
+        aktivitaeten={detailAktivitaeten}
         onClose={() => setDetailId(null)}
         onChanged={() => router.refresh()}
       />
@@ -369,11 +474,13 @@ function CreateProspectModal({
 function DetailDrawer({
   lead,
   staff,
+  aktivitaeten,
   onClose,
   onChanged,
 }: {
   lead: PartnerLeadRow | null
   staff: StaffOption[]
+  aktivitaeten: PartnerLeadAktivitaetRow[]
   onClose: () => void
   onChanged: () => void
 }) {
@@ -382,12 +489,21 @@ function DetailDrawer({
 
   // Lokaler Editier-State — key-remount via lead.id sorgt fuer frische Werte.
   const [status, setStatus] = useState<PartnerLeadStatus>(lead?.status ?? 'neu')
+  const [einstufung, setEinstufung] = useState<'' | PartnerLeadEinstufung>(lead?.einstufung ?? '')
   const [zugewiesen, setZugewiesen] = useState<string>(lead?.zugewiesen_an ?? '')
   const [notiz, setNotiz] = useState<string>(lead?.notiz ?? '')
+  // Kontakt-Anreicherung (die DAT-Import-Leads haben keine Kontaktdaten).
+  const [email, setEmail] = useState<string>(lead?.email ?? '')
+  const [telefon, setTelefon] = useState<string>(lead?.telefon ?? '')
+  const [apVorname, setApVorname] = useState<string>(lead?.ansprechpartner_vorname ?? '')
+  const [apNachname, setApNachname] = useState<string>(lead?.ansprechpartner_nachname ?? '')
 
   if (!lead) return null
 
   const bereitsKonvertiert = Boolean(lead.konvertiert_zu_user_id)
+  // Convert-Guard-Spiegel im UI: ohne E-Mail keine Konvertierung (anlegePartnerKern
+  // braucht sie fuer createUser). Bezieht sich auf den gespeicherten Wert.
+  const hatEmail = Boolean(lead.email?.trim())
 
   async function handleSave() {
     if (!lead) return
@@ -395,8 +511,13 @@ function DetailDrawer({
     try {
       const result = await updatePartnerLead(lead.id, {
         status,
+        einstufung: einstufung || null,
         zugewiesen_an: zugewiesen || null,
         notiz,
+        email: email.trim() || null,
+        telefon: telefon.trim() || null,
+        ansprechpartner_vorname: apVorname.trim() || null,
+        ansprechpartner_nachname: apNachname.trim() || null,
       })
       if (!result.ok) {
         toast.error(result.error ?? 'Speichern fehlgeschlagen')
@@ -436,7 +557,7 @@ function DetailDrawer({
   ) as [string, string][]
 
   return (
-    <Modal open onClose={onClose} maxWidth={560} ariaLabel="Prospect-Details">
+    <Modal open onClose={onClose} maxWidth={620} ariaLabel="Prospect-Details">
       <div key={lead.id}>
         <div className="mb-4 flex items-start justify-between gap-2">
           <div>
@@ -446,28 +567,14 @@ function DetailDrawer({
               {PARTNER_SOURCE_CHANNEL_LABELS[lead.source_channel] ?? lead.source_channel}
             </p>
           </div>
-          <StatusPill status={lead.status} />
+          <div className="flex flex-col items-end gap-1">
+            <LeadStatusPill status={lead.status} />
+            <EinstufungPill einstufung={lead.einstufung} />
+          </div>
         </div>
 
-        {/* Read-only Stammdaten */}
+        {/* Read-only Stammdaten (Kontakt weiter unten editierbar) */}
         <dl className="mb-4 grid grid-cols-1 gap-x-4 gap-y-1.5 text-sm sm:grid-cols-2">
-          <Feld label="Ansprechpartner">
-            {[lead.ansprechpartner_vorname, lead.ansprechpartner_nachname].filter(Boolean).join(' ') || '—'}
-          </Feld>
-          <Feld label="E-Mail">
-            <a href={`mailto:${lead.email}`} className="text-claimondo-ondo hover:underline">
-              {lead.email}
-            </a>
-          </Feld>
-          <Feld label="Telefon">
-            {lead.telefon ? (
-              <a href={`tel:${lead.telefon}`} className="text-claimondo-ondo hover:underline">
-                {lead.telefon}
-              </a>
-            ) : (
-              '—'
-            )}
-          </Feld>
           <Feld label="Ort">{[lead.plz, lead.ort].filter(Boolean).join(' ') || '—'}</Feld>
           <Feld label="Erstellt">{formatDatum(lead.erstellt_am)}</Feld>
           <Feld label="Aktualisiert">{formatDatum(lead.aktualisiert_am)}</Feld>
@@ -478,14 +585,71 @@ function DetailDrawer({
           ))}
         </dl>
 
-        {/* Editierbar */}
+        {/* Kontakt-Anreicherung */}
         <div className="space-y-3 border-t border-claimondo-border pt-4">
-          <SelectField
-            label="Status"
-            value={status}
-            onChange={(e) => setStatus(e.target.value as PartnerLeadStatus)}
-            options={PARTNER_LEAD_STATUS.map((s) => ({ value: s, label: PARTNER_LEAD_STATUS_LABELS[s] }))}
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">Kontakt</h3>
+          {!hatEmail && (
+            <div className="rounded-ios-md bg-warning-soft px-3 py-2 text-xs text-warning-strong">
+              Für diesen Prospect fehlen noch Kontaktdaten. Bitte E-Mail ergänzen, um konvertieren zu können.
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            <TextField
+              label="Ansprechpartner Vorname"
+              value={apVorname}
+              onChange={(e) => setApVorname(e.target.value)}
+              placeholder="Max"
+              hint={!apVorname ? 'fehlt' : undefined}
+            />
+            <TextField
+              label="Ansprechpartner Nachname"
+              value={apNachname}
+              onChange={(e) => setApNachname(e.target.value)}
+              placeholder="Mustermann"
+              hint={!apNachname ? 'fehlt' : undefined}
+            />
+          </div>
+          <TextField
+            label="E-Mail"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="kontakt@beispiel.de"
+            hint={!email ? 'fehlt — für Konvertierung erforderlich' : undefined}
           />
+          <TextField
+            label="Telefon"
+            type="tel"
+            value={telefon}
+            onChange={(e) => setTelefon(e.target.value)}
+            placeholder="+49 221 …"
+            hint={!telefon ? 'fehlt' : undefined}
+          />
+        </div>
+
+        {/* Triage (Status / Einstufung / Zuweisung / Notiz) */}
+        <div className="mt-4 space-y-3 border-t border-claimondo-border pt-4">
+          <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">Triage</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <SelectField
+              label="Status"
+              value={status}
+              onChange={(e) => setStatus(e.target.value as PartnerLeadStatus)}
+              options={PARTNER_LEAD_STATUS.map((s) => ({ value: s, label: PARTNER_LEAD_STATUS_LABELS[s] }))}
+            />
+            <SelectField
+              label="Einstufung"
+              value={einstufung}
+              onChange={(e) => setEinstufung(e.target.value as '' | PartnerLeadEinstufung)}
+            >
+              <option value="">— Uneingestuft —</option>
+              {PARTNER_LEAD_EINSTUFUNG.map((e) => (
+                <option key={e} value={e}>
+                  {PARTNER_LEAD_EINSTUFUNG_LABELS[e]}
+                </option>
+              ))}
+            </SelectField>
+          </div>
           <SelectField
             label="Zugewiesen an"
             value={zugewiesen}
@@ -503,30 +667,11 @@ function DetailDrawer({
             <textarea
               value={notiz}
               onChange={(e) => setNotiz(e.target.value)}
-              rows={4}
+              rows={3}
               placeholder="Triage-Notizen, Telefonat-Zusammenfassung…"
               className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
             />
           </div>
-        </div>
-
-        {/* Konvertierung */}
-        <div className="mt-4 border-t border-claimondo-border pt-4">
-          {bereitsKonvertiert ? (
-            <div className="rounded-ios-md bg-success-soft px-3 py-2.5 text-sm text-success-strong">
-              ✓ Konvertiert{lead.konvertiert_am ? ` am ${formatDatum(lead.konvertiert_am)}` : ''}
-            </div>
-          ) : (
-            <Button
-              variant="success"
-              fullWidth
-              onClick={handleConvert}
-              loading={converting}
-              disabled={converting || saving}
-            >
-              Zu Partner konvertieren
-            </Button>
-          )}
         </div>
 
         <div className="mt-4 flex gap-3">
@@ -537,8 +682,153 @@ function DetailDrawer({
             Speichern
           </Button>
         </div>
+
+        {/* Aktivitaets-Log */}
+        <div className="mt-6 border-t border-claimondo-border pt-4">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">Aktivitäten</h3>
+          <AktivitaetForm leadId={lead.id} onLogged={onChanged} disabled={saving || converting} />
+          <AktivitaetTimeline aktivitaeten={aktivitaeten} />
+        </div>
+
+        {/* Konvertierung */}
+        <div className="mt-4 border-t border-claimondo-border pt-4">
+          {bereitsKonvertiert ? (
+            <div className="rounded-ios-md bg-success-soft px-3 py-2.5 text-sm text-success-strong">
+              ✓ Konvertiert{lead.konvertiert_am ? ` am ${formatDatum(lead.konvertiert_am)}` : ''}
+            </div>
+          ) : (
+            <>
+              <Button
+                variant="success"
+                fullWidth
+                onClick={handleConvert}
+                loading={converting}
+                disabled={converting || saving || !hatEmail}
+              >
+                Zu Partner konvertieren
+              </Button>
+              {!hatEmail && (
+                <p className="mt-2 text-center text-xs text-claimondo-shield">
+                  E-Mail fehlt — bitte erst Kontakt ergänzen und speichern, dann konvertieren.
+                </p>
+              )}
+            </>
+          )}
+        </div>
       </div>
     </Modal>
+  )
+}
+
+// ─── Aktivitaets-Formular (Anruf protokollieren / Notiz hinzufuegen) ──────────
+
+function AktivitaetForm({
+  leadId,
+  onLogged,
+  disabled,
+}: {
+  leadId: string
+  onLogged: () => void
+  disabled: boolean
+}) {
+  const [typ, setTyp] = useState<PartnerAktivitaetTyp>('anruf')
+  const [text, setText] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  async function handleLog() {
+    const trimmed = text.trim()
+    if (!trimmed) {
+      toast.error('Bitte einen Text eingeben.')
+      return
+    }
+    setSaving(true)
+    try {
+      const result = await protokolliereAktivitaet(leadId, typ, trimmed)
+      if (!result.ok) {
+        toast.error(result.error ?? 'Protokollieren fehlgeschlagen')
+        return
+      }
+      toast.success('Aktivität protokolliert.')
+      setText('')
+      onLogged()
+    } catch {
+      toast.error('Protokollieren fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="mb-4 space-y-2 rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
+      <SelectField
+        label="Aktivität protokollieren"
+        value={typ}
+        onChange={(e) => setTyp(e.target.value as PartnerAktivitaetTyp)}
+        options={PARTNER_AKTIVITAET_MANUELL.map((t) => ({
+          value: t,
+          label: PARTNER_AKTIVITAET_TYP_LABELS[t],
+        }))}
+      />
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={2}
+        placeholder={
+          typ === 'anruf'
+            ? 'z.B. Erreicht — Interesse an Onboarding, Rückruf nächste Woche…'
+            : 'Was ist passiert?'
+        }
+        className="w-full rounded-ios-sm border border-claimondo-border bg-white px-3 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-shield/60 focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+      />
+      <Button
+        variant="navy"
+        onClick={handleLog}
+        loading={saving}
+        disabled={saving || disabled || !text.trim()}
+      >
+        Hinzufügen
+      </Button>
+    </div>
+  )
+}
+
+// ─── Aktivitaets-Timeline ─────────────────────────────────────────────────────
+
+function AktivitaetTimeline({ aktivitaeten }: { aktivitaeten: PartnerLeadAktivitaetRow[] }) {
+  if (aktivitaeten.length === 0) {
+    return (
+      <p className="text-sm text-claimondo-shield">Noch keine Aktivitäten protokolliert.</p>
+    )
+  }
+  return (
+    <ol className="space-y-3">
+      {aktivitaeten.map((a) => {
+        const Icon = AKTIVITAET_ICON[a.typ] ?? MoreHorizontal
+        return (
+          <li key={a.id} className="flex gap-3">
+            <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-claimondo-navy/[0.06] text-claimondo-ondo">
+              <Icon className="h-3.5 w-3.5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-baseline justify-between gap-2">
+                <span className="text-xs font-semibold text-claimondo-navy">
+                  {PARTNER_AKTIVITAET_TYP_LABELS[a.typ] ?? a.typ}
+                </span>
+                <span className="shrink-0 text-[11px] text-claimondo-shield">
+                  {formatRelativ(a.erstellt_am)}
+                </span>
+              </div>
+              {a.text && (
+                <p className="mt-0.5 whitespace-pre-wrap text-sm text-claimondo-navy">{a.text}</p>
+              )}
+              <p className="mt-0.5 text-[11px] text-claimondo-shield">
+                {a.erstellt_von_name ?? 'System'}
+              </p>
+            </div>
+          </li>
+        )
+      })}
+    </ol>
   )
 }
 

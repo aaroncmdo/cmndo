@@ -12,11 +12,12 @@ export type PartnerLeadRow = {
   firma: string | null
   ansprechpartner_vorname: string | null
   ansprechpartner_nachname: string | null
-  email: string
+  email: string | null
   telefon: string | null
   plz: string | null
   ort: string | null
   source_channel: string
+  einstufung: PartnerLeadEinstufung | null
   rollen_details: Record<string, unknown> | null
   zugewiesen_an: string | null
   konvertiert_zu_user_id: string | null
@@ -31,6 +32,21 @@ export type PartnerLeadRow = {
 export type StaffOption = {
   id: string
   name: string
+}
+
+/**
+ * Eine partner_lead_aktivitaeten-Zeile (Timeline im Detail-Drawer). Der
+ * Bearbeiter-Name wird beim Laden (page.tsx) aus profiles aufgeloest und als
+ * erstellt_von_name mitgeliefert (Row selbst haelt nur die uuid).
+ */
+export type PartnerLeadAktivitaetRow = {
+  id: string
+  partner_lead_id: string
+  typ: PartnerAktivitaetTyp
+  text: string | null
+  erstellt_von: string | null
+  erstellt_von_name: string | null
+  erstellt_am: string
 }
 
 export const PARTNER_LEAD_STATUS = [
@@ -78,3 +94,47 @@ export const PARTNER_SOURCE_CHANNEL_LABELS: Record<string, string> = {
   admin: 'Admin',
   empfehlung: 'Empfehlung',
 }
+
+// ─── Einstufung (Lead-Temperatur) ────────────────────────────────────────────
+
+export const PARTNER_LEAD_EINSTUFUNG = ['heiss', 'warm', 'kalt'] as const
+export type PartnerLeadEinstufung = (typeof PARTNER_LEAD_EINSTUFUNG)[number]
+
+export const PARTNER_LEAD_EINSTUFUNG_LABELS: Record<PartnerLeadEinstufung, string> = {
+  heiss: 'Heiß',
+  warm: 'Warm',
+  kalt: 'Kalt',
+}
+
+// Soft-Slot-Farben je Einstufung (StatusBadge colorCls-Modus, token-gebunden).
+// heiss=danger (dringend/hohes Potenzial), warm=warning, kalt=info-soft.
+export const PARTNER_LEAD_EINSTUFUNG_COLORS: Record<PartnerLeadEinstufung, string> = {
+  heiss: 'bg-danger-soft text-danger-strong',
+  warm: 'bg-warning-soft text-warning-strong',
+  kalt: 'bg-info-soft text-info-strong',
+}
+
+// ─── Aktivitaets-Log ─────────────────────────────────────────────────────────
+
+export const PARTNER_AKTIVITAET_TYP = [
+  'anruf',
+  'notiz',
+  'email',
+  'status_aenderung',
+  'einstufung',
+  'sonstiges',
+] as const
+export type PartnerAktivitaetTyp = (typeof PARTNER_AKTIVITAET_TYP)[number]
+
+export const PARTNER_AKTIVITAET_TYP_LABELS: Record<PartnerAktivitaetTyp, string> = {
+  anruf: 'Anruf',
+  notiz: 'Notiz',
+  email: 'E-Mail',
+  status_aenderung: 'Status geändert',
+  einstufung: 'Einstufung geändert',
+  sonstiges: 'Sonstiges',
+}
+
+// Typen, die manuell im Drawer protokolliert werden koennen (Auto-Log-Typen
+// status_aenderung/einstufung entstehen nur systemisch und sind hier NICHT dabei).
+export const PARTNER_AKTIVITAET_MANUELL = ['anruf', 'notiz', 'email', 'sonstiges'] as const
