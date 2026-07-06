@@ -146,22 +146,33 @@ export async function getOffeneTermine(scope: LiveOpsScope): Promise<TerminPin[]
       svTerminLocs.set(raw.assignee_id, bucket)
     }
 
-    // Je SV mit bekanntem Standort: Matrix-API aufrufen
+    // Je SV mit bekanntem Standort: Matrix-API parallel aufrufen. Die SV-Buckets
+    // sind voneinander unabhaengig -> Promise.all statt sequenzieller Round-Trips.
+    // Jedes Promise traegt seine eigenen `entries` mit, damit die etas[i]<->entries[i]-
+    // Zuordnung strikt bucket-lokal bleibt (keine Vermischung zwischen SVs).
+    const svBatches = Array.from(svTerminLocs.entries())
+      .filter(([svId]) => svStandortMap.has(svId))
+      .map(([svId, entries]) => {
+        const standort = svStandortMap.get(svId) as LatLng
+        return mapboxEtaMatrix(standort, entries.map((e) => e.loc))
+          .then((etas) => ({ entries, etas }))
+          .catch((err) => {
+            console.warn('[getOffeneTermine] mapboxEtaMatrix fehlgeschlagen fuer SV', svId, err)
+            return { entries, etas: entries.map(() => null) as Array<number | null> }
+          })
+      })
+
+    // SVs ohne Standort direkt auf null setzen (kein Matrix-Call noetig)
     for (const [svId, entries] of svTerminLocs.entries()) {
-      const standort = svStandortMap.get(svId)
-      if (!standort) {
-        // kein Standort → alle null
+      if (!svStandortMap.has(svId)) {
         for (const e of entries) terminEtaMap.set(e.id, null)
-        continue
       }
-      try {
-        const etas = await mapboxEtaMatrix(standort, entries.map((e) => e.loc))
-        for (let i = 0; i < entries.length; i++) {
-          terminEtaMap.set(entries[i].id, etas[i] ?? null)
-        }
-      } catch (err) {
-        console.warn('[getOffeneTermine] mapboxEtaMatrix fehlgeschlagen fuer SV', svId, err)
-        for (const e of entries) terminEtaMap.set(e.id, null)
+    }
+
+    const settled = await Promise.all(svBatches)
+    for (const { entries, etas } of settled) {
+      for (let i = 0; i < entries.length; i++) {
+        terminEtaMap.set(entries[i].id, etas[i] ?? null)
       }
     }
   }
