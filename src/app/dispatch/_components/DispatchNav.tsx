@@ -2,15 +2,14 @@
 
 // AAR-778: Migriert auf shared PortalNav (dark variant, 2 Sektionen).
 
-import Link from 'next/link'
 import {
-  LayoutDashboardIcon, UsersIcon, PhoneIcon, LogOutIcon,
-  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon, UserIcon, ShieldCheckIcon,
+  LayoutDashboardIcon, UsersIcon, PhoneIcon,
+  MapIcon, CarFrontIcon, TargetIcon, CalendarIcon, SearchIcon, ShieldCheckIcon,
 } from 'lucide-react'
-import { SupportButton } from '@/components/support/SupportButton'
 import TasksPill from '@/components/shared/TasksPill'
 import { DispatchNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
+import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 
 const NAV_ARBEIT: PortalNavItem[] = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
@@ -67,33 +66,13 @@ export default function DispatchNav({
         </>
       }
       footerSlot={
-        <>
-          <SupportButton userName={email} rolle="dispatch" />
-          <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-claimondo-ondo text-white">
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/80 truncate">{email}</p>
-            </div>
-          </div>
-          <Link
-            href="/mitarbeiter/profil"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
-          >
-            <UserIcon style={{ width: 17, height: 17 }} />
-            Mein Profil
-          </Link>
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
-            >
-              <LogOutIcon style={{ width: 17, height: 17 }} />
-              Abmelden
-            </button>
-          </form>
-        </>
+        <PortalUserFooter
+          rolle="dispatch"
+          supportUserName={email}
+          initials={initials}
+          primaryText={email}
+          profilHref="/mitarbeiter/profil"
+        />
       }
     />
   )
