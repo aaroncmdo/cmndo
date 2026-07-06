@@ -85,11 +85,6 @@ export function LandingFooter() {
                 </Link>
               </li>
               <li>
-                <Link href="/ersteinschaetzung" className="transition-colors hover:text-white">
-                  {t('product.einschaetzung')}
-                </Link>
-              </li>
-              <li>
                 <Link href="/beratung-anfragen" className="transition-colors hover:text-white">
                   {t('product.beratung')}
                 </Link>
