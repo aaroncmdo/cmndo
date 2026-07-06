@@ -254,7 +254,7 @@ export async function getPartnerGutschriftDownloadUrl(
   if (!g?.pdf_storage_path) return { ok: false, error: 'Keine Gutschrift-PDF vorhanden' }
 
   const { data: signed, error: urlErr } = await admin.storage
-    .from('onboarding-rechnungen')
+    .from('abrechnungen-pdf')
     .createSignedUrl(g.pdf_storage_path as string, 300)
 
   if (urlErr || !signed?.signedUrl) return { ok: false, error: urlErr?.message ?? 'Signed-URL-Fehler' }

@@ -35,6 +35,7 @@ vi.mock('@/lib/supabase/admin', () => ({
 import {
   buildGutschriftViewModel,
   generatePartnerGutschriftPdf,
+  generateAndUploadPartnerGutschriftPdf,
 } from './partner-gutschrift-pdf'
 import type { PartnerGutschriftPdfInput } from './partner-gutschrift-pdf'
 
@@ -219,5 +220,28 @@ describe('generatePartnerGutschriftPdf', () => {
     const buf = await generatePartnerGutschriftPdf(KLEINUNTERNEHMER_INPUT)
     expect(Buffer.isBuffer(buf)).toBe(true)
     expect(buf.slice(0, 5).toString('ascii')).toBe('%PDF-')
+  })
+})
+
+// ─── generateAndUploadPartnerGutschriftPdf bucket regression ─────────────────
+
+describe('generateAndUploadPartnerGutschriftPdf — bucket name guard', () => {
+  it('uploads to abrechnungen-pdf (not onboarding-rechnungen) and returns path under partner-gutschriften/', async () => {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const uploadSpy = vi.fn(async () => ({ error: null }))
+    const fromSpy = vi.fn(() => ({ upload: uploadSpy }))
+    ;(createAdminClient as ReturnType<typeof vi.fn>).mockReturnValueOnce({
+      storage: { from: fromSpy },
+    })
+
+    const result = await generateAndUploadPartnerGutschriftPdf(REGELBESTEUERT_INPUT)
+
+    expect(result.ok).toBe(true)
+    // The correct existing bucket must be used
+    expect(fromSpy).toHaveBeenCalledWith('abrechnungen-pdf')
+    // Object path must stay namespaced under partner-gutschriften/
+    if (result.ok) {
+      expect(result.pdfPath).toMatch(/^partner-gutschriften\//)
+    }
   })
 })

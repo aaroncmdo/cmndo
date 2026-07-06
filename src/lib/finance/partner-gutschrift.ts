@@ -56,7 +56,7 @@ export async function versendePartnerGutschrift(
 
     // Step 5 — PDF aus Storage herunterladen
     const { data: file } = await db.storage
-      .from('onboarding-rechnungen')
+      .from('abrechnungen-pdf')
       .download(row.pdf_storage_path)
 
     if (!file) {

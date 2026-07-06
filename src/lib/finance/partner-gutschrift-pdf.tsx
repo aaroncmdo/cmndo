@@ -305,7 +305,7 @@ export async function generateAndUploadPartnerGutschriftPdf(
     const pdfPath = `partner-gutschriften/${jahr}/${input.gutschrift_nr}.pdf`
 
     const { error } = await db.storage
-      .from('onboarding-rechnungen')
+      .from('abrechnungen-pdf')
       .upload(pdfPath, buffer, {
         contentType: 'application/pdf',
         upsert: true,

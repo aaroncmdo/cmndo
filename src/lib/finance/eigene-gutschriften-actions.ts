@@ -32,7 +32,7 @@ export async function getEigeneGutschriftUrl(
   if (!pdfPath) return { ok: false, error: 'Gutschrift nicht gefunden' }
   const admin = createAdminClient()
   const { data: signed, error } = await admin.storage
-    .from('onboarding-rechnungen')
+    .from('abrechnungen-pdf')
     .createSignedUrl(pdfPath, 300)
   if (error || !signed?.signedUrl)
     return { ok: false, error: error?.message ?? 'Signed-URL-Fehler' }
