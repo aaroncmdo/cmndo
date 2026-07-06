@@ -10,13 +10,14 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
+import { SCHADENTYP_VALUES } from '@/lib/werkstatt/schadentyp-options'
 
 // Whitelist der editierbaren Felder (kein arbitraerer Write). Lokal, NICHT exportiert
 // (Konstanten aus 'use server' werden im Client-Bundle undefined — AGENTS §Server-Actions).
 const EDITIERBARE_FELDER = [
   'vorname', 'nachname', 'telefon', 'email',
   'fahrzeug_hersteller', 'fahrzeug_modell', 'kennzeichen', 'fin', 'erstzulassung',
-  'schadens_art', 'schadens_hergang', 'unfalldatum', 'unfallort',
+  'schadentyp', 'schadens_hergang', 'unfalldatum', 'unfallort',
 ]
 
 /**
@@ -50,6 +51,13 @@ export async function bearbeiteWerkstattLead(
     }
   }
   if (Object.keys(clean).length === 0) return { ok: false, error: 'Nichts zu speichern' }
+
+  // schadentyp ist DB-CHECK-constrainted (leads_schadentyp_check) -> serverseitig gegen die
+  // erlaubten Werte pruefen (Defense-in-Depth: der Select bietet nur gueltige an, aber ein
+  // roher POST koennte sonst den DB-CHECK treffen -> saubere Meldung statt roher PG-Error).
+  if ('schadentyp' in clean && clean.schadentyp !== null && !SCHADENTYP_VALUES.includes(clean.schadentyp)) {
+    return { ok: false, error: 'Ungültiger Schadentyp' }
+  }
 
   // Update via service-role (Ownership oben geprueft; leads default-deny fuer werkstatt).
   const admin = createAdminClient()

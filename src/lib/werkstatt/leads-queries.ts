@@ -18,7 +18,7 @@ export type WerkstattLead = {
   kennzeichen: string | null
   fin: string | null
   erstzulassung: string | null
-  schadens_art: string | null
+  schadentyp: string | null
   schadens_hergang: string | null
   unfalldatum: string | null
   unfallort: string | null
@@ -29,7 +29,7 @@ export type WerkstattLead = {
 }
 
 const SELECT =
-  'id, vorname, nachname, telefon, email, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, fin, erstzulassung, schadens_art, schadens_hergang, unfalldatum, unfallort, kostenvoranschlag_netto, kostenvoranschlag_brutto, status, created_at'
+  'id, vorname, nachname, telefon, email, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, fin, erstzulassung, schadentyp, schadens_hergang, unfalldatum, unfallort, kostenvoranschlag_netto, kostenvoranschlag_brutto, status, created_at'
 
 /** Offene (nicht konvertierte) Inbound-Leads der Werkstatt (RLS-Gate in der View). */
 export async function getWerkstattLeads(): Promise<WerkstattLead[]> {
@@ -56,7 +56,7 @@ export async function getWerkstattLeads(): Promise<WerkstattLead[]> {
     kennzeichen: (r.kennzeichen as string | null) ?? null,
     fin: (r.fin as string | null) ?? null,
     erstzulassung: (r.erstzulassung as string | null) ?? null,
-    schadens_art: (r.schadens_art as string | null) ?? null,
+    schadentyp: (r.schadentyp as string | null) ?? null,
     schadens_hergang: (r.schadens_hergang as string | null) ?? null,
     unfalldatum: (r.unfalldatum as string | null) ?? null,
     unfallort: (r.unfallort as string | null) ?? null,

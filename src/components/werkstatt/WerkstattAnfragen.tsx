@@ -12,6 +12,7 @@ import type { WerkstattLead } from '@/lib/werkstatt/leads-queries'
 import { bearbeiteWerkstattLead } from '@/app/werkstatt/(shell)/anfragen/actions'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
+import { SCHADENTYP_OPTIONS, schadentypLabel } from '@/lib/werkstatt/schadentyp-options'
 
 const DATE = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 function fmtDate(iso: string | null): string {
@@ -21,7 +22,7 @@ function fmtDate(iso: string | null): string {
 type FeldKey =
   | 'vorname' | 'nachname' | 'telefon' | 'email'
   | 'fahrzeug_hersteller' | 'fahrzeug_modell' | 'kennzeichen' | 'fin' | 'erstzulassung'
-  | 'schadens_art' | 'schadens_hergang' | 'unfalldatum' | 'unfallort'
+  | 'schadentyp' | 'schadens_hergang' | 'unfalldatum' | 'unfallort'
 
 type FeldDef = {
   key: FeldKey
@@ -29,6 +30,7 @@ type FeldDef = {
   gruppe: 'Kunde' | 'Fahrzeug' | 'Schaden'
   type?: string
   textarea?: boolean
+  options?: readonly { value: string; label: string }[]
 }
 
 const FELDER: FeldDef[] = [
@@ -41,7 +43,7 @@ const FELDER: FeldDef[] = [
   { key: 'kennzeichen', label: 'Kennzeichen', gruppe: 'Fahrzeug' },
   { key: 'fin', label: 'FIN', gruppe: 'Fahrzeug' },
   { key: 'erstzulassung', label: 'Erstzulassung', gruppe: 'Fahrzeug' },
-  { key: 'schadens_art', label: 'Schadenart', gruppe: 'Schaden' },
+  { key: 'schadentyp', label: 'Schadenart', gruppe: 'Schaden', options: SCHADENTYP_OPTIONS },
   { key: 'unfalldatum', label: 'Unfalldatum', gruppe: 'Schaden', type: 'date' },
   { key: 'unfallort', label: 'Unfallort', gruppe: 'Schaden' },
   { key: 'schadens_hergang', label: 'Hergang', gruppe: 'Schaden', textarea: true },
@@ -127,7 +129,7 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
                     <div>{l.telefon ?? '–'}</div>
                     {l.email && <div className="text-xs">{l.email}</div>}
                   </Td>
-                  <Td className="text-body-sm text-claimondo-navy">{l.schadens_art ?? '–'}</Td>
+                  <Td className="text-body-sm text-claimondo-navy">{schadentypLabel(l.schadentyp)}</Td>
                   <Td className="text-body-sm text-claimondo-ondo">{fmtDate(l.created_at)}</Td>
                   <Td>
                     <Button variant="ghost" size="sm" onClick={() => oeffnen(l)}>
@@ -161,7 +163,22 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
                     <label htmlFor={`f-${f.key}`} className="text-body-xs font-medium text-claimondo-navy">
                       {f.label}
                     </label>
-                    {f.textarea ? (
+                    {f.options ? (
+                      <select
+                        id={`f-${f.key}`}
+                        value={form[f.key] ?? ''}
+                        disabled={saving}
+                        onChange={(e) => setForm((s) => ({ ...s, [f.key]: e.target.value }))}
+                        className="mt-0.5 w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 disabled:opacity-50"
+                      >
+                        <option value="">–</option>
+                        {f.options.map((o) => (
+                          <option key={o.value} value={o.value}>
+                            {o.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : f.textarea ? (
                       <textarea
                         id={`f-${f.key}`}
                         rows={2}
