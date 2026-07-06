@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import KundeJetztZuTunCard from '@/components/kunde/KundeJetztZuTunCard'
 import KundeWillkommensHero from '@/components/kunde/KundeWillkommensHero'
+import KundeSchadenUebersicht from '@/components/kunde/KundeSchadenUebersicht'
 // AAR-449: Neue FallKarte + Shared-Loader für Termin/Aktion/LastUpdate
 import FallKarte from '@/components/kunde/FallKarte'
 import { ladeFallKartenMeta, type FallKarteMetaInput } from '@/lib/kunde/fall-karte-loader'
@@ -195,7 +196,14 @@ export default async function KundeStartseite() {
       {faelle.length === 0 ? (
         <KundeWillkommensHero vorname={vorname} />
       ) : (
-        <div className="space-y-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
+        <div className="space-y-5">
+          {/* Sub-Projekt 5: Schaden-Übersicht (v.a. Firmen mit mehreren Schäden) */}
+          <KundeSchadenUebersicht
+            gesamt={faelle.length}
+            abgeschlossen={faelle.filter((f) => Boolean(f.abgeschlossen_am)).length}
+            aktionErforderlich={faelle.filter((f) => Boolean(metaByFall[f.id as string]?.aktion)).length}
+          />
+          <div className="space-y-4 md:grid md:grid-cols-2 lg:grid-cols-3 md:gap-4 md:space-y-0">
           {faelle.map((fall) => {
             const meta = metaByFall[fall.id as string] ?? { aktion: null, nextTermin: null, lastUpdate: null }
             return (
@@ -224,6 +232,7 @@ export default async function KundeStartseite() {
               />
             )
           })}
+          </div>
         </div>
       )}
     </div>
