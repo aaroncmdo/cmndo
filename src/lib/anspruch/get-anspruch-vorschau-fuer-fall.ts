@@ -1,6 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
-import type { AnspruchPosition, AnspruchSpanne, Schweregrad, TotalschadenInfo } from './types'
+import type { AnspruchPosition, AnspruchSpanne, Schuldform, Schweregrad, TotalschadenInfo } from './types'
+
+function normalisiereSchuld(roh: unknown): Schuldform {
+  return roh === 'selbst' || roh === 'teilschuld' ? roh : 'unverschuldet'
+}
 
 /**
  * KI-Vorschaetzung (aus dem Anspruch-pruefen-Tool) fuer die SV-Fallakte laden.
@@ -30,9 +34,11 @@ export async function getAnspruchVorschauFuerFall(
   const leadId = claim?.lead_id
   if (!leadId) return null
 
+  // select('*') statt expliziter Spaltenliste: die schuld-Spalte (Migration 20260706085339) fehlt noch
+  // in den generierten Typen; '*' umgeht die Select-String-Typpruefung, schuld wird unten defensiv gelesen.
   const { data: sess } = await admin
     .from('anspruch_schaetzungen')
-    .select('vision_result, positionen, erkanntes_segment, schweregrad, fahrbereit, ez_jahr, totalschaden')
+    .select('*')
     .eq('lead_id', leadId)
     .order('erstellt_am', { ascending: false })
     .limit(1)
@@ -61,6 +67,7 @@ export async function getAnspruchVorschauFuerFall(
       gesamtMinEur,
       gesamtMaxEur,
       hinweise: [],
+      schuld: normalisiereSchuld((sess as { schuld?: string | null }).schuld),
       ...(sess.totalschaden ? { totalschaden: sess.totalschaden as unknown as TotalschadenInfo } : {}),
     },
     beschaedigteTeile,

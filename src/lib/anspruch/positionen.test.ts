@@ -36,10 +36,10 @@ function typen(r: ReturnType<typeof berechneAnspruchsSpanne>) {
 }
 
 describe('berechneAnspruchsSpanne', () => {
-  it('fahrbereit + kein EZ: nur reparatur + gutachterkosten + kostenpauschale', () => {
+  it('fahrbereit + kein EZ: reparatur + gutachterkosten + anwaltskosten + kostenpauschale (default unverschuldet)', () => {
     const r = berechneAnspruchsSpanne(base, SAETZE, FAKTOREN, CONFIG)
-    expect(typen(r)).toEqual(['reparatur', 'gutachterkosten', 'kostenpauschale'])
-    // reparatur 900..1800 + pauschale 30..30 ; gutachterkosten zaehlt NICHT in Gesamt
+    expect(typen(r)).toEqual(['reparatur', 'gutachterkosten', 'anwaltskosten', 'kostenpauschale'])
+    // reparatur 900..1800 + pauschale 30..30 ; gutachterkosten + anwaltskosten zaehlen NICHT in Gesamt (gegner-gedeckt)
     expect(r.gesamtMinEur).toBe(930)
     expect(r.gesamtMaxEur).toBe(1830)
   })
@@ -184,5 +184,55 @@ describe('berechneAnspruchsSpanne', () => {
     expect(fz.minEur).toBe(0)        // max(0, 10000 - 13000)
     expect(fz.maxEur).toBe(1000)     // max(0, 12000 - 11000)
     expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThanOrEqual(0)
+  })
+})
+
+describe('Schuldfrage', () => {
+  const typen = (r: ReturnType<typeof berechneAnspruchsSpanne>) => r.positionen.map((p) => p.typ)
+
+  it('default (kein schuld) = unverschuldet: Anwaltskosten vorhanden + gegner-gedeckt, spanne.schuld gesetzt', () => {
+    const r = berechneAnspruchsSpanne(base, SAETZE, FAKTOREN, CONFIG)
+    expect(r.schuld).toBe('unverschuldet')
+    const aw = r.positionen.find((p) => p.typ === 'anwaltskosten')!
+    expect(aw).toBeDefined()
+    expect(aw.gedecktDurchGegner).toBe(true)
+    expect(aw.minEur).toBeNull()
+  })
+
+  it('teilschuld: Anwaltskosten vorhanden (Gegner haftet anteilig)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, schuld: 'teilschuld' }, SAETZE, FAKTOREN, CONFIG)
+    expect(r.schuld).toBe('teilschuld')
+    expect(typen(r)).toContain('anwaltskosten')
+  })
+
+  it('selbst: KEINE Anwaltskosten (kein Gegner haftet)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, schuld: 'selbst' }, SAETZE, FAKTOREN, CONFIG)
+    expect(r.schuld).toBe('selbst')
+    expect(typen(r)).not.toContain('anwaltskosten')
+  })
+
+  it('Gesamtbetraege identisch ueber alle Schuldformen (Anwaltskosten null -> kein Summen-Effekt)', () => {
+    const u = berechneAnspruchsSpanne({ ...base, schuld: 'unverschuldet' }, SAETZE, FAKTOREN, CONFIG)
+    const s = berechneAnspruchsSpanne({ ...base, schuld: 'selbst' }, SAETZE, FAKTOREN, CONFIG)
+    expect(u.gesamtMinEur).toBe(s.gesamtMinEur)
+    expect(u.gesamtMaxEur).toBe(s.gesamtMaxEur)
+  })
+
+  it('Totalschaden unverschuldet: Anwaltskosten im TS-Weg, aber Summe unveraendert (gegner-gedeckt/null)', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, schuld: 'unverschuldet', reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const tw = s.totalschaden!.totalschadenWeg
+    expect(tw.positionen.some((p) => p.typ === 'anwaltskosten')).toBe(true)
+    expect(tw.summeMinEur).toBe(11030) // identisch zum Zone-C-Test ohne Anwaltskosten-Effekt
+  })
+
+  it('Totalschaden selbst: keine Anwaltskosten im TS-Weg', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, schuld: 'selbst', reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    expect(s.totalschaden!.totalschadenWeg.positionen.some((p) => p.typ === 'anwaltskosten')).toBe(false)
   })
 })

@@ -1,10 +1,22 @@
 import type {
-  AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Segment, SegmentSatz,
+  AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Schuldform, Segment, SegmentSatz,
   SchaetzInput, TotalschadenInfo, WertminderungFaktor,
 } from './types'
 
 function runde(n: number): number {
   return Math.round(n)
+}
+
+// Anwaltskosten traegt die gegnerische Versicherung nur, wenn ein Gegner haftet (unverschuldet/teilschuld).
+function anwaltskostenPosition(): AnspruchPosition {
+  return {
+    typ: 'anwaltskosten',
+    label: 'Anwaltskosten',
+    minEur: null,
+    maxEur: null,
+    gedecktDurchGegner: true,
+    hinweis: 'Bei klarer Haftung trägt die gegnerische Versicherung Ihre Anwaltskosten.',
+  }
 }
 
 function findeFaktor(alter: number, faktoren: WertminderungFaktor[]): WertminderungFaktor | null {
@@ -20,6 +32,8 @@ export function berechneAnspruchsSpanne(
 ): AnspruchSpanne {
   const positionen: AnspruchPosition[] = []
   const hinweise: string[] = []
+  const schuld: Schuldform = input.schuld ?? 'unverschuldet'
+  const gegnerHaftet = schuld !== 'selbst'
   const reparaturMitte = (input.reparaturMinEur + input.reparaturMaxEur) / 2
 
   // 1) Reparaturkosten — immer
@@ -74,6 +88,9 @@ export function berechneAnspruchsSpanne(
     hinweis: 'Bei klarer Haftung trägt die gegnerische Versicherung diese Kosten.',
   })
 
+  // 4b) Anwaltskosten — nur wenn ein Gegner haftet (unverschuldet/teilschuld), Gegner traegt sie
+  if (gegnerHaftet) positionen.push(anwaltskostenPosition())
+
   // 5) Auslagenpauschale — immer
   positionen.push({
     typ: 'kostenpauschale',
@@ -112,6 +129,7 @@ export function berechneAnspruchsSpanne(
         { typ: 'nutzungsausfall', label: 'Nutzungsausfall (Wiederbeschaffung)', minEur: runde(satz.tagessatzMinEur * dauer.min), maxEur: runde(satz.tagessatzMaxEur * dauer.max), hinweis: `${satz.tagessatzMinEur}–${satz.tagessatzMaxEur} €/Tag × ${dauer.min}–${dauer.max} Tage` },
         ...(!input.fahrbereit ? [{ typ: 'abschleppkosten' as const, label: 'Abschleppkosten', minEur: config.abschleppMinEur, maxEur: config.abschleppMaxEur }] : []),
         { typ: 'gutachterkosten', label: 'Sachverständigenkosten', minEur: null, maxEur: null, gedecktDurchGegner: true, hinweis: 'Bei klarer Haftung trägt die gegnerische Versicherung diese Kosten.' },
+        ...(gegnerHaftet ? [anwaltskostenPosition()] : []),
         { typ: 'kostenpauschale', label: 'Auslagenpauschale', minEur: config.kostenpauschaleEur, maxEur: config.kostenpauschaleEur },
       ]
       const tsMin = runde(tsPositionen.reduce((s, p) => s + (p.minEur ?? 0), 0))
@@ -144,5 +162,5 @@ export function berechneAnspruchsSpanne(
     }
   }
 
-  return { positionen, gesamtMinEur, gesamtMaxEur, hinweise, ...(totalschaden ? { totalschaden } : {}) }
+  return { positionen, gesamtMinEur, gesamtMaxEur, hinweise, schuld, ...(totalschaden ? { totalschaden } : {}) }
 }

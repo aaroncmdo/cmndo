@@ -16,6 +16,17 @@ export const SEGMENT_LABEL: Record<Segment, string> = {
 
 export type Schweregrad = 'leicht' | 'mittel' | 'schwer'
 
+// Schuldfrage: steuert Framing + Positionen der Ersteinschaetzung (nicht die berechneten Betraege).
+export type Schuldform = 'unverschuldet' | 'teilschuld' | 'selbst'
+
+export const SCHULDFORMEN: readonly Schuldform[] = ['unverschuldet', 'teilschuld', 'selbst'] as const
+
+export const SCHULD_LABEL: Record<Schuldform, string> = {
+  unverschuldet: 'Die andere Person',
+  teilschuld: 'Teils ich',
+  selbst: 'Ich selbst',
+}
+
 export type VisionResult = {
   beschaedigte_teile: string[]
   schweregrad: Schweregrad
@@ -31,7 +42,7 @@ export type VisionResult = {
 
 export type AnspruchPositionTyp =
   | 'reparatur' | 'nutzungsausfall' | 'wertminderung'
-  | 'gutachterkosten' | 'kostenpauschale' | 'abschleppkosten'
+  | 'gutachterkosten' | 'kostenpauschale' | 'abschleppkosten' | 'anwaltskosten'
 
 export type AnspruchPosition = {
   typ: AnspruchPositionTyp
@@ -74,6 +85,7 @@ export type AnspruchSpanne = {
   gesamtMinEur: number
   gesamtMaxEur: number
   hinweise: string[]
+  schuld: Schuldform
   totalschaden?: TotalschadenInfo
 }
 
@@ -85,6 +97,7 @@ export type SchaetzInput = {
   fahrbereit: boolean
   ezJahr: number | null
   aktuellesJahr: number
+  schuld?: Schuldform
   wbwMinEur?: number | null
   wbwMaxEur?: number | null
   restwertMinEur?: number | null
