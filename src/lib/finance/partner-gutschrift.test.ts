@@ -10,6 +10,12 @@ vi.mock('@/lib/billing/get-rechnungs-konfig', () => ({
 
 // --- mocks for versendePartnerGutschrift ---
 vi.mock('@react-email/render', () => ({ render: vi.fn(async () => '<html>') }))
+// Mock the template module so the test never loads @react-email/components (whose nested
+// @react-email/render pulls prettier/plugins/html at import-time) -> hermetic, no transitive-dep coupling.
+vi.mock('@/lib/email/google/templates/PartnerGutschrift', () => ({
+  PartnerGutschriftEmail: () => null,
+  subject: () => 'Ihre Gutschrift TEST',
+}))
 vi.mock('@/lib/email/google/client', () => ({ sendEmail: vi.fn() }))
 
 import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
