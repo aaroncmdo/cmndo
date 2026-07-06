@@ -110,11 +110,15 @@ export async function aktualisiereAnfrageStatus(
   status: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const supabase = await createClient()
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('gutachter_finder_anfragen')
     .update({ status })
     .eq('id', id)
+    .select('id')
   if (error) return { ok: false, error: error.message }
+  // 0 Zeilen = RLS verhindert das Update (keine Berechtigung) -> echtes {ok:false} statt
+  // stillem False-Positive (der Client wuerde sonst faelschlich Erfolg melden ohne DB-Change).
+  if (!data || data.length === 0) return { ok: false, error: 'Keine Berechtigung, den Status zu ändern.' }
   revalidatePath('/dispatch/gutachter-finder')
   return { ok: true }
 }
