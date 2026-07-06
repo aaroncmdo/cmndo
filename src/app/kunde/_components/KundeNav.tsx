@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon } from 'lucide-react'
+import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIcon } from 'lucide-react'
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
@@ -15,6 +15,9 @@ function buildNavItems(singleFallId: string | null, t: (key: string) => string) 
     fallItem,
     { href: '/kunde/termine', label: t('nav.termine'), icon: CalendarIcon, exact: false },
     { href: '/kunde/nachbesichtigung', label: t('nav.nachbesichtigung'), icon: SearchIcon, exact: false },
+    // Sub-Projekt 2 (Firma & Flotte): Desktop-Nav (MOBILE_ITEMS ist kuratiert -> mobil (noch) aus).
+    // TODO i18n-Follow-up: nav.flotte-Key in den 6 Locales; hardcoded DE reicht fuer den MVP-Ship.
+    { href: '/kunde/flotte', label: 'Flotte', icon: CarIcon, exact: false },
     { href: '/kunde/chat', label: t('nav.nachrichten'), icon: MessageSquareIcon, exact: false },
     { href: '/kunde/profil', label: t('nav.profil'), icon: UserIcon, exact: false },
   ]
