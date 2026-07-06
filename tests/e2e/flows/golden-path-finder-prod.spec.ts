@@ -140,6 +140,15 @@ test('Finder-Buchung: Test-SV am obskuren Ort bis Termin reserviert', async ({ p
   await vis(page, 'input[autocomplete="tel"]').fill('+491633628571') // Test-WA (send-isolation greift ohnehin)
   await vis(page, 'input[autocomplete="email"]').fill(email)
   await vis(page, 'input[type="checkbox"]').check()
+
+  // Dry-Run (FINDER_E2E_DRYRUN=1): alles bis zum Buchen validieren — Fixture, Google-Places,
+  // Test-SV als Partner mit Slots, Schaden, Formular — aber NICHT absenden. Kein Submit -> keine
+  // Sends/kein Lead. Send-freie Validierung solange #3709 (Send-Isolation) nicht auf Prod ist.
+  if (process.env.FINDER_E2E_DRYRUN) {
+    await expect(vis(page, 'button:has-text("Termin reservieren")'), 'Buchen-Button bereit (Dry-Run)').toBeEnabled()
+    console.log('[golden-finder:dryrun] Ort→Test-SV-Slot→Schaden→Formular OK, Submit übersprungen ✓')
+    return
+  }
   await vis(page, 'button:has-text("Termin reservieren")').click()
 
   // ── Step 5: Bestaetigung ──
