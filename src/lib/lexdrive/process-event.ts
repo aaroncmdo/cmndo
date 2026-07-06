@@ -11,6 +11,7 @@ import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/crea
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { ALLOWED_STATUS_VALUES } from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -803,7 +804,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // faelle.status, nicht operative_status -> der Engine-Cursor zog beim Override nicht
       // mit; jetzt korrekt. status ist nicht CLAIM_OWNED -> landet in ovFaelle, hier umgehaengt.
       if ('status' in ovFaelle) {
-        if (claimIdForUpdates) ovClaims.operative_status = ovFaelle.status
+        // Defense-in-Depth: NUR enum-gueltige fall_status nach operative_status. operative_status ist
+        // text, aber v_claim_base castet ::fall_status -> ein enum-fremder Wert wirft bei JEDEM Read
+        // (Fallakte + alle Portale) 'invalid input value for enum' und macht die Akte unlesbar bis
+        // manueller DB-Fix. ALLOWED_STATUS_VALUES ist die kuratierte enum-gueltige Menge.
+        const s = ovFaelle.status
+        if (claimIdForUpdates && typeof s === 'string' && (ALLOWED_STATUS_VALUES as readonly string[]).includes(s)) {
+          ovClaims.operative_status = s
+        } else if (claimIdForUpdates) {
+          console.error(`[process-event] manual_status_override: ungueltiger operative_status "${String(s)}" verworfen (nicht in ALLOWED_STATUS_VALUES)`)
+        }
         delete ovFaelle.status
       }
       // ovFaelle ist danach leer (status -> operative_status; updated_at trigger-redundant
