@@ -1,8 +1,8 @@
 'use client'
 
 // Einstellungen-Client fuer Werkstatt-Partner: Profil / Bankdaten / Passwort.
-// Gespiegelt nach MaklerSettings.tsx — gleiche Section-Wrapper, gleiche
-// SaveButton/SaveFeedback-Muster, gleiche Input-Komponente.
+// Gespiegelt nach MaklerSettings.tsx, aber component-set-konform: shared
+// forms/TextField + primitives.Button statt handgerollter <input>/<button>.
 
 import { useState, useTransition } from 'react'
 import {
@@ -13,8 +13,6 @@ import {
   Trash2Icon,
   AlertTriangleIcon,
   CheckCircle2Icon,
-  Loader2Icon,
-  SaveIcon,
 } from 'lucide-react'
 import {
   updateWerkstattProfil,
@@ -22,6 +20,8 @@ import {
   changeWerkstattPasswort,
 } from '@/lib/actions/werkstatt-settings'
 import { SectionCard as SharedSectionCard } from '@/components/shared/SectionCard'
+import { TextField } from '@/components/shared/forms'
+import { Button } from '@/components/primitives/Button'
 
 // ── Typen ───────────────────────────────────────────────────────────────────
 
@@ -98,24 +98,7 @@ function SettingsSectionCard({
   )
 }
 
-// ── Wiederverwendbare Sub-Komponenten ────────────────────────────────────────
-
-function SaveButton({ state }: { state: SaveState }) {
-  return (
-    <button
-      type="submit"
-      disabled={state.status === 'saving'}
-      className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
-    >
-      {state.status === 'saving' ? (
-        <Loader2Icon width={14} height={14} className="animate-spin" />
-      ) : (
-        <SaveIcon width={14} height={14} />
-      )}
-      Speichern
-    </button>
-  )
-}
+// ── Feedback (kein raw button/card -> ratchet-neutral) ───────────────────────
 
 function SaveFeedback({ state }: { state: SaveState }) {
   if (state.status === 'success') {
@@ -137,44 +120,13 @@ function SaveFeedback({ state }: { state: SaveState }) {
   return null
 }
 
-function Input({
-  label,
-  name,
-  defaultValue,
-  type = 'text',
-  readOnly = false,
-  placeholder,
-  required = false,
-  autoComplete,
-}: {
-  label: string
-  name: string
-  defaultValue?: string | null
-  type?: string
-  readOnly?: boolean
-  placeholder?: string
-  required?: boolean
-  autoComplete?: string
-}) {
+// Label mit optionalem Pflicht-Sternchen (TextField nimmt ReactNode als label).
+function fieldLabel(text: string, required = false) {
   return (
-    <label className="block">
-      <span className="text-xs uppercase tracking-wider text-claimondo-ondo font-medium">
-        {label}
-        {required ? ' *' : ''}
-      </span>
-      <input
-        name={name}
-        type={type}
-        defaultValue={defaultValue ?? ''}
-        readOnly={readOnly}
-        placeholder={placeholder}
-        required={required}
-        autoComplete={autoComplete}
-        className={`mt-1 w-full rounded-ios-lg border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy placeholder:text-claimondo-shield focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40 ${
-          readOnly ? 'bg-claimondo-bg text-claimondo-ondo cursor-not-allowed' : ''
-        }`}
-      />
-    </label>
+    <>
+      {text}
+      {required ? ' *' : ''}
+    </>
   )
 }
 
@@ -217,64 +169,64 @@ function ProfilCard(props: WerkstattSettingsProps) {
       subtitle="Firmen- und Kontaktdaten."
     >
       <form onSubmit={handleSubmit} className="space-y-3">
-        <Input
-          label="Firmenname"
+        <TextField
+          label={fieldLabel('Firmenname', true)}
           name="name"
-          defaultValue={props.name}
+          defaultValue={props.name ?? ''}
           required
         />
-        <Input
-          label="Ansprechpartner"
+        <TextField
+          label={fieldLabel('Ansprechpartner', true)}
           name="ansprechpartner_name"
-          defaultValue={props.ansprechpartner_name}
+          defaultValue={props.ansprechpartner_name ?? ''}
           required
         />
-        <Input
+        <TextField
           label="E-Mail"
           name="email"
-          defaultValue={props.email}
           type="email"
+          defaultValue={props.email ?? ''}
           placeholder="info@werkstatt.de"
         />
-        <Input
+        <TextField
           label="Telefon"
           name="telefon"
-          defaultValue={props.telefon}
+          defaultValue={props.telefon ?? ''}
           placeholder="+49 30 1234567"
         />
-        <Input
+        <TextField
           label="Website"
           name="website"
-          defaultValue={props.website}
+          defaultValue={props.website ?? ''}
           placeholder="https://www.meine-werkstatt.de"
         />
-        <Input
+        <TextField
           label="USt-IdNr."
           name="ust_id"
-          defaultValue={props.ust_id}
+          defaultValue={props.ust_id ?? ''}
           placeholder="DE123456789"
         />
-        <Input
+        <TextField
           label="Straße & Hausnummer"
           name="adresse_strasse"
-          defaultValue={props.adresse_strasse}
+          defaultValue={props.adresse_strasse ?? ''}
         />
         <div className="grid grid-cols-3 gap-3">
-          <Input
+          <TextField
             label="PLZ"
             name="adresse_plz"
-            defaultValue={props.adresse_plz}
+            defaultValue={props.adresse_plz ?? ''}
           />
           <div className="col-span-2">
-            <Input
+            <TextField
               label="Ort"
               name="adresse_ort"
-              defaultValue={props.adresse_ort}
+              defaultValue={props.adresse_ort ?? ''}
             />
           </div>
         </div>
 
-        {/* Kleinunternehmer-Toggle */}
+        {/* Kleinunternehmer-Toggle (Checkbox -> ratchet-neutral) */}
         <label className="flex items-start gap-3 cursor-pointer">
           <input
             type="checkbox"
@@ -289,7 +241,9 @@ function ProfilCard(props: WerkstattSettingsProps) {
         </label>
 
         <div className="flex items-center gap-2 pt-2">
-          <SaveButton state={{ status: isPending ? 'saving' : state.status }} />
+          <Button variant="navy" type="submit" loading={isPending}>
+            Speichern
+          </Button>
           <SaveFeedback state={state} />
         </div>
       </form>
@@ -337,10 +291,10 @@ function BankCard(props: WerkstattSettingsProps) {
           if (t?.name === 'bank_iban') setIbanTouched(true)
         }}
       >
-        <Input
-          label="IBAN"
+        <TextField
+          label={fieldLabel('IBAN', true)}
           name="bank_iban"
-          defaultValue={props.bank_iban}
+          defaultValue={props.bank_iban ?? ''}
           required
           placeholder="DE89 3704 0044 0532 0130 00"
         />
@@ -351,21 +305,23 @@ function BankCard(props: WerkstattSettingsProps) {
           </p>
         ) : null}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Input
+          <TextField
             label="BIC"
             name="bank_bic"
-            defaultValue={props.bank_bic}
+            defaultValue={props.bank_bic ?? ''}
             placeholder="COBADEFFXXX"
           />
-          <Input
-            label="Kontoinhaber"
+          <TextField
+            label={fieldLabel('Kontoinhaber', true)}
             name="bank_kontoinhaber"
-            defaultValue={props.bank_kontoinhaber}
+            defaultValue={props.bank_kontoinhaber ?? ''}
             required
           />
         </div>
         <div className="flex items-center gap-2 pt-2">
-          <SaveButton state={{ status: isPending ? 'saving' : state.status }} />
+          <Button variant="navy" type="submit" loading={isPending}>
+            Speichern
+          </Button>
           <SaveFeedback state={state} />
         </div>
       </form>
@@ -407,40 +363,36 @@ function PasswortCard() {
       subtitle="Mindestens 8 Zeichen, eine Ziffer und ein Buchstabe."
     >
       <form onSubmit={handleSubmit} className="space-y-3">
-        <Input
-          label="Aktuelles Passwort"
+        <TextField
+          label={fieldLabel('Aktuelles Passwort', true)}
           name="current"
           type="password"
           required
           autoComplete="current-password"
         />
-        <Input
-          label="Neues Passwort"
+        <TextField
+          label={fieldLabel('Neues Passwort', true)}
           name="next"
           type="password"
           required
           autoComplete="new-password"
         />
-        <Input
-          label="Neues Passwort bestätigen"
+        <TextField
+          label={fieldLabel('Neues Passwort bestätigen', true)}
           name="confirm"
           type="password"
           required
           autoComplete="new-password"
         />
         <div className="flex items-center gap-2 pt-2">
-          <button
+          <Button
+            variant="navy"
             type="submit"
-            disabled={isPending}
-            className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-claimondo-navy text-white text-sm font-semibold hover:bg-claimondo-shield disabled:opacity-50"
+            loading={isPending}
+            iconLeft={<KeyRoundIcon width={14} height={14} />}
           >
-            {isPending ? (
-              <Loader2Icon width={14} height={14} className="animate-spin" />
-            ) : (
-              <KeyRoundIcon width={14} height={14} />
-            )}
             Passwort ändern
-          </button>
+          </Button>
           <SaveFeedback state={state} />
         </div>
       </form>
@@ -458,13 +410,9 @@ function LogoutCard() {
       subtitle="Session auf diesem Gerät beenden."
     >
       <form action="/api/auth/logout" method="POST">
-        <button
-          type="submit"
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm font-semibold text-claimondo-navy hover:border-claimondo-ondo"
-        >
-          <LogOutIcon width={14} height={14} />
+        <Button variant="ghost" type="submit" iconLeft={<LogOutIcon width={14} height={14} />}>
           Jetzt abmelden
-        </button>
+        </Button>
       </form>
     </SettingsSectionCard>
   )
