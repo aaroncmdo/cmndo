@@ -48,6 +48,20 @@ describe('darstellePositionen', () => {
     expect(r.positionen.find((p) => p.key === 'reparatur')!.hinweis).toMatch(/Selbstbeteiligung/i)
   })
 
+  it('selbst: Verbringung gilt als gedeckt (Teil der Reparatur), Nutzungsausfall nicht', () => {
+    const mitVerbringung: AnspruchPosition[] = [
+      { typ: 'reparatur', label: 'Reparaturkosten', minEur: 1000, maxEur: 2000 },
+      { typ: 'verbringung', label: 'Verbringungskosten', minEur: 130, maxEur: 130 },
+      { typ: 'nutzungsausfall', label: 'Nutzungsausfall', minEur: 300, maxEur: 500 },
+    ]
+    const r = darstellePositionen({ positionen: mitVerbringung, schuld: 'selbst' }, 'X')
+    expect(r.positionen.find((p) => p.key === 'verbringung')!.art).toBe('betrag')
+    expect(r.positionen.find((p) => p.key === 'nutzungsausfall')!.art).toBe('nicht_gedeckt')
+    // Summe = reparatur 1000..2000 + verbringung 130 = 1130..2130
+    expect(r.gesamt.minEur).toBe(1130)
+    expect(r.gesamt.maxEur).toBe(2130)
+  })
+
   it('kein schuld-Feld -> Fallback unverschuldet', () => {
     const r = darstellePositionen({ positionen: POSITIONEN }, 'X')
     expect(artFuer(r, 'gutachterkosten')).toBe('gegner')

@@ -42,7 +42,8 @@ export function darstellePositionen(
 
   const positionen: PositionsDarstellung[] = spanne.positionen.map((p): PositionsDarstellung => {
     if (schuld === 'selbst') {
-      if (p.typ === 'reparatur') {
+      // Fahrzeugschaden + Verbringung (Teil der Reparatur) traegt die Vollkasko (abzgl. SB); alles andere nicht.
+      if (p.typ === 'reparatur' || p.typ === 'verbringung') {
         return { key: p.typ, label: p.label, hinweis: 'über Ihre Vollkasko, abzüglich Selbstbeteiligung', art: 'betrag', minEur: p.minEur, maxEur: p.maxEur }
       }
       return { key: p.typ, label: p.label, hinweis: 'über die Kasko meist nicht', art: 'nicht_gedeckt', minEur: p.minEur, maxEur: p.maxEur }
