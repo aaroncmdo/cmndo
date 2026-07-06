@@ -117,6 +117,20 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'nachbesichtigung_ergebnis',
   'kuerzungs_betrag',
   'regulierung_betrag',
+  // KB-Prozess-Tab-Inputs: fehlten in der Allowlist -> die Inline-Edits in AsSection/
+  // VsReaktionSection/AuszahlungSection brachen mit "nicht in Allowlist" ab (Save = roter
+  // Fehler, nichts gespeichert). Routing + Berechtigung DB-verifiziert:
+  //   as_geforderte_summe/anschlussschreiben_am/vs_quote_grund/vs_kuerzungs_typ
+  //     -> kanzlei_faelle (KANZLEI_FAELLE_COLS -> upsertKanzleiFall, stammdaten.ts:573)
+  //   auszahlung_gutachter_eingegangen_am -> claims (CLAIM_OWNED_DUPLICATE_COLUMNS -> split)
+  // canEditField: KB/Admin haben kein Field-Whitelist (helpers.ts:97) -> ok.
+  // NICHT hier: auszahlung_kunde_betrag/_eingegangen_am = KEINE DB-Spalte (gehoeren als
+  // claim_payments-Row empfaenger='kunde') -> eigener Fix (Payment-Routing + View-Read).
+  'as_geforderte_summe',
+  'anschlussschreiben_am',
+  'vs_quote_grund',
+  'vs_kuerzungs_typ',
+  'auszahlung_gutachter_eingegangen_am',
   // Notizen
   'notizen',
   // AAR-313: Nutzungsausfall + Mietwagen-Kanzlei-Kommunikation
