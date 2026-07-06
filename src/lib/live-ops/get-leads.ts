@@ -113,8 +113,34 @@ export async function getLeads(scope: LiveOpsScope): Promise<LeadPin[]> {
       ort,
       kanal: raw.source_channel ?? null,
       erstelltAm: raw.created_at ?? new Date(0).toISOString(),
+      hasActiveTermin: false,
     })
   }
 
-  return pins
+  // Aktive Termine (bereits zugewiesen) — separater READ, kein Join (Cardinality-sauber).
+  // DB-Constraint gutachter_termine_status_check (verifiziert 2026-07-05, projekt paizkjajbuxxksdoycev):
+  //   Domain = reserviert | bestaetigt | gegenvorschlag | dispatch_pending | verschoben |
+  //            verlegt | verlegung_pending | abgeschlossen |
+  //            storniert | abgelehnt | abgesagt | sv_gesucht
+  //
+  // "nicht zugewiesen / terminal" = reserveSvTerminForLead behandelt diese als nicht-blockierend
+  // (AAR-607 B3, sv-termin.ts Z.186): storniert, abgelehnt, abgesagt.
+  // Zusaetzlich: sv_gesucht = kein SV zugewiesen -> ebenfalls re-assignbar.
+  // Muss konsistent mit reserveSvTerminForLead (NOT-IN-Liste dort) bleiben.
+  const TERMINAL_STATUS = '("storniert","abgelehnt","abgesagt","sv_gesucht")'
+  const leadIds = pins.map((p) => p.id)
+  const activeLeadIds = new Set<string>()
+  if (leadIds.length > 0) {
+    const { data: termine } = await supabase
+      .from('gutachter_termine')
+      .select('lead_id, status')
+      .in('lead_id', leadIds)
+      .not('status', 'in', TERMINAL_STATUS)
+    for (const t of termine ?? []) if (t.lead_id) activeLeadIds.add(t.lead_id as string)
+  }
+  return applyHasActiveTermin(pins, activeLeadIds)
+}
+
+export function applyHasActiveTermin(pins: LeadPin[], activeLeadIds: Set<string>): LeadPin[] {
+  return pins.map((p) => ({ ...p, hasActiveTermin: activeLeadIds.has(p.id) }))
 }

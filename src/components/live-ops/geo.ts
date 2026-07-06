@@ -165,6 +165,56 @@ export function leadsFC(leads: LeadPin[]): GeoJSON.FeatureCollection {
 }
 
 /**
+ * Kandidaten-Halos fuer die Assign-from-Map-Interaktion.
+ * Nur SVs die in candidateIds enthalten sind UND einen gueltigen Standort haben.
+ */
+export function candidateHaloFC(svs: SvLiveOps[], candidateIds: string[]): GeoJSON.FeatureCollection {
+  const set = new Set(candidateIds)
+  return {
+    type: 'FeatureCollection',
+    features: svs
+      .filter((s) => set.has(s.id) && s.standortLat != null && s.standortLng != null)
+      .map((s) => ({
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [s.standortLng as number, s.standortLat as number],
+        },
+        properties: {
+          __id: s.id,
+          __type: 'candidate',
+          svId: s.id,
+        },
+      })),
+  }
+}
+
+/**
+ * Verbindungslinie vom geklickten Lead zum gewaehlten SV-Kandidaten.
+ * Gibt 0 Features zurueck wenn from oder to fehlen (null).
+ * Koordinaten sind immer [lng, lat].
+ */
+export function assignLineFC(
+  from: [number, number] | null,
+  to: [number, number] | null,
+): GeoJSON.FeatureCollection {
+  if (!from || !to) return { type: 'FeatureCollection', features: [] }
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        type: 'Feature' as const,
+        geometry: {
+          type: 'LineString' as const,
+          coordinates: [from, to],
+        },
+        properties: {},
+      },
+    ],
+  }
+}
+
+/**
  * Isochrone-Polygone. Nur SVs mit `isochrone`-Payload werden inkludiert.
  */
 export function isochroneFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
