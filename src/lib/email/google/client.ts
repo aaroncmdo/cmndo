@@ -31,6 +31,14 @@ type SendEmailOpts = {
   template?: string
   /** One-Click-Abmelde-URL → List-Unsubscribe-Header (UWG/Gmail-Bulk-Anforderung). */
   listUnsubscribe?: string
+  /**
+   * Umgeht die Send-Isolation fuer interne/Test-Adressen (@claimondo.de etc.). NUR fuer
+   * explizit admin-ausgeloeste, transaktionale 1:1-Mails setzen, deren interner Empfaenger
+   * die GEWOLLTE Zielperson ist (z.B. Werkstatt-/Partner-Login-Zugang) — NICHT fuer Funnel-/
+   * Matching-/Reminder-Sends (dort schuetzt die Isolation echte SVs vor Test-Leads). Der
+   * SIDE_EFFECT-Dry-Run-Gate bleibt unberuehrt (Smoke-Runs unterdruecken weiterhin).
+   */
+  allowInternalRecipient?: boolean
 }
 
 export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: string }> {
@@ -55,7 +63,10 @@ export async function sendEmail(opts: SendEmailOpts): Promise<{ messageId: strin
     // Send-Isolation (2026-07-03): im Live-Modus interne/Test-Empfaenger (@claimondo.de etc.)
     // nie real anmailen — letzte Verteidigungslinie neben dem Booking-Guard. NUR live, damit
     // test-recipient (bewusste Umleitung an Test-Inbox) nicht faelschlich unterdrueckt wird.
-    if (se.mode === 'live') {
+    // Ausnahme: allowInternalRecipient (admin-getriggerte 1:1-Transaktionsmail an den
+    // Empfaenger selbst, z.B. Werkstatt-Login) — dort ist die interne Adresse die gewollte
+    // Zielperson, kein Bystander-SV. Der Funnel-/Matching-/Reminder-Schutz bleibt intakt.
+    if (se.mode === 'live' && !opts.allowInternalRecipient) {
       const empfaenger = Array.isArray(opts.to) ? opts.to : [opts.to]
       const externe = nurExterneEmpfaenger(empfaenger)
       if (externe.length === 0) {
