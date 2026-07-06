@@ -42,6 +42,7 @@ const makeTermin = (overrides: Partial<TerminPin> = {}): TerminPin => ({
   adresse: 'Musterstr. 1, 80331 Muenchen',
   claimNummer: 'CLM-2026-00001',
   fallId: 'fall-uuid-1',
+  etaMin: null,
   ...overrides,
 })
 
@@ -139,6 +140,18 @@ describe('terminPinsFC', () => {
     const t = makeTermin({ fallId: null })
     const f = terminPinsFC([t]).features[0]
     expect(f.properties?.fallId).toBeNull()
+  })
+
+  it('setzt etaMin in properties wenn nicht null', () => {
+    const t = makeTermin({ etaMin: 25 })
+    const f = terminPinsFC([t]).features[0]
+    expect(f.properties?.etaMin).toBe(25)
+  })
+
+  it('laesst etaMin weg wenn null (Layer-Filter greift)', () => {
+    const t = makeTermin({ etaMin: null })
+    const f = terminPinsFC([t]).features[0]
+    expect('etaMin' in (f.properties ?? {})).toBe(false)
   })
 })
 

@@ -33,6 +33,10 @@ import {
   Td,
   DataTableContainer,
 } from '@/components/shared/DataTable'
+import {
+  PartnerGutschriftenListe,
+  type EigeneGutschrift,
+} from '@/components/shared/finance/PartnerGutschriftenListe'
 
 const EUR = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -163,7 +167,13 @@ function exportCsv(rows: MaklerProvisionRow[], monthIso: string) {
   URL.revokeObjectURL(url)
 }
 
-export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
+export function MaklerAbrechnungen({
+  data,
+  gutschriften = [],
+}: {
+  data: MaklerAbrechnungsData
+  gutschriften?: EigeneGutschrift[]
+}) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
 
@@ -370,6 +380,9 @@ export function MaklerAbrechnungen({ data }: { data: MaklerAbrechnungsData }) {
           </DataTableContainer>
         )}
       </section>
+
+      {/* Eigene Gutschriften — wird nur angezeigt wenn mind. eine vorhanden ist */}
+      <PartnerGutschriftenListe gutschriften={gutschriften} />
     </div>
   )
 }

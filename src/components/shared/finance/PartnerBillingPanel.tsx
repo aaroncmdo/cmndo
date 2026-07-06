@@ -4,6 +4,7 @@ import { useState, useTransition } from 'react'
 import { Button } from '@/components/primitives/Button'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { TextField } from '@/components/shared/forms/TextField'
 import {
   DataTableContainer,
   Table,
@@ -20,6 +21,8 @@ import {
   zahleProvisionAus,
   storniere,
   setzePartnerUstStatus,
+  setzePartnerSteuerdaten,
+  getPartnerGutschriftDownloadUrl,
 } from '@/lib/finance/partner-billing-actions'
 import type { PartnerBillingRow } from '@/lib/finance/partner-billing'
 import type { PartnerBillingPanelProps } from './PartnerBillingPanel.types'
@@ -76,7 +79,13 @@ function AktionMeldung({ ok, error }: { ok: boolean; error?: string }) {
 }
 
 /** Aktions-Buttons einer einzelnen Zeile. */
-function ZeilenAktionen({ row }: { row: PartnerBillingRow }) {
+function ZeilenAktionen({
+  row,
+  gutschriftLedgerKeys,
+}: {
+  row: PartnerBillingRow
+  gutschriftLedgerKeys: string[]
+}) {
   const [isPending, startTransition] = useTransition()
   const [meldung, setMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
 
@@ -90,10 +99,39 @@ function ZeilenAktionen({ row }: { row: PartnerBillingRow }) {
 
   const { richtung, status_norm, quelle_tabelle, quelle_id, ust_status_bekannt } = row
 
+  const hatGutschrift =
+    richtung === 'auszahlung' &&
+    status_norm === 'erledigt' &&
+    gutschriftLedgerKeys.includes(`${quelle_tabelle}:${quelle_id}`)
+
   const zeigeKeinAktion =
     status_norm === 'erledigt' || status_norm === 'storniert'
 
   if (zeigeKeinAktion) {
+    if (hatGutschrift) {
+      return (
+        <div className="flex flex-wrap items-center gap-1.5">
+          <Button
+            size="sm"
+            variant="ghost"
+            loading={isPending}
+            onClick={() =>
+              fuehreAus(async () => {
+                const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id)
+                if (res.ok) {
+                  window.open(res.url, '_blank')
+                  return { ok: true }
+                }
+                return { ok: false, error: res.error }
+              })
+            }
+          >
+            Gutschrift ↓
+          </Button>
+          {meldung && !meldung.ok && <AktionMeldung {...meldung} />}
+        </div>
+      )
+    }
     return <span className="text-xs text-claimondo-ondo/50">—</span>
   }
 
@@ -210,6 +248,8 @@ export function PartnerBillingPanel({
   aggregat,
   showPartnerColumn = false,
   ustToggle,
+  steuerdaten,
+  gutschriftLedgerKeys = [],
 }: PartnerBillingPanelProps) {
   const [ustPending, startUstTransition] = useTransition()
   const [ustMeldung, setUstMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
@@ -220,6 +260,28 @@ export function PartnerBillingPanel({
     startUstTransition(async () => {
       const result = await setzePartnerUstStatus(ustToggle.partnerTyp, ustToggle.partnerId, value)
       setUstMeldung(result)
+    })
+  }
+
+  // Steuerdaten-State (editable variant)
+  const [stUstId, setStUstId] = useState(steuerdaten?.current.ust_id ?? '')
+  const [stStrasse, setStStrasse] = useState(steuerdaten?.current.adresse_strasse ?? '')
+  const [stPlz, setStPlz] = useState(steuerdaten?.current.adresse_plz ?? '')
+  const [stOrt, setStOrt] = useState(steuerdaten?.current.adresse_ort ?? '')
+  const [steuerdatenPending, startSteuerdatenTransition] = useTransition()
+  const [steuerdatenMeldung, setSteuerdatenMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
+
+  const handleSteuerdatenSpeichern = () => {
+    if (!steuerdaten) return
+    setSteuerdatenMeldung(null)
+    startSteuerdatenTransition(async () => {
+      const result = await setzePartnerSteuerdaten(steuerdaten.partnerTyp, steuerdaten.partnerId, {
+        ust_id: stUstId,
+        adresse_strasse: stStrasse,
+        adresse_plz: stPlz,
+        adresse_ort: stOrt,
+      })
+      setSteuerdatenMeldung(result)
     })
   }
 
@@ -349,7 +411,7 @@ export function PartnerBillingPanel({
                       </StatusBadge>
                     </Td>
                     <Td className="px-4">
-                      <ZeilenAktionen row={row} />
+                      <ZeilenAktionen row={row} gutschriftLedgerKeys={gutschriftLedgerKeys} />
                     </Td>
                   </Tr>
                 )
@@ -388,6 +450,72 @@ export function PartnerBillingPanel({
             </Button>
             {ustMeldung && <AktionMeldung {...ustMeldung} />}
           </div>
+        </SectionCard>
+      )}
+
+      {/* Steuerdaten des Partners */}
+      {steuerdaten && (
+        <SectionCard title="Steuerdaten des Partners">
+          {steuerdaten.readOnly ? (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-semibold text-claimondo-shield">USt-IdNr.</span>
+                <span className="text-sm text-claimondo-navy">{steuerdaten.current.ust_id ?? '—'}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-semibold text-claimondo-shield">Straße</span>
+                <span className="text-sm text-claimondo-navy">{steuerdaten.current.adresse_strasse ?? '—'}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-semibold text-claimondo-shield">PLZ</span>
+                <span className="text-sm text-claimondo-navy">{steuerdaten.current.adresse_plz ?? '—'}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-xs font-semibold text-claimondo-shield">Ort</span>
+                <span className="text-sm text-claimondo-navy">{steuerdaten.current.adresse_ort ?? '—'}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <TextField
+                  label="USt-IdNr."
+                  value={stUstId}
+                  onChange={(e) => setStUstId(e.target.value)}
+                  placeholder="DE123456789"
+                />
+                <TextField
+                  label="Straße"
+                  value={stStrasse}
+                  onChange={(e) => setStStrasse(e.target.value)}
+                  placeholder="Musterstraße 1"
+                />
+                <TextField
+                  label="PLZ"
+                  value={stPlz}
+                  onChange={(e) => setStPlz(e.target.value)}
+                  placeholder="50667"
+                />
+                <TextField
+                  label="Ort"
+                  value={stOrt}
+                  onChange={(e) => setStOrt(e.target.value)}
+                  placeholder="Köln"
+                />
+              </div>
+              <div className="flex flex-wrap items-center gap-3">
+                <Button
+                  size="sm"
+                  variant="navy"
+                  loading={steuerdatenPending}
+                  onClick={handleSteuerdatenSpeichern}
+                >
+                  Speichern
+                </Button>
+                {steuerdatenMeldung && <AktionMeldung {...steuerdatenMeldung} />}
+              </div>
+            </div>
+          )}
         </SectionCard>
       )}
     </div>

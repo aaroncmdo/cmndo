@@ -59,6 +59,12 @@ const nextConfig: NextConfig = {
       'node_modules/pdf-parse/**/*',
       'node_modules/pdfjs-dist/**/*',
     ],
+    // QR-Pool-Flyer: die A5-Vorlage ins Standalone tracen, damit die Flyer-
+    // Server-Actions (generateFlyerPdf) sie auf dem VPS via
+    // process.cwd()/public/... finden — sonst fehlt das PDF im getraceten
+    // Standalone-Output (analog OCR-Force-Include oben).
+    '/admin/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    '/admin/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
   },
   // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
   // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).

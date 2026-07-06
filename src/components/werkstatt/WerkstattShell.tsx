@@ -3,12 +3,14 @@
 // AAR-956 WP-B (Task 9): Werkstatt-Portal-Shell.
 // Gespiegelt nach MaklerShell — thin-Wrapper ueber shared PortalNav (dark variant).
 
+import Link from 'next/link'
 import {
   LayoutDashboardIcon,
   ClipboardListIcon,
   QrCodeIcon,
   ReceiptIcon,
   LogOutIcon,
+  SettingsIcon,
   WrenchIcon,
   FileUpIcon,
   MessagesSquareIcon,
@@ -97,6 +99,13 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
               {/* Sidebar-Footer sitzt unten-links → Popover nach oben-rechts. */}
               <UpdatesNav variant="dark" placement="up-right" />
             </div>
+            <Link
+              href="/werkstatt/einstellungen"
+              className="flex w-full items-center gap-3 rounded-ios-lg px-3 py-2.5 text-sm text-claimondo-light-blue transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <SettingsIcon style={{ width: 17, height: 17 }} />
+              Einstellungen
+            </Link>
             <form action="/api/auth/logout" method="POST">
               <button
                 type="submit"

@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import FaelleKanban from './FaelleKanban'
@@ -291,6 +292,16 @@ export default async function AdminFaellePage() {
     <>
       {/* CMM-33: Live-Aktualisierung der KB-Upload-Badge ohne manuellen Reload */}
       <KanbanUploadsRealtime fallIds={renderedFallIds} />
+      {/* Route-Reachability-Audit 06.07.: /admin/faelle/anlegen war gebaut, aber ohne
+          jeden UI-Einstieg (kein Button/Link) -> Admin konnte per UI keinen Fall anlegen. */}
+      <div className="mb-3 flex justify-end">
+        <Link
+          href="/admin/faelle/anlegen"
+          className="inline-flex items-center gap-1 rounded-ios-lg bg-claimondo-ondo px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-claimondo-navy"
+        >
+          + Fall anlegen
+        </Link>
+      </div>
       <FaelleKanban faelle={enriched} />
     </>
   )

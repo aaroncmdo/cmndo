@@ -12,13 +12,13 @@
 // Client-Modal als auch von der Server-Action importiert.
 
 export const ALLOWED_STATUS_VALUES = [
-  // Welle-7 Werte (claims.status via AAR-854 Trigger)
+  // NUR fall_status-Enum-gueltige Werte: der Override schreibt claims.operative_status, und
+  // v_claim_base castet ::fall_status -> ein enum-fremder Wert wirft bei JEDEM Read
+  // 'invalid input value for enum fall_status' und reisst die ganze Akte + alle Portale runter.
+  // Die frueheren claims.status-Namen (in_bearbeitung/vs_kontakt/reguliert/abgelehnt/kanzlei) sind
+  // KEINE fall_status-Enum-Werte -> entfernt. Terminale claims.status-Aenderungen laufen ueber die
+  // Endzustand-Actions (markClaimAsReguliert etc.), nicht ueber den operative_status-Override.
   'onboarding',
-  'in_bearbeitung',
-  'vs_kontakt',
-  'reguliert',
-  'abgelehnt',
-  'kanzlei',
   'storniert',
   // Welle-6 Werte (Backward-Compat für ältere Fälle)
   'ersterfassung',

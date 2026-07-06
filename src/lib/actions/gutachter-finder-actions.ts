@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
@@ -318,6 +319,12 @@ export async function erstelleGutachterFinderAnfrage(
 
   const anfrageId = data.id
 
+  // Send-Isolation (interne-identitaet.ts): interne/Test-Anfragen (@claimondo.de, Test-Marker im
+  // Namen/Email) loesen KEINEN Dispatch-Task + KEINE Team-WhatsApp aus — sonst spammen die
+  // Gruender-Live-Tests das Team (dokumentierter Dauer-Fall). Der gfa/Lead entsteht trotzdem,
+  // der Buchungspfad bleibt e2e-testbar.
+  const intern = istInterneIdentitaet(payload.email, `${payload.vorname} ${payload.nachname}`)
+
   // GA4-Conversions (fire-and-forget, consent-respektierend via gaClientId).
   // generate_lead immer; sa_signed wenn die SA direkt im Wizard unterzeichnet wurde.
   void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'gutachter_finder' } })
@@ -406,7 +413,7 @@ export async function erstelleGutachterFinderAnfrage(
       icon: '📞',
     }))
 
-    if (mitteilungen.length > 0) {
+    if (mitteilungen.length > 0 && !intern) {
       await admin.from('mitteilungen').insert(mitteilungen)
     }
   } catch (taskErr) {
@@ -436,7 +443,7 @@ export async function erstelleGutachterFinderAnfrage(
     ]
       .filter(Boolean)
       .join('\n')
-    await notifyTeamWhatsApp(teamText)
+    if (!intern) await notifyTeamWhatsApp(teamText)
   } catch (waErr) {
     console.error('[AAR-956] Team-WA (Gutachter-Finder) fehlgeschlagen:', waErr)
   }

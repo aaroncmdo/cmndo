@@ -42,13 +42,8 @@ export function svPinsFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
 export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
-    features: termine.map((t) => ({
-      type: 'Feature' as const,
-      geometry: {
-        type: 'Point' as const,
-        coordinates: [t.lng, t.lat],
-      },
-      properties: {
+    features: termine.map((t) => {
+      const props: Record<string, unknown> = {
         __id: t.id,
         __type: 'termin',
         status: t.status,
@@ -58,8 +53,20 @@ export function terminPinsFC(termine: TerminPin[]): GeoJSON.FeatureCollection {
         startZeit: t.startZeit,
         claimNummer: t.claimNummer,
         fallId: t.fallId,
-      },
-    })),
+      }
+      // etaMin nur setzen wenn vorhanden — Layer-Filter ['has','etaMin'] greift sonst nicht
+      if (t.etaMin != null) {
+        props.etaMin = t.etaMin
+      }
+      return {
+        type: 'Feature' as const,
+        geometry: {
+          type: 'Point' as const,
+          coordinates: [t.lng, t.lat],
+        },
+        properties: props,
+      }
+    }),
   }
 }
 
@@ -141,8 +148,10 @@ export function tagesroutenFC(tagesrouten: TagesRoute[]): GeoJSON.FeatureCollect
 
 /**
  * Lead-Pins fuer die LiveOps-Karte (offene, lokalisierte Leads).
+ * gapIds: optionale Menge von Lead-IDs ohne deckende SV-Isochrone.
+ * Abwaertskompatibel — bestehende Aufrufer ohne gapIds erhalten __gap=0.
  */
-export function leadsFC(leads: LeadPin[]): GeoJSON.FeatureCollection {
+export function leadsFC(leads: LeadPin[], gapIds?: Set<string>): GeoJSON.FeatureCollection {
   return {
     type: 'FeatureCollection',
     features: leads.map((lead) => ({
@@ -159,6 +168,7 @@ export function leadsFC(leads: LeadPin[]): GeoJSON.FeatureCollection {
         ort: lead.ort,
         kanal: lead.kanal,
         erstelltAm: lead.erstelltAm,
+        __gap: gapIds?.has(lead.id) ? 1 : 0,
       },
     })),
   }
