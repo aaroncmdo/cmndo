@@ -3,6 +3,8 @@
 // greift, da authentifizierter User-Client). embed_sites fehlt in database.types.ts
 // → Cast-Idiom (wie /api/embed/config/route.ts).
 
+import Link from 'next/link'
+import { InboxIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import PageHeader from '@/components/shared/PageHeader'
 import EmbedSitesList, { type EmbedSiteListRow } from './EmbedSitesList'
@@ -25,7 +27,20 @@ export default async function EmbedSitesPage() {
       <PageHeader
         title="Embed-Sites"
         size="lg"
-        actions={<span className="text-sm text-claimondo-ondo">{sites.length} Sites</span>}
+        actions={
+          <div className="flex items-center gap-3">
+            <span className="text-sm text-claimondo-ondo">{sites.length} Sites</span>
+            {/* Route-Reachability-Audit 06.07.: die SV-Lead-Inbox (/embed/anfragen) war
+                nirgends verlinkt — nur per direkter URL erreichbar. Einstieg vom Embed-Hub. */}
+            <Link
+              href="/gutachter/einstellungen/embed/anfragen"
+              className="inline-flex items-center gap-1 rounded-ios-lg bg-claimondo-ondo px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-claimondo-navy"
+            >
+              <InboxIcon className="w-4 h-4" />
+              Anfragen
+            </Link>
+          </div>
+        }
       />
       <EmbedSitesList sites={sites} />
     </div>
