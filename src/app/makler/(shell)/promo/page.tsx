@@ -2,6 +2,7 @@
 // Landing-Link + QR + Share-Buttons + Tracking-Stats + Landing-Preview.
 
 import QRCode from 'qrcode'
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import {
   getCurrentMakler,
@@ -47,12 +48,24 @@ export default async function PromoPage() {
   const qrSvg = await buildQrSvg(landingUrl)
 
   return (
-    <MaklerPromo
-      code={code.code}
-      landingUrl={landingUrl}
-      qrSvg={qrSvg}
-      stats={stats}
-      firma={makler.firma}
-    />
+    <>
+      {/* Reachability: der Willkommens-/Erste-Schritte-Guide (/makler/willkommen) war
+          nach Onboarding nur per Direkt-URL erreichbar — hier der intendierte Re-Entry. */}
+      <div className="mb-4">
+        <Link
+          href="/makler/willkommen"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-claimondo-ondo hover:underline"
+        >
+          Erste Schritte erneut ansehen →
+        </Link>
+      </div>
+      <MaklerPromo
+        code={code.code}
+        landingUrl={landingUrl}
+        qrSvg={qrSvg}
+        stats={stats}
+        firma={makler.firma}
+      />
+    </>
   )
 }
