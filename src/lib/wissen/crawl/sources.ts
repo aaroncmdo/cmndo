@@ -48,6 +48,24 @@ export const B2B_CRAWL_SOURCES: CrawlSource[] = [
     url: 'https://www.captain-huk.de/feed/',
   },
 
+  // recht — Fachanwalt-Verkehrsrecht-Blog mit tagesaktuellen Urteilsbesprechungen (BGH VI ZR
+  // Schadensrecht, OLG/AG-Urteile mit Az; 2026-07-06 live verifiziert, 10 Items durchgaengig on-topic).
+  {
+    name: 'Schadenfix-Blog',
+    category: 'recht',
+    kind: 'rss',
+    url: 'https://schadenfixblog.de/feed/',
+  },
+
+  // sv_verband — Kfz-Sachverstaendigenbuero-Blog: Kern-Schadenregulierung (Quotenvorrecht,
+  // Neuwertentschaedigung, Verbringungskosten/UPE, Restwert; 2026-07-06 live verifiziert, on-topic).
+  {
+    name: 'Gollenstede-SV',
+    category: 'sv_verband',
+    kind: 'rss',
+    url: 'https://gollenstede-sachverstand.de/feed/',
+  },
+
   // versicherung — Versicherungs- und Makler-Branchennews (breit; KI-Backstop filtert Nicht-Kfz)
   {
     name: 'Versicherungsbote',
