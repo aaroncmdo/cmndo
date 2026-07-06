@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getLeadPriceFromTable, isCaseInKontingent } from './calculate-lead-price'
+import { FINANCE } from '@/lib/finance/constants'
 
 /**
  * KFZ-149: Per-case Guthaben-Verrechnung (atomar).
@@ -73,7 +74,7 @@ export async function processCaseBilling(fallId: string): Promise<{
   const currentGuthaben = Number(sv?.werbebudget_guthaben_netto ?? 0)
 
   // Guthaben-Abzug: nur im Kontingent, max 150
-  const guthabenAbzug = imKontingent ? Math.min(150, currentGuthaben) : 0
+  const guthabenAbzug = imKontingent ? Math.min(FINANCE.ANZAHLUNG_PRO_KONTINGENT, currentGuthaben) : 0
   const nachzahlung = leadPreis - guthabenAbzug
   const guthabenNeu = currentGuthaben - guthabenAbzug
 
