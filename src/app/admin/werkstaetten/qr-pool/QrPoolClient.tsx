@@ -11,6 +11,7 @@ import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
+import { QrCodeDownloads, BulkDownloads } from '@/components/werkstatt/QrPoolDownload'
 import { generateQrPoolBatch, weiseQrPoolCodeZu } from '../qr-pool-actions'
 
 export type PoolCode = {
@@ -44,6 +45,7 @@ export function QrPoolClient({
   const frei = codes.filter((c) => c.status === 'frei').length
   const zugewiesen = codes.filter((c) => c.status === 'zugewiesen').length
   const chargen = Array.from(new Set(codes.map((c) => c.charge).filter((c): c is string => !!c)))
+  const freeTokens = codes.filter((c) => c.status === 'frei').map((c) => c.token)
 
   async function erzeuge() {
     if (anzahl < 1 || anzahl > 200) {
@@ -145,7 +147,7 @@ export function QrPoolClient({
         </div>
       </SectionCard>
 
-      <SectionCard title="Drucken">
+      <SectionCard title="QR-Codes anzeigen & herunterladen">
         <div className="space-y-3">
           <a
             href="/admin/werkstaetten/qr-pool/drucken?status=frei"
@@ -153,21 +155,25 @@ export function QrPoolClient({
             rel="noreferrer"
             className="inline-flex text-body-sm font-medium text-claimondo-ondo underline"
           >
-            Alle freien Codes drucken →
+            Alle freien QRs anzeigen →
           </a>
+          <BulkDownloads tokens={freeTokens} />
           {chargen.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {chargen.map((ch) => (
-                <a
-                  key={ch}
-                  href={`/admin/werkstaetten/qr-pool/drucken?charge=${encodeURIComponent(ch)}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-ios-lg border border-claimondo-border px-3 py-1.5 text-body-sm text-claimondo-navy hover:border-claimondo-ondo"
-                >
-                  {ch}
-                </a>
-              ))}
+            <div className="space-y-1.5 pt-1">
+              <p className="text-body-xs text-claimondo-ondo">Nach Charge anzeigen:</p>
+              <div className="flex flex-wrap gap-2">
+                {chargen.map((ch) => (
+                  <a
+                    key={ch}
+                    href={`/admin/werkstaetten/qr-pool/drucken?charge=${encodeURIComponent(ch)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-ios-lg border border-claimondo-border px-3 py-1.5 text-body-sm text-claimondo-navy hover:border-claimondo-ondo"
+                  >
+                    {ch}
+                  </a>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -188,6 +194,7 @@ export function QrPoolClient({
                 <StatusBadge tone={STATUS_TONE[c.status] ?? 'neutral'} size="xs">
                   {c.status}
                 </StatusBadge>
+                <QrCodeDownloads token={c.token} />
               </div>
             ))
           )}
