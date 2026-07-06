@@ -7,7 +7,6 @@ import {
   LayoutDashboardIcon,
   ClipboardListIcon,
   QrCodeIcon,
-  HandshakeIcon,
   ReceiptIcon,
   LogOutIcon,
   WrenchIcon,
@@ -36,7 +35,6 @@ const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt/anfragen', label: 'Offene Anfragen', icon: InboxIcon },
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
-  { href: '/werkstatt/vermittlungen', label: 'Meine Vermittlungen', icon: HandshakeIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 

@@ -200,45 +200,6 @@ export async function getWerkstattStaffelBoni(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Meine Vermittlungen (KVA-Leads + Funnel-Status) — leak-safe via SECURITY-DEFINER-RPC
-// ─────────────────────────────────────────────────────────────────────────────
-
-export type WerkstattVermittlungStatus = 'eingegangen' | 'beauftragt' | 'reparatur_freigegeben' | 'storniert'
-
-export type WerkstattVermittlung = {
-  lead_id: string
-  claim_id: string | null
-  kunde_name: string | null
-  fahrzeug: string | null
-  kennzeichen: string | null
-  kva_betrag: number | null
-  erstellt_am: string
-  status: WerkstattVermittlungStatus
-  reparatur_freigegeben_am: string | null
-}
-
-/** Leak-safe: self-scoped SECURITY-DEFINER-RPC (nur kuratierte Spalten, keine Kontaktdaten). */
-export async function getWerkstattVermittlungen(): Promise<WerkstattVermittlung[]> {
-  const supabase = await createClient()
-  // Funktion ist (noch) nicht in den generierten Types -> as never; sie ist in der DB live.
-  const { data, error } = await supabase.rpc('get_werkstatt_vermittlungen' as never)
-  if (error) {
-    console.error('[werkstatt] get_werkstatt_vermittlungen:', error.message)
-    return []
-  }
-  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
-    lead_id: r.lead_id as string,
-    claim_id: (r.claim_id as string | null) ?? null,
-    kunde_name: (r.kunde_name as string | null) ?? null,
-    fahrzeug: (r.fahrzeug as string | null) ?? null,
-    kennzeichen: (r.kennzeichen as string | null) ?? null,
-    kva_betrag: r.kva_betrag != null ? Number(r.kva_betrag) : null,
-    erstellt_am: r.erstellt_am as string,
-    status: (r.status as WerkstattVermittlungStatus) ?? 'eingegangen',
-    reparatur_freigegeben_am: (r.reparatur_freigegeben_am as string | null) ?? null,
-  }))
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // Auftraege — self-scoped via v_werkstatt_auftrag (SECURITY-DEFINER-View mit Gate
 // is_werkstatt_for_claim). Zeigt Gutachter + Besichtigungstermin + Fahrzeug (das,
