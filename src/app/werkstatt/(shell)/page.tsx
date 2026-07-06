@@ -3,11 +3,13 @@
 
 import { redirect } from 'next/navigation'
 import { getWerkstattByUserId, getWerkstattOverview, getWerkstattVermittlungsCount, getWerkstattStaffelStufen } from '@/lib/werkstatt/queries'
+import { getWerkstattLeads } from '@/lib/werkstatt/leads-queries'
 import {
   FolderCheckIcon,
   ClockIcon,
   CheckCircle2Icon,
   WalletIcon,
+  InboxIcon,
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
 import { WerkstattStaffelCard } from '@/components/werkstatt/WerkstattStaffelCard'
@@ -24,11 +26,13 @@ export default async function WerkstattUebersichtPage() {
   const werkstatt = await getWerkstattByUserId()
   if (!werkstatt) redirect('/login')
 
-  const [overview, vermittlung, stufen] = await Promise.all([
+  const [overview, vermittlung, stufen, offeneLeads] = await Promise.all([
     getWerkstattOverview(werkstatt.id),
     getWerkstattVermittlungsCount(werkstatt.id),
     getWerkstattStaffelStufen(werkstatt.id),
+    getWerkstattLeads(),
   ])
+  const offeneAnfragen = offeneLeads.length
 
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-6">
@@ -41,6 +45,18 @@ export default async function WerkstattUebersichtPage() {
           Provisions-Kennzahlen auf einen Blick.
         </p>
       </header>
+
+      {offeneAnfragen > 0 && (
+        <StatCard
+          label="Offene Anfragen"
+          value={offeneAnfragen}
+          icon={InboxIcon}
+          tone="navy"
+          filled
+          href="/werkstatt/anfragen"
+          hint="Kundendaten prüfen & vervollständigen →"
+        />
+      )}
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
