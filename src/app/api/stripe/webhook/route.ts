@@ -544,6 +544,35 @@ export async function POST(request: Request) {
         break
       }
 
+      case 'payment_intent.succeeded': {
+        // AAR (06.07. Bug-Audit): async erfolgreiche off_session-Einzuege verbuchen.
+        // Der abrechnung-einzug-Cron erstellt PIs mit confirm+off_session; bei SEPA/
+        // verzoegerter Zahlung ist der Erststatus 'processing' -> der Cron labelt
+        // 'fehlgeschlagen' + setzt einzug_versucht_am (Abrechnung faellt aus kuenftigen
+        // Cron-Laeufen). Wird der PI spaeter async 'succeeded', kam die Zahlung bisher
+        // NIE in der DB an (kein Handler) -> Abrechnung blieb dauerhaft 'fehlgeschlagen'/
+        // bezahlt_am=NULL trotz Geldeingang (5 verwaiste succeeded-Events in stripe_events).
+        // Jetzt: als bezahlt verbuchen (mirror von markPaid im Cron). Nur fuer Einzugs-PIs
+        // (metadata.abrechnung_id) — Onboarding-Anzahlungen laufen ueber checkout.session.
+        const pi = event.data.object
+        const meta = (pi.metadata ?? {}) as Record<string, string>
+        const abrId = meta.abrechnung_id ?? null
+        if (abrId) {
+          const nowIso = new Date().toISOString()
+          const betrag = Number(pi.amount_received ?? pi.amount ?? 0) / 100
+          // Idempotent: nur wenn noch nicht bezahlt -> ueberschreibt kein frueheres
+          // bezahlt_am, deckt Re-Delivery zusaetzlich zum stripe_events-Dedup oben ab.
+          await db.from('abrechnungen').update({
+            bezahlt_am: nowIso,
+            bezahlt_betrag: betrag,
+            einzug_fehler: null,
+            status: 'bezahlt',
+            updated_at: nowIso,
+          }).eq('id', abrId).neq('status', 'bezahlt')
+        }
+        break
+      }
+
       case 'charge.refunded': {
         const charge = event.data.object
         const meta = (charge.metadata ?? {}) as Record<string, string>
