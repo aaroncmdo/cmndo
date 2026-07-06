@@ -265,7 +265,10 @@ export async function cancelKbTermin(terminId: string): Promise<CancelResult> {
   const now = new Date().toISOString()
   const { error: updateErr } = await db
     .from('gutachter_termine')
-    .update({ status: 'kunde_storniert', cancelled_at: now })
+    // FIX (Status-Enum-Audit 05.07.): 'kunde_storniert' ist KEIN gueltiger
+    // gutachter_termine.status (CHECK) -> Update warf 400, Storno schlug fehl.
+    // 'storniert' = gueltiger Cancel-State; Kunde-Attribution via cancelled_am + Timeline.
+    .update({ status: 'storniert', cancelled_at: now })
     .eq('id', terminId)
 
   if (updateErr) return { ok: false, error: `Stornierung fehlgeschlagen: ${updateErr.message}` }
