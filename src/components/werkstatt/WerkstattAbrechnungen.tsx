@@ -21,11 +21,16 @@ import {
   DataTableContainer,
 } from '@/components/shared/DataTable'
 import { Card } from '@/components/primitives'
+import {
+  PartnerGutschriftenListe,
+  type EigeneGutschrift,
+} from '@/components/shared/finance/PartnerGutschriftenListe'
 
 type Props = {
   provisionen: WerkstattProvisionRow[]
   werkstattName: string
   boniSumme?: number
+  gutschriften?: EigeneGutschrift[]
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -97,7 +102,12 @@ function statusVisual(row: WerkstattProvisionRow): StatusVisual {
   }
 }
 
-export function WerkstattAbrechnungen({ provisionen, werkstattName, boniSumme = 0 }: Props) {
+export function WerkstattAbrechnungen({
+  provisionen,
+  werkstattName,
+  boniSumme = 0,
+  gutschriften = [],
+}: Props) {
   const total = provisionen.reduce((s, r) => s + r.betrag_netto_eur, 0)
   const offene = provisionen
     .filter((r) => r.status === 'pending')
@@ -209,6 +219,9 @@ export function WerkstattAbrechnungen({ provisionen, werkstattName, boniSumme = 
           </Tbody>
         </Table>
       </DataTableContainer>
+
+      {/* Eigene Gutschriften — wird nur angezeigt wenn mind. eine vorhanden ist */}
+      <PartnerGutschriftenListe gutschriften={gutschriften} />
     </div>
   )
 }
