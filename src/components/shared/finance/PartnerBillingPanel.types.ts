@@ -17,4 +17,26 @@ export interface PartnerBillingPanelProps {
     /** Aktueller Wert: true = USt-pflichtig, false = Kleinunternehmer, null = unbekannt */
     current: boolean | null
   }
+  /**
+   * Liste von "ledger_tabelle:ledger_id"-Keys fuer die eine Gutschrift-PDF existiert.
+   * Wird von ladePartnerBilling befuellt. Erledigt-Auszahlungszeilen mit passendem Key
+   * zeigen einen "Gutschrift ↓"-Download-Button statt "—".
+   */
+  gutschriftLedgerKeys?: string[]
+  /**
+   * Wenn gesetzt, erscheint eine "Steuerdaten des Partners"-Card nach dem USt-Toggle.
+   * makler ist bereits vollstaendig → readOnly=true zeigt Felder nur an.
+   */
+  steuerdaten?: {
+    partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+    partnerId: string
+    current: {
+      ust_id: string | null
+      adresse_strasse: string | null
+      adresse_plz: string | null
+      adresse_ort: string | null
+    }
+    /** makler ist bereits vollstaendig -> nur anzeigen, nicht editierbar. */
+    readOnly?: boolean
+  }
 }
