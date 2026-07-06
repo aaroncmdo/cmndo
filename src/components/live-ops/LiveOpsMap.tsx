@@ -5,6 +5,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
+import { MAPBOX_STYLE_STREETS } from '@/lib/mapbox/styles'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSource } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
@@ -389,7 +390,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
 
     const map = new mapboxgl.Map({
       container: containerRef.current,
-      style: 'mapbox://styles/mapbox/light-v11',
+      style: MAPBOX_STYLE_STREETS,
       center: [10.45, 51.16],
       zoom: 5.4,
       attributionControl: false,
@@ -415,7 +416,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         source: SRC_ISOS,
         paint: {
           'fill-color': TYP_COLOR_EXPR,
-          'fill-opacity': 0.1,
+          'fill-opacity': 0.18,
         },
       })
 
@@ -425,8 +426,8 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         source: SRC_ISOS,
         paint: {
           'line-color': TYP_COLOR_EXPR,
-          'line-width': 1.5,
-          'line-opacity': 0.5,
+          'line-width': 2,
+          'line-opacity': 0.7,
         },
       })
 
@@ -488,7 +489,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
           'circle-color': TERMIN_STATUS_COLOR_EXPR,
           'circle-radius': 5,
           'circle-stroke-color': '#ffffff',
-          'circle-stroke-width': 1.5,
+          'circle-stroke-width': 2,
         },
       })
 
@@ -527,7 +528,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         },
         paint: {
           'line-color': '#0D1B3E',
-          'line-width': 3,
+          'line-width': 4,
           'line-opacity': 0.6,
         },
       })
@@ -549,7 +550,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         },
         paint: {
           'line-color': '#94a3b8',
-          'line-width': 2,
+          'line-width': 3,
           'line-opacity': 0.7,
           'line-dasharray': [2, 2],
         },
@@ -570,7 +571,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-color': DEADPIN_STATUS_COLOR_EXPR,
             'circle-radius': 6,
             'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 1.5,
+            'circle-stroke-width': 2,
             'circle-opacity': 0.75,
           },
         })
@@ -674,7 +675,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
             'circle-color': LEAD_STATUS_COLOR_EXPR,
             'circle-radius': 6,
             'circle-stroke-color': '#ffffff',
-            'circle-stroke-width': 1.5,
+            'circle-stroke-width': 2,
             'circle-opacity': 0.85,
           },
         })
