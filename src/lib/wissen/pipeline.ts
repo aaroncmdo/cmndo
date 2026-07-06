@@ -3,8 +3,13 @@
 // Verantwortlich fuer:
 //   1. Crawlen aller B2B_CRAWL_SOURCES (RSS-Feeds)
 //   2. Deduplication via source_hash in wissen_themen
-//   3. AI-Generierung von Artikeln fuer freigegbene Themen (audience='b2b')
+//   3. Getierte AI-Generierung (Crawl -> Manuell -> Evergreen) mit Tages-Boden
 //   4. Validierungs-Gate (validateForAutoPublish) -> auto-publish oder in_review
+//
+// Evergreen-Autopilot: reicht der frische Crawl nicht fuer den Tages-Boden, fuellt
+// ein KI-Themen-Planer (proposeGapTopics) eine ai_gap-Queue auf -> garantiert taegliche
+// Artikel, KI-autonom, ohne Kuratierpflicht. Manuelle Vorschlaege (quelle='manuell')
+// werden vor Evergreen bevorzugt.
 //
 // NICHT 'use server' — normale lib-Funktion, aufrufbar aus Cron-Route.
 // Alle DB-Ops via service-role (createAdminClient).
@@ -15,13 +20,91 @@ import { crawlSource, sourceHash } from '@/lib/wissen/crawl/index'
 import { isRelevantB2B } from '@/lib/wissen/crawl/relevance'
 import { generateArtikelDraft } from '@/lib/wissen/generate'
 import { validateForAutoPublish } from '@/lib/wissen/validate'
+import { proposeGapTopics } from '@/lib/wissen/propose'
+import {
+  orderCandidates,
+  evergreenRefillCount,
+  shouldStopEvergreen,
+  articleQuelleForThema,
+  type PlanThema,
+} from '@/lib/wissen/pipeline-plan'
 
 const CRAWL_CAP = 12 // Maximale neue Themen pro Lauf (global)
 const PER_SOURCE_CAP = 3 // Maximale neue Themen pro Quelle/Lauf — verhindert, dass eine
 // breite Quelle (z.B. allg. Rechtsnews) das Crawl-Budget frisst und Kfz-Feeds verhungern.
-const GENERATE_LIMIT = 3 // Maximale ERZEUGTE Artikel pro Lauf
+const DAILY_MAX = 3 // Maximale ERZEUGTE Artikel pro Lauf (Deckel)
+const DAILY_MIN = 2 // Garantierter Tages-Boden — via Evergreen aufgefuellt, falls Crawl/Manuell nicht reichen.
 const ATTEMPT_CAP = 12 // Maximale KI-Generierungs-Versuche/Lauf (Kosten-/Zeitgrenze), auch wenn
 // einzelne Themen vom KI-Relevanz-Backstop als nicht_relevant abgelehnt werden.
+const EVERGREEN_TARGET = 6 // Vorrats-Queue voraus (>= DAILY_MIN) — haelt das Veto-Fenster im Admin offen.
+
+type Db = ReturnType<typeof createAdminClient>
+
+// Titel + primary_keyword aller B2B-Artikel + offener ai_gap/manuell-Themen — fuer die
+// Coverage-Avoidance des Themen-Planers (verhindert Wiederholungen).
+async function ladeCovered(supabase: Db): Promise<{ titles: string[]; keywords: string[] }> {
+  const titles: string[] = []
+  const keywords: string[] = []
+
+  const { data: artikel } = await supabase
+    .from('wissen_artikel')
+    .select('title, primary_keyword')
+    .eq('audience', 'b2b')
+    .limit(500)
+  for (const a of artikel ?? []) {
+    if (a.title) titles.push(a.title)
+    if (a.primary_keyword) keywords.push(a.primary_keyword)
+  }
+
+  const { data: themen } = await supabase
+    .from('wissen_themen')
+    .select('titel, primary_keyword')
+    .eq('audience', 'b2b')
+    .in('status', ['freigegeben', 'entwurf_erstellt'])
+    .limit(500)
+  for (const t of themen ?? []) {
+    if (t.titel) titles.push(t.titel)
+    if (t.primary_keyword) keywords.push(t.primary_keyword)
+  }
+
+  return { titles, keywords }
+}
+
+// Proponiert `count` Evergreen-Themen (coverage-aware) und legt sie als ai_gap/freigegeben an.
+// Gibt die neu angelegten Zeilen zurueck (fuer den Evergreen-Pool des laufenden Laufs).
+async function proposeUndInsert(supabase: Db, count: number): Promise<PlanThema[]> {
+  if (count <= 0) return []
+  const covered = await ladeCovered(supabase)
+  const r = await proposeGapTopics(count, covered)
+  if (!r.ok) {
+    console.error('[b2b-pipeline] proposeGapTopics fehlgeschlagen:', r.error)
+    return []
+  }
+  const inserted: PlanThema[] = []
+  for (const topic of r.data) {
+    const { data, error } = await supabase
+      .from('wissen_themen')
+      .insert({
+        titel: topic.titel,
+        kurzbrief: topic.kurzbrief,
+        begruendung: null,
+        audience: 'b2b',
+        quelle: 'ai_gap',
+        primary_keyword: topic.primary_keyword,
+        cluster: topic.cluster,
+        artikel_typ: topic.artikel_typ ?? null,
+        status: 'freigegeben',
+      })
+      .select('id, titel, kurzbrief, primary_keyword, cluster, artikel_typ, source_url, quelle, created_at')
+      .single()
+    if (error) {
+      console.error('[b2b-pipeline] ai_gap-Thema-Insert fehlgeschlagen:', error.message)
+      continue
+    }
+    if (data) inserted.push(data as PlanThema)
+  }
+  return inserted
+}
 
 export async function runB2BPipeline(): Promise<{
   ok: boolean
@@ -105,31 +188,25 @@ export async function runB2BPipeline(): Promise<{
     }
 
     // -----------------------------------------------------------------------
-    // Phase 2+3: Generate, Validate, Insert Artikel
+    // Phase 2: Generate (getiert Crawl -> Manuell -> Evergreen, mit Tages-Boden)
     // -----------------------------------------------------------------------
 
-    // Schritt 1: Kandidaten-Themen laden (neueste zuerst, bounded auf 20).
-    // "Newest first" stellt sicher, dass frisch gecrawlte Themen vorne stehen.
+    // Kandidaten-Themen laden (freigegeben, b2b, bounded auf 40).
     const { data: kandidaten, error: themenErr } = await supabase
       .from('wissen_themen')
-      .select('id, titel, kurzbrief, primary_keyword, cluster, artikel_typ, source_url')
+      .select('id, titel, kurzbrief, primary_keyword, cluster, artikel_typ, source_url, quelle, created_at')
       .eq('audience', 'b2b')
       .eq('status', 'freigegeben')
       .order('created_at', { ascending: false })
-      .limit(20)
+      .limit(40)
 
     if (themenErr) {
       console.error('[b2b-pipeline] Themen-Query fehlgeschlagen:', themenErr.message)
       return { ok: true, crawled, generated, published, review }
     }
 
-    // Schritt 2: Belegte Themen-IDs nur aus dem Kandidaten-Set abfragen (IN-list <= 20).
-    // Scoped-Query verhindert unbounded SELECT auf wissen_artikel.
-    // Der Normalfall (status='entwurf_erstellt' nach Artikel-Insert) schirmt doppeltes
-    // Verarbeiten schon im .eq('status','freigegeben')-Filter ab; diese Set-Pruefung
-    // sichert den seltenen Fehlerfall ab (Status-Update fehlgeschlagen).
+    // Belegte Themen ausschliessen (scoped IN-list) — schirmt seltenen Status-Update-Fehlerfall ab.
     const kandidatenIds = (kandidaten ?? []).map((t) => t.id)
-
     let belegteSet = new Set<string>()
     if (kandidatenIds.length > 0) {
       const { data: belegteThemen, error: belegteErr } = await supabase
@@ -149,16 +226,30 @@ export async function runB2BPipeline(): Promise<{
       )
     }
 
-    // Schritt 3: Kandidaten ohne Artikel durchgehen, bis GENERATE_LIMIT Artikel ERZEUGT sind
-    // (nicht nur GENERATE_LIMIT Versuche) — sonst nullen ein paar vom KI-Backstop abgelehnte
-    // (nicht_relevant) Themen den ganzen Lauf. ATTEMPT_CAP begrenzt die KI-Calls pro Lauf.
-    const kandidatenOffen = (kandidaten ?? []).filter((t) => !belegteSet.has(t.id))
-    let attempts = 0
+    const offen = ((kandidaten ?? []) as PlanThema[]).filter((t) => !belegteSet.has(t.id))
+    const byDesc = (a: PlanThema, b: PlanThema) => (a.created_at < b.created_at ? 1 : -1)
+    const byAsc = (a: PlanThema, b: PlanThema) => (a.created_at < b.created_at ? -1 : 1)
+    const crawlPool = offen.filter((t) => t.quelle === 'crawl').sort(byDesc)
+    const manuellPool = offen.filter((t) => t.quelle === 'manuell').sort(byAsc)
+    let evergreenPool = offen.filter((t) => t.quelle === 'ai_gap').sort(byAsc)
 
-    for (const thema of kandidatenOffen) {
-      if (generated >= GENERATE_LIMIT || attempts >= ATTEMPT_CAP) break
+    // Evergreen-Queue auffuellen: deckt den Boden UND haelt Vorrat voraus (Veto-Fenster).
+    // Konsumiert wird von vorne (FIFO) -> frisch Proponiertes hinten publiziert erst an Folgetagen.
+    const refill = evergreenRefillCount(evergreenPool.length, EVERGREEN_TARGET)
+    if (refill > 0) {
+      const neu = await proposeUndInsert(supabase, refill)
+      evergreenPool = [...evergreenPool, ...neu]
+    }
+
+    const order = orderCandidates({ crawl: crawlPool, manuell: manuellPool, evergreen: evergreenPool })
+
+    let attempts = 0
+    for (const thema of order) {
+      if (generated >= DAILY_MAX || attempts >= ATTEMPT_CAP) break
+      // Evergreen nur bis zum Tages-Boden ziehen (nicht ueberpublizieren); Crawl/Manuell laufen bis DAILY_MAX.
+      if (shouldStopEvergreen(thema.quelle, published, DAILY_MIN)) break
       attempts++
-      // AI-Draft generieren
+
       const r = await generateArtikelDraft(
         {
           titel: thema.titel,
@@ -171,8 +262,7 @@ export async function runB2BPipeline(): Promise<{
       )
 
       if (!r.ok) {
-        // KI-Relevanz-Backstop: themenfremdes Thema ablehnen, damit es nicht taeglich
-        // neu generiert (und wieder abgelehnt) wird.
+        // KI-Relevanz-Backstop: themenfremdes Thema ablehnen, damit es nicht taeglich neu generiert wird.
         if (r.error === 'nicht_relevant') {
           await supabase.from('wissen_themen').update({ status: 'abgelehnt' }).eq('id', thema.id)
         }
@@ -185,6 +275,7 @@ export async function runB2BPipeline(): Promise<{
 
       const now = new Date().toISOString()
       const artikelStatus = v.autopublish ? 'veroeffentlicht' : 'in_review'
+      const artikelQuelle = articleQuelleForThema(thema.quelle)
 
       // Artikel einfuegen — bei Slug-Kollision (23505) einmal mit '-2' Suffix retry
       async function insertArtikel(slug: string): Promise<{ error: { code: string; message: string } | null }> {
@@ -200,7 +291,7 @@ export async function runB2BPipeline(): Promise<{
           cluster: draft.cluster,
           tags: draft.tags,
           audience: 'b2b',
-          quelle: 'crawl',
+          quelle: artikelQuelle,
           source_url: thema.source_url,
           author: 'claimondo-redaktion',
           ai_model: draft.ai_model,
