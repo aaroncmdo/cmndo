@@ -11,6 +11,7 @@ import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
 import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
+import { fetchDrivingRoute } from '@/lib/mapbox/directions'
 import { computeCoverageGaps } from '@/lib/live-ops/coverage'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
 import SvPopup from './SvPopup'
@@ -881,6 +882,10 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
   }, [candidateSvIds, data.svs])
 
   // ------ Rebuild-Effect: Verbindungslinie bei Hover-SV/Assign-Lead-Aenderung updaten
+  // V2: setzt sofort eine gerade Linie (Sofort-Feedback), holt dann async die
+  // echte Fahrroute via fetchDrivingRoute. AbortController pro Effekt-Lauf damit
+  // ein Hover-Wechsel den alten Fetch canceled. Bei Abort/Fehler bleibt die
+  // gerade Linie sichtbar (kein Throw ins UI).
 
   useEffect(() => {
     const map = mapRef.current
@@ -890,7 +895,18 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     const lead = leadsRef.current.find((l) => l.id === assignLeadId)
     const from = sv?.standortLat != null && sv.standortLng != null ? [sv.standortLng, sv.standortLat] as [number, number] : null
     const to = lead ? [lead.lng, lead.lat] as [number, number] : null
-    src.setData(assignLineFC(from, to))
+    src.setData(assignLineFC(from, to)) // Sofort: gerade Linie
+    if (!from || !to) return
+    const ctrl = new AbortController()
+    fetchDrivingRoute(from, to, { signal: ctrl.signal })
+      .then((r) => {
+        const s = mapRef.current?.getSource(SRC_ASSIGN_LINE) as GeoJSONSource | undefined
+        if (s && r.primary?.coords?.length) {
+          s.setData({ type: 'FeatureCollection', features: [{ type: 'Feature', geometry: { type: 'LineString', coordinates: r.primary.coords }, properties: {} }] })
+        }
+      })
+      .catch(() => {}) // Abort/Fehler: gerade Linie bleibt
+    return () => ctrl.abort()
   }, [previewSvId, assignLeadId, data.svs])
 
   // ------ Realtime: Supabase-Kanal fuer sv_live_location-Aenderungen
