@@ -60,16 +60,24 @@ export default function PasswortZuruecksetzenPage() {
       const result = await confirmPasswordReset(password)
       if (result.success) {
         setPhase('success')
-        // Aus der temporären Recovery-Session ausloggen, damit der User
-        // sich beim nächsten Schritt sauber neu mit dem neuen Passwort
-        // anmelden kann.
-        const supabase = createClient()
-        await supabase.auth.signOut()
-        // Toast über query param — /login zeigt das oben in der ErrorMessage
-        // bzw. wir schicken den User mit ?ok=Passwort... rüber.
-        setTimeout(() => {
-          window.location.href = '/login?ok=' + encodeURIComponent('Passwort erfolgreich geändert')
-        }, 1500)
+        if (result.redirectTo) {
+          // Onboarding (frisch angelegter Account): in der Recovery-Session eingeloggt
+          // bleiben und direkt ins Portal — der Magic-Link-Button verspricht "Passwort
+          // setzen & einloggen". Hard-Nav vermeidet die RSC-Soft-Nav-Race mit den frisch
+          // rotierten Auth-Cookies (CMM-14).
+          const ziel = result.redirectTo
+          setTimeout(() => {
+            window.location.href = ziel
+          }, 1200)
+        } else {
+          // Passwort-vergessen: aus der temporären Recovery-Session ausloggen, damit der
+          // User sich beim nächsten Schritt sauber neu mit dem neuen Passwort anmeldet.
+          const supabase = createClient()
+          await supabase.auth.signOut()
+          setTimeout(() => {
+            window.location.href = '/login?ok=' + encodeURIComponent('Passwort erfolgreich geändert')
+          }, 1500)
+        }
       } else {
         if (result.error?.toLowerCase().includes('abgelaufen') || result.error?.toLowerCase().includes('ungültig')) {
           setPhase('expired')
@@ -138,7 +146,7 @@ export default function PasswortZuruecksetzenPage() {
               <p className="text-claimondo-navy font-semibold text-base mb-2">
                 Passwort erfolgreich geändert
               </p>
-              <p className="text-claimondo-ondo text-sm">Du wirst zum Login weitergeleitet …</p>
+              <p className="text-claimondo-ondo text-sm">Du wirst weitergeleitet …</p>
             </div>
           )}
 

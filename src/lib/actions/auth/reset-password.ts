@@ -3,6 +3,7 @@
 import { headers } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
+import { roleToPath } from '@/lib/auth/role-redirect'
 
 /**
  * BUG-84: Passwort-Reset Backend.
@@ -53,7 +54,7 @@ export async function requestPasswordReset(
  */
 export async function confirmPasswordReset(
   neuesPasswort: string,
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; redirectTo?: string }> {
   // AAR-auth-haertung (Befund J): zentrale Policy — >=12 Zeichen + HIBP-Breach-
   // Check (k-anonymity, fail-open). Loest die fruehere >=8-Inline-Pruefung ab.
   const policy = await pruefePasswortStaerke(neuesPasswort)
@@ -78,6 +79,16 @@ export async function confirmPasswordReset(
     return { success: false, error: updateError.message }
   }
 
+  // Onboarding (frisch angelegter Account, force_password_change war true) vs.
+  // Passwort-vergessen unterscheiden — BEVOR wir das Flag räumen. Rolle gleich fuer
+  // das Portal-Redirect mitlesen (eigene Row, RLS erlaubt Self-Read via Recovery-Session).
+  const { data: profil } = await supabase
+    .from('profiles')
+    .select('rolle, force_password_change')
+    .eq('id', user.id)
+    .single()
+  const warOnboarding = profil?.force_password_change === true
+
   // force_password_change zurücksetzen — der User hat aktiv ein neues Passwort
   // gewählt. GARANTIERT via Service-Role + Fehler-Check (analog setzeNeuesPasswort):
   // bleibt das Flag still true, landet der User beim naechsten Login erneut auf
@@ -94,5 +105,12 @@ export async function confirmPasswordReset(
     }
   }
 
+  // Onboarding: der User bleibt in der Recovery-Session eingeloggt und wird direkt in
+  // sein Portal geschickt — konsistent mit dem Einmalpasswort-Login (/passwort-aendern),
+  // damit der Magic-Link-Button "Passwort setzen & einloggen" sein Versprechen haelt.
+  // Passwort-vergessen (Flag war schon false): unveraendert -> Page loggt aus -> /login.
+  if (warOnboarding) {
+    return { success: true, redirectTo: roleToPath(profil?.rolle as string | null | undefined) }
+  }
   return { success: true }
 }

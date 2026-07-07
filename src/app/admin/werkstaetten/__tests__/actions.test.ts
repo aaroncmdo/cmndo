@@ -289,37 +289,17 @@ describe('sendWerkstattLoginMail', () => {
     expect(res.ok).toBe(false)
   })
 
-  it('force_password_change=true → resettet Passwort + ruft Flow mit Passwort', async () => {
+  it('Admin → ruft Flow Magic-Link-only (nur to+werkstattName, kein Einmalpasswort) + ok:true', async () => {
     mockConfig.authUser = { id: 'admin' }
     mockConfig.profileRolle = 'admin'
-    mockConfig.werkstattForcePwChange = true
     const { sendWerkstattLoginMail } = await import('../actions')
     const res = await sendWerkstattLoginMail('w-1')
     expect(res.ok).toBe(true)
     expect(flow.sendWillkommenWerkstatt).toHaveBeenCalledTimes(1)
-    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as { einmalpasswort: string | null }
-    expect(typeof arg.einmalpasswort).toBe('string')
-  })
-
-  it('force_password_change=false, ohne knownPassword → Flow mit einmalpasswort=null', async () => {
-    mockConfig.authUser = { id: 'admin' }
-    mockConfig.profileRolle = 'admin'
-    mockConfig.werkstattForcePwChange = false
-    const { sendWerkstattLoginMail } = await import('../actions')
-    const res = await sendWerkstattLoginMail('w-1')
-    expect(res.ok).toBe(true)
-    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as { einmalpasswort: string | null }
-    expect(arg.einmalpasswort).toBeNull()
-  })
-
-  it('knownPassword → nutzt es (kein Reset)', async () => {
-    mockConfig.authUser = { id: 'admin' }
-    mockConfig.profileRolle = 'admin'
-    mockConfig.werkstattForcePwChange = false
-    const { sendWerkstattLoginMail } = await import('../actions')
-    const res = await sendWerkstattLoginMail('w-1', 'DialogPwA1!')
-    expect(res.ok).toBe(true)
-    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as { einmalpasswort: string | null }
-    expect(arg.einmalpasswort).toBe('DialogPwA1!')
+    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as Record<string, unknown>
+    expect(arg.to).toBe('w@example.com')
+    expect(arg.werkstattName).toBe('Test-Werkstatt')
+    // Magic-Link-only: kein Einmalpasswort mehr im Flow-Aufruf.
+    expect(arg.einmalpasswort).toBeUndefined()
   })
 })
