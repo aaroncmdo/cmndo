@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { decideProposal } from '@/lib/orchestrator/proposals'
 import { buildTaskFromProposal } from '@/lib/orchestrator/task-from-proposal'
+import { getTypeStats } from '@/lib/orchestrator/stats'
+import { setAutoMode } from '@/lib/orchestrator/policy'
 import type { TaskProposalPayload } from '@/lib/orchestrator/types'
 
 async function requireAdminUserId(): Promise<string | null> {
@@ -68,6 +70,42 @@ export async function verwerfenVorschlag(
   if (!userId) return { ok: false, error: 'Nicht berechtigt' }
 
   const res = await decideProposal(id, 'verworfen', userId, feedback)
+  if (!res.ok) return res
+  revalidatePath('/admin/ai-vorschlaege')
+  return { ok: true }
+}
+
+// ── Phase 2: Auto-Graduierung ─────────────────────────────────────────────────
+
+export async function graduiereTyp(
+  vorschlagTyp: string,
+  zielRolle: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const userId = await requireAdminUserId()
+  if (!userId) return { ok: false, error: 'Nicht berechtigt' }
+
+  // Server-seitiger Re-Check: ready muss zum Zeitpunkt des Flips noch true sein
+  const stats = await getTypeStats()
+  const zeile = stats.find(
+    (s) => s.vorschlagTyp === vorschlagTyp && s.zielRolle === zielRolle,
+  )
+  if (!zeile) return { ok: false, error: 'Statistik-Zeile nicht gefunden' }
+  if (!zeile.ready) return { ok: false, error: 'Typ noch nicht graduierbar (Quote oder Mindestentscheidungen nicht erreicht)' }
+
+  const res = await setAutoMode(vorschlagTyp, zielRolle, 'auto', userId)
+  if (!res.ok) return res
+  revalidatePath('/admin/ai-vorschlaege')
+  return { ok: true }
+}
+
+export async function zuruecksetzenTyp(
+  vorschlagTyp: string,
+  zielRolle: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const userId = await requireAdminUserId()
+  if (!userId) return { ok: false, error: 'Nicht berechtigt' }
+
+  const res = await setAutoMode(vorschlagTyp, zielRolle, 'manual', userId)
   if (!res.ok) return res
   revalidatePath('/admin/ai-vorschlaege')
   return { ok: true }
