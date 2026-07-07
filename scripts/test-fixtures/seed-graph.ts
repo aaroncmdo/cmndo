@@ -55,6 +55,7 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c2,
       schadentag: SCHADENTAG,
+      onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
       operative_status: 'sv-termin',
       lead_id: LEADS.c2,
       sv_id: SV_SACHVERSTAENDIGE_ID,
@@ -100,6 +101,10 @@ async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c1,
       schadentag: SCHADENTAG,
+      // onboarding_complete=true Pflicht: kunde/layout.tsx redirected sonst (navFaelle.some(
+      // onboarding_complete===false)) JEDEN /kunde/*-Pfad nach /kunde/onboarding -> Fallakte
+      // rendert nie. Gilt für ALLE test-kunde-Claims (geschädigter auf allen), nicht nur den besuchten.
+      onboarding_complete: true,
       operative_status: 'ersterfassung',
       lead_id: LEADS.c1,
       created_via: 'manuell_admin',
@@ -134,6 +139,7 @@ async function ensureC3(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c3,
       schadentag: SCHADENTAG,
+      onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
       operative_status: 'kanzlei-uebergeben',
       lead_id: LEADS.c3,
       kanzlei_uebergeben_am: SCHADENTAG,
@@ -164,6 +170,7 @@ async function ensureC4(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c4,
       schadentag: SCHADENTAG,
+      onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
       operative_status: 'kanzlei-uebergeben',
       lead_id: LEADS.c4,
       sv_id: SV_SACHVERSTAENDIGE_ID,
