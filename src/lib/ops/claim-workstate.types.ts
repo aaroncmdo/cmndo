@@ -29,6 +29,9 @@ export interface ClaimWorkstateRow {
   dokumente_vollstaendig_fuer_phase: string | null
   vs_eskalationsstufe: string | null
   fall_id: string | null
+  edit_notizen: string | null
+  edit_interne_notizen: string | null
+  edit_schadens_hoehe_netto: number | null
 }
 
 /** Wer ist als Nächstes am Zug. */
@@ -59,4 +62,6 @@ export interface ClaimWorkItem {
   isOverdue: boolean
   overdueSinceDays: number | null
   display: { title: string; kennzeichen: string | null; schadenhoehe: number | null }
+  /** Rohe editierbare claims-Felder (aktuelle Werte) — via v_claim_workstate.edit_* (Phase 1c). */
+  editable: { notizen: string | null; interneNotizen: string | null; schadensHoeheNetto: number | null }
 }

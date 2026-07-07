@@ -44,6 +44,7 @@ function makeItem(over: Partial<ClaimWorkItem> = {}): ClaimWorkItem {
     isOverdue: false,
     overdueSinceDays: null,
     display: { title: 'Müller', kennzeichen: 'K-AB 1', schadenhoehe: 4500 },
+    editable: { notizen: null, interneNotizen: null, schadensHoeheNetto: 4500 },
     ...over,
   }
 }

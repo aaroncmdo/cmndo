@@ -45,5 +45,10 @@ export function deriveClaimWorkflowState(row: ClaimWorkstateRow, now: Date = new
       kennzeichen: row.kennzeichen,
       schadenhoehe: row.schadenhoehe,
     },
+    editable: {
+      notizen: row.edit_notizen,
+      interneNotizen: row.edit_interne_notizen,
+      schadensHoeheNetto: row.edit_schadens_hoehe_netto,
+    },
   }
 }
