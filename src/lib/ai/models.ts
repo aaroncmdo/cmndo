@@ -122,6 +122,12 @@ export const AI_MODELS = {
    * Judgment > Speed → Sonnet 4.6.
    */
   claim_copilot: 'claude-sonnet-4-6',
+  /**
+   * KI-Aufsicht SLA-Rollen (Inkrement 1): Batch-Tool-Use ueber alle Rollen-SLAs,
+   * schlaegt freigabepflichtige Remediation-Tasks vor (quelle='aufsicht').
+   * Judgment ueber mehrere Rollen > Speed → Sonnet 4.6.
+   */
+  ki_aufsicht: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
