@@ -131,6 +131,23 @@ export async function waehleGegenvorschlagSlot(
     const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
     if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
+    // Sec-Audit 07.07. (IDOR-Fix): `terminId` kommt roh vom Client, `assertKundeOwnsFall`
+    // deckt nur `fallId` ab. Ohne Bindung des Termins an den geprueften Fall koennte ein
+    // eingeloggter Kunde per fremdem `terminId` einen fremden SV-Termin ueberschreiben +
+    // verbindlich bestaetigen. Termin gehoert zum Fall, wenn EINE seiner FK-Spalten passt
+    // (keine ist universell gesetzt — prod: 11 fall_id / 11 claim_id / 27 lead_id von 58).
+    const { data: terminBesitz } = await admin
+      .from('gutachter_termine')
+      .select('fall_id, claim_id, lead_id')
+      .eq('id', terminId)
+      .maybeSingle()
+    const gehoertZumFall =
+      !!terminBesitz &&
+      (terminBesitz.fall_id === fallId ||
+        (!!ownership.claimId && terminBesitz.claim_id === ownership.claimId) ||
+        (!!ownership.leadId && terminBesitz.lead_id === ownership.leadId))
+    if (!gehoertZumFall) return { success: false, error: 'Termin nicht gefunden' }
+
     // Termin neu setzen — AAR-956 TZ: slot ist Berlin-Wall-Clock -> echter UTC-Instant.
     const startZeit = berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}:00`)
     const endZeit = new Date(new Date(startZeit).getTime() + 90 * 60 * 1000).toISOString()
