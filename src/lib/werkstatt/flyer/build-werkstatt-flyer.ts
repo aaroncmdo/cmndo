@@ -13,9 +13,10 @@ export type FlyerEntry = { token: string; url: string }
 
 // Platzhalter-Box ("Scannen & starten"-Bildchen) im 2165x3068-Raum (Origin unten-links).
 const CARD = { x: 1550, y: 655, w: 452, h: 484, radius: 30, pad: 22 }
-// QR-Nummer klein unten rechts in Ondo (#4573A2 = rgb 69/115/162).
-const TOKEN = { marginRight: 118, y: 138, fontSize: 36 }
-const ONDO = rgb(69 / 255, 115 / 255, 162 / 255)
+// QR-Nummer: klein + dezent-grau, zentriert direkt unter der QR-Karte (fuegt sich ins
+// Design ein, statt gross unten-rechts loszuloesen). gapBelowCard = Abstand unter CARD.y.
+const TOKEN = { fontSize: 19, gapBelowCard: 62 }
+const TOKEN_GREY = rgb(0.55, 0.57, 0.61)
 const QR_DARK = '#0D1B3E' // Claimondo-Navy
 const QR_LIGHT = '#ffffff'
 
@@ -61,14 +62,14 @@ export async function buildWerkstattFlyerPdf(
     const png = await out.embedPng(pngBuf)
     page.drawImage(png, { x: x + (w - qs) / 2, y: y + (h - qs) / 2, width: qs, height: qs })
 
-    // QR-Nummer klein unten rechts in Ondo.
+    // QR-Nummer klein + dezent grau, zentriert direkt unter der QR-Karte.
     const tw = font.widthOfTextAtSize(token, TOKEN.fontSize)
     page.drawText(token, {
-      x: page.getWidth() - TOKEN.marginRight - tw,
-      y: TOKEN.y,
+      x: x + (w - tw) / 2,
+      y: y - TOKEN.gapBelowCard,
       size: TOKEN.fontSize,
       font,
-      color: ONDO,
+      color: TOKEN_GREY,
     })
   }
 
