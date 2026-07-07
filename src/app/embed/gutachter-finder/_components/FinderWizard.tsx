@@ -254,6 +254,10 @@ export function FinderWizard({
           : { kind: 'deadpin' as const, deadPinId: auswahl.dp.deadPinId, ort: auswahl.dp.ort, start: auswahl.slot.start }
 
     startTransition(async () => {
+      // Makler-Attribution: `m` aus der URL (der Funnel Tool -> Finder reicht ihn via
+      // buildFinderHandoffUrl durch); reserviereEmbedTermin loest ihn server-seitig zu
+      // promotion_code_id auf -> lead.promotion_code_id -> Provision.
+      const maklerCode = new URLSearchParams(window.location.search).get('m')
       const res = await reserviereEmbedTermin({
         vorname: vorname.trim(),
         nachname: nachname.trim(),
@@ -264,6 +268,7 @@ export function FinderWizard({
         wunschterminLokal: wunschterminLokal || null,
         werkstatt_id: werkstattId ?? null,
         promotion_code_id: promotionCodeId ?? null,
+        maklerCode,
         schaetzungSessionId: schaetzungSessionId ?? null,
         auswahl: auswahlPayload,
       })
