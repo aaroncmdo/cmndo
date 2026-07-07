@@ -130,7 +130,7 @@ export async function berechneAnspruch(
   const vision = row?.vision_result as VisionResult | null
   if (!vision) return { ok: false, error: 'Keine Analyse vorhanden' }
 
-  const { saetze, faktoren, config, wbwHeuristik } = await ladeAnspruchRates()
+  const { saetze, faktoren, config, klasseSaetze, wbwHeuristik } = await ladeAnspruchRates()
   const alter = eingabe.ezJahr != null ? new Date().getFullYear() - eingabe.ezJahr : null
   const wbw = plausibilisiereWbw(
     { wiederbeschaffungswert_min: vision.wiederbeschaffungswert_min, wiederbeschaffungswert_max: vision.wiederbeschaffungswert_max, restwert_min: vision.restwert_min, restwert_max: vision.restwert_max },
@@ -152,7 +152,7 @@ export async function berechneAnspruch(
       restwertMinEur: wbw.restwertMin,
       restwertMaxEur: wbw.restwertMax,
     },
-    saetze, faktoren, config,
+    saetze, faktoren, config, klasseSaetze,
   )
   await speicherePositionen(sessionToken, eingabe.segment, vision.schweregrad, eingabe.fahrbereit, eingabe.ezJahr, spanne.schuld, spanne.positionen, spanne.totalschaden)
   return { ok: true, spanne }
