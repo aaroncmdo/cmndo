@@ -14,6 +14,7 @@
 import { revalidatePath } from 'next/cache'
 import { requireRole, type AuthedUser } from '@/lib/auth/guards'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { upsertClaimPayment } from '@/lib/faelle/claim-payments'
 import { emitEvent } from '@/lib/notifications/emit'
 
 type ActionResult = { ok: true } | { ok: false; error: string }
@@ -218,6 +219,11 @@ export async function markClaimAsReguliert(input: {
     ENDZUSTAENDE,
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
+
+  // Payment-Ledger Phase 1: VS-Soll auf die partei='vs'-Ledger-Zeile (forderungsbetrag).
+  // Der regulierungs_betrag-Cache bleibt bis Phase 3 (setEndzustandFields schrieb ihn oben).
+  await upsertClaimPayment(createAdminClient(), input.claim_id, 'vs',
+    { forderungsbetrag: input.regulierungs_betrag }, auth.user.id)
 
   await writeAudit(ctx.fallId, null, 'abschluss:erfolgreich_reguliert', auth.user, grund)
 
