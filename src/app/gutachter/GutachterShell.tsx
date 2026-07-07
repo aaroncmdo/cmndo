@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { serverSignOut } from '@/lib/auth/logout'
 import {
   MapIcon,
@@ -295,19 +296,26 @@ export default function GutachterShell({
       .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
-    // AAR-724: Neue / ungesehene Termine (gesehen_am IS NULL) über alle
-    // SV-Rows des Users.
-    const { count: neueTermineCount } = await supabase
-      .from('gutachter_termine')
-      .select('id', { count: 'exact', head: true })
-      .in('assignee_id', svIds)
-      .eq('assignee_typ', 'sachverstaendiger')
-      .is('gesehen_am', null)
+    // AAR-724 + TZ-Fix: neue/ungesehene Termine (gesehen_am IS NULL) NUR fuer die
+    // EINE SV-Row, die das Portal (Heute/Kalender) via getGutachterForUser aufloest.
+    // Vorher .in(svIds) ueber ALLE Standort-Rows -> Badge>0 obwohl der Kalender
+    // (single-row) den Termin gar nicht zeigt (Multi-Standort-Inkonsistenz).
+    const primarySv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+    let neueTermineCount = 0
+    if (primarySv?.id) {
+      const { count } = await supabase
+        .from('gutachter_termine')
+        .select('id', { count: 'exact', head: true })
+        .eq('assignee_id', primarySv.id)
+        .eq('assignee_typ', 'sachverstaendiger')
+        .is('gesehen_am', null)
+      neueTermineCount = count ?? 0
+    }
 
     setBadgeCounts({
       auftraege: auftraegeCount ?? 0,
       posteingang: (mitteilungenCount ?? 0) + (nachrichtenCount ?? 0),
-      neueTermine: neueTermineCount ?? 0,
+      neueTermine: neueTermineCount,
     })
   }, [])
 
