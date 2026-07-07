@@ -237,20 +237,21 @@ export async function setzePartnerUstStatus(
 export async function getPartnerGutschriftDownloadUrl(
   ledgerTabelle: string,
   ledgerId: string,
+  typ: 'gutschrift' | 'storno' = 'gutschrift',
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const auth = await requireAdmin()
   if (!auth.ok) return auth
 
   const admin = createAdminClient()
 
-  // typ='gutschrift': nur die Original-Gutschrift. Nach einem Reversal existieren zwei Zeilen
-  // (storniertes Original + Storno) — ohne Filter matcht .maybeSingle() beide und liefert PGRST116.
+  // typ waehlt den Beleg: 'gutschrift' = Original, 'storno' = Korrekturbeleg. Nach einem Reversal
+  // existieren zwei Zeilen je Ledger — der typ-Filter macht die Auswahl eindeutig (sonst PGRST116).
   const { data: g, error } = await admin
     .from('partner_gutschriften')
     .select('pdf_storage_path')
     .eq('ledger_tabelle', ledgerTabelle)
     .eq('ledger_id', ledgerId)
-    .eq('typ', 'gutschrift')
+    .eq('typ', typ)
     .maybeSingle()
 
   if (error) return { ok: false, error: error.message }
