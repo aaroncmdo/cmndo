@@ -16,6 +16,8 @@ export type ClaimContext = {
   fahrzeug: string | null
   offeneTasks: Array<{ titel: string; rolle: string | null; faelligAm: string | null }>
   kurzverlauf: string[] // letzte Timeline-Titel, max 8
+  /** Frühere Vorschläge DIESES Falls (letzte 8), für Nicht-Wiederholung im Prompt. */
+  bereitsVorgeschlagen: Array<{ typ: string; haupttext: string; status: string; feedback: string | null }>
 }
 
 /** Ein vom Modell vorgeschlagener Schritt, vor Persistenz. */
