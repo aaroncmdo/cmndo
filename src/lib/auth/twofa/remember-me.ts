@@ -150,6 +150,16 @@ export async function listUserDevices(userId: string): Promise<{
 }
 
 export async function clearTwoFa(targetUserId: string): Promise<{ success: boolean; error?: string }> {
+  // Sicherheit: 'use server' + createAdminClient (RLS-Bypass) + fremder targetUserId
+  // -> ohne Guard waere das ein exponierter Endpoint, mit dem jeder eingeloggte User
+  // fremde 2FA-Faktoren strippen koennte (IDOR, gleiche Klasse wie revokeRememberToken).
+  // Nur Admins duerfen fremde 2FA zuruecksetzen.
+  const caller = await createClient()
+  const callerUser = (await caller.auth.getUser())?.data?.user ?? null
+  if (!callerUser) return { success: false, error: 'Nicht angemeldet' }
+  const { data: callerProfile } = await caller.from('profiles').select('rolle').eq('id', callerUser.id).single()
+  if (callerProfile?.rolle !== 'admin') return { success: false, error: 'Nur Admins duerfen 2FA zuruecksetzen' }
+
   const db = createAdminClient()
   // F6 (AAR-audit-2fa): Auch die echten Supabase-MFA-Faktoren entfernen — sonst
   // bleibt der User trotz "2FA zurueckgesetzt" gechallenged/ausgesperrt (der

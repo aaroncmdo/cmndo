@@ -100,7 +100,9 @@ export async function createMitarbeiter(
       html: einladungEmailHtml({
         vorname,
         email,
-        introHtml: `<p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p>`,
+        introHtml:
+          `<p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p>` +
+          `<p>Beim ersten Login richten Sie zur Kontosicherheit die Zwei-Faktor-Authentifizierung ein (Authenticator-App oder SMS-Code) — für interne Konten ist sie verpflichtend.</p>`,
         magicLink,
         appUrl,
       }),
@@ -232,6 +234,33 @@ export async function resetTwoFaForUser(
   })
 
   revalidatePath('/admin/team')
+  return { success: true }
+}
+
+// F1 (Mitarbeiter-Audit 08.07.): Vollstaendiger 2FA-Reset — loescht die echten
+// GoTrue-MFA-Faktoren (TOTP/SMS) via clearTwoFa, nicht nur den profiles-Mirror wie
+// resetTwoFaForUser (das nur die Nummer wechselt). Entsperrt einen Mitarbeiter, der
+// seinen Authenticator/sein Telefon verloren hat — nach der 2FA-Pflicht der Standard-
+// Aussperr-Fall. clearTwoFa ist admin-gegatet (schliesst zugleich die frueher
+// ungegatete 'use server'-Exposure = IDOR).
+export async function clearTwoFaForUser(
+  targetUserId: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await requireAdmin()
+  const { clearTwoFa } = await import('@/lib/auth/twofa/remember-me')
+  const r = await clearTwoFa(targetUserId)
+  if (!r.success) return r
+  const admin = createAdminClient()
+  const user = (await supabase.auth.getUser())?.data?.user
+  await admin.from('timeline').insert({
+    typ: 'system',
+    titel: '2FA vollständig zurückgesetzt (Konto entsperrt)',
+    beschreibung:
+      'Admin hat alle 2FA-Faktoren (TOTP + SMS) entfernt. Der Nutzer richtet die Zwei-Faktor-Authentifizierung beim nächsten Login neu ein.',
+    erstellt_von: user?.id ?? null,
+  })
+  revalidatePath('/admin/team')
+  revalidatePath(`/admin/team/${targetUserId}`)
   return { success: true }
 }
 
