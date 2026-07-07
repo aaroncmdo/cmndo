@@ -4,6 +4,7 @@ import type { FeedEntry } from '@/lib/community/community-queries'
 import { B2B_TAGS } from '@/lib/community/tags'
 import { PostCard } from './PostCard'
 import { PostComposer } from './PostComposer'
+import { SessionSync } from './SessionSync'
 
 interface CommunityFeedClientProps {
   entries: FeedEntry[]
@@ -54,6 +55,7 @@ export function CommunityFeedClient({ entries, isLoggedIn, hasUsername, likedKey
       </div>
 
       {/* Composer */}
+      <SessionSync loggedIn={isLoggedIn} />
       <PostComposer isLoggedIn={isLoggedIn} hasUsername={hasUsername} />
 
       {/* Feed */}
