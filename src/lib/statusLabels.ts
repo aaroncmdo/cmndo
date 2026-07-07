@@ -164,15 +164,19 @@ export const AUFTRAG_STATUS_COLORS: Record<string, string> = Object.fromEntries(
 export const ABRECHNUNG_STATUS_LABELS: Record<string, string> = {
   entwurf: 'Entwurf',
   versendet: 'Versendet',
+  im_einzug: 'Im Einzug',
   bezahlt: 'Bezahlt',
   ueberfaellig: 'Überfällig',
+  fehlgeschlagen: 'Fehlgeschlagen',
   storniert: 'Storniert',
 }
 const ABRECHNUNG_STATUS_SLOT_MAP: Record<string, StatusSlot> = {
   entwurf: 'neutral',
   versendet: 'active',
+  im_einzug: 'active',
   bezahlt: 'success',
   ueberfaellig: 'danger',
+  fehlgeschlagen: 'danger',
   storniert: 'neutral',
 }
 export const ABRECHNUNG_STATUS_COLORS: Record<string, string> = Object.fromEntries(
