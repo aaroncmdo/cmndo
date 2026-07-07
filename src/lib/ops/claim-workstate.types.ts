@@ -28,6 +28,7 @@ export interface ClaimWorkstateRow {
   created_at: string | null
   dokumente_vollstaendig_fuer_phase: string | null
   vs_eskalationsstufe: string | null
+  fall_id: string | null
 }
 
 /** Wer ist als Nächstes am Zug. */
@@ -48,6 +49,7 @@ export type ClaimNextActionCode =
 export interface ClaimWorkItem {
   kind: 'claim'
   id: string
+  fallId: string | null
   claimNummer: string | null
   stage: ClaimMainPhase
   subState: ClaimSubPhase

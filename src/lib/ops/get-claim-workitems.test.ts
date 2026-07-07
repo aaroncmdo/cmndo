@@ -18,6 +18,7 @@ const row: ClaimWorkstateRow = {
   sv_zugewiesen_am: null, gutachten_eingegangen_am: null, anschlussschreiben_am: null, regulierung_am: null,
   abgeschlossen_am: null, storniert_am: null, updated_at: null, created_at: null,
   dokumente_vollstaendig_fuer_phase: null, vs_eskalationsstufe: null,
+  fall_id: null,
 }
 
 describe('getMyClaimWorkItems', () => {

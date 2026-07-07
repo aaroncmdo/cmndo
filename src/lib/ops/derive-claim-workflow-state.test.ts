@@ -11,6 +11,7 @@ const base: ClaimWorkstateRow = {
   anschlussschreiben_am: null, regulierung_am: null, abgeschlossen_am: null, storniert_am: null,
   updated_at: '2026-06-01T00:00:00Z', created_at: '2026-05-20T00:00:00Z',
   dokumente_vollstaendig_fuer_phase: null, vs_eskalationsstufe: null,
+  fall_id: 'f1',
 }
 const NOW = new Date('2026-06-15T00:00:00Z')
 
@@ -42,5 +43,11 @@ describe('deriveClaimWorkflowState', () => {
   it('display.title faellt auf claim_nummer zurueck, wenn kein Name', () => {
     const wi = deriveClaimWorkflowState({ ...base, kunde_name: null }, NOW)
     expect(wi.display.title).toBe('CLM-1')
+  })
+  it('surfaced fallId from the row', () => {
+    expect(deriveClaimWorkflowState(base, NOW).fallId).toBe('f1')
+  })
+  it('fallId ist null wenn die Zeile kein fall_id hat', () => {
+    expect(deriveClaimWorkflowState({ ...base, fall_id: null }, NOW).fallId).toBeNull()
   })
 })
