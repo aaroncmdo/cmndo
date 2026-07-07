@@ -5,6 +5,7 @@ import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import type { PartnerBillingAggregat, PartnerBillingRow } from '@/lib/finance/partner-billing'
 import { werkstattStartUrl } from '@/lib/start-link/werkstatt-start-url'
 import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
+import { berechneWerkstattLeistung, type WerkstattLeistung } from '@/lib/werkstatt/werkstatt-leistung'
 
 // Loader fuer die Admin-Werkstatt-Detailseite. Reine Reads (kein DDL), Admin-gegated
 // durch die Page. v_werkstatt_auftrag ist RLS-is_staff()-gegated -> Admin liest legitim
@@ -77,6 +78,7 @@ export interface WerkstattDetail {
   lastSignInAt: string | null
   forcePasswordChange: boolean | null
   billing: WerkstattBilling | null
+  leistung: WerkstattLeistung
   notizen: WerkstattNotiz[]
   // QR: regulaerer Kunden-Einstiegs-QR (/start/werkstatt/<id>) — server-generiert,
   // damit die Detailseite ihn ohne Client-Action-Call inline zeigt.
@@ -157,10 +159,13 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
   ])
   const zugewiesenerPoolCode = (poolRes.data as { token: string }[] | null)?.[0]?.token ?? null
 
+  const auftraege = (auftragRes.data ?? []) as unknown as WerkstattDetailAuftrag[]
+  const leistung = berechneWerkstattLeistung(auftraege, new Date())
+
   return {
     werkstatt: w as unknown as WerkstattDetailStammdaten,
     staffel: (staffelRes.data ?? []) as { schwelle: number; bonus_betrag_netto: number }[],
-    auftraege: (auftragRes.data ?? []) as unknown as WerkstattDetailAuftrag[],
+    auftraege,
     lastSignInAt,
     forcePasswordChange,
     billing: billing.ok
@@ -172,6 +177,7 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
           gutschriftLedgerKeys: billing.gutschriftLedgerKeys,
         }
       : null,
+    leistung,
     notizen: (notizenRes.data ?? []) as unknown as WerkstattNotiz[],
     qrUrl,
     qrSvg,

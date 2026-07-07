@@ -101,7 +101,7 @@ function EditFeld({
 
 export default function WerkstattDetailClient({ detail }: { detail: WerkstattDetail }) {
   const router = useRouter()
-  const { werkstatt: w, staffel, auftraege, lastSignInAt, forcePasswordChange, billing } = detail
+  const { werkstatt: w, staffel, auftraege, lastSignInAt, forcePasswordChange, billing, leistung } = detail
   const [mailLoading, setMailLoading] = useState(false)
   const [statusBusy, setStatusBusy] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
@@ -125,7 +125,6 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
   })
 
   const onboarding = leiteOnboardingStatus({ hatLogin: !!w.user_id, forcePasswordChange, lastSignInAt })
-  const provisionSumme = auftraege.reduce((s, a) => s + (a.provision_betrag_netto ?? 0), 0)
   const ausgezahltNetto = billing?.aggregat.perStatus['auszahlung:erledigt']?.netto ?? 0
   const termine = auftraege
     .map((a) => ({ a, terminAt: a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin }))
@@ -321,13 +320,34 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         <p className="text-body-sm text-claimondo-ondo mt-1">Aktiviert am {datum(w.aktiviert_am)}</p>
       </div>
 
-      {/* Kennzahlen */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <Kennzahl label="Aufträge/Vermittlungen" wert={String(auftraege.length)} />
-        <Kennzahl label="Termine geplant" wert={String(termine.length)} />
-        <Kennzahl label="Provision (netto)" wert={euro(provisionSumme)} />
-        <Kennzahl label="Ausgezahlt (netto)" wert={euro(ausgezahltNetto)} />
-      </div>
+      {/* Leistung — abgeleitet aus den Auftraegen (berechneWerkstattLeistung, pure+getestet) */}
+      <SectionCard title="Leistung">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <Kennzahl label="Aufträge gesamt" wert={String(leistung.gesamt)} />
+          <Kennzahl label="Offen" wert={String(leistung.offen)} />
+          <Kennzahl label="Erledigt" wert={String(leistung.erledigt)} />
+          <Kennzahl
+            label="Abschlussquote"
+            wert={leistung.abschlussquote == null ? '—' : `${Math.round(leistung.abschlussquote * 100)} %`}
+          />
+          <Kennzahl
+            label="Ø Reaktionszeit"
+            wert={leistung.reaktionstageMedian == null ? '—' : `${leistung.reaktionstageMedian} Tage`}
+          />
+          <Kennzahl label="Aktiv (90 Tage)" wert={String(leistung.aktivLetzte90Tage)} />
+          <Kennzahl label="Provision (netto)" wert={euro(leistung.provisionGesamtNetto)} />
+          <Kennzahl label="Ausgezahlt (netto)" wert={euro(ausgezahltNetto)} />
+        </div>
+        <p className="mt-3 text-body-xs text-claimondo-ondo">
+          {leistung.inbound} eigene Vermittlung{leistung.inbound === 1 ? '' : 'en'} ·{' '}
+          {leistung.vermittelt} Claimondo-Auftr{leistung.vermittelt === 1 ? 'ag' : 'äge'} ·{' '}
+          {termine.length} Termin{termine.length === 1 ? '' : 'e'} geplant
+          {leistung.abgelehnt > 0 ? ` · ${leistung.abgelehnt} abgelehnt/storniert` : ''}
+        </p>
+        <p className="mt-1 text-body-xs text-claimondo-ondo/70">
+          Abschlussquote = erledigt ÷ abgeschlossen · Ø Reaktionszeit = Median Tage Gutachten → bestätigter Termin
+        </p>
+      </SectionCard>
 
       {/* Ansprechpartner / Kontakt — prominent (Aaron: „sehr wichtig") */}
       <SectionCard title="Ansprechpartner / Kontakt">
