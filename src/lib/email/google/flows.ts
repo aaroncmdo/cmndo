@@ -806,30 +806,28 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
 }
 
 /**
- * Login-/Willkommens-Mail an eine Werkstatt. Generiert einen Recovery-Magic-Link
- * (Passwort-Setzen) und rendert — wenn uebergeben — zusaetzlich das Einmalpasswort.
- * Caller (sendWerkstattLoginMail) entscheidet ueber das Passwort (kein Clobber).
+ * Login-/Willkommens-Mail an eine Werkstatt. Reiner Magic-Link-Weg: der Recovery-Link
+ * ("Passwort setzen & einloggen") fuehrt auf /passwort-zuruecksetzen, wo confirmPasswordReset
+ * das Passwort setzt, force_password_change raeumt UND beim Onboarding direkt ins Portal
+ * einloggt. KEIN Einmalpasswort mehr in der Mail (Klartext-Passwort raus, ein einziger Weg).
+ * Ohne erzeugbaren Link hat die Mail keinen Sinn -> hart fehlschlagen (Caller meldet's).
  */
 export async function sendWillkommenWerkstatt(params: {
   to: string
   werkstattName: string
-  einmalpasswort: string | null
 }): Promise<void> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-  let magicLink: string | null = null
-  try {
-    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
-      type: 'recovery',
-      email: params.to,
-      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
-    })
-    if (linkErr || !linkData?.properties?.action_link) {
-      console.error('[sendWillkommenWerkstatt] Magic-Link fehlgeschlagen:', linkErr?.message)
-    } else {
-      magicLink = linkData.properties.action_link
-    }
-  } catch (err) {
-    console.error('[sendWillkommenWerkstatt] Magic-Link-Sub-Op fehlgeschlagen:', err)
+
+  const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
+    type: 'recovery',
+    email: params.to,
+    options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+  })
+  const magicLink = linkData?.properties?.action_link
+  if (linkErr || !magicLink) {
+    throw new Error(
+      `Werkstatt-Magic-Link konnte nicht erzeugt werden: ${linkErr?.message ?? 'kein action_link'}`,
+    )
   }
 
   const props = {
@@ -837,7 +835,6 @@ export async function sendWillkommenWerkstatt(params: {
     email: params.to,
     loginUrl: `${appUrl}/login`,
     magicLink,
-    einmalpasswort: params.einmalpasswort,
   }
   const html = await render(WillkommenWerkstattEmail(props))
   await sendEmail({

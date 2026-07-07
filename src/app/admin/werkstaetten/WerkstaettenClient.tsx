@@ -186,7 +186,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     if (!createdCredentials) return
     setDialogMailSending(true)
     try {
-      const res = await sendWerkstattLoginMail(createdCredentials.werkstattId, createdCredentials.password)
+      const res = await sendWerkstattLoginMail(createdCredentials.werkstattId)
       if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
       toast.success(`Login-Mail gesendet an ${createdCredentials.email}`)
     } finally {

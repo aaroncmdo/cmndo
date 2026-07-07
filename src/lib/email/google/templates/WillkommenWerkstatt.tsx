@@ -2,9 +2,9 @@
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 
 // Werkstatt Login-/Willkommens-Mail. Claimondo-Standard (Werkstatt = interner Partner,
-// kein Whitelabel). Enthaelt Magic-Link ("Passwort setzen") + — wenn vorhanden —
-// Direkt-Login (Login-URL + Email + Einmalpasswort). Ohne Einmalpasswort: Hinweis
-// aufs bestehende Passwort.
+// kein Whitelabel). Reiner Magic-Link-Weg: der Button "Passwort setzen & einloggen" fuehrt
+// auf /passwort-zuruecksetzen, setzt das Passwort und loggt beim Onboarding direkt ins Portal
+// ein. Kein Einmalpasswort mehr in der Mail (ein einziger, sicherer Weg).
 
 import { EmailShell, Hero, Card, Paragraph, Button, Footer } from '../../components'
 import { email } from '../../tokens'
@@ -13,8 +13,7 @@ type Props = {
   werkstattName: string
   email: string
   loginUrl: string
-  magicLink: string | null
-  einmalpasswort: string | null
+  magicLink: string
 }
 
 export function subject(_p: Props): string {
@@ -31,7 +30,7 @@ const codeStyle = {
   wordBreak: 'break-all' as const,
 }
 
-export function WillkommenWerkstattEmail({ werkstattName, email: mail, loginUrl, magicLink, einmalpasswort }: Props) {
+export function WillkommenWerkstattEmail({ werkstattName, email: mail, loginUrl, magicLink }: Props) {
   return (
     <EmailShell preview="Ihr Zugang zum Claimondo-Werkstatt-Portal.">
       <Hero logoUrl={null} headline={`Willkommen, ${werkstattName}!`} />
@@ -41,39 +40,22 @@ export function WillkommenWerkstattEmail({ werkstattName, email: mail, loginUrl,
           Sie vermittelte Aufträge, Besichtigungstermine und Abrechnungen.
         </Paragraph>
 
-        {magicLink && (
-          <>
-            <Button href={magicLink}>Passwort setzen &amp; einloggen</Button>
-            <Paragraph>
-              Falls der Button nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:{' '}
-              <a href={magicLink} style={{ color: email.color.ondo, wordBreak: 'break-all' as const }}>
-                {magicLink}
-              </a>
-            </Paragraph>
-          </>
-        )}
+        <Button href={magicLink}>Passwort setzen &amp; einloggen</Button>
+        <Paragraph>
+          Über diesen Button setzen Sie Ihr eigenes Passwort und werden direkt eingeloggt.
+          Falls er nicht funktioniert, kopieren Sie diesen Link in Ihren Browser:{' '}
+          <a href={magicLink} style={{ color: email.color.ondo, wordBreak: 'break-all' as const }}>
+            {magicLink}
+          </a>
+        </Paragraph>
 
         <Paragraph>
-          <strong>Direkt einloggen</strong> unter{' '}
-          <a href={loginUrl} style={{ color: email.color.ondo }}>{loginUrl}</a>:
+          Für spätere Anmeldungen unter{' '}
+          <a href={loginUrl} style={{ color: email.color.ondo }}>{loginUrl}</a> nutzen Sie Ihre
+          E-Mail-Adresse <span style={codeStyle}>{mail}</span> und Ihr gewähltes Passwort.
         </Paragraph>
-        <Paragraph>
-          E-Mail: <span style={codeStyle}>{mail}</span>
-        </Paragraph>
-        {einmalpasswort ? (
-          <Paragraph>
-            Passwort: <span style={codeStyle}>{einmalpasswort}</span>
-          </Paragraph>
-        ) : (
-          <Paragraph>
-            Nutzen Sie Ihr bestehendes Passwort. Passwort vergessen? Setzen Sie es über den
-            Button oben neu.
-          </Paragraph>
-        )}
 
-        <Paragraph>
-          Bitte ändern Sie Ihr Passwort beim ersten Login. Der Anmelde-Link ist 24 Stunden gültig.
-        </Paragraph>
+        <Paragraph>Der Anmelde-Link ist 24 Stunden gültig.</Paragraph>
       </Card>
       <Footer onDark={false} />
     </EmailShell>
