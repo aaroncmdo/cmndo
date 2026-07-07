@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
+import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
 import { revalidatePath } from 'next/cache'
 
 // Reuse the same generatePassword helper as in src/app/admin/team/actions.ts.
@@ -146,6 +147,9 @@ export async function createWerkstatt(
   } catch (err) {
     console.error('[werkstatt] Isochrone fehlgeschlagen (non-fatal):', err)
   }
+
+  // 5) Standard-Staffelung (Default-Bonus-Stufen) — best-effort, non-fatal (jede Werkstatt-Anlage).
+  await setzeStandardStaffel(admin, 'werkstatt', w.id as string)
 
   revalidatePath('/admin/werkstaetten')
   return { ok: true, email, password, werkstattId: w.id }
