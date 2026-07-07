@@ -61,3 +61,24 @@
 - Kein Backfill (Audit: 0 Ziele).
 - `kanzlei_faelle.regulierung_am` bleibt (KB-Verhandlungskontext, kein Cache).
 - `gutachten.gutachten_sv_honorar_netto` bleibt (SV-Honorar-Quelle).
+
+---
+
+## Execution Deep-Dive (2026-07-07, verifiziert — macht die Ausführung turnkey)
+
+**🔑 A1↔A2 sind GEKOPPELT — müssen zusammen shippen.** Collapse (Writer schreiben Cache nicht mehr) OHNE Reader-Migration ⇒ die Direkt-Tabellen-Reader (`analytics/finance:158`, `admin/finance:546`) sehen bei jeder NEUEN Regulierung veralteten Cache. Also EIN Code-PR für A1+A2+A3 (+ claim-duplicate-columns). Auf den heutigen statischen 28 Test-Claims wäre eine Teil-Lieferung zwar verhaltensneutral, aber inkohärent — daher zusammen.
+
+**Writer-Details (verifiziert):**
+- `endzustand-actions.ts:216` — `setEndzustandFields(claim_id, { status, regulierungs_betrag })` → `{ status }`. Ledger-Soll via `upsertClaimPayment('vs',{forderungsbetrag})` (:225) bleibt. **Clean.**
+- `kanzlei-paket.ts` **betrag-Fn (~:234)** — `.update({ regulierungs_betrag: betrag })` löschen. Der Betrag landet SCHON im Ledger: `transitionFallStatus('zahlung-eingegangen',{betrag})` → state-machine.ts:247 `cpFields.erhaltener_betrag = metadata.betrag`. `betragClaimId`-Guard bleibt (noch in der `if`-Bedingung genutzt). **Clean.**
+- `kanzlei-paket.ts` **erfasseZahlungseingang (~:378)** — `.update({ regulierungs_betrag: data.gesamtbetrag })` löschen UND `erhaltener_betrag: data.gesamtbetrag` in den `upsertClaimPayment('vs',{…})`-Call (:386) aufnehmen (sonst verliert die Ledger-Zeile den Summen-Betrag → View NULL). `upsertKanzleiFall(regulierung_am)` bleibt. **Betrag-Move — sorgfältig.**
+- `stammdaten.ts:577` — Descriptor `auszahlung_gutachter_eingegangen_am: { …, cacheAufClaims: true }` → `false`. Der `if(cacheAufClaims)`-Zweig (:587) schreibt dann keinen Cache mehr; `upsertClaimPayment('sv',{zahlungseingang_am})` (:585) bleibt. **Clean (1 Flag).**
+- `process-event.ts` **(die intrikate):** `regulierung_betrag` (:849) wird aktuell nach `fuClaims.regulierungs_betrag` (Cache) geroutet; `auszahlung_gutachter_eingegangen_am` liegt in `fuClaims` (Cache-Write :927) UND wird für den sv-Ledger gelesen (:953). **Drop-safe Restructure:** BEIDE aus `fuRest` peelen **VOR** `splitOrKeepFaelleUpdate` (:839) → direkt in die Ledger-Zeile (`cpFields.erhaltener_betrag` bzw. `upsertClaimPayment('sv',{zahlungseingang_am})`), damit sie NIE in fuClaims/fuFaelle landen → entkoppelt von claim-duplicate-columns.
+
+**⚠️ claim-duplicate-columns.ts ist SHARED** (importiert von `state-machine.ts`, `stammdaten.ts`, `process-event.ts`): `auszahlung_gutachter_betrag`/`_eingegangen_am` (~:120-121, `CLAIM_OWNED_DUPLICATE_COLUMNS`) + `regulierung_betrag→regulierungs_betrag` (~:272 rename-map) müssen VOR dem Spalten-DROP raus, sonst routet `splitOrKeepFaelleUpdate` weiter auf die gedroppte claims-Spalte. Alle Consumer prüfen, dass sie diese Felder nicht mehr über den Split erwarten (process-event peelt sie vorher).
+
+**Kein Unit-Test-Netz für die Writer.** Empfehlung: einen Writer-Integrations-/Golden-Test ergänzen (markClaimAsReguliert / erfasseZahlungseingang / process-event → Ledger-Zeile assert) BEVOR die Betrag-Moves live gehen. Die Golden-Abrechnungstests decken die Writer NICHT ab (nur die Billing-Rechnung).
+
+**A3 Dead-Code-Präzision:** `ClaimPaymentRerouteFields` NICHT löschen — `process-event.ts:913` nutzt es noch. `getCurrentClaimPayment`+`CurrentClaimPayment` sind 0-Consumer (nach Schritt C) → löschbar. `upsertCurrentClaimPayment` 0-Consumer prüfen. claim-payments.ts ist shared-hot → mit anderen Finanz-Sessions koordinieren.
+
+**Warum nicht im Session-Tail gerusht (2026-07-07):** Coupled ~12-File Money-Change + shared Routing (claim-duplicate-columns) + kein Test-Netz + Betrag-Moves. Sauber als fokussierter Chunk mit Test.
