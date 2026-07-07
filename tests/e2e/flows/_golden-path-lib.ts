@@ -4,7 +4,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // @ts-ignore — JS-Helper aus dem prod-smoke-Harness (kein .d.ts; Playwright/esbuild transpiliert)
 import { sessionToCookies } from '../../../scripts/prod-smoke/cookie.mjs'
 
-export { CLAIMS, AUFTRAEGE, ACCOUNTS, PARTIES, SV_SACHVERSTAENDIGE_ID } from '../../../scripts/test-fixtures/ids'
+export { CLAIMS, AUFTRAEGE, ACCOUNTS, PARTIES, PFLICHTDOK, SV_SACHVERSTAENDIGE_ID } from '../../../scripts/test-fixtures/ids'
 
 export const APP = process.env.GOLDEN_APP_URL ?? 'https://app.claimondo.de'
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
@@ -57,4 +57,22 @@ export async function assertRow(table: string, id: string, expected: Record<stri
   if (error) throw new Error(`assertRow ${table} ${id}: ${error.message}`)
   expect(data, `${table} ${id} existiert`).toBeTruthy()
   expect(data).toMatchObject(expected)
+}
+
+/** DB-driven Poll: wartet bis die Row (per id) das expected-Objekt matcht (für asynchrone UI-Aktionen). */
+export async function pollRow(
+  table: string,
+  id: string,
+  expected: Record<string, unknown>,
+  timeoutMs = 20_000,
+): Promise<void> {
+  await expect
+    .poll(
+      async () => {
+        const { data } = await serviceClient().from(table).select('*').eq('id', id).maybeSingle()
+        return data
+      },
+      { timeout: timeoutMs, message: `${table} ${id} soll ${JSON.stringify(expected)} erreichen` },
+    )
+    .toMatchObject(expected)
 }

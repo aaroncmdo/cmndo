@@ -112,7 +112,14 @@ async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
     [PFLICHTDOK.schadensfotos, 'schadensfotos', 2],
   ]
   for (const [id, dokument_typ, sort_order] of slots) {
-    await upsertById(db, 'pflichtdokumente', { id, fall_id: CLAIMS.c1, dokument_typ, sort_order }, o)
+    // status/dokument_url/hochgeladen_am auf ausstehend zurücksetzen -> der Kunde-Upload-Flow
+    // (SP2) ist wiederholbar (sonst bliebe der Slot nach dem 1. Upload dauerhaft 'hochgeladen').
+    await upsertById(
+      db,
+      'pflichtdokumente',
+      { id, fall_id: CLAIMS.c1, dokument_typ, sort_order, status: 'ausstehend', dokument_url: null, hochgeladen_am: null },
+      o,
+    )
   }
 }
 

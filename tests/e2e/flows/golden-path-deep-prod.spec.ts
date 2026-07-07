@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { execSync } from 'node:child_process'
-import { loginContext, assertRow, APP, CLAIMS, AUFTRAEGE } from './_golden-path-lib'
+import { loginContext, assertRow, pollRow, APP, CLAIMS, AUFTRAEGE, PFLICHTDOK } from './_golden-path-lib'
 
 // Deep Golden-Path gegen Prod — opt-in, serial, nie in CI. Fährt die SP1-Fixtures
 // je Rolle bis zur Kern-CTA (klicken + absenden + DB-Assert).
@@ -43,6 +43,36 @@ test('SV #3729 — Stellungnahme einreichen (C2) → auftrag hochgeladen', async
 
   // 5. DB-Assert: der Auftrag der Kern-CTA ist jetzt hochgeladen.
   await assertRow('auftraege', AUFTRAEGE.c2, { technische_stellungnahme_status: 'hochgeladen' })
+
+  await ctx.close()
+})
+
+// FIXME (Golden-Path-Finding, 07.07.): test-kunde wird von /kunde/faelle/{C1} nach
+// /kunde → /kunde/onboarding umgeleitet (KEIN /login-Bounce). Ursache: test-kunde ist
+// geschädigter auf ALLEN 3 Fixture-Claims → die Kunde-Portal-Onboarding-Weiche ist
+// mehrdeutig, die Fallseite rendert nicht. Sauberer Kunde-Flow braucht ein dediziertes
+// Fixture (genau 1 klarer Kunde-Claim, past-onboarding) — nächster Schritt. Struktur +
+// Selektoren (Banner→Popover→Fahrzeugschein-Slot) + DB-Assert (pollRow) stehen.
+test.fixme('Kunde — Pflichtdok-Upload (C1) → pflichtdokument hochgeladen', async ({ browser }) => {
+  test.setTimeout(90_000)
+  const ctx = await loginContext(browser, 'kunde')
+  const page = await ctx.newPage()
+
+  // 1. Kunde-Fallseite (Route-Key = claim_id). Ownership läuft normalisiert über claim_parties.
+  await page.goto(`${APP}/kunde/faelle/${CLAIMS.c1}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
+  expect(new URL(page.url()).pathname, 'Kunde nicht zu /login gebounced').not.toMatch(/\/login|\/anmelden/)
+
+  // 2. Pflichtdok-Banner (Click-Tile) öffnen → Popover mit den Slots.
+  const banner = page.getByRole('button').filter({ hasText: /Dokument|Unterlagen|Nachweis|hochladen/i }).first()
+  await expect(banner, 'Pflichtdok-Banner sichtbar').toBeVisible({ timeout: 15_000 })
+  await banner.click()
+
+  // 3. Fahrzeugschein-Slot → verstecktes File-Input → Upload.
+  const slot = page.locator('li').filter({ hasText: /Fahrzeugschein/i }).first()
+  await slot.locator('input[type="file"]').setInputFiles('tests/e2e/fixtures/test-upload.pdf')
+
+  // 4. DB-driven: warten bis der Upload den Slot auf 'hochgeladen' setzt.
+  await pollRow('pflichtdokumente', PFLICHTDOK.fahrzeugschein, { status: 'hochgeladen' }, 30_000)
 
   await ctx.close()
 })
