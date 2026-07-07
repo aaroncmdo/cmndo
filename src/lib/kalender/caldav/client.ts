@@ -309,6 +309,60 @@ export async function listCalendarEventsFull(
   return events
 }
 
+// CalDAV-Debug-Probe (2026-07): pro Kalender die Objekt-Anzahl im Fenster UND gesamt, plus ob
+// die gespeicherte calendar_url exakt matcht. Diagnostiziert "verbunden, aber 0 Events" —
+// unterscheidet: Events ausserhalb des [now,+N]-Fensters (windowed=0, total>0), leerer Kalender
+// (beide 0), oder URL-Mismatch (matchedStoredUrl=false -> Sync fiel auf calendars[0] zurueck).
+export type CalDavCalendarProbe = {
+  url: string
+  displayName: string
+  isStoredCalendar: boolean
+  windowedObjects: number
+  totalObjects: number
+}
+
+export async function probeAllCalendars(
+  creds: CalDavCredentials,
+  storedCalendarUrl: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<{ calendars: CalDavCalendarProbe[]; matchedStoredUrl: boolean }> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const out: CalDavCalendarProbe[] = []
+  for (const cal of calendars) {
+    const url = String(cal.url)
+    let windowedObjects = 0
+    let totalObjects = 0
+    try {
+      const w = (await client.fetchCalendarObjects({
+        calendar: cal,
+        timeRange: { start: rangeStartIso, end: rangeEndIso },
+      })) as unknown[]
+      windowedObjects = w?.length ?? 0
+    } catch {
+      /* per-Kalender fail-soft */
+    }
+    try {
+      const all = (await client.fetchCalendarObjects({ calendar: cal })) as unknown[]
+      totalObjects = all?.length ?? 0
+    } catch {
+      /* per-Kalender fail-soft */
+    }
+    out.push({
+      url,
+      displayName:
+        typeof cal.displayName === 'string'
+          ? cal.displayName
+          : url.replace(/\/$/, '').split('/').pop() ?? url,
+      isStoredCalendar: url === storedCalendarUrl,
+      windowedObjects,
+      totalObjects,
+    })
+  }
+  return { calendars: out, matchedStoredUrl: out.some((c) => c.isStoredCalendar) }
+}
+
 type CalDavEventInput = {
   uid?: string
   summary: string
