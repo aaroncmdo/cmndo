@@ -5,9 +5,12 @@ import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
 import { logAiUsage } from '@/lib/ai/usage-log'
 import type { ClaimContext, ProposalDraft } from './types'
+import { GRADUATION } from './types'
 import { summarizeClaimForPrompt } from './context'
 import { ORCHESTRATOR_TOOLS, validateToolCall } from './tools'
-import { persistProposals } from './proposals'
+import { persistProposals, persistAutoProposal } from './proposals'
+import { getAutoMode, isAutoEligible, isKillSwitchOn } from './policy'
+import { buildTaskFromProposal } from './task-from-proposal'
 
 const SYSTEM = `Du bist ein erfahrener Schaden-Ops-Manager bei einem deutschen KFZ-Gutachter-Dienst.
 Dir wird ein STAGNIERENDER Fall gezeigt. Beurteile, was als Nächstes passieren sollte, um ihn voranzubringen.
@@ -66,5 +69,30 @@ export async function reviewClaim(ctx: ClaimContext): Promise<number> {
     // bewusst swallowed — usage-log non-critical
   }
   const drafts = extractProposalsFromToolUse(res.content)
-  return persistProposals(ctx.claimId, model, drafts)
+  const killSwitch = isKillSwitchOn()
+  let autoCount = 0
+  const offeneDrafts: ProposalDraft[] = []
+  for (const draft of drafts) {
+    const mode = await getAutoMode(draft.vorschlagTyp, draft.zielRolle ?? '')
+    const eligible =
+      isAutoEligible(draft.vorschlagTyp, mode, killSwitch) &&
+      autoCount < GRADUATION.rateCapProLauf
+    if (eligible) {
+      const { task_id } = await buildTaskFromProposal(
+        draft.payload,
+        draft.zielRolle,
+        ctx.claimId,
+        'ai_orchestrator_auto',
+      )
+      if (task_id) {
+        await persistAutoProposal(ctx.claimId, model, draft, task_id)
+        autoCount++
+        continue
+      }
+      // Task-Erzeugung fehlgeschlagen -> sicher als offen persistieren (fall-through)
+    }
+    offeneDrafts.push(draft)
+  }
+  const offenCount = offeneDrafts.length ? await persistProposals(ctx.claimId, model, offeneDrafts) : 0
+  return autoCount + offenCount
 }

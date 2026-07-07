@@ -14,10 +14,8 @@ import {
 import { StatCard } from '@/components/shared/StatCard'
 import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
 import { MaklerStaffelCard } from '@/components/makler/MaklerStaffelCard'
-import { MaklerPipelineCard } from '@/components/makler/MaklerPipelineCard'
 import type { StaffelStufe } from '@/lib/werkstatt/staffel'
 import type { DashboardData } from '@/lib/makler/queries'
-import type { MaklerPipeline } from '@/lib/makler/pipeline'
 
 type Props = {
   makler: {
@@ -26,7 +24,6 @@ type Props = {
     ansprechpartner_vorname: string
   }
   data: DashboardData
-  pipeline: MaklerPipeline
   zeigeErsteVermittlungCard: boolean
   promoCode: string | null
   staffelSettled: number
@@ -59,7 +56,6 @@ function relativeFromNow(iso: string): string {
 export function MaklerDashboard({
   makler,
   data,
-  pipeline,
   zeigeErsteVermittlungCard,
   promoCode,
   staffelSettled,
@@ -116,9 +112,30 @@ export function MaklerDashboard({
         />
       </section>
 
-      {/* Vertriebs-Pipeline: All-Time-Funnel (Leads → Vermittelt → Ausgezahlt) +
-          Geld-Pipeline (abrechenbar/ausgezahlt) — ergaenzt die Monats-KPIs oben. */}
-      <MaklerPipelineCard offeneLeads={stats.offeneLeads} pipeline={pipeline} />
+      {/* Tipp des Monats — direkt unter den KPIs (Anordnung Aaron 07.07.) */}
+      <section aria-label="Tipp des Monats">
+        <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
+            Tipp des Monats
+          </p>
+          <h3 className="text-lg font-semibold mb-2">
+            QR-Code auf dem Beratungsgespräch zeigen
+          </h3>
+          <p className="text-sm text-claimondo-ondo leading-relaxed">
+            Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
+            direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
+            Leads wie Makler die nur per E-Mail verteilen. Der QR führt
+            direkt zum Schadenformular — Ihr Kontakt bleibt nachvollziehbar.
+          </p>
+        </div>
+      </section>
+
+      {/* Staffelung — direkt unter dem Tipp (rendert null ohne konfigurierte Stufen) */}
+      <MaklerStaffelCard
+        settledCount={staffelSettled}
+        pendingCount={staffelPending}
+        stufen={staffelStufen}
+      />
 
       {/* Activity + Schnellaktionen als 2-col auf Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -196,30 +213,6 @@ export function MaklerDashboard({
         </section>
       </div>
 
-      {/* Staffelung: Meilenstein-Fortschritt (rendert null, solange keine Stufen konfiguriert sind) */}
-      <MaklerStaffelCard
-        settledCount={staffelSettled}
-        pendingCount={staffelPending}
-        stufen={staffelStufen}
-      />
-
-      {/* Tipp des Monats */}
-      <section aria-label="Tipp des Monats">
-        <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
-            Tipp des Monats
-          </p>
-          <h3 className="text-lg font-semibold mb-2">
-            QR-Code auf dem Beratungsgespräch zeigen
-          </h3>
-          <p className="text-sm text-claimondo-ondo leading-relaxed">
-            Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
-            direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
-            Leads wie Makler die nur per E-Mail verteilen. Der QR führt
-            direkt zum Schadenformular — Ihr Kontakt bleibt nachvollziehbar.
-          </p>
-        </div>
-      </section>
     </div>
   )
 }

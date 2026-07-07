@@ -14,6 +14,10 @@ import { webhookInboundSilentCheck } from './webhook-inbound-silent'
 import { configRequiredEnvCheck } from './config-required-env'
 import { kanzleiTenancyScopingCheck } from './kanzlei-tenancy-scoping'
 import { orchestratorPipelineCheck } from './orchestrator-pipeline'
+// Data-Integrity-Guard (Ship-Safety P1): Invarianten-Checks
+import { claimsMissingPflichtdokumenteCheck } from './claims-missing-pflichtdokumente'
+import { termineMissingRemindersCheck } from './termine-missing-reminders'
+import { claimsMissingGeschaedigterCheck } from './claims-missing-geschaedigter'
 
 export const ALL_CHECKS: HealthCheck[] = [
   funnelStuckClaimsCheck,
@@ -27,4 +31,8 @@ export const ALL_CHECKS: HealthCheck[] = [
   configRequiredEnvCheck,
   kanzleiTenancyScopingCheck,
   orchestratorPipelineCheck,
+  // Data-Integrity-Guard (Ship-Safety P1)
+  claimsMissingPflichtdokumenteCheck,
+  termineMissingRemindersCheck,
+  claimsMissingGeschaedigterCheck,
 ]

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { toast } from 'sonner'
 import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon, MailIcon, ReceiptIcon } from 'lucide-react'
 import { createWerkstatt, sendWerkstattLoginMail, setWerkstattFaehigkeiten } from './actions'
@@ -188,7 +189,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     if (!createdCredentials) return
     setDialogMailSending(true)
     try {
-      const res = await sendWerkstattLoginMail(createdCredentials.werkstattId, createdCredentials.password)
+      const res = await sendWerkstattLoginMail(createdCredentials.werkstattId)
       if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
       toast.success(`Login-Mail gesendet an ${createdCredentials.email}`)
     } finally {
@@ -359,7 +360,12 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   className="border-b border-claimondo-border/50"
                 >
                   <Td>
-                    <div className="text-claimondo-navy font-medium">{w.name}</div>
+                    <Link
+                      href={`/admin/werkstaetten/${w.id}`}
+                      className="text-claimondo-navy font-medium hover:text-claimondo-ondo hover:underline"
+                    >
+                      {w.name}
+                    </Link>
                     <div className="text-claimondo-ondo text-xs">{w.email ?? '—'}</div>
                   </Td>
                   <Td>

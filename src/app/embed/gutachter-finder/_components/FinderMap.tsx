@@ -1,73 +1,155 @@
-// Token-Audit-Skip: Mapbox-GL erwartet raw hex strings für fill/line paint properties.
+// Token-Audit-Skip: Mapbox-GL erwartet raw hex strings für marker fills + paint properties.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
-// AAR-956 (05.07.) — Kunden-Finder als reine GESAMT-ABDECKUNGS-Ansicht.
-// KEINE einzelnen Gutachter mehr (Pins/Profile/Route): der Kunde sieht unsere
-// aggregierte Abdeckung — Partner-Einsatzgebiet (kräftig, Union der Partner-
-// Isochronen) + die durch Dead-Pins gewährleistete Reichweite (heller, 15-km-
-// Kreise). Standardansicht = die Abdeckung selbst (fitBounds), nie eine leere
-// Karte. Ort-Eingabe bestätigt nur „in Ihrem Gebiet" / „überregional" — es wird
-// KEIN einzelner (versteckter) Gutachter geroutet oder benannt. Das System wählt
-// den SV im Booking; sein Name erscheint erst im Slot/auf der Danke-Seite.
+// AAR-956 WS1b — portiert aus claimondo-marketing/app/[locale]/gutachter-finden/
+// GutachterFinderMapClient.tsx in die Haupt-App (Embed-Route /embed/gutachter-finder).
+// next-intl → inline DE (Open-Decision #2); ansonsten visuell deckungsgleich.
+// WS2 redesignt das Pin-Popup (+ GoogleBewertungBadge), WS3 Route/Zoom, WS4 füllt wizardSlot.
 //
-// Frühere Einzel-Gutachter-Optik (klickbare Avatar-Marker + Profil-Popups +
-// Dead-Pins) wurde durch die Abdeckungs-Layer ersetzt (Aaron 05.07.: „unsere
-// INSGESAMT Abdeckung, ohne die einzelnen Gutachter").
+// AAR-956 (05.07.) — Einzel-SV-Ansicht (Route + Profil) wiederhergestellt.
+// Coverage-Fläche = Union der Partner-Isochronen (glatter Außen-Umriss via
+// unionIsochrones aus @/lib/mapbox/union-isochrones) + Dead-Pin-Heatmap.
+// Beide Coverage-Layer bleiben als Kontext-Fläche sichtbar; die Einzel-SV-Ebene
+// (klickbare Avatar-Marker + Profil-Popup/Sheet + Route) liegt DARÜBER.
+//
+// Anti-Skimming: Popup zeigt AUSSCHLIESSLICH anonyme Trust-Signale (Initiale,
+// Region/Stadt, Specs, Bewertung, Vorname). KEINE PII: kein Telefon, keine Email,
+// keine Adresse, kein Firmenname.
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
 // 2026-05-12: NICHT aus '@/lib/mapbox' (Index) importieren — der Index
-// re-exportiert THREE.js/cesium am Top-Level (Public-Bundle-Crash). Direkt aus client.ts.
+// re-exportiert sv-car-3d-three (THREE.js am Top-Level) und cesium-3d-tiles,
+// die sonst in den Public-Map-Bundle wandern. THREE.Color hat im minified
+// Turbopack-Build den Constructor verloren → "i.Color is not a constructor"-
+// Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
-import { kmCircle, pointInAnyPolygon, type LngLat } from '@/lib/mapbox/coverage'
-import type { Map as MapboxMap, Marker } from 'mapbox-gl'
+import { fetchDrivingRoute } from '@/lib/mapbox/directions'
+import { kmCircle, pointInAnyPolygon } from '@/lib/mapbox/coverage'
+import { unionIsochrones } from '@/lib/mapbox/union-isochrones'
+import type { Map as MapboxMap, Marker, Popup, GeoJSONSource } from 'mapbox-gl'
 import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
-// AAR-glass-s1: Liquid-Glass-Design-System.
+// AAR-glass-s1: Liquid-Glass-Design-System (siehe
+// docs/superpowers/specs/2026-05-12-claimondo-glass-design-system.md).
 import { GlassPill, BeratungVereinbarenButton, BeratungModal } from '@/components/shared/glass'
+import { createRoot, type Root } from 'react-dom/client'
+import { SvProfilePopup, DeadPinProfilePopup, SvProfileInhalt } from './SvProfilePopup'
+import { empfehleSvFuerOrt } from '../actions'
 
 type Props = {
-  /** Tier-3 Lead-Partner (sv_leads). Fließen als helle Dead-Pin-Abdeckung (15-km-Kreise). */
+  /** Tier-3 Lead-Partner (sv_leads). Dead-Pins, nicht klickbar, kein Popup. */
   svLeads: SvLeadPublic[]
-  /** Tier-1 SVs (sachverstaendige). Fließen als kräftige Partner-Abdeckung (Isochronen-Union).
-   * Einzelne Gutachter werden NICHT mehr gezeigt (Aaron 05.07.). */
+  /** Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron): JEDER verifizierte,
+   * aktive SV ist klickbar mit anonymem Profil-Popup (RLS-gegated). */
   aktiveSVs?: AktiverSVPublic[]
   /** Slot für den Inline-Wizard (WS4 — FlowSlotStep). WS1b: Platzhalter aus der Page. */
   wizardSlot?: React.ReactNode
-  /** Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng), server-seitig geocodet.
-   * Wenn gesetzt: Karte startet hier (statt fitBounds auf die Abdeckung) UND die
-   * automatische Geolocation-Abfrage entfällt (explizite User-Wahl gewinnt). */
+  /** Doc 34 0a.3: Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng),
+   * server-seitig via Mapbox geocodet. Wenn gesetzt, startet die Karte hier
+   * UND die automatische Geolocation-Abfrage entfällt (explizite User-Wahl
+   * gewinnt). Ohne Wert = bisheriges Verhalten (NRW-Default + Geolocation). */
   initialCenter?: { lat: number; lng: number } | null
   initialZoom?: number
-  /** Container-Höhe. Default '100dvh'. */
+  /** Container-Höhe. Default '100dvh' (Vollseite, z.B. /gutachter-finden).
+   * Für In-Page-Sections z.B. '78vh' oder '680px' übergeben — Karte + Overlays
+   * sind container-relativ und skalieren mit. */
   height?: string
-  /** Test-Override (?fallback=1): erhalten für API-Kompatibilität; ohne Route-Ziel ungenutzt. */
+  /** Test-Override (?fallback=1): erzwingt den Dead-Pin-Pfad in der Route-Empfehlung
+   * (empfehleSvFuerOrt), damit der Dead-Pin-Flow live testbar ist. Vor Prod raus. */
   forceFallback?: boolean
 }
 
-// NRW-Mittelpunkt als LETZTER Fallback (nur wenn 0 Abdeckung vorhanden). Normal
-// zeigt die Karte per fitBounds die tatsächliche Abdeckung.
+// NRW-Mittelpunkt — gute Start-Ansicht da die 62 SVs hauptsächlich in NRW
+// liegen (Excel-Import vom 11.05.2026). Fallback wenn der User die
+// Geolocation-Permission ablehnt oder kein Standort verfügbar ist.
 const DEFAULT_CENTER: [number, number] = [7.0, 51.0]
 const DEFAULT_ZOOM = 8.5
 const USER_LOCATION_ZOOM = 10.5
 
-// Coverage-Farben (Claimondo-Palette). Token-Audit-Skip-Header oben deckt die raw
-// hex ab — Mapbox-Layer-Paint akzeptiert KEINE CSS var(). Whitelabel-Branding läuft
-// über die Tailwind-Klassen der UI-Overlays, nicht über diese Karten-Fills.
-const COL_PARTNER = '#4573A2' // Partner-Abdeckung (kräftig, Claimondo-Ondo)
-// Dead-Pin-Reichweite = Heatmap in rgba(123,163,204) (= Claimondo-Light #7BA3CC).
-const DEADPIN_RADIUS_KM = 15 // = die 15-km-Ghost-Isochrone, in der Dead-Pins vermittelbar sind
+// AAR-906: Marker-Colors über CSS-Vars (Whitelabel-fähig, Claimondo-Fallback).
+// Mapbox baut die Marker via innerHTML aus Template-Literals — `var()`-Strings
+// werden vom Browser beim Style-Resolution-Pass evaluiert.
+// Mapbox-Layer-Paint (fill-color, line-color) akzeptiert NUR raw color-strings,
+// keine CSS `var()`. Token-Audit-Skip-Header oben erlaubt diese hex literals.
+// Whitelabel-Branding läuft an anderer Stelle (var(--brand-*) in Tailwind-
+// Klassen + globals.css-Aliase auf claimondo-* Tokens).
+const COL_ONDO = '#4573A2'
+const COL_NAVY = '#0D1B3E'
+
+// Dead-Pin-Reichweite = 15-km-Ghost-Isochrone (Coverage-Check + Dead-Pin-Render-Kreise).
+const DEADPIN_RADIUS_KM = 15
+
+// Generischer Dead-Pin (Claimondo-Logo-Look) — nicht klickbar, kein Hover,
+// kein Popup. Wird für alle sv_leads (Tier-3 Excel-Imports) verwendet.
+// Zweck: zeigt Marker-Dichte ohne SV-Identität.
+function addDeadPin(
+  map: MapboxMap,
+  store: Marker[],
+  lng: number,
+  lat: number,
+) {
+  const el = document.createElement('div')
+  // pointer-events:none + cursor:default → kein Klick, kein Hand-Cursor.
+  // Mapbox propagiert Klicks dann an die Karte (Pan/Zoom) statt an den Pin.
+  el.style.pointerEvents = 'none'
+  el.style.cursor = 'default'
+  el.setAttribute('aria-hidden', 'true')
+  el.innerHTML = `
+    <div class="sv-deadpin" style="width:18px;height:18px;display:grid;place-items:center;border-radius:50%;background:${COL_NAVY};box-shadow:0 2px 6px rgba(13,27,62,0.30);border:2px solid #fff">
+      <span style="font-family:Montserrat,system-ui,sans-serif;font-size:9px;font-weight:900;color:#fff;line-height:1;letter-spacing:-.02em">C</span>
+    </div>
+  `
+  const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+    .setLngLat([lng, lat])
+    .addTo(map)
+  store.push(marker)
+  return marker
+}
+
+// Klickbarer Avatar-Marker für verifizierte SVs. Click → onClick (öffnet das
+// React-Profil-Popup über dem Pin, WS2). KEIN setPopup/HTML-Popup + kein
+// Wizard-CTA mehr — die Buchung läuft über den 3-Step-Wizard (WS4), den SV
+// wählt das System (WS3).
+function addClickableMarker(
+  map: MapboxMap,
+  store: Marker[],
+  sv: AktiverSVPublic,
+  onClick: () => void,
+) {
+  const initiale = sv.vorname_initiale ?? '·'
+  const el = document.createElement('div')
+  el.style.cursor = 'pointer'
+  el.innerHTML = `
+    <div class="sv-marker-inner" style="display:flex;flex-direction:column;align-items:center;transition:transform .35s cubic-bezier(.32,.72,0,1);transform-origin:center bottom">
+      <div style="width:40px;height:40px;border-radius:50%;border:3px solid ${COL_NAVY};background:#fff;display:grid;place-items:center;font-family:Montserrat,system-ui,sans-serif;font-size:15px;font-weight:800;color:${COL_NAVY};box-shadow:0 6px 18px rgba(13,27,62,0.22);position:relative">
+        ${initiale}
+        <div style="position:absolute;bottom:-3px;right:-3px;width:12px;height:12px;border-radius:50%;background:#34C759;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,0.2)"></div>
+      </div>
+    </div>
+  `
+  el.addEventListener('click', (e) => {
+    e.stopPropagation()
+    onClick()
+  })
+  const marker = new mapboxgl.Marker({ element: el, anchor: 'bottom' })
+    .setLngLat([sv.standort_lng, sv.standort_lat])
+    .addTo(map)
+  store.push(marker)
+  return marker
+}
 
 // DE-only Embed (AAR-956 Open-Decision #2): Map-Strings inline statt next-intl.
+// Die Marketing-SEO-Seite bleibt ×6 lokalisiert; der Embed ist eine deutsche
+// Claimondo-Fläche. Lokaler t-Shim hält die Call-Sites unverändert.
 const MAP_STRINGS: Record<string, string> = {
   h1: 'Kfz-Gutachter in Ihrer Nähe finden.',
   sub: '4 kurze Fragen — wir verbinden Sie mit dem passenden Sachverständigen.',
-  pill_bundesweit: 'Deutschlandweite Vermittlung',
-  pill_covered: 'In Ihrem Gebiet sind wir aktiv',
-  pill_ueberregional: 'Wir vermitteln überregional',
-  legend_partner: 'Partner-Einsatzgebiet',
-  legend_deadpin: 'Erweiterte Reichweite',
+  pill_near: '{count} Gutachter in Ihrer Nähe',
+  pill_bundesweit: '{count} Gutachter bundesweit verfügbar',
+  pill_short_near: '{count} Gutachter in Ihrer Nähe',
+  pill_short_bundesweit: '{count} Gutachter verfügbar',
   attribution: 'Mapbox · OpenStreetMap',
   error_title: 'Karte konnte nicht geladen werden',
   error_no_token: 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.',
@@ -76,16 +158,40 @@ const MAP_STRINGS: Record<string, string> = {
   error_generic: 'Mapbox-Fehler:',
   beratung_label: 'Beratung',
 }
-function tMap(key: string): string {
-  return MAP_STRINGS[key] ?? key
+function tMap(key: string, vars?: { count?: number }): string {
+  const s = MAP_STRINGS[key] ?? key
+  return typeof vars?.count === 'number' ? s.replace('{count}', String(vars.count)) : s
 }
 
-type CoverageStatus = 'idle' | 'covered' | 'ueberregional'
+// AAR-956 (Aaron 14.06.): Haversine-Luftlinie (km) für den standortabhängigen
+// „Gutachter in Ihrer Nähe"-Count.
+function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const R = 6371
+  const dLat = ((lat2 - lat1) * Math.PI) / 180
+  const dLng = ((lng2 - lng1) * Math.PI) / 180
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLng / 2) ** 2
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+}
 
-// AAR-956 (Aaron 14.06.): Status-Pill — Desktop im Header (links), Mobil unten-mittig.
-// Zeigt jetzt den Abdeckungs-Status statt einer Gutachter-Zahl (reine Abdeckungs-Ansicht).
-function GutachterPill({ status }: { status: CoverageStatus }) {
-  const label = status === 'covered' ? tMap('pill_covered') : status === 'ueberregional' ? tMap('pill_ueberregional') : tMap('pill_bundesweit')
+// AAR-956 (Aaron 14.06.): Glass-Override für die Beratung-CTA (leicht transparent + blur,
+// geräteübergreifend) — überschreibt die GlassButton-secondary-Defaults via gleicher
+// Arbitrary-Properties (twMerge nimmt die letzte).
+const BERATUNG_GLASS =
+  '[background:color-mix(in_srgb,white_60%,transparent)] [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] border-white/50 text-claimondo-ondo'
+
+// AAR-956 (Aaron 14.06.): Status-Pill als eigene Komponente — Desktop im Header (links), Mobil
+// unten-mittig über dem Anfrage-Sheet. Responsiver Text via die zwei spans (kurz/voll).
+function GutachterPill({
+  userLocation,
+  naeheCount,
+  gesamt,
+}: {
+  userLocation: { lat: number; lng: number } | null
+  naeheCount: number | null
+  gesamt: number
+}) {
   return (
     <GlassPill className="px-3 py-2 sm:px-4 [background:color-mix(in_srgb,white_70%,transparent)] [backdrop-filter:blur(24px)] [-webkit-backdrop-filter:blur(24px)] [border:1px_solid_color-mix(in_srgb,white_50%,transparent)]">
       <span className="relative flex h-2 w-2 flex-shrink-0">
@@ -99,59 +205,101 @@ function GutachterPill({ status }: { status: CoverageStatus }) {
           color: 'var(--brand-secondary, var(--claimondo-ondo))',
         }}
       >
-        {status === 'covered' ? '✓ ' : ''}
-        {label}
+        <span className="sm:hidden">
+          {userLocation ? tMap('pill_short_near', { count: naeheCount ?? 0 }) : tMap('pill_short_bundesweit', { count: gesamt })}
+        </span>
+        <span className="hidden sm:inline">
+          {userLocation ? tMap('pill_near', { count: naeheCount ?? 0 }) : tMap('pill_bundesweit', { count: gesamt })}
+        </span>
       </span>
     </GlassPill>
   )
 }
 
-// Kleine Karten-Legende (rechts unten, Desktop) — erklärt die zwei Abdeckungs-Töne.
-function CoverageLegend() {
-  return (
-    <div
-      className="hidden lg:flex flex-col gap-1.5 absolute bottom-9 right-3 z-[5] rounded-ios-md px-3 py-2 text-[11px] font-medium"
-      style={{ background: 'color-mix(in srgb, white 78%, transparent)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', color: 'var(--brand-primary, var(--claimondo-navy))' }}
-    >
-      <span className="flex items-center gap-2">
-        <span className="h-2.5 w-4 rounded-sm" style={{ background: 'color-mix(in srgb, var(--claimondo-ondo, #4573A2) 45%, transparent)', border: '1px solid color-mix(in srgb, var(--claimondo-ondo, #4573A2) 70%, transparent)' }} aria-hidden />
-        {tMap('legend_partner')}
-      </span>
-      <span className="flex items-center gap-2">
-        <span className="h-2.5 w-4 rounded-sm" style={{ background: 'color-mix(in srgb, #7BA3CC 30%, transparent)' }} aria-hidden />
-        {tMap('legend_deadpin')}
-      </span>
-    </div>
-  )
-}
-
-export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh' }: Props) {
+export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
-  const userMarkerRef = useRef<Marker | null>(null) // Geolocation „Sie sind hier"
-  const ortMarkerRef = useRef<Marker | null>(null) // eingegebener Besichtigungsort
+  const markersRef = useRef<Marker[]>([])
+  const popupRef = useRef<Popup | null>(null)
+  const popupRootRef = useRef<Root | null>(null)
+  const userMarkerRef = useRef<Marker | null>(null)
+  const carMarkerRef = useRef<Marker | null>(null)
+  // AAR-956 (Aaron 12.06.): die im Fallback gematchten Dead-Pins (15-km-Ghost-Isochrone) als
+  // dynamische Pins — getrennt von markersRef (Partner), damit ich sie pro Ort neu setzen kann.
+  const deadPinMarkersRef = useRef<Marker[]>([])
+  // AAR-956 #4 (Aaron 12.06.): Marker-Elemente nach ID, um den GEWÄHLTEN Gutachter
+  // hervorzuheben (Partner via svId, Dead-Pin via deadPinId) + letzter Ort für die Re-Route.
+  const svMarkerElsRef = useRef<Map<string, HTMLElement>>(new Map())
+  const deadPinElsRef = useRef<Map<string, HTMLElement>>(new Map())
+  const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
   // Alle Abdeckungs-Polygone (Partner-Isochronen + Dead-Pin-Kreise) für den
-  // client-seitigen „liegt der Ort in der Abdeckung?"-Check.
+  // client-seitigen „liegt der Ort in der Abdeckung?"-Check (pointInAnyPolygon).
   const coveragePolysRef = useRef<GeoJSON.Polygon[]>([])
-
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
+  // Aaron 04.07.: das Anfrage-Bottom-Sheet startet auf Mobil kosmetisch AUSGEFAHREN
+  // (default expanded, überall — Embed / /start/makler / /start/werkstatt). Der Nutzer
+  // sieht sofort die Anfrage-CTA; einklappen (Peek) geht per Chevron/Drag.
   const [mobileSheetOpen, setMobileSheetOpen] = useState(true)
-  const [coverageStatus, setCoverageStatus] = useState<CoverageStatus>('idle')
-  // AAR-956 (Aaron 14.06.): Touch-Drag fürs Anfrage-Bottom-Sheet.
+  // AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) statt engem Pin-Popup.
+  const [sheetSv, setSheetSv] = useState<AktiverSVPublic | null>(null)
+  // AAR-956 (Aaron 14.06.): Touch-Start-Y fürs Drag-to-toggle des Anfrage-Bottom-Sheets.
   const sheetDragRef = useRef<number | null>(null)
+  // AAR-956 (Aaron 14.06.): Live-Drag-Offset (px) fürs Anfrage-Sheet — folgt dem Finger.
   const [sheetDragY, setSheetDragY] = useState(0)
   const anfrageSheetRef = useRef<HTMLDivElement>(null)
-  const sidebarScrollRef = useRef<HTMLDivElement | null>(null)
-
-  // AAR-2026-05-12: sichtbarer Map-Diagnose-Status (siehe MAP_STRINGS.error_*).
+  // AAR-956 (Aaron 14.06.): Live-Drag-to-close fürs Profil-Sheet (herunterziehen schließt, nicht
+  // nur Klick auf den Strich) + Scroll-Lock (Hintergrund darf bei offenem Sheet nicht scrollen).
+  const [profileDragY, setProfileDragY] = useState(0)
+  const profileDragStartRef = useRef<number | null>(null)
+  const profileSheetRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!sheetSv) {
+      setProfileDragY(0)
+      return
+    }
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [sheetSv])
+  // 2026-05-12 Aaron-Smoke: Wir fragen Geolocation beim Page-Load ab, damit
+  // "In Ihrer Nähe"-Behauptung im Header ehrlich ist und die Karte direkt
+  // zum User zoomt. Bei Deny bleibt es bei NRW-Mittelpunkt + neutralem Badge.
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  // AAR-956 (Aaron 14.06.): standortabhängiger „Gutachter in Ihrer Nähe"-Count (geräteübergreifend):
+  // aktive Gutachter, deren Umkreis den bekannten Ort deckt + Dead-Pins im 15-km-Radius.
+  const loc = userLocation
+  const naeheCount = loc
+    ? aktiveSVs.filter(
+        (s) =>
+          s.standort_lat != null &&
+          s.standort_lng != null &&
+          haversineKm(loc.lat, loc.lng, s.standort_lat, s.standort_lng) <= (s.umkreis_km ?? 30),
+      ).length + svLeads.filter((s) => haversineKm(loc.lat, loc.lng, s.lat, s.lng) <= 15).length
+    : null
+  // AAR-2026-05-12: sichtbarer Map-Diagnose-Status — damit man ohne DevTools
+  // sieht WARUM die Karte ggf. nicht rendert. 'no-token' = NEXT_PUBLIC_MAPBOX_TOKEN
+  // fehlte im Build. 'auth-error' = Mapbox lehnt die Anfrage ab (401/403).
+  // 'error' = irgendein anderer Mapbox-Fehler (Message in mapErrorMsg).
+  // 'timeout' = map.on('load') ist nach 12s nicht gefeuert (Style hängt).
+  // 'ok' = alles gut.
   const [mapStatus, setMapStatus] = useState<'ok' | 'no-token' | 'auth-error' | 'error' | 'timeout'>('ok')
   const [mapErrorMsg, setMapErrorMsg] = useState<string>('')
+
+  // Sticky-Marker: wenn der User auf einen SV klickt, merken wir uns die ID
+  // und scrollen die Wizard-Sidebar zum Anfang. Spätere Iteration:
+  // pre_selected_sv-Wert in den DynamicWizard schreiben.
+  // (Aktuell reicht der Scroll, weil der Wizard sich Server-side rendert.)
+  const sidebarScrollRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
     const ok = ensureMapboxInitialized()
     if (!ok) {
+      // Token-Init failed — fail loud im Smoke statt silent
       console.error('[gutachter-finden] Mapbox-Init fehlgeschlagen — NEXT_PUBLIC_MAPBOX_TOKEN ist im Build leer/fehlt')
       setMapStatus('no-token')
       return
@@ -159,61 +307,149 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
     // ── Abdeckungs-Geometrie einmalig aus den Props ableiten (rein, synchron) ──
     // Partner-Isochronen (kräftige Fläche).
+    const partnerIsoRaws: unknown[] = []
     const partnerPolys: GeoJSON.Polygon[] = []
     for (const s of aktiveSVs) {
       const poly = s.isochrone_polygon as GeoJSON.Polygon | null
-      if (poly && Array.isArray(poly.coordinates) && poly.coordinates.length > 0) partnerPolys.push(poly)
+      if (poly && Array.isArray(poly.coordinates) && poly.coordinates.length > 0) {
+        partnerPolys.push(poly)
+        partnerIsoRaws.push(poly)
+      }
     }
     // Dead-Pin-Reichweite (helle Fläche) = 15-km-Kreise um jeden aktiven Dead-Pin.
     const deadPinPolys: GeoJSON.Polygon[] = svLeads.map((l) => kmCircle(l.lng, l.lat, DEADPIN_RADIUS_KM))
+    // coveragePolysRef: exakte Polygone für den pointInAnyPolygon-Check.
     coveragePolysRef.current = [...partnerPolys, ...deadPinPolys]
 
-    // Gesamt-Bounds der Abdeckung (für die Standardansicht).
-    const coverageBounds = new mapboxgl.LngLatBounds()
-    let hasCoverage = false
-    for (const poly of coveragePolysRef.current) {
-      const ring = poly.coordinates?.[0] as LngLat[] | undefined
-      if (!ring) continue
-      for (const [lng, lat] of ring) {
-        if (Number.isFinite(lng) && Number.isFinite(lat)) {
-          coverageBounds.extend([lng, lat])
-          hasCoverage = true
-        }
-      }
-    }
-
-    // Ein MultiPolygon-Feature pro Tier → EIN Fill → keine Overlap-Verdunklung.
-    const multi = (polys: GeoJSON.Polygon[]): GeoJSON.Feature => ({
-      type: 'Feature',
-      properties: {},
-      geometry: { type: 'MultiPolygon', coordinates: polys.map((p) => p.coordinates) },
-    })
-
-    const startCenter: [number, number] = initialCenter ? [initialCenter.lng, initialCenter.lat] : DEFAULT_CENTER
-    const startZoom = initialCenter ? initialZoom ?? 11 : DEFAULT_ZOOM
+    // Doc 34 0a.3: URL-Param-Zentrum (?stadt/?plz/?lat&lng) gewinnt über den
+    // NRW-Default. Ohne initialCenter bleibt es bei NRW-Mittelpunkt + Geolocation.
+    const startCenter: [number, number] = initialCenter
+      ? [initialCenter.lng, initialCenter.lat]
+      : DEFAULT_CENTER
+    const startZoom = initialCenter ? (initialZoom ?? 11) : DEFAULT_ZOOM
     const map = new mapboxgl.Map({
       container: containerRef.current,
       style: 'mapbox://styles/mapbox/streets-v12',
-      language: 'de',
+      language: 'de', // AAR-956 (Aaron 14.06.): Karten-Labels auf Deutsch (mapbox-gl v3 localization)
       center: startCenter,
       zoom: startZoom,
-      pitch: 0,
-      bearing: 0,
+      pitch: 35,
+      bearing: -8,
     })
     mapRef.current = map
 
+    // AAR-956 (Aaron 12.06.): das Popup darf den Pin NICHT verdecken. Anchor + Offset so wählen,
+    // dass das Popup in den freien Raum öffnet und der Pin frei bleibt:
+    //   - Pin hinter der Wizard-Spalte (links) → nach RECHTS (anchor 'left')
+    //   - Pin nah am oberen Rand → nach UNTEN (anchor 'top'), sonst clippt es oben weg
+    //   - sonst → nach OBEN (anchor 'bottom') mit genug Offset, um den 40px-Avatar frei zu lassen
+    function popupPlatzierung(lng: number, lat: number): {
+      anchor: 'left' | 'top' | 'bottom'
+      offset: [number, number]
+    } {
+      const p = map.project([lng, lat])
+      const desktop = typeof window !== 'undefined' && window.innerWidth >= 1024
+      if (desktop && p.x < 640) return { anchor: 'left', offset: [26, -6] }
+      if (p.y < 300) return { anchor: 'top', offset: [0, 16] }
+      return { anchor: 'bottom', offset: [0, -46] }
+    }
+
+    // WS2: Profil-Popup NEBEN/ÜBER dem Pin (popupPlatzierung) via React-Render
+    // (createRoot + setDOMContent, Pattern wie DispatchKarteClient). View-only,
+    // kein Wizard-CTA. Single-Popup: alter Popup + Root werden vorher entsorgt.
+    function openSvPopup(sv: AktiverSVPublic, opts?: { mobilSheet?: boolean }) {
+      popupRef.current?.remove()
+      popupRootRef.current?.unmount()
+      // AAR-956 (Aaron 14.06.): Mobil/iPad (<lg) → Bottom-Sheet NUR bei direktem Pin-Klick
+      // (opts.mobilSheet). Auto-Open (empfohlener SV nach Route) + Slot-Picker-Select öffnen
+      // auf Mobil NICHTS — ein Sheet würde sonst den Slot-Picker verdecken. Desktop (≥1024)
+      // behält in allen Fällen das Map-Popup.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+        if (opts?.mobilSheet) {
+          setSheetSv(sv)
+          setHoveredId(sv.id)
+        }
+        return
+      }
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      root.render(<SvProfilePopup sv={sv} />)
+      const { anchor, offset } = popupPlatzierung(sv.standort_lng, sv.standort_lat)
+      const popup = new mapboxgl.Popup({
+        offset,
+        closeButton: true,
+        maxWidth: '340px',
+        anchor,
+        className: 'sv-finder-popup',
+      })
+        .setLngLat([sv.standort_lng, sv.standort_lat])
+        .setDOMContent(container)
+        .addTo(map)
+      popup.on('close', () => {
+        root.unmount()
+        if (popupRef.current === popup) popupRef.current = null
+        if (popupRootRef.current === root) popupRootRef.current = null
+      })
+      setHoveredId(sv.id)
+      popupRef.current = popup
+      popupRootRef.current = root
+    }
+
+    // Light-Profil-Popup für den empfohlenen Dead-Pin (Aaron 12.06.: SELBER Wrapper wie das
+    // SV-Profil). React-Render via createRoot/setDOMContent (wie openSvPopup) — leak-safe
+    // <DeadPinProfilePopup> (kein Name/Profil/Reviews), nur „Kfz-Gutachter in {ort}" + Hinweis,
+    // in derselben GlassSurface-Shell. Anti-Wizard-Overlap-Anchor wie openSvPopup.
+    function openDeadPinPopup(lng: number, lat: number, ort: string | null) {
+      popupRef.current?.remove()
+      popupRootRef.current?.unmount()
+      // AAR-956 (Aaron 14.06.): Mobil/iPad (<lg) → KEIN enges Map-Popup für Dead-Pins —
+      // exakt wie bei den aktiven SVs (openSvPopup). Der Wizard zeigt den Dead-Pin-Slot-Step;
+      // ein Popup würde auf Mobil nur die Karte verdecken. Desktop (≥1024) behält das Popup.
+      if (typeof window !== 'undefined' && window.innerWidth < 1024) return
+      const container = document.createElement('div')
+      const root = createRoot(container)
+      root.render(<DeadPinProfilePopup ort={ort} />)
+      const { anchor, offset } = popupPlatzierung(lng, lat)
+      const popup = new mapboxgl.Popup({
+        offset,
+        closeButton: true,
+        maxWidth: '340px',
+        anchor,
+        className: 'sv-finder-popup',
+      })
+        .setLngLat([lng, lat])
+        .setDOMContent(container)
+        .addTo(map)
+      popup.on('close', () => {
+        root.unmount()
+        if (popupRef.current === popup) popupRef.current = null
+        if (popupRootRef.current === root) popupRootRef.current = null
+      })
+      popupRef.current = popup
+      popupRootRef.current = root
+    }
+
+    // resize() nach dem nächsten Frame + beim load-Event, plus ein
+    // ResizeObserver — robust gegen Container-Größenänderungen (Layout-Settle,
+    // Sidebar-Toggle, Viewport-Resize). Schadet nie, kostet nichts.
     requestAnimationFrame(() => map.resize())
     const resizeObs = new ResizeObserver(() => map.resize())
     resizeObs.observe(containerRef.current)
 
+    // Load-Timeout: wenn die Karte nach 12s noch nicht 'load' gefeuert hat,
+    // hängt der Style (Netzwerk, geblockter Request o.ä.) — sichtbar machen.
     let loaded = false
     const loadTimeout = window.setTimeout(() => {
       if (!loaded) {
-        console.error('[gutachter-finden] Mapbox-Timeout — load-Event nach 12s nicht gefeuert')
+        console.error('[gutachter-finden] Mapbox-Timeout — load-Event nach 12s nicht gefeuert (Style hängt?)')
         setMapStatus((s) => (s === 'ok' ? 'timeout' : s))
       }
     }, 12_000)
 
+    // Nur echte Auth-/Token-Fehler (401/403) loggen + sichtbar machen. Transiente
+    // Mapbox-'error'-Events (geblockte Telemetry/events.mapbox.com, Tile-Hiccups)
+    // feuern "nach einiger Zeit" obwohl die Karte laeuft — die NICHT mehr als
+    // Karten-Fehler loggen/anzeigen (Aaron 16.06.).
     map.on('error', (e) => {
       const errObj = e?.error as { message?: string; status?: number } | undefined
       const msg = errObj?.message ?? String(e?.error ?? 'unbekannter Mapbox-Fehler')
@@ -231,7 +467,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
     map.on('load', () => {
       loaded = true
       window.clearTimeout(loadTimeout)
-      map.resize()
+      map.resize() // 2026-05-12: nochmal resize beim load, falls der Container zwischenzeitlich gewachsen ist
 
       // ── Dead-Pin-Reichweite (heller, UNTEN) — als weiche Heatmap-Wolke statt harter
       //    15-km-Kreise (die stapeln sich fleckig übereinander). Reine Optik: der
@@ -269,42 +505,73 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         })
       }
 
-      // ── Partner-Einsatzgebiet (kräftig, OBEN) ──
-      if (partnerPolys.length > 0) {
-        map.addSource('coverage-partners', { type: 'geojson', data: multi(partnerPolys) })
+      // ── Partner-Einsatzgebiet (kräftig, OBEN) — als Union der Isochronen ──
+      // Task 4: unionIsochrones ersetzt multi(partnerPolys) → glatter Außen-Umriss,
+      // keine inneren Trennlinien zwischen überlappenden SV-Gebieten mehr.
+      if (partnerIsoRaws.length > 0) {
+        const unionFeature = unionIsochrones(partnerIsoRaws)
+        const coveragePartnersData: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: unionFeature ? [{ ...unionFeature, properties: {} }] : [],
+        }
+        map.addSource('coverage-partners', { type: 'geojson', data: coveragePartnersData })
         map.addLayer({
           id: 'coverage-partners-fill',
           type: 'fill',
           source: 'coverage-partners',
-          paint: { 'fill-color': COL_PARTNER, 'fill-opacity': 0.18 },
+          paint: { 'fill-color': COL_ONDO, 'fill-opacity': 0.16 },
         })
         map.addLayer({
           id: 'coverage-partners-outline',
           type: 'line',
           source: 'coverage-partners',
-          // Definierte Kante -> der starke Partner-Kern hebt sich klar von der weichen
-          // Dead-Pin-Reichweite ab (die zwei Tiers werden unterscheidbarer).
-          paint: { 'line-color': COL_PARTNER, 'line-width': 2.5, 'line-opacity': 0.7 },
+          // Union → nur noch der glatte Außen-Umriss (keine inneren SV-Grenzen mehr).
+          paint: { 'line-color': COL_ONDO, 'line-width': 2, 'line-opacity': 0.55 },
         })
       }
 
-      // Standardansicht = die Abdeckung selbst (nie eine leere Karte). URL-Param-
-      // Zentrum (?stadt/?plz/?lat&lng) gewinnt, sonst fitBounds auf die Abdeckung.
-      if (!initialCenter && hasCoverage) {
-        map.fitBounds(coverageBounds, { padding: { top: 80, bottom: 90, left: 60, right: 60 }, duration: 0, maxZoom: 9.5 })
-      }
+      // ─── Tier-1 Marker ─────────────────────────────────────────────
+      // 2026-06-02 (Aaron: "die Profile sollen public sein"): ALLE verifizierten,
+      // aktiven SVs (sachverstaendige — RLS-gegated auf verifiziert + ist_aktiv +
+      // map_ready) werden als klickbarer Avatar-Marker mit anonymem Profil-Popup
+      // gerendert (Region, Sterne, Specs, Vorname-Initiale). Verifizierte SVs sind
+      // consented Partner, die gefunden werden WOLLEN — kein paket-abhängiger
+      // Dead-Pin mehr. Nur Tier-3 sv_leads (Excel-Import ohne Consent) bleiben
+      // Dead-Pins. Buchung läuft weiterhin ausschließlich über den Wizard.
+      svMarkerElsRef.current.clear()
+      aktiveSVs.forEach((sv) => {
+        const marker = addClickableMarker(map, markersRef.current, sv, () => openSvPopup(sv, { mobilSheet: true }))
+        svMarkerElsRef.current.set(sv.id, marker.getElement())
+      })
+
+      // ─── Tier-3 sv_leads — als Dead-Pins gerendert (Aaron 12.06.: „die Dead-Pins müssen
+      // trotzdem gerendert werden"). Die 15-km-Ghost-Isochrone filtert NUR die Buchung + das
+      // Route-Ziel, NICHT die Karten-Darstellung. El nach ID (= sv_leads.id = deadPinId)
+      // merken → den gematchten/gewählten Dead-Pin hervorheben.
+      deadPinElsRef.current.clear()
+      svLeads.forEach((sv) => {
+        const m = addDeadPin(map, deadPinMarkersRef.current, sv.lng, sv.lat)
+        deadPinElsRef.current.set(sv.id, m.getElement())
+      })
     })
 
-    // Geolocation: nur wenn der Nutzer IM Abdeckungsgebiet ist, dorthin zoomen —
-    // sonst bleibt die Abdeckungs-Übersicht stehen (kein Flug in ein leeres Gebiet).
+    // WS2: Popup ist jetzt view-only (React-Profil). Die alte claimondo:open-wizard /
+    // claimondo:select-sv-Verdrahtung (Self-Dispatch der Marketing-Karte) entfällt —
+    // im Embed wählt das System den SV (WS3), Buchung über den Inline-Wizard (WS4).
+
+    // 2026-05-12 Aaron-Smoke: Beim Page-Load Geolocation anfragen. Bei
+    // Allow: Map zoomt zum User, Header-Badge wechselt auf "in Ihrer
+    // Nähe". Bei Deny / Timeout: Default-NRW-View bleibt, Header-Badge
+    // sagt "bundesweit". Hinweis: 'navigator.geolocation' braucht HTTPS
+    // im Browser — auf Staging/Production gegeben.
     if (!initialCenter && typeof navigator !== 'undefined' && navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const lat = pos.coords.latitude
           const lng = pos.coords.longitude
-          const inside = pointInAnyPolygon([lng, lat], coveragePolysRef.current)
-          if (!mapRef.current) return
-          // „Sie sind hier"-Marker immer setzen (Trust), aber nur bei Abdeckung hinzoomen.
+          setUserLocation({ lat, lng })
+          map.flyTo({ center: [lng, lat], zoom: USER_LOCATION_ZOOM, duration: 1400, essential: true })
+          // "Sie sind hier"-Marker — nur nach Geolocation-Consent sichtbar (Aaron 11.06.).
           userMarkerRef.current?.remove()
           const ueEl = document.createElement('div')
           ueEl.setAttribute('aria-label', 'Ihr Standort')
@@ -315,9 +582,6 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
             </div>
           `
           userMarkerRef.current = new mapboxgl.Marker({ element: ueEl, anchor: 'center' }).setLngLat([lng, lat]).addTo(map)
-          if (inside) {
-            map.flyTo({ center: [lng, lat], zoom: USER_LOCATION_ZOOM, duration: 1400, essential: true })
-          }
         },
         (err) => {
           console.info('[gutachter-finden] Geolocation verweigert/Fehler:', err.message)
@@ -326,18 +590,81 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       )
     }
 
-    // Ort-Eingabe aus dem Wizard (claimondo:embed-ort {lat,lng}) → Ort-Pin + reine
-    // Abdeckungs-Bestätigung (kein Routing zu einem einzelnen Gutachter).
+    // AAR-956 #4: gewählten Gutachter hervorheben — Klasse aufs Marker-Element (Partner ODER
+    // Dead-Pin, gegenseitig exklusiv). CSS-Regeln im <style>-Block unten.
+    function highlightSv(svId: string | null) {
+      svMarkerElsRef.current.forEach((el, id) => el.classList.toggle('sv-marker-selected', id === svId))
+      deadPinElsRef.current.forEach((el) => el.classList.remove('deadpin-selected'))
+    }
+    function highlightDeadPin(deadPinId: string | null) {
+      deadPinElsRef.current.forEach((el, id) => el.classList.toggle('deadpin-selected', id === deadPinId))
+      svMarkerElsRef.current.forEach((el) => el.classList.remove('sv-marker-selected'))
+    }
+
+    // AAR-956 #4: Fahr-Route vom Besichtigungsort zum Ziel + Kamera + onArrive (Popup). EINE
+    // Quelle für die Erst-Empfehlung (handleEmbedOrt) UND die spätere Auswahl (handleSvSelected).
+    function routeToTarget(
+      originLng: number,
+      originLat: number,
+      zielLng: number,
+      zielLat: number,
+      onArrive: () => void,
+    ) {
+      void fetchDrivingRoute([originLng, originLat], [zielLng, zielLat]).then(({ primary }) => {
+        if (!mapRef.current) return
+        const data: GeoJSON.Feature = {
+          type: 'Feature',
+          geometry: { type: 'LineString', coordinates: primary.coords as Array<[number, number]> },
+          properties: {},
+        }
+        const src = map.getSource('embed-route') as GeoJSONSource | undefined
+        if (src) {
+          src.setData(data)
+        } else {
+          map.addSource('embed-route', { type: 'geojson', data })
+          // Weiße Casing zuerst (darunter) → die Route hebt sich prägnant von der Karte ab.
+          map.addLayer({
+            id: 'embed-route-casing',
+            type: 'line',
+            source: 'embed-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: { 'line-color': '#ffffff', 'line-width': 11, 'line-opacity': 0.95 },
+          })
+          map.addLayer({
+            id: 'embed-route-line',
+            type: 'line',
+            source: 'embed-route',
+            layout: { 'line-cap': 'round', 'line-join': 'round' },
+            paint: {
+              'line-color': COL_ONDO,
+              'line-width': ['interpolate', ['linear'], ['zoom'], 9, 4, 13, 6, 16, 8],
+              'line-opacity': 1,
+            },
+          })
+        }
+        const bounds = new mapboxgl.LngLatBounds([originLng, originLat], [originLng, originLat]).extend([zielLng, zielLat])
+        const leftPad = typeof window !== 'undefined' && window.innerWidth >= 1024 ? 470 : 48
+        map.fitBounds(bounds, { padding: { top: 90, bottom: 110, left: leftPad, right: 70 }, duration: 1400, maxZoom: 13.5 })
+        // Popup des Ziels öffnen, sobald Route + Kamera stehen (moveend → finale Pin-Position
+        // für den Anti-Wizard-Overlap-Anchor).
+        map.once('moveend', () => {
+          if (!mapRef.current) return
+          onArrive()
+        })
+      })
+    }
+
+    // Auto-Marker + Zoom, sobald der Wizard den Besichtigungsort kennt (Aaron 11.06.):
+    // der Wizard dispatcht claimondo:embed-ort {lat,lng} → Navy-Auto-Pin ans Fahrzeug + flyTo.
     function handleEmbedOrt(e: Event) {
       const ce = e as CustomEvent<{ lat?: number; lng?: number }>
       const lat = ce.detail?.lat
       const lng = ce.detail?.lng
-      if (typeof lat !== 'number' || typeof lng !== 'number' || !mapRef.current) return
-
-      ortMarkerRef.current?.remove()
-      const el = document.createElement('div')
-      el.setAttribute('aria-label', 'Besichtigungsort')
-      el.innerHTML = `
+      if (typeof lat !== 'number' || typeof lng !== 'number') return
+      carMarkerRef.current?.remove()
+      const carEl = document.createElement('div')
+      carEl.setAttribute('aria-label', 'Fahrzeug-Standort')
+      carEl.innerHTML = `
         <div style="display:flex;flex-direction:column;align-items:center">
           <div style="width:40px;height:40px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:#0D1B3E;border:3px solid #fff;box-shadow:0 6px 18px rgba(13,27,62,0.35);display:grid;place-items:center">
             <div style="transform:rotate(45deg);display:grid;place-items:center">
@@ -346,38 +673,149 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
           </div>
         </div>
       `
-      ortMarkerRef.current = new mapboxgl.Marker({ element: el, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
+      carMarkerRef.current = new mapboxgl.Marker({ element: carEl, anchor: 'bottom' }).setLngLat([lng, lat]).addTo(map)
+      lastOrtRef.current = { lat, lng }
+      // AAR-956 (Aaron 14.06.): eingegebener Ort steuert die „Gutachter in Ihrer Nähe"-Pill
+      // (geräteübergreifend) → der Count reagiert auf den Standort.
+      setUserLocation({ lat, lng })
 
-      const covered = pointInAnyPolygon([lng, lat], coveragePolysRef.current)
-      setCoverageStatus(covered ? 'covered' : 'ueberregional')
-      map.flyTo({ center: [lng, lat], zoom: covered ? 11 : 8.5, duration: 1400, essential: true })
+      // WS3 (Aaron 12.06.): Route-Ziel DISKRIMINIERT — Partner ODER Dead-Pin (Fallback).
+      // empfehleSvFuerOrt liefert {kind}: partner → Pin aus aktiveSVs + Profil-Popup;
+      // deadpin (0 buchbare Partner) → dessen Koordinate + Lite-Popup (leak-safe);
+      // none → flyTo. KEIN Distanz-Proxy-über-Partner mehr (der war die Ursache, dass
+      // im Fallback immer ein ferner Partner statt der Dead-Pin geroutet wurde).
+      // forceFallback (?fallback=1) erzwingt den Dead-Pin-Pfad (Test).
+      void empfehleSvFuerOrt({ lat, lng, forceFallback }).then((ziel) => {
+        if (!mapRef.current) return
+        if (ziel.kind === 'partner') {
+          const sv = aktiveSVs.find((s) => s.id === ziel.svId) ?? null
+          if (!sv) {
+            map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+            return
+          }
+          routeToTarget(lng, lat, sv.standort_lng, sv.standort_lat, () => {
+            highlightSv(sv.id)
+            openSvPopup(sv)
+          })
+        } else if (ziel.kind === 'deadpin') {
+          // Die Dead-Pins sind bereits gerendert (Baseline). Route + Light-Popup zum nächsten
+          // DECKENDEN (deadPins[0], 15-km-Isochrone, nach Distanz) + diesen hervorheben.
+          const naechster = ziel.deadPins[0]
+          if (!naechster) {
+            map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+            return
+          }
+          routeToTarget(lng, lat, naechster.lng, naechster.lat, () => {
+            highlightDeadPin(naechster.deadPinId)
+            openDeadPinPopup(naechster.lng, naechster.lat, naechster.ort)
+          })
+        } else {
+          map.flyTo({ center: [lng, lat], zoom: 13, duration: 1400, essential: true })
+        }
+      })
     }
     document.addEventListener('claimondo:embed-ort', handleEmbedOrt)
+
+    // AAR-956 #4 (Aaron 12.06.): der Nutzer wählt im Booking einen Gutachter → Karte routet
+    // dorthin + hebt ihn hervor. Partner via svId (aus aktiveSVs), Dead-Pin via Koordinate.
+    function handleSvSelected(e: Event) {
+      const detail = (e as CustomEvent<{ kind?: string; svId?: string; deadPinId?: string; lat?: number; lng?: number; ort?: string | null }>).detail
+      const ort = lastOrtRef.current
+      if (!ort || !mapRef.current || !detail) return
+      if (detail.kind === 'partner' && typeof detail.svId === 'string') {
+        const sv = aktiveSVs.find((s) => s.id === detail.svId) ?? null
+        if (!sv) return
+        routeToTarget(ort.lng, ort.lat, sv.standort_lng, sv.standort_lat, () => {
+          highlightSv(sv.id)
+          openSvPopup(sv)
+        })
+      } else if (detail.kind === 'deadpin' && typeof detail.lat === 'number' && typeof detail.lng === 'number') {
+        const dLng = detail.lng
+        const dLat = detail.lat
+        const dOrt = detail.ort ?? null
+        const dId = detail.deadPinId ?? null
+        routeToTarget(ort.lng, ort.lat, dLng, dLat, () => {
+          highlightDeadPin(dId)
+          openDeadPinPopup(dLng, dLat, dOrt)
+        })
+      }
+    }
+    document.addEventListener('claimondo:embed-sv-selected', handleSvSelected)
 
     return () => {
       window.clearTimeout(loadTimeout)
       document.removeEventListener('claimondo:embed-ort', handleEmbedOrt)
+      document.removeEventListener('claimondo:embed-sv-selected', handleSvSelected)
       resizeObs.disconnect()
+      markersRef.current.forEach((m) => m.remove())
+      markersRef.current = []
+      deadPinMarkersRef.current.forEach((m) => m.remove())
+      deadPinMarkersRef.current = []
+      svMarkerElsRef.current.clear()
+      deadPinElsRef.current.clear()
       userMarkerRef.current?.remove()
-      ortMarkerRef.current?.remove()
+      carMarkerRef.current?.remove()
+      popupRootRef.current?.unmount()
+      popupRef.current?.remove()
       map.remove()
       mapRef.current = null
     }
-    // Karte NUR einmal (mount) initialisieren — svLeads/aktiveSVs sind im Embed statisch
-    // (server-once geladen). [] korrekt (sonst Re-Init bei RSC-Refresh → Abdeckung weg).
+    // AAR-956 Fix: Karte NUR einmal (mount) initialisieren. Mit [svLeads] lief der
+    // Effekt nach jedem Server-Action-Refresh (Buchung → RSC-Refresh → neue svLeads-Ref)
+    // neu → Cleanup map.remove() → Route + Fahrzeug-Pin weg. svLeads/aktiveSVs sind im
+    // Embed statisch (server-once geladen), also ist [] korrekt (kein Marker-Verlust).
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
     <div className="relative w-full" style={{ height }}>
+      {/* WS2 (Glass-Popup): Mapbox-Popup-Wrapper transparent stellen, damit die
+          GlassCard die Oberfläche ist (kein weisser Default-Kasten), Tip aus,
+          Close-Button als runder Navy-Button. Scoped via .sv-finder-popup. */}
       <style>{`
+        .sv-finder-popup .mapboxgl-popup-content {
+          background: transparent;
+          padding: 0;
+          box-shadow: none;
+          border-radius: var(--glass-radius-card);
+        }
+        .sv-finder-popup.mapboxgl-popup { z-index: 12; }
+        .sv-finder-popup .mapboxgl-popup-tip { display: none; }
+        .sv-finder-popup .mapboxgl-popup-close-button {
+          top: 10px;
+          right: 10px;
+          width: 24px;
+          height: 24px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 9999px;
+          color: var(--claimondo-navy, #0D1B3E);
+          font-size: 16px;
+          line-height: 1;
+          z-index: 3;
+          transition: background 0.15s ease;
+        }
+        .sv-finder-popup .mapboxgl-popup-close-button:hover {
+          background: color-mix(in srgb, var(--claimondo-navy, #0D1B3E) 8%, transparent);
+        }
         @keyframes gf-user-pulse {
           0% { transform: scale(0.5); opacity: 0.55; }
           80%, 100% { transform: scale(1.9); opacity: 0; }
         }
+        /* AAR-956 #4: der gewählte Gutachter ist hervorgehoben (Marker größer + Ondo-Ring). */
+        .sv-marker-selected .sv-marker-inner { transform: scale(1.28); z-index: 5; }
+        .sv-marker-selected .sv-marker-inner > div {
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--claimondo-ondo, #4573A2) 38%, transparent), 0 8px 22px rgba(13,27,62,0.34);
+        }
+        .deadpin-selected .sv-deadpin {
+          transform: scale(1.5);
+          box-shadow: 0 0 0 4px color-mix(in srgb, var(--claimondo-ondo, #4573A2) 38%, transparent), 0 4px 12px rgba(13,27,62,0.4);
+        }
         /* Google-Places-Dropdown (.pac-container) in unsere Tokens bringen. Google
            rendert es an document.body → global; greift nur solange der Embed gemountet
-           ist. Doppelklasse = höhere Spezifität als Googles Default-Stylesheet. */
+           ist. Doppelklasse = höhere Spezifität als Googles Default-Stylesheet.
+           "powered by Google" (::after) bleibt erhalten (Places-ToS). */
         .pac-container.pac-container {
           margin-top: 6px;
           padding: 4px;
@@ -408,31 +846,45 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         .pac-container .pac-matched { font-weight: 700; }
         .pac-container .pac-icon { display: none; }
       `}</style>
-
-      {/* Karte als Vollbild-Background. position/inset MÜSSEN inline stehen (mapbox-gl
-          setzt .mapboxgl-map{position:relative} → würde eine .absolute-Utility schlagen
-          → Höhe kollabiert auf 0). Inline-Style schlägt die Stylesheet-Klasse. */}
+      {/* Karte als Vollbild-Background. Fallback-Gradient (--brand-surface-gradient)
+          falls Mapbox nicht lädt (Token-Restriction o.ä.) — dann sieht's
+          wenigstens nach Brand-Surface aus statt nach leerem Weiß. Sobald die
+          Map-Tiles laden, decken sie den Gradient ab. */}
+      {/* WICHTIG: position/inset MÜSSEN inline stehen, nicht als Tailwind-Klasse.
+          mapbox-gl fügt dem Container die Klasse `mapboxgl-map` hinzu und
+          `mapbox-gl.css` setzt `.mapboxgl-map { position: relative }` — das
+          würde eine `.absolute`-Utility-Klasse überschreiben (gleiche
+          Spezifität, mapbox-CSS später in der Source-Order) → Container
+          verliert den bottom-Anker → Höhe kollabiert auf 0 → leerer Canvas,
+          KEIN Fehler. Inline-Style schlägt die Stylesheet-Klasse. */}
       <div
         ref={containerRef}
         style={{ position: 'absolute', inset: 0, background: 'var(--brand-surface, #FFFFFF)' }}
       />
 
-      {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft). */}
+      {/* AAR-Diagnose: sichtbare Map-Fehlermeldung (nur wenn was schiefläuft) —
+          damit man ohne DevTools weiß was los ist. Bei 'error' wird die
+          Original-Mapbox-Message verbatim angezeigt. */}
       {mapStatus !== 'ok' && (
         <div className="absolute bottom-4 right-4 z-[6] max-w-[460px] rounded-ios-md bg-amber-50/95 border border-amber-200 px-4 py-3 text-[12.5px] text-amber-900 shadow-lg backdrop-blur-md">
           <strong className="block mb-0.5">{t('error_title')}</strong>
-          {mapStatus === 'no-token' && t('error_no_token')}
+          {mapStatus === 'no-token' && (
+            t('error_no_token')
+          )}
           {mapStatus === 'auth-error' && (
             <>{t('error_auth')}{mapErrorMsg && <span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg}</span>}</>
           )}
-          {mapStatus === 'timeout' && t('error_timeout')}
+          {mapStatus === 'timeout' && (
+            t('error_timeout')
+          )}
           {mapStatus === 'error' && (
             <>{t('error_generic')}<span className="block mt-1 font-mono text-[11px] opacity-75">{mapErrorMsg || '(keine Message)'}</span></>
           )}
         </div>
       )}
 
-      {/* Sehr subtiler Ambient-Schatten unten/links für Tiefe. */}
+      {/* Sehr subtiler Ambient-Schatten unten/links für Tiefe — KEIN Rahmen,
+          kein weißer Veil. Diffus, randlos. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 z-[1]"
@@ -442,7 +894,13 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         }}
       />
 
-      {/* Frosted-Glass-Schleier hinter der Wizard-Spalte (nur Desktop). */}
+      {/* Frosted-Glass-Schleier hinter der freischwebenden Wizard-Spalte (nur Desktop).
+          KEIN Rahmen, KEINE Card — eine weiche, gemaskte Milchglas-Zone die links
+          full-bleed (top→bottom) liegt und nach RECHTS in den Map-Detailreichtum
+          ausläuft (mask-image fadet sowohl Tint als auch Blur). Beruhigt die Karte
+          unter Headline/Beschreibung/Feldern → Text wird lesbar, ohne dass es nach
+          „Box auf der Karte" aussieht. z-[2]: über dem Ambient-Radial, UNTER Header
+          (z-5) + Wizard (z-10), damit nur die Karte verwischt wird, nicht die UI. */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-y-0 left-0 z-[2] hidden lg:block"
@@ -457,29 +915,42 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         }}
       />
 
-      {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts. */}
+      {/* Hero-Header oben — Status-Glass-Pill links, Beratung-CTA rechts (full-bleed).
+          Mobile: kurzer Pill-Text + Beratung als Icon-only-Pill, sonst läuft's über. */}
       <div className="absolute top-0 left-0 right-0 z-[5] px-3 pt-3 sm:px-6 sm:pt-6 pointer-events-none">
         <div className="flex items-center justify-end sm:justify-between gap-2 pointer-events-auto">
+          {/* AAR-956 (Aaron 14.06.): Pill nur Desktop im Header — Mobil unten-mittig (s.u.). */}
           <div className="hidden sm:block">
-            <GutachterPill status={coverageStatus} />
+            <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
           </div>
-          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className="hidden sm:inline-flex [background:color-mix(in_srgb,white_60%,transparent)] [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] border-white/50 text-claimondo-ondo" />
-          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className="sm:hidden flex-shrink-0 text-[12px] px-3 [background:color-mix(in_srgb,white_60%,transparent)] [backdrop-filter:blur(20px)_saturate(1.4)] [-webkit-backdrop-filter:blur(20px)_saturate(1.4)] border-white/50 text-claimondo-ondo" />
+          {/* AAR-glass-s1: Permanenter Beratungs-CTA oben rechts. Auf Mobile
+              kürzeres Label ("Beratung") damit's neben dem Status-Pill passt. */}
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} className={`hidden sm:inline-flex ${BERATUNG_GLASS}`} />
+          <BeratungVereinbarenButton onClick={() => setBeratungOpen(true)} label={t('beratung_label')} className={`sm:hidden flex-shrink-0 text-[12px] px-3 ${BERATUNG_GLASS}`} />
         </div>
       </div>
 
-      {/* Status-Pill auf Mobil unten-mittig über dem Anfrage-Sheet — ausgeblendet wenn offen. */}
+      {/* AAR-956 (Aaron 14.06.): Status-Pill auf Mobil unten-mittig über dem Anfrage-Sheet
+          (nicht oben links) — ausgeblendet wenn das Sheet offen ist. Desktop = Header (s.o.). */}
       {!mobileSheetOpen && (
         <div className="sm:hidden pointer-events-none absolute inset-x-0 bottom-[72px] z-[8] flex justify-center">
-          <GutachterPill status={coverageStatus} />
+          <GutachterPill userLocation={userLocation} naeheCount={naeheCount} gesamt={aktiveSVs.length + svLeads.length} />
         </div>
       )}
 
-      <CoverageLegend />
-
-      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. */}
+      {/* Desktop — Wizard FREISCHWEBEND direkt auf der Karte. Kein Card-Wrapper,
+          dynamische Breite (clamp). WICHTIG: paddingInline 28px — overflow-y-auto
+          impliziert overflow-x:hidden, also würden die ~28px Glass-Pill-Schatten
+          am rechten Spaltenrand abgeschnitten. Das Padding gibt ihnen Raum
+          INNERHALB der Overflow-Box → kein Clip. Spalte ist breiter angesetzt
+          damit nach Abzug des Paddings noch genug Content-Breite bleibt.
+          Negatives left/top kompensiert das Padding visuell (Content sitzt
+          dort wo er soll, das Padding ist nur "Schatten-Raum"). */}
       <div
         ref={sidebarScrollRef}
+        // AAR-902: scrollbar visuell unterdrueckt (Aaron-Feedback 14.05.2026).
+        // overflow-y-auto bleibt fuer Touch/Wheel-Scroll, aber die Bar selbst
+        // ist via scrollbar-width:none + ::-webkit-scrollbar:hidden ausgeblendet.
         className="hidden lg:flex flex-col absolute top-[68px] left-1 bottom-1 z-[10] overflow-y-auto [&::-webkit-scrollbar]:hidden"
         style={{
           width: 'clamp(440px, 33vw, 620px)',
@@ -513,7 +984,13 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         {wizardSlot}
       </div>
 
-      {/* Mobile Bottom-Sheet (Wizard). AUSGEFAHREN by default (Aaron 04.07.). */}
+      {/* Mobile Bottom-Sheet (AUSGEFAHREN by default — Aaron 04.07.; einklappen per Chevron/Drag).
+          AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
+      {/* Mobile Bottom-Sheet — AAR-956 (Aaron 14.06.): EINE Glass-Fläche (leicht transparent +
+          backdrop-blur), draggable, nur der Chevron als Affordance. Grab-Strich + „Anfrage
+          starten"-Text raus (redundant — der Pfeil suggeriert das Öffnen). Header transparent +
+          innere Wizard-Card transparent ([&>div]-Override, NUR hier mobil → Desktop-Card bleibt
+          Glass) → keine gestapelten Glass-Schichten mehr. */}
       <div
         ref={anfrageSheetRef}
         className="lg:hidden absolute left-0 right-0 bottom-0 z-[10] transition-[transform] duration-500 ease-[cubic-bezier(.32,.72,0,1)]"
@@ -539,6 +1016,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
               const start = sheetDragRef.current
               if (start == null) return
               const dy = e.touches[0].clientY - start
+              // offen → nur nach unten (bis Peek); Peek → nur nach oben (bis offen). Clamp an die
+              // ECHTE Sheet-Höhe (− 56px Peek), damit es nicht weiter als nötig zieht (Aaron 14.06.).
               const maxDrag = Math.max(0, (anfrageSheetRef.current?.offsetHeight ?? 600) - 56)
               setSheetDragY(mobileSheetOpen ? Math.max(0, Math.min(dy, maxDrag)) : Math.min(0, Math.max(dy, -maxDrag)))
             }}
@@ -547,7 +1026,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
               sheetDragRef.current = null
               setSheetDragY(0)
               if (start == null) return
-              e.preventDefault()
+              e.preventDefault() // Click-Synthese nach Touch unterdrücken (sonst Doppel-Toggle)
               const dy = e.changedTouches[0].clientY - start
               if (dy < -24) setMobileSheetOpen(true)
               else if (dy > 24) setMobileSheetOpen(false)
@@ -562,17 +1041,80 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
             />
           </button>
           <div className="px-1 pb-6 pt-1 [&>div]:bg-transparent [&>div]:border-transparent [&>div]:shadow-none [&>div]:backdrop-blur-none">
+            {/* AAR-956 (Aaron 14.06.): KEIN zweiter Beratungs-CTA im Anfrage-Sheet — der
+                Header-Button oben rechts (auch auf Mobile sichtbar) reicht. Doppelung raus. */}
             {wizardSlot}
           </div>
         </div>
       </div>
 
-      {/* Map-Attribution unten rechts (subtil) */}
+      {/* Map-Attribution + Powered-By unten rechts (subtil) */}
       <div className="hidden lg:block absolute bottom-3 right-3 z-[5] text-[10px] text-claimondo-navy/40">
         {t('attribution')}
       </div>
 
-      {/* Beratung-Rückruf-Modal auf Root-Ebene. */}
+      {/* Schreibe HoveredId in den DOM für Server-Komponenten die das lesen wollen */}
+      {hoveredId && <input type="hidden" data-selected-sv-id={hoveredId} />}
+
+      {/* AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) — von unten
+          ausfahrbar, mehr Platz + Touch-freundlich als das enge Pin-Popup. Avatar + Sterne +
+          Trust-Signale (gross-Variante). Desktop (≥1024) nutzt weiterhin das Map-Popup. */}
+      {sheetSv && (
+        <div className="lg:hidden fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Gutachter-Profil">
+          <div
+            className="absolute inset-0 backdrop-blur-sm animate-in fade-in"
+            style={{ backgroundColor: 'color-mix(in srgb, var(--brand-primary, #0D1B3E) 22%, transparent)' }}
+            onClick={() => {
+              setSheetSv(null)
+              setHoveredId(null)
+            }}
+          />
+          <div
+            ref={profileSheetRef}
+            onTouchStart={(e) => {
+              // Drag-to-close nur initiieren, wenn der Inhalt oben steht — sonst scrollt der Inhalt.
+              if ((profileSheetRef.current?.scrollTop ?? 0) <= 0) profileDragStartRef.current = e.touches[0].clientY
+            }}
+            onTouchMove={(e) => {
+              if (profileDragStartRef.current === null) return
+              const dy = e.touches[0].clientY - profileDragStartRef.current
+              if (dy > 0) setProfileDragY(dy) // nur nach unten
+            }}
+            onTouchEnd={() => {
+              if (profileDragY > 90) {
+                setSheetSv(null)
+                setHoveredId(null)
+              }
+              setProfileDragY(0)
+              profileDragStartRef.current = null
+            }}
+            style={{
+              transform: profileDragY ? `translateY(${profileDragY}px)` : undefined,
+              transition: profileDragStartRef.current !== null ? 'none' : 'transform 0.25s ease-out',
+            }}
+            className="absolute inset-x-0 bottom-0 max-h-[88vh] overflow-y-auto overscroll-contain rounded-t-ios-xl border-t border-white/50 bg-white/70 shadow-glass-card backdrop-blur-xl animate-in slide-in-from-bottom duration-300"
+          >
+            <button
+              type="button"
+              onClick={() => {
+                setSheetSv(null)
+                setHoveredId(null)
+              }}
+              aria-label="Profil schließen"
+              className="sticky top-0 z-10 flex w-full justify-center pt-2.5 pb-2"
+            >
+              <span className="block h-1 w-10 rounded-full bg-claimondo-navy/25" />
+            </button>
+            <div className="px-5 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+              <SvProfileInhalt sv={sheetSv} gross />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Beratung-Rückruf-Modal auf Root-Ebene (NICHT im z-[5]-Header). Sonst bleibt die
+          z-[10]-Sidebar ÜBER dem Modal-Backdrop "hervorgehoben" — das fixed-Modal wäre im
+          Header-Stacking-Context gefangen. Hier escaped es + deckt das ganze Overlay ab. */}
       <BeratungModal open={beratungOpen} onClose={() => setBeratungOpen(false)} quelle="embed-gutachter-finder" />
     </div>
   )

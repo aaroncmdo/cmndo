@@ -3610,10 +3610,10 @@
   "ersteinschaetzung": {
     "breadcrumb_start": "Strona główna",
     "breadcrumb_current": "Wstępna ocena AI",
-    "hero_badge": "Bezpłatnie · Natychmiastowo · Bez zobowiązań",
-    "hero_h1_line1": "Pańska szkoda.",
-    "hero_h1_line2": "Oceniona w sekundach.",
-    "hero_intro": "AI analizuje Pańskie zdjęcia — koszty naprawy, wartość odtworzeniowa i zalecenie dotyczące ekspertyzy w niecałe 15 minut.",
+    "hero_badge": "Bezpłatnie · Bez zobowiązań · § 249 BGB",
+    "hero_h1_line1": "Wypadek nie z Twojej winy?",
+    "hero_h1_line2": "0 € kosztów własnych.",
+    "hero_intro": "Bezpłatna wstępna ocena AI: prześlij zdjęcia i w kilka minut zobacz, co Ci przysługuje. Przy wypadku nie z Twojej winy ubezpieczyciel sprawcy pokrywa rzeczoznawcę, adwokata i naprawę (§ 249 BGB).",
     "hero_cta_primary": "Uzyskaj bezpłatną wycenę",
     "hero_cta_phone": "Zadzwoń",
     "trust_kpi_0_wert": "< 15 Min",
@@ -3628,11 +3628,11 @@
     "antwort_p": "<strong>Bezpłatna wstępna ocena AI firmy Claimondo</strong> analizuje zdjęcia i opis szkody w Pańskim pojeździe i dostarcza w niecałe 15 minut: szacunek kosztów naprawy, przewidywaną wartość odtworzeniową oraz zalecenie, czy niezależna ekspertyza DAT jest wskazana (od ok. 750 € szkody przysługuje Panu/Pani prawo na podstawie §249 BGB). Wstępna ocena jest bezpłatna i bez zobowiązań — nie zastępuje oficjalnej ekspertyzy, lecz pomaga Panu/Pani natychmiast podjąć właściwy następny krok.",
     "ergebnis_h2": "To Pan/Pani otrzymuje — bezpłatnie",
     "ergebnis_punkte": [
-      "Szacowane koszty naprawy na podstawie Pańskich zdjęć",
-      "Wartość odtworzeniowa pojazdu",
-      "Zalecenie: ekspertyza czy kosztorys",
-      "Ocena szans na uregulowanie szkody",
-      "Wynik w niecałe 15 minut"
+      "Twoje koszty własne: 0 € przy wypadku nie z Twojej winy (§ 249 BGB)",
+      "Szacowane koszty naprawy i wartość odtworzeniowa na podstawie zdjęć",
+      "Wykryta szkoda całkowita: naprawa czy rozliczenie, z konkretnymi kwotami",
+      "Wszystkie pozycje: utrata wartości, auto zastępcze, utrata możliwości korzystania, rzeczoznawca, adwokat",
+      "Wynik w kilka minut, bez rejestracji, niezobowiązująco"
     ],
     "schritte_h2": "W 3 krokach do wstępnej oceny",
     "schritte": [
@@ -4069,8 +4069,8 @@
       "og_description": "Objaśniona tabela honorariów BVSK + dlaczego niezawinienie poszkodowani płacą 0 € (§ 249 BGB, BGH VI ZR 67/06)."
     },
     "ersteinschaetzung": {
-      "title": "Wstępna ocena AI — Pana/Pani szkoda Kfz wyceniona w kilka sekund",
-      "description": "Proszę przesłać zdjęcia szkody powypadkowej. Nasza AI dostarcza w poniżej 15 minut bezpłatną wstępną ocenę: koszty naprawy i rekomendację ekspertyzy.",
+      "title": "Szkoda samochodowa: 0 € kosztów własnych? Bezpłatna wstępna ocena AI",
+      "description": "Prześlij zdjęcia i w kilka minut zobacz, co Ci przysługuje: koszty naprawy, wartość odtworzeniowa, szkoda całkowita, pełne pozycje. Nie z Twojej winy? 0 € dla Ciebie (§ 249 BGB). Bezpłatnie.",
       "og_title": "Wstępna ocena AI — bezpłatna wycena szkody Kfz",
       "og_description": "Proszę przesłać zdjęcie, AI analizuje natychmiast. Koszty naprawy, wartość odtworzeniowa, rekomendacja ekspertyzy — w poniżej 15 minut.",
       "twitter_description": "Bezpłatnie, natychmiast, niezobowiązująco."

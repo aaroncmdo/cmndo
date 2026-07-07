@@ -11,20 +11,14 @@ const base = {
 
 describe('WillkommenWerkstattEmail', () => {
   it('subject nennt Claimondo', () => {
-    expect(subject({ ...base, einmalpasswort: null })).toContain('Claimondo')
+    expect(subject(base)).toContain('Claimondo')
   })
 
-  it('mit Einmalpasswort: enthält Passwort + Magic-Link + Login-URL', async () => {
-    const html = await render(WillkommenWerkstattEmail({ ...base, einmalpasswort: 'GeheimA1!' }))
-    expect(html).toContain('GeheimA1!')
+  it('Magic-Link-only: enthält Recovery-Link, Login-URL und Werkstattname (kein Passwort-Feld)', async () => {
+    const html = await render(WillkommenWerkstattEmail(base))
     expect(html).toContain(base.magicLink)
     expect(html).toContain(base.loginUrl)
     expect(html).toContain('Müller')
-  })
-
-  it('ohne Einmalpasswort: kein Passwort-Wert, aber Hinweis auf bestehendes Passwort', async () => {
-    const html = await render(WillkommenWerkstattEmail({ ...base, einmalpasswort: null }))
-    expect(html).toContain(base.magicLink)
-    expect(html).toContain('bestehende')
+    expect(html).toContain('Passwort setzen') // Button-Text "Passwort setzen & einloggen"
   })
 })

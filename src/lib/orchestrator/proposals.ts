@@ -26,6 +26,43 @@ export async function persistProposals(claimId: string, modell: string, drafts: 
   return count
 }
 
+/**
+ * Schreibt einen auto-ausgefuehrten Vorschlag als 'angenommen' (System, kein User).
+ * Setzt auto_ausgefuehrt=true + erzeugte_task_id fuer den Regressions-Monitor.
+ * Gibt true bei Erfolg, false bei Fehler (loggen, nie werfen).
+ */
+export async function persistAutoProposal(
+  claimId: string,
+  modell: string,
+  draft: ProposalDraft,
+  taskId: string,
+): Promise<boolean> {
+  try {
+    const db = createAdminClient()
+    const { error } = await db.from('ai_claim_proposals').insert({
+      claim_id: claimId,
+      vorschlag_typ: draft.vorschlagTyp,
+      ziel_rolle: draft.zielRolle,
+      payload: draft.payload,
+      begruendung: draft.begruendung,
+      modell,
+      dedupe_key: dedupeKey(claimId, draft),
+      status: 'angenommen',
+      auto_ausgefuehrt: true,
+      erzeugte_task_id: taskId,
+      entschieden_von: null,
+    })
+    if (error) {
+      console.error('[orchestrator] persistAutoProposal fehlgeschlagen:', error.message)
+      return false
+    }
+    return true
+  } catch (err) {
+    console.error('[orchestrator] persistAutoProposal Ausnahme:', err)
+    return false
+  }
+}
+
 export async function listOpenProposals(): Promise<AiProposal[]> {
   const db = createAdminClient()
   const { data } = await db.from('ai_claim_proposals')

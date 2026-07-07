@@ -33,7 +33,9 @@ export default async function DispatchKartePage() {
   ])
 
   return (
-    <div className="flex flex-col h-full">
+    // Aaron 07.07.: Karte full-bleed — bricht via dokumentiertem PageContainer-
+    // Escape (104.17% von 96% = 100% Main-Breite) aus dem 96%-Wrapper aus.
+    <div className="flex flex-col h-full md:w-[104.17%] md:-ml-[2.08%]">
       {/* Karte — flex-1 + min-h-0 gibt der LiveOpsMap (h-full) eine definierte Hoehe */}
       <div className="flex-1 min-h-0">
         <DispatchLiveOpsClient data={{ svs, termine, routen, tagesrouten, deadPins, leads }} />

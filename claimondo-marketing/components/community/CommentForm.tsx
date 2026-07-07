@@ -4,7 +4,7 @@ import { requestCommentLogin, ensureUsername, submitComment } from '@/lib/commun
 
 type Stage = 'email' | 'username' | 'comment' | 'sent' | 'posted'
 
-export function CommentForm({ slug, isLoggedIn, hasUsername }: { slug: string; isLoggedIn: boolean; hasUsername: boolean }) {
+export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug: string; isLoggedIn: boolean; hasUsername: boolean; username?: string | null }) {
   const initial: Stage = !isLoggedIn ? 'email' : !hasUsername ? 'username' : 'comment'
   const [stage, setStage] = useState<Stage>(initial)
   const [error, setError] = useState<string | null>(null)
@@ -42,6 +42,9 @@ export function CommentForm({ slug, isLoggedIn, hasUsername }: { slug: string; i
       )}
       {stage === 'username' && (
         <>
+          <p className="text-[0.8125rem] text-claimondo-shield">
+            Du bist angemeldet — wähle jetzt einmalig einen öffentlichen Nutzernamen für deine Kommentare.
+          </p>
           <input name="username" required placeholder="Nutzername (3–24 Zeichen)" className={input} />
           <label className="flex items-start gap-2 text-[0.75rem] text-claimondo-shield">
             <input type="checkbox" name="consent" className="mt-0.5" />
@@ -51,6 +54,11 @@ export function CommentForm({ slug, isLoggedIn, hasUsername }: { slug: string; i
       )}
       {stage === 'comment' && (
         <>
+          {username && (
+            <p className="text-[0.8125rem] text-claimondo-shield">
+              Du kommentierst <span className="font-medium">öffentlich</span> als <span className="font-semibold text-claimondo-navy">{username}</span>.
+            </p>
+          )}
           <textarea name="body" required maxLength={2000} rows={3} placeholder="Deinen Kommentar schreiben …" className={input} />
           <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/70">
             Bitte beachte die{' '}

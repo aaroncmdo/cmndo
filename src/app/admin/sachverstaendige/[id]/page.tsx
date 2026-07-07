@@ -11,6 +11,7 @@ import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { FinderVisibilityBadge } from '@/components/admin/FinderVisibilityBadge'
 import { getPartnerBilling } from '@/lib/finance/partner-billing'
 import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
@@ -34,12 +35,22 @@ export default async function SvDetailPage({
   // AAR-659: urlaub_von/bis mitladen — für Header-Badge.
   const { data: sv, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, onboarding_quelle, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
+    .select('id, firmenname, profile_id, paket, onboarding_quelle, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
     .eq('id', id)
     .single()
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
 
   if (!sv) notFound()
+
+  // Aaron 07.07.: Finder-Sichtbarkeit — hat der SV eine berechnete Isochrone?
+  // Leichter Boolean-Check (die Isochrone selbst ist ~10k Vertices, hier nicht noetig).
+  const { data: isoRow } = await supabase
+    .from('sachverstaendige')
+    .select('id')
+    .eq('id', id)
+    .not('isochrone_polygon', 'is', null)
+    .maybeSingle()
+  const hatIsochrone = !!isoRow
 
   // AAR-717: CalDAV-Verbindungs-Status für Admin-Banner. Wenn last_error
   // gesetzt ist, zeigen wir einen roten Hinweis im Stammdaten-Tab.
@@ -322,6 +333,17 @@ export default async function SvDetailPage({
                 ) : (
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-danger-soft text-danger">Inaktiv</span>
                 )}
+                {/* Aaron 07.07.: Finder-Sichtbarkeit — zeigt WARUM ein SV (nicht) im oeffentlichen Finder auftaucht */}
+                <FinderVisibilityBadge
+                  sv={{
+                    verifiziert: sv.verifiziert,
+                    ist_aktiv: sv.ist_aktiv,
+                    hatIsochrone,
+                    standort_lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
+                    standort_lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
+                    firmenname: (sv as { firmenname?: string | null }).firmenname ?? null,
+                  }}
+                />
               </>
             }
           />
