@@ -541,6 +541,31 @@ export async function POST(request: Request) {
             onboarding_status: 'anzahlung_offen',
           }).eq('id', meta.gutachter_id)
         }
+        // Einzugs-PI (SEPA-Ruecklastschrift days-later): Abrechnung auf fehlgeschlagen.
+        const { handleEinzugPaymentFailed } = await import('@/lib/finance/einzug-webhook')
+        const einzugFail = await handleEinzugPaymentFailed(db, pi as {
+          metadata?: Record<string, string> | null; amount?: number | null; last_payment_error?: { message?: string } | null
+        })
+        if (einzugFail.acted) {
+          try {
+            const { render } = await import('@react-email/render')
+            const { AdminEinzugFehlgeschlagenEmail, subject } = await import('@/lib/email/google/templates/AdminEinzugFehlgeschlagen')
+            const { sendCommunication } = await import('@/lib/communications/send')
+            const props = {
+              abrechnungsNr: einzugFail.abrechnungsNr ?? (einzugFail.abrId ?? '').slice(0, 8),
+              empfaengerName: null,
+              betragBrutto: einzugFail.betragBrutto ?? 0,
+              fehlerGrund: einzugFail.grund ?? 'Lastschrift fehlgeschlagen',
+            }
+            await sendCommunication('admin_einzug_failed', {
+              email: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
+              subject: subject(props),
+              html: await render(AdminEinzugFehlgeschlagenEmail(props)),
+            })
+          } catch (alertErr) {
+            console.error('[KFZ-148] einzug-payment_failed Admin-Alert (non-fatal):', alertErr)
+          }
+        }
         break
       }
 
