@@ -9,13 +9,20 @@ const ATTRIBUTION_KEYS = [
   'm',
 ] as const
 
-export function buildFotoCheckUrl(embedOrigin: string, search: string): string {
+export function buildFotoCheckUrl(
+  embedOrigin: string,
+  search: string,
+  extra?: Record<string, string | undefined>,
+): string {
   const inParams = new URLSearchParams(search)
   const out = new URLSearchParams()
   for (const key of ATTRIBUTION_KEYS) {
     const v = inParams.get(key)
     if (v) out.set(key, v)
   }
+  // Zusaetzliche Kontext-Params (z.B. schuld aus dem /check-Funnel) durchreichen,
+  // damit das Foto-Tool sie vorbefuellen kann -> kein Doppelt-Fragen (zusammenhaengender Flow).
+  if (extra) for (const [k, v] of Object.entries(extra)) if (v) out.set(k, v)
   const qs = out.toString()
   return `${embedOrigin}/embed/anspruch-pruefen${qs ? `?${qs}` : ''}`
 }

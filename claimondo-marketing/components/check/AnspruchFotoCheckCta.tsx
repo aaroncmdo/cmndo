@@ -3,9 +3,19 @@
 import { useTranslations } from 'next-intl'
 import { Camera, ChevronRight } from 'lucide-react'
 import { buildFotoCheckUrl } from '@/lib/check/foto-check-url'
+import { type Schuld } from '@/lib/check/result-model'
 import { trackEvent } from '@/lib/analytics/track-event'
 
 const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimondo.de'
+
+// /check-Schuldform -> Tool-Schuldform, damit das Foto-Tool die Schuldfrage vorbefuellt
+// (kein Doppelt-Fragen -> zusammenhaengender Aufnahme-Flow). 'unklar' -> kein Prefill.
+const SCHULD_ZU_TOOL: Record<Schuld, string | undefined> = {
+  gegner: 'unverschuldet',
+  teils: 'teilschuld',
+  selbst: 'selbst',
+  unklar: undefined,
+}
 
 /**
  * Prominenter Foto-Check-CTA im /check-Ergebnis (nur bei echtem Anspruch,
@@ -13,11 +23,12 @@ const EMBED_ORIGIN = process.env.NEXT_PUBLIC_EMBED_ORIGIN ?? 'https://app.claimo
  * quantitativen Foto-Wert-Check. Reicht die Attribution ueber den
  * Domain-Wechsel durch (buildFotoCheckUrl).
  */
-export function AnspruchFotoCheckCta() {
+export function AnspruchFotoCheckCta({ schuld }: { schuld?: Schuld }) {
   const t = useTranslations('check')
+  const toolSchuld = schuld ? SCHULD_ZU_TOOL[schuld] : undefined
   const href =
     typeof window !== 'undefined'
-      ? buildFotoCheckUrl(EMBED_ORIGIN, window.location.search)
+      ? buildFotoCheckUrl(EMBED_ORIGIN, window.location.search, toolSchuld ? { schuld: toolSchuld } : undefined)
       : `${EMBED_ORIGIN}/embed/anspruch-pruefen`
 
   return (
