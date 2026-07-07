@@ -21,8 +21,6 @@ import {
   bestaetigeReparaturtermin,
   erbitteRueckruf,
   lehneReparaturterminAb,
-  resendeKundenLink,
-  oeffneKundenFlow,
   oeffneGutachtenPdf,
 } from '@/app/werkstatt/(shell)/auftraege/actions'
 
@@ -217,48 +215,6 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// AuftragAktionen — Kunden-Link resenden + Flow öffnen
-// ─────────────────────────────────────────────────────────────────────────────
-
-function AuftragAktionen({ claimId }: { claimId: string }) {
-  const [resendLaden, setResendLaden] = useState(false)
-  const [flowLaden, setFlowLaden] = useState(false)
-
-  async function handleResend() {
-    setResendLaden(true)
-    const r = await resendeKundenLink(claimId)
-    setResendLaden(false)
-    if (!r.ok) {
-      toast.error(r.error ?? 'Versand fehlgeschlagen')
-      return
-    }
-    toast.success(`Link erneut gesendet (${r.kanal === 'whatsapp' ? 'WhatsApp' : 'E-Mail'}).`)
-  }
-
-  async function handleFlow() {
-    setFlowLaden(true)
-    const r = await oeffneKundenFlow(claimId)
-    setFlowLaden(false)
-    if (!r.ok) {
-      toast.error(r.error ?? 'Flow konnte nicht geöffnet werden')
-      return
-    }
-    window.open(r.url, '_blank', 'noopener,noreferrer')
-  }
-
-  return (
-    <div className="mt-2 flex flex-wrap gap-2">
-      <Button variant="ghost" size="sm" loading={resendLaden} disabled={flowLaden} onClick={handleResend}>
-        Link erneut senden
-      </Button>
-      <Button variant="ghost" size="sm" loading={flowLaden} disabled={resendLaden} onClick={handleFlow}>
-        Flow öffnen
-      </Button>
-    </div>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
 // GutachtenSektion — Kennzahlen + PDF-Download (nur Versicherungs-Fälle)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -381,7 +337,6 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
         <>
           <ReparaturterminSektion auftrag={auftrag} />
           {zeigtGutachten(auftrag.abrechnungsweg) && <GutachtenSektion auftrag={auftrag} />}
-          <AuftragAktionen claimId={auftrag.claim_id} />
         </>
       ) : (
         <SectionCard title="Meine Vermittlung">
@@ -391,9 +346,6 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
               ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${auftrag.provision_status ?? 'offen'}).`
               : ''}
           </p>
-          <div className="mt-2">
-            <AuftragAktionen claimId={auftrag.claim_id} />
-          </div>
         </SectionCard>
       )}
     </div>

@@ -22,16 +22,6 @@ vi.mock('@/lib/auth/portal-guard', () => ({
 vi.mock('@/lib/werkstatt/notify-kunde-reparaturtermin', () => ({
   notifyKundeReparaturtermin: vi.fn().mockResolvedValue({ email: true, inApp: true }),
 }))
-// P2-Actions (resendeKundenLink/oeffneKundenFlow) ziehen diese server-only-Module ins
-// actions.ts. oeffneGutachtenPdf ruft sie nie — die Stubs verhindern nur den
-//'server-only'-Import (via start-link/ensure-flowlink-for-lead) im Test-Import-Graph.
-vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: vi.fn() }))
-vi.mock('@/lib/start-link/ensure-flowlink-for-lead', () => ({
-  ensureCanonicalFlowLinkForLead: vi.fn(),
-}))
-vi.mock('@/lib/start-link/send-flowlink-multichannel', () => ({
-  sendFlowLinkMultiChannelCore: vi.fn(),
-}))
 vi.mock('@/lib/storage/url', () => ({
   getStorageUrl: h.getStorageUrlMock,
   STORAGE_TTL: { ui: 3600, download: 300, email: 604800 },
