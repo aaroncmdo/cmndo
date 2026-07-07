@@ -68,7 +68,7 @@ export interface WerkstattBilling {
   aggregat: PartnerBillingAggregat
   istKleinunternehmer: boolean | null
   steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
-  gutschriftLedgerKeys: string[]
+  gutschriftDocsByLedger: Record<string, import('@/lib/finance/partner-billing').LedgerGutschriftDocs>
 }
 
 export interface WerkstattDetail {
@@ -174,7 +174,7 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
           aggregat: billing.aggregat,
           istKleinunternehmer: billing.istKleinunternehmer,
           steuerdaten: billing.steuerdaten,
-          gutschriftLedgerKeys: billing.gutschriftLedgerKeys,
+          gutschriftDocsByLedger: billing.gutschriftDocsByLedger,
         }
       : null,
     leistung,
