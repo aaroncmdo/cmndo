@@ -4,7 +4,7 @@
 // (FlowWizard-Gate) importierbar bleibt, ohne Server-Code ins Bundle zu ziehen.
 // Authz liegt beim jeweiligen Caller (Rolle/Token/Ownership VOR dem Write).
 
-export type VermittlungQuelle = 'dispatcher' | 'kunde' | 'embed' | 'gutachter' | 'kb'
+export type VermittlungQuelle = 'dispatcher' | 'kunde' | 'embed' | 'gutachter' | 'kb' | 'qr_referral'
 export type VermittlungTarget = { target: 'lead' | 'claim'; id: string }
 
 /** Minimal-Shape fuer das Sichtbarkeits-Gate (Lead ODER Claim). */
