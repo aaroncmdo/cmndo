@@ -13,29 +13,43 @@ export default async function TageskalenderWidget() {
   const todayEnd = new Date(berlinWallClockToUtc(`${berlinDateStr}T23:59:59`)).toISOString()
 
   // Alle Termine für heute
-  const [{ data: termine }, { data: svTermine }] = await Promise.all([
-    supabase
-      .from('termine')
-      .select('id, fall_id, typ, datum, dauer_minuten, betreff, status')
-      .gte('datum', todayStart)
-      .lte('datum', todayEnd)
-      .order('datum'),
-    supabase
-      .from('v_faelle_mit_aktuellem_termin')
-      .select('id, claim_nummer, sv_termin, kennzeichen')
-      .gte('sv_termin', todayStart)
-      .lte('sv_termin', todayEnd)
-      .order('sv_termin'),
-  ])
+  const { data: termine } = await supabase
+    .from('termine')
+    .select('id, fall_id, typ, datum, dauer_minuten, betreff, status')
+    .gte('datum', todayStart)
+    .lte('datum', todayEnd)
+    .order('datum')
+
+  // KANONISCH (2026-07-07): SV-Termine aus gutachter_termine (assignee_id) statt stale
+  // v_faelle_mit_aktuellem_termin.sv_termin. claim_nummer/kennzeichen via v_claim_full.
+  const { data: svTermineRows } = await supabase
+    .from('gutachter_termine')
+    .select('fall_id, start_zeit, status')
+    .eq('assignee_typ', 'sachverstaendiger')
+    .in('status', ['reserviert', 'bestaetigt', 'verlegung_pending', 'verlegt', 'gegenvorschlag'])
+    .gte('start_zeit', todayStart)
+    .lte('start_zeit', todayEnd)
+    .order('start_zeit')
+  const svFallIds = [...new Set((svTermineRows ?? []).map((r) => r.fall_id).filter(Boolean) as string[])]
+  const svEnrich: Record<string, { claim_nummer: string | null; kennzeichen: string | null }> = {}
+  if (svFallIds.length) {
+    const { data: cf } = await supabase.from('v_claim_full').select('fall_id, claim_nummer, kennzeichen').in('fall_id', svFallIds)
+    for (const c of (cf ?? []) as Array<{ fall_id: string; claim_nummer: string | null; kennzeichen: string | null }>) {
+      svEnrich[c.fall_id] = { claim_nummer: c.claim_nummer ?? null, kennzeichen: c.kennzeichen ?? null }
+    }
+  }
 
   const events = [
-    ...(svTermine ?? []).map(f => ({
-      id: `sv-${f.id}`,
-      zeit: new Date(f.sv_termin!).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
-      titel: `SV-Termin: ${f.claim_nummer ?? f.kennzeichen ?? 'Fall'}`,
-      typ: 'gutachter' as const,
-      link: `/faelle/${f.id}`,
-    })),
+    ...(svTermineRows ?? []).map(r => {
+      const e = r.fall_id ? svEnrich[r.fall_id] : null
+      return {
+        id: `sv-${r.fall_id ?? r.start_zeit}`,
+        zeit: new Date(r.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
+        titel: `SV-Termin: ${e?.claim_nummer ?? e?.kennzeichen ?? 'Fall'}`,
+        typ: 'gutachter' as const,
+        link: r.fall_id ? `/faelle/${r.fall_id}` : '/admin/kalender',
+      }
+    }),
     ...(termine ?? []).map(t => ({
       id: `t-${t.id}`,
       zeit: new Date(t.datum).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }),
