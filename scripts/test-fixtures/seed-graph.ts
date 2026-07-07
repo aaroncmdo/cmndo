@@ -9,11 +9,12 @@ import {
   AUFTRAEGE,
   PFLICHTDOK,
   KANZLEI_FALL_ID,
+  KANZLEI_FALL_C4,
   internEmail,
 } from './ids'
 
 type Opts = { reporter: Reporter; dryRun?: boolean }
-type Stage = 'c1' | 'c2' | 'c3'
+type Stage = 'c1' | 'c2' | 'c3' | 'c4'
 
 // Fixes Schadendatum — Date.now() im Script vermeiden -> reproduzierbar/idempotent.
 const SCHADENTAG = '2026-06-15'
@@ -151,8 +152,67 @@ async function ensureC3(db: SupabaseClient, o: Opts): Promise<void> {
   )
 }
 
+// C4 — KB-Anforderungs-Fixture: Claim mit Auftrag, Stellungnahme NOCH NICHT angefordert
+// (technische_stellungnahme_status=null -> der "Stellungnahme anfordern"-CTA erscheint) +
+// vs_kuerzungs_typ='technisch' (Render-Bedingung des CTA in der VsReaktionSection) +
+// kundenbetreuer_id=test-kb (RLS: test-kb darf die Anforderung triggern). KB-Flow -> 'beauftragt'.
+async function ensureC4(db: SupabaseClient, o: Opts): Promise<void> {
+  await ensureLead(db, 'c4', o)
+  await upsertById(
+    db,
+    'claims',
+    {
+      id: CLAIMS.c4,
+      schadentag: SCHADENTAG,
+      operative_status: 'kanzlei-uebergeben',
+      lead_id: LEADS.c4,
+      sv_id: SV_SACHVERSTAENDIGE_ID,
+      sv_zugewiesen_am: SCHADENTAG,
+      kundenbetreuer_id: ACCOUNTS.kb,
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: SCHADENTAG,
+      created_via: 'manuell_admin',
+    },
+    o,
+  )
+  await ensureGeschaedigter(db, 'c4', o)
+  // kanzlei_faelle mit VS-Kürzung: vs_kuerzungs_typ='technisch' -> der KB-"Stellungnahme anfordern"-CTA
+  // (VsReaktionSection) erscheint. vs_kuerzungs_typ lebt auf kanzlei_faelle (NICHT claims).
+  await upsertById(
+    db,
+    'kanzlei_faelle',
+    {
+      id: KANZLEI_FALL_C4,
+      claim_id: CLAIMS.c4,
+      fall_id: CLAIMS.c4,
+      status: 'versicherungskontakt',
+      vs_kuerzungs_typ: 'technisch',
+      kuerzungs_betrag: 500,
+      vs_kuerzung_grund: 'UPE-Aufschlag strittig',
+    },
+    o,
+  )
+  await upsertById(
+    db,
+    'auftraege',
+    {
+      id: AUFTRAEGE.c4,
+      claim_id: CLAIMS.c4,
+      fall_id: CLAIMS.c4,
+      sv_id: SV_SACHVERSTAENDIGE_ID,
+      typ: 'erstgutachten',
+      status: 'termin',
+      // Reset auf noch-nicht-angefordert (null) -> KB-CTA erscheint; der KB-Flow setzt 'beauftragt' (wiederholbar).
+      technische_stellungnahme_status: null,
+      technische_stellungnahme_beauftragt_am: null,
+    },
+    o,
+  )
+}
+
 export async function ensureSeedGraph(db: SupabaseClient, o: Opts): Promise<void> {
   await ensureC2(db, o) // #3729-Blocker zuerst
   await ensureC1(db, o)
   await ensureC3(db, o)
+  await ensureC4(db, o)
 }

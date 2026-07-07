@@ -76,3 +76,38 @@ test.fixme('Kunde — Pflichtdok-Upload (C1) → pflichtdokument hochgeladen', a
 
   await ctx.close()
 })
+
+// FIXME (Golden-Path-Finding, 07.07.): /faelle/{C4} rendert für test-kb (interne Fallakte, KEIN
+// Auth-Gate) — gut. Aber der "Stellungnahme anfordern"-CTA (VsReaktionSection) erscheint nicht:
+// der Fall zeigt "Vollständigkeits-Check erscheint sobald der Gutachter sein Gutachten hochgeladen
+// hat" → die VS-Reaktions-Strecke braucht MEHR Lifecycle-State (Gutachten hochgeladen +
+// gutachten_final_freigegeben + VS-Reaktion), nicht nur vs_kuerzungs_typ='technisch'. Das C4-Fixture
+// (Claim + Auftrag + kanzlei_faelle) ist korrekt + prod-verifiziert; es fehlt der Gutachten/VS-State.
+// → Deep-Flows brauchen volle Claim-Lifecycle-Fixtures (dedizierter Folgeschritt).
+test.fixme('KB — Stellungnahme anfordern (C4) → auftrag beauftragt', async ({ browser }) => {
+  test.setTimeout(90_000)
+  const ctx = await loginContext(browser, 'kb')
+  const page = await ctx.newPage()
+
+  // 1. Interne Fallakte (test-kb ist kundenbetreuer_id von C4 → RLS erlaubt die Anforderung).
+  await page.goto(`${APP}/faelle/${CLAIMS.c4}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
+  expect(new URL(page.url()).pathname, 'KB nicht zu /login gebounced').not.toMatch(/\/login|\/anmelden/)
+
+  // 2. Prozess-Tab (die VsReaktionSection mit dem Anforderungs-CTA lebt dort).
+  await page
+    .getByRole('tab', { name: /prozess/i })
+    .or(page.getByRole('link', { name: /^Prozess$/i }))
+    .first()
+    .click({ timeout: 15_000 })
+    .catch(() => {})
+
+  // 3. "Stellungnahme anfordern" (sichtbar da C4.kanzlei_faelle.vs_kuerzungs_typ='technisch').
+  const cta = page.getByRole('button', { name: /Stellungnahme anfordern/i }).first()
+  await expect(cta, 'KB-Anforderungs-CTA sichtbar').toBeVisible({ timeout: 15_000 })
+  await cta.click()
+
+  // 4. DB-driven: warten bis der Auftrag auf 'beauftragt' steht (normalisiert auf auftraege).
+  await pollRow('auftraege', AUFTRAEGE.c4, { technische_stellungnahme_status: 'beauftragt' }, 30_000)
+
+  await ctx.close()
+})

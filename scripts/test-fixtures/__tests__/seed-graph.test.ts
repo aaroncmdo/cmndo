@@ -77,10 +77,21 @@ describe('ensureSeedGraph', () => {
     })
   })
 
-  it('legt für alle 3 Stages einen geschädigten (test-kunde) + internen Lead an', async () => {
+  it('legt für alle 4 Stages einen geschädigten (test-kunde) + internen Lead an', async () => {
     const rows = await seed()
-    expect((rows['claim_parties'] ?? []).filter((r) => r.rolle === 'geschaedigter' && r.user_id === ACCOUNTS.kunde)).toHaveLength(3)
-    expect((rows['leads'] ?? [])).toHaveLength(3)
+    expect((rows['claim_parties'] ?? []).filter((r) => r.rolle === 'geschaedigter' && r.user_id === ACCOUNTS.kunde)).toHaveLength(4)
+    expect((rows['leads'] ?? [])).toHaveLength(4)
     expect((rows['leads'] ?? []).every((l) => String(l.email).endsWith('@claimondo.de'))).toBe(true)
+  })
+
+  it('C4 (KB-Fixture): Auftrag technische_stellungnahme_status=null + kanzlei_faelle vs_kuerzungs_typ=technisch', async () => {
+    const rows = await seed()
+    expect((rows['auftraege'] ?? []).find((r) => r.id === AUFTRAEGE.c4)).toMatchObject({
+      claim_id: CLAIMS.c4,
+      technische_stellungnahme_status: null,
+    })
+    expect((rows['kanzlei_faelle'] ?? []).find((r) => r.claim_id === CLAIMS.c4)).toMatchObject({
+      vs_kuerzungs_typ: 'technisch',
+    })
   })
 })
