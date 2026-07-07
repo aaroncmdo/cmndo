@@ -11,6 +11,16 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { LeadWorkflowState } from '../_lib/deriveLeadWorkflowState'
 import { LEAD_WORKFLOW_META } from '../_lib/leadWorkflowMeta'
 
+// Phase 1c: Zustand -> Tab-Key in DispatchLeadForm (die Kern-Tabs sind immer
+// gerendert). Zustaende ohne Tab-Ziel (flowlink_senden/nachfassen/warten liegen
+// unter den Tabs, terminal = read-only) zeigen KEINEN CTA (nur Guidance).
+const STATE_TAB_TARGET: Partial<Record<LeadWorkflowState, string>> = {
+  neu: 'kontakt',
+  qualifizieren: 'schaden',
+  sv_zuweisen: 'termin_sv',
+  rueckruf: 'kontakt',
+}
+
 export default function LeadNextBestAction({
   state,
   onPrimaryAction,
@@ -25,6 +35,17 @@ export default function LeadNextBestAction({
   guidanceOnly?: boolean
 }) {
   const meta = LEAD_WORKFLOW_META[state]
+  // Phase 1c: self-contained Jump zum relevanten Tab (kein Server-Handler noetig —
+  // dispatcht ein Event, DispatchLeadForm hoert darauf + setzt den aktiven Tab).
+  const actionTab = STATE_TAB_TARGET[state]
+  const handleClick =
+    onPrimaryAction ??
+    (actionTab
+      ? () =>
+          document.dispatchEvent(
+            new CustomEvent('claimondo:lead-workflow-jump', { detail: { tab: actionTab } }),
+          )
+      : undefined)
   return (
     <Card p={6} radius="lg">
       <Stack gap={3}>
@@ -35,13 +56,8 @@ export default function LeadNextBestAction({
         <Text variant="bodySm" color="ondo">
           {meta.heroDescription}
         </Text>
-        {meta.ctaLabel && !guidanceOnly ? (
-          <Button
-            variant="navy"
-            onClick={onPrimaryAction}
-            loading={loading}
-            disabled={!onPrimaryAction}
-          >
+        {meta.ctaLabel && !guidanceOnly && handleClick ? (
+          <Button variant="navy" onClick={handleClick} loading={loading}>
             {meta.ctaLabel}
           </Button>
         ) : null}

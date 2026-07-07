@@ -184,7 +184,7 @@ export default async function DispatchLeadDetail({
       <LeadRealtimeRefresh leadId={id} watchTermine />
       <LeadTerminGutachterBanner info={terminGutachterInfo} />
       <div className="mb-4">
-        <LeadWorkflowPanel result={workflow} guidanceOnly />
+        <LeadWorkflowPanel result={workflow} />
       </div>
       <DispatchLeadForm
         lead={lead as Record<string, unknown> & { id: string }}
