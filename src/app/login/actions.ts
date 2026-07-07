@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue, LOGIN_CONTINUE_COOKIE } from '@/lib/auth/safe-continue'
-import { entscheideLoginRouting } from '@/lib/auth/mfa-gate'
+import { entscheideLoginRouting, istZweiFaktorPflicht } from '@/lib/auth/mfa-gate'
 
 // BUG-83 Befund 7: gleiche Konstante wie in supabase/server.ts.
 const REMEMBER_COOKIE_NAME = 'cm_remember'
@@ -124,6 +124,7 @@ export async function login(formData: FormData) {
     hasVerifiedFactor: aal?.nextLevel === 'aal2',
     legacy2faWanted:
       profile.twofa_aktiviert === true || profile.twofa_email_aktiviert === true,
+    rollePflicht: istZweiFaktorPflicht(profile.rolle),
   })
 
   if (routing !== 'portal') {

@@ -123,7 +123,6 @@ export async function updateSession(request: NextRequest) {
     const gateBasis = {
       isOn2faPage: request.nextUrl.pathname === '/login/2fa',
       isGoogleUser: user.app_metadata?.provider === 'google',
-      isGutachterPath: request.nextUrl.pathname.startsWith('/gutachter'),
       aalCurrent,
       hasVerifiedFactor: hatVerifiziertenFaktor(user.factors),
     }
@@ -166,7 +165,9 @@ export async function updateSession(request: NextRequest) {
         response = NextResponse.next({ request: { headers: requestHeaders } })
       }
     } else {
-      // 2FA OK (oder /login/2fa selbst / Google / Gutachter / kein Faktor) → durchlassen
+      // 2FA OK (oder /login/2fa selbst / Google / kein Faktor) → durchlassen.
+      // F2 (AAR-audit-2fa): /gutachter ist NICHT mehr befreit — SV mit Faktor
+      // wird oben gechallenged (Enforcement folgt dem Faktor, nicht dem Pfad).
       response = NextResponse.next({ request: { headers: requestHeaders } })
     }
   }
