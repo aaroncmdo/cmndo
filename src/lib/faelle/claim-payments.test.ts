@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { upsertClaimPayment } from './claim-payments'
+import { upsertClaimPayment, getClaimPayments } from './claim-payments'
 
 // Minimaler Fake-Supabase-Client, der die Aufrufe aufzeichnet (kein echter DB-Zugriff).
 function fakeDb(existingId: string | null) {
@@ -34,5 +34,25 @@ describe('upsertClaimPayment', () => {
     expect(res.ok).toBe(true)
     expect(calls.inserted).toBeNull()
     expect(calls.updated).toMatchObject({ erhaltener_betrag: 5000, richtung: 'eingang' })
+  })
+})
+
+describe('getClaimPayments', () => {
+  it('gruppiert claim_payments-Zeilen nach partei (vs/kunde/sv)', async () => {
+    const rows = [
+      { partei: 'vs', forderungsbetrag: 5000, erhaltener_betrag: 5000, zahlungseingang_am: '2026-07-06', status: 'erhalten' },
+      { partei: 'kunde', forderungsbetrag: null, erhaltener_betrag: 3000, zahlungseingang_am: '2026-07-07', status: null },
+    ]
+    const db = { from: () => ({ select: () => ({ eq: () => Promise.resolve({ data: rows, error: null }) }) }) } as never
+    const res = await getClaimPayments(db, 'claim-1')
+    expect(res.vs?.erhaltener_betrag).toBe(5000)
+    expect(res.kunde?.erhaltener_betrag).toBe(3000)
+    expect(res.sv).toBeNull()
+  })
+
+  it('liefert alle-null bei DB-Fehler (graceful)', async () => {
+    const db = { from: () => ({ select: () => ({ eq: () => Promise.resolve({ data: null, error: { message: 'boom' } }) }) }) } as never
+    const res = await getClaimPayments(db, 'claim-1')
+    expect(res).toEqual({ vs: null, kunde: null, sv: null })
   })
 })
