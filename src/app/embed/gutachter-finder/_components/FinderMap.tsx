@@ -26,8 +26,6 @@ import { useEffect, useRef, useState } from 'react'
 // Crash auf gutachter-finden. Direkter Import aus client.ts vermeidet das.
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import { fetchDrivingRoute } from '@/lib/mapbox/directions'
-import { kmCircle, pointInAnyPolygon } from '@/lib/mapbox/coverage'
-import { unionIsochrones } from '@/lib/mapbox/union-isochrones'
 import type { Map as MapboxMap, Marker, Popup, GeoJSONSource } from 'mapbox-gl'
 import { ChevronUp } from 'lucide-react'
 import type { SvLeadPublic, AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
@@ -44,6 +42,9 @@ type Props = {
   /** Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron): JEDER verifizierte,
    * aktive SV ist klickbar mit anonymem Profil-Popup (RLS-gegated). */
   aktiveSVs?: AktiverSVPublic[]
+  /** Server-seitig vorberechnete Union der Partner-Isochronen (Perf: die ~10k-Vertex-
+   * Isochronen wuerden sonst client-seitig via @turf/union unioniert -> Freeze). */
+  coverageUnion?: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null
   /** Slot für den Inline-Wizard (WS4 — FlowSlotStep). WS1b: Platzhalter aus der Page. */
   wizardSlot?: React.ReactNode
   /** Doc 34 0a.3: Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng),
@@ -78,8 +79,6 @@ const USER_LOCATION_ZOOM = 10.5
 const COL_ONDO = '#4573A2'
 const COL_NAVY = '#0D1B3E'
 
-// Dead-Pin-Reichweite = 15-km-Ghost-Isochrone (Coverage-Check + Dead-Pin-Render-Kreise).
-const DEADPIN_RADIUS_KM = 15
 
 // Generischer Dead-Pin (Claimondo-Logo-Look) — nicht klickbar, kein Hover,
 // kein Popup. Wird für alle sv_leads (Tier-3 Excel-Imports) verwendet.
@@ -216,7 +215,7 @@ function GutachterPill({
   )
 }
 
-export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
+export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -233,9 +232,6 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const svMarkerElsRef = useRef<Map<string, HTMLElement>>(new Map())
   const deadPinElsRef = useRef<Map<string, HTMLElement>>(new Map())
   const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
-  // Alle Abdeckungs-Polygone (Partner-Isochronen + Dead-Pin-Kreise) für den
-  // client-seitigen „liegt der Ort in der Abdeckung?"-Check (pointInAnyPolygon).
-  const coveragePolysRef = useRef<GeoJSON.Polygon[]>([])
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
   // Aaron 04.07.: das Anfrage-Bottom-Sheet startet auf Mobil kosmetisch AUSGEFAHREN
@@ -304,22 +300,6 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       setMapStatus('no-token')
       return
     }
-
-    // ── Abdeckungs-Geometrie einmalig aus den Props ableiten (rein, synchron) ──
-    // Partner-Isochronen (kräftige Fläche).
-    const partnerIsoRaws: unknown[] = []
-    const partnerPolys: GeoJSON.Polygon[] = []
-    for (const s of aktiveSVs) {
-      const poly = s.isochrone_polygon as GeoJSON.Polygon | null
-      if (poly && Array.isArray(poly.coordinates) && poly.coordinates.length > 0) {
-        partnerPolys.push(poly)
-        partnerIsoRaws.push(poly)
-      }
-    }
-    // Dead-Pin-Reichweite (helle Fläche) = 15-km-Kreise um jeden aktiven Dead-Pin.
-    const deadPinPolys: GeoJSON.Polygon[] = svLeads.map((l) => kmCircle(l.lng, l.lat, DEADPIN_RADIUS_KM))
-    // coveragePolysRef: exakte Polygone für den pointInAnyPolygon-Check.
-    coveragePolysRef.current = [...partnerPolys, ...deadPinPolys]
 
     // Doc 34 0a.3: URL-Param-Zentrum (?stadt/?plz/?lat&lng) gewinnt über den
     // NRW-Default. Ohne initialCenter bleibt es bei NRW-Mittelpunkt + Geolocation.
@@ -471,8 +451,8 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
 
       // ── Dead-Pin-Reichweite (heller, UNTEN) — als weiche Heatmap-Wolke statt harter
       //    15-km-Kreise (die stapeln sich fleckig übereinander). Reine Optik: der
-      //    Abdeckungs-CHECK (pointInAnyPolygon) nutzt weiterhin die exakten Kreise in
-      //    coveragePolysRef. Flacher Farbverlauf → gleichmäßige helle Fläche, kein Hotspot-Look.
+      //    Abdeckungs-/Nearest-SV-Check laeuft server-seitig (empfehleSvFuerOrt).
+      //    Flacher Farbverlauf → gleichmäßige helle Fläche, kein Hotspot-Look.
       if (svLeads.length > 0) {
         map.addSource('coverage-deadpins', {
           type: 'geojson',
@@ -505,14 +485,13 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         })
       }
 
-      // ── Partner-Einsatzgebiet (kräftig, OBEN) — als Union der Isochronen ──
-      // Task 4: unionIsochrones ersetzt multi(partnerPolys) → glatter Außen-Umriss,
-      // keine inneren Trennlinien zwischen überlappenden SV-Gebieten mehr.
-      if (partnerIsoRaws.length > 0) {
-        const unionFeature = unionIsochrones(partnerIsoRaws)
+      // ── Partner-Einsatzgebiet (kräftig, OBEN) — server-seitig vorberechnete Union ──
+      // Perf: die ~10k-Vertex-Isochronen werden in page.tsx (Server) via @turf/union
+      // zu EINER Flaeche vereint + als coverageUnion-Prop gereicht -> kein Client-turf.
+      if (coverageUnion) {
         const coveragePartnersData: GeoJSON.FeatureCollection = {
           type: 'FeatureCollection',
-          features: unionFeature ? [{ ...unionFeature, properties: {} }] : [],
+          features: [{ ...coverageUnion, properties: {} }],
         }
         map.addSource('coverage-partners', { type: 'geojson', data: coveragePartnersData })
         map.addLayer({
