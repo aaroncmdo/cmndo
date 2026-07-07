@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
-import { LoginEmbed } from '@/components/shared/LoginEmbed'
+import { TopbarAuthCta } from './TopbarAuthCta'
 import { useTranslations } from 'next-intl'
 import { LanguageSwitcher } from '@/components/shared'
 import { MobileNav } from './MobileNav'
@@ -156,20 +156,17 @@ export function LandingTopbar({ authenticatedUser }: Props) {
           >
             {t('gutachter_finden')}
           </Link>
-          {authenticatedUser ? (
-            <Link
-              href={authenticatedUser.portalPath}
-              className="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97]"
-            >
-              <span className="hidden sm:inline">{t('zu_meinem_portal')}</span>
-              <span className="sm:hidden">{t('portal')}</span>
-              <span aria-hidden="true" className="transition-transform group-hover:translate-x-0.5">
-                →
-              </span>
-            </Link>
-          ) : (
-            <LoginEmbed triggerClassName="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]" />
-          )}
+          {/* Marketing-Login-Persistenz: CTA hydratisiert den Login-Status client-
+              seitig (Content-Seiten uebergeben authenticatedUser=null → SSR bleibt
+              anonym/Crawler-neutral, Client schaltet Eingeloggte auf „Zu meinem
+              Portal"). Klassen + Labels 1:1 wie zuvor. */}
+          <TopbarAuthCta
+            initialUser={authenticatedUser}
+            portalLabel={t('zu_meinem_portal')}
+            portalLabelShort={t('portal')}
+            portalCtaClassName="inline-flex items-center gap-1.5 rounded-full bg-claimondo-navy px-4 py-2 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(13,27,62,0.25)] transition-all duration-200 hover:bg-claimondo-shield hover:shadow-[0_6px_18px_rgba(13,27,62,0.35)] active:scale-[0.97]"
+            loginTriggerClassName="inline-flex items-center gap-1.5 rounded-full border border-white/60 bg-white/70 px-4 py-2 text-sm font-semibold text-claimondo-navy backdrop-blur-sm transition-all duration-200 hover:border-claimondo-navy/15 hover:bg-white active:scale-[0.97]"
+          />
 
           {/* Mobile (< md): Hamburger-Menue mit allen Nav-Punkten + Finder-CTA */}
           <MobileNav
