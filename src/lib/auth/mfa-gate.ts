@@ -107,44 +107,32 @@ export type LoginRoutingInput = {
   isGoogleUser: boolean
   /** User hat einen verifizierten Supabase-MFA-Faktor */
   hasVerifiedFactor: boolean
-  /** Legacy-Flag: profile.twofa_aktiviert || profile.twofa_email_aktiviert */
-  legacy2faWanted: boolean
-  /** F3: interne Rolle mit 2FA-Pflicht (admin/dispatch/kanzlei/kundenbetreuer) */
-  rollePflicht: boolean
 }
 
-export type LoginRouting = 'portal' | 'challenge' | 'enroll'
+export type LoginRouting = 'portal' | 'challenge'
 
 /**
- * Entscheidet direkt nach erfolgreichem Passwort-Login, wohin der User geht.
- * Der Caller (login/actions.ts) hat hier — anders als die Middleware — Zugriff
- * auf die profiles-Flags und kann so den Soft-Enroll-Fall erkennen.
+ * Routing direkt nach erfolgreichem Passwort-Login. 2FA ist OPTIONAL
+ * (2026-07-08): es gibt keinen erzwungenen Enroll mehr — wer einen
+ * verifizierten Faktor HAT, verifiziert ihn ('challenge'); sonst direkt ins
+ * Portal. Aktivierung von 2FA passiert opt-in in den Konto-Einstellungen (B1).
  *
  *   'portal'    -> Rollen-Portal (kein zweiter Faktor noetig)
  *   'challenge' -> /login/2fa, vorhandenen Faktor verifizieren
- *   'enroll'    -> /login/2fa im Enroll-Modus (Legacy-User holt den Faktor nach)
  */
 export function entscheideLoginRouting(input: LoginRoutingInput): LoginRouting {
   // Google-Login: kein Custom-2FA-Schritt (Bypass-Paritaet zum Gate).
   if (input.isGoogleUser) return 'portal'
 
-  // Bereits enrollt -> Faktor verifizieren.
+  // Verifizierter Faktor vorhanden -> verifizieren. Sonst: kein Zwang -> Portal.
   if (input.hasVerifiedFactor) return 'challenge'
 
-  // F3: interne Pflicht-Rolle ohne Faktor -> Enroll (ueberstimmt legacy/portal).
-  if (input.rollePflicht) return 'enroll'
-
-  // Legacy-2FA gewollt, aber noch kein Supabase-Faktor -> Soft-Enroll.
-  if (input.legacy2faWanted) return 'enroll'
-
-  // Kein 2FA -> direkt ins Portal.
   return 'portal'
 }
 
-// F3 (AAR-audit-2fa, Aaron 2026-07-06 „interne Rollen Pflicht"): Rollen die
-// 2FA verpflichtend brauchen. Enforcement laeuft ueber die profiles.rolle-Leser
-// (login/actions, /login/2fa page, requirePortalAccess) — NICHT die Middleware,
-// weil app_metadata.rolle unzuverlaessig ist (Admins 0/5 gesetzt).
+// istZweiFaktorPflicht: markiert interne Rollen fuer den WEICHEN 2FA-Nudge
+// (Banner "2FA empfohlen", B1). Seit 2026-07-08 KEINE Enforcement mehr — 2FA
+// ist optional; kein Login-/Portal-Pfad erzwingt daraus einen Enroll.
 const ZWEI_FAKTOR_PFLICHT_ROLLEN = new Set(['admin', 'dispatch', 'kanzlei', 'kundenbetreuer'])
 
 /** true, wenn die Rolle 2FA verpflichtend braucht (interne Rollen). */
