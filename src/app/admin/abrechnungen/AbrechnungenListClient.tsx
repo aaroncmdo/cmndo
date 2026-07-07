@@ -39,7 +39,7 @@ type Row = {
   notiz: string | null
 }
 
-type FilterKey = 'offen' | 'faellig' | 'bezahlt' | 'fehlgeschlagen' | 'alle'
+type FilterKey = 'offen' | 'faellig' | 'im_einzug' | 'bezahlt' | 'fehlgeschlagen' | 'alle'
 
 function fmtEur(n: number): string {
   return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR', minimumFractionDigits: 2 })
@@ -60,14 +60,16 @@ function statusBadge(row: Row): { label: string; bg: string; text: string; dot: 
   if (row.storniert_am) return { label: 'Storniert', bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', dot: 'bg-claimondo-ondo/70' }
   if (row.bezahlt_am) return { label: 'Bezahlt', bg: 'bg-success-soft', text: 'text-success-strong', dot: 'bg-success' }
   if (row.status === 'fehlgeschlagen' || row.einzug_fehler) return { label: 'Fehlgeschlagen', bg: 'bg-danger-soft', text: 'text-danger-strong', dot: 'bg-danger' }
-  if (isFaellig(row)) return { label: 'Faellig', bg: 'bg-warning-soft', text: 'text-warning-strong', dot: 'bg-warning' }
+  if (row.status === 'im_einzug') return { label: 'Im Einzug', bg: 'bg-info-soft', text: 'text-info-strong', dot: 'bg-info' }
+  if (isFaellig(row)) return { label: 'Fällig', bg: 'bg-warning-soft', text: 'text-warning-strong', dot: 'bg-warning' }
   if (row.status === 'versendet') return { label: 'Versendet', bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', dot: 'bg-claimondo-bg0' }
   return { label: 'Offen', bg: 'bg-warning-soft', text: 'text-warning-strong', dot: 'bg-warning' }
 }
 
 const FILTER_TABS: { key: FilterKey; label: string }[] = [
   { key: 'offen', label: 'Offen' },
-  { key: 'faellig', label: 'Faellig' },
+  { key: 'faellig', label: 'Fällig' },
+  { key: 'im_einzug', label: 'Im Einzug' },
   { key: 'fehlgeschlagen', label: 'Fehlgeschlagen' },
   { key: 'bezahlt', label: 'Bezahlt' },
   { key: 'alle', label: 'Alle' },
@@ -90,9 +92,10 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
       if (filter === 'alle') return true
       if (filter === 'bezahlt') return !!r.bezahlt_am
       if (filter === 'fehlgeschlagen') return r.status === 'fehlgeschlagen' || (!!r.einzug_fehler && !r.bezahlt_am)
-      if (filter === 'faellig') return isFaellig(r) && r.status !== 'fehlgeschlagen'
-      // offen: noch nicht bezahlt, nicht storniert, nicht fehlgeschlagen
-      return !r.bezahlt_am && !r.storniert_am && r.status !== 'fehlgeschlagen'
+      if (filter === 'im_einzug') return r.status === 'im_einzug' && !r.bezahlt_am
+      if (filter === 'faellig') return isFaellig(r) && r.status !== 'fehlgeschlagen' && r.status !== 'im_einzug'
+      // offen: noch nicht bezahlt, nicht storniert, nicht fehlgeschlagen, nicht im_einzug
+      return !r.bezahlt_am && !r.storniert_am && r.status !== 'fehlgeschlagen' && r.status !== 'im_einzug'
     }).sort((a, b) => {
       // sortiert nach faellig_am desc (default), null nach hinten
       const av = a.faellig_am ?? ''
@@ -105,8 +108,9 @@ export default function AbrechnungenListClient({ rows }: { rows: Row[] }) {
   }, [rows, filter])
 
   const counts = useMemo(() => ({
-    offen: rows.filter(r => !r.bezahlt_am && !r.storniert_am && r.status !== 'fehlgeschlagen').length,
-    faellig: rows.filter(r => isFaellig(r) && r.status !== 'fehlgeschlagen').length,
+    offen: rows.filter(r => !r.bezahlt_am && !r.storniert_am && r.status !== 'fehlgeschlagen' && r.status !== 'im_einzug').length,
+    faellig: rows.filter(r => isFaellig(r) && r.status !== 'fehlgeschlagen' && r.status !== 'im_einzug').length,
+    im_einzug: rows.filter(r => r.status === 'im_einzug' && !r.bezahlt_am).length,
     fehlgeschlagen: rows.filter(r => r.status === 'fehlgeschlagen' || (!!r.einzug_fehler && !r.bezahlt_am)).length,
     bezahlt: rows.filter(r => !!r.bezahlt_am).length,
     alle: rows.length,

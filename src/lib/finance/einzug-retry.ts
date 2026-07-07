@@ -52,3 +52,19 @@ export function retryFensterStartDatum(refMs: number, tage: number = EINZUG_RETR
 export function pollCooldownCutoff(refMs: number, stunden: number = EINZUG_POLL_COOLDOWN_H): string {
   return new Date(refMs - stunden * 3_600_000).toISOString()
 }
+
+export type EinzugCreateBranch = 'paid' | 'im_einzug' | 'fehlgeschlagen'
+
+/**
+ * Klassifiziert den Status eines FRISCH ERSTELLTEN Einzugs-PaymentIntent in
+ * einen abrechnungen.status-Wert. Anders als piStatusToEinzugAction (Retrieve/
+ * Re-Charge-Entscheidung) entscheidet dies nach dem confirm-Aufruf:
+ *   - succeeded  -> 'paid'          (Karte sofort durch)
+ *   - processing -> 'im_einzug'     (SEPA eingereicht, settled asynchron; KEIN Fehler)
+ *   - sonst      -> 'fehlgeschlagen'(requires_action/-payment_method/canceled/unbekannt)
+ */
+export function einzugBranchFuerPiStatus(status: string): EinzugCreateBranch {
+  if (status === 'succeeded') return 'paid'
+  if (status === 'processing') return 'im_einzug'
+  return 'fehlgeschlagen'
+}
