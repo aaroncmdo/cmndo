@@ -13,7 +13,7 @@ import { Chip } from '@/components/ui/Chip'
 import EmptyState from '@/components/shared/EmptyState'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 // CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt der Status-Label-Maps.
-import { MAIN_PHASE_LABEL, type ClaimMainPhase } from '@/lib/claims/lifecycle'
+import ClaimMainPhaseBadge from '@/components/shared/ClaimMainPhaseBadge'
 import type { MaklerAkteRow, AktenFilter } from '@/lib/makler/queries'
 
 type Props = {
@@ -199,7 +199,7 @@ function AkteRow({
         <p className="text-xs text-claimondo-ondo mt-0.5">{fahrzeugLabel(akte)}</p>
       </Td>
       <Td>
-        <PhasePill akte={akte} />
+        <ClaimMainPhaseBadge mainPhase={akte.mainPhase} />
       </Td>
       <Td className="!text-claimondo-ondo">{formatDate(akte.sv_termin)}</Td>
       <Td>
@@ -235,7 +235,7 @@ function AkteCard({
           </p>
           <p className="text-xs text-claimondo-ondo truncate">{fahrzeugLabel(akte)}</p>
         </div>
-        <PhasePill akte={akte} />
+        <ClaimMainPhaseBadge mainPhase={akte.mainPhase} />
       </div>
       <div className="flex items-center gap-2 text-xs text-claimondo-ondo flex-wrap">
         <span>SV: {formatDate(akte.sv_termin)}</span>
@@ -275,24 +275,6 @@ function AkteCard({
 // ─────────────────────────────────────────────────────────────────────────────
 // Pills/Badges
 // ─────────────────────────────────────────────────────────────────────────────
-
-// CMM-44 MP-4e/MP-6a: Phase-Pill zeigt die abgeleitete 4-Hauptphase (v_claim_phase)
-// statt des alten claims.phase-Labels — konsistent mit dem 4-Phasen-Reader-Modell.
-const PHASE_PILL_COLOR: Record<ClaimMainPhase, string> = {
-  erfassung: 'bg-claimondo-bg text-claimondo-ondo',
-  begutachtung: 'bg-claimondo-ondo/10 text-claimondo-navy',
-  regulierung: 'bg-claimondo-navy/10 text-claimondo-navy',
-  abschluss: 'bg-success-soft text-success-strong',
-}
-function PhasePill({ akte }: { akte: MaklerAkteRow }) {
-  return (
-    <span
-      className={`inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium ${PHASE_PILL_COLOR[akte.mainPhase]}`}
-    >
-      {MAIN_PHASE_LABEL[akte.mainPhase]}
-    </span>
-  )
-}
 
 function MinimalBadge() {
   return (
@@ -342,7 +324,7 @@ function MiniDrawer({
           </p>
         </div>
         <dl className="text-sm space-y-2">
-          <Row dt="Phase" dd={<PhasePill akte={akte} />} />
+          <Row dt="Phase" dd={<ClaimMainPhaseBadge mainPhase={akte.mainPhase} />} />
           <Row dt="Fahrzeug" dd={fahrzeugLabel(akte)} />
           <Row dt="SV-Termin" dd={formatDate(akte.sv_termin)} />
           <Row
