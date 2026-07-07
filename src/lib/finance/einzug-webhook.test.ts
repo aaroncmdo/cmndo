@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 import { handleEinzugPaymentFailed } from './einzug-webhook'
 
-function fakeDb() {
+function fakeDb(neqResult: { error: null | { message: string } } = { error: null }) {
   const calls: any[] = []
   const chain: any = {}
   chain.update = vi.fn((patch: any) => { calls.push({ op: 'update', patch }); return chain })
   chain.eq = vi.fn((c: string, v: any) => { calls.push({ op: 'eq', c, v }); return chain })
-  chain.neq = vi.fn((c: string, v: any) => { calls.push({ op: 'neq', c, v }); return chain })
+  chain.neq = vi.fn((c: string, v: any) => { calls.push({ op: 'neq', c, v }); return Promise.resolve(neqResult) })
   const db: any = { from: vi.fn(() => chain), _calls: calls }
   return db
 }
@@ -33,5 +33,12 @@ describe('handleEinzugPaymentFailed', () => {
     const r = await handleEinzugPaymentFailed(db, { metadata: { gutachter_id: 'g-1' } })
     expect(r.acted).toBe(false)
     expect(db.from).not.toHaveBeenCalled()
+  })
+
+  it('wirft bei DB-Fehler damit Stripe retry ausgeloest wird', async () => {
+    const db = fakeDb({ error: { message: 'db down' } })
+    await expect(
+      handleEinzugPaymentFailed(db, { metadata: { abrechnung_id: 'abr-1' }, amount: 100 })
+    ).rejects.toThrow(/update failed/)
   })
 })

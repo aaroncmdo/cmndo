@@ -17,11 +17,12 @@ export async function handleEinzugPaymentFailed(
   const abrId = meta.abrechnung_id ?? null
   if (!abrId) return { acted: false }
   const grund = pi.last_payment_error?.message ?? 'Lastschrift fehlgeschlagen'
-  await db.from('abrechnungen').update({
+  const { error } = await db.from('abrechnungen').update({
     status: 'fehlgeschlagen',
     einzug_fehler: grund,
     updated_at: new Date().toISOString(),
   }).eq('id', abrId).neq('status', 'bezahlt')
+  if (error) throw new Error(`[einzug-webhook] abrechnungen update failed for ${abrId}: ${error.message ?? 'unknown'}`)
   return {
     acted: true,
     abrId,
