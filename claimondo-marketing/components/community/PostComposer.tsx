@@ -142,6 +142,9 @@ export function PostComposer({ isLoggedIn, hasUsername }: PostComposerProps) {
               placeholder="Was möchtest du mit der Community teilen? (max. 5.000 Zeichen)"
               className={input}
             />
+            <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/60">
+              Dein Beitrag erscheint <span className="font-medium">öffentlich</span> in der Community.
+            </p>
             <div>
               <p className="mb-1.5 text-[0.75rem] font-medium text-claimondo-navy">Themen (optional):</p>
               <div className="flex flex-wrap gap-1.5">

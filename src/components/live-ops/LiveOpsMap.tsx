@@ -6,12 +6,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import { MAPBOX_STYLE_STANDARD } from '@/lib/mapbox/styles'
-import { getMapboxLightPreset } from '@/lib/mapbox/light-preset'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSource } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
 import type { LiveOpsRole } from '@/lib/live-ops'
-import { svPinsFC, isochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
+import { svPinsFC, unionIsochroneFC, terminPinsFC, routenFC, tagesroutenFC, deadPinsFC, leadsFC, candidateHaloFC, assignLineFC } from './geo'
 import { fetchDrivingRoute } from '@/lib/mapbox/directions'
 import { computeCoverageGaps } from '@/lib/live-ops/coverage'
 import { addSvCarMarker } from '@/lib/mapbox/sv-marker'
@@ -417,7 +416,9 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     // erst nach dem Style-Load gesetzt werden koennen.
     map.on('style.load', () => {
       try {
-        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
+        // Aaron 07.07.: SV-Live-Ops-Karte bleibt 3D, aber IMMER Tages-Licht
+        // (fest 'day' statt uhrzeitabhaengig -> nie mehr naechtlich-dunkel).
+        map.setConfigProperty('basemap', 'lightPreset', 'day')
         map.setConfigProperty('basemap', 'show3dObjects', true)
         map.setConfigProperty('basemap', 'showPlaceLabels', true)
         map.setConfigProperty('basemap', 'showRoadLabels', true)
@@ -432,10 +433,14 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     map.on('load', () => {
       if (!mountedRef.current) return
 
-      // ─── Isochrone-Layer ───────────────────────────────────────────────
+      // ─── Isochrone-Layer (Union) ───────────────────────────────────────
+      // Die Union-Flaeche fasst alle SV-Isochronen zu EINER Flaeche zusammen.
+      // TYP_COLOR_EXPR entfaellt: die Union hat kein `typ`-Property (typ-uebergreifend).
+      // Stattdessen eine einheitliche Marken-Farbe (#4573A2 = claimondo-secondary;
+      // raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property).
       map.addSource(SRC_ISOS, {
         type: 'geojson',
-        data: isochroneFC(svsRef.current),
+        data: unionIsochroneFC(svsRef.current),
       })
 
       map.addLayer({
@@ -444,7 +449,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         source: SRC_ISOS,
         slot: 'middle',
         paint: {
-          'fill-color': TYP_COLOR_EXPR,
+          'fill-color': '#4573A2',
           'fill-opacity': 0.18,
         },
       } as Parameters<typeof map.addLayer>[0])
@@ -455,7 +460,8 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         source: SRC_ISOS,
         slot: 'middle',
         paint: {
-          'line-color': TYP_COLOR_EXPR,
+          // Union-Aussengrenze — kein inneres Kanten-Chaos mehr (kein per-SV-Overlap).
+          'line-color': '#4573A2',
           'line-width': 2,
           'line-opacity': 0.7,
         },
@@ -840,7 +846,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       ;(map.getSource(SRC_SVS) as GeoJSONSource).setData(svPinsFC(filteredSvs))
     }
     if (map.getSource(SRC_ISOS)) {
-      ;(map.getSource(SRC_ISOS) as GeoJSONSource).setData(isochroneFC(filteredSvs))
+      ;(map.getSource(SRC_ISOS) as GeoJSONSource).setData(unionIsochroneFC(filteredSvs))
     }
 
     // Car-Marker: alte entfernen, neue aufbauen (nur gefilterte SVs)

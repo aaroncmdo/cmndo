@@ -32,6 +32,7 @@ type LedgerMeta = {
   grundCol?: string
   partnerTyp: 'makler' | 'werkstatt' | 'marketing'
   leistungText: string
+  leistungDatumCol: string
 }
 
 const META: Record<ProvisionTabelle, LedgerMeta> = {
@@ -47,6 +48,7 @@ const META: Record<ProvisionTabelle, LedgerMeta> = {
     grundCol: 'storno_grund',
     partnerTyp: 'makler',
     leistungText: 'Vermittlungsprovision',
+    leistungDatumCol: 'trigger_at',
   },
   werkstatt_provisionen: {
     betrag: 'betrag_netto_eur',
@@ -61,6 +63,7 @@ const META: Record<ProvisionTabelle, LedgerMeta> = {
     grundCol: 'storno_grund',
     partnerTyp: 'werkstatt',
     leistungText: 'Vermittlungsprovision',
+    leistungDatumCol: 'trigger_at',
   },
   provisionen_maik: {
     betrag: 'netto_provision',
@@ -75,6 +78,7 @@ const META: Record<ProvisionTabelle, LedgerMeta> = {
     grundCol: 'reversed_grund',
     partnerTyp: 'marketing',
     leistungText: 'Vermittlungsprovision',
+    leistungDatumCol: 'created_at',
   },
   makler_staffel_bonus: {
     betrag: 'bonus_betrag_netto',
@@ -87,6 +91,7 @@ const META: Record<ProvisionTabelle, LedgerMeta> = {
     // no stornoCol/grundCol — makler_staffel_bonus has no storno timestamp/reason cols
     partnerTyp: 'makler',
     leistungText: 'Staffel-Bonus',
+    leistungDatumCol: 'erstellt_am',
   },
   werkstatt_staffel_bonus: {
     betrag: 'bonus_betrag_netto',
@@ -99,6 +104,7 @@ const META: Record<ProvisionTabelle, LedgerMeta> = {
     // no stornoCol/grundCol — werkstatt_staffel_bonus has no storno timestamp/reason cols
     partnerTyp: 'werkstatt',
     leistungText: 'Staffel-Bonus',
+    leistungDatumCol: 'erstellt_am',
   },
 } as const
 
@@ -149,9 +155,9 @@ export async function auszahlenProvision(
 ): Promise<{ ok: boolean; error?: string }> {
   const meta = META[tabelle]
 
-  // Step 1 — Lesen: netto + partner_id + ist_kleinunternehmer
+  // Step 1 — Lesen: netto + partner_id + ist_kleinunternehmer + leistungDatumCol
   // Freeze-Spalten + Partner-ist_kleinunternehmer: Migration in diesem Branch, Typen folgen beim Merge-Regen (Regel 2).
-  const selectStr = `${meta.betrag}, ${meta.fk}, ${meta.partner}(${meta.partnerFlag})`
+  const selectStr = `${meta.betrag}, ${meta.fk}, ${meta.partner}(${meta.partnerFlag}), ${meta.leistungDatumCol}`
   const { data, error: readError } = await db
     .from(tabelle)
     .select(selectStr)
@@ -168,6 +174,9 @@ export async function auszahlenProvision(
   const partnerRaw = (data as any)[meta.partner]
   const partner = Array.isArray(partnerRaw) ? partnerRaw[0] : partnerRaw
   const istKleinunternehmer: boolean | null = partner?.[meta.partnerFlag] ?? null
+
+  // Leistungsdatum je Ledger: trigger_at / created_at / erstellt_am
+  const leistungsDatum: string | null = (data as any)[meta.leistungDatumCol] ?? null
 
   const ust = computeProvisionUst(nettoEur, istKleinunternehmer)
 
@@ -212,6 +221,7 @@ export async function auszahlenProvision(
         bruttoCent: Math.round((ust.brutto ?? 0) * 100),
       },
       leistungText: meta.leistungText,
+      leistungsDatum,
     })
     if (!g.ok) return { ok: false, error: g.error }
 
@@ -236,6 +246,7 @@ export async function auszahlenProvision(
     const pdf = await generateAndUploadPartnerGutschriftPdf({
       gutschrift_nr: gutschriftRow.gutschrift_nr,
       erstellt_am: gutschriftRow.erstellt_am,
+      leistung_datum: gutschriftRow.leistung_datum ?? null,
       leistung_text: gutschriftRow.leistung_text,
       betrag_netto: gutschriftRow.betrag_netto,
       ust_satz: gutschriftRow.ust_satz,

@@ -3616,10 +3616,10 @@
   "ersteinschaetzung": {
     "breadcrumb_start": "Home",
     "breadcrumb_current": "AI Initial Assessment",
-    "hero_badge": "Free · Instant · No obligation",
-    "hero_h1_line1": "Your damage.",
-    "hero_h1_line2": "Assessed in seconds.",
-    "hero_intro": "AI analyses your photos — repair costs, replacement value, and expert report recommendation in under 15 minutes.",
+    "hero_badge": "Free · No obligation · § 249 BGB",
+    "hero_h1_line1": "Not your fault?",
+    "hero_h1_line2": "0 € out of pocket.",
+    "hero_intro": "Free AI first assessment: upload photos and see in minutes what you are entitled to. If the accident was not your fault, the other side's insurer pays for appraiser, lawyer and repair (§ 249 German Civil Code).",
     "hero_cta_primary": "Get a free assessment now",
     "hero_cta_phone": "Call",
     "trust_kpi_0_wert": "< 15 min",
@@ -3634,11 +3634,11 @@
     "antwort_p": "<strong>The free AI initial assessment from Claimondo</strong> analyses photos and a description of your vehicle damage and delivers in under 15 minutes: an estimate of repair costs, the expected replacement value, and a recommendation on whether an independent DAT expert report is advisable (from approximately 750 € in damage you are entitled to one under § 249 BGB). The initial assessment is free and non-binding — it does not replace an official expert report, but helps you immediately decide the right next step.",
     "ergebnis_h2": "What you receive — for free",
     "ergebnis_punkte": [
-      "Estimated repair costs based on your photos",
-      "Replacement value of the vehicle",
-      "Recommendation: expert report or repair estimate",
-      "Assessment of settlement prospects",
-      "Result in under 15 minutes"
+      "Your out-of-pocket cost: 0 € if you are not at fault (§ 249 BGB)",
+      "Estimated repair costs and replacement value from your photos",
+      "Total loss detected: repair or settle, with concrete figures",
+      "All items: diminished value, rental car, loss of use, appraiser, lawyer",
+      "Result in minutes, no sign-up, non-binding"
     ],
     "schritte_h2": "3 steps to your initial assessment",
     "schritte": [
@@ -4075,8 +4075,8 @@
       "og_description": "The BVSK fee table explained + why those not at fault pay €0 (§ 249 BGB, BGH VI ZR 67/06)."
     },
     "ersteinschaetzung": {
-      "title": "AI initial assessment — your car damage valued in seconds",
-      "description": "Upload photos of your accident damage. In under 15 minutes our AI delivers a free initial assessment: repair costs and an assessment recommendation.",
+      "title": "Car damage: 0 € out of pocket? Free AI first assessment",
+      "description": "Upload photos and see in minutes what you are entitled to: repair costs, replacement value, total loss, full items. Not your fault? 0 € for you (§ 249 BGB). Free and non-binding.",
       "og_title": "AI initial assessment — have your car damage valued for free",
       "og_description": "Upload a photo, the AI analyzes it instantly. Repair costs, replacement value, assessment recommendation — in under 15 minutes.",
       "twitter_description": "Free, instant, no obligation."

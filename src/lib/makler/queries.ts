@@ -698,6 +698,29 @@ export type DashboardData = {
 }
 
 /**
+ * Leichte Einzel-Query: Anzahl offener Leads (Status neu/quali-offen) eines Maklers
+ * ueber seine Promo-Codes. Extrahiert aus getMaklerDashboardData, damit die
+ * Abrechnungs-Seite die (dorthin verschobene) Pipeline-Karte rendern kann, ohne die
+ * volle Dashboard-Aggregation zu laden.
+ */
+export async function getMaklerOffeneLeadsCount(maklerId: string): Promise<number> {
+  const supabase = await createClient()
+  const { data: promoRows } = await supabase
+    .from('promotion_codes')
+    .select('id')
+    .eq('makler_id', maklerId)
+  const promoIds = (promoRows ?? []).map((p) => p.id)
+  if (promoIds.length === 0) return 0
+  const { count } = await supabase
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    // gleiche Definition wie getMaklerDashboardData (Status-Enum-Audit: 'quali-offen').
+    .in('status', ['neu', 'quali-offen'])
+    .in('promotion_code_id', promoIds)
+  return count ?? 0
+}
+
+/**
  * AAR-484: Parallel-Fetch aller Dashboard-Kennzahlen für einen Makler.
  *
  * Leads-Scope: alle Leads deren promotion_code_id zu einem eigenen Promo-Code

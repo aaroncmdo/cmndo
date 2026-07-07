@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
-import { piStatusToEinzugAction, retryFensterStartDatum, pollCooldownCutoff } from '@/lib/finance/einzug-retry'
+import { piStatusToEinzugAction, retryFensterStartDatum, pollCooldownCutoff, einzugBranchFuerPiStatus } from '@/lib/finance/einzug-retry'
 
 // Lazy-Import von '@/lib/stripe/client' innerhalb der Handler — der Client
 // instantiiert Stripe im Konstruktor mit STRIPE_SECRET_KEY!. Bei einem
@@ -70,7 +70,7 @@ export async function GET(request: Request) {
     .is('bezahlt_am', null)
     .is('storniert_am', null)
     .lte('faellig_am', heute)
-    .eq('status', 'fehlgeschlagen')
+    .in('status', ['fehlgeschlagen', 'im_einzug'])
     .gte('faellig_am', retryFensterStart)
     .lt('einzug_versucht_am', pollCutoff)
 
@@ -83,6 +83,7 @@ export async function GET(request: Request) {
   const faellig = [...(neu ?? []), ...(retries ?? [])]
 
   let success = 0
+  let pending = 0
   let failed = 0
 
   // Lazy-load Stripe nur wenn es tatsaechlich Eintraege zu verarbeiten gibt.
@@ -210,15 +211,20 @@ export async function GET(request: Request) {
         },
       })
 
-      if (pi.status === 'succeeded') {
+      const branch = einzugBranchFuerPiStatus(pi.status)
+      if (branch === 'paid') {
         await markPaid(abr.id, Number(abr.summe_brutto), pi.id)
         success++
+      } else if (branch === 'im_einzug') {
+        // SEPA-Lastschrift eingereicht — settled asynchron. KEIN Fehler, KEIN Alarm.
+        await markImEinzug(abr.id, pi.id)
+        pending++
       } else {
-        // 'requires_action' (3DS) oder 'processing' — Einzug noch offen, Versuch zaehlen
+        // terminal-nicht-erfolgreich (unerwartet fuer confirm+off_session) -> echter Fehler
         await db.from('abrechnungen').update({
           einzug_versucht_am: new Date().toISOString(),
           stripe_payment_intent_id: pi.id,
-          einzug_fehler: `PaymentIntent status=${pi.status} (3DS oder verzoegert)`,
+          einzug_fehler: `PaymentIntent status=${pi.status}`,
           status: 'fehlgeschlagen',
           updated_at: new Date().toISOString(),
         }).eq('id', abr.id)
@@ -243,8 +249,8 @@ export async function GET(request: Request) {
     }
   }
 
-  console.log(`[KFZ-149 einzug] success=${success} failed=${failed} total_pruefung=${faellig?.length ?? 0}`)
-  return NextResponse.json({ ok: true, success, failed, total: faellig?.length ?? 0 })
+  console.log(`[KFZ-149 einzug] success=${success} pending=${pending} failed=${failed} total_pruefung=${faellig?.length ?? 0}`)
+  return NextResponse.json({ ok: true, success, pending, failed, total: faellig?.length ?? 0 })
 
   // ── Helpers ──────────────────────────────────────────────────────────
   async function markPaid(abrId: string, betrag: number, piId: string) {
@@ -255,6 +261,17 @@ export async function GET(request: Request) {
       einzug_versucht_am: nowIso,
       stripe_payment_intent_id: piId,
       status: 'bezahlt',
+      updated_at: nowIso,
+    }).eq('id', abrId)
+  }
+
+  async function markImEinzug(abrId: string, piId: string) {
+    const nowIso = new Date().toISOString()
+    await db.from('abrechnungen').update({
+      einzug_versucht_am: nowIso,
+      stripe_payment_intent_id: piId,
+      einzug_fehler: null,
+      status: 'im_einzug',
       updated_at: nowIso,
     }).eq('id', abrId)
   }

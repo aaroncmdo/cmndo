@@ -37,3 +37,35 @@ export type AiProposal = {
   begruendung: string
   status: 'offen' | 'angenommen' | 'verworfen' | 'bearbeitet'
 }
+
+// ── Phase 2: Auto-Graduierung ────────────────────────────────────────────────
+export type AutoMode = 'manual' | 'auto'
+
+/** Gelockte Defaults (Aaron 06.07.). Zentral, damit Stats + Regression + Cap konsistent bleiben. */
+export const GRADUATION = {
+  quoteSchwelle: 0.8, // Annahme-Quote ab der graduierbar
+  minEntscheidungen: 30, // Fenster: letzte N Entscheidungen je (typ,rolle)
+  revertBadRate: 0.3, // Auto-Revert wenn bad_rate darueber
+  revertFenster: 20, // ueber die letzten M Auto-Tasks
+  rateCapProLauf: 10, // max Auto-Tasks pro Cron-Lauf
+} as const
+
+/** Readiness-Statistik je (vorschlag_typ, ziel_rolle) ueber das Fenster. */
+export type TypeStats = {
+  vorschlagTyp: ProposalTyp
+  zielRolle: ZielRolle | null
+  entscheidungen: number // angenommen + verworfen im Fenster
+  angenommen: number
+  verworfen: number
+  quote: number // angenommen / entscheidungen (0 wenn keine)
+  mode: AutoMode
+  ready: boolean // nur 'task': quote >= schwelle && entscheidungen >= min
+}
+
+/** Payload eines Task-Vorschlags (geteilt: Auto-Pfad + Admin-Approve). */
+export type TaskProposalPayload = {
+  titel?: string
+  beschreibung?: string
+  prioritaet?: string
+  faellig_in_tagen?: number
+}
