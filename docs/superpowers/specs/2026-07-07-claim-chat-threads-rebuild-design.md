@@ -91,7 +91,7 @@ CREATE INDEX idx_nachrichten_thread ON nachrichten (thread_id, created_at DESC);
 - **`sendChatMessage`** wird umgestellt: statt `{fallId, kanal}` nimmt es `{threadId, nachricht}`. Insert in `nachrichten` mit `thread_id`, danach **pro Thread-Mitglied Zustellung entscheiden**:
   - Mitglied ist internes Portal-Nutzer → in-app (Realtime), plus Mitteilung/Badge.
   - Mitglied ist Kunde/Werkstatt/Makler, extern erreichbar → WhatsApp (falls Telefon) bzw. E-Mail (Fallback), über die bestehende `sendCommunication`/`sendNachricht`-Infra. Provider-Message-ID zurück in `nachrichten.external_message_id`.
-- **Eingehendes WhatsApp** (`whatsapp_inbound_messages` → matched `fall_id`): wird in den **`kunde_gruppe`-Thread** des Claims geschrieben (team-sichtbar). Falls später „privater WhatsApp-Faden" gewünscht: in den Direkt-Thread Kunde↔Betreuer — als spätere Verfeinerung.
+- **Eingehendes WhatsApp** (`whatsapp_inbound_messages` → matched `fall_id`): wird in den **Direkt-Thread Kunde↔Betreuer** geschrieben (Aaron-Entscheid: der WhatsApp-Draht ist der private Kundenfaden, nicht die Gruppe). Der Direkt-Thread wird lazy angelegt, falls noch nicht vorhanden.
 - **Realtime:** Supabase `postgres_changes` auf `nachrichten` gefiltert nach `thread_id` (statt `fall_id`+`kanal`).
 
 ---
@@ -106,8 +106,8 @@ Backfill-Skript (als Migration über das Plugin), mappt jede bestehende `nachric
 | `chat_kb_kunde` | `direkt`(Betreuer, Kunde) |
 | `chat_kunde_sv` | `direkt`(Kunde, Gutachter) |
 | `chat_kb_sv` | `team_intern` des Claims |
-| `chat_gruppe_mit_makler` | **offen** — siehe §8 (Makler-Verortung) |
-| `whatsapp` | `kunde_gruppe` des Claims (team-sichtbar) — **zur Bestätigung**, siehe §8 |
+| `chat_gruppe_mit_makler` | `direkt`(Makler, Betreuer) — Makler braucht keine Gruppe (§8) |
+| `whatsapp` | `direkt`(Kunde, Betreuer) — der WhatsApp-Draht ist der private Kundenfaden (§8) |
 
 Threads + Teilnehmer werden im selben Skript aus den vorhandenen Nachrichten + Claim-Zuweisungen abgeleitet. Idempotent (mehrfach lauffähig).
 
@@ -128,12 +128,14 @@ Mehrere PRs, je Phase mindestens einer.
 
 ---
 
-## 8. Offene Punkte (für Aaron-Review)
+## 8. Entscheidungen (Aaron, 2026-07-07 — bestätigt)
 
-1. **Makler-Verortung:** Der heutige `chat_gruppe_mit_makler` ist eine Gruppe (Makler + Team). Im 3-Arten-Modell — wird der Makler (a) über **private DMs** angebunden (Makler↔Betreuer), (b) in die **`kunde_gruppe`** aufgenommen, oder (c) kriegt er einen **eigenen Gruppen-Typ** (`makler_gruppe`)? Vorschlag: (a) DMs für den Normalfall; alte Makler-Gruppen-Nachrichten → `team_intern`. Zu bestätigen.
-2. **WhatsApp-Historie:** Alt-`whatsapp`-Nachrichten → `kunde_gruppe` (team-sichtbar). Passt das, oder sollen sie in den Direkt-Thread Kunde↔Betreuer?
-3. **Thread-Anlage:** Trigger bei Claim-Erstellung vs. lazy beim ersten Zugriff (lazy = migrations-schonender, empfohlen).
-4. **Team-intern-Mitgliedschaft:** Nur zugewiesener Betreuer+Gutachter als Member (Admin/Dispatch per RLS-Oversight) — oder Admin/Dispatch explizit als Member listen?
+1. **Makler = keine Gruppen-Anbindung.** Der Claim weiß bereits, von welchem Makler er kommt (`makler_id`/Quelle); der Makler wird bei Bedarf **per DM** (`direkt`) angeschrieben — mehr braucht es nicht. Alte `chat_gruppe_mit_makler`-Nachrichten → `direkt`(Makler, Betreuer). Kein 4. Thread-Typ.
+2. **WhatsApp → privater Kundenfaden.** Historie **und** laufender Inbound landen im **Direkt-Thread Kunde↔Betreuer**, nicht in der `kunde_gruppe`. Der Kunde↔Betreuer-Direktfaden ist damit de facto die „WhatsApp-Linie"; die `kunde_gruppe` ist das explizite Mehr-Parteien-Gespräch.
+3. **Thread-Anlage lazy** beim ersten Zugriff (migrations-schonend), kein Trigger bei Claim-Erstellung.
+4. **Team-intern-Mitglieder = nur** zugewiesener Betreuer + Gutachter. Admin/Dispatch sehen per `is_staff()`-Oversight-RLS, ohne explizit als Member gelistet zu sein.
+
+**Rest-Nuance (optionale Phase-3-Verfeinerung, kein Blocker):** Antwortet der Kunde per WhatsApp auf eine ihm zugestellte *Gruppen*-Nachricht, landet die Antwort im Kunde↔Betreuer-Faden (nicht in der Gruppe). Reply-Kontext-Routing (Antwort dem Ursprungs-Thread zuordnen) ist eine spätere Verfeinerung.
 
 ---
 
