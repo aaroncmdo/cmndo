@@ -21,19 +21,13 @@ import {
 import { leiteOnboardingStatus } from '@/lib/werkstatt/onboarding-status'
 import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import type { WerkstattDetail } from './detail-data'
+import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
+import { NotizenSection } from './NotizenSection'
 
 const STATUS_TON: Record<string, StatusBadgeTone> = {
   aktiv: 'success',
   inaktiv: 'neutral',
   gesperrt: 'danger',
-}
-
-const FAEHIGKEIT_LABEL: Record<string, string> = {
-  karosserie: 'Karosserie',
-  lackierung: 'Lackierung',
-  mechanik: 'Mechanik',
-  glas: 'Glas',
-  smart_repair: 'Smart-Repair',
 }
 
 const STATUS_NORM_LABEL: Record<string, string> = {
@@ -390,32 +384,14 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         )}
       </SectionCard>
 
-      {/* Fähigkeiten & Staffelung */}
+      {/* Interne Notizen (nur Team-sichtbar) */}
+      <SectionCard title="Interne Notizen">
+        <NotizenSection werkstattId={w.id} notizen={detail.notizen} />
+      </SectionCard>
+
+      {/* Fähigkeiten & Staffelung (inline editierbar) */}
       <SectionCard title="Fähigkeiten & Staffelung">
-        <div className="space-y-3">
-          <div>
-            <p className="text-body-xs text-claimondo-ondo mb-1">Fähigkeiten</p>
-            <p className="text-body-sm text-claimondo-navy">
-              {w.faehigkeiten && w.faehigkeiten.length > 0
-                ? w.faehigkeiten.map((f) => FAEHIGKEIT_LABEL[f] ?? f).join(', ')
-                : 'Vollservice (keine Einschränkung)'}
-            </p>
-          </div>
-          <div>
-            <p className="text-body-xs text-claimondo-ondo mb-1">Staffel-Boni</p>
-            {staffel.length === 0 ? (
-              <p className="text-body-sm text-claimondo-ondo">Keine Staffel-Stufen hinterlegt.</p>
-            ) : (
-              <ul className="text-body-sm text-claimondo-navy space-y-0.5">
-                {staffel.map((s, i) => (
-                  <li key={i}>
-                    ab {s.schwelle} Vermittlungen → {euro(s.bonus_betrag_netto)} Bonus
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+        <FaehigkeitenStaffelEditor werkstattId={w.id} faehigkeiten={w.faehigkeiten ?? []} staffel={staffel} />
       </SectionCard>
 
       {/* Stammdaten-Bearbeiten-Modal */}
