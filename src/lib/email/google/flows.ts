@@ -1,4 +1,5 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { buildWelcomeConfirmLink } from '@/lib/auth/welcome-link'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
@@ -762,22 +763,10 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
   // Mail-Body. params.initial_password wird NICHT mehr versendet (der Account
   // wird weiterhin damit angelegt + in der Admin-UI angezeigt). Jeder Send
   // generiert einen frischen Link — auch der resend-welcome-Pfad.
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-  let magicLink: string | null = null
-  try {
-    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
-      type: 'recovery',
-      email: params.to,
-      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
-    })
-    if (linkErr || !linkData?.properties?.action_link) {
-      console.error('[sendWillkommenSv] Magic-Link-Generierung fehlgeschlagen:', linkErr?.message)
-    } else {
-      magicLink = linkData.properties.action_link
-    }
-  } catch (err) {
-    console.error('[sendWillkommenSv] Magic-Link-Sub-Op fehlgeschlagen:', err)
-  }
+  // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): admin.generateLink liefert einen
+  // IMPLICIT-#access_token-Hash, den /passwort-zuruecksetzen nicht verarbeitet — stattdessen
+  // hashed_token + /api/auth/confirm (verifyOtp server-seitig → Cookie).
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
 
   const props = {
     anrede: params.anrede,
@@ -818,16 +807,11 @@ export async function sendWillkommenWerkstatt(params: {
 }): Promise<void> {
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
 
-  const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
-    type: 'recovery',
-    email: params.to,
-    options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
-  })
-  const magicLink = linkData?.properties?.action_link
-  if (linkErr || !magicLink) {
-    throw new Error(
-      `Werkstatt-Magic-Link konnte nicht erzeugt werden: ${linkErr?.message ?? 'kein action_link'}`,
-    )
+  // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): hashed_token + /api/auth/confirm
+  // statt action_link (Implicit-Hash tot). Ohne Link keine sinnvolle Mail -> hart fehlschlagen.
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
+  if (!magicLink) {
+    throw new Error('Werkstatt-Magic-Link konnte nicht erzeugt werden')
   }
 
   const props = {
@@ -904,22 +888,9 @@ export type MaklerWelcomeParams = {
  * Aufruf in try/catch, damit ein Mail-Fail die Registrierung nicht bricht.
  */
 export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<void> {
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-  let magicLink: string | null = null
-  try {
-    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
-      type: 'recovery',
-      email: params.to,
-      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
-    })
-    if (linkErr || !linkData?.properties?.action_link) {
-      console.error('[sendMaklerWelcome] Magic-Link-Generierung fehlgeschlagen:', linkErr?.message)
-    } else {
-      magicLink = linkData.properties.action_link
-    }
-  } catch (err) {
-    console.error('[sendMaklerWelcome] Magic-Link-Sub-Op fehlgeschlagen:', err)
-  }
+  // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): hashed_token + /api/auth/confirm
+  // statt action_link (Implicit-Hash tot).
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
 
   const props = {
     firma: params.firma,
