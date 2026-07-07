@@ -9,7 +9,7 @@ import {
   CarFrontIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
+  WrenchIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
   NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon,
 } from 'lucide-react'
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
@@ -33,7 +33,6 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/wissen-artikel', label: 'Wissen-Artikel', icon: NewspaperIcon },
   { href: '/admin/werkstaetten', label: 'Werkstätten', icon: WrenchIcon },
   { href: '/admin/makler', label: 'Makler', icon: HandshakeIcon },
-  { href: '/admin/sv-leads', label: 'SV-Leads', icon: MapPinIcon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/vertraege', label: 'Vertragseditor', icon: FileSignatureIcon },
   { href: '/admin/kommentare', label: 'Kommentare', icon: MessageSquareIcon },

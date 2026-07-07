@@ -227,6 +227,13 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige',
         permanent: true,
       },
+      // Aaron 07.07.: SV-Leads-Verwaltung wanderte in die Sachverstaendige-
+      // Sektion (Drawer ueber der Karte). Alte Bookmarks -> neue Route.
+      {
+        source: '/admin/sv-leads',
+        destination: '/admin/sachverstaendige/leads',
+        permanent: true,
+      },
       // AAR-889 (14.05.26): /admin/sv-onboarding zeigte vorher auf
       // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
       // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
