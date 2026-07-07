@@ -213,15 +213,15 @@ export async function markClaimAsReguliert(input: {
 
   const set = await setEndzustandFields(
     input.claim_id,
-    { status: 'reguliert_vollstaendig', regulierungs_betrag: input.regulierungs_betrag },
+    { status: 'reguliert_vollstaendig' },
     auth.user,
     grund,
     ENDZUSTAENDE,
   )
   if (!set.ok) return { ok: false, error: set.error ?? 'Update fehlgeschlagen' }
 
-  // Payment-Ledger Phase 1: VS-Soll auf die partei='vs'-Ledger-Zeile (forderungsbetrag).
-  // Der regulierungs_betrag-Cache bleibt bis Phase 3 (setEndzustandFields schrieb ihn oben).
+  // Payment-Ledger Phase 3 (Collapse): VS-Soll geht NUR noch in den (claim,'vs')-Ledger
+  // (forderungsbetrag) — der regulierungs_betrag-Cache entfaellt (Reader lesen die View).
   await upsertClaimPayment(createAdminClient(), input.claim_id, 'vs',
     { forderungsbetrag: input.regulierungs_betrag }, auth.user.id)
 
