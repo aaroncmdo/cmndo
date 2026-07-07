@@ -1,3 +1,7 @@
+// status-registry-skip: Partner-Prospect-CRM-Taxonomie (Vertriebs-Recruitment von
+//   SV/Werkstatt/Makler) — eigenstaendig, orthogonal zur Claim/Fall/Lead-Pipeline, die
+//   @/lib/status zentralisiert. Statusfarben bereits token-korrekt (success/warning/
+//   danger-soft — token-audit gruen). Siehe AGENTS.md §status-registry.
 // Geteilte Typen fuer das Partner-Vertriebsdashboard (/admin/partner-leads).
 // Getrennt von actions.ts, weil aus 'use server'-Files keine const/type
 // exportiert werden duerfen (AAR-664: Client-Bundle macht undefined daraus).
