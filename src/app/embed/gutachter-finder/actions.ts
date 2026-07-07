@@ -16,6 +16,7 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import { resolvePromoCodeToId } from '@/lib/makler/resolve-promo-code'
 import {
   planeTerminMitFallback,
   ladeDeadPinFallback,
@@ -292,6 +293,9 @@ export async function reserviereEmbedTermin(input: {
   wunschterminLokal?: string | null
   werkstatt_id?: string | null
   promotion_code_id?: string | null
+  /** Makler-Code (`m`) aus der Funnel-URL — server-seitig zu promotion_code_id aufgeloest,
+   * falls promotion_code_id nicht explizit gesetzt ist (Funnel Tool -> Finder). */
+  maklerCode?: string | null
   schaetzungSessionId?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
@@ -350,10 +354,13 @@ export async function reserviereEmbedTermin(input: {
   }
 
   // Makler-Vermittlung: Promo-Code des vermittelnden Maklers auf den Lead (Attribution).
+  // Prioritaet: expliziter promotion_code_id-Input (Werkstatt-/Makler-Embed) vor dem aus der
+  // Funnel-URL durchgereichten Makler-Code (`m`), den wir hier server-seitig aufloesen.
   // convert-lead-to-claim loest promotion_code_id -> makler_id -> claims.makler_id (DB-Trigger -> Provision).
-  if (leadId && input.promotion_code_id) {
+  const resolvedPromoId = input.promotion_code_id ?? (await resolvePromoCodeToId(input.maklerCode))
+  if (leadId && resolvedPromoId) {
     try {
-      await createAdminClient().from('leads').update({ promotion_code_id: input.promotion_code_id }).eq('id', leadId)
+      await createAdminClient().from('leads').update({ promotion_code_id: resolvedPromoId }).eq('id', leadId)
     } catch (err) {
       console.error('[reserviereEmbedTermin] promotion_code_id setzen fehlgeschlagen (nicht kritisch):', (err as Error).message)
     }
