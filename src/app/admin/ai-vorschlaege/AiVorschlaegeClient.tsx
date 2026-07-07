@@ -39,6 +39,9 @@ export function AiVorschlaegeClient({
   // Per-Zeile Pending: nur der gerade bearbeitete Vorschlag laedt/disabled,
   // die anderen Zeilen bleiben klickbar.
   const [pendingId, setPendingId] = useState<string | null>(null)
+  // Fall-ID, deren „Verwerfen" gerade nach einem Grund fragt.
+  const [begruendetId, setBegruendetId] = useState<string | null>(null)
+  const VERWERF_GRUENDE = ['Schon erledigt', 'Nicht relevant', 'Unpräzise/falsch'] as const
   const [, startTransition] = useTransition()
 
   const run = (
@@ -106,24 +109,47 @@ export function AiVorschlaegeClient({
           </p>
 
           {/* Aktionen */}
-          <div className="flex gap-2 pt-1">
-            <Button
-              variant="navy"
-              size="sm"
-              loading={pendingId === v.id}
-              onClick={() => run(v.id, () => annehmenVorschlag(v.id), 'Vorschlag angenommen')}
-            >
-              Annehmen
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              loading={pendingId === v.id}
-              onClick={() => run(v.id, () => verwerfenVorschlag(v.id), 'Vorschlag verworfen')}
-            >
-              Verwerfen
-            </Button>
-          </div>
+          {begruendetId === v.id ? (
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <span className="text-caption text-claimondo-ondo">Grund:</span>
+              {VERWERF_GRUENDE.map((grund) => (
+                <Button
+                  key={grund}
+                  variant="ghost"
+                  size="sm"
+                  loading={pendingId === v.id}
+                  onClick={() => {
+                    setBegruendetId(null)
+                    run(v.id, () => verwerfenVorschlag(v.id, grund), 'Vorschlag verworfen')
+                  }}
+                >
+                  {grund}
+                </Button>
+              ))}
+              <Button variant="bare" size="sm" onClick={() => setBegruendetId(null)}>
+                Abbrechen
+              </Button>
+            </div>
+          ) : (
+            <div className="flex gap-2 pt-1">
+              <Button
+                variant="navy"
+                size="sm"
+                loading={pendingId === v.id}
+                onClick={() => run(v.id, () => annehmenVorschlag(v.id), 'Vorschlag angenommen')}
+              >
+                Annehmen
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                loading={pendingId === v.id}
+                onClick={() => setBegruendetId(v.id)}
+              >
+                Verwerfen
+              </Button>
+            </div>
+          )}
         </SectionCard>
       ))}
     </div>
