@@ -15,8 +15,13 @@ const inPast = () => new Date(Date.now() - 86_400_000).toISOString()
 
 function makeDb(row: { id: string; expires_at: string } | null) {
   const filters: Record<string, unknown> = {}
+  const updates: Record<string, unknown>[] = []
   const chain = {
     select: () => chain,
+    update: (payload: Record<string, unknown>) => {
+      updates.push(payload)
+      return chain
+    },
     eq: (col: string, val: unknown) => {
       filters[col] = val
       return chain
@@ -31,7 +36,7 @@ function makeDb(row: { id: string; expires_at: string } | null) {
   // statt die strikte Produktiv-Signatur (Pick<SupabaseClient,'from'>) fuer
   // Tests aufzuweichen.
   const db = { from: () => chain } as unknown as Parameters<typeof validateRememberToken>[2]
-  return { db, filters }
+  return { db, filters, updates }
 }
 
 describe('validateRememberToken', () => {
@@ -73,6 +78,20 @@ describe('validateRememberToken', () => {
     expect(filters.user_id).toBe(USER)
     expect(filters.token_hash).toBe(HASH) // Web-Crypto-Hash == node createHash
     expect(filters['is:revoked_am']).toBe(null) // nur nicht-widerrufene Tokens
+  })
+
+  it('schreibt last_used_at bei gueltigem Token (B — fuer die Geraete-Verwaltung)', async () => {
+    const { db, updates } = makeDb({ id: '1', expires_at: inFuture() })
+    const now = new Date('2026-03-01T12:00:00Z')
+    expect(await validateRememberToken(`${USER}:${RAW}`, USER, db, now)).toBe(true)
+    expect(updates).toHaveLength(1)
+    expect(updates[0].last_used_at).toBe(now.toISOString())
+  })
+
+  it('schreibt last_used_at NICHT bei abgelaufenem Token', async () => {
+    const { db, updates } = makeDb({ id: '1', expires_at: inPast() })
+    expect(await validateRememberToken(`${USER}:${RAW}`, USER, db)).toBe(false)
+    expect(updates).toHaveLength(0)
   })
 
   it('respektiert die injizierte now-Grenze', async () => {
