@@ -4,7 +4,7 @@ import { starteAnspruchSession } from '../actions'
 import { AnspruchFotoStep } from './AnspruchFotoStep'
 import { AnspruchEinschaetzungStep } from './AnspruchEinschaetzungStep'
 import { AnspruchSummaryStep } from './AnspruchSummaryStep'
-import type { AnspruchSpanne, VisionResult } from '@/lib/anspruch/types'
+import type { AnspruchSpanne, Schuldform, VisionResult } from '@/lib/anspruch/types'
 import { cn } from '@/lib/utils'
 
 type Phase = 'foto' | 'einschaetzung' | 'summary'
@@ -20,11 +20,19 @@ export function AnspruchWizard() {
   const [phase, setPhase] = useState<Phase>('foto')
   const [vision, setVision] = useState<VisionResult | null>(null)
   const [spanne, setSpanne] = useState<AnspruchSpanne | null>(null)
+  const [initialSchuld, setInitialSchuld] = useState<Schuldform | undefined>(undefined)
 
   useEffect(() => {
     let aktiv = true
     starteAnspruchSession().then((r) => { if (aktiv && r.ok) setSessionToken(r.sessionToken) })
     return () => { aktiv = false }
+  }, [])
+
+  useEffect(() => {
+    // Schuldfrage aus dem /check-Funnel (via ?schuld=) vorbefuellen -> kein Doppelt-Fragen
+    // (zusammenhaengender Aufnahme-Flow). Nur valide Werte uebernehmen.
+    const s = new URLSearchParams(window.location.search).get('schuld')
+    if (s === 'unverschuldet' || s === 'teilschuld' || s === 'selbst') setInitialSchuld(s)
   }, [])
 
   if (!sessionToken) return (
@@ -81,7 +89,7 @@ export function AnspruchWizard() {
         />
       )}
       {phase === 'einschaetzung' && vision && (
-        <AnspruchEinschaetzungStep sessionToken={sessionToken} vision={vision} onFertig={(s) => { setSpanne(s); setPhase('summary') }} />
+        <AnspruchEinschaetzungStep sessionToken={sessionToken} vision={vision} initialSchuld={initialSchuld} onFertig={(s) => { setSpanne(s); setPhase('summary') }} />
       )}
       {phase === 'summary' && spanne && (
         <AnspruchSummaryStep spanne={spanne} onBeauftragen={zumFinder} />
