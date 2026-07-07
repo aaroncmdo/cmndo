@@ -937,6 +937,25 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         )
         if (!cpRes.ok) console.error('[CMM-44 SP-J] process-event claim_payments fehlgeschlagen:', cpRes.error)
       }
+      // Payment-Ledger Phase 1: Auszahlungs-Split (Kunde/SV) -> (claim,partei)-Ledger.
+      // auszahlung_kunde_* liegen als Residual in fuFaelle (kein claims-Home -> vorher toter
+      // Write); auszahlung_gutachter_eingegangen_am in fuClaims (claims-Cache bleibt bis Phase 3).
+      if (claimIdForUpdates) {
+        const kundeBetrag = ('auszahlung_kunde_betrag' in fuFaelle) ? (fuFaelle.auszahlung_kunde_betrag as number | null) : null
+        const kundeAm = ('auszahlung_kunde_eingegangen_am' in fuFaelle) ? (fuFaelle.auszahlung_kunde_eingegangen_am as string | null) : null
+        if (kundeBetrag != null || kundeAm != null) {
+          const r = await upsertClaimPayment(db, claimIdForUpdates, 'kunde', {
+            ...(kundeBetrag != null ? { erhaltener_betrag: kundeBetrag } : {}),
+            ...(kundeAm != null ? { zahlungseingang_am: kundeAm } : {}),
+          }, input.triggeredByProfileId ?? null)
+          if (!r.ok) console.error('[Payment-Ledger] process-event kunde-Auszahlung fehlgeschlagen:', r.error)
+        }
+        const svAm = ('auszahlung_gutachter_eingegangen_am' in fuClaims) ? (fuClaims.auszahlung_gutachter_eingegangen_am as string | null) : null
+        if (svAm != null) {
+          const r = await upsertClaimPayment(db, claimIdForUpdates, 'sv', { zahlungseingang_am: svAm }, input.triggeredByProfileId ?? null)
+          if (!r.ok) console.error('[Payment-Ledger] process-event sv-Auszahlung fehlgeschlagen:', r.error)
+        }
+      }
       await writeAuftraegeColumns(db, claimIdForUpdates, fuAuftraege)
 
       // CMM-44 SP-I2 PR2: kanzlei_faelle-Spalten nach den anderen Writes schreiben.
