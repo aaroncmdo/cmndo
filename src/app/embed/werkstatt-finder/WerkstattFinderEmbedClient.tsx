@@ -12,7 +12,11 @@ import { Button } from '@/components/primitives/Button'
 import { TextField } from '@/components/shared/forms/TextField'
 import { WerkstattFinderMap } from '@/components/kunde/WerkstattFinderMap'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
-import { sucheEchteWerkstaetten, erstelleWerkstattFinderLead } from './actions'
+import {
+  sucheEchteWerkstaetten,
+  sucheWerkstaettenNachOrt,
+  erstelleWerkstattFinderLead,
+} from './actions'
 
 type Props = { initialLat?: number; initialLng?: number; initialPlz?: string }
 
@@ -20,6 +24,12 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
   const [rows, setRows] = useState<WerkstattFinderRow[]>([])
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [center, setCenter] = useState<{ lat: number; lng: number } | null>(
+    initialLat != null && initialLng != null ? { lat: initialLat, lng: initialLng } : null,
+  )
+  const [ort, setOrt] = useState(initialPlz ?? '')
+  const [suchLauft, setSuchLauft] = useState(false)
+  const [ortNichtGefunden, setOrtNichtGefunden] = useState(false)
   const [form, setForm] = useState({ vorname: '', nachname: '', email: '', telefon: '' })
   const [sending, setSending] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
@@ -42,8 +52,27 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
     }
   }, [initialLat, initialLng, initialPlz])
 
-  const center =
-    initialLat != null && initialLng != null ? { lat: initialLat, lng: initialLng } : null
+  async function sucheOrt(e: React.FormEvent) {
+    e.preventDefault()
+    const q = ort.trim()
+    if (!q) return
+    setSuchLauft(true)
+    setOrtNichtGefunden(false)
+    setSelectedId(null)
+    try {
+      const res = await sucheWerkstaettenNachOrt(q)
+      setRows(res.rows)
+      setCenter(res.center)
+      if (res.center == null && res.rows.length === 0) setOrtNichtGefunden(true)
+    } catch {
+      setRows([])
+      setCenter(null)
+      setOrtNichtGefunden(true)
+    } finally {
+      setSuchLauft(false)
+    }
+  }
+
   const gewaehlt = rows.find((r) => r.id === selectedId) ?? null
 
   async function absenden() {
@@ -59,9 +88,9 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
       email: form.email,
       telefon: form.telefon || null,
       werkstattId: selectedId,
-      lat: initialLat ?? null,
-      lng: initialLng ?? null,
-      ort: gewaehlt?.adresse_ort ?? null,
+      lat: center?.lat ?? null,
+      lng: center?.lng ?? null,
+      ort: gewaehlt?.adresse_ort ?? (ort.trim() || null),
     })
     setSending(false)
     if (res.ok) {
@@ -74,6 +103,23 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
   return (
     <div className="mx-auto max-w-2xl space-y-4 p-4">
       <h1 className="text-heading-md text-claimondo-navy">Werkstatt in deiner Nähe finden</h1>
+      <form onSubmit={sucheOrt} className="flex items-end gap-2">
+        <TextField
+          label="Standort (PLZ oder Ort)"
+          value={ort}
+          onChange={(e) => setOrt(e.target.value)}
+          placeholder="z. B. 10115 oder Berlin"
+          className="flex-1"
+        />
+        <Button type="submit" loading={suchLauft} disabled={!ort.trim()}>
+          Suchen
+        </Button>
+      </form>
+      {ortNichtGefunden && (
+        <p className="text-body-sm text-danger-strong">
+          Ort nicht gefunden — bitte PLZ oder Stadt prüfen.
+        </p>
+      )}
       <WerkstattFinderMap
         werkstaetten={rows}
         center={center}
