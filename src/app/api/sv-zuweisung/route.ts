@@ -328,7 +328,7 @@ export async function POST(request: Request) {
     // sv_id-Select war vestigial (nirgends gelesen — Zuweisung nutzt bestSv.id) -> weg.
     const { data: fallFull } = await db
       .from('faelle_claim_bridge')
-      .select('fall_id, claim_id, claims:claim_id(lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, regulierungs_betrag, schadens_ursache)')
+      .select('fall_id, claim_id, claims:claim_id(lead_id, claim_nummer, schadenort_adresse, schadenort_plz, schadenort_ort, schadens_ursache)')
       .eq('fall_id', fallId)
       .single()
 

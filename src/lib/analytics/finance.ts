@@ -1,4 +1,5 @@
 import { getDb, type AnalyticsFilter, type DrillDownItem } from './shared'
+import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 
 /**
  * Umsatz für einen Zeitraum.
@@ -155,14 +156,15 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   // claims geflippt (Reader-Repoint Richtung DROP); kanzlei_faelle jetzt via claims-Embed
   // (kanzlei_faelle.claim_id), regulierungs_betrag/created_at/claim_payments top-level auf
   // claims. created_at-Filter claims-direkt; "gesetzt"-Filter (regulierung_am, Zahlung) clientseitig.
-  let erwQuery = db.from('claims').select('id, regulierungs_betrag, created_at, kanzlei_faelle(regulierung_am), claim_payments(partei, zahlungseingang_am)')
+  // Payment-Ledger Phase 3 (Collapse): regulierung_betrag aus dem (claim,'vs')-Ledger
+  // (Ist-first: erhaltener_betrag ?? forderungsbetrag) statt dem entfallenden claims.regulierungs_betrag-Cache.
+  let erwQuery = db.from('claims').select('id, created_at, kanzlei_faelle(regulierung_am), claim_payments(partei, forderungsbetrag, erhaltener_betrag, zahlungseingang_am)')
   if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
   if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
   const { data: erwFaelleRaw } = await erwQuery
-  // CMM-49 P1: f ist jetzt die claims-Zeile -> regulierungs_betrag/claim_payments direkt auf f.
-  const claimBetrag = (f: { regulierungs_betrag?: number | null }): number => {
-    return Number(f?.regulierungs_betrag) || 0
-  }
+  // CMM-49 P1: f ist jetzt die claims-Zeile; der VS-Betrag kommt aus der (claim,'vs')-Ledger-Row.
+  const claimBetrag = (f: { claim_payments?: unknown }): number =>
+    Number(vsBetragAusEmbed(f?.claim_payments)) || 0
   const hatZahlung = (f: { claim_payments?: unknown }): boolean => {
     const cps = f?.claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []

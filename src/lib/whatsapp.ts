@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 import { sendWhatsAppText } from './whatsapp/baileys-client'
 import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
 import { istInternesTelefon } from '@/lib/testdaten/test-sv-guard'
@@ -246,7 +247,7 @@ export async function sendStatusWhatsApp(
     const { data: fallClaim } = waClaimId
       ? await supabase
           .from('claims')
-          .select('geschaedigter_user_id, lead_id, sv_id, claim_nummer, regulierungs_betrag')
+          .select('geschaedigter_user_id, lead_id, sv_id, claim_nummer, claim_payments(partei, forderungsbetrag, erhaltener_betrag)')
           .eq('id', waClaimId)
           .maybeSingle()
       : { data: null }
@@ -310,14 +311,16 @@ export async function sendStatusWhatsApp(
     const portalLink = `${appUrl}/kunde`
 
     // Build context
+    // Payment-Ledger Phase 3 (Collapse): VS-Betrag aus dem (claim,'vs')-Ledger statt Cache.
+    const waRegBetrag = vsBetragAusEmbed(fallClaim?.claim_payments)
     const ctx: FallContext = {
       claim_nummer: fallClaim?.claim_nummer ?? undefined,
       vorname,
       nachname,
       gutachter_name: gutachterName,
       portal_link: portalLink,
-      betrag: fallClaim?.regulierungs_betrag
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fallClaim.regulierungs_betrag))
+      betrag: waRegBetrag != null
+        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(waRegBetrag))
         : undefined,
       ...extraCtx,
     }
