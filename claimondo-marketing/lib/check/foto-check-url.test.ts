@@ -21,4 +21,14 @@ describe('buildFotoCheckUrl', () => {
   it('ignoriert leere Werte', () => {
     expect(buildFotoCheckUrl(ORIGIN, '?utm_source=&m=')).toBe('https://app.claimondo.de/embed/anspruch-pruefen')
   })
+
+  it('reicht extra-Kontext (schuld aus /check) durch, neben der Attribution', () => {
+    const u = new URL(buildFotoCheckUrl(ORIGIN, '?m=NICOLAS10', { schuld: 'unverschuldet' }))
+    expect(u.searchParams.get('m')).toBe('NICOLAS10')
+    expect(u.searchParams.get('schuld')).toBe('unverschuldet')
+  })
+
+  it('laesst undefined extra-Werte weg', () => {
+    expect(buildFotoCheckUrl(ORIGIN, '', { schuld: undefined })).toBe('https://app.claimondo.de/embed/anspruch-pruefen')
+  })
 })

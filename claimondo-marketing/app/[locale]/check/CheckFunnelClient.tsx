@@ -230,7 +230,7 @@ export function CheckFunnelClient() {
           ) : null}
 
           {/* Foto-Check-Verkettung: prominenter Upgrade-Pfad, nur bei echtem Anspruch */}
-          {result.showRanges ? <AnspruchFotoCheckCta /> : null}
+          {result.showRanges ? <AnspruchFotoCheckCta schuld={answers.schuld} /> : null}
 
           {/* Dynamische Hinweise */}
           {result.insightKeys.length > 0 ? (
