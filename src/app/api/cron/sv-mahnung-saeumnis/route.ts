@@ -57,6 +57,7 @@ export async function GET(request: Request) {
     .select('id, abrechnungs_nr, empfaenger_email, empfaenger_name, summe_brutto, faellig_am')
     .eq('empfaenger_typ', 'sv')
     .is('bezahlt_am', null)
+    .neq('status', 'im_einzug')
     .is('storniert_am', null)
     .not('faellig_am', 'is', null)
     .lte('faellig_am', grenzDatum)
