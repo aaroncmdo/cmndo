@@ -1,14 +1,16 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeftIcon, MailIcon } from 'lucide-react'
+import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
-import { Button } from '@/components/primitives'
+import { Button, Modal } from '@/components/primitives'
 import { sendWerkstattLoginMail } from '../actions'
+import { aktualisiereWerkstattStammdaten, setzeWerkstattStatus, type WerkstattStatus } from './actions'
 import { leiteOnboardingStatus } from '@/lib/werkstatt/onboarding-status'
 import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import type { WerkstattDetail } from './detail-data'
@@ -36,6 +38,9 @@ const STATUS_NORM_LABEL: Record<string, string> = {
   faellig: 'Fällig',
 }
 
+const INPUT_CLS =
+  'w-full px-3 py-2 rounded-ios-md border border-claimondo-border bg-white text-body-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/20'
+
 function euro(n: number | null | undefined): string {
   return n == null ? '—' : n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
 }
@@ -52,12 +57,48 @@ function Feld({ label, wert }: { label: string; wert: string }) {
   )
 }
 
+function EditFeld({
+  label,
+  value,
+  onChange,
+  type = 'text',
+}: {
+  label: string
+  value: string
+  onChange: (v: string) => void
+  type?: string
+}) {
+  return (
+    <div>
+      <label className="block text-body-xs font-medium text-claimondo-navy mb-1">{label}</label>
+      <input type={type} value={value} onChange={(e) => onChange(e.target.value)} className={INPUT_CLS} />
+    </div>
+  )
+}
+
 export default function WerkstattDetailClient({ detail }: { detail: WerkstattDetail }) {
+  const router = useRouter()
   const { werkstatt: w, staffel, auftraege, lastSignInAt, forcePasswordChange, billing } = detail
   const [mailLoading, setMailLoading] = useState(false)
+  const [statusBusy, setStatusBusy] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editBusy, setEditBusy] = useState(false)
+  const [form, setForm] = useState({
+    name: w.name ?? '',
+    telefon: w.telefon ?? '',
+    ansprechpartner_name: w.ansprechpartner_name ?? '',
+    website: w.website ?? '',
+    provision_betrag_netto: w.provision_betrag_netto == null ? '' : String(w.provision_betrag_netto),
+    provision_aktiv: w.provision_aktiv !== false,
+    bank_iban: w.bank_iban ?? '',
+    bank_bic: w.bank_bic ?? '',
+    bank_kontoinhaber: w.bank_kontoinhaber ?? '',
+  })
 
   const onboarding = leiteOnboardingStatus({ hatLogin: !!w.user_id, forcePasswordChange, lastSignInAt })
   const abrechnungPosten = billing ? Object.entries(billing.perStatus) : []
+  const adresse =
+    [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '—'
 
   async function loginMail() {
     setMailLoading(true)
@@ -73,8 +114,54 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
     }
   }
 
-  const adresse =
-    [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '—'
+  async function statusAendern(neu: WerkstattStatus) {
+    let grund: string | undefined
+    if (neu === 'gesperrt') {
+      const g = window.prompt('Grund für die Sperrung?')
+      if (g === null) return // abgebrochen
+      grund = g
+    }
+    setStatusBusy(true)
+    try {
+      const res = await setzeWerkstattStatus(w.id, neu, grund)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      toast.success(
+        neu === 'gesperrt' ? 'Werkstatt gesperrt' : neu === 'aktiv' ? 'Werkstatt aktiviert' : 'Werkstatt deaktiviert',
+      )
+      router.refresh()
+    } finally {
+      setStatusBusy(false)
+    }
+  }
+
+  async function speichereStammdaten() {
+    setEditBusy(true)
+    try {
+      const res = await aktualisiereWerkstattStammdaten(w.id, {
+        name: form.name,
+        telefon: form.telefon || null,
+        ansprechpartner_name: form.ansprechpartner_name || null,
+        website: form.website || null,
+        provision_betrag_netto: Number(form.provision_betrag_netto) || 0,
+        provision_aktiv: form.provision_aktiv,
+        bank_iban: form.bank_iban || null,
+        bank_bic: form.bank_bic || null,
+        bank_kontoinhaber: form.bank_kontoinhaber || null,
+      })
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      toast.success('Stammdaten gespeichert')
+      setEditOpen(false)
+      router.refresh()
+    } finally {
+      setEditBusy(false)
+    }
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
@@ -86,11 +173,41 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         >
           <ArrowLeftIcon className="w-4 h-4" /> Alle Werkstätten
         </Link>
-        <div className="flex items-center gap-3 flex-wrap">
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">{w.name}</h1>
-          <StatusBadge tone={STATUS_TON[w.status ?? ''] ?? 'neutral'} size="xs">
-            {w.status ?? 'unbekannt'}
-          </StatusBadge>
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-3 flex-wrap">
+            <h1 className="text-heading-lg font-bold text-claimondo-navy">{w.name}</h1>
+            <StatusBadge tone={STATUS_TON[w.status ?? ''] ?? 'neutral'} size="xs">
+              {w.status ?? 'unbekannt'}
+            </StatusBadge>
+          </div>
+          <div className="flex items-center gap-2">
+            {w.status === 'aktiv' ? (
+              <>
+                <Button variant="ghost" size="sm" loading={statusBusy} onClick={() => statusAendern('inaktiv')}>
+                  Deaktivieren
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  loading={statusBusy}
+                  onClick={() => statusAendern('gesperrt')}
+                  iconLeft={<LockIcon className="w-4 h-4" />}
+                >
+                  Sperren
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="navy"
+                size="sm"
+                loading={statusBusy}
+                onClick={() => statusAendern('aktiv')}
+                iconLeft={<CheckCircle2Icon className="w-4 h-4" />}
+              >
+                Aktivieren
+              </Button>
+            )}
+          </div>
         </div>
         <p className="text-body-sm text-claimondo-ondo mt-1">Aktiviert am {datum(w.aktiviert_am)}</p>
       </div>
@@ -120,6 +237,11 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
 
       {/* Stammdaten */}
       <SectionCard title="Stammdaten">
+        <div className="flex justify-end mb-2">
+          <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)} iconLeft={<PencilIcon className="w-4 h-4" />}>
+            Bearbeiten
+          </Button>
+        </div>
         <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-body-sm">
           <Feld label="Adresse" wert={adresse} />
           <Feld label="Ansprechpartner" wert={w.ansprechpartner_name ?? '—'} />
@@ -232,6 +354,56 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
           </div>
         </div>
       </SectionCard>
+
+      {/* Stammdaten-Bearbeiten-Modal */}
+      <Modal open={editOpen} onClose={() => setEditOpen(false)} maxWidth={520} ariaLabel="Werkstatt bearbeiten">
+        <h2 className="text-heading-sm font-semibold text-claimondo-navy mb-4">Stammdaten bearbeiten</h2>
+        <div className="space-y-3">
+          <EditFeld label="Name" value={form.name} onChange={(v) => setForm((f) => ({ ...f, name: v }))} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <EditFeld label="Telefon" value={form.telefon} onChange={(v) => setForm((f) => ({ ...f, telefon: v }))} />
+            <EditFeld
+              label="Ansprechpartner"
+              value={form.ansprechpartner_name}
+              onChange={(v) => setForm((f) => ({ ...f, ansprechpartner_name: v }))}
+            />
+          </div>
+          <EditFeld label="Website" value={form.website} onChange={(v) => setForm((f) => ({ ...f, website: v }))} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 items-end">
+            <EditFeld
+              label="Provision (netto, €)"
+              type="number"
+              value={form.provision_betrag_netto}
+              onChange={(v) => setForm((f) => ({ ...f, provision_betrag_netto: v }))}
+            />
+            <label className="flex items-center gap-2 text-body-sm text-claimondo-navy py-2">
+              <input
+                type="checkbox"
+                checked={form.provision_aktiv}
+                onChange={(e) => setForm((f) => ({ ...f, provision_aktiv: e.target.checked }))}
+              />
+              Provision aktiv
+            </label>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <EditFeld label="IBAN" value={form.bank_iban} onChange={(v) => setForm((f) => ({ ...f, bank_iban: v }))} />
+            <EditFeld label="BIC" value={form.bank_bic} onChange={(v) => setForm((f) => ({ ...f, bank_bic: v }))} />
+          </div>
+          <EditFeld
+            label="Kontoinhaber"
+            value={form.bank_kontoinhaber}
+            onChange={(v) => setForm((f) => ({ ...f, bank_kontoinhaber: v }))}
+          />
+          <div className="flex justify-end gap-2 pt-2">
+            <Button variant="ghost" size="sm" onClick={() => setEditOpen(false)}>
+              Abbrechen
+            </Button>
+            <Button variant="navy" size="sm" loading={editBusy} onClick={speichereStammdaten}>
+              Speichern
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   )
 }
