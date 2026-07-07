@@ -188,6 +188,7 @@ function isPublicPath(pathname: string): boolean {
     // 2026-05-11: Neue Marketing-Pages aus PR #748 / #749 / #772 — waren
     // in der Allowlist vergessen, anonyme Besucher landeten auf /login.
     '/check',
+    '/ersteinschaetzung',
     '/beratung-anfragen',
     '/makler/partner-werden',
     // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt

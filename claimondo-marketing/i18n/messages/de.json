@@ -751,8 +751,8 @@
       "og_description": "BVSK-Honorartabelle erklärt + warum unverschuldet Geschädigte 0 € zahlen (§ 249 BGB, BGH VI ZR 67/06)."
     },
     "ersteinschaetzung": {
-      "title": "KI-Ersteinschätzung — Ihr Kfz-Schaden in Sekunden bewertet",
-      "description": "Laden Sie Fotos Ihres Unfallschadens hoch. Unsere KI liefert in unter 15 Minuten eine kostenlose Ersteinschätzung: Reparaturkosten und Gutachten-Empfehlung.",
+      "title": "Kfz-Schaden: 0 € Eigenkosten? Kostenlose KI-Ersteinschätzung | Claimondo",
+      "description": "Fotos hochladen, in Minuten sehen was Ihnen zusteht: Reparaturkosten, Wiederbeschaffungswert, Totalschaden, volle Positionen. Unverschuldet? 0 € für Sie (§ 249 BGB). Kostenlos und unverbindlich.",
       "og_title": "KI-Ersteinschätzung — Kfz-Schaden kostenlos bewerten lassen",
       "og_description": "Foto hochladen, KI analysiert sofort. Reparaturkosten, Wiederbeschaffungswert, Gutachten-Empfehlung — in unter 15 Minuten.",
       "twitter_description": "Kostenlos, sofort, unverbindlich."
@@ -4279,10 +4279,10 @@
   "ersteinschaetzung": {
     "breadcrumb_start": "Startseite",
     "breadcrumb_current": "KI-Ersteinschätzung",
-    "hero_badge": "Kostenlos · Sofort · Unverbindlich",
-    "hero_h1_line1": "Ihr Schaden.",
-    "hero_h1_line2": "In Sekunden bewertet.",
-    "hero_intro": "KI analysiert Ihre Fotos — Reparaturkosten, Wiederbeschaffungswert und Gutachten-Empfehlung in unter 15 Minuten.",
+    "hero_badge": "Kostenlos · Unverbindlich · § 249 BGB",
+    "hero_h1_line1": "Unverschuldeter Unfall?",
+    "hero_h1_line2": "0 € Eigenkosten für Sie.",
+    "hero_intro": "Kostenlose KI-Ersteinschätzung: Fotos hochladen und in Minuten sehen, was Ihnen zusteht. Bei unverschuldetem Unfall trägt die gegnerische Haftpflicht Gutachter, Anwalt und Reparatur (§ 249 BGB).",
     "hero_cta_primary": "Jetzt kostenlos einschätzen lassen",
     "hero_cta_phone": "Anrufen",
     "trust_kpi_0_wert": "< 15 Min",
@@ -4297,11 +4297,11 @@
     "antwort_p": "<strong>Die kostenlose KI-Ersteinschätzung von Claimondo</strong> analysiert Fotos und Beschreibung Ihres Kfz-Schadens und liefert in unter 15 Minuten: eine Schätzung der Reparaturkosten, den voraussichtlichen Wiederbeschaffungswert und die Empfehlung ob ein unabhängiges DAT-Gutachten sinnvoll ist (ab ca. 750 € Schaden haben Sie nach §249 BGB Anspruch darauf). Die Ersteinschätzung ist kostenlos und unverbindlich — sie ersetzt kein offizielles Gutachten, hilft Ihnen aber sofort den nächsten richtigen Schritt zu entscheiden.",
     "ergebnis_h2": "Das bekommen Sie — kostenlos",
     "ergebnis_punkte": [
-      "Geschätzte Reparaturkosten auf Basis Ihrer Fotos",
-      "Wiederbeschaffungswert des Fahrzeugs",
-      "Empfehlung: Gutachten oder Kostenvoranschlag",
-      "Einschätzung der Regulierungschancen",
-      "Ergebnis in unter 15 Minuten"
+      "Ihre Eigenkosten: 0 € bei unverschuldetem Unfall (§ 249 BGB)",
+      "Geschätzte Reparaturkosten und Wiederbeschaffungswert aus Ihren Fotos",
+      "Totalschaden erkannt: reparieren oder abrechnen, mit konkreten Zahlen",
+      "Alle Positionen: Wertminderung, Mietwagen, Nutzungsausfall, Gutachter, Anwalt",
+      "Ergebnis in Minuten, ohne Anmeldung, unverbindlich"
     ],
     "schritte_h2": "In 3 Schritten zur Ersteinschätzung",
     "schritte": [
