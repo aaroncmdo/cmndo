@@ -17,7 +17,7 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   // direkt (sv_id claims-nativ, CMM-60). gutachten/claim_payments via claims-Embed.
   // `f`/`faelle`-Namen bleiben (= jetzt claims-Zeile).
   let query = db.from('claims')
-    .select('id, claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am)')
+    .select('id, claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(partei, zahlungseingang_am)')
 
   if (filter.startDate) query = query.gte('created_at', filter.startDate)
   if (filter.endDate) query = query.lte('created_at', filter.endDate)
@@ -46,7 +46,9 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
     // CMM-44 SP-J Bucket A: jüngstes zahlungseingang_am aus claim_payments (1:N).
     const cps = (f as { claim_payments?: unknown }).claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
+    // Payment-Ledger: nur VS-Eingang zaehlt als Finanz-Datum (kunde/sv sind Auszahlungen).
     const zahlungseingang = cpArr
+      .filter(p => (((p as { partei?: string | null })?.partei) ?? 'vs') === 'vs')
       .map(p => (p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
       .filter((d): d is string => !!d)
       .sort()
@@ -153,7 +155,7 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   // claims geflippt (Reader-Repoint Richtung DROP); kanzlei_faelle jetzt via claims-Embed
   // (kanzlei_faelle.claim_id), regulierungs_betrag/created_at/claim_payments top-level auf
   // claims. created_at-Filter claims-direkt; "gesetzt"-Filter (regulierung_am, Zahlung) clientseitig.
-  let erwQuery = db.from('claims').select('id, regulierungs_betrag, created_at, kanzlei_faelle(regulierung_am), claim_payments(zahlungseingang_am)')
+  let erwQuery = db.from('claims').select('id, regulierungs_betrag, created_at, kanzlei_faelle(regulierung_am), claim_payments(partei, zahlungseingang_am)')
   if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
   if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
   const { data: erwFaelleRaw } = await erwQuery
@@ -164,7 +166,10 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   const hatZahlung = (f: { claim_payments?: unknown }): boolean => {
     const cps = f?.claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
-    return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
+    return cpArr.some(p => {
+      const pp = p as { partei?: string | null; zahlungseingang_am?: string | null }
+      return (pp?.partei ?? 'vs') === 'vs' && !!pp?.zahlungseingang_am
+    })
   }
   // CMM-44 SP-I3: regulierung_am aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
   const hatReguliert = (f: { kanzlei_faelle: unknown }): boolean => {

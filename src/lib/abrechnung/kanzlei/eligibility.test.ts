@@ -86,6 +86,27 @@ describe('hatZahlungseingang', () => {
     expect(hatZahlungseingang(claim({ claim_payments: [] }))).toBe(false)
     expect(hatZahlungseingang(claim({ claim_payments: [{ zahlungseingang_am: null }] }))).toBe(false)
   })
+  it('false wenn nur eine KUNDE-/SV-Auszahlung eingegangen ist (kein VS-Zahlungseingang)', () => {
+    // Payment-Ledger: partei=kunde/sv sind AUSzahlungen, keine VS-Regulierung -> nicht abrechenbar.
+    expect(
+      hatZahlungseingang(claim({ claim_payments: [{ partei: 'kunde', zahlungseingang_am: '2026-06-15T00:00:00Z' }] })),
+    ).toBe(false)
+    expect(
+      hatZahlungseingang(claim({ claim_payments: [{ partei: 'sv', zahlungseingang_am: '2026-06-15T00:00:00Z' }] })),
+    ).toBe(false)
+  })
+  it('true bei VS-Zahlungseingang neben einer Kunde-Auszahlung', () => {
+    expect(
+      hatZahlungseingang(
+        claim({
+          claim_payments: [
+            { partei: 'kunde', zahlungseingang_am: '2026-06-20T00:00:00Z' },
+            { partei: 'vs', zahlungseingang_am: '2026-06-15T00:00:00Z' },
+          ],
+        }),
+      ),
+    ).toBe(true)
+  })
 })
 
 describe('kanzleiFallVon', () => {
