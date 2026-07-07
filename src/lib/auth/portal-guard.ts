@@ -20,7 +20,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
-import { istZweiFaktorPflicht, hatVerifiziertenFaktor } from '@/lib/auth/mfa-gate'
 import type { UserRolle } from './guards'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
@@ -80,17 +79,6 @@ export async function requirePortalAccess(
   }
 
   const rolle = profile.rolle as UserRolle
-
-  // F3 (AAR-audit-2fa): 2FA-Pflicht fuer interne Rollen pro Request erzwingen
-  // (analog force_password_change oben). Deckt alle internen Portale ab, da sie
-  // alle durch requirePortalAccess laufen. Google-Auth ist — wie im Login-Gate —
-  // befreit (Google-eigene MFA), sonst Loop mit der Google-Weiche in /login/2fa.
-  // user.factors kommt aus dem bereits geladenen getUser() -> kein Extra-Call.
-  // /login/2fa liegt ausserhalb der Portal-Layouts -> kein Loop.
-  const isGoogleUser = user.app_metadata?.provider === 'google'
-  if (!isGoogleUser && istZweiFaktorPflicht(rolle) && !hatVerifiziertenFaktor(user.factors)) {
-    redirect('/login/2fa')
-  }
 
   if (!allowedRollen.includes(rolle)) {
     redirect(roleToPath(rolle))
