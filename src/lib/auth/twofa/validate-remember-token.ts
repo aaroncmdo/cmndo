@@ -51,5 +51,20 @@ export async function validateRememberToken(
     .maybeSingle()
 
   if (!data) return false
-  return new Date((data as { expires_at: string }).expires_at) >= now
+  const valid = new Date((data as { expires_at: string }).expires_at) >= now
+  if (valid) {
+    // B (AAR-audit-trusted-devices): last_used_at aktualisieren (fuer die Geraete-
+    // Verwaltungs-UI — sonst zeigt sie dauerhaft Erstellungszeit). Best-effort:
+    // ein Fehler darf die Validierung nicht kippen. Laeuft nur im seltenen
+    // Trusted-Device-Skip-Pfad, nicht auf jedem Request.
+    try {
+      await (db as { from: SupabaseClient['from'] })
+        .from('auth_remember_tokens')
+        .update({ last_used_at: now.toISOString() })
+        .eq('id', (data as { id: string }).id)
+    } catch {
+      /* non-critical */
+    }
+  }
+  return valid
 }

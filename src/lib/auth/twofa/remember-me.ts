@@ -2,14 +2,20 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istZweiFaktorPflicht } from '@/lib/auth/mfa-gate'
 import { createHash, randomBytes } from 'crypto'
 import { cookies } from 'next/headers'
+import { revalidatePath } from 'next/cache'
 
 // KFZ-184: Remember-Me Token Management.
 // Token wird als HttpOnly Cookie gesetzt (30 Tage) und als SHA-256 Hash in DB gespeichert.
 
 const COOKIE_NAME = 'claimondo_remember'
 const TOKEN_EXPIRY_DAYS = 30
+// E (AAR-audit-trusted-devices): interne Pflicht-Rollen (admin/dispatch/kanzlei/
+// kundenbetreuer) bekommen ein KUERZERES Trust-Fenster — privilegierte Konten
+// sollen 2FA oefter bestaetigen.
+const INTERNAL_TRUST_EXPIRY_DAYS = 7
 
 function hashToken(token: string): string {
   return createHash('sha256').update(token).digest('hex')
@@ -36,9 +42,14 @@ export async function createRememberToken(
   if (!user) return { success: false, error: 'Nicht angemeldet' }
 
   const db = createAdminClient()
+  // E: Trust-Fenster rollen-abhaengig — interne Pflicht-Rollen kuerzer (7d statt 30d).
+  const { data: prof } = await db.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+  const expiryDays = istZweiFaktorPflicht((prof?.rolle as string | null | undefined) ?? null)
+    ? INTERNAL_TRUST_EXPIRY_DAYS
+    : TOKEN_EXPIRY_DAYS
   const rawToken = randomBytes(32).toString('base64url')
   const tokenHash = hashToken(rawToken)
-  const expiresAt = new Date(Date.now() + TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000)
+  const expiresAt = new Date(Date.now() + expiryDays * 24 * 60 * 60 * 1000)
 
   const deviceName = userAgent?.includes('Mobile')
     ? 'Mobil'
@@ -64,7 +75,7 @@ export async function createRememberToken(
     secure: process.env.NODE_ENV === 'production',
     sameSite: 'lax',
     path: '/',
-    maxAge: TOKEN_EXPIRY_DAYS * 24 * 60 * 60,
+    maxAge: expiryDays * 24 * 60 * 60,
   })
 
   return { success: true }
@@ -79,6 +90,41 @@ export async function createRememberToken(
 export async function revokeRememberToken(tokenId: string): Promise<void> {
   const db = createAdminClient()
   await db.from('auth_remember_tokens').update({ revoked_am: new Date().toISOString() }).eq('id', tokenId)
+}
+
+// A (AAR-audit-trusted-devices): Session-basierte Wrapper fuer die Geraete-
+// Verwaltungs-UI. Lesen/aendern NUR die Tokens des EINGELOGGTEN Users (das
+// interne revokeRememberToken(tokenId) ist ungescoped -> als Form-Action ein
+// IDOR; diese hier gaten auf user_id).
+
+/** Vertraute Geraete des eingeloggten Users (fuer die Einstellungen-UI). */
+export async function getMyTrustedDevices(): Promise<{
+  id: string; device_name: string | null; ip_address: string | null; last_used_at: string | null; created_at: string
+}[]> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return []
+  return listUserDevices(user.id)
+}
+
+/** Widerruft EIN eigenes vertrautes Geraet (Ownership-gegatet). */
+export async function revokeMyTrustedDevice(tokenId: string): Promise<{ success: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  const db = createAdminClient()
+  const { error } = await db
+    .from('auth_remember_tokens')
+    .update({ revoked_am: new Date().toISOString() })
+    .eq('id', tokenId)
+    .eq('user_id', user.id) // IDOR-Schutz: nur eigene Tokens
+    .is('revoked_am', null)
+  if (error) return { success: false, error: error.message }
+  // Geraete-Liste steht im geteilten KontoSicherheitPanel (dispatch/kanzlei/mitarbeiter-profil).
+  revalidatePath('/dispatch/konto')
+  revalidatePath('/kanzlei/konto')
+  revalidatePath('/mitarbeiter/profil')
+  return { success: true }
 }
 
 export async function revokeAllTokens(userId: string): Promise<void> {
