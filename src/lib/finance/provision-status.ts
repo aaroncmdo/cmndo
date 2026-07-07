@@ -1,6 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeProvisionUst } from './partner-billing-ust'
-import { erstellePartnerGutschrift, versendePartnerGutschrift } from './partner-gutschrift'
+import {
+  erstellePartnerGutschrift,
+  versendePartnerGutschrift,
+  erstelleStornoGutschrift,
+} from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
 
 export const PROVISION_TABELLEN = [
@@ -137,6 +141,61 @@ export async function storniereProvision(
   }
   const { error } = await db.from(tabelle).update(patch).eq('id', id)
   if (error) return { ok: false, error: error.message }
+
+  // Non-fatal: bei Storno einer AUSGEZAHLTEN Provision eine Storno-Gutschrift (Korrekturbeleg)
+  // ausstellen. Der Ledger-Storno oben ist die Primaeraktion und darf NIE an einer Beleg-/PDF-/
+  // Mail-Panne scheitern — ein ausgezahlter Payout muss reversibel bleiben.
+  try {
+    const { data: orig } = await db
+      .from('partner_gutschriften')
+      .select('*')
+      .eq('ledger_tabelle', tabelle)
+      .eq('ledger_id', id)
+      .eq('typ', 'gutschrift')
+      .neq('status', 'storniert')
+      .maybeSingle()
+
+    if (orig) {
+      const origRow = orig as Record<string, any>
+      const s = await erstelleStornoGutschrift(db, origRow.id, grund)
+      if (s.ok) {
+        const { data: stornoRow } = await db
+          .from('partner_gutschriften')
+          .select('*')
+          .eq('id', s.stornoId)
+          .maybeSingle()
+        if (stornoRow) {
+          const sr = stornoRow as Record<string, any>
+          const bezugDatum = new Date(origRow.erstellt_am).toLocaleDateString('de-DE', {
+            timeZone: 'Europe/Berlin',
+          })
+          const pdf = await generateAndUploadPartnerGutschriftPdf({
+            gutschrift_nr: sr.gutschrift_nr,
+            erstellt_am: sr.erstellt_am,
+            leistung_datum: sr.leistung_datum ?? null,
+            leistung_text: sr.leistung_text,
+            betrag_netto: sr.betrag_netto,
+            ust_satz: sr.ust_satz,
+            ust_betrag: sr.ust_betrag,
+            betrag_brutto: sr.betrag_brutto,
+            empfaenger_snapshot: sr.empfaenger_snapshot,
+            aussteller_snapshot: sr.aussteller_snapshot,
+            storno: { bezugNummer: origRow.gutschrift_nr, bezugDatum, grund },
+          })
+          if (pdf.ok) {
+            await db
+              .from('partner_gutschriften')
+              .update({ pdf_storage_path: pdf.pdfPath })
+              .eq('id', s.stornoId)
+            await versendePartnerGutschrift(db, s.stornoId)
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[storno-gutschrift] non-fatal:', err instanceof Error ? err.message : err)
+  }
+
   return { ok: true }
 }
 
