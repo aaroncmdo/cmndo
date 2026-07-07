@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { CLAIM_WORKFLOW_META } from '@/lib/ops/claim-workflow-meta'
-import { updateClaimField, ALLOWED_CLAIM_FIELDS } from '@/app/mitarbeiter/claim-edit-actions'
+import { updateClaimField } from '@/app/mitarbeiter/claim-edit-actions'
 import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
 
 // Pure helper: exported so tests can call it directly (env=node, no jsdom needed).
@@ -146,24 +146,16 @@ export default function ClaimHoverCard({ item }: { item: ClaimWorkItem }) {
         </span>
       </div>
 
-      {/* Schadenshöhe (Anzeige, nicht editierbar direkt via claim-Display) */}
-      <div className="flex flex-col gap-0.5">
-        <span className="text-caption text-claimondo-ondo/70">Schadenshöhe</span>
-        <span className="text-body-xs text-claimondo-navy">
-          {formatFieldValue('schadens_hoehe_netto', item.display.schadenhoehe)}
-        </span>
-      </div>
-
-      {/* Editierbare Felder */}
+      {/* Editierbares Feld: Schadenshöhe (aktueller Wert aus der Work-State-View).
+          Notizen/Interne Notizen + Phasen-Override folgen in Phase 1c — dann trägt die
+          View deren aktuelle Werte; blindes Überschreiben eines bestehenden Notiz-Textes
+          wäre sonst Datenverlust. Die Action-Whitelist deckt bereits alle drei ab. */}
       <div className="flex flex-col gap-2 border-t border-claimondo-border pt-2">
-        {ALLOWED_CLAIM_FIELDS.map((field) => (
-          <EditableRow
-            key={field}
-            claimId={item.id}
-            field={field}
-            initialValue={null}
-          />
-        ))}
+        <EditableRow
+          claimId={item.id}
+          field="schadens_hoehe_netto"
+          initialValue={item.display.schadenhoehe}
+        />
       </div>
 
       {/* Quick Actions */}
