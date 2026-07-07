@@ -16,15 +16,23 @@ export default function LeadWorkflowPanel({
   result,
   onPrimaryAction,
   loading,
+  guidanceOnly = false,
 }: {
   result: LeadWorkflowResult
   onPrimaryAction?: () => void
   loading?: boolean
+  /** true = read-only Guidance (Zustand + Pipeline + Next-Best-Action ohne CTA-Button). */
+  guidanceOnly?: boolean
 }) {
   return (
     <Stack gap={4}>
       <LeadWorkflowStepper current={spineIndexForState(result.state)} />
-      <LeadNextBestAction state={result.state} onPrimaryAction={onPrimaryAction} loading={loading} />
+      <LeadNextBestAction
+        state={result.state}
+        onPrimaryAction={onPrimaryAction}
+        loading={loading}
+        guidanceOnly={guidanceOnly}
+      />
     </Stack>
   )
 }

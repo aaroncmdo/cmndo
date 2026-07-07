@@ -15,10 +15,14 @@ export default function LeadNextBestAction({
   state,
   onPrimaryAction,
   loading,
+  guidanceOnly = false,
 }: {
   state: LeadWorkflowState
   onPrimaryAction?: () => void
   loading?: boolean
+  /** true = kein CTA-Button (nur Zustand + Titel + Erklaerung als Guidance) — solange
+   * die echten Zustands-Aktionen noch nicht verdrahtet sind (Phase-1b additiv). */
+  guidanceOnly?: boolean
 }) {
   const meta = LEAD_WORKFLOW_META[state]
   return (
@@ -31,7 +35,7 @@ export default function LeadNextBestAction({
         <Text variant="bodySm" color="ondo">
           {meta.heroDescription}
         </Text>
-        {meta.ctaLabel ? (
+        {meta.ctaLabel && !guidanceOnly ? (
           <Button
             variant="navy"
             onClick={onPrimaryAction}
