@@ -341,6 +341,11 @@ const nextConfig: NextConfig = {
       { source: '/sv-portal/anfragen', destination: '/gutachter/einstellungen/embed/anfragen', permanent: true },
       { source: '/sv-portal/embed-sites', destination: '/gutachter/einstellungen/embed', permanent: true },
       { source: '/sv-portal/embed-sites/:path*', destination: '/gutachter/einstellungen/embed/:path*', permanent: true },
+      // Werkstatt-Konsolidierung (06.07.): "Meine Vermittlungen" in "Auftraege" vereint.
+      // Als HTTP-308 statt RSC-redirect()-Stub: die page.tsx mit redirect('/werkstatt/auftraege')
+      // traf exakt die AAR-889-Falle oben (RSC-Redirect-Stub triggert React-#310/#418) — der
+      // Prod-Smoke 06.07. bestaetigte 200 mit leerer Shell + KEINEN Redirect. page.tsx geloescht.
+      { source: '/werkstatt/vermittlungen', destination: '/werkstatt/auftraege', permanent: true },
     ]
   },
 };
