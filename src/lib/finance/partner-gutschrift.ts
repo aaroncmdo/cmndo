@@ -69,6 +69,7 @@ export async function versendePartnerGutschrift(
     const { PartnerGutschriftEmail, subject } = await import(
       '@/lib/email/google/templates/PartnerGutschrift'
     )
+    const istStorno = row.typ === 'storno'
     const props = {
       empfaengerName: (row.empfaenger_snapshot as any)?.name ?? 'Partner',
       gutschriftNr: row.gutschrift_nr as string,
@@ -80,6 +81,7 @@ export async function versendePartnerGutschrift(
       datum: new Date(row.erstellt_am as string).toLocaleDateString('de-DE', {
         timeZone: 'Europe/Berlin',
       }),
+      storno: istStorno,
     }
     const html = await render(PartnerGutschriftEmail(props))
     const { sendEmail } = await import('@/lib/email/google/client')
@@ -95,7 +97,7 @@ export async function versendePartnerGutschrift(
         template: 'partner_gutschrift',
         attachments: [
           {
-            filename: `Gutschrift-${row.gutschrift_nr}.pdf`,
+            filename: `${istStorno ? 'Storno-Gutschrift' : 'Gutschrift'}-${row.gutschrift_nr}.pdf`,
             content: buf,
             contentType: 'application/pdf',
           },

@@ -633,6 +633,21 @@ describe('versendePartnerGutschrift', () => {
     expect((db._statusUpdates[0] as Record<string, unknown>).versendet_am).toBeDefined()
   })
 
+  it('storno row (typ=storno): attachment filename uses Storno-Gutschrift prefix', async () => {
+    // Proves row.typ flows into istStorno -> storno-aware email (subject/heading/filename).
+    const db = makeVersendDb({
+      gutschriftRow: { ...CANNED_GUTSCHRIFT, typ: 'storno', betrag_brutto: -178.5 },
+      partnerEmail: 'makler@example.de',
+    })
+
+    const result = await versendePartnerGutschrift(db, 'gs-uuid-1')
+
+    expect(result).toEqual({ ok: true })
+    const callArgs = sendEmailMock.mock.calls[0][0] as Record<string, unknown>
+    const attachments = callArgs.attachments as Array<{ filename: string }>
+    expect(attachments[0].filename).toBe(`Storno-Gutschrift-${GUTSCHRIFT_NR}.pdf`)
+  })
+
   it('already sent: skips sendEmail and returns {ok:true} (idempotent)', async () => {
     const db = makeVersendDb({
       gutschriftRow: { ...CANNED_GUTSCHRIFT, status: 'versendet' },
