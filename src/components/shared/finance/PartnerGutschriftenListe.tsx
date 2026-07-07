@@ -24,6 +24,10 @@ export type EigeneGutschrift = {
   betrag_brutto: number
   erstellt_am: string
   status: string
+  /** 'gutschrift' | 'storno' — Storno-Zeilen werden als "Storno-Gutschrift" gelabelt. */
+  typ: string
+  /** Bei Storno: Nummer der stornierten Original-Gutschrift (sonst null). */
+  bezugNr: string | null
 }
 
 const EUR_FORMAT = new Intl.NumberFormat('de-DE', {
@@ -120,7 +124,19 @@ export function PartnerGutschriftenListe({
           <Tbody>
             {gutschriften.map((g) => (
               <Tr key={g.id}>
-                <Td className="font-mono text-xs">{g.gutschrift_nr}</Td>
+                <Td className="font-mono text-xs">
+                  {g.typ === 'storno' ? (
+                    <span className="flex flex-col gap-0.5">
+                      <span className="font-sans font-semibold text-claimondo-navy">Storno-Gutschrift</span>
+                      <span>{g.gutschrift_nr}</span>
+                      {g.bezugNr && (
+                        <span className="font-sans text-claimondo-shield">Storno zu {g.bezugNr}</span>
+                      )}
+                    </span>
+                  ) : (
+                    g.gutschrift_nr
+                  )}
+                </Td>
                 <Td>{fmtDatum(g.erstellt_am)}</Td>
                 <Td className="text-right font-semibold tabular-nums">
                   {fmtBetrag(g.betrag_brutto)}
