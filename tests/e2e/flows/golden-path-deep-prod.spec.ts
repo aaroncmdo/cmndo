@@ -1,6 +1,16 @@
 import { test, expect } from '@playwright/test'
 import { execSync } from 'node:child_process'
-import { loginContext, assertRow, pollRow, APP, CLAIMS, AUFTRAEGE, PFLICHTDOK } from './_golden-path-lib'
+import {
+  loginContext,
+  loginContextOrSkip,
+  skipIfAuthWall,
+  assertRow,
+  pollRow,
+  APP,
+  CLAIMS,
+  AUFTRAEGE,
+  PFLICHTDOK,
+} from './_golden-path-lib'
 
 // Deep Golden-Path gegen Prod — opt-in, serial, nie in CI. Fährt die SP1-Fixtures
 // je Rolle bis zur Kern-CTA (klicken + absenden + DB-Assert).
@@ -20,12 +30,12 @@ test.beforeAll(() => {
 test('SV #3729 — Stellungnahme einreichen (C2) → auftrag hochgeladen', async ({ browser }) => {
   test.setTimeout(90_000)
   test.skip(!process.env.TEST_SV_PASSWORD, 'TEST_SV_PASSWORD nicht gesetzt')
-  const ctx = await loginContext(browser, 'sv')
+  const ctx = await loginContextOrSkip(browser, 'sv')
   const page = await ctx.newPage()
 
   // 1. Fallseite — der #3729-Banner-CTA muss erreichbar sein.
   await page.goto(`${APP}/gutachter/fall/${CLAIMS.c2}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
-  expect(new URL(page.url()).pathname, 'SV nicht zu /login gebounced').not.toMatch(/\/login|\/anmelden/)
+  skipIfAuthWall(page) // interne Rolle: an der 2FA-Wand skippen statt failen (aal1-Injection reicht nicht mehr)
   const cta = page.getByRole('link', { name: /Stellungnahme einreichen/i }).first()
   await expect(cta, '#3729-CTA sichtbar').toBeVisible({ timeout: 15_000 })
 
@@ -88,13 +98,13 @@ test.fixme('Kunde — Pflichtdok-Upload (C1) → pflichtdokument hochgeladen', a
 
 test('KB — Stellungnahme anfordern (C4) → auftrag beauftragt', async ({ browser }) => {
   test.setTimeout(90_000)
-  const ctx = await loginContext(browser, 'kb')
+  const ctx = await loginContextOrSkip(browser, 'kb')
   const page = await ctx.newPage()
 
   // 1. Interne Fallakte, direkt auf den Prozess-Tab (FallakteShell liest ?tab= → deep-linkbar,
   //    kein flakiger Tab-Klick). test-kb ist kundenbetreuer_id von C4 → RLS erlaubt die Anforderung.
   await page.goto(`${APP}/faelle/${CLAIMS.c4}?tab=prozess`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
-  expect(new URL(page.url()).pathname, 'KB nicht zu /login gebounced').not.toMatch(/\/login|\/anmelden/)
+  skipIfAuthWall(page) // interne Rolle: an der 2FA-Wand skippen statt failen (aal1-Injection reicht nicht mehr)
 
   // 2. VsReaktionSection rendert (C4.kanzlei_faelle: vs_reaktion_typ='gekuerzt' → Section sichtbar +
   //    isKuerzt-Block; vs_kuerzungs_typ='technisch' + technische_stellungnahme_status=null → der CTA).

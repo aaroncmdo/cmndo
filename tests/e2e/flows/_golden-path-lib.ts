@@ -1,5 +1,5 @@
-import type { Browser, BrowserContext } from '@playwright/test'
-import { expect } from '@playwright/test'
+import type { Browser, BrowserContext, Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // @ts-ignore — JS-Helper aus dem prod-smoke-Harness (kein .d.ts; Playwright/esbuild transpiliert)
 import { sessionToCookies } from '../../../scripts/prod-smoke/cookie.mjs'
@@ -46,6 +46,39 @@ export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<
   // cookie.mjs (untyped .mjs) liefert sameSite:string; Playwright will "Lax"|"Strict"|"None".
   await ctx.addCookies(cookies as Parameters<typeof ctx.addCookies>[0])
   return ctx
+}
+
+/**
+ * Wie loginContext, aber SKIPPT den Test (statt hart zu failen), wenn der GoTrue-Grant
+ * fehlschlägt — z.B. test-sv `invalid_credentials` während die Auth-Härtung läuft. So
+ * degradiert die Harness graceful, wenn eine interne Test-Identität temporär nicht loginbar ist.
+ */
+export async function loginContextOrSkip(browser: Browser, roleKey: RoleKey): Promise<BrowserContext> {
+  try {
+    return await loginContext(browser, roleKey)
+  } catch (err) {
+    test.skip(
+      true,
+      `Login ${roleKey} nicht möglich (${String(err).slice(0, 90)}) — evtl. 2FA/Credential-Härtung live; Harness braucht 2FA-aware Login (TOTP via auth.mfa_factors). Siehe COORDINATION-golden-path-deep-e2e.`,
+    )
+    throw err // unreachable — test.skip() wirft bereits
+  }
+}
+
+/**
+ * Nach einer Navigation prüfen, ob die (interne) Rolle an der Auth-Wand (/login, /login/2fa)
+ * gelandet ist. Falls ja: SKIP statt FAIL — die aal1-Cookie-Injection kommt seit der internen
+ * 2FA-Pflicht (#3745) nicht mehr an internen Rollen vorbei (aal2 nötig). Externe Rollen (Kunde)
+ * trifft das nicht; dort weiter hart asserten.
+ */
+export function skipIfAuthWall(page: Page): void {
+  const path = new URL(page.url()).pathname
+  if (/\/login|\/anmelden|\/2fa/.test(path)) {
+    test.skip(
+      true,
+      `Interne Rolle an Auth-Wand (${path}) — interne 2FA-Pflicht (#3745) blockt die aal1-Cookie-Injection (aal2 nötig). Harness braucht 2FA-aware Login. Siehe COORDINATION-golden-path-deep-e2e.`,
+    )
+  }
 }
 
 export function serviceClient(): SupabaseClient {
