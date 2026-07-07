@@ -110,6 +110,46 @@ export async function upsertClaimPayment(
   return { ok: true }
 }
 
+export type ClaimPaymentRow = {
+  forderungsbetrag: number | null
+  erhaltener_betrag: number | null
+  zahlungseingang_am: string | null
+  status: string | null
+}
+export type ClaimPaymentsByPartei = {
+  vs: ClaimPaymentRow | null
+  kunde: ClaimPaymentRow | null
+  sv: ClaimPaymentRow | null
+}
+
+/**
+ * Read-Seam der Payment-Ledger-Normalisierung: liest die claim_payments-Zeilen eines Claims
+ * und gruppiert sie nach partei (vs/kunde/sv). Ersetzt schrittweise getCurrentClaimPayment
+ * (das die neueste Row blind, empfaenger-agnostisch, las). Graceful: bei DB-Fehler alle-null.
+ */
+export async function getClaimPayments(db: DbClient, claimId: string): Promise<ClaimPaymentsByPartei> {
+  const by: ClaimPaymentsByPartei = { vs: null, kunde: null, sv: null }
+  const { data, error } = await db
+    .from('claim_payments')
+    .select('partei, forderungsbetrag, erhaltener_betrag, zahlungseingang_am, status')
+    .eq('claim_id', claimId)
+  if (error) {
+    console.error('[Payment-Ledger] getClaimPayments fehlgeschlagen:', error.message)
+    return by
+  }
+  for (const r of (data ?? []) as Array<{ partei: string } & ClaimPaymentRow>) {
+    if (r.partei === 'vs' || r.partei === 'kunde' || r.partei === 'sv') {
+      by[r.partei] = {
+        forderungsbetrag: r.forderungsbetrag,
+        erhaltener_betrag: r.erhaltener_betrag,
+        zahlungseingang_am: r.zahlungseingang_am,
+        status: r.status,
+      }
+    }
+  }
+  return by
+}
+
 export type CurrentClaimPayment = {
   zahlungseingang_am: string | null
   erhaltener_betrag: number | null
