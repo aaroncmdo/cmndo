@@ -3,6 +3,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { isStagnant, STAGNATION } from '@/lib/orchestrator/stagnation'
 import { buildClaimContext } from '@/lib/orchestrator/context'
 import { reviewClaim } from '@/lib/orchestrator/run'
+import { checkAndRevertAutoQuality } from '@/lib/orchestrator/quality-regression'
 
 export const dynamic = 'force-dynamic'
 
@@ -83,15 +84,20 @@ export async function GET(request: Request) {
       }
     }
 
+    // Qualitaets-Regressions-Check (Phase 2): revertiert Auto-Typen mit hoher
+    // bad_rate zurueck auf manual. No-op solange keine Auto-Tasks existieren
+    // (Auto ist dormant via Kill-Switch ORCHESTRATOR_AUTO_ENABLED). Wirft nie.
+    const autoRevert = await checkAndRevertAutoQuality()
+
     // Audit-Log: exakt dasselbe Muster wie pipeline-health.
     await supabase.rpc('log_cron_job_run', {
       p_job_name: 'claim-orchestrator',
       p_status: 'success',
       p_rows: reviewed,
-      p_metadata: { vorschlaege },
+      p_metadata: { vorschlaege, autoReverted: autoRevert.reverted.length },
     })
 
-    return NextResponse.json({ ok: true, reviewed, vorschlaege })
+    return NextResponse.json({ ok: true, reviewed, vorschlaege, autoReverted: autoRevert.reverted.length })
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err)
     console.error('[claim-orchestrator] Cron-Lauf fehlgeschlagen:', err)
