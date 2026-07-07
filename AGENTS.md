@@ -307,6 +307,18 @@ CI fährt `npm run check:knip -- --ratchet`. Die Drift-Bremse blockt **NEUE** un
 Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
 <!-- END:dead-code-gate -->
 
+<!-- BEGIN:redirect-stub-gate -->
+# Redirect-Stub-Gate (Ratchet)
+
+**Eine `page.tsx`, die auf ALLEN Pfaden `redirect()`/`permanentRedirect()` (aus `next/navigation`) macht und KEINEN Content-`return` hat, ist verboten.** Solche reinen Redirect-Stubs triggern deterministisch **React-#310/#418** im Next-AppRouter → der Redirect feuert NICHT, prod rendert eine **leere 200-Shell** (Nav/Layout ohne Content). Kein Build/tsc/DB-Test/anderer Ratchet fängt das — **nur ein echter Prod-Render-Smoke**. Belegt 06.–07.07.: `/werkstatt/vermittlungen`, `/kunde/einstellungen`, `/gutachter/onboarding`, `/kunde/termin` rendeten alle leere Shells.
+
+**Kanonischer Fix (in `next.config.ts` `redirects()` ~20× belegt — AAR-889/CMM-14):** HTTP-301/308-Redirect via `next.config.ts` `redirects()` + die `page.tsx` LÖSCHEN. Der Config-Redirect greift auf der Routing-Ebene **vor** jedem RSC-Render + vor der Auth-Middleware → bulletproof + anon-curl-verifizierbar (308 ohne Login). **Exakt-Match** (kein `:path*`) → aktive Sub-Routen (z.B. `/kunde/termin/[token]`, `/gutachter/onboarding/buero`) leben weiter.
+
+**Abgrenzung (0 False-Positives):** NICHT betroffen sind **Content-Seiten**, die im Normalfall JSX rendern und nur als **Guard** redirecten (`if(!user)redirect('/login'); … return <JSX>`), (shell)-Layouts, DB-getriebene Router mit `return`. Faustregel: irgendein Content-`return` → ok; redirectet auf allen Pfaden (kein return) → Stub.
+
+CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
+<!-- END:redirect-stub-gate -->
+
 <!-- BEGIN:branding-rules -->
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`
 
