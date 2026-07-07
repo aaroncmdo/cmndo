@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation'
 import { ShieldCheckIcon } from 'lucide-react'
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 import { TotpEnrollCard } from '@/components/auth/TotpEnrollCard'
+import VertrauteGeraeteSection from '@/components/shared/VertrauteGeraeteSection'
 
 export async function KontoSicherheitPanel() {
   const supabase = await createClient()
@@ -38,6 +39,7 @@ export async function KontoSicherheitPanel() {
         fallbackTelefon={profile?.telefon ?? null}
       />
       <TotpEnrollCard />
+      <VertrauteGeraeteSection />
     </div>
   )
 }
