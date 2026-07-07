@@ -32,6 +32,8 @@ export type PartnerGutschriftPdfInput = {
     bank_iban: string | null
   }
   aussteller_snapshot: RechnungsKonfig   // full konfig (after step 0)
+  /** Wenn gesetzt: dieser Beleg ist eine Storno-Gutschrift (Korrektur) mit Bezug aufs Original. */
+  storno?: { bezugNummer: string; bezugDatum: string; grund: string }
 }
 
 // ─── View model ──────────────────────────────────────────────────────────────
@@ -60,6 +62,8 @@ export type GutschriftViewModel = {
   istKleinunternehmer: boolean
   summe: RegelbesteuertSumme | KleinunternehmerSumme
   auszahlungHinweis: string
+  bezugZeile?: string
+  grundZeile?: string
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -137,7 +141,7 @@ export function buildGutschriftViewModel(
     : 'Die Auszahlung erfolgt auf das bei Claimondo hinterlegte Bankkonto.'
 
   return {
-    titel: 'Gutschrift',
+    titel: input.storno ? 'Storno-Gutschrift' : 'Gutschrift',
     hinweisParagraph: 'Gutschrift im Sinne des §14 Abs. 2 UStG',
     nummer: input.gutschrift_nr,
     datum: fmtDate(input.erstellt_am),
@@ -150,6 +154,10 @@ export function buildGutschriftViewModel(
     istKleinunternehmer,
     summe,
     auszahlungHinweis,
+    bezugZeile: input.storno
+      ? `Storno zu ${input.storno.bezugNummer} vom ${input.storno.bezugDatum}`
+      : undefined,
+    grundZeile: input.storno ? `Grund: ${input.storno.grund}` : undefined,
   }
 }
 
@@ -169,6 +177,15 @@ const s = StyleSheet.create({
     letterSpacing: 1,
   },
   empfLine: { fontSize: 10, color: '#374151', lineHeight: 1.5 },
+  stornoBlock: {
+    marginBottom: 16,
+    padding: 8,
+    borderWidth: 1,
+    borderColor: '#e5e7eb',
+    borderRadius: 4,
+    backgroundColor: '#f9fafb',
+  },
+  stornoLine: { fontSize: 9, color: '#374151', lineHeight: 1.5 },
   metaRow: {
     flexDirection: 'row',
     marginBottom: 18,
@@ -253,6 +270,14 @@ function PartnerGutschriftPdf({ input }: { input: PartnerGutschriftPdfInput }) {
             <Text key={i} style={s.empfLine}>{line}</Text>
           ))}
         </View>
+
+        {/* Storno-Bezug (nur bei Storno-Gutschrift) */}
+        {vm.bezugZeile && (
+          <View style={s.stornoBlock}>
+            <Text style={s.stornoLine}>{vm.bezugZeile}</Text>
+            {vm.grundZeile && <Text style={s.stornoLine}>{vm.grundZeile}</Text>}
+          </View>
+        )}
 
         {/* Meta */}
         <View style={s.metaRow}>

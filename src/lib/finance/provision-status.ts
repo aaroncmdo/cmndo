@@ -1,6 +1,10 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeProvisionUst } from './partner-billing-ust'
-import { erstellePartnerGutschrift, versendePartnerGutschrift } from './partner-gutschrift'
+import {
+  erstellePartnerGutschrift,
+  versendePartnerGutschrift,
+  erstelleStornoGutschrift,
+} from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
 
 export const PROVISION_TABELLEN = [
@@ -137,6 +141,65 @@ export async function storniereProvision(
   }
   const { error } = await db.from(tabelle).update(patch).eq('id', id)
   if (error) return { ok: false, error: error.message }
+
+  // Non-fatal: bei Storno einer AUSGEZAHLTEN Provision eine Storno-Gutschrift (Korrekturbeleg)
+  // ausstellen. Der Ledger-Storno oben ist die Primaeraktion und darf NIE an einer Beleg-/PDF-/
+  // Mail-Panne scheitern — ein ausgezahlter Payout muss reversibel bleiben.
+  try {
+    const { data: orig } = await db
+      .from('partner_gutschriften')
+      .select('*')
+      .eq('ledger_tabelle', tabelle)
+      .eq('ledger_id', id)
+      .eq('typ', 'gutschrift')
+      .neq('status', 'storniert')
+      .maybeSingle()
+
+    if (orig) {
+      const origRow = orig as Record<string, any>
+      const s = await erstelleStornoGutschrift(db, origRow.id, grund)
+      if (s.ok) {
+        const { data: stornoRow } = await db
+          .from('partner_gutschriften')
+          .select('*')
+          .eq('id', s.stornoId)
+          .maybeSingle()
+        if (stornoRow) {
+          const sr = stornoRow as Record<string, any>
+          // Zero-padded (05.07.2026), konsistent mit fmtDate im PDF (day/month:'2-digit').
+          const bezugDatum = new Date(origRow.erstellt_am).toLocaleDateString('de-DE', {
+            timeZone: 'Europe/Berlin',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+          })
+          const pdf = await generateAndUploadPartnerGutschriftPdf({
+            gutschrift_nr: sr.gutschrift_nr,
+            erstellt_am: sr.erstellt_am,
+            leistung_datum: sr.leistung_datum ?? null,
+            leistung_text: sr.leistung_text,
+            betrag_netto: sr.betrag_netto,
+            ust_satz: sr.ust_satz,
+            ust_betrag: sr.ust_betrag,
+            betrag_brutto: sr.betrag_brutto,
+            empfaenger_snapshot: sr.empfaenger_snapshot,
+            aussteller_snapshot: sr.aussteller_snapshot,
+            storno: { bezugNummer: origRow.gutschrift_nr, bezugDatum, grund },
+          })
+          if (pdf.ok) {
+            await db
+              .from('partner_gutschriften')
+              .update({ pdf_storage_path: pdf.pdfPath })
+              .eq('id', s.stornoId)
+            await versendePartnerGutschrift(db, s.stornoId)
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[storno-gutschrift] non-fatal:', err instanceof Error ? err.message : err)
+  }
+
   return { ok: true }
 }
 
@@ -194,15 +257,31 @@ export async function auszahlenProvision(
     .eq('id', id)
   if (freezeErr) return { ok: false, error: freezeErr.message }
 
-  // Step 3 — Idempotency pre-check: gibt es bereits eine Gutschrift fuer diesen Ledger-Eintrag?
+  // Step 3 — Idempotency pre-check: existiert bereits eine ORIGINAL-Gutschrift (typ='gutschrift')
+  // fuer diesen Ledger? Der typ-Filter ist PFLICHT: nach einem Reversal existieren ZWEI Zeilen
+  // (storniertes Original + Storno-Beleg). Ohne Filter matcht .maybeSingle() beide → liefert
+  // {data:null, error:PGRST116} (postgrest-js gibt NICHT die erste Zeile zurueck) → das wuerde
+  // faelschlich als "keine Gutschrift" gelesen. Mit Filter ist das Ergebnis dank partiellem
+  // Unique-Index (WHERE typ='gutschrift') deterministisch <=1.
   // Deliberate hardening: ohne diesen Check wuerde ein transientes Fail auf dem finalen status-Update
-  // alle Retries deadlocken (UNIQUE ledger_tabelle+ledger_id verhindert Re-Creation).
+  // alle Retries deadlocken (Index verhindert Re-Creation).
   const { data: existingRow } = await db
     .from('partner_gutschriften')
     .select('*')
     .eq('ledger_tabelle', tabelle)
     .eq('ledger_id', id)
+    .eq('typ', 'gutschrift')
     .maybeSingle()
+
+  // Eine bereits STORNIERTE Original-Gutschrift darf nicht wiederverwendet werden — sonst wuerde
+  // die Provision mit einem gecancelten Beleg als "ausgezahlt" markiert. Re-Auszahlung klar blocken
+  // (der partielle Unique-Index laesst ohnehin keine neue Original-Gutschrift fuer denselben Ledger zu).
+  if (existingRow && (existingRow as Record<string, any>).status === 'storniert') {
+    return {
+      ok: false,
+      error: 'Diese Provision wurde bereits storniert — eine erneute Auszahlung ist nicht möglich.',
+    }
+  }
 
   let row: Record<string, any> | null = existingRow ?? null
   let justCreated = false
