@@ -430,3 +430,30 @@ export function toClaimMainPhase(value: string | null | undefined): ClaimMainPha
 export function toClaimSubPhase(value: string | null | undefined): ClaimSubPhase {
   return value && value in SUBPHASE_LABEL ? (value as ClaimSubPhase) : 'sa_offen'
 }
+
+/** Vollstaendige Liste aller ClaimSubPhase-Werte — single source of truth fuer
+ *  Exhaustiveness-Tests (z.B. claimWorkflowMeta-Completeness). */
+export const ALL_CLAIM_SUB_PHASES = [
+  'sa_offen',
+  'vollmacht_offen',
+  'onboarding_offen',
+  'termin',
+  'besichtigung',
+  'gutachten',
+  'filmcheck',
+  'qc-pruefung',
+  'kanzlei_uebergabe',
+  'versicherungskontakt',
+  'auszahlung',
+  'nachforderung',
+  'vs-kuerzt',
+  'anschlussschreiben',
+  'nachbesichtigung-laeuft',
+  'erfolgreich_reguliert',
+  'storniert',
+  'klage_rechtsstreit',
+  'verjaehrt',
+  'abgelehnt_final',
+  'an_externe_kanzlei',
+  'termin_durchgefuehrt',
+] as const satisfies readonly ClaimSubPhase[]
