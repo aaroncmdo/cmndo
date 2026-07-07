@@ -101,18 +101,24 @@ function richFakeDb(opts: RichFakeDbOptions) {
           },
         }
       } else {
-        // partner_gutschriften table
+        // partner_gutschriften table — fully chainable .eq()* then .maybeSingle().
+        // precheck queries by ledger_tabelle/ledger_id/typ (3x eq); refetch queries by id (1x eq).
+        const makePgChain = () => {
+          const cols: string[] = []
+          const chain: any = {
+            eq: (col: string, _val: string) => {
+              cols.push(col)
+              return chain
+            },
+            maybeSingle: () => {
+              const isRefetch = cols.includes('id') && !cols.includes('ledger_tabelle')
+              return Promise.resolve({ data: isRefetch ? refetchData : precheckData, error: null })
+            },
+          }
+          return chain
+        }
         return {
-          select: (_str?: string) => ({
-            eq: (_col1: string, _val1: string) => ({
-              // For the precheck: .eq().eq().maybeSingle()
-              eq: (_col2: string, _val2: string) => ({
-                maybeSingle: () => Promise.resolve({ data: precheckData, error: null }),
-              }),
-              // For the refetch after create: .eq().maybeSingle()
-              maybeSingle: () => Promise.resolve({ data: refetchData, error: null }),
-            }),
-          }),
+          select: (_str?: string) => makePgChain(),
           update: (patch: Record<string, unknown>) => {
             gutschriftUpdates.push(patch)
             return { eq: () => Promise.resolve({ error: null }) }
@@ -172,6 +178,22 @@ describe('auszahlenProvision', () => {
     expect(r.ok).toBe(false)
     expect(r.error).toMatch(/USt-Status/)
     expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
+  })
+
+  it('blockt Re-Auszahlung wenn die Original-Gutschrift bereits storniert ist (kein neuer Beleg, kein Reuse)', async () => {
+    // Regression (opus review): nach einem Reversal existieren 2 partner_gutschriften-Zeilen.
+    // Der typ-gefilterte Precheck findet das storniert Original -> Re-Auszahlung MUSS klar blocken
+    // (nicht den gecancelten Beleg wiederverwenden + Provision als ausgezahlt markieren).
+    const db = richFakeDb({
+      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      gutschriftenPrecheckData: { ...CANNED_GUTSCHRIFT_ROW_WITH_PDF, status: 'storniert' },
+    })
+    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    expect(r.ok).toBe(false)
+    expect(r.error).toMatch(/storniert/)
+    expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
+    // Kein Status→ausgezahlt (nur der harmlose USt-Freeze-Write darf passiert sein).
+    expect(db._ledgerUpdates.some((p: Record<string, unknown>) => p.status === 'ausgezahlt')).toBe(false)
   })
 
   it('friert USt ein (regelbesteuert) und schreibt status:ausgezahlt via zwei getrennten Ledger-Updates', async () => {
@@ -499,6 +521,11 @@ describe('storniereProvision — Storno-Gutschrift wiring (Task 4)', () => {
     expect(r.ok).toBe(true)
     expect(erstelleStornoGutschrift).toHaveBeenCalledWith(db, 'orig-1', 'Rückbuchung')
     expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
+    // PDF-Input: Bezug auf das Original + zero-padded Datum (05.07.2026), konsistent mit fmtDate.
+    const pdfArg = vi.mocked(generateAndUploadPartnerGutschriftPdf).mock.calls[0]?.[0] as Record<string, any>
+    expect(pdfArg.storno.bezugNummer).toBe('CMNDO-GS-2026-00001')
+    expect(pdfArg.storno.bezugDatum).toBe('05.07.2026')
+    expect(pdfArg.storno.grund).toBe('Rückbuchung')
   })
 
   it('(storno-b) no original gutschrift → erstelleStornoGutschrift NOT called, ledger storniert only', async () => {
