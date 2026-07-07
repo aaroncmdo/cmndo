@@ -6,16 +6,17 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { EigeneGutschrift } from '@/components/shared/finance/PartnerGutschriftenListe'
+import { mapEigeneGutschriften, type EigeneGutschriftRoh } from '@/lib/finance/eigene-gutschriften-map'
 
 export async function getEigeneGutschriften(): Promise<EigeneGutschrift[]> {
   const supabase = await createClient()
   // RLS pg_partner_self_read -> nur eigene Zeilen; kein expliziter partner-Filter noetig.
   const { data, error } = await supabase
     .from('partner_gutschriften')
-    .select('id, gutschrift_nr, betrag_brutto, erstellt_am, status')
+    .select('id, gutschrift_nr, betrag_brutto, erstellt_am, status, typ, bezug_gutschrift_id')
     .order('erstellt_am', { ascending: false })
   if (error) console.error('[eigene-gutschriften] Laden fehlgeschlagen:', error.message)
-  return (data ?? []) as EigeneGutschrift[]
+  return mapEigeneGutschriften((data ?? []) as EigeneGutschriftRoh[])
 }
 
 export async function getEigeneGutschriftUrl(
