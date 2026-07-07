@@ -20,6 +20,10 @@ export type AbrechnungsKanzleiFall = {
 }
 
 export type AbrechnungsClaimPayment = {
+  // Payment-Ledger: partei diskriminiert die Zeile (vs/kunde/sv). Fuer die Kanzlei-
+  // Abrechenbarkeit zaehlt NUR der VS-Zahlungseingang (partei='vs'), nicht eine
+  // Kunde-/SV-Auszahlung. Optional/nullable -> Alt-Reads ohne partei gelten als 'vs'.
+  partei?: string | null
   zahlungseingang_am: string | null
   status?: string | null
 }
@@ -44,9 +48,15 @@ export function kanzleiFallVon(claim: AbrechnungsClaim): AbrechnungsKanzleiFall 
   return asArray(claim.kanzlei_faelle)[0] ?? null
 }
 
-/** Hat der Claim mindestens eine eingegangene Zahlung? */
+/**
+ * Hat der Claim mindestens einen VS-Zahlungseingang? Nur `partei='vs'` (die VS-Regulierung)
+ * zaehlt fuer die Kanzlei-Abrechenbarkeit — Kunde-/SV-Auszahlungen (partei='kunde'/'sv') sind
+ * Abfluesse, kein Regulierungs-Eingang. Alt-Reads ohne partei -> als 'vs' gewertet (Uebergang).
+ */
 export function hatZahlungseingang(claim: AbrechnungsClaim): boolean {
-  return asArray(claim.claim_payments).some((p) => p?.zahlungseingang_am != null)
+  return asArray(claim.claim_payments).some(
+    (p) => (p?.partei ?? 'vs') === 'vs' && p?.zahlungseingang_am != null,
+  )
 }
 
 /**

@@ -37,7 +37,7 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
   // faelle-Tabellenzugriff mehr. created_at-Filter claims-direkt. gutachten/claim_payments via
   // claims-Embed (gutachten.claim_id / claim_payments.claim_id). `faelle`-Variablenname
   // bleibt (= jetzt claims-Zeile; Funnel zaehlt Faelle = Claims, SSoT).
-  let fallQuery = db.from('claims').select('id, gutachten(fertiggestellt_am), claim_payments(zahlungseingang_am)')
+  let fallQuery = db.from('claims').select('id, gutachten(fertiggestellt_am), claim_payments(partei, zahlungseingang_am)')
   if (filter?.startDate) fallQuery = fallQuery.gte('created_at', filter.startDate)
   if (filter?.endDate) fallQuery = fallQuery.lte('created_at', filter.endDate)
   const { data: faelle } = await fallQuery
@@ -55,7 +55,11 @@ export async function getConversionFunnel(filter?: AnalyticsFilter): Promise<Con
   const mitZahlung = allFaelle.filter(f => {
     const cps = (f as { claim_payments?: unknown }).claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
-    return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
+    // Payment-Ledger: "mit Zahlung" = VS-Eingang (partei='vs'), keine Kunde-/SV-Auszahlung.
+    return cpArr.some(p => {
+      const pp = p as { partei?: string | null; zahlungseingang_am?: string | null }
+      return (pp?.partei ?? 'vs') === 'vs' && !!pp?.zahlungseingang_am
+    })
   })
 
   const leadsCount = allLeads.length
