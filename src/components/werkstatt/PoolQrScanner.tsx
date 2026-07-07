@@ -1,14 +1,15 @@
 'use client'
 
-// Werkstatt-QR-Pool — Zuweis-Scanner. Kamera-Scan via BarcodeDetector (wo
-// verfuegbar) + immer sichtbarer manueller Token-Fallback. Liefert den
-// erkannten/eingegebenen Token via onToken.
+// Werkstatt-QR-Pool — Zuweis-Scanner. Kamera-Scan (nativ via BarcodeDetector wo
+// verfuegbar — Chrome/Edge/Android; sonst jsQR-Fallback für Safari/iOS/Firefox) +
+// immer sichtbarer manueller Token-Fallback. Liefert den erkannten/eingegebenen
+// Token via onToken.
 
 import { useEffect, useRef, useState } from 'react'
 import { Button } from '@/components/primitives'
 import { extractQrPoolToken } from '@/lib/werkstatt/qr-pool-token'
 
-// BarcodeDetector ist (noch) nicht in den Standard-DOM-Types.
+// BarcodeDetector ist (noch) nicht in den Standard-DOM-Types + fehlt in Safari/Firefox.
 interface BarcodeDetectorLike {
   detect(source: CanvasImageSource): Promise<Array<{ rawValue: string }>>
 }
@@ -30,11 +31,18 @@ export function PoolQrScanner({ onToken, disabled }: Props) {
   const [manuell, setManuell] = useState('')
   const [scanAktiv, setScanAktiv] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
+  // Kamera-Verfuegbarkeit erst NACH Mount pruefen (kein Hydration-Mismatch). getUserMedia
+  // gibt es in allen modernen Browsern (auch Safari/iOS/Firefox) — der QR-Decode faellt bei
+  // fehlendem BarcodeDetector auf jsQR zurueck. Frueher war der Button an BarcodeDetector
+  // gebunden -> auf Safari/Firefox unsichtbar (Admin fand den Kamera-Scan nicht).
+  const [kameraVerfuegbar, setKameraVerfuegbar] = useState(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const rafRef = useRef<number | null>(null)
 
-  const scannerVerfuegbar = getBarcodeDetectorCtor() !== null
+  useEffect(() => {
+    setKameraVerfuegbar(typeof navigator !== 'undefined' && !!navigator.mediaDevices?.getUserMedia)
+  }, [])
 
   function stopScan() {
     if (rafRef.current !== null) {
@@ -53,9 +61,8 @@ export function PoolQrScanner({ onToken, disabled }: Props) {
 
   async function startScan() {
     setFehler(null)
-    const Ctor = getBarcodeDetectorCtor()
-    if (!Ctor) {
-      setFehler('Kamera-Scan wird auf diesem Gerät nicht unterstützt — bitte Code manuell eingeben.')
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setFehler('Kamera wird auf diesem Gerät nicht unterstützt — bitte Code manuell eingeben.')
       return
     }
     try {
@@ -69,13 +76,34 @@ export function PoolQrScanner({ onToken, disabled }: Props) {
       }
       video.srcObject = stream
       await video.play()
-      const detector = new Ctor({ formats: ['qr_code'] })
+
+      // Decoder waehlen: nativ (BarcodeDetector) — sonst jsQR-Fallback, lazy geladen,
+      // damit die ~40 KB nur auf Browsern ohne BarcodeDetector im Bundle landen.
+      const Ctor = getBarcodeDetectorCtor()
+      let decodeFrame: (v: HTMLVideoElement) => Promise<string | null>
+      if (Ctor) {
+        const detector = new Ctor({ formats: ['qr_code'] })
+        decodeFrame = async (v) => (await detector.detect(v))[0]?.rawValue ?? null
+      } else {
+        const { default: jsQR } = await import('jsqr')
+        const canvas = document.createElement('canvas')
+        const ctx = canvas.getContext('2d', { willReadFrequently: true })
+        decodeFrame = async (v) => {
+          if (!ctx || !v.videoWidth) return null
+          canvas.width = v.videoWidth
+          canvas.height = v.videoHeight
+          ctx.drawImage(v, 0, 0, canvas.width, canvas.height)
+          const { data, width, height } = ctx.getImageData(0, 0, canvas.width, canvas.height)
+          return jsQR(data, width, height, { inversionAttempts: 'dontInvert' })?.data ?? null
+        }
+      }
+
       const tick = async () => {
         if (!streamRef.current || !videoRef.current) return
         try {
-          const codes = await detector.detect(videoRef.current)
-          if (codes.length > 0) {
-            const token = extractQrPoolToken(codes[0].rawValue)
+          const raw = await decodeFrame(videoRef.current)
+          if (raw) {
+            const token = extractQrPoolToken(raw)
             if (token) {
               stopScan()
               onToken(token)
@@ -120,7 +148,7 @@ export function PoolQrScanner({ onToken, disabled }: Props) {
           </Button>
         </div>
       ) : (
-        scannerVerfuegbar && (
+        kameraVerfuegbar && (
           <Button variant="navy" size="sm" onClick={startScan} disabled={disabled}>
             Kamera-Scan starten
           </Button>
@@ -129,7 +157,7 @@ export function PoolQrScanner({ onToken, disabled }: Props) {
 
       <div className="space-y-1">
         <label className="text-body-xs font-medium text-claimondo-navy">
-          {scannerVerfuegbar ? 'Oder Code manuell eingeben' : 'Code manuell eingeben'}
+          {kameraVerfuegbar ? 'Oder Code manuell eingeben' : 'Code manuell eingeben'}
         </label>
         <div className="flex gap-2">
           <input
