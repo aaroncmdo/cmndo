@@ -207,19 +207,23 @@ code-korrekt (Bearer `CRON_SECRET`).
 Stille)** → der Cron surfaced ab Lauf 1 echte, bislang unsichtbare Probleme an die 3 realen Admins (gewollt —
 das ist der Zweck der Observability).
 
-## Stand 2026-07-07 — `purge-remember-tokens` (PR #3819, PENDING VPS-Application)
+## Stand 2026-07-07 — `purge-remember-tokens` NACHGETRAGEN (Live-VPS)
 
-> Neuer Cron aus dem Trusted-Device-Audit (2FA-Härtung, [[coordination-2fa-auth-hardening]]).
-> Route gebaut (`src/app/api/cron/purge-remember-tokens/route.ts`, `CRON_SECRET`-gated), aber
-> **noch NICHT auf dem Live-VPS geschedult** — diese Zeile muss per `crontab -e` ergänzt werden
-> (Aaron/ops), sonst wächst `auth_remember_tokens` unbegrenzt. Kein Security-, sondern ein
-> Hygiene-Problem: der Validator (`validate-remember-token.ts`) lehnt abgelaufene Tokens ohnehin ab.
+> Neuer Cron aus dem Trusted-Device-Audit (2FA-Härtung, PR #3819). Per `paramiko`
+> (Aaron-autorisiert, root) auf den Live-VPS angewendet + verifiziert. Backup:
+> `/root/crontab-backup-20260707-163851-pre-purge.txt` (Rollback: `crontab <backup>`).
 
+**Umgesetzt:** nachgetragen —
 ```cron
-20 3 * * *  cron-call.sh /api/cron/purge-remember-tokens  # Trusted-Device-Token-Purge (PR #3819)
+20 3 * * * /usr/local/bin/cron-call.sh /api/cron/purge-remember-tokens
 ```
+Crontab **91 → 94 Zeilen**. Löscht abgelaufene + >30 Tage alt-widerrufene `auth_remember_tokens`
+(widerrufene bleiben 30 d als Audit-Spur); idempotent, No-op wenn nichts fällig.
 
-Löscht abgelaufene + >30 Tage alt-widerrufene Tokens (widerrufene bleiben 30 d als Audit-Spur).
-Idempotent, No-op wenn nichts fällig. Nach Anwendung: Zeile in den Live-Crontab-Block oben
-(Sektion „LOW") hochziehen + Zeilenzahl nachziehen.
+**Aktivierung nach Deploy:** die Route existiert erst nach dem #3819-Deploy (staging→main). Vorher
+liefert der Endpoint sauber **404** (verifiziert: `curl` → HTTP 404; `cron-call.sh` nutzt `curl -sf`
+→ exit 22 ohne Output/Side-Effect; Kontroll-Route `pipeline-health` = HTTP 200 → App/Secret/Wrapper
+ok). Nach dem Deploy schaltet der Cron automatisch scharf (HTTP 200 → `{ ok, geloescht }`). Kein
+Security-, sondern ein Hygiene-Cron: der Validator (`validate-remember-token.ts`) lehnt abgelaufene
+Tokens ohnehin ab.
 
