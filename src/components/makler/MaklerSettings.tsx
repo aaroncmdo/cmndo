@@ -13,7 +13,6 @@ import {
   ShieldCheckIcon,
   BellIcon,
   LogOutIcon,
-  Trash2Icon,
   AlertTriangleIcon,
   CheckCircle2Icon,
   Loader2Icon,
@@ -92,7 +91,6 @@ export function MaklerSettings({
         <NotificationPreferencesCard initial={notificationPrefs} />
       ) : null}
       <LogoutCard />
-      <AccountLoeschenCard firma={profile.firma} email={profile.email} />
     </div>
   )
 }
@@ -679,48 +677,5 @@ function LogoutCard() {
 
 // ── 7. Account-Löschung ─────────────────────────────────────────────────────
 
-function AccountLoeschenCard({
-  firma,
-  email,
-}: {
-  firma: string | null
-  email: string | null
-}) {
-  const subject = encodeURIComponent(
-    `Account-Löschung anfragen: ${firma ?? 'Makler'}`,
-  )
-  const body = encodeURIComponent(
-    `Hallo Claimondo-Team,\n\nich möchte meinen Makler-Account löschen lassen.\n\nFirma: ${firma ?? '-'}\nEmail: ${email ?? '-'}\n\nBitte bestätigen Sie den DSGVO-Löschauftrag.\n\nViele Grüße`,
-  )
-  return (
-    <section className="bg-white rounded-ios-md border border-danger/30 overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-danger/20 bg-danger-soft/50">
-        <span className="shrink-0 w-9 h-9 rounded-ios-xl bg-danger/15 text-danger-strong border border-danger/30 flex items-center justify-center">
-          <Trash2Icon width={16} height={16} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-danger-strong">
-            Account löschen
-          </h2>
-          <p className="text-xs text-danger-strong mt-0.5">
-            DSGVO-konforme Löschung auf Anfrage — irreversibel.
-          </p>
-        </div>
-      </div>
-      <div className="p-5 space-y-3">
-        <p className="text-sm text-claimondo-navy">
-          Die Account-Löschung wird manuell durch unser Team durchgeführt,
-          damit alle DSGVO-Aufbewahrungs-Fristen (z.&nbsp;B. offene Fälle)
-          beachtet werden können. Klicken Sie unten um per Email anzufragen.
-        </p>
-        <a
-          href={`mailto:info@claimondo.de?subject=${subject}&body=${body}`}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-danger text-white text-sm font-semibold hover:bg-danger/90"
-        >
-          <Trash2Icon width={14} height={14} />
-          Account-Löschung anfragen
-        </a>
-      </div>
-    </section>
-  )
-}
+// AccountLoeschenCard (mailto-basiert) entfernt — Makler nutzt jetzt den strukturierten
+// Self-Service-Loeschflow (DsgvoLoeschSection auf der Einstellungen-Page, wie Kunde/SV).

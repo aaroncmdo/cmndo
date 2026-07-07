@@ -5,6 +5,7 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { WerkstattSettings } from '@/components/werkstatt/WerkstattSettings'
+import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,7 @@ export default async function WerkstattEinstellungenPage() {
   if (!werkstatt) redirect('/werkstatt/pending')
 
   return (
+    <>
     <WerkstattSettings
       name={(werkstatt as unknown as { name: string | null }).name ?? null}
       ansprechpartner_name={(werkstatt as unknown as { ansprechpartner_name: string | null }).ansprechpartner_name ?? null}
@@ -39,5 +41,12 @@ export default async function WerkstattEinstellungenPage() {
       bank_bic={(werkstatt as unknown as { bank_bic: string | null }).bank_bic ?? null}
       bank_kontoinhaber={(werkstatt as unknown as { bank_kontoinhaber: string | null }).bank_kontoinhaber ?? null}
     />
+      <div className="mx-auto max-w-2xl px-4 pb-8">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/70">
+          Konto &amp; Datenschutz
+        </p>
+        <DsgvoLoeschSection />
+      </div>
+    </>
   )
 }
