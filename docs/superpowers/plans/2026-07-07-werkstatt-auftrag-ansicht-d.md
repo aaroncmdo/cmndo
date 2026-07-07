@@ -28,9 +28,18 @@
 **Interfaces:**
 - Produces: neue View-Spalten `abrechnungsweg text`, `vermittler_werkstatt_id uuid`, `reparatur_werkstatt_id uuid`, `meine_rolle text` (`'reparateur'|'vermittler'|'beide'|NULL`). Bestehende Spalten (inkl. `richtung`, `werkstatt_id`) unverändert.
 
-- [ ] **Step 1: Bestehende Definition + additive Spalten formulieren.** DDL (die aktuelle Def aus `20260704093003_v_werkstatt_auftrag_gutachten.sql` 1:1 + 4 neue Spalten nach `richtung`):
+- [ ] **Step 1: Helper + Definition formulieren.** Postgres `CREATE OR REPLACE VIEW` erlaubt nur **Append am Ende** (bestehende Spalten unverändert in Reihenfolge/Typ) — die 4 neuen Spalten kommen ans SELECT-**Ende**. `meine_rolle` nutzt einen SECURITY-DEFINER-Helper (kein RLS-Gamble aufs `werkstaetten`-SELECT). Beides in EINER Migration:
 
 ```sql
+-- Helper: die Werkstatt-IDs des aktuellen Users (SECURITY DEFINER, analog is_werkstatt_for_claim)
+CREATE OR REPLACE FUNCTION public.my_werkstatt_ids()
+ RETURNS setof uuid LANGUAGE sql STABLE SECURITY DEFINER SET search_path TO 'public'
+AS $function$
+  SELECT id FROM werkstaetten WHERE user_id = (SELECT auth.uid())
+$function$;
+REVOKE ALL ON FUNCTION public.my_werkstatt_ids() FROM public;
+GRANT EXECUTE ON FUNCTION public.my_werkstatt_ids() TO authenticated, service_role;
+
 CREATE OR REPLACE VIEW public.v_werkstatt_auftrag AS
  SELECT c.id AS claim_id,
     c.reparatur_vermittlung_status AS vermittlung_status,
@@ -40,20 +49,6 @@ CREATE OR REPLACE VIEW public.v_werkstatt_auftrag AS
             WHEN c.reparatur_werkstatt_id IS NOT NULL THEN 'vermittelt'::text
             ELSE 'inbound'::text
         END AS richtung,
-    -- D: rollen-korrekte Zusatzspalten (additiv)
-    c.abrechnungsweg AS abrechnungsweg,
-    c.werkstatt_id AS vermittler_werkstatt_id,
-    c.reparatur_werkstatt_id AS reparatur_werkstatt_id,
-        CASE
-            WHEN c.reparatur_werkstatt_id IN (SELECT id FROM werkstaetten WHERE user_id = (SELECT auth.uid()))
-             AND c.werkstatt_id           IN (SELECT id FROM werkstaetten WHERE user_id = (SELECT auth.uid()))
-                THEN 'beide'::text
-            WHEN c.reparatur_werkstatt_id IN (SELECT id FROM werkstaetten WHERE user_id = (SELECT auth.uid()))
-                THEN 'reparateur'::text
-            WHEN c.werkstatt_id           IN (SELECT id FROM werkstaetten WHERE user_id = (SELECT auth.uid()))
-                THEN 'vermittler'::text
-            ELSE NULL::text
-        END AS meine_rolle,
     c.claim_nummer,
     c.schadenart,
     c.reparaturwunsch,
@@ -84,7 +79,17 @@ CREATE OR REPLACE VIEW public.v_werkstatt_auftrag AS
     gu.restwert AS gutachten_restwert,
     gu.wiederbeschaffungswert AS gutachten_wiederbeschaffungswert,
     gu.totalschaden AS gutachten_totalschaden,
-    gu.fertiggestellt_am AS gutachten_fertiggestellt_am
+    gu.fertiggestellt_am AS gutachten_fertiggestellt_am,
+    -- D: rollen-korrekte Zusatzspalten (additiv, ans ENDE — CREATE OR REPLACE VIEW erlaubt nur Append)
+    c.abrechnungsweg AS abrechnungsweg,
+    c.werkstatt_id AS vermittler_werkstatt_id,
+    c.reparatur_werkstatt_id AS reparatur_werkstatt_id,
+        CASE
+            WHEN c.reparatur_werkstatt_id IN (SELECT my_werkstatt_ids()) AND c.werkstatt_id IN (SELECT my_werkstatt_ids()) THEN 'beide'::text
+            WHEN c.reparatur_werkstatt_id IN (SELECT my_werkstatt_ids()) THEN 'reparateur'::text
+            WHEN c.werkstatt_id IN (SELECT my_werkstatt_ids()) THEN 'vermittler'::text
+            ELSE NULL::text
+        END AS meine_rolle
    FROM claims c
      LEFT JOIN vehicles v ON v.id = c.vehicle_id
      LEFT JOIN LATERAL ( SELECT t.start_zeit, t.besichtigungsort_adresse, t.status
