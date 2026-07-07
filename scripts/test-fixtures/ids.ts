@@ -16,18 +16,24 @@ export const CLAIMS = {
   c1: 'fbc10001-0000-4000-8000-000000000001',
   c2: 'fbc10002-0000-4000-8000-000000000002',
   c3: 'fbc10003-0000-4000-8000-000000000003',
+  c4: 'fbc10004-0000-4000-8000-000000000004',
 } as const
 export const LEADS = {
   c1: 'fb1e0001-0000-4000-8000-000000000001',
   c2: 'fb1e0002-0000-4000-8000-000000000002',
   c3: 'fb1e0003-0000-4000-8000-000000000003',
+  c4: 'fb1e0004-0000-4000-8000-000000000004',
 } as const
 export const PARTIES = {
   c1: 'fbc90001-0000-4000-8000-000000000001',
   c2: 'fbc90002-0000-4000-8000-000000000002',
   c3: 'fbc90003-0000-4000-8000-000000000003',
+  c4: 'fbc90004-0000-4000-8000-000000000004',
 } as const
-export const AUFTRAEGE = { c2: 'fba00002-0000-4000-8000-000000000002' } as const
+export const AUFTRAEGE = {
+  c2: 'fba00002-0000-4000-8000-000000000002',
+  c4: 'fba00004-0000-4000-8000-000000000004',
+} as const
 export const PFLICHTDOK = {
   fahrzeugschein: 'fbd10001-0000-4000-8000-000000000001',
   unfallfotos: 'fbd10002-0000-4000-8000-000000000002',
@@ -35,8 +41,9 @@ export const PFLICHTDOK = {
 } as const
 export const KANZLEI_ID = 'fbca0001-0000-4000-8000-000000000001'
 export const KANZLEI_FALL_ID = 'fbca0f01-0000-4000-8000-000000000001'
+export const KANZLEI_FALL_C4 = 'fbca0f04-0000-4000-8000-000000000004'
 
 /** Intern (@claimondo.de) plus-adressiert -> test-sv-guard behandelt den Lead als intern. */
-export function internEmail(stage: 'c1' | 'c2' | 'c3'): string {
+export function internEmail(stage: 'c1' | 'c2' | 'c3' | 'c4'): string {
   return `test-kunde+${stage}@claimondo.de`
 }

@@ -9,11 +9,12 @@ import {
   AUFTRAEGE,
   PFLICHTDOK,
   KANZLEI_FALL_ID,
+  KANZLEI_FALL_C4,
   internEmail,
 } from './ids'
 
 type Opts = { reporter: Reporter; dryRun?: boolean }
-type Stage = 'c1' | 'c2' | 'c3'
+type Stage = 'c1' | 'c2' | 'c3' | 'c4'
 
 // Fixes Schadendatum — Date.now() im Script vermeiden -> reproduzierbar/idempotent.
 const SCHADENTAG = '2026-06-15'
@@ -54,11 +55,17 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c2,
       schadentag: SCHADENTAG,
+      onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
+      geschaedigter_user_id: ACCOUNTS.kunde, // s. C1 — pflichtdokumente-RLS + Ownership-SSoT
       operative_status: 'sv-termin',
       lead_id: LEADS.c2,
       sv_id: SV_SACHVERSTAENDIGE_ID,
       sv_zugewiesen_am: SCHADENTAG,
       kundenbetreuer_id: ACCOUNTS.kb,
+      // sa_unterschrieben=true ist Pflicht: die SV-Fallseite (/gutachter/fall/[id])
+      // gated auf sa_unterschrieben (CMM-25: Fallakte erst nach SA-Unterschrift). SP2-Flagship deckte das auf.
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: SCHADENTAG,
       created_via: 'manuell_admin',
     },
     o,
@@ -74,7 +81,11 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
       sv_id: SV_SACHVERSTAENDIGE_ID,
       typ: 'erstgutachten',
       status: 'termin',
-      technische_stellungnahme_status: 'angefordert',
+      // Realer Wert der KB-Anforderung ist 'beauftragt' (prozess.ts / process-event.ts),
+      // NICHT 'angefordert' (das ist nachbesichtigung_status). Die SV-Stellungnahme-Seite
+      // gated auf 'beauftragt'. SP2-Flagship deckte den Prod-Bug im Fall-Banner auf.
+      technische_stellungnahme_status: 'beauftragt',
+      technische_stellungnahme_beauftragt_am: SCHADENTAG,
     },
     o,
   )
@@ -91,6 +102,15 @@ async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c1,
       schadentag: SCHADENTAG,
+      // onboarding_complete=true Pflicht: kunde/layout.tsx redirected sonst (navFaelle.some(
+      // onboarding_complete===false)) JEDEN /kunde/*-Pfad nach /kunde/onboarding -> Fallakte
+      // rendert nie. Gilt für ALLE test-kunde-Claims (geschädigter auf allen), nicht nur den besuchten.
+      onboarding_complete: true,
+      // geschaedigter_user_id = kanonischer denormalisierter Ownership-SSoT (CMM-49). Pflicht für die
+      // pflichtdokumente-RLS ("Kunden eigene Dokumente": fall_id→claims.geschaedigter_user_id=auth.uid())
+      // — claim_parties allein reicht der RLS NICHT → sonst sieht der Kunde die Slots nicht
+      // (pflichtdokument_id=null → Upload-Guard "Slot noch nicht initialisiert"). Gilt für alle Kunde-Claims.
+      geschaedigter_user_id: ACCOUNTS.kunde,
       operative_status: 'ersterfassung',
       lead_id: LEADS.c1,
       created_via: 'manuell_admin',
@@ -104,7 +124,14 @@ async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
     [PFLICHTDOK.schadensfotos, 'schadensfotos', 2],
   ]
   for (const [id, dokument_typ, sort_order] of slots) {
-    await upsertById(db, 'pflichtdokumente', { id, fall_id: CLAIMS.c1, dokument_typ, sort_order }, o)
+    // status/dokument_url/hochgeladen_am auf ausstehend zurücksetzen -> der Kunde-Upload-Flow
+    // (SP2) ist wiederholbar (sonst bliebe der Slot nach dem 1. Upload dauerhaft 'hochgeladen').
+    await upsertById(
+      db,
+      'pflichtdokumente',
+      { id, fall_id: CLAIMS.c1, dokument_typ, sort_order, status: 'ausstehend', dokument_url: null, hochgeladen_am: null },
+      o,
+    )
   }
 }
 
@@ -118,6 +145,8 @@ async function ensureC3(db: SupabaseClient, o: Opts): Promise<void> {
     {
       id: CLAIMS.c3,
       schadentag: SCHADENTAG,
+      onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
+      geschaedigter_user_id: ACCOUNTS.kunde, // s. C1 — pflichtdokumente-RLS + Ownership-SSoT
       operative_status: 'kanzlei-uebergeben',
       lead_id: LEADS.c3,
       kanzlei_uebergeben_am: SCHADENTAG,
@@ -136,8 +165,75 @@ async function ensureC3(db: SupabaseClient, o: Opts): Promise<void> {
   )
 }
 
+// C4 — KB-Anforderungs-Fixture: Claim mit Auftrag, Stellungnahme NOCH NICHT angefordert
+// (technische_stellungnahme_status=null -> der "Stellungnahme anfordern"-CTA erscheint) +
+// vs_kuerzungs_typ='technisch' (Render-Bedingung des CTA in der VsReaktionSection) +
+// kundenbetreuer_id=test-kb (RLS: test-kb darf die Anforderung triggern). KB-Flow -> 'beauftragt'.
+async function ensureC4(db: SupabaseClient, o: Opts): Promise<void> {
+  await ensureLead(db, 'c4', o)
+  await upsertById(
+    db,
+    'claims',
+    {
+      id: CLAIMS.c4,
+      schadentag: SCHADENTAG,
+      onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
+      geschaedigter_user_id: ACCOUNTS.kunde, // s. C1 — pflichtdokumente-RLS + Ownership-SSoT
+      operative_status: 'kanzlei-uebergeben',
+      lead_id: LEADS.c4,
+      sv_id: SV_SACHVERSTAENDIGE_ID,
+      sv_zugewiesen_am: SCHADENTAG,
+      kundenbetreuer_id: ACCOUNTS.kb,
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: SCHADENTAG,
+      created_via: 'manuell_admin',
+    },
+    o,
+  )
+  await ensureGeschaedigter(db, 'c4', o)
+  // kanzlei_faelle mit VS-Kürzung. Zwei Felder steuern den KB-CTA (verifiziert gg section-visibility.ts
+  // + Sections.tsx VsReaktionSection):
+  //   - vs_reaktion_typ='gekuerzt' -> 'vs_reaktion'-Section sichtbar (getTriggeredFallSections:
+  //     phase>=6 || vs_reaktion_typ) UND isKuerzt (reaktionTyp==='gekuerzt') -> "VS kürzt"-Block rendert.
+  //   - vs_kuerzungs_typ='technisch' (+ technische_stellungnahme_status=null am Auftrag) -> der Button
+  //     "Stellungnahme von SV anfordern" erscheint.
+  // Beide sind text-Spalten auf kanzlei_faelle (NICHT claims), projiziert in v_claim_base/v_faelle.
+  await upsertById(
+    db,
+    'kanzlei_faelle',
+    {
+      id: KANZLEI_FALL_C4,
+      claim_id: CLAIMS.c4,
+      fall_id: CLAIMS.c4,
+      status: 'versicherungskontakt',
+      vs_reaktion_typ: 'gekuerzt',
+      vs_kuerzungs_typ: 'technisch',
+      kuerzungs_betrag: 500,
+      vs_kuerzung_grund: 'UPE-Aufschlag strittig',
+    },
+    o,
+  )
+  await upsertById(
+    db,
+    'auftraege',
+    {
+      id: AUFTRAEGE.c4,
+      claim_id: CLAIMS.c4,
+      fall_id: CLAIMS.c4,
+      sv_id: SV_SACHVERSTAENDIGE_ID,
+      typ: 'erstgutachten',
+      status: 'termin',
+      // Reset auf noch-nicht-angefordert (null) -> KB-CTA erscheint; der KB-Flow setzt 'beauftragt' (wiederholbar).
+      technische_stellungnahme_status: null,
+      technische_stellungnahme_beauftragt_am: null,
+    },
+    o,
+  )
+}
+
 export async function ensureSeedGraph(db: SupabaseClient, o: Opts): Promise<void> {
   await ensureC2(db, o) // #3729-Blocker zuerst
   await ensureC1(db, o)
   await ensureC3(db, o)
+  await ensureC4(db, o)
 }
