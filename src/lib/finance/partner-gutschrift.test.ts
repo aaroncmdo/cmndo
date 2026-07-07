@@ -386,6 +386,87 @@ describe('erstellePartnerGutschrift', () => {
     expect(db._insertedRows).toHaveLength(0)
   })
 
+  // ── Task 2: bank_iban + leistung_datum ──────────────────────────────────────
+
+  // (bank_iban-a) partner with bank_iban → empfaenger_snapshot.bank_iban stored
+  it('(bank_iban-a) stores bank_iban in empfaenger_snapshot when partner has one', async () => {
+    const db = makeDb({
+      partnerData: {
+        firma: 'IBAN Makler GmbH',
+        adresse_strasse: 'Ibanstr. 1',
+        adresse_plz: '10115',
+        adresse_ort: 'Berlin',
+        ust_id: 'DE123456789',
+        ist_kleinunternehmer: false,
+        bank_iban: 'DE12345678901234567890',
+      },
+    })
+    const result = await erstellePartnerGutschrift(db, BASE_PARAMS)
+    expect(result.ok).toBe(true)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    const snap = row.empfaenger_snapshot as Record<string, unknown>
+    expect(snap.bank_iban).toBe('DE12345678901234567890')
+  })
+
+  // (bank_iban-b) marketing partner without bank_iban → empfaenger_snapshot.bank_iban is null
+  it('(bank_iban-b) empfaenger_snapshot.bank_iban is null for partner without bank_iban', async () => {
+    const db = makeDb({
+      partnerData: {
+        name: 'Marketing Partner ohne IBAN',
+        adresse_strasse: 'Str. 2',
+        adresse_plz: '10115',
+        adresse_ort: 'Berlin',
+        ust_id: 'DE999999999',
+        ist_kleinunternehmer: false,
+        // no bank_iban field
+      },
+    })
+    const result = await erstellePartnerGutschrift(db, { ...BASE_PARAMS, partnerTyp: 'marketing' })
+    expect(result.ok).toBe(true)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    const snap = row.empfaenger_snapshot as Record<string, unknown>
+    expect(snap.bank_iban).toBeNull()
+  })
+
+  // (leistung_datum-a) leistungsDatum ISO → insert row leistung_datum === date part
+  it('(leistung_datum-a) leistungsDatum ISO timestamp → row.leistung_datum === date string YYYY-MM-DD', async () => {
+    const db = makeDb({
+      partnerData: {
+        firma: 'Datum Makler GmbH',
+        adresse_strasse: 'Datumstr. 1',
+        adresse_plz: '10115',
+        adresse_ort: 'Berlin',
+        ust_id: 'DE111222333',
+        ist_kleinunternehmer: false,
+      },
+    })
+    const result = await erstellePartnerGutschrift(db, {
+      ...BASE_PARAMS,
+      leistungsDatum: '2026-07-15T10:00:00.000Z',
+    })
+    expect(result.ok).toBe(true)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    expect(row.leistung_datum).toBe('2026-07-15')
+  })
+
+  // (leistung_datum-b) no leistungsDatum → row.leistung_datum === null
+  it('(leistung_datum-b) without leistungsDatum param → row.leistung_datum is null', async () => {
+    const db = makeDb({
+      partnerData: {
+        firma: 'Kein Datum Makler GmbH',
+        adresse_strasse: 'Str. 3',
+        adresse_plz: '10115',
+        adresse_ort: 'Berlin',
+        ust_id: 'DE444555666',
+        ist_kleinunternehmer: false,
+      },
+    })
+    const result = await erstellePartnerGutschrift(db, BASE_PARAMS)
+    expect(result.ok).toBe(true)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    expect(row.leistung_datum).toBeNull()
+  })
+
   // Aussteller snapshot populated correctly from konfig (full RechnungsKonfig after step 0)
   it('populates aussteller_snapshot from RechnungsKonfig (full konfig including geschaeftsfuehrer/hrb)', async () => {
     const db = makeDb({

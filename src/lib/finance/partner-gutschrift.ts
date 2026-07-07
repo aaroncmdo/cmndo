@@ -131,6 +131,7 @@ export async function erstellePartnerGutschrift(
       bruttoCent: number
     }
     leistungText: string
+    leistungsDatum?: string | null
   },
 ): Promise<{ ok: true; gutschriftId: string; nummer: string } | { ok: false; error: string }> {
   try {
@@ -165,6 +166,7 @@ export async function erstellePartnerGutschrift(
       adresse_ort: ort,
       ust_id,
       ist_kleinunternehmer,
+      bank_iban: (partner as any).bank_iban ?? null,
     }
 
     // 2. Completeness block (§14c protection)
@@ -214,6 +216,9 @@ export async function erstellePartnerGutschrift(
       empfaenger_snapshot,
       aussteller_snapshot,
       leistung_text: p.leistungText,
+      leistung_datum: p.leistungsDatum
+        ? new Date(p.leistungsDatum).toISOString().slice(0, 10)
+        : null,
       status: 'erstellt',
     }
 
