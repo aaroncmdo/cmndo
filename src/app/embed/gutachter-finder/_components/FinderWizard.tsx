@@ -18,6 +18,7 @@ import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { AufnahmeFlowHinweis } from '@/components/shared/AufnahmeFlowHinweis'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
 import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher } from '../actions'
@@ -339,6 +340,13 @@ export function FinderWizard({
     // ein (fade + leichter slide-up). GlassSurface persistiert über Phasen → kein Re-Trigger
     // bei Step-Wechseln. Dezent, im Claimondo-Look.
     <GlassSurface className="flex flex-col gap-4 p-5 animate-in fade-in slide-in-from-bottom-3 duration-700 ease-out">
+      {/* Kontinuitaets-Klammer: wer aus dem Foto-Tool kommt (schaetzungSessionId gesetzt),
+          sieht dass Finder + Anspruchs-Pruefung EIN Vorgang sind (spiegelt den Tool-Banner P2).
+          Nur auf dem Einstiegs-Schritt (ort), wie P2 nur auf 'foto'. mb-0: die GlassSurface ist
+          flex/gap-4, der Default-mb-4 wuerde doppelt spacen. */}
+      {schaetzungSessionId && phase === 'ort' ? (
+        <AufnahmeFlowHinweis text="Weiter aus Ihrer Anspruchs-Prüfung: jetzt Gutachter & Termin." className="mb-0" />
+      ) : null}
       {phase !== 'gebucht' && (
         <div className="flex items-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (

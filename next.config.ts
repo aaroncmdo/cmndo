@@ -227,6 +227,13 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige',
         permanent: true,
       },
+      // Aaron 07.07.: SV-Leads-Verwaltung wanderte in die Sachverstaendige-
+      // Sektion (Drawer ueber der Karte). Alte Bookmarks -> neue Route.
+      {
+        source: '/admin/sv-leads',
+        destination: '/admin/sachverstaendige/leads',
+        permanent: true,
+      },
       // AAR-889 (14.05.26): /admin/sv-onboarding zeigte vorher auf
       // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
       // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
@@ -341,6 +348,16 @@ const nextConfig: NextConfig = {
       { source: '/sv-portal/anfragen', destination: '/gutachter/einstellungen/embed/anfragen', permanent: true },
       { source: '/sv-portal/embed-sites', destination: '/gutachter/einstellungen/embed', permanent: true },
       { source: '/sv-portal/embed-sites/:path*', destination: '/gutachter/einstellungen/embed/:path*', permanent: true },
+      // Werkstatt-Konsolidierung (06.07.): "Meine Vermittlungen" in "Auftraege" vereint.
+      // Als HTTP-308 statt RSC-redirect()-Stub: die page.tsx mit redirect('/werkstatt/auftraege')
+      // traf exakt die AAR-889-Falle oben (RSC-Redirect-Stub triggert React-#310/#418) — der
+      // Prod-Smoke 06.07. bestaetigte 200 mit leerer Shell + KEINEN Redirect. page.tsx geloescht.
+      { source: '/werkstatt/vermittlungen', destination: '/werkstatt/auftraege', permanent: true },
+      // Kunde-Portal (SP4 1+): /kunde/einstellungen wurde nach /kunde/profil konsolidiert.
+      // Als HTTP-308 statt RSC-redirect()-Stub — die page.tsx mit redirect('/kunde/profil') traf
+      // exakt dieselbe AAR-889-Falle (leere 200-Shell, kein Redirect; Prod-Smoke 07.07. als
+      // test-kunde bestaetigt). page.tsx geloescht.
+      { source: '/kunde/einstellungen', destination: '/kunde/profil', permanent: true },
     ]
   },
 };

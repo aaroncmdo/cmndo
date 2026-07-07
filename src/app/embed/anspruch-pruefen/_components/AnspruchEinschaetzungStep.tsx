@@ -12,10 +12,10 @@ const SCHULD_HINT: Record<Schuldform, string> = {
 }
 
 export function AnspruchEinschaetzungStep({
-  sessionToken, vision, onFertig,
-}: { sessionToken: string; vision: VisionResult; onFertig: (s: AnspruchSpanne) => void }) {
+  sessionToken, vision, onFertig, initialSchuld,
+}: { sessionToken: string; vision: VisionResult; onFertig: (s: AnspruchSpanne) => void; initialSchuld?: Schuldform }) {
   const [segment, setSegment] = useState<Segment>(vision.segment)
-  const [schuld, setSchuld] = useState<Schuldform>('unverschuldet')
+  const [schuld, setSchuld] = useState<Schuldform>(initialSchuld ?? 'unverschuldet')
   const [fahrbereit, setFahrbereit] = useState<boolean | null>(null)
   const [ersatzfahrzeug, setErsatzfahrzeug] = useState<Ersatzfahrzeug>('nutzungsausfall')
   const [ezJahr, setEzJahr] = useState<string>('')

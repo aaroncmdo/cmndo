@@ -541,6 +541,31 @@ export async function POST(request: Request) {
             onboarding_status: 'anzahlung_offen',
           }).eq('id', meta.gutachter_id)
         }
+        // Einzugs-PI (SEPA-Ruecklastschrift days-later): Abrechnung auf fehlgeschlagen.
+        const { handleEinzugPaymentFailed } = await import('@/lib/finance/einzug-webhook')
+        const einzugFail = await handleEinzugPaymentFailed(db, pi as {
+          metadata?: Record<string, string> | null; amount?: number | null; last_payment_error?: { message?: string } | null
+        })
+        if (einzugFail.acted) {
+          try {
+            const { render } = await import('@react-email/render')
+            const { AdminEinzugFehlgeschlagenEmail, subject } = await import('@/lib/email/google/templates/AdminEinzugFehlgeschlagen')
+            const { sendCommunication } = await import('@/lib/communications/send')
+            const props = {
+              abrechnungsNr: einzugFail.abrechnungsNr ?? (einzugFail.abrId ?? '').slice(0, 8),
+              empfaengerName: null,
+              betragBrutto: einzugFail.betragBrutto ?? 0,
+              fehlerGrund: einzugFail.grund ?? 'Lastschrift fehlgeschlagen',
+            }
+            await sendCommunication('admin_einzug_failed', {
+              email: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
+              subject: subject(props),
+              html: await render(AdminEinzugFehlgeschlagenEmail(props)),
+            })
+          } catch (alertErr) {
+            console.error('[KFZ-148] einzug-payment_failed Admin-Alert (non-fatal):', alertErr)
+          }
+        }
         break
       }
 
@@ -555,21 +580,10 @@ export async function POST(request: Request) {
         // Jetzt: als bezahlt verbuchen (mirror von markPaid im Cron). Nur fuer Einzugs-PIs
         // (metadata.abrechnung_id) — Onboarding-Anzahlungen laufen ueber checkout.session.
         const pi = event.data.object
-        const meta = (pi.metadata ?? {}) as Record<string, string>
-        const abrId = meta.abrechnung_id ?? null
-        if (abrId) {
-          const nowIso = new Date().toISOString()
-          const betrag = Number(pi.amount_received ?? pi.amount ?? 0) / 100
-          // Idempotent: nur wenn noch nicht bezahlt -> ueberschreibt kein frueheres
-          // bezahlt_am, deckt Re-Delivery zusaetzlich zum stripe_events-Dedup oben ab.
-          await db.from('abrechnungen').update({
-            bezahlt_am: nowIso,
-            bezahlt_betrag: betrag,
-            einzug_fehler: null,
-            status: 'bezahlt',
-            updated_at: nowIso,
-          }).eq('id', abrId).neq('status', 'bezahlt')
-        }
+        const { handleEinzugPaymentSucceeded } = await import('@/lib/finance/einzug-webhook')
+        await handleEinzugPaymentSucceeded(db, pi as {
+          metadata?: Record<string, string> | null; amount?: number | null; amount_received?: number | null
+        })
         break
       }
 

@@ -67,6 +67,7 @@ function makeKonfig() {
 const REGELBESTEUERT_INPUT: PartnerGutschriftPdfInput = {
   gutschrift_nr: 'CMNDO-GS-2026-00042',
   erstellt_am: '2026-07-05T10:00:00.000Z',
+  leistung_datum: null,
   leistung_text: 'Provision Lead #123 — Maklerleistung',
   betrag_netto: 150,
   ust_satz: 19,
@@ -79,6 +80,7 @@ const REGELBESTEUERT_INPUT: PartnerGutschriftPdfInput = {
     adresse_ort: 'Berlin',
     ust_id: 'DE987654321',
     ist_kleinunternehmer: false,
+    bank_iban: null,
   },
   aussteller_snapshot: makeKonfig(),
 }
@@ -86,6 +88,7 @@ const REGELBESTEUERT_INPUT: PartnerGutschriftPdfInput = {
 const KLEINUNTERNEHMER_INPUT: PartnerGutschriftPdfInput = {
   gutschrift_nr: 'CMNDO-GS-2026-00043',
   erstellt_am: '2026-07-05T10:00:00.000Z',
+  leistung_datum: null,
   leistung_text: 'Provision Lead #456 — Kleinunternehmer',
   betrag_netto: 100,
   ust_satz: null,
@@ -98,6 +101,7 @@ const KLEINUNTERNEHMER_INPUT: PartnerGutschriftPdfInput = {
     adresse_ort: 'Köln',
     ust_id: null,
     ist_kleinunternehmer: true,
+    bank_iban: null,
   },
   aussteller_snapshot: makeKonfig(),
 }
@@ -220,6 +224,44 @@ describe('generatePartnerGutschriftPdf', () => {
     const buf = await generatePartnerGutschriftPdf(KLEINUNTERNEHMER_INPUT)
     expect(Buffer.isBuffer(buf)).toBe(true)
     expect(buf.slice(0, 5).toString('ascii')).toBe('%PDF-')
+  })
+})
+
+// ─── Task 3: leistungszeitraum + auszahlungHinweis (IBAN) ────────────────────
+
+describe('buildGutschriftViewModel — leistungszeitraum + IBAN (Task 3)', () => {
+  it('(leistungszeitraum-a) leistung_datum="2026-07-15" → vm.leistungszeitraum === "Juli 2026"', () => {
+    const input: PartnerGutschriftPdfInput = {
+      ...REGELBESTEUERT_INPUT,
+      leistung_datum: '2026-07-15',
+    }
+    const vm = buildGutschriftViewModel(input)
+    expect(vm.leistungszeitraum).toBe('Juli 2026')
+  })
+
+  it('(leistungszeitraum-b) leistung_datum=null → vm.leistungszeitraum === fallback note', () => {
+    const vm = buildGutschriftViewModel({ ...REGELBESTEUERT_INPUT, leistung_datum: null })
+    expect(vm.leistungszeitraum).toBe('Leistungsdatum entspricht dem Ausstellungsdatum')
+  })
+
+  it('(iban-a) bank_iban set → auszahlungHinweis contains "IBAN" and formatted IBAN in 4-groups', () => {
+    const input: PartnerGutschriftPdfInput = {
+      ...REGELBESTEUERT_INPUT,
+      empfaenger_snapshot: {
+        ...REGELBESTEUERT_INPUT.empfaenger_snapshot,
+        bank_iban: 'DE45100110012844464931',
+      },
+    }
+    const vm = buildGutschriftViewModel(input)
+    expect(vm.auszahlungHinweis).toContain('IBAN')
+    expect(vm.auszahlungHinweis).toContain('DE45 1001 1001 2844 4649 31')
+  })
+
+  it('(iban-b) bank_iban=null → auszahlungHinweis === generic Bankkonto text', () => {
+    const vm = buildGutschriftViewModel({ ...REGELBESTEUERT_INPUT, leistung_datum: null })
+    expect(vm.auszahlungHinweis).toBe(
+      'Die Auszahlung erfolgt auf das bei Claimondo hinterlegte Bankkonto.',
+    )
   })
 })
 

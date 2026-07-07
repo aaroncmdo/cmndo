@@ -107,12 +107,13 @@ const CANNED_GUTSCHRIFT_ROW = {
   id: 'gs-id-1',
   gutschrift_nr: 'CMNDO-GS-2026-00001',
   erstellt_am: '2026-07-05T10:00:00.000Z',
+  leistung_datum: '2026-07-15',
   leistung_text: 'Vermittlungsprovision',
   betrag_netto: 100,
   ust_satz: 19,
   ust_betrag: 19,
   betrag_brutto: 119,
-  empfaenger_snapshot: { name: 'Test Makler', adresse_strasse: 'Str. 1', adresse_plz: '10115', adresse_ort: 'Berlin', ust_id: 'DE123456789', ist_kleinunternehmer: false },
+  empfaenger_snapshot: { name: 'Test Makler', adresse_strasse: 'Str. 1', adresse_plz: '10115', adresse_ort: 'Berlin', ust_id: 'DE123456789', ist_kleinunternehmer: false, bank_iban: null },
   aussteller_snapshot: { firma: 'Claimondo GmbH' },
   pdf_storage_path: null,
 }
@@ -265,6 +266,112 @@ describe('auszahlenProvision', () => {
       (p: Record<string, unknown>) => 'status' in p,
     )
     expect(statusPatch?.status).toBe('ausgezahlt')
+  })
+
+  // ── Task 4: leistungDatumCol je Ledger + Durchreichen an erstellePartnerGutschrift ──
+
+  it('(Task4-a) makler_provisionen: trigger_at aus Ledger-Row wird als leistungsDatum an erstellePartnerGutschrift uebergeben', async () => {
+    vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
+      ok: true,
+      gutschriftId: 'gs-id-1',
+      nummer: 'CMNDO-GS-2026-00001',
+    })
+    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p.pdf' })
+
+    const db = richFakeDb({
+      ledgerRow: {
+        betrag_netto_eur: 100,
+        makler_id: 'makler-1',
+        makler: { ist_kleinunternehmer: false },
+        trigger_at: '2026-07-15T10:00:00.000Z',
+      },
+      gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
+    })
+
+    const r = await auszahlenProvision(db, 'makler_provisionen', 'prov-1')
+    expect(r.ok).toBe(true)
+
+    // erstellePartnerGutschrift must have been called with leistungsDatum from trigger_at
+    expect(erstellePartnerGutschrift).toHaveBeenCalledTimes(1)
+    const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
+    expect(callArg.leistungsDatum).toBe('2026-07-15T10:00:00.000Z')
+  })
+
+  it('(Task4-b) werkstatt_staffel_bonus: erstellt_am aus Ledger-Row wird als leistungsDatum uebergeben', async () => {
+    vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
+      ok: true,
+      gutschriftId: 'gs-id-2',
+      nummer: 'CMNDO-GS-2026-00002',
+    })
+    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p2.pdf' })
+
+    const db = richFakeDb({
+      ledgerRow: {
+        bonus_betrag_netto: 50,
+        werkstatt_id: 'ws-1',
+        werkstaetten: { ist_kleinunternehmer: false },
+        erstellt_am: '2026-06-30T08:00:00.000Z',
+      },
+      gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
+    })
+
+    const r = await auszahlenProvision(db, 'werkstatt_staffel_bonus', 'bonus-1')
+    expect(r.ok).toBe(true)
+
+    const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
+    expect(callArg.leistungsDatum).toBe('2026-06-30T08:00:00.000Z')
+  })
+
+  it('(Task4-c) provisionen_maik: created_at aus Ledger-Row wird als leistungsDatum uebergeben', async () => {
+    vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
+      ok: true,
+      gutschriftId: 'gs-id-3',
+      nummer: 'CMNDO-GS-2026-00003',
+    })
+    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p3.pdf' })
+
+    const db = richFakeDb({
+      ledgerRow: {
+        netto_provision: 75,
+        marketing_partner_id: 'mp-1',
+        marketing_partner: { ist_kleinunternehmer: true },
+        created_at: '2026-05-10T12:00:00.000Z',
+      },
+      gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
+    })
+
+    const r = await auszahlenProvision(db, 'provisionen_maik', 'maik-1')
+    expect(r.ok).toBe(true)
+
+    const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
+    expect(callArg.leistungsDatum).toBe('2026-05-10T12:00:00.000Z')
+  })
+
+  it('(Task4-d) PDF-Input-Konstruktion enthaelt leistung_datum aus re-fetchter Gutschrift-Row', async () => {
+    vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
+      ok: true,
+      gutschriftId: 'gs-id-1',
+      nummer: 'CMNDO-GS-2026-00001',
+    })
+    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p.pdf' })
+
+    const db = richFakeDb({
+      ledgerRow: {
+        betrag_netto_eur: 100,
+        makler_id: 'makler-1',
+        makler: { ist_kleinunternehmer: false },
+        trigger_at: '2026-07-15T10:00:00.000Z',
+      },
+      gutschriftenRefetchData: { ...CANNED_GUTSCHRIFT_ROW, leistung_datum: '2026-07-15' },
+    })
+
+    const r = await auszahlenProvision(db, 'makler_provisionen', 'prov-2')
+    expect(r.ok).toBe(true)
+
+    // generateAndUploadPartnerGutschriftPdf must have been called with leistung_datum from row
+    expect(generateAndUploadPartnerGutschriftPdf).toHaveBeenCalledTimes(1)
+    const pdfArg = vi.mocked(generateAndUploadPartnerGutschriftPdf).mock.calls[0][0] as Record<string, unknown>
+    expect(pdfArg.leistung_datum).toBe('2026-07-15')
   })
 
   it('pre-existing Gutschrift (pdf_storage_path null) + PDF-Fehler: Zeile NICHT geloescht, kein status:paid, {ok:false}', async () => {
