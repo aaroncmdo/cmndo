@@ -109,7 +109,7 @@ export default function TotpChallengeClient({
               maxLength={6}
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              onKeyDown={(e) => e.key === 'Enter' && handleVerify()}
+              onKeyDown={(e) => e.key === 'Enter' && challengeId && handleVerify()}
               autoFocus
               className="w-full text-center text-2xl font-mono tracking-[0.5em] bg-claimondo-bg border border-claimondo-border rounded-ios-md px-4 py-3 focus:outline-none focus:ring-2 focus:ring-claimondo-ondo focus:border-transparent"
               placeholder="000000"
@@ -132,12 +132,17 @@ export default function TotpChallengeClient({
             </div>
           )}
 
+          {/* AAR-2fa-race: Button erst freigeben, wenn die beim Mount async erzeugte
+              Challenge da ist. Vorher wurde ein frueher Klick (Code schnell getippt +
+              Challenge auf langsamem Cold-Path noch pending) stumm verschluckt
+              (handleVerify -> `!challengeId`-Branch „wird vorbereitet"), der User musste
+              erneut klicken. Disabled + Label-Wechsel macht das eindeutig. */}
           <button
             onClick={handleVerify}
-            disabled={pending || code.length !== 6}
+            disabled={pending || code.length !== 6 || !challengeId}
             className="w-full py-3 rounded-ios-md bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold transition-colors disabled:opacity-50"
           >
-            {pending ? 'Wird geprüft …' : 'Bestätigen'}
+            {!challengeId ? 'Wird vorbereitet …' : pending ? 'Wird geprüft …' : 'Bestätigen'}
           </button>
 
           {smsFallbackHref && (
