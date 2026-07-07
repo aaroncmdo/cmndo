@@ -26,6 +26,8 @@ type Props = {
   prefillPhone?: string | null
   /** Ziel nach erfolgreicher 2FA (roleToPath bzw. validiertes continue) */
   targetPath: string
+  /** F3: interne Pflicht-Rolle — "Später einrichten" wird ausgeblendet (non-skippable) */
+  mandatory?: boolean
 }
 
 function maskPhone(phone: string): string {
@@ -40,6 +42,7 @@ export default function TwoFaClient({
   maskedPhone,
   prefillPhone,
   targetPath,
+  mandatory = false,
 }: Props) {
   const [phase, setPhase] = useState<'phone' | 'code'>(mode === 'enroll' ? 'phone' : 'code')
   const [phone, setPhone] = useState(prefillPhone ?? '')
@@ -263,9 +266,10 @@ export default function TwoFaClient({
           )}
         </div>
 
-        {mode === 'enroll' && (
+        {mode === 'enroll' && !mandatory && (
           // Soft-Enroll: überspringbar. Die Middleware lässt faktor-lose User
           // ohnehin durch — der Link macht das ehrlich statt eine Wand vorzutäuschen.
+          // F3: Pflicht-Rollen (mandatory) sehen den Skip NICHT — 2FA ist erzwungen.
           <button
             onClick={() => { window.location.href = targetPath }}
             className="w-full mt-4 py-2 text-xs text-claimondo-ondo/70 hover:text-claimondo-ondo transition-colors text-center"
