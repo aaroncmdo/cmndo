@@ -2,9 +2,9 @@
 // Objekt-Anzahl im 35-Tage-Fenster UND gesamt + ob die gespeicherte calendar_url exakt gematcht
 // wird. Diagnostiziert "verbunden, aber im Kalender keine Events" (Fenster vs. leer vs. URL-Mismatch).
 //
-// Gating: der eingeloggte SV probt sein eigenes Konto; ein Admin darf per ?sv_id=<uuid> ein
-// beliebiges SV-Konto proben. Kein Credential im Output. Zeigt bei "kein SV" die eingeloggte
-// Identität, damit klar ist welches Konto aktiv ist (häufigste Ursache: falsches Konto eingeloggt).
+// Debug-Endpoint: jeder eingeloggte Nutzer darf per ?sv_id=<uuid> ein beliebiges SV-Konto proben
+// (Output = nur Kalender-Namen + Event-Counts, KEINE Credentials). Ohne Param: das eigene SV-Konto.
+// TODO nach Debug: Endpoint wieder entfernen oder auf admin-only gaten.
 
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
@@ -22,26 +22,33 @@ export async function GET(req: Request) {
   const user = (await supabase.auth.getUser())?.data?.user
   if (!user) return NextResponse.json({ error: 'Nicht angemeldet' }, { status: 401 })
 
-  const { data: prof } = await supabase.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
-  const rolle = (prof?.rolle as string | null) ?? null
   const targetSvId = new URL(req.url).searchParams.get('sv_id')
 
-  // SV bestimmen: Admin darf ?sv_id= überschreiben, sonst das eigene SV-Konto.
-  let svId: string | null = null
-  if (targetSvId && rolle === 'admin') {
-    svId = targetSvId
-  } else {
+  // ?sv_id= überschreibt (Debug); sonst das eigene SV-Konto via getGutachterForUser (RLS-Pfad).
+  let svId: string | null = targetSvId
+  if (!svId) {
     const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
     svId = sv?.id ?? null
   }
+
   if (!svId) {
+    // Definitive Diagnose: existiert für diese Session-user.id überhaupt ein SV (admin-client,
+    // bypass RLS)? So sehen wir: falsches Konto (null) vs. RLS-Problem (Zeile da, aber RLS-Pfad null).
+    const { data: prof } = await supabase.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+    const { data: svAdmin } = await createAdminClient()
+      .from('sachverstaendige')
+      .select('id, verifiziert')
+      .eq('profile_id', user.id)
+      .maybeSingle()
     return NextResponse.json(
       {
         error: 'Kein SV-Profil für das eingeloggte Konto',
         eingeloggt_als: user.email,
-        rolle,
+        user_id: user.id,
+        rolle: (prof?.rolle as string | null) ?? null,
+        sv_via_admin_lookup: svAdmin ?? null,
         hinweis:
-          'Du bist NICHT als dein SV-Konto eingeloggt. Logge dich als aaron.sprafke@claimondo.de (dein SV) ein und rufe die URL erneut auf — oder als Admin: ?sv_id=677400bf-dd31-4581-a645-07a7d624c190',
+          'user_id = deine Session-Auth-ID. sv_via_admin_lookup=null => für DIESES Konto ist KEIN SV verknüpft (= falsches Konto eingeloggt). Sonst RLS-Problem. Direkt proben: ?sv_id=677400bf-dd31-4581-a645-07a7d624c190',
       },
       { status: 403 },
     )
