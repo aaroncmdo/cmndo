@@ -79,19 +79,18 @@ export function AnspruchEinschaetzungStep({
         </div>
       </div>
 
-      {fahrbereit === false ? (
-        <div>
-          <p className="mb-2 text-body-sm font-medium text-claimondo-navy">Ersatzfahrzeug während der Reparatur?</p>
-          <div className="flex flex-col gap-2">
-            {ERSATZFAHRZEUG_OPTIONEN.map((e) => (
-              <button key={e} type="button" onClick={() => setErsatzfahrzeug(e)}
-                className={`rounded-ios-sm border px-3 py-2 text-left text-body-sm ${ersatzfahrzeug === e ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>
-                {ERSATZFAHRZEUG_LABEL[e]}
-              </button>
-            ))}
-          </div>
+      <div>
+        <p className="mb-1 text-body-sm font-medium text-claimondo-navy">Ausgleich während der Reparatur?</p>
+        <p className="mb-2 text-caption text-claimondo-shield">Nutzungsausfall wird rückwirkend nach nachgewiesener Reparatur gezahlt, wenn Sie keinen Mietwagen nehmen.</p>
+        <div className="flex flex-col gap-2">
+          {ERSATZFAHRZEUG_OPTIONEN.map((e) => (
+            <button key={e} type="button" onClick={() => setErsatzfahrzeug(e)}
+              className={`rounded-ios-sm border px-3 py-2 text-left text-body-sm ${ersatzfahrzeug === e ? 'border-claimondo-navy bg-claimondo-navy text-white' : 'border-claimondo-border text-claimondo-navy'}`}>
+              {ERSATZFAHRZEUG_LABEL[e]}
+            </button>
+          ))}
         </div>
-      ) : null}
+      </div>
 
       <div>
         <label className="mb-1 block text-body-sm font-medium text-claimondo-navy">Erstzulassung (Jahr)</label>
