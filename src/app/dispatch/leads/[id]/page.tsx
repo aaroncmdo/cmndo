@@ -14,6 +14,8 @@ import { ladeFlowPhasen } from '@/lib/onboarding/lade-flow-phasen'
 import { computeQualificationStatus } from './_lib/qualification-engine'
 import { ladeLeadTerminGutachter } from '@/lib/dispatch/lade-lead-termin-gutachter'
 import LeadTerminGutachterBanner from './_components/LeadTerminGutachterBanner'
+import { deriveLeadWorkflowState } from './_lib/deriveLeadWorkflowState'
+import LeadWorkflowPanel from './_components/LeadWorkflowPanel'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import { buildDokumentKontext } from '@/lib/dokumente/build-kontext'
 import { evaluateKatalogRule } from '@/lib/dokumente/ruleEvaluator'
@@ -172,10 +174,18 @@ export default async function DispatchLeadDetail({
     }
   }
 
+  // Phase 1b (additiv): der abgeleitete Workflow-Zustand als Kopfzone —
+  // Zustands-Badge + Pipeline-Schiene + Next-Best-Action (guidanceOnly = noch
+  // ohne CTA-Verdrahtung). DispatchLeadForm bleibt unveraendert darunter.
+  const workflow = deriveLeadWorkflowState(lead, aktiverSvTermin, flowLinks[0] ?? null)
+
   return (
     <>
       <LeadRealtimeRefresh leadId={id} watchTermine />
       <LeadTerminGutachterBanner info={terminGutachterInfo} />
+      <div className="mb-4">
+        <LeadWorkflowPanel result={workflow} />
+      </div>
       <DispatchLeadForm
         lead={lead as Record<string, unknown> & { id: string }}
         phasen={phasen}
