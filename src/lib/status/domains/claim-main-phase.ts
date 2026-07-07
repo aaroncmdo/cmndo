@@ -6,12 +6,15 @@
 import type { StatusDef, StatusSlot } from '../types'
 import { MAIN_PHASE_LABEL, type ClaimMainPhase } from '@/lib/claims/lifecycle'
 
-// Semantische Slots (nicht die frueheren beliebigen Tints): erfassung=Start/neutral,
-// begutachtung+regulierung=aktive Arbeitsphasen, abschluss=erledigt (gruen, wie vorher).
+// Semantische 4-Schritt-Pipeline statt der frueheren beliebigen (und zwischen den beiden
+// Consumern widerspruechlichen) Tints: erfassung=Start/neutral (grau), begutachtung=aktive
+// Arbeit (blau), regulierung=wartet auf Versicherer-Regulierung (pending/amber), abschluss=
+// erledigt (gruen). 4 optisch distinkte Stufen -> Kanban-Spalten + Akten-Pillen bleiben auf
+// einen Blick unterscheidbar (Design-Intent der urspruenglichen 4-Farb-PHASE_ACCENT-Map).
 const SLOT: Record<ClaimMainPhase, StatusSlot> = {
   erfassung: 'neutral',
   begutachtung: 'active',
-  regulierung: 'active',
+  regulierung: 'pending',
   abschluss: 'success',
 }
 
