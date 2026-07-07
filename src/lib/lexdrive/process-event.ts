@@ -9,7 +9,7 @@ import { transitionFallStatus, istGueltigerFallUebergang } from '@/lib/faelle/st
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
-import { upsertClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
+import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { ALLOWED_STATUS_VALUES } from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 
@@ -846,8 +846,11 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // faelle-Teil. Hier herausziehen und mit dem neuen claims-Namen ins
       // claims-Update umhaengen (bei claim_id), sonst verwerfen (faelle-Spalte
       // wird in PR2 gedroppt — claim-lose Faelle sind Alt-Datenbestand).
+      // Payment-Ledger Phase 3 (Collapse): regulierung_betrag (anerkannt/Soll) geht NUR noch in den
+      // (claim,'vs')-Ledger (forderungsbetrag, s. cpFields unten) — kein claims.regulierungs_betrag-Cache.
+      let regBetrag: number | null = null
       if ('regulierung_betrag' in fuFaelle) {
-        if (claimIdForUpdates) fuClaims.regulierungs_betrag = fuFaelle.regulierung_betrag
+        regBetrag = fuFaelle.regulierung_betrag as number | null
         delete fuFaelle.regulierung_betrag
       }
       if ('vs_ablehnungsgrund' in fuFaelle) {
@@ -910,7 +913,8 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // Hinweis: beim Event zahlung_eingegangen hat transitionFallStatus (oben via
       // EVENT_STATUS_MAP) ggf. schon eine claim_payments-Row angelegt; dieser
       // Upsert trifft via create-or-update DIESELBE (aktuelle) Row — idempotent.
-      const cpFields: ClaimPaymentRerouteFields = {}
+      const cpFields: ClaimPaymentFields = {}
+      if (regBetrag != null) cpFields.forderungsbetrag = regBetrag
       if ('zahlung_eingegangen_am' in fuFaelle) {
         cpFields.zahlungseingang_am = fuFaelle.zahlung_eingegangen_am as string | null
         delete fuFaelle.zahlung_eingegangen_am
@@ -920,6 +924,13 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         delete fuFaelle.zahlung_betrag
       }
       if (cpFields.zahlungseingang_am != null) cpFields.status = 'erhalten'
+
+      // Payment-Ledger Phase 3 (Collapse): auszahlung_gutachter_eingegangen_am aus fuClaims peelen —
+      // es geht NUR in den (claim,'sv')-Ledger (unten via svAmPeel), nicht mehr in den claims-Cache.
+      const svAmPeel = ('auszahlung_gutachter_eingegangen_am' in fuClaims)
+        ? (fuClaims.auszahlung_gutachter_eingegangen_am as string | null)
+        : null
+      delete fuClaims.auszahlung_gutachter_eingegangen_am
 
       // CMM-49 faelle-DROP: faelle ist gedroppt — der fuFaelle-Residual-Write entfaellt.
       // (fuFaelle wird oben weiterhin fuer den claim_payments-Peel gelesen; sein Rest war
@@ -937,9 +948,9 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         )
         if (!cpRes.ok) console.error('[CMM-44 SP-J] process-event claim_payments fehlgeschlagen:', cpRes.error)
       }
-      // Payment-Ledger Phase 1: Auszahlungs-Split (Kunde/SV) -> (claim,partei)-Ledger.
-      // auszahlung_kunde_* liegen als Residual in fuFaelle (kein claims-Home -> vorher toter
-      // Write); auszahlung_gutachter_eingegangen_am in fuClaims (claims-Cache bleibt bis Phase 3).
+      // Payment-Ledger Phase 3: Auszahlungs-Split (Kunde/SV) -> (claim,partei)-Ledger, cache-frei.
+      // auszahlung_kunde_* liegen als Residual in fuFaelle (kein claims-Home); auszahlung_gutachter_
+      // eingegangen_am wurde oben aus fuClaims gepeelt (svAmPeel) — kein claims-Cache mehr.
       if (claimIdForUpdates) {
         const kundeBetrag = ('auszahlung_kunde_betrag' in fuFaelle) ? (fuFaelle.auszahlung_kunde_betrag as number | null) : null
         const kundeAm = ('auszahlung_kunde_eingegangen_am' in fuFaelle) ? (fuFaelle.auszahlung_kunde_eingegangen_am as string | null) : null
@@ -950,9 +961,8 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
           }, input.triggeredByProfileId ?? null)
           if (!r.ok) console.error('[Payment-Ledger] process-event kunde-Auszahlung fehlgeschlagen:', r.error)
         }
-        const svAm = ('auszahlung_gutachter_eingegangen_am' in fuClaims) ? (fuClaims.auszahlung_gutachter_eingegangen_am as string | null) : null
-        if (svAm != null) {
-          const r = await upsertClaimPayment(db, claimIdForUpdates, 'sv', { zahlungseingang_am: svAm }, input.triggeredByProfileId ?? null)
+        if (svAmPeel != null) {
+          const r = await upsertClaimPayment(db, claimIdForUpdates, 'sv', { zahlungseingang_am: svAmPeel }, input.triggeredByProfileId ?? null)
           if (!r.ok) console.error('[Payment-Ledger] process-event sv-Auszahlung fehlgeschlagen:', r.error)
         }
       }

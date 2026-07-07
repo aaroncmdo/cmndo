@@ -1,5 +1,6 @@
 ﻿import { Suspense } from 'react'
 import { createClient } from '@/lib/supabase/server'
+import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 import { redirect } from 'next/navigation'
 import { FINANCE } from '@/lib/finance/constants'
 import { getPaket } from '@/lib/pakete'
@@ -540,12 +541,12 @@ export default async function FinancePage() {
       .not('regulierung_betrag', 'is', null),
 
     // 4. Alle abgeschlossenen Fälle mit Betrag (für Durchschnitt)
+    // Payment-Ledger Phase 3 (Collapse): regulierung_betrag aus dem (claim,'vs')-Ledger (Ist-first);
+    // admin darf claim_payments lesen (RLS-Policy). Der NOT-NULL-Filter wandert in JS (claimRegBetrag > 0).
     supabase
-      // CMM-49: faelle-frei + value-neutral via Bridge-Intersection (faelle-backed Claim-IDs).
       .from('claims')
-      .select('regulierungs_betrag')
-      .in('id', abgeschlossenFaelleClaimIds)
-      .not('regulierungs_betrag', 'is', null),
+      .select('claim_payments(partei, forderungsbetrag, erhaltener_betrag)')
+      .in('id', abgeschlossenFaelleClaimIds),
 
     // 5. Fälle pro Monat (letzte 6 Monate) – alle Fälle nach created_at
     // CMM-49: claims-direkt auf den faelle-backed Claim-IDs (Bridge-Intersection) — claims ⊋ faelle,
@@ -585,16 +586,17 @@ export default async function FinancePage() {
     return sum + (sv.paket ? getPaket(sv.paket).preis : 0)
   }, 0)
 
-  // CMM-49: alleAbgeschlossen liest jetzt claims-direkt (flach) — regulierungs_betrag direkt.
-  const claimRegBetrag = (c: { regulierungs_betrag: number | null }): number =>
-    Number(c.regulierungs_betrag) || 0
+  // Payment-Ledger Phase 3 (Collapse): VS-Betrag aus der (claim,'vs')-Ledger-Row (Ist-first).
+  const claimRegBetrag = (c: { claim_payments?: unknown }): number =>
+    Number(vsBetragAusEmbed(c?.claim_payments)) || 0
   // CMM-44 SP-I3: Query #3/#6 lesen jetzt aus v_faelle_mit_aktuellem_termin —
   // regulierung_betrag ist dort flach.
   const viewRegBetrag = (f: { regulierung_betrag: number | null }): number =>
     Number(f.regulierung_betrag) || 0
 
   // ── Durchschnittlicher Fallwert ──
-  const alleBetraege = (alleAbgeschlossen ?? []).map(claimRegBetrag)
+  // >0-Filter ersetzt den frueheren .not('regulierungs_betrag','is',null) (nur regulierte zaehlen im Schnitt).
+  const alleBetraege = (alleAbgeschlossen ?? []).map(claimRegBetrag).filter(b => b > 0)
   const avgFallwert = alleBetraege.length > 0
     ? alleBetraege.reduce((a, b) => a + b, 0) / alleBetraege.length
     : 0

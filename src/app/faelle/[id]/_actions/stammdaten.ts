@@ -567,27 +567,24 @@ export async function updateFallField(
   // Cluster 2 (PR1b) = Hergang/Art/Typ/Flags, Cluster 3 (PR1c) = Rest
   // (gegner_schadennummer/regulierung_betrag in der Allowlist) — alle Maps
   // liefern denselben { faelle/UI-Name: claimsSpalte }-Shape, gleicher Pfad.
-  // Payment-Ledger Phase 1: die Auszahlungs-Felder der AuszahlungSection wandern in den
-  // (claim_id, partei)-Ledger. auszahlung_kunde_* war heimatlos (nur View-NULL, toter Write)
-  // -> jetzt echter Home; auszahlung_gutachter_eingegangen_am schreibt zusaetzlich weiter
-  // den claims-Cache (bis Phase 3). gutachter_honorar (Soll) laeuft weiter ueber GUTACHTEN_FIELD_MAP.
+  // Payment-Ledger Phase 3 (Collapse): die Auszahlungs-Felder der AuszahlungSection
+  // schreiben NUR noch den (claim_id, partei)-Ledger — kein claims-Cache mehr.
+  // auszahlung_gutachter_betrag (sv-Ist) ergaenzt: war zuvor cache-only OHNE Ledger-Writer
+  // (Normalisierungs-Luecke, 0 prod-Daten) -> jetzt symmetrisch zu auszahlung_kunde_betrag.
+  // gutachter_honorar (Soll) laeuft weiter ueber GUTACHTEN_FIELD_MAP.
   const auszahlungLedger = {
-    auszahlung_kunde_betrag:             { partei: 'kunde' as const, betrag: true,  cacheAufClaims: false },
-    auszahlung_kunde_eingegangen_am:     { partei: 'kunde' as const, betrag: false, cacheAufClaims: false },
-    auszahlung_gutachter_eingegangen_am: { partei: 'sv' as const,    betrag: false, cacheAufClaims: true },
+    auszahlung_kunde_betrag:             { partei: 'kunde' as const, betrag: true  },
+    auszahlung_kunde_eingegangen_am:     { partei: 'kunde' as const, betrag: false },
+    auszahlung_gutachter_betrag:         { partei: 'sv' as const,    betrag: true  },
+    auszahlung_gutachter_eingegangen_am: { partei: 'sv' as const,    betrag: false },
   }[field]
   if (auszahlungLedger) {
     if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
-    const admin = createAdminClient()
     const cpFields: ClaimPaymentFields = auszahlungLedger.betrag
       ? { erhaltener_betrag: normalized as number | null }
       : { zahlungseingang_am: normalized as string | null }
-    const cpRes = await upsertClaimPayment(admin, claimId, auszahlungLedger.partei, cpFields)
+    const cpRes = await upsertClaimPayment(createAdminClient(), claimId, auszahlungLedger.partei, cpFields)
     if (!cpRes.ok) return { success: false, error: cpRes.error ?? 'claim_payments Update fehlgeschlagen' }
-    if (auszahlungLedger.cacheAufClaims) {
-      const { error: cacheErr } = await admin.from('claims').update({ [field]: normalized }).eq('id', claimId)
-      if (cacheErr) return { success: false, error: cacheErr.message }
-    }
     revalidatePath(`/faelle/${fallId}`)
     return { success: true }
   }
