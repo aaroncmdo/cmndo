@@ -29,6 +29,11 @@ const ALL = [
   { email: 'test-dispatch@claimondo.de', pw: process.env.TEST_DISPATCH_PASSWORD ?? 'Test1234!', env: 'TEST_DISPATCH_TOTP_SECRET' },
   // test-sv: starkes Passwort NUR aus env (Supabase lehnt Test1234! als schwach ab).
   { email: 'test-sv@claimondo.de', pw: process.env.TEST_SV_PASSWORD ?? '', env: 'TEST_SV_TOTP_SECRET' },
+  // AAR-2fa-blast-radius: kanzlei + kundenbetreuer sind ebenfalls Pflicht-2FA-Rollen
+  // (istZweiFaktorPflicht) und werden von e2e genutzt (golden-path-prod, onboarding-
+  // pflichtdok) — nach #3745 sonst im Enroll-Wall. Passwoerter aus CI-env.
+  { email: 'test-kanzlei@claimondo.de', pw: process.env.TEST_KANZLEI_PASSWORD ?? '', env: 'TEST_KANZLEI_TOTP_SECRET' },
+  { email: 'test-kb@claimondo.de', pw: process.env.TEST_KB_PASSWORD ?? '', env: 'TEST_KB_TOTP_SECRET' },
 ]
 const filter = process.argv.slice(2)
 const accounts = filter.length ? ALL.filter((a) => filter.includes(a.email)) : ALL
