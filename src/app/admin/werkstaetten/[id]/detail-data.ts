@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import type { PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
@@ -47,6 +48,13 @@ export interface WerkstattDetailStammdaten {
   user_id: string | null
 }
 
+export interface WerkstattNotiz {
+  id: string
+  text: string
+  autor_name: string | null
+  created_at: string
+}
+
 export interface WerkstattDetail {
   werkstatt: WerkstattDetailStammdaten
   staffel: { schwelle: number; bonus_betrag_netto: number }[]
@@ -54,6 +62,7 @@ export interface WerkstattDetail {
   lastSignInAt: string | null
   forcePasswordChange: boolean | null
   billing: PartnerBillingAggregat | null
+  notizen: WerkstattNotiz[]
 }
 
 export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail | null> {
@@ -99,6 +108,17 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
 
   const billing = await ladePartnerBilling('werkstatt', id)
 
+  // Interne Notizen (Tabelle nicht in database.types -> untypisierter Client-Cast, damit
+  // wir das geteilte database.types.ts nicht anfassen muessen). Service-Role-Read ist ok:
+  // die Page ist admin-gegated, RLS gatet zusaetzlich auf is_staff().
+  const notizenDb = createAdminClient() as unknown as SupabaseClient
+  const { data: notizenData } = await notizenDb
+    .from('werkstatt_notizen')
+    .select('id, text, autor_name, created_at')
+    .eq('werkstatt_id', id)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
   return {
     werkstatt: w as unknown as WerkstattDetailStammdaten,
     staffel: (staffelRes.data ?? []) as { schwelle: number; bonus_betrag_netto: number }[],
@@ -106,5 +126,6 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
     lastSignInAt,
     forcePasswordChange,
     billing: billing.ok ? billing.aggregat : null,
+    notizen: (notizenData ?? []) as unknown as WerkstattNotiz[],
   }
 }

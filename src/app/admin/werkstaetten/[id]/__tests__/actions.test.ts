@@ -33,6 +33,11 @@ vi.mock('@/lib/supabase/admin', () => ({
         lastPatch = p
         return { eq: () => Promise.resolve({ error: state.updateError }) }
       },
+      insert: (p: Record<string, unknown>) => {
+        lastPatch = p
+        return Promise.resolve({ error: state.updateError })
+      },
+      delete: () => ({ eq: () => ({ eq: () => Promise.resolve({ error: state.updateError }) }) }),
     }),
   }),
 }))
@@ -43,6 +48,7 @@ import {
   setzeWerkstattStatus,
   aktualisiereWerkstattEmail,
   aktualisiereWerkstattAdresse,
+  fuegeWerkstattNotizHinzu,
 } from '../actions'
 
 const basePatch = {
@@ -152,5 +158,21 @@ describe('aktualisiereWerkstattAdresse', () => {
     expect(res.ok).toBe(true)
     expect(lastPatch?.lat).toBe(51.5)
     expect(lastPatch?.adresse_ort).toBe('Dortmund')
+  })
+})
+
+describe('fuegeWerkstattNotizHinzu', () => {
+  it('Nicht-Admin -> ok:false', async () => {
+    state.rolle = 'dispatch'
+    expect((await fuegeWerkstattNotizHinzu('w-1', 'Notiz')).ok).toBe(false)
+  })
+  it('leerer Text -> ok:false', async () => {
+    expect((await fuegeWerkstattNotizHinzu('w-1', '  ')).ok).toBe(false)
+  })
+  it('Happy: Admin + Text -> Insert mit getrimmtem Text', async () => {
+    const res = await fuegeWerkstattNotizHinzu('w-1', '  Kunde angerufen  ')
+    expect(res.ok).toBe(true)
+    expect(lastPatch?.text).toBe('Kunde angerufen')
+    expect(lastPatch?.werkstatt_id).toBe('w-1')
   })
 })
