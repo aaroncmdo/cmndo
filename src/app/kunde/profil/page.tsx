@@ -13,7 +13,7 @@ import KundeProfilForm from './KundeProfilForm'
 import PageHeader from '@/components/shared/PageHeader'
 import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
 import { NotificationPreferencesForm } from '@/components/notifications/NotificationPreferencesForm'
-import DsgvoLoeschCard from '@/components/kunde/DsgvoLoeschCard'
+import DsgvoLoeschCard from '@/components/shared/DsgvoLoeschCard'
 
 // User-spezifische Notification-Prefs -> dynamisch (aus /kunde/einstellungen uebernommen).
 export const dynamic = 'force-dynamic'

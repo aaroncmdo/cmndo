@@ -11,6 +11,7 @@ import {
 } from '@/lib/makler/queries'
 import { MaklerSettings } from '@/components/makler/MaklerSettings'
 import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
+import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
 
 export const dynamic = 'force-dynamic'
 
@@ -35,10 +36,15 @@ export default async function EinstellungenPage() {
   }
 
   return (
-    <MaklerSettings
-      profile={profile}
-      consents={consents}
-      notificationPrefs={notificationPrefs}
-    />
+    <>
+      <MaklerSettings
+        profile={profile}
+        consents={consents}
+        notificationPrefs={notificationPrefs}
+      />
+      <div className="mx-auto max-w-2xl px-4 pb-8">
+        <DsgvoLoeschSection />
+      </div>
+    </>
   )
 }
