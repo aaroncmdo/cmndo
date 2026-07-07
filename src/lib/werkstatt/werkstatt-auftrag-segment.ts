@@ -32,6 +32,20 @@ export function zeigtGutachten(w: string | null): boolean {
   return w === 'haftpflicht' || w === 'kasko'
 }
 
+const QUELLE_LABEL: Record<string, string> = {
+  dispatcher: 'Dispatcher',
+  kunde: 'Kunde',
+  embed: 'Online-Finder',
+  gutachter: 'Gutachter',
+  kb: 'Kundenbetreuung',
+  qr_referral: 'QR-Empfehlung',
+}
+
+/** DE-Label fuer die Vermittlungs-Quelle (reparatur_werkstatt_quelle). null wenn leer. */
+export function quelleLabel(q: string | null): string | null {
+  return q ? (QUELLE_LABEL[q] ?? q) : null
+}
+
 /** Zaehlt Auftraege pro Segment (fuer die Chip-Counts). */
 export function zaehleSegmente(rows: SegmentInput[]): { reparatur: number; vermittlung: number } {
   let reparatur = 0

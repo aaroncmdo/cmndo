@@ -14,6 +14,7 @@ import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstat
 import {
   werkstattAuftragSegment,
   abrechnungswegLabel,
+  quelleLabel,
   zeigtGutachten,
 } from '@/lib/werkstatt/werkstatt-auftrag-segment'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
@@ -297,6 +298,15 @@ function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const segment = werkstattAuftragSegment(auftrag)
   const typ = abrechnungswegLabel(auftrag.abrechnungsweg)
+  const kundeName = auftrag.kunde_name ?? '–'
+
+  // Früh-Zustand: der Kunde ist noch mitten in der Ersterfassung — es gibt noch
+  // kein Fahrzeug, keinen Reparaturtermin und kein Gutachten. Statt einer nackten
+  // „–"-Detailseite zeigen wir einen freundlichen Hinweis (nur Reparatur-Sicht).
+  const istFrueh =
+    !auftrag.fahrzeug_hersteller &&
+    !auftrag.reparatur_termin_id &&
+    !auftrag.gutachten_fertiggestellt_am
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto space-y-4">
@@ -314,6 +324,7 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
             </StatusBadge>
           )}
         </div>
+        <p className="text-body-sm text-claimondo-navy font-medium">{kundeName}</p>
         <p className="text-body-sm text-claimondo-ondo">
           {[auftrag.fahrzeug_hersteller, auftrag.fahrzeug_modell].filter(Boolean).join(' ') || '–'}
           {auftrag.kennzeichen ? ` · ${auftrag.kennzeichen}` : ''}
@@ -322,6 +333,10 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
 
       <SectionCard title="Fall">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
+          <div>
+            <dt className="text-body-xs text-claimondo-ondo">Kunde</dt>
+            <dd className="text-claimondo-navy font-medium">{kundeName}</dd>
+          </div>
           <div>
             <dt className="text-body-xs text-claimondo-ondo">Schaden</dt>
             <dd className="text-claimondo-navy">{auftrag.schadenart ?? '–'}</dd>
@@ -335,17 +350,49 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
 
       {segment === 'reparatur' ? (
         <>
+          {istFrueh && (
+            <SectionCard title="Status" className="mt-3">
+              <p className="text-body-sm text-claimondo-ondo">
+                Der Kunde bearbeitet gerade seinen Fall (Ersterfassung). Fahrzeug- und
+                Schadendaten erscheinen hier, sobald der Flow durchlaufen ist.
+              </p>
+            </SectionCard>
+          )}
           <ReparaturterminSektion auftrag={auftrag} />
           {zeigtGutachten(auftrag.abrechnungsweg) && <GutachtenSektion auftrag={auftrag} />}
         </>
       ) : (
         <SectionCard title="Meine Vermittlung">
-          <p className="text-body-sm text-claimondo-ondo">
-            Du hast diesen Kunden an Claimondo vermittelt.
-            {auftrag.provision_betrag_netto != null
-              ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${auftrag.provision_status ?? 'offen'}).`
-              : ''}
-          </p>
+          <div className="space-y-3">
+            <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
+              <div>
+                <dt className="text-body-xs text-claimondo-ondo">Kunde</dt>
+                <dd className="text-claimondo-navy font-medium">{kundeName}</dd>
+              </div>
+              <div>
+                <dt className="text-body-xs text-claimondo-ondo">Quelle</dt>
+                <dd className="text-claimondo-navy">{quelleLabel(auftrag.quelle) ?? '–'}</dd>
+              </div>
+              {auftrag.zugewiesen_am && (
+                <div>
+                  <dt className="text-body-xs text-claimondo-ondo">Vermittelt am</dt>
+                  <dd className="text-claimondo-navy tabular-nums">
+                    {formatBerlin(auftrag.zugewiesen_am, {
+                      day: '2-digit',
+                      month: '2-digit',
+                      year: 'numeric',
+                    })}
+                  </dd>
+                </div>
+              )}
+            </dl>
+            <p className="text-body-sm text-claimondo-ondo">
+              Du hast diesen Kunden an Claimondo vermittelt.
+              {auftrag.provision_betrag_netto != null
+                ? ` Provision: ${EUR.format(auftrag.provision_betrag_netto)} (${auftrag.provision_status ?? 'offen'}).`
+                : ''}
+            </p>
+          </div>
         </SectionCard>
       )}
     </div>
