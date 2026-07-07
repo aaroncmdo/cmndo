@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue } from '@/lib/auth/safe-continue'
+import { externalOrigin } from '@/lib/external-url'
 
 // AAR-718: Das frühere lokale ROLE_REDIRECT-Mapping enthielt falsche Ziele
 // (Kanzlei → /admin statt /kanzlei/dashboard) und fehlende Rollen (dispatch,
@@ -9,7 +10,12 @@ import { safeContinue } from '@/lib/auth/safe-continue'
 // roleToPath-Funktion wie der Email-Login + die 2FA-Page.
 
 export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url)
+  const { searchParams } = new URL(request.url)
+  // externalOrigin statt request.url-origin: hinter dem nginx/PM2-Proxy
+  // ist der request.url-Origin die interne Bind-Adresse (0.0.0.0:3000 Prod /
+  // 0.0.0.0:3001 Staging) — ein Redirect dorthin schickt den Kunden auf eine
+  // unerreichbare Adresse. Betraf den Magic-Link-Login aus der Kunden-Welcome-Mail.
+  const appOrigin = externalOrigin(request)
   const code = searchParams.get('code')
   // next wird von Magic-Link-Flows (Kunden-Welcome, Passwort-Reset etc.)
   // mitgeschickt damit der Callback nach Session-Exchange direkt dorthin navigiert.
@@ -35,12 +41,12 @@ export async function GET(request: Request) {
         const target = cont
           ? cont.startsWith('http')
             ? cont
-            : `${origin}${cont}`
-          : `${origin}${dest}`
+            : `${appOrigin}${cont}`
+          : `${appOrigin}${dest}`
         return NextResponse.redirect(target)
       }
     }
   }
 
-  return NextResponse.redirect(`${origin}/login?error=OAuth+fehlgeschlagen`)
+  return NextResponse.redirect(`${appOrigin}/login?error=OAuth+fehlgeschlagen`)
 }

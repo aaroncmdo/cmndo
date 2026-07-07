@@ -1,5 +1,3 @@
-import type { NextRequest } from 'next/server'
-
 // Hinter dem nginx-Reverse-Proxy ist `request.url` der INTERNE Listen-Origin
 // (z.B. http://0.0.0.0:3001). Redirects oder OAuth-redirect_uris, die daraus
 // gebaut werden, leaken `0.0.0.0:3001` an den Browser bzw. an Google.
@@ -7,9 +5,15 @@ import type { NextRequest } from 'next/server'
 // Fallback auf `host`, erst danach auf `request.url` (lokaler Dev).
 //
 // Gleiche Logik wie die lokale `externalUrl` in src/lib/supabase/middleware.ts
-// (2026-05-12) — hier als Shared-Util, damit OAuth-Routen sie mitnutzen,
-// statt erneut `new URL(path, req.url)` zu bauen.
-export function externalOrigin(request: NextRequest): string {
+// (2026-05-12) — hier als Shared-Util, damit OAuth-/Auth-Routen sie mitnutzen,
+// statt erneut `new URL(path, req.url)` zu bauen. Consumer: google/connect,
+// google/callback, google-calendar/callback, auth/callback (Kunde-Magic-Link),
+// auth/linkedin/callback, auth/logout — Letztere drei via FlowLink-Callback-
+// Audit 2026-07-06 (Magic-Link-Login lief sonst auf 0.0.0.0:3000).
+//
+// Akzeptiert das breite `Request`-Interface (Web-Request + NextRequest), da nur
+// `.headers.get()` + `.url` genutzt werden.
+export function externalOrigin(request: Request): string {
   const forwardedHost = request.headers.get('x-forwarded-host')
   const forwardedProto = request.headers.get('x-forwarded-proto')
   if (forwardedHost) {
@@ -25,6 +29,6 @@ export function externalOrigin(request: NextRequest): string {
   return new URL(request.url).origin
 }
 
-export function externalUrl(request: NextRequest, path: string): URL {
+export function externalUrl(request: Request, path: string): URL {
   return new URL(path, externalOrigin(request))
 }
