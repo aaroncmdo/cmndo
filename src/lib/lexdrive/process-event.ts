@@ -9,7 +9,7 @@ import { transitionFallStatus, istGueltigerFallUebergang } from '@/lib/faelle/st
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
-import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
+import { upsertClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { ALLOWED_STATUS_VALUES } from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 
@@ -928,9 +928,10 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
       }
       if (claimIdForUpdates && Object.keys(cpFields).length > 0) {
-        const cpRes = await upsertCurrentClaimPayment(
+        const cpRes = await upsertClaimPayment(
           db,
           claimIdForUpdates,
+          'vs',
           cpFields,
           input.triggeredByProfileId ?? null,
         )
