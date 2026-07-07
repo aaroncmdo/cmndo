@@ -131,6 +131,22 @@ export async function waehleGegenvorschlagSlot(
     const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
     if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
+    // IDOR-Fix: assertKundeOwnsFall prueft nur fallId — der uebergebene terminId MUSS
+    // zusaetzlich zum eigenen Fall gehoeren. Sonst kann ein Kunde mit gueltigem eigenem
+    // fallId einen FREMDEN terminId umbuchen + via bestaetigeTermin bestaetigen (Admin-
+    // Client umgeht RLS -> keine DB-Absicherung). NULL-sicher: fall_id ODER claim_id muss
+    // matchen (gutachter_termine.claim_id ist noch teils NULL).
+    const { data: terminOwner } = await admin
+      .from('gutachter_termine')
+      .select('fall_id, claim_id')
+      .eq('id', terminId)
+      .maybeSingle()
+    const gehoertZumFall =
+      !!terminOwner &&
+      (terminOwner.fall_id === fallId ||
+        (!!ownership.claimId && terminOwner.claim_id === ownership.claimId))
+    if (!gehoertZumFall) return { success: false, error: 'Nicht autorisiert' }
+
     // Termin neu setzen — AAR-956 TZ: slot ist Berlin-Wall-Clock -> echter UTC-Instant.
     const startZeit = berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}:00`)
     const endZeit = new Date(new Date(startZeit).getTime() + 90 * 60 * 1000).toISOString()
