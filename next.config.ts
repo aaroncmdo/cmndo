@@ -346,6 +346,11 @@ const nextConfig: NextConfig = {
       // traf exakt die AAR-889-Falle oben (RSC-Redirect-Stub triggert React-#310/#418) — der
       // Prod-Smoke 06.07. bestaetigte 200 mit leerer Shell + KEINEN Redirect. page.tsx geloescht.
       { source: '/werkstatt/vermittlungen', destination: '/werkstatt/auftraege', permanent: true },
+      // Kunde-Portal (SP4 1+): /kunde/einstellungen wurde nach /kunde/profil konsolidiert.
+      // Als HTTP-308 statt RSC-redirect()-Stub — die page.tsx mit redirect('/kunde/profil') traf
+      // exakt dieselbe AAR-889-Falle (leere 200-Shell, kein Redirect; Prod-Smoke 07.07. als
+      // test-kunde bestaetigt). page.tsx geloescht.
+      { source: '/kunde/einstellungen', destination: '/kunde/profil', permanent: true },
     ]
   },
 };
