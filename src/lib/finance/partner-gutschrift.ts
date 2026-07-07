@@ -117,6 +117,92 @@ export async function versendePartnerGutschrift(
   }
 }
 
+/**
+ * Erstellt eine Storno-Gutschrift fuer eine bereits ausgestellte Gutschrift.
+ * Spiegelt die Original-Betraege negiert, kopiert Snapshots und leistung_datum.
+ * Markiert das Original als storniert.
+ *
+ * Non-fatal: gibt immer ein Result-Object zurueck, wirft nie.
+ * Idempotenz-Schutz: Original bereits storniert → {ok:false, error:'Gutschrift bereits storniert'}.
+ */
+export async function erstelleStornoGutschrift(
+  db: SupabaseClient<any>,
+  originalGutschriftId: string,
+  grund: string,
+): Promise<{ ok: true; stornoId: string; nummer: string } | { ok: false; error: string }> {
+  try {
+    // Step 1 — Original laden
+    const { data: orig, error: origErr } = await db
+      .from('partner_gutschriften')
+      .select('*')
+      .eq('id', originalGutschriftId)
+      .single()
+
+    if (origErr || !orig) {
+      return { ok: false, error: 'Original-Gutschrift nicht gefunden' }
+    }
+
+    // Step 2 — Idempotenz: bereits storniert
+    if ((orig as any).status === 'storniert') {
+      return { ok: false, error: 'Gutschrift bereits storniert' }
+    }
+
+    // Step 3 — Neue Nummer in derselben CMNDO-GS-Serie
+    const jahr = new Date().getFullYear()
+    let n: number
+    try {
+      n = await nextRechnungsNrRaw('CMNDO-GS', jahr)
+    } catch (err) {
+      return { ok: false, error: (err as Error).message }
+    }
+    const nummer = `CMNDO-GS-${jahr}-${String(n).padStart(5, '0')}`
+
+    // Step 4 — Storno-Row inserten (negierte Betraege, Snapshots vom Original)
+    const origRow = orig as Record<string, any>
+    const stornoRow = {
+      partner_typ: origRow.partner_typ,
+      partner_id: origRow.partner_id,
+      gutschrift_nr: nummer,
+      ledger_tabelle: origRow.ledger_tabelle,
+      ledger_id: origRow.ledger_id,
+      betrag_netto: -origRow.betrag_netto,
+      ust_satz: origRow.ust_satz,
+      ust_betrag: origRow.ust_betrag === null ? null : -origRow.ust_betrag,
+      betrag_brutto: -origRow.betrag_brutto,
+      empfaenger_snapshot: origRow.empfaenger_snapshot,
+      aussteller_snapshot: origRow.aussteller_snapshot,
+      leistung_text: origRow.leistung_text,
+      leistung_datum: origRow.leistung_datum,
+      typ: 'storno',
+      bezug_gutschrift_id: origRow.id,
+      storno_grund: grund,
+      status: 'erstellt',
+    }
+
+    const { data: inserted, error: insertError } = await db
+      .from('partner_gutschriften')
+      .insert(stornoRow)
+      .select('id')
+      .single()
+
+    if (insertError) {
+      return { ok: false, error: insertError.message }
+    }
+
+    const stornoId = (inserted as any).id
+
+    // Step 5 — Original auf storniert setzen
+    await db
+      .from('partner_gutschriften')
+      .update({ status: 'storniert' })
+      .eq('id', origRow.id)
+
+    return { ok: true, stornoId, nummer }
+  } catch (err) {
+    return { ok: false, error: (err as Error).message ?? 'Unbekannter Fehler' }
+  }
+}
+
 export async function erstellePartnerGutschrift(
   db: SupabaseClient<any>,
   p: {

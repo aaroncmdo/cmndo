@@ -20,7 +20,7 @@ vi.mock('@/lib/email/google/client', () => ({ sendEmail: vi.fn() }))
 
 import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 import { getAktuelleRechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
-import { erstellePartnerGutschrift, versendePartnerGutschrift } from './partner-gutschrift'
+import { erstellePartnerGutschrift, versendePartnerGutschrift, erstelleStornoGutschrift } from './partner-gutschrift'
 
 const mockNextNr = vi.mocked(nextRechnungsNrRaw)
 const mockKonfig = vi.mocked(getAktuelleRechnungsKonfig)
@@ -677,5 +677,171 @@ describe('versendePartnerGutschrift', () => {
       (p: Record<string, unknown>) => p.status === 'versendet',
     )
     expect(versendetUpdates).toHaveLength(0)
+  })
+})
+
+// ─────────────────────────────────────────────────────────────────────────────
+// erstelleStornoGutschrift (Task 2)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Fake DB for erstelleStornoGutschrift tests.
+ * Tracks inserts and updates on partner_gutschriften.
+ */
+function makeStornoDb(opts: {
+  originalRow: Record<string, unknown> | null
+  insertResult?: { data: { id: string } | null; error: { code?: string; message: string } | null }
+}) {
+  const insertedRows: unknown[] = []
+  const updatedPatches: Array<{ patch: Record<string, unknown>; id: string }> = []
+
+  const insertResult = opts.insertResult ?? { data: { id: 'storno-uuid-1' }, error: null }
+
+  const db = {
+    _insertedRows: insertedRows,
+    _updatedPatches: updatedPatches,
+    from: (_table: string) => ({
+      select: (_cols: string) => ({
+        eq: (_col: string, _val: string) => ({
+          single: () =>
+            Promise.resolve({
+              data: opts.originalRow,
+              error: opts.originalRow ? null : { message: 'PGRST116: not found' },
+            }),
+        }),
+      }),
+      insert: (row: unknown) => {
+        insertedRows.push(row)
+        return {
+          select: (_cols: string) => ({
+            single: () => Promise.resolve(insertResult),
+          }),
+        }
+      },
+      update: (patch: Record<string, unknown>) => ({
+        eq: (_col: string, val: string) => {
+          updatedPatches.push({ patch, id: val })
+          return Promise.resolve({ error: null })
+        },
+      }),
+    }),
+  }
+  return db as any
+}
+
+const ORIGINAL_ROW = {
+  id: 'orig-gs-uuid-1',
+  gutschrift_nr: 'CMNDO-GS-2026-00001',
+  erstellt_am: '2026-07-01T10:00:00.000Z',
+  status: 'erstellt',
+  betrag_netto: 100,
+  ust_satz: 19,
+  ust_betrag: 19,
+  betrag_brutto: 119,
+  leistung_datum: '2026-07-01',
+  leistung_text: 'Vermittlungsprovision',
+  empfaenger_snapshot: { name: 'Test Makler', ust_id: 'DE123', ist_kleinunternehmer: false, adresse_strasse: 'Str. 1', adresse_plz: '10115', adresse_ort: 'Berlin', bank_iban: null },
+  aussteller_snapshot: { firmenname: 'Claimondo GmbH' },
+  partner_typ: 'makler',
+  partner_id: 'makler-1',
+  ledger_tabelle: 'makler_provisionen',
+  ledger_id: 'prov-1',
+  typ: 'gutschrift',
+  bezug_gutschrift_id: null,
+  storno_grund: null,
+  pdf_storage_path: 'partner-gutschriften/2026/CMNDO-GS-2026-00001.pdf',
+}
+
+describe('erstelleStornoGutschrift', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    mockNextNr.mockResolvedValue(99)
+  })
+
+  // (a) Normal storno: mirrored negative amounts, correct typ/bezug/grund, snapshots from original, original→storniert
+  it('(a) inserts negative storno row mirroring original amounts and marks original as storniert', async () => {
+    const db = makeStornoDb({ originalRow: ORIGINAL_ROW })
+
+    const result = await erstelleStornoGutschrift(db, 'orig-gs-uuid-1', 'Rueckbuchung Payout')
+
+    expect(result.ok).toBe(true)
+    if (!result.ok) throw new Error('expected success')
+
+    // Number format
+    expect(result.nummer).toMatch(/^CMNDO-GS-\d{4}-00099$/)
+    expect(result.stornoId).toBe('storno-uuid-1')
+
+    // Inserted row: negative amounts
+    expect(db._insertedRows).toHaveLength(1)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    expect(row.betrag_netto).toBe(-100)
+    expect(row.ust_betrag).toBe(-19)
+    expect(row.betrag_brutto).toBe(-119)
+    expect(row.ust_satz).toBe(19)   // ust_satz unchanged
+
+    // Storno metadata
+    expect(row.typ).toBe('storno')
+    expect(row.bezug_gutschrift_id).toBe('orig-gs-uuid-1')
+    expect(row.storno_grund).toBe('Rueckbuchung Payout')
+
+    // Snapshots and leistung copied from original
+    expect(row.empfaenger_snapshot).toEqual(ORIGINAL_ROW.empfaenger_snapshot)
+    expect(row.aussteller_snapshot).toEqual(ORIGINAL_ROW.aussteller_snapshot)
+    expect(row.leistung_datum).toBe(ORIGINAL_ROW.leistung_datum)
+    expect(row.leistung_text).toBe(ORIGINAL_ROW.leistung_text)
+
+    // Status
+    expect(row.status).toBe('erstellt')
+
+    // Original must have been updated to status:storniert
+    const originalUpdate = db._updatedPatches.find(
+      (u: { patch: Record<string, unknown>; id: string }) => u.id === 'orig-gs-uuid-1'
+    )
+    expect(originalUpdate).toBeDefined()
+    expect(originalUpdate!.patch.status).toBe('storniert')
+  })
+
+  // (b) Original not found → {ok:false}
+  it('(b) returns {ok:false} when original Gutschrift not found', async () => {
+    const db = makeStornoDb({ originalRow: null })
+
+    const result = await erstelleStornoGutschrift(db, 'nonexistent-id', 'Grund')
+
+    expect(result.ok).toBe(false)
+    if (result.ok) throw new Error('expected failure')
+    expect(result.error).toMatch(/nicht gefunden/i)
+    expect(db._insertedRows).toHaveLength(0)
+  })
+
+  // (c) Original already storniert → {ok:false, error:/bereits storniert/} — no insert
+  it('(c) returns {ok:false, error:/bereits storniert/} when original is already storniert', async () => {
+    const db = makeStornoDb({
+      originalRow: { ...ORIGINAL_ROW, status: 'storniert' },
+    })
+
+    const result = await erstelleStornoGutschrift(db, 'orig-gs-uuid-1', 'Grund')
+
+    expect(result.ok).toBe(false)
+    if (result.ok) throw new Error('expected failure')
+    expect(result.error).toMatch(/bereits storniert/i)
+    expect(db._insertedRows).toHaveLength(0)
+    // No update either
+    expect(db._updatedPatches).toHaveLength(0)
+  })
+
+  // (d) ust_betrag null in original → null in storno row (not negated)
+  it('(d) ust_betrag null in original → null in storno row (Kleinunternehmer)', async () => {
+    const db = makeStornoDb({
+      originalRow: { ...ORIGINAL_ROW, ust_betrag: null, ust_satz: null, betrag_netto: 50, betrag_brutto: 50 },
+    })
+
+    const result = await erstelleStornoGutschrift(db, 'orig-gs-uuid-1', 'Storno KU')
+
+    expect(result.ok).toBe(true)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    expect(row.ust_betrag).toBeNull()
+    expect(row.ust_satz).toBeNull()
+    expect(row.betrag_netto).toBe(-50)
+    expect(row.betrag_brutto).toBe(-50)
   })
 })
