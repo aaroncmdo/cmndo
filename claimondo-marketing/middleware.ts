@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server'
 import { routing } from './i18n/routing'
+import { refreshSession } from './lib/supabase/middleware'
 
 // Host-Routing (Subdomains, de-only) + deterministisches as-needed Locale-Routing
 // fuer claimondo.de/www.
@@ -49,7 +50,7 @@ function rememberLocale(res: NextResponse, locale: string): NextResponse {
   return res
 }
 
-export default function middleware(req: NextRequest) {
+export default async function middleware(req: NextRequest) {
   const host = (req.headers.get('host') ?? '').split(':')[0].toLowerCase()
   const { pathname, search } = req.nextUrl
   const landing = SUBDOMAIN_LANDING[host]
@@ -68,42 +69,50 @@ export default function middleware(req: NextRequest) {
     return NextResponse.redirect(`https://${MAIN_HOST}${pathname}${search}`, 301)
   }
 
-  // claimondo.de / www: as-needed Locale-Routing.
+  // claimondo.de / www: as-needed Locale-Routing. Die Locale-Response wird in
+  // `response` gebaut (statt direkt returned), damit unten refreshSession() (Bug B)
+  // rotierte Auth-Cookies drauf schreiben kann. Die Routing-Logik ist unveraendert.
   const seg1 = pathname.split('/')[1] ?? ''
+  let response: NextResponse
 
-  // Bereits praefixierte Nicht-Default-Locale (/en/.., /tr/..) -> [locale] matcht
-  // direkt + Sprache im Cookie merken (damit prefix-freie Folge-Links mittragen,
-  // auch bei Direkt-Einstieg/Shared-Link ohne vorherigen Switch).
   if (LOCALE_SET.has(seg1) && seg1 !== DEFAULT_LOCALE) {
-    return rememberLocale(NextResponse.next(withLocale(req, seg1)), seg1)
-  }
-
-  // Praefixierte Default-Locale (/de/..) -> direkt ausliefern + Cookie=de merken.
-  // KEIN /de->/-Redirect (sonst Loop beim Middleware-Re-Run auf dem internen
-  // Rewrite). Die prefix-freie /<pfad> ist die kanonische URL (Page-canonical -> Dedupe).
-  if (seg1 === DEFAULT_LOCALE) {
-    return rememberLocale(NextResponse.next(withLocale(req, DEFAULT_LOCALE)), DEFAULT_LOCALE)
-  }
-
-  // Unpraefixiert: Cookie-Sprachpraeferenz mittragen, damit die Sprache beim
-  // Seitenwechsel ueber prefix-freie Links erhalten bleibt. Nicht-de-Praeferenz ->
-  // 307 auf die praefixierte Locale-URL (loop-frei: /en/.. wird oben direkt serviert).
-  // Crawler / Erstbesuch OHNE Cookie -> de (canonical, indexierbar) — der Cookie
-  // wird nie serverseitig vorausgesetzt, nur respektiert.
-  const cookieLoc = req.cookies.get(LOCALE_COOKIE)?.value
-  if (cookieLoc && cookieLoc !== DEFAULT_LOCALE && LOCALE_SET.has(cookieLoc)) {
-    return NextResponse.redirect(
-      new URL(`/${cookieLoc}${pathname === '/' ? '' : pathname}${search}`, req.url),
-      307,
+    // Bereits praefixierte Nicht-Default-Locale (/en/.., /tr/..) -> [locale] matcht
+    // direkt + Sprache im Cookie merken (damit prefix-freie Folge-Links mittragen,
+    // auch bei Direkt-Einstieg/Shared-Link ohne vorherigen Switch).
+    response = rememberLocale(NextResponse.next(withLocale(req, seg1)), seg1)
+  } else if (seg1 === DEFAULT_LOCALE) {
+    // Praefixierte Default-Locale (/de/..) -> direkt ausliefern + Cookie=de merken.
+    // KEIN /de->/-Redirect (sonst Loop beim Middleware-Re-Run auf dem internen
+    // Rewrite). Die prefix-freie /<pfad> ist die kanonische URL (Page-canonical -> Dedupe).
+    response = rememberLocale(NextResponse.next(withLocale(req, DEFAULT_LOCALE)), DEFAULT_LOCALE)
+  } else {
+    // Unpraefixiert: Cookie-Sprachpraeferenz mittragen, damit die Sprache beim
+    // Seitenwechsel ueber prefix-freie Links erhalten bleibt. Nicht-de-Praeferenz ->
+    // 307 auf die praefixierte Locale-URL (loop-frei: /en/.. wird oben direkt serviert).
+    // Crawler / Erstbesuch OHNE Cookie -> de (canonical, indexierbar) — der Cookie
+    // wird nie serverseitig vorausgesetzt, nur respektiert.
+    const cookieLoc = req.cookies.get(LOCALE_COOKIE)?.value
+    if (cookieLoc && cookieLoc !== DEFAULT_LOCALE && LOCALE_SET.has(cookieLoc)) {
+      // Reiner Locale-Redirect: das Target durchlaeuft die Middleware erneut ->
+      // der Session-Refresh passiert dort auf der ausgelieferten Content-Response.
+      return NextResponse.redirect(
+        new URL(`/${cookieLoc}${pathname === '/' ? '' : pathname}${search}`, req.url),
+        307,
+      )
+    }
+    // de-Cookie oder kein Cookie -> de ausliefern (intern /de/<pfad>) + Cookie=de merken.
+    const target = pathname === '/' ? `/${DEFAULT_LOCALE}` : `/${DEFAULT_LOCALE}${pathname}`
+    response = rememberLocale(
+      NextResponse.rewrite(new URL(`${target}${search}`, req.url), withLocale(req, DEFAULT_LOCALE)),
+      DEFAULT_LOCALE,
     )
   }
 
-  // de-Cookie oder kein Cookie -> de ausliefern (intern /de/<pfad>) + Cookie=de merken.
-  const target = pathname === '/' ? `/${DEFAULT_LOCALE}` : `/${DEFAULT_LOCALE}${pathname}`
-  return rememberLocale(
-    NextResponse.rewrite(new URL(`${target}${search}`, req.url), withLocale(req, DEFAULT_LOCALE)),
-    DEFAULT_LOCALE,
-  )
+  // Bug B (Marketing-Login-Persistenz): Session-Refresh auf der Content-Response.
+  // Rein additiv (nur rotierte Auth-Cookies, nur bei vorhandenem Auth-Cookie,
+  // try/catch-gewrappt) -> das Locale-Routing bleibt unberuehrt.
+  await refreshSession(req, response)
+  return response
 }
 
 export const config = {
