@@ -29,13 +29,31 @@ export default function PasswortZuruecksetzenPage() {
     let cancelled = false
     async function check() {
       const supabase = createClient()
-      // Kleiner Delay, damit Supabase Zeit hat, den Hash zu verarbeiten.
+      // FIX (Werkstatt-/SV-Welcome): admin.generateLink({ type: 'recovery' }) liefert eine
+      // IMPLICIT-Session im URL-Hash (#access_token). Der @supabase/ssr-Client laeuft im
+      // PKCE-Modus und verarbeitet den Implicit-Hash NICHT automatisch (nur ?code) → ohne das
+      // Folgende etabliert die Session NIE, der User sieht "Link abgelaufen" und das Formular
+      // erscheint gar nicht. Wir parsen den Hash daher manuell und etablieren die Session via
+      // setSession (schreibt auch das server-lesbare Cookie, das confirmPasswordReset liest).
+      // Forgot-Password (?code / PKCE) laeuft unveraendert automatisch weiter.
+      if (typeof window !== 'undefined' && window.location.hash.includes('access_token')) {
+        const params = new URLSearchParams(window.location.hash.slice(1))
+        const access_token = params.get('access_token')
+        const refresh_token = params.get('refresh_token')
+        if (access_token && refresh_token) {
+          await supabase.auth.setSession({ access_token, refresh_token })
+          // Token aus der URL entfernen — nicht im Verlauf/Referrer hinterlassen.
+          window.history.replaceState(null, '', window.location.pathname + window.location.search)
+        }
+      }
+      // Kleiner Delay, damit Supabase Zeit hat, die Session zu schreiben.
       await new Promise((r) => setTimeout(r, 200))
       const { data } = await supabase.auth.getUser()
       if (cancelled) return
       if (data?.user) {
-        // Tokens der In-Memory-Recovery-Session festhalten — die Server-Action braucht sie,
-        // weil der Hash-Login (Welcome-Magic-Links) kein server-lesbares Cookie schreibt.
+        // Tokens der Recovery-Session zusaetzlich festhalten (Belt-and-Suspenders): die
+        // Server-Action confirmPasswordReset nutzt sie als Fallback, falls das per setSession
+        // geschriebene Cookie nicht rechtzeitig server-lesbar ist.
         const { data: sessionData } = await supabase.auth.getSession()
         if (sessionData?.session) {
           recoveryTokensRef.current = {
