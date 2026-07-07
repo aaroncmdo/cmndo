@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import type { PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
@@ -13,6 +14,8 @@ export interface WerkstattDetailAuftrag {
   richtung: string | null
   operative_status: string | null
   reparatur_termin_status: string | null
+  reparatur_wunschtermin: string | null
+  reparatur_bestaetigter_termin: string | null
   gutachten_fertiggestellt_am: string | null
   gutachten_totalschaden: boolean | null
   besichtigung_start: string | null
@@ -45,6 +48,16 @@ export interface WerkstattDetailStammdaten {
   aktiviert_am: string | null
   created_at: string | null
   user_id: string | null
+  lat: number | null
+  lng: number | null
+  isochrone: unknown
+}
+
+export interface WerkstattNotiz {
+  id: string
+  text: string
+  autor_name: string | null
+  created_at: string
 }
 
 export interface WerkstattDetail {
@@ -54,6 +67,7 @@ export interface WerkstattDetail {
   lastSignInAt: string | null
   forcePasswordChange: boolean | null
   billing: PartnerBillingAggregat | null
+  notizen: WerkstattNotiz[]
 }
 
 export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail | null> {
@@ -62,7 +76,7 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
   const { data: w } = await supabase
     .from('werkstaetten')
     .select(
-      'id, name, status, adresse_strasse, adresse_plz, adresse_ort, email, telefon, website, ansprechpartner_name, provision_betrag_netto, provision_aktiv, faehigkeiten, bank_iban, bank_bic, bank_kontoinhaber, ist_kleinunternehmer, ust_id, aktiviert_am, created_at, user_id',
+      'id, name, status, adresse_strasse, adresse_plz, adresse_ort, email, telefon, website, ansprechpartner_name, provision_betrag_netto, provision_aktiv, faehigkeiten, bank_iban, bank_bic, bank_kontoinhaber, ist_kleinunternehmer, ust_id, aktiviert_am, created_at, user_id, lat, lng, isochrone',
     )
     .eq('id', id)
     .maybeSingle()
@@ -77,7 +91,7 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
     supabase
       .from('v_werkstatt_auftrag')
       .select(
-        'claim_id, claim_nummer, richtung, operative_status, reparatur_termin_status, gutachten_fertiggestellt_am, gutachten_totalschaden, besichtigung_start, provision_betrag_netto, provision_status, fahrzeug_hersteller, fahrzeug_modell, kennzeichen',
+        'claim_id, claim_nummer, richtung, operative_status, reparatur_termin_status, reparatur_wunschtermin, reparatur_bestaetigter_termin, gutachten_fertiggestellt_am, gutachten_totalschaden, besichtigung_start, provision_betrag_netto, provision_status, fahrzeug_hersteller, fahrzeug_modell, kennzeichen',
       )
       .eq('werkstatt_id', id)
       .order('besichtigung_start', { ascending: false, nullsFirst: false }),
@@ -99,6 +113,17 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
 
   const billing = await ladePartnerBilling('werkstatt', id)
 
+  // Interne Notizen (Tabelle nicht in database.types -> untypisierter Client-Cast, damit
+  // wir das geteilte database.types.ts nicht anfassen muessen). Service-Role-Read ist ok:
+  // die Page ist admin-gegated, RLS gatet zusaetzlich auf is_staff().
+  const notizenDb = createAdminClient() as unknown as SupabaseClient
+  const { data: notizenData } = await notizenDb
+    .from('werkstatt_notizen')
+    .select('id, text, autor_name, created_at')
+    .eq('werkstatt_id', id)
+    .order('created_at', { ascending: false })
+    .limit(50)
+
   return {
     werkstatt: w as unknown as WerkstattDetailStammdaten,
     staffel: (staffelRes.data ?? []) as { schwelle: number; bonus_betrag_netto: number }[],
@@ -106,5 +131,6 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
     lastSignInAt,
     forcePasswordChange,
     billing: billing.ok ? billing.aggregat : null,
+    notizen: (notizenData ?? []) as unknown as WerkstattNotiz[],
   }
 }
