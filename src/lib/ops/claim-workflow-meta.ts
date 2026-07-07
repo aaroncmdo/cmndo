@@ -24,7 +24,7 @@ export const CLAIM_WORKFLOW_META: Record<ClaimSubPhase, ClaimWorkflowMetaEntry> 
   kanzlei_uebergabe:         { nextActionCode: 'kanzlei_uebergeben',   ownerRole: 'kb',       waitingOn: 'kanzlei', ctaLabel: 'An Kanzlei übergeben' },
   anschlussschreiben:        { nextActionCode: 'anschlussschreiben',   ownerRole: 'kb',       waitingOn: 'vs',      ctaLabel: 'Anschlussschreiben senden' },
   versicherungskontakt:      { nextActionCode: 'vs_nachfassen',        ownerRole: 'kb',       waitingOn: 'vs',      ctaLabel: 'Bei Versicherer nachfassen' },
-  'vs-kuerzt':               { nextActionCode: 'kuerzung_pruefen',     ownerRole: 'kb',       waitingOn: 'kb',      ctaLabel: 'Kürzung prüfen' },
+  'vs-kuerzt':               { nextActionCode: 'kuerzung_pruefen',     ownerRole: 'kb',       waitingOn: 'intern',  ctaLabel: 'Kürzung prüfen' },
   'nachbesichtigung-laeuft': { nextActionCode: 'nachbesichtigung',     ownerRole: 'sv',       waitingOn: 'sv',      ctaLabel: 'Nachbesichtigung läuft' },
   nachforderung:             { nextActionCode: 'nachforderung_treiben',ownerRole: 'kb',       waitingOn: 'vs',      ctaLabel: 'Nachforderung treiben' },
   auszahlung:                { nextActionCode: 'auszahlung_pruefen',   ownerRole: 'kb',       waitingOn: 'none',    ctaLabel: 'Auszahlung prüfen' },
