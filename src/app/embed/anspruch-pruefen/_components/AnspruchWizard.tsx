@@ -6,6 +6,7 @@ import { AnspruchEinschaetzungStep } from './AnspruchEinschaetzungStep'
 import { AnspruchSummaryStep } from './AnspruchSummaryStep'
 import type { AnspruchSpanne, Schuldform, VisionResult } from '@/lib/anspruch/types'
 import { AufnahmeFlowHinweis } from '@/components/shared/AufnahmeFlowHinweis'
+import { buildFinderHandoffUrl } from '@/lib/embed/finder-handoff-url'
 import { cn } from '@/lib/utils'
 
 type Phase = 'foto' | 'einschaetzung' | 'summary'
@@ -45,7 +46,9 @@ export function AnspruchWizard() {
 
   function zumFinder() {
     if (!sessionToken) return
-    window.location.href = `/embed/gutachter-finder?schaetzung=${encodeURIComponent(sessionToken)}`
+    // Attribution (Makler-`m`, utm, Ads-Click-IDs) verlustfrei Tool -> Finder durchreichen,
+    // damit der Finder-Lead makler-attribuiert wird + die Finder-GTM die Klick-ID sieht.
+    window.location.href = buildFinderHandoffUrl(window.location.search, sessionToken)
   }
 
   const aktuellerIndex = SCHRITTE.findIndex((s) => s.key === phase)
