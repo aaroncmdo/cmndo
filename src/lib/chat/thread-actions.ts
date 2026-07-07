@@ -10,7 +10,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { leiteGruppenTeilnehmer, sortiereDirektPaar, type ClaimZuweisung } from './thread-model'
+import { leiteGruppenTeilnehmer, sortiereDirektPaar, threadLabel, type ClaimZuweisung, type ThreadArt } from './thread-model'
 
 type Ergebnis<T> = { ok: true; data: T } | { ok: false; error: string }
 
@@ -189,4 +189,46 @@ export async function markiereThreadGelesen(threadId: string): Promise<Ergebnis<
     .eq('user_id', user.id)
   if (error) return { ok: false, error: error.message }
   return { ok: true, data: null }
+}
+
+export interface ClaimThreadInfo {
+  id: string
+  art: ThreadArt
+  label: string
+}
+
+/** Listet die fuer den aktuellen User sichtbaren Threads eines Claims (RLS: Mitglied ODER is_staff).
+ *  Direkt-Labels werden aus den Teilnehmer-Rollen (via Service-Role) zusammengesetzt. */
+export async function ladeClaimThreads(claimId: string): Promise<Ergebnis<ClaimThreadInfo[]>> {
+  const { supabase, user } = await aktuellerUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+
+  const { data: threadsRaw, error } = await (supabase as unknown as SupabaseClient)
+    .from('chat_threads')
+    .select('id, art')
+    .eq('claim_id', claimId)
+    .order('art', { ascending: true })
+  if (error) return { ok: false, error: error.message }
+  const threads = (threadsRaw ?? []) as { id: string; art: ThreadArt }[]
+  if (threads.length === 0) return { ok: true, data: [] }
+
+  const admin = createAdminClient() as unknown as SupabaseClient
+  const { data: teil } = await admin
+    .from('chat_thread_teilnehmer')
+    .select('thread_id, rolle')
+    .in(
+      'thread_id',
+      threads.map((t) => t.id),
+    )
+  const rollenProThread = new Map<string, string[]>()
+  for (const p of (teil ?? []) as { thread_id: string; rolle: string | null }[]) {
+    const arr = rollenProThread.get(p.thread_id) ?? []
+    if (p.rolle) arr.push(p.rolle)
+    rollenProThread.set(p.thread_id, arr)
+  }
+
+  return {
+    ok: true,
+    data: threads.map((t) => ({ id: t.id, art: t.art, label: threadLabel(t.art, rollenProThread.get(t.id) ?? []) })),
+  }
 }

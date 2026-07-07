@@ -46,3 +46,22 @@ export function leiteGruppenTeilnehmer(
     return true
   })
 }
+
+const ROLLE_LABEL: Record<string, string> = {
+  kunde: 'Kunde',
+  kundenbetreuer: 'Betreuer',
+  sachverstaendiger: 'Gutachter',
+  werkstatt: 'Werkstatt',
+  makler: 'Makler',
+  admin: 'Admin',
+  dispatch: 'Dispatch',
+  teilnehmer: 'Teilnehmer',
+}
+
+/** Anzeige-Label eines Threads. Fuer direkt-Threads aus den Teilnehmer-Rollen zusammengesetzt. */
+export function threadLabel(art: ThreadArt, rollen: string[] = []): string {
+  if (art === 'kunde_gruppe') return 'Gruppe'
+  if (art === 'team_intern') return 'Team-intern'
+  const namen = rollen.map((r) => ROLLE_LABEL[r] ?? r)
+  return namen.length ? `Privat: ${namen.join(' · ')}` : 'Privater Chat'
+}

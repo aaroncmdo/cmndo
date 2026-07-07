@@ -1,5 +1,16 @@
 import { describe, it, expect } from 'vitest'
-import { sortiereDirektPaar, leiteGruppenTeilnehmer, type ClaimZuweisung } from '../thread-model'
+import { sortiereDirektPaar, leiteGruppenTeilnehmer, threadLabel, type ClaimZuweisung } from '../thread-model'
+
+describe('threadLabel', () => {
+  it('labelt Gruppe/Team-intern fix', () => {
+    expect(threadLabel('kunde_gruppe')).toBe('Gruppe')
+    expect(threadLabel('team_intern')).toBe('Team-intern')
+  })
+  it('labelt direkt aus den Teilnehmer-Rollen', () => {
+    expect(threadLabel('direkt', ['kunde', 'werkstatt'])).toBe('Privat: Kunde · Werkstatt')
+    expect(threadLabel('direkt', [])).toBe('Privater Chat')
+  })
+})
 
 describe('sortiereDirektPaar', () => {
   it('sortiert deterministisch (kleinere id zuerst), egal welche Reihenfolge rein', () => {
