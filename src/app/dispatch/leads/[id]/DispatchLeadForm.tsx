@@ -103,16 +103,26 @@ export default function DispatchLeadForm({
   const [status, setStatus] = useState<SaveStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
-  // Phase 1c: kontrollierter aktiver Tab, damit die Workflow-Kopfzone (page.tsx,
-  // <LeadWorkflowPanel>) per Event zum relevanten Tab springen kann. Default = 1. Phase.
+  // Phase 1c/1d: kontrollierter aktiver Tab + Scroll-Fokus, damit die Workflow-
+  // Kopfzone (page.tsx, <LeadWorkflowPanel>) per Event springen kann: `tab` schaltet
+  // den relevanten Tab, `scrollTo` scrollt zu einem Panel UNTER den Tabs (z.B. dem
+  // FlowLink-Versand). Default = 1. Phase.
   const [activeTab, setActiveTab] = useState<string | undefined>(phasen[0]?.phase_key)
+  // Phase 1d: kurzer Fokus-Ring aufs FlowLink-Panel nach dem Scroll-Sprung.
+  const [flowlinkHighlight, setFlowlinkHighlight] = useState(false)
   useEffect(() => {
     const gueltig = new Set(phasen.map((p) => p.phase_key))
     const onJump = (e: Event) => {
-      const tab = (e as CustomEvent<{ tab?: string }>).detail?.tab
-      if (tab && gueltig.has(tab)) {
-        setActiveTab(tab)
+      const detail = (e as CustomEvent<{ tab?: string; scrollTo?: string }>).detail
+      if (detail?.tab && gueltig.has(detail.tab)) {
+        setActiveTab(detail.tab)
         document.getElementById('lead-detail-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      } else if (detail?.scrollTo) {
+        document.getElementById(detail.scrollTo)?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+        if (detail.scrollTo === 'flowlink-panel') {
+          setFlowlinkHighlight(true)
+          setTimeout(() => setFlowlinkHighlight(false), 2000)
+        }
       }
     }
     document.addEventListener('claimondo:lead-workflow-jump', onJump)
@@ -285,8 +295,15 @@ export default function DispatchLeadForm({
       </div>
 
       {/* P2g (Versand-Parität): FlowLink an den Kunden versenden — portiert aus
-          Phase5Zusammenfassung, entkoppelt vom Phasen-Provider, nicht-blockierend. */}
-      <DispatchFlowlinkPanel leadId={leadId} lead={lead} flowLinks={flowLinks} />
+          Phase5Zusammenfassung, entkoppelt vom Phasen-Provider, nicht-blockierend.
+          Phase 1d: id-Wrapper = Scroll-Target der Workflow-CTA (flowlink_senden/
+          nachfassen/warten) + kurzer Fokus-Ring nach dem Sprung. */}
+      <div
+        id="flowlink-panel"
+        className={`transition-shadow ${flowlinkHighlight ? 'rounded-ios-xl ring-2 ring-claimondo-ondo ring-offset-2' : ''}`}
+      >
+        <DispatchFlowlinkPanel leadId={leadId} lead={lead} flowLinks={flowLinks} />
+      </div>
 
       {/* P2h (Versand-Parität 2/3): Status-Tracking (FlowLink-Stepper + Inaktiv-Alarm),
           portiert aus Phase6, liest lead + flowLinks. */}
