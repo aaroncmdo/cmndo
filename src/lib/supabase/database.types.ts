@@ -2454,6 +2454,8 @@ export type Database = {
           created_by_user_id: string | null
           differenz_betrag: number | null
           empfaenger: string
+          partei: string
+          richtung: string
           erhaltener_betrag: number | null
           forderungsbetrag: number | null
           id: string
@@ -2470,6 +2472,8 @@ export type Database = {
           created_by_user_id?: string | null
           differenz_betrag?: number | null
           empfaenger?: string
+          partei?: string
+          richtung?: string
           erhaltener_betrag?: number | null
           forderungsbetrag?: number | null
           id?: string
@@ -2486,6 +2490,8 @@ export type Database = {
           created_by_user_id?: string | null
           differenz_betrag?: number | null
           empfaenger?: string
+          partei?: string
+          richtung?: string
           erhaltener_betrag?: number | null
           forderungsbetrag?: number | null
           id?: string

@@ -14,7 +14,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
-import { upsertCurrentClaimPayment } from '@/lib/faelle/claim-payments'
+import { upsertClaimPayment } from '@/lib/faelle/claim-payments'
 import {
   processLexDriveEvent,
   type LexDriveEventPayload,
@@ -381,9 +381,12 @@ export async function erfasseZahlungseingang(
       .eq('id', zeClaimId)
     // CMM-44 SP-I3: regulierung_am auf kanzlei_faelle (1:1) statt faelle.
     await upsertKanzleiFall(adminZE, zeClaimId, { regulierung_am: zahlungAm })
-    await upsertCurrentClaimPayment(
+    // Payment-Ledger Phase 1: VS-Zahlungseingang -> partei='vs' (Betrag/Positions-Detail
+    // bleibt in zahlungseingaenge oben; regulierungs_betrag-Cache bleibt bis Phase 3).
+    await upsertClaimPayment(
       adminZE,
       zeClaimId,
+      'vs',
       { zahlungseingang_am: zahlungAm, status: 'erhalten' },
       user.id,
     )

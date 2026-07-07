@@ -62,6 +62,54 @@ export async function upsertCurrentClaimPayment(
   return { ok: true }
 }
 
+// ── Payment-Ledger-Normalisierung: kanonischer Write-Seam ────────────────────
+// Design: docs/superpowers/specs/2026-07-07-payment-ledger-normalisierung-design.md
+
+export type Partei = 'vs' | 'kunde' | 'sv'
+
+export type ClaimPaymentFields = {
+  forderungsbetrag?: number | null
+  erhaltener_betrag?: number | null
+  zahlungseingang_am?: string | null
+  zahlungsweg?: string | null
+  status?: 'ausstehend' | 'teilweise' | 'erhalten' | 'final' | 'abgelehnt'
+}
+
+/**
+ * Kanonischer Write-Seam: schreibt die (claim_id, partei)-Ledger-Zeile
+ * (create-or-update via unique(claim_id, partei)). richtung wird aus partei
+ * abgeleitet (vs -> eingang, kunde/sv -> auszahlung). Ersetzt schrittweise
+ * upsertCurrentClaimPayment, das die neueste Row blind (empfaenger-agnostisch) traf.
+ */
+export async function upsertClaimPayment(
+  db: DbClient,
+  claimId: string,
+  partei: Partei,
+  fields: ClaimPaymentFields,
+  createdByUserId?: string | null,
+): Promise<{ ok: boolean; error?: string }> {
+  const richtung: 'eingang' | 'auszahlung' = partei === 'vs' ? 'eingang' : 'auszahlung'
+
+  const { data: current, error: selErr } = await db
+    .from('claim_payments')
+    .select('id')
+    .eq('claim_id', claimId)
+    .eq('partei', partei)
+    .maybeSingle()
+  if (selErr) return { ok: false, error: selErr.message }
+
+  if (current?.id) {
+    const { error } = await db.from('claim_payments').update({ ...fields, richtung }).eq('id', current.id)
+    if (error) return { ok: false, error: error.message }
+  } else {
+    const { error } = await db
+      .from('claim_payments')
+      .insert({ claim_id: claimId, partei, richtung, ...fields, created_by_user_id: createdByUserId ?? null })
+    if (error) return { ok: false, error: error.message }
+  }
+  return { ok: true }
+}
+
 export type CurrentClaimPayment = {
   zahlungseingang_am: string | null
   erhaltener_betrag: number | null

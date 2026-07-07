@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
-import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
+import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { mapFallStatusToClaimStatus } from '@/lib/faelle/fall-status-claim-mapping'
 
@@ -242,9 +242,10 @@ export async function transitionFallStatus(
   // die zahlung_*-Daten werden dort nicht erfasst (pre-launch 0-cov, faelle-
   // Spalte stirbt in Phase 6).
   if (newStatus === 'zahlung-eingegangen' && claimId) {
-    const cpFields: ClaimPaymentRerouteFields = { zahlungseingang_am: now, status: 'erhalten' }
+    // Payment-Ledger Phase 1: VS-Zahlungseingang -> partei='vs'-Ledger-Zeile (Seam).
+    const cpFields: ClaimPaymentFields = { zahlungseingang_am: now, status: 'erhalten' }
     if (metadata?.betrag != null) cpFields.erhaltener_betrag = metadata.betrag
-    const cpResult = await upsertCurrentClaimPayment(db, claimId, cpFields, metadata?.user_id ?? null)
+    const cpResult = await upsertClaimPayment(db, claimId, 'vs', cpFields, metadata?.user_id ?? null)
     if (!cpResult.ok) throw new Error(cpResult.error ?? 'claim_payments Upsert fehlgeschlagen')
   }
 
