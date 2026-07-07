@@ -27,14 +27,15 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
   if (!sv) return { success: false, typ: '', error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
-  // Ownership via faelle_claim_bridge + claims (SSoT, service-role-sichtbar). Die fruehere
-  // v_faelle_mit_aktuellem_termin ist DEFINER-row-gated -> liefert dem admin-Client 0 Zeilen
-  // -> stornoFall war komplett "Fall nicht gefunden" (MCP-verifiziert 2026-07-07).
+  // Ownership direkt aus der normalisierten claims-Tabelle (SSoT): faelle ist gedroppt, im
+  // SV-Domain gilt claims.id == fall_id (MCP-verifiziert 8/8) -> die faelle_claim_bridge
+  // brauchen wir hier nicht. claims ist eine Tabelle -> service-role-sichtbar; die gated
+  // v_claim_full/v_faelle liefern dem admin-Client 0 Zeilen (-> stornoFall war komplett tot).
   const { data: fall } = await db
-    .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id!inner(sv_id)')
-    .eq('fall_id', fallId)
-    .eq('claims.sv_id', sv.id)
+    .from('claims')
+    .select('id, sv_id')
+    .eq('id', fallId)
+    .eq('sv_id', sv.id)
     .maybeSingle()
   if (!fall) return { success: false, typ: '', error: 'Fall nicht gefunden' }
 
