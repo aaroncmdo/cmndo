@@ -10,13 +10,14 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { google } from 'googleapis'
-import { listCalendarEventsFull, type CalDavCredentials } from '@/lib/kalender/caldav/client'
+import { listAllCalendarEventsFull, type CalDavCredentials } from '@/lib/kalender/caldav/client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 
-const SYNC_HORIZON_DAYS = 35
-// 2026-07-08: Backfill der letzten 7 Tage — der SV-Kalender liest [-7d,+21d], der Sync zog aber
-// nur [now,+35d] -> externe Belegung der letzten Tage fehlte. Fetch- UND Diff-Fenster nutzen -7d.
-const SYNC_BACKFILL_DAYS = 7
+// 2026-07-08 (Aaron): grosszuegiges festes Fenster [-90d, +365d] — Busy-Blocking + juengste
+// Historie sichtbar. DB-driven: der Cron haelt sv_kalender_events_cache aktuell (SSoT), die UI
+// liest nur die DB. Fetch- UND Diff-existing-Fenster nutzen dieselben Konstanten (sonst Duplikate).
+const SYNC_HORIZON_DAYS = 365
+const SYNC_BACKFILL_DAYS = 90
 const GOOGLE_TIMEOUT_MS = 8000
 
 type CacheRow = {
@@ -101,8 +102,13 @@ async function syncCalDav(row: VerbindungRow, db: ReturnType<typeof createAdminC
 
   let events: Array<{ uid: string; summary: string; start: string; end: string }>
   try {
-    const raw = await listCalendarEventsFull(creds, row.calendar_url ?? '', fromIso, toIso)
-    events = raw.map((e) => ({
+    // ALLE Kalender des Accounts (nicht nur der gewaehlte) — Busy-Blocking deckt Arbeit+Privat+…
+    // claimondo-* UIDs raus: das sind unsere EIGENEN in iCloud geschriebenen Termine (Write-back);
+    // sie werden schon als Claimondo-Termin angezeigt -> nicht zusaetzlich als externe Busy doppeln.
+    const raw = await listAllCalendarEventsFull(creds, fromIso, toIso)
+    events = raw
+      .filter((e) => !e.uid.startsWith('claimondo-'))
+      .map((e) => ({
       uid: e.uid || `${e.start}__${e.end}`,
       summary: e.summary ?? '',
       start: e.start,
