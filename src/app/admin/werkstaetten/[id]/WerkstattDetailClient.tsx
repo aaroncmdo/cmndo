@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon, PhoneIcon, CopyIcon, CheckIcon } from 'lucide-react'
+import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon, PhoneIcon, CopyIcon, CheckIcon, MessageSquareIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -28,6 +28,8 @@ import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons
 import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
 import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
 import { weiseQrPoolCodeZu } from '../qr-pool-actions'
+import { ClaimThreadChat } from '@/components/chat/ClaimThreadChat'
+import { holeOderErstelleDirektThread } from '@/lib/chat/thread-actions'
 
 const STATUS_TON: Record<string, StatusBadgeTone> = {
   aktiv: 'success',
@@ -99,7 +101,7 @@ function EditFeld({
   )
 }
 
-export default function WerkstattDetailClient({ detail }: { detail: WerkstattDetail }) {
+export default function WerkstattDetailClient({ detail, currentUserId }: { detail: WerkstattDetail; currentUserId: string }) {
   const router = useRouter()
   const { werkstatt: w, staffel, auftraege, lastSignInAt, forcePasswordChange, billing, leistung } = detail
   const [mailLoading, setMailLoading] = useState(false)
@@ -112,6 +114,9 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
   const [neueAdresse, setNeueAdresse] = useState<PlaceResult | null>(null)
   const [copiedUrl, setCopiedUrl] = useState(false)
   const [poolBusy, setPoolBusy] = useState(false)
+  const [chatThreadId, setChatThreadId] = useState<string | null>(null)
+  const [chatClaimNummer, setChatClaimNummer] = useState<string | null>(null)
+  const [chatBusyClaimId, setChatBusyClaimId] = useState<string | null>(null)
   const [form, setForm] = useState({
     name: w.name ?? '',
     telefon: w.telefon ?? '',
@@ -132,6 +137,25 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
     .sort((x, y) => (x.terminAt ?? '').localeCompare(y.terminAt ?? ''))
   const adresse =
     [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '—'
+
+  async function oeffneWerkstattChat(claimId: string, claimNummer: string | null) {
+    if (!w.user_id) {
+      toast.error('Werkstatt hat keinen Login — Chat nicht möglich.')
+      return
+    }
+    setChatBusyClaimId(claimId)
+    try {
+      const res = await holeOderErstelleDirektThread(claimId, w.user_id)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Chat konnte nicht geöffnet werden')
+        return
+      }
+      setChatThreadId(res.data)
+      setChatClaimNummer(claimNummer)
+    } finally {
+      setChatBusyClaimId(null)
+    }
+  }
 
   async function loginMail() {
     setMailLoading(true)
@@ -516,6 +540,7 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
                 <Th>Richtung</Th>
                 <Th>Status</Th>
                 <Th className="text-right">Provision</Th>
+                <Th>Chat</Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -535,6 +560,21 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
                       </StatusBadge>
                     </Td>
                     <Td className="text-right tabular-nums">{euro(a.provision_betrag_netto)}</Td>
+                    <Td>
+                      {w.user_id ? (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          loading={chatBusyClaimId === a.claim_id}
+                          onClick={() => oeffneWerkstattChat(a.claim_id, a.claim_nummer)}
+                          iconLeft={<MessageSquareIcon className="w-4 h-4" />}
+                        >
+                          Chat
+                        </Button>
+                      ) : (
+                        <span className="text-body-xs text-claimondo-ondo/60">—</span>
+                      )}
+                    </Td>
                   </Tr>
                 )
               })}
@@ -684,6 +724,19 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
             <Button variant="navy" size="sm" loading={adresseBusy} disabled={!neueAdresse} onClick={speichereAdresse}>
               Speichern
             </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Werkstatt-Chat — claim-scoped DM mit der Werkstatt (Phase-2 Thread-Modell) */}
+      <Modal open={chatThreadId !== null} onClose={() => setChatThreadId(null)} maxWidth={520} ariaLabel="Chat mit Werkstatt">
+        <div className="flex flex-col h-[70vh] max-h-[600px]">
+          <h2 className="text-heading-sm font-semibold text-claimondo-navy mb-2 shrink-0">
+            Chat mit {w.name}
+            {chatClaimNummer ? ` · ${chatClaimNummer}` : ''}
+          </h2>
+          <div className="flex-1 min-h-0 overflow-hidden rounded-ios-md border border-claimondo-border">
+            {chatThreadId && <ClaimThreadChat threadId={chatThreadId} currentUserId={currentUserId} />}
           </div>
         </div>
       </Modal>
