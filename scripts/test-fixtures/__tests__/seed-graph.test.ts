@@ -56,6 +56,10 @@ describe('ensureSeedGraph', () => {
     const rows = await seed()
     expect((rows['claims'] ?? []).find((r) => r.id === CLAIMS.c1)).toMatchObject({
       operative_status: 'ersterfassung',
+      // Kunde-Flow-kritisch: onboarding_complete verhindert den /kunde/onboarding-Redirect,
+      // geschaedigter_user_id erfüllt die pflichtdokumente-RLS (Slots mit pflichtdokument_id).
+      onboarding_complete: true,
+      geschaedigter_user_id: ACCOUNTS.kunde,
     })
     const slots = (rows['pflichtdokumente'] ?? []).filter((r) => r.fall_id === CLAIMS.c1)
     expect(slots).toHaveLength(3)

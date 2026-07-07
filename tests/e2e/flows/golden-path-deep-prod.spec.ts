@@ -57,22 +57,14 @@ test('SV #3729 — Stellungnahme einreichen (C2) → auftrag hochgeladen', async
   await ctx.close()
 })
 
-// FIXME (07.07., Kunde-Upload-Persist — onboarding-Blocker ist GEFIXT): C1–C4 onboarding_complete=true
-// → /kunde/faelle/{C1} rendert (kein /onboarding-Bounce, verifiziert) UND die Selektoren greifen
-// (Banner-Klick + Fahrzeugschein-<li> + input[type=file] alle gefunden — kein Selektor-Fehler, der Test
-// erreicht pollRow). ABER der Upload persistiert nicht: pflichtdokumente.fbd10001 bleibt 'ausstehend'.
-// assertKundeOwnsFall 2b SOLLTE greifen (claim_parties geschaedigter-Row existiert) → Ursache offen,
-// Kandidaten: (a) .first()-Banner traf den falschen Button, (b) onChange feuerte nicht auf dem hidden
-// input (className="hidden"), (c) slot.pflichtdokument_id != fbd10001, (d) Storage-Upload-Fehler.
-// Nächster Schritt = Trace: npx playwright show-trace test-results/…-hochgeladen-chromium-retry1/trace.zip
-test.fixme('Kunde — Pflichtdok-Upload (C1) → pflichtdokument hochgeladen', async ({ browser }) => {
+test('Kunde — Pflichtdok-Upload (C1) → pflichtdokument hochgeladen', async ({ browser }) => {
   test.setTimeout(90_000)
   const ctx = await loginContext(browser, 'kunde')
   const page = await ctx.newPage()
 
-  // 1. Kunde-Fallakte (Route-Key = claim_id, Ownership normalisiert über claim_parties). C1–C4
-  //    haben onboarding_complete=true → kunde/layout.tsx redirected NICHT nach /kunde/onboarding
-  //    (navFaelle.some(onboarding_complete===false) wäre sonst true auf jedem owned Fall).
+  // 1. Kunde-Fallakte (Route-Key=claim_id). onboarding_complete=true → kein /onboarding-Redirect;
+  //    geschaedigter_user_id=kunde → pflichtdokumente-RLS liefert die Slots MIT pflichtdokument_id
+  //    (claim_parties allein reicht der RLS nicht — Root des früheren "Slot noch nicht initialisiert").
   await page.goto(`${APP}/kunde/faelle/${CLAIMS.c1}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
   const path = new URL(page.url()).pathname
   expect(path, 'Kunde nicht zu /login gebounced').not.toMatch(/\/login|\/anmelden/)

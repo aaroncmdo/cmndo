@@ -56,6 +56,7 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
       id: CLAIMS.c2,
       schadentag: SCHADENTAG,
       onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
+      geschaedigter_user_id: ACCOUNTS.kunde, // s. C1 — pflichtdokumente-RLS + Ownership-SSoT
       operative_status: 'sv-termin',
       lead_id: LEADS.c2,
       sv_id: SV_SACHVERSTAENDIGE_ID,
@@ -105,6 +106,11 @@ async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
       // onboarding_complete===false)) JEDEN /kunde/*-Pfad nach /kunde/onboarding -> Fallakte
       // rendert nie. Gilt für ALLE test-kunde-Claims (geschädigter auf allen), nicht nur den besuchten.
       onboarding_complete: true,
+      // geschaedigter_user_id = kanonischer denormalisierter Ownership-SSoT (CMM-49). Pflicht für die
+      // pflichtdokumente-RLS ("Kunden eigene Dokumente": fall_id→claims.geschaedigter_user_id=auth.uid())
+      // — claim_parties allein reicht der RLS NICHT → sonst sieht der Kunde die Slots nicht
+      // (pflichtdokument_id=null → Upload-Guard "Slot noch nicht initialisiert"). Gilt für alle Kunde-Claims.
+      geschaedigter_user_id: ACCOUNTS.kunde,
       operative_status: 'ersterfassung',
       lead_id: LEADS.c1,
       created_via: 'manuell_admin',
@@ -140,6 +146,7 @@ async function ensureC3(db: SupabaseClient, o: Opts): Promise<void> {
       id: CLAIMS.c3,
       schadentag: SCHADENTAG,
       onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
+      geschaedigter_user_id: ACCOUNTS.kunde, // s. C1 — pflichtdokumente-RLS + Ownership-SSoT
       operative_status: 'kanzlei-uebergeben',
       lead_id: LEADS.c3,
       kanzlei_uebergeben_am: SCHADENTAG,
@@ -171,6 +178,7 @@ async function ensureC4(db: SupabaseClient, o: Opts): Promise<void> {
       id: CLAIMS.c4,
       schadentag: SCHADENTAG,
       onboarding_complete: true, // s. C1 — Kunde-Layout-Redirect-Gate
+      geschaedigter_user_id: ACCOUNTS.kunde, // s. C1 — pflichtdokumente-RLS + Ownership-SSoT
       operative_status: 'kanzlei-uebergeben',
       lead_id: LEADS.c4,
       sv_id: SV_SACHVERSTAENDIGE_ID,
