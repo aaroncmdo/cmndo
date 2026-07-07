@@ -39,7 +39,7 @@ describe('ensureSeedGraph', () => {
       claim_id: CLAIMS.c2,
       rolle: 'geschaedigter',
       user_id: ACCOUNTS.kunde,
-      quelle: 'seed',
+      quelle: 'manuell_kb',
     })
     expect((rows['auftraege'] ?? []).find((r) => r.id === AUFTRAEGE.c2)).toMatchObject({
       claim_id: CLAIMS.c2,
@@ -55,7 +55,6 @@ describe('ensureSeedGraph', () => {
     const rows = await seed()
     expect((rows['claims'] ?? []).find((r) => r.id === CLAIMS.c1)).toMatchObject({
       operative_status: 'ersterfassung',
-      makler_id: ACCOUNTS.makler,
     })
     const slots = (rows['pflichtdokumente'] ?? []).filter((r) => r.fall_id === CLAIMS.c1)
     expect(slots).toHaveLength(3)

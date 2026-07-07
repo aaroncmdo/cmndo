@@ -40,7 +40,7 @@ async function ensureGeschaedigter(db: SupabaseClient, stage: Stage, o: Opts): P
   await upsertById(
     db,
     'claim_parties',
-    { id: PARTIES[stage], claim_id: CLAIMS[stage], rolle: 'geschaedigter', user_id: ACCOUNTS.kunde, quelle: 'seed' },
+    { id: PARTIES[stage], claim_id: CLAIMS[stage], rolle: 'geschaedigter', user_id: ACCOUNTS.kunde, quelle: 'manuell_kb' },
     o,
   )
 }
@@ -80,7 +80,9 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
   )
 }
 
-// C1 — ersterfassung: offener Fall fürs Dispatch (assign-from-map) + Kunde-Upload (Pflichtdok-Slots) + Makler-Attribution.
+// C1 — ersterfassung: offener Fall fürs Dispatch (assign-from-map) + Kunde-Upload (Pflichtdok-Slots).
+// Makler-Attribution deferred: claims.makler_id -> makler-Tabelle (nicht profiles); ein Trigger legt
+// makler_fall_consent mit FK auf makler an -> braucht test-maklers makler.id (Refinement / SP2).
 async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
   await ensureLead(db, 'c1', o)
   await upsertById(
@@ -91,8 +93,7 @@ async function ensureC1(db: SupabaseClient, o: Opts): Promise<void> {
       schadentag: SCHADENTAG,
       operative_status: 'ersterfassung',
       lead_id: LEADS.c1,
-      makler_id: ACCOUNTS.makler,
-      created_via: 'makler_portal',
+      created_via: 'manuell_admin',
     },
     o,
   )

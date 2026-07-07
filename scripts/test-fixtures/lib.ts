@@ -7,6 +7,22 @@ export function makeClient(): SupabaseClient {
   return createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 }
 
+/** Robuste Fehler-Beschreibung — Supabase PostgrestError ist KEIN Error-Instance. */
+export function describeError(err: unknown): string {
+  if (err instanceof Error) return err.message
+  if (err && typeof err === 'object') {
+    const e = err as { message?: unknown; code?: unknown; details?: unknown }
+    if (e.message != null) {
+      const parts = [String(e.message)]
+      if (e.code != null) parts.push(`code=${String(e.code)}`)
+      if (e.details != null) parts.push(String(e.details))
+      return parts.join(' | ')
+    }
+    return JSON.stringify(err)
+  }
+  return String(err)
+}
+
 export class Reporter {
   failures = 0
   private lines: string[] = []
@@ -18,7 +34,7 @@ export class Reporter {
   }
   fail(msg: string, err: unknown) {
     this.failures++
-    this.lines.push(`  [FAIL] ${msg}: ${err instanceof Error ? err.message : String(err)}`)
+    this.lines.push(`  [FAIL] ${msg}: ${describeError(err)}`)
   }
   print() {
     console.log(this.lines.join('\n'))
