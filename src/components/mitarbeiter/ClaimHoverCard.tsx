@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { CLAIM_WORKFLOW_META } from '@/lib/ops/claim-workflow-meta'
 import { updateClaimField } from '@/app/mitarbeiter/claim-edit-actions'
 import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
+import { Card, Button } from '@/components/primitives'
 
 // Pure helper: exported so tests can call it directly (env=node, no jsdom needed).
 export function formatFieldValue(field: string, value: unknown): string {
@@ -83,22 +84,12 @@ function EditableRow({
             disabled={saving}
           />
           <div className="flex gap-1">
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={saving}
-              className="text-caption px-2 py-0.5 rounded-ios-sm bg-claimondo-navy text-white hover:opacity-90 disabled:opacity-50 transition-opacity"
-            >
-              {saving ? 'Speichern…' : 'Speichern'}
-            </button>
-            <button
-              type="button"
-              onClick={() => { setEditing(false); setError(null) }}
-              disabled={saving}
-              className="text-caption px-2 py-0.5 rounded-ios-sm border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg disabled:opacity-50 transition-colors"
-            >
+            <Button type="button" variant="navy" size="sm" onClick={handleSave} loading={saving}>
+              Speichern
+            </Button>
+            <Button type="button" variant="bare" size="sm" onClick={() => { setEditing(false); setError(null) }} disabled={saving}>
               Abbrechen
-            </button>
+            </Button>
           </div>
           {error && (
             <p className="text-caption text-danger-strong">{error}</p>
@@ -118,7 +109,7 @@ export default function ClaimHoverCard({ item }: { item: ClaimWorkItem }) {
   const fallUrl = item.fallId ? `/faelle/${item.fallId}` : null
 
   return (
-    <div className="w-80 rounded-ios-xl border border-claimondo-border bg-white shadow-md p-3 flex flex-col gap-3">
+    <Card p={3} className="w-80 shadow-md flex flex-col gap-3">
       {/* Header: Titel + Claim-Nummer */}
       <div className="flex items-start justify-between gap-2">
         <div>
@@ -169,6 +160,6 @@ export default function ClaimHoverCard({ item }: { item: ClaimWorkItem }) {
           </a>
         </div>
       )}
-    </div>
+    </Card>
   )
 }

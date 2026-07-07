@@ -2,9 +2,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-
-export const ALLOWED_CLAIM_FIELDS = ['notizen', 'interne_notizen', 'schadens_hoehe_netto'] as const
-type AllowedField = (typeof ALLOWED_CLAIM_FIELDS)[number]
+import { ALLOWED_CLAIM_FIELDS, type AllowedField } from './claim-edit-fields'
 
 export async function updateClaimField(
   claimId: string,
