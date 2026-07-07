@@ -27,7 +27,9 @@ export type AktiverSVPublic = {
   id: string
   standort_lat: number
   standort_lng: number
-  isochrone_polygon: unknown
+  /** Optional: die Loader-Ausgabe hat es immer, der Finder-Client-Payload strippt es
+   * aber (die Union wird server-seitig vorberechnet -> page.tsx). Siehe FinderMap. */
+  isochrone_polygon?: unknown
   paket: string
   vorname_initiale: string | null
   /** Vorname des SV — NUR bei aktiven, verifizierten Partnern öffentlich gezeigt (Aaron 12.06.).
