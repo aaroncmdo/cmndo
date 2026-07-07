@@ -43,7 +43,8 @@ export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<
     serviceWorkers: 'block',
     viewport: { width: 1440, height: 1200 },
   })
-  await ctx.addCookies(cookies)
+  // cookie.mjs (untyped .mjs) liefert sameSite:string; Playwright will "Lax"|"Strict"|"None".
+  await ctx.addCookies(cookies as Parameters<typeof ctx.addCookies>[0])
   return ctx
 }
 
