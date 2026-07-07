@@ -21,19 +21,14 @@ import {
 import { leiteOnboardingStatus } from '@/lib/werkstatt/onboarding-status'
 import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import type { WerkstattDetail } from './detail-data'
+import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
+import { NotizenSection } from './NotizenSection'
+import { WerkstattKarte } from './WerkstattKarte'
 
 const STATUS_TON: Record<string, StatusBadgeTone> = {
   aktiv: 'success',
   inaktiv: 'neutral',
   gesperrt: 'danger',
-}
-
-const FAEHIGKEIT_LABEL: Record<string, string> = {
-  karosserie: 'Karosserie',
-  lackierung: 'Lackierung',
-  mechanik: 'Mechanik',
-  glas: 'Glas',
-  smart_repair: 'Smart-Repair',
 }
 
 const STATUS_NORM_LABEL: Record<string, string> = {
@@ -62,6 +57,32 @@ function Feld({ label, wert }: { label: string; wert: string }) {
       <dd className="text-claimondo-navy">{wert}</dd>
     </div>
   )
+}
+
+function Kennzahl({ label, wert }: { label: string; wert: string }) {
+  return (
+    <div className="rounded-ios-md bg-claimondo-bg px-3 py-2">
+      <p className="text-body-xs text-claimondo-ondo">{label}</p>
+      <p className="text-body font-semibold text-claimondo-navy tabular-nums">{wert}</p>
+    </div>
+  )
+}
+
+function terminDatum(iso: string | null): string {
+  return iso
+    ? new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '—'
+}
+const REP_TERMIN_LABEL: Record<string, string> = {
+  angefragt: 'Angefragt',
+  anruf_erbeten: 'Anruf erbeten',
+  bestaetigt: 'Bestätigt',
+  erledigt: 'Erledigt',
+  abgelehnt: 'Abgelehnt',
+  storniert: 'Storniert',
+}
+function reparaturTerminLabel(s: string | null): string {
+  return s ? REP_TERMIN_LABEL[s] ?? s : '—'
 }
 
 function EditFeld({
@@ -108,6 +129,12 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
 
   const onboarding = leiteOnboardingStatus({ hatLogin: !!w.user_id, forcePasswordChange, lastSignInAt })
   const abrechnungPosten = billing ? Object.entries(billing.perStatus) : []
+  const provisionSumme = auftraege.reduce((s, a) => s + (a.provision_betrag_netto ?? 0), 0)
+  const ausgezahltNetto = billing?.perStatus['auszahlung:erledigt']?.netto ?? 0
+  const termine = auftraege
+    .map((a) => ({ a, terminAt: a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin }))
+    .filter((t) => !!t.terminAt)
+    .sort((x, y) => (x.terminAt ?? '').localeCompare(y.terminAt ?? ''))
   const adresse =
     [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '—'
 
@@ -267,6 +294,14 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         <p className="text-body-sm text-claimondo-ondo mt-1">Aktiviert am {datum(w.aktiviert_am)}</p>
       </div>
 
+      {/* Kennzahlen */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Kennzahl label="Aufträge/Vermittlungen" wert={String(auftraege.length)} />
+        <Kennzahl label="Termine geplant" wert={String(termine.length)} />
+        <Kennzahl label="Provision (netto)" wert={euro(provisionSumme)} />
+        <Kennzahl label="Ausgezahlt (netto)" wert={euro(ausgezahltNetto)} />
+      </div>
+
       {/* Zugang & Onboarding */}
       <SectionCard title="Zugang & Onboarding">
         <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -323,6 +358,11 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         </dl>
       </SectionCard>
 
+      {/* Standort & Fahrgebiet */}
+      <SectionCard title="Standort & Fahrgebiet">
+        <WerkstattKarte lat={w.lat} lng={w.lng} isochrone={w.isochrone} />
+      </SectionCard>
+
       {/* Aktivität / Aufträge */}
       <SectionCard
         title={`Aktivität — ${auftraege.length} ${auftraege.length === 1 ? 'Auftrag/Vermittlung' : 'Aufträge/Vermittlungen'}`}
@@ -365,6 +405,32 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         )}
       </SectionCard>
 
+      {/* Reparatur-Termine (aus den Aufträgen abgeleitet, nach Datum) */}
+      <SectionCard title={`Termine — ${termine.length} geplant`}>
+        {termine.length === 0 ? (
+          <p className="text-body-sm text-claimondo-ondo">Keine geplanten Termine.</p>
+        ) : (
+          <Table>
+            <Thead>
+              <Tr>
+                <Th>Datum</Th>
+                <Th>Fall</Th>
+                <Th>Status</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {termine.map(({ a, terminAt }) => (
+                <Tr key={a.claim_id}>
+                  <Td>{terminDatum(terminAt)}</Td>
+                  <Td className="font-mono">{a.claim_nummer ?? '—'}</Td>
+                  <Td>{reparaturTerminLabel(a.reparatur_termin_status)}</Td>
+                </Tr>
+              ))}
+            </Tbody>
+          </Table>
+        )}
+      </SectionCard>
+
       {/* Abrechnung */}
       <SectionCard title="Abrechnung">
         {abrechnungPosten.length === 0 ? (
@@ -390,32 +456,14 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         )}
       </SectionCard>
 
-      {/* Fähigkeiten & Staffelung */}
+      {/* Interne Notizen (nur Team-sichtbar) */}
+      <SectionCard title="Interne Notizen">
+        <NotizenSection werkstattId={w.id} notizen={detail.notizen} />
+      </SectionCard>
+
+      {/* Fähigkeiten & Staffelung (inline editierbar) */}
       <SectionCard title="Fähigkeiten & Staffelung">
-        <div className="space-y-3">
-          <div>
-            <p className="text-body-xs text-claimondo-ondo mb-1">Fähigkeiten</p>
-            <p className="text-body-sm text-claimondo-navy">
-              {w.faehigkeiten && w.faehigkeiten.length > 0
-                ? w.faehigkeiten.map((f) => FAEHIGKEIT_LABEL[f] ?? f).join(', ')
-                : 'Vollservice (keine Einschränkung)'}
-            </p>
-          </div>
-          <div>
-            <p className="text-body-xs text-claimondo-ondo mb-1">Staffel-Boni</p>
-            {staffel.length === 0 ? (
-              <p className="text-body-sm text-claimondo-ondo">Keine Staffel-Stufen hinterlegt.</p>
-            ) : (
-              <ul className="text-body-sm text-claimondo-navy space-y-0.5">
-                {staffel.map((s, i) => (
-                  <li key={i}>
-                    ab {s.schwelle} Vermittlungen → {euro(s.bonus_betrag_netto)} Bonus
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+        <FaehigkeitenStaffelEditor werkstattId={w.id} faehigkeiten={w.faehigkeiten ?? []} staffel={staffel} />
       </SectionCard>
 
       {/* Stammdaten-Bearbeiten-Modal */}
