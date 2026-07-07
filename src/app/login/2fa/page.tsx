@@ -5,7 +5,7 @@ import TwoFaClient from './TwoFaClient'
 import TotpChallengeClient from './TotpChallengeClient'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue, LOGIN_CONTINUE_COOKIE } from '@/lib/auth/safe-continue'
-import { waehleZweitFaktor } from '@/lib/auth/mfa-gate'
+import { waehleZweitFaktor, istZweiFaktorPflicht } from '@/lib/auth/mfa-gate'
 
 // AAR-939: 2FA via Supabase-MFA. Faktor-Wahl (waehleZweitFaktor):
 //   - TOTP-Faktor vorhanden        -> TotpChallengeClient (Code aus Authenticator-App)
@@ -73,13 +73,16 @@ export default async function TwoFaPage({
   // Kein verifizierter Faktor.
   const legacyWanted =
     profile?.twofa_aktiviert === true || profile?.twofa_email_aktiviert === true
-  if (legacyWanted) {
-    // SOFT-ENROLL (Phone): Legacy-2FA-User ohne Supabase-Faktor holt ihn nach.
+  // F3: interne Pflicht-Rolle erzwingt Enroll (auch ohne Legacy-Flag), non-skippable.
+  const pflicht = istZweiFaktorPflicht(profile?.rolle as string | null | undefined)
+  if (legacyWanted || pflicht) {
+    // ENROLL (Phone): Legacy-2FA-User ODER interne Pflicht-Rolle holt den Faktor nach.
     return (
       <TwoFaClient
         mode="enroll"
         prefillPhone={profile?.twofa_telefon ?? profile?.telefon ?? null}
         targetPath={finalTarget}
+        mandatory={pflicht}
       />
     )
   }

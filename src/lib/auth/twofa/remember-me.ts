@@ -105,9 +105,22 @@ export async function listUserDevices(userId: string): Promise<{
 
 export async function clearTwoFa(targetUserId: string): Promise<{ success: boolean; error?: string }> {
   const db = createAdminClient()
+  // F6 (AAR-audit-2fa): Auch die echten Supabase-MFA-Faktoren entfernen — sonst
+  // bleibt der User trotz "2FA zurueckgesetzt" gechallenged/ausgesperrt (der
+  // profiles-Mirror allein hebt aal2 nicht auf). Admin-MFA-API (service role),
+  // idempotent: kein Faktor -> no-op.
+  try {
+    const { data } = await db.auth.admin.mfa.listFactors({ userId: targetUserId })
+    for (const f of data?.factors ?? []) {
+      await db.auth.admin.mfa.deleteFactor({ id: f.id, userId: targetUserId })
+    }
+  } catch (err) {
+    console.error('[clearTwoFa] MFA-Faktor-Delete fehlgeschlagen:', err)
+  }
   await db.from('profiles').update({
     twofa_telefon: null,
     twofa_telefon_verifiziert_am: null,
+    twofa_aktiviert: false,
   }).eq('id', targetUserId)
   await revokeAllTokens(targetUserId)
   return { success: true }
