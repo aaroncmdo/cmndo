@@ -23,6 +23,7 @@ import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-
 import type { WerkstattDetail } from './detail-data'
 import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
 import { NotizenSection } from './NotizenSection'
+import { WerkstattKarte } from './WerkstattKarte'
 
 const STATUS_TON: Record<string, StatusBadgeTone> = {
   aktiv: 'success',
@@ -355,6 +356,11 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
           <Feld label="Bank (IBAN)" wert={w.bank_iban ?? '—'} />
           <Feld label="Website" wert={w.website ?? '—'} />
         </dl>
+      </SectionCard>
+
+      {/* Standort & Fahrgebiet */}
+      <SectionCard title="Standort & Fahrgebiet">
+        <WerkstattKarte lat={w.lat} lng={w.lng} isochrone={w.isochrone} />
       </SectionCard>
 
       {/* Aktivität / Aufträge */}
