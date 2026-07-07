@@ -364,6 +364,12 @@ const nextConfig: NextConfig = {
       // das ALLE Faelle selbst routet (freigeschaltet->/gutachter Z.160, no-sv Z.57, sonst Steps).
       // Statischer 308 dorthin + page.tsx geloescht.
       { source: '/gutachter/onboarding', destination: '/gutachter/willkommen', permanent: true },
+      // Kunde-Portal (AAR-450): /kunde/termin (Termin-Liste) wurde aus der Nav entfernt — Termine
+      // leben jetzt in den Fall-Karten. Als HTTP-308 statt permanentRedirect()-Stub: die page.tsx
+      // traf die AAR-889-Falle (leere 200-Shell, kein Redirect; Prod-Smoke 07.07. als test-kunde
+      // bestaetigt). Exakt-Match -> die Token-Subroute /kunde/termin/[token] (WhatsApp-Magic-Links
+      // fuer SV-Termin-Tracking) bleibt unberuehrt.
+      { source: '/kunde/termin', destination: '/kunde', permanent: true },
     ]
   },
 };
