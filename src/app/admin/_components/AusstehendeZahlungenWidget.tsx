@@ -85,12 +85,13 @@ async function loadAusstehende(): Promise<{ rows: Eintrag[]; gesamt: number; tot
     .select('id, empfaenger_typ, empfaenger_id, empfaenger_email, empfaenger_name, summe_brutto, faellig_am, bezahlt_am, status, storniert_am')
     .is('bezahlt_am', null)
     .is('storniert_am', null)
+    .neq('status', 'im_einzug')
     .lt('faellig_am', today)
     .order('faellig_am', { ascending: true })
     .limit(20)
 
   for (const r of rRows ?? []) {
-    const failed = (r.status ?? '').toLowerCase().includes('failed') || (r.status ?? '').toLowerCase().includes('einzug')
+    const failed = (r.status ?? '') === 'fehlgeschlagen'
     eintraege.push({
       key: `r-${r.id}`,
       name: r.empfaenger_name ?? '—',

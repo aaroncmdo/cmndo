@@ -68,6 +68,7 @@ export default async function SaeumigeSvsPage() {
     .select('id, abrechnungs_nr, empfaenger_id, empfaenger_name, empfaenger_email, summe_brutto, faellig_am, status')
     .eq('empfaenger_typ', 'sv')
     .is('bezahlt_am', null)
+    .neq('status', 'im_einzug')
     .is('storniert_am', null)
     .not('faellig_am', 'is', null)
     .lte('faellig_am', grenzDatum)

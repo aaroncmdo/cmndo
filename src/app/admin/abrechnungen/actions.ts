@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
 import { revalidatePath } from 'next/cache'
+import { einzugBranchFuerPiStatus } from '@/lib/finance/einzug-retry'
 
 // Stripe wird in retryEinzug() lazy via dynamic import geladen — sonst crasht
 // 'next build' im Page-Data-Collection-Schritt falls STRIPE_SECRET_KEY
@@ -39,11 +40,12 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
   const db = createAdminClient()
 
   const { data: abr } = await db.from('abrechnungen')
-    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, summe_brutto, bezahlt_am')
+    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, summe_brutto, bezahlt_am, status')
     .eq('id', abrechnung_id)
     .maybeSingle()
   if (!abr) return { success: false, error: 'Abrechnung nicht gefunden' }
   if (abr.bezahlt_am) return { success: false, error: 'Abrechnung ist bereits bezahlt' }
+  if (abr.status === 'im_einzug') return { success: false, error: 'Abrechnung ist bereits im Einzug (SEPA wird verarbeitet) — bitte abwarten.' }
   if (abr.empfaenger_typ !== 'sv') return { success: false, error: 'Retry nur fuer SV-Abrechnungen unterstuetzt' }
   if (!abr.empfaenger_id || !abr.summe_brutto) return { success: false, error: 'empfaenger_id oder Betrag fehlt' }
 
@@ -168,6 +170,19 @@ export async function retryEinzug(abrechnung_id: string): Promise<{ success: boo
         console.error('[KFZ-149 retry] Bezahlt-Mail fehlgeschlagen:', mailErr)
       }
 
+      revalidatePath('/admin/finance/abrechnungen', 'page')
+      return { success: true, payment_intent_id: pi.id }
+    }
+
+    if (einzugBranchFuerPiStatus(pi.status) === 'im_einzug') {
+      const nowIso = new Date().toISOString()
+      await db.from('abrechnungen').update({
+        einzug_versucht_am: nowIso,
+        einzug_fehler: null,
+        stripe_payment_intent_id: pi.id,
+        status: 'im_einzug',
+        updated_at: nowIso,
+      }).eq('id', abr.id)
       revalidatePath('/admin/finance/abrechnungen', 'page')
       return { success: true, payment_intent_id: pi.id }
     }
