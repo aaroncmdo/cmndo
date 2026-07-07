@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-05T16:14:40.058Z",
-  "count": 41,
+  "generatedAt": "2026-07-07T13:39:06.421Z",
+  "count": 40,
   "files": [
     "src/app/admin/_components/KritischeUpdatesWidget.tsx",
     "src/app/admin/_components/TageskalenderWidget.tsx",
@@ -40,7 +40,6 @@
     "src/components/kb/RegulierungCard.tsx",
     "src/components/kunde/KundeJetztZuTunCard.tsx",
     "src/components/live-ops/DeadPinDrawer.tsx",
-    "src/components/makler/MaklerAktenList.tsx",
     "src/components/offline/OutboxBadge.tsx",
     "src/components/termine/TerminListeClient.tsx"
   ]
