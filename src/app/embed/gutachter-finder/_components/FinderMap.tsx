@@ -512,7 +512,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         const unionFeature = unionIsochrones(partnerIsoRaws)
         const coveragePartnersData: GeoJSON.FeatureCollection = {
           type: 'FeatureCollection',
-          features: unionFeature ? [unionFeature] : [],
+          features: unionFeature ? [{ ...unionFeature, properties: {} }] : [],
         }
         map.addSource('coverage-partners', { type: 'geojson', data: coveragePartnersData })
         map.addLayer({

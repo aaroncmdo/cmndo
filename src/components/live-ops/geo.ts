@@ -226,9 +226,11 @@ export function assignLineFC(
 }
 
 /**
- * Isochrone-Polygone. Nur SVs mit `isochrone`-Payload werden inkludiert.
- * Wird weiterhin von der Coverage-Gap-Logik (computeCoverageGaps) benoetigt —
- * fuer die Darstellung wird stattdessen unionIsochroneFC verwendet.
+ * Isochrone-Polygone (per SV, ein Feature je SV mit typ-Property).
+ * Aktuell nur noch von geo.test.ts referenziert: die Karten-Darstellung
+ * laeuft ueber unionIsochroneFC (Union-Flaeche), und computeCoverageGaps
+ * ruft parseIsochrone direkt (nicht ueber diese Projektion). Behalten als
+ * getestete per-SV-Projektion / moegliche Debug-Ansicht.
  */
 export function isochroneFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
   return {
