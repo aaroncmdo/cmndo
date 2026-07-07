@@ -7,6 +7,9 @@
 
 import { useMemo } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
+// Lucide statt Heroicons, weil PageHeader/EmptyState `icon` als LucideIcon typen
+// (gleiche Wahl wie makler/akten FolderIcon + admin/werkstaetten WrenchIcon).
+import { WrenchIcon } from 'lucide-react'
 
 import type { WerkstattAuftrag } from '@/lib/werkstatt/queries'
 import {
@@ -33,6 +36,8 @@ import {
   DataTableContainer,
 } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
+import PageHeader from '@/components/shared/PageHeader'
+import EmptyState from '@/components/shared/EmptyState'
 import { Chip, ChipRow } from '@/components/ui/Chip'
 
 const EUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
@@ -101,84 +106,106 @@ export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
 
   const hatStatusFilter = statusFilter.size > 0
 
+  // Nur die „Status"-Gruppe (Label + Row) rendern, wenn es überhaupt Status-Chips
+  // gibt — sonst hinge das Label ohne Chips (verwaistes Label) in der Luft.
+  const hatStatusChips = WERKSTATT_PHASE_ORDER.some(
+    (k) => (phaseCounts.get(k) ?? 0) > 0 || statusFilter.has(k),
+  )
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
-      <header>
-        <h1 className="text-heading-md text-claimondo-navy font-bold">Aufträge</h1>
-        <p className="text-body text-claimondo-ondo mt-0.5">
-          Ihre Aufträge für {werkstattName} — Reparatur-Aufträge und Vermittlungen.
-        </p>
-      </header>
+      <PageHeader
+        title="Aufträge"
+        description={`Ihre Aufträge für ${werkstattName} — Reparatur-Aufträge und Vermittlungen.`}
+        icon={WrenchIcon}
+      />
 
       {auftraege.length > 0 && (
-        <div className="space-y-2">
-          {/* Segment — Reparatur-Aufträge (ich repariere) vs Meine Vermittlungen (ich habe geworben) */}
-          <ChipRow>
-            <Chip
-              variant={segment === 'reparatur' ? 'selected' : 'default'}
-              count={segCounts.reparatur}
-              onClick={() => updateParam('segment', 'reparatur')}
-            >
-              Reparatur-Aufträge
-            </Chip>
-            <Chip
-              variant={segment === 'vermittlung' ? 'selected' : 'default'}
-              count={segCounts.vermittlung}
-              onClick={() => updateParam('segment', 'vermittlung')}
-            >
-              Meine Vermittlungen
-            </Chip>
-          </ChipRow>
-
-          {/* Status-Filter innerhalb des Segments */}
-          <ChipRow>
-            {WERKSTATT_PHASE_ORDER.map((key) => {
-              const count = phaseCounts.get(key) ?? 0
-              if (count === 0 && !statusFilter.has(key)) return null
-              return (
-                <Chip
-                  key={key}
-                  variant={statusFilter.has(key) ? 'selected' : 'default'}
-                  count={count}
-                  onClick={() => toggleInSet('status', statusFilter, key)}
-                >
-                  {WERKSTATT_PHASE_META[key].label}
-                </Chip>
-              )
-            })}
-            {hatStatusFilter && (
-              <Chip variant="ghost" onClick={() => updateParam('status', null)}>
-                Zurücksetzen
+        <div className="space-y-3">
+          {/* Ansicht — Reparatur-Aufträge (ich repariere) vs Meine Vermittlungen (ich habe geworben) */}
+          <div className="space-y-1">
+            <span className="text-caption font-medium text-claimondo-ondo">Ansicht</span>
+            <ChipRow>
+              <Chip
+                variant={segment === 'reparatur' ? 'selected' : 'default'}
+                count={segCounts.reparatur}
+                onClick={() => updateParam('segment', 'reparatur')}
+              >
+                Reparatur-Aufträge
               </Chip>
-            )}
-          </ChipRow>
+              <Chip
+                variant={segment === 'vermittlung' ? 'selected' : 'default'}
+                count={segCounts.vermittlung}
+                onClick={() => updateParam('segment', 'vermittlung')}
+              >
+                Meine Vermittlungen
+              </Chip>
+            </ChipRow>
+          </div>
+
+          {/* Status-Filter innerhalb des Segments — kleinere Chips, klar als „Status" gelabelt */}
+          {hatStatusChips && (
+            <div className="space-y-1">
+              <span className="text-caption font-medium text-claimondo-ondo">Status</span>
+              <ChipRow>
+                {WERKSTATT_PHASE_ORDER.map((key) => {
+                  const count = phaseCounts.get(key) ?? 0
+                  if (count === 0 && !statusFilter.has(key)) return null
+                  return (
+                    <Chip
+                      key={key}
+                      size="sm"
+                      variant={statusFilter.has(key) ? 'selected' : 'default'}
+                      count={count}
+                      onClick={() => toggleInSet('status', statusFilter, key)}
+                    >
+                      {WERKSTATT_PHASE_META[key].label}
+                    </Chip>
+                  )
+                })}
+                {hatStatusFilter && (
+                  <Chip size="sm" variant="ghost" onClick={() => updateParam('status', null)}>
+                    Zurücksetzen
+                  </Chip>
+                )}
+              </ChipRow>
+            </div>
+          )}
         </div>
       )}
 
-      <DataTableContainer>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>Auftrag</Th>
-              <Th>Fahrzeug</Th>
-              <Th>Schaden</Th>
-              <Th>Status</Th>
-              <Th>Provision</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {gefiltert.length === 0 ? (
+      {gefiltert.length === 0 ? (
+        <EmptyState
+          icon={WrenchIcon}
+          title={
+            auftraege.length === 0
+              ? 'Noch keine Aufträge'
+              : segment === 'reparatur'
+                ? 'Keine Reparatur-Aufträge'
+                : 'Noch keine Vermittlungen'
+          }
+          description={
+            auftraege.length === 0
+              ? 'Sobald Ihnen ein Auftrag zugewiesen wird, erscheint er hier.'
+              : segment === 'reparatur'
+                ? 'Für die gewählten Filter gibt es keine Reparatur-Aufträge.'
+                : 'In dieser Ansicht sind noch keine Vermittlungen.'
+          }
+        />
+      ) : (
+        <DataTableContainer>
+          <Table>
+            <Thead>
               <Tr>
-                <Td colSpan={5} className="text-center text-claimondo-ondo py-8">
-                  {auftraege.length === 0
-                    ? 'Noch keine Aufträge vorhanden. Sobald Ihnen ein Auftrag zugewiesen wird, erscheint er hier.'
-                    : segment === 'reparatur'
-                      ? 'Keine Reparatur-Aufträge für diese Filter.'
-                      : 'Noch keine Vermittlungen in dieser Ansicht.'}
-                </Td>
+                <Th>Auftrag</Th>
+                <Th>Fahrzeug</Th>
+                <Th>Schaden</Th>
+                <Th>Status</Th>
+                <Th>Provision</Th>
               </Tr>
-            ) : (
-              gefiltert.map((a) => {
+            </Thead>
+            <Tbody>
+              {gefiltert.map((a) => {
                 const phase = werkstattAuftragPhase(a)
                 const opLabel = operativeStatusLabel(a.operative_status)
                 const wunsch = reparaturwunschLabel(a.reparaturwunsch)
@@ -215,11 +242,11 @@ export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
                     </Td>
                   </ClickableTr>
                 )
-              })
-            )}
-          </Tbody>
-        </Table>
-      </DataTableContainer>
+              })}
+            </Tbody>
+          </Table>
+        </DataTableContainer>
+      )}
     </div>
   )
 }
