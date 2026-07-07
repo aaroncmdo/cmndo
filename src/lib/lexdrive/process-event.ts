@@ -1060,7 +1060,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     // beide Pfade (SA-Signatur bei nur_gutachter und Vollmacht bei komplett).
     if (input.eventType === 'vollmacht_bestaetigt') {
       try {
-        const { confirmVollmacht } = await import('@/app/flow/[token]/actions')
+        const { confirmVollmacht } = await import('@/lib/vollmacht/confirm-vollmacht')
         await confirmVollmacht(input.fallId)
       } catch (err) {
         console.error('[AAR-kanzlei] confirmVollmacht failed:', err)
