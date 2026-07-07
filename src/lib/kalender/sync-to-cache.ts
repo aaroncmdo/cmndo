@@ -226,19 +226,42 @@ export async function syncAllExternalCalendars(): Promise<SyncResult[]> {
     }
   }
 
-  // ── CalDAV: alle aktiven Verbindungen (universell, profil-gekeyed) ────────
+  // ── CalDAV: kanonisch aus sv_kalender_verbindungen (dort schreibt der Connect-Flow +
+  // liest die gesamte UI). Die frühere kalender_verbindungen-Quelle wurde nur per Einmal-
+  // Backfill befüllt (kein Mirror-Trigger, DB-verifiziert 2026-07-08) -> NEUE Verbindungen
+  // landeten nie im Sync. profile_id via sachverstaendige aufgelöst (Cache bleibt profil-gekeyed).
   const { data: verbindungen } = await db
-    .from('kalender_verbindungen')
-    .select('id, profile_id, server_url, username, password_encrypted, calendar_url')
+    .from('sv_kalender_verbindungen')
+    .select('id, sv_id, server_url, username, password_encrypted, calendar_url')
     .eq('provider', 'caldav')
     .is('last_error', null)
 
-  for (const row of (verbindungen ?? []) as VerbindungRow[]) {
+  const svIds = [...new Set((verbindungen ?? []).map((r) => r.sv_id).filter(Boolean) as string[])]
+  const svToProfile = new Map<string, string>()
+  if (svIds.length) {
+    const { data: svs } = await db.from('sachverstaendige').select('id, profile_id').in('id', svIds)
+    for (const s of (svs ?? []) as Array<{ id: string; profile_id: string | null }>) {
+      if (s.profile_id) svToProfile.set(s.id, s.profile_id)
+    }
+  }
+
+  for (const raw of (verbindungen ?? []) as Array<Record<string, unknown>>) {
+    const svId = raw.sv_id as string | null
+    const profileId = svId ? svToProfile.get(svId) : undefined
+    if (!profileId) continue
+    const row: VerbindungRow = {
+      id: raw.id as string,
+      profile_id: profileId,
+      server_url: raw.server_url as string,
+      username: raw.username as string,
+      password_encrypted: raw.password_encrypted as string,
+      calendar_url: (raw.calendar_url as string | null) ?? null,
+    }
     try {
       const { inserted, deleted } = await syncCalDav(row, db)
-      results.push({ profileId: row.profile_id, source: 'caldav', inserted, deleted })
+      results.push({ profileId, source: 'caldav', inserted, deleted })
     } catch (err) {
-      results.push({ profileId: row.profile_id, source: 'caldav', inserted: 0, deleted: 0, error: String(err) })
+      results.push({ profileId, source: 'caldav', inserted: 0, deleted: 0, error: String(err) })
     }
   }
 
