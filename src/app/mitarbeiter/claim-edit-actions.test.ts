@@ -7,7 +7,7 @@ vi.mock('@/lib/supabase/server', () => ({ createClient: async () => ({ auth: { g
 vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: () => ({ from: fromMock }) }))
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
-import { updateClaimField } from './claim-edit-actions'
+import { updateClaimField, overrideClaimPhase } from './claim-edit-actions'
 
 function claimRow(kb: string | null) {
   return { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { kundenbetreuer_id: kb }, error: null }) }) }) }
@@ -40,6 +40,34 @@ describe('updateClaimField', () => {
       : t === 'claims' ? { update: () => ({ eq: updateEq }) } // 2nd claims call = the write
       : t === 'timeline' ? { insert } : {})
     const res = await updateClaimField('c1', 'notizen', 'neue Notiz')
+    expect(res).toEqual({ ok: true })
+    expect(updateEq).toHaveBeenCalled()
+    expect(insert).toHaveBeenCalled()
+  })
+})
+
+describe('overrideClaimPhase', () => {
+  it('lehnt ungueltige Phase ab (enum-sicher)', async () => {
+    authGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    const res = await overrideClaimPhase('c1', 'quatsch', 'grund')
+    expect(res).toEqual({ ok: false, error: expect.stringMatching(/Phase/i) })
+  })
+  it('verlangt einen Grund beim Setzen', async () => {
+    authGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    const res = await overrideClaimPhase('c1', 'regulierung', '   ')
+    expect(res).toEqual({ ok: false, error: expect.stringMatching(/Grund/i) })
+  })
+  it('setzt Override bei Owner + auditet', async () => {
+    authGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } })
+    const updateEq = vi.fn(async () => ({ error: null }))
+    const insert = vi.fn(async () => ({ error: null }))
+    fromMock.mockImplementation((t: string) =>
+      t === 'profiles' ? { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { rolle: 'kundenbetreuer' }, error: null }) }) }) }
+      : t === 'claims' && fromMock.mock.calls.filter(c => c[0]==='claims').length === 1
+        ? { select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: { kundenbetreuer_id: 'u1', phase_override: null }, error: null }) }) }) }
+      : t === 'claims' ? { update: () => ({ eq: updateEq }) }
+      : t === 'timeline' ? { insert } : {})
+    const res = await overrideClaimPhase('c1', 'regulierung', 'Signal war stale')
     expect(res).toEqual({ ok: true })
     expect(updateEq).toHaveBeenCalled()
     expect(insert).toHaveBeenCalled()

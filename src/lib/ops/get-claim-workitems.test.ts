@@ -19,6 +19,7 @@ const row: ClaimWorkstateRow = {
   abgeschlossen_am: null, storniert_am: null, updated_at: null, created_at: null,
   dokumente_vollstaendig_fuer_phase: null, vs_eskalationsstufe: null,
   fall_id: null,
+  edit_notizen: null, edit_interne_notizen: null, edit_schadens_hoehe_netto: null,
 }
 
 describe('getMyClaimWorkItems', () => {
