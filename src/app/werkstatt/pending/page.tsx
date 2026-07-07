@@ -11,6 +11,7 @@ import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { ClockIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { SectionCard } from '@/components/shared/SectionCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,7 +30,7 @@ export default async function WerkstattPendingPage() {
 
   return (
     <main className="min-h-screen bg-claimondo-bg flex items-center justify-center px-6 py-12">
-      <div className="max-w-md w-full bg-white rounded-2xl shadow-sm border border-claimondo-border p-8">
+      <SectionCard size="lg" className="max-w-md w-full shadow-sm">
         <PageHeader
           title="Ihr Betrieb wird noch aktiviert"
           description="Ihr Werkstatt-Zugang ist derzeit noch nicht freigegeben. Sobald wir Ihre Registrierung geprüft haben, erhalten Sie eine Benachrichtigung per E-Mail."
@@ -54,7 +55,7 @@ export default async function WerkstattPendingPage() {
             Abmelden
           </button>
         </form>
-      </div>
+      </SectionCard>
     </main>
   )
 }
