@@ -31,7 +31,9 @@ export default async function MitarbeiterKartePage() {
   ])
 
   return (
-    <div className="flex flex-col h-full">
+    // Aaron 07.07.: Karte full-bleed — bricht via dokumentiertem 96%-Escape
+    // (104.17% von 96% = 100% Main-Breite) aus dem Wrapper aus.
+    <div className="flex flex-col h-full md:w-[104.17%] md:-ml-[2.08%]">
       <div className="flex items-center px-4 py-2.5 border-b border-claimondo-border bg-claimondo-bg/60 shrink-0">
         <h1 className="text-sm font-semibold text-claimondo-navy">Karte</h1>
       </div>
