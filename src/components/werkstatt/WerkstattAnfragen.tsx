@@ -9,7 +9,11 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 
 import type { WerkstattLead } from '@/lib/werkstatt/leads-queries'
-import { bearbeiteWerkstattLead } from '@/app/werkstatt/(shell)/anfragen/actions'
+import {
+  bearbeiteWerkstattLead,
+  resendeAnfrageFlowLink,
+  oeffneAnfrageFlow,
+} from '@/app/werkstatt/(shell)/anfragen/actions'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
 import { SCHADENTYP_OPTIONS, schadentypLabel } from '@/lib/werkstatt/schadentyp-options'
@@ -61,6 +65,7 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
   const [editLead, setEditLead] = useState<WerkstattLead | null>(null)
   const [form, setForm] = useState<Record<string, string>>({})
   const [saving, setSaving] = useState(false)
+  const [busy, setBusy] = useState<string | null>(null)
 
   function oeffnen(lead: WerkstattLead) {
     const init: Record<string, string> = {}
@@ -81,6 +86,30 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
     toast.success('Anfrage aktualisiert.')
     setEditLead(null)
     router.refresh()
+  }
+
+  // Flow-Push: den Kunden durch seinen offenen Vorgang holen (gehoert zu Anfragen, nicht Auftraegen).
+  async function handleResend(lead: WerkstattLead) {
+    setBusy(`${lead.id}:resend`)
+    const r = await resendeAnfrageFlowLink(lead.id)
+    setBusy(null)
+    if (!r.ok) {
+      toast.error(r.error ?? 'Versand fehlgeschlagen')
+      return
+    }
+    toast.success(`Link gesendet (${r.kanal === 'whatsapp' ? 'WhatsApp' : 'E-Mail'}).`)
+  }
+
+  async function handleFlow(lead: WerkstattLead) {
+    setBusy(`${lead.id}:flow`)
+    const r = await oeffneAnfrageFlow(lead.id)
+    setBusy(null)
+    if (!r.ok) {
+      toast.error(r.error ?? 'Flow konnte nicht geöffnet werden')
+      return
+    }
+    // Neuer Tab — die Werkstatt behaelt ihr Portal offen, waehrend sie den Kunden-Flow durchgeht.
+    window.open(r.url, '_blank', 'noopener,noreferrer')
   }
 
   const kundeName = (l: WerkstattLead) => [l.vorname, l.nachname].filter(Boolean).join(' ') || '–'
@@ -132,9 +161,27 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
                   <Td className="text-body-sm text-claimondo-navy">{schadentypLabel(l.schadentyp)}</Td>
                   <Td className="text-body-sm text-claimondo-ondo">{fmtDate(l.created_at)}</Td>
                   <Td>
-                    <Button variant="ghost" size="sm" onClick={() => oeffnen(l)}>
-                      Bearbeiten
-                    </Button>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Button variant="ghost" size="sm" onClick={() => oeffnen(l)}>
+                        Bearbeiten
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        loading={busy === `${l.id}:resend`}
+                        onClick={() => handleResend(l)}
+                      >
+                        Link senden
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        loading={busy === `${l.id}:flow`}
+                        onClick={() => handleFlow(l)}
+                      >
+                        Flow öffnen
+                      </Button>
+                    </div>
                   </Td>
                 </Tr>
               ))
