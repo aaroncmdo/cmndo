@@ -3,15 +3,15 @@ import { cookies } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { exchangeCode, fetchAdminOrgUrn } from '@/lib/linkedin/oauth'
-import { resolveExternalOrigin } from '@/lib/auth/external-origin'
+import { externalOrigin } from '@/lib/external-url'
 
 export async function GET(request: Request) {
   const { user } = await requirePortalAccess(['admin']) // redirects if not admin
   const url = new URL(request.url)
-  // resolveExternalOrigin statt request.url als Redirect-Base: hinter dem
+  // externalOrigin statt request.url als Redirect-Base: hinter dem
   // nginx/PM2-Proxy ist der request.url-Origin die interne Bind-Adresse
   // (0.0.0.0:3000) → der OAuth-Ruecksprung ins Admin-Portal lief ins Leere.
-  const appOrigin = resolveExternalOrigin(request)
+  const appOrigin = externalOrigin(request)
   const jar = await cookies()
   const expectedState = jar.get('li_oauth_state')?.value
   const gotState = url.searchParams.get('state')

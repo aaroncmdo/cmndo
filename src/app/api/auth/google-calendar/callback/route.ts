@@ -15,16 +15,19 @@
 
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+// externalOrigin: hinter dem nginx/PM2-Proxy ist req.url-origin die interne
+// Bind-Adresse (0.0.0.0:3000) → der SV-Kalender-OAuth-Ruecksprung lief ins Leere.
+import { externalOrigin } from '@/lib/external-url'
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get('code')
-  if (!code) return NextResponse.redirect(new URL('/gutachter/profil?error=no_code', req.url))
+  if (!code) return NextResponse.redirect(new URL('/gutachter/profil?error=no_code', externalOrigin(req)))
 
   const clientId = process.env.GOOGLE_CLIENT_ID
   const clientSecret = process.env.GOOGLE_CLIENT_SECRET
   const redirectUri = process.env.GOOGLE_CALENDAR_REDIRECT_URI || `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/auth/google-calendar/callback`
 
-  if (!clientId || !clientSecret) return NextResponse.redirect(new URL('/gutachter/profil?error=config', req.url))
+  if (!clientId || !clientSecret) return NextResponse.redirect(new URL('/gutachter/profil?error=config', externalOrigin(req)))
 
   try {
     // Token-Exchange
@@ -34,11 +37,11 @@ export async function GET(req: NextRequest) {
       body: new URLSearchParams({ code, client_id: clientId, client_secret: clientSecret, redirect_uri: redirectUri, grant_type: 'authorization_code' }),
     })
     const tokens = await tokenRes.json()
-    if (!tokens.access_token) return NextResponse.redirect(new URL('/gutachter/profil?error=token_exchange', req.url))
+    if (!tokens.access_token) return NextResponse.redirect(new URL('/gutachter/profil?error=token_exchange', externalOrigin(req)))
 
     const supabase = await createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
-    if (!user) return NextResponse.redirect(new URL('/login', req.url))
+    if (!user) return NextResponse.redirect(new URL('/login', externalOrigin(req)))
 
     // Google-Email für Anzeige im Profil holen (best-effort, kein Showstopper)
     let googleEmail: string | null = null
@@ -87,9 +90,9 @@ export async function GET(req: NextRequest) {
         if (decoded.startsWith('/gutachter/')) returnTo = decoded
       } catch { /* invalid state — fallback to profil */ }
     }
-    return NextResponse.redirect(new URL(returnTo, req.url))
+    return NextResponse.redirect(new URL(returnTo, externalOrigin(req)))
   } catch (err) {
     console.error('[google-calendar/callback] Fehler:', err instanceof Error ? err.message : err)
-    return NextResponse.redirect(new URL('/gutachter/profil?error=oauth_failed', req.url))
+    return NextResponse.redirect(new URL('/gutachter/profil?error=oauth_failed', externalOrigin(req)))
   }
 }

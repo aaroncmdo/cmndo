@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import { safeContinue } from '@/lib/auth/safe-continue'
-import { resolveExternalOrigin } from '@/lib/auth/external-origin'
+import { externalOrigin } from '@/lib/external-url'
 
 // AAR-718: Das frühere lokale ROLE_REDIRECT-Mapping enthielt falsche Ziele
 // (Kanzlei → /admin statt /kanzlei/dashboard) und fehlende Rollen (dispatch,
@@ -11,11 +11,11 @@ import { resolveExternalOrigin } from '@/lib/auth/external-origin'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-  // resolveExternalOrigin statt request.url-origin: hinter dem nginx/PM2-Proxy
+  // externalOrigin statt request.url-origin: hinter dem nginx/PM2-Proxy
   // ist der request.url-Origin die interne Bind-Adresse (0.0.0.0:3000 Prod /
   // 0.0.0.0:3001 Staging) — ein Redirect dorthin schickt den Kunden auf eine
   // unerreichbare Adresse. Betraf den Magic-Link-Login aus der Kunden-Welcome-Mail.
-  const appOrigin = resolveExternalOrigin(request)
+  const appOrigin = externalOrigin(request)
   const code = searchParams.get('code')
   // next wird von Magic-Link-Flows (Kunden-Welcome, Passwort-Reset etc.)
   // mitgeschickt damit der Callback nach Session-Exchange direkt dorthin navigiert.
