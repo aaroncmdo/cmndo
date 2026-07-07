@@ -116,6 +116,12 @@ export const AI_MODELS = {
    * den nächsten Schritt vor (Shadow-Mode). Judgment > Speed → Sonnet 4.6.
    */
   claim_orchestrator: 'claude-sonnet-4-6',
+  /**
+   * Claim-AI-Konsole: interaktiver Admin-Copilot in der Claim-View (Streaming +
+   * Tool-Use). Nutzt vollen Fall-Kontext, schlaegt freigabepflichtige Aktionen vor.
+   * Judgment > Speed → Sonnet 4.6.
+   */
+  claim_copilot: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
