@@ -141,6 +141,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament-Haertung (Audit 2026-07-07): systematischer anon-Exposure-Guard.
+      # Schliesst die Luecke der claim-zentrierten View-Guards (die security_invoker +
+      # matviews + Views-ohne-claim_id ausschliessen — genau der v_partner_billing-Pfad).
+      # Default-Deny ueber ALLE anon-lesbaren public-Views: faengt jede, die einem echten
+      # anon Zeilen zeigt (anon-REST) ODER security_invoker=false (DEFINER) ist.
+      # Siehe scripts/check-anon-exposure.mjs + Backing-RPC audit_anon_readable_views().
+      - name: Anon-Exposure-Guard
+        run: node scripts/check-anon-exposure.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
