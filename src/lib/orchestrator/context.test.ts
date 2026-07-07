@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { summarizeClaimForPrompt } from './context'
+import { summarizeClaimForPrompt, proposalHaupttext } from './context'
 import type { ClaimContext } from './types'
 
 const ctx: ClaimContext = {
@@ -12,6 +12,7 @@ const ctx: ClaimContext = {
   fahrzeug: 'VW Golf',
   offeneTasks: [{ titel: 'Gutachten prüfen', rolle: 'kundenbetreuer', faelligAm: null }],
   kurzverlauf: ['Fall angelegt', 'SV zugewiesen'],
+  bereitsVorgeschlagen: [],
 }
 
 describe('summarizeClaimForPrompt', () => {
@@ -26,5 +27,14 @@ describe('summarizeClaimForPrompt', () => {
     const s = summarizeClaimForPrompt({ ...ctx, offeneTasks: [], kurzverlauf: [] })
     expect(typeof s).toBe('string')
     expect(s.length).toBeGreaterThan(0)
+  })
+})
+
+describe('proposalHaupttext', () => {
+  it('nimmt titel, sonst hinweis, sonst grund, sonst —', () => {
+    expect(proposalHaupttext({ titel: 'T', hinweis: 'H' })).toBe('T')
+    expect(proposalHaupttext({ hinweis: 'H' })).toBe('H')
+    expect(proposalHaupttext({ grund: 'G' })).toBe('G')
+    expect(proposalHaupttext({})).toBe('—')
   })
 })

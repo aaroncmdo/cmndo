@@ -4,6 +4,17 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { ClaimContext } from './types'
 
+/** Kern-Text eines Vorschlags-Payloads (titel > hinweis > grund > —). */
+export function proposalHaupttext(payload: Record<string, unknown>): string {
+  const t = payload.titel
+  const h = payload.hinweis
+  const g = payload.grund
+  if (typeof t === 'string' && t) return t
+  if (typeof h === 'string' && h) return h
+  if (typeof g === 'string' && g) return g
+  return '—'
+}
+
 /** Reine Funktion: erzeugt einen kompakten, prompt-tauglichen Kontext-String. */
 export function summarizeClaimForPrompt(ctx: ClaimContext): string {
   const tasks = ctx.offeneTasks.length
@@ -99,6 +110,26 @@ export async function buildClaimContext(claimId: string): Promise<ClaimContext |
     faelligAm: t.faellig_am ?? null,
   }))
 
+  // --- frühere Vorschläge dieses Falls (Stateful Context, Spec §1) ---
+  const { data: proposalRows } = await db
+    .from('ai_claim_proposals')
+    .select('vorschlag_typ, payload, status, feedback')
+    .eq('claim_id', claimId)
+    .order('erstellt_am', { ascending: false })
+    .limit(8)
+
+  const bereitsVorgeschlagen = ((proposalRows ?? []) as Array<{
+    vorschlag_typ?: string | null
+    payload?: Record<string, unknown> | null
+    status?: string | null
+    feedback?: string | null
+  }>).map((r) => ({
+    typ: r.vorschlag_typ ?? '',
+    haupttext: proposalHaupttext(r.payload ?? {}),
+    status: r.status ?? '',
+    feedback: r.feedback ?? null,
+  }))
+
   // --- abgeleitete Felder ---
   const phase = (claim.operative_status as string | null) ?? (claim.status as string | null) ?? null
   const tageInaktiv = letzteAktivitaetAm
@@ -115,5 +146,6 @@ export async function buildClaimContext(claimId: string): Promise<ClaimContext |
     fahrzeug,
     offeneTasks,
     kurzverlauf,
+    bereitsVorgeschlagen,
   }
 }
