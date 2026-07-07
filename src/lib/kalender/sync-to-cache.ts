@@ -14,6 +14,9 @@ import { listCalendarEventsFull, type CalDavCredentials } from '@/lib/kalender/c
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 
 const SYNC_HORIZON_DAYS = 35
+// 2026-07-08: Backfill der letzten 7 Tage — der SV-Kalender liest [-7d,+21d], der Sync zog aber
+// nur [now,+35d] -> externe Belegung der letzten Tage fehlte. Fetch- UND Diff-Fenster nutzen -7d.
+const SYNC_BACKFILL_DAYS = 7
 const GOOGLE_TIMEOUT_MS = 8000
 
 type CacheRow = {
@@ -32,7 +35,7 @@ async function syncGoogle(profileId: string, db: ReturnType<typeof createAdminCl
   if (!auth) return { inserted: 0, deleted: 0 }
 
   const now = new Date()
-  const fromIso = now.toISOString()
+  const fromIso = new Date(now.getTime() - SYNC_BACKFILL_DAYS * 86400_000).toISOString()
   const toIso = new Date(now.getTime() + SYNC_HORIZON_DAYS * 86400_000).toISOString()
 
   let busy: Array<{ start: string; end: string }> = []
@@ -93,7 +96,7 @@ async function syncCalDav(row: VerbindungRow, db: ReturnType<typeof createAdminC
   }
 
   const now = new Date()
-  const fromIso = now.toISOString()
+  const fromIso = new Date(now.getTime() - SYNC_BACKFILL_DAYS * 86400_000).toISOString()
   const toIso = new Date(now.getTime() + SYNC_HORIZON_DAYS * 86400_000).toISOString()
 
   let events: Array<{ uid: string; summary: string; start: string; end: string }>
@@ -148,7 +151,9 @@ async function diffAndApply(
   incoming: CacheRow[],
 ): Promise<{ inserted: number; deleted: number }> {
   const now = new Date()
-  const fromIso = now.toISOString()
+  // Existing-Fenster == Fetch-Fenster (now-7d): sonst wären Events der letzten 7 Tage nie in
+  // `existing` -> toInsert würde sie jeden Lauf als „neu" duplizieren (Plain-Insert, kein onConflict).
+  const fromIso = new Date(now.getTime() - SYNC_BACKFILL_DAYS * 86400_000).toISOString()
 
   const { data: existing } = await db
     .from('sv_kalender_events_cache')
