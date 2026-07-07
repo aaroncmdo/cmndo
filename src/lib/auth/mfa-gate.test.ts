@@ -83,8 +83,6 @@ function loginInput(overrides: Partial<LoginRoutingInput> = {}): LoginRoutingInp
   return {
     isGoogleUser: false,
     hasVerifiedFactor: false,
-    legacy2faWanted: false,
-    rollePflicht: false,
     ...overrides,
   }
 }
@@ -98,17 +96,17 @@ describe('entscheideLoginRouting', () => {
     expect(entscheideLoginRouting(loginInput({ hasVerifiedFactor: true }))).toBe('challenge')
   })
 
-  it('Enroll: Legacy-2FA gewollt, aber noch kein Supabase-Faktor (Soft-Enroll)', () => {
-    expect(entscheideLoginRouting(loginInput({ legacy2faWanted: true }))).toBe('enroll')
+  it('Portal: kein Supabase-Faktor -> optional, kein erzwungener Enroll', () => {
+    expect(entscheideLoginRouting(loginInput())).toBe('portal')
   })
 
   it('Google-User: immer Portal (kein Custom-2FA)', () => {
     expect(entscheideLoginRouting(loginInput({ isGoogleUser: true }))).toBe('portal')
   })
 
-  it('Faktor schlaegt Legacy-Flag: bereits enrollt -> Challenge, nicht Enroll', () => {
+  it('Faktor -> Challenge (bereits enrollt)', () => {
     expect(
-      entscheideLoginRouting(loginInput({ hasVerifiedFactor: true, legacy2faWanted: true })),
+      entscheideLoginRouting(loginInput({ hasVerifiedFactor: true })),
     ).toBe('challenge')
   })
 
@@ -135,15 +133,14 @@ describe('istZweiFaktorPflicht', () => {
   })
 })
 
-describe('entscheideLoginRouting — 2FA-Pflicht (F3)', () => {
-  it('Pflicht-Rolle ohne Faktor -> enroll (auch ohne Legacy-Flag)', () => {
-    expect(entscheideLoginRouting(loginInput({ rollePflicht: true }))).toBe('enroll')
+describe('entscheideLoginRouting — 2FA optional (kein Lockout)', () => {
+  it('interne Rolle ohne Faktor wird NICHT mehr in Enroll gezwungen -> portal', () => {
+    // rollePflicht existiert nicht mehr als Input; die Entscheidung haengt nur
+    // am Faktor. Ein Admin ohne Faktor landet im Portal (Lockout-Regression).
+    expect(entscheideLoginRouting({ isGoogleUser: false, hasVerifiedFactor: false })).toBe('portal')
   })
-  it('Pflicht-Rolle mit Faktor -> challenge (Faktor schlaegt Pflicht)', () => {
-    expect(entscheideLoginRouting(loginInput({ rollePflicht: true, hasVerifiedFactor: true }))).toBe('challenge')
-  })
-  it('Google-Pflicht-Rolle -> portal (Google-Bypass bleibt, kein Loop)', () => {
-    expect(entscheideLoginRouting(loginInput({ rollePflicht: true, isGoogleUser: true }))).toBe('portal')
+  it('mit Faktor weiterhin challenge', () => {
+    expect(entscheideLoginRouting({ isGoogleUser: false, hasVerifiedFactor: true })).toBe('challenge')
   })
 })
 
