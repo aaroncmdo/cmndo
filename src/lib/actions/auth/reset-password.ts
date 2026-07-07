@@ -54,6 +54,7 @@ export async function requestPasswordReset(
  */
 export async function confirmPasswordReset(
   neuesPasswort: string,
+  recoverySession?: { access_token: string; refresh_token: string },
 ): Promise<{ success: boolean; error?: string; redirectTo?: string }> {
   // AAR-auth-haertung (Befund J): zentrale Policy — >=12 Zeichen + HIBP-Breach-
   // Check (k-anonymity, fail-open). Loest die fruehere >=8-Inline-Pruefung ab.
@@ -63,6 +64,21 @@ export async function confirmPasswordReset(
   }
 
   const supabase = await createClient()
+
+  // Welcome-Magic-Links (Werkstatt/SV) nutzen admin.generateLink({ type: 'recovery' }) → eine
+  // IMPLICIT-Session im URL-Hash (#access_token). Der Browser-Client haelt sie nur in-memory und
+  // schreibt KEIN Cookie; die Page reicht deshalb die Recovery-Tokens durch und wir etablieren
+  // die Session hier serverseitig. Ohne das findet getUser() keine Session → der Reset schlaegt
+  // bei JEDEM Welcome-Magic-Link STILL fehl (Passwort wird nie gesetzt, Login unmoeglich).
+  // Passwort-vergessen nutzt PKCE ?code (Cookie ist bereits gesetzt) → recoverySession dort
+  // redundant, aber harmlos. Die Tokens stammen aus der geschuetzten Recovery-Session (per
+  // Magic-Link), setSession validiert sie serverseitig — kein zusaetzlicher Angriffsvektor.
+  if (recoverySession?.access_token && recoverySession?.refresh_token) {
+    await supabase.auth.setSession({
+      access_token: recoverySession.access_token,
+      refresh_token: recoverySession.refresh_token,
+    })
+  }
 
   const { data: { user }, error: userError } = await supabase.auth.getUser()
   if (userError || !user) {
