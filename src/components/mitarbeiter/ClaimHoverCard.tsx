@@ -6,7 +6,7 @@
 
 import { useState } from 'react'
 import { CLAIM_WORKFLOW_META } from '@/lib/ops/claim-workflow-meta'
-import { updateClaimField } from '@/app/mitarbeiter/claim-edit-actions'
+import { updateClaimField, overrideClaimPhase } from '@/app/mitarbeiter/claim-edit-actions'
 import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
 import { Card, Button } from '@/components/primitives'
 
@@ -104,6 +104,69 @@ function EditableRow({
   )
 }
 
+const PHASE_LABEL: Record<string, string> = { erfassung: 'Erfassung', begutachtung: 'Begutachtung', regulierung: 'Regulierung', abschluss: 'Abschluss' }
+const OVERRIDE_PHASES = ['erfassung', 'begutachtung', 'regulierung', 'abschluss'] as const
+
+function OverridePhaseRow({ claimId, currentPhase }: { claimId: string; currentPhase: string }) {
+  const [open, setOpen] = useState(false)
+  const [phase, setPhase] = useState<string>(currentPhase)
+  const [grund, setGrund] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  async function apply(clear: boolean) {
+    setSaving(true)
+    setError(null)
+    const res = await overrideClaimPhase(claimId, clear ? null : phase, grund)
+    setSaving(false)
+    if (!res.ok) setError(res.error)
+    else setOpen(false)
+  }
+
+  return (
+    <div className="flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-1">
+        <span className="text-caption text-claimondo-ondo/70">Phase (Override)</span>
+        {!open && (
+          <button
+            type="button"
+            aria-label="Phase überschreiben"
+            className="text-caption text-claimondo-ondo/50 hover:text-claimondo-ondo transition-colors"
+            onClick={() => { setOpen(true); setPhase(currentPhase); setError(null) }}
+          >
+            ✎
+          </button>
+        )}
+      </div>
+      {open && (
+        <div className="flex flex-col gap-1">
+          <select
+            value={phase}
+            onChange={(e) => setPhase(e.target.value)}
+            disabled={saving}
+            className="w-full rounded-ios-sm border border-claimondo-border px-2 py-1 text-body-xs text-claimondo-navy bg-white"
+          >
+            {OVERRIDE_PHASES.map((p) => <option key={p} value={p}>{PHASE_LABEL[p]}</option>)}
+          </select>
+          <input
+            value={grund}
+            onChange={(e) => setGrund(e.target.value)}
+            placeholder="Grund (Pflicht)"
+            disabled={saving}
+            className="w-full rounded-ios-sm border border-claimondo-border px-2 py-1 text-body-xs text-claimondo-navy bg-white focus:outline-none focus:border-claimondo-ondo"
+          />
+          <div className="flex flex-wrap gap-1">
+            <Button type="button" variant="navy" size="sm" onClick={() => apply(false)} loading={saving}>Setzen</Button>
+            <Button type="button" variant="bare" size="sm" onClick={() => apply(true)} disabled={saving}>Automatisch</Button>
+            <Button type="button" variant="bare" size="sm" onClick={() => { setOpen(false); setError(null) }} disabled={saving}>Abbrechen</Button>
+          </div>
+          {error && <p className="text-caption text-danger-strong">{error}</p>}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function ClaimHoverCard({ item }: { item: ClaimWorkItem }) {
   const meta = CLAIM_WORKFLOW_META[item.subState]
   const fallUrl = item.fallId ? `/faelle/${item.fallId}` : null
@@ -155,6 +218,11 @@ export default function ClaimHoverCard({ item }: { item: ClaimWorkItem }) {
           field="interne_notizen"
           initialValue={item.editable.interneNotizen}
         />
+      </div>
+
+      {/* Phasen-Override (Admin/KB-Eingriff) — moves the card; effektive Phase via COALESCE. */}
+      <div className="border-t border-claimondo-border pt-2">
+        <OverridePhaseRow claimId={item.id} currentPhase={item.stage} />
       </div>
 
       {/* Quick Actions */}
