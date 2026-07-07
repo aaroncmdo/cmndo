@@ -5,6 +5,7 @@ import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import PageHeader from '@/components/shared/PageHeader'
 import KartenAnzeigeToggle from './KartenAnzeigeToggle'
+import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
 
 // AAR-720: Einstellungen-Hub. Sammel-Page für alle konfigurierbaren
 // Bereiche des SV-Portals — startet mit Kalender + Profil, wird nach
@@ -146,6 +147,13 @@ export default async function EinstellungenPage() {
         {/* Direkt-Toggle (kein Sub-Page-Link): steuert das Gebiets-Polygon im
             Heute-Hub via LocalStorage. War gebaut aber nie im Hub gerendert. */}
         <KartenAnzeigeToggle />
+      </div>
+
+      <div className="pt-2">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/70">
+          Konto &amp; Datenschutz
+        </p>
+        <DsgvoLoeschSection />
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">

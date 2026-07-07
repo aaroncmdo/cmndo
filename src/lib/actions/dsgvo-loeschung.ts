@@ -124,10 +124,11 @@ export async function fuehreLoeschungAus(auftragId: string): Promise<Result> {
     .eq('id', auftrag.user_id as string)
     .single()
 
+  // Claims-Ownership = geschaedigter_user_id (claims.kunde_id existiert NICHT — CMM-44).
   const { count: claimsCount } = await admin
     .from('claims')
     .select('id', { count: 'exact', head: true })
-    .eq('kunde_id', auftrag.user_id as string)
+    .eq('geschaedigter_user_id', auftrag.user_id as string)
 
   // 1. SQL-Function rufen — anonymisiert alle PII-Tabellen
   const { error: anonErr } = await admin.rpc('dsgvo_anonymize_user_data', {
