@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
-import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser } from '../actions'
+import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser, clearTwoFaForUser } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button } from '@/components/primitives'
 import { TextField as SharedTextField } from '@/components/shared/forms'
@@ -200,7 +200,7 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
         {/* AAR-343: 2FA-Reset — für Nummern-Wechsel oder wenn User ausgesperrt ist */}
         <div className="mt-5 bg-white border border-claimondo-border rounded-2xl p-5">
           <h3 className="text-sm font-medium text-claimondo-navy mb-3 flex items-center gap-2">
-            <ShieldOffIcon className="w-4 h-4" /> 2FA-Telefonnummer
+            <ShieldOffIcon className="w-4 h-4" /> Zwei-Faktor-Authentifizierung
           </h3>
           <p className="text-xs text-claimondo-ondo mb-3">
             Aktuelle 2FA-Nummer:{' '}
@@ -252,7 +252,36 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
                   ? 'Wird zurückgesetzt …'
                   : twofaNeuePhone.trim()
                     ? 'Nummer setzen + Tokens widerrufen'
-                    : 'Zurücksetzen + Tokens widerrufen'}
+                    : 'Nummer zurücksetzen + Tokens widerrufen'}
+              </button>
+              {/* F1 (Mitarbeiter-Audit): vollständiger 2FA-Reset — löscht ALLE Faktoren
+                  (TOTP + SMS) und entsperrt ein ausgesperrtes Konto (Authenticator verloren). */}
+              <button
+                type="button"
+                disabled={twofaLoading}
+                onClick={async () => {
+                  if (!confirm('Alle 2FA-Faktoren (Authenticator + SMS) dieses Mitarbeiters löschen und das Konto entsperren? Der Nutzer richtet die Zwei-Faktor-Authentifizierung beim nächsten Login neu ein.')) return
+                  setTwofaLoading(true)
+                  setTwofaMsg(null)
+                  try {
+                    const r = await clearTwoFaForUser(m.id as string)
+                    if (!r.success) {
+                      setTwofaMsg(r.error ?? 'Fehler')
+                    } else {
+                      setTwofaMsg('2FA vollständig zurückgesetzt — Konto entsperrt!')
+                      setTwofaNeuePhone('')
+                      router.refresh()
+                    }
+                  } catch (e) {
+                    setTwofaMsg(e instanceof Error ? e.message : 'Fehler')
+                  } finally {
+                    setTwofaLoading(false)
+                  }
+                }}
+                className="flex items-center gap-1.5 bg-danger hover:bg-danger/90 disabled:opacity-40 text-white text-sm font-medium px-4 py-2 rounded-ios-xl transition-colors"
+              >
+                <ShieldOffIcon className="w-4 h-4" />
+                2FA komplett zurücksetzen (entsperren)
               </button>
             </div>
             {twofaMsg && (
