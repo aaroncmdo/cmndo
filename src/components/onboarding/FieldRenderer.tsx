@@ -81,7 +81,13 @@ export function FieldRenderer({
           value={(value as string) ?? ''}
           onChange={onChange as (v: string) => void}
           disabled={disabled}
-          voiceDictation={feld.feld_key === 'unfallhergang' && token ? { token } : undefined}
+          voiceDictation={
+            feld.feld_key === 'unfallhergang' && token
+              ? { kind: 'flow', token }
+              : feld.feld_key === 'hergang_kunde_text'
+                ? { kind: 'auth' }
+                : undefined
+          }
         />
       )
     case 'segmented':

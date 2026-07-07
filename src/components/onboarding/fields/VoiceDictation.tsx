@@ -6,19 +6,19 @@
 // verbatim Text via onFinalTranscript in der editierbaren Textarea.
 
 import { Mic, Square, Loader2 } from 'lucide-react'
-import { useChunkedDictation } from './useChunkedDictation'
+import { useChunkedDictation, type DictationSource } from './useChunkedDictation'
 
 export function VoiceDictation({
-  token,
+  source,
   onFinalTranscript,
   disabled,
 }: {
-  token: string
+  source: DictationSource
   onFinalTranscript: (text: string) => void
   disabled?: boolean
 }) {
   const { isRecording, isTranscribing, liveTranscript, error, isSupported, start, stop } =
-    useChunkedDictation(token)
+    useChunkedDictation(source)
 
   // Kein MediaRecorder im Browser -> gar kein Button, nur die Textarea bleibt.
   if (!isSupported) return null

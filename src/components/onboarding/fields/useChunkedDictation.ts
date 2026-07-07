@@ -1,10 +1,15 @@
 'use client'
 
-// Gechunktes Sprachdiktat (rolling re-transcribe) fuer das Unfallhergang-Feld im
-// FlowLink. MediaRecorder nimmt durchgehend auf (1s-Timeslice); alle ~7s wird das
-// BISHER aufgenommene Gesamt-Audio (gueltiges webm-Praefix -> kein Wortverlust an
-// Chunk-Grenzen) an /api/flow/voice-transcribe geschickt -> Live-Vorschau waechst
+// Gechunktes Sprachdiktat (rolling re-transcribe) fuer das Unfallhergang-Feld.
+// MediaRecorder nimmt durchgehend auf (1s-Timeslice); alle ~7s wird das BISHER
+// aufgenommene Gesamt-Audio (gueltiges webm-Praefix -> kein Wortverlust an
+// Chunk-Grenzen) an den Transkriptions-Endpoint geschickt -> Live-Vorschau waechst
 // mit. Beim Stopp liefert transcribeSnapshot(final) den maßgeblichen verbatim Text.
+//
+// Zwei Quellen (source):
+//  - flow: token-authed /api/flow/voice-transcribe (anonymer FlowLink).
+//  - auth: session-authed /api/support/voice-transcribe (eingeloggter Kunde, z.B.
+//    Kunde-Onboarding — der Endpoint erlaubt Rolle 'kunde' bereits).
 //
 // Trade-off (bewusst, Aaron 07.07.): rolling re-transcribe laedt das wachsende Audio
 // wiederholt hoch. Fuer typische Diktate (30-120s, Groq turbo billig/schnell)
@@ -15,7 +20,13 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 const AUTO_STOP_MS = 120_000 // 2 min Safety (ausfuehrliches Diktat erlaubt)
 const REFRESH_MS = 7_000
 
-export function useChunkedDictation(token: string) {
+export type DictationSource = { kind: 'flow'; token: string } | { kind: 'auth' }
+
+export function useChunkedDictation(source: DictationSource) {
+  const endpoint =
+    source.kind === 'flow' ? '/api/flow/voice-transcribe' : '/api/support/voice-transcribe'
+  const flowToken = source.kind === 'flow' ? source.token : null
+
   const [isRecording, setIsRecording] = useState(false)
   const [isTranscribing, setIsTranscribing] = useState(false)
   const [liveTranscript, setLiveTranscript] = useState('')
@@ -60,10 +71,10 @@ export function useChunkedDictation(token: string) {
       if (blob.size === 0) return null
       const fd = new FormData()
       fd.append('audio', blob, 'recording.webm')
-      fd.append('token', token)
+      if (flowToken) fd.append('token', flowToken)
       fd.append('language', 'de')
       try {
-        const res = await fetch('/api/flow/voice-transcribe', { method: 'POST', body: fd })
+        const res = await fetch(endpoint, { method: 'POST', body: fd })
         const data = (await res.json().catch(() => ({}))) as {
           transcript?: string
           error?: string
@@ -78,7 +89,7 @@ export function useChunkedDictation(token: string) {
         return null
       }
     },
-    [token],
+    [endpoint, flowToken],
   )
 
   // stop VOR start definiert (start referenziert stop im Auto-Stop-Timer).
