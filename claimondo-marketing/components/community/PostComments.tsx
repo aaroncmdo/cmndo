@@ -304,6 +304,9 @@ export function PostComments({
             placeholder="Kommentar schreiben …"
             className={input}
           />
+          <p className="text-[0.7rem] leading-relaxed text-claimondo-shield/60">
+            Dein Kommentar erscheint <span className="font-medium">öffentlich</span> in der Community.
+          </p>
           {error && <p className="text-[0.75rem] text-danger-strong">{error}</p>}
           <button type="button" onClick={submitTopLevel} disabled={pending} className={btn}>
             {pending ? 'Sende…' : 'Kommentar abschicken'}
