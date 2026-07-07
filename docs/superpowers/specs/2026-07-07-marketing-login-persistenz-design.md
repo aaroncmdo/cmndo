@@ -124,3 +124,32 @@ ebenso App-Partner (deren `.claimondo.de`-Session wird jetzt auch auf Marketing-
 - Kommentar-Identitaet (Partner-unter-Firma) — gehoert der Schwester-Session.
 - Umbau der Topbar in ein shared Layout (groesserer Refactor, nicht noetig).
 - Server-Resolve auf allen Content-Seiten (wuerde SEO-Seiten dynamic machen — schlechterer Trade-off).
+
+## KORREKTUR 07.07. (nach Verifikation) — Fix 2 VERWORFEN
+
+**Befund:** `updateSession` in `claimondo-marketing/lib/supabase/middleware.ts` ist **dead code** —
+`git grep updateSession` in `claimondo-marketing/` findet **nur die Definition, keinen Aufruf**. Die
+echte Next-Middleware (`claimondo-marketing/middleware.ts`, `export default function middleware`)
+macht **ausschliesslich Locale-Routing** und ruft `updateSession` nie auf. Die Funktion wurde beim
+Marketing-Split aus der App kopiert, aber nie verdrahtet (Marketing hat keine geschuetzten
+Portal-Pfade — die liegen auf app.claimondo.de). **→ Fix 2 haette nichts bewirkt** und ist aus dem
+PR entfernt (`middleware.ts` auf origin/main zurueckgesetzt).
+
+**Konsequenz fuer Bug B:** Marketing hat **gar keine** Auth-Middleware (bewusst locale-only).
+Session-Persistenz laeuft rein ueber den **Browser-Client** (`autoRefreshToken`, Cookies
+`httpOnly:false`). SSR-Auth (RSC `getUser`) kann in Edge-Faellen veralten (kann rotiertes Token nicht
+persistieren) — der klassische @supabase/ssr-Footgun, den normalerweise die Middleware loest.
+
+**Was bleibt (Fix 1, valide):** Der Topbar-Client-Hydrate ist **das marketing-korrekte Muster**
+(Client-Session, keine Middleware-Abhaengigkeit) und fixt die sichtbare „ausgeloggt"-Ursache (Bug A).
+
+**Bug B echte Loesung (Follow-up, Aaron-Entscheidung offen):**
+- **Option A (kanonisch):** Session-Refresh in die Locale-Middleware verdrahten → fixt ALLE
+  SSR-Auth-Surfaces (Kommentar-Form + Feed) an der Wurzel, **ohne** die Schwester-Session-Files
+  anzufassen. Aber: load-bearing File, andere Sessions fassen es an → eigener, sorgfaeltig
+  reviewter PR, nicht unter Merge-Druck.
+- **Option B:** Kommentar-Form + Feed-Composer client-hydraten (dasselbe Muster wie Topbar) →
+  konsistent, aber die Files gehoeren der aktiven Schwester-Session `wissen-comment-login-state`.
+
+Empfehlung: Fix 1 jetzt shippen (fixt das Sichtbare sicher), Bug-B-Residuum mit Repro verifizieren
+und dann Option A als eigenen PR. **Kein spekulativer Middleware-Umbau unter Merge-Druck.**
