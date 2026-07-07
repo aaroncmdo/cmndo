@@ -10,7 +10,7 @@ import {
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
   WrenchIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
-  NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon,
+  NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon, ShieldAlertIcon,
 } from 'lucide-react'
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
@@ -24,6 +24,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
   { href: '/admin/ai-vorschlaege', label: 'KI-Vorschläge', icon: SparklesIcon },
+  { href: '/admin/ki-aufsicht', label: 'KI-Aufsicht', icon: ShieldAlertIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
