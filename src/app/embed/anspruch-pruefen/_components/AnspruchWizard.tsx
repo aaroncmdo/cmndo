@@ -6,6 +6,7 @@ import { AnspruchEinschaetzungStep } from './AnspruchEinschaetzungStep'
 import { AnspruchSummaryStep } from './AnspruchSummaryStep'
 import type { AnspruchSpanne, Schuldform, VisionResult } from '@/lib/anspruch/types'
 import { AufnahmeFlowHinweis } from '@/components/shared/AufnahmeFlowHinweis'
+import { MaklerEmpfehlungBadge } from '@/components/shared/MaklerEmpfehlungBadge'
 import { buildFinderHandoffUrl } from '@/lib/embed/finder-handoff-url'
 import { cn } from '@/lib/utils'
 
@@ -55,6 +56,9 @@ export function AnspruchWizard() {
 
   return (
     <div className="mx-auto max-w-md p-4">
+      {/* Makler-Empfehlung: wer ueber /m/<code> kam (URL `m`), sieht durchgehend
+          „Empfohlen von <Firma>" — Brand-Kontinuitaet vom Makler-Hub bis zur Buchung. */}
+      <MaklerEmpfehlungBadge />
       {/* Kontinuitaets-Klammer: wer aus dem /check-Funnel kommt (Schuldfrage vorbefuellt),
           sieht dass es EIN Vorgang ist, kein Frisch-Start. */}
       {initialSchuld && phase === 'foto' ? (

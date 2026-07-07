@@ -19,6 +19,7 @@ import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePl
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 import { AufnahmeFlowHinweis } from '@/components/shared/AufnahmeFlowHinweis'
+import { MaklerEmpfehlungBadge } from '@/components/shared/MaklerEmpfehlungBadge'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
 import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher } from '../actions'
@@ -345,6 +346,9 @@ export function FinderWizard({
     // ein (fade + leichter slide-up). GlassSurface persistiert über Phasen → kein Re-Trigger
     // bei Step-Wechseln. Dezent, im Claimondo-Look.
     <GlassSurface className="flex flex-col gap-4 p-5 animate-in fade-in slide-in-from-bottom-3 duration-700 ease-out">
+      {/* Makler-Empfehlung: wer ueber /m/<code> kam (URL `m`), sieht „Empfohlen von <Firma>"
+          durchgehend bis zur Buchung. Self-contained (liest `m`); mb-0 gegen GlassSurface-gap. */}
+      <MaklerEmpfehlungBadge className="mb-0" />
       {/* Kontinuitaets-Klammer: wer aus dem Foto-Tool kommt (schaetzungSessionId gesetzt),
           sieht dass Finder + Anspruchs-Pruefung EIN Vorgang sind (spiegelt den Tool-Banner P2).
           Nur auf dem Einstiegs-Schritt (ort), wie P2 nur auf 'foto'. mb-0: die GlassSurface ist
