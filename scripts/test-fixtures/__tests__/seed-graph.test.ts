@@ -91,6 +91,7 @@ describe('ensureSeedGraph', () => {
       technische_stellungnahme_status: null,
     })
     expect((rows['kanzlei_faelle'] ?? []).find((r) => r.claim_id === CLAIMS.c4)).toMatchObject({
+      vs_reaktion_typ: 'gekuerzt',
       vs_kuerzungs_typ: 'technisch',
     })
   })

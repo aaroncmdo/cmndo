@@ -176,8 +176,13 @@ async function ensureC4(db: SupabaseClient, o: Opts): Promise<void> {
     o,
   )
   await ensureGeschaedigter(db, 'c4', o)
-  // kanzlei_faelle mit VS-Kürzung: vs_kuerzungs_typ='technisch' -> der KB-"Stellungnahme anfordern"-CTA
-  // (VsReaktionSection) erscheint. vs_kuerzungs_typ lebt auf kanzlei_faelle (NICHT claims).
+  // kanzlei_faelle mit VS-Kürzung. Zwei Felder steuern den KB-CTA (verifiziert gg section-visibility.ts
+  // + Sections.tsx VsReaktionSection):
+  //   - vs_reaktion_typ='gekuerzt' -> 'vs_reaktion'-Section sichtbar (getTriggeredFallSections:
+  //     phase>=6 || vs_reaktion_typ) UND isKuerzt (reaktionTyp==='gekuerzt') -> "VS kürzt"-Block rendert.
+  //   - vs_kuerzungs_typ='technisch' (+ technische_stellungnahme_status=null am Auftrag) -> der Button
+  //     "Stellungnahme von SV anfordern" erscheint.
+  // Beide sind text-Spalten auf kanzlei_faelle (NICHT claims), projiziert in v_claim_base/v_faelle.
   await upsertById(
     db,
     'kanzlei_faelle',
@@ -186,6 +191,7 @@ async function ensureC4(db: SupabaseClient, o: Opts): Promise<void> {
       claim_id: CLAIMS.c4,
       fall_id: CLAIMS.c4,
       status: 'versicherungskontakt',
+      vs_reaktion_typ: 'gekuerzt',
       vs_kuerzungs_typ: 'technisch',
       kuerzungs_betrag: 500,
       vs_kuerzung_grund: 'UPE-Aufschlag strittig',
