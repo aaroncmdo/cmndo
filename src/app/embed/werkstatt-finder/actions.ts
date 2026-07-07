@@ -5,6 +5,7 @@ import { createLead } from '@/lib/leads/create-lead'
 import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
+import { findWerkstaetten, type WerkstattFinderRow } from '@/lib/werkstatt/finder'
 
 export type WerkstattFinderLeadPayload = {
   vorname?: string | null
@@ -75,4 +76,17 @@ export async function erstelleWerkstattFinderLead(
     console.error('[werkstatt-finder] FlowLink fehlgeschlagen', err)
     return { ok: false, error: 'Flow-Link konnte nicht erstellt werden' }
   }
+}
+
+/**
+ * Public-Finder-Suche: liest nach Distanz rangierte ECHTE Partner-Werkstaetten
+ * (nurEchte=true grenzt Test-/interne Werkstaetten email-basiert aus). findWerkstaetten
+ * ist server-only (service-role Admin-Client) — der Client ruft daher diese Action.
+ */
+export async function sucheEchteWerkstaetten(input: {
+  lat?: number
+  lng?: number
+  plz?: string
+}): Promise<WerkstattFinderRow[]> {
+  return findWerkstaetten({ ...input, nurEchte: true, limit: 10 })
 }
