@@ -56,8 +56,8 @@ Zwei der acht Surfaces schreiben **Geld/Gebühren**, die **aktuell (durch die st
 - **1b-#5 `monatsabrechnung`** — reaktiviert die monatliche SV-Abrechnung (bill't aktuell vermutlich ~nichts, weil `sv_termin` leer). Fix = SVs bekommen wieder Monatsrechnungen. → **Aaron-Freigabe + Rollout-Abstimmung** (evtl. SV-Ankündigung), NICHT stumm mitflippen.
 - **1b-#7 `storno-actions` Vertragsstrafe** — reaktiviert die 24h-Storno-Gebühr (feuert aktuell nie → Kunden stornieren spät gratis). Fix = Gebühr greift wieder. → **Aaron-Freigabe.**
 
-**Phase 1a (dieser PR, bauen jetzt):** #1 Helper · #2 SV-Kalender · #3 Tagesroute · #4 `gutachter-erinnerungen` (Reminder feuern wieder — gewollt) · #6 `no-show-timeout` (verhindert Fehl-Storno — reiner Fix) · #8 Admin-Kalender/Widget. Reine Display/Notification/Anti-Fehl-Storno-Fixes, kein Geld-Flip.
-**Phase 1b (nach Aaron-OK):** #5 `monatsabrechnung` · #7 storno-Vertragsstrafe — Geld reaktiviert, separat + bewusst.
+**Phase 1a (dieser PR, bauen jetzt):** #1 Helper · #2 SV-Kalender · #3 Tagesroute · #6 `no-show-timeout` (verhindert Fehl-Storno — reiner Fix, reduziert Über-Stornierung) · #8 Admin-Kalender/Widget. Reine Display/Anti-Fehl-Storno-Fixes, keine Reaktivierung von Geld ODER Notifications.
+**Phase 1b (nach Aaron-OK, separat + bewusst):** #4 `gutachter-erinnerungen` (reaktiviert Push/WhatsApp-Reminder — SVs bekommen wieder Benachrichtigungen) · #5 `monatsabrechnung` (reaktiviert SV-Monatsabrechnung) · #7 storno-Vertragsstrafe (reaktiviert 24h-Gebühr). Alle drei „flippen" Aussenwirkung wieder an → Aaron-Freigabe + Rollout.
 
 ## Phase 2 — Fall-scoped Consumer (Follow-up, koordiniert; skizziert)
 
