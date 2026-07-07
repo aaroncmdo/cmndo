@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon } from 'lucide-react'
+import { ArrowLeftIcon, MailIcon, PencilIcon, LockIcon, CheckCircle2Icon, PhoneIcon, CopyIcon, CheckIcon } from 'lucide-react'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
@@ -24,20 +24,15 @@ import type { WerkstattDetail } from './detail-data'
 import { FaehigkeitenStaffelEditor } from './FaehigkeitenStaffelEditor'
 import { NotizenSection } from './NotizenSection'
 import { WerkstattKarte } from './WerkstattKarte'
+import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
+import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
+import { PoolQrScanner } from '@/components/werkstatt/PoolQrScanner'
+import { weiseQrPoolCodeZu } from '../qr-pool-actions'
 
 const STATUS_TON: Record<string, StatusBadgeTone> = {
   aktiv: 'success',
   inaktiv: 'neutral',
   gesperrt: 'danger',
-}
-
-const STATUS_NORM_LABEL: Record<string, string> = {
-  gehalten: 'Gehalten',
-  freigegeben: 'Freigegeben',
-  erledigt: 'Ausgezahlt',
-  storniert: 'Storniert',
-  offen: 'Offen',
-  faellig: 'Fällig',
 }
 
 const INPUT_CLS =
@@ -115,6 +110,8 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
   const [adresseOpen, setAdresseOpen] = useState(false)
   const [adresseBusy, setAdresseBusy] = useState(false)
   const [neueAdresse, setNeueAdresse] = useState<PlaceResult | null>(null)
+  const [copiedUrl, setCopiedUrl] = useState(false)
+  const [poolBusy, setPoolBusy] = useState(false)
   const [form, setForm] = useState({
     name: w.name ?? '',
     telefon: w.telefon ?? '',
@@ -128,9 +125,8 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
   })
 
   const onboarding = leiteOnboardingStatus({ hatLogin: !!w.user_id, forcePasswordChange, lastSignInAt })
-  const abrechnungPosten = billing ? Object.entries(billing.perStatus) : []
   const provisionSumme = auftraege.reduce((s, a) => s + (a.provision_betrag_netto ?? 0), 0)
-  const ausgezahltNetto = billing?.perStatus['auszahlung:erledigt']?.netto ?? 0
+  const ausgezahltNetto = billing?.aggregat.perStatus['auszahlung:erledigt']?.netto ?? 0
   const termine = auftraege
     .map((a) => ({ a, terminAt: a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin }))
     .filter((t) => !!t.terminAt)
@@ -245,6 +241,37 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
     }
   }
 
+  async function poolQrZuweisen(token: string) {
+    setPoolBusy(true)
+    try {
+      const res = await weiseQrPoolCodeZu(w.id, token)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Zuweisung fehlgeschlagen')
+        return
+      }
+      toast.success(`Pool-QR ${token} zugewiesen`)
+      router.refresh()
+    } finally {
+      setPoolBusy(false)
+    }
+  }
+
+  function copyQrUrl() {
+    void navigator.clipboard.writeText(detail.qrUrl).then(() => {
+      setCopiedUrl(true)
+      setTimeout(() => setCopiedUrl(false), 2000)
+    })
+  }
+
+  function qrFileBase(): string {
+    const slug = w.name
+      .toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+    return `claimondo-werkstatt-${slug || 'qr'}-qr`
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
       {/* Header */}
@@ -301,6 +328,46 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         <Kennzahl label="Provision (netto)" wert={euro(provisionSumme)} />
         <Kennzahl label="Ausgezahlt (netto)" wert={euro(ausgezahltNetto)} />
       </div>
+
+      {/* Ansprechpartner / Kontakt — prominent (Aaron: „sehr wichtig") */}
+      <SectionCard title="Ansprechpartner / Kontakt">
+        <div className="flex flex-wrap items-start justify-between gap-3">
+          <div className="space-y-1.5">
+            <p className="text-heading-sm font-semibold text-claimondo-navy">
+              {w.ansprechpartner_name || 'Kein Ansprechpartner hinterlegt'}
+            </p>
+            <div className="flex flex-col gap-1 text-body-sm">
+              {w.telefon ? (
+                <a
+                  href={`tel:${w.telefon}`}
+                  className="inline-flex items-center gap-1.5 text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+                >
+                  <PhoneIcon className="w-4 h-4 shrink-0" /> {w.telefon}
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-claimondo-ondo/70">
+                  <PhoneIcon className="w-4 h-4 shrink-0" /> Keine Telefonnummer
+                </span>
+              )}
+              {w.email ? (
+                <a
+                  href={`mailto:${w.email}`}
+                  className="inline-flex items-center gap-1.5 text-claimondo-ondo hover:text-claimondo-navy transition-colors"
+                >
+                  <MailIcon className="w-4 h-4 shrink-0" /> {w.email}
+                </a>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 text-claimondo-ondo/70">
+                  <MailIcon className="w-4 h-4 shrink-0" /> Keine E-Mail
+                </span>
+              )}
+            </div>
+          </div>
+          <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)} iconLeft={<PencilIcon className="w-4 h-4" />}>
+            Bearbeiten
+          </Button>
+        </div>
+      </SectionCard>
 
       {/* Zugang & Onboarding */}
       <SectionCard title="Zugang & Onboarding">
@@ -361,6 +428,57 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
       {/* Standort & Fahrgebiet */}
       <SectionCard title="Standort & Fahrgebiet">
         <WerkstattKarte lat={w.lat} lng={w.lng} isochrone={w.isochrone} />
+      </SectionCard>
+
+      {/* QR-Code & Einstieg (Anzeige + Download + physischer Pool-Sticker zuweisen) */}
+      <SectionCard title="QR-Code & Einstieg">
+        <div className="flex flex-col sm:flex-row gap-5">
+          <div
+            className="shrink-0 self-start flex items-center justify-center p-4 rounded-ios-xl bg-claimondo-bg border border-claimondo-border [&_svg]:w-40 [&_svg]:h-40"
+            dangerouslySetInnerHTML={{ __html: detail.qrSvg }}
+          />
+          <div className="flex-1 min-w-0 space-y-3">
+            <p className="text-body-sm text-claimondo-ondo">
+              Kunden scannen diesen Code und starten die Schadenmeldung dieser Werkstatt.
+            </p>
+            <div>
+              <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">Einstiegs-Link</p>
+              <div className="mt-1.5 flex items-center gap-2">
+                <input
+                  readOnly
+                  value={detail.qrUrl}
+                  onFocus={(e) => e.currentTarget.select()}
+                  className="flex-1 min-w-0 font-mono text-body-sm text-claimondo-navy bg-claimondo-bg border border-claimondo-border rounded-ios-md px-3 py-2 truncate"
+                />
+                <Button
+                  variant="navy"
+                  size="sm"
+                  onClick={copyQrUrl}
+                  iconLeft={copiedUrl ? <CheckIcon className="w-4 h-4" /> : <CopyIcon className="w-4 h-4" />}
+                >
+                  {copiedUrl ? 'Kopiert' : 'Kopieren'}
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <span className="text-body-xs text-claimondo-ondo">Zum Aushängen / Drucken:</span>
+              <QrCodeDownloadButtons qrSvg={detail.qrSvg} fileBaseName={qrFileBase()} />
+            </div>
+            <div className="border-t border-claimondo-border pt-3">
+              <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium mb-1">
+                Physischer Pool-QR-Sticker
+              </p>
+              {detail.zugewiesenerPoolCode ? (
+                <p className="text-body-sm text-claimondo-navy mb-2">
+                  Zugewiesen: <span className="font-mono">{detail.zugewiesenerPoolCode}</span> — zum Ersetzen neuen Code scannen/eingeben.
+                </p>
+              ) : (
+                <p className="text-body-sm text-claimondo-ondo/70 mb-2">Noch kein Pool-Sticker zugewiesen.</p>
+              )}
+              <PoolQrScanner onToken={poolQrZuweisen} disabled={poolBusy} />
+            </div>
+          </div>
+        </div>
       </SectionCard>
 
       {/* Aktivität / Aufträge */}
@@ -431,28 +549,23 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         )}
       </SectionCard>
 
-      {/* Abrechnung */}
+      {/* Abrechnung — volle Verwaltung (Bezahlt / Freigeben / Auszahlen / Storno / USt) */}
       <SectionCard title="Abrechnung">
-        {abrechnungPosten.length === 0 ? (
-          <p className="text-body-sm text-claimondo-ondo">Noch keine Abrechnungsposten.</p>
+        {billing ? (
+          <PartnerBillingPanel
+            rows={billing.rows}
+            aggregat={billing.aggregat}
+            gutschriftLedgerKeys={billing.gutschriftLedgerKeys}
+            ustToggle={{ partnerTyp: 'werkstatt', partnerId: w.id, current: billing.istKleinunternehmer }}
+            steuerdaten={{
+              partnerTyp: 'werkstatt',
+              partnerId: w.id,
+              current: billing.steuerdaten ?? { ust_id: null, adresse_strasse: null, adresse_plz: null, adresse_ort: null },
+              readOnly: false,
+            }}
+          />
         ) : (
-          <div className="flex flex-wrap gap-6">
-            {abrechnungPosten.map(([key, v]) => {
-              const statusNorm = key.split(':')[1] ?? key
-              return (
-                <div key={key} className="min-w-[110px]">
-                  <p className="text-body-xs text-claimondo-ondo">{STATUS_NORM_LABEL[statusNorm] ?? statusNorm}</p>
-                  <p className="text-body font-semibold text-claimondo-navy tabular-nums">{euro(v.netto)}</p>
-                  <p className="text-body-xs text-claimondo-ondo">{v.anzahl} Posten</p>
-                </div>
-              )
-            })}
-          </div>
-        )}
-        {billing?.hat_unbekannten_ust_status && (
-          <p className="mt-3 text-body-xs text-warning-strong">
-            USt-Status unbekannt — Auszahlung ist gesperrt, bitte in der Abrechnung erfassen.
-          </p>
+          <p className="text-body-sm text-claimondo-ondo">Keine Abrechnungsdaten.</p>
         )}
       </SectionCard>
 
