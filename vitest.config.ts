@@ -3,10 +3,11 @@ import { resolve } from 'path'
 
 // AAR-289: Vitest läuft auf src/**/*.test.ts + scripts/lib/**/*.test.mjs (pure Libs).
 // Nur scripts/lib/ — andere scripts/*.test.mjs (z.B. build-gpt-knowledge) nutzen node:test.
+// scripts/test-fixtures/ (Test-Fixtures-Provisioner SP1) hat vitest-.ts-Unit-Tests (mocked db).
 // Playwright (tests/e2e/) bleibt über das eigene Script `npm run test:e2e` separat lauffähig.
 export default defineConfig({
   test: {
-    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/lib/**/*.test.mjs'],
+    include: ['src/**/*.{test,spec}.{ts,tsx}', 'scripts/lib/**/*.test.mjs', 'scripts/test-fixtures/**/*.test.ts'],
     exclude: ['node_modules', 'tests/e2e/**', '.next/**'],
     environment: 'node',
   },
