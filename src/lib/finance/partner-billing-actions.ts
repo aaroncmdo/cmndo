@@ -243,11 +243,14 @@ export async function getPartnerGutschriftDownloadUrl(
 
   const admin = createAdminClient()
 
+  // typ='gutschrift': nur die Original-Gutschrift. Nach einem Reversal existieren zwei Zeilen
+  // (storniertes Original + Storno) — ohne Filter matcht .maybeSingle() beide und liefert PGRST116.
   const { data: g, error } = await admin
     .from('partner_gutschriften')
     .select('pdf_storage_path')
     .eq('ledger_tabelle', ledgerTabelle)
     .eq('ledger_id', ledgerId)
+    .eq('typ', 'gutschrift')
     .maybeSingle()
 
   if (error) return { ok: false, error: error.message }

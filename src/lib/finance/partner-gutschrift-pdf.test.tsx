@@ -265,6 +265,49 @@ describe('buildGutschriftViewModel — leistungszeitraum + IBAN (Task 3)', () =>
   })
 })
 
+// ─── Storno-Gutschrift variant ───────────────────────────────────────────────
+
+describe('buildGutschriftViewModel — Storno-Variante', () => {
+  const STORNO_INPUT: PartnerGutschriftPdfInput = {
+    ...REGELBESTEUERT_INPUT,
+    gutschrift_nr: 'CMNDO-GS-2026-00043',
+    betrag_netto: -150,
+    ust_betrag: -28.5,
+    betrag_brutto: -178.5,
+    storno: {
+      bezugNummer: 'CMNDO-GS-2026-00042',
+      bezugDatum: '05.07.2026',
+      grund: 'Rückbuchung',
+    },
+  }
+
+  it('(storno-a) storno set → titel "Storno-Gutschrift" + bezugZeile + grundZeile', () => {
+    const vm = buildGutschriftViewModel(STORNO_INPUT)
+    expect(vm.titel).toBe('Storno-Gutschrift')
+    expect(vm.bezugZeile).toBe('Storno zu CMNDO-GS-2026-00042 vom 05.07.2026')
+    expect(vm.grundZeile).toBe('Grund: Rückbuchung')
+  })
+
+  it('(storno-b) no storno → titel "Gutschrift", bezugZeile/grundZeile undefined', () => {
+    const vm = buildGutschriftViewModel(REGELBESTEUERT_INPUT)
+    expect(vm.titel).toBe('Gutschrift')
+    expect(vm.bezugZeile).toBeUndefined()
+    expect(vm.grundZeile).toBeUndefined()
+  })
+
+  it('(storno-c) negative amounts → summe formatted as negative', () => {
+    const vm = buildGutschriftViewModel(STORNO_INPUT)
+    expect(vm.summe.netto).toBe('-150,00 €')
+    expect(vm.summe.brutto).toBe('-178,50 €')
+    expect((vm.summe as any).ustBetrag).toBe('-28,50 €')
+  })
+
+  it('(storno-d) renders without error (Buffer %PDF-)', async () => {
+    const buf = await generatePartnerGutschriftPdf(STORNO_INPUT)
+    expect(buf.slice(0, 5).toString('ascii')).toBe('%PDF-')
+  })
+})
+
 // ─── generateAndUploadPartnerGutschriftPdf bucket regression ─────────────────
 
 describe('generateAndUploadPartnerGutschriftPdf — bucket name guard', () => {
