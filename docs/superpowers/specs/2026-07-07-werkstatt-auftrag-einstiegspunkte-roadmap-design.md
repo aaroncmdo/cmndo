@@ -138,6 +138,11 @@ Kein neues Feld auf Basis-Tabellen (alles existiert). Twin-Drift-Regel (File == 
 - **B:** neue Embed-Fläche.
 - **C:** deferred (fremde Lane).
 
-## Offene Business-Frage (nicht blockierend für D)
+## Business-Regel (geklärt 2026-07-07, Aaron)
 
-Fluss ① Selbstzahler-Vermittlung: Zahlt die Werkstatt *uns* eine Provision für einen zugeführten Selbstzahler (umgekehrte Geldrichtung zu ②)? Falls ja, braucht „Meine Vermittlungen" später eine zweite Provisions-Art. D zeigt zunächst nur, was in `werkstatt_provisionen` steht — additiv erweiterbar.
+Fluss ① Selbstzahler: **Wir nehmen aktuell KEINE Provision** für einen zugeführten Selbstzahler. Die Werkstatt bekommt den zahlenden Kunden ohne Geldfluss zu/von Claimondo. Konsequenz für D:
+
+- **„Meine Vermittlungen"** zeigt nur ② (Haftpflicht-Referral, 150 € die *wir* zahlen — aus `werkstatt_provisionen`). Kein Selbstzahler-Eintrag.
+- **Provisions-Badge** auf „Reparatur-Aufträge" erscheint nur, wenn ein `werkstatt_provisionen`-Eintrag existiert → faktisch nur bei Haftpflicht-Dual-Rolle. Selbstzahler-Reparaturen tragen kein Provisions-Badge.
+
+D zeigt also schlicht, was in `werkstatt_provisionen` steht — keine Sonderlogik, additiv erweiterbar falls sich das Provisionsmodell ändert.
