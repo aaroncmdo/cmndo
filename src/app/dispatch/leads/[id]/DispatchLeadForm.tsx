@@ -103,6 +103,22 @@ export default function DispatchLeadForm({
   const [status, setStatus] = useState<SaveStatus>('idle')
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
 
+  // Phase 1c: kontrollierter aktiver Tab, damit die Workflow-Kopfzone (page.tsx,
+  // <LeadWorkflowPanel>) per Event zum relevanten Tab springen kann. Default = 1. Phase.
+  const [activeTab, setActiveTab] = useState<string | undefined>(phasen[0]?.phase_key)
+  useEffect(() => {
+    const gueltig = new Set(phasen.map((p) => p.phase_key))
+    const onJump = (e: Event) => {
+      const tab = (e as CustomEvent<{ tab?: string }>).detail?.tab
+      if (tab && gueltig.has(tab)) {
+        setActiveTab(tab)
+        document.getElementById('lead-detail-tabs')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+    }
+    document.addEventListener('claimondo:lead-workflow-jump', onJump)
+    return () => document.removeEventListener('claimondo:lead-workflow-jump', onJump)
+  }, [phasen])
+
   // Refs fuer den debounced Save-Closure (immer aktuelle Werte + dirty-Set).
   const valuesRef = useRef(values)
   valuesRef.current = values
@@ -193,7 +209,7 @@ export default function DispatchLeadForm({
       {/* AAR-956 15.06. (Aaron): Sektionen als Tabs (Desktop-Power-User) statt
           gestapeltem Akkordeon; Felder im 2-Spalten-Grid (mehrzeilig/Rich = volle
           Breite) — keine lange Einspalter-Kolonne mobile-first Felder mehr. */}
-      <Tabs defaultValue={phasen[0]?.phase_key} className="w-full">
+      <Tabs id="lead-detail-tabs" value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList variant="default" className="w-full overflow-x-auto bg-claimondo-navy/[0.06]">
           {phasen.map((phase) => (
             <TabsTrigger key={phase.id} value={phase.phase_key}>
