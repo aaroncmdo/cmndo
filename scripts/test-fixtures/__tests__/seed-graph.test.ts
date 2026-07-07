@@ -34,6 +34,7 @@ describe('ensureSeedGraph', () => {
       operative_status: 'sv-termin',
       sv_id: SV_SACHVERSTAENDIGE_ID,
       lead_id: LEADS.c2,
+      sa_unterschrieben: true,
     })
     expect((rows['claim_parties'] ?? []).find((r) => r.id === PARTIES.c2)).toMatchObject({
       claim_id: CLAIMS.c2,
@@ -47,7 +48,7 @@ describe('ensureSeedGraph', () => {
       sv_id: SV_SACHVERSTAENDIGE_ID,
       typ: 'erstgutachten',
       status: 'termin',
-      technische_stellungnahme_status: 'angefordert',
+      technische_stellungnahme_status: 'beauftragt',
     })
   })
 

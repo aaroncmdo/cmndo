@@ -59,6 +59,10 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
       sv_id: SV_SACHVERSTAENDIGE_ID,
       sv_zugewiesen_am: SCHADENTAG,
       kundenbetreuer_id: ACCOUNTS.kb,
+      // sa_unterschrieben=true ist Pflicht: die SV-Fallseite (/gutachter/fall/[id])
+      // gated auf sa_unterschrieben (CMM-25: Fallakte erst nach SA-Unterschrift). SP2-Flagship deckte das auf.
+      sa_unterschrieben: true,
+      sa_unterschrieben_am: SCHADENTAG,
       created_via: 'manuell_admin',
     },
     o,
@@ -74,7 +78,11 @@ async function ensureC2(db: SupabaseClient, o: Opts): Promise<void> {
       sv_id: SV_SACHVERSTAENDIGE_ID,
       typ: 'erstgutachten',
       status: 'termin',
-      technische_stellungnahme_status: 'angefordert',
+      // Realer Wert der KB-Anforderung ist 'beauftragt' (prozess.ts / process-event.ts),
+      // NICHT 'angefordert' (das ist nachbesichtigung_status). Die SV-Stellungnahme-Seite
+      // gated auf 'beauftragt'. SP2-Flagship deckte den Prod-Bug im Fall-Banner auf.
+      technische_stellungnahme_status: 'beauftragt',
+      technische_stellungnahme_beauftragt_am: SCHADENTAG,
     },
     o,
   )
