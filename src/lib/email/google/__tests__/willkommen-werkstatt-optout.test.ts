@@ -35,7 +35,6 @@ describe('sendWillkommenWerkstatt — Send-Isolation-Optout', () => {
     await sendWillkommenWerkstatt({
       to: 'aaron.sprafke+werkstattneu@claimondo.de',
       werkstattName: 'Claimondo GmbH (i.Gr.)',
-      einmalpasswort: 'PwA1!',
     })
     expect(sendEmailMock).toHaveBeenCalledTimes(1)
     const arg = sendEmailMock.mock.calls[0][0] as Record<string, unknown>

@@ -153,7 +153,6 @@ export async function createWerkstatt(
 
 export async function sendWerkstattLoginMail(
   werkstattId: string,
-  knownPassword?: string,
 ): Promise<{ ok: boolean; error?: string }> {
   const adminUser = await requireAdmin()
   if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Login-Mails senden.' }
@@ -168,32 +167,15 @@ export async function sendWerkstattLoginMail(
   if (!w.email) return { ok: false, error: 'Werkstatt hat keine E-Mail-Adresse.' }
   if (!w.user_id) return { ok: false, error: 'Werkstatt hat keinen Login-Account.' }
 
-  // Passwort-Logik (kein Clobber): knownPassword > frisch (nur wenn nie eingeloggt) > null.
-  let einmalpasswort: string | null = knownPassword ?? null
-  if (!einmalpasswort) {
-    const { data: prof } = await admin
-      .from('profiles')
-      .select('force_password_change')
-      .eq('id', w.user_id)
-      .maybeSingle()
-    if (prof?.force_password_change === true) {
-      const pw = generatePassword()
-      const { error: authErr } = await admin.auth.admin.updateUserById(w.user_id, {
-        password: pw,
-        user_metadata: { force_password_change: true },
-      })
-      if (authErr) return { ok: false, error: `Passwort-Reset fehlgeschlagen: ${authErr.message}` }
-      await admin.from('profiles').update({ force_password_change: true }).eq('id', w.user_id)
-      einmalpasswort = pw
-    }
-  }
-
+  // Reiner Magic-Link-Weg: sendWillkommenWerkstatt erzeugt einen frischen Recovery-Link
+  // ("Passwort setzen & einloggen"). Kein Einmalpasswort-Reset mehr (der Link setzt das
+  // Passwort; das im Anlage-Dialog angezeigte Fallback-Passwort bleibt fuer die manuelle
+  // Weitergabe unberuehrt).
   try {
     const { sendWillkommenWerkstatt } = await import('@/lib/email/google/flows')
     await sendWillkommenWerkstatt({
       to: w.email,
       werkstattName: w.name ?? 'Ihre Werkstatt',
-      einmalpasswort,
     })
   } catch (err) {
     console.error('[sendWerkstattLoginMail] Versand fehlgeschlagen:', err)
