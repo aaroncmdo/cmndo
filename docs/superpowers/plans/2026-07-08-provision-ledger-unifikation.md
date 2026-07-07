@@ -71,21 +71,29 @@ REVOKE ALL ON public.partner_provisionen FROM anon;
 
 ---
 
-### Phase 1: Write-Seam + Writer auf `partner_provisionen` (mit `partner_typ`)
+> **⚠️ KOPPLUNG — Phase 1 + Phase 2 deployen ZUSAMMEN.** Sie sind Schreib- und Lese-Hälfte EINER Umstellung: Phase 1 verschiebt die *Entstehung* neuer Provisions-/Bonus-Rows nach `partner_provisionen`; Phase 2 zieht die *Reader* (View + Cockpit + Portal + Gutschrift-Ledger) nach. Phase 1 allein → neue Rows unsichtbar/unauszahlbar. Phase 2 allein → View liest leere Union-Tabelle → Cockpit zeigt nichts. **Ein kombinierter PR gegen `staging` (oder derselbe Deploy-Zyklus); nie eine Hälfte allein nach `main`.** Da `apply_migration` sofort auf prod wirkt und prod-Provisionen rein Test-Account-getrieben sind (2+7 Zeilen), ist das Fenster real unkritisch — aber die Kopplung MUSS im PR-Body stehen.
 
-**Files:** `src/lib/finance/provision-status.ts` (META/PROVISION_TABELLEN → Union), die 4+ Writer, `src/lib/supabase/database.types.ts` (chirurgisch: die 2 neuen Tabellen + partner_typ ergänzen, kein Full-Regen).
+### Phase 1: DB-Trigger-Rewrite — neue Provisionen/Boni entstehen in `partner_provisionen` (mit `partner_typ`)
 
-**Ansatz:** EIN Insert-Seam `insertPartnerProvision(db, {partnerTyp, partnerId, ...felder})` (nach `upsertClaimPayment`-Muster aus der claim_payments-Normalisierung), alle Writer routen dort durch statt roher `.from('makler_provisionen').insert`. `provision-status.ts`-META kollabiert von 5 auf 3 Einträge (`partner_provisionen` mit partner_typ-Filter statt makler_/werkstatt_ separat; `provisionen_maik` bleibt). **Verhaltensneutral** (Reader lesen in Phase 1 noch die Alt-Tabellen NICHT — die sind ab jetzt leer für neue Writes; Bestand bleibt bis Backfill). TDD je Writer + `provision-status.test.ts` anpassen. **Exakte Per-Writer-Diffs bei Phase-Start finalisieren** (Writer-Liste oben; jeder liest heute `.from('makler_provisionen'|'werkstatt_provisionen')`).
+> **Detail-Plan (TDD-ready, prod-gegroundet):** `docs/superpowers/plans/2026-07-08-provision-ledger-unifikation-phase1-detail.md`. Der folgende Absatz ist die Zusammenfassung; die Line-by-Line-Payloads stehen dort.
 
-**Deliverable:** neue Provisionen landen in `partner_provisionen`; `npx vitest run src/lib/finance` grün; tsc(8GB) grün.
+**Prämissen-Korrektur (Code-Discovery 2026-07-08):** Der ursprüngliche „TS-Write-Seam `insertPartnerProvision`, durch den alle Writer routen"-Ansatz trifft die Realität NICHT: `grep .from('*_provisionen').insert` = 0 — **alle Provisions-/Bonus-INSERTs sind DB-Trigger** (`create_makler_provision()` auf `faelle_claim_bridge`, `create_werkstatt_provision()` auf `claims`; Staffel-Boni via Trigger AUF den Provisions-Tabellen). Der Phase-1-Write-Seam ist also **DDL (Trigger-Rewrites)**, nicht TS.
+
+**Files:** apply_migration (3 money-kritische Trigger-Umzüge + front-loaded partielle Unique-Indizes), `src/lib/leads/convert-lead-to-claim.ts` (der eine makler-Provisions-READ), beide `release-*-provisionen/route.ts` (Cron), `src/lib/supabase/database.types.ts` (chirurgisch, kein Full-Regen), optional `src/lib/finance/insert-partner-provision.ts` (Referenz-Seam für den Phase-4-Smoke, nicht im kritischen Pfad).
+
+**Ansatz:** `create_makler_provision`/`create_werkstatt_provision` INSERTen ab jetzt `partner_provisionen` (partner_typ='makler'/'werkstatt'); die Staffel-Bonus-Trigger-Kette re-ankert auf `partner_provisionen` → `partner_staffel_bonus`. **Front-loaded Unique-Indizes** `(partner_typ, claim_id) WHERE claim_id IS NOT NULL` bzw. `(partner_typ, partner_id, schwelle)` (Phase-0-Tabellen erbten die Alt-Uniques NICHT → ohne sie wirft `ON CONFLICT` → AFTER-INSERT-Exception → **Claim-Insert rollt zurück = Prod-Breaker**). **`makler_fall_consent`-INSERT im makler-Trigger verbatim erhalten** (Sichtbarkeit != Eligibility). **Die `provision-status.ts`-META-Kollapse 5→3 ist NICHT hier — sie ist Phase 2** (gekoppelt an den View + `ledger_tabelle`, sonst bräche der `PROVISION_TABELLEN`-Contract mit dem noch-alten View → Bestands-Payout kaputt).
+
+**Deliverable:** neue Provisionen/Boni entstehen in `partner_provisionen`/`partner_staffel_bonus`; `npx vitest run src/lib/finance` grün; tsc(8GB) grün; DB-Trigger-Inventar-Recheck.
 
 ---
 
-### Phase 2: Reader auf `partner_provisionen` + `ledger_tabelle`-Konstante
+### Phase 2: Reader auf `partner_provisionen` + META-Kollapse 5→3 + `ledger_tabelle`-Konstante
 
-**Files:** `v_partner_billing`-View (DO-Block-Technik aus der claim_payments-Arbeit: `pg_get_viewdef` → UNION der Alt-Tabellen durch `partner_provisionen` mit partner_typ ersetzen → `apply_migration`), `partner-billing.ts`, makler/werkstatt `queries.ts` + `wochenreport.ts` + Abrechnungs-Pages, die 2 Cron-Routes, + `partner-gutschrift.ts`/`partner-billing-actions.ts`/`provision-status.ts` für die **typsichere `ledger_tabelle`-Konstante** (`export const LEDGER_TABELLEN = {PARTNER_PROVISIONEN:'partner_provisionen', PARTNER_STAFFEL_BONUS:'partner_staffel_bonus', PROVISIONEN_MAIK:'provisionen_maik'} as const` in einer nicht-'use server'-lib; alle rohen ledger_tabelle-Strings darauf umstellen → schließt die T6b-Bug-Klasse).
+> **Detail-Plan (TDD-ready, prod-gegroundet):** `docs/superpowers/plans/2026-07-08-provision-ledger-unifikation-phase2-detail.md`. Enthält den vollständigen `v_partner_billing`-Before/After (viewdef-verbatim) + die money-kritische META-5→3-Kollapse.
 
-**Deliverable:** Cockpit + Portal + Cron + Gutschrift-Ledger lesen ausschließlich die Union-Tabelle über die Konstante; `v_partner_billing` liefert identische Zeilen (Before/After-Signatur-verifiziert wie bei claim_payments); Golden-Finance-Tests grün. **Exakte View-/Reader-Diffs bei Phase-Start** (v_partner_billing-viewdef zuerst fetchen).
+**Files:** `v_partner_billing`-View (`CREATE OR REPLACE VIEW`: die 4 Provisions-/Bonus-Branches → 2 auf `partner_provisionen`/`partner_staffel_bonus` mit `partner_typ`-Filter; die sv/kanzlei/onboarding/maik-Branches unverändert; Output-Signatur Before==After), **`provision-status.ts` META 5→3** (aus Phase 1 hierher — nach dem View-Umbau emittiert `quelle_tabelle` nur noch `'partner_provisionen'`/`'partner_staffel_bonus'`, ein Wert trägt makler+werkstatt → die Payout-/Storno-/Gutschrift-Logik verzweigt zur Laufzeit auf `row.partner_typ` für die richtige Partner-Tabelle + Steuerdaten), makler/werkstatt `queries.ts` + `wochenreport.ts` + `pipeline.ts` + Abrechnungs-Pages (Reader → `.from('partner_provisionen').eq('partner_typ',…)`), `partner-gutschrift.ts`/`partner-billing-actions.ts` für die **typsichere `LEDGER_TABELLEN`-Konstante** (`{PARTNER_PROVISIONEN, PARTNER_STAFFEL_BONUS, PROVISIONEN_MAIK}` in einer nicht-'use server'-lib → schließt die T6b-Bug-Klasse). Die 2 Cron-Routes sind bereits in Phase 1 umgezogen.
+
+**Deliverable:** Cockpit + Portal + Gutschrift-Ledger lesen ausschließlich die Union-Tabelle über die Konstante; `v_partner_billing` liefert identische Zeilen (Before/After-Signatur-verifiziert); `npx vitest run src/lib/finance` grün. **0 Gutschriften auf prod → kein `ledger_tabelle`-Backfill (sauberer Schnitt).** Kombinierter Phase-1+2-PR (s. Kopplungs-Banner oben).
 
 ---
 
