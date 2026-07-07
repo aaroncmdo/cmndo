@@ -1,6 +1,6 @@
 ﻿'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { KeyIcon, CheckCircle2Icon, AlertTriangleIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -16,6 +16,11 @@ export default function PasswortZuruecksetzenPage() {
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
+  // Recovery-Tokens der (nur in-memory gehaltenen) Client-Session. Welcome-Magic-Links
+  // (Werkstatt/SV, admin.generateLink type=recovery) etablieren die Session via URL-Hash OHNE
+  // Cookie — wir merken uns die Tokens hier und reichen sie beim Speichern an die Server-Action
+  // durch, sonst sieht diese keine Session (siehe confirmPasswordReset).
+  const recoveryTokensRef = useRef<{ access_token: string; refresh_token: string } | null>(null)
 
   // Supabase liest den Recovery-Token automatisch aus dem URL-Hash und
   // etabliert eine temporäre Session. Wir prüfen einmal beim Mount, ob das
@@ -29,6 +34,15 @@ export default function PasswortZuruecksetzenPage() {
       const { data } = await supabase.auth.getUser()
       if (cancelled) return
       if (data?.user) {
+        // Tokens der In-Memory-Recovery-Session festhalten — die Server-Action braucht sie,
+        // weil der Hash-Login (Welcome-Magic-Links) kein server-lesbares Cookie schreibt.
+        const { data: sessionData } = await supabase.auth.getSession()
+        if (sessionData?.session) {
+          recoveryTokensRef.current = {
+            access_token: sessionData.session.access_token,
+            refresh_token: sessionData.session.refresh_token,
+          }
+        }
         setPhase('ready')
       } else {
         setPhase('expired')
@@ -57,7 +71,7 @@ export default function PasswortZuruecksetzenPage() {
 
     setSubmitting(true)
     try {
-      const result = await confirmPasswordReset(password)
+      const result = await confirmPasswordReset(password, recoveryTokensRef.current ?? undefined)
       if (result.success) {
         setPhase('success')
         if (result.redirectTo) {
