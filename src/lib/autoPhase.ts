@@ -1,7 +1,7 @@
 import { createServiceClient } from '@/lib/supabase/server'
 import { triggerGutachterTerminTask, triggerQcTask, triggerArchivierungTask } from '@/lib/tasking'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
-import { getCurrentClaimPayment } from '@/lib/faelle/claim-payments'
+import { getClaimPayments } from '@/lib/faelle/claim-payments'
 import { computeNextOperativePhase, type OperativeSignals } from '@/lib/autophase-decision'
 
 /**
@@ -64,13 +64,13 @@ export async function checkFallAutoPhase(fallId: string) {
   if (!claim || !status) return
 
   // Live-Signale parallel laden (claim-native, nicht aus der toten View).
-  const [gutachtenRes, terminRes, kanzleiRes, currentPayment] = await Promise.all([
+  const [gutachtenRes, terminRes, kanzleiRes, payments] = await Promise.all([
     svc.from('gutachten').select('fertiggestellt_am').eq('claim_id', claimId)
       .not('fertiggestellt_am', 'is', null).limit(1).maybeSingle(),
     svc.from('gutachter_termine').select('id').eq('claim_id', claimId)
       .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt']).limit(1).maybeSingle(),
     svc.from('kanzlei_faelle').select('anschlussschreiben_am').eq('claim_id', claimId).maybeSingle(),
-    getCurrentClaimPayment(svc, claimId),
+    getClaimPayments(svc, claimId),
   ])
 
   const signals: OperativeSignals = {
@@ -79,7 +79,7 @@ export async function checkFallAutoPhase(fallId: string) {
     gutachtenFertig: !!(gutachtenRes.data as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am,
     istKomplett: (claim.service_typ as string | null) === 'komplett',
     anschlussschreibenVorhanden: !!(kanzleiRes.data as { anschlussschreiben_am?: string | null } | null)?.anschlussschreiben_am,
-    zahlungEingegangen: !!currentPayment?.zahlungseingang_am,
+    zahlungEingegangen: !!payments.vs?.zahlungseingang_am,
   }
 
   // Task-Empfaenger einmal aufloesen (aendern sich im Loop nicht).
