@@ -7,6 +7,7 @@
 
 import { haversineKm } from '@/lib/gps/geofence'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istInterneEmail } from '@/lib/testdaten/interne-identitaet'
 
 export type WerkstattFinderRow = {
   id: string
@@ -34,6 +35,15 @@ export function computePasst(faehigkeiten: string[] | null | undefined, kategori
   if (kategorie == null || kategorie === 'unbekannt') return true
   if (!faehigkeiten || faehigkeiten.length === 0) return true
   return faehigkeiten.includes(kategorie)
+}
+
+/**
+ * Filtert Test-/interne Werkstaetten (email-basiert, SSoT interne-identitaet.ts) raus.
+ * Werkstaetten ohne Email gelten als echt (kein Test-Signal). Fuer die oeffentliche
+ * Embed-Nutzung: ein echter Kunde darf keine Test-Werkstatt sehen (und umgekehrt).
+ */
+export function filterEchteWerkstaetten<T extends { email: string | null }>(rows: T[]): T[] {
+  return rows.filter((r) => !istInterneEmail(r.email))
 }
 
 /**
@@ -66,6 +76,7 @@ export function rankWerkstaetten(
 }
 
 const SELECT_COLS = 'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten'
+const SELECT_COLS_INTERN = SELECT_COLS + ',email'
 
 /**
  * Liest aktive Werkstaetten und gibt sie nach Distanz zum (lat/lng)-Origin
@@ -81,18 +92,26 @@ export async function findWerkstaetten(input: {
   plz?: string
   limit?: number
   kategorie?: string | null
+  nurEchte?: boolean
 }): Promise<WerkstattFinderRow[]> {
   const limit = input.limit ?? 10
   const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('werkstaetten')
-    .select(SELECT_COLS)
+    .select(SELECT_COLS_INTERN)
     .eq('status', STATUS_AKTIV)
 
   if (error || !data) return []
 
-  const rows = data as Array<Omit<WerkstattFinderRow, 'distanz_km' | 'passt'>>
+  // Test-Ausgrenzung fuer oeffentliche Caller, dann email strippen (nicht Teil von WerkstattFinderRow).
+  // Cast via unknown: `faehigkeiten` ist eine Type-Lag-Spalte (nicht in den generierten
+  // DB-Types) -> der select-String liefert GenericStringError[] als inferierten Typ.
+  const withEmail = data as unknown as Array<
+    Omit<WerkstattFinderRow, 'distanz_km' | 'passt'> & { email: string | null }
+  >
+  const gefiltert = input.nurEchte ? filterEchteWerkstaetten(withEmail) : withEmail
+  const rows = gefiltert.map(({ email: _email, ...r }) => r)
 
   // Echter Geo-Origin vorhanden -> nach Distanz + Kategorie-Passung rangieren.
   if (input.lat !== undefined && input.lng !== undefined) {
