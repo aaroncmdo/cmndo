@@ -10,6 +10,7 @@ import { MAIN_PHASE_LABEL, type ClaimMainPhase } from '@/lib/claims/lifecycle'
 import { CLAIM_WORKFLOW_META } from '@/lib/ops/claim-workflow-meta'
 import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
+import ClaimHoverCard from './ClaimHoverCard'
 
 const AKTIVE_PHASEN: ClaimMainPhase[] = ['erfassung', 'begutachtung', 'regulierung']
 
@@ -120,13 +121,21 @@ function ArbeitCard({ item }: { item: ClaimWorkItem }) {
     </div>
   )
 
-  // Nur klickbar wenn fallId vorhanden — kein toter href='#'
-  if (href) {
-    return (
-      <Link href={href} className="block">
-        {inner}
-      </Link>
-    )
-  }
-  return <div>{inner}</div>
+  // Wrapper: group relative so the hover popover can be placed absolutely below the card.
+  return (
+    <div className="relative group">
+      {/* Klickbare Karte — nur wenn fallId vorhanden, kein toter href='#' */}
+      {href ? (
+        <Link href={href} className="block">
+          {inner}
+        </Link>
+      ) : (
+        <div>{inner}</div>
+      )}
+      {/* Hover-Popover: erscheint unterhalb der Karte beim Hovern ueber den Container */}
+      <div className="hidden group-hover:block absolute top-full left-0 z-50 pt-1">
+        <ClaimHoverCard item={item} />
+      </div>
+    </div>
+  )
 }
