@@ -2,6 +2,7 @@ import { listApprovedComments, getAuthState } from '@/lib/community/comments'
 import { CommentForm } from './CommentForm'
 import { ReportButton } from './ReportButton'
 import { jsonLdScript } from '@/lib/seo/jsonld'
+import { SessionSync } from './SessionSync'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -28,6 +29,7 @@ export async function ArticleComments({ articleSlug }: { articleSlug: string }) 
         Kommentare {comments.length > 0 && <span className="text-claimondo-shield">({comments.length})</span>}
       </h2>
 
+      <SessionSync loggedIn={state.isLoggedIn} />
       <CommentForm slug={articleSlug} isLoggedIn={state.isLoggedIn} hasUsername={!!state.username} username={state.username} />
 
       <ul className="mt-6 space-y-3.5">
