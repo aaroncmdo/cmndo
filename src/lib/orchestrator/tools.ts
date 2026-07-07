@@ -42,7 +42,7 @@ export const ORCHESTRATOR_TOOLS: Anthropic.Tool[] = [
   },
   {
     name: 'flag_escalation',
-    description: 'Markiere den Fall als eskalationsbedürftig für eine Rolle.',
+    description: 'Nur für einen HARTEN, blockierenden Zustand, den eine Rolle SOFORT auflösen muss (z. B. verletzter SLA mit konkretem Owner). Kein Status-Bericht, keine Analyse. `grund` = die konkrete Sofort-Aktion, nicht die Beschreibung. Im Zweifel propose_task statt Eskalation.',
     input_schema: {
       type: 'object',
       properties: {
