@@ -207,3 +207,19 @@ code-korrekt (Bearer `CRON_SECRET`).
 Stille)** → der Cron surfaced ab Lauf 1 echte, bislang unsichtbare Probleme an die 3 realen Admins (gewollt —
 das ist der Zweck der Observability).
 
+## Stand 2026-07-07 — `purge-remember-tokens` (PR #3819, PENDING VPS-Application)
+
+> Neuer Cron aus dem Trusted-Device-Audit (2FA-Härtung, [[coordination-2fa-auth-hardening]]).
+> Route gebaut (`src/app/api/cron/purge-remember-tokens/route.ts`, `CRON_SECRET`-gated), aber
+> **noch NICHT auf dem Live-VPS geschedult** — diese Zeile muss per `crontab -e` ergänzt werden
+> (Aaron/ops), sonst wächst `auth_remember_tokens` unbegrenzt. Kein Security-, sondern ein
+> Hygiene-Problem: der Validator (`validate-remember-token.ts`) lehnt abgelaufene Tokens ohnehin ab.
+
+```cron
+20 3 * * *  cron-call.sh /api/cron/purge-remember-tokens  # Trusted-Device-Token-Purge (PR #3819)
+```
+
+Löscht abgelaufene + >30 Tage alt-widerrufene Tokens (widerrufene bleiben 30 d als Audit-Spur).
+Idempotent, No-op wenn nichts fällig. Nach Anwendung: Zeile in den Live-Crontab-Block oben
+(Sektion „LOW") hochziehen + Zeilenzahl nachziehen.
+
