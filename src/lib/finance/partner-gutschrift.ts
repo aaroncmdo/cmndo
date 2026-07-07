@@ -216,8 +216,11 @@ export async function erstellePartnerGutschrift(
       empfaenger_snapshot,
       aussteller_snapshot,
       leistung_text: p.leistungText,
+      // Truncate to the Berlin calendar date (legal/business TZ), NOT UTC — else a
+      // late-evening month-boundary provision could freeze the wrong Leistungs-Monat (§14).
+      // sv-SE locale formats as YYYY-MM-DD.
       leistung_datum: p.leistungsDatum
-        ? new Date(p.leistungsDatum).toISOString().slice(0, 10)
+        ? new Date(p.leistungsDatum).toLocaleDateString('sv-SE', { timeZone: 'Europe/Berlin' })
         : null,
       status: 'erstellt',
     }

@@ -125,6 +125,7 @@ export function buildGutschriftViewModel(
   // Leistungszeitraum: §14 Abs. 4 Nr. 6 UStG — Kalendermonat genuegt (§31 Abs. 4 UStDV)
   const leistungszeitraum = input.leistung_datum
     ? new Date(input.leistung_datum).toLocaleDateString('de-DE', {
+        timeZone: 'Europe/Berlin',
         month: 'long',
         year: 'numeric',
       })

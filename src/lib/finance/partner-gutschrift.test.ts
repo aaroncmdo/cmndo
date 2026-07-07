@@ -467,6 +467,28 @@ describe('erstellePartnerGutschrift', () => {
     expect(row.leistung_datum).toBeNull()
   })
 
+  // (leistung_datum-c) Berlin month-boundary: 22:30 UTC (Jul 31) === 00:30 Europe/Berlin (Aug 1).
+  //   Must freeze the BERLIN date '2026-08-01', not the UTC date '2026-07-31' (§14 Leistungs-Monat).
+  it('(leistung_datum-c) truncates leistungsDatum in Europe/Berlin, not UTC (month boundary)', async () => {
+    const db = makeDb({
+      partnerData: {
+        firma: 'Grenzfall Makler GmbH',
+        adresse_strasse: 'Grenzstr. 1',
+        adresse_plz: '10115',
+        adresse_ort: 'Berlin',
+        ust_id: 'DE111111111',
+        ist_kleinunternehmer: false,
+      },
+    })
+    const result = await erstellePartnerGutschrift(db, {
+      ...BASE_PARAMS,
+      leistungsDatum: '2026-07-31T22:30:00.000Z',
+    })
+    expect(result.ok).toBe(true)
+    const row = db._insertedRows[0] as Record<string, unknown>
+    expect(row.leistung_datum).toBe('2026-08-01')
+  })
+
   // Aussteller snapshot populated correctly from konfig (full RechnungsKonfig after step 0)
   it('populates aussteller_snapshot from RechnungsKonfig (full konfig including geschaeftsfuehrer/hrb)', async () => {
     const db = makeDb({
