@@ -9,8 +9,15 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge, type StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { sendWerkstattLoginMail } from '../actions'
-import { aktualisiereWerkstattStammdaten, setzeWerkstattStatus, type WerkstattStatus } from './actions'
+import {
+  aktualisiereWerkstattStammdaten,
+  setzeWerkstattStatus,
+  aktualisiereWerkstattEmail,
+  aktualisiereWerkstattAdresse,
+  type WerkstattStatus,
+} from './actions'
 import { leiteOnboardingStatus } from '@/lib/werkstatt/onboarding-status'
 import { werkstattAuftragPhase, richtungLabel } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import type { WerkstattDetail } from './detail-data'
@@ -83,6 +90,10 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
   const [statusBusy, setStatusBusy] = useState(false)
   const [editOpen, setEditOpen] = useState(false)
   const [editBusy, setEditBusy] = useState(false)
+  const [emailBusy, setEmailBusy] = useState(false)
+  const [adresseOpen, setAdresseOpen] = useState(false)
+  const [adresseBusy, setAdresseBusy] = useState(false)
+  const [neueAdresse, setNeueAdresse] = useState<PlaceResult | null>(null)
   const [form, setForm] = useState({
     name: w.name ?? '',
     telefon: w.telefon ?? '',
@@ -163,6 +174,50 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
     }
   }
 
+  async function emailAendern() {
+    const neu = window.prompt('Neue (Login-)E-Mail-Adresse:', w.email ?? '')
+    if (neu === null) return
+    setEmailBusy(true)
+    try {
+      const res = await aktualisiereWerkstattEmail(w.id, neu)
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      toast.success('E-Mail geändert')
+      router.refresh()
+    } finally {
+      setEmailBusy(false)
+    }
+  }
+
+  async function speichereAdresse() {
+    if (!neueAdresse) {
+      toast.error('Bitte eine Adresse aus den Vorschlägen wählen.')
+      return
+    }
+    setAdresseBusy(true)
+    try {
+      const res = await aktualisiereWerkstattAdresse(w.id, {
+        adresse_strasse: neueAdresse.strasse,
+        adresse_plz: neueAdresse.plz,
+        adresse_ort: neueAdresse.stadt,
+        lat: neueAdresse.lat,
+        lng: neueAdresse.lng,
+      })
+      if (!res.ok) {
+        toast.error(res.error ?? 'Fehler')
+        return
+      }
+      toast.success('Adresse geändert — Fahrgebiet neu berechnet')
+      setAdresseOpen(false)
+      setNeueAdresse(null)
+      router.refresh()
+    } finally {
+      setAdresseBusy(false)
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto px-4 py-6 space-y-5">
       {/* Header */}
@@ -223,21 +278,29 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
               {w.email ?? '—'} · Letzter Login: {datum(lastSignInAt)}
             </p>
           </div>
-          <Button
-            variant="navy"
-            size="sm"
-            loading={mailLoading}
-            onClick={loginMail}
-            iconLeft={<MailIcon className="w-4 h-4" />}
-          >
-            Login-Mail senden
-          </Button>
+          <div className="flex flex-col gap-2 items-stretch">
+            <Button
+              variant="navy"
+              size="sm"
+              loading={mailLoading}
+              onClick={loginMail}
+              iconLeft={<MailIcon className="w-4 h-4" />}
+            >
+              Login-Mail senden
+            </Button>
+            <Button variant="ghost" size="sm" loading={emailBusy} onClick={emailAendern}>
+              E-Mail ändern
+            </Button>
+          </div>
         </div>
       </SectionCard>
 
       {/* Stammdaten */}
       <SectionCard title="Stammdaten">
-        <div className="flex justify-end mb-2">
+        <div className="flex justify-end gap-2 mb-2">
+          <Button variant="ghost" size="sm" onClick={() => setAdresseOpen(true)}>
+            Adresse ändern
+          </Button>
           <Button variant="ghost" size="sm" onClick={() => setEditOpen(true)} iconLeft={<PencilIcon className="w-4 h-4" />}>
             Bearbeiten
           </Button>
@@ -399,6 +462,45 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
               Abbrechen
             </Button>
             <Button variant="navy" size="sm" loading={editBusy} onClick={speichereStammdaten}>
+              Speichern
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
+      {/* Adresse-Modal (GooglePlaceAutocomplete -> lat/lng -> Isochrone-Neuberechnung) */}
+      <Modal
+        open={adresseOpen}
+        onClose={() => {
+          setAdresseOpen(false)
+          setNeueAdresse(null)
+        }}
+        maxWidth={480}
+        ariaLabel="Adresse ändern"
+      >
+        <h2 className="text-heading-sm font-semibold text-claimondo-navy mb-2">Adresse ändern</h2>
+        <p className="text-body-xs text-claimondo-ondo mb-3">Aktuell: {adresse}</p>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-body-xs font-medium text-claimondo-navy mb-1">
+              Neue Adresse (aus den Vorschlägen wählen)
+            </label>
+            <GooglePlaceAutocomplete placeholder="Adresse eingeben…" onSelect={(r) => setNeueAdresse(r)} />
+          </div>
+          {neueAdresse && <p className="text-body-sm text-claimondo-navy">Gewählt: {neueAdresse.adresse}</p>}
+          <p className="text-body-xs text-claimondo-ondo">Das 30-Minuten-Fahrgebiet wird neu berechnet.</p>
+          <div className="flex justify-end gap-2 pt-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setAdresseOpen(false)
+                setNeueAdresse(null)
+              }}
+            >
+              Abbrechen
+            </Button>
+            <Button variant="navy" size="sm" loading={adresseBusy} disabled={!neueAdresse} onClick={speichereAdresse}>
               Speichern
             </Button>
           </div>
