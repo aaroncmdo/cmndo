@@ -137,15 +137,23 @@ export default function ClaimHoverCard({ item }: { item: ClaimWorkItem }) {
         </span>
       </div>
 
-      {/* Editierbares Feld: Schadenshöhe (aktueller Wert aus der Work-State-View).
-          Notizen/Interne Notizen + Phasen-Override folgen in Phase 1c — dann trägt die
-          View deren aktuelle Werte; blindes Überschreiben eines bestehenden Notiz-Textes
-          wäre sonst Datenverlust. Die Action-Whitelist deckt bereits alle drei ab. */}
+      {/* Editierbare Felder mit AKTUELLEN Werten (aus v_claim_workstate.edit_*, Phase 1c).
+          Phasen-Override folgt in Phase 1d (isoliert, geteilte v_claim_phase). */}
       <div className="flex flex-col gap-2 border-t border-claimondo-border pt-2">
         <EditableRow
           claimId={item.id}
           field="schadens_hoehe_netto"
-          initialValue={item.display.schadenhoehe}
+          initialValue={item.editable.schadensHoeheNetto}
+        />
+        <EditableRow
+          claimId={item.id}
+          field="notizen"
+          initialValue={item.editable.notizen}
+        />
+        <EditableRow
+          claimId={item.id}
+          field="interne_notizen"
+          initialValue={item.editable.interneNotizen}
         />
       </div>
 
