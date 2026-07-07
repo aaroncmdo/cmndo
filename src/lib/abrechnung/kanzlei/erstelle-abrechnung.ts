@@ -92,7 +92,7 @@ export async function erstelleKanzleiAbrechnung(
       // fall_id aus kanzlei_faelle (native, fuer positionen + leads-Lookup).
       const { data: claimsRaw, error: claimsErr } = await db
         .from('claims')
-        .select('id, claim_nummer, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(zahlungseingang_am, status)')
+        .select('id, claim_nummer, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(partei, zahlungseingang_am, status)')
         .eq('service_typ', 'komplett')
         .is('kanzlei_abrechnung_id', null)
 
