@@ -9,6 +9,7 @@
  */
 
 import type { SvLiveOps, TerminPin, DeadPin, UnterwegsRoute, TagesRoute, LeadPin } from '@/lib/live-ops'
+import { unionIsochrones } from '@/lib/mapbox/union-isochrones'
 
 /**
  * SV-Standort-Pins. SVs ohne standortLat/Lng werden gefiltert.
@@ -225,7 +226,11 @@ export function assignLineFC(
 }
 
 /**
- * Isochrone-Polygone. Nur SVs mit `isochrone`-Payload werden inkludiert.
+ * Isochrone-Polygone (per SV, ein Feature je SV mit typ-Property).
+ * Aktuell nur noch von geo.test.ts referenziert: die Karten-Darstellung
+ * laeuft ueber unionIsochroneFC (Union-Flaeche), und computeCoverageGaps
+ * ruft parseIsochrone direkt (nicht ueber diese Projektion). Behalten als
+ * getestete per-SV-Projektion / moegliche Debug-Ansicht.
  */
 export function isochroneFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
   return {
@@ -241,5 +246,33 @@ export function isochroneFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
           typ: sv.typ,
         },
       })),
+  }
+}
+
+/**
+ * Union-Isochrone-FeatureCollection fuer die Darstellung auf der LiveOps-Karte.
+ * Fasst alle SV-Isochronen zur EINEN gemeinsamen Flaeche zusammen (turf-Union):
+ *   - ueberlappende Polygone verschmelzen → kein innerer Rand-Chaos
+ *   - disjunkte Gebiete bleiben getrennt als MultiPolygon
+ *   - 0 gueltige Isochronen → leere FeatureCollection
+ *
+ * Unterschied zu isochroneFC: isochroneFC liefert N Features (per SV, mit typ-Property).
+ * unionIsochroneFC liefert genau 1 Feature (typuebergreifende Union, kein typ-Property).
+ * Deshalb verwendet LiveOpsMap eine einheitliche Marken-Farbe statt TYP_COLOR_EXPR.
+ */
+export function unionIsochroneFC(svs: SvLiveOps[]): GeoJSON.FeatureCollection {
+  const raws = svs.filter((sv) => sv.isochrone != null).map((sv) => sv.isochrone)
+  const unionFeature = unionIsochrones(raws)
+  if (!unionFeature) {
+    return { type: 'FeatureCollection', features: [] }
+  }
+  return {
+    type: 'FeatureCollection',
+    features: [
+      {
+        ...unionFeature,
+        properties: { __type: 'isochrone-union' },
+      } as GeoJSON.Feature,
+    ],
   }
 }
