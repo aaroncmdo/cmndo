@@ -11,6 +11,7 @@ import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { revalidatePath } from 'next/cache'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { cancelOffeneTermineFuerFall } from '@/lib/termine/cancel-offene-termine'
+import { aktuellerTerminFuerFall } from '@/lib/termine/aktueller-termin-fuer-fall'
 
 /**
  * KFZ-150: SV storniert einen Termin/Fall.
@@ -26,11 +27,23 @@ export async function stornoFall(fallId: string, grund: string): Promise<{ succe
   if (!sv) return { success: false, typ: '', error: 'Kein SV-Profil' }
 
   const db = createAdminClient()
-  const { data: fall } = await db.from('v_faelle_mit_aktuellem_termin').select('id, sv_id, sv_termin').eq('id', fallId).eq('sv_id', sv.id).single()
+  // Ownership direkt aus der normalisierten claims-Tabelle (SSoT): faelle ist gedroppt, im
+  // SV-Domain gilt claims.id == fall_id (MCP-verifiziert 8/8) -> die faelle_claim_bridge
+  // brauchen wir hier nicht. claims ist eine Tabelle -> service-role-sichtbar; die gated
+  // v_claim_full/v_faelle liefern dem admin-Client 0 Zeilen (-> stornoFall war komplett tot).
+  const { data: fall } = await db
+    .from('claims')
+    .select('id, sv_id')
+    .eq('id', fallId)
+    .eq('sv_id', sv.id)
+    .maybeSingle()
   if (!fall) return { success: false, typ: '', error: 'Fall nicht gefunden' }
 
-  // Check: wie viel Zeit bis zum Termin?
-  const terminDate = fall.sv_termin ? new Date(fall.sv_termin) : null
+  // Frist: echter Termin-Start kanonisch aus gutachter_termine — NICHT die stale
+  // sv_termin (claim_id meist NULL -> terminDate immer null -> hoursUntilTermin Infinity
+  // -> die 24h-Vertragsstrafe storno_sv_spaet feuerte nie).
+  const aktTermin = await aktuellerTerminFuerFall(db, fallId)
+  const terminDate = aktTermin ? new Date(aktTermin.start_zeit) : null
   const hoursUntilTermin = terminDate ? (terminDate.getTime() - Date.now()) / (1000 * 60 * 60) : Infinity
 
   if (hoursUntilTermin >= 24) {
