@@ -580,21 +580,10 @@ export async function POST(request: Request) {
         // Jetzt: als bezahlt verbuchen (mirror von markPaid im Cron). Nur fuer Einzugs-PIs
         // (metadata.abrechnung_id) — Onboarding-Anzahlungen laufen ueber checkout.session.
         const pi = event.data.object
-        const meta = (pi.metadata ?? {}) as Record<string, string>
-        const abrId = meta.abrechnung_id ?? null
-        if (abrId) {
-          const nowIso = new Date().toISOString()
-          const betrag = Number(pi.amount_received ?? pi.amount ?? 0) / 100
-          // Idempotent: nur wenn noch nicht bezahlt -> ueberschreibt kein frueheres
-          // bezahlt_am, deckt Re-Delivery zusaetzlich zum stripe_events-Dedup oben ab.
-          await db.from('abrechnungen').update({
-            bezahlt_am: nowIso,
-            bezahlt_betrag: betrag,
-            einzug_fehler: null,
-            status: 'bezahlt',
-            updated_at: nowIso,
-          }).eq('id', abrId).neq('status', 'bezahlt')
-        }
+        const { handleEinzugPaymentSucceeded } = await import('@/lib/finance/einzug-webhook')
+        await handleEinzugPaymentSucceeded(db, pi as {
+          metadata?: Record<string, string> | null; amount?: number | null; amount_received?: number | null
+        })
         break
       }
 
