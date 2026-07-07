@@ -563,21 +563,23 @@ async function sendWelcomeWithLogin(
 ): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
-    // PKCE-Fix: Supabase hängt ?code=XXX an die redirectTo-URL — das muss
-    // auf /api/auth/callback landen (exchangeCodeForSession), nicht direkt
-    // auf /kunde/onboarding (die Page kann keinen Code einlösen).
-    // next=/kunde/onboarding wird vom Callback nach erfolgreichem Login genutzt.
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
-    const redirectTo = `${base}/api/auth/callback?next=/kunde/onboarding`
+    // TOKEN-HASH-FIX: admin.generateLink liefert inzwischen einen IMPLICIT-#access_token-Hash
+    // im action_link, den /api/auth/callback (erwartet ?code) NICHT einloesen kann ("OAuth
+    // fehlgeschlagen" → /login). Wir nutzen daher data.properties.hashed_token + die
+    // /api/auth/confirm-Route (verifyOtp server-seitig → Cookie → Redirect auf next).
+    // Siehe src/app/api/auth/confirm/route.ts.
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
     const { data, error } = await adminDb.auth.admin.generateLink({
       type: 'magiclink',
       email,
-      options: { redirectTo },
     })
     if (error) {
       console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen:', error)
     } else {
-      magicLink = data?.properties?.action_link ?? null
+      const tokenHash = data?.properties?.hashed_token
+      magicLink = tokenHash
+        ? `${base}/api/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink&next=${encodeURIComponent('/kunde/onboarding')}`
+        : null
     }
   } catch (err) {
     console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen (Exception):', err)
