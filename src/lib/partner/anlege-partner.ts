@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { buildSvInsertAusLead, type SvLeadRow } from '@/lib/sv-basic/claim-eligibility'
 import type { PartnerRolle } from '@/lib/partner/policy'
+import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
 
 // Konsolidierter Kern der Partner-Account-Anlage (makler | sachverstaendiger | werkstatt).
 // Spiegelt anlegeMaklerKern: Auth-User (Random-PW + force_password_change) ->
@@ -232,6 +233,11 @@ export async function anlegePartnerKern(
       return { ok: false, error: `Unbekannte Partner-Rolle: ${String(rolle)}` }
     }
   }
+
+  // Standard-Staffelung (Default-Bonus-Stufen) — best-effort, non-fatal. Nur makler + werkstatt
+  // haben eine Bonus-Staffel; SV nicht.
+  if (rolle === 'makler') await setzeStandardStaffel(admin, 'makler', partnerId)
+  else if (rolle === 'werkstatt') await setzeStandardStaffel(admin, 'werkstatt', partnerId)
 
   return { ok: true, userId, partnerId, password }
 }
