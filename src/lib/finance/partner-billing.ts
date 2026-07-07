@@ -106,3 +106,44 @@ export async function getPartnerBilling(
 
   return { rows, aggregat: { perStatus, perPartnerTyp, hat_unbekannten_ust_status } }
 }
+
+export type LedgerGutschriftDocs = {
+  original?: { nr: string }
+  storno?: { nr: string; bezugNr: string | null }
+}
+
+export type GutschriftRohzeile = {
+  id: string
+  gutschrift_nr: string
+  typ: string
+  bezug_gutschrift_id: string | null
+  ledger_tabelle: string
+  ledger_id: string
+}
+
+/**
+ * Baut aus den partner_gutschriften-Rohzeilen eines Partners eine Map
+ * ledgerKey ("tabelle:id") -> { original?, storno? }. Der Storno-Bezug (Original-Nr)
+ * wird aus derselben Zeilenmenge aufgeloest (id -> gutschrift_nr), kein Extra-Query.
+ */
+export function buildGutschriftDocsByLedger(
+  rows: GutschriftRohzeile[],
+): Record<string, LedgerGutschriftDocs> {
+  const idToNr = new Map<string, string>()
+  for (const r of rows) idToNr.set(r.id, r.gutschrift_nr)
+
+  const map: Record<string, LedgerGutschriftDocs> = {}
+  for (const r of rows) {
+    const key = `${r.ledger_tabelle}:${r.ledger_id}`
+    const entry = (map[key] ??= {})
+    if (r.typ === 'storno') {
+      entry.storno = {
+        nr: r.gutschrift_nr,
+        bezugNr: r.bezug_gutschrift_id ? idToNr.get(r.bezug_gutschrift_id) ?? null : null,
+      }
+    } else {
+      entry.original = { nr: r.gutschrift_nr }
+    }
+  }
+  return map
+}
