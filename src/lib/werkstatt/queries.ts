@@ -211,6 +211,11 @@ export type WerkstattAuftrag = {
   claim_id: string
   claim_nummer: string | null
   richtung: string | null
+  // D — rollen-korrekte Zusatzspalten (v_werkstatt_auftrag)
+  abrechnungsweg: string | null
+  vermittler_werkstatt_id: string | null
+  reparatur_werkstatt_id: string | null
+  meine_rolle: string | null
   vermittlung_status: string | null
   operative_status: string | null
   fahrzeug_hersteller: string | null
@@ -242,31 +247,29 @@ export type WerkstattAuftrag = {
   gutachten_totalschaden: boolean | null
 }
 
-/** Self-scoped Auftrags-Liste via v_werkstatt_auftrag (RLS-Gate in der View). */
-export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
-  const supabase = await createClient()
-  const { data, error } = await supabase
-    .from('v_werkstatt_auftrag')
-    .select(`
-      claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
-      fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
-      gutachter_firmenname,
-      besichtigung_start, besichtigung_ort, besichtigung_status,
-      provision_betrag_netto, provision_status,
-      reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
-      reparatur_bestaetigter_termin, reparatur_absage_grund,
-      gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
-      gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden
-    `)
-    .order('besichtigung_start', { ascending: false, nullsFirst: false })
-  if (error) {
-    console.error('[werkstatt] getWerkstattAuftraege:', error.message)
-    return []
-  }
-  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
+// Gemeinsame Spalten-Auswahl + Row-Mapping (DRY: Liste + Einzel-Loader).
+const AUFTRAG_SELECT = `
+  claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
+  abrechnungsweg, vermittler_werkstatt_id, reparatur_werkstatt_id, meine_rolle,
+  fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
+  gutachter_firmenname,
+  besichtigung_start, besichtigung_ort, besichtigung_status,
+  provision_betrag_netto, provision_status,
+  reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
+  reparatur_bestaetigter_termin, reparatur_absage_grund,
+  gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
+  gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden
+`
+
+function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
+  return {
     claim_id: r.claim_id as string,
     claim_nummer: (r.claim_nummer as string | null) ?? null,
     richtung: (r.richtung as string | null) ?? null,
+    abrechnungsweg: (r.abrechnungsweg as string | null) ?? null,
+    vermittler_werkstatt_id: (r.vermittler_werkstatt_id as string | null) ?? null,
+    reparatur_werkstatt_id: (r.reparatur_werkstatt_id as string | null) ?? null,
+    meine_rolle: (r.meine_rolle as string | null) ?? null,
     vermittlung_status: (r.vermittlung_status as string | null) ?? null,
     operative_status: (r.operative_status as string | null) ?? null,
     fahrzeug_hersteller: (r.fahrzeug_hersteller as string | null) ?? null,
@@ -294,5 +297,35 @@ export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
     gutachten_restwert: r.gutachten_restwert != null ? Number(r.gutachten_restwert) : null,
     gutachten_wiederbeschaffungswert: r.gutachten_wiederbeschaffungswert != null ? Number(r.gutachten_wiederbeschaffungswert) : null,
     gutachten_totalschaden: r.gutachten_totalschaden != null ? Boolean(r.gutachten_totalschaden) : null,
-  }))
+  }
+}
+
+/** Self-scoped Auftrags-Liste via v_werkstatt_auftrag (RLS-Gate in der View). */
+export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('v_werkstatt_auftrag')
+    .select(AUFTRAG_SELECT)
+    .order('besichtigung_start', { ascending: false, nullsFirst: false })
+  if (error) {
+    console.error('[werkstatt] getWerkstattAuftraege:', error.message)
+    return []
+  }
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map(mapWerkstattAuftragRow)
+}
+
+/** Ein einzelner Auftrag via v_werkstatt_auftrag (RLS-Gate). null = kein Zugriff/nicht da. */
+export async function getWerkstattAuftrag(claimId: string): Promise<WerkstattAuftrag | null> {
+  if (!claimId) return null
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('v_werkstatt_auftrag')
+    .select(AUFTRAG_SELECT)
+    .eq('claim_id', claimId)
+    .maybeSingle()
+  if (error) {
+    console.error('[werkstatt] getWerkstattAuftrag:', error.message)
+    return null
+  }
+  return data ? mapWerkstattAuftragRow(data as unknown as Record<string, unknown>) : null
 }
