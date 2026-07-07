@@ -106,14 +106,14 @@ function ArbeitCard({ item }: { item: ClaimWorkItem }) {
       {/* Phase-Badge + Aktion */}
       <div className="mt-2 flex flex-wrap items-center gap-1.5">
         <FallPhaseBadge subPhase={item.subState} size="sm" />
-        <span className="text-caption px-1.5 py-0.5 rounded bg-claimondo-bg text-claimondo-ondo border border-claimondo-border">
+        <span className="text-caption px-1.5 py-0.5 rounded-ios-sm bg-claimondo-bg text-claimondo-ondo border border-claimondo-border">
           {meta.ctaLabel}
         </span>
       </div>
 
       {/* Ueberfaellig-Marker */}
       {item.isOverdue && item.overdueSinceDays != null && (
-        <p className="mt-2 text-caption font-medium bg-warning-soft text-warning-strong rounded px-1.5 py-0.5 inline-block">
+        <p className="mt-2 text-caption font-medium bg-warning-soft text-warning-strong rounded-ios-sm px-1.5 py-0.5 inline-block">
           ⏱ {item.overdueSinceDays} {item.overdueSinceDays === 1 ? 'Tag' : 'Tage'} überfällig
         </p>
       )}

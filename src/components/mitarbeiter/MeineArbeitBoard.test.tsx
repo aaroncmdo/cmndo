@@ -2,8 +2,32 @@
 // Testet die exportierte groupWorkItemsByPhase-Hilfsfunktion mit env=node
 // (kein @testing-library/react, kein jsdom — vitest.config.ts: environment='node').
 // JSX-Korrektheit wird durch tsc (npx tsc --noEmit) abgedeckt.
-import { describe, it, expect } from 'vitest'
-import { groupWorkItemsByPhase } from './MeineArbeitBoard'
+//
+// Render-Tests: renderToStaticMarkup aus react-dom/server (node-native),
+// next/link und FallPhaseBadge werden zu plain HTML-Elementen gemockt.
+import { describe, it, expect, vi } from 'vitest'
+
+// -- Mocks BEFORE any component import --
+
+// next/link -> plain <a href> so renderToStaticMarkup works in node
+vi.mock('next/link', () => ({
+  default: ({ href, children, className }: { href: string; children: React.ReactNode; className?: string }) => {
+    const React = require('react') as typeof import('react')
+    return React.createElement('a', { href, className }, children)
+  },
+}))
+
+// FallPhaseBadge -> plain <span data-subphase> (avoids status-registry deps in node render)
+vi.mock('@/components/shared/FallPhaseBadge', () => ({
+  default: ({ subPhase }: { subPhase: string | null | undefined }) => {
+    const React = require('react') as typeof import('react')
+    return React.createElement('span', { 'data-subphase': subPhase ?? '' })
+  },
+}))
+
+import { renderToStaticMarkup } from 'react-dom/server'
+import React from 'react'
+import MeineArbeitBoard, { groupWorkItemsByPhase } from './MeineArbeitBoard'
 import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
 
 function makeItem(over: Partial<ClaimWorkItem> = {}): ClaimWorkItem {
@@ -23,6 +47,53 @@ function makeItem(over: Partial<ClaimWorkItem> = {}): ClaimWorkItem {
     ...over,
   }
 }
+
+// ---------------------------------------------------------------------------
+// Render-Branch Tests (renderToStaticMarkup)
+// ---------------------------------------------------------------------------
+
+describe('MeineArbeitBoard — render branches', () => {
+  it('leere Items rendern "Keine aktiven Fälle" (empty state)', () => {
+    const html = renderToStaticMarkup(React.createElement(MeineArbeitBoard, { items: [] }))
+    expect(html).toContain('Keine aktiven Fälle')
+  })
+
+  it('item mit fallId rendert einen Link mit href="/faelle/<id>"', () => {
+    const item = makeItem({ id: 'c1', fallId: 'f1', stage: 'begutachtung', subState: 'gutachten' })
+    const html = renderToStaticMarkup(React.createElement(MeineArbeitBoard, { items: [item] }))
+    expect(html).toContain('href="/faelle/f1"')
+  })
+
+  it('item ohne fallId rendert KEINEN /faelle/-href', () => {
+    const item = makeItem({ id: 'c2', fallId: null, stage: 'begutachtung', subState: 'gutachten' })
+    const html = renderToStaticMarkup(React.createElement(MeineArbeitBoard, { items: [item] }))
+    expect(html).not.toContain('/faelle/')
+  })
+
+  it('ueberfaelliges item rendert "überfällig" mit korrekter Tageszahl', () => {
+    const item = makeItem({
+      id: 'c3',
+      stage: 'begutachtung',
+      subState: 'gutachten',
+      isOverdue: true,
+      overdueSinceDays: 14,
+    })
+    const html = renderToStaticMarkup(React.createElement(MeineArbeitBoard, { items: [item] }))
+    expect(html).toContain('überfällig')
+    expect(html).toContain('14')
+  })
+
+  it('rendert ctaLabel "Gutachten anfordern" und Spalten-Titel "Begutachtung"', () => {
+    const item = makeItem({ stage: 'begutachtung', subState: 'gutachten' })
+    const html = renderToStaticMarkup(React.createElement(MeineArbeitBoard, { items: [item] }))
+    expect(html).toContain('Gutachten anfordern')
+    expect(html).toContain('Begutachtung')
+  })
+})
+
+// ---------------------------------------------------------------------------
+// Pure-Logic Tests (groupWorkItemsByPhase)
+// ---------------------------------------------------------------------------
 
 describe('groupWorkItemsByPhase', () => {
   it('gibt leere Arrays fuer alle Phasen zurueck wenn keine Items', () => {
