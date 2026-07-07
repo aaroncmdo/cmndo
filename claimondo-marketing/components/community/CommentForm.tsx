@@ -56,7 +56,7 @@ export function CommentForm({ slug, isLoggedIn, hasUsername, username }: { slug:
         <>
           {username && (
             <p className="text-[0.8125rem] text-claimondo-shield">
-              Angemeldet als <span className="font-semibold text-claimondo-navy">{username}</span>
+              Du kommentierst <span className="font-medium">öffentlich</span> als <span className="font-semibold text-claimondo-navy">{username}</span>.
             </p>
           )}
           <textarea name="body" required maxLength={2000} rows={3} placeholder="Deinen Kommentar schreiben …" className={input} />
