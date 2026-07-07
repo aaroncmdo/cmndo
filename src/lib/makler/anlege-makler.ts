@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generatePromoCode } from '@/lib/makler/promo-code'
+import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
 
 // Gemeinsamer Kern der Makler-Anlage — von admin-createMakler UND dem Self-Signup genutzt.
 // Legt Auth-User (Random-PW + force_password_change) + profiles(rolle='makler') +
@@ -117,6 +118,9 @@ export async function anlegeMaklerKern(
       break
     }
   }
+
+  // 5) Standard-Staffelung (Default-Bonus-Stufen) — best-effort, non-fatal (jeder neue Makler).
+  await setzeStandardStaffel(admin, 'makler', m.id as string)
 
   return { ok: true, userId, maklerId: m.id as string, password }
 }
