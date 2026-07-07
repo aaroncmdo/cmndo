@@ -575,7 +575,7 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
           <PartnerBillingPanel
             rows={billing.rows}
             aggregat={billing.aggregat}
-            gutschriftLedgerKeys={billing.gutschriftLedgerKeys}
+            gutschriftDocsByLedger={billing.gutschriftDocsByLedger}
             ustToggle={{ partnerTyp: 'werkstatt', partnerId: w.id, current: billing.istKleinunternehmer }}
             steuerdaten={{
               partnerTyp: 'werkstatt',

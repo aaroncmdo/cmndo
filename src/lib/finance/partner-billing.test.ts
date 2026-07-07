@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest'
-import { buildGutschriftDocsByLedger, type GutschriftRohzeile } from './partner-billing'
+import { buildGutschriftDocsByLedger, belegeFuerZeile, type GutschriftRohzeile } from './partner-billing'
+import type { PartnerBillingRow } from './partner-billing'
 
 const base = { ledger_tabelle: 'makler_provisionen', ledger_id: 'led-1' }
 
@@ -37,5 +38,31 @@ describe('buildGutschriftDocsByLedger', () => {
       nr: 'CMNDO-GS-2026-00002',
       bezugNr: null,
     })
+  })
+})
+
+const auszahlung = (status: string): PartnerBillingRow =>
+  ({ richtung: 'auszahlung', status_norm: status, quelle_tabelle: 'makler_provisionen', quelle_id: 'led-1' }) as PartnerBillingRow
+
+describe('belegeFuerZeile', () => {
+  it('storniert + original+storno → beide Belege (gutschrift, storno) mit bezugNr', () => {
+    const docs = { 'makler_provisionen:led-1': { original: { nr: 'A' }, storno: { nr: 'B', bezugNr: 'A' } } }
+    const b = belegeFuerZeile(auszahlung('storniert'), docs)
+    expect(b.map((x) => x.typ)).toEqual(['gutschrift', 'storno'])
+    expect(b.find((x) => x.typ === 'storno')?.bezugNr).toBe('A')
+  })
+
+  it('erledigt + nur original → ein Beleg', () => {
+    const docs = { 'makler_provisionen:led-1': { original: { nr: 'A' } } }
+    expect(belegeFuerZeile(auszahlung('erledigt'), docs).map((x) => x.typ)).toEqual(['gutschrift'])
+  })
+
+  it('forderung / offen → keine Belege', () => {
+    const row = { richtung: 'forderung', status_norm: 'offen', quelle_tabelle: 'abrechnungen', quelle_id: 'x' } as PartnerBillingRow
+    expect(belegeFuerZeile(row, {})).toEqual([])
+  })
+
+  it('kein Doc in der Map → leer (Alt-Storno / kein Beleg)', () => {
+    expect(belegeFuerZeile(auszahlung('storniert'), {})).toEqual([])
   })
 })

@@ -270,7 +270,7 @@ export async function getPartnerGutschriftDownloadUrl(
  * Wird vom Admin-Drawer in Makler-, Werkstatt-, Marketing- und Kanzlei-Listen on-demand aufgerufen.
  *
  * Fuer 'kanzlei': kein ist_kleinunternehmer (Forderungs-Partner, immer 19% USt) → null.
- * Fuer alle anderen Typen: gibt zusaetzlich gutschriftLedgerKeys zurueck.
+ * Fuer alle anderen Typen: gibt zusaetzlich gutschriftDocsByLedger (Original + Storno je Ledger) zurueck.
  */
 export async function ladePartnerBilling(
   partnerTyp: 'makler' | 'werkstatt' | 'marketing' | 'kanzlei',
@@ -282,7 +282,7 @@ export async function ladePartnerBilling(
       aggregat: import('@/lib/finance/partner-billing').PartnerBillingAggregat
       istKleinunternehmer: boolean | null
       steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
-      gutschriftLedgerKeys: string[]
+      gutschriftDocsByLedger: Record<string, import('@/lib/finance/partner-billing').LedgerGutschriftDocs>
     }
   | { ok: false; error: string }
 > {
@@ -291,7 +291,7 @@ export async function ladePartnerBilling(
 
   let istKleinunternehmer: boolean | null = null
   let steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null = null
-  let gutschriftLedgerKeys: string[] = []
+  let gutschriftDocsByLedger: Record<string, import('@/lib/finance/partner-billing').LedgerGutschriftDocs> = {}
 
   // Kanzlei ist Forderungs-Partner ohne Steuerdaten-Spalten → skip
   if (partnerTyp !== 'kanzlei') {
@@ -322,14 +322,15 @@ export async function ladePartnerBilling(
       ? { ust_id: row.ust_id, adresse_strasse: row.adresse_strasse, adresse_plz: row.adresse_plz, adresse_ort: row.adresse_ort }
       : null
 
-    // Gutschrift-Ledger-Keys laden (welche Auszahlungen haben eine PDF-Gutschrift)
+    // Gutschrift-Belege je Ledger laden (Original + Storno) fuer Download + Bezug-Anzeige.
     const { data: gs } = await admin
       .from('partner_gutschriften')
-      .select('ledger_tabelle, ledger_id')
+      .select('id, gutschrift_nr, typ, bezug_gutschrift_id, ledger_tabelle, ledger_id')
       .eq('partner_typ', partnerTyp)
       .eq('partner_id', partnerId)
-    gutschriftLedgerKeys = (gs ?? []).map(
-      (g: { ledger_tabelle: string; ledger_id: string }) => `${g.ledger_tabelle}:${g.ledger_id}`,
+    const { buildGutschriftDocsByLedger } = await import('@/lib/finance/partner-billing')
+    gutschriftDocsByLedger = buildGutschriftDocsByLedger(
+      (gs ?? []) as import('@/lib/finance/partner-billing').GutschriftRohzeile[],
     )
   }
 
@@ -337,7 +338,7 @@ export async function ladePartnerBilling(
 
   try {
     const { rows, aggregat } = await getPartnerBilling({ partnerTyp, partnerId })
-    return { ok: true, rows, aggregat, istKleinunternehmer, steuerdaten, gutschriftLedgerKeys }
+    return { ok: true, rows, aggregat, istKleinunternehmer, steuerdaten, gutschriftDocsByLedger }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
   }

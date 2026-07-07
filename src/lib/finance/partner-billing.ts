@@ -147,3 +147,23 @@ export function buildGutschriftDocsByLedger(
   }
   return map
 }
+
+export type ZeilenBeleg = { typ: 'gutschrift' | 'storno'; nr: string; bezugNr: string | null }
+
+/**
+ * Welche Gutschrift-Belege sind fuer eine Billing-Zeile herunterladbar.
+ * Nur Auszahlungszeilen (erledigt/storniert): Original + ggf. Storno-Korrekturbeleg.
+ */
+export function belegeFuerZeile(
+  row: Pick<PartnerBillingRow, 'richtung' | 'status_norm' | 'quelle_tabelle' | 'quelle_id'>,
+  docs: Record<string, LedgerGutschriftDocs>,
+): ZeilenBeleg[] {
+  if (row.richtung !== 'auszahlung') return []
+  if (row.status_norm !== 'erledigt' && row.status_norm !== 'storniert') return []
+  const entry = docs[`${row.quelle_tabelle}:${row.quelle_id}`]
+  if (!entry) return []
+  const out: ZeilenBeleg[] = []
+  if (entry.original) out.push({ typ: 'gutschrift', nr: entry.original.nr, bezugNr: null })
+  if (entry.storno) out.push({ typ: 'storno', nr: entry.storno.nr, bezugNr: entry.storno.bezugNr })
+  return out
+}

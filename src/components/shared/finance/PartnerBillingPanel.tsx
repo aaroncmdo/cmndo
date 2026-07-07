@@ -24,7 +24,8 @@ import {
   setzePartnerSteuerdaten,
   getPartnerGutschriftDownloadUrl,
 } from '@/lib/finance/partner-billing-actions'
-import type { PartnerBillingRow } from '@/lib/finance/partner-billing'
+import { belegeFuerZeile } from '@/lib/finance/partner-billing'
+import type { PartnerBillingRow, LedgerGutschriftDocs } from '@/lib/finance/partner-billing'
 import type { PartnerBillingPanelProps } from './PartnerBillingPanel.types'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 
@@ -81,10 +82,10 @@ function AktionMeldung({ ok, error }: { ok: boolean; error?: string }) {
 /** Aktions-Buttons einer einzelnen Zeile. */
 function ZeilenAktionen({
   row,
-  gutschriftLedgerKeys,
+  gutschriftDocsByLedger,
 }: {
   row: PartnerBillingRow
-  gutschriftLedgerKeys: string[]
+  gutschriftDocsByLedger: Record<string, LedgerGutschriftDocs>
 }) {
   const [isPending, startTransition] = useTransition()
   const [meldung, setMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
@@ -99,25 +100,27 @@ function ZeilenAktionen({
 
   const { richtung, status_norm, quelle_tabelle, quelle_id, ust_status_bekannt } = row
 
-  const hatGutschrift =
-    richtung === 'auszahlung' &&
-    status_norm === 'erledigt' &&
-    gutschriftLedgerKeys.includes(`${quelle_tabelle}:${quelle_id}`)
+  // Erledigte + stornierte Auszahlungen: pro vorhandenem Beleg ein Download-Button
+  // (Original "Gutschrift ↓" + ggf. Storno-Korrekturbeleg "Storno ↓" mit Bezug).
+  const belege = belegeFuerZeile(row, gutschriftDocsByLedger)
 
   const zeigeKeinAktion =
     status_norm === 'erledigt' || status_norm === 'storniert'
 
   if (zeigeKeinAktion) {
-    if (hatGutschrift) {
-      return (
-        <div className="flex flex-wrap items-center gap-1.5">
+    if (belege.length === 0) return <span className="text-xs text-claimondo-ondo/50">—</span>
+    return (
+      <div className="flex flex-wrap items-center gap-1.5">
+        {belege.map((b) => (
           <Button
+            key={b.typ}
             size="sm"
             variant="ghost"
             loading={isPending}
+            title={b.typ === 'storno' && b.bezugNr ? `Storno zu ${b.bezugNr}` : undefined}
             onClick={() =>
               fuehreAus(async () => {
-                const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id)
+                const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id, b.typ)
                 if (res.ok) {
                   window.open(res.url, '_blank')
                   return { ok: true }
@@ -126,13 +129,12 @@ function ZeilenAktionen({
               })
             }
           >
-            Gutschrift ↓
+            {b.typ === 'storno' ? 'Storno ↓' : 'Gutschrift ↓'}
           </Button>
-          {meldung && !meldung.ok && <AktionMeldung {...meldung} />}
-        </div>
-      )
-    }
-    return <span className="text-xs text-claimondo-ondo/50">—</span>
+        ))}
+        {meldung && !meldung.ok && <AktionMeldung {...meldung} />}
+      </div>
+    )
   }
 
   // Forderungs-Aktionen (Als bezahlt / Einzug erneut / Stornieren) sind nur fuer
@@ -249,7 +251,7 @@ export function PartnerBillingPanel({
   showPartnerColumn = false,
   ustToggle,
   steuerdaten,
-  gutschriftLedgerKeys = [],
+  gutschriftDocsByLedger = {},
 }: PartnerBillingPanelProps) {
   const [ustPending, startUstTransition] = useTransition()
   const [ustMeldung, setUstMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
@@ -411,7 +413,7 @@ export function PartnerBillingPanel({
                       </StatusBadge>
                     </Td>
                     <Td className="px-4">
-                      <ZeilenAktionen row={row} gutschriftLedgerKeys={gutschriftLedgerKeys} />
+                      <ZeilenAktionen row={row} gutschriftDocsByLedger={gutschriftDocsByLedger} />
                     </Td>
                   </Tr>
                 )
