@@ -15,6 +15,7 @@ import {
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
 import { AdminNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
+import { AdminAiVorschlaegeBadge } from '@/components/admin/AdminAiVorschlaegeBadge'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
 const NAV_ITEMS: PortalNavItem[] = [
@@ -77,6 +78,9 @@ export default function AdminNav({
         }
         if (item.label === 'Kalender') {
           return <span className="ml-auto"><AdminNeueRueckrufeBadge /></span>
+        }
+        if (item.label === 'KI-Vorschläge') {
+          return <span className="ml-auto"><AdminAiVorschlaegeBadge /></span>
         }
         return null
       }}

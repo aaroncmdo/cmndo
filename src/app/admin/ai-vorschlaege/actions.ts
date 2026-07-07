@@ -110,3 +110,19 @@ export async function zuruecksetzenTyp(
   revalidatePath('/admin/ai-vorschlaege')
   return { ok: true }
 }
+
+/**
+ * Anzahl offener KI-Vorschlaege — fuer die Attention-Badge im Admin-Nav.
+ * ai_claim_proposals ist RLS-locked (service_role only) → nur ueber diese
+ * admin-gegatete Server-Action lesbar, nicht per Client-Query.
+ */
+export async function getOffeneVorschlaegeCount(): Promise<number> {
+  const userId = await requireAdminUserId()
+  if (!userId) return 0
+  const db = createAdminClient()
+  const { count } = await db
+    .from('ai_claim_proposals')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'offen')
+  return count ?? 0
+}
