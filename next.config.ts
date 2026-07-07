@@ -358,6 +358,12 @@ const nextConfig: NextConfig = {
       // exakt dieselbe AAR-889-Falle (leere 200-Shell, kein Redirect; Prod-Smoke 07.07. als
       // test-kunde bestaetigt). page.tsx geloescht.
       { source: '/kunde/einstellungen', destination: '/kunde/profil', permanent: true },
+      // Gutachter-Onboarding (ARCH-1, seit 04.2026): /gutachter/onboarding war ein data-driven
+      // RSC-redirect()-Router (4 SV-State-Faelle) -> traf die AAR-889-Falle (Prod-Smoke 07.07. als
+      // smoke-sv: leere 200-Shell, kein Redirect). Der aktive Flow liegt eh in /gutachter/willkommen,
+      // das ALLE Faelle selbst routet (freigeschaltet->/gutachter Z.160, no-sv Z.57, sonst Steps).
+      // Statischer 308 dorthin + page.tsx geloescht.
+      { source: '/gutachter/onboarding', destination: '/gutachter/willkommen', permanent: true },
     ]
   },
 };
