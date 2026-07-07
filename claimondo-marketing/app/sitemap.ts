@@ -68,7 +68,15 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'monthly',
       priority: 0.9,
     },
-    // KI-Ersteinschätzung — Conversion-Funnel-Einstieg vor /schaden-melden
+    // KI-Ersteinschätzung — SEO-Landing (Front-Door), klickt weiter in den /check-Funnel
+    {
+      url: `${SITE_URL}/ersteinschaetzung`,
+      lastModified: now,
+      changeFrequency: 'monthly',
+      priority: 0.85,
+      alternates: { languages: langAlternates('/ersteinschaetzung') },
+    },
+    // /check — interaktiver Anspruchs-Funnel
     {
       url: `${SITE_URL}/check`,
       lastModified: now,
