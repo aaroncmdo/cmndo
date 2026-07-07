@@ -61,11 +61,13 @@ export async function svTermine(
   svId: string,
   opts: SvTermineOpts,
 ): Promise<SvTerminRow[]> {
-  const { data, error } = await buildSvTermineQuery(
-    db.from('gutachter_termine'),
-    svId,
-    opts,
-  )
+  // buildSvTermineQuery liefert (typseitig) den QueryBuilder zurueck; zur Laufzeit ist es
+  // der awaitable FilterBuilder. Cast auf das PromiseLike-{data,error}-Shape fuer den await.
+  const query = buildSvTermineQuery(db.from('gutachter_termine'), svId, opts) as unknown as PromiseLike<{
+    data: SvTerminRow[] | null
+    error: { message?: string } | null
+  }>
+  const { data, error } = await query
   if (error) {
     console.error('[sv-termine] query:', error.message)
     return []
