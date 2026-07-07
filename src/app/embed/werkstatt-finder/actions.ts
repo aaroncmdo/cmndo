@@ -6,6 +6,7 @@ import { buildWerkstattFinderLeadExtra } from '@/lib/werkstatt/embed-finder-core
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { getConsentedGaClientId } from '@/lib/analytics/ga4-conversions'
 import { findWerkstaetten, type WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import { geocodeAdresse } from '@/lib/mapbox/geocode'
 
 export type WerkstattFinderLeadPayload = {
   vorname?: string | null
@@ -89,4 +90,20 @@ export async function sucheEchteWerkstaetten(input: {
   plz?: string
 }): Promise<WerkstattFinderRow[]> {
   return findWerkstaetten({ ...input, nurEchte: true, limit: 10 })
+}
+
+/**
+ * Standalone-Finder-Suche nach freiem Ort/PLZ-String: geocodiert die Eingabe
+ * (Mapbox, DE-scoped) und liefert die nach Distanz rangierten ECHTEN Partner-
+ * Werkstaetten + das neue Karten-Zentrum. Ermoeglicht den Embed-Finder ohne
+ * lat/lng-URL-Params (Direkt-Besucher tippen PLZ/Ort). center=null => Ort nicht
+ * gefunden, der Client zeigt einen Hinweis.
+ */
+export async function sucheWerkstaettenNachOrt(
+  query: string,
+): Promise<{ rows: WerkstattFinderRow[]; center: { lat: number; lng: number } | null }> {
+  const geo = await geocodeAdresse(query)
+  if (!geo) return { rows: [], center: null }
+  const rows = await findWerkstaetten({ lat: geo.lat, lng: geo.lng, nurEchte: true, limit: 10 })
+  return { rows, center: { lat: geo.lat, lng: geo.lng } }
 }
