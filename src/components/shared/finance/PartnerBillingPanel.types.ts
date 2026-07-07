@@ -1,6 +1,6 @@
-import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
+import type { PartnerBillingRow, PartnerBillingAggregat, LedgerGutschriftDocs } from '@/lib/finance/partner-billing'
 
-export type { PartnerBillingRow, PartnerBillingAggregat }
+export type { PartnerBillingRow, PartnerBillingAggregat, LedgerGutschriftDocs }
 
 export interface PartnerBillingPanelProps {
   rows: PartnerBillingRow[]
@@ -18,11 +18,11 @@ export interface PartnerBillingPanelProps {
     current: boolean | null
   }
   /**
-   * Liste von "ledger_tabelle:ledger_id"-Keys fuer die eine Gutschrift-PDF existiert.
-   * Wird von ladePartnerBilling befuellt. Erledigt-Auszahlungszeilen mit passendem Key
-   * zeigen einen "Gutschrift ↓"-Download-Button statt "—".
+   * Map ledgerKey ("tabelle:id") -> { original?, storno? } der vorhandenen Belege.
+   * Von ladePartnerBilling befuellt. Auszahlungszeilen (erledigt/storniert) zeigen pro
+   * Beleg einen Download-Button ("Gutschrift ↓" / "Storno ↓").
    */
-  gutschriftLedgerKeys?: string[]
+  gutschriftDocsByLedger?: Record<string, LedgerGutschriftDocs>
   /**
    * Wenn gesetzt, erscheint eine "Steuerdaten des Partners"-Card nach dem USt-Toggle.
    * makler ist bereits vollstaendig → readOnly=true zeigt Felder nur an.

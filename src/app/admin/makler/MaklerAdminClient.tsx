@@ -51,7 +51,7 @@ type DrawerData = {
   aggregat: PartnerBillingAggregat
   istKleinunternehmer: boolean | null
   steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
-  gutschriftLedgerKeys: string[]
+  gutschriftDocsByLedger: Record<string, import('@/lib/finance/partner-billing').LedgerGutschriftDocs>
 }
 
 export default function MaklerAdminClient({
@@ -130,7 +130,7 @@ export default function MaklerAdminClient({
     startDrawerTransition(async () => {
       const r = await ladePartnerBilling('makler', m.id)
       if (r.ok) {
-        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer, steuerdaten: r.steuerdaten, gutschriftLedgerKeys: r.gutschriftLedgerKeys })
+        setDrawerData({ rows: r.rows, aggregat: r.aggregat, istKleinunternehmer: r.istKleinunternehmer, steuerdaten: r.steuerdaten, gutschriftDocsByLedger: r.gutschriftDocsByLedger })
       } else {
         toast.error(r.error)
         setOpenPartnerId(null)
@@ -406,7 +406,7 @@ export default function MaklerAdminClient({
                 <PartnerBillingPanel
                   rows={drawerData.rows}
                   aggregat={drawerData.aggregat}
-                  gutschriftLedgerKeys={drawerData.gutschriftLedgerKeys}
+                  gutschriftDocsByLedger={drawerData.gutschriftDocsByLedger}
                   ustToggle={{
                     partnerTyp: 'makler',
                     partnerId: openPartnerId,
