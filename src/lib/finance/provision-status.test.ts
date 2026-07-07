@@ -5,12 +5,13 @@ import { auszahlenProvision, freigebenProvision, storniereProvision } from './pr
 vi.mock('./partner-gutschrift', () => ({
   erstellePartnerGutschrift: vi.fn(),
   versendePartnerGutschrift: vi.fn(async () => ({ ok: true })),
+  erstelleStornoGutschrift: vi.fn(),
 }))
 vi.mock('./partner-gutschrift-pdf', () => ({
   generateAndUploadPartnerGutschriftPdf: vi.fn(),
 }))
 
-import { erstellePartnerGutschrift } from './partner-gutschrift'
+import { erstellePartnerGutschrift, erstelleStornoGutschrift } from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
 
 // ─── Legacy simple fakeDb (kept for storno/freigeben tests) ──────────────────
@@ -22,6 +23,39 @@ function fakeDb(row: Record<string, unknown>) {
       select: () => ({ eq: () => ({ single: () => Promise.resolve({ data: row, error: null }) }) }),
       update: (patch: unknown) => { upd(patch); return { eq: () => Promise.resolve({ error: null }) } },
     }),
+  } as any
+}
+
+// ─── Storno-wiring fakeDb: chainable select (.eq/.neq→self, maybeSingle) ──────
+// 1st maybeSingle = original-precheck, 2nd = storno-row refetch.
+function stornoFakeDb(opts: { origData: Record<string, unknown> | null; stornoRowData?: Record<string, unknown> | null }) {
+  const ledgerUpdates: Record<string, unknown>[] = []
+  const gutschriftUpdates: Record<string, unknown>[] = []
+  let maybeSingleCall = 0
+  const makeChain = () => {
+    const c: any = {
+      eq: () => c,
+      neq: () => c,
+      maybeSingle: () => {
+        maybeSingleCall += 1
+        const data = maybeSingleCall === 1 ? opts.origData : (opts.stornoRowData ?? null)
+        return Promise.resolve({ data, error: null })
+      },
+    }
+    return c
+  }
+  return {
+    _ledgerUpdates: ledgerUpdates,
+    _gutschriftUpdates: gutschriftUpdates,
+    from: (table: string) => {
+      if (table !== 'partner_gutschriften') {
+        return { update: (patch: Record<string, unknown>) => { ledgerUpdates.push(patch); return { eq: () => Promise.resolve({ error: null }) } } }
+      }
+      return {
+        select: () => makeChain(),
+        update: (patch: Record<string, unknown>) => { gutschriftUpdates.push(patch); return { eq: () => Promise.resolve({ error: null }) } },
+      }
+    },
   } as any
 }
 
@@ -67,18 +101,24 @@ function richFakeDb(opts: RichFakeDbOptions) {
           },
         }
       } else {
-        // partner_gutschriften table
+        // partner_gutschriften table — fully chainable .eq()* then .maybeSingle().
+        // precheck queries by ledger_tabelle/ledger_id/typ (3x eq); refetch queries by id (1x eq).
+        const makePgChain = () => {
+          const cols: string[] = []
+          const chain: any = {
+            eq: (col: string, _val: string) => {
+              cols.push(col)
+              return chain
+            },
+            maybeSingle: () => {
+              const isRefetch = cols.includes('id') && !cols.includes('ledger_tabelle')
+              return Promise.resolve({ data: isRefetch ? refetchData : precheckData, error: null })
+            },
+          }
+          return chain
+        }
         return {
-          select: (_str?: string) => ({
-            eq: (_col1: string, _val1: string) => ({
-              // For the precheck: .eq().eq().maybeSingle()
-              eq: (_col2: string, _val2: string) => ({
-                maybeSingle: () => Promise.resolve({ data: precheckData, error: null }),
-              }),
-              // For the refetch after create: .eq().maybeSingle()
-              maybeSingle: () => Promise.resolve({ data: refetchData, error: null }),
-            }),
-          }),
+          select: (_str?: string) => makePgChain(),
           update: (patch: Record<string, unknown>) => {
             gutschriftUpdates.push(patch)
             return { eq: () => Promise.resolve({ error: null }) }
@@ -138,6 +178,22 @@ describe('auszahlenProvision', () => {
     expect(r.ok).toBe(false)
     expect(r.error).toMatch(/USt-Status/)
     expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
+  })
+
+  it('blockt Re-Auszahlung wenn die Original-Gutschrift bereits storniert ist (kein neuer Beleg, kein Reuse)', async () => {
+    // Regression (opus review): nach einem Reversal existieren 2 partner_gutschriften-Zeilen.
+    // Der typ-gefilterte Precheck findet das storniert Original -> Re-Auszahlung MUSS klar blocken
+    // (nicht den gecancelten Beleg wiederverwenden + Provision als ausgezahlt markieren).
+    const db = richFakeDb({
+      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      gutschriftenPrecheckData: { ...CANNED_GUTSCHRIFT_ROW_WITH_PDF, status: 'storniert' },
+    })
+    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    expect(r.ok).toBe(false)
+    expect(r.error).toMatch(/storniert/)
+    expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
+    // Kein Status→ausgezahlt (nur der harmlose USt-Freeze-Write darf passiert sein).
+    expect(db._ledgerUpdates.some((p: Record<string, unknown>) => p.status === 'ausgezahlt')).toBe(false)
   })
 
   it('friert USt ein (regelbesteuert) und schreibt status:ausgezahlt via zwei getrennten Ledger-Updates', async () => {
@@ -431,5 +487,60 @@ describe('storniereProvision', () => {
     expect(patch.status).toBe('reversed')
     expect(patch.reversed_grund).toBe('Rueckbuchung')
     expect(patch.storniert_am).toBeUndefined()
+  })
+})
+
+// ─── Task 4: Storno-Gutschrift wiring in storniereProvision ───────────────────
+
+describe('storniereProvision — Storno-Gutschrift wiring (Task 4)', () => {
+  beforeEach(() => vi.clearAllMocks())
+
+  const ORIG = {
+    id: 'orig-1',
+    gutschrift_nr: 'CMNDO-GS-2026-00001',
+    erstellt_am: '2026-07-05T10:00:00.000Z',
+  }
+  const STORNO_ROW = {
+    gutschrift_nr: 'CMNDO-GS-2026-00002',
+    erstellt_am: '2026-07-07T10:00:00.000Z',
+    leistung_datum: '2026-07-05',
+    leistung_text: 'Vermittlungsprovision',
+    betrag_netto: -100,
+    ust_satz: 19,
+    ust_betrag: -19,
+    betrag_brutto: -119,
+    empfaenger_snapshot: { name: 'Test' },
+    aussteller_snapshot: { firmenname: 'Claimondo' },
+  }
+
+  it('(storno-a) original gutschrift exists → erstelleStornoGutschrift called + ledger storniert', async () => {
+    vi.mocked(erstelleStornoGutschrift).mockResolvedValue({ ok: true, stornoId: 'storno-1', nummer: 'CMNDO-GS-2026-00002' } as any)
+    vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'partner-gutschriften/2026/x.pdf' } as any)
+    const db = stornoFakeDb({ origData: ORIG, stornoRowData: STORNO_ROW })
+    const r = await storniereProvision(db, 'makler_provisionen', 'led-1', 'Rückbuchung')
+    expect(r.ok).toBe(true)
+    expect(erstelleStornoGutschrift).toHaveBeenCalledWith(db, 'orig-1', 'Rückbuchung')
+    expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
+    // PDF-Input: Bezug auf das Original + zero-padded Datum (05.07.2026), konsistent mit fmtDate.
+    const pdfArg = vi.mocked(generateAndUploadPartnerGutschriftPdf).mock.calls[0]?.[0] as Record<string, any>
+    expect(pdfArg.storno.bezugNummer).toBe('CMNDO-GS-2026-00001')
+    expect(pdfArg.storno.bezugDatum).toBe('05.07.2026')
+    expect(pdfArg.storno.grund).toBe('Rückbuchung')
+  })
+
+  it('(storno-b) no original gutschrift → erstelleStornoGutschrift NOT called, ledger storniert only', async () => {
+    const db = stornoFakeDb({ origData: null })
+    const r = await storniereProvision(db, 'makler_provisionen', 'led-1', 'Grund')
+    expect(r.ok).toBe(true)
+    expect(erstelleStornoGutschrift).not.toHaveBeenCalled()
+    expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
+  })
+
+  it('(storno-c) erstelleStornoGutschrift fails → storniereProvision still ok (non-fatal)', async () => {
+    vi.mocked(erstelleStornoGutschrift).mockResolvedValue({ ok: false, error: 'boom' } as any)
+    const db = stornoFakeDb({ origData: ORIG })
+    const r = await storniereProvision(db, 'makler_provisionen', 'led-1', 'Grund')
+    expect(r.ok).toBe(true)
+    expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
   })
 })
