@@ -6,7 +6,6 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { ensureMapboxInitialized, mapboxgl } from '@/lib/mapbox/client'
 import { MAPBOX_STYLE_STANDARD } from '@/lib/mapbox/styles'
-import { getMapboxLightPreset } from '@/lib/mapbox/light-preset'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature, GeoJSONSource } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
 import type { LiveOpsData, LayerKey, LayerState, FilterState } from './types'
@@ -417,7 +416,9 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
     // erst nach dem Style-Load gesetzt werden koennen.
     map.on('style.load', () => {
       try {
-        map.setConfigProperty('basemap', 'lightPreset', getMapboxLightPreset())
+        // Aaron 07.07.: SV-Live-Ops-Karte bleibt 3D, aber IMMER Tages-Licht
+        // (fest 'day' statt uhrzeitabhaengig -> nie mehr naechtlich-dunkel).
+        map.setConfigProperty('basemap', 'lightPreset', 'day')
         map.setConfigProperty('basemap', 'show3dObjects', true)
         map.setConfigProperty('basemap', 'showPlaceLabels', true)
         map.setConfigProperty('basemap', 'showRoadLabels', true)
