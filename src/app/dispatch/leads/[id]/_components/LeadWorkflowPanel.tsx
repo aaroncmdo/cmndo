@@ -11,6 +11,7 @@ import type { LeadWorkflowResult } from '../_lib/deriveLeadWorkflowState'
 import { spineIndexForState } from '../_lib/leadWorkflowMeta'
 import LeadWorkflowStepper from './LeadWorkflowStepper'
 import LeadNextBestAction from './LeadNextBestAction'
+import LeadQualProgress from './LeadQualProgress'
 
 export default function LeadWorkflowPanel({
   result,
@@ -33,6 +34,9 @@ export default function LeadWorkflowPanel({
         loading={loading}
         guidanceOnly={guidanceOnly}
       />
+      {result.state === 'qualifizieren' || result.state === 'sv_zuweisen' ? (
+        <LeadQualProgress qual={result.qual} />
+      ) : null}
     </Stack>
   )
 }
