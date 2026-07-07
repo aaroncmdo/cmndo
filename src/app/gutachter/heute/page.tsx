@@ -126,19 +126,12 @@ export default async function HeutePage() {
     session && session.status !== 'idle' && session.status !== 'finished',
   )
 
-  // Heutige Termine
-  // AAR-607 B4: lead_id mitladen — Pre-FlowLink-Termine haben nur lead_id (kein
-  // fall_id), sonst sieht der SV den Termin bis zur SA-Unterschrift nicht.
-  const { data: termine } = await supabase
-    .from('gutachter_termine')
-    // AAR-956/CMM-49: bezug_typ/bezug_id mitladen — bezug-native Termine (Engine
-    // schreibt fall_id/lead_id NULL) sonst ohne auflösbaren Auftrag. Siehe
-    // effektiveBezugIds + engine/CONTRACT.md §Datenmodell.
-    .select('id, fall_id, lead_id, start_zeit, end_zeit, status, gesehen_am, bezug_typ, bezug_id')
-    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee
-    .eq('assignee_id', sv.id)
-    .eq('assignee_typ', 'sachverstaendiger')
-    .in('status', [
+  // Heutige Termine — KANONISCH via svTermine (gutachter_termine.assignee_id).
+  // Identische Quelle wie der SV-Kalender (lib/termine/sv-termine.ts). Der Helper
+  // liefert alle hier genutzten Spalten (fall_id/lead_id/bezug_typ/bezug_id/gesehen_am …).
+  const { svTermine } = await import('@/lib/termine/sv-termine')
+  const termine = await svTermine(supabase, sv.id, {
+    statuses: [
       'reserviert',
       'bestaetigt',
       'vorschlag',
@@ -146,10 +139,10 @@ export default async function HeutePage() {
       // AAR-864: Verlegungs-Slots auch in Tagesansicht zeigen
       'verlegung_pending',
       'verlegt',
-    ])
-    .gte('start_zeit', todayStart.toISOString())
-    .lt('start_zeit', tomorrowStart.toISOString())
-    .order('start_zeit', { ascending: true })
+    ],
+    from: todayStart.toISOString(),
+    to: tomorrowStart.toISOString(),
+  })
 
   // Fall-Daten nachladen
   const fallIds = (termine ?? [])

@@ -19,7 +19,7 @@ export async function GET(request: Request) {
   // CMM-40: re_termin_token_eingelaufen_am mitlesen — wenn der Kunde ueber
   // den Re-Termin-Link einen neuen Slot vorgeschlagen hat, kein Storno.
   const { data: faelle } = await db.from('v_faelle_mit_aktuellem_termin')
-    .select('id, no_show_gemeldet_am, sv_termin, re_termin_token_eingelaufen_am')
+    .select('id, no_show_gemeldet_am, re_termin_token_eingelaufen_am')
     .not('no_show_gemeldet_am', 'is', null)
     .is('storniert_am', null)
 
@@ -46,8 +46,16 @@ export async function GET(request: Request) {
       // CMM-40: Kunde hat ueber Re-Termin-Link einen Slot vorgeschlagen → kein Storno
       if (fall.re_termin_token_eingelaufen_am) continue
 
-      // Prüfen ob zwischenzeitlich ein neuer Termin eingetragen wurde
-      if (fall.sv_termin && new Date(fall.sv_termin) > gemeldet) continue // Neuer Termin existiert
+      // Kanonisch: neuer Termin? -> gutachter_termine (nicht stale View.sv_termin).
+      const { data: neuerTermin } = await db
+        .from('gutachter_termine')
+        .select('start_zeit')
+        .eq('fall_id', fall.id)
+        .in('status', ['reserviert', 'bestaetigt', 'verlegung_pending', 'verlegt'])
+        .gt('start_zeit', gemeldet.toISOString())
+        .limit(1)
+        .maybeSingle()
+      if (neuerTermin) continue // Neuer Termin existiert -> kein Storno
 
       // Storno durchführen
       await transitionFallStatus(fall.id, 'storniert', { grund: 'storno_kunde_no_show' })
