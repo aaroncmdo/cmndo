@@ -28,6 +28,8 @@ import GutachtenOcrCard from '@/components/admin/fallakte/GutachtenOcrCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
+// Claim-AI-Konsole — interaktiver Admin-Copilot + Vorschlags-Karten.
+import { ClaimAiPanelServer } from '@/app/faelle/[id]/_components/ClaimAiPanel.server'
 import {
   getKbPhaseAudit,
   type KbTask,
@@ -1016,6 +1018,12 @@ export default async function FallaktePage({
         </div>
       )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
+      {/* Claim-AI-Konsole — nur fuer Admin sichtbar (human-in-loop, DSGVO Art. 22). */}
+      {userRolle === 'admin' && (
+        <div className="mb-4">
+          <ClaimAiPanelServer fallId={id} />
+        </div>
+      )}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
       {kanzleiBlockData && (
