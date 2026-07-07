@@ -5,6 +5,7 @@ import { AnspruchFotoStep } from './AnspruchFotoStep'
 import { AnspruchEinschaetzungStep } from './AnspruchEinschaetzungStep'
 import { AnspruchSummaryStep } from './AnspruchSummaryStep'
 import type { AnspruchSpanne, Schuldform, VisionResult } from '@/lib/anspruch/types'
+import { AufnahmeFlowHinweis } from '@/components/shared/AufnahmeFlowHinweis'
 import { cn } from '@/lib/utils'
 
 type Phase = 'foto' | 'einschaetzung' | 'summary'
@@ -54,10 +55,7 @@ export function AnspruchWizard() {
       {/* Kontinuitaets-Klammer: wer aus dem /check-Funnel kommt (Schuldfrage vorbefuellt),
           sieht dass es EIN Vorgang ist, kein Frisch-Start. */}
       {initialSchuld && phase === 'foto' ? (
-        <div className="mb-4 flex items-center gap-2 rounded-ios-md bg-claimondo-bg px-3 py-2">
-          <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-claimondo-ondo" aria-hidden />
-          <p className="text-caption text-claimondo-shield">Weiter aus Ihrer Anspruchs-Prüfung: jetzt die Fotos hochladen.</p>
-        </div>
+        <AufnahmeFlowHinweis text="Weiter aus Ihrer Anspruchs-Prüfung: jetzt die Fotos hochladen." />
       ) : null}
 
       {/* Fortschritt: rahmt die drei Schritte als einen zusammenhaengenden Flow */}
