@@ -37,6 +37,8 @@ import {
   PartnerGutschriftenListe,
   type EigeneGutschrift,
 } from '@/components/shared/finance/PartnerGutschriftenListe'
+import { MaklerPipelineCard } from '@/components/makler/MaklerPipelineCard'
+import type { MaklerPipeline } from '@/lib/makler/pipeline'
 
 const EUR = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -170,9 +172,13 @@ function exportCsv(rows: MaklerProvisionRow[], monthIso: string) {
 export function MaklerAbrechnungen({
   data,
   gutschriften = [],
+  pipeline,
+  offeneLeads,
 }: {
   data: MaklerAbrechnungsData
   gutschriften?: EigeneGutschrift[]
+  pipeline: MaklerPipeline
+  offeneLeads: number
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -263,6 +269,10 @@ export function MaklerAbrechnungen({
           tone="blue"
         />
       </section>
+
+      {/* Deine Pipeline — vom Makler-Dashboard hierher verschoben (Anordnung Aaron 07.07.),
+          direkt unter den 4 Summary-Karten. */}
+      <MaklerPipelineCard offeneLeads={offeneLeads} pipeline={pipeline} />
 
       {/* Monats-Navigator */}
       <div className="flex items-center justify-center gap-3">

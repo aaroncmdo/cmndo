@@ -9,10 +9,7 @@ import {
   getMaklerVermittlungsCount,
   getMaklerStaffelStufen,
 } from '@/lib/makler/queries'
-import { getMaklerPipeline } from '@/lib/makler/pipeline'
-import { createClient } from '@/lib/supabase/server'
 import { MaklerDashboard } from '@/components/makler/MaklerDashboard'
-import { NetzwerkWidget } from '@/components/shared/netzwerk/NetzwerkWidget'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,10 +22,10 @@ export default async function MaklerDashboardPage() {
   // Weiche steht hier in der Dashboard-Page (nicht im Layout) -> kein Loop mit /makler/willkommen.
   if (!makler.onboarding_abgeschlossen) redirect('/makler/willkommen')
 
-  const supabase = await createClient()
-  const [data, pipeline, vermittlungsCount, staffelStufen] = await Promise.all([
+  // Vertriebs-Pipeline lebt jetzt auf /makler/abrechnungen (Anordnung Aaron 07.07.) -> hier
+  // nicht mehr laden.
+  const [data, vermittlungsCount, staffelStufen] = await Promise.all([
     getMaklerDashboardData(makler.id),
-    getMaklerPipeline(supabase, makler.id),
     getMaklerVermittlungsCount(makler.id),
     getMaklerStaffelStufen(makler.id),
   ])
@@ -39,18 +36,14 @@ export default async function MaklerDashboardPage() {
   const zeigeErsteVermittlungCard = data.hatVermittlung && !makler.vermittlung_prompt_gesehen
 
   return (
-    <>
-      <MaklerDashboard
-        makler={makler}
-        data={data}
-        pipeline={pipeline}
-        zeigeErsteVermittlungCard={zeigeErsteVermittlungCard}
-        promoCode={data.promoCode}
-        staffelSettled={vermittlungsCount.settled}
-        staffelPending={vermittlungsCount.pending}
-        staffelStufen={staffelStufen}
-      />
-      <div className="mt-6"><NetzwerkWidget portal="makler" /></div>
-    </>
+    <MaklerDashboard
+      makler={makler}
+      data={data}
+      zeigeErsteVermittlungCard={zeigeErsteVermittlungCard}
+      promoCode={data.promoCode}
+      staffelSettled={vermittlungsCount.settled}
+      staffelPending={vermittlungsCount.pending}
+      staffelStufen={staffelStufen}
+    />
   )
 }
