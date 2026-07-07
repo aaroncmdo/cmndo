@@ -4,8 +4,8 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { decideProposal } from '@/lib/orchestrator/proposals'
-import { createLinkedTask } from '@/lib/tasks/create-task'
-import type { TaskPrioritaet } from '@/lib/tasks/types'
+import { buildTaskFromProposal } from '@/lib/orchestrator/task-from-proposal'
+import type { TaskProposalPayload } from '@/lib/orchestrator/types'
 
 async function requireAdminUserId(): Promise<string | null> {
   const supabase = await createClient()
@@ -19,16 +19,6 @@ async function requireAdminUserId(): Promise<string | null> {
     .eq('id', user.id)
     .maybeSingle()
   return profile?.rolle === 'admin' ? user.id : null
-}
-
-// Plan nutzte niedrig/normal/hoch — echte TaskPrioritaet ist 'normal'|'dringend'|'kritisch'.
-// Mapping: hoch -> dringend, niedrig -> normal (konservativ), normal -> normal.
-const PRIO_MAP: Record<string, TaskPrioritaet> = {
-  niedrig: 'normal',
-  normal: 'normal',
-  hoch: 'dringend',
-  dringend: 'dringend',
-  kritisch: 'kritisch',
 }
 
 export async function annehmenVorschlag(
@@ -50,25 +40,13 @@ export async function annehmenVorschlag(
 
   // Nur 'task'-Vorschlaege erzeugen echte Tasks; escalation/next_step werden als 'bearbeitet' markiert.
   if (p.vorschlag_typ === 'task') {
-    const payload = (p.payload ?? {}) as {
-      titel?: string
-      beschreibung?: string
-      prioritaet?: string
-      faellig_in_tagen?: number
-    }
-    const faellig =
-      typeof payload.faellig_in_tagen === 'number'
-        ? new Date(Date.now() + payload.faellig_in_tagen * 86400000)
-        : undefined
-    const { task_id } = await createLinkedTask({
-      titel: payload.titel ?? 'AI-Vorschlag',
-      beschreibung: payload.beschreibung,
-      prioritaet: payload.prioritaet ? PRIO_MAP[payload.prioritaet] : undefined,
-      empfaenger_rolle: (p.ziel_rolle as string | null) ?? undefined,
-      fall_id: p.claim_id as string,
-      faellig_am: faellig,
-      trigger_event: 'ai_orchestrator_vorschlag',
-    })
+    const payload = (p.payload ?? {}) as TaskProposalPayload
+    const { task_id } = await buildTaskFromProposal(
+      payload,
+      p.ziel_rolle as string | null,
+      p.claim_id as string,
+      'ai_orchestrator_vorschlag',
+    )
     if (!task_id) return { ok: false, error: 'Task-Erstellung fehlgeschlagen' }
   }
 
