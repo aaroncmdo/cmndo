@@ -2,7 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
-import type { PartnerBillingAggregat } from '@/lib/finance/partner-billing'
+import type { PartnerBillingAggregat, PartnerBillingRow } from '@/lib/finance/partner-billing'
+import { werkstattStartUrl } from '@/lib/start-link/werkstatt-start-url'
+import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 
 // Loader fuer die Admin-Werkstatt-Detailseite. Reine Reads (kein DDL), Admin-gegated
 // durch die Page. v_werkstatt_auftrag ist RLS-is_staff()-gegated -> Admin liest legitim
@@ -60,14 +62,28 @@ export interface WerkstattNotiz {
   created_at: string
 }
 
+export interface WerkstattBilling {
+  rows: PartnerBillingRow[]
+  aggregat: PartnerBillingAggregat
+  istKleinunternehmer: boolean | null
+  steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null } | null
+  gutschriftLedgerKeys: string[]
+}
+
 export interface WerkstattDetail {
   werkstatt: WerkstattDetailStammdaten
   staffel: { schwelle: number; bonus_betrag_netto: number }[]
   auftraege: WerkstattDetailAuftrag[]
   lastSignInAt: string | null
   forcePasswordChange: boolean | null
-  billing: PartnerBillingAggregat | null
+  billing: WerkstattBilling | null
   notizen: WerkstattNotiz[]
+  // QR: regulaerer Kunden-Einstiegs-QR (/start/werkstatt/<id>) — server-generiert,
+  // damit die Detailseite ihn ohne Client-Action-Call inline zeigt.
+  qrUrl: string
+  qrSvg: string
+  // Aktuell zugewiesener physischer Pool-QR-Sticker-Code (falls vorhanden).
+  zugewiesenerPoolCode: string | null
 }
 
 export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail | null> {
@@ -113,16 +129,33 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
 
   const billing = await ladePartnerBilling('werkstatt', id)
 
-  // Interne Notizen (Tabelle nicht in database.types -> untypisierter Client-Cast, damit
-  // wir das geteilte database.types.ts nicht anfassen muessen). Service-Role-Read ist ok:
-  // die Page ist admin-gegated, RLS gatet zusaetzlich auf is_staff().
-  const notizenDb = createAdminClient() as unknown as SupabaseClient
-  const { data: notizenData } = await notizenDb
-    .from('werkstatt_notizen')
-    .select('id, text, autor_name, created_at')
-    .eq('werkstatt_id', id)
-    .order('created_at', { ascending: false })
-    .limit(50)
+  // QR-Code (regulaerer Kunden-Einstieg /start/werkstatt/<id>) mit den reinen Server-Utils
+  // direkt generieren — bewusst NICHT die 'use server'-Action werkstattQrSvg (die ist fuer
+  // Client-On-Demand-Calls gedacht; ein Server-Loader nutzt die Primitives, kein
+  // Action-Call-waehrend-des-Renders). generateQrCodeSvg ist eine reine, render-sichere Util.
+  const qrUrl = werkstattStartUrl(id)
+  const qrSvg = await generateQrCodeSvg(qrUrl, 300)
+
+  // Interne Notizen + aktuell zugewiesener Pool-QR-Code — beide ueber einen
+  // untypisierten Service-Role-Client (werkstatt_notizen nicht in database.types;
+  // werkstatt_qr_pool ist service-role-only). Die Page ist admin-gegated, RLS gatet
+  // Notizen zusaetzlich auf is_staff().
+  const adminDb = createAdminClient() as unknown as SupabaseClient
+  const [notizenRes, poolRes] = await Promise.all([
+    adminDb
+      .from('werkstatt_notizen')
+      .select('id, text, autor_name, created_at')
+      .eq('werkstatt_id', id)
+      .order('created_at', { ascending: false })
+      .limit(50),
+    adminDb
+      .from('werkstatt_qr_pool')
+      .select('token')
+      .eq('werkstatt_id', id)
+      .eq('status', 'zugewiesen')
+      .limit(1),
+  ])
+  const zugewiesenerPoolCode = (poolRes.data as { token: string }[] | null)?.[0]?.token ?? null
 
   return {
     werkstatt: w as unknown as WerkstattDetailStammdaten,
@@ -130,7 +163,18 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
     auftraege: (auftragRes.data ?? []) as unknown as WerkstattDetailAuftrag[],
     lastSignInAt,
     forcePasswordChange,
-    billing: billing.ok ? billing.aggregat : null,
-    notizen: (notizenData ?? []) as unknown as WerkstattNotiz[],
+    billing: billing.ok
+      ? {
+          rows: billing.rows,
+          aggregat: billing.aggregat,
+          istKleinunternehmer: billing.istKleinunternehmer,
+          steuerdaten: billing.steuerdaten,
+          gutschriftLedgerKeys: billing.gutschriftLedgerKeys,
+        }
+      : null,
+    notizen: (notizenRes.data ?? []) as unknown as WerkstattNotiz[],
+    qrUrl,
+    qrSvg,
+    zugewiesenerPoolCode,
   }
 }
