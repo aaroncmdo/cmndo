@@ -28,7 +28,7 @@ export async function ArticleComments({ articleSlug }: { articleSlug: string }) 
         Kommentare {comments.length > 0 && <span className="text-claimondo-shield">({comments.length})</span>}
       </h2>
 
-      <CommentForm slug={articleSlug} isLoggedIn={state.isLoggedIn} hasUsername={!!state.username} />
+      <CommentForm slug={articleSlug} isLoggedIn={state.isLoggedIn} hasUsername={!!state.username} username={state.username} />
 
       <ul className="mt-6 space-y-3.5">
         {comments.length === 0 && (
