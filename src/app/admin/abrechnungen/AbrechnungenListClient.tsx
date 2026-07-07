@@ -61,14 +61,14 @@ function statusBadge(row: Row): { label: string; bg: string; text: string; dot: 
   if (row.bezahlt_am) return { label: 'Bezahlt', bg: 'bg-success-soft', text: 'text-success-strong', dot: 'bg-success' }
   if (row.status === 'fehlgeschlagen' || row.einzug_fehler) return { label: 'Fehlgeschlagen', bg: 'bg-danger-soft', text: 'text-danger-strong', dot: 'bg-danger' }
   if (row.status === 'im_einzug') return { label: 'Im Einzug', bg: 'bg-info-soft', text: 'text-info-strong', dot: 'bg-info' }
-  if (isFaellig(row)) return { label: 'Faellig', bg: 'bg-warning-soft', text: 'text-warning-strong', dot: 'bg-warning' }
+  if (isFaellig(row)) return { label: 'Fällig', bg: 'bg-warning-soft', text: 'text-warning-strong', dot: 'bg-warning' }
   if (row.status === 'versendet') return { label: 'Versendet', bg: 'bg-claimondo-bg', text: 'text-claimondo-ondo', dot: 'bg-claimondo-bg0' }
   return { label: 'Offen', bg: 'bg-warning-soft', text: 'text-warning-strong', dot: 'bg-warning' }
 }
 
 const FILTER_TABS: { key: FilterKey; label: string }[] = [
   { key: 'offen', label: 'Offen' },
-  { key: 'faellig', label: 'Faellig' },
+  { key: 'faellig', label: 'Fällig' },
   { key: 'im_einzug', label: 'Im Einzug' },
   { key: 'fehlgeschlagen', label: 'Fehlgeschlagen' },
   { key: 'bezahlt', label: 'Bezahlt' },
