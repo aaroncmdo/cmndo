@@ -509,7 +509,11 @@ export default async function GutachterFallPage({
   // lead.adresse die Wohnadresse — drei klar getrennte Bedeutungen.
   const besichtigungsAdresse = (fall.besichtigungsort_adresse as string | null) ?? null
 
-  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
+  // Realer KB-Anforderungs-Wert ist 'beauftragt' (prozess.ts / process-event.ts; die
+  // Stellungnahme-Seite gated ebenfalls auf 'beauftragt'). 'angefordert' existiert für
+  // technische_stellungnahme_status NICHT (das ist nachbesichtigung_status) → vorher feuerte
+  // der Banner nie und die #3729-„Stellungnahme einreichen"-CTA war in Prod tot. (Golden-Path-E2E)
+  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'beauftragt'
   const nachbesichtigungAktiv =
     (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
     (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
