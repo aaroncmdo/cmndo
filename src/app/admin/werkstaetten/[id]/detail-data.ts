@@ -14,6 +14,8 @@ export interface WerkstattDetailAuftrag {
   richtung: string | null
   operative_status: string | null
   reparatur_termin_status: string | null
+  reparatur_wunschtermin: string | null
+  reparatur_bestaetigter_termin: string | null
   gutachten_fertiggestellt_am: string | null
   gutachten_totalschaden: boolean | null
   besichtigung_start: string | null
@@ -86,7 +88,7 @@ export async function ladeWerkstattDetail(id: string): Promise<WerkstattDetail |
     supabase
       .from('v_werkstatt_auftrag')
       .select(
-        'claim_id, claim_nummer, richtung, operative_status, reparatur_termin_status, gutachten_fertiggestellt_am, gutachten_totalschaden, besichtigung_start, provision_betrag_netto, provision_status, fahrzeug_hersteller, fahrzeug_modell, kennzeichen',
+        'claim_id, claim_nummer, richtung, operative_status, reparatur_termin_status, reparatur_wunschtermin, reparatur_bestaetigter_termin, gutachten_fertiggestellt_am, gutachten_totalschaden, besichtigung_start, provision_betrag_netto, provision_status, fahrzeug_hersteller, fahrzeug_modell, kennzeichen',
       )
       .eq('werkstatt_id', id)
       .order('besichtigung_start', { ascending: false, nullsFirst: false }),

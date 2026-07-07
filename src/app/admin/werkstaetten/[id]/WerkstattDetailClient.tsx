@@ -58,6 +58,32 @@ function Feld({ label, wert }: { label: string; wert: string }) {
   )
 }
 
+function Kennzahl({ label, wert }: { label: string; wert: string }) {
+  return (
+    <div className="rounded-ios-md bg-claimondo-bg px-3 py-2">
+      <p className="text-body-xs text-claimondo-ondo">{label}</p>
+      <p className="text-body font-semibold text-claimondo-navy tabular-nums">{wert}</p>
+    </div>
+  )
+}
+
+function terminDatum(iso: string | null): string {
+  return iso
+    ? new Date(iso).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '—'
+}
+const REP_TERMIN_LABEL: Record<string, string> = {
+  angefragt: 'Angefragt',
+  anruf_erbeten: 'Anruf erbeten',
+  bestaetigt: 'Bestätigt',
+  erledigt: 'Erledigt',
+  abgelehnt: 'Abgelehnt',
+  storniert: 'Storniert',
+}
+function reparaturTerminLabel(s: string | null): string {
+  return s ? REP_TERMIN_LABEL[s] ?? s : '—'
+}
+
 function EditFeld({
   label,
   value,
@@ -102,6 +128,12 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
 
   const onboarding = leiteOnboardingStatus({ hatLogin: !!w.user_id, forcePasswordChange, lastSignInAt })
   const abrechnungPosten = billing ? Object.entries(billing.perStatus) : []
+  const provisionSumme = auftraege.reduce((s, a) => s + (a.provision_betrag_netto ?? 0), 0)
+  const ausgezahltNetto = billing?.perStatus['auszahlung:erledigt']?.netto ?? 0
+  const termine = auftraege
+    .map((a) => ({ a, terminAt: a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin }))
+    .filter((t) => !!t.terminAt)
+    .sort((x, y) => (x.terminAt ?? '').localeCompare(y.terminAt ?? ''))
   const adresse =
     [w.adresse_strasse, [w.adresse_plz, w.adresse_ort].filter(Boolean).join(' ')].filter(Boolean).join(', ') || '—'
 
@@ -261,6 +293,14 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
         <p className="text-body-sm text-claimondo-ondo mt-1">Aktiviert am {datum(w.aktiviert_am)}</p>
       </div>
 
+      {/* Kennzahlen */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <Kennzahl label="Aufträge/Vermittlungen" wert={String(auftraege.length)} />
+        <Kennzahl label="Termine geplant" wert={String(termine.length)} />
+        <Kennzahl label="Provision (netto)" wert={euro(provisionSumme)} />
+        <Kennzahl label="Ausgezahlt (netto)" wert={euro(ausgezahltNetto)} />
+      </div>
+
       {/* Zugang & Onboarding */}
       <SectionCard title="Zugang & Onboarding">
         <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -354,6 +394,32 @@ export default function WerkstattDetailClient({ detail }: { detail: WerkstattDet
                   </Tr>
                 )
               })}
+            </Tbody>
+          </Table>
+        )}
+      </SectionCard>
+
+      {/* Reparatur-Termine (aus den Aufträgen abgeleitet, nach Datum) */}
+      <SectionCard title={`Termine — ${termine.length} geplant`}>
+        {termine.length === 0 ? (
+          <p className="text-body-sm text-claimondo-ondo">Keine geplanten Termine.</p>
+        ) : (
+          <Table>
+            <Thead>
+              <Tr>
+                <Th>Datum</Th>
+                <Th>Fall</Th>
+                <Th>Status</Th>
+              </Tr>
+            </Thead>
+            <Tbody>
+              {termine.map(({ a, terminAt }) => (
+                <Tr key={a.claim_id}>
+                  <Td>{terminDatum(terminAt)}</Td>
+                  <Td className="font-mono">{a.claim_nummer ?? '—'}</Td>
+                  <Td>{reparaturTerminLabel(a.reparatur_termin_status)}</Td>
+                </Tr>
+              ))}
             </Tbody>
           </Table>
         )}
