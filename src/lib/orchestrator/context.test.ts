@@ -28,6 +28,22 @@ describe('summarizeClaimForPrompt', () => {
     expect(typeof s).toBe('string')
     expect(s.length).toBeGreaterThan(0)
   })
+  it('rendert die Sektion „Bereits vorgeschlagen" wenn Verlauf existiert', () => {
+    const s = summarizeClaimForPrompt({
+      ...ctx,
+      bereitsVorgeschlagen: [
+        { typ: 'task', haupttext: 'Kunde anrufen', status: 'verworfen', feedback: 'schon erledigt' },
+      ],
+    })
+    expect(s).toContain('Bereits vorgeschlagen')
+    expect(s).toContain('Kunde anrufen')
+    expect(s).toContain('verworfen')
+    expect(s).toContain('schon erledigt')
+  })
+  it('lässt die Sektion weg wenn kein Verlauf', () => {
+    const s = summarizeClaimForPrompt({ ...ctx, bereitsVorgeschlagen: [] })
+    expect(s).not.toContain('Bereits vorgeschlagen')
+  })
 })
 
 describe('proposalHaupttext', () => {

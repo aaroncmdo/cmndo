@@ -30,12 +30,25 @@ export function summarizeClaimForPrompt(ctx: ClaimContext): string {
     ? ctx.kurzverlauf.map((v) => `- ${v}`).join('\n')
     : '- (kein Verlauf)'
 
-  return [
+  const vorgeschlagen = ctx.bereitsVorgeschlagen.length
+    ? ctx.bereitsVorgeschlagen
+        .map(
+          (v) =>
+            `- [${v.status}${v.feedback ? `: ${v.feedback}` : ''}] ${v.haupttext} (${v.typ})`,
+        )
+        .join('\n')
+    : null
+
+  const teile = [
     `Fall ${ctx.claimId} — Status: ${ctx.status ?? 'unbekannt'}, Phase: ${ctx.phase ?? 'unbekannt'}.`,
     `Fahrzeug: ${ctx.fahrzeug ?? 'unbekannt'}. Seit ${ctx.tageInaktiv} Tagen keine Aktivität.`,
     `Offene Tasks:\n${tasks}`,
     `Letzte Ereignisse:\n${verlauf}`,
-  ].join('\n\n')
+  ]
+  if (vorgeschlagen) {
+    teile.push(`Bereits vorgeschlagen (NICHT wiederholen):\n${vorgeschlagen}`)
+  }
+  return teile.join('\n\n')
 }
 
 /**
