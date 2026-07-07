@@ -63,4 +63,19 @@ describe('LeadNextBestAction (Render-Tree)', () => {
     expect(collectStrings(node)).toContain('Abgeschlossen')
     expect(containsType(node, ButtonMock)).toBe(false)
   })
+
+  it('flowlink_senden (unter den Tabs): CTA jetzt vorhanden — Phase 1d schliesst die Guidance-Luecke', () => {
+    const node = render('flowlink_senden')
+    expect(collectStrings(node)).toContain('FlowLink senden')
+    expect(containsType(node, ButtonMock)).toBe(true)
+  })
+
+  it('alle Nicht-terminal-Zustaende rendern einen CTA (kein Zustand faellt auf Guidance-only zurueck)', () => {
+    const states: LeadWorkflowState[] = [
+      'neu', 'qualifizieren', 'sv_zuweisen', 'flowlink_senden', 'nachfassen', 'warten', 'rueckruf',
+    ]
+    for (const s of states) {
+      expect(containsType(render(s), ButtonMock), `${s} sollte einen CTA-Button rendern`).toBe(true)
+    }
+  })
 })
