@@ -8,8 +8,9 @@ import Link from 'next/link'
 import { FolderOpenIcon, CheckSquareIcon, MessageCircleIcon, AlertCircleIcon, CalendarIcon, PhoneCallIcon } from 'lucide-react'
 import { StatBar } from '@/components/shared/StatBar'
 import { Panel } from '@/components/shared/Panel'
-import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 import { cn } from '@/lib/utils'
+import { getMyClaimWorkItems } from '@/lib/ops/get-claim-workitems'
+import MeineArbeitBoard from '@/components/mitarbeiter/MeineArbeitBoard'
 
 export const dynamic = 'force-dynamic'
 
@@ -49,13 +50,16 @@ export default async function MitarbeiterDashboard() {
   const vorname = (profile?.vorname as string | null) ?? null
 
   // CMM-47 B-Rest: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  const { data: faelle, count: faelleCount } = await supabase
+  // Board ersetzt die flache Liste; nur Count fuer StatBar + Panel-Header benoetigt.
+  const { count: faelleCount } = await supabase
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, sub_phase, kennzeichen, fall_created_at, lead_id', { count: 'exact' })
+    .select('fall_id', { count: 'exact', head: true })
     .eq('kundenbetreuer_id', user.id)
     .neq('main_phase', 'abschluss')
-    .order('fall_created_at', { ascending: false })
-    .limit(8)
+
+  // Work-Items fuer das Board (v_claim_workstate im User-Kontext, RLS greift).
+  const workItemsRes = await getMyClaimWorkItems(supabase, { kundenbetreuerId: user.id })
+  const workItems = workItemsRes.ok ? workItemsRes.items : []
 
   // Offene Tasks — eigene ODER unassigned KB-Broadcast-Tasks (Dashboard-Audit 29.06.).
   const { data: tasks, count: tasksCount } = await supabase
@@ -257,19 +261,9 @@ export default async function MitarbeiterDashboard() {
         {/* Arbeit — Fälle + Tasks */}
         <div className="space-y-5 lg:order-1">
           <Panel title="Meine Fälle" count={faelleCount ?? 0} actionLabel="Alle anzeigen →" actionHref="/mitarbeiter/faelle">
-            {(faelle ?? []).length === 0 ? (
-              <p className="px-4 py-8 text-center text-body-sm text-claimondo-ondo/70">Keine aktiven Fälle</p>
-            ) : (
-              (faelle ?? []).map((f) => (
-                <Link key={f.fall_id as string} href={`/faelle/${f.fall_id}`} className="flex items-center justify-between gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg">
-                  <div className="min-w-0">
-                    <p className="truncate font-mono text-body-sm font-medium text-claimondo-navy">{f.claim_nummer ?? (f.fall_id as string).slice(0, 8)}</p>
-                    <p className="truncate text-body-xs text-claimondo-ondo">{f.kennzeichen ?? '—'}</p>
-                  </div>
-                  <FallPhaseBadge subPhase={f.sub_phase} size="sm" className="shrink-0" />
-                </Link>
-              ))
-            )}
+            <div className="p-3">
+              <MeineArbeitBoard items={workItems} />
+            </div>
           </Panel>
 
           <Panel title="Offene Tasks" count={tasksCount ?? 0} actionLabel="Alle anzeigen →" actionHref="/mitarbeiter/tasks">
