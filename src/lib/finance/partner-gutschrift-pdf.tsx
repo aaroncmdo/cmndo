@@ -16,6 +16,7 @@ import type { RechnungsKonfig } from '@/lib/billing/get-rechnungs-konfig'
 export type PartnerGutschriftPdfInput = {
   gutschrift_nr: string
   erstellt_am: string          // ISO; issue date
+  leistung_datum: string | null // ISO date (YYYY-MM-DD) or null; §14 Abs. 4 Nr. 6 UStG
   leistung_text: string
   betrag_netto: number         // EUROS (row stores euros, not cents)
   ust_satz: number | null      // percentage (e.g. 19 / 0 / null)
@@ -28,6 +29,7 @@ export type PartnerGutschriftPdfInput = {
     adresse_ort: string | null
     ust_id: string | null
     ist_kleinunternehmer: boolean | null
+    bank_iban: string | null
   }
   aussteller_snapshot: RechnungsKonfig   // full konfig (after step 0)
 }
@@ -52,6 +54,7 @@ export type GutschriftViewModel = {
   hinweisParagraph: string
   nummer: string
   datum: string
+  leistungszeitraum: string
   empfaenger: string[]
   position: { text: string; netto: string }
   istKleinunternehmer: boolean
@@ -78,6 +81,12 @@ function fmtDate(iso: string): string {
     month: '2-digit',
     year: 'numeric',
   })
+}
+
+/** Formats a raw IBAN string into 4-character groups separated by spaces. */
+function formatIban(raw: string): string {
+  const stripped = raw.replace(/\s+/g, '')
+  return stripped.match(/.{1,4}/g)?.join(' ') ?? stripped
 }
 
 // ─── Pure view-model builder (unit-testable, no PDF primitives) ───────────────
@@ -113,11 +122,25 @@ export function buildGutschriftViewModel(
         brutto: formatEur(input.betrag_brutto),
       }
 
+  // Leistungszeitraum: §14 Abs. 4 Nr. 6 UStG — Kalendermonat genuegt (§31 Abs. 4 UStDV)
+  const leistungszeitraum = input.leistung_datum
+    ? new Date(input.leistung_datum).toLocaleDateString('de-DE', {
+        month: 'long',
+        year: 'numeric',
+      })
+    : 'Leistungsdatum entspricht dem Ausstellungsdatum'
+
+  // Auszahlungs-Hinweis: IBAN-aware wenn Empfaenger-IBAN im Snapshot hinterlegt
+  const auszahlungHinweis = snap.bank_iban
+    ? `Die Auszahlung erfolgt auf IBAN ${formatIban(snap.bank_iban)}.`
+    : 'Die Auszahlung erfolgt auf das bei Claimondo hinterlegte Bankkonto.'
+
   return {
     titel: 'Gutschrift',
     hinweisParagraph: 'Gutschrift im Sinne des §14 Abs. 2 UStG',
     nummer: input.gutschrift_nr,
     datum: fmtDate(input.erstellt_am),
+    leistungszeitraum,
     empfaenger,
     position: {
       text: input.leistung_text,
@@ -125,8 +148,7 @@ export function buildGutschriftViewModel(
     },
     istKleinunternehmer,
     summe,
-    auszahlungHinweis:
-      'Die Auszahlung erfolgt auf das bei Claimondo hinterlegte Bankkonto.',
+    auszahlungHinweis,
   }
 }
 
@@ -240,6 +262,10 @@ function PartnerGutschriftPdf({ input }: { input: PartnerGutschriftPdfInput }) {
           <View style={s.metaBlock}>
             <Text style={s.metaLabel}>Datum</Text>
             <Text style={s.metaValue}>{vm.datum}</Text>
+          </View>
+          <View style={s.metaBlock}>
+            <Text style={s.metaLabel}>Leistungszeitraum</Text>
+            <Text style={s.metaValue}>{vm.leistungszeitraum}</Text>
           </View>
         </View>
 
