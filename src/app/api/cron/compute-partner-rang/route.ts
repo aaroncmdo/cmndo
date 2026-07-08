@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ladeSvKandidaten, ladeMaklerKandidaten, type Kandidat } from '@/lib/partner-rang/signals'
 import { computePartnerStrength } from '@/lib/partner-rang/compute'
@@ -13,8 +14,7 @@ import { ladeRangConfig } from '@/lib/partner-rang/config-loader'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const supabase = createAdminClient()

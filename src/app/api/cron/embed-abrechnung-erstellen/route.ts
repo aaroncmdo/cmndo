@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
 import { EMBED_DESCRIPTOR } from '@/lib/abrechnung/descriptors/embed'
@@ -36,8 +37,7 @@ export const dynamic = 'force-dynamic'
  * embed_abrechnung_positionen sind der Rechnungs-Record.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
