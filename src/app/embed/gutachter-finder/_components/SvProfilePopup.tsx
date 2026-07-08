@@ -14,6 +14,7 @@
 import { ShieldCheck, MapPin, Clock } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { PartnerRangBadge } from '@/components/shared/PartnerRangBadge'
 import type { AktiverSVPublic } from '@/lib/actions/gutachter-finder-actions'
 import { GlassSurface } from './GlassSurface'
 
@@ -107,6 +108,9 @@ export function SvProfileInhalt({ sv, gross = false }: { sv: AktiverSVPublic; gr
           </div>
         </div>
       </div>
+
+      {/* Partner-Tier-Badge (verdienter Rang) — ehrliches Trust-/Wahl-Signal */}
+      {sv.rang && <PartnerRangBadge tier={sv.rang} sinnsatz={sv.rangSinnsatz} />}
 
       {/* Bewertung + Einsatzgebiet */}
       {(hatBewertung || sv.umkreis_km !== null) && (
