@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // C (AAR-audit-trusted-devices): Purge abgelaufener + alt-widerrufener Trusted-
@@ -8,8 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 //
 // Auth: Authorization: Bearer ${CRON_SECRET}. VPS-Crontab: 1x taeglich.
 export async function GET(request: NextRequest) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

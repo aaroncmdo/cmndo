@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 
@@ -17,8 +18,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 //   offenen Fälle — NICHT termin-gebunden.
 // Dieser Cron adressiert explizit die 24h-vor-Termin-Situation aus AAR-354.
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchFeedItems } from '@/lib/linkedin/feed-source'
 import { selectNextUnposted } from '@/lib/linkedin/select-next'
 import { composePost } from '@/lib/linkedin/compose'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const orgId = process.env.LINKEDIN_ORG_ID

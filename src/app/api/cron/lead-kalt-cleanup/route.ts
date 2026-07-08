@@ -1,15 +1,8 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
-
-// Vercel/VPS-Cron sendet `Authorization: Bearer ${CRON_SECRET}`. Wie die anderen
-// Cron-Routen pruefen wir das Header, damit der Endpoint nicht oeffentlich ist.
-function authorize(request: Request): boolean {
-  const expected = process.env.CRON_SECRET
-  if (!expected) return true // dev-Mode ohne Secret zulassen
-  return request.headers.get('authorization') === `Bearer ${expected}`
-}
 
 // #lead-hygiene: Taeglicher Cron. Schliesst offene Leads, die STALE_TAGE ohne
 // Abschluss stallen, auf 'kalt' (beide Lifecycle-Achsen status + qualifizierungs_phase).
@@ -23,7 +16,7 @@ const STALE_TAGE = 30
 const MAX_PRO_LAUF = 200 // Runaway-Schutz: mehr -> Anomalie, wird geloggt
 
 export async function GET(request: Request) {
-  if (!authorize(request)) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
