@@ -7,6 +7,7 @@ function makeEntry(overrides: Partial<FeedEntry> & { createdAt: string; id: stri
     title: null,
     body: 'test body',
     authorDisplay: 'Test Autor',
+    rang: null,
     isRedaktion: false,
     tags: [],
     likeCount: 0,
