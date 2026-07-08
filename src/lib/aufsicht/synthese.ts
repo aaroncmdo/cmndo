@@ -6,9 +6,9 @@
 
 import { createHash, randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import Anthropic from '@anthropic-ai/sdk'
+import type Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
-import { logAiUsage } from '@/lib/ai/usage-log'
+import { callForProposals } from '@/lib/claim-ai/engine/call'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { summarizeSlaRollenLage } from '@/lib/aufsicht/sla-rollen'
 import type { SlaRollenLage } from '@/lib/aufsicht/sla-rollen'
@@ -181,39 +181,20 @@ export async function persistAufsichtRemediation(
  */
 export async function laufeSlaAufsicht(lage: SlaRollenLage): Promise<{ findings: number }> {
   const model = AI_MODELS.ki_aufsicht
-  let res: Anthropic.Message
 
-  try {
-    // Konstruktor im try: fehlt ANTHROPIC_API_KEY, wirft er — dann sauber 0.
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    res = await client.messages.create({
-      model,
-      max_tokens: 4000,
-      system: AUFSICHT_SYSTEM,
-      tools: AUFSICHT_TOOLS,
-      messages: [{ role: 'user', content: summarizeSlaRollenLage(lage) }],
-    })
-  } catch (err) {
-    console.error('[ki_aufsicht] Anthropic-Call fehlgeschlagen:', err)
-    return { findings: 0 }
-  }
-
-  // Usage-Log: non-critical, darf nie den Haupt-Flow blockieren.
-  try {
-    await logAiUsage({
-      endpoint: 'ki_aufsicht',
-      model,
-      fallId: null, // Batch-Call ohne spezifischen Fall
-      usage: {
-        input_tokens: res.usage.input_tokens,
-        output_tokens: res.usage.output_tokens,
-      },
-    })
-  } catch {
-    // Bewusst swallowed — usage-log non-critical.
-  }
-
-  const drafts = extractAufsichtDrafts(res.content)
+  // SP2-Konvergenz P4: geteilte Engine statt inline-Anthropic-Block. callForProposals
+  // kapselt Client-Konstruktor + messages.create + Usage-Log + Fehler->[] (byte-identisch);
+  // extractAufsichtDrafts bleibt die layer-spezifische Extraktion, maxTokens=4000 (Prod-Fix).
+  const drafts = await callForProposals({
+    model,
+    system: AUFSICHT_SYSTEM,
+    tools: AUFSICHT_TOOLS,
+    userContent: summarizeSlaRollenLage(lage),
+    maxTokens: 4000,
+    logEndpoint: 'ki_aufsicht',
+    logFallId: null,
+    extract: extractAufsichtDrafts,
+  })
   if (!drafts.length) return { findings: 0 }
 
   const ids = await persistAufsichtRemediation(model, drafts)
