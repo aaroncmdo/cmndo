@@ -2,6 +2,7 @@
 // Shared helper: Admin-Approve + Auto-Graduierung erzeugen exakt denselben Task.
 
 import { createLinkedTask } from '@/lib/tasks/create-task'
+import { createAdminClient } from '@/lib/supabase/admin'
 import type { TaskPrioritaet } from '@/lib/tasks/types'
 import type { TaskProposalPayload } from './types'
 
@@ -23,6 +24,22 @@ export type TaskFromProposalParams = {
   fall_id: string
   faellig_am?: Date
   trigger_event: string
+  empfaenger_user_id?: string | null
+}
+
+/**
+ * Fall-Owner fuer die Zielrolle: KB-Tasks an den betreuenden KB, SV-Tasks an
+ * den zugewiesenen SV. Andere Rollen (admin) haben keinen Einzel-Owner → null
+ * (Caller faellt auf das Least-Loaded-Auto-Assign in createLinkedTask zurueck).
+ * Pure — kein DB-Zugriff.
+ */
+export function assigneeFromClaim(
+  claim: { kundenbetreuer_id: string | null; sv_id: string | null },
+  zielRolle: string | null,
+): string | null {
+  if (zielRolle === 'kundenbetreuer') return claim.kundenbetreuer_id ?? null
+  if (zielRolle === 'sachverstaendiger') return claim.sv_id ?? null
+  return null
 }
 
 /**
@@ -34,12 +51,14 @@ export function mapProposalToTaskParams(
   zielRolle: string | null,
   claimId: string,
   triggerEvent: string,
+  empfaengerUserId?: string | null,
 ): TaskFromProposalParams {
   return {
     titel: payload.titel ?? 'AI-Vorschlag',
     beschreibung: payload.beschreibung,
     prioritaet: payload.prioritaet ? PRIO_MAP[payload.prioritaet] : undefined,
     empfaenger_rolle: zielRolle ?? undefined,
+    empfaenger_user_id: empfaengerUserId ?? undefined,
     fall_id: claimId,
     faellig_am:
       typeof payload.faellig_in_tagen === 'number'
@@ -60,5 +79,27 @@ export async function buildTaskFromProposal(
   claimId: string,
   triggerEvent: string,
 ): Promise<{ task_id: string | null }> {
-  return createLinkedTask(mapProposalToTaskParams(payload, zielRolle, claimId, triggerEvent))
+  // Owner-Routing: Task an den Fall-Owner der Zielrolle (KB/SV). Fallback auf
+  // das Least-Loaded-Auto-Assign in createLinkedTask (kein Owner / Load-Fehler).
+  // Non-critical — der Task entsteht in jedem Fall.
+  let empfaengerUserId: string | null = null
+  try {
+    const db = createAdminClient()
+    const { data: claim } = await db
+      .from('claims')
+      .select('kundenbetreuer_id, sv_id')
+      .eq('id', claimId)
+      .maybeSingle()
+    if (claim) {
+      empfaengerUserId = assigneeFromClaim(
+        claim as { kundenbetreuer_id: string | null; sv_id: string | null },
+        zielRolle,
+      )
+    }
+  } catch {
+    // Owner-Load fehlgeschlagen → Fallback Auto-Assign.
+  }
+  return createLinkedTask(
+    mapProposalToTaskParams(payload, zielRolle, claimId, triggerEvent, empfaengerUserId),
+  )
 }
