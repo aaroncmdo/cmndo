@@ -3,7 +3,7 @@
 // NIE unhandled werfen — alle Fehler werden gefangen und geloggt.
 import Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
-import { logAiUsage } from '@/lib/ai/usage-log'
+import { callForProposals } from '@/lib/claim-ai/engine/call'
 import type { ClaimContext, ProposalDraft } from './types'
 import { GRADUATION } from './types'
 import { summarizeClaimForPrompt } from './context'
@@ -41,36 +41,18 @@ export function extractProposalsFromToolUse(content: Anthropic.ContentBlock[]): 
  */
 export async function reviewClaim(ctx: ClaimContext): Promise<number> {
   const model = AI_MODELS.claim_orchestrator
-  let res: Anthropic.Message
-  try {
-    // Konstruktor im try: fehlt ANTHROPIC_API_KEY, wirft er — dann sauber 0 statt unhandled.
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    res = await client.messages.create({
-      model,
-      max_tokens: 1024,
-      system: SYSTEM,
-      tools: ORCHESTRATOR_TOOLS,
-      messages: [{ role: 'user', content: summarizeClaimForPrompt(ctx) }],
-    })
-  } catch (err) {
-    console.error('[orchestrator] Anthropic-Call fehlgeschlagen:', err)
-    return 0
-  }
-  // Usage-Log: non-critical, darf nie den Haupt-Flow blockieren.
-  try {
-    await logAiUsage({
-      endpoint: 'claim_orchestrator',
-      model,
-      fallId: ctx.fallId ?? null,
-      usage: {
-        input_tokens: res.usage.input_tokens,
-        output_tokens: res.usage.output_tokens,
-      },
-    })
-  } catch {
-    // bewusst swallowed — usage-log non-critical
-  }
-  const drafts = extractProposalsFromToolUse(res.content)
+  // SP2-Konvergenz P1: geteilte Engine (callForProposals) statt inline Anthropic-
+  // Call — byte-identisch (Konstruktor-im-try + non-critical Usage-Log + Fehler→[]).
+  const drafts = await callForProposals({
+    model,
+    system: SYSTEM,
+    tools: ORCHESTRATOR_TOOLS,
+    userContent: summarizeClaimForPrompt(ctx),
+    maxTokens: 1024,
+    logEndpoint: 'claim_orchestrator',
+    logFallId: ctx.fallId ?? null,
+    extract: extractProposalsFromToolUse,
+  })
   const killSwitch = isKillSwitchOn()
   let autoCount = 0
   const offeneDrafts: ProposalDraft[] = []
