@@ -8,6 +8,7 @@ import EmptyState from '@/components/shared/EmptyState'
 import { Panel } from '@/components/shared/Panel'
 import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
 import FestgefahreneFaelleCard from '@/components/dispatch/FestgefahreneFaelleCard'
+import { LeadPipelinePanel } from './_components/LeadPipelinePanel'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
 import { ladeFestgefahreneFaelle } from '@/lib/sla/festgefahrene-faelle'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
@@ -203,6 +204,9 @@ export default async function DispatchDashboard() {
       {/* Festgefahrene Fälle (Aaron 03.07., Option B): SLA-verletzte Claims, die
           operativ haengen — prominent oben, jede Zeile klickbar in die Lead-Maske. */}
       {festgefahrene.length > 0 && <FestgefahreneFaelleCard items={festgefahrene} />}
+
+      {/* Ops-Cockpit Phase 3b: Lead-Pipeline — aktive Leads nach abgeleitetem Arbeitszustand. */}
+      <LeadPipelinePanel />
 
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
       <Panel
