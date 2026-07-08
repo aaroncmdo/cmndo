@@ -29,6 +29,7 @@ export type VertriebKontaktRow = {
   roh_portal_zugang: boolean | null // sv.portal_zugang_freigeschaltet
   roh_onboarding_offen: boolean | null // sv: !vertrag ∨ verif-offen ; makler/ws: !onboarding_abgeschlossen
   roh_warteliste: string | null // sv_leads.warteliste_status/claim_status
+  notizen: string | null // P2.1: vereinheitlichtes Notizen-Feld (sv.notizen / partner_leads.notiz / …)
 }
 
 export type VertriebKontakt = VertriebKontaktRow & { stufe: VertriebStufe }
