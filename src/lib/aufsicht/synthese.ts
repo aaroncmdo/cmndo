@@ -182,6 +182,24 @@ export async function persistAufsichtRemediation(
   return ids
 }
 
+/**
+ * Loescht un-actioned (status='offen') Aufsicht-Vorschlaege des letzten Laufs.
+ * Die Aufsicht ist eine periodische Momentaufnahme des aktuellen Remediation-Bedarfs:
+ * offene Vorschlaege werden je Lauf ERSETZT (nicht akkumuliert), sonst stapelt der
+ * taegliche Cron bei Dauer-Breaches neue Vorschlaege (der partielle Unique-Index
+ * greift nicht, weil buildDedupeKey einen randomUUID-Anteil hat). Actioned
+ * (angenommen/verworfen) bleiben als Admin-Entscheidungen erhalten. Wirft nie.
+ */
+export async function clearOpenAufsichtProposals(): Promise<void> {
+  const db = createAdminClient()
+  const { error } = await db
+    .from('ai_claim_proposals')
+    .delete()
+    .eq('quelle', 'aufsicht')
+    .eq('status', 'offen')
+  if (error) console.error('[ki_aufsicht] clearOpenAufsichtProposals failed:', error.message)
+}
+
 // ---------------------------------------------------------------------------
 // laufeSlaAufsicht — Batch-Claude-Call (spiegelt reviewClaim)
 // ---------------------------------------------------------------------------
@@ -210,6 +228,10 @@ export async function laufeSlaAufsicht(lage: SlaRollenLage): Promise<{ findings:
   })
   if (!drafts.length) return { findings: 0 }
 
+  // Replace-Strategie: erst die un-actioned Vorschlaege des letzten Laufs loeschen
+  // (NUR wenn wir neue haben -> bei API-Fehler/0-Drafts bleibt die vorige Lage erhalten),
+  // dann die frischen persistieren. Verhindert taegliche Akkumulation bei Dauer-Breaches.
+  await clearOpenAufsichtProposals()
   const ids = await persistAufsichtRemediation(model, drafts)
   return { findings: ids.length }
 }
