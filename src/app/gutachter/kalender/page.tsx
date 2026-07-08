@@ -52,14 +52,20 @@ export default async function SVKalenderPage({
   // matchte 1125/1129 Zeilen NICHT -> externe CalDAV-Events waren im Kalender unsichtbar.
   const { data: cachedEvents } = await supabase
     .from('sv_kalender_events_cache')
-    .select('start_zeit, end_zeit')
+    .select('start_zeit, end_zeit, titel, source')
     .eq('profile_id', user.id)
     .gte('start_zeit', fromIso)
     .lte('start_zeit', toIso)
     .order('start_zeit')
+  // 2026-07-08: titel + source mitlesen. CalDAV-Events haben echte Titel (VEVENT SUMMARY) — die
+  // zeigen wir im Kalender statt anonym "Privat (Google)". Google-FreeBusy hat KEINEN Titel
+  // (titel=NULL) -> source unterscheidet die Fallback-Beschriftung. Aaron 2026-07-08: "Termine
+  // nicht als Privat (google) anzeigen wenn wir sie ja auslesen koennen."
   const externalBusy = (cachedEvents ?? []).map((e) => ({
     start: e.start_zeit as string,
     end: e.end_zeit as string,
+    titel: (e.titel as string | null) ?? null,
+    source: (e.source as string | null) ?? null,
   }))
 
   // KANONISCH (2026-07-07): SV-Termine aus gutachter_termine via assignee_id — NICHT

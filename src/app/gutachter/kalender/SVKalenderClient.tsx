@@ -80,8 +80,9 @@ export default function SVKalenderClient({
   standortLat?: number | null
   standortLng?: number | null
   termine?: GutachterTermin[]
-  // AAR-google-cal-drift: externe Google-Termine als geblockte Zeitfenster
-  externalBusy?: { start: string; end: string }[]
+  // AAR-google-cal-drift: externe Kalender-Events (CalDAV/Google) als geblockte Zeitfenster.
+  // titel/source seit 2026-07-08: CalDAV-Titel zeigen statt anonym "Privat (Google)".
+  externalBusy?: { start: string; end: string; titel?: string | null; source?: string | null }[]
   // AAR-864: verlegt-Slots — gedimmter „Privater Termin"-Block, blockt
   // weiter den Slot bis der Kunde entscheidet
   verlegteSlots?: { id: string; start: string; end: string }[]
@@ -294,16 +295,19 @@ export default function SVKalenderClient({
                       .map((b, idx) => {
                         const bs = new Date(b.start)
                         const be = new Date(b.end)
+                        // CalDAV-Events haben echte Titel -> anzeigen. Google-FreeBusy (titel=null)
+                        // -> "Privat (Google)"; CalDAV ohne Titel -> "Privater Termin".
+                        const busyLabel = b.titel ?? (b.source === 'google' ? 'Privat (Google)' : 'Privater Termin')
                         return (
                           <div
                             key={`busy-${idx}`}
                             className="px-2 py-1 rounded-ios-lg text-[10px] leading-tight bg-claimondo-bg text-claimondo-ondo border border-claimondo-border"
-                            title="Externer Google-Termin — blockiert"
+                            title={`${busyLabel} — blockiert`}
                           >
                             <div className="font-medium">
                               {format(bs, 'HH:mm')}–{format(be, 'HH:mm')}
                             </div>
-                            <div className="truncate">Privat (Google)</div>
+                            <div className="truncate">{busyLabel}</div>
                           </div>
                         )
                       })}
