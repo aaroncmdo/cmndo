@@ -93,8 +93,28 @@ describe('toOeffentlichesSvProfil — Daten-Leak-Schutz', () => {
     expect(Object.keys(r).sort()).toEqual([
       'bewertungAktualisiert', 'bewertungAnzahl', 'bewertungDurchschnitt',
       'distanzGerundet', 'istTopPartner', 'istWunschterminFrei',
-      'profilbeschreibung', 'profilbild', 'slots', 'svId', 'vorname',
+      'profilbeschreibung', 'profilbild', 'rang', 'rangSinnsatz', 'slots', 'svId', 'vorname',
     ])
+  })
+
+  test('rang — verdienter Tier + Sinnsatz werden projiziert; fehlend → null', () => {
+    const mit = toOeffentlichesSvProfil({
+      candidate: makeCandidate(),
+      bewertung: null,
+      profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+      slots: [],
+      rang: { tier: 'silber', sinnsatz: 'Silber-Partner · top bewertet · verifiziert' },
+    })
+    expect(mit.rang).toBe('silber')
+    expect(mit.rangSinnsatz).toBe('Silber-Partner · top bewertet · verifiziert')
+    const ohne = toOeffentlichesSvProfil({
+      candidate: makeCandidate(),
+      bewertung: null,
+      profil: { vorname: 'Thomas', avatar_url: null, profilbeschreibung: null },
+      slots: [],
+    })
+    expect(ohne.rang).toBeNull()
+    expect(ohne.rangSinnsatz).toBeNull()
   })
 
   test('leakt KEINE internen Werte (serialisiert)', () => {
