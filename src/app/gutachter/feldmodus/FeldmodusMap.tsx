@@ -21,7 +21,6 @@ import {
   MAPBOX_STYLE_STANDARD_SATELLITE,
   DEFAULT_FIELD_MAP_CONFIG,
   getMapboxLightPreset,
-  tryAddSvCar3dModel,
   type SvCar3dHandle,
   tryAddSvCarThreeJs,
   getSvCarObjUrl,
@@ -317,9 +316,12 @@ export default function FeldmodusMap({
         }
         return [10.4515, 51.1657]
       })()
-      // 2026-05-08 (C11b): wenn NEXT_PUBLIC_SV_CAR_OBJ_URL gesetzt ist,
-      // bevorzugen wir den Three.js-OBJ-Pfad. Fällt bei Fehler (404,
-      // OOM bei zu großem OBJ) auf den Mapbox-glb-Pfad zurück.
+      // 2026-07-08 (Aaron „mach den pfeil zum default"): Der Navi-Pfeil (addSvNavArrowMarker,
+      // s. svPosition-Effect) ist jetzt der DEFAULT-Marker. Das schwere 3D-Auto-glb
+      // (/3d/sv-car.glb, ~4 MB) wird NICHT mehr geladen — zu schwer fuers Mobile-Feld
+      // (Funkloch/Cellular -> Timeout/langsam). Nur wenn explizit ein leichtes OBJ via
+      // NEXT_PUBLIC_SV_CAR_OBJ_URL gesetzt ist (opt-in, aktuell nicht deployt), wird das versucht;
+      // schlaegt es fehl, bleibt der Pfeil. Kein glb-Fallback mehr.
       const objUrl = getSvCarObjUrl()
       const onCarReady = () => {
         if (svMarkerRef.current) {
@@ -328,32 +330,15 @@ export default function FeldmodusMap({
         }
       }
       if (objUrl) {
-        // 2026-05-08: Scale 8 — das Porsche-OBJ ist in -0.85..0.85-
-        // Range modeled, scale 8 macht es ca. 13 m visuell groß. Auf
-        // Mapbox-Standard-Buildings (~30 m hoch) das ist ein gut
-        // sichtbares Mini-Auto bei Zoom 17.8. Aaron-Smoke #33: scale
-        // 3.5 war zu klein, kaum erkennbar.
+        // Scale 8: OBJ in -0.85..0.85-Range -> ~13 m visuell (gut sichtbar bei Zoom 17.8).
         tryAddSvCarThreeJs(map, { lngLat: initialPose, heading: 0, scale: 8 }, { objUrl })
           .then((handle) => {
             if (handle) {
               svThreeHandleRef.current = handle
               onCarReady()
-              return
             }
-            // OBJ failed → glb-Fallback versuchen
-            return tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 }).then((h) => {
-              if (h) { sv3dHandleRef.current = h; onCarReady() }
-            })
           })
-          .catch(() => { /* fail silent — 2D-Fallback bleibt aktiv */ })
-      } else {
-        tryAddSvCar3dModel(map, { lngLat: initialPose, heading: 0 })
-          .then((handle) => {
-            if (!handle) return
-            sv3dHandleRef.current = handle
-            onCarReady()
-          })
-          .catch(() => { /* fail silent — 2D-Fallback bleibt aktiv */ })
+          .catch(() => { /* fail silent — Navi-Pfeil bleibt Default */ })
       }
 
       // Stop-Pins setzen (Nummer im Marker als Initials verwendet)
