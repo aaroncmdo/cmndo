@@ -33,6 +33,17 @@ export const colors = {
 } as const
 
 /**
+ * Partner-Tier-Farben (Bronze/Silber/Gold) — Spiegel von src/lib/design-tokens.ts
+ * tierColors. Tragen Bedeutung (Rang) und werden NICHT gebrandet. Fuer den Community-
+ * Partner-Rang-Badge (Phase 2b, PartnerRangPille).
+ */
+export const tierColors = {
+  bronze: { soft: '#F6EDE3', text: '#8A5A2B', accent: '#B87333' },
+  silber: { soft: '#EEF1F4', text: '#4B5563', accent: '#9CA3AF' },
+  gold: { soft: '#FBF5E4', text: '#8A6D1F', accent: '#C9A84C' },
+} as const
+
+/**
  * Web-only Brand-Resolver. Marken-Farben als CSS-Custom-Property mit Claimondo-
  * Fallback, damit WEB-Primitives mit INLINE-Styles das Whitelabel-Theme eines
  * verifizierten SV greifen (var(--brand-*) wird per generateCssVars auf einem
@@ -265,6 +276,7 @@ export const touchMin = 44
 export const tokens = {
   colors,
   cssColors,
+  tierColors,
   radius,
   shadow,
   shadowNative,
