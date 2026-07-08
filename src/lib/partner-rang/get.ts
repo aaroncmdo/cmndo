@@ -1,5 +1,7 @@
 // src/lib/partner-rang/get.ts
 import type { PartnerTyp, Tier } from './types'
+import { rangFortschritt } from './compute'
+import { ladeRangConfig } from './config-loader'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any
 
@@ -33,4 +35,32 @@ export async function getPartnerRangBatch(supabase: Sb, typ: PartnerTyp, ids: st
     if (mapped) out.set(row.partner_id, mapped)
   }
   return out
+}
+
+export type PartnerRangSelf = {
+  tier: Tier
+  sinnsatz: string
+  volumen: number
+  naechster: Tier | null
+  prozent: number
+}
+
+/**
+ * Selbstansicht des verdienten Rangs (Makler/Werkstatt-Dashboard): Tier + Sinnsatz + Volumen
+ * (in der EIGENEN Ansicht erlaubt) + Fortschritt zur naechsten Stufe (Motivation). Laedt die
+ * Live-Config (DB-getunte Schwellen). null = kein Rang (nicht gegatet). Der Composite-Score
+ * bleibt intern — nur der Fortschritts-Prozent verlaesst die Funktion (keine nackte Zahl).
+ */
+export async function getPartnerRangSelf(supabase: Sb, typ: PartnerTyp, id: string): Promise<PartnerRangSelf | null> {
+  const config = await ladeRangConfig(supabase)
+  const { data } = await supabase
+    .from('partner_rang')
+    .select('rang, sinnsatz, volumen, score')
+    .eq('partner_typ', typ)
+    .eq('partner_id', id)
+    .maybeSingle()
+  if (!data || !data.rang) return null
+  const tier = data.rang as Tier
+  const { naechster, prozent } = rangFortschritt(Number(data.score ?? 0), tier, config)
+  return { tier, sinnsatz: data.sinnsatz ?? '', volumen: data.volumen ?? 0, naechster, prozent }
 }
