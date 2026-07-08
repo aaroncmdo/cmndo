@@ -46,6 +46,7 @@ import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
+import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -325,6 +326,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       reparaturwunsch: string | null
       // SP4a Task 4: Werkstatt-Vermittlung
       reparatur_werkstatt_id: string | null
+      // Fiktiv-Gate-Fix: der kanonische brauchtWerkstattVermittlung braucht diese 2
+      werkstatt_id: string | null
+      reparatur_vermittlung_status: string | null
       // SP-D: Abrechnungsweg fuer den Selbstzahler-Reparatur-Stepper
       abrechnungsweg: string | null
     } | null = null
@@ -334,7 +338,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, abrechnungsweg')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
@@ -364,6 +368,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           reparaturwunsch: (cxClaim?.reparaturwunsch as string | null) ?? null,
           // SP4a Task 4: Werkstatt-Vermittlung
           reparatur_werkstatt_id: (cxClaim?.reparatur_werkstatt_id as string | null) ?? null,
+          // Fiktiv-Gate-Fix: fuer den kanonischen brauchtWerkstattVermittlung-Gate
+          werkstatt_id: (cxClaim?.werkstatt_id as string | null) ?? null,
+          reparatur_vermittlung_status: ((cxClaim as Record<string, unknown> | null)?.reparatur_vermittlung_status as string | null) ?? null,
           // SP-D: abrechnungsweg ist type-lagged -> Record-Cast beim Lesen.
           abrechnungsweg: ((cxClaim as Record<string, unknown> | null)?.abrechnungsweg as string | null) ?? null,
         }
@@ -957,8 +964,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* SP-C1: Werkstatt-Finder - Reparatur-Claim OHNE hinterlegte Werkstatt. */}
-        {!reparaturWerkstattId && claimExtra?.reparaturwunsch === 'reparatur' && (
+        {/* Werkstatt-Finder — Kunde ohne vermittelte Werkstatt. Kanonischer Gate
+            brauchtWerkstattVermittlung (reparatur ODER fiktiv, keine Werkstatt,
+            Status offen) statt lokalem reparatur-only-Check → deckt fiktive
+            Abrechnung ab (SP4d-Drift-Fix, Aaron 08.07.). */}
+        {claimExtra && brauchtWerkstattVermittlung(claimExtra) && (
           <WerkstattFinderCard claimId={fall.claim_id as string} />
         )}
 
