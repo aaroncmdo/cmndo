@@ -106,17 +106,6 @@ function firstInitial(name: string | null | undefined): string | null {
   return trimmed.length > 0 ? trimmed.charAt(0).toUpperCase() : null
 }
 
-// Aaron-Smoke 14.05.2026: "Test Aaron Gutachter GmbH" + "Smoke SV" sind
-// interne Demo-Accounts die NICHT auf der Marketing-Karte erscheinen sollen
-// (Customer sieht sonst "Sachverständiger in Köln Test" o.ä. — peinlich +
-// verfälscht den Marker-Count). Heuristik: Firmenname enthält Test/Smoke/Demo
-// als Wort-Token. Kein DB-Flag (yet) — wenn ein echter SV namens "Testfeld
-// Gutachter GmbH" reinkommt, müssen wir auf ist_test-Spalte upgraden.
-function isTestAccount(firmenname: string | null | undefined): boolean {
-  if (!firmenname) return false
-  return /\b(test|smoke|demo)\b/i.test(firmenname)
-}
-
 export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } | { ok: false; error: string }> {
   // Privacy: sv_leads sind Tier-3 Excel-Importe ohne Pakete. Auf der Karte
   // erscheinen sie als Dead-Pins ohne Popup — wir reichen daher KEINE
@@ -131,8 +120,9 @@ export async function ladeSvLeads(): Promise<{ ok: true; data: SvLeadPublic[] } 
 }
 
 export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic[] } | { ok: false; error: string }> {
-  // Read 1: Geo + paket + spezifikationen + firmenname (firmenname NUR für den
-  // Test-Account-Filter — verlässt die Function nie).
+  // Read 1 (Service-Role, AAR-956): Geo + paket + spezifikationen. Test-/Demo-Accounts
+  // filtert jetzt das kanonische ist_testaccount-Flag DIREKT in der Query (Befund #6 /
+  // #3438) — kein firmenname-Read + keine App-seitige ILIKE-Heuristik mehr.
   //
   // AAR-956 (05.07.): Läuft über den Service-Role-Client mit EXPLIZITEM map-ready-
   // Filter statt über den RLS-Client. Grund: die map-ready-Sichtbarkeit war per RLS
@@ -147,7 +137,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const admin = createAdminClient()
   const { data: allRows, error } = await admin
     .from('sachverstaendige')
-    .select('id,paket,profile_id,firmenname,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
+    .select('id,paket,profile_id,standort_lat,standort_lng,standort_adresse,spezifikationen,isochrone_polygon')
     .eq('verifiziert', true)
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
@@ -161,9 +151,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
     console.error('[ladeAktiveSVs] Partner-Read fehlgeschlagen:', error.message)
     return { ok: false, error: error.message }
   }
-  // Test-Accounts ("Test Aaron Gutachter GmbH", "Smoke SV") server-side filtern
-  // — firmenname verlässt diese Function nie.
-  const rows = (allRows ?? []).filter((r) => !isTestAccount(r.firmenname as string | null))
+  const rows = allRows ?? []
   if (rows.length === 0) return { ok: true, data: [] }
 
   // Read 2 (Service-Role): Vorname-Initiale + Google-Reviews + Profil-Anreicherung.

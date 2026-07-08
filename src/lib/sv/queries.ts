@@ -29,6 +29,18 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  *     portal_zugang_freigeschaltet gesetzt, siehe /api/stripe/webhook/route.ts)
  *   - gesperrt_seit IS NULL (kein Admin-Block)
  *   - geloescht_am IS NULL (nicht gelöscht)
+ *   - ist_testaccount = false (kein interner Test-/Demo-Account)
+ *
+ * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
+ * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
+ * nur auf portal_zugang -> ein bezahlter-aber-unverifizierter SV war buchbar,
+ * aber unsichtbar auf der Karte (und die Engine wies unvetteten SVs Fälle zu).
+ * Jetzt gilt: "auf der Karte gelistet" == "durch die Engine buchbar".
+ *
+ * Befund #6: `ist_testaccount=false` ist neu. Test-Accounts wurden bisher NUR
+ * per crude firmenname-ILIKE (isTestAccount) aus Karte + LP-Count gefiltert,
+ * NICHT aus Dispatch/MCP -> ein aktiver Test-SV war auto-buchbar. Das DB-Flag
+ * schließt die Lücke an EINER Stelle (statt drei ILIKE-Kopien).
  *
  * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
  * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
@@ -47,6 +59,7 @@ export function applyDispatchableFilter(q: any): any {
     .eq('verifiziert', true)
     .eq('ist_aktiv', true)
     .eq('portal_zugang_freigeschaltet', true)
+    .eq('ist_testaccount', false)
     .is('gesperrt_seit', null)
     .is('geloescht_am', null)
 }

@@ -6,19 +6,28 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 // (sachverstaendige = Tier-1, sv_leads = Tier-3).
 const mockSvSelect = vi.fn()
 const mockSvLeadsSelect = vi.fn().mockReturnValue({ data: [], error: null })
+// Erfasst die .eq()-Aufrufe auf der sachverstaendige-Query -> Test kann pruefen,
+// dass der Test-Account-Filter (ist_testaccount=false) DB-seitig angewandt wird.
+const svEqCalls: Array<[string, unknown]> = []
 const mockServiceClient = {
-  from: vi.fn().mockImplementation((table: string) => ({
-    select: vi.fn().mockReturnThis(),
-    eq: vi.fn().mockReturnThis(),
-    is: vi.fn().mockReturnThis(),
-    not: vi.fn().mockReturnThis(),
-    in: vi.fn().mockReturnThis(),
-    then: (resolve: (v: unknown) => void) => {
-      if (table === 'sachverstaendige') resolve(mockSvSelect())
-      else if (table === 'sv_leads') resolve(mockSvLeadsSelect())
-      else resolve({ data: [], error: null })
-    },
-  })),
+  from: vi.fn().mockImplementation((table: string) => {
+    const chain = {
+      select: vi.fn(() => chain),
+      eq: vi.fn((col: string, val: unknown) => {
+        if (table === 'sachverstaendige') svEqCalls.push([col, val])
+        return chain
+      }),
+      is: vi.fn(() => chain),
+      not: vi.fn(() => chain),
+      in: vi.fn(() => chain),
+      then: (resolve: (v: unknown) => void) => {
+        if (table === 'sachverstaendige') resolve(mockSvSelect())
+        else if (table === 'sv_leads') resolve(mockSvLeadsSelect())
+        else resolve({ data: [], error: null })
+      },
+    }
+    return chain
+  }),
 }
 vi.mock('@/lib/supabase/server', () => ({
   createServiceClient: () => mockServiceClient,
@@ -41,6 +50,7 @@ vi.mock('@/lib/supabase/admin', () => ({
 const originalFetch = global.fetch
 beforeEach(() => {
   vi.stubEnv('GOOGLE_PLACES_API_KEY', 'test-key')
+  svEqCalls.length = 0
 })
 afterEach(() => {
   vi.unstubAllEnvs()
@@ -168,11 +178,14 @@ describe('POST /api/kfzgutachter-lp/gutachter-verfuegbar', () => {
       expect(json.count).toBe(1) // nur Tier-1, kein Crash
     })
 
-    it('filtert Test-Accounts raus', async () => {
+    it('filtert Test-Accounts raus (ist_testaccount-Flag DB-seitig, kein firmenname-ILIKE mehr)', async () => {
       stubGoogle(50.94, 6.96)
+      // Die DB-Query filtert Test-Accounts per .eq('ist_testaccount', false) -> der Mock
+      // liefert den bereits gefilterten Satz (nur der echte SV). Zusaetzlich pruefen wir,
+      // dass die Route den Flag-Filter ueberhaupt anwendet (svEqCalls) — sonst waere die
+      // Filterung still verschwunden (Befund #6 / #3438).
       mockSvSelect.mockReturnValue({
         data: [
-          { id: 'sv1', isochrone_polygon: KOELN_POLY, paket: 'free', firmenname: 'Test Aaron Gutachter GmbH', standort_adresse: null, profile_id: null },
           { id: 'sv2', isochrone_polygon: KOELN_POLY, paket: 'free', firmenname: 'Echter SV', standort_adresse: null, profile_id: null },
         ],
         error: null,
@@ -180,6 +193,7 @@ describe('POST /api/kfzgutachter-lp/gutachter-verfuegbar', () => {
       const res = await POST(makeReq({ placeId: 'ChIJ1234567890' }))
       const json = await res.json()
       expect(json.count).toBe(1)
+      expect(svEqCalls).toContainEqual(['ist_testaccount', false])
     })
 
     it('überspringt invalide Isochronen (Legacy-Array-Format) ohne zu crashen', async () => {

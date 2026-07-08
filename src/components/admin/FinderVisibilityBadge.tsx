@@ -14,7 +14,7 @@ const REASON_LABEL: Record<FinderVisibilityReason, string> = {
   'nicht-aktiv': 'nicht aktiv',
   'keine-isochrone': 'keine Isochrone berechnet',
   'kein-standort': 'kein Standort',
-  'test-name': 'Test-/Demo-Firmenname',
+  'test-account': 'als Test-/Demo-Account markiert',
 }
 
 export function FinderVisibilityBadge({ sv }: { sv: FinderVisibilityInput }) {

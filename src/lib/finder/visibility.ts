@@ -1,19 +1,18 @@
 // Finder-Sichtbarkeit — spiegelt die Eligibility-Gates des oeffentlichen Gutachter-
-// Finders (die ladeAktiveSVs-Query + der isTestAccount-Filter in
-// src/lib/actions/gutachter-finder-actions.ts). Damit Admins in /admin/sachverstaendige
-// SEHEN, warum ein SV (nicht) im Finder auftaucht — ohne raten/nachfragen.
+// Finders (die ladeAktiveSVs-Query in src/lib/actions/gutachter-finder-actions.ts).
+// Damit Admins in /admin/sachverstaendige SEHEN, warum ein SV (nicht) im Finder
+// auftaucht — ohne raten/nachfragen.
 //
-// Bewusste kleine Duplikation der Test-Name-Heuristik: die zentrale liegt als
-// lokale Funktion im 'use server'-Loader und laesst sich von dort nicht als reine
-// Helferfunktion importieren, ohne sie zur Server-Action zu machen. Bei Aenderung
-// der Finder-Gates (ladeAktiveSVs) HIER nachziehen.
+// Test-Accounts werden seit #3438 per kanonischem ist_testaccount-DB-Flag gefiltert
+// (nicht mehr per firmenname-ILIKE-Heuristik) — dieser Badge spiegelt das Flag. Bei
+// Aenderung der Finder-Gates (ladeAktiveSVs) HIER nachziehen.
 
 export type FinderVisibilityReason =
   | 'nicht-verifiziert'
   | 'nicht-aktiv'
   | 'keine-isochrone'
   | 'kein-standort'
-  | 'test-name'
+  | 'test-account'
 
 export type FinderVisibilityInput = {
   verifiziert?: boolean | null
@@ -22,19 +21,15 @@ export type FinderVisibilityInput = {
   hatIsochrone?: boolean | null
   standort_lat?: number | null
   standort_lng?: number | null
-  firmenname?: string | null
-}
-
-function istTestName(firmenname: string | null | undefined): boolean {
-  if (!firmenname) return false
-  return /\b(test|smoke|demo)\b/i.test(firmenname)
+  /** Kanonisches Test-/Demo-Account-Flag (ist_testaccount) — ersetzt die firmenname-Heuristik. */
+  istTestaccount?: boolean | null
 }
 
 /**
  * Ist der SV im oeffentlichen Finder sichtbar? Der erste fehlschlagende Gate liefert
  * den Grund. Reihenfolge/Regeln spiegeln ladeAktiveSVs:
  *   verifiziert=true & ist_aktiv=true & isochrone_polygon!=null & standort!=null
- *   & Firmenname ohne \b(test|smoke|demo)\b.
+ *   & ist_testaccount=false.
  */
 export function deriveFinderVisibility(
   sv: FinderVisibilityInput,
@@ -45,6 +40,6 @@ export function deriveFinderVisibility(
   if (sv.standort_lat == null || sv.standort_lng == null) {
     return { visible: false, reason: 'kein-standort' }
   }
-  if (istTestName(sv.firmenname)) return { visible: false, reason: 'test-name' }
+  if (sv.istTestaccount === true) return { visible: false, reason: 'test-account' }
   return { visible: true }
 }
