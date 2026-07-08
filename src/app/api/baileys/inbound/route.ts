@@ -77,21 +77,20 @@ export async function POST(request: Request) {
   const fallId = match.fallId
   const leadId = match.leadId
 
-  // Zustellungs-Routing (Inbound, P2): die eingehende WhatsApp zusaetzlich am kunde_gruppe-Thread
-  // des Claims verankern -> in v1 (kanal) UND v2 (thread) sichtbar (Datenmodell A). Nur Lookup eines
-  // EXISTIERENDEN Threads (die meisten Claims haben ihn aus dem Backfill); kein Create hier -> sonst
-  // v1-only bis der Thread anderswo (Kunde-Portal/Staff) angelegt wird.
+  // Zustellungs-Routing (Inbound): die eingehende WhatsApp am kunde_gruppe-Thread des Claims
+  // verankern -> in v1 (kanal) UND v2 (thread) sichtbar (Datenmodell A). Get-or-create via Service
+  // (service-role, kein Auth) -> auch Claims OHNE bestehenden Thread bekommen die Inbound-Nachricht
+  // sofort thread-nativ (+ SV/KB werden als Teilnehmer resolved). Non-critical -> Fehler = threadId null.
   let threadId: string | null = null
   if (fallId) {
     const claimIdForThread = await resolveClaimId(db, fallId)
     if (claimIdForThread) {
-      const { data: t } = await (db as unknown as SupabaseClient)
-        .from('chat_threads')
-        .select('id')
-        .eq('claim_id', claimIdForThread)
-        .eq('art', 'kunde_gruppe')
-        .maybeSingle()
-      threadId = (t as { id: string } | null)?.id ?? null
+      const { holeOderErstelleGruppenThreadService } = await import('@/lib/chat/thread-service')
+      threadId = await holeOderErstelleGruppenThreadService(
+        db as unknown as SupabaseClient,
+        claimIdForThread,
+        'kunde_gruppe',
+      ).catch(() => null)
     }
   }
 
