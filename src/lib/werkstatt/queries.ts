@@ -3,8 +3,14 @@
 // werkstatt_provisionen (wp_werkstatt_read: werkstatt_id=auth.uid()-werkstatt)
 // greifen und Werkstaetten nur ihre eigenen Rows sehen.
 //
-// Leak-safe: Alle Queries selektieren NUR nicht-PII-Felder (betrag, status,
-// dates, claim_nummer). Keine Kundennamen/Kontaktdaten.
+// Leak-safe (Provisionen): Die Provisions-Queries selektieren NUR nicht-PII-
+// Felder (betrag, status, dates, claim_nummer). Keine Kundennamen/Kontaktdaten.
+//
+// Ausnahme Auftrags-View: getWerkstattAuftraege/getWerkstattAuftrag lesen
+// zusaetzlich kunde_name aus v_werkstatt_auftrag. Das ist legitim — die View ist
+// RLS-gegatet (is_werkstatt_for_claim), eine Werkstatt sieht also ausschliesslich
+// die Kunden IHRER EIGENEN Claims (Parity mit der makler/akten-Sicht). Der
+// Kundenname wird NICHT auf die werkstatt_provisionen-Queries ausgeweitet.
 
 import { createClient } from '@/lib/supabase/server'
 
@@ -211,6 +217,10 @@ export type WerkstattAuftrag = {
   claim_id: string
   claim_nummer: string | null
   richtung: string | null
+  // Kunde + Vermittlungs-Kontext (v_werkstatt_auftrag ist RLS-gegatet -> eigene Claims)
+  kunde_name: string | null
+  quelle: string | null
+  zugewiesen_am: string | null
   // D — rollen-korrekte Zusatzspalten (v_werkstatt_auftrag)
   abrechnungsweg: string | null
   vermittler_werkstatt_id: string | null
@@ -249,7 +259,8 @@ export type WerkstattAuftrag = {
 
 // Gemeinsame Spalten-Auswahl + Row-Mapping (DRY: Liste + Einzel-Loader).
 const AUFTRAG_SELECT = `
-  claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
+  claim_id, claim_nummer, richtung, kunde_name, quelle, zugewiesen_am,
+  vermittlung_status, operative_status,
   abrechnungsweg, vermittler_werkstatt_id, reparatur_werkstatt_id, meine_rolle,
   fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
   gutachter_firmenname,
@@ -266,6 +277,9 @@ function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
     claim_id: r.claim_id as string,
     claim_nummer: (r.claim_nummer as string | null) ?? null,
     richtung: (r.richtung as string | null) ?? null,
+    kunde_name: (r.kunde_name as string | null) ?? null,
+    quelle: (r.quelle as string | null) ?? null,
+    zugewiesen_am: (r.zugewiesen_am as string | null) ?? null,
     abrechnungsweg: (r.abrechnungsweg as string | null) ?? null,
     vermittler_werkstatt_id: (r.vermittler_werkstatt_id as string | null) ?? null,
     reparatur_werkstatt_id: (r.reparatur_werkstatt_id as string | null) ?? null,
