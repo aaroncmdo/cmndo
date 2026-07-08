@@ -98,10 +98,10 @@ export default async function FeldmodusPage() {
     [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') ||
     'Gutachter'
 
-  // Aktive Session holen — ohne Session gibt es keinen Fokus-Modus
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  const session = await getTagesSession(sv.id, today)
+  // Aktive Session holen — ohne Session gibt es keinen Fokus-Modus.
+  // getTagesSession leitet den Berliner Kalendertag intern ab (berlinIsoDate),
+  // daher den rohen Instant durchreichen statt server-lokale Mitternacht.
+  const session = await getTagesSession(sv.id, new Date())
   if (!session || session.status === 'finished') {
     redirect('/gutachter/heute?info=Keine+aktive+Tages-Session')
   }

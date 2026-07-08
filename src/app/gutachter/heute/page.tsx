@@ -11,6 +11,7 @@ import { effektiveBezugIds } from '@/lib/termine/effektive-bezug-ids'
 import HeuteClient from './HeuteClient'
 import type { TagesroutePflichtStat } from './TagesrouteSidebar'
 import { listPrivatStopsForDate } from './private-stops-actions'
+import { berlinDayRangeUtc } from '@/lib/time/berlin-day'
 
 export const dynamic = 'force-dynamic'
 
@@ -60,10 +61,6 @@ export type HeuteTerminFull = {
   einzusammelnde_dokumente: Array<{ slot_id: string; label: string }>
 }
 
-function isoDate(d: Date): string {
-  return d.toISOString().slice(0, 10)
-}
-
 // 15.05.2026: `sachverstaendige.isochrone_polygon` ist JSONB ohne Schema-
 // Constraint. In Prod existieren zwei Shapes (DB-Audit 15.05.):
 //   Legacy:  Array<{lat,lng}>  (1 Row)
@@ -109,17 +106,18 @@ export default async function HeutePage() {
   }>(supabase, user.id, 'id, standort_lat, standort_lng, isochrone_polygon')
   if (!sv) redirect('/gutachter?error=Kein+SV-Profil')
 
-  const todayStart = new Date()
-  todayStart.setHours(0, 0, 0, 0)
-  const tomorrowStart = new Date(todayStart)
-  tomorrowStart.setDate(tomorrowStart.getDate() + 1)
+  // Tag-Grenze hart an Europe/Berlin (nicht Server-lokale TZ) — sonst driftet
+  // „heute" auf UTC-Servern um den Offset (1-2h) rund um Mitternacht.
+  // Siehe lib/time/berlin-day.ts.
+  const { startUtc: todayStart, endUtc: tomorrowStart, isoDate: berlinHeute } =
+    berlinDayRangeUtc()
 
   // Aktive Session für heute (AAR-380)
   const { data: session } = await supabase
     .from('sv_tages_session')
     .select('id, status')
     .eq('sv_id', sv.id)
-    .eq('datum', isoDate(todayStart))
+    .eq('datum', berlinHeute)
     .maybeSingle()
 
   const hasActiveSession = Boolean(
@@ -532,7 +530,7 @@ export default async function HeutePage() {
 
   // AAR-872: Privat-Stops (GCal/CalDAV-Termine, die der SV manuell als
   // Tagesroute-Anker addet) initial laden.
-  const initialPrivatStops = await listPrivatStopsForDate(isoDate(todayStart))
+  const initialPrivatStops = await listPrivatStopsForDate(berlinHeute)
 
   return (
     <HeuteClient
