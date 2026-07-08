@@ -49,6 +49,7 @@ import {
   schlageCsvMappingVor,
   scrapePartnerLeadsVorschau,
   importScrapedLeads,
+  legePartnerOnboardingTermin,
 } from './actions'
 import {
   parseCsv,
@@ -59,6 +60,7 @@ import {
   type PartnerCsvLead,
 } from '@/lib/partner/csv-import'
 import type { ScrapeKandidat } from '@/lib/partner/scraping'
+import { formatTerminZeitpunkt, type OnboardingTerminKanal } from '@/lib/partner/onboarding-termin'
 import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow, PartnerOnboardingTerminRow } from './types'
 import {
   PARTNER_LEAD_STATUS,
@@ -183,6 +185,12 @@ export default function PartnerLeadsClient({
   const detailAktivitaeten = useMemo(
     () => (detailId ? aktivitaeten.filter((a) => a.partner_lead_id === detailId) : []),
     [aktivitaeten, detailId],
+  )
+
+  // Onboarding-Termine des offenen Leads.
+  const detailTermine = useMemo(
+    () => (detailId ? termine.filter((t) => t.partner_lead_id === detailId) : []),
+    [termine, detailId],
   )
 
   return (
@@ -416,6 +424,7 @@ export default function PartnerLeadsClient({
         lead={detailLead}
         staff={staff}
         aktivitaeten={detailAktivitaeten}
+        termine={detailTermine}
         onClose={() => setDetailId(null)}
         onChanged={() => router.refresh()}
       />
@@ -839,17 +848,20 @@ function DetailDrawer({
   lead,
   staff,
   aktivitaeten,
+  termine,
   onClose,
   onChanged,
 }: {
   lead: PartnerLeadRow | null
   staff: StaffOption[]
   aktivitaeten: PartnerLeadAktivitaetRow[]
+  termine: PartnerOnboardingTerminRow[]
   onClose: () => void
   onChanged: () => void
 }) {
   const [saving, setSaving] = useState(false)
   const [converting, setConverting] = useState(false)
+  const [showTermin, setShowTermin] = useState(false)
 
   // Lokaler Editier-State — key-remount via lead.id sorgt fuer frische Werte.
   const [status, setStatus] = useState<PartnerLeadStatus>(lead?.status ?? 'neu')
@@ -1046,6 +1058,55 @@ function DetailDrawer({
             Speichern
           </Button>
         </div>
+
+        {/* Onboarding-Termine */}
+        <div className="mt-6 border-t border-claimondo-border pt-4">
+          <div className="mb-3 flex items-center justify-between">
+            <h3 className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
+              Onboarding-Termine
+            </h3>
+            <Button variant="ghost" onClick={() => setShowTermin(true)} disabled={saving || converting}>
+              Termin legen
+            </Button>
+          </div>
+          {termine.length === 0 ? (
+            <p className="text-sm text-claimondo-shield">Noch keine Onboarding-Termine.</p>
+          ) : (
+            <ul className="space-y-2">
+              {termine.map((t) => (
+                <li
+                  key={t.id}
+                  className="flex items-center justify-between gap-2 rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 px-3 py-2 text-sm"
+                >
+                  <div>
+                    <span className="font-medium text-claimondo-navy">{formatTerminZeitpunkt(t.start_zeit)}</span>
+                    <span className="ml-2 text-xs text-claimondo-ondo">
+                      {t.kanal === 'online' ? 'Video' : 'vor Ort'}
+                    </span>
+                  </div>
+                  {t.kanal === 'online' && t.video_link ? (
+                    <a
+                      href={t.video_link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 text-xs font-medium text-claimondo-ondo hover:underline"
+                    >
+                      Meet öffnen
+                    </a>
+                  ) : t.treffpunkt_adresse ? (
+                    <span className="shrink-0 truncate text-xs text-claimondo-shield">{t.treffpunkt_adresse}</span>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        <TerminModal
+          open={showTermin}
+          onClose={() => setShowTermin(false)}
+          lead={lead}
+          onCreated={onChanged}
+        />
 
         {/* Aktivitaets-Log */}
         <div className="mt-6 border-t border-claimondo-border pt-4">
@@ -1435,6 +1496,122 @@ function ScrapeModal({
             disabled={importing || !kandidaten || kandidaten.length === 0}
           >
             {kandidaten && kandidaten.length > 0 ? `${kandidaten.length} übernehmen` : 'Übernehmen'}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+// ─── Termin-Modal (Onboarding-Termin legen) ──────────────────────────────────
+
+function TerminModal({
+  open,
+  onClose,
+  lead,
+  onCreated,
+}: {
+  open: boolean
+  onClose: () => void
+  lead: PartnerLeadRow
+  onCreated: () => void
+}) {
+  const [datum, setDatum] = useState('')
+  const [kanal, setKanal] = useState<OnboardingTerminKanal>('online')
+  const [treffpunkt, setTreffpunkt] = useState(
+    [lead.strasse, [lead.plz, lead.ort].filter(Boolean).join(' ')].filter(Boolean).join(', '),
+  )
+  const [saving, setSaving] = useState(false)
+
+  function handleClose() {
+    setDatum('')
+    setKanal('online')
+    setSaving(false)
+    onClose()
+  }
+
+  async function handleSubmit() {
+    if (!datum) {
+      toast.error('Bitte Datum und Uhrzeit wählen.')
+      return
+    }
+    const start = new Date(datum)
+    if (Number.isNaN(start.getTime())) {
+      toast.error('Ungültiges Datum.')
+      return
+    }
+    if (kanal === 'vor_ort' && treffpunkt.trim().length < 4) {
+      toast.error('Bitte eine Adresse für den Vor-Ort-Termin angeben.')
+      return
+    }
+    setSaving(true)
+    try {
+      const res = await legePartnerOnboardingTermin(lead.id, {
+        startIso: start.toISOString(),
+        kanal,
+        treffpunktAdresse: kanal === 'vor_ort' ? treffpunkt.trim() : undefined,
+      })
+      if (!res.ok) {
+        toast.error(res.error)
+        return
+      }
+      if (res.warnung) toast.warning(res.warnung)
+      else toast.success('Onboarding-Termin angelegt.')
+      onCreated()
+      handleClose()
+    } catch {
+      toast.error('Termin anlegen fehlgeschlagen — bitte erneut versuchen.')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={handleClose} maxWidth={520} ariaLabel="Onboarding-Termin legen">
+      <h2 className="text-claimondo-navy font-semibold text-lg mb-1">Onboarding-Termin legen</h2>
+      <p className="text-sm text-claimondo-ondo mb-4">
+        30-Minuten-Termin mit {lead.firma ?? 'dem Prospect'}. Online erzeugt automatisch einen
+        Google-Meet-Link; vor Ort wird die Adresse geokodiert.
+      </p>
+      <div className="space-y-3">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-xs font-semibold text-claimondo-shield">Datum &amp; Uhrzeit</label>
+          <input
+            type="datetime-local"
+            value={datum}
+            onChange={(e) => setDatum(e.target.value)}
+            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
+          />
+        </div>
+        <SelectField
+          label="Kanal"
+          value={kanal}
+          onChange={(e) => setKanal(e.target.value as OnboardingTerminKanal)}
+          options={[
+            { value: 'online', label: 'Online (Google Meet)' },
+            { value: 'vor_ort', label: 'Vor Ort' },
+          ]}
+        />
+        {kanal === 'vor_ort' ? (
+          <TextField
+            label="Treffpunkt-Adresse"
+            value={treffpunkt}
+            onChange={(e) => setTreffpunkt(e.target.value)}
+            placeholder="Straße Nr., PLZ Ort"
+          />
+        ) : (
+          <p className="rounded-ios-md bg-info-soft px-3 py-2 text-xs text-info-strong">
+            Der Google-Meet-Link wird automatisch erzeugt (Google-Konto des Bearbeiters unter
+            /admin/einstellungen/google erforderlich). Ohne Verbindung wird der Termin trotzdem
+            angelegt — ohne Link.
+          </p>
+        )}
+        <div className="flex gap-3 pt-2">
+          <Button variant="ghost" fullWidth onClick={handleClose} type="button">
+            Abbrechen
+          </Button>
+          <Button variant="navy" fullWidth onClick={handleSubmit} loading={saving} disabled={saving || !datum}>
+            Termin anlegen
           </Button>
         </div>
       </div>
