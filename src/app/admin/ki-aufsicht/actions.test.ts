@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 // vi.hoisted: spies BEFORE vi.mock factories (hoisting workaround)
 const { decideSpy, taskSpy, rolleForUser } = vi.hoisted(() => ({
   decideSpy: vi.fn(async () => ({ ok: true })),
-  taskSpy: vi.fn(async () => ({ task_id: 't1' })),
+  taskSpy: vi.fn(async (): Promise<{ task_id: string | null }> => ({ task_id: 't1' })),
   rolleForUser: vi.fn(async () => 'admin' as string | null),
 }))
 

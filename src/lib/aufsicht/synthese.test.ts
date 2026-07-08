@@ -2,7 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // vi.hoisted: alle Spies/Stubs muessen VOR den vi.mock()-Aufrufen existieren.
 const h = vi.hoisted(() => {
-  const insertSpy = vi.fn(async () => ({ error: null }))
+  const insertSpy = vi.fn(
+    async (
+      _row: Record<string, unknown>,
+    ): Promise<{ error: { code: string; message: string } | null }> => ({ error: null }),
+  )
   const db = {
     from: (_table: string) => ({
       insert: insertSpy,
@@ -40,15 +44,15 @@ import type Anthropic from '@anthropic-ai/sdk'
 
 describe('extractAufsichtDrafts', () => {
   it('ignoriert text-Bloecke', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       { type: 'text', text: 'Hier ist meine Analyse der SLA-Lage...' },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(0)
   })
 
   it('ignoriert invalide tool_use-Bloecke (fehlendes claim_id)', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       {
         type: 'tool_use',
         id: 'tu1',
@@ -61,12 +65,12 @@ describe('extractAufsichtDrafts', () => {
         },
       },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(0)
   })
 
   it('ignoriert unbekannte Tool-Namen', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       {
         type: 'tool_use',
         id: 'tu2',
@@ -79,12 +83,12 @@ describe('extractAufsichtDrafts', () => {
         },
       },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(0)
   })
 
   it('extrahiert valide propose_sla_task-Bloecke', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       {
         type: 'tool_use',
         id: 'tu3',
@@ -98,7 +102,7 @@ describe('extractAufsichtDrafts', () => {
         },
       },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(1)
     expect(result[0].claimId).toBe('c1')
     expect(result[0].zielRolle).toBe('sachverstaendiger')
@@ -108,7 +112,7 @@ describe('extractAufsichtDrafts', () => {
   })
 
   it('setzt Default-Prioritaet auf normal wenn weggelassen', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       {
         type: 'tool_use',
         id: 'tu4',
@@ -122,13 +126,13 @@ describe('extractAufsichtDrafts', () => {
         },
       },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(1)
     expect(result[0].prioritaet).toBe('normal')
   })
 
   it('filtert invalide ziel_rolle heraus', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       {
         type: 'tool_use',
         id: 'tu5',
@@ -141,12 +145,12 @@ describe('extractAufsichtDrafts', () => {
         },
       },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(0)
   })
 
   it('extrahiert mehrere valide Bloecke', () => {
-    const content: Anthropic.ContentBlock[] = [
+    const content: Record<string, unknown>[] = [
       { type: 'text', text: 'Analyse...' },
       {
         type: 'tool_use',
@@ -172,7 +176,7 @@ describe('extractAufsichtDrafts', () => {
         },
       },
     ]
-    const result = extractAufsichtDrafts(content)
+    const result = extractAufsichtDrafts(content as unknown as Anthropic.ContentBlock[])
     expect(result).toHaveLength(2)
     expect(result[0].zielRolle).toBe('dispatch')
     expect(result[1].zielRolle).toBe('admin')
