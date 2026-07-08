@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   bewerteSvKandidat, vergleicheTenure, sortiereKandidaten,
-  istKontingentBlockiert, haversineKm, pointInPolygon, ersterFreierSlot,
+  istKontingentBlockiert, haversineKm, pointInPolygon, ersterFreierSlot, rangToOrdinal,
   type RankbarerKandidat,
 } from '../matching-score'
 import type { TagVerfuegbarkeit } from '../types'
@@ -29,6 +29,33 @@ describe('bewerteSvKandidat', () => {
   it('null ETA → Haversine-km als Penalty', () => {
     const s = bewerteSvKandidat({ paket: 'standard', kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: null, distanzKm: 20 })
     expect(s).toBe(1 * 100 - 20) // paketPrio(standard=1)*100 - distanzKm
+  })
+})
+
+describe('bewerteSvKandidat — Rang-Fein-Sort (C: innerhalb Paket, nie tier-übergreifend)', () => {
+  const base = { kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: 10, distanzKm: 5 }
+  it('höherer Rang → höherer Score INNERHALB derselben Paket-Stufe', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 2 }))
+      .toBeGreaterThan(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 0 }))
+  })
+  it('Revenue-Schutz: Rang überschreitet NIE eine Paket-Stufe — standard+gold < pro+bronze', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'standard', rangOrdinal: 2 }))
+      .toBeLessThan(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
+  })
+  it('auch pro+gold < premium+bronze', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 2 }))
+      .toBeLessThan(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 0 }))
+  })
+  it('fehlender rangOrdinal → identischer Score (backward-compat)', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'pro' }))
+      .toBe(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
+  })
+  it('rangToOrdinal: gold=2, silber=1, bronze/null/undefined=0', () => {
+    expect(rangToOrdinal('gold')).toBe(2)
+    expect(rangToOrdinal('silber')).toBe(1)
+    expect(rangToOrdinal('bronze')).toBe(0)
+    expect(rangToOrdinal(null)).toBe(0)
+    expect(rangToOrdinal(undefined)).toBe(0)
   })
 })
 
