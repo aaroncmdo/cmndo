@@ -188,3 +188,63 @@ export function addSvCarMarker(
     .setLngLat(lngLat)
     .addTo(map)
 }
+
+// ─── Navigations-Pfeil (Google-Maps-Style Puck) ────────────────────────────
+// Aaron 2026-07-08: „wenn das mit dem modell nicht funktioniert nimm bitte einen
+// klassischen navigationspfeil." Zuverlaessiger Default-/Fallback-Marker der KEIN
+// 3D-Modell + KEINE Env-Var braucht — weisser Puck + Chevron in Fahrtrichtung.
+
+export interface SvNavArrowOptions {
+  /** Heading 0=Norden, 90=Osten — rotiert den Pfeil in Fahrtrichtung. */
+  heading?: number | null
+  /** Chevron-/Ring-Farbe (hex). Default Claimondo-Blue. */
+  color?: string
+}
+
+function buildNavArrowElement(opts: SvNavArrowOptions): HTMLDivElement {
+  const wrapper = document.createElement('div')
+  wrapper.className = 'sv-nav-arrow'
+  // AAR-marker-instant: keine CSS-transition (Aaron-Spec „nicht mit latenz nachziehen").
+  wrapper.style.cssText = [
+    'position: relative',
+    'width: 44px',
+    'height: 44px',
+    'pointer-events: none',
+    opts.heading != null ? `transform: rotate(${opts.heading}deg)` : '',
+  ]
+    .filter(Boolean)
+    .join(';')
+
+  const color = opts.color ?? '#4573A2' // claimondo-blue
+  wrapper.innerHTML = `
+    <svg viewBox="0 0 44 44" width="44" height="44" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <filter id="nav-arrow-shadow" x="-50%" y="-50%" width="200%" height="200%">
+          <feDropShadow dx="0" dy="2" stdDeviation="2.5" flood-color="rgba(0,0,0,0.35)"/>
+        </filter>
+      </defs>
+      <g filter="url(#nav-arrow-shadow)">
+        <circle cx="22" cy="22" r="15" fill="#FFFFFF" stroke="${color}" stroke-width="2"/>
+        <!-- Chevron nach oben = Fahrtrichtung (Wrapper rotiert mit heading) -->
+        <path d="M22 10.5 L30.5 30 L22 24.5 L13.5 30 Z" fill="${color}"/>
+      </g>
+    </svg>
+  `
+  return wrapper
+}
+
+/**
+ * Navigations-Pfeil als SV-Position (Google-Maps-Style). Rotiert mit `heading`.
+ * Braucht kein 3D-Modell / keine Env-Var -> immer verfuegbar. Ersetzt den
+ * Auto-SVG-Fallback im Feldmodus, wenn das 3D-Modell nicht laedt.
+ */
+export function addSvNavArrowMarker(
+  map: MapboxMap,
+  lngLat: [number, number],
+  options: SvNavArrowOptions = {},
+): mapboxgl.Marker {
+  const el = buildNavArrowElement(options)
+  return new mapboxgl.Marker({ element: el, anchor: 'center' })
+    .setLngLat(lngLat)
+    .addTo(map)
+}

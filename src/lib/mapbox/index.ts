@@ -8,7 +8,7 @@ export {
   MAPBOX_STYLE_NAVIGATION_DAY,
   MAPBOX_STYLE_NAVIGATION_NIGHT,
 } from './styles'
-export { addSvAvatarMarker, addSvCarMarker, type SvMarkerOptions, type SvCarMarkerOptions } from './sv-marker'
+export { addSvAvatarMarker, addSvCarMarker, addSvNavArrowMarker, type SvMarkerOptions, type SvCarMarkerOptions, type SvNavArrowOptions } from './sv-marker'
 export {
   tryAddSvCar3dModel,
   SV_CAR_3D_DEFAULT_GLB,
