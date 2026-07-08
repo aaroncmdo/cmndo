@@ -1,5 +1,6 @@
 import { createClient as createAnonClient } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/server'
+import { rangMapFromRows, type Tier } from './rang'
 
 // Cookie-loser Anon-Client fuer OEFFENTLICHE Community-/Wissen-Daten.
 // Gleiche Begruendung wie db-articles.ts: build-zeit-sicher fuer force-static-Routen,
@@ -28,6 +29,8 @@ export type FeedEntry = {
   title: string | null
   body: string
   authorDisplay: string
+  /** Verdienter Partner-Rang des Autors (nur Posts; gate-konform via RPC). null = kein Badge. */
+  rang: Tier | null
   isRedaktion: boolean
   tags: string[]
   createdAt: string
@@ -39,6 +42,8 @@ export type FeedEntry = {
 export type CommentRow = {
   id: string
   authorDisplay: string
+  /** Verdienter Partner-Rang des Kommentar-Autors (gate-konform via RPC). null = kein Badge. */
+  rang: Tier | null
   body: string
   parentId: string | null
   createdAt: string
@@ -188,6 +193,20 @@ export async function getCommunityFeed(tag?: string): Promise<FeedEntry[]> {
   const artikelCommentCount = countById(artikelComments as Array<{ target_id: string }> | null)
   const postCommentCount = countById(postComments as Array<{ target_id: string }> | null)
 
+  // --- Partner-Rang je Post (gate-konform, via SECURITY-DEFINER-RPC community_content_rang) ---
+  // Nur sichtbare, partner-authored Posts mit gate_ok-Rang liefern eine Zeile; Rest bleibt null.
+  let postRangMap = new Map<string, Tier>()
+  if (postIds.length > 0) {
+    // RPC neu (community_content_rang) noch nicht in den generierten Marketing-Typen ->
+    // Cast (Marketing-Idiom bei Typen-Lag, vgl. comments.ts).
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: rangRows } = await (client as any).rpc('community_content_rang', {
+      p_kind: 'post',
+      p_ids: postIds,
+    })
+    postRangMap = rangMapFromRows(rangRows as Array<{ content_id: string; rang: string | null }> | null)
+  }
+
   // Map Artikel → FeedEntry
   const FALLBACK_DATE = '2024-01-01T00:00:00Z'
   const artikelEntries: FeedEntry[] = artikelRows.map((r) => {
@@ -198,6 +217,7 @@ export async function getCommunityFeed(tag?: string): Promise<FeedEntry[]> {
       title: r.title,
       body: r.excerpt ?? r.body,
       authorDisplay: 'Claimondo Redaktion',
+      rang: null,
       isRedaktion: true,
       tags: r.tags ?? [],
       createdAt,
@@ -214,6 +234,7 @@ export async function getCommunityFeed(tag?: string): Promise<FeedEntry[]> {
     title: null,
     body: r.body,
     authorDisplay: r.author_display,
+    rang: postRangMap.get(r.id) ?? null,
     isRedaktion: false,
     tags: r.tags ?? [],
     createdAt: r.created_at,
@@ -262,6 +283,18 @@ export async function getThread(
     created_at: string
   }>
 
+  // Partner-Rang je Kommentar (gate-konform, via SECURITY-DEFINER-RPC community_content_rang).
+  const commentIds = rows.map((r) => r.id)
+  let rangMap = new Map<string, Tier>()
+  if (commentIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: rangRows } = await (anonClient() as any).rpc('community_content_rang', {
+      p_kind: 'comment',
+      p_ids: commentIds,
+    })
+    rangMap = rangMapFromRows(rangRows as Array<{ content_id: string; rang: string | null }> | null)
+  }
+
   const top: CommentRow[] = []
   const repliesByParent: Record<string, CommentRow[]> = {}
 
@@ -269,6 +302,7 @@ export async function getThread(
     const mapped: CommentRow = {
       id: r.id,
       authorDisplay: r.author_display,
+      rang: rangMap.get(r.id) ?? null,
       body: r.body,
       parentId: r.parent_id,
       createdAt: r.created_at,
