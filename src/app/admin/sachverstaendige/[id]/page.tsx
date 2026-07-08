@@ -360,7 +360,7 @@ export default async function SvDetailPage({
                     hatIsochrone,
                     standort_lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
                     standort_lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
-                    firmenname: (sv as { firmenname?: string | null }).firmenname ?? null,
+                    istTestaccount,
                   }}
                 />
               </>
