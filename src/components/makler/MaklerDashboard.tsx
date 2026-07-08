@@ -16,6 +16,8 @@ import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
 import { MaklerStaffelCard } from '@/components/makler/MaklerStaffelCard'
 import type { StaffelStufe } from '@/lib/werkstatt/staffel'
 import type { DashboardData } from '@/lib/makler/queries'
+import { PartnerRangSelfCard } from '@/components/shared/PartnerRangSelfCard'
+import type { PartnerRangSelf } from '@/lib/partner-rang/get'
 
 type Props = {
   makler: {
@@ -29,6 +31,7 @@ type Props = {
   staffelSettled: number
   staffelPending: number
   staffelStufen: StaffelStufe[]
+  partnerRang: PartnerRangSelf | null
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -61,6 +64,7 @@ export function MaklerDashboard({
   staffelSettled,
   staffelPending,
   staffelStufen,
+  partnerRang,
 }: Props) {
   const { stats, activity } = data
 
@@ -111,6 +115,9 @@ export function MaklerDashboard({
           hint="Leads → Akten"
         />
       </section>
+
+      {/* Partner-Rang — Selbstansicht (Badge + Fortschritt zur naechsten Stufe) */}
+      {partnerRang && <PartnerRangSelfCard rang={partnerRang} />}
 
       {/* Tipp des Monats — direkt unter den KPIs (Anordnung Aaron 07.07.) */}
       <section aria-label="Tipp des Monats">

@@ -62,3 +62,21 @@ export function computePartnerStrength(s: PartnerSignals, config: RangConfig = D
   const tier = minTier(deriveTier(score, config), cap)
   return { score, volumenScore, credentialScore: cScore, ratingScore: rScore, gateOk: true, gateCap: cap, tier, sinnsatz: buildSinnsatz(s, tier, config) }
 }
+
+/**
+ * Fortschritt zur naechsten Tier-Stufe fuer die Partner-SELBSTansicht (Dashboard).
+ * prozent = Composite-Score relativ zur naechsten Schwelle (0..100, geclamped). gold = Endstufe.
+ * Rein/deterministisch. Nur die Selbstansicht zeigt Fortschritt — oeffentlich bleibt die nackte
+ * Zahl verborgen (Design-Prinzip). Bronze->Silber-Schwelle bzw. Silber->Gold-Schwelle.
+ */
+export function rangFortschritt(
+  score: number,
+  tier: Tier,
+  config: RangConfig = DEFAULT_RANG_CONFIG,
+): { naechster: Tier | null; prozent: number } {
+  if (tier === 'gold') return { naechster: null, prozent: 100 }
+  const schwelle = tier === 'silber' ? config.schwelleGold : config.schwelleSilber
+  const naechster: Tier = tier === 'silber' ? 'gold' : 'silber'
+  const prozent = schwelle > 0 ? Math.max(0, Math.min(100, Math.round((score / schwelle) * 100))) : 0
+  return { naechster, prozent }
+}
