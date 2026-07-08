@@ -32,6 +32,7 @@ export function deriveClaimWorkflowState(row: ClaimWorkstateRow, now: Date = new
     kind: 'claim',
     id: row.claim_id,
     fallId: row.fall_id,
+    kundenbetreuerId: row.kundenbetreuer_id,
     claimNummer: row.claim_nummer,
     stage,
     subState,

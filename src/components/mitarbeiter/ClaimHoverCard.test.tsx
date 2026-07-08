@@ -8,7 +8,7 @@ import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
 vi.mock('@/app/mitarbeiter/claim-edit-actions', () => ({ updateClaimField: vi.fn(async () => ({ ok: true })), ALLOWED_CLAIM_FIELDS: ['notizen','interne_notizen','schadens_hoehe_netto'] }))
 
 const item: ClaimWorkItem = {
-  kind: 'claim', id: 'c1', fallId: 'f1', claimNummer: 'CLM-1', stage: 'begutachtung', subState: 'gutachten',
+  kind: 'claim', id: 'c1', fallId: 'f1', kundenbetreuerId: 'kb1', claimNummer: 'CLM-1', stage: 'begutachtung', subState: 'gutachten',
   nextActionCode: 'gutachten_ausstehend', ownerRole: 'sv', waitingOn: 'sv', isOverdue: false, overdueSinceDays: null,
   display: { title: 'Müller', kennzeichen: 'K-AB 1', schadenhoehe: 4500 },
   editable: { notizen: 'Kunde nicht erreicht', interneNotizen: null, schadensHoeheNetto: 4500 },
