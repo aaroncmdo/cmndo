@@ -7,7 +7,7 @@
 
 import { useEffect, useState } from 'react'
 import { Button } from '@/components/primitives'
-import { ladeClaimThreads, type ClaimThreadInfo } from '@/lib/chat/thread-actions'
+import { ladeClaimThreads, holeOderErstelleGruppenThread, type ClaimThreadInfo } from '@/lib/chat/thread-actions'
 import { ClaimThreadChat } from './ClaimThreadChat'
 
 export function ClaimChatPanel({ claimId, currentUserId }: { claimId: string; currentUserId: string }) {
@@ -18,6 +18,8 @@ export function ClaimChatPanel({ claimId, currentUserId }: { claimId: string; cu
   useEffect(() => {
     let ok = true
     void (async () => {
+      // Kunde-Gruppe lazy sicherstellen, damit auch Claims ohne Backfill-Thread sofort einen Chat haben.
+      await holeOderErstelleGruppenThread(claimId, 'kunde_gruppe')
       const res = await ladeClaimThreads(claimId)
       if (ok && res.ok) {
         setThreads(res.data)
