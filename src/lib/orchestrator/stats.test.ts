@@ -1,7 +1,27 @@
-import { describe, it, expect } from 'vitest'
-import { windowAndCount, computeReadiness } from './stats'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { windowAndCount, computeReadiness, getTypeStats } from './stats'
 import type { AutoMode } from './types'
 import { GRADUATION } from './types'
+
+// Mock-Infrastruktur fuer den getTypeStats-DB-Loader (quelle-Filter-Test).
+// vi.hoisted, damit eqCalls in der gehoisteten vi.mock-Factory sichtbar ist.
+const { eqCalls } = vi.hoisted(() => ({ eqCalls: [] as Array<[string, unknown]> }))
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => {
+    const builder = {
+      select: () => builder,
+      in: () => builder,
+      eq: (col: string, val: unknown) => {
+        eqCalls.push([col, val])
+        return builder
+      },
+      then: (resolve: (v: { data: unknown[]; error: null }) => void) =>
+        resolve({ data: [], error: null }),
+    }
+    return { from: () => builder }
+  },
+}))
+vi.mock('./policy', () => ({ getAllPolicies: async () => ({}) }))
 
 // ── windowAndCount ────────────────────────────────────────────────────────────
 
@@ -131,5 +151,20 @@ describe('GRADUATION-Konstanten', () => {
   it('hat quoteSchwelle=0.8 und minEntscheidungen=30', () => {
     expect(GRADUATION.quoteSchwelle).toBe(0.8)
     expect(GRADUATION.minEntscheidungen).toBe(30)
+  })
+})
+
+// ── getTypeStats quelle-Filter ────────────────────────────────────────────────
+// Die Auto-Graduierung bewertet NUR die autonome Orchestrator-Qualitaet.
+// Mit drei quelle-Werten (orchestrator/copilot/aufsicht) auf dem geteilten Spine
+// duerfen copilot-/aufsicht-Entscheidungen die Graduierungs-Quote nicht verzerren.
+describe('getTypeStats quelle-Filter', () => {
+  beforeEach(() => {
+    eqCalls.length = 0
+  })
+
+  it('filtert quelle=orchestrator (copilot/aufsicht-Entscheidungen fliessen nicht in die Quote)', async () => {
+    await getTypeStats()
+    expect(eqCalls).toContainEqual(['quelle', 'orchestrator'])
   })
 })
