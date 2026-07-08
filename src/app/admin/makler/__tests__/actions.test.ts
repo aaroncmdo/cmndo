@@ -1,5 +1,13 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Mailer mocken: Unit-Isolation (kein echtes Rendern/Senden) + vermeidet das
+// Laden von @react-email/render in der Test-Umgebung.
+const { sendMaklerWelcomeMock } = vi.hoisted(() => ({ sendMaklerWelcomeMock: vi.fn() }))
+vi.mock('@/lib/email/google/flows', () => ({ sendMaklerWelcome: sendMaklerWelcomeMock }))
+// promo-code.ts ist 'server-only' (import bricht in vitest) -> mocken, damit der
+// anlegePartnerKern-Promo-Zweig deterministisch laeuft (nicht env-abhaengig geskippt wird).
+vi.mock('@/lib/makler/promo-code', () => ({ generatePromoCode: () => 'MK-TEST' }))
+
 let adminRolle = 'admin'
 vi.mock('@/lib/supabase/server', () => ({
   createClient: async () => ({
@@ -17,6 +25,10 @@ let maklerInsertResult: { data: { id: string } | null; error: { message: string 
   data: { id: 'makler-1' }, error: null,
 }
 let promoInsertError: { message: string } | null = null
+let maklerSelectResult: { data: { firma: string; email: string | null; ansprechpartner_vorname: string | null } | null } = {
+  data: { firma: 'Aaron der Makler', email: 'a@b.de', ansprechpartner_vorname: 'Aaron' },
+}
+let promoSelectResult: { data: { code: string } | null } = { data: { code: 'MK-TEST' } }
 const calls: string[] = []
 
 function makeAdmin() {
@@ -36,12 +48,24 @@ function makeAdmin() {
         return Promise.resolve({ error: null })
       },
       delete: () => ({ eq: async () => { calls.push(`delete:${table}`); return { error: null } } }),
+      select: () => {
+        // makler/promotion_codes -> konfigurierbar (resendMaklerWelcome + createMakler-Welcome-Read).
+        // *_staffel_stufen -> "existiert bereits" (truthy), damit setzeStandardStaffel early-returned
+        // und createMakler denselben Insert-Pfad wie in CI behaelt (kein zusaetzlicher Staffel-Insert).
+        const result =
+          table === 'makler' ? maklerSelectResult
+          : table === 'promotion_codes' ? promoSelectResult
+          : (table === 'makler_staffel_stufen' || table === 'werkstatt_staffel_stufen') ? { data: { id: 'existing' } }
+          : { data: null }
+        const maybeSingle = async () => result
+        return { eq: () => ({ maybeSingle, limit: () => ({ maybeSingle }) }) }
+      },
     }),
   }
 }
 vi.mock('@/lib/supabase/admin', () => ({ createAdminClient: () => makeAdmin() }))
 
-import { createMakler } from '../actions'
+import { createMakler, resendMaklerWelcome } from '../actions'
 
 function fd(obj: Record<string, string>) {
   const f = new FormData()
@@ -55,6 +79,9 @@ beforeEach(() => {
   profileInsertError = null
   maklerInsertResult = { data: { id: 'makler-1' }, error: null }
   promoInsertError = null
+  maklerSelectResult = { data: { firma: 'Aaron der Makler', email: 'a@b.de', ansprechpartner_vorname: 'Aaron' } }
+  promoSelectResult = { data: { code: 'MK-TEST' } }
+  sendMaklerWelcomeMock.mockReset()
 })
 
 describe('createMakler', () => {
@@ -98,5 +125,37 @@ describe('createMakler', () => {
     promoInsertError = { message: 'irgendwas' }
     const r = await createMakler(fd({ firma: 'X', email: 'a@b.de', ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster' }))
     expect(r.ok).toBe(true)
+  })
+})
+
+describe('resendMaklerWelcome', () => {
+  it('admin: laedt Makler + sendet Login-Mail mit allowInternalRecipient, ok:true', async () => {
+    const r = await resendMaklerWelcome('makler-1')
+    expect(r.ok).toBe(true)
+    expect(sendMaklerWelcomeMock).toHaveBeenCalledTimes(1)
+    expect(sendMaklerWelcomeMock).toHaveBeenCalledWith(
+      expect.objectContaining({ to: 'a@b.de', firma: 'Aaron der Makler', vorname: 'Aaron' }),
+      { allowInternalRecipient: true },
+    )
+  })
+
+  it('Nicht-Admin -> ok:false, kein Send', async () => {
+    adminRolle = 'kunde'
+    const r = await resendMaklerWelcome('makler-1')
+    expect(r.ok).toBe(false)
+    expect(sendMaklerWelcomeMock).not.toHaveBeenCalled()
+  })
+
+  it('Makler nicht gefunden -> ok:false, kein Send', async () => {
+    maklerSelectResult = { data: null }
+    const r = await resendMaklerWelcome('nope')
+    expect(r.ok).toBe(false)
+    expect(sendMaklerWelcomeMock).not.toHaveBeenCalled()
+  })
+
+  it('Send-Fehler -> ok:false', async () => {
+    sendMaklerWelcomeMock.mockRejectedValueOnce(new Error('smtp down'))
+    const r = await resendMaklerWelcome('makler-1')
+    expect(r.ok).toBe(false)
   })
 })
