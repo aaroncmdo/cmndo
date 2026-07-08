@@ -47,6 +47,7 @@ import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntsc
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
+import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -747,9 +748,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 kundeVorname: kundeVorname ?? null,
               }
             : null
-          // SP-D: Selbstzahler bekommen die reduzierte Reparatur-Strecke (Schaden -> Werkstatt
-          // -> Termin -> Reparatur) statt des SV/Gutachten/Regulierungs-Steppers.
-          if (claimExtra?.abrechnungsweg === 'selbstzahler') {
+          // SP-D + WS2: Werkstatt-Reparatur-Claims (Selbstzahler ODER Kasko mit freier Werkstattwahl)
+          // bekommen die reduzierte Reparatur-Strecke (Schaden -> Werkstatt -> Termin -> Reparatur)
+          // statt des SV/Gutachten/Regulierungs-Steppers.
+          if (istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null)) {
             return (
               <SelbstzahlerReparaturStepper
                 hatWerkstatt={!!reparaturWerkstattId}
