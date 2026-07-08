@@ -18,7 +18,15 @@ import {
 } from '@/lib/chat/thread-actions'
 import { ClaimThreadChat } from './ClaimThreadChat'
 
-export function ClaimChatPanel({ claimId, currentUserId }: { claimId: string; currentUserId: string }) {
+export function ClaimChatPanel({
+  claimId,
+  currentUserId,
+  istStaff = false,
+}: {
+  claimId: string
+  currentUserId: string
+  istStaff?: boolean
+}) {
   const [threads, setThreads] = useState<ClaimThreadInfo[]>([])
   const [kandidaten, setKandidaten] = useState<ClaimBeteiligter[]>([])
   const [aktiv, setAktiv] = useState<string | null>(null)
@@ -31,6 +39,8 @@ export function ClaimChatPanel({ claimId, currentUserId }: { claimId: string; cu
     void (async () => {
       // Kunde-Gruppe lazy sicherstellen, damit auch Claims ohne Backfill-Thread sofort einen Chat haben.
       await holeOderErstelleGruppenThread(claimId, 'kunde_gruppe')
+      // Staff bekommen zusaetzlich den team-internen Thread (Ersatz fuer chat_kb_sv, kunde-unsichtbar via RLS).
+      if (istStaff) await holeOderErstelleGruppenThread(claimId, 'team_intern')
       const res = await ladeClaimThreads(claimId)
       if (ok && res.ok) {
         setThreads(res.data)
@@ -43,7 +53,7 @@ export function ClaimChatPanel({ claimId, currentUserId }: { claimId: string; cu
     return () => {
       ok = false
     }
-  }, [claimId])
+  }, [claimId, istStaff])
 
   async function starteDm(userId: string) {
     setDmBusy(userId)
