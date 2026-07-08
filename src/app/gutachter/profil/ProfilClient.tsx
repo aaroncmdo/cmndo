@@ -7,7 +7,7 @@ import Link from 'next/link'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
 import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
-import { ANREDE_OPTIONEN, TITEL_OPTIONEN, QUALIFIKATIONEN, SPEZIFIKATIONEN, SCHADENARTEN } from '@/app/admin/sachverstaendige/anlegen/constants'
+import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import GoogleBusinessFeld from '@/components/GoogleBusinessFeld'
 import { LoadingButton } from '@/components/ui/loading-button'
@@ -19,6 +19,9 @@ import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 import { TotpEnrollCard } from '@/components/auth/TotpEnrollCard'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 import { FieldRow, ControlledRow, SelectRow, ROW_WRAPPER_CLS, ROW_LABEL_CLS } from './_components/fields'
+import { ProfilSpezialisierung } from './_components/ProfilSpezialisierung'
+import { ProfilCommunityPrivacy } from './_components/ProfilCommunityPrivacy'
+import { ProfilVertrag } from './_components/ProfilVertrag'
 // AAR-369: Profilbild-Upload + Anzeige-Felder
 import AvatarUpload from '@/components/shared/AvatarUpload'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -338,12 +341,6 @@ export default function ProfilClient({
                 </>
               )}
 
-              <div className="pt-3 mt-3 border-t border-claimondo-border">
-                <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Vertrag</p>
-              </div>
-              <FieldRow label="Paket" value={PAKET_LABELS[sv.paket] ?? sv.paket ?? '—'} />
-              <FieldRow label="Offene Fälle" value={`${sv.offene_faelle} / ${sv.paket_faelle_gesamt}`} />
-              <FieldRow label="Zugewiesene Fälle gesamt" value={String(faelleCount)} />
             </div>
 
             {/* Actions */}
@@ -373,6 +370,13 @@ export default function ProfilClient({
           </SectionCard>
         </form>
 
+        <ProfilVertrag
+          paketLabel={PAKET_LABELS[sv.paket] ?? sv.paket ?? '—'}
+          offene={sv.offene_faelle}
+          gesamt={sv.paket_faelle_gesamt}
+          zugewiesen={faelleCount}
+        />
+
         {/* AAR-720: Kalender-Verbindung komplett nach Einstellungen umgezogen.
             Google, Apple iCloud, CalDAV + Status + Disconnect liegen jetzt
             unter /gutachter/einstellungen/kalender. Hier auf dem Profil nur
@@ -394,49 +398,16 @@ export default function ProfilClient({
         </Link>
 
         {/* KFZ-154: 3 Spezialisierungs-Listen */}
-        <SectionCard className="p-6 mt-5">
-          <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Spezialisierungen</h2>
-          <p className="text-xs text-claimondo-ondo/70 mb-4">
-            Wir nutzen diese Angaben um dir passende Fälle zuzuordnen. Änderungen werden sofort gespeichert.
-          </p>
-          <div className="space-y-5">
-            <SpezSection
-              svId={sv.id}
-              column="qualifikationen_neu"
-              title="Qualifikationen"
-              hint="Was bietest du fachlich an?"
-              options={QUALIFIKATIONEN}
-              initial={sv.qualifikationen_neu ?? []}
-            />
-            <SpezSection
-              svId={sv.id}
-              column="spezifikationen"
-              title="Spezifikationen"
-              hint="Auf welche Fahrzeug-Arten bist du spezialisiert?"
-              options={SPEZIFIKATIONEN}
-              initial={sv.spezifikationen ?? []}
-            />
-            <SpezSection
-              svId={sv.id}
-              column="schadenarten"
-              title="Schadenarten"
-              hint="Welche Schadenarten bearbeitest du?"
-              options={SCHADENARTEN}
-              initial={sv.schadenarten ?? []}
-            />
-          </div>
-        </SectionCard>
+        <ProfilSpezialisierung
+          svId={sv.id}
+          qualifikationen={sv.qualifikationen_neu ?? []}
+          spezifikationen={sv.spezifikationen ?? []}
+          schadenarten={sv.schadenarten ?? []}
+        />
 
         {/* KFZ-152 Phase 3 Follow-up: Privacy-Toggle (nur fuer Community-Mitglieder) */}
         {sv.rolle_in_organisation === 'community_member' && (
-          <SectionCard className="p-6 mt-5">
-            <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Community-Privatsphäre</h2>
-            <p className="text-xs text-claimondo-ondo/70 mb-4">
-              Wenn aktiv, sehen andere Community-Mitglieder im Leaderboard „Anonym" statt deines Namens.
-              Deine Statistiken (Fälle, Umsatz) bleiben sichtbar — nur dein Name wird verborgen.
-            </p>
-            <PrivacyToggle svId={sv.id} initial={sv.community_anonym} />
-          </SectionCard>
+          <ProfilCommunityPrivacy svId={sv.id} initial={sv.community_anonym} />
         )}
 
         {/* KFZ-158 Phase 2: GPS-Tracking Privacy-Toggle */}
@@ -631,59 +602,6 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
   )
 }
 
-// KFZ-152 Phase 3 Follow-up: Privacy-Toggle fuer Community-Mitglieder.
-// Toggled sachverstaendige.community_anonym zwischen true/false.
-function PrivacyToggle({ svId, initial }: { svId: string; initial: boolean }) {
-  const [active, setActive] = useState(initial)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-
-  async function toggle() {
-    setSaving(true)
-    setError(null)
-    const next = !active
-    setActive(next)
-    try {
-      const supabase = createClient()
-      const { error: updErr } = await supabase
-        .from('sachverstaendige')
-        .update({ community_anonym: next })
-        .eq('id', svId)
-      if (updErr) {
-        setError(updErr.message)
-        setActive(!next) // rollback UI
-      } else {
-        router.refresh()
-      }
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={toggle}
-        disabled={saving}
-        className={`relative inline-flex items-center w-12 h-6 rounded-full transition-colors disabled:opacity-50 ${
-          active ? 'bg-success' : 'bg-claimondo-border'
-        }`}
-      >
-        <span className={`inline-block w-5 h-5 rounded-full bg-white shadow transform transition-transform ${
-          active ? 'translate-x-6' : 'translate-x-0.5'
-        }`} />
-      </button>
-      <span className="ml-3 text-sm text-claimondo-navy">
-        {active ? 'Anonym aktiviert' : 'Name sichtbar'}
-        {saving && <span className="text-claimondo-ondo/70 text-xs ml-2">speichert...</span>}
-      </span>
-      {error && <p className="text-xs text-danger mt-2">{error}</p>}
-    </div>
-  )
-}
-
 // KFZ-158 Phase 2: GPS-Tracking Toggle
 // KFZ-184: 2FA Telefon-Verifizierung Section
 function TwoFaPhoneSection() {
@@ -726,80 +644,6 @@ function GpsTrackingToggle({ svId, initial }: { svId: string; initial: boolean }
         {active ? 'Live-Tracking aktiv' : 'Tracking deaktiviert'}
         {saving && <span className="text-claimondo-ondo/70 text-xs ml-2">speichert...</span>}
       </span>
-    </div>
-  )
-}
-
-// KFZ-154 Cleanup: SV pflegt seine 3 Spezialisierungs-Listen direkt aus dem
-// Profil (Tags). Legacy 'qualifikationen' Spalte ist gedroppt.
-function SpezSection({
-  svId, column, title, hint, options, initial,
-}: {
-  svId: string
-  column: 'qualifikationen_neu' | 'spezifikationen' | 'schadenarten'
-  title: string
-  hint: string
-  options: ReadonlyArray<string>
-  initial: string[]
-}) {
-  const [values, setValues] = useState<string[]>(initial)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const router = useRouter()
-
-  async function toggle(value: string) {
-    const next = values.includes(value) ? values.filter(v => v !== value) : [...values, value]
-    setValues(next)
-    setSaving(true)
-    setError(null)
-    try {
-      const supabase = createClient()
-      const update: Record<string, string[]> = { [column]: next }
-      const { error: updErr } = await supabase
-        .from('sachverstaendige')
-        .update(update)
-        .eq('id', svId)
-      if (updErr) {
-        setError(updErr.message)
-        setValues(values) // rollback UI
-      } else {
-        router.refresh()
-      }
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  return (
-    <div>
-      <div className="flex items-baseline justify-between mb-1">
-        <h3 className="text-sm font-medium text-claimondo-navy">{title}</h3>
-        <span className="text-[10px] text-claimondo-ondo/70">
-          {values.length} gewaehlt{saving ? ' · speichert...' : ''}
-        </span>
-      </div>
-      <p className="text-xs text-claimondo-ondo mb-2">{hint}</p>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map(opt => {
-          const active = values.includes(opt)
-          return (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => toggle(opt)}
-              disabled={saving}
-              className={`px-3 py-1.5 rounded-ios-lg text-xs font-medium transition-colors disabled:opacity-60 ${
-                active
-                  ? 'bg-[var(--brand-secondary)] text-white'
-                  : 'bg-claimondo-bg text-claimondo-ondo hover:text-claimondo-navy'
-              }`}
-            >
-              {opt}
-            </button>
-          )
-        })}
-      </div>
-      {error && <p className="text-xs text-danger mt-2">{error}</p>}
     </div>
   )
 }
