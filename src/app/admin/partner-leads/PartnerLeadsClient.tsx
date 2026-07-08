@@ -6,7 +6,7 @@
 // Nutzt ausschliesslich Shared-Components (DataTable, StatusBadge, forms/*,
 // primitives Button/Modal) — kein handgerolltes Button/Card/Table-Markup.
 
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -46,10 +46,18 @@ import {
   konvertierePartnerLead,
   protokolliereAktivitaet,
   importCsvLeads,
+  schlageCsvMappingVor,
   scrapePartnerLeadsVorschau,
   importScrapedLeads,
 } from './actions'
-import { parseCsv, mapCsvZuLeads, type PartnerCsvLead } from '@/lib/partner/csv-import'
+import {
+  parseCsv,
+  mapCsvMitMapping,
+  heuristischesMapping,
+  CSV_ZIEL_FELDER,
+  type CsvZielFeld,
+  type PartnerCsvLead,
+} from '@/lib/partner/csv-import'
 import type { ScrapeKandidat } from '@/lib/partner/scraping'
 import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow } from './types'
 import {
@@ -515,14 +523,32 @@ function CreateProspectModal({
 
 // ─── CSV-Import-Modal ─────────────────────────────────────────────────────────
 
-// Erwartete (flexibel gemappte) Spalten fuer die Hinweis-Zeile im Modal.
-const CSV_ERWARTETE_SPALTEN = 'Firma, E-Mail, Telefon, Vorname, Nachname, PLZ, Ort'
+// Deutsche Labels fuer die Mapping-Dropdowns.
+const CSV_ZIEL_FELD_LABELS: Record<CsvZielFeld, string> = {
+  firma: 'Firma',
+  email: 'E-Mail',
+  telefon: 'Telefon',
+  ansprechpartner_vorname: 'Vorname',
+  ansprechpartner_nachname: 'Nachname',
+  plz: 'PLZ',
+  ort: 'Ort',
+  datNr: 'DAT-Nr',
+  ihk: 'IHK-Nr',
+  ignorieren: 'Ignorieren',
+}
 
 // Vorschau-Zustand nach dem Datei-Parsen (clientseitig, vor dem Import).
 type CsvVorschau = {
   dateiName: string
   valide: PartnerCsvLead[]
   uebersprungen: number
+}
+
+// Roh-CSV-Daten fuer das Live-Mapping (Header + Datenzeilen).
+type CsvRohdaten = {
+  dateiName: string
+  header: string[]
+  rows: string[][]
 }
 
 function ImportCsvModal({
@@ -535,12 +561,17 @@ function ImportCsvModal({
   onImported: () => void
 }) {
   const [rolle, setRolle] = useState<PartnerRolle>('sachverstaendiger')
-  const [vorschau, setVorschau] = useState<CsvVorschau | null>(null)
+  const [rohdaten, setRohdaten] = useState<CsvRohdaten | null>(null)
+  const [mapping, setMapping] = useState<CsvZielFeld[]>([])
+  const [mappingQuelle, setMappingQuelle] = useState<'ki' | 'heuristik' | null>(null)
   const [parseFehler, setParseFehler] = useState<string | null>(null)
   const [importing, setImporting] = useState(false)
+  const [mappingPending, startMappingTransition] = useTransition()
 
   function reset() {
-    setVorschau(null)
+    setRohdaten(null)
+    setMapping([])
+    setMappingQuelle(null)
     setParseFehler(null)
     setImporting(false)
   }
@@ -554,7 +585,9 @@ function ImportCsvModal({
     const file = e.target.files?.[0]
     if (!file) return
     setParseFehler(null)
-    setVorschau(null)
+    setRohdaten(null)
+    setMapping([])
+    setMappingQuelle(null)
     try {
       const text = await file.text()
       const { header, rows } = parseCsv(text)
@@ -562,23 +595,52 @@ function ImportCsvModal({
         setParseFehler('Die Datei enthält keine erkennbare Kopfzeile.')
         return
       }
-      const { valide, uebersprungen } = mapCsvZuLeads(header, rows, rolle)
-      if (valide.length === 0) {
-        setParseFehler(
-          uebersprungen > 0
-            ? `Keine gültigen Zeilen — allen ${uebersprungen} Zeilen fehlt die Spalte „Firma".`
-            : 'Keine Datenzeilen gefunden. Erwartete Spalten: ' + CSV_ERWARTETE_SPALTEN + '.',
-        )
+      if (rows.length === 0) {
+        setParseFehler('Keine Datenzeilen gefunden — die Datei enthält nur eine Kopfzeile.')
         return
       }
-      setVorschau({ dateiName: file.name, valide, uebersprungen })
+      // Heuristik sofort als Initialwert setzen (kein Flicker waehrend KI-Call).
+      const initialMapping = heuristischesMapping(header)
+      setMapping(initialMapping)
+      setRohdaten({ dateiName: file.name, header, rows })
+
+      // KI-Vorschlag asynchron nachladen (non-blocking per startTransition).
+      startMappingTransition(async () => {
+        const result = await schlageCsvMappingVor(header, rows)
+        if (result.ok) {
+          setMapping(result.mapping)
+          setMappingQuelle(result.quelle)
+        } else {
+          // Heuristik-Fallback bleibt (bereits gesetzt) — kein Fehler anzeigen.
+          setMappingQuelle('heuristik')
+        }
+      })
     } catch {
       setParseFehler('Datei konnte nicht gelesen werden — bitte eine gültige CSV-Datei wählen.')
     }
   }
 
+  function updateMapping(idx: number, zielFeld: CsvZielFeld) {
+    setMapping((prev) => {
+      const next = [...prev]
+      next[idx] = zielFeld
+      return next
+    })
+  }
+
+  // Live-Vorschau: immer aus dem aktuellen Mapping ableiten.
+  const vorschau: CsvVorschau | null = rohdaten
+    ? (() => {
+        const { valide, uebersprungen } = mapCsvMitMapping(rohdaten.rows, mapping)
+        return { dateiName: rohdaten.dateiName, valide, uebersprungen }
+      })()
+    : null
+
+  const hatFirmaSpalte = mapping.includes('firma')
+  const vorschauZeilen = vorschau?.valide.slice(0, 5) ?? []
+
   async function handleImport() {
-    if (!vorschau) return
+    if (!vorschau || vorschau.valide.length === 0) return
     setImporting(true)
     try {
       const result = await importCsvLeads(rolle, vorschau.valide)
@@ -596,10 +658,8 @@ function ImportCsvModal({
     }
   }
 
-  const vorschauZeilen = vorschau?.valide.slice(0, 5) ?? []
-
   return (
-    <Modal open={open} onClose={handleClose} maxWidth={640} ariaLabel="CSV importieren">
+    <Modal open={open} onClose={handleClose} maxWidth={680} ariaLabel="CSV importieren">
       <h2 className="text-claimondo-navy font-semibold text-lg mb-1">CSV importieren</h2>
       <p className="text-sm text-claimondo-ondo mb-4">
         Leads aus einer CSV-Datei für die gewählte Rolle anlegen.
@@ -631,8 +691,8 @@ function ImportCsvModal({
             className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy file:mr-3 file:rounded-ios-sm file:border-0 file:bg-claimondo-navy file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:cursor-pointer focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
           />
           <span className="text-xs text-claimondo-shield">
-            Erkannte Spalten (flexibel, deutsch/englisch): {CSV_ERWARTETE_SPALTEN}. Nur Zeilen mit
-            Firma werden importiert.
+            Spalten werden automatisch zugeordnet (KI-Vorschlag oder Heuristik). Nur Zeilen
+            mit Firma werden importiert.
           </span>
         </div>
 
@@ -642,7 +702,51 @@ function ImportCsvModal({
           </div>
         )}
 
-        {vorschau && (
+        {/* Mapping-Panel — erscheint sobald eine Datei geladen ist */}
+        {rohdaten && rohdaten.header.length > 0 && (
+          <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
+            <div className="mb-2 flex items-center gap-2">
+              <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
+                Spalten-Zuordnung
+              </span>
+              {mappingPending && (
+                <span className="text-[11px] text-claimondo-shield">KI analysiert…</span>
+              )}
+              {!mappingPending && mappingQuelle === 'ki' && (
+                <span className="inline-flex items-center rounded-full bg-claimondo-navy/[0.08] px-2 py-0.5 text-[11px] font-medium text-claimondo-navy">
+                  KI-Vorschlag
+                </span>
+              )}
+            </div>
+            <div className="space-y-1.5">
+              {rohdaten.header.map((col, i) => (
+                <div key={i} className="flex items-center gap-2">
+                  <span className="w-32 shrink-0 truncate text-xs font-medium text-claimondo-navy" title={col}>
+                    {col}
+                  </span>
+                  <SelectField
+                    label=""
+                    value={mapping[i] ?? 'ignorieren'}
+                    onChange={(e) => updateMapping(i, e.target.value as CsvZielFeld)}
+                    options={CSV_ZIEL_FELDER.map((f) => ({
+                      value: f,
+                      label: CSV_ZIEL_FELD_LABELS[f],
+                    }))}
+                  />
+                </div>
+              ))}
+            </div>
+            {!hatFirmaSpalte && (
+              <div className="mt-2 rounded-ios-sm bg-warning-soft px-3 py-2 text-xs text-warning-strong">
+                Bitte mindestens eine Spalte auf „Firma" setzen — Zeilen ohne Firma werden
+                übersprungen.
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Vorschau-Tabelle */}
+        {vorschau && vorschau.valide.length > 0 && (
           <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
             <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
               <span className="font-medium text-claimondo-navy">{vorschau.dateiName}</span>
@@ -691,6 +795,15 @@ function ImportCsvModal({
           </div>
         )}
 
+        {/* Hinweis: Datei geladen aber 0 valide Leads */}
+        {rohdaten && vorschau && vorschau.valide.length === 0 && hatFirmaSpalte && (
+          <div className="rounded-ios-md bg-warning-soft px-3 py-2 text-xs text-warning-strong">
+            {vorschau.uebersprungen > 0
+              ? `Keine gültigen Zeilen — allen ${vorschau.uebersprungen} Zeilen fehlt der Wert in der Firma-Spalte.`
+              : 'Keine Datenzeilen mit Firma-Inhalt gefunden.'}
+          </div>
+        )}
+
         <div className="flex gap-3 pt-2">
           <Button variant="ghost" fullWidth onClick={handleClose} type="button">
             Abbrechen
@@ -700,9 +813,17 @@ function ImportCsvModal({
             fullWidth
             onClick={handleImport}
             loading={importing}
-            disabled={importing || !vorschau || vorschau.valide.length === 0}
+            disabled={
+              importing ||
+              !vorschau ||
+              vorschau.valide.length === 0 ||
+              !hatFirmaSpalte ||
+              mappingPending
+            }
           >
-            {vorschau ? `${vorschau.valide.length} importieren` : 'Importieren'}
+            {vorschau && vorschau.valide.length > 0
+              ? `${vorschau.valide.length} importieren`
+              : 'Importieren'}
           </Button>
         </div>
       </div>
