@@ -100,14 +100,16 @@ export async function ladeMaklerKandidaten(supabase: Sb): Promise<Kandidat[]> {
     .is('gesperrt_am', null)
   if (error || !makler || makler.length === 0) return []
   const ids: string[] = makler.map((m: { id: string }) => m.id)
+  // Provisions-Ledger-Unifikation (Phase 3): partner_provisionen (typ-gefiltert) statt makler_provisionen.
   const { data: prov } = await supabase
-    .from('makler_provisionen')
-    .select('makler_id, status')
-    .in('makler_id', ids)
+    .from('partner_provisionen')
+    .select('partner_id, status')
+    .eq('partner_typ', 'makler')
+    .in('partner_id', ids)
   const volumen = new Map<string, number>()
-  for (const p of (prov ?? []) as { makler_id: string; status: string | null }[]) {
+  for (const p of (prov ?? []) as { partner_id: string; status: string | null }[]) {
     if (p.status === 'freigegeben' || p.status === 'ausgezahlt') {
-      volumen.set(p.makler_id, (volumen.get(p.makler_id) ?? 0) + 1)
+      volumen.set(p.partner_id, (volumen.get(p.partner_id) ?? 0) + 1)
     }
   }
   return makler.map((m: { id: string; status: string | null; aktiviert_am: string | null }): Kandidat => ({
