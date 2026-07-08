@@ -99,10 +99,14 @@ export const googleProvider: KalenderProvider = {
 type CalDavConn = { server_url: string; username: string; password_encrypted: string; calendar_url: string | null }
 
 async function caldavConn(db: SupabaseClient, profileId: string): Promise<CalDavConn | null> {
+  // Kanonisch aus sv_kalender_verbindungen (Connect-Quelle; kalender_verbindungen war nur
+  // Einmal-Backfill ohne Mirror -> neue Verbindungen fehlten). sv_id via profile_id auflösen.
+  const { data: sv } = await db.from('sachverstaendige').select('id').eq('profile_id', profileId).maybeSingle()
+  if (!sv) return null
   const { data } = await db
-    .from('kalender_verbindungen')
+    .from('sv_kalender_verbindungen')
     .select('server_url, username, password_encrypted, calendar_url')
-    .eq('profile_id', profileId)
+    .eq('sv_id', sv.id as string)
     .eq('provider', 'caldav')
     .maybeSingle()
   if (!data || !data.calendar_url) return null
@@ -140,11 +144,14 @@ export const caldavProvider: KalenderProvider = {
       // markieren, damit der SV im Profil "App-Passwort pruefen" sieht. Danach
       // rethrow → der aeussere Sync-Loop loggt + setzt results['caldav']='error'.
       if (err instanceof CalDavError && err.code === 'auth_failed') {
-        await db
-          .from('kalender_verbindungen')
-          .update({ last_error: 'Login fehlgeschlagen — App-Passwort prüfen', last_error_at: new Date().toISOString() })
-          .eq('profile_id', profileId)
-          .eq('provider', 'caldav')
+        const { data: svRow } = await db.from('sachverstaendige').select('id').eq('profile_id', profileId).maybeSingle()
+        if (svRow) {
+          await db
+            .from('sv_kalender_verbindungen')
+            .update({ last_error: 'Login fehlgeschlagen — App-Passwort prüfen', last_error_at: new Date().toISOString() })
+            .eq('sv_id', svRow.id as string)
+            .eq('provider', 'caldav')
+        }
       }
       throw err
     }

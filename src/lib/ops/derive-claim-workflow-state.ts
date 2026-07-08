@@ -32,6 +32,7 @@ export function deriveClaimWorkflowState(row: ClaimWorkstateRow, now: Date = new
     kind: 'claim',
     id: row.claim_id,
     fallId: row.fall_id,
+    kundenbetreuerId: row.kundenbetreuer_id,
     claimNummer: row.claim_nummer,
     stage,
     subState,
@@ -44,6 +45,11 @@ export function deriveClaimWorkflowState(row: ClaimWorkstateRow, now: Date = new
       title: row.kunde_name ?? row.claim_nummer ?? row.claim_id,
       kennzeichen: row.kennzeichen,
       schadenhoehe: row.schadenhoehe,
+    },
+    editable: {
+      notizen: row.edit_notizen,
+      interneNotizen: row.edit_interne_notizen,
+      schadensHoeheNetto: row.edit_schadens_hoehe_netto,
     },
   }
 }

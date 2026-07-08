@@ -25,6 +25,8 @@ const CONFIG: AnspruchConfig = {
   totalschadenSchwelleProzent: 0.9,
   reparaturGrenzeProzent: 1.3,
   wiederbeschaffungsdauerTage: { min: 10, max: 14 },
+  nutzungsausfallMaxTage: 12,
+  mietwagenMaxTage: 14,
   verbringungEur: 130,
   ummeldungEur: 75,
 }
@@ -38,27 +40,27 @@ function typen(r: ReturnType<typeof berechneAnspruchsSpanne>) {
 }
 
 describe('berechneAnspruchsSpanne', () => {
-  it('fahrbereit + kein EZ: reparatur + verbringung + gutachterkosten + anwaltskosten + kostenpauschale (default unverschuldet)', () => {
+  it('fahrbereit + kein EZ: reparatur + nutzungsausfall + verbringung + gutachterkosten + anwaltskosten + kostenpauschale', () => {
     const r = berechneAnspruchsSpanne(base, SAETZE, FAKTOREN, CONFIG)
-    expect(typen(r)).toEqual(['reparatur', 'verbringung', 'gutachterkosten', 'anwaltskosten', 'kostenpauschale'])
-    // reparatur 900..1800 + verbringung 130 + pauschale 30 ; gutachterkosten + anwaltskosten gegner-gedeckt (nicht in Gesamt)
-    expect(r.gesamtMinEur).toBe(1060)
-    expect(r.gesamtMaxEur).toBe(1960)
+    expect(typen(r)).toEqual(['reparatur', 'nutzungsausfall', 'verbringung', 'gutachterkosten', 'anwaltskosten', 'kostenpauschale'])
+    // reparatur 900..1800 + NA Klasse E 43x5..9 = 215..387 + verbringung 130 + pauschale 30 ; gutachter+anwalt gegner-gedeckt
+    expect(r.gesamtMinEur).toBe(1275)
+    expect(r.gesamtMaxEur).toBe(2347)
   })
 
-  it('nicht fahrbereit: nutzungsausfall (segment x dauer) + abschleppkosten kommen dazu', () => {
+  it('nicht fahrbereit: nutzungsausfall (klasse x dauer) + abschleppkosten kommen dazu', () => {
     const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false }, SAETZE, FAKTOREN, CONFIG)
     expect(typen(r)).toContain('nutzungsausfall')
     expect(typen(r)).toContain('abschleppkosten')
     const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
-    // mittelklasse 50..59 x dauer mittel 5..9 => 250..531
-    expect(na.minEur).toBe(250)
-    expect(na.maxEur).toBe(531)
+    // mittelklasse -> Klasse E 43 x dauer mittel 5..9 => 215..387
+    expect(na.minEur).toBe(215)
+    expect(na.maxEur).toBe(387)
   })
 
-  it('fahrbereit unterdrueckt nutzungsausfall UND abschleppkosten', () => {
+  it('fahrbereit unterdrueckt NUR abschleppkosten — nutzungsausfall bleibt (Reparaturdauer)', () => {
     const r = berechneAnspruchsSpanne({ ...base, fahrbereit: true }, SAETZE, FAKTOREN, CONFIG)
-    expect(typen(r)).not.toContain('nutzungsausfall')
+    expect(typen(r)).toContain('nutzungsausfall')
     expect(typen(r)).not.toContain('abschleppkosten')
   })
 
@@ -111,8 +113,8 @@ describe('berechneAnspruchsSpanne', () => {
     expect(s.totalschaden).toBeDefined()
     expect(s.totalschaden!.reparaturWeg).toBeNull()
     expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBeGreaterThan(0)
-    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(11105)  // 10500 Fahrzeugschaden + 500 NA + 30 Pauschale + 75 Ummeldung
-    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(18931)  // 18000 + 826 + 30 + 75
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(11035)  // 10500 Fahrzeugschaden + NA Klasse E 43x10=430 + 30 Pauschale + 75 Ummeldung
+    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(18707)  // 18000 + 43x14=602 + 30 + 75
     expect(s.totalschaden!.guenstiger).toBe('totalschaden')
     // gutachterkosten muss im TS-Weg vorhanden sein (gegner-getragen, null)
     const gk = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'gutachterkosten')
@@ -131,9 +133,9 @@ describe('berechneAnspruchsSpanne', () => {
     expect(tw.positionen.some((p) => p.typ === 'abschleppkosten')).toBe(true)
     const abschl = tw.positionen.find((p) => p.typ === 'abschleppkosten')!
     expect(abschl.minEur).toBe(150)   // CONFIG.abschleppMinEur
-    // fahrbereit=true hatte 11030/18856; fahrbereit=false addiert 150/350
-    expect(tw.summeMinEur).toBe(11255) // 10500 + 500 + 150 Abschlepp + 30 + 75 Ummeldung
-    expect(tw.summeMaxEur).toBe(19281) // 18000 + 826 + 350 + 30 + 75
+    // fahrbereit=true hatte 11035/18707; fahrbereit=false addiert 150/350
+    expect(tw.summeMinEur).toBe(11185) // 10500 + NA 430 + 150 Abschlepp + 30 + 75 Ummeldung
+    expect(tw.summeMaxEur).toBe(19057) // 18000 + 602 + 350 + 30 + 75
   })
 
   it('Zone B: 90-130% WBW -> beide Wege, Wertminderung im Reparatur-Weg', () => {
@@ -146,13 +148,13 @@ describe('berechneAnspruchsSpanne', () => {
     )
     expect(s.totalschaden!.reparaturWeg).not.toBeNull()
     expect(s.totalschaden!.reparaturWeg!.positionen.some((p) => p.typ === 'wertminderung')).toBe(true)
-    expect(s.totalschaden!.reparaturWeg!.summeMinEur).toBe(21310)   // reparatur 20000 + WM 1150 + Verbringung 130 + Pauschale 30
-    expect(s.totalschaden!.reparaturWeg!.summeMaxEur).toBe(29610)   // 26000 + 3450 + 130 + 30
-    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(14605) // 14000 + 500 + 30 + 75 Ummeldung
-    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(22931) // 22000 + 826 + 30 + 75
+    expect(s.totalschaden!.reparaturWeg!.summeMinEur).toBe(21525)   // reparatur 20000 + NA Klasse E 215 + WM 1150 + Verbringung 130 + Pauschale 30
+    expect(s.totalschaden!.reparaturWeg!.summeMaxEur).toBe(29997)   // 26000 + NA 387 + WM 3450 + 130 + 30
+    expect(s.totalschaden!.totalschadenWeg.summeMinEur).toBe(14535) // 14000 + NA Wiederbeschaffung 430 + 30 + 75 Ummeldung
+    expect(s.totalschaden!.totalschadenWeg.summeMaxEur).toBe(22707) // 22000 + 602 + 30 + 75
     // reparaturMitte 23000 < wbwMitte 25000 -> kein 130%-Hinweis
     expect(s.totalschaden!.hinweisReparatur).toBeUndefined()
-    // midpoint: reparaturMitte (21180+29480)/2 = 25330 >= tsMitte (14530+22856)/2 = 18693 -> 'reparatur'
+    // midpoint: reparaturMitteWeg (21525+29997)/2 = 25761 >= tsMitte (14535+22707)/2 = 18621 -> 'reparatur'
     expect(s.totalschaden!.guenstiger).toBe('reparatur')
   })
 
@@ -227,7 +229,7 @@ describe('Schuldfrage', () => {
     )
     const tw = s.totalschaden!.totalschadenWeg
     expect(tw.positionen.some((p) => p.typ === 'anwaltskosten')).toBe(true)
-    expect(tw.summeMinEur).toBe(11105) // Zone-C-Wert inkl. Ummeldung; Anwaltskosten null -> kein Summen-Effekt
+    expect(tw.summeMinEur).toBe(11035) // Zone-C-Wert inkl. Ummeldung; Anwaltskosten null -> kein Summen-Effekt
   })
 
   it('Totalschaden selbst: keine Anwaltskosten im TS-Weg', () => {
@@ -264,10 +266,29 @@ describe('Volle Positionen (Ersatzfahrzeug + Verbringung + Ummeldung)', () => {
     expect(typen(r)).not.toContain('mietwagen')
   })
 
-  it('fahrbereit: keine Ersatzfahrzeug-Position im Hauptweg', () => {
-    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: true }, SAETZE, FAKTOREN, CONFIG)
+  it('fahrbereit + ersatzfahrzeug=keins: keine Ersatzfahrzeug-Position im Hauptweg', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: true, ersatzfahrzeug: 'keins' }, SAETZE, FAKTOREN, CONFIG)
     expect(typen(r)).not.toContain('nutzungsausfall')
     expect(typen(r)).not.toContain('mietwagen')
+  })
+
+  it('fahrbereit + nutzungsausfall: NA erscheint jetzt auch bei fahrbereit (Reparaturfall, Klasse x Dauer)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: true, ersatzfahrzeug: 'nutzungsausfall' }, SAETZE, FAKTOREN, CONFIG)
+    expect(typen(r)).toContain('nutzungsausfall')
+    const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    // mittelklasse -> Klasse E (43) x dauer mittel 5..9 => 215..387 (kein Altersabschlag, ezJahr null)
+    expect(na.minEur).toBe(215)
+    expect(na.maxEur).toBe(387)
+  })
+
+  it('Altersabschlag wirkt im NA-Betrag: >5J mittelklasse -> Klasse D (38)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, ezJahr: 2019 }, SAETZE, FAKTOREN, CONFIG) // aktuellesJahr 2026 -> alter 7
+    const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    // Klasse D 38 x dauer mittel 5..9 => 190..342
+    expect(na.minEur).toBe(190)
+    expect(na.maxEur).toBe(342)
+    expect(na.hinweis).toMatch(/Klasse D/)
+    expect(na.hinweis).toMatch(/Rückstufung/)
   })
 
   it('Verbringung: bei nennenswerter Reparatur (>= Bagatelle) mit Fixbetrag', () => {
@@ -301,5 +322,44 @@ describe('Volle Positionen (Ersatzfahrzeug + Verbringung + Ummeldung)', () => {
     const tw = s.totalschaden!.totalschadenWeg
     expect(tw.positionen.some((p) => p.typ === 'mietwagen')).toBe(true)
     expect(tw.positionen.some((p) => p.typ === 'nutzungsausfall')).toBe(false)
+  })
+})
+
+describe('Hoechstdauern: Nutzungsausfall max 12 Tage (Reparatur), Mietwagen max 14 Tage', () => {
+  it('schwer Reparatur: Nutzungsausfall auf 12 Tage gedeckelt (dauer 10-21 -> 10-12)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, schweregrad: 'schwer' }, SAETZE, FAKTOREN, CONFIG)
+    expect(r.positionen.some((p) => p.typ === 'nutzungsausfall')).toBe(true)
+    const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    // mittelklasse -> Klasse E 43 x [10, min(21,12)=12] => 430..516
+    expect(na.minEur).toBe(430)
+    expect(na.maxEur).toBe(516)
+    expect(na.hinweis).toMatch(/× 10–12 Tage/)
+  })
+
+  it('schwer Reparatur: Mietwagen auf 14 Tage gedeckelt (dauer 10-21 -> 10-14)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, schweregrad: 'schwer', ersatzfahrzeug: 'mietwagen' }, SAETZE, FAKTOREN, CONFIG)
+    const mw = r.positionen.find((p) => p.typ === 'mietwagen')!
+    // mittelklasse mietwagen 60..85 x [10, min(21,14)=14] => 600..1190
+    expect(mw.minEur).toBe(600)
+    expect(mw.maxEur).toBe(1190)
+    expect(mw.hinweis).toMatch(/× 10–14 Tage/)
+  })
+
+  it('mittel Reparatur: keine Deckelung (dauer 5-9 unter Cap)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, schweregrad: 'mittel' }, SAETZE, FAKTOREN, CONFIG)
+    const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    expect(na.minEur).toBe(215) // 43 x 5
+    expect(na.maxEur).toBe(387) // 43 x 9
+  })
+
+  it('Totalschaden: Wiederbeschaffungs-Nutzungsausfall NICHT auf 12 gedeckelt (WBW-Dauer 10-14 bleibt)', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const na = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    // Klasse E 43 x 10..14 => 430..602 (kontext=wiederbeschaffung -> KEIN 12-Cap)
+    expect(na.minEur).toBe(430)
+    expect(na.maxEur).toBe(602)
   })
 })

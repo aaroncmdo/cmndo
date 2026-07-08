@@ -41,13 +41,19 @@ export default async function SVKalenderPage({
   // FreeBusy-Pfad zurückgerollt — wodurch CalDAV-Events (Apple/Fastmail/…)
   // komplett aus der SV-Kalender-UI verschwanden. KalenderRealtimeRefresh
   // unten triggert router.refresh() wenn neue Events eintreffen.
+  // 2026-07-08: Anzeige-Fenster geweitet ([-90d,+90d]) damit die Wochen-Navigation auch
+  // vergangene externe Termine zeigt. Der Sync cached [-90d,+365d] (fuers Finder-Busy via
+  // v_belegung); die Wochen-Ansicht braucht nur einen nav-tauglichen Ausschnitt.
   const now = new Date()
-  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
-  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
+  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90).toISOString()
+  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 90).toISOString()
+  // 2026-07-08: profil-gekeyt lesen. Der Sync-Cron (sync-to-cache) schreibt den Cache
+  // profil-gekeyed (profile_id gesetzt, sv_id meist NULL) — der frühere .eq('sv_id')-Reader
+  // matchte 1125/1129 Zeilen NICHT -> externe CalDAV-Events waren im Kalender unsichtbar.
   const { data: cachedEvents } = await supabase
     .from('sv_kalender_events_cache')
     .select('start_zeit, end_zeit')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .gte('start_zeit', fromIso)
     .lte('start_zeit', toIso)
     .order('start_zeit')
@@ -161,7 +167,7 @@ export default async function SVKalenderPage({
 
   return (
     <div className="h-full flex flex-col">
-      <KalenderRealtimeRefresh svId={sv.id} />
+      <KalenderRealtimeRefresh profileId={user.id} />
       {/* View-Toggle */}
       <div className="px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
         <PageHeader

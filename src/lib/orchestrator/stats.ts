@@ -127,9 +127,13 @@ export async function getTypeStats(): Promise<TypeStats[]> {
   try {
     const supabase = createAdminClient()
 
+    // Nur die AUTONOME Orchestrator-Qualitaet zaehlt fuer die Auto-Graduierung.
+    // Der Spine ist geteilt (quelle orchestrator|copilot|aufsicht) — copilot-/
+    // aufsicht-Entscheidungen duerfen die Graduierungs-Quote nicht verzerren.
     const { data, error } = await supabase
       .from('ai_claim_proposals')
       .select('vorschlag_typ, ziel_rolle, status, entschieden_am')
+      .eq('quelle', 'orchestrator')
       .in('status', ['angenommen', 'verworfen'])
 
     if (error || !data) return []

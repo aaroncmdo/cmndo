@@ -12,6 +12,7 @@ import { getOrCreateMaklerPromoCode } from '@/lib/makler/promo-code'
 import { createLead } from '@/lib/leads/create-lead'
 import { pickRoundRobinDispatcher } from '@/lib/start-link/pick-dispatcher'
 import { sendFlowLinkMultiChannelCore } from '@/lib/start-link/send-flowlink-multichannel'
+import { toE164 } from '@/lib/format/telefon'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
 import { notifyNewLead } from '@/lib/leads/notify-new-lead'
 import { getLocaleCookie } from '@/lib/i18n/locale-cookie'
@@ -39,13 +40,10 @@ export type MaklerAnfrageResult =
   | { ok: true; leadId: string; ausgang: MaklerAnfrageAusgang; token?: string; terminId?: string; warnung?: string }
   | { ok: false; error: string }
 
-// Telefon auf eine vergleichbare Form normalisieren (Dedup ist formatierungs-tolerant).
+// Telefon auf die kanonische E.164-Form normalisieren (Dedup ist formatierungs-
+// tolerant). Delegiert an die EINE Quelle (format/telefon) statt inline zu duplizieren.
 function normTel(t: string | null): string {
-  let s = (t ?? '').replace(/[^\d+]/g, '')
-  if (s.startsWith('00')) s = '+' + s.slice(2)
-  else if (s.startsWith('0')) s = '+49' + s.slice(1)
-  else if (s && !s.startsWith('+')) s = '+' + s
-  return s
+  return toE164(t) ?? ''
 }
 
 const TERMINALE_LEAD_STATUS = new Set(['umgewandelt', 'umgewandelt-sv', 'disqualifiziert', 'kalt'])

@@ -98,7 +98,8 @@ jobs:
             # PORT=3001 unterscheidet uns von Production (Port 3000) — nginx
             # routet staging.app.claimondo.de auf 3001.
             pm2 delete claimondo-v2-staging 2>/dev/null || true
-            PORT=3001 pm2 start /var/www/claimondo-v2-staging/server.js \
+            # TZ=Europe/Berlin: Node-Prozess auf deutsche Zeit pinnen (siehe Prod-Deploy).
+            TZ=Europe/Berlin PORT=3001 pm2 start /var/www/claimondo-v2-staging/server.js \
               --name claimondo-v2-staging \
               --env production \
               --max-memory-restart 1400M \

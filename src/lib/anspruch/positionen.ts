@@ -2,6 +2,10 @@ import type {
   AnspruchConfig, AnspruchPosition, AnspruchSpanne, AnspruchWeg, Ersatzfahrzeug, Schuldform, Segment, SegmentSatz,
   SchaetzInput, TotalschadenInfo, WertminderungFaktor,
 } from './types'
+import {
+  bestimmeNutzungsausfallKlasse, STANDARD_KLASSE_SAETZE,
+  type KlasseErgebnis, type NutzungsausfallKlasse,
+} from './nutzungsausfall-klasse'
 
 function runde(n: number): number {
   return Math.round(n)
@@ -19,24 +23,54 @@ function anwaltskostenPosition(): AnspruchPosition {
   }
 }
 
-// Ersatzfahrzeug waehrend Reparatur/Wiederbeschaffung: Nutzungsausfall (Geld) ODER Mietwagen ODER nichts.
+function capDauer(dauer: { min: number; max: number }, maxTage: number): { min: number; max: number } {
+  return { min: Math.min(dauer.min, maxTage), max: Math.min(dauer.max, maxTage) }
+}
+
+// Ersatzfahrzeug waehrend Reparatur/Wiederbeschaffung: Nutzungsausfall (Geld, klassenbasiert nach
+// Nutzungsausfalltabelle A-L + Altersabschlag) ODER Mietwagen (segment-basiert) ODER nichts.
 // Rechtlich ein Entweder-oder -> genau eine Position (oder keine).
+// Hoechstdauern: Nutzungsausfall im Reparaturfall auf maxTage.nutzungsausfallReparatur (default 12)
+// gedeckelt, Mietwagen auf maxTage.mietwagen (default 14). Die Wiederbeschaffung (Totalschaden) nutzt
+// die eigene WBW-Dauer und wird beim Nutzungsausfall NICHT auf 12 gedeckelt (andere Rechtsgrundlage).
 function ersatzfahrzeugPosition(
   ersatzfahrzeug: Ersatzfahrzeug,
-  satz: SegmentSatz,
+  naKlasse: KlasseErgebnis,
+  mietwagen: { minEur: number; maxEur: number },
   dauer: { min: number; max: number },
   labelSuffix: string,
+  kontext: 'reparatur' | 'wiederbeschaffung',
+  maxTage: { nutzungsausfallReparatur: number; mietwagen: number },
 ): AnspruchPosition | null {
   if (ersatzfahrzeug === 'keins') return null
-  const istMietwagen = ersatzfahrzeug === 'mietwagen'
-  const tagesMin = istMietwagen ? satz.mietwagenMinEur : satz.tagessatzMinEur
-  const tagesMax = istMietwagen ? satz.mietwagenMaxEur : satz.tagessatzMaxEur
+  if (ersatzfahrzeug === 'mietwagen') {
+    const d = capDauer(dauer, maxTage.mietwagen)
+    return {
+      typ: 'mietwagen',
+      label: `Mietwagen${labelSuffix}`,
+      minEur: runde(mietwagen.minEur * d.min),
+      maxEur: runde(mietwagen.maxEur * d.max),
+      hinweis: `${mietwagen.minEur}–${mietwagen.maxEur} €/Tag × ${d.min}–${d.max} Tage`,
+    }
+  }
+  // Nutzungsausfall — fester Tagessatz je Klasse (nach Altersabschlag); im Reparaturfall gedeckelt.
+  const { klasse, satzEur, stufen } = naKlasse
+  const d = kontext === 'reparatur' ? capDauer(dauer, maxTage.nutzungsausfallReparatur) : dauer
+  const teile = [`Klasse ${klasse} · ${satzEur} €/Tag × ${d.min}–${d.max} Tage.`]
+  teile.push(
+    kontext === 'reparatur'
+      ? 'Rückwirkend nach nachgewiesener Reparatur geltend zu machen, sofern kein Mietwagen genommen wird.'
+      : 'Für die Dauer der Ersatzbeschaffung, sofern kein Mietwagen genommen wird.',
+  )
+  if (stufen > 0) {
+    teile.push(`Fahrzeugalter berücksichtigt: Rückstufung um ${stufen} Klasse${stufen > 1 ? 'n' : ''}.`)
+  }
   return {
-    typ: istMietwagen ? 'mietwagen' : 'nutzungsausfall',
-    label: `${istMietwagen ? 'Mietwagen' : 'Nutzungsausfall'}${labelSuffix}`,
-    minEur: runde(tagesMin * dauer.min),
-    maxEur: runde(tagesMax * dauer.max),
-    hinweis: `${tagesMin}–${tagesMax} €/Tag × ${dauer.min}–${dauer.max} Tage`,
+    typ: 'nutzungsausfall',
+    label: `Nutzungsausfall${labelSuffix}`,
+    minEur: runde(satzEur * d.min),
+    maxEur: runde(satzEur * d.max),
+    hinweis: teile.join(' '),
   }
 }
 
@@ -50,6 +84,7 @@ export function berechneAnspruchsSpanne(
   saetze: Record<Segment, SegmentSatz>,
   faktoren: WertminderungFaktor[],
   config: AnspruchConfig,
+  klasseSaetze: Record<NutzungsausfallKlasse, number> = STANDARD_KLASSE_SAETZE,
 ): AnspruchSpanne {
   const positionen: AnspruchPosition[] = []
   const hinweise: string[] = []
@@ -57,6 +92,10 @@ export function berechneAnspruchsSpanne(
   const gegnerHaftet = schuld !== 'selbst'
   const ersatzfahrzeug: Ersatzfahrzeug = input.ersatzfahrzeug ?? 'nutzungsausfall'
   const reparaturMitte = (input.reparaturMinEur + input.reparaturMaxEur) / 2
+  const alter = input.ezJahr != null ? input.aktuellesJahr - input.ezJahr : null
+  const naKlasse = bestimmeNutzungsausfallKlasse(input.segment, alter, klasseSaetze)
+  const mietwagenSatz = { minEur: saetze[input.segment].mietwagenMinEur, maxEur: saetze[input.segment].mietwagenMaxEur }
+  const maxTage = { nutzungsausfallReparatur: config.nutzungsausfallMaxTage, mietwagen: config.mietwagenMaxTage }
 
   // 1) Reparaturkosten — immer
   positionen.push({
@@ -66,14 +105,13 @@ export function berechneAnspruchsSpanne(
     maxEur: runde(input.reparaturMaxEur),
   })
 
-  // 2) Ersatzfahrzeug (Nutzungsausfall ODER Mietwagen) — nur wenn nicht fahrbereit
-  if (!input.fahrbereit) {
-    const ef = ersatzfahrzeugPosition(ersatzfahrzeug, saetze[input.segment], config.dauerTage[input.schweregrad], '')
-    if (ef) positionen.push(ef)
-  }
+  // 2) Ersatzfahrzeug (Nutzungsausfall ODER Mietwagen) — im Reparaturfall ueber die Reparaturdauer,
+  //    UNABHAENGIG von fahrbereit: der Nutzungsausfall wird rueckwirkend nach nachgewiesener Reparatur
+  //    geltend gemacht (sofern kein Mietwagen). 'keins' -> keine Position. Abschlepp bleibt fahrbereit-gated.
+  const ef = ersatzfahrzeugPosition(ersatzfahrzeug, naKlasse, mietwagenSatz, config.dauerTage[input.schweregrad], '', 'reparatur', maxTage)
+  if (ef) positionen.push(ef)
 
   // 3) Wertminderung — nur jung + Substanz + ueber Schwelle
-  const alter = input.ezJahr != null ? input.aktuellesJahr - input.ezJahr : null
   const wmAnwendbar =
     alter != null &&
     alter <= config.wertminderungMaxAlterJahre &&
@@ -148,8 +186,7 @@ export function berechneAnspruchsSpanne(
       const restMin = input.restwertMinEur ?? 0
       const restMax = input.restwertMaxEur ?? 0
       const dauer = config.wiederbeschaffungsdauerTage
-      const satz = saetze[input.segment]
-      const efTs = ersatzfahrzeugPosition(ersatzfahrzeug, satz, dauer, ' (Wiederbeschaffung)')
+      const efTs = ersatzfahrzeugPosition(ersatzfahrzeug, naKlasse, mietwagenSatz, dauer, ' (Wiederbeschaffung)', 'wiederbeschaffung', maxTage)
       // Totalschaden-Weg: WBW - Restwert + Ersatzfahrzeug (Wiederbeschaffungsdauer) + (Abschlepp wenn nicht fahrbereit) + SV-Kosten + Auslagenpauschale + Ummeldung
       const tsPositionen: AnspruchPosition[] = [
         { typ: 'reparatur', label: 'Fahrzeugschaden (Wiederbeschaffung − Restwert)', minEur: runde(Math.max(0, input.wbwMinEur! - restMax)), maxEur: runde(Math.max(0, input.wbwMaxEur! - restMin)) },

@@ -10,10 +10,16 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { google } from 'googleapis'
-import { listCalendarEventsFull, type CalDavCredentials } from '@/lib/kalender/caldav/client'
+import { listAllCalendarEventsFull, type CalDavCredentials } from '@/lib/kalender/caldav/client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 
-const SYNC_HORIZON_DAYS = 35
+// 2026-07-08 (Aaron): grosszuegiges festes Fenster [-90d, +365d] — Busy-Blocking + juengste
+// Historie sichtbar. DB-driven: der Cron haelt sv_kalender_events_cache aktuell (SSoT), die UI
+// liest nur die DB. Fetch- UND Diff-existing-Fenster nutzen dieselben Konstanten (sonst Duplikate).
+// 2026-07-08: Fenster [-90d, +90d]. Mit expand:true (Serientermin-Instanzen) waere +365d zu
+// viele Instanzen (taeglicher Termin × 455 Tage) -> +90d deckt Busy-Blocking + naechste Monate.
+const SYNC_HORIZON_DAYS = 90
+const SYNC_BACKFILL_DAYS = 90
 const GOOGLE_TIMEOUT_MS = 8000
 
 type CacheRow = {
@@ -32,7 +38,7 @@ async function syncGoogle(profileId: string, db: ReturnType<typeof createAdminCl
   if (!auth) return { inserted: 0, deleted: 0 }
 
   const now = new Date()
-  const fromIso = now.toISOString()
+  const fromIso = new Date(now.getTime() - SYNC_BACKFILL_DAYS * 86400_000).toISOString()
   const toIso = new Date(now.getTime() + SYNC_HORIZON_DAYS * 86400_000).toISOString()
 
   let busy: Array<{ start: string; end: string }> = []
@@ -93,14 +99,21 @@ async function syncCalDav(row: VerbindungRow, db: ReturnType<typeof createAdminC
   }
 
   const now = new Date()
-  const fromIso = now.toISOString()
+  const fromIso = new Date(now.getTime() - SYNC_BACKFILL_DAYS * 86400_000).toISOString()
   const toIso = new Date(now.getTime() + SYNC_HORIZON_DAYS * 86400_000).toISOString()
 
   let events: Array<{ uid: string; summary: string; start: string; end: string }>
   try {
-    const raw = await listCalendarEventsFull(creds, row.calendar_url ?? '', fromIso, toIso)
-    events = raw.map((e) => ({
-      uid: e.uid || `${e.start}__${e.end}`,
+    // ALLE Kalender des Accounts (nicht nur der gewaehlte) — Busy-Blocking deckt Arbeit+Privat+…
+    // claimondo-* UIDs raus: das sind unsere EIGENEN in iCloud geschriebenen Termine (Write-back);
+    // sie werden schon als Claimondo-Termin angezeigt -> nicht zusaetzlich als externe Busy doppeln.
+    const raw = await listAllCalendarEventsFull(creds, fromIso, toIso)
+    events = raw
+      .filter((e) => !e.uid.startsWith('claimondo-'))
+      .map((e) => ({
+      // external_event_id per OCCURRENCE (uid::start): Serien-Instanzen (expand:true) teilen die
+      // UID -> ohne das Datum im Key würden sie im Cache kollidieren (nur 1 Instanz gespeichert).
+      uid: e.uid ? `${e.uid}::${e.start}` : `${e.start}__${e.end}`,
       summary: e.summary ?? '',
       start: e.start,
       end: e.end,
@@ -148,7 +161,9 @@ async function diffAndApply(
   incoming: CacheRow[],
 ): Promise<{ inserted: number; deleted: number }> {
   const now = new Date()
-  const fromIso = now.toISOString()
+  // Existing-Fenster == Fetch-Fenster (now-7d): sonst wären Events der letzten 7 Tage nie in
+  // `existing` -> toInsert würde sie jeden Lauf als „neu" duplizieren (Plain-Insert, kein onConflict).
+  const fromIso = new Date(now.getTime() - SYNC_BACKFILL_DAYS * 86400_000).toISOString()
 
   const { data: existing } = await db
     .from('sv_kalender_events_cache')
@@ -221,19 +236,42 @@ export async function syncAllExternalCalendars(): Promise<SyncResult[]> {
     }
   }
 
-  // ── CalDAV: alle aktiven Verbindungen (universell, profil-gekeyed) ────────
+  // ── CalDAV: kanonisch aus sv_kalender_verbindungen (dort schreibt der Connect-Flow +
+  // liest die gesamte UI). Die frühere kalender_verbindungen-Quelle wurde nur per Einmal-
+  // Backfill befüllt (kein Mirror-Trigger, DB-verifiziert 2026-07-08) -> NEUE Verbindungen
+  // landeten nie im Sync. profile_id via sachverstaendige aufgelöst (Cache bleibt profil-gekeyed).
   const { data: verbindungen } = await db
-    .from('kalender_verbindungen')
-    .select('id, profile_id, server_url, username, password_encrypted, calendar_url')
+    .from('sv_kalender_verbindungen')
+    .select('id, sv_id, server_url, username, password_encrypted, calendar_url')
     .eq('provider', 'caldav')
     .is('last_error', null)
 
-  for (const row of (verbindungen ?? []) as VerbindungRow[]) {
+  const svIds = [...new Set((verbindungen ?? []).map((r) => r.sv_id).filter(Boolean) as string[])]
+  const svToProfile = new Map<string, string>()
+  if (svIds.length) {
+    const { data: svs } = await db.from('sachverstaendige').select('id, profile_id').in('id', svIds)
+    for (const s of (svs ?? []) as Array<{ id: string; profile_id: string | null }>) {
+      if (s.profile_id) svToProfile.set(s.id, s.profile_id)
+    }
+  }
+
+  for (const raw of (verbindungen ?? []) as Array<Record<string, unknown>>) {
+    const svId = raw.sv_id as string | null
+    const profileId = svId ? svToProfile.get(svId) : undefined
+    if (!profileId) continue
+    const row: VerbindungRow = {
+      id: raw.id as string,
+      profile_id: profileId,
+      server_url: raw.server_url as string,
+      username: raw.username as string,
+      password_encrypted: raw.password_encrypted as string,
+      calendar_url: (raw.calendar_url as string | null) ?? null,
+    }
     try {
       const { inserted, deleted } = await syncCalDav(row, db)
-      results.push({ profileId: row.profile_id, source: 'caldav', inserted, deleted })
+      results.push({ profileId, source: 'caldav', inserted, deleted })
     } catch (err) {
-      results.push({ profileId: row.profile_id, source: 'caldav', inserted: 0, deleted: 0, error: String(err) })
+      results.push({ profileId, source: 'caldav', inserted: 0, deleted: 0, error: String(err) })
     }
   }
 
