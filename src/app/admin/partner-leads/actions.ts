@@ -11,7 +11,8 @@ import { convertPartnerLead } from '@/lib/partner/convert-partner-lead'
 import { geocodePartnerLead } from '@/lib/partner/geocode-partner-lead'
 import { revalidatePath } from 'next/cache'
 import type { PartnerRolle } from '@/lib/partner/policy'
-import type { PartnerCsvLead } from '@/lib/partner/csv-import'
+import type { PartnerCsvLead, CsvZielFeld } from '@/lib/partner/csv-import'
+import { heuristischesMapping, parseLlmMapping, CSV_ZIEL_FELDER } from '@/lib/partner/csv-import'
 import {
   scrapeGooglePlaces,
   filterGegenBestand,
@@ -24,6 +25,9 @@ import {
   sendWillkommenWerkstatt,
   sendSvBasicClaimLink,
 } from '@/lib/email/google/flows'
+import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODELS } from '@/lib/ai/models'
+import { logAiUsage } from '@/lib/ai/usage-log'
 
 const VERTRIEB_ROLLEN = ['admin', 'dispatch', 'leadbearbeiter']
 const PARTNER_ROLLEN: PartnerRolle[] = ['sachverstaendiger', 'werkstatt', 'makler']
@@ -432,6 +436,74 @@ export async function importCsvLeads(
 
   revalidatePath('/admin/partner-leads')
   return { ok: true, angelegt: data?.length ?? rows.length }
+}
+
+// ─── CSV-Mapping-Vorschlag (KI + Heuristik-Fallback) ──────────────────────
+
+/**
+ * Schlaegt ein Spalten-Mapping fuer einen CSV-Import vor. Nutzt das LLM
+ * (claude haiku) wenn ANTHROPIC_API_KEY gesetzt ist; faellt deterministisch
+ * auf die Header-Alias-Heuristik zurueck (kein harter Fehler).
+ *
+ * @param header   Erste Zeile der CSV (Spaltennamen).
+ * @param sampleRows  Bis zu 5 Datenzeilen zur Kontextualisierung des LLM.
+ * @returns { ok: true, mapping, quelle } oder { ok: false, error }.
+ */
+export async function schlageCsvMappingVor(
+  header: string[],
+  sampleRows: string[][],
+): Promise<
+  | { ok: true; mapping: CsvZielFeld[]; quelle: 'ki' | 'heuristik' }
+  | { ok: false; error: string }
+> {
+  const staff = await requireVertriebStaff()
+  if (!staff) return { ok: false, error: 'Nur Vertriebs-Team darf Mapping-Vorschlaege anfragen.' }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    return { ok: true, mapping: heuristischesMapping(header), quelle: 'heuristik' }
+  }
+
+  try {
+    const anthropic = new Anthropic({ apiKey })
+    const zielFelderListe = [...CSV_ZIEL_FELDER].join(',')
+    const systemPrompt =
+      `Ordne jeden CSV-Header genau EINEM Zielfeld aus [${zielFelderListe}] zu. ` +
+      'datNr = DAT-Expert-Nummer (Sachverstaendige), ihk = IHK-Registrierungsnummer (Makler). ' +
+      'Unklar → ignorieren. Antworte NUR mit JSON {header:zielfeld}.'
+
+    const userContent =
+      'Header: ' +
+      JSON.stringify(header) +
+      '\nBeispielzeilen: ' +
+      JSON.stringify(sampleRows.slice(0, 5))
+
+    const resp = await anthropic.messages.create({
+      model: AI_MODELS.faq_bot_kunde, // Haiku 4.5 — kurze strukturierte Antwort, Speed > Qualitaet
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    })
+
+    // Ersten Text-Block aus der Antwort extrahieren.
+    const textBlock = resp.content.find((b) => b.type === 'text')
+    const llmText = textBlock?.type === 'text' ? textBlock.text : ''
+
+    // Usage loggen (fire-and-forget, kein fallId-Kontext hier).
+    void logAiUsage({
+      endpoint: 'partner_csv_mapping',
+      model: AI_MODELS.faq_bot_kunde,
+      fallId: null,
+      usage: resp.usage,
+    })
+
+    const parsed = parseLlmMapping(llmText, header)
+    const mapping = parsed ?? heuristischesMapping(header)
+    return { ok: true, mapping, quelle: 'ki' }
+  } catch (err) {
+    console.error('[schlageCsvMappingVor] LLM-Fehler (Heuristik-Fallback):', err)
+    return { ok: true, mapping: heuristischesMapping(header), quelle: 'heuristik' }
+  }
 }
 
 // ─── Lead-Scraping (Google Places) ─────────────────────────────────────────
