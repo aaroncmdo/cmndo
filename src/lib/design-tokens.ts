@@ -69,6 +69,18 @@ export const cssColors = {
 } as const
 
 /**
+ * Partner-Tier-Farben (Bronze/Silber/Gold) — semantische Rang-Farben, NICHT
+ * gebrandet (tragen Bedeutung wie success/warning). `soft` = Pillen-Background,
+ * `text` = AA-lesbarer Text darauf, `accent` = Medaillen-/Icon-Ton.
+ * Gold-Akzent = Claimondo Navigation-Gold (#C9A84C).
+ */
+export const tierColors = {
+  bronze: { soft: '#F6EDE3', text: '#8A5A2B', accent: '#B87333' },
+  silber: { soft: '#EEF1F4', text: '#4B5563', accent: '#9CA3AF' },
+  gold: { soft: '#FBF5E4', text: '#8A6D1F', accent: '#C9A84C' },
+} as const
+
+/**
  * Radien-Skala — an `--radius-ios-*` (globals.css) angeglichen, damit die
  * Inline-Styles der primitives/* und die Tailwind-`rounded-ios-*`-Klassen EINE
  * Skala sprechen.
@@ -273,6 +285,7 @@ export const touchMin = 44
 export const tokens = {
   colors,
   cssColors,
+  tierColors,
   radius,
   shadow,
   shadowNative,
