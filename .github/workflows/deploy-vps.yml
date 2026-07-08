@@ -100,7 +100,11 @@ jobs:
             # an dem toten ID, der Fallback "pm2 start" failt weil der Name
             # belegt ist von id 2. Delete-First-Pattern ist robust dagegen.
             pm2 delete claimondo-v2 2>/dev/null || true
-            pm2 start /var/www/claimondo-v2/server.js \
+            # TZ=Europe/Berlin: Node-Prozess auf deutsche Zeit pinnen (DB laeuft UTC,
+            # kein OS-TZ-Pin) -> "heute"/Datums-Logik konsistent fuer deutsche Nutzer.
+            # App-Code (lib/time/berlin-day) ist zwar TZ-unabhaengig, das ist der Guertel
+            # zum Hosentraeger fuer alle sonstigen new Date()/toLocale*-Aufrufe.
+            TZ=Europe/Berlin pm2 start /var/www/claimondo-v2/server.js \
               --name claimondo-v2 \
               --env production \
               --max-memory-restart 1400M \
