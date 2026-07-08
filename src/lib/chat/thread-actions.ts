@@ -123,9 +123,35 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
   // Leads; der einzige nicht-gefangene Rest (disposable @web-library.net) hat eine Test-Telefonnummer
   // (+4915510000099) -> Baileys-No-Op. Kein echter Empfaenger wird gespammt.
   const zustellungAktiv = process.env.CHAT_ZUSTELLUNG_WHATSAPP !== '0'
-  const zustellen = zustellungAktiv && thread.art === 'kunde_gruppe' && !!prof?.rolle && prof.rolle !== 'kunde'
+  const staffInGruppe = thread.art === 'kunde_gruppe' && !!prof?.rolle && prof.rolle !== 'kunde'
 
   const admin = createAdminClient() as unknown as SupabaseClient
+
+  // Zustell-Kanal VOR dem Insert bestimmen (Datenmodell A: kanal markiert den TATSAECHLICHEN Kanal).
+  // WhatsApp bevorzugt (Telefon), sonst E-Mail-Fallback (E-Mail ist outbound-only, kein Inbound-Webhook).
+  // Defense-in-Depth: Test-Kunden (@claimondo.de / Test-Marker / email-los) bekommen KEINE echte
+  // Zustellung — istTestEmail faengt @claimondo.de nicht, daher hier explizit.
+  let zustellKanal: 'whatsapp' | 'email' | null = null
+  let zielLead: { email: string | null; telefon: string | null; vorname: string | null } | null = null
+  if (zustellungAktiv && staffInGruppe) {
+    const { data: claim } = await admin
+      .from('claims')
+      .select('lead_id, leads(email, telefon, vorname)')
+      .eq('id', thread.claim_id)
+      .maybeSingle()
+    const leadJoin = (claim as { leads?: unknown } | null)?.leads
+    zielLead = (Array.isArray(leadJoin) ? leadJoin[0] : leadJoin) as
+      | { email: string | null; telefon: string | null; vorname: string | null }
+      | null
+    const { istTestEmail } = await import('@/lib/testdaten/ist-test-email')
+    const zielEmail = zielLead?.email ?? null
+    const istTestKunde = !zielEmail || istTestEmail(zielEmail) || /@claimondo\.(de|test)$/i.test(zielEmail)
+    if (!istTestKunde) {
+      if (zielLead?.telefon) zustellKanal = 'whatsapp'
+      else if (zielLead?.email) zustellKanal = 'email'
+    }
+  }
+
   const { data: neu, error } = await admin
     .from('nachrichten')
     .insert({
@@ -136,43 +162,37 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
       nachricht: inhalt,
       richtung: 'outbound',
       status: 'gesendet',
-      kanal: zustellen ? 'whatsapp' : null,
+      kanal: zustellKanal,
     })
     .select('id')
     .maybeSingle()
   if (error) return { ok: false, error: error.message }
 
-  // Zustellung via die BESTEHENDE isolierte Send-Infra (identisch zu sendChatMessage -> erbt
-  // dieselbe Isolation). Non-critical: ein Zustell-Fehler bricht NIE den Thread-Save (Nachricht
-  // ist bereits persistiert). Defense-in-Depth: Test-Kunden (@claimondo.de / Test-Marker) bekommen
-  // KEINE echte WhatsApp — der Baileys-Pfad selbst hat keinen Test-Guard, daher hier explizit.
-  if (zustellen) {
+  // Zustellung via die BESTEHENDE isolierte Send-Infra. Non-critical: ein Fehler bricht NIE den
+  // Thread-Save. Test/interne Empfaenger sind oben bereits ausgeschlossen (zustellKanal bleibt null).
+  if (zustellKanal === 'whatsapp' && zielLead?.telefon) {
     try {
-      const { data: claim } = await admin
-        .from('claims')
-        .select('lead_id, leads(email, telefon, vorname)')
-        .eq('id', thread.claim_id)
-        .maybeSingle()
-      const leadJoin = (claim as { leads?: unknown } | null)?.leads
-      const lead = (Array.isArray(leadJoin) ? leadJoin[0] : leadJoin) as
-        | { email: string | null; telefon: string | null; vorname: string | null }
-        | null
-        | undefined
-      const { istTestEmail } = await import('@/lib/testdaten/ist-test-email')
-      // Strenger als istTestEmail allein (das @claimondo.de NICHT faengt): interne + Email-lose
-      // Leads ebenfalls unterdruecken. Kein Email = nicht verifizierbar -> sicherheitshalber NICHT senden.
-      const zielEmail = lead?.email ?? null
-      const istTestKunde = !zielEmail || istTestEmail(zielEmail) || /@claimondo\.(de|test)$/i.test(zielEmail)
-      if (lead?.telefon && !istTestKunde) {
-        const { sendCommunication } = await import('@/lib/communications/send')
-        await sendCommunication('freitext', {
-          telefon: lead.telefon,
-          vorname: lead.vorname ?? '',
-          '1': inhalt,
-        }).catch(() => {})
-      }
+      const { sendCommunication } = await import('@/lib/communications/send')
+      await sendCommunication('freitext', {
+        telefon: zielLead.telefon,
+        vorname: zielLead.vorname ?? '',
+        '1': inhalt,
+      }).catch(() => {})
     } catch (err) {
       console.error('[Zustellung] Thread->WhatsApp Fehler:', err)
+    }
+  } else if (zustellKanal === 'email' && zielLead?.email) {
+    try {
+      const { sendEmail } = await import('@/lib/email/google/client')
+      const sicher = inhalt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+      await sendEmail({
+        to: zielLead.email,
+        subject: 'Neue Nachricht zu Ihrem Schadenfall',
+        html: `<p>Sie haben eine neue Nachricht von Ihrem Claimondo-Team:</p><p>${sicher}</p>`,
+        text: inhalt,
+      }).catch(() => {})
+    } catch (err) {
+      console.error('[Zustellung] Thread->E-Mail Fehler:', err)
     }
   }
 
