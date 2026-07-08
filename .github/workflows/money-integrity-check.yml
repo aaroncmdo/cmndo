@@ -1,0 +1,49 @@
+name: Money-Integrity-Check
+
+# Faehrt den Money-Integrity-Monitor (Session 6f60c510) taeglich gegen Prod: USt-Tripel-Konsistenz +
+# §14-Beleg-Reconciliation + Ledger-Cache-Drift. Der Endpoint liefert immer HTTP 200 + JSON; dieser
+# Workflow macht die Monitor-Semantik: Findings ODER Endpoint-Fehler => Workflow-Failure => die
+# GitHub-Actions-Failure-Notification ist der Alerting-Kanal (loest das Log-only-Follow-up des Crons).
+#
+# Nutzt dieselben Secrets wie backup.yml (CRON_SECRET + PRODUCTION_URL) — kein neues Setup noetig.
+# Scheduled-Runs greifen erst nach Merge auf den Default-Branch (main).
+
+on:
+  schedule:
+    - cron: '0 6 * * *' # taeglich 06:00 UTC
+  workflow_dispatch: {} # Manueller Trigger
+
+jobs:
+  money-integrity:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Money-Integrity-Check Cron
+        run: |
+          RESPONSE=$(curl -s -w "\n%{http_code}" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
+            "${{ secrets.PRODUCTION_URL }}/api/cron/money-integrity-check")
+
+          HTTP_CODE=$(echo "$RESPONSE" | tail -1)
+          BODY=$(echo "$RESPONSE" | head -n -1)
+
+          echo "HTTP Status: $HTTP_CODE"
+          echo "Response: $BODY"
+
+          if [ "$HTTP_CODE" != "200" ]; then
+            echo "::error::Money-Integrity-Check-Endpoint fehlgeschlagen (HTTP $HTTP_CODE)"
+            exit 1
+          fi
+
+          # Monitor-Semantik: Findings => Failure (GH-Actions-Notification = Alerting-Kanal).
+          FINDINGS=$(echo "$BODY" | grep -oE '"findings_count":[0-9]+' | grep -oE '[0-9]+')
+          FINDINGS=${FINDINGS:-0}
+          if [ "$FINDINGS" != "0" ]; then
+            echo "::error::Money-Integritaet: $FINDINGS Finding(s)! Details in der Response oben + VPS-Logs ([money-integrity]) + Admin Finance-Hub -> Money-Integritaet -> Pruefen."
+            exit 1
+          fi
+          echo "Money-Integritaet OK — 0 Findings."
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "::error::Money-Integrity-Check fehlgeschlagen ODER Findings entdeckt. Pruefen: Admin Finance-Hub -> Money-Integritaet -> Pruefen (Detail-Report) + VPS-Logs [money-integrity]."
