@@ -120,11 +120,11 @@ export function KiAufsichtPanel({ lage, vorschlaege }: KiAufsichtPanelProps) {
               <div key={entry.rolle} className="border border-claimondo-border rounded-ios-md p-4">
                 {/* Rollen-Header */}
                 <div className="flex items-center justify-between gap-3 mb-3">
-                  <h4 className="text-sm font-semibold text-claimondo-navy">
+                  <h4 className="text-body-sm font-semibold text-claimondo-navy">
                     {ROLLEN_LABEL[entry.rolle] ?? entry.rolle}
                   </h4>
                   <span
-                    className={`inline-flex items-center rounded-full text-[10px] font-medium px-2 py-0.5 whitespace-nowrap ${ampelCls(entry.breached, entry.impending)}`}
+                    className={`inline-flex items-center rounded-full text-caption font-medium px-2 py-0.5 whitespace-nowrap ${ampelCls(entry.breached, entry.impending)}`}
                   >
                     {ampelLabel(entry.breached, entry.impending)}
                   </span>
