@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { pruefe2faSperre, registriere2faVerify } from './verify-rate-limit'
+import { toE164 } from '@/lib/format/telefon'
 
 // AAR-939: Duenne Wrapper um supabase.auth.mfa (Phone-Faktor). Result-Object-
 // Pattern (kein throw) — siehe AGENTS.md §Server-Actions. Die SMS-Zustellung
@@ -242,6 +243,31 @@ export async function merkeTwofaTelefon(phone: string): Promise<MfaResult> {
     })
     .eq('id', user.id)
   if (error) return { ok: false, error: error.message }
+
+  // AAR-2fa-optional (B2): die verifizierte Nummer auch nach auth.users.phone
+  // spiegeln (E164) -> ermoeglicht passwordless Telefon-Login (signInWithOtp
+  // loest gegen auth.users.phone auf, nicht gegen profiles.telefon). Best-effort +
+  // uniqueness-safe: auth.users.phone ist UNIQUE -> bei Kollision (Nummer schon
+  // auf einem anderen Konto) still ueberspringen; 2FA + Anzeige bleiben intakt
+  // (nur der Login-per-Nummer ist fuer dieses Konto dann nicht aktivierbar).
+  try {
+    const e164 = toE164(phone)
+    if (e164) {
+      const { error: phoneErr } = await admin.auth.admin.updateUserById(user.id, {
+        phone: e164,
+        phone_confirm: true,
+      })
+      if (phoneErr) {
+        console.warn(
+          '[B2] auth.users.phone-Sync uebersprungen (evtl. Nummer bereits vergeben):',
+          phoneErr.message,
+        )
+      }
+    }
+  } catch (err) {
+    console.warn('[B2] auth.users.phone-Sync Ausnahme (non-critical):', err)
+  }
+
   return { ok: true }
 }
 
