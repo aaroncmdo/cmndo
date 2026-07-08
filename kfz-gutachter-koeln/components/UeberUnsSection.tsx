@@ -54,7 +54,7 @@ export function UeberUnsSection({ city }: { city: City }) {
           <div className="uu-pillrow" role="list" aria-label="Qualifikationen">
             <div className="uu-pill" role="listitem">
               <span className="uu-pill-key">DAT</span>
-              <span className="uu-pill-sub">Expert Partner</span>
+              <span className="uu-pill-sub">Zugang</span>
             </div>
             <span className="uu-pill-sep" aria-hidden="true" />
             <div className="uu-pill" role="listitem">
