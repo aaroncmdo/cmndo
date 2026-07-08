@@ -3,6 +3,7 @@ import { expect, test } from '@playwright/test'
 import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 // @ts-ignore — JS-Helper aus dem prod-smoke-Harness (kein .d.ts; Playwright/esbuild transpiliert)
 import { sessionToCookies } from '../../../scripts/prod-smoke/cookie.mjs'
+import { totp } from './totp'
 
 export { CLAIMS, AUFTRAEGE, ACCOUNTS, PARTIES, PFLICHTDOK, SV_SACHVERSTAENDIGE_ID } from '../../../scripts/test-fixtures/ids'
 
@@ -23,7 +24,57 @@ export const ROLES = {
 
 export type RoleKey = keyof typeof ROLES
 
-/** GoTrue password-grant + Cookie-Injection -> isolierter, SW-blockierter, eingeloggter Context. */
+// Interne Test-Accounts haben TOTP-2FA (auth.mfa_factors, verified). Secret (base32) kommt aus
+// env — NUR Test-Accounts, gitignored, nie committet. Fehlt es, bleibt der Login aal1 -> der
+// interne Flow skippt (skipIfAuthWall). Kunde ist extern -> kein TOTP.
+const TOTP_SECRETS: Partial<Record<RoleKey, string | undefined>> = {
+  sv: process.env.TEST_SV_TOTP_SECRET,
+  kb: process.env.TEST_KB_TOTP_SECRET,
+  admin: process.env.TEST_ADMIN_TOTP_SECRET,
+  dispatch: process.env.TEST_DISPATCH_TOTP_SECRET,
+  kanzlei: process.env.TEST_KANZLEI_TOTP_SECRET,
+}
+
+/**
+ * Schließt die Supabase-MFA für eine aal1-Session programmatisch ab: verifizierten TOTP-Faktor
+ * holen -> challenge -> verify mit frisch gerechnetem Code -> aal2-Session. Nötig seit der
+ * internen 2FA-Pflicht (#3745), die die aal1-Cookie-Injection an internen Rollen blockt.
+ */
+async function completeMfa(
+  session: { access_token: string; [k: string]: unknown },
+  secretBase32: string,
+  roleKey: RoleKey,
+): Promise<Record<string, unknown>> {
+  const authHeaders = {
+    apikey: ANON_KEY,
+    Authorization: `Bearer ${session.access_token}`,
+    'Content-Type': 'application/json',
+  }
+
+  const userRes = await fetch(`${SUPABASE_URL}/auth/v1/user`, { headers: authHeaders })
+  const user = (await userRes.json()) as { factors?: { id: string; factor_type: string; status: string }[] }
+  const factor = (user.factors ?? []).find((f) => f.factor_type === 'totp' && f.status === 'verified')
+  if (!factor) throw new Error(`Kein verifizierter TOTP-Faktor für ${roleKey}`)
+
+  const chRes = await fetch(`${SUPABASE_URL}/auth/v1/factors/${factor.id}/challenge`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: '{}',
+  })
+  const challenge = (await chRes.json()) as { id?: string }
+  if (!challenge.id) throw new Error(`MFA-Challenge fehlgeschlagen (${roleKey}): ${JSON.stringify(challenge)}`)
+
+  const vRes = await fetch(`${SUPABASE_URL}/auth/v1/factors/${factor.id}/verify`, {
+    method: 'POST',
+    headers: authHeaders,
+    body: JSON.stringify({ challenge_id: challenge.id, code: totp(secretBase32) }),
+  })
+  const verified = (await vRes.json()) as { access_token?: string }
+  if (!verified.access_token) throw new Error(`MFA-Verify fehlgeschlagen (${roleKey}): ${JSON.stringify(verified)}`)
+  return { ...session, ...verified } // aal2-Tokens; user aus dem Grant behalten
+}
+
+/** GoTrue password-grant (+ MFA falls TOTP-Secret) + Cookie-Injection -> eingeloggter Context. */
 export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<BrowserContext> {
   const { email, pass } = ROLES[roleKey]
   const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
@@ -36,8 +87,13 @@ export async function loginContext(browser: Browser, roleKey: RoleKey): Promise<
     throw new Error(`Auth ${roleKey} fehlgeschlagen: ${session?.error_description ?? JSON.stringify(session)}`)
   }
 
+  // Interne Rollen brauchen seit der 2FA-Pflicht (#3745) eine aal2-Session. Ist ein TOTP-Secret
+  // hinterlegt, schließen wir die MFA hier ab -> aal2. Ohne Secret bleibt es aal1 (externe Rollen).
+  const totpSecret = TOTP_SECRETS[roleKey]
+  const effectiveSession = totpSecret ? await completeMfa(session, totpSecret, roleKey) : session
+
   const projectRef = new URL(SUPABASE_URL).hostname.split('.')[0]
-  const cookies = sessionToCookies(session, { projectRef, cookieDomain: '.claimondo.de' })
+  const cookies = sessionToCookies(effectiveSession, { projectRef, cookieDomain: '.claimondo.de' })
   const ctx = await browser.newContext({
     baseURL: APP,
     serviceWorkers: 'block',
