@@ -23,6 +23,7 @@ import {
   abrechnungswegLabel,
   quelleLabel,
   zaehleSegmente,
+  kvaStatus,
 } from '@/lib/werkstatt/werkstatt-auftrag-segment'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 
@@ -69,6 +70,7 @@ function ReparaturZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => vo
   const phase = werkstattAuftragPhase(a)
   const opLabel = operativeStatusLabel(a.operative_status)
   const typ = abrechnungswegLabel(a.abrechnungsweg)
+  const kva = kvaStatus(a)
   const terminIso = a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin
   return (
     <ClickableTr onClick={onClick}>
@@ -86,6 +88,13 @@ function ReparaturZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => vo
       <Td>
         <div className="flex flex-col items-start gap-1">
           <StatusBadge tone={phase.ton} size="xs">{phase.label}</StatusBadge>
+          {kva === 'benoetigt' && <StatusBadge tone="warning" size="xs">KVA offen</StatusBadge>}
+          {kva === 'erstellt' && (
+            <StatusBadge tone="info" size="xs">
+              KVA {EUR.format(a.kostenvoranschlag_brutto ?? a.kostenvoranschlag_netto ?? 0)}
+            </StatusBadge>
+          )}
+          {kva === 'freigegeben' && <StatusBadge tone="success" size="xs">KVA ✓</StatusBadge>}
           {opLabel && <span className="text-claimondo-ondo text-xs">{opLabel}</span>}
         </div>
       </Td>
