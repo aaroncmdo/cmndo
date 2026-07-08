@@ -83,6 +83,7 @@ Dir wird die aktuelle SLA-Lage ueber alle internen Rollen (Dispatch, Sachverstae
 Priorisiere die Lage: Welche Claims brauchen sofortige Intervention?
 Schlage 0 bis N konkrete Tasks an die haengende Rolle vor (nur die kritischsten — keine Routineaufgaben).
 Begruende faktenbasiert aus den gezeigten Zahlen (Claim-Nummer, SLA-Typ, Stunden ueberfaellig).
+Fuer das Feld claim_id im propose_sla_task-Tool nutze die exakte UUID aus dem Kontext (Feld [claim_id: ...]) — NICHT die Claim-Nummer (CLM-...).
 Deine Vorschlaege werden NICHT automatisch ausgefuehrt — ein Mensch gibt jeden Task frei.
 Mache KEINEN Vorschlag, wenn die SLA-Lage keine konkrete Intervention erfordert.`
 
@@ -121,6 +122,17 @@ function buildDedupeKey(claimId: string, titel: string): string {
   return createHash('sha256').update(raw).digest('hex').slice(0, 32)
 }
 
+// Aufsicht-Anzeige-Rollen (SLA-Verantwortliche) -> gueltige ai_claim_proposals.ziel_rolle
+// (Task-Empfaenger; DB-CHECK erlaubt nur sachverstaendiger/kundenbetreuer/admin).
+// dispatch (Gutachter-Zuweisung) + kanzlei (Koordination) haben KEINE eigene Empfaenger-Rolle
+// -> kundenbetreuer (per-Claim-Koordinator; Owner-Routing #3920 setzt claims.kundenbetreuer_id).
+const ZIEL_ROLLE_DB: Record<AufsichtDraft['zielRolle'], string> = {
+  dispatch: 'kundenbetreuer',
+  sachverstaendiger: 'sachverstaendiger',
+  kanzlei: 'kundenbetreuer',
+  admin: 'admin',
+}
+
 export async function persistAufsichtRemediation(
   modell: string,
   drafts: AufsichtDraft[],
@@ -134,7 +146,7 @@ export async function persistAufsichtRemediation(
     const { error } = await db.from('ai_claim_proposals').insert({
       claim_id: draft.claimId,
       vorschlag_typ: 'task',
-      ziel_rolle: draft.zielRolle,
+      ziel_rolle: ZIEL_ROLLE_DB[draft.zielRolle],
       payload: {
         titel: draft.titel,
         beschreibung: draft.begruendung,
@@ -176,7 +188,7 @@ export async function laufeSlaAufsicht(lage: SlaRollenLage): Promise<{ findings:
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
     res = await client.messages.create({
       model,
-      max_tokens: 1500,
+      max_tokens: 4000,
       system: AUFSICHT_SYSTEM,
       tools: AUFSICHT_TOOLS,
       messages: [{ role: 'user', content: summarizeSlaRollenLage(lage) }],
