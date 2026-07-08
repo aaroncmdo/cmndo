@@ -281,35 +281,28 @@ export function PortalNav({
         {/* 2026-05-14: Dark-Variant erbt floating-Pills via data-sidebar-mode
             (CSS in globals.css). Floating-Default app-weit (Hook merkt die
             Bar-Opt-out-Präferenz in localStorage). */}
+        {/* Detached Navy-Panel: freischwebende Sidebar mit Margin ringsum +
+            Rundung + Schatten. w-52 + top/left/bottom-2 passen INNERHALB des
+            bestehenden md:ml-56-Content-Offsets (kein Layout-Wrapper noetig).
+            Solide (data-sidebar-mode="bar") — kein Floating-Glass. */}
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
-          data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
-          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 ${
-            floatingMode ? 'bg-transparent py-3 px-3 gap-3' : 'bg-claimondo-navy'
-          } ${className}`}
+          data-sidebar-mode="bar"
+          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg bg-claimondo-navy shadow-ios-lg overflow-hidden ${className}`}
         >
-          {headerSlot && <div className={floatingMode ? '' : 'px-5 py-5'}>{headerSlot}</div>}
+          {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 
-          <nav className={`flex-1 ${floatingMode ? '' : 'px-3'} overflow-y-auto`}>
+          <nav className="flex-1 px-3 overflow-y-auto">
             {sections.map((section, i) => (
               <div
                 key={section.label ?? i}
-                className={`space-y-0.5 ${
-                  !floatingMode && i > 0 ? 'pt-3 mt-3 border-t border-white/10' : ''
-                } ${!floatingMode && i === 0 ? 'pb-4' : ''}`}
+                className={`space-y-0.5 ${i > 0 ? 'pt-3 mt-3 border-t border-white/10' : ''} ${
+                  i === 0 ? 'pb-4' : ''
+                }`}
               >
                 {section.label && (
-                  <p
-                    className={`px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider font-semibold ${
-                      floatingMode ? '' : 'text-claimondo-light-blue/70'
-                    }`}
-                    style={
-                      floatingMode
-                        ? { color: 'var(--brand-sidebar-text, #7BA3CC)', opacity: 0.6 }
-                        : undefined
-                    }
-                  >
+                  <p className="px-3 pt-1 pb-1 text-[10px] uppercase tracking-wider font-semibold text-claimondo-light-blue/70">
                     {section.label}
                   </p>
                 )}
@@ -319,7 +312,7 @@ export function PortalNav({
           </nav>
 
           {footerSlot && (
-            <div className={floatingMode ? 'space-y-2' : 'px-3 pb-4 space-y-2 border-t border-white/10 pt-3'}>
+            <div className="px-3 pb-4 space-y-2 border-t border-white/10 pt-3">
               {footerSlot}
             </div>
           )}
@@ -342,13 +335,16 @@ export function PortalNav({
   // data-sidebar-mode="bar" verhindert die Floating-Glass-CSS-Regeln.
   return (
     <>
+    {/* Detached Navy-Panel (in-flow, m-2 statt fixed → floatet INNERHALB des
+        bestehenden Flex-Layouts; kein Offset/Restructure noetig, Top-Bar bleibt).
+        w-52 + m-2 = ~alte w-56-Breite, Layout unveraendert. */}
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
       data-sidebar-mode="bar"
-      className={`w-56 shrink-0 overflow-y-auto bg-claimondo-navy border-r border-white/10 ${className}`}
+      className={`w-52 shrink-0 m-2 rounded-ios-lg overflow-hidden bg-claimondo-navy shadow-ios-lg ${className}`}
     >
-      <div className="flex flex-col gap-0.5 p-3">
+      <div className="flex flex-col gap-0.5 p-3 overflow-y-auto">
         {sections.map((section, i) => (
           <div
             key={section.label ?? i}
