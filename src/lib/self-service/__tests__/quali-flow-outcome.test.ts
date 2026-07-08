@@ -11,12 +11,12 @@ describe('qualiFlowOutcome', () => {
     })
   })
 
-  it('eigenverantwortung + eigene Versicherung -> kasko, abbruch, disqualifiziert', () => {
+  it('eigenverantwortung + eigene Versicherung -> kasko, weiter, Direct-Reparatur (Aaron 08.07.)', () => {
     expect(qualiFlowOutcome('eigenverantwortung', true)).toEqual({
       abrechnungsweg: 'kasko',
-      ergebnis: 'abbruch',
-      disqualifizieren: true,
-      reparaturwunsch: null,
+      ergebnis: 'weiter',
+      disqualifizieren: false,
+      reparaturwunsch: 'reparatur',
     })
   })
 

@@ -15,7 +15,8 @@ export type QualiFlowOutcome = {
 /**
  * Leitet aus Schuldfrage (+ Versicherungs-Folgefrage) die Flow-Quali-Entscheidung ab:
  * - gegner                          -> haftpflicht, weiter (kanonischer Flow, unveraendert)
- * - eigenverantwortung + Kasko      -> kasko, abbruch (KaskoEndansicht wie heute)
+ * - eigenverantwortung + Kasko      -> kasko, weiter + reparaturwunsch='reparatur' (Direct-Reparatur
+ *                                      wie Selbstzahler; KEIN SV-Gutachten, Aaron 08.07.)
  * - eigenverantwortung ohne Kasko   -> selbstzahler, weiter + reparaturwunsch='reparatur'
  * - unklar / leer / offen           -> bestehendes bewerteSchuldfrage-Verhalten
  */
@@ -29,8 +30,9 @@ export function qualiFlowOutcome(
     return { abrechnungsweg, ergebnis: 'weiter', disqualifizieren: false, reparaturwunsch: 'reparatur' }
   }
   if (abrechnungsweg === 'kasko') {
-    // Heutiges Eigenverantwortung-Verhalten: Abbruch + KaskoEndansicht, Weg protokolliert.
-    return { abrechnungsweg, ergebnis: 'abbruch', disqualifizieren: true, reparaturwunsch: null }
+    // Aaron 08.07.: Kasko = Direct-Reparatur wie Selbstzahler — nicht mehr disqualifiziert,
+    // Werkstatt-Strecke + reparaturwunsch armiert das Gate, KEIN SV-Gutachten.
+    return { abrechnungsweg, ergebnis: 'weiter', disqualifizieren: false, reparaturwunsch: 'reparatur' }
   }
   // haftpflicht (gegner) + null (unklar/leer/unbeantwortet): das bestehende Gate entscheidet.
   const ergebnis = bewerteSchuldfrage(schuldfrage)

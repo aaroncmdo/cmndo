@@ -1,8 +1,10 @@
 'use client'
 
 // AAR-956 §3a + SP-B1/B2: Quali-Step im /flow. gegner/unklar wie bisher. eigenverantwortung
-// oeffnet eine Versicherungs-Folgefrage -> kasko (KaskoEndansicht) oder selbstzahler
-// (SP-B2: partieller Claim via erzeugeSelbstzahlerClaim -> onSelbstzahler -> Account-Step/Portal).
+// oeffnet eine Versicherungs-Folgefrage -> kasko ODER selbstzahler; BEIDE laufen seit
+// Aaron 08.07. als Direct-Reparatur (SP-B2: partieller Claim via erzeugeSelbstzahlerClaim
+// -> onSelbstzahler -> Account-Step/Portal + Werkstatt-Strecke, kein SV-Gutachten).
+// KaskoEndansicht bleibt nur fuer echte Disqualifikationen (ergebnis='abbruch').
 // QualiOptionen bleibt unberuehrt.
 
 import { useState } from 'react'
@@ -40,8 +42,10 @@ export function FlowQualiStep({
         setFehler(r.error ?? t('errors.allgemein'))
         return
       }
-      if (r.abrechnungsweg === 'selbstzahler') {
-        // SP-B2: partiellen Claim erzeugen, dann via onSelbstzahler in den Account-Step (Portal).
+      if (r.abrechnungsweg === 'selbstzahler' || r.abrechnungsweg === 'kasko') {
+        // SP-B2 + Aaron 08.07.: Selbstzahler UND Kasko = Direct-Reparatur — partiellen Claim
+        // erzeugen, dann via onSelbstzahler in den Account-Step (Portal). Werkstatt-Strecke,
+        // kein SV-Gutachten. Kasko ist jetzt ergebnis='weiter' (nicht mehr 'abbruch').
         setPhase('selbstzahler')
         const claimRes = await erzeugeSelbstzahlerClaim(token)
         if (!claimRes.ok) {
