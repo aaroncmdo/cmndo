@@ -1,7 +1,7 @@
 // AAR-97: Aircall Inbound Webhook - Call-Events + Auto-Lead bei neuer Nummer
 // AAR-1480: Body-Validation jetzt via AircallEventSchema (Zod, src/lib/schemas/aircall-event.ts)
 import { NextRequest, NextResponse } from 'next/server'
-import crypto from 'node:crypto'
+import { verifyWebhookSignature } from '@/lib/aircall/client'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { createLead } from '@/lib/leads/create-lead'
@@ -13,18 +13,12 @@ export const dynamic = 'force-dynamic'
 export async function POST(req: NextRequest) {
   const body = await req.text()
   const signature = req.headers.get('x-aircall-signature') ?? ''
-  const secret = process.env.AIRCALL_WEBHOOK_TOKEN
 
-  // HMAC-Check (falls Secret konfiguriert)
-  if (secret) {
-    const expected = crypto.createHmac('sha256', secret).update(body).digest('hex')
-    try {
-      if (!crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(expected))) {
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-      }
-    } catch {
-      return NextResponse.json({ error: 'Signature mismatch' }, { status: 401 })
-    }
+  // HMAC IMMER pruefen (fail-closed): verifyWebhookSignature liefert false bei
+  // fehlendem AIRCALL_WEBHOOK_TOKEN ODER fehlender/falscher Signatur. Der fruehere
+  // `if (secret)`-Guard uebersprang die Pruefung komplett, wenn das Secret unset war.
+  if (!verifyWebhookSignature(body, signature)) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
   // AAR-1480: Parse + Zod-Validation in einem Schritt (vorher: untyped cast).
