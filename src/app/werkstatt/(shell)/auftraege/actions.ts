@@ -15,7 +15,10 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
+import { getWerkstattAuftrag } from '@/lib/werkstatt/queries'
+import { extrahiereKvaAusBase64 } from '@/lib/ai/kostenvoranschlag-ocr'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 
@@ -226,4 +229,80 @@ export async function oeffneGutachtenPdf(
   if (!url) return { ok: false, error: 'Signed-URL konnte nicht erstellt werden.' }
 
   return { ok: true, url }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// KVA aus dem Auftrag erstellen (Inkrement 2 — WRITE)
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * OCR-Prefill fuer den Auftrags-KVA-Dialog: liest netto/brutto aus dem
+ * hochgeladenen KVA-Dokument. Reuse des KVA-OCR-Cores (extrahiereKvaAusBase64) —
+ * Fahrzeug-/Halterdaten liegen bereits am Claim, hier interessieren nur die Betraege.
+ */
+export async function extrahiereKvaFuerAuftragOcr(
+  input: { base64: string; mediaType: string },
+): Promise<{ ok: true; netto: number | null; brutto: number | null } | { ok: false; error: string }> {
+  await requirePortalAccess(['werkstatt'])
+  if (!input?.base64) return { ok: false, error: 'Kein Dokument' }
+  const res = await extrahiereKvaAusBase64(input)
+  if (!res.ok) return { ok: false, error: res.error }
+  return { ok: true, netto: res.data.kostenvoranschlag_netto, brutto: res.data.kostenvoranschlag_brutto }
+}
+
+/**
+ * Werkstatt stellt den Kostenvoranschlag direkt aus dem Auftrag aus: schreibt
+ * claims.kostenvoranschlag_netto/brutto auf den BESTEHENDEN Claim (+ optional das
+ * KVA-PDF in den Storage). Flippt den Auftrag benoetigt -> erstellt.
+ *
+ * Ownership-Gate (Pflicht): getWerkstattAuftrag liest ueber die RLS-gegatete
+ * v_werkstatt_auftrag-View — kein Treffer => diese Werkstatt gehoert nicht zu dem
+ * Claim => Abbruch. Der eigentliche Write laeuft danach ueber den Admin-Client
+ * (claims hat keine Werkstatt-RLS-Policy fuer UPDATE), aber NUR nach bestandener
+ * Ownership-Pruefung.
+ */
+export async function erstelleKvaFuerAuftrag(
+  claimId: string,
+  input: { netto: number | null; brutto: number | null; pdfBase64?: string | null; pdfMediaType?: string | null },
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  await requirePortalAccess(['werkstatt'])
+  if (!claimId) return { ok: false, error: 'Kein Auftrag.' }
+  if (input.netto == null && input.brutto == null) {
+    return { ok: false, error: 'Bitte mindestens einen Betrag (netto oder brutto) angeben.' }
+  }
+
+  // Ownership: RLS-gegatete View — Werkstatt sieht nur ihre eigenen Claims.
+  const auftrag = await getWerkstattAuftrag(claimId)
+  if (!auftrag) return { ok: false, error: 'Kein Zugriff auf diesen Auftrag' }
+
+  // Write via Admin-Client (claims hat keine Werkstatt-UPDATE-RLS-Policy).
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('claims')
+    .update({
+      kostenvoranschlag_netto: input.netto,
+      kostenvoranschlag_brutto: input.brutto,
+    } as never)
+    .eq('id', claimId)
+  if (error) return { ok: false, error: error.message }
+
+  // KVA-PDF an den Claim haengen (non-critical).
+  try {
+    if (input.pdfBase64 && input.pdfMediaType) {
+      const ext = input.pdfMediaType === 'application/pdf' ? 'pdf' : (input.pdfMediaType.split('/')[1] ?? 'bin')
+      const bytes = Buffer.from(input.pdfBase64, 'base64')
+      await admin.storage
+        .from('fall-dokumente')
+        .upload(`faelle/${claimId}/kostenvoranschlag_${Date.now()}.${ext}`, bytes, {
+          contentType: input.pdfMediaType,
+          upsert: false,
+        })
+    }
+  } catch (e) {
+    console.error('[werkstatt-auftrag-kva] KVA-Doc-Upload fehlgeschlagen (nicht kritisch):', e)
+  }
+
+  revalidatePath(`/werkstatt/auftraege/${claimId}`)
+  revalidatePath('/werkstatt/auftraege')
+  return { ok: true }
 }
