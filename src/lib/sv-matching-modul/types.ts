@@ -2,6 +2,7 @@
 // Eine Quelle fuer Dispatch + /gutachter-finden + Self-Service-Wizard.
 
 import type { SvMatchCandidate } from '@/lib/dispatch/findBestSV'
+import type { Tier } from '@/lib/partner-rang/types'
 
 /**
  * Slot-Vorschlag in der kundensicheren Projektion. Nur ISO-Strings +
@@ -49,6 +50,14 @@ export type OeffentlichesSvProfil = {
    * visuelle Hervorhebung im Embed-Slot-Picker; verraet den exakten paket-Tier nie.
    */
   istTopPartner: boolean
+  /**
+   * AAR-956 Partner-Tier: verdienter Rang (Bronze/Silber/Gold) aus partner_rang;
+   * null = kein oeffentlicher Rang. Loest die paket-basierte istTopPartner-Plakette
+   * im Slot-Picker durch ein ehrliches Tier-Signal ab. (istTopPartner bleibt fuer
+   * die bestehende API-v1-Back-Compat im Typ.)
+   */
+  rang: Tier | null
+  rangSinnsatz: string | null
   slots: SlotVorschlag[]
 }
 
@@ -71,4 +80,7 @@ export type ProjektionInput = {
   bewertung: SvBewertung | null
   profil: SvProfilFelder | null
   slots: SlotVorschlag[]
+  /** Verdienter Partner-Rang (aus partner_rang, vom Loader batch-nachgeladen). Optional:
+   *  nur der Loader setzt ihn; fehlt er, projiziert toOeffentlichesSvProfil rang=null. */
+  rang?: { tier: Tier; sinnsatz: string | null } | null
 }
