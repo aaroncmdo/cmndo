@@ -10,7 +10,16 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { SupabaseClient } from '@supabase/supabase-js'
-import { leiteGruppenTeilnehmer, sortiereDirektPaar, threadLabel, type ClaimZuweisung, type ThreadArt } from './thread-model'
+import {
+  leiteGruppenTeilnehmer,
+  sortiereDirektPaar,
+  threadLabel,
+  leiteDmKandidaten,
+  rolleLabel,
+  type ClaimZuweisung,
+  type ThreadArt,
+  type DmKandidatenClaim,
+} from './thread-model'
 
 type Ergebnis<T> = { ok: true; data: T } | { ok: false; error: string }
 
@@ -231,4 +240,25 @@ export async function ladeClaimThreads(claimId: string): Promise<Ergebnis<ClaimT
     ok: true,
     data: threads.map((t) => ({ id: t.id, art: t.art, label: threadLabel(t.art, rollenProThread.get(t.id) ?? []) })),
   }
+}
+
+export interface ClaimBeteiligter {
+  userId: string
+  rolle: string
+  label: string
+}
+
+/** DM-Kandidaten eines Claims (zugewiesene Beteiligte ausser dem aktuellen User) fuer "Neue Nachricht". */
+export async function ladeClaimBeteiligte(claimId: string): Promise<Ergebnis<ClaimBeteiligter[]>> {
+  const { user } = await aktuellerUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+  const admin = createAdminClient() as unknown as SupabaseClient
+  const { data: claim } = await admin
+    .from('claims')
+    .select('geschaedigter_user_id, kundenbetreuer_id, sv_id, makler_id')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim) return { ok: false, error: 'Claim nicht gefunden.' }
+  const kandidaten = leiteDmKandidaten(claim as DmKandidatenClaim, user.id)
+  return { ok: true, data: kandidaten.map((k) => ({ userId: k.userId, rolle: k.rolle, label: rolleLabel(k.rolle) })) }
 }
