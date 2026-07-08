@@ -25,6 +25,8 @@ const CONFIG: AnspruchConfig = {
   totalschadenSchwelleProzent: 0.9,
   reparaturGrenzeProzent: 1.3,
   wiederbeschaffungsdauerTage: { min: 10, max: 14 },
+  nutzungsausfallMaxTage: 12,
+  mietwagenMaxTage: 14,
   verbringungEur: 130,
   ummeldungEur: 75,
 }
@@ -320,5 +322,44 @@ describe('Volle Positionen (Ersatzfahrzeug + Verbringung + Ummeldung)', () => {
     const tw = s.totalschaden!.totalschadenWeg
     expect(tw.positionen.some((p) => p.typ === 'mietwagen')).toBe(true)
     expect(tw.positionen.some((p) => p.typ === 'nutzungsausfall')).toBe(false)
+  })
+})
+
+describe('Hoechstdauern: Nutzungsausfall max 12 Tage (Reparatur), Mietwagen max 14 Tage', () => {
+  it('schwer Reparatur: Nutzungsausfall auf 12 Tage gedeckelt (dauer 10-21 -> 10-12)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, schweregrad: 'schwer' }, SAETZE, FAKTOREN, CONFIG)
+    expect(r.positionen.some((p) => p.typ === 'nutzungsausfall')).toBe(true)
+    const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    // mittelklasse -> Klasse E 43 x [10, min(21,12)=12] => 430..516
+    expect(na.minEur).toBe(430)
+    expect(na.maxEur).toBe(516)
+    expect(na.hinweis).toMatch(/× 10–12 Tage/)
+  })
+
+  it('schwer Reparatur: Mietwagen auf 14 Tage gedeckelt (dauer 10-21 -> 10-14)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, schweregrad: 'schwer', ersatzfahrzeug: 'mietwagen' }, SAETZE, FAKTOREN, CONFIG)
+    const mw = r.positionen.find((p) => p.typ === 'mietwagen')!
+    // mittelklasse mietwagen 60..85 x [10, min(21,14)=14] => 600..1190
+    expect(mw.minEur).toBe(600)
+    expect(mw.maxEur).toBe(1190)
+    expect(mw.hinweis).toMatch(/× 10–14 Tage/)
+  })
+
+  it('mittel Reparatur: keine Deckelung (dauer 5-9 unter Cap)', () => {
+    const r = berechneAnspruchsSpanne({ ...base, fahrbereit: false, schweregrad: 'mittel' }, SAETZE, FAKTOREN, CONFIG)
+    const na = r.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    expect(na.minEur).toBe(215) // 43 x 5
+    expect(na.maxEur).toBe(387) // 43 x 9
+  })
+
+  it('Totalschaden: Wiederbeschaffungs-Nutzungsausfall NICHT auf 12 gedeckelt (WBW-Dauer 10-14 bleibt)', () => {
+    const s = berechneAnspruchsSpanne(
+      { ...base, reparaturMinEur: 18000, reparaturMaxEur: 32000, wbwMinEur: 15000, wbwMaxEur: 21000, restwertMinEur: 3000, restwertMaxEur: 4500 },
+      SAETZE, FAKTOREN, CONFIG,
+    )
+    const na = s.totalschaden!.totalschadenWeg.positionen.find((p) => p.typ === 'nutzungsausfall')!
+    // Klasse E 43 x 10..14 => 430..602 (kontext=wiederbeschaffung -> KEIN 12-Cap)
+    expect(na.minEur).toBe(430)
+    expect(na.maxEur).toBe(602)
   })
 })
