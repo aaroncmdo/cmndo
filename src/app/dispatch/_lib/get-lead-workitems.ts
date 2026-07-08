@@ -50,6 +50,29 @@ export async function getLeadWorkItems(
   if (error) return { ok: false, error: (error as { message?: string }).message ?? 'Fehler' }
 
   const rows = (data ?? []) as LeadWorkstateRow[]
+
+  // Owner-Namen fuer die Cockpit-Anzeige aufloesen: distinct leads.zugewiesen_an ->
+  // profiles-Name (EINE Query fuer alle Owner). Via adminClient (Staff schon geguardet).
+  const ownerIds = Array.from(
+    new Set(rows.map((r) => r.zugewiesen_an).filter((v): v is string => !!v)),
+  )
+  const ownerNames = new Map<string, string>()
+  if (ownerIds.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: owners } = await (admin as any)
+      .from('profiles')
+      .select('id, vorname, nachname')
+      .in('id', ownerIds)
+    for (const o of (owners ?? []) as Array<{
+      id: string
+      vorname: string | null
+      nachname: string | null
+    }>) {
+      const name = [o.vorname, o.nachname].filter(Boolean).join(' ')
+      if (name) ownerNames.set(o.id, name)
+    }
+  }
+
   const items: LeadWorkItem[] = rows.map((row) => {
     const lead = row as unknown as WorkflowLeadLike
     const aktiverTermin: AktiverTerminLike = row.termin_status
@@ -71,6 +94,7 @@ export async function getLeadWorkItems(
       kind: 'lead',
       id: row.id,
       ownerId: row.zugewiesen_an,
+      ownerName: row.zugewiesen_an ? (ownerNames.get(row.zugewiesen_an) ?? null) : null,
       state,
       qualCompleted: qual.completedCount,
       display: { title, telefon: row.telefon },

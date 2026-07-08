@@ -1,6 +1,6 @@
-// Ops-Cockpit Phase 3 — Tests fuer getLeadWorkItems (Loader + Role-Guard + Derivation-Konsum).
-// deriveLeadWorkflowState/qualification-engine bleiben ECHT (pure) -> der Test verifiziert die
-// tatsaechliche Zustands-Ableitung, nicht ein Mock. Nur DB + Auth werden gemockt.
+// Ops-Cockpit Phase 3 — Tests fuer getLeadWorkItems (Loader + Role-Guard + Derivation-Konsum
+// + Owner-Namen-Aufloesung). deriveLeadWorkflowState/qualification-engine bleiben ECHT (pure).
+// Nur DB + Auth werden gemockt.
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
@@ -8,22 +8,29 @@ const h = vi.hoisted(() => ({
   user: { id: 'disp-1' } as { id: string } | null,
   rolle: 'dispatch' as string | null,
   rows: [] as Record<string, unknown>[],
+  owners: [] as Array<{ id: string; vorname: string | null; nachname: string | null }>,
   dbError: null as { message: string } | null,
 }))
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: () => ({
-    from: () => ({
-      select: () => {
-        const result = { data: h.rows, error: h.dbError }
-        // Thenable (await ohne .eq) UND chainable (.eq mit ownerId).
-        return {
-          eq: () => Promise.resolve(result),
-          then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) =>
-            Promise.resolve(result).then(res, rej),
-        }
-      },
-    }),
+    from: (table: string) => {
+      if (table === 'profiles') {
+        // Owner-Namen-Aufloesung: .select(...).in('id', ownerIds)
+        return { select: () => ({ in: () => Promise.resolve({ data: h.owners, error: null }) }) }
+      }
+      // v_lead_workstate: .select('*') [.eq(...)] -> thenable + chainable
+      return {
+        select: () => {
+          const result = { data: h.rows, error: h.dbError }
+          return {
+            eq: () => Promise.resolve(result),
+            then: (res: (v: unknown) => unknown, rej?: (e: unknown) => unknown) =>
+              Promise.resolve(result).then(res, rej),
+          }
+        },
+      }
+    },
   }),
 }))
 
@@ -63,6 +70,7 @@ beforeEach(() => {
   h.user = { id: 'disp-1' }
   h.rolle = 'dispatch'
   h.rows = []
+  h.owners = []
   h.dbError = null
 })
 
@@ -125,5 +133,20 @@ describe('getLeadWorkItems — Derivation + Mapping', () => {
     const r = await getLeadWorkItems(mockSupabase())
     expect(r.ok).toBe(true)
     if (r.ok) expect(r.items[0].display.title).toBe('+49170')
+  })
+
+  it('loest Owner-Namen auf (zugewiesen_an -> profiles)', async () => {
+    h.rows = [fullyQualifiedRow({ zugewiesen_an: 'disp-1' })]
+    h.owners = [{ id: 'disp-1', vorname: 'Dana', nachname: 'Dispatch' }]
+    const r = await getLeadWorkItems(mockSupabase())
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.items[0].ownerName).toBe('Dana Dispatch')
+  })
+
+  it('kein Owner -> ownerName null', async () => {
+    h.rows = [fullyQualifiedRow({ zugewiesen_an: null })]
+    const r = await getLeadWorkItems(mockSupabase())
+    expect(r.ok).toBe(true)
+    if (r.ok) expect(r.items[0].ownerName).toBeNull()
   })
 })
