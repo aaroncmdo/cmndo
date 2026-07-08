@@ -67,6 +67,9 @@ export async function listOpenProposals(): Promise<AiProposal[]> {
   const db = createAdminClient()
   const { data } = await db.from('ai_claim_proposals')
     .select('id, claim_id, erstellt_am, vorschlag_typ, ziel_rolle, payload, begruendung, status')
+    // Nur autonome Orchestrator-Vorschlaege — copilot (In-Claim-Panel) + aufsicht
+    // (/admin/ki-aufsicht) haben eigene Flaechen (geteilter Spine, quelle-Discriminator).
+    .eq('quelle', 'orchestrator')
     .eq('status', 'offen').order('erstellt_am', { ascending: false }).limit(200)
   return (data as AiProposal[] | null) ?? []
 }
