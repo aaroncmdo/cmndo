@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getTagesSession } from '@/lib/sv/tages-session'
 import { effektiveBezugIds, type TerminBezugRow } from '@/lib/termine/effektive-bezug-ids'
+import { weavePrivatStops } from '@/lib/feldmodus/weave-privat-stops'
 import FeldmodusClient from './FeldmodusClient'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
 
@@ -429,23 +430,9 @@ export default async function FeldmodusPage({
       vorschaden_letzter_datum: null,
     }))
 
-  // Termine bleiben in Session-Reihenfolge; Privat-Stops zeitlich dazwischen einsortiert (nach
-  // Uhrzeit relativ zum jeweils naechsten Termin). Danach 0-basiert re-indexen. Ohne Privat-Stops
-  // bleibt es exakt die alte termineStops-Liste (Termin-Flow unangetastet).
-  const stops: FeldmodusStop[] = (() => {
-    if (privatStops.length === 0) return termineStops
-    const merged: FeldmodusStop[] = []
-    let pi = 0
-    for (const t of termineStops) {
-      const tMs = new Date(t.start_zeit).getTime()
-      while (pi < privatStops.length && new Date(privatStops[pi].start_zeit).getTime() <= tMs) {
-        merged.push(privatStops[pi++])
-      }
-      merged.push(t)
-    }
-    while (pi < privatStops.length) merged.push(privatStops[pi++])
-    return merged.map((s, i) => ({ ...s, index: i }))
-  })()
+  // Termine bleiben in Session-Reihenfolge; Privat-Stops zeitlich dazwischen einsortiert + re-indexed.
+  // Pure + getestet: src/lib/feldmodus/weave-privat-stops.ts (weave-privat-stops.test.ts).
+  const stops: FeldmodusStop[] = weavePrivatStops(termineStops, privatStops)
 
   const feldmodusSv: FeldmodusSV = {
     id: sv.id,
