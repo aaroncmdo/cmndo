@@ -34,8 +34,14 @@ Die 3 Spalten sind **NICHT 3 redundante Status-Felder**, sondern **zwei synchron
 2. **`work_state` klären:** eigenständige Dispatch-Achse — dokumentieren + ggf. sauberer modellieren (eigenes Enum/Guard), NICHT in die Phase falten. Prüfen ob die 7-File-Surface konsistent ist.
 3. **Guard = A1-Parity-Test** (bereits gebaut): sichert `getClaimLifecycle ↔ v_claim_phase`. Ergänzend ggf. ein Test „operative_status-Terminal ⇒ claims.status-Terminal" (Konvergenz-Invariante).
 
-## Offen (nächster B0-Schritt)
-Edge-Writer im Detail lesen: `gutachter/team/actions.ts`, `lexdrive/process-event.ts`, die Webhook-Status-Schreiber, + die `work_state`-Setter (`convert-lead-to-claim.ts`, `kanzlei-wunsch/actions.ts`). Dann B-Plan schreiben.
+## ✅ B0 KOMPLETT — Edge-Writer verifiziert, Modell clean
+- `gutachter/team/actions:74` — schreibt `operative_status:'sv-zugewiesen'` direkt (nicht via state-machine), aber NICHT `claims.status`. Korrekt: sv-zugewiesen ist non-terminal → status bleibt null (hält nur Terminal/rechtl. Werte). **Kein Drift.**
+- `lexdrive/process-event.ts` — routet Status-Änderungen via `transitionFallStatus` (`:761`) → **synced**. (Der direkte `gutachter_termine.status`-Write `:554` ist Termin-Status, nicht claims.)
+- `convert-lead-to-claim:386` — `work_state:'dispatch_done'` bei Anlage; `claims.status` startet NULL (Kommentar `:384-385` bestätigt das 3-Achsen-Modell), operative_status wird bei Anlage gesetzt.
+
+**⇒ B = KEIN Spalten-Merge.** Verbleibendes B: (a) Invarianten-Test „operative_status-Terminal ⇒ claims.status-Terminal", (b) `work_state` als Dispatch-Achse dokumentieren/sauberer modellieren. Niedrige Risk.
+
+**Contested-Core-Koordination (v_claim_*/claims-Status):** [[broadcast-vclaim-lifecycle-cleanup-coordination]] — Aaron koordiniert die Lanes (89f501f6 v_claim_base-Revert ↔ diese A2/B).
 
 ## Koordination
 Contested Core (`claims`-Status + `v_claim_*`). Aktive Sessions: 89f501f6 (v_claim_base-Revert), 6f60c510 (money-tables). B-Writes additiv + koordiniert.
