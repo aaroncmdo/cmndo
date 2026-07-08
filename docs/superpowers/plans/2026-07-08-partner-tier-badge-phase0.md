@@ -20,6 +20,20 @@
 
 ---
 
+## AMENDMENT (2026-07-08) — Rang-Config DB-getrieben (Broadcast-Mandat)
+
+Das DB-Getriebenheits-Mandat (Broadcast „smoke bis 1+"): business-kritische **Limits/Schwellen/Gewichte** sind SSoT in der **DB**, nicht hardcoded in TS (Lehre: leadpreis-Formel-Konstanten → Drift → in DB konsolidiert). Deshalb:
+
+- **DB-SSoT `partner_rang_config`** (key-value, Migration `20260708001515`, **prod-applied**, 15 Seeds) trägt Gewichte/Caps/Schwellen — live tunbar ohne Redeploy.
+- **`config.ts`** liefert nur noch: `interface RangConfig` + `DEFAULT_RANG_CONFIG` (Fallback/Seed-Spiegel — für Tests und falls eine DB-Zeile fehlt). Es ist NICHT die Live-Quelle.
+- **Neu `config-loader.ts`:** `ladeRangConfig(supabase): Promise<RangConfig>` liest `partner_rang_config` und merged die Werte über `DEFAULT_RANG_CONFIG` (DB gewinnt je vorhandenem Key).
+- **`computePartnerStrength(s, config: RangConfig = DEFAULT_RANG_CONFIG)`** — Config wird **injiziert** (Funktion bleibt rein; Tests übergeben `DEFAULT_RANG_CONFIG` oder eine Test-Config).
+- **Cron** lädt `const config = await ladeRangConfig(supabase)` und übergibt sie an `computePartnerStrength`.
+
+Wo unten „`RANG_CONFIG` aus `config.ts`" steht, gilt stattdessen: `RangConfig`-Objekt (aus DB via Loader, Default als Fallback), als Parameter injiziert. Migration-Task für `partner_rang` + `partner_rang_config` = **bereits vom Controller angewandt** (Files `20260708000904_partner_rang.sql`, `20260708001515_partner_rang_config.sql`).
+
+---
+
 ## File Structure
 
 - Create: `supabase/migrations/<V>_partner_rang.sql` — Tabelle + RLS (public-read der öffentlichen Ränge).
