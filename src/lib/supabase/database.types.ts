@@ -12448,11 +12448,14 @@ export type Database = {
           email: string | null
           erstellt_am: string
           firma: string | null
+          google_place_id: string | null
           id: string
           konvertiert_am: string | null
           konvertiert_durch: string | null
           konvertiert_zu_partner_id: string | null
           konvertiert_zu_user_id: string | null
+          lat: number | null
+          lng: number | null
           notiz: string | null
           ort: string | null
           plz: string | null
@@ -12460,6 +12463,7 @@ export type Database = {
           rollen_details: Json
           source_channel: string
           status: string
+          strasse: string | null
           telefon: string | null
           zugewiesen_an: string | null
         }
@@ -12471,11 +12475,14 @@ export type Database = {
           email?: string | null
           erstellt_am?: string
           firma?: string | null
+          google_place_id?: string | null
           id?: string
           konvertiert_am?: string | null
           konvertiert_durch?: string | null
           konvertiert_zu_partner_id?: string | null
           konvertiert_zu_user_id?: string | null
+          lat?: number | null
+          lng?: number | null
           notiz?: string | null
           ort?: string | null
           plz?: string | null
@@ -12483,6 +12490,7 @@ export type Database = {
           rollen_details?: Json
           source_channel?: string
           status?: string
+          strasse?: string | null
           telefon?: string | null
           zugewiesen_an?: string | null
         }
@@ -12494,11 +12502,14 @@ export type Database = {
           email?: string | null
           erstellt_am?: string
           firma?: string | null
+          google_place_id?: string | null
           id?: string
           konvertiert_am?: string | null
           konvertiert_durch?: string | null
           konvertiert_zu_partner_id?: string | null
           konvertiert_zu_user_id?: string | null
+          lat?: number | null
+          lng?: number | null
           notiz?: string | null
           ort?: string | null
           plz?: string | null
@@ -12506,6 +12517,7 @@ export type Database = {
           rollen_details?: Json
           source_channel?: string
           status?: string
+          strasse?: string | null
           telefon?: string | null
           zugewiesen_an?: string | null
         }

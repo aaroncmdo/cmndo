@@ -2,6 +2,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkIpRateLimit } from '@/lib/rate-limit/ip-rate-limit'
+import { geocodePartnerLead } from '@/lib/partner/geocode-partner-lead'
 
 // Oeffentlicher Inbound-Antrag "Werkstatt Partner werden" (Slice D). Erzeugt einen
 // partner_leads-Prospect (rolle=werkstatt, status=neu, source_channel=marketing_bewerbung),
@@ -49,6 +50,17 @@ export async function werkstattPartnerAnfrage(
   if (marken) rollenDetails.marken = marken
   if (nachricht) rollenDetails.nachricht = nachricht
 
+  // Geocoding (best-effort): oeffentliche Bewerbung nie wegen Geocode-Fehler ablehnen.
+  let geoFields: { lat?: number; lng?: number; google_place_id?: string | null } = {}
+  try {
+    const geo = await geocodePartnerLead({ plz, ort })
+    if (geo.ok) {
+      geoFields = { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+    }
+  } catch (geoErr) {
+    console.error('[werkstattPartnerAnfrage] Geocoding fehlgeschlagen (non-critical):', geoErr)
+  }
+
   const { error } = await admin.from('partner_leads').insert({
     rolle: 'werkstatt',
     status: 'neu',
@@ -61,6 +73,7 @@ export async function werkstattPartnerAnfrage(
     plz,
     ort,
     rollen_details: rollenDetails,
+    ...geoFields,
   })
   if (error) {
     // M1: keine rohen DB-Fehler an den oeffentlichen Client.

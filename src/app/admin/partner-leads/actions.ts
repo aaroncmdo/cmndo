@@ -8,6 +8,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { convertPartnerLead } from '@/lib/partner/convert-partner-lead'
+import { geocodePartnerLead } from '@/lib/partner/geocode-partner-lead'
 import { revalidatePath } from 'next/cache'
 import type { PartnerRolle } from '@/lib/partner/policy'
 import type { PartnerCsvLead } from '@/lib/partner/csv-import'
@@ -110,6 +111,20 @@ export async function createPartnerLead(
     return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse angeben.' }
   }
 
+  // Geocoding (best-effort): Fehler brechen den Insert NICHT (Lead nie verlieren).
+  const plz = (input.plz ?? '').trim() || null
+  const ort = (input.ort ?? '').trim() || null
+  // createPartnerLead hat kein strasse-Feld im Input-Typ → undefined (helper behandelt das).
+  let geoFields: { lat?: number; lng?: number; google_place_id?: string | null } = {}
+  try {
+    const geo = await geocodePartnerLead({ plz, ort })
+    if (geo.ok) {
+      geoFields = { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+    }
+  } catch (geoErr) {
+    console.error('[createPartnerLead] Geocoding fehlgeschlagen (non-critical):', geoErr)
+  }
+
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('partner_leads')
@@ -122,10 +137,11 @@ export async function createPartnerLead(
       ansprechpartner_nachname: (input.ansprechpartner_nachname ?? '').trim() || null,
       email,
       telefon: (input.telefon ?? '').trim() || null,
-      plz: (input.plz ?? '').trim() || null,
-      ort: (input.ort ?? '').trim() || null,
+      plz,
+      ort,
       rollen_details: input.rollen_details ?? {},
       zugewiesen_an: staff.id,
+      ...geoFields,
     })
     .select('id')
     .single()
@@ -357,30 +373,58 @@ export async function importCsvLeads(
     return { ok: false, error: 'Keine importierbaren Zeilen gefunden.' }
   }
 
-  const rows = leads
-    .filter((l) => (l?.firma ?? '').trim().length > 0)
-    .map((l) => {
-      const email = (l.email ?? '').trim().toLowerCase()
-      return {
-        rolle: r,
-        status: 'neu',
-        source_channel: 'csv_import',
-        einstufung: null,
-        firma: l.firma.trim(),
-        ansprechpartner_vorname: (l.ansprechpartner_vorname ?? '').trim() || null,
-        ansprechpartner_nachname: (l.ansprechpartner_nachname ?? '').trim() || null,
-        email: email || null,
-        telefon: (l.telefon ?? '').trim() || null,
-        plz: (l.plz ?? '').trim() || null,
-        ort: (l.ort ?? '').trim() || null,
-        rollen_details: l.rollen_details ?? {},
-        zugewiesen_an: staff.id,
-      }
-    })
+  const validLeads = leads.filter((l) => (l?.firma ?? '').trim().length > 0)
 
-  if (rows.length === 0) {
+  if (validLeads.length === 0) {
     return { ok: false, error: 'Keine gültigen Zeilen (Firma fehlt überall).' }
   }
+
+  // Geocoding mit Concurrency-Limit 5 (Google-Rate-Limit vermeiden).
+  // Best-effort: Fehler je Row brechen den Import NICHT — Lead ohne Koordinaten anlegen.
+  const CONCURRENCY = 5
+  const geoResults: Array<{ lat?: number; lng?: number; google_place_id?: string | null }> =
+    new Array(validLeads.length).fill({})
+  for (let i = 0; i < validLeads.length; i += CONCURRENCY) {
+    const batch = validLeads.slice(i, i + CONCURRENCY)
+    const batchGeo = await Promise.all(
+      batch.map(async (l) => {
+        try {
+          const geo = await geocodePartnerLead({
+            // PartnerCsvLead hat kein strasse-Feld → undefined (helper akzeptiert null/undefined).
+            plz: (l.plz ?? '').trim() || null,
+            ort: (l.ort ?? '').trim() || null,
+          })
+          if (geo.ok) return { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+        } catch (geoErr) {
+          console.error('[importCsvLeads] Geocoding-Fehler (non-critical):', geoErr)
+        }
+        return {}
+      }),
+    )
+    batchGeo.forEach((g, j) => {
+      geoResults[i + j] = g
+    })
+  }
+
+  const rows = validLeads.map((l, idx) => {
+    const email = (l.email ?? '').trim().toLowerCase()
+    return {
+      rolle: r,
+      status: 'neu',
+      source_channel: 'csv_import',
+      einstufung: null,
+      firma: l.firma.trim(),
+      ansprechpartner_vorname: (l.ansprechpartner_vorname ?? '').trim() || null,
+      ansprechpartner_nachname: (l.ansprechpartner_nachname ?? '').trim() || null,
+      email: email || null,
+      telefon: (l.telefon ?? '').trim() || null,
+      plz: (l.plz ?? '').trim() || null,
+      ort: (l.ort ?? '').trim() || null,
+      rollen_details: l.rollen_details ?? {},
+      zugewiesen_an: staff.id,
+      ...geoResults[idx],
+    }
+  })
 
   const admin = createAdminClient()
   const { data, error } = await admin.from('partner_leads').insert(rows).select('id')
@@ -467,7 +511,33 @@ export async function importScrapedLeads(
     return { ok: false, error: 'Alle ausgewählten Kandidaten sind bereits vorhanden (Dubletten).' }
   }
 
-  const rows = zuAnlegen.map((k) => ({
+  // Geocoding mit Concurrency-Limit 5 (best-effort — ScrapeKandidat hat kein lat/lng).
+  const SCRAPE_CONCURRENCY = 5
+  const scrapeGeoResults: Array<{ lat?: number; lng?: number; google_place_id?: string | null }> =
+    new Array(zuAnlegen.length).fill({})
+  for (let i = 0; i < zuAnlegen.length; i += SCRAPE_CONCURRENCY) {
+    const batch = zuAnlegen.slice(i, i + SCRAPE_CONCURRENCY)
+    const batchGeo = await Promise.all(
+      batch.map(async (k) => {
+        try {
+          const geo = await geocodePartnerLead({
+            strasse: k.strasse,
+            plz: (k.plz ?? '').trim() || null,
+            ort: (k.ort ?? '').trim() || null,
+          })
+          if (geo.ok) return { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+        } catch (geoErr) {
+          console.error('[importScrapedLeads] Geocoding-Fehler (non-critical):', geoErr)
+        }
+        return {}
+      }),
+    )
+    batchGeo.forEach((g, j) => {
+      scrapeGeoResults[i + j] = g
+    })
+  }
+
+  const rows = zuAnlegen.map((k, idx) => ({
     rolle: r,
     status: 'neu',
     source_channel: 'scraping',
@@ -476,6 +546,7 @@ export async function importScrapedLeads(
     telefon: (k.telefon ?? '').trim() || null,
     plz: (k.plz ?? '').trim() || null,
     ort: (k.ort ?? '').trim() || null,
+    strasse: k.strasse ?? null,
     rollen_details: {
       google_place_id: k.google_place_id,
       website: k.website ?? null,
@@ -483,6 +554,7 @@ export async function importScrapedLeads(
       quelle: 'google_places',
     },
     zugewiesen_an: staff.id,
+    ...scrapeGeoResults[idx],
   }))
 
   const admin = createAdminClient()
