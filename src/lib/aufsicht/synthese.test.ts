@@ -256,4 +256,18 @@ describe('persistAufsichtRemediation', () => {
     // Soll nicht werfen, nur stilles Ueberspringen
     await expect(persistAufsichtRemediation('claude-sonnet-4-6', drafts)).resolves.not.toThrow()
   })
+
+  it('mappt Aufsicht-Rollen auf gueltige DB-ziel_rolle (dispatch/kanzlei -> kundenbetreuer)', async () => {
+    // ai_claim_proposals.ziel_rolle_check erlaubt NUR sachverstaendiger/kundenbetreuer/admin.
+    // dispatch/kanzlei sind keine Empfaenger-Rollen -> muessen gemappt werden (sonst 23514).
+    const drafts: AufsichtDraft[] = [
+      { claimId: 'c1', zielRolle: 'dispatch', titel: 'T', begruendung: 'G', prioritaet: 'normal' },
+      { claimId: 'c2', zielRolle: 'kanzlei', titel: 'T', begruendung: 'G', prioritaet: 'normal' },
+      { claimId: 'c3', zielRolle: 'sachverstaendiger', titel: 'T', begruendung: 'G', prioritaet: 'normal' },
+      { claimId: 'c4', zielRolle: 'admin', titel: 'T', begruendung: 'G', prioritaet: 'normal' },
+    ]
+    await persistAufsichtRemediation('m', drafts)
+    const rollen = h.insertSpy.mock.calls.map((c) => (c[0] as Record<string, unknown>).ziel_rolle)
+    expect(rollen).toEqual(['kundenbetreuer', 'kundenbetreuer', 'sachverstaendiger', 'admin'])
+  })
 })
