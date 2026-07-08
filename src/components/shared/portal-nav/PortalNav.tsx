@@ -14,6 +14,7 @@ import { ExternalLinkIcon, MoreHorizontalIcon, XIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useFloatingSidebar } from '@/lib/branding/use-floating-sidebar'
+import { usePortalShellDrawer } from '@/components/shared/portal-shell/context'
 
 // CMM-32 P2: --app-sidebar-width auf <html> setzen, damit Portal-rendered
 // Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
@@ -80,6 +81,9 @@ export function PortalNav({
 }: Props) {
   const pathname = usePathname()
   const floatingMode = useFloatingSidebar()
+  // Additiv: rendert PortalNav (dark) innerhalb des PortalShell-Mobile-Drawers?
+  // Default (kein Provider) = false → heutiges Verhalten fuer alle Bestandscaller.
+  const { inShellDrawer, onNavigate } = usePortalShellDrawer()
   // Sidebar bleibt w-56 (224 px) in beiden Modi — Floating-Pills sitzen mit
   // py-3 px-3 INNERHALB der Sidebar-Breite, kein Layout-Offset nötig.
   useSidebarWidthVar('224px')
@@ -105,7 +109,12 @@ export function PortalNav({
       )
     }
     return (
-      <Link key={item.href} href={item.href} className={cls}>
+      <Link
+        key={item.href}
+        href={item.href}
+        className={cls}
+        onClick={inShellDrawer ? onNavigate : undefined}
+      >
         <item.icon style={{ width: 17, height: 17 }} />
         <span className="flex-1">{item.label}</span>
         {renderBadge?.(item) ?? null}
@@ -285,7 +294,11 @@ export function PortalNav({
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
           data-sidebar-mode={floatingMode ? 'floating' : 'bar'}
-          className={`hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40 ${
+          className={`${
+            inShellDrawer
+              ? 'flex flex-col h-full w-full' // PortalShell positioniert (Rail/Drawer)
+              : 'hidden md:flex flex-col fixed top-0 left-0 h-screen w-56 z-40'
+          } ${
             floatingMode ? 'bg-transparent py-3 px-3 gap-3' : 'bg-claimondo-navy'
           } ${className}`}
         >
@@ -325,8 +338,9 @@ export function PortalNav({
           )}
         </aside>
 
-        {renderMobileBar()}
-        {renderMoreSheet()}
+        {/* Im PortalShell-Drawer ersetzt der Shell-Drawer die Bottom-Bar + Sheet. */}
+        {!inShellDrawer && renderMobileBar()}
+        {!inShellDrawer && renderMoreSheet()}
       </>
     )
   }
