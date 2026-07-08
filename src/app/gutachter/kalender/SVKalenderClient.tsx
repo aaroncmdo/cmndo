@@ -13,6 +13,7 @@ import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { svWochentagArbeitszeit } from '@/lib/termine/sv-arbeitszeiten'
 
 type Fall = {
   id: string
@@ -63,6 +64,16 @@ function findMatchingFallId(
   return hit?.fallId ?? null
 }
 
+// 2026-07-08: Label fuer eine Verfuegbarkeits-Ausnahme (Urlaub/Sperre). grund hat Vorrang,
+// sonst ein sprechendes Label je typ, sonst der rohe typ.
+function ausnahmeLabel(a: { typ: string | null; grund: string | null }): string {
+  if (a.grund) return a.grund
+  const map: Record<string, string> = {
+    urlaub: 'Urlaub', sperre: 'Gesperrt', gesperrt: 'Gesperrt', krank: 'Krank', krankheit: 'Krank', feiertag: 'Feiertag',
+  }
+  return (a.typ ? map[a.typ.toLowerCase()] : undefined) ?? a.typ ?? 'Nicht verfügbar'
+}
+
 export default function SVKalenderClient({
   faelle,
   leadMap,
@@ -72,6 +83,9 @@ export default function SVKalenderClient({
   termine,
   externalBusy,
   verlegteSlots,
+  arbeitszeiten,
+  blockierteWochentage,
+  ausnahmen,
 }: {
   faelle: Fall[]
   leadMap: Record<string, string>
@@ -86,6 +100,11 @@ export default function SVKalenderClient({
   // AAR-864: verlegt-Slots — gedimmter „Privater Termin"-Block, blockt
   // weiter den Slot bis der Kunde entscheidet
   verlegteSlots?: { id: string; start: string; end: string }[]
+  // 2026-07-08: SV-Verfuegbarkeit sichtbar machen — dieselbe Quelle (svWochentagArbeitszeit) wie
+  // die Engine, damit angezeigte Verfuegbarkeit == angebotene Slots (kein Drift).
+  arbeitszeiten?: Record<string, { von: string; bis: string } | undefined> | null
+  blockierteWochentage?: number[] | null
+  ausnahmen?: { von: string; bis: string; typ: string | null; grund: string | null }[]
 }) {
   const router = useRouter()
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -263,8 +282,19 @@ export default function SVKalenderClient({
               const today = isToday(day)
               const dayKey = format(day, 'yyyy-MM-dd')
               const dayW = dailyWeather[dayKey]
+              // 2026-07-08: Verfuegbarkeit dieses Tages — Arbeitszeit (null = geschlossen/blockiert,
+              // gleiche Logik wie die Engine) + ueberlappende Ausnahmen (Urlaub/Sperre).
+              const az = svWochentagArbeitszeit(arbeitszeiten ?? null, blockierteWochentage ?? null, day.getDay())
+              const dayStartMs = new Date(day.getFullYear(), day.getMonth(), day.getDate()).getTime()
+              const dayEndMs = dayStartMs + 24 * 60 * 60 * 1000
+              const dayAusnahmen = (ausnahmen ?? []).filter((a) => {
+                const av = new Date(a.von).getTime()
+                const ab = new Date(a.bis).getTime()
+                return av < dayEndMs && ab > dayStartMs
+              })
+              const geschlossen = az === null
               return (
-                <div key={i} className={`border-r border-claimondo-border/50 last:border-r-0 min-h-48 ${today ? 'bg-claimondo-bg/30' : ''}`}>
+                <div key={i} className={`border-r border-claimondo-border/50 last:border-r-0 min-h-48 ${today ? 'bg-claimondo-bg/30' : geschlossen ? 'bg-claimondo-bg/50' : ''}`}>
                   {/* Day header */}
                   <div className="px-2 py-2 border-b border-claimondo-border/50 text-center">
                     <span className="text-claimondo-ondo text-[10px] uppercase">{format(day, 'EEE', { locale: de })}</span>
@@ -272,6 +302,10 @@ export default function SVKalenderClient({
                       today ? 'bg-[var(--brand-primary)] text-white' : 'text-claimondo-navy'
                     }`}>
                       {format(day, 'd')}
+                    </div>
+                    {/* 2026-07-08: Arbeitszeit-Fenster / geschlossen — Verfuegbarkeit auf einen Blick */}
+                    <div className={`text-[9px] mt-0.5 ${az ? 'text-claimondo-ondo' : 'text-claimondo-ondo/50'}`}>
+                      {az ? `${az.von}–${az.bis}` : 'geschlossen'}
                     </div>
                     {dayW && (
                       <div className="mt-0.5">
@@ -283,6 +317,17 @@ export default function SVKalenderClient({
 
                   {/* Entries */}
                   <div className="p-1.5 space-y-1">
+                    {/* 2026-07-08: Verfuegbarkeits-Ausnahmen (Urlaub/Sperre) — Nicht-verfuegbar-Band */}
+                    {dayAusnahmen.map((a, ai) => (
+                      <div
+                        key={`ausn-${ai}`}
+                        className="px-2 py-1 rounded-ios-lg text-[10px] leading-tight bg-warning-soft text-warning-strong border border-warning/30"
+                        title={`Nicht verfügbar${a.grund ? ': ' + a.grund : ''}`}
+                      >
+                        <div className="font-medium truncate">{ausnahmeLabel(a)}</div>
+                        <div className="text-[9px] opacity-80">nicht verfügbar</div>
+                      </div>
+                    ))}
                     {/* AAR-google-cal-drift: externe Google-Termine als geblockte Slots anzeigen */}
                     {(externalBusy ?? [])
                       .filter((b) => {

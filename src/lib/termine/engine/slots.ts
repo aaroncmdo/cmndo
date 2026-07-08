@@ -5,20 +5,13 @@ import { ladeBelegung } from './belegung'
 import { TERMIN_DAUER_MIN, TERMIN_PUFFER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { KB_BERATUNG_DURATION_MIN } from '@/lib/termine/constants'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+// Geteilte SV-Arbeitszeiten-Quelle (Default + Block-Logik) — dieselbe Fn nutzt die SV-Kalender-
+// Anzeige, damit angezeigte Verfuegbarkeit == angebotene Slots (kein Drift Engine vs. UI).
+import { svWochentagArbeitszeit, TAG_KEYS, type SvArbeitszeitenMap } from '@/lib/termine/sv-arbeitszeiten'
 
 const WOCHENTAG_LABELS = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa']
-const TAG_KEYS = ['so', 'mo', 'di', 'mi', 'do', 'fr', 'sa']
 type BelegtPeriod = { von: Date; bis: Date }
 
-// Default-Arbeitszeiten wenn nichts konfiguriert ist — Parität zu ladeFreieSlots/getAvailableKbSlots.
-// (Befund 02.06.: alle 10 SVs haben arbeitszeiten=null -> ohne Default = 0 Slots ueberall.)
-const DEFAULT_SV_ARBEITSZEITEN: Record<string, { von: string; bis: string }> = {
-  mo: { von: '09:00', bis: '17:00' },
-  di: { von: '09:00', bis: '17:00' },
-  mi: { von: '09:00', bis: '17:00' },
-  do: { von: '09:00', bis: '17:00' },
-  fr: { von: '09:00', bis: '16:00' },
-}
 const DEFAULT_KB_WORKING_HOURS: Record<string, [string, string]> = {
   mo: ['09:00', '17:00'],
   di: ['09:00', '17:00'],
@@ -77,16 +70,15 @@ async function konfigFuerAssignee(db: SupabaseClient, assignee: Assignee): Promi
       .maybeSingle()
     // Existiert der SV nicht -> keine Slots (kein Default fuer Phantom-IDs).
     if (!data) return { slotDauerMin: TERMIN_DAUER_MIN, pufferMin: TERMIN_PUFFER_MIN, reachability: true, proWochentag: () => null }
-    const az = (data.arbeitszeiten as Record<string, { von: string; bis: string } | undefined> | null) ?? DEFAULT_SV_ARBEITSZEITEN
-    const blocked = (data.blockierte_wochentage as number[] | null) ?? []
+    const arbeitszeiten = (data.arbeitszeiten as SvArbeitszeitenMap) ?? null
+    const blocked = (data.blockierte_wochentage as number[] | null) ?? null
     return {
       slotDauerMin: TERMIN_DAUER_MIN,
       pufferMin: TERMIN_PUFFER_MIN,
       reachability: true,
+      // svWochentagArbeitszeit = geteilte Quelle mit der SV-Kalender-Anzeige (Default + Block-Logik).
       proWochentag: (dowJs) => {
-        const dowIso = dowJs === 0 ? 7 : dowJs
-        if (blocked.includes(dowIso)) return null
-        const t = az[TAG_KEYS[dowJs]]
+        const t = svWochentagArbeitszeit(arbeitszeiten, blocked, dowJs)
         return t ? { vonMin: zeitZuMin(t.von), bisMin: zeitZuMin(t.bis) } : null
       },
     }

@@ -20,7 +20,7 @@ export default async function SVKalenderPage({
   if (!user) redirect('/login')
 
   // Get the SV's sachverstaendige ID
-  const sv = await getGutachterForUser<{ id: string; gcal_connected: boolean | null; standort_lat: number | null; standort_lng: number | null }>(supabase, user.id, 'id, gcal_connected, standort_lat, standort_lng')
+  const sv = await getGutachterForUser<{ id: string; gcal_connected: boolean | null; standort_lat: number | null; standort_lng: number | null; arbeitszeiten: Record<string, { von: string; bis: string } | undefined> | null; blockierte_wochentage: number[] | null }>(supabase, user.id, 'id, gcal_connected, standort_lat, standort_lng, arbeitszeiten, blockierte_wochentage')
 
   if (!sv) redirect('/login')
 
@@ -68,6 +68,29 @@ export default async function SVKalenderPage({
     source: (e.source as string | null) ?? null,
   }))
 
+  // Admin-Client, scoped auf die EIGENE sv.id (via getGutachterForUser verifiziert) — fuer Reads,
+  // die nicht sinnvoll user-RLS-gated sind (Verfuegbarkeits-Ausnahmen ohne SELECT-Policy, Lead-Namen).
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const adminDb = createAdminClient()
+
+  // 2026-07-08: SV-Verfuegbarkeits-Ausnahmen (Urlaub/Sperren) im Anzeige-Fenster — DIESELBE Quelle
+  // wie die Engine (v_belegung 'ausnahme'). Damit zeigt der Kalender die reale Buchbarkeit. Aaron:
+  // „die svs koennen in den einstellungen relevante dinge einstellen … evtl im kalender anzeigen."
+  const { data: ausnahmenRows } = await adminDb
+    .from('verfuegbarkeits_ausnahmen')
+    .select('von, bis, typ, grund')
+    .eq('assignee_typ', 'sachverstaendiger')
+    .eq('assignee_id', sv.id)
+    .lt('von', toIso)
+    .gt('bis', fromIso)
+    .order('von')
+  const ausnahmen = ((ausnahmenRows ?? []) as Array<Record<string, unknown>>).map((a) => ({
+    von: a.von as string,
+    bis: a.bis as string,
+    typ: (a.typ as string | null) ?? null,
+    grund: (a.grund as string | null) ?? null,
+  }))
+
   // KANONISCH (2026-07-07): SV-Termine aus gutachter_termine via assignee_id — NICHT
   // aus der stale v_faelle_mit_aktuellem_termin.sv_termin (claim-scoped, claim_id meist
   // NULL -> Mehrheit der Termine unsichtbar). Kein sa_unterschrieben-Hardfilter mehr
@@ -107,8 +130,7 @@ export default async function SVKalenderPage({
     .filter(Boolean) as string[])]
   const leadMap: Record<string, string> = {}
   if (leadIds.length) {
-    const { createAdminClient } = await import('@/lib/supabase/admin')
-    const { data: leads } = await createAdminClient().from('leads').select('id, vorname, nachname').in('id', leadIds)
+    const { data: leads } = await adminDb.from('leads').select('id, vorname, nachname').in('id', leadIds)
     for (const l of leads ?? []) leadMap[l.id] = `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '—'
   }
 
@@ -213,6 +235,9 @@ export default async function SVKalenderPage({
           }))}
           externalBusy={externalBusy}
           verlegteSlots={verlegteSlots}
+          arbeitszeiten={sv.arbeitszeiten}
+          blockierteWochentage={sv.blockierte_wochentage}
+          ausnahmen={ausnahmen}
         />
       ) : (
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
