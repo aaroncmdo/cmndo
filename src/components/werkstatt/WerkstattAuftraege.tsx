@@ -16,14 +16,15 @@ import {
   werkstattAuftragPhase,
   WERKSTATT_PHASE_ORDER,
   WERKSTATT_PHASE_META,
-  reparaturwunschLabel,
   operativeStatusLabel,
 } from '@/lib/werkstatt/werkstatt-auftrag-phase'
 import {
   werkstattAuftragSegment,
   abrechnungswegLabel,
+  quelleLabel,
   zaehleSegmente,
 } from '@/lib/werkstatt/werkstatt-auftrag-segment'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
 
 import {
   Table,
@@ -47,12 +48,75 @@ function fahrzeugText(a: WerkstattAuftrag): string {
   return parts.length ? parts.join(' ') : '–'
 }
 
+/** Kurzdatum (TT.MM.JJJJ, Berlin) oder „–" wenn kein ISO-String. */
+function kurzDatum(iso: string | null): string {
+  return iso ? formatBerlin(iso, { day: '2-digit', month: '2-digit', year: 'numeric' }) : '–'
+}
+
 type Props = {
   auftraege: WerkstattAuftrag[]
   werkstattName: string
 }
 
 type Segment = 'reparatur' | 'vermittlung'
+
+// ─── Segment-spezifische Zeilen ──────────────────────────────────────────────
+// Reparatur-Auftrag (ich repariere): Kunde + Fahrzeug + Reparatur-Status + Termin.
+// Jede Zeile führt mit Kunde + Phasen-Badge, sodass ein früher Fall (noch kein
+// Fahrzeug/Termin) als „Kunde + Ersterfassung" intentional liest — nicht kaputt.
+
+function ReparaturZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => void }) {
+  const phase = werkstattAuftragPhase(a)
+  const opLabel = operativeStatusLabel(a.operative_status)
+  const typ = abrechnungswegLabel(a.abrechnungsweg)
+  const terminIso = a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin
+  return (
+    <ClickableTr onClick={onClick}>
+      <Td>
+        <div className="text-claimondo-navy font-medium">{a.claim_nummer ?? '–'}</div>
+        {typ && <StatusBadge tone="neutral" size="xs">{typ}</StatusBadge>}
+      </Td>
+      <Td className="text-body-sm text-claimondo-navy font-medium">{a.kunde_name ?? '–'}</Td>
+      <Td className="text-body-sm">
+        <div className="text-claimondo-navy">{fahrzeugText(a)}</div>
+        {a.kennzeichen && (
+          <div className="text-claimondo-ondo text-xs font-mono">{a.kennzeichen}</div>
+        )}
+      </Td>
+      <Td>
+        <div className="flex flex-col items-start gap-1">
+          <StatusBadge tone={phase.ton} size="xs">{phase.label}</StatusBadge>
+          {opLabel && <span className="text-claimondo-ondo text-xs">{opLabel}</span>}
+        </div>
+      </Td>
+      <Td className="text-body-sm text-claimondo-navy tabular-nums">{kurzDatum(terminIso)}</Td>
+    </ClickableTr>
+  )
+}
+
+// Meine Vermittlung (ich habe geworben): Kunde + Quelle + Vermittelt-am + Provision.
+function VermittlungZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => void }) {
+  return (
+    <ClickableTr onClick={onClick}>
+      <Td>
+        <div className="text-claimondo-navy font-medium">{a.claim_nummer ?? '–'}</div>
+      </Td>
+      <Td className="text-body-sm text-claimondo-navy font-medium">{a.kunde_name ?? '–'}</Td>
+      <Td className="text-body-sm text-claimondo-navy">{quelleLabel(a.quelle) ?? '–'}</Td>
+      <Td className="text-body-sm text-claimondo-navy tabular-nums">{kurzDatum(a.zugewiesen_am)}</Td>
+      <Td className="text-body-sm text-claimondo-navy tabular-nums">
+        {a.provision_betrag_netto != null ? (
+          <div className="flex flex-col items-start gap-1">
+            <span>{EUR.format(a.provision_betrag_netto)}</span>
+            <StatusBadge tone="neutral" size="xs">{a.provision_status ?? 'offen'}</StatusBadge>
+          </div>
+        ) : (
+          '–'
+        )}
+      </Td>
+    </ClickableTr>
+  )
+}
 
 export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
   const router = useRouter()
@@ -196,53 +260,32 @@ export function WerkstattAuftraege({ auftraege, werkstattName }: Props) {
         <DataTableContainer>
           <Table>
             <Thead>
-              <Tr>
-                <Th>Auftrag</Th>
-                <Th>Fahrzeug</Th>
-                <Th>Schaden</Th>
-                <Th>Status</Th>
-                <Th>Provision</Th>
-              </Tr>
+              {segment === 'reparatur' ? (
+                <Tr>
+                  <Th>Auftrag</Th>
+                  <Th>Kunde</Th>
+                  <Th>Fahrzeug</Th>
+                  <Th>Status</Th>
+                  <Th>Termin</Th>
+                </Tr>
+              ) : (
+                <Tr>
+                  <Th>Vermittlung</Th>
+                  <Th>Kunde</Th>
+                  <Th>Quelle</Th>
+                  <Th>Vermittelt am</Th>
+                  <Th>Provision</Th>
+                </Tr>
+              )}
             </Thead>
             <Tbody>
-              {gefiltert.map((a) => {
-                const phase = werkstattAuftragPhase(a)
-                const opLabel = operativeStatusLabel(a.operative_status)
-                const wunsch = reparaturwunschLabel(a.reparaturwunsch)
-                const typ = abrechnungswegLabel(a.abrechnungsweg)
-                return (
-                  <ClickableTr
-                    key={a.claim_id}
-                    onClick={() => router.push(`/werkstatt/auftraege/${a.claim_id}`)}
-                  >
-                    <Td>
-                      <div className="text-claimondo-navy font-medium">{a.claim_nummer ?? '–'}</div>
-                      {typ && (
-                        <StatusBadge tone="neutral" size="xs">{typ}</StatusBadge>
-                      )}
-                    </Td>
-                    <Td className="text-body-sm">
-                      <div className="text-claimondo-navy">{fahrzeugText(a)}</div>
-                      {a.kennzeichen && (
-                        <div className="text-claimondo-ondo text-xs font-mono">{a.kennzeichen}</div>
-                      )}
-                    </Td>
-                    <Td className="text-body-sm">
-                      <div className="text-claimondo-navy">{a.schadenart ?? '–'}</div>
-                      {wunsch && <div className="text-claimondo-ondo text-xs">{wunsch}</div>}
-                    </Td>
-                    <Td>
-                      <div className="flex flex-col items-start gap-1">
-                        <StatusBadge tone={phase.ton} size="xs">{phase.label}</StatusBadge>
-                        {opLabel && <span className="text-claimondo-ondo text-xs">{opLabel}</span>}
-                      </div>
-                    </Td>
-                    <Td className="tabular-nums text-body-sm text-claimondo-navy">
-                      {a.provision_betrag_netto != null ? EUR.format(a.provision_betrag_netto) : '–'}
-                    </Td>
-                  </ClickableTr>
-                )
-              })}
+              {gefiltert.map((a) =>
+                segment === 'reparatur' ? (
+                  <ReparaturZeile key={a.claim_id} a={a} onClick={() => router.push(`/werkstatt/auftraege/${a.claim_id}`)} />
+                ) : (
+                  <VermittlungZeile key={a.claim_id} a={a} onClick={() => router.push(`/werkstatt/auftraege/${a.claim_id}`)} />
+                ),
+              )}
             </Tbody>
           </Table>
         </DataTableContainer>
