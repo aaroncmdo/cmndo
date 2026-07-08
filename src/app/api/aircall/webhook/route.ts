@@ -12,13 +12,14 @@ export const dynamic = 'force-dynamic'
 export async function POST(request: Request) {
   const body = await request.text()
 
-  // Signatur prüfen (falls Token gesetzt)
+  // Signatur IMMER pruefen (fail-closed): verifyWebhookSignature liefert false bei
+  // fehlendem AIRCALL_WEBHOOK_TOKEN ODER fehlender/falscher Signatur. Der fruehere
+  // Guard `if (TOKEN && sig)` war umgehbar — ohne x-aircall-signature-Header wurde
+  // die Pruefung komplett uebersprungen (auch bei GESETZTEM Secret).
   const sig = request.headers.get('x-aircall-signature') ?? ''
-  if (process.env.AIRCALL_WEBHOOK_TOKEN && sig) {
-    const { verifyWebhookSignature } = await import('@/lib/aircall/client')
-    if (!verifyWebhookSignature(body, sig)) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
-    }
+  const { verifyWebhookSignature } = await import('@/lib/aircall/client')
+  if (!verifyWebhookSignature(body, sig)) {
+    return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
 
   let event: { event: string; data: Record<string, unknown>; resource?: string }
