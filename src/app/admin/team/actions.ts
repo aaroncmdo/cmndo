@@ -57,6 +57,9 @@ export async function createMitarbeiter(
     twofa_email_aktiviert: false,
   })
   if (profileError) {
+    // F3 (Mitarbeiter-Audit): Rollback — den verwaisten auth.user wieder loeschen,
+    // sonst blockt ein Retry mit derselben Email am "Email existiert" (createUser).
+    try { await admin.auth.admin.deleteUser(newUser.user.id) } catch { /* best-effort */ }
     return { success: false, error: `Profil erstellen fehlgeschlagen: ${profileError.message}` }
   }
 
@@ -67,6 +70,9 @@ export async function createMitarbeiter(
     eingestellt_am: new Date().toISOString().split('T')[0],
   })
   if (vergError) {
+    // F3 (Mitarbeiter-Audit): Rollback — profiles-Zeile + auth.user wieder entfernen.
+    try { await admin.from('profiles').delete().eq('id', newUser.user.id) } catch { /* best-effort */ }
+    try { await admin.auth.admin.deleteUser(newUser.user.id) } catch { /* best-effort */ }
     return { success: false, error: `Verguetung anlegen fehlgeschlagen: ${vergError.message}` }
   }
 

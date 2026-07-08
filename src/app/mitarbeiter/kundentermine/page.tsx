@@ -40,31 +40,42 @@ export default async function MitarbeiterKundentermine() {
 
   const sinceIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
 
-  // SV-Termine der Fälle wo ich KB bin. Join fall → kundenbetreuer_id=me.
-  const { data: termineRaw } = await supabase
-    .from('gutachter_termine')
-    .select(
-      'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, assignee_id, assignee_typ, ' +
-        'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer, kundenbetreuer_id, lead_id))',
-    )
-    .neq('typ', 'kb_beratung')
-    .in('status', ['reserviert', 'bestaetigt'])
-    .is('cancelled_at', null)
-    .gte('start_zeit', sinceIso)
-    .order('start_zeit', { ascending: true })
-    .limit(200)
+  // F5-Fix (Mitarbeiter-Audit): server-seitig auf die Fälle scopen, die ich als KB
+  // betreue — vorher schnitt .limit(200) GLOBAL (über alle KB) ab, BEVOR client-seitig
+  // gefiltert wurde, sodass ein KB mit vielen Terminen welche verlor. v_claim_full.fall_id
+  // == gutachter_termine.fall_id (beide via faelle_claim_bridge).
+  const { data: myClaims } = await supabase
+    .from('v_claim_full')
+    .select('fall_id')
+    .eq('kundenbetreuer_id', user.id)
+  const myFallIds = Array.from(
+    new Set((myClaims ?? []).map((c) => c.fall_id as string | null).filter(Boolean) as string[]),
+  )
 
-  const termineAll = (termineRaw ?? []) as unknown as GutachterTerminRow[]
+  // SV-Termine der Fälle wo ich KB bin.
+  let termineRaw: unknown[] = []
+  if (myFallIds.length > 0) {
+    const { data } = await supabase
+      .from('gutachter_termine')
+      .select(
+        'id, start_zeit, end_zeit, status, kanal, adresse, fall_id, assignee_id, assignee_typ, ' +
+          'fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(id:fall_id, claims:claim_id(claim_nummer, kundenbetreuer_id, lead_id))',
+      )
+      .in('fall_id', myFallIds)
+      .neq('typ', 'kb_beratung')
+      .in('status', ['reserviert', 'bestaetigt'])
+      .is('cancelled_at', null)
+      .gte('start_zeit', sinceIso)
+      .order('start_zeit', { ascending: true })
+      .limit(200)
+    termineRaw = data ?? []
+  }
 
-  // Filter auf fall.kundenbetreuer_id = user.id (server-side). Wir filtern
-  // hier client-side nach dem Query, weil Supabase Nested-FK-Filter nicht
-  // immer zuverlässig durchreicht. Bei Bedarf als RLS-Policy umziehen.
-  const termine = termineAll.filter((t) => {
-    const fallRaw = t.fall as unknown
-    const fall = Array.isArray(fallRaw) ? fallRaw[0] ?? null : (fallRaw as { claims: ClaimJoin } | null)
-    const claim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-    return claim?.kundenbetreuer_id === user.id
-  })
+  const termineAll = termineRaw as unknown as GutachterTerminRow[]
+
+  // F5-Fix: Scoping erfolgt jetzt server-seitig via .in('fall_id', myFallIds) — der
+  // fruehere client-seitige kundenbetreuer_id-Filter (nach limit(200)) entfaellt.
+  const termine = termineAll
 
   // Kunden-Namen für Lead-Ids nachladen
   const leadIds = Array.from(
