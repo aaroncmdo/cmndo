@@ -50,10 +50,14 @@ export const orchestratorPipelineCheck: HealthCheck = {
   title: 'AI-Claim-Orchestrator',
 
   async run(ctx): Promise<CheckResult> {
+    // Der Spine ai_claim_proposals ist geteilt (quelle orchestrator|copilot|aufsicht).
+    // Dieser Check beobachtet NUR die Orchestrator-Pipeline — copilot-/aufsicht-
+    // Vorschlaege duerfen den Rueckstau-Zaehler (und den >50-Alarm) nicht verfaelschen.
     const { count: offen } = await ctx.supabase
       .from('ai_claim_proposals')
       .select('id', { count: 'exact', head: true })
       .eq('status', 'offen')
+      .eq('quelle', 'orchestrator')
 
     // Schema-Override (2026-07-05): Timestamp-Spalte ist started_at, nicht erstellt_am
     const { data: lauf } = await ctx.supabase
