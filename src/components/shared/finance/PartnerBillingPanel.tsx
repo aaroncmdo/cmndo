@@ -111,30 +111,38 @@ function ZeilenAktionen({
     if (belege.length === 0) return <span className="text-xs text-claimondo-ondo/50">—</span>
     return (
       <div className="flex flex-wrap items-center gap-1.5">
-        {belege.map((b) => (
-          <span key={b.typ} className="inline-flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              loading={isPending}
-              onClick={() =>
-                fuehreAus(async () => {
-                  const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id, b.typ)
-                  if (res.ok) {
-                    window.open(res.url, '_blank')
-                    return { ok: true }
-                  }
-                  return { ok: false, error: res.error }
-                })
-              }
-            >
-              {b.typ === 'storno' ? 'Storno ↓' : 'Gutschrift ↓'}
-            </Button>
-            {b.typ === 'storno' && b.bezugNr && (
-              <span className="text-xs text-claimondo-shield">zu {b.bezugNr}</span>
-            )}
-          </span>
-        ))}
+        {belege.map((b) => {
+          const label =
+            b.typ === 'storno'
+              ? 'Storno ↓'
+              : b.status === 'storniert'
+                ? 'Gutschrift (storniert) ↓'
+                : 'Gutschrift ↓'
+          return (
+            <span key={b.gutschriftId} className="inline-flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                loading={isPending}
+                onClick={() =>
+                  fuehreAus(async () => {
+                    const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id, b.typ, b.gutschriftId)
+                    if (res.ok) {
+                      window.open(res.url, '_blank')
+                      return { ok: true }
+                    }
+                    return { ok: false, error: res.error }
+                  })
+                }
+              >
+                {label}
+              </Button>
+              {b.typ === 'storno' && b.bezugNr && (
+                <span className="text-xs text-claimondo-shield">zu {b.bezugNr}</span>
+              )}
+            </span>
+          )
+        })}
         {meldung && !meldung.ok && <AktionMeldung {...meldung} />}
       </div>
     )
