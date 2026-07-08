@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
+import ClaimChatInbox from '@/components/chat/ClaimChatInbox'
+import { ladeClaimUnreadCounts } from '@/lib/chat/thread-actions'
 import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 // AAR-722 + AAR-726: Gutachter-Posteingang ist jetzt reiner Chat-Bereich.
@@ -15,7 +17,7 @@ import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 export const dynamic = 'force-dynamic'
 
-type Search = { fall?: string }
+type Search = { fall?: string; chatv2?: string }
 
 export default async function PosteingangPage({
   searchParams,
@@ -50,14 +52,43 @@ export default async function PosteingangPage({
   const { data: faelleRaw } = aktiveClaimIds.length
     ? await supabase
         .from('v_claim_full')
-        .select('fall_id, lead_id, claim_nummer, created_at')
+        .select('id, fall_id, lead_id, claim_nummer, created_at')
         .eq('sv_id', sv.id)
         .in('id', aktiveClaimIds)
-    : { data: [] as Array<{ fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }> }
+    : { data: [] as Array<{ id: string; fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }> }
   const claimCreatedAt = (f: { created_at?: string | null }): string => f.created_at ?? ''
   const faelle = (faelleRaw ?? [])
     .slice()
     .sort((a, b) => claimCreatedAt(b).localeCompare(claimCreatedAt(a)))
+
+  // Phase-2c Cutover-Flag: ?chatv2=1 -> claim-natives Thread-Modell (ClaimChatInbox).
+  // SV = Staff (istStaff=true -> team_intern sichtbar). Titel = Kundenname. Default aus,
+  // null Prod-Risiko. claim-native id (f.id), NICHT fall_id (Lehre #3910).
+  if (params.chatv2 === '1') {
+    const leadIds = Array.from(new Set(faelle.map(f => f.lead_id).filter(Boolean) as string[]))
+    const kundenMap: Record<string, string> = {}
+    if (leadIds.length > 0) {
+      const { data: leads } = await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
+      for (const l of leads ?? []) kundenMap[l.id as string] = [l.vorname, l.nachname].filter(Boolean).join(' ') || 'Kunde'
+    }
+    const unreadRes = await ladeClaimUnreadCounts(faelle.map(f => f.id))
+    const unread = unreadRes.ok ? unreadRes.data : {}
+    return (
+      <ClaimChatInbox
+        eintraege={faelle.map(f => ({
+          claimId: f.id,
+          title: f.lead_id ? (kundenMap[f.lead_id] ?? 'Kunde') : 'Kunde',
+          fallNummer: f.claim_nummer ?? null,
+          lastAt: f.created_at ?? '',
+          unreadCount: unread[f.id] ?? 0,
+        }))}
+        currentUserId={user.id}
+        istStaff={true}
+        initialClaimId={faelle.find(f => f.fall_id === params.fall)?.id ?? null}
+        emptyHint="Noch keine Kunden-Nachrichten. Sobald ein Fall zugewiesen ist, kannst du hier mit dem Kunden kommunizieren."
+      />
+    )
+  }
 
   const fallIds = (faelle ?? []).map(f => f.fall_id)
   const threads: FallThread[] = []
