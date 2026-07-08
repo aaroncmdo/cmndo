@@ -1,5 +1,5 @@
 // AAR-956 WP-B (Task 9): Provisions-Seite fuer Werkstatt.
-// Zeigt werkstatt_provisionen gefiltert nach werkstatt_id (RLS + expliziter Filter).
+// Zeigt partner_provisionen (partner_typ='werkstatt') gefiltert nach partner_id (RLS + expliziter Filter).
 // Leak-safe: keine PII — nur betrag, status, dates, claim_nummer.
 
 import { redirect } from 'next/navigation'

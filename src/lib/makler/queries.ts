@@ -392,9 +392,10 @@ export async function getMaklerFallDetail(
   }
 
   const { data: provisionRows } = await supabase
-    .from('makler_provisionen')
+    .from('partner_provisionen')
     .select('id, betrag_netto_eur, status, service_typ, trigger_at, hold_until')
-    .eq('makler_id', maklerId)
+    .eq('partner_typ', 'makler')
+    .eq('partner_id', maklerId)
     .eq('fall_id', fallId)
     .order('trigger_at', { ascending: false })
     .limit(1)
@@ -776,14 +777,16 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       .eq('makler_id', maklerId)
       .is('widerrufen_am', null),
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .eq('status', 'pending'),
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .eq('status', 'freigegeben')
       .gte('trigger_at', monthStart),
     hasPromos
@@ -795,25 +798,27 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
           .limit(5)
       : Promise.resolve({ data: [], error: null }),
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select(`
         id, betrag_netto_eur, status, trigger_at, fall_id,
-        fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+        fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
           claims:claim_id(
             leads:lead_id(vorname, nachname),
             kunde:geschaedigter_user_id(vorname, nachname)
           )
         )
       `)
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .order('trigger_at', { ascending: false })
       .limit(5),
     // Erste-Vermittlung-Signal: hat der Makler >=1 Provision (= mind. eine erfolgreiche
     // Vermittlung)? RLS-sicher (Makler liest eigene Provisionen). head+count = billig.
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select('id', { count: 'exact', head: true })
-      .eq('makler_id', maklerId),
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId),
   ])
 
   const monatPending = (provPendingRes.data ?? []).reduce(
@@ -965,29 +970,32 @@ export async function getMaklerAbrechnungsData(
 
   const [pendingRes, releasedRes, totalRes, rowsRes] = await Promise.all([
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .eq('status', 'pending'),
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .in('status', ['freigegeben', 'ausgezahlt'])
       .gte('trigger_at', range.startIso)
       .lt('trigger_at', range.endIso),
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .in('status', ['freigegeben', 'ausgezahlt']),
     supabase
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .select(
         `
         id, betrag_netto_eur, status, service_typ, trigger_event,
         trigger_at, hold_until, storniert_am, storno_grund,
-        fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+        fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
           id:fall_id,
           claims:claim_id(
             claim_nummer,
@@ -997,7 +1005,8 @@ export async function getMaklerAbrechnungsData(
         )
       `,
       )
-      .eq('makler_id', maklerId)
+      .eq('partner_typ', 'makler')
+      .eq('partner_id', maklerId)
       .order('trigger_at', { ascending: false, nullsFirst: false })
       .limit(200),
   ])
@@ -1440,10 +1449,10 @@ export async function getMaklerVermittlungsCount(
 ): Promise<{ settled: number; pending: number }> {
   const supabase = await createClient()
   const [settledRes, pendingRes] = await Promise.all([
-    supabase.from('makler_provisionen').select('id', { count: 'exact', head: true })
-      .eq('makler_id', maklerId).in('status', ['freigegeben', 'ausgezahlt']),
-    supabase.from('makler_provisionen').select('id', { count: 'exact', head: true })
-      .eq('makler_id', maklerId).eq('status', 'pending'),
+    supabase.from('partner_provisionen').select('id', { count: 'exact', head: true })
+      .eq('partner_typ', 'makler').eq('partner_id', maklerId).in('status', ['freigegeben', 'ausgezahlt']),
+    supabase.from('partner_provisionen').select('id', { count: 'exact', head: true })
+      .eq('partner_typ', 'makler').eq('partner_id', maklerId).eq('status', 'pending'),
   ])
   return { settled: settledRes.count ?? 0, pending: pendingRes.count ?? 0 }
 }
@@ -1465,8 +1474,9 @@ export async function getMaklerStaffelBoni(
   maklerId: string,
 ): Promise<{ schwelle: number; bonus_betrag_netto: number; status: string; erstellt_am: string }[]> {
   const supabase = await createClient()
-  const { data } = await supabase.from('makler_staffel_bonus')
-    .select('schwelle, bonus_betrag_netto, status, erstellt_am').eq('makler_id', maklerId)
+  const { data } = await supabase.from('partner_staffel_bonus')
+    .select('schwelle, bonus_betrag_netto, status, erstellt_am')
+    .eq('partner_typ', 'makler').eq('partner_id', maklerId)
     .order('schwelle', { ascending: true })
   return (data ?? []).map((r) => ({
     schwelle: Number(r.schwelle),
@@ -1498,10 +1508,10 @@ export async function getMaklerRechnungData(maklerId: string): Promise<MaklerRec
 
   // Freigegebene Provisionen = abrechenbar. Namen via bewaehrtem Nested-Embed (wie Dashboard-Activity).
   const { data: provs } = await supabase
-    .from('makler_provisionen')
+    .from('partner_provisionen')
     .select(`
       id, betrag_netto_eur, trigger_at,
-      fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+      fall:faelle_claim_bridge!partner_provisionen_claim_bridge_fkey(
         claims:claim_id(
           claim_nummer,
           leads:lead_id(vorname, nachname),
@@ -1509,7 +1519,8 @@ export async function getMaklerRechnungData(maklerId: string): Promise<MaklerRec
         )
       )
     `)
-    .eq('makler_id', maklerId)
+    .eq('partner_typ', 'makler')
+    .eq('partner_id', maklerId)
     .eq('status', 'freigegeben')
     .order('trigger_at', { ascending: true })
 

@@ -61,9 +61,10 @@ export async function getMaklerPipeline(
   maklerId: string,
 ): Promise<MaklerPipeline> {
   const { data } = await db
-    .from('makler_provisionen')
+    .from('partner_provisionen')
     .select('status, betrag_netto_eur')
-    .eq('makler_id', maklerId)
+    .eq('partner_typ', 'makler')
+    .eq('partner_id', maklerId)
   return aggregierePipeline(
     (data ?? []) as Array<{ status: string; betrag_netto_eur: number | string }>,
   )
