@@ -11,6 +11,18 @@ import { convertPartnerLead } from '@/lib/partner/convert-partner-lead'
 import { revalidatePath } from 'next/cache'
 import type { PartnerRolle } from '@/lib/partner/policy'
 import type { PartnerCsvLead } from '@/lib/partner/csv-import'
+import {
+  scrapeGooglePlaces,
+  filterGegenBestand,
+  dedupeInBatch,
+  type ScrapeKandidat,
+  type BestandsLead,
+} from '@/lib/partner/scraping'
+import {
+  sendMaklerWelcome,
+  sendWillkommenWerkstatt,
+  sendSvBasicClaimLink,
+} from '@/lib/email/google/flows'
 
 const VERTRIEB_ROLLEN = ['admin', 'dispatch', 'leadbearbeiter']
 const PARTNER_ROLLEN: PartnerRolle[] = ['sachverstaendiger', 'werkstatt', 'makler']
@@ -278,17 +290,45 @@ export async function konvertierePartnerLead(
   const admin = createAdminClient()
   const { data: lead, error: loadErr } = await admin
     .from('partner_leads')
-    .select('email')
+    .select('rolle, firma, ansprechpartner_vorname, email')
     .eq('id', id)
     .maybeSingle()
   if (loadErr) return { ok: false, error: loadErr.message }
   if (!lead) return { ok: false, error: 'Prospect nicht gefunden.' }
-  if (!(lead.email as string | null)?.trim()) {
+  const email = (lead.email as string | null)?.trim()
+  if (!email) {
     return { ok: false, error: 'E-Mail fehlt — bitte erst Kontakt ergänzen, dann konvertieren.' }
   }
 
   const result = await convertPartnerLead(id, { durchUserId: staff.id })
   if (!result.ok) return { ok: false, error: result.error }
+
+  // Login-/Willkommens-Mail an den frisch konvertierten Partner (best-effort, non-critical).
+  // Ohne sie haette der neue Account zwar Random-PW + force_password_change, aber KEINEN
+  // Weg hinein. Die rollen-spezifischen Welcome-Flows generieren jeweils selbst einen
+  // Recovery-Magic-Link (Passwort-Setzen). Ein Send-Fehler bricht die Konvertierung nicht.
+  try {
+    const rolle = lead.rolle as string
+    const firma = ((lead.firma as string | null) ?? '').trim()
+    const vorname = ((lead.ansprechpartner_vorname as string | null) ?? '').trim()
+    if (rolle === 'makler') {
+      const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+      await sendMaklerWelcome({ to: email, firma, vorname, landeseiteUrl: base })
+    } else if (rolle === 'werkstatt') {
+      await sendWillkommenWerkstatt({ to: email, werkstattName: firma })
+    } else if (rolle === 'sachverstaendiger') {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+      const { data: linkData } = await admin.auth.admin.generateLink({
+        type: 'recovery',
+        email,
+        options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
+      })
+      const actionUrl = linkData?.properties?.action_link
+      if (actionUrl) await sendSvBasicClaimLink({ to: email, vorname: vorname || null, actionUrl })
+    }
+  } catch (err) {
+    console.error('[konvertierePartnerLead] Login-Willkommens-Mail fehlgeschlagen (non-critical):', err)
+  }
 
   revalidatePath('/admin/partner-leads')
   return { ok: true, userId: result.userId, partnerId: result.partnerId }
@@ -348,4 +388,107 @@ export async function importCsvLeads(
 
   revalidatePath('/admin/partner-leads')
   return { ok: true, angelegt: data?.length ?? rows.length }
+}
+
+// ─── Lead-Scraping (Google Places) ─────────────────────────────────────────
+
+/** Laedt den Bestand (partner_leads einer Rolle) im Minimal-Shape fuer die Dubletten-Pruefung. */
+async function ladeBestandsLeads(rolle: string): Promise<BestandsLead[]> {
+  const admin = createAdminClient()
+  const { data } = await admin
+    .from('partner_leads')
+    .select('firma, telefon, plz, rollen_details')
+    .eq('rolle', rolle)
+  return (data ?? []).map((row) => ({
+    firma: (row.firma as string | null) ?? null,
+    telefon: (row.telefon as string | null) ?? null,
+    plz: (row.plz as string | null) ?? null,
+    google_place_id:
+      (row.rollen_details as { google_place_id?: string } | null)?.google_place_id ?? null,
+  }))
+}
+
+/**
+ * Scraping-Vorschau: findet Prospects via Google Places, filtert Dubletten gegen
+ * den Bestand (partner_leads derselben Rolle) heraus und liefert die NEUEN
+ * Kandidaten zur Bestaetigung zurueck (KEIN Insert). Aaron: Vorschau + Dubletten filtern.
+ */
+export async function scrapePartnerLeadsVorschau(
+  rolle: string,
+  region: string,
+  limit: number,
+): Promise<
+  | { ok: true; neu: ScrapeKandidat[]; dublettenCount: number; gefunden: number }
+  | { ok: false; error: string }
+> {
+  const staff = await requireVertriebStaff()
+  if (!staff) return { ok: false, error: 'Nur das Vertriebs-Team darf Leads scrapen.' }
+
+  const r = (rolle ?? '').trim()
+  if (!PARTNER_ROLLEN.includes(r as PartnerRolle)) {
+    return { ok: false, error: 'Bitte eine gültige Rolle wählen (SV, Werkstatt oder Makler).' }
+  }
+
+  const scrape = await scrapeGooglePlaces({ rolle: r as PartnerRolle, region, limit })
+  if (!scrape.ok) return scrape
+
+  const bestehende = await ladeBestandsLeads(r)
+  const { neu, dubletten } = filterGegenBestand(scrape.kandidaten, bestehende)
+  return { ok: true, neu, dublettenCount: dubletten.length, gefunden: scrape.kandidaten.length }
+}
+
+/**
+ * Importiert bestaetigte (ggf. bearbeitete) Scraping-Kandidaten als partner_leads.
+ * Re-filtert Dubletten gegen den AKTUELLEN Bestand (Race-Sicherheit zwischen Vorschau
+ * und Bestaetigung) + Batch-Dedup. status='neu', source_channel='scraping',
+ * einstufung=null (muessen eingestuft werden), zugewiesen_an=staff.
+ */
+export async function importScrapedLeads(
+  rolle: string,
+  kandidaten: ScrapeKandidat[],
+): Promise<{ ok: true; angelegt: number; uebersprungen: number } | { ok: false; error: string }> {
+  const staff = await requireVertriebStaff()
+  if (!staff) return { ok: false, error: 'Nur das Vertriebs-Team darf importieren.' }
+
+  const r = (rolle ?? '').trim()
+  if (!PARTNER_ROLLEN.includes(r as PartnerRolle)) {
+    return { ok: false, error: 'Bitte eine gültige Rolle wählen.' }
+  }
+  if (!Array.isArray(kandidaten) || kandidaten.length === 0) {
+    return { ok: false, error: 'Keine Kandidaten zum Importieren.' }
+  }
+
+  // Re-Dedup gegen aktuellen Bestand (Race Vorschau→Import) + innerhalb der Auswahl.
+  const bestehende = await ladeBestandsLeads(r)
+  const { neu } = filterGegenBestand(kandidaten, bestehende)
+  const zuAnlegen = dedupeInBatch(neu).filter((k) => (k.firma ?? '').trim().length > 0)
+  const uebersprungen = kandidaten.length - zuAnlegen.length
+  if (zuAnlegen.length === 0) {
+    return { ok: false, error: 'Alle ausgewählten Kandidaten sind bereits vorhanden (Dubletten).' }
+  }
+
+  const rows = zuAnlegen.map((k) => ({
+    rolle: r,
+    status: 'neu',
+    source_channel: 'scraping',
+    einstufung: null,
+    firma: k.firma.trim(),
+    telefon: (k.telefon ?? '').trim() || null,
+    plz: (k.plz ?? '').trim() || null,
+    ort: (k.ort ?? '').trim() || null,
+    rollen_details: {
+      google_place_id: k.google_place_id,
+      website: k.website ?? null,
+      strasse: k.strasse ?? null,
+      quelle: 'google_places',
+    },
+    zugewiesen_an: staff.id,
+  }))
+
+  const admin = createAdminClient()
+  const { data, error } = await admin.from('partner_leads').insert(rows).select('id')
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/admin/partner-leads')
+  return { ok: true, angelegt: data?.length ?? rows.length, uebersprungen }
 }
