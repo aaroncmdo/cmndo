@@ -6,6 +6,7 @@ import { reportCommunityTarget } from '@/lib/community/community-actions'
 import { loadThread } from '@/lib/community/thread-loader'
 import { LikeButton } from './LikeButton'
 import { PostComments } from './PostComments'
+import { PartnerRangPille } from './PartnerRangPille'
 
 const HEAD_FONT = { fontFamily: 'Montserrat, system-ui, sans-serif' } as const
 
@@ -58,6 +59,7 @@ export function PostCard({ entry, isLoggedIn, hasUsername, likedKeys }: PostCard
       {/* Header — Autor + Redaktion-Badge + Datum */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-xs font-semibold text-claimondo-navy">{entry.authorDisplay}</span>
+        {entry.rang && <PartnerRangPille tier={entry.rang} />}
         {entry.isRedaktion && (
           <span className="rounded-ios-sm bg-claimondo-navy px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-white">
             Redaktion

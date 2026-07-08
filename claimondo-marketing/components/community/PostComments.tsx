@@ -5,6 +5,7 @@ import type { CommentRow } from '@/lib/community/community-queries'
 import { createCommunityComment, reportCommunityTarget } from '@/lib/community/community-actions'
 import { requestCommentLogin, ensureUsername } from '@/lib/community/actions'
 import { loadThread } from '@/lib/community/thread-loader'
+import { PartnerRangPille } from './PartnerRangPille'
 
 // ---------------------------------------------------------------------------
 // Magic-Link-Auth helper (identisch mit CommentForm-Pattern)
@@ -151,7 +152,10 @@ function CommentItem({
     <li className="space-y-2">
       <div className="rounded-ios-sm border border-claimondo-border bg-white p-3">
         <div className="flex items-start justify-between gap-2">
-          <span className="text-xs font-semibold text-claimondo-navy">{comment.authorDisplay}</span>
+          <span className="flex flex-wrap items-center gap-1.5">
+            <span className="text-xs font-semibold text-claimondo-navy">{comment.authorDisplay}</span>
+            {comment.rang && <PartnerRangPille tier={comment.rang} />}
+          </span>
           <span className="shrink-0 text-[0.65rem] text-claimondo-shield/50">
             {new Date(comment.createdAt).toLocaleDateString('de-DE')}
           </span>
@@ -218,7 +222,10 @@ function CommentItem({
               className="rounded-ios-sm border border-claimondo-border/60 bg-claimondo-bg p-2.5"
             >
               <div className="flex items-start justify-between gap-2">
-                <span className="text-xs font-semibold text-claimondo-navy">{r.authorDisplay}</span>
+                <span className="flex flex-wrap items-center gap-1.5">
+                  <span className="text-xs font-semibold text-claimondo-navy">{r.authorDisplay}</span>
+                  {r.rang && <PartnerRangPille tier={r.rang} />}
+                </span>
                 <span className="shrink-0 text-[0.65rem] text-claimondo-shield/50">
                   {new Date(r.createdAt).toLocaleDateString('de-DE')}
                 </span>
