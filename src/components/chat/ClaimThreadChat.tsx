@@ -21,7 +21,16 @@ function zeit(iso: string): string {
   return new Date(iso).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })
 }
 
-export function ClaimThreadChat({ threadId, currentUserId }: { threadId: string; currentUserId: string }) {
+export function ClaimThreadChat({
+  threadId,
+  currentUserId,
+  whatsappHinweis = false,
+}: {
+  threadId: string
+  currentUserId: string
+  /** Zeigt „geht auch per WhatsApp raus" ueber dem Composer (nur Staff in kunde_gruppe). */
+  whatsappHinweis?: boolean
+}) {
   const [nachrichten, setNachrichten] = useState<ThreadNachricht[]>([])
   const [text, setText] = useState('')
   const [laden, setLaden] = useState(true)
@@ -129,23 +138,31 @@ export function ClaimThreadChat({ threadId, currentUserId }: { threadId: string;
         )}
         <div ref={endeRef} />
       </div>
-      <div className="flex items-end gap-2 border-t border-claimondo-border p-2">
-        <textarea
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault()
-              void senden()
-            }
-          }}
-          rows={1}
-          placeholder="Nachricht schreiben…"
-          className="flex-1 resize-none rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-body-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo max-h-32"
-        />
-        <Button variant="navy" size="sm" loading={sende} disabled={!text.trim()} onClick={senden} iconLeft={<SendIcon className="w-4 h-4" />}>
-          Senden
-        </Button>
+      <div className="border-t border-claimondo-border p-2">
+        {whatsappHinweis && (
+          <div className="mb-1.5 flex items-center gap-1.5 text-caption text-claimondo-ondo/70">
+            <SendIcon className="w-3 h-3 shrink-0" />
+            <span>Der Kunde erhält diese Nachricht auch per WhatsApp.</span>
+          </div>
+        )}
+        <div className="flex items-end gap-2">
+          <textarea
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                void senden()
+              }
+            }}
+            rows={1}
+            placeholder="Nachricht schreiben…"
+            className="flex-1 resize-none rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-body-sm text-claimondo-navy focus:outline-none focus:border-claimondo-ondo max-h-32"
+          />
+          <Button variant="navy" size="sm" loading={sende} disabled={!text.trim()} onClick={senden} iconLeft={<SendIcon className="w-4 h-4" />}>
+            Senden
+          </Button>
+        </div>
       </div>
     </div>
   )
