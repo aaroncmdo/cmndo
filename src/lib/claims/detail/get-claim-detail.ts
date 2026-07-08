@@ -39,10 +39,12 @@ export async function getClaimDetail(
     if (!viewer) return null
     const core = await getKundeFallDetailRecord(admin, viewer.userId, viewer.email, claimId)
     if (!core) return null
-    const { lifecycle } = await getClaimLifecycleForClaim(admin, claimId)
+    const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
     const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, 'kunde')
-    // Kunde: keine Sub-Entity-Rohzeilen (no-leak); die Phase kommt via lifecycle.
-    return { rolle: 'kunde', core, lifecycle, auftraege: [], kanzleiFall: null, pflichtDokumente }
+    // Sub-Entities = die EIGENEN Claim-Daten (kein Leak — der Core-Loader hat den
+    // Zugriff bereits gegated). Die Kunde-Page nutzt auftraege (erstgutachten/QC-Gates)
+    // → mitliefern, sonst braeche die Migration die Gutachten-Anzeige.
+    return { rolle: 'kunde', core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
   }
 
   // staff/sv: RLS-Gate via getClaimForRole (v_claim_full; admin/kb='*' = vollstaendig).
@@ -50,15 +52,7 @@ export async function getClaimDetail(
   if (!core) return null
   const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
   const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, rolle)
-  // Rollen-gescopte Exposure der admin-geladenen Sub-Entities (no-leak-Default:
-  // kein Column-Profile auf auftraege/kanzlei_faelle → nur Staff sieht Rohzeilen).
-  const istStaff = rolle === 'kb' || rolle === 'admin'
-  return {
-    rolle,
-    core,
-    lifecycle,
-    auftraege: istStaff ? auftraege : [],
-    kanzleiFall: istStaff || rolle === 'kanzlei' ? kanzleiFall : null,
-    pflichtDokumente,
-  }
+  // Sub-Entities = eigene Claim-Daten des (bereits gegateten) Claims → an alle
+  // autorisierten Rollen (matcht das heutige Verhalten der Detail-Pages).
+  return { rolle, core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
 }

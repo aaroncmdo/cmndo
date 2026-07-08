@@ -49,8 +49,9 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
       if (asKunde) {
         kundeCoreLoaded = true
         expect(asKunde.rolle).toBe('kunde')
-        expect(asKunde.auftraege, 'kunde no-leak auftraege').toEqual([])
-        expect(asKunde.kanzleiFall, 'kunde no-leak kanzleiFall').toBeNull()
+        // Sub-Entities = eigene Claim-Daten → auch der Kunde bekommt sie (die
+        // Kunde-Page nutzt auftraege fuer erstgutachten/QC-Gates).
+        expect(Array.isArray(asKunde.auftraege), 'kunde bekommt eigene auftraege').toBe(true)
         expect(Array.isArray(asKunde.pflichtDokumente)).toBe(true)
       }
     }
