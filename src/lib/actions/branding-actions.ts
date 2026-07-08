@@ -313,10 +313,12 @@ export async function applyBrandPreset(params: {
     const supabase = await createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return { ok: false, error: 'Nicht angemeldet' }
-    const { data: sv } = await db.from('sachverstaendige')
-      .select('organisation_id, ist_parent_account')
-      .eq('profile_id', user.id)
-      .maybeSingle()
+    // multi-standort-safe: getGutachterForUser (Ordering+limit(1)) statt .maybeSingle().
+    const sv = await getGutachterForUser<{ organisation_id: string | null; ist_parent_account: boolean | null }>(
+      db,
+      user.id,
+      'organisation_id, ist_parent_account',
+    )
     if (!sv?.organisation_id || !sv.ist_parent_account) {
       return { ok: false, error: 'Keine Berechtigung' }
     }
