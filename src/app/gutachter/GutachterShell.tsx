@@ -261,15 +261,14 @@ export default function GutachterShell({
     const supabase = createClient()
     const user = (await supabase.auth.getUser())?.data?.user ?? null
     if (!user) return
-    // AAR-222 Audit: Inhaber + Sub-Standort = mehrere SV-Rows → single() würde
-    // werfen. Wir laden ALLE und nehmen die SV-IDs als Filter (Aufträge zählen
-    // dann über alle Standorte des Users).
-    const { data: svs } = await supabase
-      .from('sachverstaendige')
-      .select('id')
-      .eq('profile_id', user.id)
-    const svIds = (svs ?? []).map(s => s.id)
-    if (svIds.length === 0) return
+    // Alle Badge-Zaehler an die EINE SV-Row binden, die das Portal (Heute/
+    // Kalender/Auftraege) via getGutachterForUser aufloest. Vorher zaehlten
+    // auftraege + neueTermine ueber ALLE Standort-Rows des Users (.in(svIds)) ->
+    // ein Multi-Standort-SV sah Badge>0, waehrend die (single-row) Listen leer
+    // waren. Loest die AAR-222-„alle Standorte"-Zaehlung ab (war inkonsistent zur
+    // Auftraege-/Kalender-Seite, die beide getGutachterForUser nutzen).
+    const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
+    if (!sv?.id) return
 
     // CMM-32f: Aufträge-Badge zählt aktive Aufträge bis QC-Freigabe — auf
     // auftraege-Sub-Entity migriert. Sobald gutachten_final_freigegeben=true
@@ -277,45 +276,37 @@ export default function GutachterShell({
     const { count: auftraegeCount } = await supabase
       .from('auftraege')
       .select('id', { count: 'exact', head: true })
-      .in('sv_id', svIds)
+      .eq('sv_id', sv.id)
       .eq('gutachten_final_freigegeben', false)
       .eq('status', 'termin')
 
     // Posteingang Tab 1: ungelesene System-Mitteilungen (Phase 5: kanonische
-    // `mitteilungen`, empfaenger = User-id, statt der retireten gutachter_mitteilungen).
+    // `mitteilungen`, empfaenger = User-id). User-scoped (kein SV-Row-Bezug) — bleibt.
     const { count: mitteilungenCount } = await supabase
       .from('mitteilungen')
       .select('id', { count: 'exact', head: true })
       .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
-    // Posteingang Tab 2: ungelesene Chat-Nachrichten.
+    // Posteingang Tab 2: ungelesene Chat-Nachrichten (ebenfalls user-scoped).
     const { count: nachrichtenCount } = await supabase
       .from('nachrichten')
       .select('id', { count: 'exact', head: true })
       .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
-    // AAR-724 + TZ-Fix: neue/ungesehene Termine (gesehen_am IS NULL) NUR fuer die
-    // EINE SV-Row, die das Portal (Heute/Kalender) via getGutachterForUser aufloest.
-    // Vorher .in(svIds) ueber ALLE Standort-Rows -> Badge>0 obwohl der Kalender
-    // (single-row) den Termin gar nicht zeigt (Multi-Standort-Inkonsistenz).
-    const primarySv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
-    let neueTermineCount = 0
-    if (primarySv?.id) {
-      const { count } = await supabase
-        .from('gutachter_termine')
-        .select('id', { count: 'exact', head: true })
-        .eq('assignee_id', primarySv.id)
-        .eq('assignee_typ', 'sachverstaendiger')
-        .is('gesehen_am', null)
-      neueTermineCount = count ?? 0
-    }
+    // AAR-724: neue/ungesehene Termine (gesehen_am IS NULL) — dieselbe Single-Row.
+    const { count: neueTermineCount } = await supabase
+      .from('gutachter_termine')
+      .select('id', { count: 'exact', head: true })
+      .eq('assignee_id', sv.id)
+      .eq('assignee_typ', 'sachverstaendiger')
+      .is('gesehen_am', null)
 
     setBadgeCounts({
       auftraege: auftraegeCount ?? 0,
       posteingang: (mitteilungenCount ?? 0) + (nachrichtenCount ?? 0),
-      neueTermine: neueTermineCount,
+      neueTermine: neueTermineCount ?? 0,
     })
   }, [])
 
