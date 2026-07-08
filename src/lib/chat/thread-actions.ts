@@ -241,6 +241,19 @@ export interface ClaimThreadInfo {
 
 /** Listet die fuer den aktuellen User sichtbaren Threads eines Claims (RLS: Mitglied ODER is_staff).
  *  Direkt-Labels werden aus den Teilnehmer-Rollen (via Service-Role) zusammengesetzt. */
+/** Resolvt user_ids -> Anzeigenamen (profiles.anzeigename ?? vorname+nachname). Nicht Gefundene fehlen in der Map. */
+async function ladeProfilNamen(admin: SupabaseClient, userIds: string[]): Promise<Map<string, string>> {
+  const uniq = [...new Set(userIds.filter(Boolean))]
+  const map = new Map<string, string>()
+  if (uniq.length === 0) return map
+  const { data } = await admin.from('profiles').select('id, anzeigename, vorname, nachname').in('id', uniq)
+  for (const p of (data ?? []) as Array<{ id: string; anzeigename: string | null; vorname: string | null; nachname: string | null }>) {
+    const name = p.anzeigename ?? ([p.vorname, p.nachname].filter(Boolean).join(' ') || null)
+    if (name) map.set(p.id, name)
+  }
+  return map
+}
+
 export async function ladeClaimThreads(claimId: string): Promise<Ergebnis<ClaimThreadInfo[]>> {
   const { supabase, user } = await aktuellerUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
@@ -257,21 +270,37 @@ export async function ladeClaimThreads(claimId: string): Promise<Ergebnis<ClaimT
   const admin = createAdminClient() as unknown as SupabaseClient
   const { data: teil } = await admin
     .from('chat_thread_teilnehmer')
-    .select('thread_id, rolle')
+    .select('thread_id, rolle, user_id')
     .in(
       'thread_id',
       threads.map((t) => t.id),
     )
   const rollenProThread = new Map<string, string[]>()
-  for (const p of (teil ?? []) as { thread_id: string; rolle: string | null }[]) {
+  const andererUserProThread = new Map<string, string>() // direkt: der Teilnehmer != ich (= der DM-Partner)
+  for (const p of (teil ?? []) as { thread_id: string; rolle: string | null; user_id: string }[]) {
     const arr = rollenProThread.get(p.thread_id) ?? []
     if (p.rolle) arr.push(p.rolle)
     rollenProThread.set(p.thread_id, arr)
+    if (p.user_id !== user.id) andererUserProThread.set(p.thread_id, p.user_id)
   }
+
+  // Direkt-Threads mit dem Namen des Gegenuebers labeln ("Privat: Max Mueller") statt Rollen-Label.
+  const direktUserIds = threads
+    .filter((t) => t.art === 'direkt')
+    .map((t) => andererUserProThread.get(t.id))
+    .filter(Boolean) as string[]
+  const namen = await ladeProfilNamen(admin, direktUserIds)
 
   return {
     ok: true,
-    data: threads.map((t) => ({ id: t.id, art: t.art, label: threadLabel(t.art, rollenProThread.get(t.id) ?? []) })),
+    data: threads.map((t) => {
+      if (t.art === 'direkt') {
+        const other = andererUserProThread.get(t.id)
+        const name = other ? namen.get(other) : undefined
+        if (name) return { id: t.id, art: t.art, label: `Privat: ${name}` }
+      }
+      return { id: t.id, art: t.art, label: threadLabel(t.art, rollenProThread.get(t.id) ?? []) }
+    }),
   }
 }
 
@@ -294,7 +323,14 @@ export async function ladeClaimBeteiligte(claimId: string): Promise<Ergebnis<Cla
   if (!claim) return { ok: false, error: 'Claim nicht gefunden.' }
   const resolved = await resolveClaimUserIds(admin, claim as DmKandidatenClaim)
   const kandidaten = leiteDmKandidaten(resolved, user.id)
-  return { ok: true, data: kandidaten.map((k) => ({ userId: k.userId, rolle: k.rolle, label: rolleLabel(k.rolle) })) }
+  const namen = await ladeProfilNamen(admin, kandidaten.map((k) => k.userId))
+  return {
+    ok: true,
+    data: kandidaten.map((k) => {
+      const name = namen.get(k.userId)
+      return { userId: k.userId, rolle: k.rolle, label: name ? `${name} · ${rolleLabel(k.rolle)}` : rolleLabel(k.rolle) }
+    }),
+  }
 }
 
 /** Ungelesene Nachrichten pro Claim fuer die Inbox-Sidebar (eigene Thread-Membership + zuletzt_gelesen_am). */
