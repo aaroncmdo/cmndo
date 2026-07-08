@@ -185,8 +185,27 @@ D migrates the three presentations onto `getClaimDetail`. Do this as **separate 
 
 ---
 
+## Architecture incorporation — Aaron audit (08.07.) + "für alle Rollen"
+
+Aaron relayed a claims-data-architecture audit; incorporated here (durchdenken sauber + nutzungsfähig, **all roles**). Live-verified facts + the real actionable debt:
+
+### A. Load-once-and-pass-down for ALL roles (the primary upgrade)
+Today Admin/KB + SV load the claim **once** (`getFallById` → `FallProvider` / `useFall()`) and pass `claim_id`/`sv_id`/`kundenbetreuer_id` to every sub-tab — no sub-queries. **The Kunde portal has NO such context** — its server page loads inline + fires several extra queries. `getClaimDetail` IS the load-once primitive that closes this gap. → **Phase D gains a shared `ClaimDetailProvider` + `useClaimDetail()`** (generalising the FallProvider pattern) that EVERY role layout (kunde/sv/kb/admin/kanzlei) mounts, so all five roles get the same load-once-pass-down structure. **C-Task 2 (refactor `kunde/faelle/[id]` onto `getClaimDetail`) is the first, highest-value instance — it closes the Kunde gap directly.** This is the concrete meaning of "für alle Rollen".
+
+### B. Stop the detail-page rest-field re-queries (makes the loader genuinely "nutzungsfähig")
+Detail pages still re-query rest-fields directly on `claims`/`v_claim_full` — `work_state`, `schadenort_*`, `kostenvoranschlag_*` (kva), `reparatur_freigegeben_am`, `werkstatt_id` (see `faelle/[id]/page.tsx:95-118`) — because `v_claim_base` does not mirror them yet (documented temporary "CMM-Brücke"). → `getClaimDetail` should **absorb** these reads (one place) so presentations stop re-querying. Add them to `ClaimDetail` in the Task that migrates the staff view (D-admin/kb), reading via `getClaimForRole` (v_claim_full already carries several) or a thin staff-only supplemental read. Coordinate the DB side (mirror-in-base) with lane 6f60c510.
+
+### C. View-layer facts (live-verified this session via pg_get_viewdef) + lane
+Prod: `v_claim_full` **references `v_claim_base`** (`refs_v_claim_base=true`); `v_claim_base` references `v_claim_phase`. So the chain `v_claim_phase ← v_claim_base ← v_claim_full` **holds live**, and A2's phase-parity (v_claim_full ≡ v_claim_phase, 0/32) stands. **Correction:** the audit's "v_claim_full is its own definition FROM claims, not derived from base" is stale/imprecise post-ledger-central — full DOES read base today. The genuine remaining view debt = rest-field mirroring (B) + eventual `v_claim_base`/`v_claim_full` consolidation, both owned by **lane 6f60c510** (v_claim_base/ledger). My lane (getClaimDetail + presentations) **depends on** `v_claim_full` (via `getClaimForRole`) but does not change it — coordinate, don't clobber.
+
+### D. faelle_claim_bridge = deliberate drop-runway
+`faelle` table is gone; `faelle_claim_bridge` (id-mapping) stays active as a runway (no dual-write). `resolveClaimId` (used by every loader C composes) already handles both `claims.id` and the bridge lookup — C needs no change here; do NOT "fix" the bridge prematurely.
+
+---
+
 ## Self-Review
 
+- **All-roles coverage:** Section A makes "für alle Rollen" concrete — a shared provider so Kunde gets the same load-once structure as Admin/KB/SV. ✔
 - **Spec coverage:** C = the "geteilte Datenschicht" from the approved design spec (`docs/superpowers/specs/2026-07-08-claim-detail-ops-rebuild-lifecycle-cleanup-design.md`). ✔ claim+lifecycle+auftraege+kanzleiFall+parties+fahrzeug+payments (in ClaimFull)+dokumente+timeline+workItem+permissions, role-scoped — every listed field maps to a task. Mietwagen/repairs/vs_korrespondenz already ride inside `ClaimFull` per COLUMN_PROFILES (no extra task).
 - **Placeholder scan:** all signatures are copied from confirmed source (file:line verified this session). No TBD.
 - **Type consistency:** `ClaimDetail` field names are stable across Tasks 1→3; loaders' return types are the source of truth (no re-declaration).
