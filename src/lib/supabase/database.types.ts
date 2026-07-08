@@ -12511,6 +12511,123 @@ export type Database = {
         }
         Relationships: []
       }
+      partner_provisionen: {
+        Row: {
+          abrechnung_id: string | null
+          ausgezahlt_am: string | null
+          betrag_brutto: number | null
+          betrag_netto_eur: number | null
+          claim_id: string | null
+          claim_nummer: string | null
+          erstellt_am: string
+          fall_id: string | null
+          hold_until: string | null
+          id: string
+          lead_id: string | null
+          partner_id: string
+          partner_typ: string
+          promotion_code_id: string | null
+          service_typ: string | null
+          status: string | null
+          storniert_am: string | null
+          storno_grund: string | null
+          trigger_at: string | null
+          trigger_event: string | null
+          ust_betrag: number | null
+          ust_satz: number | null
+        }
+        Insert: {
+          abrechnung_id?: string | null
+          ausgezahlt_am?: string | null
+          betrag_brutto?: number | null
+          betrag_netto_eur?: number | null
+          claim_id?: string | null
+          claim_nummer?: string | null
+          erstellt_am?: string
+          fall_id?: string | null
+          hold_until?: string | null
+          id?: string
+          lead_id?: string | null
+          partner_id: string
+          partner_typ: string
+          promotion_code_id?: string | null
+          service_typ?: string | null
+          status?: string | null
+          storniert_am?: string | null
+          storno_grund?: string | null
+          trigger_at?: string | null
+          trigger_event?: string | null
+          ust_betrag?: number | null
+          ust_satz?: number | null
+        }
+        Update: {
+          abrechnung_id?: string | null
+          ausgezahlt_am?: string | null
+          betrag_brutto?: number | null
+          betrag_netto_eur?: number | null
+          claim_id?: string | null
+          claim_nummer?: string | null
+          erstellt_am?: string
+          fall_id?: string | null
+          hold_until?: string | null
+          id?: string
+          lead_id?: string | null
+          partner_id?: string
+          partner_typ?: string
+          promotion_code_id?: string | null
+          service_typ?: string | null
+          status?: string | null
+          storniert_am?: string | null
+          storno_grund?: string | null
+          trigger_at?: string | null
+          trigger_event?: string | null
+          ust_betrag?: number | null
+          ust_satz?: number | null
+        }
+        Relationships: []
+      }
+      partner_staffel_bonus: {
+        Row: {
+          betrag_brutto: number | null
+          bonus_betrag_netto: number | null
+          erstellt_am: string
+          id: string
+          partner_id: string
+          partner_typ: string
+          schwelle: number | null
+          status: string | null
+          stufe_id: string | null
+          ust_betrag: number | null
+          ust_satz: number | null
+        }
+        Insert: {
+          betrag_brutto?: number | null
+          bonus_betrag_netto?: number | null
+          erstellt_am?: string
+          id?: string
+          partner_id: string
+          partner_typ: string
+          schwelle?: number | null
+          status?: string | null
+          stufe_id?: string | null
+          ust_betrag?: number | null
+          ust_satz?: number | null
+        }
+        Update: {
+          betrag_brutto?: number | null
+          bonus_betrag_netto?: number | null
+          erstellt_am?: string
+          id?: string
+          partner_id?: string
+          partner_typ?: string
+          schwelle?: number | null
+          status?: string | null
+          stufe_id?: string | null
+          ust_betrag?: number | null
+          ust_satz?: number | null
+        }
+        Relationships: []
+      }
       partner_rollen_policy: {
         Row: {
           aktualisiert_am: string

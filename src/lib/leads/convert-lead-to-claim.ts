@@ -870,7 +870,8 @@ export async function convertLeadToClaim(
   // Makler-Value-Loop: den Vermittler benachrichtigen, dass sein Kontakt Kunde geworden ist
   // (+ vorgemerkte Provision). Best-effort — darf die Konvertierung nie brechen. Das Event ist
   // maklerId-getargetet (fan-out nutzt payload.maklerId direkt, kein Consent noetig). Die Provision
-  // hat der trg_makler_provision_on_bridge (via claim-insert) bereits angelegt -> betragEur lesbar.
+  // hat der trg_makler_provision_on_bridge (via claim-insert) bereits in partner_provisionen
+  // (partner_typ='makler') angelegt -> betragEur lesbar.
   if (maklerId) {
     try {
       const kundeName = [lead.vorname as string | null, lead.nachname as string | null]
@@ -878,10 +879,11 @@ export async function convertLeadToClaim(
         .join(' ')
         .trim()
       const { data: prov } = await admin
-        .from('makler_provisionen')
+        .from('partner_provisionen')
         .select('betrag_netto_eur')
+        .eq('partner_typ', 'makler')
         .eq('fall_id', fallId)
-        .eq('makler_id', maklerId)
+        .eq('partner_id', maklerId)
         .order('trigger_at', { ascending: false })
         .limit(1)
         .maybeSingle()

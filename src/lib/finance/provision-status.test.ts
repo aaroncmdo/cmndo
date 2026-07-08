@@ -61,15 +61,16 @@ function stornoFakeDb(opts: { origData: Record<string, unknown> | null; stornoRo
 
 // ─── Rich fakeDb for auszahlenProvision tests ─────────────────────────────────
 // Dispatches by table name.
-// - ledger table: from(tabelle).select(...).eq().single() → ledger row
-// - ledger table: from(tabelle).update(patch).eq() → { error: null }
-// - partner_gutschriften: from('partner_gutschriften').select('*').eq().eq().maybeSingle() → precheck
-// - partner_gutschriften: from('partner_gutschriften').select('*').eq().maybeSingle() → refetch after create
-// - partner_gutschriften: from('partner_gutschriften').update(patch).eq() → { error: null }
-// - partner_gutschriften: from('partner_gutschriften').delete().eq() → tracked
+// - ledger table (partner_provisionen / partner_staffel_bonus / provisionen_maik):
+//     from(tabelle).select(...).eq().single() → ledger row
+//     from(tabelle).update(patch).eq() → { error: null }
+// - makler / werkstaetten (Union-Steuer-Read, seit der Provisions-Unifikation):
+//     from(partnerTable).select('ist_kleinunternehmer').eq('id',..).maybeSingle() → { ist_kleinunternehmer }
+// - partner_gutschriften: select('*').eq()*.maybeSingle() (precheck/refetch), update, delete, insert
 
 type RichFakeDbOptions = {
   ledgerRow: Record<string, unknown>
+  partnerKleinunternehmer?: boolean | null   // separater Partner-Read (Union-Pfad: from('makler'|'werkstaetten'))
   gutschriftenPrecheckData?: Record<string, unknown> | null  // default null
   gutschriftenRefetchData?: Record<string, unknown> | null   // returned after create
 }
@@ -87,6 +88,17 @@ function richFakeDb(opts: RichFakeDbOptions) {
     _gutschriftUpdates: gutschriftUpdates,
     _deleteCalledWith: () => deleteCalledWith,
     from: (table: string) => {
+      if (table === 'makler' || table === 'werkstaetten') {
+        // Union-Steuer-Read: from(partnerTable).select('ist_kleinunternehmer').eq('id',..).maybeSingle()
+        return {
+          select: (_str?: string) => ({
+            eq: (_col: string, _val: string) => ({
+              maybeSingle: () =>
+                Promise.resolve({ data: { ist_kleinunternehmer: opts.partnerKleinunternehmer ?? null }, error: null }),
+            }),
+          }),
+        }
+      }
       if (table !== 'partner_gutschriften') {
         // Ledger table
         return {
@@ -164,17 +176,19 @@ const CANNED_GUTSCHRIFT_ROW_WITH_PDF = {
 }
 
 // ─── auszahlenProvision — extended tests ─────────────────────────────────────
+// Nach der Provisions-Unifikation: Ledger = partner_provisionen (partner_typ+partner_id), der
+// USt-Status kommt aus einem separaten Partner-Read (partnerKleinunternehmer), nicht aus einem Embed.
 describe('auszahlenProvision', () => {
   beforeEach(() => {
     vi.clearAllMocks()
   })
 
   it('blockt bei unbekanntem USt-Status (kein Gutschrift-Aufruf)', async () => {
-    // Use legacy simple db — just needs the ledger read path
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: null } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: null,
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(false)
     expect(r.error).toMatch(/USt-Status/)
     expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
@@ -185,10 +199,11 @@ describe('auszahlenProvision', () => {
     // Der typ-gefilterte Precheck findet das storniert Original -> Re-Auszahlung MUSS klar blocken
     // (nicht den gecancelten Beleg wiederverwenden + Provision als ausgezahlt markieren).
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       gutschriftenPrecheckData: { ...CANNED_GUTSCHRIFT_ROW_WITH_PDF, status: 'storniert' },
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(false)
     expect(r.error).toMatch(/storniert/)
     expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
@@ -205,10 +220,11 @@ describe('auszahlenProvision', () => {
     vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p.pdf' })
 
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(true)
 
     // Freeze update: first ledger patch — should NOT contain status
@@ -231,10 +247,11 @@ describe('auszahlenProvision', () => {
     })
 
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       gutschriftenRefetchData: null,
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(false)
     expect(r.error).toContain('unvollständig')
 
@@ -258,11 +275,12 @@ describe('auszahlenProvision', () => {
     })
 
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       // Re-fetch returns row with pdf_storage_path: null (just created, no PDF yet)
       gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(false)
 
     // Compensation delete must have been issued for the gutschrift row
@@ -284,10 +302,11 @@ describe('auszahlenProvision', () => {
     vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'partner-gutschriften/2026/CMNDO-GS-2026-00001.pdf' })
 
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(true)
 
     // pdf_storage_path must have been patched on partner_gutschriften
@@ -307,10 +326,11 @@ describe('auszahlenProvision', () => {
   it('idempotenter Retry: bestehende Gutschrift mit PDF → erstelle NICHT gerufen, status:paid OK', async () => {
     // Pre-check returns existing row WITH pdf_storage_path already set
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       gutschriftenPrecheckData: CANNED_GUTSCHRIFT_ROW_WITH_PDF,
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
     expect(r.ok).toBe(true)
 
     // Neither erstelle nor pdf should have been called
@@ -324,9 +344,9 @@ describe('auszahlenProvision', () => {
     expect(statusPatch?.status).toBe('ausgezahlt')
   })
 
-  // ── Task 4: leistungDatumCol je Ledger + Durchreichen an erstellePartnerGutschrift ──
+  // ── leistungDatumCol je Ledger + Durchreichen an erstellePartnerGutschrift ──
 
-  it('(Task4-a) makler_provisionen: trigger_at aus Ledger-Row wird als leistungsDatum an erstellePartnerGutschrift uebergeben', async () => {
+  it('(Datum-a) partner_provisionen makler: trigger_at wird als leistungsDatum an erstellePartnerGutschrift uebergeben', async () => {
     vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
       ok: true,
       gutschriftId: 'gs-id-1',
@@ -337,23 +357,25 @@ describe('auszahlenProvision', () => {
     const db = richFakeDb({
       ledgerRow: {
         betrag_netto_eur: 100,
-        makler_id: 'makler-1',
-        makler: { ist_kleinunternehmer: false },
+        partner_id: 'makler-1',
+        partner_typ: 'makler',
         trigger_at: '2026-07-15T10:00:00.000Z',
       },
+      partnerKleinunternehmer: false,
       gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
     })
 
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'prov-1')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'prov-1')
     expect(r.ok).toBe(true)
 
-    // erstellePartnerGutschrift must have been called with leistungsDatum from trigger_at
+    // erstellePartnerGutschrift must have been called with partnerTyp=makler + leistungsDatum from trigger_at
     expect(erstellePartnerGutschrift).toHaveBeenCalledTimes(1)
     const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
+    expect(callArg.partnerTyp).toBe('makler')
     expect(callArg.leistungsDatum).toBe('2026-07-15T10:00:00.000Z')
   })
 
-  it('(Task4-b) werkstatt_staffel_bonus: erstellt_am aus Ledger-Row wird als leistungsDatum uebergeben', async () => {
+  it('(Datum-b) partner_staffel_bonus werkstatt: erstellt_am wird als leistungsDatum uebergeben; partnerTyp=werkstatt', async () => {
     vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
       ok: true,
       gutschriftId: 'gs-id-2',
@@ -364,21 +386,23 @@ describe('auszahlenProvision', () => {
     const db = richFakeDb({
       ledgerRow: {
         bonus_betrag_netto: 50,
-        werkstatt_id: 'ws-1',
-        werkstaetten: { ist_kleinunternehmer: false },
+        partner_id: 'ws-1',
+        partner_typ: 'werkstatt',
         erstellt_am: '2026-06-30T08:00:00.000Z',
       },
+      partnerKleinunternehmer: false,
       gutschriftenRefetchData: CANNED_GUTSCHRIFT_ROW,
     })
 
-    const r = await auszahlenProvision(db, 'werkstatt_staffel_bonus', 'bonus-1')
+    const r = await auszahlenProvision(db, 'partner_staffel_bonus', 'bonus-1')
     expect(r.ok).toBe(true)
 
     const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
+    expect(callArg.partnerTyp).toBe('werkstatt')
     expect(callArg.leistungsDatum).toBe('2026-06-30T08:00:00.000Z')
   })
 
-  it('(Task4-c) provisionen_maik: created_at aus Ledger-Row wird als leistungsDatum uebergeben', async () => {
+  it('(Datum-c) provisionen_maik: created_at wird als leistungsDatum uebergeben (Embed-Pfad, partnerTyp=marketing)', async () => {
     vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
       ok: true,
       gutschriftId: 'gs-id-3',
@@ -386,6 +410,7 @@ describe('auszahlenProvision', () => {
     })
     vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'p3.pdf' })
 
+    // maik ist non-Union: FK-Embed marketing_partner(ist_kleinunternehmer) bleibt in der Ledger-Row.
     const db = richFakeDb({
       ledgerRow: {
         netto_provision: 75,
@@ -400,10 +425,11 @@ describe('auszahlenProvision', () => {
     expect(r.ok).toBe(true)
 
     const callArg = vi.mocked(erstellePartnerGutschrift).mock.calls[0][1] as Record<string, unknown>
+    expect(callArg.partnerTyp).toBe('marketing')
     expect(callArg.leistungsDatum).toBe('2026-05-10T12:00:00.000Z')
   })
 
-  it('(Task4-d) PDF-Input-Konstruktion enthaelt leistung_datum aus re-fetchter Gutschrift-Row', async () => {
+  it('(Datum-d) PDF-Input-Konstruktion enthaelt leistung_datum aus re-fetchter Gutschrift-Row', async () => {
     vi.mocked(erstellePartnerGutschrift).mockResolvedValue({
       ok: true,
       gutschriftId: 'gs-id-1',
@@ -414,14 +440,15 @@ describe('auszahlenProvision', () => {
     const db = richFakeDb({
       ledgerRow: {
         betrag_netto_eur: 100,
-        makler_id: 'makler-1',
-        makler: { ist_kleinunternehmer: false },
+        partner_id: 'makler-1',
+        partner_typ: 'makler',
         trigger_at: '2026-07-15T10:00:00.000Z',
       },
+      partnerKleinunternehmer: false,
       gutschriftenRefetchData: { ...CANNED_GUTSCHRIFT_ROW, leistung_datum: '2026-07-15' },
     })
 
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'prov-2')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'prov-2')
     expect(r.ok).toBe(true)
 
     // generateAndUploadPartnerGutschriftPdf must have been called with leistung_datum from row
@@ -438,11 +465,12 @@ describe('auszahlenProvision', () => {
     })
 
     const db = richFakeDb({
-      ledgerRow: { betrag_netto_eur: 100, makler_id: 'makler-1', makler: { ist_kleinunternehmer: false } },
+      ledgerRow: { betrag_netto_eur: 100, partner_id: 'makler-1', partner_typ: 'makler' },
+      partnerKleinunternehmer: false,
       // Existing row found by pre-check; pdf_storage_path is null → PDF generation will be attempted
       gutschriftenPrecheckData: CANNED_GUTSCHRIFT_ROW, // pdf_storage_path: null
     })
-    const r = await auszahlenProvision(db, 'makler_provisionen', 'x')
+    const r = await auszahlenProvision(db, 'partner_provisionen', 'x')
 
     // erstellePartnerGutschrift must NOT have been called — row already existed
     expect(erstellePartnerGutschrift).not.toHaveBeenCalled()
@@ -462,9 +490,9 @@ describe('auszahlenProvision', () => {
 })
 
 describe('storniereProvision', () => {
-  it('(a) makler_staffel_bonus schreibt NUR status:storniert — kein storniert_am', async () => {
+  it('(a) partner_staffel_bonus schreibt NUR status:storniert — kein storniert_am', async () => {
     const db = fakeDb({})
-    const r = await storniereProvision(db, 'makler_staffel_bonus', 'x', 'Testgrund')
+    const r = await storniereProvision(db, 'partner_staffel_bonus', 'x', 'Testgrund')
     expect(r.ok).toBe(true)
     const patch = db._upd.mock.calls[0][0] as Record<string, unknown>
     expect(patch.status).toBe('storniert')
@@ -490,9 +518,9 @@ describe('storniereProvision', () => {
   })
 })
 
-// ─── Task 4: Storno-Gutschrift wiring in storniereProvision ───────────────────
+// ─── Storno-Gutschrift wiring in storniereProvision ───────────────────────────
 
-describe('storniereProvision — Storno-Gutschrift wiring (Task 4)', () => {
+describe('storniereProvision — Storno-Gutschrift wiring', () => {
   beforeEach(() => vi.clearAllMocks())
 
   const ORIG = {
@@ -517,7 +545,7 @@ describe('storniereProvision — Storno-Gutschrift wiring (Task 4)', () => {
     vi.mocked(erstelleStornoGutschrift).mockResolvedValue({ ok: true, stornoId: 'storno-1', nummer: 'CMNDO-GS-2026-00002' } as any)
     vi.mocked(generateAndUploadPartnerGutschriftPdf).mockResolvedValue({ ok: true, pdfPath: 'partner-gutschriften/2026/x.pdf' } as any)
     const db = stornoFakeDb({ origData: ORIG, stornoRowData: STORNO_ROW })
-    const r = await storniereProvision(db, 'makler_provisionen', 'led-1', 'Rückbuchung')
+    const r = await storniereProvision(db, 'partner_provisionen', 'led-1', 'Rückbuchung')
     expect(r.ok).toBe(true)
     expect(erstelleStornoGutschrift).toHaveBeenCalledWith(db, 'orig-1', 'Rückbuchung')
     expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
@@ -530,7 +558,7 @@ describe('storniereProvision — Storno-Gutschrift wiring (Task 4)', () => {
 
   it('(storno-b) no original gutschrift → erstelleStornoGutschrift NOT called, ledger storniert only', async () => {
     const db = stornoFakeDb({ origData: null })
-    const r = await storniereProvision(db, 'makler_provisionen', 'led-1', 'Grund')
+    const r = await storniereProvision(db, 'partner_provisionen', 'led-1', 'Grund')
     expect(r.ok).toBe(true)
     expect(erstelleStornoGutschrift).not.toHaveBeenCalled()
     expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
@@ -539,7 +567,7 @@ describe('storniereProvision — Storno-Gutschrift wiring (Task 4)', () => {
   it('(storno-c) erstelleStornoGutschrift fails → storniereProvision still ok (non-fatal)', async () => {
     vi.mocked(erstelleStornoGutschrift).mockResolvedValue({ ok: false, error: 'boom' } as any)
     const db = stornoFakeDb({ origData: ORIG })
-    const r = await storniereProvision(db, 'makler_provisionen', 'led-1', 'Grund')
+    const r = await storniereProvision(db, 'partner_provisionen', 'led-1', 'Grund')
     expect(r.ok).toBe(true)
     expect(db._ledgerUpdates.some((p: any) => p.status === 'storniert')).toBe(true)
   })
