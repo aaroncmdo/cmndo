@@ -668,7 +668,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "شبكة شركاء معتمدة"
+          "label": "شبكة Expert Partner"
         },
         {
           "kpi": "30–40 %",
@@ -2113,7 +2113,7 @@
     "kpis": [
       {
         "wert": "DAT",
-        "label": "شبكة شركاء معتمدة"
+        "label": "شبكة Expert Partner"
       },
       {
         "wert": "< 48 ساعة",
@@ -2262,7 +2262,7 @@
       },
       {
         "wert": "DAT",
-        "label": "شبكة معتمدة"
+        "label": "شبكة Expert Partner"
       },
       {
         "wert": "كولن",
@@ -2854,7 +2854,7 @@
     "hero_intro": "خبراء تقييم شركاء معتمدون من قائمة DAT العامة (dat.de/sachverstaendige)، متاحون في جميع أنحاء ألمانيا. موعد في الموقع خلال 48 ساعة. للمتضررين بدون ذنب: 0 € تكلفة ذاتية — شركة تأمين الطرف الآخر تتحمل جميع التكاليف وفق §249 BGB (بشرط الاعتراف).",
     "hero_cta_karte": "عرض على الخريطة",
     "hero_cta_schaden": "الإبلاغ عن ضرر",
-    "trust_kpi_dat_label": "شبكة معتمدة",
+    "trust_kpi_dat_label": "شبكة Expert Partner",
     "trust_kpi_termin_label": "موعد",
     "trust_kpi_eigenanteil_label": "تكلفة ذاتية¹",
     "trust_kpi_recht_label": "الأساس القانوني",
@@ -3664,7 +3664,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "أساس المطالبة",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "شبكة معتمدة"
+    "trust_stat_3_label": "شبكة Expert Partner"
   },
   "unfallskizze": {
     "breadcrumb_start": "البداية",

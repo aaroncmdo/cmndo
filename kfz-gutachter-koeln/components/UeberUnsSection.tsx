@@ -54,7 +54,7 @@ export function UeberUnsSection({ city }: { city: City }) {
           <div className="uu-pillrow" role="list" aria-label="Qualifikationen">
             <div className="uu-pill" role="listitem">
               <span className="uu-pill-key">DAT</span>
-              <span className="uu-pill-sub">zertifiziert</span>
+              <span className="uu-pill-sub">Expert Partner</span>
             </div>
             <span className="uu-pill-sep" aria-hidden="true" />
             <div className="uu-pill" role="listitem">
@@ -137,7 +137,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               DAT-Expert · BVSK · 10+ Jahre · 2.500+ Schäden
             </div>
             <p className="text-white/[.84] text-base mb-3 leading-relaxed">
-              DAT-zertifiziert, ingenieurbasiert, gerichtsfest. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
+              Zertifiziert, ingenieurbasiert, gerichtsfest — mit Zugang zum DAT Expert Partner-Netzwerk. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
               die komplette Abwicklung — Gutachten, Anwalt, Mietwagen/Nutzungsausfall und
               Versicherungskommunikation. Sie sehen jeden Schritt live im Portal.
             </p>
