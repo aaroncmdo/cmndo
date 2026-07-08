@@ -32,6 +32,7 @@ export type AufsichtVorschlag = {
 const ROLLEN_LABEL: Record<string, string> = {
   dispatch: 'Dispatch',
   sachverstaendiger: 'Sachverständiger',
+  kundenbetreuer: 'Kundenbetreuer',
   kanzlei: 'Kanzlei',
   admin: 'Admin',
   kunde: 'Kunde',
