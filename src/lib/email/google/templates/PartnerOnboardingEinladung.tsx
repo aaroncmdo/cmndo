@@ -1,7 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 
-import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Footer } from '../../components'
+import { EmailShell, MailHeader, Card, Paragraph, InfoRow, Button, Footer } from '../../components'
 import { email } from '../../tokens'
 
 export type PartnerOnboardingEinladungProps = {
