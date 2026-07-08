@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from 'react'
 import {
   ensureMapboxInitialized,
   mapboxgl,
-  addSvCarMarker,
+  addSvNavArrowMarker,
   addKundeMarker,
   upsertTrafficRouteLayer,
   fetchDrivingRoute,
@@ -638,7 +638,9 @@ export default function FeldmodusMap({
     }
 
     if (!svMarkerRef.current) {
-      svMarkerRef.current = addSvCarMarker(
+      // Aaron 2026-07-08: klassischer Navi-Pfeil als Fallback wenn das 3D-Auto-Modell
+      // nicht laedt (kein NEXT_PUBLIC_SV_CAR_OBJ_URL / glb-404). Braucht keine Env-Var.
+      svMarkerRef.current = addSvNavArrowMarker(
         map,
         [svPosition.lng, svPosition.lat],
         { heading: svPosition.heading },
