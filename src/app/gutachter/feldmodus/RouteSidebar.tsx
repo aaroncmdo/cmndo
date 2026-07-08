@@ -7,6 +7,7 @@
 import type { SessionStatus } from '@/lib/types/field-modus'
 import type { FeldmodusStop } from './page'
 import AktuellerStopCard from './AktuellerStopCard'
+import PrivatStopCard from './PrivatStopCard'
 import StopListItem from './StopListItem'
 import FokusHeader from './FokusHeader'
 
@@ -21,6 +22,8 @@ export interface RouteSidebarProps {
   permissionState: 'pending' | 'granted' | 'denied'
   onAdvanced: (nextTerminId: string | null) => void
   onArrived: (lat: number, lng: number, via: 'geofence' | 'manuell' | 'termin_uhrzeit') => void
+  /** 2026-07-08: Advance fuer einen Privat-Wegpunkt (kein Besichtigungs-Flow). */
+  onWeiter: () => void
 }
 
 export default function RouteSidebar({
@@ -34,6 +37,7 @@ export default function RouteSidebar({
   permissionState,
   onAdvanced,
   onArrived,
+  onWeiter,
 }: RouteSidebarProps) {
   const aktuellerStop = stops[aktuellerStopIndex] ?? null
   const kommende = stops.slice(aktuellerStopIndex + 1)
@@ -51,17 +55,26 @@ export default function RouteSidebar({
 
       <div className="flex-1 overflow-y-auto p-3 space-y-4">
         {aktuellerStop ? (
-          <AktuellerStopCard
-            stop={aktuellerStop}
-            sessionId={sessionId}
-            sessionStatus={sessionStatus}
-            svPosition={svPosition}
-            svInGeofence={svInGeofence}
-            permissionState={permissionState}
-            distanceMeters={distanceMeters}
-            onAdvanced={onAdvanced}
-            onArrived={onArrived}
-          />
+          aktuellerStop.kind === 'privat' ? (
+            <PrivatStopCard
+              stop={aktuellerStop}
+              distanceMeters={distanceMeters}
+              svInGeofence={svInGeofence}
+              onWeiter={onWeiter}
+            />
+          ) : (
+            <AktuellerStopCard
+              stop={aktuellerStop}
+              sessionId={sessionId}
+              sessionStatus={sessionStatus}
+              svPosition={svPosition}
+              svInGeofence={svInGeofence}
+              permissionState={permissionState}
+              distanceMeters={distanceMeters}
+              onAdvanced={onAdvanced}
+              onArrived={onArrived}
+            />
+          )
         ) : (
           <div className="rounded-ios-xl bg-white/10 p-4 text-sm text-white/80">
             Kein aktiver Stop.
