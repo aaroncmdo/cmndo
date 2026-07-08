@@ -55,7 +55,8 @@ export async function ladeWerkstaettenFuerClaim(
   const owner = await assertOwnerOhneWerkstatt(claimId)
   if (!owner.ok) return { ok: false, error: owner.error }
   const { findReparaturWerkstaettenForTarget } = await import('@/lib/werkstatt/vermittlung-server')
-  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'claim', id: claimId })
+  // nurEchte: der Kunde darf keine Test-/internen Werkstaetten sehen (SSoT interne-identitaet).
+  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'claim', id: claimId, nurEchte: true })
   return { ok: true, werkstaetten, center: owner.center }
 }
 
