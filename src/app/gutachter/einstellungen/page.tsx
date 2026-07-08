@@ -7,6 +7,9 @@ import { berlinIsoDate } from '@/lib/time/berlin-day'
 import PageHeader from '@/components/shared/PageHeader'
 import KartenAnzeigeToggle from './KartenAnzeigeToggle'
 import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
+// AAR-500 N5 / AAR-344 / KFZ-158: Settings-Panels von /profil hierher verschoben
+import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
+import { EinstellungenSettings } from './_components/EinstellungenSettings'
 
 // AAR-720: Einstellungen-Hub. Sammel-Page für alle konfigurierbaren
 // Bereiche des SV-Portals — startet mit Kalender + Profil, wird nach
@@ -34,8 +37,28 @@ export default async function EinstellungenPage() {
     arbeitszeiten: Record<string, unknown> | null
     urlaub_von: string | null
     urlaub_bis: string | null
-  }>(supabase, user.id, 'id, gcal_connected, arbeitszeiten, urlaub_von, urlaub_bis')
+    live_tracking_enabled: boolean | null
+  }>(supabase, user.id, 'id, gcal_connected, arbeitszeiten, urlaub_von, urlaub_bis, live_tracking_enabled')
   if (!sv) redirect('/gutachter/willkommen')
+
+  // AAR-500 N5: Benachrichtigungs-Praeferenzen + AAR-344: 2FA-Telefon laden
+  // (von /gutachter/profil hierher verschoben)
+  const [prefsRes, { data: profileRow }] = await Promise.all([
+    getMyNotificationPreferences(),
+    supabase
+      .from('profiles')
+      .select('twofa_telefon, telefon')
+      .eq('id', user.id)
+      .single(),
+  ])
+
+  const notificationPrefs = prefsRes.prefs ?? {
+    quiet_hours_start: null,
+    quiet_hours_end: null,
+    timezone: 'Europe/Berlin',
+    channel_opt_outs: [],
+    event_opt_outs: {},
+  }
 
   // Verfuegbarkeit-Status: laufender Urlaub schlaegt "individuell" schlaegt "Standard".
   const heuteIso = berlinIsoDate()
@@ -150,16 +173,22 @@ export default async function EinstellungenPage() {
         <KartenAnzeigeToggle />
       </div>
 
+      {/* AAR-500 N5 / AAR-344 / KFZ-158: Benachrichtigungen, 2FA + Live-Standort
+          (von /gutachter/profil hierher verschoben) */}
+      <EinstellungenSettings
+        svId={sv.id}
+        notificationPrefs={notificationPrefs}
+        twofaTelefon={profileRow?.twofa_telefon ?? null}
+        telefonFallback={profileRow?.telefon ?? null}
+        gpsInitial={sv.live_tracking_enabled !== false}
+      />
+
       <div className="pt-2">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/70">
           Konto &amp; Datenschutz
         </p>
         <DsgvoLoeschSection />
       </div>
-
-      <p className="text-[11px] text-claimondo-ondo/70 text-center">
-        Weitere Bereiche (Benachrichtigungen, 2FA, Datenexport) folgen.
-      </p>
     </div>
   )
 }
