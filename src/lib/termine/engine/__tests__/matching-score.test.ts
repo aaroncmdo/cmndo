@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
   bewerteSvKandidat, vergleicheTenure, sortiereKandidaten,
-  istKontingentBlockiert, haversineKm, pointInPolygon, ersterFreierSlot,
+  istKontingentBlockiert, haversineKm, pointInPolygon, ersterFreierSlot, rangToOrdinal,
   type RankbarerKandidat,
 } from '../matching-score'
 import type { TagVerfuegbarkeit } from '../types'
@@ -49,6 +49,13 @@ describe('bewerteSvKandidat — Rang-Fein-Sort (C: innerhalb Paket, nie tier-üb
   it('fehlender rangOrdinal → identischer Score (backward-compat)', () => {
     expect(bewerteSvKandidat({ ...base, paket: 'pro' }))
       .toBe(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
+  })
+  it('rangToOrdinal: gold=2, silber=1, bronze/null/undefined=0', () => {
+    expect(rangToOrdinal('gold')).toBe(2)
+    expect(rangToOrdinal('silber')).toBe(1)
+    expect(rangToOrdinal('bronze')).toBe(0)
+    expect(rangToOrdinal(null)).toBe(0)
+    expect(rangToOrdinal(undefined)).toBe(0)
   })
 })
 

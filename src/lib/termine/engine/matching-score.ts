@@ -55,6 +55,11 @@ export function bewerteSvKandidat(f: SvKandidatFeatures): number {
     - distanzPenalty
 }
 
+/** Rang → Ordinal für die Fein-Sort: bronze/kein Rang = 0, silber = 1, gold = 2. */
+export function rangToOrdinal(rang: string | null | undefined): number {
+  return rang === 'gold' ? 2 : rang === 'silber' ? 1 : 0
+}
+
 export interface TenureInfo {
   partnerSeit: string | null
   createdAt: string | null
