@@ -48,3 +48,19 @@ export function routeForAbrechnungsweg(weg: Abrechnungsweg): SchadenRoute {
 export function istReparaturOnly(abrechnungsweg: string | null): boolean {
   return abrechnungsweg === 'selbstzahler'
 }
+
+/**
+ * WS2 (Reduced-Repair): Ist es ein Werkstatt-Reparatur-Claim (Selbstzahler ODER Kasko mit freier
+ * Werkstattwahl)? -> reduzierter Stepper + Werkstatt-Vermittlung; SV/Gutachten/Regulierung entfallen.
+ * Kasko-gebunden (freieWerkstattwahl===false) wird schon im Quali disqualifiziert und konvertiert nie
+ * -> ein kasko-CLAIM ist implizit freie Wahl; null/undefined/true zaehlen als Werkstatt-Strecke, nur
+ * explizites false schliesst aus. Verallgemeinert istReparaturOnly (das nur 'selbstzahler' kennt).
+ */
+export function istWerkstattReparaturWeg(
+  abrechnungsweg: string | null,
+  freieWerkstattwahl?: boolean | null,
+): boolean {
+  if (abrechnungsweg === 'selbstzahler') return true
+  if (abrechnungsweg === 'kasko') return freieWerkstattwahl !== false
+  return false
+}
