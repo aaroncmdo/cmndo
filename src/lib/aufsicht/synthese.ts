@@ -9,6 +9,8 @@ import { z } from 'zod'
 import type Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
 import { callForProposals } from '@/lib/claim-ai/engine/call'
+import { toolsFrom, validateVerb } from '@/lib/claim-ai/engine/verbs'
+import type { VerbDefinition } from '@/lib/claim-ai/engine/verbs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { summarizeSlaRollenLage } from '@/lib/aufsicht/sla-rollen'
 import type { SlaRollenLage } from '@/lib/aufsicht/sla-rollen'
@@ -41,11 +43,12 @@ const proposeSlaTaskSchema = z.object({
 })
 
 // ---------------------------------------------------------------------------
-// Tool-Definitionen (Anthropic.Tool[])
+// Verb-Registry (SP2-Konvergenz: geteilte VerbDefinition-Struktur wie Orchestrator)
 // ---------------------------------------------------------------------------
 
-export const AUFSICHT_TOOLS: Anthropic.Tool[] = [
-  {
+const proposeSlaTaskVerb: VerbDefinition<AufsichtDraft> = {
+  name: 'propose_sla_task',
+  tool: {
     name: 'propose_sla_task',
     description:
       'Schlage einen konkreten Task an die haengende Rolle vor, um eine SLA-Verletzung zu beheben. Wird NICHT automatisch ausgefuehrt — ein Mensch gibt frei.',
@@ -72,7 +75,19 @@ export const AUFSICHT_TOOLS: Anthropic.Tool[] = [
       required: ['claim_id', 'ziel_rolle', 'titel', 'begruendung'],
     },
   },
-]
+  validate: (input) => {
+    const parsed = proposeSlaTaskSchema.safeParse(input)
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'invalide Eingabe' }
+    }
+    const { claim_id, ziel_rolle, titel, begruendung, prioritaet } = parsed.data
+    return { ok: true, draft: { claimId: claim_id, zielRolle: ziel_rolle, titel, begruendung, prioritaet } }
+  },
+}
+
+const AUFSICHT_VERBS: VerbDefinition<AufsichtDraft>[] = [proposeSlaTaskVerb]
+
+export const AUFSICHT_TOOLS = toolsFrom(AUFSICHT_VERBS)
 
 // ---------------------------------------------------------------------------
 // System-Prompt
@@ -95,14 +110,12 @@ export function extractAufsichtDrafts(content: Anthropic.ContentBlock[]): Aufsic
   const out: AufsichtDraft[] = []
   for (const block of content) {
     if (block.type !== 'tool_use') continue
-    if (block.name !== 'propose_sla_task') continue
-    const parsed = proposeSlaTaskSchema.safeParse(block.input)
-    if (!parsed.success) {
-      console.warn('[ki_aufsicht] propose_sla_task invalide Input:', parsed.error.issues[0]?.message)
+    const result = validateVerb(AUFSICHT_VERBS, block.name, block.input)
+    if (!result.ok) {
+      console.warn('[ki_aufsicht] Verb-Validierung fehlgeschlagen:', result.error)
       continue
     }
-    const { claim_id, ziel_rolle, titel, begruendung, prioritaet } = parsed.data
-    out.push({ claimId: claim_id, zielRolle: ziel_rolle, titel, begruendung, prioritaet })
+    out.push(result.draft)
   }
   return out
 }
