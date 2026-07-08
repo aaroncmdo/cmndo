@@ -70,6 +70,8 @@ export async function ladeAnspruchRates(): Promise<AnspruchRates> {
       min: num(cfg, 'wiederbeschaffungsdauer_min_tage', 10),
       max: num(cfg, 'wiederbeschaffungsdauer_max_tage', 14),
     },
+    nutzungsausfallMaxTage: num(cfg, 'nutzungsausfall_max_tage', 12),
+    mietwagenMaxTage: num(cfg, 'mietwagen_max_tage', 14),
     verbringungEur: num(cfg, 'verbringung_eur', 130),
     ummeldungEur: num(cfg, 'ummeldung_eur', 75),
   }
