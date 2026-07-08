@@ -16,7 +16,9 @@ import { decrypt } from '@/lib/kalender/caldav/encryption'
 // 2026-07-08 (Aaron): grosszuegiges festes Fenster [-90d, +365d] — Busy-Blocking + juengste
 // Historie sichtbar. DB-driven: der Cron haelt sv_kalender_events_cache aktuell (SSoT), die UI
 // liest nur die DB. Fetch- UND Diff-existing-Fenster nutzen dieselben Konstanten (sonst Duplikate).
-const SYNC_HORIZON_DAYS = 365
+// 2026-07-08: Fenster [-90d, +90d]. Mit expand:true (Serientermin-Instanzen) waere +365d zu
+// viele Instanzen (taeglicher Termin × 455 Tage) -> +90d deckt Busy-Blocking + naechste Monate.
+const SYNC_HORIZON_DAYS = 90
 const SYNC_BACKFILL_DAYS = 90
 const GOOGLE_TIMEOUT_MS = 8000
 
@@ -109,7 +111,9 @@ async function syncCalDav(row: VerbindungRow, db: ReturnType<typeof createAdminC
     events = raw
       .filter((e) => !e.uid.startsWith('claimondo-'))
       .map((e) => ({
-      uid: e.uid || `${e.start}__${e.end}`,
+      // external_event_id per OCCURRENCE (uid::start): Serien-Instanzen (expand:true) teilen die
+      // UID -> ohne das Datum im Key würden sie im Cache kollidieren (nur 1 Instanz gespeichert).
+      uid: e.uid ? `${e.uid}::${e.start}` : `${e.start}__${e.end}`,
       summary: e.summary ?? '',
       start: e.start,
       end: e.end,

@@ -107,7 +107,8 @@ async function fetchCaldavEvents(
       .filter((e) => !e.uid.startsWith('claimondo-'))
       .map<PrivateCalendarEvent>((e) => ({
         source: 'caldav',
-        external_event_id: e.uid,
+        // per Occurrence (uid::start) — Serien-Instanzen (expand:true) teilen die UID.
+        external_event_id: e.uid ? `${e.uid}::${e.start}` : `${e.start}__${e.end}`,
         titel: e.summary,
         start_zeit: e.start,
         end_zeit: e.end,

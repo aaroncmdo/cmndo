@@ -316,9 +316,11 @@ export async function listCalendarEventsFull(
 }
 
 // Multi-Kalender (2026-07-08, Aaron): Events aus ALLEN Kalendern des Accounts, aggregiert.
-// Busy-Blocking soll alle Termine (Arbeit/Privat/…) abdecken. Per-Kalender fail-soft (ein
-// Kalender-Timeout blockt die anderen nicht) + Dedup per UID (falls ein Event in mehreren
-// Kalendern liegt). Genutzt vom Cache-Sync + der Live-Event-Liste.
+// Busy-Blocking soll alle Termine (Arbeit/Privat/…) abdecken. Per-Kalender fail-soft.
+// expand:true -> iCloud expandiert Serientermine (RRULE) serverseitig in einzelne Instanzen mit
+// echtem Occurrence-Datum. Sonst wuerde nur der (oft VERGANGENE) Serien-Master geliefert ->
+// zukuenftige Wiederholungen (woechentlicher Termin etc.) waeren im Kalender unsichtbar.
+// Dedup per UID+start: Serien-Instanzen teilen die UID, unterscheiden sich nur im Datum.
 export async function listAllCalendarEventsFull(
   creds: CalDavCredentials,
   rangeStartIso: string,
@@ -327,20 +329,21 @@ export async function listAllCalendarEventsFull(
   const client = await createClient(creds)
   const calendars = await client.fetchCalendars()
   const all: CalDavEventFull[] = []
-  const seenUids = new Set<string>()
+  const seen = new Set<string>()
   for (const cal of calendars) {
     let objects: unknown[]
     try {
       objects = (await Promise.race([
-        client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
+        client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso }, expand: true }),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
       ])) as unknown[]
     } catch {
       continue // per-Kalender fail-soft
     }
     for (const ev of parseCalDavObjectsFull(objects)) {
-      if (ev.uid && seenUids.has(ev.uid)) continue
-      if (ev.uid) seenUids.add(ev.uid)
+      const key = `${ev.uid}|${ev.start}` // Occurrence-Identitaet (Serien-Instanzen teilen die UID)
+      if (seen.has(key)) continue
+      seen.add(key)
       all.push(ev)
     }
   }
