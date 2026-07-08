@@ -227,3 +227,25 @@ ok). Nach dem Deploy schaltet der Cron automatisch scharf (HTTP 200 → `{ ok, g
 Security-, sondern ein Hygiene-Cron: der Validator (`validate-remember-token.ts`) lehnt abgelaufene
 Tokens ohnehin ab.
 
+## Stand 2026-07-08 — `ki-aufsicht-sla` NACHGETRAGEN (Live-VPS)
+
+> Neuer Cron: KI-Aufsicht SLA-Rollen-Aufsicht (Ink.1, PR #3897 live). Per `paramiko`
+> (Aaron-autorisiert, root) auf den Live-VPS angewendet + verifiziert. Backup:
+> `/root/crontab-backup-preki-20260708-144147.txt` (Rollback: `crontab <backup>`).
+
+**Umgesetzt:** nachgetragen —
+```cron
+0 8 * * * /usr/local/bin/cron-call.sh /api/cron/ki-aufsicht-sla  # KI-Aufsicht SLA-Rollen-Aufsicht (Ink.1)
+```
+Crontab **96 → 99 Zeilen** (Kommentar + Leerzeile + Eintrag).
+
+**Verifiziert:** Test-Trigger `cron-call.sh /api/cron/ki-aufsicht-sla` → exit 0 (HTTP 2xx),
+**5 valide `quelle='aufsicht'`-Vorschlaege** generiert (5 Claims, Rollen kundenbetreuer+admin) →
+der Live-Cron laeuft E2E (Bearer CRON_SECRET → deployte Route → Generierungs-Fix #3935 → Persist).
+Deps: Route auf main deployt, `log_cron_job_run`-RPC + der `cron-call.sh`-Wrapper (60+ Crons) bewaehrt.
+
+**Reif-Fix (im selben PR):** die Aufsicht nutzt jetzt eine **Replace-Strategie** — un-actioned
+(`status='offen'`) Vorschlaege werden je Lauf ERSETZT (nicht akkumuliert; `buildDedupeKey` hat einen
+randomUUID-Anteil → der partielle Unique-Index dedupliziert Laeufe nicht). Actioned bleiben. E2E belegt
+(2 Laeufe → offen-Count 4 dann 6, nicht 9/10).
+

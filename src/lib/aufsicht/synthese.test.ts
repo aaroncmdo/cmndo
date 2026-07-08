@@ -7,14 +7,21 @@ const h = vi.hoisted(() => {
       _row: Record<string, unknown>,
     ): Promise<{ error: { code: string; message: string } | null }> => ({ error: null }),
   )
+  const deleteEqSpy = vi.fn()
+  type DelChain = { eq: (c: string, v: string) => DelChain; then: (r: (v: { error: null }) => void) => void }
+  const deleteChain: DelChain = {
+    eq: (c, v) => { deleteEqSpy(c, v); return deleteChain },
+    then: (r) => r({ error: null }),
+  }
   const db = {
     from: (_table: string) => ({
       insert: insertSpy,
+      delete: () => deleteChain,
     }),
   }
   const anthropicMessagesSpy = vi.fn()
   const AnthropicConstructorSpy = vi.fn()
-  return { insertSpy, db, anthropicMessagesSpy, AnthropicConstructorSpy }
+  return { insertSpy, deleteEqSpy, db, anthropicMessagesSpy, AnthropicConstructorSpy }
 })
 
 vi.mock('@/lib/supabase/admin', () => ({
@@ -36,7 +43,7 @@ vi.mock('@/lib/ai/usage-log', () => ({
   logAiUsage: vi.fn(async () => undefined),
 }))
 
-import { extractAufsichtDrafts, persistAufsichtRemediation } from './synthese'
+import { extractAufsichtDrafts, persistAufsichtRemediation, clearOpenAufsichtProposals } from './synthese'
 import type { AufsichtDraft } from './synthese'
 import type Anthropic from '@anthropic-ai/sdk'
 
@@ -269,5 +276,17 @@ describe('persistAufsichtRemediation', () => {
     await persistAufsichtRemediation('m', drafts)
     const rollen = h.insertSpy.mock.calls.map((c) => (c[0] as Record<string, unknown>).ziel_rolle)
     expect(rollen).toEqual(['kundenbetreuer', 'kundenbetreuer', 'sachverstaendiger', 'admin'])
+  })
+})
+
+describe('clearOpenAufsichtProposals', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('loescht quelle=aufsicht + status=offen (Replace-Strategie), wirft nie', async () => {
+    await expect(clearOpenAufsichtProposals()).resolves.toBeUndefined()
+    expect(h.deleteEqSpy).toHaveBeenCalledWith('quelle', 'aufsicht')
+    expect(h.deleteEqSpy).toHaveBeenCalledWith('status', 'offen')
   })
 })
