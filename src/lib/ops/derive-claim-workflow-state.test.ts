@@ -55,4 +55,8 @@ describe('deriveClaimWorkflowState', () => {
     const wi = deriveClaimWorkflowState(base, NOW)
     expect(wi.editable).toEqual({ notizen: 'hallo', interneNotizen: null, schadensHoeheNetto: 4500 })
   })
+  it('surfaced kundenbetreuerId from the row (Admin-Cockpit-Gruppierung)', () => {
+    expect(deriveClaimWorkflowState(base, NOW).kundenbetreuerId).toBe('kb1')
+    expect(deriveClaimWorkflowState({ ...base, kundenbetreuer_id: null }, NOW).kundenbetreuerId).toBeNull()
+  })
 })

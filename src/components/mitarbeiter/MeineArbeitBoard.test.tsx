@@ -35,6 +35,7 @@ function makeItem(over: Partial<ClaimWorkItem> = {}): ClaimWorkItem {
     kind: 'claim',
     id: 'c1',
     fallId: 'f1',
+    kundenbetreuerId: 'kb1',
     claimNummer: 'CLM-1',
     stage: 'begutachtung',
     subState: 'gutachten',
