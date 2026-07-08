@@ -102,7 +102,7 @@ export async function createMitarbeiter(
         email,
         introHtml:
           `<p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p>` +
-          `<p>Beim ersten Login richten Sie zur Kontosicherheit die Zwei-Faktor-Authentifizierung ein (Authenticator-App oder SMS-Code) — für interne Konten ist sie verpflichtend.</p>`,
+          `<p>Zur Kontosicherheit empfehlen wir Ihnen, nach dem ersten Login die Zwei-Faktor-Authentifizierung einzurichten (Authenticator-App oder SMS-Code).</p>`,
         magicLink,
         appUrl,
       }),
