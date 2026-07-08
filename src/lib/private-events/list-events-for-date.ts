@@ -9,6 +9,7 @@
 
 import { google } from 'googleapis'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { listAllCalendarEventsFull } from '@/lib/kalender/caldav/client'
@@ -72,11 +73,8 @@ async function fetchCaldavEvents(
 ): Promise<PrivateCalendarEvent[]> {
   try {
     const db = createAdminClient()
-    const { data: sv } = await db
-      .from('sachverstaendige')
-      .select('id')
-      .eq('profile_id', profileId)
-      .maybeSingle()
+    // multi-standort-safe: getGutachterForUser (Ordering+limit(1)) statt .maybeSingle().
+    const sv = await getGutachterForUser<{ id: string }>(db, profileId, 'id')
     if (!sv) return []
     const { data: verb } = await db
       .from('sv_kalender_verbindungen')

@@ -49,8 +49,11 @@ export async function startBridgeCall({
     }
   } else {
     // SV muss dem Fall zugewiesen sein
-    const { data: sv } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).single()
-    if (!sv || claim.sv_id !== sv.id) return { error: 'Kein Zugriff' }
+    // multi-standort-safe: Membership-Check (Claim muss EINER der eigenen sv-Rows
+    // gehoeren) statt .single() (warf bei >1 SV-Row). Vgl. feldmodus/actions-Guard.
+    const { data: svRows } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id)
+    const svIds = (svRows ?? []).map((r) => r.id as string)
+    if (!claim.sv_id || !svIds.includes(claim.sv_id as string)) return { error: 'Kein Zugriff' }
   }
 
   // Telefonnummern laden
