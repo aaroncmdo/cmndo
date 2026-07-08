@@ -21,6 +21,10 @@ export async function DELETE(req: Request) {
     .from('sachverstaendige')
     .select('id, organisation_id, ist_parent_account')
     .eq('profile_id', user.id)
+    // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser (Buero+Sub-Standort).
+    .order('ist_parent_account', { ascending: true, nullsFirst: true })
+    .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+    .limit(1)
     .maybeSingle()
   if (!sv) return NextResponse.json({ error: 'Kein SV-Profil' }, { status: 403 })
 
