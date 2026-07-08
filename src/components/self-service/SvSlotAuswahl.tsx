@@ -6,9 +6,10 @@
 // /anfrage). Match-/Buchungs-Logik liegt beim Consumer.
 
 import { useTranslations } from 'next-intl'
-import { Check, BadgeCheck } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { PartnerRangBadge } from '@/components/shared/PartnerRangBadge'
 import { Card } from '@/components/primitives/Card'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
@@ -64,16 +65,9 @@ export function SvSlotAuswahl({
           // Card hervorgehoben (glass='dark'); Inhalt dann in Weiß. /flow (kein embedMode) bleibt
           // unverändert (weiße Card, Ondo-„Empfohlen"-Text).
           const dunkel = embedMode && i === 0
-          // AAR-956 (Aaron 14.06.): Tier-1 (zahlender Partner) vs Tier-2 (basic) sichtbar
-          // machen — NUR im Slot-Picker (embedMode). Eine Plakette pro Karte, Text variiert:
-          //   #1 + Tier-1 → „Empfohlener Partner" · #1 + Tier-2 → „Empfohlen" (bestpassend,
-          //   aber kein Partner-Framing) · sonst Tier-1 → „Partner" · Tier-2 → keine.
-          // Tier-1-Plaketten tragen ein BadgeCheck-Icon. /flow + /anfrage (kein embedMode)
-          // zeigen weiterhin nur das schlichte „Empfohlen" beim #1 (else-Zweig unten).
-          const istTop = sv.istTopPartner === true
-          const embedBadge = i === 0
-            ? (istTop ? t('slot.empfohlener_partner') : t('slot.empfohlen'))
-            : (istTop ? t('slot.partner') : null)
+          // AAR-956 Partner-Tier (Aaron 08.07.): der ehrliche verdiente Rang (PartnerRangBadge)
+          // loest die paket-basierte istTopPartner-Plakette ab. Das schlichte „Empfohlen" beim #1
+          // bleibt als Positions-Marker (bestpassender Match), ist aber vom Paket entkoppelt.
           const kopf = (
             <>
               {sv.profilbild ? (
@@ -90,18 +84,11 @@ export function SvSlotAuswahl({
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className={cn('font-semibold', dunkel ? 'text-white' : 'text-claimondo-navy')}>{sv.vorname}</span>
-                  {embedMode ? (
-                    embedBadge && (
-                      <span className={cn(
-                        'inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide',
-                        dunkel ? 'bg-white/90 text-claimondo-navy' : 'bg-claimondo-navy text-white',
-                      )}>
-                        {istTop && <BadgeCheck className="h-3 w-3" />}
-                        {embedBadge}
-                      </span>
-                    )
-                  ) : (
-                    i === 0 && <span className="text-[11px] font-semibold text-claimondo-ondo">{t('slot.empfohlen')}</span>
+                  {sv.rang && <PartnerRangBadge tier={sv.rang} sinnsatz={sv.rangSinnsatz} size="sm" pillOnly />}
+                  {i === 0 && (
+                    <span className={cn('text-[11px] font-semibold', dunkel ? 'text-white/90' : 'text-claimondo-ondo')}>
+                      {t('slot.empfohlen')}
+                    </span>
                   )}
                   {selektiert && (
                     <span className={cn('ml-auto inline-flex items-center gap-1 text-[11px] font-bold', dunkel ? 'text-white' : 'text-claimondo-navy')}>
