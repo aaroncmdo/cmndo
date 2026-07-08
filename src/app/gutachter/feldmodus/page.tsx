@@ -16,6 +16,7 @@ export const dynamic = 'force-dynamic'
 export type FeldmodusStop = {
   termin_id: string
   fall_id: string
+  claim_id: string | null
   index: number
   start_zeit: string
   status: string
@@ -70,7 +71,13 @@ function normalizeStruktur(raw: unknown): SvBriefingStruktur | null {
   }
 }
 
-export default async function FeldmodusPage() {
+export default async function FeldmodusPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ chatv2?: string }>
+}) {
+  // Phase-2c Cutover-Flag: ?chatv2=1 -> Fokus-Chat thread-nativ (kunde_gruppe). Default aus.
+  const chatV2 = ((await searchParams) ?? {}).chatv2 === '1'
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -336,6 +343,8 @@ export default async function FeldmodusPage() {
       const stop: FeldmodusStop = {
         termin_id: t.id as string,
         fall_id: fallId,
+        // claim-nativ fuer den Chat-Cutover (kunde_gruppe-Thread); null bei bezug-nativen Stops ohne Fall.
+        claim_id: (fall?.claim_id as string | null) ?? null,
         index: idx,
         start_zeit: t.start_zeit as string,
         status: t.status as string,
@@ -388,6 +397,7 @@ export default async function FeldmodusPage() {
       sv={feldmodusSv}
       stops={stops}
       userId={user.id}
+      chatV2={chatV2}
     />
   )
 }
