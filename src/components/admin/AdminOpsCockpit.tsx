@@ -51,6 +51,13 @@ export default function AdminOpsCockpit({ rollup, items }: { rollup: OpsRollup; 
     .sort((a, b) => (b.overdueSinceDays ?? 0) - (a.overdueSinceDays ?? 0))
   const unassigned = items.filter((i) => !i.kundenbetreuerId).length
 
+  // Ueberfaellige je Zelle (TS-isOverdue) -> Matrix-Heat konsistent zur Attention-Liste.
+  const overdueByCell = new Map<string, number>()
+  for (const i of overdue) {
+    const key = `${i.stage}::${i.kundenbetreuerId ?? ''}`
+    overdueByCell.set(key, (overdueByCell.get(key) ?? 0) + 1)
+  }
+
   const drill = selected
     ? items.filter((i) => i.stage === selected.phase && i.kundenbetreuerId === selected.ownerId)
     : []
@@ -67,9 +74,9 @@ export default function AdminOpsCockpit({ rollup, items }: { rollup: OpsRollup; 
       {/* Rollup-Matrix (abgeleitete v_ops_rollup) */}
       <div>
         <h2 className="mb-2 text-body-sm font-semibold text-claimondo-navy">Fälle nach Phase &amp; Owner</h2>
-        <OpsRollupMatrix rollup={rollup} selected={selected} onSelect={setSelected} />
+        <OpsRollupMatrix rollup={rollup} selected={selected} onSelect={setSelected} overdueByCell={overdueByCell} />
         <p className="mt-1.5 text-caption text-claimondo-ondo/60">
-          Zelle anklicken für Details · gelb = seit &gt;7 Tagen unbewegt
+          Zelle anklicken für Details · gelb = überfällige Fälle (SLA)
         </p>
       </div>
 

@@ -32,12 +32,17 @@ const rollup: OpsRollup = {
 describe('OpsRollupMatrix', () => {
   it('rendert Owner-Zeilen, Counts, Stale-Marker und Total', () => {
     const html = renderToStaticMarkup(
-      React.createElement(OpsRollupMatrix, { rollup, selected: null, onSelect: () => {} }),
+      React.createElement(OpsRollupMatrix, {
+        rollup,
+        selected: null,
+        onSelect: () => {},
+        overdueByCell: new Map([['begutachtung::kb1', 2]]),
+      }),
     )
     expect(html).toContain('Lena Schmidt')
     expect(html).toContain('Nicht zugewiesen')
     expect(html).toContain('>3<') // Zelle begutachtung/kb1
-    expect(html).toContain('1 alt') // stale-Marker
+    expect(html).toContain('2 überfällig') // overdue-Marker (TS-isOverdue)
     expect(html).toContain('>5<') // totalAktiv
   })
 
@@ -47,6 +52,7 @@ describe('OpsRollupMatrix', () => {
         rollup: { ...rollup, owners: [], cells: [] },
         selected: null,
         onSelect: () => {},
+        overdueByCell: new Map(),
       }),
     )
     expect(html).toContain('Keine aktiven Fälle')
