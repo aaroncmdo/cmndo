@@ -136,6 +136,8 @@ export type AnspruchConfig = {
   totalschadenSchwelleProzent: number
   reparaturGrenzeProzent: number
   wiederbeschaffungsdauerTage: { min: number; max: number }
+  nutzungsausfallMaxTage: number // Hoechstdauer Nutzungsausfall im Reparaturfall (default 12)
+  mietwagenMaxTage: number // Hoechstdauer Mietwagen (default 14)
   verbringungEur: number
   ummeldungEur: number
 }
