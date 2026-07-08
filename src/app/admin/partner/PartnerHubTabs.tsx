@@ -25,7 +25,7 @@ export default function PartnerHubTabs() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
+            className={`px-4 py-3 text-body-sm font-medium border-b-2 transition-colors whitespace-nowrap ${
               active
                 ? 'border-claimondo-navy text-claimondo-navy'
                 : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy hover:border-claimondo-border'

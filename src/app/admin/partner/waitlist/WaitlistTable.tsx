@@ -67,11 +67,11 @@ export default function WaitlistTable({ eintraege }: { eintraege: Eintrag[] }) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="rounded-2xl border border-claimondo-border bg-white p-8 text-center">
-          <p className="text-sm text-claimondo-ondo">Keine Einträge im aktuellen Filter.</p>
+        <div className="rounded-ios-lg border border-claimondo-border bg-white p-8 text-center">
+          <p className="text-body-sm text-claimondo-ondo">Keine Einträge im aktuellen Filter.</p>
         </div>
       ) : (
-        <DataTableContainer variant="plain" className="overflow-hidden rounded-2xl border border-claimondo-border bg-white">
+        <DataTableContainer variant="plain" className="overflow-hidden rounded-ios-lg border border-claimondo-border bg-white">
           <Table>
             <Thead className="border-b border-claimondo-border">
               <tr>
@@ -154,7 +154,7 @@ function Row({
           <div className="font-medium text-claimondo-navy">
             {e.vorname} {e.nachname}
           </div>
-          <div className="text-xs text-claimondo-ondo">
+          <div className="text-body-xs text-claimondo-ondo">
             <a href={`mailto:${e.email}`} className="hover:underline">
               {e.email}
             </a>
@@ -177,14 +177,14 @@ function Row({
               {qualis.map((q) => (
                 <span
                   key={q}
-                  className="rounded-full border border-claimondo-border bg-claimondo-bg px-2 py-0.5 text-[10px] font-semibold text-claimondo-navy"
+                  className="rounded-full border border-claimondo-border bg-claimondo-bg px-2 py-0.5 text-caption font-semibold text-claimondo-navy"
                 >
                   {q}
                 </span>
               ))}
             </div>
           ) : (
-            <span className="text-xs text-claimondo-ondo/70">—</span>
+            <span className="text-body-xs text-claimondo-ondo/70">—</span>
           )}
         </Td>
         <Td className="text-claimondo-ondo!">
@@ -196,7 +196,7 @@ function Row({
             value={currentStatus}
             onChange={(ev) => changeStatus(ev.target.value as StatusKey)}
             disabled={pending}
-            className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${sl?.color ?? ''}`}
+            className={`rounded-full border px-2.5 py-1 text-body-xs font-semibold ${sl?.color ?? ''}`}
           >
             {STATUS_KEYS.map((k) => (
               <option key={k} value={k}>
@@ -205,7 +205,7 @@ function Row({
             ))}
           </select>
         </Td>
-        <Td className="text-xs text-claimondo-ondo!">
+        <Td className="text-body-xs text-claimondo-ondo!">
           {new Date(e.erstellt_am).toLocaleDateString('de-DE', {
             day: '2-digit',
             month: '2-digit',
@@ -215,7 +215,7 @@ function Row({
         <Td>
           <button
             onClick={onToggle}
-            className="text-xs font-medium text-claimondo-ondo hover:text-claimondo-navy"
+            className="text-body-xs font-medium text-claimondo-ondo hover:text-claimondo-navy"
           >
             {expanded ? 'Schließen' : 'Details'}
           </button>
@@ -226,10 +226,10 @@ function Row({
           <Td colSpan={7} className="py-4!">
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+                <p className="text-caption font-semibold uppercase tracking-wider text-claimondo-ondo">
                   Geschäft
                 </p>
-                <dl className="mt-2 space-y-1 text-xs text-claimondo-navy">
+                <dl className="mt-2 space-y-1 text-body-xs text-claimondo-navy">
                   {e.unternehmen && (
                     <div>
                       <dt className="inline text-claimondo-ondo">Unternehmen: </dt>
@@ -269,7 +269,7 @@ function Row({
                 </dl>
               </div>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
+                <p className="text-caption font-semibold uppercase tracking-wider text-claimondo-ondo">
                   Notizen
                 </p>
                 <textarea
@@ -277,12 +277,12 @@ function Row({
                   onChange={(ev) => setNotiz(ev.target.value)}
                   rows={4}
                   placeholder="Triage-Notizen, Telefonat-Zusammenfassung…"
-                  className="mt-2 w-full rounded-ios-xl border border-claimondo-border bg-white px-3 py-2 text-xs text-claimondo-navy placeholder-claimondo-ondo/40 outline-none focus:border-claimondo-ondo"
+                  className="mt-2 w-full rounded-ios-xl border border-claimondo-border bg-white px-3 py-2 text-body-xs text-claimondo-navy placeholder-claimondo-ondo/40 outline-none focus:border-claimondo-ondo"
                 />
                 <button
                   onClick={saveNotiz}
                   disabled={pending}
-                  className="mt-2 rounded-ios-xl bg-claimondo-navy px-4 py-2 text-xs font-semibold text-white hover:bg-claimondo-ondo disabled:opacity-50"
+                  className="mt-2 rounded-ios-xl bg-claimondo-navy px-4 py-2 text-body-xs font-semibold text-white hover:bg-claimondo-ondo disabled:opacity-50"
                 >
                   Notiz speichern
                 </button>

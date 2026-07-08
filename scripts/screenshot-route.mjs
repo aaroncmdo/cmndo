@@ -8,7 +8,7 @@
 //   MSYS_NO_PATHCONV=1 node scripts/screenshot-route.mjs /gutachter/heute
 //   MSYS_NO_PATHCONV=1 node scripts/screenshot-route.mjs /gutachter/heute /gutachter/profil
 //   MSYS_NO_PATHCONV=1 node scripts/screenshot-route.mjs /kunde --viewports=desktop,mobile
-//   MSYS_NO_PATHCONV=1 node scripts/screenshot-route.mjs /dispatch/leads --base=https://cmndo.vercel.app
+//   MSYS_NO_PATHCONV=1 node scripts/screenshot-route.mjs /dispatch/leads --base=https://app.claimondo.de
 // Auf Linux/Mac/PowerShell: ohne MSYS_NO_PATHCONV.
 //
 // Auto-Login: Portal aus dem ersten Pfad-Segment abgeleitet
@@ -24,7 +24,7 @@ import { join } from 'node:path'
 
 const BASE_URL = (process.argv.find((a) => a.startsWith('--base='))?.split('=')[1])
   ?? process.env.SCREENSHOT_BASE_URL
-  ?? 'https://cmndo.vercel.app'
+  ?? 'https://app.claimondo.de'
 const PASSWORD = process.env.SCREENSHOT_PASSWORD ?? 'Test1234!'
 const OUT_DIR = 'tmp/screenshots'
 

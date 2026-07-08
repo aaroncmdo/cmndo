@@ -1,5 +1,7 @@
 // AAR-92: Maik-Provisionen Admin-UI
+// Task-11: marketing_partner Maik-Zeile server-seitig laden, USt-Toggle an Client weitergeben.
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import ProvisionenClient from './ProvisionenClient'
 
@@ -26,6 +28,22 @@ export default async function ProvisionenMaikPage({ searchParams }: {
     .eq('monat', aktMonat)
     .order('created_at', { ascending: false })
 
+  // Maik-marketing_partner-Zeile fuer USt-Toggle + Steuerdaten laden (admin-Client, Spalten in Branch neu)
+  const adminDb = createAdminClient()
+  const { data: maikRaw } = await adminDb
+    .from('marketing_partner' as never)
+    .select('id, ist_kleinunternehmer, ust_id, adresse_strasse, adresse_plz, adresse_ort')
+    .limit(1)
+    .single()
+  const maik = maikRaw as {
+    id: string
+    ist_kleinunternehmer: boolean | null
+    ust_id: string | null
+    adresse_strasse: string | null
+    adresse_plz: string | null
+    adresse_ort: string | null
+  } | null
+
   // KPIs
   const total = provisionen?.length ?? 0
   const pending = provisionen?.filter(p => p.status === 'pending').length ?? 0
@@ -47,6 +65,11 @@ export default async function ProvisionenMaikPage({ searchParams }: {
       monat={aktMonat}
       months={months}
       kpi={{ total, pending, confirmed, sumPending, sumConfirmed }}
+      maik={maik ? {
+        id: maik.id,
+        istKleinunternehmer: maik.ist_kleinunternehmer,
+        steuerdaten: { ust_id: maik.ust_id, adresse_strasse: maik.adresse_strasse, adresse_plz: maik.adresse_plz, adresse_ort: maik.adresse_ort },
+      } : null}
     />
   )
 }

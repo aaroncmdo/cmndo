@@ -11,6 +11,7 @@
 'use server'
 
 import { createServiceClient } from '@/lib/supabase/server'
+import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
 
 export type TerminData = {
   id: string
@@ -95,8 +96,10 @@ export async function getTerminByToken(
     if (fall?.kennzeichen) kennzeichen = fall.kennzeichen
     if (fp.length > 0) fahrzeug = fp.join(' ')
 
-    const { data: partei } = await svc.from('parteien').select('versicherung_name').eq('fall_id', termin.fall_id).eq('rolle', 'gegner').limit(1).maybeSingle()
-    if (partei?.versicherung_name) versicherung = partei.versicherung_name
+    // Versicherung — SSoT: kanonische Gegner-Versicherung aus v_claim_full
+    // (loest das tote parteien/rolle='gegner'-Read ab, s. resolveGegnerVersicherung).
+    const gv = await resolveGegnerVersicherung(svc, { fallId: termin.fall_id })
+    if (gv.name) versicherung = gv.name
   } else if (termin.lead_id) {
     await loadLeadData(termin.lead_id)
   }

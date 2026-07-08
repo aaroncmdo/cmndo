@@ -6,11 +6,15 @@ import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
 import TestAccountToggle from './TestAccountToggle'
 import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
+import AbrechnungsTab from './AbrechnungsTab'
 import { getSvStatus } from '@/lib/sv-status'
 import FallStatusBadge from '@/components/shared/FallStatusBadge'
 import PageHeader from '@/components/shared/PageHeader'
 import { getAlleSlots } from '@/lib/dokumente/katalog'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { FinderVisibilityBadge } from '@/components/admin/FinderVisibilityBadge'
+import { getPartnerBilling } from '@/lib/finance/partner-billing'
+import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
 
 type SvSearchParams = { tab?: string }
 
@@ -23,7 +27,7 @@ export default async function SvDetailPage({
 }) {
   const { id } = await params
   const sp = (await searchParams) ?? {}
-  const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : 'stammdaten'
+  const activeTab = sp.tab === 'verifizierung' ? 'verifizierung' : sp.tab === 'abrechnungen' ? 'abrechnungen' : 'stammdaten'
   const supabase = await createClient()
 
   // AAR-659: profiles-Embed mit FK-Hint (Follow-up zu AAR-657 — die Stelle
@@ -32,7 +36,7 @@ export default async function SvDetailPage({
   // AAR-659: urlaub_von/bis mitladen — für Header-Badge.
   const { data: sv, error: svErr } = await supabase
     .from('sachverstaendige')
-    .select('id, profile_id, paket, onboarding_quelle, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, verifizierung_status, verifizierung_frist_bis, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
+    .select('id, firmenname, profile_id, paket, onboarding_quelle, offene_faelle, partner_seit, ist_aktiv, notizen, paket_faelle_gesamt, paket_faelle_genutzt, paket_umkreis_km, standort_adresse, standort_plz, standort_lat, standort_lng, standort_place_id, gutachter_typ, werbebudget_guthaben_netto, anzahlung_status, portal_zugang_freigeschaltet, vertrag_unterschrieben, gesperrt_seit, verifiziert, verifiziert_am, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, gesperrt_grund, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer, qualifikationen_neu, spezifikationen, schadenarten, urlaub_von, urlaub_bis, profiles!sachverstaendige_profile_id_fkey(vorname, nachname, email, telefon, google_place_id)')
     .eq('id', id)
     .single()
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
@@ -54,6 +58,16 @@ export default async function SvDetailPage({
   } catch (err) {
     console.error('[admin/sv-detail] ist_testaccount-Read:', err)
   }
+
+  // Aaron 07.07.: Finder-Sichtbarkeit — hat der SV eine berechnete Isochrone?
+  // Leichter Boolean-Check (die Isochrone selbst ist ~10k Vertices, hier nicht noetig).
+  const { data: isoRow } = await supabase
+    .from('sachverstaendige')
+    .select('id')
+    .eq('id', id)
+    .not('isochrone_polygon', 'is', null)
+    .maybeSingle()
+  const hatIsochrone = !!isoRow
 
   // AAR-717: CalDAV-Verbindungs-Status für Admin-Banner. Wenn last_error
   // gesetzt ist, zeigen wir einen roten Hinweis im Stammdaten-Tab.
@@ -254,6 +268,15 @@ export default async function SvDetailPage({
     }
   }
 
+  // Abrechnungs-Tab-Daten (nur wenn aktiv — spart Query sonst)
+  let abrechnungsRows: PartnerBillingRow[] = []
+  let abrechnungsAggregat: PartnerBillingAggregat = { perStatus: {}, perPartnerTyp: {}, hat_unbekannten_ust_status: false }
+  if (activeTab === 'abrechnungen') {
+    const result = await getPartnerBilling({ partnerTyp: 'sv', partnerId: id })
+    abrechnungsRows = result.rows
+    abrechnungsAggregat = result.aggregat
+  }
+
   return (
     <div className="h-full flex flex-col overflow-hidden">
       {/* ── Sticky Header ──────────────────────────────────────────── */}
@@ -329,6 +352,17 @@ export default async function SvDetailPage({
                 ) : (
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-danger-soft text-danger">Inaktiv</span>
                 )}
+                {/* Aaron 07.07.: Finder-Sichtbarkeit — zeigt WARUM ein SV (nicht) im oeffentlichen Finder auftaucht */}
+                <FinderVisibilityBadge
+                  sv={{
+                    verifiziert: sv.verifiziert,
+                    ist_aktiv: sv.ist_aktiv,
+                    hatIsochrone,
+                    standort_lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
+                    standort_lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
+                    firmenname: (sv as { firmenname?: string | null }).firmenname ?? null,
+                  }}
+                />
               </>
             }
           />
@@ -358,11 +392,23 @@ export default async function SvDetailPage({
           >
             Verifizierung
           </Link>
+          <Link
+            href={`/admin/sachverstaendige/${id}?tab=abrechnungen`}
+            className={`px-3 py-2 text-xs font-medium border-b-2 transition-colors ${
+              activeTab === 'abrechnungen'
+                ? 'border-claimondo-ondo text-claimondo-shield'
+                : 'border-transparent text-claimondo-ondo hover:text-claimondo-navy'
+            }`}
+          >
+            Abrechnungen
+          </Link>
         </div>
       </div>
 
       {/* ── Tab-Content ──────────────────────────────────────────── */}
-      {activeTab === 'verifizierung' ? (
+      {activeTab === 'abrechnungen' ? (
+        <AbrechnungsTab rows={abrechnungsRows} aggregat={abrechnungsAggregat} />
+      ) : activeTab === 'verifizierung' ? (
         <div className="flex-1 overflow-y-auto p-4 bg-claimondo-bg/30">
           <div className="max-w-4xl mx-auto">
             {verifizierungsData.loadError && (
@@ -378,7 +424,8 @@ export default async function SvDetailPage({
               svId={sv.id}
               paket={(sv.paket as string | null) ?? null}
               onboardingQuelle={(sv.onboarding_quelle as string | null) ?? null}
-              verifizierungStatus={(sv.verifizierung_status as 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | null) ?? null}
+              verifizierungStatus={(sv.verifizierung_status as 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | 'abgelehnt' | null) ?? null}
+              verifizierungAdminNotiz={(sv.verifizierung_admin_notiz as string | null) ?? null}
               verifizierungFristBis={sv.verifizierung_frist_bis ?? null}
               verifiziertAm={sv.verifiziert_am ?? null}
               tier2Slots={verifizierungsData.tier2Slots}

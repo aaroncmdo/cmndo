@@ -55,8 +55,8 @@ function WissenCard({ item }: { item: FeedItem }) {
   )
 }
 
-export default function Page() {
-  const { gruppen, weiterstoebern } = getWissenData()
+export default async function Page() {
+  const { gruppen, weiterstoebern } = await getWissenData()
   const alleItems = gruppen.flatMap((g) => g.items)
 
   const itemListSchema = {

@@ -123,7 +123,6 @@ export async function updateSession(request: NextRequest) {
     const gateBasis = {
       isOn2faPage: request.nextUrl.pathname === '/login/2fa',
       isGoogleUser: user.app_metadata?.provider === 'google',
-      isGutachterPath: request.nextUrl.pathname.startsWith('/gutachter'),
       aalCurrent,
       hasVerifiedFactor: hatVerifiziertenFaktor(user.factors),
     }
@@ -166,7 +165,9 @@ export async function updateSession(request: NextRequest) {
         response = NextResponse.next({ request: { headers: requestHeaders } })
       }
     } else {
-      // 2FA OK (oder /login/2fa selbst / Google / Gutachter / kein Faktor) → durchlassen
+      // 2FA OK (oder /login/2fa selbst / Google / kein Faktor) → durchlassen.
+      // F2 (AAR-audit-2fa): /gutachter ist NICHT mehr befreit — SV mit Faktor
+      // wird oben gechallenged (Enforcement folgt dem Faktor, nicht dem Pfad).
       response = NextResponse.next({ request: { headers: requestHeaders } })
     }
   }
@@ -250,10 +251,19 @@ function isPublicPath(pathname: string): boolean {
     '/ersteinschaetzung',
     '/beratung-anfragen',
     '/makler/partner-werden',
+    // Oeffentliche Werkstatt-Partner-Bewerbung (/werkstatt-partner-werden) — anon MUSS
+    // rein, sonst 307 -> /login (analog '/makler/partner-werden'). SPEZIFISCHER Full-Path,
+    // NICHT '/werkstatt' (das wuerde via startsWith das ganze Werkstatt-Portal oeffnen).
+    '/werkstatt-partner-werden',
     // Saeule B: oeffentliche Makler-Selbst-Registrierung — anon MUSS rein, sonst
     // 307 -> /login (analog '/sv' fuer /sv/registrieren). SPEZIFISCHER Pfad, NICHT
     // '/makler' (das wuerde via startsWith das ganze Portal oeffnen = Auth-Bypass).
     '/makler/registrieren',
+    // Makler-Wochenreport One-Click-Abmeldung (public, Token in der URL). BEWUSST
+    // NICHT unter '/abmelden' — app.claimondo.de/abmelden/* wird auf Infra-Ebene
+    // per 301 auf claimondo.de (Marketing) umgeleitet, wo es 404t (tote Zone, trifft
+    // auch den Winback-Link). Darum ein eigener App-Pfad, der nicht wegge-301't wird.
+    '/wochenreport-abmelden',
     // Weitere bestehende Marketing-Pages explizit, damit nichts mehr unbeabsichtigt
     // hinter den Auth-Guard rutscht:
     '/vorteile',

@@ -81,6 +81,11 @@ export default function KalenderClient({
   const [gutachterSearch, setGutachterSearch] = useState('')
   const [serverTermine, setServerTermine] = useState<KalenderTermin[]>([])
   const [modal, setModal] = useState<{ mode: 'create' | 'edit'; date?: Date; termin?: KalenderTermin } | null>(null)
+  // Hydration-Guard: die Kalender-Ansicht haengt von new Date()/isToday ab (currentDate +
+  // Tages-Highlight) -> SSR (Server-TZ) und Client (Berlin) koennen abweichen -> React #418
+  // (Live-Smoke 03.07. /admin/kalender). Erst nach Mount rendern; SSR + erster Client-Render
+  // zeigen identisch das Skeleton, danach die echte Ansicht.
+  const [mounted, setMounted] = useState(false)
 
   // Load filter from localStorage
   useEffect(() => {
@@ -88,6 +93,9 @@ export default function KalenderClient({
     setTypFilter(saved.typFilter)
     setGutachterIds(saved.gutachterIds)
   }, [])
+
+  // Nach Mount: Hydration-Guard freigeben (s. mounted-State oben).
+  useEffect(() => { setMounted(true) }, [])
 
   // Save filter changes
   useEffect(() => { saveFilter(typFilter, gutachterIds) }, [typFilter, gutachterIds])
@@ -200,6 +208,17 @@ export default function KalenderClient({
   }
 
   const WEEKDAYS = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So']
+
+  if (!mounted) {
+    return (
+      <div className="h-full overflow-y-auto py-6">
+        <div className="animate-pulse space-y-4" aria-hidden>
+          <div className="h-8 w-48 bg-claimondo-bg rounded-ios-lg" />
+          <div className="h-[70vh] bg-claimondo-bg rounded-ios-lg" />
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-full overflow-y-auto py-6">
@@ -373,14 +392,23 @@ export default function KalenderClient({
                         >
                           {inner}
                         </button>
-                      ) : (
+                      ) : entry.link ? (
                         <Link
                           key={entry.id}
-                          href={entry.link ?? '#'}
+                          href={entry.link}
                           className="flex items-stretch gap-2.5 px-3 py-2.5 hover:bg-claimondo-bg/50 transition-colors"
                         >
                           {inner}
                         </Link>
+                      ) : (
+                        // Fix: ziel-loser Termin (bezug-nativer SV-Eigentermin / claim-lose Beratung
+                        // ohne fall_id) -> nicht-klickbar statt totem href='#'.
+                        <div
+                          key={entry.id}
+                          className="flex items-stretch gap-2.5 px-3 py-2.5"
+                        >
+                          {inner}
+                        </div>
                       )
                     })}
                   </div>
@@ -424,8 +452,8 @@ export default function KalenderClient({
                           style={{ backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` }}>
                           <span className="truncate block">{entry.titel}</span>
                         </button>
-                      ) : (
-                        <Link key={entry.id} href={entry.link ?? '#'}
+                      ) : entry.link ? (
+                        <Link key={entry.id} href={entry.link}
                           className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate transition-colors ${
                             entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
                           }`}
@@ -435,6 +463,18 @@ export default function KalenderClient({
                             <span className="text-[9px] opacity-70 truncate block">{entry.gutachterName}</span>
                           )}
                         </Link>
+                      ) : (
+                        // Fix: ziel-loser Termin -> nicht-klickbar statt totem href='#'.
+                        <div key={entry.id}
+                          className={`block px-1.5 py-0.5 rounded text-[10px] leading-tight truncate ${
+                            entry.overdue ? 'bg-danger-soft/80 text-danger' : ''
+                          }`}
+                          style={!entry.overdue ? { backgroundColor: entry.farbe + '15', color: entry.farbe, borderLeft: `3px solid ${entry.farbe}` } : { borderLeft: '3px solid #ef4444' }}>
+                          <span className="truncate block">{entry.titel}</span>
+                          {entry.gutachterName && viewMode === 'week' && (
+                            <span className="text-[9px] opacity-70 truncate block">{entry.gutachterName}</span>
+                          )}
+                        </div>
                       )
                     })}
                     {dayEntries.length > (viewMode === 'week' ? 10 : 3) && (

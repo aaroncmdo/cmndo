@@ -3,18 +3,21 @@
 // AAR-956 WP-B (Task 9): Werkstatt-Portal-Shell.
 // Gespiegelt nach MaklerShell — thin-Wrapper ueber shared PortalNav (dark variant).
 
+import Link from 'next/link'
 import {
   LayoutDashboardIcon,
+  ClipboardListIcon,
   QrCodeIcon,
-  HandshakeIcon,
   ReceiptIcon,
   LogOutIcon,
+  SettingsIcon,
   WrenchIcon,
   FileUpIcon,
+  MessagesSquareIcon,
+  InboxIcon,
 } from 'lucide-react'
 import { SupportButton } from '@/components/support/SupportButton'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import TasksPill from '@/components/shared/TasksPill'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
@@ -31,9 +34,11 @@ type WerkstattShellProps = {
 
 const WERKSTATT_NAV_ITEMS: PortalNavItem[] = [
   { href: '/werkstatt', label: 'Übersicht', icon: LayoutDashboardIcon, exact: true },
+  { href: '/werkstatt/auftraege', label: 'Aufträge', icon: ClipboardListIcon },
+  { href: '/werkstatt/anfragen', label: 'Offene Anfragen', icon: InboxIcon },
+  { href: '/werkstatt/netzwerk', label: 'Netzwerk', icon: MessagesSquareIcon },
   { href: '/werkstatt/promo', label: 'QR-Code', icon: QrCodeIcon },
   { href: '/werkstatt/kva', label: 'Kostenvoranschlag', icon: FileUpIcon },
-  { href: '/werkstatt/vermittlungen', label: 'Meine Vermittlungen', icon: HandshakeIcon },
   { href: '/werkstatt/abrechnungen', label: 'Provisionen', icon: ReceiptIcon },
 ]
 
@@ -45,7 +50,7 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
     : (email?.substring(0, 2).toUpperCase() ?? 'WS')
 
   return (
-    <MitteilungenProvider>
+    <>
     <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphaerische Hintergrund-Spotlights */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
@@ -91,8 +96,16 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
                 <p className="truncate text-sm text-white/90">{werkstatt.name}</p>
                 <p className="truncate text-body-xs text-claimondo-light-blue">{email}</p>
               </div>
-              <UpdatesNav variant="dark" />
+              {/* Sidebar-Footer sitzt unten-links → Popover nach oben-rechts. */}
+              <UpdatesNav variant="dark" placement="up-right" />
             </div>
+            <Link
+              href="/werkstatt/einstellungen"
+              className="flex w-full items-center gap-3 rounded-ios-lg px-3 py-2.5 text-sm text-claimondo-light-blue transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <SettingsIcon style={{ width: 17, height: 17 }} />
+              Einstellungen
+            </Link>
             <form action="/api/auth/logout" method="POST">
               <button
                 type="submit"
@@ -128,6 +141,6 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
         </main>
       </div>
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }

@@ -1,6 +1,7 @@
 // Token-Audit-Skip: Email-Template via react-email/Resend — rendert ohne Tailwind/CSS-Vars.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 import { EmailShell, MailHeader, Card, Heading, Paragraph, InfoRow, Button, Note, Footer } from '../../components'
+import { FINANCE } from '@/lib/finance/constants'
 
 // KFZ-188: Kanzlei-Monatsabrechnung mit Magic-Link zur Online-Zahlung
 
@@ -41,7 +42,7 @@ export function KanzleiMagicLinkAbrechnungEmail(props: Props) {
         <InfoRow label="Leistungszeitraum" value={props.monat} />
         <InfoRow label="Anzahl Vollmachten" value={String(props.anzahl)} />
         <InfoRow label="Nettobetrag" value={props.nettoGesamt} />
-        <InfoRow label="MwSt. (19 %)" value={props.mwstBetrag} />
+        <InfoRow label={`MwSt. (${FINANCE.MWST_PROZENT} %)`} value={props.mwstBetrag} />
         <InfoRow label="Bruttobetrag" value={props.brutto} />
         <InfoRow label="Fällig am" value={props.faelligAm} />
 

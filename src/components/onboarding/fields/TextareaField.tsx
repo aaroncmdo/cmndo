@@ -4,15 +4,21 @@
 
 import type { OnboardingFeld } from '../types'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
+import { VoiceDictation } from './VoiceDictation'
+import { appendTranscript } from './append-transcript'
+import type { DictationSource } from './useChunkedDictation'
 
 interface Props {
   feld: OnboardingFeld
   value: string
   onChange: (val: string) => void
   disabled?: boolean
+  // Unfallhergang-Sprachdiktat: wenn gesetzt, erscheint der Diktat-Button unter der
+  // Textarea. flow = token-authed (FlowLink), auth = session-authed (eingeloggt).
+  voiceDictation?: DictationSource
 }
 
-export function TextareaField({ feld, value, onChange, disabled }: Props) {
+export function TextareaField({ feld, value, onChange, disabled, voiceDictation }: Props) {
   return (
     <div className="flex w-full min-w-0 flex-col gap-2">
       <label className="text-sm font-semibold tracking-[-.01em] text-claimondo-navy">
@@ -31,6 +37,13 @@ export function TextareaField({ feld, value, onChange, disabled }: Props) {
         rows={4}
         className={`min-h-[110px] w-full resize-y rounded-ios-md px-4 py-3 text-base leading-relaxed ${liquidFieldBase}`}
       />
+      {voiceDictation && (
+        <VoiceDictation
+          source={voiceDictation}
+          disabled={disabled}
+          onFinalTranscript={(t) => onChange(appendTranscript(value, t))}
+        />
+      )}
     </div>
   )
 }

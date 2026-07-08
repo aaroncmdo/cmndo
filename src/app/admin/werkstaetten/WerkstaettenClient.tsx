@@ -2,17 +2,25 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { toast } from 'sonner'
-import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, CopyIcon, CheckIcon, Layers3Icon, Trash2Icon } from 'lucide-react'
+import { WrenchIcon, PlusIcon, KeyIcon, QrCodeIcon, ArrowRightIcon } from 'lucide-react'
 import { createWerkstatt } from './actions'
-import { werkstattQrSvg } from './qr-action'
-import { getWerkstattStaffel, setWerkstattStaffel } from './staffel-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
+import { Chip } from '@/components/ui/Chip'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { TextField } from '@/components/shared/forms/TextField'
-import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
+
+// Label-Map im Client (NICHT aus actions.ts importieren — Client-Bundle macht undefined daraus, AAR-664)
+const FAEHIGKEITEN_OPTIONS: { value: string; label: string }[] = [
+  { value: 'karosserie', label: 'Karosserie / Blech' },
+  { value: 'lackierung', label: 'Lackierung / Kratzer' },
+  { value: 'mechanik', label: 'Mechanik / Motor' },
+  { value: 'glas', label: 'Glas' },
+  { value: 'smart_repair', label: 'Smart-Repair' },
+]
 
 type Werkstatt = {
   id: string
@@ -24,6 +32,7 @@ type Werkstatt = {
   aktiviert_am: string | null
   email: string | null
   telefon: string | null
+  faehigkeiten: string[] | null
 }
 
 const STATUS_LABELS: Record<string, string> = {
@@ -43,22 +52,16 @@ function formatDatum(iso: string | null) {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
+// Reine Navigations-Liste: die pro-Werkstatt-Steuerung (QR, Staffel, Faehigkeiten, Login-Mail,
+// Abrechnung, Status, Stammdaten, Notizen, …) lebt komplett in der Detailseite
+// /admin/werkstaetten/[id]. Hier bleibt nur: Ueberblick + Klick auf eine Zeile -> Verwaltung,
+// plus "Neue Werkstatt" anlegen.
 export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Werkstatt[] }) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
-
-  // QR-Code-Anzeige pro Werkstatt (regulaerer Kunden-QR /start/werkstatt/<id>)
-  const [qr, setQr] = useState<{ name: string; url: string; svg: string } | null>(null)
-  const [qrLoadingId, setQrLoadingId] = useState<string | null>(null)
-  const [copiedUrl, setCopiedUrl] = useState(false)
-
-  // Staffelung pro Werkstatt (Meilenstein-Boni)
-  const [staffelFor, setStaffelFor] = useState<Werkstatt | null>(null)
-  const [staffelRows, setStaffelRows] = useState<{ schwelle: string; bonus: string }[]>([])
-  const [staffelLoadingId, setStaffelLoadingId] = useState<string | null>(null)
-  const [staffelSaving, setStaffelSaving] = useState(false)
+  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string; werkstattId: string } | null>(null)
+  const [createFaehigkeiten, setCreateFaehigkeiten] = useState<string[]>([])
 
   // Adress-State fuer GooglePlaceAutocomplete → hidden form fields
   const [adresse, setAdresse] = useState<{
@@ -84,6 +87,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
   function openDialog() {
     setAdresse({ strasse: '', plz: '', ort: '', lat: null, lng: null, display: '' })
     setCreatedCredentials(null)
+    setCreateFaehigkeiten([])
     setShowDialog(true)
   }
 
@@ -104,7 +108,7 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
         toast.error(result.error)
         return
       }
-      setCreatedCredentials({ email: result.email, password: result.password })
+      setCreatedCredentials({ email: result.email, password: result.password, werkstattId: result.werkstattId })
       toast.success(`Werkstatt angelegt: ${result.email}`)
       router.refresh()
     } finally {
@@ -112,71 +116,10 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
     }
   }
 
-  async function openQr(w: Werkstatt) {
-    setQrLoadingId(w.id)
-    try {
-      const res = await werkstattQrSvg(w.id)
-      if (!res.ok) { toast.error(res.error); return }
-      setQr({ name: res.name, url: res.url, svg: res.svg })
-      setCopiedUrl(false)
-    } finally {
-      setQrLoadingId(null)
-    }
-  }
-
-  function copyQrUrl(text: string) {
-    void navigator.clipboard.writeText(text).then(() => {
-      setCopiedUrl(true)
-      setTimeout(() => setCopiedUrl(false), 2000)
-    })
-  }
-
-  function qrFileBase(name: string) {
-    const slug = name.toLowerCase()
-      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
-    return `claimondo-werkstatt-${slug || 'qr'}-qr`
-  }
-
-  async function openStaffel(w: Werkstatt) {
-    setStaffelLoadingId(w.id)
-    try {
-      const res = await getWerkstattStaffel(w.id)
-      if (!res.ok) { toast.error(res.error); return }
-      setStaffelRows(res.stufen.map((s) => ({ schwelle: String(s.schwelle), bonus: String(s.bonus_betrag_netto) })))
-      setStaffelFor(w)
-    } finally {
-      setStaffelLoadingId(null)
-    }
-  }
-
-  function addStaffelRow() {
-    setStaffelRows((rows) => [...rows, { schwelle: '', bonus: '' }])
-  }
-
-  function removeStaffelRow(i: number) {
-    setStaffelRows((rows) => rows.filter((_, idx) => idx !== i))
-  }
-
-  function updateStaffelRow(i: number, field: 'schwelle' | 'bonus', val: string) {
-    setStaffelRows((rows) => rows.map((r, idx) => (idx === i ? { ...r, [field]: val } : r)))
-  }
-
-  async function saveStaffel() {
-    if (!staffelFor) return
-    setStaffelSaving(true)
-    try {
-      const stufen = staffelRows
-        .filter((r) => r.schwelle.trim() !== '')
-        .map((r) => ({ schwelle: Number(r.schwelle), bonus_betrag_netto: Number(r.bonus || 0) }))
-      const res = await setWerkstattStaffel(staffelFor.id, stufen)
-      if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
-      toast.success('Staffelung gespeichert.')
-      setStaffelFor(null)
-      router.refresh()
-    } finally {
-      setStaffelSaving(false)
-    }
+  function toggleCreateFaehigkeit(value: string) {
+    setCreateFaehigkeiten((prev) =>
+      prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]
+    )
   }
 
   return (
@@ -185,16 +128,25 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
         <div className="mb-6">
           <PageHeader
             title="Werkstätten"
-            description={`${werkstaetten.length} Partnerwerk${werkstaetten.length === 1 ? 'statt' : 'stätten'}`}
+            description={`${werkstaetten.length} Partnerwerk${werkstaetten.length === 1 ? 'statt' : 'stätten'} · Klick auf eine Werkstatt öffnet die Verwaltung`}
             icon={WrenchIcon}
             actions={
-              <Button
-                variant="navy"
-                onClick={openDialog}
-                iconLeft={<PlusIcon className="w-4 h-4" />}
-              >
-                Neue Werkstatt
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push('/admin/werkstaetten/qr-pool')}
+                  iconLeft={<QrCodeIcon className="w-4 h-4" />}
+                >
+                  QR-Code-Pool
+                </Button>
+                <Button
+                  variant="navy"
+                  onClick={openDialog}
+                  iconLeft={<PlusIcon className="w-4 h-4" />}
+                >
+                  Neue Werkstatt
+                </Button>
+              </div>
             }
           />
         </div>
@@ -208,8 +160,6 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <Th className="text-left text-claimondo-ondo!">Status</Th>
                 <Th className="text-left text-claimondo-ondo!">Provision (netto)</Th>
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
-                <Th className="text-left text-claimondo-ondo!">QR</Th>
-                <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -219,7 +169,12 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   className="border-b border-claimondo-border/50"
                 >
                   <Td>
-                    <div className="text-claimondo-navy font-medium">{w.name}</div>
+                    <Link
+                      href={`/admin/werkstaetten/${w.id}`}
+                      className="text-claimondo-navy font-medium hover:text-claimondo-ondo hover:underline"
+                    >
+                      {w.name}
+                    </Link>
                     <div className="text-claimondo-ondo text-xs">{w.email ?? '—'}</div>
                   </Td>
                   <Td>
@@ -243,33 +198,11 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   <Td>
                     <span className="text-claimondo-ondo text-sm">{formatDatum(w.aktiviert_am)}</span>
                   </Td>
-                  <Td>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      loading={qrLoadingId === w.id}
-                      onClick={() => openQr(w)}
-                      iconLeft={<QrCodeIcon className="w-4 h-4" />}
-                    >
-                      QR
-                    </Button>
-                  </Td>
-                  <Td>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      loading={staffelLoadingId === w.id}
-                      onClick={() => openStaffel(w)}
-                      iconLeft={<Layers3Icon className="w-4 h-4" />}
-                    >
-                      Staffel
-                    </Button>
-                  </Td>
                 </Tr>
               ))}
               {werkstaetten.length === 0 && (
                 <Tr>
-                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={5} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Werkstätten angelegt.
                   </Td>
                 </Tr>
@@ -286,7 +219,8 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 <h2 className="text-claimondo-navy font-semibold text-lg">Werkstatt angelegt</h2>
               </div>
               <p className="text-claimondo-ondo text-sm">
-                Zugangsdaten einmalig anzeigen — bitte sofort an die Werkstatt weitergeben.
+                Zugangsdaten einmalig notieren. Login-Mail senden und QR-Code zuweisen erfolgt in der
+                Werkstatt-Verwaltung.
               </p>
               <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 space-y-2">
                 <div>
@@ -301,7 +235,22 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
               <p className="text-xs text-claimondo-ondo">
                 Das Passwort wird dem Nutzer beim ersten Login zur Änderung aufgefordert.
               </p>
-              <Button variant="navy" fullWidth onClick={() => { setCreatedCredentials(null); setShowDialog(false) }}>
+              <Button
+                variant="navy"
+                fullWidth
+                onClick={() => router.push(`/admin/werkstaetten/${createdCredentials.werkstattId}`)}
+                iconLeft={<ArrowRightIcon className="w-4 h-4" />}
+              >
+                Zur Werkstatt-Verwaltung
+              </Button>
+              <Button
+                variant="ghost"
+                fullWidth
+                onClick={() => {
+                  setCreatedCredentials(null)
+                  setShowDialog(false)
+                }}
+              >
                 Schließen
               </Button>
             </div>
@@ -328,6 +277,11 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   type="tel"
                   placeholder="+49 221 …"
                 />
+                <TextField
+                  label="Ansprechpartner / Geschäftsführer (optional)"
+                  name="ansprechpartner_name"
+                  placeholder="z.B. Max Mustermann"
+                />
                 <div>
                   <label className="text-sm text-claimondo-ondo mb-1 block">Standort</label>
                   <GooglePlaceAutocomplete
@@ -349,6 +303,29 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                   min="0"
                   defaultValue={150}
                 />
+                <div>
+                  <label className="text-sm text-claimondo-ondo mb-2 block">
+                    Fähigkeiten (optional — leer = Vollservice)
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    {FAEHIGKEITEN_OPTIONS.map((opt) => {
+                      const active = createFaehigkeiten.includes(opt.value)
+                      return (
+                        <Chip
+                          key={opt.value}
+                          variant={active ? 'selected' : 'default'}
+                          onClick={() => toggleCreateFaehigkeit(opt.value)}
+                        >
+                          {opt.label}
+                        </Chip>
+                      )
+                    })}
+                  </div>
+                  {/* Hidden inputs so FormData.getAll('faehigkeiten') liefert die Auswahl */}
+                  {createFaehigkeiten.map((v) => (
+                    <input key={v} type="hidden" name="faehigkeiten" value={v} />
+                  ))}
+                </div>
                 <div className="flex gap-3 pt-2">
                   <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>
                     Abbrechen
@@ -365,112 +342,6 @@ export default function WerkstaettenClient({ werkstaetten }: { werkstaetten: Wer
                 </div>
               </form>
             </>
-          )}
-        </Modal>
-
-        <Modal open={qr !== null} onClose={() => setQr(null)} maxWidth={420} ariaLabel="Werkstatt-QR-Code">
-          {qr && (
-            <div className="space-y-4">
-              <h2 className="text-claimondo-navy font-semibold text-lg">QR-Code — {qr.name}</h2>
-              <p className="text-claimondo-ondo text-sm">
-                Kunden scannen diesen Code und gelangen direkt zum Schadenmelde-Einstieg dieser Werkstatt.
-              </p>
-              <div
-                className="flex items-center justify-center p-6 rounded-ios-xl bg-claimondo-bg border border-claimondo-border"
-                dangerouslySetInnerHTML={{ __html: qr.svg }}
-              />
-              <div>
-                <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">Einstiegs-Link</p>
-                <div className="mt-2 flex items-center gap-2">
-                  <input
-                    readOnly
-                    value={qr.url}
-                    className="flex-1 font-mono text-sm text-claimondo-navy bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2.5 truncate"
-                    onFocus={(e) => e.currentTarget.select()}
-                  />
-                  <Button
-                    variant="navy"
-                    size="sm"
-                    onClick={() => copyQrUrl(qr.url)}
-                    iconLeft={copiedUrl ? <CheckIcon width={14} height={14} /> : <CopyIcon width={14} height={14} />}
-                  >
-                    {copiedUrl ? 'Kopiert' : 'Kopieren'}
-                  </Button>
-                </div>
-              </div>
-              <div className="flex items-center justify-between gap-3">
-                <span className="text-body-xs text-claimondo-ondo">Zum Aushängen / Drucken:</span>
-                <QrCodeDownloadButtons qrSvg={qr.svg} fileBaseName={qrFileBase(qr.name)} />
-              </div>
-            </div>
-          )}
-        </Modal>
-
-        <Modal open={staffelFor !== null} onClose={() => setStaffelFor(null)} maxWidth={520} ariaLabel="Staffelung bearbeiten">
-          {staffelFor && (
-            <div className="space-y-4">
-              <div>
-                <h2 className="text-claimondo-navy font-semibold text-lg">Staffelung — {staffelFor.name}</h2>
-                <p className="mt-0.5 text-claimondo-ondo text-sm">
-                  Meilenstein-Boni: ab X freigegebenen Vermittlungen ein Einmal-Bonus.
-                </p>
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center gap-2 px-1 text-xs font-medium text-claimondo-ondo">
-                  <span className="flex-1">ab … Kunden</span>
-                  <span className="flex-1">Bonus (netto, €)</span>
-                  <span className="w-11 shrink-0" />
-                </div>
-                {staffelRows.length === 0 && (
-                  <p className="px-1 text-sm text-claimondo-ondo/70">Noch keine Stufen — füge eine hinzu.</p>
-                )}
-                {staffelRows.map((r, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <input
-                      type="number"
-                      min="1"
-                      step="1"
-                      inputMode="numeric"
-                      value={r.schwelle}
-                      onChange={(e) => updateStaffelRow(i, 'schwelle', e.target.value)}
-                      placeholder="z.B. 10"
-                      className="flex-1 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy"
-                    />
-                    <input
-                      type="number"
-                      min="0"
-                      step="0.01"
-                      inputMode="decimal"
-                      value={r.bonus}
-                      onChange={(e) => updateStaffelRow(i, 'bonus', e.target.value)}
-                      placeholder="z.B. 500"
-                      className="flex-1 rounded-ios-lg border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      ariaLabel="Stufe entfernen"
-                      onClick={() => removeStaffelRow(i)}
-                      iconLeft={<Trash2Icon width={15} height={15} />}
-                    />
-                  </div>
-                ))}
-              </div>
-
-              <Button variant="ghost" size="sm" onClick={addStaffelRow} iconLeft={<PlusIcon className="w-4 h-4" />}>
-                Stufe hinzufügen
-              </Button>
-
-              <div className="flex gap-3 pt-2">
-                <Button variant="ghost" fullWidth onClick={() => setStaffelFor(null)}>
-                  Abbrechen
-                </Button>
-                <Button variant="navy" fullWidth loading={staffelSaving} onClick={saveStaffel}>
-                  Speichern
-                </Button>
-              </div>
-            </div>
           )}
         </Modal>
       </div>

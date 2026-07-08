@@ -3,6 +3,7 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { assertLeadBoundToToken } from '@/lib/flow/assert-lead-bound'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
 // Portal-i18n F-11: stille Sprach-Vorbelegung des neuen Kunden-Accounts.
@@ -66,8 +67,12 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
 export async function updateLeadStammdaten(
   leadId: string,
   data: { vorname?: string; nachname?: string; telefon?: string; email?: string; unfall_konstellation?: string; gegner_anzahl_beteiligte?: string; gegner_fahrzeugtyp?: string },
-) {
+  // IDOR-Guard: der Flow-Token, gegen den die leadId gebunden wird (sonst koennte ein
+  // Caller mit fremder leadId beliebige Lead-PII ueberschreiben).
+  token: string | null,
+): Promise<{ success: boolean; error?: string }> {
   const admin = createAdminClient()
+  if (!(await assertLeadBoundToToken(admin, token, leadId))) return { success: false, error: 'Nicht autorisiert' }
   const update: Record<string, unknown> = { updated_at: new Date().toISOString() }
   if (data.vorname !== undefined) update.vorname = data.vorname
   if (data.nachname !== undefined) update.nachname = data.nachname
@@ -77,7 +82,8 @@ export async function updateLeadStammdaten(
   if (data.unfall_konstellation !== undefined) update.unfall_konstellation = data.unfall_konstellation
   if (data.gegner_anzahl_beteiligte !== undefined) update.gegner_anzahl_beteiligte = parseInt(data.gegner_anzahl_beteiligte) || 1
   if (data.gegner_fahrzeugtyp !== undefined) update.gegner_fahrzeugtyp = data.gegner_fahrzeugtyp
-  await admin.from('leads').update(update).eq('id', leadId)
+  const { error } = await admin.from('leads').update(update).eq('id', leadId)
+  return error ? { success: false, error: error.message } : { success: true }
 }
 
 /**
@@ -87,8 +93,11 @@ export async function generateSAPdf(
   fallId: string,
   leadId: string,
   signatureUrl: string,
+  // IDOR-Guard: Flow-Token zum Binden der leadId (sonst Info-Disclosure fremder Lead-PII).
+  token: string | null,
 ): Promise<{ pdfUrl: string }> {
   const admin = createAdminClient()
+  if (!(await assertLeadBoundToToken(admin, token, leadId))) return { pdfUrl: '' }
 
   // Lead-Daten laden
   const { data: lead } = await admin.from('leads').select('vorname, nachname, email, telefon, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, fahrzeug_standort_adresse').eq('id', leadId).single()
@@ -284,6 +293,8 @@ export async function loginAfterFlowFormAction(formData: FormData) {
  */
 export async function createKundeAccount(
   fallId: string,
+  // F1 (Account-Hijack-Schutz): Flow-Token der [token]-Route. MUSS zu diesem Fall gehoeren.
+  flowToken: string,
   email: string,
   vorname: string,
   nachname: string,
@@ -293,18 +304,32 @@ export async function createKundeAccount(
     return { success: false, error: 'Bitte geben Sie eine gültige E-Mail-Adresse ein.' }
   }
   if (!fallId) return { success: false, error: 'Fall-ID fehlt.' }
+  if (!flowToken) return { success: false, error: 'Nicht autorisiert.' }
 
   try {
     const admin = createAdminClient()
     const password = generateInitialPassword(16)
     const normalizedEmail = email.trim().toLowerCase()
 
+    // F1 (Account-Hijack-Schutz): der Flow-Token MUSS zu diesem Fall gehoeren —
+    // sonst koennte ein Angreifer mit fremder fallId sich zum Geschaedigten machen
+    // oder via Idempotenz-Pfad unten ein fremdes Kunden-Passwort resetten. Bindung
+    // ueber den Lead: token -> flow_links.lead_id (Backward-Compat: token IST die
+    // lead_id, kein flow_link) -> muss claims.lead_id (v_claim_full) des Falls matchen.
+    // Prod-verifiziert 02.07.: 25/25 konvertierte flow_links haben lead_id == claims.lead_id.
+    const { data: flowBind } = await admin
+      .from('flow_links').select('lead_id').eq('token', flowToken).maybeSingle()
+    const boundLeadId = flowBind?.lead_id ?? flowToken
+    // Idempotenz-Read (zugleich Binding-Quelle): kunde_id + lead_id des Falls.
+    const { data: existingFall } = await admin
+      .from('v_claim_full').select('kunde_id, lead_id').eq('fall_id', fallId).maybeSingle()
+    if (!existingFall || existingFall.lead_id !== boundLeadId) {
+      return { success: false, error: 'Konto konnte nicht erstellt werden (nicht autorisiert).' }
+    }
     // 1. Idempotenz: Falls der Fall schon mit einem Kunden verknüpft ist
     //    (Browser-Reload nach SA-Unterschrift), nur Passwort refreshen.
     //    Defensive Check: kunde_id muss tatsächlich auf einen rolle='kunde'-
     //    Account zeigen, sonst nicht anfassen.
-    const { data: existingFall } = await admin
-      .from('v_claim_full').select('kunde_id').eq('fall_id', fallId).maybeSingle()
     if (existingFall?.kunde_id) {
       const { data: linkedProfile } = await admin
         .from('profiles').select('rolle').eq('id', existingFall.kunde_id).maybeSingle()
@@ -538,21 +563,23 @@ async function sendWelcomeWithLogin(
 ): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
-    // PKCE-Fix: Supabase hängt ?code=XXX an die redirectTo-URL — das muss
-    // auf /api/auth/callback landen (exchangeCodeForSession), nicht direkt
-    // auf /kunde/onboarding (die Page kann keinen Code einlösen).
-    // next=/kunde/onboarding wird vom Callback nach erfolgreichem Login genutzt.
-    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://claimondo.de'
-    const redirectTo = `${base}/api/auth/callback?next=/kunde/onboarding`
+    // TOKEN-HASH-FIX: admin.generateLink liefert inzwischen einen IMPLICIT-#access_token-Hash
+    // im action_link, den /api/auth/callback (erwartet ?code) NICHT einloesen kann ("OAuth
+    // fehlgeschlagen" → /login). Wir nutzen daher data.properties.hashed_token + die
+    // /api/auth/confirm-Route (verifyOtp server-seitig → Cookie → Redirect auf next).
+    // Siehe src/app/api/auth/confirm/route.ts.
+    const base = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
     const { data, error } = await adminDb.auth.admin.generateLink({
       type: 'magiclink',
       email,
-      options: { redirectTo },
     })
     if (error) {
       console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen:', error)
     } else {
-      magicLink = data?.properties?.action_link ?? null
+      const tokenHash = data?.properties?.hashed_token
+      magicLink = tokenHash
+        ? `${base}/api/auth/confirm?token_hash=${encodeURIComponent(tokenHash)}&type=magiclink&next=${encodeURIComponent('/kunde/onboarding')}`
+        : null
     }
   } catch (err) {
     console.error('[AAR-127] Magic-Link-Generierung fehlgeschlagen (Exception):', err)
@@ -579,6 +606,8 @@ export async function signSAandCreateFall(
   // AAR-360 Follow-up: Zustimmung zu Datenschutz + Widerrufsbelehrung des zugewiesenen Gutachters
   // (FlowLink-Häkchen, entkoppelt von der SA-Signatur). Default false = kein SV zugewiesen.
   svDsWiderrufZugestimmt: boolean = false,
+  // IDOR-Guard: Flow-Token zum Binden der leadId (schliesst den flowLinkId=null-Bypass).
+  token: string | null = null,
 ): Promise<{ ok: true; fallId: string } | { ok: false; error: string }> {
   if (!leadId || !signatureUrl) return { ok: false, error: 'Fehlende Daten für SA-Unterschrift' }
 
@@ -594,6 +623,13 @@ export async function signSAandCreateFall(
     .eq('id', leadId)
     .single()
   if (leadErr || !lead) return { ok: false, error: 'Lead nicht gefunden' }
+
+  // F1 (IDOR-Guard, jetzt token-basiert): die leadId MUSS zum Flow-Token gehoeren — sonst
+  // konvertiert ein Angreifer fremde Leads bzw. stempelt einen fremden flow_link (Update
+  // unten ~:1118) mit dieser fallId. Frueher nur `if (flowLinkId)` -> der Backward-Compat-
+  // Pfad (flowLinkId=null) uebersprang die Bindung = Bypass. assertLeadBoundToToken deckt
+  // beide Pfade ab (canonical via flow_links.token, backward-compat via token==lead_id).
+  if (!(await assertLeadBoundToToken(admin, token, leadId))) return { ok: false, error: 'Nicht autorisiert' }
 
   // Re-Entry-Dedup: `lead` ist der Pre-Conversion-Snapshot (select('*') oben, VOR
   // convertLeadToClaim). War die SA schon unterschrieben, ist dies ein Re-Entry
@@ -940,6 +976,29 @@ export async function signSAandCreateFall(
     ),
   )
 
+  // CalDAV-Paritaet zum gegateten Google-Sync oben: der /flow-Confirm schrieb bisher NUR
+  // Google, CalDAV (Apple/Fastmail) fehlte. Das Datenschutz-Gate MUSS mit — bei 'nur_gutachter'
+  // ist die SA verbindlich (jetzt syncen); 'komplett' erst in confirmVollmacht (vor Vollmacht
+  // KEIN externer Event, sonst pre-Mandat-Leak). Non-critical, fire-and-forget.
+  if ((lead.service_typ ?? 'komplett') === 'nur_gutachter') {
+    void (async () => {
+      const { data: caldavTermine } = await admin
+        .from('gutachter_termine')
+        .select('id')
+        .eq('fall_id', fall.id)
+        .eq('assignee_typ', 'sachverstaendiger')
+        .in('status', ['bestaetigt', 'reserviert'])
+      const { syncSvTerminToCalDav } = await import('@/lib/kalender/caldav/sv-termin-sync')
+      for (const t of caldavTermine ?? []) {
+        await syncSvTerminToCalDav(t.id as string).catch((err) =>
+          console.warn('[signSAandCreateFall] syncSvTerminToCalDav:', err instanceof Error ? err.message : err),
+        )
+      }
+    })().catch((err) =>
+      console.warn('[signSAandCreateFall] CalDAV-Sync:', err instanceof Error ? err.message : err),
+    )
+  }
+
   // AAR-229 W4: SA-Unterschrift Mitteilung an Admin + SV
   try {
     const { createMitteilungMulti } = await import('@/lib/mitteilungen/create-mitteilung')
@@ -1239,16 +1298,15 @@ export async function signSAandCreateFall(
             '6': terminLink,
           })
 
-          // Mitteilung im Gutachter-Portal
-          await admin.from('gutachter_mitteilungen').insert({
-            // CMM-49 (sv_id-Drop): Wert aus terminRow.assignee_id; gutachter_mitteilungen.sv_id
-            // ist Fremd-Tabelle (eigene Spalte, bleibt) — value-identisch.
-            sv_id: terminRow.assignee_id,
-            typ: 'termin_bestaetigt',
-            titel: `Neuer Termin: ${datum} ${uhrzeit}`,
-            nachricht: `Besichtigung bei ${kundeName} in ${adresse}. Kennzeichen: ${lead.kennzeichen || '—'}.`,
-            dringend: true,
-            link: `/gutachter/fall/${fall.id}`,
+          // Mitteilung im Gutachter-Portal (Phase 5: kanonische mitteilungen via
+          // Helper. Der fruehere Raw-Insert mit `dringend` failte silent — 42703
+          // keine Spalte — die SV-Termin-Notif kam also nie an; jetzt repariert.)
+          const { createGutachterMitteilung } = await import('@/lib/mitteilungen')
+          await createGutachterMitteilung(terminRow.assignee_id, 'termin_bestaetigt', fall.id, {
+            datum,
+            uhrzeit,
+            kunde_name: kundeName,
+            adresse,
           })
         }
       }
@@ -1487,82 +1545,11 @@ export async function signSAandCreateFall(
  * KFZ-192: Vollmacht unterschrieben → Termin bestätigen (nur für service_typ='komplett').
  * Wird aufgerufen nachdem Kunde Vollmacht unterschrieben hat.
  */
-export async function confirmVollmacht(fallId: string): Promise<void> {
-  const admin = createAdminClient()
-
-  // Fall laden, um service_typ zu prüfen
-  // CMM-44 SP-B PR2a: service_typ lebt auf claims (SSoT) — via claims-Embed.
-  // CMM-49 (faelle-Drop-Runway): via v_claim_full (flat). vcf.id = claim_id; service_typ/lead_id flach.
-  const { data: fall, error: fallErr } = await admin
-    .from('v_claim_full')
-    .select('id, service_typ, lead_id')
-    .eq('fall_id', fallId)
-    .single()
-
-  if (fallErr || !fall) return
-  const claimIdForVollmacht = (fall.id as string | null) ?? null
-  const leadIdForVollmacht = (fall.lead_id as string | null) ?? null
-
-  // Nur für 'komplett' — bei 'nur_gutachter' wurde Termin bereits bei SA bestätigt
-  if (((fall.service_typ as string | null) ?? 'komplett') !== 'komplett') return
-
-  // Aktiven Termin finden (status='reserviert')
-  const { data: termin, error: terminErr } = await admin
-    .from('gutachter_termine')
-    .select('id')
-    .eq('fall_id', fallId)
-    .eq('status', 'reserviert')
-    .order('created_at', { ascending: false })
-    .limit(1)
-    .maybeSingle()
-
-  if (terminErr) {
-    console.error('[confirmVollmacht] Termin-Query:', terminErr.message)
-    return
-  }
-  if (!termin) return // Kein Termin vorhanden
-
-  // Termin bestätigen
-  const { bestaetigeTermin } = await import('@/lib/termine/bestaetigung')
-  await bestaetigeTermin(termin.id)
-
-  // Vollmacht-Unterschrift markieren (Bool-Semantik wird aus IS NOT NULL abgeleitet):
-  // - `claims.vollmacht_signiert_am` = SSoT der Schadens-Welt (CMM-44 SP-B PR2b).
-  // - `leads.vollmacht_datum` = CPA-/Provisions-Billing-Datum (gelesen in
-  //   admin/finance/(hub) + lib/finance/abrechnungen-generator).
-  // FIX: schrieb `vollmacht_datum` vorher auf `faelle` — die Spalte existiert dort
-  // NICHT (pre-existing Drift, vgl. AAR-583 N6) -> stiller Fehlschlag, leads.vollmacht_datum
-  // blieb leer -> CPA-auf-Vollmacht-Billing war tot. Jetzt auf `leads` via claims.lead_id,
-  // set-once (erste Unterschrift zaehlt), beide Writes non-fatal (error-geloggt).
-  const nowIso = new Date().toISOString()
-  if (claimIdForVollmacht) {
-    const { error: claimErr } = await admin.from('claims')
-      .update({ vollmacht_signiert_am: nowIso })
-      .eq('id', claimIdForVollmacht)
-    if (claimErr) console.error('[confirmVollmacht] claims.vollmacht_signiert_am:', claimErr.message)
-  }
-  if (leadIdForVollmacht) {
-    const { error: leadErr } = await admin.from('leads')
-      .update({ vollmacht_datum: nowIso })
-      .eq('id', leadIdForVollmacht)
-      .is('vollmacht_datum', null)
-    if (leadErr) console.error('[confirmVollmacht] leads.vollmacht_datum:', leadErr.message)
-  }
-
-  // KFZ-136: Reminder generieren
-  try {
-    const { generateReminderForTermin } = await import('@/lib/reminders/generate')
-    await generateReminderForTermin(termin.id)
-  } catch (err) { console.error('[KFZ-136] Reminder-Gen nach Vollmacht:', err) }
-
-  // AAR-694b: Bei Komplettpaket war die Vollmacht der finale Trigger für den
-  // Google-Kalender-Event. Jetzt nachschreiben (für alle aktiven Termine).
-  import('@/lib/google-calendar/sv-event-sync').then(({ syncSvCalendarEventsForFall }) =>
-    syncSvCalendarEventsForFall(fallId).catch((err) =>
-      console.warn('[confirmVollmacht] syncSvCalendarEventsForFall:', err instanceof Error ? err.message : err),
-    ),
-  )
-}
+// confirmVollmacht wurde nach @/lib/vollmacht/confirm-vollmacht verschoben (Security-
+// Relocation, Route-Audit-Handoff): raus aus dieser 'use server'-Action-Datei -> keine
+// latente IDOR-Endpoint-Surface mehr (die Funktion nahm rohe fallId + admin-Client ohne
+// Ownership-Bindung). Beide Caller (kanzlei-wunsch/actions + lexdrive/process-event) sind
+// server-intern und importieren jetzt aus dem Lib-Modul.
 
 // Initial-Passwort-Generator: siehe @/lib/auth/generate-initial-password
 // (CSPRNG, bias-frei) — ersetzt die fruehere Math.random()-Variante.

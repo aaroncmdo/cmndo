@@ -8,7 +8,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { ClipboardCheckIcon, FileTextIcon } from 'lucide-react'
+import { ClipboardCheckIcon, FileTextIcon, AlertTriangleIcon } from 'lucide-react'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import {
   qcBestanden,
@@ -16,6 +16,8 @@ import {
   upsertQcCheckliste,
 } from '../../../../app/faelle/[id]/_actions'
 import { qcChecklisteVollstaendig } from '@/lib/qc/checkliste-validation'
+// Filmcheck QC-Anomalie-Erkennung: reine (server-import-freie) Logik, hier nur der Typ.
+import type { GutachtenAnomalie } from '@/lib/qc/anomalien'
 
 // AAR-170: die 9 Prüf-Felder entsprechen 1:1 den Spalten in `qc_checkliste`
 // (information_schema-verifiziert).
@@ -49,6 +51,21 @@ const QC_FIELDS: { key: keyof QcCheckliste; label: string }[] = [
   { key: 'vorschaeden_beruecksichtigt', label: 'Vorschäden berücksichtigt' },
 ]
 
+/**
+ * Filmcheck Phase 3 (P3a): read-only-Kurzansicht der per OCR aus dem Gutachten
+ * extrahierten Kern-Werte. KB prueft die Zahlen direkt beim Abhaken; Editieren
+ * bleibt der admin-only GutachtenOcrCard vorbehalten. Alle Felder null -> nichts
+ * rendern (historisch 0 OCR-Laeufe).
+ */
+export type QcOcrWerte = {
+  reparaturkosten_netto: number | null
+  restwert: number | null
+  wiederbeschaffungswert: number | null
+  minderwert: number | null
+  gesamt_schadensbetrag: number | null
+  totalschaden: boolean | null
+}
+
 type Props = {
   fallId: string
   qcCheckliste: QcCheckliste | null
@@ -56,9 +73,20 @@ type Props = {
   autoChecks?: Record<string, boolean>
   /** Filmcheck #7: Gutachten-PDF zur Inline-Pruefung. */
   gutachtenUrl?: string | null
+  /** Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB (keine Edit-Rechte). */
+  qcOcrWerte?: QcOcrWerte | null
+  /**
+   * Filmcheck QC-Anomalien (02.07.): geflaggte Widersprueche in den OCR-Werten. Leer/
+   * undefined -> kein Pruef-Hinweise-Block. Berechnet in page.tsx via
+   * berechneGutachtenAnomalien().
+   */
+  qcAnomalien?: GutachtenAnomalie[]
 }
 
-export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl }: Props) {
+const formatEuro = (n: number | null) =>
+  n == null ? '–' : n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
+
+export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenUrl, qcOcrWerte, qcAnomalien }: Props) {
   const router = useRouter()
   const [qcState, setQcState] = useState<Record<string, boolean | null>>(() => {
     const init: Record<string, boolean | null> = {}
@@ -171,6 +199,8 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
             <span className="text-claimondo-ondo">↗</span>
           </a>
         )}
+        <QcOcrWerteBlock werte={qcOcrWerte} />
+        <QcAnomalienBlock anomalien={qcAnomalien} />
         {autoChecks && Object.keys(autoChecks).length > 0 && (
           <p className="text-[10px] text-claimondo-ondo/70">
             Einige Felder sind aus den Falldaten vorbefüllt — bitte prüfen, die offenen („—") selbst beurteilen.
@@ -253,6 +283,81 @@ export function QcChecklisteBlock({ fallId, qcCheckliste, autoChecks, gutachtenU
           </p>
         )}
       </div>
+    </div>
+  )
+}
+
+/**
+ * Filmcheck Phase 3 (P3a): read-only OCR-Kern-Werte im Filmcheck. Nur zur Ansicht
+ * fuer den KB — Editieren bleibt der admin-only GutachtenOcrCard vorbehalten.
+ * Rendert nichts, wenn alle Werte null sind (historisch 0 OCR-Laeufe).
+ */
+function QcOcrWerteBlock({ werte }: { werte?: QcOcrWerte | null }) {
+  if (!werte) return null
+  const eurFelder: { key: keyof QcOcrWerte; label: string }[] = [
+    { key: 'reparaturkosten_netto', label: 'Reparaturkosten netto' },
+    { key: 'wiederbeschaffungswert', label: 'Wiederbeschaffungswert' },
+    { key: 'restwert', label: 'Restwert' },
+    { key: 'minderwert', label: 'Minderwert' },
+    { key: 'gesamt_schadensbetrag', label: 'Gesamt-Schadensbetrag' },
+  ]
+  const hatEur = eurFelder.some((f) => werte[f.key] != null)
+  const hatTotalschaden = werte.totalschaden != null
+  // Alle Werte null -> nichts rendern (kein leerer Kasten).
+  if (!hatEur && !hatTotalschaden) return null
+
+  return (
+    <div className="rounded-ios-lg border border-claimondo-border bg-claimondo-bg/60 p-3">
+      <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo/70 font-semibold mb-2">
+        Gutachten-Werte (aus OCR · nur Ansicht)
+      </p>
+      <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-1 text-xs">
+        {eurFelder.map((f) => (
+          <div key={f.key} className="flex items-center justify-between gap-2">
+            <dt className="text-claimondo-ondo/80">{f.label}</dt>
+            <dd className="text-claimondo-navy font-medium text-right">{formatEuro(werte[f.key] as number | null)}</dd>
+          </div>
+        ))}
+        {hatTotalschaden && (
+          <div className="flex items-center justify-between gap-2">
+            <dt className="text-claimondo-ondo/80">Totalschaden</dt>
+            <dd className="text-claimondo-navy font-medium text-right">{werte.totalschaden ? 'Ja' : 'Nein'}</dd>
+          </div>
+        )}
+      </dl>
+    </div>
+  )
+}
+
+/**
+ * Filmcheck QC-Anomalien (02.07.): flaggt Widersprueche in den OCR-Werten, damit der KB
+ * WARNUNGEN prueft statt blind abzuhaken. warnung -> danger-Tokens, hinweis -> warning-
+ * Tokens. Rendert nichts, wenn keine Anomalien vorliegen (kein leerer Kasten).
+ */
+function QcAnomalienBlock({ anomalien }: { anomalien?: GutachtenAnomalie[] }) {
+  if (!anomalien || anomalien.length === 0) return null
+  return (
+    <div className="rounded-ios-lg border border-warning/40 bg-warning-soft/50 p-3">
+      <p className="text-[10px] uppercase tracking-wider text-warning-strong font-semibold mb-2 flex items-center gap-1.5">
+        <AlertTriangleIcon className="w-3 h-3" /> Prüf-Hinweise ({anomalien.length})
+      </p>
+      <ul className="space-y-1.5">
+        {anomalien.map((a) => {
+          const cls =
+            a.schwere === 'warnung'
+              ? 'bg-danger-soft border-danger/30 text-danger-strong'
+              : 'bg-warning-soft border-warning/30 text-warning-strong'
+          return (
+            <li
+              key={a.code}
+              className={`flex items-start gap-2 px-2.5 py-1.5 rounded-ios-md border text-xs ${cls}`}
+            >
+              <AlertTriangleIcon className="w-3.5 h-3.5 mt-0.5 shrink-0" />
+              <span>{a.text}</span>
+            </li>
+          )
+        })}
+      </ul>
     </div>
   )
 }

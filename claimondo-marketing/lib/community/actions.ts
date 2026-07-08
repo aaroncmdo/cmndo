@@ -56,8 +56,16 @@ export async function submitComment(
   const { data: auth } = await supabase.auth.getUser()
   if (!auth.user) return { ok: false, error: 'Bitte zuerst anmelden.' }
 
-  // Anti-Spam: Rate-Limit (max 5 Kommentare/Stunde pro User) + Links nur fuer freigeschaltete Nutzer.
-  // Beides RLS-konform: der User darf seine eigenen Kommentare/sein Profil lesen.
+  // Community-Identitaet aufloesen: registrierte Partner kommentieren unter ihrer Firma
+  // (community_my_identity -> _community_author), sonst unter dem Community-Username.
+  // Kein separater Nutzername mehr noetig fuer erkannte Partner.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: idData } = await (supabase as any).rpc('community_my_identity')
+  const id = (Array.isArray(idData) ? idData[0] : idData) as { display: string | null; trusted: boolean | null } | null
+  const display = id?.display ?? null
+  if (!display) return { ok: false, error: 'Bitte zuerst einen Nutzernamen setzen.' }
+
+  // Anti-Spam: Rate-Limit (max 5 Kommentare/Stunde pro User) + Links nur fuer vertrauenswuerdige Autoren.
   const since = new Date(Date.now() - 3_600_000).toISOString()
   const { count } = await supabase
     .from('article_comments')
@@ -65,18 +73,14 @@ export async function submitComment(
     .eq('author_id', auth.user.id)
     .gte('created_at', since)
   if ((count ?? 0) >= 5) return { ok: false, error: 'Zu viele Kommentare in kurzer Zeit — bitte später erneut.' }
-  if (containsLink(body)) {
-    const { data: prof } = await supabase
-      .from('community_profiles')
-      .select('trusted')
-      .eq('user_id', auth.user.id)
-      .maybeSingle()
-    if (!prof?.trusted) return { ok: false, error: 'Links sind erst nach Freischaltung deines Kontos möglich.' }
+  if (containsLink(body) && !id?.trusted) {
+    return { ok: false, error: 'Links sind erst nach Freischaltung deines Kontos möglich.' }
   }
 
-  const { error } = await supabase
-    .from('article_comments')
-    .insert({ author_id: auth.user.id, article_slug: slug, body })
+  // author_display denormalisiert (Migration 20260706222056), noch nicht in den Marketing-Typen.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { error } = await (supabase.from('article_comments') as any)
+    .insert({ author_id: auth.user.id, article_slug: slug, body, author_display: display })
   if (error) return { ok: false, error: 'Kommentar konnte nicht gespeichert werden.' }
   revalidatePath(`/${slug}`)
   return { ok: true }

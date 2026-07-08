@@ -42,6 +42,12 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * NICHT aus Dispatch/MCP -> ein aktiver Test-SV war auto-buchbar. Das DB-Flag
  * schließt die Lücke an EINER Stelle (statt drei ILIKE-Kopien).
  *
+ * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
+ * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
+ * nur auf portal_zugang -> ein bezahlter-aber-unverifizierter SV war buchbar,
+ * aber unsichtbar auf der Karte (und die Engine wies unvetteten SVs Fälle zu).
+ * Jetzt gilt: "auf der Karte gelistet" == "durch die Engine buchbar".
+ *
  * Wird in findBestSV + gutachter-matching + sv-zuweisung genutzt.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */

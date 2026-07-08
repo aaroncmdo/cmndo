@@ -41,3 +41,20 @@ export function brauchtKanzleiHandoff(
 export function kanzleiHandoffBereitsErfolgt(operativeStatus: string | null | undefined): boolean {
   return !!operativeStatus && HANDOFF_ERLEDIGT_ODER_TERMINAL.has(operativeStatus)
 }
+
+// Robustheit (Filmcheck-Audit 01.07.2026): der Handoff-Zielstatus 'kanzlei-uebergeben' ist
+// laut State-Machine (FALL_STATUS_TRANSITIONS in state-machine.ts) NUR aus 'filmcheck' und
+// 'qc-pruefung' erreichbar. Hier gespiegelt (analog HANDOFF_ERLEDIGT_ODER_TERMINAL oben) statt
+// die server-only state-machine.ts (createAdminClient) in dieses pure Modul zu ziehen. Beim
+// Erweitern der Quell-Status DORT diese Menge mitziehen.
+const HANDOFF_QUELL_STATUS = new Set<string>(['filmcheck', 'qc-pruefung'])
+
+/**
+ * True nur wenn der Kanzlei-Handoff (transitionFallStatus -> 'kanzlei-uebergeben') aus dem
+ * aktuellen operativen Status laut State-Machine GUELTIG ist. saveFilmcheck prueft das vor
+ * dem Transition-Call: ein komplett-Claim, der noch VOR dem Filmcheck haengt (z.B. ohne
+ * Gutachten in 'begutachtung-laeuft'), wuerfe sonst einen ungueltigen Uebergang -> rohe 500.
+ */
+export function kanzleiHandoffMoeglich(operativeStatus: string | null | undefined): boolean {
+  return !!operativeStatus && HANDOFF_QUELL_STATUS.has(operativeStatus)
+}

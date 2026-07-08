@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { calculateIsochrone } from '@/lib/isochrone/calculate-isochrone'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
 import { createLinkedTask } from '@/lib/tasks/create-task'
 import { getKatalogSlot } from '@/lib/dokumente/katalog'
@@ -192,6 +193,12 @@ export async function svSperren(
       gesperrt_grund: trimmed,
       gesperrt_von_user_id: auth.userId,
       ist_aktiv: false,
+      // Legacy-Felder mitschreiben — sie werden weiterhin gelesen
+      // (dispatch/sachverstaendige/page.tsx zeigt deaktiviert_grund/-am;
+      // konfrontations-dispatch-lite prueft deaktiviert_am != null als „gesperrt").
+      // svSperren ist damit der EINE kanonische Sperr-Pfad (= deactivateGutachter).
+      deaktiviert_grund: trimmed,
+      deaktiviert_am: new Date().toISOString(),
     })
     .eq('id', svId)
   if (error) return { success: false, error: `Sperren fehlgeschlagen: ${error.message}` }
@@ -212,6 +219,9 @@ export async function svEntsperren(svId: string): Promise<{ success: boolean; er
       gesperrt_grund: null,
       gesperrt_von_user_id: null,
       ist_aktiv: true,
+      // Legacy-Felder analog nullen (s. svSperren).
+      deaktiviert_grund: null,
+      deaktiviert_am: null,
     })
     .eq('id', svId)
   if (error) return { success: false, error: `Entsperren fehlgeschlagen: ${error.message}` }
@@ -342,28 +352,25 @@ export async function dokumenteAlleFreigeben(
   const byType = new Map<string, string>()
   for (const r of rows ?? []) byType.set(r.dokument_typ as string, (r.status as string) ?? '')
 
-  const hatAbtretungOk = PFLICHT_ABTRETUNG.some((s) => {
-    const st = byType.get(s)
-    return st === 'hochgeladen' || st === 'geprueft'
-  })
+  // Sammel-Freigabe verlangt echte Einzel-Reviews: nur bereits 'geprueft'-Rows
+  // zaehlen als „alle ok". Ein bloss 'hochgeladen'-Dokument reicht NICHT — sonst
+  // koennte der Admin verifiziert=true setzen ohne jedes Dokument angesehen zu haben.
+  const hatAbtretungOk = PFLICHT_ABTRETUNG.some((s) => byType.get(s) === 'geprueft')
   if (!hatAbtretungOk) {
-    return { success: false, error: 'Sicherungsabtretung oder Honorarvereinbarung fehlt.' }
+    return {
+      success: false,
+      error: 'Sicherungsabtretung oder Honorarvereinbarung muss zuerst einzeln geprüft (freigegeben) werden.',
+    }
   }
   for (const s of PFLICHT_SINGLE) {
-    const st = byType.get(s)
-    if (st !== 'hochgeladen' && st !== 'geprueft') {
-      return { success: false, error: `Pflichtdokument fehlt: ${s}.` }
+    if (byType.get(s) !== 'geprueft') {
+      return { success: false, error: `Pflichtdokument noch nicht geprüft: ${s}.` }
     }
   }
 
-  // Alle vorhandenen hochgeladen/geprueft-Rows auf 'geprueft' setzen.
-  const { error: updErr } = await db
-    .from('pflichtdokumente')
-    .update({ status: 'geprueft' })
-    .eq('sv_id', svId)
-    .in('dokument_typ', [...PFLICHT_ABTRETUNG, ...PFLICHT_SINGLE] as unknown as string[])
-    .in('status', ['hochgeladen', 'geprueft'])
-  if (updErr) return { success: false, error: `Dokumenten-Freigabe fehlgeschlagen: ${updErr.message}` }
+  // Alle relevanten Rows sind bereits 'geprueft' (s.o.) — nichts mehr umzustellen.
+  // (Frueher wurden hier 'hochgeladen'-Rows auf 'geprueft' gehoben; das umging
+  // das Einzel-Review und ist jetzt entfernt.)
 
   const { error: svErr } = await db
     .from('sachverstaendige')
@@ -404,7 +411,49 @@ export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; 
 
   const db = createAdminClient()
 
-  // Schritt 1: alle 5 Freigabe-Flags atomar setzen.
+  // Gutachter-Onboarding-Audit #3: Go-Live-Geo-Guard. Die Freigabe macht den SV
+  // map-sichtbar (Karten-RLS: isochrone_polygon + lat/lng NOT NULL) UND dispatchbar
+  // (Matching: Isochrone deckt Schadenort). Fehlt Geo, waere der SV zwar "frei",
+  // wuerde aber 0 Leads treffen (self-reg geocodet lat/lng nur best-effort und
+  // berechnet NIE eine Isochrone). Darum: ohne Koordinaten blocken, fehlende
+  // Isochrone aus den Koordinaten nachberechnen.
+  const { data: sv, error: readErr } = await db
+    .from('sachverstaendige')
+    .select('standort_lat, standort_lng, paket_umkreis_km, isochrone_polygon')
+    .eq('id', svId)
+    .maybeSingle()
+  if (readErr) return { success: false, error: `SV konnte nicht geladen werden: ${readErr.message}` }
+  if (!sv) return { success: false, error: 'Sachverständiger nicht gefunden.' }
+
+  if (sv.standort_lat == null || sv.standort_lng == null) {
+    return {
+      success: false,
+      error:
+        'Freigabe nicht möglich: Dem Gutachter fehlen Standort-Koordinaten. Bitte zuerst die Adresse (via Google Places) nachtragen — sonst ist er auf der Karte unsichtbar und nicht buchbar.',
+    }
+  }
+
+  // Fehlende Isochrone nachberechnen, damit der SV nach der Freigabe wirklich
+  // sichtbar + dispatchbar ist. Schlägt die Berechnung fehl -> blocken (nicht
+  // stillschweigend "frei ohne Einsatzgebiet"), Admin kann später erneut freigeben.
+  const geoPatch: Record<string, unknown> = {}
+  if (sv.isochrone_polygon == null) {
+    const radiusKm = sv.paket_umkreis_km ?? 25
+    try {
+      const polygon = await calculateIsochrone(Number(sv.standort_lat), Number(sv.standort_lng), radiusKm)
+      if (!polygon.length) throw new Error('leeres Polygon')
+      geoPatch.isochrone_polygon = polygon
+    } catch (err) {
+      console.error('[gibBasicSvFrei] Isochrone-Nachberechnung fehlgeschlagen:', err)
+      return {
+        success: false,
+        error:
+          'Freigabe nicht möglich: Das Einsatzgebiet (Isochrone) konnte nicht berechnet werden. Bitte später erneut versuchen.',
+      }
+    }
+  }
+
+  // Schritt 1: alle 5 Freigabe-Flags atomar setzen (+ ggf. nachberechnete Isochrone).
   const { error: svErr } = await db
     .from('sachverstaendige')
     .update({
@@ -413,6 +462,7 @@ export async function gibBasicSvFrei(svId: string): Promise<{ success: boolean; 
       verifiziert_am: new Date().toISOString(),
       ist_aktiv: true,
       portal_zugang_freigeschaltet: true,
+      ...geoPatch,
     })
     .eq('id', svId)
   if (svErr) return { success: false, error: `Freigabe fehlgeschlagen: ${svErr.message}` }

@@ -34,8 +34,8 @@ export async function POST(request: Request) {
         await sendSvAuftragszusammenfassung(fallId, gutachterId)
         break
       case 'sv_abrechnung':
-        if (!abrechnungId) return NextResponse.json({ error: 'abrechnungId fehlt' }, { status: 400 })
-        await sendSvAbrechnung(abrechnungId)
+        if (!fallId) return NextResponse.json({ error: 'fallId fehlt' }, { status: 400 })
+        await sendSvAbrechnung(fallId)
         break
       case 'sv_rechnung':
         if (!rechnungId) return NextResponse.json({ error: 'rechnungId fehlt' }, { status: 400 })

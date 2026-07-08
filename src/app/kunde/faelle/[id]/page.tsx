@@ -24,7 +24,6 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { getStorageUrl, getStorageUrlBulk } from '@/lib/storage/url'
 import { redirect, notFound } from 'next/navigation'
 import Link from 'next/link'
-import { FallPhasenPanel } from '@/components/shared/fall-phases'
 import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
@@ -37,6 +36,7 @@ import { NoticeBox } from '@/components/shared/NoticeBox'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
 import SaeuleMeinBetreuer from '@/components/kunde/SaeuleMeinBetreuer'
 import AuszahlungCard from '@/components/kunde/AuszahlungCard'
+import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
@@ -44,6 +44,8 @@ import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
+import WerkstattCard from '@/components/kunde/WerkstattCard'
+import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -52,6 +54,7 @@ import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
 import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
 import { EMBED_B_KLAERUNG_TASK_TYP, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
+import SelbstzahlerReparaturStepper from '@/components/kunde/SelbstzahlerReparaturStepper'
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
@@ -279,15 +282,25 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       }
     }
 
-    // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view laden.
-    // Nur noch für AuszahlungCard genutzt — Eskalations-Tag-Felder kommen
-    // mit, werden aber nicht mehr gerendert (CMM-28 Cleanup).
+    // AAR-558 (C9): Kunden-sichere Felder aus faelle_kunde_view — jetzt nur noch
+    // der Zahlungsweg. auszahlung_kunde_betrag/_eingegangen_am waren in der View
+    // hardcoded NULL (keine eigene Spalte); kanonische Quelle siehe kanzleiPayout unten.
     const { data: kundeView } = await supabase
       .from('faelle_kunde_view')
-      .select(
-        'auszahlung_kunde_betrag, auszahlung_kunde_eingegangen_am, auszahlung_zahlungsweg',
-      )
+      .select('auszahlung_zahlungsweg')
       .eq('id', id)
+      .maybeSingle()
+
+    // AAR-558 Follow-up (Aaron 02.07.): Netto-Kunden-Auszahlbetrag ist keine eigene
+    // Spalte — im komplett/Kanzlei-Pfad ist die kanonische SSoT kanzlei_faelle:
+    // vs_quote_betrag_ausgezahlt = "Quote ausgezahlt" (der Netto-Betrag AN den Kunden,
+    // Aaron-bestätigt) + ausgezahlt_am = Auszahl-Datum. Admin-Client fuer den bereits
+    // ownership-verifizierten Fall (Muster wie claims/v_gutachten_werte unten).
+    // nur_gutachter hat kein kanzlei_faelle -> null -> Karte bleibt aus (VS zahlt direkt).
+    const { data: kanzleiPayout } = await admin
+      .from('kanzlei_faelle')
+      .select('vs_quote_betrag_ausgezahlt, ausgezahlt_am')
+      .eq('fall_id', id)
       .maybeSingle()
 
     // 13.05.2026 Restore: claim-Row + fall-Extras für die im 8f088031-Merge
@@ -308,6 +321,12 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       minderwert: number | null
       wiederbeschaffungswert: number | null
       restwert: number | null
+      reparaturkosten_netto: number | null
+      reparaturwunsch: string | null
+      // SP4a Task 4: Werkstatt-Vermittlung
+      reparatur_werkstatt_id: string | null
+      // SP-D: Abrechnungsweg fuer den Selbstzahler-Reparatur-Stepper
+      abrechnungsweg: string | null
     } | null = null
     if (fall.claim_id) {
       // Cluster F+G PR-2: Split in 2 Queries — claims für Kanzlei-Felder (Nicht-F+G),
@@ -315,13 +334,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, abrechnungsweg')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
           .from('v_gutachten_werte')
           .select(
-            'totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
+            'totalschaden, gutachten_ocr_processed_at, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert',
           )
           .eq('claim_id', fall.claim_id as string)
           .maybeSingle(),
@@ -338,11 +357,41 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           gutachten_nutzungsausfall_tagessatz_eur: (cxView?.gutachten_nutzungsausfall_tagessatz_eur as number | null) ?? null,
           gutachten_mietwagen_tagessatz_eur: (cxView?.gutachten_mietwagen_tagessatz_eur as number | null) ?? null,
           reparaturkosten_brutto: cxView?.reparaturkosten_brutto != null ? Number(cxView.reparaturkosten_brutto) : null,
+          reparaturkosten_netto: cxView?.reparaturkosten_netto != null ? Number(cxView.reparaturkosten_netto) : null,
           minderwert: cxView?.minderwert != null ? Number(cxView.minderwert) : null,
           wiederbeschaffungswert: cxView?.wiederbeschaffungswert != null ? Number(cxView.wiederbeschaffungswert) : null,
           restwert: cxView?.restwert != null ? Number(cxView.restwert) : null,
+          reparaturwunsch: (cxClaim?.reparaturwunsch as string | null) ?? null,
+          // SP4a Task 4: Werkstatt-Vermittlung
+          reparatur_werkstatt_id: (cxClaim?.reparatur_werkstatt_id as string | null) ?? null,
+          // SP-D: abrechnungsweg ist type-lagged -> Record-Cast beim Lesen.
+          abrechnungsweg: ((cxClaim as Record<string, unknown> | null)?.abrechnungsweg as string | null) ?? null,
         }
       }
+    }
+
+    // SP4a Task 4: Werkstatt-Stammdaten + aktiver Reparaturtermin.
+    // Ownership ist durch getKundeFallDetailRecord bereits verifiziert.
+    // Admin-Client konsistent mit allen anderen page.tsx-Reads.
+    let werkstattData: { name: string; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null; telefon: string | null } | null = null
+    let reparaturTermin: { id: string; status: string; wunschtermin: string | null; bestaetigter_termin: string | null; absage_grund: string | null } | null = null
+    const reparaturWerkstattId = claimExtra?.reparatur_werkstatt_id ?? null
+    if (reparaturWerkstattId) {
+      const { data: w } = await admin
+        .from('werkstaetten')
+        .select('name, adresse_strasse, adresse_plz, adresse_ort, telefon')
+        .eq('id', reparaturWerkstattId)
+        .maybeSingle()
+      werkstattData = w as typeof werkstattData
+      const { data: t } = await admin
+        .from('reparatur_termine')
+        .select('id, status, wunschtermin, bestaetigter_termin, absage_grund')
+        .eq('claim_id', fall.claim_id as string)
+        .neq('status', 'storniert')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      reparaturTermin = t as typeof reparaturTermin
     }
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
@@ -640,6 +689,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           svAvatarUrl={svAvatarUrl}
           svBeschreibung={svBeschreibung}
           svVerifiziert={svVerifiziert}
+          nurSv
         />
 
         {/* AAR Layout-Audit (2026-06-29): 2-Spalten Master/Detail — links der
@@ -690,6 +740,17 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 kundeVorname: kundeVorname ?? null,
               }
             : null
+          // SP-D: Selbstzahler bekommen die reduzierte Reparatur-Strecke (Schaden -> Werkstatt
+          // -> Termin -> Reparatur) statt des SV/Gutachten/Regulierungs-Steppers.
+          if (claimExtra?.abrechnungsweg === 'selbstzahler') {
+            return (
+              <SelbstzahlerReparaturStepper
+                hatWerkstatt={!!reparaturWerkstattId}
+                terminStatus={(reparaturTermin as { status: string } | null)?.status ?? null}
+                abgeschlossen={claimLifecycle.mainPhase === 'abschluss'}
+              />
+            )
+          }
           return (
             <ClaimStepper
               lifecycle={claimLifecycle}
@@ -790,9 +851,21 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         {/* AAR-558 (C9): Auszahlungs-Card — nur Netto-Kunden-Anteil. */}
         {kundeView && (
           <AuszahlungCard
-            betrag={(kundeView.auszahlung_kunde_betrag as number | null) ?? null}
-            eingegangenAm={(kundeView.auszahlung_kunde_eingegangen_am as string | null) ?? null}
+            betrag={(kanzleiPayout?.vs_quote_betrag_ausgezahlt as number | null) ?? null}
+            eingegangenAm={(kanzleiPayout?.ausgezahlt_am as string | null) ?? null}
             zahlungsweg={(kundeView.auszahlung_zahlungsweg as string | null) ?? null}
+          />
+        )}
+
+        {/* SP4c: Fiktive-Abrechnung-Card — voraussichtliche Auszahlung auf Gutachten-Basis
+            (nur wenn der Kunde die fiktive Abrechnung gewählt hat). */}
+        {claimExtra?.reparaturwunsch === 'fiktiv' && (
+          <FiktiveAbrechnungCard
+            reparaturkostenNetto={claimExtra.reparaturkosten_netto}
+            minderwert={claimExtra.minderwert}
+            totalschaden={claimExtra.totalschaden}
+            wiederbeschaffungswert={claimExtra.wiederbeschaffungswert}
+            restwert={claimExtra.restwert}
           />
         )}
 
@@ -875,6 +948,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
+        {/* SP4a Task 4: Werkstatt-Card — nur bei hinterlegter Werkstatt. */}
+        {werkstattData && (
+          <WerkstattCard
+            claimId={fall.claim_id as string}
+            werkstatt={werkstattData}
+            termin={reparaturTermin}
+          />
+        )}
+
+        {/* SP-C1: Werkstatt-Finder - Reparatur-Claim OHNE hinterlegte Werkstatt. */}
+        {!reparaturWerkstattId && claimExtra?.reparaturwunsch === 'reparatur' && (
+          <WerkstattFinderCard claimId={fall.claim_id as string} />
+        )}
+
         {/* 13.05.2026 Restore: Mietwagen-/Nutzungsausfall-Card (XOR). Render
             nur wenn Gutachten OCR-verarbeitet + Schadenstyp klar. Pre-merge
             war diese Card als ausfallSlot in den ClaimStepper eingehängt;
@@ -934,23 +1021,15 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         </div>
 
-        {/* Fortschritt + Fall-Details */}
-        <div className="grid md:grid-cols-2 gap-5">
-          <FallPhasenPanel
-            lifecycle={claimLifecycle}
-            fallId={fall.id as string}
-            rolle="kunde"
-            variant="progress-card"
-            banner={
-              szenario === 'ruegefall' ? (
-                <NoticeBox tone="warning" className="mt-4 rounded-ios-xl px-3 py-2">
-                  <p className="text-xs text-warning-strong font-medium">
-                    {t('ruegefall.banner')}
-                  </p>
-                </NoticeBox>
-              ) : null
-            }
-          />
+        {/* Fortschritt + Fall-Details — Sub-Projekt 3: "Mein Fortschritt"-Duplikat
+            (FallPhasenPanel progress-card) entfernt; der ClaimStepper oben ist die
+            kanonische Fortschritts-Anzeige. Der Ruegefall-Banner bleibt standalone. */}
+        <div className="space-y-5">
+          {szenario === 'ruegefall' ? (
+            <NoticeBox tone="warning" className="rounded-ios-xl px-3 py-2">
+              <p className="text-xs text-warning-strong font-medium">{t('ruegefall.banner')}</p>
+            </NoticeBox>
+          ) : null}
 
           <FallDetailSections
             fall={fall as Record<string, unknown>}

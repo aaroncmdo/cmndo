@@ -13,8 +13,8 @@ function toInternalHref(link: string): string {
   return link.startsWith(SITE_URL) ? link.slice(SITE_URL.length) : link
 }
 
-export function WissensRatgeberSection() {
-  const items = getNewsFeedItems().slice(0, 3)
+export async function WissensRatgeberSection() {
+  const items = (await getNewsFeedItems()).slice(0, 3)
   if (items.length === 0) return null
 
   return (

@@ -1,4 +1,5 @@
 import { getDb, type AnalyticsFilter, type DrillDownItem } from './shared'
+import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 
 /**
  * Umsatz für einen Zeitraum.
@@ -17,7 +18,7 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
   // direkt (sv_id claims-nativ, CMM-60). gutachten/claim_payments via claims-Embed.
   // `f`/`faelle`-Namen bleiben (= jetzt claims-Zeile).
   let query = db.from('claims')
-    .select('id, claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(zahlungseingang_am)')
+    .select('id, claim_nummer, created_at, gutachten(gesamt_schadensbetrag, fertiggestellt_am), claim_payments(partei, zahlungseingang_am)')
 
   if (filter.startDate) query = query.gte('created_at', filter.startDate)
   if (filter.endDate) query = query.lte('created_at', filter.endDate)
@@ -46,7 +47,9 @@ export async function getUmsatz(filter: AnalyticsFilter): Promise<{
     // CMM-44 SP-J Bucket A: jüngstes zahlungseingang_am aus claim_payments (1:N).
     const cps = (f as { claim_payments?: unknown }).claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
+    // Payment-Ledger: nur VS-Eingang zaehlt als Finanz-Datum (kunde/sv sind Auszahlungen).
     const zahlungseingang = cpArr
+      .filter(p => (((p as { partei?: string | null })?.partei) ?? 'vs') === 'vs')
       .map(p => (p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
       .filter((d): d is string => !!d)
       .sort()
@@ -82,19 +85,26 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
 }> {
   const db = getDb()
 
-  // SV-Kosten aus gutachter_abrechnungen
-  let svQuery = db.from('gutachter_abrechnungen').select('id, fall_id, sv_id, leadpreis, monat')
-  if (filter.startDate) svQuery = svQuery.gte('created_at', filter.startDate)
-  if (filter.endDate) svQuery = svQuery.lte('created_at', filter.endDate)
+  // SV-Kosten aus claims.lead_preis_netto (Billing-Konsolidierung 2026-07-01, SSoT —
+  // processCaseBilling; loest die retirete gutachter_abrechnungen-Tabelle ab). Service-Client
+  // (getDb) -> claims-Tabelle direkt (RLS-Bypass; die Definer-View liefert unter service_role 0).
+  // fall_id fuer den Drilldown-Link via faelle_claim_bridge (claims.id != fall_id post-CMM-49).
+  let svQuery = db.from('claims').select('id, sv_id, lead_preis_netto, lead_preis_berechnet_am, faelle_claim_bridge(fall_id)').not('lead_preis_netto', 'is', null)
+  if (filter.startDate) svQuery = svQuery.gte('lead_preis_berechnet_am', filter.startDate)
+  if (filter.endDate) svQuery = svQuery.lte('lead_preis_berechnet_am', filter.endDate)
   const { data: svAbr } = await svQuery
 
-  const svKosten = svAbr?.reduce((sum, a) => sum + (Number(a.leadpreis) || 0), 0) ?? 0
-  const svDrillDown = (svAbr ?? []).map(a => ({
-    id: a.fall_id ?? a.id,
-    label: `SV-Abr. ${a.monat ?? ''}`,
-    betrag: Number(a.leadpreis) || 0,
-    link: a.fall_id ? `/faelle/${a.fall_id}` : undefined,
-  }))
+  const svKosten = svAbr?.reduce((sum, a) => sum + (Number(a.lead_preis_netto) || 0), 0) ?? 0
+  const svDrillDown = (svAbr ?? []).map(a => {
+    const bridge = Array.isArray(a.faelle_claim_bridge) ? a.faelle_claim_bridge[0] : a.faelle_claim_bridge
+    const fallId = (bridge as { fall_id?: string | null } | null)?.fall_id ?? a.id
+    return {
+      id: fallId,
+      label: `SV-Abr. ${a.lead_preis_berechnet_am ? new Date(a.lead_preis_berechnet_am).toISOString().slice(0, 7) : ''}`,
+      betrag: Number(a.lead_preis_netto) || 0,
+      link: `/faelle/${fallId}`,
+    }
+  })
 
   // Kanzlei-Kosten aus claims.kanzlei_honorar (CMM-61: kanzlei_honorar lebt jetzt
   // claims-nativ; claim-globaler Finanz-Aggregat -> from('claims'), created_at-Filter direkt).
@@ -116,7 +126,7 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
     svKosten, kanzleiKosten, marketingKosten,
     gesamt: svKosten + kanzleiKosten + marketingKosten,
     svDrillDown,
-    berechnetAus: 'SV: gutachter_abrechnungen.leadpreis | Kanzlei: claims.kanzlei_honorar | Marketing: claims.marketing_provision',
+    berechnetAus: 'SV: claims.lead_preis_netto | Kanzlei: claims.kanzlei_honorar | Marketing: claims.marketing_provision',
   }
 }
 
@@ -146,18 +156,22 @@ export async function getCashFlow(filter: AnalyticsFilter): Promise<{
   // claims geflippt (Reader-Repoint Richtung DROP); kanzlei_faelle jetzt via claims-Embed
   // (kanzlei_faelle.claim_id), regulierungs_betrag/created_at/claim_payments top-level auf
   // claims. created_at-Filter claims-direkt; "gesetzt"-Filter (regulierung_am, Zahlung) clientseitig.
-  let erwQuery = db.from('claims').select('id, regulierungs_betrag, created_at, kanzlei_faelle(regulierung_am), claim_payments(zahlungseingang_am)')
+  // Payment-Ledger Phase 3 (Collapse): regulierung_betrag aus dem (claim,'vs')-Ledger
+  // (Ist-first: erhaltener_betrag ?? forderungsbetrag) statt dem entfallenden claims.regulierungs_betrag-Cache.
+  let erwQuery = db.from('claims').select('id, created_at, kanzlei_faelle(regulierung_am), claim_payments(partei, forderungsbetrag, erhaltener_betrag, zahlungseingang_am)')
   if (filter.startDate) erwQuery = erwQuery.gte('created_at', filter.startDate)
   if (filter.endDate) erwQuery = erwQuery.lte('created_at', filter.endDate)
   const { data: erwFaelleRaw } = await erwQuery
-  // CMM-49 P1: f ist jetzt die claims-Zeile -> regulierungs_betrag/claim_payments direkt auf f.
-  const claimBetrag = (f: { regulierungs_betrag?: number | null }): number => {
-    return Number(f?.regulierungs_betrag) || 0
-  }
+  // CMM-49 P1: f ist jetzt die claims-Zeile; der VS-Betrag kommt aus der (claim,'vs')-Ledger-Row.
+  const claimBetrag = (f: { claim_payments?: unknown }): number =>
+    Number(vsBetragAusEmbed(f?.claim_payments)) || 0
   const hatZahlung = (f: { claim_payments?: unknown }): boolean => {
     const cps = f?.claim_payments
     const cpArr = Array.isArray(cps) ? cps : cps ? [cps] : []
-    return cpArr.some(p => !!(p as { zahlungseingang_am?: string | null })?.zahlungseingang_am)
+    return cpArr.some(p => {
+      const pp = p as { partei?: string | null; zahlungseingang_am?: string | null }
+      return (pp?.partei ?? 'vs') === 'vs' && !!pp?.zahlungseingang_am
+    })
   }
   // CMM-44 SP-I3: regulierung_am aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
   const hatReguliert = (f: { kanzlei_faelle: unknown }): boolean => {

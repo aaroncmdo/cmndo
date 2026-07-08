@@ -105,7 +105,13 @@
     "restart": "Yeniden başla",
     "alternativ_text": "Doğrudan konuşmayı mı tercih edersiniz? Buradayız.",
     "alternativ_cta": "Hasarı çevrimiçi bildir",
-    "trust_heading": "Güvenebilecekleriniz"
+    "trust_heading": "Güvenebilecekleriniz",
+    "foto_check": {
+      "heading": "Hasarınız gerçekte ne kadar değerinde?",
+      "text": "Hasarınızın bir fotoğrafını yükleyin ve bir dakikadan kısa sürede taleplerinizin somut, bağlayıcı olmayan bir tahminini ücretsiz alın.",
+      "button": "Hasarı fotoğrafla kontrol et"
+    },
+    "lead_heading_alt": "Telefonu mu tercih edersiniz? Geri arama talep edin"
   },
   "not_found": {
     "heading": "Bu sayfa (artık) yok.",
@@ -3610,10 +3616,10 @@
   "ersteinschaetzung": {
     "breadcrumb_start": "Ana Sayfa",
     "breadcrumb_current": "Yapay Zekâ Ön Değerlendirmesi",
-    "hero_badge": "Ücretsiz · Anında · Bağlayıcı Değil",
-    "hero_h1_line1": "Hasarınız.",
-    "hero_h1_line2": "Saniyeler içinde değerlendirildi.",
-    "hero_intro": "Yapay zekâ fotoğraflarınızı analiz eder — 15 dakika içinde onarım maliyeti, yeniden edinme değeri ve ekspertiz önerisi.",
+    "hero_badge": "Ücretsiz · Yükümlülük yok · § 249 BGB",
+    "hero_h1_line1": "Kusursuz kaza mı?",
+    "hero_h1_line2": "Size 0 € masraf.",
+    "hero_intro": "Ücretsiz yapay zekâ ön değerlendirmesi: fotoğrafları yükleyin, dakikalar içinde hakkınız olanı görün. Kusurunuz yoksa karşı tarafın sigortası bilirkişi, avukat ve onarımı karşılar (§ 249 BGB).",
     "hero_cta_primary": "Şimdi ücretsiz değerlendirin",
     "hero_cta_phone": "Arayın",
     "trust_kpi_0_wert": "< 15 Dak.",
@@ -3628,11 +3634,11 @@
     "antwort_p": "<strong>Claimondo'nun ücretsiz yapay zekâ ön değerlendirmesi</strong>, araç hasarınızın fotoğraf ve açıklamasını analiz eder; 15 dakika içinde şunları sunar: onarım maliyeti tahmini, beklenen yeniden edinme değeri ve bağımsız DAT ekspertizinin gerekip gerekmediğine dair öneri (yaklaşık 750 € üstündeki hasarlarda §249 BGB uyarınca bu hakkınız bulunmaktadır). Ön değerlendirme ücretsiz ve bağlayıcı değildir — resmi bir ekspertizin yerini tutmaz, ancak bir sonraki doğru adımı hemen belirlemenize yardımcı olur.",
     "ergebnis_h2": "Ücretsiz olarak bunları alırsınız",
     "ergebnis_punkte": [
-      "Fotoğraflarınıza dayalı tahmini onarım maliyeti",
-      "Aracın yeniden edinme değeri",
-      "Öneri: ekspertiz mi yoksa fiyat teklifi mi",
-      "Tazminat olasılığı değerlendirmesi",
-      "15 dakika içinde sonuç"
+      "Masrafınız: kusurunuz yoksa 0 € (§ 249 BGB)",
+      "Fotoğraflarınıza göre tahmini onarım maliyeti ve ikame değeri",
+      "Pert tespit edildi: onarım mı ödeme mi, somut rakamlarla",
+      "Tüm kalemler: değer kaybı, ikame araç, kullanım kaybı, bilirkişi, avukat",
+      "Sonuç dakikalar içinde, kayıt yok, bağlayıcı değil"
     ],
     "schritte_h2": "3 adımda ön değerlendirme",
     "schritte": [
@@ -4069,8 +4075,8 @@
       "og_description": "BVSK ücret tablosu açıklandı + suçsuz zarar görenler neden 0 € öder (§ 249 BGB, BGH VI ZR 67/06)."
     },
     "ersteinschaetzung": {
-      "title": "Yapay zeka ilk değerlendirmesi — Araç hasarınız saniyeler içinde değerlendirilir",
-      "description": "Kaza hasarınızın fotoğraflarını yükleyin. Yapay zekamız 15 dakika altında ücretsiz ilk değerlendirme sunar: tamir masrafları ve bilirkişi raporu önerisi.",
+      "title": "Araç hasarı: size 0 € masraf? Ücretsiz yapay zekâ ön değerlendirmesi",
+      "description": "Fotoğrafları yükleyin, dakikalar içinde hakkınız olanı görün: onarım maliyeti, ikame değeri, pert, tüm kalemler. Kusursuz mu? Size 0 € (§ 249 BGB). Ücretsiz.",
       "og_title": "Yapay zeka ilk değerlendirmesi — Araç hasarını ücretsiz değerlendirin",
       "og_description": "Fotoğraf yükleyin, yapay zeka anında analiz eder. Tamir masrafları, yeniden edinim değeri, bilirkişi raporu önerisi — 15 dakika altında.",
       "twitter_description": "Ücretsiz, anında, bağlayıcı olmadan."

@@ -24,7 +24,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
-import { getCurrentClaimPayment, type CurrentClaimPayment } from '@/lib/faelle/claim-payments'
+import { getClaimPayments, type ClaimPaymentRow } from '@/lib/faelle/claim-payments'
 
 type DbClient = SupabaseClient<Database>
 
@@ -418,7 +418,7 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-H PR2: storno_grund aus dem faelle-Select entfernt — lebt auf
   // auftraege (aktueller Auftrag), wird unten parallel zum claims-Read geladen.
   // CMM-44 SP-J Bucket A: zahlung_eingegangen_am aus dem faelle-Select entfernt —
-  // lebt auf claim_payments (aktuelle Row, unten via getCurrentClaimPayment).
+  // lebt auf claim_payments (VS-Zeile, unten via getClaimPayments(...).vs).
   // CMM-65 Part B: zahlungsweg lebt jetzt auf claims (Auszahlungs-ZIEL des Kunden
   // {kundenkonto, werkstatt_direkt} ≠ claim_payments.zahlungsweg-Methode
   // {ueberweisung,...}) — kommt unten aus dem claims-Read, nicht mehr aus faelle.
@@ -493,7 +493,7 @@ export async function getKundeFallDetailRecord(
   // CMM-44 SP-H PR2: storno_grund kommt aus dem aktuellen Auftrag (reihenfolge DESC).
   let stornoGrund: string | null = null
   // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungsweg/zahlungseingang_am).
-  let currentPayment: CurrentClaimPayment | null = null
+  let currentPayment: ClaimPaymentRow | null = null
   // CMM-44 SP-I2 PR2: anschlussschreiben_am lebt auf kanzlei_faelle (1:1 per Claim).
   let anschlussschreibenAm: string | null = null
   // CMM-44 SP-I3: regulierung_am + vs_kuerzung_grund + SP-I6: kanzlei_id ebenfalls auf kanzlei_faelle (1:1).
@@ -549,7 +549,7 @@ export async function getKundeFallDetailRecord(
         .limit(1)
         .maybeSingle(),
       // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row.
-      getCurrentClaimPayment(admin, claimId),
+      getClaimPayments(admin, claimId),
       // CMM-44 SP-I2: anschlussschreiben_am + SP-I3: regulierung_am, vs_kuerzung_grund + SP-I6: kanzlei_id aus kanzlei_faelle (1:1).
       admin.from('kanzlei_faelle').select('anschlussschreiben_am, regulierung_am, vs_kuerzung_grund, kanzlei_id').eq('claim_id', claimId).maybeSingle(),
       // CMM-49 Tier-2: gegner_aktenzeichen/versicherungsnummer aus v_claim_full
@@ -568,7 +568,7 @@ export async function getKundeFallDetailRecord(
     gutachtenWerte = viewData ?? null
     gutachtenFertiggestelltAm = (gutachtenRow as { fertiggestellt_am?: string | null } | null)?.fertiggestellt_am ?? null
     stornoGrund = (aktAuftragRow as { storno_grund?: string | null } | null)?.storno_grund ?? null
-    currentPayment = claimPayment
+    currentPayment = claimPayment.vs
     const kfTyped = kfRow as { anschlussschreiben_am?: string | null; regulierung_am?: string | null; vs_kuerzung_grund?: string | null; kanzlei_id?: string | null } | null
     anschlussschreibenAm = kfTyped?.anschlussschreiben_am ?? null
     regulierungAmKf = kfTyped?.regulierung_am ?? null

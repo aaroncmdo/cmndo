@@ -278,6 +278,20 @@ CI fährt `npm run check:component-set -- --ratchet`. Es blockt **neue** handger
 Design/Plan: `docs/superpowers/specs/2026-05-28-component-set-ratchet-design.md` + `docs/superpowers/plans/2026-05-28-component-set-ratchet.md`.
 <!-- END:claimondo-component-set -->
 
+<!-- BEGIN:claimondo-status-registry -->
+# Status-Registry-Gate (Ratchet)
+
+Status-/Phasen-Badges ziehen Label + Farbe aus der zentralen getypten Registry `src/lib/status/` (`resolveStatus`/`statusLabel`/`statusSlotClass` + `<StatusBadge domain=.../>` / `<FallStatusBadge>` / `<FallPhaseBadge>`). Farbe = einer der 7 Token-Slots (`neutral/active/pending/done/success/warning/danger`), nie roh — branded via `var(--brand-*)`, token-audit-safe. Rollen-Varianten via `labelByRole` (verallgemeinert das alte `labelKunde`).
+
+CI fährt `npm run check:status-registry -- --ratchet`. Es blockt **NEUE** inline Status-/Farb-Maps (`const STATUS_COLORS = {…}`, `PHASE_PILL_COLOR`, `*_BADGE`, `*_CLS`) + Status-Farb-Ternaries (`status === 'x' ? 'bg-…'`) in `src/app/**` + `src/components/**` (ohne `ui/primitives/shared` — dort leben die sanktionierten Badge-Komponenten) gegen `scripts/status-registry-baseline.json`. Bestand (41 grandfathered) wird per **Boy-Scout** abgebaut: Consumer auf die Registry migrieren + Baseline mit `npm run check:status-registry -- --update-baseline` senken. Lokal (ohne Flag) `--warn` (exit 0).
+
+**Skip** (echte Nicht-Status-Farben — Chart-/Kategorie-Palette, Kanal-Identität): `// status-registry-skip: <grund>`-Header am File-Anfang. Pure-Logik: `scripts/lib/status-registry-scan.mjs`.
+
+**Nur COLOR-Logik gegatet** — reine Label-Maps (`Record<code,string>` ohne Farbe) sind erlaubt (Labels ≠ Branding). Zentrale Maps (`src/lib/statusLabels.ts`, `src/lib/status/*`, `src/components/shared/claims/*`) liegen ausserhalb des Scans = bewusst exempt.
+
+Design: `docs/superpowers/specs/2026-07-04-status-badge-registry-design.md`.
+<!-- END:claimondo-status-registry -->
+
 <!-- BEGIN:dead-code-gate -->
 # Dead-Code-Gate (knip)
 
@@ -292,6 +306,18 @@ CI fährt `npm run check:knip -- --ratchet`. Die Drift-Bremse blockt **NEUE** un
 
 Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
 <!-- END:dead-code-gate -->
+
+<!-- BEGIN:redirect-stub-gate -->
+# Redirect-Stub-Gate (Ratchet)
+
+**Eine `page.tsx`, die auf ALLEN Pfaden `redirect()`/`permanentRedirect()` (aus `next/navigation`) macht und KEINEN Content-`return` hat, ist verboten.** Solche reinen Redirect-Stubs triggern deterministisch **React-#310/#418** im Next-AppRouter → der Redirect feuert NICHT, prod rendert eine **leere 200-Shell** (Nav/Layout ohne Content). Kein Build/tsc/DB-Test/anderer Ratchet fängt das — **nur ein echter Prod-Render-Smoke**. Belegt 06.–07.07.: `/werkstatt/vermittlungen`, `/kunde/einstellungen`, `/gutachter/onboarding`, `/kunde/termin` rendeten alle leere Shells.
+
+**Kanonischer Fix (in `next.config.ts` `redirects()` ~20× belegt — AAR-889/CMM-14):** HTTP-301/308-Redirect via `next.config.ts` `redirects()` + die `page.tsx` LÖSCHEN. Der Config-Redirect greift auf der Routing-Ebene **vor** jedem RSC-Render + vor der Auth-Middleware → bulletproof + anon-curl-verifizierbar (308 ohne Login). **Exakt-Match** (kein `:path*`) → aktive Sub-Routen (z.B. `/kunde/termin/[token]`, `/gutachter/onboarding/buero`) leben weiter.
+
+**Abgrenzung (0 False-Positives):** NICHT betroffen sind **Content-Seiten**, die im Normalfall JSX rendern und nur als **Guard** redirecten (`if(!user)redirect('/login'); … return <JSX>`), (shell)-Layouts, DB-getriebene Router mit `return`. Faustregel: irgendein Content-`return` → ok; redirectet auf allen Pfaden (kein return) → Stub.
+
+CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
+<!-- END:redirect-stub-gate -->
 
 <!-- BEGIN:branding-rules -->
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`

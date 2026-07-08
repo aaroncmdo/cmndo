@@ -11,7 +11,7 @@ import { google } from 'googleapis'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
-import { listCalendarEventsFull } from '@/lib/kalender/caldav/client'
+import { listAllCalendarEventsFull } from '@/lib/kalender/caldav/client'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export type PrivateCalendarEvent = {
@@ -87,14 +87,14 @@ async function fetchCaldavEvents(
     if (!verb) return []
 
     const password = decrypt(verb.password_encrypted as string)
+    // ALLE Kalender (Arbeit/Privat/…) — der SV soll jeden privaten Termin als Stop adden koennen.
     const events = await Promise.race([
-      listCalendarEventsFull(
+      listAllCalendarEventsFull(
         {
           serverUrl: verb.server_url as string,
           username: verb.username as string,
           password,
         },
-        (verb.calendar_url as string) ?? '',
         fromIso,
         toIso,
       ),
@@ -102,14 +102,17 @@ async function fetchCaldavEvents(
         setTimeout(() => reject(new Error('caldav-events-timeout')), CALDAV_TIMEOUT_MS),
       ),
     ])
-    return events.map<PrivateCalendarEvent>((e) => ({
-      source: 'caldav',
-      external_event_id: e.uid,
-      titel: e.summary,
-      start_zeit: e.start,
-      end_zeit: e.end,
-      location: e.location ?? null,
-    }))
+    // claimondo-* UIDs raus: eigene in iCloud geschriebene Termine nicht als "privates Event" anbieten.
+    return events
+      .filter((e) => !e.uid.startsWith('claimondo-'))
+      .map<PrivateCalendarEvent>((e) => ({
+        source: 'caldav',
+        external_event_id: e.uid,
+        titel: e.summary,
+        start_zeit: e.start,
+        end_zeit: e.end,
+        location: e.location ?? null,
+      }))
   } catch (err) {
     console.warn('[private-events] CalDAV-Fetch fehlgeschlagen:', err instanceof Error ? err.message : err)
     return []

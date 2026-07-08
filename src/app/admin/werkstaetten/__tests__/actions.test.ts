@@ -9,6 +9,9 @@
 
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
+// Hoisted holder to capture the werkstaetten insert payload (happy-path assertion).
+const h = vi.hoisted(() => ({ werkstattInsert: null as Record<string, unknown> | null }))
+
 // ─── Mock: next/cache (revalidatePath is a no-op in tests) ──────────────────
 vi.mock('next/cache', () => ({
   revalidatePath: vi.fn(),
@@ -19,6 +22,10 @@ vi.mock('@/lib/isochrone/calculate-isochrone', () => ({
   calculateIsochrone: vi.fn().mockResolvedValue([]),
 }))
 
+// ─── Mock: Email-Flow (dynamischer Import in sendWerkstattLoginMail) ──────────
+const flow = vi.hoisted(() => ({ sendWillkommenWerkstatt: vi.fn().mockResolvedValue(undefined) }))
+vi.mock('@/lib/email/google/flows', () => ({ sendWillkommenWerkstatt: flow.sendWillkommenWerkstatt }))
+
 // ─── Supabase mock state ─────────────────────────────────────────────────────
 // We maintain a simple queue for server-client responses (auth.getUser + profiles.select)
 // and a separate flag for the admin client.
@@ -26,6 +33,7 @@ type MockConfig = {
   authUser: { id: string } | null
   profileRolle: string | null
   adminCreateUserError?: { message: string } | null
+  werkstattForcePwChange?: boolean
 }
 
 let mockConfig: MockConfig = {
@@ -74,6 +82,7 @@ vi.mock('@/lib/supabase/admin', () => ({
           return { data: { user: { id: 'new-werkstatt-user-id' } }, error: null }
         }),
         deleteUser: vi.fn().mockResolvedValue({ error: null }),
+        updateUserById: vi.fn().mockResolvedValue({ data: {}, error: null }),
       },
     },
     from: vi.fn().mockImplementation((table: string) => {
@@ -81,16 +90,33 @@ vi.mock('@/lib/supabase/admin', () => ({
         return {
           insert: vi.fn().mockResolvedValue({ data: null, error: null }),
           delete: vi.fn().mockReturnThis(),
+          update: vi.fn().mockReturnThis(),
+          select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
+          maybeSingle: vi.fn().mockImplementation(async () => ({
+            data: { force_password_change: mockConfig.werkstattForcePwChange ?? false }, error: null,
+          })),
         }
       }
       if (table === 'werkstaetten') {
         return {
-          insert: vi.fn().mockReturnThis(),
+          // Capture the insert payload so tests can assert individual fields
+          // (e.g. ansprechpartner_name) are threaded through to the DB row.
+          insert: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+            h.werkstattInsert = payload
+            return {
+              select: vi.fn().mockReturnThis(),
+              eq: vi.fn().mockReturnThis(),
+              single: vi.fn().mockResolvedValue({ data: { id: 'w-1' }, error: null }),
+            }
+          }),
           update: vi.fn().mockReturnThis(),
           select: vi.fn().mockReturnThis(),
           eq: vi.fn().mockReturnThis(),
           single: vi.fn().mockResolvedValue({ data: { id: 'w-1' }, error: null }),
+          maybeSingle: vi.fn().mockResolvedValue({
+            data: { id: 'w-1', name: 'Test-Werkstatt', email: 'w@example.com', user_id: 'wk-user-1' }, error: null,
+          }),
         }
       }
       return {
@@ -119,6 +145,7 @@ beforeEach(() => {
     profileRolle: null,
     adminCreateUserError: null,
   }
+  h.werkstattInsert = null
   vi.clearAllMocks()
 })
 
@@ -215,5 +242,64 @@ describe('createWerkstatt', () => {
     if (!result.ok) {
       expect(result.error).toContain('Pflicht')
     }
+  })
+
+  it('übernimmt ansprechpartner_name in den werkstaetten-Insert', async () => {
+    mockConfig.authUser = { id: 'admin-user-id' }
+    mockConfig.profileRolle = 'admin'
+
+    const { createWerkstatt } = await import('../actions')
+    const fd = makeFormData({
+      name: 'Muster-Werkstatt',
+      email: 'werkstatt@example.com',
+      adresse_strasse: 'Musterstr. 1',
+      adresse_plz: '44135',
+      adresse_ort: 'Dortmund',
+      lat: '51.5',
+      lng: '7.0',
+      ansprechpartner_name: 'Max Muster',
+    })
+    const result = await createWerkstatt(fd)
+
+    expect(result.ok).toBe(true)
+    expect(h.werkstattInsert).not.toBeNull()
+    expect(h.werkstattInsert).toMatchObject({ ansprechpartner_name: 'Max Muster' })
+  })
+})
+
+describe('setWerkstattFaehigkeiten', () => {
+  it('gibt ok:false zurück wenn nicht Admin', async () => {
+    mockConfig.authUser = { id: 'u' }; mockConfig.profileRolle = 'dispatch'
+    const { setWerkstattFaehigkeiten } = await import('../actions')
+    expect((await setWerkstattFaehigkeiten('w-1', ['glas'])).ok).toBe(false)
+  })
+  it('admin -> ok:true', async () => {
+    mockConfig.authUser = { id: 'a' }; mockConfig.profileRolle = 'admin'
+    const { setWerkstattFaehigkeiten } = await import('../actions')
+    expect((await setWerkstattFaehigkeiten('w-1', ['karosserie','lackierung'])).ok).toBe(true)
+  })
+})
+
+describe('sendWerkstattLoginMail', () => {
+  it('gibt ok:false zurück wenn nicht Admin', async () => {
+    mockConfig.authUser = { id: 'u' }
+    mockConfig.profileRolle = 'dispatch'
+    const { sendWerkstattLoginMail } = await import('../actions')
+    const res = await sendWerkstattLoginMail('w-1')
+    expect(res.ok).toBe(false)
+  })
+
+  it('Admin → ruft Flow Magic-Link-only (nur to+werkstattName, kein Einmalpasswort) + ok:true', async () => {
+    mockConfig.authUser = { id: 'admin' }
+    mockConfig.profileRolle = 'admin'
+    const { sendWerkstattLoginMail } = await import('../actions')
+    const res = await sendWerkstattLoginMail('w-1')
+    expect(res.ok).toBe(true)
+    expect(flow.sendWillkommenWerkstatt).toHaveBeenCalledTimes(1)
+    const arg = flow.sendWillkommenWerkstatt.mock.calls[0][0] as Record<string, unknown>
+    expect(arg.to).toBe('w@example.com')
+    expect(arg.werkstattName).toBe('Test-Werkstatt')
+    // Magic-Link-only: kein Einmalpasswort mehr im Flow-Aufruf.
+    expect(arg.einmalpasswort).toBeUndefined()
   })
 })

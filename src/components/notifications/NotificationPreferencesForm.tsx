@@ -13,6 +13,7 @@ import { useMemo, useState, useTransition } from 'react'
 import { BellIcon, MoonIcon, CheckCircle2Icon, AlertTriangleIcon, Loader2Icon, SaveIcon } from 'lucide-react'
 import { updateNotificationPreferences } from '@/lib/actions/notification-preferences'
 import type { Channel, EventType } from '@/lib/notifications/types'
+import { PushToggle } from './PushToggle'
 
 type Role = 'kunde' | 'sachverstaendiger' | 'makler' | 'kundenbetreuer' | 'admin'
 
@@ -140,7 +141,59 @@ const CATEGORIES_BY_ROLE: Record<Role, CategoryDef[]> = {
       events: ['gutachten.fertig', 'nachricht.received', 'dokument.hochgeladen'],
     },
   ],
-  kundenbetreuer: [],
+  kundenbetreuer: [
+    {
+      id: 'kb_fall_ausgang',
+      label: 'Fall-Ausgang',
+      events: [
+        'claim.reguliert',
+        'claim.abgelehnt',
+        'claim.storniert',
+        'claim.in_kommunikation_vs',
+        'claim.an_externe_kanzlei_uebergeben',
+        'claim.klage_rechtsstreit',
+        'claim.verjaehrt',
+      ],
+    },
+    {
+      id: 'kb_kanzlei_gutachten',
+      label: 'Kanzlei & Gutachten',
+      events: [
+        'claim.kanzlei_paket_pending',
+        'claim.kanzlei_paket_versendet',
+        'gutachten.ocr_succeeded',
+        'gutachten.ocr_failed',
+        'gutachten.pflicht_fotos_unvollstaendig',
+      ],
+    },
+    {
+      id: 'kb_termin_verlegung',
+      label: 'Termin-Verlegungen',
+      events: [
+        'termin.verlegung_vorgeschlagen',
+        'termin.verlegung_bestaetigt',
+        'termin.verlegung_abgelehnt',
+        'termin.verlegung_eskalation',
+        'termin.verschoben_durch_kunde',
+      ],
+    },
+    {
+      id: 'kb_mietwagen',
+      label: 'Mietwagen',
+      events: ['mietwagen.rechnung_ausstehend', 'mietwagen.abgabe_naht', 'mietwagen.ueber_limit'],
+    },
+    {
+      id: 'kb_gegner',
+      label: 'Gegner-Einladung',
+      events: [
+        'claim.gegner_eingeladen',
+        'claim.gegner_hat_geoeffnet',
+        'claim.gegner_hat_geantwortet',
+        'claim.gegner_konvertiert_zu_voll',
+        'claim.einladung_abgelaufen',
+      ],
+    },
+  ],
   admin: [],
 }
 
@@ -177,6 +230,32 @@ const EVENT_LABELS: Partial<Record<EventType, string>> = {
   'nachricht.received': 'Neue Nachricht',
   'makler.lead_eingegangen': 'Neuer Lead',
   'makler.provision_status': 'Provisions-Status',
+  // KB-Events (interne Fall-Aufsicht)
+  'claim.reguliert': 'Fall reguliert',
+  'claim.abgelehnt': 'Fall abgelehnt',
+  'claim.storniert': 'Fall storniert',
+  'claim.in_kommunikation_vs': 'In Kommunikation mit Versicherung',
+  'claim.an_externe_kanzlei_uebergeben': 'An externe Kanzlei übergeben',
+  'claim.klage_rechtsstreit': 'Klage / Rechtsstreit',
+  'claim.verjaehrt': 'Fall verjährt',
+  'claim.kanzlei_paket_pending': 'Kanzlei-Paket fällig',
+  'claim.kanzlei_paket_versendet': 'Kanzlei-Paket versendet',
+  'gutachten.ocr_succeeded': 'Gutachten-OCR erfolgreich',
+  'gutachten.ocr_failed': 'Gutachten-OCR fehlgeschlagen',
+  'gutachten.pflicht_fotos_unvollstaendig': 'Pflicht-Fotos unvollständig',
+  'termin.verlegung_vorgeschlagen': 'Termin-Verlegung vorgeschlagen',
+  'termin.verlegung_bestaetigt': 'Termin-Verlegung bestätigt',
+  'termin.verlegung_abgelehnt': 'Termin-Verlegung abgelehnt',
+  'termin.verlegung_eskalation': 'Termin-Verlegung eskaliert',
+  'termin.verschoben_durch_kunde': 'Termin durch Kunde verschoben',
+  'mietwagen.rechnung_ausstehend': 'Mietwagen-Rechnung ausstehend',
+  'mietwagen.abgabe_naht': 'Mietwagen-Abgabe naht',
+  'mietwagen.ueber_limit': 'Mietwagen über Limit',
+  'claim.gegner_eingeladen': 'Gegner eingeladen',
+  'claim.gegner_hat_geoeffnet': 'Gegner hat geöffnet',
+  'claim.gegner_hat_geantwortet': 'Gegner hat geantwortet',
+  'claim.gegner_konvertiert_zu_voll': 'Gegner wurde Vollkunde',
+  'claim.einladung_abgelaufen': 'Einladung abgelaufen',
 }
 
 const CHANNEL_LABELS: Record<Channel, { short: string; long: string }> = {
@@ -187,7 +266,26 @@ const CHANNEL_LABELS: Record<Channel, { short: string; long: string }> = {
   native_push: { short: 'Native', long: 'App-Push' },
 }
 
-const CHANNELS_FOR_UI: Channel[] = ['whatsapp', 'web_push', 'email']
+// Kanäle im "komplett abschalten"-Block. in_app ist bewusst NIE dabei — die
+// In-App-Inbox lässt sich nicht wholesale abschalten (nur per-Event feintunen).
+const OPTOUT_CHANNELS_BY_ROLE: Record<Role, Channel[]> = {
+  kunde: ['whatsapp', 'web_push', 'email'],
+  sachverstaendiger: ['whatsapp', 'web_push', 'email'],
+  makler: ['whatsapp', 'web_push', 'email'],
+  kundenbetreuer: ['web_push', 'email'],
+  admin: ['web_push', 'email'],
+}
+// Kanäle im Event-Feintuning. Interne Rollen (KB/Admin) empfangen v.a. in_app —
+// darum ist in_app dort steuerbar (laute Events stummschalten), ohne die Inbox
+// komplett zu killen (das geht oben bewusst nicht).
+const MATRIX_CHANNELS_BY_ROLE: Record<Role, Channel[]> = {
+  kunde: ['whatsapp', 'web_push', 'email'],
+  sachverstaendiger: ['whatsapp', 'web_push', 'email'],
+  makler: ['whatsapp', 'web_push', 'email'],
+  kundenbetreuer: ['in_app', 'web_push', 'email'],
+  admin: ['in_app', 'web_push', 'email'],
+}
+const DEFAULT_UI_CHANNELS: Channel[] = ['whatsapp', 'web_push', 'email']
 
 type SaveState = { status: 'idle' | 'saving' | 'success' | 'error'; msg?: string }
 
@@ -211,6 +309,8 @@ export function NotificationPreferencesForm({
   const [isPending, startTransition] = useTransition()
 
   const categories = useMemo(() => CATEGORIES_BY_ROLE[role] ?? [], [role])
+  const optOutChannels = useMemo(() => OPTOUT_CHANNELS_BY_ROLE[role] ?? DEFAULT_UI_CHANNELS, [role])
+  const matrixChannels = useMemo(() => MATRIX_CHANNELS_BY_ROLE[role] ?? DEFAULT_UI_CHANNELS, [role])
 
   function toggleChannelOptOut(channel: Channel) {
     setChannelOptOuts((prev) => {
@@ -260,7 +360,10 @@ export function NotificationPreferencesForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-6">
+      {/* Browser-Push-Opt-in (per Geraet/Browser) — separat vom Praeferenz-Submit. */}
+      <PushToggle />
+      <form onSubmit={handleSubmit} className="space-y-6">
       {/* Ruhezeiten */}
       <section>
         <div className="flex items-center gap-2 mb-2">
@@ -316,7 +419,7 @@ export function NotificationPreferencesForm({
           Deaktiviert alle Benachrichtigungen für diesen Kanal — unabhängig vom Event-Typ.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-          {CHANNELS_FOR_UI.map((channel) => {
+          {optOutChannels.map((channel) => {
             const isOptedOut = channelOptOuts.has(channel)
             return (
               <label
@@ -364,7 +467,7 @@ export function NotificationPreferencesForm({
                         {EVENT_LABELS[eventType] ?? eventType}
                       </span>
                       <div className="flex items-center gap-3">
-                        {CHANNELS_FOR_UI.map((channel) => {
+                        {matrixChannels.map((channel) => {
                           const disabledByChannelOptOut = channelOptOuts.has(channel)
                           const enabled = isEventChannelEnabled(eventType, channel)
                           return (
@@ -421,6 +524,7 @@ export function NotificationPreferencesForm({
         ) : null}
       </div>
     </form>
+    </div>
   )
 }
 

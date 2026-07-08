@@ -83,12 +83,12 @@ export async function updateNotificationPreferences(
     return { success: false, error: error.message }
   }
 
-  // Settings-Pages aller Rollen revalidieren — der Form steht in
-  // SV (/gutachter/profil), Kunde (/kunde/einstellungen) und Makler
-  // (/makler/einstellungen). Konservativ alle drei revalidieren.
+  // Settings-Pages aller Rollen revalidieren — der Form steht in SV (/gutachter/profil),
+  // Kunde (/kunde/profil, Sub-Projekt 4 konsolidiert), Makler (/makler/einstellungen), KB (/mitarbeiter/profil).
   revalidatePath('/gutachter/profil')
-  revalidatePath('/kunde/einstellungen')
+  revalidatePath('/kunde/profil')
   revalidatePath('/makler/einstellungen')
+  revalidatePath('/mitarbeiter/profil')
 
   return { success: true }
 }

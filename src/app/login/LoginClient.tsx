@@ -49,7 +49,13 @@ export default function LoginClient({
     setPhoneLoading(true)
     try {
       const supabase = createClient()
-      const { error } = await supabase.auth.signInWithOtp({ phone })
+      // F4 (AAR-audit-2fa): kein Auto-Signup — signInWithOtp legt sonst per
+      // Default neue Konten an (Signup-Vektor). Nur bestehende Konten duerfen
+      // sich per SMS-OTP anmelden.
+      const { error } = await supabase.auth.signInWithOtp({
+        phone,
+        options: { shouldCreateUser: false },
+      })
       if (error) throw error
       setPhoneStep('verify')
     } catch (err) {

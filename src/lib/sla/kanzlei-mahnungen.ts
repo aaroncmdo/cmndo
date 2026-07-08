@@ -173,8 +173,11 @@ export async function sendKanzleiMahnung(
     kbEmail = kb?.email ?? null
   }
 
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
-  const portalUrl = `${appUrl}/kanzlei/faelle/${fall.id}`
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
+  // Route-Reachability: /kanzlei/faelle/[id] existiert NICHT (In-House-Modell, bewusst nie gebaut)
+  // -> Mandate-Liste, wo die Kanzlei den Fall per Fall-Nr wiederfindet (konsistent mit
+  // KanzleiAuftragszusammenfassung, Route-Reachability-Audit #3710). Sonst 404 in jeder Mahnung.
+  const portalUrl = `${appUrl}/kanzlei/mandate`
   const kuerzungBetrag = fall.kuerzungs_betrag
     ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fall.kuerzungs_betrag))
     : undefined

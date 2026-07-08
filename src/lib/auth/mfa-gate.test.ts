@@ -4,6 +4,7 @@ import {
   entscheideLoginRouting,
   hatVerifiziertenFaktor,
   waehleZweitFaktor,
+  istZweiFaktorPflicht,
   type MfaGateInput,
   type LoginRoutingInput,
 } from './mfa-gate'
@@ -22,7 +23,6 @@ function input(overrides: Partial<MfaGateInput> = {}): MfaGateInput {
   return {
     isOn2faPage: false,
     isGoogleUser: false,
-    isGutachterPath: false,
     aalCurrent: 'aal1',
     hasVerifiedFactor: true,
     hasRememberToken: false,
@@ -51,8 +51,9 @@ describe('entscheideMfaGate', () => {
     expect(entscheideMfaGate(input({ isGoogleUser: true }))).toBe('allow')
   })
 
-  it('laesst /gutachter-Pfade durch (SV-Portal ist 2FA-frei)', () => {
-    expect(entscheideMfaGate(input({ isGutachterPath: true }))).toBe('allow')
+  it('challenge auch auf /gutachter (Exemption entfernt): Faktor + aal1', () => {
+    // F2: SV-Portal ist nicht mehr 2FA-frei. Ein SV mit Faktor wird gechallenged.
+    expect(entscheideMfaGate(input())).toBe('challenge')
   })
 
   it('laesst die /login/2fa-Seite selbst durch (kein Self-Redirect-Loop)', () => {
@@ -82,7 +83,6 @@ function loginInput(overrides: Partial<LoginRoutingInput> = {}): LoginRoutingInp
   return {
     isGoogleUser: false,
     hasVerifiedFactor: false,
-    legacy2faWanted: false,
     ...overrides,
   }
 }
@@ -96,17 +96,17 @@ describe('entscheideLoginRouting', () => {
     expect(entscheideLoginRouting(loginInput({ hasVerifiedFactor: true }))).toBe('challenge')
   })
 
-  it('Enroll: Legacy-2FA gewollt, aber noch kein Supabase-Faktor (Soft-Enroll)', () => {
-    expect(entscheideLoginRouting(loginInput({ legacy2faWanted: true }))).toBe('enroll')
+  it('Portal: kein Supabase-Faktor -> optional, kein erzwungener Enroll', () => {
+    expect(entscheideLoginRouting(loginInput())).toBe('portal')
   })
 
   it('Google-User: immer Portal (kein Custom-2FA)', () => {
     expect(entscheideLoginRouting(loginInput({ isGoogleUser: true }))).toBe('portal')
   })
 
-  it('Faktor schlaegt Legacy-Flag: bereits enrollt -> Challenge, nicht Enroll', () => {
+  it('Faktor -> Challenge (bereits enrollt)', () => {
     expect(
-      entscheideLoginRouting(loginInput({ hasVerifiedFactor: true, legacy2faWanted: true })),
+      entscheideLoginRouting(loginInput({ hasVerifiedFactor: true })),
     ).toBe('challenge')
   })
 
@@ -114,6 +114,33 @@ describe('entscheideLoginRouting', () => {
     expect(
       entscheideLoginRouting(loginInput({ isGoogleUser: true, hasVerifiedFactor: true })),
     ).toBe('portal')
+  })
+})
+
+// F3 (AAR-audit-2fa): 2FA-Pflicht fuer interne Rollen.
+describe('istZweiFaktorPflicht', () => {
+  it('true fuer interne Rollen', () => {
+    for (const r of ['admin', 'dispatch', 'kanzlei', 'kundenbetreuer']) {
+      expect(istZweiFaktorPflicht(r)).toBe(true)
+    }
+  })
+  it('false fuer externe Rollen + null/undefined', () => {
+    for (const r of ['kunde', 'sachverstaendiger', 'makler', 'werkstatt']) {
+      expect(istZweiFaktorPflicht(r)).toBe(false)
+    }
+    expect(istZweiFaktorPflicht(null)).toBe(false)
+    expect(istZweiFaktorPflicht(undefined)).toBe(false)
+  })
+})
+
+describe('entscheideLoginRouting — 2FA optional (kein Lockout)', () => {
+  it('interne Rolle ohne Faktor wird NICHT mehr in Enroll gezwungen -> portal', () => {
+    // rollePflicht existiert nicht mehr als Input; die Entscheidung haengt nur
+    // am Faktor. Ein Admin ohne Faktor landet im Portal (Lockout-Regression).
+    expect(entscheideLoginRouting({ isGoogleUser: false, hasVerifiedFactor: false })).toBe('portal')
+  })
+  it('mit Faktor weiterhin challenge', () => {
+    expect(entscheideLoginRouting({ isGoogleUser: false, hasVerifiedFactor: true })).toBe('challenge')
   })
 })
 

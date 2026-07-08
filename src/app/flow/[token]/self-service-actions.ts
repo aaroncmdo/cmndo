@@ -8,7 +8,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { bewerteSchuldfrage } from '@/lib/self-service/quali-gate'
+import { qualiFlowOutcome } from '@/lib/self-service/quali-flow-outcome'
 import { matchAndSlots, planeTerminOeffentlich, type OeffentlichesSvProfil } from '@/lib/sv-matching-modul'
 import { mergeFixerUndAlternativen } from '@/lib/self-service/merge-fixer-alternativen'
 import { resolveFlowTerminState } from '@/lib/self-service/flow-resolver'
@@ -16,6 +16,13 @@ import { planeTermin } from '@/lib/termine/engine'
 import { buildZb1LeadUpdate } from '@/lib/ocr/apply-zb1-to-lead'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { resolveWerkstattFallbackGeo } from './werkstatt-geo-fallback'
+import { resolveWunschterminIso } from './wunschtermin'
+import {
+  assignReparaturWerkstatt,
+  findReparaturWerkstaettenForTarget,
+} from '@/lib/werkstatt/vermittlung-server'
+import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
+import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 
 /**
  * flow_links-Token → Lead (service_role). Backward-compat: ein Token, das kein
@@ -45,44 +52,73 @@ async function resolveFlowLead(token: string): Promise<{
 
 /**
  * Selbst-Quali (Schuldfrage) für den Flow-Lead. Policy identisch zu /anfrage
- * speichereQuali: nur Eigenverschulden disqualifiziert (KEIN Termin).
+ * SP-B1: qualiFlowOutcome-Router -> haftpflicht/kasko/selbstzahler (Details im Helfer).
  */
 export async function speichereQualiFlow(
   token: string,
   schuldfrage: string,
-): Promise<{ ok: boolean; ergebnis?: 'weiter' | 'abbruch'; error?: string }> {
+  ueberEigeneVersicherung?: boolean,
+): Promise<{ ok: boolean; ergebnis?: 'weiter' | 'abbruch'; abrechnungsweg?: string | null; error?: string }> {
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  const ergebnis = bewerteSchuldfrage(schuldfrage)
+  const outcome = qualiFlowOutcome(schuldfrage, ueberEigeneVersicherung ?? null)
   const nowIso = new Date().toISOString()
 
-  if (ergebnis === 'abbruch') {
+  if (outcome.disqualifizieren) {
     const { error: updErr } = await admin
       .from('leads')
       .update({
         schuldfrage,
+        // SP-B1: abrechnungsweg-Record (kasko). leads.abrechnungsweg type-lagged -> Cast unten.
+        abrechnungsweg: outcome.abrechnungsweg,
         disqualifiziert: true,
         disqualifiziert_am: nowIso,
         disqualifiziert_grund_key: 'eigenverschulden',
         disqualifiziert_grund:
           'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
         status: 'disqualifiziert',
-      })
+      } as never)
       .eq('id', leadId)
     if (updErr) return { ok: false, error: updErr.message }
     revalidatePath('/dispatch/leads')
-    return { ok: true, ergebnis: 'abbruch' }
+    return { ok: true, ergebnis: 'abbruch', abrechnungsweg: outcome.abrechnungsweg }
   }
 
   const update: Record<string, unknown> = { schuldfrage }
-  if (ergebnis === 'weiter_mit_flag') {
+  if (outcome.abrechnungsweg) update.abrechnungsweg = outcome.abrechnungsweg
+  if (outcome.reparaturwunsch) update.reparaturwunsch = outcome.reparaturwunsch
+  if (outcome.ergebnis === 'weiter_mit_flag') {
     update.notiz = `[Self-Service] Schuldfrage „${schuldfrage}" — Dispatcher-Review empfohlen.`
   }
   const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
   revalidatePath('/dispatch/leads')
-  return { ok: true, ergebnis: 'weiter' }
+  return { ok: true, ergebnis: 'weiter', abrechnungsweg: outcome.abrechnungsweg }
+}
+
+/**
+ * SP-B2: Selbstzahler-Abschluss. Erzeugt aus dem Flow-Lead den PARTIELLEN Claim
+ * (kein SV/Gutachten/SA) via convertLeadToClaim ohne svIdFromTermin/signatureUrl.
+ * Nur wenn der Lead als Selbstzahler qualifiziert ist (abrechnungsweg='selbstzahler',
+ * SP-B1). Idempotent (convertLeadToClaim). Account-Step + Portal folgen im Wizard.
+ */
+export async function erzeugeSelbstzahlerClaim(
+  token: string,
+): Promise<{ ok: true; claimId: string } | { ok: false; error: string }> {
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  // Defensive: nur echte Selbstzahler-Vorgaenge. abrechnungsweg ist type-lagged -> select('*')+Cast.
+  const { data: leadRow } = await admin.from('leads').select('*').eq('id', leadId).maybeSingle()
+  const abrechnungsweg = (leadRow as Record<string, unknown> | null)?.abrechnungsweg as string | null | undefined
+  if (abrechnungsweg !== 'selbstzahler') return { ok: false, error: 'Kein Selbstzahler-Vorgang.' }
+
+  const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
+  const conv = await convertLeadToClaim({ leadId })
+  if (!conv.ok) return { ok: false, error: conv.error }
+  revalidatePath('/dispatch/leads')
+  return { ok: true, claimId: conv.claimId }
 }
 
 /**
@@ -383,6 +419,7 @@ export async function aendereTerminFlow(
 export async function speichereBesichtigungsortFlow(
   token: string,
   ort: { adresse: string; lat: number; lng: number },
+  wunschterminLokal?: string | null,
 ): Promise<{ ok: boolean; error?: string }> {
   if (!ort || typeof ort.lat !== 'number' || typeof ort.lng !== 'number') {
     return { ok: false, error: 'Bitte wählen Sie eine Adresse aus den Vorschlägen.' }
@@ -390,16 +427,84 @@ export async function speichereBesichtigungsortFlow(
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  const { error: updErr } = await admin
-    .from('leads')
-    .update({
-      besichtigungsort_adresse: ort.adresse,
-      besichtigungsort_lat: ort.lat,
-      besichtigungsort_lng: ort.lng,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', leadId)
+  const update: {
+    besichtigungsort_adresse: string
+    besichtigungsort_lat: number
+    besichtigungsort_lng: number
+    updated_at: string
+    wunschtermin?: string | null
+  } = {
+    besichtigungsort_adresse: ort.adresse,
+    besichtigungsort_lat: ort.lat,
+    besichtigungsort_lng: ort.lng,
+    updated_at: new Date().toISOString(),
+  }
+  // AAR-956: optionaler Wunschtermin aus dem /flow-Slot-Step (Berlin-Wall-Clock -> UTC-ISO).
+  // Nur setzen, wenn der Caller den Parameter uebergibt (undefined = alte Caller, unberuehrt).
+  // ladeMatchingFlow liest lead.wunschtermin und rankt die Slots danach.
+  if (wunschterminLokal !== undefined) {
+    update.wunschtermin = resolveWunschterminIso(wunschterminLokal)
+  }
+
+  const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+/**
+ * Reparaturwunsch/Werkstatt: die 5 naechsten Partner-Werkstaetten zum Flow-Lead laden.
+ * Token-scoped (resolveFlowLead) — kein Client-leadId.
+ */
+export async function ladeWerkstaettenFlow(
+  token: string,
+): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
+  const { leadId, error } = await resolveFlowLead(token)
+  if (!leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId })
+  return { ok: true, werkstaetten }
+}
+
+/**
+ * Kunde waehlt im Flow eine Partner-Werkstatt (quelle='kunde'). Token-scoped: schreibt NUR
+ * die zum Token gehoerende Lead-Zeile (leadId aus resolveFlowLead, NIE aus Client-Input) —
+ * verhindert Ownership-Hijack (vgl. F1-Flow-Token-Binding-Haertung).
+ */
+export async function waehleWerkstattFlow(
+  token: string,
+  werkstattId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!werkstattId) return { ok: false, error: 'Keine Werkstatt gewählt.' }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
+
+  // Gate/Idempotenz: nur zuweisen, wenn der Lead wirklich eine Vermittlung braucht
+  // (Reparatur-Intent, noch keine Werkstatt, Status offen). Verhindert Assign bei
+  // falschem Intent + Re-Assign-Overwrite. Die UI zeigt den Picker ohnehin nur so.
+  const { data: leadRow } = await admin
+    .from('leads')
+    .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status')
+    .eq('id', leadId)
+    .maybeSingle()
+  if (!leadRow || !brauchtWerkstattVermittlung(leadRow as BedarfRow)) {
+    return { ok: false, error: 'Für diesen Vorgang ist keine Werkstatt-Auswahl möglich.' }
+  }
+
+  // Nur eine der tatsächlich angebotenen (5 nächsten aktiven Partner) zulassen — ein
+  // manipulierter Request darf keine beliebige Werkstatt setzen.
+  const angeboten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId })
+  if (!angeboten.some((w) => w.id === werkstattId)) {
+    return { ok: false, error: 'Bitte wählen Sie eine der angebotenen Werkstätten.' }
+  }
+
+  const res = await assignReparaturWerkstatt({
+    target: 'lead',
+    id: leadId,
+    werkstattId,
+    quelle: 'kunde',
+    actorUserId: null,
+  })
+  if (!res.ok) return res
   revalidatePath('/dispatch/leads')
   return { ok: true }
 }
@@ -714,5 +819,40 @@ export async function speichereZb1KorrekturFlow(
   const { error: updErr } = await admin.from('leads').update(update).eq('id', leadId)
   if (updErr) return { ok: false, error: updErr.message }
   revalidatePath('/dispatch/leads')
+  return { ok: true }
+}
+
+// ─── SP2 Task 3: Reparatur-Wunschtermin im Flow ─────────────────────────────
+
+/**
+ * SP2 Task 3: Kunden-Wunschtermin fuer die Reparatur speichern (optional).
+ * Erscheint im FlowWerkstattStep sobald eine Werkstatt hinterlegt ist.
+ * Schreibt leads.reparatur_wunschtermin (timestamptz, UTC).
+ * Token-scoped via resolveFlowLead — kein Client-leadId vertraut.
+ */
+export async function speichereReparaturWunschterminFlow(
+  token: string,
+  wunschterminLokal: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!token || !wunschterminLokal) {
+    return { ok: false, error: 'Token und Wunschtermin sind erforderlich.' }
+  }
+  const { admin, leadId, error } = await resolveFlowLead(token)
+  if (!admin || !leadId) return { ok: false, error: error ?? 'Ungültiger Link.' }
+
+  let utc: string | null
+  try {
+    utc = resolveWunschterminIso(wunschterminLokal)
+  } catch {
+    return { ok: false, error: 'Ungültiger Wunschtermin.' }
+  }
+  if (!utc) return { ok: false, error: 'Ungültiger Wunschtermin.' }
+
+  const { error: updErr } = await admin
+    .from('leads')
+    .update({ reparatur_wunschtermin: utc })
+    .eq('id', leadId)
+  if (updErr) return { ok: false, error: updErr.message }
+  revalidatePath(`/flow/${token}`)
   return { ok: true }
 }

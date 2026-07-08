@@ -12,6 +12,9 @@ import {
   TrendingUpIcon,
 } from 'lucide-react'
 import { StatCard } from '@/components/shared/StatCard'
+import { ErsteVermittlungCard } from '@/components/makler/ErsteVermittlungCard'
+import { MaklerStaffelCard } from '@/components/makler/MaklerStaffelCard'
+import type { StaffelStufe } from '@/lib/werkstatt/staffel'
 import type { DashboardData } from '@/lib/makler/queries'
 
 type Props = {
@@ -21,6 +24,11 @@ type Props = {
     ansprechpartner_vorname: string
   }
   data: DashboardData
+  zeigeErsteVermittlungCard: boolean
+  promoCode: string | null
+  staffelSettled: number
+  staffelPending: number
+  staffelStufen: StaffelStufe[]
 }
 
 const EUR = new Intl.NumberFormat('de-DE', {
@@ -45,7 +53,15 @@ function relativeFromNow(iso: string): string {
   return RELATIVE.format(-months, 'month')
 }
 
-export function MaklerDashboard({ makler, data }: Props) {
+export function MaklerDashboard({
+  makler,
+  data,
+  zeigeErsteVermittlungCard,
+  promoCode,
+  staffelSettled,
+  staffelPending,
+  staffelStufen,
+}: Props) {
   const { stats, activity } = data
 
   return (
@@ -57,6 +73,11 @@ export function MaklerDashboard({ makler, data }: Props) {
         </h1>
         <p className="text-sm text-claimondo-ondo mt-1">Ihre Makler-Übersicht</p>
       </header>
+
+      {/* Erste-Vermittlung-Prompt: einmalig nach der ersten erfolgreichen Vermittlung */}
+      {zeigeErsteVermittlungCard && promoCode ? (
+        <ErsteVermittlungCard code={promoCode} firma={makler.firma} />
+      ) : null}
 
       {/* Stat-Grid */}
       <section
@@ -91,6 +112,31 @@ export function MaklerDashboard({ makler, data }: Props) {
         />
       </section>
 
+      {/* Tipp des Monats — direkt unter den KPIs (Anordnung Aaron 07.07.) */}
+      <section aria-label="Tipp des Monats">
+        <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
+          <p className="text-[11px] uppercase tracking-wider text-claimondo-ondo mb-2">
+            Tipp des Monats
+          </p>
+          <h3 className="text-lg font-semibold mb-2">
+            QR-Code auf dem Beratungsgespräch zeigen
+          </h3>
+          <p className="text-sm text-claimondo-ondo leading-relaxed">
+            Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
+            direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
+            Leads wie Makler die nur per E-Mail verteilen. Der QR führt
+            direkt zum Schadenformular — Ihr Kontakt bleibt nachvollziehbar.
+          </p>
+        </div>
+      </section>
+
+      {/* Staffelung — direkt unter dem Tipp (rendert null ohne konfigurierte Stufen) */}
+      <MaklerStaffelCard
+        settledCount={staffelSettled}
+        pendingCount={staffelPending}
+        stufen={staffelStufen}
+      />
+
       {/* Activity + Schnellaktionen als 2-col auf Desktop */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <section aria-label="Aktivität" className="lg:col-span-2">
@@ -121,8 +167,15 @@ export function MaklerDashboard({ makler, data }: Props) {
                       ) : (
                         <>
                           <p className="text-sm text-claimondo-navy">
-                            Provision {EUR.format(a.betrag_netto_eur)}{' '}
-                            <span className="text-claimondo-ondo">— {a.status}</span>
+                            {a.kunde_name ? (
+                              <>
+                                <strong>{a.kunde_name}</strong> ist Kunde geworden ·{' '}
+                              </>
+                            ) : null}
+                            {EUR.format(a.betrag_netto_eur)}{' '}
+                            <span className="text-claimondo-ondo">
+                              — {a.status === 'pending' ? 'vorgemerkt' : a.status}
+                            </span>
                           </p>
                           <p className="text-xs text-claimondo-ondo mt-0.5">
                             {relativeFromNow(a.timestamp)}
@@ -138,6 +191,7 @@ export function MaklerDashboard({ makler, data }: Props) {
         </section>
 
         <section aria-label="Schnellaktionen" className="space-y-4">
+          <h2 className="text-base font-semibold text-claimondo-navy">Hier klicken</h2>
           <QuickAction
             href="/makler/promo"
             label="Promo-Code teilen"
@@ -159,23 +213,6 @@ export function MaklerDashboard({ makler, data }: Props) {
         </section>
       </div>
 
-      {/* Tipp des Monats */}
-      <section aria-label="Tipp des Monats">
-        <div className="bg-claimondo-navy text-white rounded-ios-md p-6 md:p-8">
-          <p className="text-[11px] uppercase tracking-wider text-claimondo-shield mb-2">
-            Tipp des Monats
-          </p>
-          <h3 className="text-lg font-semibold mb-2">
-            QR-Code auf dem Beratungsgespräch zeigen
-          </h3>
-          <p className="text-sm text-claimondo-shield leading-relaxed">
-            Erfahrungswerte zeigen: Makler die ihren persönlichen QR-Code
-            direkt im Beratungsgespräch zeigen, erzeugen doppelt so viele
-            Leads wie Makler die nur per E-Mail verteilen. Der QR führt
-            direkt zum Schadenformular — Ihr Kontakt bleibt nachvollziehbar.
-          </p>
-        </div>
-      </section>
     </div>
   )
 }

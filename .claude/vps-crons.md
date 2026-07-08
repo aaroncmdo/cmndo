@@ -15,7 +15,7 @@ Schedule: täglich 07:00 Berliner Zeit (05:00 UTC Sommer, 06:00 UTC Winter)
 Route: /api/cron/termin-morgen-erinnerung
 Curl-Befehl:
 ```bash
-curl -s -H "Authorization: Bearer $CRON_SECRET" https://cmndo.vercel.app/api/cron/termin-morgen-erinnerung
+curl -s -H "Authorization: Bearer $CRON_SECRET" https://app.claimondo.de/api/cron/termin-morgen-erinnerung
 ```
 
 PM2 cron-Eintrag auf VPS hinzufügen:
@@ -23,7 +23,7 @@ PM2 cron-Eintrag auf VPS hinzufügen:
 {
   name: 'termin-morgen-erinnerung',
   script: 'curl',
-  args: ['-s', '-H', 'Authorization: Bearer <CRON_SECRET>', 'https://cmndo.vercel.app/api/cron/termin-morgen-erinnerung'],
+  args: ['-s', '-H', 'Authorization: Bearer <CRON_SECRET>', 'https://app.claimondo.de/api/cron/termin-morgen-erinnerung'],
   cron_restart: '0 5 * * *',
   autorestart: false,
 }
@@ -33,13 +33,13 @@ PM2 cron-Eintrag auf VPS hinzufügen:
 
 Der Baileys-VPS-Service (`services/baileys`) postet eingehende WA-Nachrichten an:
 ```
-POST https://cmndo.vercel.app/api/baileys/inbound
+POST https://app.claimondo.de/api/baileys/inbound
 Authorization: Bearer $CRON_SECRET
 ```
 
 Benötigte Env-Vars auf dem VPS (in `ecosystem.config.js` unter `env`):
 ```
-NEXT_PUBLIC_SITE_URL=https://cmndo.vercel.app
+NEXT_PUBLIC_SITE_URL=https://app.claimondo.de
 CRON_SECRET=<gleicher Wert wie in Vercel>
 BAILEYS_AUTH_TOKEN=<lokaler Auth-Token für /check und /send Endpoints>
 ```

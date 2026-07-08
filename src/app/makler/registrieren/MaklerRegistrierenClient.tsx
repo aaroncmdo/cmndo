@@ -4,6 +4,10 @@ import { useState, useTransition, type ChangeEvent } from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/primitives'
 import { registriereMaklerSelf } from './actions'
+import { ShareTools } from '@/components/makler/ShareTools'
+import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
+
+type GesellschaftOption = { id: string; name: string }
 
 type FormState = {
   firma: string
@@ -28,12 +32,20 @@ const EMPTY: FormState = {
 const inputClass =
   'w-full rounded-ios-md border border-claimondo-border px-4 py-2.5 text-sm text-claimondo-navy placeholder:text-claimondo-ondo focus:border-claimondo-ondo focus:outline-none'
 
-export function MaklerRegistrierenClient() {
+export function MaklerRegistrierenClient({
+  versicherungen,
+  maklerpools,
+}: {
+  versicherungen: GesellschaftOption[]
+  maklerpools: GesellschaftOption[]
+}) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<{ code: string | null } | null>(null)
   const [form, setForm] = useState<FormState>(EMPTY)
   const [einwilligung, setEinwilligung] = useState(false)
+  const [versicherungId, setVersicherungId] = useState<string | null>(null)
+  const [maklerpoolId, setMaklerpoolId] = useState<string | null>(null)
 
   function set(key: keyof FormState) {
     return (e: ChangeEvent<HTMLInputElement>) =>
@@ -45,6 +57,8 @@ export function MaklerRegistrierenClient() {
     const fd = new FormData()
     for (const [k, v] of Object.entries(form)) fd.set(k, v)
     fd.set('einwilligung', einwilligung ? 'true' : 'false')
+    if (versicherungId) fd.set('versicherung_id', versicherungId)
+    if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
     startTransition(async () => {
       const res = await registriereMaklerSelf(fd)
       if (res.ok) setSuccess({ code: res.code })
@@ -73,6 +87,14 @@ export function MaklerRegistrierenClient() {
             >
               {url.replace(/^https?:\/\//, '')}
             </a>
+          </div>
+        ) : null}
+        {success.code ? (
+          <div className="mt-5 text-left">
+            <p className="mb-2 text-center text-sm font-semibold text-claimondo-navy">
+              Teilen Sie Ihren Link — so gewinnen Sie sofort Kunden:
+            </p>
+            <ShareTools code={success.code} firma={form.firma} variant="quick" />
           </div>
         ) : null}
         <div className="mt-6">
@@ -111,6 +133,20 @@ export function MaklerRegistrierenClient() {
         <Field label="Ort">
           <input className={inputClass} value={form.adresse_ort} onChange={set('adresse_ort')} placeholder="Köln" />
         </Field>
+      </div>
+
+      <div className="mt-5">
+        <span className="mb-2 block text-xs font-semibold text-claimondo-ondo">Ihre Gesellschaft</span>
+        <GesellschaftSelect
+          versicherungen={versicherungen}
+          maklerpools={maklerpools}
+          versicherungId={versicherungId}
+          maklerpoolId={maklerpoolId}
+          onChange={({ versicherungId: v, maklerpoolId: p }) => {
+            setVersicherungId(v)
+            setMaklerpoolId(p)
+          }}
+        />
       </div>
 
       <label className="mt-5 flex items-start gap-3 text-sm text-claimondo-shield">

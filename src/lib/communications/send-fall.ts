@@ -9,6 +9,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 import { sendCommunication } from './send'
 import { COMMUNICATION_REGISTRY } from './registry'
 
@@ -31,7 +32,8 @@ export async function sendFallCommunication(
     if (!claimId) return
     const { data: claim } = await supabase
       .from('claims')
-      .select('lead_id, sv_id, geschaedigter_user_id, sprache, claim_nummer, kundenbetreuer_id, regulierungs_betrag')
+      // Payment-Ledger Phase 3 (Collapse): VS-Betrag aus dem (claim,'vs')-Ledger (admin-Client, RLS-Bypass).
+      .select('lead_id, sv_id, geschaedigter_user_id, sprache, claim_nummer, kundenbetreuer_id, claim_payments(partei, forderungsbetrag, erhaltener_betrag)')
       .eq('id', claimId)
       .maybeSingle()
 
@@ -112,10 +114,9 @@ export async function sendFallCommunication(
 
     if (!telefon && !email) return
 
-    const betragFormatted = claim.regulierungs_betrag
-      ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(
-          Number(claim.regulierungs_betrag),
-        )
+    const regBetrag = vsBetragAusEmbed(claim.claim_payments)
+    const betragFormatted = regBetrag != null
+      ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(regBetrag))
       : ''
 
     const data: Record<string, string> = {

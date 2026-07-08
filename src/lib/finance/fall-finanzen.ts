@@ -1,6 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
-import { getCurrentClaimPayment, type CurrentClaimPayment } from '@/lib/faelle/claim-payments'
+import { getClaimPayments, type ClaimPaymentRow } from '@/lib/faelle/claim-payments'
 
 export type FallFinanzen = {
   // Umsatz
@@ -90,7 +90,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   let claimKanzleiHonorar: number | null = null
   // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungseingang_am/
   // erhaltener_betrag) — ersetzt die alten faelle.zahlung_*-Reads.
-  let currentPayment: CurrentClaimPayment | null = null
+  let currentPayment: ClaimPaymentRow | null = null
   {
     const [{ data }, { data: claimRow }, { data: gutachtenRow }, claimPayment] = await Promise.all([
       db.from('v_gutachten_werte')
@@ -105,14 +105,14 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
         .select('gesamt_schadensbetrag')
         .eq('claim_id', claimId)
         .maybeSingle(),
-      getCurrentClaimPayment(db, claimId),
+      getClaimPayments(db, claimId),
     ])
     gutachtenWerte = data
     schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
     claimMarketingProvision = (claimRow?.marketing_provision as number | null) ?? null
     claimKanzleiHonorar = (claimRow?.kanzlei_honorar as number | null) ?? null
     gesamtSchadensbetrag = (gutachtenRow as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag ?? null
-    currentPayment = claimPayment
+    currentPayment = claimPayment.vs
   }
 
   // SV-Abrechnung
@@ -120,15 +120,15 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   let svLeadpreis: number | null = null
   let svPreistyp: string | null = null
   if (claim.sv_id) {
-    const { data: abr } = await db.from('gutachter_abrechnungen')
-      .select('leadpreis, preistyp')
-      .eq('fall_id', fallId)
-      .eq('sv_id', claim.sv_id)
-      .limit(1)
+    // Billing-Konsolidierung 2026-07-01: Leadpreis aus claims-SSoT (lead_preis_netto/-typ,
+    // processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
+    const { data: cLead } = await db.from('claims')
+      .select('lead_preis_netto, lead_preis_typ')
+      .eq('id', claimId)
       .maybeSingle()
-    if (abr) {
-      svLeadpreis = Number(abr.leadpreis) || null
-      svPreistyp = abr.preistyp
+    if (cLead?.lead_preis_netto != null) {
+      svLeadpreis = Number(cLead.lead_preis_netto) || null
+      svPreistyp = cLead.lead_preis_typ
       svHonorar = svLeadpreis
     }
   }

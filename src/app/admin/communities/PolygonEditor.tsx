@@ -199,7 +199,7 @@ export default function PolygonEditor({
 
   if (error) {
     return (
-      <div className="rounded-ios-xl bg-danger-soft border border-danger/30 p-3 text-xs text-danger-strong">
+      <div className="rounded-ios-xl bg-danger-soft border border-danger/30 p-3 text-body-xs text-danger-strong">
         Polygon-Editor konnte nicht geladen werden: {error}
       </div>
     )
@@ -208,7 +208,7 @@ export default function PolygonEditor({
   return (
     <div className="space-y-2">
       <div ref={containerRef} className="w-full h-72 rounded-ios-xl border border-claimondo-border overflow-hidden bg-claimondo-bg" />
-      <div className="flex items-center justify-between text-[10px] text-claimondo-ondo">
+      <div className="flex items-center justify-between text-caption text-claimondo-ondo">
         <span>
           {hasPolygon
             ? '✓ Polygon gesetzt — Ecken zum Anpassen ziehen, Mitte zum Verschieben.'

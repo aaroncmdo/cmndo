@@ -109,6 +109,23 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   }
   const lead = { id: created.leadId }
 
+  // Compliance (UX-Audit #3): dsgvo_consent-Haken persistieren (war bisher nur validiert,
+  // nie geloggt -> Art.-7-DSGVO-Nachweisbarkeit). Die Spalte leads.dsgvo_zustimmung_am wurde
+  // mit Migration 20260704113818 ergaenzt (spiegelt anfragen/gutachter_finder_anfragen, die
+  // dritte Intake-Tabelle hatte sie nie). `as never`, weil die generierten Marketing-database.types
+  // die frische Spalte noch nicht kennen (Type-Lag; Regen aufgeschoben) -> ohne Cast braeche der
+  // Deploy-Typecheck ("does not exist in type 'LeadUpdate'"; die CI-`build` deckt den Marketing-
+  // Build NICHT ab, nur der Deploy). Type-Lag-Cast wie in der App. Consent ist per Schema
+  // (safeParse oben) garantiert. Non-fatal.
+  try {
+    await admin
+      .from('leads')
+      .update({ dsgvo_zustimmung_am: new Date().toISOString() } as never)
+      .eq('id', lead.id as string)
+  } catch (err) {
+    console.error('[mini-wizard] dsgvo_zustimmung_am persist fehlgeschlagen (non-fatal):', err)
+  }
+
   // GA4: client_id auf dem Lead speichern (fuer spaetere flowlink_sent/sa_signed)
   // + generate_lead feuern (nur qualifizierte Leads, fire-and-forget).
   if (gaClientId) {

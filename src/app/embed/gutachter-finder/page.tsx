@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { ladeAktiveSVs, ladeSvLeads } from '@/lib/actions/gutachter-finder-actions'
+import { unionIsochrones } from '@/lib/mapbox/union-isochrones'
 import { FinderMap } from './_components/FinderMap'
 import { FinderWizard } from './_components/FinderWizard'
 import { ConsentBridge } from './_components/ConsentBridge'
@@ -23,7 +24,7 @@ export const metadata: Metadata = {
 export default async function GutachterFinderEmbedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string }>
+  searchParams: Promise<{ lat?: string; lng?: string; zoom?: string; fallback?: string; schaetzung?: string }>
 }) {
   const sp = await searchParams
 
@@ -31,6 +32,13 @@ export default async function GutachterFinderEmbedPage({
   const [aktiveRes, leadsRes] = await Promise.all([ladeAktiveSVs(), ladeSvLeads()])
   const svs = aktiveRes.ok ? aktiveRes.data : []
   const leadPins = leadsRes.ok ? leadsRes.data : []
+
+  // Perf: die Partner-Isochronen (~10k Vertices/SV) server-seitig zu EINER Coverage-
+  // Flaeche vereinen — sonst liefe @turf/union client-seitig (~1.6s Freeze bei 6 SVs,
+  // waechst mit dem Netz). isochrone_polygon danach aus dem Client-Payload strippen
+  // (nur die Union wird gerendert; der Nearest-SV-Check laeuft server via empfehleSvFuerOrt).
+  const coverageUnion = unionIsochrones(svs.map((s) => s.isochrone_polygon))
+  const svsLight = svs.map(({ isochrone_polygon: _iso, ...rest }) => rest)
 
   // WS6: Optionales Start-Zentrum aus der iframe-URL (?lat&lng[&zoom]). Die
   // einbettende Marketing-Seite reicht ihr server-geocodetes ?stadt/?plz als
@@ -41,6 +49,9 @@ export default async function GutachterFinderEmbedPage({
     Number.isFinite(latN) && Number.isFinite(lngN) ? { lat: latN, lng: lngN } : null
   const zoomN = sp.zoom ? Number(sp.zoom) : NaN
   const initialZoom = Number.isFinite(zoomN) ? zoomN : undefined
+
+  // Anspruch-pruefen handoff: schaetzung=<sessionToken> → FinderWizard verknuepft Buchung mit Schaetzung.
+  const schaetzung = typeof sp.schaetzung === 'string' ? sp.schaetzung : undefined
 
   // AAR-956: GTM-Container im iframe (env-gegated). Lädt NUR wenn `GF_GTM_ID` gesetzt ist (auf
   // app.claimondo.de / VPS Portal :3000) → die dataLayer-Pushes aus tracking.ts erreichen GTM →
@@ -65,12 +76,13 @@ export default async function GutachterFinderEmbedPage({
       <ConsentBridge />
       <FinderMap
         svLeads={leadPins}
-        aktiveSVs={svs}
+        aktiveSVs={svsLight}
+        coverageUnion={coverageUnion}
         height="100dvh"
         initialCenter={initialCenter}
         initialZoom={initialZoom}
         forceFallback={sp.fallback === '1'}
-        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} />}
+        wizardSlot={<FinderWizard forceFallback={sp.fallback === '1'} schaetzungSessionId={schaetzung} />}
       />
     </>
   )

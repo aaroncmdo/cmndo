@@ -58,8 +58,13 @@ export function KanzleiAuftragszusammenfassungEmail(props: Props) {
 
         <Paragraph>{props.svBerichtHinweis}</Paragraph>
 
-        <Button href={`${APP_URL}/kanzlei/fall/${props.fallId}`}>
-          Vollständige Fallakte im Kanzlei-Portal öffnen
+        {/* Route-Reachability-Audit 06.07.: /kanzlei/fall/[id] existiert NICHT (bewusst nie
+            gebaut — siehe Kommentar in kanzlei/mandate/page.tsx, In-House-Modell). Der alte
+            Button lief ins 404 -> auf die Mandate-Liste umgebogen, wo die Kanzlei den Fall
+            per Fall-Nr (oben als "Fallnummer" genannt) wiederfindet. props.fallId bleibt im
+            Type (von flows.ts befuellt), falls je eine Kanzlei-Detailseite gebaut wird. */}
+        <Button href={`${APP_URL}/kanzlei/mandate`}>
+          Mandate im Kanzlei-Portal öffnen
         </Button>
 
         {dokumente.length > 0 && (

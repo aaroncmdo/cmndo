@@ -58,19 +58,10 @@ export default async function AbrechnungPage() {
     sv.anzahlung_status === 'bezahlt' ||
     !!sv.stripe_anzahlung_bezahlt_am
 
-  // Fetch abrechnungen from the real billing table
-  const { data: abrechnungen } = await supabase
-    .from('gutachter_abrechnungen')
-    .select('id, claim_id, schadenhoehe, leadpreis, preistyp, abgerechnet_am')
-    .eq('sv_id', sv.id)
-    .order('abgerechnet_am', { ascending: false })
-
-  // CMM-49: Lookup claim_id → abrechnung (gutachter_abrechnungen.claim_id native FK; der
-  // completedFaelle-Anker ist jetzt claims-zentrisch, claim.id != altem faelle.id).
-  const abrMap: Record<string, { leadpreis: number; preistyp: string }> = {}
-  for (const a of abrechnungen ?? []) {
-    if (a.claim_id) abrMap[a.claim_id] = { leadpreis: Number(a.leadpreis), preistyp: a.preistyp ?? '' }
-  }
+  // Leadpreis lebt jetzt direkt am Claim (Billing-Konsolidierung 2026-07-01):
+  // lead_preis_netto/lead_preis_typ sind claims-SSoT (processCaseBilling). Die
+  // fruehere gutachter_abrechnungen-Query ist weg (write-dead nach der Konsolidierung) —
+  // die Werte kommen aus dem completedFaelle-claims-Query unten.
 
   // Fetch completed cases
   // CMM-49 Reader-Sweep: claims-direkt (faelle-frei). sv_id = claims.sv_id (CMM-60, 0-diff);
@@ -78,7 +69,7 @@ export default async function AbrechnungPage() {
   // CMM-44 SP-G PR2: gutachten_betrag → gutachten.gesamt_schadensbetrag/fertiggestellt_am.
   const { data: completedFaelleRaw } = await supabase
     .from('claims')
-    .select('id, lead_id, created_at, claim_nummer, gutachten(gesamt_schadensbetrag, fertiggestellt_am, gutachten_sv_honorar_netto)')
+    .select('id, lead_id, created_at, claim_nummer, lead_preis_netto, lead_preis_typ, gutachten(gesamt_schadensbetrag, fertiggestellt_am, gutachten_sv_honorar_netto)')
     .eq('sv_id', sv.id)
   // CMM-49 T1.2 (CMM-72): abgeleitete Phase je Claim (ersetzt den fall_status-Scope).
   const abrPhaseMap = await getClaimPhaseMap(
@@ -167,7 +158,7 @@ export default async function AbrechnungPage() {
   }
 
   // Einnahmen-Dashboard Daten (KFZ-88)
-  const totalLeadpreise = (abrechnungen ?? []).reduce((s, a) => s + Number(a.leadpreis ?? 0), 0)
+  const totalLeadpreise = (completedFaelle ?? []).reduce((s, f) => s + Number(f.lead_preis_netto ?? 0), 0)
   // CMM-44 SP-G PR2: gesamt_schadensbetrag + fertiggestellt_am aus gutachten-Embed (SSoT).
   type CompletedFall = NonNullable<typeof completedFaelle>[number]
   function getGutachtenBetrag(fall: CompletedFall): number | null {
@@ -334,9 +325,10 @@ export default async function AbrechnungPage() {
                               maximumFractionDigits: 2,
                             }) + ' EUR'
                           : '—'
-                        const abr = abrMap[fall.id]
-                        const leadpreisStr = abr
-                          ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
+                        const leadpreisNetto = fall.lead_preis_netto != null ? Number(fall.lead_preis_netto) : null
+                        const preistyp = (fall.lead_preis_typ as string | null) ?? ''
+                        const leadpreisStr = leadpreisNetto != null
+                          ? leadpreisNetto.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                           : '—'
                         const gutachtenDatum = getGutachtenDatum(fall)
                         const datum = gutachtenDatum
@@ -366,10 +358,10 @@ export default async function AbrechnungPage() {
                             <Td>{name}</Td>
                             <Td className="text-right tabular-nums">{betrag}</Td>
                             <Td className="text-right tabular-nums">
-                              {abr ? (
-                                <span className={abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy'}>
+                              {leadpreisNetto != null ? (
+                                <span className={preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy'}>
                                   {leadpreisStr}
-                                  {abr.preistyp === 'einzel' && <span className="text-amber-500 text-[10px] ml-1">Einzel</span>}
+                                  {preistyp === 'einzel' && <span className="text-amber-500 text-[10px] ml-1">Einzel</span>}
                                 </span>
                               ) : (
                                 <span className="text-claimondo-ondo text-xs">—</span>
@@ -397,9 +389,10 @@ export default async function AbrechnungPage() {
                         maximumFractionDigits: 2,
                       }) + ' EUR'
                     : '—'
-                  const abr = abrMap[fall.id]
-                  const leadpreisStr = abr
-                    ? abr.leadpreis.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
+                  const leadpreisNetto = fall.lead_preis_netto != null ? Number(fall.lead_preis_netto) : null
+                  const preistyp = (fall.lead_preis_typ as string | null) ?? ''
+                  const leadpreisStr = leadpreisNetto != null
+                    ? leadpreisNetto.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' EUR'
                     : '—'
                   const gutachtenDatum2 = getGutachtenDatum(fall)
                   const datum = gutachtenDatum2
@@ -434,7 +427,7 @@ export default async function AbrechnungPage() {
                         </div>
                         <div className="text-right">
                           <span className="text-claimondo-ondo text-xs">Leadpreis</span>
-                          <p className={abr ? (abr.preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy') : 'text-claimondo-ondo'}>
+                          <p className={leadpreisNetto != null ? (preistyp === 'einzel' ? 'text-amber-400' : 'text-claimondo-navy') : 'text-claimondo-ondo'}>
                             {leadpreisStr}
                           </p>
                         </div>

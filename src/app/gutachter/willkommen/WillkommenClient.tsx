@@ -20,11 +20,12 @@ import {
 } from 'lucide-react'
 import { loadStripe, type Stripe } from '@stripe/stripe-js'
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from '@stripe/react-stripe-js'
-import { signSvVertrag, startStripeCheckout } from '@/lib/actions/sv-onboarding-actions'
+import { signSvVertrag, startStripeCheckout, einloeseGutscheincode } from '@/lib/actions/sv-onboarding-actions'
 import { signBueroVertrag, startBueroStripeCheckout } from '@/app/gutachter/onboarding/buero/actions'
 import { signAkademieVertrag, startAkademieStripeCheckout } from '@/app/gutachter/onboarding/_akademie/actions'
 import { akzeptiereAgbSubSv } from './actions'
 import SignaturePadInput from '@/components/SignaturePadInput'
+import { Button } from '@/components/primitives/Button/Button.web'
 import StripeBrandingFooter from '@/components/StripeBrandingFooter'
 import LogoUploadStep from '@/components/LogoUploadStep'
 import DokumenteUploadStep, { type DokumentSlotState } from '@/components/DokumenteUploadStep'
@@ -263,6 +264,26 @@ export default function WillkommenClient({
   // KFZ-156: Embedded Checkout state — clientSecret wird beim Eintritt in
   // Step 2 vom Server geholt und an EmbeddedCheckoutProvider uebergeben.
   const [clientSecret, setClientSecret] = useState<string | null>(null)
+  // Gutscheincode-Einloesung (Alternative zur Stripe-Anzahlung): schaltet den
+  // SV frei und springt zum Dokumente-Schritt weiter (spiegelt Stripe-Success).
+  const [gutscheinCode, setGutscheinCode] = useState('')
+  const [gutscheinBusy, setGutscheinBusy] = useState(false)
+  const [gutscheinError, setGutscheinError] = useState<string | null>(null)
+  const handleGutschein = async () => {
+    setGutscheinError(null)
+    if (!gutscheinCode.trim()) { setGutscheinError('Bitte Code eingeben'); return }
+    setGutscheinBusy(true)
+    try {
+      const res = await einloeseGutscheincode(gutscheinCode.trim())
+      if (!res.ok) { setGutscheinError(res.error ?? 'Code ungültig'); return }
+      goToStep('dokumente')
+      router.refresh()
+    } catch {
+      setGutscheinError('Einlösen fehlgeschlagen')
+    } finally {
+      setGutscheinBusy(false)
+    }
+  }
   const [stripePromise] = useState<Promise<Stripe | null>>(() =>
     stripePublishableKey ? loadStripe(stripePublishableKey) : Promise.resolve(null),
   )
@@ -993,6 +1014,34 @@ export default function WillkommenClient({
                   <StripeBrandingFooter />
                 </div>
               </div>
+
+              {/* Gutscheincode einloesen — Alternative zur Anzahlung. Ein
+                  gueltiger Code schaltet frei und springt zum Dokumente-Schritt. */}
+              <div className="rounded-ios-xl border border-claimondo-border bg-claimondo-bg p-4 space-y-2">
+                <p className="text-sm font-semibold text-claimondo-navy">Gutscheincode</p>
+                <p className="text-xs text-claimondo-ondo">
+                  Du hast einen Gutscheincode? Dann kannst du die Anzahlung überspringen.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-2">
+                  <input
+                    type="text"
+                    value={gutscheinCode}
+                    onChange={(e) => setGutscheinCode(e.target.value)}
+                    placeholder="Code eingeben"
+                    disabled={gutscheinBusy}
+                    className="flex-1 px-3 py-2 rounded-ios-lg border border-claimondo-border text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-shield/30 disabled:opacity-60"
+                  />
+                  <Button
+                    variant="ondo"
+                    onClick={handleGutschein}
+                    disabled={!gutscheinCode.trim()}
+                    loading={gutscheinBusy}
+                  >
+                    Einlösen
+                  </Button>
+                </div>
+                {gutscheinError && <p className="text-xs text-danger">{gutscheinError}</p>}
+              </div>
             </div>
           )}
 
@@ -1040,7 +1089,6 @@ export default function WillkommenClient({
           {/* AAR-242: Kalender-Step nach Stripe-Anzahlung */}
           {currentKey === 'kalender' && r !== 'sub_mitarbeiter' && (
             <KalenderConnectStep
-              svId={sv.id}
               gcalConnected={sv.gcal_connected}
               caldavConnected={sv.caldav_connected}
               onDone={() => {

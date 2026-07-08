@@ -1,5 +1,4 @@
 ﻿import { createClient } from '@/lib/supabase/server'
-import PageHeader from '@/components/shared/PageHeader'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 
@@ -29,13 +28,16 @@ export default async function SupportPage() {
   return (
     <div className="py-6 overflow-y-auto" style={{ height: '100%' }}>
       <div>
-        <div className="mb-4">
-          <PageHeader title="Support-Tickets" description={`${(probleme ?? []).length} gemeldete Probleme`} />
+        <div className="mb-6 flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-heading-lg font-bold text-claimondo-navy">Support-Tickets</h1>
+            <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${(probleme ?? []).length} gemeldete Probleme`}</p>
+          </div>
         </div>
 
         {(probleme ?? []).length === 0 ? (
           <div className="bg-white rounded-ios-lg shadow-ios-md p-8 text-center">
-            <p className="text-claimondo-ondo/70 text-sm">Keine Probleme gemeldet</p>
+            <p className="text-claimondo-ondo/70 text-body-sm">Keine Probleme gemeldet</p>
           </div>
         ) : (
           <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md overflow-hidden">
@@ -57,18 +59,18 @@ export default async function SupportPage() {
                   const name = profile ? [profile.vorname, profile.nachname].filter(Boolean).join(' ') || profile.email : '—'
                   return (
                     <Tr key={p.id} className="border-b border-claimondo-border hover:bg-claimondo-bg">
-                      <Td className="text-claimondo-ondo! text-xs whitespace-nowrap">
+                      <Td className="text-claimondo-ondo! text-body-xs whitespace-nowrap">
                         {new Date(p.erstellt_am).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                       </Td>
-                      <Td className="text-xs">{name}</Td>
+                      <Td className="text-body-xs">{name}</Td>
                       <Td>
-                        <span className="text-[10px] bg-claimondo-bg text-claimondo-ondo px-1.5 py-0.5 rounded">{KAT_LABEL[p.kategorie] ?? p.kategorie}</span>
+                        <span className="text-caption bg-claimondo-bg text-claimondo-ondo px-1.5 py-0.5 rounded">{KAT_LABEL[p.kategorie] ?? p.kategorie}</span>
                       </Td>
-                      <Td className="text-xs max-w-xs truncate">{p.beschreibung}</Td>
+                      <Td className="text-body-xs max-w-xs truncate">{p.beschreibung}</Td>
                       <Td>
                         <StatusBadge colorCls={STATUS_COLOR[p.status] ?? 'bg-claimondo-bg text-claimondo-ondo'}>{p.status}</StatusBadge>
                       </Td>
-                      <Td className="text-claimondo-ondo/70! text-[10px] max-w-32 truncate">{p.browser?.split(' ').pop() ?? '—'}</Td>
+                      <Td className="text-claimondo-ondo/70! text-caption max-w-32 truncate">{p.browser?.split(' ').pop() ?? '—'}</Td>
                     </Tr>
                   )
                 })}

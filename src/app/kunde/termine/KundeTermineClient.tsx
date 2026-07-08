@@ -14,6 +14,7 @@ import {
   VideoIcon, HardHatIcon, PhoneIcon,
 } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { TerminStatusBadge } from '@/components/shared/TerminStatusBadge'
 
 export type TerminRow = {
   id: string
@@ -37,14 +38,6 @@ const STATUS_LABEL: Record<string, string> = {
   gegenvorschlag: 'Gegenvorschlag vom SV — Antwort nötig',
   abgelehnt: 'Abgelehnt',
   abgeschlossen: 'Durchgeführt',
-}
-
-const STATUS_BADGE: Record<string, string> = {
-  reserviert: 'bg-warning-soft text-warning-strong border-warning/30',
-  bestaetigt: 'bg-success-soft text-success-strong border-success/30',
-  gegenvorschlag: 'bg-warning-soft text-warning-strong border-warning/30',
-  abgelehnt: 'bg-danger-soft text-danger-strong border-danger/30',
-  abgeschlossen: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border',
 }
 
 // Dot-Farbe pro Status im Kalender
@@ -308,19 +301,16 @@ function TerminCard({
   const isVideo = termin.kanal === 'video'
   const Icon = isKb ? VideoIcon : HardHatIcon
   const start = new Date(termin.start_zeit)
-  const badgeCls = STATUS_BADGE[termin.status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
   const statusLabel = termin.status in STATUS_LABEL ? t(`statusLabel.${termin.status}`) : termin.status
 
   // AAR-698: Karte komplett klickbar → Termin-Detail-View.
   // KB-Beratungstermine haben eine andere Detail-Logik und bleiben vorerst
   // bei „Zum Fall" (Beratungs-Detail kommt in eigenem Ticket).
-  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : '#') : `/kunde/termine/${termin.id}`
-
-  return (
-    <Link
-      href={targetHref}
-      className={`block bg-white rounded-2xl border border-claimondo-border p-4 hover:border-claimondo-ondo/40 hover:shadow-sm transition ${muted ? 'opacity-90' : ''}`}
-    >
+  // KB-Beratung ohne Fall hat (noch) kein Ziel -> nicht-klickbar statt totem href='#'
+  // (Beratungs-Detail kommt in eigenem Ticket; SV-Termine gehen zur Detail-View).
+  const targetHref = isKb ? (fall ? `/kunde/faelle/${fall.id}` : null) : `/kunde/termine/${termin.id}`
+  const cardClass = `block bg-white rounded-2xl border border-claimondo-border p-4 transition ${targetHref ? 'hover:border-claimondo-ondo/40 hover:shadow-sm' : ''} ${muted ? 'opacity-90' : ''}`
+  const cardInner = (
       <div className="flex items-start gap-3">
         <div className="w-9 h-9 rounded-ios-xl bg-[var(--brand-secondary-soft)] flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4 text-claimondo-ondo" />
@@ -330,9 +320,7 @@ function TerminCard({
             <span className="text-sm font-semibold text-claimondo-navy">
               {isKb ? t('card.kundenBeratung') : t('card.gutachterTermin')}
             </span>
-            <span className={`text-[10px] font-medium px-2 py-0.5 rounded-full border ${badgeCls}`}>
-              {statusLabel}
-            </span>
+            <TerminStatusBadge status={termin.status} label={statusLabel} />
           </div>
           <p className="text-sm text-claimondo-navy mt-1">
             {format.dateTime(start, { weekday: 'long', day: '2-digit', month: 'long', timeZone: 'Europe/Berlin' })}
@@ -352,10 +340,19 @@ function TerminCard({
                   : <><PhoneIcon className="w-3 h-3 inline" /> {t('card.vorOrtTermin')}</>}
               </span>
             )}
-            <span className="text-claimondo-ondo font-medium ml-auto">{t('card.detailsOeffnen')}</span>
+            {targetHref && <span className="text-claimondo-ondo font-medium ml-auto">{t('card.detailsOeffnen')}</span>}
           </div>
         </div>
       </div>
+  )
+
+  return targetHref ? (
+    <Link href={targetHref} className={cardClass}>
+      {cardInner}
     </Link>
+  ) : (
+    <div className={cardClass}>
+      {cardInner}
+    </div>
   )
 }

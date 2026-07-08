@@ -7,17 +7,15 @@
 // next-intl → inline DE (Open-Decision #2); ansonsten visuell deckungsgleich.
 // WS2 redesignt das Pin-Popup (+ GoogleBewertungBadge), WS3 Route/Zoom, WS4 füllt wizardSlot.
 //
-// 2026-05-11: Gutachter-Finder mit Mapbox-Vollbild-Karte (Referenz:
-// docs/Pages/sv-live-mapbox_25.html) + DynamicWizard im Sidebar-Panel
-// (Referenz: docs/Pages/terminierung-flow.html).
+// AAR-956 (05.07.) — Einzel-SV-Ansicht (Route + Profil) wiederhergestellt.
+// Coverage-Fläche = Union der Partner-Isochronen (glatter Außen-Umriss via
+// unionIsochrones aus @/lib/mapbox/union-isochrones) + Dead-Pin-Heatmap.
+// Beide Coverage-Layer bleiben als Kontext-Fläche sichtbar; die Einzel-SV-Ebene
+// (klickbare Avatar-Marker + Profil-Popup/Sheet + Route) liegt DARÜBER.
 //
-// Pattern:
-//   - Map = Vollbild-Background mit 3D-Buildings, Pitch 35°
-//   - Marker = Custom HTML pro sv_lead (Ondo-Border, Initial)
-//   - Iso-Polygon = transparenter Halo (Ondo-Fill, 12% Opacity)
-//   - Sidebar = Glass-Panel links mit DynamicWizard
-//   - Click auf SV → highlight + scrollIntoView des Wizards
-//   - Mobile = Bottom-Sheet statt Sidebar
+// Anti-Skimming: Popup zeigt AUSSCHLIESSLICH anonyme Trust-Signale (Initiale,
+// Region/Stadt, Specs, Bewertung, Vorname). KEINE PII: kein Telefon, keine Email,
+// keine Adresse, kein Firmenname.
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { useEffect, useRef, useState } from 'react'
@@ -44,6 +42,9 @@ type Props = {
   /** Tier-1 SVs (sachverstaendige). 2026-06-02 (Aaron): JEDER verifizierte,
    * aktive SV ist klickbar mit anonymem Profil-Popup (RLS-gegated). */
   aktiveSVs?: AktiverSVPublic[]
+  /** Server-seitig vorberechnete Union der Partner-Isochronen (Perf: die ~10k-Vertex-
+   * Isochronen wuerden sonst client-seitig via @turf/union unioniert -> Freeze). */
+  coverageUnion?: GeoJSON.Feature<GeoJSON.Polygon | GeoJSON.MultiPolygon> | null
   /** Slot für den Inline-Wizard (WS4 — FlowSlotStep). WS1b: Platzhalter aus der Page. */
   wizardSlot?: React.ReactNode
   /** Doc 34 0a.3: Start-Zentrum aus URL-Param (?stadt / ?plz / ?lat&lng),
@@ -78,9 +79,10 @@ const USER_LOCATION_ZOOM = 10.5
 const COL_ONDO = '#4573A2'
 const COL_NAVY = '#0D1B3E'
 
+
 // Generischer Dead-Pin (Claimondo-Logo-Look) — nicht klickbar, kein Hover,
-// kein Popup. Wird für SVs mit paket!='standard' UND alle sv_leads
-// (Tier-3 Excel-Imports) verwendet. Zweck: zeigt Marker-Dichte ohne SV-Identität.
+// kein Popup. Wird für alle sv_leads (Tier-3 Excel-Imports) verwendet.
+// Zweck: zeigt Marker-Dichte ohne SV-Identität.
 function addDeadPin(
   map: MapboxMap,
   store: Marker[],
@@ -147,8 +149,6 @@ const MAP_STRINGS: Record<string, string> = {
   pill_bundesweit: '{count} Gutachter bundesweit verfügbar',
   pill_short_near: '{count} Gutachter in Ihrer Nähe',
   pill_short_bundesweit: '{count} Gutachter verfügbar',
-  sheet_open: 'Karte zeigen',
-  sheet_closed: 'Anfrage starten',
   attribution: 'Mapbox · OpenStreetMap',
   error_title: 'Karte konnte nicht geladen werden',
   error_no_token: 'NEXT_PUBLIC_MAPBOX_TOKEN fehlt im Build — das GitHub-Secret ist leer oder nicht gesetzt.',
@@ -215,7 +215,7 @@ function GutachterPill({
   )
 }
 
-export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
+export function FinderMap({ svLeads, aktiveSVs = [], coverageUnion = null, wizardSlot, initialCenter = null, initialZoom, height = '100dvh', forceFallback = false }: Props) {
   const t = tMap
   const mapRef = useRef<MapboxMap | null>(null)
   const containerRef = useRef<HTMLDivElement | null>(null)
@@ -234,7 +234,10 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
   const lastOrtRef = useRef<{ lat: number; lng: number } | null>(null)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [beratungOpen, setBeratungOpen] = useState(false)
-  const [mobileSheetOpen, setMobileSheetOpen] = useState(false)
+  // Aaron 04.07.: das Anfrage-Bottom-Sheet startet auf Mobil kosmetisch AUSGEFAHREN
+  // (default expanded, überall — Embed / /start/makler / /start/werkstatt). Der Nutzer
+  // sieht sofort die Anfrage-CTA; einklappen (Peek) geht per Chevron/Drag.
+  const [mobileSheetOpen, setMobileSheetOpen] = useState(true)
   // AAR-956 (Aaron 14.06.): SV-Profil als Bottom-Sheet auf Mobil/iPad (<lg) statt engem Pin-Popup.
   const [sheetSv, setSheetSv] = useState<AktiverSVPublic | null>(null)
   // AAR-956 (Aaron 14.06.): Touch-Start-Y fürs Drag-to-toggle des Anfrage-Bottom-Sheets.
@@ -297,6 +300,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       setMapStatus('no-token')
       return
     }
+
     // Doc 34 0a.3: URL-Param-Zentrum (?stadt/?plz/?lat&lng) gewinnt über den
     // NRW-Default. Ohne initialCenter bleibt es bei NRW-Mittelpunkt + Geolocation.
     const startCenter: [number, number] = initialCenter
@@ -444,52 +448,64 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
       loaded = true
       window.clearTimeout(loadTimeout)
       map.resize() // 2026-05-12: nochmal resize beim load, falls der Container zwischenzeitlich gewachsen ist
-      // 2026-05-12: 3D-Buildings-Layer ENTFERNT — die interpolate-Ausdrücke
-      // waren kaputt (Stops als verschachtelte Arrays statt flach), das hat
-      // die Mapbox-Render-Loop abgestürzt → schwarze Karte. War nur ein
-      // dezenter Tiefe-Effekt ab Zoom 13 (Default-Zoom ist 8.5), also kein
-      // Verlust. Falls wieder gewünscht: korrekte interpolate-Syntax nutzen
-      // (['interpolate', ['linear'], input, stop1_in, stop1_out, stop2_in, ...]).
 
-      // Iso-Halos (Coverage-Radius) für alle verifizierten aktiven SVs.
-      // 2026-06-02 (Aaron "die Profile sollen public sein"): zuvor nur
-      // paket='standard' (Dead-Pin-Privacy-Default). Da jetzt jeder verifizierte
-      // SV ein öffentliches Profil ist, bekommt er auch sein Coverage-Halo.
-      // Tier-3 sv_leads bleiben ohne Iso.
-      const tier1Features = aktiveSVs
-        .filter((s) => s.isochrone_polygon)
-        .map((s) => ({
-          type: 'Feature' as const,
-          properties: { id: s.id, tier: 'standard' },
-          geometry: s.isochrone_polygon as GeoJSON.Polygon,
-        }))
-
-      if (tier1Features.length > 0) {
-        map.addSource('sv-isos-pro', {
+      // ── Dead-Pin-Reichweite (heller, UNTEN) — als weiche Heatmap-Wolke statt harter
+      //    15-km-Kreise (die stapeln sich fleckig übereinander). Reine Optik: der
+      //    Abdeckungs-/Nearest-SV-Check laeuft server-seitig (empfehleSvFuerOrt).
+      //    Flacher Farbverlauf → gleichmäßige helle Fläche, kein Hotspot-Look.
+      if (svLeads.length > 0) {
+        map.addSource('coverage-deadpins', {
           type: 'geojson',
-          data: { type: 'FeatureCollection', features: tier1Features },
+          data: {
+            type: 'FeatureCollection',
+            features: svLeads.map((l) => ({
+              type: 'Feature' as const,
+              properties: {},
+              geometry: { type: 'Point' as const, coordinates: [l.lng, l.lat] },
+            })),
+          },
         })
-
-        // Tier-1 Halo: Ondo-Fill mit hoeherer Opacity als vorher
         map.addLayer({
-          id: 'sv-isos-pro-fill',
+          id: 'coverage-deadpins-heat',
+          type: 'heatmap',
+          source: 'coverage-deadpins',
+          paint: {
+            'heatmap-weight': 1,
+            'heatmap-intensity': ['interpolate', ['linear'], ['zoom'], 5, 0.7, 9, 1.1],
+            // Radius ~ 15 km über den Zoom (verdoppelt sich pro Zoomstufe wie die Karte).
+            'heatmap-radius': ['interpolate', ['exponential', 2], ['zoom'], 5, 8, 7, 32, 9, 128, 11, 512],
+            'heatmap-color': [
+              'interpolate', ['linear'], ['heatmap-density'],
+              0, 'rgba(123,163,204,0)',
+              0.03, 'rgba(123,163,204,0.30)',
+              1, 'rgba(123,163,204,0.42)',
+            ],
+            'heatmap-opacity': 0.85,
+          },
+        })
+      }
+
+      // ── Partner-Einsatzgebiet (kräftig, OBEN) — server-seitig vorberechnete Union ──
+      // Perf: die ~10k-Vertex-Isochronen werden in page.tsx (Server) via @turf/union
+      // zu EINER Flaeche vereint + als coverageUnion-Prop gereicht -> kein Client-turf.
+      if (coverageUnion) {
+        const coveragePartnersData: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: [{ ...coverageUnion, properties: {} }],
+        }
+        map.addSource('coverage-partners', { type: 'geojson', data: coveragePartnersData })
+        map.addLayer({
+          id: 'coverage-partners-fill',
           type: 'fill',
-          source: 'sv-isos-pro',
-          paint: {
-            'fill-color': COL_ONDO,
-            'fill-opacity': 0.12,
-          },
+          source: 'coverage-partners',
+          paint: { 'fill-color': COL_ONDO, 'fill-opacity': 0.16 },
         })
-
         map.addLayer({
-          id: 'sv-isos-pro-outline',
+          id: 'coverage-partners-outline',
           type: 'line',
-          source: 'sv-isos-pro',
-          paint: {
-            'line-color': COL_ONDO,
-            'line-width': 2,
-            'line-opacity': 0.55,
-          },
+          source: 'coverage-partners',
+          // Union → nur noch der glatte Außen-Umriss (keine inneren SV-Grenzen mehr).
+          paint: { 'line-color': COL_ONDO, 'line-width': 2, 'line-opacity': 0.55 },
         })
       }
 
@@ -947,7 +963,7 @@ export function FinderMap({ svLeads, aktiveSVs = [], wizardSlot, initialCenter =
         {wizardSlot}
       </div>
 
-      {/* Mobile Bottom-Sheet (collapsed by default, klick zum Öffnen).
+      {/* Mobile Bottom-Sheet (AUSGEFAHREN by default — Aaron 04.07.; einklappen per Chevron/Drag).
           AAR-glass-s1: Glass-Tokens statt hartkodierter bg-white/85. */}
       {/* Mobile Bottom-Sheet — AAR-956 (Aaron 14.06.): EINE Glass-Fläche (leicht transparent +
           backdrop-blur), draggable, nur der Chevron als Affordance. Grab-Strich + „Anfrage

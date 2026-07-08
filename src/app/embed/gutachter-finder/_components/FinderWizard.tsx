@@ -18,6 +18,8 @@ import { ChevronRight, ChevronLeft, CheckCircle2, Phone } from 'lucide-react'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
+import { AufnahmeFlowHinweis } from '@/components/shared/AufnahmeFlowHinweis'
+import { MaklerEmpfehlungBadge } from '@/components/shared/MaklerEmpfehlungBadge'
 import { Button } from '@/components/primitives'
 import { GlassSurface } from './GlassSurface'
 import { ladeEmbedMatching, reserviereEmbedTermin, bucheRueckrufBeimDispatcher } from '../actions'
@@ -87,6 +89,7 @@ export function FinderWizard({
   werkstattName,
   werkstattGeo,
   promotionCodeId,
+  schaetzungSessionId,
 }: {
   forceFallback?: boolean
   /** AAR-956 Task 7: opake Werkstatt-ID (aus /start/werkstatt/[id]). Wird 1:1 an
@@ -97,6 +100,8 @@ export function FinderWizard({
   werkstattGeo?: { lat: number; lng: number; adresse: string }
   /** Makler-Vermittlung: Promo-Code-ID des vermittelnden Maklers → reserviereEmbedTermin → lead.promotion_code_id. */
   promotionCodeId?: string | null
+  /** Anspruch-pruefen: Session-Token der Schaetzung → reserviereEmbedTermin → Lead-Verknuepfung. */
+  schaetzungSessionId?: string | null
 } = {}) {
   const [phase, setPhase] = useState<Phase>('ort')
   const [ort, setOrt] = useState<Ort | null>(null)
@@ -250,6 +255,10 @@ export function FinderWizard({
           : { kind: 'deadpin' as const, deadPinId: auswahl.dp.deadPinId, ort: auswahl.dp.ort, start: auswahl.slot.start }
 
     startTransition(async () => {
+      // Makler-Attribution: `m` aus der URL (der Funnel Tool -> Finder reicht ihn via
+      // buildFinderHandoffUrl durch); reserviereEmbedTermin loest ihn server-seitig zu
+      // promotion_code_id auf -> lead.promotion_code_id -> Provision.
+      const maklerCode = new URLSearchParams(window.location.search).get('m')
       const res = await reserviereEmbedTermin({
         vorname: vorname.trim(),
         nachname: nachname.trim(),
@@ -260,6 +269,8 @@ export function FinderWizard({
         wunschterminLokal: wunschterminLokal || null,
         werkstatt_id: werkstattId ?? null,
         promotion_code_id: promotionCodeId ?? null,
+        maklerCode,
+        schaetzungSessionId: schaetzungSessionId ?? null,
         auswahl: auswahlPayload,
       })
       if (!res.ok) {
@@ -335,6 +346,16 @@ export function FinderWizard({
     // ein (fade + leichter slide-up). GlassSurface persistiert über Phasen → kein Re-Trigger
     // bei Step-Wechseln. Dezent, im Claimondo-Look.
     <GlassSurface className="flex flex-col gap-4 p-5 animate-in fade-in slide-in-from-bottom-3 duration-700 ease-out">
+      {/* Makler-Empfehlung: wer ueber /m/<code> kam (URL `m`), sieht „Empfohlen von <Firma>"
+          durchgehend bis zur Buchung. Self-contained (liest `m`); mb-0 gegen GlassSurface-gap. */}
+      <MaklerEmpfehlungBadge className="mb-0" />
+      {/* Kontinuitaets-Klammer: wer aus dem Foto-Tool kommt (schaetzungSessionId gesetzt),
+          sieht dass Finder + Anspruchs-Pruefung EIN Vorgang sind (spiegelt den Tool-Banner P2).
+          Nur auf dem Einstiegs-Schritt (ort), wie P2 nur auf 'foto'. mb-0: die GlassSurface ist
+          flex/gap-4, der Default-mb-4 wuerde doppelt spacen. */}
+      {schaetzungSessionId && phase === 'ort' ? (
+        <AufnahmeFlowHinweis text="Weiter aus Ihrer Anspruchs-Prüfung: jetzt Gutachter & Termin." className="mb-0" />
+      ) : null}
       {phase !== 'gebucht' && (
         <div className="flex items-center gap-1.5">
           {[0, 1, 2, 3].map((i) => (

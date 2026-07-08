@@ -5,12 +5,13 @@
 // Auszahlungs-Mitteilungen.
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
-import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { transitionFallStatus, istGueltigerFallUebergang } from '@/lib/faelle/state-machine'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { createMitteilung, createMitteilungMulti } from '@/lib/mitteilungen/create-mitteilung'
 import { peelAuftraegeColumns, splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
-import { upsertCurrentClaimPayment, type ClaimPaymentRerouteFields } from '@/lib/faelle/claim-payments'
+import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { peelKanzleiFaelleColumns, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { ALLOWED_STATUS_VALUES } from '@/app/faelle/[id]/_actions/manual-status-override.constants'
 
 export const VALID_LEXDRIVE_EVENTS = [
   // Legacy-Events (Original AAR-108)
@@ -481,7 +482,7 @@ async function sendKbMitteilung(
   await createMitteilung({
     empfaenger_id: claim.kundenbetreuer_id,
     empfaenger_rolle: 'kundenbetreuer',
-    kategorie: 'task',
+    kategorie: 'update',
     titel,
     inhalt,
     kontext_typ: 'fall',
@@ -526,7 +527,7 @@ async function sendSvKonfrontationsAnfrage(
   await createMitteilung({
     empfaenger_id: claim.sv_id,
     empfaenger_rolle: 'sachverstaendiger',
-    kategorie: 'task',
+    kategorie: 'update',
     titel: 'Konfrontations-Begleitung angefragt',
     inhalt:
       `Der Kunde wünscht deine Begleitung bei der Nachbesichtigung am ${terminLabel}. ` +
@@ -702,6 +703,33 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     if (existing) return { success: true, skipped: true }
   }
 
+  // AAR-108: fall_geschlossen ALL-OR-NOTHING. transitionFallStatus (unten) wirft bei einem
+  // Abschluss aus nicht-terminalem operative_status und wird im try/catch geschluckt — der
+  // updates-Builder schriebe abgeschlossen_am/geschlossen_grund aber trotzdem => Halb-
+  // Schliessung (abgeschlossen_am gesetzt, status offen). Da die Writes NICHT in einer
+  // Transaktion laufen, hier ein Pre-Check VOR allen Writes: ist der Abschluss aus dem
+  // aktuellen operative_status ueberhaupt zulaessig? Sonst NICHTS schreiben + klaren Fehler.
+  if (input.eventType === 'fall_geschlossen' && input.fallId) {
+    const { data: opRow } = await db
+      .from('faelle_claim_bridge')
+      .select('claims:claim_id(operative_status)')
+      .eq('fall_id', input.fallId)
+      .maybeSingle()
+    const opRel = (opRow as {
+      claims?:
+        | { operative_status?: string | null }
+        | { operative_status?: string | null }[]
+        | null
+    } | null)?.claims
+    const opStatus = (Array.isArray(opRel) ? opRel[0] : opRel)?.operative_status ?? null
+    if (!istGueltigerFallUebergang(opStatus, 'abgeschlossen')) {
+      return {
+        success: false,
+        error: `Fall kann aus Status "${opStatus ?? 'unbekannt'}" nicht geschlossen werden — erst Regulierung/Zahlung abschließen.`,
+      }
+    }
+  }
+
   const eventId = input.externalEventId ?? `manual-${input.fallId}-${input.eventType}-${Date.now()}`
   // AAR-540: source='manual_admin' schreibt user_id (AAR-557 C8-Spalte)
   const source = input.source === 'manual' ? 'manual_admin' : 'lexdrive'
@@ -776,7 +804,16 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // faelle.status, nicht operative_status -> der Engine-Cursor zog beim Override nicht
       // mit; jetzt korrekt. status ist nicht CLAIM_OWNED -> landet in ovFaelle, hier umgehaengt.
       if ('status' in ovFaelle) {
-        if (claimIdForUpdates) ovClaims.operative_status = ovFaelle.status
+        // Defense-in-Depth: NUR enum-gueltige fall_status nach operative_status. operative_status ist
+        // text, aber v_claim_base castet ::fall_status -> ein enum-fremder Wert wirft bei JEDEM Read
+        // (Fallakte + alle Portale) 'invalid input value for enum' und macht die Akte unlesbar bis
+        // manueller DB-Fix. ALLOWED_STATUS_VALUES ist die kuratierte enum-gueltige Menge.
+        const s = ovFaelle.status
+        if (claimIdForUpdates && typeof s === 'string' && (ALLOWED_STATUS_VALUES as readonly string[]).includes(s)) {
+          ovClaims.operative_status = s
+        } else if (claimIdForUpdates) {
+          console.error(`[process-event] manual_status_override: ungueltiger operative_status "${String(s)}" verworfen (nicht in ALLOWED_STATUS_VALUES)`)
+        }
         delete ovFaelle.status
       }
       // ovFaelle ist danach leer (status -> operative_status; updated_at trigger-redundant
@@ -809,8 +846,11 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // faelle-Teil. Hier herausziehen und mit dem neuen claims-Namen ins
       // claims-Update umhaengen (bei claim_id), sonst verwerfen (faelle-Spalte
       // wird in PR2 gedroppt — claim-lose Faelle sind Alt-Datenbestand).
+      // Payment-Ledger Phase 3 (Collapse): regulierung_betrag (anerkannt/Soll) geht NUR noch in den
+      // (claim,'vs')-Ledger (forderungsbetrag, s. cpFields unten) — kein claims.regulierungs_betrag-Cache.
+      let regBetrag: number | null = null
       if ('regulierung_betrag' in fuFaelle) {
-        if (claimIdForUpdates) fuClaims.regulierungs_betrag = fuFaelle.regulierung_betrag
+        regBetrag = fuFaelle.regulierung_betrag as number | null
         delete fuFaelle.regulierung_betrag
       }
       if ('vs_ablehnungsgrund' in fuFaelle) {
@@ -873,7 +913,8 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       // Hinweis: beim Event zahlung_eingegangen hat transitionFallStatus (oben via
       // EVENT_STATUS_MAP) ggf. schon eine claim_payments-Row angelegt; dieser
       // Upsert trifft via create-or-update DIESELBE (aktuelle) Row — idempotent.
-      const cpFields: ClaimPaymentRerouteFields = {}
+      const cpFields: ClaimPaymentFields = {}
+      if (regBetrag != null) cpFields.forderungsbetrag = regBetrag
       if ('zahlung_eingegangen_am' in fuFaelle) {
         cpFields.zahlungseingang_am = fuFaelle.zahlung_eingegangen_am as string | null
         delete fuFaelle.zahlung_eingegangen_am
@@ -884,6 +925,13 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
       }
       if (cpFields.zahlungseingang_am != null) cpFields.status = 'erhalten'
 
+      // Payment-Ledger Phase 3 (Collapse): auszahlung_gutachter_eingegangen_am aus fuClaims peelen —
+      // es geht NUR in den (claim,'sv')-Ledger (unten via svAmPeel), nicht mehr in den claims-Cache.
+      const svAmPeel = ('auszahlung_gutachter_eingegangen_am' in fuClaims)
+        ? (fuClaims.auszahlung_gutachter_eingegangen_am as string | null)
+        : null
+      delete fuClaims.auszahlung_gutachter_eingegangen_am
+
       // CMM-49 faelle-DROP: faelle ist gedroppt — der fuFaelle-Residual-Write entfaellt.
       // (fuFaelle wird oben weiterhin fuer den claim_payments-Peel gelesen; sein Rest war
       // schon vor dem DROP reader-frei.)
@@ -891,13 +939,32 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
         await db.from('claims').update(fuClaims).eq('id', claimIdForUpdates)
       }
       if (claimIdForUpdates && Object.keys(cpFields).length > 0) {
-        const cpRes = await upsertCurrentClaimPayment(
+        const cpRes = await upsertClaimPayment(
           db,
           claimIdForUpdates,
+          'vs',
           cpFields,
           input.triggeredByProfileId ?? null,
         )
         if (!cpRes.ok) console.error('[CMM-44 SP-J] process-event claim_payments fehlgeschlagen:', cpRes.error)
+      }
+      // Payment-Ledger Phase 3: Auszahlungs-Split (Kunde/SV) -> (claim,partei)-Ledger, cache-frei.
+      // auszahlung_kunde_* liegen als Residual in fuFaelle (kein claims-Home); auszahlung_gutachter_
+      // eingegangen_am wurde oben aus fuClaims gepeelt (svAmPeel) — kein claims-Cache mehr.
+      if (claimIdForUpdates) {
+        const kundeBetrag = ('auszahlung_kunde_betrag' in fuFaelle) ? (fuFaelle.auszahlung_kunde_betrag as number | null) : null
+        const kundeAm = ('auszahlung_kunde_eingegangen_am' in fuFaelle) ? (fuFaelle.auszahlung_kunde_eingegangen_am as string | null) : null
+        if (kundeBetrag != null || kundeAm != null) {
+          const r = await upsertClaimPayment(db, claimIdForUpdates, 'kunde', {
+            ...(kundeBetrag != null ? { erhaltener_betrag: kundeBetrag } : {}),
+            ...(kundeAm != null ? { zahlungseingang_am: kundeAm } : {}),
+          }, input.triggeredByProfileId ?? null)
+          if (!r.ok) console.error('[Payment-Ledger] process-event kunde-Auszahlung fehlgeschlagen:', r.error)
+        }
+        if (svAmPeel != null) {
+          const r = await upsertClaimPayment(db, claimIdForUpdates, 'sv', { zahlungseingang_am: svAmPeel }, input.triggeredByProfileId ?? null)
+          if (!r.ok) console.error('[Payment-Ledger] process-event sv-Auszahlung fehlgeschlagen:', r.error)
+        }
       }
       await writeAuftraegeColumns(db, claimIdForUpdates, fuAuftraege)
 
@@ -993,7 +1060,7 @@ export async function processLexDriveEvent(input: ProcessEventInput): Promise<Pr
     // beide Pfade (SA-Signatur bei nur_gutachter und Vollmacht bei komplett).
     if (input.eventType === 'vollmacht_bestaetigt') {
       try {
-        const { confirmVollmacht } = await import('@/app/flow/[token]/actions')
+        const { confirmVollmacht } = await import('@/lib/vollmacht/confirm-vollmacht')
         await confirmVollmacht(input.fallId)
       } catch (err) {
         console.error('[AAR-kanzlei] confirmVollmacht failed:', err)

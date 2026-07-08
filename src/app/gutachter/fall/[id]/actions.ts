@@ -8,15 +8,52 @@ import { getGutachterForUser } from '@/lib/gutachter'
 import { revalidatePath } from 'next/cache'
 import { emailGutachtenEingegangen } from '@/lib/email'
 import { sendFallCommunication } from '@/lib/communications/send-fall'
-import { getLeadPriceFromTable } from '@/lib/abrechnung/calculate-lead-price'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
 import { checkFallAutoPhase } from '@/lib/autoPhase'
 import { createNotification } from '@/lib/notifications'
 import { emitEvent } from '@/lib/notifications/emit'
 import { getStorageUrl } from '@/lib/storage/url'
 import { setSvIdForFall } from '@/lib/faelle/sv-assignment'
+import { assignReparaturWerkstatt } from '@/lib/werkstatt/vermittlung-server'
 
 type ActionResult = { success?: boolean; error?: string }
+
+// Gutachter vermittelt IM AUFTRAG des Kunden eine Partner-Werkstatt (quelle='gutachter').
+// Ownership: der Claim muss diesem SV zugewiesen sein (sv_id, CMM-49-Muster). Waehlt
+// ausschliesslich aus unserem aktiven Partner-Pool (findWerkstaetten). Neuer ok-Result-Shape
+// (AGENTS.md: neue Code-Pfade nutzen ok, auch wenn diese Datei sonst success verwendet).
+export async function vermittleWerkstattAlsGutachter(
+  input: { fallId: string; werkstattId: string },
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const sv = await getGutachterForUser(supabase, user.id, 'id')
+  if (!sv) return { ok: false, error: 'Kein Sachverständigen-Profil gefunden' }
+
+  const claimId = await resolveClaimId(supabase, input.fallId)
+  const { data: fall } = claimId
+    ? await supabase
+        .from('claims')
+        .select('id')
+        .eq('id', claimId)
+        .eq('sv_id', (sv as { id: string }).id)
+        .maybeSingle()
+    : { data: null }
+  if (!fall || !claimId) return { ok: false, error: 'Fall nicht gefunden oder kein Zugriff.' }
+
+  const res = await assignReparaturWerkstatt({
+    target: 'claim',
+    id: claimId,
+    werkstattId: input.werkstattId,
+    quelle: 'gutachter',
+    actorUserId: user.id,
+  })
+  if (!res.ok) return res
+  revalidatePath(`/gutachter/fall/${input.fallId}`)
+  return { ok: true }
+}
 
 export async function uploadGutachten(
   fallId: string,
@@ -175,53 +212,32 @@ export async function uploadGutachten(
     ).catch(() => {})
   }
 
-  // ── Automatische Abrechnung ──────────────────────────────────────────────
+  // ── SV-Kapazitaets-Counter ────────────────────────────────────────────────
+  // Billing entfernt (Konsolidierung 2026-07-01): Leadpreis-Berechnung,
+  // gutachter_abrechnungen-Insert und Guthaben-Abzug laufen jetzt ausschliesslich
+  // ueber processCaseBilling (State-Machine-Hook @ gutachten-eingegangen, AAR-924 —
+  // idempotent, MIN(150)-Guthaben-Modell, claims-SSoT). Behebt den frueheren
+  // Dreifach-Abzug (Zuweisung + Gutachten-Upload + Cron).
+  // Der paket_faelle_genutzt-Increment BLEIBT: das ist der SV-Kapazitaets-/Dispatch-
+  // Counter (sv-zuweisung Load-Balancing + Admin/Team-Anzeige), KEIN Billing.
   const { data: svData } = await supabase
     .from('sachverstaendige')
-    .select('id, werbebudget_guthaben_netto, paket_faelle_genutzt, paket_faelle_gesamt')
+    .select('paket_faelle_genutzt')
     .eq('id', sv.id)
     .single()
 
   if (svData) {
-    const hatPaket = (svData.paket_faelle_genutzt ?? 0) < (svData.paket_faelle_gesamt ?? 0)
-    // CMM-44: Leadpreis aus der kanonischen DB-Tabelle (leadpreise_tabelle, naechste-Stufe) —
-    // dieselbe Quelle wie process-case-billing. Ersetzt die fruehere hardcoded/interpolierte
-    // berechneLeadpreis-Tabelle (geloescht), damit SV-Vorschau == tatsaechliche Abrechnung.
-    const { betrag_netto: leadpreis, typ: preistyp } = await getLeadPriceFromTable(betrag, hatPaket)
-    const guthabenVorher = Number(svData.werbebudget_guthaben_netto ?? 0)
-    const guthabenNachher = guthabenVorher - leadpreis
-    const monat = new Date().toISOString().slice(0, 7) // YYYY-MM
-
-    // Abrechnungseintrag erstellen
-    await supabase.from('gutachter_abrechnungen').insert({
-      sv_id: sv.id,
-      fall_id: fallId,
-      schadenhoehe: betrag,
-      leadpreis,
-      preistyp,
-      guthaben_vorher: guthabenVorher,
-      guthaben_nachher: guthabenNachher,
-      monat,
-    })
-
-    // AAR-239: Guthaben-Spalte heißt werbebudget_guthaben_netto (nicht
-    // 'guthaben') — der SELECT oben liest korrekt, aber das UPDATE
-    // schrieb auf die nicht-existierende 'guthaben'-Spalte → silent fail,
-    // SV-Abrechnung zeigte immer Ursprungs-Guthaben.
     await supabase
       .from('sachverstaendige')
-      .update({
-        werbebudget_guthaben_netto: guthabenNachher,
-        paket_faelle_genutzt: (svData.paket_faelle_genutzt ?? 0) + 1,
-      })
+      .update({ paket_faelle_genutzt: (svData.paket_faelle_genutzt ?? 0) + 1 })
       .eq('id', sv.id)
   }
 
   // OCR-Auslesung des Gutachten-PDFs triggern
-  // AAR-240: Production-Fallback cmndo.vercel.app statt localhost — in
+  // AAR-240: Production-Fallback app.claimondo.de statt localhost — in
   // Serverless-Functions ohne NEXT_PUBLIC_APP_URL würde localhost einen
   // ECONNREFUSED geben.
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
   fetch(`${baseUrl}/api/ocr-gutachten`, {
     method: 'POST',
     // Write-Path-Audit (28.06.): /api/ocr-gutachten ist jetzt Bearer-CRON_SECRET-gegated

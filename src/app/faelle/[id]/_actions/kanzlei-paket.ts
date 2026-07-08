@@ -14,7 +14,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
 import { splitOrKeepFaelleUpdate } from '@/lib/faelle/claim-duplicate-columns'
-import { upsertCurrentClaimPayment } from '@/lib/faelle/claim-payments'
+import { upsertClaimPayment } from '@/lib/faelle/claim-payments'
 import {
   processLexDriveEvent,
   type LexDriveEventPayload,
@@ -225,20 +225,16 @@ export async function recordZahlung(
     }
   }
 
-  // CMM-44 SP-A2 (Cluster 3): regulierung_betrag → claims.regulierungs_betrag
-  // (SSoT). Legacy-Fall ohne claim_id sauber abfangen statt zu werfen.
+  // Payment-Ledger Phase 3 (Collapse): der VS-Betrag geht NUR noch in den Ledger — ueber die
+  // State-Machine unten (transitionFallStatus 'zahlung-eingegangen' schreibt erhaltener_betrag=betrag
+  // auf die (claim,'vs')-Row, s. state-machine.ts:244-248). Kein claims.regulierungs_betrag-Cache mehr.
+  // Legacy-Fall ohne claim_id sauber abfangen statt zu werfen (betragClaimId unten weiterverwendet).
   const betragClaimId = await resolveClaimId(supabase, fallId)
   if (!betragClaimId) {
     return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
   }
-  const { error } = await createAdminClient()
-    .from('claims')
-    .update({ regulierungs_betrag: betrag })
-    .eq('id', betragClaimId)
 
-  if (error) return { success: false, error: error.message }
-
-  // KFZ-202: State-Machine (setzt zahlung_eingegangen_am + Timeline)
+  // KFZ-202: State-Machine (setzt zahlung_eingegangen_am + erhaltener_betrag im Ledger + Timeline)
   await transitionFallStatus(fallId, 'zahlung-eingegangen', { betrag, user_id: user.id })
 
   sendFallCommunication(fallId, 'zahlung_eingegangen').catch(() => {})
@@ -375,16 +371,16 @@ export async function erfasseZahlungseingang(
 
   if (zeClaimId) {
     const adminZE = createAdminClient()
-    await adminZE
-      .from('claims')
-      .update({ regulierungs_betrag: data.gesamtbetrag })
-      .eq('id', zeClaimId)
     // CMM-44 SP-I3: regulierung_am auf kanzlei_faelle (1:1) statt faelle.
     await upsertKanzleiFall(adminZE, zeClaimId, { regulierung_am: zahlungAm })
-    await upsertCurrentClaimPayment(
+    // Payment-Ledger Phase 3 (Collapse): VS-Zahlungseingang NUR in den (claim,'vs')-Ledger —
+    // erhaltener_betrag=gesamtbetrag (vorher nur claims-Cache, jetzt Ledger-Ist). Der
+    // Positions-Detail bleibt in zahlungseingaenge/zahlungspositionen oben.
+    await upsertClaimPayment(
       adminZE,
       zeClaimId,
-      { zahlungseingang_am: zahlungAm, status: 'erhalten' },
+      'vs',
+      { erhaltener_betrag: data.gesamtbetrag, zahlungseingang_am: zahlungAm, status: 'erhalten' },
       user.id,
     )
   }

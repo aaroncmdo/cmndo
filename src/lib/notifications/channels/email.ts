@@ -5,13 +5,26 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendEmail } from '@/lib/email/google/client'
+import { buildEmailRecipients } from './email-recipients'
 import type { ChannelHandler } from './types'
 import type { EventType } from '../types'
 
-async function lookupEmail(userId: string): Promise<string | null> {
+// Empfaenger-Profil in EINEM Query: primaere Email + optionale Zweitadresse
+// (AAR-703, zweit_email) + Vorname fuer die Anrede.
+async function lookupRecipient(
+  userId: string,
+): Promise<{ email: string | null; zweitEmail: string | null; vorname: string }> {
   const db = createAdminClient()
-  const { data } = await db.from('profiles').select('email').eq('id', userId).maybeSingle()
-  return (data?.email as string | null) ?? null
+  const { data } = await db
+    .from('profiles')
+    .select('email, zweit_email, vorname')
+    .eq('id', userId)
+    .maybeSingle()
+  return {
+    email: (data?.email as string | null) ?? null,
+    zweitEmail: (data?.zweit_email as string | null) ?? null,
+    vorname: (data?.vorname as string | null) ?? '',
+  }
 }
 
 type EmailTemplate = { subject: string; html: string }
@@ -92,11 +105,14 @@ function buildTemplate(
         html: `${greet}<p>Wir haben die Auszahlung${betrag ? ` von ${betrag.toFixed(2)} €` : ''} veranlasst. Die Gutschrift auf Ihrem Konto ist${tage ? ` in ca. ${tage} Werktagen` : ' in Kürze'} zu erwarten.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
       }
     }
-    case 'makler.lead_eingegangen':
+    case 'makler.lead_eingegangen': {
+      const kunde = payload.kundeName as string | undefined
+      const betrag = payload.betragEur as number | undefined
       return {
-        subject: 'Neuer Lead eingegangen',
-        html: `${greet}<p>Über Ihren Partnerlink ist ein neuer Lead eingegangen. Wir haben mit der Bearbeitung begonnen.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
+        subject: kunde ? `${kunde} ist über Ihren Empfehlungs-Link Kunde geworden` : 'Neuer Lead über Ihren Empfehlungs-Link',
+        html: `${greet}<p>🎉 ${kunde ? `<strong>${kunde}</strong> ist` : 'Ein neuer Kontakt ist'} über Ihren Empfehlungs-Link Kunde geworden${betrag ? ` — <strong>${betrag.toFixed(2)} €</strong> sind für Sie vorgemerkt` : ''}. Wir kümmern uns ab jetzt um alles Weitere.</p><p><a href="${base}/makler">Im Makler-Portal ansehen</a></p>${footer}`,
       }
+    }
     case 'makler.provision_status': {
       const status = payload.status as string | undefined
       const betrag = payload.betragEur as number | undefined
@@ -190,25 +206,20 @@ function buildTemplate(
 }
 
 export const emailHandler: ChannelHandler = async (input) => {
-  const email = await lookupEmail(input.recipientUserId)
-  if (!email) {
+  const { email, zweitEmail, vorname } = await lookupRecipient(input.recipientUserId)
+  // AAR-703: primaere + optionale zweite Kontakt-Adresse (der Kunde traegt sie
+  // selbst im Profil ein). Leer -> kein Empfaenger, skip.
+  const recipients = buildEmailRecipients(email, zweitEmail)
+  if (recipients.length === 0) {
     return { success: false, skipReason: 'no_email_for_recipient' }
   }
-
-  const db = createAdminClient()
-  const { data: profile } = await db
-    .from('profiles')
-    .select('vorname')
-    .eq('id', input.recipientUserId)
-    .maybeSingle()
-  const vorname = (profile?.vorname as string | null) ?? ''
 
   const fallId = (input.payload.fallId ?? input.event.fall_id) as string | undefined
   const { subject, html } = buildTemplate(input.eventType, input.payload, vorname)
 
   try {
     const result = await sendEmail({
-      to: email,
+      to: recipients,
       subject,
       html,
       fallId: fallId ?? null,

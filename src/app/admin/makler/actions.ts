@@ -1,22 +1,15 @@
 'use server'
 
-// Makler-Vermittlung: Admin-Anlage eines Maklers. Spiegelt admin/werkstaetten/actions.ts
-// (createWerkstatt): Auth-User + profiles(rolle='makler') + makler-Row + default Promo-Code.
-// KEIN Isochrone (makler-irrelevant). dual-rate (komplett/nur_gutachter) statt flat.
+// Makler-Vermittlung: Admin-Anlage eines Maklers. Kern-Anlage (Auth-User + profiles +
+// makler-Row + Promo-Code) via konsolidiertem anlegePartnerKern; makler-spezifische
+// Felder (dual-rate Provision, Gesellschaft, Strasse) laufen ueber rollenDetails.
+// Form-Parsing + Welcome-Mail bleiben hier (Caller-Verantwortung, wie im Kern dokumentiert).
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { generatePromoCode } from '@/lib/makler/promo-code'
-
-function generatePassword(length = 14): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789'
-  let password = ''
-  const array = new Uint8Array(length)
-  crypto.getRandomValues(array)
-  for (let i = 0; i < length; i++) password += chars[array[i] % chars.length]
-  return password + 'A1!'
-}
+import { sendMaklerWelcome } from '@/lib/email/google/flows'
+import { anlegePartnerKern } from '@/lib/partner/anlege-partner'
 
 async function requireAdmin(): Promise<{ id: string } | null> {
   const supabase = await createClient()
@@ -43,82 +36,55 @@ export async function createMakler(
   const adresse_ort = String(formData.get('adresse_ort') ?? '').trim() || null
   const provKomplett = Number(formData.get('provision_betrag_komplett_netto') ?? 100) || 100
   const provGutachter = Number(formData.get('provision_betrag_nur_gutachter_netto') ?? 50) || 50
+  // Makler-Gesellschaft: versicherungsgebunden (versicherung_id) ODER frei (maklerpool_id).
+  const versicherung_id = String(formData.get('versicherung_id') ?? '').trim() || null
+  const maklerpool_id = String(formData.get('maklerpool_id') ?? '').trim() || null
 
   if (!firma || !email || !ansprechpartner_vorname || !ansprechpartner_nachname) {
     return { ok: false, error: 'Firma, E-Mail und Ansprechpartner (Vor- und Nachname) sind Pflicht.' }
   }
 
+  // Kern-Anlage via konsolidiertem anlegePartnerKern (Auth-User + profiles + makler-Row +
+  // Promo-Code + Rollback-Cascade). Makler-spezifische Felder laufen ueber rollenDetails;
+  // anlegePartnerKern setzt sie nur wenn vorhanden (dual-rate Provision liefern wir immer).
   const admin = createAdminClient()
-  const password = generatePassword()
-
-  // 1) Auth-User (rolle='makler')
-  const { data: authUser, error: authErr } = await admin.auth.admin.createUser({
-    email,
-    password,
-    email_confirm: true,
-    user_metadata: { force_password_change: true },
-  })
-  if (authErr || !authUser?.user) {
-    return { ok: false, error: authErr?.message ?? 'User-Anlage fehlgeschlagen' }
-  }
-  const userId = authUser.user.id
-
-  // 2) Profile (rolle='makler')
-  const { error: profErr } = await admin.from('profiles').insert({
-    id: userId,
-    email,
-    rolle: 'makler',
-    vorname: firma,
-    force_password_change: true,
-    twofa_aktiviert: false,
-    twofa_email_aktiviert: false,
-  })
-  if (profErr) {
-    await admin.auth.admin.deleteUser(userId)
-    return { ok: false, error: profErr.message }
-  }
-
-  // 3) makler-Row
-  const { data: m, error: mErr } = await admin.from('makler').insert({
+  const result = await anlegePartnerKern(admin, 'makler', {
     firma,
-    ansprechpartner_vorname,
-    ansprechpartner_nachname,
+    ansprechpartnerVorname: ansprechpartner_vorname,
+    ansprechpartnerNachname: ansprechpartner_nachname,
     email,
     telefon,
-    adresse_strasse,
-    adresse_plz,
-    adresse_ort,
-    provision_betrag_komplett_netto: provKomplett,
-    provision_betrag_nur_gutachter_netto: provGutachter,
-    provision_aktiv: true,
-    status: 'aktiv',
-    aktiviert_am: new Date().toISOString(),
-    aktiviert_von: adminUser.id,
-    user_id: userId,
-  }).select('id').single()
+    plz: adresse_plz,
+    ort: adresse_ort,
+    aktiviertVon: adminUser.id,
+    rollenDetails: {
+      adresse_strasse,
+      provision_betrag_komplett_netto: provKomplett,
+      provision_betrag_nur_gutachter_netto: provGutachter,
+      versicherung_id,
+      maklerpool_id,
+    },
+  })
+  if (!result.ok) return { ok: false, error: result.error }
 
-  if (mErr || !m) {
-    await admin.from('profiles').delete().eq('id', userId)
-    await admin.auth.admin.deleteUser(userId)
-    return { ok: false, error: mErr?.message ?? 'Makler-Anlage fehlgeschlagen' }
-  }
-
-  // 4) Default Promo-Code (MK-xxxx) — der vermittelnde Identifier (Attribution via leads.promotion_code_id).
-  //    Non-fatal: der Makler steht; ein Code kann nachgezogen werden. Retry bei Unique-Kollision.
-  let promoOk = false
-  for (let i = 0; i < 3 && !promoOk; i++) {
-    const { error: pcErr } = await admin.from('promotion_codes').insert({
-      makler_id: m.id,
-      code: generatePromoCode(),
-      aktiv: true,
-    })
-    if (!pcErr) promoOk = true
-    else if (!/duplicate|unique/i.test(pcErr.message)) {
-      console.error('[createMakler] Promo-Code-Anlage fehlgeschlagen (non-fatal):', pcErr.message)
-      break
-    }
+  // Willkommens-/Login-Email (best-effort, non-critical) — analog zum Self-Signup:
+  // Empfehlungs-Landeseite + Recovery-Magic-Link. Promo-Code aus der DB nachladen
+  // (anlegePartnerKern legt genau einen an). Das Passwort bleibt Admin-Fallback im Ergebnis.
+  try {
+    const { data: pc } = await admin
+      .from('promotion_codes')
+      .select('code')
+      .eq('makler_id', result.partnerId)
+      .limit(1)
+      .maybeSingle()
+    const code = (pc?.code as string | undefined) ?? null
+    const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+    const landeseiteUrl = code ? `${base}/m/${code}` : base
+    await sendMaklerWelcome({ to: email, firma, vorname: ansprechpartner_vorname, landeseiteUrl })
+  } catch (err) {
+    console.error('[createMakler] Welcome-Email fehlgeschlagen (non-critical):', err)
   }
 
   revalidatePath('/admin/makler')
-  return { ok: true, email, password }
+  return { ok: true, email, password: result.password }
 }

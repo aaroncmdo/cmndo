@@ -46,20 +46,24 @@ export default async function PerSvBalancePage() {
     : { data: [] }
   const profileMap = Object.fromEntries((profiles ?? []).map(p => [p.id, p]))
 
-  // Alle Abrechnungen pro SV (letzte 90 Tage)
+  // Abrechnungen pro SV.
+  // WICHTIG: "offen" (unbezahlt + nicht storniert) wird OHNE Zeitfenster
+  // aggregiert — sonst fallen genau die aeltesten offenen Forderungen raus
+  // (versand_datum > 90d oder versand_datum IS NULL). Nur "bezahlt" bleibt
+  // auf die letzten 90 Tage gefenstert. Ein einziger Fetch deckt beides via
+  // OR: offene Zeilen immer + alles mit versand_datum >= grenze.
   const grenze = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
   const { data: abrechnungen } = await supabase
     .from('abrechnungen')
     .select('empfaenger_id, summe_brutto, bezahlt_am, storniert_am, faellig_am, versand_datum')
     .eq('empfaenger_typ', 'sv')
     .in('empfaenger_id', svIds)
-    .gte('versand_datum', grenze)
+    .or(`and(bezahlt_am.is.null,storniert_am.is.null),versand_datum.gte.${grenze}`)
 
   type Aggregat = { offen: number; bezahlt: number; storniert: number; letzteAktivitaet: string | null }
   const aggMap: Record<string, Aggregat> = {}
   for (const svId of svIds) aggMap[svId] = { offen: 0, bezahlt: 0, storniert: 0, letzteAktivitaet: null }
 
-  const heute = new Date()
   for (const abr of abrechnungen ?? []) {
     const svId = abr.empfaenger_id as string
     if (!aggMap[svId]) continue
@@ -123,8 +127,8 @@ export default async function PerSvBalancePage() {
             </Thead>
             <Tbody>
               {rows.map((r) => {
-                const offenColor = r.offen > 1000 ? 'text-red-400' : r.offen > 0 ? 'text-amber-400' : 'text-claimondo-ondo'
-                const guthabenColor = r.guthaben <= 0 ? 'text-red-400' : r.guthaben < 500 ? 'text-amber-400' : 'text-emerald-400'
+                const offenColor = r.offen > 1000 ? 'text-danger' : r.offen > 0 ? 'text-warning' : 'text-claimondo-ondo'
+                const guthabenColor = r.guthaben <= 0 ? 'text-danger' : r.guthaben < 500 ? 'text-warning' : 'text-success-strong'
                 return (
                   <Tr key={r.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
                     <Td className="px-4">
@@ -132,7 +136,7 @@ export default async function PerSvBalancePage() {
                       <div className="text-xs text-claimondo-ondo">{r.email}</div>
                     </Td>
                     <Td className={`px-4 text-right tabular-nums ${offenColor}`}>{eur(r.offen)}</Td>
-                    <Td className="px-4 text-right tabular-nums text-emerald-400">{eur(r.bezahlt)}</Td>
+                    <Td className="px-4 text-right tabular-nums text-success-strong">{eur(r.bezahlt)}</Td>
                     <Td className="px-4 text-right tabular-nums text-claimondo-ondo">{r.storniert > 0 ? eur(r.storniert) : '–'}</Td>
                     <Td className={`px-4 text-right tabular-nums ${guthabenColor}`}>{eur(r.guthaben)}</Td>
                     <Td className="px-4 text-center text-xs">

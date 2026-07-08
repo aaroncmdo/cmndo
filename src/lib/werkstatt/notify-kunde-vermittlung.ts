@@ -57,10 +57,16 @@ export function buildKundeVermittlungWhatsApp(args: {
   werkstattName: string
   adresse?: string | null
   telefon?: string | null
+  /** Rolle, die im Auftrag des Kunden vermittelt hat (fuer die Einleitung). */
+  imAuftragVon?: string | null
 }): string {
   const anrede = args.vorname?.trim() ? `Hallo ${args.vorname.trim()},` : 'Hallo,'
+  const intro =
+    args.imAuftragVon === 'gutachter'
+      ? `${anrede} dein Gutachter hat für dich eine Reparatur-Werkstatt organisiert:`
+      : `${anrede} wir haben Dir eine Reparatur-Werkstatt vermittelt:`
   const zeilen: Array<string | null> = [
-    `${anrede} wir haben Dir eine Reparatur-Werkstatt vermittelt:`,
+    intro,
     '',
     args.werkstattName,
     args.adresse?.trim() ? args.adresse.trim() : null,
@@ -79,6 +85,8 @@ export function buildKundeVermittlungEmailHtml(args: {
   werkstattName: string
   adresse?: string | null
   telefon?: string | null
+  /** Rolle, die im Auftrag des Kunden vermittelt hat (fuer die Einleitung). */
+  imAuftragVon?: string | null
 }): string {
   const NAVY = '#0D1B3E'
   const BG = '#f8f9fb'
@@ -102,7 +110,7 @@ export function buildKundeVermittlungEmailHtml(args: {
         <tr><td style="background:${NAVY};padding:20px 28px;color:#ffffff;font-size:18px;font-weight:700;">Claimondo</td></tr>
         <tr><td style="padding:28px;">
           <p style="margin:0 0 12px;font-size:15px;">${anrede}</p>
-          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">wir haben Dir eine Reparatur-Werkstatt für Dein Fahrzeug vermittelt:</p>
+          <p style="margin:0 0 20px;font-size:15px;line-height:1.5;">${args.imAuftragVon === 'gutachter' ? 'dein Gutachter hat für dich eine Reparatur-Werkstatt organisiert:' : 'wir haben Dir eine Reparatur-Werkstatt für Dein Fahrzeug vermittelt:'}</p>
           <div style="background:${BG};border-radius:12px;padding:18px 20px;margin-bottom:20px;">${werkstattZeilen}</div>
           <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Die Werkstatt kümmert sich um die Reparatur Deines Fahrzeugs. Bei Fragen sind wir jederzeit für Dich da.</p>
           <p style="margin:24px 0 0;font-size:15px;">Dein Claimondo-Team</p>
@@ -124,6 +132,8 @@ export async function notifyKundeWerkstattVermittlung(
     kunde: KundeKontakt
     werkstatt: WerkstattInfo
     fallId?: string | null
+    /** Rolle, die im Auftrag des Kunden vermittelt hat (null = Kunde selbst / Standard). */
+    imAuftragVon?: string | null
   },
   deps: NotifyDeps = defaultDeps,
 ): Promise<{ whatsapp: boolean; email: boolean }> {
@@ -137,6 +147,7 @@ export async function notifyKundeWerkstattVermittlung(
         werkstattName: werkstatt.name,
         adresse: werkstatt.adresse,
         telefon: werkstatt.telefon,
+        imAuftragVon: args.imAuftragVon,
       })
       // sendWhatsApp normalisiert die Nummer intern (E.164).
       const r = await deps.sendWhatsApp(kunde.telefon.trim(), msg)
@@ -153,6 +164,7 @@ export async function notifyKundeWerkstattVermittlung(
         werkstattName: werkstatt.name,
         adresse: werkstatt.adresse,
         telefon: werkstatt.telefon,
+        imAuftragVon: args.imAuftragVon,
       })
       await deps.sendEmail({
         to: kunde.email.trim(),

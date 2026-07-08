@@ -1,16 +1,18 @@
 import crypto from 'crypto'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
 import { FINANCE } from '@/lib/finance/constants'
+import { eurToCent } from '@/lib/billing/calculate-ust'
 import { sendEmail } from '@/lib/email/google/client'
 import { render } from '@react-email/render'
 import { KanzleiMagicLinkAbrechnungEmail, subject as magicLinkSubject } from '@/lib/email/google/templates/KanzleiMagicLinkAbrechnung'
 import { generateAndUploadKanzleiAbrechnungPdf, generateKanzleiAbrechnungPdf } from './generate-pdf'
 import type { KanzleiPdfData } from './generate-pdf'
 import { istAbrechenbarerKanzleiClaim, type AbrechnungsClaim } from './eligibility'
+import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
+import { KANZLEI_DESCRIPTOR } from '@/lib/abrechnung/descriptors/kanzlei'
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
-const BETRAG_PRO_VOLLMACHT_NETTO = 150
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
+const BETRAG_PRO_VOLLMACHT_NETTO = FINANCE.KANZLEI_PROVISION_NETTO
 
 /**
  * KFZ-188: Generiert Kanzlei-Monatsabrechnungen fuer alle aktiven Kanzleien.
@@ -90,7 +92,7 @@ export async function erstelleKanzleiAbrechnung(
       // fall_id aus kanzlei_faelle (native, fuer positionen + leads-Lookup).
       const { data: claimsRaw, error: claimsErr } = await db
         .from('claims')
-        .select('id, claim_nummer, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(zahlungseingang_am, status)')
+        .select('id, claim_nummer, vollmacht_signiert_am, kanzlei_abrechnung_id, kanzlei_honorar, kanzlei_faelle(fall_id, kanzlei_id, mandatsnummer), claim_payments(partei, zahlungseingang_am, status)')
         .eq('service_typ', 'komplett')
         .is('kanzlei_abrechnung_id', null)
 
@@ -109,62 +111,23 @@ export async function erstelleKanzleiAbrechnung(
         continue
       }
 
-      // Betraege berechnen
-      const anzahl = berechtigteClaims.length
-      const nettoGesamt = anzahl * BETRAG_PRO_VOLLMACHT_NETTO
-      const mwstBetrag = Math.round(nettoGesamt * FINANCE.MWST_PROZENT / 100 * 100) / 100
-      const brutto = Math.round((nettoGesamt + mwstBetrag) * 100) / 100
-
-      // Magic-Link Token generieren
+      // Magic-Link Token generieren (vor createAbrechnung, da Token im Header-Row benoetigt)
       const magicToken = crypto.randomBytes(32).toString('hex')
       const heute = new Date()
       const faelligkeitsdatum = new Date(heute.getTime() + 14 * 24 * 60 * 60 * 1000)
       const magicLinkExpires = new Date(faelligkeitsdatum.getTime() + 30 * 24 * 60 * 60 * 1000)
 
-      // Rechnungsnummer atomar vergeben (AAR-948): zählt im rechnungs_nr_counter
-      // hoch (lückenlos, keine Race-Condition zwischen parallelen Cron-Läufen).
-      const lfdNr = await nextRechnungsNrRaw(`CMNDO-K-${monatPad}`, jahr)
-      const rechnungsnummer = `CMNDO-K-${jahr}-${monatPad}-${String(lfdNr).padStart(3, '0')}`
-
-      // kanzlei_abrechnungen einfuegen
-      const { data: abrechnung, error: insertErr } = await db
-        .from('kanzlei_abrechnungen')
-        .insert({
-          kanzlei_id: kanzlei.id,
-          abrechnungsmonat: monat,
-          abrechnungsjahr: jahr,
-          rechnungsnummer,
-          anzahl_vollmachten: anzahl,
-          betrag_pro_vollmacht_netto: BETRAG_PRO_VOLLMACHT_NETTO,
-          endbetrag_netto: nettoGesamt,
-          mwst_betrag: mwstBetrag,
-          endbetrag_brutto: brutto,
-          magic_link_token: magicToken,
-          magic_link_expires_at: magicLinkExpires.toISOString(),
-          status: 'offen',
-          faelligkeitsdatum: faelligkeitsdatum.toISOString().slice(0, 10),
-        })
-        .select('id')
-        .single()
-
-      if (insertErr || !abrechnung) {
-        console.error(`[KFZ-188] kanzlei_abrechnungen insert fuer ${kanzlei.id}:`, insertErr?.message)
-        fehler++
-        continue
-      }
-
-      const abrechnungId = abrechnung.id as string
-
-      // Positionen einfuegen — Kundennamen aus leads laden
-      const positionen: Array<{
-        kanzlei_abrechnung_id: string
+      // Positionen aufbauen — Kundennamen aus leads laden
+      const anzahl = berechtigteClaims.length
+      type KanzleiPosition = {
+        betrag_netto_cent: number
         fall_id: string
         fall_nr: string | null
         kunde_name: string
         vollmacht_unterschrieben_am: string
-        betrag_netto: number
         position_nr: number
-      }> = []
+      }
+      const positionen: KanzleiPosition[] = []
 
       for (let i = 0; i < berechtigteClaims.length; i++) {
         const claim = berechtigteClaims[i]
@@ -190,37 +153,58 @@ export async function erstelleKanzleiAbrechnung(
         }
 
         positionen.push({
-          kanzlei_abrechnung_id: abrechnungId,
+          // CMM-61: kanzlei_honorar aus claims (SSoT) als Cent-Betrag fuer createAbrechnung.
+          betrag_netto_cent: eurToCent(
+            Number((claim as { kanzlei_honorar?: number | null }).kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
+          ),
           fall_id: fallId,
           // CMM-49: claim_nummer (= altes faelle.fall_nr, 0-diff) aus dem claims-Anker.
           fall_nr: (claim.claim_nummer as string | null) ?? null,
           kunde_name: kundeName,
           // CMM-44 SP-B PR2b: vollmacht_signiert_am aus claims (SSoT, direkt am Anker).
           vollmacht_unterschrieben_am: (claim.vollmacht_signiert_am as string) ?? '',
-          // CMM-61: kanzlei_honorar aus claims (SSoT), nicht mehr faelle.
-          betrag_netto: Number((claim as { kanzlei_honorar?: number | null }).kanzlei_honorar ?? BETRAG_PRO_VOLLMACHT_NETTO),
           position_nr: i + 1,
         })
       }
 
-      if (positionen.length > 0) {
-        const { error: posErr } = await db.from('kanzlei_abrechnung_positionen').insert(positionen)
-        if (posErr) {
-          console.error(`[KFZ-188] positionen insert fuer ${abrechnungId}:`, posErr.message)
-        }
+      // Kanonische Erzeugung: createAbrechnung uebernimmt Netto/MwSt/Brutto-Berechnung,
+      // Rechnungsnummer-Vergabe (AAR-948: atomar via rechnungs_nr_counter), Header-Insert,
+      // Positionen-Insert und claims-Markierung (kanzlei_abrechnung_id + kanzlei_provision_status).
+      const kanzleiClaimIds = berechtigteClaims.map((c) => c.id).filter((id): id is string => !!id)
+      const abrResult = await createAbrechnung(db, KANZLEI_DESCRIPTOR, {
+        positionen,
+        kontext: {
+          kanzlei_id: kanzlei.id,
+          monat,
+          jahr,
+          monatPad,
+          anzahl_vollmachten: anzahl,
+          magic_link_token: magicToken,
+          magic_link_expires_at: magicLinkExpires.toISOString(),
+          faelligkeitsdatum: faelligkeitsdatum.toISOString().slice(0, 10),
+          claim_ids: kanzleiClaimIds,
+        },
+      })
+
+      if (!abrResult.ok) {
+        console.error(`[KFZ-188] createAbrechnung fehlgeschlagen fuer ${kanzlei.id}:`, abrResult.error)
+        fehler++
+        continue
       }
 
-      // claims aktualisieren (SSoT).
-      // CMM-44 SP-J Bucket B: kanzlei_abrechnung_id auf claims.
-      // CMM-61: kanzlei_provision_status auf claims (war faelle-nativ) — beide Writes
-      // in EINEM claims.update gebuendelt ueber die claim_ids (= berechtigteClaims.id).
-      const kanzleiClaimIds = berechtigteClaims.map((c) => c.id).filter((id): id is string => !!id)
-      if (kanzleiClaimIds.length > 0) {
-        await db
-          .from('claims')
-          .update({ kanzlei_provision_status: 'abgerechnet', kanzlei_abrechnung_id: abrechnungId })
-          .in('id', kanzleiClaimIds)
+      if (!abrResult.erstellt) {
+        // Schon eine Abrechnung fuer diesen Monat (pruefeBestehend) — uebersprungen.
+        // (Normalfall: bereits durch den Idempotenz-Check oben abgefangen; dieser Zweig
+        //  ist ein zusaetzlicher Safety-Net falls pruefeBestehend eine race-condition faengt.)
+        uebersprungen++
+        continue
       }
+
+      const abrechnungId = abrResult.id
+      const rechnungsnummer = abrResult.nummer
+      const nettoGesamt = abrResult.betraege.nettoCent / 100
+      const mwstBetrag = abrResult.betraege.ustCent / 100
+      const brutto = abrResult.betraege.bruttoCent / 100
 
       // Email mit Magic-Link versenden
       const magicUrl = `${APP_URL}/kanzlei/abrechnung/${magicToken}`
@@ -248,7 +232,7 @@ export async function erstelleKanzleiAbrechnung(
           vollmachtDatum: fmtDateStr(new Date(p.vollmacht_unterschrieben_am)),
           fallNr: p.fall_nr ?? '',
           kundeName: p.kunde_name,
-          betragNetto: p.betrag_netto,
+          betragNetto: p.betrag_netto_cent / 100,
         })),
         nettoGesamt,
         mwstBetrag,

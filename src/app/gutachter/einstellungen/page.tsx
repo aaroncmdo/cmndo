@@ -1,9 +1,11 @@
 ﻿import Link from 'next/link'
-import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon, Code2Icon } from 'lucide-react'
+import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon, Code2Icon, ClockIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import PageHeader from '@/components/shared/PageHeader'
+import KartenAnzeigeToggle from './KartenAnzeigeToggle'
+import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
 
 // AAR-720: Einstellungen-Hub. Sammel-Page für alle konfigurierbaren
 // Bereiche des SV-Portals — startet mit Kalender + Profil, wird nach
@@ -28,8 +30,20 @@ export default async function EinstellungenPage() {
   const sv = await getGutachterForUser<{
     id: string
     gcal_connected: boolean | null
-  }>(supabase, user.id, 'id, gcal_connected')
+    arbeitszeiten: Record<string, unknown> | null
+    urlaub_von: string | null
+    urlaub_bis: string | null
+  }>(supabase, user.id, 'id, gcal_connected, arbeitszeiten, urlaub_von, urlaub_bis')
   if (!sv) redirect('/gutachter/willkommen')
+
+  // Verfuegbarkeit-Status: laufender Urlaub schlaegt "individuell" schlaegt "Standard".
+  const heuteIso = new Date().toISOString().slice(0, 10)
+  const imUrlaub = !!sv.urlaub_von && !!sv.urlaub_bis && sv.urlaub_bis >= heuteIso
+  const verfuegbarkeitStatus = imUrlaub
+    ? { label: `Urlaub bis ${sv.urlaub_bis!.slice(8, 10)}.${sv.urlaub_bis!.slice(5, 7)}.`, tone: 'amber' as const }
+    : sv.arbeitszeiten
+      ? { label: 'Individuell', tone: 'green' as const }
+      : { label: 'Standard-Zeiten', tone: 'gray' as const }
 
   const { data: caldavRow } = await supabase
     .from('sv_kalender_verbindungen')
@@ -55,6 +69,15 @@ export default async function EinstellungenPage() {
       status: kalenderStatus.label,
       statusTone: kalenderStatus.tone,
       icon: CalendarIcon,
+    },
+    {
+      href: '/gutachter/einstellungen/verfuegbarkeit',
+      label: 'Verfügbarkeit',
+      description:
+        'Arbeitszeiten je Wochentag, geschlossene Tage und Urlaub — die Basis für Claimondos Terminvorschläge.',
+      status: verfuegbarkeitStatus.label,
+      statusTone: verfuegbarkeitStatus.tone,
+      icon: ClockIcon,
     },
     {
       href: '/gutachter/einstellungen/embed',
@@ -121,6 +144,16 @@ export default async function EinstellungenPage() {
             </Link>
           )
         })}
+        {/* Direkt-Toggle (kein Sub-Page-Link): steuert das Gebiets-Polygon im
+            Heute-Hub via LocalStorage. War gebaut aber nie im Hub gerendert. */}
+        <KartenAnzeigeToggle />
+      </div>
+
+      <div className="pt-2">
+        <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/70">
+          Konto &amp; Datenschutz
+        </p>
+        <DsgvoLoeschSection />
       </div>
 
       <p className="text-[11px] text-claimondo-ondo/70 text-center">

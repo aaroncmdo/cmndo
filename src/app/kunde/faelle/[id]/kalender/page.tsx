@@ -6,6 +6,7 @@ import Link from 'next/link'
 import KalenderClient from './KalenderClient'
 // CMM-63 SP-C: Ownership zentral über claim_parties (SSoT) statt inline faelle.kunde_id.
 import { assertKundeOwnsFall } from '@/lib/claims/kunde-ownership'
+import { getSvKontakt } from '@/lib/kunde/get-kontakt'
 
 export default async function KundeKalenderPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -57,13 +58,9 @@ export default async function KundeKalenderPage({ params }: { params: Promise<{ 
   // In Zukunft aus sachverstaendige.arbeitszeiten laden
   const arbeitszeiten = { start: 8, end: 18, tage: [1, 2, 3, 4, 5] } // Mo=1 ... Fr=5
 
-  // SV-Name laden
-  const { data: sv } = await admin.from('sachverstaendige').select('profile_id').eq('id', svId).single()
-  let svName = t('kalender.sachverstaendiger')
-  if (sv?.profile_id) {
-    const { data: p } = await admin.from('profiles').select('vorname, nachname').eq('id', sv.profile_id).single()
-    if (p) svName = [p.vorname, p.nachname].filter(Boolean).join(' ') || t('kalender.sachverstaendiger')
-  }
+  // SV-Name laden (geteilter Loader statt inline sachverstaendige->profiles-Join)
+  const svKontakt = await getSvKontakt(admin, svId)
+  const svName = svKontakt?.name || t('kalender.sachverstaendiger')
 
   return (
     <div className="w-full px-4 md:px-8 pt-5 pb-8 max-w-xl mx-auto">

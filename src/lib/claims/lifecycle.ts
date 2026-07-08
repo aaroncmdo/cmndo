@@ -7,9 +7,11 @@
 //   begutachtung — aktiver Auftrag (status != abgeschlossen) ODER Kanzlei-Uebergabe
 //                  laeuft (kanzlei_fall existiert, aber lexdrive_case_id noch null —
 //                  B-10-Interim "Kanzlei-Uebergabe laeuft", begutachtung-Tail)
-//   regulierung  — kanzlei_fall MIT lexdrive_case_id (B-10: Eintritt erst wenn die
-//                  LexDrive-Kanzlei den Fall uebernommen hat; KB-manuell bis LexDrive-
-//                  Anbindung). Nachbesichtigung/Stellungnahme als Side-Quest sichtbar.
+//   regulierung  — kanzlei_fall in Regulierung, DATA-DRIVEN (Aaron 03.07.): KB-nativer
+//                  VS-Kontakt (kf.vs_kontakt_am) / Auszahlung (kf.status='auszahlung' /
+//                  ausgezahlt_am) ODER LexDrive-Uebernahme (lexdrive_case_id). Das alte
+//                  B-10-lexdrive-Gate ist aufgehoben — unsere DB treibt die Phase (die
+//                  LexDrive-API kommt spaeter). Nachbesichtigung/Stellungnahme als Side-Quest.
 //   abschluss    — claims.status terminal (B-11/B-12 / MP-8: KB/Kanzlei-gesetzt, NICHT
 //                  aus Auszahlung auto-abgeleitet). Substates erfolgreich_reguliert /
 //                  storniert / klage_rechtsstreit / verjaehrt / abgelehnt_final /
@@ -257,6 +259,12 @@ function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
       aktiverAuftrag: aktiveNachbesichtigung,
     }
   }
+  // ── Auszahlung (Aaron 03.07., DATA-DRIVEN) ── KB-nativ (kanzleiAuszahlungEingegangen
+  // setzt kf.status='auszahlung'/ausgezahlt_am) ODER LexDrive. KEIN lexdrive_case_id-Gate
+  // mehr — unsere DB treibt die Phase. Weiteste Regulierungs-Sub-Phase → zuerst geprüft.
+  if (kanzleiFall?.status === 'auszahlung' || kanzleiFall?.ausgezahlt_am) {
+    return { mainPhase: 'regulierung', subPhase: 'auszahlung', aktiveSideQuests: sideQuests, aktiverAuftrag: sideQuests[0] ?? null }
+  }
   if (kanzleiFall?.vs_reaktion_typ === 'gekuerzt') {
     return { mainPhase: 'regulierung', subPhase: 'vs-kuerzt', aktiveSideQuests: sideQuests, aktiverAuftrag: null }
   }
@@ -264,13 +272,14 @@ function milestoneLifecycle(input: ClaimLifecycleInput): ClaimLifecycle {
     return { mainPhase: 'regulierung', subPhase: 'anschlussschreiben', aktiveSideQuests: sideQuests, aktiverAuftrag: null }
   }
 
-  // ── Regulierung ── B-10: Eintritt erst wenn lexdrive_case_id gesetzt ist
-  // (LexDrive-Kanzlei hat uebernommen). Bloße kanzlei_faelle-Existenz reicht NICHT.
-  if (kanzleiFall?.lexdrive_case_id) {
-    const sub: ClaimSubPhase = kanzleiFall.status === 'auszahlung' ? 'auszahlung' : 'versicherungskontakt'
+  // ── Regulierung/versicherungskontakt (Aaron 03.07., DATA-DRIVEN) ── LexDrive-Uebernahme
+  // (lexdrive_case_id) ODER KB-nativer VS-Kontakt (kanzleiVsKontaktErfasst → kf.vs_kontakt_am).
+  // Das alte B-10-lexdrive-Gate ist aufgehoben: die Regulierung wird von UNSEREN DB-Daten
+  // getrieben, nicht von der (noch nicht angebundenen) LexDrive-API.
+  if (kanzleiFall?.lexdrive_case_id || kanzleiFall?.vs_kontakt_am) {
     return {
       mainPhase: 'regulierung',
-      subPhase: sub,
+      subPhase: 'versicherungskontakt',
       aktiveSideQuests: sideQuests,
       aktiverAuftrag: sideQuests[0] ?? null,
     }
@@ -421,3 +430,30 @@ export function toClaimMainPhase(value: string | null | undefined): ClaimMainPha
 export function toClaimSubPhase(value: string | null | undefined): ClaimSubPhase {
   return value && value in SUBPHASE_LABEL ? (value as ClaimSubPhase) : 'sa_offen'
 }
+
+/** Vollstaendige Liste aller ClaimSubPhase-Werte — single source of truth fuer
+ *  Exhaustiveness-Tests (z.B. claimWorkflowMeta-Completeness). */
+export const ALL_CLAIM_SUB_PHASES = [
+  'sa_offen',
+  'vollmacht_offen',
+  'onboarding_offen',
+  'termin',
+  'besichtigung',
+  'gutachten',
+  'filmcheck',
+  'qc-pruefung',
+  'kanzlei_uebergabe',
+  'versicherungskontakt',
+  'auszahlung',
+  'nachforderung',
+  'vs-kuerzt',
+  'anschlussschreiben',
+  'nachbesichtigung-laeuft',
+  'erfolgreich_reguliert',
+  'storniert',
+  'klage_rechtsstreit',
+  'verjaehrt',
+  'abgelehnt_final',
+  'an_externe_kanzlei',
+  'termin_durchgefuehrt',
+] as const satisfies readonly ClaimSubPhase[]

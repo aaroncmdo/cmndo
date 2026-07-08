@@ -121,7 +121,18 @@ export async function gibKanzleipaketFrei(
         }
         await checkFallAutoPhase(auftrag.fall_id as string)
         const { saveFilmcheck } = await import('@/app/faelle/[id]/_actions/filmcheck')
-        await saveFilmcheck(auftrag.fall_id as string, '')
+        const handoffResult = await saveFilmcheck(auftrag.fall_id as string, '')
+        // #3402-Follow-up: saveFilmcheck wirft nicht mehr (liefert { success:false } wenn der
+        // Fall nach dem autoPhase-Lauf noch nicht im Filmcheck steht) -> der catch unten griffe
+        // nicht mehr, ein abgelehnter Handoff waere sonst 100% stumm. Result nicht verschlucken.
+        // Bewusst KEIN { ok:false }: die primaere Freigabe (auftrag abgeschlossen + kanzlei_faelle)
+        // gilt, und die gutachten_final_freigegeben-Idempotenz oben wuerde einen Retry abkuerzen.
+        // Der Handoff wird via QC-bestanden / autoPhase nachgeholt, sobald der Filmcheck steht.
+        if (!handoffResult.success) {
+          console.warn(
+            `[gibKanzleipaketFrei] Kanzlei-Handoff nicht ausgeloest fuer fall ${auftrag.fall_id}: ${handoffResult.error ?? 'unbekannt'} (Freigabe/Auftrag dennoch gespeichert)`,
+          )
+        }
       }
     }
   } catch (err) {

@@ -18,6 +18,7 @@ import { getAlleSlots } from '@/lib/dokumente/katalog'
 import KbPhaseAuditCard from '@/components/kb/KbPhaseAuditCard'
 import VollstaendigkeitsCheckCard from '@/components/kb/VollstaendigkeitsCheckCard'
 import { berechneQcAutoChecks } from '@/lib/qc/auto-checks'
+import { berechneGutachtenAnomalien, type GutachtenAnomalie } from '@/lib/qc/anomalien'
 import RegulierungCard from '@/components/kb/RegulierungCard'
 // 13.05.2026 Restore (8f088031-Merge + 693f97f8-ts-cleanup): 3 Cards
 // silent rausgefallen — siehe docs/13.05.26/TICKET-cmm28-followup-admin-kb-fallakte.md
@@ -27,6 +28,8 @@ import GutachtenOcrCard from '@/components/admin/fallakte/GutachtenOcrCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // AAR-446: FAQ-Bot-Analyse-Card (liest letzte fall_summaries-Row des Kunden)
 import FaqBotAnalyseCard from '@/components/admin/FaqBotAnalyseCard'
+// Claim-AI-Konsole — interaktiver Admin-Copilot + Vorschlags-Karten.
+import { ClaimAiPanelServer } from '@/app/faelle/[id]/_components/ClaimAiPanel.server'
 import {
   getKbPhaseAudit,
   type KbTask,
@@ -145,12 +148,12 @@ export default async function FallaktePage({
     .single()
   const userRolle = ((profile?.rolle as FallakteRolle | null) ?? 'kunde') as FallakteRolle
 
-  // Task 7: aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel
-  // (nur dispatch/admin). reparatur_werkstatt_id ist wegen Type-Lag noch nicht in
+  // Aktuell zugewiesene Reparatur-Werkstatt fuers WerkstattVermittlungPanel
+  // (dispatch/admin/KB). reparatur_werkstatt_id ist wegen Type-Lag noch nicht in
   // den generierten Types -> Select-String-Cast + separater Name-Read (analog
   // Lead-Seite). Liest am Claim (claims.id), NICHT an der fall-Route-id.
   let currentReparaturWerkstatt: { id: string; name: string } | null = null
-  if (claimId && (userRolle === 'dispatch' || userRolle === 'admin')) {
+  if (claimId && (userRolle === 'dispatch' || userRolle === 'admin' || userRolle === 'kundenbetreuer')) {
     const adminW = createAdminClient()
     const { data: cwRow } = await adminW
       .from('claims')
@@ -686,7 +689,10 @@ export default async function FallaktePage({
           .in('status', ['offen', 'in-bearbeitung']),
         admin
           .from('sla_tracking')
-          .select('fall_id, target_rolle, blocker_rolle, blocker_grund, status, breach_at, phase, blocker_seit')
+          // blocker_seit existiert nicht auf sla_tracking (Spaltenfehler -> Query warf ->
+          // KB-Phasen-Audit-Card verschwand still). started_at (= SLA-/Blocker-Start) ist
+          // die kanonische "blockt seit"-Quelle -> als blocker_seit aliasen (Consumer unveraendert).
+          .select('fall_id, target_rolle, blocker_rolle, blocker_grund, status, breach_at, phase, blocker_seit:started_at')
           .eq('claim_id', claimId)
           .in('status', ['pending', 'breached']),
         getStepperState(id),
@@ -733,6 +739,17 @@ export default async function FallaktePage({
   // Filmcheck #7: auto-vorbefuellte QC-Checks + Gutachten-PDF fuer die QC-Karte (KB/Admin).
   let qcAutoChecks: Record<string, boolean> = {}
   let qcGutachtenUrl: string | null = null
+  // Filmcheck Phase 3 (P3a): read-only OCR-Kern-Werte fuer den KB im Filmcheck.
+  let qcOcrWerte: {
+    reparaturkosten_netto: number | null
+    restwert: number | null
+    wiederbeschaffungswert: number | null
+    minderwert: number | null
+    gesamt_schadensbetrag: number | null
+    totalschaden: boolean | null
+  } | null = null
+  // Filmcheck (02.07.): geflaggte Widersprueche in den OCR-Werten (Pruef-Hinweise).
+  let qcAnomalien: GutachtenAnomalie[] = []
   let qcCardProps: React.ComponentProps<typeof VollstaendigkeitsCheckCard> | null = null
   if (userRolle === 'admin' || userRolle === 'kundenbetreuer') {
     const adminCli = createAdminClient()
@@ -798,13 +815,103 @@ export default async function FallaktePage({
         vorhanden: p.status === 'hochgeladen' || p.status === 'geprueft',
         pflicht: !!p.pflicht,
       }))
-      // Filmcheck #7: QC-Checks aus Falldaten vorbefuellen (gutachten_vorhanden/sa/vollmacht).
-      // vorschaden_geprueft ist in page.tsx nicht geladen -> Phase 1b. PDF = Hauptgutachten.
+      // Filmcheck #7 / Phase 1b (02.07.): QC-Checks aus Falldaten vorbefuellen. FIN +
+      // Kundendaten (Ansprechpartner + Kontakt) + Besichtigungsadresse + Vorschaden-Status
+      // claim-nativ aus v_claim_full (via adminCli, analog den Doc-Reads hier). PDF = Hauptgutachten.
+      type VcfQcRow = {
+        fin_vin: string | null
+        kunde_vorname: string | null
+        kunde_nachname: string | null
+        kunde_email: string | null
+        kunde_telefon: string | null
+        besichtigungsort_adresse: string | null
+        vorschaden_geprueft: boolean | null
+      }
+      let vcfQc: VcfQcRow | null = null
+      // Filmcheck Phase 3 (P3a/P3b): flache OCR-Kern-Werte + gutachten.positionen (jsonb)
+      // aus der ALTEN/kanonischen Pipeline (gutachten claim-keyed) + Anzahl der
+      // schadenspositionen-Zeilen — beides via adminCli, analog den Doc-Reads hier.
+      type GutOcrRow = {
+        reparaturkosten_netto: number | null
+        restwert: number | null
+        wiederbeschaffungswert: number | null
+        minderwert: number | null
+        gesamt_schadensbetrag: number | null
+        totalschaden: boolean | null
+        positionen: unknown
+      }
+      let gutOcr: GutOcrRow | null = null
+      let schadenspositionenCount: number | null = null
+      if (claimId) {
+        const { data: vcfQcData } = await adminCli
+          .from('v_claim_full')
+          .select(
+            'fin_vin, kunde_vorname, kunde_nachname, kunde_email, kunde_telefon, besichtigungsort_adresse, vorschaden_geprueft',
+          )
+          .eq('id', claimId)
+          .maybeSingle<VcfQcRow>()
+        vcfQc = vcfQcData ?? null
+        const { data: gutOcrData } = await adminCli
+          .from('gutachten')
+          .select(
+            'reparaturkosten_netto, restwert, wiederbeschaffungswert, minderwert, gesamt_schadensbetrag, totalschaden, positionen',
+          )
+          .eq('claim_id', claimId)
+          .maybeSingle<GutOcrRow>()
+        gutOcr = gutOcrData ?? null
+        const { count: spCount } = await adminCli
+          .from('schadenspositionen')
+          .select('id', { count: 'exact', head: true })
+          .eq('claim_id', claimId)
+        schadenspositionenCount = spCount ?? 0
+      }
       qcAutoChecks = berechneQcAutoChecks({
         gutachtenUrlVorhanden: !!erstgutachten.gutachten_url,
-        vorschaedenGeprueft: null,
+        vorschaedenGeprueft: vcfQc?.vorschaden_geprueft ?? null,
         pflichtItems: pflichtItemsList,
+        finVin: vcfQc?.fin_vin ?? null,
+        kundendaten: {
+          vorname: vcfQc?.kunde_vorname ?? null,
+          nachname: vcfQc?.kunde_nachname ?? null,
+          email: vcfQc?.kunde_email ?? null,
+          telefon: vcfQc?.kunde_telefon ?? null,
+          besichtigungsadresse: vcfQc?.besichtigungsort_adresse ?? null,
+        },
+        // P3b: nur uebergeben wenn die Quellen ladbar waren (claimId vorhanden) ->
+        // dann wird schadenspositionen_erfasst abgeleitet, sonst bleibt es KB-Urteil.
+        ...(claimId
+          ? {
+              positionen: {
+                schadenspositionenCount: schadenspositionenCount ?? 0,
+                gutachtenPositionen: gutOcr?.positionen ?? null,
+              },
+            }
+          : {}),
       })
+      // P3a: read-only OCR-Werte an die QC-Karte (graceful — QcOcrWerteBlock rendert
+      // nichts, wenn alle Werte null sind).
+      qcOcrWerte = gutOcr
+        ? {
+            reparaturkosten_netto: gutOcr.reparaturkosten_netto,
+            restwert: gutOcr.restwert,
+            wiederbeschaffungswert: gutOcr.wiederbeschaffungswert,
+            minderwert: gutOcr.minderwert,
+            gesamt_schadensbetrag: gutOcr.gesamt_schadensbetrag,
+            totalschaden: gutOcr.totalschaden,
+          }
+        : null
+      // Filmcheck (02.07.): Anomalien aus den flachen OCR-Werten + FIN (aus v_claim_full).
+      // Jede Regel feuert nur bei non-null Inputs -> ohne gutOcr bleibt die Liste leer.
+      if (gutOcr) {
+        qcAnomalien = berechneGutachtenAnomalien({
+          reparaturkosten_netto: gutOcr.reparaturkosten_netto,
+          wiederbeschaffungswert: gutOcr.wiederbeschaffungswert,
+          restwert: gutOcr.restwert,
+          minderwert: gutOcr.minderwert,
+          totalschaden: gutOcr.totalschaden,
+          gutachten_fin: vcfQc?.fin_vin ?? null,
+        })
+      }
       qcGutachtenUrl = haupt?.url ?? null
       qcCardProps = {
         auftragId: erstgutachten.id,
@@ -911,6 +1018,12 @@ export default async function FallaktePage({
         </div>
       )}
       {zeigeAnalyseCard && <FaqBotAnalyseCard fallId={id} />}
+      {/* Claim-AI-Konsole — nur fuer Admin sichtbar (human-in-loop, DSGVO Art. 22). */}
+      {userRolle === 'admin' && (
+        <div className="mb-4">
+          <ClaimAiPanelServer fallId={id} />
+        </div>
+      )}
       {/* AAR-842: Kanzlei-Block — prominent bei Phase 9_abgelehnt, sonst normal.
           Render-Logik im Parent (Aaron-Pattern): Component bleibt dumm. */}
       {kanzleiBlockData && (
@@ -918,9 +1031,11 @@ export default async function FallaktePage({
           <KanzleiAnsprechpartnerBlock {...kanzleiBlockData} />
         </div>
       )}
-      {/* Task 7: Reparatur-Werkstatt vermitteln (nur dispatch/admin). Gleiches
-          Panel wie im Dispatch-Lead-Detail, hier mit target='claim' (claimId). */}
-      {claimId && (userRolle === 'dispatch' || userRolle === 'admin') && (
+      {/* Reparatur-Werkstatt vermitteln (dispatch/admin/KB — im Auftrag des Kunden,
+          falls der Gutachter es noch nicht gemacht hat). Gleiches Panel wie im
+          Dispatch-Lead-Detail, hier target='claim' (claimId). quelle wird serverseitig
+          aus der Rolle abgeleitet (KB -> 'kb'). Gate: reparatur_werkstatt_id NULL. */}
+      {claimId && (userRolle === 'dispatch' || userRolle === 'admin' || userRolle === 'kundenbetreuer') && (
         <div className="mb-4 max-w-md">
           <WerkstattVermittlungPanel
             target="claim"
@@ -985,6 +1100,10 @@ export default async function FallaktePage({
           // Filmcheck #7: auto-vorbefuellte Checks + Gutachten-PDF zur Pruefung
           qcAutoChecks,
           qcGutachtenUrl,
+          // Filmcheck Phase 3: read-only OCR-Kern-Werte fuer den KB im Filmcheck
+          qcOcrWerte,
+          // Filmcheck (02.07.): geflaggte Widersprueche in den OCR-Werten (Pruef-Hinweise)
+          qcAnomalien,
           // AAR-327: Dokument-Anforderungs-UI
           anforderbareSlots,
           anforderungenVonMir,

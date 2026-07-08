@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { SvSlotAuswahl } from '@/components/self-service/SvSlotAuswahl'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
+import { WunschterminPicker } from '@/app/embed/gutachter-finder/_components/WunschterminPicker'
 import { ladeMatchingFlow, bucheTerminFlow, speichereBesichtigungsortFlow } from './self-service-actions'
 import type { OeffentlichesSvProfil, SlotVorschlag } from '@/lib/sv-matching-modul/types'
 import { Button } from '@/components/primitives/Button/Button.web'
@@ -47,6 +48,10 @@ export function FlowSlotStep({
   const [svs, setSvs] = useState<OeffentlichesSvProfil[]>([])
   const [fehler, setFehler] = useState<string | null>(null)
   const [ortSpeichern, setOrtSpeichern] = useState(false)
+  // AAR-956: optionaler Wunschtermin (Berlin-Wall-Clock "YYYY-MM-DDTHH:MM" oder "").
+  // Wird beim Ort-Bestaetigen an speichereBesichtigungsortFlow gereicht -> lead.wunschtermin
+  // -> ladeMatchingFlow rankt die Slots danach. Leer = naechste freie Termine.
+  const [wunschterminLokal, setWunschterminLokal] = useState('')
   // AAR-956 #4: der aktuell hervorgehobene SV (default = #1/empfohlen). Nur gesetzt/genutzt
   // wenn onSvSelect vorliegt (Embed) — der Default-Set emittiert NICHT (die Karte zeigt den
   // Top-SV beim Ort-Schritt schon), erst die Nutzer-Auswahl re-routet.
@@ -109,7 +114,7 @@ export function FlowSlotStep({
     besichtigungsAdresseRef.current = ort.adresse
     setOrtSpeichern(true)
     setFehler(null)
-    const r = await speichereBesichtigungsortFlow(token, ort)
+    const r = await speichereBesichtigungsortFlow(token, ort, wunschterminLokal || null)
     setOrtSpeichern(false)
     if (!r.ok) {
       setFehler(r.error ?? t('ort.fehler_speichern'))
@@ -152,6 +157,16 @@ export function FlowSlotStep({
       <div className="max-w-md" data-testid="buchung-ort-abfragen">
         <h1 className="text-2xl font-semibold text-claimondo-navy mb-2">{t('ort.titel')}</h1>
         <p className="text-sm text-claimondo-ondo mb-4">{t('ort.hinweis')}</p>
+        {/* AAR-956: optionaler Wunschtermin — rankt die Gutachter-Slots (lead.wunschtermin
+            -> ladeMatchingFlow). Hardcoded-DE wie im Embed-Finder (per-Locale-JSON ohne
+            Key-Fallback -> fehlender i18n-Key wuerde Nicht-de-Kunden crashen). */}
+        <div className="mb-5">
+          <h2 className="text-base font-semibold text-claimondo-navy">Ihr Wunschtermin</h2>
+          <p className="mt-0.5 mb-2 text-sm text-claimondo-ondo">
+            Optional — wählen Sie Ihren Wunschtag und die Uhrzeit.
+          </p>
+          <WunschterminPicker value={wunschterminLokal} onChange={setWunschterminLokal} />
+        </div>
         {/* Item 1: Vorschlag aus dem gemeldeten Unfallort — 1-Klick bestaetigen oder unten anders waehlen. */}
         {vorschlagOrt && (
           <div className="mb-4 rounded-ios-lg border border-claimondo-ondo/20 bg-claimondo-ondo/5 p-4">

@@ -4,7 +4,7 @@
 // Konsumenten: /api/webhooks/twilio/inbound + /api/twilio/inbound-kb-whatsapp.
 // Issue #1477 (Lead-Audit P0): aus inbound-kb-whatsapp extrahiert, ENV-driven URL +
 // all-env-active. Vorher war Sig-Verify NUR in inbound-kb-whatsapp + dort
-// production-only + Hardcoded cmndo.vercel.app — bei VPS-Routing ueber
+// production-only + Hardcoded app.claimondo.de — bei VPS-Routing ueber
 // app.claimondo.de waere die Sig nie gematched.
 
 import crypto from 'crypto'
@@ -46,7 +46,7 @@ export function validateTwilioSignature(
  * eingetragen ist.
  *
  * NEXT_PUBLIC_APP_URL ist Quelle der Wahrheit (in /etc/claimondo/.env.local
- * gesetzt). Kein Fallback auf cmndo.vercel.app — explizit throw bei Missing,
+ * gesetzt). Kein Fallback auf app.claimondo.de — explizit throw bei Missing,
  * damit Misconfig in CI/Staging sofort sichtbar wird.
  *
  * @param requestPath - Path-Teil (z.B. "/api/webhooks/twilio/inbound")

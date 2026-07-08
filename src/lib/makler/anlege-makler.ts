@@ -1,5 +1,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generatePromoCode } from '@/lib/makler/promo-code'
+import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
 
 // Gemeinsamer Kern der Makler-Anlage — von admin-createMakler UND dem Self-Signup genutzt.
 // Legt Auth-User (Random-PW + force_password_change) + profiles(rolle='makler') +
@@ -30,6 +31,10 @@ export type MaklerAnlageInput = {
   provisionKomplett: number
   provisionGutachter: number
   aktiviertVon: string | null // admin user-id, oder null beim Self-Signup
+  // Makler-Gesellschaft: entweder versicherungsgebunden (versicherungId) ODER frei (maklerpoolId).
+  // Der Typ wird aus dem gesetzten FK abgeleitet; beide null = (noch) nicht zugeordnet.
+  versicherungId?: string | null
+  maklerpoolId?: string | null
 }
 
 export type MaklerAnlageResult =
@@ -87,6 +92,8 @@ export async function anlegeMaklerKern(
       status: 'aktiv',
       aktiviert_am: new Date().toISOString(),
       aktiviert_von: input.aktiviertVon,
+      versicherung_id: input.versicherungId ?? null,
+      maklerpool_id: input.maklerpoolId ?? null,
       user_id: userId,
     })
     .select('id')
@@ -111,6 +118,9 @@ export async function anlegeMaklerKern(
       break
     }
   }
+
+  // 5) Standard-Staffelung (Default-Bonus-Stufen) — best-effort, non-fatal (jeder neue Makler).
+  await setzeStandardStaffel(admin, 'makler', m.id as string)
 
   return { ok: true, userId, maklerId: m.id as string, password }
 }

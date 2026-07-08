@@ -73,6 +73,13 @@ jobs:
       - name: Component-Set-Ratchet
         run: npm run check:component-set -- --ratchet
 
+      # Status-Registry-Drift-Bremse (Ratchet): blockt NEUE inline Status-/Farb-Maps
+      # + Status-Farb-Ternaries ggue. scripts/status-registry-baseline.json. Neuer Code
+      # nutzt @/lib/status (resolveStatus/statusSlotClass/<StatusBadge domain=.../>).
+      # Skip via `// status-registry-skip:`-Header. Siehe AGENTS.md §status-registry.
+      - name: Status-Registry-Ratchet
+        run: npm run check:status-registry -- --ratchet
+
       # Termin-Engine-Contract-Drift-Bremse (Ratchet): blockt NEUE direkte
       # Legacy-Filter (.eq('lead_id')/.eq('sv_id')) auf gutachter_termine
       # ausserhalb engine/* ggue. scripts/termin-engine-contract-baseline.json
@@ -87,6 +94,14 @@ jobs:
       # Siehe AGENTS.md §dead-code-gate + docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md.
       - name: Knip-Dead-Code-Ratchet
         run: npm run check:knip -- --ratchet
+
+      # Redirect-Stub-Drift-Bremse (Ratchet): blockt NEUE reine redirect()-/permanentRedirect()-
+      # only page.tsx (kein Content-return) ggue. scripts/redirect-stub-baseline.json. Solche
+      # Stubs rendern auf prod eine LEERE 200-Shell (React #310, kein Redirect) — kein Build/
+      # tsc/Ratchet faengt das, nur ein Prod-Render-Smoke. Fix: HTTP-308 via next.config.ts
+      # redirects() + page.tsx loeschen. Siehe AGENTS.md §Redirect-Stub + BROADCAST-redirect-stub-antipattern.
+      - name: Redirect-Stub-Ratchet
+        run: npm run check:redirect-stubs -- --ratchet
 
       # i18n-Drift-Bremse (Strategie B): erzwingt identische Key-Sets ueber alle
       # 6 Locales. Verhindert, dass untersetzte i18n-Keys live gehen — next-intl
@@ -134,6 +149,19 @@ jobs:
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
 
+      # Fundament-Haertung (Audit 2026-07-07): systematischer anon-Exposure-Guard.
+      # Schliesst die Luecke der claim-zentrierten View-Guards (die security_invoker +
+      # matviews + Views-ohne-claim_id ausschliessen — genau der v_partner_billing-Pfad).
+      # Default-Deny ueber ALLE anon-lesbaren public-Views: faengt jede, die einem echten
+      # anon Zeilen zeigt (anon-REST) ODER security_invoker=false (DEFINER) ist.
+      # Siehe scripts/check-anon-exposure.mjs + Backing-RPC audit_anon_readable_views().
+      - name: Anon-Exposure-Guard
+        run: node scripts/check-anon-exposure.mjs
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+
       - name: Build
         run: npm run build
         env:
@@ -153,6 +181,13 @@ jobs:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
 
   e2e:
+    # E2E laeuft NUR post-merge (push auf main/staging) gegen den DEPLOYTEN Stand auf
+    # app.claimondo.de — NICHT auf pull_request. Auf PRs testete der Job den Prod-Stand
+    # gegen den (nicht deployten) PR-Branch -> systematisch rot (doc40-cards-clickable.spec.ts
+    # sagt das im Header selbst: "Asserts werden erst gruen, wenn deployed"). Der `build`-Job
+    # bleibt auf PRs required. Das entfernt das rote e2e von allen PRs (13 Parallel-Sessions
+    # sahen es dauerhaft rot). Manuelle Live-Smokes s. playwright.config.ts testIgnore.
+    if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs: build
     steps:

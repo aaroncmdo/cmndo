@@ -23,9 +23,9 @@ import {
   ClipboardListIcon,
   FileSignatureIcon,
   ShieldCheckIcon,
+  MessagesSquareIcon,
 } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
-import { MitteilungenProvider } from '@/components/mitteilungszentrale/MitteilungenProvider'
 import OutboxBadge from '@/components/offline/OutboxBadge'
 import { SupportButton } from '@/components/support/SupportButton'
 import { SupportSidebarPanel } from '@/components/support/SupportSidebarPanel'
@@ -76,6 +76,7 @@ const NAV_SECTIONS_BASE: NavSection[] = [
       { href: '/gutachter/auftraege', label: 'Aufträge', icon: ClipboardListIcon, badgeKey: 'auftraege' },
       { href: '/gutachter/faelle', label: 'Meine Fälle', icon: FolderOpenIcon },
       { href: '/gutachter/kalender', label: 'Kalender', icon: CalendarIcon, badgeKey: 'neueTermine' },
+      { href: '/gutachter/netzwerk', label: 'Netzwerk', icon: MessagesSquareIcon },
     ],
   },
   // AAR-727: Kommunikations-Sektion entfällt — der GlobalPosteingangFab
@@ -247,7 +248,7 @@ export default function GutachterShell({
 
   // AAR-370: Badge-Counter für Sidebar-Items.
   // - auftraege: Anzahl Fälle mit status='sv-zugewiesen' (noch nicht terminiert)
-  // - posteingang: ungelesene gutachter_mitteilungen + ungelesene nachrichten
+  // - posteingang: ungelesene mitteilungen + ungelesene nachrichten
   //   gemeinsam als aggregierter Counter (Tabs Mitteilungen + Nachrichten).
   const [badgeCounts, setBadgeCounts] = useState<{ auftraege: number; posteingang: number; neueTermine: number }>({
     auftraege: 0,
@@ -279,11 +280,12 @@ export default function GutachterShell({
       .eq('gutachten_final_freigegeben', false)
       .eq('status', 'termin')
 
-    // Posteingang Tab 1: ungelesene System-Mitteilungen über alle SV-Rows.
+    // Posteingang Tab 1: ungelesene System-Mitteilungen (Phase 5: kanonische
+    // `mitteilungen`, empfaenger = User-id, statt der retireten gutachter_mitteilungen).
     const { count: mitteilungenCount } = await supabase
-      .from('gutachter_mitteilungen')
+      .from('mitteilungen')
       .select('id', { count: 'exact', head: true })
-      .in('sv_id', svIds)
+      .eq('empfaenger_id', user.id)
       .eq('gelesen', false)
 
     // Posteingang Tab 2: ungelesene Chat-Nachrichten.
@@ -316,7 +318,7 @@ export default function GutachterShell({
       .channel('gutachter-sidebar-badges')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'auftraege' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'nachrichten' }, () => loadBadges())
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_mitteilungen' }, () => loadBadges())
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'mitteilungen' }, () => loadBadges())
       .on('postgres_changes', { event: '*', schema: 'public', table: 'gutachter_termine' }, () => loadBadges())
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -336,7 +338,7 @@ export default function GutachterShell({
   }
 
   return (
-    <MitteilungenProvider>
+    <>
     <div
       /* 2026-05-14 Mobile-Cockpit: BG bleibt brand-primary nur auf lg+ (rahmt
          die Desktop-Card-Sidebar). Auf Mobile setzen wir bg-claimondo-bg —
@@ -701,6 +703,6 @@ export default function GutachterShell({
       {!isFeldmodus && <GlobalPosteingangFab currentUserId={userId} />}
       {!isFeldmodus && <SVSpotlight />}
     </div>
-    </MitteilungenProvider>
+    </>
   )
 }

@@ -1,5 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
+import { buildWelcomeConfirmLink } from '@/lib/auth/welcome-link'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
 import { sendEmail } from './client'
 import { render } from '@react-email/render'
@@ -27,6 +29,11 @@ import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from 
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
+import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates/MaklerWelcome'
+import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from './templates/WillkommenWerkstatt'
+import { MaklerWochenReportEmail, subject as maklerWochenReportSubject } from './templates/MaklerWochenReport'
+import type { MaklerWochenReportData } from '@/lib/makler/wochenreport'
+import { wochenreportOptOutUrl } from '@/lib/makler/wochenreport-optout'
 
 const admin = () => createAdminClient()
 
@@ -114,10 +121,9 @@ export async function sendKundeWelcome(
   }
   if (!kundeEmail) throw new Error('Keine Email-Adresse für Kunden')
 
-  // Versicherung
-  let versicherung = '—'
-  const { data: partei } = await db.from('parteien').select('versicherung_name').eq('fall_id', fallId).eq('rolle', 'gegner').limit(1).maybeSingle()
-  if (partei?.versicherung_name) versicherung = partei.versicherung_name
+  // Versicherung — SSoT: kanonische Gegner-Versicherung aus v_claim_full
+  // (loest das tote parteien/rolle='gegner'-Read ab, s. resolveGegnerVersicherung).
+  const versicherung = (await resolveGegnerVersicherung(db, { fallId })).name ?? '—'
 
   // SV-Name
   let svName: string | null = null
@@ -277,10 +283,8 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
     }
   }
 
-  // Versicherung
-  let versicherung = '—'
-  const { data: partei } = await db.from('parteien').select('versicherung_name').eq('fall_id', fallId).eq('rolle', 'gegner').limit(1).maybeSingle()
-  if (partei?.versicherung_name) versicherung = partei.versicherung_name
+  // Versicherung — SSoT via v_claim_full (loest totes parteien/rolle='gegner'-Read ab).
+  const versicherung = (await resolveGegnerVersicherung(db, { fallId })).name ?? '—'
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
@@ -308,32 +312,43 @@ export async function sendSvAuftragszusammenfassung(fallId: string, gutachterId:
 
 // ─── 3. SV Abrechnung ──────────────────────────────────────────────────────
 
-export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
+export async function sendSvAbrechnung(fallId: string): Promise<void> {
   const db = admin()
-  const { data: abr } = await db.from('gutachter_abrechnungen').select('sv_id, fall_id, schadenhoehe, leadpreis, preistyp').eq('id', abrechnungId).single()
-  if (!abr) return
+  // Billing-Konsolidierung 2026-07-01: Leadpreis/Schadenhoehe aus claims-SSoT
+  // (processCaseBilling) statt aus der retireten gutachter_abrechnungen-Tabelle.
+  const claimId = await resolveClaimId(db, fallId)
+  if (!claimId) return
+  const { data: claim } = await db.from('claims')
+    .select('sv_id, claim_nummer, lead_preis_netto, lead_preis_typ, schadens_hoehe_netto, gutachten(gesamt_schadensbetrag)')
+    .eq('id', claimId)
+    .maybeSingle()
+  if (!claim?.sv_id || claim.lead_preis_netto == null) return
 
-  // CMM-49: claim_nummer claims-direkt (faelle-frei).
-  const claimId = await resolveClaimId(db, abr.fall_id)
-  const { data: fallClaim } = claimId
-    ? await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
-    : { data: null }
+  const g = Array.isArray((claim as { gutachten?: unknown }).gutachten)
+    ? ((claim as { gutachten: unknown[] }).gutachten)[0]
+    : (claim as { gutachten?: unknown }).gutachten
+  const schadenhoehe = Number(
+    (g as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag
+      ?? claim.schadens_hoehe_netto
+      ?? 0,
+  )
+  const leadpreis = Number(claim.lead_preis_netto)
 
-  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', abr.sv_id).single()
+  const { data: sv } = await db.from('sachverstaendige').select('profile_id').eq('id', claim.sv_id).single()
   if (!sv?.profile_id) return
   const { data: svProfile } = await db.from('profiles').select('email, vorname').eq('id', sv.profile_id).single()
   if (!svProfile?.email) throw new Error('Keine Email-Adresse für SV')
 
   const props = {
     svVorname: svProfile.vorname ?? 'Gutachter',
-    fallNummer: fallClaim?.claim_nummer ?? '—',
+    fallNummer: claim.claim_nummer ?? '—',
     positionen: [
-      { bezeichnung: 'Schadenshöhe', betrag: fmtCurrency(Number(abr.schadenhoehe)) },
-      { bezeichnung: `Leadpreis (${abr.preistyp ?? 'einzel'})`, betrag: fmtCurrency(Number(abr.leadpreis)) },
+      { bezeichnung: 'Schadenshöhe', betrag: fmtCurrency(schadenhoehe) },
+      { bezeichnung: `Leadpreis (${claim.lead_preis_typ ?? 'einzel'})`, betrag: fmtCurrency(leadpreis) },
     ],
-    gesamtbetrag: fmtCurrency(Number(abr.leadpreis)),
+    gesamtbetrag: fmtCurrency(leadpreis),
     zahlungsHinweis: 'Der Betrag wird mit Ihrem Guthaben verrechnet. Details finden Sie im Portal.',
-    abrechnungId,
+    abrechnungId: claimId,
   }
 
   const html = await render(SvAbrechnungEmail(props))
@@ -341,7 +356,7 @@ export async function sendSvAbrechnung(abrechnungId: string): Promise<void> {
     to: svProfile.email,
     subject: svAbrechnungSubject(props),
     html,
-    fallId: abr.fall_id,
+    fallId,
     empfaengerTyp: 'sv',
     template: 'sv_abrechnung',
   })
@@ -461,14 +476,10 @@ export async function sendKanzleiAuftragszusammenfassung(fallId: string, kanzlei
     if (lead) kundeName = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || '—'
   }
 
-  // Versicherung + Schadennummer
-  let versicherung = '—'
-  let schadennummer = '—'
-  const { data: partei } = await db.from('parteien').select('versicherung_name, versicherung_nr').eq('fall_id', fallId).eq('rolle', 'gegner').limit(1).maybeSingle()
-  if (partei) {
-    versicherung = partei.versicherung_name ?? '—'
-    schadennummer = partei.versicherung_nr ?? '—'
-  }
+  // Versicherung + Schadennummer — SSoT via v_claim_full (loest totes parteien-Read ab).
+  const gegnerVers = await resolveGegnerVersicherung(db, { fallId })
+  const versicherung = gegnerVers.name ?? '—'
+  const schadennummer = gegnerVers.nummer ?? '—'
 
   // AAR-kanzlei-portal PR 5: Fall-Dokumente laden für Attachments + Download-
   // Links. Strategie:
@@ -752,22 +763,10 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
   // Mail-Body. params.initial_password wird NICHT mehr versendet (der Account
   // wird weiterhin damit angelegt + in der Admin-UI angezeigt). Jeder Send
   // generiert einen frischen Link — auch der resend-welcome-Pfad.
-  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-  let magicLink: string | null = null
-  try {
-    const { data: linkData, error: linkErr } = await createAdminClient().auth.admin.generateLink({
-      type: 'recovery',
-      email: params.to,
-      options: { redirectTo: `${appUrl}/passwort-zuruecksetzen` },
-    })
-    if (linkErr || !linkData?.properties?.action_link) {
-      console.error('[sendWillkommenSv] Magic-Link-Generierung fehlgeschlagen:', linkErr?.message)
-    } else {
-      magicLink = linkData.properties.action_link
-    }
-  } catch (err) {
-    console.error('[sendWillkommenSv] Magic-Link-Sub-Op fehlgeschlagen:', err)
-  }
+  // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): admin.generateLink liefert einen
+  // IMPLICIT-#access_token-Hash, den /passwort-zuruecksetzen nicht verarbeitet — stattdessen
+  // hashed_token + /api/auth/confirm (verifyOtp server-seitig → Cookie).
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
 
   const props = {
     anrede: params.anrede,
@@ -792,6 +791,47 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
     fallId: null,
     empfaengerTyp: 'sv',
     template: 'arch1_willkommen_sv',
+  })
+}
+
+/**
+ * Login-/Willkommens-Mail an eine Werkstatt. Reiner Magic-Link-Weg: der Recovery-Link
+ * ("Passwort setzen & einloggen") fuehrt auf /passwort-zuruecksetzen, wo confirmPasswordReset
+ * das Passwort setzt, force_password_change raeumt UND beim Onboarding direkt ins Portal
+ * einloggt. KEIN Einmalpasswort mehr in der Mail (Klartext-Passwort raus, ein einziger Weg).
+ * Ohne erzeugbaren Link hat die Mail keinen Sinn -> hart fehlschlagen (Caller meldet's).
+ */
+export async function sendWillkommenWerkstatt(params: {
+  to: string
+  werkstattName: string
+}): Promise<void> {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
+
+  // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): hashed_token + /api/auth/confirm
+  // statt action_link (Implicit-Hash tot). Ohne Link keine sinnvolle Mail -> hart fehlschlagen.
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
+  if (!magicLink) {
+    throw new Error('Werkstatt-Magic-Link konnte nicht erzeugt werden')
+  }
+
+  const props = {
+    werkstattName: params.werkstattName,
+    email: params.to,
+    loginUrl: `${appUrl}/login`,
+    magicLink,
+  }
+  const html = await render(WillkommenWerkstattEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: willkommenWerkstattSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'werkstatt',
+    template: 'willkommen_werkstatt',
+    // Admin-getriggerte Login-Mail an die Werkstatt selbst -> Send-Isolation umgehen, sonst
+    // erreicht der Zugang nie interne/Gruender-Testadressen (@claimondo.de). Der interne
+    // Empfaenger ist hier die gewollte Zielperson, kein Bystander-SV.
+    allowInternalRecipient: true,
   })
 }
 
@@ -829,6 +869,99 @@ export async function sendWillkommenSvAnBuero(params: WillkommenSvAnBueroParams)
     fallId: null,
     empfaengerTyp: 'sv',
     template: 'arch1_willkommen_sv_an_buero',
+  })
+}
+
+// ─── Makler-Aktivierung: Welcome-Mail an selbst-registrierten Makler ─────────
+
+export type MaklerWelcomeParams = {
+  to: string
+  firma: string
+  vorname: string
+  landeseiteUrl: string
+}
+
+/**
+ * Welcome-Mail an einen selbst-registrierten Makler (Makler-Aktivierung).
+ * Enthaelt die Empfehlungs-Landeseite + einen Recovery-Magic-Link zum Passwort-Setzen
+ * (AAR-auth-haertung: kein Klartext-Passwort). Best-effort — der Caller wickelt den
+ * Aufruf in try/catch, damit ein Mail-Fail die Registrierung nicht bricht.
+ */
+export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<void> {
+  // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): hashed_token + /api/auth/confirm
+  // statt action_link (Implicit-Hash tot).
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
+
+  const props = {
+    firma: params.firma,
+    vorname: params.vorname,
+    landeseiteUrl: params.landeseiteUrl,
+    magicLink,
+  }
+  const html = await render(MaklerWelcomeEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: maklerWelcomeSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'makler',
+    template: 'makler_welcome',
+  })
+}
+
+// ─── Makler Wochenreport ─────────────────────────────────────────────────
+// Scheduled Digest (Cron makler-wochenreport), KEIN N5-Event: eine geplante
+// Zusammenfassung wie die kanzlei_monats_abrechnung, direkt per E-Mail.
+// Opt-in = notification_preferences.woechentlicher_report. Best-effort — der
+// Cron wickelt den Aufruf pro Makler in try/catch.
+
+export type MaklerWochenReportParams = {
+  to: string
+  maklerId: string
+  vorname: string
+  firma: string
+  zeitraumStart: Date
+  zeitraumEnde: Date
+  data: MaklerWochenReportData
+}
+
+export async function sendMaklerWochenReport(params: MaklerWochenReportParams): Promise<void> {
+  const { data } = params
+  const zeitraumLabel = `${fmtDate(params.zeitraumStart.toISOString())} – ${fmtDate(params.zeitraumEnde.toISOString())}`
+  const optOutUrl = wochenreportOptOutUrl(params.maklerId)
+
+  const staffel = data.staffel
+    ? {
+        settledCount: data.settledCount,
+        nochBis: data.staffel.naechste ? data.staffel.naechste.schwelle - data.settledCount : null,
+        bonusLabel: data.staffel.naechste ? fmtCurrency(data.staffel.naechste.bonus_betrag_netto) : null,
+        alleErreicht: data.staffel.alleErreicht,
+      }
+    : null
+
+  const props = {
+    vorname: params.vorname,
+    firma: params.firma,
+    zeitraumLabel,
+    neueLeads: data.neueLeads,
+    neueVermittlungen: data.neueVermittlungen,
+    neueVermittlungenSummeLabel: data.neueVermittlungenSumme > 0 ? fmtCurrency(data.neueVermittlungenSumme) : null,
+    offeneLeads: data.offeneLeads,
+    freigegebenAnzahl: data.freigegebenAnzahl,
+    freigegebenSummeLabel: fmtCurrency(data.freigegebenSumme),
+    staffel,
+    optOutUrl,
+  }
+
+  const html = await render(MaklerWochenReportEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: maklerWochenReportSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'makler',
+    template: 'makler_wochenreport',
+    listUnsubscribe: optOutUrl ?? undefined,
   })
 }
 

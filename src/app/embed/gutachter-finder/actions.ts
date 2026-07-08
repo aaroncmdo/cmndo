@@ -16,6 +16,7 @@
 
 import { erstelleGutachterFinderAnfrage } from '@/lib/actions/gutachter-finder-actions'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
+import { resolvePromoCodeToId } from '@/lib/makler/resolve-promo-code'
 import {
   planeTerminMitFallback,
   ladeDeadPinFallback,
@@ -25,6 +26,7 @@ import {
 } from '@/lib/sv-matching-modul'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { sendWhatsAppText } from '@/lib/whatsapp/baileys-client'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
@@ -47,11 +49,29 @@ export type EmbedBuchungInput = {
   zugeordneter_sv_lead_id?: string | null
   matching_typ?: string | null
   werkstatt_id?: string | null
+  /** Anspruch-pruefen: Session-ID der Schaetzung (Fotos + Inputs), wird beim Promoter auf Lead uebertragen. */
+  schaetzungSessionId?: string | null
 }
 
 export async function starteEmbedBuchung(
   input: EmbedBuchungInput,
 ): Promise<{ ok: true; token: string; anfrageId: string } | { ok: false; error: string }> {
+  // Blocker 1 fix: schaetzungSessionId is the session_token (anon-visible), but
+  // gutachter_finder_anfragen.schaetzung_session_id is a FK to anspruch_schaetzungen(id).
+  // Resolve token -> row id here using service-role (anspruch_schaetzungen is RLS deny-all).
+  let schaetzungId: string | null = null
+  let ezJahr: number | null = null
+  if (input.schaetzungSessionId) {
+    const svc = createAdminClient()
+    const { data: sess } = await svc
+      .from('anspruch_schaetzungen')
+      .select('id, ez_jahr')
+      .eq('session_token', input.schaetzungSessionId)
+      .maybeSingle()
+    schaetzungId = sess?.id ?? null
+    ezJahr = sess?.ez_jahr ?? null
+  }
+
   // 1) gfa (Anfrage) anlegen — Ort landet auf schadenort_* (→ lead.fahrzeug_standort_*).
   const gfa = await erstelleGutachterFinderAnfrage({
     vorname: input.vorname,
@@ -68,6 +88,11 @@ export async function starteEmbedBuchung(
     zugeordneter_sv_lead_id: input.zugeordneter_sv_lead_id ?? undefined,
     matching_typ: input.matching_typ ?? undefined,
     werkstatt_id: input.werkstatt_id ?? undefined,
+    // Use the resolved row id (not the session_token) — FK to anspruch_schaetzungen(id).
+    schaetzung_session_id: schaetzungId,
+    // Harden EZ carry (Aaron 04.07.): EZ-Jahr nativ auf die GFA -> gfa.fahrzeug_baujahr ->
+    // lead.fahrzeug_baujahr -> vehicles (2. kanonischer Pfad neben dem Session-Side-Lookup).
+    fahrzeug_baujahr: ezJahr ?? undefined,
   })
   if (!gfa.ok) return { ok: false, error: gfa.error }
 
@@ -268,6 +293,10 @@ export async function reserviereEmbedTermin(input: {
   wunschterminLokal?: string | null
   werkstatt_id?: string | null
   promotion_code_id?: string | null
+  /** Makler-Code (`m`) aus der Funnel-URL — server-seitig zu promotion_code_id aufgeloest,
+   * falls promotion_code_id nicht explizit gesetzt ist (Funnel Tool -> Finder). */
+  maklerCode?: string | null
+  schaetzungSessionId?: string | null
   auswahl:
     | { kind: 'partner'; svId: string; svVorname: string; start: string; end: string }
     | { kind: 'deadpin'; deadPinId: string; ort: string | null; start: string }
@@ -287,6 +316,11 @@ export async function reserviereEmbedTermin(input: {
   }
   const requestModus = wunschterminIso != null
 
+  // Send-Isolation (interne-identitaet.ts): interne/Test-Bucher (@claimondo.de, Test-Marker) loesen
+  // keine Team-/Dispatcher-Benachrichtigung (Rueckruf-Task, Kunde-/Team-WhatsApp) aus. Lead + Termin
+  // entstehen trotzdem -> der Buchungspfad bleibt e2e-testbar, ohne echtes Personal zu stoeren.
+  const intern = istInterneIdentitaet(input.email, `${input.vorname} ${input.nachname}`)
+
   // 1) Lead + Token (idempotent; Lead bekommt Round-Robin-Dispatcher + Flowlink-WA an den Kunden).
   const res = await starteEmbedBuchung({
     vorname: input.vorname,
@@ -301,6 +335,7 @@ export async function reserviereEmbedTermin(input: {
     zugeordneter_sv_lead_id: input.auswahl?.kind === 'deadpin' ? input.auswahl.deadPinId : null,
     matching_typ: input.auswahl?.kind ?? null,
     werkstatt_id: input.werkstatt_id ?? null,
+    schaetzungSessionId: input.schaetzungSessionId ?? null,
   })
   if (!res.ok) return { ok: false, error: res.error }
   const token = res.token
@@ -319,10 +354,13 @@ export async function reserviereEmbedTermin(input: {
   }
 
   // Makler-Vermittlung: Promo-Code des vermittelnden Maklers auf den Lead (Attribution).
+  // Prioritaet: expliziter promotion_code_id-Input (Werkstatt-/Makler-Embed) vor dem aus der
+  // Funnel-URL durchgereichten Makler-Code (`m`), den wir hier server-seitig aufloesen.
   // convert-lead-to-claim loest promotion_code_id -> makler_id -> claims.makler_id (DB-Trigger -> Provision).
-  if (leadId && input.promotion_code_id) {
+  const resolvedPromoId = input.promotion_code_id ?? (await resolvePromoCodeToId(input.maklerCode))
+  if (leadId && resolvedPromoId) {
     try {
-      await createAdminClient().from('leads').update({ promotion_code_id: input.promotion_code_id }).eq('id', leadId)
+      await createAdminClient().from('leads').update({ promotion_code_id: resolvedPromoId }).eq('id', leadId)
     } catch (err) {
       console.error('[reserviereEmbedTermin] promotion_code_id setzen fehlgeschlagen (nicht kritisch):', (err as Error).message)
     }
@@ -332,7 +370,8 @@ export async function reserviereEmbedTermin(input: {
   // Dispatcher (auch bei 0-Verfügbarkeit, auswahl=null). Non-critical: bricht die
   // Reservierung nie. Die Danke-Seite (bucheRueckrufBeimDispatcher) aktualisiert
   // später DIESELBE Zeile via Upsert (kein zweiter Rückruf). ASAP-Hinweis (now+5min).
-  if (leadId) {
+  // Send-Isolation: interne/Test-Bucher erzeugen keinen Dispatcher-Rueckruf-Task.
+  if (leadId && !intern) {
     try {
       await upsertReservierungsRueckruf({
         leadId,
@@ -368,14 +407,14 @@ export async function reserviereEmbedTermin(input: {
     if (!b.ok && !requestModus) {
       return { ok: false, error: b.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
     }
-    void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
+    if (!intern) void sendeEmbedTerminBestaetigung({ token, svVorname: input.auswahl.svVorname, startIso: input.auswahl.start })
     const gutachter = await ladeGutachterProfil(input.auswahl.svId)
     return { ok: true, token, leadId, svVorname: input.auswahl.svVorname, ortLabel: null, startIso: input.auswahl.start, dispatcher, gutachter }
   }
 
   const d = await bucheEmbedDeadPin({ token, deadPinId: input.auswahl.deadPinId, startIso: input.auswahl.start })
   if (!d.ok) return { ok: false, error: d.error ?? 'Der gewählte Termin ist nicht mehr verfügbar.', slotWeg: true }
-  void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
+  if (!intern) void sendeEmbedDeadPinBestaetigung({ token, ortLabel: input.auswahl.ort, startIso: input.auswahl.start })
   return { ok: true, token, leadId, svVorname: null, ortLabel: input.auswahl.ort, startIso: input.auswahl.start, dispatcher, gutachter: null }
 }
 

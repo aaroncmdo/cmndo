@@ -10,7 +10,7 @@ import { waehleZweitFaktor } from '@/lib/auth/mfa-gate'
 // AAR-939: 2FA via Supabase-MFA. Faktor-Wahl (waehleZweitFaktor):
 //   - TOTP-Faktor vorhanden        -> TotpChallengeClient (Code aus Authenticator-App)
 //   - Phone bevorzugt / ?factor=phone -> TwoFaClient challenge (SMS)
-//   - Legacy-2FA ohne Faktor       -> TwoFaClient enroll (Soft-Enroll, Phone)
+//   - Legacy/kein Faktor           -> direkt ins Ziel (2FA optional, kein Zwang)
 //   - sonst                        -> direkt ins Ziel (kein 2FA)
 // TOTP wird bevorzugt; bei zusätzlichem Phone-Faktor gibt es einen
 // „Stattdessen SMS"-Fallback (Navigation auf /login/2fa?factor=phone).
@@ -29,7 +29,7 @@ export default async function TwoFaPage({
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('rolle, twofa_telefon, telefon, twofa_aktiviert, twofa_email_aktiviert')
+    .select('rolle, twofa_telefon, telefon')
     .eq('id', user.id)
     .single()
 
@@ -70,20 +70,7 @@ export default async function TwoFaPage({
     )
   }
 
-  // Kein verifizierter Faktor.
-  const legacyWanted =
-    profile?.twofa_aktiviert === true || profile?.twofa_email_aktiviert === true
-  if (legacyWanted) {
-    // SOFT-ENROLL (Phone): Legacy-2FA-User ohne Supabase-Faktor holt ihn nach.
-    return (
-      <TwoFaClient
-        mode="enroll"
-        prefillPhone={profile?.twofa_telefon ?? profile?.telefon ?? null}
-        targetPath={finalTarget}
-      />
-    )
-  }
-
-  // Kein Faktor + kein Legacy-Flag → kein 2FA. Direkt ins Ziel.
+  // Kein verifizierter Faktor -> 2FA ist optional, kein erzwungener Enroll.
+  // Die 2FA-Einrichtung passiert opt-in in den Konto-Einstellungen (B1).
   redirect(finalTarget)
 }

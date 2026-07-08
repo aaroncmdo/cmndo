@@ -3,14 +3,14 @@
 // AAR-108 / AAR-540 (C3): Endpoint-Register — manuelle Trigger für alle
 // 24+ LexDrive/Manual-Events aus der Fallakte. ✓/⏳-Status-Badges lesen
 // aus webhook_events; special-Events (manual_status_override) nicht sichtbar.
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import {
   CheckCircleIcon, FileTextIcon, AlertTriangleIcon, EuroIcon,
   ClockIcon, GavelIcon, XCircleIcon, ScaleIcon, EyeIcon, CircleIcon, XIcon,
   HandshakeIcon, FilmIcon, UsersIcon, PhoneIcon, UploadIcon, ShieldAlertIcon,
   type LucideIcon,
 } from 'lucide-react'
-import { triggerLexDriveEventManually } from '../lexdrive-actions'
+import { triggerLexDriveEventManually, getProcessedLexDriveEvents } from '../lexdrive-actions'
 import type { LexDriveEvent } from '@/lib/lexdrive/process-event'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -138,6 +138,16 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
   const [payload, setPayload] = useState<Record<string, string>>({})
   const [pending, startTransition] = useTransition()
   const [feedback, setFeedback] = useState<{ ok: boolean; msg: string } | null>(null)
+  // Fortschritts-Status: initial aus dem (optionalen) Prop, dann live nachgeladen.
+  const [processed, setProcessed] = useState<ProcessedEventMap>(processedEvents ?? {})
+
+  useEffect(() => {
+    let alive = true
+    getProcessedLexDriveEvents(fallId)
+      .then((m) => { if (alive) setProcessed(m) })
+      .catch(() => { /* Badges bleiben dann auf dem Prop-Stand */ })
+    return () => { alive = false }
+  }, [fallId])
 
   function handleSubmit() {
     if (!activeEvent) return
@@ -160,6 +170,8 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
       }
       const result = await triggerLexDriveEventManually(fallId, activeEvent.id, converted)
       if (result.success) {
+        // Optimistisch: das gerade ausgelöste Event sofort als ✓ markieren.
+        setProcessed((p) => ({ ...p, [activeEvent.id]: true }))
         setFeedback({ ok: true, msg: `Event "${activeEvent.label}" ausgelöst.` })
         setActiveEvent(null)
         setPayload({})
@@ -170,7 +182,7 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
     })
   }
 
-  const statusFor = (id: LexDriveEvent) => processedEvents?.[id] === true
+  const statusFor = (id: LexDriveEvent) => processed[id] === true
 
   return (
     <div className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-4">
@@ -229,6 +241,17 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                 <XIcon className="w-5 h-5" />
               </button>
             </div>
+
+            {statusFor(activeEvent.id) && (
+              <div className="flex items-start gap-2 rounded-ios-lg bg-warning-soft border border-warning/30 px-3 py-2.5">
+                <AlertTriangleIcon className="w-4 h-4 shrink-0 text-warning-strong mt-0.5" />
+                <p className="text-xs text-warning-strong leading-relaxed">
+                  Dieses Event wurde für diesen Fall <strong>bereits verarbeitet</strong>. Erneutes Auslösen
+                  wiederholt alle Nebenwirkungen (Status, Benachrichtigungen, Mitteilungen, Timeline) —
+                  nur bei bewusster Korrektur nötig.
+                </p>
+              </div>
+            )}
 
             {activeEvent.fields.length === 0 && (
               <p className="text-sm text-claimondo-ondo">
@@ -323,8 +346,12 @@ export default function EndpointRegister({ fallId, processedEvents }: LexDriveTr
                 Abbrechen
               </button>
               <button onClick={handleSubmit} disabled={pending}
-                className="flex-1 py-2.5 text-sm bg-claimondo-ondo text-white rounded-ios-lg disabled:opacity-50 hover:bg-claimondo-navy">
-                {pending ? 'Lädt…' : 'Auslösen'}
+                className={`flex-1 py-2.5 text-sm text-white rounded-ios-lg disabled:opacity-50 ${
+                  statusFor(activeEvent.id)
+                    ? 'bg-warning hover:bg-warning/90'
+                    : 'bg-claimondo-ondo hover:bg-claimondo-navy'
+                }`}>
+                {pending ? 'Lädt…' : statusFor(activeEvent.id) ? 'Trotzdem erneut auslösen' : 'Auslösen'}
               </button>
             </div>
           </div>

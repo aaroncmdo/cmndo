@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { SearchIcon, PhoneIcon, MailIcon, GlobeIcon, PlusIcon, XIcon } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
-import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, ClickableTr, Th, Td } from '@/components/shared/DataTable'
@@ -82,55 +81,55 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
     <div className="h-full flex flex-col overflow-hidden">
       {/* Header */}
       <div className="px-4 py-3 border-b border-claimondo-border shrink-0">
-        <PageHeader
-          title="Versicherer"
-          description={`${filtered.length} von ${versicherungen.length}`}
-          actions={
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
-                <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
-                  className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
-              </div>
-              <button onClick={() => { setCreating(true); setForm({}) }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-ondo text-white rounded-ios-lg text-xs font-medium hover:bg-claimondo-shield transition-colors">
-                <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
-              </button>
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="text-heading-lg font-bold text-claimondo-navy">Versicherer</h1>
+            <p className="mt-0.5 text-body-sm text-claimondo-ondo">{`${filtered.length} von ${versicherungen.length}`}</p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="relative">
+              <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-claimondo-ondo/70" />
+              <input type="text" value={search} onChange={e => setSearch(e.target.value)} placeholder="Suchen..."
+                className="pl-8 pr-3 py-1.5 bg-white border border-claimondo-border rounded-ios-lg text-body-xs text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-1 focus:ring-claimondo-ondo w-48" />
             </div>
-          }
-        />
+            <button onClick={() => { setCreating(true); setForm({}) }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-claimondo-ondo text-white rounded-ios-lg text-body-xs font-medium hover:bg-claimondo-shield transition-colors">
+              <PlusIcon className="w-3.5 h-3.5" /> Neue Versicherung
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Tabelle */}
       <div className="flex-1 overflow-y-auto">
         <Table>
-          <Thead className="sticky top-0 z-10 bg-white! text-sm! normal-case! tracking-normal! border-b border-claimondo-border">
+          <Thead className="sticky top-0 z-10 bg-white! text-body-sm! normal-case! tracking-normal! border-b border-claimondo-border">
             <tr>
-              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Name</Th>
-              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Schadentelefon</Th>
-              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Schaden-Email</Th>
-              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Stadt</Th>
-              <Th className="text-left py-2! text-claimondo-ondo! text-xs!">Status</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-body-xs!">Name</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-body-xs!">Schadentelefon</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-body-xs!">Schaden-Email</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-body-xs!">Stadt</Th>
+              <Th className="text-left py-2! text-claimondo-ondo! text-body-xs!">Status</Th>
             </tr>
           </Thead>
           <Tbody className="divide-y-0!">
             {filtered.map(v => (
               <ClickableTr key={v.id} onClick={() => { setSelected(v); setForm(v); setEditing(false) }}
                 className={`border-b border-claimondo-border ${!v.ist_aktiv ? 'opacity-50' : ''}`}>
-                <Td className="py-2.5! font-medium text-xs">{v.name}</Td>
-                <Td className="py-2.5! text-xs">
+                <Td className="py-2.5! font-medium text-body-xs">{v.name}</Td>
+                <Td className="py-2.5! text-body-xs">
                   {v.schaden_telefon ? (
                     <PhoneButton nummer={v.schaden_telefon} variant="inline" label={v.schaden_telefon} stopPropagation />
                   ) : <span className="text-claimondo-ondo/50">—</span>}
                 </Td>
-                <Td className="py-2.5! text-xs">
+                <Td className="py-2.5! text-body-xs">
                   {v.schaden_email ? (
                     <a href={`mailto:${v.schaden_email}`} className="text-claimondo-ondo hover:underline flex items-center gap-1" onClick={e => e.stopPropagation()}>
                       <MailIcon className="w-3 h-3" /> {v.schaden_email}
                     </a>
                   ) : <span className="text-claimondo-ondo/50">—</span>}
                 </Td>
-                <Td className="py-2.5! text-claimondo-ondo! text-xs">{v.stadt ?? '—'}</Td>
+                <Td className="py-2.5! text-claimondo-ondo! text-body-xs">{v.stadt ?? '—'}</Td>
                 <Td className="py-2.5!">
                   <StatusBadge tone={v.ist_aktiv ? 'success' : 'danger'}>
                     {v.ist_aktiv ? 'Aktiv' : 'Deaktiviert'}
@@ -146,23 +145,23 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
       <Modal open={creating} onClose={() => setCreating(false)} noPadding hideCloseButton maxWidth={512} ariaLabel="Neue Versicherung">
         <div className="max-h-[80vh] overflow-y-auto">
           <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
-            <h2 className="text-base font-semibold text-claimondo-navy">Neue Versicherung</h2>
+            <h2 className="text-body font-semibold text-claimondo-navy">Neue Versicherung</h2>
             <button onClick={() => setCreating(false)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
           </div>
           <div className="p-5 space-y-3">
             {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
               <div key={key}>
-                <label className="text-xs text-claimondo-ondo mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
+                <label className="text-body-xs text-claimondo-ondo mb-0.5 block">{key === 'name' ? 'Name *' : key.replace(/_/g, ' ')}</label>
                 <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
-                  className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
+                  className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
               </div>
             ))}
             <div className="flex gap-2 pt-2">
               <button onClick={handleCreate} disabled={saving || !form.name?.trim()}
-                className="flex-1 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
+                className="flex-1 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-body-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
                 {saving ? 'Speichert...' : 'Erstellen'}
               </button>
-              <button onClick={() => setCreating(false)} className="px-4 py-2 bg-claimondo-bg text-claimondo-navy rounded-ios-lg text-sm">Abbrechen</button>
+              <button onClick={() => setCreating(false)} className="px-4 py-2 bg-claimondo-bg text-claimondo-navy rounded-ios-lg text-body-sm">Abbrechen</button>
             </div>
           </div>
         </div>
@@ -173,7 +172,7 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
         {selected && (
           <div className="max-h-[80vh] overflow-y-auto">
             <div className="flex items-center justify-between px-5 py-4 border-b border-claimondo-border">
-              <h2 className="text-base font-semibold text-claimondo-navy">{selected.name}</h2>
+              <h2 className="text-body font-semibold text-claimondo-navy">{selected.name}</h2>
               <button onClick={() => setSelected(null)} className="p-1 text-claimondo-ondo/70 hover:text-claimondo-ondo"><XIcon className="w-5 h-5" /></button>
             </div>
             <div className="p-5 space-y-3">
@@ -181,17 +180,17 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                 <>
                   {(['name', 'schaden_telefon', 'schaden_email', 'hotline_telefon', 'webseite', 'adresse', 'plz', 'stadt', 'bafin_nummer'] as const).map(key => (
                     <div key={key}>
-                      <label className="text-xs text-claimondo-ondo mb-0.5 block">{key.replace(/_/g, ' ')}</label>
+                      <label className="text-body-xs text-claimondo-ondo mb-0.5 block">{key.replace(/_/g, ' ')}</label>
                       <input value={(form as Record<string, string | null>)[key] ?? ''} onChange={e => setForm(prev => ({ ...prev, [key]: e.target.value || null }))}
-                        className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
+                        className="w-full px-3 py-2 border border-claimondo-border rounded-ios-lg text-body-sm focus:outline-none focus:ring-1 focus:ring-claimondo-ondo" />
                     </div>
                   ))}
                   <div className="flex gap-2 pt-2">
                     <button onClick={handleSave} disabled={saving}
-                      className="flex-1 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
+                      className="flex-1 py-2 bg-claimondo-ondo text-white rounded-ios-lg text-body-sm font-medium hover:bg-claimondo-shield disabled:opacity-50">
                       {saving ? 'Speichert...' : 'Speichern'}
                     </button>
-                    <button onClick={() => setEditing(false)} className="px-4 py-2 bg-claimondo-bg text-claimondo-navy rounded-ios-lg text-sm">Abbrechen</button>
+                    <button onClick={() => setEditing(false)} className="px-4 py-2 bg-claimondo-bg text-claimondo-navy rounded-ios-lg text-body-sm">Abbrechen</button>
                   </div>
                 </>
               ) : (
@@ -204,9 +203,9 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
                   <Row label="PLZ / Stadt" value={[selected.plz, selected.stadt].filter(Boolean).join(' ')} />
                   <Row label="BaFin-Nr." value={selected.bafin_nummer} />
                   <div className="flex gap-2 pt-3">
-                    <button onClick={() => setEditing(true)} className="flex-1 py-2 bg-claimondo-navy text-white rounded-ios-lg text-sm font-medium hover:bg-claimondo-shield">Bearbeiten</button>
+                    <button onClick={() => setEditing(true)} className="flex-1 py-2 bg-claimondo-navy text-white rounded-ios-lg text-body-sm font-medium hover:bg-claimondo-shield">Bearbeiten</button>
                     <button onClick={() => handleToggleActive(selected)}
-                      className={`px-4 py-2 rounded-ios-lg text-sm font-medium ${selected.ist_aktiv ? 'bg-danger-soft text-danger-strong hover:bg-danger/15' : 'bg-success-soft text-success-strong hover:bg-success/15'}`}>
+                      className={`px-4 py-2 rounded-ios-lg text-body-sm font-medium ${selected.ist_aktiv ? 'bg-danger-soft text-danger-strong hover:bg-danger/15' : 'bg-success-soft text-success-strong hover:bg-success/15'}`}>
                       {selected.ist_aktiv ? 'Deaktivieren' : 'Aktivieren'}
                     </button>
                   </div>
@@ -223,26 +222,26 @@ export default function VersicherungenClient({ versicherungen }: { versicherunge
 function Row({ label, value, type }: { label: string; value: string | null; type?: 'tel' | 'email' | 'link' }) {
   if (!value) return (
     <div className="flex justify-between py-1.5 border-b border-claimondo-border">
-      <span className="text-xs text-claimondo-ondo/70">{label}</span>
-      <span className="text-xs text-claimondo-ondo/50">—</span>
+      <span className="text-body-xs text-claimondo-ondo/70">{label}</span>
+      <span className="text-body-xs text-claimondo-ondo/50">—</span>
     </div>
   )
 
   return (
     <div className="flex justify-between items-center py-1.5 border-b border-claimondo-border">
-      <span className="text-xs text-claimondo-ondo/70">{label}</span>
+      <span className="text-body-xs text-claimondo-ondo/70">{label}</span>
       {type === 'tel' ? (
-        <PhoneButton nummer={value} variant="inline" label={value} className="text-xs" />
+        <PhoneButton nummer={value} variant="inline" label={value} className="text-body-xs" />
       ) : type === 'email' ? (
-        <a href={`mailto:${value}`} className="text-xs text-claimondo-ondo hover:underline flex items-center gap-1">
+        <a href={`mailto:${value}`} className="text-body-xs text-claimondo-ondo hover:underline flex items-center gap-1">
           <MailIcon className="w-3 h-3" /> {value}
         </a>
       ) : type === 'link' ? (
-        <a href={value} target="_blank" rel="noopener noreferrer" className="text-xs text-claimondo-ondo hover:underline flex items-center gap-1">
+        <a href={value} target="_blank" rel="noopener noreferrer" className="text-body-xs text-claimondo-ondo hover:underline flex items-center gap-1">
           <GlobeIcon className="w-3 h-3" /> Webseite
         </a>
       ) : (
-        <span className="text-xs text-claimondo-navy">{value}</span>
+        <span className="text-body-xs text-claimondo-navy">{value}</span>
       )}
     </div>
   )

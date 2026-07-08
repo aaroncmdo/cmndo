@@ -2,6 +2,7 @@
 
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { FINANCE } from '@/lib/finance/constants'
 // Alias: die exportierte Server-Action in dieser Datei heißt selbst `createLead`.
 import { createLead as insertLeadRow } from '@/lib/leads/create-lead'
 import { createNotification } from '@/lib/notifications'
@@ -15,6 +16,7 @@ import { sendFallCommunication } from '@/lib/communications/send-fall'
 import { triggerKonversionTasks, triggerGutachterTerminTask, triggerGutachtenUploadTask, triggerQcTask, triggerLeadTasks, triggerOnboardingTasks, resolveGates, autoCompleteTask, triggerKanzleiPaketTask, triggerAsSendedatumTask, triggerArchivierungTask } from '@/lib/tasking'
 import { createGutachterMitteilung } from '@/lib/mitteilungen'
 import { transitionFallStatus } from '@/lib/faelle/state-machine'
+import { aktuellerTerminFuerFall } from '@/lib/termine/aktueller-termin-fuer-fall'
 import { convertLeadToFall, type ConvertResult } from '@/lib/leads/convert-lead-to-fall'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { staffMayMutateClaim } from './_helpers/staff-claim-scope'
@@ -114,10 +116,14 @@ export async function updateFallStatus(
   }
   if (newStatus === 'sv-termin') {
     sendFallCommunication(fallId, 'termin_bestaetigt').catch(() => {})
-    // Gutachter-Mitteilung: Termin bestaetigt
-    const { data: fallInfo } = await supabase.from('v_faelle_mit_aktuellem_termin').select('sv_id, claim_nummer, sv_termin').eq('id', fallId).single()
+    // Gutachter-Mitteilung: Termin bestaetigt.
+    // CMM-49-Nachzug: sv_id/claim_nummer aus v_claim_full (wie die Nachbar-Branches),
+    // Termin-Datum kanonisch aus gutachter_termine statt der stale
+    // v_faelle_mit_aktuellem_termin.sv_termin (claim_id meist NULL -> Datum fehlte).
+    const { data: fallInfo } = await supabase.from('v_claim_full').select('sv_id, claim_nummer').eq('fall_id', fallId).maybeSingle()
     if (fallInfo?.sv_id) {
-      const terminDate = fallInfo.sv_termin ? new Date(fallInfo.sv_termin) : null
+      const aktTermin = await aktuellerTerminFuerFall(serviceClient, fallId)
+      const terminDate = aktTermin ? new Date(aktTermin.start_zeit) : null
       createGutachterMitteilung(fallInfo.sv_id, 'termin_bestaetigt', fallId, {
         datum: terminDate?.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' }) ?? undefined,
         uhrzeit: terminDate?.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' }) ?? undefined,
@@ -240,11 +246,11 @@ export async function updateFallStatus(
         }
       }
 
-      // Refund
-      try {
-        const { refundLeadpreis } = await import('@/lib/gutachterTasking')
-        refundLeadpreis(stornoSvId, fallId, stornoClaimNummer ?? fallId.slice(0, 8)).catch(() => {})
-      } catch { /* */ }
+      // Refund entfernt (Billing-Konsolidierung 2026-07-01): der Storno-Refund
+      // laeuft ueber die State-Machine (transitionFallStatus('storniert') ->
+      // AAR-926 revertCaseBilling, claims-basiert, respektiert
+      // STORNO_GRUENDE_OHNE_REVERT). Die fruehere gutachter_abrechnungen-
+      // Gegenbuchung war eine Doppel-Buchung.
     }
 
     // Phase 2c: Kanzlei-Email wenn schon übergeben
@@ -344,7 +350,7 @@ export async function createLead(data: {
     await supabase.from('provisionen_maik').insert({
       lead_id: leadId,
       monat,
-      basis_provision: 150.00,
+      basis_provision: FINANCE.CPA_MARKETING_NETTO,
       source_channel: data.source_channel,
       status: 'pending',
     }).then(({ error }) => { if (error) console.error('[AAR-92] Provision-Insert:', error.message) })

@@ -131,6 +131,26 @@ export async function waehleGegenvorschlagSlot(
     const ownership = await assertKundeOwnsFall(admin, user.id, user.email ?? null, fallId)
     if (!ownership.ok) return { success: false, error: 'Nicht autorisiert' }
 
+    // IDOR-Fix: assertKundeOwnsFall prueft nur fallId — der uebergebene terminId MUSS
+    // zusaetzlich zum eigenen Fall gehoeren. Sonst kann ein Kunde mit gueltigem eigenem
+    // fallId einen FREMDEN terminId umbuchen + via bestaetigeTermin bestaetigen (Admin-
+    // Client umgeht RLS -> keine DB-Absicherung). NULL-sicher: fall_id ODER claim_id ODER
+    // lead_id muss matchen — KEINE Spalte ist universell gesetzt (prod: 24/61 Termine sind
+    // lead-only mit fall_id+claim_id NULL). Der lead_id-Zweig verhindert, dass der Guard den
+    // EIGENEN lead-gekeyten Termin des Kunden faelschlich ablehnt; ownership.leadId stammt aus
+    // dem verifizierten Fall (nicht client-steuerbar) -> kein neuer IDOR-Vektor.
+    const { data: terminOwner } = await admin
+      .from('gutachter_termine')
+      .select('fall_id, claim_id, lead_id')
+      .eq('id', terminId)
+      .maybeSingle()
+    const gehoertZumFall =
+      !!terminOwner &&
+      (terminOwner.fall_id === fallId ||
+        (!!ownership.claimId && terminOwner.claim_id === ownership.claimId) ||
+        (!!ownership.leadId && terminOwner.lead_id === ownership.leadId))
+    if (!gehoertZumFall) return { success: false, error: 'Nicht autorisiert' }
+
     // Termin neu setzen — AAR-956 TZ: slot ist Berlin-Wall-Clock -> echter UTC-Instant.
     const startZeit = berlinWallClockToUtc(`${slot.datum}T${slot.uhrzeit}:00`)
     const endZeit = new Date(new Date(startZeit).getTime() + 90 * 60 * 1000).toISOString()

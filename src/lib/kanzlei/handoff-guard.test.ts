@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { brauchtKanzleiHandoff, kanzleiHandoffBereitsErfolgt } from './handoff-guard'
+import { brauchtKanzleiHandoff, kanzleiHandoffBereitsErfolgt, kanzleiHandoffMoeglich } from './handoff-guard'
 
 // Filmcheck-Audit 29.06.2026: gibKanzleipaketFrei (qc.ts) schrieb nur kanzlei_faelle +
 // auftrag, advancte aber operative_status NICHT -> der Fall tauchte in den (operative_
@@ -49,5 +49,30 @@ describe('kanzleiHandoffBereitsErfolgt (Idempotenz-Guard fuer saveFilmcheck)', (
   it('null -> false', () => {
     expect(kanzleiHandoffBereitsErfolgt(null)).toBe(false)
     expect(kanzleiHandoffBereitsErfolgt(undefined)).toBe(false)
+  })
+})
+
+describe('kanzleiHandoffMoeglich (Robustheit: Handoff nur aus Filmcheck-Quellstatus)', () => {
+  // Filmcheck-Audit 01.07.2026: 'kanzlei-uebergeben' ist laut State-Machine
+  // (FALL_STATUS_TRANSITIONS) nur aus 'filmcheck'/'qc-pruefung' erreichbar. saveFilmcheck
+  // prueft das VOR transitionFallStatus -> ein komplett-Claim, der noch davorhaengt (z.B.
+  // ohne Gutachten in 'begutachtung-laeuft'), bekommt einen sauberen Fehler statt einer 500.
+  it('filmcheck/qc-pruefung -> true (gueltiger Quellstatus)', () => {
+    expect(kanzleiHandoffMoeglich('filmcheck')).toBe(true)
+    expect(kanzleiHandoffMoeglich('qc-pruefung')).toBe(true)
+  })
+  it('vor dem Filmcheck (noch kein Gutachten) -> false', () => {
+    for (const s of ['ersterfassung', 'sv-termin', 'besichtigung', 'begutachtung-laeuft', 'gutachten-eingegangen']) {
+      expect(kanzleiHandoffMoeglich(s)).toBe(false)
+    }
+  })
+  it('bereits uebergeben/terminal -> false (kein zweiter Handoff)', () => {
+    for (const s of ['kanzlei-uebergeben', 'anschlussschreiben', 'regulierung', 'abgeschlossen', 'storniert']) {
+      expect(kanzleiHandoffMoeglich(s)).toBe(false)
+    }
+  })
+  it('null/undefined -> false', () => {
+    expect(kanzleiHandoffMoeglich(null)).toBe(false)
+    expect(kanzleiHandoffMoeglich(undefined)).toBe(false)
   })
 })

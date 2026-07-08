@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { reminderStufeNachAlter } from '@/lib/cron/reminder-stufe'
 
 /**
  * B1 (CMM Phase 1.5e): SA-Reminder Cron.
@@ -58,11 +59,14 @@ export async function GET(request: Request) {
     const ageMs = now.getTime() - createdAt.getTime()
     const ageDays = ageMs / (1000 * 60 * 60 * 24)
 
-    const isDay1 = ageDays >= 1 && ageDays < 2
-    const isDay3 = ageDays >= 3 && ageDays < 4
-    const isDay5Plus = ageDays >= 5
-
-    if (!isDay1 && !isDay3 && !isDay5Plus) continue
+    // AAR (06.07. Cron-Hunt): Nachhol-Fenster statt fester [1,2)/[3,4)-Fenster — sonst
+    // wird eine Reminder-Stufe bei ausgefallenem/verspaetetem Cron-Lauf dauerhaft
+    // uebersprungen. Der Timeline-Idempotenz-Check unten verhindert weiter Doppel-Sends.
+    const stufe = reminderStufeNachAlter(ageDays, 3, 5)
+    if (stufe === null) continue
+    const isDay1 = stufe === 'stufe1'
+    const isDay3 = stufe === 'stufe2'
+    const isDay5Plus = stufe === 'stufe3'
 
     const reminderTyp = isDay5Plus
       ? 'sa_task'
@@ -118,7 +122,7 @@ export async function GET(request: Request) {
         if (lead?.telefon) {
           try {
             const { sendCommunication } = await import('@/lib/communications/send')
-            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://cmndo.vercel.app'
+            const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
             await sendCommunication('dokumente_nachreichen', {
               telefon: lead.telefon,
               vorname: lead.vorname ?? 'Kunde',

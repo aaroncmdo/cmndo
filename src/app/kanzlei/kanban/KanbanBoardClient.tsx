@@ -14,10 +14,11 @@ import {
 import DokumenteDrawer from './DokumenteDrawer'
 import {
   MAIN_PHASE_LABEL,
-  SUBPHASE_LABEL,
   type ClaimMainPhase,
   type ClaimSubPhase,
 } from '@/lib/claims/lifecycle'
+import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
+import { resolveStatus, statusSlotClass } from '@/lib/status'
 
 export type KanbanKarte = {
   id: string
@@ -39,13 +40,6 @@ const PHASEN: Array<{ key: ClaimMainPhase; name: string }> = [
   { key: 'regulierung', name: MAIN_PHASE_LABEL.regulierung },
   { key: 'abschluss', name: MAIN_PHASE_LABEL.abschluss },
 ]
-
-const PHASE_ACCENT: Record<ClaimMainPhase, string> = {
-  erfassung: '#eef4fb',
-  begutachtung: '#fffbeb',
-  regulierung: '#f5f3ff',
-  abschluss: '#ecfdf5',
-}
 
 function formatDate(iso: string | null): string {
   if (!iso) return '—'
@@ -73,8 +67,7 @@ export default function KanbanBoardClient({ karten }: { karten: KanbanKarte[] })
               className="w-72 shrink-0 rounded-ios-xl border border-claimondo-border bg-white overflow-hidden flex flex-col"
             >
               <div
-                className="px-3 py-2 border-b border-claimondo-border flex items-center justify-between"
-                style={{ backgroundColor: PHASE_ACCENT[s.key] }}
+                className={`px-3 py-2 border-b border-claimondo-border flex items-center justify-between ${statusSlotClass(resolveStatus('claim-main-phase', s.key).slot)}`}
               >
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-wider text-claimondo-ondo font-medium">
@@ -186,9 +179,7 @@ function KanbanCard({
       </div>
       <div className="mt-2 flex items-center gap-2 flex-wrap text-[11px]">
         {/* CMM-44 MP-4d: aktueller Substate (z.B. Versicherungskontakt / Storniert) */}
-        <span className="text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded font-medium">
-          {SUBPHASE_LABEL[karte.subPhase]}
-        </span>
+        <FallPhaseBadge subPhase={karte.subPhase} size="sm" />
         {karte.kennzeichen && (
           <span className="font-mono text-claimondo-navy bg-claimondo-bg px-1.5 py-0.5 rounded">
             {karte.kennzeichen}

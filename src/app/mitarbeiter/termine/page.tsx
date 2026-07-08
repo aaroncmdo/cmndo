@@ -1,19 +1,20 @@
-﻿// AAR-637: Mitarbeiter-Terminübersicht. Zeigt alle meine admin_termine
-// (zugewiesen_an = user.id) gruppiert nach Tag. Kalender-Charakter weil
-// KB/LB sowohl Rückrufe als auch Kundentermine haben.
+// AAR-637: Mitarbeiter-Terminuebersicht. Zeigt alle meine admin_termine
+// (zugewiesen_an = user.id) + KB-Beratungen. NEUKONZEPTION (Zeitplan statt
+// flacher Tagesliste): Ueberfaellige abgetrennt + priorisiert oben; kommende
+// Termine relativ nach Tag (Heute/Morgen/Wochentag) als Zeit-Rail-Liste mit
+// "Als Naechstes"-Marker. Datenschicht unveraendert.
 
 import { createClient } from '@/lib/supabase/server'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { PhoneCallIcon, CalendarIcon, UsersIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
 const TYP_META: Record<string, { label: string; icon: typeof PhoneCallIcon; cls: string }> = {
-  rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-amber-50 text-amber-700 border-amber-200' },
-  kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+  rueckruf: { label: 'Rückruf', icon: PhoneCallIcon, cls: 'bg-warning-soft text-warning-strong border-warning/30' },
+  kunde: { label: 'Kunde', icon: UsersIcon, cls: 'bg-success-soft text-success-strong border-success/30' },
   intern: { label: 'Intern', icon: CalendarIcon, cls: 'bg-claimondo-bg text-claimondo-navy border-claimondo-border' },
   kb_beratung: { label: 'KB-Beratung', icon: CalendarIcon, cls: 'bg-claimondo-ondo/[0.06] text-claimondo-navy border-claimondo-ondo/30' },
 }
@@ -22,8 +23,6 @@ export default async function MitarbeiterTermine() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
-
-  const nowIso = new Date().toISOString()
 
   type TerminRow = {
     id: string
@@ -141,81 +140,145 @@ export default async function MitarbeiterTermine() {
     (a, b) => new Date(a.start_zeit).getTime() - new Date(b.start_zeit).getTime(),
   )
 
-  const groups = new Map<string, TerminRow[]>()
-  for (const t of termine) {
-    const dayKey = new Date(t.start_zeit).toISOString().slice(0, 10)
-    const bucket = groups.get(dayKey) ?? []
-    bucket.push(t)
-    groups.set(dayKey, bucket)
+  // ── Praesentations-Logik: Ueberfaellig abtrennen + relativ nach Tag gruppieren ──
+  const now = new Date()
+  const berlinDay = (iso: string) =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
+  const todayKey = berlinDay(now.toISOString())
+  const tomorrowKey = berlinDay(new Date(now.getTime() + 86_400_000).toISOString())
+
+  const overdue = termine.filter((t) => new Date(t.start_zeit) < now)
+  const upcoming = termine.filter((t) => new Date(t.start_zeit) >= now)
+  const nextId = upcoming[0]?.id ?? null
+
+  const dayGroups: { key: string; rows: TerminRow[] }[] = []
+  for (const t of upcoming) {
+    const k = berlinDay(t.start_zeit)
+    const last = dayGroups[dayGroups.length - 1]
+    if (last && last.key === k) last.rows.push(t)
+    else dayGroups.push({ key: k, rows: [t] })
+  }
+  const dayLabel = (key: string) => {
+    if (key === todayKey) return 'Heute'
+    if (key === tomorrowKey) return 'Morgen'
+    return new Date(key + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })
+  }
+
+  const heuteCount = dayGroups.find((g) => g.key === todayKey)?.rows.length ?? 0
+  const summaryParts: string[] = []
+  if (overdue.length) summaryParts.push(`${overdue.length} überfällig`)
+  summaryParts.push(`${heuteCount} heute`)
+  summaryParts.push(`${termine.length} gesamt`)
+
+  // Eine Termin-Zeile: Zeit-Rail links (tabular), Node + Inhalt rechts. Volle Klickflaeche.
+  function TerminZeile(t: TerminRow) {
+    const meta = TYP_META[t.typ] ?? TYP_META.intern
+    const Icon = meta.icon
+    const leadRaw = t.lead as unknown
+    const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
+    const fall = t.fall
+    const subject = lead
+      ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Lead'
+      : fall?.claim_nummer ?? t.titel
+    const href =
+      t.typ === 'kb_beratung'
+        ? `/mitarbeiter/konsultation/${t.id}`
+        : lead
+        ? `/dispatch/leads/${lead.id}`
+        : fall
+        ? `/faelle/${fall.id}`
+        : null
+    const isOverdue = new Date(t.start_zeit) < now
+    // Ziel-loser Termin (kein lead + kein fall, non-KB) -> nicht-klickbar statt totem href='#'.
+    const zeile = (
+      <>
+        {/* Zeit-Rail */}
+        <div className="flex w-12 shrink-0 flex-col items-end pt-px text-right">
+          <span className={`text-body-sm font-semibold tabular-nums ${isOverdue ? 'text-danger-strong' : 'text-claimondo-navy'}`}>
+            {formatBerlin(t.start_zeit, { hour: '2-digit', minute: '2-digit' })}
+          </span>
+          {t.end_zeit && (
+            <span className="text-caption tabular-nums text-claimondo-ondo/60">
+              {formatBerlin(t.end_zeit, { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )}
+        </div>
+        {/* Node + Inhalt */}
+        <div className="min-w-0 flex-1 border-l border-claimondo-border pl-3 sm:pl-4">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2 py-0.5 text-caption font-medium ${meta.cls}`}>
+              <Icon className="h-3 w-3" />
+              {meta.label}
+            </span>
+            {t.id === nextId && (
+              <span className="rounded-full bg-claimondo-navy px-2 py-0.5 text-caption font-medium text-white">Als Nächstes</span>
+            )}
+          </div>
+          <p className="mt-1 truncate text-body-sm font-medium text-claimondo-navy">{subject}</p>
+          {(t.notizen || isOverdue) && (
+            <p className={`mt-0.5 truncate text-body-xs ${isOverdue ? 'font-medium text-danger' : 'text-claimondo-ondo'}`}>
+              {isOverdue && 'überfällig'}
+              {isOverdue && t.notizen && ' · '}
+              {t.notizen}
+            </p>
+          )}
+        </div>
+        {/* Telefon (Desktop) */}
+        {lead?.telefon && (
+          <span className="hidden shrink-0 self-center text-body-xs text-claimondo-ondo/70 sm:block">{lead.telefon}</span>
+        )}
+      </>
+    )
+    return href ? (
+      <Link key={t.id} href={href} className="group flex items-stretch gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg sm:gap-4">
+        {zeile}
+      </Link>
+    ) : (
+      <div key={t.id} className="group flex items-stretch gap-3 px-4 py-3 sm:gap-4">
+        {zeile}
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader title="Meine Termine" description="Rückrufe und Kundentermine, die dir zugewiesen sind." size="lg" />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Zeitplan</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+          {termine.length === 0 ? 'Rückrufe und Kundentermine, die dir zugewiesen sind.' : summaryParts.join(' · ')}
+        </p>
+      </div>
 
-      {groups.size === 0 && (
-        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
-          <p className="text-sm text-claimondo-ondo/70">Keine offenen Termine</p>
+      {termine.length === 0 && (
+        <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-16 text-center text-body-sm text-claimondo-ondo/70">
+          Keine offenen Termine
         </div>
       )}
 
-      {Array.from(groups.entries()).map(([day, rows]) => {
-        const isToday = day === nowIso.slice(0, 10)
+      {/* Ueberfaellig — abgetrennt + priorisiert */}
+      {overdue.length > 0 && (
+        <section className="overflow-hidden rounded-ios-md border border-danger/30 bg-white">
+          <div className="flex items-center justify-between border-b border-danger/20 bg-danger-soft/50 px-4 py-2.5">
+            <h2 className="text-heading-sm font-semibold text-danger-strong">Überfällig</h2>
+            <span className="text-body-sm font-medium text-danger-strong">{overdue.length}</span>
+          </div>
+          <div className="divide-y divide-claimondo-border">{overdue.map(TerminZeile)}</div>
+        </section>
+      )}
+
+      {/* Kommende Termine — relativ nach Tag */}
+      {dayGroups.map((g) => {
+        const isToday = g.key === todayKey
         return (
-          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
-            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })}
-                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
+          <section key={g.key} className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
+            <div className="flex items-center justify-between border-b border-claimondo-border px-4 py-2.5">
+              <h2 className="flex items-center gap-2 text-heading-sm capitalize text-claimondo-navy">
+                <span className={isToday ? 'font-semibold' : ''}>{dayLabel(g.key)}</span>
+                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-claimondo-ondo" aria-hidden />}
               </h2>
-              <span className="text-xs text-claimondo-ondo">{rows?.length ?? 0}</span>
+              <span className="text-body-sm text-claimondo-ondo">{g.rows.length}</span>
             </div>
-            <div className="divide-y divide-claimondo-border">
-              {(rows ?? []).map((t) => {
-                const meta = TYP_META[t.typ] ?? TYP_META.intern
-                const Icon = meta.icon
-                const leadRaw = t.lead as unknown
-                const lead = Array.isArray(leadRaw) ? leadRaw[0] ?? null : (leadRaw as { id: string; vorname: string | null; nachname: string | null; telefon: string | null } | null)
-                const fall = t.fall
-                const subject = lead
-                  ? `${[lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Lead'}`
-                  : fall?.claim_nummer ?? t.titel
-                const href =
-                  t.typ === 'kb_beratung'
-                    ? `/mitarbeiter/konsultation/${t.id}`
-                    : lead
-                    ? `/dispatch/leads/${lead.id}`
-                    : fall
-                    ? `/faelle/${fall.id}`
-                    : '#'
-                const overdue = new Date(t.start_zeit) < new Date()
-                return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className={`flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border ${meta.cls}`}>
-                        <Icon className="w-3 h-3" />
-                        {meta.label}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy truncate">{subject}</p>
-                        <p className={`text-xs ${overdue ? 'text-danger font-medium' : 'text-claimondo-ondo'}`}>
-                          {formatBerlin(t.start_zeit, { hour: '2-digit', minute: '2-digit' })}
-                          {t.notizen && ` · ${t.notizen}`}
-                          {overdue && ' (überfällig)'}
-                        </p>
-                      </div>
-                      {lead?.telefon && (
-                        <span className="text-xs text-claimondo-ondo/70 hidden sm:block">{lead.telefon}</span>
-                      )}
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
+            <div className="divide-y divide-claimondo-border">{g.rows.map(TerminZeile)}</div>
           </section>
         )
       })}

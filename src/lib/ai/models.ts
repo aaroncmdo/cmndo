@@ -111,6 +111,17 @@ export const AI_MODELS = {
    * gecacht, Speed + niedrige Kosten dominieren → Haiku 4.5.
    */
   chat_translate: 'claude-haiku-4-5-20251001',
+  /**
+   * AI-Claim-Orchestrator (Phase-1-PoC): liest Fall-Kontext, schlägt via Tool-Use
+   * den nächsten Schritt vor (Shadow-Mode). Judgment > Speed → Sonnet 4.6.
+   */
+  claim_orchestrator: 'claude-sonnet-4-6',
+  /**
+   * Claim-AI-Konsole: interaktiver Admin-Copilot in der Claim-View (Streaming +
+   * Tool-Use). Nutzt vollen Fall-Kontext, schlaegt freigabepflichtige Aktionen vor.
+   * Judgment > Speed → Sonnet 4.6.
+   */
+  claim_copilot: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS

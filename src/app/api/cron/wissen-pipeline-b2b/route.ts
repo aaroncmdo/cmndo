@@ -1,0 +1,30 @@
+import { runB2BPipeline } from '@/lib/wissen/pipeline'
+
+export const dynamic = 'force-dynamic'
+// Die Pipeline generiert bis zu ATTEMPT_CAP KI-Artikel pro Lauf und kann ~1-2 Min dauern.
+// Ohne maxDuration wuerde der Serverless-Default-Timeout (Vercel 60s) den Cron abbrechen.
+// 300 = Plattform-Max, gleiche Konvention wie die andere langlaufende Route sync-external-calendars.
+export const maxDuration = 300
+
+/**
+ * B2B Content-Pipeline Cron-Route.
+ *
+ * Auth: Authorization: Bearer $CRON_SECRET (Header) oder ?secret=<CRON_SECRET> (Query).
+ * Beides gemaess Plan-Spec (erweitert das Repo-Basis-Pattern um Query-Fallback fuer
+ * einfachere VPS-Crontab-Konfiguration ohne Header-Support).
+ *
+ * VPS-Crontab-Eintrag (Aaron) — taeglich:
+ *   0 4 * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://app.claimondo.de/api/cron/wissen-pipeline-b2b
+ */
+export async function GET(req: Request) {
+  const secret = process.env.CRON_SECRET
+  const auth = req.headers.get('authorization')
+  const url = new URL(req.url)
+
+  if (!secret || (auth !== `Bearer ${secret}` && url.searchParams.get('secret') !== secret)) {
+    return new Response('Unauthorized', { status: 401 })
+  }
+
+  const r = await runB2BPipeline()
+  return Response.json(r, { status: r.ok ? 200 : 500 })
+}

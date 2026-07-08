@@ -200,41 +200,132 @@ export async function getWerkstattStaffelBoni(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Meine Vermittlungen (KVA-Leads + Funnel-Status) — leak-safe via SECURITY-DEFINER-RPC
+// ─────────────────────────────────────────────────────────────────────────────
+// Auftraege — self-scoped via v_werkstatt_auftrag (SECURITY-DEFINER-View mit Gate
+// is_werkstatt_for_claim). Zeigt Gutachter + Besichtigungstermin + Fahrzeug (das,
+// was die Werkstatt zum Koordinieren braucht) — anders als die KVA-Funnel-Liste
+// "Meine Vermittlungen". KEIN neuer RPC: die View IST der SSoT + RLS-gegatet.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export type WerkstattVermittlungStatus = 'eingegangen' | 'beauftragt' | 'reparatur_freigegeben' | 'storniert'
-
-export type WerkstattVermittlung = {
-  lead_id: string
-  claim_id: string | null
-  kunde_name: string | null
-  fahrzeug: string | null
+export type WerkstattAuftrag = {
+  claim_id: string
+  claim_nummer: string | null
+  richtung: string | null
+  // D — rollen-korrekte Zusatzspalten (v_werkstatt_auftrag)
+  abrechnungsweg: string | null
+  vermittler_werkstatt_id: string | null
+  reparatur_werkstatt_id: string | null
+  meine_rolle: string | null
+  vermittlung_status: string | null
+  operative_status: string | null
+  fahrzeug_hersteller: string | null
+  fahrzeug_modell: string | null
   kennzeichen: string | null
-  kva_betrag: number | null
-  erstellt_am: string
-  status: WerkstattVermittlungStatus
-  reparatur_freigegeben_am: string | null
+  schadenart: string | null
+  reparaturwunsch: string | null
+  gutachter_firmenname: string | null
+  besichtigung_start: string | null
+  besichtigung_ort: string | null
+  besichtigung_status: string | null
+  provision_betrag_netto: number | null
+  provision_status: string | null
+  // SP2 Task 5 — Reparaturtermin-Spalten (additiv, aus v_werkstatt_auftrag)
+  reparatur_termin_id: string | null
+  reparatur_termin_status: string | null
+  reparatur_wunschtermin: string | null
+  reparatur_bestaetigter_termin: string | null
+  reparatur_absage_grund: string | null
+  // SP3 Task 2 — Gutachten-Kennzahlen (additiv, aus v_werkstatt_auftrag).
+  // HINWEIS: gutachten_bericht_pdf_url wird NICHT an den Client gereicht —
+  // bleibt server-only; die oeffneGutachtenPdf-Action liest ihn frisch.
+  gutachten_fertiggestellt_am: string | null
+  gutachten_reparaturkosten_netto: number | null
+  gutachten_reparaturkosten_brutto: number | null
+  gutachten_minderwert: number | null
+  gutachten_restwert: number | null
+  gutachten_wiederbeschaffungswert: number | null
+  gutachten_totalschaden: boolean | null
 }
 
-/** Leak-safe: self-scoped SECURITY-DEFINER-RPC (nur kuratierte Spalten, keine Kontaktdaten). */
-export async function getWerkstattVermittlungen(): Promise<WerkstattVermittlung[]> {
+// Gemeinsame Spalten-Auswahl + Row-Mapping (DRY: Liste + Einzel-Loader).
+const AUFTRAG_SELECT = `
+  claim_id, claim_nummer, richtung, vermittlung_status, operative_status,
+  abrechnungsweg, vermittler_werkstatt_id, reparatur_werkstatt_id, meine_rolle,
+  fahrzeug_hersteller, fahrzeug_modell, kennzeichen, schadenart, reparaturwunsch,
+  gutachter_firmenname,
+  besichtigung_start, besichtigung_ort, besichtigung_status,
+  provision_betrag_netto, provision_status,
+  reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
+  reparatur_bestaetigter_termin, reparatur_absage_grund,
+  gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
+  gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden
+`
+
+function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
+  return {
+    claim_id: r.claim_id as string,
+    claim_nummer: (r.claim_nummer as string | null) ?? null,
+    richtung: (r.richtung as string | null) ?? null,
+    abrechnungsweg: (r.abrechnungsweg as string | null) ?? null,
+    vermittler_werkstatt_id: (r.vermittler_werkstatt_id as string | null) ?? null,
+    reparatur_werkstatt_id: (r.reparatur_werkstatt_id as string | null) ?? null,
+    meine_rolle: (r.meine_rolle as string | null) ?? null,
+    vermittlung_status: (r.vermittlung_status as string | null) ?? null,
+    operative_status: (r.operative_status as string | null) ?? null,
+    fahrzeug_hersteller: (r.fahrzeug_hersteller as string | null) ?? null,
+    fahrzeug_modell: (r.fahrzeug_modell as string | null) ?? null,
+    kennzeichen: (r.kennzeichen as string | null) ?? null,
+    schadenart: (r.schadenart as string | null) ?? null,
+    reparaturwunsch: (r.reparaturwunsch as string | null) ?? null,
+    gutachter_firmenname: (r.gutachter_firmenname as string | null) ?? null,
+    besichtigung_start: (r.besichtigung_start as string | null) ?? null,
+    besichtigung_ort: (r.besichtigung_ort as string | null) ?? null,
+    besichtigung_status: (r.besichtigung_status as string | null) ?? null,
+    provision_betrag_netto: r.provision_betrag_netto != null ? Number(r.provision_betrag_netto) : null,
+    provision_status: (r.provision_status as string | null) ?? null,
+    // SP2 Task 5 — Reparaturtermin-Spalten
+    reparatur_termin_id: (r.reparatur_termin_id as string | null) ?? null,
+    reparatur_termin_status: (r.reparatur_termin_status as string | null) ?? null,
+    reparatur_wunschtermin: (r.reparatur_wunschtermin as string | null) ?? null,
+    reparatur_bestaetigter_termin: (r.reparatur_bestaetigter_termin as string | null) ?? null,
+    reparatur_absage_grund: (r.reparatur_absage_grund as string | null) ?? null,
+    // SP3 Task 2 — Gutachten-Kennzahlen (PDF-Pfad bleibt server-only)
+    gutachten_fertiggestellt_am: (r.gutachten_fertiggestellt_am as string | null) ?? null,
+    gutachten_reparaturkosten_netto: r.gutachten_reparaturkosten_netto != null ? Number(r.gutachten_reparaturkosten_netto) : null,
+    gutachten_reparaturkosten_brutto: r.gutachten_reparaturkosten_brutto != null ? Number(r.gutachten_reparaturkosten_brutto) : null,
+    gutachten_minderwert: r.gutachten_minderwert != null ? Number(r.gutachten_minderwert) : null,
+    gutachten_restwert: r.gutachten_restwert != null ? Number(r.gutachten_restwert) : null,
+    gutachten_wiederbeschaffungswert: r.gutachten_wiederbeschaffungswert != null ? Number(r.gutachten_wiederbeschaffungswert) : null,
+    gutachten_totalschaden: r.gutachten_totalschaden != null ? Boolean(r.gutachten_totalschaden) : null,
+  }
+}
+
+/** Self-scoped Auftrags-Liste via v_werkstatt_auftrag (RLS-Gate in der View). */
+export async function getWerkstattAuftraege(): Promise<WerkstattAuftrag[]> {
   const supabase = await createClient()
-  // Funktion ist (noch) nicht in den generierten Types -> as never; sie ist in der DB live.
-  const { data, error } = await supabase.rpc('get_werkstatt_vermittlungen' as never)
+  const { data, error } = await supabase
+    .from('v_werkstatt_auftrag')
+    .select(AUFTRAG_SELECT)
+    .order('besichtigung_start', { ascending: false, nullsFirst: false })
   if (error) {
-    console.error('[werkstatt] get_werkstatt_vermittlungen:', error.message)
+    console.error('[werkstatt] getWerkstattAuftraege:', error.message)
     return []
   }
-  return ((data ?? []) as unknown as Record<string, unknown>[]).map((r) => ({
-    lead_id: r.lead_id as string,
-    claim_id: (r.claim_id as string | null) ?? null,
-    kunde_name: (r.kunde_name as string | null) ?? null,
-    fahrzeug: (r.fahrzeug as string | null) ?? null,
-    kennzeichen: (r.kennzeichen as string | null) ?? null,
-    kva_betrag: r.kva_betrag != null ? Number(r.kva_betrag) : null,
-    erstellt_am: r.erstellt_am as string,
-    status: (r.status as WerkstattVermittlungStatus) ?? 'eingegangen',
-    reparatur_freigegeben_am: (r.reparatur_freigegeben_am as string | null) ?? null,
-  }))
+  return ((data ?? []) as unknown as Record<string, unknown>[]).map(mapWerkstattAuftragRow)
+}
+
+/** Ein einzelner Auftrag via v_werkstatt_auftrag (RLS-Gate). null = kein Zugriff/nicht da. */
+export async function getWerkstattAuftrag(claimId: string): Promise<WerkstattAuftrag | null> {
+  if (!claimId) return null
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('v_werkstatt_auftrag')
+    .select(AUFTRAG_SELECT)
+    .eq('claim_id', claimId)
+    .maybeSingle()
+  if (error) {
+    console.error('[werkstatt] getWerkstattAuftrag:', error.message)
+    return null
+  }
+  return data ? mapWerkstattAuftragRow(data as unknown as Record<string, unknown>) : null
 }

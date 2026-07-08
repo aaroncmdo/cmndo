@@ -23,6 +23,7 @@ import { aendereTerminFlow } from './self-service-actions'
 import { BeratungsterminCard } from './BeratungsterminCard'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { FlowFeststellungStep } from './FlowFeststellungStep'
+import { FlowWerkstattStep } from './FlowWerkstattStep'
 import { istFeststellungsFeld } from '@/lib/self-service/feststellung-felder'
 import type { OnboardingPhase, OnboardingFeld } from '@/components/onboarding/types'
 import { FieldRenderer } from '@/components/onboarding/FieldRenderer'
@@ -112,7 +113,7 @@ export type GutachterInfo = {
 // wurde rausgenommen — Foto-Upload + Werkstatt-Erfassung gehören ins
 // Onboarding nach Magic-Link-Login, nicht in den FlowLink.
 // AAR-956 §3a: quali + termin nur im incomplete-Pfad (termin-loser Lead).
-type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'termin' | 'gutachter' | 'sa' | 'account'
+type StepId = 'zusammenfassung' | 'quali' | 'feststellung' | 'werkstatt' | 'termin' | 'gutachter' | 'sa' | 'account'
 
 // STEPS + stepIndexById sind jetzt komponenten-lokal (dynamisch je needsBooking).
 
@@ -134,6 +135,7 @@ export default function FlowWizardKfz({
   lead,
   gutachter,
   needsBooking,
+  needsWerkstatt,
   terminPending,
   besichtigungsAdresse,
   feststellungPhasen,
@@ -151,6 +153,9 @@ export default function FlowWizardKfz({
   // via CANONICAL_FLOWLINK_ENABLED). besichtigungsAdresse speist die gutachter-
   // Anzeige nach Client-seitiger Reservierung.
   needsBooking?: boolean
+  // Reparaturwunsch/Werkstatt: server-gegated (CANONICAL_FLOWLINK_ENABLED + brauchtWerkstatt-
+  // Vermittlung am Lead). Beim Mount gecappt (initialNeedsWerkstatt) wie needsBooking/hatFeststellung.
+  needsWerkstatt?: boolean
   // AAR-956 16.06. (Aaron Wunschtermin-Modell): kein harter Termin, aber gewählter SV +
   // Wunschtermin → Gutachter-Step zeigt den Wunschtermin als "wird bestätigt" (kein Re-Pick).
   terminPending?: boolean
@@ -177,6 +182,10 @@ export default function FlowWizardKfz({
     t.has(key as Parameters<typeof t.has>[0]) ? t(key as Parameters<typeof t>[0]) : fallback
   const [stepIndex, setStepIndex] = useState(0)
   const [datenschutz, setDatenschutz] = useState(false)
+  // Zusammenfassung-Weiter: statt disabled (toter Button ohne Grund) -> bei offenem
+  // Pflichtpunkt aktiv hinweisen (Highlight + Scroll auf den Datenschutz-Block).
+  const [zeigeWeiterHinweis, setZeigeWeiterHinweis] = useState(false)
+  const datenschutzRef = useRef<HTMLDivElement>(null)
   // SV-Schritt: Akzeptanz Widerrufsbelehrung + Datenschutz des SVs (Pflicht
   // bevor „Weiter" zum SA-Step). Modale für die zwei Texte.
   const [svRechtsakzeptanz, setSvRechtsakzeptanz] = useState(false)
@@ -278,11 +287,15 @@ export default function FlowWizardKfz({
   // — sonst fällt der ①-Step aus STEPS, sobald der Kunde den Hergang submittet (feststellungPhasen→[]
   // beim RSC-Re-Render, da unfallhergang dann gefüllt) → Stale-Step-Index. Session-stabil halten.
   const [initialHatFeststellung] = useState(hatFeststellung)
+  // Werkstatt-Step-Praesenz beim Mount cappen (wie initialNeedsBooking/initialHatFeststellung),
+  // damit STEPS mid-Flow nicht schrumpft/waechst -> keine Stale-Step-Index-Spruenge.
+  const [initialNeedsWerkstatt] = useState(needsWerkstatt === true)
   const STEPS: { id: StepId; label: string }[] = istIncomplete
     ? [
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
         ...(qualiPending ? [{ id: 'quali' as StepId, label: 'Schuldfrage' }] : []),
         ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
+        ...(initialNeedsWerkstatt ? [{ id: 'werkstatt' as StepId, label: 'Werkstatt' }] : []),
         { id: 'termin', label: 'Termin' },
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
@@ -294,6 +307,7 @@ export default function FlowWizardKfz({
         // feststellungNeeded). ②Quali+③Slot bleiben weg (Termin steht).
         { id: 'zusammenfassung', label: 'Zusammenfassung' },
         ...(initialHatFeststellung ? [{ id: 'feststellung' as StepId, label: 'Angaben' }] : []),
+        ...(initialNeedsWerkstatt ? [{ id: 'werkstatt' as StepId, label: 'Werkstatt' }] : []),
         { id: 'gutachter', label: 'Ihr Gutachter' },
         { id: 'sa', label: 'Beauftragung' },
         { id: 'account', label: 'Konto' },
@@ -388,12 +402,12 @@ export default function FlowWizardKfz({
 
       // 2. Server Action: Fall erstellen
       // AAR-360 Follow-up: SV-Datenschutz/Widerruf-Zustimmung (nur relevant wenn ein SV zugewiesen ist).
-      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null, gutachterAnzeige ? svRechtsakzeptanz : false)
+      const result = await signSAandCreateFall(lead.id, publicUrl, flowLinkId ?? null, gutachterAnzeige ? svRechtsakzeptanz : false, token)
       if (!result.ok) throw new Error(result.error ?? 'Fehler bei der Beauftragung')
       setFallId(result.fallId)
 
       // 3. SA-PDF generieren (Background, non-blocking)
-      generateSAPdf(result.fallId, lead.id, publicUrl).catch(() => {})
+      generateSAPdf(result.fallId, lead.id, publicUrl, token).catch(() => {})
 
       // AAR-99 + AAR-305: Nach SA → Account-Step (dynamisch per ID)
       setStepIndex(stepIndexById('account'))
@@ -412,7 +426,7 @@ export default function FlowWizardKfz({
     setError(null)
     try {
       // AAR-308/309: createKundeAccount wirft NIE — sauberes Result-Object.
-      const result = await createKundeAccount(fallId, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
+      const result = await createKundeAccount(fallId, token, accountEmail, editVorname || lead.vorname, editNachname || lead.nachname, editTelefon || lead.telefon || null)
       if (!result.success) {
         // CMM-14 Debug: alert damit der User die Meldung sicher sieht.
         if (typeof window !== 'undefined') {
@@ -554,7 +568,14 @@ export default function FlowWizardKfz({
                 </div>
 
                 {/* Datenschutz */}
-                <div className="border-t border-claimondo-border pt-5">
+                <div
+                  ref={datenschutzRef}
+                  className={`border-t border-claimondo-border pt-5 transition-all duration-200 ${
+                    zeigeWeiterHinweis && !datenschutz
+                      ? 'ring-2 ring-danger ring-offset-2 bg-danger-soft rounded-ios-md'
+                      : ''
+                  }`}
+                >
                   <label className="flex items-start gap-3 cursor-pointer group">
                     <input
                       type="checkbox"
@@ -581,6 +602,11 @@ export default function FlowWizardKfz({
                 vorname={editVorname || lead.vorname || null}
                 onSchuldfrage={setSchuldfrageWahl}
                 onWeiter={() => setStepIndex(stepIndex + 1)}
+                onSelbstzahler={(claimId) => {
+                  // SP-B2: partieller Selbstzahler-Claim existiert -> wie SA-Pfad in den Account-Step.
+                  setFallId(claimId)
+                  setStepIndex(stepIndexById('account'))
+                }}
               />
             )}
 
@@ -784,6 +810,12 @@ export default function FlowWizardKfz({
             {/* CMM-14: Step 'weitere-angaben' (Werkstatt + Fotos) entfernt —
                 Foto-Upload + Werkstatt-Erfassung gehören ins Onboarding nach
                 Magic-Link-Login, nicht in den FlowLink. */}
+
+            {/* Reparaturwunsch/Werkstatt: Kunde waehlt eine Partner-Werkstatt (5 naechste).
+                Ueberspringbar; onWeiter -> naechster Step (termin/gutachter/sa je nach Pfad). */}
+            {currentStep.id === 'werkstatt' && (
+              <FlowWerkstattStep token={token} onWeiter={() => setStepIndex(stepIndex + 1)} />
+            )}
 
             {/* ═══ SCHRITT 4: SA UNTERSCHREIBEN ═══ */}
             {currentStep.id === 'sa' && (
@@ -1027,16 +1059,22 @@ export default function FlowWizardKfz({
           <div className="pt-4">
             <button
               onClick={async () => {
+                // Pflichtpunkt offen -> nicht still als toter Button blockieren, sondern aktiv
+                // hinweisen: Highlight + Scroll auf den Datenschutz-Block (Conversion-Fix).
+                if (!datenschutz || !editVorname || !editNachname) {
+                  setZeigeWeiterHinweis(true)
+                  datenschutzRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+                  return
+                }
                 // Korrigierte Stammdaten speichern
                 if (editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email) {
                   try {
-                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail })
+                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail }, token)
                     setAccountEmail(editEmail)
                   } catch { /* weiter trotzdem */ }
                 }
                 setStepIndex(stepIndex + 1) // → nächster Step (quali/termin/gutachter je nach Pfad)
               }}
-              disabled={!datenschutz || !editVorname || !editNachname}
               className="w-full inline-flex items-center justify-center gap-2 min-h-12 px-6 py-3.5 rounded-full bg-claimondo-ondo hover:bg-claimondo-shield text-white font-semibold text-sm tracking-[-.01em] shadow-cta-ondo hover:-translate-y-[1px] active:translate-y-0 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none disabled:translate-y-0 transition-all duration-200 ease-[cubic-bezier(.32,.72,0,1)]"
             >
               {t('common.weiter')}

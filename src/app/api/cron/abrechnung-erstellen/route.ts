@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FINANCE } from '@/lib/finance/constants'
-import { nextRechnungsNrRaw } from '@/lib/billing/generate-rechnungs-nr'
+import { eurToCent } from '@/lib/billing/calculate-ust'
+import { createAbrechnung } from '@/lib/abrechnung/create-abrechnung'
+import { SV_MONAT_DESCRIPTOR } from '@/lib/abrechnung/descriptors/sv-monat'
 
 export const dynamic = 'force-dynamic'
 
@@ -20,6 +22,10 @@ export const dynamic = 'force-dynamic'
  *
  * abrechnung_positionen-Tabelle existiert weiterhin (aus kfz149 angelegt) und
  * dient als Audit-Trail mit FK auf abrechnungen(id).
+ *
+ * Refactored (Task 4): beide Sub-Pfade (Individual-SV + Org-Sammelrechnung)
+ * nutzen createAbrechnung() + SV_MONAT_DESCRIPTOR. Orphan-Relink liegt im
+ * Caller (hier), nicht im Descriptor (erstellt:false => relink im Route).
  */
 export async function GET(request: Request) {
   const authHeader = request.headers.get('authorization')
@@ -41,6 +47,7 @@ export async function GET(request: Request) {
   // NICHT mehr ein Filter auf das Fall-Erstelldatum (created_at-Fenster entfernt).
   const monthStartDate = new Date(jahr, monat - 1, 1).toISOString().slice(0, 10)
   const monthEndDate = new Date(jahr, monat, 0).toISOString().slice(0, 10)
+  const monatPad = String(monat).padStart(2, '0')
 
   // KFZ-152 Phase 2+3: Alle aktiven SVs MIT Org-Info fuer die Sammelabrechnungs-
   // Logik. Buero+Akademie werden zur EINEN Sammelrechnung pro Org gruppiert,
@@ -108,12 +115,9 @@ export async function GET(request: Request) {
 
     if (!faelle?.length) continue
 
-    // Per-case Summen (schon pro Fall berechnet!)
+    // Per-case Summen (schon pro Fall berechnet!) — fuer Notiz-Text
     const bruttoNetto = faelle.reduce((s, f) => s + (Number(f.lead_preis_netto) || 0), 0)
     const guthabenVerrechnet = faelle.reduce((s, f) => s + (Number(f.guthaben_verrechnet_netto) || 0), 0)
-    const endbetragNetto = faelle.reduce((s, f) => s + (Number(f.sv_nachzahlung_netto) || 0), 0)
-    const mwst = Math.round(endbetragNetto * FINANCE.MWST_PROZENT / 100 * 100) / 100
-    const endbetragBrutto = Math.round((endbetragNetto + mwst) * 100) / 100
 
     // Empfaenger-Daten aus profiles laden
     const { data: profile } = await db.from('profiles')
@@ -132,7 +136,7 @@ export async function GET(request: Request) {
     // Org wird nach dem Loop am Ende erstellt.
     const orgInfo = sv.organisation_id ? orgTypMap.get(sv.organisation_id) : null
     if (orgInfo && (orgInfo.typ === 'buero' || orgInfo.typ === 'akademie')) {
-      const acc: { org_typ: string; org_name: string; org_id: string; positions: OrgPosition[]; fall_ids: string[]; claim_ids: string[] } = orgAccumulator.get(sv.organisation_id!) ?? {
+      const acc = orgAccumulator.get(sv.organisation_id!) ?? {
         org_typ: orgInfo.typ,
         org_name: orgInfo.name,
         org_id: sv.organisation_id!,
@@ -161,91 +165,63 @@ export async function GET(request: Request) {
       continue // Skip individual insert
     }
 
-    // Rechnungsnummer: CMNDO-YYYY-MM-NNNN — W1.1/AAR-948: atomar + lückenlos via
-    // rechnungs_nr_counter (next_rechnungs_nr, UPSERT+RETURNING) statt
-    // race-anfälligem inline-COUNT (zwei parallele/wiederholte Cron-Läufe konnten
-    // dieselbe Nr. vergeben). Monat im serie-Key (`CMNDO-{MM}`) → Zähler resettet
-    // pro Monat, analog der Kanzlei-Serie (CMNDO-K). Ausgabeformat unverändert
-    // (4-stellig); Individual- + Org-Sammelpfad teilen die Serie → monatsweit
-    // eindeutig & kollisionsfrei.
-    const monatPad = String(monat).padStart(2, '0')
-    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
-    const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
+    const abrClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
 
     // Faelligkeitsdatum: 14. des Folgemonats
     const faellig = new Date(jahr, monat, 14)
     const faelligIso = faellig.toISOString().slice(0, 10)
 
-    // Positionen als JSONB-Array fuer die kfz141-Spalte.
-    // CMM-44 SP-B PR2c: schadens_hoehe_netto (claims) + SP-G gutachten_betrag
-    // (gutachten) flach aus der repointeten View.
-    const positionenJson = faelle.map((f, i) => {
-      return {
-        position_nr: i + 1,
-        fall_id: f.id,
-        fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
-        kennzeichen: f.kennzeichen ?? null,
-        schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
-        lead_preis_netto: Number(f.lead_preis_netto),
-        lead_preis_typ: f.lead_preis_typ ?? 'paket',
-        guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
-        sv_nachzahlung_netto: Number(f.sv_nachzahlung_netto ?? 0),
-      }
-    })
+    // Positionen fuer createAbrechnung (betrag_netto_cent = sv_nachzahlung_netto in Cent)
+    const positionen = faelle.map((f, i) => ({
+      betrag_netto_cent: eurToCent(Number(f.sv_nachzahlung_netto ?? 0)),
+      position_nr: i + 1,
+      fall_id: f.id,
+      fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
+      kennzeichen: f.kennzeichen ?? null,
+      schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
+      lead_preis_netto: Number(f.lead_preis_netto),
+      lead_preis_typ: f.lead_preis_typ ?? 'paket',
+      guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
+      sv_nachzahlung_netto: Number(f.sv_nachzahlung_netto ?? 0),
+    }))
 
-    // Insert Abrechnung im kfz141-Schema
-    const { data: abr, error: abrErr } = await db.from('abrechnungen').insert({
-      empfaenger_typ: 'sv',
+    const kontext = {
       empfaenger_id: sv.id,
       empfaenger_email: profile.email,
       empfaenger_name: empfaengerName,
-      abrechnungs_nr: abrechnungsNr,
+      jahr,
+      monatPad,
       abrechnungs_zeitraum_start: monthStartDate,
       abrechnungs_zeitraum_ende: monthEndDate,
-      positionen: positionenJson,
-      summe_netto: endbetragNetto,
-      ust_satz: 19.00,
-      ust_betrag: mwst,
-      summe_brutto: endbetragBrutto,
       faellig_am: faelligIso,
-      status: 'versendet',
-      versand_datum: new Date().toISOString(),
+      versand_datum: now.toISOString(),
       notiz: `Brutto-Lead-Preise: ${bruttoNetto.toFixed(2)} EUR. Verrechnet aus Werbebudget: ${guthabenVerrechnet.toFixed(2)} EUR. Restguthaben: ${Number(sv.werbebudget_guthaben_netto ?? 0).toFixed(2)} EUR.`,
-    }).select('id').single()
+      claim_ids: abrClaimIds,
+    }
 
-    if (abrErr || !abr) {
-      console.error(`[KFZ-149] Abrechnung ${sv.id}:`, abrErr?.message)
+    const result = await createAbrechnung(db, SV_MONAT_DESCRIPTOR, { positionen, kontext })
+
+    if (!result.ok) {
+      console.error(`[KFZ-149] Abrechnung SV ${sv.id}:`, result.error)
       continue
     }
 
-    // Audit-Trail: Positionen zusaetzlich in abrechnung_positionen
-    // (dient als zweite Quelle der Wahrheit + erlaubt joined queries).
-    for (let i = 0; i < faelle.length; i++) {
-      const f = faelle[i]
-      await db.from('abrechnung_positionen').insert({
-        abrechnung_id: abr.id,
-        fall_id: f.id,
-        fall_datum: new Date(f.created_at).toISOString().slice(0, 10),
-        kennzeichen: f.kennzeichen ?? null,
-        // CMM-44 SP-J: schadens_hoehe_netto (claims) + gutachten_betrag (gutachten) flach aus der View.
-        schadenhoehe_netto: Number(f.schadens_hoehe_netto ?? f.gutachten_betrag ?? 0),
-        lead_preis_netto: Number(f.lead_preis_netto),
-        lead_preis_typ: f.lead_preis_typ ?? 'paket',
-        guthaben_verrechnet_netto: Number(f.guthaben_verrechnet_netto ?? 0),
-        sv_nachzahlung_netto: Number(f.sv_nachzahlung_netto ?? 0),
-        position_nr: i + 1,
-      })
+    if (!result.erstellt) {
+      // Doppel-Rechnungs-Schutz: bestehende Rechnung gefunden (pruefeBestehend).
+      // Orphan-Relink: Claims an die bestehende Rechnung haengen (crash-recovery).
+      if (abrClaimIds.length > 0) {
+        await db.from('claims').update({ abrechnung_id: result.bestehendeId }).in('id', abrClaimIds)
+      }
+      console.warn(`[KFZ-149] SV ${sv.id}: bestehende Monatsrechnung gefunden — ${abrClaimIds.length} Claim(s) nachverknuepft (keine 2. Rechnung).`)
+      continue
     }
 
-    // Faelle markieren als abgerechnet.
-    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die
-    // claim_ids schreiben. Moderne Billing-Faelle haben immer einen Claim
-    // (lead_preis_netto-Flow setzt ihn voraus); claimlose Legacy-Faelle kommen
-    // hier nicht vor.
-    const abrClaimIds = faelle.map(f => f.claim_id).filter((id): id is string => !!id)
-    if (abrClaimIds.length > 0) {
-      await db.from('claims').update({ abrechnung_id: abr.id }).in('id', abrClaimIds)
+    if (!result.markiertOk) {
+      console.error(`[KFZ-149] SV ${sv.id}: claims.abrechnung_id-Markierung fehlgeschlagen (Rechnung ${result.id})`)
     }
+
+    const abrechnungsNr = result.nummer
+    const endbetragBrutto = result.betraege.bruttoCent / 100
 
     // Email an SV
     try {
@@ -274,8 +250,6 @@ export async function GET(request: Request) {
   // ─── KFZ-152 Phase 2+3: Sammelrechnungen pro Buero/Akademie-Org ─────────
   for (const [orgId, acc] of orgAccumulator.entries()) {
     const totalNetto = acc.positions.reduce((s, p) => s + p.sv_nachzahlung_netto, 0)
-    const mwst = Math.round(totalNetto * FINANCE.MWST_PROZENT / 100 * 100) / 100
-    const totalBrutto = Math.round((totalNetto + mwst) * 100) / 100
     if (totalNetto <= 0) continue
 
     // Verwalter-Email aus Org laden
@@ -295,55 +269,71 @@ export async function GET(request: Request) {
       continue
     }
 
-    // Rechnungsnummer — atomar via rechnungs_nr_counter, dieselbe Serie
-    // (`CMNDO-{MM}`) wie der Individual-Pfad → monatsweit eindeutig & lückenlos (AAR-948).
-    const monatPad = String(monat).padStart(2, '0')
-    const lfdNr = await nextRechnungsNrRaw(`CMNDO-${monatPad}`, jahr)
-    const abrechnungsNr = `CMNDO-${jahr}-${monatPad}-${String(lfdNr).padStart(4, '0')}`
-
     const faellig = new Date(jahr, monat, 14)
     const faelligIso = faellig.toISOString().slice(0, 10)
 
-    // Positionen mit Sub-SV-Sektionen (jede Position trackt ihren sub_sv_id)
-    const positionenJson = acc.positions.map((p, i) => ({ position_nr: i + 1, ...p }))
+    // Positionen fuer createAbrechnung (betrag_netto_cent pro Sub-SV-Fall)
+    const positionen = acc.positions.map((p, i) => ({
+      betrag_netto_cent: eurToCent(p.sv_nachzahlung_netto),
+      position_nr: i + 1,
+      fall_id: p.fall_id,
+      fall_datum: p.fall_datum,
+      kennzeichen: p.kennzeichen,
+      schadenhoehe_netto: p.schadenhoehe_netto,
+      lead_preis_netto: p.lead_preis_netto,
+      lead_preis_typ: p.lead_preis_typ,
+      guthaben_verrechnet_netto: p.guthaben_verrechnet_netto,
+      sv_nachzahlung_netto: p.sv_nachzahlung_netto,
+      sub_sv_id: p.sub_sv_id,
+      sub_sv_name: p.sub_sv_name,
+    }))
 
-    const { data: abr, error: abrErr } = await db.from('abrechnungen').insert({
-      empfaenger_typ: 'sv',
-      empfaenger_id: orgId, // Die ORG ist Empfaenger der Sammelrechnung
+    const orgTypLabel = acc.org_typ === 'buero' ? 'Büro' : 'Akademie'
+    const subSvCount = new Set(acc.positions.map(p => p.sub_sv_id)).size
+
+    const kontext = {
+      empfaenger_id: orgId,
       empfaenger_email: verwalterEmail,
-      empfaenger_name: `${verwalterName} (${acc.org_typ === 'buero' ? 'Büro' : 'Akademie'} ${acc.org_name})`,
-      abrechnungs_nr: abrechnungsNr,
+      empfaenger_name: `${verwalterName} (${orgTypLabel} ${acc.org_name})`,
+      jahr,
+      monatPad,
       abrechnungs_zeitraum_start: monthStartDate,
       abrechnungs_zeitraum_ende: monthEndDate,
-      positionen: positionenJson,
-      summe_netto: totalNetto,
-      ust_satz: 19.00,
-      ust_betrag: mwst,
-      summe_brutto: totalBrutto,
       faellig_am: faelligIso,
-      status: 'versendet',
-      versand_datum: new Date().toISOString(),
-      notiz: `Sammelrechnung für ${acc.org_typ === 'buero' ? 'Büro' : 'Akademie'} ${acc.org_name}. ${acc.positions.length} Positionen aus ${new Set(acc.positions.map(p => p.sub_sv_id)).size} Sub-SVs. Wird gegen ${acc.org_typ === 'buero' ? 'parent_stripe_customer_id' : 'Akademie-Customer'} eingezogen.`,
-    }).select('id').single()
+      versand_datum: now.toISOString(),
+      notiz: `Sammelrechnung für ${orgTypLabel} ${acc.org_name}. ${acc.positions.length} Positionen aus ${subSvCount} Sub-SVs. Wird gegen ${acc.org_typ === 'buero' ? 'parent_stripe_customer_id' : 'Akademie-Customer'} eingezogen.`,
+      claim_ids: acc.claim_ids,
+    }
 
-    if (abrErr || !abr) {
-      console.error(`[KFZ-152] Sammelrechnung ${orgId}:`, abrErr?.message)
+    const result = await createAbrechnung(db, SV_MONAT_DESCRIPTOR, { positionen, kontext })
+
+    if (!result.ok) {
+      console.error(`[KFZ-152] Sammelrechnung ${orgId}:`, result.error)
       continue
     }
 
-    // Faelle markieren.
-    // CMM-44 SP-J Bucket B: abrechnung_id liegt auf claims (SSoT) → ueber die
-    // gesammelten claim_ids schreiben (Sammelrechnung-Faelle sind claim-verknuepft).
-    if (acc.claim_ids.length > 0) {
-      await db.from('claims').update({ abrechnung_id: abr.id }).in('id', acc.claim_ids)
+    if (!result.erstellt) {
+      // Doppel-Rechnungs-Schutz: bestehende Org-Sammelrechnung gefunden.
+      // Orphan-Relink: Claims an die bestehende Rechnung haengen (crash-recovery).
+      if (acc.claim_ids.length > 0) {
+        await db.from('claims').update({ abrechnung_id: result.bestehendeId }).in('id', acc.claim_ids)
+      }
+      console.warn(`[KFZ-152] Org ${orgId}: bestehende Sammelrechnung gefunden — ${acc.claim_ids.length} Claim(s) nachverknuepft (keine 2. Rechnung).`)
+      continue
     }
+
+    if (!result.markiertOk) {
+      console.error(`[KFZ-152] Org ${orgId}: claims.abrechnung_id-Markierung fehlgeschlagen (Rechnung ${result.id})`)
+    }
+
+    const abrechnungsNr = result.nummer
+    const totalBrutto = result.betraege.bruttoCent / 100
 
     // Welcome-Mail an Verwalter
     try {
       const { render } = await import('@react-email/render')
       const { BueroVerwalterAbrechnungInfoEmail, subject: bueroAbrSubject } = await import('@/lib/email/google/templates/BueroVerwalterAbrechnungInfo')
       const { sendCommunication } = await import('@/lib/communications/send')
-      const subSvCount = new Set(acc.positions.map(p => p.sub_sv_id)).size
       const orgAbrProps = {
         verwalterVorname: verwalterName.split(' ')[0] || null,
         bueroName: acc.org_name,

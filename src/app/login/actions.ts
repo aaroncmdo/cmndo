@@ -81,7 +81,7 @@ export async function login(formData: FormData) {
 
   const { data: profile, error: profileError } = await supabase
     .from('profiles')
-    .select('rolle, force_password_change, auth_provider, twofa_aktiviert, twofa_email_aktiviert')
+    .select('rolle, force_password_change, auth_provider')
     .eq('id', user.id)
     .single()
 
@@ -122,14 +122,10 @@ export async function login(formData: FormData) {
   const routing = entscheideLoginRouting({
     isGoogleUser: authProvider === 'google',
     hasVerifiedFactor: aal?.nextLevel === 'aal2',
-    legacy2faWanted:
-      profile.twofa_aktiviert === true || profile.twofa_email_aktiviert === true,
   })
 
   if (routing !== 'portal') {
-    // 'challenge' (vorhandenen Faktor verifizieren) ODER 'enroll' (Soft-Enroll
-    // für Legacy-User ohne Supabase-Faktor) → /login/2fa. Welcher Modus
-    // angezeigt wird, entscheidet die Page anhand der Faktoren.
+    // routing === 'challenge': vorhandenen Faktor auf /login/2fa verifizieren.
     revalidatePath('/login/2fa', 'layout')
     redirect('/login/2fa')
   }

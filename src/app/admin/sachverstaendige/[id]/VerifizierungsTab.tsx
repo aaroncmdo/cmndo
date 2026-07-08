@@ -59,9 +59,11 @@ export type Tier2Slot = {
   slotId: string
   label: string
   beschreibung: string | null
-  // pflichtdokumente-Row falls bereits angefordert
+  // pflichtdokumente-Row falls bereits angefordert. Werte sind die echten
+  // pflichtdokumente.status-Werte (CHECK-Constraint), NICHT ein eigenes Set —
+  // sonst matcht das Badge nie (frueher 'eingereicht'/'genehmigt' → immer „Ausstehend").
   pflichtdokId: string | null
-  status: 'ausstehend' | 'eingereicht' | 'genehmigt' | 'abgelehnt' | null
+  status: 'ausstehend' | 'hochgeladen' | 'geprueft' | 'abgelehnt' | 'nachgereicht_angefordert' | null
   hochgeladenAm: string | null
   // optional document_uploads info
   uploadCount: number
@@ -85,9 +87,11 @@ type Props = {
   pflichtdokumente: PflichtdokumentSlot[]
   svVerifiziert: boolean
   // Tier 2
-  verifizierungStatus: 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | null
+  verifizierungStatus: 'ausstehend' | 'geprueft' | 'frist_ueberschritten' | 'abgelehnt' | null
   verifizierungFristBis: string | null
   verifiziertAm: string | null
+  // Ablehnungsgrund (verifizierung_admin_notiz) — nur relevant bei Status 'abgelehnt'.
+  verifizierungAdminNotiz: string | null
   tier2Slots: Tier2Slot[]
   // Sperre
   gesperrtSeit: string | null
@@ -302,15 +306,15 @@ function PflichtdokumenteCard({
   const [rejectingSlot, setRejectingSlot] = useState<string | null>(null)
   const [rejectNotiz, setRejectNotiz] = useState('')
 
+  // Sammel-Freigabe (verifiziert=true) verlangt, dass jedes Pflichtdokument
+  // bereits EINZELN geprüft (freigegeben) wurde — 'hochgeladen' allein reicht
+  // nicht (spiegelt dokumenteAlleFreigeben serverseitig).
   const byId = new Map(pflichtdokumente.map((d) => [d.slotId, d]))
-  const abtretungOk = PFLICHT_GROUP_ABTRETUNG.some((s) => {
-    const st = byId.get(s)?.status
-    return st === 'hochgeladen' || st === 'geprueft'
-  })
+  const abtretungOk = PFLICHT_GROUP_ABTRETUNG.some((s) => byId.get(s)?.status === 'geprueft')
   const datenschutz = byId.get('sv_datenschutzerklaerung')
   const widerruf = byId.get('sv_widerrufsbelehrung')
-  const datenschutzOk = datenschutz?.status === 'hochgeladen' || datenschutz?.status === 'geprueft'
-  const widerrufOk = widerruf?.status === 'hochgeladen' || widerruf?.status === 'geprueft'
+  const datenschutzOk = datenschutz?.status === 'geprueft'
+  const widerrufOk = widerruf?.status === 'geprueft'
   const kannAlleFreigeben = abtretungOk && datenschutzOk && widerrufOk && !svVerifiziert
 
   function handleFreigeben(slotId: string) {
@@ -533,6 +537,7 @@ function Tier2Card({
   verifizierungStatus,
   verifizierungFristBis,
   verifiziertAm,
+  verifizierungAdminNotiz,
   tier2Slots,
 }: Props) {
   const [pending, startTransition] = useTransition()
@@ -549,6 +554,8 @@ function Tier2Card({
     badge = <StatusBadge tone="green"><CheckCircle2Icon className="w-2.5 h-2.5" />Verifiziert</StatusBadge>
   } else if (verifizierungStatus === 'frist_ueberschritten') {
     badge = <StatusBadge tone="red"><AlertTriangleIcon className="w-2.5 h-2.5" />Frist überschritten</StatusBadge>
+  } else if (verifizierungStatus === 'abgelehnt') {
+    badge = <StatusBadge tone="red"><XCircleIcon className="w-2.5 h-2.5" />Abgelehnt</StatusBadge>
   }
 
   const fristDatum = verifizierungFristBis
@@ -612,6 +619,23 @@ function Tier2Card({
           </div>
         )}
       </div>
+
+      {/* Ablehnungs-Hinweis (verifizierung_admin_notiz) — sichtbar wenn abgelehnt. */}
+      {verifizierungStatus === 'abgelehnt' && (
+        <div className="mb-4 px-3 py-2.5 rounded-ios-lg bg-danger-soft border border-danger/30 text-[11px]">
+          <p className="font-semibold text-danger-strong flex items-center gap-1">
+            <XCircleIcon className="w-3 h-3" />
+            Profil abgelehnt
+          </p>
+          {verifizierungAdminNotiz ? (
+            <p className="text-danger-strong mt-1 whitespace-pre-line">
+              <span className="font-semibold">Grund:</span> {verifizierungAdminNotiz}
+            </p>
+          ) : (
+            <p className="text-danger-strong/80 mt-1">Kein Grund hinterlegt.</p>
+          )}
+        </div>
+      )}
 
       {/* Angeforderte Slots */}
       {angefordert.length > 0 && (
@@ -714,9 +738,12 @@ function Tier2Card({
 }
 
 function SlotStatusBadge({ status, uploadCount }: { status: Tier2Slot['status']; uploadCount: number }) {
-  if (status === 'genehmigt') return <StatusBadge tone="green">Genehmigt</StatusBadge>
-  if (status === 'eingereicht') return <StatusBadge tone="amber">Eingereicht ({uploadCount})</StatusBadge>
+  // Mapping der echten pflichtdokumente.status-Werte auf Badges.
+  if (status === 'geprueft') return <StatusBadge tone="green">Geprüft</StatusBadge>
+  if (status === 'hochgeladen')
+    return <StatusBadge tone="amber">Eingereicht{uploadCount > 0 ? ` (${uploadCount})` : ''}</StatusBadge>
   if (status === 'abgelehnt') return <StatusBadge tone="red">Abgelehnt</StatusBadge>
+  if (status === 'nachgereicht_angefordert') return <StatusBadge tone="amber">Nachgefordert</StatusBadge>
   return <StatusBadge tone="gray">Ausstehend</StatusBadge>
 }
 

@@ -40,6 +40,7 @@ import { resolveFallEntityFks } from '@/lib/lead-fall-mapping'
 import { upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
 import { parseUhrzeit } from '@/lib/format/zeit'
 import type { ClaimInsert } from '@/lib/claims/types'
+import { emitEvent } from '@/lib/notifications/emit'
 
 export type ConvertLeadToClaimInput = {
   leadId: string
@@ -142,13 +143,17 @@ export async function convertLeadToClaim(
     })
     if (veh.ok) resolvedVehicleId = veh.vehicleId
     else console.warn('[CMM-50.0] vehicles-Upsert bei Konversion fehlgeschlagen:', veh.error)
-  } else if (!resolvedVehicleId && (
+  }
+  // CMM-fix: Kennzeichen-Stub-Fallback greift jetzt auch, wenn der FIN-Pfad KEIN Fahrzeug ergab
+  // (Fake/Tippfehler-FIN oder Lookup down) — sonst gingen die Fahrzeugdaten verloren (nicht db-driven).
+  // Der !resolvedVehicleId-Guard verhindert Doppelanlage bei erfolgreicher FIN.
+  if (!resolvedVehicleId && (
     lead.kennzeichen || lead.fahrzeug_hersteller || lead.fahrzeug_modell ||
     lead.fahrzeug_farbe || lead.lackfarbe_code || lead.hsn || lead.tsn ||
     lead.fahrzeug_baujahr || lead.erstzulassung || lead.kilometerstand ||
     lead.kennzeichen_buchstaben || lead.fahrzeug_ausstattung
   )) {
-    // CMM-68/CMM-50: kein FIN, aber IRGENDEIN Fahrzeugdatum -> FIN-loser Stub, damit ALLE
+    // CMM-68/CMM-50: kein (erfolgreicher) FIN, aber IRGENDEIN Fahrzeugdatum -> FIN-loser Stub, damit ALLE
     // Fahrzeugdaten unbedingt auf vehicles landen (Vorbedingung dafuer, dass der faelle-INSERT
     // die vehicle-Cols verlustfrei NICHT mehr schreibt). claims.vehicle_id wird gesetzt; die FIN
     // kommt spaeter (ZB1) und dedupliziert via ensureVehicleFromFin (ein Fahrzeug, mehrere Claims).
@@ -180,8 +185,16 @@ export async function convertLeadToClaim(
   // NICHT als KB durchschlagen. Gegate auf source_channel (nicht service_typ),
   // damit NATIVE nur_gutachter-Faelle ihren KB wie gehabt behalten.
   const istEmbedB = (lead.source_channel as string | null) === 'monika_embed'
+  // Selbstzahler (abrechnungsweg='selbstzahler'): reiner Self-Service-Reparatur-
+  // Vorgang OHNE SV/Gutachten/Regulierung -> kein Kundenbetreuer noetig (analog
+  // embed-B; Aaron 06.07.). Sonst bindet der Round-Robin KB-Kapazitaet fuer einen
+  // Fall ohne KB-Arbeit. Null-KB ist downstream-safe: das Kunde-Portal gatet die
+  // KB-Anzeige auf fall.kundenbetreuer_id, embed-B liefert bereits KB-lose Claims.
+  // abrechnungsweg ist type-lagged -> Record-Cast (AGENTS.md §6).
+  const istSelbstzahler =
+    ((lead as Record<string, unknown>).abrechnungsweg as string | null) === 'selbstzahler'
   let kundenbetreuerId: string | null = input.kundenbetreuerId ?? null
-  if (!istEmbedB && !kundenbetreuerId) {
+  if (!istEmbedB && !istSelbstzahler && !kundenbetreuerId) {
     // AAR-956: lead.zugewiesen_an NUR als KB uebernehmen, wenn die Rolle KB-faehig
     // ist. Beim kanonischen Self-Service-Lead (/start) ist zugewiesen_an der
     // DISPATCHER (pickRoundRobinDispatcher) — der claims-Trigger
@@ -436,13 +449,15 @@ export async function convertLeadToClaim(
   // DB-Trigger trg_makler_provision_on_bridge legt dann die makler_provisionen-Provision an
   // (dual-rate je service_typ). Record-Cast wie werkstatt_id (generierte Types laggen die Spalte).
   let maklerId: string | null = null
+  let maklerPromoCode: string | null = null
   if (lead.promotion_code_id) {
     const { data: pc } = await admin
       .from('promotion_codes')
-      .select('makler_id')
+      .select('makler_id, code')
       .eq('id', lead.promotion_code_id as string)
       .maybeSingle()
     maklerId = (pc?.makler_id as string | null) ?? null
+    maklerPromoCode = (pc?.code as string | null) ?? null
   }
   ;(claimsInsert as Record<string, unknown>).makler_id = maklerId
 
@@ -456,6 +471,20 @@ export async function convertLeadToClaim(
     (lead.reparatur_werkstatt_zugewiesen_von as string | null) ?? null
   ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_quelle =
     (lead.reparatur_werkstatt_quelle as string | null) ?? null
+
+  // Reparaturwunsch (Intent) + operativer Vermittlungs-Status + Extern-Werkstatt: Lead -> Claim.
+  ;(claimsInsert as Record<string, unknown>).reparaturwunsch =
+    (lead.reparaturwunsch as string | null) ?? null
+  ;(claimsInsert as Record<string, unknown>).reparatur_vermittlung_status =
+    (lead.reparatur_vermittlung_status as string | null) ?? 'offen'
+  ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_extern =
+    (lead.reparatur_werkstatt_extern as string | null) ?? null
+  // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
+  ;(claimsInsert as Record<string, unknown>).schadenskategorie =
+    (lead.schadenskategorie as string | null) ?? null
+  // SP-B1: Abrechnungsweg (haftpflicht/kasko/selbstzahler) Lead -> Claim (SSoT). Record-Cast wg. Type-Lag.
+  ;(claimsInsert as Record<string, unknown>).abrechnungsweg =
+    (lead.abrechnungsweg as string | null) ?? null
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')
@@ -712,6 +741,30 @@ export async function convertLeadToClaim(
     )
   }
 
+  // ─── SP2 Task 4: reparatur_termine-Row anlegen (non-fatal) ──────────────
+  // Bedingung: Lead hat sowohl eine Reparatur-Werkstatt (reparatur_werkstatt_id)
+  // als auch einen Wunschtermin (reparatur_wunschtermin, im Flow gesetzt, Task 3).
+  // status='angefragt' — die Werkstatt bestaetigt/ruft an/lehnt ab im naechsten Schritt.
+  // Non-fatal: ein Fehler bricht die Konversion NICHT ab (Claim ist bereits valide angelegt).
+  {
+    const rwtWerkstattId = (lead.reparatur_werkstatt_id as string | null) ?? null
+    const rwtWunschtermin = (lead.reparatur_wunschtermin as string | null) ?? null
+    if (rwtWerkstattId && rwtWunschtermin) {
+      const { error: rtErr } = await admin
+        .from('reparatur_termine')
+        .insert({
+          claim_id: claimId,
+          werkstatt_id: rwtWerkstattId,
+          wunschtermin: rwtWunschtermin,
+          status: 'angefragt',
+          erstellt_von: input.triggerByUserId ?? null,
+        })
+      if (rtErr) {
+        console.error('[SP2 T4] reparatur_termine-Insert fehlgeschlagen (non-fatal):', rtErr.message)
+      }
+    }
+  }
+
   // ─── Schritt 5: claim_vehicle_involvements ──────────────────────────────
   // Wir legen ein Involvement für das geschädigte Fahrzeug an, sofern eine
   // vehicle_id aufgelöst werden konnte (CMM-50.0: propagiert oder frisch
@@ -812,6 +865,38 @@ export async function convertLeadToClaim(
     // Hier kein Cleanup — Claim und Fall sind valide, nur das Lead-Update
     // hat versagt. Caller bekommt success=true mit warning im Log.
     console.error('[convertLeadToClaim] leads-Update fehlgeschlagen:', leadUpdErr)
+  }
+
+  // Makler-Value-Loop: den Vermittler benachrichtigen, dass sein Kontakt Kunde geworden ist
+  // (+ vorgemerkte Provision). Best-effort — darf die Konvertierung nie brechen. Das Event ist
+  // maklerId-getargetet (fan-out nutzt payload.maklerId direkt, kein Consent noetig). Die Provision
+  // hat der trg_makler_provision_on_bridge (via claim-insert) bereits angelegt -> betragEur lesbar.
+  if (maklerId) {
+    try {
+      const kundeName = [lead.vorname as string | null, lead.nachname as string | null]
+        .filter(Boolean)
+        .join(' ')
+        .trim()
+      const { data: prov } = await admin
+        .from('makler_provisionen')
+        .select('betrag_netto_eur')
+        .eq('fall_id', fallId)
+        .eq('makler_id', maklerId)
+        .order('trigger_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      const betragEur =
+        prov?.betrag_netto_eur != null ? Number(prov.betrag_netto_eur) : undefined
+      await emitEvent('makler.lead_eingegangen', {
+        leadId: input.leadId,
+        maklerId,
+        promoCode: maklerPromoCode ?? '',
+        kundeName: kundeName || undefined,
+        betragEur,
+      })
+    } catch (err) {
+      console.error('[convertLeadToClaim] makler.lead_eingegangen emit fehlgeschlagen (non-critical):', err)
+    }
   }
 
   return {

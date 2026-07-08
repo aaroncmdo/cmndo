@@ -1,15 +1,52 @@
 ﻿'use client'
 
 // AAR-92: Maik-Provisionen Client UI mit Inline-CPL + Confirm/Reverse
+// Task-11: USt-Status-Toggle fuer Maik (marketing_partner).
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { UsersIcon, ClockIcon, CheckCircle2Icon, WalletIcon } from 'lucide-react'
 import { setCpl, confirmProvision, reverseProvision, markMonthAsPaid } from './actions'
+import { setzePartnerUstStatus, setzePartnerSteuerdaten, getPartnerGutschriftDownloadUrl } from '@/lib/finance/partner-billing-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { StatCard } from '@/components/shared/StatCard'
+import { Button } from '@/components/primitives/Button'
+import { SectionCard } from '@/components/shared/SectionCard'
+import { TextField } from '@/components/shared/forms/TextField'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { PROVISION_STATUS_COLORS, PROVISION_STATUS_LABELS } from '@/lib/statusLabels'
+
+// Fix 2: Per-Zeile Loading-State fuer Gutschrift-Download — verhindert dass
+// alle Zeilen gleichzeitig laden wenn eine geklickt wird.
+function MaikGutschriftButton({ provisionId }: { provisionId: string }) {
+  const [pending, startTransition] = useTransition()
+  const [fehler, setFehler] = useState<string | null>(null)
+
+  function handleClick() {
+    setFehler(null)
+    startTransition(async () => {
+      const res = await getPartnerGutschriftDownloadUrl('provisionen_maik', provisionId)
+      if (res.ok) {
+        window.open(res.url, '_blank')
+      } else {
+        setFehler(res.error)
+      }
+    })
+  }
+
+  return (
+    <>
+      <Button size="sm" variant="ghost" loading={pending} onClick={handleClick}>
+        Gutschrift ↓
+      </Button>
+      {fehler && (
+        <span className="ml-1 rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">
+          {fehler}
+        </span>
+      )}
+    </>
+  )
+}
 
 type Provision = {
   id: string
@@ -31,12 +68,55 @@ type Props = {
   monat: string
   months: string[]
   kpi: { total: number; pending: number; confirmed: number; sumPending: number; sumConfirmed: number }
+  /** Maik-marketing_partner-Zeile fuer USt-Toggle + Steuerdaten. null wenn Tabelle leer. */
+  maik: {
+    id: string
+    istKleinunternehmer: boolean | null
+    steuerdaten: { ust_id: string | null; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null }
+  } | null
 }
 
-export default function ProvisionenClient({ provisionen, monat, months, kpi }: Props) {
+export default function ProvisionenClient({ provisionen, monat, months, kpi, maik }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [editing, setEditing] = useState<Record<string, string>>({})
+
+  // USt-Toggle fuer Maik
+  const [maikUstPending, startMaikUstTransition] = useTransition()
+  const [maikUstMeldung, setMaikUstMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
+  const [maikUstAktuell, setMaikUstAktuell] = useState<boolean | null>(maik?.istKleinunternehmer ?? null)
+
+  function handleMaikUstToggle(value: boolean) {
+    if (!maik) return
+    setMaikUstMeldung(null)
+    startMaikUstTransition(async () => {
+      const result = await setzePartnerUstStatus('marketing', maik.id, value)
+      setMaikUstMeldung(result)
+      if (result.ok) setMaikUstAktuell(value)
+    })
+  }
+
+  // Steuerdaten fuer Maik
+  const [maikStUstId, setMaikStUstId] = useState(maik?.steuerdaten?.ust_id ?? '')
+  const [maikStStrasse, setMaikStStrasse] = useState(maik?.steuerdaten?.adresse_strasse ?? '')
+  const [maikStPlz, setMaikStPlz] = useState(maik?.steuerdaten?.adresse_plz ?? '')
+  const [maikStOrt, setMaikStOrt] = useState(maik?.steuerdaten?.adresse_ort ?? '')
+  const [maikSteuerdatenPending, startMaikSteuerdatenTransition] = useTransition()
+  const [maikSteuerdatenMeldung, setMaikSteuerdatenMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
+
+  function handleMaikSteuerdatenSpeichern() {
+    if (!maik) return
+    setMaikSteuerdatenMeldung(null)
+    startMaikSteuerdatenTransition(async () => {
+      const result = await setzePartnerSteuerdaten('marketing', maik.id, {
+        ust_id: maikStUstId,
+        adresse_strasse: maikStStrasse,
+        adresse_plz: maikStPlz,
+        adresse_ort: maikStOrt,
+      })
+      setMaikSteuerdatenMeldung(result)
+    })
+  }
 
   function handleSetCpl(id: string) {
     const val = parseFloat(editing[id])
@@ -115,6 +195,91 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
         <StatCard size="sm" icon={WalletIcon} tone="ondo" label="Auszahlbar" value={`${kpi.sumConfirmed.toFixed(2)}€`} />
       </div>
 
+      {/* USt-Status Maik */}
+      {maik && (
+        <SectionCard title="USt-Status Maik">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-sm text-claimondo-navy">
+              {maikUstAktuell === true
+                ? 'Aktuell: USt-pflichtig'
+                : maikUstAktuell === false
+                  ? 'Aktuell: Kleinunternehmer'
+                  : 'Aktuell: Unbekannt'}
+            </span>
+            <Button
+              size="sm"
+              variant={maikUstAktuell === true ? 'ghost' : 'navy'}
+              loading={maikUstPending}
+              onClick={() => handleMaikUstToggle(true)}
+            >
+              USt-pflichtig
+            </Button>
+            <Button
+              size="sm"
+              variant={maikUstAktuell === false ? 'ghost' : 'navy'}
+              loading={maikUstPending}
+              onClick={() => handleMaikUstToggle(false)}
+            >
+              Kleinunternehmer
+            </Button>
+            {maikUstMeldung && (
+              maikUstMeldung.ok
+                ? <span className="rounded-ios-sm bg-success-soft px-2 py-0.5 text-xs text-success-strong">Gespeichert</span>
+                : <span className="rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">{maikUstMeldung.error ?? 'Fehler'}</span>
+            )}
+          </div>
+        </SectionCard>
+      )}
+
+      {/* Steuerdaten Maik */}
+      {maik && (
+        <SectionCard title="Steuerdaten des Partners">
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <TextField
+                label="USt-IdNr."
+                value={maikStUstId}
+                onChange={(e) => setMaikStUstId(e.target.value)}
+                placeholder="DE123456789"
+              />
+              <TextField
+                label="Straße"
+                value={maikStStrasse}
+                onChange={(e) => setMaikStStrasse(e.target.value)}
+                placeholder="Musterstraße 1"
+              />
+              <TextField
+                label="PLZ"
+                value={maikStPlz}
+                onChange={(e) => setMaikStPlz(e.target.value)}
+                placeholder="50667"
+              />
+              <TextField
+                label="Ort"
+                value={maikStOrt}
+                onChange={(e) => setMaikStOrt(e.target.value)}
+                placeholder="Köln"
+              />
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <Button
+                size="sm"
+                variant="navy"
+                loading={maikSteuerdatenPending}
+                onClick={handleMaikSteuerdatenSpeichern}
+              >
+                Speichern
+              </Button>
+              {maikSteuerdatenMeldung && (
+                maikSteuerdatenMeldung.ok
+                  ? <span className="rounded-ios-sm bg-success-soft px-2 py-0.5 text-xs text-success-strong">Gespeichert</span>
+                  : <span className="rounded-ios-sm bg-danger-soft px-2 py-0.5 text-xs text-danger-strong">{maikSteuerdatenMeldung.error ?? 'Fehler'}</span>
+              )}
+            </div>
+          </div>
+        </SectionCard>
+      )}
+
       {/* Tabelle */}
       <DataTableContainer variant="plain" className="bg-white rounded-ios-lg shadow-ios-md">
         <Table className="min-w-[800px]">
@@ -168,7 +333,7 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                     {p.reversed_grund && <p className="text-[10px] text-claimondo-ondo/70 mt-0.5">{p.reversed_grund}</p>}
                   </Td>
                   <Td>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 flex-wrap items-center">
                       {p.status === 'pending' && p.cpl_actual != null && (
                         <button disabled={pending} onClick={() => handleConfirm(p.id)}
                           className="text-xs px-2 py-1 rounded bg-success-soft text-success-strong hover:bg-success/15 disabled:opacity-50">
@@ -180,6 +345,9 @@ export default function ProvisionenClient({ provisionen, monat, months, kpi }: P
                           className="text-xs px-2 py-1 rounded bg-danger-soft text-danger-strong hover:bg-danger/15 disabled:opacity-50">
                           Stornieren
                         </button>
+                      )}
+                      {p.status === 'paid' && (
+                        <MaikGutschriftButton provisionId={p.id} />
                       )}
                     </div>
                   </Td>

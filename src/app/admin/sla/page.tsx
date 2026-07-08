@@ -3,8 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 import Link from 'next/link'
 import { AlertTriangleIcon, ClockIcon, CheckCircleIcon } from 'lucide-react'
 import { SLA_LABEL, type SlaTyp } from '@/lib/sla/tracker'
-import PageHeader from '@/components/shared/PageHeader'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import { StatCard } from '@/components/shared/StatCard'
 
 export const dynamic = 'force-dynamic'
 
@@ -29,34 +29,18 @@ export default async function SlaMonitoringPage() {
 
   return (
     <div className="py-6 space-y-6">
-      <PageHeader
-        title="SLA-Monitoring"
-        description="Pipeline-Fristen ab SA-Unterschrift. Cron alle 15 Min, automatische Eskalations-Tasks bei Verletzung."
-      />
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">SLA-Monitoring</h1>
+          <p className="mt-0.5 text-body-sm text-claimondo-ondo">Pipeline-Fristen ab SA-Unterschrift. Cron alle 15 Min, automatische Eskalations-Tasks bei Verletzung.</p>
+        </div>
+      </div>
 
-      {/* KPI-Boxen */}
+      {/* KPI-Boxen — shared StatCard (filled = getoente Alert-Kachel) */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="bg-danger-soft border border-danger/30 rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-danger-strong">
-            <AlertTriangleIcon className="w-5 h-5" />
-            <span className="text-xs font-semibold uppercase">Verletzt</span>
-          </div>
-          <p className="text-3xl font-bold text-danger-strong mt-2">{breached.length}</p>
-        </div>
-        <div className="bg-warning-soft border border-warning/30 rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-warning-strong">
-            <ClockIcon className="w-5 h-5" />
-            <span className="text-xs font-semibold uppercase">Risiko (&lt; 30 Min)</span>
-          </div>
-          <p className="text-3xl font-bold text-warning-strong mt-2">{atRisk.length}</p>
-        </div>
-        <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4">
-          <div className="flex items-center gap-2 text-claimondo-ondo">
-            <CheckCircleIcon className="w-5 h-5" />
-            <span className="text-xs font-semibold uppercase">Offen</span>
-          </div>
-          <p className="text-3xl font-bold text-claimondo-navy mt-2">{pending.length}</p>
-        </div>
+        <StatCard filled tone="danger" icon={AlertTriangleIcon} label="Verletzt" value={breached.length} />
+        <StatCard filled tone="warning" icon={ClockIcon} label="Risiko (< 30 Min)" value={atRisk.length} />
+        <StatCard filled tone="neutral" icon={CheckCircleIcon} label="Offen" value={pending.length} />
       </div>
 
       {/* Tabelle */}
@@ -92,27 +76,27 @@ export default async function SlaMonitoringPage() {
                   <Td className="text-claimondo-ondo!">
                     {breach.toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}
                     {!isBreached && (
-                      <span className={`ml-2 text-xs ${restMin < 30 ? 'text-warning font-medium' : 'text-claimondo-ondo/70'}`}>
+                      <span className={`ml-2 text-body-xs ${restMin < 30 ? 'text-warning font-medium' : 'text-claimondo-ondo/70'}`}>
                         {restMin > 0 ? `noch ${restMin} Min` : 'überfällig'}
                       </span>
                     )}
                   </Td>
                   <Td>
                     {isBreached ? (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-danger-soft text-danger-strong">Verletzt</span>
+                      <span className="text-body-xs font-medium px-2 py-0.5 rounded-full bg-danger-soft text-danger-strong">Verletzt</span>
                     ) : restMin < 30 ? (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong">Risiko</span>
+                      <span className="text-body-xs font-medium px-2 py-0.5 rounded-full bg-warning-soft text-warning-strong">Risiko</span>
                     ) : (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">Offen</span>
+                      <span className="text-body-xs font-medium px-2 py-0.5 rounded-full bg-claimondo-bg text-claimondo-ondo">Offen</span>
                     )}
                   </Td>
                   <Td>
                     {sla.eskalation_task_id ? (
-                      <Link href={`/admin/aufgaben/alle?id=${sla.eskalation_task_id}`} className="text-xs text-claimondo-ondo hover:underline">
+                      <Link href={`/admin/aufgaben/alle?id=${sla.eskalation_task_id}`} className="text-body-xs text-claimondo-ondo hover:underline">
                         Task ansehen
                       </Link>
                     ) : (
-                      <span className="text-xs text-claimondo-ondo/50">—</span>
+                      <span className="text-body-xs text-claimondo-ondo/50">—</span>
                     )}
                   </Td>
                 </Tr>
@@ -120,7 +104,7 @@ export default async function SlaMonitoringPage() {
             })}
             {(!slas || slas.length === 0) && (
               <Tr>
-                <Td colSpan={5} className="py-12! text-center text-claimondo-ondo/70! text-sm">
+                <Td colSpan={5} className="py-12! text-center text-claimondo-ondo/70! text-body-sm">
                   Aktuell keine offenen oder verletzten SLAs
                 </Td>
               </Tr>

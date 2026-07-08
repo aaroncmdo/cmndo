@@ -13,7 +13,6 @@ import {
   ShieldCheckIcon,
   BellIcon,
   LogOutIcon,
-  Trash2Icon,
   AlertTriangleIcon,
   CheckCircle2Icon,
   Loader2Icon,
@@ -23,17 +22,15 @@ import {
 import type {
   MaklerFullProfile,
   AktiveConsentRow,
-  NotificationPreferences,
 } from '@/lib/makler/queries'
 import {
   updateMaklerProfil,
   updateMaklerBank,
   changeMaklerPasswort,
   revokeMaklerConsent,
-  updateMaklerNotificationPrefs,
 } from '@/lib/actions/makler-settings'
-// AAR-500 N5: neue Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-/Event-
-// Opt-Outs). Ersetzt nicht die bestehenden Email-Flags unten — wirkt zusätzlich.
+// AAR-500 N5: Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-/Event-Opt-Outs).
+// Seit die alte M10-Email-Flag-Card entfernt wurde die EINZIGE Benachrichtigungs-UI.
 import {
   NotificationPreferencesForm,
   type NotificationPreferencesFormValue,
@@ -90,12 +87,10 @@ export function MaklerSettings({
       <BankCard profile={profile} />
       <PasswortCard />
       <ConsentsCard consents={consents} />
-      <NotificationsCard prefs={profile.notification_preferences} />
       {notificationPrefs ? (
         <NotificationPreferencesCard initial={notificationPrefs} />
       ) : null}
       <LogoutCard />
-      <AccountLoeschenCard firma={profile.firma} email={profile.email} />
     </div>
   )
 }
@@ -245,6 +240,7 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
         ansprechpartner_vorname: String(fd.get('ansprechpartner_vorname') ?? ''),
         ansprechpartner_nachname: String(fd.get('ansprechpartner_nachname') ?? ''),
         ihk_nummer: String(fd.get('ihk_nummer') ?? ''),
+        ust_id: String(fd.get('ust_id') ?? ''),
         telefon: String(fd.get('telefon') ?? ''),
         adresse_strasse: String(fd.get('adresse_strasse') ?? ''),
         adresse_plz: String(fd.get('adresse_plz') ?? ''),
@@ -290,6 +286,12 @@ function ProfilCard({ profile }: { profile: MaklerFullProfile }) {
           label="IHK-Nummer"
           name="ihk_nummer"
           defaultValue={profile.ihk_nummer}
+        />
+        <Input
+          label="USt-IdNr. (für Ihre Provisions-Rechnung)"
+          name="ust_id"
+          defaultValue={profile.ust_id}
+          placeholder="DE123456789"
         />
         <Input
           label="Email"
@@ -646,81 +648,12 @@ function ConsentsCard({ consents }: { consents: AktiveConsentRow[] }) {
   )
 }
 
-// ── 5. Benachrichtigungen ──────────────────────────────────────────────────
+// (M10-Email-Flag-Card entfernt 04.07. — die 5 Boolean-Toggles waren doppelt
+// zur N5-Kanäle/Ruhezeiten-Card bzw. hatten kein Backend (monats_abrechnung/
+// woechentlicher_report). Benachrichtigungen laufen jetzt ausschliesslich über
+// NotificationPreferencesCard oben.)
 
-const NOTIF_LABELS: Array<{ key: keyof NotificationPreferences; label: string; hint?: string }> = [
-  { key: 'neuer_lead', label: 'Neuer Lead via Promo-Code' },
-  { key: 'kanzlei_uebergabe', label: 'Fall erreicht Kanzlei-Übergabe' },
-  { key: 'provision_freigegeben', label: 'Provision freigegeben' },
-  { key: 'monats_abrechnung', label: 'Monatliche Abrechnungs-Zusammenfassung' },
-  {
-    key: 'woechentlicher_report',
-    label: 'Wöchentlicher Report',
-    hint: 'Optional, Opt-In',
-  },
-]
-
-function NotificationsCard({ prefs }: { prefs: NotificationPreferences }) {
-  const [local, setLocal] = useState<NotificationPreferences>(prefs)
-  const [state, setState] = useState<SaveState>({ status: 'idle' })
-  const [isPending, startTransition] = useTransition()
-
-  function toggle(key: keyof NotificationPreferences) {
-    setLocal((p) => ({ ...p, [key]: !p[key] }))
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setState({ status: 'saving' })
-    startTransition(async () => {
-      const res = await updateMaklerNotificationPrefs(local)
-      if (res.success) {
-        setState({ status: 'success' })
-        setTimeout(() => setState({ status: 'idle' }), 2500)
-      } else {
-        setState({ status: 'error', msg: res.error })
-      }
-    })
-  }
-
-  return (
-    <SettingsSectionCard
-      icon={<BellIcon width={16} height={16} />}
-      title="Benachrichtigungen"
-      subtitle="Welche Emails möchten Sie erhalten?"
-    >
-      <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="space-y-2">
-          {NOTIF_LABELS.map((n) => (
-            <label
-              key={n.key}
-              className="flex items-start gap-3 p-3 rounded-ios-lg border border-claimondo-border bg-claimondo-bg hover:bg-white cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                checked={local[n.key]}
-                onChange={() => toggle(n.key)}
-                className="mt-0.5 w-4 h-4 rounded border-claimondo-border text-claimondo-navy focus:ring-claimondo-ondo/40"
-              />
-              <div className="flex-1">
-                <p className="text-sm text-claimondo-navy">{n.label}</p>
-                {n.hint ? (
-                  <p className="text-xs text-claimondo-shield">{n.hint}</p>
-                ) : null}
-              </div>
-            </label>
-          ))}
-        </div>
-        <div className="flex items-center gap-2 pt-2">
-          <SaveButton state={{ status: isPending ? 'saving' : state.status }} />
-          <SaveFeedback state={state} />
-        </div>
-      </form>
-    </SettingsSectionCard>
-  )
-}
-
-// ── 6. Logout ───────────────────────────────────────────────────────────────
+// ── Logout ──────────────────────────────────────────────────────────────────
 
 function LogoutCard() {
   return (
@@ -744,48 +677,5 @@ function LogoutCard() {
 
 // ── 7. Account-Löschung ─────────────────────────────────────────────────────
 
-function AccountLoeschenCard({
-  firma,
-  email,
-}: {
-  firma: string | null
-  email: string | null
-}) {
-  const subject = encodeURIComponent(
-    `Account-Löschung anfragen: ${firma ?? 'Makler'}`,
-  )
-  const body = encodeURIComponent(
-    `Hallo Claimondo-Team,\n\nich möchte meinen Makler-Account löschen lassen.\n\nFirma: ${firma ?? '-'}\nEmail: ${email ?? '-'}\n\nBitte bestätigen Sie den DSGVO-Löschauftrag.\n\nViele Grüße`,
-  )
-  return (
-    <section className="bg-white rounded-ios-md border border-danger/30 overflow-hidden">
-      <div className="flex items-start gap-3 px-5 py-4 border-b border-danger/20 bg-danger-soft/50">
-        <span className="shrink-0 w-9 h-9 rounded-ios-xl bg-danger/15 text-danger-strong border border-danger/30 flex items-center justify-center">
-          <Trash2Icon width={16} height={16} />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-semibold text-danger-strong">
-            Account löschen
-          </h2>
-          <p className="text-xs text-danger-strong mt-0.5">
-            DSGVO-konforme Löschung auf Anfrage — irreversibel.
-          </p>
-        </div>
-      </div>
-      <div className="p-5 space-y-3">
-        <p className="text-sm text-claimondo-navy">
-          Die Account-Löschung wird manuell durch unser Team durchgeführt,
-          damit alle DSGVO-Aufbewahrungs-Fristen (z.&nbsp;B. offene Fälle)
-          beachtet werden können. Klicken Sie unten um per Email anzufragen.
-        </p>
-        <a
-          href={`mailto:info@claimondo.de?subject=${subject}&body=${body}`}
-          className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-danger text-white text-sm font-semibold hover:bg-danger/90"
-        >
-          <Trash2Icon width={14} height={14} />
-          Account-Löschung anfragen
-        </a>
-      </div>
-    </section>
-  )
-}
+// AccountLoeschenCard (mailto-basiert) entfernt — Makler nutzt jetzt den strukturierten
+// Self-Service-Loeschflow (DsgvoLoeschSection auf der Einstellungen-Page, wie Kunde/SV).

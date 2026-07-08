@@ -63,8 +63,6 @@ export type MfaGateInput = {
   isOn2faPage: boolean
   /** user.app_metadata.provider === 'google' — Google-Login hat kein Custom-2FA */
   isGoogleUser: boolean
-  /** pathname.startsWith('/gutachter') — das SV-Portal ist bewusst 2FA-frei */
-  isGutachterPath: boolean
   /** aktuelles Assurance-Level der Session (aus dem Access-Token), null = unbekannt */
   aalCurrent: 'aal1' | 'aal2' | null
   /** User hat mindestens einen verifizierten MFA-Faktor (Phone) */
@@ -79,8 +77,9 @@ export type MfaGateDecision = 'allow' | 'challenge'
  * Entscheidet, ob ein eingeloggter Request durchgelassen wird ('allow') oder
  * den zweiten Faktor nachholen muss ('challenge' -> Redirect auf /login/2fa).
  *
- * Reihenfolge ist bedeutsam: Bypass-Bedingungen (Self-Page, Google, Gutachter)
- * haben Vorrang vor der eigentlichen Faktor-/AAL-Pruefung.
+ * Reihenfolge ist bedeutsam: Bypass-Bedingungen (Self-Page, Google) haben
+ * Vorrang vor der eigentlichen Faktor-/AAL-Pruefung. F2 (AAR-audit-2fa): die
+ * fruehere /gutachter-Ausnahme ist entfernt — Enforcement folgt dem Faktor.
  */
 export function entscheideMfaGate(input: MfaGateInput): MfaGateDecision {
   // Die /login/2fa-Seite selbst darf nie auf sich selbst zeigen, sonst Loop.
@@ -88,9 +87,6 @@ export function entscheideMfaGate(input: MfaGateInput): MfaGateDecision {
 
   // Google-Login: kein Custom-2FA-Schritt.
   if (input.isGoogleUser) return 'allow'
-
-  // SV-Portal (/gutachter*) ist 2FA-frei (KFZ-184-Parität).
-  if (input.isGutachterPath) return 'allow'
 
   // Soft-Enroll: Wer keinen verifizierten Faktor hat, ist nicht gegated.
   if (!input.hasVerifiedFactor) return 'allow'
@@ -111,31 +107,35 @@ export type LoginRoutingInput = {
   isGoogleUser: boolean
   /** User hat einen verifizierten Supabase-MFA-Faktor */
   hasVerifiedFactor: boolean
-  /** Legacy-Flag: profile.twofa_aktiviert || profile.twofa_email_aktiviert */
-  legacy2faWanted: boolean
 }
 
-export type LoginRouting = 'portal' | 'challenge' | 'enroll'
+export type LoginRouting = 'portal' | 'challenge'
 
 /**
- * Entscheidet direkt nach erfolgreichem Passwort-Login, wohin der User geht.
- * Der Caller (login/actions.ts) hat hier — anders als die Middleware — Zugriff
- * auf die profiles-Flags und kann so den Soft-Enroll-Fall erkennen.
+ * Routing direkt nach erfolgreichem Passwort-Login. 2FA ist OPTIONAL
+ * (2026-07-08): es gibt keinen erzwungenen Enroll mehr — wer einen
+ * verifizierten Faktor HAT, verifiziert ihn ('challenge'); sonst direkt ins
+ * Portal. Aktivierung von 2FA passiert opt-in in den Konto-Einstellungen (B1).
  *
  *   'portal'    -> Rollen-Portal (kein zweiter Faktor noetig)
  *   'challenge' -> /login/2fa, vorhandenen Faktor verifizieren
- *   'enroll'    -> /login/2fa im Enroll-Modus (Legacy-User holt den Faktor nach)
  */
 export function entscheideLoginRouting(input: LoginRoutingInput): LoginRouting {
   // Google-Login: kein Custom-2FA-Schritt (Bypass-Paritaet zum Gate).
   if (input.isGoogleUser) return 'portal'
 
-  // Bereits enrollt -> Faktor verifizieren.
+  // Verifizierter Faktor vorhanden -> verifizieren. Sonst: kein Zwang -> Portal.
   if (input.hasVerifiedFactor) return 'challenge'
 
-  // Legacy-2FA gewollt, aber noch kein Supabase-Faktor -> Soft-Enroll.
-  if (input.legacy2faWanted) return 'enroll'
-
-  // Kein 2FA -> direkt ins Portal.
   return 'portal'
+}
+
+// istZweiFaktorPflicht: markiert interne Rollen fuer den WEICHEN 2FA-Nudge
+// (Banner "2FA empfohlen", B1). Seit 2026-07-08 KEINE Enforcement mehr — 2FA
+// ist optional; kein Login-/Portal-Pfad erzwingt daraus einen Enroll.
+const ZWEI_FAKTOR_PFLICHT_ROLLEN = new Set(['admin', 'dispatch', 'kanzlei', 'kundenbetreuer'])
+
+/** true, wenn die Rolle 2FA verpflichtend braucht (interne Rollen). */
+export function istZweiFaktorPflicht(rolle: string | null | undefined): boolean {
+  return !!rolle && ZWEI_FAKTOR_PFLICHT_ROLLEN.has(rolle)
 }

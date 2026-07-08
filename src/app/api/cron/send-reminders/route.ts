@@ -6,6 +6,10 @@ export const dynamic = 'force-dynamic'
 
 // ─── WhatsApp Template Builder ─────────────────────────────────────────────
 
+function buildKunde24hMsg(vorname: string, datum: string, uhrzeit: string, adresse: string, svName: string): string {
+  return `Hallo ${vorname}! Erinnerung an deine Fahrzeug-Besichtigung: ${datum} um ${uhrzeit} Uhr bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
+}
+
 function buildKundeMorgenMsg(vorname: string, datum: string, uhrzeit: string, adresse: string, svName: string): string {
   return `Guten Morgen ${vorname}! Heute findet die Besichtigung deines Fahrzeugs statt. Termin: ${datum} ${uhrzeit} bei ${adresse}. Sachverständiger: ${svName}. Bitte stelle sicher, dass das Fahrzeug zugänglich ist.`
 }
@@ -174,7 +178,9 @@ export async function GET(request: Request) {
 
       // Nachricht bauen
       let message: string
-      if (reminder.reminder_typ === 'kunde_morgen') {
+      if (reminder.reminder_typ === 'kunde_24h') {
+        message = buildKunde24hMsg(kundeVorname || 'Kunde', datumStr, uhrzeitStr, adresse, svName)
+      } else if (reminder.reminder_typ === 'kunde_morgen') {
         message = buildKundeMorgenMsg(kundeVorname || 'Kunde', datumStr, uhrzeitStr, adresse, svName)
       } else if (reminder.reminder_typ === 'kunde_1h') {
         message = buildKunde1hMsg(uhrzeitStr, adresse, svName)
@@ -231,7 +237,7 @@ export async function GET(request: Request) {
       }
 
       // WhatsApp senden
-      const triggerName = reminder.reminder_typ === 'kunde_morgen' ? 'reminder_24h'
+      const triggerName = (reminder.reminder_typ === 'kunde_24h' || reminder.reminder_typ === 'kunde_morgen') ? 'reminder_24h'
         : reminder.reminder_typ === 'kunde_1h' ? 'reminder_2h'
         : 'sv_tagesroute'
       await sendCommunication(triggerName, {

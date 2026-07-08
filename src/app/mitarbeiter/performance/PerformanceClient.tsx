@@ -1,21 +1,26 @@
-﻿'use client'
+'use client'
 
 import Link from 'next/link'
-import { BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon, PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
-import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
+import type { ReactNode } from 'react'
+import {
+  BarChart3Icon, BriefcaseIcon, TrophyIcon, GiftIcon, ClockIcon,
+  PhoneIcon, VideoIcon, AlertTriangleIcon, CalendarIcon,
+} from 'lucide-react'
+import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
+import { Panel } from '@/components/shared/Panel'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 type Incentive = { id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string; bedingung: string; wert: number }
 type TimelineItem = { zeit: string; typ: string; label: string; detail: string; color: string; link?: string; meetLink?: string }
 
-const MEDAL = ['text-amber-300', 'text-claimondo-ondo', 'text-orange-400']
+// Rang-Identitaet (Gold/Silber/Bronze) ueber Claimondo-Toene statt roher Scales.
+const MEDAL = ['text-warning-strong', 'text-claimondo-ondo', 'text-claimondo-light-blue']
 
-const TL_COLORS: Record<string, { bg: string; text: string; icon: React.ReactNode }> = {
-  telefon: { bg: 'bg-claimondo-ondo/20', text: 'text-claimondo-shield', icon: <PhoneIcon className="w-4 h-4" /> },
-  video: { bg: 'bg-claimondo-navy/20', text: 'text-claimondo-ondo', icon: <VideoIcon className="w-4 h-4" /> },
-  task: { bg: 'bg-amber-500/20', text: 'text-amber-400', icon: <AlertTriangleIcon className="w-4 h-4" /> },
-  gutachter: { bg: 'bg-orange-500/20', text: 'text-orange-400', icon: <CalendarIcon className="w-4 h-4" /> },
+const TL_STYLE: Record<string, { bg: string; text: string; icon: ReactNode }> = {
+  telefon: { bg: 'bg-claimondo-ondo/15', text: 'text-claimondo-ondo', icon: <PhoneIcon className="h-4 w-4" /> },
+  video: { bg: 'bg-claimondo-navy/10', text: 'text-claimondo-navy', icon: <VideoIcon className="h-4 w-4" /> },
+  task: { bg: 'bg-warning-soft', text: 'text-warning-strong', icon: <AlertTriangleIcon className="h-4 w-4" /> },
+  gutachter: { bg: 'bg-claimondo-light-blue/25', text: 'text-claimondo-navy', icon: <CalendarIcon className="h-4 w-4" /> },
 }
 
 export default function PerformanceClient({ profile, stats, performanceHistory, incentives, leaderboard, monatLabel, userId, timeline, tagesSummary }: {
@@ -32,156 +37,144 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
   const name = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
   const fmt = (v: number) => new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(v)
   const myRank = leaderboard.findIndex(l => l.id === userId) + 1
+  const rankMedal = myRank > 0 && myRank <= 3 ? MEDAL[myRank - 1] : 'text-claimondo-ondo'
+
+  // 3 operative Metriken (saubere 3-Spalten-Leiste); Rang wird separat eskaliert.
+  const statItems: StatBarItem[] = stats.isDispatch
+    ? [
+        { label: 'Leads', value: stats.leadsTotal, icon: BarChart3Icon },
+        { label: 'Konvertiert', value: stats.leadsKonv, icon: BriefcaseIcon, tone: 'success' },
+        { label: 'Conv. Rate', value: stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonv / stats.leadsTotal) * 100)}%` : '—' },
+      ]
+    : [
+        { label: 'Aktive Fälle', value: stats.aktiveFaelle, icon: BriefcaseIcon },
+        { label: 'Abgeschlossen', value: stats.abgeschlossen, icon: BarChart3Icon, tone: 'success' },
+        { label: 'Kapazität', value: `${stats.aktiveFaelle}/${profile.kapazitaet_max ?? 100}`, icon: ClockIcon },
+      ]
 
   return (
-    <div className="py-8"><div>
-      <div className="mb-6">
-        <PageHeader title="Meine Performance" description={`${name} · ${monatLabel}`} icon={BarChart3Icon} />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Performance</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">{name} · {monatLabel}</p>
       </div>
 
-      {/* ─── TAGES-TIMELINE (KFZ-41) ──────────────────────── */}
-      {timeline && timeline.length > 0 && (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mb-6">
-          {/* Tages-Zusammenfassung */}
-          {tagesSummary && (
-            <div className="flex items-center gap-4 mb-4 pb-3 border-b border-claimondo-border">
-              <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><CalendarIcon className="w-4 h-4 text-claimondo-shield" />Heute</h2>
-              <div className="flex gap-3 text-xs">
-                <span className="text-claimondo-shield font-medium">{tagesSummary.termine} Termine</span>
-                <span className="text-amber-400 font-medium">{tagesSummary.offeneTasks} Tasks</span>
-                {tagesSummary.ueberfaellig > 0 && <span className="text-red-400 font-semibold">{tagesSummary.ueberfaellig} überfällig</span>}
+      {/* Standing — Rang eskaliert (statt als 4. gleichrangige Karte vergraben) */}
+      <div className="flex items-center gap-2.5 rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5">
+        <TrophyIcon className={`h-4 w-4 shrink-0 ${rankMedal}`} />
+        <p className="text-body-sm text-claimondo-navy">
+          {myRank > 0 ? (
+            <>Rang <span className="font-bold">#{myRank}</span> von {leaderboard.length} {stats.isDispatch ? 'Dispatchern' : 'Kundenbetreuern'} · {monatLabel}</>
+          ) : (
+            <>Noch nicht im Ranking · {monatLabel}</>
+          )}
+        </p>
+      </div>
+
+      <StatBar items={statItems} />
+
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+        {/* Hauptspalte: Heute + Verlauf */}
+        <div className="space-y-5">
+          {timeline && timeline.length > 0 ? (
+            <Panel title="Heute" count={timeline.length} icon={<CalendarIcon className="h-4 w-4 text-claimondo-ondo" />}>
+              {tagesSummary && (
+                <div className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-body-xs">
+                  <span className="font-medium text-claimondo-ondo">{tagesSummary.termine} Termine</span>
+                  <span className="font-medium text-warning-strong">{tagesSummary.offeneTasks} Tasks</span>
+                  {tagesSummary.ueberfaellig > 0 && <span className="font-semibold text-danger-strong">{tagesSummary.ueberfaellig} überfällig</span>}
+                </div>
+              )}
+              {timeline.map((item, i) => {
+                const zeit = new Date(item.zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+                const style = TL_STYLE[item.typ] ?? TL_STYLE.task
+                const inner = (
+                  <div className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-claimondo-bg">
+                    <span className="w-11 shrink-0 text-body-sm font-semibold tabular-nums text-claimondo-navy">{zeit}</span>
+                    <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${style.bg} ${style.text}`}>{style.icon}</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-body-sm font-medium text-claimondo-navy">{item.label}</p>
+                      {item.detail && <p className="truncate text-body-xs text-claimondo-ondo">{item.detail}</p>}
+                    </div>
+                    {item.meetLink && (
+                      <a
+                        href={item.meetLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="shrink-0 rounded-ios-sm bg-claimondo-navy px-2.5 py-1 text-caption font-medium text-white"
+                        onClick={e => e.stopPropagation()}
+                      >
+                        Meet
+                      </a>
+                    )}
+                  </div>
+                )
+                return item.link ? (
+                  <Link key={i} href={item.link} className="block">{inner}</Link>
+                ) : (
+                  <div key={i}>{inner}</div>
+                )
+              })}
+            </Panel>
+          ) : (
+            tagesSummary && (
+              <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-12 text-center">
+                <CalendarIcon className="mx-auto mb-2 h-8 w-8 text-claimondo-ondo/50" />
+                <p className="text-body-sm text-claimondo-ondo">Keine Termine oder Tasks für heute</p>
               </div>
-            </div>
+            )
           )}
 
-          {/* Timeline */}
-          <div className="space-y-2">
-            {timeline.map((item, i) => {
-              const d = new Date(item.zeit)
-              const zeit = d.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-              const style = TL_COLORS[item.typ] ?? TL_COLORS.task
-              const content = (
-                <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-ios-xl hover:bg-claimondo-bg/50 transition-colors">
-                  <span className="text-claimondo-ondo text-sm font-semibold tabular-nums w-12 shrink-0">{zeit}</span>
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${style.bg} ${style.text} shrink-0`}>
-                    {style.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-claimondo-navy text-sm font-medium truncate">{item.label}</p>
-                    {item.detail && <p className="text-claimondo-ondo text-xs truncate">{item.detail}</p>}
-                  </div>
-                  {item.meetLink && (
-                    <a href={item.meetLink} target="_blank" rel="noopener noreferrer"
-                      className="text-[10px] bg-claimondo-navy hover:bg-claimondo-navy text-white px-2.5 py-1 rounded-ios-lg font-medium shrink-0"
-                      onClick={e => e.stopPropagation()}>
-                      Meet
-                    </a>
-                  )}
+          {performanceHistory.length > 0 && (
+            <Panel title="Monatsvergleich">
+              <div className="flex items-center gap-3 px-4 py-2 text-caption uppercase text-claimondo-ondo/70">
+                <span className="flex-1">Monat</span>
+                <span className="w-14 text-right">{stats.isDispatch ? 'Leads' : 'Aktiv'}</span>
+                <span className="w-16 text-right">{stats.isDispatch ? 'Konv.' : 'Abg.'}</span>
+                <span className="w-20 text-right">Umsatz</span>
+              </div>
+              {performanceHistory.map(p => (
+                <div key={`${p.monat}-${p.jahr}`} className="flex items-center gap-3 px-4 py-2.5 text-body-sm">
+                  <span className="flex-1 truncate text-claimondo-navy">{p.monat} {p.jahr}</span>
+                  <span className="w-14 text-right tabular-nums text-claimondo-navy">{stats.isDispatch ? p.leads_qualifiziert : p.aktive_faelle}</span>
+                  <span className="w-16 text-right font-medium tabular-nums text-success-strong">{stats.isDispatch ? p.leads_konvertiert : p.faelle_abgeschlossen}</span>
+                  <span className="w-20 text-right tabular-nums text-claimondo-ondo">{fmt(p.umsatz_generiert ?? 0)}</span>
                 </div>
-              )
-              return item.link ? <Link key={i} href={item.link}>{content}</Link> : content
-            })}
-          </div>
+              ))}
+            </Panel>
+          )}
         </div>
-      )}
 
-      {timeline && timeline.length === 0 && tagesSummary && (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mb-6 text-center">
-          <CalendarIcon className="w-8 h-8 text-claimondo-ondo/50 mx-auto mb-2" />
-          <p className="text-claimondo-ondo text-sm">Keine Termine oder Tasks für heute</p>
-        </div>
-      )}
-
-      {/* KPI Karten */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-        {stats.isDispatch ? (<>
-          <KPI icon={<BarChart3Icon className="w-4 h-4 text-amber-400" />} label="Leads qualifiziert" value={stats.leadsTotal} />
-          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-green-400" />} label="Konvertiert" value={stats.leadsKonv} />
-          <KPI icon={<BarChart3Icon className="w-4 h-4 text-claimondo-shield" />} label="Conv. Rate" value={stats.leadsTotal > 0 ? `${Math.round((stats.leadsKonv / stats.leadsTotal) * 100)}%` : '—'} />
-        </>) : (<>
-          <KPI icon={<BriefcaseIcon className="w-4 h-4 text-claimondo-shield" />} label="Aktive Fälle" value={stats.aktiveFaelle} />
-          <KPI icon={<BarChart3Icon className="w-4 h-4 text-green-400" />} label="Abgeschlossen" value={stats.abgeschlossen} />
-          <KPI icon={<ClockIcon className="w-4 h-4 text-amber-400" />} label="Kapazität" value={`${stats.aktiveFaelle}/${profile.kapazitaet_max ?? 100}`} />
-        </>)}
-        <KPI icon={<TrophyIcon className="w-4 h-4 text-amber-400" />} label="Rang" value={myRank > 0 ? `#${myRank}` : '—'} />
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Leaderboard meiner Kategorie */}
-        <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
-          <div className="px-5 py-4 border-b border-claimondo-border">
-            <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><TrophyIcon className="w-4 h-4 text-amber-400" />{stats.isDispatch ? 'Dispatch' : 'Kundenbetreuer'}-Ranking</h2>
-          </div>
-          <div className="divide-y divide-claimondo-border/50">
+        {/* Seitenspalte: Ranking + Incentives */}
+        <div className="space-y-5">
+          <Panel title={`${stats.isDispatch ? 'Dispatch' : 'Kundenbetreuer'}-Ranking`} icon={<TrophyIcon className="h-4 w-4 text-warning-strong" />}>
+            {leaderboard.length === 0 && <div className="px-4 py-8 text-center text-body-sm text-claimondo-ondo">Keine Daten</div>}
             {leaderboard.map((entry, i) => (
-              <div key={entry.id} className={`px-5 py-3 flex items-center justify-between ${entry.id === userId ? 'bg-claimondo-ondo/10 border-l-2 border-claimondo-ondo' : ''}`}>
-                <div className="flex items-center gap-3">
-                  <span className={`text-sm font-bold w-6 ${i < 3 ? MEDAL[i] : 'text-claimondo-ondo'}`}>{i + 1}</span>
-                  <span className={`text-sm ${entry.id === userId ? 'text-claimondo-navy font-semibold' : 'text-claimondo-navy'}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
+              <div key={entry.id} className={`flex items-center justify-between px-4 py-2.5 ${entry.id === userId ? 'bg-claimondo-ondo/10' : ''}`}>
+                <div className="flex min-w-0 items-center gap-3">
+                  <span className={`w-5 shrink-0 text-body-sm font-bold tabular-nums ${i < 3 ? MEDAL[i] : 'text-claimondo-ondo'}`}>{i + 1}</span>
+                  <span className={`truncate text-body-sm text-claimondo-navy ${entry.id === userId ? 'font-semibold' : ''}`}>{entry.name}{entry.id === userId ? ' (Du)' : ''}</span>
                 </div>
-                <span className="text-sm text-claimondo-ondo tabular-nums font-semibold">{entry.value}</span>
+                <span className="shrink-0 text-body-sm font-semibold tabular-nums text-claimondo-ondo">{entry.value}</span>
               </div>
             ))}
-            {leaderboard.length === 0 && <div className="px-5 py-8 text-center text-claimondo-ondo">Keine Daten</div>}
-          </div>
-        </div>
+          </Panel>
 
-        {/* Erreichbare Incentives */}
-        <div className="bg-white rounded-2xl border border-claimondo-border overflow-hidden">
-          <div className="px-5 py-4 border-b border-claimondo-border">
-            <h2 className="text-claimondo-navy font-semibold flex items-center gap-2"><GiftIcon className="w-4 h-4 text-claimondo-ondo" />Erreichbare Incentives</h2>
-          </div>
-          <div className="divide-y divide-claimondo-border/50">
+          <Panel title="Erreichbare Incentives" icon={<GiftIcon className="h-4 w-4 text-claimondo-ondo" />}>
+            {incentives.length === 0 && <div className="px-4 py-8 text-center text-body-sm text-claimondo-ondo">Keine Incentives verfügbar</div>}
             {incentives.map(inc => (
-              <div key={inc.id} className="px-5 py-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-claimondo-navy text-sm font-medium">{inc.titel}</span>
-                  <span className="text-green-400 text-sm font-semibold">{fmt(inc.wert)}</span>
+              <div key={inc.id} className="px-4 py-3">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-body-sm font-medium text-claimondo-navy">{inc.titel}</span>
+                  <span className="shrink-0 text-body-sm font-semibold text-success-strong">{fmt(inc.wert)}</span>
                 </div>
-                <p className="text-claimondo-ondo text-xs mt-0.5">{inc.bedingung}</p>
-                {inc.beschreibung && <p className="text-claimondo-ondo/70 text-xs mt-0.5">{inc.beschreibung}</p>}
+                <p className="mt-0.5 text-body-xs text-claimondo-ondo">{inc.bedingung}</p>
+                {inc.beschreibung && <p className="mt-0.5 text-body-xs text-claimondo-ondo/70">{inc.beschreibung}</p>}
               </div>
             ))}
-            {incentives.length === 0 && <div className="px-5 py-8 text-center text-claimondo-ondo">Keine Incentives verfügbar</div>}
-          </div>
+          </Panel>
         </div>
       </div>
-
-      {/* Performance-Verlauf */}
-      {performanceHistory.length > 0 && (
-        <div className="bg-white rounded-2xl border border-claimondo-border p-5 mt-6">
-          <h3 className="text-claimondo-ondo text-xs font-semibold uppercase tracking-wider mb-3">Monatsvergleich</h3>
-          <DataTableContainer variant="plain">
-            <Table>
-              <Thead className="!bg-transparent !text-sm !normal-case !tracking-normal"><Tr className="border-b border-claimondo-border">
-                <Th className="!px-3 !py-2 text-claimondo-ondo">Monat</Th>
-                <Th className="!px-3 !py-2 text-right text-claimondo-ondo">{stats.isDispatch ? 'Leads' : 'Aktiv'}</Th>
-                <Th className="!px-3 !py-2 text-right text-claimondo-ondo">{stats.isDispatch ? 'Konvertiert' : 'Abgeschl.'}</Th>
-                <Th className="!px-3 !py-2 text-right text-claimondo-ondo">Umsatz</Th>
-              </Tr></Thead>
-              <Tbody className="!divide-y-0">
-                {performanceHistory.map(p => (
-                  <Tr key={`${p.monat}-${p.jahr}`} className="border-b border-claimondo-border/50">
-                    <Td className="!px-3 !py-2">{p.monat} {p.jahr}</Td>
-                    <Td className="!px-3 !py-2 text-right tabular-nums">{stats.isDispatch ? p.leads_qualifiziert : p.aktive_faelle}</Td>
-                    <Td className="!px-3 !py-2 text-right !text-green-400 tabular-nums">{stats.isDispatch ? p.leads_konvertiert : p.faelle_abgeschlossen}</Td>
-                    <Td className="!px-3 !py-2 text-right tabular-nums">{fmt(p.umsatz_generiert ?? 0)}</Td>
-                  </Tr>
-                ))}
-              </Tbody>
-            </Table>
-          </DataTableContainer>
-        </div>
-      )}
-    </div></div>
-  )
-}
-
-function KPI({ icon, label, value }: { icon: React.ReactNode; label: string; value: string | number }) {
-  return (
-    <div className="bg-white border border-claimondo-border rounded-2xl p-4">
-      <div className="flex items-center gap-2 mb-1">{icon}<span className="text-claimondo-ondo text-xs">{label}</span></div>
-      <div className="text-xl font-bold text-claimondo-navy">{value}</div>
     </div>
   )
 }

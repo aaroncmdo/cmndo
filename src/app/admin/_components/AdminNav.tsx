@@ -6,14 +6,16 @@
 
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
-  CarFrontIcon, LogOutIcon, GitBranchIcon, CalendarIcon,
+  CarFrontIcon, GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, MapPinIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
+  WrenchIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
+  NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon, UserPlusIcon,
 } from 'lucide-react'
-import { SupportButton } from '@/components/support/SupportButton'
+import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
 import { AdminNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
+import { AdminAiVorschlaegeBadge } from '@/components/admin/AdminAiVorschlaegeBadge'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 
 const NAV_ITEMS: PortalNavItem[] = [
@@ -21,22 +23,29 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/dispatch/dashboard', label: 'Dispatch', icon: GitBranchIcon, external: true },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
+  { href: '/admin/ai-vorschlaege', label: 'KI-Vorschläge', icon: SparklesIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
+  { href: '/admin/partner-leads', label: 'Partner-Leads', icon: UserPlusIcon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   { href: '/admin/embed-billing', label: 'Embed-Billing', icon: ReceiptIcon },
   { href: '/admin/embed-sites', label: 'Embed-Sites', icon: Code2Icon },
   { href: '/admin/marketing', label: 'Marketing', icon: Share2Icon },
+  { href: '/admin/wissen-artikel', label: 'Wissen-Artikel', icon: NewspaperIcon },
   { href: '/admin/werkstaetten', label: 'Werkstätten', icon: WrenchIcon },
   { href: '/admin/makler', label: 'Makler', icon: HandshakeIcon },
-  { href: '/admin/sv-leads', label: 'SV-Leads', icon: MapPinIcon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/vertraege', label: 'Vertragseditor', icon: FileSignatureIcon },
   { href: '/admin/kommentare', label: 'Kommentare', icon: MessageSquareIcon },
+  { href: '/admin/community', label: 'Community', icon: NetworkIcon },
   { href: '/admin/einstellungen', label: 'Einstellungen', icon: SettingsIcon },
   { href: '/admin/konto', label: 'Sicherheit', icon: ShieldCheckIcon },
   { href: '/admin/health', label: 'Pipeline-Health', icon: ActivityIcon },
+  // Route-Reachability-Audit 06.07.: /admin/support (Ansicht der von Usern gemeldeten
+  // technischen Probleme, Tabelle technische_probleme) war gebaut, aber nirgends verlinkt —
+  // es gab nur den SupportButton (Composer zum Melden), keinen Einstieg zur Ticket-Liste.
+  { href: '/admin/support', label: 'Support-Tickets', icon: LifeBuoyIcon },
 ]
 
 const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/kalender', '/admin/sachverstaendige']
@@ -70,6 +79,9 @@ export default function AdminNav({
         if (item.label === 'Kalender') {
           return <span className="ml-auto"><AdminNeueRueckrufeBadge /></span>
         }
+        if (item.label === 'KI-Vorschläge') {
+          return <span className="ml-auto"><AdminAiVorschlaegeBadge /></span>
+        }
         return null
       }}
       headerSlot={
@@ -85,26 +97,12 @@ export default function AdminNav({
         </>
       }
       footerSlot={
-        <>
-          <SupportButton userName={email} rolle="admin" />
-          <div className="flex items-center gap-3 px-3 py-2.5">
-            <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold bg-claimondo-ondo text-white">
-              {initials}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm text-white/80 truncate">{email}</p>
-            </div>
-          </div>
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg text-sm transition-colors w-full text-claimondo-light-blue hover:bg-white/5 hover:text-white"
-            >
-              <LogOutIcon style={{ width: 17, height: 17 }} />
-              Abmelden
-            </button>
-          </form>
-        </>
+        <PortalUserFooter
+          rolle="admin"
+          supportUserName={email}
+          initials={initials}
+          primaryText={email}
+        />
       }
     />
   )

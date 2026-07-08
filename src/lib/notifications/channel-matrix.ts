@@ -251,9 +251,13 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     },
   },
   // 5.11 Makler
+  // Kein admin-CC: Admins bekommen fuer JEDE Conversion bereits "Neuer Fall"
+  // (Fall-Erstellungs-Pfad) -> ein zweiter, makler-gerahmter Bell ("X ist Kunde
+  // geworden / 100 EUR vorgemerkt") ist redundant + die "vorgemerkt"-Copy ist die
+  // private Provision des MAKLERS, nicht des Admins. Das Event ist rein makler-facing.
   'makler.lead_eingegangen': {
     priority: 'normal',
-    channels: { makler: ['web_push', 'email', 'in_app'], admin: ['in_app'] },
+    channels: { makler: ['web_push', 'email', 'in_app'] },
   },
   'makler.provision_status': {
     priority: 'normal',
@@ -312,6 +316,9 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      // Makler-Value-Loop: der Vermittler will das Ergebnis seines Falls wissen (gegated durch
+      // makler_fall_consent im fan-out -> nur eigene Faelle). reguliert = wichtigstes Outcome -> + email.
+      makler: ['in_app', 'email'],
     },
   },
   'claim.abgelehnt': {
@@ -320,6 +327,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      makler: ['in_app'],
     },
   },
   'claim.storniert': {
@@ -328,6 +336,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['in_app'],
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      makler: ['in_app'],
     },
   },
   'claim.an_externe_kanzlei_uebergeben': {
@@ -336,6 +345,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      makler: ['in_app'],
     },
   },
   // CMM-44 MP-8: weitere terminale Endzustände
@@ -345,6 +355,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       kunde: ['whatsapp', 'email', 'in_app'],
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      makler: ['in_app'],
     },
   },
   'claim.verjaehrt': {
@@ -352,6 +363,7 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
     channels: {
       kundenbetreuer: ['in_app'],
       admin: ['in_app'],
+      makler: ['in_app'],
     },
   },
   // 5.15 Kanzlei-Workflow (AAR-841)

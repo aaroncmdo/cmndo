@@ -3,10 +3,13 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import Link from 'next/link'
 import { UsersIcon, PhoneIcon, LinkIcon, ClockIcon, AlertCircleIcon, InboxIcon, CheckCircleIcon } from 'lucide-react'
 import { PHASE_LABELS, PHASE_BADGES } from '../leads/_components/leadPhaseConstants'
-import PageHeader from '@/components/shared/PageHeader'
+import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import EmptyState from '@/components/shared/EmptyState'
+import { Panel } from '@/components/shared/Panel'
 import EmbedBKlaerungCard from '@/components/dispatch/EmbedBKlaerungCard'
+import FestgefahreneFaelleCard from '@/components/dispatch/FestgefahreneFaelleCard'
 import { EMBED_B_KLAERUNG_TASK_TYP } from '@/lib/termine/embed-b-klaerung-task'
+import { ladeFestgefahreneFaelle } from '@/lib/sla/festgefahrene-faelle'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 
 export default async function DispatchDashboard() {
@@ -70,12 +73,6 @@ export default async function DispatchDashboard() {
       .order('start_zeit', { ascending: true })
       .limit(12),
   ])
-
-  const stats = [
-    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, color: 'text-claimondo-ondo', bg: 'bg-claimondo-bg', href: '/dispatch/leads' },
-    { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, color: 'text-warning', bg: 'bg-warning-soft', href: '/dispatch/rueckrufe' },
-    { label: 'FlowLinks versendet', value: flowLinksRes.count ?? 0, icon: LinkIcon, color: 'text-success', bg: 'bg-success-soft', href: '/dispatch/leads' },
-  ]
 
   const tasks = myTasksRes.data ?? []
   const recentLeads = recentLeadsRes.data ?? []
@@ -148,6 +145,12 @@ export default async function DispatchDashboard() {
       startZeit: klaerungTerminMap.get(t.entity_id as string) ?? null,
     }))
 
+  // Festgefahrene Faelle (Aaron 03.07., Option B): Claims mit verletzter SLA, die
+  // operativ haengen (kein Gutachter zugewiesen / Termin unbestaetigt). Diese
+  // kritischen Signale sah Dispatch bisher NIRGENDS (nur /admin/sla als flache
+  // Tabelle) — die roh-`sla_breach`-Tasks werden von keiner UI gerendert.
+  const festgefahrene = await ladeFestgefahreneFaelle()
+
   function timeSince(d: string): string {
     const h = Math.floor((Date.now() - new Date(d).getTime()) / 3600000)
     if (h < 1) return `${Math.floor((Date.now() - new Date(d).getTime()) / 60000)}m`
@@ -155,104 +158,114 @@ export default async function DispatchDashboard() {
     return `${Math.floor(h / 24)}d`
   }
 
-  return (
-    <div className="py-6 space-y-6">
-      <PageHeader title="Dispatch Dashboard" size="lg" />
+  const { data: profile } = await supabase.from('profiles').select('vorname').eq('id', user.id).maybeSingle()
+  const vorname = (profile?.vorname as string | null) ?? null
+  const dateStr = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Berlin' })
+  const overdueRueckrufe = kommendeRueckrufe.filter((r) => r.lead && new Date(r.start_zeit).getTime() < Date.now()).length
+  const seg: { t: string; danger?: boolean }[] = []
+  if (festgefahrene.length) seg.push({ t: `${festgefahrene.length} festgefahrene ${festgefahrene.length === 1 ? 'Fall' : 'Fälle'}`, danger: true })
+  if (overdueRueckrufe) seg.push({ t: `${overdueRueckrufe} ${overdueRueckrufe === 1 ? 'überfälliger Rückruf' : 'überfällige Rückrufe'}`, danger: true })
+  if (newLeadsRes.count) seg.push({ t: `${newLeadsRes.count} ${newLeadsRes.count === 1 ? 'neuer Lead' : 'neue Leads'} heute` })
+  if (tasks.length) seg.push({ t: `${tasks.length} ${tasks.length === 1 ? 'offener Task' : 'offene Tasks'}` })
+  const statBarItems: StatBarItem[] = [
+    { label: 'Neue Leads heute', value: newLeadsRes.count ?? 0, icon: UsersIcon, href: '/dispatch/leads' },
+    { label: 'Offene Rückrufe', value: openRueckrufeRes.count ?? 0, icon: PhoneIcon, href: '/dispatch/rueckrufe', tone: (openRueckrufeRes.count ?? 0) > 0 ? 'warning' : 'default' },
+    { label: 'FlowLinks heute', value: flowLinksRes.count ?? 0, icon: LinkIcon, href: '/dispatch/leads', tone: 'success' },
+    { label: 'Offene Tasks', value: tasks.length, icon: ClockIcon },
+  ]
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {stats.map((s) => (
-          <Link key={s.label} href={s.href} className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06] p-5 flex items-center gap-4 hover:-translate-y-[1px] hover:shadow-sheet transition-all duration-200">
-            <div className={`w-11 h-11 rounded-ios-lg ${s.bg} flex items-center justify-center`}>
-              <s.icon className={`w-5 h-5 ${s.color}`} />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-claimondo-navy">{s.value}</p>
-              <p className="text-xs text-claimondo-ondo">{s.label}</p>
-            </div>
-          </Link>
-        ))}
+  return (
+    <div className="py-6 space-y-5">
+      {/* Greeting + Dringlichkeits-Zeile (Redesign 07/2026 — konsistent mit KB/Admin-Dashboard) */}
+      <div>
+        <div className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
+          <h1 className="text-heading-lg font-bold text-claimondo-navy">
+            Guten Tag{vorname ? `, ${vorname}` : ''}
+          </h1>
+          <p className="text-body-sm font-medium capitalize text-claimondo-ondo">{dateStr}</p>
+        </div>
+        <p className="mt-1 text-body-sm text-claimondo-ondo">
+          {seg.length ? (
+            seg.map((s, i) => (
+              <span key={i}>
+                {i > 0 ? <span className="text-claimondo-ondo/50"> · </span> : null}
+                <span className={s.danger ? 'font-semibold text-danger-strong' : undefined}>{s.t}</span>
+              </span>
+            ))
+          ) : (
+            'Alles im grünen Bereich — nichts Dringendes.'
+          )}
+        </p>
       </div>
+
+      <StatBar items={statBarItems} />
+
+      {/* Festgefahrene Fälle (Aaron 03.07., Option B): SLA-verletzte Claims, die
+          operativ haengen — prominent oben, jede Zeile klickbar in die Lead-Maske. */}
+      {festgefahrene.length > 0 && <FestgefahreneFaelleCard items={festgefahrene} />}
 
       {/* Rückrufe-Timeline: chronologische Liste, Click → Rückrufe-Liste mit Auto-Open-Popover */}
-      <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
-        <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-            <PhoneIcon className="w-4 h-4 text-warning" />
-            Rückrufe-Timeline
-            {kommendeRueckrufe.length > 0 && (
-              <span className="bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">
-                {kommendeRueckrufe.length}
-              </span>
-            )}
-          </h2>
-          <Link href="/dispatch/rueckrufe" className="text-xs text-claimondo-ondo hover:underline">
-            Alle anzeigen
-          </Link>
-        </div>
-        <ul className="divide-y divide-claimondo-navy/[0.06] max-h-[320px] overflow-y-auto">
-          {kommendeRueckrufe.map((r) => {
-            const lead = r.lead
-            if (!lead) return null
-            const start = new Date(r.start_zeit)
-            const isOverdue = start.getTime() < Date.now()
-            const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
-            const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
-            const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
-            return (
-              <li key={r.id}>
-                <Link
-                  href={`/dispatch/rueckrufe?open=${r.id}`}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors"
-                >
-                  {!r.gesehen_am && (
-                    <span className="w-2 h-2 rounded-full bg-danger shrink-0" aria-label="Neu" />
-                  )}
-                  <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-ios-lg py-1.5 ${
-                    isOverdue ? 'bg-danger-soft text-danger-strong' : 'bg-warning-soft text-warning-strong'
-                  }`}>
-                    <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>
-                    <span className="text-sm font-bold">{uhrzeit}</span>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
-                    {lead.telefon && (
-                      <p className="text-xs text-claimondo-ondo truncate">{lead.telefon}</p>
-                    )}
-                    {r.notizen && (
-                      <p className="text-[11px] text-claimondo-ondo/70 truncate">{r.notizen}</p>
-                    )}
-                  </div>
-                  {isOverdue && (
-                    <span className="inline-flex items-center gap-1 text-[10px] font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
-                      <AlertCircleIcon className="w-3 h-3" />
-                      Überfällig
-                    </span>
-                  )}
-                </Link>
-              </li>
-            )
-          })}
-          {kommendeRueckrufe.length === 0 && (
-            <li className="px-5 py-8 text-sm text-claimondo-ondo/70 text-center">
-              Keine offenen Rückrufe
-            </li>
-          )}
-        </ul>
-      </div>
+      <Panel
+        title="Rückrufe-Timeline"
+        icon={<PhoneIcon className="w-4 h-4 text-warning" />}
+        count={kommendeRueckrufe.length || undefined}
+        actionLabel="Alle anzeigen"
+        actionHref="/dispatch/rueckrufe"
+        bodyClassName="max-h-[320px] overflow-y-auto"
+      >
+        {kommendeRueckrufe.map((r) => {
+          const lead = r.lead
+          if (!lead) return null
+          const start = new Date(r.start_zeit)
+          const isOverdue = start.getTime() < Date.now()
+          const datum = start.toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', weekday: 'short', day: '2-digit', month: '2-digit' })
+          const uhrzeit = start.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+          const name = [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt'
+          return (
+            <Link
+              key={r.id}
+              href={`/dispatch/rueckrufe?open=${r.id}`}
+              className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors"
+            >
+              {!r.gesehen_am && (
+                <span className="w-2 h-2 rounded-full bg-danger shrink-0" aria-label="Neu" />
+              )}
+              <div className={`flex flex-col items-center justify-center w-14 shrink-0 rounded-ios-lg py-1.5 ${
+                isOverdue ? 'bg-danger-soft text-danger-strong' : 'bg-warning-soft text-warning-strong'
+              }`}>
+                <span className="text-[10px] font-medium uppercase tracking-wider">{datum}</span>
+                <span className="text-sm font-bold">{uhrzeit}</span>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
+                {lead.telefon && (
+                  <p className="text-xs text-claimondo-ondo truncate">{lead.telefon}</p>
+                )}
+                {r.notizen && (
+                  <p className="text-[11px] text-claimondo-ondo/70 truncate">{r.notizen}</p>
+                )}
+              </div>
+              {isOverdue && (
+                <span className="inline-flex items-center gap-1 text-[10px] font-medium text-danger-strong bg-danger-soft px-2 py-0.5 rounded-full shrink-0">
+                  <AlertCircleIcon className="w-3 h-3" />
+                  Überfällig
+                </span>
+              )}
+            </Link>
+          )
+        })}
+        {kommendeRueckrufe.length === 0 && (
+          <EmptyState icon={PhoneIcon} title="Keine offenen Rückrufe" variant="compact" />
+        )}
+      </Panel>
 
       {/* AAR-939: Ungeklärte embed-B/nur_gutachter-Termine auflösen (SV-No-Show / durchgeführt). */}
       {klaerungItems.length > 0 && <EmbedBKlaerungCard items={klaerungItems} />}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Live-Feed: Neueste Leads */}
-        <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
-          <div className="px-5 py-4 border-b border-claimondo-navy/[0.06] flex items-center justify-between">
-            <h2 className="text-sm font-semibold text-claimondo-navy">Neueste Leads</h2>
-            <Link href="/dispatch/leads" className="text-xs text-claimondo-ondo hover:underline">Alle anzeigen</Link>
-          </div>
-          <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
-            {recentLeads.map((lead) => (
+        <Panel title="Neueste Leads" actionLabel="Alle anzeigen" actionHref="/dispatch/leads" bodyClassName="max-h-[400px] overflow-y-auto">
+          {recentLeads.map((lead) => (
               <Link key={lead.id} href={`/dispatch/leads/${lead.id}`} className="flex items-center gap-3 px-5 py-3 hover:bg-claimondo-navy/[0.03] transition-colors">
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-medium text-claimondo-navy truncate">
@@ -266,37 +279,40 @@ export default async function DispatchDashboard() {
                 <span className="text-[10px] text-claimondo-ondo/70 whitespace-nowrap">{timeSince(lead.created_at)}</span>
               </Link>
             ))}
-            {recentLeads.length === 0 && (
-              <EmptyState icon={InboxIcon} title="Keine Leads vorhanden" variant="compact" />
-            )}
-          </div>
-        </div>
+          {recentLeads.length === 0 && (
+            <EmptyState icon={InboxIcon} title="Keine Leads vorhanden" variant="compact" />
+          )}
+        </Panel>
 
         {/* Meine Tasks */}
-        <div className="bg-white rounded-3xl shadow-claimondo-md border border-claimondo-navy/[0.06]">
-          <div className="px-5 py-4 border-b border-claimondo-navy/[0.06]">
-            <h2 className="text-sm font-semibold text-claimondo-navy flex items-center gap-2">
-              <ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />
-              Offene Dispatch-Tasks
-              {tasks.length > 0 && (
-                <span className="ml-auto bg-warning-soft text-warning-strong text-[10px] font-bold px-2 py-0.5 rounded-full">{tasks.length}</span>
-              )}
-            </h2>
-          </div>
-          <div className="divide-y divide-claimondo-navy/[0.06] max-h-[400px] overflow-y-auto">
-            {tasks.map((task) => (
-              <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+        <Panel
+          title="Offene Dispatch-Tasks"
+          icon={<ClockIcon className="w-4 h-4 text-claimondo-ondo/70" />}
+          count={tasks.length || undefined}
+          bodyClassName="max-h-[400px] overflow-y-auto"
+        >
+          {tasks.map((task) => {
+              const leadId = leadIdForTask(task)
+              const inner = (
                 <div className="flex-1 min-w-0">
                   <p className="text-sm text-claimondo-navy truncate">{task.titel}</p>
                   <p className="text-xs text-claimondo-ondo/70">{task.faellig_am ? new Date(task.faellig_am).toLocaleDateString('de-DE') : ''}</p>
                 </div>
-              </div>
-            ))}
+              )
+              return leadId ? (
+                <Link key={task.id} href={`/dispatch/leads/${leadId}`} className="px-5 py-3 flex items-center gap-3 hover:bg-claimondo-navy/[0.03] transition-colors">
+                  {inner}
+                </Link>
+              ) : (
+                <div key={task.id} className="px-5 py-3 flex items-center gap-3">
+                  {inner}
+                </div>
+              )
+            })}
             {tasks.length === 0 && (
               <EmptyState icon={CheckCircleIcon} title="Keine offenen Tasks" variant="compact" />
             )}
-          </div>
-        </div>
+        </Panel>
       </div>
     </div>
   )

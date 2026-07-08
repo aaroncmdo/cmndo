@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { pruefePasswortStaerke } from '@/lib/auth/password-policy'
 
 // AAR-auth-haertung: Passwort-Wechsel als Server-Action.
 //
@@ -17,16 +18,15 @@ import { roleToPath } from '@/lib/auth/role-redirect'
 // deterministisch. Gleiches Muster wie confirmPasswordReset (reset-password.ts)
 // und die CMM-14-Loesung in login-after-flow.
 
-const MIN_PASSWORT_LAENGE = 8
-
 export async function setzeNeuesPasswort(
   neuesPasswort: string,
 ): Promise<{ ok: true; redirectTo: string } | { ok: false; error: string }> {
-  if (!neuesPasswort || neuesPasswort.length < MIN_PASSWORT_LAENGE) {
-    return {
-      ok: false,
-      error: `Passwort muss mindestens ${MIN_PASSWORT_LAENGE} Zeichen lang sein.`,
-    }
+  // Staerke-Pruefung (>= 12 Zeichen + HIBP-Breach-Check) an die zentrale Policy
+  // delegiert — identisch zu confirmPasswordReset (reset-password.ts). Die
+  // Policy deckt leere/zu-kurze Eingaben selbst ab (guard vor dem HIBP-Fetch).
+  const policy = await pruefePasswortStaerke(neuesPasswort)
+  if (!policy.ok) {
+    return { ok: false, error: policy.error }
   }
 
   const supabase = await createClient()
@@ -44,14 +44,19 @@ export async function setzeNeuesPasswort(
     return { ok: false, error: updateError.message }
   }
 
-  // force_password_change zuruecksetzen — der Fehler MUSS geprueft werden.
-  // Schlaegt der Write fehl (z.B. RLS) und bleibt das Flag true, landet der
-  // User beim naechsten Login erneut auf /passwort-aendern (stiller Loop).
-  const { error: flagError } = await supabase
+  // force_password_change zuruecksetzen — GARANTIERT via Service-Role (nicht dem
+  // User-RLS-Client) + Row-Count-Check. Schlaegt der Clear still fehl (RLS-Aenderung,
+  // Session-Edge, 0-Row-Match) und bleibt das Flag true, landet der User beim
+  // naechsten Login erneut auf /passwort-aendern (stiller Loop-Trap — genau das,
+  // was einen frisch angelegten SV aussperrt). Service-Role (eigene Row, kein RLS)
+  // + .select()-Row-Count schliessen die Falle aus.
+  const { createAdminClient } = await import('@/lib/supabase/admin')
+  const { data: flagRows, error: flagError } = await createAdminClient()
     .from('profiles')
     .update({ force_password_change: false })
     .eq('id', user.id)
-  if (flagError) {
+    .select('id')
+  if (flagError || !flagRows || flagRows.length === 0) {
     return {
       ok: false,
       error:

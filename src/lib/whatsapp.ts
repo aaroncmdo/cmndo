@@ -1,6 +1,9 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { vsBetragAusEmbed } from '@/lib/faelle/claim-payment-read'
 import { sendWhatsAppText } from './whatsapp/baileys-client'
+import { resolveSideEffectRecipient } from '@/lib/side-effects/mode'
+import { istInternesTelefon } from '@/lib/testdaten/test-sv-guard'
 
 // ─── WhatsApp-Versand (Baileys, VPS-Worker) ──────────────────────────────────
 // 2026-06-02: Twilio-WhatsApp vollstaendig entfernt — alle ausgehenden WhatsApp-
@@ -14,6 +17,26 @@ export async function sendWhatsApp(to: string, message: string): Promise<{ succe
   else if (cleanTo.startsWith('0')) cleanTo = '+49' + cleanTo.slice(1)
   else if (!cleanTo.startsWith('+')) cleanTo = '+49' + cleanTo
   if (cleanTo.length < 7) return { success: false, error: 'Keine gültige Telefonnummer' }
+
+  // Side-Effect-Gate (Prod-Smoke): dry-run unterdrueckt den Send, test-recipient leitet um.
+  // Default (SIDE_EFFECT_MODE unset) = live -> unveraendert.
+  const se = resolveSideEffectRecipient('whatsapp', cleanTo)
+  if (se.suppress) {
+    console.warn(`[side-effect:${se.mode}] WhatsApp UNTERDRUECKT -> ${cleanTo}: "${message.slice(0, 60)}"`)
+    return { success: true, sid: 'side-effect-suppressed' }
+  }
+  if (se.mode === 'test-recipient' && se.recipient !== cleanTo) {
+    console.warn(`[side-effect:test-recipient] WhatsApp UMLEITUNG ${cleanTo} -> ${se.recipient}`)
+    cleanTo = se.recipient
+  }
+
+  // Send-Isolation (2026-07-03): im Live-Modus keine WhatsApp an interne/Test-Telefone
+  // (Reverse-Lookup leads/profiles -> interne Email). Fail-open (nie eine echte Nachricht
+  // brechen). NUR live, damit test-recipient (Umleitung an Test-Nummer) intakt bleibt.
+  if (se.mode === 'live' && (await istInternesTelefon(cleanTo))) {
+    console.warn(`[send-isolation] WhatsApp an internes/Test-Telefon ${cleanTo} unterdrueckt`)
+    return { success: true, sid: 'internal-recipient-suppressed' }
+  }
 
   const result = await sendWhatsAppText(cleanTo, message)
   if (result.ok) return { success: true, sid: result.messageId ?? undefined }
@@ -224,7 +247,7 @@ export async function sendStatusWhatsApp(
     const { data: fallClaim } = waClaimId
       ? await supabase
           .from('claims')
-          .select('geschaedigter_user_id, lead_id, sv_id, claim_nummer, regulierungs_betrag')
+          .select('geschaedigter_user_id, lead_id, sv_id, claim_nummer, claim_payments(partei, forderungsbetrag, erhaltener_betrag)')
           .eq('id', waClaimId)
           .maybeSingle()
       : { data: null }
@@ -284,18 +307,20 @@ export async function sendStatusWhatsApp(
     }
 
     // Build portal link
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://cmndo.vercel.app')
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
     const portalLink = `${appUrl}/kunde`
 
     // Build context
+    // Payment-Ledger Phase 3 (Collapse): VS-Betrag aus dem (claim,'vs')-Ledger statt Cache.
+    const waRegBetrag = vsBetragAusEmbed(fallClaim?.claim_payments)
     const ctx: FallContext = {
       claim_nummer: fallClaim?.claim_nummer ?? undefined,
       vorname,
       nachname,
       gutachter_name: gutachterName,
       portal_link: portalLink,
-      betrag: fallClaim?.regulierungs_betrag
-        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(fallClaim.regulierungs_betrag))
+      betrag: waRegBetrag != null
+        ? new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(Number(waRegBetrag))
         : undefined,
       ...extraCtx,
     }

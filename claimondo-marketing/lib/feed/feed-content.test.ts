@@ -17,15 +17,20 @@ describe('Feed-Frontmatter', () => {
 })
 
 describe('getWissenData (lesbare /wissen-Aufbereitung)', () => {
-  it('liefert 4 nicht-leere Themen-Gruppen + 2 Hub-Verweise', () => {
-    const { gruppen, weiterstoebern } = getWissenData()
-    expect(gruppen).toHaveLength(4)
+  it('liefert mindestens 4 nicht-leere Themen-Gruppen + 2 Hub-Verweise', async () => {
+    const { gruppen, weiterstoebern } = await getWissenData()
+    // Mindestens die 4 MDX-Gruppen (cornerstone/decoder/versicherer/sachverstaendige);
+    // optional kommt noch eine 'redaktion'-Gruppe voran wenn DB-Artikel vorhanden sind.
+    expect(gruppen.length).toBeGreaterThanOrEqual(4)
     expect(gruppen.every((g) => g.items.length > 0)).toBe(true)
     expect(weiterstoebern.map((h) => h.href)).toEqual(['/haftpflicht', '/kfz-gutachter'])
   })
 
-  it('alle Item-Links sind absolut (Voraussetzung fuer toInternalHref)', () => {
-    const links = getWissenData().gruppen.flatMap((g) => g.items).map((i) => i.link)
+  it('MDX-Item-Links sind absolut (Voraussetzung fuer toInternalHref)', async () => {
+    const { gruppen } = await getWissenData()
+    // Nur MDX-Gruppen pruefen (DB-Artikel / 'redaktion'-Gruppe nutzen relative Links).
+    const mdxGruppen = gruppen.filter((g) => g.key !== 'redaktion')
+    const links = mdxGruppen.flatMap((g) => g.items).map((i) => i.link)
     expect(links.length).toBeGreaterThan(0)
     expect(links.every((l) => l.startsWith('https://claimondo.de'))).toBe(true)
   })

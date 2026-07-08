@@ -1,6 +1,9 @@
+import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { resolveGegnerVersicherung } from '@/lib/claims/gegner-versicherung'
+import { getAnspruchVorschauFuerFall } from '@/lib/anspruch/get-anspruch-vorschau-fuer-fall'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { redirect, notFound } from 'next/navigation'
@@ -12,6 +15,10 @@ import FallDetailClient from './FallDetailClient'
 // CMM-23: post-Auftrag MeinFallStatusCard für die Fall-Phasen.
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
+import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
+import { findReparaturWerkstaettenForTarget } from '@/lib/werkstatt/vermittlung-server'
+import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import { WerkstattVermittelnCard } from './_components/WerkstattVermittelnCard'
 import { getSvLifecyclePhase, isFallPhase } from '@/lib/auftrag/phase'
 // SV-Briefing — wandert aus der Sidebar nach oben unter den gelben Banner.
 import BriefingCard from '@/components/fall/BriefingCard'
@@ -20,6 +27,7 @@ import GutachtenUploadBanner from '@/components/gutachter/GutachtenUploadBanner'
 import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
 import { LeadAblehnenCard } from './_components/LeadAblehnenCard'
+import { AnspruchVorschauCard } from './_components/AnspruchVorschauCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
@@ -97,11 +105,18 @@ export default async function GutachterFallPage({
   const hatNeueKundeVerlegung = zuletztGesehenIds.length > 0
 
   // Fetch all related data in parallel
+  // Leadpreis-Claim aufloesen: Route-Param id ist die fall_id (Bridge) != claims.id.
+  const lpClaimId = await resolveClaimId(admin, id)
+
+  // KI-Vorschaetzung (Anspruch-pruefen-Tool) fuer den SV — read-only. Admin-Client NACH dem
+  // getFallForSv-Ownership-Gate (Defense-in-Depth wie AAR-771; anspruch_schaetzungen ist RLS-deny-all).
+  const anspruchVorschau = lpClaimId ? await getAnspruchVorschauFuerFall(admin, lpClaimId) : null
+
   const [
     { data: lead },
     { data: dokumente },
     { data: pflichtdokumente },
-    { data: parteien },
+    { data: vcfGegnerRow },
     { data: timeline },
     { data: abrechnung },
     { data: nachrichten },
@@ -137,21 +152,31 @@ export default async function GutachterFallPage({
       .eq('fall_id', id)
       .order('sort_order', { ascending: true })
       .order('created_at'),
+    // CMM-49: parteien-Tabelle ist leer — Gegner-Name aus v_claim_full (SSoT).
+    // resolveGegnerVersicherung (Versicherungsname/Nr) wird nach dem Promise.all
+    // mit dem dann bekannten noShowClaimId/fallId aufgerufen.
     supabase
-      .from('parteien')
-      .select('id, rolle, name, versicherung_name, versicherung_nr, telefon, email')
-      .eq('fall_id', id),
+      .from('v_claim_full')
+      .select('gegner_name')
+      .eq('fall_id', id)
+      .maybeSingle(),
     supabase
       .from('timeline')
       .select('id, typ, titel, beschreibung, erstellt_von, metadata, created_at')
       .eq('fall_id', id)
       .order('created_at', { ascending: false }),
-    supabase
-      .from('gutachter_abrechnungen')
-      .select('leadpreis, preistyp, abgerechnet_am, schadenhoehe')
-      .eq('fall_id', id)
-      .eq('sv_id', sv.id)
-      .maybeSingle(),
+    // Billing-Konsolidierung 2026-07-01: Leadpreis aus claims-SSoT (lead_preis_netto/-typ,
+      // processCaseBilling) via Admin-Client — der SV hat keine RLS auf die claims-Tabelle (liest
+      // sonst ueber Definer-Views), daher admin + resolveClaimId (lpClaimId oben), weil der
+      // Route-Param id die fall_id (Bridge) ist != claims.id (Prod: 78/94 verschieden).
+      lpClaimId
+        ? admin
+            .from('claims')
+            .select('lead_preis_netto, lead_preis_typ')
+            .eq('id', lpClaimId)
+            .eq('sv_id', sv.id)
+            .maybeSingle()
+        : Promise.resolve({ data: null }),
     supabase
       .from('nachrichten')
       .select('id, kanal, sender_id, sender_rolle, nachricht, hat_anhang, anhang_url, created_at')
@@ -170,6 +195,17 @@ export default async function GutachterFallPage({
       .eq('id', id)
       .maybeSingle(),
   ])
+
+  // CMM-49: parteien-Tabelle ist leer — Gegner-Partei synthetisch aus v_claim_full
+  // (gegner_name) + resolveGegnerVersicherung (Versicherungsname/Nr) aufbauen.
+  // StammdatenDetail.GegnerDetail liest: rolle, name, telefon, email,
+  // versicherung_name, versicherung_nr — Shape muss kompatibel bleiben.
+  const gegnerVers = await resolveGegnerVersicherung(supabase, { fallId: id })
+  const gegnerName = (vcfGegnerRow?.gegner_name as string | null) ?? null
+  const parteien: { rolle: string; name: string | null; telefon: null; email: null; versicherung_name: string | null; versicherung_nr: string | null }[] =
+    (gegnerName ?? gegnerVers.name)
+      ? [{ rolle: 'verursacher', name: gegnerName, versicherung_name: gegnerVers.name, versicherung_nr: gegnerVers.nummer, telefon: null, email: null }]
+      : []
 
   // Fetch kundenbetreuer profile
   let kundenbetreuer: {
@@ -190,8 +226,8 @@ export default async function GutachterFallPage({
   // Attach leadpreis to fall object for display.
   const fallWithAbrechnung = {
     ...fall,
-    _leadpreis: abrechnung?.leadpreis ? Number(abrechnung.leadpreis) : null,
-    _preistyp: abrechnung?.preistyp ?? null,
+    _leadpreis: abrechnung?.lead_preis_netto != null ? Number(abrechnung.lead_preis_netto) : null,
+    _preistyp: abrechnung?.lead_preis_typ ?? null,
   }
 
   // AAR-403: Kürzungs-Positionen für KanzleiStatusCard (Phase 5+)
@@ -342,6 +378,23 @@ export default async function GutachterFallPage({
     : { data: null }
   const noShowCount = (fallClaimRow?.kunde_no_show_count as number | null) ?? 0
 
+  // Reparatur-Werkstatt-Vermittlung (Gutachter im Auftrag): Gate + 5 naechste Partner.
+  // Nur wenn Reparatur gewuenscht + noch keine Werkstatt hinterlegt (brauchtWerkstattVermittlung).
+  let werkstattVermittlung: { fallId: string; werkstaetten: WerkstattFinderRow[] } | null = null
+  if (noShowClaimId) {
+    const { data: rwGate } = await admin
+      .from('claims')
+      .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status')
+      .eq('id', noShowClaimId)
+      .maybeSingle()
+    if (rwGate && brauchtWerkstattVermittlung(rwGate as BedarfRow)) {
+      werkstattVermittlung = {
+        fallId: id,
+        werkstaetten: await findReparaturWerkstaettenForTarget({ target: 'claim', id: noShowClaimId }),
+      }
+    }
+  }
+
   // SV-Gutachten-Verifikation: 6 wichtigste OCR-extrahierte Werte aus claims
   // an die GutachtenCard durchreichen, damit der SV nach Upload prüfen kann
   // ob die Pipeline die Geld-Zahlen korrekt erkannt hat.
@@ -456,7 +509,11 @@ export default async function GutachterFallPage({
   // lead.adresse die Wohnadresse — drei klar getrennte Bedeutungen.
   const besichtigungsAdresse = (fall.besichtigungsort_adresse as string | null) ?? null
 
-  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'angefordert'
+  // Realer KB-Anforderungs-Wert ist 'beauftragt' (prozess.ts / process-event.ts; die
+  // Stellungnahme-Seite gated ebenfalls auf 'beauftragt'). 'angefordert' existiert für
+  // technische_stellungnahme_status NICHT (das ist nachbesichtigung_status) → vorher feuerte
+  // der Banner nie und die #3729-„Stellungnahme einreichen"-CTA war in Prod tot. (Golden-Path-E2E)
+  const stellungnahmeAktiv = (fall.technische_stellungnahme_status as string | null) === 'beauftragt'
   const nachbesichtigungAktiv =
     (fall.nachbesichtigung_status as string | null) === 'angefordert' ||
     (fall.nachbesichtigung_status as string | null) === 'termin-eingereicht'
@@ -535,8 +592,15 @@ export default async function GutachterFallPage({
           <p className="text-sm font-semibold text-warning-strong">Stellungnahme angefordert</p>
           <p className="text-xs text-warning-strong mt-1">
             Der Kundenbetreuer bittet um eine technische Stellungnahme zu diesem Fall.
-            Bitte über den Chat mit dem Betreuer abstimmen.
+            Stimme dich bei Bedarf über den Chat mit dem Betreuer ab und reiche deine
+            Stellungnahme anschließend hier ein.
           </p>
+          <Link
+            href={`/gutachter/fall/${id}/stellungnahme`}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-ios-lg bg-claimondo-navy px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          >
+            Stellungnahme einreichen →
+          </Link>
         </div>
       )}
       {nachbesichtigungAktiv && (
@@ -551,13 +615,20 @@ export default async function GutachterFallPage({
         <MeinFallStatusCard
           phase={svPhase}
           geforderterBetrag={(fall.gutachten_betrag as number | null) ?? null}
-          gutachtenUrl={(fall.gutachten_url as string | null) ?? null}
-          gutachtenFreigegebenAm={(fall.gutachten_freigabe_am as string | null) ?? (fall.gutachten_eingegangen_am as string | null) ?? null}
+          gutachtenUrl={erstgutachtenAuftrag?.gutachten_url ?? null}
+          gutachtenFreigegebenAm={(fall.gutachten_eingegangen_am as string | null) ?? null}
           lexdriveCaseId={(fall.lexdrive_case_id as string | null) ?? null}
           svHonorarBetrag={svHonorarBetrag}
           svHonorarEingegangenAm={svHonorarEingegangenAm}
         />
       )}
+      {werkstattVermittlung && (
+        <WerkstattVermittelnCard
+          fallId={werkstattVermittlung.fallId}
+          werkstaetten={werkstattVermittlung.werkstaetten}
+        />
+      )}
+      {anspruchVorschau && <AnspruchVorschauCard vorschau={anspruchVorschau} />}
     </>
   )
 
@@ -588,7 +659,7 @@ export default async function GutachterFallPage({
       aktiverTermin={aktiverTermin as unknown as Parameters<typeof FallDetailClient>[0]['aktiverTermin']}
       fallDokumente={fallDokumente}
       kuerzungen={kuerzungen}
-      abrechnungAusgezahltAm={(abrechnung as { abgerechnet_am?: string | null } | null)?.abgerechnet_am ?? null}
+      abrechnungAusgezahltAm={null}
       konfrontationGewuenscht={konfrontationGewuenscht}
       konfrontationTerminVereinbartAm={konfrontationTerminVereinbartAm}
       konfrontationTerminVorschlaege={terminVorschlaege}

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
+import { piStatusToEinzugAction, retryFensterStartDatum, pollCooldownCutoff, einzugBranchFuerPiStatus } from '@/lib/finance/einzug-retry'
 
 // Lazy-Import von '@/lib/stripe/client' innerhalb der Handler — der Client
 // instantiiert Stripe im Konstruktor mit STRIPE_SECRET_KEY!. Bei einem
@@ -29,6 +30,11 @@ const ADMIN_ALERT_EMAIL = process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de'
  * Bei Fehler: einzug_versucht_am + einzug_fehler setzen, status='fehlgeschlagen'
  * und Aaron als Admin per Mail alerten (ADMIN_ALERT_EMAIL).
  *
+ * Retry (2026-07-03): fehlgeschlagene Einzuege werden bis EINZUG_RETRY_WINDOW_TAGE
+ * Tage nach Faelligkeit erneut versucht (behebt den Umsatz-Leak durch transiente
+ * Fehler). IDEMPOTENT: ein bereits angelegter PaymentIntent wird per Status geprueft
+ * (piStatusToEinzugAction) statt blind neu angelegt -> keine Doppelbelastung.
+ *
  * Auth: Authorization: Bearer ${CRON_SECRET} (analog allen anderen Crons).
  */
 export async function GET(request: Request) {
@@ -39,23 +45,45 @@ export async function GET(request: Request) {
 
   const db = createAdminClient()
 
-  const heute = new Date().toISOString().slice(0, 10)
+  const nowMs = Date.now()
+  const heute = new Date(nowMs).toISOString().slice(0, 10)
+  const retryFensterStart = retryFensterStartDatum(nowMs)
+  const pollCutoff = pollCooldownCutoff(nowMs)
 
-  const { data: faellig, error } = await db
+  // (1) Noch nie eingezogen.
+  const { data: neu, error: errNeu } = await db
     .from('abrechnungen')
-    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, empfaenger_email, empfaenger_name, summe_brutto, faellig_am')
+    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, empfaenger_email, empfaenger_name, summe_brutto, faellig_am, stripe_payment_intent_id')
     .eq('empfaenger_typ', 'sv')
     .is('bezahlt_am', null)
-    .is('einzug_versucht_am', null)
     .is('storniert_am', null)
     .lte('faellig_am', heute)
+    .is('einzug_versucht_am', null)
 
+  // (2) Zuvor fehlgeschlagen, aber noch im Retry-Fenster (nach Faelligkeit) UND Poll-Cooldown
+  //     vorbei. Behebt den Umsatz-Leak durch transiente Fehler (3DS/Netz/Stripe-5xx), ohne
+  //     endlos zu re-chargen. Der Einzug selbst bleibt idempotent (PI-Retrieve unten).
+  const { data: retries, error: errRetry } = await db
+    .from('abrechnungen')
+    .select('id, abrechnungs_nr, empfaenger_typ, empfaenger_id, empfaenger_email, empfaenger_name, summe_brutto, faellig_am, stripe_payment_intent_id')
+    .eq('empfaenger_typ', 'sv')
+    .is('bezahlt_am', null)
+    .is('storniert_am', null)
+    .lte('faellig_am', heute)
+    .in('status', ['fehlgeschlagen', 'im_einzug'])
+    .gte('faellig_am', retryFensterStart)
+    .lt('einzug_versucht_am', pollCutoff)
+
+  const error = errNeu ?? errRetry
   if (error) {
     console.error('[KFZ-149 einzug] Query-Fehler:', error.message)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
+  // Disjunkt (einzug_versucht_am null vs. gesetzt) -> kein Dedupe noetig.
+  const faellig = [...(neu ?? []), ...(retries ?? [])]
 
   let success = 0
+  let pending = 0
   let failed = 0
 
   // Lazy-load Stripe nur wenn es tatsaechlich Eintraege zu verarbeiten gibt.
@@ -136,6 +164,32 @@ export async function GET(request: Request) {
       continue
     }
 
+    // Idempotenz-Guard (Retry): existierenden PaymentIntent pruefen statt blind neu
+    // anzulegen -> verhindert Doppelbelastung bei 3DS/processing-Rows.
+    if (abr.stripe_payment_intent_id) {
+      try {
+        const existing = await stripe.paymentIntents.retrieve(abr.stripe_payment_intent_id)
+        const action = piStatusToEinzugAction(existing.status)
+        if (action === 'paid') {
+          await markPaid(abr.id, Number(abr.summe_brutto), existing.id)
+          success++
+          continue
+        }
+        if (action === 'pending') {
+          // PI laeuft noch (3DS/processing) -> nur Versuchszeit bumpen, KEIN 2. Charge.
+          const nowIso = new Date().toISOString()
+          await db.from('abrechnungen').update({ einzug_versucht_am: nowIso, updated_at: nowIso }).eq('id', abr.id)
+          continue
+        }
+        // action === 'retry' -> alter PI terminal, unten sicher ein neuer Versuch.
+      } catch (retrErr) {
+        console.warn(
+          `[KFZ-149 einzug] PI-Retrieve fuer ${abr.abrechnungs_nr} fehlgeschlagen, neuer Versuch:`,
+          retrErr instanceof Error ? retrErr.message : retrErr,
+        )
+      }
+    }
+
     // PaymentIntent off_session auslosen
     try {
       const pi = await stripe.paymentIntents.create({
@@ -157,23 +211,20 @@ export async function GET(request: Request) {
         },
       })
 
-      if (pi.status === 'succeeded') {
-        const bezahltAm = new Date().toISOString()
-        await db.from('abrechnungen').update({
-          bezahlt_am: bezahltAm,
-          bezahlt_betrag: Number(abr.summe_brutto),
-          einzug_versucht_am: bezahltAm,
-          stripe_payment_intent_id: pi.id,
-          status: 'bezahlt',
-          updated_at: bezahltAm,
-        }).eq('id', abr.id)
+      const branch = einzugBranchFuerPiStatus(pi.status)
+      if (branch === 'paid') {
+        await markPaid(abr.id, Number(abr.summe_brutto), pi.id)
         success++
+      } else if (branch === 'im_einzug') {
+        // SEPA-Lastschrift eingereicht — settled asynchron. KEIN Fehler, KEIN Alarm.
+        await markImEinzug(abr.id, pi.id)
+        pending++
       } else {
-        // 'requires_action' (3DS) oder 'processing' — Einzug noch offen, Versuch zaehlen
+        // terminal-nicht-erfolgreich (unerwartet fuer confirm+off_session) -> echter Fehler
         await db.from('abrechnungen').update({
           einzug_versucht_am: new Date().toISOString(),
           stripe_payment_intent_id: pi.id,
-          einzug_fehler: `PaymentIntent status=${pi.status} (3DS oder verzoegert)`,
+          einzug_fehler: `PaymentIntent status=${pi.status}`,
           status: 'fehlgeschlagen',
           updated_at: new Date().toISOString(),
         }).eq('id', abr.id)
@@ -198,10 +249,33 @@ export async function GET(request: Request) {
     }
   }
 
-  console.log(`[KFZ-149 einzug] success=${success} failed=${failed} total_pruefung=${faellig?.length ?? 0}`)
-  return NextResponse.json({ ok: true, success, failed, total: faellig?.length ?? 0 })
+  console.log(`[KFZ-149 einzug] success=${success} pending=${pending} failed=${failed} total_pruefung=${faellig?.length ?? 0}`)
+  return NextResponse.json({ ok: true, success, pending, failed, total: faellig?.length ?? 0 })
 
   // ── Helpers ──────────────────────────────────────────────────────────
+  async function markPaid(abrId: string, betrag: number, piId: string) {
+    const nowIso = new Date().toISOString()
+    await db.from('abrechnungen').update({
+      bezahlt_am: nowIso,
+      bezahlt_betrag: betrag,
+      einzug_versucht_am: nowIso,
+      stripe_payment_intent_id: piId,
+      status: 'bezahlt',
+      updated_at: nowIso,
+    }).eq('id', abrId)
+  }
+
+  async function markImEinzug(abrId: string, piId: string) {
+    const nowIso = new Date().toISOString()
+    await db.from('abrechnungen').update({
+      einzug_versucht_am: nowIso,
+      stripe_payment_intent_id: piId,
+      einzug_fehler: null,
+      status: 'im_einzug',
+      updated_at: nowIso,
+    }).eq('id', abrId)
+  }
+
   async function markFailed(
     abrechnungId: string,
     fehler: string,

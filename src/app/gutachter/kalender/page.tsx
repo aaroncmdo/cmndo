@@ -41,13 +41,19 @@ export default async function SVKalenderPage({
   // FreeBusy-Pfad zurückgerollt — wodurch CalDAV-Events (Apple/Fastmail/…)
   // komplett aus der SV-Kalender-UI verschwanden. KalenderRealtimeRefresh
   // unten triggert router.refresh() wenn neue Events eintreffen.
+  // 2026-07-08: Anzeige-Fenster geweitet ([-90d,+90d]) damit die Wochen-Navigation auch
+  // vergangene externe Termine zeigt. Der Sync cached [-90d,+365d] (fuers Finder-Busy via
+  // v_belegung); die Wochen-Ansicht braucht nur einen nav-tauglichen Ausschnitt.
   const now = new Date()
-  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
-  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 21).toISOString()
+  const fromIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 90).toISOString()
+  const toIso = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 90).toISOString()
+  // 2026-07-08: profil-gekeyt lesen. Der Sync-Cron (sync-to-cache) schreibt den Cache
+  // profil-gekeyed (profile_id gesetzt, sv_id meist NULL) — der frühere .eq('sv_id')-Reader
+  // matchte 1125/1129 Zeilen NICHT -> externe CalDAV-Events waren im Kalender unsichtbar.
   const { data: cachedEvents } = await supabase
     .from('sv_kalender_events_cache')
     .select('start_zeit, end_zeit')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .gte('start_zeit', fromIso)
     .lte('start_zeit', toIso)
     .order('start_zeit')
@@ -56,30 +62,67 @@ export default async function SVKalenderPage({
     end: e.end_zeit as string,
   }))
 
-  // CMM-25: Kalender zeigt nur Termine, deren Auftrag bereits durch die
-  // Sicherungsabtretung bestätigt wurde. Reine Dispatcher-Slot-Blocks
-  // (vor SA) bleiben extern (Google/CalDAV) — im Claimondo-Portal
-  // werden sie erst nach SA-Unterschrift sichtbar.
-  // CMM-44 SP-B PR2b: sa_unterschrieben lebt auf claims (SSoT); die View
-  // v_faelle_mit_aktuellem_termin liefert die Spalte bereits aus claims
-  // (PR1-Repoint) — flacher View-Read, DB-Filter-Pushdown bleibt.
-  const { data: faelle } = await supabase
-    .from('v_faelle_mit_aktuellem_termin')
-    .select('id, claim_nummer, sv_termin, status, schadens_ort, schadens_adresse, lead_id, gutachter_termin_status')
-    .eq('sv_id', sv.id)
-    .eq('sa_unterschrieben', true)
-    .not('status', 'in', '("abgeschlossen","storniert")')
-    .order('sv_termin', { ascending: true })
+  // KANONISCH (2026-07-07): SV-Termine aus gutachter_termine via assignee_id — NICHT
+  // aus der stale v_faelle_mit_aktuellem_termin.sv_termin (claim-scoped, claim_id meist
+  // NULL -> Mehrheit der Termine unsichtbar). Kein sa_unterschrieben-Hardfilter mehr
+  // (Aaron 07.07.: „alle meine Termine"). Siehe lib/termine/sv-termine.ts + Spec.
+  const { svTermine } = await import('@/lib/termine/sv-termine')
+  const { effektiveBezugIds } = await import('@/lib/termine/effektive-bezug-ids')
+  const fensterVon = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString()
+  const fensterBis = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 35).toISOString()
+  const svTermineRows = await svTermine(supabase, sv.id, {
+    statuses: ['reserviert', 'bestaetigt', 'verlegung_pending', 'verlegt', 'gegenvorschlag'],
+    from: fensterVon,
+    to: fensterBis,
+  })
 
-  // KFZ-192: gutachter_termine mit final_verbindlich_ab laden (für Ablehnen/Gegenvorschlag)
-  const fallIds = (faelle ?? []).map(f => f.id).filter(Boolean)
-  const { data: termine } = fallIds.length > 0
-    ? await supabase
-        .from('gutachter_termine')
-        .select('id, fall_id, status, final_verbindlich_ab')
-        .in('fall_id', fallIds)
-        .in('status', ['reserviert', 'bestaetigt'])
-    : { data: [] }
+  // Fall-/Claim-Enrichment (v_claim_full) fuer die Termine mit fall_id.
+  const enrichFallIds = [...new Set(svTermineRows.map((t) => t.fall_id).filter(Boolean) as string[])]
+  const fallMap = new Map<string, { claim_nummer: string | null; schadenort_ort: string | null; schadenort_adresse: string | null; lead_id: string | null; fall_status: string | null }>()
+  if (enrichFallIds.length) {
+    const { data: faelleFlat } = await supabase
+      .from('v_claim_full')
+      .select('fall_id, claim_nummer, schadenort_ort, schadenort_adresse, lead_id, fall_status')
+      .in('fall_id', enrichFallIds)
+    for (const f of (faelleFlat ?? []) as Array<Record<string, unknown>>) {
+      fallMap.set(f.fall_id as string, {
+        claim_nummer: (f.claim_nummer as string) ?? null,
+        schadenort_ort: (f.schadenort_ort as string) ?? null,
+        schadenort_adresse: (f.schadenort_adresse as string) ?? null,
+        lead_id: (f.lead_id as string) ?? null,
+        fall_status: (f.fall_status as string) ?? null,
+      })
+    }
+  }
+
+  // Lead-Namen (auch fuer bezug-native/pre-flowlink Termine ohne fall_id).
+  const leadIds = [...new Set(svTermineRows
+    .map((t) => (t.fall_id ? (fallMap.get(t.fall_id)?.lead_id ?? null) : effektiveBezugIds(t).leadId))
+    .filter(Boolean) as string[])]
+  const leadMap: Record<string, string> = {}
+  if (leadIds.length) {
+    const { createAdminClient } = await import('@/lib/supabase/admin')
+    const { data: leads } = await createAdminClient().from('leads').select('id, vorname, nachname').in('id', leadIds)
+    for (const l of leads ?? []) leadMap[l.id] = `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '—'
+  }
+
+  // faelle-Prop fuer SVKalenderClient: 1 Eintrag pro Termin (rendert sv_termin je Eintrag).
+  const faelle = svTermineRows.map((t) => {
+    const f = t.fall_id ? fallMap.get(t.fall_id) : null
+    const eff = effektiveBezugIds(t)
+    return {
+      id: (t.fall_id ?? '') as string,
+      claim_nummer: f?.claim_nummer ?? null,
+      sv_termin: t.start_zeit,
+      status: f?.fall_status ?? t.status,
+      schadens_ort: f?.schadenort_ort ?? null,
+      schadens_adresse: f?.schadenort_adresse ?? t.besichtigungsort_adresse ?? null,
+      lead_id: (f?.lead_id ?? eff.leadId) ?? null,
+      gutachter_termin_status: t.status,
+    }
+  })
+  // termine-Prop: rohe Termin-Zeilen fuer Ablehnen/Gegenvorschlag-Aktionen.
+  const termine = svTermineRows.map((t) => ({ id: t.id, fall_id: (t.fall_id ?? '') as string, status: t.status, final_verbindlich_ab: t.final_verbindlich_ab }))
 
   // AAR-864: verlegt-Slots als „Privater Termin"-Blocker im Kalender. Diese
   // tauchen NICHT in v_faelle_mit_aktuellem_termin auf (View priorisiert
@@ -103,16 +146,7 @@ export default async function SVKalenderPage({
     end: r.end_zeit as string,
   }))
 
-  // Fetch lead names
-  const leadIds = [...new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean))]
-  const { data: leads } = leadIds.length > 0
-    ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-    : { data: [] }
-
-  const leadMap: Record<string, string> = {}
-  for (const l of leads ?? []) {
-    leadMap[l.id] = `${l.vorname ?? ''} ${l.nachname ?? ''}`.trim() || '—'
-  }
+  // leadMap wird oben aus den kanonischen Termin-Zeilen gebaut.
 
   // AAR-229 W5 / F-12: Liste = chronologische Termine (Subset der Fälle mit sv_termin)
   const terminListe = (faelle ?? [])
@@ -133,7 +167,7 @@ export default async function SVKalenderPage({
 
   return (
     <div className="h-full flex flex-col">
-      <KalenderRealtimeRefresh svId={sv.id} />
+      <KalenderRealtimeRefresh profileId={user.id} />
       {/* View-Toggle */}
       <div className="px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
         <PageHeader

@@ -6,7 +6,7 @@
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { VideoIcon } from 'lucide-react'
-import { FALL_STATUS_LABELS, FALL_STATUS_COLORS } from '@/lib/statusLabels'
+import { resolveStatus, statusSlotClass, isKnownStatus } from '@/lib/status'
 import { useFall } from '../FallContext'
 import { createKbVideoterminByKb } from '../_actions/termine'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
@@ -78,9 +78,13 @@ export default function UebersichtTab() {
         }
       : null
   const strukturGeneratedBy = strukturRaw?.generated_by ?? null
-  const statusLabel = FALL_STATUS_LABELS[status] ?? status
-  const statusCls =
-    FALL_STATUS_COLORS[status] ?? 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
+  // W1: Label + Slot-Farbe aus der zentralen @/lib/status-Registry (byte-identisch
+  // zur Legacy-Ableitung aus FALL_STATUS_LABELS/COLORS — Span/Klassen unverändert).
+  const statusDef = resolveStatus('fall-status', status)
+  const statusLabel = statusDef.label
+  const statusCls = isKnownStatus('fall-status', status)
+    ? statusSlotClass(statusDef.slot)
+    : 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border'
 
   // AAR-169: KB-Videotermin-Buchen
   const [showBuchen, setShowBuchen] = useState(false)

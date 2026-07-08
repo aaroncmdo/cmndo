@@ -43,6 +43,15 @@ describe('berlinWallClockToUtc', () => {
   })
 })
 
+describe('toBerlinWallClock (Google-Sync-Payload — Berlin-Wall statt UTC)', () => {
+  it('Sommer (CEST, +2h): 07:00Z -> 09:00 Berlin-Wall ohne Offset', () => {
+    expect(toBerlinWallClock('2026-06-03T07:00:00.000Z')).toBe('2026-06-03T09:00:00')
+  })
+  it('Winter (CET, +1h): 08:00Z -> 09:00 Berlin-Wall', () => {
+    expect(toBerlinWallClock('2026-01-15T08:00:00.000Z')).toBe('2026-01-15T09:00:00')
+  })
+})
+
 describe('formatBerlin', () => {
   it('Sommer: 07:00Z -> "09:00" (Berlin)', () => {
     expect(formatBerlin('2026-06-03T07:00:00.000Z', { hour: '2-digit', minute: '2-digit' })).toBe('09:00')

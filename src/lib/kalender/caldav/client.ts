@@ -265,27 +265,9 @@ const SUMMARY_RE = /^SUMMARY:(.+)$/m
 const LOCATION_RE = /^LOCATION:(.+)$/m
 const UID_RE = /^UID:(.+)$/m
 
-export async function listCalendarEventsFull(
-  creds: CalDavCredentials,
-  calendarUrl: string,
-  rangeStartIso: string,
-  rangeEndIso: string,
-): Promise<CalDavEventFull[]> {
-  const client = await createClient(creds)
-  const calendars = await client.fetchCalendars()
-  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
-  if (!cal) return []
-
-  let objects: unknown[]
-  try {
-    objects = (await Promise.race([
-      client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
-      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
-    ])) as unknown[]
-  } catch (err) {
-    throw new CalDavError(`Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`, 'other', err)
-  }
-
+// Gemeinsames Parsing: tsdav-DAVObject[] -> CalDavEventFull[] (DTSTART/DTEND/UID/SUMMARY/LOCATION).
+// Fail-safe: kaputte VEVENTs werden geskippt, nicht die ganze Liste.
+function parseCalDavObjectsFull(objects: unknown[]): CalDavEventFull[] {
   const events: CalDavEventFull[] = []
   for (const obj of objects) {
     const raw = obj as { data?: string; url?: string }
@@ -307,6 +289,116 @@ export async function listCalendarEventsFull(
     }
   }
   return events
+}
+
+export async function listCalendarEventsFull(
+  creds: CalDavCredentials,
+  calendarUrl: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<CalDavEventFull[]> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const cal = calendars.find((c) => String(c.url) === calendarUrl) ?? calendars[0]
+  if (!cal) return []
+
+  let objects: unknown[]
+  try {
+    objects = (await Promise.race([
+      client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
+      new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
+    ])) as unknown[]
+  } catch (err) {
+    throw new CalDavError(`Event-Liste konnte nicht geladen werden: ${err instanceof Error ? err.message : String(err)}`, 'other', err)
+  }
+
+  return parseCalDavObjectsFull(objects)
+}
+
+// Multi-Kalender (2026-07-08, Aaron): Events aus ALLEN Kalendern des Accounts, aggregiert.
+// Busy-Blocking soll alle Termine (Arbeit/Privat/…) abdecken. Per-Kalender fail-soft (ein
+// Kalender-Timeout blockt die anderen nicht) + Dedup per UID (falls ein Event in mehreren
+// Kalendern liegt). Genutzt vom Cache-Sync + der Live-Event-Liste.
+export async function listAllCalendarEventsFull(
+  creds: CalDavCredentials,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<CalDavEventFull[]> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const all: CalDavEventFull[] = []
+  const seenUids = new Set<string>()
+  for (const cal of calendars) {
+    let objects: unknown[]
+    try {
+      objects = (await Promise.race([
+        client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
+        new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
+      ])) as unknown[]
+    } catch {
+      continue // per-Kalender fail-soft
+    }
+    for (const ev of parseCalDavObjectsFull(objects)) {
+      if (ev.uid && seenUids.has(ev.uid)) continue
+      if (ev.uid) seenUids.add(ev.uid)
+      all.push(ev)
+    }
+  }
+  return all
+}
+
+// CalDAV-Debug-Probe (2026-07): pro Kalender die Objekt-Anzahl im Fenster UND gesamt, plus ob
+// die gespeicherte calendar_url exakt matcht. Diagnostiziert "verbunden, aber 0 Events" —
+// unterscheidet: Events ausserhalb des [now,+N]-Fensters (windowed=0, total>0), leerer Kalender
+// (beide 0), oder URL-Mismatch (matchedStoredUrl=false -> Sync fiel auf calendars[0] zurueck).
+export type CalDavCalendarProbe = {
+  url: string
+  displayName: string
+  isStoredCalendar: boolean
+  windowedObjects: number
+  totalObjects: number
+}
+
+export async function probeAllCalendars(
+  creds: CalDavCredentials,
+  storedCalendarUrl: string,
+  rangeStartIso: string,
+  rangeEndIso: string,
+): Promise<{ calendars: CalDavCalendarProbe[]; matchedStoredUrl: boolean }> {
+  const client = await createClient(creds)
+  const calendars = await client.fetchCalendars()
+  const out: CalDavCalendarProbe[] = []
+  for (const cal of calendars) {
+    const url = String(cal.url)
+    let windowedObjects = 0
+    let totalObjects = 0
+    try {
+      const w = (await client.fetchCalendarObjects({
+        calendar: cal,
+        timeRange: { start: rangeStartIso, end: rangeEndIso },
+      })) as unknown[]
+      windowedObjects = w?.length ?? 0
+    } catch {
+      /* per-Kalender fail-soft */
+    }
+    try {
+      const all = (await client.fetchCalendarObjects({ calendar: cal })) as unknown[]
+      totalObjects = all?.length ?? 0
+    } catch {
+      /* per-Kalender fail-soft */
+    }
+    out.push({
+      url,
+      displayName:
+        typeof cal.displayName === 'string'
+          ? cal.displayName
+          : url.replace(/\/$/, '').split('/').pop() ?? url,
+      isStoredCalendar: url === storedCalendarUrl,
+      windowedObjects,
+      totalObjects,
+    })
+  }
+  return { calendars: out, matchedStoredUrl: out.some((c) => c.isStoredCalendar) }
 }
 
 type CalDavEventInput = {

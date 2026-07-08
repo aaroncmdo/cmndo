@@ -22,6 +22,17 @@ const nextConfig: NextConfig = {
   // module '@napi-rs/canvas'". Als serverExternalPackage laeuft pdf-parse als
   // echtes node_modules-Modul; sein require('@napi-rs/canvas') loest normal auf.
   serverExternalPackages: ['pdf-parse'],
+  // SV-Onboarding-Doku-Upload (uploadSvPflichtdokument / uploadSaVorlage) erlaubt
+  // 15 MB PDFs/Scans. Server-Actions capen den Request-Body per Default bei 1 MB
+  // -> jede Datei > 1 MB warf einen Framework-Fehler VOR dem Action-Code, der
+  // User sah "Upload fehlgeschlagen". Limit auf 20 MB (15 MB Datei + Multipart-
+  // Overhead) angehoben; Bucket fall-dokumente erlaubt bis 50 MB. Next 16:
+  // serverActions liegt unter experimental (config-shared.d.ts:634).
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '20mb',
+    },
+  },
   // Doc-45-Perf-Nachzug: AVIF zusaetzlich zu WebP fuer next/image. AVIF ist
   // ~20-30% kleiner als WebP bei Foto-Heros (LP-Hero-PNGs 670-690 KB Quelle)
   // -> kleinerer LCP-Transfer auf ~95 % der Browser. Trade-off: erstmaliges
@@ -48,6 +59,12 @@ const nextConfig: NextConfig = {
       'node_modules/pdf-parse/**/*',
       'node_modules/pdfjs-dist/**/*',
     ],
+    // QR-Pool-Flyer: die A5-Vorlage ins Standalone tracen, damit die Flyer-
+    // Server-Actions (generateFlyerPdf) sie auf dem VPS via
+    // process.cwd()/public/... finden — sonst fehlt das PDF im getraceten
+    // Standalone-Output (analog OCR-Force-Include oben).
+    '/admin/werkstaetten/qr-pool': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
+    '/admin/werkstaetten/qr-pool/drucken': ['public/flyer-templates/werkstatt-partner-a5.pdf'],
   },
   // Turbopack-Alias für 3D-Pakete die NICHT installiert sind (Feldmodus-Backlog).
   // three/@deck.gl/@loaders.gl würden OOM im CI-Build verursachen (4 GB Runner).
@@ -210,6 +227,13 @@ const nextConfig: NextConfig = {
         destination: '/admin/sachverstaendige',
         permanent: true,
       },
+      // Aaron 07.07.: SV-Leads-Verwaltung wanderte in die Sachverstaendige-
+      // Sektion (Drawer ueber der Karte). Alte Bookmarks -> neue Route.
+      {
+        source: '/admin/sv-leads',
+        destination: '/admin/sachverstaendige/leads',
+        permanent: true,
+      },
       // AAR-889 (14.05.26): /admin/sv-onboarding zeigte vorher auf
       // /admin/sachverstaendige/neu — der selbst ein RSC-Stub auf
       // /anlegen war (Sweep-Eintrag unten). Direktes Ziel statt
@@ -324,6 +348,28 @@ const nextConfig: NextConfig = {
       { source: '/sv-portal/anfragen', destination: '/gutachter/einstellungen/embed/anfragen', permanent: true },
       { source: '/sv-portal/embed-sites', destination: '/gutachter/einstellungen/embed', permanent: true },
       { source: '/sv-portal/embed-sites/:path*', destination: '/gutachter/einstellungen/embed/:path*', permanent: true },
+      // Werkstatt-Konsolidierung (06.07.): "Meine Vermittlungen" in "Auftraege" vereint.
+      // Als HTTP-308 statt RSC-redirect()-Stub: die page.tsx mit redirect('/werkstatt/auftraege')
+      // traf exakt die AAR-889-Falle oben (RSC-Redirect-Stub triggert React-#310/#418) — der
+      // Prod-Smoke 06.07. bestaetigte 200 mit leerer Shell + KEINEN Redirect. page.tsx geloescht.
+      { source: '/werkstatt/vermittlungen', destination: '/werkstatt/auftraege', permanent: true },
+      // Kunde-Portal (SP4 1+): /kunde/einstellungen wurde nach /kunde/profil konsolidiert.
+      // Als HTTP-308 statt RSC-redirect()-Stub — die page.tsx mit redirect('/kunde/profil') traf
+      // exakt dieselbe AAR-889-Falle (leere 200-Shell, kein Redirect; Prod-Smoke 07.07. als
+      // test-kunde bestaetigt). page.tsx geloescht.
+      { source: '/kunde/einstellungen', destination: '/kunde/profil', permanent: true },
+      // Gutachter-Onboarding (ARCH-1, seit 04.2026): /gutachter/onboarding war ein data-driven
+      // RSC-redirect()-Router (4 SV-State-Faelle) -> traf die AAR-889-Falle (Prod-Smoke 07.07. als
+      // smoke-sv: leere 200-Shell, kein Redirect). Der aktive Flow liegt eh in /gutachter/willkommen,
+      // das ALLE Faelle selbst routet (freigeschaltet->/gutachter Z.160, no-sv Z.57, sonst Steps).
+      // Statischer 308 dorthin + page.tsx geloescht.
+      { source: '/gutachter/onboarding', destination: '/gutachter/willkommen', permanent: true },
+      // Kunde-Portal (AAR-450): /kunde/termin (Termin-Liste) wurde aus der Nav entfernt — Termine
+      // leben jetzt in den Fall-Karten. Als HTTP-308 statt permanentRedirect()-Stub: die page.tsx
+      // traf die AAR-889-Falle (leere 200-Shell, kein Redirect; Prod-Smoke 07.07. als test-kunde
+      // bestaetigt). Exakt-Match -> die Token-Subroute /kunde/termin/[token] (WhatsApp-Magic-Links
+      // fuer SV-Termin-Tracking) bleibt unberuehrt.
+      { source: '/kunde/termin', destination: '/kunde', permanent: true },
     ]
   },
 };

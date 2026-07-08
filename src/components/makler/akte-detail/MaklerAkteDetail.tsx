@@ -13,7 +13,6 @@ import {
   EuroIcon,
   ShieldCheckIcon,
   CalendarIcon,
-  FileTextIcon,
   LayoutListIcon,
   MessageSquareIcon,
   SparklesIcon,
@@ -24,7 +23,6 @@ import {
 } from 'lucide-react'
 import type {
   FallDetail,
-  FallDetailDocument,
   TimelineEvent,
   MaklerRow,
   MaklerChatMessage,
@@ -33,16 +31,13 @@ import type {
 import { MAIN_PHASE_LABEL, SUBPHASE_LABEL } from '@/lib/claims/lifecycle'
 import { MaklerChatTab } from './MaklerChatTab'
 import { MaklerCopilotTab } from './MaklerCopilotTab'
-// AAR-727 Kandidat 1: Shared Download-Liste — Makler nutzt grid-Variante.
-import DokumenteDownloadListe, { type DokumentItem } from '@/components/shared/DokumenteDownloadListe'
 import { SectionCard } from '@/components/shared/SectionCard'
 import EmptyState from '@/components/shared/EmptyState'
 
-type TabKey = 'overview' | 'timeline' | 'documents' | 'chat' | 'copilot'
+type TabKey = 'overview' | 'timeline' | 'chat' | 'copilot'
 
 type Props = {
   detail: FallDetail
-  signedUrls: Record<string, string | null>
   initialTab: TabKey
   makler: MaklerRow
   currentUserId: string
@@ -93,7 +88,6 @@ function fullName(
 
 export function MaklerAkteDetail({
   detail,
-  signedUrls,
   initialTab,
   currentUserId,
   initialChatMessages,
@@ -102,7 +96,7 @@ export function MaklerAkteDetail({
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const { fall, kunde, provision, documents, timeline } = detail
+  const { fall, kunde, provision, timeline } = detail
 
   function selectTab(next: TabKey) {
     setTab(next)
@@ -221,13 +215,6 @@ export function MaklerAkteDetail({
           icon={<CalendarIcon width={15} height={15} />}
         />
         <TabButton
-          active={tab === 'documents'}
-          onClick={() => selectTab('documents')}
-          label="Dokumente"
-          icon={<FileTextIcon width={15} height={15} />}
-          count={documents.length}
-        />
-        <TabButton
           active={tab === 'chat'}
           onClick={() => selectTab('chat')}
           label="Chat"
@@ -246,9 +233,6 @@ export function MaklerAkteDetail({
         <OverviewPanel detail={detail} gesamtforderung={gesamtforderung} />
       ) : null}
       {tab === 'timeline' ? <TimelinePanel events={timeline} /> : null}
-      {tab === 'documents' ? (
-        <DocumentsPanel docs={documents} signedUrls={signedUrls} />
-      ) : null}
       {tab === 'chat' ? (
         <MaklerChatTab
           fallId={fall.id}
@@ -566,37 +550,6 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
         ))}
       </ol>
     </SectionCard>
-  )
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Documents Panel — AAR-727 Kandidat 1: shared DokumenteDownloadListe
-// ─────────────────────────────────────────────────────────────────────────────
-
-function DocumentsPanel({
-  docs,
-  signedUrls,
-}: {
-  docs: FallDetailDocument[]
-  signedUrls: Record<string, string | null>
-}) {
-  const items: DokumentItem[] = docs.map((d) => ({
-    id: d.id,
-    name: d.original_filename ?? d.dokument_typ,
-    url: signedUrls[d.id] ?? null,
-    typ: d.dokument_typ,
-    mimeType: d.mime_type,
-    groesseBytes: d.groesse_bytes,
-    createdAt: d.hochgeladen_am,
-  }))
-  return (
-    <DokumenteDownloadListe
-      variant="grid"
-      rolle="makler"
-      emptyTitle="Noch keine Dokumente"
-      emptyDescription="Dokumente erscheinen hier, sobald Kunde oder SV sie hochladen."
-      dokumente={items}
-    />
   )
 }
 

@@ -78,7 +78,7 @@ Disaster-Recovery-Runbook: `scripts/disaster-recovery-runbook.md`
   - `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
   - `SENTRY_AUTH_TOKEN`
   - `CRON_SECRET` (fuer Backup Action)
-  - `PRODUCTION_URL` (z.B. `https://cmndo.vercel.app`, fuer Backup Action)
+  - `PRODUCTION_URL` (z.B. `https://app.claimondo.de`, fuer Backup Action)
 - [ ] **Vercel**: Production Branch auf `main` belassen (default), `staging` wird automatisch als Preview deployed
 - [ ] **Team informieren**: Hunde sollen ab jetzt zu `staging` pushen statt direkt `main` (Aaron entscheidet Timing)
 

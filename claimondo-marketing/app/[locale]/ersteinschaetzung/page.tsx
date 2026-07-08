@@ -130,9 +130,9 @@ export default function ErsteinschaetzungPage() {
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
             <Link
-              href="/schaden-melden"
+              href="/check"
               className="inline-flex items-center gap-2 rounded-full bg-white px-7 py-4 text-base font-bold text-claimondo-navy shadow-claimondo-md transition-all hover:bg-claimondo-light-blue/90"
-              data-tracking="cta-ee-melden"
+              data-tracking="cta-ee-check"
             >
               {t('hero_cta_primary')}
               <ChevronRight className="h-5 w-5" aria-hidden />
@@ -277,7 +277,7 @@ export default function ErsteinschaetzungPage() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <Link
-              href="/schaden-melden"
+              href="/check"
               className="inline-flex items-center gap-2 rounded-full bg-claimondo-ondo px-7 py-3.5 text-base font-bold text-white shadow-cta-ondo transition-all duration-200 hover:bg-claimondo-light-blue active:scale-[0.98]"
             >
               {t('cta_primary')}

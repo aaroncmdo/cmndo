@@ -270,4 +270,176 @@ describe('convertLeadToClaim', () => {
     expect(payload.reparatur_werkstatt_id).toBeNull()
     expect(payload.reparatur_werkstatt_quelle).toBeNull()
   })
+
+  it('propagiert reparaturwunsch + vermittlung_status + extern vom Lead auf den Claim-Insert', async () => {
+    primeResponses([
+      { data: { id: 'lead-rwu', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster',
+                reparaturwunsch: 'reparatur', reparatur_vermittlung_status: 'eigene', reparatur_werkstatt_extern: 'Karosserie Müller' } },
+      { data: [] },
+      { data: { id: 'claim-rwu', claim_nummer: 'CLM-RWU' } },
+      { data: { id: 'person-9' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-rwu' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.reparaturwunsch).toBe('reparatur')
+    expect(payload.reparatur_vermittlung_status).toBe('eigene')
+    expect(payload.reparatur_werkstatt_extern).toBe('Karosserie Müller')
+  })
+
+  it('setzt reparaturwunsch=null + vermittlung_status default offen wenn der Lead keinen hat', async () => {
+    primeResponses([
+      { data: { id: 'lead-def', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } },
+      { data: [] },
+      { data: { id: 'claim-def', claim_nummer: 'CLM-DEF' } },
+      { data: { id: 'person-10' } },
+      { data: null },
+      { data: null },
+      { data: null },
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-def' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.reparaturwunsch).toBeNull()
+    expect(payload.reparatur_vermittlung_status).toBe('offen')
+    expect(payload.reparatur_werkstatt_extern).toBeNull()
+  })
+
+  // ─── SP2 Task 4: reparatur_termine-Insert bei Conversion ─────────────────
+
+  it('SP2 T4: legt reparatur_termine-Zeile (status=angefragt) an wenn Lead reparatur_werkstatt_id + reparatur_wunschtermin hat', async () => {
+    // Sequence:
+    //  1 leads select (load + Idempotenz)
+    //  2 profiles select (KB Round-Robin -> leer -> null)
+    //  3 claims insert
+    //  4 personen insert (geschaedigter, account-los)
+    //  5 claim_parties insert
+    //  6 reparatur_termine insert  <-- neuer SP2-T4-Insert
+    //  7 faelle_claim_bridge upsert
+    //  8 leads update
+    primeResponses([
+      {
+        data: {
+          id: 'lead-rt',
+          schadens_art: 'haftpflicht',
+          gegner_bekannt: false,
+          vorname: 'Max',
+          nachname: 'Muster',
+          reparatur_werkstatt_id: 'werkstatt-rt-1',
+          reparatur_wunschtermin: '2026-07-10T08:00:00.000Z',
+        },
+      }, // 1 leads select
+      { data: [] },                                              // 2 profiles select
+      { data: { id: 'claim-rt', claim_nummer: 'CLM-RT' } },    // 3 claims insert
+      { data: { id: 'person-rt' } },                            // 4 personen insert
+      { data: null },                                            // 5 claim_parties insert
+      { data: null },                                            // 6 reparatur_termine insert
+      { data: null },                                            // 7 faelle_claim_bridge upsert
+      { data: null },                                            // 8 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-rt', triggerByUserId: 'user-dispatcher' })
+    expect(r.ok).toBe(true)
+
+    // reparatur_termine-Insert muss abgesetzt worden sein
+    const rtInsert = operations.find((o) => o.table === 'reparatur_termine' && o.op === 'insert')
+    expect(rtInsert).toBeTruthy()
+    const rtPayload = rtInsert!.payload as Record<string, unknown>
+    expect(rtPayload.claim_id).toBe('claim-rt')
+    expect(rtPayload.werkstatt_id).toBe('werkstatt-rt-1')
+    expect(rtPayload.wunschtermin).toBe('2026-07-10T08:00:00.000Z')
+    expect(rtPayload.status).toBe('angefragt')
+    expect(rtPayload.erstellt_von).toBe('user-dispatcher')
+  })
+
+  it('SP2 T4: legt KEINE reparatur_termine-Zeile an wenn reparatur_wunschtermin fehlt', async () => {
+    // Lead hat Werkstatt-Zuweisung, aber kein Wunschtermin (Dispatcher-Vermittlung ohne Flow-Termin)
+    primeResponses([
+      {
+        data: {
+          id: 'lead-no-rt',
+          schadens_art: 'haftpflicht',
+          gegner_bekannt: false,
+          vorname: 'Max',
+          nachname: 'Muster',
+          reparatur_werkstatt_id: 'werkstatt-rt-2',
+          // reparatur_wunschtermin absichtlich nicht gesetzt
+        },
+      }, // 1 leads select
+      { data: [] },                                                // 2 profiles select
+      { data: { id: 'claim-no-rt', claim_nummer: 'CLM-NO-RT' } }, // 3 claims insert
+      { data: { id: 'person-nrt' } },                              // 4 personen insert
+      { data: null },                                              // 5 claim_parties insert
+      // KEIN reparatur_termine-Insert (Gate: beide Felder muessen gesetzt sein)
+      { data: null },                                              // 6 faelle_claim_bridge upsert
+      { data: null },                                              // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-no-rt' })
+    expect(r.ok).toBe(true)
+
+    const rtInsert = operations.find((o) => o.table === 'reparatur_termine' && o.op === 'insert')
+    expect(rtInsert).toBeUndefined()
+  })
+
+  // ─── KB-Skip fuer Selbstzahler (Aaron 06.07.) ────────────────────────────
+  it('KB-Skip: Selbstzahler-Lead bekommt KEINEN Kundenbetreuer (Round-Robin uebersprungen)', async () => {
+    // abrechnungsweg='selbstzahler' -> reiner Reparatur-Vorgang ohne SV/Regulierung
+    // -> kein KB (analog embed-B). Der KB-Round-Robin (profiles-Select) faellt weg,
+    // die Response-Sequenz hat daher ein Element WENIGER als der Normalpfad.
+    primeResponses([
+      { data: { id: 'lead-sz', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', abrechnungsweg: 'selbstzahler' } }, // 1 leads select
+      { data: { id: 'claim-sz', claim_nummer: 'CLM-SZ' } }, // 2 claims insert (KEIN profiles-Select davor)
+      { data: { id: 'person-sz' } },                         // 3 personen insert
+      { data: null },                                        // 4 claim_parties insert
+      { data: null },                                        // 5 faelle_claim_bridge upsert
+      { data: null },                                        // 6 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-sz' })
+    expect(r.ok).toBe(true)
+
+    // Round-Robin uebersprungen -> gar kein profiles-Select.
+    expect(operations.filter((o) => o.table === 'profiles')).toHaveLength(0)
+
+    // claims-Insert traegt kundenbetreuer_id = null + abrechnungsweg durchgereicht.
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.kundenbetreuer_id).toBeNull()
+    expect(payload.abrechnungsweg).toBe('selbstzahler')
+    if (r.ok) expect(r.kundenbetreuerId).toBeNull()
+  })
+
+  it('KB-Skip: Nicht-Selbstzahler (haftpflicht) durchlaeuft den KB-Round-Robin weiterhin', async () => {
+    // Kontrast/Regressions-Guard: ohne abrechnungsweg='selbstzahler' MUSS das
+    // profiles-Select (Round-Robin) wie gehabt laufen. Leerer Betreuer-Pool ->
+    // KB null, aber der Select findet statt.
+    primeResponses([
+      { data: { id: 'lead-hp', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
+      { data: [] },                                          // 2 profiles select (Round-Robin -> leer)
+      { data: { id: 'claim-hp', claim_nummer: 'CLM-HP' } }, // 3 claims insert
+      { data: { id: 'person-hp' } },                         // 4 personen insert
+      { data: null },                                        // 5 claim_parties insert
+      { data: null },                                        // 6 faelle_claim_bridge upsert
+      { data: null },                                        // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-hp' })
+    expect(r.ok).toBe(true)
+
+    // Round-Robin lief -> mindestens ein profiles-Select.
+    expect(operations.filter((o) => o.table === 'profiles').length).toBeGreaterThanOrEqual(1)
+  })
 })

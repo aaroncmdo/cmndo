@@ -20,6 +20,34 @@ function formatDate(iso: string | null): string {
   return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
+// Eskalationsstufe -> Design-Token-Klasse. Explizite Map statt
+// String-Interpolation `text-${stufe}` — Tailwind scannt statisch, eine
+// interpolierte Klasse existiert nur zufaellig und faellt bei Purge raus.
+const STUFE_CLS = {
+  danger: 'text-danger',
+  'warning-strong': 'text-warning-strong',
+  warning: 'text-warning',
+} as const
+type Stufe = keyof typeof STUFE_CLS
+
+// Berlin-Kalendertag als YYYY-MM-DD (sv-SE liefert exakt dieses Format).
+function berlinTodayIsoDate(): string {
+  return new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Berlin',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  }).format(new Date())
+}
+
+// Ganze Kalendertage zwischen zwei YYYY-MM-DD-Strings (beide als UTC-Mitternacht
+// interpretiert -> reiner Tages-Diff, kein Off-by-one durch Uhrzeit/TZ-Versatz).
+function tageZwischen(vonIsoDate: string, bisIsoDate: string): number {
+  const von = Date.parse(`${vonIsoDate}T00:00:00Z`)
+  const bis = Date.parse(`${bisIsoDate}T00:00:00Z`)
+  return Math.round((bis - von) / (24 * 60 * 60 * 1000))
+}
+
 export default async function SaeumigeSvsPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -28,14 +56,19 @@ export default async function SaeumigeSvsPage() {
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (profile?.rolle !== 'admin') redirect('/')
 
-  const heute = new Date()
-  const grenzDatum = new Date(heute.getTime() - 14 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+  // Reine Berlin-Kalendertage — faellig_am ist ein DATE (YYYY-MM-DD), also
+  // konsistent auf Tagesbasis vergleichen (kein Mischen mit Uhrzeit/TZ).
+  const heuteIso = berlinTodayIsoDate()
+  const grenzDatum = new Date(Date.parse(`${heuteIso}T00:00:00Z`) - 14 * 24 * 60 * 60 * 1000)
+    .toISOString()
+    .slice(0, 10)
 
   const { data: faellige } = await supabase
     .from('abrechnungen')
     .select('id, abrechnungs_nr, empfaenger_id, empfaenger_name, empfaenger_email, summe_brutto, faellig_am, status')
     .eq('empfaenger_typ', 'sv')
     .is('bezahlt_am', null)
+    .neq('status', 'im_einzug')
     .is('storniert_am', null)
     .not('faellig_am', 'is', null)
     .lte('faellig_am', grenzDatum)
@@ -43,7 +76,7 @@ export default async function SaeumigeSvsPage() {
 
   const rows = (faellige ?? []).map((a) => {
     const tageUeberfaellig = a.faellig_am
-      ? Math.floor((heute.getTime() - new Date(a.faellig_am as string).getTime()) / (24 * 60 * 60 * 1000))
+      ? tageZwischen(a.faellig_am as string, heuteIso)
       : 0
     return { ...a, tage_ueberfaellig: tageUeberfaellig }
   })
@@ -78,7 +111,7 @@ export default async function SaeumigeSvsPage() {
             </Thead>
             <Tbody>
               {rows.map((r) => {
-                const stufe = r.tage_ueberfaellig >= 28 ? 'danger' : r.tage_ueberfaellig >= 21 ? 'warning-strong' : 'warning'
+                const stufe: Stufe = r.tage_ueberfaellig >= 28 ? 'danger' : r.tage_ueberfaellig >= 21 ? 'warning-strong' : 'warning'
                 return (
                   <Tr key={r.id} className="border-b border-claimondo-border/50 hover:bg-claimondo-bg/40">
                     <Td className="px-4 font-mono text-xs">{r.abrechnungs_nr}</Td>
@@ -88,7 +121,7 @@ export default async function SaeumigeSvsPage() {
                     </Td>
                     <Td className="px-4 text-right tabular-nums">{eur(Number(r.summe_brutto ?? 0))}</Td>
                     <Td className="px-4 text-center">{formatDate(r.faellig_am as string | null)}</Td>
-                    <Td className={`px-4 text-center font-semibold text-${stufe}`}>{r.tage_ueberfaellig}d</Td>
+                    <Td className={`px-4 text-center font-semibold ${STUFE_CLS[stufe]}`}>{r.tage_ueberfaellig}d</Td>
                     <Td className="px-4">{r.status}</Td>
                     <Td className="px-4 text-right">
                       <Link

@@ -79,6 +79,7 @@ export async function requirePortalAccess(
   }
 
   const rolle = profile.rolle as UserRolle
+
   if (!allowedRollen.includes(rolle)) {
     redirect(roleToPath(rolle))
   }

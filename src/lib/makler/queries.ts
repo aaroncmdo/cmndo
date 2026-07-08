@@ -16,6 +16,8 @@ export type MaklerRow = {
   ansprechpartner_vorname: string
   status: string
   erstellt_am: string
+  onboarding_abgeschlossen: boolean
+  vermittlung_prompt_gesehen: boolean
 }
 
 /** Holt die Makler-Row für den eingeloggten User (oder null). */
@@ -25,7 +27,7 @@ export async function getCurrentMakler(): Promise<MaklerRow | null> {
   if (!user) return null
   const { data } = await supabase
     .from('makler')
-    .select('id, user_id, firma, ansprechpartner_vorname, status, erstellt_am')
+    .select('id, user_id, firma, ansprechpartner_vorname, status, erstellt_am, onboarding_abgeschlossen, vermittlung_prompt_gesehen')
     .eq('user_id', user.id)
     .maybeSingle()
   return data
@@ -235,16 +237,6 @@ export type TimelineEvent = {
   meta?: string
 }
 
-export type FallDetailDocument = {
-  id: string
-  dokument_typ: string
-  original_filename: string | null
-  mime_type: string | null
-  groesse_bytes: number | null
-  hochgeladen_am: string | null
-  storage_path: string | null
-}
-
 export type FallDetailProvision = {
   id: string
   betrag_netto_eur: number
@@ -313,7 +305,6 @@ export type FallDetail = {
   }
   kunde: FallDetailKunde | null
   provision: FallDetailProvision | null
-  documents: FallDetailDocument[]
   timeline: TimelineEvent[]
 }
 
@@ -418,14 +409,9 @@ export async function getMaklerFallDetail(
       }
     : null
 
-  const { data: documents } = await supabase
-    .from('fall_dokumente')
-    .select(
-      'id, dokument_typ, original_filename, mime_type, groesse_bytes, hochgeladen_am, storage_path',
-    )
-    .eq('fall_id', fallId)
-    .is('geloescht_am', null)
-    .order('hochgeladen_am', { ascending: false })
+  // Datenschutz-Entscheid (Aaron 04.07.): Makler sehen KEINE Kundendokumente (Vermittler-
+  // Datenminimierung). Frueher wurde hier fall_dokumente gelesen — es gibt aber keine
+  // Makler-RLS-Policy, der Read lieferte immer 0 (leerer Tab). Feature entfernt.
 
   const timeline = buildTimelineForFall(
     fall as unknown as FallDetail['fall'],
@@ -446,7 +432,6 @@ export async function getMaklerFallDetail(
     } as unknown as FallDetail['fall'],
     kunde,
     provision,
-    documents: (documents ?? []) as FallDetailDocument[],
     timeline,
   }
 }
@@ -508,31 +493,6 @@ function buildTimelineForFall(
   // Sort ascending, mark latest non-future „done" als „current"
   events.sort((a, b) => (a.timestamp < b.timestamp ? -1 : 1))
   return events
-}
-
-/**
- * Erzeugt Signed-URLs für alle Dokumente eines Falls. Supabase Storage
- * Bucket: `fall-dokumente` (siehe Admin-Settings).
- */
-export async function getDocumentSignedUrls(
-  docs: FallDetailDocument[],
-): Promise<Record<string, string | null>> {
-  if (docs.length === 0) return {}
-  const supabase = await createClient()
-  const result: Record<string, string | null> = {}
-  await Promise.all(
-    docs.map(async (d) => {
-      if (!d.storage_path) {
-        result[d.id] = null
-        return
-      }
-      const { data } = await supabase.storage
-        .from('fall-dokumente')
-        .createSignedUrl(d.storage_path, 3600)
-      result[d.id] = data?.signedUrl ?? null
-    }),
-  )
-  return result
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -719,6 +679,7 @@ export type DashboardActivityItem =
       betrag_netto_eur: number
       status: string
       fall_id: string | null
+      kunde_name: string | null
     }
 
 export type DashboardData = {
@@ -730,6 +691,33 @@ export type DashboardData = {
     konversion: number
   }
   activity: DashboardActivityItem[]
+  /** Makler hat >=1 erfolgreiche Vermittlung (>=1 Provision) — steuert die Erste-Vermittlung-Card. */
+  hatVermittlung: boolean
+  /** Primaerer Promo-Code des Maklers (fuer ShareTools in der Erste-Vermittlung-Card); null wenn keiner. */
+  promoCode: string | null
+}
+
+/**
+ * Leichte Einzel-Query: Anzahl offener Leads (Status neu/quali-offen) eines Maklers
+ * ueber seine Promo-Codes. Extrahiert aus getMaklerDashboardData, damit die
+ * Abrechnungs-Seite die (dorthin verschobene) Pipeline-Karte rendern kann, ohne die
+ * volle Dashboard-Aggregation zu laden.
+ */
+export async function getMaklerOffeneLeadsCount(maklerId: string): Promise<number> {
+  const supabase = await createClient()
+  const { data: promoRows } = await supabase
+    .from('promotion_codes')
+    .select('id')
+    .eq('makler_id', maklerId)
+  const promoIds = (promoRows ?? []).map((p) => p.id)
+  if (promoIds.length === 0) return 0
+  const { count } = await supabase
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    // gleiche Definition wie getMaklerDashboardData (Status-Enum-Audit: 'quali-offen').
+    .in('status', ['neu', 'quali-offen'])
+    .in('promotion_code_id', promoIds)
+  return count ?? 0
 }
 
 /**
@@ -746,11 +734,13 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString()
 
   // Promo-Code-IDs einmal auflösen, dann als IN-Liste wiederverwenden.
+  // `code` zusaetzlich fuer die Erste-Vermittlung-Card (ShareTools braucht den Code-Slug).
   const { data: promoRows } = await supabase
     .from('promotion_codes')
-    .select('id')
+    .select('id, code')
     .eq('makler_id', maklerId)
   const promoIds = (promoRows ?? []).map((p) => p.id)
+  const promoCode = (promoRows ?? [])[0]?.code ?? null
 
   // Wenn keine Promo-Codes existieren → alle lead-basierten Queries sind leer
   // und müssen nicht gefeuert werden.
@@ -764,12 +754,14 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
     provReleasedRes,
     activityLeadsRes,
     activityProvRes,
+    provTotalRes,
   ] = await Promise.all([
     hasPromos
       ? supabase
           .from('leads')
           .select('id', { count: 'exact', head: true })
-          .in('status', ['neu', 'qualifiziert'])
+          // FIX (Status-Enum-Audit 05.07.): 'qualifiziert' ∉ lead_status-Enum -> 'quali-offen' (wie spontan.ts).
+          .in('status', ['neu', 'quali-offen'])
           .in('promotion_code_id', promoIds)
       : Promise.resolve({ data: null, count: 0, error: null }),
     hasPromos
@@ -804,10 +796,24 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       : Promise.resolve({ data: [], error: null }),
     supabase
       .from('makler_provisionen')
-      .select('id, betrag_netto_eur, status, trigger_at, fall_id')
+      .select(`
+        id, betrag_netto_eur, status, trigger_at, fall_id,
+        fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+          claims:claim_id(
+            leads:lead_id(vorname, nachname),
+            kunde:geschaedigter_user_id(vorname, nachname)
+          )
+        )
+      `)
       .eq('makler_id', maklerId)
       .order('trigger_at', { ascending: false })
       .limit(5),
+    // Erste-Vermittlung-Signal: hat der Makler >=1 Provision (= mind. eine erfolgreiche
+    // Vermittlung)? RLS-sicher (Makler liest eigene Provisionen). head+count = billig.
+    supabase
+      .from('makler_provisionen')
+      .select('id', { count: 'exact', head: true })
+      .eq('makler_id', maklerId),
   ])
 
   const monatPending = (provPendingRes.data ?? []).reduce(
@@ -823,6 +829,7 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
   const totalLeads = leadsTotalRes.count ?? 0
   const aktiveAkten = faelleRes.count ?? 0
   const konversion = totalLeads > 0 ? aktiveAkten / totalLeads : 0
+  const hatVermittlung = (provTotalRes.count ?? 0) >= 1
 
   // Activity-Merge: Leads + Provisionen nach Timestamp DESC, Top 10
   const leadsActivity: DashboardActivityItem[] = (activityLeadsRes.data ?? []).map(
@@ -834,16 +841,34 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       status: l.status,
     }),
   )
-  const provActivity: DashboardActivityItem[] = (activityProvRes.data ?? []).map(
-    (p) => ({
+  const provActivity: DashboardActivityItem[] = (activityProvRes.data ?? []).map((p) => {
+    // Value-Loop-Story: Kunden-/Lead-Name aus dem Nested-Embed (Array|Objekt je Cardinality
+    // normalisieren, AGENTS §6). kunde (geschaedigter) hat Vorrang, sonst der Lead-Name.
+    const fallRaw = (p as { fall?: unknown }).fall
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] : fallRaw
+    const claimRaw = (fall as { claims?: unknown } | null | undefined)?.claims
+    const claim = Array.isArray(claimRaw) ? claimRaw[0] : claimRaw
+    const nameOf = (raw: unknown): string | null => {
+      const o = (Array.isArray(raw) ? raw[0] : raw) as
+        | { vorname?: string | null; nachname?: string | null }
+        | null
+        | undefined
+      const n = [o?.vorname, o?.nachname].filter(Boolean).join(' ').trim()
+      return n.length > 0 ? n : null
+    }
+    const kunde_name =
+      nameOf((claim as { kunde?: unknown } | null | undefined)?.kunde) ??
+      nameOf((claim as { leads?: unknown } | null | undefined)?.leads)
+    return {
       kind: 'provision' as const,
       id: p.id,
       timestamp: p.trigger_at,
       betrag_netto_eur: Number(p.betrag_netto_eur ?? 0),
       status: p.status,
       fall_id: p.fall_id,
-    }),
-  )
+      kunde_name,
+    }
+  })
 
   const activity = [...leadsActivity, ...provActivity]
     .sort((a, b) => (a.timestamp < b.timestamp ? 1 : -1))
@@ -858,6 +883,8 @@ export async function getMaklerDashboardData(maklerId: string): Promise<Dashboar
       konversion,
     },
     activity,
+    hatVermittlung,
+    promoCode,
   }
 }
 
@@ -1234,6 +1261,7 @@ export type MaklerFullProfile = {
   ansprechpartner_vorname: string | null
   ansprechpartner_nachname: string | null
   ihk_nummer: string | null
+  ust_id: string | null
   email: string | null
   telefon: string | null
   adresse_strasse: string | null
@@ -1287,7 +1315,7 @@ export async function getMaklerFullProfile(
   const { data } = await supabase
     .from('makler')
     .select(
-      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
+      'id, firma, ansprechpartner_vorname, ansprechpartner_nachname, ihk_nummer, ust_id, email, telefon, adresse_strasse, adresse_plz, adresse_ort, bank_iban, bank_bic, bank_kontoinhaber, notification_preferences',
     )
     .eq('id', maklerId)
     .maybeSingle()
@@ -1300,6 +1328,7 @@ export async function getMaklerFullProfile(
     ansprechpartner_nachname:
       (data.ansprechpartner_nachname as string | null) ?? null,
     ihk_nummer: (data.ihk_nummer as string | null) ?? null,
+    ust_id: (data.ust_id as string | null) ?? null,
     email: (data.email as string | null) ?? null,
     telefon: (data.telefon as string | null) ?? null,
     adresse_strasse: (data.adresse_strasse as string | null) ?? null,
@@ -1396,4 +1425,132 @@ export async function getMaklerAktiveConsents(
       kunde_name: kundeName,
     }
   })
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Staffelung (Meilenstein-Boni) — 1:1 gespiegelt vom Werkstatt-System
+// (src/lib/werkstatt/queries.ts). Metrik = Anzahl freigegebener/ausgezahlter
+// Provisionen (settled); der DB-Trigger trg_award_makler_staffel vergibt bei
+// genau diesem Count. RLS: Makler liest eigene Zeilen (mss_/msb_makler_read).
+// ─────────────────────────────────────────────────────────────────────────────
+
+/** settled = freigegeben+ausgezahlt (zaehlt fuer Meilensteine), pending = Hinweis. */
+export async function getMaklerVermittlungsCount(
+  maklerId: string,
+): Promise<{ settled: number; pending: number }> {
+  const supabase = await createClient()
+  const [settledRes, pendingRes] = await Promise.all([
+    supabase.from('makler_provisionen').select('id', { count: 'exact', head: true })
+      .eq('makler_id', maklerId).in('status', ['freigegeben', 'ausgezahlt']),
+    supabase.from('makler_provisionen').select('id', { count: 'exact', head: true })
+      .eq('makler_id', maklerId).eq('status', 'pending'),
+  ])
+  return { settled: settledRes.count ?? 0, pending: pendingRes.count ?? 0 }
+}
+
+export async function getMaklerStaffelStufen(
+  maklerId: string,
+): Promise<{ schwelle: number; bonus_betrag_netto: number }[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('makler_staffel_stufen')
+    .select('schwelle, bonus_betrag_netto').eq('makler_id', maklerId)
+    .order('schwelle', { ascending: true })
+  return (data ?? []).map((r) => ({
+    schwelle: Number(r.schwelle),
+    bonus_betrag_netto: Number(r.bonus_betrag_netto),
+  }))
+}
+
+export async function getMaklerStaffelBoni(
+  maklerId: string,
+): Promise<{ schwelle: number; bonus_betrag_netto: number; status: string; erstellt_am: string }[]> {
+  const supabase = await createClient()
+  const { data } = await supabase.from('makler_staffel_bonus')
+    .select('schwelle, bonus_betrag_netto, status, erstellt_am').eq('makler_id', maklerId)
+    .order('schwelle', { ascending: true })
+  return (data ?? []).map((r) => ({
+    schwelle: Number(r.schwelle),
+    bonus_betrag_netto: Number(r.bonus_betrag_netto),
+    status: r.status,
+    erstellt_am: r.erstellt_am,
+  }))
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Provisions-Rechnung — Daten fuer die herunterladbare Makler-Rechnung
+// (freigegebene = abrechenbare Provisionen als Positionen + Aussteller-Stammdaten).
+// ─────────────────────────────────────────────────────────────────────────────
+
+export type MaklerRechnungPositionen = {
+  makler: { firma: string; adresse: string; ustId: string | null; iban: string | null; bic: string | null; kontoinhaber: string | null }
+  positionen: { nr: number; datum: string; fallNr: string; kundeName: string; betragNetto: number }[]
+  nettoGesamt: number
+}
+
+export async function getMaklerRechnungData(maklerId: string): Promise<MaklerRechnungPositionen | null> {
+  const supabase = await createClient()
+  const { data: m } = await supabase
+    .from('makler')
+    .select('firma, adresse_strasse, adresse_plz, adresse_ort, ust_id, bank_iban, bank_bic, bank_kontoinhaber')
+    .eq('id', maklerId)
+    .maybeSingle()
+  if (!m) return null
+
+  // Freigegebene Provisionen = abrechenbar. Namen via bewaehrtem Nested-Embed (wie Dashboard-Activity).
+  const { data: provs } = await supabase
+    .from('makler_provisionen')
+    .select(`
+      id, betrag_netto_eur, trigger_at,
+      fall:faelle_claim_bridge!makler_provisionen_fall_id_fkey(
+        claims:claim_id(
+          claim_nummer,
+          leads:lead_id(vorname, nachname),
+          kunde:geschaedigter_user_id(vorname, nachname)
+        )
+      )
+    `)
+    .eq('makler_id', maklerId)
+    .eq('status', 'freigegeben')
+    .order('trigger_at', { ascending: true })
+
+  const DATE = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const nameOf = (raw: unknown): string | null => {
+    const o = (Array.isArray(raw) ? raw[0] : raw) as { vorname?: string | null; nachname?: string | null } | null | undefined
+    const n = [o?.vorname, o?.nachname].filter(Boolean).join(' ').trim()
+    return n.length > 0 ? n : null
+  }
+  const positionen = (provs ?? []).map((p, i) => {
+    const fallRaw = (p as { fall?: unknown }).fall
+    const fall = Array.isArray(fallRaw) ? fallRaw[0] : fallRaw
+    const claimRaw = (fall as { claims?: unknown } | null | undefined)?.claims
+    const claim = Array.isArray(claimRaw) ? claimRaw[0] : claimRaw
+    const kundeName =
+      nameOf((claim as { kunde?: unknown } | null | undefined)?.kunde) ??
+      nameOf((claim as { leads?: unknown } | null | undefined)?.leads) ??
+      'Vermittlung'
+    return {
+      nr: i + 1,
+      datum: p.trigger_at ? DATE.format(new Date(p.trigger_at as string)) : '—',
+      fallNr: ((claim as { claim_nummer?: string | null } | null | undefined)?.claim_nummer) ?? '—',
+      kundeName,
+      betragNetto: Number(p.betrag_netto_eur ?? 0),
+    }
+  })
+  const nettoGesamt = positionen.reduce((sum, p) => sum + p.betragNetto, 0)
+  const adresse = [m.adresse_strasse, [m.adresse_plz, m.adresse_ort].filter(Boolean).join(' ')]
+    .filter((z) => z && z.trim().length > 0)
+    .join('\n')
+
+  return {
+    makler: {
+      firma: m.firma,
+      adresse,
+      ustId: m.ust_id ?? null,
+      iban: m.bank_iban ?? null,
+      bic: m.bank_bic ?? null,
+      kontoinhaber: m.bank_kontoinhaber ?? null,
+    },
+    positionen,
+    nettoGesamt,
+  }
 }

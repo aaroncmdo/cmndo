@@ -22,6 +22,7 @@ import {
   CLUSTER3_RENAMED_TO_CLAIMS,
 } from '@/lib/faelle/claim-duplicate-columns'
 import { KANZLEI_FAELLE_COLS, upsertKanzleiFall } from '@/lib/kanzlei-fall/upsert-kanzlei-fall'
+import { upsertClaimPayment, type ClaimPaymentFields } from '@/lib/faelle/claim-payments'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { findVerursacherParty, insertVerursacherParty } from '@/lib/claims/verursacher-party'
 import { coerceJaNein, splitPersonName } from '@/lib/stammdaten/field-coercion'
@@ -117,6 +118,20 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'nachbesichtigung_ergebnis',
   'kuerzungs_betrag',
   'regulierung_betrag',
+  // KB-Prozess-Tab-Inputs: fehlten in der Allowlist -> die Inline-Edits in AsSection/
+  // VsReaktionSection/AuszahlungSection brachen mit "nicht in Allowlist" ab (Save = roter
+  // Fehler, nichts gespeichert). Routing + Berechtigung DB-verifiziert:
+  //   as_geforderte_summe/anschlussschreiben_am/vs_quote_grund/vs_kuerzungs_typ
+  //     -> kanzlei_faelle (KANZLEI_FAELLE_COLS -> upsertKanzleiFall, stammdaten.ts:573)
+  //   auszahlung_gutachter_eingegangen_am -> claims (CLAIM_OWNED_DUPLICATE_COLUMNS -> split)
+  // canEditField: KB/Admin haben kein Field-Whitelist (helpers.ts:97) -> ok.
+  // NICHT hier: auszahlung_kunde_betrag/_eingegangen_am = KEINE DB-Spalte (gehoeren als
+  // claim_payments-Row empfaenger='kunde') -> eigener Fix (Payment-Routing + View-Read).
+  'as_geforderte_summe',
+  'anschlussschreiben_am',
+  'vs_quote_grund',
+  'vs_kuerzungs_typ',
+  'auszahlung_gutachter_eingegangen_am',
   // Notizen
   'notizen',
   // AAR-313: Nutzungsausfall + Mietwagen-Kanzlei-Kommunikation
@@ -145,6 +160,10 @@ const FALL_EDITABLE_FIELDS = new Set<string>([
   'vorschaeden_beschreibung',
   // Werkstatt-Kontext:
   'werkstatt_seit_datum',
+  // Reparaturwunsch (Intent) + operativer Vermittlungs-Status (Reparaturwunsch-Feature):
+  'reparaturwunsch',
+  'reparatur_vermittlung_status',
+  'reparatur_werkstatt_extern',
   // Kundensprache für Portal-Übersetzungen (war bisher nur über Lead-Edit):
   'sprache',
   // Zeugen-Kontaktdaten (JSONB-Array):
@@ -548,6 +567,28 @@ export async function updateFallField(
   // Cluster 2 (PR1b) = Hergang/Art/Typ/Flags, Cluster 3 (PR1c) = Rest
   // (gegner_schadennummer/regulierung_betrag in der Allowlist) — alle Maps
   // liefern denselben { faelle/UI-Name: claimsSpalte }-Shape, gleicher Pfad.
+  // Payment-Ledger Phase 3 (Collapse): die Auszahlungs-Felder der AuszahlungSection
+  // schreiben NUR noch den (claim_id, partei)-Ledger — kein claims-Cache mehr.
+  // auszahlung_gutachter_betrag (sv-Ist) ergaenzt: war zuvor cache-only OHNE Ledger-Writer
+  // (Normalisierungs-Luecke, 0 prod-Daten) -> jetzt symmetrisch zu auszahlung_kunde_betrag.
+  // gutachter_honorar (Soll) laeuft weiter ueber GUTACHTEN_FIELD_MAP.
+  const auszahlungLedger = {
+    auszahlung_kunde_betrag:             { partei: 'kunde' as const, betrag: true  },
+    auszahlung_kunde_eingegangen_am:     { partei: 'kunde' as const, betrag: false },
+    auszahlung_gutachter_betrag:         { partei: 'sv' as const,    betrag: true  },
+    auszahlung_gutachter_eingegangen_am: { partei: 'sv' as const,    betrag: false },
+  }[field]
+  if (auszahlungLedger) {
+    if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const cpFields: ClaimPaymentFields = auszahlungLedger.betrag
+      ? { erhaltener_betrag: normalized as number | null }
+      : { zahlungseingang_am: normalized as string | null }
+    const cpRes = await upsertClaimPayment(createAdminClient(), claimId, auszahlungLedger.partei, cpFields)
+    if (!cpRes.ok) return { success: false, error: cpRes.error ?? 'claim_payments Update fehlgeschlagen' }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   const renamedClaimsColumn =
     CLUSTER1_RENAMED_TO_CLAIMS[field] ??
     CLUSTER2_RENAMED_TO_CLAIMS[field] ??

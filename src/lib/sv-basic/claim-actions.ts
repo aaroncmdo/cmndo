@@ -624,6 +624,52 @@ export async function registriereSvBasicNeu(input: {
     console.error('[sv-basic/registriereSvBasicNeu] Admin-Task fehlgeschlagen:', err)
   }
 
+  // 9d. Partner-CRM-Spiegel (best-effort, non-critical): der selbst-registrierte SV
+  // erscheint als partner_leads-Prospect fuer Vertriebs-Sichtbarkeit + Tracking
+  // (Einstufung, Aktivitaets-Log). Als 'onboarding' + bereits-konvertiert markiert
+  // (konvertiert_zu_user_id/-partner_id gesetzt) -> die CRM-Convert-Idempotenz
+  // (istBereitsKonvertiert) verhindert eine Doppel-Anlage. Der Freigabe-Gate bleibt
+  // /admin/sachverstaendige/basic-freigaben (unveraendert). War der SV bereits ein
+  // offener Prospect (gescraped/CSV), wird DIESER als konvertiert markiert statt
+  // eine Dublette anzulegen.
+  try {
+    const spiegel = {
+      status: 'onboarding',
+      konvertiert_zu_user_id: userId,
+      konvertiert_zu_partner_id: svId,
+      konvertiert_am: new Date().toISOString(),
+    }
+    const { data: offeneLeads } = await adminDb
+      .from('partner_leads')
+      .select('id')
+      .eq('rolle', 'sachverstaendiger')
+      .eq('email', input.email)
+      .is('konvertiert_zu_user_id', null)
+      .limit(1)
+    const offenerLead = offeneLeads?.[0]
+    if (offenerLead) {
+      await adminDb.from('partner_leads').update(spiegel).eq('id', offenerLead.id)
+    } else {
+      await adminDb.from('partner_leads').insert({
+        rolle: 'sachverstaendiger',
+        source_channel: 'self_signup',
+        ansprechpartner_vorname: input.vorname.trim(),
+        ansprechpartner_nachname: input.nachname.trim(),
+        email: input.email,
+        telefon: input.telefon.trim(),
+        plz: input.plz ?? null,
+        rollen_details: {
+          dat_expert_nr: input.datNr.trim(),
+          adresse: input.adresse.trim(),
+          quelle: 'self_service_neu',
+        },
+        ...spiegel,
+      })
+    }
+  } catch (err) {
+    console.error('[sv-basic/registriereSvBasicNeu] partner_leads-Spiegel fehlgeschlagen (non-critical):', err)
+  }
+
   // kein revalidatePath — anon-Pfad, kein Admin-Route hier bekannt
   return { ok: true, svId, emailSent }
 }

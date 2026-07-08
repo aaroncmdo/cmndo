@@ -8,8 +8,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { CalendarIcon, UsersIcon, MapPinIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
+import { UsersIcon, MapPinIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +38,6 @@ export default async function MitarbeiterKundentermine() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const nowIso = new Date().toISOString()
   const sinceIso = new Date(Date.now() - 24 * 3600 * 1000).toISOString()
 
   // SV-Termine der Fälle wo ich KB bin. Join fall → kundenbetreuer_id=me.
@@ -123,86 +121,114 @@ export default async function MitarbeiterKundentermine() {
     }
   }
 
-  // Gruppieren nach Tag
-  const groups = new Map<string, GutachterTerminRow[]>()
+  // ── Praesentation: relativ nach Tag (inkl. Zurueckliegendes im 24h-Fenster) + Zeit-Rail ──
+  const now = new Date()
+  const berlinDay = (iso: string) =>
+    new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Berlin', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date(iso))
+  const todayKey = berlinDay(now.toISOString())
+  const tomorrowKey = berlinDay(new Date(now.getTime() + 86_400_000).toISOString())
+
+  const dayGroups: { key: string; rows: GutachterTerminRow[] }[] = []
   for (const t of termine) {
-    const dayKey = new Date(t.start_zeit).toISOString().slice(0, 10)
-    const bucket = groups.get(dayKey) ?? []
-    bucket.push(t)
-    groups.set(dayKey, bucket)
+    const k = berlinDay(t.start_zeit)
+    const last = dayGroups[dayGroups.length - 1]
+    if (last && last.key === k) last.rows.push(t)
+    else dayGroups.push({ key: k, rows: [t] })
+  }
+  const dayLabel = (key: string) => {
+    if (key === todayKey) return 'Heute'
+    if (key === tomorrowKey) return 'Morgen'
+    return new Date(key + 'T12:00:00').toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' })
+  }
+  const fmtTime = (iso: string) => new Date(iso).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })
+
+  const heuteCount = dayGroups.find((g) => g.key === todayKey)?.rows.length ?? 0
+  const summaryParts = [`${heuteCount} heute`, `${termine.length} gesamt`]
+
+  // Status = zentrales Monitoring-Signal (ist die Besichtigung bestaetigt?).
+  const STATUS_META: Record<string, { label: string; cls: string }> = {
+    reserviert: { label: 'Reserviert', cls: 'bg-warning-soft text-warning-strong border-warning/30' },
+    bestaetigt: { label: 'Bestätigt', cls: 'bg-success-soft text-success-strong border-success/30' },
+  }
+
+  function TerminZeile(t: GutachterTerminRow) {
+    const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; claims: ClaimJoin } | null)
+    const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
+    const svProfileId = t.assignee_typ === 'sachverstaendiger' && t.assignee_id ? svProfileMap.get(t.assignee_id) ?? null : null
+    const kundeName = fallClaim?.lead_id ? leadNameMap[fallClaim.lead_id] ?? 'Kunde' : 'Kunde'
+    const svName = svProfileId ? svNameMap[svProfileId] ?? 'SV' : 'SV'
+    const href = fall ? `/faelle/${fall.id}` : null
+    const status = STATUS_META[t.status] ?? { label: t.status, cls: 'bg-claimondo-bg text-claimondo-ondo border-claimondo-border' }
+    // Ziel-loser SV-Termin (kein fall, Pre-FlowLink-Direktbuchung) -> nicht-klickbar statt totem href='#'.
+    const zeile = (
+      <>
+        {/* Zeit-Rail */}
+        <div className="flex w-12 shrink-0 flex-col items-end pt-px text-right">
+          <span className="text-body-sm font-semibold tabular-nums text-claimondo-navy">{fmtTime(t.start_zeit)}</span>
+          {t.end_zeit && <span className="text-caption tabular-nums text-claimondo-ondo/60">{fmtTime(t.end_zeit)}</span>}
+        </div>
+        {/* Inhalt */}
+        <div className="min-w-0 flex-1 border-l border-claimondo-border pl-3 sm:pl-4">
+          <div className="flex items-start justify-between gap-2">
+            <p className="truncate text-body-sm font-medium text-claimondo-navy">
+              {fallClaim?.claim_nummer ?? '—'} · {kundeName}
+            </p>
+            <span className={`shrink-0 rounded-full border px-2 py-0.5 text-caption font-medium ${status.cls}`}>{status.label}</span>
+          </div>
+          <p className="mt-0.5 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-body-xs text-claimondo-ondo">
+            <UsersIcon className="h-3 w-3 shrink-0 text-claimondo-ondo/70" />
+            <span className="truncate">{svName}</span>
+            {t.adresse && (
+              <>
+                <MapPinIcon className="h-3 w-3 shrink-0 text-claimondo-ondo/70" />
+                <span className="truncate">{t.adresse}</span>
+              </>
+            )}
+          </p>
+        </div>
+      </>
+    )
+    return href ? (
+      <Link key={t.id} href={href} className="flex items-stretch gap-3 px-4 py-3 transition-colors hover:bg-claimondo-bg sm:gap-4">
+        {zeile}
+      </Link>
+    ) : (
+      <div key={t.id} className="flex items-stretch gap-3 px-4 py-3 sm:gap-4">
+        {zeile}
+      </div>
+    )
   }
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Kundentermine"
-        description="SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Terminänderungen erfolgen im Fall."
-        size="lg"
-      />
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-heading-lg font-bold text-claimondo-navy">Kundentermine</h1>
+        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
+          {termine.length === 0
+            ? 'SV-Besichtigungen der Fälle, die du als Kundenbetreuer begleitest. Nur lesend — Änderungen erfolgen im Fall.'
+            : summaryParts.join(' · ')}
+        </p>
+      </div>
 
-      {groups.size === 0 && (
-        <div className="bg-white rounded-ios-lg shadow-ios-md px-6 py-16 text-center">
-          <p className="text-sm text-claimondo-ondo/70">Keine anstehenden Kundentermine</p>
+      {termine.length === 0 && (
+        <div className="rounded-ios-md border border-claimondo-border bg-white px-6 py-16 text-center text-body-sm text-claimondo-ondo/70">
+          Keine anstehenden Kundentermine
         </div>
       )}
 
-      {Array.from(groups.entries()).map(([day, rows]) => {
-        const isToday = day === nowIso.slice(0, 10)
+      {dayGroups.map((g) => {
+        const isToday = g.key === todayKey
+        const isPast = g.key < todayKey
         return (
-          <section key={day} className="bg-white rounded-ios-lg shadow-ios-md">
-            <div className="px-4 py-3 border-b border-claimondo-border flex items-center justify-between">
-              <h2 className="text-sm font-semibold text-claimondo-navy">
-                {new Date(day + 'T00:00:00').toLocaleDateString('de-DE', {
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: '2-digit',
-                })}
-                {isToday && <span className="ml-2 text-xs text-claimondo-ondo">(heute)</span>}
+          <section key={g.key} className="overflow-hidden rounded-ios-md border border-claimondo-border bg-white">
+            <div className="flex items-center justify-between border-b border-claimondo-border px-4 py-2.5">
+              <h2 className="flex items-center gap-2 text-heading-sm capitalize text-claimondo-navy">
+                <span className={isToday ? 'font-semibold' : isPast ? 'text-claimondo-ondo' : ''}>{dayLabel(g.key)}</span>
+                {isToday && <span className="h-1.5 w-1.5 rounded-full bg-claimondo-ondo" aria-hidden />}
               </h2>
-              <span className="text-xs text-claimondo-ondo">{rows?.length ?? 0}</span>
+              <span className="text-body-sm text-claimondo-ondo">{g.rows.length}</span>
             </div>
-            <div className="divide-y divide-claimondo-border">
-              {(rows ?? []).map((t) => {
-                const fall = Array.isArray(t.fall) ? t.fall[0] ?? null : (t.fall as { id: string; claims: ClaimJoin } | null)
-                const fallClaim = Array.isArray(fall?.claims) ? fall?.claims[0] : fall?.claims
-                const svProfileId = t.assignee_typ === 'sachverstaendiger' && t.assignee_id ? svProfileMap.get(t.assignee_id) ?? null : null
-                const kundeName = fallClaim?.lead_id ? leadNameMap[fallClaim.lead_id] ?? 'Kunde' : 'Kunde'
-                const svName = svProfileId ? svNameMap[svProfileId] ?? 'SV' : 'SV'
-                const href = fall ? `/faelle/${fall.id}` : '#'
-                return (
-                  <Link key={t.id} href={href} className="block px-4 py-3 hover:bg-claimondo-bg transition-colors">
-                    <div className="flex items-center gap-3">
-                      <span className="flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full border bg-claimondo-ondo/10 text-claimondo-ondo border-claimondo-ondo/20">
-                        <CalendarIcon className="w-3 h-3" />
-                        SV-Termin
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-claimondo-navy truncate">
-                          {fallClaim?.claim_nummer ?? '—'} · {kundeName}
-                        </p>
-                        <p className="text-xs text-claimondo-ondo flex items-center gap-1 flex-wrap">
-                          <span>
-                            {new Date(t.start_zeit).toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                          <UsersIcon className="w-3 h-3 text-claimondo-ondo/70" />
-                          <span>{svName}</span>
-                          {t.adresse && (
-                            <>
-                              <MapPinIcon className="w-3 h-3 text-claimondo-ondo/70" />
-                              <span className="truncate">{t.adresse}</span>
-                            </>
-                          )}
-                        </p>
-                      </div>
-                      <span className="text-[10px] uppercase tracking-wide text-claimondo-ondo/70">{t.status}</span>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
+            <div className="divide-y divide-claimondo-border">{g.rows.map(TerminZeile)}</div>
           </section>
         )
       })}

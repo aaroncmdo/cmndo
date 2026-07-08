@@ -41,12 +41,14 @@ export default async function KanzleiDashboardPage() {
   // faelle.updated_at stirbt mit Phase-6-Drop, claims.updated_at backfill-geclobbert).
   // supabase-js kann nicht nach eingebetteter to-one-Spalte ordnen -> flachziehen + client-sort.
   // CMM-49 (faelle-Drop-Runway): Anker von .from('faelle') auf claims-zentrisch (Bridge+vcf).
-  // 1) RLS-Scope: welche komplett-Claims sieht diese Kanzlei? faelle_claim_bridge-RLS spiegelt
-  //    die faelle-RLS exakt (service_typ='komplett' AND rolle='kanzlei') -> gleiche Sichtbarkeit.
+  // 1) RLS-Scope: welche Claims sieht diese Kanzlei? faelle_claim_bridge-RLS (Definer-Gate
+  //    claim_sichtbar_fuer_aktuellen_user, #3445) grantet kanzlei bereits NUR komplett-Claims.
+  //    Der komplett-Filter darf NICHT via claims-Inner-Join laufen: claims ist fuer kanzlei
+  //    nicht SELECT-bar -> !inner wuerde ALLE Zeilen wegfiltern -> Empty-State trotz #3445.
+  //    Filter lebt daher in Schritt 2 auf v_claim_full (kanzlei-lesbar via Gate).
   const { data: scopeRows, error: scopeErr } = await supabase
     .from('faelle_claim_bridge')
-    .select('claim_id, claims:claim_id!inner(service_typ)')
-    .eq('claims.service_typ', 'komplett')
+    .select('claim_id')
   const scopedClaimIds = (scopeRows ?? []).map((r) => r.claim_id as string)
   // 2) Display via v_claim_full (DEFINER loest kunde_vorname/kennzeichen/mandatsnummer flach;
   //    NUR fuer die bridge-RLS-autorisierten claim_ids -> leak-safe; div=0 vs faelle).
@@ -60,6 +62,7 @@ export default async function KanzleiDashboardPage() {
         .from('v_claim_full')
         .select('id, fall_id, claim_nummer, kunde_vorname, kunde_nachname, kennzeichen, operative_status, created_at, mandatsnummer')
         .in('id', scopedClaimIds)
+        .eq('service_typ', 'komplett')
     : { data: [], error: null }
   const error = scopeErr ?? vcfErr
   const faelle = ((vcfRaw ?? []) as unknown as KanzleiVcfRow[])

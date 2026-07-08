@@ -2,29 +2,42 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { recordFailedOperation, markOperationResolved } from '@/lib/reliability/dead-letter'
+import { meldePartnerZahlungsproblem, resolvePartnerFromStripe } from '@/lib/stripe/zahlungsproblem-alert'
 
 export const dynamic = 'force-dynamic'
 
 /**
  * KFZ-148: Stripe Webhook Endpoint.
- * Verarbeitet checkout.session.completed, payment_intent.payment_failed.
+ * Verarbeitet checkout.session.completed, payment_intent.payment_failed,
+ * charge.refunded, charge.dispute.created, payment_intent.canceled.
+ * Letztere drei feuern nur Admin-Alerts (kein automatischer Zugangs-/Budget-Entzug).
  */
 export async function POST(request: Request) {
   const body = await request.text()
   const sig = request.headers.get('stripe-signature') ?? ''
 
-  // Signatur-Verifizierung
+  // Signatur-Verifizierung — FAIL-CLOSED.
+  // Der fruehere else-Zweig (JSON.parse(body) ohne Secret ODER ohne Signatur) war
+  // fail-open und schon durch WEGLASSEN des stripe-signature-Headers ausnutzbar
+  // (sig='' -> Bedingung false -> ungeprueft): ein Angreifer konnte forged
+  // checkout.session.completed senden und SVs/Orgs freischalten bzw. auf 'bezahlt'
+  // setzen. In Prod wird ein Event OHNE gueltiges Secret+Signatur jetzt abgelehnt.
   let event: { id: string; type: string; data: { object: Record<string, unknown> } }
   try {
     if (process.env.STRIPE_WEBHOOK_SECRET && sig) {
       const { stripe } = await import('@/lib/stripe/client')
       const verified = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET)
       event = verified as unknown as typeof event
-    } else {
+    } else if (process.env.NODE_ENV !== 'production') {
+      // DEV-only: lokal ohne Secret/Stripe-CLI. NIE in Prod (s.o.).
+      console.warn('[KFZ-148] Stripe Webhook UNVERIFIZIERT verarbeitet (nur non-prod).')
       event = JSON.parse(body)
+    } else {
+      console.error('[KFZ-148] Stripe Webhook: Secret oder Signatur fehlt in Prod — abgelehnt (fail-closed).')
+      return NextResponse.json({ error: 'Signatur erforderlich' }, { status: 400 })
     }
   } catch (err) {
-    console.error('[KFZ-148] Stripe Webhook Signatur-Fehler:', err)
+    console.error('[KFZ-148] Stripe Webhook Signatur-/Body-Fehler:', err)
     return NextResponse.json({ error: 'Signatur ungültig' }, { status: 400 })
   }
 
@@ -503,17 +516,12 @@ export async function POST(request: Request) {
             }
           } catch (err) { console.error('[AAR-401] Solo Rechnung/Mail:', err) }
 
-          // Admin-Notification
-          try {
-            const { data: admins } = await db.from('profiles').select('telefon').eq('rolle', 'admin')
-            const { sendCommunication } = await import('@/lib/communications/send')
-            for (const a of admins ?? []) {
-              if (a.telefon) await sendCommunication('admin_einzug_failed', {
-                telefon: a.telefon,
-                '1': svId.slice(0, 8),
-              })
-            }
-          } catch { /* */ }
+          // (2026-07-04, Reliability-Sweep) Der frueher hier feuernde
+          // admin_einzug_failed-Alert wurde ENTFERNT: das ist ein FEHLSCHLAG-Trigger
+          // (channel=email, "Stripe-Einzug fehlgeschlagen"), lief aber im Solo-ANZAHLUNG-
+          // ERFOLG-Zweig UND via telefon (Kanal-Mismatch) -> Falschalarm an Admins bei
+          // JEDER erfolgreichen Anzahlung. Copy-Paste-Rest (Buero/Akademie-Zweige
+          // notifizieren hier bewusst gar nicht; ein echter "SV aktiviert"-Trigger existiert nicht).
 
           // BUG-92: Admin-Listing/Karte revalidieren — analog Buero-Branch.
           try {
@@ -532,6 +540,114 @@ export async function POST(request: Request) {
           await db.from('sachverstaendige').update({
             onboarding_status: 'anzahlung_offen',
           }).eq('id', meta.gutachter_id)
+        }
+        // Einzugs-PI (SEPA-Ruecklastschrift days-later): Abrechnung auf fehlgeschlagen.
+        const { handleEinzugPaymentFailed } = await import('@/lib/finance/einzug-webhook')
+        const einzugFail = await handleEinzugPaymentFailed(db, pi as {
+          metadata?: Record<string, string> | null; amount?: number | null; last_payment_error?: { message?: string } | null
+        })
+        if (einzugFail.acted) {
+          try {
+            const { render } = await import('@react-email/render')
+            const { AdminEinzugFehlgeschlagenEmail, subject } = await import('@/lib/email/google/templates/AdminEinzugFehlgeschlagen')
+            const { sendCommunication } = await import('@/lib/communications/send')
+            const props = {
+              abrechnungsNr: einzugFail.abrechnungsNr ?? (einzugFail.abrId ?? '').slice(0, 8),
+              empfaengerName: null,
+              betragBrutto: einzugFail.betragBrutto ?? 0,
+              fehlerGrund: einzugFail.grund ?? 'Lastschrift fehlgeschlagen',
+            }
+            await sendCommunication('admin_einzug_failed', {
+              email: process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de',
+              subject: subject(props),
+              html: await render(AdminEinzugFehlgeschlagenEmail(props)),
+            })
+          } catch (alertErr) {
+            console.error('[KFZ-148] einzug-payment_failed Admin-Alert (non-fatal):', alertErr)
+          }
+        }
+        break
+      }
+
+      case 'payment_intent.succeeded': {
+        // AAR (06.07. Bug-Audit): async erfolgreiche off_session-Einzuege verbuchen.
+        // Der abrechnung-einzug-Cron erstellt PIs mit confirm+off_session; bei SEPA/
+        // verzoegerter Zahlung ist der Erststatus 'processing' -> der Cron labelt
+        // 'fehlgeschlagen' + setzt einzug_versucht_am (Abrechnung faellt aus kuenftigen
+        // Cron-Laeufen). Wird der PI spaeter async 'succeeded', kam die Zahlung bisher
+        // NIE in der DB an (kein Handler) -> Abrechnung blieb dauerhaft 'fehlgeschlagen'/
+        // bezahlt_am=NULL trotz Geldeingang (5 verwaiste succeeded-Events in stripe_events).
+        // Jetzt: als bezahlt verbuchen (mirror von markPaid im Cron). Nur fuer Einzugs-PIs
+        // (metadata.abrechnung_id) — Onboarding-Anzahlungen laufen ueber checkout.session.
+        const pi = event.data.object
+        const { handleEinzugPaymentSucceeded } = await import('@/lib/finance/einzug-webhook')
+        await handleEinzugPaymentSucceeded(db, pi as {
+          metadata?: Record<string, string> | null; amount?: number | null; amount_received?: number | null
+        })
+        break
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object
+        const meta = (charge.metadata ?? {}) as Record<string, string>
+        const piId = typeof charge.payment_intent === 'string' ? charge.payment_intent : null
+        const betragCent = Number((charge as any).amount_refunded ?? (charge as any).amount ?? 0)
+        const grund = (charge as any).refunds?.data?.[0]?.reason ?? null
+        const stripeRef = String((charge as any).id)
+        try {
+          const partner = await resolvePartnerFromStripe(db, meta, piId)
+          await meldePartnerZahlungsproblem({
+            art: 'refund',
+            ...partner,
+            betragCent,
+            grund,
+            stripeRef,
+          })
+        } catch (alertErr) {
+          console.error('[KFZ-148] charge.refunded Alert-Fehler (non-fatal):', alertErr)
+        }
+        break
+      }
+
+      case 'charge.dispute.created': {
+        const dispute = event.data.object
+        const piId = typeof (dispute as any).payment_intent === 'string' ? (dispute as any).payment_intent : null
+        const betragCent = Number((dispute as any).amount ?? 0)
+        const grund = String((dispute as any).reason ?? '')
+        const stripeRef = String((dispute as any).id)
+        try {
+          const partner = await resolvePartnerFromStripe(db, {}, piId)
+          await meldePartnerZahlungsproblem({
+            art: 'dispute',
+            ...partner,
+            betragCent,
+            grund,
+            stripeRef,
+          })
+        } catch (alertErr) {
+          console.error('[KFZ-148] charge.dispute.created Alert-Fehler (non-fatal):', alertErr)
+        }
+        break
+      }
+
+      case 'payment_intent.canceled': {
+        const pi = event.data.object
+        const meta = ((pi as any).metadata ?? {}) as Record<string, string>
+        const piId = String((pi as any).id)
+        const betragCent = Number((pi as any).amount ?? 0)
+        const grund = String((pi as any).cancellation_reason ?? '')
+        const stripeRef = piId
+        try {
+          const partner = await resolvePartnerFromStripe(db, meta, piId)
+          await meldePartnerZahlungsproblem({
+            art: 'canceled',
+            ...partner,
+            betragCent,
+            grund,
+            stripeRef,
+          })
+        } catch (alertErr) {
+          console.error('[KFZ-148] payment_intent.canceled Alert-Fehler (non-fatal):', alertErr)
         }
         break
       }

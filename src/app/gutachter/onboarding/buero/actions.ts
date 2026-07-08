@@ -171,7 +171,7 @@ export async function signBueroVertrag(params: {
     const { BueroSubSvEinladungEmail, subject: bueroSubject } = await import('@/lib/email/google/templates/BueroSubSvEinladung')
     const { data: profile } = await db.from('profiles').select('email, vorname').eq('id', user.id).single()
     if (profile?.email) {
-      const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://cmndo.vercel.app'
+      const APP_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://app.claimondo.de'
       const props = {
         vorname: profile.vorname ?? null,
         bueroName: org.name,
@@ -213,6 +213,19 @@ export async function startBueroStripeCheckout(organisationId: string): Promise<
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'Nicht angemeldet' }
+
+  // IDOR-Guard: User muss Verwalter (hauptansprechpartner) dieser Organisation sein — analog
+  // startAkademieStripeCheckout. Ohne den Check konnte jeder eingeloggte User fuer eine FREMDE
+  // Org Checkout ausloesen, deren onboarding_status auf 'anzahlung_offen' biegen + einen
+  // Stripe-Customer auf ihr anlegen (State-Change-IDOR, OWASP A01).
+  const adminDb = createAdminClient()
+  const { data: org } = await adminDb.from('organisationen')
+    .select('hauptansprechpartner_user_id, typ')
+    .eq('id', organisationId)
+    .maybeSingle()
+  if (!org || org.typ !== 'buero' || org.hauptansprechpartner_user_id !== user.id) {
+    return { error: 'Keine Berechtigung' }
+  }
 
   try {
     const { createBueroCheckoutSession } = await import('@/lib/stripe/buero-checkout')

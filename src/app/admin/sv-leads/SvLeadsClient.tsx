@@ -33,7 +33,14 @@ function formatDatum(iso: string | null) {
   return new Date(iso).toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
-export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
+export default function SvLeadsClient({
+  svLeads,
+  hideHeader = false,
+}: {
+  svLeads: SvLeadRow[]
+  /** true = kein PageHeader-Titel (der Drawer liefert den Titel), nur die Aktions-Buttons. */
+  hideHeader?: boolean
+}) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -199,51 +206,57 @@ export default function SvLeadsClient({ svLeads }: { svLeads: SvLeadRow[] }) {
     }
   }
 
+  const aktionen = (
+    <div className="flex gap-2 flex-wrap">
+      <Button
+        variant="ghost"
+        onClick={handleDatSync}
+        iconLeft={<RefreshCwIcon className="w-4 h-4" />}
+        loading={datSyncLoading}
+      >
+        DAT-Sync ausführen
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={() => setShowImportDialog(true)}
+        iconLeft={<UploadIcon className="w-4 h-4" />}
+        loading={importLoading}
+      >
+        Bulk-Import (CSV)
+      </Button>
+      <Button
+        variant="ghost"
+        onClick={handleAlleEinladen}
+        iconLeft={<MailIcon className="w-4 h-4" />}
+        loading={bulkEinladenLoading}
+      >
+        Alle offenen einladen
+      </Button>
+      <Button
+        variant="navy"
+        onClick={openDialog}
+        iconLeft={<PlusIcon className="w-4 h-4" />}
+      >
+        Neuer Dead-Pin
+      </Button>
+    </div>
+  )
+
   return (
     <div className="h-full overflow-y-auto py-8">
       <div>
-        <div className="mb-6">
-          <PageHeader
-            title="SV-Leads"
-            description={`${svLeads.length} Dead-Pin${svLeads.length === 1 ? '' : 's'}`}
-            icon={MapPinIcon}
-            actions={
-              <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  onClick={handleDatSync}
-                  iconLeft={<RefreshCwIcon className="w-4 h-4" />}
-                  loading={datSyncLoading}
-                >
-                  DAT-Sync ausführen
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowImportDialog(true)}
-                  iconLeft={<UploadIcon className="w-4 h-4" />}
-                  loading={importLoading}
-                >
-                  Bulk-Import (CSV)
-                </Button>
-                <Button
-                  variant="ghost"
-                  onClick={handleAlleEinladen}
-                  iconLeft={<MailIcon className="w-4 h-4" />}
-                  loading={bulkEinladenLoading}
-                >
-                  Alle offenen einladen
-                </Button>
-                <Button
-                  variant="navy"
-                  onClick={openDialog}
-                  iconLeft={<PlusIcon className="w-4 h-4" />}
-                >
-                  Neuer Dead-Pin
-                </Button>
-              </div>
-            }
-          />
-        </div>
+        {hideHeader ? (
+          <div className="mb-6 flex justify-end">{aktionen}</div>
+        ) : (
+          <div className="mb-6">
+            <PageHeader
+              title="SV-Leads"
+              description={`${svLeads.length} Dead-Pin${svLeads.length === 1 ? '' : 's'}`}
+              icon={MapPinIcon}
+              actions={aktionen}
+            />
+          </div>
+        )}
 
         <DataTableContainer
           variant="plain"

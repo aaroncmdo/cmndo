@@ -10,6 +10,7 @@ import { FlowLinkVersandEmail, subject as flowLinkSubject } from '@/lib/email/go
 import { KundeTerminGegenvorschlagEmail, subject as terminGegenvorschlagSubject } from '@/lib/email/google/templates/KundeTerminGegenvorschlag'
 import { MiniWizardMagicLinkEmail, subject as miniWizardSubject } from '@/lib/email/google/templates/MiniWizardMagicLink'
 import { DokumenteAnfrageEmail, subject as dokumenteSubject } from '@/lib/email/google/templates/DokumenteAnfrage'
+import LeadWinback from '@/lib/email/google/templates/LeadWinback'
 
 export type Preview = { name: string; tier: number; subject: string; element: ReactElement }
 
@@ -27,8 +28,14 @@ const kundeWelcomeProps = {
   loginInfo: { magicLink: 'https://app.claimondo.de/auth/magic/2f7a9e1c4b6d80a3f5e2c1b9d7406a8e', email: 'max.mustermann@example.de', password: 'Höhle-Birke-42!' },
   brand: null,
   locale: 'de',
+  // imagin off (Prod-Default) → kein inline VehicleCard-Render; der Blur-Marken-Hero
+  // (unten) ist das, was Kunden aktuell bekommen. Mit imagin live käme hier zusätzlich
+  // die imagin-URL des Kundenfahrzeugs rein.
   fahrzeugBildUrl: null,
-  heroBildUrl: null,
+  // Echter gebackener Blur-Hero aus dem email-hero-Bucket (composeHero: Basis-Asset +
+  // Navy/Glow), damit die Preview den Hero im vollen Email-Kontext zeigt. In Prod backt
+  // der erste Welcome die geteilte base-hero.jpg; dieses Bild ist byte-identisch dazu.
+  heroBildUrl: 'https://paizkjajbuxxksdoycev.supabase.co/storage/v1/object/public/email-hero/bmw_x5_x.jpg',
   berater: { name: 'Sandra Köhler', photoUrl: null, contact: 'WhatsApp · 0221 9876543' },
 }
 
@@ -77,6 +84,12 @@ const dokumenteProps = {
   brand: null,
 }
 
+const leadWinbackProps = {
+  vorname: 'Max',
+  resumeUrl: 'https://claimondo.de/schaden-melden/fortsetzen/wb_8f3a2c7e1b4d4f90a6c2',
+  optOutUrl: 'https://claimondo.de/abmelden/wb_8f3a2c7e1b4d4f90a6c2',
+}
+
 export const PREVIEWS: Preview[] = [
   { name: 'KundeWelcome', tier: 1, subject: kundeWelcomeSubject(kundeWelcomeProps), element: KundeWelcomeEmail(kundeWelcomeProps) },
   { name: 'LeadReminder1', tier: 1, subject: 'Ihre Schadenmeldung ist fast fertig', element: LeadReminder1({ vorname: 'Max', resumeUrl: 'https://app.claimondo.de/schaden-melden/fortsetzen/cl-2026-00042-9f3a7b2c1d' }) },
@@ -86,4 +99,5 @@ export const PREVIEWS: Preview[] = [
   { name: 'KundeTerminGegenvorschlag', tier: 1, subject: terminGegenvorschlagSubject(terminGegenvorschlagProps), element: KundeTerminGegenvorschlagEmail(terminGegenvorschlagProps) },
   { name: 'MiniWizardMagicLink', tier: 1, subject: miniWizardSubject(miniWizardProps), element: MiniWizardMagicLinkEmail(miniWizardProps) },
   { name: 'DokumenteAnfrage', tier: 1, subject: dokumenteSubject(dokumenteProps), element: DokumenteAnfrageEmail(dokumenteProps) },
+  { name: 'LeadWinback', tier: 1, subject: 'Ihre Schadenmeldung wartet noch auf Sie', element: LeadWinback(leadWinbackProps) },
 ]

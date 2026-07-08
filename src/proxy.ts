@@ -38,6 +38,9 @@ const MARKETING_PREFIXES = [
   '/vorteile', '/wie-es-funktioniert', '/faq', '/kfz-gutachter',
   '/gutachter-finden', '/ueber-uns',
   '/schaden-melden', '/ersteinschaetzung', '/beratung-anfragen', '/sa-volltext',
+  // 2026-07-03: Win-back-Opt-out (/abmelden/[token]) — öffentlicher Abmelde-Link
+  // in Reaktivierungs-Mails, kein Auth (Lead ist nicht eingeloggt).
+  '/abmelden',
   '/impressum', '/datenschutz', '/agb', '/nutzungsbedingungen',
   '/schadensreport-2026',
   // 2026-05-22: Doc-16 Content-Render-Routen — bleiben auf claimondo.de,
@@ -206,7 +209,7 @@ export async function proxy(request: NextRequest) {
     return await updateSession(request)
   }
 
-  // ─── localhost / Vercel-Previews / *.staging.claimondo.de ─────────────
+  // ─── localhost / *.staging.claimondo.de ─────────────
   return await updateSession(request)
 }
 
