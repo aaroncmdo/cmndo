@@ -4,8 +4,8 @@
 // Attribution:
 //   - Leads  → ueber promotion_codes.makler_id → promoIds → leads.promotion_code_id
 //     (leads hat KEINE direkte makler_id-Spalte).
-//   - Provisionen → direkt ueber makler_provisionen.makler_id (+ trigger_at als
-//     Fenster-Spalte, wie in den Dashboard-Queries).
+//   - Provisionen → direkt ueber partner_provisionen (partner_typ='makler', partner_id)
+//     (+ trigger_at als Fenster-Spalte, wie in den Dashboard-Queries).
 //
 // Der DB-Fetch (buildMaklerWochenReport) delegiert die Skip-/Shaping-Logik an das
 // pure verdichteWochenReport — das ist der getestete Seam. Versand ist DEFAULT-ON
@@ -136,21 +136,24 @@ export async function buildMaklerWochenReport(
             .in('status', ['neu', 'quali-offen']) as unknown as Promise<CountRes>)
         : leerCount,
       db
-        .from('makler_provisionen')
+        .from('partner_provisionen')
         .select('betrag_netto_eur')
-        .eq('makler_id', makler.id)
+        .eq('partner_typ', 'makler')
+        .eq('partner_id', makler.id)
         .neq('status', 'storniert')
         .gte('trigger_at', startIso)
         .lt('trigger_at', endIso) as unknown as Promise<BetragRes>,
       db
-        .from('makler_provisionen')
+        .from('partner_provisionen')
         .select('betrag_netto_eur')
-        .eq('makler_id', makler.id)
+        .eq('partner_typ', 'makler')
+        .eq('partner_id', makler.id)
         .eq('status', 'freigegeben') as unknown as Promise<BetragRes>,
       db
-        .from('makler_provisionen')
+        .from('partner_provisionen')
         .select('id', { count: 'exact', head: true })
-        .eq('makler_id', makler.id)
+        .eq('partner_typ', 'makler')
+        .eq('partner_id', makler.id)
         .in('status', ['freigegeben', 'ausgezahlt']) as unknown as Promise<CountRes>,
       db
         .from('makler_staffel_stufen')

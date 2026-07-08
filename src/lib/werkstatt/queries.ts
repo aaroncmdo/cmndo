@@ -1,6 +1,6 @@
 // AAR-956 WP-B (Task 9): Query-Helper fuer Werkstatt-Portal. Jede Funktion
 // nutzt den auth-aware SSR-Client, sodass die RLS-Policies aus
-// werkstatt_provisionen (wp_werkstatt_read: werkstatt_id=auth.uid()-werkstatt)
+// partner_provisionen (pp_partner_read: partner_typ='werkstatt' + werkstaetten.user_id=auth.uid())
 // greifen und Werkstaetten nur ihre eigenen Rows sehen.
 //
 // Leak-safe (Provisionen): Die Provisions-Queries selektieren NUR nicht-PII-
@@ -67,26 +67,30 @@ export async function getWerkstattOverview(werkstattId: string): Promise<Werksta
   const supabase = await createClient()
 
   const [claimsRes, offenRes, freigRes, ausgRes] = await Promise.all([
-    // Fix: claims hat keine werkstatt-RLS-Policy → count via werkstatt_provisionen
-    // (UNIQUE auf claim_id, eine Provision-Row pro Claim → count == vermittelte Claims).
+    // Fix: claims hat keine werkstatt-RLS-Policy → count via partner_provisionen
+    // (UNIQUE auf (partner_typ, claim_id), eine Provision-Row pro Claim → count == vermittelte Claims).
     supabase
-      .from('werkstatt_provisionen')
+      .from('partner_provisionen')
       .select('id', { count: 'exact', head: true })
-      .eq('werkstatt_id', werkstattId),
+      .eq('partner_typ', 'werkstatt')
+      .eq('partner_id', werkstattId),
     supabase
-      .from('werkstatt_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('werkstatt_id', werkstattId)
+      .eq('partner_typ', 'werkstatt')
+      .eq('partner_id', werkstattId)
       .eq('status', 'pending'),
     supabase
-      .from('werkstatt_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('werkstatt_id', werkstattId)
+      .eq('partner_typ', 'werkstatt')
+      .eq('partner_id', werkstattId)
       .eq('status', 'freigegeben'),
     supabase
-      .from('werkstatt_provisionen')
+      .from('partner_provisionen')
       .select('betrag_netto_eur')
-      .eq('werkstatt_id', werkstattId)
+      .eq('partner_typ', 'werkstatt')
+      .eq('partner_id', werkstattId)
       .eq('status', 'ausgezahlt'),
   ])
 
@@ -130,16 +134,17 @@ export type WerkstattProvisionRow = {
 export async function getWerkstattProvisionen(werkstattId: string): Promise<WerkstattProvisionRow[]> {
   const supabase = await createClient()
 
-  // claim_nummer liegt denormalisiert auf werkstatt_provisionen (Mig 20260623050718) — RLS-sicher
+  // claim_nummer liegt denormalisiert auf partner_provisionen (werkstatt-Herkunft) — RLS-sicher
   // direkt lesbar; KEIN claims-Join (claims hat keine werkstatt-RLS-Policy -> lieferte sonst null).
   const { data } = await supabase
-    .from('werkstatt_provisionen')
+    .from('partner_provisionen')
     .select(`
       id, betrag_netto_eur, status, trigger_event,
       trigger_at, hold_until, storniert_am, storno_grund, erstellt_am,
       claim_nummer
     `)
-    .eq('werkstatt_id', werkstattId)
+    .eq('partner_typ', 'werkstatt')
+    .eq('partner_id', werkstattId)
     .order('erstellt_am', { ascending: false, nullsFirst: false })
     .limit(200)
 
@@ -169,10 +174,10 @@ export async function getWerkstattVermittlungsCount(
 ): Promise<{ settled: number; pending: number }> {
   const supabase = await createClient()
   const [settledRes, pendingRes] = await Promise.all([
-    supabase.from('werkstatt_provisionen').select('id', { count: 'exact', head: true })
-      .eq('werkstatt_id', werkstattId).in('status', ['freigegeben', 'ausgezahlt']),
-    supabase.from('werkstatt_provisionen').select('id', { count: 'exact', head: true })
-      .eq('werkstatt_id', werkstattId).eq('status', 'pending'),
+    supabase.from('partner_provisionen').select('id', { count: 'exact', head: true })
+      .eq('partner_typ', 'werkstatt').eq('partner_id', werkstattId).in('status', ['freigegeben', 'ausgezahlt']),
+    supabase.from('partner_provisionen').select('id', { count: 'exact', head: true })
+      .eq('partner_typ', 'werkstatt').eq('partner_id', werkstattId).eq('status', 'pending'),
   ])
   return { settled: settledRes.count ?? 0, pending: pendingRes.count ?? 0 }
 }
@@ -194,8 +199,9 @@ export async function getWerkstattStaffelBoni(
   werkstattId: string,
 ): Promise<{ schwelle: number; bonus_betrag_netto: number; status: string; erstellt_am: string }[]> {
   const supabase = await createClient()
-  const { data } = await supabase.from('werkstatt_staffel_bonus')
-    .select('schwelle, bonus_betrag_netto, status, erstellt_am').eq('werkstatt_id', werkstattId)
+  const { data } = await supabase.from('partner_staffel_bonus')
+    .select('schwelle, bonus_betrag_netto, status, erstellt_am')
+    .eq('partner_typ', 'werkstatt').eq('partner_id', werkstattId)
     .order('schwelle', { ascending: true })
   return (data ?? []).map((r) => ({
     schwelle: Number((r as unknown as { schwelle: number }).schwelle),

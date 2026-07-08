@@ -1,7 +1,7 @@
 // AAR-490 (M8): Abrechnungen-Seite für Makler. Zeigt Provisions-Historie,
 // Monats-Summary und CSV-Export. Consent-Gate läuft in den Fall-Links auf
 // der Akte-Detail-Seite — hier gibt es nur Read-Only-Auswertungen aus
-// makler_provisionen (eigenes makler_id via RLS gefiltert).
+// partner_provisionen (partner_typ='makler', eigenes partner_id via RLS gefiltert).
 // Anordnung Aaron 07.07.: die "Deine Pipeline"-Karte lebt jetzt hier (unter den
 // 4 Summary-Karten) statt auf dem Dashboard.
 

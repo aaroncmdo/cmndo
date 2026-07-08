@@ -37,8 +37,9 @@ export async function GET(request: Request) {
   // so erwischen wir auch Provisionen, die nach der Hold-Periode aber vor
   // dem Cron-Run storniert wurden.
   const { data: pendingRaw, error: pendingErr } = await db
-    .from('werkstatt_provisionen')
+    .from('partner_provisionen')
     .select('id, claim_id, hold_until')
+    .eq('partner_typ', 'werkstatt')
     .eq('status', 'pending')
     .limit(500)
 
@@ -81,12 +82,13 @@ export async function GET(request: Request) {
   let storniert = 0
   if (stornoIds.length > 0) {
     const { error: stornoErr } = await db
-      .from('werkstatt_provisionen')
+      .from('partner_provisionen')
       .update({
         status: 'storniert',
         storniert_am: now,
         storno_grund: 'fall_storniert',
       })
+      .eq('partner_typ', 'werkstatt')
       .in('id', stornoIds)
     if (stornoErr) {
       return NextResponse.json({ error: stornoErr.message }, { status: 500 })
@@ -108,8 +110,9 @@ export async function GET(request: Request) {
   let released = 0
   if (releaseIds.length > 0) {
     const { error: releaseErr } = await db
-      .from('werkstatt_provisionen')
+      .from('partner_provisionen')
       .update({ status: 'freigegeben' })
+      .eq('partner_typ', 'werkstatt')
       .in('id', releaseIds)
     if (releaseErr) {
       return NextResponse.json({ error: releaseErr.message }, { status: 500 })

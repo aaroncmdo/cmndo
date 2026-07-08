@@ -23,7 +23,7 @@ type PendingRow = {
   betrag_netto_eur: number | string
   service_typ: 'komplett' | 'nur_gutachter'
   hold_until: string
-  makler_id: string
+  partner_id: string
 }
 
 type FallRow = {
@@ -44,8 +44,9 @@ export async function GET(request: Request) {
   // Alle pending Provisionen laden. Hold-Filter erst NACH dem Storno-Pass (erwischt auch
   // Provisionen die nach der Hold-Periode aber vor Cron-Run storniert wurden).
   const { data: pendingRaw, error: pendingErr } = await db
-    .from('makler_provisionen')
-    .select('id, fall_id, claim_id, betrag_netto_eur, service_typ, hold_until, makler_id')
+    .from('partner_provisionen')
+    .select('id, fall_id, claim_id, betrag_netto_eur, service_typ, hold_until, partner_id')
+    .eq('partner_typ', 'makler')
     .eq('status', 'pending')
     .limit(500)
 
@@ -97,7 +98,7 @@ export async function GET(request: Request) {
       await emitEvent('makler.provision_status', {
         fallId: p.fall_id ?? p.claim_id ?? '',
         provisionId: p.id,
-        maklerId: p.makler_id,
+        maklerId: p.partner_id,
         status,
         betragEur: Number(p.betrag_netto_eur),
         grund,
@@ -117,8 +118,9 @@ export async function GET(request: Request) {
   let storniert = 0
   if (stornoIds.length > 0) {
     const { error: stornoErr } = await db
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .update({ status: 'storniert', storniert_am: now, storno_grund: 'fall_storniert' })
+      .eq('partner_typ', 'makler')
       .in('id', stornoIds)
     if (stornoErr) {
       return NextResponse.json({ error: stornoErr.message }, { status: 500 })
@@ -142,8 +144,9 @@ export async function GET(request: Request) {
   if (toRelease.length > 0) {
     const releaseIds = toRelease.map((p) => p.id)
     const { error: releaseErr } = await db
-      .from('makler_provisionen')
+      .from('partner_provisionen')
       .update({ status: 'freigegeben' })
+      .eq('partner_typ', 'makler')
       .in('id', releaseIds)
     if (releaseErr) {
       return NextResponse.json({ error: releaseErr.message }, { status: 500 })

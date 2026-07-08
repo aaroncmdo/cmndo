@@ -1,5 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { computeProvisionUst } from './partner-billing-ust'
+import { LEDGER_TABELLEN } from './ledger-tabellen'
 import {
   erstellePartnerGutschrift,
   versendePartnerGutschrift,
@@ -7,108 +8,84 @@ import {
 } from './partner-gutschrift'
 import { generateAndUploadPartnerGutschriftPdf } from './partner-gutschrift-pdf'
 
+// Nach der Provisions-Unifikation: EINE Provisions- + EINE Staffel-Tabelle (partner_typ-Union),
+// maik separat. Die Alt-Tabellen sind aus dem View + allen Readern raus (Phase 2); v_partner_billing
+// emittiert quelle_tabelle nur noch aus dieser Liste. Quelle = die typsichere LEDGER_TABELLEN-
+// Konstante -> EINE Definition der gueltigen Ledger-Tabellen (schliesst die T6b-Bug-Klasse).
 export const PROVISION_TABELLEN = [
-  'makler_provisionen',
-  'werkstatt_provisionen',
-  'provisionen_maik',
-  'makler_staffel_bonus',
-  'werkstatt_staffel_bonus',
+  LEDGER_TABELLEN.PARTNER_PROVISIONEN,
+  LEDGER_TABELLEN.PARTNER_STAFFEL_BONUS,
+  LEDGER_TABELLEN.PROVISIONEN_MAIK,
 ] as const
 
 export type ProvisionTabelle = (typeof PROVISION_TABELLEN)[number]
 
-// Per-ledger status/storno vocabulary verified against database.types.ts:
-//   makler_provisionen     → status: freigegeben/storniert; HAS storniert_am + storno_grund
-//   werkstatt_provisionen  → status: freigegeben/storniert; HAS storniert_am + storno_grund
-//   makler_staffel_bonus   → status: freigegeben/storniert; NO storniert_am / storno_grund
-//   werkstatt_staffel_bonus→ status: freigegeben/storniert; NO storniert_am / storno_grund
-//   provisionen_maik       → status: pending/confirmed/paid/reversed; HAS reversed_grund (NO storniert_am)
+// Ledger-Vokabular (nach Provisions-Unifikation, verifiziert gegen prod-Schema):
+//   partner_provisionen   → status: freigegeben/ausgezahlt/storniert; HAS storniert_am + storno_grund
+//                           + ausgezahlt_am (paidCol, fuer makler+werkstatt vereinheitlicht)
+//   partner_staffel_bonus → status: freigegeben/ausgezahlt/storniert; NO storniert_am/storno_grund/ausgezahlt_am
+//   provisionen_maik      → status: pending/confirmed/paid/reversed; HAS reversed_grund (NO storniert_am)
+// Union-Tabellen tragen partner_typ als Spalte (partnerTypCol) -> Partner-Tabelle + Steuer-Status
+// werden pro Row aufgeloest (partner_provisionen ist FK-los zu makler/werkstaetten -> kein Embed).
+// maik bleibt statisch (fixer partner/partnerTyp).
 type LedgerMeta = {
   betrag: string
-  partner: string
   fk: string
   partnerFlag: string
+  partner?: string          // nur non-Union (maik): Embed-Partner-Tabelle
+  partnerTyp?: 'makler' | 'werkstatt' | 'marketing'  // nur non-Union (maik): statischer Typ
+  partnerTypCol?: string    // Union: Spalte mit partner_typ (dynamisch aufgeloest)
   paidStatus: string
   paidCol?: string
   releaseStatus: string
   stornoStatus: string
   stornoCol?: string
   grundCol?: string
-  partnerTyp: 'makler' | 'werkstatt' | 'marketing'
   leistungText: string
   leistungDatumCol: string
 }
 
 const META: Record<ProvisionTabelle, LedgerMeta> = {
-  makler_provisionen: {
+  partner_provisionen: {
     betrag: 'betrag_netto_eur',
-    partner: 'makler',
-    fk: 'makler_id',
+    fk: 'partner_id',
     partnerFlag: 'ist_kleinunternehmer',
-    paidStatus: 'ausgezahlt',
-    releaseStatus: 'freigegeben',
-    stornoStatus: 'storniert',
-    stornoCol: 'storniert_am',
-    grundCol: 'storno_grund',
-    partnerTyp: 'makler',
-    leistungText: 'Vermittlungsprovision',
-    leistungDatumCol: 'trigger_at',
-  },
-  werkstatt_provisionen: {
-    betrag: 'betrag_netto_eur',
-    partner: 'werkstaetten',
-    fk: 'werkstatt_id',
-    partnerFlag: 'ist_kleinunternehmer',
+    partnerTypCol: 'partner_typ',
     paidStatus: 'ausgezahlt',
     paidCol: 'ausgezahlt_am',
     releaseStatus: 'freigegeben',
     stornoStatus: 'storniert',
     stornoCol: 'storniert_am',
     grundCol: 'storno_grund',
-    partnerTyp: 'werkstatt',
     leistungText: 'Vermittlungsprovision',
     leistungDatumCol: 'trigger_at',
   },
+  partner_staffel_bonus: {
+    betrag: 'bonus_betrag_netto',
+    fk: 'partner_id',
+    partnerFlag: 'ist_kleinunternehmer',
+    partnerTypCol: 'partner_typ',
+    paidStatus: 'ausgezahlt',
+    releaseStatus: 'freigegeben',
+    stornoStatus: 'storniert',
+    // no stornoCol/grundCol — partner_staffel_bonus has no storno timestamp/reason cols
+    leistungText: 'Staffel-Bonus',
+    leistungDatumCol: 'erstellt_am',
+  },
   provisionen_maik: {
     betrag: 'netto_provision',
-    partner: 'marketing_partner',
     fk: 'marketing_partner_id',
     partnerFlag: 'ist_kleinunternehmer',
+    partner: 'marketing_partner',
+    partnerTyp: 'marketing',
     paidStatus: 'paid',
     paidCol: 'paid_at',
     releaseStatus: 'confirmed',
     stornoStatus: 'reversed',
     // no stornoCol — provisionen_maik has no storniert_am equivalent
     grundCol: 'reversed_grund',
-    partnerTyp: 'marketing',
     leistungText: 'Vermittlungsprovision',
     leistungDatumCol: 'created_at',
-  },
-  makler_staffel_bonus: {
-    betrag: 'bonus_betrag_netto',
-    partner: 'makler',
-    fk: 'makler_id',
-    partnerFlag: 'ist_kleinunternehmer',
-    paidStatus: 'ausgezahlt',
-    releaseStatus: 'freigegeben',
-    stornoStatus: 'storniert',
-    // no stornoCol/grundCol — makler_staffel_bonus has no storno timestamp/reason cols
-    partnerTyp: 'makler',
-    leistungText: 'Staffel-Bonus',
-    leistungDatumCol: 'erstellt_am',
-  },
-  werkstatt_staffel_bonus: {
-    betrag: 'bonus_betrag_netto',
-    partner: 'werkstaetten',
-    fk: 'werkstatt_id',
-    partnerFlag: 'ist_kleinunternehmer',
-    paidStatus: 'ausgezahlt',
-    releaseStatus: 'freigegeben',
-    stornoStatus: 'storniert',
-    // no stornoCol/grundCol — werkstatt_staffel_bonus has no storno timestamp/reason cols
-    partnerTyp: 'werkstatt',
-    leistungText: 'Staffel-Bonus',
-    leistungDatumCol: 'erstellt_am',
   },
 } as const
 
@@ -218,9 +195,14 @@ export async function auszahlenProvision(
 ): Promise<{ ok: boolean; error?: string }> {
   const meta = META[tabelle]
 
-  // Step 1 — Lesen: netto + partner_id + ist_kleinunternehmer + leistungDatumCol
-  // Freeze-Spalten + Partner-ist_kleinunternehmer: Migration in diesem Branch, Typen folgen beim Merge-Regen (Regel 2).
-  const selectStr = `${meta.betrag}, ${meta.fk}, ${meta.partner}(${meta.partnerFlag}), ${meta.leistungDatumCol}`
+  // Step 1 — Lesen: netto + partner_id (+ partner_typ bei Union) + leistungDatumCol.
+  // Union-Tabellen (partner_provisionen/-staffel_bonus) sind polymorph -- partner_id hat KEINEN FK
+  // zu makler/werkstaetten -> kein PostgREST-Embed moeglich; ist_kleinunternehmer wird ueber
+  // partner_typ + einen separaten Partner-Read aufgeloest. maik bleibt beim FK-Embed.
+  const isUnion = !!meta.partnerTypCol
+  const selectStr = isUnion
+    ? `${meta.betrag}, ${meta.fk}, ${meta.partnerTypCol}, ${meta.leistungDatumCol}`
+    : `${meta.betrag}, ${meta.fk}, ${meta.partner}(${meta.partnerFlag}), ${meta.leistungDatumCol}`
   const { data, error: readError } = await db
     .from(tabelle)
     .select(selectStr)
@@ -233,13 +215,29 @@ export async function auszahlenProvision(
   const partnerId: string | null | undefined = (data as any)[meta.fk]
   if (!partnerId) return { ok: false, error: 'Partner-Zuordnung fehlt' }
 
-  // Supabase select('a(b)') liefert je nach Cardinality Array oder Objekt -- immer normalisieren.
-  const partnerRaw = (data as any)[meta.partner]
-  const partner = Array.isArray(partnerRaw) ? partnerRaw[0] : partnerRaw
-  const istKleinunternehmer: boolean | null = partner?.[meta.partnerFlag] ?? null
-
   // Leistungsdatum je Ledger: trigger_at / created_at / erstellt_am
   const leistungsDatum: string | null = (data as any)[meta.leistungDatumCol] ?? null
+
+  // partner_typ + ist_kleinunternehmer aufloesen. Union: partner_typ aus der Row -> passende
+  // Partner-Tabelle separat lesen. Non-Union (maik): statischer partnerTyp + FK-Embed normalisieren.
+  let partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+  let istKleinunternehmer: boolean | null
+  if (isUnion) {
+    partnerTyp = (data as any)[meta.partnerTypCol as string] as 'makler' | 'werkstatt'
+    const partnerTable = partnerTyp === 'makler' ? 'makler' : 'werkstaetten'
+    const { data: pRow } = await db
+      .from(partnerTable)
+      .select(meta.partnerFlag)
+      .eq('id', partnerId)
+      .maybeSingle()
+    istKleinunternehmer = (pRow as any)?.[meta.partnerFlag] ?? null
+  } else {
+    partnerTyp = meta.partnerTyp as 'makler' | 'werkstatt' | 'marketing'
+    // Supabase select('a(b)') liefert je nach Cardinality Array oder Objekt -- immer normalisieren.
+    const partnerRaw = (data as any)[meta.partner as string]
+    const partner = Array.isArray(partnerRaw) ? partnerRaw[0] : partnerRaw
+    istKleinunternehmer = partner?.[meta.partnerFlag] ?? null
+  }
 
   const ust = computeProvisionUst(nettoEur, istKleinunternehmer)
 
@@ -291,7 +289,7 @@ export async function auszahlenProvision(
     const g = await erstellePartnerGutschrift(db, {
       tabelle,
       ledgerId: id,
-      partnerTyp: meta.partnerTyp,
+      partnerTyp,
       partnerId,
       betraege: {
         nettoCent: Math.round(nettoEur * 100),
