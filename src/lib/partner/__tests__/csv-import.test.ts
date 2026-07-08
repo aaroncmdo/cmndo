@@ -1,5 +1,12 @@
 import { describe, it, expect } from 'vitest'
-import { parseCsv, mapCsvZuLeads } from '../csv-import'
+import {
+  parseCsv,
+  mapCsvZuLeads,
+  heuristischesMapping,
+  mapCsvMitMapping,
+  CSV_ZIEL_FELDER,
+  type CsvZielFeld,
+} from '../csv-import'
 
 describe('parseCsv', () => {
   it('parst Header + Datenzeilen (simpel)', () => {
@@ -133,6 +140,113 @@ describe('mapCsvZuLeads', () => {
   it('gibt leeres Ergebnis bei nur Header ohne Datenzeilen', () => {
     const { header, rows } = parseCsv('firma,email')
     const { valide, uebersprungen } = mapCsvZuLeads(header, rows, 'werkstatt')
+    expect(valide).toEqual([])
+    expect(uebersprungen).toBe(0)
+  })
+})
+
+describe('CSV_ZIEL_FELDER', () => {
+  it('enthält genau die 8 definierten Zielfelder', () => {
+    const expected: CsvZielFeld[] = [
+      'firma',
+      'email',
+      'telefon',
+      'ansprechpartner_vorname',
+      'ansprechpartner_nachname',
+      'plz',
+      'ort',
+      'ignorieren',
+    ]
+    expect([...CSV_ZIEL_FELDER].sort()).toEqual([...expected].sort())
+    expect(CSV_ZIEL_FELDER.length).toBe(8)
+  })
+})
+
+describe('heuristischesMapping', () => {
+  it('mappt "Firma" → firma', () => {
+    const mapping = heuristischesMapping(['Firma'])
+    expect(mapping[0]).toBe('firma')
+  })
+
+  it('mappt "E-Mail" → email (case-insensitiv)', () => {
+    const mapping = heuristischesMapping(['E-Mail'])
+    expect(mapping[0]).toBe('email')
+  })
+
+  it('mappt bekannte Aliase korrekt', () => {
+    const mapping = heuristischesMapping(['Company', 'First Name', 'Last Name', 'Phone', 'ZIP', 'City'])
+    expect(mapping[0]).toBe('firma')
+    expect(mapping[1]).toBe('ansprechpartner_vorname')
+    expect(mapping[2]).toBe('ansprechpartner_nachname')
+    expect(mapping[3]).toBe('telefon')
+    expect(mapping[4]).toBe('plz')
+    expect(mapping[5]).toBe('ort')
+  })
+
+  it('mappt unbekannte Header auf "ignorieren"', () => {
+    const mapping = heuristischesMapping(['xyz', 'umsatz', 'quelle'])
+    expect(mapping).toEqual(['ignorieren', 'ignorieren', 'ignorieren'])
+  })
+
+  it('mappt rollen_details-Aliase (datNr, ihk) auf "ignorieren" (kein LLM-Target im MVP)', () => {
+    const mapping = heuristischesMapping(['dat', 'datNr', 'ihk'])
+    expect(mapping).toEqual(['ignorieren', 'ignorieren', 'ignorieren'])
+  })
+
+  it('gibt leeres Array fuer leeren Header zurueck', () => {
+    expect(heuristischesMapping([])).toEqual([])
+  })
+})
+
+describe('mapCsvMitMapping', () => {
+  it('wendet explizites Mapping an und erzeugt korrekte PartnerCsvLead', () => {
+    const rows = [['Acme GmbH', 'max@acme.de', '+49 221 1', 'Max', 'Muster', '50667', 'Köln']]
+    const mapping: CsvZielFeld[] = [
+      'firma', 'email', 'telefon', 'ansprechpartner_vorname', 'ansprechpartner_nachname', 'plz', 'ort',
+    ]
+    const { valide, uebersprungen } = mapCsvMitMapping(rows, mapping)
+    expect(uebersprungen).toBe(0)
+    expect(valide).toEqual([
+      {
+        firma: 'Acme GmbH',
+        email: 'max@acme.de',
+        telefon: '+49 221 1',
+        ansprechpartner_vorname: 'Max',
+        ansprechpartner_nachname: 'Muster',
+        plz: '50667',
+        ort: 'Köln',
+      },
+    ])
+  })
+
+  it('überspringt Zeilen ohne firma-Zielfeld befüllt und zaehlt sie', () => {
+    const rows = [
+      ['', 'mail@x.de'],   // kein Firmenwert → übersprungen
+      ['Beta', 'b@b.de'],  // valide
+    ]
+    const mapping: CsvZielFeld[] = ['firma', 'email']
+    const { valide, uebersprungen } = mapCsvMitMapping(rows, mapping)
+    expect(uebersprungen).toBe(1)
+    expect(valide).toHaveLength(1)
+    expect(valide[0].firma).toBe('Beta')
+  })
+
+  it('ignoriert Spalten die als "ignorieren" gemappt sind', () => {
+    const rows = [['Acme', 'ignorierterWert', 'a@acme.de']]
+    const mapping: CsvZielFeld[] = ['firma', 'ignorieren', 'email']
+    const { valide } = mapCsvMitMapping(rows, mapping)
+    expect(valide[0]).toEqual({ firma: 'Acme', email: 'a@acme.de' })
+  })
+
+  it('nimmt das erste befuellte firma-Feld wenn mehrere firma-Spalten gemappt sind', () => {
+    const rows = [['ErsteFirma', 'ZweiteFirma']]
+    const mapping: CsvZielFeld[] = ['firma', 'firma']
+    const { valide } = mapCsvMitMapping(rows, mapping)
+    expect(valide[0].firma).toBe('ErsteFirma')
+  })
+
+  it('gibt leeres Ergebnis bei leeren rows', () => {
+    const { valide, uebersprungen } = mapCsvMitMapping([], ['firma'])
     expect(valide).toEqual([])
     expect(uebersprungen).toBe(0)
   })

@@ -120,6 +120,32 @@ function parseRecords(text: string): string[][] {
   return records
 }
 
+/**
+ * Die 8 Ziel-Felder fuer das explizite Mapping-Panel.
+ * 'ignorieren' = Spalte wird beim Import uebergangen.
+ * rollen_details.datNr/ihk sind Heuristik-only — kein LLM-Target im MVP.
+ */
+export type CsvZielFeld =
+  | 'firma'
+  | 'email'
+  | 'telefon'
+  | 'ansprechpartner_vorname'
+  | 'ansprechpartner_nachname'
+  | 'plz'
+  | 'ort'
+  | 'ignorieren'
+
+export const CSV_ZIEL_FELDER: readonly CsvZielFeld[] = [
+  'firma',
+  'email',
+  'telefon',
+  'ansprechpartner_vorname',
+  'ansprechpartner_nachname',
+  'plz',
+  'ort',
+  'ignorieren',
+]
+
 // Header-Alias-Tabelle: normalisierter Header-Text → Ziel-Feld. Der Wert
 // 'rollen_details.datNr' bzw. '.ihk' signalisiert Ablage im rollen_details-jsonb.
 type Ziel =
@@ -170,36 +196,39 @@ function normHeader(h: string): string {
 }
 
 /**
- * Mappt geparste CSV-Zeilen flexibel auf PartnerCsvLead. Header werden ueber
- * die Alias-Tabelle (case-insensitiv) den Ziel-Feldern zugeordnet; unbekannte
- * Spalten werden ignoriert. Eine Zeile ist valide, wenn `firma` non-empty ist.
- *
- * @param rolle nur zur Signatur-Vollstaendigkeit durchgereicht — die Rolle wird
- *   beim Insert (Server-Action) gesetzt, nicht pro Zeile aus dem CSV. So bleibt
- *   der Mapper rein und die Rolle die eine, im Modal gewaehlte Quelle der Wahrheit.
- * @returns { valide, uebersprungen } — uebersprungen = Anzahl Zeilen ohne Firma.
+ * Gibt fuer jeden Header-Eintrag das passende CsvZielFeld zurueck.
+ * rollen_details.datNr/.ihk sind Heuristik-only — werden als 'ignorieren' behandelt
+ * (kein LLM-Target im MVP). Unbekannte Header ebenfalls 'ignorieren'.
  */
-export function mapCsvZuLeads(
-  header: string[],
-  rows: string[][],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _rolle: string,
-): MapCsvResult {
-  // Spaltenindex → Ziel-Feld (erste passende Alias-Spalte gewinnt je Ziel).
-  const zielProSpalte: (Ziel | undefined)[] = header.map((h) => HEADER_ALIASE[normHeader(h)])
+export function heuristischesMapping(header: string[]): CsvZielFeld[] {
+  return header.map((h) => {
+    const ziel = HEADER_ALIASE[normHeader(h)]
+    if (!ziel) return 'ignorieren'
+    if (ziel === 'rollen_details.datNr' || ziel === 'rollen_details.ihk') return 'ignorieren'
+    return ziel satisfies CsvZielFeld
+  })
+}
 
+/**
+ * Wendet ein EXPLIZITES Spalten-Mapping (Spaltenindex → CsvZielFeld) auf die
+ * Datenzeilen an. 'ignorieren'-Eintraege werden uebersprungen. `firma` ist
+ * Pflicht — Zeilen ohne befuellte firma-Spalte werden gezaehlt und verworfen.
+ *
+ * Die interne Feld-Zuordnungs-Logik ist identisch mit der frueheren mapCsvZuLeads-
+ * Implementierung; mapCsvZuLeads delegiert jetzt hierhin.
+ */
+export function mapCsvMitMapping(rows: string[][], mapping: CsvZielFeld[]): MapCsvResult {
   const valide: PartnerCsvLead[] = []
   let uebersprungen = 0
 
   for (const row of rows) {
     const lead: PartnerCsvLead = { firma: '' }
-    const details: Record<string, unknown> = {}
 
-    zielProSpalte.forEach((ziel, idx) => {
-      if (!ziel) return
+    mapping.forEach((zielFeld, idx) => {
+      if (zielFeld === 'ignorieren') return
       const raw = (row[idx] ?? '').trim()
       if (!raw) return
-      switch (ziel) {
+      switch (zielFeld) {
         case 'firma':
           if (!lead.firma) lead.firma = raw
           break
@@ -221,13 +250,105 @@ export function mapCsvZuLeads(
         case 'ort':
           if (!lead.ort) lead.ort = raw
           break
-        case 'rollen_details.datNr':
-          if (details.datNr === undefined) details.datNr = raw
+      }
+    })
+
+    if (!lead.firma) {
+      uebersprungen += 1
+      continue
+    }
+    valide.push(lead)
+  }
+
+  return { valide, uebersprungen }
+}
+
+/**
+ * Mappt geparste CSV-Zeilen flexibel auf PartnerCsvLead. Header werden ueber
+ * die Alias-Tabelle (case-insensitiv) den Ziel-Feldern zugeordnet; unbekannte
+ * Spalten werden ignoriert. Eine Zeile ist valide, wenn `firma` non-empty ist.
+ *
+ * Delegiert intern an mapCsvMitMapping(rows, heuristischesMapping(header)) —
+ * Verhalten unveraendert, Logik DRY.
+ *
+ * Hinweis: rollen_details (datNr/ihk) werden hier weiterhin unterstuetzt, weil
+ * die Heuristik diese Aliase kennt und der bestehende Import-Flow sie benoetigt.
+ * mapCsvMitMapping selbst kennt rollen_details NICHT (kein CsvZielFeld-Target im
+ * MVP) — daher werden datNr/ihk-Spalten beim expliziten Mapping als 'ignorieren'
+ * behandelt. Fuer die automatische Heuristik hier bleibt das Verhalten stabil,
+ * indem wir die alte Logik fuer rollen_details separat anwenden.
+ *
+ * @param rolle nur zur Signatur-Vollstaendigkeit durchgereicht — die Rolle wird
+ *   beim Insert (Server-Action) gesetzt, nicht pro Zeile aus dem CSV.
+ * @returns { valide, uebersprungen } — uebersprungen = Anzahl Zeilen ohne Firma.
+ */
+export function mapCsvZuLeads(
+  header: string[],
+  rows: string[][],
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  _rolle: string,
+): MapCsvResult {
+  // Basis-Mapping ueber heuristischesMapping (ohne rollen_details-Spalten).
+  const zielFeldProSpalte = heuristischesMapping(header)
+
+  // rollen_details separat tracken (die Aliase landen als 'ignorieren' im
+  // CsvZielFeld-Mapping, aber der existierende Import-Flow braucht sie).
+  const rollenDetailProSpalte: (Ziel | undefined)[] = header.map((h) => {
+    const ziel = HEADER_ALIASE[normHeader(h)]
+    if (ziel === 'rollen_details.datNr' || ziel === 'rollen_details.ihk') return ziel
+    return undefined
+  })
+
+  const hasRollenDetailCols = rollenDetailProSpalte.some((z) => z !== undefined)
+
+  if (!hasRollenDetailCols) {
+    // Kein rollen_details-Overhead — direkt delegieren.
+    return mapCsvMitMapping(rows, zielFeldProSpalte)
+  }
+
+  // Mit rollen_details: Basis-Mapping + Details zusammenfuehren.
+  const valide: PartnerCsvLead[] = []
+  let uebersprungen = 0
+
+  for (const row of rows) {
+    const lead: PartnerCsvLead = { firma: '' }
+    const details: Record<string, unknown> = {}
+
+    zielFeldProSpalte.forEach((zielFeld, idx) => {
+      if (zielFeld === 'ignorieren') return
+      const raw = (row[idx] ?? '').trim()
+      if (!raw) return
+      switch (zielFeld) {
+        case 'firma':
+          if (!lead.firma) lead.firma = raw
           break
-        case 'rollen_details.ihk':
-          if (details.ihk === undefined) details.ihk = raw
+        case 'ansprechpartner_vorname':
+          if (!lead.ansprechpartner_vorname) lead.ansprechpartner_vorname = raw
+          break
+        case 'ansprechpartner_nachname':
+          if (!lead.ansprechpartner_nachname) lead.ansprechpartner_nachname = raw
+          break
+        case 'email':
+          if (!lead.email) lead.email = raw
+          break
+        case 'telefon':
+          if (!lead.telefon) lead.telefon = raw
+          break
+        case 'plz':
+          if (!lead.plz) lead.plz = raw
+          break
+        case 'ort':
+          if (!lead.ort) lead.ort = raw
           break
       }
+    })
+
+    rollenDetailProSpalte.forEach((ziel, idx) => {
+      if (!ziel) return
+      const raw = (row[idx] ?? '').trim()
+      if (!raw) return
+      if (ziel === 'rollen_details.datNr' && details.datNr === undefined) details.datNr = raw
+      if (ziel === 'rollen_details.ihk' && details.ihk === undefined) details.ihk = raw
     })
 
     if (!lead.firma) {
