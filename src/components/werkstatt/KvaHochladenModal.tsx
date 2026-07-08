@@ -1,9 +1,12 @@
 'use client'
 
-// Inkrement 2 (WRITE) — KVA aus dem Auftrag erstellen. Die Werkstatt laedt
-// optional das KVA-PDF hoch (OCR liest netto/brutto vor), prueft/ergaenzt die
-// Betraege und speichert sie auf den bestehenden Claim
-// (erstelleKvaFuerAuftrag -> claims.kostenvoranschlag_netto/brutto). Flippt den
+// Inkrement 2 (WRITE) — Kostenvoranschlag NUR HOCHLADEN. Die Werkstatt erstellt
+// KEINEN KVA aus dem Nichts; sie laedt ihren offiziellen KVA als PDF hoch, die OCR
+// (extrahiereKvaFuerAuftragOcr) liest netto/brutto AUS dem Dokument. Die Betraege
+// bleiben leicht editierbar (OCR-Korrektur), sind aber keine Frei-Eingabe. Der
+// Upload ist Pflicht: ohne PDF kein Speichern. erstelleKvaFuerAuftrag schreibt
+// claims.kostenvoranschlag_netto/brutto auf den bestehenden Claim, legt das PDF im
+// Storage ab und haengt eine fall_dokumente-Zeile fuer den Kunden an. Flippt den
 // Auftrag benoetigt -> erstellt.
 
 import { useRef, useState } from 'react'
@@ -24,7 +27,7 @@ function parseNumOpt(v: string): number | null {
   return Number.isFinite(n) ? n : null
 }
 
-export function KvaErstellenModal({
+export function KvaHochladenModal({
   claimId,
   open,
   onClose,
@@ -45,6 +48,8 @@ export function KvaErstellenModal({
   const [ocrHinweis, setOcrHinweis] = useState<string | null>(null)
   const [speichern, setSpeichern] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
+
+  const pdfHochgeladen = pdfBase64 != null && pdfMediaType != null
 
   function reset() {
     setNetto('')
@@ -91,10 +96,10 @@ export function KvaErstellenModal({
         if (result.netto != null) setNetto(String(result.netto))
         if (result.brutto != null) setBrutto(String(result.brutto))
         if (result.netto == null && result.brutto == null) {
-          setOcrHinweis('Keine Beträge erkannt — bitte manuell eintragen.')
+          setOcrHinweis('Keine Beträge erkannt — bitte aus dem Dokument nachtragen.')
         }
       } else {
-        setOcrHinweis(`OCR konnte das Dokument nicht lesen: ${result.error}. Bitte Beträge manuell eintragen.`)
+        setOcrHinweis(`OCR konnte das Dokument nicht lesen: ${result.error}. Bitte Beträge aus dem Dokument nachtragen.`)
       }
       setOcrLaden(false)
     }
@@ -107,12 +112,12 @@ export function KvaErstellenModal({
 
   async function handleSpeichern() {
     setFehler(null)
-    const nettoNum = parseNumOpt(netto)
-    const bruttoNum = parseNumOpt(brutto)
-    if (nettoNum == null && bruttoNum == null) {
-      setFehler('Bitte mindestens einen Betrag (netto oder brutto) angeben.')
+    if (!pdfHochgeladen) {
+      setFehler('Bitte laden Sie den Kostenvoranschlag als PDF hoch.')
       return
     }
+    const nettoNum = parseNumOpt(netto)
+    const bruttoNum = parseNumOpt(brutto)
 
     setSpeichern(true)
     const res = await erstelleKvaFuerAuftrag(claimId, {
@@ -135,20 +140,20 @@ export function KvaErstellenModal({
   }
 
   return (
-    <Modal open={open} onClose={handleClose} ariaLabel="Kostenvoranschlag erstellen" maxWidth={520}>
+    <Modal open={open} onClose={handleClose} ariaLabel="Kostenvoranschlag hochladen" maxWidth={520}>
       <div className="space-y-5">
         <div className="space-y-1">
-          <h2 className="text-heading-sm text-claimondo-navy font-semibold">Kostenvoranschlag erstellen</h2>
+          <h2 className="text-heading-sm text-claimondo-navy font-semibold">Kostenvoranschlag hochladen</h2>
           <p className="text-body-sm text-claimondo-ondo">
-            Optional das KVA-PDF hochladen — die OCR liest die Beträge automatisch vor. Prüfen Sie
-            netto/brutto und speichern Sie. Der Kunde benötigt den Kostenvoranschlag für die Freigabe.
+            Laden Sie den Kostenvoranschlag als PDF hoch — die Beträge werden automatisch
+            ausgelesen. Der Kunde benötigt den Kostenvoranschlag für die Freigabe.
           </p>
         </div>
 
-        {/* Optionaler Upload */}
+        {/* Pflicht-Upload */}
         <div className="space-y-2">
           <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
-            Dokument (optional — PDF, JPG, PNG)
+            Kostenvoranschlag (PDF, JPG oder PNG) — erforderlich
           </p>
           <label
             htmlFor="auftrag-kva-datei"
@@ -181,36 +186,46 @@ export function KvaErstellenModal({
           )}
         </div>
 
-        {/* Betraege */}
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <div className="space-y-1">
-            <label htmlFor="auftrag-kva-netto" className="text-body-xs font-medium text-claimondo-navy">
-              Netto (€)
-            </label>
-            <Input
-              value={netto}
-              onChangeText={setNetto}
-              inputType="number"
-              name="auftrag-kva-netto"
-              ariaLabel="Nettobetrag in Euro"
-              placeholder="3245.67"
-              disabled={ocrLaden || speichern}
-            />
+        {/* Betraege — aus dem Dokument gelesen, nur zur Korrektur editierbar */}
+        <div className="space-y-2">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
+            Beträge — aus dem Dokument gelesen
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label htmlFor="auftrag-kva-netto" className="text-body-xs font-medium text-claimondo-navy">
+                Netto (€)
+              </label>
+              <Input
+                value={netto}
+                onChangeText={setNetto}
+                inputType="number"
+                name="auftrag-kva-netto"
+                ariaLabel="Nettobetrag in Euro (aus dem Dokument gelesen)"
+                placeholder="—"
+                disabled={ocrLaden || speichern || !pdfHochgeladen}
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="auftrag-kva-brutto" className="text-body-xs font-medium text-claimondo-navy">
+                Brutto (€)
+              </label>
+              <Input
+                value={brutto}
+                onChangeText={setBrutto}
+                inputType="number"
+                name="auftrag-kva-brutto"
+                ariaLabel="Bruttobetrag in Euro (aus dem Dokument gelesen)"
+                placeholder="—"
+                disabled={ocrLaden || speichern || !pdfHochgeladen}
+              />
+            </div>
           </div>
-          <div className="space-y-1">
-            <label htmlFor="auftrag-kva-brutto" className="text-body-xs font-medium text-claimondo-navy">
-              Brutto (€)
-            </label>
-            <Input
-              value={brutto}
-              onChangeText={setBrutto}
-              inputType="number"
-              name="auftrag-kva-brutto"
-              ariaLabel="Bruttobetrag in Euro"
-              placeholder="3862.35"
-              disabled={ocrLaden || speichern}
-            />
-          </div>
+          {pdfHochgeladen && (
+            <p className="text-body-xs text-claimondo-shield">
+              Falls die automatische Erkennung daneben liegt, können Sie die Beträge korrigieren.
+            </p>
+          )}
         </div>
 
         {fehler && <p className="text-body-xs text-danger-strong">{fehler}</p>}
@@ -223,10 +238,10 @@ export function KvaErstellenModal({
             variant="navy"
             size="sm"
             loading={speichern}
-            disabled={ocrLaden}
+            disabled={ocrLaden || !pdfHochgeladen}
             onClick={handleSpeichern}
           >
-            Kostenvoranschlag speichern
+            Speichern
           </Button>
         </div>
       </div>

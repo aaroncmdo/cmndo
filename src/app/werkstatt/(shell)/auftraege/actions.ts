@@ -251,9 +251,14 @@ export async function extrahiereKvaFuerAuftragOcr(
 }
 
 /**
- * Werkstatt stellt den Kostenvoranschlag direkt aus dem Auftrag aus: schreibt
- * claims.kostenvoranschlag_netto/brutto auf den BESTEHENDEN Claim (+ optional das
- * KVA-PDF in den Storage). Flippt den Auftrag benoetigt -> erstellt.
+ * Werkstatt laedt ihren Kostenvoranschlag HOCH (kein Erstellen aus dem Nichts):
+ * legt das PDF im Storage ab, schreibt die (per OCR gelesenen) Betraege
+ * claims.kostenvoranschlag_netto/brutto auf den BESTEHENDEN Claim und haengt eine
+ * fall_dokumente-Zeile fuer den Kunden an. Flippt den Auftrag benoetigt -> erstellt.
+ *
+ * Das PDF ist PFLICHT — ohne pdfBase64/pdfMediaType kein Speichern (die Betraege
+ * sind eine OCR-Ableitung des Dokuments, kein Frei-Autoren-Wert; sie duerfen fehlen,
+ * das Dokument nicht).
  *
  * Ownership-Gate (Pflicht): getWerkstattAuftrag liest ueber die RLS-gegatete
  * v_werkstatt_auftrag-View — kein Treffer => diese Werkstatt gehoert nicht zu dem
@@ -267,8 +272,8 @@ export async function erstelleKvaFuerAuftrag(
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   await requirePortalAccess(['werkstatt'])
   if (!claimId) return { ok: false, error: 'Kein Auftrag.' }
-  if (input.netto == null && input.brutto == null) {
-    return { ok: false, error: 'Bitte mindestens einen Betrag (netto oder brutto) angeben.' }
+  if (!input.pdfBase64 || !input.pdfMediaType) {
+    return { ok: false, error: 'Bitte laden Sie den Kostenvoranschlag als PDF hoch.' }
   }
 
   // Ownership: RLS-gegatete View — Werkstatt sieht nur ihre eigenen Claims.
@@ -286,20 +291,48 @@ export async function erstelleKvaFuerAuftrag(
     .eq('id', claimId)
   if (error) return { ok: false, error: error.message }
 
-  // KVA-PDF an den Claim haengen (non-critical).
+  // KVA-PDF an den Claim haengen (non-critical) + fuer den Kunden sichtbar machen.
   try {
-    if (input.pdfBase64 && input.pdfMediaType) {
-      const ext = input.pdfMediaType === 'application/pdf' ? 'pdf' : (input.pdfMediaType.split('/')[1] ?? 'bin')
-      const bytes = Buffer.from(input.pdfBase64, 'base64')
-      await admin.storage
-        .from('fall-dokumente')
-        .upload(`faelle/${claimId}/kostenvoranschlag_${Date.now()}.${ext}`, bytes, {
-          contentType: input.pdfMediaType,
-          upsert: false,
-        })
-    }
+    const ext = input.pdfMediaType === 'application/pdf' ? 'pdf' : (input.pdfMediaType.split('/')[1] ?? 'bin')
+    const bytes = Buffer.from(input.pdfBase64, 'base64')
+    const dateiName = `kostenvoranschlag_${Date.now()}.${ext}`
+    const storagePath = `faelle/${claimId}/${dateiName}`
+
+    const { error: uploadErr } = await admin.storage
+      .from('fall-dokumente')
+      .upload(storagePath, bytes, {
+        contentType: input.pdfMediaType,
+        upsert: false,
+      })
+    if (uploadErr) throw uploadErr
+
+    // fall_dokumente-Zeile, damit der Kunde das PDF im Dokumente-Tab sieht. Die
+    // Kunde-Sicht liest fall_dokumente ueber fall_id (claim_id -> fall_id via
+    // faelle_claim_bridge); claim_id wird ausserdem per DB-Trigger aus fall_id
+    // abgeleitet, wir setzen ihn hier direkt (NOT NULL). fall_id via Reverse-Bridge,
+    // Fallback claimId (in den Daten identisch; matcht die Kunde-Seite).
+    const { data: bridge } = await admin
+      .from('faelle_claim_bridge')
+      .select('fall_id')
+      .eq('claim_id', claimId)
+      .maybeSingle()
+    const fallId = (bridge as { fall_id: string } | null)?.fall_id ?? claimId
+
+    const { error: docErr } = await admin.from('fall_dokumente').insert({
+      fall_id: fallId,
+      claim_id: claimId,
+      dokument_typ: 'kostenvoranschlag',
+      storage_path: storagePath,
+      original_filename: dateiName,
+      mime_type: input.pdfMediaType,
+      groesse_bytes: bytes.byteLength,
+      kategorie: 'kostenvoranschlag',
+      quelle: 'werkstatt',
+      sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
+    } as never)
+    if (docErr) throw docErr
   } catch (e) {
-    console.error('[werkstatt-auftrag-kva] KVA-Doc-Upload fehlgeschlagen (nicht kritisch):', e)
+    console.error('[werkstatt-auftrag-kva] KVA-Doc-Upload/-Zeile fehlgeschlagen (nicht kritisch):', e)
   }
 
   revalidatePath(`/werkstatt/auftraege/${claimId}`)
