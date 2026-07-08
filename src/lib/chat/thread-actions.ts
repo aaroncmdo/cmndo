@@ -16,6 +16,7 @@ import {
   threadLabel,
   leiteDmKandidaten,
   rolleLabel,
+  aggregiereUnreadProClaim,
   type ClaimZuweisung,
   type ThreadArt,
   type DmKandidatenClaim,
@@ -261,4 +262,44 @@ export async function ladeClaimBeteiligte(claimId: string): Promise<Ergebnis<Cla
   if (!claim) return { ok: false, error: 'Claim nicht gefunden.' }
   const kandidaten = leiteDmKandidaten(claim as DmKandidatenClaim, user.id)
   return { ok: true, data: kandidaten.map((k) => ({ userId: k.userId, rolle: k.rolle, label: rolleLabel(k.rolle) })) }
+}
+
+/** Ungelesene Nachrichten pro Claim fuer die Inbox-Sidebar (eigene Thread-Membership + zuletzt_gelesen_am). */
+export async function ladeClaimUnreadCounts(claimIds: string[]): Promise<Ergebnis<Record<string, number>>> {
+  const { user } = await aktuellerUser()
+  if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
+  if (claimIds.length === 0) return { ok: true, data: {} }
+  const admin = createAdminClient() as unknown as SupabaseClient
+
+  // Eigene Memberships in den betroffenen Claims (+ zuletzt_gelesen_am). !inner-Join auf
+  // chat_threads liefert die claim_id; Nested-FK je nach Cardinality Array|Objekt -> normalisieren.
+  const { data: membRaw } = await admin
+    .from('chat_thread_teilnehmer')
+    .select('thread_id, zuletzt_gelesen_am, chat_threads!inner(claim_id)')
+    .eq('user_id', user.id)
+    .in('chat_threads.claim_id', claimIds)
+  const memberships = ((membRaw ?? []) as Array<{
+    thread_id: string
+    zuletzt_gelesen_am: string | null
+    chat_threads: { claim_id: string } | { claim_id: string }[]
+  }>)
+    .map((m) => {
+      const ct = Array.isArray(m.chat_threads) ? m.chat_threads[0] : m.chat_threads
+      return { threadId: m.thread_id, claimId: ct?.claim_id ?? '', zuletztGelesenAm: m.zuletzt_gelesen_am }
+    })
+    .filter((m) => m.claimId)
+  if (memberships.length === 0) return { ok: true, data: {} }
+
+  const { data: nachrRaw } = await admin
+    .from('nachrichten')
+    .select('thread_id, created_at, sender_id')
+    .in(
+      'thread_id',
+      memberships.map((m) => m.threadId),
+    )
+  const nachrichten = ((nachrRaw ?? []) as Array<{ thread_id: string; created_at: string; sender_id: string | null }>).map(
+    (n) => ({ threadId: n.thread_id, createdAt: n.created_at, senderId: n.sender_id }),
+  )
+
+  return { ok: true, data: aggregiereUnreadProClaim(memberships, nachrichten, user.id) }
 }
