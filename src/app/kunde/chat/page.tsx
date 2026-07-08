@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import ClaimChatInbox from '@/components/chat/ClaimChatInbox'
+import { ladeClaimUnreadCounts } from '@/lib/chat/thread-actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
@@ -71,6 +72,8 @@ export default async function KundeChatPage({
   // Gruppe + private DMs pro Fall) statt kanal-basierter ChatWithFallSidebar.
   // Default aus -> unveraendert, null Prod-Risiko. Kunde = kein Staff (istStaff=false).
   if (params.chatv2 === '1') {
+    const unreadRes = await ladeClaimUnreadCounts(faelle.map(f => f.claimId))
+    const unread = unreadRes.ok ? unreadRes.data : {}
     return (
       <ClaimChatInbox
         eintraege={faelle.map(f => ({
@@ -78,6 +81,7 @@ export default async function KundeChatPage({
           title: t('chat.meinFall'),
           fallNummer: f.claim_nummer,
           lastAt: f._c,
+          unreadCount: unread[f.claimId] ?? 0,
         }))}
         currentUserId={user.id}
         istStaff={false}

@@ -93,3 +93,45 @@ export function leiteDmKandidaten(claim: DmKandidatenClaim, meId: string): Threa
   }
   return out
 }
+
+/** Membership eines Users in einem Thread (fuer die Unread-Aggregation). */
+export interface UnreadMembership {
+  threadId: string
+  claimId: string
+  zuletztGelesenAm: string | null
+}
+
+/** Nachricht-Minimal-Shape fuer die Unread-Aggregation. */
+export interface UnreadNachricht {
+  threadId: string
+  createdAt: string
+  senderId: string | null
+}
+
+/**
+ * Zaehlt ungelesene Nachrichten pro Claim: fremde Nachrichten (senderId != meId),
+ * die nach dem zuletzt_gelesen_am des Users im jeweiligen Thread liegen (null =
+ * nie gelesen -> alle fremden zaehlen). Nachrichten ohne Membership werden ignoriert.
+ */
+export function aggregiereUnreadProClaim(
+  memberships: UnreadMembership[],
+  nachrichten: UnreadNachricht[],
+  meId: string,
+): Record<string, number> {
+  const threadToClaim = new Map<string, string>()
+  const threadGelesen = new Map<string, string | null>()
+  for (const m of memberships) {
+    threadToClaim.set(m.threadId, m.claimId)
+    threadGelesen.set(m.threadId, m.zuletztGelesenAm)
+  }
+  const counts: Record<string, number> = {}
+  for (const n of nachrichten) {
+    const claimId = threadToClaim.get(n.threadId)
+    if (!claimId) continue
+    if (n.senderId === meId) continue
+    const gelesen = threadGelesen.get(n.threadId)
+    if (gelesen && n.createdAt <= gelesen) continue
+    counts[claimId] = (counts[claimId] ?? 0) + 1
+  }
+  return counts
+}

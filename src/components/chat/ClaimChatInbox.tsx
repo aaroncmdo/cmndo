@@ -20,6 +20,8 @@ export type ClaimInboxEintrag = {
   fallNummer: string | null
   /** Letzte Aktivitaet (ISO) fuer die Sortierung/Anzeige. */
   lastAt: string
+  /** Ungelesene Nachrichten (fremd, nach zuletzt_gelesen_am) fuer das Sidebar-Badge. */
+  unreadCount: number
 }
 
 export default function ClaimChatInbox({
@@ -40,7 +42,7 @@ export default function ClaimChatInbox({
     title: e.title,
     subtitle: e.fallNummer ? `Fall #${e.fallNummer}` : 'Fall-Chat',
     lastAt: e.lastAt,
-    unreadCount: 0, // Unread-Aggregation ueber Threads = Follow-up (v2 zeigt sie im Panel).
+    unreadCount: e.unreadCount,
     searchKey: `${e.title} ${e.fallNummer ?? ''}`,
   }))
   const byId = new Map(eintraege.map((e) => [e.claimId, e]))
