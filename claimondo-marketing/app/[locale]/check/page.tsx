@@ -7,6 +7,7 @@ import { LandingFooter } from '@/components/landing/LandingFooter'
 import { StickyCallBar } from '@/components/landing/StickyCallBar'
 import { TrustBlock } from '@/components/landing/TrustBlock'
 import { CheckFunnelClient } from './CheckFunnelClient'
+import { MaklerEmpfehlungHinweis } from '@/components/check/MaklerEmpfehlungHinweis'
 import {
   serviceSchema,
   breadcrumbsSchema,
@@ -78,6 +79,9 @@ export default async function CheckPage() {
           }}
         />
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          {/* Makler-Empfehlung: wer ueber /m/<code> kam (URL ?m), sieht „Empfohlen von <Firma>"
+              auch hier — schliesst die letzte neutrale Funnel-Stufe (LP->Check->Tool->Finder). */}
+          <div><MaklerEmpfehlungHinweis /></div>
           <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/70 px-4 py-1.5 text-xs font-semibold text-claimondo-ondo shadow-glass-pill backdrop-blur-md sm:text-sm">
             <ShieldCheck className="h-4 w-4" aria-hidden />
             {t('badge')}
