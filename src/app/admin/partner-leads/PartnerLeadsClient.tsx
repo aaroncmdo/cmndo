@@ -532,6 +532,8 @@ const CSV_ZIEL_FELD_LABELS: Record<CsvZielFeld, string> = {
   ansprechpartner_nachname: 'Nachname',
   plz: 'PLZ',
   ort: 'Ort',
+  datNr: 'DAT-Nr',
+  ihk: 'IHK-Nr',
   ignorieren: 'Ignorieren',
 }
 

@@ -469,6 +469,7 @@ export async function schlageCsvMappingVor(
     const zielFelderListe = [...CSV_ZIEL_FELDER].join(',')
     const systemPrompt =
       `Ordne jeden CSV-Header genau EINEM Zielfeld aus [${zielFelderListe}] zu. ` +
+      'datNr = DAT-Expert-Nummer (Sachverstaendige), ihk = IHK-Registrierungsnummer (Makler). ' +
       'Unklar → ignorieren. Antworte NUR mit JSON {header:zielfeld}.'
 
     const userContent =
