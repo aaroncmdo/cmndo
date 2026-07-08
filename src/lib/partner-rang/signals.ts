@@ -26,6 +26,7 @@ export async function ladeSvKandidaten(supabase: Sb): Promise<Kandidat[]> {
     .select('id, profile_id, verifiziert, partner_seit, ablehnungen_30_tage, oeffentlich_bestellt, bvsk_mitgliedsnummer, dat_nummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer')
     .eq('ist_testaccount', false)
     .is('geloescht_am', null)
+    .is('gesperrt_seit', null)
   if (error || !svs || svs.length === 0) return []
 
   const ids: string[] = svs.map((s: { id: string }) => s.id)
