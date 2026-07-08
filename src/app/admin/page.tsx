@@ -10,6 +10,9 @@ import DashboardStats from './_components/DashboardStats'
 import TageskalenderWidget from './_components/TageskalenderWidget'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { getOpsRollup } from '@/lib/ops/get-ops-rollup'
+import { getMyClaimWorkItems } from '@/lib/ops/get-claim-workitems'
+import AdminOpsCockpit from '@/components/admin/AdminOpsCockpit'
 
 // KFZ-155 -> Redesign 07/2026 ("Der Tag auf einen Blick"): PageHeader -> Greeting +
 // Dringlichkeits-Zeile; die 6 KpiCards (StatCard-Grid) -> verbundene StatBar. loadKpis
@@ -115,11 +118,17 @@ export default async function AdminDashboardPage() {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  const [{ data: profile }, kpis] = await Promise.all([
+  const [{ data: profile }, kpis, rollupRes, itemsRes] = await Promise.all([
     supabase.from('profiles').select('vorname').eq('id', user.id).maybeSingle(),
     loadKpis(),
+    getOpsRollup(supabase),
+    getMyClaimWorkItems(supabase, {}),
   ])
   const vorname = (profile?.vorname as string | null) ?? null
+  // Ops-Cockpit-Datenquellen (Phase 2 Rebuild) — Matrix aus der abgeleiteten v_ops_rollup,
+  // Attention/Drill-in aus den WorkItems (Admin-Kontext -> Gate liefert alle Claims).
+  const opsRollup = rollupRes.ok ? rollupRes.rollup : null
+  const opsItems = itemsRes.ok ? itemsRes.items : []
   const dateStr = new Date().toLocaleDateString('de-DE', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'Europe/Berlin' })
 
   // Dringlichkeits-Zeile — nur Handlungs-Bedarf; ueberfaellig/kritisch in danger.
@@ -162,6 +171,16 @@ export default async function AdminDashboardPage() {
             )}
           </p>
         </div>
+
+        {/* Ops-Cockpit (Claim-Workflow) — primaere Flaeche (Phase 2 Rebuild):
+            abgeleitete v_ops_rollup-Matrix + Ueberfaellig-Liste + Klick-Drill-in. */}
+        {opsRollup && <AdminOpsCockpit rollup={opsRollup} items={opsItems} />}
+
+        {/* Finanzen & Betrieb — bestehende Finanz-/SV-Widgets, unter das Cockpit demoted
+            (anderer Domain als Claim-Workflow; bewusst erhalten statt geloescht). */}
+        <h2 className="border-t border-claimondo-border pt-4 text-heading-sm font-bold text-claimondo-navy">
+          Finanzen &amp; Betrieb
+        </h2>
 
         {/* Metrik-Leiste (ex 6 KpiCards) */}
         <StatBar items={stats} />

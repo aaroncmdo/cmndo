@@ -53,6 +53,8 @@ export interface ClaimWorkItem {
   kind: 'claim'
   id: string
   fallId: string | null
+  /** Owner (KB) des Claims — Admin-Cockpit gruppiert + drillt danach. */
+  kundenbetreuerId: string | null
   claimNummer: string | null
   stage: ClaimMainPhase
   subState: ClaimSubPhase
