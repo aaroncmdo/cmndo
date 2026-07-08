@@ -4,6 +4,7 @@ import {
   mapCsvZuLeads,
   heuristischesMapping,
   mapCsvMitMapping,
+  parseLlmMapping,
   CSV_ZIEL_FELDER,
   type CsvZielFeld,
 } from '../csv-import'
@@ -249,5 +250,58 @@ describe('mapCsvMitMapping', () => {
     const { valide, uebersprungen } = mapCsvMitMapping([], ['firma'])
     expect(valide).toEqual([])
     expect(uebersprungen).toBe(0)
+  })
+})
+
+describe('parseLlmMapping', () => {
+  it('parst valides JSON und gibt ein korrektes CsvZielFeld-Array in Header-Reihenfolge zurueck', () => {
+    const header = ['Firma', 'E-Mail', 'Telefon']
+    const json = JSON.stringify({ 'Firma': 'firma', 'E-Mail': 'email', 'Telefon': 'telefon' })
+    const result = parseLlmMapping(json, header)
+    expect(result).toEqual(['firma', 'email', 'telefon'])
+  })
+
+  it('liefert null bei kaputtem (nicht-parsebarem) JSON', () => {
+    const header = ['Firma', 'Email']
+    const result = parseLlmMapping('{ ungueltig json }}}', header)
+    expect(result).toBeNull()
+  })
+
+  it('liefert null bei JSON das kein Objekt ist (z.B. Array)', () => {
+    const header = ['Firma']
+    const result = parseLlmMapping('["firma"]', header)
+    expect(result).toBeNull()
+  })
+
+  it('setzt unbekanntes Zielfeld auf "ignorieren"', () => {
+    const header = ['Firma', 'KomischeSpalte']
+    const json = JSON.stringify({ 'Firma': 'firma', 'KomischeSpalte': 'unbekannt_ziel' })
+    const result = parseLlmMapping(json, header)
+    expect(result).toEqual(['firma', 'ignorieren'])
+  })
+
+  it('setzt fehlende Header-Eintraege (im JSON nicht vorhanden) auf "ignorieren"', () => {
+    const header = ['Firma', 'Ort', 'PLZ']
+    const json = JSON.stringify({ 'Firma': 'firma' }) // Ort und PLZ fehlen im JSON
+    const result = parseLlmMapping(json, header)
+    expect(result).toEqual(['firma', 'ignorieren', 'ignorieren'])
+  })
+
+  it('respektiert die Header-Reihenfolge (Ausgabe hat selbe Laenge wie header)', () => {
+    const header = ['Ort', 'Firma', 'Email']
+    const json = JSON.stringify({ 'Firma': 'firma', 'Email': 'email', 'Ort': 'ort' })
+    const result = parseLlmMapping(json, header)
+    expect(result).toHaveLength(header.length)
+    expect(result).toEqual(['ort', 'firma', 'email'])
+  })
+
+  it('gibt ein leeres Array bei leerem Header zurueck (valides JSON, kein Fehler)', () => {
+    const result = parseLlmMapping('{}', [])
+    expect(result).toEqual([])
+  })
+
+  it('liefert null bei leerem String', () => {
+    const result = parseLlmMapping('', ['Firma'])
+    expect(result).toBeNull()
   })
 })

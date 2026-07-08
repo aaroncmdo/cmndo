@@ -264,6 +264,42 @@ export function mapCsvMitMapping(rows: string[][], mapping: CsvZielFeld[]): MapC
 }
 
 /**
+ * Validiert die JSON-Antwort des LLM (Mapping-Vorschlag) und gibt ein
+ * CsvZielFeld-Array in Header-Reihenfolge zurueck. Erwartet JSON der Form
+ * { "<headerName>": "<zielfeld>" }. Unbekannte Zielfelder und fehlende
+ * Header-Eintraege werden als 'ignorieren' behandelt.
+ *
+ * @returns CsvZielFeld[] in Header-Reihenfolge, oder null bei kaputtem/nicht-
+ *          parsebarem JSON (kein gueltige JSON-Objekt).
+ */
+export function parseLlmMapping(json: string, header: string[]): CsvZielFeld[] | null {
+  if (!json) return null
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(json)
+  } catch {
+    return null
+  }
+
+  // Muss ein nicht-null Objekt sein (kein Array, kein primitiver Typ).
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return null
+  }
+
+  const obj = parsed as Record<string, unknown>
+  const zielFeldSet = new Set<string>(CSV_ZIEL_FELDER)
+
+  return header.map((h) => {
+    const kandidat = obj[h]
+    if (typeof kandidat === 'string' && zielFeldSet.has(kandidat)) {
+      return kandidat as CsvZielFeld
+    }
+    return 'ignorieren'
+  })
+}
+
+/**
  * Mappt geparste CSV-Zeilen flexibel auf PartnerCsvLead. Header werden ueber
  * die Alias-Tabelle (case-insensitiv) den Ziel-Feldern zugeordnet; unbekannte
  * Spalten werden ignoriert. Eine Zeile ist valide, wenn `firma` non-empty ist.
