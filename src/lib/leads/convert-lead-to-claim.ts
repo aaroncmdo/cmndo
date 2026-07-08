@@ -30,6 +30,7 @@
 //     RLS-Boundary-übergreifend Lead, Claim, Fall und Profiles anfasst.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveAbrechnungsweg } from '@/lib/werkstatt/abrechnungsweg'
 import { ensureVehicleFromFin, createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
@@ -484,7 +485,19 @@ export async function convertLeadToClaim(
     (lead.schadenskategorie as string | null) ?? null
   // SP-B1: Abrechnungsweg (haftpflicht/kasko/selbstzahler) Lead -> Claim (SSoT). Record-Cast wg. Type-Lag.
   ;(claimsInsert as Record<string, unknown>).abrechnungsweg =
-    (lead.abrechnungsweg as string | null) ?? null
+    (lead.abrechnungsweg as string | null) ??
+    // WS1b (Reduced-Repair-Aktivierung): traegt der Lead keinen Weg (die meisten Nicht-/flow-
+    // Entstehungspfade leiten nicht ab), am Konversionspunkt aus schuldfrage + eigene_versicherung
+    // ableiten — sonst bleibt der Claim wegs-los und die Reparatur-Strecke dormant.
+    resolveAbrechnungsweg({
+      schuldfrage: (lead.schuldfrage as string | null) ?? null,
+      ueberEigeneVersicherung:
+        (lead.eigene_versicherung as string | null) === 'ja'
+          ? true
+          : (lead.eigene_versicherung as string | null) === 'nein'
+            ? false
+            : null,
+    })
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')

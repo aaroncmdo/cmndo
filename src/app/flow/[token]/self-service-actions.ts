@@ -86,6 +86,12 @@ export async function speichereQualiFlow(
   }
 
   const update: Record<string, unknown> = { schuldfrage }
+  // WS1a (Reduced-Repair-Aktivierung): den rohen VS-Input persistieren (leads.eigene_versicherung,
+  // text 'ja'/'nein') — sonst geht er session-lokal verloren und der eigenverantwortung-Fall laesst
+  // sich am Konversionspunkt (convert-lead-to-claim) nicht mehr zu kasko/selbstzahler ableiten.
+  if (ueberEigeneVersicherung !== undefined) {
+    update.eigene_versicherung = ueberEigeneVersicherung ? 'ja' : 'nein'
+  }
   if (outcome.abrechnungsweg) update.abrechnungsweg = outcome.abrechnungsweg
   if (outcome.reparaturwunsch) update.reparaturwunsch = outcome.reparaturwunsch
   if (outcome.ergebnis === 'weiter_mit_flag') {
