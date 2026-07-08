@@ -32,6 +32,26 @@ describe('bewerteSvKandidat', () => {
   })
 })
 
+describe('bewerteSvKandidat — Rang-Fein-Sort (C: innerhalb Paket, nie tier-übergreifend)', () => {
+  const base = { kontingentGenutzt: 0, ablehnungen30d: 0, etaVomBueroMin: 10, distanzKm: 5 }
+  it('höherer Rang → höherer Score INNERHALB derselben Paket-Stufe', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 2 }))
+      .toBeGreaterThan(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 0 }))
+  })
+  it('Revenue-Schutz: Rang überschreitet NIE eine Paket-Stufe — standard+gold < pro+bronze', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'standard', rangOrdinal: 2 }))
+      .toBeLessThan(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
+  })
+  it('auch pro+gold < premium+bronze', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 2 }))
+      .toBeLessThan(bewerteSvKandidat({ ...base, paket: 'premium', rangOrdinal: 0 }))
+  })
+  it('fehlender rangOrdinal → identischer Score (backward-compat)', () => {
+    expect(bewerteSvKandidat({ ...base, paket: 'pro' }))
+      .toBe(bewerteSvKandidat({ ...base, paket: 'pro', rangOrdinal: 0 }))
+  })
+})
+
 describe('vergleicheTenure', () => {
   const mk = (partnerSeit: string | null, createdAt: string | null, id: string) => ({ partnerSeit, createdAt, id })
   it('früheres partner_seit gewinnt', () => {
