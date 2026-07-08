@@ -1,54 +1,28 @@
-﻿'use client'
+'use client'
 
-import { useState, useCallback } from 'react'
-import { toast } from 'sonner'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
-import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
-import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
-import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-
-import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 // AAR-939: TOTP (Authenticator-App) als optionaler 2. Faktor
 import { TotpEnrollCard } from '@/components/auth/TotpEnrollCard'
-import { MapPinIcon, InfoIcon } from 'lucide-react'
-import { FieldRow, ControlledRow, SelectRow, ROW_WRAPPER_CLS, ROW_LABEL_CLS } from './_components/fields'
 import { ProfilSpezialisierung } from './_components/ProfilSpezialisierung'
 import { ProfilCommunityPrivacy } from './_components/ProfilCommunityPrivacy'
 import { ProfilVertrag } from './_components/ProfilVertrag'
 import { ProfilDarstellung } from './_components/ProfilDarstellung'
-// AAR-369: Profilbild-Upload + Anzeige-Felder
-import AvatarUpload from '@/components/shared/AvatarUpload'
+import { ProfilStammdaten } from './_components/ProfilStammdaten'
 import { SectionCard } from '@/components/shared/SectionCard'
 // AAR-500 N5: Benachrichtigungs-Präferenzen (Quiet-Hours + Channel-Opt-Outs + Feintuning)
 import {
   NotificationPreferencesForm,
   type NotificationPreferencesFormValue,
 } from '@/components/notifications/NotificationPreferencesForm'
-
-type Profile = { anrede: string | null; titel: string | null; vorname: string | null; nachname: string | null; telefon: string | null; rolle: string; twofa_telefon?: string | null; avatar_url?: string | null; anzeigename?: string | null; profilbeschreibung?: string | null }
-type SV = { id: string; paket: string; gebiet_plz: string | null; ist_aktiv: boolean; paket_faelle_gesamt: number; offene_faelle: number; qualifikationen_neu: string[] | null; spezifikationen: string[] | null; schadenarten: string[] | null; standort_adresse: string | null; standort_plz: string | null; standort_lat: number | null; standort_lng: number | null; standort_place_id: string | null; firmenname: string | null; rechtsform: string | null; steuernummer: string | null; ust_id: string | null; hrb: string | null; rolle_in_organisation: string | null; community_anonym: boolean }
-
-// BUG-91: Klassische deutsche Rechtsformen + 'Einzelunternehmen' als Default
-// fuer Solo-SVs ohne eigene GmbH/UG.
-const RECHTSFORM_OPTIONEN = [
-  '',
-  'Einzelunternehmen',
-  'Freiberufler',
-  'GbR',
-  'OHG',
-  'KG',
-  'GmbH',
-  'GmbH & Co. KG',
-  'UG (haftungsbeschränkt)',
-  'AG',
-] as const
+import type { Profile, SV } from './_components/fields'
 
 // KFZ-154: Qualifikationen / Spezifikationen / Schadenarten kommen jetzt aus
 // /admin/sachverstaendige/anlegen/constants.ts (single source of truth).
@@ -79,98 +53,9 @@ export default function ProfilClient({
   // AAR-707: echter OAuth-Status aus profiles.google_refresh_token
   googleConnected: boolean
 }) {
-  const router = useRouter()
-  const [editing, setEditing] = useState(false)
-  const [showEmptyFields, setShowEmptyFields] = useState(false)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
   const [mapsReady, setMapsReady] = useState(
     typeof window !== 'undefined' && typeof google !== 'undefined' && !!google.maps?.places,
   )
-
-  // BUG-91: Lokaler Form-State fuer alle editierbaren Felder.
-  // Email ist read-only und wird via prop reingereicht.
-  const [form, setForm] = useState({
-    anrede: profile.anrede ?? '',
-    titel: profile.titel ?? '',
-    vorname: profile.vorname ?? '',
-    nachname: profile.nachname ?? '',
-    telefon: profile.telefon ?? '',
-    firmenname: sv.firmenname ?? '',
-    rechtsform: sv.rechtsform ?? '',
-    steuernummer: sv.steuernummer ?? '',
-    ust_id: sv.ust_id ?? '',
-    hrb: sv.hrb ?? '',
-    // AAR-369: Anzeige-Felder
-    anzeigename: profile.anzeigename ?? '',
-    profilbeschreibung: profile.profilbeschreibung ?? '',
-  })
-
-  const [standort, setStandort] = useState({
-    adresse: sv.standort_adresse ?? '',
-    plz: sv.standort_plz ?? '',
-    lat: sv.standort_lat,
-    lng: sv.standort_lng,
-    place_id: sv.standort_place_id ?? '',
-  })
-
-  const onPlaceSelect = useCallback((result: PlaceResult) => {
-    setStandort({
-      adresse: result.adresse,
-      plz: result.plz,
-      lat: result.lat,
-      lng: result.lng,
-      place_id: result.place_id,
-    })
-  }, [])
-
-  function updateField<K extends keyof typeof form>(key: K, value: string) {
-    setForm(prev => ({ ...prev, [key]: value }))
-  }
-
-  async function handleSave(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setSaving(true)
-    setError(null)
-    setSuccess(false)
-    try {
-      const result = await updateOwnProfile({
-        anrede: form.anrede || null,
-        titel: form.titel || null,
-        vorname: form.vorname,
-        nachname: form.nachname,
-        telefon: form.telefon || null,
-        firmenname: form.firmenname || null,
-        rechtsform: form.rechtsform || null,
-        steuernummer: form.steuernummer || null,
-        ust_id: form.ust_id || null,
-        hrb: form.hrb || null,
-        standort_adresse: standort.adresse || null,
-        standort_plz: standort.plz || null,
-        standort_lat: standort.lat,
-        standort_lng: standort.lng,
-        standort_place_id: standort.place_id || null,
-        // AAR-369
-        anzeigename: form.anzeigename || null,
-        profilbeschreibung: form.profilbeschreibung || null,
-      })
-      if (!result.success) {
-        setError(result.error ?? 'Fehler beim Speichern')
-        return
-      }
-      setEditing(false)
-      setSuccess(true)
-      router.refresh()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Fehler beim Speichern')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  const initials = `${(profile.vorname?.[0] ?? '').toUpperCase()}${(profile.nachname?.[0] ?? '').toUpperCase()}`
-  const fullName = [profile.vorname, profile.nachname].filter(Boolean).join(' ') || '—'
 
   return (
     <div className="h-full flex flex-col">
@@ -187,17 +72,6 @@ export default function ProfilClient({
         <PageHeader
           title="Mein Profil"
           description="Stammdaten + Firma + Standort"
-          actions={
-            !editing ? (
-              <button
-                type="button"
-                onClick={() => { setEditing(true); setSuccess(false) }}
-                className="px-4 py-2 text-xs font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] rounded-ios-xl transition-colors"
-              >
-                Bearbeiten
-              </button>
-            ) : null
-          }
         />
       </div>
 
@@ -206,170 +80,12 @@ export default function ProfilClient({
           damit Desktop/Tablet quer den Platz nutzen. 4xl (~896px) bleibt
           fuer das einspaltige Profil-Form gut lesbar. */}
       <div className="flex-1 min-h-0 overflow-y-auto p-6 max-w-full">
-        {success && (
-          <div className="bg-[var(--brand-secondary)]/5 border border-[var(--brand-secondary)]/20 rounded-ios-xl p-3 mb-4 max-w-4xl">
-            <p className="text-[var(--brand-primary)] text-sm">Profil gespeichert.</p>
-          </div>
-        )}
-
-        <form onSubmit={handleSave} className="max-w-4xl">
-          <SectionCard className="p-6" bodyClassName="space-y-4">
-            {/* Avatar — AAR-369: Upload statt statischer Initialen-Kreis */}
-            <div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:gap-4 pb-4 border-b border-claimondo-border">
-              <AvatarUpload
-                currentUrl={profile.avatar_url ?? null}
-                initials={initials || '??'}
-                size="md"
-              />
-              <div>
-                <p className="text-claimondo-navy font-medium text-lg">{fullName}</p>
-                <p className="text-claimondo-ondo text-sm">Sachverständiger</p>
-              </div>
-            </div>
-
-            {/* Fields */}
-            <div className="space-y-0">
-              {/* E-Mail read-only mit Hinweis */}
-              <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 py-2.5 border-b border-claimondo-border/50">
-                <span className="text-claimondo-ondo text-sm sm:w-36 sm:shrink-0">E-Mail</span>
-                <div className="flex-1">
-                  <span className="text-claimondo-navy text-sm">{email}</span>
-                  <p className="text-claimondo-ondo/70 text-[10px] mt-0.5 flex items-center gap-1">
-                    <InfoIcon className="w-3 h-3" />
-                    Email-Änderung via Support: <span className="text-[var(--brand-secondary)]">aaron.sprafke@claimondo.de</span>
-                  </p>
-                </div>
-              </div>
-
-              {editing ? (
-                <>
-                  {/* Anrede + Titel als Dropdowns */}
-                  <SelectRow
-                    label="Anrede"
-                    value={form.anrede}
-                    onChange={v => updateField('anrede', v)}
-                    options={['', ...ANREDE_OPTIONEN].map(o => ({ value: o, label: o || '— wählen —' }))}
-                  />
-                  <SelectRow
-                    label="Titel"
-                    value={form.titel}
-                    onChange={v => updateField('titel', v)}
-                    options={TITEL_OPTIONEN.map(o => ({ value: o, label: o || '— kein Titel —' }))}
-                  />
-                  <ControlledRow label="Vorname" value={form.vorname} onChange={v => updateField('vorname', v)} />
-                  <ControlledRow label="Nachname" value={form.nachname} onChange={v => updateField('nachname', v)} />
-                  <ControlledRow label="Telefon" type="tel" value={form.telefon} onChange={v => updateField('telefon', v)} />
-                  <div className={ROW_WRAPPER_CLS}>
-                    <span className={ROW_LABEL_CLS}>Anschrift</span>
-                    <div className="flex-1 space-y-2">
-                      {mapsReady ? (
-                        <GooglePlaceAutocomplete
-                          defaultValue={standort.adresse}
-                          placeholder="Büro-/Wohnadresse eingeben"
-                          onSelect={onPlaceSelect}
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
-                        />
-                      ) : (
-                        <input
-                          type="text"
-                          value={standort.adresse}
-                          onChange={e => setStandort(prev => ({ ...prev, adresse: e.target.value }))}
-                          placeholder="Büro-/Wohnadresse eingeben"
-                          className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
-                        />
-                      )}
-                      {standort.lat != null && (
-                        <p className="text-success text-xs flex items-center gap-1">
-                          <MapPinIcon className="w-3 h-3" />
-                          Koordinaten erfasst ({standort.lat.toFixed(4)}, {standort.lng?.toFixed(4)}) — Einsatzgebiet wird neu berechnet
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* AAR-369: Anzeige-Name + Profilbeschreibung (sichtbar für Kunden) */}
-                  <ControlledRow
-                    label="Anzeigename"
-                    value={form.anzeigename}
-                    onChange={v => updateField('anzeigename', v)}
-                    placeholder="z.B. Max M. — Fallback: Vor- + Nachname"
-                  />
-                  <div className={ROW_WRAPPER_CLS}>
-                    <span className={ROW_LABEL_CLS}>Profiltext</span>
-                    <textarea
-                      value={form.profilbeschreibung}
-                      onChange={e => updateField('profilbeschreibung', e.target.value)}
-                      placeholder="z.B. Ihr persönlicher Sachverständiger mit 15 Jahren Erfahrung"
-                      rows={2}
-                      maxLength={200}
-                      className="flex-1 bg-claimondo-bg border border-claimondo-border rounded-ios-lg px-3 py-2 text-sm text-claimondo-navy placeholder-claimondo-ondo/60 focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)] resize-none"
-                    />
-                  </div>
-
-                  <div className="pt-3 mt-3 border-t border-claimondo-border">
-                    <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
-                  </div>
-                  <ControlledRow label="Firmenname" value={form.firmenname} onChange={v => updateField('firmenname', v)} />
-                  <SelectRow
-                    label="Rechtsform"
-                    value={form.rechtsform}
-                    onChange={v => updateField('rechtsform', v)}
-                    options={RECHTSFORM_OPTIONEN.map(o => ({ value: o, label: o || '— wählen —' }))}
-                  />
-                  <ControlledRow label="Steuernummer" value={form.steuernummer} onChange={v => updateField('steuernummer', v)} />
-                  <ControlledRow label="USt-IdNr" value={form.ust_id} onChange={v => updateField('ust_id', v)} placeholder="z.B. DE123456789" />
-                  <ControlledRow label="HRB" value={form.hrb} onChange={v => updateField('hrb', v)} placeholder="z.B. HRB 12345 (Berlin)" />
-                </>
-              ) : (
-                <>
-                  <FieldRow label="Anrede" value={profile.anrede ?? '—'} />
-                  <FieldRow label="Titel" value={profile.titel || '—'} />
-                  <FieldRow label="Vorname" value={profile.vorname ?? '—'} />
-                  <FieldRow label="Nachname" value={profile.nachname ?? '—'} />
-                  <FieldRow label="Telefon" value={profile.telefon ?? '—'} />
-                  <FieldRow label="Anschrift" value={sv.standort_adresse ?? '—'} />
-                  {/* AAR-369 */}
-                  <FieldRow label="Anzeigename" value={profile.anzeigename ?? '—'} />
-                  <FieldRow label="Profiltext" value={profile.profilbeschreibung ?? '—'} />
-                  <div className="pt-3 mt-3 border-t border-claimondo-border">
-                    <p className="text-[10px] text-claimondo-ondo/70 uppercase tracking-wide mb-1 px-1">Firma / Steuerliches</p>
-                  </div>
-                  <FieldRow label="Firmenname" value={sv.firmenname ?? '—'} />
-                  <FieldRow label="Rechtsform" value={sv.rechtsform ?? '—'} />
-                  <FieldRow label="Steuernummer" value={sv.steuernummer ?? '—'} />
-                  <FieldRow label="USt-IdNr" value={sv.ust_id ?? '—'} />
-                  <FieldRow label="HRB" value={sv.hrb ?? '—'} />
-                </>
-              )}
-
-            </div>
-
-            {/* Actions */}
-            {editing && (
-              <div className="flex gap-2 pt-4 border-t border-claimondo-border">
-                <button
-                  type="button"
-                  onClick={() => setEditing(false)}
-                  className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors"
-                >
-                  Abbrechen
-                </button>
-                <LoadingButton
-                  type="submit"
-                  isLoading={saving}
-                  loadingText="Wird gespeichert..."
-                  className="flex-1 py-2.5 rounded-ios-xl text-sm font-semibold bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] text-white transition-colors disabled:opacity-40"
-                >
-                  Speichern
-                </LoadingButton>
-              </div>
-            )}
-
-            {error && (
-              <p className="text-danger text-sm bg-danger-soft border border-danger/30 rounded-ios-xl p-3 mt-2">{error}</p>
-            )}
-          </SectionCard>
-        </form>
+        <ProfilStammdaten
+          email={email}
+          profile={profile}
+          sv={sv}
+          mapsReady={mapsReady}
+        />
 
         <ProfilVertrag
           paketLabel={PAKET_LABELS[sv.paket] ?? sv.paket ?? '—'}

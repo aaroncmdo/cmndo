@@ -1,5 +1,44 @@
 'use client'
 
+// Shared types fuer ProfilClient + ProfilStammdaten (Task 4 Profil-Rebuild).
+// Hier zentralisiert damit beide Files aus einem Import stammen.
+export type Profile = {
+  anrede: string | null
+  titel: string | null
+  vorname: string | null
+  nachname: string | null
+  telefon: string | null
+  rolle: string
+  twofa_telefon?: string | null
+  avatar_url?: string | null
+  anzeigename?: string | null
+  profilbeschreibung?: string | null
+}
+
+export type SV = {
+  id: string
+  paket: string
+  gebiet_plz: string | null
+  ist_aktiv: boolean
+  paket_faelle_gesamt: number
+  offene_faelle: number
+  qualifikationen_neu: string[] | null
+  spezifikationen: string[] | null
+  schadenarten: string[] | null
+  standort_adresse: string | null
+  standort_plz: string | null
+  standort_lat: number | null
+  standort_lng: number | null
+  standort_place_id: string | null
+  firmenname: string | null
+  rechtsform: string | null
+  steuernummer: string | null
+  ust_id: string | null
+  hrb: string | null
+  rolle_in_organisation: string | null
+  community_anonym: boolean
+}
+
 // 2026-05-06 SV7 (Form-Audit): drei Verbesserungen pro Form-Row:
 //   1) Mobile-Stack: flex-col auf <sm, flex-row ab sm — Label nimmt nicht
 //      mehr 144px vom 390px-Mobile-Viewport, Input bekommt full-width.
