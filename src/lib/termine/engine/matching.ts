@@ -19,8 +19,9 @@ import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { freieSlots } from './slots'
 import {
   bewerteSvKandidat, sortiereKandidaten, istKontingentBlockiert,
-  haversineKm, pointInPolygon, ersterFreierSlot, type RankbarerKandidat,
+  haversineKm, pointInPolygon, ersterFreierSlot, rangToOrdinal, type RankbarerKandidat,
 } from './matching-score'
+import { getPartnerRangBatch } from '@/lib/partner-rang/get'
 import { applyDispatchableFilter } from '@/lib/sv/queries'
 import { parseIsochrone } from '@/lib/dispatch/isochrone-parse'
 import { mapboxEtaMatrix } from '@/lib/mapbox/matrix'
@@ -189,6 +190,13 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
   )
 
   // 4. Score + Tenure-Felder.
+  // AAR-956 Phase 1c: Rang-Fein-Sort INNERHALB der Paket-Stufe. Flag-gated (ENV
+  // PARTNER_RANG_MATCHING; default OFF ⇒ kein rang-Fetch, rangOrdinal undefined ⇒
+  // identischer Score wie heute). Kein DB-Read im heißen Matching-Pfad, solange der Flag aus ist.
+  const rangAktiv = process.env.PARTNER_RANG_MATCHING === '1'
+  const rangById = rangAktiv
+    ? await getPartnerRangBatch(db, 'sachverstaendiger', imGebiet.map((g) => g.sv.id as string))
+    : null
   type Bewertet = PersonKandidat & RankbarerKandidat & { sv: SvRow }
   const bewertet: Bewertet[] = imGebiet.map((g, i) => {
     const sv = g.sv
@@ -204,7 +212,7 @@ export async function findeBestePerson(input: FindeBestePersonInput): Promise<Fi
       fallSpezifikation && Array.isArray(sv.spezifikationen) && sv.spezifikationen.includes(fallSpezifikation)
         ? SPEZ_MATCH_BONUS
         : 0
-    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm }) + stickyBonus + spezBonus
+    const score = bewerteSvKandidat({ paket, kontingentGenutzt, ablehnungen30d, etaVomBueroMin, distanzKm: g.distanzKm, rangOrdinal: rangById ? rangToOrdinal(rangById.get(sv.id as string)?.tier) : undefined }) + stickyBonus + spezBonus
     const profile = Array.isArray(sv.profiles) ? sv.profiles[0] : sv.profiles
     const reasons = [...g.reasons, `Paket: ${paket}`]
     if (etaVomBueroMin != null) reasons.push(`${etaVomBueroMin} min Fahrt vom Büro`)
