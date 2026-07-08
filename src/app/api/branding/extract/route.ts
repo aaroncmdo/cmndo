@@ -69,6 +69,10 @@ export async function POST(req: Request) {
     .from('sachverstaendige')
     .select('id')
     .eq('profile_id', user.id)
+    // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser (Buero+Sub-Standort).
+    .order('ist_parent_account', { ascending: true, nullsFirst: true })
+    .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+    .limit(1)
     .maybeSingle()
   const bucketKey = sv?.id ?? user.id
 
