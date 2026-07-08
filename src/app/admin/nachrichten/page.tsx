@@ -31,11 +31,11 @@ export default async function NachrichtenPage({
     redirect(profile?.rolle ? roleToPath(profile.rolle as string) : '/login')
   }
 
-  // Phase-2c Cutover-Flag: ?chatv2=1 -> claim-natives Thread-Modell (ClaimChatInbox).
+  // Phase-2c Cutover-Flag: claim-natives Thread-Modell (ClaimChatInbox) ist jetzt DEFAULT.
   // Admin/KB/Dispatch = Staff (is_staff-RLS sieht alle Threads). Zeigt Claims mit
-  // Thread-Aktivitaet, neueste zuerst. Default aus -> Multi-Channel-Inbox v1 unveraendert
-  // (bis das Zustellungs-Routing Thread<->WhatsApp/E-Mail existiert). claim-native id (Lehre #3910).
-  if (params.chatv2 === '1') {
+  // Thread-Aktivitaet, neueste zuerst. Zustellungs-Routing Thread<->WhatsApp/E-Mail ist live
+  // (P1/P2/P3). Escape-Hatch ?chatv2=0 -> Multi-Channel-Inbox v1. claim-native id (Lehre #3910).
+  if (params.chatv2 !== '0') {
     const admin = createAdminClient()
     const { data: tmsgs } = await admin
       .from('nachrichten')

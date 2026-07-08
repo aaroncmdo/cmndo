@@ -80,8 +80,8 @@ export default async function FeldmodusPage({
 }: {
   searchParams?: Promise<{ chatv2?: string }>
 }) {
-  // Phase-2c Cutover-Flag: ?chatv2=1 -> Fokus-Chat thread-nativ (kunde_gruppe). Default aus.
-  const chatV2 = ((await searchParams) ?? {}).chatv2 === '1'
+  // Phase-2c Cutover-Flag: Fokus-Chat thread-nativ (kunde_gruppe) ist jetzt DEFAULT. Escape-Hatch ?chatv2=0.
+  const chatV2 = ((await searchParams) ?? {}).chatv2 !== '0'
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
