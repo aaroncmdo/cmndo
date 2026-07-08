@@ -15,6 +15,22 @@ describe('rolleForSla', () => {
   it('nutzt target_rolle bei kanzlei', () => {
     expect(rolleForSla({ sla_typ: 'kanzlei_as_versand', target_rolle: 'kanzlei' })).toBe('kanzlei')
   })
+  it('bekannter Typ gewinnt ueber generisches target_rolle=sv (Prod-Daten)', () => {
+    // Prod setzt target_rolle='sv' auf allen aktiven Zeilen — gutachter_zuweisung
+    // gehoert trotzdem zu Dispatch, termin_bestaetigung zu SV.
+    expect(rolleForSla({ sla_typ: 'gutachter_zuweisung', target_rolle: 'sv' })).toBe('dispatch')
+    expect(rolleForSla({ sla_typ: 'termin_bestaetigung', target_rolle: 'sv' })).toBe(
+      'sachverstaendiger'
+    )
+  })
+  it('kanonisiert target_rolle-Kurzform sv -> sachverstaendiger bei unbekanntem Typ', () => {
+    expect(rolleForSla({ sla_typ: 'kanzlei_kuerzung_antwort', target_rolle: 'sv' })).toBe(
+      'sachverstaendiger'
+    )
+  })
+  it('unbekannte target_rolle bei unbekanntem Typ -> unbekannt', () => {
+    expect(rolleForSla({ sla_typ: 'irgendwas', target_rolle: 'xyz' })).toBe('unbekannt')
+  })
 })
 
 describe('aggregiereSlaLage', () => {

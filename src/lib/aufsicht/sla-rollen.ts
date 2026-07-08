@@ -42,13 +42,25 @@ const SLA_TYP_ROLLE: Record<string, AufsichtRolle> = {
   qc_filmcheck: 'admin',
 }
 
+// Kanonisierung der target_rolle-Kurzformen (kanzlei-tracker nutzt sv/kanzlei/kunde).
+const TARGET_ROLLE_NORM: Record<string, AufsichtRolle> = {
+  sv: 'sachverstaendiger',
+  sachverstaendiger: 'sachverstaendiger',
+  dispatch: 'dispatch',
+  kanzlei: 'kanzlei',
+  kunde: 'kunde',
+  admin: 'admin',
+}
+
 export function rolleForSla(row: Pick<SlaRow, 'sla_typ' | 'target_rolle'>): AufsichtRolle {
-  // Priority: target_rolle (as AufsichtRolle) -> SLA_TYP_ROLLE[sla_typ] -> 'unbekannt'
-  if (row.target_rolle) {
-    const rolle = row.target_rolle as AufsichtRolle
-    return rolle
-  }
-  return SLA_TYP_ROLLE[row.sla_typ] ?? 'unbekannt'
+  // Bekannte Haupt-Tracker-SLA-Typen haben eine kanonische Rolle -> die gewinnt.
+  // Prod-Daten setzen target_rolle oft generisch auf 'sv' und wuerden damit z.B.
+  // gutachter_zuweisung faelschlich SV zuordnen (gehoert zu Dispatch) -> Typ zuerst.
+  const byTyp = SLA_TYP_ROLLE[row.sla_typ]
+  if (byTyp) return byTyp
+  // Kanzlei-/sonstige Typen: explizite target_rolle nutzen (Kurzform kanonisieren).
+  if (row.target_rolle) return TARGET_ROLLE_NORM[row.target_rolle] ?? 'unbekannt'
+  return 'unbekannt'
 }
 
 export function aggregiereSlaLage(rows: SlaRow[], now: Date): SlaRollenLage {
