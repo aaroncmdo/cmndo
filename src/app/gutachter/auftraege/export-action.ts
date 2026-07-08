@@ -14,6 +14,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { berlinIsoDate, berlinDayRangeForIsoDates } from '@/lib/time/berlin-day'
 import { LACKFARBE_LABEL, type LackfarbeCode } from '@/lib/fahrzeug/imagin'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 
@@ -87,20 +88,17 @@ export async function exportTagesvorbereitung({
   const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
   if (!sv) return { ok: false, error: 'Kein SV-Profil gefunden' }
 
-  const heute = new Date()
-  heute.setHours(0, 0, 0, 0)
-  const morgen = new Date(heute)
-  morgen.setDate(morgen.getDate() + 1)
-
-  const vonDate = von ? new Date(von) : heute
-  const bisDate = bis ? new Date(bis) : morgen
-  if (Number.isNaN(vonDate.getTime()) || Number.isNaN(bisDate.getTime())) {
+  // Berliner Kalendertage (von/bis als 'YYYY-MM-DD', bis INKLUSIV). Default = heute.
+  // berlinDayRangeForIsoDates liefert das DST-korrekte UTC-Fenster. Frueher wurde
+  // new Date('YYYY-MM-DD') als UTC-Mitternacht geparst -> Fenster um den Berlin-
+  // Offset verschoben (Termine 00:00-02:00 Berlin fielen aus dem Tag).
+  const heuteBerlin = berlinIsoDate()
+  const vonIso = (von ?? heuteBerlin).slice(0, 10)
+  const bisIso = (bis ?? von ?? heuteBerlin).slice(0, 10)
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(vonIso) || !/^\d{4}-\d{2}-\d{2}$/.test(bisIso)) {
     return { ok: false, error: 'Ungültiger Datums-Bereich' }
   }
-  // bis exklusiv → +1 Tag wenn der Caller einen einzelnen Tag bis-inklusiv liefert
-  if (vonDate.getTime() === bisDate.getTime()) {
-    bisDate.setDate(bisDate.getDate() + 1)
-  }
+  const { startUtc: vonDate, endUtc: bisDate } = berlinDayRangeForIsoDates(vonIso, bisIso)
 
   const admin = createAdminClient()
 
@@ -238,8 +236,7 @@ export async function exportTagesvorbereitung({
   // BOM + CRLF damit Excel DE die Datei direkt korrekt darstellt
   const csv = '﻿' + rows.join('\r\n') + '\r\n'
 
-  const tag = vonDate.toISOString().slice(0, 10)
-  const filename = `claimondo_tagesvorbereitung_${tag}.csv`
+  const filename = `claimondo_tagesvorbereitung_${vonIso}.csv`
 
   return { ok: true, csv, filename, rowCount: termine.length }
 }

@@ -7,6 +7,7 @@ import { NavigationIcon, MapPinIcon, CheckCircleIcon, XCircleIcon, ClockIcon, Al
 import { markNurGutachterTerminDurchgefuehrt, reportKundeGrundEmbedB, startNavigation } from '@/lib/termine/actions'
 import { svAblehneTermin, svGegenvorschlagTermin } from './actions'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
+import { berlinIsoDate } from '@/lib/time/berlin-day'
 import { Modal } from '@/components/primitives/Modal'
 import { Button } from '@/components/primitives/Button/Button.web'
 
@@ -344,7 +345,7 @@ type SlotInput = { datum: string; zeit: string; dauerMin: number }
 function emptySlot(): SlotInput {
   const morgen = new Date()
   morgen.setDate(morgen.getDate() + 1)
-  return { datum: morgen.toISOString().slice(0, 10), zeit: '09:00', dauerMin: 120 }
+  return { datum: berlinIsoDate(morgen), zeit: '09:00', dauerMin: 120 }
 }
 
 function GegenvorschlagModal({
