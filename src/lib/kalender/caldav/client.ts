@@ -317,10 +317,11 @@ export async function listCalendarEventsFull(
 
 // Multi-Kalender (2026-07-08, Aaron): Events aus ALLEN Kalendern des Accounts, aggregiert.
 // Busy-Blocking soll alle Termine (Arbeit/Privat/…) abdecken. Per-Kalender fail-soft.
-// expand:true -> iCloud expandiert Serientermine (RRULE) serverseitig in einzelne Instanzen mit
-// echtem Occurrence-Datum. Sonst wuerde nur der (oft VERGANGENE) Serien-Master geliefert ->
-// zukuenftige Wiederholungen (woechentlicher Termin etc.) waeren im Kalender unsichtbar.
-// Dedup per UID+start: Serien-Instanzen teilen die UID, unterscheiden sich nur im Datum.
+// KEIN expand:true (2026-07-08 Revert): mit expand blaehte EIN Test-Profil 26 Serien-Events auf
+// 1455 Instanzen -> dessen Sync frass das Cron-Budget (maxDuration 300s) -> andere Profile
+// (Aaron) wurden gestarvt (57 Min nicht gesynct). Serien-Master wird als Einzel-Event gecacht;
+// zukuenftige Wiederholungen sind ein separater, sauber GEBOUNDETER Follow-up (future-only + Cap).
+// Dedup per UID+start (schadet nicht ohne expand; Einmal-Events haben eh eindeutige UID+start).
 export async function listAllCalendarEventsFull(
   creds: CalDavCredentials,
   rangeStartIso: string,
@@ -334,14 +335,14 @@ export async function listAllCalendarEventsFull(
     let objects: unknown[]
     try {
       objects = (await Promise.race([
-        client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso }, expand: true }),
+        client.fetchCalendarObjects({ calendar: cal, timeRange: { start: rangeStartIso, end: rangeEndIso } }),
         new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), REQUEST_TIMEOUT_MS * 3)),
       ])) as unknown[]
     } catch {
       continue // per-Kalender fail-soft
     }
     for (const ev of parseCalDavObjectsFull(objects)) {
-      const key = `${ev.uid}|${ev.start}` // Occurrence-Identitaet (Serien-Instanzen teilen die UID)
+      const key = `${ev.uid}|${ev.start}`
       if (seen.has(key)) continue
       seen.add(key)
       all.push(ev)
