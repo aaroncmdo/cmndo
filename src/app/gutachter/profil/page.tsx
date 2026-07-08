@@ -2,11 +2,6 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import ProfilClient from './ProfilClient'
-// AAR-500 N5: Benachrichtigungs-Präferenzen in Settings-Section laden
-import { getMyNotificationPreferences } from '@/lib/actions/notification-preferences'
-// AAR-707: Google-Verbindungs-Status aus profiles.google_refresh_token (Single
-// Source of Truth — sachverstaendige.kalender_sync_aktiv ist Legacy-Drift).
-import { isGoogleConnected } from '@/lib/google/oauth-client'
 import GoogleBewertungBadge from '@/components/shared/GoogleBewertungBadge'
 // AAR-939: Einstieg ins SV-Self-Service-Portal (Embed-Sites + Anfragen)
 import Link from 'next/link'
@@ -66,8 +61,6 @@ export default async function ProfilPage() {
     pendingTermine = termine ?? []
   }
 
-  const prefsRes = await getMyNotificationPreferences()
-  const googleConnected = await isGoogleConnected(user.id)
   const bewertung = bewertungRes?.data ?? null
 
   return (
@@ -103,16 +96,6 @@ export default async function ProfilPage() {
       sv={(sv as never) ?? { id: '', paket: '', gebiet_plz: null, ist_aktiv: true, paket_faelle_gesamt: 10, offene_faelle: 0, qualifikationen_neu: [], spezifikationen: [], schadenarten: [], standort_adresse: null, standort_plz: null, standort_lat: null, standort_lng: null, standort_place_id: null, firmenname: null, rechtsform: null, steuernummer: null, ust_id: null, hrb: null, rolle_in_organisation: null, community_anonym: false }}
       faelleCount={faelleResult.count ?? 0}
       pendingTermine={pendingTermine}
-      notificationPrefs={
-        prefsRes.prefs ?? {
-          quiet_hours_start: null,
-          quiet_hours_end: null,
-          timezone: 'Europe/Berlin',
-          channel_opt_outs: [],
-          event_opt_outs: {},
-        }
-      }
-      googleConnected={googleConnected}
     />
     </>
   )
