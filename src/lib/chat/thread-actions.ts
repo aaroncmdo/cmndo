@@ -46,10 +46,10 @@ async function aktuellerUser() {
 async function hatThreadZugriff(supabase: Awaited<ReturnType<typeof createClient>>, threadId: string) {
   const { data } = await (supabase as unknown as SupabaseClient)
     .from('chat_threads')
-    .select('id, claim_id')
+    .select('id, claim_id, art')
     .eq('id', threadId)
     .maybeSingle()
-  return data as { id: string; claim_id: string } | null
+  return data as { id: string; claim_id: string; art: string } | null
 }
 
 /** Synchronisiert Gruppen-Teilnehmer (nur gueltige auth.users — stale Refs pro Zeile ueberspringen). */
@@ -183,6 +183,15 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
 
   const { data: prof } = await supabase.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
 
+  // Zustellungs-Routing (Datenmodell A): Staff-Nachrichten in der kunde_gruppe werden dem
+  // Kunden zusaetzlich via WhatsApp zugestellt -> die Zeile traegt dann kanal='whatsapp'
+  // (in v1 UND v2 sichtbar). team_intern/direkt + Kunde-Sender bleiben thread-nativ (kanal null).
+  // ENV-Backstop CHAT_ZUSTELLUNG_WHATSAPP=1: DEFAULT AUS. Der WhatsApp-Pfad (Baileys) hat KEINEN
+  // eigenen Test-Guard + der prod-Datenbestand mischt @claimondo.de/disposable-Test-Leads mit
+  // echten Kunden -> erst scharf schalten, wenn die Isolation in true-prod verifiziert ist.
+  const zustellungAktiv = process.env.CHAT_ZUSTELLUNG_WHATSAPP === '1'
+  const zustellen = zustellungAktiv && thread.art === 'kunde_gruppe' && !!prof?.rolle && prof.rolle !== 'kunde'
+
   const admin = createAdminClient() as unknown as SupabaseClient
   const { data: neu, error } = await admin
     .from('nachrichten')
@@ -194,11 +203,46 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
       nachricht: inhalt,
       richtung: 'outbound',
       status: 'gesendet',
-      kanal: null,
+      kanal: zustellen ? 'whatsapp' : null,
     })
     .select('id')
     .maybeSingle()
   if (error) return { ok: false, error: error.message }
+
+  // Zustellung via die BESTEHENDE isolierte Send-Infra (identisch zu sendChatMessage -> erbt
+  // dieselbe Isolation). Non-critical: ein Zustell-Fehler bricht NIE den Thread-Save (Nachricht
+  // ist bereits persistiert). Defense-in-Depth: Test-Kunden (@claimondo.de / Test-Marker) bekommen
+  // KEINE echte WhatsApp — der Baileys-Pfad selbst hat keinen Test-Guard, daher hier explizit.
+  if (zustellen) {
+    try {
+      const { data: claim } = await admin
+        .from('claims')
+        .select('lead_id, leads(email, telefon, vorname)')
+        .eq('id', thread.claim_id)
+        .maybeSingle()
+      const leadJoin = (claim as { leads?: unknown } | null)?.leads
+      const lead = (Array.isArray(leadJoin) ? leadJoin[0] : leadJoin) as
+        | { email: string | null; telefon: string | null; vorname: string | null }
+        | null
+        | undefined
+      const { istTestEmail } = await import('@/lib/testdaten/ist-test-email')
+      // Strenger als istTestEmail allein (das @claimondo.de NICHT faengt): interne + Email-lose
+      // Leads ebenfalls unterdruecken. Kein Email = nicht verifizierbar -> sicherheitshalber NICHT senden.
+      const zielEmail = lead?.email ?? null
+      const istTestKunde = !zielEmail || istTestEmail(zielEmail) || /@claimondo\.(de|test)$/i.test(zielEmail)
+      if (lead?.telefon && !istTestKunde) {
+        const { sendCommunication } = await import('@/lib/communications/send')
+        await sendCommunication('freitext', {
+          telefon: lead.telefon,
+          vorname: lead.vorname ?? '',
+          '1': inhalt,
+        }).catch(() => {})
+      }
+    } catch (err) {
+      console.error('[Zustellung] Thread->WhatsApp Fehler:', err)
+    }
+  }
+
   return { ok: true, data: (neu as { id: string } | null)?.id ?? '' }
 }
 
