@@ -3,6 +3,7 @@ import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon, Code2Icon, Cloc
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
+import { berlinIsoDate } from '@/lib/time/berlin-day'
 import PageHeader from '@/components/shared/PageHeader'
 import KartenAnzeigeToggle from './KartenAnzeigeToggle'
 import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
@@ -37,7 +38,7 @@ export default async function EinstellungenPage() {
   if (!sv) redirect('/gutachter/willkommen')
 
   // Verfuegbarkeit-Status: laufender Urlaub schlaegt "individuell" schlaegt "Standard".
-  const heuteIso = new Date().toISOString().slice(0, 10)
+  const heuteIso = berlinIsoDate()
   const imUrlaub = !!sv.urlaub_von && !!sv.urlaub_bis && sv.urlaub_bis >= heuteIso
   const verfuegbarkeitStatus = imUrlaub
     ? { label: `Urlaub bis ${sv.urlaub_bis!.slice(8, 10)}.${sv.urlaub_bis!.slice(5, 7)}.`, tone: 'amber' as const }

@@ -41,6 +41,11 @@ export default async function VerifizierungPage() {
       'id, verifizierung_status, verifizierung_frist_bis, verifizierung_admin_notiz, verifiziert_am, qualifikationen_neu, gutachter_typ, bvsk_mitgliedsnummer, ihk_zertifikat_nummer, oebuv_bestellungsnummer',
     )
     .eq('profile_id', user.id)
+    // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser (sonst
+    // maybeSingle-Fehler bei >1 SV-Row -> sv=null -> Redirect /willkommen).
+    .order('ist_parent_account', { ascending: true, nullsFirst: true })
+    .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+    .limit(1)
     .maybeSingle()
 
   if (!sv) redirect('/gutachter/willkommen')

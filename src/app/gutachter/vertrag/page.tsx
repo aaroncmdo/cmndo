@@ -31,6 +31,10 @@ export default function VertragPage() {
           .from('sachverstaendige')
           .select('id, paket, paket_faelle_gesamt, anzahlung_faellig, vertrag_unterschrieben')
           .eq('profile_id', user.id)
+          // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser.
+          .order('ist_parent_account', { ascending: true, nullsFirst: true })
+          .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+          .limit(1)
           .maybeSingle()
         if (!sv) { setLoadError('Kein SV-Profil gefunden'); return }
         // AAR-258 Audit: Wenn Vertrag bereits unterschrieben → svData

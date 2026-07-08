@@ -80,3 +80,20 @@ export function berlinDayRangeUtc(now: Date = new Date()): {
   const endUtc = berlinMidnightUtc(nextIsoDate(isoDate))
   return { startUtc, endUtc, isoDate }
 }
+
+/**
+ * Halboffenes UTC-Fenster [startUtc, endUtc) fuer einen Berliner Kalendertag-
+ * BEREICH — vonIso..bisIso als 'YYYY-MM-DD'-Strings, bisIso INKLUSIV. endUtc =
+ * Berliner Mitternacht des Tages NACH bisIso (exklusiv). DST-korrekt. Fuer
+ * `.gte('start_zeit', startUtc)` / `.lt('start_zeit', endUtc)`-Queries, wenn der
+ * Caller Berliner Kalendertage (z. B. aus einem Date-Picker) statt Instants hat.
+ */
+export function berlinDayRangeForIsoDates(
+  vonIso: string,
+  bisIso: string,
+): { startUtc: Date; endUtc: Date } {
+  return {
+    startUtc: berlinMidnightUtc(vonIso),
+    endUtc: berlinMidnightUtc(nextIsoDate(bisIso)),
+  }
+}

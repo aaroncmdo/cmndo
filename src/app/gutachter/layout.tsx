@@ -24,6 +24,13 @@ export default async function GutachterLayout({
     .from('sachverstaendige')
     .select(svSelect)
     .eq('profile_id', user.id)
+    // Multi-Standort-safe: ein User kann mehrere sachverstaendige-Rows haben
+    // (Inhaber + Sub-Standorte). Ohne Ordering+limit(1) wirft .maybeSingle() bei
+    // >1 Row -> sv=null -> Redirect nach /willkommen (Portal-Lockout fuer den
+    // ganzen SV-Bereich). Ordering identisch zu getGutachterForUser.
+    .order('ist_parent_account', { ascending: true, nullsFirst: true })
+    .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+    .limit(1)
     .maybeSingle()
 
   // KFZ-152 Phase 2+3: Conditional Sidebar-Eintraege

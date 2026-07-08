@@ -7,14 +7,14 @@
 import { useState, useTransition } from 'react'
 import { DownloadIcon, Loader2Icon } from 'lucide-react'
 import { exportTagesvorbereitung } from './export-action'
+import { berlinIsoDate } from '@/lib/time/berlin-day'
 
 export default function TagesvorbereitungButton() {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [tag, setTag] = useState<string>(() => {
-    const d = new Date()
-    return d.toISOString().slice(0, 10)
-  })
+  // Berliner Kalendertag (nicht UTC-Slice) — sonst defaultet der Export nahe
+  // Mitternacht auf gestern.
+  const [tag, setTag] = useState<string>(() => berlinIsoDate())
 
   function trigger() {
     setError(null)
