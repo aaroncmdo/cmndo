@@ -87,11 +87,16 @@ export async function checkAndRevertAutoQuality(): Promise<{
   try {
     const supabase = createAdminClient()
 
-    // Schritt 1: Alle auto-ausgefuehrten Vorschlaege laden
+    // Schritt 1: Alle auto-ausgefuehrten Orchestrator-Vorschlaege laden.
+    // Der Spine ai_claim_proposals ist geteilt (quelle orchestrator|copilot|aufsicht);
+    // orchestrator_auto_policy governt aber NUR die Orchestrator-Auto-Ausfuehrung, daher
+    // quelle-scoped. (Heute setzt nur der Orchestrator auto_ausgefuehrt=true — der Filter
+    // haelt die Invariante fuer die kommende quelle-uebergreifende Auto-Ausfuehrung.)
     const { data: proposals, error: propErr } = await supabase
       .from('ai_claim_proposals')
       .select('vorschlag_typ, ziel_rolle, erzeugte_task_id, erstellt_am')
       .eq('auto_ausgefuehrt', true)
+      .eq('quelle', 'orchestrator')
 
     if (propErr) {
       console.error('[quality-regression] Fehler beim Laden der Vorschlaege:', propErr.message)
