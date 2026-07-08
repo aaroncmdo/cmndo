@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { sortiereDirektPaar, leiteGruppenTeilnehmer, threadLabel, leiteDmKandidaten, type ClaimZuweisung } from '../thread-model'
+import { sortiereDirektPaar, leiteGruppenTeilnehmer, threadLabel, leiteDmKandidaten, aggregiereUnreadProClaim, type ClaimZuweisung } from '../thread-model'
 
 describe('leiteDmKandidaten', () => {
   it('gibt alle Beteiligten ausser mir zurueck (non-null)', () => {
@@ -68,5 +68,40 @@ describe('leiteGruppenTeilnehmer', () => {
     const t = leiteGruppenTeilnehmer(doppelt, 'kunde_gruppe')
     // 'x' nur einmal (erste Rolle gewinnt)
     expect(t.filter((p) => p.userId === 'x')).toHaveLength(1)
+  })
+})
+
+describe('aggregiereUnreadProClaim', () => {
+  const meId = 'me'
+
+  it('zaehlt fremde Nachrichten nach zuletzt_gelesen_am pro Claim', () => {
+    const memberships = [
+      { threadId: 't1', claimId: 'c1', zuletztGelesenAm: '2026-01-01T10:00:00Z' },
+      { threadId: 't2', claimId: 'c2', zuletztGelesenAm: null },
+    ]
+    const nachrichten = [
+      { threadId: 't1', createdAt: '2026-01-01T09:00:00Z', senderId: 'other' }, // schon gelesen -> nein
+      { threadId: 't1', createdAt: '2026-01-01T11:00:00Z', senderId: 'other' }, // ungelesen -> c1+1
+      { threadId: 't1', createdAt: '2026-01-01T12:00:00Z', senderId: 'me' }, // eigen -> nie
+      { threadId: 't2', createdAt: '2026-01-01T08:00:00Z', senderId: 'other' }, // nie gelesen -> c2+1
+      { threadId: 'unknown', createdAt: '2026-01-01T12:00:00Z', senderId: 'other' }, // kein Membership -> skip
+    ]
+    expect(aggregiereUnreadProClaim(memberships, nachrichten, meId)).toEqual({ c1: 1, c2: 1 })
+  })
+
+  it('summiert mehrere Threads desselben Claims', () => {
+    const memberships = [
+      { threadId: 't1', claimId: 'c1', zuletztGelesenAm: null },
+      { threadId: 't2', claimId: 'c1', zuletztGelesenAm: null },
+    ]
+    const nachrichten = [
+      { threadId: 't1', createdAt: '2026-01-01T10:00:00Z', senderId: 'a' },
+      { threadId: 't2', createdAt: '2026-01-01T10:00:00Z', senderId: 'b' },
+    ]
+    expect(aggregiereUnreadProClaim(memberships, nachrichten, meId)).toEqual({ c1: 2 })
+  })
+
+  it('leere Eingaben -> leere Map', () => {
+    expect(aggregiereUnreadProClaim([], [], meId)).toEqual({})
   })
 })
