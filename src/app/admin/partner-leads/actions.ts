@@ -27,7 +27,7 @@ import {
   sendePartnerOnboardingEinladung,
 } from '@/lib/email/google/flows'
 import { createMeetEvent } from '@/lib/google-calendar/events'
-import { geocodeAddress } from '@/lib/google-geocoding/geocode-address'
+import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
 import {
   baueTerminTitel, berechneEndzeit, baueTerminBeschreibung,
   baueTerminAktivitaetText, ONBOARDING_TERMIN_DAUER_MIN,
@@ -739,12 +739,12 @@ export async function legePartnerOnboardingTermin(
   } else {
     if (treffpunktAdresse) {
       try {
-        const geo = await geocodeAddress(treffpunktAdresse)
-        if (geo.ok) {
+        const geo = await geocodeMitFallback(treffpunktAdresse)
+        if (geo) {
           await admin.from('admin_termine').update({
-            treffpunkt_adresse: geo.data.formatted_address,
-            treffpunkt_lat: geo.data.lat,
-            treffpunkt_lng: geo.data.lng,
+            treffpunkt_adresse: geo.adresse ?? treffpunktAdresse,
+            treffpunkt_lat: geo.lat,
+            treffpunkt_lng: geo.lng,
           } as never).eq('id', terminId)
         }
       } catch (err) {

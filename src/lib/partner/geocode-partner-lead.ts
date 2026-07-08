@@ -1,9 +1,12 @@
 // AAR-956: Geocoding-Helper für partner_leads.
-// Wrapt geocodeAddress, baut den Adress-String, erzwingt PLZ+Ort-Vollständigkeit.
+// Wrapt geocodeMitFallback (Mapbox-first, Google-Fallback), baut den Adress-String,
+// erzwingt PLZ+Ort-Vollständigkeit. Der rohe Google-geocodeAddress schlug server-seitig
+// mit REQUEST_DENIED fehl (Geocoding-API für den Browser-Key nicht aktiv, kein
+// GOOGLE_MAPS_SERVER_KEY) → Mapbox ist der kanonische Prod-Geocoder (verifiziert).
 // Wird an allen Partner-Lead-Intakes aufgerufen (create/csv/scrape/public-form).
 // Non-critical beim Intake — Fehler brechen den Lead-Insert NICHT (nur Convert blockt hart).
 
-import { geocodeAddress } from '@/lib/google-geocoding/geocode-address'
+import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
 
 export type PartnerLeadGeoInput = {
   strasse?: string | null
@@ -41,17 +44,17 @@ export async function geocodePartnerLead(input: PartnerLeadGeoInput): Promise<Pa
   }
 
   const adresse = baueAdresse(input)
-  const res = await geocodeAddress(adresse)
+  const res = await geocodeMitFallback(adresse)
 
-  if (!res.ok) {
-    return { ok: false, error: res.error, unvollstaendig: false }
+  if (!res) {
+    return { ok: false, error: 'Adresse konnte nicht geokodiert werden.', unvollstaendig: false }
   }
 
   return {
     ok: true,
-    lat: res.data.lat,
-    lng: res.data.lng,
-    place_id: res.data.place_id,
-    formatted: res.data.formatted_address,
+    lat: res.lat,
+    lng: res.lng,
+    place_id: res.placeId,
+    formatted: res.adresse ?? adresse,
   }
 }

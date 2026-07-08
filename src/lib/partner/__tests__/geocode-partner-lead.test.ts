@@ -1,11 +1,11 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { baueAdresse, geocodePartnerLead } from '../geocode-partner-lead'
 
-vi.mock('@/lib/google-geocoding/geocode-address')
+vi.mock('@/lib/termine/engine/geocode')
 
-import { geocodeAddress } from '@/lib/google-geocoding/geocode-address'
+import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
 
-const mockGeocode = vi.mocked(geocodeAddress)
+const mockGeocode = vi.mocked(geocodeMitFallback)
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -46,28 +46,22 @@ describe('geocodePartnerLead', () => {
   })
 
   it('ok-Pfad: reicht lat/lng/place_id/formatted durch (gemockt)', async () => {
-    mockGeocode.mockResolvedValueOnce({
-      ok: true,
-      data: { lat: 50.938, lng: 6.96, formatted_address: 'Domstr. 1, 50667 Köln, Deutschland', place_id: 'ChIJ123' },
-    })
+    mockGeocode.mockResolvedValueOnce({ lat: 50.938, lng: 6.96, adresse: 'Domstr. 1, 50667 Köln, Deutschland', placeId: 'ChIJ123' })
     const r = await geocodePartnerLead({ strasse: 'Domstr. 1', plz: '50667', ort: 'Köln' })
     expect(r).toEqual({ ok: true, lat: 50.938, lng: 6.96, place_id: 'ChIJ123', formatted: 'Domstr. 1, 50667 Köln, Deutschland' })
     expect(mockGeocode).toHaveBeenCalledWith('Domstr. 1, 50667 Köln')
   })
 
   it('ok-Pfad: place_id null wird durchgereicht', async () => {
-    mockGeocode.mockResolvedValueOnce({
-      ok: true,
-      data: { lat: 52.52, lng: 13.405, formatted_address: '10115 Berlin, Deutschland', place_id: null },
-    })
+    mockGeocode.mockResolvedValueOnce({ lat: 52.52, lng: 13.405, adresse: '10115 Berlin, Deutschland', placeId: null })
     const r = await geocodePartnerLead({ plz: '10115', ort: 'Berlin' })
     expect(r).toEqual({ ok: true, lat: 52.52, lng: 13.405, place_id: null, formatted: '10115 Berlin, Deutschland' })
   })
 
-  it('geocode-Fehler → {ok:false, unvollstaendig:false}', async () => {
-    mockGeocode.mockResolvedValueOnce({ ok: false, error: 'Geocoding fehlgeschlagen: ZERO_RESULTS' })
+  it('geocode-Fehler (null) → {ok:false, unvollstaendig:false}', async () => {
+    mockGeocode.mockResolvedValueOnce(null)
     const r = await geocodePartnerLead({ strasse: 'Unbekannte Str. 999', plz: '99999', ort: 'Nirgendwo' })
-    expect(r).toEqual({ ok: false, error: 'Geocoding fehlgeschlagen: ZERO_RESULTS', unvollstaendig: false })
+    expect(r).toEqual({ ok: false, error: 'Adresse konnte nicht geokodiert werden.', unvollstaendig: false })
   })
 
   it('null-Werte für plz/ort werden als fehlend behandelt', async () => {

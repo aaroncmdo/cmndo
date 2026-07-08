@@ -37,7 +37,7 @@ for (const line of envRaw.split('\n')) {
 }
 const URL_ = env.NEXT_PUBLIC_SUPABASE_URL
 const KEY = env.SUPABASE_SERVICE_ROLE_KEY
-const GKEY = env.GOOGLE_MAPS_SERVER_KEY || env.NEXT_PUBLIC_GOOGLE_MAPS_KEY
+const MBTOKEN = env.MAPBOX_TOKEN || env.MAPBOX_ACCESS_TOKEN || env.NEXT_PUBLIC_MAPBOX_TOKEN
 if (!URL_ || !KEY) throw new Error('NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY fehlen')
 const db = createClient(URL_, KEY, { auth: { persistSession: false, autoRefreshToken: false } })
 
@@ -70,13 +70,16 @@ async function clean() {
 }
 
 async function geocode(addr) {
-  if (!GKEY) return { ok: false, reason: 'kein GOOGLE_MAPS_SERVER_KEY im env' }
-  const u = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(addr)}&region=de&key=${GKEY}`
+  // Kanonischer Prod-Geocoder = Mapbox (geocodeMitFallback ist Mapbox-first); der rohe
+  // Google-Geocode schlaegt server-seitig mit REQUEST_DENIED fehl (kein Server-Key).
+  if (!MBTOKEN) return { ok: false, reason: 'kein Mapbox-Token im env' }
+  const u = `https://api.mapbox.com/geocoding/v5/mapbox.places/${encodeURIComponent(addr)}.json?country=de&limit=1&access_token=${MBTOKEN}`
   const r = await fetch(u)
   const j = await r.json()
-  if (j.status !== 'OK' || !j.results?.[0]) return { ok: false, reason: 'Geocode-Status ' + j.status }
-  const g = j.results[0]
-  return { ok: true, lat: g.geometry.location.lat, lng: g.geometry.location.lng, formatted: g.formatted_address }
+  const f = j?.features?.[0]
+  if (!f?.center) return { ok: false, reason: 'Mapbox kein Treffer' }
+  const [lng, lat] = f.center
+  return { ok: true, lat, lng, formatted: f.place_name ?? addr }
 }
 
 function tomorrowAt(h) {
@@ -115,8 +118,8 @@ async function main() {
 
   // --- 1) Echter Google-Geocode (vor_ort) — BEST-EFFORT (Action faengt Fehler ab) ---
   const geo = await geocode(ADRESSE)
-  if (geo.ok) pass('geocode (echter Google-Call)', `${geo.lat.toFixed(4)},${geo.lng.toFixed(4)} — ${geo.formatted}`)
-  else warn('geocode best-effort uebersprungen', `${geo.reason} (lokal kein GOOGLE_MAPS_SERVER_KEY; in der Action non-fatal -> Termin ohne Koordinaten)`)
+  if (geo.ok) pass('geocode (echter Mapbox-Call = Prod-Geocoder geocodeMitFallback)', `${geo.lat.toFixed(4)},${geo.lng.toFixed(4)} — ${geo.formatted}`)
+  else warn('geocode best-effort uebersprungen', `${geo.reason} (in der Action non-fatal -> Termin ohne Koordinaten)`)
   // Action-Semantik: nur bei geo.ok werden Koordinaten gesetzt, sonst bleiben sie NULL.
   const gLat = geo.ok ? geo.lat : null
   const gLng = geo.ok ? geo.lng : null
