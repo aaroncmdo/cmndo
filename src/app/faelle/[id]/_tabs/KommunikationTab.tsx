@@ -53,13 +53,17 @@ export default function KommunikationTab({
   // Phase-2c Cutover-Flag: ?chatv2=1 -> neues Thread-Modell (ClaimChatPanel) statt Kanal-Matrix.
   // Default aus -> unveraendert. Staff-seitig (Fallakte), per URL testbar, null Prod-Risiko.
   const chatV2 = search?.get('chatv2') === '1'
+  // ClaimChatPanel ist claim-nativ: die Threads haengen an claims.id — das ist
+  // fall.claim_id (seit AAR-816 NOT NULL), NICHT fall.id (= v_faelle-View-id /
+  // legacy fall_id, weicht vom claim_id ab). Sonst: "Claim nicht gefunden".
+  const claimId = ((fall as Record<string, unknown>).claim_id as string | null) ?? fall.id
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-4">
       <div>
         {chatV2 && currentUserId ? (
           <div className="h-[70vh] min-h-0 overflow-hidden rounded-ios-xl border border-claimondo-border bg-white">
-            <ClaimChatPanel claimId={fall.id} currentUserId={currentUserId} istStaff={showInternal} />
+            <ClaimChatPanel claimId={claimId} currentUserId={currentUserId} istStaff={showInternal} />
           </div>
         ) : (
           <MultiChannelChat
