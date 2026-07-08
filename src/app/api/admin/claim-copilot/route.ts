@@ -4,11 +4,11 @@
 // nach finalMessage() → Proposals + Thread persistieren (non-critical).
 // Guard: nur Admin-Rolle. Body: { fallId, messages, modus? }.
 
-import Anthropic from '@anthropic-ai/sdk'
+import type Anthropic from '@anthropic-ai/sdk'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_MODELS } from '@/lib/ai/models'
-import { logAiUsage } from '@/lib/ai/usage-log'
+import { streamForProposals } from '@/lib/claim-ai/engine/call'
 import { CLAIM_AI_TOOLS, extractClaimAiDrafts } from '@/lib/claim-ai/verbs'
 import { persistCopilotProposals } from '@/lib/claim-ai/proposals'
 import { appendTurns } from '@/lib/claim-ai/threads'
@@ -157,32 +157,28 @@ export async function POST(req: Request) {
   const readable = new ReadableStream<Uint8Array>({
     async start(controller) {
       try {
-        const anthropic = new Anthropic({ apiKey })
-        const stream = anthropic.messages.stream({
+        // SP2-Konvergenz P3: geteilte Engine (streamForProposals) statt inline-Anthropic-
+        // Streaming. onTextDelta streamt zum Client + akkumuliert assistantText; die Engine
+        // kapselt Client + stream + finalMessage + Usage-Log + extract. Wirft bei Stream-
+        // Fehler -> der äußere catch signalisiert dem Client den Abbruch (SSE-UX erhalten).
+        let assistantText = ''
+        const drafts = await streamForProposals({
           model,
-          max_tokens: 2048,
           system,
           tools: CLAIM_AI_TOOLS,
           messages: anthropicMessages, // Fenster bereits auf Client-Ebene begrenzt; Kontext-Paar bleibt erhalten
+          maxTokens: 2048,
+          logEndpoint: 'claim_copilot',
+          logFallId: fallId,
+          extract: extractClaimAiDrafts,
+          onTextDelta: (t) => {
+            assistantText += t
+            controller.enqueue(encoder.encode(t))
+          },
         })
-
-        let assistantText = ''
-
-        for await (const event of stream) {
-          if (
-            event.type === 'content_block_delta' &&
-            event.delta.type === 'text_delta'
-          ) {
-            assistantText += event.delta.text
-            controller.enqueue(encoder.encode(event.delta.text))
-          }
-        }
-
-        const final = await stream.finalMessage()
 
         // Non-critical persistence — never break the stream
         try {
-          const drafts = extractClaimAiDrafts(final.content)
           if (drafts.length > 0) {
             await persistCopilotProposals(claimId, model, drafts)
           }
@@ -204,20 +200,6 @@ export async function POST(req: Request) {
           ])
         } catch (err) {
           console.error('[claim-copilot] appendTurns fehlgeschlagen:', err)
-        }
-
-        try {
-          await logAiUsage({
-            endpoint: 'claim_copilot',
-            model,
-            fallId,
-            usage: {
-              input_tokens: final.usage.input_tokens,
-              output_tokens: final.usage.output_tokens,
-            },
-          })
-        } catch (err) {
-          console.error('[claim-copilot] logAiUsage fehlgeschlagen:', err)
         }
 
         controller.close()
