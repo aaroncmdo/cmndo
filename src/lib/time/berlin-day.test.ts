@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { berlinIsoDate, berlinDayRangeUtc } from './berlin-day'
+import { berlinIsoDate, berlinDayRangeUtc, berlinDayRangeForIsoDates } from './berlin-day'
 
 describe('berlinIsoDate', () => {
   it('gibt den Berliner Kalendertag zurueck, auch wenn UTC noch der Vortag ist', () => {
@@ -54,5 +54,19 @@ describe('berlinDayRangeUtc', () => {
     expect(r.endUtc.toISOString()).toBe('2026-10-25T23:00:00.000Z')
     const hours = (r.endUtc.getTime() - r.startUtc.getTime()) / 3_600_000
     expect(hours).toBe(25)
+  })
+})
+
+describe('berlinDayRangeForIsoDates', () => {
+  it('Single-Tag Sommer: [von 00:00 Berlin, bis+1 00:00 Berlin)', () => {
+    const r = berlinDayRangeForIsoDates('2026-07-08', '2026-07-08')
+    expect(r.startUtc.toISOString()).toBe('2026-07-07T22:00:00.000Z')
+    expect(r.endUtc.toISOString()).toBe('2026-07-08T22:00:00.000Z')
+  })
+
+  it('Mehrtags-Bereich Winter: von-Start bis (bis+1)-Start, inklusiv bis', () => {
+    const r = berlinDayRangeForIsoDates('2026-01-15', '2026-01-16')
+    expect(r.startUtc.toISOString()).toBe('2026-01-14T23:00:00.000Z')
+    expect(r.endUtc.toISOString()).toBe('2026-01-16T23:00:00.000Z')
   })
 })
