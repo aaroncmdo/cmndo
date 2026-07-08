@@ -255,6 +255,10 @@ export type WerkstattAuftrag = {
   gutachten_restwert: number | null
   gutachten_wiederbeschaffungswert: number | null
   gutachten_totalschaden: boolean | null
+  // KVA — Werkstatt-Kostenvoranschlag-Snapshot (claims.*), NICHT der SV-Gutachten-Wert.
+  kostenvoranschlag_netto: number | null
+  kostenvoranschlag_brutto: number | null
+  reparatur_freigegeben_am: string | null
 }
 
 // Gemeinsame Spalten-Auswahl + Row-Mapping (DRY: Liste + Einzel-Loader).
@@ -269,7 +273,8 @@ const AUFTRAG_SELECT = `
   reparatur_termin_id, reparatur_termin_status, reparatur_wunschtermin,
   reparatur_bestaetigter_termin, reparatur_absage_grund,
   gutachten_fertiggestellt_am, gutachten_reparaturkosten_netto, gutachten_reparaturkosten_brutto,
-  gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden
+  gutachten_minderwert, gutachten_restwert, gutachten_wiederbeschaffungswert, gutachten_totalschaden,
+  kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am
 `
 
 function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
@@ -311,6 +316,10 @@ function mapWerkstattAuftragRow(r: Record<string, unknown>): WerkstattAuftrag {
     gutachten_restwert: r.gutachten_restwert != null ? Number(r.gutachten_restwert) : null,
     gutachten_wiederbeschaffungswert: r.gutachten_wiederbeschaffungswert != null ? Number(r.gutachten_wiederbeschaffungswert) : null,
     gutachten_totalschaden: r.gutachten_totalschaden != null ? Boolean(r.gutachten_totalschaden) : null,
+    // KVA — Werkstatt-Kostenvoranschlag (claims.*)
+    kostenvoranschlag_netto: r.kostenvoranschlag_netto != null ? Number(r.kostenvoranschlag_netto) : null,
+    kostenvoranschlag_brutto: r.kostenvoranschlag_brutto != null ? Number(r.kostenvoranschlag_brutto) : null,
+    reparatur_freigegeben_am: (r.reparatur_freigegeben_am as string | null) ?? null,
   }
 }
 

@@ -27,6 +27,39 @@ export function abrechnungswegLabel(w: string | null): 'Selbstzahler' | 'Haftpfl
   return w ? (ABRECHNUNGSWEG_LABEL[w] ?? null) : null
 }
 
+// ─── KVA-Status (Kostenvoranschlag) ──────────────────────────────────────────
+// Erster Schritt der Werkstatt bei Selbstzahler-/Kasko-Direkt-Reparaturen: einen
+// Kostenvoranschlag ausstellen. benoetigt -> erstellt(EUR) -> freigegeben.
+
+export type KvaStatus = 'benoetigt' | 'erstellt' | 'freigegeben'
+
+type KvaInput = {
+  meine_rolle: string | null
+  reparatur_werkstatt_id: string | null
+  gutachten_fertiggestellt_am: string | null
+  reparatur_freigegeben_am: string | null
+  kostenvoranschlag_netto: number | null
+  kostenvoranschlag_brutto: number | null
+}
+
+/**
+ * KVA-Status aus Sicht der reparierenden Werkstatt — null, wenn KVA nicht relevant.
+ * KVA nur im Reparatur-Segment OHNE SV-Gutachten (Selbstzahler/Kasko-direkt): bei
+ * Vermittlung ODER Gutachten-basiert (Haftpflicht) ist die Kostenbasis das Gutachten.
+ */
+export function kvaStatus(a: KvaInput): KvaStatus | null {
+  if (werkstattAuftragSegment(a) !== 'reparatur') return null
+  if (a.gutachten_fertiggestellt_am != null) return null
+  if (a.reparatur_freigegeben_am != null) return 'freigegeben'
+  if (a.kostenvoranschlag_netto != null || a.kostenvoranschlag_brutto != null) return 'erstellt'
+  return 'benoetigt'
+}
+
+/** DE-Label fuer den KVA-Status (Badge-Text). */
+export function kvaStatusLabel(s: KvaStatus): string {
+  return { benoetigt: 'KVA benötigt', erstellt: 'KVA erstellt', freigegeben: 'KVA freigegeben' }[s]
+}
+
 /** Gutachten ist nur bei Versicherungs-Faellen (Haftpflicht/Kasko) relevant. */
 export function zeigtGutachten(w: string | null): boolean {
   return w === 'haftpflicht' || w === 'kasko'
