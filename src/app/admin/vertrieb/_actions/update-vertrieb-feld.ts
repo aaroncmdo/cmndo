@@ -5,7 +5,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
-import { VERTRIEB_EDIT_TARGET } from '@/lib/vertrieb/vertrieb-edit-fields'
+import { resolveEditColumn } from '@/lib/vertrieb/vertrieb-edit-fields'
 import type { VertriebKind } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 // Module-local (nicht exportiert) — keine 'use server'-const-Export-Falle (AAR-664).
@@ -17,8 +17,8 @@ export async function updateVertriebFeld(
   feld: string,
   wert: string | number | null,
 ): Promise<{ ok: true } | { ok: false; error: string }> {
-  const target = VERTRIEB_EDIT_TARGET[kind]
-  if (!target || !target.fields.includes(feld)) {
+  const target = resolveEditColumn(kind, feld)
+  if (!target) {
     return { ok: false, error: 'Feld nicht editierbar' }
   }
   const supabase = await createClient()
@@ -31,7 +31,7 @@ export async function updateVertriebFeld(
   const rolle = (profile?.rolle as string | null) ?? null
   if (!rolle || !STAFF_ROLLEN.has(rolle)) return { ok: false, error: 'Keine Berechtigung' }
 
-  const { error: upErr } = await admin.from(target.table).update({ [feld]: wert }).eq('id', id)
+  const { error: upErr } = await admin.from(target.table).update({ [target.column]: wert }).eq('id', id)
   if (upErr) return { ok: false, error: upErr.message }
 
   // Audit — best-effort (Partner haben kein claim_id; timeline ist claim/lead-scoped ->
