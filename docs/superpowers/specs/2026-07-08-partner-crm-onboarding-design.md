@@ -30,7 +30,7 @@
 3. **Einladung an den Prospect** (best-effort, non-critical): Mail mit Datum + Kanal + Link/Adresse + **ICS-Anhang** (reuse bestehender ICS-Generierung falls vorhanden, sonst minimaler VEVENT-Builder).
 4. Anzeige der offenen Termine im Lead-Drawer (Liste) + im Admin-Kalender (schon vorhanden via admin_termine).
 
-**Offene Design-Entscheidung (Review):** Video-Link — automatisch generieren (Google Meet via Calendar-API, da wir Google-Sync haben) **oder** manuell einfügen? Vorschlag: **manuell im MVP** (Feld), Auto-Meet als Follow-up.
+**Entschieden (Aaron 08.07.):** Video-Link **automatisch als Google Meet, 30 Min Dauer**. Beim Anlegen eines online-Termins erzeugt die Google-Calendar-API (admin_termine synct eh nach Google) via `conferenceData.createRequest` + `conferenceDataVersion=1` einen Meet-Link; `video_link` wird aus der API-Antwort gespeichert, `end_zeit = start_zeit + 30 Min`. Fallback (keine Google-Verbindung des Staff / API-Fehler): Termin bleibt bestehen ohne Link, Warnung im UI.
 
 ---
 
@@ -54,7 +54,7 @@
 **Lösung — ein geteiltes Util an allen Eingängen:** reuse `src/lib/google-geocoding/geocode-address.ts::geocodeAddress` (existiert, Google Maps).
 - **Wo:** Scrape (Places liefert schon `formatted_address`; ergänzen um Geocode falls keine Koordinaten) · CSV-Import · manueller „Neuer Prospect" · Public-Form (`/werkstatt-partner-werden`) · **Convert** (setzt beim Anlegen die `lat/lng` der werkstatt/makler/sv-Row).
 - **Vollständigkeits-Gate:** eine Adresse gilt nur als vollständig, wenn Google einen eindeutigen Treffer mit **Straße + PLZ + Ort** liefert. Sonst: **Warnung + kein stiller Insert/Convert** — der Nutzer ergänzt/bestätigt. (Convert ohne vollständige geokodierte Adresse blockiert für werkstatt/makler, da sie sonst nicht auf der Karte erscheinen; SV läuft über eigene Isochrone-Logik.)
-- **Speicherung:** normalisierte Adresse zurück in plz/ort (+ strasse falls Spalte) + `lat/lng`. Auf `partner_leads` ggf. `lat/lng`-Spalten additiv ergänzen (heute nicht vorhanden) — oder erst beim Convert in die Rollen-Row geocoden. **Review-Entscheidung:** Geocode schon beim Lead (Karte im CRM) oder erst beim Convert? Vorschlag: **beim Lead** (früh validiert, CRM kann Prospects auf Karte zeigen) → `partner_leads` + `lat/lng`-Spalten.
+- **Speicherung — Entschieden (Aaron 08.07.): Geocode schon beim Lead.** `partner_leads` bekommt additiv `lat/lng` (+ optional `strasse`, `google_place_id`). Jeder Lead-Eingang geokodiert sofort → CRM kann Prospects auf Karte zeigen, früh validiert; der **Convert übernimmt die geokodierten Koordinaten** in die werkstatt/makler/sv-Row (statt heute `null`).
 
 ---
 
@@ -67,8 +67,9 @@
 
 Jede DDL via `apply_migration` (Regel 2). Jede Server-Action `{ ok, error? }` + `revalidatePath`. Umlaute in allen UI-Strings. Ratchets 0-neu.
 
-## Zu klärende Review-Punkte
-- ③ Video-Link: manuell (MVP) vs. Auto-Google-Meet?
-- ⑤ Geocode-Zeitpunkt: beim Lead vs. beim Convert?
-- ⑤ Convert-Block bei unvollständiger Adresse: hart blocken (werkstatt/makler) — ok?
-- Priorität/Reihenfolge der Phase-2-Teile.
+## Entschieden (Aaron 08.07.)
+- ③ Video-Link: **Auto-Google-Meet, 30 Min Dauer** (Calendar-API `conferenceData`).
+- ⑤ Geocode: **schon beim Lead** (`partner_leads.lat/lng` additiv).
+- ⑤ Convert bei unvollständiger Adresse: **hart blocken** (werkstatt/makler).
+- Reihenfolge: **⑤ Geocoding → ④ CSV → ③ Termine**.
+- Rest des Specs: approved.
