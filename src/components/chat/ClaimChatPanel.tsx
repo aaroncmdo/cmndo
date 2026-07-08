@@ -109,7 +109,11 @@ export function ClaimChatPanel({
       </div>
       <div className="min-h-0 flex-1">
         {aktiv ? (
-          <ClaimThreadChat threadId={aktiv} currentUserId={currentUserId} />
+          <ClaimThreadChat
+            threadId={aktiv}
+            currentUserId={currentUserId}
+            whatsappHinweis={Boolean(istStaff && threads.find((t) => t.id === aktiv)?.art === 'kunde_gruppe')}
+          />
         ) : (
           <p className="py-8 text-center text-body-sm text-claimondo-ondo">Thread wählen.</p>
         )}
