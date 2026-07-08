@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { zaehleZertifikate, ladeSvKandidaten } from '../signals'
+import { zaehleZertifikate, ladeSvKandidaten, ladeMaklerKandidaten } from '../signals'
 
 describe('zaehleZertifikate', () => {
   it('zaehlt nur vorhandene Nummern', () => {
@@ -53,5 +53,32 @@ describe('ladeSvKandidaten', () => {
     expect(r[0].signals.ratingDurchschnitt).toBe(4.6)
     expect(r[0].signals.ratingAnzahl).toBe(20)
     expect(eqCalls['gutachter_termine:assignee_typ']).toBe('sachverstaendiger')
+  })
+})
+
+describe('ladeMaklerKandidaten', () => {
+  it('liest partner_provisionen (typ=makler) und aggregiert volumen', async () => {
+    const eqCalls: Record<string, unknown> = {}
+    const dataByTable: Record<string, unknown[]> = {
+      makler: [{ id: 'm1', status: 'aktiv', aktiviert_am: null, gesperrt_am: null }],
+      partner_provisionen: [
+        { partner_id: 'm1', status: 'freigegeben' },
+        { partner_id: 'm1', status: 'ausgezahlt' },
+        { partner_id: 'm1', status: 'pending' },
+      ],
+    }
+    const makeQuery = (table: string) => ({
+      select: function () { return this },
+      eq: function (col: string, val: unknown) { eqCalls[`${table}:${col}`] = val; return this },
+      is: function () { return this },
+      in: function () { return this },
+      then: (resolve: (r: { data: unknown[]; error: null }) => void) => resolve({ data: dataByTable[table] ?? [], error: null }),
+    })
+    const supabase = { from: (t: string) => makeQuery(t) } as unknown as Parameters<typeof ladeMaklerKandidaten>[0]
+    const r = await ladeMaklerKandidaten(supabase)
+    expect(r).toHaveLength(1)
+    expect(eqCalls['partner_provisionen:partner_typ']).toBe('makler') // typ-Filter ist Pflicht auf der Union-Tabelle
+    expect(r[0].signals.volumen).toBe(2) // freigegeben + ausgezahlt; pending zaehlt nicht
+    expect(r[0].signals.typ).toBe('makler')
   })
 })
