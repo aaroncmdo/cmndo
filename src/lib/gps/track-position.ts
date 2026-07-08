@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from '@/lib/supabase/server'
+import { getGutachterForUser } from '@/lib/gutachter'
 
 // KFZ-158 Phase 2: Server Action um GPS-Position in sv_live_position zu speichern.
 // Wird vom Frontend alle 30 Sekunden aufgerufen (Throttling im Client).
@@ -16,11 +17,13 @@ export async function trackPosition(input: {
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { error: 'unauthorized' }
 
-  const { data: sv } = await supabase
-    .from('sachverstaendige')
-    .select('id, live_tracking_enabled')
-    .eq('profile_id', user.id)
-    .single()
+  // multi-standort-safe: getGutachterForUser (Ordering+limit(1)) statt .single()
+  // (warf bei >1 SV-Row = Buero+Sub-Standort, und bei 0 Rows).
+  const sv = await getGutachterForUser<{ id: string; live_tracking_enabled: boolean | null }>(
+    supabase,
+    user.id,
+    'id, live_tracking_enabled',
+  )
 
   if (!sv) return { error: 'no_sv' }
   if (!sv.live_tracking_enabled) return { error: 'tracking_disabled' }

@@ -6,6 +6,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { getGutachterForUser } from '@/lib/gutachter'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import { getStorageUrl } from '@/lib/storage/url'
@@ -177,8 +178,9 @@ export async function gutachtenAbgeben(
   const abgRolle = (abgProfile?.rolle as string | null) ?? null
   let eigeneSvId: string | null = null
   if (abgRolle === 'sachverstaendiger') {
-    const { data: svRow } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).maybeSingle()
-    eigeneSvId = (svRow?.id as string | null) ?? null
+    // multi-standort-safe: getGutachterForUser (Ordering+limit(1)) statt .maybeSingle().
+    const svRow = await getGutachterForUser<{ id: string }>(db, user.id, 'id')
+    eigeneSvId = svRow?.id ?? null
   }
   if (!kannGutachtenAbgeben({ rolle: abgRolle, eigeneSvId, auftragSvId: auftrag.sv_id as string | null })) {
     return { ok: false, error: 'Keine Berechtigung' }
@@ -332,8 +334,9 @@ export async function loescheGutachtenDokument(
   const berRolle = (berProfile?.rolle as string | null) ?? null
   let eigeneSvId: string | null = null
   if (berRolle === 'sachverstaendiger') {
-    const { data: svRow } = await db.from('sachverstaendige').select('id').eq('profile_id', user.id).maybeSingle()
-    eigeneSvId = (svRow?.id as string | null) ?? null
+    // multi-standort-safe: getGutachterForUser (Ordering+limit(1)) statt .maybeSingle().
+    const svRow = await getGutachterForUser<{ id: string }>(db, user.id, 'id')
+    eigeneSvId = svRow?.id ?? null
   }
   if (!kannGutachtenAbgeben({ rolle: berRolle, eigeneSvId, auftragSvId: auftrag.sv_id as string | null })) {
     return { ok: false, error: 'Keine Berechtigung' }
