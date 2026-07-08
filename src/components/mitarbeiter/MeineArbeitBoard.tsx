@@ -1,16 +1,13 @@
 'use client'
 
 // KB-Cockpit Phase 1a: Work-State Board fuer /mitarbeiter
-// Zeigt ClaimWorkItems in 3 Hauptphasen-Spalten mit naechster-bester-Aktion + Ueberfaellig-Marker.
-// Keine inline Status-/Farb-Maps (check:status-registry-konform) -- Farbe via FallPhaseBadge,
-// Label via CLAIM_WORKFLOW_META, Spalten-Titel via MAIN_PHASE_LABEL.
+// Zeigt ClaimWorkItems in 3 Hauptphasen-Spalten. Die einzelne Karte (inkl. Hover-Edit)
+// ist ausgelagert in @/components/ops/WorkItemCard (geteilt mit dem Admin-Cockpit).
+// Spalten-Titel via MAIN_PHASE_LABEL.
 
-import Link from 'next/link'
 import { MAIN_PHASE_LABEL, type ClaimMainPhase } from '@/lib/claims/lifecycle'
-import { CLAIM_WORKFLOW_META } from '@/lib/ops/claim-workflow-meta'
-import FallPhaseBadge from '@/components/shared/FallPhaseBadge'
 import type { ClaimWorkItem } from '@/lib/ops/claim-workstate.types'
-import ClaimHoverCard from './ClaimHoverCard'
+import WorkItemCard from '@/components/ops/WorkItemCard'
 
 const AKTIVE_PHASEN: ClaimMainPhase[] = ['erfassung', 'begutachtung', 'regulierung']
 
@@ -77,7 +74,7 @@ export default function MeineArbeitBoard({ items }: { items: ClaimWorkItem[] }) 
                   </p>
                 )}
                 {spalteItems.map((item) => (
-                  <ArbeitCard key={item.id} item={item} />
+                  <WorkItemCard key={item.id} item={item} />
                 ))}
               </div>
             </div>
@@ -88,54 +85,3 @@ export default function MeineArbeitBoard({ items }: { items: ClaimWorkItem[] }) 
   )
 }
 
-function ArbeitCard({ item }: { item: ClaimWorkItem }) {
-  const href = item.fallId ? `/faelle/${item.fallId}` : null
-  const meta = CLAIM_WORKFLOW_META[item.subState]
-
-  const inner = (
-    <div className="rounded-ios-lg border border-claimondo-border bg-white p-3 hover:border-claimondo-ondo hover:shadow-sm transition-all">
-      {/* Titel + Kennzeichen */}
-      <p className="text-body-sm font-semibold text-claimondo-navy truncate">
-        {item.display.title}
-      </p>
-      {item.display.kennzeichen && (
-        <p className="text-caption font-mono text-claimondo-ondo mt-0.5">
-          {item.display.kennzeichen}
-        </p>
-      )}
-
-      {/* Phase-Badge + Aktion */}
-      <div className="mt-2 flex flex-wrap items-center gap-1.5">
-        <FallPhaseBadge subPhase={item.subState} size="sm" />
-        <span className="text-caption px-1.5 py-0.5 rounded-ios-sm bg-claimondo-bg text-claimondo-ondo border border-claimondo-border">
-          {meta.ctaLabel}
-        </span>
-      </div>
-
-      {/* Ueberfaellig-Marker */}
-      {item.isOverdue && item.overdueSinceDays != null && (
-        <p className="mt-2 text-caption font-medium bg-warning-soft text-warning-strong rounded-ios-sm px-1.5 py-0.5 inline-block">
-          ⏱ {item.overdueSinceDays} {item.overdueSinceDays === 1 ? 'Tag' : 'Tage'} überfällig
-        </p>
-      )}
-    </div>
-  )
-
-  // Wrapper: group relative so the hover popover can be placed absolutely below the card.
-  return (
-    <div className="relative group">
-      {/* Klickbare Karte — nur wenn fallId vorhanden, kein toter href='#' */}
-      {href ? (
-        <Link href={href} className="block">
-          {inner}
-        </Link>
-      ) : (
-        <div>{inner}</div>
-      )}
-      {/* Hover-Popover: erscheint unterhalb der Karte beim Hovern ueber den Container */}
-      <div className="hidden group-hover:block absolute top-full left-0 z-50 pt-1">
-        <ClaimHoverCard item={item} />
-      </div>
-    </div>
-  )
-}
