@@ -26,6 +26,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/ai-vorschlaege', label: 'KI-Vorschläge', icon: SparklesIcon },
   { href: '/admin/ki-aufsicht', label: 'KI-Aufsicht', icon: ShieldAlertIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
+  { href: '/admin/vertrieb', label: 'Vertrieb', icon: HandshakeIcon },
   { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
   { href: '/admin/partner-leads', label: 'Partner-Leads', icon: UserPlusIcon },
