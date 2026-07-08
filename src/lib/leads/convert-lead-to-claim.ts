@@ -30,7 +30,7 @@
 //     RLS-Boundary-übergreifend Lead, Claim, Fall und Profiles anfasst.
 
 import { createAdminClient } from '@/lib/supabase/admin'
-import { resolveAbrechnungsweg } from '@/lib/werkstatt/abrechnungsweg'
+import { resolveAbrechnungsweg, istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import { ensureVehicleFromFin, createVehicleStub } from '@/lib/vehicles/ensure-vehicle'
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
@@ -484,11 +484,11 @@ export async function convertLeadToClaim(
   ;(claimsInsert as Record<string, unknown>).schadenskategorie =
     (lead.schadenskategorie as string | null) ?? null
   // SP-B1: Abrechnungsweg (haftpflicht/kasko/selbstzahler) Lead -> Claim (SSoT). Record-Cast wg. Type-Lag.
-  ;(claimsInsert as Record<string, unknown>).abrechnungsweg =
+  // WS1b (Reduced-Repair-Aktivierung): traegt der Lead keinen Weg (die meisten Nicht-/flow-
+  // Entstehungspfade leiten nicht ab), am Konversionspunkt aus schuldfrage + eigene_versicherung
+  // ableiten — sonst bleibt der Claim wegs-los und die Reparatur-Strecke dormant.
+  const resolvedAbrechnungsweg =
     (lead.abrechnungsweg as string | null) ??
-    // WS1b (Reduced-Repair-Aktivierung): traegt der Lead keinen Weg (die meisten Nicht-/flow-
-    // Entstehungspfade leiten nicht ab), am Konversionspunkt aus schuldfrage + eigene_versicherung
-    // ableiten — sonst bleibt der Claim wegs-los und die Reparatur-Strecke dormant.
     resolveAbrechnungsweg({
       schuldfrage: (lead.schuldfrage as string | null) ?? null,
       ueberEigeneVersicherung:
@@ -498,6 +498,14 @@ export async function convertLeadToClaim(
             ? false
             : null,
     })
+  ;(claimsInsert as Record<string, unknown>).abrechnungsweg = resolvedAbrechnungsweg
+  // WS5b (Reduced-Repair): Reparatur-only-Claims (selbstzahler / kasko-freie Wahl) bekommen das
+  // reduzierte Pflichtdok-Szenario (nur Fahrzeugschein statt vollmacht/gutachten/versicherer;
+  // Fotos+KVA laufen ueber eigene Kunde-Cards). Haftpflicht bleibt szenario=null (Dispatch/SV
+  // setzt es spaeter szenario-spezifisch).
+  if (istWerkstattReparaturWeg(resolvedAbrechnungsweg)) {
+    ;(claimsInsert as Record<string, unknown>).szenario = resolvedAbrechnungsweg
+  }
 
   const { data: claim, error: claimErr } = await admin
     .from('claims')
