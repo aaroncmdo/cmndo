@@ -3,7 +3,7 @@ import { groupLeadWorkItemsByState, LEAD_BOARD_STATE_ORDER } from './lead-board-
 import type { LeadWorkItem } from './lead-workstate.types'
 
 function item(id: string, state: LeadWorkItem['state']): LeadWorkItem {
-  return { kind: 'lead', id, ownerId: null, state, qualCompleted: 0, display: { title: id, telefon: null } }
+  return { kind: 'lead', id, ownerId: null, ownerName: null, state, qualCompleted: 0, display: { title: id, telefon: null } }
 }
 
 describe('groupLeadWorkItemsByState', () => {
