@@ -34,6 +34,8 @@ import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from 
 import { MaklerWochenReportEmail, subject as maklerWochenReportSubject } from './templates/MaklerWochenReport'
 import type { MaklerWochenReportData } from '@/lib/makler/wochenreport'
 import { wochenreportOptOutUrl } from '@/lib/makler/wochenreport-optout'
+import { PartnerOnboardingEinladung } from './templates/PartnerOnboardingEinladung'
+import { baueOnboardingIcs, formatTerminZeitpunkt, type OnboardingTerminKanal } from '@/lib/partner/onboarding-termin'
 
 const admin = () => createAdminClient()
 
@@ -1429,4 +1431,48 @@ export async function sendSvBasicClaimLink({
       error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
     }
   }
+}
+
+// ─── Partner-Onboarding-Einladung ────────────────────────────────────────────
+
+export async function sendePartnerOnboardingEinladung(input: {
+  empfaengerEmail: string | null
+  firma: string | null
+  ansprechpartner: string | null
+  kanal: OnboardingTerminKanal
+  startIso: string
+  endIso: string
+  videoLink: string | null
+  treffpunktAdresse: string | null
+  terminId: string
+}): Promise<void> {
+  if (!input.empfaengerEmail) return // ohne Postfach keine Einladung
+  const ics = baueOnboardingIcs({
+    terminId: input.terminId,
+    firma: input.firma,
+    kanal: input.kanal,
+    startIso: input.startIso,
+    endIso: input.endIso,
+    videoLink: input.videoLink,
+    treffpunktAdresse: input.treffpunktAdresse,
+  })
+  const html = await render(
+    PartnerOnboardingEinladung({
+      firma: input.firma,
+      ansprechpartner: input.ansprechpartner,
+      zeitpunktText: formatTerminZeitpunkt(input.startIso),
+      kanal: input.kanal,
+      videoLink: input.videoLink,
+      treffpunktAdresse: input.treffpunktAdresse,
+    }),
+  )
+  await sendEmail({
+    to: input.empfaengerEmail,
+    subject: 'Ihr Onboarding-Termin bei Claimondo',
+    html,
+    attachments: [
+      { filename: 'onboarding-termin.ics', content: ics, contentType: 'text/calendar; charset=utf-8; method=PUBLISH' },
+    ],
+    empfaengerTyp: 'admin',
+  })
 }
