@@ -19,10 +19,14 @@ export default function OpsRollupMatrix({
   rollup,
   selected,
   onSelect,
+  overdueByCell,
 }: {
   rollup: OpsRollup
   selected: MatrixSelection | null
   onSelect: (sel: MatrixSelection | null) => void
+  /** Ueberfaellige Claims je Zelle (Key `${phase}::${ownerId ?? ''}`, TS-isOverdue) —
+   *  treibt die Heat/Marker konsistent zur "Braucht Aufmerksamkeit"-Liste. */
+  overdueByCell: Map<string, number>
 }) {
   if (rollup.owners.length === 0) {
     return (
@@ -62,6 +66,7 @@ export default function OpsRollupMatrix({
                 const cell = get(p, o.id)
                 const sel = isSel(p, o.id)
                 const clickable = cell.anzahl > 0
+                const overdue = overdueByCell.get(`${p}::${o.id ?? ''}`) ?? 0
                 return (
                   <Td
                     key={p}
@@ -82,7 +87,7 @@ export default function OpsRollupMatrix({
                     className={cn(
                       'text-center',
                       clickable && 'cursor-pointer hover:bg-claimondo-bg',
-                      cell.stale > 0 && 'bg-warning-soft',
+                      overdue > 0 && 'bg-warning-soft',
                       sel && 'ring-2 ring-inset ring-claimondo-ondo',
                     )}
                   >
@@ -91,13 +96,13 @@ export default function OpsRollupMatrix({
                         <span
                           className={cn(
                             'text-body-sm font-semibold',
-                            cell.stale > 0 && 'text-warning-strong',
-                            cell.stale === 0 && 'text-claimondo-navy',
+                            overdue > 0 && 'text-warning-strong',
+                            overdue === 0 && 'text-claimondo-navy',
                           )}
                         >
                           {cell.anzahl}
                         </span>
-                        {cell.stale > 0 && <span className="text-caption text-warning-strong">{cell.stale} alt</span>}
+                        {overdue > 0 && <span className="text-caption text-warning-strong">{overdue} überfällig</span>}
                       </span>
                     ) : (
                       <span className="text-claimondo-ondo/30">—</span>
