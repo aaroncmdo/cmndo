@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import SvDetailClient from './SvDetailClient'
 import VerifizierungsToggle from './VerifizierungsToggle'
+import TestAccountToggle from './TestAccountToggle'
 import VerifizierungsTab, { type Tier2Slot, type PflichtdokumentSlot } from './VerifizierungsTab'
 import AbrechnungsTab from './AbrechnungsTab'
 import { getSvStatus } from '@/lib/sv-status'
@@ -41,6 +42,22 @@ export default async function SvDetailPage({
   if (svErr) console.error('[admin/sv-detail] SV-Query:', svErr.message)
 
   if (!sv) notFound()
+
+  // Gutachter-Onboarding-Audit (Befund #6): ist_testaccount separat via untyped
+  // admin-client lesen — die Spalte ist neu und noch nicht in database.types, der
+  // typisierte Select oben wuerde sonst tsc brechen. Defensive: bei fehlendem
+  // SERVICE_ROLE_KEY nicht die ganze Seite crashen (default false).
+  let istTestaccount = false
+  try {
+    const { data: testFlagRow } = await createAdminClient()
+      .from('sachverstaendige')
+      .select('ist_testaccount')
+      .eq('id', id)
+      .maybeSingle()
+    istTestaccount = Boolean((testFlagRow as { ist_testaccount?: boolean } | null)?.ist_testaccount)
+  } catch (err) {
+    console.error('[admin/sv-detail] ist_testaccount-Read:', err)
+  }
 
   // Aaron 07.07.: Finder-Sichtbarkeit — hat der SV eine berechnete Isochrone?
   // Leichter Boolean-Check (die Isochrone selbst ist ~10k Vertices, hier nicht noetig).
@@ -322,6 +339,8 @@ export default async function SvDetailPage({
                   verifiziert={sv.verifiziert ?? false}
                   verifiziertAm={sv.verifiziert_am ?? null}
                 />
+                {/* Gutachter-Onboarding-Audit (Befund #6): Test-Account-Toggle */}
+                <TestAccountToggle svId={sv.id} istTestaccount={istTestaccount} />
                 {/* KFZ-153: Gutachten-Mängel Warnung */}
                 {(mangelCounts.formal > 0 || mangelCounts.inhaltlich > 0) && (
                   <span className="px-2.5 py-1 rounded-full text-[10px] font-medium bg-warning-soft text-warning" title={`${mangelCounts.formal}x formaler Mangel, ${mangelCounts.inhaltlich}x inhaltlicher Mangel`}>
@@ -341,7 +360,7 @@ export default async function SvDetailPage({
                     hatIsochrone,
                     standort_lat: sv.standort_lat != null ? Number(sv.standort_lat) : null,
                     standort_lng: sv.standort_lng != null ? Number(sv.standort_lng) : null,
-                    firmenname: (sv as { firmenname?: string | null }).firmenname ?? null,
+                    istTestaccount,
                   }}
                 />
               </>

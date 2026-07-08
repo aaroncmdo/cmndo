@@ -56,11 +56,6 @@ export function firstInitial(name: string | null | undefined): string | null {
   return trimmed.length > 0 ? `${trimmed.charAt(0).toUpperCase()}.` : null
 }
 
-export function isTestAccount(firmenname: string | null | undefined): boolean {
-  if (!firmenname) return false
-  return /\b(test|smoke|demo)\b/i.test(firmenname)
-}
-
 export function sample<T>(arr: T[], n: number, rng: () => number = Math.random): T[] {
   if (arr.length <= n) return arr.slice()
   const copy = arr.slice()

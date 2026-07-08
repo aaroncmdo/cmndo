@@ -7,7 +7,7 @@ const sichtbar = {
   hatIsochrone: true,
   standort_lat: 51.0,
   standort_lng: 7.0,
-  firmenname: 'Ingenieurbüro Echt',
+  istTestaccount: false,
 }
 
 describe('deriveFinderVisibility', () => {
@@ -43,13 +43,11 @@ describe('deriveFinderVisibility', () => {
     })
   })
 
-  it('Test-/Demo-/Smoke-Firmenname wird gefiltert', () => {
-    expect(deriveFinderVisibility({ ...sichtbar, firmenname: 'Claimondo Test' }).reason).toBe('test-name')
-    expect(deriveFinderVisibility({ ...sichtbar, firmenname: 'Smoke SV' }).reason).toBe('test-name')
-    expect(deriveFinderVisibility({ ...sichtbar, firmenname: 'Demo GmbH' }).reason).toBe('test-name')
-    // 'test' nur als Wort-Token — 'Testarossa Gutachten' hat kein \btest\b-Wort? Doch (Wortgrenze am Anfang).
-    // Aber ein echter Name ohne test/smoke/demo bleibt sichtbar:
-    expect(deriveFinderVisibility({ ...sichtbar, firmenname: 'Kontest Sachverständige' }).visible).toBe(true)
+  it('als Test-/Demo-Account markiert (ist_testaccount=true) wird gefiltert', () => {
+    expect(deriveFinderVisibility({ ...sichtbar, istTestaccount: true }).reason).toBe('test-account')
+    // ohne Flag bleibt sichtbar:
+    expect(deriveFinderVisibility({ ...sichtbar, istTestaccount: false }).visible).toBe(true)
+    expect(deriveFinderVisibility({ ...sichtbar, istTestaccount: null }).visible).toBe(true)
   })
 
   it('Prioritaet: erster fehlschlagender Gate gewinnt (verifiziert vor aktiv)', () => {
