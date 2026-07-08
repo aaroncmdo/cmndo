@@ -114,7 +114,7 @@ export function FlowQualiStep({
             className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
           >
             <span className="block font-semibold text-claimondo-navy">Ja, ich habe eine Kaskoversicherung</span>
-            <span className="block text-sm text-claimondo-navy/60">Wir zeigen dir, wie du dort meldest.</span>
+            <span className="block text-sm text-claimondo-navy/60">Wir finden dir eine passende Werkstatt für die Reparatur.</span>
           </button>
           <button
             type="button"
