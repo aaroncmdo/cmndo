@@ -27,7 +27,9 @@
 
 ### Task 1: `v_lead_workstate` view (foundation)
 
-**Files:** Create `supabase/migrations/<tracked>_v_lead_workstate.sql` (apply via plugin first).
+> **⚠️ EMPIRICAL BLOCKER (2026-07-08, found while applying):** the `security_invoker` view below applied fine + passed both RLS audits (0/0), BUT is **unreadable**: `permission denied for table flow_links`. Under `security_invoker` the caller (`authenticated`) needs SELECT on every joined table; `flow_links` (and likely `gutachter_termine`) are NOT granted to `authenticated` — they're reached via controlled paths, not a broad grant. A DEFINER view *would* read them but then gets flagged by `audit_ungated_definer_views` (no recognized gate for a lead-view — same as v_ops_rollup was). **This is a real design decision touching SHARED tables → must be coordinated, not hacked.** Options: **(1)** gated access — reuse/create a DEFINER helper `_lead_active_termin(lead_id)` + `_lead_latest_flowlink(lead_id)` (owner-reads, scoped by the lead_id the invoker view already filtered — minor status/timestamp exposure, no PII); **(2)** review + grant `SELECT` on `gutachter_termine`/`flow_links` to `authenticated` IF they carry their own RLS (verify first — a bare grant would over-expose); **(3)** check whether the existing `v_lead_termin_gutachter` view (+ a gated flowlink view, if one exists) can be joined instead of the raw tables. **Recommendation: investigate how the dispatch lead-detail page currently reads termine + flowlinks (it must use a gated path), then reuse that.** The applied view was DROPPED (`20260708073806`) to keep prod clean; the two migrations are committed for chain integrity.
+
+**Files:** Create `supabase/migrations/<tracked>_v_lead_workstate.sql` (apply via plugin first). *(Original attempt: `20260708073516` create + `20260708073806` drop — see the blocker above.)*
 
 **DDL:**
 ```sql
