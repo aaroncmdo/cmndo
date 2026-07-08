@@ -137,7 +137,7 @@ export async function markSvVorOrt(
 export async function markBesichtigungGestartet(
   sessionId: string,
   terminId: string,
-  via: 'beide_angekommen' | 'termin_uhrzeit',
+  via: 'beide_angekommen' | 'termin_uhrzeit' | 'manuell',
 ): Promise<Result> {
   const guard = await assertSvOwnsTermin(terminId)
   if (!guard.ok) return { success: false, error: guard.error }
@@ -154,10 +154,10 @@ export async function markBesichtigungGestartet(
     return { success: true }
   }
 
-  // Bei Zeit-Fallback ohne GPS: sv_angekommen_am ebenfalls setzen, damit
-  // der KundeSvLiveBanner / die ClaimStepper-Status-Logik konsistent ist.
+  // Bei Zeit-Fallback ODER manueller Ankunft ohne vorheriges Geofence: sv_angekommen_am
+  // ebenfalls setzen, damit KundeSvLiveBanner / ClaimStepper-Status konsistent sind.
   const update: Record<string, string> = { besichtigung_gestartet_am: nowIso }
-  if (via === 'termin_uhrzeit' && !existing?.sv_angekommen_am) {
+  if ((via === 'termin_uhrzeit' || via === 'manuell') && !existing?.sv_angekommen_am) {
     update.sv_angekommen_am = nowIso
     update.notification_angekommen_gesendet_am = nowIso
   }
