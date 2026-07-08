@@ -3,6 +3,7 @@ import RealtimeLeadAlert from './_components/RealtimeLeadAlert'
 import { PageContainer } from '@/components/PageContainer'
 import UpdatesNav from '@/components/shared/updates'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
+import { PortalShell } from '@/components/shared/portal-shell'
 
 export default async function DispatchLayout({
   children,
@@ -15,34 +16,30 @@ export default async function DispatchLayout({
 
   return (
     <>
-    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
       <RealtimeLeadAlert />
-      <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
-
-      <div className="md:ml-56 h-screen flex flex-col relative z-10">
-        {/* Mobile header — AAR-727 Glass-Dark */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-claimondo-light-blue bg-claimondo-shield px-2 py-0.5 rounded-ios-sm">Dispatch</span>
-            <UpdatesNav variant="dark" />
+      <PortalShell
+        breakpoint="md"
+        contentOffsetClass="md:pl-56"
+        mobileNav="self"
+        sidebar={<DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />}
+        mobileHeader={
+          <>
+            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
+            <div className="ml-auto flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-wider text-claimondo-light-blue bg-claimondo-shield px-2 py-0.5 rounded-ios-sm">Dispatch</span>
+              <UpdatesNav variant="dark" />
+            </div>
+          </>
+        }
+        desktopTopRight={
+          <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
+            <UpdatesNav variant="light" />
           </div>
-        </header>
-
-        {/* AAR-725: UpdatesNav desktop top-right. */}
-        <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
-          <UpdatesNav variant="light" />
-        </div>
-
-        {/* AAR-911 v2: Statt md:pr-36 die VOLLE Main-Höhe für die fixe Corner-Pill
-            zu opfern (144px tote Spalte), hält `.has-corner-pill` (globals.css) nur
-            die PageHeader-Action-Zeile rechts frei — Body-Content (Tabellen/Grids)
-            gewinnt die 144px Breite zurück. */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
-          <PageContainer className="h-full">{children}</PageContainer>
-        </main>
-      </div>
-    </div>
+        }
+        contentClassName="has-corner-pill pb-16 md:pb-0"
+      >
+        <PageContainer className="h-full">{children}</PageContainer>
+      </PortalShell>
     </>
   )
 }
