@@ -1,12 +1,17 @@
 'use client'
-// Vertrieb-CRM P1a: der Roster — Triage-KPIs (aus rollup) + kind-Segment-Tabs + Tabelle
-// mit Stufe-Badge. Read-only. shared/DataTable + StatusBadge(domain=vertrieb-workflow) +
-// primitives.Card (kein handgerolltes Card). Housing/Kanban/Filter/Detail = spaetere Inkremente.
+// Vertrieb-CRM P1b: der Roster — Triage-KPIs + Segment-Auswahl + Suche + Stufe-Filter +
+// Tabelle mit Stufe-Badge. Filter/Sort-Logik in reiner filterKontakte-Fn (getestet).
+// shared/DataTable + StatusBadge(domain=vertrieb-workflow) + primitives.Card/Button.
 import { useMemo, useState } from 'react'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { Card } from '@/components/primitives'
+import { Card, Button } from '@/components/primitives'
+import { filterKontakte } from './_lib/filter-kontakte'
+import {
+  ALL_VERTRIEB_STUFEN,
+  VERTRIEB_WORKFLOW_DEFS,
+  type VertriebStufe,
+} from '@/lib/status/domains/vertrieb-workflow'
 import type { VertriebKontakt, VertriebKind } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebRollupZelle } from '@/lib/vertrieb/vertrieb-rollup.types'
 
@@ -21,6 +26,8 @@ const KIND_LABEL: Record<Segment, string> = {
   'sv-lead': 'SV-Leads',
 }
 const SEGMENTE: Segment[] = ['alle', 'sv', 'makler', 'werkstatt', 'partner-lead', 'sv-lead']
+const FELD_CLS =
+  'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
 
 export default function VertriebRosterClient({
   kontakte,
@@ -30,9 +37,11 @@ export default function VertriebRosterClient({
   rollup: VertriebRollupZelle[]
 }) {
   const [seg, setSeg] = useState<Segment>('alle')
+  const [search, setSearch] = useState('')
+  const [stufe, setStufe] = useState<VertriebStufe | 'alle'>('alle')
   const gefiltert = useMemo(
-    () => (seg === 'alle' ? kontakte : kontakte.filter((k) => k.kind === seg)),
-    [kontakte, seg],
+    () => filterKontakte(kontakte, { seg, search, stufe }),
+    [kontakte, seg, search, stufe],
   )
   const kpi = useMemo(() => {
     const sum = (pred: (z: VertriebRollupZelle) => boolean) =>
@@ -56,50 +65,72 @@ export default function VertriebRosterClient({
         ))}
       </div>
 
-      <Tabs value={seg} onValueChange={(v) => setSeg(v as Segment)} className="w-full">
-        <TabsList variant="default" className="w-full overflow-x-auto bg-claimondo-navy/[0.06]">
-          {SEGMENTE.map((s) => (
-            <TabsTrigger key={s} value={s}>
-              {KIND_LABEL[s]}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+      <div className="flex flex-wrap gap-2">
         {SEGMENTE.map((s) => (
-          <TabsContent key={s} value={s} className="pt-4">
-            <DataTableContainer>
-              <Table>
-                <Thead>
-                  <Tr>
-                    <Th>Name</Th>
-                    <Th>Typ</Th>
-                    <Th>Stufe</Th>
-                    <Th>Ort</Th>
-                    <Th>Kontakt</Th>
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {gefiltert.map((k) => (
-                    <Tr key={`${k.kind}-${k.id}`}>
-                      <Td>{k.name ?? '—'}</Td>
-                      <Td>{KIND_LABEL[k.kind]}</Td>
-                      <Td>
-                        <StatusBadge domain="vertrieb-workflow" code={k.stufe} size="sm" />
-                      </Td>
-                      <Td>{k.plz ? `${k.plz} ${k.ort ?? ''}`.trim() : k.ort ?? '—'}</Td>
-                      <Td>{k.email ?? k.telefon ?? '—'}</Td>
-                    </Tr>
-                  ))}
-                  {gefiltert.length === 0 && (
-                    <Tr>
-                      <Td>Keine Einträge in diesem Segment.</Td>
-                    </Tr>
-                  )}
-                </Tbody>
-              </Table>
-            </DataTableContainer>
-          </TabsContent>
+          <Button key={s} variant={seg === s ? 'navy' : 'ghost'} onClick={() => setSeg(s)}>
+            {KIND_LABEL[s]}
+          </Button>
         ))}
-      </Tabs>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Suche nach Name, Ort oder E-Mail…"
+          aria-label="Suche"
+          className={`${FELD_CLS} flex-1 min-w-[220px]`}
+        />
+        <select
+          value={stufe}
+          onChange={(e) => setStufe(e.target.value as VertriebStufe | 'alle')}
+          aria-label="Nach Stufe filtern"
+          className={FELD_CLS}
+        >
+          <option value="alle">Alle Stufen</option>
+          {ALL_VERTRIEB_STUFEN.map((s) => (
+            <option key={s} value={s}>
+              {VERTRIEB_WORKFLOW_DEFS[s].label}
+            </option>
+          ))}
+        </select>
+        <span className="text-caption text-claimondo-ondo/60">
+          {gefiltert.length} von {kontakte.length}
+        </span>
+      </div>
+
+      <DataTableContainer>
+        <Table>
+          <Thead>
+            <Tr>
+              <Th>Name</Th>
+              <Th>Typ</Th>
+              <Th>Stufe</Th>
+              <Th>Ort</Th>
+              <Th>Kontakt</Th>
+            </Tr>
+          </Thead>
+          <Tbody>
+            {gefiltert.map((k) => (
+              <Tr key={`${k.kind}-${k.id}`}>
+                <Td>{k.name ?? '—'}</Td>
+                <Td>{KIND_LABEL[k.kind]}</Td>
+                <Td>
+                  <StatusBadge domain="vertrieb-workflow" code={k.stufe} size="sm" />
+                </Td>
+                <Td>{k.plz ? `${k.plz} ${k.ort ?? ''}`.trim() : k.ort ?? '—'}</Td>
+                <Td>{k.email ?? k.telefon ?? '—'}</Td>
+              </Tr>
+            ))}
+            {gefiltert.length === 0 && (
+              <Tr>
+                <Td colSpan={5}>Keine Einträge — Filter anpassen.</Td>
+              </Tr>
+            )}
+          </Tbody>
+        </Table>
+      </DataTableContainer>
     </div>
   )
 }
