@@ -8,6 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { geocodeAddress } from '@/lib/google-geocoding/geocode-address'
+import { berlinIsoDate } from '@/lib/time/berlin-day'
 
 export type PrivatStopRow = {
   id: string
@@ -60,7 +61,10 @@ export async function addPrivatStop(
     address = geo.data.formatted_address
   }
 
-  const datum = new Date(input.start_zeit).toISOString().slice(0, 10)
+  // Berlin-Kalendertag (nicht UTC-Slice) — konsistent mit listPrivatStopsForDate
+  // + dem heute/page-Fenster. Sonst landet ein Stop um 00:30 Berlin (22:30 UTC
+  // Vortag) auf dem UTC-Vortag und verschwindet aus der Berlin-Tagesroute.
+  const datum = berlinIsoDate(new Date(input.start_zeit))
 
   const { data, error } = await supabase
     .from('sv_private_stops')
