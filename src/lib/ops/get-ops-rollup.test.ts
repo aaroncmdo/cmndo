@@ -20,18 +20,23 @@ describe('getOpsRollup', () => {
       mockSupabase({
         rollup: [
           { main_phase: 'begutachtung', kundenbetreuer_id: 'kb1', anzahl: 3, stale_anzahl: 1 },
+          { main_phase: 'erfassung', kundenbetreuer_id: 'kb2', anzahl: 1, stale_anzahl: 0 },
           { main_phase: 'regulierung', kundenbetreuer_id: null, anzahl: 2, stale_anzahl: 0 },
         ],
-        profiles: [{ id: 'kb1', vorname: 'Lena', nachname: 'Schmidt' }],
+        profiles: [
+          { id: 'kb1', vorname: 'Lena', nachname: 'Schmidt', email: 'lena@x.de' },
+          { id: 'kb2', vorname: null, nachname: null, email: 'tom.k@x.de' },
+        ],
       }),
     )
     expect(res.ok).toBe(true)
     if (!res.ok) return
-    expect(res.rollup.cells).toHaveLength(2)
-    expect(res.rollup.totalAktiv).toBe(5)
+    expect(res.rollup.cells).toHaveLength(3)
+    expect(res.rollup.totalAktiv).toBe(6)
     expect(res.rollup.totalStale).toBe(1)
     const names = res.rollup.owners.map((o) => o.name)
     expect(names).toContain('Lena Schmidt')
+    expect(names).toContain('tom.k') // email-local-part Fallback wenn kein Name
     expect(names[names.length - 1]).toBe('Nicht zugewiesen') // null-Owner immer zuletzt
   })
 

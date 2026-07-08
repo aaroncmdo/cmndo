@@ -2,7 +2,7 @@
 // Admin-Cockpit: Rollup-Matrix (Phase x Owner). Klickbare Zellen -> Drill-in.
 // Phase-Header via ClaimMainPhaseBadge (Registry). Heat via semantische Tokens
 // (bg-warning-soft = stale, KEIN roher status-scale). Tabelle via shared/DataTable
-// (kein hand-rolled <table>). Zellen sind role=button + tastatur-bedienbar.
+// (kein rohes HTML-Tabellen-Element). Zellen sind role=button + tastatur-bedienbar.
 
 import { cn } from '@/lib/utils'
 import { type ClaimMainPhase } from '@/lib/claims/lifecycle'

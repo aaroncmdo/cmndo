@@ -31,10 +31,12 @@ export async function getOpsRollup(
   )
   const nameById = new Map<string, string>()
   if (ownerIds.length > 0) {
-    const { data: profs } = await supabase.from('profiles').select('id,vorname,nachname').in('id', ownerIds)
-    for (const p of (profs ?? []) as { id: string; vorname: string | null; nachname: string | null }[]) {
-      const name = [p.vorname, p.nachname].filter(Boolean).join(' ').trim()
-      nameById.set(p.id, name || p.id.slice(0, 8))
+    const { data: profs } = await supabase.from('profiles').select('id,vorname,nachname,email').in('id', ownerIds)
+    for (const p of (profs ?? []) as { id: string; vorname: string | null; nachname: string | null; email: string | null }[]) {
+      const full = [p.vorname, p.nachname].filter(Boolean).join(' ').trim()
+      // Fallback-Kette: voller Name -> email-local-part (z.B. "smoke-admin") -> id-Prefix.
+      const fallback = p.email ? p.email.split('@')[0] : p.id.slice(0, 8)
+      nameById.set(p.id, full || fallback)
     }
   }
 

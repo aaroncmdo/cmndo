@@ -1,6 +1,6 @@
 // src/components/admin/OpsRollupMatrix.test.tsx
 // env=node: renderToStaticMarkup. ClaimMainPhaseBadge gemockt (vermeidet status-Registry
-// im node-Render); DataTable rendert plain <table> und bleibt echt.
+// im node-Render); DataTable rendert echtes Tabellen-Markup und bleibt ungemockt.
 import { describe, it, expect, vi } from 'vitest'
 
 vi.mock('@/components/shared/ClaimMainPhaseBadge', () => ({
