@@ -1,13 +1,16 @@
 'use client'
 
-// AAR-778: Migriert auf shared PortalNav (light variant, desktop-only).
+// Shared PortalNav (dark = detached Navy-Panel). Header-/Footer-Slots tragen die
+// frueher im Top-Bar gerenderten Aktionen (Logo + TasksPill / Updates + Logout).
 
 import {
   LayoutDashboardIcon, FolderOpenIcon, CheckSquareIcon, CalendarIcon,
   MessageCircleIcon, BarChart3Icon, AlertCircleIcon, UserIcon,
-  MapIcon, UsersRoundIcon, MapPinnedIcon,
+  MapIcon, UsersRoundIcon, MapPinnedIcon, LogOutIcon,
 } from 'lucide-react'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
+import TasksPill from '@/components/shared/TasksPill'
+import UpdatesNav from '@/components/shared/updates'
 
 const ITEMS: PortalNavItem[] = [
   { href: '/mitarbeiter', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
@@ -27,12 +30,19 @@ const ITEMS: PortalNavItem[] = [
 const MOBILE_HREFS = ['/mitarbeiter', '/mitarbeiter/faelle', '/mitarbeiter/termine', '/mitarbeiter/nachrichten']
 const MOBILE_ITEMS = MOBILE_HREFS.map((h) => ITEMS.find((i) => i.href === h)!).filter(Boolean)
 
-export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichten?: number }) {
+export default function MitarbeiterNav({
+  userId,
+  displayName,
+  unreadNachrichten,
+}: {
+  userId: string
+  displayName: string
+  unreadNachrichten?: number
+}) {
   return (
     <PortalNav
-      variant="light"
+      variant="dark"
       ariaLabel="Mitarbeiter-Navigation"
-      className="hidden md:flex md:flex-col min-h-[calc(100vh-60px)]"
       sections={[{ items: ITEMS }]}
       mobileItems={MOBILE_ITEMS}
       renderBadge={(item) => {
@@ -45,6 +55,30 @@ export default function MitarbeiterNav({ unreadNachrichten }: { unreadNachrichte
         }
         return null
       }}
+      headerSlot={
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold tracking-tight">
+            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
+          </span>
+          <TasksPill userId={userId} href="/mitarbeiter/tasks" />
+        </div>
+      }
+      footerSlot={
+        <>
+          <div className="flex items-center gap-3 px-3 py-2.5">
+            <UpdatesNav variant="dark" placement="up-right" />
+            <span className="min-w-0 flex-1 truncate text-sm text-white/90">{displayName}</span>
+          </div>
+          <form action="/api/auth/logout" method="POST">
+            <button
+              type="submit"
+              className="flex w-full items-center gap-3 rounded-ios-lg px-3 py-2.5 text-sm text-claimondo-light-blue transition-colors hover:bg-white/5 hover:text-white"
+            >
+              <LogOutIcon style={{ width: 17, height: 17 }} /> Abmelden
+            </button>
+          </form>
+        </>
+      }
     />
   )
 }

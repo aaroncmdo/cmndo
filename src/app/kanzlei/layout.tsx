@@ -1,17 +1,10 @@
-﻿// AAR-kanzlei-portal Layout — Navy-Header + Sidebar, spiegelt das
-// Mitarbeiter-Layout damit der Look konsistent ist. Design-Tokens laut
-// Design & Daten Philosophie (Notion 11.04.2026):
-//   Navy #0D1B3E — Header
-//   Light-Blue #7BA3CC — Logo-Akzent + Sub-Labels auf dunkel
-//   Bg #f8f9fb — Main-Surface
+// AAR-kanzlei-portal Layout — Detached-Navy-Panel-Sidebar (dark PortalNav),
+// KEINE Top-Bar mehr (Aktionen in den KanzleiNav-Slots), konsistent mit admin.
+// h-screen + inner-scroll; Content per md:ml-56 am fixed Panel vorbei.
 //
-// Guard: Rolle muss 'kanzlei' sein. Admin darf ebenfalls rein, damit wir
-// das Portal im Admin-Modus testen können ohne Rollen-Switch.
+// Guard: Rolle muss 'kanzlei' sein. Admin darf ebenfalls rein (Testing).
 
-import { LogOutIcon } from 'lucide-react'
 import KanzleiNav from './_components/KanzleiNav'
-import TasksPill from '@/components/shared/TasksPill'
-import UpdatesNav from '@/components/shared/updates'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 
 export default async function KanzleiLayout({
@@ -19,54 +12,15 @@ export default async function KanzleiLayout({
 }: {
   children: React.ReactNode
 }) {
-  // K5: Auth + Rollen-Guard zentralisiert. Admin bleibt erlaubt für Testing.
   const { user, displayName } = await requirePortalAccess(['kanzlei', 'admin'])
 
-  // AAR-676: h-screen + overflow-hidden damit die komplette Kanzlei-Shell
-  // nicht das Fenster scrollt. Sidebar + Header bleiben fix, nur der Main-
-  // Content scrollt innen. Das Main hat keinen max-width-Cap mehr — sonst
-  // entsteht rechts ein grauer Balken auf breiten Screens.
   return (
-    <>
-    <div className="h-screen bg-claimondo-bg flex flex-col overflow-hidden">
-      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/claimondo-shield.svg" alt="" width={24} height={24} className="h-6 w-6 shrink-0" />
-            <span className="text-xl font-bold tracking-tight">
-              <span className="text-white">Claim</span>
-              <span className="text-claimondo-light-blue">ondo</span>
-            </span>
-          </div>
-          <span className="text-[11px] uppercase tracking-wider text-claimondo-light-blue border border-claimondo-light-blue/30 rounded px-2 py-0.5">
-            Kanzlei
-          </span>
-          {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
-          <TasksPill userId={user.id} href="/kanzlei/mandate" />
-        </div>
-        <div className="flex items-center gap-3">
-          <UpdatesNav variant="dark" />
-          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
-          <form action="/api/auth/logout" method="POST">
-            <button
-              type="submit"
-              className="text-claimondo-light-blue hover:text-white transition-colors"
-              aria-label="Abmelden"
-            >
-              <LogOutIcon className="w-4 h-4" />
-            </button>
-          </form>
-        </div>
-      </header>
-      <div className="flex flex-1 min-h-0 relative z-10">
-        <KanzleiNav />
-        {/* pb-24 mobile: Platz fuer die Mobile-Bottom-Nav (md:hidden); ab md zurueck auf py-6. */}
-        <main className="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 md:px-8 py-6 pb-24 md:pb-6">
-          {children}
-        </main>
-      </div>
+    <div className="h-screen bg-claimondo-bg overflow-hidden">
+      <KanzleiNav userId={user.id} displayName={displayName} />
+      {/* pb-24 mobile: Platz fuer die PortalNav-Bottom-Bar (md:hidden). */}
+      <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-8 py-6 pb-24 md:pb-6">
+        {children}
+      </main>
     </div>
-    </>
   )
 }
