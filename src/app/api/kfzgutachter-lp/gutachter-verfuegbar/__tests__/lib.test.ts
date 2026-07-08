@@ -6,7 +6,6 @@ import {
   isValidPolygon,
   extractStadt,
   firstInitial,
-  isTestAccount,
   sample,
   isValidPlaceId,
 } from '../_lib'
@@ -118,22 +117,6 @@ describe('firstInitial', () => {
     expect(firstInitial(null)).toBe(null)
     expect(firstInitial('')).toBe(null)
     expect(firstInitial('   ')).toBe(null)
-  })
-})
-
-describe('isTestAccount', () => {
-  it('Test-Account erkannt', () => {
-    expect(isTestAccount('Test Aaron Gutachter GmbH')).toBe(true)
-    expect(isTestAccount('Smoke SV')).toBe(true)
-    expect(isTestAccount('Demo Gutachter GbR')).toBe(true)
-  })
-  it('Substring "test" als Teil eines Wortes → nicht erkannt', () => {
-    expect(isTestAccount('Westend Sachverständige')).toBe(false)
-    expect(isTestAccount('Testfeld Gutachter')).toBe(false)
-  })
-  it('null-safe', () => {
-    expect(isTestAccount(null)).toBe(false)
-    expect(isTestAccount('')).toBe(false)
   })
 })
 
