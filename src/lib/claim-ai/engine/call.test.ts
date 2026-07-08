@@ -1,18 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 // Anthropic-SDK + logAiUsage mocken (die Engine kapselt beide).
-const { messagesCreate, logAiUsageSpy } = vi.hoisted(() => ({
+const { messagesCreate, messagesStream, logAiUsageSpy } = vi.hoisted(() => ({
   messagesCreate: vi.fn(),
+  messagesStream: vi.fn(),
   logAiUsageSpy: vi.fn(async () => {}),
 }))
 vi.mock('@anthropic-ai/sdk', () => ({
   default: class {
-    messages = { create: messagesCreate }
+    messages = { create: messagesCreate, stream: messagesStream }
   },
 }))
 vi.mock('@/lib/ai/usage-log', () => ({ logAiUsage: logAiUsageSpy }))
 
-import { callForProposals } from './call'
+import { callForProposals, streamForProposals } from './call'
+
+// mock-Stream: async-iterable Events + finalMessage()
+function fakeStream(deltas: string[], final: unknown) {
+  const events = deltas.map((text) => ({ type: 'content_block_delta', delta: { type: 'text_delta', text } }))
+  return {
+    async *[Symbol.asyncIterator]() {
+      for (const e of events) yield e
+    },
+    finalMessage: async () => final,
+  }
+}
 
 describe('callForProposals', () => {
   beforeEach(() => {
@@ -64,5 +76,48 @@ describe('callForProposals', () => {
     logAiUsageSpy.mockRejectedValue(new Error('log fail'))
     const out = await callForProposals({ model: 'm', system: 's', tools: [], userContent: 'c', logEndpoint: 'ep', extract: () => ['ok'] })
     expect(out).toEqual(['ok'])
+  })
+})
+
+describe('streamForProposals', () => {
+  beforeEach(() => {
+    messagesStream.mockReset()
+    logAiUsageSpy.mockReset()
+    logAiUsageSpy.mockResolvedValue(undefined)
+  })
+
+  it('streamt Text-Deltas per onTextDelta + extrahiert aus finalMessage', async () => {
+    const content = [{ type: 'tool_use', name: 'x', input: {} }]
+    messagesStream.mockReturnValue(fakeStream(['Hal', 'lo'], { content, usage: { input_tokens: 3, output_tokens: 2 } }))
+    const chunks: string[] = []
+    const extract = vi.fn(() => ['d1'])
+    const out = await streamForProposals({
+      model: 'm', system: 's', tools: [], messages: [{ role: 'user', content: 'hi' }],
+      maxTokens: 2048, logEndpoint: 'cp', logFallId: 'f', extract,
+      onTextDelta: (t) => chunks.push(t),
+    })
+    expect(chunks).toEqual(['Hal', 'lo'])
+    expect(out).toEqual(['d1'])
+    expect(extract).toHaveBeenCalledWith(content)
+    expect(messagesStream).toHaveBeenCalledWith(
+      expect.objectContaining({ model: 'm', max_tokens: 2048, messages: [{ role: 'user', content: 'hi' }] }),
+    )
+  })
+
+  it('loggt Usage aus finalMessage', async () => {
+    messagesStream.mockReturnValue(fakeStream([], { content: [], usage: { input_tokens: 7, output_tokens: 4 } }))
+    await streamForProposals({ model: 'm', system: 's', tools: [], messages: [], logEndpoint: 'cp', extract: () => [], onTextDelta: () => {} })
+    expect(logAiUsageSpy).toHaveBeenCalledWith(
+      expect.objectContaining({ endpoint: 'cp', usage: { input_tokens: 7, output_tokens: 4 } }),
+    )
+  })
+
+  it('WIRFT bei Stream-Fehler (anders als callForProposals → Caller signalisiert SSE-Abbruch)', async () => {
+    messagesStream.mockImplementation(() => {
+      throw new Error('stream boom')
+    })
+    await expect(
+      streamForProposals({ model: 'm', system: 's', tools: [], messages: [], logEndpoint: 'cp', extract: () => [], onTextDelta: () => {} }),
+    ).rejects.toThrow('stream boom')
   })
 })
