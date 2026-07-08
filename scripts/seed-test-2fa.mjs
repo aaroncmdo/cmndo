@@ -16,6 +16,23 @@ import { createClient } from '@supabase/supabase-js'
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs'
 import { computeTotp } from '../tests/e2e/lib/totp.mjs'
 
+// 2FA-Optional-Guard (08.07.2026): 2FA ist auf prod OPTIONAL geworden
+// (Mandatory-Umkehr; istZweiFaktorPflicht = nur noch weicher Nudge).
+// entscheideMfaGate fordert weiterhin JEDEN Account MIT Faktor -> TOTP-Seeding
+// auf den Test-Accounts sperrt damit MANUELLE Logins (Aaron/Debugging) aus und
+// stellt exakt den Lockout wieder her, der am 08.07. entfernt wurde
+// (siehe memory reference-internal-test-account-logins). Darum nur noch mit
+// explizitem Opt-in laufen lassen — und die Faktoren nach dem Seed via
+// clearTwoFa/Admin-API wieder entfernen, sonst bleiben die Accounts gesperrt.
+if (process.env.ALLOW_2FA_SEED !== '1') {
+  console.error(
+    '\nAbbruch: 2FA ist prod-optional — TOTP-Seeding sperrt manuelle Logins aus\n' +
+      '  (recreated den Lockout vom 08.07.). Bewusst gewollt? Dann mit ALLOW_2FA_SEED=1\n' +
+      '  laufen lassen und die Faktoren danach wieder entfernen.\n',
+  )
+  process.exit(0)
+}
+
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL
 const ANON = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 if (!URL || !ANON) {
