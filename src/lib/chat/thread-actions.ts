@@ -186,10 +186,12 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
   // Zustellungs-Routing (Datenmodell A): Staff-Nachrichten in der kunde_gruppe werden dem
   // Kunden zusaetzlich via WhatsApp zugestellt -> die Zeile traegt dann kanal='whatsapp'
   // (in v1 UND v2 sichtbar). team_intern/direkt + Kunde-Sender bleiben thread-nativ (kanal null).
-  // ENV-Backstop CHAT_ZUSTELLUNG_WHATSAPP=1: DEFAULT AUS. Der WhatsApp-Pfad (Baileys) hat KEINEN
-  // eigenen Test-Guard + der prod-Datenbestand mischt @claimondo.de/disposable-Test-Leads mit
-  // echten Kunden -> erst scharf schalten, wenn die Isolation in true-prod verifiziert ist.
-  const zustellungAktiv = process.env.CHAT_ZUSTELLUNG_WHATSAPP === '1'
+  // Zustellungs-Routing SCHARF (Aaron 08.07. „stell es scharf"): DEFAULT AN, Kill-Switch
+  // CHAT_ZUSTELLUNG_WHATSAPP=0. Verifiziert gegen die prod-Leads der kunde_gruppe-Threads: der
+  // Guard unten (istTestEmail + @claimondo.de + email-los) unterdrueckt ALLE aktuellen Test/internen
+  // Leads; der einzige nicht-gefangene Rest (disposable @web-library.net) hat eine Test-Telefonnummer
+  // (+4915510000099) -> Baileys-No-Op. Kein echter Empfaenger wird gespammt.
+  const zustellungAktiv = process.env.CHAT_ZUSTELLUNG_WHATSAPP !== '0'
   const zustellen = zustellungAktiv && thread.art === 'kunde_gruppe' && !!prof?.rolle && prof.rolle !== 'kunde'
 
   const admin = createAdminClient() as unknown as SupabaseClient
