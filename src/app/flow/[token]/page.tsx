@@ -1,6 +1,7 @@
 ﻿import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { notFound, redirect } from 'next/navigation'
 import FlowWizardKfz from './FlowWizardKfz'
+import WerkstattIntakeSignatur from './WerkstattIntakeSignatur'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
 import LeadRealtimeRefresh from '@/components/shared/LeadRealtimeRefresh'
 import { getAllLegalDocs } from '@/lib/legal/get-doc'
@@ -170,6 +171,47 @@ export default async function FlowPage({
     .maybeSingle()
 
   if (!lead) return notFound()
+
+  // i18n: Empfaenger-Locale + Messages FRUEH aufloesen (haengt nur an flowLink/lead.sprache),
+  // damit der Werkstatt-Intake-Branch sie nutzen kann. (AAR-316; frueher weiter unten)
+  const sprache = (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
+  const flowLocale = resolveFlowLocale(flowLink?.sprache as string | null, lead.sprache as string | null)
+  const flowMessages = await loadMessages(flowLocale)
+
+  // Werkstatt-getriebener Intake (Haftpflicht): die Werkstatt hat die Falldaten gefuellt,
+  // der Kunde unterschreibt nur die SA (Signatur-only). Kurzschluss VOR der Termin-/
+  // Gutachter-/Feststellungs-Logik — die braucht der Intake-Pfad nicht. Expiry- +
+  // 'abgeschlossen'-Checks liefen bereits oben (im flowLink-Block).
+  if (lead.werkstatt_intake_am) {
+    return (
+      <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
+        <LeadRealtimeRefresh leadId={lead.id} />
+        <NextIntlClientProvider locale={flowLocale} messages={flowMessages}>
+          <WerkstattIntakeSignatur
+            token={token}
+            leadId={leadId}
+            flowLinkId={flowLinkId}
+            legalDocs={getAllLegalDocs()}
+            zusammenfassung={{
+              vorname: lead.vorname ?? '',
+              nachname: lead.nachname ?? '',
+              fahrzeug: [lead.fahrzeug_hersteller, lead.fahrzeug_modell].filter(Boolean).join(' '),
+              kennzeichen: lead.kennzeichen ?? '',
+              unfalldatum: lead.unfalldatum ?? null,
+              unfallort: lead.unfallort ?? null,
+              unfallhergang: lead.unfallhergang ?? null,
+              gegnerName: lead.gegner_name ?? null,
+              gegnerVersicherung: lead.gegner_versicherung ?? null,
+            }}
+            kundeEmail={lead.email ?? ''}
+            kundeVorname={lead.vorname ?? ''}
+            kundeNachname={lead.nachname ?? ''}
+            kundeTelefon={lead.telefon ?? ''}
+          />
+        </NextIntlClientProvider>
+      </div>
+    )
+  }
 
   // 2026-05-12 Funnel v2 PR #5: Wenn User eingeloggt + Fall existiert,
   // direkt zum datenabhaengigen Onboarding redirecten — ersetzt den
@@ -434,18 +476,8 @@ export default async function FlowPage({
     }
   }
 
-  // AAR-316: Sprach-Priorität flow_links.sprache > lead.sprache > 'de'
-  const sprache =
-    (flowLink?.sprache as string | null) ?? (lead.sprache as string | null) ?? 'de'
-
-  // i18n Strategie B (P1): Empfänger-Locale für den scoped Provider auflösen
-  // + die zugehörigen Messages laden. Überschreibt die globale Cookie-Locale
-  // nur für den Flow-Subtree.
-  const flowLocale = resolveFlowLocale(
-    flowLink?.sprache as string | null,
-    lead.sprache as string | null,
-  )
-  const flowMessages = await loadMessages(flowLocale)
+  // sprache/flowLocale/flowMessages: bereits FRUEH aufgeloest (oben, vor dem
+  // Werkstatt-Intake-Branch) — hier nur noch genutzt.
 
   return (
     <div style={brandStyle} dir={flowLocale === 'ar' ? 'rtl' : 'ltr'}>
