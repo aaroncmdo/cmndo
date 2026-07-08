@@ -20,7 +20,7 @@ export default async function DispatchLayout({
       <PortalShell
         breakpoint="md"
         contentOffsetClass="md:pl-56"
-        mobileNav="self"
+        mobileNav="shell-drawer"
         sidebar={<DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />}
         mobileHeader={
           <>

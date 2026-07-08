@@ -86,7 +86,7 @@ export default async function FaelleLayout({
       <PortalShell
         breakpoint="md"
         contentOffsetClass="md:pl-56"
-        mobileNav="self"
+        mobileNav="shell-drawer"
         sidebar={<MitarbeiterNav userId={user.id} displayName={displayName} unreadNachrichten={unread} />}
         mobileHeader={
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
@@ -111,7 +111,7 @@ export default async function FaelleLayout({
       <PortalShell
         breakpoint="md"
         contentOffsetClass="md:pl-56"
-        mobileNav="self"
+        mobileNav="shell-drawer"
         sidebar={<AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />}
         mobileHeader={
           <>

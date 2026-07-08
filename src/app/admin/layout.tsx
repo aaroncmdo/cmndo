@@ -38,7 +38,7 @@ export default async function AdminLayout({
       <PortalShell
         breakpoint="md"
         contentOffsetClass="md:pl-56"
-        mobileNav="self"
+        mobileNav="shell-drawer"
         sidebar={<AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />}
         mobileHeader={
           <>
