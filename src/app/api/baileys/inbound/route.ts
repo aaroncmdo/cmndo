@@ -4,6 +4,7 @@ import { matchInboundToFall } from '@/lib/inbound/match-fall'
 import { processInboundText } from '@/lib/inbound/process-inbound-text'
 import { processInboundMedia, type InboundMediaFile } from '@/lib/inbound/process-inbound-media'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,8 +77,27 @@ export async function POST(request: Request) {
   const fallId = match.fallId
   const leadId = match.leadId
 
+  // Zustellungs-Routing (Inbound, P2): die eingehende WhatsApp zusaetzlich am kunde_gruppe-Thread
+  // des Claims verankern -> in v1 (kanal) UND v2 (thread) sichtbar (Datenmodell A). Nur Lookup eines
+  // EXISTIERENDEN Threads (die meisten Claims haben ihn aus dem Backfill); kein Create hier -> sonst
+  // v1-only bis der Thread anderswo (Kunde-Portal/Staff) angelegt wird.
+  let threadId: string | null = null
+  if (fallId) {
+    const claimIdForThread = await resolveClaimId(db, fallId)
+    if (claimIdForThread) {
+      const { data: t } = await (db as unknown as SupabaseClient)
+        .from('chat_threads')
+        .select('id')
+        .eq('claim_id', claimIdForThread)
+        .eq('art', 'kunde_gruppe')
+        .maybeSingle()
+      threadId = (t as { id: string } | null)?.id ?? null
+    }
+  }
+
   const { error } = await db.from('nachrichten').insert({
     fall_id: fallId,
+    thread_id: threadId,
     kanal: 'whatsapp',
     sender_id: null,
     sender_rolle: 'kunde',
