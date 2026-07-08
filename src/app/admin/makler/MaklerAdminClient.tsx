@@ -7,8 +7,8 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { UsersIcon, PlusIcon, KeyIcon, Layers3Icon, Trash2Icon, ReceiptIcon } from 'lucide-react'
-import { createMakler } from './actions'
+import { UsersIcon, PlusIcon, KeyIcon, Layers3Icon, Trash2Icon, ReceiptIcon, MailIcon } from 'lucide-react'
+import { createMakler, resendMaklerWelcome } from './actions'
 import { getMaklerStaffel, setMaklerStaffel } from './staffel-actions'
 import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
 import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
@@ -75,6 +75,7 @@ export default function MaklerAdminClient({
   const [staffelRows, setStaffelRows] = useState<{ schwelle: string; bonus: string }[]>([])
   const [staffelLoadingId, setStaffelLoadingId] = useState<string | null>(null)
   const [staffelSaving, setStaffelSaving] = useState(false)
+  const [resendingId, setResendingId] = useState<string | null>(null)
 
   async function openStaffel(m: Makler) {
     setStaffelLoadingId(m.id)
@@ -143,6 +144,19 @@ export default function MaklerAdminClient({
     setDrawerData(null)
   }
 
+  // Login-/Willkommens-Mail erneut an den Makler senden. Deckt den Fall ab, dass die Mail
+  // bei der Selbst-Registrierung nicht ankam (z.B. interne/Test-Adresse -> Send-Isolation).
+  async function handleResendWelcome(m: Makler) {
+    setResendingId(m.id)
+    try {
+      const r = await resendMaklerWelcome(m.id)
+      if (r.ok) toast.success(`Login-Mail an ${m.email ?? m.firma} gesendet.`)
+      else toast.error(r.error)
+    } finally {
+      setResendingId(null)
+    }
+  }
+
   function openDialog() {
     setCreatedCredentials(null)
     setVersicherungId(null)
@@ -199,6 +213,7 @@ export default function MaklerAdminClient({
                 <Th className="text-left text-claimondo-ondo!">Aktiviert am</Th>
                 <Th className="text-left text-claimondo-ondo!">Staffelung</Th>
                 <Th className="text-left text-claimondo-ondo!">Abrechnung</Th>
+                <Th className="text-left text-claimondo-ondo!">Login-Mail</Th>
               </Tr>
             </Thead>
             <Tbody className="divide-y-0!">
@@ -255,11 +270,23 @@ export default function MaklerAdminClient({
                       Abrechnung
                     </Button>
                   </Td>
+                  <Td>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      loading={resendingId === m.id}
+                      disabled={!m.email}
+                      onClick={() => handleResendWelcome(m)}
+                      iconLeft={<MailIcon className="w-4 h-4" />}
+                    >
+                      Login-Mail
+                    </Button>
+                  </Td>
                 </Tr>
               ))}
               {maklers.length === 0 && (
                 <Tr>
-                  <Td colSpan={7} className="py-12! text-center text-claimondo-ondo!">
+                  <Td colSpan={8} className="py-12! text-center text-claimondo-ondo!">
                     Noch keine Makler angelegt.
                   </Td>
                 </Tr>
