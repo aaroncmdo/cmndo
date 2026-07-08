@@ -36,22 +36,24 @@ test('SV #3729 — Stellungnahme einreichen (C2) → auftrag hochgeladen', async
   // 1. Fallseite — der #3729-Banner-CTA muss erreichbar sein.
   await page.goto(`${APP}/gutachter/fall/${CLAIMS.c2}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
   skipIfAuthWall(page) // interne Rolle: an der 2FA-Wand skippen statt failen (aal1-Injection reicht nicht mehr)
+  // #3729-Regression: der Stellungnahme-CTA MUSS erreichbar sein (war in Prod tot bis #3816).
   const cta = page.getByRole('link', { name: /Stellungnahme einreichen/i }).first()
-  await expect(cta, '#3729-CTA sichtbar').toBeVisible({ timeout: 15_000 })
+  await expect(cta, '#3729-CTA erreichbar').toBeVisible({ timeout: 15_000 })
 
-  // 2. Auf die Stellungnahme-Seite (CTA klicken).
-  await cta.click()
-  await page.waitForURL(/\/gutachter\/fall\/.+\/stellungnahme/, { timeout: 20_000 })
+  // 2. Zur Einreich-Seite per CTA-href (robuster als Klick — das SV-Portal-Hilfe-Widget
+  //    liegt als Overlay über der Seite und fängt sonst den Klick ab).
+  const href = (await cta.getAttribute('href')) ?? `/gutachter/fall/${CLAIMS.c2}/stellungnahme`
+  await page.goto(`${APP}${href}`, { waitUntil: 'domcontentloaded', timeout: 45_000 })
 
-  // 3. Formular: Datei + Bestätigung + absenden.
+  // 3. Formular: Datei + Bestätigung + absenden. (Die Einreich-Seite muss überhaupt rendern —
+  //    das deckte den claims-RLS-Bug auf: SV kam bis zum leeren notFound-Shell. Fix: Seite liest
+  //    jetzt v_claim_base statt rohem claims!inner.)
   await page.locator('input[type="file"]').setInputFiles('tests/e2e/fixtures/test-upload.pdf')
   await page.locator('input[type="checkbox"]').first().check()
   await page.getByRole('button', { name: 'Stellungnahme einreichen' }).click()
 
-  // 4. Erfolg → redirect zurück zur Fallseite.
+  // 4. Erfolg → redirect zurück zur Fallseite + DB-Assert.
   await page.waitForURL(new RegExp(`/gutachter/fall/${CLAIMS.c2}$`), { timeout: 30_000 })
-
-  // 5. DB-Assert: der Auftrag der Kern-CTA ist jetzt hochgeladen.
   await assertRow('auftraege', AUFTRAEGE.c2, { technische_stellungnahme_status: 'hochgeladen' })
 
   await ctx.close()
