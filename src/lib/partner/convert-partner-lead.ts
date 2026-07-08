@@ -4,6 +4,7 @@ import {
   type PartnerAnlageInput,
 } from '@/lib/partner/anlege-partner'
 import type { PartnerRolle } from '@/lib/partner/policy'
+import { geocodePartnerLead } from '@/lib/partner/geocode-partner-lead'
 
 // Idempotente Konvertierung eines partner_leads-Prospects in einen echten Partner-Account.
 // Spiegelt das bewaehrte convert-lead-to-claim-Muster: Lead laden -> Idempotenz-Guard ->
@@ -21,6 +22,7 @@ export type PartnerLeadRow = {
   telefon: string | null
   plz: string | null
   ort: string | null
+  strasse: string | null
   lat: number | null
   lng: number | null
   rollen_details: Record<string, unknown> | null
@@ -68,7 +70,7 @@ export async function convertPartnerLead(
   const { data: lead, error: loadErr } = await admin
     .from('partner_leads')
     .select(
-      'id, rolle, firma, ansprechpartner_vorname, ansprechpartner_nachname, email, telefon, plz, ort, lat, lng, rollen_details, konvertiert_zu_user_id, konvertiert_zu_partner_id',
+      'id, rolle, firma, ansprechpartner_vorname, ansprechpartner_nachname, email, telefon, plz, ort, strasse, lat, lng, rollen_details, konvertiert_zu_user_id, konvertiert_zu_partner_id',
     )
     .eq('id', partnerLeadId)
     .maybeSingle()
@@ -88,11 +90,28 @@ export async function convertPartnerLead(
 
   // 2b) Koordinaten-Guard — Werkstatt MUSS geokodiert sein (erscheint auf Karte/Finder).
   //     SV ausgenommen (laeuft ueber Isochrone-Geologik); makler hat keine Koordinaten-Spalte.
+  //     Bestandsleads ohne Intake-Geocode (vor dem Mapbox-Fix angelegt, lat/lng=null) werden
+  //     hier on-demand nachgeholt statt hart geblockt — sonst waere jeder solche werkstatt-
+  //     Convert eine unfixbare Sackgasse. geocodePartnerLead nutzt jetzt geocodeMitFallback (Mapbox).
   if (typedLead.rolle === 'werkstatt' && (typedLead.lat == null || typedLead.lng == null)) {
-    return {
-      ok: false,
-      error: 'Adresse unvollständig/nicht geokodiert — bitte im Lead ergänzen, dann konvertieren.',
+    const geo = await geocodePartnerLead({
+      strasse: typedLead.strasse,
+      plz: typedLead.plz,
+      ort: typedLead.ort,
+    })
+    if (!geo.ok) {
+      return {
+        ok: false,
+        error: 'Adresse unvollständig/nicht geokodiert — bitte im Lead ergänzen, dann konvertieren.',
+      }
     }
+    typedLead.lat = geo.lat
+    typedLead.lng = geo.lng
+    // Koordinaten am Lead persistieren (Karte + kuenftige Converts sehen sie sofort).
+    await admin
+      .from('partner_leads')
+      .update({ lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id })
+      .eq('id', partnerLeadId)
   }
 
   // 3) Account anlegen (anlegePartnerKern rollbackt seinen halben Account bei Fehler selbst)

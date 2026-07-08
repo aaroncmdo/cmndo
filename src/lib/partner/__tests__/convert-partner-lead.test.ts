@@ -11,6 +11,7 @@ const lead = {
   telefon: null,
   plz: null,
   ort: null,
+  strasse: null,
   lat: null,
   lng: null,
   rollen_details: { ihk: '123' },
@@ -40,49 +41,56 @@ describe('convert-partner-lead', () => {
   })
 })
 
-// Block-Guard-Test: werkstatt-Convert ohne Koordinaten muss blocken
-describe('convertPartnerLead Block-Guard', () => {
+// Koordinaten-Guard (werkstatt): on-demand-Geocode-Fallback statt harter Sackgasse.
+// Bestandsleads ohne Intake-Geocode (lat/lng=null) werden beim Convert nachgeocodet;
+// nur ein echt fehlschlagender Geocode blockt. vi.doMock (nicht gehoistet) je Test.
+describe('convertPartnerLead Koordinaten-Guard (werkstatt, on-demand-Geocode)', () => {
+  const werkstattOhneKoord = {
+    id: 'pl-ws-1', rolle: 'werkstatt', firma: 'Test Werkstatt GmbH',
+    ansprechpartner_vorname: 'Max', ansprechpartner_nachname: 'Muster', email: 'ws@test.de',
+    telefon: null, plz: '50667', ort: 'Koeln', strasse: 'Domkloster 4',
+    lat: null, lng: null, rollen_details: {},
+    konvertiert_zu_user_id: null, konvertiert_zu_partner_id: null,
+  }
+  const mockAdmin = () => ({
+    createAdminClient: () => ({
+      from: () => ({
+        select: () => ({ eq: () => ({ maybeSingle: async () => ({ data: werkstattOhneKoord, error: null }) }) }),
+        update: () => ({ eq: async () => ({ error: null }) }),
+      }),
+    }),
+  })
+  const anlageStub = () => ({ anlegePartnerKern: async () => ({ ok: false, error: 'ANLAGE_STUB' }) })
+
   beforeEach(() => {
     vi.resetModules()
   })
 
-  it('blockt werkstatt-Convert ohne lat/lng (ok:false, error enthaelt Adresse)', async () => {
-    // Admin-Client mocken: gibt werkstatt-Lead ohne lat/lng zurueck
-    vi.mock('@/lib/supabase/admin', () => ({
-      createAdminClient: () => ({
-        from: () => ({
-          select: () => ({
-            eq: () => ({
-              maybeSingle: async () => ({
-                data: {
-                  id: 'pl-ws-1',
-                  rolle: 'werkstatt',
-                  firma: 'Test Werkstatt GmbH',
-                  ansprechpartner_vorname: 'Max',
-                  ansprechpartner_nachname: 'Muster',
-                  email: 'ws@test.de',
-                  telefon: null,
-                  plz: '50667',
-                  ort: 'Koeln',
-                  lat: null,
-                  lng: null,
-                  rollen_details: {},
-                  konvertiert_zu_user_id: null,
-                  konvertiert_zu_partner_id: null,
-                },
-                error: null,
-              }),
-            }),
-          }),
-        }),
-      }),
+  it('blockt, wenn der on-demand-Geocode fehlschlaegt (unfixbare Adresse)', async () => {
+    vi.doMock('@/lib/supabase/admin', mockAdmin)
+    vi.doMock('@/lib/partner/anlege-partner', anlageStub)
+    vi.doMock('@/lib/partner/geocode-partner-lead', () => ({
+      geocodePartnerLead: async () => ({ ok: false, error: 'x', unvollstaendig: false }),
     }))
-
     const { convertPartnerLead: convert } = await import('../convert-partner-lead')
     const result = await convert('pl-ws-1')
     expect(result.ok).toBe(false)
+    if (!result.ok) expect(result.error).toContain('Adresse')
+  })
+
+  it('holt Koordinaten on-demand nach → Guard passiert (Bestandslead wird konvertierbar)', async () => {
+    vi.doMock('@/lib/supabase/admin', mockAdmin)
+    vi.doMock('@/lib/partner/anlege-partner', anlageStub)
+    vi.doMock('@/lib/partner/geocode-partner-lead', () => ({
+      geocodePartnerLead: async () => ({ ok: true, lat: 50.94, lng: 6.96, place_id: 'mb-1', formatted: 'Domkloster 4, 50667 Köln' }),
+    }))
+    const { convertPartnerLead: convert } = await import('../convert-partner-lead')
+    const result = await convert('pl-ws-1')
+    // anlegePartnerKern-Stub liefert den Fehler → beweist, dass der Koordinaten-Block PASSIERT wurde.
+    expect(result.ok).toBe(false)
     if (!result.ok) {
-      expect(result.error).toContain('Adresse')
+      expect(result.error).toBe('ANLAGE_STUB')
+      expect(result.error).not.toContain('Adresse')
     }
   })
 })
