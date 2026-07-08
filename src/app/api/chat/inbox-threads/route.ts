@@ -35,6 +35,10 @@ export async function GET() {
       .from('sachverstaendige')
       .select('id')
       .eq('profile_id', user.id)
+      // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser.
+      .order('ist_parent_account', { ascending: true, nullsFirst: true })
+      .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+      .limit(1)
       .maybeSingle()
     if (sv?.id) fallFilter = { column: 'sv_id', value: sv.id }
   } else if (rolle === 'kunde') {

@@ -54,7 +54,12 @@ export async function POST(req: NextRequest) {
       .from('sachverstaendige')
       .select('id, live_tracking_enabled')
       .eq('profile_id', user.id)
-      .single()
+      // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser. Vorher
+      // .single() -> warf bei >1 sv-Row (Buero+Sub-Standort) UND bei 0 Rows.
+      .order('ist_parent_account', { ascending: true, nullsFirst: true })
+      .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+      .limit(1)
+      .maybeSingle()
 
     if (!sv) return NextResponse.json({ error: 'no_sv' }, { status: 403 })
     if (!sv.live_tracking_enabled) {
