@@ -1,8 +1,9 @@
 # Werkstatt-getriebener Haftpflicht-Intake — Design
 
 **Datum:** 2026-07-08
-**Branch (Ziel):** werkstatt-auftrag-view (aktuell), PR gegen `staging`
-**Status:** Approved (Aaron „das passt", 08.07.)
+**Branch (Ziel):** kitta/werkstatt-flow-enrichment, PR gegen `staging`
+**Status:** Approved (Aaron „das passt", 08.07.; Korrektur: Unterschrift **primär am
+Werkstatt-Gerät**, Link-senden als Zusatz-Option)
 
 ## 1 · Ziel & Kontext
 
@@ -17,6 +18,14 @@ füllt die Falldaten (Kunde / Fahrzeug / Unfall / Gegner) → der Kunde untersch
 **Sicherungsabtretung (SA)** → Haftpflicht-Claim + 150€ Vermittlungsprämie. Selbstzahler/Kasko
 bleibt beim bestehenden schlanken Flow (dort gibt es keine SA — der partielle Claim entsteht
 schon im Quali-Step).
+
+**Signatur-Ort (Aaron 08.07., Korrektur):** Die Unterschrift passiert **primär auf dem Gerät der
+Werkstatt** — der Kunde ist beim Ausfüllen physisch vor Ort (Tresen-Szenario), die Werkstatt
+reicht ihm das Gerät zum Unterschreiben. **„Link an Kunden senden" (auf dessen eigenes Gerät) ist
+die zusätzliche Option**, falls der Kunde nicht da ist. Beide Wege nutzen dieselbe
+`/flow/[token]`-Signatur-Fläche und unterscheiden sich nur darin, **wer den Link öffnet**
+(Werkstatt-Gerät im neuen Tab vs. Kunden-Gerät via Versand). Für die Extraktion / den Branch /
+die Fläche ändert sich dadurch nichts — nur die Werkstatt-Aktionen.
 
 **Technischer Entscheid (Aaron):** Approach **C — SA-Step extrahieren**. Der SA-Signatur-Block
 wird einmal aus `FlowWizardKfz` in eine geteilte Komponente `SaSignaturStep` gezogen und in
@@ -37,14 +46,19 @@ Werkstatt /werkstatt/anfragen (offene Anfrage)
   ├─ sieht ALLE Falldaten (v_werkstatt_lead erweitert: Kunde/Fahrzeug/Unfall/Gegner)
   ├─ editiert sie (bearbeiteWerkstattLead, Whitelist erweitert)
   │
-  └─ Button „Zur Unterschrift an Kunden"
-        → sendeAnfrageZurUnterschrift(leadId)
-        → setzt leads.werkstatt_intake_am + werkstatt_intake_von
-        → ensureCanonicalFlowLinkForLead(leadId)  (Token, 72h)
-        → Versand (WhatsApp/Email, reuse sendFlowLinkMultiChannelCore)
+  ├─ PRIMÄR: „Zur Unterschrift (am Gerät)"
+  │     → starteUnterschriftAmGeraet(leadId)
+  │     → setzt leads.werkstatt_intake_am + _von; ensureCanonicalFlowLinkForLead → Token
+  │     → öffnet /flow/[token] im BROWSER DER WERKSTATT (neuer Tab)
+  │     → Werkstatt reicht Gerät → Kunde unterschreibt am Werkstatt-Gerät
+  │
+  └─ SEKUNDÄR (Zusatz-Option): „Link an Kunden senden"
+        → sendeUnterschriftLink(leadId)
+        → setzt Flag + Token; Versand (WhatsApp/Email, sendFlowLinkMultiChannelCore)
+        → Kunde öffnet /flow/[token] auf SEINEM Gerät
              │
-             ▼
-Kunde öffnet /flow/[token]
+             ▼  (beide Wege → dieselbe Fläche)
+/flow/[token]
   → page.tsx lädt lead (select('*'))  →  lead.werkstatt_intake_am gesetzt?
         JA  → <WerkstattIntakeSignatur>  (Signatur-only)
         NEIN → <FlowWizardKfz>            (unverändert)
@@ -102,8 +116,8 @@ WHERE werkstatt_id IN (SELECT w.id FROM werkstaetten w WHERE w.user_id = (SELECT
 ```
 
 **Migrations-Ablauf (Regel 2):** `apply_migration` → `list_migrations` → committetes File exakt
-nach getrackter Version benennen → `execute_sql` (READ) verifizieren. Zwei getrennte Migrationen
-(Flag, dann View) oder eine kombinierte — eine kombinierte ist sauberer (ein getrackter Schritt).
+nach getrackter Version benennen → `execute_sql` (READ) verifizieren. Eine kombinierte Migration
+(Flag + View) = ein getrackter Schritt (sauberer als zwei).
 
 ## 4 · Komponenten & Interfaces
 
@@ -141,7 +155,8 @@ interface SaSignaturStepProps {
 ### 4.2 · `WerkstattIntakeSignatur` (neu) — `src/app/flow/[token]/WerkstattIntakeSignatur.tsx`
 
 Die Signatur-only-Fläche. Client-Komponente, innerhalb des `NextIntlClientProvider` (nutzt
-`useTranslations`).
+`useTranslations`). Kundensichtbar — läuft **entweder** auf dem Werkstatt-Gerät (Primär)
+**oder** auf dem Kunden-Gerät (Link) — die Fläche ist in beiden Fällen identisch.
 
 ```typescript
 interface WerkstattIntakeSignaturProps {
@@ -200,6 +215,10 @@ if (lead.werkstatt_intake_am) {
 Die `flowLocale`/`flowMessages`-Auflösung wird vor den Branch gezogen (sie hängt nur an
 `flowLink.sprache`/`lead.sprache`). Expiry- + `abgeschlossen`-Checks (Z. 85–112) laufen **vor**
 dem Branch (unverändert) — ein bereits unterschriebener Intake zeigt den Done-Screen.
+**Hinweis:** Der Branch liegt **nach** dem „geoeffnet_am/Mitteilung"-Block (Z. 118–145). Für den
+Primär-Pfad (Werkstatt öffnet auf ihrem Gerät) feuert die „Kunde hat FlowLink geöffnet"-
+Mitteilung leicht ungenau — akzeptabel für v1 (der Plan darf sie optional für
+`werkstatt_intake_am`-Leads unterdrücken).
 
 ### 4.4 · `bearbeiteWerkstattLead` — Whitelist erweitern
 
@@ -213,36 +232,50 @@ fahrzeug_standort_plz`. Empty-String → NULL bleibt. `schadentyp`-Validierung b
 - **Edit-Modal:** neue Feld-Gruppen „Unfall" (unfallhergang, unfall_konstellation) + „Gegner"
   (name, versicherung, kennzeichen, telefon, email). Bestehende Gruppen (Kunde/Fahrzeug/Schaden)
   bleiben. Felder nutzen `shared/forms/TextField` (Komponenten-Set-Regel).
-- **Primär-Button „Zur Unterschrift an Kunden"** → `sendeAnfrageZurUnterschrift(lead.id)` →
-  Toast „Link an Kunden gesendet (WhatsApp/E-Mail)". Ersetzt die alten „Link senden" + „Flow
-  öffnen" als *primären* Pfad. „Flow öffnen" bleibt als sekundäre **Vorschau** (die Werkstatt
-  kann die Signatur-Fläche selbst ansehen). „Link senden" entfällt (in „Zur Unterschrift"
-  aufgegangen).
+- **Primär-Button „Zur Unterschrift (am Gerät)"** → `starteUnterschriftAmGeraet(lead.id)` →
+  öffnet `/flow/[token]` (Signatur-Fläche) in einem neuen Tab auf dem Werkstatt-Gerät; die
+  Werkstatt reicht das Gerät dem anwesenden Kunden zum Unterschreiben.
+- **Sekundär-Option „Link an Kunden senden"** → `sendeUnterschriftLink(lead.id)` → Toast „Link
+  an Kunden gesendet (WhatsApp/E-Mail)"; der Kunde unterschreibt auf seinem eigenen Gerät.
+- Die alten „Flow öffnen" (Voll-Flow-Vorschau) + „Link senden" (Voll-Flow) entfallen — beide
+  gehen in den zwei Signatur-Optionen auf.
 
-### 4.6 · `sendeAnfrageZurUnterschrift` (neu) — `anfragen/actions.ts`
+### 4.6 · Signatur-Aktionen (neu) — `anfragen/actions.ts`
+
+Interner (nicht-exportierter) Helper + zwei Server-Actions:
 
 ```typescript
-async function sendeAnfrageZurUnterschrift(leadId: string):
+// Helper (nicht exportiert): Flag setzen + Token sichern
+async function markiereIntakeBereit(leadId: string):
+  Promise<{ ok: true; token: string } | { ok: false; error: string }>
+
+// PRIMÄR: am Werkstatt-Gerät unterschreiben — gibt die URL zum Öffnen zurück
+export async function starteUnterschriftAmGeraet(leadId: string):
+  Promise<{ ok: true; url: string } | { ok: false; error: string }>
+
+// SEKUNDÄR: Link an den Kunden senden
+export async function sendeUnterschriftLink(leadId: string):
   Promise<{ ok: true; kanal: 'whatsapp' | 'email' } | { ok: false; error: string }>
 ```
 
-- Ownership-Gate via `v_werkstatt_lead` (RLS, wie `bearbeiteWerkstattLead`).
-- Setzt `werkstatt_intake_am = now()`, `werkstatt_intake_von = auth.uid()` (service-role UPDATE).
-- `ensureCanonicalFlowLinkForLead(leadId)` → Token.
-- Versand via `sendFlowLinkMultiChannelCore` (WhatsApp bevorzugt, Email-Fallback) — wie
-  `resendeAnfrageFlowLink`.
-- `revalidatePath('/werkstatt/anfragen')`.
-- Result-Object (`ok`), kein throw (Server-Action-Pattern).
+- `markiereIntakeBereit`: Ownership-Gate via `v_werkstatt_lead` (RLS); setzt
+  `werkstatt_intake_am = now()`, `werkstatt_intake_von = auth.uid()` (service-role UPDATE,
+  idempotent); `ensureCanonicalFlowLinkForLead(leadId)` → Token; `revalidatePath('/werkstatt/anfragen')`.
+- `starteUnterschriftAmGeraet`: ruft Helper → gibt `${appUrl}/flow/${token}` zurück; der Client
+  öffnet die URL (neuer Tab) auf dem Werkstatt-Gerät.
+- `sendeUnterschriftLink`: ruft Helper → Versand via `sendFlowLinkMultiChannelCore` (WhatsApp
+  bevorzugt, Email-Fallback) → `kanal`.
+- Alle Result-Object (`ok`), kein throw (Server-Action-Pattern).
 
 ## 5 · Fehlerbehandlung & Edge-Cases
 
 | Fall | Verhalten |
 |---|---|
-| Flag gesetzt, Kunde noch offen | Werkstatt kann nachbearbeiten; Link/Token bleibt gültig; erneutes „Zur Unterschrift" re-sendet (idempotent). |
+| Flag gesetzt, Kunde noch offen | Werkstatt kann nachbearbeiten; Token bleibt gültig; „am Gerät" öffnet erneut, „Link senden" re-sendet (idempotent). |
 | Kunde hat unterschrieben | `signSAandCreateFall` setzt `konvertiert_zu_claim_id` + `flow_links.status='abgeschlossen'` → Lead fällt aus `v_werkstatt_lead`; Reload zeigt Done-Screen. |
-| Token abgelaufen | `sendeAnfrageZurUnterschrift` / `resendeAnfrageFlowLink` re-issued (72h). |
+| Token abgelaufen | `markiereIntakeBereit` (via beide Aktionen) re-issued den Token (72h). |
 | Re-Entry (Link 2×) | `signSAandCreateFall` idempotent (`lead.sa_unterschrieben`-Check, IDOR-Guard `assertLeadBoundToToken`). |
-| Kunde ohne Email/Telefon | Versand-Fallback greift; wenn beide fehlen → `{ ok:false, error }` + Toast (Werkstatt nutzt „Flow öffnen"-Vorschau + kopiert Link). |
+| Kunde ohne Email/Telefon | Betrifft nur „Link senden" (→ `{ ok:false, error }` + Toast). Der Primär-Pfad „am Gerät" braucht keinen Versand und funktioniert immer. |
 | SV noch nicht vergeben | `gutachterAnzeige={null}` → kein SV-Consent-Häkchen; Claim ohne SV; Dispatch vergibt danach. |
 
 ## 6 · Testing
@@ -250,18 +283,20 @@ async function sendeAnfrageZurUnterschrift(leadId: string):
 - **Unit — `SaSignaturStep`-Parität:** Signatur-Disabled-Logik (`!signatureBlob || !saAccepted ||
   (gutachterAnzeige && !svRechtsakzeptanz)`), SV-Consent nur bei `gutachterAnzeige`. Sichert, dass
   die Extraktion das Flow-Verhalten nicht ändert.
-- **Unit — `sendeAnfrageZurUnterschrift`:** setzt Flag, ruft ensureCanonicalFlowLinkForLead, gibt
-  `kanal` zurück; Ownership-Gate; kein-Kontakt → Fehler.
+- **Unit — `starteUnterschriftAmGeraet` / `sendeUnterschriftLink`:** setzen Flag, rufen
+  ensureCanonicalFlowLinkForLead; erstere gibt `url` zurück, zweitere `kanal`; Ownership-Gate;
+  „Link senden" ohne Kontakt → Fehler.
 - **Prod-Smoke** (SW-freier Browser, nur Test-Accounts): SMOKE-Werkstatt füllt eine Test-Anfrage
-  (Gegner-Felder) → „Zur Unterschrift" → test-kunde öffnet `/flow/[token]` → sieht
-  Signatur-only-Fläche (kein Datenschritt) → signiert → DB-assert: `claims`-Zeile entsteht,
+  (Gegner-Felder) → „Zur Unterschrift (am Gerät)" → öffnet `/flow/[token]` (Werkstatt-Gerät) →
+  sieht Signatur-only-Fläche (kein Datenschritt) → signiert → DB-assert: `claims`-Zeile entsteht,
   `lead.sa_unterschrieben=true`, `konvertiert_zu_claim_id` gesetzt, Lead aus `v_werkstatt_lead`
   raus. Smoke-Script lokal, **nie committen** (enthält Passwort).
 
 ## 7 · Audit-Hooks (7-Punkte)
 
 - **Build:** voller `npm run build` (page.tsx = Route → Next-Validator).
-- **UI-Erreichbarkeit:** „Zur Unterschrift"-Button an der Anfrage-Zeile (Werkstatt-Rolle).
+- **UI-Erreichbarkeit:** „Zur Unterschrift (am Gerät)" (primär) + „Link an Kunden senden"
+  (sekundär) an der Anfrage-Zeile (Werkstatt-Rolle).
 - **Redundanz:** `SaSignaturStep` extrahiert statt dupliziert (Approach C); `SignatureCanvas`,
   `createKundeAccount`, `signSAandCreateFall`, `sendFlowLinkMultiChannelCore` wiederverwendet;
   Felder via `shared/forms/TextField`.
@@ -278,6 +313,7 @@ async function sendeAnfrageZurUnterschrift(leadId: string):
 - **Selbstzahler/Kasko-Intake** — bleibt beim schlanken Flow (kein SA).
 - **Gegner-Versicherung-Auswahl per `gegner_versicherung_id`** (Dropdown statt Freitext) — später;
   v1 nutzt `gegner_versicherung` (Freitext) + `gegner_kennzeichen`.
+- **„Kunde hat geöffnet"-Mitteilung für werkstatt_intake-Leads unterdrücken** — Feinschliff.
 
 ## 9 · Datei-Übersicht
 
@@ -288,6 +324,6 @@ async function sendeAnfrageZurUnterschrift(leadId: string):
 | `src/app/flow/[token]/FlowWizardKfz.tsx` | ändern | SA-Step → `<SaSignaturStep>` (Parität) |
 | `src/app/flow/[token]/WerkstattIntakeSignatur.tsx` | neu | Signatur-only-Fläche |
 | `src/app/flow/[token]/page.tsx` | ändern | Branch auf `werkstatt_intake_am` |
-| `src/app/werkstatt/(shell)/anfragen/actions.ts` | ändern | Whitelist + `sendeAnfrageZurUnterschrift` |
-| `src/components/werkstatt/WerkstattAnfragen.tsx` | ändern | Unfall/Gegner-Felder + „Zur Unterschrift"-Button |
+| `src/app/werkstatt/(shell)/anfragen/actions.ts` | ändern | Whitelist + `starteUnterschriftAmGeraet` + `sendeUnterschriftLink` (+ Helper) |
+| `src/components/werkstatt/WerkstattAnfragen.tsx` | ändern | Unfall/Gegner-Felder + 2 Signatur-Buttons |
 | `src/lib/werkstatt/queries.ts` (o. ä. Lead-Type) | ändern | v_werkstatt_lead-Type um neue Felder |
