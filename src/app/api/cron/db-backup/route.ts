@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 // 2026-06-20: Tabellenliste auf den kanonischen Satz korrigiert (Notification/Cron-Audit).
@@ -34,8 +35,7 @@ const RETENTION_DAYS = 30
  * Loescht Backups aelter als 30 Tage.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

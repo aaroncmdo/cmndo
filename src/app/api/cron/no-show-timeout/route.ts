@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revertCaseBilling } from '@/lib/abrechnung/revert-case-billing'
 import { resolveTasksForEntity } from '@/lib/tasks/resolve-tasks'
@@ -11,8 +12,7 @@ export const dynamic = 'force-dynamic'
  * Fälle mit no_show_gemeldet_am > 5 Werktage → storno_kunde_no_show.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const db = createAdminClient()
