@@ -208,8 +208,10 @@ export function summarizeSlaRollenLage(lage: SlaRollenLage): string {
     if (roleEntry.kritischste.length > 0) {
       lines.push('- Kritischste:')
       for (const item of roleEntry.kritischste) {
+        // claim_id (UUID) MUSS im Kontext stehen — propose_sla_task verlangt sie.
+        // Ohne sie kann Claude keinen validen Vorschlag bauen (findings blieben 0).
         lines.push(
-          `  - ${item.claim_nummer} (${item.sla_typ}, ${item.ueberfaellig_std.toFixed(1)}h überfällig)`
+          `  - ${item.claim_nummer} [claim_id: ${item.claim_id}] — ${item.sla_typ}, ${item.ueberfaellig_std.toFixed(1)}h überfällig`
         )
       }
     }
