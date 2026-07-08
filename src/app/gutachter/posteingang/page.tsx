@@ -61,10 +61,10 @@ export default async function PosteingangPage({
     .slice()
     .sort((a, b) => claimCreatedAt(b).localeCompare(claimCreatedAt(a)))
 
-  // Phase-2c Cutover-Flag: ?chatv2=1 -> claim-natives Thread-Modell (ClaimChatInbox).
-  // SV = Staff (istStaff=true -> team_intern sichtbar). Titel = Kundenname. Default aus,
-  // null Prod-Risiko. claim-native id (f.id), NICHT fall_id (Lehre #3910).
-  if (params.chatv2 === '1') {
+  // Phase-2c Cutover-Flag: claim-natives Thread-Modell (ClaimChatInbox) ist jetzt DEFAULT.
+  // SV = Staff (istStaff=true -> team_intern sichtbar). Titel = Kundenname. Escape-Hatch
+  // ?chatv2=0 -> v1. claim-native id (f.id), NICHT fall_id (Lehre #3910).
+  if (params.chatv2 !== '0') {
     const leadIds = Array.from(new Set(faelle.map(f => f.lead_id).filter(Boolean) as string[]))
     const kundenMap: Record<string, string> = {}
     if (leadIds.length > 0) {
