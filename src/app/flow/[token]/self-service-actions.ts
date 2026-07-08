@@ -98,10 +98,11 @@ export async function speichereQualiFlow(
 }
 
 /**
- * SP-B2: Selbstzahler-Abschluss. Erzeugt aus dem Flow-Lead den PARTIELLEN Claim
- * (kein SV/Gutachten/SA) via convertLeadToClaim ohne svIdFromTermin/signatureUrl.
- * Nur wenn der Lead als Selbstzahler qualifiziert ist (abrechnungsweg='selbstzahler',
- * SP-B1). Idempotent (convertLeadToClaim). Account-Step + Portal folgen im Wizard.
+ * SP-B2: Direct-Reparatur-Abschluss (Selbstzahler ODER Kasko-Direct). Erzeugt aus dem
+ * Flow-Lead den PARTIELLEN Claim (kein SV/Gutachten/SA) via convertLeadToClaim ohne
+ * svIdFromTermin/signatureUrl. Nur wenn der Lead als Direkt-Reparatur qualifiziert ist
+ * (abrechnungsweg='selbstzahler' ODER 'kasko', SP-B1; Kasko seit Aaron 08.07.).
+ * Idempotent (convertLeadToClaim). Account-Step + Portal folgen im Wizard.
  */
 export async function erzeugeSelbstzahlerClaim(
   token: string,
@@ -109,10 +110,12 @@ export async function erzeugeSelbstzahlerClaim(
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  // Defensive: nur echte Selbstzahler-Vorgaenge. abrechnungsweg ist type-lagged -> select('*')+Cast.
+  // Defensive: nur echte Direkt-Reparatur-Vorgaenge (Selbstzahler ODER Kasko-Direct, Aaron 08.07.).
+  // abrechnungsweg ist type-lagged -> select('*')+Cast.
   const { data: leadRow } = await admin.from('leads').select('*').eq('id', leadId).maybeSingle()
   const abrechnungsweg = (leadRow as Record<string, unknown> | null)?.abrechnungsweg as string | null | undefined
-  if (abrechnungsweg !== 'selbstzahler') return { ok: false, error: 'Kein Selbstzahler-Vorgang.' }
+  if (abrechnungsweg !== 'selbstzahler' && abrechnungsweg !== 'kasko')
+    return { ok: false, error: 'Kein Direkt-Reparatur-Vorgang.' }
 
   const { convertLeadToClaim } = await import('@/lib/leads/convert-lead-to-claim')
   const conv = await convertLeadToClaim({ leadId })
