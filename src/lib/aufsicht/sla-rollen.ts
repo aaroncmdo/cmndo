@@ -152,12 +152,15 @@ export function aggregiereSlaLage(rows: SlaRow[], now: Date): SlaRollenLage {
 }
 
 export async function ladeSlaRows(): Promise<SlaRow[]> {
-  const supabase = await createAdminClient()
+  const supabase = createAdminClient()
 
   const { data, error } = await supabase
     .from('sla_tracking')
     .select('id, claim_id, sla_typ, status, breach_at, target_rolle, claims(claim_nummer)')
     .in('status', ['pending', 'breached'])
+    // claim-scoped Aufsicht: Zeilen ohne claim_id koennen keinen validen (claim_id NOT NULL)
+    // Vorschlag erzeugen -> gar nicht erst laden. Haelt zugleich SlaRow.claim_id ehrlich non-null.
+    .not('claim_id', 'is', null)
 
   if (error) {
     console.error('Error loading sla_rows:', error)
