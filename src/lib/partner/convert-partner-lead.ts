@@ -21,6 +21,8 @@ export type PartnerLeadRow = {
   telefon: string | null
   plz: string | null
   ort: string | null
+  lat: number | null
+  lng: number | null
   rollen_details: Record<string, unknown> | null
   konvertiert_zu_user_id: string | null
   konvertiert_zu_partner_id?: string | null
@@ -39,6 +41,8 @@ export function mapLeadZuAnlageInput(
     telefon: lead.telefon,
     plz: lead.plz,
     ort: lead.ort,
+    lat: lead.lat ?? null,
+    lng: lead.lng ?? null,
     aktiviertVon,
     rollenDetails: lead.rollen_details ?? {},
   }
@@ -64,7 +68,7 @@ export async function convertPartnerLead(
   const { data: lead, error: loadErr } = await admin
     .from('partner_leads')
     .select(
-      'id, rolle, firma, ansprechpartner_vorname, ansprechpartner_nachname, email, telefon, plz, ort, rollen_details, konvertiert_zu_user_id, konvertiert_zu_partner_id',
+      'id, rolle, firma, ansprechpartner_vorname, ansprechpartner_nachname, email, telefon, plz, ort, lat, lng, rollen_details, konvertiert_zu_user_id, konvertiert_zu_partner_id',
     )
     .eq('id', partnerLeadId)
     .maybeSingle()
@@ -79,6 +83,15 @@ export async function convertPartnerLead(
       ok: true,
       userId: typedLead.konvertiert_zu_user_id as string,
       partnerId: (typedLead.konvertiert_zu_partner_id ?? '') as string,
+    }
+  }
+
+  // 2b) Koordinaten-Guard — Werkstatt MUSS geokodiert sein (erscheint auf Karte/Finder).
+  //     SV ausgenommen (laeuft ueber Isochrone-Geologik); makler hat keine Koordinaten-Spalte.
+  if (typedLead.rolle === 'werkstatt' && (typedLead.lat == null || typedLead.lng == null)) {
+    return {
+      ok: false,
+      error: 'Adresse unvollständig/nicht geokodiert — bitte im Lead ergänzen, dann konvertieren.',
     }
   }
 
