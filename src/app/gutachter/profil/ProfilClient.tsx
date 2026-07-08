@@ -9,7 +9,7 @@ import { createClient } from '@/lib/supabase/client'
 import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
 import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
-import GoogleBusinessFeld from '@/components/GoogleBusinessFeld'
+
 import { LoadingButton } from '@/components/ui/loading-button'
 import PageHeader from '@/components/shared/PageHeader'
 import PhoneVerificationModal from '@/components/auth/PhoneVerificationModal'
@@ -22,6 +22,7 @@ import { FieldRow, ControlledRow, SelectRow, ROW_WRAPPER_CLS, ROW_LABEL_CLS } fr
 import { ProfilSpezialisierung } from './_components/ProfilSpezialisierung'
 import { ProfilCommunityPrivacy } from './_components/ProfilCommunityPrivacy'
 import { ProfilVertrag } from './_components/ProfilVertrag'
+import { ProfilDarstellung } from './_components/ProfilDarstellung'
 // AAR-369: Profilbild-Upload + Anzeige-Felder
 import AvatarUpload from '@/components/shared/AvatarUpload'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -448,15 +449,8 @@ export default function ProfilClient({
             </div>
           </SectionCard>
         )}
-        {/* AAR-956: Google-Business-Profil verknüpfen — schaltet die echte
-            Sterne-Bewertung im Gutachter-Finder frei (Places API). */}
-        {/* Fix: erst nach Maps-Load mounten — sonst laedt das Places-Widget die
-            Maps-JS-API ein ZWEITES Mal (Race mit dem lazyOnload-<Script> oben) →
-            "included multiple times"-Konsolen-Fehler. mapsReady gated (wie das
-            Standort-Feld). */}
-        {mapsReady && <GoogleBusinessFeld />}
-        {/* KFZ-139: Branding Section */}
-        <BrandingSection svId={sv.id} />
+        {/* AAR-956 / KFZ-139: Darstellung-Section (Branding-Editor + Google-Business) */}
+        <ProfilDarstellung _svId={sv.id} mapsReady={mapsReady} />
         {/* AAR-500 N5: Benachrichtigungs-Präferenzen */}
         <NotificationSection initial={notificationPrefs} />
       </div>
@@ -474,30 +468,6 @@ function NotificationSection({ initial }: { initial: NotificationPreferencesForm
   )
 }
 
-// AAR-454: Altes V1-Branding-UI (Toggle + Farb-Picker + Preview) komplett
-// entfernt. Der neue Branding-Editor mit Live-Preview + Font-Picker unter
-// /gutachter/profil/branding (AAR-422) ist die einzige Anlaufstelle. Hier
-// bleibt nur eine schmale Verweis-Card.
-
-function BrandingSection({ svId: _svId }: { svId: string }) {
-  return (
-    <div className="bg-white border border-claimondo-border rounded-2xl p-5 mt-5">
-      <h2 className="text-sm font-medium text-claimondo-ondo mb-4">Branding</h2>
-      <a
-        href="/gutachter/profil/branding"
-        className="flex items-center justify-between gap-3 p-3 rounded-ios-xl border border-[var(--brand-secondary)]/30 bg-[var(--brand-secondary)]/5 hover:bg-[var(--brand-secondary)]/10 transition-colors"
-      >
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-[var(--brand-primary)]">Branding-Editor mit Live-Preview</p>
-          <p className="text-xs text-claimondo-ondo mt-0.5">
-            Logo hochladen — Farben und Schriftart werden automatisch extrahiert.
-          </p>
-        </div>
-        <span className="text-xs font-medium text-[var(--brand-secondary)] whitespace-nowrap">Öffnen →</span>
-      </a>
-    </div>
-  )
-}
 
 function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }) {
   const [responding, setResponding] = useState(false)
