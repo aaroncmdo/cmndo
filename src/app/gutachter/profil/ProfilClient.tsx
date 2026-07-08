@@ -216,22 +216,4 @@ function TerminAnfrage({ termin, svId }: { termin: PendingTermin; svId: string }
 
 // 2026-05-06 SV7 (Form-Audit): FieldRow, ControlledRow, SelectRow, ROW_*_CLS
 // wurden nach ./_components/fields.tsx extrahiert (Task 1 Profil-Rebuild).
-// inferInputMode/inferAutoComplete bleiben hier (toter Code, kein Consumer,
-// separater Cleanup-Pass).
-
-function inferInputMode(type: string): 'text' | 'tel' | 'email' | 'numeric' | 'decimal' | undefined {
-  if (type === 'tel') return 'tel'
-  if (type === 'email') return 'email'
-  if (type === 'number') return 'decimal'
-  return undefined
-}
-
-function inferAutoComplete(type: string, label: string): string | undefined {
-  if (type === 'tel') return 'tel'
-  if (type === 'email') return 'email'
-  const l = label.toLowerCase()
-  if (l.startsWith('vorname')) return 'given-name'
-  if (l.startsWith('nachname')) return 'family-name'
-  if (l.startsWith('firmenname')) return 'organization'
-  return undefined
-}
+// inferInputMode/inferAutoComplete (0 Consumer) im Rebuild entfernt (Task 7).
