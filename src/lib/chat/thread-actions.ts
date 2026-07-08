@@ -62,6 +62,37 @@ async function syncGruppenTeilnehmer(admin: SupabaseClient, threadId: string, te
   }
 }
 
+/**
+ * Loest die Domain-IDs der Claim-Zuweisung auf auth-user_ids auf:
+ * - sv_id ist eine sachverstaendige.id -> sachverstaendige.profile_id (= user_id)
+ * - makler_id ist eine makler.id -> makler.user_id
+ * geschaedigter_user_id + kundenbetreuer_id sind bereits user_ids (unveraendert).
+ * OHNE diese Aufloesung landet die sachverstaendige.id als Teilnehmer-user_id -> der
+ * auth.users-Guard im Teilnehmer-Sync verwirft sie -> der SV wird nie Thread-Mitglied
+ * (sieht kunde_gruppe/team_intern nicht, DMs an ihn zielen auf die falsche id).
+ */
+async function resolveClaimUserIds(
+  admin: SupabaseClient,
+  claim: { geschaedigter_user_id: string | null; kundenbetreuer_id: string | null; sv_id: string | null; makler_id?: string | null },
+): Promise<{ geschaedigter_user_id: string | null; kundenbetreuer_id: string | null; sv_id: string | null; makler_id: string | null }> {
+  let svUserId: string | null = null
+  if (claim.sv_id) {
+    const { data } = await admin.from('sachverstaendige').select('profile_id').eq('id', claim.sv_id).maybeSingle()
+    svUserId = (data as { profile_id: string | null } | null)?.profile_id ?? null
+  }
+  let maklerUserId: string | null = null
+  if (claim.makler_id) {
+    const { data } = await admin.from('makler').select('user_id').eq('id', claim.makler_id).maybeSingle()
+    maklerUserId = (data as { user_id: string | null } | null)?.user_id ?? null
+  }
+  return {
+    geschaedigter_user_id: claim.geschaedigter_user_id,
+    kundenbetreuer_id: claim.kundenbetreuer_id,
+    sv_id: svUserId,
+    makler_id: maklerUserId,
+  }
+}
+
 /** Get-or-create kunde_gruppe/team_intern-Thread + Teilnehmer-Sync (server-autoritativ via Service-Role). */
 export async function holeOderErstelleGruppenThread(
   claimId: string,
@@ -97,7 +128,8 @@ export async function holeOderErstelleGruppenThread(
   }
   if (!threadId) return { ok: false, error: 'Thread konnte nicht angelegt werden.' }
 
-  await syncGruppenTeilnehmer(admin, threadId, leiteGruppenTeilnehmer(claim as ClaimZuweisung, art))
+  const resolved = await resolveClaimUserIds(admin, claim as ClaimZuweisung)
+  await syncGruppenTeilnehmer(admin, threadId, leiteGruppenTeilnehmer(resolved, art))
   return { ok: true, data: threadId }
 }
 
@@ -260,7 +292,8 @@ export async function ladeClaimBeteiligte(claimId: string): Promise<Ergebnis<Cla
     .eq('id', claimId)
     .maybeSingle()
   if (!claim) return { ok: false, error: 'Claim nicht gefunden.' }
-  const kandidaten = leiteDmKandidaten(claim as DmKandidatenClaim, user.id)
+  const resolved = await resolveClaimUserIds(admin, claim as DmKandidatenClaim)
+  const kandidaten = leiteDmKandidaten(resolved, user.id)
   return { ok: true, data: kandidaten.map((k) => ({ userId: k.userId, rolle: k.rolle, label: rolleLabel(k.rolle) })) }
 }
 
