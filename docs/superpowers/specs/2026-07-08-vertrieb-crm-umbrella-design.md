@@ -222,9 +222,11 @@ durch EINE typ-/rollen-parametrierte Ansicht:
 - Der **Tag des Vertriebs-Admins** mit seinen Partner-/Lead-Terminen (auf `admin_termine` —
   die partner-leads-CRM-Phase-2 legt Onboarding-Termine genau dort ab; Kalender-Sync
   Google/CalDAV/Outlook existiert schon).
-- **Feld-/Routen-Modus wie der SV-Tagesmodus:** die heutigen Besuche/Calls als räumliche Route
-  + Zeitachse; „unterwegs zu Prospect X". Reuse des SV-Tagesmodus/Feldmodus-Musters.
-- Verbindet Roster/Detail (Termin am Kontakt) mit der Karte (Route) — ein Kontext.
+- **Echte Navigation (Entscheidung §9.6):** nicht nur eine Routen-Übersicht, sondern
+  **Turn-by-Turn** zu jedem Termin über eine Routing-API (Mapbox Directions o.ä.) — der
+  Vertriebs-Admin **navigiert real** zum nächsten Prospect/Partner. Reuse des SV-Tagesmodus/
+  Feldmodus-Musters + Mapbox (existiert in `LiveOpsMap` / Finder-Routing).
+- Verbindet Roster/Detail (Termin am Kontakt) mit der Karte (Route + TbT) — ein Kontext.
 
 ---
 
@@ -297,22 +299,34 @@ Test-Accounts) bis 1+. P0 ist rein additiv (Views + `src/lib` + Registry) und bl
 
 ---
 
-## 9. Offene Entscheidungen (für Aaron)
+## 9. Getroffene Entscheidungen (Aaron, 08.07.)
 
-1. **Nav-Konsolidierung:** `/admin/partner-leads` **umbenennen** zu `/admin/vertrieb` (Redirect)
-   oder `/admin/vertrieb` als neue Shell, die das Bestehende hostet?
-2. **`src/lib`-Grenze:** gemeinsames `src/lib/ops` mit dem ops-cockpit (WorkItem-Union um
-   `partner`-kinds erweitern) **oder** eigenes `src/lib/vertrieb` (parallel, gleiches Muster)?
-3. **Erste Phase:** P0 Fundament (sauberste Basis, UI erst später) **vs** P1 Shell/Roster
-   (schnell sichtbarer Nutzen, Fundament härtet unterwegs)?
-4. **Owner-Verteilung:** Wer baut welche Phase? (partner-leads-CRM-Lane beendet; ops-cockpit-
-   Lane aktiv auf Claims; SV-/Makler-/Werkstatt-Lanes teils aktiv.)
-5. **SV-Migrations-Timing:** `/admin/sachverstaendige` sofort in `/admin/vertrieb` absorbieren
-   oder parallel weiterlaufen lassen bis P2-Detail steht?
-6. **Feldmodus-Scope:** nur Termine-Route + Kalender **oder** auch Live-Standort/Check-in (wie
-   SV-Tagesmodus mit Tracking)?
-7. **SV-Leads-Rolle:** bleiben sie Daten-only (Karten-Pins) **oder** werden sie im Roster
-   erst-klassige Recruiting-Leads (eigene Akquise-Pipeline neben Partner-Leads)?
+1. **Erste Phase:** **P0 Fundament zuerst** (kein UI) — die abgeleitete Basis vor allen Flächen
+   (wie das ops-cockpit; Foundation-first hat dort funktioniert).
+2. **`src/lib`-Grenze:** **eigenes `src/lib/vertrieb`** — eigene Abstraktion `VertriebKontakt`
+   (Partner-Beziehung, NICHT „Arbeitsitem"). Teilt aber die generischen Präsentations-Bausteine
+   (Stepper/Hero/Panel), die Registry-Mechanik und das Write/Audit-Muster mit `src/lib/ops`.
+   Saubere Domänen-Trennung, wenig Kopplung an die aktive ops-Lane.
+3. **Nav:** **neuer `/admin/vertrieb`-Shell**; `/admin/partner-leads` + `/admin/sachverstaendige`
+   → Redirects. Das partner-leads-CRM wird zum „Leads"-Segment des Rosters.
+4. **SV-Migration (hybrid):** der Roster schluckt die SV-Liste **früh (P1)**; das SV-**Detail**
+   läuft **parallel bis P2** es vollwertig ersetzt (dann Redirect); die **SV-Live-Ops-Karte WIRD
+   die Vertrieb-Karte (②)**. Die **gesamte** SV-Verwaltung inkl. Karte lebt am Ende in
+   `/admin/vertrieb` — kein Funktions-Verlust unterwegs.
+5. **SV-Leads:** **erst-klassige Recruiting-Leads** (`kind='sv-lead'`) mit Kontakt-/Onboarding-
+   Workflow → Convert zu SV, dieselbe Pipeline wie Partner-Leads. ⚠ PII/Consent-Nuance bei
+   Tier-3-Excel-Importen (anonym, kein Consent) beim Recruiting-Workflow beachten/gaten.
+6. **Feldmodus:** **echte Navigation** — Turn-by-Turn + Routing-API (Mapbox Directions o.ä.),
+   nicht nur eine Routen-Linie. Der Vertriebs-Admin **navigiert echt** zu seinen Partner-/Lead-
+   Terminen (auf `admin_termine`, Kalender-Sync). Live-Standort/Check-in optional später.
+7. **Owner P0:** **diese Session baut P0** (additiv, kollisionsfrei, koordiniert mit der
+   ops-cockpit-Lane). P1+-Owner werden danach verteilt.
+
+**🔗 Integrations-Punkt (festgehalten):** ein SV/Partner hat zugleich eine **Claim-Seite**
+(Aufträge/Termine/Kanzleifälle). Das Vertrieb-Detail eines Partners **verlinkt sauber zu dessen
+Claim-Seite (ops-cockpit)** — Integration an der Grenze, kein Duplikat der Lifecycle-Modelle.
+Die ops-cockpit-Lane (470d55c9) hält dieselbe Sauberkeit auf der Claim-Seite; beide Cockpits
+treffen sich am Partner↔Fall-Übergang.
 
 ---
 
