@@ -70,6 +70,12 @@ describe('computePartnerStrength', () => {
     expect(r.sinnsatz.toLowerCase()).toContain('begutachtet')
   })
 
+  it('hohe ablehnungen30d deckelt auf bronze', () => {
+    const r = computePartnerStrength({ ...base, volumen: 100, ablehnungen30d: 9 })
+    expect(r.tier).toBe('bronze')
+    expect(r.gateCap).toBe('bronze')
+  })
+
   it('Config-Injektion: hohes Volumen mit schwelleGold=999 -> NICHT gold', () => {
     const highThresholdConfig = { ...DEFAULT_RANG_CONFIG, schwelleGold: 999 }
     const r = computePartnerStrength({ ...base, volumen: 100 }, highThresholdConfig)

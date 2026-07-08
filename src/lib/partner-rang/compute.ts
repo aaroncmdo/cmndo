@@ -21,7 +21,7 @@ function credentialScore(s: PartnerSignals, config: RangConfig): number {
 
 function ratingScore(s: PartnerSignals, config: RangConfig): number {
   if (s.ratingDurchschnitt == null || s.ratingAnzahl < config.ratingMinBewertungen) return 0
-  const norm = Math.max(0, Math.min(1, (s.ratingDurchschnitt - 3) / 2))
+  const norm = Math.max(0, Math.min(1, (s.ratingDurchschnitt - config.ratingNormFloor) / config.ratingNormSpan))
   return Math.round(norm * config.ratingCap * 10) / 10
 }
 
@@ -40,7 +40,7 @@ function buildSinnsatz(s: PartnerSignals, tier: Tier, config: RangConfig): strin
   if (s.volumen >= config.volumenVielfach) teile.push('vielfach begutachtet')
   else if (s.volumen >= config.volumenErfahren) teile.push('erfahrener Partner')
   if (s.oeffentlichBestellt) teile.push('öffentlich bestellt & vereidigt')
-  if (s.ratingDurchschnitt != null && s.ratingAnzahl >= config.ratingMinBewertungen && s.ratingDurchschnitt >= 4.3) {
+  if (s.ratingDurchschnitt != null && s.ratingAnzahl >= config.ratingMinBewertungen && s.ratingDurchschnitt >= config.sinnsatzTopRating) {
     teile.push('top bewertet')
   }
   teile.push('verifiziert')

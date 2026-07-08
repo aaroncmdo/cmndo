@@ -1,5 +1,5 @@
 // src/lib/partner-rang/config.ts
-// Tunbare Gewichte/Caps/Schwellen. Startw erte fuer Cold-Start (niedrig), spaeter an reale Verteilung anpassen.
+// Tunbare Gewichte/Caps/Schwellen. Startwerte fuer Cold-Start (niedrig), spaeter an reale Verteilung anpassen.
 // Live-SSoT ist die DB-Tabelle partner_rang_config (via config-loader.ts).
 // DEFAULT_RANG_CONFIG ist Fallback (Test + Falls DB-Zeile fehlt) -- spiegelt die 15 DB-Seeds.
 
@@ -16,6 +16,9 @@ export interface RangConfig {
   // Rating
   ratingMinBewertungen: number
   ratingCap: number
+  ratingNormFloor: number
+  ratingNormSpan: number
+  sinnsatzTopRating: number
   // Gates
   maxNoShowQuoteGold: number
   maxNoShowQuoteSilber: number
@@ -38,6 +41,9 @@ export const DEFAULT_RANG_CONFIG: RangConfig = {
   credTenureCap: 8,
   ratingMinBewertungen: 5,
   ratingCap: 30,
+  ratingNormFloor: 3,
+  ratingNormSpan: 2,
+  sinnsatzTopRating: 4.3,
   maxNoShowQuoteGold: 0.08,
   maxNoShowQuoteSilber: 0.15,
   maxAblehnungen30d: 8,
