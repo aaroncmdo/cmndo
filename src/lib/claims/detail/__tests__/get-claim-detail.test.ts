@@ -29,9 +29,8 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
     const asAdmin = await getClaimDetail(admin, claimId, 'admin')
     expect(asAdmin, 'admin bekam null').not.toBeNull()
     expect(asAdmin!.rolle).toBe('admin')
-    if (asAdmin && asAdmin.rolle !== 'kunde') {
-      expect(asAdmin.core.id, 'ClaimFull.core.id != claimId').toBe(claimId)
-    }
+    // Dank Overload ist asAdmin bereits das staff-Member → core = ClaimFull (kein Narrowing noetig).
+    expect(asAdmin!.core.id, 'ClaimFull.core.id != claimId').toBe(claimId)
     expect(Array.isArray(asAdmin!.auftraege)).toBe(true)
     expect(Array.isArray(asAdmin!.pflichtDokumente)).toBe(true)
     expect(asAdmin!.lifecycle.mainPhase, 'keine Phase abgeleitet').toBeTruthy()
@@ -59,9 +58,7 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
     // null-Kontrakt: staff-Gate mit nicht-existenter ID → null.
     const missing = await getClaimDetail(admin, '00000000-0000-0000-0000-000000000000', 'admin')
     expect(missing, 'nicht-existente ID -> null').toBeNull()
-    // Kunde ohne viewer → null (braucht Ownership-Kontext).
-    const kundeNoViewer = await getClaimDetail(admin, claimId, 'kunde')
-    expect(kundeNoViewer, 'kunde ohne viewer -> null').toBeNull()
+    // (kunde-ohne-viewer ist jetzt ein COMPILE-Fehler dank Overload — kein Runtime-Test.)
 
     process.stdout.write(
       `\n[claim-detail] claimId=${claimId} adminCore=ClaimFull auftraege=${asAdmin!.auftraege.length} ` +

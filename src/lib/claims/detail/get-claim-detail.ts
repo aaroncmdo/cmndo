@@ -20,6 +20,19 @@ import type { ClaimDetail } from './types'
 
 type DbClient = SupabaseClient<Database>
 
+// Overloads: kunde ERZWINGT viewer (Ownership-Kontext) und verengt den Rueckgabe-Typ
+// aufs jeweilige Union-Member (Consumer brauchen kein manuelles rolle-Narrowing).
+export function getClaimDetail(
+  supabase: DbClient,
+  claimId: string,
+  rolle: 'kunde',
+  viewer: { userId: string; email: string | null },
+): Promise<Extract<ClaimDetail, { rolle: 'kunde' }> | null>
+export function getClaimDetail(
+  supabase: DbClient,
+  claimId: string,
+  rolle: Exclude<Rolle, 'kunde'>,
+): Promise<Extract<ClaimDetail, { rolle: Exclude<Rolle, 'kunde'> }> | null>
 export async function getClaimDetail(
   supabase: DbClient,
   claimId: string,
