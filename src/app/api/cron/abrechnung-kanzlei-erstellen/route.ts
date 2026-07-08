@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { erstelleKanzleiAbrechnung } from '@/lib/abrechnung/kanzlei/erstelle-abrechnung'
 
 export const dynamic = 'force-dynamic'
@@ -10,8 +11,7 @@ export const dynamic = 'force-dynamic'
  * Auth: Authorization: Bearer ${CRON_SECRET}
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

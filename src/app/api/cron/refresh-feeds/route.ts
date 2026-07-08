@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { revalidatePath } from 'next/cache'
 import { submitToIndexNow } from '@/lib/seo/indexnow'
 
@@ -14,7 +15,7 @@ export const dynamic = 'force-dynamic'
 const FEED_PATHS = ['/feed.xml', '/feed.json', '/feed/katalog.xml', '/feed/katalog.json']
 
 export async function GET(request: Request) {
-  if (request.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 })
   }
 

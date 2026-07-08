@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createServiceClient } from '@/lib/supabase/server'
 import { sendCommunication } from '@/lib/communications/send'
 import { triggerSV02 } from '@/lib/gutachterTasking'
 
 export async function GET(req: NextRequest) {
   // CRON_SECRET check
-  const authHeader = req.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

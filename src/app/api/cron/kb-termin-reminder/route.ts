@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
@@ -8,8 +9,7 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
  * Findet kb_beratung-Termine die in 23–25h stattfinden und noch keine 24h-Erinnerung erhalten haben.
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

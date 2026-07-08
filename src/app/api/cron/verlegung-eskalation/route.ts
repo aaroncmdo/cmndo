@@ -13,6 +13,7 @@
 // Schedule: */30 * * * * (alle 30 Minuten) via vercel.json.
 
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
@@ -38,8 +39,7 @@ function fmtUhrzeit(iso: string): string {
 export async function GET(request: Request) {
   // Audit-Fix #4: CRON_SECRET-Auth ergaenzt — vorher konnte jeder die Route
   // ohne Header triggern und damit Eskalations-Events fluten.
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

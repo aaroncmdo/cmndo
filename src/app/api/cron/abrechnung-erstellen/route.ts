@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { FINANCE } from '@/lib/finance/constants'
 import { eurToCent } from '@/lib/billing/calculate-ust'
@@ -28,8 +29,7 @@ export const dynamic = 'force-dynamic'
  * Caller (hier), nicht im Descriptor (erstellt:false => relink im Route).
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   // Ist heute der letzte Tag des Monats?

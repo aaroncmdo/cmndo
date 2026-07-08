@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendCommunication } from '@/lib/communications/send'
 import { piStatusToEinzugAction, retryFensterStartDatum, pollCooldownCutoff, einzugBranchFuerPiStatus } from '@/lib/finance/einzug-retry'
@@ -38,8 +39,7 @@ const ADMIN_ALERT_EMAIL = process.env.ADMIN_ALERT_EMAIL || 'aaron@claimondo.de'
  * Auth: Authorization: Bearer ${CRON_SECRET} (analog allen anderen Crons).
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

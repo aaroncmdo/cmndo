@@ -7,6 +7,7 @@
 // ein Mail-Fail bricht den Cron nie. Auth: Bearer-Token via CRON_SECRET.
 
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import {
   ladeWochenReportEmpfaenger,
@@ -17,8 +18,7 @@ import { sendMaklerWochenReport } from '@/lib/email/google/flows'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

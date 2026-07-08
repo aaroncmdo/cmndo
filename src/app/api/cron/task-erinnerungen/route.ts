@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { sendTaskReminder } from '@/lib/tasks/reminder-sender'
 
@@ -11,8 +12,7 @@ import { sendTaskReminder } from '@/lib/tasks/reminder-sender'
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

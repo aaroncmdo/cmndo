@@ -1,9 +1,10 @@
 // AAR-826: Cardentity Re-Check — Fahrzeuge mit veraltetem Cardentity-Befund neu abrufen
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 
 export async function GET(request: Request) {
-  if (request.headers.get('authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { generiereMarketingAbrechnung, generiereKanzleiAbrechnungen } from '@/lib/finance/abrechnungen-generator'
 import { generateAbrechnungPDF } from '@/lib/finance/abrechnung-pdf'
 import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/email/google/flows'
@@ -6,8 +7,7 @@ import { sendMarketingAbrechnung, sendKanzleiMonatsAbrechnung } from '@/lib/emai
 export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
