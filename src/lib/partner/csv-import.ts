@@ -120,6 +120,37 @@ function parseRecords(text: string): string[][] {
   return records
 }
 
+/**
+ * Die 10 Ziel-Felder fuer das explizite Mapping-Panel.
+ * 'ignorieren' = Spalte wird beim Import uebergangen.
+ * 'datNr' = DAT-Expert-Nr (SV), 'ihk' = IHK-Registrierungsnr. (Makler) —
+ * landen beide in lead.rollen_details.
+ */
+export type CsvZielFeld =
+  | 'firma'
+  | 'email'
+  | 'telefon'
+  | 'ansprechpartner_vorname'
+  | 'ansprechpartner_nachname'
+  | 'plz'
+  | 'ort'
+  | 'datNr'
+  | 'ihk'
+  | 'ignorieren'
+
+export const CSV_ZIEL_FELDER: readonly CsvZielFeld[] = [
+  'firma',
+  'email',
+  'telefon',
+  'ansprechpartner_vorname',
+  'ansprechpartner_nachname',
+  'plz',
+  'ort',
+  'datNr',
+  'ihk',
+  'ignorieren',
+]
+
 // Header-Alias-Tabelle: normalisierter Header-Text → Ziel-Feld. Der Wert
 // 'rollen_details.datNr' bzw. '.ihk' signalisiert Ablage im rollen_details-jsonb.
 type Ziel =
@@ -170,24 +201,27 @@ function normHeader(h: string): string {
 }
 
 /**
- * Mappt geparste CSV-Zeilen flexibel auf PartnerCsvLead. Header werden ueber
- * die Alias-Tabelle (case-insensitiv) den Ziel-Feldern zugeordnet; unbekannte
- * Spalten werden ignoriert. Eine Zeile ist valide, wenn `firma` non-empty ist.
- *
- * @param rolle nur zur Signatur-Vollstaendigkeit durchgereicht — die Rolle wird
- *   beim Insert (Server-Action) gesetzt, nicht pro Zeile aus dem CSV. So bleibt
- *   der Mapper rein und die Rolle die eine, im Modal gewaehlte Quelle der Wahrheit.
- * @returns { valide, uebersprungen } — uebersprungen = Anzahl Zeilen ohne Firma.
+ * Gibt fuer jeden Header-Eintrag das passende CsvZielFeld zurueck.
+ * rollen_details.datNr/.ihk werden auf 'datNr'/'ihk' gemappt (first-class Targets).
+ * Unbekannte Header werden als 'ignorieren' behandelt.
  */
-export function mapCsvZuLeads(
-  header: string[],
-  rows: string[][],
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  _rolle: string,
-): MapCsvResult {
-  // Spaltenindex → Ziel-Feld (erste passende Alias-Spalte gewinnt je Ziel).
-  const zielProSpalte: (Ziel | undefined)[] = header.map((h) => HEADER_ALIASE[normHeader(h)])
+export function heuristischesMapping(header: string[]): CsvZielFeld[] {
+  return header.map((h) => {
+    const ziel = HEADER_ALIASE[normHeader(h)]
+    if (!ziel) return 'ignorieren'
+    if (ziel === 'rollen_details.datNr') return 'datNr'
+    if (ziel === 'rollen_details.ihk') return 'ihk'
+    return ziel satisfies CsvZielFeld
+  })
+}
 
+/**
+ * Wendet ein EXPLIZITES Spalten-Mapping (Spaltenindex → CsvZielFeld) auf die
+ * Datenzeilen an. 'ignorieren'-Eintraege werden uebersprungen. `firma` ist
+ * Pflicht — Zeilen ohne befuellte firma-Spalte werden gezaehlt und verworfen.
+ * 'datNr' und 'ihk' landen in lead.rollen_details.
+ */
+export function mapCsvMitMapping(rows: string[][], mapping: CsvZielFeld[]): MapCsvResult {
   const valide: PartnerCsvLead[] = []
   let uebersprungen = 0
 
@@ -195,11 +229,11 @@ export function mapCsvZuLeads(
     const lead: PartnerCsvLead = { firma: '' }
     const details: Record<string, unknown> = {}
 
-    zielProSpalte.forEach((ziel, idx) => {
-      if (!ziel) return
+    mapping.forEach((zielFeld, idx) => {
+      if (zielFeld === 'ignorieren') return
       const raw = (row[idx] ?? '').trim()
       if (!raw) return
-      switch (ziel) {
+      switch (zielFeld) {
         case 'firma':
           if (!lead.firma) lead.firma = raw
           break
@@ -221,10 +255,10 @@ export function mapCsvZuLeads(
         case 'ort':
           if (!lead.ort) lead.ort = raw
           break
-        case 'rollen_details.datNr':
+        case 'datNr':
           if (details.datNr === undefined) details.datNr = raw
           break
-        case 'rollen_details.ihk':
+        case 'ihk':
           if (details.ihk === undefined) details.ihk = raw
           break
       }
@@ -240,3 +274,40 @@ export function mapCsvZuLeads(
 
   return { valide, uebersprungen }
 }
+
+/**
+ * Validiert die JSON-Antwort des LLM (Mapping-Vorschlag) und gibt ein
+ * CsvZielFeld-Array in Header-Reihenfolge zurueck. Erwartet JSON der Form
+ * { "<headerName>": "<zielfeld>" }. Unbekannte Zielfelder und fehlende
+ * Header-Eintraege werden als 'ignorieren' behandelt.
+ *
+ * @returns CsvZielFeld[] in Header-Reihenfolge, oder null bei kaputtem/nicht-
+ *          parsebarem JSON (kein gueltigem JSON-Objekt).
+ */
+export function parseLlmMapping(json: string, header: string[]): CsvZielFeld[] | null {
+  if (!json) return null
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(json)
+  } catch {
+    return null
+  }
+
+  // Muss ein nicht-null Objekt sein (kein Array, kein primitiver Typ).
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    return null
+  }
+
+  const obj = parsed as Record<string, unknown>
+  const zielFeldSet = new Set<string>(CSV_ZIEL_FELDER)
+
+  return header.map((h) => {
+    const kandidat = obj[h]
+    if (typeof kandidat === 'string' && zielFeldSet.has(kandidat)) {
+      return kandidat as CsvZielFeld
+    }
+    return 'ignorieren'
+  })
+}
+
