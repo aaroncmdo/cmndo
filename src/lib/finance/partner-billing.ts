@@ -107,15 +107,20 @@ export async function getPartnerBilling(
   return { rows, aggregat: { perStatus, perPartnerTyp, hat_unbekannten_ust_status } }
 }
 
-export type LedgerGutschriftDocs = {
-  original?: { nr: string }
-  storno?: { nr: string; bezugNr: string | null }
+export type GutschriftBeleg = {
+  gutschriftId: string
+  nr: string
+  typ: 'gutschrift' | 'storno'
+  status: string
+  bezugNr: string | null
 }
+export type LedgerGutschriftDocs = { belege: GutschriftBeleg[] }
 
 export type GutschriftRohzeile = {
   id: string
   gutschrift_nr: string
   typ: string
+  status: string
   bezug_gutschrift_id: string | null
   ledger_tabelle: string
   ledger_id: string
@@ -123,8 +128,9 @@ export type GutschriftRohzeile = {
 
 /**
  * Baut aus den partner_gutschriften-Rohzeilen eines Partners eine Map
- * ledgerKey ("tabelle:id") -> { original?, storno? }. Der Storno-Bezug (Original-Nr)
- * wird aus derselben Zeilenmenge aufgeloest (id -> gutschrift_nr), kein Extra-Query.
+ * ledgerKey ("tabelle:id") -> { belege: [...] }. Nach einer Korrektur kann ein Ledger MEHRERE
+ * Belege haben (stornierte Original + Storno + korrigierte Original) — daher Liste statt
+ * original/storno-Paar. Der Storno-Bezug (Original-Nr) wird aus derselben Zeilenmenge aufgeloest.
  */
 export function buildGutschriftDocsByLedger(
   rows: GutschriftRohzeile[],
@@ -135,24 +141,24 @@ export function buildGutschriftDocsByLedger(
   const map: Record<string, LedgerGutschriftDocs> = {}
   for (const r of rows) {
     const key = `${r.ledger_tabelle}:${r.ledger_id}`
-    const entry = (map[key] ??= {})
-    if (r.typ === 'storno') {
-      entry.storno = {
-        nr: r.gutschrift_nr,
-        bezugNr: r.bezug_gutschrift_id ? idToNr.get(r.bezug_gutschrift_id) ?? null : null,
-      }
-    } else {
-      entry.original = { nr: r.gutschrift_nr }
-    }
+    const entry = (map[key] ??= { belege: [] })
+    entry.belege.push({
+      gutschriftId: r.id,
+      nr: r.gutschrift_nr,
+      typ: r.typ === 'storno' ? 'storno' : 'gutschrift',
+      status: r.status,
+      bezugNr: r.bezug_gutschrift_id ? idToNr.get(r.bezug_gutschrift_id) ?? null : null,
+    })
   }
   return map
 }
 
-export type ZeilenBeleg = { typ: 'gutschrift' | 'storno'; nr: string; bezugNr: string | null }
+export type ZeilenBeleg = GutschriftBeleg
 
 /**
- * Welche Gutschrift-Belege sind fuer eine Billing-Zeile herunterladbar.
- * Nur Auszahlungszeilen (erledigt/storniert): Original + ggf. Storno-Korrekturbeleg.
+ * Welche Gutschrift-Belege sind fuer eine Billing-Zeile herunterladbar (nur Auszahlungszeilen
+ * erledigt/storniert). Liste ALLER Belege des Ledgers (stornierte + aktive Original + Stornos),
+ * chronologisch nach Nummer — jeder mit gutschriftId fuer praezisen Download.
  */
 export function belegeFuerZeile(
   row: Pick<PartnerBillingRow, 'richtung' | 'status_norm' | 'quelle_tabelle' | 'quelle_id'>,
@@ -162,8 +168,5 @@ export function belegeFuerZeile(
   if (row.status_norm !== 'erledigt' && row.status_norm !== 'storniert') return []
   const entry = docs[`${row.quelle_tabelle}:${row.quelle_id}`]
   if (!entry) return []
-  const out: ZeilenBeleg[] = []
-  if (entry.original) out.push({ typ: 'gutschrift', nr: entry.original.nr, bezugNr: null })
-  if (entry.storno) out.push({ typ: 'storno', nr: entry.storno.nr, bezugNr: entry.storno.bezugNr })
-  return out
+  return [...entry.belege].sort((a, b) => a.nr.localeCompare(b.nr))
 }
