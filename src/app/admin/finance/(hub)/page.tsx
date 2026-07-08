@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import FinanceClient from './FinanceClient'
 import AbrechnungenSection from './AbrechnungenSection'
+import MoneyIntegritaetWidget from './MoneyIntegritaetWidget'
 import AusstehendeZahlungenTable from '../../_components/AusstehendeZahlungenTable'
 import StripeConnectStatusWidget from '../../_components/StripeConnectStatusWidget'
 import LeadPreiseVerteilungWidget from '../../_components/LeadPreiseVerteilungWidget'
@@ -837,6 +838,7 @@ export default async function FinancePage() {
       </Suspense>
       <IndividuelleAnfragenSection anfragen={individuelleAnfragen} />
       <InvestitionProFallSection />
+      <MoneyIntegritaetWidget />
       </div>
     </div>
   )
