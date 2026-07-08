@@ -26,6 +26,7 @@ import {
 } from '@/lib/finance/partner-billing-actions'
 import { belegeFuerZeile } from '@/lib/finance/partner-billing'
 import type { PartnerBillingRow, LedgerGutschriftDocs } from '@/lib/finance/partner-billing'
+import { GutschriftKorrekturModal } from './GutschriftKorrekturModal'
 import type { PartnerBillingPanelProps } from './PartnerBillingPanel.types'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 
@@ -89,6 +90,7 @@ function ZeilenAktionen({
 }) {
   const [isPending, startTransition] = useTransition()
   const [meldung, setMeldung] = useState<{ ok: boolean; error?: string } | null>(null)
+  const [korrekturOffen, setKorrekturOffen] = useState(false)
 
   const fuehreAus = (fn: () => Promise<{ ok: boolean; error?: string }>) => {
     setMeldung(null)
@@ -109,33 +111,56 @@ function ZeilenAktionen({
 
   if (zeigeKeinAktion) {
     if (belege.length === 0) return <span className="text-xs text-claimondo-ondo/50">—</span>
+    const kannKorrigieren =
+      status_norm === 'erledigt' && belege.some((b) => b.typ === 'gutschrift' && b.status !== 'storniert')
     return (
       <div className="flex flex-wrap items-center gap-1.5">
-        {belege.map((b) => (
-          <span key={b.typ} className="inline-flex items-center gap-1">
-            <Button
-              size="sm"
-              variant="ghost"
-              loading={isPending}
-              onClick={() =>
-                fuehreAus(async () => {
-                  const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id, b.typ)
-                  if (res.ok) {
-                    window.open(res.url, '_blank')
-                    return { ok: true }
-                  }
-                  return { ok: false, error: res.error }
-                })
-              }
-            >
-              {b.typ === 'storno' ? 'Storno ↓' : 'Gutschrift ↓'}
-            </Button>
-            {b.typ === 'storno' && b.bezugNr && (
-              <span className="text-xs text-claimondo-shield">zu {b.bezugNr}</span>
-            )}
-          </span>
-        ))}
+        {belege.map((b) => {
+          const label =
+            b.typ === 'storno'
+              ? 'Storno ↓'
+              : b.status === 'storniert'
+                ? 'Gutschrift (storniert) ↓'
+                : 'Gutschrift ↓'
+          return (
+            <span key={b.gutschriftId} className="inline-flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="ghost"
+                loading={isPending}
+                onClick={() =>
+                  fuehreAus(async () => {
+                    const res = await getPartnerGutschriftDownloadUrl(quelle_tabelle, quelle_id, b.typ, b.gutschriftId)
+                    if (res.ok) {
+                      window.open(res.url, '_blank')
+                      return { ok: true }
+                    }
+                    return { ok: false, error: res.error }
+                  })
+                }
+              >
+                {label}
+              </Button>
+              {b.typ === 'storno' && b.bezugNr && (
+                <span className="text-xs text-claimondo-shield">zu {b.bezugNr}</span>
+              )}
+            </span>
+          )
+        })}
+        {kannKorrigieren && (
+          <Button size="sm" variant="ghost" onClick={() => setKorrekturOffen(true)}>
+            Korrigieren
+          </Button>
+        )}
         {meldung && !meldung.ok && <AktionMeldung {...meldung} />}
+        {kannKorrigieren && (
+          <GutschriftKorrekturModal
+            open={korrekturOffen}
+            onClose={() => setKorrekturOffen(false)}
+            ledgerTabelle={quelle_tabelle}
+            ledgerId={quelle_id}
+          />
+        )}
       </div>
     )
   }

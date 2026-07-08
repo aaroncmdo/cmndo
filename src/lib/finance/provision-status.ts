@@ -359,3 +359,60 @@ export async function auszahlenProvision(
 
   return { ok: true }
 }
+
+/**
+ * Liest den Ledger-Kontext (Netto + Partner + USt-Status + Leistungsdatum/-text) fuer einen
+ * Ledger-Eintrag — spiegelt den Read-Teil von auszahlenProvision (Step 1). Exportiert, damit die
+ * Gutschrift-Korrektur (partner-gutschrift-korrektur.ts) dieselbe Partner-/USt-Aufloesung nutzt.
+ * (auszahlenProvision behaelt seinen inline-Read, um den Money-Payout-Pfad unangetastet zu lassen.)
+ */
+export async function resolveLedgerKontext(
+  db: SupabaseClient<any>,
+  tabelle: ProvisionTabelle,
+  id: string,
+): Promise<
+  | {
+      ok: true
+      ctx: {
+        nettoEur: number
+        partnerId: string
+        partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+        istKleinunternehmer: boolean | null
+        leistungsDatum: string | null
+        leistungText: string
+      }
+    }
+  | { ok: false; error: string }
+> {
+  const meta = META[tabelle]
+  const isUnion = !!meta.partnerTypCol
+  const selectStr = isUnion
+    ? `${meta.betrag}, ${meta.fk}, ${meta.partnerTypCol}, ${meta.leistungDatumCol}`
+    : `${meta.betrag}, ${meta.fk}, ${meta.partner}(${meta.partnerFlag}), ${meta.leistungDatumCol}`
+  const { data, error } = await db.from(tabelle).select(selectStr).eq('id', id).single()
+  if (error) return { ok: false, error: error.message }
+
+  const nettoEur: number = (data as any)[meta.betrag]
+  const partnerId: string | null | undefined = (data as any)[meta.fk]
+  if (!partnerId) return { ok: false, error: 'Partner-Zuordnung fehlt' }
+  const leistungsDatum: string | null = (data as any)[meta.leistungDatumCol] ?? null
+
+  let partnerTyp: 'makler' | 'werkstatt' | 'marketing'
+  let istKleinunternehmer: boolean | null
+  if (isUnion) {
+    partnerTyp = (data as any)[meta.partnerTypCol as string] as 'makler' | 'werkstatt'
+    const partnerTable = partnerTyp === 'makler' ? 'makler' : 'werkstaetten'
+    const { data: pRow } = await db.from(partnerTable).select(meta.partnerFlag).eq('id', partnerId).maybeSingle()
+    istKleinunternehmer = (pRow as any)?.[meta.partnerFlag] ?? null
+  } else {
+    partnerTyp = meta.partnerTyp as 'makler' | 'werkstatt' | 'marketing'
+    const partnerRaw = (data as any)[meta.partner as string]
+    const partner = Array.isArray(partnerRaw) ? partnerRaw[0] : partnerRaw
+    istKleinunternehmer = partner?.[meta.partnerFlag] ?? null
+  }
+
+  return {
+    ok: true,
+    ctx: { nettoEur, partnerId, partnerTyp, istKleinunternehmer, leistungsDatum, leistungText: meta.leistungText },
+  }
+}
