@@ -47,6 +47,7 @@ import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntsc
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
+import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
 import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
@@ -412,7 +413,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // WS4: zuletzt hochgeladenes KVA-Dokument (Werkstatt ODER Kunde) fuer die
     // Kunde-KVA-Card — nur fuer Werkstatt-Reparatur-Claims (selbstzahler/kasko-frei),
     // damit normale Claims keinen ueberfluessigen Read machen.
+    // WS3: alle Schadenfotos (fall_dokumente dokument_typ='schadensfoto') fuer die
+    // SchadensfotoUploadCard — im selben Gate.
     let kvaDokUrl: string | null = null
+    let schadensfotoUrls: string[] = []
     if (fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null)) {
       const { data: kvaDoc } = await admin
         .from('fall_dokumente')
@@ -427,6 +431,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       if (kvaDoc?.storage_path) {
         kvaDokUrl = (await getStorageUrl(admin, 'fall-dokumente', kvaDoc.storage_path as string)) ?? null
       }
+
+      const { data: fotoDocs } = await admin
+        .from('fall_dokumente')
+        .select('storage_path')
+        .in('fall_id', claimFallIds)
+        .eq('dokument_typ', 'schadensfoto')
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: true })
+      const fotoUrls = await getStorageUrlBulk(
+        admin,
+        (fotoDocs ?? []).map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path as string })),
+      )
+      schadensfotoUrls = fotoUrls.filter((u): u is string => !!u)
     }
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
@@ -981,6 +999,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             kanzleiUebergebenAm={claimExtra?.kanzlei_uebergeben_am ?? null}
             gutachtenFreigegeben={gutachtenFreigegebenFuerSummary}
             gutachtenUrl={gutachtenUrlAusBucket}
+          />
+        )}
+
+        {/* WS3 (Reduced-Repair): Schadenfotos-Card — VOR der Werkstatt-Card, damit
+            der Werkstatt-/Finder-Schritt die Foto-Kontext-Basis hat. Werkstatt-
+            Reparatur-Claims (Selbstzahler/Kasko-frei); kein SV macht Fotos. */}
+        {!!fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null) && (
+          <SchadensfotoUploadCard
+            claimId={fall.claim_id as string}
+            fotos={schadensfotoUrls.map((url) => ({ url }))}
           />
         )}
 
