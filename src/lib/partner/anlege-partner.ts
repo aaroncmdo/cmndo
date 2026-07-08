@@ -28,6 +28,9 @@ export type PartnerAnlageInput = {
   telefon: string | null
   plz: string | null
   ort: string | null
+  /** Geocodierte Koordinaten — nur werkstatt nutzt sie (makler/SV haben keine Koordinaten-Spalte). */
+  lat?: number | null
+  lng?: number | null
   aktiviertVon: string | null // admin user-id, oder null beim Self-Signup
   rollenDetails: Record<string, unknown> // rollen-spezifisch (DAT-Nr, Marken, IHK ...)
 }
@@ -196,7 +199,7 @@ export async function anlegePartnerKern(
 
     case 'werkstatt': {
       // Insert-Spalten aus createWerkstatt (admin/werkstaetten/actions). status='aktiv'.
-      // lat/lng bleiben null (Geocoding spaeter); name aus firma.
+      // lat/lng aus input (von geocodePartnerLead via Convert-Pfad geliefert).
       const normalized_name = input.firma.toLowerCase().replace(/\s+/g, ' ').trim()
       const { data: w, error: wErr } = await admin
         .from('werkstaetten')
@@ -205,6 +208,8 @@ export async function anlegePartnerKern(
           normalized_name,
           adresse_plz: input.plz,
           adresse_ort: input.ort,
+          lat: input.lat ?? null,
+          lng: input.lng ?? null,
           telefon: input.telefon,
           ansprechpartner_name:
             `${input.ansprechpartnerVorname} ${input.ansprechpartnerNachname}`.trim() || null,
