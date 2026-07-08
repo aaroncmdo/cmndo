@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { Button } from '@/components/primitives'
 // AAR-344: 2FA-Nummer-Änderung (Self-Service, eingeloggter User)
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 // AAR-939: TOTP (Authenticator-App) als optionaler 2. Faktor
@@ -79,10 +80,9 @@ function TwoFaPhoneSection() {
     <SectionCard className="p-6 mt-5">
       <h2 className="text-sm font-medium text-claimondo-ondo mb-1">Zwei-Faktor-Authentifizierung</h2>
       <p className="text-xs text-claimondo-ondo/70 mb-4">Verifizieren Sie Ihre Telefonnummer für den SMS-Login-Code.</p>
-      <button onClick={() => setShowModal(true)}
-        className="px-4 py-2 rounded-ios-xl bg-[var(--brand-secondary)] hover:bg-[var(--brand-primary)] text-white text-sm font-semibold transition-colors">
+      <Button variant="ondo" size="sm" onClick={() => setShowModal(true)}>
         Telefon verifizieren
-      </button>
+      </Button>
       {showModal && <PhoneVerificationModal onClose={() => setShowModal(false)} />}
     </SectionCard>
   )

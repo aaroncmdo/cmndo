@@ -6,6 +6,7 @@ import { updateOwnProfile } from '@/lib/actions/sv/update-own-profile'
 import { ANREDE_OPTIONEN, TITEL_OPTIONEN } from '@/app/admin/sachverstaendige/anlegen/constants'
 import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { LoadingButton } from '@/components/ui/loading-button'
+import { Button } from '@/components/primitives'
 import { MapPinIcon, InfoIcon } from 'lucide-react'
 import AvatarUpload from '@/components/shared/AvatarUpload'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -144,13 +145,9 @@ export function ProfilStammdaten({
 
       {!editing && (
         <div className="flex justify-end max-w-4xl mb-3">
-          <button
-            type="button"
-            onClick={() => { setEditing(true); setSuccess(false) }}
-            className="px-4 py-2 text-xs font-medium text-white bg-[var(--brand-primary)] hover:bg-[var(--brand-secondary)] rounded-ios-xl transition-colors"
-          >
+          <Button variant="navy" size="sm" onClick={() => { setEditing(true); setSuccess(false) }}>
             Bearbeiten
-          </button>
+          </Button>
         </div>
       )}
 
@@ -288,13 +285,9 @@ export function ProfilStammdaten({
           {/* Actions */}
           {editing && (
             <div className="flex gap-2 pt-4 border-t border-claimondo-border">
-              <button
-                type="button"
-                onClick={() => setEditing(false)}
-                className="flex-1 py-2.5 rounded-ios-xl text-sm text-claimondo-ondo hover:text-claimondo-navy hover:bg-claimondo-bg transition-colors"
-              >
+              <Button variant="bare" size="md" className="flex-1" onClick={() => setEditing(false)}>
                 Abbrechen
-              </button>
+              </Button>
               <LoadingButton
                 type="submit"
                 isLoading={saving}
