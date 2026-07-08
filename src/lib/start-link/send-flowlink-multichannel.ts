@@ -12,6 +12,7 @@ import type { Database } from '@/lib/supabase/database.types'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink-for-lead'
 import { persistFlowLinkVersand } from '@/lib/start-link/persist-flowlink-versand'
+import { toE164 } from '@/lib/format/telefon'
 
 type DbClient = SupabaseClient<Database>
 
@@ -71,10 +72,8 @@ export async function sendFlowLinkMultiChannelCore(
 
   if (kanal === 'whatsapp') {
     if (!telefon) return { success: false, error: 'Keine Telefonnummer für WhatsApp' }
-    let waTelefon = telefon.replace(/\s/g, '')
-    if (waTelefon.startsWith('0')) waTelefon = '+49' + waTelefon.slice(1)
-    else if (waTelefon.startsWith('00')) waTelefon = '+' + waTelefon.slice(2)
-    if (!waTelefon.startsWith('+')) waTelefon = '+' + waTelefon
+    const waTelefon = toE164(telefon)
+    if (!waTelefon) return { success: false, error: 'Ungültige Telefonnummer für WhatsApp' }
     try {
       if (terminTextMoeglich) {
         const { sendCommunication } = await import('@/lib/communications/send')
@@ -103,10 +102,8 @@ export async function sendFlowLinkMultiChannelCore(
     if (!accountSid || !authToken || !smsFrom) {
       return { success: false, error: 'Twilio-SMS-Credentials fehlen (TWILIO_SMS_FROM)' }
     }
-    let normalTo = telefon.replace(/\s/g, '')
-    if (normalTo.startsWith('0')) normalTo = '+49' + normalTo.slice(1)
-    else if (normalTo.startsWith('00')) normalTo = '+' + normalTo.slice(2)
-    if (!normalTo.startsWith('+')) normalTo = '+' + normalTo
+    const normalTo = toE164(telefon)
+    if (!normalTo) return { success: false, error: 'Ungültige Telefonnummer für SMS' }
     const body = terminTextMoeglich
       ? `Hallo ${vornameVal}, Ihr Schadenportal ist bereit. Termin mit ${svVorname} ${svNachname} am ${datum} ${uhrzeit}. Portal öffnen: ${flowUrl}`
       : `${introText ? introText + ' ' : ''}Hallo ${vornameVal}, hier geht es zu Ihrer Schadensregulierung bei Claimondo: ${flowUrl}`

@@ -9,6 +9,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { requireRole } from '@/lib/auth/guards'
 import { revalidatePath } from 'next/cache'
+import { toE164 } from '@/lib/format/telefon'
 
 export type KundenMatch = {
   kunde_user_id: string
@@ -30,9 +31,9 @@ export type KundenMatch = {
   }>
 }
 
+// Kanonische E.164-Normalisierung (EINE Quelle: format/telefon) fuer den Match.
 function normalizeTel(tel: string | null | undefined): string | null {
-  if (!tel) return null
-  return tel.replace(/[^0-9+]/g, '').replace(/^00/, '+').replace(/^0/, '+49')
+  return toE164(tel)
 }
 
 export async function findKundenMatches(
