@@ -335,13 +335,16 @@ export function PortalNav({
   // data-sidebar-mode="bar" verhindert die Floating-Glass-CSS-Regeln.
   return (
     <>
+    {/* Detached Navy-Panel (in-flow, m-2 statt fixed → floatet INNERHALB des
+        bestehenden Flex-Layouts; kein Offset/Restructure noetig, Top-Bar bleibt).
+        w-52 + m-2 = ~alte w-56-Breite, Layout unveraendert. */}
     <aside
       role="navigation"
       aria-label={ariaLabel ?? 'Portal-Navigation'}
       data-sidebar-mode="bar"
-      className={`w-56 shrink-0 overflow-y-auto bg-claimondo-navy border-r border-white/10 ${className}`}
+      className={`w-52 shrink-0 m-2 rounded-ios-lg overflow-hidden bg-claimondo-navy shadow-ios-lg ${className}`}
     >
-      <div className="flex flex-col gap-0.5 p-3">
+      <div className="flex flex-col gap-0.5 p-3 overflow-y-auto">
         {sections.map((section, i) => (
           <div
             key={section.label ?? i}
