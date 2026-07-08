@@ -1,5 +1,19 @@
 import { describe, it, expect } from 'vitest'
-import { sortiereDirektPaar, leiteGruppenTeilnehmer, threadLabel, type ClaimZuweisung } from '../thread-model'
+import { sortiereDirektPaar, leiteGruppenTeilnehmer, threadLabel, leiteDmKandidaten, type ClaimZuweisung } from '../thread-model'
+
+describe('leiteDmKandidaten', () => {
+  it('gibt alle Beteiligten ausser mir zurueck (non-null)', () => {
+    const r = leiteDmKandidaten({ geschaedigter_user_id: 'kunde', kundenbetreuer_id: 'me', sv_id: 'sv', makler_id: null }, 'me')
+    expect(r).toEqual([
+      { userId: 'kunde', rolle: 'kunde' },
+      { userId: 'sv', rolle: 'sachverstaendiger' },
+    ])
+  })
+  it('dedupliziert doppelte user-ids', () => {
+    const r = leiteDmKandidaten({ geschaedigter_user_id: 'x', kundenbetreuer_id: 'x', sv_id: 'y', makler_id: 'y' }, 'me')
+    expect(r.map((k) => k.userId)).toEqual(['x', 'y'])
+  })
+})
 
 describe('threadLabel', () => {
   it('labelt Gruppe/Team-intern fix', () => {

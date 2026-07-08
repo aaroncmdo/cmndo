@@ -59,7 +59,7 @@ export default function KommunikationTab({
       <div>
         {chatV2 && currentUserId ? (
           <div className="h-[70vh] min-h-0 overflow-hidden rounded-ios-xl border border-claimondo-border bg-white">
-            <ClaimChatPanel claimId={fall.id} currentUserId={currentUserId} />
+            <ClaimChatPanel claimId={fall.id} currentUserId={currentUserId} istStaff={showInternal} />
           </div>
         ) : (
           <MultiChannelChat

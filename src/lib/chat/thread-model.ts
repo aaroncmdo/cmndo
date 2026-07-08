@@ -65,3 +65,31 @@ export function threadLabel(art: ThreadArt, rollen: string[] = []): string {
   const namen = rollen.map((r) => ROLLE_LABEL[r] ?? r)
   return namen.length ? `Privat: ${namen.join(' · ')}` : 'Privater Chat'
 }
+
+/** Anzeige-Label einer einzelnen Rolle (fuer den DM-Kandidaten-Picker). */
+export function rolleLabel(rolle: string): string {
+  return ROLLE_LABEL[rolle] ?? rolle
+}
+
+/** Claim-Felder fuer die DM-Kandidaten (alle zugewiesenen Beteiligten). */
+export interface DmKandidatenClaim extends ClaimZuweisung {
+  makler_id: string | null
+}
+
+/** DM-Kandidaten eines Claims: alle zugewiesenen Beteiligten AUSSER dem aktuellen User (non-null, dedup). */
+export function leiteDmKandidaten(claim: DmKandidatenClaim, meId: string): ThreadTeilnehmer[] {
+  const roh: { userId: string | null; rolle: string }[] = [
+    { userId: claim.geschaedigter_user_id, rolle: 'kunde' },
+    { userId: claim.kundenbetreuer_id, rolle: 'kundenbetreuer' },
+    { userId: claim.sv_id, rolle: 'sachverstaendiger' },
+    { userId: claim.makler_id, rolle: 'makler' },
+  ]
+  const gesehen = new Set<string>()
+  const out: ThreadTeilnehmer[] = []
+  for (const k of roh) {
+    if (!k.userId || k.userId === meId || gesehen.has(k.userId)) continue
+    gesehen.add(k.userId)
+    out.push({ userId: k.userId, rolle: k.rolle })
+  }
+  return out
+}
