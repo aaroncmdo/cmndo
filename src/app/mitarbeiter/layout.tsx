@@ -1,10 +1,11 @@
-﻿// AAR-61: Mitarbeiter-Portal Layout mit Sidebar
-import { LogOutIcon } from 'lucide-react'
+// AAR-61: Mitarbeiter-Portal Layout — PortalShell (Navy-Canvas + schwebende
+// Content-Card + Full-Height-Sidebar). Frueher Top-Bar + in-flow Light-Sidebar;
+// die Top-Bar-Aktionen leben jetzt in den MitarbeiterNav-Slots. Mobile-Drawer
+// folgt in Phase 3 (mobileNav bis dahin 'self' = PortalNav-Bottom-Bar).
 import MitarbeiterNav from './_components/MitarbeiterNav'
-import TasksPill from '@/components/shared/TasksPill'
-import UpdatesNav from '@/components/shared/updates'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
+import { PortalShell } from '@/components/shared/portal-shell'
 
 export default async function MitarbeiterLayout({
   children,
@@ -29,34 +30,20 @@ export default async function MitarbeiterLayout({
 
   return (
     <>
-    <div className="min-h-screen bg-claimondo-bg">
-      <header className="glass-dark shadow-ios-md px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
-          </span>
-          {/* AAR-723: Globale Tasks-Pill neben dem Logo. */}
-          <TasksPill userId={user.id} href="/mitarbeiter/tasks" />
-        </div>
-        <div className="flex items-center gap-3">
-          <UpdatesNav variant="dark" />
-          <span className="text-claimondo-light-blue text-sm">{displayName}</span>
-          <form action="/api/auth/logout" method="POST">
-            <button type="submit" className="text-claimondo-light-blue hover:text-white transition-colors">
-              <LogOutIcon className="w-4 h-4" />
-            </button>
-          </form>
-        </div>
-      </header>
-      <div className="flex">
-        <MitarbeiterNav unreadNachrichten={unread} />
-        {/* pb-24 mobile: Platz fuer die Mobile-Bottom-Nav (md:hidden); ab md zurueck auf py-6. */}
-        <main className="flex-1 px-4 py-6 pb-24 md:w-[96%] md:mx-auto md:px-0 md:pb-6">{children}</main>
-      </div>
-      {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen,
-          damit KB Chats genauso anpinnen + parallel offen halten kann. */}
+      <PortalShell
+        breakpoint="md"
+        contentOffsetClass="md:pl-56"
+        mobileNav="shell-drawer"
+        sidebar={<MitarbeiterNav userId={user.id} displayName={displayName} unreadNachrichten={unread} />}
+        mobileHeader={
+          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
+        }
+        contentClassName="px-4 py-6 pb-24 md:px-6 md:pb-6"
+      >
+        {children}
+      </PortalShell>
+      {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen. */}
       <GlobalPosteingangFab currentUserId={user.id} />
-    </div>
     </>
   )
 }

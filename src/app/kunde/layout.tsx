@@ -30,6 +30,7 @@ import OrphanMatchBanner from '@/components/kunde/OrphanMatchBanner'
 // AAR-536 (K4): SV-Branding im Kunde-Portal — nur bei verifiziertem SV.
 import { resolveKundenTheme } from '@/lib/branding/kunden-theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { PortalShell } from '@/components/shared/portal-shell'
 
 // Layout zeigt Kontextdaten (KB-/SV-Card, LexDrive-QR-Card) die sich nach
 // Vollmacht-Bestaetigung aendern — dynamisch rendern, damit
@@ -348,12 +349,15 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   return (
     <>
-    <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
-      {/* Desktop Sidebar — hidden on mobile.
-          iOS-Glass: glass-branded liefert backdrop-blur + border, der
-          inline-backgroundColor ist auf 80% transluzent gesetzt damit
-          die Brand-Farbe erhalten bleibt + der Blur Content unter sich
-          weichzeichnen kann. */}
+    {/* themeStyle traegt die Brand-CSS-Vars → PortalShell-Canvas var(--brand-primary)
+        nimmt das SV-Brand des zugewiesenen Gutachters (sonst global Claimondo-Navy). */}
+    <div style={themeStyle}>
+      <PortalShell
+        breakpoint="lg"
+        contentOffsetClass="lg:pl-64"
+        mobileNav="self"
+        contentClassName="pt-14 lg:pt-0 pb-20 lg:pb-6 overflow-x-hidden"
+        sidebar={
       <aside
         className="kunde-sidebar glass-branded hidden lg:flex lg:flex-col lg:w-64 lg:shrink-0 fixed top-0 left-0 h-screen z-40"
         style={{
@@ -430,8 +434,17 @@ export default async function KundeLayout({ children }: { children: React.ReactN
           </form>
         </div>
       </aside>
+        }
+      >
+        {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
+        <SprachBanner sprache={kundenSprache} />
+        {/* Login-Tor Slice B: Self-Confirm fuer einen moeglichen frueheren Vorgang (null ohne Match). */}
+        <OrphanMatchBanner userId={user.id} />
+        {/* CMM-33: Pflichtdaten-Banner lebt in der Fall-Detail-Page (kein Doppel-Banner). */}
+        {children}
+      </PortalShell>
 
-      {/* Mobile Header — hidden on desktop */}
+      {/* Mobile Header — bespoke, md-Breakpoint unveraendert (Sibling der Shell) */}
       <header
         className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-ios-md glass-branded"
         style={{ backgroundColor: sidebarBg }}
@@ -463,19 +476,7 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </div>
       </header>
 
-      {/* Hauptinhalt — offset by sidebar on desktop, offset by header on mobile */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-6 overflow-x-hidden">
-        {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
-        <SprachBanner sprache={kundenSprache} />
-        {/* Login-Tor Slice B: Self-Confirm fuer einen moeglichen frueheren Vorgang (null ohne Match). */}
-        <OrphanMatchBanner userId={user.id} />
-        {/* CMM-33: Globaler Pflichtdaten-Banner ist raus — die Detail-Page
-            hat einen eigenen Banner-Click-Tile mit Pop-over (PflichtdokumenteSection
-            variant=banner). Doppel-Banner war redundant. */}
-        {children}
-      </main>
-
-      {/* Mobile Bottom-Nav — hidden on desktop */}
+      {/* Mobile Bottom-Nav — bespoke, md-Breakpoint unveraendert (Sibling der Shell) */}
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-branded shadow-ios-md"
         style={{
