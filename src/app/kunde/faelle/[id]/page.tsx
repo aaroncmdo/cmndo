@@ -46,6 +46,7 @@ import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
+import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
@@ -332,6 +333,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       reparatur_vermittlung_status: string | null
       // SP-D: Abrechnungsweg fuer den Selbstzahler-Reparatur-Stepper
       abrechnungsweg: string | null
+      // WS4: Werkstatt-KVA (claims.kostenvoranschlag_*) fuer die Kunde-KVA-Card
+      kostenvoranschlag_netto: number | null
+      kostenvoranschlag_brutto: number | null
     } | null = null
     if (fall.claim_id) {
       // Cluster F+G PR-2: Split in 2 Queries — claims für Kanzlei-Felder (Nicht-F+G),
@@ -339,7 +343,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg, kostenvoranschlag_netto, kostenvoranschlag_brutto')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
@@ -374,6 +378,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           reparatur_vermittlung_status: ((cxClaim as Record<string, unknown> | null)?.reparatur_vermittlung_status as string | null) ?? null,
           // SP-D: abrechnungsweg ist type-lagged -> Record-Cast beim Lesen.
           abrechnungsweg: ((cxClaim as Record<string, unknown> | null)?.abrechnungsweg as string | null) ?? null,
+          // WS4: Werkstatt-KVA-Betraege (claims-nativ).
+          kostenvoranschlag_netto: cxClaim?.kostenvoranschlag_netto != null ? Number(cxClaim.kostenvoranschlag_netto) : null,
+          kostenvoranschlag_brutto: cxClaim?.kostenvoranschlag_brutto != null ? Number(cxClaim.kostenvoranschlag_brutto) : null,
         }
       }
     }
@@ -400,6 +407,26 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .limit(1)
         .maybeSingle()
       reparaturTermin = t as typeof reparaturTermin
+    }
+
+    // WS4: zuletzt hochgeladenes KVA-Dokument (Werkstatt ODER Kunde) fuer die
+    // Kunde-KVA-Card — nur fuer Werkstatt-Reparatur-Claims (selbstzahler/kasko-frei),
+    // damit normale Claims keinen ueberfluessigen Read machen.
+    let kvaDokUrl: string | null = null
+    if (fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null)) {
+      const { data: kvaDoc } = await admin
+        .from('fall_dokumente')
+        .select('storage_path')
+        .in('fall_id', claimFallIds)
+        .eq('dokument_typ', 'kostenvoranschlag')
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+      if (kvaDoc?.storage_path) {
+        kvaDokUrl = (await getStorageUrl(admin, 'fall-dokumente', kvaDoc.storage_path as string)) ?? null
+      }
     }
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
@@ -963,6 +990,18 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             claimId={fall.claim_id as string}
             werkstatt={werkstattData}
             termin={reparaturTermin}
+          />
+        )}
+
+        {/* WS4 (Reduced-Repair): Kunde-KVA-Card — Werkstatt-Reparatur-Claims
+            (Selbstzahler/Kasko-frei). Zeigt den (Werkstatt-)KVA + PDF-Link und
+            erlaubt dem Kunden, einen eigenen KVA hochzuladen. */}
+        {!!fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null) && (
+          <KostenvoranschlagCard
+            claimId={fall.claim_id as string}
+            netto={claimExtra?.kostenvoranschlag_netto ?? null}
+            brutto={claimExtra?.kostenvoranschlag_brutto ?? null}
+            kvaDokUrl={kvaDokUrl}
           />
         )}
 

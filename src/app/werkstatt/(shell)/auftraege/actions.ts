@@ -286,17 +286,51 @@ export async function erstelleKvaFuerAuftrag(
     .eq('id', claimId)
   if (error) return { ok: false, error: error.message }
 
-  // KVA-PDF an den Claim haengen (non-critical).
+  // KVA-PDF an den Claim haengen (non-critical) + fall_dokumente-Row (WS4b:
+  // EIN KVA-Dokument, zwei Upload-Quellen — Werkstatt via Modal, Kunde via Claim).
+  // Der Kunde sieht das Dokument in seiner Fallakte (sichtbar_fuer inkl. 'kunde').
   try {
     if (input.pdfBase64 && input.pdfMediaType) {
       const ext = input.pdfMediaType === 'application/pdf' ? 'pdf' : (input.pdfMediaType.split('/')[1] ?? 'bin')
       const bytes = Buffer.from(input.pdfBase64, 'base64')
-      await admin.storage
+      const path = `faelle/${claimId}/kostenvoranschlag_${Date.now()}.${ext}`
+      const { error: uploadErr } = await admin.storage
         .from('fall-dokumente')
-        .upload(`faelle/${claimId}/kostenvoranschlag_${Date.now()}.${ext}`, bytes, {
+        .upload(path, bytes, {
           contentType: input.pdfMediaType,
           upsert: false,
         })
+      if (uploadErr) {
+        console.error('[werkstatt-auftrag-kva] KVA-Storage-Upload fehlgeschlagen (nicht kritisch):', uploadErr.message)
+      } else {
+        // fall_id via Bridge — fall_dokumente.fall_id ist NOT NULL, claim_id wird
+        // per Trigger aus fall_id abgeleitet (setzen wir zusaetzlich explizit).
+        const { data: bridge } = await admin
+          .from('faelle_claim_bridge')
+          .select('fall_id')
+          .eq('claim_id', claimId)
+          .maybeSingle()
+        const fallId = (bridge as { fall_id: string } | null)?.fall_id ?? null
+        if (fallId) {
+          const { error: docErr } = await admin.from('fall_dokumente').insert({
+            fall_id: fallId,
+            claim_id: claimId,
+            dokument_typ: 'kostenvoranschlag',
+            storage_path: path,
+            original_filename: `Kostenvoranschlag.${ext}`,
+            mime_type: input.pdfMediaType,
+            groesse_bytes: bytes.byteLength,
+            kategorie: 'kostenvoranschlag',
+            quelle: 'werkstatt',
+            sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
+          } as never)
+          if (docErr) {
+            console.error('[werkstatt-auftrag-kva] fall_dokumente-Insert fehlgeschlagen (nicht kritisch):', docErr.message)
+          }
+        } else {
+          console.error('[werkstatt-auftrag-kva] Keine fall_id fuer claim', claimId, '— fall_dokumente-Row uebersprungen.')
+        }
+      }
     }
   } catch (e) {
     console.error('[werkstatt-auftrag-kva] KVA-Doc-Upload fehlgeschlagen (nicht kritisch):', e)
