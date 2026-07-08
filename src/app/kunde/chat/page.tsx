@@ -4,6 +4,7 @@ import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
 import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
+import ClaimChatInbox from '@/components/chat/ClaimChatInbox'
 import PageHeader from '@/components/shared/PageHeader'
 import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
@@ -15,7 +16,7 @@ export const dynamic = 'force-dynamic'
 
 const KUNDE_KANAELE = getInboxKanaele('kunde')
 
-type Search = { fall?: string }
+type Search = { fall?: string; chatv2?: string }
 
 export default async function KundeChatPage({
   searchParams,
@@ -41,13 +42,16 @@ export default async function KundeChatPage({
   // CMM-65: created_at lebt auf claims (SSoT). CMM-49: via v_claim_full (flat, faelle-frei) —
   // vcf.id = claim_id (Filter), fall_id == faelle.id, claim_nummer/created_at flach. Sortierung
   // clientseitig created_at-desc (juengster Fall zuerst).
-  type FallRow = { fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }
+  // CMM-49: vcf.id = claim_id, fall_id == legacy faelle.id. Beide laden — der
+  // kanal-basierte v1-Pfad arbeitet fall-nativ (fall_id), der thread-basierte
+  // v2-Pfad (ClaimChatInbox) claim-nativ (claim_id).
+  type FallRow = { id: string; fall_id: string; lead_id: string | null; claim_nummer: string | null; created_at: string | null }
   const { data: faelleData } = await admin
     .from('v_claim_full')
-    .select('fall_id, lead_id, claim_nummer, created_at')
+    .select('id, fall_id, lead_id, claim_nummer, created_at')
     .in('id', ownedClaimIds)
   const faelle = ((faelleData ?? []) as FallRow[])
-    .map(f => ({ id: f.fall_id, claim_nummer: f.claim_nummer ?? null, lead_id: f.lead_id, _c: f.created_at ?? '' }))
+    .map(f => ({ id: f.fall_id, claimId: f.id, claim_nummer: f.claim_nummer ?? null, lead_id: f.lead_id, _c: f.created_at ?? '' }))
     .sort((a, b) => b._c.localeCompare(a._c))
 
   if (faelle.length === 0) {
@@ -60,6 +64,26 @@ export default async function KundeChatPage({
           </p>
         </div>
       </div>
+    )
+  }
+
+  // Phase-2c Cutover-Flag: ?chatv2=1 -> claim-natives Thread-Modell (ClaimChatInbox:
+  // Gruppe + private DMs pro Fall) statt kanal-basierter ChatWithFallSidebar.
+  // Default aus -> unveraendert, null Prod-Risiko. Kunde = kein Staff (istStaff=false).
+  if (params.chatv2 === '1') {
+    return (
+      <ClaimChatInbox
+        eintraege={faelle.map(f => ({
+          claimId: f.claimId,
+          title: t('chat.meinFall'),
+          fallNummer: f.claim_nummer,
+          lastAt: f._c,
+        }))}
+        currentUserId={user.id}
+        istStaff={false}
+        initialClaimId={faelle.find(f => f.id === params.fall)?.claimId ?? null}
+        emptyHint={t('chat.emptyHint')}
+      />
     )
   }
 
