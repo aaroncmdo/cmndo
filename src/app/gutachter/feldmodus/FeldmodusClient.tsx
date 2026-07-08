@@ -19,6 +19,7 @@ import FokusChatPanel from './FokusChatPanel'
 import TbtBanner from './TbtBanner'
 import FokusHeader from './FokusHeader'
 import AktuellerStopCard from './AktuellerStopCard'
+import PrivatStopCard from './PrivatStopCard'
 import StopListItem from './StopListItem'
 import GlassPanel from '@/components/shared/GlassPanel'
 import NaviHud, { pickHighestPriorityNotice, formatNaviDistance, type NaviNotice } from './NaviHud'
@@ -113,7 +114,9 @@ export default function FeldmodusClient({
   const { position: livePosition, distanceMeters, permissionState, error, staleSinceMs } = useFieldTracking({
     enabled: trackingEnabled,
     svId: sv.id,
-    terminId: aktuellerStop?.termin_id ?? null,
+    // 2026-07-08: nur Termine schreiben Tracking (Privat-Wegpunkt hat keine termin_id in der DB).
+    // targetLat/Lng bleiben — Geofence/Distanz zum Privat-Wegpunkt sollen weiter berechnet werden.
+    terminId: aktuellerStop?.kind === 'termin' ? aktuellerStop.termin_id : null,
     targetLat: aktuellerStop?.lat ?? null,
     targetLng: aktuellerStop?.lng ?? null,
     onGeofenceReached,
@@ -187,6 +190,8 @@ export default function FeldmodusClient({
   const losfahrenFiredRef = useRef<string | null>(null)
   useEffect(() => {
     if (!aktuellerStop) return
+    // 2026-07-08: Privat-Wegpunkte haben keinen Termin -> kein Losfahren/Kunde-Notify.
+    if (aktuellerStop.kind !== 'termin') return
     if (sessionStatus === 'arrived' || sessionStatus === 'finished' || sessionStatus === 'paused') return
     if (aktuellerStop.losgefahren_am) return
     if (losfahrenFiredRef.current === aktuellerStop.termin_id) return
@@ -207,7 +212,8 @@ export default function FeldmodusClient({
   // andere Tab-Instanz) gesetzt wird, schaltet die UI ohne Reload in den
   // arrived-State und öffnet die Fallakte.
   useEffect(() => {
-    const terminId = aktuellerStop?.termin_id
+    // 2026-07-08: nur echte Termine haben eine gutachter_termine-Row -> nur die subscriben.
+    const terminId = aktuellerStop?.kind === 'termin' ? aktuellerStop.termin_id : null
     if (!terminId) return
     const supabase = createClient()
     const channel = supabase
@@ -248,23 +254,32 @@ export default function FeldmodusClient({
     void syncGpsOutbox().catch(() => {})
   }, [])
 
-  const onAdvanced = useCallback(
-    (nextTerminId: string | null) => {
-      if (!nextTerminId) {
+  // 2026-07-08: Index-basierter Advance über das gemischte stops-Array (Termine + Privat-Wegpunkte).
+  // Für termin-only-Routen identisch zum alten findIndex(nextTerminId), weil index+1 = nächster Termin.
+  // router.refresh() setzt useState NICHT zurück -> der lokale Index bleibt stabil.
+  const goToStopIndex = useCallback(
+    (nextIdx: number) => {
+      if (nextIdx >= stops.length) {
         setSessionStatus('finished')
         router.refresh()
         return
       }
-      const nextIdx = stops.findIndex((s) => s.termin_id === nextTerminId)
-      if (nextIdx >= 0) {
-        setAktuellerStopIndex(nextIdx)
-        setSessionStatus('idle')
-        setSvInGeofence(false)
-        arrivedFiredRef.current = false
-      }
+      setAktuellerStopIndex(nextIdx)
+      setSvInGeofence(false)
+      arrivedFiredRef.current = false
+      setSessionStatus('idle')
       router.refresh()
     },
-    [stops, router],
+    [stops.length, router],
+  )
+
+  const onAdvanced = useCallback(
+    (_nextTerminId: string | null) => {
+      // Nach einem Termin-Abschluss zum NÄCHSTEN Stop — kann ein Privat-Wegpunkt sein, den
+      // advanceToNextTermin server-seitig überspringt. Deshalb index-basiert statt termin-id-basiert.
+      goToStopIndex(aktuellerStopIndex + 1)
+    },
+    [goToStopIndex, aktuellerStopIndex],
   )
 
   // Sidebar-Inhalt einmal definiert, in Desktop-Sidebar + Mobile-Sheet wiederverwendet
@@ -283,7 +298,7 @@ export default function FeldmodusClient({
   }, [aktuellerStop, session.id])
 
   const sidebarContent =
-    sessionStatus === 'arrived' && aktuellerStop ? (
+    sessionStatus === 'arrived' && aktuellerStop && aktuellerStop.kind === 'termin' ? (
       <SvFallakteView
         fallId={aktuellerStop.fall_id}
         sessionId={session.id}
@@ -312,6 +327,7 @@ export default function FeldmodusClient({
         permissionState={permissionState}
         onAdvanced={onAdvanced}
         onArrived={onArrived}
+        onWeiter={() => goToStopIndex(aktuellerStopIndex + 1)}
       />
     )
 
@@ -359,7 +375,7 @@ export default function FeldmodusClient({
           (Aaron-Smoke MAP3: vollwertiger Popover + Backdrop-Dim für klaren Modus-Wechsel).
           sonst  → AktuellerStopCard mid-left + Kommende-Stops-Liste bottom-left, beide
           als schwebende Glass-Cards. (Mobile: alles im Bottom-Sheet unten.) */}
-      {sessionStatus === 'arrived' && aktuellerStop ? (
+      {sessionStatus === 'arrived' && aktuellerStop && aktuellerStop.kind === 'termin' ? (
         <div className="hidden md:block fixed inset-0 z-40 bg-claimondo-navy/30 backdrop-blur-sm">
           <GlassPanel
             variant="prominent"
@@ -391,17 +407,26 @@ export default function FeldmodusClient({
               variant="prominent"
               className="hidden md:block absolute left-4 top-24 w-[380px] z-30 overflow-hidden"
             >
-              <AktuellerStopCard
-                stop={aktuellerStop}
-                sessionId={session.id}
-                sessionStatus={sessionStatus}
-                svPosition={position ? { lat: position.lat, lng: position.lng } : null}
-                svInGeofence={svInGeofence}
-                permissionState={permissionState}
-                distanceMeters={distanceMeters}
-                onAdvanced={onAdvanced}
-                onArrived={onArrived}
-              />
+              {aktuellerStop.kind === 'privat' ? (
+                <PrivatStopCard
+                  stop={aktuellerStop}
+                  distanceMeters={distanceMeters}
+                  svInGeofence={svInGeofence}
+                  onWeiter={() => goToStopIndex(aktuellerStopIndex + 1)}
+                />
+              ) : (
+                <AktuellerStopCard
+                  stop={aktuellerStop}
+                  sessionId={session.id}
+                  sessionStatus={sessionStatus}
+                  svPosition={position ? { lat: position.lat, lng: position.lng } : null}
+                  svInGeofence={svInGeofence}
+                  permissionState={permissionState}
+                  distanceMeters={distanceMeters}
+                  onAdvanced={onAdvanced}
+                  onArrived={onArrived}
+                />
+              )}
             </GlassPanel>
           )}
 
@@ -509,8 +534,9 @@ export default function FeldmodusClient({
       )}
 
       {/* AAR-383: Fokus-Chat als fixes Bottom-Panel — bleibt im normalen
-          Wrapper als floating Panel über allem. */}
-      {aktuellerStop && sessionStatus !== 'finished' && (
+          Wrapper als floating Panel über allem. 2026-07-08: nur für Termine (Privat-
+          Wegpunkte haben keinen Fall/Claim -> keinen Chat). */}
+      {aktuellerStop && aktuellerStop.kind === 'termin' && sessionStatus !== 'finished' && (
         <FokusChatPanel
           fallId={aktuellerStop.fall_id}
           claimId={aktuellerStop.claim_id}
