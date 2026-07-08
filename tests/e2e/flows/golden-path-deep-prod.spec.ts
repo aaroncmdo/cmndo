@@ -17,8 +17,9 @@ import {
 //
 // Run:
 //   set -a; source <(grep -E 'NEXT_PUBLIC_SUPABASE_URL|NEXT_PUBLIC_SUPABASE_ANON_KEY|SUPABASE_SERVICE_ROLE_KEY' ../../../.env.local); set +a
-//   RUN_GOLDEN_PATH_DEEP=1 TEST_SV_PASSWORD='Claimondo-SV-Smoke-2026' \
+//   RUN_GOLDEN_PATH_DEEP=1 TEST_SV_PASSWORD='Claimondo2026!' \
 //   npx playwright test golden-path-deep-prod --workers=1 --reporter=line
+//   (TEST_SV_PASSWORD rotiert bei Account-Resets; aktuelles PW siehe Memory reference-internal-test-account-logins)
 test.describe.configure({ mode: 'serial' })
 test.skip(!process.env.RUN_GOLDEN_PATH_DEEP, 'set RUN_GOLDEN_PATH_DEEP=1 (läuft echt gegen Prod)')
 

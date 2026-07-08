@@ -50,8 +50,10 @@ export default defineConfig({
     },
   ],
 
-  // Dev server (only locally)
-  ...(process.env.CI ? {} : {
+  // Dev server (only locally). Skip für den Prod-Golden-Path (RUN_GOLDEN_PATH_DEEP): der fährt
+  // gegen app.claimondo.de (absolute URLs), braucht keinen lokalen Server — und `npm run dev`
+  // scheitert im Worktree an unvollständigem node_modules (otel/sentry MODULE_NOT_FOUND).
+  ...((process.env.CI || process.env.RUN_GOLDEN_PATH_DEEP) ? {} : {
     webServer: {
       command: 'npm run dev',
       url: 'http://localhost:3000',
