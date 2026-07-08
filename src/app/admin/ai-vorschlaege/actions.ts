@@ -123,6 +123,7 @@ export async function getOffeneVorschlaegeCount(): Promise<number> {
   const { count } = await db
     .from('ai_claim_proposals')
     .select('id', { count: 'exact', head: true })
+    .eq('quelle', 'orchestrator')
     .eq('status', 'offen')
   return count ?? 0
 }

@@ -8,7 +8,9 @@ import { useEffect, useId } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
-export default function KalenderRealtimeRefresh({ svId }: { svId: string }) {
+// 2026-07-08: profil-gekeyt. Der Sync-Cron schreibt sv_kalender_events_cache profil-gekeyed
+// (profile_id gesetzt, sv_id meist NULL). Der frühere sv_id-Filter matchte die neuen Zeilen nie.
+export default function KalenderRealtimeRefresh({ profileId }: { profileId: string }) {
   const router = useRouter()
   const channelId = useId()
 
@@ -22,14 +24,14 @@ export default function KalenderRealtimeRefresh({ svId }: { svId: string }) {
           event: '*',
           schema: 'public',
           table: 'sv_kalender_events_cache',
-          filter: `sv_id=eq.${svId}`,
+          filter: `profile_id=eq.${profileId}`,
         },
         () => router.refresh(),
       )
       .subscribe()
 
     return () => { void supabase.removeChannel(channel) }
-  }, [svId, channelId, router])
+  }, [profileId, channelId, router])
 
   return null
 }

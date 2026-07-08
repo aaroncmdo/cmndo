@@ -485,7 +485,7 @@ export async function bestaetigeVollmachtKunde(
   // Side-Effects (Termin-Bestaetigung, Kalender-Sync) im Hintergrund —
   // Fehler werden geloggt, blockieren aber das Ergebnis nicht.
   try {
-    const { confirmVollmacht } = await import('@/app/flow/[token]/actions')
+    const { confirmVollmacht } = await import('@/lib/vollmacht/confirm-vollmacht')
     await confirmVollmacht(fallId)
   } catch (err) {
     console.warn('[bestaetigeVollmachtKunde] confirmVollmacht (non-critical):', err)

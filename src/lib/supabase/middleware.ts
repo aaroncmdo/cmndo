@@ -251,6 +251,10 @@ function isPublicPath(pathname: string): boolean {
     '/ersteinschaetzung',
     '/beratung-anfragen',
     '/makler/partner-werden',
+    // Oeffentliche Werkstatt-Partner-Bewerbung (/werkstatt-partner-werden) — anon MUSS
+    // rein, sonst 307 -> /login (analog '/makler/partner-werden'). SPEZIFISCHER Full-Path,
+    // NICHT '/werkstatt' (das wuerde via startsWith das ganze Werkstatt-Portal oeffnen).
+    '/werkstatt-partner-werden',
     // Saeule B: oeffentliche Makler-Selbst-Registrierung — anon MUSS rein, sonst
     // 307 -> /login (analog '/sv' fuer /sv/registrieren). SPEZIFISCHER Pfad, NICHT
     // '/makler' (das wuerde via startsWith das ganze Portal oeffnen = Auth-Bypass).

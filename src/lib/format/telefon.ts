@@ -7,8 +7,14 @@
 //   "0175/1234-567"  → "+49 175 1234567"
 //   "1751234567"     → "+49 175 1234567"
 
-/** Reduziert auf Ziffern + führenden Plus. */
-function toE164(raw: string | null | undefined): string | null {
+/**
+ * Kanonische Normalisierung einer Telefonnummer auf E.164 (+49…) für Deutschland.
+ * EINZIGE Quelle für Telefon-Normalisierung — Sende-/Match-/Dedup-Pfade importieren
+ * dies statt +49/0-Präfix-Logik inline zu wiederholen. Reduziert auf Ziffern +
+ * führenden Plus. Reihenfolge ist wichtig: `00` VOR `0` prüfen (sonst wird `0049…`
+ * fälschlich zu `+49049…` — genau der Bug in den früheren Inline-Kopien).
+ */
+export function toE164(raw: string | null | undefined): string | null {
   if (!raw) return null
   const trimmed = raw.trim()
   if (!trimmed) return null

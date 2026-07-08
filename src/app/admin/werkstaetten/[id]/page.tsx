@@ -15,5 +15,5 @@ export default async function WerkstattDetailPage({ params }: { params: Promise<
   const detail = await ladeWerkstattDetail(id)
   if (!detail) notFound()
 
-  return <WerkstattDetailClient detail={detail} />
+  return <WerkstattDetailClient detail={detail} currentUserId={user.id} />
 }

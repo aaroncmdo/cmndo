@@ -26,41 +26,36 @@ export default async function StellungnahmePage({
   // <=1 Auftrag pro Claim.
   // CMM-49 (faelle-Drop-Runway): Anchor faelle_claim_bridge + claims!inner; sv-Filter via embedded
   // claims.sv_id (SSoT div=0).
+  // Golden-Path-Fund (08.07.): SV liest die Claim-Daten über v_claim_base (SECURITY-DEFINER,
+  // claim_sichtbar_fuer_aktuellen_user-gated — die Fn HAT einen sv_id-Pfad), NICHT über einen rohen
+  // faelle_claim_bridge->claims!inner-Embed. Grund: die *claims-Tabellen*-RLS hat KEINEN SV-Pfad
+  // (nur kunde/dispatch/party/admin/kb) → der !inner-Join lieferte für den SV leer → notFound →
+  // der seit #3816 wieder erreichbare "Stellungnahme einreichen"-CTA führte für JEDEN SV ins Leere.
+  // v_claim_base ist SV-lesbar (wie die Fallseite) und projiziert alle benötigten Felder flach.
   const { data: fallRaw } = await supabase
-    .from('faelle_claim_bridge')
+    .from('v_claim_base')
     .select(
-      // CMM-44 SP-I3: vs_kuerzung_grund + kuerzungs_betrag leben auf kanzlei_faelle (1:1) — Nested-Embed unter claims.
-      'claims:claim_id!inner(sv_id, claim_nummer, auftraege(technische_stellungnahme_status, technische_stellungnahme_beauftragt_am), kanzlei_faelle(vs_kuerzung_grund, kuerzungs_betrag))',
+      'sv_id, claim_nummer, technische_stellungnahme_status, technische_stellungnahme_beauftragt_am, vs_kuerzung_grund, kuerzungs_betrag',
     )
     .eq('fall_id', id)
-    .eq('claims.sv_id', sv.id)
+    .eq('sv_id', sv.id)
     .maybeSingle()
-  const fall = fallRaw as unknown as { claims: Record<string, unknown> | Record<string, unknown>[] | null } | null
+  const fall = fallRaw as unknown as {
+    sv_id: string | null
+    claim_nummer: string | null
+    technische_stellungnahme_status: string | null
+    technische_stellungnahme_beauftragt_am: string | null
+    vs_kuerzung_grund: string | null
+    kuerzungs_betrag: number | null
+  } | null
 
   if (!fall) notFound()
 
-  const fallClaim = Array.isArray(fall.claims) ? fall.claims[0] : fall.claims
-  // CMM-44 SP-I3: vs_kuerzung_grund + kuerzungs_betrag aus dem kanzlei_faelle-Embed (1:1, Array-normalisiert).
-  const fallKf = Array.isArray((fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle)
-    ? (fallClaim as { kanzlei_faelle: unknown[] }).kanzlei_faelle[0]
-    : (fallClaim as { kanzlei_faelle?: unknown } | null)?.kanzlei_faelle
-  const fallAuftraege = Array.isArray(
-    (fallClaim as { auftraege?: unknown } | null)?.auftraege,
-  )
-    ? ((fallClaim as { auftraege: unknown[] }).auftraege)
-    : ((fallClaim as { auftraege?: unknown } | null)?.auftraege
-        ? [(fallClaim as { auftraege: unknown }).auftraege]
-        : [])
-  const aktAuftrag =
-    (fallAuftraege[0] as
-      | { technische_stellungnahme_status?: string | null; technische_stellungnahme_beauftragt_am?: string | null }
-      | undefined) ?? null
-
-  if (aktAuftrag?.technische_stellungnahme_status === 'hochgeladen' || aktAuftrag?.technische_stellungnahme_status === 'freigegeben') {
+  const stStatus = fall.technische_stellungnahme_status
+  if (stStatus === 'hochgeladen' || stStatus === 'freigegeben') {
     redirect(`/gutachter/fall/${id}`)
   }
-
-  if (aktAuftrag?.technische_stellungnahme_status !== 'beauftragt') {
+  if (stStatus !== 'beauftragt') {
     notFound()
   }
 
@@ -98,10 +93,10 @@ export default async function StellungnahmePage({
   return (
     <StellungnahmeClient
       fallId={id}
-      fallNummer={((fallClaim as { claim_nummer?: string | null } | null)?.claim_nummer) ?? null}
-      beauftragAm={(aktAuftrag?.technische_stellungnahme_beauftragt_am as string | null) ?? null}
-      vsKuerzungGrund={((fallKf as { vs_kuerzung_grund?: string | null } | null)?.vs_kuerzung_grund) ?? null}
-      kuerzungsBetrag={(fallKf as { kuerzungs_betrag?: number | null } | null)?.kuerzungs_betrag != null ? Number((fallKf as { kuerzungs_betrag: number }).kuerzungs_betrag) : null}
+      fallNummer={fall.claim_nummer}
+      beauftragAm={fall.technische_stellungnahme_beauftragt_am}
+      vsKuerzungGrund={fall.vs_kuerzung_grund}
+      kuerzungsBetrag={fall.kuerzungs_betrag != null ? Number(fall.kuerzungs_betrag) : null}
       kuerzungen={kuerzungen}
     />
   )

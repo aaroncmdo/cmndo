@@ -14,24 +14,9 @@ import type { Database } from '@/lib/supabase/database.types'
 
 type DbClient = SupabaseClient<Database>
 
-export type ClaimPaymentRerouteFields = {
-  zahlungseingang_am?: string | null
-  erhaltener_betrag?: number | null
-  zahlungsweg?: string | null
-  zahlungsreferenz?: string | null
-  /**
-   * claim_payments.status ist NOT NULL DEFAULT 'ausstehend'
-   * (CHECK in ausstehend|teilweise|erhalten|final|abgelehnt). Beim
-   * Zahlungseingang explizit 'erhalten' setzen; bei reiner Methoden-/Payout-
-   * Erfassung (z.B. Kunde waehlt Zahlungsweg) weglassen -> der INSERT faellt auf
-   * den DB-Default 'ausstehend' zurueck, ein UPDATE laesst den Status unberuehrt.
-   */
-  status?: 'ausstehend' | 'teilweise' | 'erhalten' | 'final' | 'abgelehnt'
-}
-
-// Payment-Ledger Phase 4: das alte `upsertCurrentClaimPayment` (neueste-Row-blind,
-// empfaenger-agnostisch) ist entfernt — 0 Consumer nach der partei-aware Migration (Schritt C).
-// `ClaimPaymentRerouteFields` (oben) bleibt: lexdrive/process-event nutzt es noch fuer cpFields.
+// Payment-Ledger Phase 4: die alten neueste-Row-blinden Seams (`upsertCurrentClaimPayment` +
+// Typ `ClaimPaymentRerouteFields`) sind entfernt — 0 Consumer nach der partei-aware Reader-Migration
+// (Schritt C) + dem Collapse (#3845 migrierte process-event auf `ClaimPaymentFields`).
 
 // ── Payment-Ledger-Normalisierung: kanonischer Write-Seam ────────────────────
 // Design: docs/superpowers/specs/2026-07-07-payment-ledger-normalisierung-design.md

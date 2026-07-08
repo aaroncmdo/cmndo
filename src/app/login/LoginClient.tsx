@@ -9,6 +9,7 @@ import { LoadingButton } from '@/components/ui/loading-button'
 import { PasswordInput } from '@/components/ui/PasswordInput'
 import { safeContinue } from '@/lib/auth/safe-continue'
 import { finalisierePhoneLogin } from './actions'
+import { toE164 } from '@/lib/format/telefon'
 
 // Submit-Button mit useFormStatus damit der Loading-Spinner waehrend der
 // Server-Action-Ausfuehrung sichtbar ist (BUG-88).
@@ -52,8 +53,11 @@ export default function LoginClient({
       // F4 (AAR-audit-2fa): kein Auto-Signup — signInWithOtp legt sonst per
       // Default neue Konten an (Signup-Vektor). Nur bestehende Konten duerfen
       // sich per SMS-OTP anmelden.
+      // B2: Eingabe auf E.164 normalisieren, damit sie gegen auth.users.phone
+      // (kanonisch E.164) aufloest — sonst findet signInWithOtp das Konto nicht.
+      const phoneE164 = toE164(phone) ?? phone
       const { error } = await supabase.auth.signInWithOtp({
-        phone,
+        phone: phoneE164,
         options: { shouldCreateUser: false },
       })
       if (error) throw error
@@ -70,7 +74,7 @@ export default function LoginClient({
     setPhoneLoading(true)
     try {
       const supabase = createClient()
-      const { error } = await supabase.auth.verifyOtp({ phone, token: otp, type: 'sms' })
+      const { error } = await supabase.auth.verifyOtp({ phone: toE164(phone) ?? phone, token: otp, type: 'sms' })
       if (error) throw error
       // AAR-auth-haertung (Befund I): Profil-Write (auth_provider +
       // force_password_change) serverseitig + error-checked statt ungeprueft auf

@@ -7,7 +7,8 @@
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
-import { geocodeAddress } from '@/lib/google-geocoding/geocode-address'
+import { geocodeMitFallback } from '@/lib/termine/engine/geocode'
+import { berlinIsoDate } from '@/lib/time/berlin-day'
 
 export type PrivatStopRow = {
   id: string
@@ -52,15 +53,24 @@ export async function addPrivatStop(
   let address = input.address.trim()
 
   if (lat == null || lng == null) {
-    const geo = await geocodeAddress(address)
-    if (!geo.ok) return { ok: false, error: `Adresse nicht geocodierbar: ${geo.error}` }
-    lat = geo.data.lat
-    lng = geo.data.lng
-    placeId = geo.data.place_id
-    address = geo.data.formatted_address
+    // Kanonischer Produktions-Geocoder (Mapbox-first, Google-Fallback) — dieselbe Funktion wie die
+    // Termin-Engine (geocodeMitFallback). Der fruehere direkte geocodeAddress (Google) schlug
+    // server-seitig mit REQUEST_DENIED fehl: die Google-Geocoding-API ist fuer unseren Browser-Key
+    // NICHT aktiviert und es gibt keinen GOOGLE_MAPS_SERVER_KEY -> der Fallback auf den
+    // referrer-beschraenkten NEXT_PUBLIC-Key wird server-seitig (kein Referrer) abgelehnt.
+    // Mapbox (MAPBOX_ACCESS_TOKEN) geocodet server-seitig sauber (verifiziert).
+    const geo = await geocodeMitFallback(address)
+    if (!geo) return { ok: false, error: `Adresse nicht geocodierbar: ${address}` }
+    lat = geo.lat
+    lng = geo.lng
+    placeId = geo.placeId
+    address = geo.adresse ?? address
   }
 
-  const datum = new Date(input.start_zeit).toISOString().slice(0, 10)
+  // Berlin-Kalendertag (nicht UTC-Slice) — konsistent mit listPrivatStopsForDate
+  // + dem heute/page-Fenster. Sonst landet ein Stop um 00:30 Berlin (22:30 UTC
+  // Vortag) auf dem UTC-Vortag und verschwindet aus der Berlin-Tagesroute.
+  const datum = berlinIsoDate(new Date(input.start_zeit))
 
   const { data, error } = await supabase
     .from('sv_private_stops')

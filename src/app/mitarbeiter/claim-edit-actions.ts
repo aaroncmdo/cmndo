@@ -45,3 +45,56 @@ export async function updateClaimField(
   revalidatePath('/mitarbeiter')
   return { ok: true }
 }
+
+// Module-local (nicht exportiert) -> keine 'use server'-const-Export-Falle (AAR-664).
+const VALID_PHASE_OVERRIDES = ['erfassung', 'begutachtung', 'regulierung', 'abschluss'] as const
+
+/**
+ * Setzt oder loescht den manuellen Phasen-Override (Admin/KB-Eingriff, Phase 1d).
+ * phase=null -> Override aufheben (zurueck zur abgeleiteten Phase). Enum-sicher (CHECK-konform).
+ * Owner (KB) ODER Admin (Aaron: Override=beide). Audit -> timeline.
+ */
+export async function overrideClaimPhase(
+  claimId: string,
+  phase: string | null,
+  grund: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  if (phase !== null && !(VALID_PHASE_OVERRIDES as readonly string[]).includes(phase)) {
+    return { ok: false, error: 'Ungültige Phase' }
+  }
+  if (phase !== null && !grund.trim()) {
+    return { ok: false, error: 'Grund erforderlich' }
+  }
+  const supabase = await createClient()
+  const { data: auth } = await supabase.auth.getUser()
+  const user = auth?.user
+  if (!user) return { ok: false, error: 'Nicht angemeldet' }
+
+  const admin = createAdminClient()
+  const { data: profile } = await admin.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
+  const rolle = (profile?.rolle as string | null) ?? null
+  const { data: claim, error: readErr } = await admin.from('claims').select('kundenbetreuer_id, phase_override').eq('id', claimId).maybeSingle()
+  if (readErr || !claim) return { ok: false, error: 'Fall nicht gefunden' }
+  if (rolle !== 'admin' && claim.kundenbetreuer_id !== user.id) return { ok: false, error: 'Keine Berechtigung' }
+
+  const clearing = phase === null
+  const { error: upErr } = await admin.from('claims').update({
+    phase_override: phase,
+    phase_override_grund: clearing ? null : grund,
+    phase_override_von: clearing ? null : user.id,
+    phase_override_am: clearing ? null : new Date().toISOString(),
+  }).eq('id', claimId)
+  if (upErr) return { ok: false, error: upErr.message }
+
+  try {
+    await admin.from('timeline').insert({
+      claim_id: claimId, typ: 'phase_override',
+      titel: clearing ? 'Phasen-Override aufgehoben' : `Phase manuell gesetzt: ${phase}`,
+      erstellt_von: user.id,
+      metadata: { old: (claim as { phase_override: string | null }).phase_override, new: phase, grund: clearing ? null : grund },
+    })
+  } catch (err) { console.error('[overrideClaimPhase] audit insert failed', err) }
+
+  revalidatePath('/mitarbeiter')
+  return { ok: true }
+}

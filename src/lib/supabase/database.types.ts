@@ -12412,12 +12412,40 @@ export type Database = {
           },
         ]
       }
+      partner_lead_aktivitaeten: {
+        Row: {
+          erstellt_am: string
+          erstellt_von: string | null
+          id: string
+          partner_lead_id: string
+          text: string | null
+          typ: string
+        }
+        Insert: {
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          partner_lead_id: string
+          text?: string | null
+          typ: string
+        }
+        Update: {
+          erstellt_am?: string
+          erstellt_von?: string | null
+          id?: string
+          partner_lead_id?: string
+          text?: string | null
+          typ?: string
+        }
+        Relationships: []
+      }
       partner_leads: {
         Row: {
           aktualisiert_am: string
           ansprechpartner_nachname: string | null
           ansprechpartner_vorname: string | null
-          email: string
+          einstufung: string | null
+          email: string | null
           erstellt_am: string
           firma: string | null
           id: string
@@ -12439,7 +12467,8 @@ export type Database = {
           aktualisiert_am?: string
           ansprechpartner_nachname?: string | null
           ansprechpartner_vorname?: string | null
-          email: string
+          einstufung?: string | null
+          email?: string | null
           erstellt_am?: string
           firma?: string | null
           id?: string
@@ -12461,7 +12490,8 @@ export type Database = {
           aktualisiert_am?: string
           ansprechpartner_nachname?: string | null
           ansprechpartner_vorname?: string | null
-          email?: string
+          einstufung?: string | null
+          email?: string | null
           erstellt_am?: string
           firma?: string | null
           id?: string

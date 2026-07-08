@@ -8,6 +8,7 @@ import { useMemo } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useFall } from '../FallContext'
 import MultiChannelChat from '@/components/chat/MultiChannelChat'
+import { ClaimChatPanel } from '@/components/chat/ClaimChatPanel'
 import type { ChatKanal } from '@/lib/communications/channels'
 import { getKanaeleForRolle, resolveKanalAlias } from '@/lib/chat/kanal-routing'
 
@@ -49,16 +50,26 @@ export default function KommunikationTab({
   // AAR-541: Admin/KB = Super-User → interner Kanal explizit erlauben
   const showInternal = visibleKanaele.includes('chat_kb_sv')
 
+  // Phase-2c Cutover-Flag: ?chatv2=1 -> neues Thread-Modell (ClaimChatPanel) statt Kanal-Matrix.
+  // Default aus -> unveraendert. Staff-seitig (Fallakte), per URL testbar, null Prod-Risiko.
+  const chatV2 = search?.get('chatv2') === '1'
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-4">
       <div>
-        <MultiChannelChat
-          fallId={fall.id}
-          currentUserId={currentUserId}
-          showInternalKbSvChat={showInternal}
-          defaultKanal={defaultKanal}
-          visibleKanaele={visibleKanaele}
-        />
+        {chatV2 && currentUserId ? (
+          <div className="h-[70vh] min-h-0 overflow-hidden rounded-ios-xl border border-claimondo-border bg-white">
+            <ClaimChatPanel claimId={fall.id} currentUserId={currentUserId} istStaff={showInternal} />
+          </div>
+        ) : (
+          <MultiChannelChat
+            fallId={fall.id}
+            currentUserId={currentUserId}
+            showInternalKbSvChat={showInternal}
+            defaultKanal={defaultKanal}
+            visibleKanaele={visibleKanaele}
+          />
+        )}
       </div>
 
       <aside className="bg-white border border-claimondo-border rounded-ios-xl p-4 h-fit">

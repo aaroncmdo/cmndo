@@ -13,14 +13,11 @@ import type {
   SvTagesSession,
 } from '@/lib/types/field-modus'
 import { computeTransitionPatch } from './field-state-machine'
+import { berlinIsoDate } from '@/lib/time/berlin-day'
 
 function revalidateFeldmodusRoutes() {
   revalidatePath('/gutachter/heute')
   revalidatePath('/gutachter/feldmodus')
-}
-
-function isoDate(datum: Date): string {
-  return datum.toISOString().slice(0, 10)
 }
 
 /** Lädt die Session eines SV an einem Tag oder null. */
@@ -33,7 +30,7 @@ export async function getTagesSession(
     .from('sv_tages_session')
     .select('*')
     .eq('sv_id', svId)
-    .eq('datum', isoDate(datum))
+    .eq('datum', berlinIsoDate(datum))
     .maybeSingle()
 
   if (error) {
@@ -64,7 +61,7 @@ export async function ensureTagesSession(
     .from('sv_tages_session')
     .insert({
       sv_id: svId,
-      datum: isoDate(datum),
+      datum: berlinIsoDate(datum),
       status: 'idle',
       reihenfolge_termin_ids: terminIds,
       aktueller_termin_id: terminIds[0] ?? null,
@@ -77,7 +74,7 @@ export async function ensureTagesSession(
     // wichtige Hints im `details`-Feld die der User-facing-Toast braucht.
     console.error('[tages-session] ensureTagesSession failed:', {
       svId,
-      datum: isoDate(datum),
+      datum: berlinIsoDate(datum),
       terminIds,
       code: (error as { code?: string }).code,
       message: error.message,

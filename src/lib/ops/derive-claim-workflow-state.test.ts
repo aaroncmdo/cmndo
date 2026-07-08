@@ -12,6 +12,7 @@ const base: ClaimWorkstateRow = {
   updated_at: '2026-06-01T00:00:00Z', created_at: '2026-05-20T00:00:00Z',
   dokumente_vollstaendig_fuer_phase: null, vs_eskalationsstufe: null,
   fall_id: 'f1',
+  edit_notizen: 'hallo', edit_interne_notizen: null, edit_schadens_hoehe_netto: 4500,
 }
 const NOW = new Date('2026-06-15T00:00:00Z')
 
@@ -49,5 +50,13 @@ describe('deriveClaimWorkflowState', () => {
   })
   it('fallId ist null wenn die Zeile kein fall_id hat', () => {
     expect(deriveClaimWorkflowState({ ...base, fall_id: null }, NOW).fallId).toBeNull()
+  })
+  it('surfaced editable fields (aktuelle Werte fuer den Hover)', () => {
+    const wi = deriveClaimWorkflowState(base, NOW)
+    expect(wi.editable).toEqual({ notizen: 'hallo', interneNotizen: null, schadensHoeheNetto: 4500 })
+  })
+  it('surfaced kundenbetreuerId from the row (Admin-Cockpit-Gruppierung)', () => {
+    expect(deriveClaimWorkflowState(base, NOW).kundenbetreuerId).toBe('kb1')
+    expect(deriveClaimWorkflowState({ ...base, kundenbetreuer_id: null }, NOW).kundenbetreuerId).toBeNull()
   })
 })

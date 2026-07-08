@@ -34,6 +34,7 @@ describe('ensureSeedGraph', () => {
       operative_status: 'sv-termin',
       sv_id: SV_SACHVERSTAENDIGE_ID,
       lead_id: LEADS.c2,
+      sa_unterschrieben: true,
     })
     expect((rows['claim_parties'] ?? []).find((r) => r.id === PARTIES.c2)).toMatchObject({
       claim_id: CLAIMS.c2,
@@ -47,7 +48,7 @@ describe('ensureSeedGraph', () => {
       sv_id: SV_SACHVERSTAENDIGE_ID,
       typ: 'erstgutachten',
       status: 'termin',
-      technische_stellungnahme_status: 'angefordert',
+      technische_stellungnahme_status: 'beauftragt',
     })
   })
 
@@ -55,6 +56,10 @@ describe('ensureSeedGraph', () => {
     const rows = await seed()
     expect((rows['claims'] ?? []).find((r) => r.id === CLAIMS.c1)).toMatchObject({
       operative_status: 'ersterfassung',
+      // Kunde-Flow-kritisch: onboarding_complete verhindert den /kunde/onboarding-Redirect,
+      // geschaedigter_user_id erfüllt die pflichtdokumente-RLS (Slots mit pflichtdokument_id).
+      onboarding_complete: true,
+      geschaedigter_user_id: ACCOUNTS.kunde,
     })
     const slots = (rows['pflichtdokumente'] ?? []).filter((r) => r.fall_id === CLAIMS.c1)
     expect(slots).toHaveLength(3)
@@ -76,10 +81,22 @@ describe('ensureSeedGraph', () => {
     })
   })
 
-  it('legt für alle 3 Stages einen geschädigten (test-kunde) + internen Lead an', async () => {
+  it('legt für alle 4 Stages einen geschädigten (test-kunde) + internen Lead an', async () => {
     const rows = await seed()
-    expect((rows['claim_parties'] ?? []).filter((r) => r.rolle === 'geschaedigter' && r.user_id === ACCOUNTS.kunde)).toHaveLength(3)
-    expect((rows['leads'] ?? [])).toHaveLength(3)
+    expect((rows['claim_parties'] ?? []).filter((r) => r.rolle === 'geschaedigter' && r.user_id === ACCOUNTS.kunde)).toHaveLength(4)
+    expect((rows['leads'] ?? [])).toHaveLength(4)
     expect((rows['leads'] ?? []).every((l) => String(l.email).endsWith('@claimondo.de'))).toBe(true)
+  })
+
+  it('C4 (KB-Fixture): Auftrag technische_stellungnahme_status=null + kanzlei_faelle vs_kuerzungs_typ=technisch', async () => {
+    const rows = await seed()
+    expect((rows['auftraege'] ?? []).find((r) => r.id === AUFTRAEGE.c4)).toMatchObject({
+      claim_id: CLAIMS.c4,
+      technische_stellungnahme_status: null,
+    })
+    expect((rows['kanzlei_faelle'] ?? []).find((r) => r.claim_id === CLAIMS.c4)).toMatchObject({
+      vs_reaktion_typ: 'gekuerzt',
+      vs_kuerzungs_typ: 'technisch',
+    })
   })
 })
