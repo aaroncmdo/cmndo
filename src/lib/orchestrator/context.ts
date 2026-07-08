@@ -124,10 +124,15 @@ export async function buildClaimContext(claimId: string): Promise<ClaimContext |
   }))
 
   // --- frühere Vorschläge dieses Falls (Stateful Context, Spec §1) ---
+  // Nur eigene Orchestrator-Vorschläge: der geteilte Spine trägt auch copilot/aufsicht
+  // (andere Flächen + Semantik). Der Self-Learning-Prompt ("NICHT wiederholen" + feedback)
+  // darf nur die autonome Orchestrator-Historie sehen — sonst verzerren fremde Ablehnungen
+  // das Signal. Konsistent mit stats/proposals/quality-regression (alle quelle=orchestrator).
   const { data: proposalRows } = await db
     .from('ai_claim_proposals')
     .select('vorschlag_typ, payload, status, feedback')
     .eq('claim_id', claimId)
+    .eq('quelle', 'orchestrator')
     .order('erstellt_am', { ascending: false })
     .limit(8)
 
