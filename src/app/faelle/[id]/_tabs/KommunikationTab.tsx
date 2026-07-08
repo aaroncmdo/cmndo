@@ -50,9 +50,9 @@ export default function KommunikationTab({
   // AAR-541: Admin/KB = Super-User → interner Kanal explizit erlauben
   const showInternal = visibleKanaele.includes('chat_kb_sv')
 
-  // Phase-2c Cutover-Flag: ?chatv2=1 -> neues Thread-Modell (ClaimChatPanel) statt Kanal-Matrix.
-  // Default aus -> unveraendert. Staff-seitig (Fallakte), per URL testbar, null Prod-Risiko.
-  const chatV2 = search?.get('chatv2') === '1'
+  // Phase-2c Cutover-Flag: neues Thread-Modell (ClaimChatPanel) ist jetzt DEFAULT statt Kanal-Matrix.
+  // Escape-Hatch ?chatv2=0 -> v1 (MultiChannelChat). Staff-seitig (Fallakte).
+  const chatV2 = search?.get('chatv2') !== '0'
   // ClaimChatPanel ist claim-nativ: die Threads haengen an claims.id — das ist
   // fall.claim_id (seit AAR-816 NOT NULL), NICHT fall.id (= v_faelle-View-id /
   // legacy fall_id, weicht vom claim_id ab). Sonst: "Claim nicht gefunden".
