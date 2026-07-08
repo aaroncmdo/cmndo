@@ -211,39 +211,28 @@ export default function AktuellerStopCard({
     stop.lng,
   ])
 
-  // Phase 3 — Fallback: Terminuhrzeit erreicht und GPS nicht überall
-  useEffect(() => {
-    if (besichtigungLaeuft) return
-    if (permissionState === 'granted' && kundeTracking.aktiviert) return
-    const startMs = new Date(stop.start_zeit).getTime()
-    const delay = Math.max(0, startMs - Date.now())
-    const timer = setTimeout(() => {
-      if (besichtigungFiredRef.current) return
-      besichtigungFiredRef.current = true
-      void markBesichtigungGestartet(sessionId, stop.termin_id, 'termin_uhrzeit')
-        .then((res) => {
-          if (res.success) {
-            onArrived(stop.lat ?? 0, stop.lng ?? 0, 'termin_uhrzeit')
-          } else {
-            besichtigungFiredRef.current = false
-          }
-        })
-        .catch(() => {
-          besichtigungFiredRef.current = false
-        })
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [
-    besichtigungLaeuft,
-    permissionState,
-    kundeTracking.aktiviert,
-    sessionId,
-    stop.termin_id,
-    stop.start_zeit,
-    stop.lat,
-    stop.lng,
-    onArrived,
-  ])
+  // 2026-07-08 (Aaron „immer den tagesmodus von mapbox, nicht uhrzeitabhängig"):
+  // Die frühere Phase 3 (Uhrzeit-Auto-Ankunft) ist ENTFERNT. Sie startete die Besichtigung
+  // beim Erreichen der Terminuhrzeit — bei einem Termin in der Vergangenheit (delay=0) also
+  // SOFORT beim Öffnen des Feldmodus („Besichtigung obwohl nicht beim Termin"). Der Tagesmodus
+  // bleibt jetzt IMMER in der Navigation; die Besichtigung startet nur bei echter Ankunft
+  // (Geofence, Phase 2) oder wenn der SV sie unten MANUELL bestätigt (onManuellAngekommen).
+
+  // 2026-07-08: Manuelle Ankunft — ersetzt die entfernte Uhrzeit-Auto-Ankunft. Startet die
+  // Besichtigung erst, wenn der SV wirklich da ist (auch ohne Geofence/GPS). Nicht uhrzeitabhängig.
+  function onManuellAngekommen() {
+    if (besichtigungFiredRef.current) return
+    besichtigungFiredRef.current = true
+    startTransition(async () => {
+      const res = await markBesichtigungGestartet(sessionId, stop.termin_id, 'manuell')
+      if (res.success) {
+        onArrived(svPosition?.lat ?? stop.lat ?? 0, svPosition?.lng ?? stop.lng ?? 0, 'manuell')
+      } else {
+        besichtigungFiredRef.current = false
+        toast.error(res.error ?? 'Konnte Besichtigung nicht starten')
+      }
+    })
+  }
 
   function onAbschliessen() {
     startTransition(async () => {
@@ -269,9 +258,9 @@ export default function AktuellerStopCard({
     }
     if (svInGeofence) return 'Ankunft wird gleich bestätigt'
     if (permissionState === 'denied') {
-      return 'GPS verweigert — Ankunft wird zur Terminuhrzeit erkannt'
+      return 'GPS verweigert — bestätige deine Ankunft unten mit „Ich bin angekommen".'
     }
-    return 'Auto-Ankunft aktiv (Geofence 100 m)'
+    return 'Auto-Ankunft bei Geofence (100 m) — oder unten manuell bestätigen.'
   })()
 
   // C1: Kompakt-Variante (weit weg / keine Distanz) — Glass-Look kommt vom
@@ -475,6 +464,21 @@ export default function AktuellerStopCard({
 
       {/* Aktionen */}
       <div className="flex flex-col gap-2 pt-2">
+        {/* 2026-07-08: Manuelle Ankunft (ersetzt Uhrzeit-Auto-Ankunft) — nur solange die
+            Besichtigung noch nicht läuft. Startet die Besichtigung bei echter Ankunft. */}
+        {!besichtigungLaeuft && sessionStatus !== 'finished' && (
+          <Button
+            type="button"
+            variant="navy"
+            size="lg"
+            fullWidth
+            onClick={onManuellAngekommen}
+            disabled={pending}
+            iconLeft={<MapPinIcon className="w-5 h-5" />}
+          >
+            {pending ? 'Starte …' : 'Ich bin angekommen — Besichtigung starten'}
+          </Button>
+        )}
         {besichtigungLaeuft && sessionStatus !== 'finished' && (
           <Button
             type="button"
