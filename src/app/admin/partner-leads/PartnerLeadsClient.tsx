@@ -59,7 +59,7 @@ import {
   type PartnerCsvLead,
 } from '@/lib/partner/csv-import'
 import type { ScrapeKandidat } from '@/lib/partner/scraping'
-import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow } from './types'
+import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow, PartnerOnboardingTerminRow } from './types'
 import {
   PARTNER_LEAD_STATUS,
   PARTNER_LEAD_STATUS_LABELS,
@@ -147,10 +147,12 @@ export default function PartnerLeadsClient({
   leads,
   staff,
   aktivitaeten,
+  termine,
 }: {
   leads: PartnerLeadRow[]
   staff: StaffOption[]
   aktivitaeten: PartnerLeadAktivitaetRow[]
+  termine: PartnerOnboardingTerminRow[]
 }) {
   const router = useRouter()
   const [rolleFilter, setRolleFilter] = useState<'alle' | PartnerRolle>('alle')

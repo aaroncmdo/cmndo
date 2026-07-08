@@ -10,8 +10,9 @@
 
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import PartnerLeadsClient from './PartnerLeadsClient'
-import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow } from './types'
+import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow, PartnerOnboardingTerminRow } from './types'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,7 +35,7 @@ export default async function PartnerLeadsPage() {
   const { data: leadsRaw, error } = await supabase
     .from('partner_leads')
     .select(
-      'id, rolle, status, firma, ansprechpartner_vorname, ansprechpartner_nachname, email, telefon, plz, ort, source_channel, einstufung, rollen_details, zugewiesen_an, konvertiert_zu_user_id, konvertiert_zu_partner_id, konvertiert_am, notiz, erstellt_am, aktualisiert_am',
+      'id, rolle, status, firma, ansprechpartner_vorname, ansprechpartner_nachname, email, telefon, plz, ort, strasse, source_channel, einstufung, rollen_details, zugewiesen_an, konvertiert_zu_user_id, konvertiert_zu_partner_id, konvertiert_am, notiz, erstellt_am, aktualisiert_am',
     )
     .order('erstellt_am', { ascending: false })
     .limit(500)
@@ -89,11 +90,38 @@ export default async function PartnerLeadsPage() {
     erstellt_am: a.erstellt_am as string,
   }))
 
+  // Onboarding-Termine (admin_termine.typ='partner_onboarding') per service-role:
+  // admin_termine-RLS deckt leadbearbeiter nicht; die Seite ist bereits rollen-gegatet.
+  const termine: PartnerOnboardingTerminRow[] = []
+  if (leadIds.length) {
+    const svc = createAdminClient()
+    const { data: termineRaw } = await svc
+      .from('admin_termine')
+      .select('id, partner_lead_id, start_zeit, end_zeit, kanal, video_link, treffpunkt_adresse, status, titel')
+      .eq('typ', 'partner_onboarding')
+      .in('partner_lead_id', leadIds)
+      .order('start_zeit', { ascending: true })
+    for (const t of termineRaw ?? []) {
+      termine.push({
+        id: t.id as string,
+        partner_lead_id: t.partner_lead_id as string,
+        start_zeit: t.start_zeit as string,
+        end_zeit: (t.end_zeit as string | null) ?? null,
+        kanal: (t.kanal as 'online' | 'vor_ort' | null) ?? null,
+        video_link: (t.video_link as string | null) ?? null,
+        treffpunkt_adresse: (t.treffpunkt_adresse as string | null) ?? null,
+        status: (t.status as string | null) ?? null,
+        titel: t.titel as string,
+      })
+    }
+  }
+
   return (
     <PartnerLeadsClient
       leads={leads}
       staff={staff}
       aktivitaeten={aktivitaeten}
+      termine={termine}
     />
   )
 }
