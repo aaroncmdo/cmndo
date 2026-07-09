@@ -668,7 +668,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "сертифицированная партнёрская сеть"
+          "label": "сеть Expert Partner"
         },
         {
           "kpi": "30–40 %",
@@ -2113,7 +2113,7 @@
     "kpis": [
       {
         "wert": "DAT",
-        "label": "сертифицированная партнёрская сеть"
+        "label": "сеть Expert Partner"
       },
       {
         "wert": "< 48 ч",
@@ -2262,7 +2262,7 @@
       },
       {
         "wert": "DAT",
-        "label": "сертифицированная сеть"
+        "label": "сеть Expert Partner"
       },
       {
         "wert": "Köln",
@@ -2854,7 +2854,7 @@
     "hero_intro": "Сертифицированные партнёры-эксперты из официального реестра DAT (dat.de/sachverstaendige), доступные по всей Германии. Выезд на осмотр в течение 48 часов. Для пострадавших без вины — 0 € собственных расходов: страховая виновника несёт все расходы согласно §249 BGB (при условии признания ответственности).",
     "hero_cta_karte": "Смотреть на карте",
     "hero_cta_schaden": "Сообщить об ущербе",
-    "trust_kpi_dat_label": "сертифицированная сеть",
+    "trust_kpi_dat_label": "сеть Expert Partner",
     "trust_kpi_termin_label": "Приём",
     "trust_kpi_eigenanteil_label": "Собственные расходы¹",
     "trust_kpi_recht_label": "Правовая основа",
@@ -3664,7 +3664,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Правовая основа требования",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "сертифицированная сеть"
+    "trust_stat_3_label": "сеть Expert Partner"
   },
   "unfallskizze": {
     "breadcrumb_start": "Начало",
