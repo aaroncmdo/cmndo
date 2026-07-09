@@ -7,6 +7,7 @@ import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer } from
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Card, Button } from '@/components/primitives'
 import { filterKontakte } from './_lib/filter-kontakte'
+import { collapseByFirma } from './_lib/collapse-firmen'
 import { KIND_LABEL } from './_lib/labels'
 import VertriebDetailDrawer from './VertriebDetailDrawer'
 import {
@@ -38,6 +39,8 @@ export default function VertriebRosterClient({
     () => filterKontakte(kontakte, { seg, search, stufe }),
     [kontakte, seg, search, stufe],
   )
+  // Mehr-Standort-Firmen im Roster zu einer Zeile zusammenfassen (Karte behält alle Filialen).
+  const angezeigt = useMemo(() => collapseByFirma(gefiltert), [gefiltert])
   const kpi = useMemo(() => {
     const sum = (pred: (z: VertriebRollupZelle) => boolean) =>
       rollup.filter(pred).reduce((a, z) => a + z.anzahl, 0)
@@ -91,7 +94,7 @@ export default function VertriebRosterClient({
           ))}
         </select>
         <span className="text-caption text-claimondo-ondo/60">
-          {gefiltert.length} von {kontakte.length}
+          {angezeigt.length} von {kontakte.length}
         </span>
       </div>
 
@@ -107,9 +110,16 @@ export default function VertriebRosterClient({
             </Tr>
           </Thead>
           <Tbody>
-            {gefiltert.map((k) => (
+            {angezeigt.map((k) => (
               <ClickableTr key={`${k.kind}-${k.id}`} onClick={() => setSelected(k)}>
-                <Td>{k.name ?? '—'}</Td>
+                <Td>
+                  {k.name ?? '—'}
+                  {k.standorte > 1 && (
+                    <span className="ml-2 text-caption text-claimondo-ondo/60">
+                      · {k.standorte} Standorte
+                    </span>
+                  )}
+                </Td>
                 <Td>{KIND_LABEL[k.kind]}</Td>
                 <Td>
                   <StatusBadge domain="vertrieb-workflow" code={k.stufe} size="sm" />
@@ -118,7 +128,7 @@ export default function VertriebRosterClient({
                 <Td>{k.email ?? k.telefon ?? '—'}</Td>
               </ClickableTr>
             ))}
-            {gefiltert.length === 0 && (
+            {angezeigt.length === 0 && (
               <Tr>
                 <Td colSpan={5}>Keine Einträge — Filter anpassen.</Td>
               </Tr>
