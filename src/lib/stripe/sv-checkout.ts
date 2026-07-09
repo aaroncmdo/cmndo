@@ -54,6 +54,13 @@ export async function createStripeCheckoutSession(gutachterId: string): Promise<
 
   if (!sv) throw new Error('SV nicht gefunden')
 
+  // Basic-Partner (Pay-per-Lead) haben KEINE Onboarding-Anzahlung → nie ein Stripe-Checkout.
+  // Sie umgehen den Zahl-Schritt bereits (gutachter/willkommen early-exit -> SvBasicOnboardingClient);
+  // dieser Guard ist die belt-and-suspenders-Absicherung, falls der Checkout doch direkt aufgerufen wird.
+  if ((sv.paket ?? '') === 'basic') {
+    throw new Error('Basic-Partner (Pay-per-Lead) haben keine Anzahlung — kein Stripe-Checkout nötig.')
+  }
+
   const betrag = Number(sv.onboarding_anzahlung_betrag ?? 0)
   if (betrag <= 0) throw new Error('Kein Anzahlungsbetrag hinterlegt')
 

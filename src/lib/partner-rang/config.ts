@@ -9,6 +9,8 @@ export interface RangConfig {
   volumenFaktor: number
   // Credentials
   credOeffentlichBestellt: number
+  /** Dedizierter DAT-Partner-Bonus (zusaetzlich zum generischen Zertifikat-Zaehler) — der eigentliche „DAT bevorzugt"-Hebel. */
+  credDatPartner: number
   credProZertifikat: number
   credZertifikatCap: number
   credProJahr: number
@@ -35,6 +37,7 @@ export interface RangConfig {
 export const DEFAULT_RANG_CONFIG: RangConfig = {
   volumenFaktor: 8,
   credOeffentlichBestellt: 20,
+  credDatPartner: 25, // starker In-Stufen-Hebel: silber-Schwelle=35, gold=60 → DAT bringt SVs klar nach vorn
   credProZertifikat: 6,
   credZertifikatCap: 12,
   credProJahr: 3,
