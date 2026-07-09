@@ -1086,7 +1086,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {/* AV7: direkter Gutachten-PDF-Download fuer den Kunden (neben der Email-Weiterleitung). */}
-              {fall.claim_id && <GutachtenPdfButton claimId={fall.claim_id as string} />}
+              {!!fall.claim_id && <GutachtenPdfButton claimId={fall.claim_id as string} />}
               <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
             </div>
           </div>
