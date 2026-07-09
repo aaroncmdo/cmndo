@@ -4,6 +4,7 @@
 // Leads UND Partner, rollen-filterbar; die Karte folgt dem Filter (Farbe = Rolle).
 // Filter/Sort in reiner filterKontakte-Fn; Firmen-Collapse nur in der Liste (Karte behält Filialen).
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Card, Button } from '@/components/primitives'
@@ -31,6 +32,12 @@ const ROLLE_FILTER: { key: VertriebRolle | 'alle'; label: string }[] = [
   { key: 'makler', label: 'Makler' },
   { key: 'werkstatt', label: 'Werkstätten' },
 ]
+// P3b: Vertrieb-Rolle -> partner_leads.rolle (für den role-aware Prefill des gemounteten CRM).
+const ROLLE_TO_PL: Record<VertriebRolle, string> = {
+  sv: 'sachverstaendiger',
+  makler: 'makler',
+  werkstatt: 'werkstatt',
+}
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
 
@@ -47,6 +54,14 @@ export default function VertriebRosterClient({
   const [search, setSearch] = useState('')
   const [stufe, setStufe] = useState<VertriebStufe | 'alle'>('alle')
   const [selected, setSelected] = useState<VertriebKontakt | null>(null)
+  const router = useRouter()
+
+  // P3b: „Neue Leads" role-aware ins gemountete partner_leads-CRM (Rolle vorbelegt).
+  function neueLeads(aktion: 'scrapen' | 'csv') {
+    const params = new URLSearchParams({ aktion })
+    if (rolle !== 'alle') params.set('rolle', ROLLE_TO_PL[rolle])
+    router.push(`/admin/vertrieb/partner-leads?${params.toString()}`)
+  }
 
   const gefiltert = useMemo(
     () => filterKontakte(kontakte, { typ, rolle, search, stufe }),
@@ -101,6 +116,19 @@ export default function VertriebRosterClient({
           </Button>
         ))}
       </div>
+
+      {/* P3b: Neue Leads role-aware ins gemountete CRM (Rolle vorbelegt) — nur im Leads-Modus */}
+      {typ === 'lead' && (
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-caption text-claimondo-ondo/70">Neue Leads:</span>
+          <Button variant="ghost" size="sm" onClick={() => neueLeads('scrapen')}>
+            Scrapen (Google Places)
+          </Button>
+          <Button variant="ghost" size="sm" onClick={() => neueLeads('csv')}>
+            CSV importieren
+          </Button>
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center gap-2">
         <input
