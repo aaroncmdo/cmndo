@@ -47,7 +47,6 @@ import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntsc
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
-import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
 import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
@@ -422,24 +421,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
     // Kunde-KVA-Card — nur fuer Werkstatt-Reparatur-Claims (selbstzahler/kasko-frei),
     // damit normale Claims keinen ueberfluessigen Read machen.
     // WS3: alle Schadenfotos (fall_dokumente dokument_typ='schadensfoto') fuer die
-    // SchadensfotoUploadCard — im selben Gate.
-    let kvaDokUrl: string | null = null
+    // SchadensfotoUploadCard — im selben Gate. (Der KVA-PDF-Link kommt aus dem
+    // staging-KVA-Loop via kostenvoranschlagPdfUrl, kein separater Load hier.)
     let schadensfotoUrls: string[] = []
     if (fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null)) {
-      const { data: kvaDoc } = await admin
-        .from('fall_dokumente')
-        .select('storage_path')
-        .in('fall_id', claimFallIds)
-        .eq('dokument_typ', 'kostenvoranschlag')
-        .is('geloescht_am', null)
-        .is('abgelehnt_am', null)
-        .order('hochgeladen_am', { ascending: false })
-        .limit(1)
-        .maybeSingle()
-      if (kvaDoc?.storage_path) {
-        kvaDokUrl = (await getStorageUrl(admin, 'fall-dokumente', kvaDoc.storage_path as string)) ?? null
-      }
-
       const { data: fotoDocs } = await admin
         .from('fall_dokumente')
         .select('storage_path')
