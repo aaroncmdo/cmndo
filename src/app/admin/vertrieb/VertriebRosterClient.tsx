@@ -1,26 +1,36 @@
 'use client'
-// Vertrieb-CRM P1b: der Roster — Triage-KPIs + Segment-Auswahl + Suche + Stufe-Filter +
-// Tabelle mit Stufe-Badge. Filter/Sort-Logik in reiner filterKontakte-Fn (getestet).
-// shared/DataTable + StatusBadge(domain=vertrieb-workflow) + primitives.Card/Button.
+// Vertrieb-CRM P2: Switch-Ansicht — Typ-Switch [Alle·Leads·Partner] + Rolle-Filter
+// [Alle·SV·Makler·Werkstatt] + Suche/Stufe + Liste/Karte-Toggle. Eine Ansicht über
+// Leads UND Partner, rollen-filterbar; die Karte folgt dem Filter (Farbe = Rolle).
+// Filter/Sort in reiner filterKontakte-Fn; Firmen-Collapse nur in der Liste (Karte behält Filialen).
 import { useMemo, useState } from 'react'
 import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Card, Button } from '@/components/primitives'
 import { filterKontakte } from './_lib/filter-kontakte'
 import { collapseByFirma } from './_lib/collapse-firmen'
-import { KIND_LABEL } from './_lib/labels'
+import { ROLLE_LABEL, TYP_LABEL } from './_lib/labels'
 import VertriebDetailDrawer from './VertriebDetailDrawer'
+import VertriebKarteClient from './karte/VertriebKarteClient'
 import {
   ALL_VERTRIEB_STUFEN,
   VERTRIEB_WORKFLOW_DEFS,
   type VertriebStufe,
 } from '@/lib/status/domains/vertrieb-workflow'
-import type { VertriebKontakt, VertriebKind } from '@/lib/vertrieb/vertrieb-kontakt.types'
+import type { VertriebKontakt, VertriebTyp, VertriebRolle } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebRollupZelle } from '@/lib/vertrieb/vertrieb-rollup.types'
 
-type Segment = VertriebKind | 'alle'
-
-const SEGMENTE: Segment[] = ['alle', 'sv', 'makler', 'werkstatt', 'partner-lead']
+const TYP_SWITCH: { key: VertriebTyp | 'alle'; label: string }[] = [
+  { key: 'alle', label: 'Alle' },
+  { key: 'lead', label: 'Leads' },
+  { key: 'partner', label: 'Partner' },
+]
+const ROLLE_FILTER: { key: VertriebRolle | 'alle'; label: string }[] = [
+  { key: 'alle', label: 'Alle Rollen' },
+  { key: 'sv', label: 'Sachverständige' },
+  { key: 'makler', label: 'Makler' },
+  { key: 'werkstatt', label: 'Werkstätten' },
+]
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
 
@@ -31,15 +41,18 @@ export default function VertriebRosterClient({
   kontakte: VertriebKontakt[]
   rollup: VertriebRollupZelle[]
 }) {
-  const [seg, setSeg] = useState<Segment>('alle')
+  const [typ, setTyp] = useState<VertriebTyp | 'alle'>('alle')
+  const [rolle, setRolle] = useState<VertriebRolle | 'alle'>('alle')
+  const [ansicht, setAnsicht] = useState<'liste' | 'karte'>('liste')
   const [search, setSearch] = useState('')
   const [stufe, setStufe] = useState<VertriebStufe | 'alle'>('alle')
   const [selected, setSelected] = useState<VertriebKontakt | null>(null)
+
   const gefiltert = useMemo(
-    () => filterKontakte(kontakte, { seg, search, stufe }),
-    [kontakte, seg, search, stufe],
+    () => filterKontakte(kontakte, { typ, rolle, search, stufe }),
+    [kontakte, typ, rolle, search, stufe],
   )
-  // Mehr-Standort-Firmen im Roster zu einer Zeile zusammenfassen (Karte behält alle Filialen).
+  // Liste: Mehr-Standort-Firmen zusammenfassen. Karte nutzt gefiltert (behält Filialen).
   const angezeigt = useMemo(() => collapseByFirma(gefiltert), [gefiltert])
   const kpi = useMemo(() => {
     const sum = (pred: (z: VertriebRollupZelle) => boolean) =>
@@ -63,10 +76,28 @@ export default function VertriebRosterClient({
         ))}
       </div>
 
+      {/* Typ-Switch + Liste/Karte-Toggle */}
+      <div className="flex flex-wrap items-center gap-2">
+        {TYP_SWITCH.map((t) => (
+          <Button key={t.key} variant={typ === t.key ? 'navy' : 'ghost'} onClick={() => setTyp(t.key)}>
+            {t.label}
+          </Button>
+        ))}
+        <div className="ml-auto flex gap-2">
+          <Button variant={ansicht === 'liste' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('liste')}>
+            Liste
+          </Button>
+          <Button variant={ansicht === 'karte' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('karte')}>
+            Karte
+          </Button>
+        </div>
+      </div>
+
+      {/* Rolle-Filter */}
       <div className="flex flex-wrap gap-2">
-        {SEGMENTE.map((s) => (
-          <Button key={s} variant={seg === s ? 'navy' : 'ghost'} onClick={() => setSeg(s)}>
-            {s === 'alle' ? 'Alle' : KIND_LABEL[s]}
+        {ROLLE_FILTER.map((r) => (
+          <Button key={r.key} variant={rolle === r.key ? 'navy' : 'ghost'} size="sm" onClick={() => setRolle(r.key)}>
+            {r.label}
           </Button>
         ))}
       </div>
@@ -94,48 +125,55 @@ export default function VertriebRosterClient({
           ))}
         </select>
         <span className="text-caption text-claimondo-ondo/60">
-          {angezeigt.length} von {kontakte.length}
+          {ansicht === 'liste' ? angezeigt.length : gefiltert.length} von {kontakte.length}
         </span>
       </div>
 
-      <DataTableContainer>
-        <Table>
-          <Thead>
-            <Tr>
-              <Th>Name</Th>
-              <Th>Typ</Th>
-              <Th>Stufe</Th>
-              <Th>Ort</Th>
-              <Th>Kontakt</Th>
-            </Tr>
-          </Thead>
-          <Tbody>
-            {angezeigt.map((k) => (
-              <ClickableTr key={`${k.kind}-${k.id}`} onClick={() => setSelected(k)}>
-                <Td>
-                  {k.name ?? '—'}
-                  {k.standorte > 1 && (
-                    <span className="ml-2 text-caption text-claimondo-ondo/60">
-                      · {k.standorte} Standorte
-                    </span>
-                  )}
-                </Td>
-                <Td>{KIND_LABEL[k.kind]}</Td>
-                <Td>
-                  <StatusBadge domain="vertrieb-workflow" code={k.stufe} size="sm" />
-                </Td>
-                <Td>{k.plz ? `${k.plz} ${k.ort ?? ''}`.trim() : k.ort ?? '—'}</Td>
-                <Td>{k.email ?? k.telefon ?? '—'}</Td>
-              </ClickableTr>
-            ))}
-            {angezeigt.length === 0 && (
+      {ansicht === 'liste' ? (
+        <DataTableContainer>
+          <Table>
+            <Thead>
               <Tr>
-                <Td colSpan={5}>Keine Einträge — Filter anpassen.</Td>
+                <Th>Name</Th>
+                <Th>Rolle</Th>
+                <Th>Stufe</Th>
+                <Th>Ort</Th>
+                <Th>Kontakt</Th>
               </Tr>
-            )}
-          </Tbody>
-        </Table>
-      </DataTableContainer>
+            </Thead>
+            <Tbody>
+              {angezeigt.map((k) => (
+                <ClickableTr key={`${k.kind}-${k.id}`} onClick={() => setSelected(k)}>
+                  <Td>
+                    {k.name ?? '—'}
+                    {k.typ === 'lead' && (
+                      <span className="ml-2 text-caption text-claimondo-ondo/60">· {TYP_LABEL.lead}</span>
+                    )}
+                    {k.standorte > 1 && (
+                      <span className="ml-2 text-caption text-claimondo-ondo/60">· {k.standorte} Standorte</span>
+                    )}
+                  </Td>
+                  <Td>{ROLLE_LABEL[k.rolle]}</Td>
+                  <Td>
+                    <StatusBadge domain="vertrieb-workflow" code={k.stufe} size="sm" />
+                  </Td>
+                  <Td>{k.plz ? `${k.plz} ${k.ort ?? ''}`.trim() : k.ort ?? '—'}</Td>
+                  <Td>{k.email ?? k.telefon ?? '—'}</Td>
+                </ClickableTr>
+              ))}
+              {angezeigt.length === 0 && (
+                <Tr>
+                  <Td colSpan={5}>Keine Einträge — Filter anpassen.</Td>
+                </Tr>
+              )}
+            </Tbody>
+          </Table>
+        </DataTableContainer>
+      ) : (
+        <div className="h-[70vh] rounded-ios-lg overflow-hidden border border-claimondo-border">
+          <VertriebKarteClient kontakte={gefiltert} />
+        </div>
+      )}
 
       <VertriebDetailDrawer kontakt={selected} onClose={() => setSelected(null)} />
     </div>

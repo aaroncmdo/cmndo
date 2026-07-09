@@ -1,6 +1,6 @@
 // src/app/admin/vertrieb/_lib/labels.ts
 // Geteilte UI-Labels für den Roster + das Detail (DRY). Umlaute echt.
-import type { VertriebKind } from '@/lib/vertrieb/vertrieb-kontakt.types'
+import type { VertriebKind, VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebStufe } from '@/lib/status/domains/vertrieb-workflow'
 
 export const KIND_LABEL: Record<VertriebKind, string> = {
@@ -8,6 +8,18 @@ export const KIND_LABEL: Record<VertriebKind, string> = {
   makler: 'Makler',
   werkstatt: 'Werkstatt',
   'partner-lead': 'Partner-Lead',
+}
+
+/** P2 Switch-Modell: Rolle- und Typ-Labels. */
+export const ROLLE_LABEL: Record<VertriebRolle, string> = {
+  sv: 'Sachverständige',
+  makler: 'Makler',
+  werkstatt: 'Werkstätten',
+}
+
+export const TYP_LABEL: Record<VertriebTyp, string> = {
+  lead: 'Lead',
+  partner: 'Partner',
 }
 
 /** Was ist bei dieser Stufe der nächste Schritt? (workflow-getriebener Hinweis fürs Detail) */
