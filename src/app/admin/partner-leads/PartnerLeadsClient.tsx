@@ -6,8 +6,8 @@
 // Nutzt ausschliesslich Shared-Components (DataTable, StatusBadge, forms/*,
 // primitives Button/Modal) — kein handgerolltes Button/Card/Table-Markup.
 
-import { useMemo, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
+import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import {
   PlusIcon,
@@ -160,6 +160,20 @@ export default function PartnerLeadsClient({
   const [showImport, setShowImport] = useState(false)
   const [showScrape, setShowScrape] = useState(false)
   const [detailId, setDetailId] = useState<string | null>(null)
+
+  // P3b (Vertrieb-Umbrella): role-aware Prefill aus der Vertrieb-Leads-Ansicht.
+  // ?rolle=<sachverstaendiger|makler|werkstatt> setzt den Rolle-Filter; ?aktion=
+  // <scrapen|csv|create> öffnet das passende Modal (Rolle dort vorbelegt). Ohne Query
+  // = Verhalten unverändert.
+  const searchParams = useSearchParams()
+  useEffect(() => {
+    const r = searchParams.get('rolle')
+    if (r === 'sachverstaendiger' || r === 'makler' || r === 'werkstatt') setRolleFilter(r)
+    const a = searchParams.get('aktion')
+    if (a === 'scrapen') setShowScrape(true)
+    else if (a === 'csv') setShowImport(true)
+    else if (a === 'create') setShowCreate(true)
+  }, [searchParams])
 
   const filtered = useMemo(
     () =>
@@ -384,6 +398,7 @@ export default function PartnerLeadsClient({
 
       <CreateProspectModal
         open={showCreate}
+        defaultRolle={rolleFilter === 'alle' ? undefined : rolleFilter}
         onClose={() => setShowCreate(false)}
         onCreated={() => {
           setShowCreate(false)
@@ -393,6 +408,7 @@ export default function PartnerLeadsClient({
 
       <ImportCsvModal
         open={showImport}
+        defaultRolle={rolleFilter === 'alle' ? undefined : rolleFilter}
         onClose={() => setShowImport(false)}
         onImported={() => {
           setShowImport(false)
@@ -402,6 +418,7 @@ export default function PartnerLeadsClient({
 
       <ScrapeModal
         open={showScrape}
+        defaultRolle={rolleFilter === 'alle' ? undefined : rolleFilter}
         onClose={() => setShowScrape(false)}
         onImported={() => {
           setShowScrape(false)
@@ -427,12 +444,17 @@ function CreateProspectModal({
   open,
   onClose,
   onCreated,
+  defaultRolle,
 }: {
   open: boolean
   onClose: () => void
   onCreated: () => void
+  defaultRolle?: PartnerRolle
 }) {
-  const [rolle, setRolle] = useState<PartnerRolle>('sachverstaendiger')
+  const [rolle, setRolle] = useState<PartnerRolle>(defaultRolle ?? 'sachverstaendiger')
+  useEffect(() => {
+    if (open && defaultRolle) setRolle(defaultRolle)
+  }, [open, defaultRolle])
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -555,12 +577,17 @@ function ImportCsvModal({
   open,
   onClose,
   onImported,
+  defaultRolle,
 }: {
   open: boolean
   onClose: () => void
   onImported: () => void
+  defaultRolle?: PartnerRolle
 }) {
-  const [rolle, setRolle] = useState<PartnerRolle>('sachverstaendiger')
+  const [rolle, setRolle] = useState<PartnerRolle>(defaultRolle ?? 'sachverstaendiger')
+  useEffect(() => {
+    if (open && defaultRolle) setRolle(defaultRolle)
+  }, [open, defaultRolle])
   const [rohdaten, setRohdaten] = useState<CsvRohdaten | null>(null)
   const [mapping, setMapping] = useState<CsvZielFeld[]>([])
   const [mappingQuelle, setMappingQuelle] = useState<'ki' | 'heuristik' | null>(null)
@@ -1215,12 +1242,17 @@ function ScrapeModal({
   open,
   onClose,
   onImported,
+  defaultRolle,
 }: {
   open: boolean
   onClose: () => void
   onImported: () => void
+  defaultRolle?: PartnerRolle
 }) {
-  const [rolle, setRolle] = useState<PartnerRolle>('sachverstaendiger')
+  const [rolle, setRolle] = useState<PartnerRolle>(defaultRolle ?? 'sachverstaendiger')
+  useEffect(() => {
+    if (open && defaultRolle) setRolle(defaultRolle)
+  }, [open, defaultRolle])
   const [region, setRegion] = useState('')
   const [limit, setLimit] = useState(20)
   const [suchend, setSuchend] = useState(false)
