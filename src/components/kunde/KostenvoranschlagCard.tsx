@@ -5,7 +5,7 @@
 // und laesst den Kunden die Reparaturkosten freigeben
 // (-> claims.reparatur_freigegeben_am via genehmigeKvaPortal).
 
-import { useTransition } from 'react'
+import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { FileTextIcon } from 'lucide-react'
@@ -14,6 +14,7 @@ import { formatBerlin } from '@/lib/google-calendar/timezone'
 import { genehmigeKvaPortal } from '@/app/kunde/faelle/[id]/kva-freigabe-actions'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Card, Button } from '@/components/primitives'
+import SignaturePadInput from '@/components/SignaturePadInput'
 
 export type KostenvoranschlagCardProps = {
   claimId: string
@@ -36,6 +37,8 @@ export default function KostenvoranschlagCard({
 }: KostenvoranschlagCardProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
+  // AV6: der Kunde unterschreibt den Reparaturauftrag (PNG data URI), bevor er freigibt.
+  const [signature, setSignature] = useState<string | null>(null)
 
   // Betrag: brutto bevorzugt, sonst netto. Defensiver Guard — der Parent
   // rendert die Card nur bei vorhandenem KVA, aber falls doch beide null sind
@@ -46,12 +49,16 @@ export default function KostenvoranschlagCard({
   const freigegeben = !!freigegebenAm
 
   async function handleFreigeben() {
-    const res = await genehmigeKvaPortal(claimId)
+    if (!signature) {
+      toast.error('Bitte unterschreiben Sie den Reparaturauftrag.')
+      return
+    }
+    const res = await genehmigeKvaPortal(claimId, signature)
     if (!res.ok) {
       toast.error(res.error ?? 'Fehler')
       return
     }
-    toast.success('Kostenvoranschlag freigegeben.')
+    toast.success('Reparaturauftrag freigegeben.')
     startTransition(() => router.refresh())
   }
 
@@ -90,15 +97,27 @@ export default function KostenvoranschlagCard({
           )}
         </div>
 
-        {/* Freigabe-Aktion — nur solange nicht freigegeben */}
+        {/* Freigabe-Aktion — nur solange nicht freigegeben. AV6: per Unterschrift. */}
         {!freigegeben && (
-          <div className="space-y-2 pt-1">
+          <div className="space-y-3 pt-1">
             <p className="text-body-sm text-claimondo-ondo">
-              Prüfen Sie den Kostenvoranschlag und geben Sie die Reparaturkosten frei,
-              damit die Werkstatt mit der Reparatur beginnen kann.
+              Prüfen Sie den Kostenvoranschlag und erteilen Sie den Reparaturauftrag mit Ihrer
+              Unterschrift, damit die Werkstatt mit der Reparatur beginnen kann.
             </p>
-            <Button variant="navy" size="sm" loading={isPending} onClick={handleFreigeben}>
-              Reparaturkosten freigeben
+            <div>
+              <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo mb-2">
+                Unterschrift
+              </p>
+              <SignaturePadInput value={signature} onChange={setSignature} />
+            </div>
+            <Button
+              variant="navy"
+              size="sm"
+              loading={isPending}
+              disabled={!signature}
+              onClick={handleFreigeben}
+            >
+              Reparaturauftrag erteilen
             </Button>
           </div>
         )}
