@@ -172,7 +172,7 @@ export default async function GutachterFallPage({
       lpClaimId
         ? admin
             .from('claims')
-            .select('lead_preis_netto, lead_preis_typ')
+            .select('lead_preis_netto, lead_preis_typ, bkat_unfallart')
             .eq('id', lpClaimId)
             .eq('sv_id', sv.id)
             .maybeSingle()
@@ -229,6 +229,12 @@ export default async function GutachterFallPage({
     _leadpreis: abrechnung?.lead_preis_netto != null ? Number(abrechnung.lead_preis_netto) : null,
     _preistyp: abrechnung?.lead_preis_typ ?? null,
   }
+
+  // AV3-SV: Auffahrunfall-Hinweis fuer den SV (Aaron 09.07.) — reiner Hinweis (Stoßfänger/
+  // Hebebühne + Hilfestellungskosten individuell mit der Werkstatt aushandeln), KEINE
+  // SV-System-Position. bkat_unfallart aus dem claims-SSoT (admin-Read oben).
+  const istAuffahrunfallSv =
+    (abrechnung as { bkat_unfallart?: string | null } | null)?.bkat_unfallart === 'auffahrunfall'
 
   // AAR-403: Kürzungs-Positionen für KanzleiStatusCard (Phase 5+)
   let kuerzungen: {
@@ -528,6 +534,16 @@ export default async function GutachterFallPage({
 
   const topServerBlocks = (
     <>
+      {/* AV3-SV: Auffahrunfall-Hinweis (Aaron 09.07.) — reiner Hinweis, KEINE SV-System-Position. */}
+      {istAuffahrunfallSv && (
+        <div className="rounded-2xl border-2 border-warning/30 bg-warning-soft p-4">
+          <p className="text-sm font-semibold text-warning-strong">Auffahrunfall</p>
+          <p className="text-xs text-warning-strong mt-1">
+            Stoßfänger muss ausgebaut werden, Hebebühne benötigt. Hinweis: Hilfestellungskosten
+            (Hebebühne) sind individuell mit der Werkstatt auszuhandeln — keine Position im Gutachten.
+          </p>
+        </div>
+      )}
       {/* AAR-Followup (SV-Lead-Ablehnung): Lead-Ablehnen-Card nur in
           sv-zugewiesen + sv-termin sichtbar (Component intern gegated). */}
       <LeadAblehnenCard fallId={id} status={fall.status as string | null} />

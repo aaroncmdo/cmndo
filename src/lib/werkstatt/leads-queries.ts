@@ -26,10 +26,22 @@ export type WerkstattLead = {
   kostenvoranschlag_brutto: number | null
   status: string | null
   created_at: string | null
+  // Werkstatt-Intake (Haftpflicht): Gegner-/Unfall-/Standort-Read-Felder + Signatur-Flag.
+  gegner_name: string | null
+  gegner_versicherung: string | null
+  gegner_kennzeichen: string | null
+  gegner_telefon: string | null
+  gegner_email: string | null
+  gegner_bekannt: boolean | null
+  unfallhergang: string | null
+  unfall_konstellation: string | null
+  fahrzeug_standort_adresse: string | null
+  fahrzeug_standort_plz: string | null
+  werkstatt_intake_am: string | null
 }
 
 const SELECT =
-  'id, vorname, nachname, telefon, email, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, fin, erstzulassung, schadentyp, schadens_hergang, unfalldatum, unfallort, kostenvoranschlag_netto, kostenvoranschlag_brutto, status, created_at'
+  'id, vorname, nachname, telefon, email, fahrzeug_hersteller, fahrzeug_modell, kennzeichen, fin, erstzulassung, schadentyp, schadens_hergang, unfalldatum, unfallort, kostenvoranschlag_netto, kostenvoranschlag_brutto, status, created_at, gegner_name, gegner_versicherung, gegner_kennzeichen, gegner_telefon, gegner_email, gegner_bekannt, unfallhergang, unfall_konstellation, fahrzeug_standort_adresse, fahrzeug_standort_plz, werkstatt_intake_am'
 
 /** Offene (nicht konvertierte) Inbound-Leads der Werkstatt (RLS-Gate in der View). */
 export async function getWerkstattLeads(): Promise<WerkstattLead[]> {
@@ -64,5 +76,16 @@ export async function getWerkstattLeads(): Promise<WerkstattLead[]> {
     kostenvoranschlag_brutto: r.kostenvoranschlag_brutto != null ? Number(r.kostenvoranschlag_brutto) : null,
     status: (r.status as string | null) ?? null,
     created_at: (r.created_at as string | null) ?? null,
+    gegner_name: (r.gegner_name as string | null) ?? null,
+    gegner_versicherung: (r.gegner_versicherung as string | null) ?? null,
+    gegner_kennzeichen: (r.gegner_kennzeichen as string | null) ?? null,
+    gegner_telefon: (r.gegner_telefon as string | null) ?? null,
+    gegner_email: (r.gegner_email as string | null) ?? null,
+    gegner_bekannt: (r.gegner_bekannt as boolean | null) ?? null,
+    unfallhergang: (r.unfallhergang as string | null) ?? null,
+    unfall_konstellation: (r.unfall_konstellation as string | null) ?? null,
+    fahrzeug_standort_adresse: (r.fahrzeug_standort_adresse as string | null) ?? null,
+    fahrzeug_standort_plz: (r.fahrzeug_standort_plz as string | null) ?? null,
+    werkstatt_intake_am: (r.werkstatt_intake_am as string | null) ?? null,
   }))
 }

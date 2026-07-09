@@ -58,11 +58,12 @@ export async function speichereQualiFlow(
   token: string,
   schuldfrage: string,
   ueberEigeneVersicherung?: boolean,
+  freieWerkstattwahl?: boolean,
 ): Promise<{ ok: boolean; ergebnis?: 'weiter' | 'abbruch'; abrechnungsweg?: string | null; error?: string }> {
   const { admin, leadId, error } = await resolveFlowLead(token)
   if (!admin || !leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
 
-  const outcome = qualiFlowOutcome(schuldfrage, ueberEigeneVersicherung ?? null)
+  const outcome = qualiFlowOutcome(schuldfrage, ueberEigeneVersicherung ?? null, freieWerkstattwahl ?? null)
   const nowIso = new Date().toISOString()
 
   if (outcome.disqualifizieren) {
@@ -72,11 +73,15 @@ export async function speichereQualiFlow(
         schuldfrage,
         // SP-B1: abrechnungsweg-Record (kasko). leads.abrechnungsweg type-lagged -> Cast unten.
         abrechnungsweg: outcome.abrechnungsweg,
+        ...(freieWerkstattwahl !== undefined ? { freie_werkstattwahl: freieWerkstattwahl } : {}),
         disqualifiziert: true,
         disqualifiziert_am: nowIso,
-        disqualifiziert_grund_key: 'eigenverschulden',
+        // WS2 (Kasko-frei): Kasko-Werkstattbindung korrekt labeln statt pauschal 'eigenverschulden'.
+        disqualifiziert_grund_key: outcome.disqualifikationsGrundKey ?? 'eigenverschulden',
         disqualifiziert_grund:
-          'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
+          outcome.disqualifikationsGrundKey === 'werkstattbindung'
+            ? 'Kasko mit Werkstattbindung — Reparatur nur in der vom Versicherer vorgeschriebenen Werkstatt, keine Vermittlung moeglich (Self-Service-Quali)'
+            : 'Eigenverschulden — Gutachterkosten nicht über die gegnerische Haftpflicht regulierbar (Self-Service-Quali)',
         status: 'disqualifiziert',
       } as never)
       .eq('id', leadId)
@@ -86,6 +91,14 @@ export async function speichereQualiFlow(
   }
 
   const update: Record<string, unknown> = { schuldfrage }
+  // WS1a (Reduced-Repair-Aktivierung): den rohen VS-Input persistieren (leads.eigene_versicherung,
+  // text 'ja'/'nein') — sonst geht er session-lokal verloren und der eigenverantwortung-Fall laesst
+  // sich am Konversionspunkt (convert-lead-to-claim) nicht mehr zu kasko/selbstzahler ableiten.
+  if (ueberEigeneVersicherung !== undefined) {
+    update.eigene_versicherung = ueberEigeneVersicherung ? 'ja' : 'nein'
+  }
+  // WS2 (Kasko-frei): Werkstattbindung persistieren (leads.freie_werkstattwahl bool).
+  if (freieWerkstattwahl !== undefined) update.freie_werkstattwahl = freieWerkstattwahl
   if (outcome.abrechnungsweg) update.abrechnungsweg = outcome.abrechnungsweg
   if (outcome.reparaturwunsch) update.reparaturwunsch = outcome.reparaturwunsch
   if (outcome.ergebnis === 'weiter_mit_flag') {

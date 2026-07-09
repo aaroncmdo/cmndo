@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-08T19:42:20.413Z",
-  "count": 126,
+  "generatedAt": "2026-07-09T18:06:47.481Z",
+  "count": 127,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -38,6 +38,7 @@
     "src/app/faelle/[id]/_tabs/UebersichtTab.tsx",
     "src/app/faelle/[id]/error.tsx",
     "src/app/flow/[token]/FlowWizardKfz.tsx",
+    "src/app/flow/[token]/SaSignaturStep.tsx",
     "src/app/flow/[token]/error.tsx",
     "src/app/gutachter/fall/[id]/_components/FallakteDrawer.tsx",
     "src/app/gutachter/feldmodus/FeldmodusDokumentSlot.tsx",

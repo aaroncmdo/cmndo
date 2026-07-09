@@ -21,6 +21,7 @@ import {
 import {
   werkstattAuftragSegment,
   abrechnungswegLabel,
+  zeigtGutachten,
   quelleLabel,
   zaehleSegmente,
   kvaStatus,
@@ -71,7 +72,12 @@ function ReparaturZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => vo
   const opLabel = operativeStatusLabel(a.operative_status)
   const typ = abrechnungswegLabel(a.abrechnungsweg)
   const kva = kvaStatus(a)
-  const terminIso = a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin
+  // Haftpflicht (SV-Gutachten-Route): der abgemachte Besichtigungstermin + Gutachter.
+  // Kasko/Selbstzahler (KVA-Route): der Reparaturtermin. (Aaron 09.07.)
+  const istGutachtenWeg = zeigtGutachten(a.abrechnungsweg)
+  const terminIso = istGutachtenWeg
+    ? a.besichtigung_start
+    : (a.reparatur_bestaetigter_termin ?? a.reparatur_wunschtermin)
   return (
     <ClickableTr onClick={onClick}>
       <Td>
@@ -98,7 +104,12 @@ function ReparaturZeile({ a, onClick }: { a: WerkstattAuftrag; onClick: () => vo
           {opLabel && <span className="text-claimondo-ondo text-xs">{opLabel}</span>}
         </div>
       </Td>
-      <Td className="text-body-sm text-claimondo-navy tabular-nums">{kurzDatum(terminIso)}</Td>
+      <Td className="text-body-sm text-claimondo-navy tabular-nums">
+        {kurzDatum(terminIso)}
+        {istGutachtenWeg && a.gutachter_firmenname && (
+          <div className="text-claimondo-ondo text-xs">{a.gutachter_firmenname}</div>
+        )}
+      </Td>
     </ClickableTr>
   )
 }

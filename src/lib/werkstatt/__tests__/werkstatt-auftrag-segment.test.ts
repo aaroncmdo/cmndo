@@ -31,9 +31,9 @@ describe('abrechnungswegLabel', () => {
 })
 
 describe('zeigtGutachten', () => {
-  it('nur bei Versicherung (haftpflicht/kasko)', () => {
+  it('nur Haftpflicht (SV-Gutachten-Route); Kasko/Selbstzahler = KVA-Route', () => {
     expect(zeigtGutachten('haftpflicht')).toBe(true)
-    expect(zeigtGutachten('kasko')).toBe(true)
+    expect(zeigtGutachten('kasko')).toBe(false)
     expect(zeigtGutachten('selbstzahler')).toBe(false)
     expect(zeigtGutachten(null)).toBe(false)
   })
