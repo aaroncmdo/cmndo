@@ -183,7 +183,7 @@ export function HeroSection({ city }: { city: City }) {
                   <span className="text-[14px] text-white/90 font-medium">Google-Bewertungen</span>
                 </div>
                 <div className="flex items-center flex-wrap gap-x-2.5 gap-y-1 text-[14px] leading-tight">
-                  <span className="text-white/85"><strong className="text-white font-semibold">DAT-Expert</strong></span>
+                  <span className="text-white/85"><strong className="text-white font-semibold">DAT-Standard</strong></span>
                   <span className="text-white/30" aria-hidden="true">·</span>
                   <span className="text-white/85"><strong className="text-white font-semibold">BVSK</strong></span>
                   <span className="text-white/30" aria-hidden="true">·</span>
@@ -214,7 +214,7 @@ export function HeroSection({ city }: { city: City }) {
                   <span className="font-mono font-bold text-white text-[12.5px]" aria-label={`Bewertung ${rating} von 5`}>{rating}</span>
                   <span className="text-[11.5px] text-white/70 font-medium">Google</span>
                   <span className="text-white/40" aria-hidden="true">·</span>
-                  <span className="text-[12px] text-white/85 font-semibold">DAT-Expert</span>
+                  <span className="text-[12px] text-white/85 font-semibold">DAT-Standard</span>
                   <span className="text-white/40" aria-hidden="true">·</span>
                   <span className="text-[12px] text-white/85 font-semibold">BVSK</span>
                 </div>

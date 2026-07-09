@@ -668,7 +668,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "certyfikowana sieć partnerów"
+          "label": "sieć Expert Partner"
         },
         {
           "kpi": "30–40 %",
@@ -2113,7 +2113,7 @@
     "kpis": [
       {
         "wert": "DAT",
-        "label": "certyfikowana sieć partnerów"
+        "label": "sieć Expert Partner"
       },
       {
         "wert": "< 48 h",
@@ -2262,7 +2262,7 @@
       },
       {
         "wert": "DAT",
-        "label": "certyfikowana sieć"
+        "label": "sieć Expert Partner"
       },
       {
         "wert": "Köln",
@@ -2854,7 +2854,7 @@
     "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru DAT (dat.de/sachverstaendige), dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
     "hero_cta_karte": "Zobacz na mapie",
     "hero_cta_schaden": "Zgłoś szkodę",
-    "trust_kpi_dat_label": "certyfikowana sieć",
+    "trust_kpi_dat_label": "sieć Expert Partner",
     "trust_kpi_termin_label": "Termin",
     "trust_kpi_eigenanteil_label": "Udział własny¹",
     "trust_kpi_recht_label": "Podstawa prawna",
@@ -3664,7 +3664,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Podstawa roszczenia",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "certyfikowana sieć"
+    "trust_stat_3_label": "sieć Expert Partner"
   },
   "unfallskizze": {
     "breadcrumb_start": "Start",

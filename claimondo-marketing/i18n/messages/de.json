@@ -960,7 +960,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "zertifiziertes Partner-Netzwerk"
+          "label": "Expert Partner-Netzwerk"
         },
         {
           "kpi": "30–40 %",
@@ -1996,7 +1996,7 @@
     "kpis": [
       {
         "wert": "DAT",
-        "label": "zertifiziertes Partner-Netzwerk"
+        "label": "Expert Partner-Netzwerk"
       },
       {
         "wert": "< 48 h",
@@ -2145,7 +2145,7 @@
       },
       {
         "wert": "DAT",
-        "label": "zertifiziertes Netzwerk"
+        "label": "Expert Partner-Netzwerk"
       },
       {
         "wert": "Köln",
@@ -3267,7 +3267,7 @@
     "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
     "hero_cta_karte": "Auf der Karte ansehen",
     "hero_cta_schaden": "Schaden melden",
-    "trust_kpi_dat_label": "zertifiziertes Netzwerk",
+    "trust_kpi_dat_label": "Expert Partner-Netzwerk",
     "trust_kpi_termin_label": "Termin",
     "trust_kpi_eigenanteil_label": "Eigenanteil¹",
     "trust_kpi_recht_label": "Rechtsgrundlage",
@@ -4333,7 +4333,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Anspruchs-Basis",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "zertifiziertes Netzwerk"
+    "trust_stat_3_label": "Expert Partner-Netzwerk"
   },
   "unfallskizze": {
     "breadcrumb_start": "Start",
