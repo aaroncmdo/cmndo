@@ -11,7 +11,6 @@ export const VERTRIEB_EDIT_TARGET: Partial<
 > = {
   sv: { table: 'sachverstaendige', columns: { notizen: 'notizen' } },
   'partner-lead': { table: 'partner_leads', columns: { notizen: 'notiz' } },
-  'sv-lead': { table: 'sv_leads', columns: { notizen: 'notizen' } },
   makler: { table: 'makler', columns: { notizen: 'notizen' } },
   werkstatt: { table: 'werkstaetten', columns: { notizen: 'notizen' } },
 }

@@ -10,7 +10,8 @@ const row = (id: string, o: Partial<VertriebKontaktRow>): VertriebKontaktRow => 
   id, kind: 'sv', name: null, email: null, telefon: null, plz: null, ort: null,
   lat: null, lng: null, owner_id: null, quelle: null, erstellt_am: null,
   roh_status: null, roh_ist_aktiv: null, roh_gesperrt: null, roh_verifiziert: null,
-  roh_portal_zugang: null, roh_onboarding_offen: null, roh_warteliste: null, notizen: null, ...o,
+  roh_portal_zugang: null, roh_onboarding_offen: null, roh_warteliste: null, notizen: null,
+  rolle: null, ...o,
 })
 
 describe('getVertriebRollup', () => {

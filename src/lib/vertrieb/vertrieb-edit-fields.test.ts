@@ -6,7 +6,6 @@ describe('resolveEditColumn', () => {
     expect(resolveEditColumn('sv', 'notizen')).toEqual({ table: 'sachverstaendige', column: 'notizen' })
     // partner_leads nutzt die bestehende Singular-Spalte 'notiz' — kein Duplikat
     expect(resolveEditColumn('partner-lead', 'notizen')).toEqual({ table: 'partner_leads', column: 'notiz' })
-    expect(resolveEditColumn('sv-lead', 'notizen')).toEqual({ table: 'sv_leads', column: 'notizen' })
     expect(resolveEditColumn('makler', 'notizen')).toEqual({ table: 'makler', column: 'notizen' })
     expect(resolveEditColumn('werkstatt', 'notizen')).toEqual({ table: 'werkstaetten', column: 'notizen' })
   })
@@ -17,7 +16,7 @@ describe('resolveEditColumn', () => {
   })
 
   it('alle 5 kinds haben ein editierbares notizen-Target', () => {
-    for (const kind of ['sv', 'partner-lead', 'sv-lead', 'makler', 'werkstatt'] as const) {
+    for (const kind of ['sv', 'partner-lead', 'makler', 'werkstatt'] as const) {
       expect(resolveEditColumn(kind, 'notizen')).not.toBeNull()
     }
   })

@@ -2,7 +2,7 @@
 // Vertrieb-CRM P0: reine Ableitung der VertriebStufe je kind (first-match). Kollabiert
 // die fragmentierten SV-Onboarding/Verifizierungs-Spalten in EINE Stufe. Konsumiert die
 // kanonische vertrieb-workflow-Domain. Vorbild: deriveLeadWorkflowState / deriveClaimWorkflowState.
-import type { VertriebKontaktRow, VertriebKontakt } from './vertrieb-kontakt.types'
+import type { VertriebKontaktRow, VertriebKontakt, VertriebTyp, VertriebRolle } from './vertrieb-kontakt.types'
 import type { VertriebStufe } from '@/lib/status/domains/vertrieb-workflow'
 
 function stufeFuer(row: VertriebKontaktRow): VertriebStufe {
@@ -30,13 +30,18 @@ function stufeFuer(row: VertriebKontaktRow): VertriebStufe {
       if (row.roh_status === 'konvertiert' || row.roh_status === 'umgewandelt') return 'aktiv'
       if (row.roh_status && row.roh_status !== 'neu') return 'kontaktiert'
       return 'neu'
-    case 'sv-lead':
-      if (row.roh_ist_aktiv === false) return 'verloren'
-      if (row.roh_warteliste && row.roh_warteliste !== 'neu') return 'kontaktiert'
-      return 'neu'
   }
 }
 
+// P1 Typ×Rolle: Typ aus kind (partner-lead = Lead, sonst Partner); Rolle aus der
+// View-Spalte (defensiver Fallback — die View liefert immer eine der drei).
+function typFuer(kind: VertriebKontaktRow['kind']): VertriebTyp {
+  return kind === 'partner-lead' ? 'lead' : 'partner'
+}
+function rolleFuer(row: VertriebKontaktRow): VertriebRolle {
+  return row.rolle === 'makler' || row.rolle === 'werkstatt' ? row.rolle : 'sv'
+}
+
 export function deriveVertriebState(row: VertriebKontaktRow): VertriebKontakt {
-  return { ...row, stufe: stufeFuer(row) }
+  return { ...row, stufe: stufeFuer(row), typ: typFuer(row.kind), rolle: rolleFuer(row) }
 }

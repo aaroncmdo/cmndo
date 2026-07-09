@@ -6,8 +6,9 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
 const TABS = [
+  // P2: „Übersicht" ist die Switch-Ansicht mit eigenem Liste/Karte-Toggle — kein
+  // separater Karte-Tab mehr. Die Rollen-Tabs führen in die tiefe Verwaltung (Mounts).
   { href: '/admin/vertrieb', label: 'Übersicht' },
-  { href: '/admin/vertrieb/karte', label: 'Karte' },
   { href: '/admin/vertrieb/sachverstaendige', label: 'Sachverständige' },
   { href: '/admin/vertrieb/partner-leads', label: 'Partner-Leads' },
   { href: '/admin/vertrieb/makler', label: 'Makler' },

@@ -8,40 +8,35 @@ import { MAPBOX_STYLE_STANDARD } from '@/lib/mapbox/styles'
 import type { Map as MapboxMap, MapMouseEvent, MapboxGeoJSONFeature } from 'mapbox-gl'
 import ErrorState from '@/components/shared/ErrorState'
 import { Card } from '@/components/primitives'
-import type { VertriebKontakt, VertriebKind } from '@/lib/vertrieb/vertrieb-kontakt.types'
+import type { VertriebKontakt, VertriebRolle } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 // ------------------------------------------------------------------ Konstanten
 
 const SRC_KONTAKTE = 'vk-kontakte'
 const LAYER_KONTAKTE = 'vk-kontakte-circle'
 
-/** Farben je Kind (raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property). */
-const KIND_COLORS: Record<VertriebKind, string> = {
-  sv: '#0D1B3E',           // claimondo-navy — aktive Sachverstaendige
-  makler: '#4573A2',       // claimondo-secondary
-  werkstatt: '#7BA3CC',    // claimondo-accent
-  'partner-lead': '#f59e0b', // Amber — Partner-Lead noch nicht konvertiert
-  'sv-lead': '#10b981',    // Emerald — SV-Lead noch nicht verifiziert
+/** P2: Farbe nach ROLLE (nicht Typ — der Switch trennt Partner/Lead schon).
+ *  raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property. */
+const ROLLE_COLORS: Record<VertriebRolle, string> = {
+  sv: '#0D1B3E',        // claimondo-navy
+  makler: '#4573A2',    // claimondo-secondary
+  werkstatt: '#7BA3CC', // claimondo-accent
 }
 
-/** Deutsche Labels je Kind. */
-const KIND_LABELS: Record<VertriebKind, string> = {
+/** Deutsche Labels je Rolle. */
+const ROLLE_LABELS: Record<VertriebRolle, string> = {
   sv: 'Sachverständige',
   makler: 'Makler',
   werkstatt: 'Werkstätten',
-  'partner-lead': 'Partner-Leads',
-  'sv-lead': 'SV-Leads',
 }
 
 // Match-Expression fuer circle-color (raw hex ok — Token-Audit-Skip-Header oben)
-const KIND_COLOR_EXPR = [
+const ROLLE_COLOR_EXPR = [
   'match',
-  ['get', 'kind'],
-  'sv', KIND_COLORS.sv,
-  'makler', KIND_COLORS.makler,
-  'werkstatt', KIND_COLORS.werkstatt,
-  'partner-lead', KIND_COLORS['partner-lead'],
-  'sv-lead', KIND_COLORS['sv-lead'],
+  ['get', 'rolle'],
+  'sv', ROLLE_COLORS.sv,
+  'makler', ROLLE_COLORS.makler,
+  'werkstatt', ROLLE_COLORS.werkstatt,
   /* default */ '#94a3b8',
 ] as unknown as mapboxgl.Expression
 
@@ -55,14 +50,14 @@ export interface VertriebKarteClientProps {
 
 function buildFeatureCollection(
   kontakte: VertriebKontakt[],
-): GeoJSON.FeatureCollection<GeoJSON.Point, { kind: VertriebKind; name: string }> {
-  const features: GeoJSON.Feature<GeoJSON.Point, { kind: VertriebKind; name: string }>[] = []
+): GeoJSON.FeatureCollection<GeoJSON.Point, { rolle: VertriebRolle; name: string }> {
+  const features: GeoJSON.Feature<GeoJSON.Point, { rolle: VertriebRolle; name: string }>[] = []
   for (const k of kontakte) {
     if (k.lat == null || k.lng == null) continue
     features.push({
       type: 'Feature',
       geometry: { type: 'Point', coordinates: [k.lng, k.lat] },
-      properties: { kind: k.kind, name: k.name ?? '(unbekannt)' },
+      properties: { rolle: k.rolle, name: k.name ?? '(unbekannt)' },
     })
   }
   return { type: 'FeatureCollection', features }
@@ -84,11 +79,11 @@ export default function VertriebKarteClient({ kontakte }: VertriebKarteClientPro
     [kontakte],
   )
 
-  // Anzahl je Kind (nur geplottete)
-  const countByKind = useMemo(() => {
-    const counts = new Map<VertriebKind, number>()
+  // Anzahl je Rolle (nur geplottete)
+  const countByRolle = useMemo(() => {
+    const counts = new Map<VertriebRolle, number>()
     for (const k of plotted) {
-      counts.set(k.kind, (counts.get(k.kind) ?? 0) + 1)
+      counts.set(k.rolle, (counts.get(k.rolle) ?? 0) + 1)
     }
     return counts
   }, [plotted])
@@ -135,7 +130,7 @@ export default function VertriebKarteClient({ kontakte }: VertriebKarteClientPro
         type: 'circle',
         source: SRC_KONTAKTE,
         paint: {
-          'circle-color': KIND_COLOR_EXPR,
+          'circle-color': ROLLE_COLOR_EXPR,
           'circle-radius': 6,
           'circle-stroke-width': 1.5,
           'circle-stroke-color': '#ffffff',
@@ -149,9 +144,9 @@ export default function VertriebKarteClient({ kontakte }: VertriebKarteClientPro
         (e: MapMouseEvent & { features?: MapboxGeoJSONFeature[] }) => {
           const feature = e.features?.[0]
           if (!feature) return
-          const { name, kind } = feature.properties as { name: string; kind: VertriebKind }
+          const { name, rolle } = feature.properties as { name: string; rolle: VertriebRolle }
           const coords = (feature.geometry as GeoJSON.Point).coordinates as [number, number]
-          const label = KIND_LABELS[kind] ?? kind
+          const label = ROLLE_LABELS[rolle] ?? rolle
 
           // Popup-Inhalt als einfaches HTML (kein React-Root noetig fuer diesen simplen Fall)
           const html = `<div style="font-family:inherit;padding:2px 0"><strong style="color:#0D1B3E">${name}</strong><br/><span style="color:#64748b;font-size:12px">${label}</span></div>`
@@ -213,7 +208,7 @@ export default function VertriebKarteClient({ kontakte }: VertriebKarteClientPro
   // ---- Render
 
   // Reihenfolge fuer die Legende (feste Reihenfolge statt Map-Iteration)
-  const legendKinds: VertriebKind[] = ['sv', 'makler', 'werkstatt', 'partner-lead', 'sv-lead']
+  const legendRollen: VertriebRolle[] = ['sv', 'makler', 'werkstatt']
 
   return (
     <div className="relative h-full w-full">
@@ -226,17 +221,17 @@ export default function VertriebKarteClient({ kontakte }: VertriebKarteClientPro
 
       {/* Legende — primitives.Card (Schwebe-Panel über der Karte) */}
       <Card radius="md" shadow="lg" p={3} className="absolute left-3 bottom-3 z-10 text-body-xs">
-        {legendKinds.map((kind) => {
-          const count = countByKind.get(kind) ?? 0
+        {legendRollen.map((rolle) => {
+          const count = countByRolle.get(rolle) ?? 0
           if (count === 0) return null
           return (
-            <div key={kind} className="flex items-center gap-2 mb-1 last:mb-0">
+            <div key={rolle} className="flex items-center gap-2 mb-1 last:mb-0">
               <span
                 className="inline-block h-2.5 w-2.5 rounded-full flex-shrink-0"
-                style={{ backgroundColor: KIND_COLORS[kind] }}
+                style={{ backgroundColor: ROLLE_COLORS[rolle] }}
               />
               <span className="text-claimondo-navy">
-                {KIND_LABELS[kind]}
+                {ROLLE_LABELS[rolle]}
               </span>
               <span className="ml-auto pl-3 text-claimondo-navy font-medium tabular-nums">
                 {count}

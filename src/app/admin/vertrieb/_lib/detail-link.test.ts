@@ -13,9 +13,8 @@ describe('detailLink', () => {
     })
   })
 
-  it('Makler/Partner-Lead/SV-Lead → Listen-Route (id noch nicht fokussiert)', () => {
+  it('Makler/Partner-Lead → Listen-Route (id noch nicht fokussiert)', () => {
     expect(detailLink('makler', 'm1').href).toBe('/admin/makler')
     expect(detailLink('partner-lead', 'p1').href).toBe('/admin/partner-leads')
-    expect(detailLink('sv-lead', 's1').href).toBe('/admin/sachverstaendige/leads')
   })
 })

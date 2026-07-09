@@ -5,7 +5,13 @@
 // Eigene Abstraktion (Partner-Beziehung) — NICHT die ops-WorkItem-Union.
 import type { VertriebStufe } from '@/lib/status/domains/vertrieb-workflow'
 
-export type VertriebKind = 'sv-lead' | 'partner-lead' | 'sv' | 'makler' | 'werkstatt'
+// P1: sv-lead entfällt — Leads kommen nur noch aus partner_leads (role-getaggt).
+// sv_leads (Dead-Pins) bleiben nur in der getDeadPins-Karte, nicht in dieser View.
+export type VertriebKind = 'partner-lead' | 'sv' | 'makler' | 'werkstatt'
+
+/** P1 Typ×Rolle-Modell: die zwei UI-Achsen. */
+export type VertriebRolle = 'sv' | 'makler' | 'werkstatt'
+export type VertriebTyp = 'partner' | 'lead'
 
 /** Rohzeile aus v_vertrieb_kontakt (Task 3) — Spalten == diese Felder. */
 export type VertriebKontaktRow = {
@@ -30,6 +36,12 @@ export type VertriebKontaktRow = {
   roh_onboarding_offen: boolean | null // sv: !vertrag ∨ verif-offen ; makler/ws: !onboarding_abgeschlossen
   roh_warteliste: string | null // sv_leads.warteliste_status/claim_status
   notizen: string | null // P2.1: vereinheitlichtes Notizen-Feld (sv.notizen / partner_leads.notiz / …)
+  rolle: string | null // P1: View liefert 'sv'|'makler'|'werkstatt' (partner_leads.rolle normalisiert)
 }
 
-export type VertriebKontakt = VertriebKontaktRow & { stufe: VertriebStufe }
+// P1: + abgeleitete UI-Achsen typ (Partner/Lead) und rolle (SV/Makler/Werkstatt).
+export type VertriebKontakt = VertriebKontaktRow & {
+  stufe: VertriebStufe
+  typ: VertriebTyp
+  rolle: VertriebRolle
+}
