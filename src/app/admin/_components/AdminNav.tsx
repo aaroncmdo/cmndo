@@ -6,11 +6,11 @@
 
 import {
   LayoutDashboardIcon, FolderOpenIcon, BadgeEuroIcon,
-  CarFrontIcon, GitBranchIcon, CalendarIcon,
+  GitBranchIcon, CalendarIcon,
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
-  WrenchIcon, HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
-  NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon, ShieldAlertIcon, UserPlusIcon,
+  HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
+  NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon, ShieldAlertIcon,
 } from 'lucide-react'
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
@@ -26,17 +26,17 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/ai-vorschlaege', label: 'KI-Vorschläge', icon: SparklesIcon },
   { href: '/admin/ki-aufsicht', label: 'KI-Aufsicht', icon: ShieldAlertIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
+  // Vertrieb-Konsole (Ein-Dach): Sachverständige, Partner-Leads, Makler und Werkstätten
+  // sind unter „Vertrieb" gebündelt (Übersicht + Karte + je ein Sub-Tab, der die bestehende
+  // Verwaltung wiederverwendet — alle Funktionen ziehen mit um). Ihre alten Routes bleiben
+  // erreichbar (Deep-Links/Bookmarks), sind aber nicht mehr in der Top-Nav.
   { href: '/admin/vertrieb', label: 'Vertrieb', icon: HandshakeIcon },
-  { href: '/admin/sachverstaendige', label: 'Sachverständige', icon: CarFrontIcon },
   { href: '/admin/partner', label: 'Partner', icon: Building2Icon },
-  { href: '/admin/partner-leads', label: 'Partner-Leads', icon: UserPlusIcon },
   { href: '/admin/finance', label: 'Finanzen', icon: BadgeEuroIcon },
   { href: '/admin/embed-billing', label: 'Embed-Billing', icon: ReceiptIcon },
   { href: '/admin/embed-sites', label: 'Embed-Sites', icon: Code2Icon },
   { href: '/admin/marketing', label: 'Marketing', icon: Share2Icon },
   { href: '/admin/wissen-artikel', label: 'Wissen-Artikel', icon: NewspaperIcon },
-  { href: '/admin/werkstaetten', label: 'Werkstätten', icon: WrenchIcon },
-  { href: '/admin/makler', label: 'Makler', icon: HandshakeIcon },
   { href: '/admin/team', label: 'Team', icon: UsersIcon },
   { href: '/admin/vertraege', label: 'Vertragseditor', icon: FileSignatureIcon },
   { href: '/admin/kommentare', label: 'Kommentare', icon: MessageSquareIcon },
@@ -50,7 +50,7 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin/support', label: 'Support-Tickets', icon: LifeBuoyIcon },
 ]
 
-const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/kalender', '/admin/sachverstaendige']
+const MOBILE_HREFS = ['/admin', '/admin/faelle', '/admin/aufgaben', '/admin/kalender', '/admin/vertrieb']
 const MOBILE_ITEMS = MOBILE_HREFS.map(h => NAV_ITEMS.find(i => i.href === h)!).filter(Boolean)
 
 export default function AdminNav({

@@ -42,18 +42,26 @@ Vertrieb  (EIN Nav-Punkt; Sachverständige/Partner-Leads/Makler/Werkstätten ver
 - **Akquise-Daten:** `partner_leads` + `partner_lead_aktivitaeten` + `einstufung` (e8aa73d4, prod-live). Das Detail-Cockpit liest die Aktivitäten-Timeline aus `partner_lead_aktivitaeten` (für `partner-lead`-kind; für andere Typen später analog).
 - **Write:** `updateVertriebFeld` (P0, Whitelist-gegated) — in P2.1 auf alle 5 kinds erweitert (notizen). Weitere operative Felder (Einstufung, Betreuer) additiv über dieselbe gegatete Action.
 
-## 5. Nav-Konsolidierung (der „ein Nav-Punkt"-Schritt)
+## 5. „Umzug" der Funktionen = Mount per Re-Export (nicht Deep-Link, nicht Kopie)
 
-- `src/app/admin/_components/AdminNav.tsx`: die Einträge **Sachverständige, Partner-Leads, Werkstätten, Makler** aus `NAV_ITEMS` entfernen; **Vertrieb** bleibt der einzige Partner-Einstieg. `MOBILE_HREFS` `/admin/sachverstaendige` → `/admin/vertrieb`.
-- **Routes bleiben** — nur der Nav-Shortcut kollabiert. Erreichbarkeit: Vertrieb-Roster-Segmente + Deep-Links + Bookmarks.
-- **Koordination:** AdminNav-Items = jetzt **mein** Ownership (Vertrieb-Konsole). Die Nav-**Shell** (schwebendes Panel, `PortalNav`-Styling) bleibt `eb3e46ca` (andere Files — `src/components/shared/portal-nav/*`). Kein Doppel-Edit.
+Aaron 08.07.: „partner leads muss auch mit umgezogen werden. und denk daran dass du **alle funktionen von den seiten sauber mit umziehst**." → Nicht nur Nav umbiegen — die **Verwaltungs-Flächen leben unter dem Vertrieb-Dach**, mit allen Funktionen, ohne Duplikation.
+
+**Mechanismus je Fläche (nach Struktur-Analyse):**
+- **makler, partner-leads, werkstaetten** = je eine einzelne `page.tsx` (Guard + Load + Client, kein eigenes Layout, keine dynamischen Params) → **Mount per Re-Export**: `/admin/vertrieb/<fläche>/page.tsx` = `export { default } from '@/app/admin/<fläche>/page'` (+ `export const dynamic = 'force-dynamic'`). Identische Funktionen, **null Duplikation, EINE Quelle** — Änderungen an der Ursprungs-Page (z.B. e8aa73d4 baut partner-leads weiter) greifen automatisch. **Kein Trampeln** (ich importiere nur).
+- **sachverstaendige** = full-bleed `LiveOpsMap`-Konsole mit eigenem `layout.tsx` (`@drawer`-Parallel-Slot) + Selbst-Escape → ebenfalls Re-Export; der `@drawer`-Intercept entfällt unter der neuen Route (Pin-Klick fällt auf die Full-Page-`[id]` zurück, deep-link-kompatibel wie im SV-Layout dokumentiert). **Wichtig:** das Konsolen-`layout.tsx` escapet NICHT (sonst doppelter PageContainer-Escape → Overflow); jede Seite bringt ihren eigenen Full-Bleed-Escape mit.
+- Alte Routes (`/admin/sachverstaendige` etc.) **bleiben erreichbar** (Deep-Links, Bookmarks, `@drawer`-Intercept dort) — nur aus der Top-Nav raus. 308-Redirects auf die Vertrieb-Route = späterer Schritt, sobald die Nachbar-Lanes (e8aa73d4 partner-leads offen) gemergt sind.
+
+## 5b. Nav-Konsolidierung (der „ein Nav-Punkt"-Schritt)
+
+- `src/app/admin/_components/AdminNav.tsx`: **Sachverständige, Partner-Leads, Werkstätten, Makler** aus `NAV_ITEMS` entfernt; **Vertrieb** = einziger Partner-Einstieg. `MOBILE_HREFS` `/admin/sachverstaendige` → `/admin/vertrieb`.
+- **Koordination:** AdminNav-Items = **mein** Ownership (Vertrieb-Konsole). Die Nav-**Shell** (schwebendes Panel, `PortalNav`-Styling) bleibt `eb3e46ca` (andere Files — `src/components/shared/portal-nav/*`). Kein Doppel-Edit. e8aa73d4 hat den partner-leads-Nav-Umzug mir überlassen ([[coordination-an-vertrieb-umbrella-partner-leads-komponente]]).
 
 ## 6. Phasen-Bauordnung
 
 Jede Phase = eigener PR gegen staging, additiv, bestehende Routes intakt.
 
-- **Phase A — Konsolen-Shell + Nav-Konsolidierung:** `/admin/vertrieb/layout.tsx` mit Sub-Nav; Roster wird „Übersicht"; AdminNav-Konsolidierung (4 Einträge raus). Kleinster sichtbarer „ein Dach"-Schritt.
-- **Phase B — Karte:** `/admin/vertrieb/karte` mit `LiveOpsMap` (alle Typen, geocodiert). Koordination `6c630247` (mapbox) + `LiveOpsMap`-Daten-Adapter.
+- **Phase A — Konsolen-Shell + Nav-Konsolidierung + Mounts [✅ GEBAUT]:** `/admin/vertrieb/layout.tsx` mit Sub-Nav (`VertriebKonsoleTabs`: Übersicht · Karte · Sachverständige · Partner-Leads · Makler · Werkstätten); Roster = „Übersicht"; **Karte** (`VertriebKarteClient`, full-bleed Mapbox, alle Typen, token-konsistente `primitives.Card`-Legende); **4 Mounts per Re-Export**; AdminNav-Konsolidierung (4 Einträge raus). Der sichtbare „ein Dach"-Schritt.
+- **Phase B — Karte:** `/admin/vertrieb/karte` mit `LiveOpsMap` (alle Typen, geocodiert). **Full-bleed** (etabliertes PageContainer-Escape-Muster `md:w-[104.17%] md:-ml-[2.08%]` aus SV-Karte #3793 — PageContainer selbst unangetastet) + **token-konsistent** (`claimondo-*`/`rounded-ios-*`/semantische Status-Tokens; Mapbox-Paint-Hex nur mit `// Token-Audit-Skip`-Header wie in `LiveOpsMap`). Koordination `6c630247` (mapbox) + `LiveOpsMap`-Daten-Adapter.
 - **Phase C — Akquise eingehängt:** `/admin/vertrieb/akquise` mountet/verlinkt das partner-leads-CRM (e8aa73d4). Kein Rebuild — Wiring/Einhängen.
 - **Phase D — Detail-Cockpit vertieft:** `/admin/vertrieb/[kind]/[id]` — Stufe + Notizen (P2.1) + Aktivitäten-Timeline (`partner_lead_aktivitaeten`) + Einstufung + Deep-Link. Löst den Read-only-Drawer schrittweise ab.
 - **Phase E — Admin-Feldmodus:** `/admin/vertrieb/feldmodus` — Besuchsrouten über Partner-Standorte, auf Basis von 6c630247-Feldmodus. Koordination Pflicht.
