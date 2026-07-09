@@ -3,11 +3,11 @@ import { collapseByFirma } from './collapse-firmen'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 const k = (o: Partial<VertriebKontakt>): VertriebKontakt => ({
-  id: Math.random().toString(36), kind: 'sv-lead', name: null, email: null, telefon: null,
+  id: Math.random().toString(36), kind: 'partner-lead', name: null, email: null, telefon: null,
   plz: null, ort: null, lat: null, lng: null, owner_id: null, quelle: null, erstellt_am: null,
   roh_status: null, roh_ist_aktiv: null, roh_gesperrt: null, roh_verifiziert: null,
   roh_portal_zugang: null, roh_onboarding_offen: null, roh_warteliste: null, notizen: null,
-  stufe: 'neu', ...o,
+  stufe: 'neu', rolle: 'sv', typ: 'lead', ...o,
 })
 
 describe('collapseByFirma', () => {
@@ -34,7 +34,7 @@ describe('collapseByFirma', () => {
 
   it('gruppiert NICHT über kind hinweg (gleicher Name, anderer Typ = getrennt)', () => {
     const res = collapseByFirma([
-      k({ name: 'Muster GmbH', kind: 'sv-lead' }),
+      k({ name: 'Muster GmbH', kind: 'partner-lead' }),
       k({ name: 'Muster GmbH', kind: 'werkstatt' }),
     ])
     expect(res).toHaveLength(2)

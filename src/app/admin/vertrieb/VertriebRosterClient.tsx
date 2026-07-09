@@ -20,7 +20,7 @@ import type { VertriebRollupZelle } from '@/lib/vertrieb/vertrieb-rollup.types'
 
 type Segment = VertriebKind | 'alle'
 
-const SEGMENTE: Segment[] = ['alle', 'sv', 'makler', 'werkstatt', 'partner-lead', 'sv-lead']
+const SEGMENTE: Segment[] = ['alle', 'sv', 'makler', 'werkstatt', 'partner-lead']
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
 
@@ -45,7 +45,7 @@ export default function VertriebRosterClient({
     const sum = (pred: (z: VertriebRollupZelle) => boolean) =>
       rollup.filter(pred).reduce((a, z) => a + z.anzahl, 0)
     return {
-      Leads: sum((z) => z.kind === 'partner-lead' || z.kind === 'sv-lead'),
+      Leads: sum((z) => z.kind === 'partner-lead'),
       Onboarding: sum((z) => z.stufe === 'onboarding'),
       Aktiv: sum((z) => z.stufe === 'aktiv'),
       Gesperrt: sum((z) => z.stufe === 'gesperrt'),

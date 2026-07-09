@@ -8,7 +8,6 @@ export const KIND_LABEL: Record<VertriebKind, string> = {
   makler: 'Makler',
   werkstatt: 'Werkstatt',
   'partner-lead': 'Partner-Lead',
-  'sv-lead': 'SV-Lead',
 }
 
 /** Was ist bei dieser Stufe der nächste Schritt? (workflow-getriebener Hinweis fürs Detail) */

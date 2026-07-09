@@ -21,7 +21,6 @@ const KIND_COLORS: Record<VertriebKind, string> = {
   makler: '#4573A2',       // claimondo-secondary
   werkstatt: '#7BA3CC',    // claimondo-accent
   'partner-lead': '#f59e0b', // Amber — Partner-Lead noch nicht konvertiert
-  'sv-lead': '#10b981',    // Emerald — SV-Lead noch nicht verifiziert
 }
 
 /** Deutsche Labels je Kind. */
@@ -30,7 +29,6 @@ const KIND_LABELS: Record<VertriebKind, string> = {
   makler: 'Makler',
   werkstatt: 'Werkstätten',
   'partner-lead': 'Partner-Leads',
-  'sv-lead': 'SV-Leads',
 }
 
 // Match-Expression fuer circle-color (raw hex ok — Token-Audit-Skip-Header oben)
@@ -41,7 +39,6 @@ const KIND_COLOR_EXPR = [
   'makler', KIND_COLORS.makler,
   'werkstatt', KIND_COLORS.werkstatt,
   'partner-lead', KIND_COLORS['partner-lead'],
-  'sv-lead', KIND_COLORS['sv-lead'],
   /* default */ '#94a3b8',
 ] as unknown as mapboxgl.Expression
 
@@ -213,7 +210,7 @@ export default function VertriebKarteClient({ kontakte }: VertriebKarteClientPro
   // ---- Render
 
   // Reihenfolge fuer die Legende (feste Reihenfolge statt Map-Iteration)
-  const legendKinds: VertriebKind[] = ['sv', 'makler', 'werkstatt', 'partner-lead', 'sv-lead']
+  const legendKinds: VertriebKind[] = ['sv', 'makler', 'werkstatt', 'partner-lead']
 
   return (
     <div className="relative h-full w-full">

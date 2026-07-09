@@ -6,7 +6,8 @@ const k = (o: Partial<VertriebKontakt>): VertriebKontakt => ({
   id: Math.random().toString(36), kind: 'sv', name: 'X', email: null, telefon: null,
   plz: null, ort: null, lat: null, lng: null, owner_id: null, quelle: null, erstellt_am: null,
   roh_status: null, roh_ist_aktiv: null, roh_gesperrt: null, roh_verifiziert: null,
-  roh_portal_zugang: null, roh_onboarding_offen: null, roh_warteliste: null, notizen: null, stufe: 'neu', ...o,
+  roh_portal_zugang: null, roh_onboarding_offen: null, roh_warteliste: null, notizen: null,
+  stufe: 'neu', rolle: 'sv', typ: 'partner', ...o,
 })
 
 const daten: VertriebKontakt[] = [
