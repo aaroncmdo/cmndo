@@ -28,7 +28,6 @@ import { VorOrtTriggerCard } from './_components/VorOrtTriggerCard'
 // AAR-Followup (SV-Lead-Ablehnung): Card sichtbar nur in Status sv-zugewiesen + sv-termin.
 import { LeadAblehnenCard } from './_components/LeadAblehnenCard'
 import { AnspruchVorschauCard } from './_components/AnspruchVorschauCard'
-import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
 import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
@@ -51,11 +50,8 @@ export default async function GutachterFallPage({
   if (!sv) notFound()
 
   // Phase C: EIN rollen-aware getClaimDetail (Facade) statt getFallForSv +
-  // getPflichtdokumenteForFall separat. sv-core === getFallForSv-Output (behavior-
-  // preserving); getFallForSv bleibt das sv_id-Defense-in-Depth-Gate (null → notFound).
-  // auftraege bleibt bewusst der eigene getAlleAuftraege(supabase)-Read (SV-User-Client,
-  // RLS) — die Facade laedt auftraege via Admin; fuer Multi-SV-Claims koennte sich die
-  // sichtbare Menge unterscheiden → nicht umstellen (behavior-safe).
+  // getPflichtdokumenteForFall + getAlleAuftraege separat. sv-core === getFallForSv-Output
+  // (behavior-preserving); getFallForSv bleibt das sv_id-Defense-in-Depth-Gate (null → notFound).
   const detail = await getClaimDetail(supabase, id, 'sv', { svId: (sv as { id: string }).id })
   if (!detail) notFound()
   const fall = detail.core
@@ -363,9 +359,12 @@ export default async function GutachterFallPage({
       )
     : null
 
-  // CMM-32: aktive Auftraege bereits hier laden, damit der Phase-Resolver
-  // gutachten_final_freigegeben aus auftraege ziehen kann.
-  const auftraegeOfFall = await getAlleAuftraege(supabase, id)
+  // Phase C: auftraege aus dem getClaimDetail-Bundle (oben) statt separatem
+  // getAlleAuftraege(supabase). Einziger Consumer ist die erstgutachten-.find() —
+  // auf einem sv-gegateten Fall ist das erstgutachten immer das des betrachtenden SV,
+  // daher liefert der Admin-Bundle-Read dasselbe erstgutachten (behavior-preserving)
+  // und spart den Doppel-Load (Review I1).
+  const auftraegeOfFall = detail.auftraege
   const erstgutachtenAuftrag = auftraegeOfFall.find((a) => a.typ === 'erstgutachten') ?? null
 
   // CMM-32: claim_id ist nicht in der v_faelle_mit_aktuellem_termin-View

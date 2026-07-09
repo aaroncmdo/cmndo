@@ -60,7 +60,11 @@ export async function getClaimDetail(
     const core = await getFallForSv(supabase, claimId, ctx.svId)
     if (!core) return null
     const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
-    const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, 'sv')
+    // C1: getPflichtdokumenteForFall filtert pflichtdokumente/fall_dokumente per fall_id
+    // (= faelle.id!). core.id ist die faelle.id (getFallForSv-View-id); claimId koennte
+    // ein claim_id sein → 0 Treffer. Immer die faelle.id (core.id) durchreichen.
+    const fallId = fallIdOf(core, claimId)
+    const pflichtDokumente = await getPflichtdokumenteForFall(supabase, fallId, 'sv')
     return { rolle: 'sv', core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
   }
 
@@ -73,19 +77,34 @@ export async function getClaimDetail(
     const core = await getKundeFallDetailRecord(admin, ctx.userId, ctx.email ?? null, claimId)
     if (!core) return null
     const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
-    const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, 'kunde')
+    // C1: pflicht per faelle.id (core.id = id:fall_id-Alias), NICHT claimId (auf der
+    // canonical URL ist routeId der claim_id → 0 Pflichtdok/fall_dokumente-Treffer).
+    const fallId = fallIdOf(core, claimId)
+    const pflichtDokumente = await getPflichtdokumenteForFall(supabase, fallId, 'kunde')
     // Sub-Entities = die EIGENEN Claim-Daten (kein Leak — der Core-Loader hat den
     // Zugriff bereits gegated). Die Kunde-Page nutzt auftraege (erstgutachten/QC-Gates)
     // → mitliefern, sonst braeche die Migration die Gutachten-Anzeige.
     return { rolle: 'kunde', core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
   }
 
-  // staff/sv: RLS-Gate via getClaimForRole (v_claim_full; admin/kb='*' = vollstaendig).
+  // staff (kb/admin/kanzlei): RLS-Gate via getClaimForRole (v_claim_full; admin/kb='*').
   const core = await getClaimForRole(supabase, claimId, rolle)
   if (!core) return null
   const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
+  // ⚠ D-admin-TODO: staff core.id = claims.id (claim_id), NICHT faelle.id. getPflichtdokumenteForFall
+  // filtert per fall_id (=faelle.id) → wenn D-admin detail.pflichtDokumente konsumiert, hier
+  // core.id→faelle.id via Bridge aufloesen. Aktuell KEIN staff-Consumer der Facade → claimId
+  // belassen (nicht spekulativ fixen; die Monolith-Page laedt pflicht heute selbst korrekt).
   const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, rolle)
   // Sub-Entities = eigene Claim-Daten des (bereits gegateten) Claims → an alle
   // autorisierten Rollen (matcht das heutige Verhalten der Detail-Pages).
   return { rolle, core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
+}
+
+// core.id ist bei kunde (getKundeFallDetailRecord: id:fall_id) + sv (getFallForSv-View)
+// die faelle.id — die getPflichtdokumenteForFall + andere fall_id-gekeyte Reads brauchen.
+// Fallback claimId nur falls core kein id traegt (sollte nie).
+function fallIdOf(core: Record<string, unknown>, claimId: string): string {
+  const id = core.id
+  return typeof id === 'string' && id.length > 0 ? id : claimId
 }

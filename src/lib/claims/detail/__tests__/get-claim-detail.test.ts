@@ -6,6 +6,7 @@
 import { describe, it, expect } from 'vitest'
 import { createClient } from '@supabase/supabase-js'
 import { getClaimDetail } from '../get-claim-detail'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 
 const URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
 const SERVICE = process.env.SUPABASE_SERVICE_ROLE_KEY ?? ''
@@ -79,6 +80,46 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
       expect(svWrong, 'sv mit fremder svId -> null').toBeNull()
     }
 
+    // C1-Guard (Review-Fund): getClaimDetail(kunde) MUSS pflicht per faelle.id keyen,
+    // NICHT per claim_id. Referenz = die faelle.id UNABHAENGIG via Bridge aus claim_id
+    // abgeleitet (nicht via core.id — das nutzt die Facade selbst → waere zirkulaer).
+    // Bevorzugt einen OLD-Claim (bridge.fall_id != claim_id), wo der Bug sich zeigt:
+    // dort liefert die Facade-mit-Bug pflicht-per-claim_id (idR []) != direct(faelle.id).
+    let c1Checked = -1
+    let c1Distinguishing = false
+    const { data: bridgeData } = await admin
+      .from('faelle_claim_bridge')
+      .select('claim_id, fall_id')
+      .limit(200)
+    const bridgeRows = (bridgeData ?? []) as Array<{ claim_id: string; fall_id: string }>
+    // Bevorzugt eine OLD-Zeile (claim_id != fall_id) — dort ist der Guard distinguishing;
+    // sonst irgendeine Zeile (Konsistenz-Check).
+    const anyRow = bridgeRows.find((r) => r.claim_id !== r.fall_id) ?? bridgeRows[0] ?? null
+    if (anyRow) {
+      c1Distinguishing = anyRow.claim_id !== anyRow.fall_id
+      // userId aus v_claim_full.kunde_id (= was getKundeFallDetailRecord fuer die
+      // Ownership-Path-1-Aufloesung prueft) → deterministisch aufloesbar.
+      const { data: vcfOwner } = await admin
+        .from('v_claim_full')
+        .select('kunde_id')
+        .eq('id', anyRow.claim_id)
+        .maybeSingle()
+      const oId = (vcfOwner?.kunde_id as string | null) ?? null
+      if (oId) {
+        const facadeDetail = await getClaimDetail(admin, anyRow.claim_id, 'kunde', { userId: oId, email: null })
+        // Falls Ownership doch nicht aufloest (Daten-Edge): skippen, nicht failen —
+        // der Guard prueft C1 (id-Keying), nicht Ownership.
+        if (facadeDetail) {
+          const directPflicht = await getPflichtdokumenteForFall(admin, anyRow.fall_id, 'kunde')
+          expect(
+            facadeDetail.pflichtDokumente.length,
+            'C1: Facade-pflicht != direct(faelle.id) — pflicht wird per claim_id statt faelle.id gekeyt',
+          ).toBe(directPflicht.length)
+          c1Checked = directPflicht.length
+        }
+      }
+    }
+
     // null-Kontrakt: staff-Gate mit nicht-existenter ID → null.
     const missing = await getClaimDetail(admin, '00000000-0000-0000-0000-000000000000', 'admin')
     expect(missing, 'nicht-existente ID -> null').toBeNull()
@@ -87,7 +128,8 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
     process.stdout.write(
       `\n[claim-detail] claimId=${claimId} adminCore=ClaimFull auftraege=${asAdmin!.auftraege.length} ` +
         `mainPhase=${asAdmin!.lifecycle.mainPhase} ownerId=${ownerId ? 'yes' : 'none'} ` +
-        `kundeCoreLoaded=${kundeCoreLoaded} svCoreLoaded=${svCoreLoaded}\n`,
+        `kundeCoreLoaded=${kundeCoreLoaded} svCoreLoaded=${svCoreLoaded} ` +
+        `c1PflichtParity=${c1Checked} c1Distinguishing=${c1Distinguishing}\n`,
     )
   }, 90_000)
 })
