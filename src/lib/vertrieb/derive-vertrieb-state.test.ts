@@ -7,8 +7,24 @@ const base: VertriebKontaktRow = {
   lat: null, lng: null, owner_id: null, quelle: null, erstellt_am: null,
   roh_status: null, roh_ist_aktiv: null, roh_gesperrt: null, roh_verifiziert: null,
   roh_portal_zugang: null, roh_onboarding_offen: null, roh_warteliste: null, notizen: null,
+  rolle: null,
 }
 const sv = (o: Partial<VertriebKontaktRow>) => deriveVertriebState({ ...base, kind: 'sv', ...o }).stufe
+
+describe('deriveVertriebState — typ×rolle (P1)', () => {
+  it('typ: partner-lead = Lead, aktive Partner = Partner', () => {
+    expect(deriveVertriebState({ ...base, kind: 'partner-lead' }).typ).toBe('lead')
+    expect(deriveVertriebState({ ...base, kind: 'sv' }).typ).toBe('partner')
+    expect(deriveVertriebState({ ...base, kind: 'makler' }).typ).toBe('partner')
+    expect(deriveVertriebState({ ...base, kind: 'werkstatt' }).typ).toBe('partner')
+  })
+  it('rolle: aus der View-Spalte, Fallback sv', () => {
+    expect(deriveVertriebState({ ...base, kind: 'makler', rolle: 'makler' }).rolle).toBe('makler')
+    expect(deriveVertriebState({ ...base, kind: 'partner-lead', rolle: 'werkstatt' }).rolle).toBe('werkstatt')
+    expect(deriveVertriebState({ ...base, kind: 'partner-lead', rolle: 'sv' }).rolle).toBe('sv')
+    expect(deriveVertriebState({ ...base, kind: 'partner-lead', rolle: null }).rolle).toBe('sv')
+  })
+})
 
 describe('deriveVertriebState — sv (konsolidiert die 6-Spalten-Fragmentierung)', () => {
   it('gesperrt schlägt alles', () => {
@@ -43,9 +59,3 @@ describe('deriveVertriebState — partner-lead', () => {
   it('neu default', () => expect(pl({ roh_status: 'neu' })).toBe('neu'))
 })
 
-const svl = (o: Partial<VertriebKontaktRow>) => deriveVertriebState({ ...base, kind: 'sv-lead', ...o }).stufe
-describe('deriveVertriebState — sv-lead', () => {
-  it('inaktiv = verloren', () => expect(svl({ roh_ist_aktiv: false })).toBe('verloren'))
-  it('warteliste kontaktiert', () => expect(svl({ roh_ist_aktiv: true, roh_warteliste: 'kontaktiert' })).toBe('kontaktiert'))
-  it('aktiv default = neu', () => expect(svl({ roh_ist_aktiv: true })).toBe('neu'))
-})
