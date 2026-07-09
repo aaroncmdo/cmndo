@@ -1,20 +1,26 @@
 import { describe, it, expect } from 'vitest'
 import { detailLink } from './detail-link'
 
-describe('detailLink', () => {
-  it('SV + Werkstatt → Einzel-Akte mit id', () => {
+describe('detailLink (P3: gemountete Routen unter dem Dach)', () => {
+  it('SV + Werkstatt → gemountete Einzel-Akte mit id', () => {
     expect(detailLink('sv', 'abc')).toEqual({
-      href: '/admin/sachverstaendige/abc',
+      href: '/admin/vertrieb/sachverstaendige/abc',
       label: 'Vollständige Akte öffnen',
     })
     expect(detailLink('werkstatt', 'xyz')).toEqual({
-      href: '/admin/werkstaetten/xyz',
+      href: '/admin/vertrieb/werkstaetten/xyz',
       label: 'Vollständige Akte öffnen',
     })
   })
 
-  it('Makler/Partner-Lead → Listen-Route (id noch nicht fokussiert)', () => {
-    expect(detailLink('makler', 'm1').href).toBe('/admin/makler')
-    expect(detailLink('partner-lead', 'p1').href).toBe('/admin/partner-leads')
+  it('Makler/Partner-Lead → gemountete Liste', () => {
+    expect(detailLink('makler', 'm1').href).toBe('/admin/vertrieb/makler')
+    expect(detailLink('partner-lead', 'p1').href).toBe('/admin/vertrieb/partner-leads')
+  })
+
+  it('alle Ziele bleiben unter /admin/vertrieb (in der Konsole)', () => {
+    for (const kind of ['sv', 'werkstatt', 'makler', 'partner-lead'] as const) {
+      expect(detailLink(kind, 'x').href.startsWith('/admin/vertrieb/')).toBe(true)
+    }
   })
 })
