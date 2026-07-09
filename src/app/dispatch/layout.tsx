@@ -19,7 +19,9 @@ export default async function DispatchLayout({
       <RealtimeLeadAlert />
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 
-      <div className="md:ml-56 h-screen flex flex-col relative z-10">
+      {/* Content full-bleed; fixes Glass-Panel schwebt darueber (Content bleedt
+          drunter → "on top", statt md:ml-56-Offset daneben). */}
+      <div className="h-screen flex flex-col relative z-10">
         {/* Mobile header — AAR-727 Glass-Dark */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>

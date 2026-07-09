@@ -44,8 +44,9 @@ export default async function AdminLayout({
       {/* Client-side nav with usePathname for active state */}
       <AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />
 
-      {/* Main content area — offset by sidebar width on desktop */}
-      <div className="md:ml-56 h-screen flex flex-col relative z-10">
+      {/* Main content area — full-bleed; das fixe Glass-Panel schwebt darueber
+          (Content bleedt drunter → "on top", statt md:ml-56-Offset daneben). */}
+      <div className="h-screen flex flex-col relative z-10">
         {/* AAR-725: UpdatesNav ersetzt MitteilungszentralePanel + alte
             NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
         {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}

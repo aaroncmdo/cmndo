@@ -349,15 +349,16 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   return (
     <>
     <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
-      {/* Detached Panel: freischwebende Kunde-Sidebar (Margin ringsum + Rundung
-          + Schatten), solide Brand-BG. w-60 + top/left/bottom-2 passen innerhalb
-          des bestehenden lg:ml-64-Content-Offsets. Kein `kunde-sidebar`/`glass-
-          branded` mehr, damit die globals.css Floating-Glass-Regeln (transparent
-          + Pills) NICHT greifen. */}
+      {/* Detached Glass-Panel: freischwebende Kunde-Sidebar (Margin ringsum +
+          Rundung + Schatten), transluzentes Brand-Glas statt solide — der
+          full-bleed Content darunter schimmert durch → Ebene "on top". glass-branded
+          liefert Blur + Border; color-mix 72% haelt die Brand-Farbe satt (kein
+          Washout auf hellem BG). NICHT die globals.css `kunde-sidebar`-Pill-Regeln
+          (die brauchen den body-Trigger + die Klasse). */}
       <aside
-        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 z-40 rounded-ios-lg shadow-ios-lg overflow-hidden"
+        className="glass-branded hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 z-40 rounded-ios-lg shadow-ios-lg overflow-hidden"
         style={{
-          backgroundColor: sidebarBg,
+          backgroundColor: `color-mix(in srgb, ${sidebarBg} 72%, transparent)`,
         }}
       >
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
