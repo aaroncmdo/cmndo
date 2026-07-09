@@ -1027,6 +1027,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               kostenvoranschlagBrutto={(fall.kostenvoranschlag_brutto as number | null) ?? null}
               freigegebenAm={(fall.reparatur_freigegeben_am as string | null) ?? null}
               pdfUrl={kostenvoranschlagPdfUrl}
+              reparaturdauerTage={(fall.reparaturdauer_tage_kva as number | null) ?? null}
             />
           )}
 

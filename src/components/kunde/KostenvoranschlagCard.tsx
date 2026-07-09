@@ -22,6 +22,8 @@ export type KostenvoranschlagCardProps = {
   kostenvoranschlagBrutto: number | null
   freigegebenAm: string | null
   pdfUrl?: string | null
+  // AV8: von der Werkstatt beim KVA-Upload angegebene Reparaturdauer (Tage).
+  reparaturdauerTage?: number | null
 }
 
 function formatEuro(n: number): string {
@@ -34,6 +36,7 @@ export default function KostenvoranschlagCard({
   kostenvoranschlagBrutto,
   freigegebenAm,
   pdfUrl,
+  reparaturdauerTage,
 }: KostenvoranschlagCardProps) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -77,6 +80,13 @@ export default function KostenvoranschlagCard({
             <p className="text-2xl font-bold text-claimondo-navy">{formatEuro(betrag)}</p>
             <p className="text-body-sm text-claimondo-ondo">Reparaturkosten ({betragLabel})</p>
           </div>
+        )}
+
+        {/* AV8: von der Werkstatt angegebene Reparaturdauer */}
+        {reparaturdauerTage != null && (
+          <p className="text-body-sm text-claimondo-ondo">
+            Voraussichtliche Reparaturdauer: {reparaturdauerTage} Tage
+          </p>
         )}
 
         {/* Freigabe-Status */}
