@@ -10,9 +10,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SchadensUrsacheBadge from '@/components/shared/SchadensUrsacheBadge'
 import EmptyState from '@/components/shared/EmptyState'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
-import { FolderIcon } from 'lucide-react'
 
 type FilterKey = 'alle' | 'versicherungskontakt' | 'auszahlung'
 
@@ -64,7 +62,6 @@ export default async function GutachterFaellePage({
     return (
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
-          <PageHeader title="Meine Fälle" description="0 Fälle in Regulierung" icon={FolderIcon} />
           <EmptyState title="Noch keine Fälle in Regulierung." />
         </div>
       </div>
@@ -90,7 +87,6 @@ export default async function GutachterFaellePage({
     return (
       <div className="h-full flex flex-col">
         <div className="w-full space-y-6">
-          <PageHeader title="Meine Fälle" description="0 Fälle in Regulierung" icon={FolderIcon} />
           <FilterTabs activeFilter={activeFilter} />
           <EmptyState title="Keine Fälle für diesen Filter." />
         </div>
@@ -138,12 +134,6 @@ export default async function GutachterFaellePage({
   return (
     <div className="h-full flex flex-col">
       <div className="w-full space-y-6">
-        <PageHeader
-          title="Meine Fälle"
-          description={`${filtered.length} ${filtered.length === 1 ? 'Fall' : 'Fälle'} in Regulierung`}
-          icon={FolderIcon}
-        />
-
         <FilterTabs activeFilter={activeFilter} />
 
         {filtered.length === 0 ? (

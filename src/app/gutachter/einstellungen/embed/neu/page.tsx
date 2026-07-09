@@ -2,7 +2,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
-import PageHeader from '@/components/shared/PageHeader'
 import { emptyEmbedSiteForm } from '@/lib/embed/site-write'
 import EmbedSiteWizard from '../EmbedSiteWizard'
 
@@ -24,7 +23,6 @@ export default async function NeueEmbedSitePage() {
 
   return (
     <div className="py-6 space-y-4">
-      <PageHeader title="Neue Embed-Site" size="lg" description="In 3 Schritten zu deinem Widget-Snippet." />
       <EmbedSiteWizard
         mode="create"
         initial={emptyEmbedSiteForm()}

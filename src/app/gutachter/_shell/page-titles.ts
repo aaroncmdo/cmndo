@@ -4,6 +4,7 @@
 export const SV_PAGE_TITLES: Array<{ prefix: string; title: string }> = [
   { prefix: '/gutachter/einstellungen/verfuegbarkeit', title: 'Verfügbarkeit' },
   { prefix: '/gutachter/einstellungen/kalender', title: 'Kalender' },
+  { prefix: '/gutachter/einstellungen/embed/neu', title: 'Neue Embed-Site' },
   { prefix: '/gutachter/einstellungen/embed', title: 'Embed-Sites' },
   { prefix: '/gutachter/einstellungen', title: 'Einstellungen' },
   { prefix: '/gutachter/heute', title: 'Heute' },

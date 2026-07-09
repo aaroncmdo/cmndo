@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Script from 'next/script'
 import { createClient } from '@/lib/supabase/client'
-import PageHeader from '@/components/shared/PageHeader'
 import { ProfilSpezialisierung } from './_components/ProfilSpezialisierung'
 import { ProfilCommunityPrivacy } from './_components/ProfilCommunityPrivacy'
 import { ProfilVertrag } from './_components/ProfilVertrag'
@@ -50,14 +49,6 @@ export default function ProfilClient({
           onReady={() => setMapsReady(true)}
         />
       )}
-
-      {/* BUG-91: Sticky Header — bleibt beim Scrollen oben sichtbar */}
-      <div className="flex-shrink-0 sticky top-0 z-20 bg-white border-b border-claimondo-border px-6 py-3">
-        <PageHeader
-          title="Mein Profil"
-          description="Stammdaten + Firma + Standort"
-        />
-      </div>
 
       {/* BUG-91: Scroll-Container, max-w-full Page-Content
           BUG-98 Folge-Cleanup: Form von max-w-3xl auf max-w-4xl angehoben

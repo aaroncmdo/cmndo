@@ -1,10 +1,8 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { FINANCE } from '@/lib/finance/constants'
 import { redirect } from 'next/navigation'
-import { TagIcon } from 'lucide-react'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { paketLabelMitKontingent } from '@/lib/sachverstaendige/kontingent'
-import PageHeader from '@/components/shared/PageHeader'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 export default async function LeadpreisePage() {
@@ -36,11 +34,7 @@ export default async function LeadpreisePage() {
     <div className="h-full overflow-y-auto py-6">
       <div className="space-y-5">
         <div>
-          <PageHeader
-            title="Lead-Preis-Tabelle"
-            description={`Stand: ${standDatum} (Version ${tabelle?.[0]?.version ?? 'v1'})`}
-            icon={TagIcon}
-          />
+          <p className="text-sm text-claimondo-ondo">Stand: {standDatum} (Version {tabelle?.[0]?.version ?? 'v1'})</p>
           <p className="text-xs text-claimondo-ondo/70 mt-1">Diese Tabelle ist Bestandteil deines Kooperationsvertrags (Anhang). Änderungen werden dir vorab schriftlich mitgeteilt.</p>
         </div>
 

@@ -4,9 +4,8 @@ import { useMemo, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { toast } from 'sonner'
-import { ChevronLeftIcon, ClockIcon, CheckCircle2Icon } from 'lucide-react'
+import { ChevronLeftIcon, CheckCircle2Icon } from 'lucide-react'
 import { Button, Card } from '@/components/primitives'
-import PageHeader from '@/components/shared/PageHeader'
 import { updateVerfuegbarkeit } from './actions'
 
 // AAR-SV-Verfuegbarkeit: Editor fuer Arbeitszeiten (pro Wochentag) + Urlaub.
@@ -135,18 +134,6 @@ export default function VerfuegbarkeitClient({
       >
         <ChevronLeftIcon className="w-4 h-4" /> Einstellungen
       </Link>
-
-      <PageHeader
-        title="Verfügbarkeit"
-        description="Deine Arbeitszeiten, geschlossene Tage und Urlaub. Claimondo schlägt Termine nur innerhalb dieser Zeiten vor."
-        size="lg"
-        useBranding
-        leadingSlot={
-          <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center shrink-0">
-            <ClockIcon className="w-5 h-5" />
-          </div>
-        }
-      />
 
       {/* Arbeitszeiten */}
       <Card className="space-y-1">

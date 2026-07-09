@@ -1,8 +1,7 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { ShieldCheckIcon, CheckCircleIcon, ClockIcon, XCircleIcon, AlertTriangleIcon, FileTextIcon, IdCardIcon } from 'lucide-react'
+import { CheckCircleIcon, ClockIcon, XCircleIcon, AlertTriangleIcon, FileTextIcon, IdCardIcon } from 'lucide-react'
 import QualiSlotUpload from './QualiSlotUpload'
-import PageHeader from '@/components/shared/PageHeader'
 
 // AAR-359 W5 + AAR-515 v4.1 + AAR-360: Verifizierungs-Übersicht für SVs.
 // Read-only — zeigt die Tier-2-Frist plus die conditional Tier-2-Slots
@@ -182,18 +181,6 @@ export default async function VerifizierungPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-6">
-      <PageHeader
-        title="Verifizierung"
-        description="Status Ihrer Zulassungs-Unterlagen"
-        size="lg"
-        useBranding
-        leadingSlot={
-          <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center shrink-0">
-            <ShieldCheckIcon className="w-5 h-5" />
-          </div>
-        }
-      />
-
       {/* Tier 2: 14-Tage-Dokumente */}
       <section className="bg-white rounded-2xl border border-claimondo-border p-5 space-y-3">
         <div className="flex items-start justify-between gap-3">

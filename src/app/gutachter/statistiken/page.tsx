@@ -1,14 +1,10 @@
 import { BarChart3Icon, ArrowRightIcon } from 'lucide-react'
 import Link from 'next/link'
-import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 
 export default function StatistikenPage() {
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2">
-        <PageHeader title="Statistiken" description="Auswertungen und Kennzahlen" />
-      </div>
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         <SectionCard className="p-12 text-center">
           <div className="w-14 h-14 mx-auto rounded-2xl bg-[var(--brand-secondary)]/10 flex items-center justify-center mb-4">
