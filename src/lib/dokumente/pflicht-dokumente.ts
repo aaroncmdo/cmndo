@@ -6,7 +6,9 @@
 // von 'lead' bis einschliesslich der aktuellen Phase des Falls.
 
 export type Phase = 'lead' | 'aufnahme' | 'vor_termin' | 'termin' | 'nach_termin' | 'reklamation' | 'abrechnung' | 'abgeschlossen'
-export type Szenario = 'haftpflicht_eindeutig' | 'haftpflicht_strittig' | 'bewertung' | 'leasingrueckgabe' | 'totalschaden' | 'gerichtsgutachten'
+// WS5b (Reduced-Repair): 'selbstzahler' + 'kasko' = reparatur-only-Claims (kein SV/Gutachten/
+// Regulierung) -> reduziertes Pflichtdok-Set (nur Fahrzeugschein).
+export type Szenario = 'haftpflicht_eindeutig' | 'haftpflicht_strittig' | 'bewertung' | 'leasingrueckgabe' | 'totalschaden' | 'gerichtsgutachten' | 'selbstzahler' | 'kasko'
 
 export const PHASEN_REIHENFOLGE: Phase[] = [
   'lead', 'aufnahme', 'vor_termin', 'termin', 'nach_termin', 'reklamation', 'abrechnung', 'abgeschlossen',
@@ -28,6 +30,11 @@ export const PFLICHT_DOKUMENTE_MATRIX: Record<Phase, Partial<Record<Szenario, st
     leasingrueckgabe: ['fahrzeugschein', 'leasingvertrag', 'wartungsheft'],
     totalschaden: ['fahrzeugschein', 'versicherungsschein_eigener', 'versicherungsdaten_gegner'],
     gerichtsgutachten: ['fahrzeugschein'],
+    // WS5b (Reduced-Repair): reparatur-only — nur Fahrzeugschein (ZB1). Schadenfotos (WS3
+    // SchadensfotoUploadCard) + KVA (WS4 KostenvoranschlagCard) laufen ueber eigene Kunde-Cards.
+    // KEIN vollmacht/gutachten/versicherer.
+    selbstzahler: ['fahrzeugschein'],
+    kasko: ['fahrzeugschein'],
   },
   vor_termin: {},
   termin: {

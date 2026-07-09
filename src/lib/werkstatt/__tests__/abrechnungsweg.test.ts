@@ -3,6 +3,7 @@ import {
   resolveAbrechnungsweg,
   routeForAbrechnungsweg,
   istReparaturOnly,
+  istWerkstattReparaturWeg,
 } from '../abrechnungsweg'
 
 describe('resolveAbrechnungsweg', () => {
@@ -54,5 +55,23 @@ describe('istReparaturOnly', () => {
     expect(istReparaturOnly('kasko')).toBe(false)
     expect(istReparaturOnly(null)).toBe(false)
     expect(istReparaturOnly('irgendwas')).toBe(false)
+  })
+})
+
+describe('istWerkstattReparaturWeg (WS2 — selbstzahler ODER kasko-freie-Wahl)', () => {
+  it('selbstzahler ist immer Werkstatt-Reparatur', () => {
+    expect(istWerkstattReparaturWeg('selbstzahler')).toBe(true)
+    expect(istWerkstattReparaturWeg('selbstzahler', false)).toBe(true)
+  })
+  it('kasko ist Werkstatt-Reparatur, ausser bei expliziter Werkstattbindung (false)', () => {
+    expect(istWerkstattReparaturWeg('kasko', true)).toBe(true)
+    expect(istWerkstattReparaturWeg('kasko', null)).toBe(true)
+    expect(istWerkstattReparaturWeg('kasko')).toBe(true)
+    expect(istWerkstattReparaturWeg('kasko', false)).toBe(false)
+  })
+  it('haftpflicht / null / unbekannt sind keine Werkstatt-Reparatur', () => {
+    expect(istWerkstattReparaturWeg('haftpflicht')).toBe(false)
+    expect(istWerkstattReparaturWeg(null)).toBe(false)
+    expect(istWerkstattReparaturWeg('irgendwas')).toBe(false)
   })
 })

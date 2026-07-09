@@ -11,8 +11,8 @@ import { toast } from 'sonner'
 import type { WerkstattLead } from '@/lib/werkstatt/leads-queries'
 import {
   bearbeiteWerkstattLead,
-  resendeAnfrageFlowLink,
-  oeffneAnfrageFlow,
+  starteUnterschriftAmGeraet,
+  sendeUnterschriftLink,
 } from '@/app/werkstatt/(shell)/anfragen/actions'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { Button, Modal } from '@/components/primitives'
@@ -26,12 +26,15 @@ function fmtDate(iso: string | null): string {
 type FeldKey =
   | 'vorname' | 'nachname' | 'telefon' | 'email'
   | 'fahrzeug_hersteller' | 'fahrzeug_modell' | 'kennzeichen' | 'fin' | 'erstzulassung'
+  | 'fahrzeug_standort_adresse' | 'fahrzeug_standort_plz'
   | 'schadentyp' | 'schadens_hergang' | 'unfalldatum' | 'unfallort'
+  | 'unfallhergang' | 'unfall_konstellation'
+  | 'gegner_name' | 'gegner_versicherung' | 'gegner_kennzeichen' | 'gegner_telefon' | 'gegner_email'
 
 type FeldDef = {
   key: FeldKey
   label: string
-  gruppe: 'Kunde' | 'Fahrzeug' | 'Schaden'
+  gruppe: 'Kunde' | 'Fahrzeug' | 'Schaden' | 'Unfall' | 'Gegner'
   type?: string
   textarea?: boolean
   options?: readonly { value: string; label: string }[]
@@ -47,13 +50,22 @@ const FELDER: FeldDef[] = [
   { key: 'kennzeichen', label: 'Kennzeichen', gruppe: 'Fahrzeug' },
   { key: 'fin', label: 'FIN', gruppe: 'Fahrzeug' },
   { key: 'erstzulassung', label: 'Erstzulassung', gruppe: 'Fahrzeug' },
+  { key: 'fahrzeug_standort_adresse', label: 'Standort-Adresse', gruppe: 'Fahrzeug' },
+  { key: 'fahrzeug_standort_plz', label: 'Standort-PLZ', gruppe: 'Fahrzeug' },
   { key: 'schadentyp', label: 'Schadenart', gruppe: 'Schaden', options: SCHADENTYP_OPTIONS },
   { key: 'unfalldatum', label: 'Unfalldatum', gruppe: 'Schaden', type: 'date' },
   { key: 'unfallort', label: 'Unfallort', gruppe: 'Schaden' },
   { key: 'schadens_hergang', label: 'Hergang', gruppe: 'Schaden', textarea: true },
+  { key: 'unfallhergang', label: 'Unfallhergang (Detail)', gruppe: 'Unfall', textarea: true },
+  { key: 'unfall_konstellation', label: 'Unfallkonstellation', gruppe: 'Unfall' },
+  { key: 'gegner_name', label: 'Name', gruppe: 'Gegner' },
+  { key: 'gegner_versicherung', label: 'Versicherung', gruppe: 'Gegner' },
+  { key: 'gegner_kennzeichen', label: 'Kennzeichen', gruppe: 'Gegner' },
+  { key: 'gegner_telefon', label: 'Telefon', gruppe: 'Gegner' },
+  { key: 'gegner_email', label: 'E-Mail', gruppe: 'Gegner' },
 ]
 
-const GRUPPEN = ['Kunde', 'Fahrzeug', 'Schaden'] as const
+const GRUPPEN = ['Kunde', 'Fahrzeug', 'Schaden', 'Unfall', 'Gegner'] as const
 
 type Props = {
   leads: WerkstattLead[]
@@ -88,28 +100,28 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
     router.refresh()
   }
 
-  // Flow-Push: den Kunden durch seinen offenen Vorgang holen (gehoert zu Anfragen, nicht Auftraegen).
-  async function handleResend(lead: WerkstattLead) {
-    setBusy(`${lead.id}:resend`)
-    const r = await resendeAnfrageFlowLink(lead.id)
+  // Werkstatt-Intake-Signatur: PRIMAER am Werkstatt-Geraet (Kunde vor Ort), SEKUNDAER per Link.
+  async function handleGeraet(lead: WerkstattLead) {
+    setBusy(`${lead.id}:geraet`)
+    const r = await starteUnterschriftAmGeraet(lead.id)
+    setBusy(null)
+    if (!r.ok) {
+      toast.error(r.error ?? 'Unterschrift konnte nicht gestartet werden')
+      return
+    }
+    // Neuer Tab: die Werkstatt reicht dem anwesenden Kunden das Geraet zum Unterschreiben.
+    window.open(r.url, '_blank', 'noopener,noreferrer')
+  }
+
+  async function handleLink(lead: WerkstattLead) {
+    setBusy(`${lead.id}:link`)
+    const r = await sendeUnterschriftLink(lead.id)
     setBusy(null)
     if (!r.ok) {
       toast.error(r.error ?? 'Versand fehlgeschlagen')
       return
     }
-    toast.success(`Link gesendet (${r.kanal === 'whatsapp' ? 'WhatsApp' : 'E-Mail'}).`)
-  }
-
-  async function handleFlow(lead: WerkstattLead) {
-    setBusy(`${lead.id}:flow`)
-    const r = await oeffneAnfrageFlow(lead.id)
-    setBusy(null)
-    if (!r.ok) {
-      toast.error(r.error ?? 'Flow konnte nicht geöffnet werden')
-      return
-    }
-    // Neuer Tab — die Werkstatt behaelt ihr Portal offen, waehrend sie den Kunden-Flow durchgeht.
-    window.open(r.url, '_blank', 'noopener,noreferrer')
+    toast.success(`Link an Kunden gesendet (${r.kanal === 'whatsapp' ? 'WhatsApp' : 'E-Mail'}).`)
   }
 
   const kundeName = (l: WerkstattLead) => [l.vorname, l.nachname].filter(Boolean).join(' ') || '–'
@@ -166,20 +178,20 @@ export function WerkstattAnfragen({ leads, werkstattName }: Props) {
                         Bearbeiten
                       </Button>
                       <Button
-                        variant="ghost"
+                        variant="navy"
                         size="sm"
-                        loading={busy === `${l.id}:resend`}
-                        onClick={() => handleResend(l)}
+                        loading={busy === `${l.id}:geraet`}
+                        onClick={() => handleGeraet(l)}
                       >
-                        Link senden
+                        Zur Unterschrift (am Gerät)
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        loading={busy === `${l.id}:flow`}
-                        onClick={() => handleFlow(l)}
+                        loading={busy === `${l.id}:link`}
+                        onClick={() => handleLink(l)}
                       >
-                        Flow öffnen
+                        Link an Kunden senden
                       </Button>
                     </div>
                   </Td>

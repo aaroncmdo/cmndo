@@ -13,7 +13,7 @@ import { QualiOptionen } from '@/components/self-service/QualiOptionen'
 import { KaskoEndansicht } from '@/components/self-service/KaskoEndansicht'
 import { speichereQualiFlow, erzeugeSelbstzahlerClaim } from './self-service-actions'
 
-type Phase = 'frage' | 'versicherung' | 'sende' | 'abbruch' | 'selbstzahler' | 'fehler'
+type Phase = 'frage' | 'versicherung' | 'werkstattbindung' | 'sende' | 'abbruch' | 'selbstzahler' | 'fehler'
 
 export function FlowQualiStep({
   token,
@@ -32,20 +32,27 @@ export function FlowQualiStep({
   const [phase, setPhase] = useState<Phase>('frage')
   const [fehler, setFehler] = useState<string | null>(null)
 
-  async function sende(schuldfrage: string, ueberEigeneVersicherung?: boolean) {
+  async function sende(schuldfrage: string, ueberEigeneVersicherung?: boolean, freieWerkstattwahl?: boolean) {
     setPhase('sende')
     setFehler(null)
     try {
-      const r = await speichereQualiFlow(token, schuldfrage, ueberEigeneVersicherung)
+      const r = await speichereQualiFlow(token, schuldfrage, ueberEigeneVersicherung, freieWerkstattwahl)
       if (!r.ok) {
         setPhase('fehler')
         setFehler(r.error ?? t('errors.allgemein'))
         return
       }
+      // WS2 (Kasko-frei): abbruch ZUERST pruefen — Kasko-gebunden liefert abrechnungsweg='kasko'
+      // UND ergebnis='abbruch' (KaskoEndansicht); der abrechnungsweg-Check unten wuerde sonst
+      // faelschlich einen Claim erzeugen.
+      if (r.ergebnis === 'abbruch') {
+        setPhase('abbruch')
+        return
+      }
       if (r.abrechnungsweg === 'selbstzahler' || r.abrechnungsweg === 'kasko') {
-        // SP-B2 + Aaron 08.07.: Selbstzahler UND Kasko = Direct-Reparatur — partiellen Claim
-        // erzeugen, dann via onSelbstzahler in den Account-Step (Portal). Werkstatt-Strecke,
-        // kein SV-Gutachten. Kasko ist jetzt ergebnis='weiter' (nicht mehr 'abbruch').
+        // SP-B2 + Aaron 08.07.: Selbstzahler UND Kasko(freie Wahl) = Direct-Reparatur — partiellen
+        // Claim erzeugen, dann via onSelbstzahler in den Account-Step (Portal). Werkstatt-Strecke,
+        // kein SV-Gutachten.
         setPhase('selbstzahler')
         const claimRes = await erzeugeSelbstzahlerClaim(token)
         if (!claimRes.ok) {
@@ -54,10 +61,6 @@ export function FlowQualiStep({
           return
         }
         onSelbstzahler?.(claimRes.claimId)
-        return
-      }
-      if (r.ergebnis === 'abbruch') {
-        setPhase('abbruch')
         return
       }
       // AAR-956 gegner-conditional: gewaehlte Schuldfrage an den Wizard melden.
@@ -110,11 +113,11 @@ export function FlowQualiStep({
           <button
             type="button"
             data-testid="quali-versicherung-ja"
-            onClick={() => void sende('eigenverantwortung', true)}
+            onClick={() => setPhase('werkstattbindung')}
             className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
           >
             <span className="block font-semibold text-claimondo-navy">Ja, ich habe eine Kaskoversicherung</span>
-            <span className="block text-sm text-claimondo-navy/60">Wir finden dir eine passende Werkstatt für die Reparatur.</span>
+            <span className="block text-sm text-claimondo-navy/60">Eine kurze Rückfrage zu deiner Kasko-Werkstattwahl.</span>
           </button>
           <button
             type="button"
@@ -124,6 +127,41 @@ export function FlowQualiStep({
           >
             <span className="block font-semibold text-claimondo-navy">Nein, ich zahle die Reparatur selbst</span>
             <span className="block text-sm text-claimondo-navy/60">Wir finden dir eine passende Werkstatt.</span>
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  if (phase === 'werkstattbindung') {
+    // WS2 (Kasko-frei): nach „Ja, Kasko" fragen, ob der Kunde an eine Versicherer-Werkstatt
+    // gebunden ist. Frei (nein) -> Werkstatt-Strecke; gebunden (ja) -> KaskoEndansicht.
+    return (
+      <div className="max-w-md w-full">
+        <h1 className="text-2xl font-semibold text-claimondo-navy mb-2 text-center">
+          Bist du an eine Werkstatt deiner Versicherung gebunden?
+        </h1>
+        <p className="text-claimondo-navy/60 text-sm mb-6 text-center">
+          Manche Kasko-Tarife schreiben eine Partnerwerkstatt vor. Wenn du frei wählen darfst, finden wir dir eine passende Werkstatt.
+        </p>
+        <div className="flex flex-col gap-3">
+          <button
+            type="button"
+            data-testid="quali-werkstattbindung-nein"
+            onClick={() => void sende('eigenverantwortung', true, true)}
+            className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
+          >
+            <span className="block font-semibold text-claimondo-navy">Nein, ich kann die Werkstatt frei wählen</span>
+            <span className="block text-sm text-claimondo-navy/60">Wir finden dir eine passende Werkstatt für die Reparatur.</span>
+          </button>
+          <button
+            type="button"
+            data-testid="quali-werkstattbindung-ja"
+            onClick={() => void sende('eigenverantwortung', true, false)}
+            className="w-full text-left rounded-ios-xl border border-claimondo-border bg-white px-5 py-4 transition hover:border-claimondo-ondo"
+          >
+            <span className="block font-semibold text-claimondo-navy">Ja, meine Versicherung schreibt die Werkstatt vor</span>
+            <span className="block text-sm text-claimondo-navy/60">Dann wende dich bitte direkt an deine Kaskoversicherung.</span>
           </button>
         </div>
       </div>

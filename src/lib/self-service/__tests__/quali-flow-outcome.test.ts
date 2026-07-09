@@ -49,4 +49,26 @@ describe('qualiFlowOutcome', () => {
   it('null/leer schuldfrage -> weiter_mit_flag', () => {
     expect(qualiFlowOutcome(null, null).ergebnis).toBe('weiter_mit_flag')
   })
+
+  // WS2 (Kasko-frei): dritter Parameter freieWerkstattwahl splittet den Kasko-Fall.
+  it('kasko + freie Werkstattwahl -> weiter, Werkstatt-Strecke', () => {
+    expect(qualiFlowOutcome('eigenverantwortung', true, true)).toEqual({
+      abrechnungsweg: 'kasko',
+      ergebnis: 'weiter',
+      disqualifizieren: false,
+      reparaturwunsch: 'reparatur',
+    })
+  })
+
+  it('kasko + an Versicherer-Werkstatt gebunden -> abbruch (KaskoEndansicht), grundKey werkstattbindung', () => {
+    const o = qualiFlowOutcome('eigenverantwortung', true, false)
+    expect(o.abrechnungsweg).toBe('kasko')
+    expect(o.ergebnis).toBe('abbruch')
+    expect(o.disqualifizieren).toBe(true)
+    expect(o.disqualifikationsGrundKey).toBe('werkstattbindung')
+  })
+
+  it('kasko + Werkstattbindung nicht gefragt (null) -> weiter (hilfsbereiter Default)', () => {
+    expect(qualiFlowOutcome('eigenverantwortung', true, null).ergebnis).toBe('weiter')
+  })
 })

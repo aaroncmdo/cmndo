@@ -23,7 +23,7 @@ describe('kvaStatus', () => {
   const base = {
     meine_rolle: 'reparateur' as string | null,
     reparatur_werkstatt_id: 'ws-1' as string | null,
-    gutachten_fertiggestellt_am: null as string | null,
+    abrechnungsweg: 'selbstzahler' as string | null,
     reparatur_freigegeben_am: null as string | null,
     kostenvoranschlag_netto: null as number | null,
     kostenvoranschlag_brutto: null as number | null,
@@ -33,8 +33,12 @@ describe('kvaStatus', () => {
     expect(kvaStatus({ ...base, meine_rolle: 'vermittler', reparatur_werkstatt_id: null })).toBeNull()
   })
 
-  it('Reparateur + SV-Gutachten fertig -> null (Kostenbasis = Gutachten)', () => {
-    expect(kvaStatus({ ...base, gutachten_fertiggestellt_am: '2026-07-01T10:00:00Z' })).toBeNull()
+  it('Reparateur + Haftpflicht -> null (SV-Gutachten-Route, kein KVA)', () => {
+    expect(kvaStatus({ ...base, abrechnungsweg: 'haftpflicht' })).toBeNull()
+  })
+
+  it('Reparateur + Kasko -> "benoetigt" (Werkstatt-Reparatur-Route)', () => {
+    expect(kvaStatus({ ...base, abrechnungsweg: 'kasko' })).toBe('benoetigt')
   })
 
   it('Reparateur + freigegeben -> "freigegeben"', () => {

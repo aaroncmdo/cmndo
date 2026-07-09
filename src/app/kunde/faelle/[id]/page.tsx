@@ -39,6 +39,7 @@ import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
+import GutachtenPdfButton from '@/components/kunde/GutachtenPdfButton'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
 import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
@@ -47,7 +48,9 @@ import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntsc
 import WerkstattCard from '@/components/kunde/WerkstattCard'
 import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
+import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
 import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
+import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
 import FallRealtimeRefresh from '@/components/fall/FallRealtimeRefresh'
@@ -339,6 +342,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       reparatur_vermittlung_status: string | null
       // SP-D: Abrechnungsweg fuer den Selbstzahler-Reparatur-Stepper
       abrechnungsweg: string | null
+      // WS4: Werkstatt-KVA (claims.kostenvoranschlag_*) fuer die Kunde-KVA-Card
+      kostenvoranschlag_netto: number | null
+      kostenvoranschlag_brutto: number | null
     } | null = null
     if (fall.claim_id) {
       // Cluster F+G PR-2: Split in 2 Queries — claims für Kanzlei-Felder (Nicht-F+G),
@@ -346,7 +352,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       const [{ data: cxClaim }, { data: cxView }] = await Promise.all([
         admin
           .from('claims')
-          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
+          .select('kanzlei_uebergeben_am, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg, kostenvoranschlag_netto, kostenvoranschlag_brutto')
           .eq('id', fall.claim_id as string)
           .maybeSingle(),
         admin
@@ -381,6 +387,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           reparatur_vermittlung_status: ((cxClaim as Record<string, unknown> | null)?.reparatur_vermittlung_status as string | null) ?? null,
           // SP-D: abrechnungsweg ist type-lagged -> Record-Cast beim Lesen.
           abrechnungsweg: ((cxClaim as Record<string, unknown> | null)?.abrechnungsweg as string | null) ?? null,
+          // WS4: Werkstatt-KVA-Betraege (claims-nativ).
+          kostenvoranschlag_netto: cxClaim?.kostenvoranschlag_netto != null ? Number(cxClaim.kostenvoranschlag_netto) : null,
+          kostenvoranschlag_brutto: cxClaim?.kostenvoranschlag_brutto != null ? Number(cxClaim.kostenvoranschlag_brutto) : null,
         }
       }
     }
@@ -407,6 +416,29 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .limit(1)
         .maybeSingle()
       reparaturTermin = t as typeof reparaturTermin
+    }
+
+    // WS4: zuletzt hochgeladenes KVA-Dokument (Werkstatt ODER Kunde) fuer die
+    // Kunde-KVA-Card — nur fuer Werkstatt-Reparatur-Claims (selbstzahler/kasko-frei),
+    // damit normale Claims keinen ueberfluessigen Read machen.
+    // WS3: alle Schadenfotos (fall_dokumente dokument_typ='schadensfoto') fuer die
+    // SchadensfotoUploadCard — im selben Gate. (Der KVA-PDF-Link kommt aus dem
+    // staging-KVA-Loop via kostenvoranschlagPdfUrl, kein separater Load hier.)
+    let schadensfotoUrls: string[] = []
+    if (fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null)) {
+      const { data: fotoDocs } = await admin
+        .from('fall_dokumente')
+        .select('storage_path')
+        .in('fall_id', claimFallIds)
+        .eq('dokument_typ', 'schadensfoto')
+        .is('geloescht_am', null)
+        .is('abgelehnt_am', null)
+        .order('hochgeladen_am', { ascending: true })
+      const fotoUrls = await getStorageUrlBulk(
+        admin,
+        (fotoDocs ?? []).map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path as string })),
+      )
+      schadensfotoUrls = fotoUrls.filter((u): u is string => !!u)
     }
 
     // Fall-Extras: Mietwagen-Felder + Google-Review-Prompt-Marker.
@@ -755,9 +787,10 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 kundeVorname: kundeVorname ?? null,
               }
             : null
-          // SP-D: Selbstzahler bekommen die reduzierte Reparatur-Strecke (Schaden -> Werkstatt
-          // -> Termin -> Reparatur) statt des SV/Gutachten/Regulierungs-Steppers.
-          if (claimExtra?.abrechnungsweg === 'selbstzahler') {
+          // SP-D + WS2: Werkstatt-Reparatur-Claims (Selbstzahler ODER Kasko mit freier Werkstattwahl)
+          // bekommen die reduzierte Reparatur-Strecke (Schaden -> Werkstatt -> Termin -> Reparatur)
+          // statt des SV/Gutachten/Regulierungs-Steppers.
+          if (istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null)) {
             return (
               <SelbstzahlerReparaturStepper
                 hatWerkstatt={!!reparaturWerkstattId}
@@ -963,6 +996,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
+        {/* WS3 (Reduced-Repair): Schadenfotos-Card — VOR der Werkstatt-Card, damit
+            der Werkstatt-/Finder-Schritt die Foto-Kontext-Basis hat. Werkstatt-
+            Reparatur-Claims (Selbstzahler/Kasko-frei); kein SV macht Fotos. */}
+        {!!fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null) && (
+          <SchadensfotoUploadCard
+            claimId={fall.claim_id as string}
+            fotos={schadensfotoUrls.map((url) => ({ url }))}
+          />
+        )}
+
         {/* SP4a Task 4: Werkstatt-Card — nur bei hinterlegter Werkstatt. */}
         {werkstattData && (
           <WerkstattCard
@@ -974,7 +1017,8 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
         {/* KVA-Loop (Kunde-Seite): Kostenvoranschlag-Card — nur bei Reparatur-Claim
             (hinterlegte Werkstatt) mit hochgeladenem KVA. Kunde sieht Betrag + PDF
-            und gibt die Reparaturkosten frei (-> claims.reparatur_freigegeben_am). */}
+            und gibt die Reparaturkosten frei (-> claims.reparatur_freigegeben_am).
+            Abrechnungsweg-Verfeinerung (KVA nur kasko/selbstzahler) folgt im Design-Schritt. */}
         {reparaturWerkstattId &&
           (fall.kostenvoranschlag_netto != null || fall.kostenvoranschlag_brutto != null) && (
             <KostenvoranschlagCard
@@ -983,6 +1027,7 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
               kostenvoranschlagBrutto={(fall.kostenvoranschlag_brutto as number | null) ?? null}
               freigegebenAm={(fall.reparatur_freigegeben_am as string | null) ?? null}
               pdfUrl={kostenvoranschlagPdfUrl}
+              reparaturdauerTage={(fall.reparaturdauer_tage_kva as number | null) ?? null}
             />
           )}
 
@@ -1040,7 +1085,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 {t('gutachtenWeiterleitung.text')}
               </p>
             </div>
-            <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
+            <div className="flex flex-wrap items-center gap-2">
+              {/* AV7: direkter Gutachten-PDF-Download fuer den Kunden (neben der Email-Weiterleitung). */}
+              {!!fall.claim_id && <GutachtenPdfButton claimId={fall.claim_id as string} />}
+              <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
+            </div>
           </div>
         )}
 

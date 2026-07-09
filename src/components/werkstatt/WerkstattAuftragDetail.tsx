@@ -14,6 +14,7 @@ import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstat
 import {
   werkstattAuftragSegment,
   abrechnungswegLabel,
+  istAuffahrunfall,
   quelleLabel,
   zeigtGutachten,
   kvaStatus,
@@ -283,12 +284,56 @@ function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
             Reparaturkosten netto: {EUR2.format(auftrag.gutachten_reparaturkosten_netto)}
           </p>
         )}
+        {auftrag.reparaturdauer_tage != null && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Voraussichtliche Reparaturdauer: {auftrag.reparaturdauer_tage} Tage
+          </p>
+        )}
 
         <div className="pt-1">
           <Button variant="ghost" size="sm" loading={pdfLaden} onClick={handlePdf}>
             Gutachten-PDF öffnen
           </Button>
         </div>
+      </div>
+    </SectionCard>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BesichtigungsterminSektion — der mit dem Kunden vereinbarte SV-Begutachtungstermin
+// (Datum/Uhrzeit + Gutachter + Ort). Nur Haftpflicht (SV-Gutachten-Route); erst wenn ein
+// Termin existiert. Aaron 09.07.: „der genaue abgemachte Termin plus der Gutachter".
+// ─────────────────────────────────────────────────────────────────────────────
+
+function BesichtigungsterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
+  if (!auftrag.besichtigung_start) return null
+
+  return (
+    <SectionCard title="Begutachtungstermin" className="mt-3">
+      <div className="space-y-1.5">
+        <p className="text-body-sm font-medium text-claimondo-navy">
+          {formatBerlin(auftrag.besichtigung_start, {
+            weekday: 'short',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}{' '}
+          Uhr
+        </p>
+        {auftrag.gutachter_firmenname && (
+          <p className="text-body-xs text-claimondo-ondo">Gutachter: {auftrag.gutachter_firmenname}</p>
+        )}
+        {auftrag.besichtigung_ort && (
+          <p className="text-body-xs text-claimondo-ondo">Ort: {auftrag.besichtigung_ort}</p>
+        )}
+        {auftrag.besichtigung_status && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Status: {auftrag.besichtigung_status === 'bestaetigt' ? 'bestätigt' : 'reserviert'}
+          </p>
+        )}
       </div>
     </SectionCard>
   )
@@ -334,6 +379,11 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
           )}
         </div>
         <p className="text-body-sm text-claimondo-ondo">{hinweis}</p>
+        {auftrag.reparaturdauer_tage_kva != null && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Geschätzte Reparaturdauer: {auftrag.reparaturdauer_tage_kva} Tage
+          </p>
+        )}
 
         {status === 'benoetigt' && (
           <div className="pt-1">
@@ -393,6 +443,16 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
         </p>
       </header>
 
+      {/* AV3: Auffahrunfall-Hinweis fuer die Werkstatt (Aaron 09.07.). */}
+      {istAuffahrunfall(auftrag.unfallart) && (
+        <div className="rounded-ios-md bg-warning-soft border border-warning/30 px-4 py-3">
+          <p className="text-body-sm text-warning-strong font-medium">Auffahrunfall</p>
+          <p className="text-body-xs text-warning-strong/90">
+            Stoßfänger muss ausgebaut werden, Hebebühne benötigt.
+          </p>
+        </div>
+      )}
+
       <SectionCard title="Fall">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">
           <div>
@@ -422,6 +482,7 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
           )}
           <KvaSektion auftrag={auftrag} />
           <ReparaturterminSektion auftrag={auftrag} />
+          {zeigtGutachten(auftrag.abrechnungsweg) && <BesichtigungsterminSektion auftrag={auftrag} />}
           {zeigtGutachten(auftrag.abrechnungsweg) && <GutachtenSektion auftrag={auftrag} />}
         </>
       ) : (
