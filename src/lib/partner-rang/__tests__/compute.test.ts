@@ -59,6 +59,24 @@ describe('computePartnerStrength', () => {
     expect(r.credentialScore).toBe(12) // credZertifikatCap
   })
 
+  it('DAT-Partner: dedizierter credDatPartner-Bonus ON TOP (nicht gedeckelt vom Zertifikat-Cap)', () => {
+    const ohne = computePartnerStrength(base)
+    const mit = computePartnerStrength({ ...base, hatDat: true })
+    expect(mit.credentialScore).toBe(ohne.credentialScore + DEFAULT_RANG_CONFIG.credDatPartner)
+    expect(mit.score).toBeGreaterThan(ohne.score)
+  })
+
+  it('DAT kippt einen mittelmaessig bewerteten SV von bronze auf silber (DAT bevorzugt)', () => {
+    const sig = { ratingDurchschnitt: 4.0, ratingAnzahl: 10 } // rating ~15, < schwelleSilber(35)
+    expect(computePartnerStrength({ ...base, ...sig }).tier).toBe('bronze')
+    expect(computePartnerStrength({ ...base, ...sig, hatDat: true }).tier).toBe('silber') // +25 → 40 ≥ 35
+  })
+
+  it('DAT bleibt gate-limitiert: DAT + offene Reklamation → trotzdem bronze', () => {
+    const r = computePartnerStrength({ ...base, hatDat: true, volumen: 100, offeneReklamationen: 1 })
+    expect(r.tier).toBe('bronze')
+  })
+
   it('Rating unter Mindest-Bewertungszahl wird ignoriert', () => {
     const r = computePartnerStrength({ ...base, ratingDurchschnitt: 5, ratingAnzahl: 2 })
     expect(r.ratingScore).toBe(0)

@@ -13,6 +13,7 @@ export async function ladeRangConfig(supabase: Sb): Promise<RangConfig> {
   return {
     volumenFaktor: g('volumen_faktor', DEFAULT_RANG_CONFIG.volumenFaktor),
     credOeffentlichBestellt: g('cred_oeffentlich_bestellt', DEFAULT_RANG_CONFIG.credOeffentlichBestellt),
+    credDatPartner: g('cred_dat_partner', DEFAULT_RANG_CONFIG.credDatPartner),
     credProZertifikat: g('cred_pro_zertifikat', DEFAULT_RANG_CONFIG.credProZertifikat),
     credZertifikatCap: g('cred_zertifikat_cap', DEFAULT_RANG_CONFIG.credZertifikatCap),
     credProJahr: g('cred_pro_jahr', DEFAULT_RANG_CONFIG.credProJahr),

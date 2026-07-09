@@ -80,6 +80,7 @@ export async function ladeSvKandidaten(supabase: Sb): Promise<Kandidat[]> {
       volumen: volumen.get(sv.id) ?? 0,
       oeffentlichBestellt: sv.oeffentlich_bestellt === true,
       zertifikate: zaehleZertifikate(sv),
+      hatDat: typeof sv.dat_nummer === 'string' && sv.dat_nummer.trim().length > 0,
       partnerSeitJahre: jahreSeit(sv.partner_seit),
       ratingDurchschnitt: rating?.d ?? null,
       ratingAnzahl: rating?.n ?? 0,

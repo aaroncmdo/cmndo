@@ -291,7 +291,6 @@ function NeuSchritt({
       setFehler('Bitte eine gültige Telefonnummer eingeben.'); return
     }
     if (!adresse.trim()) { setFehler('Adresse ist ein Pflichtfeld.'); return }
-    if (!datNr.trim()) { setFehler('DAT-Nummer ist ein Pflichtfeld.'); return }
 
     startTransition(async () => {
       const res = await registriereSvBasicNeu({
@@ -301,7 +300,7 @@ function NeuSchritt({
         telefon: telefon.trim(),
         adresse: adresse.trim(),
         plz: plz.trim() || undefined,
-        datNr: datNr.trim(),
+        datNr: datNr.trim() || undefined,
       })
       if (!res.ok) {
         setFehler(res.error)
@@ -376,11 +375,11 @@ function NeuSchritt({
           autoComplete="postal-code"
         />
         <TextField
-          label="DAT-Nummer *"
-          placeholder="DAT-12345 (Identitätsnachweis für die Freigabe)"
+          label="DAT-Nummer (optional)"
+          placeholder="z. B. DAT-12345"
           value={datNr}
           onChange={(e) => setDatNr(e.target.value)}
-          hint="Deine DAT-Sachverständigennummer — wird zur Identitätsprüfung benötigt."
+          hint="Optional — Sachverständige mit DAT-Nummer werden im Gutachter-Finder bevorzugt gelistet."
         />
       </div>
 

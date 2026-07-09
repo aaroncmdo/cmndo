@@ -16,7 +16,11 @@ function credentialScore(s: PartnerSignals, config: RangConfig): number {
   const bestellt = s.oeffentlichBestellt ? config.credOeffentlichBestellt : 0
   const zert = Math.min(s.zertifikate * config.credProZertifikat, config.credZertifikatCap)
   const tenure = Math.min(s.partnerSeitJahre * config.credProJahr, config.credTenureCap)
-  return bestellt + zert + tenure
+  // DAT-Partner werden bevorzugt: dedizierter Bonus ZUSAETZLICH zum generischen Zertifikat-
+  // Zaehler (dat_nummer zaehlt weiterhin als 1 Zertifikat). Der Bonus ist der Praeferenz-
+  // Hebel — er ordnet DAT-SVs innerhalb ihrer Paket-Stufe nach vorn (Paket bleibt strikt primaer).
+  const dat = s.hatDat ? config.credDatPartner : 0
+  return bestellt + zert + tenure + dat
 }
 
 function ratingScore(s: PartnerSignals, config: RangConfig): number {
