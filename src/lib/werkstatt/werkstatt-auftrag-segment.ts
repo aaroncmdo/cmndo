@@ -2,6 +2,8 @@
 // Segment = welcher Reiter (Reparatur-Auftrag vs Meine Vermittlung), abgeleitet aus
 // meine_rolle (aus v_werkstatt_auftrag, gg die fragende Werkstatt berechnet).
 
+import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
+
 type SegmentInput = { meine_rolle: string | null; reparatur_werkstatt_id: string | null }
 
 /**
@@ -36,7 +38,7 @@ export type KvaStatus = 'benoetigt' | 'erstellt' | 'freigegeben'
 type KvaInput = {
   meine_rolle: string | null
   reparatur_werkstatt_id: string | null
-  gutachten_fertiggestellt_am: string | null
+  abrechnungsweg: string | null
   reparatur_freigegeben_am: string | null
   kostenvoranschlag_netto: number | null
   kostenvoranschlag_brutto: number | null
@@ -44,12 +46,14 @@ type KvaInput = {
 
 /**
  * KVA-Status aus Sicht der reparierenden Werkstatt — null, wenn KVA nicht relevant.
- * KVA nur im Reparatur-Segment OHNE SV-Gutachten (Selbstzahler/Kasko-direkt): bei
- * Vermittlung ODER Gutachten-basiert (Haftpflicht) ist die Kostenbasis das Gutachten.
+ * KVA NUR auf der Werkstatt-Reparatur-Route (Selbstzahler / Kasko-freie Wahl,
+ * istWerkstattReparaturWeg) im Reparatur-Segment. Haftpflicht laeuft die SV-Gutachten-Route
+ * -> NIE KVA (Aaron 09.07.: „bei Haftpflicht braucht die Werkstatt keine KVA-Info"). Bei
+ * Vermittlung ebenfalls null.
  */
 export function kvaStatus(a: KvaInput): KvaStatus | null {
   if (werkstattAuftragSegment(a) !== 'reparatur') return null
-  if (a.gutachten_fertiggestellt_am != null) return null
+  if (!istWerkstattReparaturWeg(a.abrechnungsweg)) return null
   if (a.reparatur_freigegeben_am != null) return 'freigegeben'
   if (a.kostenvoranschlag_netto != null || a.kostenvoranschlag_brutto != null) return 'erstellt'
   return 'benoetigt'
@@ -60,9 +64,12 @@ export function kvaStatusLabel(s: KvaStatus): string {
   return { benoetigt: 'KVA benötigt', erstellt: 'KVA erstellt', freigegeben: 'KVA freigegeben' }[s]
 }
 
-/** Gutachten ist nur bei Versicherungs-Faellen (Haftpflicht/Kasko) relevant. */
+/**
+ * Gutachten-Route = NUR Haftpflicht (SV-Gutachten reguliert). Kasko + Selbstzahler laufen die
+ * Werkstatt-Reparatur-Route (KVA, istWerkstattReparaturWeg) — kein Gutachten (Aaron 09.07.).
+ */
 export function zeigtGutachten(w: string | null): boolean {
-  return w === 'haftpflicht' || w === 'kasko'
+  return w === 'haftpflicht'
 }
 
 const QUELLE_LABEL: Record<string, string> = {
