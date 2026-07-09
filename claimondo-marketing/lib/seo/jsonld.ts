@@ -106,7 +106,7 @@ export function organizationSchema(opts?: {
       'Wertminderung',
       'BVSK-Honorartabelle',
       'Sicherungsabtretung §398 BGB',
-      'DAT-Expert-Sachverständige',
+      'Kfz-Sachverständige',
       'Verkehrsrecht',
       'Haftpflichtschaden',
       'Nutzungsausfall',

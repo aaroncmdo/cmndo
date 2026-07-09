@@ -630,7 +630,7 @@
       "heading": "Sygnały wiarygodności, każdy z podanym źródłem",
       "items": [
         {
-          "titel": "Sieć partnerów DAT Expert",
+          "titel": "Sieć partnerów",
           "text": "Claimondo współpracuje wyłącznie z certyfikowanymi rzeczoznawcami z publicznego rejestru DAT. Głównie NRW, zasięg ogólnokrajowy.",
           "quelle": "dat.de/sachverstaendige"
         },
@@ -1835,7 +1835,7 @@
         "gruppe": "Rzeczoznawcy i certyfikacja",
         "fragen": [
           {
-            "frage": "Czym jest DAT-Expert i dlaczego jest to ważne?",
+            "frage": "Czym jest system kalkulacji DAT i dlaczego jest to ważne?",
             "antwort": "DAT (Deutsche Automobil Treuhand) to wiodąca niemiecka baza danych wycen pojazdów. Nasi rzeczoznawcy korzystają z systemu kalkulacyjnego DAT — ubezpieczyciele akceptują te ekspertyzy bez dyskusji o danych źródłowych. Inne programy (np. Audatex) są również uznawane, jednak DAT jest liderem rynku i naszym standardowym wyborem."
           },
           {
@@ -2300,7 +2300,7 @@
       "label_jahre": "Lata doświadczenia",
       "label_auftraege": "Zlecenia / miesiąc",
       "label_schwerpunkte": "Specjalizacje",
-      "label_dat_nr": "Nr DAT-Expert",
+      "label_dat_nr": "Nr DAT",
       "label_bvsk_nr": "Nr członkowski BVSK",
       "label_oebuv_nr": "Nr wpisu öbuv",
       "placeholder_schwerpunkte": "np. pojazd elektryczny, oldtimer, ciężarówka",
@@ -3519,7 +3519,7 @@
       },
       {
         "wert": "89",
-        "label": "Partnerzy DAT-Expert NRW",
+        "label": "Partnerzy NRW",
         "sub": "sieć Claimondo"
       },
       {
@@ -4114,7 +4114,7 @@
     "kfz_gutachter": {
       "title": "Znajdź rzeczoznawcę Kfz — niezależnie, szybko, bezpłatnie",
       "description": "Niezależni certyfikowani rzeczoznawcy Kfz do szkód powypadkowych w całych Niemczech. Partner DAT, termin poniżej 48 h, 0 € dla niezawinienie poszkodowanych (§249 BGB).",
-      "og_description": "Partnerzy DAT-Expert z publicznego rejestru DAT · termin <48h · 0 € dla poszkodowanych wg §249 BGB"
+      "og_description": "Partnerzy z publicznego rejestru DAT · termin <48h · 0 € dla poszkodowanych wg §249 BGB"
     },
     "kfz_gutachter_ablauf": {
       "title": "Przebieg rozliczania szkody Kfz — objaśniony krok po kroku",

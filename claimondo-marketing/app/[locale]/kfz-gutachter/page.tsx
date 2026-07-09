@@ -25,7 +25,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Kfz-Gutachter',
       'Unfallgutachter',
       'unabhängiger Sachverständiger',
-      'DAT-Experte',
+      'Kfz-Sachverständiger',
       'Schadensgutachten',
       'BVSK-Honorartabelle',
       'Wertminderung berechnen',

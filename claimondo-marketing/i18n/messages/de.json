@@ -2293,7 +2293,7 @@
         "gruppe": "Sachverständige & Zertifizierung",
         "fragen": [
           {
-            "frage": "Was ist DAT-Expert und warum ist das wichtig?",
+            "frage": "Was ist das DAT-Kalkulationssystem und warum ist das wichtig?",
             "antwort": "DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. Unsere Sachverständigen nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl."
           },
           {
@@ -2596,7 +2596,7 @@
       "label_jahre": "Jahre Erfahrung",
       "label_auftraege": "Aufträge / Monat",
       "label_schwerpunkte": "Fachschwerpunkte",
-      "label_dat_nr": "DAT-Expert-Nr.",
+      "label_dat_nr": "DAT-Nr.",
       "label_bvsk_nr": "BVSK-Mitglieds-Nr.",
       "label_oebuv_nr": "öbuv-Bestellungs-Nr.",
       "placeholder_schwerpunkte": "z. B. E-Auto, Oldtimer, Lkw",
@@ -2623,7 +2623,7 @@
         },
         {
           "titel": "Verifikation",
-          "text": "Wir prüfen DAT-Expert-Nr., BVSK-Mitgliedschaft, IHK- oder öbuv-Bestellung gegen die jeweiligen Register. Das ist kein Marketing-Check — wir telefonieren bei Bedarf mit den Kammern."
+          "text": "Wir prüfen DAT-Nr., BVSK-Mitgliedschaft, IHK- oder öbuv-Bestellung gegen die jeweiligen Register. Das ist kein Marketing-Check — wir telefonieren bei Bedarf mit den Kammern."
         },
         {
           "titel": "Region-Freischaltung",

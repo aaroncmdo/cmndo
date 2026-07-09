@@ -1841,7 +1841,7 @@
         "gruppe": "Appraisers & Certification",
         "fragen": [
           {
-            "frage": "What is DAT-Expert and why does it matter?",
+            "frage": "What is the DAT calculation system and why does it matter?",
             "antwort": "DAT (Deutsche Automobil Treuhand) is Germany's leading vehicle valuation database. Our appraisers use the DAT calculation system — insurance companies accept these reports without disputing the underlying data. Other systems (e.g. Audatex) are also recognised, but DAT is the market leader and our default choice."
           },
           {
@@ -2306,7 +2306,7 @@
       "label_jahre": "Years of experience",
       "label_auftraege": "Jobs / month",
       "label_schwerpunkte": "Areas of expertise",
-      "label_dat_nr": "DAT-Expert No.",
+      "label_dat_nr": "DAT No.",
       "label_bvsk_nr": "BVSK membership No.",
       "label_oebuv_nr": "öbuv appointment No.",
       "placeholder_schwerpunkte": "e.g. electric vehicles, classic cars, trucks",
@@ -2333,7 +2333,7 @@
         },
         {
           "titel": "Verification",
-          "text": "We verify your DAT-Expert No., BVSK membership, and IHK or öbuv appointment against the respective registers. This is not a marketing check — we call the chambers directly if needed."
+          "text": "We verify your DAT No., BVSK membership, and IHK or öbuv appointment against the respective registers. This is not a marketing check — we call the chambers directly if needed."
         },
         {
           "titel": "Region Activation",
@@ -3525,7 +3525,7 @@
       },
       {
         "wert": "89",
-        "label": "DAT-Expert partners in NRW",
+        "label": "Partners in NRW",
         "sub": "Claimondo network"
       },
       {
@@ -4120,7 +4120,7 @@
     "kfz_gutachter": {
       "title": "Find a car assessor — independent, fast, free",
       "description": "Independent certified car assessors for accident damage nationwide. DAT partners, appointment within 48 h, €0 for those not at fault (§249 BGB).",
-      "og_description": "DAT-Expert partners from the public DAT directory · appointment <48h · €0 for the injured party under §249 BGB"
+      "og_description": "Vetted partners from the public DAT directory · appointment <48h · €0 for the injured party under §249 BGB"
     },
     "kfz_gutachter_ablauf": {
       "title": "Car claim settlement process — explained step by step",

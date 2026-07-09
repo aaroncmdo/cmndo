@@ -148,7 +148,7 @@ export const FAQ_GRUPPEN: FaqGruppe[] = [
     gruppe: 'Sachverständige & Zertifizierung',
     fragen: [
       {
-        frage: 'Was ist DAT-Expert und warum ist das wichtig?',
+        frage: 'Was ist das DAT-Kalkulationssystem und warum ist das wichtig?',
         antwort:
           'DAT (Deutsche Automobil Treuhand) ist die führende deutsche Bewertungs-Datenbank für Fahrzeuge. Unsere Sachverständigen nutzen das DAT-Kalkulationssystem — Versicherungen akzeptieren diese Gutachten ohne Diskussion über die zugrundeliegenden Daten. Andere Programme (z.B. Audatex) sind ebenfalls anerkannt, DAT ist aber Marktführer und unsere Standard-Wahl.',
       },

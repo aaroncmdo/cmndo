@@ -843,7 +843,7 @@ export default function DatenschutzPage() {
             <H2>14. Automatisierte Entscheidungsfindung und Profiling</H2>
             <p>
               Eine vollautomatisierte Entscheidungsfindung im Sinne des Art. 22 DSGVO findet nicht
-              statt. Wir setzen zwar KI-gestützte Vorabkalkulationen (DAT-Expert) sowie
+              statt. Wir setzen zwar KI-gestützte Vorabkalkulationen (DAT-Kalkulation) sowie
               KI-gestützte Zusammenfassungen und Textanalysen Ihrer Falldaten (Anthropic Claude)
               und KI-gestützte Texterkennung hochgeladener Dokumente (Google Vision OCR) ein; die
               finale Entscheidung über die Annahme eines Falls und die weitere Bearbeitung erfolgt

@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
       'Kfz-Gutachter finden',
       'Sachverständiger in der Nähe',
       'Unfallgutachter',
-      'DAT-Experte Karte',
+      'Gutachter-Karte',
       'Kfz-Sachverständiger Köln',
       'Kfz-Sachverständiger Düsseldorf',
       'Kfz-Sachverständiger NRW',

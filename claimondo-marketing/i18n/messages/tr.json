@@ -636,7 +636,7 @@
       "heading": "Her biri kaynaklı güven sinyalleri",
       "items": [
         {
-          "titel": "DAT Expert İş Ortağı Ağı",
+          "titel": "İş Ortağı Ağı",
           "text": "Claimondo, yalnızca DAT'ın kamuya açık dizinindeki sertifikalı bilirkişilerle çalışır. Ağırlıklı olarak NRW, tüm Almanya'da ulaşılabilir.",
           "quelle": "dat.de/sachverstaendige"
         },
@@ -1841,7 +1841,7 @@
         "gruppe": "Bilirkişiler ve Sertifikasyon",
         "fragen": [
           {
-            "frage": "DAT-Expert nedir ve neden önemlidir?",
+            "frage": "DAT hesaplama sistemi nedir ve neden önemlidir?",
             "antwort": "DAT (Deutsche Automobil Treuhand), Almanya'nın önde gelen araç değerleme veri tabanıdır. Bilirkişilerimiz DAT hesaplama sistemini kullanır — sigortalar bu raporları temel veriler üzerinde tartışmaya açmadan kabul eder. Audatex gibi diğer programlar da geçerlidir; ancak DAT pazar lideridir ve bizim standart tercihimizdir."
           },
           {
@@ -2306,7 +2306,7 @@
       "label_jahre": "Yıl deneyimi",
       "label_auftraege": "İş emri / ay",
       "label_schwerpunkte": "Uzmanlık alanları",
-      "label_dat_nr": "DAT-Expert-Nr.",
+      "label_dat_nr": "DAT-Nr.",
       "label_bvsk_nr": "BVSK-Mitglieds-Nr.",
       "label_oebuv_nr": "öbuv-Sipariş No.",
       "placeholder_schwerpunkte": "örn. elektrikli araç, klasik araç, kamyon",
@@ -2333,7 +2333,7 @@
         },
         {
           "titel": "Doğrulama",
-          "text": "DAT-Expert numaranızı, BVSK üyeliğinizi, IHK veya öbuv atamanızı ilgili sicillere karşı doğrularız. Bu bir pazarlama kontrolü değildir — gerektiğinde odalarla bizzat telefon görüşmesi yaparız."
+          "text": "DAT numaranızı, BVSK üyeliğinizi, IHK veya öbuv atamanızı ilgili sicillere karşı doğrularız. Bu bir pazarlama kontrolü değildir — gerektiğinde odalarla bizzat telefon görüşmesi yaparız."
         },
         {
           "titel": "Bölge Aktivasyonu",
@@ -4120,7 +4120,7 @@
     "kfz_gutachter": {
       "title": "Araç bilirkişisi bulun — Bağımsız, hızlı, ücretsiz",
       "description": "Ülke genelinde kaza hasarları için bağımsız sertifikalı araç bilirkişileri. DAT partneri, 48 saat altında randevu, suçsuz zarar görenler için 0 € (§249 BGB).",
-      "og_description": "Kamuya açık DAT dizininden DAT-Expert partnerleri · randevu <48 saat · §249 BGB uyarınca zarar görenler için 0 €"
+      "og_description": "Kamuya açık DAT dizininden partnerleri · randevu <48 saat · §249 BGB uyarınca zarar görenler için 0 €"
     },
     "kfz_gutachter_ablauf": {
       "title": "Araç hasar tazminatı süreci — adım adım açıklandı",

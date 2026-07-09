@@ -85,7 +85,7 @@ export async function generateMetadata({
       `Unfallgutachter ${s.name}`,
       `Schadensgutachten ${s.name}`,
       `unabhängiger Gutachter ${s.name}`,
-      'DAT-Experte', 'Wertminderung berechnen',
+      'Kfz-Sachverständiger', 'Wertminderung berechnen',
       '§249 BGB', 'BVSK-Honorartabelle',
     ],
     alternates: await localeAlternates(`/kfz-gutachter/${s.slug}`),

@@ -249,7 +249,7 @@ export default function WaitlistApply() {
             <ol className="ml-4 list-decimal space-y-1">
               <li>Anruf von einem Claimondo-Partnermanager (2 Werktage)</li>
               <li>15-Minuten-Call zu Region, Auslastung, technischer Anbindung</li>
-              <li>DAT-Expert-Nachweis + Haftpflicht hochladen</li>
+              <li>Qualifikationsnachweis + Haftpflicht hochladen</li>
               <li>Freischaltung — erste Aufträge meist innerhalb einer Woche</li>
             </ol>
           </div>
@@ -319,7 +319,7 @@ export default function WaitlistApply() {
           Qualifikation
         </h4>
         <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
-          <Field name="dat_expert_nummer" label="DAT-Expert-Nr." />
+          <Field name="dat_expert_nummer" label="DAT-Nr." />
           <Field name="bvsk_mitgliedsnummer" label="BVSK-Mitglieds-Nr." />
           <Field name="ihk_zertifikat_nummer" label="IHK-Zertifikat" />
           <Field name="oebuv_bestellungsnummer" label="öbuv-Bestellungs-Nr." />
