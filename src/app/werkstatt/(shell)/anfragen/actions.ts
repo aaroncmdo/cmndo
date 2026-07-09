@@ -19,7 +19,11 @@ import { ensureCanonicalFlowLinkForLead } from '@/lib/start-link/ensure-flowlink
 const EDITIERBARE_FELDER = [
   'vorname', 'nachname', 'telefon', 'email',
   'fahrzeug_hersteller', 'fahrzeug_modell', 'kennzeichen', 'fin', 'erstzulassung',
+  'fahrzeug_standort_adresse', 'fahrzeug_standort_plz',
   'schadentyp', 'schadens_hergang', 'unfalldatum', 'unfallort',
+  // Werkstatt-Intake (Haftpflicht): Unfall-Detail + Gegner.
+  'unfallhergang', 'unfall_konstellation',
+  'gegner_name', 'gegner_versicherung', 'gegner_kennzeichen', 'gegner_telefon', 'gegner_email',
 ]
 
 /**
@@ -71,20 +75,24 @@ export async function bearbeiteWerkstattLead(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Flow-Push — den Kunden durch seinen OFFENEN Vorgang holen (Link senden / Flow öffnen).
+// Flow-Push — den Kunden durch seinen OFFENEN Vorgang holen (Unterschrift am Geraet / Link senden).
 // Gehoert hierher (offene Anfrage = Lead), NICHT zu /auftraege (konvertierte Claims):
 // ein Flowlink-Resend auf einem fertigen Auftrag ist sinnlos. Lead-basiert -> kein
 // Claim->Lead-Resolve. Ownership via v_werkstatt_lead (auth-aware, Fremd-Lead=0 Zeilen).
 // ─────────────────────────────────────────────────────────────────────────────
 
 /**
- * Sendet dem Kunden den Flow-Link erneut (WhatsApp bevorzugt, Email-Fallback).
- * Ensure-Semantik im Core: ein abgelaufener Token wird neu ausgestellt (72h) — genau
- * der Fall bei steckengebliebenen Self-Service-Kunden.
+ * Interner Helper (nicht exportiert): markiert den Lead als werkstatt-Intake-bereit
+ * (leads.werkstatt_intake_am -> /flow/[token] rendert die Signatur-only-Flaeche) + sichert
+ * einen gueltigen Flow-Token (ensure: neu ausgestellt falls abgelaufen). Ownership via
+ * v_werkstatt_lead (auth-aware, Fremd-Lead=0 Zeilen). Liefert Kontakt fuer den Versand mit.
  */
-export async function resendeAnfrageFlowLink(
+async function markiereIntakeBereit(
   leadId: string,
-): Promise<{ ok: boolean; error?: string; kanal?: 'whatsapp' | 'email' }> {
+): Promise<
+  | { ok: true; token: string; actorId: string; telefon: string | null; email: string | null }
+  | { ok: false; error: string }
+> {
   await requirePortalAccess(['werkstatt'])
   if (!leadId) return { ok: false, error: 'Anfrage fehlt' }
 
@@ -92,7 +100,6 @@ export async function resendeAnfrageFlowLink(
   const actorId = (await supabase.auth.getUser()).data.user?.id
   if (!actorId) return { ok: false, error: 'Nicht angemeldet' }
 
-  // Ownership-Gate + Kontakt in einem: v_werkstatt_lead liefert nur eigene offene Leads.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: owned } = await (supabase as any)
     .from('v_werkstatt_lead')
@@ -101,48 +108,65 @@ export async function resendeAnfrageFlowLink(
     .maybeSingle()
   if (!owned) return { ok: false, error: 'Kein Zugriff auf diese Anfrage' }
 
-  const hatTelefon = Boolean((owned as { telefon: string | null }).telefon)
-  const hatEmail = Boolean((owned as { email: string | null }).email)
+  // Flag setzen (service-role; leads default-deny fuer werkstatt). Ab jetzt Signatur-only-Flaeche.
+  const admin = createAdminClient()
+  const { error: flagErr } = await admin
+    .from('leads')
+    .update({ werkstatt_intake_am: new Date().toISOString(), werkstatt_intake_von: actorId } as never)
+    .eq('id', leadId)
+  if (flagErr) return { ok: false, error: flagErr.message }
+
+  const flRes = await ensureCanonicalFlowLinkForLead(leadId, { admin })
+  if (!flRes.ok) return { ok: false, error: flRes.error }
+
+  revalidatePath('/werkstatt/anfragen')
+  return {
+    ok: true,
+    token: flRes.token,
+    actorId,
+    telefon: (owned as { telefon: string | null }).telefon ?? null,
+    email: (owned as { email: string | null }).email ?? null,
+  }
+}
+
+/**
+ * SEKUNDAER: sendet dem Kunden den Signatur-Link (WhatsApp bevorzugt, Email-Fallback), falls
+ * er nicht vor Ort ist. Setzt zuvor das Intake-Flag (markiereIntakeBereit).
+ */
+export async function sendeUnterschriftLink(
+  leadId: string,
+): Promise<{ ok: true; kanal: 'whatsapp' | 'email' } | { ok: false; error: string }> {
+  const r = await markiereIntakeBereit(leadId)
+  if (!r.ok) return r
+
+  const hatTelefon = Boolean(r.telefon)
+  const hatEmail = Boolean(r.email)
   if (!hatTelefon && !hatEmail) {
     return { ok: false, error: 'Kein Kontaktkanal (Telefon/E-Mail) bei der Anfrage hinterlegt' }
   }
 
   const admin = createAdminClient()
   let kanal: 'whatsapp' | 'email' = hatTelefon ? 'whatsapp' : 'email'
-  let res = await sendFlowLinkMultiChannelCore(admin, leadId, kanal, actorId)
+  let res = await sendFlowLinkMultiChannelCore(admin, leadId, kanal, r.actorId)
   if (!res.success && kanal === 'whatsapp' && hatEmail) {
     kanal = 'email'
-    res = await sendFlowLinkMultiChannelCore(admin, leadId, kanal, actorId)
+    res = await sendFlowLinkMultiChannelCore(admin, leadId, kanal, r.actorId)
   }
   if (!res.success) return { ok: false, error: res.error ?? 'Versand fehlgeschlagen' }
 
-  revalidatePath('/werkstatt/anfragen')
   return { ok: true, kanal }
 }
 
 /**
- * Oeffnet den Kunden-Flow selbst (vor Ort mit dem Kunden). Liefert einen GUELTIGEN
- * /flow/<token>-Link (ensure: neu ausgestellt falls abgelaufen). Gegatet auf die
- * eigene offene Anfrage (v_werkstatt_lead).
+ * PRIMAER: oeffnet die Signatur-Flaeche auf dem Werkstatt-Geraet (Kunde ist vor Ort und
+ * unterschreibt direkt). Setzt das Intake-Flag + liefert die /flow/<token>-URL zum Oeffnen
+ * (neuer Tab). Gegatet auf die eigene offene Anfrage (v_werkstatt_lead).
  */
-export async function oeffneAnfrageFlow(
+export async function starteUnterschriftAmGeraet(
   leadId: string,
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
-  await requirePortalAccess(['werkstatt'])
-  if (!leadId) return { ok: false, error: 'Anfrage fehlt' }
-
-  const supabase = await createClient()
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: owned } = await (supabase as any)
-    .from('v_werkstatt_lead')
-    .select('id')
-    .eq('id', leadId)
-    .maybeSingle()
-  if (!owned) return { ok: false, error: 'Kein Zugriff auf diese Anfrage' }
-
-  const flRes = await ensureCanonicalFlowLinkForLead(leadId, { admin: createAdminClient() })
-  if (!flRes.ok) return { ok: false, error: flRes.error }
-
+  const r = await markiereIntakeBereit(leadId)
+  if (!r.ok) return r
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
-  return { ok: true, url: `${appUrl}/flow/${flRes.token}` }
+  return { ok: true, url: `${appUrl}/flow/${r.token}` }
 }

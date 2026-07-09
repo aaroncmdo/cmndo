@@ -10,6 +10,9 @@ export type QualiFlowOutcome = {
   ergebnis: QualiErgebnis
   disqualifizieren: boolean
   reparaturwunsch: 'reparatur' | null
+  // WS2: nur bei Kasko-Werkstattbindung gesetzt -> speichereQualiFlow labelt die Disqualifikation
+  // korrekt (statt pauschal 'eigenverschulden').
+  disqualifikationsGrundKey?: 'eigenverschulden' | 'werkstattbindung'
 }
 
 /**
@@ -23,6 +26,7 @@ export type QualiFlowOutcome = {
 export function qualiFlowOutcome(
   schuldfrage: string | null,
   ueberEigeneVersicherung: boolean | null,
+  freieWerkstattwahl: boolean | null = null,
 ): QualiFlowOutcome {
   const abrechnungsweg = resolveAbrechnungsweg({ schuldfrage, ueberEigeneVersicherung })
   if (abrechnungsweg === 'selbstzahler') {
@@ -30,8 +34,18 @@ export function qualiFlowOutcome(
     return { abrechnungsweg, ergebnis: 'weiter', disqualifizieren: false, reparaturwunsch: 'reparatur' }
   }
   if (abrechnungsweg === 'kasko') {
-    // Aaron 08.07.: Kasko = Direct-Reparatur wie Selbstzahler — nicht mehr disqualifiziert,
-    // Werkstatt-Strecke + reparaturwunsch armiert das Gate, KEIN SV-Gutachten.
+    // WS2 (Kasko-frei): nur bei EXPLIZITER Werkstattbindung (freieWerkstattwahl===false) abbrechen —
+    // der Versicherer schreibt die Werkstatt vor, keine Vermittlung moeglich (KaskoEndansicht).
+    // Freie Wahl ODER noch nicht gefragt (null) -> Werkstatt-Strecke wie Selbstzahler (Aaron 08.07.).
+    if (freieWerkstattwahl === false) {
+      return {
+        abrechnungsweg,
+        ergebnis: 'abbruch',
+        disqualifizieren: true,
+        reparaturwunsch: null,
+        disqualifikationsGrundKey: 'werkstattbindung',
+      }
+    }
     return { abrechnungsweg, ergebnis: 'weiter', disqualifizieren: false, reparaturwunsch: 'reparatur' }
   }
   // haftpflicht (gegner) + null (unklar/leer/unbeantwortet): das bestehende Gate entscheidet.

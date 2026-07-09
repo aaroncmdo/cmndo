@@ -527,7 +527,7 @@ export async function getKundeFallDetailRecord(
           // CMM-74 b″: operative_status ergaenzt — claims = SSoT (1:1-Mirror faelle.status).
           // KVA-Loop (Kunde-Seite): kostenvoranschlag_netto/_brutto + reparatur_freigegeben_am
           // ergaenzt — claims = SSoT (Werkstatt-Upload setzt sie, Kunde sieht + gibt frei).
-          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id, kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am',
+          'id, claim_nummer, operative_status, schadentag, schadenort_adresse, schadenort_plz, schadenort_ort, polizei_vor_ort, hergang_kunde_text, schadenart, fall_typ, kanzlei_wunsch, kanzlei_wunsch_gefragt_am, hat_personenschaden, hat_mietwagen, hat_nutzungsausfall, hat_sachschaden, sachschaden_beschreibung, kunden_konstellation, unfallskizze_url, unfallskizze_svg, unfallskizze_bestaetigt, abgeschlossen_am, kundenbetreuer_id, kanzlei_ansprechpartner_name, vs_ablehnungs_grund, szenario, onboarding_complete, google_review_gesendet, service_typ, sa_unterschrieben, vollmacht_signiert_am, vollmacht_status, schadens_hoehe_netto, zahlungsweg, bankdaten_hinterlegt_am, vehicle_id, kostenvoranschlag_netto, kostenvoranschlag_brutto, reparatur_freigegeben_am, reparaturdauer_tage_kva',
         )
         .eq('id', claimId)
         .maybeSingle(),
@@ -706,6 +706,8 @@ export async function getKundeFallDetailRecord(
     kostenvoranschlag_netto: c.kostenvoranschlag_netto != null ? Number(c.kostenvoranschlag_netto) : null,
     kostenvoranschlag_brutto: c.kostenvoranschlag_brutto != null ? Number(c.kostenvoranschlag_brutto) : null,
     reparatur_freigegeben_am: c.reparatur_freigegeben_am ?? null,
+    // AV8: Werkstatt-Reparaturdauer (KVA-Route) fuer die Kunde-KostenvoranschlagCard.
+    reparaturdauer_tage_kva: c.reparaturdauer_tage_kva != null ? Number(c.reparaturdauer_tage_kva) : null,
     // CMM-44 SP-D PR2a: nachbesichtigung_* aus gutachter_termine (SSoT).
     nachbesichtigung_status: t.nachbesichtigung_status ?? null,
     nachbesichtigung_termin_datum: t.nachbesichtigung_termin_datum ?? null,
