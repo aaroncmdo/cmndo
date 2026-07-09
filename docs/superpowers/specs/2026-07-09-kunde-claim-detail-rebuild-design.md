@@ -77,6 +77,20 @@ Reparaturauftrag-Signatur-Card, `istWerkstattReparaturWeg`), die aktuell nur auf
 **Bau auf frischem Branch `kitta/kunde-claim-detail-rebuild` off staging NACH #3985-Merge** (dann
 trägt staging die Deps). Verhindert Doppel-Arbeit + hält #3985 schlank.
 
+## 7b · Termine-Views mitgezogen (Approach A, Aaron 09.07. „unbedingt ansehen")
+Die standalone **Kunde-Termine-Views** (`kunde/termine/page.tsx` + `KundeTermineClient`,
+`kunde/termine/[id]/page.tsx` + `KundeTerminDetailClient`) werden im selben Rebuild mitgezogen —
+sie sind der Zwilling der Detail-View (dieselben zwei Probleme):
+- **Funktions-Gap (Bug):** laden nur `gutachter_termine`, **0× `reparatur_termine`** → Selbstzahler/
+  Kasko-Kunden sehen ihren Reparaturtermin (KVA→Termin, AV5) NICHT. Fix: **ein gemeinsamer
+  Kunde-Termin-Loader** `getKundeTermine(claimIds)` der SV-`gutachter_termine` UND
+  Reparatur-`reparatur_termine` vereint (discriminated by `art: 'sv'|'reparatur'`). Diesen Loader
+  nutzen sowohl die Termine-Views ALS AUCH die DoksTermineZone (§4) → ein Muster.
+- **Token:** KundeTermineClient (358 Z., 3 Sünder + 3 handgerollte Cards) + KundeTerminDetailClient
+  (377 Z., 5 Sünder) → primitives/shared + status-registry, wie der Rest.
+- **Koordination:** View-Layer ist meins, Termin-Lifecycle/Engine bleibt 6c630247
+  (`BROADCAST-kunde-termine-rebuild-an-6c630247`). Ich lese nur gutachter_termine/reparatur_termine.
+
 ## 8 · Fehler & Testing
 - `deriveKundeZonen` + `deriveKundeAufgaben`: **pure, vitest** — Test-Matrix (4 Phasen ×
   abrechnungsweg × Kern-Flags). Der DB-Getriebenheits-Kern.
