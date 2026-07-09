@@ -295,6 +295,45 @@ function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// BesichtigungsterminSektion — der mit dem Kunden vereinbarte SV-Begutachtungstermin
+// (Datum/Uhrzeit + Gutachter + Ort). Nur Haftpflicht (SV-Gutachten-Route); erst wenn ein
+// Termin existiert. Aaron 09.07.: „der genaue abgemachte Termin plus der Gutachter".
+// ─────────────────────────────────────────────────────────────────────────────
+
+function BesichtigungsterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
+  if (!auftrag.besichtigung_start) return null
+
+  return (
+    <SectionCard title="Begutachtungstermin" className="mt-3">
+      <div className="space-y-1.5">
+        <p className="text-body-sm font-medium text-claimondo-navy">
+          {formatBerlin(auftrag.besichtigung_start, {
+            weekday: 'short',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+          })}{' '}
+          Uhr
+        </p>
+        {auftrag.gutachter_firmenname && (
+          <p className="text-body-xs text-claimondo-ondo">Gutachter: {auftrag.gutachter_firmenname}</p>
+        )}
+        {auftrag.besichtigung_ort && (
+          <p className="text-body-xs text-claimondo-ondo">Ort: {auftrag.besichtigung_ort}</p>
+        )}
+        {auftrag.besichtigung_status && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Status: {auftrag.besichtigung_status === 'bestaetigt' ? 'bestätigt' : 'reserviert'}
+          </p>
+        )}
+      </div>
+    </SectionCard>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // KvaSektion — Kostenvoranschlag-Status (nur Reparatur ohne SV-Gutachten)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -422,6 +461,7 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
           )}
           <KvaSektion auftrag={auftrag} />
           <ReparaturterminSektion auftrag={auftrag} />
+          {zeigtGutachten(auftrag.abrechnungsweg) && <BesichtigungsterminSektion auftrag={auftrag} />}
           {zeigtGutachten(auftrag.abrechnungsweg) && <GutachtenSektion auftrag={auftrag} />}
         </>
       ) : (
