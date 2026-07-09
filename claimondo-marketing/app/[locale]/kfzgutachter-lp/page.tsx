@@ -387,7 +387,7 @@ function WasIstNichtUnsereSache() {
 const PROZESS = [
   { nr: '1', titel: 'Schaden melden', text: 'Drei Felder, ohne Anmeldung — online oder telefonisch.' },
   { nr: '2', titel: 'Rückruf in Minuten', text: 'Ihr persönlicher Berater meldet sich in unter 15 Minuten.' },
-  { nr: '3', titel: 'Gutachter vor Ort', text: 'DAT-Sachverständiger besichtigt in unter 48 Stunden — meist am Folgetag.' },
+  { nr: '3', titel: 'Gutachter vor Ort', text: 'Kfz-Sachverständiger besichtigt in unter 48 Stunden — meist am Folgetag.' },
   { nr: '4', titel: 'Anwalt setzt durch', text: 'Partnerkanzlei reguliert alle Ansprüche gegen die Versicherung.' },
   { nr: '5', titel: 'Geld auf dem Konto', text: 'Im Schnitt nach 32 Tagen — live im Kundenportal verfolgbar.' },
 ]

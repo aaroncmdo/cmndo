@@ -18,7 +18,7 @@ export const PARTNER_FAQ = [
   {
     frage: 'Welche Voraussetzungen muss ich erfüllen?',
     antwort:
-      'Mindestens eine anerkannte Qualifikation: DAT-Expert, BVSK-Mitgliedschaft, IHK-Zertifikat oder öffentliche Bestellung (öbuv). Dazu gültige Berufshaftpflicht, GoBD-konforme Rechnungsstellung und ein aktiver Standort in Deutschland.',
+      'Mindestens eine anerkannte Qualifikation: BVSK-Mitgliedschaft, IHK-Zertifikat oder öffentliche Bestellung (öbuv). Dazu gültige Berufshaftpflicht, GoBD-konforme Rechnungsstellung und ein aktiver Standort in Deutschland.',
   },
   {
     frage: 'Wie lange dauert das Onboarding?',

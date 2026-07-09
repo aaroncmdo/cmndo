@@ -117,7 +117,7 @@ export function organizationSchema(opts?: {
     memberOf: [
       {
         '@type': 'Organization',
-        name: 'DAT Expert Partner Netzwerk',
+        name: 'Sachverständigen-Netzwerk Netzwerk',
         url: 'https://www.dat.de/sachverstaendige/',
       },
     ],

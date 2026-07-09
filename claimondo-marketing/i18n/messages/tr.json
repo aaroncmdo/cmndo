@@ -674,7 +674,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "Expert Partner ağı"
+          "label": "hesaplama standardı"
         },
         {
           "kpi": "%30–40",
@@ -812,7 +812,7 @@
     },
     "detail": {
       "entfernt": "{km} km uzaklıkta",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Sachverständigen-Netzwerk",
       "freie_termine": "Uygun Randevular",
       "termin_reservieren": "Randevu rezerve et →",
       "legal": "Kusursuz mağdurlar için ücretsiz · 0 € katkı payı",
@@ -989,7 +989,7 @@
       "quote_accent": "Hak kalır."
     },
     "hero": {
-      "trust_badge": "DAT-Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
+      "trust_badge": "Kfz-Sachverständigen-Netzwerk · tüm Almanya'da erişilebilir",
       "h1_plain": "Kazada kusurunuz yok mu?",
       "h1_accent": "Biz hallederiz.",
       "sub_headline": "Bilirkişi, avukat ve tamirhanesini koordine ederiz — karşı tarafın sigortasıyla müzakereyi ortak hukuk bürosu yürütür. Sizin için 0 € (§ 249 BGB). Sektör ortalaması 4–6 ay yerine ortalama 32 günde ödeme.",
@@ -1602,9 +1602,9 @@
       {
         "titel": "Tüm Almanya'da Geçerli",
         "sub": "Odak: NRW · Almanya geneli",
-        "text": "Köln, Münih, Berlin veya Schwerin fark etmez: iş ortağı ağı Almanya'nın büyük şehirlerini kapsıyor. Ağdaki en yakın DAT-Sachverständiger genellikle yalnızca birkaç kilometre uzakta.",
+        "text": "Köln, Münih, Berlin veya Schwerin fark etmez: iş ortağı ağı Almanya'nın büyük şehirlerini kapsıyor. Ağdaki en yakın Kfz-Sachverständiger genellikle yalnızca birkaç kilometre uzakta.",
         "punkte": [
-          "Kamuya açık DAT dizininden DAT-Sachverständige",
+          "Kamuya açık DAT dizininden Kfz-Sachverständige",
           "Yerel SEO için Dizine Eklenmiş Şehir Sayfaları",
           "Konuma Dayalı Atama",
           "Her Bölgede Yerel Uzmanlar"
@@ -2115,11 +2115,11 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Yakınınızdaki Kfz bilirkişisini bulun — DAT-Sachverständige haritası, §249 BGB kapsamında ücretsiz",
+    "sr_h1": "Yakınınızdaki Kfz bilirkişisini bulun — Kfz-Sachverständige haritası, §249 BGB kapsamında ücretsiz",
     "kpis": [
       {
         "wert": "DAT",
-        "label": "Expert Partner ağı"
+        "label": "hesaplama standardı"
       },
       {
         "wert": "< 48 sa",
@@ -2268,7 +2268,7 @@
       },
       {
         "wert": "DAT",
-        "label": "Expert Partner ağı"
+        "label": "hesaplama standardı"
       },
       {
         "wert": "Köln",
@@ -2351,7 +2351,7 @@
       "onboarding_heading": "Onboarding Süresi ve Gereksinimler",
       "onboarding_text": "Bölgeniz aktive edildikten sonra onboarding 7 ila 14 iş günü sürer: Niteliğinizi ilgili sicillere (DAT, BVSK, IHK, öbuv-Kammern) karşı doğrularız, ortaklık sözleşmesini göndeririz, sizi SV-Portal'a kaydederiz ve 30 dakikalık canlı onboarding görüşmesi yaparız. Ardından ilk görevler yayına girer.",
       "voraussetzungen": [
-        "En az bir tanınan nitelik: DAT-Expert · BVSK · IHK · öbuv",
+        "En az bir tanınan nitelik: BVSK · IHK · öbuv",
         "Geçerli mesleki sorumluluk sigortası (en az 2 milyon € teminat)",
         "GoBD uyumlu faturalama",
         "Almanya'da aktif konum",
@@ -2374,7 +2374,7 @@
         },
         {
           "frage": "Hangi ön koşulları yerine getirmem gerekiyor?",
-          "antwort": "En az bir tanınmış nitelik: DAT-Expert, BVSK üyeliği, IHK sertifikası veya kamuya açık atama (öbuv). Bunlara ek olarak geçerli mesleki sorumluluk sigortası, GoBD uyumlu faturalama ve Almanya'da aktif bir konum gereklidir."
+          "antwort": "En az bir tanınmış nitelik: BVSK üyeliği, IHK sertifikası veya kamuya açık atama (öbuv). Bunlara ek olarak geçerli mesleki sorumluluk sigortası, GoBD uyumlu faturalama ve Almanya'da aktif bir konum gereklidir."
         },
         {
           "frage": "Onboarding ne kadar sürer?",
@@ -2860,7 +2860,7 @@
     "hero_intro": "DAT bilirkişi dizininden (dat.de/sachverstaendige) sertifikalı partner bilirkişiler, tüm Almanya genelinde ulaşılabilir. 48 saat içinde yerinde randevu. Kusursuz kazalarda 0 € öz katkı — karşı tarafın zorunlu trafik sigortası tüm masrafları §249 BGB uyarınca karşılar (karşı sigortanın kabulü şartıyla).",
     "hero_cta_karte": "Haritada Görüntüle",
     "hero_cta_schaden": "Hasar Bildir",
-    "trust_kpi_dat_label": "Expert Partner ağı",
+    "trust_kpi_dat_label": "hesaplama standardı",
     "trust_kpi_termin_label": "Randevu",
     "trust_kpi_eigenanteil_label": "Öz Katkı¹",
     "trust_kpi_recht_label": "Hukuki Dayanak",
@@ -2970,7 +2970,7 @@
       {
         "titel": "Ekspertiz + Avukat",
         "dauer": "Randevu <48 s, Rapor 48 s sonra",
-        "text": "DAT-Sachverständiger aracı yerinde inceler — evinizde, serviste veya iş yerinizde. Rapor; onarım masrafları, değer kaybı (Wertminderung), hurda değeri (tam hasar durumunda) ve yeniden edinim değerini içerir. Ardından avukat karşı tarafın sigortasından (gegnerische Versicherung) talepte bulunur."
+        "text": "Kfz-Sachverständiger aracı yerinde inceler — evinizde, serviste veya iş yerinizde. Rapor; onarım masrafları, değer kaybı (Wertminderung), hurda değeri (tam hasar durumunda) ve yeniden edinim değerini içerir. Ardından avukat karşı tarafın sigortasından (gegnerische Versicherung) talepte bulunur."
       },
       {
         "titel": "Ödeme",
@@ -3525,7 +3525,7 @@
       },
       {
         "wert": "89",
-        "label": "DAT-Expert-Partner NRW",
+        "label": "Partner NRW",
         "sub": "Claimondo ağı"
       },
       {
@@ -3670,7 +3670,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Hak Dayanağı",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "Expert Partner ağı"
+    "trust_stat_3_label": "hesaplama standardı"
   },
   "unfallskizze": {
     "breadcrumb_start": "Başlangıç",

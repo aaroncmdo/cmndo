@@ -22,7 +22,7 @@ type Props = {
 const PARTNER = [
   {
     icon: ShieldCheck,
-    title: 'DAT Expert Partner',
+    title: 'Sachverständigen-Netzwerk',
     subtitle: 'Sachverständigen-Netzwerk',
     url: 'https://www.dat.de/sachverstaendige/',
   },

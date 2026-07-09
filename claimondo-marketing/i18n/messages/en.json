@@ -636,7 +636,7 @@
       "heading": "Trust signals, each with a source",
       "items": [
         {
-          "titel": "DAT Expert Partner Network",
+          "titel": "Sachverständigen-Netzwerk Network",
           "text": "Claimondo works exclusively with certified expert appraisers listed in the public DAT directory. Primary focus on NRW, available nationwide.",
           "quelle": "dat.de/sachverstaendige"
         },
@@ -674,7 +674,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "Expert Partner network"
+          "label": "calculation standard"
         },
         {
           "kpi": "30–40 %",
@@ -695,7 +695,7 @@
           "rolle": "Managing Director, CEO & Co-Founder",
           "foto_label": "right in photo",
           "bio_kurz": "Nicolas leads Claimondo strategically, overseeing the partner network and investor relations.",
-          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of DAT-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
+          "bio_lang": "Nicolas co-founded Claimondo from a simple observation: too many accident victims in Germany sign settlement declarations without realising they are signing away a third of their statutory entitlement. At Claimondo he builds the partner network of Kfz-Sachverständige and specialist lawyers — ensuring every client receives the same standard that insurers have long established for their own major accounts.",
           "quote": "\"It's not about who I am, but what I do. That's how you're judged.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -812,7 +812,7 @@
     },
     "detail": {
       "entfernt": "{km} km away",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Sachverständigen-Netzwerk",
       "freie_termine": "Available appointments",
       "termin_reservieren": "Reserve appointment →",
       "legal": "Free for injured parties with no fault · €0 out of pocket",
@@ -989,7 +989,7 @@
       "quote_accent": "Your claim doesn't."
     },
     "hero": {
-      "trust_badge": "DAT-Sachverständigen-Netzwerk · nationwide coverage",
+      "trust_badge": "Kfz-Sachverständigen-Netzwerk · nationwide coverage",
       "h1_plain": "Not your fault in the crash?",
       "h1_accent": "We've got you covered.",
       "sub_headline": "We coordinate the expert, lawyer, and repair shop — and the partner law firm leads the negotiation with the opposing insurance. For you: €0 (§249 BGB). 32 days avg. payout instead of the industry average of 4–6 months.",
@@ -1604,7 +1604,7 @@
         "sub": "Focus on NRW · nationwide",
         "text": "Whether Cologne, Munich, Berlin, or Schwerin: the partner network covers major German cities. The nearest DAT-Gutachter in the network is usually just a few kilometres away.",
         "punkte": [
-          "DAT-Sachverständige from the public DAT directory",
+          "Kfz-Sachverständige from the public DAT directory",
           "Indexed city pages for local SEO",
           "Location-based assignment",
           "Locally experienced experts in every region"
@@ -2119,7 +2119,7 @@
     "kpis": [
       {
         "wert": "DAT",
-        "label": "Expert Partner network"
+        "label": "calculation standard"
       },
       {
         "wert": "< 48 h",
@@ -2268,7 +2268,7 @@
       },
       {
         "wert": "DAT",
-        "label": "Expert Partner network"
+        "label": "calculation standard"
       },
       {
         "wert": "Cologne",
@@ -2351,7 +2351,7 @@
       "onboarding_heading": "Onboarding Duration & Requirements",
       "onboarding_text": "Once your region is activated, onboarding takes 7 to 14 working days: we verify your qualification against the relevant registers (DAT, BVSK, IHK, öbuv chambers), send the partner agreement, set you up in the SV portal, and conduct a 30-minute live onboarding call. After that, the first assignments go live.",
       "voraussetzungen": [
-        "At least one recognised qualification: DAT-Expert · BVSK · IHK · öbuv",
+        "At least one recognised qualification: BVSK · IHK · öbuv",
         "Valid professional liability insurance (min. €2 million coverage)",
         "GoBD-compliant invoicing",
         "Active location in Germany",
@@ -2374,7 +2374,7 @@
         },
         {
           "frage": "What requirements do I need to meet?",
-          "antwort": "At least one recognised qualification: DAT-Expert, BVSK membership, IHK certificate, or public appointment (öbuv). Additionally: valid professional liability insurance, GoBD-compliant invoicing, and an active location in Germany."
+          "antwort": "At least one recognised qualification: BVSK membership, IHK certificate, or public appointment (öbuv). Additionally: valid professional liability insurance, GoBD-compliant invoicing, and an active location in Germany."
         },
         {
           "frage": "How long does onboarding take?",
@@ -2860,7 +2860,7 @@
     "hero_intro": "Certified partner appraisers from the official DAT directory (dat.de/sachverstaendige), available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
     "hero_cta_karte": "View on map",
     "hero_cta_schaden": "Report a claim",
-    "trust_kpi_dat_label": "Expert Partner network",
+    "trust_kpi_dat_label": "calculation standard",
     "trust_kpi_termin_label": "Appointment",
     "trust_kpi_eigenanteil_label": "Out-of-pocket cost¹",
     "trust_kpi_recht_label": "Legal basis",
@@ -2970,7 +2970,7 @@
       {
         "titel": "Expert report + lawyer",
         "dauer": "Appointment <48 h, report 48 h later",
-        "text": "A DAT-Sachverständiger inspects the vehicle — at your home, at the workshop, or at your workplace. The report includes repair costs, diminished value, residual value (in total-loss cases), and replacement value. The lawyer then issues demands to the opposing insurance."
+        "text": "A Kfz-Sachverständiger inspects the vehicle — at your home, at the workshop, or at your workplace. The report includes repair costs, diminished value, residual value (in total-loss cases), and replacement value. The lawyer then issues demands to the opposing insurance."
       },
       {
         "titel": "Payout",
@@ -3670,7 +3670,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Entitlement basis",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "Expert Partner network"
+    "trust_stat_3_label": "calculation standard"
   },
   "unfallskizze": {
     "breadcrumb_start": "Home",

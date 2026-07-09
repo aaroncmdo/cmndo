@@ -668,7 +668,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "شبكة Expert Partner"
+          "label": "معيار الحساب"
         },
         {
           "kpi": "30–40 %",
@@ -806,7 +806,7 @@
     },
     "detail": {
       "entfernt": "على بُعد {km} كم",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Sachverständigen-Netzwerk",
       "freie_termine": "مواعيد متاحة",
       "termin_reservieren": "احجز موعداً ←",
       "legal": "مجاناً للمتضررين غير المتسببين · 0 € تكلفة ذاتية",
@@ -983,7 +983,7 @@
       "quote_accent": "الحق يبقى."
     },
     "hero": {
-      "trust_badge": "شبكة DAT-Sachverständigen · متاحة على مستوى ألمانيا",
+      "trust_badge": "شبكة Kfz-Sachverständigen · متاحة على مستوى ألمانيا",
       "h1_plain": "حادث ليس بخطئك؟",
       "h1_accent": "نحن نتولّى الأمر.",
       "sub_headline": "نحن ننسّق الخبير والمحامي وورشة الإصلاح — ويُدير المكتب القانوني الشريك التفاوض مع تأمين الطرف الآخر. بتكلفة 0 € على المتضرر (§ 249 BGB). متوسط صرف التعويض 32 يومًا بدلًا من 4–6 أشهر وهو المتوسط المعتاد في القطاع.",
@@ -2109,11 +2109,11 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "العثور على خبير سيارات بالقرب منك — خريطة بخبراء DAT-Sachverständige، مجاناً وفق §249 BGB",
+    "sr_h1": "العثور على خبير سيارات بالقرب منك — خريطة بخبراء Kfz-Sachverständige، مجاناً وفق §249 BGB",
     "kpis": [
       {
         "wert": "DAT",
-        "label": "شبكة Expert Partner"
+        "label": "معيار الحساب"
       },
       {
         "wert": "< 48 ساعة",
@@ -2262,7 +2262,7 @@
       },
       {
         "wert": "DAT",
-        "label": "شبكة Expert Partner"
+        "label": "معيار الحساب"
       },
       {
         "wert": "كولن",
@@ -2345,7 +2345,7 @@
       "onboarding_heading": "مدة التأهيل والمتطلبات",
       "onboarding_text": "بعد تفعيل منطقتك، تستغرق عملية التأهيل 7 إلى 14 يوم عمل: نتحقق من مؤهلاتك مقابل السجلات المعتمدة (DAT، BVSK، IHK، öbuv)، نرسل عقد الشراكة، نُعدّك في بوابة SV، ونُجري مكالمة تأهيل مباشرة مدتها 30 دقيقة. بعد ذلك تنطلق أولى الطلبات.",
       "voraussetzungen": [
-        "مؤهل معتمد واحد على الأقل: DAT-Expert · BVSK · IHK · öbuv",
+        "مؤهل معتمد واحد على الأقل: BVSK · IHK · öbuv",
         "تأمين مسؤولية مهنية سارٍ (تغطية لا تقل عن 2 مليون €)",
         "إصدار فواتير متوافقة مع GoBD",
         "موقع نشط في ألمانيا",
@@ -2854,7 +2854,7 @@
     "hero_intro": "خبراء تقييم شركاء معتمدون من قائمة DAT العامة (dat.de/sachverstaendige)، متاحون في جميع أنحاء ألمانيا. موعد في الموقع خلال 48 ساعة. للمتضررين بدون ذنب: 0 € تكلفة ذاتية — شركة تأمين الطرف الآخر تتحمل جميع التكاليف وفق §249 BGB (بشرط الاعتراف).",
     "hero_cta_karte": "عرض على الخريطة",
     "hero_cta_schaden": "الإبلاغ عن ضرر",
-    "trust_kpi_dat_label": "شبكة Expert Partner",
+    "trust_kpi_dat_label": "معيار الحساب",
     "trust_kpi_termin_label": "موعد",
     "trust_kpi_eigenanteil_label": "تكلفة ذاتية¹",
     "trust_kpi_recht_label": "الأساس القانوني",
@@ -3664,7 +3664,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "أساس المطالبة",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "شبكة Expert Partner"
+    "trust_stat_3_label": "معيار الحساب"
   },
   "unfallskizze": {
     "breadcrumb_start": "البداية",

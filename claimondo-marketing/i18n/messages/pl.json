@@ -668,7 +668,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "sieć Expert Partner"
+          "label": "standard kalkulacji"
         },
         {
           "kpi": "30–40 %",
@@ -689,7 +689,7 @@
           "rolle": "Geschäftsführer, CEO i współzałożyciel",
           "foto_label": "z prawej strony zdjęcia",
           "bio_kurz": "Nicolas odpowiada za strategiczny kierunek Claimondo, zarządzanie siecią partnerów i relacje z inwestorami.",
-          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z DAT-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
+          "bio_lang": "Nicolas współzałożył Claimondo na podstawie prostej obserwacji: zbyt wielu poszkodowanych w wypadkach drogowych w Niemczech podpisuje oświadczenia o zrzeczeniu się roszczeń, nie wiedząc, że tracą w ten sposób jedną trzecią swojego ustawowego roszczenia. W Claimondo odpowiada za budowę sieci partnerskiej złożonej z Kfz-Sachverständigen i adwokatów specjalistów — i dba o to, aby każdy klient otrzymał ten sam standard, który towarzystwa ubezpieczeniowe od dawna zapewniają swoim największym klientom.",
           "quote": "„Nie chodzi o to, kim jestem, lecz o to, co robię. Z tego się jest rozliczanym.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -806,7 +806,7 @@
     },
     "detail": {
       "entfernt": " {km} km stąd",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Sachverständigen-Netzwerk",
       "freie_termine": "Wolne terminy",
       "termin_reservieren": "Zarezerwuj termin →",
       "legal": "Bezpłatnie dla poszkodowanych bez winy · 0 € własnego wkładu",
@@ -983,7 +983,7 @@
       "quote_accent": "Roszczenie zostaje."
     },
     "hero": {
-      "trust_badge": "Sieć rzeczoznawców DAT-Sachverständige · zasięg ogólnokrajowy",
+      "trust_badge": "Sieć rzeczoznawców Kfz-Sachverständige · zasięg ogólnokrajowy",
       "h1_plain": "Wypadek nie z Twojej winy?",
       "h1_accent": "Zajmiemy się wszystkim.",
       "sub_headline": "Koordynujemy rzeczoznawcę, adwokat i warsztat — a negocjacje z ubezpieczeniem sprawcy prowadzi kancelaria partnerska. Dla Państwa 0 € (§ 249 BGB). Średnio 32 dni do wypłaty zamiast 4–6 miesięcy branżowej średniej.",
@@ -2109,11 +2109,11 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Znajdź rzeczoznawcę samochodowego w pobliżu — mapa z DAT-Sachverständigen, bezpłatnie zgodnie z §249 BGB",
+    "sr_h1": "Znajdź rzeczoznawcę samochodowego w pobliżu — mapa z Kfz-Sachverständigen, bezpłatnie zgodnie z §249 BGB",
     "kpis": [
       {
         "wert": "DAT",
-        "label": "sieć Expert Partner"
+        "label": "standard kalkulacji"
       },
       {
         "wert": "< 48 h",
@@ -2262,7 +2262,7 @@
       },
       {
         "wert": "DAT",
-        "label": "sieć Expert Partner"
+        "label": "standard kalkulacji"
       },
       {
         "wert": "Köln",
@@ -2327,7 +2327,7 @@
         },
         {
           "titel": "Weryfikacja",
-          "text": "Sprawdzamy nr DAT-Expert, członkostwo w BVSK oraz wpis IHK lub öbuv w odpowiednich rejestrach. To nie jest formalność marketingowa — w razie potrzeby kontaktujemy się telefonicznie z izbami."
+          "text": "Sprawdzamy nr członkostwo w BVSK oraz wpis IHK lub öbuv w odpowiednich rejestrach. To nie jest formalność marketingowa — w razie potrzeby kontaktujemy się telefonicznie z izbami."
         },
         {
           "titel": "Aktywacja regionu",
@@ -2345,7 +2345,7 @@
       "onboarding_heading": "Czas onboardingu i wymagania",
       "onboarding_text": "Po uruchomieniu Twojego regionu onboarding trwa od 7 do 14 dni roboczych: weryfikujemy Twoje kwalifikacje w odpowiednich rejestrach (DAT, BVSK, IHK, öbuv), przesyłamy umowę partnerską, konfigurujemy Twoje konto w portalu SV i przeprowadzamy 30-minutowy onboarding call na żywo. Następnie pierwsze zlecenia ruszają.",
       "voraussetzungen": [
-        "Co najmniej jedna uznana kwalifikacja: DAT-Expert · BVSK · IHK · öbuv",
+        "Co najmniej jedna uznana kwalifikacja: BVSK · IHK · öbuv",
         "Ważne ubezpieczenie OC zawodowe (min. 2 mln € pokrycia)",
         "Fakturowanie zgodne z GoBD",
         "Aktywna siedziba w Niemczech",
@@ -2368,7 +2368,7 @@
         },
         {
           "frage": "Jakie wymagania muszę spełnić?",
-          "antwort": "Co najmniej jedna uznana kwalifikacja: DAT-Expert, członkostwo w BVSK, certyfikat IHK lub publiczne uprawnienia (öbuv). Ponadto ważne ubezpieczenie OC zawodowe, fakturowanie zgodne z GoBD oraz aktywna siedziba w Niemczech."
+          "antwort": "Co najmniej jedna uznana kwalifikacja: członkostwo w BVSK, certyfikat IHK lub publiczne uprawnienia (öbuv). Ponadto ważne ubezpieczenie OC zawodowe, fakturowanie zgodne z GoBD oraz aktywna siedziba w Niemczech."
         },
         {
           "frage": "Jak długo trwa onboarding?",
@@ -2854,7 +2854,7 @@
     "hero_intro": "Certyfikowani rzeczoznawcy partnerzy z publicznego rejestru DAT (dat.de/sachverstaendige), dostępni na terenie całych Niemiec. Wizyta na miejscu w ciągu 48 godzin. Dla poszkodowanych bez winy — 0 € udziału własnego: wszystkie koszty pokrywa ubezpieczenie sprawcy zgodnie z §249 BGB (z zastrzeżeniem uznania roszczenia).",
     "hero_cta_karte": "Zobacz na mapie",
     "hero_cta_schaden": "Zgłoś szkodę",
-    "trust_kpi_dat_label": "sieć Expert Partner",
+    "trust_kpi_dat_label": "standard kalkulacji",
     "trust_kpi_termin_label": "Termin",
     "trust_kpi_eigenanteil_label": "Udział własny¹",
     "trust_kpi_recht_label": "Podstawa prawna",
@@ -2964,7 +2964,7 @@
       {
         "titel": "Ekspertyza + adwokat",
         "dauer": "Termin <48 h, raport 48 h później",
-        "text": "DAT-Sachverständiger ogląda pojazd — u Ciebie, w warsztacie lub w miejscu pracy. Raport obejmuje koszty naprawy, utratę wartości, wartość pozostałości (przy szkodzie całkowitej) i wartość odtworzeniową. Adwokat kieruje następnie roszczenie do ubezpieczenia sprawcy."
+        "text": "Kfz-Sachverständiger ogląda pojazd — u Ciebie, w warsztacie lub w miejscu pracy. Raport obejmuje koszty naprawy, utratę wartości, wartość pozostałości (przy szkodzie całkowitej) i wartość odtworzeniową. Adwokat kieruje następnie roszczenie do ubezpieczenia sprawcy."
       },
       {
         "titel": "Wypłata",
@@ -3664,7 +3664,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Podstawa roszczenia",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "sieć Expert Partner"
+    "trust_stat_3_label": "standard kalkulacji"
   },
   "unfallskizze": {
     "breadcrumb_start": "Start",

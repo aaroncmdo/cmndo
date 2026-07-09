@@ -237,7 +237,7 @@ export default function OgImage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 36 }}>
             {[
               'Direktvermittlung ohne Eigenakquise',
-              'DAT-Experten, BVSK, IHK & öbuv willkommen',
+              'qualifizierte Sachverständige, BVSK, IHK & öbuv willkommen',
               'Einzugsgebiet selbst festlegen (30–100 km)',
             ].map((text, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>

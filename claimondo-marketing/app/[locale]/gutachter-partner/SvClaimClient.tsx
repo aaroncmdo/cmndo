@@ -455,7 +455,7 @@ function NeuSchritt({
             ariaLabel="DAT-Nummer"
           />
           <p className="mt-1.5 text-xs text-claimondo-shield">
-            Deine DAT-Sachverständigennummer — wird zur Identitätsprüfung benötigt.
+            Deine Kfz-Sachverständigennummer — wird zur Identitätsprüfung benötigt.
           </p>
         </label>
       </div>

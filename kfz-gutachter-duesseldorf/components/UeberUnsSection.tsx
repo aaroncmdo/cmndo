@@ -137,7 +137,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               DAT-Standard · BVSK · 10+ Jahre · 2.500+ Schäden
             </div>
             <p className="text-white/[.84] text-base mb-3 leading-relaxed">
-              Zertifiziert, ingenieurbasiert, gerichtsfest — mit Zugang zum DAT Expert Partner-Netzwerk. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
+              Zertifiziert, ingenieurbasiert, gerichtsfest — mit Zugang zum Sachverständigen-Netzwerk. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
               die komplette Abwicklung — Gutachten, Anwalt, Mietwagen/Nutzungsausfall und
               Versicherungskommunikation. Sie sehen jeden Schritt live im Portal.
             </p>

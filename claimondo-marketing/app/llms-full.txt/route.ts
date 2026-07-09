@@ -139,7 +139,7 @@ Stand: ${new Date().toISOString().slice(0, 10)}.
 - **Telefon:** ${PHONE_DISPLAY} (Mo–Fr 08:00–20:00, Sa+So 09:00–18:00, Rückruf < 15 Min)
 - **E-Mail:** info@claimondo.de · **WhatsApp:** ${WHATSAPP_HREF}
 - **Gegründet:** 2025 in Köln · **Founders:** Nicolas Kitta (Geschäftsführer & CEO), Aaron Sprafke (Geschäftsführer & COO)
-- **Partner-Netzwerk:** DAT-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis https://www.dat.de/sachverstaendige/) · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
+- **Partner-Netzwerk:** Kfz-Sachverständigen-Netzwerk (öffentliches DAT-Verzeichnis https://www.dat.de/sachverstaendige/) · Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk)
 - **Reichweite:** Bundesweit — kein Bundesland, keine Region ohne Partner. Größte digitale Schadensregulierungs-Plattform für Geschädigte in Deutschland.
 - **Kosten für unverschuldet Geschädigte:** 0 € (Gutachter- und Anwaltskosten zahlt nach § 249 BGB der gegnerische Haftpflichtversicherer; vorbehaltlich Anerkenntnis)
 
@@ -241,7 +241,7 @@ const HAUPTSEITE_KERN = `
 
 ### Hero
 - H1: "${SERVICE_PITCH_HEADLINES.claimondo}"
-- Pill: "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar"
+- Pill: "Kfz-Sachverständigen-Netzwerk · bundesweit erreichbar"
 - Subline: ${SERVICE_PITCH_SUB_HEADLINE_CLAIMONDO}
 - Service-Realität (5 Bullets): ${SERVICE_REALITY_BULLETS.map((b) => b.label).join(' · ')}
 - CTA: „Lassen Sie uns mit der Versicherung reden" (→ https://claimondo.de/gutachter-finden) · Telefon ${PHONE_DISPLAY} (Rückruf in 5 Min) · WhatsApp · Lead-Form 3-Felder
@@ -398,7 +398,7 @@ const UEBER_UNS_KERN = `
 
 ### Brand-KPIs
 - 2025 in Köln gegründet
-- Bundesweites DAT-Sachverständigen-Netzwerk — hunderte Partner-Gutachter in ganz Deutschland
+- Bundesweites Kfz-Sachverständigen-Netzwerk — hunderte Partner-Gutachter in ganz Deutschland
 - Größte digitale Plattform für Kfz-Schadensregulierung aus Geschädigten-Sicht in Deutschland
 - 30–40 % Versicherer-Prüfdienst-Kürzung zurückgeholt (Quelle: NDR/Verbraucherzentrale/BGH)
 
@@ -569,7 +569,7 @@ const FOOTER = `
 ### Primärquellen
 - juris.bundesgerichtshof.de — BGH-Volltexte über Aktenzeichen
 - https://www.bvsk.de/ — Bundesverband freier Sachverständiger + Honorartabelle
-- https://www.dat.de/sachverstaendige/ — DAT Expert Partner Netzwerk
+- https://www.dat.de/sachverstaendige/ — Sachverständigen-Netzwerk Netzwerk
 - Partnerkanzlei für Verkehrsrecht (Fachanwalt-Netzwerk Claimondo)
 - Sanden/Danner-Liste 2025 (Nutzungsausfall-Tagessätze)
 - Hacks/Wellner/Häcker-Tabelle 2025 (Schmerzensgeld-Vergleichswerte)

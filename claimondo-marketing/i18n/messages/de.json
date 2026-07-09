@@ -677,7 +677,7 @@
     },
     "vorteile": {
       "title": "Vorteile — Versicherer-Kürzungen zurückgeholt · Claimondo",
-      "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger DAT-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
+      "description": "0 € Eigenanteil bei unverschuldetem Unfall (§249 BGB). Unabhängiger Kfz-Sachverständiger statt Prüfdienst-Kürzung. Sehen Sie, was Ihnen wirklich zusteht.",
       "og_description": "0 € Eigenanteil bei unverschuldetem Unfall nach §249 BGB. Unabhängiger Gutachter, voller Anspruch. Prüfdienst-Kürzungen (typischerweise 30–40 % laut NDR/BGH) holen wir zurück."
     },
     "faq": {
@@ -695,8 +695,8 @@
     "gutachter_finden": {
       "title": "Kfz-Gutachter finden in Ihrer Nähe — Karte & Termin in unter 48 h",
       "description": "Interaktive Karte mit zertifizierten Partner-Sachverständigen bundesweit. Termin sehen, in unter 48 h vor Ort. 0 € bei unverschuldetem Unfall (§249 BGB).",
-      "og_title": "Kfz-Gutachter finden — Karte mit DAT-Sachverständigen",
-      "og_description": "Interaktive Karte aller verfügbaren DAT-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
+      "og_title": "Kfz-Gutachter finden — Karte mit Kfz-Sachverständigen",
+      "og_description": "Interaktive Karte aller verfügbaren Kfz-Sachverständigen in Deutschland. Termin in unter 48 h. Kostenfrei für unverschuldet Geschädigte nach §249 BGB.",
       "twitter_title": "Kfz-Gutachter finden — Karte mit DAT-SVs",
       "twitter_description": "Karte aller verfügbaren Sachverständigen in Deutschland. Termin in unter 48h."
     },
@@ -709,7 +709,7 @@
     },
     "gutachter_partner": {
       "title": "Als Kfz-Sachverständiger Partner werden — Warteliste",
-      "description": "Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. DAT-Experten und BVSK-Mitglieder willkommen.",
+      "description": "Jetzt auf die Warteliste: bundesweites SV-Netzwerk von Claimondo. Aufträge direkt vermittelt, ohne Akquise. qualifizierte Sachverständige und BVSK-Mitglieder willkommen.",
       "og_title": "Als Kfz-Sachverständiger Partner werden — Claimondo",
       "og_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein — wir vermitteln direkt in Ihrem Einzugsgebiet.",
       "twitter_description": "Aufträge ohne Akquise. Tragen Sie sich in das Claimondo SV-Netzwerk ein."
@@ -796,7 +796,7 @@
     "kfz_gutachter": {
       "title": "Kfz-Gutachter finden — Unabhängig, schnell, kostenfrei",
       "description": "Unabhängige zertifizierte Kfz-Sachverständige für Unfallschäden bundesweit. DAT-Partner, Termin unter 48 h, 0 € für unverschuldet Geschädigte (§249 BGB).",
-      "og_description": "DAT-Expert-Partner aus dem öffentlichen DAT-Verzeichnis · Termin <48h · 0 € für Geschädigte nach §249 BGB"
+      "og_description": "Partner aus dem öffentlichen DAT-Verzeichnis · Termin <48h · 0 € für Geschädigte nach §249 BGB"
     },
     "kfz_gutachter_ablauf": {
       "title": "Ablauf Kfz-Schadensregulierung — Schritt für Schritt erklärt",
@@ -922,7 +922,7 @@
       "heading": "Vertrauenssignale, jedes mit Quelle",
       "items": [
         {
-          "titel": "DAT Expert Partner-Netzwerk",
+          "titel": "Sachverständigen-Netzwerk",
           "text": "Claimondo arbeitet ausschließlich mit zertifizierten Sachverständigen aus dem öffentlichen DAT-Verzeichnis. Schwerpunkt NRW, bundesweit erreichbar.",
           "quelle": "dat.de/sachverstaendige"
         },
@@ -960,7 +960,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "Expert Partner-Netzwerk"
+          "label": "Kalkulations-Standard"
         },
         {
           "kpi": "30–40 %",
@@ -981,7 +981,7 @@
           "rolle": "Geschäftsführer, CEO & Mitgründer",
           "foto_label": "rechts im Bild",
           "bio_kurz": "Nicolas führt Claimondo strategisch, verantwortet Partnernetzwerk und Investorenbeziehungen.",
-          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus DAT-Sachverständigen und Fachanwälten — und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
+          "bio_lang": "Nicolas hat Claimondo aus einer simplen Beobachtung heraus mitgegründet: zu viele Unfallgeschädigte unterschreiben in Deutschland Abfindungserklärungen, ohne zu wissen, dass sie damit ein Drittel ihres gesetzlichen Anspruchs verlieren. Bei Claimondo verantwortet er den Aufbau des Partner-Netzwerks aus Kfz-Sachverständigen und Fachanwälten — und sorgt dafür, dass jeder Mandant denselben Standard bekommt, den sich Versicherungen für ihre eigenen Großkunden längst aufgebaut haben.",
           "quote": "„Es geht nicht darum wer ich bin, sondern was ich tue. Daran wird man gemessen.\"",
           "quote_autor": "Bruce Wayne"
         },
@@ -1128,7 +1128,7 @@
       "quote_accent": "Anspruch bleibt."
     },
     "hero": {
-      "trust_badge": "DAT-Sachverständigen-Netzwerk · bundesweit erreichbar",
+      "trust_badge": "Kfz-Sachverständigen-Netzwerk · bundesweit erreichbar",
       "h1_plain": "Unverschuldet im Unfall?",
       "h1_accent": "Wir haben's im Griff.",
       "sub_headline": "Wir koordinieren Gutachter, Anwalt und Werkstatt — unsere Partnerkanzlei verhandelt mit der gegnerischen Versicherung. Für Sie 0 € (§ 249 BGB). 32 Tage Ø Auszahlung statt 4–6 Monate Branchen-Durchschnitt.",
@@ -1287,7 +1287,7 @@
     "einsatzgebiet": {
       "sub": "Bewegen Sie die Karte oder öffnen Sie die volle Suche — unabhängige Sachverständige in Ihrer Region. Schwerpunkt NRW, Anbindung deutschlandweit.",
       "finder_cta": "SV in Ihrer Nähe finden",
-      "eyebrow": "DAT-Sachverständigen-Netzwerk",
+      "eyebrow": "Kfz-Sachverständigen-Netzwerk",
       "heading": "Unabhängige Gutachter — bundesweit, mit Schwerpunkt NRW.",
       "map_alt": "Claimondo Einsatzgebiet — Schwerpunkt Nordrhein-Westfalen, mit Anbindung an weitere deutsche Großstädte",
       "city_intro": "Direkt zur Stadt-Page (regionaler Landgericht, Anwaltskammer, BVSK-Honorar):",
@@ -1739,7 +1739,7 @@
     },
     "detail": {
       "entfernt": "{km} km entfernt",
-      "dat_badge": "DAT Expert Partner",
+      "dat_badge": "Sachverständigen-Netzwerk",
       "freie_termine": "Freie Termine",
       "termin_reservieren": "Termin reservieren →",
       "legal": "Kostenlos für unverschuldet Geschädigte · 0 € Eigenanteil",
@@ -1894,7 +1894,7 @@
         "sub": "Schwerpunkt NRW · bundesweit",
         "text": "Egal ob Köln, München, Berlin oder Schwerin: das Partner-Netzwerk deckt deutsche Großstädte ab. Der nächste DAT-Gutachter aus dem Netzwerk ist meist wenige Kilometer entfernt.",
         "punkte": [
-          "DAT-Sachverständige aus dem öffentlichen DAT-Verzeichnis",
+          "Kfz-Sachverständige aus dem öffentlichen DAT-Verzeichnis",
           "Indexierte Stadt-Pages für lokales SEO",
           "Standortbasierte Zuweisung",
           "Ortskundige Experten in jeder Region"
@@ -1992,11 +1992,11 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit DAT-Sachverständigen, kostenfrei nach §249 BGB",
+    "sr_h1": "Kfz-Gutachter in Ihrer Nähe finden — Karte mit Kfz-Sachverständigen, kostenfrei nach §249 BGB",
     "kpis": [
       {
         "wert": "DAT",
-        "label": "Expert Partner-Netzwerk"
+        "label": "Kalkulations-Standard"
       },
       {
         "wert": "< 48 h",
@@ -2145,7 +2145,7 @@
       },
       {
         "wert": "DAT",
-        "label": "Expert Partner-Netzwerk"
+        "label": "Kalkulations-Standard"
       },
       {
         "wert": "Köln",
@@ -2641,7 +2641,7 @@
       "onboarding_heading": "Onboarding-Dauer & Voraussetzungen",
       "onboarding_text": "Nach Freischaltung Ihrer Region dauert das Onboarding 7 bis 14 Werktage: Wir verifizieren Ihre Qualifikation gegen die jeweiligen Register (DAT, BVSK, IHK, öbuv-Kammern), schicken den Partnervertrag, richten Sie im SV-Portal ein und führen einen 30-minütigen Live-Onboarding-Call durch. Danach gehen die ersten Aufträge live.",
       "voraussetzungen": [
-        "Mindestens eine anerkannte Qualifikation: DAT-Expert · BVSK · IHK · öbuv",
+        "Mindestens eine anerkannte Qualifikation: BVSK · IHK · öbuv",
         "Gültige Berufshaftpflicht (mind. 2 Mio. € Deckung)",
         "GoBD-konforme Rechnungsstellung",
         "Aktiver Standort in Deutschland",
@@ -2668,7 +2668,7 @@
         },
         {
           "frage": "Welche Voraussetzungen muss ich erfüllen?",
-          "antwort": "Mindestens eine anerkannte Qualifikation: DAT-Expert, BVSK-Mitgliedschaft, IHK-Zertifikat oder öffentliche Bestellung (öbuv). Dazu gültige Berufshaftpflicht, GoBD-konforme Rechnungsstellung und ein aktiver Standort in Deutschland."
+          "antwort": "Mindestens eine anerkannte Qualifikation: BVSK-Mitgliedschaft, IHK-Zertifikat oder öffentliche Bestellung (öbuv). Dazu gültige Berufshaftpflicht, GoBD-konforme Rechnungsstellung und ein aktiver Standort in Deutschland."
         },
         {
           "frage": "Wie lange dauert das Onboarding?",
@@ -3267,7 +3267,7 @@
     "hero_intro": "Zertifizierte Partner-Sachverständige aus dem öffentlichen DAT-Verzeichnis (dat.de/sachverstaendige), bundesweit erreichbar. Termin vor Ort in unter 48 Stunden. Für unverschuldet Geschädigte 0 € Eigenanteil — die gegnerische Haftpflichtversicherung trägt alle Kosten nach §249 BGB (vorbehaltlich Anerkenntnis).",
     "hero_cta_karte": "Auf der Karte ansehen",
     "hero_cta_schaden": "Schaden melden",
-    "trust_kpi_dat_label": "Expert Partner-Netzwerk",
+    "trust_kpi_dat_label": "Kalkulations-Standard",
     "trust_kpi_termin_label": "Termin",
     "trust_kpi_eigenanteil_label": "Eigenanteil¹",
     "trust_kpi_recht_label": "Rechtsgrundlage",
@@ -3436,7 +3436,7 @@
       {
         "titel": "Gutachten + Anwalt",
         "dauer": "Termin <48 h, Bericht 48 h später",
-        "text": "DAT-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung."
+        "text": "Kfz-Sachverständiger besichtigt das Fahrzeug — bei Ihnen, in der Werkstatt oder am Arbeitsplatz. Bericht inkl. Reparaturkosten, Wertminderung, Restwert (bei Totalschaden) und Wiederbeschaffungswert. Anwalt fordert anschließend von der gegnerischen Versicherung."
       },
       {
         "titel": "Auszahlung",
@@ -3924,7 +3924,7 @@
   "kfz_gutachter_stadt": {
     "hero_band_eyebrow": "Sofort nach dem Unfall {ort}",
     "hero_band_quote": "„Ihr erster Anruf nach dem Unfall? <hl>Der richtige.</hl>“",
-    "hero_badge": "DAT-Sachverständige aktuell {ort} verfügbar",
+    "hero_badge": "Kfz-Sachverständige aktuell {ort} verfügbar",
     "hero_h1_line1": "Unfall gehabt?",
     "hero_h1_city": "Ihr Kfz-Gutachter {ort}.",
     "hero_subheadline": "Wir disponieren Ihren Gutachter (< 48 h), führen die Versicherungs-Verhandlung und setzen Ihren Anspruch BGH-konform durch. 0 € für Sie.",
@@ -4028,7 +4028,7 @@
       }
     ],
     "einsatz_eyebrow": "Vor Ort — bundesweit",
-    "einsatz_h2": "DAT-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit",
+    "einsatz_h2": "Kfz-Sachverständigen-Netzwerk · Schwerpunkt NRW · bundesweit",
     "einsatz_verfuegbar": "Auch verfügbar in:",
     "einsatz_alle": "Alle Einsatz-Städte →",
     "faq_eyebrow": "Häufige Fragen — Kfz-Gutachter {ort}",
@@ -4048,7 +4048,7 @@
     "faq_130_frage": "Was bedeutet die 130%-Regel beim Totalschaden?",
     "faq_130_antwort": "Die 130%-Regel (BGH VI ZR 67/91) erlaubt Reparaturkosten bis 130 % des Wiederbeschaffungswertes — sofern fachgerecht repariert nach Gutachten und das Fahrzeug 6 Monate weitergenutzt wird.",
     "cta_h2": "Schaden {ort}? Wir regeln das.",
-    "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien DAT-Sachverständigen {ort} in unter 48 h.",
+    "cta_p": "Online melden in 5 Minuten — wir vermitteln einen freien Kfz-Sachverständigen {ort} in unter 48 h.",
     "cta_karte": "Auf Karte ansehen"
   },
   "onboarding_wizard": {
@@ -4188,7 +4188,7 @@
       },
       {
         "wert": "89",
-        "label": "DAT-Expert-Partner NRW",
+        "label": "Partner NRW",
         "sub": "Claimondo-Netzwerk"
       },
       {
@@ -4272,7 +4272,7 @@
       "Unverschuldeter Unfall: deine Rechte im Überblick"
     ],
     "final_h2": "Ihre Versicherung hat gekürzt? Unsere Partnerkanzlei holt es zurück.",
-    "final_p": "Unabhängiger DAT-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.",
+    "final_p": "Unabhängiger Kfz-Sachverständiger + Partnerkanzlei. 0 € Eigenanteil nach §249 BGB.",
     "final_cta_gutachter": "Gutachter finden",
     "markt_erkenntnis_pre": "Der Marktführer"
   },
@@ -4333,7 +4333,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Anspruchs-Basis",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "Expert Partner-Netzwerk"
+    "trust_stat_3_label": "Kalkulations-Standard"
   },
   "unfallskizze": {
     "breadcrumb_start": "Start",
