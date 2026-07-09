@@ -15,6 +15,7 @@ const PAKET_OPTIONS = [
   { value: 'standard', label: 'Standard (10 Fälle, 15km)' },
   { value: 'pro', label: 'Pro (25 Fälle, 40km)' },
   { value: 'premium', label: 'Premium (50 Fälle, 70km)' },
+  { value: 'basic', label: 'Basic (Pay-per-Lead · 0 Inklusivfälle, 25km)' },
 ]
 
 type SvData = {
@@ -243,7 +244,7 @@ export default function SvDetailClient({ sv }: { sv: SvData }) {
           </div>
           <div>
             <label className="block text-claimondo-ondo text-xs mb-1">Max Fälle / Monat</label>
-            <input name="paket_faelle_gesamt" type="number" min="1" defaultValue={sv.maxFaelleMonat} className={inputCls} />
+            <input name="paket_faelle_gesamt" type="number" min="0" defaultValue={sv.maxFaelleMonat} className={inputCls} />
           </div>
         </div>
 
