@@ -386,7 +386,8 @@ export async function beanspracheSvLead(input: {
 
 // ─── Action 3: registriereSvBasicNeu ──────────────────────────────────────
 // Frische SV-Registrierung ohne Cold-Pin (kein sv_leads-Eintrag vorhanden).
-// datNr ist Pflicht — dient als Identitaetsgrundlage fuer die P3-Pruefung.
+// datNr ist OPTIONAL: Registrierung steht allen SVs offen; DAT-Partner werden im
+// Finder nur BEVORZUGT gerankt (partner-rang credDatPartner-Bonus), nicht gegated.
 
 export async function registriereSvBasicNeu(input: {
   vorname: string
@@ -395,7 +396,7 @@ export async function registriereSvBasicNeu(input: {
   telefon: string
   adresse: string
   plz?: string
-  datNr: string
+  datNr?: string
 }): Promise<{ ok: true; svId: string; emailSent: boolean } | { ok: false; error: string }> {
   // 1. Validierung
   const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -413,9 +414,6 @@ export async function registriereSvBasicNeu(input: {
   }
   if (!input.adresse?.trim()) {
     return { ok: false, error: 'Adresse ist ein Pflichtfeld.' }
-  }
-  if (!input.datNr?.trim()) {
-    return { ok: false, error: 'DAT-Nummer ist ein Pflichtfeld (Identitätsnachweis für die Freigabe).' }
   }
 
   // 2. Rate-Limit — fail-CLOSED (Account-Erstellung ist sicherheitsrelevant)
@@ -524,7 +522,7 @@ export async function registriereSvBasicNeu(input: {
     lat: geoLat,
     lng: geoLng,
     dat_id: null,
-    dat_expert_nr: input.datNr.trim(),
+    dat_expert_nr: input.datNr?.trim() || null,
     bvsk_nr: null,
     ihk_zertifikat: null,
     oebuv_nr: null,
@@ -610,7 +608,7 @@ export async function registriereSvBasicNeu(input: {
     const { createLinkedTask } = await import('@/lib/tasks/create-task')
     await createLinkedTask({
       titel: 'Neue Basic-Registrierung wartet auf Freigabe',
-      beschreibung: `Frische SV-Selbstregistrierung von ${input.email} (DAT-Nr: ${input.datNr.trim()}). Bitte Identität prüfen und Konto freigeben.`,
+      beschreibung: `Frische SV-Selbstregistrierung von ${input.email} (DAT-Nr: ${input.datNr?.trim() || 'keine angegeben'}). Bitte Identität prüfen und Konto freigeben.`,
       prioritaet: 'normal',
       typ: 'sv_basic_claim_review',
       entity_type: 'gutachter',
@@ -659,7 +657,7 @@ export async function registriereSvBasicNeu(input: {
         telefon: input.telefon.trim(),
         plz: input.plz ?? null,
         rollen_details: {
-          dat_expert_nr: input.datNr.trim(),
+          dat_expert_nr: input.datNr?.trim() || null,
           adresse: input.adresse.trim(),
           quelle: 'self_service_neu',
         },
