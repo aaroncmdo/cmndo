@@ -3,9 +3,13 @@ name: Money-Integrity-Check
 # Faehrt den Money-Integrity-Monitor (Session 6f60c510) taeglich gegen Prod: USt-Tripel-Konsistenz +
 # §14-Beleg-Reconciliation + Ledger-Cache-Drift. Der Endpoint liefert immer HTTP 200 + JSON; dieser
 # Workflow macht die Monitor-Semantik: Findings ODER Endpoint-Fehler => Workflow-Failure => die
-# GitHub-Actions-Failure-Notification ist der Alerting-Kanal (loest das Log-only-Follow-up des Crons).
+# GitHub-Actions-Failure-Notification ist der Alerting-Kanal.
 #
-# Nutzt dieselben Secrets wie backup.yml (CRON_SECRET + PRODUCTION_URL) — kein neues Setup noetig.
+# Prod-URL ist hart auf https://app.claimondo.de gesetzt (stabile, oeffentliche Brand-Domain, verifiziert
+# live). Das frueher genutzte Secret PRODUCTION_URL zeigt auf eine tote Vercel-Deployment-URL
+# ("The deployment could not be found on Vercel", HTTP 404) — der echte Prod-App laeuft auf der Domain,
+# nicht auf jener ephemeren Vercel-URL. (Betrifft auch backup.yml — separat zu fixen.) Nur CRON_SECRET
+# bleibt ein Secret; die Domain ist oeffentlich und darf im Klartext stehen.
 # Scheduled-Runs greifen erst nach Merge auf den Default-Branch (main).
 
 on:
@@ -21,7 +25,7 @@ jobs:
         run: |
           RESPONSE=$(curl -s -w "\n%{http_code}" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.PRODUCTION_URL }}/api/cron/money-integrity-check")
+            "https://app.claimondo.de/api/cron/money-integrity-check")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
