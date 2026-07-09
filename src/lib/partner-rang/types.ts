@@ -11,6 +11,10 @@ export interface PartnerSignals {
   oeffentlichBestellt: boolean
   /** Anzahl vorhandener Zertifikatsnummern (BVSK/DAT/IHK/OEBUV). */
   zertifikate: number
+  /** DAT-Partner (dat_nummer gesetzt). Dediziertes starkes Praeferenz-Gewicht (credDatPartner)
+   *  ZUSAETZLICH zum generischen Zertifikat-Zaehler — DAT-SVs werden im Finder innerhalb ihrer
+   *  Paket-Stufe bevorzugt. Optional (undefined = false) = abwaertskompatibel. */
+  hatDat?: boolean
   /** Tenure in Jahren (partner_seit). */
   partnerSeitJahre: number
   // --- Rating (gedeckelt) ---
