@@ -428,7 +428,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
             <div>
               <label className="text-xs text-claimondo-ondo mb-2 block uppercase tracking-wide">Paket</label>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {(['standard', 'pro', 'premium', 'individuell'] as const).map(p => {
+                {(['standard', 'pro', 'premium', 'basic', 'individuell'] as const).map(p => {
                   const cfg = p === 'individuell' ? null : PAKET_KONFIG[p]
                   return (
                     <button
