@@ -44,12 +44,18 @@
   - `rolle`: `sv`→sv, `makler`→makler, `werkstatt`→werkstatt, `partner-lead`→(neues `rolle`-View-Feld).
   - `kind` bleibt intern; `typ`/`rolle` sind die UI-Achsen. `sv-lead`-kind entfällt.
 
-### 4.2 Roster (eine Ansicht) — my lane (console)
-- Filter: **Typ** (Alle/Partner/Lead) + **Rolle** (Alle/SV/Makler/Werkstatt) statt der 5 kind-Segmente. Suche + Stufe-Filter bleiben. Firmen-Collapse (#4016) bleibt.
-- Spalten: Name · Rolle · Stufe · Ort · Kontakt · (Betreuer).
+### 4.2 Verwaltungs-Ansicht: Leads/Partner-**Switch** — my lane (console) [Aaron 09.07.]
+- **Primärer Switch (segmented): `[ Leads | Partner ]`** — die Typ-Achse als **Modus**, nicht als flacher Filter. Zwei Modi mit je eigenen Filtern/Spalten/Aktionen (Leads = Akquise, Partner = Bestandspflege — unterschiedliche Arbeit).
+- **Rolle-Filter (geteilt, chips):** `Alle · SV · Makler · Werkstatt`.
+- **Modus-spezifisch:**
+  - **Leads:** Einstufung (heiß/warm/kalt) · Stufe (neu/kontaktiert) · Betreuer · Suche · Aktionen **[Scrapen (Rolle vorbelegt)] [CSV] [Zuweisen] [Konvertieren]**.
+  - **Partner:** Status (aktiv/onboarding/pausiert/gesperrt) · (SV: Verifizierung) · Suche.
+- **Ansicht-Toggle `[ Liste | Karte ]`** — beide spiegeln Switch + Filter.
+- Firmen-Collapse (#4016) bleibt (Leads). Zeilen-Klick → **rollen-spezifisches Detail**.
+- **Absorbiert die Phase-A-Sub-Nav:** „Partner-Leads"-Tab → Leads-Modus; SV/Makler/Werkstatt-Tabs → Rolle-Filter im Partner-Modus.
 
 ### 4.3 Karte — my lane (console)
-- `VertriebKarteClient`: Farbe nach **Rolle**, Form/Deckkraft nach **Typ** (Partner vs Lead). Filter Typ×Rolle. Alle Standorte sichtbar (View liefert `partner_leads` mit Koordinaten).
+- `VertriebKarteClient` **folgt dem Switch**: zeigt die Pins des aktiven Modus (Leads ODER Partner), **Farbe nach Rolle**. Kein Dual-Encoding nötig — der Switch trennt Typ schon (s. §9). Rolle-Filter + Suche wirken auch auf die Karte. Alle Standorte sichtbar (`partner_leads` geocoded).
 
 ### 4.4 Funktionen unter's Dach (SURFACE/MOUNT, nicht neu bauen)
 - **Scraping role-aware:** `partner_leads`-Scrape-Modal (Rolle+Region, Google Places) — im gemounteten CRM ✓; zusätzlich aus der Lead-Ansicht triggerbar mit **Rolle aus dem aktiven Filter vorbelegt** (SV→„Kfz-Sachverständige", Makler→„Versicherungsmakler", Werkstatt→„Kfz-Werkstatt").
@@ -92,8 +98,7 @@
 - #4003 (offen): notizen + Lead-Dedup-View (`konvertiert`/aktiv-als-SV-Exclusion).
 - #4016 (offen): Ein-Dach-Konsole (Layout+Sub-Nav+Karte+4 Mounts) + Firmen-Collapse.
 
-## 9. Offene Fragen (nächste Iteration)
+## 9. Entscheidungen (Aaron 09.07.) + Rest-Offen
 
-- Karte: Partner vs Lead visuell — Form (Kreis/Raute) vs Deckkraft vs zwei Layer? (P2-Preview).
-- `/leads`-Altroute: 308-Redirect auf `/admin/vertrieb` (Lead-Ansicht mit Rolle=SV vorbelegt) vs stilles Entfernen.
-- Makler-Scraping-Query: „Versicherungsmakler" default — mit Aaron/e8aa73d4 finalisieren.
+- **✅ Verwaltung = Leads/Partner-Switch** (segmented, je eigene Filter — §4.2). Das **löst die Karten-Typ-Frage:** die Karte folgt dem Switch (ein Typ je Modus, Farbe=Rolle) — kein Form/Deckkraft-Dual-Encoding nötig.
+- **Offen (klein, im Bau entscheidbar):** `/leads`-Altroute (308-Redirect vs. still entfernen); Makler-Scraping-Default („Versicherungsmakler") mit e8aa73d4.
