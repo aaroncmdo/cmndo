@@ -39,6 +39,7 @@ import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
 import { saveBankdaten, updateZahlungsweg } from './actions'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
+import GutachtenPdfButton from '@/components/kunde/GutachtenPdfButton'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
 import KundeBetreuerStrip from '@/components/kunde/KundeBetreuerStrip'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
@@ -1083,7 +1084,11 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
                 {t('gutachtenWeiterleitung.text')}
               </p>
             </div>
-            <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
+            <div className="flex flex-wrap items-center gap-2">
+              {/* AV7: direkter Gutachten-PDF-Download fuer den Kunden (neben der Email-Weiterleitung). */}
+              {fall.claim_id && <GutachtenPdfButton claimId={fall.claim_id as string} />}
+              <GutachtenWeiterleitungButton fallId={fall.id as string} defaultEmail={user.email ?? null} />
+            </div>
           </div>
         )}
 
