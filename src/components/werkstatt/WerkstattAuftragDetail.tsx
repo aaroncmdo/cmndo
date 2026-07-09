@@ -14,6 +14,7 @@ import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstat
 import {
   werkstattAuftragSegment,
   abrechnungswegLabel,
+  istAuffahrunfall,
   quelleLabel,
   zeigtGutachten,
   kvaStatus,
@@ -283,6 +284,11 @@ function GutachtenSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
             Reparaturkosten netto: {EUR2.format(auftrag.gutachten_reparaturkosten_netto)}
           </p>
         )}
+        {auftrag.reparaturdauer_tage != null && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Voraussichtliche Reparaturdauer: {auftrag.reparaturdauer_tage} Tage
+          </p>
+        )}
 
         <div className="pt-1">
           <Button variant="ghost" size="sm" loading={pdfLaden} onClick={handlePdf}>
@@ -373,6 +379,11 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
           )}
         </div>
         <p className="text-body-sm text-claimondo-ondo">{hinweis}</p>
+        {auftrag.reparaturdauer_tage_kva != null && (
+          <p className="text-body-xs text-claimondo-ondo">
+            Geschätzte Reparaturdauer: {auftrag.reparaturdauer_tage_kva} Tage
+          </p>
+        )}
 
         {status === 'benoetigt' && (
           <div className="pt-1">
@@ -431,6 +442,16 @@ export function WerkstattAuftragDetail({ auftrag }: { auftrag: WerkstattAuftrag 
           {auftrag.kennzeichen ? ` · ${auftrag.kennzeichen}` : ''}
         </p>
       </header>
+
+      {/* AV3: Auffahrunfall-Hinweis fuer die Werkstatt (Aaron 09.07.). */}
+      {istAuffahrunfall(auftrag.unfallart) && (
+        <div className="rounded-ios-md bg-warning-soft border border-warning/30 px-4 py-3">
+          <p className="text-body-sm text-warning-strong font-medium">Auffahrunfall</p>
+          <p className="text-body-xs text-warning-strong/90">
+            Stoßfänger muss ausgebaut werden, Hebebühne benötigt.
+          </p>
+        </div>
+      )}
 
       <SectionCard title="Fall">
         <dl className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-body-sm">

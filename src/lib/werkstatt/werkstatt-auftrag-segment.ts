@@ -72,6 +72,14 @@ export function zeigtGutachten(w: string | null): boolean {
   return w === 'haftpflicht'
 }
 
+/**
+ * Auffahrunfall (bkat_unfallart='auffahrunfall')? -> Werkstatt-/SV-Hinweis (Stoßfänger ausbauen,
+ * Hebebühne benötigt). Aaron 09.07.: reiner Hinweis, keine SV-System-Position.
+ */
+export function istAuffahrunfall(unfallart: string | null): boolean {
+  return unfallart === 'auffahrunfall'
+}
+
 const QUELLE_LABEL: Record<string, string> = {
   dispatcher: 'Dispatcher',
   kunde: 'Kunde',
