@@ -31,10 +31,9 @@ import { AnspruchVorschauCard } from './_components/AnspruchVorschauCard'
 import { getAlleAuftraege } from '@/lib/auftrag/queries'
 // CMM-23: Pflichtdokumente-Liste mit Download-Links — ersetzt den
 // gelben "Noch einzuholen"-Banner als Single-Source der Pflicht-Doku-Sicht.
-import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
+import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
 // AAR-327: Katalog-Slots die der SV anfordern darf + bestehende Anforderungen
 // AAR-651: Zentrale Fall-Loader-Lib
-import { getFallForSv } from '@/lib/fall/queries'
 
 export default async function GutachterFallPage({
   params,
@@ -51,10 +50,15 @@ export default async function GutachterFallPage({
 
   if (!sv) notFound()
 
-  // Fetch case and verify sv_id match
-  // AAR-651: Zentrale Lib — sv_id-Filter als Defense-in-Depth über RLS hinaus
-  const fall = await getFallForSv(supabase, id, (sv as { id: string }).id)
-  if (!fall) notFound()
+  // Phase C: EIN rollen-aware getClaimDetail (Facade) statt getFallForSv +
+  // getPflichtdokumenteForFall separat. sv-core === getFallForSv-Output (behavior-
+  // preserving); getFallForSv bleibt das sv_id-Defense-in-Depth-Gate (null → notFound).
+  // auftraege bleibt bewusst der eigene getAlleAuftraege(supabase)-Read (SV-User-Client,
+  // RLS) — die Facade laedt auftraege via Admin; fuer Multi-SV-Claims koennte sich die
+  // sichtbare Menge unterscheiden → nicht umstellen (behavior-safe).
+  const detail = await getClaimDetail(supabase, id, 'sv', { svId: (sv as { id: string }).id })
+  if (!detail) notFound()
+  const fall = detail.core
 
   // CMM-25: Auftragslebenszyklus beim SV beginnt erst mit der Sicherungs-
   // abtretungs-Unterschrift. Vorher ist der vom Dispatcher reservierte Slot
@@ -483,9 +487,9 @@ export default async function GutachterFallPage({
     fallStatus: (fall.status as string | null) ?? null,
   })
 
-  // CMM-23: Pflichtdokumente-Liste laden — 1:1 das was der Kunde im
-  // Onboarding sieht, mit Download-Links für hochgeladene Files.
-  const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'sv')
+  // Phase C: Pflichtdokumente aus dem getClaimDetail-Bundle (oben) — identische
+  // Filter-Logik + gleicher User-Client (getPflichtdokumenteForFall(supabase,…,'sv')).
+  const pflichtSlots = detail.pflichtDokumente
 
   // SV-Vorname für Unterwegs-Banner — kommt aus profiles, nicht aus sachverstaendige
   const { data: svProfile } = await supabase
