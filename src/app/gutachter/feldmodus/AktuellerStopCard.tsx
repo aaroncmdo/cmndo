@@ -74,6 +74,10 @@ export default function AktuellerStopCard({
 }: AktuellerStopCardProps) {
   const [pending, startTransition] = useTransition()
   const distanceShort = formatDistanceShort(distanceMeters)
+  // 2026-07-08 (Aaron): sichtbarer Lücken-Hinweis, wenn ein claim-verknüpfter Termin (noch) keine
+  // Fahrzeugdaten aus dem Claim hat — der SV sieht die Lücke statt stiller leerer Felder und weiß,
+  // dass er sie vor Ort erfassen muss. Claimlose SV-Eigentermine (kein fall_id) triggern es NICHT.
+  const claimFahrzeugFehlt = !!stop.fall_id && !stop.kennzeichen && !stop.fahrzeug
   // 2026-05-08 (C1) Smart-Collapse: bei null oder > 500 m Distanz → Card kompakt
   // (Briefing/Pflichtdoku/Aktionen nehmen sonst 80 % des Viewports beim Fahren).
   // Tap expandiert. manualMode überschreibt die Auto-Heuristik in beide Richtungen.
@@ -328,10 +332,18 @@ export default function AktuellerStopCard({
           )}
         </div>
         <p className="text-sm font-semibold text-claimondo-navy">
-          {stop.kennzeichen && (
+          {stop.kennzeichen ? (
             <span className="font-mono mr-2">{stop.kennzeichen}</span>
+          ) : (
+            <span className="font-mono mr-2 text-claimondo-ondo/40">—</span>
           )}
-          {stop.fahrzeug ?? stop.kunde_name}
+          {stop.fahrzeug ?? (
+            claimFahrzeugFehlt ? (
+              <span className="font-normal italic text-claimondo-ondo/60">Fahrzeug noch nicht erfasst</span>
+            ) : (
+              stop.kunde_name
+            )
+          )}
         </p>
         <p className="text-xs text-claimondo-ondo">{stop.kunde_name}</p>
       </div>
