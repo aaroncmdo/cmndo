@@ -6,7 +6,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Drawer, Card, Button } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { KIND_LABEL, STUFE_HINT } from './_lib/labels'
+import { TYP_LABEL, ROLLE_LABEL, ROLLE_VERWALTUNG_HINT, STUFE_HINT } from './_lib/labels'
 import { detailLink } from './_lib/detail-link'
 import { updateVertriebFeld } from './_actions/update-vertrieb-feld'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
@@ -82,7 +82,9 @@ export default function VertriebDetailDrawer({
       {kontakt && (
         <div className="space-y-5">
           <div className="space-y-2">
-            <p className="text-caption text-claimondo-ondo/60">{KIND_LABEL[kontakt.kind]}</p>
+            <p className="text-caption text-claimondo-ondo/60">
+              {TYP_LABEL[kontakt.typ]} · {ROLLE_LABEL[kontakt.rolle]}
+            </p>
             <h2 className="text-heading-md text-claimondo-navy">{kontakt.name ?? '—'}</h2>
             <StatusBadge domain="vertrieb-workflow" code={kontakt.stufe} size="sm" />
           </div>
@@ -107,9 +109,14 @@ export default function VertriebDetailDrawer({
           <NotizenEditor key={kontakt.id} kontakt={kontakt} />
 
           {link && (
-            <Button variant="navy" fullWidth onClick={() => router.push(link.href)}>
-              {link.label}
-            </Button>
+            <div className="space-y-1.5">
+              <Button variant="navy" fullWidth onClick={() => router.push(link.href)}>
+                {link.label}
+              </Button>
+              <p className="text-caption text-claimondo-ondo/60 text-center">
+                {ROLLE_VERWALTUNG_HINT[kontakt.rolle]}
+              </p>
+            </div>
           )}
         </div>
       )}

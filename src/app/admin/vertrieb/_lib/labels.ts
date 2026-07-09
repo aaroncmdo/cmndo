@@ -22,6 +22,14 @@ export const TYP_LABEL: Record<VertriebTyp, string> = {
   partner: 'Partner',
 }
 
+/** P4: rollen-spezifisches Detail — was in der Voll-Akte je Rolle verwaltet wird.
+ *  Macht das Detail-Cockpit rollen-gerecht (Makler gleichrangig zu SV/Werkstatt). */
+export const ROLLE_VERWALTUNG_HINT: Record<VertriebRolle, string> = {
+  sv: 'Verifizierung (DAT/BVSK/ÖbUV), Portal-Freischaltung, Vertrag & Qualifikation.',
+  makler: 'Gesellschaft/Versicherung, Maklerpool, Provisionsmodell (komplett/nur Gutachter).',
+  werkstatt: 'QR-Codes, Fähigkeiten & Ausstattung, Vermittlungs-Konditionen.',
+}
+
 /** Was ist bei dieser Stufe der nächste Schritt? (workflow-getriebener Hinweis fürs Detail) */
 export const STUFE_HINT: Record<VertriebStufe, string> = {
   neu: 'Neuer Kontakt — Erstansprache & Qualifizierung.',
