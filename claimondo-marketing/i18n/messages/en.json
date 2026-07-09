@@ -674,7 +674,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "certified partner network"
+          "label": "Expert Partner network"
         },
         {
           "kpi": "30–40 %",
@@ -2115,11 +2115,11 @@
     }
   },
   "gutachter_finden": {
-    "sr_h1": "Find a vehicle appraiser near you — map of DAT-certified experts, no cost under §249 BGB",
+    "sr_h1": "Find a vehicle appraiser near you — map of qualified appraisers, no cost under §249 BGB",
     "kpis": [
       {
         "wert": "DAT",
-        "label": "certified partner network"
+        "label": "Expert Partner network"
       },
       {
         "wert": "< 48 h",
@@ -2268,7 +2268,7 @@
       },
       {
         "wert": "DAT",
-        "label": "certified network"
+        "label": "Expert Partner network"
       },
       {
         "wert": "Cologne",
@@ -2860,7 +2860,7 @@
     "hero_intro": "Certified partner appraisers from the official DAT directory (dat.de/sachverstaendige), available nationwide. On-site appointment within 48 hours. For non-at-fault parties: €0 out of pocket — the opposing liability insurer covers all costs under §249 BGB (subject to acknowledgement of liability).",
     "hero_cta_karte": "View on map",
     "hero_cta_schaden": "Report a claim",
-    "trust_kpi_dat_label": "certified network",
+    "trust_kpi_dat_label": "Expert Partner network",
     "trust_kpi_termin_label": "Appointment",
     "trust_kpi_eigenanteil_label": "Out-of-pocket cost¹",
     "trust_kpi_recht_label": "Legal basis",
@@ -3670,7 +3670,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Entitlement basis",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "certified network"
+    "trust_stat_3_label": "Expert Partner network"
   },
   "unfallskizze": {
     "breadcrumb_start": "Home",

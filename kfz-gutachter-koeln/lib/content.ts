@@ -39,7 +39,7 @@ export interface Review {
 }
 
 export const REVIEWS: Review[] = [
-  { name: 'Vincent Heinen', initials: 'VH', avatarBg: '#4573A2', meta: '', hasText: true, text: '„Claimondo war von vorne bis hinten einfach nur super. Besonders gut hat mir das Kundenportal gefallen und die schnelle Auszahlung. Die DAT-Expert Gutachter haben kompetent und zuverlässig gearbeitet. Ich musste mich um nichts kümmern und würde Claimondo jederzeit weiterempfehlen!“' },
+  { name: 'Vincent Heinen', initials: 'VH', avatarBg: '#4573A2', meta: '', hasText: true, text: '„Claimondo war von vorne bis hinten einfach nur super. Besonders gut hat mir das Kundenportal gefallen und die schnelle Auszahlung. Die Gutachter haben kompetent und zuverlässig gearbeitet. Ich musste mich um nichts kümmern und würde Claimondo jederzeit weiterempfehlen!“' },
   { name: 'V. R.', initials: 'VR', avatarBg: '#0D1B3E', meta: '', hasText: true, localGuide: true, text: '„Ich bin sehr positiv überrascht gewesen, wie unkompliziert und schnell der Service durch Claimondo erfolgte. Als ich Opfer eines Parkremplers wurde, wusste ich erstmal auch nicht, was ich machen sollte … Claimondo … organisierten mir schnell einen Gutachtertermin und unterstützten mich in der Abwicklung von A bis Z!“' },
   { name: 'Jan', initials: 'J', avatarBg: '#1E3A5F', meta: '', hasText: true, text: '„Schaden wurde gut betreut und vor allem wurde sich um Mietwagen und Kommunikation mit den Rechtsanwälten gekümmert. Kann ich nur empfehlen.“' },
   { name: 'Busra Sevim', initials: 'BS', avatarBg: '#374151', meta: '', hasText: true, text: '„Der Service ist super! Der Gutachter hat super Arbeit geleistet und die Kanzlei hat schnell reguliert. Ich bin sehr zufrieden und kann es nur weiter empfehlen.“' },
@@ -271,7 +271,7 @@ export interface AblaufTimelineStep {
 
 export const ABLAUF_TIMELINE: AblaufTimelineStep[] = [
   { step: 1, day: 'TAG 0', dayMod: 'start', title: 'Anrufen', sub: 'Per Telefon oder WhatsApp — Rückruf **innerhalb 60 Min**.', subStrong: 'font-bold' },
-  { step: 2, day: 'TAG 1–3', title: 'Termin vor Ort', sub: 'DAT-Sachverständiger dokumentiert gerichtsfest bei Ihnen.', subStrong: 'text-petrol' },
+  { step: 2, day: 'TAG 1–3', title: 'Termin vor Ort', sub: 'Ihr Sachverständiger im Netzwerk dokumentiert gerichtsfest bei Ihnen.', subStrong: 'text-petrol' },
   { step: 3, day: 'TAG 3–7', title: 'Gutachten + Anwalt', pill: '0 €', sub: '**LexDrive** kämpft für Sie. Kosten trägt die Gegenseite.', subStrong: 'text-petrol' },
   { step: 4, day: 'TAG 7+', title: 'Mietwagen oder Geld', sub: 'Ersatzwagen organisiert — oder Nutzungsausfall aufs Konto. **Ihre Wahl.**', subStrong: 'text-petrol', tooltip: 'Nutzungsausfall je nach Fahrzeugklasse, typisch ca. **23–175 €/Tag** (Sanden/Danner-Tabelle). Mietwagen klassengleich zum Normaltarif.' },
   { step: 5, day: '~TAG 32', dayMod: 'end', title: 'Geld auf dem Konto', titleEnd: true, sub: 'Reparatur, Wertminderung & Nutzungsausfall — direkt von der Versicherung.', subStrong: 'text-petrol', dotEnd: true, itemEnd: true },
