@@ -55,14 +55,39 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
       }
     }
 
+    // SV-Facade (Core = getFallForSv, flaches Record). Sample einen Claim mit sv_id,
+    // svId aus sachverstaendige. Nur wenn ein SV-zugewiesener Claim existiert.
+    const { data: svClaim } = await admin
+      .from('claims')
+      .select('id, sv_id')
+      .not('sv_id', 'is', null)
+      .limit(1)
+      .maybeSingle()
+    let svCoreLoaded = false
+    if (svClaim?.sv_id) {
+      const asSv = await getClaimDetail(admin, svClaim.id as string, 'sv', { svId: svClaim.sv_id as string })
+      if (asSv) {
+        svCoreLoaded = true
+        expect(asSv.rolle).toBe('sv')
+        expect(Array.isArray(asSv.auftraege), 'sv bekommt eigene auftraege').toBe(true)
+        expect(Array.isArray(asSv.pflichtDokumente)).toBe(true)
+      }
+      // Falscher svId → null (Defense-in-Depth-Gate von getFallForSv).
+      const svWrong = await getClaimDetail(admin, svClaim.id as string, 'sv', {
+        svId: '00000000-0000-0000-0000-000000000000',
+      })
+      expect(svWrong, 'sv mit fremder svId -> null').toBeNull()
+    }
+
     // null-Kontrakt: staff-Gate mit nicht-existenter ID → null.
     const missing = await getClaimDetail(admin, '00000000-0000-0000-0000-000000000000', 'admin')
     expect(missing, 'nicht-existente ID -> null').toBeNull()
-    // (kunde-ohne-viewer ist jetzt ein COMPILE-Fehler dank Overload — kein Runtime-Test.)
+    // (kunde/sv-ohne-ctx ist jetzt ein COMPILE-Fehler dank Overload — kein Runtime-Test.)
 
     process.stdout.write(
       `\n[claim-detail] claimId=${claimId} adminCore=ClaimFull auftraege=${asAdmin!.auftraege.length} ` +
-        `mainPhase=${asAdmin!.lifecycle.mainPhase} ownerId=${ownerId ? 'yes' : 'none'} kundeCoreLoaded=${kundeCoreLoaded}\n`,
+        `mainPhase=${asAdmin!.lifecycle.mainPhase} ownerId=${ownerId ? 'yes' : 'none'} ` +
+        `kundeCoreLoaded=${kundeCoreLoaded} svCoreLoaded=${svCoreLoaded}\n`,
     )
   }, 90_000)
 })

@@ -1,7 +1,8 @@
 // src/lib/claims/detail/get-claim-detail.ts
 // Phase C: rollen-aware Facade ueber die v_claim_full-geerdeten Claim-Loader.
 // (Aaron 08.07.: „das ist ja auch eine detail view aus der claim base bzw claim view".)
-//   - kunde -> getKundeFallDetailRecord (Ownership via viewer{userId,email})
+//   - kunde -> getKundeFallDetailRecord (Ownership via ctx{userId,email})
+//   - sv    -> getFallForSv (sv_id-Defense-in-Depth via ctx{svId})
 //   - staff -> getClaimForRole (v_claim_full; admin/kb='*' vollstaendig; RLS-Gate)
 // + Sub-Entity-Bundle (lifecycle/auftraege/kanzleiFall/pflicht), rollen-gescoped.
 // 0 neue DB-Reads (reine Komposition existierender, live Loader). Liefert
@@ -13,6 +14,7 @@ import type { Database } from '@/lib/supabase/database.types'
 import type { Rolle } from '@/lib/claims/types'
 import { getClaimForRole } from '@/lib/claims/get-claim-for-role'
 import { getKundeFallDetailRecord } from '@/lib/claims/get-kunde-faelle'
+import { getFallForSv } from '@/lib/fall/queries'
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -20,37 +22,55 @@ import type { ClaimDetail } from './types'
 
 type DbClient = SupabaseClient<Database>
 
-// Overloads: kunde ERZWINGT viewer (Ownership-Kontext) und verengt den Rueckgabe-Typ
-// aufs jeweilige Union-Member (Consumer brauchen kein manuelles rolle-Narrowing).
+// Overloads: kunde/sv ERZWINGEN ihren Rollen-Kontext (ctx) und verengen den
+// Rueckgabe-Typ aufs jeweilige Union-Member (Consumer brauchen kein Narrowing).
 export function getClaimDetail(
   supabase: DbClient,
   claimId: string,
   rolle: 'kunde',
-  viewer: { userId: string; email: string | null },
+  ctx: { userId: string; email: string | null },
 ): Promise<Extract<ClaimDetail, { rolle: 'kunde' }> | null>
 export function getClaimDetail(
   supabase: DbClient,
   claimId: string,
-  rolle: Exclude<Rolle, 'kunde'>,
-): Promise<Extract<ClaimDetail, { rolle: Exclude<Rolle, 'kunde'> }> | null>
+  rolle: 'sv',
+  ctx: { svId: string },
+): Promise<Extract<ClaimDetail, { rolle: 'sv' }> | null>
+export function getClaimDetail(
+  supabase: DbClient,
+  claimId: string,
+  rolle: Exclude<Rolle, 'kunde' | 'sv'>,
+): Promise<Extract<ClaimDetail, { rolle: Exclude<Rolle, 'kunde' | 'sv'> }> | null>
 export async function getClaimDetail(
   supabase: DbClient,
   claimId: string,
   rolle: Rolle,
-  viewer?: { userId: string; email: string | null },
+  ctx?: { userId?: string; email?: string | null; svId?: string },
 ): Promise<ClaimDetail | null> {
   // Post-Gate-Loads (Lifecycle/Dokumente) laufen via Admin — getClaimLifecycle
   // braucht ALLE Sub-Entities fuer die A1-kanonische Phase; der jeweilige Core-
-  // Loader unten prueft den Zugriff (RLS bzw. Ownership) und ist das Gate.
+  // Loader unten prueft den Zugriff (RLS bzw. Ownership/sv_id) und ist das Gate.
   const admin = createAdminClient()
+
+  if (rolle === 'sv') {
+    // SV: getFallForSv (granted View + sv_id-Defense-in-Depth) ist das Gate —
+    // null wenn der Fall nicht dem SV gehoert. Braucht ctx.svId (die Page hat die
+    // SV-Profile-id via getGutachterForUser aufgeloest).
+    if (!ctx?.svId) return null
+    const core = await getFallForSv(supabase, claimId, ctx.svId)
+    if (!core) return null
+    const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
+    const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, 'sv')
+    return { rolle: 'sv', core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
+  }
 
   if (rolle === 'kunde') {
     // Kunde: ownership-aufloesender Detail-Loader (liest v_claim_full-Anker +
     // claims-SSoT-Extras + Sub-Entities → flaches Legacy-Alias-Record, das die
-    // Kunde-Sub-Components 1:1 konsumieren). Braucht viewer — die Kunde-Page hat
+    // Kunde-Sub-Components 1:1 konsumieren). Braucht ctx — die Kunde-Page hat
     // den User-Kontext (claim_parties/kunde_id/lead.email-Ownership).
-    if (!viewer) return null
-    const core = await getKundeFallDetailRecord(admin, viewer.userId, viewer.email, claimId)
+    if (!ctx?.userId) return null
+    const core = await getKundeFallDetailRecord(admin, ctx.userId, ctx.email ?? null, claimId)
     if (!core) return null
     const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
     const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, 'kunde')

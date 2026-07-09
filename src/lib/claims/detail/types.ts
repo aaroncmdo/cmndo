@@ -7,6 +7,7 @@
 // ist daher eine rollen-aware FACADE ueber die v_claim_full-geerdeten Loader:
 //   - kunde -> getKundeFallDetailRecord (flaches, ownership-aufgeloestes Legacy-
 //              Alias-Record; liest v_claim_full + claims-SSoT-Extras)
+//   - sv    -> getFallForSv (flaches Record, sv_id-Defense-in-Depth ueber RLS)
 //   - staff -> getClaimForRole (v_claim_full; admin/kb = '*' = vollstaendig)
 // + Sub-Entity-Bundle (lifecycle/auftraege/kanzleiFall/pflicht), rollen-gescoped.
 //
@@ -22,6 +23,10 @@ import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSecti
  *  Loader liefert (noch) untyped; volle Typisierung ist ein Folge-Schritt. */
 export type ClaimDetailCoreKunde = Record<string, unknown>
 
+/** SV-Core = flaches Record aus getFallForSv (v_faelle_mit_aktuellem_termin,
+ *  granted View + sv_id-Defense-in-Depth). Wie Kunde: untyped waehrend der Transition. */
+export type ClaimDetailCoreSv = Record<string, unknown>
+
 /** Sub-Entity-Bundle — rollen-unabhaengige Struktur (Werte rollen-gescoped im Loader). */
 type ClaimDetailBundle = {
   lifecycle: ClaimLifecycle
@@ -30,7 +35,10 @@ type ClaimDetailBundle = {
   pflichtDokumente: PflichtSlotForView[]
 }
 
-/** Rollen-diskriminierte Union: kunde-Core = flaches Record, staff/sv-Core = ClaimFull. */
+/** Rollen-diskriminierte Union — jede Rolle hat ihre eigene Detail-Core-Shape
+ *  (alle v_claim_full-geerdet, aber rollen-spezifisch projiziert):
+ *  kunde/sv = flaches Legacy-Alias-Record, staff (kb/admin/kanzlei) = ClaimFull. */
 export type ClaimDetail =
   | ({ rolle: 'kunde'; core: ClaimDetailCoreKunde } & ClaimDetailBundle)
-  | ({ rolle: Exclude<Rolle, 'kunde'>; core: ClaimFull } & ClaimDetailBundle)
+  | ({ rolle: 'sv'; core: ClaimDetailCoreSv } & ClaimDetailBundle)
+  | ({ rolle: Exclude<Rolle, 'kunde' | 'sv'>; core: ClaimFull } & ClaimDetailBundle)
