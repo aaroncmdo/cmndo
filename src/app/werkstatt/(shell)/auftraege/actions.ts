@@ -21,6 +21,7 @@ import { getWerkstattAuftrag } from '@/lib/werkstatt/queries'
 import { extrahiereKvaAusBase64 } from '@/lib/ai/kostenvoranschlag-ocr'
 import { notifyKundeReparaturtermin } from '@/lib/werkstatt/notify-kunde-reparaturtermin'
 import { getStorageUrl, STORAGE_TTL } from '@/lib/storage/url'
+import { resolveWunschterminIso } from '@/app/flow/[token]/wunschtermin'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // bestaetigeReparaturtermin
@@ -268,7 +269,17 @@ export async function extrahiereKvaFuerAuftragOcr(
  */
 export async function erstelleKvaFuerAuftrag(
   claimId: string,
-  input: { netto: number | null; brutto: number | null; pdfBase64?: string | null; pdfMediaType?: string | null },
+  input: {
+    netto: number | null
+    brutto: number | null
+    pdfBase64?: string | null
+    pdfMediaType?: string | null
+    // AV5: die Werkstatt schlaegt beim KVA-Upload einen Reparaturtermin (Berlin-Wandzeit) +
+    // die geschaetzte Reparaturdauer (Tage) mit vor. Beide optional (Modal macht den Termin
+    // zur Pflicht; die Action bleibt tolerant).
+    reparaturWunschterminLokal?: string | null
+    reparaturdauerTage?: number | null
+  },
 ): Promise<{ ok: true } | { ok: false; error: string }> {
   await requirePortalAccess(['werkstatt'])
   if (!claimId) return { ok: false, error: 'Kein Auftrag.' }
@@ -287,6 +298,8 @@ export async function erstelleKvaFuerAuftrag(
     .update({
       kostenvoranschlag_netto: input.netto,
       kostenvoranschlag_brutto: input.brutto,
+      // AV5: geschaetzte Reparaturdauer (Tage) aus dem KVA-Upload.
+      ...(input.reparaturdauerTage != null ? { reparaturdauer_tage_kva: input.reparaturdauerTage } : {}),
     } as never)
     .eq('id', claimId)
   if (error) return { ok: false, error: error.message }
@@ -333,6 +346,36 @@ export async function erstelleKvaFuerAuftrag(
     if (docErr) throw docErr
   } catch (e) {
     console.error('[werkstatt-auftrag-kva] KVA-Doc-Upload/-Zeile fehlgeschlagen (nicht kritisch):', e)
+  }
+
+  // AV5: die Werkstatt schlaegt beim KVA-Upload einen Reparaturtermin vor (non-fatal). Nur wenn
+  // ein Termin angegeben wurde UND noch kein aktiver reparatur_termine existiert (kein Doppel).
+  // Der Kunde bestaetigt ihn spaeter (bzw. gibt den Reparaturauftrag frei, AV6).
+  if (input.reparaturWunschterminLokal) {
+    try {
+      const utc = resolveWunschterminIso(input.reparaturWunschterminLokal)
+      const werkstattId = auftrag.reparatur_werkstatt_id
+      if (utc && werkstattId) {
+        const { data: aktiv } = await admin
+          .from('reparatur_termine')
+          .select('id')
+          .eq('claim_id', claimId)
+          .in('status', ['angefragt', 'anruf_erbeten', 'bestaetigt'])
+          .limit(1)
+        if (!aktiv || aktiv.length === 0) {
+          const actorId = (await (await createClient()).auth.getUser()).data.user?.id ?? null
+          await admin.from('reparatur_termine').insert({
+            claim_id: claimId,
+            werkstatt_id: werkstattId,
+            wunschtermin: utc,
+            status: 'angefragt',
+            erstellt_von: actorId,
+          } as never)
+        }
+      }
+    } catch (e) {
+      console.error('[werkstatt-auftrag-kva] Reparaturtermin-Vorschlag (nicht kritisch):', e)
+    }
   }
 
   revalidatePath(`/werkstatt/auftraege/${claimId}`)

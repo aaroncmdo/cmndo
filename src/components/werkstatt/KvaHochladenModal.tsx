@@ -41,6 +41,10 @@ export function KvaHochladenModal({
 
   const [netto, setNetto] = useState('')
   const [brutto, setBrutto] = useState('')
+  // AV5: die Werkstatt schlaegt beim KVA-Upload einen Reparaturtermin (Pflicht) + die
+  // geschaetzte Reparaturdauer in Tagen (optional) mit vor.
+  const [reparaturtermin, setReparaturtermin] = useState('')
+  const [reparaturdauer, setReparaturdauer] = useState('')
   const [pdfBase64, setPdfBase64] = useState<string | null>(null)
   const [pdfMediaType, setPdfMediaType] = useState<string | null>(null)
   const [dateiName, setDateiName] = useState<string | null>(null)
@@ -54,6 +58,8 @@ export function KvaHochladenModal({
   function reset() {
     setNetto('')
     setBrutto('')
+    setReparaturtermin('')
+    setReparaturdauer('')
     setPdfBase64(null)
     setPdfMediaType(null)
     setDateiName(null)
@@ -119,12 +125,19 @@ export function KvaHochladenModal({
     const nettoNum = parseNumOpt(netto)
     const bruttoNum = parseNumOpt(brutto)
 
+    if (!reparaturtermin) {
+      setFehler('Bitte schlagen Sie einen Reparaturtermin vor.')
+      return
+    }
+
     setSpeichern(true)
     const res = await erstelleKvaFuerAuftrag(claimId, {
       netto: nettoNum,
       brutto: bruttoNum,
       pdfBase64,
       pdfMediaType,
+      reparaturWunschterminLokal: reparaturtermin,
+      reparaturdauerTage: parseNumOpt(reparaturdauer),
     })
     setSpeichern(false)
 
@@ -226,6 +239,42 @@ export function KvaHochladenModal({
               Falls die automatische Erkennung daneben liegt, können Sie die Beträge korrigieren.
             </p>
           )}
+        </div>
+
+        {/* AV5: Reparaturtermin-Vorschlag (Pflicht) + Reparaturdauer */}
+        <div className="space-y-2">
+          <p className="text-body-xs uppercase tracking-wider text-claimondo-ondo font-medium">
+            Reparaturtermin vorschlagen
+          </p>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="space-y-1">
+              <label htmlFor="auftrag-kva-termin" className="text-body-xs font-medium text-claimondo-navy">
+                Wunschtermin
+              </label>
+              <input
+                id="auftrag-kva-termin"
+                type="datetime-local"
+                value={reparaturtermin}
+                onChange={(e) => setReparaturtermin(e.target.value)}
+                disabled={speichern}
+                className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2 text-body-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/30 disabled:opacity-50"
+              />
+            </div>
+            <div className="space-y-1">
+              <label htmlFor="auftrag-kva-dauer" className="text-body-xs font-medium text-claimondo-navy">
+                Reparaturdauer (Tage)
+              </label>
+              <Input
+                value={reparaturdauer}
+                onChangeText={setReparaturdauer}
+                inputType="number"
+                name="auftrag-kva-dauer"
+                ariaLabel="Geschätzte Reparaturdauer in Tagen"
+                placeholder="—"
+                disabled={speichern}
+              />
+            </div>
+          </div>
         </div>
 
         {fehler && <p className="text-body-xs text-danger-strong">{fehler}</p>}
