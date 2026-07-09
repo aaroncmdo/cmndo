@@ -11,6 +11,7 @@ const PAKET_KM: Record<string, number> = {
   standard: 15, 'starter-10': 15,
   pro: 40, 'standard-25': 40,
   premium: 70, 'premium-50': 70,
+  basic: 25, // Pay-per-Lead: kanonischer Basic-Radius (== BASIC_DEFAULT_RADIUS_KM)
 }
 
 export async function updateSvProfile(
@@ -27,7 +28,10 @@ export async function updateSvProfile(
   const nachname = (formData.get('nachname') as string)?.trim() || null
   const telefon = (formData.get('telefon') as string)?.trim() || null
   const paket = formData.get('paket') as string
-  const maxFaelle = parseInt(formData.get('paket_faelle_gesamt') as string) || 10
+  // `|| 10` wuerde 0 (basic/pay-per-lead: 0 Inklusivfaelle) faelschlich auf 10 zwingen.
+  // Finite-Check statt truthy: leeres/ungueltiges Feld -> Default 10, explizite 0 bleibt 0.
+  const maxFaelleRaw = parseInt(formData.get('paket_faelle_gesamt') as string, 10)
+  const maxFaelle = Number.isFinite(maxFaelleRaw) ? maxFaelleRaw : 10
   // AAR SV-Audit-Konsolidierung: ist_aktiv wird NICHT hier gesetzt.
   // Das Flag steuert der Onboarding-Flow (Stripe-Webhook setzt true nach
   // Anzahlung). Admin-Sperre läuft über svSperren/svEntsperren

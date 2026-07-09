@@ -13,9 +13,22 @@ export const PAKETE = {
   premium: { name: 'Premium', key: 'premium', radius_km: 70, faelle: 50, preis: 7500, anzahlung: 7500 },
 } as const
 
+// Pay-per-Lead-Tier: KEIN Vorab-Paket (0 Inklusivfaelle, keine Anzahlung), pro Fall
+// abgerechnet — der Datensatz, den self-service-claim (sv-basic/claim-eligibility.ts:
+// buildSvInsertAusLead) anlegt. BEWUSST NICHT Teil von PAKETE: dort leben nur die drei
+// KAUFBAREN Pakete, ueber die Kauf-/Upgrade-UIs (gebiet, PAKET_KONFIG) iterieren — basic
+// darf da nicht als "buy-up-front"-Option auftauchen. getPaket('basic') liefert stattdessen
+// diesen Deskriptor, damit preis-/kontingent-/label-Konsumenten (finance-hub, gutachter/
+// vertrag, gutachter/gebiet) NICHT faelschlich auf Standard (1500 EUR / 10 Faelle) zurueckfallen.
+// Shape identisch zu den PAKETE-Membern → typkompatibel als getPaket-Rueckgabe.
+export const BASIC_PAKET = {
+  name: 'Basic', key: 'basic', radius_km: 25, faelle: 0, preis: 0, anzahlung: 0,
+} as const
+
 export type PaketKey = keyof typeof PAKETE
 
 export function getPaket(key: string) {
+  if (key === 'basic') return BASIC_PAKET
   if (key === 'starter-10' || key === 'starter' || key === 'standard') return PAKETE.standard
   if (key === 'standard-25' || key === 'pro') return PAKETE.pro
   if (key === 'premium-50' || key === 'premium') return PAKETE.premium
