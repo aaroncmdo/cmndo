@@ -12,6 +12,7 @@
 
 import { useState, useEffect } from 'react'
 import { CheckIcon } from 'lucide-react'
+import { Card } from '@/components/primitives'
 import SaSignaturStep from './SaSignaturStep'
 import { createKundeAccount } from './actions'
 
@@ -94,7 +95,7 @@ export default function WerkstattIntakeSignatur({
   if (fallId) {
     return (
       <div className="min-h-screen bg-claimondo-bg flex items-center justify-center p-4">
-        <div className="bg-white rounded-ios-md shadow-claimondo-lg p-8 max-w-md w-full text-center">
+        <Card p={8} shadow="lg" className="max-w-md text-center">
           <div className="w-14 h-14 rounded-full bg-success-soft flex items-center justify-center mx-auto mb-4">
             <CheckIcon className="w-7 h-7 text-success" />
           </div>
@@ -106,7 +107,7 @@ export default function WerkstattIntakeSignatur({
                 ? 'Wir richten Ihren persönlichen Zugang ein …'
                 : 'Wir haben Ihnen einen Zugang per E-Mail geschickt. Ihr Gutachter wird zugewiesen und meldet sich zeitnah bei Ihnen.'}
           </p>
-        </div>
+        </Card>
       </div>
     )
   }
@@ -127,17 +128,17 @@ export default function WerkstattIntakeSignatur({
         </p>
 
         {/* Read-only-Zusammenfassung der Werkstatt-Eingaben */}
-        <div className="bg-white rounded-ios-md border border-claimondo-border p-5 mb-6 space-y-3">
+        <Card p={5} className="mb-6 space-y-3">
           <p className="text-xs font-semibold uppercase tracking-wide text-claimondo-ondo/70">Ihre Angaben</p>
           <SummaryRow label="Name" value={name || '–'} />
           <SummaryRow label="Fahrzeug" value={fahrzeugZeile || '–'} />
           <SummaryRow label="Unfall" value={unfallZeile || '–'} />
           {zusammenfassung.unfallhergang && <SummaryRow label="Hergang" value={zusammenfassung.unfallhergang} />}
           {gegnerZeile && <SummaryRow label="Unfallgegner" value={gegnerZeile} />}
-        </div>
+        </Card>
 
         {/* SA-Signatur (geteilte Komponente; kein SV-Consent, kein Feld-Lock) */}
-        <div className="bg-white rounded-ios-md border border-claimondo-border p-5">
+        <Card p={5}>
           <SaSignaturStep
             token={token}
             leadId={leadId}
@@ -146,7 +147,7 @@ export default function WerkstattIntakeSignatur({
             legalDocs={legalDocs}
             onSigned={setFallId}
           />
-        </div>
+        </Card>
       </div>
     </div>
   )
