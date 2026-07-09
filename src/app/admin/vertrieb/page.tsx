@@ -1,18 +1,14 @@
 // src/app/admin/vertrieb/page.tsx
-// Vertrieb-CRM P1a: der /admin/vertrieb-Roster (erster sichtbarer UI-Schritt). RSC laedt
-// den Staff-gegateten getVertriebDaten (P1a T1) und reicht Kontakte+Rollup an den Client.
+// Vertrieb-Konsole: die "Übersicht" (Roster über alle 5 Partner-Typen). RSC lädt den
+// Staff-gegateten getVertriebDaten und reicht Kontakte+Rollup an den Client. Titel + Tabs
+// liefert das Konsolen-Layout (layout.tsx) — die Seite rendert nur noch den Roster.
 import { getVertriebDaten } from './_lib/get-vertrieb-daten'
 import VertriebRosterClient from './VertriebRosterClient'
-import PageHeader from '@/components/shared/PageHeader'
 
 export default async function VertriebPage() {
   const res = await getVertriebDaten()
   return (
     <div className="px-4 sm:px-6 py-6">
-      <PageHeader title="Vertrieb" />
-      <p className="text-sm text-claimondo-ondo/70 mt-0.5 mb-4">
-        Partner &amp; Leads — alle Typen in einem Roster.
-      </p>
       {res.ok ? (
         <VertriebRosterClient kontakte={res.kontakte} rollup={res.rollup} />
       ) : (
