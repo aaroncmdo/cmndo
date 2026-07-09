@@ -3,7 +3,7 @@
 // duerfen aus 'use server' Files exportiert werden).
 import { PAKETE } from '@/lib/pakete'
 
-export type AnlegePaket = 'standard' | 'pro' | 'premium' | 'individuell'
+export type AnlegePaket = 'standard' | 'pro' | 'premium' | 'basic' | 'individuell'
 
 // AAR-947 / W1.3: aus der zentralen SSoT `PAKETE` (src/lib/pakete.ts) abgeleitet
 // statt eigener Literale — Werte unveraendert (1500/3750/7500, 10/25/50, 15/40/70).
@@ -13,6 +13,10 @@ export const PAKET_KONFIG: Record<Exclude<AnlegePaket, 'individuell'>, { konting
   standard: { kontingent: PAKETE.standard.faelle, radius_km: PAKETE.standard.radius_km, preis_anzahlung_eur: PAKETE.standard.preis, label: PAKETE.standard.name },
   pro: { kontingent: PAKETE.pro.faelle, radius_km: PAKETE.pro.radius_km, preis_anzahlung_eur: PAKETE.pro.preis, label: PAKETE.pro.name },
   premium: { kontingent: PAKETE.premium.faelle, radius_km: PAKETE.premium.radius_km, preis_anzahlung_eur: PAKETE.premium.preis, label: PAKETE.premium.name },
+  // Pay-per-Lead: kein Vorab-Kontingent, keine Anzahlung — pro Fall abgerechnet. Der admin-
+  // angelegte basic-SV wird (wie ein self-registrierter) inaktiv angelegt und durchlaeuft das
+  // basic-Onboarding (Vertrag) + Admin-Freigabe; KEIN Stripe. radius_km = BASIC_DEFAULT_RADIUS_KM.
+  basic: { kontingent: 0, radius_km: 25, preis_anzahlung_eur: 0, label: 'Basic (Pay-per-Lead)' },
 }
 
 export function paketAnzahlung(paket: AnlegePaket, override?: number): number {
