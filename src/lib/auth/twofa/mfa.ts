@@ -226,7 +226,9 @@ export async function entferneAndereFaktoren(behalteFactorId: string): Promise<M
  * die Anzeige in den Einstellungen (TwoFaPhoneChange) korrekt bleibt. Quelle der
  * Wahrheit fuer 2FA ist auth.mfa_factors — das hier ist reine Anzeige-Kohaerenz.
  */
-export async function merkeTwofaTelefon(phone: string): Promise<MfaResult> {
+export async function merkeTwofaTelefon(
+  phone: string,
+): Promise<MfaResult<{ phoneLoginAktiviert: boolean }>> {
   const supabase = await createClient()
   const {
     data: { user },
@@ -250,6 +252,9 @@ export async function merkeTwofaTelefon(phone: string): Promise<MfaResult> {
   // uniqueness-safe: auth.users.phone ist UNIQUE -> bei Kollision (Nummer schon
   // auf einem anderen Konto) still ueberspringen; 2FA + Anzeige bleiben intakt
   // (nur der Login-per-Nummer ist fuer dieses Konto dann nicht aktivierbar).
+  // phoneLoginAktiviert meldet dem Caller, ob der Sync griff -> die UI kann eine
+  // Kollision sichtbar machen, statt sie still zu verschlucken.
+  let phoneLoginAktiviert = false
   try {
     const e164 = toE164(phone)
     if (e164) {
@@ -262,13 +267,15 @@ export async function merkeTwofaTelefon(phone: string): Promise<MfaResult> {
           '[B2] auth.users.phone-Sync uebersprungen (evtl. Nummer bereits vergeben):',
           phoneErr.message,
         )
+      } else {
+        phoneLoginAktiviert = true
       }
     }
   } catch (err) {
     console.warn('[B2] auth.users.phone-Sync Ausnahme (non-critical):', err)
   }
 
-  return { ok: true }
+  return { ok: true, phoneLoginAktiviert }
 }
 
 // Lokaler Helfer (NICHT exportiert — 'use server'-Files duerfen nur async
