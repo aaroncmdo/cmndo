@@ -58,9 +58,20 @@ export function SvMobileHeader({
           <button type="button" onClick={() => router.back()} aria-label="Zurück" className="shrink-0 -ml-1 p-1">
             <ChevronLeftIcon className="w-5 h-5" />
           </button>
-          <span className="font-semibold text-base truncate" style={{ fontFamily: 'var(--brand-font-heading, inherit)' }}>
-            {title}
-          </span>
+          {logoUrl ? (
+            <img
+              src={logoUrl}
+              alt={useBrand ? (firmenname ? `${firmenname} Logo` : 'Logo') : 'Claimondo Logo'}
+              className={`h-5 w-auto max-w-16 object-contain shrink-0 ${useBrand ? '' : 'brightness-0 invert'}`}
+            />
+          ) : (
+            <img src="/brand/logo-mark.svg" alt="Claimondo" className="h-5 w-auto object-contain shrink-0 brightness-0 invert" />
+          )}
+          {title ? (
+            <h1 className="font-semibold text-base truncate" style={{ fontFamily: 'var(--brand-font-heading, inherit)' }}>
+              {title}
+            </h1>
+          ) : null}
         </div>
       )}
       <UpdatesNav variant="dark" />
