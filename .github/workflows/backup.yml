@@ -1,5 +1,9 @@
 name: Weekly DB Backup
 
+# Prod-URL hart auf https://app.claimondo.de (stabile oeffentliche Domain). Das Secret PRODUCTION_URL
+# zeigte auf eine tote Vercel-Deployment-URL -> dieser Backup-Cron schlug ~6 Wochen still fehl
+# (HTTP 404 "The deployment could not be found on Vercel"). Nur CRON_SECRET bleibt Secret.
+
 on:
   schedule:
     - cron: '0 4 * * 0' # Sonntag 04:00 UTC
@@ -13,7 +17,7 @@ jobs:
         run: |
           RESPONSE=$(curl -s -w "\n%{http_code}" \
             -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}" \
-            "${{ secrets.PRODUCTION_URL }}/api/cron/db-backup")
+            "https://app.claimondo.de/api/cron/db-backup")
 
           HTTP_CODE=$(echo "$RESPONSE" | tail -1)
           BODY=$(echo "$RESPONSE" | head -n -1)
