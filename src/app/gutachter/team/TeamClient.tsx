@@ -53,7 +53,6 @@ export default function TeamClient({
 }: {
   orgName: string
   orgLabel: string
-  iconKey: 'akademie' | 'buero'
   subSvs: SubSvData[]
   poolLeads: PoolLeadData[]
   showPoolSection: boolean
