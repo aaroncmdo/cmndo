@@ -40,6 +40,8 @@ export interface LeadWorkItem {
   id: string
   /** leads.zugewiesen_an = der Dispatch-Owner. */
   ownerId: string | null
+  /** Aufgeloester Owner-Name (zugewiesen_an -> profiles); null wenn nicht zugewiesen/unbekannt. */
+  ownerName: string | null
   /** Der abgeleitete Workflow-Zustand (aus deriveLeadWorkflowState). */
   state: LeadWorkflowState
   /** Erfuellte Qualifizierungs-Gates (0-8), fuer den Progress in der UI. */

@@ -887,7 +887,10 @@ export type MaklerWelcomeParams = {
  * (AAR-auth-haertung: kein Klartext-Passwort). Best-effort — der Caller wickelt den
  * Aufruf in try/catch, damit ein Mail-Fail die Registrierung nicht bricht.
  */
-export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<void> {
+export async function sendMaklerWelcome(
+  params: MaklerWelcomeParams,
+  opts?: { allowInternalRecipient?: boolean },
+): Promise<void> {
   // TOKEN-HASH-FIX (siehe src/lib/auth/welcome-link.ts): hashed_token + /api/auth/confirm
   // statt action_link (Implicit-Hash tot).
   const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
@@ -906,6 +909,10 @@ export async function sendMaklerWelcome(params: MaklerWelcomeParams): Promise<vo
     fallId: null,
     empfaengerTyp: 'makler',
     template: 'makler_welcome',
+    // Admin-getriggerter Resend (allowInternalRecipient) darf auch an interne/Test-Adressen
+    // zustellen — 1:1-Transaktions-Login-Mail (wie Werkstatt-Login). Self-Signup/createMakler
+    // uebergeben nichts -> Send-Isolation bleibt fuer sie unveraendert.
+    allowInternalRecipient: opts?.allowInternalRecipient,
   })
 }
 

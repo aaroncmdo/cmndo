@@ -1,60 +1,58 @@
 'use client'
 
-// WS4 (Reduced-Repair) — Kunde-KVA-Card fuer die reparatur-only Fallakte.
-// Zeigt den (von der Werkstatt) hochgeladenen Kostenvoranschlag (Betrag + PDF-Link)
-// und erlaubt dem Kunden, einen eigenen Kostenvoranschlag hochzuladen.
-// EIN KVA-Dokument, zwei Upload-Quellen (Werkstatt via Modal, Kunde hier).
+// KVA-Loop (Kunde-Seite) — Kostenvoranschlag-Card fuer die Kunde-Fallakte.
+// Zeigt den von der Werkstatt hochgeladenen Kostenvoranschlag (Betrag + PDF)
+// und laesst den Kunden die Reparaturkosten freigeben
+// (-> claims.reparatur_freigegeben_am via genehmigeKvaPortal).
 
-import { useRef, useState, useTransition } from 'react'
+import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { FileTextIcon, UploadIcon, Loader2Icon, ExternalLinkIcon } from 'lucide-react'
+import { FileTextIcon } from 'lucide-react'
 
-import { Card } from '@/components/primitives'
-import { uploadKvaKunde } from '@/app/kunde/faelle/[id]/kva-actions'
+import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { genehmigeKvaPortal } from '@/app/kunde/faelle/[id]/kva-freigabe-actions'
+import { StatusBadge } from '@/components/shared/StatusBadge'
+import { Card, Button } from '@/components/primitives'
 
 export type KostenvoranschlagCardProps = {
   claimId: string
-  netto: number | null
-  brutto: number | null
-  /** Signed/Public-URL des zuletzt hochgeladenen KVA-Dokuments (oder null). */
-  kvaDokUrl: string | null
+  kostenvoranschlagNetto: number | null
+  kostenvoranschlagBrutto: number | null
+  freigegebenAm: string | null
+  pdfUrl?: string | null
 }
 
-function euro(n: number): string {
+function formatEuro(n: number): string {
   return n.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })
 }
 
 export default function KostenvoranschlagCard({
   claimId,
-  netto,
-  brutto,
-  kvaDokUrl,
+  kostenvoranschlagNetto,
+  kostenvoranschlagBrutto,
+  freigegebenAm,
+  pdfUrl,
 }: KostenvoranschlagCardProps) {
   const router = useRouter()
-  const [pending, startTransition] = useTransition()
-  const [error, setError] = useState<string | null>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [isPending, startTransition] = useTransition()
 
-  const hatBetrag = netto != null || brutto != null
+  // Betrag: brutto bevorzugt, sonst netto. Defensiver Guard — der Parent
+  // rendert die Card nur bei vorhandenem KVA, aber falls doch beide null sind
+  // zeigen wir keinen Betrag (Card bleibt trotzdem als Freigabe-Trigger sinnvoll).
+  const betrag = kostenvoranschlagBrutto ?? kostenvoranschlagNetto ?? null
+  const betragLabel = kostenvoranschlagBrutto != null ? 'brutto' : 'netto'
 
-  function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setError(null)
-    startTransition(async () => {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await uploadKvaKunde(claimId, fd)
-      if (inputRef.current) inputRef.current.value = ''
-      if (!res.ok) {
-        setError(res.error ?? 'Upload fehlgeschlagen')
-        toast.error(res.error ?? 'Upload fehlgeschlagen')
-        return
-      }
-      toast.success('Kostenvoranschlag hochgeladen.')
-      router.refresh()
-    })
+  const freigegeben = !!freigegebenAm
+
+  async function handleFreigeben() {
+    const res = await genehmigeKvaPortal(claimId)
+    if (!res.ok) {
+      toast.error(res.error ?? 'Fehler')
+      return
+    }
+    toast.success('Kostenvoranschlag freigegeben.')
+    startTransition(() => router.refresh())
   }
 
   return (
@@ -66,70 +64,59 @@ export default function KostenvoranschlagCard({
           <h2 className="text-sm font-semibold text-claimondo-navy">Kostenvoranschlag</h2>
         </div>
 
-        {/* Betrag + Dokument der Werkstatt */}
-        {hatBetrag ? (
-          <div className="space-y-1.5">
-            {brutto != null && (
-              <div className="flex justify-between gap-2 text-body-sm">
-                <span className="text-claimondo-ondo">Kostenvoranschlag (brutto)</span>
-                <span className="text-claimondo-navy font-semibold tabular-nums">{euro(brutto)}</span>
-              </div>
-            )}
-            {netto != null && (
-              <div className="flex justify-between gap-2 text-body-sm">
-                <span className="text-claimondo-ondo">Kostenvoranschlag (netto)</span>
-                <span className="text-claimondo-navy font-medium tabular-nums">{euro(netto)}</span>
-              </div>
-            )}
+        {/* Betrag */}
+        {betrag != null && (
+          <div>
+            <p className="text-2xl font-bold text-claimondo-navy">{formatEuro(betrag)}</p>
+            <p className="text-body-sm text-claimondo-ondo">Reparaturkosten ({betragLabel})</p>
           </div>
-        ) : (
-          <p className="text-body-sm text-claimondo-ondo">
-            Sobald die Werkstatt einen Kostenvoranschlag erstellt, siehst du ihn hier. Du kannst
-            auch selbst einen hochladen.
-          </p>
         )}
 
-        {/* Dokument ansehen */}
-        {kvaDokUrl && (
+        {/* Freigabe-Status */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {freigegeben ? (
+            <StatusBadge tone="success" size="xs">
+              Freigegeben am{' '}
+              {formatBerlin(freigegebenAm as string, {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })}
+            </StatusBadge>
+          ) : (
+            <StatusBadge tone="neutral" size="xs">
+              Freigabe ausstehend
+            </StatusBadge>
+          )}
+        </div>
+
+        {/* Freigabe-Aktion — nur solange nicht freigegeben */}
+        {!freigegeben && (
+          <div className="space-y-2 pt-1">
+            <p className="text-body-sm text-claimondo-ondo">
+              Prüfen Sie den Kostenvoranschlag und geben Sie die Reparaturkosten frei,
+              damit die Werkstatt mit der Reparatur beginnen kann.
+            </p>
+            <Button variant="navy" size="sm" loading={isPending} onClick={handleFreigeben}>
+              Reparaturkosten freigeben
+            </Button>
+          </div>
+        )}
+
+        {/* PDF-Link oder Hinweis auf den Dokumente-Reiter */}
+        {pdfUrl ? (
           <a
-            href={kvaDokUrl}
+            href={pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-1.5 text-body-sm font-medium text-claimondo-navy underline underline-offset-2 hover:text-claimondo-ondo"
+            className="inline-flex items-center gap-1.5 text-body-sm font-medium text-claimondo-navy hover:text-claimondo-ondo"
           >
-            <ExternalLinkIcon className="w-4 h-4" />
+            <FileTextIcon className="w-4 h-4" />
             Kostenvoranschlag ansehen
           </a>
-        )}
-
-        {/* Eigenen KVA hochladen */}
-        <label
-          className={`flex items-center justify-center gap-2 w-full min-h-11 rounded-ios-xl border-2 border-dashed border-claimondo-border hover:border-claimondo-ondo bg-claimondo-bg hover:bg-white text-sm font-medium text-claimondo-navy cursor-pointer transition-colors ${
-            pending ? 'opacity-60 pointer-events-none' : ''
-          }`}
-        >
-          {pending ? (
-            <>
-              <Loader2Icon className="w-4 h-4 animate-spin" /> Lädt hoch …
-            </>
-          ) : (
-            <>
-              <UploadIcon className="w-4 h-4" /> Eigenen Kostenvoranschlag hochladen
-            </>
-          )}
-          <input
-            ref={inputRef}
-            type="file"
-            accept="image/*,application/pdf"
-            className="hidden"
-            disabled={pending}
-            onChange={handleFileSelected}
-          />
-        </label>
-
-        {error && (
-          <p className="text-xs text-danger-strong bg-danger-soft border border-danger/30 rounded-ios-lg p-2">
-            {error}
+        ) : (
+          <p className="text-body-sm text-claimondo-ondo">
+            Das Dokument finden Sie im Reiter „Dokumente“.
           </p>
         )}
       </div>

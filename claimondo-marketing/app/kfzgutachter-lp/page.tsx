@@ -232,7 +232,7 @@ function TrustSiegelStrip() {
 function TrustBar() {
   const items = [
     '2.000+ vermittelte Fälle',
-    '100+ DAT-geprüfte Gutachter',
+    '100+ geprüfte Gutachter',
     '5,0 ★ Google',
     'Anwalt + VS-Kommunikation kostenfrei',
   ]

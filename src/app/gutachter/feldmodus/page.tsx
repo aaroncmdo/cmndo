@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { getTagesSession } from '@/lib/sv/tages-session'
 import { effektiveBezugIds, type TerminBezugRow } from '@/lib/termine/effektive-bezug-ids'
+import { weavePrivatStops } from '@/lib/feldmodus/weave-privat-stops'
 import FeldmodusClient from './FeldmodusClient'
 import type { SvBriefingStruktur } from '@/lib/types/field-modus'
 
@@ -15,7 +16,11 @@ export const dynamic = 'force-dynamic'
 
 export type FeldmodusStop = {
   termin_id: string
+  // 2026-07-08 (Aaron): 'termin' = echter Gutachter-Termin (voller Besichtigungs-Flow),
+  // 'privat' = Kalender-Wegpunkt ohne Besichtigung (Pin + Route-Eintrag + TBT-Ziel, kein „angekommen").
+  kind: 'termin' | 'privat'
   fall_id: string
+  claim_id: string | null
   index: number
   start_zeit: string
   status: string
@@ -70,7 +75,13 @@ function normalizeStruktur(raw: unknown): SvBriefingStruktur | null {
   }
 }
 
-export default async function FeldmodusPage() {
+export default async function FeldmodusPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ chatv2?: string }>
+}) {
+  // Phase-2c Cutover-Flag: Fokus-Chat thread-nativ (kunde_gruppe) ist jetzt DEFAULT. Escape-Hatch ?chatv2=0.
+  const chatV2 = ((await searchParams) ?? {}).chatv2 !== '0'
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -297,8 +308,8 @@ export default async function FeldmodusPage() {
     }
   }
 
-  // Stops in session-Reihenfolge
-  const stops: FeldmodusStop[] = terminIds
+  // Termin-Stops in session-Reihenfolge (Privat-Stops werden unten zeitlich eingewoben).
+  const termineStops: FeldmodusStop[] = terminIds
     .map((id, idx) => {
       const t = terminById.get(id)
       if (!t) return null
@@ -335,7 +346,10 @@ export default async function FeldmodusPage() {
       const auftrag = auftragMap.get(fallId) ?? null
       const stop: FeldmodusStop = {
         termin_id: t.id as string,
+        kind: 'termin' as const,
         fall_id: fallId,
+        // claim-nativ fuer den Chat-Cutover (kunde_gruppe-Thread); null bei bezug-nativen Stops ohne Fall.
+        claim_id: (fall?.claim_id as string | null) ?? null,
         index: idx,
         start_zeit: t.start_zeit as string,
         status: t.status as string,
@@ -373,6 +387,53 @@ export default async function FeldmodusPage() {
     })
     .filter(Boolean) as FeldmodusStop[]
 
+  // 2026-07-08 (Aaron): Privat-Stops (sv_private_stops) als Wegpunkte in die Route einweben.
+  // Reiner Wegpunkt OHNE Besichtigung (kind:'privat', synthetische termin_id) — TBT + Pins laufen
+  // ueber das stops-Array, also wird der Wegpunkt automatisch navigiert. Admin-Client, scoped auf
+  // die eigene sv.id + den Session-Kalendertag (session.datum). Nur Stops mit Koordinaten.
+  const { data: privatRows } = await admin
+    .from('sv_private_stops')
+    .select('id, titel, start_zeit, end_zeit, address, place_id, lat, lng')
+    .eq('sv_id', sv.id)
+    .eq('datum', session.datum)
+    .order('start_zeit', { ascending: true })
+  const privatStops: FeldmodusStop[] = ((privatRows ?? []) as Array<Record<string, unknown>>)
+    .filter((r) => r.lat != null && r.lng != null)
+    .map((r) => ({
+      termin_id: `privat:${r.id as string}`,
+      kind: 'privat' as const,
+      fall_id: '',
+      claim_id: null,
+      index: 0, // unten neu vergeben
+      start_zeit: r.start_zeit as string,
+      status: 'privat',
+      losgefahren_am: null,
+      sv_angekommen_am: null,
+      abschluss_zeit: null,
+      kunde_name: ((r.titel as string | null) ?? '').trim() || 'Privater Termin',
+      kunde_vorname: null,
+      kunde_telefon: null,
+      claim_nummer: '',
+      kennzeichen: null,
+      fahrzeug: null,
+      schadentyp: null,
+      adresse: ((r.address as string | null) ?? '').trim() || '—',
+      place_id: (r.place_id as string | null) ?? null,
+      lat: r.lat != null ? Number(r.lat) : null,
+      lng: r.lng != null ? Number(r.lng) : null,
+      briefing_text: null,
+      briefing_struktur: null,
+      auftrag_typ: null,
+      einzusammelnde_dokumente: [],
+      hat_vorschaeden: null,
+      vorschaden_anzahl: null,
+      vorschaden_letzter_datum: null,
+    }))
+
+  // Termine bleiben in Session-Reihenfolge; Privat-Stops zeitlich dazwischen einsortiert + re-indexed.
+  // Pure + getestet: src/lib/feldmodus/weave-privat-stops.ts (weave-privat-stops.test.ts).
+  const stops: FeldmodusStop[] = weavePrivatStops(termineStops, privatStops)
+
   const feldmodusSv: FeldmodusSV = {
     id: sv.id,
     anzeigename: displayName,
@@ -388,6 +449,7 @@ export default async function FeldmodusPage() {
       sv={feldmodusSv}
       stops={stops}
       userId={user.id}
+      chatV2={chatV2}
     />
   )
 }

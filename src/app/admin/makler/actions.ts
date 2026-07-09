@@ -88,3 +88,55 @@ export async function createMakler(
   revalidatePath('/admin/makler')
   return { ok: true, email, password: result.password }
 }
+
+// Admin sendet einem bestehenden Makler die Login-/Willkommens-Mail (erneut). Deckt den Fall
+// ab, dass die Mail bei der Anlage/Selbst-Registrierung nicht ankam (z.B. interne/Test-Adresse
+// von der Send-Isolation unterdrueckt). Anders als bei createMakler ist der Mail-Versand hier
+// der Zweck der Aktion -> ein Fehler wird als Result zurueckgegeben (nicht verschluckt).
+export async function resendMaklerWelcome(
+  maklerId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Login-Mails senden.' }
+
+  const admin = createAdminClient()
+  const { data: m } = await admin
+    .from('makler')
+    .select('firma, email, ansprechpartner_vorname')
+    .eq('id', maklerId)
+    .maybeSingle()
+  if (!m || !m.email) {
+    return { ok: false, error: 'Makler nicht gefunden oder ohne E-Mail-Adresse.' }
+  }
+
+  // Promo-Code fuer die Empfehlungs-Landeseite nachladen (non-fatal wie in createMakler).
+  const { data: pc } = await admin
+    .from('promotion_codes')
+    .select('code')
+    .eq('makler_id', maklerId)
+    .limit(1)
+    .maybeSingle()
+  const code = (pc?.code as string | undefined) ?? null
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://claimondo.de'
+  const landeseiteUrl = code ? `${base}/m/${code}` : base
+
+  // Admin-getriggerte 1:1-Transaktionsmail -> Send-Isolations-Ausnahme (allowInternalRecipient),
+  // damit die Login-Mail auch an interne/Test-Adressen zugestellt wird. SIDE_EFFECT-Dry-Run bleibt aktiv.
+  try {
+    await sendMaklerWelcome(
+      {
+        to: m.email,
+        firma: (m.firma as string | null) ?? '',
+        vorname: (m.ansprechpartner_vorname as string | null) ?? '',
+        landeseiteUrl,
+      },
+      { allowInternalRecipient: true },
+    )
+  } catch (err) {
+    console.error('[resendMaklerWelcome] Login-Mail fehlgeschlagen:', err)
+    return { ok: false, error: 'Die Login-Mail konnte nicht gesendet werden.' }
+  }
+
+  revalidatePath('/admin/makler')
+  return { ok: true }
+}

@@ -2,6 +2,7 @@
 // Lädt alle SVs mit google_place_id, fragt die Places Details API ab
 // und schreibt Durchschnitt + Anzahl in google_bewertungen_cache.
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { fetchUndCacheGoogleBewertung } from '@/lib/google-bewertungen/fetch-und-cache'
 
@@ -12,8 +13,7 @@ function sleep(ms: number) {
 }
 
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

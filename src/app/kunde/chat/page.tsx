@@ -68,10 +68,10 @@ export default async function KundeChatPage({
     )
   }
 
-  // Phase-2c Cutover-Flag: ?chatv2=1 -> claim-natives Thread-Modell (ClaimChatInbox:
-  // Gruppe + private DMs pro Fall) statt kanal-basierter ChatWithFallSidebar.
-  // Default aus -> unveraendert, null Prod-Risiko. Kunde = kein Staff (istStaff=false).
-  if (params.chatv2 === '1') {
+  // Phase-2c Cutover-Flag: claim-natives Thread-Modell (ClaimChatInbox: Gruppe + private
+  // DMs pro Fall) ist jetzt DEFAULT statt kanal-basierter ChatWithFallSidebar.
+  // Escape-Hatch ?chatv2=0 -> v1. Kunde = kein Staff (istStaff=false).
+  if (params.chatv2 !== '0') {
     const unreadRes = await ladeClaimUnreadCounts(faelle.map(f => f.claimId))
     const unread = unreadRes.ok ? unreadRes.data : {}
     return (

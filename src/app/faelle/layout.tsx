@@ -13,7 +13,6 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { LogOutIcon } from 'lucide-react'
 import { roleToPath } from '@/lib/auth/role-redirect'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
@@ -56,38 +55,14 @@ export default async function FaelleLayout({
   // Policy in Migration 20260421151144 limitiert die sichtbaren Fälle
   // zusätzlich auf service_typ='komplett'.
   if (rolle === 'kanzlei') {
-    // AAR-676: h-screen + overflow-hidden, nur Main scrollt. max-w-Cap weg.
+    // Detached-Navy-Panel-Sidebar (KanzleiNav dark), keine Top-Bar (Aktionen in
+    // den Nav-Slots). Read-only via field-permissions, nicht hier.
     return (
-      <div className="h-screen bg-claimondo-bg flex flex-col overflow-hidden">
-        <header className="bg-claimondo-navy px-4 py-3 flex items-center justify-between shrink-0">
-          <div className="flex items-center gap-3">
-            <span className="text-xl font-bold tracking-tight">
-              <span className="text-white">Claim</span>
-              <span className="text-claimondo-light-blue">ondo</span>
-            </span>
-            <span className="text-[11px] uppercase tracking-wider text-claimondo-light-blue border border-claimondo-light-blue/30 rounded px-2 py-0.5">
-              Kanzlei
-            </span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span className="text-claimondo-light-blue text-sm">{displayName}</span>
-            <form action="/api/auth/logout" method="POST">
-              <button
-                type="submit"
-                className="text-claimondo-light-blue hover:text-white transition-colors"
-                aria-label="Abmelden"
-              >
-                <LogOutIcon className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
-        </header>
-        <div className="flex flex-1 min-h-0">
-          <KanzleiNav />
-          <main className="flex-1 min-w-0 min-h-0 overflow-y-auto px-4 md:px-8 py-6">
-            {children}
-          </main>
-        </div>
+      <div className="h-screen bg-claimondo-bg overflow-hidden">
+        <KanzleiNav userId={user.id} displayName={displayName} />
+        <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-8 py-6 pb-24 md:pb-6">
+          {children}
+        </main>
       </div>
     )
   }
@@ -105,24 +80,9 @@ export default async function FaelleLayout({
     } catch { /* non-critical */ }
 
     return (
-      <div className="min-h-screen bg-claimondo-bg">
-        <header className="bg-claimondo-navy px-4 py-3 flex items-center justify-between">
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
-          </span>
-          <div className="flex items-center gap-3">
-            <span className="text-claimondo-light-blue text-sm">{displayName}</span>
-            <form action="/api/auth/logout" method="POST">
-              <button type="submit" className="text-claimondo-light-blue hover:text-white transition-colors">
-                <LogOutIcon className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
-        </header>
-        <div className="flex">
-          <MitarbeiterNav unreadNachrichten={unread} />
-          <main className="flex-1 px-4 py-6 md:w-[96%] md:mx-auto md:px-0">{children}</main>
-        </div>
+      <div className="h-screen bg-claimondo-bg overflow-hidden">
+        <MitarbeiterNav userId={user.id} displayName={displayName} unreadNachrichten={unread} />
+        <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-6 py-6 pb-24 md:pb-6">{children}</main>
       </div>
     )
   }

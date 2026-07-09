@@ -674,7 +674,7 @@
         },
         {
           "kpi": "DAT",
-          "label": "sertifikalı iş ortağı ağı"
+          "label": "Expert Partner ağı"
         },
         {
           "kpi": "%30–40",
@@ -2119,7 +2119,7 @@
     "kpis": [
       {
         "wert": "DAT",
-        "label": "sertifikalı ortak ağı"
+        "label": "Expert Partner ağı"
       },
       {
         "wert": "< 48 sa",
@@ -2268,7 +2268,7 @@
       },
       {
         "wert": "DAT",
-        "label": "sertifikalı ağ"
+        "label": "Expert Partner ağı"
       },
       {
         "wert": "Köln",
@@ -2860,7 +2860,7 @@
     "hero_intro": "DAT bilirkişi dizininden (dat.de/sachverstaendige) sertifikalı partner bilirkişiler, tüm Almanya genelinde ulaşılabilir. 48 saat içinde yerinde randevu. Kusursuz kazalarda 0 € öz katkı — karşı tarafın zorunlu trafik sigortası tüm masrafları §249 BGB uyarınca karşılar (karşı sigortanın kabulü şartıyla).",
     "hero_cta_karte": "Haritada Görüntüle",
     "hero_cta_schaden": "Hasar Bildir",
-    "trust_kpi_dat_label": "sertifikalı ağ",
+    "trust_kpi_dat_label": "Expert Partner ağı",
     "trust_kpi_termin_label": "Randevu",
     "trust_kpi_eigenanteil_label": "Öz Katkı¹",
     "trust_kpi_recht_label": "Hukuki Dayanak",
@@ -3670,7 +3670,7 @@
     "trust_stat_2_wert": "§249 BGB",
     "trust_stat_2_label": "Hak Dayanağı",
     "trust_stat_3_wert": "DAT",
-    "trust_stat_3_label": "sertifikalı ağ"
+    "trust_stat_3_label": "Expert Partner ağı"
   },
   "unfallskizze": {
     "breadcrumb_start": "Başlangıç",

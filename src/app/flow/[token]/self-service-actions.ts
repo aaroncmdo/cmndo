@@ -477,7 +477,7 @@ export async function ladeWerkstaettenFlow(
 ): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
   const { leadId, error } = await resolveFlowLead(token)
   if (!leadId) return { ok: false, error: error ?? 'Dieser Link ist ungültig.' }
-  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId })
+  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId, nurEchte: true })
   return { ok: true, werkstaetten }
 }
 
@@ -508,7 +508,9 @@ export async function waehleWerkstattFlow(
 
   // Nur eine der tatsächlich angebotenen (5 nächsten aktiven Partner) zulassen — ein
   // manipulierter Request darf keine beliebige Werkstatt setzen.
-  const angeboten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId })
+  // nurEchte muss mit ladeWerkstaettenFlow matchen — sonst zeigt der Finder echte-only,
+  // aber die Validierung liesse Test-Werkstaetten zu (offered-set-Konsistenz).
+  const angeboten = await findReparaturWerkstaettenForTarget({ target: 'lead', id: leadId, nurEchte: true })
   if (!angeboten.some((w) => w.id === werkstattId)) {
     return { ok: false, error: 'Bitte wählen Sie eine der angebotenen Werkstätten.' }
   }

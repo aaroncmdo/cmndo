@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { checkCompletionSignal } from '@/lib/sla/completion-signals'
 import { completeKanzleiSla } from '@/lib/sla/kanzlei-tracker'
@@ -20,8 +21,7 @@ export const dynamic = 'force-dynamic'
  *   3. Wenn status='breached' und letzte_mahnung_am + 3/7 WT < NOW() → Stufe 2/3
  */
 export async function GET(request: Request) {
-  const authHeader = request.headers.get('authorization')
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(request)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

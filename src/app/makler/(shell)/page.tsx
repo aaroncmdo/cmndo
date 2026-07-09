@@ -10,6 +10,8 @@ import {
   getMaklerStaffelStufen,
 } from '@/lib/makler/queries'
 import { MaklerDashboard } from '@/components/makler/MaklerDashboard'
+import { getPartnerRangSelf } from '@/lib/partner-rang/get'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,10 +26,11 @@ export default async function MaklerDashboardPage() {
 
   // Vertriebs-Pipeline lebt jetzt auf /makler/abrechnungen (Anordnung Aaron 07.07.) -> hier
   // nicht mehr laden.
-  const [data, vermittlungsCount, staffelStufen] = await Promise.all([
+  const [data, vermittlungsCount, staffelStufen, partnerRang] = await Promise.all([
     getMaklerDashboardData(makler.id),
     getMaklerVermittlungsCount(makler.id),
     getMaklerStaffelStufen(makler.id),
+    getPartnerRangSelf(createAdminClient(), 'makler', makler.id),
   ])
 
   // Erste-Vermittlung-Prompt: einmalig, sobald der Makler >=1 Vermittlung hat und die Card
@@ -44,6 +47,7 @@ export default async function MaklerDashboardPage() {
       staffelSettled={vermittlungsCount.settled}
       staffelPending={vermittlungsCount.pending}
       staffelStufen={staffelStufen}
+      partnerRang={partnerRang}
     />
   )
 }

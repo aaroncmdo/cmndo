@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-04T08:16:41.641Z",
-  "count": 127,
+  "generatedAt": "2026-07-08T19:42:20.413Z",
+  "count": 126,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -13,7 +13,6 @@
     "src/app/admin/nachrichten/NachrichtenInboxClient.tsx",
     "src/app/admin/partner/waitlist/WaitlistTable.tsx",
     "src/app/admin/sachverstaendige/[id]/VerifizierungsTab.tsx",
-
     "src/app/admin/sachverstaendige/anlegen/AkademieAnlegenWizard.tsx",
     "src/app/admin/sachverstaendige/anlegen/BueroAnlegenWizard.tsx",
     "src/app/admin/sachverstaendige/anlegen/SoloAnlegenWizard.tsx",
@@ -47,7 +46,6 @@
     "src/app/gutachter/kalender/SVKalenderClient.tsx",
     "src/app/gutachter/leadpreise/page.tsx",
     "src/app/gutachter/onboarding/buero/BueroOnboardingClient.tsx",
-    "src/app/gutachter/profil/ProfilClient.tsx",
     "src/app/gutachter/reklamationen/ReklamationenClient.tsx",
     "src/app/gutachter/team/TeamClient.tsx",
     "src/app/gutachter/termine/[id]/vor-ort/VorOrtClient.tsx",

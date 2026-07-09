@@ -65,7 +65,7 @@ function groups(): { label: string; items: Entry[] }[] {
     {
       label: 'Tools & Rechner',
       items: [
-        { url: u('/gutachter-finden'), title: 'Gutachter finden', desc: 'BVSK-/DAT-zertifizierte Kfz-Sachverständige in Ihrer Nähe finden.' },
+        { url: u('/gutachter-finden'), title: 'Gutachter finden', desc: 'qualifizierte Kfz-Sachverständige in Ihrer Nähe finden.' },
         { url: u('/rechner'), title: 'Rechner-Übersicht', desc: 'Interaktive Rechner rund um den Unfallschaden.' },
         { url: u('/kuerzungs-checker'), title: 'Kürzungs-Checker', desc: 'Prüfen, ob die Versicherung Ihren Anspruch unzulässig gekürzt hat.' },
         { url: u('/unfallbericht'), title: 'Unfallbericht-Assistent', desc: 'Strukturierte Beweissicherung direkt nach dem Unfall.' },

@@ -14,6 +14,9 @@ import {
 import { StatCard } from '@/components/shared/StatCard'
 import { WerkstattStaffelCard } from '@/components/werkstatt/WerkstattStaffelCard'
 import { NetzwerkWidget } from '@/components/shared/netzwerk/NetzwerkWidget'
+import { PartnerRangSelfCard } from '@/components/shared/PartnerRangSelfCard'
+import { getPartnerRangSelf } from '@/lib/partner-rang/get'
+import { createAdminClient } from '@/lib/supabase/admin'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,11 +30,12 @@ export default async function WerkstattUebersichtPage() {
   const werkstatt = await getWerkstattByUserId()
   if (!werkstatt) redirect('/login')
 
-  const [overview, vermittlung, stufen, offeneLeads] = await Promise.all([
+  const [overview, vermittlung, stufen, offeneLeads, partnerRang] = await Promise.all([
     getWerkstattOverview(werkstatt.id),
     getWerkstattVermittlungsCount(werkstatt.id),
     getWerkstattStaffelStufen(werkstatt.id),
     getWerkstattLeads(),
+    getPartnerRangSelf(createAdminClient(), 'werkstatt', werkstatt.id),
   ])
   const offeneAnfragen = offeneLeads.length
 
@@ -88,6 +92,8 @@ export default async function WerkstattUebersichtPage() {
           hint="bisherige Gesamtauszahlungen"
         />
       </div>
+
+      {partnerRang && <PartnerRangSelfCard rang={partnerRang} />}
 
       <WerkstattStaffelCard
         settledCount={vermittlung.settled}

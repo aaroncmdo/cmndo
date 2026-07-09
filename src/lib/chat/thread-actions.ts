@@ -11,16 +11,15 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import {
-  leiteGruppenTeilnehmer,
   sortiereDirektPaar,
   threadLabel,
   leiteDmKandidaten,
   rolleLabel,
   aggregiereUnreadProClaim,
-  type ClaimZuweisung,
   type ThreadArt,
   type DmKandidatenClaim,
 } from './thread-model'
+import { syncGruppenTeilnehmer, resolveClaimUserIds, holeOderErstelleGruppenThreadService } from './thread-service'
 
 type Ergebnis<T> = { ok: true; data: T } | { ok: false; error: string }
 
@@ -46,54 +45,13 @@ async function aktuellerUser() {
 async function hatThreadZugriff(supabase: Awaited<ReturnType<typeof createClient>>, threadId: string) {
   const { data } = await (supabase as unknown as SupabaseClient)
     .from('chat_threads')
-    .select('id, claim_id')
+    .select('id, claim_id, art')
     .eq('id', threadId)
     .maybeSingle()
-  return data as { id: string; claim_id: string } | null
+  return data as { id: string; claim_id: string; art: string } | null
 }
 
-/** Synchronisiert Gruppen-Teilnehmer (nur gueltige auth.users — stale Refs pro Zeile ueberspringen). */
-async function syncGruppenTeilnehmer(admin: SupabaseClient, threadId: string, teilnehmer: { userId: string; rolle: string }[]) {
-  for (const t of teilnehmer) {
-    const { error } = await admin
-      .from('chat_thread_teilnehmer')
-      .upsert({ thread_id: threadId, user_id: t.userId, rolle: t.rolle }, { onConflict: 'thread_id,user_id', ignoreDuplicates: true })
-    if (error) continue // z.B. gedroppte auth.users-Referenz -> ueberspringen
-  }
-}
-
-/**
- * Loest die Domain-IDs der Claim-Zuweisung auf auth-user_ids auf:
- * - sv_id ist eine sachverstaendige.id -> sachverstaendige.profile_id (= user_id)
- * - makler_id ist eine makler.id -> makler.user_id
- * geschaedigter_user_id + kundenbetreuer_id sind bereits user_ids (unveraendert).
- * OHNE diese Aufloesung landet die sachverstaendige.id als Teilnehmer-user_id -> der
- * auth.users-Guard im Teilnehmer-Sync verwirft sie -> der SV wird nie Thread-Mitglied
- * (sieht kunde_gruppe/team_intern nicht, DMs an ihn zielen auf die falsche id).
- */
-async function resolveClaimUserIds(
-  admin: SupabaseClient,
-  claim: { geschaedigter_user_id: string | null; kundenbetreuer_id: string | null; sv_id: string | null; makler_id?: string | null },
-): Promise<{ geschaedigter_user_id: string | null; kundenbetreuer_id: string | null; sv_id: string | null; makler_id: string | null }> {
-  let svUserId: string | null = null
-  if (claim.sv_id) {
-    const { data } = await admin.from('sachverstaendige').select('profile_id').eq('id', claim.sv_id).maybeSingle()
-    svUserId = (data as { profile_id: string | null } | null)?.profile_id ?? null
-  }
-  let maklerUserId: string | null = null
-  if (claim.makler_id) {
-    const { data } = await admin.from('makler').select('user_id').eq('id', claim.makler_id).maybeSingle()
-    maklerUserId = (data as { user_id: string | null } | null)?.user_id ?? null
-  }
-  return {
-    geschaedigter_user_id: claim.geschaedigter_user_id,
-    kundenbetreuer_id: claim.kundenbetreuer_id,
-    sv_id: svUserId,
-    makler_id: maklerUserId,
-  }
-}
-
-/** Get-or-create kunde_gruppe/team_intern-Thread + Teilnehmer-Sync (server-autoritativ via Service-Role). */
+/** Get-or-create kunde_gruppe/team_intern-Thread + Teilnehmer-Sync (authed Wrapper -> Service). */
 export async function holeOderErstelleGruppenThread(
   claimId: string,
   art: 'kunde_gruppe' | 'team_intern',
@@ -101,35 +59,8 @@ export async function holeOderErstelleGruppenThread(
   const { user } = await aktuellerUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
   const admin = createAdminClient() as unknown as SupabaseClient
-
-  const { data: claim } = await admin
-    .from('claims')
-    .select('geschaedigter_user_id, kundenbetreuer_id, sv_id')
-    .eq('id', claimId)
-    .maybeSingle()
-  if (!claim) return { ok: false, error: 'Claim nicht gefunden.' }
-
-  const { data: vorhanden } = await admin
-    .from('chat_threads')
-    .select('id')
-    .eq('claim_id', claimId)
-    .eq('art', art)
-    .maybeSingle()
-  let threadId = (vorhanden as { id: string } | null)?.id
-
-  if (!threadId) {
-    const { data: neu, error } = await admin
-      .from('chat_threads')
-      .insert({ claim_id: claimId, art })
-      .select('id')
-      .maybeSingle()
-    if (error) return { ok: false, error: error.message }
-    threadId = (neu as { id: string } | null)?.id
-  }
-  if (!threadId) return { ok: false, error: 'Thread konnte nicht angelegt werden.' }
-
-  const resolved = await resolveClaimUserIds(admin, claim as ClaimZuweisung)
-  await syncGruppenTeilnehmer(admin, threadId, leiteGruppenTeilnehmer(resolved, art))
+  const threadId = await holeOderErstelleGruppenThreadService(admin, claimId, art)
+  if (!threadId) return { ok: false, error: 'Claim nicht gefunden oder Thread konnte nicht angelegt werden.' }
   return { ok: true, data: threadId }
 }
 
@@ -183,7 +114,44 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
 
   const { data: prof } = await supabase.from('profiles').select('rolle').eq('id', user.id).maybeSingle()
 
+  // Zustellungs-Routing (Datenmodell A): Staff-Nachrichten in der kunde_gruppe werden dem
+  // Kunden zusaetzlich via WhatsApp zugestellt -> die Zeile traegt dann kanal='whatsapp'
+  // (in v1 UND v2 sichtbar). team_intern/direkt + Kunde-Sender bleiben thread-nativ (kanal null).
+  // Zustellungs-Routing SCHARF (Aaron 08.07. „stell es scharf"): DEFAULT AN, Kill-Switch
+  // CHAT_ZUSTELLUNG_WHATSAPP=0. Verifiziert gegen die prod-Leads der kunde_gruppe-Threads: der
+  // Guard unten (istTestEmail + @claimondo.de + email-los) unterdrueckt ALLE aktuellen Test/internen
+  // Leads; der einzige nicht-gefangene Rest (disposable @web-library.net) hat eine Test-Telefonnummer
+  // (+4915510000099) -> Baileys-No-Op. Kein echter Empfaenger wird gespammt.
+  const zustellungAktiv = process.env.CHAT_ZUSTELLUNG_WHATSAPP !== '0'
+  const staffInGruppe = thread.art === 'kunde_gruppe' && !!prof?.rolle && prof.rolle !== 'kunde'
+
   const admin = createAdminClient() as unknown as SupabaseClient
+
+  // Zustell-Kanal VOR dem Insert bestimmen (Datenmodell A: kanal markiert den TATSAECHLICHEN Kanal).
+  // WhatsApp bevorzugt (Telefon), sonst E-Mail-Fallback (E-Mail ist outbound-only, kein Inbound-Webhook).
+  // Defense-in-Depth: Test-Kunden (@claimondo.de / Test-Marker / email-los) bekommen KEINE echte
+  // Zustellung — istTestEmail faengt @claimondo.de nicht, daher hier explizit.
+  let zustellKanal: 'whatsapp' | 'email' | null = null
+  let zielLead: { email: string | null; telefon: string | null; vorname: string | null } | null = null
+  if (zustellungAktiv && staffInGruppe) {
+    const { data: claim } = await admin
+      .from('claims')
+      .select('lead_id, leads(email, telefon, vorname)')
+      .eq('id', thread.claim_id)
+      .maybeSingle()
+    const leadJoin = (claim as { leads?: unknown } | null)?.leads
+    zielLead = (Array.isArray(leadJoin) ? leadJoin[0] : leadJoin) as
+      | { email: string | null; telefon: string | null; vorname: string | null }
+      | null
+    const { istTestEmail } = await import('@/lib/testdaten/ist-test-email')
+    const zielEmail = zielLead?.email ?? null
+    const istTestKunde = !zielEmail || istTestEmail(zielEmail) || /@claimondo\.(de|test)$/i.test(zielEmail)
+    if (!istTestKunde) {
+      if (zielLead?.telefon) zustellKanal = 'whatsapp'
+      else if (zielLead?.email) zustellKanal = 'email'
+    }
+  }
+
   const { data: neu, error } = await admin
     .from('nachrichten')
     .insert({
@@ -194,11 +162,40 @@ export async function sendeThreadNachricht(threadId: string, text: string): Prom
       nachricht: inhalt,
       richtung: 'outbound',
       status: 'gesendet',
-      kanal: null,
+      kanal: zustellKanal,
     })
     .select('id')
     .maybeSingle()
   if (error) return { ok: false, error: error.message }
+
+  // Zustellung via die BESTEHENDE isolierte Send-Infra. Non-critical: ein Fehler bricht NIE den
+  // Thread-Save. Test/interne Empfaenger sind oben bereits ausgeschlossen (zustellKanal bleibt null).
+  if (zustellKanal === 'whatsapp' && zielLead?.telefon) {
+    try {
+      const { sendCommunication } = await import('@/lib/communications/send')
+      await sendCommunication('freitext', {
+        telefon: zielLead.telefon,
+        vorname: zielLead.vorname ?? '',
+        '1': inhalt,
+      }).catch(() => {})
+    } catch (err) {
+      console.error('[Zustellung] Thread->WhatsApp Fehler:', err)
+    }
+  } else if (zustellKanal === 'email' && zielLead?.email) {
+    try {
+      const { sendEmail } = await import('@/lib/email/google/client')
+      const sicher = inhalt.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\n/g, '<br>')
+      await sendEmail({
+        to: zielLead.email,
+        subject: 'Neue Nachricht zu Ihrem Schadenfall',
+        html: `<p>Sie haben eine neue Nachricht von Ihrem Claimondo-Team:</p><p>${sicher}</p>`,
+        text: inhalt,
+      }).catch(() => {})
+    } catch (err) {
+      console.error('[Zustellung] Thread->E-Mail Fehler:', err)
+    }
+  }
+
   return { ok: true, data: (neu as { id: string } | null)?.id ?? '' }
 }
 
@@ -241,6 +238,19 @@ export interface ClaimThreadInfo {
 
 /** Listet die fuer den aktuellen User sichtbaren Threads eines Claims (RLS: Mitglied ODER is_staff).
  *  Direkt-Labels werden aus den Teilnehmer-Rollen (via Service-Role) zusammengesetzt. */
+/** Resolvt user_ids -> Anzeigenamen (profiles.anzeigename ?? vorname+nachname). Nicht Gefundene fehlen in der Map. */
+async function ladeProfilNamen(admin: SupabaseClient, userIds: string[]): Promise<Map<string, string>> {
+  const uniq = [...new Set(userIds.filter(Boolean))]
+  const map = new Map<string, string>()
+  if (uniq.length === 0) return map
+  const { data } = await admin.from('profiles').select('id, anzeigename, vorname, nachname').in('id', uniq)
+  for (const p of (data ?? []) as Array<{ id: string; anzeigename: string | null; vorname: string | null; nachname: string | null }>) {
+    const name = p.anzeigename ?? ([p.vorname, p.nachname].filter(Boolean).join(' ') || null)
+    if (name) map.set(p.id, name)
+  }
+  return map
+}
+
 export async function ladeClaimThreads(claimId: string): Promise<Ergebnis<ClaimThreadInfo[]>> {
   const { supabase, user } = await aktuellerUser()
   if (!user) return { ok: false, error: 'Nicht eingeloggt.' }
@@ -257,21 +267,37 @@ export async function ladeClaimThreads(claimId: string): Promise<Ergebnis<ClaimT
   const admin = createAdminClient() as unknown as SupabaseClient
   const { data: teil } = await admin
     .from('chat_thread_teilnehmer')
-    .select('thread_id, rolle')
+    .select('thread_id, rolle, user_id')
     .in(
       'thread_id',
       threads.map((t) => t.id),
     )
   const rollenProThread = new Map<string, string[]>()
-  for (const p of (teil ?? []) as { thread_id: string; rolle: string | null }[]) {
+  const andererUserProThread = new Map<string, string>() // direkt: der Teilnehmer != ich (= der DM-Partner)
+  for (const p of (teil ?? []) as { thread_id: string; rolle: string | null; user_id: string }[]) {
     const arr = rollenProThread.get(p.thread_id) ?? []
     if (p.rolle) arr.push(p.rolle)
     rollenProThread.set(p.thread_id, arr)
+    if (p.user_id !== user.id) andererUserProThread.set(p.thread_id, p.user_id)
   }
+
+  // Direkt-Threads mit dem Namen des Gegenuebers labeln ("Privat: Max Mueller") statt Rollen-Label.
+  const direktUserIds = threads
+    .filter((t) => t.art === 'direkt')
+    .map((t) => andererUserProThread.get(t.id))
+    .filter(Boolean) as string[]
+  const namen = await ladeProfilNamen(admin, direktUserIds)
 
   return {
     ok: true,
-    data: threads.map((t) => ({ id: t.id, art: t.art, label: threadLabel(t.art, rollenProThread.get(t.id) ?? []) })),
+    data: threads.map((t) => {
+      if (t.art === 'direkt') {
+        const other = andererUserProThread.get(t.id)
+        const name = other ? namen.get(other) : undefined
+        if (name) return { id: t.id, art: t.art, label: `Privat: ${name}` }
+      }
+      return { id: t.id, art: t.art, label: threadLabel(t.art, rollenProThread.get(t.id) ?? []) }
+    }),
   }
 }
 
@@ -294,7 +320,14 @@ export async function ladeClaimBeteiligte(claimId: string): Promise<Ergebnis<Cla
   if (!claim) return { ok: false, error: 'Claim nicht gefunden.' }
   const resolved = await resolveClaimUserIds(admin, claim as DmKandidatenClaim)
   const kandidaten = leiteDmKandidaten(resolved, user.id)
-  return { ok: true, data: kandidaten.map((k) => ({ userId: k.userId, rolle: k.rolle, label: rolleLabel(k.rolle) })) }
+  const namen = await ladeProfilNamen(admin, kandidaten.map((k) => k.userId))
+  return {
+    ok: true,
+    data: kandidaten.map((k) => {
+      const name = namen.get(k.userId)
+      return { userId: k.userId, rolle: k.rolle, label: name ? `${name} · ${rolleLabel(k.rolle)}` : rolleLabel(k.rolle) }
+    }),
+  }
 }
 
 /** Ungelesene Nachrichten pro Claim fuer die Inbox-Sidebar (eigene Thread-Membership + zuletzt_gelesen_am). */

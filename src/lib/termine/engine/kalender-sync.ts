@@ -10,6 +10,7 @@ import { CalDavError, createCalendarEvent, updateCalendarEvent, deleteCalendarEv
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { resolveTerminKontext, type TerminKontext } from './kalender-kontext'
 import { resolveAssigneeProfileId } from './assignee-profile'
+import { getGutachterForUser } from '@/lib/gutachter'
 
 export type SyncStatus = 'created' | 'updated' | 'skip' | 'error'
 
@@ -101,7 +102,7 @@ type CalDavConn = { server_url: string; username: string; password_encrypted: st
 async function caldavConn(db: SupabaseClient, profileId: string): Promise<CalDavConn | null> {
   // Kanonisch aus sv_kalender_verbindungen (Connect-Quelle; kalender_verbindungen war nur
   // Einmal-Backfill ohne Mirror -> neue Verbindungen fehlten). sv_id via profile_id auflösen.
-  const { data: sv } = await db.from('sachverstaendige').select('id').eq('profile_id', profileId).maybeSingle()
+  const sv = await getGutachterForUser<{ id: string }>(db, profileId, 'id')
   if (!sv) return null
   const { data } = await db
     .from('sv_kalender_verbindungen')
@@ -144,7 +145,7 @@ export const caldavProvider: KalenderProvider = {
       // markieren, damit der SV im Profil "App-Passwort pruefen" sieht. Danach
       // rethrow → der aeussere Sync-Loop loggt + setzt results['caldav']='error'.
       if (err instanceof CalDavError && err.code === 'auth_failed') {
-        const { data: svRow } = await db.from('sachverstaendige').select('id').eq('profile_id', profileId).maybeSingle()
+        const svRow = await getGutachterForUser<{ id: string }>(db, profileId, 'id')
         if (svRow) {
           await db
             .from('sv_kalender_verbindungen')

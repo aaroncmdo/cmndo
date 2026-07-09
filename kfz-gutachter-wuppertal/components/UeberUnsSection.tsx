@@ -36,7 +36,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               />
               <div className="uu-quote-sign-text">
                 <p className="uu-quote-name">
-                  {CLUSTER.svName} <span className="uu-quote-role">· DAT-Sachverständiger</span>
+                  {CLUSTER.svName} <span className="uu-quote-role">· Kfz-Sachverständiger</span>
                 </p>
                 <p className="uu-quote-brand">{PARTNER_LINE.pre} <ClaimondoLink>{PARTNER_LINE.brand}</ClaimondoLink></p>
               </div>
@@ -54,7 +54,7 @@ export function UeberUnsSection({ city }: { city: City }) {
           <div className="uu-pillrow" role="list" aria-label="Qualifikationen">
             <div className="uu-pill" role="listitem">
               <span className="uu-pill-key">DAT</span>
-              <span className="uu-pill-sub">zertifiziert</span>
+              <span className="uu-pill-sub">Zugang</span>
             </div>
             <span className="uu-pill-sep" aria-hidden="true" />
             <div className="uu-pill" role="listitem">
@@ -91,7 +91,7 @@ export function UeberUnsSection({ city }: { city: City }) {
               <img
                 id="teamPhoto"
                 src={`${CLUSTER.imgPath}team-${CLUSTER.key}.webp?v=${CLUSTER.assetVersion}`}
-                alt={`Kfz-Sachverständigen-Team in ${city.name} — DAT-zertifiziert, Claimondo-Partner`}
+                alt={`Kfz-Sachverständigen-Team in ${city.name} — nach DAT-/BVSK-Standard, Claimondo-Partner`}
                 loading="lazy"
                 data-placeholder="true"
                 width={600}
@@ -134,10 +134,10 @@ export function UeberUnsSection({ city }: { city: City }) {
               Ihr Kfz-Sachverständigenbüro in <span className="text-amber">{city.name}</span>
             </h2>
             <div className="text-white/[.85] text-sm font-semibold mb-4">
-              DAT-Expert · BVSK · 10+ Jahre · 2.500+ Schäden
+              DAT-Standard · BVSK · 10+ Jahre · 2.500+ Schäden
             </div>
             <p className="text-white/[.84] text-base mb-3 leading-relaxed">
-              DAT-zertifiziert, ingenieurbasiert, gerichtsfest. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
+              Zertifiziert, ingenieurbasiert, gerichtsfest — mit Zugang zum DAT Expert Partner-Netzwerk. Als <ClaimondoLink>Claimondo-Partner</ClaimondoLink> übernehmen wir
               die komplette Abwicklung — Gutachten, Anwalt, Mietwagen/Nutzungsausfall und
               Versicherungskommunikation. Sie sehen jeden Schritt live im Portal.
             </p>

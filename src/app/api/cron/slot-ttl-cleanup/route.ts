@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createServiceClient } from '@/lib/supabase/server'
 
 // VPS-Cron: alle 5 Minuten.
@@ -7,8 +8,7 @@ import { createServiceClient } from '@/lib/supabase/server'
 // von 'reserviert' zurück auf 'abgelehnt'.
 
 export async function GET(req: NextRequest) {
-  const auth = req.headers.get('authorization')
-  if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
+  if (!assertCronAuth(req)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 

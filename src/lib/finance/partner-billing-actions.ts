@@ -7,8 +7,13 @@ import {
   freigebenProvision,
   storniereProvision,
   auszahlenProvision,
+  resolveLedgerKontext,
   PROVISION_TABELLEN,
 } from '@/lib/finance/provision-status'
+import {
+  korrigierePartnerGutschrift,
+  computeKorrekturBetraege,
+} from '@/lib/finance/partner-gutschrift-korrektur'
 import {
   markBezahlt,
   retryEinzug,
@@ -238,21 +243,27 @@ export async function getPartnerGutschriftDownloadUrl(
   ledgerTabelle: string,
   ledgerId: string,
   typ: 'gutschrift' | 'storno' = 'gutschrift',
+  gutschriftId?: string,
 ): Promise<{ ok: true; url: string } | { ok: false; error: string }> {
   const auth = await requireAdmin()
   if (!auth.ok) return auth
 
   const admin = createAdminClient()
 
-  // typ waehlt den Beleg: 'gutschrift' = Original, 'storno' = Korrekturbeleg. Nach einem Reversal
-  // existieren zwei Zeilen je Ledger — der typ-Filter macht die Auswahl eindeutig (sonst PGRST116).
-  const { data: g, error } = await admin
-    .from('partner_gutschriften')
-    .select('pdf_storage_path')
-    .eq('ledger_tabelle', ledgerTabelle)
-    .eq('ledger_id', ledgerId)
-    .eq('typ', typ)
-    .maybeSingle()
+  // Praezise per Gutschrift-ID (nach einer Korrektur hat ein Ledger mehrere typ='gutschrift'-Zeilen:
+  // stornierte + aktive Original). Fallback ohne ID: ledger+typ, aktiv-/aktualitaets-bewusst
+  // (neueste zuerst + limit 1) statt bloss .maybeSingle() -> kein PGRST116 bei mehreren Zeilen.
+  const { data: g, error } = gutschriftId
+    ? await admin.from('partner_gutschriften').select('pdf_storage_path').eq('id', gutschriftId).maybeSingle()
+    : await admin
+        .from('partner_gutschriften')
+        .select('pdf_storage_path')
+        .eq('ledger_tabelle', ledgerTabelle)
+        .eq('ledger_id', ledgerId)
+        .eq('typ', typ)
+        .order('erstellt_am', { ascending: false })
+        .limit(1)
+        .maybeSingle()
 
   if (error) return { ok: false, error: error.message }
   if (!g?.pdf_storage_path) return { ok: false, error: 'Keine Gutschrift-PDF vorhanden' }
@@ -325,7 +336,7 @@ export async function ladePartnerBilling(
     // Gutschrift-Belege je Ledger laden (Original + Storno) fuer Download + Bezug-Anzeige.
     const { data: gs } = await admin
       .from('partner_gutschriften')
-      .select('id, gutschrift_nr, typ, bezug_gutschrift_id, ledger_tabelle, ledger_id')
+      .select('id, gutschrift_nr, typ, status, bezug_gutschrift_id, ledger_tabelle, ledger_id')
       .eq('partner_typ', partnerTyp)
       .eq('partner_id', partnerId)
     const { buildGutschriftDocsByLedger } = await import('@/lib/finance/partner-billing')
@@ -342,4 +353,96 @@ export async function ladePartnerBilling(
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : 'Unbekannter Fehler' }
   }
+}
+
+/**
+ * Vorschau fuer das Korrektur-Modal: Betraege der aktiven Original-Gutschrift + Recompute-Default
+ * aus den aktuellen Ledger-/Partner-Daten. Alles in Cent (DB speichert EUR -> *100). recompute
+ * faellt auf die Original-Werte zurueck, wenn der USt-Status (noch) unbekannt ist.
+ */
+export async function getKorrekturVorschauAction(
+  ledgerTabelle: string,
+  ledgerId: string,
+): Promise<
+  | {
+      ok: true
+      original: { nettoCent: number; ustSatz: number | null; ustBetragCent: number | null; bruttoCent: number; nr: string }
+      recompute: { nettoCent: number; ustSatz: number | null; ustBetragCent: number | null; bruttoCent: number }
+    }
+  | { ok: false; error: string }
+> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth
+  if (!(PROVISION_TABELLEN as readonly string[]).includes(ledgerTabelle)) {
+    return { ok: false, error: 'Korrektur für diese Quelle nicht verfügbar' }
+  }
+
+  const admin = createAdminClient()
+  const { data: orig, error } = await admin
+    .from('partner_gutschriften')
+    .select('gutschrift_nr, betrag_netto, ust_satz, ust_betrag, betrag_brutto')
+    .eq('ledger_tabelle', ledgerTabelle)
+    .eq('ledger_id', ledgerId)
+    .eq('typ', 'gutschrift')
+    .neq('status', 'storniert')
+    .maybeSingle()
+  if (error) return { ok: false, error: error.message }
+  if (!orig) return { ok: false, error: 'Keine aktive Gutschrift zum Korrigieren gefunden' }
+  const o = orig as Record<string, number | string | null>
+
+  const toCent = (v: number | string | null): number => Math.round(Number(v ?? 0) * 100)
+  const original = {
+    nettoCent: toCent(o.betrag_netto),
+    ustSatz: o.ust_satz === null || o.ust_satz === undefined ? null : Number(o.ust_satz),
+    ustBetragCent: o.ust_betrag === null || o.ust_betrag === undefined ? null : toCent(o.ust_betrag),
+    bruttoCent: toCent(o.betrag_brutto),
+    nr: String(o.gutschrift_nr),
+  }
+
+  const kt = await resolveLedgerKontext(admin, ledgerTabelle as (typeof PROVISION_TABELLEN)[number], ledgerId)
+  const rc = kt.ok
+    ? computeKorrekturBetraege({ currentNettoEur: kt.ctx.nettoEur, istKleinunternehmer: kt.ctx.istKleinunternehmer })
+    : ({ ok: false, error: 'kontext' } as const)
+  const recompute = rc.ok
+    ? {
+        nettoCent: rc.betraege.nettoCent,
+        ustSatz: rc.betraege.ustSatz,
+        ustBetragCent: rc.betraege.ustBetragCent,
+        bruttoCent: rc.betraege.bruttoCent,
+      }
+    : {
+        nettoCent: original.nettoCent,
+        ustSatz: original.ustSatz,
+        ustBetragCent: original.ustBetragCent,
+        bruttoCent: original.bruttoCent,
+      }
+
+  return { ok: true, original, recompute }
+}
+
+/**
+ * Korrigiert eine ausgestellte Partner-Gutschrift: Storno der aktiven Original + korrigierte
+ * Neuausstellung (recompute + optionales Override netto/ust_satz). Delegiert an den Baustein.
+ */
+export async function korrigierePartnerGutschriftAction(
+  ledgerTabelle: string,
+  ledgerId: string,
+  grund: string,
+  override?: { nettoCent?: number; ustSatz?: number },
+): Promise<{ ok: boolean; error?: string; stornoNummer?: string; korrekturNummer?: string }> {
+  const auth = await requireAdmin()
+  if (!auth.ok) return auth
+  if (!(PROVISION_TABELLEN as readonly string[]).includes(ledgerTabelle)) {
+    return { ok: false, error: 'Korrektur für diese Quelle nicht verfügbar' }
+  }
+  if (!grund?.trim()) return { ok: false, error: 'Bitte einen Korrektur-Grund angeben.' }
+
+  const admin = createAdminClient()
+  const r = await korrigierePartnerGutschrift(admin, ledgerTabelle, ledgerId, grund.trim(), override)
+
+  revalidatePath('/admin/finance/partner-abrechnungen')
+  revalidatePath('/admin/finance/provisionen')
+  revalidatePath('/admin/werkstaetten')
+  revalidatePath('/admin/makler')
+  return r
 }

@@ -31,7 +31,7 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Button, Modal } from '@/components/primitives'
-import { KvaErstellenModal } from '@/components/werkstatt/KvaErstellenModal'
+import { KvaHochladenModal } from '@/components/werkstatt/KvaHochladenModal'
 
 const EUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 const EUR2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })
@@ -311,7 +311,7 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
 
   const hinweis =
     status === 'benoetigt'
-      ? 'Als Erstes einen Kostenvoranschlag erstellen — der Kunde benötigt ihn für die Reparatur.'
+      ? 'Als Erstes den Kostenvoranschlag hochladen — der Kunde benötigt ihn für die Reparatur.'
       : status === 'erstellt'
         ? 'Kostenvoranschlag liegt vor, wartet auf Freigabe durch den Kunden.'
         : auftrag.reparatur_freigegeben_am
@@ -338,13 +338,13 @@ function KvaSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
         {status === 'benoetigt' && (
           <div className="pt-1">
             <Button variant="navy" size="sm" onClick={() => setModalOffen(true)}>
-              Kostenvoranschlag erstellen
+              Kostenvoranschlag hochladen
             </Button>
           </div>
         )}
       </div>
 
-      <KvaErstellenModal
+      <KvaHochladenModal
         claimId={auftrag.claim_id}
         open={modalOffen}
         onClose={() => setModalOffen(false)}

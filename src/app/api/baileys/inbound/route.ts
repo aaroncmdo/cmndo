@@ -4,6 +4,7 @@ import { matchInboundToFall } from '@/lib/inbound/match-fall'
 import { processInboundText } from '@/lib/inbound/process-inbound-text'
 import { processInboundMedia, type InboundMediaFile } from '@/lib/inbound/process-inbound-media'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import type { SupabaseClient } from '@supabase/supabase-js'
 
 export const dynamic = 'force-dynamic'
 
@@ -76,8 +77,26 @@ export async function POST(request: Request) {
   const fallId = match.fallId
   const leadId = match.leadId
 
+  // Zustellungs-Routing (Inbound): die eingehende WhatsApp am kunde_gruppe-Thread des Claims
+  // verankern -> in v1 (kanal) UND v2 (thread) sichtbar (Datenmodell A). Get-or-create via Service
+  // (service-role, kein Auth) -> auch Claims OHNE bestehenden Thread bekommen die Inbound-Nachricht
+  // sofort thread-nativ (+ SV/KB werden als Teilnehmer resolved). Non-critical -> Fehler = threadId null.
+  let threadId: string | null = null
+  if (fallId) {
+    const claimIdForThread = await resolveClaimId(db, fallId)
+    if (claimIdForThread) {
+      const { holeOderErstelleGruppenThreadService } = await import('@/lib/chat/thread-service')
+      threadId = await holeOderErstelleGruppenThreadService(
+        db as unknown as SupabaseClient,
+        claimIdForThread,
+        'kunde_gruppe',
+      ).catch(() => null)
+    }
+  }
+
   const { error } = await db.from('nachrichten').insert({
     fall_id: fallId,
+    thread_id: threadId,
     kanal: 'whatsapp',
     sender_id: null,
     sender_rolle: 'kunde',

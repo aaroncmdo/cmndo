@@ -7,6 +7,8 @@ import { checkAndCacheAvailability } from '@/lib/whatsapp/availability'
 import { notifyTeamWhatsApp } from '@/lib/whatsapp/team-notify'
 import { istInterneIdentitaet } from '@/lib/testdaten/interne-identitaet'
 import { getConsentedGaClientId, trackServerConversion, buildSaSignedEvent } from '@/lib/analytics/ga4-conversions'
+import { getPartnerRangBatch } from '@/lib/partner-rang/get'
+import type { Tier } from '@/lib/partner-rang/types'
 
 // Privacy-by-default: nur Geokoordinaten + ID. Tier-3 sv_leads (Excel-Import,
 // keine Pakete, keine Reviews) sind auf der Marketing-Karte komplett
@@ -51,6 +53,10 @@ export type AktiverSVPublic = {
   mitgliedschaften: string[]
   bewertungs_durchschnitt: number | null
   bewertungs_anzahl: number | null
+  /** Partner-Tier-Rang (Bronze/Silber/Gold) aus partner_rang; null = kein oeffentlicher Rang. */
+  rang: Tier | null
+  /** Komponenten-ehrlicher Sinnsatz zum Rang (nie eine Fallzahl). */
+  rangSinnsatz: string | null
 }
 
 export type GutachterFinderPayload = {
@@ -181,7 +187,7 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
   const enrichBySvId = new Map<string, SvEnrich>()
 
   // `admin` (Service-Role) wird bereits in Read 1 erzeugt und hier wiederverwendet.
-  const [profilesRes, bewRes, enrichRes] = await Promise.all([
+  const [profilesRes, bewRes, enrichRes, rangBySvId] = await Promise.all([
     admin.from('profiles').select('id,vorname,anzeigename,profilbeschreibung').in('id', profileIds),
     admin
       .from('google_bewertungen_cache')
@@ -193,6 +199,8 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
         'id,gutachter_typ,paket_umkreis_km,qualifikationen_neu,schadenarten,oeffentlich_bestellt,bvsk_mitgliedsnummer,ihk_zertifikat_nummer,oebuv_bestellungsnummer,dat_nummer',
       )
       .in('id', svIds),
+    // AAR-956 Partner-Tier: verdienter Rang je SV (partner_rang, cron-berechnet).
+    getPartnerRangBatch(admin, 'sachverstaendiger', svIds),
   ])
   if (profilesRes.data) {
     for (const p of profilesRes.data as Array<{ id: string; vorname: string | null; anzeigename: string | null; profilbeschreibung: string | null }>) {
@@ -255,6 +263,8 @@ export async function ladeAktiveSVs(): Promise<{ ok: true; data: AktiverSVPublic
       bewertungs_durchschnitt: bew ? bew.durchschnitt : null,
       bewertungs_anzahl: bew ? bew.anzahl : null,
       profilbeschreibung: profileId ? beschreibungByProfileId.get(profileId) ?? null : null,
+      rang: rangBySvId.get(r.id as string)?.tier ?? null,
+      rangSinnsatz: rangBySvId.get(r.id as string)?.sinnsatz ?? null,
     }
   })
 

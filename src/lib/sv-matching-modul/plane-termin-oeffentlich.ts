@@ -23,6 +23,7 @@ import { freieSlots, type Assignee } from '@/lib/termine/engine'
 import { toBerlinWallClock } from '@/lib/google-calendar/timezone'
 import { rankSlots } from './ranking'
 import { toOeffentlichesSvProfil } from './projection'
+import { getPartnerRangBatch } from '@/lib/partner-rang/get'
 import type { OeffentlichesSvProfil, SlotVorschlag, SvBewertung, SvProfilFelder } from './types'
 
 const SLOT_FENSTER_TAGE = 14
@@ -198,6 +199,7 @@ export async function planeTerminOeffentlich(
     const candidates = await ladeFixenSvKandidat(admin, fixerSvId, lat, lng)
     if (candidates.length === 0) return []
     const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
+    const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
     const cand = candidates[0]
     const slots = await slotsFuer(cand.svId, FIXER_MAX_SLOTS)
     return [
@@ -206,6 +208,7 @@ export async function planeTerminOeffentlich(
         bewertung: cand.profileId ? bewById.get(cand.profileId) ?? null : null,
         profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
         slots,
+        rang: rangById.get(cand.svId) ?? null,
       }),
     ]
   }
@@ -214,6 +217,7 @@ export async function planeTerminOeffentlich(
   const candidates = await findBestSV({ fallLat: lat, fallLng: lng, wunschterminIso }, TOP_KANDIDATEN)
   if (candidates.length === 0) return []
   const { profilById, bewById } = await ladeProfilUndBewertung(admin, candidates)
+  const rangById = await getPartnerRangBatch(admin, 'sachverstaendiger', candidates.map((c) => c.svId))
   // AAR-956 (Aaron 14.06.): die slotsFuer-Calls (freieSlots, DB-schwer) PARALLEL statt sequenziell —
   // der Hauptgrund der „Wir suchen"-Sekunden war 3× freieSlots nacheinander. Promise.all erhält die
   // Reihenfolge (Engine-Ranking) → Ergebnis bit-identisch, nur ~3× schneller.
@@ -233,6 +237,7 @@ export async function planeTerminOeffentlich(
         bewertung: cand.profileId ? bewById.get(cand.profileId) ?? null : null,
         profil: cand.profileId ? profilById.get(cand.profileId) ?? null : null,
         slots,
+        rang: rangById.get(cand.svId) ?? null,
       }),
     )
   })

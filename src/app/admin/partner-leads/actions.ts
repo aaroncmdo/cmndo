@@ -8,9 +8,11 @@
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { convertPartnerLead } from '@/lib/partner/convert-partner-lead'
+import { geocodePartnerLead } from '@/lib/partner/geocode-partner-lead'
 import { revalidatePath } from 'next/cache'
 import type { PartnerRolle } from '@/lib/partner/policy'
-import type { PartnerCsvLead } from '@/lib/partner/csv-import'
+import type { PartnerCsvLead, CsvZielFeld } from '@/lib/partner/csv-import'
+import { heuristischesMapping, parseLlmMapping, CSV_ZIEL_FELDER } from '@/lib/partner/csv-import'
 import {
   scrapeGooglePlaces,
   filterGegenBestand,
@@ -23,6 +25,9 @@ import {
   sendWillkommenWerkstatt,
   sendSvBasicClaimLink,
 } from '@/lib/email/google/flows'
+import Anthropic from '@anthropic-ai/sdk'
+import { AI_MODELS } from '@/lib/ai/models'
+import { logAiUsage } from '@/lib/ai/usage-log'
 
 const VERTRIEB_ROLLEN = ['admin', 'dispatch', 'leadbearbeiter']
 const PARTNER_ROLLEN: PartnerRolle[] = ['sachverstaendiger', 'werkstatt', 'makler']
@@ -110,6 +115,20 @@ export async function createPartnerLead(
     return { ok: false, error: 'Bitte eine gültige E-Mail-Adresse angeben.' }
   }
 
+  // Geocoding (best-effort): Fehler brechen den Insert NICHT (Lead nie verlieren).
+  const plz = (input.plz ?? '').trim() || null
+  const ort = (input.ort ?? '').trim() || null
+  // createPartnerLead hat kein strasse-Feld im Input-Typ → undefined (helper behandelt das).
+  let geoFields: { lat?: number; lng?: number; google_place_id?: string | null } = {}
+  try {
+    const geo = await geocodePartnerLead({ plz, ort })
+    if (geo.ok) {
+      geoFields = { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+    }
+  } catch (geoErr) {
+    console.error('[createPartnerLead] Geocoding fehlgeschlagen (non-critical):', geoErr)
+  }
+
   const admin = createAdminClient()
   const { data, error } = await admin
     .from('partner_leads')
@@ -122,10 +141,11 @@ export async function createPartnerLead(
       ansprechpartner_nachname: (input.ansprechpartner_nachname ?? '').trim() || null,
       email,
       telefon: (input.telefon ?? '').trim() || null,
-      plz: (input.plz ?? '').trim() || null,
-      ort: (input.ort ?? '').trim() || null,
+      plz,
+      ort,
       rollen_details: input.rollen_details ?? {},
       zugewiesen_an: staff.id,
+      ...geoFields,
     })
     .select('id')
     .single()
@@ -357,30 +377,58 @@ export async function importCsvLeads(
     return { ok: false, error: 'Keine importierbaren Zeilen gefunden.' }
   }
 
-  const rows = leads
-    .filter((l) => (l?.firma ?? '').trim().length > 0)
-    .map((l) => {
-      const email = (l.email ?? '').trim().toLowerCase()
-      return {
-        rolle: r,
-        status: 'neu',
-        source_channel: 'csv_import',
-        einstufung: null,
-        firma: l.firma.trim(),
-        ansprechpartner_vorname: (l.ansprechpartner_vorname ?? '').trim() || null,
-        ansprechpartner_nachname: (l.ansprechpartner_nachname ?? '').trim() || null,
-        email: email || null,
-        telefon: (l.telefon ?? '').trim() || null,
-        plz: (l.plz ?? '').trim() || null,
-        ort: (l.ort ?? '').trim() || null,
-        rollen_details: l.rollen_details ?? {},
-        zugewiesen_an: staff.id,
-      }
-    })
+  const validLeads = leads.filter((l) => (l?.firma ?? '').trim().length > 0)
 
-  if (rows.length === 0) {
+  if (validLeads.length === 0) {
     return { ok: false, error: 'Keine gültigen Zeilen (Firma fehlt überall).' }
   }
+
+  // Geocoding mit Concurrency-Limit 5 (Google-Rate-Limit vermeiden).
+  // Best-effort: Fehler je Row brechen den Import NICHT — Lead ohne Koordinaten anlegen.
+  const CONCURRENCY = 5
+  const geoResults: Array<{ lat?: number; lng?: number; google_place_id?: string | null }> =
+    new Array(validLeads.length).fill({})
+  for (let i = 0; i < validLeads.length; i += CONCURRENCY) {
+    const batch = validLeads.slice(i, i + CONCURRENCY)
+    const batchGeo = await Promise.all(
+      batch.map(async (l) => {
+        try {
+          const geo = await geocodePartnerLead({
+            // PartnerCsvLead hat kein strasse-Feld → undefined (helper akzeptiert null/undefined).
+            plz: (l.plz ?? '').trim() || null,
+            ort: (l.ort ?? '').trim() || null,
+          })
+          if (geo.ok) return { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+        } catch (geoErr) {
+          console.error('[importCsvLeads] Geocoding-Fehler (non-critical):', geoErr)
+        }
+        return {}
+      }),
+    )
+    batchGeo.forEach((g, j) => {
+      geoResults[i + j] = g
+    })
+  }
+
+  const rows = validLeads.map((l, idx) => {
+    const email = (l.email ?? '').trim().toLowerCase()
+    return {
+      rolle: r,
+      status: 'neu',
+      source_channel: 'csv_import',
+      einstufung: null,
+      firma: l.firma.trim(),
+      ansprechpartner_vorname: (l.ansprechpartner_vorname ?? '').trim() || null,
+      ansprechpartner_nachname: (l.ansprechpartner_nachname ?? '').trim() || null,
+      email: email || null,
+      telefon: (l.telefon ?? '').trim() || null,
+      plz: (l.plz ?? '').trim() || null,
+      ort: (l.ort ?? '').trim() || null,
+      rollen_details: l.rollen_details ?? {},
+      zugewiesen_an: staff.id,
+      ...geoResults[idx],
+    }
+  })
 
   const admin = createAdminClient()
   const { data, error } = await admin.from('partner_leads').insert(rows).select('id')
@@ -388,6 +436,74 @@ export async function importCsvLeads(
 
   revalidatePath('/admin/partner-leads')
   return { ok: true, angelegt: data?.length ?? rows.length }
+}
+
+// ─── CSV-Mapping-Vorschlag (KI + Heuristik-Fallback) ──────────────────────
+
+/**
+ * Schlaegt ein Spalten-Mapping fuer einen CSV-Import vor. Nutzt das LLM
+ * (claude haiku) wenn ANTHROPIC_API_KEY gesetzt ist; faellt deterministisch
+ * auf die Header-Alias-Heuristik zurueck (kein harter Fehler).
+ *
+ * @param header   Erste Zeile der CSV (Spaltennamen).
+ * @param sampleRows  Bis zu 5 Datenzeilen zur Kontextualisierung des LLM.
+ * @returns { ok: true, mapping, quelle } oder { ok: false, error }.
+ */
+export async function schlageCsvMappingVor(
+  header: string[],
+  sampleRows: string[][],
+): Promise<
+  | { ok: true; mapping: CsvZielFeld[]; quelle: 'ki' | 'heuristik' }
+  | { ok: false; error: string }
+> {
+  const staff = await requireVertriebStaff()
+  if (!staff) return { ok: false, error: 'Nur Vertriebs-Team darf Mapping-Vorschlaege anfragen.' }
+
+  const apiKey = process.env.ANTHROPIC_API_KEY
+  if (!apiKey) {
+    return { ok: true, mapping: heuristischesMapping(header), quelle: 'heuristik' }
+  }
+
+  try {
+    const anthropic = new Anthropic({ apiKey })
+    const zielFelderListe = [...CSV_ZIEL_FELDER].join(',')
+    const systemPrompt =
+      `Ordne jeden CSV-Header genau EINEM Zielfeld aus [${zielFelderListe}] zu. ` +
+      'datNr = DAT-Expert-Nummer (Sachverstaendige), ihk = IHK-Registrierungsnummer (Makler). ' +
+      'Unklar → ignorieren. Antworte NUR mit JSON {header:zielfeld}.'
+
+    const userContent =
+      'Header: ' +
+      JSON.stringify(header) +
+      '\nBeispielzeilen: ' +
+      JSON.stringify(sampleRows.slice(0, 5))
+
+    const resp = await anthropic.messages.create({
+      model: AI_MODELS.faq_bot_kunde, // Haiku 4.5 — kurze strukturierte Antwort, Speed > Qualitaet
+      max_tokens: 1024,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: userContent }],
+    })
+
+    // Ersten Text-Block aus der Antwort extrahieren.
+    const textBlock = resp.content.find((b) => b.type === 'text')
+    const llmText = textBlock?.type === 'text' ? textBlock.text : ''
+
+    // Usage loggen (fire-and-forget, kein fallId-Kontext hier).
+    void logAiUsage({
+      endpoint: 'partner_csv_mapping',
+      model: AI_MODELS.faq_bot_kunde,
+      fallId: null,
+      usage: resp.usage,
+    })
+
+    const parsed = parseLlmMapping(llmText, header)
+    const mapping = parsed ?? heuristischesMapping(header)
+    return { ok: true, mapping, quelle: 'ki' }
+  } catch (err) {
+    console.error('[schlageCsvMappingVor] LLM-Fehler (Heuristik-Fallback):', err)
+    return { ok: true, mapping: heuristischesMapping(header), quelle: 'heuristik' }
+  }
 }
 
 // ─── Lead-Scraping (Google Places) ─────────────────────────────────────────
@@ -467,7 +583,33 @@ export async function importScrapedLeads(
     return { ok: false, error: 'Alle ausgewählten Kandidaten sind bereits vorhanden (Dubletten).' }
   }
 
-  const rows = zuAnlegen.map((k) => ({
+  // Geocoding mit Concurrency-Limit 5 (best-effort — ScrapeKandidat hat kein lat/lng).
+  const SCRAPE_CONCURRENCY = 5
+  const scrapeGeoResults: Array<{ lat?: number; lng?: number; google_place_id?: string | null }> =
+    new Array(zuAnlegen.length).fill({})
+  for (let i = 0; i < zuAnlegen.length; i += SCRAPE_CONCURRENCY) {
+    const batch = zuAnlegen.slice(i, i + SCRAPE_CONCURRENCY)
+    const batchGeo = await Promise.all(
+      batch.map(async (k) => {
+        try {
+          const geo = await geocodePartnerLead({
+            strasse: k.strasse,
+            plz: (k.plz ?? '').trim() || null,
+            ort: (k.ort ?? '').trim() || null,
+          })
+          if (geo.ok) return { lat: geo.lat, lng: geo.lng, google_place_id: geo.place_id }
+        } catch (geoErr) {
+          console.error('[importScrapedLeads] Geocoding-Fehler (non-critical):', geoErr)
+        }
+        return {}
+      }),
+    )
+    batchGeo.forEach((g, j) => {
+      scrapeGeoResults[i + j] = g
+    })
+  }
+
+  const rows = zuAnlegen.map((k, idx) => ({
     rolle: r,
     status: 'neu',
     source_channel: 'scraping',
@@ -476,6 +618,7 @@ export async function importScrapedLeads(
     telefon: (k.telefon ?? '').trim() || null,
     plz: (k.plz ?? '').trim() || null,
     ort: (k.ort ?? '').trim() || null,
+    strasse: k.strasse ?? null,
     rollen_details: {
       google_place_id: k.google_place_id,
       website: k.website ?? null,
@@ -483,6 +626,7 @@ export async function importScrapedLeads(
       quelle: 'google_places',
     },
     zugewiesen_an: staff.id,
+    ...scrapeGeoResults[idx],
   }))
 
   const admin = createAdminClient()

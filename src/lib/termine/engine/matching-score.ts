@@ -17,6 +17,11 @@ export const W_PAKET = 100
 export const W_KONTINGENT_GENUTZT = 2
 export const W_ABLEHNUNG = 2
 export const W_ETA_MIN = 0.5
+// C-Reihung (Aaron 08.07.): Rang-Fein-Sort INNERHALB der Paket-Stufe. 2*W_RANG < W_PAKET
+// (20 < 100) => der Rang ueberschreitet NIE eine Paket-Stufe — die Paket-Prioritaet (Revenue)
+// bleibt primaer, der verdiente Rang verfeinert nur die Reihung innerhalb derselben Stufe.
+// Flag-gated im Caller (rangOrdinal nur gesetzt, wenn das Matching-Flag an ist). Tunbar.
+export const W_RANG = 10
 // "Zweifelsfall"-Granularität: Kandidaten im selben Score-Bucket gelten als gleich gut
 // → Tenure entscheidet. 5 ≈ 10 ETA-Minuten Unterschied. Tunebar.
 export const SCORE_BUCKET = 5
@@ -34,6 +39,9 @@ export interface SvKandidatFeatures {
   /** echte Mapbox-ETA Büro→Schadenort in Minuten; null → Haversine-km als Fallback-Penalty. */
   etaVomBueroMin: number | null
   distanzKm: number
+  /** 0=bronze/kein Rang, 1=silber, 2=gold. Rang-Fein-Sort INNERHALB der Paket-Stufe
+   *  (nur gesetzt, wenn das Matching-Flag an ist; sonst undefined → kein Effekt). */
+  rangOrdinal?: number
 }
 
 /** Reiner SV-Score (höher = besser). "Pakete voll bekommen" = paketPrio + Rest-Kapazität bevorzugt. */
@@ -41,9 +49,15 @@ export function bewerteSvKandidat(f: SvKandidatFeatures): number {
   const paketPrio = PAKET_PRIO[f.paket] ?? 1
   const distanzPenalty = f.etaVomBueroMin != null ? f.etaVomBueroMin * W_ETA_MIN : f.distanzKm
   return paketPrio * W_PAKET
+    + (f.rangOrdinal ?? 0) * W_RANG
     - f.kontingentGenutzt * W_KONTINGENT_GENUTZT
     - f.ablehnungen30d * W_ABLEHNUNG
     - distanzPenalty
+}
+
+/** Rang → Ordinal für die Fein-Sort: bronze/kein Rang = 0, silber = 1, gold = 2. */
+export function rangToOrdinal(rang: string | null | undefined): number {
+  return rang === 'gold' ? 2 : rang === 'silber' ? 1 : 0
 }
 
 export interface TenureInfo {

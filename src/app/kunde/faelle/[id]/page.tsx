@@ -45,6 +45,7 @@ import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
 import WerkstattCard from '@/components/kunde/WerkstattCard'
+import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
 import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
@@ -208,6 +209,13 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
       datei_name: (d.original_filename as string | null) ?? null,
       created_at: d.hochgeladen_am as string,
     }))
+    // KVA-Loop (Kunde-Seite): signierte URL des jüngsten Kostenvoranschlag-PDFs
+    // aus den bereits geladenen Dokumenten (Werkstatt lädt dokument_typ='kostenvoranschlag'
+    // sichtbar_fuer inkl. 'kunde' hoch). Fallback = Dokumente-Reiter (Card-Hinweis).
+    const kostenvoranschlagPdfUrl =
+      dokumente
+        .filter((d) => d.typ === 'kostenvoranschlag' && d.datei_url)
+        .slice(-1)[0]?.datei_url ?? null
 
     // CMM-23: Pflichtdokumente-Liste laden — identische Filter-Logik wie
     // beim SV im Auftrag, nur aus Kunden-Sicht.
@@ -1021,17 +1029,20 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
           />
         )}
 
-        {/* WS4 (Reduced-Repair): Kunde-KVA-Card — Werkstatt-Reparatur-Claims
-            (Selbstzahler/Kasko-frei). Zeigt den (Werkstatt-)KVA + PDF-Link und
-            erlaubt dem Kunden, einen eigenen KVA hochzuladen. */}
-        {!!fall.claim_id && istWerkstattReparaturWeg(claimExtra?.abrechnungsweg ?? null) && (
-          <KostenvoranschlagCard
-            claimId={fall.claim_id as string}
-            netto={claimExtra?.kostenvoranschlag_netto ?? null}
-            brutto={claimExtra?.kostenvoranschlag_brutto ?? null}
-            kvaDokUrl={kvaDokUrl}
-          />
-        )}
+        {/* KVA-Loop (Kunde-Seite): Kostenvoranschlag-Card — nur bei Reparatur-Claim
+            (hinterlegte Werkstatt) mit hochgeladenem KVA. Kunde sieht Betrag + PDF
+            und gibt die Reparaturkosten frei (-> claims.reparatur_freigegeben_am).
+            Abrechnungsweg-Verfeinerung (KVA nur kasko/selbstzahler) folgt im Design-Schritt. */}
+        {reparaturWerkstattId &&
+          (fall.kostenvoranschlag_netto != null || fall.kostenvoranschlag_brutto != null) && (
+            <KostenvoranschlagCard
+              claimId={fall.claim_id as string}
+              kostenvoranschlagNetto={(fall.kostenvoranschlag_netto as number | null) ?? null}
+              kostenvoranschlagBrutto={(fall.kostenvoranschlag_brutto as number | null) ?? null}
+              freigegebenAm={(fall.reparatur_freigegeben_am as string | null) ?? null}
+              pdfUrl={kostenvoranschlagPdfUrl}
+            />
+          )}
 
         {/* Werkstatt-Finder — Kunde ohne vermittelte Werkstatt. Kanonischer Gate
             brauchtWerkstattVermittlung (reparatur ODER fiktiv, keine Werkstatt,

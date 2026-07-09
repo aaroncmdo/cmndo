@@ -6,9 +6,11 @@
 
 import { createHash, randomUUID } from 'node:crypto'
 import { z } from 'zod'
-import Anthropic from '@anthropic-ai/sdk'
+import type Anthropic from '@anthropic-ai/sdk'
 import { AI_MODELS } from '@/lib/ai/models'
-import { logAiUsage } from '@/lib/ai/usage-log'
+import { callForProposals } from '@/lib/claim-ai/engine/call'
+import { toolsFrom, validateVerb } from '@/lib/claim-ai/engine/verbs'
+import type { VerbDefinition } from '@/lib/claim-ai/engine/verbs'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { summarizeSlaRollenLage } from '@/lib/aufsicht/sla-rollen'
 import type { SlaRollenLage } from '@/lib/aufsicht/sla-rollen'
@@ -41,11 +43,12 @@ const proposeSlaTaskSchema = z.object({
 })
 
 // ---------------------------------------------------------------------------
-// Tool-Definitionen (Anthropic.Tool[])
+// Verb-Registry (SP2-Konvergenz: geteilte VerbDefinition-Struktur wie Orchestrator)
 // ---------------------------------------------------------------------------
 
-export const AUFSICHT_TOOLS: Anthropic.Tool[] = [
-  {
+const proposeSlaTaskVerb: VerbDefinition<AufsichtDraft> = {
+  name: 'propose_sla_task',
+  tool: {
     name: 'propose_sla_task',
     description:
       'Schlage einen konkreten Task an die haengende Rolle vor, um eine SLA-Verletzung zu beheben. Wird NICHT automatisch ausgefuehrt — ein Mensch gibt frei.',
@@ -72,7 +75,19 @@ export const AUFSICHT_TOOLS: Anthropic.Tool[] = [
       required: ['claim_id', 'ziel_rolle', 'titel', 'begruendung'],
     },
   },
-]
+  validate: (input) => {
+    const parsed = proposeSlaTaskSchema.safeParse(input)
+    if (!parsed.success) {
+      return { ok: false, error: parsed.error.issues[0]?.message ?? 'invalide Eingabe' }
+    }
+    const { claim_id, ziel_rolle, titel, begruendung, prioritaet } = parsed.data
+    return { ok: true, draft: { claimId: claim_id, zielRolle: ziel_rolle, titel, begruendung, prioritaet } }
+  },
+}
+
+const AUFSICHT_VERBS: VerbDefinition<AufsichtDraft>[] = [proposeSlaTaskVerb]
+
+export const AUFSICHT_TOOLS = toolsFrom(AUFSICHT_VERBS)
 
 // ---------------------------------------------------------------------------
 // System-Prompt
@@ -95,14 +110,12 @@ export function extractAufsichtDrafts(content: Anthropic.ContentBlock[]): Aufsic
   const out: AufsichtDraft[] = []
   for (const block of content) {
     if (block.type !== 'tool_use') continue
-    if (block.name !== 'propose_sla_task') continue
-    const parsed = proposeSlaTaskSchema.safeParse(block.input)
-    if (!parsed.success) {
-      console.warn('[ki_aufsicht] propose_sla_task invalide Input:', parsed.error.issues[0]?.message)
+    const result = validateVerb(AUFSICHT_VERBS, block.name, block.input)
+    if (!result.ok) {
+      console.warn('[ki_aufsicht] Verb-Validierung fehlgeschlagen:', result.error)
       continue
     }
-    const { claim_id, ziel_rolle, titel, begruendung, prioritaet } = parsed.data
-    out.push({ claimId: claim_id, zielRolle: ziel_rolle, titel, begruendung, prioritaet })
+    out.push(result.draft)
   }
   return out
 }
@@ -169,6 +182,24 @@ export async function persistAufsichtRemediation(
   return ids
 }
 
+/**
+ * Loescht un-actioned (status='offen') Aufsicht-Vorschlaege des letzten Laufs.
+ * Die Aufsicht ist eine periodische Momentaufnahme des aktuellen Remediation-Bedarfs:
+ * offene Vorschlaege werden je Lauf ERSETZT (nicht akkumuliert), sonst stapelt der
+ * taegliche Cron bei Dauer-Breaches neue Vorschlaege (der partielle Unique-Index
+ * greift nicht, weil buildDedupeKey einen randomUUID-Anteil hat). Actioned
+ * (angenommen/verworfen) bleiben als Admin-Entscheidungen erhalten. Wirft nie.
+ */
+export async function clearOpenAufsichtProposals(): Promise<void> {
+  const db = createAdminClient()
+  const { error } = await db
+    .from('ai_claim_proposals')
+    .delete()
+    .eq('quelle', 'aufsicht')
+    .eq('status', 'offen')
+  if (error) console.error('[ki_aufsicht] clearOpenAufsichtProposals failed:', error.message)
+}
+
 // ---------------------------------------------------------------------------
 // laufeSlaAufsicht — Batch-Claude-Call (spiegelt reviewClaim)
 // ---------------------------------------------------------------------------
@@ -181,41 +212,26 @@ export async function persistAufsichtRemediation(
  */
 export async function laufeSlaAufsicht(lage: SlaRollenLage): Promise<{ findings: number }> {
   const model = AI_MODELS.ki_aufsicht
-  let res: Anthropic.Message
 
-  try {
-    // Konstruktor im try: fehlt ANTHROPIC_API_KEY, wirft er — dann sauber 0.
-    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY })
-    res = await client.messages.create({
-      model,
-      max_tokens: 4000,
-      system: AUFSICHT_SYSTEM,
-      tools: AUFSICHT_TOOLS,
-      messages: [{ role: 'user', content: summarizeSlaRollenLage(lage) }],
-    })
-  } catch (err) {
-    console.error('[ki_aufsicht] Anthropic-Call fehlgeschlagen:', err)
-    return { findings: 0 }
-  }
-
-  // Usage-Log: non-critical, darf nie den Haupt-Flow blockieren.
-  try {
-    await logAiUsage({
-      endpoint: 'ki_aufsicht',
-      model,
-      fallId: null, // Batch-Call ohne spezifischen Fall
-      usage: {
-        input_tokens: res.usage.input_tokens,
-        output_tokens: res.usage.output_tokens,
-      },
-    })
-  } catch {
-    // Bewusst swallowed — usage-log non-critical.
-  }
-
-  const drafts = extractAufsichtDrafts(res.content)
+  // SP2-Konvergenz P4: geteilte Engine statt inline-Anthropic-Block. callForProposals
+  // kapselt Client-Konstruktor + messages.create + Usage-Log + Fehler->[] (byte-identisch);
+  // extractAufsichtDrafts bleibt die layer-spezifische Extraktion, maxTokens=4000 (Prod-Fix).
+  const drafts = await callForProposals({
+    model,
+    system: AUFSICHT_SYSTEM,
+    tools: AUFSICHT_TOOLS,
+    userContent: summarizeSlaRollenLage(lage),
+    maxTokens: 4000,
+    logEndpoint: 'ki_aufsicht',
+    logFallId: null,
+    extract: extractAufsichtDrafts,
+  })
   if (!drafts.length) return { findings: 0 }
 
+  // Replace-Strategie: erst die un-actioned Vorschlaege des letzten Laufs loeschen
+  // (NUR wenn wir neue haben -> bei API-Fehler/0-Drafts bleibt die vorige Lage erhalten),
+  // dann die frischen persistieren. Verhindert taegliche Akkumulation bei Dauer-Breaches.
+  await clearOpenAufsichtProposals()
   const ids = await persistAufsichtRemediation(model, drafts)
   return { findings: ids.length }
 }

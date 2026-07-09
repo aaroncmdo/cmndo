@@ -19,9 +19,11 @@ type AdminClient = ReturnType<typeof createAdminClient>
  * Die 5 naechsten aktiven Partner-Werkstaetten zum Standort-Anker eines Lead/Claim.
  * Anker: Lead -> besichtigungsort_lat/lng, sonst unfallort_lat/lng, sonst
  * kunde_plz/halter_plz. Claim -> schadenort_lat/lng, sonst schadenort_plz.
+ * nurEchte=true (Kunde-/Flow-Caller) blendet Test-/interne Werkstaetten aus der
+ * Kundensicht aus; Dispatch/SV rufen ohne nurEchte und sehen weiterhin alle.
  */
 export async function findReparaturWerkstaettenForTarget(
-  input: VermittlungTarget,
+  input: VermittlungTarget & { nurEchte?: boolean },
 ): Promise<WerkstattFinderRow[]> {
   const admin = createAdminClient()
   let lat: number | undefined
@@ -77,7 +79,7 @@ export async function findReparaturWerkstaettenForTarget(
     }
   }
 
-  return findWerkstaetten({ lat, lng, plz, kategorie, limit: 5 })
+  return findWerkstaetten({ lat, lng, plz, kategorie, limit: 5, nurEchte: input.nurEchte })
 }
 
 /**
