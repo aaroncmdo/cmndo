@@ -10,6 +10,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { KB_BERATUNG_DURATION_MIN } from '@/lib/termine/constants'
+import { pruefeKbBelegt } from '@/lib/termine/kb-belegung'
 
 export async function createKbVideoterminByKb(
   fallId: string,
@@ -53,16 +54,14 @@ export async function createKbVideoterminByKb(
   }
   const endZeit = new Date(startZeit.getTime() + KB_BERATUNG_DURATION_MIN * 60 * 1000)
 
-  // Konflikt-Check: kein anderer KB-Termin zur gleichen Zeit für denselben KB
-  const { data: konflikt } = await db
-    .from('gutachter_termine')
-    .select('id')
-    .eq('kb_id', kbId)
-    .eq('typ', 'kb_beratung')
-    .in('status', ['bestaetigt', 'reserviert'])
-    .eq('start_zeit', startZeit.toISOString())
-    .is('cancelled_at', null)
-  if (konflikt && konflikt.length > 0) {
+  // Fail-CLOSED Konflikt-Check gegen die KB-Busy-Definition (kb_beratung-Overlap ∪ admin_termine-Overlap),
+  // identisch zum Offer getAvailableKbSlots + zu bookKbTermin. Der fruehere Read pruefte nur kb_beratung
+  // auf EXAKTE Startzeit + KEIN admin_termine.
+  const kbBelegt = await pruefeKbBelegt(db, kbId, startZeit.toISOString(), endZeit.toISOString())
+  if (!kbBelegt.ok) {
+    return { success: false, error: 'Fehler bei Slot-Prüfung' }
+  }
+  if (!kbBelegt.frei) {
     return { success: false, error: 'Slot bereits belegt' }
   }
 
@@ -88,7 +87,13 @@ export async function createKbVideoterminByKb(
     })
     .select('id')
     .single()
-  if (error || !termin) return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+  if (error || !termin) {
+    // 23P01 = Exclusion-Constraint (KB<->KB atomar): Slot in der TOCTOU-Luecke vergeben.
+    if (error?.code === '23P01') {
+      return { success: false, error: 'Slot bereits belegt' }
+    }
+    return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+  }
 
   await db.from('timeline').insert({
     fall_id: fallId,
