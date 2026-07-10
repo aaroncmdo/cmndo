@@ -6,6 +6,7 @@ import { Phone, X, Send, Check, Search } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { erstelleOeffentlichenRueckruf } from '@/lib/actions/public-rueckruf'
 import { trackEvent } from '@/lib/analytics/track-event'
+import { setUserData } from '@/lib/analytics/user-data'
 import { PHONE_E164, PHONE_DISPLAY } from '@/lib/seo/jsonld'
 
 const PHONE_TEL = PHONE_E164
@@ -44,6 +45,7 @@ export function StickyCallBar({ quelle = 'Hauptseite', whatsappHref }: Props) {
         setDone(true)
         // Conversion-Event: Rückruf-Anfrage = Lead (claimondo_rueckruf). Kein
         // Server-Event in public-rueckruf → client-seitig; Consent-Mode-Modeling.
+        setUserData({ name, phone: telefon })
         trackEvent('generate_lead', { currency: 'EUR', value: 0, source: 'sticky-rueckruf' })
       } else setError(r.error)
     })
