@@ -125,3 +125,36 @@ export async function ladeMaklerKandidaten(supabase: Sb): Promise<Kandidat[]> {
     },
   }))
 }
+
+/** Werkstatt: volumen-gefuehrt (analog Makler; duenne Qualitaetsdaten). */
+export async function ladeWerkstattKandidaten(supabase: Sb): Promise<Kandidat[]> {
+  const { data: werkstaetten, error } = await supabase
+    .from('werkstaetten')
+    .select('id, status, aktiviert_am, gesperrt_am')
+    .is('gesperrt_am', null)
+  if (error || !werkstaetten || werkstaetten.length === 0) return []
+  const ids: string[] = werkstaetten.map((w: { id: string }) => w.id)
+  // Provisions-Ledger-Unifikation: partner_provisionen (typ-gefiltert) als Volumen-Signal.
+  const { data: prov } = await supabase
+    .from('partner_provisionen')
+    .select('partner_id, status')
+    .eq('partner_typ', 'werkstatt')
+    .in('partner_id', ids)
+  const volumen = new Map<string, number>()
+  for (const p of (prov ?? []) as { partner_id: string; status: string | null }[]) {
+    if (p.status === 'freigegeben' || p.status === 'ausgezahlt') {
+      volumen.set(p.partner_id, (volumen.get(p.partner_id) ?? 0) + 1)
+    }
+  }
+  return werkstaetten.map((w: { id: string; status: string | null; aktiviert_am: string | null }): Kandidat => ({
+    id: w.id,
+    signals: {
+      typ: 'werkstatt',
+      volumen: volumen.get(w.id) ?? 0,
+      oeffentlichBestellt: false, zertifikate: 0, partnerSeitJahre: jahreSeit(w.aktiviert_am),
+      ratingDurchschnitt: null, ratingAnzahl: 0,
+      aktiv: w.status === 'aktiv',
+      offeneReklamationen: 0, noShowQuote: 0, ablehnungen30d: 0,
+    },
+  }))
+}
