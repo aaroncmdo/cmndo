@@ -9633,6 +9633,7 @@ export type Database = {
           reminder_1_sent_at: string | null
           reminder_2_sent_at: string | null
           reminder_3_sent_at: string | null
+          reminder_4_sent_at: string | null
           reminder_token: string | null
           reparatur_werkstatt_id: string | null
           reparatur_werkstatt_quelle: string | null
@@ -9850,6 +9851,7 @@ export type Database = {
           reminder_1_sent_at?: string | null
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
+          reminder_4_sent_at?: string | null
           reminder_token?: string | null
           reparatur_werkstatt_id?: string | null
           reparatur_werkstatt_quelle?: string | null
@@ -10067,6 +10069,7 @@ export type Database = {
           reminder_1_sent_at?: string | null
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
+          reminder_4_sent_at?: string | null
           reminder_token?: string | null
           reparatur_werkstatt_id?: string | null
           reparatur_werkstatt_quelle?: string | null
