@@ -281,18 +281,16 @@ export function PortalNav({
         {/* 2026-05-14: Dark-Variant erbt floating-Pills via data-sidebar-mode
             (CSS in globals.css). Floating-Default app-weit (Hook merkt die
             Bar-Opt-out-Präferenz in localStorage). */}
-        {/* Detached Glass-Panel: freischwebende Sidebar (Margin ringsum + Rundung +
-            Schatten), transluzentes Navy-Glas (glass-branded blur + color-mix)
-            statt solide — der full-bleed Content darunter (Layout-Offset entfernt)
-            schimmert durch → Ebene "on top", wie SV-Cockpit. Hoehere Deckung (72%)
-            als die SV-Pills (55%), weil der Backdrop hier nicht durchgaengig Navy
-            ist (55% wuerde auf hellem BG auswaschen — 26.06.-Lehre). */}
+        {/* Detached Navy-Panel: freischwebende Sidebar (Margin ringsum + Rundung +
+            Schatten), SOLIDES Navy. w-52 + top/left/bottom-2 passen INNERHALB des
+            bestehenden md:ml-56-Content-Offsets. Bewusst solide statt Glas: auf
+            hellem BG mit freigeraeumtem Content milcht Glas nur den leeren BG =
+            washed (26.06.-Lehre "das Glas WAR das Problem"). */}
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
           data-sidebar-mode="bar"
-          className={`glass-branded hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg shadow-ios-lg overflow-hidden ${className}`}
-          style={{ backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 72%, transparent)' }}
+          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg bg-claimondo-navy shadow-ios-lg overflow-hidden ${className}`}
         >
           {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 
