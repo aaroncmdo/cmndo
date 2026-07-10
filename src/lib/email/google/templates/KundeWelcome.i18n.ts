@@ -37,6 +37,7 @@ type S = {
   labelEmail: string
   labelPasswort: string
   passwortHint: string
+  telefonLoginHint: string
   // ── accountExists branch ──
   accountExistsIntro: string
   accountExistsButton: string
@@ -84,6 +85,7 @@ const de: S = {
   labelEmail: 'E-Mail:',
   labelPasswort: 'Passwort:',
   passwortHint: 'Wir empfehlen Ihnen, das Passwort nach dem ersten Login in den Einstellungen zu ändern.',
+  telefonLoginHint: 'Tipp: Sie können sich künftig auch direkt mit Ihrer Telefonnummer anmelden — ganz ohne Passwort.',
   accountExistsIntro: 'In Ihrem Kunden-Portal können Sie den Fortschritt Ihres Falls verfolgen, Dokumente einsehen und direkt mit uns kommunizieren.',
   accountExistsButton: 'Zum Kunden-Portal',
   noAccountIntro: 'Erstellen Sie jetzt Ihr persönliches Portal-Konto, um den Fortschritt Ihres Falls zu verfolgen und Dokumente einzusehen.',
@@ -127,6 +129,7 @@ const en: S = {
   labelEmail: 'E-mail:',
   labelPasswort: 'Password:',
   passwortHint: 'We recommend that you change the password in the settings after your first login.',
+  telefonLoginHint: 'Tip: In future you can also log in directly with your phone number — no password needed.',
   accountExistsIntro: 'In your customer portal you can track the progress of your case, view documents and communicate directly with us.',
   accountExistsButton: 'To the customer portal',
   noAccountIntro: 'Create your personal portal account now to track the progress of your case and view documents.',
@@ -170,6 +173,7 @@ const tr: S = {
   labelEmail: 'E-posta:',
   labelPasswort: 'Şifre:',
   passwortHint: 'İlk girişinizden sonra şifreyi ayarlardan değiştirmenizi öneririz.',
+  telefonLoginHint: 'İpucu: Bundan böyle doğrudan telefon numaranızla da giriş yapabilirsiniz — şifre gerekmez.',
   accountExistsIntro: 'Müşteri portalınızda dosyanızın ilerlemesini takip edebilir, belgeleri görüntüleyebilir ve bizimle doğrudan iletişim kurabilirsiniz.',
   accountExistsButton: 'Müşteri portalına git',
   noAccountIntro: 'Dosyanızın ilerlemesini takip etmek ve belgeleri görüntülemek için şimdi kişisel portal hesabınızı oluşturun.',
@@ -213,6 +217,7 @@ const ar: S = {
   labelEmail: 'البريد الإلكتروني:',
   labelPasswort: 'كلمة المرور:',
   passwortHint: 'نوصيك بتغيير كلمة المرور من الإعدادات بعد أول تسجيل دخول.',
+  telefonLoginHint: 'نصيحة: يمكنك مستقبلاً تسجيل الدخول مباشرةً برقم هاتفك أيضًا — دون الحاجة إلى كلمة مرور.',
   accountExistsIntro: 'في بوابة العملاء يمكنك متابعة تقدّم ملفك والاطلاع على المستندات والتواصل معنا مباشرة.',
   accountExistsButton: 'إلى بوابة العملاء',
   noAccountIntro: 'أنشئ الآن حساب البوابة الشخصي الخاص بك لمتابعة تقدّم ملفك والاطلاع على المستندات.',
@@ -256,6 +261,7 @@ const ru: S = {
   labelEmail: 'Эл. почта:',
   labelPasswort: 'Пароль:',
   passwortHint: 'Рекомендуем изменить пароль в настройках после первого входа.',
+  telefonLoginHint: 'Совет: в дальнейшем вы также можете входить напрямую по номеру телефона — без пароля.',
   accountExistsIntro: 'В клиентском портале вы можете отслеживать ход вашего дела, просматривать документы и общаться с нами напрямую.',
   accountExistsButton: 'В клиентский портал',
   noAccountIntro: 'Создайте сейчас свой личный аккаунт на портале, чтобы отслеживать ход вашего дела и просматривать документы.',
@@ -299,6 +305,7 @@ const pl: S = {
   labelEmail: 'E-mail:',
   labelPasswort: 'Hasło:',
   passwortHint: 'Zalecamy zmianę hasła w ustawieniach po pierwszym logowaniu.',
+  telefonLoginHint: 'Wskazówka: w przyszłości możesz też logować się bezpośrednio numerem telefonu — bez hasła.',
   accountExistsIntro: 'W portalu klienta możesz śledzić postęp swojej sprawy, przeglądać dokumenty i komunikować się z nami bezpośrednio.',
   accountExistsButton: 'Do portalu klienta',
   noAccountIntro: 'Utwórz teraz swoje osobiste konto w portalu, aby śledzić postęp swojej sprawy i przeglądać dokumenty.',
