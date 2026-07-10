@@ -28,7 +28,6 @@ import PageHeader from '@/components/shared/PageHeader'
 import FallDetailSections from './FallDetailSections'
 import BankdatenBanner from '@/components/kunde/BankdatenBanner'
 import PflichtdokumenteSection from '@/components/fall/PflichtdokumenteSection'
-import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
 import { FallMitteilungenBanner } from '@/components/shared/fall-mitteilungen'
 // AAR Fallakte-Kanonisierung: kanonische Status/Notice-Box.
@@ -60,8 +59,8 @@ import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termi
 import { EMBED_B_KLAERUNG_TASK_TYP, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 import ClaimStepper from '@/components/kunde/ClaimStepper'
 import SelbstzahlerReparaturStepper from '@/components/kunde/SelbstzahlerReparaturStepper'
-import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
-import { getKundeFallDetailRecord, getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
 import { isRedirectError } from 'next/dist/client/components/redirect-error'
 import { isHTTPAccessFallbackError } from 'next/dist/client/components/http-access-fallback/http-access-fallback'
 
@@ -85,11 +84,16 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const admin = createAdminClient()
 
-    // CMM-28: claim-zentrierter Loader. Ownership wird intern aufgelöst
-    // (claim_parties.user_id ODER faelle.kunde_id ODER lead.email).
-    // CMM-63: accept-both — routeId ist claim_id (neu) ODER faelle.id (Alt-Bookmark).
-    const fall = await getKundeFallDetailRecord(admin, user.id, user.email ?? null, routeId)
-    if (!fall) notFound()
+    // Phase C: EIN rollen-aware getClaimDetail (Facade) statt 3 separater Loader
+    // (getKundeFallDetailRecord + getClaimLifecycleForClaim + getPflichtdokumenteForFall).
+    // detail.core === getKundeFallDetailRecord-Output (behavior-preserving); Ownership
+    // via viewer. CMM-63: accept-both — routeId ist claim_id (neu) ODER faelle.id (Alt).
+    const detail = await getClaimDetail(supabase, routeId, 'kunde', {
+      userId: user.id,
+      email: user.email ?? null,
+    })
+    if (!detail) notFound()
+    const fall = detail.core
 
     // CMM-63: Ab hier ist `id` die aufgelöste faelle.id. Damit bleiben ALLE
     // fall_id-keyed Sub-Queries unten unverändert korrekt — egal ob die Route
@@ -217,9 +221,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
         .filter((d) => d.typ === 'kostenvoranschlag' && d.datei_url)
         .slice(-1)[0]?.datei_url ?? null
 
-    // CMM-23: Pflichtdokumente-Liste laden — identische Filter-Logik wie
-    // beim SV im Auftrag, nur aus Kunden-Sicht.
-    const pflichtSlots = await getPflichtdokumenteForFall(supabase, id, 'kunde')
+    // Phase C: Pflichtdokumente kommen aus dem getClaimDetail-Bundle (oben) —
+    // identische Filter-Logik (getPflichtdokumenteForFall, rolle='kunde').
+    const pflichtSlots = detail.pflichtDokumente
 
     // Aktiven gutachter_termine Eintrag laden (inkl. sv_vorgeschlagene_slots)
     const { data: aktiverTermin } = await admin
@@ -597,11 +601,9 @@ export default async function KundeFallDetailPage({ params }: { params: Promise<
 
     const gutachtenVerfuegbar = !!fall.gutachten_eingegangen_am
 
-    // CMM-44 Claim-Phasen-SSoT (P0): zentraler Loader = die EINE Quelle fuer den
-    // Lifecycle (statt Inline-Assembly). Liefert auch auftraege/kanzleiFall fuer
-    // die weitere Verwendung unten (kein Doppel-Load).
-    const { lifecycle: claimLifecycle, auftraege, kanzleiFall } =
-      await getClaimLifecycleForClaim(admin, fall.id as string)
+    // Phase C: Lifecycle + auftraege kommen aus dem getClaimDetail-Bundle (oben).
+    // (kanzleiFall wird auf dieser Kunde-Page nicht genutzt → nicht destrukturiert.)
+    const { lifecycle: claimLifecycle, auftraege } = detail
     // Gutachten-PDF aus dem Storage-Bucket
     let gutachtenUrlAusBucket: string | null = null
     if (fall.claim_id) {
