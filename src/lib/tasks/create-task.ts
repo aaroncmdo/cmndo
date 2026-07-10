@@ -15,6 +15,10 @@ type CreateLinkedTaskParams = {
   entity_id?: string
   faellig_am?: Date | string
   fall_id?: string | null
+  // CMM-49: claims.id (SSoT-Anker). tasks.fall_id FKt auf faelle_claim_bridge.fall_id
+  // (NICHT claims.id) — Caller die nur eine claim_id haben, muessen fall_id ueber die
+  // Bridge aufloesen und claim_id hier separat mitgeben.
+  claim_id?: string | null
   typ?: string
   empfaenger_rolle?: string
   empfaenger_user_id?: string | null
@@ -74,6 +78,7 @@ export async function createLinkedTask(params: CreateLinkedTaskParams): Promise<
 
   const { data, error } = await db.from('tasks').insert({
     fall_id: params.fall_id ?? null,
+    claim_id: params.claim_id ?? null,
     typ: params.typ ?? params.entity_type ?? 'allgemein',
     titel: params.titel,
     beschreibung: params.beschreibung ?? null,

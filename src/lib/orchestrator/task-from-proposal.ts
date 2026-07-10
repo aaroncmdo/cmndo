@@ -21,7 +21,11 @@ export type TaskFromProposalParams = {
   beschreibung?: string
   prioritaet?: TaskPrioritaet
   empfaenger_rolle?: string
-  fall_id: string
+  // fall_id = faelle_claim_bridge.fall_id (tasks.fall_id-FK-Domain), aufgeloest aus claim_id.
+  // Optional, weil eine claim ohne Bridge-Zeile keinen fall_id hat — dann traegt claim_id den Task.
+  fall_id?: string | null
+  // claim_id = claims.id (SSoT-Anker, tasks.claim_id-FK).
+  claim_id: string
   faellig_am?: Date
   trigger_event: string
   empfaenger_user_id?: string | null
@@ -49,6 +53,7 @@ export function assigneeFromClaim(
 export function mapProposalToTaskParams(
   payload: TaskProposalPayload,
   zielRolle: string | null,
+  fallId: string | null,
   claimId: string,
   triggerEvent: string,
   empfaengerUserId?: string | null,
@@ -59,7 +64,10 @@ export function mapProposalToTaskParams(
     prioritaet: payload.prioritaet ? PRIO_MAP[payload.prioritaet] : undefined,
     empfaenger_rolle: zielRolle ?? undefined,
     empfaenger_user_id: empfaengerUserId ?? undefined,
-    fall_id: claimId,
+    // fall_id kommt aus der Bridge-Aufloesung (fallId), NICHT aus claimId — sonst
+    // verletzt der tasks-insert tasks_fall_id_fkey (FK auf faelle_claim_bridge.fall_id).
+    fall_id: fallId ?? undefined,
+    claim_id: claimId,
     faellig_am:
       typeof payload.faellig_in_tagen === 'number'
         ? new Date(Date.now() + payload.faellig_in_tagen * 86400000)
@@ -83,6 +91,11 @@ export async function buildTaskFromProposal(
   // das Least-Loaded-Auto-Assign in createLinkedTask (kein Owner / Load-Fehler).
   // Non-critical — der Task entsteht in jedem Fall.
   let empfaengerUserId: string | null = null
+  // fall_id-Aufloesung: tasks.fall_id FKt auf faelle_claim_bridge.fall_id, NICHT auf
+  // claims.id. claim_id und fall_id sind verschieden (CMM-49-Invariante), daher die
+  // Bridge-Aufloesung. Ohne sie schlug der tasks-insert mit tasks_fall_id_fkey fehl
+  // ("Task-Erstellung fehlgeschlagen" im /admin/ai-vorschlaege-Approve).
+  let fallId: string | null = null
   try {
     const db = createAdminClient()
     const { data: claim } = await db
@@ -96,10 +109,16 @@ export async function buildTaskFromProposal(
         zielRolle,
       )
     }
+    const { data: bridge } = await db
+      .from('faelle_claim_bridge')
+      .select('fall_id')
+      .eq('claim_id', claimId)
+      .maybeSingle()
+    fallId = (bridge as { fall_id: string | null } | null)?.fall_id ?? null
   } catch {
-    // Owner-Load fehlgeschlagen → Fallback Auto-Assign.
+    // Owner-/Bridge-Load fehlgeschlagen → Auto-Assign-Fallback; claim_id bleibt der Anker.
   }
   return createLinkedTask(
-    mapProposalToTaskParams(payload, zielRolle, claimId, triggerEvent, empfaengerUserId),
+    mapProposalToTaskParams(payload, zielRolle, fallId, claimId, triggerEvent, empfaengerUserId),
   )
 }
