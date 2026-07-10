@@ -1,6 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import WerkstaettenClient from './WerkstaettenClient'
+import { AusstehendeFreigabenSection } from './AusstehendeFreigabenSection'
+import { getAusstehendeFreigaben } from '@/lib/werkstatt/ausstehende-freigaben'
 
 export default async function WerkstaettenPage() {
   const supabase = await createClient()
@@ -14,12 +16,18 @@ export default async function WerkstaettenPage() {
     .single()
   if (profile?.rolle !== 'admin') redirect('/admin')
 
-  const { data: werkstaetten } = await supabase
-    .from('werkstaetten')
-    .select('id, name, adresse_ort, adresse_plz, status, provision_betrag_netto, aktiviert_am, email, telefon, faehigkeiten')
-    .order('aktiviert_am', { ascending: false })
+  const [{ data: werkstaetten }, ausstehendeFreigaben] = await Promise.all([
+    supabase
+      .from('werkstaetten')
+      .select('id, name, adresse_ort, adresse_plz, status, provision_betrag_netto, aktiviert_am, email, telefon, faehigkeiten')
+      .order('aktiviert_am', { ascending: false }),
+    getAusstehendeFreigaben(),
+  ])
 
   return (
-    <WerkstaettenClient werkstaetten={werkstaetten ?? []} />
+    <div className="space-y-6">
+      <AusstehendeFreigabenSection rows={ausstehendeFreigaben} />
+      <WerkstaettenClient werkstaetten={werkstaetten ?? []} />
+    </div>
   )
 }
