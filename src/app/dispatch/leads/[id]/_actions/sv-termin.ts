@@ -12,6 +12,7 @@ import type { SvSuggestion } from './types'
 import { TERMIN_DAUER_MIN } from '@/lib/dispatch/termin-konstanten'
 import { checkSvReachability, precomputeSvSlotEtas, isSlotReachable } from '@/lib/dispatch/reachability'
 import { berlinWallClockToUtc, toBerlinWallClock } from '@/lib/google-calendar/timezone'
+import { pruefeBelegungStrict } from '@/lib/termine/engine'
 
 /**
  * Sticky-SV-Lookup: hat dieser Lead bereits einen gewohnten SV? Match per
@@ -189,22 +190,22 @@ export async function reserveSvTerminForLead(
   if (Number.isNaN(startDate.getTime())) return { success: false, error: 'Ungültiges Startdatum' }
   const endDate = new Date(startDate.getTime() + durationMin * 60_000)
 
-  // AAR-607 B3: Terminal-Status (abgelehnt, abgesagt) dürfen neue Reservierung
-  // nicht mehr blockieren — sonst kann Dispatcher nach SV-Ablehnung keinen neuen
-  // SV im selben Zeitfenster buchen.
-  const { data: konflikt } = await supabase
-    .from('gutachter_termine')
-    .select('id')
-    // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Konflikt-Filter)
-    .eq('assignee_id', svId)
-    .eq('assignee_typ', 'sachverstaendiger')
-    .not('status', 'in', '("storniert","abgelehnt","abgesagt","no_show")')
-    .lt('start_zeit', endDate.toISOString())
-    .gt('end_zeit', startDate.toISOString())
-    .limit(1)
-
-  if (konflikt && konflikt.length > 0) {
-    return { success: false, error: 'SV hat bereits einen Termin im gewählten Zeitfenster' }
+  // AAR-607 B3 bleibt intakt: Terminal-Status (storniert/abgelehnt/abgesagt/no_show) sind in
+  // v_belegung ohnehin ausgeschlossen → Rebook nach SV-Ablehnung weiterhin moeglich.
+  // Fail-CLOSED Verfuegbarkeits-Check gegen v_belegung (Buchung ∪ externer CalDAV-Kalender ∪
+  // Urlaub/Sperre) statt des frueheren gutachter_termine-only-Reads: der war (a) fail-OPEN
+  // (DB-Fehler → stumm 'frei' → Doppelbuchungs-Vektor) und (b) blind fuer CalDAV-Events + Urlaube.
+  // pruefeBelegungStrict liest via Admin-Client (v_belegung ist service-role-only) → KEIN db-Argument.
+  const belegung = await pruefeBelegungStrict(
+    { typ: 'sachverstaendiger', id: svId },
+    startDate.toISOString(),
+    endDate.toISOString(),
+  )
+  if (!belegung.ok) {
+    return { success: false, error: 'Verfügbarkeit konnte nicht geprüft werden — bitte erneut versuchen' }
+  }
+  if (!belegung.frei) {
+    return { success: false, error: 'SV ist im gewählten Zeitfenster nicht verfügbar (Termin, Kalender-Eintrag oder Urlaub)' }
   }
 
   // AAR-CMM: Reachability-Hard-Check — SV muss zum Slot anfahren UND nach
@@ -258,7 +259,13 @@ export async function reserveSvTerminForLead(
     .select('id, ablehnen_token')
     .single()
 
-  if (error || !inserted) return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+  if (error || !inserted) {
+    // 23P01 = Exclusion-Constraint: SV in der TOCTOU-Luecke anderweitig verplant → freundliche Meldung.
+    if (error?.code === '23P01') {
+      return { success: false, error: 'SV wurde zwischenzeitlich anderweitig verplant — bitte anderen Slot wählen' }
+    }
+    return { success: false, error: error?.message ?? 'Insert fehlgeschlagen' }
+  }
 
   // CMM-36: Baseline-Fahrtzeit (SV-Standort → Kunde) einmalig cachen.
   // Fire-and-forget — Mapbox-Fehler dürfen die Reservation nicht brechen.
