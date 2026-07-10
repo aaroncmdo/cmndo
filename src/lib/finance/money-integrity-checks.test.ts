@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { isUstTripleConsistent, findUstInconsistencies, idsOhneMatch } from './money-integrity-checks'
+import { isUstTripleConsistent, findUstInconsistencies, idsOhneMatch, istTestPartner } from './money-integrity-checks'
 
 describe('isUstTripleConsistent', () => {
   it('true bei brutto = netto + ust', () => {
@@ -53,5 +53,22 @@ describe('idsOhneMatch', () => {
   })
   it('alle wenn Vorhanden-Menge leer', () => {
     expect(idsOhneMatch(['a', 'b'], [])).toEqual(['a', 'b'])
+  })
+})
+
+describe('istTestPartner', () => {
+  it('true bei smoke/test/demo im Namen', () => {
+    expect(istTestPartner('SMOKE Werkstatt (Test)', 'werkstatt-smoke@claimondo.de')).toBe(true)
+    expect(istTestPartner('Demo GmbH', null)).toBe(true)
+  })
+  it('true bei test/smoke in der Email', () => {
+    expect(istTestPartner('Autohaus X', 'x-test@y.de')).toBe(true)
+  })
+  it('false bei echtem Partner', () => {
+    expect(istTestPartner('Autohaus Mueller', 'info@mueller.de')).toBe(false)
+    expect(istTestPartner(null, null)).toBe(false)
+  })
+  it('false bei "Contest" (Word-Boundary — kein Substring-False-Positive)', () => {
+    expect(istTestPartner('Contest Autohaus', 'info@contest.de')).toBe(false)
   })
 })
