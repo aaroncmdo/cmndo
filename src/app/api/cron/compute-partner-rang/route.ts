@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { ladeSvKandidaten, ladeMaklerKandidaten, type Kandidat } from '@/lib/partner-rang/signals'
+import { ladeSvKandidaten, ladeMaklerKandidaten, ladeWerkstattKandidaten, type Kandidat } from '@/lib/partner-rang/signals'
 import { computePartnerStrength } from '@/lib/partner-rang/compute'
 import { ladeRangConfig } from '@/lib/partner-rang/config-loader'
 
-// Naechtlicher Cron: berechnet Partner-Rang (Bronze/Silber/Gold) je SV + Makler und
-// upsertet partner_rang. Config kommt aus der DB-SSoT (partner_rang_config). Werkstatt
-// dormant (kein Volumen). Auth: Bearer ${CRON_SECRET} (Projekt-Konvention).
+// Naechtlicher Cron: berechnet Partner-Rang (Bronze/Silber/Gold) je SV + Makler +
+// Werkstatt und upsertet partner_rang. Config kommt aus der DB-SSoT (partner_rang_config).
+// Werkstatt volumen-gefuehrt (partner_provisionen typ=werkstatt), analog Makler.
+// Auth: Bearer ${CRON_SECRET} (Projekt-Konvention).
 //
 // VPS-Crontab-Eintrag (Aaron) — naechtliche Ausfuehrung um 03:00 Uhr:
 //   0 3 * * * curl -s -H "Authorization: Bearer $CRON_SECRET" https://app.claimondo.de/api/cron/compute-partner-rang
@@ -19,8 +20,8 @@ export async function GET(request: Request) {
   }
   const supabase = createAdminClient()
   const config = await ladeRangConfig(supabase)
-  const [svs, makler] = await Promise.all([ladeSvKandidaten(supabase), ladeMaklerKandidaten(supabase)])
-  const alle: Kandidat[] = [...svs, ...makler]
+  const [svs, makler, werkstaetten] = await Promise.all([ladeSvKandidaten(supabase), ladeMaklerKandidaten(supabase), ladeWerkstattKandidaten(supabase)])
+  const alle: Kandidat[] = [...svs, ...makler, ...werkstaetten]
   const rows = alle.map((k) => {
     const r = computePartnerStrength(k.signals, config)
     return {
