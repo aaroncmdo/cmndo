@@ -12,11 +12,16 @@ import type { ReactNode } from 'react'
 type Props = {
   children: ReactNode
   className?: string
+  /** Full-bleed: kein 96%-Zentrier-Box (=> w-full). Fuer Portale mit
+   *  freischwebendem Glass-Panel, wo der Content bis zur Kante / unter das
+   *  Panel laufen soll — analog zum SV-Portal (AAR-697: dort PageContainer
+   *  komplett entfernt fuer full-width). Default false = unveraendert. */
+  fullBleed?: boolean
 }
 
-export function PageContainer({ children, className = '' }: Props) {
+export function PageContainer({ children, className = '', fullBleed = false }: Props) {
   return (
-    <div className={`w-full md:w-[96%] md:mx-auto ${className}`}>
+    <div className={`${fullBleed ? 'w-full' : 'w-full md:w-[96%] md:mx-auto'} ${className}`}>
       {children}
     </div>
   )

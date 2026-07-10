@@ -349,13 +349,11 @@ export default async function KundeLayout({ children }: { children: React.ReactN
   return (
     <>
     <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
-      {/* Detached Panel: freischwebende Kunde-Sidebar (Margin ringsum + Rundung
-          + Schatten), solide Brand-BG. w-60 + top/left/bottom-2 passen innerhalb
-          des bestehenden lg:ml-64-Content-Offsets. Kein `kunde-sidebar`/`glass-
-          branded` mehr, damit die globals.css Floating-Glass-Regeln (transparent
-          + Pills) NICHT greifen. */}
+      {/* Freischwebende Kunde-Sidebar auf der grauen Vollflaeche: solides Brand-BG,
+          Margin ringsum + Rundung + Schatten. KEIN overflow-hidden — sonst clippt
+          die Panel-Kante das Updates-/Outbox-Popover unten (Aaron 10.07.). */}
       <aside
-        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 z-40 rounded-ios-lg shadow-ios-lg overflow-hidden"
+        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 z-40 rounded-ios-lg shadow-ios-lg"
         style={{
           backgroundColor: sidebarBg,
         }}

@@ -44,8 +44,11 @@ export default async function AdminLayout({
       {/* Client-side nav with usePathname for active state */}
       <AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />
 
-      {/* Main content area — offset by sidebar width on desktop */}
-      <div className="md:ml-56 h-screen flex flex-col relative z-10">
+      {/* Main content area — full-bleed (PageContainer fullBleed = w-full);
+          md:pl-56 raeumt das fixe Glass-Panel frei, damit der Content nicht
+          dahinter kollidiert. Hintergrund (bg + Spotlights) bleedt unter das
+          Panel, der Content laeuft rechts bis zur Kante. */}
+      <div className="md:pl-56 h-screen flex flex-col relative z-10">
         {/* AAR-725: UpdatesNav ersetzt MitteilungszentralePanel + alte
             NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
         {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}
@@ -68,7 +71,7 @@ export default async function AdminLayout({
             zu opfern, hält `.has-corner-pill` (globals.css) nur die PageHeader-
             Action-Zeile rechts frei — Body-Content gewinnt 144px Breite zurück. */}
         <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
-          <PageContainer className="h-full">{children}</PageContainer>
+          <PageContainer fullBleed className="h-full">{children}</PageContainer>
         </main>
       </div>
       <GlobalPosteingangFab currentUserId={user.id} />

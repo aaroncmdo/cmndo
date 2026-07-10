@@ -281,15 +281,17 @@ export function PortalNav({
         {/* 2026-05-14: Dark-Variant erbt floating-Pills via data-sidebar-mode
             (CSS in globals.css). Floating-Default app-weit (Hook merkt die
             Bar-Opt-out-Präferenz in localStorage). */}
-        {/* Detached Navy-Panel: freischwebende Sidebar mit Margin ringsum +
-            Rundung + Schatten. w-52 + top/left/bottom-2 passen INNERHALB des
-            bestehenden md:ml-56-Content-Offsets (kein Layout-Wrapper noetig).
-            Solide (data-sidebar-mode="bar") — kein Floating-Glass. */}
+        {/* Freischwebende Sidebar auf der grauen Vollflaeche (bg-claimondo-bg):
+            solides Navy-Panel, Margin ringsum + Rundung + Schatten. KEIN
+            overflow-hidden — sonst clippt die Panel-Kante das Updates-/Support-
+            Popover aus dem footerSlot (Aaron 10.07.: "schneidet die updates ab").
+            rounded-Ecken bleiben via bg + rounded; die Nav-Items brauchen keine
+            Eck-Clipping. */}
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
           data-sidebar-mode="bar"
-          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg bg-claimondo-navy shadow-ios-lg overflow-hidden ${className}`}
+          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg bg-claimondo-navy shadow-ios-lg ${className}`}
         >
           {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 
