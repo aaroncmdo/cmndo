@@ -7347,6 +7347,9 @@ export type Database = {
           verlegung_quelle_id: string | null
           verspaetung_minuten: number | null
           video_link: string | null
+          treffpunkt_adresse: string | null
+          treffpunkt_lat: number | null
+          treffpunkt_lng: number | null
           vorgeschlagenes_datum: string | null
           wunschtermin: string | null
         }
@@ -7466,6 +7469,9 @@ export type Database = {
           verlegung_quelle_id?: string | null
           verspaetung_minuten?: number | null
           video_link?: string | null
+          treffpunkt_adresse?: string | null
+          treffpunkt_lat?: number | null
+          treffpunkt_lng?: number | null
           vorgeschlagenes_datum?: string | null
           wunschtermin?: string | null
         }
@@ -7585,6 +7591,9 @@ export type Database = {
           verlegung_quelle_id?: string | null
           verspaetung_minuten?: number | null
           video_link?: string | null
+          treffpunkt_adresse?: string | null
+          treffpunkt_lat?: number | null
+          treffpunkt_lng?: number | null
           vorgeschlagenes_datum?: string | null
           wunschtermin?: string | null
         }
