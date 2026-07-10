@@ -69,6 +69,29 @@ export type KundeDoks = {
   aktiverTermin: KundeAktiverTermin | null
 }
 
+// P3 (StatusZone): aktiver SV-Begutachtungstermin (mit Realtime-Feldern) — Stepper-terminInfo + SvLiveBanner.
+export type KundeSvTermin = {
+  id: string
+  status: string | null
+  start: string | null
+  kanal: string | null
+  svUnterwegsSeit: string | null
+  svAngekommenAm: string | null
+  svEtaMinuten: number | null
+  durchgefuehrtAm: string | null
+}
+
+// P3 (StatusZone): Status-Strang-Daten (Stepper + SvLive + Abschluss + GoogleReview).
+export type KundeStatus = {
+  svTermin: KundeSvTermin | null
+  kundeVorname: string | null
+  svLive: { gutachtenHochgeladen: boolean; qcFreigegeben: boolean; inUeberarbeitung: boolean }
+  gutachtenUrl: string | null
+  gutachtenFreigegeben: boolean
+  googleReviewGezeigtAm: string | null
+  svGooglePlaceId: string | null
+}
+
 export type KundeClaimViewModel = {
   claimId: string
   fallId: string
@@ -97,6 +120,7 @@ export type KundeClaimViewModel = {
   }
   pflichtdokumente: { offen: number; slots: PflichtSlotForView[] }
   doks: KundeDoks
+  status: KundeStatus
   defaultEmail: string | null
   flags: {
     abrechnungsweg: string | null
@@ -128,7 +152,7 @@ export async function getKundeClaimView(
   const resolvedClaimId = (fall.claim_id as string | null) ?? claimId
   const pflichtSlots = detail.pflichtDokumente
 
-  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes] =
+  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes, svTerminRes, kundeProfilRes] =
     await Promise.all([
       getKundeTermine(admin, { fallIds: [fallId], claimIds: [resolvedClaimId] }),
       getKbKontakt(admin, (fall.kundenbetreuer_id as string | null) ?? null),
@@ -155,7 +179,7 @@ export async function getKundeClaimView(
       // P3 (GeldZone): claims-native Extras (Reparatur-Route-Gate + Mietwagen fuer die Ausfall-Card).
       admin
         .from('claims')
-        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden')
+        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
       // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
@@ -187,6 +211,18 @@ export async function getKundeClaimView(
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      // P3 (StatusZone): aktiver SV-Begutachtungstermin (Realtime-Felder) — Stepper-terminInfo + SvLive.
+      // Array (kein limit) → JS-Sort nach Status-Prio wie die Live-page.tsx.
+      admin
+        .from('gutachter_termine')
+        .select('id, status, start_zeit, kanal, sv_unterwegs_seit, sv_angekommen_am, sv_eta_minuten, durchgefuehrt_am')
+        .eq('fall_id', fallId)
+        .eq('typ', 'sv_begutachtung')
+        .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben'])
+        .is('cancelled_at', null)
+        .order('created_at', { ascending: false }),
+      // P3 (StatusZone): Kunde-Vorname (terminInfo „X ist da").
+      admin.from('profiles').select('vorname').eq('id', userId).maybeSingle(),
     ])
 
   // Dokumentenliste (mit signierten URLs) — Basis fuer FallDetailSections + KVA-PDF-Ableitung.
@@ -302,6 +338,42 @@ export async function getKundeClaimView(
       : null
   const pflichtOffen = pflichtSlots.filter((s) => s.status === 'offen').length
 
+  // Status-Strang (StatusZone): aktiver SV-Begutachtungstermin nach Status-Prio (bestaetigt>gegenvorschlag>
+  // reserviert>verschoben, wie page.tsx) + Realtime-Felder; SvLive/Abschluss-Flags aus erstAuftrag.
+  const SV_STATUS_PRIO: Record<string, number> = { bestaetigt: 1, gegenvorschlag: 2, reserviert: 3, verschoben: 4 }
+  const svTerminRow =
+    ((svTerminRes.data ?? []) as Array<Record<string, unknown>>)
+      .slice()
+      .sort((a, b) => (SV_STATUS_PRIO[(a.status as string) ?? ''] ?? 9) - (SV_STATUS_PRIO[(b.status as string) ?? ''] ?? 9))[0] ?? null
+  const svTermin: KundeSvTermin | null = svTerminRow
+    ? {
+        id: svTerminRow.id as string,
+        status: (svTerminRow.status as string | null) ?? null,
+        start: (svTerminRow.start_zeit as string | null) ?? null,
+        kanal: (svTerminRow.kanal as string | null) ?? null,
+        svUnterwegsSeit: (svTerminRow.sv_unterwegs_seit as string | null) ?? null,
+        svAngekommenAm: (svTerminRow.sv_angekommen_am as string | null) ?? null,
+        svEtaMinuten: (svTerminRow.sv_eta_minuten as number | null) ?? null,
+        durchgefuehrtAm: (svTerminRow.durchgefuehrt_am as string | null) ?? null,
+      }
+    : null
+  const gutachtenFreigegeben = !!erstAuftrag?.gutachten_final_freigegeben
+  const status: KundeStatus = {
+    svTermin,
+    kundeVorname: (kundeProfilRes.data as { vorname: string | null } | null)?.vorname ?? null,
+    svLive: {
+      gutachtenHochgeladen: !!erstAuftrag?.gutachten_url,
+      qcFreigegeben: gutachtenFreigegeben,
+      inUeberarbeitung: !!(erstAuftrag as { zurueckgewiesen_am?: string | null } | undefined)?.zurueckgewiesen_am,
+    },
+    gutachtenUrl: gutachtenFreigegeben
+      ? (dokumente.filter((d) => d.typ === 'gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null)
+      : null,
+    gutachtenFreigegeben,
+    googleReviewGezeigtAm: (claimExtra?.google_review_prompt_gezeigt_am as string | null) ?? null,
+    svGooglePlaceId: sv?.googlePlaceId ?? null,
+  }
+
   return {
     claimId: resolvedClaimId,
     fallId,
@@ -326,6 +398,7 @@ export async function getKundeClaimView(
     },
     pflichtdokumente: { offen: pflichtOffen, slots: pflichtSlots },
     doks: { qcLaeuft, kbTerminCard, dokumente, aktiverTermin },
+    status,
     defaultEmail: userEmail,
     flags: {
       abrechnungsweg,
