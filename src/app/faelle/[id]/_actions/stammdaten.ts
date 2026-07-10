@@ -589,6 +589,23 @@ export async function updateFallField(
     return { success: true }
   }
 
+  // Payment-Ledger (Normalisierung Slice 4 / Divergenz-Fix): die KB-Inline-Edit "Regulierungs-Betrag"
+  // schreibt NICHT mehr den Cache claims.regulierungs_betrag (via CLUSTER3-Map regulierung_betrag),
+  // sondern das (claim,'vs')-Ledger — forderungsbetrag = VS-Soll, konsistent mit dem kanonischen
+  // Writer markClaimAsReguliert (endzustand-actions). Vorher gab es ZWEI Writer fuer denselben Wert
+  // (Cache hier, Ledger dort) -> moegliche Cache/Ledger-Divergenz. Strikt besser als der Cache-Write:
+  // COALESCE(vs_ist, vs_soll, cache) bevorzugt vs_soll vor dem Cache. Danach ist regulierungs_betrag
+  // retire-bar (Column-Drop = eigener Slice-4-PR mit v_claim_base-Rewrite).
+  if (field === 'regulierung_betrag') {
+    if (!claimId) return { success: false, error: 'Kein Claim mit dem Fall verknüpft' }
+    const cpRes = await upsertClaimPayment(createAdminClient(), claimId, 'vs', {
+      forderungsbetrag: normalized as number | null,
+    })
+    if (!cpRes.ok) return { success: false, error: cpRes.error ?? 'claim_payments Update fehlgeschlagen' }
+    revalidatePath(`/faelle/${fallId}`)
+    return { success: true }
+  }
+
   const renamedClaimsColumn =
     CLUSTER1_RENAMED_TO_CLAIMS[field] ??
     CLUSTER2_RENAMED_TO_CLAIMS[field] ??
