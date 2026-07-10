@@ -1,5 +1,6 @@
 // src/lib/partner-rang/signals.ts
 import type { PartnerSignals } from './types'
+import { istTestPartner } from '@/lib/testdaten/ist-test-email'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Sb = any
 
@@ -93,14 +94,18 @@ export async function ladeSvKandidaten(supabase: Sb): Promise<Kandidat[]> {
   })
 }
 
-/** Makler: volumen-gefuehrt (duenne Qualitaetsdaten). */
+/** Makler: volumen-gefuehrt (duenne Qualitaetsdaten). Test-/Smoke-Konten -> kein Rang. */
 export async function ladeMaklerKandidaten(supabase: Sb): Promise<Kandidat[]> {
-  const { data: makler, error } = await supabase
+  const { data, error } = await supabase
     .from('makler')
-    .select('id, status, aktiviert_am, gesperrt_am')
+    .select('id, status, aktiviert_am, gesperrt_am, firma, email')
     .is('gesperrt_am', null)
-  if (error || !makler || makler.length === 0) return []
-  const ids: string[] = makler.map((m: { id: string }) => m.id)
+  if (error || !data) return []
+  // Test-/Smoke-/Demo-Konten bekommen keinen oeffentlichen Rang (kanonisch via istTestPartner).
+  const makler = (data as { id: string; status: string | null; aktiviert_am: string | null; firma: string | null; email: string | null }[])
+    .filter((m) => !istTestPartner(m.firma, m.email))
+  if (makler.length === 0) return []
+  const ids: string[] = makler.map((m) => m.id)
   // Provisions-Ledger-Unifikation (Phase 3): partner_provisionen (typ-gefiltert) statt makler_provisionen.
   const { data: prov } = await supabase
     .from('partner_provisionen')
@@ -113,7 +118,7 @@ export async function ladeMaklerKandidaten(supabase: Sb): Promise<Kandidat[]> {
       volumen.set(p.partner_id, (volumen.get(p.partner_id) ?? 0) + 1)
     }
   }
-  return makler.map((m: { id: string; status: string | null; aktiviert_am: string | null }): Kandidat => ({
+  return makler.map((m): Kandidat => ({
     id: m.id,
     signals: {
       typ: 'makler',
@@ -126,14 +131,18 @@ export async function ladeMaklerKandidaten(supabase: Sb): Promise<Kandidat[]> {
   }))
 }
 
-/** Werkstatt: volumen-gefuehrt (analog Makler; duenne Qualitaetsdaten). */
+/** Werkstatt: volumen-gefuehrt (analog Makler). Test-/Smoke-Konten -> kein Rang. */
 export async function ladeWerkstattKandidaten(supabase: Sb): Promise<Kandidat[]> {
-  const { data: werkstaetten, error } = await supabase
+  const { data, error } = await supabase
     .from('werkstaetten')
-    .select('id, status, aktiviert_am, gesperrt_am')
+    .select('id, status, aktiviert_am, gesperrt_am, name, email')
     .is('gesperrt_am', null)
-  if (error || !werkstaetten || werkstaetten.length === 0) return []
-  const ids: string[] = werkstaetten.map((w: { id: string }) => w.id)
+  if (error || !data) return []
+  // Test-/Smoke-/Demo-Konten bekommen keinen oeffentlichen Rang (kanonisch via istTestPartner).
+  const werkstaetten = (data as { id: string; status: string | null; aktiviert_am: string | null; name: string | null; email: string | null }[])
+    .filter((w) => !istTestPartner(w.name, w.email))
+  if (werkstaetten.length === 0) return []
+  const ids: string[] = werkstaetten.map((w) => w.id)
   // Provisions-Ledger-Unifikation: partner_provisionen (typ-gefiltert) als Volumen-Signal.
   const { data: prov } = await supabase
     .from('partner_provisionen')
@@ -146,7 +155,7 @@ export async function ladeWerkstattKandidaten(supabase: Sb): Promise<Kandidat[]>
       volumen.set(p.partner_id, (volumen.get(p.partner_id) ?? 0) + 1)
     }
   }
-  return werkstaetten.map((w: { id: string; status: string | null; aktiviert_am: string | null }): Kandidat => ({
+  return werkstaetten.map((w): Kandidat => ({
     id: w.id,
     signals: {
       typ: 'werkstatt',
