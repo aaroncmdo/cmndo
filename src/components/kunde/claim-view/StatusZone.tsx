@@ -18,6 +18,8 @@ import SelbstzahlerReparaturStepper from '@/components/kunde/SelbstzahlerReparat
 import KundeSvLiveBanner from '@/components/kunde/KundeSvLiveBanner'
 import GoogleReviewPrompt from '@/components/kunde/GoogleReviewPrompt'
 import KundeAbschlussCard from '@/components/kunde/KundeAbschlussCard'
+import TerminVerlegungBanner from '@/components/kunde/TerminVerlegungBanner'
+import KundeTerminCheckBanner from '@/components/kunde/KundeTerminCheckBanner'
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 
 export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
@@ -55,6 +57,11 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
       }
     : null
 
+  const fmtVerlegD = (iso: string | null) =>
+    iso ? format.dateTime(new Date(iso), { weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Europe/Berlin' }) : ''
+  const fmtVerlegT = (iso: string | null) =>
+    iso ? format.dateTime(new Date(iso), { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' }) : ''
+
   return (
     <div className="space-y-4">
       <FallMitteilungenBanner fallId={vm.fallId} rolle="kunde" />
@@ -67,7 +74,37 @@ export async function StatusZone({ vm }: { vm: KundeClaimViewModel }) {
           abgeschlossen={lifecycle.mainPhase === 'abschluss'}
         />
       ) : (
-        <ClaimStepper lifecycle={lifecycle} terminInfo={terminInfo} />
+        <ClaimStepper
+          lifecycle={lifecycle}
+          terminInfo={terminInfo}
+          bottomSlot={
+            status.verlegung ? (
+              <TerminVerlegungBanner
+                pendingTerminId={status.verlegung.pendingTerminId}
+                alterDatum={fmtVerlegD(status.verlegung.alterStart)}
+                alterUhrzeit={fmtVerlegT(status.verlegung.alterStart)}
+                neuesDatum={fmtVerlegD(status.verlegung.neuesStart)}
+                neuesUhrzeit={fmtVerlegT(status.verlegung.neuesStart)}
+                svVorname={status.verlegung.svVorname}
+                grund={status.verlegung.grund}
+                embedded
+              />
+            ) : null
+          }
+        />
+      )}
+
+      {/* „Kam dein Gutachter?"-Selbstauskunft bei ueberfaelligem, ungeklaertem nur_gutachter-Termin. */}
+      {status.terminCheck && (
+        <KundeTerminCheckBanner
+          terminId={status.terminCheck.terminId}
+          svVorname={status.terminCheck.svVorname}
+          terminLabel={
+            status.terminCheck.terminStart
+              ? `${format.dateTime(new Date(status.terminCheck.terminStart), { weekday: 'long', day: '2-digit', month: '2-digit', timeZone: 'Europe/Berlin' })} um ${format.dateTime(new Date(status.terminCheck.terminStart), { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Berlin' })}`
+              : null
+          }
+        />
       )}
 
       {/* Realtime SV-Live-Banner (unterwegs/da/ETA) — nur bei aktivem SV-Termin. */}

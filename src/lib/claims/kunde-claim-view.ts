@@ -13,6 +13,8 @@ import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
+import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
+import { EMBED_B_KLAERUNG_TASK_TYP, TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE } from '@/lib/termine/embed-b-klaerung-task'
 
 export type KundeGutachtenWerte = {
   totalschaden: boolean | null
@@ -81,7 +83,18 @@ export type KundeSvTermin = {
   durchgefuehrtAm: string | null
 }
 
-// P3 (StatusZone): Status-Strang-Daten (Stepper + SvLive + Abschluss + GoogleReview).
+// P3 (StatusZone Edge-Banner): Verlegungs-Vorschlag (ClaimStepper-bottomSlot) + „kam dein Gutachter?".
+// Rohe ISO-Daten — StatusZone formatiert (Berlin) beim Rendern.
+export type KundeVerlegung = {
+  pendingTerminId: string
+  alterStart: string | null
+  neuesStart: string | null
+  svVorname: string
+  grund: string | null
+}
+export type KundeTerminCheck = { terminId: string; svVorname: string | null; terminStart: string | null }
+
+// P3 (StatusZone): Status-Strang-Daten (Stepper + SvLive + Abschluss + GoogleReview + Edge-Banner).
 export type KundeStatus = {
   svTermin: KundeSvTermin | null
   kundeVorname: string | null
@@ -90,6 +103,8 @@ export type KundeStatus = {
   gutachtenFreigegeben: boolean
   googleReviewGezeigtAm: string | null
   svGooglePlaceId: string | null
+  verlegung: KundeVerlegung | null
+  terminCheck: KundeTerminCheck | null
 }
 
 export type KundeClaimViewModel = {
@@ -152,7 +167,7 @@ export async function getKundeClaimView(
   const resolvedClaimId = (fall.claim_id as string | null) ?? claimId
   const pflichtSlots = detail.pflichtDokumente
 
-  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes, svTerminRes, kundeProfilRes] =
+  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes, svTerminRes, kundeProfilRes, verlegungRes] =
     await Promise.all([
       getKundeTermine(admin, { fallIds: [fallId], claimIds: [resolvedClaimId] }),
       getKbKontakt(admin, (fall.kundenbetreuer_id as string | null) ?? null),
@@ -179,7 +194,7 @@ export async function getKundeClaimView(
       // P3 (GeldZone): claims-native Extras (Reparatur-Route-Gate + Mietwagen fuer die Ausfall-Card).
       admin
         .from('claims')
-        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am')
+        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, status')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
       // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
@@ -223,6 +238,16 @@ export async function getKundeClaimView(
         .order('created_at', { ascending: false }),
       // P3 (StatusZone): Kunde-Vorname (terminInfo „X ist da").
       admin.from('profiles').select('vorname').eq('id', userId).maybeSingle(),
+      // P3 (StatusZone Edge-Banner): pending Verlegungs-Vorschlag (nur zukuenftige).
+      admin
+        .from('gutachter_termine')
+        .select('id, start_zeit, verlegung_quelle_id, verlegung_grund, assignee_id')
+        .eq('fall_id', fallId)
+        .eq('status', 'verlegung_pending')
+        .gt('start_zeit', new Date().toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ])
 
   // Dokumentenliste (mit signierten URLs) — Basis fuer FallDetailSections + KVA-PDF-Ableitung.
@@ -358,6 +383,69 @@ export async function getKundeClaimView(
       }
     : null
   const gutachtenFreigegeben = !!erstAuftrag?.gutachten_final_freigegeben
+
+  // Edge-Banner: Verlegungs-Vorschlag (alter Termin-Start + SV-Vorname nachladen, wie page.tsx).
+  const verlegungRow = verlegungRes.data as {
+    id: string; start_zeit: string | null; verlegung_quelle_id: string | null; verlegung_grund: string | null; assignee_id: string | null
+  } | null
+  let verlegung: KundeVerlegung | null = null
+  if (verlegungRow?.verlegung_quelle_id) {
+    const { data: alterTermin } = await admin
+      .from('gutachter_termine').select('start_zeit').eq('id', verlegungRow.verlegung_quelle_id).maybeSingle()
+    let vSvVorname = ''
+    if (verlegungRow.assignee_id) {
+      const { data: vSv } = await admin.from('sachverstaendige').select('profile_id').eq('id', verlegungRow.assignee_id).maybeSingle()
+      if (vSv?.profile_id) {
+        const { data: vp } = await admin.from('profiles').select('vorname, anzeigename').eq('id', vSv.profile_id as string).maybeSingle()
+        vSvVorname = ((vp?.vorname as string | null) ?? (vp?.anzeigename as string | null) ?? '') as string
+      }
+    }
+    verlegung = {
+      pendingTerminId: verlegungRow.id,
+      alterStart: (alterTermin?.start_zeit as string | null) ?? null,
+      neuesStart: verlegungRow.start_zeit ?? null,
+      svVorname: vSvVorname,
+      grund: verlegungRow.verlegung_grund ?? null,
+    }
+  }
+
+  // Edge-Banner: „kam dein Gutachter?" — nur_gutachter + ueberfaelliger ungeklaerter Termin + kein offener Klaerungs-Task.
+  const istNurGutachter = (claimExtra?.service_typ as string | null) === 'nur_gutachter'
+  const claimTerminal = (CLAIM_TERMINAL_STATUSES as readonly string[]).includes((claimExtra?.status as string | null) ?? '')
+  let terminCheck: KundeTerminCheck | null = null
+  if (istNurGutachter && !claimTerminal) {
+    const { data: staleTermin } = await admin
+      .from('gutachter_termine')
+      .select('id, start_zeit')
+      .eq('fall_id', fallId)
+      .lt('end_zeit', new Date().toISOString())
+      .is('durchgefuehrt_am', null)
+      .is('sv_no_show_am', null)
+      .is('sv_ablehnung_am', null)
+      .not('status', 'in', TERMIN_RESOLUTION_EXCLUDED_IN_CLAUSE)
+      .order('end_zeit', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+    if (staleTermin) {
+      const { data: offenerTask } = await admin
+        .from('tasks')
+        .select('id')
+        .eq('entity_type', 'termin')
+        .eq('entity_id', staleTermin.id as string)
+        .eq('task_typ', EMBED_B_KLAERUNG_TASK_TYP)
+        .eq('status', 'offen')
+        .limit(1)
+        .maybeSingle()
+      if (!offenerTask) {
+        terminCheck = {
+          terminId: staleTermin.id as string,
+          svVorname: sv?.name ? sv.name.split(' ')[0] : null,
+          terminStart: (staleTermin.start_zeit as string | null) ?? null,
+        }
+      }
+    }
+  }
+
   const status: KundeStatus = {
     svTermin,
     kundeVorname: (kundeProfilRes.data as { vorname: string | null } | null)?.vorname ?? null,
@@ -372,6 +460,8 @@ export async function getKundeClaimView(
     gutachtenFreigegeben,
     googleReviewGezeigtAm: (claimExtra?.google_review_prompt_gezeigt_am as string | null) ?? null,
     svGooglePlaceId: sv?.googlePlaceId ?? null,
+    verlegung,
+    terminCheck,
   }
 
   return {
