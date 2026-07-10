@@ -41,7 +41,7 @@ export default async function DispatchLayout({
             die PageHeader-Action-Zeile rechts frei — Body-Content (Tabellen/Grids)
             gewinnt die 144px Breite zurück. */}
         <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
-          <PageContainer className="h-full">{children}</PageContainer>
+          <PageContainer fullBleed className="h-full">{children}</PageContainer>
         </main>
       </div>
     </div>
