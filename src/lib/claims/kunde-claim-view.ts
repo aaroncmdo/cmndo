@@ -6,12 +6,10 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { ClaimLifecycle } from '@/lib/claims/lifecycle'
-import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
-import { getKundeFallDetailRecord } from '@/lib/claims/get-kunde-faelle'
+import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
 import { getSvKontakt, getKbKontakt, type SvKontakt, type KbKontakt } from '@/lib/kunde/get-kontakt'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
-import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
@@ -119,15 +117,19 @@ export async function getKundeClaimView(
   userEmail: string | null,
   claimId: string,
 ): Promise<KundeClaimViewModel | null> {
-  const fall = await getKundeFallDetailRecord(admin, userId, userEmail, claimId)
-  if (!fall) return null
-
+  // AAR (Kunde-Detail-Rebuild): auf die geteilte Datenschicht ausgerichtet — getClaimDetail
+  // (rollen-aware Facade, staging #4039) ist das Ownership-Gate + liefert core/lifecycle/auftraege/
+  // pflichtDokumente (inkl. C1-Fix fallIdOf → korrekt fall_id-gekeyte Pflichtdokumente). Ersetzt die
+  // 3 frueheren Einzel-Loader (getKundeFallDetailRecord/getClaimLifecycleForClaim/getPflichtdokumenteForFall).
+  const detail = await getClaimDetail(admin, claimId, 'kunde', { userId, email: userEmail })
+  if (!detail) return null
+  const fall = detail.core
   const fallId = fall.id as string
   const resolvedClaimId = (fall.claim_id as string | null) ?? claimId
+  const pflichtSlots = detail.pflichtDokumente
 
-  const [bundle, termine, kb, sv, payoutRes, gwRes, pflichtSlots, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes] =
+  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes] =
     await Promise.all([
-      getClaimLifecycleForClaim(admin, fallId),
       getKundeTermine(admin, { fallIds: [fallId], claimIds: [resolvedClaimId] }),
       getKbKontakt(admin, (fall.kundenbetreuer_id as string | null) ?? null),
       getSvKontakt(admin, (fall.sv_id as string | null) ?? null),
@@ -144,9 +146,6 @@ export async function getKundeClaimView(
         .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_ocr_processed_at, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur')
         .eq('claim_id', resolvedClaimId)
         .maybeSingle(),
-      // Pflichtdok-Slots — fallId-gekeyt! (getPflichtdokumenteForFall filtert pflichtdokumente.fall_id;
-      // frueher faelschlich resolvedClaimId uebergeben -> 0 Slots).
-      getPflichtdokumenteForFall(admin, fallId, 'kunde'),
       // P3 (GeldZone): Kunden-Zahlungsweg der Auszahlung (faelle_kunde_view) — Card-Gate = Row existiert.
       admin
         .from('faelle_kunde_view')
@@ -253,7 +252,7 @@ export async function getKundeClaimView(
 
   // qcLaeuft: waehrend Besichtigung/Vollstaendigkeits-Check (erstgutachten-Auftrag, nicht freigegeben)
   // ist der Pflichtdok-Banner ausgeblendet (Kunde soll nicht nachladen). Danach wieder sichtbar.
-  const erstAuftrag = bundle.auftraege.find((a) => a.typ === 'erstgutachten')
+  const erstAuftrag = detail.auftraege.find((a) => a.typ === 'erstgutachten')
   const qcLaeuft =
     !!erstAuftrag &&
     (erstAuftrag.status === 'besichtigung' || erstAuftrag.status === 'gutachten') &&
@@ -261,7 +260,7 @@ export async function getKundeClaimView(
 
   const abrechnungsweg = (fall.abrechnungsweg as string | null) ?? null
   const reparaturFreigegeben = !!fall.reparatur_freigegeben_am
-  const mainPhase = bundle.lifecycle.mainPhase
+  const mainPhase = detail.lifecycle.mainPhase
   const istGeldPhase = mainPhase === 'regulierung' || mainPhase === 'abschluss'
 
   const payout = payoutRes.data as { vs_quote_betrag_ausgezahlt: number | null; ausgezahlt_am: string | null } | null
@@ -307,7 +306,7 @@ export async function getKundeClaimView(
     claimId: resolvedClaimId,
     fallId,
     fall,
-    lifecycle: bundle.lifecycle,
+    lifecycle: detail.lifecycle,
     termine,
     team: { kb, sv },
     geld: {
