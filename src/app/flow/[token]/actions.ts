@@ -3,6 +3,7 @@
 import { emailNeuerFall } from '@/lib/email'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { enablePhoneLogin } from '@/lib/auth/phone-login'
 import { assertLeadBoundToToken } from '@/lib/flow/assert-lead-bound'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { findeTerminFuerLead } from '@/lib/termine/finde-termin-fuer-lead'
@@ -382,7 +383,11 @@ export async function createKundeAccount(
       }
     }
 
-    const finRes = await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password)
+    // AAR-phone-login: passwordless Telefon-Login fuer NEUE Kunden aktivieren
+    // (auth.users.phone = Flow-Nummer). NUR hier im Neu-Zweig -> kein Lazy-Backfill
+    // auf dem Relink-Pfad. Best-effort/kollisionssicher (siehe enablePhoneLogin).
+    const phoneLoginAktiviert = await enablePhoneLogin(admin, authUser.user.id, telefon)
+    const finRes = await finalizeKundeSetup(admin, fallId, authUser.user.id, normalizedEmail, vorname, nachname, telefon, password, phoneLoginAktiviert)
     return { success: true, password, magicLink: finRes.magicLink }
   } catch (err) {
     console.error('[createKundeAccount] unerwarteter Fehler:', err)
@@ -406,6 +411,8 @@ async function finalizeKundeSetup(
   nachname: string,
   telefon: string | null,
   password: string,
+  // AAR-phone-login: nur im Neu-Zweig true; Default false = Relink-Pfad unveraendert.
+  phoneLoginAktiviert: boolean = false,
 ): Promise<{ magicLink: string | null }> {
   await admin.from('profiles').upsert({
     id: userId,
@@ -548,7 +555,7 @@ async function finalizeKundeSetup(
   // AAR-127: Welcome-Mail mit Magic-Link + Zugangsdaten
   // CMM-14: Magic-Link weiterreichen damit der Wizard direkt einen
   // "Zu meinem Portal"-Button anbieten kann.
-  return await sendWelcomeWithLogin(admin, fallId, email, password)
+  return await sendWelcomeWithLogin(admin, fallId, email, password, phoneLoginAktiviert)
 }
 
 // AAR-127: Helper — generiert Magic-Link via Supabase Auth Admin API
@@ -560,6 +567,7 @@ async function sendWelcomeWithLogin(
   fallId: string,
   email: string,
   password: string,
+  phoneLoginAktiviert: boolean = false,
 ): Promise<{ magicLink: string | null }> {
   let magicLink: string | null = null
   try {
@@ -587,7 +595,7 @@ async function sendWelcomeWithLogin(
 
   try {
     const { sendKundeWelcome } = await import('@/lib/email/google/flows')
-    await sendKundeWelcome(fallId, { magicLink, email, password })
+    await sendKundeWelcome(fallId, { magicLink, email, password, phoneLoginAktiviert })
   } catch (err) {
     console.error('[AAR-127] Welcome-Mail-Versand fehlgeschlagen:', err)
   }
