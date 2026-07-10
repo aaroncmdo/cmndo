@@ -4627,7 +4627,8 @@
         "description": "جميع مواعيد الخبراء المتعلقة بقضاياك.",
         "empty": "لا توجد مواعيد مجدولة حالياً",
         "kommend": "القادمة",
-        "verlauf": "السابقة"
+        "verlauf": "السابقة",
+        "reparatur": "مواعيد الإصلاح"
       },
       "toggle": {
         "liste": "قائمة",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "مؤكد",
         "gegenvorschlag": "مقترح مضاد من الخبير — يلزم الرد",
         "abgelehnt": "مرفوض",
-        "abgeschlossen": "منجز"
+        "abgeschlossen": "منجز",
+        "angefragt": "تم الطلب",
+        "anruf_erbeten": "مطلوب معاودة الاتصال"
       },
       "card": {
         "kundenBeratung": "استشارة عميل",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "قضية",
         "videoTermin": "موعد فيديو",
         "vorOrtTermin": "موعد ميداني",
-        "detailsOeffnen": "فتح التفاصيل →"
+        "detailsOeffnen": "فتح التفاصيل →",
+        "reparaturTermin": "موعد الإصلاح",
+        "terminOffen": "سيتم تحديد الموعد لاحقاً",
+        "zumFall": "إلى القضية"
       },
       "detail": {
         "statusLabel": {

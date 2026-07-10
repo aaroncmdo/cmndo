@@ -11,9 +11,10 @@ import Link from 'next/link'
 import {
   CalendarIcon, ListIcon,
   ChevronLeftIcon, ChevronRightIcon,
-  VideoIcon, HardHatIcon, PhoneIcon,
+  VideoIcon, HardHatIcon, PhoneIcon, WrenchIcon,
 } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
+import { Card } from '@/components/primitives'
 import { TerminStatusBadge } from '@/components/shared/TerminStatusBadge'
 
 export type TerminRow = {
@@ -23,14 +24,27 @@ export type TerminRow = {
   typ: string | null
   kanal: string | null
   fall_id: string
-  ablehnen_token: string | null
+}
+
+// Werkstatt-Reparaturtermin (reparatur_termine) — Datum kann noch offen sein.
+export type ReparaturTerminRow = {
+  id: string
+  start: string | null
+  status: string
+  claim_id: string | null
+  werkstatt_id: string | null
 }
 
 export type FallInfo = {
   id: string
+  claimId: string
   claim_nummer: string | null
   fahrzeug: string
 }
+
+// Label-Map (keine Farbe -> status-registry-safe) fuer Reparatur-Status. Farbe kommt aus
+// TerminStatusBadge (Registry). Unbekannte Status fallen auf den Rohwert zurueck.
+const REPARATUR_STATUS_KEYS = new Set(['angefragt', 'anruf_erbeten', 'bestaetigt', 'abgeschlossen'])
 
 const STATUS_LABEL: Record<string, string> = {
   reserviert: 'Reserviert — wartet auf SV-Bestätigung',
@@ -57,9 +71,11 @@ function toDateKey(date: Date): string {
 
 export default function KundeTermineClient({
   termine,
+  reparaturTermine = [],
   fallMap,
 }: {
   termine: TerminRow[]
+  reparaturTermine?: ReparaturTerminRow[]
   fallMap: Record<string, FallInfo>
 }) {
   const t = useTranslations('kunde.termine')
@@ -148,7 +164,7 @@ export default function KundeTermineClient({
         }
       />
 
-      {termine.length === 0 && (
+      {termine.length === 0 && reparaturTermine.length === 0 && (
         <div className="bg-white rounded-2xl border border-claimondo-border p-10 text-center">
           <CalendarIcon className="w-6 h-6 text-claimondo-ondo/50 mx-auto mb-2" />
           <p className="text-sm text-claimondo-ondo/70">{t('liste.empty')}</p>
@@ -282,7 +298,74 @@ export default function KundeTermineClient({
           )}
         </>
       )}
+
+      {/* ── Reparaturtermine ─────────────────────────────────────────────
+          Werkstatt-Reparaturtermine (reparatur_termine) — in beiden Ansichten
+          sichtbar, da sie nicht im SV-Kalender leben. Behebt den Gap, dass
+          Selbstzahler/Kasko-Kunden ihren Reparaturtermin nirgends sahen. */}
+      {reparaturTermine.length > 0 && (
+        <section>
+          <h2 className="text-xs font-semibold text-claimondo-ondo uppercase tracking-wider mb-2">{t('liste.reparatur')}</h2>
+          <div className="space-y-2">
+            {reparaturTermine.map((rt) => (
+              <ReparaturTerminCard key={rt.id} termin={rt} fall={rt.claim_id ? fallMap[rt.claim_id] : undefined} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
+  )
+}
+
+function ReparaturTerminCard({
+  termin,
+  fall,
+}: {
+  termin: ReparaturTerminRow
+  fall?: FallInfo
+}) {
+  const t = useTranslations('kunde.termine')
+  const format = useFormatter()
+  const statusLabel = REPARATUR_STATUS_KEYS.has(termin.status) ? t(`statusLabel.${termin.status}`) : termin.status
+  const targetHref = fall ? `/kunde/faelle/${fall.claimId}` : null
+  const start = termin.start ? new Date(termin.start) : null
+
+  const inner = (
+    <div className="flex items-start gap-3">
+      <div className="w-9 h-9 rounded-ios-xl bg-[var(--brand-secondary-soft)] flex items-center justify-center shrink-0">
+        <WrenchIcon className="w-4 h-4 text-claimondo-ondo" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-semibold text-claimondo-navy">{t('card.reparaturTermin')}</span>
+          <TerminStatusBadge status={termin.status} label={statusLabel} />
+        </div>
+        <p className="text-sm text-claimondo-navy mt-1">
+          {start
+            ? `${format.dateTime(start, { weekday: 'long', day: '2-digit', month: 'long', timeZone: 'Europe/Berlin' })} · ${format.dateTime(start, { timeZone: 'Europe/Berlin', hour: '2-digit', minute: '2-digit' })}`
+            : t('card.terminOffen')}
+        </p>
+        {fall && (
+          <p className="text-xs text-claimondo-ondo mt-0.5">
+            {t('card.fallPrefix')} {fall.claim_nummer ?? fall.claimId.slice(0, 8)} · {fall.fahrzeug}
+          </p>
+        )}
+        {targetHref && (
+          <div className="flex items-center gap-1 mt-2 text-xs text-claimondo-ondo font-medium">
+            {t('card.zumFall')}
+            <ChevronRightIcon className="w-3.5 h-3.5" />
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  return targetHref ? (
+    <Link href={targetHref} className="block transition hover:opacity-90">
+      <Card p={4}>{inner}</Card>
+    </Link>
+  ) : (
+    <Card p={4}>{inner}</Card>
   )
 }
 
