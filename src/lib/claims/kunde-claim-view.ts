@@ -11,6 +11,7 @@ import { getKundeFallDetailRecord } from '@/lib/claims/get-kunde-faelle'
 import { getSvKontakt, getKbKontakt, type SvKontakt, type KbKontakt } from '@/lib/kunde/get-kontakt'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
+import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 
 export type KundeGutachtenWerte = {
   totalschaden: boolean | null
@@ -64,17 +65,47 @@ export async function getKundeClaimView(
   const fallId = fall.id as string
   const resolvedClaimId = (fall.claim_id as string | null) ?? claimId
 
-  const [bundle, termine, kb, sv] = await Promise.all([
+  const [bundle, termine, kb, sv, payoutRes, gwRes, pflichtSlots] = await Promise.all([
     getClaimLifecycleForClaim(admin, fallId),
     getKundeTermine(admin, { fallIds: [fallId], claimIds: [resolvedClaimId] }),
     getKbKontakt(admin, (fall.kundenbetreuer_id as string | null) ?? null),
     getSvKontakt(admin, (fall.sv_id as string | null) ?? null),
+    // Netto-Kunden-Auszahlbetrag: kanonische SSoT kanzlei_faelle.vs_quote_betrag_ausgezahlt
+    // (Aaron 02.07.); nur_gutachter/direkt-Zahlung -> keine kanzlei_faelle-Row -> null.
+    admin
+      .from('kanzlei_faelle')
+      .select('vs_quote_betrag_ausgezahlt, ausgezahlt_am')
+      .eq('fall_id', fallId)
+      .maybeSingle(),
+    // Gutachten-F+G-Werte aus der Dual-Source-View v_gutachten_werte.
+    admin
+      .from('v_gutachten_werte')
+      .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage')
+      .eq('claim_id', resolvedClaimId)
+      .maybeSingle(),
+    getPflichtdokumenteForFall(admin, resolvedClaimId, 'kunde'),
   ])
 
   const abrechnungsweg = (fall.abrechnungsweg as string | null) ?? null
   const reparaturFreigegeben = !!fall.reparatur_freigegeben_am
   const mainPhase = bundle.lifecycle.mainPhase
   const istGeldPhase = mainPhase === 'regulierung' || mainPhase === 'abschluss'
+
+  const payout = payoutRes.data as { vs_quote_betrag_ausgezahlt: number | null } | null
+  const gw = gwRes.data as Record<string, unknown> | null
+  const gutachtenWerte: KundeGutachtenWerte | null = gw
+    ? {
+        totalschaden: (gw.totalschaden as boolean | null) ?? null,
+        reparaturkostenNetto: num(gw.reparaturkosten_netto),
+        reparaturkostenBrutto: num(gw.reparaturkosten_brutto),
+        minderwert: num(gw.minderwert),
+        wiederbeschaffungswert: num(gw.wiederbeschaffungswert),
+        restwert: num(gw.restwert),
+        nutzungsausfallTage: num(gw.nutzungsausfall_tage),
+        wiederbeschaffungsdauerTage: num(gw.wiederbeschaffungsdauer_tage),
+      }
+    : null
+  const pflichtOffen = pflichtSlots.filter((s) => s.status === 'offen').length
 
   return {
     claimId: resolvedClaimId,
@@ -85,16 +116,13 @@ export async function getKundeClaimView(
     team: { kb, sv },
     geld: {
       forderungNetto: num(fall.schadens_hoehe_netto),
-      // P1: auszahlungNetto aus faelle_kunde_view beim UI-Wiring nachziehen.
-      auszahlungNetto: null,
+      auszahlungNetto: num(payout?.vs_quote_betrag_ausgezahlt),
       kvaNetto: num(fall.kostenvoranschlag_netto),
       kvaBrutto: num(fall.kostenvoranschlag_brutto),
       reparaturdauerTageKva: num(fall.reparaturdauer_tage_kva),
-      // P1: gutachtenWerte aus v_gutachten_werte (Dual-Source, 10 F+G-Werte) beim UI-Wiring.
-      gutachtenWerte: null,
+      gutachtenWerte,
     },
-    // P1: offene Pflichtdok-Anzahl aus getPflichtdokumenteForFall beim UI-Wiring.
-    pflichtdokumente: { offen: 0 },
+    pflichtdokumente: { offen: pflichtOffen },
     flags: {
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),
