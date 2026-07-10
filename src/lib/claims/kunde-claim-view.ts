@@ -12,7 +12,9 @@ import { getSvKontakt, getKbKontakt, type SvKontakt, type KbKontakt } from '@/li
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
 import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
-import { getStorageUrl } from '@/lib/storage/url'
+import { getStorageUrlBulk } from '@/lib/storage/url'
+import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
+import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
 
 export type KundeGutachtenWerte = {
   totalschaden: boolean | null
@@ -46,6 +48,29 @@ export type KundeAusfallDaten = {
   mietwagenTagessatzEur: number | null
 }
 
+export type KundeDokument = { id: string; typ: string; datei_url: string; datei_name: string | null; created_at: string }
+
+// P3 (DoksTermineZone): aktiver gutachter_termine fuer FallDetailSections (Gegenvorschlag-Slots etc.).
+export type KundeAktiverTermin = {
+  id: string
+  status: string
+  start_zeit: string
+  end_zeit: string
+  vorgeschlagenes_datum: string | null
+  gegenvorschlag_von: string | null
+  gegenvorschlag_grund: string | null
+  sv_id: string | null
+  sv_vorgeschlagene_slots?: Array<{ datum: string; uhrzeit: string }> | null
+}
+
+// P3 (DoksTermineZone): Pflichtdok-Banner-Gate (qcLaeuft) + KB-Termin-Card + Dokumente + aktiver Termin.
+export type KundeDoks = {
+  qcLaeuft: boolean
+  kbTerminCard: TerminSectionProps | null
+  dokumente: KundeDokument[]
+  aktiverTermin: KundeAktiverTermin | null
+}
+
 export type KundeClaimViewModel = {
   claimId: string
   fallId: string
@@ -72,7 +97,9 @@ export type KundeClaimViewModel = {
     // P3 (GeldZone): KundeAusfallEntschaedigungCard (null wenn keine Gutachten-/claims-Basis).
     ausfall: KundeAusfallDaten | null
   }
-  pflichtdokumente: { offen: number }
+  pflichtdokumente: { offen: number; slots: PflichtSlotForView[] }
+  doks: KundeDoks
+  defaultEmail: string | null
   flags: {
     abrechnungsweg: string | null
     istReparaturRoute: boolean
@@ -98,7 +125,7 @@ export async function getKundeClaimView(
   const fallId = fall.id as string
   const resolvedClaimId = (fall.claim_id as string | null) ?? claimId
 
-  const [bundle, termine, kb, sv, payoutRes, gwRes, pflichtSlots, kundeViewRes, claimExtraRes, kvaDocRes] =
+  const [bundle, termine, kb, sv, payoutRes, gwRes, pflichtSlots, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes] =
     await Promise.all([
       getClaimLifecycleForClaim(admin, fallId),
       getKundeTermine(admin, { fallIds: [fallId], claimIds: [resolvedClaimId] }),
@@ -117,7 +144,9 @@ export async function getKundeClaimView(
         .select('totalschaden, reparaturkosten_netto, reparaturkosten_brutto, minderwert, wiederbeschaffungswert, restwert, nutzungsausfall_tage, wiederbeschaffungsdauer_tage, gutachten_ocr_processed_at, gutachten_nutzungsausfall_tagessatz_eur, gutachten_mietwagen_tagessatz_eur')
         .eq('claim_id', resolvedClaimId)
         .maybeSingle(),
-      getPflichtdokumenteForFall(admin, resolvedClaimId, 'kunde'),
+      // Pflichtdok-Slots — fallId-gekeyt! (getPflichtdokumenteForFall filtert pflichtdokumente.fall_id;
+      // frueher faelschlich resolvedClaimId uebergeben -> 0 Slots).
+      getPflichtdokumenteForFall(admin, fallId, 'kunde'),
       // P3 (GeldZone): Kunden-Zahlungsweg der Auszahlung (faelle_kunde_view) — Card-Gate = Row existiert.
       admin
         .from('faelle_kunde_view')
@@ -130,21 +159,105 @@ export async function getKundeClaimView(
         .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
-      // P3 (GeldZone): juengstes KVA-PDF (Werkstatt/Kunde laden dokument_typ='kostenvoranschlag' sichtbar_fuer kunde).
+      // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
       admin
         .from('fall_dokumente')
-        .select('storage_path')
+        .select('id, dokument_typ, storage_path, original_filename, hochgeladen_am')
         .eq('fall_id', fallId)
-        .eq('dokument_typ', 'kostenvoranschlag')
         .is('geloescht_am', null)
         .is('abgelehnt_am', null)
-        .order('hochgeladen_am', { ascending: false })
+        .order('hochgeladen_am'),
+      // P3 (DoksTermineZone): aktiver gutachter_termine (FallDetailSections Gegenvorschlag/Slots).
+      admin
+        .from('gutachter_termine')
+        .select('id, status, start_zeit, end_zeit, vorgeschlagenes_datum, gegenvorschlag_von, gegenvorschlag_grund, sv_id:assignee_id, sv_vorgeschlagene_slots')
+        .eq('fall_id', fallId)
+        .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt'])
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+      // P3 (DoksTermineZone): aktiver KB-Beratungstermin (eigene TerminSectionCard; SV lebt im Stepper).
+      admin
+        .from('gutachter_termine')
+        .select('id, typ, status, start_zeit, end_zeit, kanal, video_link, kb_id')
+        .eq('fall_id', fallId)
+        .eq('typ', 'kb_beratung')
+        .in('status', ['reserviert', 'bestaetigt', 'gegenvorschlag', 'verschoben'])
+        .is('cancelled_at', null)
+        .gte('start_zeit', new Date(Date.now() - 60 * 60 * 1000).toISOString())
+        .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle(),
     ])
 
-  const kvaStoragePath = (kvaDocRes.data as { storage_path: string | null } | null)?.storage_path ?? null
-  const kvaPdfUrl = kvaStoragePath ? await getStorageUrl(admin, 'fall-dokumente', kvaStoragePath) : null
+  // Dokumentenliste (mit signierten URLs) — Basis fuer FallDetailSections + KVA-PDF-Ableitung.
+  const dokRows = (dokumenteRes.data ?? []) as Array<{
+    id: string; dokument_typ: string; storage_path: string; original_filename: string | null; hochgeladen_am: string
+  }>
+  const dokUrls = await getStorageUrlBulk(admin, dokRows.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path })))
+  const dokumente: KundeDokument[] = dokRows.map((d, i) => ({
+    id: d.id,
+    typ: d.dokument_typ,
+    datei_url: dokUrls[i] ?? '',
+    datei_name: d.original_filename ?? null,
+    created_at: d.hochgeladen_am,
+  }))
+  // KVA-PDF = juengstes kostenvoranschlag-Dokument mit URL (aus der Liste, wie page.tsx).
+  const kvaPdfUrl = dokumente.filter((d) => d.typ === 'kostenvoranschlag' && d.datei_url).slice(-1)[0]?.datei_url ?? null
+
+  const aktiverTermin = (aktiverTerminRes.data as KundeAktiverTermin | null) ?? null
+
+  // KB-Termin-Card (Gegenueber-Kontakt inkl. email). SV-Termin lebt im ClaimStepper (StatusZone),
+  // daher hier NUR der KB-Beratungstermin (Doppel-Card vermeiden — wie in der Live-page.tsx).
+  const kbTerminRow = kbTerminRes.data as {
+    id: string; status: string | null; start_zeit: string | null; end_zeit: string | null
+    kanal: string | null; video_link: string | null; kb_id: string | null
+  } | null
+  let kbTerminCard: TerminSectionProps | null = null
+  if (kbTerminRow) {
+    const kbId = kbTerminRow.kb_id ?? (fall.kundenbetreuer_id as string | null) ?? null
+    let gegenueber: TerminSectionProps['gegenueber'] = null
+    if (kbId) {
+      const { data: p } = await admin
+        .from('profiles')
+        .select('vorname, nachname, telefon, anzeigename, avatar_url, email')
+        .eq('id', kbId)
+        .maybeSingle()
+      if (p) {
+        gegenueber = {
+          rolle: 'kundenbetreuer',
+          name: (p.anzeigename as string | null) || [p.vorname, p.nachname].filter(Boolean).join(' ') || null,
+          telefon: (p.telefon as string | null) ?? null,
+          email: (p.email as string | null) ?? null,
+          avatar_url: (p.avatar_url as string | null) ?? null,
+        }
+      }
+    }
+    kbTerminCard = {
+      termin: {
+        id: kbTerminRow.id,
+        typ: 'kb_beratung',
+        status: kbTerminRow.status ?? 'reserviert',
+        start_zeit: kbTerminRow.start_zeit ?? null,
+        end_zeit: kbTerminRow.end_zeit ?? null,
+        kanal: kbTerminRow.kanal ?? null,
+        video_link: kbTerminRow.video_link ?? null,
+        sv_unterwegs_seit: null,
+        sv_angekommen_am: null,
+        sv_eta_minuten: null,
+        adresse: null,
+      },
+      gegenueber,
+    }
+  }
+
+  // qcLaeuft: waehrend Besichtigung/Vollstaendigkeits-Check (erstgutachten-Auftrag, nicht freigegeben)
+  // ist der Pflichtdok-Banner ausgeblendet (Kunde soll nicht nachladen). Danach wieder sichtbar.
+  const erstAuftrag = bundle.auftraege.find((a) => a.typ === 'erstgutachten')
+  const qcLaeuft =
+    !!erstAuftrag &&
+    (erstAuftrag.status === 'besichtigung' || erstAuftrag.status === 'gutachten') &&
+    !erstAuftrag.gutachten_final_freigegeben
 
   const abrechnungsweg = (fall.abrechnungsweg as string | null) ?? null
   const reparaturFreigegeben = !!fall.reparatur_freigegeben_am
@@ -212,7 +325,9 @@ export async function getKundeClaimView(
       gutachtenWerte,
       ausfall,
     },
-    pflichtdokumente: { offen: pflichtOffen },
+    pflichtdokumente: { offen: pflichtOffen, slots: pflichtSlots },
+    doks: { qcLaeuft, kbTerminCard, dokumente, aktiverTermin },
+    defaultEmail: userEmail,
     flags: {
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),

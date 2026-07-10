@@ -10,6 +10,7 @@ import { StatusZone } from './StatusZone'
 import { AufgabenZone } from './AufgabenZone'
 import { TeamZone } from './TeamZone'
 import { GeldZone } from './GeldZone'
+import { DoksTermineZone } from './DoksTermineZone'
 
 export function KundeClaimView({ vm }: { vm: KundeClaimViewModel }) {
   const zonen = deriveKundeZonen(vm)
@@ -42,7 +43,12 @@ export function KundeClaimView({ vm }: { vm: KundeClaimViewModel }) {
                 <GeldZone vm={vm} />
               </div>
             )
-          // doksTermine: P3
+          case 'doksTermine':
+            return (
+              <div id="zone-doksTermine" key={z}>
+                <DoksTermineZone vm={vm} />
+              </div>
+            )
           default:
             return null
         }
