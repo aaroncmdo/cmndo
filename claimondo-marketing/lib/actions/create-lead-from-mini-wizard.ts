@@ -24,6 +24,7 @@ import { dispatchMagicLink } from '@/lib/magic-link/dispatch-magic-link'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { createNotification } from '@/lib/notifications'
 import { getConsentedGaClientId, trackServerConversion } from '@/lib/analytics/ga4-conversions'
+import { buildHashedUserData } from '@/lib/analytics/user-data-mp'
 
 type Result =
   | {
@@ -131,7 +132,16 @@ export async function createLeadFromMiniWizard(input: MiniWizardInput): Promise<
   if (gaClientId) {
     await admin.from('leads').update({ ga_client_id: gaClientId }).eq('id', lead.id as string)
     if (!isDisqualifiziert) {
-      void trackServerConversion(gaClientId, { name: 'generate_lead', params: { source: 'mini_wizard' } })
+      void trackServerConversion(
+        gaClientId,
+        { name: 'generate_lead', params: { source: 'mini_wizard' } },
+        buildHashedUserData({
+          email: data.email,
+          phone: data.telefon,
+          firstName: data.vorname,
+          lastName: data.nachname,
+        }),
+      )
     }
   }
 

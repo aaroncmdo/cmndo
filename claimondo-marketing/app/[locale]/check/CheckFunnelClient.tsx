@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import { PHONE_DISPLAY, PHONE_E164 } from '@/lib/seo/jsonld'
 import { submitCheckLead } from './check-lead-action'
 import { trackEvent } from '@/lib/analytics/track-event'
+import { setUserData } from '@/lib/analytics/user-data'
 import { buildCheckResult, type Schuld, type Frist, type Gutachten } from '@/lib/check/result-model'
 import { AnspruchFotoCheckCta } from '@/components/check/AnspruchFotoCheckCta'
 
@@ -103,6 +104,8 @@ export function CheckFunnelClient() {
         const name = String(fd.get('name') ?? '').trim()
         setError(null)
         setSubmittedName(name.split(/\s+/)[0] || '')
+        // Enhanced Conversions: Form-Daten (gehasht via gtag) für besseres Ads-Matching.
+        setUserData({ name, phone: String(fd.get('phone') ?? '') })
         // Conversion-Event (Task 2): Lead aus dem Anspruch-Check. Tier mitgeben
         // fuer Funnel-Analyse. Feuert auch bei Consent=denied (Consent-Mode-Modeling).
         trackEvent('generate_lead', {
