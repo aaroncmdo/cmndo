@@ -63,6 +63,17 @@ export function idsOhneMatch(ids: string[], vorhandene: string[]): string[] {
   return ids.filter((id) => !set.has(id))
 }
 
+/**
+ * Test-/Smoke-/Demo-Partner erkennen (name/firma ODER email enthaelt test/smoke/demo als Wort).
+ * Der Monitor alarmiert auf ECHTES Geld — Smoke-Fixtures (die z.B. eine Provision direkt auf
+ * `ausgezahlt` setzen, ohne den §14-Beleg zu erzeugen) sollen ihn nicht taeglich rot faerben.
+ * Word-Boundary (`\b`) vermeidet False-Positives wie "Contest" (matcht NICHT "test").
+ * Kein `ist_testaccount`-Flag auf werkstaetten/makler -> name/email-Heuristik (konservativ).
+ */
+export function istTestPartner(name: string | null, email: string | null): boolean {
+  return /\b(test|smoke|demo)\b/i.test(`${name ?? ''} ${email ?? ''}`)
+}
+
 // ── DB-Orchestrierung ───────────────────────────────────────────────────────
 
 // USt-Tripel-Tabellen (Spaltennamen 2026-07-08 gg prod-Schema verifiziert — abweichendes Naming
@@ -120,15 +131,35 @@ export async function runMoneyIntegrityChecks(
 
   // Check 2: Reconciliation — jede AUSGEZAHLTE Provision (ausgezahlt_am gesetzt) braucht einen
   // §14-Self-Billing-Beleg (partner_gutschriften). Fehlender Beleg = Beleg-Luecke.
+  // Test-/Smoke-Partner werden ausgeschlossen (istTestPartner) — der Monitor alarmiert auf ECHTES
+  // Geld, nicht auf Smoke-Fixtures. Ausschluss NUR hier (nicht in USt/Cache): nur diese Pruefung
+  // reagiert auf einen Workflow-State (ausgezahlt-ohne-Beleg), den Smoke-Skripte bewusst setzen.
   geprueft++
   {
     const { data: paid, error } = await from('partner_provisionen')
-      .select('id')
+      .select('id, partner_typ, partner_id')
       .not('ausgezahlt_am', 'is', null)
     if (error) {
       findings.push({ check: 'reconciliation', severity: 'warning', tabelle: 'partner_provisionen', count: 0, detail: `Query-Fehler: ${error.message}` })
     } else {
-      const paidIds = ((paid ?? []) as Array<{ id: string }>).map((r) => r.id)
+      const paidRows = (paid ?? []) as Array<{ id: string; partner_typ: string; partner_id: string }>
+      // Test-Partner-Ids ermitteln (nur unter den Partnern mit ausgezahlten Provisionen).
+      const testPartnerIds = new Set<string>()
+      const wsIds = [...new Set(paidRows.filter((p) => p.partner_typ === 'werkstatt').map((p) => p.partner_id))]
+      const mkIds = [...new Set(paidRows.filter((p) => p.partner_typ === 'makler').map((p) => p.partner_id))]
+      if (wsIds.length > 0) {
+        const { data: ws } = await from('werkstaetten').select('id, name, email').in('id', wsIds)
+        for (const w of (ws ?? []) as Array<{ id: string; name: string | null; email: string | null }>) {
+          if (istTestPartner(w.name, w.email)) testPartnerIds.add(w.id)
+        }
+      }
+      if (mkIds.length > 0) {
+        const { data: mk } = await from('makler').select('id, firma, email').in('id', mkIds)
+        for (const m of (mk ?? []) as Array<{ id: string; firma: string | null; email: string | null }>) {
+          if (istTestPartner(m.firma, m.email)) testPartnerIds.add(m.id)
+        }
+      }
+      const paidIds = paidRows.filter((p) => !testPartnerIds.has(p.partner_id)).map((p) => p.id)
       if (paidIds.length > 0) {
         const { data: belege, error: belErr } = await from('partner_gutschriften')
           .select('ledger_id')

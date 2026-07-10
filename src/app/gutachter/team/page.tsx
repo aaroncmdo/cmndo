@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
-import { Building2Icon, GraduationCapIcon } from 'lucide-react'
 import TeamClient from './TeamClient'
 
 // KFZ-152 Phase 2+3: Team-Verwaltung fuer Buero-Inhaber und Akademie-Verwalter.
@@ -125,7 +124,6 @@ export default async function TeamPage() {
     }
   })
 
-  const Icon = org.typ === 'akademie' ? GraduationCapIcon : Building2Icon
   const orgLabel = org.typ === 'akademie' ? 'Akademie' : 'Büro'
   // Nur in Org-Pool-Modellen (Akademie) hat Verwalter Pool-Leads zur Verteilung.
   // Buero verteilt direkt an Sub-Standorte beim Dispatch.
@@ -150,13 +148,10 @@ export default async function TeamPage() {
     pool_leads: poolLeads.length,
   }
 
-  // Icon wird im Client-Component anhand iconKey gewaehlt
-  void Icon
   return (
     <TeamClient
       orgName={org.name}
       orgLabel={orgLabel}
-      iconKey={org.typ === 'akademie' ? 'akademie' : 'buero'}
       subSvs={subSvs}
       poolLeads={poolLeads}
       showPoolSection={showPoolSection}

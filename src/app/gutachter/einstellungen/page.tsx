@@ -1,10 +1,9 @@
 ﻿import Link from 'next/link'
-import { CalendarIcon, UserIcon, ChevronRightIcon, SettingsIcon, Code2Icon, ClockIcon } from 'lucide-react'
+import { CalendarIcon, UserIcon, ChevronRightIcon, Code2Icon, ClockIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { berlinIsoDate } from '@/lib/time/berlin-day'
-import PageHeader from '@/components/shared/PageHeader'
 import KartenAnzeigeToggle from './KartenAnzeigeToggle'
 import DsgvoLoeschSection from '@/components/shared/DsgvoLoeschSection'
 // AAR-500 N5 / AAR-344 / KFZ-158: Settings-Panels von /profil hierher verschoben
@@ -125,18 +124,6 @@ export default async function EinstellungenPage() {
 
   return (
     <div className="max-w-3xl mx-auto py-6 px-4 space-y-5">
-      <PageHeader
-        title="Einstellungen"
-        description="Alle Konfigurations-Bereiche deines Gutachter-Kontos."
-        size="lg"
-        useBranding
-        leadingSlot={
-          <div className="w-10 h-10 rounded-full bg-[var(--brand-secondary)]/10 text-[var(--brand-primary)] flex items-center justify-center shrink-0">
-            <SettingsIcon className="w-5 h-5" />
-          </div>
-        }
-      />
-
       <div className="space-y-3">
         {items.map((item) => {
           const Icon = item.icon

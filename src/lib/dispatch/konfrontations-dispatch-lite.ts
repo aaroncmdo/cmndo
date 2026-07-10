@@ -8,6 +8,8 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
+import { pruefeBelegungStrict } from '@/lib/termine/engine'
+import { checkSvReachability } from '@/lib/dispatch/reachability'
 
 export interface TriggerKonfrontationsDispatchInput {
   fallId: string
@@ -77,11 +79,16 @@ export async function triggerKonfrontationsDispatch(
     }
   }
 
-  let aktTerminKonfr: { nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null; nachbesichtigung_sv_termin_vereinbart_am: string | null } | null = null
+  let aktTerminKonfr: {
+    nachbesichtigung_sv_konfrontation_gewuenscht: boolean | null
+    nachbesichtigung_sv_termin_vereinbart_am: string | null
+    besichtigungsort_lat: number | null
+    besichtigungsort_lng: number | null
+  } | null = null
   if (fall.claim_id) {
     const { data: at } = await db
       .from('gutachter_termine')
-      .select('nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am')
+      .select('nachbesichtigung_sv_konfrontation_gewuenscht, nachbesichtigung_sv_termin_vereinbart_am, besichtigungsort_lat, besichtigungsort_lng')
       .eq('claim_id', fall.claim_id as string)
       .order('start_zeit', { ascending: false })
       .limit(1)
@@ -137,6 +144,49 @@ export async function triggerKonfrontationsDispatch(
     }
   }
 
+  // Fail-closed Verfuegbarkeits-Check: der Konfrontations-Slot ist kunde-vorgeschlagen + KB-gewaehlt,
+  // also NICHT gegen die SV-Verfuegbarkeit vorgeprueft. pruefeBelegungStrict liest v_belegung
+  // (Buchung ∪ externer CalDAV-Kalender ∪ Urlaub/Sperre) → verhindert Doppelbuchung ueber den
+  // Privatkalender/Urlaub des SV; die DB-Exclusion-Constraint deckt nur Buchung<->Buchung.
+  const belegung = await pruefeBelegungStrict(
+    { typ: 'sachverstaendiger', id: fall.sv_id as string },
+    startDate.toISOString(),
+    endDate.toISOString(),
+    db,
+  )
+  if (!belegung.ok) {
+    return { success: false, error: 'Verfügbarkeit konnte nicht geprüft werden — bitte erneut versuchen' }
+  }
+  if (!belegung.frei) {
+    return {
+      success: false,
+      error: 'Der SV ist zu dieser Zeit bereits verplant (Termin, Kalender-Eintrag oder Urlaub)',
+    }
+  }
+
+  // ETA-Hard-Check (analog reserveSvTerminForLead): schafft der fixe SV die Anfahrt zur Konfrontation
+  // zwischen seinen Nachbar-Terminen? Ziel-Ort = besichtigungsort des Claim-Termins (Proxy fuer den
+  // Nachbesichtigungs-Ort — die Konfrontation traegt keinen eigenen Ort). Null-Guard: ohne Koordinaten
+  // kein ETA-Check (graceful degradation, wie beim Lead-Pfad). checkSvReachability ermittelt die
+  // Nachbar-Termine + deren Orte selbst.
+  const konfrLat = aktTerminKonfr?.besichtigungsort_lat ?? null
+  const konfrLng = aktTerminKonfr?.besichtigungsort_lng ?? null
+  if (konfrLat != null && konfrLng != null) {
+    const reach = await checkSvReachability(db, {
+      svId: fall.sv_id as string,
+      candidateLat: konfrLat,
+      candidateLng: konfrLng,
+      candidateStartIso: startDate.toISOString(),
+      candidateEndIso: endDate.toISOString(),
+    })
+    if (!reach.reachable) {
+      return {
+        success: false,
+        error: reach.grund ?? 'Der SV kann den Konfrontations-Termin nicht rechtzeitig erreichen',
+      }
+    }
+  }
+
   const { data: inserted, error: insertError } = await db
     .from('gutachter_termine')
     .insert({
@@ -155,6 +205,13 @@ export async function triggerKonfrontationsDispatch(
     .single()
 
   if (insertError || !inserted) {
+    // 23P01 = Exclusion-Constraint: SV wurde in der TOCTOU-Luecke anderweitig verplant.
+    if (insertError?.code === '23P01') {
+      return {
+        success: false,
+        error: 'Der SV wurde zwischenzeitlich anderweitig verplant — bitte anderen Slot wählen',
+      }
+    }
     return {
       success: false,
       error: insertError?.message ?? 'gutachter_termine-Insert fehlgeschlagen',

@@ -32,6 +32,9 @@ export function TwoFaPhoneChange({
   const [code, setCode] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  // B2: Info, wenn die Nummer zwar als SMS-2FA verifiziert wurde, aber der
+  // passwordless Telefon-Login nicht aktivierbar war (Nummer bereits vergeben).
+  const [loginHinweis, setLoginHinweis] = useState<string | null>(null)
   const [pending, startTransition] = useTransition()
 
   const aktuell = aktuelleTwofaTelefon ?? fallbackTelefon
@@ -46,6 +49,7 @@ export function TwoFaPhoneChange({
     setCode('')
     setError(null)
     setSuccess(null)
+    setLoginHinweis(null)
   }
 
   function sendCode() {
@@ -78,14 +82,24 @@ export function TwoFaPhoneChange({
       }
       // Neuer Faktor verifiziert → alte Nummern wegräumen + Anzeige syncen.
       await entferneAndereFaktoren(factorId)
-      await merkeTwofaTelefon(normalized)
+      const sync = await merkeTwofaTelefon(normalized)
       setSuccess(`2FA-Nummer geändert auf ${mask(normalized)}`)
+      // B2: Der auth.users.phone-Sync (Login-per-Nummer) kann fehlschlagen, wenn die
+      // Nummer bereits einem anderen Konto zugeordnet ist (UNIQUE). SMS-2FA ist dann
+      // trotzdem aktiv — nur der zusätzliche Telefon-Login nicht. Sichtbar machen
+      // statt still verschlucken; bei Hinweis das Modal länger offen lassen.
+      const loginAus = sync.ok && !sync.phoneLoginAktiviert
+      if (loginAus) {
+        setLoginHinweis(
+          'Der zusätzliche Login per Telefonnummer wurde nicht aktiviert — diese Nummer ist möglicherweise bereits einem anderen Konto zugeordnet. Deine SMS-2FA funktioniert normal.',
+        )
+      }
       // Modal nach kurzer Zeit schließen + Page refreshen via reload
       setTimeout(() => {
         setOpen(false)
         reset()
         window.location.reload()
-      }, 1500)
+      }, loginAus ? 4500 : 1500)
     })
   }
 
@@ -203,6 +217,11 @@ export function TwoFaPhoneChange({
               {success && (
                 <p className="text-xs text-success-strong bg-success-soft border border-success/30 rounded-ios-md p-2">
                   {success}
+                </p>
+              )}
+              {loginHinweis && (
+                <p className="text-xs text-claimondo-ondo bg-claimondo-bg border border-claimondo-border rounded-ios-md p-2">
+                  {loginHinweis}
                 </p>
               )}
             </div>

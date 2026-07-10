@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import SVKalenderClient from './SVKalenderClient'
 import EmptyState from '@/components/shared/EmptyState'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import KalenderRealtimeRefresh from '@/components/kalender/KalenderRealtimeRefresh'
 import KalenderListeEmpty from './KalenderListeEmpty'
 
@@ -196,28 +196,25 @@ export default async function SVKalenderPage({
   return (
     <div className="h-full flex flex-col">
       <KalenderRealtimeRefresh profileId={user.id} />
-      {/* View-Toggle */}
-      <div className="px-4 py-2 bg-white border-b border-claimondo-border shrink-0">
-        <PageHeader
-          title="Kalender"
-          actions={
-            <div className="flex gap-1 bg-claimondo-bg rounded-ios-lg p-0.5">
-              <Link
-                href="/gutachter/kalender?view=kalender"
-                className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
-                  view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
-                }`}
-              >Kalender</Link>
-              <Link
-                href="/gutachter/kalender?view=liste"
-                className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
-                  view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
-                }`}
-              >Liste</Link>
-            </div>
-          }
-        />
-      </div>
+      <SvPageChrome
+        title="Kalender"
+        actions={
+          <div className="flex gap-1 bg-claimondo-bg rounded-ios-lg p-0.5">
+            <Link
+              href="/gutachter/kalender?view=kalender"
+              className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
+                view === 'kalender' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
+              }`}
+            >Kalender</Link>
+            <Link
+              href="/gutachter/kalender?view=liste"
+              className={`px-3 py-1.5 rounded-ios-md text-xs font-medium transition-colors ${
+                view === 'liste' ? 'bg-white text-claimondo-navy shadow-sm' : 'text-claimondo-ondo'
+              }`}
+            >Liste</Link>
+          </div>
+        }
+      />
 
       {view === 'kalender' ? (
         <SVKalenderClient

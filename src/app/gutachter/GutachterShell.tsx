@@ -40,6 +40,9 @@ import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
 import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
+import { SvPageChromeProvider } from './_shell/page-chrome-context'
+import { SvTopBar } from './_shell/SvTopBar'
+import { SvMobileHeader } from './_shell/SvMobileHeader'
 // CMM-36: Geo-Tracking startet beim App-Öffnen
 import { useGeoPosition } from '@/hooks/useGeoPosition'
 
@@ -563,6 +566,7 @@ export default function GutachterShell({
         </div>
       </aside>}
 
+      <SvPageChromeProvider>
       <div
         className={`flex-1 flex flex-col min-w-0 h-screen ${
           floatingMode ? 'lg:pl-64' : ''
@@ -571,70 +575,18 @@ export default function GutachterShell({
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
         {/* AAR-211 + AAR-220: Header nutzt Theme-Sidebar-Bg (gleicher Look wie
             Sidebar-Hintergrund) mit sanfter 1.5s Color-Transition. */}
-        {/* 2026-05-14 Mobile-Cockpit-Header: schlanke Floating-Capsule statt
-            klassischer top-Bar. Brand-Logo links, Updates-Glocke rechts.
-            Hamburger entfällt — die neue Tab-Bar unten hat einen „Mehr"-Tab
-            der den Drawer öffnet. */}
-        <div
-          className="lg:hidden fixed left-3 right-3 z-40 flex items-center justify-between gap-3"
-          style={{
-            top: 'calc(env(safe-area-inset-top, 0px) + 12px)',
-            backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent)',
-            backdropFilter: 'saturate(180%) blur(22px)',
-            WebkitBackdropFilter: 'saturate(180%) blur(22px)',
-            border: '1px solid color-mix(in srgb, white 22%, transparent)',
-            borderRadius: 22,
-            padding: '8px 14px',
-            color: 'var(--brand-text-on-primary)',
-            boxShadow:
-              '0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent), inset 0 1px 0 color-mix(in srgb, white 25%, transparent)',
-          }}
-        >
-          {logoUrl && useBrand ? (
-            <Link href="/gutachter" className="inline-flex items-center justify-center">
-              <img
-                src={logoUrl}
-                alt={firmenname ? `${firmenname} Logo` : 'Logo'}
-                className="h-6 w-auto max-w-28 object-contain"
-              />
-            </Link>
-          ) : logoUrl ? (
-            <Link href="/gutachter">
-              <img
-                src={logoUrl}
-                alt="Claimondo Logo"
-                className="h-6 w-auto max-w-28 object-contain brightness-0 invert"
-              />
-            </Link>
-          ) : (
-            <Link
-              href="/gutachter"
-              className="text-base font-bold tracking-tight"
-              style={{ fontFamily: 'var(--brand-font-heading, inherit)' }}
-            >
-              <span className="text-white">Claim</span>
-              <span style={{ color: 'var(--brand-sidebar-text, #7BA3CC)' }}>ondo</span>
-            </Link>
-          )}
-          <UpdatesNav variant="dark" />
-        </div>
+        <SvMobileHeader logoUrl={logoUrl} useBrand={useBrand} firmenname={firmenname} />
 
-        {/* Desktop: WeatherBanner als Section direkt unter Topbar mit Trailing-
-            Slot (Outbox + UpdatesNav). Mobile: nicht hier rendern — die
-            floating Header-Capsule führt UpdatesNav, und ein eigenes
-            kompaktes Weather-Element (siehe unten) overlayed über der Map. */}
-        <div className="hidden lg:block lg:pl-4 lg:pt-4">
-          <WeatherBanner
-            standortLat={standortLat ?? null}
-            standortLng={standortLng ?? null}
-            trailingSlot={
-              <>
-                <OutboxBadge />
-                <UpdatesNav variant="dark" />
-              </>
-            }
-          />
-        </div>
+        <SvTopBar
+          standortLat={standortLat ?? null}
+          standortLng={standortLng ?? null}
+          trailingSlot={
+            <>
+              <OutboxBadge />
+              <UpdatesNav variant="dark" />
+            </>
+          }
+        />
 
         {/* Mobile-Wetter-Capsule: NUR auf /heute (Cockpit-Route). Auf List-
             Views (Aufträge, Fälle, Kalender) ist Wetter Kontext-Lärm. */}
@@ -684,6 +636,7 @@ export default function GutachterShell({
           />
         )}
       </div>
+      </SvPageChromeProvider>
       {/* AAR-864: Portal-Root für Modals im SV-Portal. position:fixed mit
           left=256px (Sidebar-Breite) damit der Backdrop nur den Content-
           Bereich überdeckt und die Sidebar nie einschließt. Modals
