@@ -4627,7 +4627,8 @@
         "description": "Wszystkie terminy wizyt rzeczoznawcy dla Państwa spraw.",
         "empty": "Brak zaplanowanych terminów",
         "kommend": "Nadchodzące",
-        "verlauf": "Historia"
+        "verlauf": "Historia",
+        "reparatur": "Terminy naprawy"
       },
       "toggle": {
         "liste": "Lista",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "Potwierdzony",
         "gegenvorschlag": "Kontrpropozycja rzeczoznawcy — wymagana odpowiedź",
         "abgelehnt": "Odrzucony",
-        "abgeschlossen": "Zrealizowany"
+        "abgeschlossen": "Zrealizowany",
+        "angefragt": "Zapytano",
+        "anruf_erbeten": "Prośba o oddzwonienie"
       },
       "card": {
         "kundenBeratung": "Konsultacja klienta",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "Sprawa",
         "videoTermin": "Wizyta wideo",
         "vorOrtTermin": "Termin na miejscu",
-        "detailsOeffnen": "Otwórz szczegóły →"
+        "detailsOeffnen": "Otwórz szczegóły →",
+        "reparaturTermin": "Termin naprawy",
+        "terminOffen": "Termin zostanie jeszcze ustalony",
+        "zumFall": "Do sprawy"
       },
       "detail": {
         "statusLabel": {

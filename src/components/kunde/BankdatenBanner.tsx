@@ -3,8 +3,9 @@
 import { useState, useTransition } from 'react'
 import { useTranslations } from 'next-intl'
 import { BanknoteIcon, CheckCircleIcon } from 'lucide-react'
+import { BANKDATEN_SHOW_STATUSES } from '@/lib/kunde/bankdaten-status'
 
-const SHOW_STATUSES = ['gutachten-eingegangen', 'filmcheck', 'qc-pruefung', 'kanzlei-uebergeben', 'anschlussschreiben', 'regulierung-laeuft', 'regulierung']
+const SHOW_STATUSES: readonly string[] = BANKDATEN_SHOW_STATUSES
 
 function validateIban(iban: string): boolean {
   const cleaned = iban.replace(/\s/g, '').toUpperCase()
