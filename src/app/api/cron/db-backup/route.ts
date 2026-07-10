@@ -8,22 +8,53 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // ist deprecated (CMM-49-Drop) und die SSoT-Tabellen claims/claim_parties/leads/vehicles
 // fehlten komplett. (db-backup ist error-tolerant pro Tabelle; echtes DR-Netz = Supabase-PITR,
 // dies ist ein ergaenzender JSON-Export der Kern-Tabellen.)
+//
+// 2026-07-10: Umfang auf einen echten Kern-Business-Snapshot erweitert — der alte 12er-Satz liess
+// business-kritische Tabellen MIT Daten aus: das Money-Ledger (claim_payments) + Provisions-/§14-
+// Gutschrift-Belege, die Gutachten (Kernprodukt-Output), Partner (makler/werkstaetten/kanzleien),
+// Versicherer, DSGVO-Einwilligungen (consent_records) und die Claim-Timeline. Alle Namen gg
+// prod-Schema verifiziert. Bleibt ergaenzend zu Supabase-PITR (DR-Netz-Status im Dashboard pruefen).
 const BACKUP_TABLES = [
   // Kern-Entitaeten (CMM-49 SSoT)
   'claims',
   'claim_parties',
+  'claim_vehicle_involvements',
   'leads',
   'vehicles',
   'gutachter_termine',
-  // Akteure
+  // Akteure + Partner
   'profiles',
   'sachverstaendige',
   'organisationen',
+  'makler',
+  'werkstaetten',
+  'kanzleien',
+  'versicherungen',
+  // Gutachten (Kernprodukt-Output) + Anspruch
+  'gutachten',
+  'gutachten_positionen',
+  'gutachten_fotos',
+  'schadenspositionen',
+  'anspruch_schaetzungen',
+  // Geld / §14-Belege (Money-Model)
+  'claim_payments',
+  'partner_provisionen',
+  'partner_gutschriften',
+  'gutschriften',
+  'provisionen_maik',
+  'gutachter_einzahlungen',
+  'gutachter_monatsabrechnungen',
+  'kanzlei_faelle',
+  'kanzlei_abrechnungen',
   // Billing + Dokumente
   'abrechnungen',
   'fall_dokumente',
   'vertraege_unterzeichnet',
   'vertragsvorlagen',
+  // Legal + Verlauf
+  'consent_records',
+  'timeline',
+  'nachrichten',
 ] as const
 
 const BUCKET = 'db-backups'
@@ -50,14 +81,28 @@ export async function GET(request: Request) {
     let totalRows = 0
 
     for (const table of BACKUP_TABLES) {
-      const { data, error } = await supabase.from(table).select('*')
-      if (error) {
-        console.error(`Backup error for table ${table}:`, error.message)
+      // Paginiert: supabase.select('*') cappt sonst bei 1000 Zeilen (API max-rows) -> stiller
+      // Truncate. Fuer ein Backup inakzeptabel; Seiten a 1000 bis eine Teilseite kommt.
+      const rows: unknown[] = []
+      let offset = 0
+      let tableError: string | null = null
+      for (;;) {
+        const { data, error } = await supabase.from(table).select('*').range(offset, offset + 999)
+        if (error) {
+          tableError = error.message
+          break
+        }
+        rows.push(...(data ?? []))
+        if (!data || data.length < 1000) break
+        offset += 1000
+      }
+      if (tableError) {
+        console.error(`Backup error for table ${table}:`, tableError)
         backup[table] = { count: 0, rows: [] }
         continue
       }
-      backup[table] = { count: data.length, rows: data }
-      totalRows += data.length
+      backup[table] = { count: rows.length, rows }
+      totalRows += rows.length
     }
 
     // 2) Upload to Storage
