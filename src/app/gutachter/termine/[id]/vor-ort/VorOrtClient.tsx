@@ -163,7 +163,7 @@ export default function VorOrtClient({
         <div className="flex items-center gap-2 mb-1">
           <Link href={`/gutachter/termine/${terminId}`} className="text-sm text-[var(--brand-secondary)] hover:underline">← Termin</Link>
         </div>
-        <h1 className="text-xl font-bold text-claimondo-navy">Vor-Ort-Modus</h1>
+        <h2 className="text-xl font-bold text-claimondo-navy">Vor-Ort-Modus</h2>
         <p className="text-sm text-claimondo-ondo">{leadName} · {fahrzeug || kennzeichen || fallNummer}</p>
       </div>
 

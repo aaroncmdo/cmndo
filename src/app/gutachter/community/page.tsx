@@ -1,8 +1,8 @@
 ﻿import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
-import { TrophyIcon, UsersIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
+import { TrophyIcon } from 'lucide-react'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 
 // KFZ-152 Phase 3: Community-Dashboard fuer Mitglieder.
@@ -110,16 +110,7 @@ export default async function CommunityDashboardPage() {
 
   return (
     <div className="px-8 py-8 max-w-5xl mx-auto">
-      <div className="mb-6">
-        <PageHeader
-          title={org.name}
-          description={`Community-Dashboard · ${String(monat).padStart(2, '0')}/${jahr}${
-            org.community_max_faelle_monat ? ` · max ${org.community_max_faelle_monat} Fälle/Monat` : ''
-          }`}
-          icon={UsersIcon}
-          size="lg"
-        />
-      </div>
+      <SvPageChrome title={org.name} />
 
       <div className="bg-white border border-claimondo-border rounded-2xl overflow-hidden">
         <div className="px-5 py-3 border-b border-claimondo-border bg-gradient-to-r from-amber-50 to-white">

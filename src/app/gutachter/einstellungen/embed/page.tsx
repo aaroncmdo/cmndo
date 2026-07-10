@@ -6,7 +6,7 @@
 import Link from 'next/link'
 import { InboxIcon } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import EmbedSitesList, { type EmbedSiteListRow } from './EmbedSitesList'
 
 export const dynamic = 'force-dynamic'
@@ -24,9 +24,8 @@ export default async function EmbedSitesPage() {
 
   return (
     <div className="py-6 space-y-4">
-      <PageHeader
+      <SvPageChrome
         title="Embed-Sites"
-        size="lg"
         actions={
           <div className="flex items-center gap-3">
             <span className="text-sm text-claimondo-ondo">{sites.length} Sites</span>

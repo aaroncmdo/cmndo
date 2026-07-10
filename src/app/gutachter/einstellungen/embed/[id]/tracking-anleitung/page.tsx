@@ -5,7 +5,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs'
 
@@ -27,7 +27,7 @@ export default async function TrackingAnleitungPage({ params }: { params: Promis
 
   return (
     <div className="py-6 space-y-4">
-      <PageHeader title="Tracking einrichten" size="lg" description={`Für Site „${site.slug}"`} />
+      <SvPageChrome title="Tracking einrichten" />
       <Link href={`/gutachter/einstellungen/embed/${id}`} className="text-sm text-claimondo-ondo hover:underline">
         ← Zurück zur Site
       </Link>

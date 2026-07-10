@@ -230,7 +230,7 @@ export default function SVKalenderClient({
       <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center justify-between gap-2 min-w-0">
           <div className="min-w-0">
-            <h1 className="text-sm font-semibold text-claimondo-navy">Kalender</h1>
+            <h2 className="text-sm font-semibold text-claimondo-navy">Kalender</h2>
             <p className="text-claimondo-ondo text-xs truncate">
               {format(weekDays[0], 'd. MMM', { locale: de })} – {format(weekDays[6], 'd. MMM yyyy', { locale: de })}
             </p>
