@@ -51,7 +51,7 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
 
   return (
     <>
-    <div className="h-screen relative overflow-hidden bg-claimondo-bg md:bg-claimondo-navy">
+    <div className="h-screen relative overflow-hidden bg-claimondo-bg">
       {/* Atmosphaerische Hintergrund-Spotlights */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
         <div
@@ -119,9 +119,8 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
         }
       />
 
-      {/* Content-Karte auf dem Navy-Canvas; md:pl-60 = Gap zur Glas-Sidebar,
-          md:py-4/md:pr-4 = Navy-Rand rundum (SV-Komposition). */}
-      <div className="relative z-10 flex h-screen flex-col md:pl-60 md:py-4 md:pr-4">
+      {/* Content-Bereich — Offset durch die fixe PortalNav-Sidebar (w-56) */}
+      <div className="relative z-10 flex h-screen flex-col md:ml-56">
         {/* Mobile header */}
         <header className="flex shrink-0 items-center justify-between px-4 py-3 glass-dark shadow-ios-md md:hidden">
           <span className="text-lg font-bold tracking-tight">
@@ -136,11 +135,9 @@ export function WerkstattShell({ werkstatt, email, userId, children }: Werkstatt
         <main
           id="main-content"
           role="main"
-          className="min-h-0 flex-1 overflow-hidden pb-20 md:pb-0"
+          className="min-h-0 flex-1 overflow-y-auto pb-20 md:pb-0"
         >
-          <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg">
-            {children}
-          </div>
+          {children}
         </main>
       </div>
     </div>

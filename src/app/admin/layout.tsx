@@ -1,4 +1,4 @@
-import AdminNav from './_components/AdminNav'
+﻿import AdminNav from './_components/AdminNav'
 import UpdatesNav from '@/components/shared/updates'
 import Spotlight from '@/components/Spotlight'
 import { PageContainer } from '@/components/PageContainer'
@@ -11,10 +11,15 @@ export default async function AdminLayout({
 }: {
   children: React.ReactNode
 }) {
-  // KFZ-203 + AAR-628 / K5: Auth + Rollen-Guard zentralisiert.
+  // KFZ-203 + AAR-628 / K5 / AAR-frontend-konsolidierung-p1: Auth + Rollen-Guard
+  // zentralisiert (requirePortalAccess wirft via redirect bei fehlendem Login /
+  // falscher Rolle / nicht ladbarem Profil). Dispatch/Kundenbetreuer landen in
+  // ihrem eigenen Portal — die /admin/*-Seiten sind Admin-only.
   const { supabase, user, initials } = await requirePortalAccess(['admin'])
 
   // AAR-531: Meine offene Tasks für Aufgaben-Badge.
+  // AAR-727: unreadNachrichten-Count entfällt — Posteingang läuft über den
+  // GlobalPosteingangFab (eigener Badge-Counter via /api/chat/inbox-threads).
   const { count: meineTasksCount } = await supabase
     .from('tasks')
     .select('*', { count: 'exact', head: true })
@@ -23,12 +28,8 @@ export default async function AdminLayout({
 
   return (
     <>
-    {/* SV-Komposition: durchgehender Navy-Canvas (md:bg-claimondo-navy), auf dem
-        die Glas-Sidebar UND der Content (als schwebende graue Karte) schweben —
-        der Canvas ist rings um alles sichtbar (= "Sidebar schwebt vollstaendig
-        frei", analog zum SV-Portal). Mobile bleibt heller bg-claimondo-bg. */}
-    <div className="h-screen relative overflow-hidden bg-claimondo-bg md:bg-claimondo-navy">
-      {/* Atmosphärische Hintergrund-Spotlights */}
+    <div className="h-screen relative overflow-hidden bg-claimondo-bg">
+      {/* Atmosphärische Hintergrund-Spotlights — identisch mit Login-Page */}
       <div aria-hidden className="pointer-events-none absolute inset-0 z-0">
         <div className="absolute inset-0" style={{
           background: [
@@ -43,10 +44,14 @@ export default async function AdminLayout({
       {/* Client-side nav with usePathname for active state */}
       <AdminNav email={user.email ?? ''} initials={initials} userId={user.id} meineTasksCount={meineTasksCount ?? 0} />
 
-      {/* md:pl-56 = Gap zur fixed Glas-Sidebar; md:py-2/md:pr-2 = Navy-Rand
-          oben/rechts/unten → die Content-Karte schwebt auf dem Navy-Canvas. */}
-      <div className="md:pl-60 md:py-4 md:pr-4 h-screen flex flex-col relative z-10">
-        {/* Mobile header — AAR-727 Glass-Dark */}
+      {/* Main content area — full-bleed (PageContainer fullBleed = w-full);
+          md:pl-56 raeumt das fixe Glass-Panel frei, damit der Content nicht
+          dahinter kollidiert. Hintergrund (bg + Spotlights) bleedt unter das
+          Panel, der Content laeuft rechts bis zur Kante. */}
+      <div className="md:pl-56 h-screen flex flex-col relative z-10">
+        {/* AAR-725: UpdatesNav ersetzt MitteilungszentralePanel + alte
+            NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
+        {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
           <UpdatesNav variant="dark" />
@@ -58,13 +63,15 @@ export default async function AdminLayout({
           <UpdatesNav variant="light" />
         </div>
 
-        {/* Content-Karte: schwebende graue Karte auf dem Navy-Canvas (md+).
-            AAR-911 v2: `.has-corner-pill` haelt nur die PageHeader-Action-Zeile
-            rechts frei. Mobile: kein Karten-Chrome (voller heller bg). */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0 has-corner-pill">
-          <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg">
-            <PageContainer fullBleed className="min-h-full">{children}</PageContainer>
-          </div>
+        {/* Content — each page decides its own scroll behavior.
+            BUG-98: PageContainer gibt Desktop ~15-20 % horizontale Marge,
+            Tablet quer großflächig, Mobile fast volle Breite. Kein py,
+            damit Sticky-Header-Pattern in Pages weiter funktionieren. */}
+        {/* AAR-911 v2: Statt md:pr-36 die VOLLE Main-Höhe für die fixe Corner-Pill
+            zu opfern, hält `.has-corner-pill` (globals.css) nur die PageHeader-
+            Action-Zeile rechts frei — Body-Content gewinnt 144px Breite zurück. */}
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
+          <PageContainer fullBleed className="h-full">{children}</PageContainer>
         </main>
       </div>
       <GlobalPosteingangFab currentUserId={user.id} />

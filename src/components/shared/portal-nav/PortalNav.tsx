@@ -281,24 +281,17 @@ export function PortalNav({
         {/* 2026-05-14: Dark-Variant erbt floating-Pills via data-sidebar-mode
             (CSS in globals.css). Floating-Default app-weit (Hook merkt die
             Bar-Opt-out-Präferenz in localStorage). */}
-        {/* Detached Glass-Panel auf Navy-Canvas: die Layouts setzen jetzt einen
-            durchgehenden Navy-Canvas (md:bg-claimondo-navy), auf dem diese Sidebar
-            schwebt. Glas (SV-Rezept: 55% + blur + heller Border + inset-Highlight)
-            hebt sie vom Navy-Canvas ab — solides Navy wuerde damit verschmelzen.
-            So schwebt die Sidebar "vollstaendig frei" wie im SV-Portal. */}
+        {/* Freischwebende Sidebar auf der grauen Vollflaeche (bg-claimondo-bg):
+            solides Navy-Panel, Margin ringsum + Rundung + Schatten. KEIN
+            overflow-hidden — sonst clippt die Panel-Kante das Updates-/Support-
+            Popover aus dem footerSlot (Aaron 10.07.: "schneidet die updates ab").
+            rounded-Ecken bleiben via bg + rounded; die Nav-Items brauchen keine
+            Eck-Clipping. */}
         <aside
           role="navigation"
           aria-label={ariaLabel ?? 'Portal-Navigation'}
           data-sidebar-mode="bar"
-          className={`hidden md:flex flex-col fixed top-4 left-4 bottom-4 w-52 z-40 rounded-ios-lg overflow-hidden ${className}`}
-          style={{
-            backgroundColor: 'color-mix(in srgb, var(--brand-sidebar-bg) 55%, transparent)',
-            backdropFilter: 'saturate(180%) blur(22px)',
-            WebkitBackdropFilter: 'saturate(180%) blur(22px)',
-            border: '1px solid color-mix(in srgb, white 22%, transparent)',
-            boxShadow:
-              '0 14px 36px color-mix(in srgb, var(--brand-sidebar-bg) 45%, transparent), inset 0 1px 0 color-mix(in srgb, white 25%, transparent)',
-          }}
+          className={`hidden md:flex flex-col fixed top-2 left-2 bottom-2 w-52 z-40 rounded-ios-lg bg-claimondo-navy shadow-ios-lg ${className}`}
         >
           {headerSlot && <div className="px-5 py-5">{headerSlot}</div>}
 

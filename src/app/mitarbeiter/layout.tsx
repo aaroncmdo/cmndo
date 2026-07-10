@@ -1,5 +1,6 @@
-// AAR-61: Mitarbeiter-Portal Layout — SV-Komposition: durchgehender Navy-Canvas +
-// Glas-Sidebar (dark PortalNav) + schwebende Content-Karte.
+// AAR-61: Mitarbeiter-Portal Layout — Detached-Navy-Panel-Sidebar (dark PortalNav),
+// KEINE Top-Bar mehr (Aktionen in den MitarbeiterNav-Slots), konsistent mit admin.
+// h-screen + inner-scroll; Content per md:ml-56 am fixed Panel vorbei.
 import MitarbeiterNav from './_components/MitarbeiterNav'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
@@ -24,13 +25,11 @@ export default async function MitarbeiterLayout({
   } catch { /* */ }
 
   return (
-    <div className="h-screen bg-claimondo-bg md:bg-claimondo-navy overflow-hidden">
+    <div className="h-screen bg-claimondo-bg overflow-hidden">
       <MitarbeiterNav userId={user.id} displayName={displayName} unreadNachrichten={unread} />
-      {/* md:pl-60/md:py-4/md:pr-4 = Navy-Rand um die schwebende Content-Karte. */}
-      <main className="h-screen overflow-hidden md:pl-60 md:py-4 md:pr-4">
-        <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg px-4 md:px-6 py-6 pb-24 md:pb-6">
-          {children}
-        </div>
+      {/* pb-24 mobile: Platz fuer die PortalNav-Bottom-Bar (md:hidden). */}
+      <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-6 py-6 pb-24 md:pb-6">
+        {children}
       </main>
       {/* Globaler Posteingang + Pinned-Chats — gleicher FAB den Admin/SV nutzen. */}
       <GlobalPosteingangFab currentUserId={user.id} />

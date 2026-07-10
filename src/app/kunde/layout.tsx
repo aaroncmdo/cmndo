@@ -348,19 +348,14 @@ export default async function KundeLayout({ children }: { children: React.ReactN
 
   return (
     <>
-    <div className="flex min-h-screen bg-claimondo-bg lg:bg-claimondo-navy" style={themeStyle}>
-      {/* Detached Glas-Panel auf Brand-Canvas: freischwebende Kunde-Sidebar, die
-          auf dem durchgehenden Brand-Canvas (lg:bg-claimondo-navy = via Rebind die
-          Brand-Farbe) schwebt. Glas (SV-Rezept 55% + blur + heller Border +
-          inset-Highlight) hebt sie vom Canvas ab; inset-4 wie die anderen Portale. */}
+    <div className="flex min-h-screen bg-claimondo-bg" style={themeStyle}>
+      {/* Freischwebende Kunde-Sidebar auf der grauen Vollflaeche: solides Brand-BG,
+          Margin ringsum + Rundung + Schatten. KEIN overflow-hidden — sonst clippt
+          die Panel-Kante das Updates-/Outbox-Popover unten (Aaron 10.07.). */}
       <aside
-        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-4 left-4 bottom-4 z-40 rounded-ios-lg overflow-hidden"
+        className="hidden lg:flex lg:flex-col lg:w-60 lg:shrink-0 fixed top-2 left-2 bottom-2 z-40 rounded-ios-lg shadow-ios-lg"
         style={{
-          backgroundColor: `color-mix(in srgb, ${sidebarBg} 55%, transparent)`,
-          backdropFilter: 'saturate(180%) blur(22px)',
-          WebkitBackdropFilter: 'saturate(180%) blur(22px)',
-          border: '1px solid color-mix(in srgb, white 22%, transparent)',
-          boxShadow: `0 14px 36px color-mix(in srgb, ${sidebarBg} 45%, transparent), inset 0 1px 0 color-mix(in srgb, white 25%, transparent)`,
+          backgroundColor: sidebarBg,
         }}
       >
         <div className="kunde-sidebar-rest px-5 py-5 transition-opacity duration-200">
@@ -466,18 +461,16 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </div>
       </header>
 
-      {/* Hauptinhalt — SV-Komposition: Content als schwebende Karte auf dem
-          Brand-Canvas. lg:pl-[272px] = Gap zur fixed Glas-Sidebar (w-60 + left-4),
-          lg:py-4/lg:pr-4 = Canvas-Rand; mobil offset durch Header (pt-14) +
-          Bottom-Nav (pb-20). */}
-      <main className="flex-1 lg:pl-[272px] lg:py-4 lg:pr-4 pt-14 lg:pt-0 pb-20 lg:pb-0 overflow-x-hidden">
-        <div className="lg:min-h-full lg:rounded-ios-lg lg:bg-claimondo-bg lg:shadow-ios-lg">
-          {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
-          <SprachBanner sprache={kundenSprache} />
-          {/* Login-Tor Slice B: Self-Confirm fuer einen moeglichen frueheren Vorgang. */}
-          <OrphanMatchBanner userId={user.id} />
-          {children}
-        </div>
+      {/* Hauptinhalt — offset by sidebar on desktop, offset by header on mobile */}
+      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-6 overflow-x-hidden">
+        {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
+        <SprachBanner sprache={kundenSprache} />
+        {/* Login-Tor Slice B: Self-Confirm fuer einen moeglichen frueheren Vorgang (null ohne Match). */}
+        <OrphanMatchBanner userId={user.id} />
+        {/* CMM-33: Globaler Pflichtdaten-Banner ist raus — die Detail-Page
+            hat einen eigenen Banner-Click-Tile mit Pop-over (PflichtdokumenteSection
+            variant=banner). Doppel-Banner war redundant. */}
+        {children}
       </main>
 
       {/* Mobile Bottom-Nav — hidden on desktop */}
