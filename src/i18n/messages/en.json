@@ -4627,7 +4627,8 @@
         "description": "All appraiser appointments for your cases.",
         "empty": "No appointments scheduled at the moment",
         "kommend": "Upcoming",
-        "verlauf": "History"
+        "verlauf": "History",
+        "reparatur": "Repair appointments"
       },
       "toggle": {
         "liste": "List",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "Confirmed",
         "gegenvorschlag": "Counter-proposal from appraiser — response required",
         "abgelehnt": "Declined",
-        "abgeschlossen": "Completed"
+        "abgeschlossen": "Completed",
+        "angefragt": "Requested",
+        "anruf_erbeten": "Callback requested"
       },
       "card": {
         "kundenBeratung": "Customer consultation",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "Case",
         "videoTermin": "Video appointment",
         "vorOrtTermin": "On-Site Appointment",
-        "detailsOeffnen": "Open details →"
+        "detailsOeffnen": "Open details →",
+        "reparaturTermin": "Repair appointment",
+        "terminOffen": "Appointment still being scheduled",
+        "zumFall": "To the case"
       },
       "detail": {
         "statusLabel": {
