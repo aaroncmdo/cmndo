@@ -8,11 +8,11 @@
 //   - kunde -> getKundeFallDetailRecord (flaches, ownership-aufgeloestes Legacy-
 //              Alias-Record; liest v_claim_full + claims-SSoT-Extras)
 //   - sv    -> getFallForSv (flaches Record, sv_id-Defense-in-Depth ueber RLS)
-//   - staff -> getClaimForRole (v_claim_full; admin/kb = '*' = vollstaendig)
+//   - staff -> getFallById (v_faelle_mit_aktuellem_termin, faelle.id-keyed; Route-gegated)
 // + Sub-Entity-Bundle (lifecycle/auftraege/kanzleiFall/pflicht), rollen-gescoped.
 //
 // Plan: docs/superpowers/plans/2026-07-08-claim-C-getClaimDetail-loader.md
-import type { ClaimFull, Rolle } from '@/lib/claims/types'
+import type { Rolle } from '@/lib/claims/types'
 import type { ClaimLifecycle } from '@/lib/claims/lifecycle'
 import type { AuftragRow } from '@/lib/auftrag/queries'
 import type { KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
@@ -27,6 +27,11 @@ export type ClaimDetailCoreKunde = Record<string, unknown>
  *  granted View + sv_id-Defense-in-Depth). Wie Kunde: untyped waehrend der Transition. */
 export type ClaimDetailCoreSv = Record<string, unknown>
 
+/** Staff-Core (admin/kb/kanzlei) = flaches Record aus getFallById
+ *  (v_faelle_mit_aktuellem_termin, faelle.id-keyed) — dieselbe Shape, die die
+ *  Admin/KB/Kanzlei-Fallakte heute laedt. Wie kunde/sv untyped waehrend der Transition. */
+export type ClaimDetailCoreStaff = Record<string, unknown>
+
 /** Sub-Entity-Bundle — rollen-unabhaengige Struktur (Werte rollen-gescoped im Loader). */
 type ClaimDetailBundle = {
   lifecycle: ClaimLifecycle
@@ -37,8 +42,8 @@ type ClaimDetailBundle = {
 
 /** Rollen-diskriminierte Union — jede Rolle hat ihre eigene Detail-Core-Shape
  *  (alle v_claim_full-geerdet, aber rollen-spezifisch projiziert):
- *  kunde/sv = flaches Legacy-Alias-Record, staff (kb/admin/kanzlei) = ClaimFull. */
+ *  kunde/sv/staff = flaches Record (kunde=v_claim_full-Alias, sv/staff=v_faelle). */
 export type ClaimDetail =
   | ({ rolle: 'kunde'; core: ClaimDetailCoreKunde } & ClaimDetailBundle)
   | ({ rolle: 'sv'; core: ClaimDetailCoreSv } & ClaimDetailBundle)
-  | ({ rolle: Exclude<Rolle, 'kunde' | 'sv'>; core: ClaimFull } & ClaimDetailBundle)
+  | ({ rolle: Exclude<Rolle, 'kunde' | 'sv'>; core: ClaimDetailCoreStaff } & ClaimDetailBundle)
