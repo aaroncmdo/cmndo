@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { freieSlots } from '@/lib/termine/engine'
+import { freieSlots, pruefeBelegungStrict } from '@/lib/termine/engine'
 
 export type TagSlot = {
   uhrzeit: string // 'HH:MM'
@@ -146,6 +146,24 @@ export async function reserviereSlot(
 
   if (gfaErr) return { ok: false, error: gfaErr.message }
 
+  // Fail-closed Verfuegbarkeits-Check nur fuer echte SVs (Tier-1). Der Wizard bietet freieSlots-
+  // gepruefte Slots an — dieser Recheck schliesst das TOCTOU-Fenster (SV traegt zwischen Angebot und
+  // Submit ein CalDAV-Event/Urlaub ein). Tier-3 (sv_lead) hat KEINEN echten Kalender → skip.
+  if (!svLeadId) {
+    const belegung = await pruefeBelegungStrict(
+      { typ: 'sachverstaendiger', id: svId },
+      vonISO,
+      bisISO,
+      supabase,
+    )
+    if (!belegung.ok) {
+      return { ok: false, error: 'Verfuegbarkeit konnte nicht geprueft werden — bitte erneut versuchen.' }
+    }
+    if (!belegung.frei) {
+      return { ok: false, error: 'Der gewaehlte Slot ist nicht mehr frei — bitte einen anderen waehlen.' }
+    }
+  }
+
   // Vorläufigen Termin mit status='reserviert' anlegen.
   // CHECK-Fix (2026-06-04): typ war 'vor_ort' + Tier-3-status 'pre_flowlink_reserviert' — beide
   // NICHT im gutachter_termine-CHECK (typ ∈ {sv_begutachtung,kb_beratung,konfrontation}; status-
@@ -167,6 +185,10 @@ export async function reserviereSlot(
     .single()
 
   if (terminErr || !terminData) {
+    // 23P01 = Exclusion-Constraint: SV in der TOCTOU-Luecke anderweitig verplant.
+    if (terminErr?.code === '23P01') {
+      return { ok: false, error: 'Der gewaehlte Slot wurde gerade vergeben — bitte einen anderen waehlen.' }
+    }
     return { ok: false, error: terminErr?.message ?? 'Termin-Insert fehlgeschlagen' }
   }
 
