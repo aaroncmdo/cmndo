@@ -13,6 +13,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
+import { pruefeBelegungStrict } from '@/lib/termine/engine'
 import { revalidatePath } from 'next/cache'
 
 const SLOT_DURATION_H = 1
@@ -85,20 +86,22 @@ export async function waehleReTerminSlot(
   if (aktTerminReTermin?.re_termin_token_eingelaufen_am) return { ok: false, error: 'Termin wurde bereits ausgewaehlt' }
   if (!fall.sv_id) return { ok: false, error: 'Kein Sachverstaendiger zugewiesen' }
 
-  // Race-safe Konflikt-Check
-  const { data: konflikte } = await db
-    .from('gutachter_termine')
-    // CMM-49 (sv_id-Drop): assignee_id+typ statt sv_id (value-identisch für SV-Termine).
-    .select('id')
-    .eq('assignee_id', fall.sv_id)
-    .eq('assignee_typ', 'sachverstaendiger')
-    .not('status', 'in', '("storniert","abgelehnt","abgesagt")')
-    .lt('start_zeit', end.toISOString())
-    .gt('end_zeit', start.toISOString())
-    .limit(1)
-
-  if (konflikte && konflikte.length > 0) {
-    return { ok: false, error: 'Dieser Slot ist nicht mehr verfuegbar — bitte einen anderen waehlen.' }
+  // Race-safe, fail-CLOSED Verfuegbarkeits-Check gegen v_belegung (Buchung ∪ externer CalDAV-Kalender
+  // ∪ Urlaub/Sperre) statt des frueheren gutachter_termine-only-Reads (fail-open + CalDAV/Urlaub-blind).
+  // Der Kunde waehlt zwar aus freieSlots-geprueften Slots — dieser Recheck schliesst das TOCTOU-Fenster
+  // (SV traegt zwischen Page-Render und Submit ein CalDAV-Event/Urlaub ein). db = Admin-Client
+  // (v_belegung ist service-role-only).
+  const belegung = await pruefeBelegungStrict(
+    { typ: 'sachverstaendiger', id: fall.sv_id as string },
+    start.toISOString(),
+    end.toISOString(),
+    db,
+  )
+  if (!belegung.ok) {
+    return { ok: false, error: 'Verfügbarkeit konnte nicht geprüft werden — bitte erneut versuchen.' }
+  }
+  if (!belegung.frei) {
+    return { ok: false, error: 'Dieser Slot ist nicht mehr verfügbar — bitte einen anderen wählen.' }
   }
 
   // Insert: kunde-vorgeschlagener Termin als 'reserviert'. SV bestaetigt
@@ -119,6 +122,10 @@ export async function waehleReTerminSlot(
   }).select('id').single()
 
   if (insertErr) {
+    // 23P01 = Exclusion-Constraint: SV in der TOCTOU-Luecke anderweitig verplant.
+    if (insertErr.code === '23P01') {
+      return { ok: false, error: 'Dieser Slot wurde gerade vergeben — bitte einen anderen wählen.' }
+    }
     return { ok: false, error: insertErr.message }
   }
 
