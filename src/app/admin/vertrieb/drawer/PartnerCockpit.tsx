@@ -8,6 +8,8 @@ import { Card, Button } from '@/components/primitives'
 import { STUFE_HINT } from '../_lib/labels'
 import { detailLink } from '../_lib/detail-link'
 import { updateVertriebFeld } from '../_actions/update-vertrieb-feld'
+import { resendWerkstattWelcome } from '../_actions/resend-werkstatt-welcome'
+import { resendMaklerWelcome } from '@/app/admin/makler/actions'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 const FELD_CLS =
@@ -35,6 +37,19 @@ export default function PartnerCockpit({
   const [fehler, setFehler] = useState<string | null>(null)
   const dirty = notiz !== (kontakt.notizen ?? '')
   const link = detailLink(kontakt.kind, kontakt.id)
+  const [mailBusy, setMailBusy] = useState(false)
+  const [mailStatus, setMailStatus] = useState<string | null>(null)
+
+  async function sendeLoginMail() {
+    setMailBusy(true)
+    setMailStatus(null)
+    const res =
+      kontakt.rolle === 'makler'
+        ? await resendMaklerWelcome(kontakt.id)
+        : await resendWerkstattWelcome(kontakt.id)
+    setMailBusy(false)
+    setMailStatus(res.ok ? 'Login-Mail gesendet.' : res.error ?? 'Konnte nicht gesendet werden.')
+  }
 
   async function speichern() {
     setBusy(true)
@@ -66,6 +81,20 @@ export default function PartnerCockpit({
           wert={kontakt.erstellt_am ? new Date(kontakt.erstellt_am).toLocaleDateString('de-DE') : null}
         />
       </div>
+
+      {(kontakt.rolle === 'makler' || kontakt.rolle === 'werkstatt') && (
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="ghost" size="sm" loading={mailBusy} onClick={sendeLoginMail}>
+            ✉️ Login-Mail neu senden
+          </Button>
+          {kontakt.rolle === 'werkstatt' && (
+            <Button variant="ghost" size="sm" onClick={() => router.push('/admin/vertrieb/werkstaetten/qr-pool')}>
+              🔳 QR-Codes
+            </Button>
+          )}
+          {mailStatus && <span className="text-caption text-claimondo-ondo/60">{mailStatus}</span>}
+        </div>
+      )}
 
       <div className="space-y-2">
         <p className="text-caption text-claimondo-ondo/60">Notizen (intern)</p>
