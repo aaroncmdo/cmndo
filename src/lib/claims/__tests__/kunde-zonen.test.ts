@@ -11,7 +11,7 @@ function vm(over: Record<string, unknown> = {}): KundeClaimViewModel {
     geld: { forderungNetto: null, auszahlungNetto: null, kvaNetto: null, kvaBrutto: null, reparaturdauerTageKva: null, gutachtenWerte: null },
     pflichtdokumente: { offen: 0 },
     fall: {},
-    flags: { abrechnungsweg: null, istReparaturRoute: false, bankdatenOffen: false, gutachtenVerfuegbar: false, reparaturFreigegeben: false },
+    flags: { abrechnungsweg: null, istReparaturRoute: false, bankdatenOffen: false, gutachtenVerfuegbar: false, reparaturFreigegeben: false, istNurGutachter: false, kanzleiSichtbar: false },
   }
   return { ...base, ...over, lifecycle: { ...base.lifecycle, ...(over.lifecycle as object ?? {}) }, geld: { ...base.geld, ...(over.geld as object ?? {}) }, flags: { ...base.flags, ...(over.flags as object ?? {}) } } as unknown as KundeClaimViewModel
 }
@@ -44,6 +44,22 @@ describe('deriveKundeZonen', () => {
   })
   it('Regulierung -> geld erscheint (in Reihenfolge)', () => {
     expect(deriveKundeZonen(vm({ lifecycle: { mainPhase: 'regulierung' } }))).toEqual(['status', 'geld', 'doksTermine'])
+  })
+  // Preserve-all: die GeldZone beherbergt jetzt auch Kanzlei/Werkstatt/Bankdaten-Cards,
+  // die in der Live-page.tsx phasen-unabhaengig (in der immer-sichtbaren Sidebar) standen.
+  // Darum erscheint die Zone auch ausserhalb der Regulierungs-Phase, wenn eine dieser
+  // Karten Inhalt haette — sonst faellt sie in fruehen Phasen faelschlich weg.
+  it('Reparatur-Route (Begutachtung) -> geld erscheint (Werkstatt/Schadenfoto-Cards)', () => {
+    expect(deriveKundeZonen(vm({ flags: { istReparaturRoute: true } }))).toContain('geld')
+  })
+  it('Kanzlei sichtbar (Begutachtung) -> geld erscheint (MeineKanzlei/KanzleiPfad)', () => {
+    expect(deriveKundeZonen(vm({ flags: { kanzleiSichtbar: true } }))).toContain('geld')
+  })
+  it('Bankdaten offen -> geld erscheint (BankdatenBanner)', () => {
+    expect(deriveKundeZonen(vm({ flags: { bankdatenOffen: true } }))).toContain('geld')
+  })
+  it('nur_gutachter, fruehe Phase, keine Karten -> KEIN geld (phasen-adaptiv bleibt)', () => {
+    expect(deriveKundeZonen(vm({ flags: { istNurGutachter: true } }))).not.toContain('geld')
   })
   it('offene Aufgabe -> aufgaben nach status', () => {
     const z = deriveKundeZonen(vm({ flags: { bankdatenOffen: true } }))

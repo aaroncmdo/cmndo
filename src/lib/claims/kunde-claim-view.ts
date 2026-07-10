@@ -9,7 +9,10 @@ import type { ClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
 import { getSvKontakt, getKbKontakt, type SvKontakt, type KbKontakt } from '@/lib/kunde/get-kontakt'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
+import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
+import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
+import { istBankdatenPhase } from '@/lib/kunde/bankdaten-status'
 import { getStorageUrlBulk } from '@/lib/storage/url'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
@@ -107,6 +110,29 @@ export type KundeStatus = {
   terminCheck: KundeTerminCheck | null
 }
 
+// P4 (GeldZone-Completion): Kanzlei-Karten-Daten (MeineKanzleiCard + KanzleiPfadCard) — in der
+// alten page.tsx in der phasen-unabhaengigen Sidebar. `gutachtenUrlRaw` ist bewusst NICHT
+// freigegeben-gated (Selbst-Einreichen-Download im KanzleiPfad), im Gegensatz zu status.gutachtenUrl.
+export type KundeKanzlei = {
+  row: { name: string | null; email: string | null; adresse: string | null } | null
+  ansprechpartnerName: string | null
+  ansprechpartnerEmail: string | null
+  ansprechpartnerTelefon: string | null
+  wunsch: string | null
+  uebergebenAm: string | null
+  vollmachtSigniertAm: string | null
+  gutachtenUrlRaw: string | null
+}
+
+// P4 (GeldZone-Completion): Werkstatt-/Reparatur-Karten-Daten (SchadensfotoUploadCard +
+// WerkstattCard + WerkstattFinderCard) — reparatur-only Fallakte (Selbstzahler/Kasko-frei).
+export type KundeWerkstatt = {
+  data: { name: string; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null; telefon: string | null } | null
+  reparaturTermin: { id: string; status: string; wunschtermin: string | null; bestaetigter_termin: string | null; absage_grund: string | null } | null
+  schadensfotoUrls: string[]
+  brauchtVermittlung: boolean
+}
+
 export type KundeClaimViewModel = {
   claimId: string
   fallId: string
@@ -136,6 +162,9 @@ export type KundeClaimViewModel = {
   pflichtdokumente: { offen: number; slots: PflichtSlotForView[] }
   doks: KundeDoks
   status: KundeStatus
+  kanzlei: KundeKanzlei
+  werkstatt: KundeWerkstatt
+  hatMehrereFaelle: boolean
   defaultEmail: string | null
   flags: {
     abrechnungsweg: string | null
@@ -143,6 +172,10 @@ export type KundeClaimViewModel = {
     bankdatenOffen: boolean
     gutachtenVerfuegbar: boolean
     reparaturFreigegeben: boolean
+    // P4: nur_gutachter hat kein Mandat/Kanzlei -> gated die Kanzlei-Karten (+ terminCheck).
+    istNurGutachter: boolean
+    // P4: „wuerde eine Kanzlei-Karte Inhalt haben?" -> GeldZone-Sichtbarkeit (preserve-all).
+    kanzleiSichtbar: boolean
   }
 }
 
@@ -167,7 +200,7 @@ export async function getKundeClaimView(
   const resolvedClaimId = (fall.claim_id as string | null) ?? claimId
   const pflichtSlots = detail.pflichtDokumente
 
-  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes, svTerminRes, kundeProfilRes, verlegungRes] =
+  const [termine, kb, sv, payoutRes, gwRes, kundeViewRes, claimExtraRes, dokumenteRes, aktiverTerminRes, kbTerminRes, svTerminRes, kundeProfilRes, verlegungRes, kanzleiRowRes, alleFaelle] =
     await Promise.all([
       getKundeTermine(admin, { fallIds: [fallId], claimIds: [resolvedClaimId] }),
       getKbKontakt(admin, (fall.kundenbetreuer_id as string | null) ?? null),
@@ -191,10 +224,11 @@ export async function getKundeClaimView(
         .select('auszahlung_zahlungsweg')
         .eq('id', fallId)
         .maybeSingle(),
-      // P3 (GeldZone): claims-native Extras (Reparatur-Route-Gate + Mietwagen fuer die Ausfall-Card).
+      // P3/P4 (GeldZone): claims-native Extras (Reparatur-Route-Gate + Mietwagen fuer die
+      // Ausfall-Card + P4: Kanzlei-Ansprechpartner/Uebergabe + Werkstatt-Vermittlung-Gate).
       admin
         .from('claims')
-        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, status')
+        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
       // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
@@ -248,6 +282,12 @@ export async function getKundeClaimView(
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle(),
+      // P4 (GeldZone): Kanzlei-Stammdaten (MeineKanzleiCard) — nur wenn eine Kanzlei zugeordnet ist.
+      fall.kanzlei_id
+        ? admin.from('kanzleien').select('name, email, adresse').eq('id', fall.kanzlei_id as string).maybeSingle()
+        : Promise.resolve({ data: null }),
+      // P4 (Shell-Header): „← Meine Faelle"-Link nur bei Multi-Fall-Kunden (wie Live-page.tsx).
+      getKundeFaelle(admin, userId, userEmail),
     ])
 
   // Dokumentenliste (mit signierten URLs) — Basis fuer FallDetailSections + KVA-PDF-Ableitung.
@@ -321,12 +361,65 @@ export async function getKundeClaimView(
 
   const abrechnungsweg = (fall.abrechnungsweg as string | null) ?? null
   const reparaturFreigegeben = !!fall.reparatur_freigegeben_am
-  const mainPhase = detail.lifecycle.mainPhase
-  const istGeldPhase = mainPhase === 'regulierung' || mainPhase === 'abschluss'
 
   const payout = payoutRes.data as { vs_quote_betrag_ausgezahlt: number | null; ausgezahlt_am: string | null } | null
   const kundeView = kundeViewRes.data as { auszahlung_zahlungsweg: string | null } | null
   const claimExtra = claimExtraRes.data as Record<string, unknown> | null
+
+  // ── P4 (GeldZone-Completion): Kanzlei- + Werkstatt-/Reparatur-Karten-Daten ─────────────────
+  // Diese Karten standen in der alten page.tsx in der phasen-unabhaengigen Sidebar; hier als
+  // vm-Daten gebuendelt, damit die GeldZone sie 1:1 (mit den Live-Gates) wrappen kann.
+  const istNurGutachter = (claimExtra?.service_typ as string | null) === 'nur_gutachter'
+
+  // Werkstatt-Stammdaten + aktiver Reparaturtermin — nur bei vermittelter Werkstatt.
+  const reparaturWerkstattId = (claimExtra?.reparatur_werkstatt_id as string | null) ?? null
+  let werkstattData: KundeWerkstatt['data'] = null
+  let reparaturTermin: KundeWerkstatt['reparaturTermin'] = null
+  if (reparaturWerkstattId) {
+    const [werkstattRes, reparaturTerminRes] = await Promise.all([
+      admin.from('werkstaetten').select('name, adresse_strasse, adresse_plz, adresse_ort, telefon').eq('id', reparaturWerkstattId).maybeSingle(),
+      admin
+        .from('reparatur_termine')
+        .select('id, status, wunschtermin, bestaetigter_termin, absage_grund')
+        .eq('claim_id', resolvedClaimId)
+        .neq('status', 'storniert')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
+    ])
+    werkstattData = (werkstattRes.data as KundeWerkstatt['data']) ?? null
+    reparaturTermin = (reparaturTerminRes.data as KundeWerkstatt['reparaturTermin']) ?? null
+  }
+  // Schadenfotos + Roh-Gutachten-URL aus der bereits signierten Dokumentenliste ableiten (kein
+  // zusaetzlicher Storage-Call). gutachtenUrlRaw ist bewusst NICHT freigegeben-gated (KanzleiPfad).
+  const schadensfotoUrls = dokumente.filter((d) => d.typ === 'schadensfoto' && d.datei_url).map((d) => d.datei_url)
+  const gutachtenUrlRaw = dokumente.filter((d) => d.typ === 'gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null
+  const brauchtVermittlung = brauchtWerkstattVermittlung({
+    reparaturwunsch: (claimExtra?.reparaturwunsch as string | null) ?? null,
+    reparatur_werkstatt_id: reparaturWerkstattId,
+    werkstatt_id: (claimExtra?.werkstatt_id as string | null) ?? null,
+    reparatur_vermittlung_status: (claimExtra?.reparatur_vermittlung_status as string | null) ?? null,
+  })
+  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, brauchtVermittlung }
+
+  const kanzleiRow = (kanzleiRowRes.data as { name: string | null; email: string | null; adresse: string | null } | null) ?? null
+  const kanzleiAnsprechpartnerName = (fall.kanzlei_ansprechpartner_name as string | null) ?? null
+  const kanzlei: KundeKanzlei = {
+    row: kanzleiRow,
+    ansprechpartnerName: kanzleiAnsprechpartnerName,
+    ansprechpartnerEmail: (claimExtra?.kanzlei_ansprechpartner_email as string | null) ?? null,
+    ansprechpartnerTelefon: (claimExtra?.kanzlei_ansprechpartner_telefon as string | null) ?? null,
+    wunsch: (fall.kanzlei_wunsch as string | null) ?? null,
+    uebergebenAm: (claimExtra?.kanzlei_uebergeben_am as string | null) ?? null,
+    vollmachtSigniertAm: (fall.vollmacht_signiert_am as string | null) ?? null,
+    gutachtenUrlRaw,
+  }
+  // kanzleiSichtbar: „wuerde MeineKanzleiCard ODER KanzleiPfadCard etwas rendern?" — treibt die
+  // GeldZone-Sichtbarkeit auch in fruehen Phasen (preserve-all). MeineKanzlei zeigt bei Kanzlei-/
+  // AP-Name; KanzleiPfad nur bei kanzlei_wunsch='eigene_kanzlei'. nur_gutachter hat kein Mandat.
+  const kanzleiSichtbar =
+    !istNurGutachter && (!!kanzleiRow?.name || !!kanzleiAnsprechpartnerName || kanzlei.wunsch === 'eigene_kanzlei')
+
   const gw = gwRes.data as Record<string, unknown> | null
   const gutachtenWerte: KundeGutachtenWerte | null = gw
     ? {
@@ -409,8 +502,8 @@ export async function getKundeClaimView(
     }
   }
 
-  // Edge-Banner: „kam dein Gutachter?" — nur_gutachter + ueberfaelliger ungeklaerter Termin + kein offener Klaerungs-Task.
-  const istNurGutachter = (claimExtra?.service_typ as string | null) === 'nur_gutachter'
+  // Edge-Banner: „kam dein Gutachter?" — nur_gutachter (oben berechnet) + ueberfaelliger
+  // ungeklaerter Termin + kein offener Klaerungs-Task.
   const claimTerminal = (CLAIM_TERMINAL_STATUSES as readonly string[]).includes((claimExtra?.status as string | null) ?? '')
   let terminCheck: KundeTerminCheck | null = null
   if (istNurGutachter && !claimTerminal) {
@@ -489,14 +582,21 @@ export async function getKundeClaimView(
     pflichtdokumente: { offen: pflichtOffen, slots: pflichtSlots },
     doks: { qcLaeuft, kbTerminCard, dokumente, aktiverTermin },
     status,
+    kanzlei,
+    werkstatt,
+    hatMehrereFaelle: alleFaelle.length > 1,
     defaultEmail: userEmail,
     flags: {
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),
-      // bankdatenOffen: Geld-Phase erreicht + noch keine Bankdaten hinterlegt (lifecycle-getrieben).
-      bankdatenOffen: istGeldPhase && !fall.bankdaten_hinterlegt_am,
+      // bankdatenOffen == „Bankdaten-Banner ist in dieser Phase aktiv & noch nicht hinterlegt"
+      // (istBankdatenPhase = kanonische Payout-Status-Liste, geteilt mit BankdatenBanner) — haelt
+      // Aufgabe + GeldZone-Sichtbarkeit exakt synchron zum Banner.
+      bankdatenOffen: istBankdatenPhase(fall.status as string | null) && !fall.bankdaten_hinterlegt_am,
       gutachtenVerfuegbar: !!fall.gutachten_eingegangen_am,
       reparaturFreigegeben,
+      istNurGutachter,
+      kanzleiSichtbar,
     },
   }
 }

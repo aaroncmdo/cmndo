@@ -1,9 +1,13 @@
-// P2/P3 (Kunde-Detail-Rebuild): GeldZone — Forderung/Auszahlung/KVA/Ausfall, konsolidiert.
+// P2/P3/P4 (Kunde-Detail-Rebuild): GeldZone — Geld, Reparatur & Regulierung, konsolidiert.
 // „Alles erhalten, nur umbauen" (Aaron 10.07.): wrappt die bestehenden interaktiven Bestands-Cards
-// (SaeuleMeinGeld/AuszahlungCard/KostenvoranschlagCard/FiktiveAbrechnungCard/
-// KundeAusfallEntschaedigungCard) — Gates + Props 1:1 aus der Live-page.tsx, gespeist aus dem
-// ViewModel (vm.geld + vm.fall). Server-Component: reicht die updateZahlungsweg-Action an die
-// 'use client'-Card durch (keine eigene Client-Grenze noetig).
+// 1:1 aus der Live-page.tsx (Gates + Props identisch), gespeist aus dem ViewModel (vm.geld/vm.fall/
+// vm.kanzlei/vm.werkstatt). P4 ergaenzt die 6 Sidebar-Karten, die vorher kein Zonen-Home hatten:
+// BankdatenBanner, MeineKanzleiCard, KanzleiPfadCard, SchadensfotoUploadCard, WerkstattCard,
+// WerkstattFinderCard. Die Zone erscheint (kunde-zonen.ts) sobald eine dieser Karten Inhalt hat —
+// so faellt in fruehen Phasen nichts weg (preserve-all).
+//
+// Server-Component: reicht die Server-Actions (updateZahlungsweg/saveBankdaten) an die
+// 'use client'-Cards durch (keine eigene Client-Grenze noetig).
 
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 import SaeuleMeinGeld from '@/components/kunde/SaeuleMeinGeld'
@@ -11,15 +15,52 @@ import AuszahlungCard from '@/components/kunde/AuszahlungCard'
 import KostenvoranschlagCard from '@/components/kunde/KostenvoranschlagCard'
 import FiktiveAbrechnungCard from '@/components/kunde/FiktiveAbrechnungCard'
 import KundeAusfallEntschaedigungCard from '@/components/kunde/KundeAusfallEntschaedigungCard'
-import { updateZahlungsweg } from '@/app/kunde/faelle/[id]/actions'
+import BankdatenBanner from '@/components/kunde/BankdatenBanner'
+import { MeineKanzleiCard } from '@/components/kunde/kanzlei'
+import KanzleiPfadCard from '@/components/kunde/KanzleiPfadCard'
+import SchadensfotoUploadCard from '@/components/kunde/SchadensfotoUploadCard'
+import WerkstattCard from '@/components/kunde/WerkstattCard'
+import WerkstattFinderCard from '@/components/kunde/WerkstattFinderCard'
+import { saveBankdaten, updateZahlungsweg } from '@/app/kunde/faelle/[id]/actions'
 
 export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
-  const { geld } = vm
+  const { geld, kanzlei, werkstatt, flags } = vm
   const gw = geld.gutachtenWerte
   const kvaSichtbar = geld.reparaturWerkstattId != null && (geld.kvaNetto != null || geld.kvaBrutto != null)
 
   return (
     <div className="space-y-4">
+      {/* Bankdaten-Abfrage — self-gated (nur in Payout-Phasen & noch nicht hinterlegt). Oben als
+          actionable CTA. Kritisch fuer die Auszahlung. */}
+      <BankdatenBanner
+        fallId={vm.fallId}
+        status={(vm.fall.status as string | null) ?? ''}
+        bankdatenHinterlegt={!!vm.fall.bankdaten_hinterlegt_am}
+        saveBankdaten={saveBankdaten}
+      />
+
+      {/* ── Reparatur-Strecke (Selbstzahler/Kasko-frei) — nur bei Werkstatt-Reparatur-Weg ─────── */}
+      {/* WS3: Schadenfotos — kein SV macht Fotos, der Kunde liefert sie fuer die Werkstatt. */}
+      {flags.istReparaturRoute && (
+        <SchadensfotoUploadCard claimId={vm.claimId} fotos={werkstatt.schadensfotoUrls.map((url) => ({ url }))} />
+      )}
+      {/* Werkstatt-Finder — Kunde ohne vermittelte Werkstatt (kanonischer brauchtWerkstattVermittlung-Gate). */}
+      {werkstatt.brauchtVermittlung && <WerkstattFinderCard claimId={vm.claimId} />}
+      {/* Werkstatt-Card — bei hinterlegter Werkstatt (+ Reparaturtermin-Status). */}
+      {werkstatt.data && <WerkstattCard claimId={vm.claimId} werkstatt={werkstatt.data} termin={werkstatt.reparaturTermin} />}
+      {/* KVA-Loop — Reparatur-Claim (Werkstatt) mit hochgeladenem Kostenvoranschlag. */}
+      {kvaSichtbar && (
+        <KostenvoranschlagCard
+          claimId={vm.claimId}
+          kostenvoranschlagNetto={geld.kvaNetto}
+          kostenvoranschlagBrutto={geld.kvaBrutto}
+          freigegebenAm={(vm.fall.reparatur_freigegeben_am as string | null) ?? null}
+          pdfUrl={geld.kvaPdfUrl}
+          reparaturdauerTage={geld.reparaturdauerTageKva}
+        />
+      )}
+
+      {/* ── Geld ─────────────────────────────────────────────────────────────────────────────── */}
       <SaeuleMeinGeld
         fallId={vm.fallId}
         status={(vm.fall.status as string | null) ?? ''}
@@ -42,23 +83,7 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
 
       {/* AAR-558 (C9): Auszahlungs-Card — nur Netto-Kunden-Anteil (faelle_kunde_view-Row existiert). */}
       {geld.auszahlungCardSichtbar && (
-        <AuszahlungCard
-          betrag={geld.auszahlungNetto}
-          eingegangenAm={geld.auszahlungEingegangenAm}
-          zahlungsweg={geld.auszahlungZahlungsweg}
-        />
-      )}
-
-      {/* KVA-Loop (Kunde-Seite): Kostenvoranschlag-Card — Reparatur-Claim (Werkstatt) mit KVA. */}
-      {kvaSichtbar && (
-        <KostenvoranschlagCard
-          claimId={vm.claimId}
-          kostenvoranschlagNetto={geld.kvaNetto}
-          kostenvoranschlagBrutto={geld.kvaBrutto}
-          freigegebenAm={(vm.fall.reparatur_freigegeben_am as string | null) ?? null}
-          pdfUrl={geld.kvaPdfUrl}
-          reparaturdauerTage={geld.reparaturdauerTageKva}
-        />
+        <AuszahlungCard betrag={geld.auszahlungNetto} eingegangenAm={geld.auszahlungEingegangenAm} zahlungsweg={geld.auszahlungZahlungsweg} />
       )}
 
       {/* SP4c: Fiktive-Abrechnung-Card — voraussichtliche Auszahlung auf Gutachten-Basis. */}
@@ -74,6 +99,35 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
 
       {/* Mietwagen-/Nutzungsausfall-Card (XOR) — Card entscheidet Sichtbarkeit selbst. */}
       {geld.ausfall && <KundeAusfallEntschaedigungCard {...geld.ausfall} />}
+
+      {/* ── Kanzlei / Regulierung — nur mit Mandat (nicht bei nur_gutachter) ──────────────────── */}
+      {/* MeineKanzleiCard self-gated (nur bei Kanzlei-/Ansprechpartner-Verbindung). */}
+      {!flags.istNurGutachter && (
+        <MeineKanzleiCard
+          kanzlei={kanzlei.row}
+          ansprechpartner={{
+            name: kanzlei.ansprechpartnerName,
+            position: null,
+            email: kanzlei.ansprechpartnerEmail,
+            telefon: kanzlei.ansprechpartnerTelefon,
+          }}
+          vollmachtSigniertAm={kanzlei.vollmachtSigniertAm}
+          uebergebenAm={kanzlei.uebergebenAm}
+        />
+      )}
+      {/* KanzleiPfadCard — Switch je nach kanzlei_wunsch (rendert null ausser bei 'eigene_kanzlei'). */}
+      {!flags.istNurGutachter && (
+        <KanzleiPfadCard
+          claimId={vm.claimId}
+          kanzleiWunsch={(kanzlei.wunsch as React.ComponentProps<typeof KanzleiPfadCard>['kanzleiWunsch']) ?? null}
+          kanzleiName={kanzlei.ansprechpartnerName}
+          kanzleiEmail={kanzlei.ansprechpartnerEmail}
+          kanzleiTelefon={kanzlei.ansprechpartnerTelefon}
+          kanzleiUebergebenAm={kanzlei.uebergebenAm}
+          gutachtenFreigegeben={vm.status.gutachtenFreigegeben}
+          gutachtenUrl={kanzlei.gutachtenUrlRaw}
+        />
+      )}
     </div>
   )
 }

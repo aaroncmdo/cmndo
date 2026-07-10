@@ -60,7 +60,14 @@ export function deriveKundeZonen(vm: KundeClaimViewModel): ZoneId[] {
     mainPhase === 'abschluss' ||
     vm.geld.forderungNetto != null ||
     vm.geld.auszahlungNetto != null ||
-    vm.geld.kvaBrutto != null
+    vm.geld.kvaBrutto != null ||
+    // Preserve-all: die GeldZone beherbergt jetzt auch die Kanzlei-, Werkstatt- und
+    // Bankdaten-Karten, die in der alten page.tsx in der phasen-unabhaengigen Sidebar
+    // standen. Ohne diese ORs fielen sie in fruehen Phasen (Erfassung/Begutachtung)
+    // faelschlich weg — genau der preserve-all-Bruch, den Task A schliesst.
+    vm.flags.istReparaturRoute ||
+    vm.flags.kanzleiSichtbar ||
+    vm.flags.bankdatenOffen
   if (geldSichtbar) zonen.push('geld')
 
   zonen.push('doksTermine')
