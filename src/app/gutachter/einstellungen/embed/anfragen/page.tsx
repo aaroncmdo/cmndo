@@ -6,7 +6,6 @@
 // v_sv_inbox fehlt (wie embed_sites) in database.types.ts → Cast-Idiom.
 
 import { createClient } from '@/lib/supabase/server'
-import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
 import { Badge } from '@/components/primitives'
 import { Chip, ChipRow } from '@/components/ui/Chip'
@@ -88,12 +87,6 @@ export default async function SVPortalAnfragen({
 
   return (
     <div className="py-6 space-y-4">
-      <PageHeader
-        title="Anfragen"
-        size="lg"
-        actions={<span className="text-sm text-claimondo-ondo">{rows.length} Anfragen</span>}
-      />
-
       <ChipRow>
         {VARIANTE_FILTER.map((f) => (
           <Chip

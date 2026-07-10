@@ -7,7 +7,6 @@ import { PlusIcon, XIcon, ShieldCheckIcon, AlertCircleIcon } from 'lucide-react'
 import { createReklamation } from './actions'
 // AAR-664 (Folge): Konstante aus non-`'use server'`-Datei.
 import { REKLAMATIONS_GRUENDE } from './constants'
-import PageHeader from '@/components/shared/PageHeader'
 import { Modal } from '@/components/primitives/Modal'
 import { liquidField } from '@/lib/styles/liquid-field'
 
@@ -67,11 +66,7 @@ export default function ReklamationenClient({ reklamationen, faelle }: { reklama
 
   return (
     <div className="py-6 space-y-4 max-w-5xl mx-auto px-4">
-      <div className="flex items-center justify-between">
-        <PageHeader
-          title="Meine Reklamationen"
-          description="Reklamationen zu Aufträgen — z.B. Kunde war nicht da, Schaden anders, Mehraufwand."
-        />
+      <div className="flex items-center justify-end">
         {/* AAR-259: Button deaktiviert wenn keine Fälle vorhanden — sonst
             öffnet der Dialog einen leeren Select und User denkt "Klick tut
             nichts". Mit Hover-Hint erklären. */}

@@ -3,13 +3,12 @@ import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import {
-  ClipboardListIcon,
   ClockIcon,
   AlertTriangleIcon,
   CheckCircle2Icon,
   ExternalLinkIcon,
 } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 
 const PRIO_COLORS: Record<string, string> = {
   kritisch: 'bg-danger-soft text-danger-strong border-danger/30',
@@ -66,15 +65,7 @@ export default async function GutachterTasksPage() {
   return (
     <div className="h-full overflow-y-auto py-6 sm:py-8">
       <div className="space-y-6">
-        <PageHeader
-          title="Meine Tasks"
-          icon={ClipboardListIcon}
-          actions={
-            <span className="bg-claimondo-bg text-claimondo-navy text-xs font-medium px-2.5 py-1 rounded-full">
-              {offeneTasks.length} offen
-            </span>
-          }
-        />
+        <SvPageChrome title="Meine Tasks" />
 
         {/* Warnungen */}
         {ueberfaellige.length > 0 && (
