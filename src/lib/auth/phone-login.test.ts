@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { enablePhoneLogin } from './phone-login'
 
 type Admin = Parameters<typeof enablePhoneLogin>[0]
@@ -14,6 +14,15 @@ function makeAdmin(result: { error: { message: string } | null } | Error) {
 }
 
 describe('enablePhoneLogin', () => {
+  // Die Fehlerpfade loggen bewusst via console.warn — im Test stummschalten,
+  // damit die Ausgabe pristine bleibt.
+  beforeEach(() => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {})
+  })
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
   it('normalisiert die Nummer auf E.164 und setzt phone_confirm; gibt true zurueck', async () => {
     const { admin, updateUserById } = makeAdmin({ error: null })
     const ok = await enablePhoneLogin(admin, 'user-1', '0175 1234567')
@@ -28,6 +37,8 @@ describe('enablePhoneLogin', () => {
     const { admin, updateUserById } = makeAdmin({ error: null })
     expect(await enablePhoneLogin(admin, 'user-1', null)).toBe(false)
     expect(await enablePhoneLogin(admin, 'user-1', '')).toBe(false)
+    // undefined ist per Signatur ausgeschlossen, aber toE164 haelt es ab — abgesichert.
+    expect(await enablePhoneLogin(admin, 'user-1', undefined as unknown as null)).toBe(false)
     expect(updateUserById).not.toHaveBeenCalled()
   })
 
