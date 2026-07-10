@@ -4627,7 +4627,8 @@
         "description": "Все встречи с экспертом-оценщиком по вашим делам.",
         "empty": "Запланированных встреч нет",
         "kommend": "Предстоящие",
-        "verlauf": "История"
+        "verlauf": "История",
+        "reparatur": "Записи на ремонт"
       },
       "toggle": {
         "liste": "Список",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "Подтверждено",
         "gegenvorschlag": "Встречное предложение от эксперта — требуется ответ",
         "abgelehnt": "Отклонено",
-        "abgeschlossen": "Проведено"
+        "abgeschlossen": "Проведено",
+        "angefragt": "Запрошено",
+        "anruf_erbeten": "Требуется обратный звонок"
       },
       "card": {
         "kundenBeratung": "Консультация клиента",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "Дело",
         "videoTermin": "Видеовстреча",
         "vorOrtTermin": "Встреча на месте",
-        "detailsOeffnen": "Открыть подробности →"
+        "detailsOeffnen": "Открыть подробности →",
+        "reparaturTermin": "Запись на ремонт",
+        "terminOffen": "Дата ещё согласовывается",
+        "zumFall": "К делу"
       },
       "detail": {
         "statusLabel": {
