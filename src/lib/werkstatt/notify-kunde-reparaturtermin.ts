@@ -30,7 +30,7 @@ function fmtTermin(iso: string): string {
   return `${DATETIME.format(new Date(iso))} Uhr`
 }
 
-export type ReparaturterminEreignis = 'bestaetigt' | 'anruf_erbeten' | 'abgelehnt'
+export type ReparaturterminEreignis = 'werkstatt_vorschlag' | 'bestaetigt' | 'anruf_erbeten' | 'abgelehnt'
 
 export type NotifyKundeReparaturterminDeps = {
   sendEmail: typeof sendEmail
@@ -41,6 +41,10 @@ const defaultDeps: NotifyKundeReparaturterminDeps = { sendEmail, createNotificat
 
 // In-App-Texte je Ereignis (nutzersichtbar — echte Umlaute).
 const INAPP_TEXT: Record<ReparaturterminEreignis, { titel: string; text: string }> = {
+  werkstatt_vorschlag: {
+    titel: 'Terminvorschlag der Werkstatt',
+    text: 'Deine Werkstatt hat einen Reparaturtermin vorgeschlagen — bitte bestätigen.',
+  },
   bestaetigt: {
     titel: 'Reparaturtermin bestätigt',
     text: 'Deine Werkstatt hat den vorgeschlagenen Termin bestätigt.',
@@ -71,7 +75,16 @@ export function buildKundeReparaturterminEmailHtml(args: {
   let inhalt: string
   let betreff: string
 
-  if (args.ereignis === 'bestaetigt') {
+  if (args.ereignis === 'werkstatt_vorschlag') {
+    const terminZeile = args.bestaetigterTermin?.trim()
+      ? `<p style="margin:0 0 16px;font-size:15px;">Vorgeschlagener Termin: <strong>${escapeHtml(fmtTermin(args.bestaetigterTermin.trim()))}</strong></p>`
+      : ''
+    betreff = 'Die Werkstatt hat einen Termin vorgeschlagen'
+    inhalt = `
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">die Werkstatt hat einen Reparaturtermin für Sie vorgeschlagen.</p>
+      ${terminZeile}
+      <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Bitte bestätigen Sie den Termin in Ihrem Claimondo-Portal. Passt er nicht, können Sie die Werkstatt direkt anrufen oder einen Rückruf vereinbaren.</p>`
+  } else if (args.ereignis === 'bestaetigt') {
     const terminZeile = args.bestaetigterTermin?.trim()
       ? `<p style="margin:0 0 16px;font-size:15px;">Ihr bestätigter Reparaturtermin: <strong>${escapeHtml(fmtTermin(args.bestaetigterTermin.trim()))}</strong></p>`
       : ''
