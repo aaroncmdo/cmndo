@@ -9,20 +9,19 @@ export default async function DispatchLayout({
 }: {
   children: React.ReactNode
 }) {
-  // K5: Auth + Rollen-Guard zentralisiert. Dispatch erlaubt Admin als
-  // Testing-Fallback weiterhin.
+  // K5: Auth + Rollen-Guard zentralisiert. Dispatch erlaubt Admin als Testing-Fallback.
   const { user, initials } = await requirePortalAccess(['dispatch', 'admin'])
 
   return (
     <>
-    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
+    {/* SV-Komposition: durchgehender Navy-Canvas (md:bg-claimondo-navy) + schwebende
+        Glas-Sidebar + schwebende Content-Karte (siehe admin/layout). */}
+    <div className="h-screen bg-claimondo-bg md:bg-claimondo-navy relative overflow-hidden">
       <RealtimeLeadAlert />
       <DispatchNav email={user.email ?? ''} initials={initials} userId={user.id} />
 
-      {/* Content full-bleed (PageContainer fullBleed); md:pl-56 raeumt das fixe
-          Glass-Panel frei (kein Kollidieren dahinter). BG bleedt unter das Panel,
-          Content laeuft rechts bis zur Kante. */}
-      <div className="md:pl-56 h-screen flex flex-col relative z-10">
+      {/* md:pl-60 = Gap zur fixed Glas-Sidebar; md:py-4/md:pr-4 = Navy-Rand. */}
+      <div className="md:pl-60 md:py-4 md:pr-4 h-screen flex flex-col relative z-10">
         {/* Mobile header — AAR-727 Glass-Dark */}
         <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
           <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
@@ -37,12 +36,11 @@ export default async function DispatchLayout({
           <UpdatesNav variant="light" />
         </div>
 
-        {/* AAR-911 v2: Statt md:pr-36 die VOLLE Main-Höhe für die fixe Corner-Pill
-            zu opfern (144px tote Spalte), hält `.has-corner-pill` (globals.css) nur
-            die PageHeader-Action-Zeile rechts frei — Body-Content (Tabellen/Grids)
-            gewinnt die 144px Breite zurück. */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
-          <PageContainer fullBleed className="h-full">{children}</PageContainer>
+        {/* Content-Karte auf dem Navy-Canvas. */}
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0 has-corner-pill">
+          <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg">
+            <PageContainer fullBleed className="min-h-full">{children}</PageContainer>
+          </div>
         </main>
       </div>
     </div>

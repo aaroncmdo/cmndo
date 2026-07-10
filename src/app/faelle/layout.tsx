@@ -1,15 +1,13 @@
-﻿// AAR-628: Rolle-abhängige Shell für die Fallakte-Route.
+// AAR-628: Rolle-abhängige Shell für die Fallakte-Route.
+// SV-Komposition (2026-07-10): alle Rollen-Shells = durchgehender Navy-Canvas +
+// Glas-Sidebar (dark PortalNav) + schwebende Content-Karte, analog admin/kanzlei/
+// mitarbeiter.
 //
 // Die Fallakte wird von vier internen Rollen genutzt:
-//   - admin           → volle Admin-Shell (AdminNav + NotificationBell + Spotlight)
-//   - kundenbetreuer  → Mitarbeiter-Shell (MitarbeiterNav + reduzierte Header)
-//   - kanzlei         → Kanzlei-Shell (KanzleiNav, read-only) — PR 2b
-//   - dispatch  → Mitarbeiter-Shell
-//
-// AAR-kanzlei-portal (PR 2b): Kanzlei bekommt eigene Shell mit KanzleiNav,
-// damit sie nicht in der Admin-UI landen. Read-only ist über
-// field-permissions + FALL_PERMISSIONS (kanzlei → READONLY_PERMISSIONS)
-// abgesichert, plus RLS-Policy aus Migration 20260421151144.
+//   - admin           → Admin-Shell (AdminNav + Spotlight)
+//   - kundenbetreuer  → Mitarbeiter-Shell (MitarbeiterNav)
+//   - kanzlei         → Kanzlei-Shell (KanzleiNav, read-only via field-permissions)
+//   - dispatch        → Mitarbeiter-Shell
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
@@ -38,9 +36,7 @@ export default async function FaelleLayout({
     .single()
   const rolle = profile?.rolle as string | undefined
 
-  // AAR-718: Rollen die hier nichts zu suchen haben — per zentrale
-  // roleToPath-Funktion in ihr eigenes Portal. Vorher hardcoded-Switch.
-  // Admin/Kanzlei/KB/Dispatcher dürfen drin bleiben.
+  // AAR-718: Rollen die hier nichts zu suchen haben → eigenes Portal.
   if (!rolle || !['admin', 'kanzlei', 'kundenbetreuer', 'dispatch'].includes(rolle)) {
     redirect(rolle ? roleToPath(rolle) : '/login')
   }
@@ -49,19 +45,16 @@ export default async function FaelleLayout({
   const displayName =
     [profile?.vorname, profile?.nachname].filter(Boolean).join(' ') || user.email || ''
 
-  // AAR-kanzlei-portal: Kanzlei → eigene Shell (KanzleiNav + Navy-Header).
-  // Read-only-Verhalten wird NICHT hier, sondern in field-permissions.ts
-  // + FALL_PERMISSIONS gesetzt (kanzlei → READONLY_PERMISSIONS). Die RLS-
-  // Policy in Migration 20260421151144 limitiert die sichtbaren Fälle
-  // zusätzlich auf service_typ='komplett'.
+  // Kanzlei → eigene Shell (KanzleiNav). Read-only via field-permissions +
+  // FALL_PERMISSIONS + RLS-Policy (Migration 20260421151144).
   if (rolle === 'kanzlei') {
-    // Detached-Navy-Panel-Sidebar (KanzleiNav dark), keine Top-Bar (Aktionen in
-    // den Nav-Slots). Read-only via field-permissions, nicht hier.
     return (
-      <div className="h-screen bg-claimondo-bg overflow-hidden">
+      <div className="h-screen bg-claimondo-bg md:bg-claimondo-navy overflow-hidden">
         <KanzleiNav userId={user.id} displayName={displayName} />
-        <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-8 py-6 pb-24 md:pb-6">
-          {children}
+        <main className="h-screen overflow-hidden md:pl-60 md:py-4 md:pr-4">
+          <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg px-4 md:px-8 py-6 pb-24 md:pb-6">
+            {children}
+          </div>
         </main>
       </div>
     )
@@ -80,15 +73,16 @@ export default async function FaelleLayout({
     } catch { /* non-critical */ }
 
     return (
-      <div className="h-screen bg-claimondo-bg overflow-hidden">
+      <div className="h-screen bg-claimondo-bg md:bg-claimondo-navy overflow-hidden">
         <MitarbeiterNav userId={user.id} displayName={displayName} unreadNachrichten={unread} />
-        <main className="h-screen overflow-y-auto md:ml-56 px-4 md:px-6 py-6 pb-24 md:pb-6">{children}</main>
+        <main className="h-screen overflow-hidden md:pl-60 md:py-4 md:pr-4">
+          <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg px-4 md:px-6 py-6 pb-24 md:pb-6">{children}</div>
+        </main>
       </div>
     )
   }
 
-  // admin → Admin-Shell (Kopie der /admin/layout.tsx-Logik). AAR-727:
-  // unreadNachrichten entfernt — Posteingang läuft jetzt über GlobalPosteingangFab.
+  // admin → Admin-Shell (Kopie der /admin/layout.tsx-Logik).
   const { count: meineTasksCount } = await supabase
     .from('tasks')
     .select('*', { count: 'exact', head: true })
@@ -97,7 +91,7 @@ export default async function FaelleLayout({
 
   return (
     <>
-    <div className="h-screen bg-claimondo-bg relative overflow-hidden">
+    <div className="h-screen bg-claimondo-bg md:bg-claimondo-navy relative overflow-hidden">
       <Spotlight />
       <AdminNav
         email={user.email ?? ''}
@@ -105,7 +99,7 @@ export default async function FaelleLayout({
         userId={user.id}
         meineTasksCount={meineTasksCount ?? 0}
       />
-      <div className="md:ml-56 h-screen flex flex-col relative z-10">
+      <div className="md:pl-60 md:py-4 md:pr-4 h-screen flex flex-col relative z-10">
         <header className="md:hidden flex items-center justify-between px-4 py-3 bg-claimondo-navy shrink-0">
           <span className="text-lg font-bold tracking-tight">
             <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
@@ -116,11 +110,10 @@ export default async function FaelleLayout({
           <OutboxBadge />
           <UpdatesNav variant="light" />
         </div>
-        {/* AAR-911 v2: Statt md:pr-36 die VOLLE Main-Höhe für die fixe Corner-Pill
-            zu opfern, hält `.has-corner-pill` (globals.css) nur die PageHeader-
-            Action-Zeile rechts frei — Body-Content gewinnt 144px Breite zurück. */}
-        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
-          <PageContainer fullBleed className="h-full">{children}</PageContainer>
+        <main id="main-content" role="main" className="flex-1 min-h-0 overflow-hidden pb-16 md:pb-0 has-corner-pill">
+          <div className="h-full overflow-y-auto md:rounded-ios-lg md:bg-claimondo-bg md:shadow-ios-lg">
+            <PageContainer fullBleed className="min-h-full">{children}</PageContainer>
+          </div>
         </main>
       </div>
     </div>
