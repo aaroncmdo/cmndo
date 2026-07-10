@@ -5,12 +5,13 @@
 // Nummer eingeben -> SMS-Code bestaetigen. Setzt auth.users.phone via phone_change
 // (Server-Actions), KEINEN MFA-Faktor.
 import { useState, useTransition } from 'react'
-import { PhoneIcon, LoaderIcon, XIcon } from 'lucide-react'
+import { PhoneIcon, XIcon } from 'lucide-react'
 import {
   starteTelefonLoginVerify,
   bestaetigeTelefonLoginVerify,
 } from '@/lib/auth/phone-login-actions'
 import { Modal } from '@/components/primitives/Modal'
+import { Button } from '@/components/primitives/Button'
 
 export function PhoneLoginCard({ aktuellePhone }: { aktuellePhone: string | null }) {
   const [open, setOpen] = useState(false)
@@ -82,16 +83,17 @@ export function PhoneLoginCard({ aktuellePhone }: { aktuellePhone: string | null
             <span className="text-claimondo-ondo/70">nicht aktiv</span>
           )}
         </p>
-        <button
-          type="button"
+        <Button
+          variant="ondo"
+          size="sm"
+          className="mt-2"
           onClick={() => {
             reset()
             setOpen(true)
           }}
-          className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-lg bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy"
         >
           {aktuellePhone ? 'Nummer ändern' : 'Telefon-Login aktivieren'}
-        </button>
+        </Button>
       </div>
 
       <Modal
@@ -187,34 +189,34 @@ export function PhoneLoginCard({ aktuellePhone }: { aktuellePhone: string | null
           </div>
 
           <div className="flex justify-end gap-2 border-t border-claimondo-border p-3">
-            <button
-              type="button"
-              onClick={() => !pending && setOpen(false)}
+            <Button
+              variant="ghost"
+              size="sm"
               disabled={pending}
-              className="px-3 py-1.5 rounded-ios-md text-xs font-medium border border-claimondo-border text-claimondo-ondo hover:bg-claimondo-bg disabled:opacity-50"
+              onClick={() => !pending && setOpen(false)}
             >
               Abbrechen
-            </button>
+            </Button>
             {step === 'input' ? (
-              <button
-                type="button"
-                onClick={sendCode}
+              <Button
+                variant="ondo"
+                size="sm"
+                loading={pending}
                 disabled={pending || !neuePhone.trim()}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+                onClick={sendCode}
               >
-                {pending && <LoaderIcon className="w-3 h-3 animate-spin" />}
                 Code senden
-              </button>
+              </Button>
             ) : (
-              <button
-                type="button"
-                onClick={confirm}
+              <Button
+                variant="ondo"
+                size="sm"
+                loading={pending}
                 disabled={pending || code.length !== 6}
-                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-ios-md bg-claimondo-ondo text-white text-xs font-medium hover:bg-claimondo-navy disabled:opacity-50"
+                onClick={confirm}
               >
-                {pending && <LoaderIcon className="w-3 h-3 animate-spin" />}
                 Bestätigen
-              </button>
+              </Button>
             )}
           </div>
         </div>
