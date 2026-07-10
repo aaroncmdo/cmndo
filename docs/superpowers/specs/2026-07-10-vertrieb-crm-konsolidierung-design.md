@@ -41,6 +41,7 @@
 - **D2 — Interaktion:** **EIN Drawer/Overlay-System** für alles — leichte Aktionen (Notiz, Einstufung, Convert, Anruf) und schwere Flows (Onboarding-Wizard, QR-Pool, Basis-Freigaben) nutzen dasselbe Panel, das nur größer wird. Die Liste bleibt der ruhende Kontext dahinter.
 - **D3 — Layout:** **Cockpit** — Rollen-Pills groß oben, darunter **kontext-abhängige KPIs**, eine **kontextuelle Aktions-Leiste** (ändert sich je Pill + Lead/Partner), dann Suche/Stufe + Liste/Karte-Toggle + Roster.
 - **D4 — ★-Punkte:** Basis-Freigaben = **Button mit Badge** unter SV-Pill (öffnet Overlay-Queue) · QR-Pool = **Overlay** unter Werkstatt-Pill · Alt-Routen (`/admin/makler`, `/admin/sachverstaendige`, `/admin/werkstaetten`, `/admin/partner-leads`) = **Redirect** auf die Übersicht (Bookmarks bleiben heil).
+- **D5 — Vollständig DB-driven:** Keine hardcoded-/Mock-Inhalte. Alle KPIs/Counts, Kontakte, Ansprechpartner, Aktivitäten, Anrufe, Notizen, Einstufungen, Stufen-Zuordnungen, **E-Mail-Vorlagen** und Dedup-Quellen kommen aus der DB und werden dorthin persistiert. Vorlagen-Texte liegen in einer **editierbaren DB-Tabelle** — kein Deploy nötig, um den Mail-Text zu ändern.
 
 ---
 
@@ -147,7 +148,7 @@ SV-Onboarding-Wizard, QR-Pool-Overlay, Basis-Freigaben-Queue öffnen im selben O
 - **Branding:** Claimondo-intern (Akquise an Prospects) — **NICHT** das Whitelabel-Kundenbranding. Umlaute Pflicht (user-facing Mail, AGENTS.md §Sprache).
 - **Versand:** über bestehende E-Mail-Infrastruktur (`src/lib/email/**`), `nurExterneEmpfaenger`-Guard beachten (Prospects sind extern). Gesendete Mail → Aktivitäts-Log-Eintrag.
 
-**Umsetzung:** 2 react-email-Templates + Composer-Component (rendert Template → editierbares Betreff/Body → Send-Action). Vorlagen-Text als Ausgangspunkt, nicht hart gesperrt.
+**Umsetzung (DB-driven):** Die Vorlagen-Master (Betreff + Body + Merge-Feld-Platzhalter) liegen in einer **DB-Tabelle** `vertrieb_mail_vorlagen` (`typ` = `vorstellung` | `terminbestaetigung`, `betreff`, `body`, `aktiv`, `aktualisiert_am`) und sind über eine Verwaltungs-/Settings-Fläche editierbar — **kein Code-Deploy** zum Textändern. Der Composer lädt die aktive Vorlage aus der DB, füllt Merge-Felder (Ansprechpartner/Firma/Termin) aus DB-Daten, lässt Betreff/Body vor dem Senden anpassen; der **gesendete (ggf. editierte) Text** wird als Kopie persistiert und im Aktivitäts-Log referenziert. Rendering via react-email auf Basis des DB-Bodys.
 
 ---
 
@@ -203,6 +204,9 @@ Vor jedem DDL: `list_tables` + `execute_sql` (READ) zur Verifikation der Ist-Spa
 1. `partner_leads`: `ansprechpartner_*` (§9).
 2. Aktivitäts-Log: `typ='anruf'` + `ergebnis` + `wiedervorlage_am` **oder** `lead_anrufe` (§10) — nach DB-Inspektion.
 3. Dedup: `google_place_id` auf Partner-Tabellen sicherstellen/backfillen (§11) — erst prüfen, welche Tabellen sie schon haben.
+4. `vertrieb_mail_vorlagen` (§8): Master-Vorlagen (`typ`/`betreff`/`body`/`aktiv`/`aktualisiert_am`) + Persistenz der gesendeten Mail-Kopien (Spalten im Aktivitäts-Log oder eigene `vertrieb_mail_versand`).
+
+**DB-driven-Prinzip (D5):** keine statischen Listen/Mock-Werte für Daten. Einzige Ausnahme = strukturelle Domain-Config: die **Workflow-Stufen-Definitionen** (Labels/Reihenfolge/Farben in `vertrieb-workflow`) bleiben token-gebunden im Code (StatusBadge/Design-Tokens); nur die **Stufen-Zuordnung pro Kontakt** ist DB-State. Runtime-editierbare Stufen → §18.
 
 Types via `generate_typescript_types` regenerieren, sobald ein Consumer die Spalte nutzt.
 
@@ -214,7 +218,7 @@ Inkrementell, jede Phase eigenständig prüfbar + Post-Task-Audit (7 Punkte):
 
 - **P1 — Shell/Cockpit (UI-only, kein Datenverlust):** Tabs → Pills, Cockpit-Layout, kontextuelle Aktions-Leiste (Skelett/Deep-Links auf Bestand), Alt-Routen-Redirects. *Sofort sichtbarer Aufräum-Effekt, geringes Risiko.*
 - **P2 — Drawer-CRM-Tiefe:** Lead-Pipeline im Drawer (Stufe, Einstufung, Convert, Aktivitäts-Log, Notizen) + **Ansprechpartner** (DDL) + **Anruf-Log** (DDL).
-- **P3 — E-Mail-Vorlagen:** 2 Templates + editierbarer Composer + Versand + Activity-Log.
+- **P3 — E-Mail-Vorlagen (DB-driven):** `vertrieb_mail_vorlagen`-Tabelle (DDL) + Verwaltungs-/Edit-Fläche für die Master-Vorlagen + Composer (lädt aktive Vorlage aus DB, Merge, editierbar) + Versand + Persistenz der gesendeten Kopie im Activity-Log.
 - **P4 — Scraper-Dedup:** pro Rubrik + Cross-Table-Dedup + Bericht (+ place_id-Backfill).
 - **P5 — Schwere Flows als Overlay:** SV-Onboarding, Basis-Freigaben-Queue, QR-Pool, Anlegen (SV/Makler/Werkstatt), Login-Mail (Makler+Werkstatt inkl. `resendWerkstattWelcome`).
 
@@ -256,3 +260,4 @@ Inkrementell, jede Phase eigenständig prüfbar + Post-Task-Audit (7 Punkte):
 3. Anruf-Datenmodell: Enum-Erweiterung vs. eigene Tabelle — nach DB-Inspektion.
 4. Welche Partner-Tabellen haben schon `google_place_id`? Backfill-Umfang.
 5. KPI-Rollup: reicht die vorhandene `kind`-Dimension für rollen-gescopte KPIs?
+6. Sollen die **Workflow-Stufen-Definitionen** (nicht nur die Zuordnung) DB-driven/runtime-editierbar werden? Default: nein (bleiben token-gebundene Code-Domain). Bei Bedarf eigene `vertrieb_workflow_stufen`-Tabelle.
