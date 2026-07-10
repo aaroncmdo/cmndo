@@ -1,7 +1,7 @@
 {
-  "generatedAt": "2026-07-05T05:01:58.219Z",
+  "generatedAt": "2026-07-10T16:43:57.448Z",
   "note": "Files + gegatete Deps eingefroren. Exports/Types sind --warn (nicht gegatet).",
-  "fileCount": 56,
+  "fileCount": 61,
   "files": [
     "src/app/admin/sachverstaendige/actions.ts",
     "src/app/dispatch/leads/[id]/_actions/geocode.ts",
@@ -18,6 +18,11 @@
     "src/components/gutachter/AuftragDokumenteBanner.tsx",
     "src/components/gutachter/GeoPermissionPrompt.tsx",
     "src/components/gutachter/SvHonorarCard.tsx",
+    "src/components/kunde/claim-view/AufgabenZone.tsx",
+    "src/components/kunde/claim-view/GeldZone.tsx",
+    "src/components/kunde/claim-view/KundeClaimView.tsx",
+    "src/components/kunde/claim-view/StatusZone.tsx",
+    "src/components/kunde/claim-view/TeamZone.tsx",
     "src/components/legal/LegalDocPage.tsx",
     "src/components/shared/TerminCard.tsx",
     "src/components/sv/MobileBottomSheet.tsx",

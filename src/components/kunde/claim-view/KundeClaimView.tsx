@@ -9,6 +9,7 @@ import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 import { StatusZone } from './StatusZone'
 import { AufgabenZone } from './AufgabenZone'
 import { TeamZone } from './TeamZone'
+import { GeldZone } from './GeldZone'
 
 export function KundeClaimView({ vm }: { vm: KundeClaimViewModel }) {
   const zonen = deriveKundeZonen(vm)
@@ -35,7 +36,13 @@ export function KundeClaimView({ vm }: { vm: KundeClaimViewModel }) {
                 <TeamZone vm={vm} />
               </div>
             )
-          // geld / doksTermine: P2/P3
+          case 'geld':
+            return (
+              <div id="zone-geld" key={z}>
+                <GeldZone vm={vm} />
+              </div>
+            )
+          // doksTermine: P3
           default:
             return null
         }
