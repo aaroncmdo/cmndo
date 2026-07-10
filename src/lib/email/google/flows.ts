@@ -60,6 +60,8 @@ export type KundeWelcomeLoginInfo = {
   magicLink: string | null
   email: string
   password: string
+  // AAR-phone-login: an KundeWelcomeEmail.loginInfo durchgereicht (Z.236 loginInfo: loginInfo ?? null)
+  phoneLoginAktiviert?: boolean
 }
 
 export async function sendKundeWelcome(

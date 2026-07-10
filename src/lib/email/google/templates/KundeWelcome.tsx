@@ -20,6 +20,8 @@ export type LoginInfo = {
   magicLink: string | null
   email: string
   password: string
+  // AAR-phone-login: konditionaler Hinweis, wenn auth.users.phone gesetzt wurde
+  phoneLoginAktiviert?: boolean
 }
 
 // P2: phasenabhängiger Ansprechpartner (Resolver: src/lib/email/google/kunde-berater.ts)
@@ -129,6 +131,7 @@ export function KundeWelcomeEmail(props: Props) {
               <InfoRow label={s.labelPasswort} value={<span style={{ fontFamily: 'monospace' }}>{props.loginInfo.password}</span>} />
               <Note>{s.passwortHint}</Note>
             </div>
+            {props.loginInfo.phoneLoginAktiviert ? <Note>{s.telefonLoginHint}</Note> : null}
           </>
         ) : props.accountExists ? (
           <>
