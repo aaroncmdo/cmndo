@@ -173,6 +173,9 @@ export type UpdatePartnerLeadInput = {
   telefon?: string | null
   ansprechpartner_vorname?: string | null
   ansprechpartner_nachname?: string | null
+  ansprechpartner_position?: string | null
+  ansprechpartner_email?: string | null
+  ansprechpartner_telefon?: string | null
 }
 
 export async function updatePartnerLead(
@@ -228,6 +231,15 @@ export async function updatePartnerLead(
   }
   if (patch.ansprechpartner_nachname !== undefined) {
     updates.ansprechpartner_nachname = (patch.ansprechpartner_nachname ?? '').trim() || null
+  }
+  if (patch.ansprechpartner_position !== undefined) {
+    updates.ansprechpartner_position = (patch.ansprechpartner_position ?? '').trim() || null
+  }
+  if (patch.ansprechpartner_email !== undefined) {
+    updates.ansprechpartner_email = (patch.ansprechpartner_email ?? '').trim() || null
+  }
+  if (patch.ansprechpartner_telefon !== undefined) {
+    updates.ansprechpartner_telefon = (patch.ansprechpartner_telefon ?? '').trim() || null
   }
 
   const { error } = await admin.from('partner_leads').update(updates).eq('id', id)
