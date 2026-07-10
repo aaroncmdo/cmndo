@@ -201,7 +201,7 @@ export default async function AbrechnungPage() {
         actions={
           <Link
             href="/gutachter/leadpreise"
-            className="text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] underline underline-offset-2 whitespace-nowrap"
+            className="text-xs font-medium text-[var(--brand-text-on-primary,#FFFFFF)] hover:opacity-75 underline underline-offset-2 whitespace-nowrap"
           >
             Aktuelle Lead-Preis-Tabelle einsehen
           </Link>
