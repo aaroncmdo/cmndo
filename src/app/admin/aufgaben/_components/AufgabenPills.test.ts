@@ -1,4 +1,10 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
+
+// AufgabenPills.tsx importiert AdminAiVorschlaegeBadge (self-fetch via Server-Action) transitiv.
+// Im environment='node'-Test stubben wir den Badge, damit der PILLS/pillActive-Import stabil
+// bleibt und nicht bricht, falls der Badge kuenftig Browser-/Next-only-Deps zieht.
+vi.mock('@/components/admin/AdminAiVorschlaegeBadge', () => ({ AdminAiVorschlaegeBadge: () => null }))
+
 import { PILLS, pillActive } from './AufgabenPills'
 
 // environment='node' (kein jsdom / keine testing-library): reine Logik testen, kein Render.
