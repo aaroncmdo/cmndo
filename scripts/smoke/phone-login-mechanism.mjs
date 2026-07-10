@@ -35,11 +35,11 @@ console.log(`[phone-login-smoke] Ziel-Projekt: ${url}`)
 
 const admin = createClient(url, key, { auth: { autoRefreshToken: false, persistSession: false } })
 
-// Eindeutige Test-Nummer je Lauf (vermeidet Kollision mit echten Konten).
-const suffix = String(Date.now()).slice(-7)
+// Eindeutige Test-Nummer + Emails je Lauf aus EINEM Zeitstempel (kein 1ms-Skew).
+const stamp = Date.now()
+const suffix = String(stamp).slice(-7)
 const TEST_PHONE = `+49151${suffix}` // deutsches Mobil-Muster
 const digits = (s) => (s || '').replace(/\D/g, '')
-const stamp = Date.now()
 const emailA = `smoke-phone-a-${stamp}@claimondo.test`
 const emailB = `smoke-phone-b-${stamp}@claimondo.test`
 
