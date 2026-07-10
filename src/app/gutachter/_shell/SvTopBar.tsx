@@ -22,7 +22,7 @@ export function SvTopBar({
   return (
     <div className="hidden lg:flex lg:items-center lg:gap-4 lg:pl-4 lg:pt-4">
       {title ? (
-        <h1 className="text-lg font-semibold text-[var(--brand-primary,#0D1B3E)] truncate shrink-0">
+        <h1 className="text-lg font-semibold text-[var(--brand-text-on-primary,#FFFFFF)] truncate shrink-0">
           {title}
         </h1>
       ) : null}
