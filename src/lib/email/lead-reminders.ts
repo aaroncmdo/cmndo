@@ -4,17 +4,18 @@ import { htmlToPlainText } from './plain-text'
 import LeadReminder1 from './google/templates/LeadReminder1'
 import LeadReminder2 from './google/templates/LeadReminder2'
 import LeadReminder3 from './google/templates/LeadReminder3'
+import LeadReminder4 from './google/templates/LeadReminder4'
 
-// AAR-477 C11: Versender für die 3 Reminder-Templates. Zentralisiert Subject,
+// AAR-477 C11: Versender für die Reminder-Templates. Zentralisiert Subject,
 // Absender, Template-Wahl — damit die Cron-Route nur noch
-// sendLeadReminderEmail(lead, 1|2|3) aufruft.
+// sendLeadReminderEmail(lead, 1|2|3|4) aufruft.
 //
 // Fail-Soft: Wenn RESEND_API_KEY fehlt (Dev ohne Env), loggt wir und geben
 // false zurück. Der Cron zählt dann nicht als „gesendet" und setzt
 // reminder_N_sent_at auch nicht — so kriegt der User die Mail später
 // nach, wenn die Env gesetzt ist.
 
-type ReminderStep = 1 | 2 | 3
+type ReminderStep = 1 | 2 | 3 | 4
 
 type ReminderLead = {
   id: string
@@ -27,6 +28,7 @@ const SUBJECTS: Record<ReminderStep, string> = {
   1: 'Ihre Schadenmeldung ist fast fertig',
   2: 'Sollen wir Ihren Schadenfall noch bearbeiten?',
   3: 'Letzte Chance: Ihre Schadenmeldung läuft ab',
+  4: 'Wirklich letzte Erinnerung — Ihre Schadenmeldung schließt bald',
 }
 
 const FROM = 'Claimondo <noreply@claimondo.de>'
@@ -54,7 +56,7 @@ export async function sendLeadReminderEmail(
 
   const url = resumeUrl(lead.reminder_token)
   const Component =
-    step === 1 ? LeadReminder1 : step === 2 ? LeadReminder2 : LeadReminder3
+    step === 1 ? LeadReminder1 : step === 2 ? LeadReminder2 : step === 3 ? LeadReminder3 : LeadReminder4
 
   try {
     const html = await render(Component({ vorname: lead.vorname, resumeUrl: url }))
