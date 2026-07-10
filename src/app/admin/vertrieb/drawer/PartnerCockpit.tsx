@@ -1,16 +1,26 @@
 'use client'
-// Vertrieb-CRM P2: Profil + Notiz fuer einen aktiven Partner (SV/Makler/Werkstatt).
-// Notiz ueber die bestehende updateVertriebFeld-Action (Whitelist pro kind). Login-Mail
-// (Makler+Werkstatt) + QR-Codes folgen in P5.
+// Vertrieb-CRM P2: vollstaendige Partner-Detailflaeche (SV/Makler/Werkstatt) — Naechster-
+// Schritt-Hinweis, Felder, editierbare Notiz (updateVertriebFeld, Whitelist pro kind), Deep-
+// Link in die tiefe Akte. Login-Mail (Makler+Werkstatt) + QR-Codes folgen in P5.
 import { useState } from 'react'
-import { StatusBadge } from '@/components/shared/StatusBadge'
+import { useRouter } from 'next/navigation'
+import { Card, Button } from '@/components/primitives'
+import { STUFE_HINT } from '../_lib/labels'
+import { detailLink } from '../_lib/detail-link'
 import { updateVertriebFeld } from '../_actions/update-vertrieb-feld'
-import { ROLLE_LABEL } from '../_lib/labels'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
-const LABEL_CLS = 'text-caption uppercase tracking-wide text-claimondo-ondo/60'
+
+function Feld({ label, wert }: { label: string; wert: string | null }) {
+  return (
+    <div>
+      <p className="text-caption text-claimondo-ondo/60">{label}</p>
+      <p className="text-sm text-claimondo-navy break-words">{wert && wert.trim() ? wert : '—'}</p>
+    </div>
+  )
+}
 
 export default function PartnerCockpit({
   kontakt,
@@ -19,50 +29,62 @@ export default function PartnerCockpit({
   kontakt: VertriebKontakt
   onChanged: () => void
 }) {
+  const router = useRouter()
   const [notiz, setNotiz] = useState(kontakt.notizen ?? '')
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
+  const dirty = notiz !== (kontakt.notizen ?? '')
+  const link = detailLink(kontakt.kind, kontakt.id)
 
-  async function speichereNotiz() {
-    if (notiz === (kontakt.notizen ?? '')) return
+  async function speichern() {
     setBusy(true)
     setFehler(null)
     const res = await updateVertriebFeld(kontakt.kind, kontakt.id, 'notizen', notiz.trim() || null)
     setBusy(false)
-    if (!res.ok) setFehler(res.error ?? 'Konnte nicht gespeichert werden.')
-    else onChanged()
+    if (!res.ok) {
+      setFehler(res.error)
+      return
+    }
+    onChanged()
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <StatusBadge domain="vertrieb-workflow" code={kontakt.stufe} size="sm" />
-        <span className="text-caption text-claimondo-ondo/70">{ROLLE_LABEL[kontakt.rolle]} · Partner</span>
+    <div className="space-y-5">
+      <Card p={4} radius="lg">
+        <p className="text-caption text-claimondo-ondo/60 mb-1">Nächster Schritt</p>
+        <p className="text-sm text-claimondo-navy">{STUFE_HINT[kontakt.stufe]}</p>
+      </Card>
+
+      <div className="grid grid-cols-2 gap-4">
+        <Feld label="E-Mail" wert={kontakt.email} />
+        <Feld label="Telefon" wert={kontakt.telefon} />
+        <Feld label="PLZ" wert={kontakt.plz} />
+        <Feld label="Ort" wert={kontakt.ort} />
+        <Feld label="Quelle" wert={kontakt.quelle} />
+        <Feld
+          label="Angelegt"
+          wert={kontakt.erstellt_am ? new Date(kontakt.erstellt_am).toLocaleDateString('de-DE') : null}
+        />
       </div>
 
-      <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/40 p-3 text-sm text-claimondo-navy space-y-1">
-        <p>
-          <span className="text-claimondo-ondo/60">Ort:</span>{' '}
-          {kontakt.plz ? `${kontakt.plz} ${kontakt.ort ?? ''}`.trim() : kontakt.ort ?? '—'}
-        </p>
-        <p>
-          <span className="text-claimondo-ondo/60">Kontakt:</span> {kontakt.email ?? kontakt.telefon ?? '—'}
-        </p>
-      </div>
-
-      <div>
-        <p className={`${LABEL_CLS} mb-1`}>Notiz</p>
+      <div className="space-y-2">
+        <p className="text-caption text-claimondo-ondo/60">Notizen (intern)</p>
         <textarea
           value={notiz}
           onChange={(e) => setNotiz(e.target.value)}
-          onBlur={speichereNotiz}
-          disabled={busy}
           rows={3}
-          placeholder="Interne Notiz…"
+          placeholder="Interne Notiz zu diesem Partner…"
           className={`${FELD_CLS} w-full resize-y`}
         />
-        {fehler && <p className="text-sm text-danger">{fehler}</p>}
+        {fehler && <p className="text-caption text-danger-strong">{fehler}</p>}
+        <Button variant="navy" size="sm" onClick={speichern} loading={busy} disabled={!dirty || busy}>
+          Speichern
+        </Button>
       </div>
+
+      <Button variant="navy" fullWidth onClick={() => router.push(link.href)}>
+        {link.label}
+      </Button>
     </div>
   )
 }
