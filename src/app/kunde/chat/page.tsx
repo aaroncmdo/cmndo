@@ -3,21 +3,15 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { getOwnedClaimIds } from '@/lib/claims/owned-claims'
 import { getTranslations } from 'next-intl/server'
 import { redirect } from 'next/navigation'
-import ChatWithFallSidebar, { type FallThread } from '@/components/chat/ChatWithFallSidebar'
 import ClaimChatInbox from '@/components/chat/ClaimChatInbox'
 import { ladeClaimUnreadCounts } from '@/lib/chat/thread-actions'
 import PageHeader from '@/components/shared/PageHeader'
-import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
-// AAR-730: Kunde-Chat auf MultiChannelChat-Basis migriert. Sichtbare Kanaele
-// kommen aus getInboxKanaele('kunde') (zentrale SSoT). 01.06.2026 (Aaron): inkl.
-// WhatsApp, damit der Kunde seine Kommunikation vollstaendig ueberblickt.
+// Kunde-Chat: claim-natives Thread-Modell (ClaimChatInbox — Gruppe + private DMs pro Fall).
 
 export const dynamic = 'force-dynamic'
 
-const KUNDE_KANAELE = getInboxKanaele('kunde')
-
-type Search = { fall?: string; chatv2?: string }
+type Search = { fall?: string }
 
 export default async function KundeChatPage({
   searchParams,
@@ -68,71 +62,21 @@ export default async function KundeChatPage({
     )
   }
 
-  // Phase-2c Cutover-Flag: claim-natives Thread-Modell (ClaimChatInbox: Gruppe + private
-  // DMs pro Fall) ist jetzt DEFAULT statt kanal-basierter ChatWithFallSidebar.
-  // Escape-Hatch ?chatv2=0 -> v1. Kunde = kein Staff (istStaff=false).
-  if (params.chatv2 !== '0') {
-    const unreadRes = await ladeClaimUnreadCounts(faelle.map(f => f.claimId))
-    const unread = unreadRes.ok ? unreadRes.data : {}
-    return (
-      <ClaimChatInbox
-        eintraege={faelle.map(f => ({
-          claimId: f.claimId,
-          title: t('chat.meinFall'),
-          fallNummer: f.claim_nummer,
-          lastAt: f._c,
-          unreadCount: unread[f.claimId] ?? 0,
-        }))}
-        currentUserId={user.id}
-        istStaff={false}
-        initialClaimId={faelle.find(f => f.id === params.fall)?.claimId ?? null}
-        emptyHint={t('chat.emptyHint')}
-      />
-    )
-  }
-
-  const fallIds = faelle.map(f => f.id)
-
-  // Nachrichten pro Fall aggregieren.
-  const { data: nachrichten } = await admin
-    .from('nachrichten')
-    .select('id, fall_id, kanal, sender_id, nachricht, gelesen, created_at')
-    .in('fall_id', fallIds)
-    .in('kanal', KUNDE_KANAELE)
-    .order('created_at', { ascending: false })
-    .limit(500)
-
-  const threadMap = new Map<string, FallThread>()
-  for (const fall of faelle) {
-    threadMap.set(fall.id, {
-      fallId: fall.id,
-      fallNummer: fall.claim_nummer,
-      kundeName: t('chat.meinFall'),
-      lastMessage: '',
-      lastAt: '',
-      unreadCount: 0,
-    })
-  }
-  for (const n of nachrichten ?? []) {
-    if (!n.fall_id) continue
-    const t = threadMap.get(n.fall_id)
-    if (!t) continue
-    if (!t.lastAt || n.created_at > t.lastAt) {
-      t.lastAt = n.created_at
-      t.lastMessage = (n.nachricht ?? '').slice(0, 80)
-    }
-    if (!n.gelesen && n.sender_id !== user.id) t.unreadCount++
-  }
-  const threads = Array.from(threadMap.values()).sort((a, b) =>
-    b.lastAt > a.lastAt ? 1 : a.lastAt > b.lastAt ? -1 : 0,
-  )
-
+  // Kunde = kein Staff (istStaff=false).
+  const unreadRes = await ladeClaimUnreadCounts(faelle.map(f => f.claimId))
+  const unread = unreadRes.ok ? unreadRes.data : {}
   return (
-    <ChatWithFallSidebar
-      threads={threads}
+    <ClaimChatInbox
+      eintraege={faelle.map(f => ({
+        claimId: f.claimId,
+        title: t('chat.meinFall'),
+        fallNummer: f.claim_nummer,
+        lastAt: f._c,
+        unreadCount: unread[f.claimId] ?? 0,
+      }))}
       currentUserId={user.id}
-      visibleKanaele={KUNDE_KANAELE}
-      initialFallId={params.fall ?? null}
+      istStaff={false}
+      initialClaimId={faelle.find(f => f.id === params.fall)?.claimId ?? null}
       emptyHint={t('chat.emptyHint')}
     />
   )
