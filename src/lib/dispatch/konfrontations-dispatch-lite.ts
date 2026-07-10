@@ -8,6 +8,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { processLexDriveEvent } from '@/lib/lexdrive/process-event'
+import { pruefeBelegungStrict } from '@/lib/termine/engine'
 
 export interface TriggerKonfrontationsDispatchInput {
   fallId: string
@@ -137,6 +138,26 @@ export async function triggerKonfrontationsDispatch(
     }
   }
 
+  // Fail-closed Verfuegbarkeits-Check: der Konfrontations-Slot ist kunde-vorgeschlagen + KB-gewaehlt,
+  // also NICHT gegen die SV-Verfuegbarkeit vorgeprueft. pruefeBelegungStrict liest v_belegung
+  // (Buchung ∪ externer CalDAV-Kalender ∪ Urlaub/Sperre) → verhindert Doppelbuchung ueber den
+  // Privatkalender/Urlaub des SV; die DB-Exclusion-Constraint deckt nur Buchung<->Buchung.
+  const belegung = await pruefeBelegungStrict(
+    { typ: 'sachverstaendiger', id: fall.sv_id as string },
+    startDate.toISOString(),
+    endDate.toISOString(),
+    db,
+  )
+  if (!belegung.ok) {
+    return { success: false, error: 'Verfügbarkeit konnte nicht geprüft werden — bitte erneut versuchen' }
+  }
+  if (!belegung.frei) {
+    return {
+      success: false,
+      error: 'Der SV ist zu dieser Zeit bereits verplant (Termin, Kalender-Eintrag oder Urlaub)',
+    }
+  }
+
   const { data: inserted, error: insertError } = await db
     .from('gutachter_termine')
     .insert({
@@ -155,6 +176,13 @@ export async function triggerKonfrontationsDispatch(
     .single()
 
   if (insertError || !inserted) {
+    // 23P01 = Exclusion-Constraint: SV wurde in der TOCTOU-Luecke anderweitig verplant.
+    if (insertError?.code === '23P01') {
+      return {
+        success: false,
+        error: 'Der SV wurde zwischenzeitlich anderweitig verplant — bitte anderen Slot wählen',
+      }
+    }
     return {
       success: false,
       error: insertError?.message ?? 'gutachter_termine-Insert fehlgeschlagen',
