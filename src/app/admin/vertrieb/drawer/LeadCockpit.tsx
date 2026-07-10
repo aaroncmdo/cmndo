@@ -6,7 +6,9 @@ import { Button } from '@/components/primitives'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { updatePartnerLead, konvertierePartnerLead } from '@/app/admin/partner-leads/actions'
 import AktivitaetLog from './AktivitaetLog'
+import MailComposer from './MailComposer'
 import { LEAD_STATUS_OPTIONS, LEAD_EINSTUFUNG_OPTIONS } from '../_lib/lead-status-labels'
+import type { VorlageTyp } from '../_lib/mail-vorlagen'
 import type { VertriebKontakt } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebLeadDetail } from '../_lib/lead-detail'
 
@@ -27,6 +29,7 @@ export default function LeadCockpit({
   const [busy, setBusy] = useState(false)
   const [fehler, setFehler] = useState<string | null>(null)
   const [notiz, setNotiz] = useState(detail.notiz ?? '')
+  const [composerTyp, setComposerTyp] = useState<VorlageTyp | null>(null)
 
   async function patch(p: Parameters<typeof updatePartnerLead>[1]) {
     setBusy(true)
@@ -107,11 +110,28 @@ export default function LeadCockpit({
             </option>
           ))}
         </select>
+        <Button variant="ghost" size="sm" onClick={() => setComposerTyp('vorstellung')}>
+          ✉️ Vorstellungs-Mail
+        </Button>
+        <Button variant="ghost" size="sm" onClick={() => setComposerTyp('terminbestaetigung')}>
+          📅 Terminbestätigung
+        </Button>
         <Button variant="navy" size="sm" loading={busy} onClick={convert}>
           → In Partner umwandeln
         </Button>
       </div>
       {fehler && <p className="text-sm text-danger">{fehler}</p>}
+
+      {composerTyp && (
+        <MailComposer
+          leadId={kontakt.id}
+          empfaenger={detail.ansprechpartner.email ?? kontakt.email}
+          merge={{ Ansprechpartner: apName || (kontakt.name ?? ''), Firma: kontakt.name ?? '', Termin: '' }}
+          startTyp={composerTyp}
+          onClose={() => setComposerTyp(null)}
+          onSent={onChanged}
+        />
+      )}
 
       <div>
         <p className={`${LABEL_CLS} mb-2`}>Aktivität</p>
