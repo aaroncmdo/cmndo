@@ -4,6 +4,7 @@
 
 import { Card } from '@/components/primitives'
 import { PhoneIcon } from 'lucide-react'
+import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { KundeClaimViewModel } from '@/lib/claims/kunde-claim-view'
 
 type KontaktProps = {
@@ -11,12 +12,14 @@ type KontaktProps = {
   rolle: string
   telefon: string | null
   avatarUrl: string | null
+  verifiziert?: boolean
+  beschreibung?: string | null
 }
 
-function KontaktRow({ name, rolle, telefon, avatarUrl }: KontaktProps) {
+function KontaktRow({ name, rolle, telefon, avatarUrl, verifiziert, beschreibung }: KontaktProps) {
   const initial = (name ?? '?').trim().charAt(0).toUpperCase() || '?'
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-start gap-3">
       {avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={avatarUrl} alt="" className="w-10 h-10 rounded-full object-cover shrink-0" />
@@ -27,7 +30,11 @@ function KontaktRow({ name, rolle, telefon, avatarUrl }: KontaktProps) {
       )}
       <div className="min-w-0 flex-1">
         <p className="text-body-xs text-claimondo-ondo">{rolle}</p>
-        <p className="text-body-sm font-medium text-claimondo-navy truncate">{name ?? '—'}</p>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <p className="text-body-sm font-medium text-claimondo-navy truncate">{name ?? '—'}</p>
+          {verifiziert && <StatusBadge tone="success" size="sm">Verifiziert</StatusBadge>}
+        </div>
+        {beschreibung && <p className="text-body-xs text-claimondo-ondo/80 mt-0.5 line-clamp-2">{beschreibung}</p>}
       </div>
       {telefon && (
         <a
@@ -56,6 +63,7 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
           rolle="Dein Betreuer"
           telefon={kb.telefon}
           avatarUrl={kb.avatarUrl}
+          beschreibung={kb.profilbeschreibung}
         />
       )}
       {sv && (
@@ -64,6 +72,8 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
           rolle="Dein Gutachter"
           telefon={sv.telefon}
           avatarUrl={sv.avatarUrl}
+          verifiziert={sv.verifiziert}
+          beschreibung={sv.profilbeschreibung}
         />
       )}
     </Card>
