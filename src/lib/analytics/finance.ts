@@ -114,19 +114,17 @@ export async function getKosten(filter: AnalyticsFilter): Promise<{
   const { data: kClaims } = await kQuery
   const kanzleiKosten = kClaims?.reduce((sum, c) => sum + (Number(c.kanzlei_honorar) || 0), 0) ?? 0
 
-  // Marketing-Provision aus claims.marketing_provision (CMM-65 Part B: marketing_provision
-  // lebt jetzt claims-nativ; claim-globaler Finanz-Aggregat -> from('claims'), created_at-Filter direkt).
-  let mQuery = db.from('claims').select('id, marketing_provision').not('marketing_provision', 'is', null)
-  if (filter.startDate) mQuery = mQuery.gte('created_at', filter.startDate)
-  if (filter.endDate) mQuery = mQuery.lte('created_at', filter.endDate)
-  const { data: mClaims } = await mQuery
-  const marketingKosten = mClaims?.reduce((sum, c) => sum + (Number(c.marketing_provision) || 0), 0) ?? 0
+  // Marketing-Provision: claims.marketing_provision ist tot (0 Daten, kein Writer, 0 Funktions-Refs
+  // — DB-verifiziert 10.07.). Die echten Marketing-Kosten laufen ueber abrechnungen/partner_provisionen,
+  // nicht ueber diesen Cache. Normalisierung Slice 4: der (immer 0 liefernde) Reader entfaellt, damit
+  // die Spalte droppbar wird. marketingKosten bleibt 0 (verhaltensneutral).
+  const marketingKosten = 0
 
   return {
     svKosten, kanzleiKosten, marketingKosten,
     gesamt: svKosten + kanzleiKosten + marketingKosten,
     svDrillDown,
-    berechnetAus: 'SV: claims.lead_preis_netto | Kanzlei: claims.kanzlei_honorar | Marketing: claims.marketing_provision',
+    berechnetAus: 'SV: claims.lead_preis_netto | Kanzlei: claims.kanzlei_honorar | Marketing: n/a (marketing_provision retired)',
   }
 }
 
