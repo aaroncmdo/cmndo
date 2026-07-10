@@ -4,6 +4,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { ladeSvKandidaten, ladeMaklerKandidaten, ladeWerkstattKandidaten, type Kandidat } from '@/lib/partner-rang/signals'
 import { computePartnerStrength } from '@/lib/partner-rang/compute'
 import { ladeRangConfig } from '@/lib/partner-rang/config-loader'
+import { prunePartnerRang } from '@/lib/partner-rang/prune'
 
 // Naechtlicher Cron: berechnet Partner-Rang (Bronze/Silber/Gold) je SV + Makler +
 // Werkstatt und upsertet partner_rang. Config kommt aus der DB-SSoT (partner_rang_config).
@@ -40,5 +41,9 @@ export async function GET(request: Request) {
     }
     updated = rows.length
   }
+  // Prune: partner_rang exakt aufs aktuelle Kandidaten-Set bringen — Stale-Zeilen von
+  // Test-/geloeschten/deaktivierten Partnern entfernen (upsert allein raeumt nicht auf).
+  // Leeres-Set-Guard in der Fn schuetzt vor Massen-Delete bei Loader-Fehler.
+  await prunePartnerRang(supabase, rows)
   return NextResponse.json({ ok: true, computed: alle.length, updated })
 }
