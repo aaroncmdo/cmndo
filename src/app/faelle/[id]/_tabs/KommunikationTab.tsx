@@ -1,16 +1,13 @@
 ﻿'use client'
 
-// AAR-541 (C4): Admin/KB-Sicht auf den MultiChannelChat.
-// Rendert den Shared-Component mit rollenabhängigem Kanal-Whitelist,
-// einer Teilnehmer-Liste und URL-Param-Deep-Link (?kanal=kb_sv_intern).
+// Admin/KB-Sicht auf den Claim-Chat (Thread-Modell): ClaimChatPanel
+// (Gruppe / Team-intern / DMs) + eine Teilnehmer-Liste.
 
 import { useMemo } from 'react'
-import { useSearchParams } from 'next/navigation'
 import { useFall } from '../FallContext'
-import MultiChannelChat from '@/components/chat/MultiChannelChat'
 import { ClaimChatPanel } from '@/components/chat/ClaimChatPanel'
 import type { ChatKanal } from '@/lib/communications/channels'
-import { getKanaeleForRolle, resolveKanalAlias } from '@/lib/chat/kanal-routing'
+import { getKanaeleForRolle } from '@/lib/chat/kanal-routing'
 
 export type FallTeilnehmer = {
   user_id: string
@@ -34,25 +31,15 @@ export default function KommunikationTab({
   teilnehmer: FallTeilnehmer[]
 }) {
   const { fall, userRolle } = useFall()
-  const search = useSearchParams()
 
   const visibleKanaele = useMemo<ChatKanal[]>(
     () => getKanaeleForRolle(userRolle),
     [userRolle],
   )
 
-  const defaultKanal = useMemo<ChatKanal>(() => {
-    const aliased = resolveKanalAlias(search?.get('kanal'))
-    if (aliased && visibleKanaele.includes(aliased)) return aliased
-    return visibleKanaele[0] ?? 'whatsapp'
-  }, [search, visibleKanaele])
-
   // AAR-541: Admin/KB = Super-User → interner Kanal explizit erlauben
   const showInternal = visibleKanaele.includes('chat_kb_sv')
 
-  // Phase-2c Cutover-Flag: neues Thread-Modell (ClaimChatPanel) ist jetzt DEFAULT statt Kanal-Matrix.
-  // Escape-Hatch ?chatv2=0 -> v1 (MultiChannelChat). Staff-seitig (Fallakte).
-  const chatV2 = search?.get('chatv2') !== '0'
   // ClaimChatPanel ist claim-nativ: die Threads haengen an claims.id — das ist
   // fall.claim_id (seit AAR-816 NOT NULL), NICHT fall.id (= v_faelle-View-id /
   // legacy fall_id, weicht vom claim_id ab). Sonst: "Claim nicht gefunden".
@@ -61,18 +48,12 @@ export default function KommunikationTab({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-4">
       <div>
-        {chatV2 && currentUserId ? (
+        {currentUserId ? (
           <div className="h-[70vh] min-h-0 overflow-hidden rounded-ios-xl border border-claimondo-border bg-white">
             <ClaimChatPanel claimId={claimId} currentUserId={currentUserId} istStaff={showInternal} />
           </div>
         ) : (
-          <MultiChannelChat
-            fallId={fall.id}
-            currentUserId={currentUserId}
-            showInternalKbSvChat={showInternal}
-            defaultKanal={defaultKanal}
-            visibleKanaele={visibleKanaele}
-          />
+          <p className="text-body-sm text-claimondo-ondo">Nicht eingeloggt.</p>
         )}
       </div>
 

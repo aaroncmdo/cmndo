@@ -4,9 +4,8 @@
 // ChatInboxLayout (Sidebar + Detail) mit ClaimChatPanel im Detail-Panel — so
 // bekommt der Nutzer pro Fall Gruppe + Team-intern (Staff) + private DMs.
 //
-// Wird flag-gegated genutzt (kunde/chat ?chatv2=1). Der Default-Pfad bleibt der
-// kanal-basierte ChatWithFallSidebar (unangetastet, da von mehreren Portalen
-// geteilt) — dieser Wrapper ist additiv.
+// Consumer (v2-Default): kunde/chat, admin/nachrichten, gutachter/posteingang.
+// Der frühere kanal-basierte v1-Pfad (ChatWithFallSidebar) wurde entfernt (Phase 1).
 
 import ChatInboxLayout, { type InboxThread } from './ChatInboxLayout'
 import { ClaimChatPanel } from './ClaimChatPanel'

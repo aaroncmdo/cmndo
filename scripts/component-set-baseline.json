@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-09T18:06:47.481Z",
-  "count": 127,
+  "generatedAt": "2026-07-10T20:58:39.880Z",
+  "count": 126,
   "files": [
     "src/app/admin/abrechnungen/AbrechnungenListClient.tsx",
     "src/app/admin/communities/CommunitiesListClient.tsx",
@@ -10,7 +10,6 @@
     "src/app/admin/finance/(hub)/AbrechnungenSection.tsx",
     "src/app/admin/finance/(hub)/provisionen/ProvisionenClient.tsx",
     "src/app/admin/kalender/KalenderClient.tsx",
-    "src/app/admin/nachrichten/NachrichtenInboxClient.tsx",
     "src/app/admin/partner/waitlist/WaitlistTable.tsx",
     "src/app/admin/sachverstaendige/[id]/VerifizierungsTab.tsx",
     "src/app/admin/sachverstaendige/anlegen/AkademieAnlegenWizard.tsx",
