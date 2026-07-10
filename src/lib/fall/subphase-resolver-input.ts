@@ -17,10 +17,12 @@ import type {
   WebhookEventRow,
 } from '@/lib/fall/subphase-resolver'
 
+// Normalisierung Slice 4: auszahlung_gutachter_eingegangen_am NICHT mehr aus dem claims-Cache
+// (wird retired), sondern aus dem (claim,'sv')-Ledger (claim_payments.zahlungseingang_am, s.u.).
 const CLAIM_SELECT =
   'status, szenario, service_typ, sa_unterschrieben_am, vollmacht_status, vollmacht_geprueft_am, ' +
   'kanzlei_uebergeben_am, dokumente_reminder_whatsapp_letzte_sendung, abgeschlossen_am, ' +
-  'google_review_gesendet, kanzlei_provision_status, auszahlung_gutachter_eingegangen_am'
+  'google_review_gesendet, kanzlei_provision_status'
 
 // gutachter_termine: erweitert um start_zeit (2.6) + termin_erinnerung_5min_gesendet (2.6)
 // + nachbesichtigung_status (6e), die der re-basete Resolver jetzt von der
@@ -40,7 +42,7 @@ export async function getSubphaseResolverInput(
 ): Promise<Omit<ResolverInput, 'now'>> {
   const { fallId, claimId, leadId } = args
 
-  const [claimRes, leadRes, auftraege, kanzleiFall, gutachtenRes, termineRes, webhookRes] = await Promise.all([
+  const [claimRes, leadRes, auftraege, kanzleiFall, gutachtenRes, termineRes, webhookRes, svLedgerRes] = await Promise.all([
     claimId
       ? admin.from('claims').select(CLAIM_SELECT).eq('id', claimId).maybeSingle()
       : Promise.resolve({ data: null }),
@@ -59,10 +61,18 @@ export async function getSubphaseResolverInput(
       .select('event_type, claim_id, processed_at, source')
       .eq('claim_id', claimId ?? '00000000-0000-0000-0000-000000000000')
       .in('event_type', ['kb_filmcheck_bestanden']),
+    // auszahlung_gutachter_eingegangen_am (sv-Am) aus dem (claim,'sv')-Ledger statt dem claims-Cache
+    // (Normalisierung Slice 4 — die Cache-Spalte wird retired).
+    claimId
+      ? admin.from('claim_payments').select('zahlungseingang_am').eq('claim_id', claimId).eq('partei', 'sv').maybeSingle()
+      : Promise.resolve({ data: null }),
   ])
 
+  const svAm = (svLedgerRes.data as { zahlungseingang_am: string | null } | null)?.zahlungseingang_am ?? null
   return {
-    claim: (claimRes.data as ClaimTriggers | null) ?? null,
+    claim: claimRes.data
+      ? ({ ...(claimRes.data as unknown as Record<string, unknown>), auszahlung_gutachter_eingegangen_am: svAm } as ClaimTriggers)
+      : null,
     lead: (leadRes.data as LeadTriggers | null) ?? null,
     kanzleiFall,
     auftraege,
