@@ -20,6 +20,7 @@ import {
   type ScrapeKandidat,
   type BestandsLead,
 } from '@/lib/partner/scraping'
+import { ladeBestandsPartner } from '@/lib/partner/bestands-partner'
 import {
   sendMaklerWelcome,
   sendWillkommenWerkstatt,
@@ -568,7 +569,9 @@ export async function scrapePartnerLeadsVorschau(
   const scrape = await scrapeGooglePlaces({ rolle: r as PartnerRolle, region, limit })
   if (!scrape.ok) return scrape
 
-  const bestehende = await ladeBestandsLeads(r)
+  // Dedup gegen Leads UND Bestands-Partner derselben Rolle (Aaron: "keine Dupes").
+  const [bestandLeads, bestandPartner] = await Promise.all([ladeBestandsLeads(r), ladeBestandsPartner(r)])
+  const bestehende = [...bestandLeads, ...bestandPartner]
   const { neu, dubletten } = filterGegenBestand(scrape.kandidaten, bestehende)
   return { ok: true, neu, dublettenCount: dubletten.length, gefunden: scrape.kandidaten.length }
 }
@@ -595,7 +598,9 @@ export async function importScrapedLeads(
   }
 
   // Re-Dedup gegen aktuellen Bestand (Race Vorschau→Import) + innerhalb der Auswahl.
-  const bestehende = await ladeBestandsLeads(r)
+  // Dedup gegen Leads UND Bestands-Partner derselben Rolle (Aaron: "keine Dupes").
+  const [bestandLeads, bestandPartner] = await Promise.all([ladeBestandsLeads(r), ladeBestandsPartner(r)])
+  const bestehende = [...bestandLeads, ...bestandPartner]
   const { neu } = filterGegenBestand(kandidaten, bestehende)
   const zuAnlegen = dedupeInBatch(neu).filter((k) => (k.firma ?? '').trim().length > 0)
   const uebersprungen = kandidaten.length - zuAnlegen.length
