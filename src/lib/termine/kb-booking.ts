@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { KB_BERATUNG_DURATION_MIN, KB_BERATUNG_VORLAUF_H } from './constants'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
+import { pruefeKbBelegt } from './kb-belegung'
 
 type BookResult =
   | { ok: true; terminId: string }
@@ -56,18 +57,12 @@ export async function bookKbTermin(
 
   const endZeit = new Date(startZeit.getTime() + KB_BERATUNG_DURATION_MIN * 60 * 1000)
 
-  // 4. Re-validate slot not already booked (race condition check)
-  const { data: conflicting, error: conflErr } = await db
-    .from('gutachter_termine')
-    .select('id')
-    .eq('kb_id', kbId)
-    .eq('typ', 'kb_beratung')
-    .in('status', ['bestaetigt', 'reserviert'])
-    .eq('start_zeit', startZeit.toISOString())
-    .is('cancelled_at', null)
-
-  if (conflErr) return { ok: false, error: 'Fehler bei Slot-Prüfung' }
-  if (conflicting && conflicting.length > 0) return { ok: false, error: 'Dieser Termin ist nicht mehr verfügbar' }
+  // 4. Fail-CLOSED Re-Check gegen die KB-Busy-Definition (kb_beratung-Overlap ∪ admin_termine-Overlap),
+  //    identisch zum Offer getAvailableKbSlots. Der fruehere Read pruefte nur kb_beratung auf EXAKTE
+  //    Startzeit + KEIN admin_termine → ein KB konnte ueber einen eigenen Rueckruf/Meeting gebucht werden.
+  const kbBelegt = await pruefeKbBelegt(db, kbId, startZeit.toISOString(), endZeit.toISOString())
+  if (!kbBelegt.ok) return { ok: false, error: 'Fehler bei Slot-Prüfung' }
+  if (!kbBelegt.frei) return { ok: false, error: 'Dieser Termin ist nicht mehr verfügbar' }
 
   // 5. Check max 1 open kb_beratung per fall
   const { data: existing, error: existErr } = await db
@@ -175,6 +170,10 @@ export async function bookKbTermin(
     .single()
 
   if (insertErr || !newTermin) {
+    // 23P01 = Exclusion-Constraint (KB<->KB atomar): Slot in der TOCTOU-Luecke vergeben.
+    if (insertErr?.code === '23P01') {
+      return { ok: false, error: 'Dieser Termin ist nicht mehr verfügbar' }
+    }
     return { ok: false, error: `Termin konnte nicht gespeichert werden: ${insertErr?.message ?? 'Unbekannter Fehler'}` }
   }
 
