@@ -12,7 +12,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
 
 export type MoneyIntegrityFinding = {
-  check: 'ust_tripel' | 'reconciliation' | 'ledger_cache'
+  check: 'ust_tripel' | 'reconciliation'
   severity: 'critical' | 'warning'
   tabelle: string
   count: number
@@ -86,11 +86,9 @@ const UST_TABELLEN: ReadonlyArray<{ tabelle: string; netto: string; ust: string;
   { tabelle: 'provisionen_maik', netto: 'netto_provision', ust: 'ust_betrag', brutto: 'betrag_brutto' },
 ]
 
-// Ledger-Cache-Regression: claims-Cache-Money-Spalte -> erwartete claim_payments-partei.
-const CACHE_CHECKS: ReadonlyArray<{ cacheCol: string; partei: 'vs' | 'sv'; label: string }> = [
-  { cacheCol: 'regulierungs_betrag', partei: 'vs', label: 'VS-Regulierung' },
-  { cacheCol: 'auszahlung_gutachter_betrag', partei: 'sv', label: 'SV-Auszahlung' },
-]
+// Ledger-Cache-Regression (Check 3) entfernt (Normalisierung Slice 4): die geprueften Cache-Spalten
+// regulierungs_betrag + auszahlung_gutachter_betrag werden retired (auf's Ledger kollabiert) — nach dem
+// DROP COLUMN gibt es keinen Cache mehr, gegen den zu pruefen waere. USt + §14-Reconciliation bleiben.
 
 /**
  * Faehrt alle Money-Integritaets-Checks gegen die DB und liefert einen strukturierten Report.
@@ -185,40 +183,7 @@ export async function runMoneyIntegrityChecks(
     }
   }
 
-  // Check 3: Ledger-Cache-Regression — ein claims-Cache-Money-Wert ohne korrespondierende
-  // claim_payments-Ledger-Zeile ist fuer die collapsed Reader (die den Ledger lesen) unsichtbar.
-  for (const c of CACHE_CHECKS) {
-    geprueft++
-    const { data: cached, error } = await from('claims')
-      .select(`id, ${c.cacheCol}`)
-      .not(c.cacheCol, 'is', null)
-    if (error) {
-      findings.push({ check: 'ledger_cache', severity: 'warning', tabelle: 'claims', count: 0, detail: `Query-Fehler (${c.label}): ${error.message}` })
-      continue
-    }
-    const cachedIds = ((cached ?? []) as Array<{ id: string }>).map((r) => r.id)
-    if (cachedIds.length === 0) continue
-    const { data: ledger, error: lErr } = await from('claim_payments')
-      .select('claim_id')
-      .eq('partei', c.partei)
-      .in('claim_id', cachedIds)
-    if (lErr) {
-      findings.push({ check: 'ledger_cache', severity: 'warning', tabelle: 'claim_payments', count: 0, detail: `Query-Fehler (${c.label}): ${lErr.message}` })
-      continue
-    }
-    const ledgeredIds = ((ledger ?? []) as Array<{ claim_id: string }>).map((r) => r.claim_id)
-    const cacheOnly = idsOhneMatch(cachedIds, ledgeredIds)
-    if (cacheOnly.length > 0) {
-      findings.push({
-        check: 'ledger_cache',
-        severity: 'warning',
-        tabelle: 'claims',
-        count: cacheOnly.length,
-        detail: `${cacheOnly.length} Claim(s): ${c.label}-Cache gesetzt, aber keine claim_payments(${c.partei})-Ledger-Zeile`,
-        beispiel_ids: cacheOnly.slice(0, 5),
-      })
-    }
-  }
+  // (Check 3 Ledger-Cache-Regression entfernt — s.o.; die Cache-Spalten werden in Slice 4 retired.)
 
   return { ok: findings.length === 0, geprueft, findings }
 }
