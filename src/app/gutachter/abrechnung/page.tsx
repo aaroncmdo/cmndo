@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
 import { WalletIcon, PackageIcon, FileTextIcon, DownloadIcon, InfoIcon } from 'lucide-react'
 import EmptyState from '@/components/shared/EmptyState'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
@@ -196,20 +196,17 @@ export default async function AbrechnungPage() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex-shrink-0 bg-white border-b border-claimondo-border px-4 py-2">
-        <PageHeader
-          title="Abrechnung"
-          description="Übersicht Ihrer Abrechnungen und Pakete"
-          actions={
-            <Link
-              href="/gutachter/leadpreise"
-              className="text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] underline underline-offset-2 whitespace-nowrap"
-            >
-              Aktuelle Lead-Preis-Tabelle einsehen
-            </Link>
-          }
-        />
-      </div>
+      <SvPageChrome
+        title="Abrechnung"
+        actions={
+          <Link
+            href="/gutachter/leadpreise"
+            className="text-xs font-medium text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] underline underline-offset-2 whitespace-nowrap"
+          >
+            Aktuelle Lead-Preis-Tabelle einsehen
+          </Link>
+        }
+      />
       <div className="flex-1 min-h-0 overflow-y-auto p-4">
         {/* Einnahmen-Dashboard (KFZ-88) */}
         <div className="grid grid-cols-3 gap-3 mb-4">

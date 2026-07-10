@@ -7,7 +7,6 @@
 import { useEffect, useRef, useState, useTransition } from 'react'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { SearchIcon, XIcon } from 'lucide-react'
-import PageHeader from '@/components/shared/PageHeader'
 import { liquidFieldBase } from '@/lib/styles/liquid-field'
 
 // AAR-370: Filter um zwei fallübergreifende Slices erweitert —
@@ -35,7 +34,7 @@ const FILTER_TABS: [FilterKey, string][] = [
 ]
 
 export default function FaelleFilterBar({
-  faelleCount,
+  faelleCount: _faelleCount,
   initialFilter,
   initialQuery,
 }: {
@@ -85,11 +84,6 @@ export default function FaelleFilterBar({
   return (
     <div className="bg-white border-b border-claimondo-border px-4 py-3 space-y-3">
       <div className="flex items-center justify-between gap-3">
-        <PageHeader
-          title="Meine Fälle"
-          description={`${faelleCount} ${faelleCount === 1 ? 'Fall' : 'Fälle'}`}
-        />
-
         <div className="relative flex-1 max-w-sm">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-claimondo-ondo/70" />
           <input

@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 import { submitStellungnahme } from './actions'
 import { formatDatum, formatEURausEuro } from '@/lib/format'
-import PageHeader from '@/components/shared/PageHeader'
+import { useSvPageChrome } from '@/app/gutachter/_shell/page-chrome-context'
 import { Button } from '@/components/primitives/Button/Button.web'
 
 type KuerzungsPosition = {
@@ -47,6 +47,7 @@ export default function StellungnahmeClient({
   kuerzungen,
 }: Props) {
   const router = useRouter()
+  useSvPageChrome({ title: 'Technische Stellungnahme' })
   const inputRef = useRef<HTMLInputElement | null>(null)
   const [file, setFile] = useState<File | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -94,21 +95,18 @@ export default function StellungnahmeClient({
 
   return (
     <div className="max-w-xl mx-auto px-4 py-6 space-y-6">
-      {/* Header */}
-      <PageHeader
-        title="Technische Stellungnahme"
-        description={fallNummer ? `Fall ${fallNummer}` : undefined}
-        leadingSlot={
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="p-2 rounded-ios-lg text-claimondo-ondo hover:bg-claimondo-bg transition-colors shrink-0"
-            aria-label="Zurück"
-          >
-            <ArrowLeftIcon className="w-5 h-5" />
-          </button>
-        }
-      />
+      {/* Header: Titel in der Top-Bar; hier nur Zurück-Button + Fall-Bezug */}
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          onClick={() => router.back()}
+          className="p-2 rounded-ios-lg text-claimondo-ondo hover:bg-claimondo-bg transition-colors shrink-0"
+          aria-label="Zurück"
+        >
+          <ArrowLeftIcon className="w-5 h-5" />
+        </button>
+        {fallNummer && <p className="text-sm text-claimondo-ondo">Fall {fallNummer}</p>}
+      </div>
 
       {/* Kontext: Kürzungs-Positionen */}
       <div className="rounded-2xl border border-warning/30 bg-warning-soft p-4 space-y-3">

@@ -3,7 +3,7 @@
 import { notFound } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { getGutachterForUser } from '@/lib/gutachter'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import { type EmbedSiteFormData } from '@/lib/embed/site-write'
 import EmbedSiteWizard from '../EmbedSiteWizard'
 
@@ -54,7 +54,7 @@ export default async function EditEmbedSitePage({ params }: { params: Promise<{ 
 
   return (
     <div className="py-6 space-y-4">
-      <PageHeader title="Embed-Site bearbeiten" size="lg" />
+      <SvPageChrome title="Embed-Site bearbeiten" />
       <EmbedSiteWizard
         mode="edit"
         siteId={id}

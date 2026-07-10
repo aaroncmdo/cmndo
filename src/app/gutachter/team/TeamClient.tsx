@@ -1,9 +1,9 @@
 ﻿'use client'
 
 import { useState, useTransition } from 'react'
-import { Building2Icon, GraduationCapIcon, MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
+import { MailIcon, ShieldOffIcon, ShieldCheckIcon, ArrowRightIcon, InboxIcon, UsersIcon, BarChart3Icon, WalletIcon, ActivityIcon } from 'lucide-react'
 import { assignPoolLead, toggleSubSvSperre } from './actions'
-import PageHeader from '@/components/shared/PageHeader'
+import { useSvPageChrome } from '@/app/gutachter/_shell/page-chrome-context'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { StatCard } from '@/components/shared/StatCard'
 import { Table, Thead, Tbody, Tr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
@@ -49,17 +49,16 @@ export type OrgStats = {
 }
 
 export default function TeamClient({
-  orgName, orgLabel, iconKey, subSvs, poolLeads, showPoolSection, stats,
+  orgName, orgLabel, subSvs, poolLeads, showPoolSection, stats,
 }: {
   orgName: string
   orgLabel: string
-  iconKey: 'akademie' | 'buero'
   subSvs: SubSvData[]
   poolLeads: PoolLeadData[]
   showPoolSection: boolean
   stats: OrgStats
 }) {
-  const Icon = iconKey === 'akademie' ? GraduationCapIcon : Building2Icon
+  useSvPageChrome({ title: orgName })
   const [pending, startTransition] = useTransition()
   const [actionMsg, setActionMsg] = useState<{ kind: 'success' | 'error'; text: string } | null>(null)
   const [assignTargets, setAssignTargets] = useState<Record<string, string>>({})
@@ -92,12 +91,6 @@ export default function TeamClient({
 
   return (
     <div className="px-8 py-8 max-w-6xl mx-auto space-y-6">
-      <PageHeader
-        title={orgName}
-        description={`Team-Verwaltung — ${orgLabel} mit ${subSvs.length} Mitgliedern`}
-        icon={Icon}
-      />
-
       {/* KFZ-152 Follow-up: Aggregierte Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <StatCard size="sm" icon={UsersIcon} tone="ondo" label="Mitglieder" value={`${stats.mitglieder_aktiv} aktiv`} hint={stats.mitglieder_gesperrt > 0 ? `${stats.mitglieder_gesperrt} gesperrt` : `${stats.mitglieder_gesamt} gesamt`} />

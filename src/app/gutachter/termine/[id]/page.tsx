@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import TerminDetailActions from './TerminDetailActions'
 import BesichtigungsortKorrektur from './BesichtigungsortKorrektur'
-import PageHeader from '@/components/shared/PageHeader'
+import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
 import PolizeiberichtUpload from './PolizeiberichtUpload'
 import PhoneButton from '@/components/shared/PhoneButton'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -166,11 +166,6 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
   const fahrzeugHersteller = fall?.fahrzeug_hersteller ?? lead?.fahrzeug_hersteller ?? null
   const fahrzeugModell = fall?.fahrzeug_modell ?? lead?.fahrzeug_modell ?? null
   const kennzeichen = fall?.kennzeichen ?? lead?.kennzeichen ?? null
-  const referenzLabel = fall?.claim_nummer
-    ? `Fall ${fall.claim_nummer}`
-    : termin.lead_id
-      ? `Lead ${termin.lead_id.slice(0, 8)}`
-      : id.slice(0, 8)
 
   const datum = new Date(termin.start_zeit).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin',
     weekday: 'long', day: '2-digit', month: '2-digit', year: 'numeric',
@@ -185,11 +180,7 @@ export default async function TerminDetailPage({ params }: { params: Promise<{ i
         <Link href="/gutachter/termine" className="text-sm text-[var(--brand-secondary)] hover:underline">← Alle Termine</Link>
       </div>
 
-      <PageHeader
-        title={`${datum} · ${uhrzeit}`}
-        description={referenzLabel}
-        size="lg"
-      />
+      <SvPageChrome title={`${datum} · ${uhrzeit}`} />
 
       {/* AAR-133: Vorreservierung-Badge wenn Pre-FlowLink (kein Fall) */}
       {istVorreservierung && (
