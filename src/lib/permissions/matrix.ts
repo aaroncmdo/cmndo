@@ -195,11 +195,11 @@ export const PERMISSION_MATRIX: Record<UserRolle, Permission> = {
   // Firmen-Flotten-Portal: Flottenmanager verwaltet Fahrzeug-Schadensfaelle
   // der eigenen Firmen-Flotte. Lese-Zugriff auf eigene Faelle, kein Admin.
   flottenmanager: {
-    scope: 'own',
+    scope: 'own', // Platzhalter: fleet-scope = firmen_id-gated, RLS folgt mit dem /flotte-Portal
     resources: {
       fall: 'read',
       stammdaten: 'read',
-      abrechnung: 'read',
+      abrechnung: 'none', // 'none' bis /flotte-Portal + RLS (firmen_id-Gate) live ist
       dokumente: 'read',
       chat: 'write',
       tasks: 'none',
