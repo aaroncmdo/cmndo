@@ -3,6 +3,8 @@
 // Sub-Projekt 2 (Kunde-Portal 1+): Firma & Flotte — Client.
 // Kein Firmen-Konto -> Firma-Setup; sonst Flotten-Liste + Hinzufuegen/Entfernen.
 // Policy-konform: shared/forms/TextField, SectionCard, primitives/Button.
+// Actions als Props — kunde-Portal reicht eigene Server-Actions rein;
+// flottenmanager reicht seine Actions rein (kein harter './actions'-Import mehr).
 
 import { useState } from 'react'
 import type { FormEvent } from 'react'
@@ -11,10 +13,17 @@ import { CarIcon, Trash2Icon } from 'lucide-react'
 import { TextField } from '@/components/shared/forms/TextField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
-import { speichereFirma, fuegeFahrzeugHinzu, entferneFahrzeug } from './actions'
-import type { KundeFirma, FlottenFahrzeug } from '@/lib/kunde/firma-flotte'
+import type { KundeFirma, FlottenFahrzeug, FirmaForm, FahrzeugForm } from '@/lib/kunde/firma-flotte'
 
-export default function FlotteClient({ firma, flotte }: { firma: KundeFirma | null; flotte: FlottenFahrzeug[] }) {
+type Props = {
+  firma: KundeFirma | null
+  flotte: FlottenFahrzeug[]
+  onSpeichereFirma?: (form: FirmaForm) => Promise<{ ok: boolean; error?: string }>
+  onFuegeHinzu: (form: FahrzeugForm) => Promise<{ ok: boolean; error?: string }>
+  onEntferne: (flottenId: string) => Promise<{ ok: boolean; error?: string }>
+}
+
+export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -22,21 +31,21 @@ export default function FlotteClient({ firma, flotte }: { firma: KundeFirma | nu
   const [firmaForm, setFirmaForm] = useState({ name: '', rechtsform: '', ustId: '', strasse: '', plz: '', ort: '' })
   const [fzForm, setFzForm] = useState({ kennzeichen: '', hersteller: '', modell: '', notiz: '' })
 
-  async function onSpeichereFirma(e: FormEvent) {
+  async function handleSpeichereFirma(e: FormEvent) {
     e.preventDefault()
     setError(null)
     setBusy(true)
-    const res = await speichereFirma(firmaForm)
+    const res = await onSpeichereFirma!(firmaForm)
     setBusy(false)
     if (res.ok) router.refresh()
-    else setError(res.error)
+    else setError(res.error ?? 'Fehler')
   }
 
-  async function onFuegeHinzu(e: FormEvent) {
+  async function handleFuegeHinzu(e: FormEvent) {
     e.preventDefault()
     setError(null)
     setBusy(true)
-    const res = await fuegeFahrzeugHinzu(fzForm)
+    const res = await onFuegeHinzu(fzForm)
     setBusy(false)
     if (res.ok) {
       setFzForm({ kennzeichen: '', hersteller: '', modell: '', notiz: '' })
@@ -44,19 +53,20 @@ export default function FlotteClient({ firma, flotte }: { firma: KundeFirma | nu
     } else setError(res.error ?? 'Fehler')
   }
 
-  async function onEntferne(flottenId: string) {
+  async function handleEntferne(flottenId: string) {
     setError(null)
     setBusy(true)
-    const res = await entferneFahrzeug(flottenId)
+    const res = await onEntferne(flottenId)
     setBusy(false)
     if (res.ok) router.refresh()
     else setError(res.error ?? 'Fehler')
   }
 
   if (!firma) {
+    if (!onSpeichereFirma) return null
     return (
       <SectionCard title="Firmen-Konto anlegen" subtitle="Für gewerbliche Kunden mit mehreren Fahrzeugen.">
-        <form onSubmit={onSpeichereFirma} className="space-y-4">
+        <form onSubmit={handleSpeichereFirma} className="space-y-4">
           <TextField
             label="Firmenname"
             value={firmaForm.name}
@@ -110,7 +120,7 @@ export default function FlotteClient({ firma, flotte }: { firma: KundeFirma | nu
                   variant="bare"
                   size="icon"
                   ariaLabel="Fahrzeug entfernen"
-                  onClick={() => onEntferne(v.flottenId)}
+                  onClick={() => handleEntferne(v.flottenId)}
                   iconLeft={<Trash2Icon className="h-4 w-4" />}
                 />
               </li>
@@ -120,7 +130,7 @@ export default function FlotteClient({ firma, flotte }: { firma: KundeFirma | nu
       </SectionCard>
 
       <SectionCard title="Fahrzeug hinzufügen">
-        <form onSubmit={onFuegeHinzu} className="space-y-4">
+        <form onSubmit={handleFuegeHinzu} className="space-y-4">
           <TextField
             label="Kennzeichen"
             value={fzForm.kennzeichen}
