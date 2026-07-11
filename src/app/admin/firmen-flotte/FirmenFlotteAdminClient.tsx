@@ -13,6 +13,7 @@ import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { TextField } from '@/components/shared/forms/TextField'
+import { statusSlotClass } from '@/lib/status'
 
 export type FlottenKontoRow = {
   user_id: string
@@ -120,11 +121,9 @@ export default function FirmenFlotteAdminClient({ konten }: { konten: FlottenKon
                   </Td>
                   <Td>
                     <span
-                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                        k.status === 'aktiv'
-                          ? 'bg-success-soft text-success-strong'
-                          : 'bg-claimondo-bg text-claimondo-ondo'
-                      }`}
+                      className={`px-2 py-0.5 rounded-full text-xs font-medium ${statusSlotClass(
+                        k.status === 'aktiv' ? 'success' : 'neutral',
+                      )}`}
                     >
                       {k.status ?? '—'}
                     </span>
