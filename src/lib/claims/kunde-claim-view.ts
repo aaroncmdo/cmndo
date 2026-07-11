@@ -131,6 +131,8 @@ export type KundeWerkstatt = {
   reparaturTermin: { id: string; status: string; wunschtermin: string | null; bestaetigter_termin: string | null; absage_grund: string | null } | null
   schadensfotoUrls: string[]
   schlussrechnungUrl: string | null
+  // Slice 1b: juengste SV-Rechnung (rechnung_gutachten, kunde-sichtbar) fuer Normal-Claim-Belege.
+  svRechnungUrl: string | null
   brauchtVermittlung: boolean
 }
 
@@ -405,13 +407,17 @@ export async function getKundeClaimView(
   const gutachtenUrlRaw = dokumente.filter((d) => d.typ === 'gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null
   const schlussrechnungUrl =
     dokumente.filter((d) => d.typ === 'schlussrechnung' && d.datei_url).slice(-1)[0]?.datei_url ?? null
+  // Slice 1b: juengste SV-Rechnung (rechnung_gutachten, kunde-sichtbar) fuer Normal-Claim-Belege.
+  // Analoges Muster zu schlussrechnungUrl und gutachtenUrlRaw.
+  const svRechnungUrl =
+    dokumente.filter((d) => d.typ === 'rechnung_gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null
   const brauchtVermittlung = brauchtWerkstattVermittlung({
     reparaturwunsch: (claimExtra?.reparaturwunsch as string | null) ?? null,
     reparatur_werkstatt_id: reparaturWerkstattId,
     werkstatt_id: (claimExtra?.werkstatt_id as string | null) ?? null,
     reparatur_vermittlung_status: (claimExtra?.reparatur_vermittlung_status as string | null) ?? null,
   })
-  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, schlussrechnungUrl, brauchtVermittlung }
+  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, schlussrechnungUrl, svRechnungUrl, brauchtVermittlung }
 
   const kanzleiRow = (kanzleiRowRes.data as { name: string | null; email: string | null; adresse: string | null } | null) ?? null
   const kanzleiAnsprechpartnerName = (fall.kanzlei_ansprechpartner_name as string | null) ?? null
