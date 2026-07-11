@@ -24,6 +24,11 @@ import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
 import { findRecentMcpLead } from '@/lib/api-v1/recent-lead-dedup'
+import {
+  phoneWriteCapExceeded,
+  globalWriteCapExceeded,
+  recordGlobalWrite,
+} from '@/lib/api-v1/write-abuse-guard'
 import type { EmbedAnfrageInput } from '@/lib/schemas/embed-anfrage'
 
 export const runtime = 'nodejs'
@@ -128,6 +133,34 @@ export async function POST(req: Request) {
       200,
     )
   }
+
+  // Abuse-Härtung (öffentlicher Write-Endpoint, breit an externe KI-Assistenten): IP-unabhängige
+  // Backstops zusätzlich zum Per-IP-Limit. NACH der Retry-Dedup, damit Retries nicht zählen, und
+  // VOR jedem Insert/Versand, damit ein geblockter Request weder Lead noch (teure) WhatsApp erzeugt.
+  //   1. Per-Telefon-Velocity — stoppt WhatsApp-Bombing derselben Opfer-Nummer.
+  //   2. Globaler Circuit-Breaker — deckelt Massen-Spam / Twilio-Kosten prozessweit.
+  if (await phoneWriteCapExceeded(input.telefon)) {
+    return json(
+      {
+        ok: false,
+        error: 'phone_rate_limit',
+        hinweis:
+          'Für diese Telefonnummer wurden in kurzer Zeit zu viele Schadenmeldungen angelegt. Bitte später erneut versuchen oder direkt telefonisch melden.',
+      },
+      429,
+    )
+  }
+  if (globalWriteCapExceeded()) {
+    return json(
+      {
+        ok: false,
+        error: 'service_busy',
+        hinweis: 'Aktuell sehr viele Anfragen — bitte in wenigen Minuten erneut versuchen.',
+      },
+      429,
+    )
+  }
+  recordGlobalWrite()
 
   const center = await geocodeAdresse(input.plz)
   if (!center) return json({ ok: false, error: 'PLZ not found' }, 404)
