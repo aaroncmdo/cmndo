@@ -1,6 +1,5 @@
 // WS6 Slice 1 — claim-type-aware Beleg-/Dokumenten-Download für den Kunden.
-// Reparatur-Claim: KVA + Schlussrechnung + Schadenfotos. Normal-/SV-Claim: Gutachten
-// (SV-Rechnung folgt in Slice 1b — SV-Upload + Sichtbarkeit sind heute ein Gap).
+// Reparatur-Claim: KVA + Schlussrechnung + Schadenfotos. Normal-/SV-Claim: Gutachten + SV-Rechnung.
 // Task B (DokumentVorschau): Vorschau-Button neben jedem Beleg-Download.
 'use client'
 

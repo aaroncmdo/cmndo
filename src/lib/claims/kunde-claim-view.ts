@@ -14,6 +14,7 @@ import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { istBankdatenPhase } from '@/lib/kunde/bankdaten-status'
 import { getStorageUrlBulk } from '@/lib/storage/url'
+import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
 import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
@@ -597,7 +598,11 @@ export async function getKundeClaimView(
       ausfall,
     },
     pflichtdokumente: { offen: pflichtOffen, slots: pflichtSlots },
-    doks: { qcLaeuft, kbTerminCard, dokumente, aktiverTermin },
+    // Rolle-Sichtbarkeits-Filter: interne Typen (abrechnung_intern, ki_kalkulation, kanzlei_paket,
+    // gutachter_fotos, vorschaden_bericht usw.) werden aus der gerenderten Liste entfernt.
+    // Die typ-spezifischen Ableitungen (schlussrechnungUrl, svRechnungUrl, kvaPdfUrl etc.) nutzen
+    // die ungefilterte lokale `dokumente`-Variable (oben) — die sind bereits typ-gated.
+    doks: { qcLaeuft, kbTerminCard, dokumente: getSichtbarFuerRolle(dokumente, 'kunde'), aktiverTermin },
     status,
     kanzlei,
     werkstatt,
