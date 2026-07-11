@@ -566,15 +566,13 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
 function MaklerKontakte({ kontakte }: { kontakte: FallDetail['kontakte'] }) {
   const hasAny = !!(kontakte.kundenbetreuer || kontakte.sv || kontakte.kanzlei)
   if (!hasAny) {
+    // Shared SectionCard statt handgerolltem Card-Div (component-set-Ratchet).
     return (
-      <section className="bg-white rounded-ios-md border border-claimondo-border p-4">
-        <h3 className="text-[10px] font-semibold uppercase tracking-wider text-claimondo-ondo">
-          Ansprechpartner
-        </h3>
-        <p className="text-sm text-claimondo-ondo mt-2">
+      <SectionCard title="Ansprechpartner">
+        <p className="text-sm text-claimondo-ondo">
           Ansprechpartner werden zugewiesen, sobald Betreuer oder Gutachter feststehen.
         </p>
-      </section>
+      </SectionCard>
     )
   }
   return (
