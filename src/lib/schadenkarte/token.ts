@@ -27,9 +27,9 @@ export function extractSchadenkarteToken(scanned: string): string | null {
   const trimmed = (scanned ?? '').trim().toUpperCase()
   if (!trimmed) return null
   // URL-Form: /schaden/<token>
-  const urlMatch = trimmed.match(/\/SCHADEN\/(SKT-[0-9A-HJKMNP-TV-Z]{16})\b/i)
+  const urlMatch = trimmed.match(/\/SCHADEN\/(SKT-[2-9A-HJKMNP-TV-Z]{16})\b/)
   if (urlMatch) return urlMatch[1]
   // Bare token (already uppercased)
-  if (/^SKT-[0-9A-HJKMNP-TV-Z]{16}$/i.test(trimmed)) return trimmed
+  if (/^SKT-[2-9A-HJKMNP-TV-Z]{16}$/.test(trimmed)) return trimmed
   return null
 }

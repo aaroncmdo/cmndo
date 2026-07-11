@@ -4,7 +4,7 @@ import { generateSchadenkarteToken, extractSchadenkarteToken } from './token'
 describe('schadenkarte token', () => {
   it('generates SKT-prefixed 16-char tokens', () => {
     const t = generateSchadenkarteToken()
-    expect(t).toMatch(/^SKT-[0-9A-Z]{16}$/)
+    expect(t).toMatch(/^SKT-[2-9A-HJKMNP-TV-Z]{16}$/)
     expect(generateSchadenkarteToken()).not.toBe(t)
   })
   it('extracts token from a full /schaden URL', () => {
