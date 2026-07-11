@@ -172,6 +172,7 @@ export async function bestaetigeKiAusfuehrung(
 export async function brichAbKiAusfuehrung(
   execId: string,
 ): Promise<{ ok: boolean; error?: string }> {
+  // Kein Kill-Switch-Guard: Abbrechen muss auch bei deaktiviertem Executor moeglich bleiben (in-flight consequential-Aktion zurueckziehen).
   const guard = await requireRole(['admin', 'kundenbetreuer'])
   if (!guard.success) return { ok: false, error: guard.error }
 
