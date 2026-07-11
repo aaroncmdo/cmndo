@@ -183,6 +183,7 @@ export default function FallDetailSections({
             <DokumenteDownloadListe
               variant="list"
               rolle="kunde"
+              enableVorschau
               emptyTitle={t('dokumente.leer')}
               dokumente={dokumente.map<DokumentItem>(doc => ({
                 id: doc.id,
