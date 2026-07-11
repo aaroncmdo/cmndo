@@ -266,6 +266,8 @@ const nextConfig: NextConfig = {
       // Aufgaben-Hub (AAR-531):
       { source: '/admin/meine-tasks', destination: '/admin/aufgaben/meine', permanent: true },
       { source: '/admin/tasks', destination: '/admin/aufgaben/alle', permanent: true },
+      { source: '/admin/ai-vorschlaege', destination: '/admin/aufgaben/vorschlaege', permanent: true },
+      { source: '/admin/aufgaben', destination: '/admin/aufgaben/alle', permanent: true },
       // AAR-628: Fallakte-Route-Konsolidierung. Die Detail-Route wird
       // aus /admin/faelle/[id] rausgezogen in die neutrale Route /faelle/[id],
       // damit KB + Kanzlei ihre eigene Shell bekommen. Der Redirect muss
