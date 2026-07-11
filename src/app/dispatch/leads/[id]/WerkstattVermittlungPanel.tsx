@@ -32,6 +32,7 @@ export default function WerkstattVermittlungPanel({ target, id, currentWerkstatt
   const [open, setOpen] = useState(false)
   const [loading, setLoading] = useState(false)
   const [werkstaetten, setWerkstaetten] = useState<WerkstattFinderRow[]>([])
+  const [keineSpezialisierte, setKeineSpezialisierte] = useState(false)
   const [pending, startTransition] = useTransition()
 
   function openDrawer() {
@@ -40,8 +41,10 @@ export default function WerkstattVermittlungPanel({ target, id, currentWerkstatt
     setWerkstaetten([])
     getWerkstaettenNah({ target, id })
       .then((r) => {
-        if (r.ok) setWerkstaetten(r.werkstaetten)
-        else toast.error(r.error ?? 'Werkstätten konnten nicht geladen werden')
+        if (r.ok) {
+          setWerkstaetten(r.werkstaetten)
+          setKeineSpezialisierte(r.keineSpezialisierte)
+        } else toast.error(r.error ?? 'Werkstätten konnten nicht geladen werden')
       })
       .catch(() => toast.error('Werkstätten konnten nicht geladen werden'))
       .finally(() => setLoading(false))
@@ -107,6 +110,7 @@ export default function WerkstattVermittlungPanel({ target, id, currentWerkstatt
               loading={loading || pending}
               onSelect={handleSelect}
               selectedId={currentWerkstatt?.id ?? null}
+              keineSpezialisierte={keineSpezialisierte}
             />
           </div>
         </div>
