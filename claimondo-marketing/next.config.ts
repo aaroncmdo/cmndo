@@ -40,14 +40,22 @@ const nextConfig: NextConfig = {
     return [{ source: '/:path*', headers: securityHeaders }]
   },
 
-  // Brand-Domain-Discovery: claimondo.de/openapi.json -> kanonische OpenAPI 3.1 der
-  // oeffentlichen Funnel-API auf dem Portal-Host. AI-Crawler/Action-Importer, die die
-  // OpenAPI auf der Brand-Domain raten, landen so beim echten Spec. Single Source bleibt
-  // das Portal (src/app/api/v1/openapi.json) — kein Duplikat. 308 (permanent).
+  // Brand-Domain-Discovery: claimondo.de/openapi.json UND claimondo.de/api/v1/openapi.json ->
+  // kanonische OpenAPI der oeffentlichen Funnel-API auf dem Portal-Host. AI-Crawler/Action-
+  // Importer (ChatGPT-GPT-Builder etc.), die die OpenAPI auf der Brand-Domain raten — mit ODER
+  // ohne /api/v1-Prefix — landen so beim echten Spec statt im 404. Single Source bleibt das
+  // Portal (src/app/api/v1/openapi.json) — kein Duplikat. 308 (permanent).
   async redirects() {
     return [
       {
         source: '/openapi.json',
+        destination: 'https://app.claimondo.de/api/v1/openapi.json',
+        permanent: true,
+      },
+      {
+        // doc34-Custom-GPT-Setup + haeufigster Rate-Versuch: die volle Portal-Pfad-URL auf der
+        // Brand-Domain (claimondo.de/api/v1/openapi.json 404te bisher — Marketing hat kein /api/v1).
+        source: '/api/v1/openapi.json',
         destination: 'https://app.claimondo.de/api/v1/openapi.json',
         permanent: true,
       },
