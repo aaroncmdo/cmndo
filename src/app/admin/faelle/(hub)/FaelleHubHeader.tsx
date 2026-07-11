@@ -32,11 +32,9 @@ export default function FaelleHubHeader({ offeneReklamationen }: { offeneReklama
         : undefined,
   }))
   return (
-    <div className="pt-4">
-      <PageHeader title="Fälle" size="lg">
-        <RouteTabBar tabs={tabs} />
-        <p className="mt-2 text-sm text-claimondo-ondo">{active.subtitle}</p>
-      </PageHeader>
-    </div>
+    <PageHeader title="Fälle" size="lg">
+      <RouteTabBar tabs={tabs} />
+      <p className="mt-2 text-sm text-claimondo-ondo">{active.subtitle}</p>
+    </PageHeader>
   )
 }

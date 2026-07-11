@@ -31,12 +31,21 @@ test.describe('PageHeader Floating-Card', () => {
         const card = page.locator('[data-page-header-card]').first()
         await expect(card, `Floating-Card auf ${path}`).toBeVisible({ timeout: 10_000 })
         await expect(card).toHaveClass(/page-header-card/)
-        // Negativ: der Header steckt nicht mehr in einer eckigen Band-Leiste — der
-        // direkte Eltern-Wrapper darf keine bg-white + border-b-Kombination tragen.
-        const parentBandClass = await card.evaluate((el) => el.parentElement?.className ?? '')
+        // Negativ: KEIN Vorfahre im Header-Bereich traegt gleichzeitig bg-white + border-b
+        // (eckiges Band). Bis zu 4 Ebenen hoch pruefen — das Band kann Layout-Wrapper sein
+        // (Grosseltern), nicht nur der direkte Parent.
+        const hasBandAncestor = await card.evaluate((el) => {
+          let node: HTMLElement | null = el.parentElement
+          for (let i = 0; i < 4 && node; i++) {
+            const c = node.className || ''
+            if (/bg-white/.test(c) && /border-b/.test(c)) return true
+            node = node.parentElement
+          }
+          return false
+        })
         expect(
-          /bg-white/.test(parentBandClass) && /border-b/.test(parentBandClass),
-          `kein eckiges Band um den Header auf ${path} (parent="${parentBandClass}")`,
+          hasBandAncestor,
+          `kein eckiges bg-white/border-b-Band um den Header auf ${path}`,
         ).toBeFalsy()
       }
     } finally {
