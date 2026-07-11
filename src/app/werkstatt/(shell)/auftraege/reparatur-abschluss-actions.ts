@@ -69,7 +69,7 @@ export async function markiereReparaturErledigt(
   const bytes = new Uint8Array(await file.arrayBuffer())
   const { error: upErr } = await admin.storage
     .from('fall-dokumente')
-    .upload(storagePath, bytes, { contentType: file.type || 'application/pdf', upsert: false })
+    .upload(storagePath, bytes, { contentType: file.type || 'application/pdf', upsert: true })
   if (upErr) return { ok: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
 
   const { error: docErr } = await admin.from('fall_dokumente').insert({
@@ -96,20 +96,22 @@ export async function markiereReparaturErledigt(
 
   // 3) Claim schließen — direkter Write (Praezedenz endzustand-actions.ts; state-machine erlaubt
   //    'abgeschlossen' NICHT aus dem Reparatur-Zustand). Guard gegen Re-Close via .neq.
-  await admin
+  const { error: closeErr } = await admin
     .from('claims')
     .update({ operative_status: REPARATUR_CLOSE_STATUS, abgeschlossen_am: nowIso, geschlossen_grund: REPARATUR_CLOSE_GRUND } as never)
     .eq('id', claimId)
     .neq('operative_status', REPARATUR_CLOSE_STATUS)
+  if (closeErr) console.error('[WS6] Claim-Close fehlgeschlagen:', closeErr.message)
 
   // 4) Werkstatt-Provision freigeben (pending -> freigegeben), an die Fertigstellung gekoppelt.
   //    Praematur-Release-Vermeidung im Cron = 457ab612-Naht (Marker separat).
-  await admin
+  const { error: provErr } = await admin
     .from('partner_provisionen')
     .update({ status: 'freigegeben' } as never)
     .eq('partner_typ', 'werkstatt')
     .eq('claim_id', claimId)
     .eq('status', 'pending')
+  if (provErr) console.error('[WS6] Provisions-Freigabe fehlgeschlagen:', provErr.message)
 
   revalidatePath(`/werkstatt/auftraege/${claimId}`)
   revalidatePath('/werkstatt/auftraege')
