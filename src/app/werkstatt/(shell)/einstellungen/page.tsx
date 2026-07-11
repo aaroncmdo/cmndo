@@ -17,7 +17,7 @@ export default async function WerkstattEinstellungenPage() {
   const { data: werkstatt } = await supabase
     .from('werkstaetten')
     .select(
-      'name, ansprechpartner_name, adresse_strasse, adresse_plz, adresse_ort, telefon, email, website, ust_id, ist_kleinunternehmer, bank_iban, bank_bic, bank_kontoinhaber',
+      'name, ansprechpartner_name, adresse_strasse, adresse_plz, adresse_ort, telefon, email, website, ust_id, ist_kleinunternehmer, bank_iban, bank_bic, bank_kontoinhaber, faehigkeiten',
     )
     .eq('user_id', user.id)
     .maybeSingle()
@@ -40,6 +40,7 @@ export default async function WerkstattEinstellungenPage() {
       bank_iban={(werkstatt as unknown as { bank_iban: string | null }).bank_iban ?? null}
       bank_bic={(werkstatt as unknown as { bank_bic: string | null }).bank_bic ?? null}
       bank_kontoinhaber={(werkstatt as unknown as { bank_kontoinhaber: string | null }).bank_kontoinhaber ?? null}
+      faehigkeiten={(werkstatt as unknown as { faehigkeiten: string[] | null }).faehigkeiten ?? null}
     />
       <div className="mx-auto max-w-2xl px-4 pb-8">
         <p className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-claimondo-ondo/70">
