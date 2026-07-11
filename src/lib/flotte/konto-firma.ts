@@ -38,3 +38,17 @@ export async function resolveKontoFirma(db: AnyDb, userId: string, rolle: string
   if (rolle === 'flottenmanager') return getFlottenmanagerFirma(db, userId)
   return getKundeFirma(db, userId)
 }
+
+/** flottenmanager-Konto anlegen (Link user<->firma). db = Admin/Service-Role (AnyDb: firmen_flotten_konten noch nicht in database.types, Regel-2-Lag). */
+export async function insertFlottenmanagerKonto(
+  db: AnyDb,
+  params: { firmaId: string; userId: string; aktiviertVon: string | null },
+): Promise<{ error: string | null }> {
+  const { error } = await db.from('firmen_flotten_konten').insert({
+    firma_id: params.firmaId,
+    user_id: params.userId,
+    status: 'aktiv',
+    aktiviert_von: params.aktiviertVon,
+  })
+  return { error: error ? error.message : null }
+}
