@@ -1,18 +1,9 @@
-// AAR-727 / AAR-769 Phase 3: Einheitlicher Seiten-Header für alle
-// Portale. Ersetzt das `<div><h1>...</h1><p>...</p>+Actions</div>`-
-// Pattern, das vorher in 30+ Seiten leicht abweichend kopiert war.
-//
-// AAR-791: API erweitert auf
-//   - description: ReactNode (statt nur string) — erlaubt Inline-Links
-//   - useBranding: Title in `var(--brand-primary)` statt navy (Whitelabel-SVs)
-//   - leadingSlot: Node vor dem Title-Block (Avatar-Kreise, Back-Buttons)
-//
-// Token-Treue: claimondo-navy / claimondo-ondo entsprechen 1:1 den
-// Werten in src/lib/design-tokens.ts (navy=#0D1B3E, ondo=#4573A2). Die
-// Farben kommen über Tailwind-Klassen statt Primitives, weil das
-// Description-Feld jetzt ReactNode ist und ein Inline-Style-Color sich
-// schlecht mit verschachtelten Links/Spans verträgt.
-
+// AAR-727 / AAR-769 Phase 3: Einheitlicher Seiten-Header fuer alle Portale.
+// AAR-791: description: ReactNode; useBranding; leadingSlot.
+// 2026-07-11 (PageHeader-Floating-Card): Der Start-Header rendert per Default als
+// weiche Floating-Card (.page-header-card). `bare` (bzw. align="center") rendert
+// wie zuvor ohne Card. `children` erlaubt Hub-Tabs/Untertitel INNERHALB der Card.
+// Positionierung (sticky/flex-shrink-0) bleibt beim Consumer.
 import { type LucideIcon } from 'lucide-react'
 import { type ReactNode } from 'react'
 
@@ -21,28 +12,18 @@ type Props = {
   description?: ReactNode
   icon?: LucideIcon
   actions?: ReactNode
-  /**
-   * `md` (default) für Sub-Seiten (18px Titel).
-   * `lg` für oberste Hub-Seiten (24px Titel).
-   */
+  /** `md` (default) fuer Sub-Seiten (18px), `lg` fuer Hub-Seiten (24px). */
   size?: 'md' | 'lg'
-  /**
-   * Schaltet den Title-Color auf `var(--brand-primary)` statt navy. Für
-   * Whitelabel-SV-Pages (Gutachter-Portal mit eigenem Branding) — fällt
-   * auf navy zurück, wenn keine CSS-Var gesetzt ist.
-   */
+  /** Title-Color auf var(--brand-primary) statt navy (Whitelabel-SV). */
   useBranding?: boolean
-  /**
-   * Optionaler Slot vor dem Title-Block — z.B. Avatar-Kreis (Mitarbeiter-
-   * Detail), Back-Button (SV-Detail) oder ähnliche dekorative Elemente.
-   */
+  /** Slot vor dem Title-Block (Avatar-Kreis, Back-Button). */
   leadingSlot?: ReactNode
-  /**
-   * Ausrichtung. `start` (default) für Standard-Hub-Pages, `center` für
-   * Wizard-Steps und Auth-Pages mit zentriertem Card-Layout.
-   * Bei `center` rendert leadingSlot ÜBER dem Title (gestapelt) statt links.
-   */
+  /** `start` (default) linksbuendig, `center` fuer Wizard/Auth (impliziert bare). */
   align?: 'start' | 'center'
+  /** Inhalt INNERHALB der Card unter der Titelzeile (z.B. Hub-Tabs + Untertitel). */
+  children?: ReactNode
+  /** Opt-out: rendert ohne Floating-Card (Auth/Login, in SectionCard verschachtelt). */
+  bare?: boolean
 }
 
 export default function PageHeader({
@@ -54,6 +35,8 @@ export default function PageHeader({
   useBranding = false,
   leadingSlot,
   align = 'start',
+  children,
+  bare = false,
 }: Props) {
   const titleSize = size === 'lg' ? 'text-2xl' : 'text-lg'
   const titleColor = useBranding
@@ -80,13 +63,8 @@ export default function PageHeader({
     )
   }
 
-  return (
-    // Mobil gestapelt (Titel volle Breite -> kein Truncate wenn actions breit sind,
-    // z.B. Liste/Kalender-Toggle auf /kunde/termine), ab sm einreihig wie gehabt.
-    <div
-      className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between"
-      data-page-header
-    >
+  const titleRow = (
+    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex items-center gap-3 min-w-0 sm:flex-1">
         {leadingSlot}
         <div className="flex flex-col gap-1 min-w-0">
@@ -106,6 +84,27 @@ export default function PageHeader({
       {actions ? (
         <div className="flex items-center gap-3 shrink-0">{actions}</div>
       ) : null}
+    </div>
+  )
+
+  const bodyContent = (
+    <>
+      {titleRow}
+      {children ? <div className="mt-3">{children}</div> : null}
+    </>
+  )
+
+  if (bare) {
+    return <div data-page-header>{bodyContent}</div>
+  }
+
+  return (
+    <div
+      data-page-header
+      data-page-header-card
+      className="page-header-card rounded-ios-lg px-5 py-4"
+    >
+      {bodyContent}
     </div>
   )
 }
