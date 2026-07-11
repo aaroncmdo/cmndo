@@ -9,6 +9,7 @@ import WichtigeUpdatesWidget from './_components/WichtigeUpdatesWidget'
 import DashboardStats from './_components/DashboardStats'
 import TageskalenderWidget from './_components/TageskalenderWidget'
 import TermineIntegritaetWidget from './_components/TermineIntegritaetWidget'
+import ReparaturWorkstateWidget from './_components/ReparaturWorkstateWidget'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { getOpsRollup } from '@/lib/ops/get-ops-rollup'
@@ -198,6 +199,9 @@ export default async function AdminDashboardPage() {
 
         {/* Termine-Integritaets-Monitor — on-demand (kein Server-Fetch beim Render) */}
         <TermineIntegritaetWidget />
+
+        {/* Reparatur-Workstate-Monitor — on-demand (WS6 Slice 2, kein Server-Fetch beim Render) */}
+        <ReparaturWorkstateWidget />
 
         {/* Ausstehende Zahlungen + Wichtige Updates (split) */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
