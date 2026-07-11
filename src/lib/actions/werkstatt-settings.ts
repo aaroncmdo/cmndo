@@ -7,7 +7,9 @@
 
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
+import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
 
 export type WerkstattActionResult = { ok: true } | { ok: false; error: string }
 
@@ -179,5 +181,29 @@ export async function changeWerkstattPasswort(
     password: parsed.data.next,
   })
   if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+// ── Faehigkeiten ────────────────────────────────────────────────────────────
+
+/**
+ * Self-Service: Werkstatt pflegt eigene Faehigkeiten.
+ * user_id-scoped (kein IDOR) — Admin-Client fuer den Update,
+ * SSR-Client fuer Auth-Check.
+ */
+export async function setMeineFaehigkeiten(
+  faehigkeiten: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const clean = (faehigkeiten ?? []).filter((f) => (GEWERKE as readonly string[]).includes(f))
+
+  const admin = createAdminClient()
+  const { error } = await admin.from('werkstaetten').update({ faehigkeiten: clean }).eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/werkstatt/einstellungen')
   return { ok: true }
 }
