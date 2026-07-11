@@ -17,6 +17,7 @@ import TasksPill from '@/components/shared/TasksPill'
 import { AdminNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
 import { AdminAiVorschlaegeBadge } from '@/components/admin/AdminAiVorschlaegeBadge'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
+import UpdatesNav from '@/components/shared/updates'
 
 const NAV_ITEMS: PortalNavItem[] = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboardIcon, exact: true },
@@ -69,6 +70,7 @@ export default function AdminNav({
       ariaLabel="Admin-Navigation"
       sections={[{ items: NAV_ITEMS }]}
       mobileItems={MOBILE_ITEMS}
+      mobileSheetTop={<UpdatesNav variant="dark" />}
       renderBadge={(item) => {
         if (item.label === 'Aufgaben') {
           return <span className="ml-auto"><AdminAiVorschlaegeBadge /></span>

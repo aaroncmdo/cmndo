@@ -35,14 +35,14 @@ import { CLAIMONDO_DEFAULT_THEME, type BrandTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
 import { FONT_PAIRS, CLAIMONDO_DEFAULT_FONT_PAIR_ID, buildGoogleFontsUrl } from '@/lib/branding/fonts'
 import { useFloatingSidebar } from '@/lib/branding/use-floating-sidebar'
-import GutachterMobileTabBar from './GutachterMobileTabBar'
+import { MobileNav, type MobileNavItem, type MobileNavSection } from '@/components/shared/mobile-nav'
 import { GlobalPosteingangFab } from '@/components/chat/GlobalPosteingangFab'
 import SVSpotlight from './_components/SVSpotlight'
 import WeatherBanner from '@/components/shared/WeatherBanner'
 import { toInitials } from '@/components/shared/KundeAvatar'
 import { SvPageChromeProvider } from './_shell/page-chrome-context'
 import { SvTopBar } from './_shell/SvTopBar'
-import { SvMobileHeader } from './_shell/SvMobileHeader'
+// SvMobileHeader entfernt (bottom-only): die MobileNav-Menü-Sheet ersetzt den mobilen Drawer/Header.
 // CMM-36: Geo-Tracking startet beim App-Öffnen
 import { useGeoPosition } from '@/hooks/useGeoPosition'
 
@@ -106,6 +106,21 @@ const NAV_SECTIONS_BASE: NavSection[] = [
     ],
   },
 ]
+
+// Bottom-only Mobile-Nav (geteilte MobileNav): Sektionen aus NAV_SECTIONS_BASE,
+// 4 Primaer-Tabs (Heute/Auftraege/Faelle/Kalender), Rest in der Menü-Sheet.
+const SV_MOBILE_SECTIONS: MobileNavSection[] = NAV_SECTIONS_BASE.map((s) => ({
+  label: s.title,
+  items: s.items.map((it) => ({ href: it.href, label: it.label, icon: it.icon })),
+}))
+const SV_MOBILE_PRIMARY: MobileNavItem[] = [
+  '/gutachter/heute',
+  '/gutachter/auftraege',
+  '/gutachter/faelle',
+  '/gutachter/kalender',
+]
+  .map((h) => SV_MOBILE_SECTIONS.flatMap((s) => s.items).find((i) => i.href === h))
+  .filter((i): i is MobileNavItem => Boolean(i))
 
 // AAR-809: Wetter-Logik raus in components/shared/WeatherBanner.
 
@@ -575,7 +590,7 @@ export default function GutachterShell({
         {/* Mobile Header (nur Hamburger + Logo, Glocke ist im Wetter-Banner) */}
         {/* AAR-211 + AAR-220: Header nutzt Theme-Sidebar-Bg (gleicher Look wie
             Sidebar-Hintergrund) mit sanfter 1.5s Color-Transition. */}
-        <SvMobileHeader logoUrl={logoUrl} useBrand={useBrand} firmenname={firmenname} />
+        {/* Kein mobiler Top-Bar mehr (bottom-only) — Navigation via MobileNav-Pille + Menü-Sheet. */}
 
         <SvTopBar
           standortLat={standortLat ?? null}
@@ -627,12 +642,41 @@ export default function GutachterShell({
             Drawer öffnen via „Mehr"-Tab für Sekundär-Items (Abrechnung,
             Vertrag, Statistiken, Einstellungen, Abmelden). */}
         {!isFeldmodus && (
-          <GutachterMobileTabBar
-            onOpenDrawer={() => setSidebarOpen(true)}
-            badges={{
-              auftraege: badgeCounts.auftraege,
-              kalender: badgeCounts.neueTermine,
+          <MobileNav
+            hideBreakpoint="lg"
+            ariaLabel="SV-Navigation"
+            primary={SV_MOBILE_PRIMARY}
+            sections={SV_MOBILE_SECTIONS}
+            brand={{
+              logo: logoUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={logoUrl} alt="" className="h-6 w-auto" />
+              ) : undefined,
+              name: <span className="text-sm font-semibold text-white">{firmenname ?? 'Claimondo'}</span>,
             }}
+            renderBadge={(item) => {
+              const n =
+                item.href === '/gutachter/auftraege'
+                  ? badgeCounts.auftraege
+                  : item.href === '/gutachter/kalender'
+                    ? badgeCounts.neueTermine
+                    : 0
+              return n > 0 ? (
+                <span className="ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold bg-danger text-white">
+                  {n > 99 ? '99+' : n}
+                </span>
+              ) : null
+            }}
+            sheetFooter={
+              <form action="/api/auth/logout" method="POST">
+                <button
+                  type="submit"
+                  className="flex w-full items-center gap-3 rounded-ios-lg px-3 py-2.5 text-sm text-claimondo-light-blue hover:bg-white/5 hover:text-white"
+                >
+                  <LogOutIcon style={{ width: 17, height: 17 }} /> Abmelden
+                </button>
+              </form>
+            }
           />
         )}
       </div>

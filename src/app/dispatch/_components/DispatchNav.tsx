@@ -10,6 +10,7 @@ import TasksPill from '@/components/shared/TasksPill'
 import { DispatchNeueRueckrufeBadge } from '@/components/shared/NeueTermineBadge'
 import { PortalNav, type PortalNavItem } from '@/components/shared/portal-nav'
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
+import UpdatesNav from '@/components/shared/updates'
 
 const NAV_ARBEIT: PortalNavItem[] = [
   { href: '/dispatch/dashboard', label: 'Dashboard', icon: LayoutDashboardIcon },
@@ -44,6 +45,7 @@ export default function DispatchNav({
         { label: 'Nachschlagen', items: NAV_NACHSCHLAGEN },
       ]}
       mobileItems={NAV_ARBEIT}
+      mobileSheetTop={<UpdatesNav variant="dark" />}
       renderBadge={(item) => {
         if (item.href === '/dispatch/rueckrufe') {
           return <DispatchNeueRueckrufeBadge userId={userId} className="shrink-0" />
