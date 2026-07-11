@@ -51,11 +51,7 @@ export default async function AdminLayout({
       <div className="md:pl-56 h-screen flex flex-col relative z-10">
         {/* AAR-725: UpdatesNav ersetzt MitteilungszentralePanel + alte
             NotificationBell. Tasks haben jetzt eigene Pill (AAR-723). */}
-        {/* Mobile header — AAR-727 Glass-Dark mit subtilem Shadow */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
-          <UpdatesNav variant="dark" />
-        </header>
+        {/* Mobile-Nav ist bottom-only (MobileNav-Pille + Menü-Sheet inkl. Updates) — kein Top-Bar. */}
 
         {/* Desktop: Updates-Nav + Outbox badge top-right */}
         <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">

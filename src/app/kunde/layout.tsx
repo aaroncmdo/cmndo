@@ -8,6 +8,7 @@ import { LogOutIcon } from 'lucide-react'
 import UpdatesNav from '@/components/shared/updates'
 // SupportButton: Dead-Import entfernt (AAR-prod-cj-fix-01) — wird im JSX nicht gerendert.
 import KundeNav from './_components/KundeNav'
+import { KundeMobileNav } from './_components/KundeMobileNav'
 import KundenbetreuerCard from './_components/KundenbetreuerCard'
 import GutachterCard from './_components/GutachterCard'
 import EskalierterAdminCard from './_components/EskalierterAdminCard'
@@ -429,40 +430,10 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         </div>
       </aside>
 
-      {/* Mobile Header — hidden on desktop */}
-      <header
-        className="md:hidden fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-5 py-3 shadow-ios-md glass-branded"
-        style={{ backgroundColor: sidebarBg }}
-      >
-        <Link href="/kunde" className="flex-shrink-0 min-w-0">
-          {branding.useBrand && branding.logoUrl ? (
-            <div className="flex items-center">
-              <Image
-                src={branding.logoUrl}
-                alt={branding.firmenname ?? 'Logo'}
-                width={140}
-                height={32}
-                className="max-h-8 w-auto max-w-[140px] object-contain"
-                unoptimized
-              />
-            </div>
-          ) : (
-            <span className="text-xl font-bold tracking-tight whitespace-nowrap">
-              <span className="text-white">Claim</span>
-              <span style={{ color: accentBg }}>ondo</span>
-            </span>
-          )}
-        </Link>
-        <div className="flex items-center gap-2 flex-shrink-0">
-          {/* Portal-i18n F-13: Sprach-Switcher (persistiert via setLocaleAction → profiles.sprache). */}
-          <LanguageSwitcher locale={activeLocale} variant="compact" />
-          <OutboxBadge />
-          <UpdatesNav variant="dark" />
-        </div>
-      </header>
+      {/* Mobile-Nav ist bottom-only (KundeMobileNav-Pille + Menü-Sheet) — kein Top-Bar. */}
 
       {/* Hauptinhalt — offset by sidebar on desktop, offset by header on mobile */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 pb-20 lg:pb-6 overflow-x-hidden">
+      <main className="flex-1 lg:ml-64 pb-20 lg:pb-6 overflow-x-hidden">
         {/* AAR-316 W3: Sprach-Banner rendert sich nur bei sprache !== 'de' */}
         <SprachBanner sprache={kundenSprache} />
         {/* Login-Tor Slice B: Self-Confirm fuer einen moeglichen frueheren Vorgang (null ohne Match). */}
@@ -473,17 +444,36 @@ export default async function KundeLayout({ children }: { children: React.ReactN
         {children}
       </main>
 
-      {/* Mobile Bottom-Nav — hidden on desktop */}
-      <nav
-        className="md:hidden fixed bottom-0 left-0 right-0 z-50 flex justify-around items-center glass-branded shadow-ios-md"
-        style={{
-          backgroundColor: sidebarBg,
-          paddingTop: 8,
-          paddingBottom: 'calc(8px + env(safe-area-inset-bottom))',
-        }}
-      >
-        <KundeNav mobile singleFallId={singleRouteId} />
-      </nav>
+      {/* Mobile Bottom-Nav — geteilte MobileNav (Pille + Menü-Sheet), bottom-only. */}
+      <KundeMobileNav
+        singleFallId={singleRouteId}
+        brandLogo={
+          branding.useBrand && branding.logoUrl ? (
+            <Image src={branding.logoUrl} alt={branding.firmenname ?? 'Logo'} width={120} height={28} unoptimized className="max-h-7 w-auto max-w-[120px] object-contain" />
+          ) : undefined
+        }
+        brandName={
+          branding.useBrand && branding.logoUrl ? (
+            <span className="sr-only">{branding.firmenname ?? 'Claimondo'}</span>
+          ) : (
+            <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span style={{ color: accentBg }}>ondo</span></span>
+          )
+        }
+        sheetTop={
+          <div className="flex items-center gap-2 px-1 pb-1">
+            <LanguageSwitcher locale={activeLocale} variant="compact" />
+            <OutboxBadge />
+            <UpdatesNav variant="dark" />
+          </div>
+        }
+        sheetFooter={
+          <form action="/api/auth/logout" method="POST">
+            <button type="submit" className="flex w-full items-center gap-3 rounded-ios-lg px-3 py-2.5 text-sm text-claimondo-light-blue hover:bg-white/5 hover:text-white">
+              <LogOutIcon style={{ width: 17, height: 17 }} /> {tDrawer('abmelden')}
+            </button>
+          </form>
+        }
+      />
     </div>
     </>
   )

@@ -23,14 +23,7 @@ export default async function DispatchLayout({
           Glass-Panel frei (kein Kollidieren dahinter). BG bleedt unter das Panel,
           Content laeuft rechts bis zur Kante. */}
       <div className="md:pl-56 h-screen flex flex-col relative z-10">
-        {/* Mobile header — AAR-727 Glass-Dark */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 glass-dark shadow-ios-md shrink-0">
-          <span className="text-lg font-bold tracking-tight"><span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span></span>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase tracking-wider text-claimondo-light-blue bg-claimondo-shield px-2 py-0.5 rounded-ios-sm">Dispatch</span>
-            <UpdatesNav variant="dark" />
-          </div>
-        </header>
+        {/* Mobile-Nav ist bottom-only (MobileNav-Pille + Menü-Sheet inkl. Updates) — kein Top-Bar. */}
 
         {/* AAR-725: UpdatesNav desktop top-right. */}
         <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
