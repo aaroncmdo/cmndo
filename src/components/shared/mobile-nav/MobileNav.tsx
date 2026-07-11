@@ -29,7 +29,7 @@ export function MobileNav({
   primary,
   sections,
   brand,
-  hasUnread,
+  menuIndicator,
   renderBadge,
   sheetTop,
   sheetFooter,
@@ -95,12 +95,7 @@ export function MobileNav({
         >
           <span className="relative">
             <MenuIcon style={{ width: 22, height: 22 }} />
-            {hasUnread && (
-              <span
-                className="absolute -top-0.5 -right-1 w-2 h-2 rounded-full bg-danger"
-                aria-hidden
-              />
-            )}
+            {menuIndicator}
           </span>
           <span className="text-[10px] font-semibold tracking-wide">Menü</span>
         </button>

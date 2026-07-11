@@ -21,8 +21,8 @@ export type MobileNavProps = {
   sections: MobileNavSection[]
   /** Sheet-Header-Branding: Logo-Node (optional) + Name-Node. */
   brand: { logo?: ReactNode; name: ReactNode }
-  /** Punkt am Menue-Tab (offene Updates/Tasks). */
-  hasUnread?: boolean
+  /** Indikator-Slot am Menue-Tab (z.B. Updates-Dot). */
+  menuIndicator?: ReactNode
   /** Optionale Badge neben einem Tab-/Nav-Item. */
   renderBadge?: (item: MobileNavItem) => ReactNode
   /** Slot oben in der Sheet (z.B. Updates-Zeile, Schaden-melden-CTA). */

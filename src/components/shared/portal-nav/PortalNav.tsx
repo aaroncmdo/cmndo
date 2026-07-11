@@ -15,6 +15,7 @@ import { ExternalLinkIcon } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { MobileNav } from '@/components/shared/mobile-nav'
+import { MobileUpdatesDot } from '@/components/shared/updates/MobileUpdatesDot'
 
 // CMM-32 P2: --app-sidebar-width auf <html> setzen, damit Portal-rendered
 // Modals (Modal.web.tsx) ihren Backdrop nur über den Content-Bereich legen
@@ -64,6 +65,8 @@ type Props = {
   footerSlot?: ReactNode
   /** Badge rechts neben einem Item (z.B. TasksPill, Rückrufe-Counter) */
   renderBadge?: (item: PortalNavItem) => ReactNode
+  /** Slot oben in der mobilen Menü-Sheet (z.B. UpdatesNav für admin/dispatch, deren footerSlot keine Updates trägt). */
+  mobileSheetTop?: ReactNode
   ariaLabel?: string
   /** Zusätzliche CSS-Klassen für das Wurzel-Element (z.B. 'hidden md:flex md:flex-col') */
   className?: string
@@ -76,6 +79,7 @@ export function PortalNav({
   headerSlot,
   footerSlot,
   renderBadge,
+  mobileSheetTop,
   ariaLabel,
   className = '',
 }: Props) {
@@ -140,6 +144,8 @@ export function PortalNav({
       sections={sections}
       brand={{ name: <span className="text-sm font-semibold text-white">Navigation</span> }}
       renderBadge={renderBadge}
+      menuIndicator={<MobileUpdatesDot />}
+      sheetTop={mobileSheetTop}
       sheetFooter={footerSlot}
     />
   )
