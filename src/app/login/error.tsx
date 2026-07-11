@@ -5,24 +5,20 @@
 import { useEffect } from 'react'
 import { reportBoundaryError } from '@/lib/observability/report-boundary-error'
 
-// CMM-14: Diese Root-Boundary fängt jeden Throw eines Top-Level-Portal-Layouts
-// (die rollen-eigene error.tsx fängt das layout.tsx ihres Segments NICHT).
-// Früher zeigte sie ein rohes lila Diagnose-Dump ("APP ROOT CRASH") — jetzt eine
-// gebrandete, freundliche Seite + fire-and-forget-Capture in client_error_log,
-// damit der exakte Fehler auch ohne Sentry-Zugriff auffindbar bleibt.
-//
-// AAR-271: window.location.reload() statt unstable_retry()/reset() — React-
-// Recovery führt bei transienten Server-Fehlern oft erneut zum gleichen Fehler.
-// Full-Reload behält URL + Cookies → kein Verlust des Arbeitsstands.
+// CMM-14: /login und /login/2fa hatten KEINE eigene error.tsx — ein Throw beim
+// Rendern (z.B. transienter getUser-/MFA-Fehler auf /login/2fa) eskalierte zur
+// lila Root-Boundary. Diese Boundary fängt die Login-Strecke jetzt ab: saubere,
+// login-passende Seite + Capture (boundary='login', so lassen sich Login-Render-
+// Throws in client_error_log von anderen Routen unterscheiden).
 
-export default function Error({
+export default function LoginError({
   error,
 }: {
   error: Error & { digest?: string }
 }) {
   useEffect(() => {
     console.error(error)
-    reportBoundaryError('root', error)
+    reportBoundaryError('login', error)
   }, [error])
 
   return (
@@ -32,14 +28,14 @@ export default function Error({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 24,
+        padding: 20,
         background: '#f8f9fb',
         fontFamily: "'Montserrat', system-ui, sans-serif",
       }}
     >
       <div
         style={{
-          maxWidth: 440,
+          maxWidth: 400,
           width: '100%',
           background: '#ffffff',
           border: '1px solid #e2e8f0',
@@ -49,16 +45,18 @@ export default function Error({
           boxShadow: '0 8px 30px rgba(13,27,62,0.08)',
         }}
       >
-        <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden>🛠️</div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px' }}>
-          Da ist etwas schiefgelaufen
+        <h1 style={{ fontSize: 22, fontWeight: 700, margin: '0 0 8px' }}>
+          <span style={{ color: '#0D1B3E' }}>Claim</span>
+          <span style={{ color: '#4573A2' }}>ondo</span>
         </h1>
         <p style={{ fontSize: 14, color: '#4573A2', lineHeight: 1.5, margin: '0 0 24px' }}>
-          Diese Seite konnte gerade nicht geladen werden. Bitte versuche es erneut —
-          meist genügt ein einfaches Neuladen.
+          Die Anmeldung konnte gerade nicht abgeschlossen werden. Bitte versuche es
+          erneut.
         </p>
         <button
-          onClick={() => window.location.reload()}
+          onClick={() => {
+            window.location.href = '/login'
+          }}
           style={{
             padding: '12px 24px',
             background: '#0D1B3E',
@@ -70,7 +68,7 @@ export default function Error({
             cursor: 'pointer',
           }}
         >
-          Seite neu laden
+          Zurück zum Login
         </button>
         {error.digest && (
           <p style={{ marginTop: 20, fontSize: 11, color: '#94a3b8' }}>
