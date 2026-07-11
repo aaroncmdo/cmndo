@@ -4,6 +4,8 @@ import { getInboxKanaele } from '@/lib/chat/kanal-routing'
 
 export type InboxThread = {
   fallId: string
+  // claim-nativ (Phase 2b): der v2-Thread des Fensters wird ueber die claim_id aufgeloest.
+  claimId: string
   fallNummer: string | null
   kundeName: string
   lastMessage: string
@@ -80,13 +82,14 @@ export async function GET() {
 
   // CMM-49: faelle->v_claim_full. claim_nummer flach aus der View, zurueck in die
   // claims-Embed-Form gemappt (Downstream liest fall.claims/lead_id unveraendert).
+  // id:fall_id (legacy-Key) + claim_id:id (echte claims-PK aus der claim-anchored View).
   const { data: faelleMetaRaw } = await supabase
     .from('v_claim_full')
-    .select('id:fall_id, lead_id, claim_nummer')
+    .select('id:fall_id, claim_id:id, lead_id, claim_nummer')
     .in('fall_id', allFallIds.slice(0, 100))
   const faelleMeta = (faelleMetaRaw ?? []).map((row) => {
     const x = row as Record<string, unknown>
-    return { id: x.id as string | null, lead_id: x.lead_id as string | null, claims: { claim_nummer: x.claim_nummer as string | null } }
+    return { id: x.id as string | null, claimId: x.claim_id as string | null, lead_id: x.lead_id as string | null, claims: { claim_nummer: x.claim_nummer as string | null } }
   })
 
   const leadIds = Array.from(new Set((faelleMeta ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
@@ -112,6 +115,7 @@ export async function GET() {
       const claim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
       threadMap.set(n.fall_id, {
         fallId: n.fall_id,
+        claimId: fall?.claimId ?? '',
         fallNummer: claim?.claim_nummer ?? null,
         kundeName,
         lastMessage: n.nachricht ?? '',
