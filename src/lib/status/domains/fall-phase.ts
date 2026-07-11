@@ -27,6 +27,11 @@ const SLOT: Record<ClaimSubPhase, StatusSlot> = {
   abgelehnt_final: 'danger',
   an_externe_kanzlei: 'done',
   termin_durchgefuehrt: 'done',
+  // WS6 Slice 2a: Reparatur-Lane
+  reparatur_werkstattwahl: 'pending',
+  reparatur_terminfindung: 'pending',
+  reparatur_laeuft: 'active',
+  reparatur_fertig: 'done',
 }
 
 export const FALL_PHASE_DEFS: Record<ClaimSubPhase, StatusDef> = Object.fromEntries(

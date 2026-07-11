@@ -105,6 +105,11 @@ export const PHASE_VISIBLE_SECTIONS: Record<string, StammdatenSection[]> = {
   abgelehnt_final: ALLE_SECTIONS,
   an_externe_kanzlei: ALLE_SECTIONS,
   termin_durchgefuehrt: ALLE_SECTIONS,
+  // ── WS6 Slice 2a: Reparatur-Lane (Selbstzahler/Kasko) ───────────────────
+  reparatur_werkstattwahl: BASIS,
+  reparatur_terminfindung: [...BASIS, 'besichtigung'],
+  reparatur_laeuft: [...BASIS, 'besichtigung'],
+  reparatur_fertig: ALLE_SECTIONS,
 }
 
 /**

@@ -61,6 +61,11 @@ export type ClaimSubPhase =
   // AAR-939: nur_gutachter/embed-B Terminal — Termin durchgeführt (SV macht das
   // Gutachten off-platform → kein Upload/QC/Regulierungs-Tail)
   | 'termin_durchgefuehrt'
+  // WS6 Slice 2a: Selbstzahler-/Kasko-Reparatur-Lane (ops-Cockpit-Sicht)
+  | 'reparatur_werkstattwahl'
+  | 'reparatur_terminfindung'
+  | 'reparatur_laeuft'
+  | 'reparatur_fertig'
 
 export type ClaimLifecycle = {
   mainPhase: ClaimMainPhase
@@ -130,6 +135,11 @@ export const SUBPHASE_LABEL: Record<ClaimSubPhase, string> = {
   abgelehnt_final: 'Abgelehnt (final)',
   an_externe_kanzlei: 'An externe Kanzlei übergeben',
   termin_durchgefuehrt: 'Termin durchgeführt',
+  // WS6 Slice 2a: Reparatur-Lane
+  reparatur_werkstattwahl: 'Werkstatt wählen',
+  reparatur_terminfindung: 'Reparaturtermin wird vereinbart',
+  reparatur_laeuft: 'Reparatur läuft',
+  reparatur_fertig: 'Reparatur abgeschlossen — Abschluss ausstehend',
 }
 
 /** CMM-44 MP-3 (B-11) / MP-8: terminale claims.status-Werte → abschluss-Substate.
@@ -191,6 +201,10 @@ export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
   if (sub === 'sa_offen' || sub === 'vollmacht_offen' || sub === 'onboarding_offen') return 'erfassung'
   if (sub === 'termin' || sub === 'besichtigung' || sub === 'gutachten' || sub === 'kanzlei_uebergabe' || sub === 'filmcheck' || sub === 'qc-pruefung') return 'begutachtung'
   if (sub === 'versicherungskontakt' || sub === 'auszahlung' || sub === 'nachforderung' || sub === 'vs-kuerzt' || sub === 'anschlussschreiben' || sub === 'nachbesichtigung-laeuft') return 'regulierung'
+  // WS6 Slice 2a: Reparatur-Lane — eigene Erfassungs-/Begutachtungs-/Abschluss-Phasen
+  if (sub === 'reparatur_werkstattwahl' || sub === 'reparatur_terminfindung') return 'erfassung'
+  if (sub === 'reparatur_laeuft') return 'begutachtung'
+  if (sub === 'reparatur_fertig') return 'abschluss'
   return 'abschluss'
 }
 
@@ -223,6 +237,11 @@ const SUB_ORDER: Record<ClaimSubPhase, number> = {
   abgelehnt_final: 15,
   an_externe_kanzlei: 15,
   termin_durchgefuehrt: 15,
+  // WS6 Slice 2a: Reparatur-Lane — eigene monotone Progression (1→4)
+  reparatur_werkstattwahl: 1,
+  reparatur_terminfindung: 2,
+  reparatur_laeuft: 3,
+  reparatur_fertig: 15,
 }
 
 // Milestone-Kaskade (CMM-44 MP-3/MP-8 / CMM-74 b2): Phase aus den Sub-Entity-Feldern
@@ -456,4 +475,9 @@ export const ALL_CLAIM_SUB_PHASES = [
   'abgelehnt_final',
   'an_externe_kanzlei',
   'termin_durchgefuehrt',
+  // WS6 Slice 2a: Reparatur-Lane
+  'reparatur_werkstattwahl',
+  'reparatur_terminfindung',
+  'reparatur_laeuft',
+  'reparatur_fertig',
 ] as const satisfies readonly ClaimSubPhase[]

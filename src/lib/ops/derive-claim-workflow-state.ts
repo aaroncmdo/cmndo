@@ -6,6 +6,12 @@ import type { ClaimWorkItem, ClaimWorkstateRow } from './claim-workstate.types'
 
 const MS_PER_DAY = 86_400_000
 
+/** Terminale operative_status-Werte — Reparatur-Lane ueberspringen. */
+const TERMINAL_OPERATIVE = new Set(['abgeschlossen', 'storniert', 'abgelehnt', 'verjaehrt'])
+
+/** Abrechnungswege die eine Reparatur-Lane haben (kein Kanzlei-/Gutachten-Tail). */
+const REPARATUR_ABRECHNUNGSWEGE = new Set(['selbstzahler', 'kasko'])
+
 /** Bester verfuegbarer "seit wann in dieser Phase"-Zeitstempel (Heuristik, v_claim_full-Spalten). */
 function phaseSince(row: ClaimWorkstateRow, sub: ClaimSubPhase): string | null {
   if (sub === 'anschlussschreiben') return row.anschlussschreiben_am ?? row.updated_at
@@ -13,7 +19,74 @@ function phaseSince(row: ClaimWorkstateRow, sub: ClaimSubPhase): string | null {
   return row.updated_at ?? row.created_at
 }
 
+/** WS6 Slice 2a: Reparatur-Sub-Phase aus den reparatur_*-Spalten ableiten.
+ *  Nur aufgerufen wenn abrechnungsweg IN (selbstzahler, kasko) + nicht terminal. */
+function deriveRepairSubState(row: ClaimWorkstateRow): ClaimSubPhase {
+  if (!row.reparatur_werkstatt_id) return 'reparatur_werkstattwahl'
+  const rs = row.reparatur_status
+  if (rs === 'bestaetigt') return 'reparatur_laeuft'
+  if (rs === 'erledigt') return 'reparatur_fertig'
+  // angefragt | anruf_erbeten | null -> Terminfindung
+  return 'reparatur_terminfindung'
+}
+
 export function deriveClaimWorkflowState(row: ClaimWorkstateRow, now: Date = new Date()): ClaimWorkItem {
+  // ── WS6 Slice 2a: Reparatur-Lane EARLY (vor normalem Mapping) ──────────────
+  // Bedingung: abrechnungsweg IN (selbstzahler, kasko) UND operative_status ist
+  // nicht terminal (abgeschlossen/storniert/abgelehnt/verjaehrt). Terminal-Claims
+  // fallen durch zum normalen Mapping.
+  if (
+    row.abrechnungsweg != null &&
+    REPARATUR_ABRECHNUNGSWEGE.has(row.abrechnungsweg) &&
+    !TERMINAL_OPERATIVE.has(row.operative_status ?? '')
+  ) {
+    const subState = deriveRepairSubState(row)
+    const meta = CLAIM_WORKFLOW_META[subState]
+    const sla = CLAIM_SLA_DAYS[subState]
+    const since = row.updated_at ?? row.created_at
+    let overdueSinceDays: number | null = null
+    let isOverdue = false
+    if (sla != null && since) {
+      const days = Math.floor((now.getTime() - new Date(since).getTime()) / MS_PER_DAY)
+      overdueSinceDays = days
+      isOverdue = days > sla
+    }
+    // stage aus sub-Phase ableiten (reparatur_werkstattwahl/terminfindung=erfassung,
+    // reparatur_laeuft=begutachtung, reparatur_fertig=abschluss)
+    type RepairSubState = 'reparatur_werkstattwahl' | 'reparatur_terminfindung' | 'reparatur_laeuft' | 'reparatur_fertig'
+    const stageMap: Record<RepairSubState, ReturnType<typeof toClaimMainPhase>> = {
+      reparatur_werkstattwahl: 'erfassung',
+      reparatur_terminfindung: 'erfassung',
+      reparatur_laeuft: 'begutachtung',
+      reparatur_fertig: 'abschluss',
+    }
+    return {
+      kind: 'claim',
+      id: row.claim_id,
+      fallId: row.fall_id,
+      kundenbetreuerId: row.kundenbetreuer_id,
+      claimNummer: row.claim_nummer,
+      stage: stageMap[subState as RepairSubState],
+      subState,
+      nextActionCode: meta.nextActionCode,
+      ownerRole: meta.ownerRole,
+      waitingOn: meta.waitingOn,
+      isOverdue,
+      overdueSinceDays,
+      display: {
+        title: row.kunde_name ?? row.claim_nummer ?? row.claim_id,
+        kennzeichen: row.kennzeichen,
+        schadenhoehe: row.schadenhoehe,
+      },
+      editable: {
+        notizen: row.edit_notizen,
+        interneNotizen: row.edit_interne_notizen,
+        schadensHoeheNetto: row.edit_schadens_hoehe_netto,
+      },
+    }
+  }
+
+  // ── Normales Mapping (alle anderen Claims) ──────────────────────────────────
   const stage = toClaimMainPhase(row.main_phase)
   const subState = toClaimSubPhase(row.sub_phase)
   const meta = CLAIM_WORKFLOW_META[subState]
