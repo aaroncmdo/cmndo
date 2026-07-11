@@ -25,10 +25,8 @@ export function buildNavItems(singleFallId: string | null, t: (key: string) => s
 }
 
 export default function KundeNav({
-  mobile,
   singleFallId = null,
 }: {
-  mobile?: boolean
   /** Wenn der Kunde nur einen Fall hat: faelle.id direkt durchreichen, damit
    *  die Nav direkt zur Detail-Page linkt statt zum Dashboard mit Liste. */
   singleFallId?: string | null
@@ -41,12 +39,6 @@ export default function KundeNav({
   const tHero = useTranslations('kundeHero')
   const SCHADEN_HREF = '/kunde/schaden-melden'
   const NAV_ITEMS = buildNavItems(singleFallId, t)
-  const MOBILE_ITEMS = [
-    NAV_ITEMS[0]!,
-    NAV_ITEMS.find((i) => i.href === '/kunde/termine')!,
-    NAV_ITEMS.find((i) => i.href === '/kunde/chat')!,
-    NAV_ITEMS.find((i) => i.href === '/kunde/profil')!,
-  ]
 
   function isActive(href: string, exact?: boolean) {
     if (exact) return pathname === href
@@ -55,36 +47,7 @@ export default function KundeNav({
     return pathname === href || pathname?.startsWith(href + '/')
   }
 
-  // Mobile: Bottom-Nav Items (Icons + kleine Labels)
-  if (mobile) {
-    return (
-      <>
-        <Link
-          href={SCHADEN_HREF}
-          className={`flex flex-col items-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-2 text-center leading-tight transition-colors duration-500 ${
-            isActive(SCHADEN_HREF) ? 'text-white' : 'text-claimondo-light-blue hover:text-white'
-          }`}
-        >
-          <PlusCircleIcon className="w-5 h-5" />
-          <span className="text-[10px] font-medium">{tHero('schadenMelden')}</span>
-        </Link>
-        {MOBILE_ITEMS.map(item => {
-          const active = isActive(item.href, item.exact)
-          return (
-            <Link key={item.href} href={item.href}
-              className={`flex flex-col items-center gap-0.5 min-w-[48px] min-h-[48px] px-3 py-2 transition-colors duration-500 ${
-                active ? 'text-white' : 'text-claimondo-light-blue hover:text-white'
-              }`}>
-              <item.icon className="w-5 h-5" />
-              <span className="text-[10px] font-medium">{item.label}</span>
-            </Link>
-          )
-        })}
-      </>
-    )
-  }
-
-  // Desktop: Sidebar Nav
+  // Desktop-Sidebar-Nav (Mobile läuft über die geteilte KundeMobileNav/MobileNav).
   return (
     <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto">
       {/* Sub-Projekt 1: prominenter "Schaden melden"-CTA (accent), immer erreichbar. */}
