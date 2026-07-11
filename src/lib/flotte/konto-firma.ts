@@ -39,6 +39,21 @@ export async function resolveKontoFirma(db: AnyDb, userId: string, rolle: string
   return getKundeFirma(db, userId)
 }
 
+/** Konto-Status + firma-Name des flottenmanagers fuers Portal-Layout. db = Admin/Service-Role (AnyDb, Regel-2-Lag). */
+export async function getFlottenmanagerKontoWithFirma(
+  db: AnyDb, userId: string,
+): Promise<{ status: string; firmaName: string } | null> {
+  const { data } = await db
+    .from('firmen_flotten_konten')
+    .select('status, firma:firma_id(name)')
+    .eq('user_id', userId)
+    .maybeSingle()
+  if (!data) return null
+  const firmaRaw = (data as Record<string, unknown>).firma
+  const firma = (Array.isArray(firmaRaw) ? firmaRaw[0] : firmaRaw) as { name: string } | null
+  return { status: (data as Record<string, unknown>).status as string, firmaName: firma?.name ?? 'Flotte' }
+}
+
 /** flottenmanager-Konto anlegen (Link user<->firma). db = Admin/Service-Role (AnyDb: firmen_flotten_konten noch nicht in database.types, Regel-2-Lag). */
 export async function insertFlottenmanagerKonto(
   db: AnyDb,
