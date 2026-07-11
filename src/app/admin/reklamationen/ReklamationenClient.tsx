@@ -25,8 +25,8 @@ const GRUND_LABELS: Record<string, string> = {
   sonstiges: 'Sonstiges',
 }
 
-export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMap }: {
-  reklamationen: Reklamation[]; svNameMap: Record<string, string>; fallNrMap: Record<string, string>
+export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMap, embedded = false }: {
+  reklamationen: Reklamation[]; svNameMap: Record<string, string>; fallNrMap: Record<string, string>; embedded?: boolean
 }) {
   const router = useRouter()
   const [filter, setFilter] = useState('eingereicht')
@@ -49,12 +49,14 @@ export default function ReklamationenClient({ reklamationen, svNameMap, fallNrMa
   return (
     <div className="h-full overflow-y-auto py-6">
       <div>
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <div>
-            <h1 className="text-heading-lg font-bold text-claimondo-navy">Reklamationen</h1>
-            <p className="mt-0.5 text-body-sm text-claimondo-ondo">SV-Reklamationen prüfen und entscheiden</p>
+        {!embedded && (
+          <div className="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <h1 className="text-heading-lg font-bold text-claimondo-navy">Reklamationen</h1>
+              <p className="mt-0.5 text-body-sm text-claimondo-ondo">SV-Reklamationen prüfen und entscheiden</p>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex gap-1.5 mb-4">
           {['eingereicht', 'pruefung', 'berechtigt', 'abgelehnt', 'alle'].map(f => (

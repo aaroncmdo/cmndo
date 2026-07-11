@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-07-07T13:39:06.421Z",
+  "generatedAt": "2026-07-11T10:21:22.613Z",
   "count": 40,
   "files": [
     "src/app/admin/_components/KritischeUpdatesWidget.tsx",
     "src/app/admin/_components/TageskalenderWidget.tsx",
     "src/app/admin/finance/(hub)/page.tsx",
     "src/app/admin/finance/(hub)/saeumige-svs/page.tsx",
-    "src/app/admin/kanzlei-board/page.tsx",
+    "src/app/admin/kanzlei-board/KanzleiBoardContent.tsx",
     "src/app/admin/makler/MaklerAdminClient.tsx",
     "src/app/admin/meine-tasks/MyTasksClient.tsx",
     "src/app/admin/organisationen/OrganisationenClient.tsx",
