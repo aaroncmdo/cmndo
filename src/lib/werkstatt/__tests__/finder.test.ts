@@ -21,6 +21,7 @@ function row(over: Partial<RawRow> & Pick<RawRow, 'id'>): RawRow {
     lng: over.lng ?? null,
     status: over.status ?? 'aktiv',
     faehigkeiten: over.faehigkeiten ?? null,
+    verifiziert: over.verifiziert ?? false,
     ...over,
   }
 }
@@ -84,7 +85,7 @@ describe('rankWerkstaetten', () => {
 const base = (over: Partial<{ id: string; faehigkeiten: string[] | null; lat: number; lng: number }>) => ({
   id: over.id ?? 'w', name: over.id ?? 'W', adresse_strasse: null, adresse_plz: null,
   adresse_ort: null, telefon: null, lat: over.lat ?? 50.9, lng: over.lng ?? 6.9,
-  status: 'aktiv', faehigkeiten: over.faehigkeiten ?? null,
+  status: 'aktiv', faehigkeiten: over.faehigkeiten ?? null, verifiziert: false,
 })
 const ORIGIN_KOELN = { lat: 50.94, lng: 6.96 } // Koeln
 

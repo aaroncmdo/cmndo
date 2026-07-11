@@ -108,9 +108,14 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, k
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <p className="font-semibold text-claimondo-navy truncate">
-                      {w.name}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-semibold text-claimondo-navy truncate">
+                        {w.name}
+                      </p>
+                      {w.verifiziert ? (
+                        <StatusBadge tone="success" size="xs">✓ Verifizierter Partner</StatusBadge>
+                      ) : null}
+                    </div>
                     {fitChip}
                     {adresse ? (
                       <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
