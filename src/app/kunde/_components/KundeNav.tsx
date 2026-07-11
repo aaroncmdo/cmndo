@@ -8,7 +8,7 @@ import { HomeIcon, MessageSquareIcon, UserIcon, SearchIcon, CalendarIcon, CarIco
 
 // CMM-28: Fall-Item dynamisch — bei Single-Fall direkt zur Detail-Page
 // und Label „Mein Fall" (statt „Meine Fälle" + Auto-Redirect-Flicker).
-function buildNavItems(singleFallId: string | null, t: (key: string) => string) {
+export function buildNavItems(singleFallId: string | null, t: (key: string) => string) {
   const fallItem = singleFallId
     ? { href: `/kunde/faelle/${singleFallId}`, label: t('nav.meinFall'), icon: HomeIcon, exact: false }
     : { href: '/kunde', label: t('nav.meineFaelle'), icon: HomeIcon, exact: true }
