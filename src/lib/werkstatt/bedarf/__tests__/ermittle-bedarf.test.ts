@@ -101,64 +101,52 @@ describe('waehleBedarf (Evidenz-Eskalation)', () => {
 // ermittleReparaturbedarf — DB-Huelle
 // ---------------------------------------------------------------------------
 
-/** Helper: baut eine vollstaendige Supabase-Query-Chain (from->select->eq->maybeSingle) */
-function buildChain(resolveWith: unknown) {
-  const single = vi.fn().mockResolvedValue({ data: resolveWith, error: null })
-  const eq = vi.fn().mockReturnValue({ maybeSingle: single, eq: vi.fn().mockReturnValue({ maybeSingle: single }) })
-  const select = vi.fn().mockReturnValue({ eq })
-  const update = vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) })
-  return { select, eq, update, single }
-}
+// Chain-Stubs, gespiegelt an den ECHTEN Query-Formen im Resolver:
+//   claims:            .from('claims').select(...).eq('id', X).maybeSingle()
+//   auftraege (Gate):  .from('auftraege').select(...).eq('claim_id', X).eq('gutachten_final_freigegeben', true).maybeSingle()
+//   v_gutachten_werte: .from('v_gutachten_werte').select(...).eq('claim_id', X).maybeSingle()
+//   leads:             .from('leads').select(...).eq('id', X).maybeSingle()
+//   persist:           .from(table).update(patch).eq('id', X)
 
-/** Minimal Fake-sb: from(table) gibt unterschiedliche Chains per Aufruf-Reihenfolge */
-function buildFakeSb(fromMap: Record<string, unknown>) {
-  return {
-    from: vi.fn().mockImplementation((table: string) => {
-      const data = fromMap[table]
-      const chain = buildChain(data)
-      return {
-        select: chain.select,
-        update: chain.update,
-      }
+/** select().eq().maybeSingle() — 1 eq */
+const selEq1 = (data: unknown) => ({
+  select: vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data, error: null }) }),
+  }),
+})
+/** select().eq().eq().maybeSingle() — 2 eq (auftraege-Gate) */
+const selEq2 = (data: unknown) => ({
+  select: vi.fn().mockReturnValue({
+    eq: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data, error: null }) }),
     }),
-  }
-}
+  }),
+})
+/** update().eq() — success */
+const updOk = () => ({ update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) })
+/** update().eq() — throws (persist-Fehler) */
+const updThrow = () => ({ update: vi.fn().mockReturnValue({ eq: vi.fn().mockRejectedValue(new Error('DB down')) }) })
 
 describe('ermittleReparaturbedarf (DB-Huelle)', () => {
-  it('Gutachten freigegeben + Stunden -> quelle gutachten, confidence 100', async () => {
-    // auftraege row: gutachten_final_freigegeben=true, claim_id matches
-    // claims row: gutachten_zeit_kar_std=5, others null
-    let callCount = 0
+  it('Gutachten freigegeben + Stunden (aus v_gutachten_werte) -> quelle gutachten, confidence 100', async () => {
+    // claims: lead_id + schadenskategorie (KEINE gutachten_zeit_*)
+    // auftraege: freigegeben -> Gate offen
+    // v_gutachten_werte: Stunden per claim_id
     const fakeSb = {
       from: vi.fn().mockImplementation((table: string) => {
-        if (table === 'auftraege') {
-          const maybeSingle = vi.fn().mockResolvedValue({
-            data: { gutachten_final_freigegeben: true, claim_id: 'claim-1' },
-            error: null,
-          })
-          return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle }), maybeSingle }) }) }
-        }
         if (table === 'claims') {
-          callCount++
-          if (callCount === 1) {
-            // first claims call: load gutachten_zeit_* + schadenskategorie
-            const maybeSingle = vi.fn().mockResolvedValue({
-              data: { gutachten_zeit_kar_std: 5, gutachten_zeit_lack_std: null, gutachten_zeit_ak_std: null, schadenskategorie: 'glas', lead_id: null, schadensfoto_urls: null },
-              error: null,
-            })
-            return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle }) }), update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }
-          }
-          // persist update call
-          return { update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }
+          return { ...selEq1({ lead_id: 'lead-1', schadenskategorie: 'glas' }), ...updOk() }
+        }
+        if (table === 'auftraege') {
+          return selEq2({ gutachten_final_freigegeben: true, claim_id: 'claim-1' })
+        }
+        if (table === 'v_gutachten_werte') {
+          return selEq1({ gutachten_zeit_kar_std: 5, gutachten_zeit_lack_std: null, gutachten_zeit_ak_std: null })
         }
         if (table === 'leads') {
-          const maybeSingle = vi.fn().mockResolvedValue({ data: { schadensfoto_urls: [], schadenskategorie: 'glas' }, error: null })
-          return {
-            select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle }) }),
-            update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-          }
+          return { ...selEq1({ schadensfoto_urls: [], schadenskategorie: 'glas' }), ...updOk() }
         }
-        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }), update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }
+        return { ...selEq1(null), ...updOk() }
       }),
     }
 
@@ -166,22 +154,21 @@ describe('ermittleReparaturbedarf (DB-Huelle)', () => {
     expect(result.quelle).toBe('gutachten')
     expect(result.confidence).toBe(100)
     expect(result.kategorien).toContain('karosserie')
+    // Gutachten ist definitiv -> Vision-Klassifizierer NICHT aufgerufen
+    expect(mockKlassifiziere).not.toHaveBeenCalled()
   })
 
   it('kein Gutachten, nur schadenskategorie -> quelle manuell, confidence 40', async () => {
     mockKlassifiziere.mockResolvedValue({ kategorien: [], confidence: 0 })
     const fakeSb = {
       from: vi.fn().mockImplementation((table: string) => {
-        if (table === 'auftraege') {
-          return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) }
-        }
         if (table === 'claims') {
-          return {
-            select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { gutachten_zeit_kar_std: null, gutachten_zeit_lack_std: null, gutachten_zeit_ak_std: null, schadenskategorie: 'lackierung', lead_id: null, schadensfoto_urls: null }, error: null }) }) }),
-            update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-          }
+          return { ...selEq1({ lead_id: null, schadenskategorie: 'lackierung' }), ...updOk() }
         }
-        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }), update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }
+        if (table === 'auftraege') {
+          return selEq2(null) // kein freigegebenes Gutachten
+        }
+        return { ...selEq1(null), ...updOk() }
       }),
     }
 
@@ -195,17 +182,14 @@ describe('ermittleReparaturbedarf (DB-Huelle)', () => {
     mockKlassifiziere.mockResolvedValue({ kategorien: [], confidence: 0 })
     const fakeSb = {
       from: vi.fn().mockImplementation((table: string) => {
-        if (table === 'auftraege') {
-          return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) }
-        }
         if (table === 'claims') {
-          return {
-            select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { gutachten_zeit_kar_std: null, gutachten_zeit_lack_std: null, gutachten_zeit_ak_std: null, schadenskategorie: 'glas', lead_id: null, schadensfoto_urls: null }, error: null }) }) }),
-            // persist update throws
-            update: vi.fn().mockReturnValue({ eq: vi.fn().mockRejectedValue(new Error('DB down')) }),
-          }
+          // select ok, aber persist-update wirft
+          return { ...selEq1({ lead_id: null, schadenskategorie: 'glas' }), ...updThrow() }
         }
-        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }), update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }
+        if (table === 'auftraege') {
+          return selEq2(null)
+        }
+        return { ...selEq1(null), ...updThrow() }
       }),
     }
 
@@ -215,17 +199,40 @@ describe('ermittleReparaturbedarf (DB-Huelle)', () => {
     expect(result.kategorien).toContain('glas')
   })
 
-  it('Lead-Kontext: laedt schadensfoto_urls und schadenskategorie aus leads', async () => {
+  it('Claim-Kontext: Fotos aus leads via claims.lead_id -> quelle schadenbild', async () => {
+    mockKlassifiziere.mockResolvedValue({ kategorien: ['karosserie'], confidence: 70 })
+    const fakeSb = {
+      from: vi.fn().mockImplementation((table: string) => {
+        if (table === 'claims') {
+          return { ...selEq1({ lead_id: 'lead-9', schadenskategorie: null }), ...updOk() }
+        }
+        if (table === 'auftraege') {
+          return selEq2(null) // kein Gutachten
+        }
+        if (table === 'leads') {
+          return { ...selEq1({ schadensfoto_urls: ['http://img.com/9.jpg'], schadenskategorie: null }), ...updOk() }
+        }
+        return { ...selEq1(null), ...updOk() }
+      }),
+    }
+
+    const result = await ermittleReparaturbedarf(fakeSb, { claimId: 'claim-9' })
+    expect(result.quelle).toBe('schadenbild')
+    expect(result.kategorien).toContain('karosserie')
+    expect(mockKlassifiziere).toHaveBeenCalledWith(['http://img.com/9.jpg'])
+  })
+
+  it('Lead-Kontext: laedt schadensfoto_urls und schadenskategorie direkt aus leads', async () => {
     mockKlassifiziere.mockResolvedValue({ kategorien: ['karosserie'], confidence: 70 })
     const fakeSb = {
       from: vi.fn().mockImplementation((table: string) => {
         if (table === 'leads') {
           return {
-            select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { schadensfoto_urls: ['http://img.com/1.jpg'], schadenskategorie: 'mechanik' }, error: null }) }) }),
-            update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+            ...selEq1({ schadensfoto_urls: ['http://img.com/1.jpg'], schadenskategorie: 'mechanik' }),
+            ...updOk(),
           }
         }
-        return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }), update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }) }
+        return { ...selEq1(null), ...updOk() }
       }),
     }
 
@@ -239,13 +246,13 @@ describe('ermittleReparaturbedarf (DB-Huelle)', () => {
     mockKlassifiziere.mockResolvedValue({ kategorien: [], confidence: 0 })
     const fakeSb = {
       from: vi.fn().mockImplementation((table: string) => {
+        if (table === 'claims') {
+          return { ...selEq1({ lead_id: null, schadenskategorie: null }), ...updOk() }
+        }
         if (table === 'auftraege') {
-          return { select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }), maybeSingle: vi.fn().mockResolvedValue({ data: null, error: null }) }) }) }
+          return selEq2(null)
         }
-        return {
-          select: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: { gutachten_zeit_kar_std: null, gutachten_zeit_lack_std: null, gutachten_zeit_ak_std: null, schadenskategorie: null, lead_id: null, schadensfoto_urls: null }, error: null }) }) }),
-          update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
-        }
+        return { ...selEq1(null), ...updOk() }
       }),
     }
 

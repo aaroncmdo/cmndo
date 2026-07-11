@@ -39,9 +39,10 @@ export async function waehleBedarf(inputs: {
  * persistiert das Ergebnis (non-kritisch, nie throw) und gibt Reparaturbedarf zurueck.
  *
  * Evidenz-Quellen (in Prioritaet, gespiegelt aus vermittlung-server + gutachten-ocr):
- *   1. Gutachten-Zeiten: auftraege.gutachten_final_freigegeben=true + claims.gutachten_zeit_*
- *   2. Fotos: leads.schadensfoto_urls (direkt bei leadId; bei claimId via claims.lead_id)
- *   3. Manuell: claims.schadenskategorie / leads.schadenskategorie
+ *   1. Gutachten-Zeiten: auftraege.gutachten_final_freigegeben=true (Gate) +
+ *      v_gutachten_werte.gutachten_zeit_* (View, gekeyt per claim_id — NICHT auf claims).
+ *   2. Fotos: leads.schadensfoto_urls (direkt bei leadId; bei claimId via claims.lead_id).
+ *   3. Manuell: claims.schadenskategorie / leads.schadenskategorie.
  *
  * Persist: bedarf_kategorien / bedarf_quelle / bedarf_confidence / bedarf_ermittelt_am
  *   auf claims UND/ODER leads, je nach ctx.
@@ -60,7 +61,24 @@ export async function ermittleReparaturbedarf(
   let resolvedLeadId: string | null = leadId ?? null
 
   if (claimId) {
-    // 1a. Gutachten: pruefen ob auftraege-Row mit gutachten_final_freigegeben=true existiert
+    // 1a. Claim-Basis: lead_id (Foto-Resolver) + schadenskategorie (Manuell-Fallback).
+    //     KEINE gutachten_zeit_*/schadensfoto_urls — die existieren nicht auf claims.
+    try {
+      const { data: claimRow } = await sb
+        .from('claims')
+        .select('lead_id, schadenskategorie')
+        .eq('id', claimId)
+        .maybeSingle()
+      if (claimRow) {
+        schadenskategorie = (claimRow.schadenskategorie as string | null) ?? null
+        resolvedLeadId = (claimRow.lead_id as string | null) ?? null
+      }
+    } catch (err) {
+      console.warn('[ermittleReparaturbedarf] Claim-Basis-Laden fehlgeschlagen (non-fatal):', err)
+    }
+
+    // 1b. Gutachten-Gate: nur wenn eine freigegebene auftraege-Zeile existiert, gilt
+    //     die Gutachten-Quelle. Zeiten dann aus der View v_gutachten_werte (per claim_id).
     try {
       const { data: auftragRow } = await sb
         .from('auftraege')
@@ -69,46 +87,25 @@ export async function ermittleReparaturbedarf(
         .eq('gutachten_final_freigegeben', true)
         .maybeSingle()
       if (auftragRow?.gutachten_final_freigegeben) {
-        // Lade Gutachten-Zeiten aus dem Claim
-        const { data: claimRow } = await sb
-          .from('claims')
-          .select('gutachten_zeit_kar_std, gutachten_zeit_lack_std, gutachten_zeit_ak_std, schadenskategorie, lead_id, schadensfoto_urls')
-          .eq('id', claimId)
+        const { data: gw } = await sb
+          .from('v_gutachten_werte')
+          .select('gutachten_zeit_kar_std, gutachten_zeit_lack_std, gutachten_zeit_ak_std')
+          .eq('claim_id', claimId)
           .maybeSingle()
-        if (claimRow) {
+        if (gw) {
           gutachtenZeiten = {
-            zeit_kar_std: claimRow.gutachten_zeit_kar_std,
-            zeit_lack_std: claimRow.gutachten_zeit_lack_std,
-            zeit_ak_std: claimRow.gutachten_zeit_ak_std,
-          }
-          schadenskategorie = (claimRow.schadenskategorie as string | null) ?? null
-          resolvedLeadId = (claimRow.lead_id as string | null) ?? null
-          // Falls Claim direkt schadensfoto_urls hat (zukuenftig): direkt nehmen
-          if (Array.isArray(claimRow.schadensfoto_urls)) {
-            fotoUrls = (claimRow.schadensfoto_urls as string[]).filter(Boolean)
-          }
-        }
-      } else {
-        // Kein Gutachten: nur schadenskategorie + lead_id fuer Fotos laden
-        const { data: claimRow } = await sb
-          .from('claims')
-          .select('schadenskategorie, lead_id, schadensfoto_urls')
-          .eq('id', claimId)
-          .maybeSingle()
-        if (claimRow) {
-          schadenskategorie = (claimRow.schadenskategorie as string | null) ?? null
-          resolvedLeadId = (claimRow.lead_id as string | null) ?? null
-          if (Array.isArray(claimRow.schadensfoto_urls)) {
-            fotoUrls = (claimRow.schadensfoto_urls as string[]).filter(Boolean)
+            zeit_kar_std: gw.gutachten_zeit_kar_std,
+            zeit_lack_std: gw.gutachten_zeit_lack_std,
+            zeit_ak_std: gw.gutachten_zeit_ak_std,
           }
         }
       }
     } catch (err) {
-      console.warn('[ermittleReparaturbedarf] Claim-Evidenz-Laden fehlgeschlagen (non-fatal):', err)
+      console.warn('[ermittleReparaturbedarf] Gutachten-Laden fehlgeschlagen (non-fatal):', err)
     }
 
-    // 1b. Fotos: falls noch keine direkt am Claim, via leads.schadensfoto_urls
-    if (fotoUrls.length === 0 && resolvedLeadId) {
+    // 1c. Fotos: leads.schadensfoto_urls via die resolvte claims.lead_id.
+    if (resolvedLeadId) {
       try {
         const { data: leadRow } = await sb
           .from('leads')
