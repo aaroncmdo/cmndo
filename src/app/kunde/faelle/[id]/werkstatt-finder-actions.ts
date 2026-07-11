@@ -9,6 +9,7 @@
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import type { Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
 
 /** Ownership-Check via Kunde-RLS + "noch keine Werkstatt". */
 async function assertOwnerOhneWerkstatt(
@@ -44,20 +45,29 @@ async function assertOwnerOhneWerkstatt(
   return { ok: true, userId: user.id, center }
 }
 
-/** Die naechsten aktiven Partner-Werkstaetten zum Schadenort des Claims. */
+/** Die naechsten aktiven Partner-Werkstaetten zum Schadenort des Claims (bedarf-qualifiziert). */
 export async function ladeWerkstaettenFuerClaim(
   claimId: string,
 ): Promise<
-  | { ok: true; werkstaetten: WerkstattFinderRow[]; center: { lat: number; lng: number } | null }
+  | {
+      ok: true
+      werkstaetten: Qualifiziert<WerkstattFinderRow>[]
+      keineSpezialisierte: boolean
+      center: { lat: number; lng: number } | null
+    }
   | { ok: false; error: string }
 > {
   if (!claimId) return { ok: false, error: 'Claim-ID fehlt.' }
   const owner = await assertOwnerOhneWerkstatt(claimId)
   if (!owner.ok) return { ok: false, error: owner.error }
-  const { findReparaturWerkstaettenForTarget } = await import('@/lib/werkstatt/vermittlung-server')
+  const { findQualifizierteReparaturWerkstaetten } = await import('@/lib/werkstatt/vermittlung-server')
   // nurEchte: der Kunde darf keine Test-/internen Werkstaetten sehen (SSoT interne-identitaet).
-  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: 'claim', id: claimId, nurEchte: true })
-  return { ok: true, werkstaetten, center: owner.center }
+  const { werkstaetten, keineSpezialisierte } = await findQualifizierteReparaturWerkstaetten({
+    target: 'claim',
+    id: claimId,
+    nurEchte: true,
+  })
+  return { ok: true, werkstaetten, keineSpezialisierte, center: owner.center }
 }
 
 /** Kunde waehlt eine Werkstatt fuer seinen Reparatur-Claim (quelle='kunde'). */

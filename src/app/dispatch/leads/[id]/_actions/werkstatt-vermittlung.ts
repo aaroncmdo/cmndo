@@ -10,9 +10,10 @@ import { requireRole } from '@/lib/auth/guards'
 import { revalidatePath } from 'next/cache'
 import {
   assignReparaturWerkstatt,
-  findReparaturWerkstaettenForTarget,
+  findQualifizierteReparaturWerkstaetten,
 } from '@/lib/werkstatt/vermittlung-server'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import type { Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
 import type { VermittlungQuelle } from '@/lib/werkstatt/vermittlung-core'
 
 export type VermittleWerkstattInput = {
@@ -57,10 +58,16 @@ export type GetWerkstaettenNahInput = {
 
 export async function getWerkstaettenNah(
   input: GetWerkstaettenNahInput,
-): Promise<{ ok: true; werkstaetten: WerkstattFinderRow[] } | { ok: false; error: string }> {
+): Promise<
+  | { ok: true; werkstaetten: Qualifiziert<WerkstattFinderRow>[]; keineSpezialisierte: boolean }
+  | { ok: false; error: string }
+> {
   // Read-Path-Haertung: gleiche Rollen wie die Mutation (dispatch/admin/kundenbetreuer).
   const guard = await requireRole(['dispatch', 'admin', 'kundenbetreuer'])
   if (!guard.success) return { ok: false, error: guard.error }
-  const werkstaetten = await findReparaturWerkstaettenForTarget({ target: input.target, id: input.id })
-  return { ok: true, werkstaetten }
+  const { werkstaetten, keineSpezialisierte } = await findQualifizierteReparaturWerkstaetten({
+    target: input.target,
+    id: input.id,
+  })
+  return { ok: true, werkstaetten, keineSpezialisierte }
 }
