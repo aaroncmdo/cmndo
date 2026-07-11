@@ -46,6 +46,12 @@ const FALL_STATUS_TO_CLAIM_STATUS: Readonly<Record<string, string | null>> = {
   // Aktive Phasen — via v_claim_phase aus gutachter_termine/auftraege abgeleitet
   ersterfassung: null,
   onboarding: null,
+  // Selbstzahler-Reparatur-Achse (Reduced-Repair): aktive Phasen, claims.status bleibt
+  // unberuehrt (kein Terminal bis abgeschlossen) — v_claim_phase leitet main='reparatur' ab.
+  'reparatur-werkstatt-suche': null,
+  'reparatur-angefragt': null,
+  'reparatur-laeuft': null,
+  'reparatur-erledigt': null,
   'sv-gesucht': null,
   'sv-zugewiesen': null,
   'sv-termin': null,

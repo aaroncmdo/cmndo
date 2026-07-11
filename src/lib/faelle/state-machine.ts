@@ -18,8 +18,18 @@ import { mapFallStatusToClaimStatus } from '@/lib/faelle/fall-status-claim-mappi
  */
 
 export const FALL_STATUS_TRANSITIONS: Record<string, string[]> = {
-  'ersterfassung': ['sv-gesucht', 'sv-zugewiesen', 'sv-termin', 'storniert'],
-  'onboarding': ['ersterfassung', 'storniert'],
+  // Selbstzahler-Reparatur-Track (Reduced-Repair): ein Selbstzahler-Claim (abrechnungsweg=
+  // 'selbstzahler', kein SV/Gutachten/Kanzlei) verzweigt aus der Erfassung NICHT in die
+  // SV-/Begutachtungs-Achse, sondern in die Werkstatt-Reparatur-Achse. v_claim_phase branched
+  // auf abrechnungsweg und mappt diese operative_status-Werte auf die reduzierte main_phase
+  // 'reparatur'. Der Cursor wird beim Werkstatt-Picker / reparatur_termine-Lifecycle gesetzt.
+  'ersterfassung': ['sv-gesucht', 'sv-zugewiesen', 'sv-termin', 'reparatur-werkstatt-suche', 'reparatur-angefragt', 'storniert'],
+  'onboarding': ['ersterfassung', 'reparatur-werkstatt-suche', 'storniert'],
+  // Selbstzahler-Reparatur-Achse (parallel zur SV-/Regulierungs-Achse; endet in abgeschlossen):
+  'reparatur-werkstatt-suche': ['reparatur-angefragt', 'storniert'],
+  'reparatur-angefragt': ['reparatur-laeuft', 'reparatur-erledigt', 'storniert'],
+  'reparatur-laeuft': ['reparatur-erledigt', 'storniert'],
+  'reparatur-erledigt': ['abgeschlossen', 'storniert'],
   'sv-gesucht': ['sv-zugewiesen', 'sv-termin', 'storniert'],
   // AAR-Followup (SV-Lead-Ablehnung): sv-zugewiesen + sv-termin koennen nach
   // sv-gesucht zurueckgehen wenn SV den Lead ablehnt. Dispatch findet neuen SV.
