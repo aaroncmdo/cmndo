@@ -348,6 +348,12 @@ Aus der Flottenverwaltung, pro Fahrzeug „Schaden melden" (Fahrzeug + firma vor
   - **Kleine Claim-Uebersicht** in der Fahrzeug-Detailview.
   - **Mini-Aktionen pro Fahrzeug** in der Flotten-Liste (Schaden melden, Karte identifizieren, …).
 
+### Technische Aufloesung (Audit kanonische Claim-Pipeline, 11.07.)
+- **Claim-Erzeugung = Reuse `createLead` + `convertLeadToClaim`** (`src/lib/leads/`). Der Gegner-Flow baut eine EIGENE Route `/schaden/[token]` + eigene Actions, die diese Lib-Primitive aufrufen — **OHNE** die aktiven `flow/[token]`/melde-schaden-Files zu editieren (Reuse ueber stabile Lib-Exports). `convertLeadToClaim` ist idempotent + mappt Lead -> claims + claim_parties(geschaedigter+verursacher) + vehicles + faelle_claim_bridge + kanzlei_faelle.
+- **Reihenfolge Gegner-Flow (claim-first!):** `createLead` (firma+vehicle aus Karten-Token vorbefuellt) -> Gegner fuellt Form -> `convertLeadToClaim` (atomar) -> DANN optional `inviteGegnerViaAirdrop` (SMS-Kopie + Account-Upgrade). `inviteGegnerViaAirdrop` setzt einen EXISTIERENDEN Claim voraus (claim-first), nicht invite-first.
+- **Draft-Sichtbarkeit am Fahrzeug (elegant, low-risk):** der LEAD ist der Draft (status neu/flow-gesendet). Fleet-Vehicle-View zusaetzlich `leads WHERE vehicle_id=X AND status != 'umgewandelt'` abfragen -> „Schaden in Bearbeitung". Kein premature Stub-Claim. Submit -> convert -> voller Claim (claim_vehicle_involvements + vehicle_vorschaeden).
+- **Fremdes Territorium (nur Lib-Reuse, NICHT editieren):** `src/app/flow/[token]/*`, `src/lib/start-link/*`, `src/app/api/v1/melde-schaden`, `sv-matching-modul`, `src/lib/termine/*` — aar-956-Cluster. Layer 2 baut DANEBEN (`/schaden/[token]`).
+
 ---
 
 ## 11 · Offene Fragen (fuer Review)
