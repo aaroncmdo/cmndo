@@ -1,9 +1,9 @@
 // src/lib/claims/detail/get-claim-detail.ts
 // Phase C: rollen-aware Facade ueber die v_claim_full-geerdeten Claim-Loader.
 // (Aaron 08.07.: „das ist ja auch eine detail view aus der claim base bzw claim view".)
-//   - kunde -> getKundeFallDetailRecord (Ownership via ctx{userId,email})
-//   - sv    -> getFallForSv (sv_id-Defense-in-Depth via ctx{svId})
-//   - staff -> getClaimForRole (v_claim_full; admin/kb='*' vollstaendig; RLS-Gate)
+//   - kunde -> getKundeFallDetailRecord (claim_id-Input; Ownership via ctx{userId,email})
+//   - sv    -> getFallForSv (faelle.id-Input; sv_id-Defense-in-Depth via ctx{svId})
+//   - staff -> getFallById (faelle.id-Input; v_faelle_mit_aktuellem_termin, Route-gegated)
 // + Sub-Entity-Bundle (lifecycle/auftraege/kanzleiFall/pflicht), rollen-gescoped.
 // 0 neue DB-Reads (reine Komposition existierender, live Loader). Liefert
 // ClaimDetail | null (Loader-Konvention, KEIN {ok,error} — ist kein 'use server').
@@ -12,9 +12,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
 import type { Rolle } from '@/lib/claims/types'
-import { getClaimForRole } from '@/lib/claims/get-claim-for-role'
 import { getKundeFallDetailRecord } from '@/lib/claims/get-kunde-faelle'
-import { getFallForSv } from '@/lib/fall/queries'
+import { getFallForSv, getFallById } from '@/lib/fall/queries'
 import { getClaimLifecycleForClaim } from '@/lib/claims/get-claim-lifecycle-for-claim'
 import { getPflichtdokumenteForFall } from '@/lib/claims/pflicht-for-fall'
 import { createAdminClient } from '@/lib/supabase/admin'
@@ -87,14 +86,16 @@ export async function getClaimDetail(
     return { rolle: 'kunde', core, lifecycle, auftraege, kanzleiFall, pflichtDokumente }
   }
 
-  // staff (kb/admin/kanzlei): RLS-Gate via getClaimForRole (v_claim_full; admin/kb='*').
-  const core = await getClaimForRole(supabase, claimId, rolle)
+  // staff (kb/admin/kanzlei/...): getFallById (v_faelle_mit_aktuellem_termin, faelle.id-keyed,
+  // flaches Record) — GENAU die Ladung, die die Admin/KB/Kanzlei-Fallakte (/faelle/[id]) heute
+  // selbst nutzt (D2 migriert die Page auf diese Facade). WIE sv ist der Input hier die
+  // faelle.id (Route [id]), NICHT die claim_id. getFallById gated NICHT per Row: die /faelle-
+  // Route ist upstream rollen-gegated (Layout) + RLS auf der View greift. core.id == claimId-Input.
+  const core = await getFallById(supabase, claimId)
   if (!core) return null
   const { lifecycle, auftraege, kanzleiFall } = await getClaimLifecycleForClaim(admin, claimId)
-  // ⚠ D-admin-TODO: staff core.id = claims.id (claim_id), NICHT faelle.id. getPflichtdokumenteForFall
-  // filtert per fall_id (=faelle.id) → wenn D-admin detail.pflichtDokumente konsumiert, hier
-  // core.id→faelle.id via Bridge aufloesen. Aktuell KEIN staff-Consumer der Facade → claimId
-  // belassen (nicht spekulativ fixen; die Monolith-Page laedt pflicht heute selbst korrekt).
+  // pflicht/fall_dokumente sind fall_id (=faelle.id)-gekeyt → claimId IST hier die faelle.id,
+  // also korrekt (loest den frueheren D-admin-Keying-TODO auf; kein claim_id-Mismatch mehr).
   const pflichtDokumente = await getPflichtdokumenteForFall(supabase, claimId, rolle)
   // Sub-Entities = eigene Claim-Daten des (bereits gegateten) Claims → an alle
   // autorisierten Rollen (matcht das heutige Verhalten der Detail-Pages).

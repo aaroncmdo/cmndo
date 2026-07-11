@@ -14,6 +14,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeGetUser } from '@/lib/auth/safe-get-user'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
@@ -28,7 +29,9 @@ export default async function FaelleLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  // CMM-14: getUser()-Reject nicht ins Layout werfen lassen (→ lila Root-Crash).
+  // safeGetUser degradiert transiente Rejects zu null → sauberer /login-Redirect.
+  const user = await safeGetUser(() => supabase.auth.getUser())
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
@@ -120,7 +123,7 @@ export default async function FaelleLayout({
             zu opfern, hält `.has-corner-pill` (globals.css) nur die PageHeader-
             Action-Zeile rechts frei — Body-Content gewinnt 144px Breite zurück. */}
         <main id="main-content" role="main" className="flex-1 min-h-0 overflow-y-auto pb-16 md:pb-0 has-corner-pill">
-          <PageContainer className="h-full">{children}</PageContainer>
+          <PageContainer fullBleed className="h-full">{children}</PageContainer>
         </main>
       </div>
     </div>

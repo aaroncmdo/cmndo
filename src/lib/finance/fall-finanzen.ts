@@ -50,8 +50,8 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   //   faellt damit ebenfalls auf null.
   //
   // Restliche Werte sind bereits claim_id-gekeyt: F+G aus v_gutachten_werte,
-  // schadens_hoehe_netto/marketing_provision/kanzlei_honorar aus claims (CMM-44 SP-B /
-  // CMM-65 Part B / CMM-61), gutachten.gesamt_schadensbetrag (SP-G), claim_payments (SP-J),
+  // schadens_hoehe_netto/kanzlei_honorar aus claims (CMM-44 SP-B / CMM-61),
+  // gutachten.gesamt_schadensbetrag (SP-G), claim_payments (SP-J),
   // forderungspositionen + zahlungseingaenge claim-gekeyt.
   const claimId = await resolveClaimId(db, fallId)
   if (!claimId) {
@@ -84,8 +84,11 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   } | null = null
   let schadensHoeheNetto: number | null = null
   let gesamtSchadensbetrag: number | null = null
-  // CMM-65 Part B: marketing_provision lebt jetzt auf claims (SSoT) — aus dem claims-Read.
-  let claimMarketingProvision: number | null = null
+  // Slice-4 (claims-Normalisierung): claims.marketing_provision wird retired — 0 Daten, kein
+  // Writer, echte Marketing-Kosten laufen ueber abrechnungen/partner_provisionen. Reader raus,
+  // Wert bleibt konstant null (war ohnehin immer null -> 0-Beitrag zur nettoMarge). Column-Drop
+  // = eigener Slice-4-DDL-Schritt (v_claim_base-Rewrite). analytics/finance.ts-Reader ist schon raus.
+  const claimMarketingProvision: number | null = null
   // CMM-61: kanzlei_honorar lebt jetzt auf claims (SSoT) — aus dem claims-Read.
   let claimKanzleiHonorar: number | null = null
   // CMM-44 SP-J Bucket A: aktuelle claim_payments-Row (zahlungseingang_am/
@@ -98,7 +101,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
         .eq('claim_id', claimId)
         .maybeSingle(),
       db.from('claims')
-        .select('schadens_hoehe_netto, marketing_provision, kanzlei_honorar')
+        .select('schadens_hoehe_netto, kanzlei_honorar')
         .eq('id', claimId)
         .maybeSingle(),
       db.from('gutachten')
@@ -109,7 +112,6 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
     ])
     gutachtenWerte = data
     schadensHoeheNetto = (claimRow?.schadens_hoehe_netto as number | null) ?? null
-    claimMarketingProvision = (claimRow?.marketing_provision as number | null) ?? null
     claimKanzleiHonorar = (claimRow?.kanzlei_honorar as number | null) ?? null
     gesamtSchadensbetrag = (gutachtenRow as { gesamt_schadensbetrag?: number | null } | null)?.gesamt_schadensbetrag ?? null
     currentPayment = claimPayment.vs
@@ -159,7 +161,7 @@ export async function getFallFinanzen(fallId: string): Promise<FallFinanzen> {
   // Kosten
   // CMM-61: kanzlei_honorar aus claims (s.o.), nicht mehr faelle.
   const kanzleiHonorar = Number(claimKanzleiHonorar) || null
-  // CMM-65 Part B: marketing_provision aus claims (s.o.), nicht mehr faelle.
+  // Slice-4: marketing_provision retired (s.o.) — bleibt null, wert-neutral (war immer null).
   const marketingProvision = Number(claimMarketingProvision) || null
 
   // Netto-Marge

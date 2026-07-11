@@ -8,6 +8,8 @@
 
 import type { PartnerRolle } from '@/lib/partner/policy'
 
+export type { PartnerOnboardingTerminRow } from '@/lib/partner/onboarding-termin'
+
 /** Eine partner_leads-Zeile wie sie die Liste + der Detail-Drawer konsumiert. */
 export type PartnerLeadRow = {
   id: string
@@ -20,6 +22,7 @@ export type PartnerLeadRow = {
   telefon: string | null
   plz: string | null
   ort: string | null
+  strasse: string | null
   source_channel: string
   einstufung: PartnerLeadEinstufung | null
   rollen_details: Record<string, unknown> | null

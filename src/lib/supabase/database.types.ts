@@ -2830,7 +2830,6 @@ export type Database = {
           finanzierungsgeber_vertragsnr: string | null
           gegner_bekannt: boolean
           gegner_versicherung_id: string | null
-          gegnerisches_vehicle_id: string | null
           geschaedigter_user_id: string | null
           geschlossen_grund: string | null
           gewerbe_flag: boolean
@@ -2867,8 +2866,6 @@ export type Database = {
           konvertiert_am: string | null
           kostenvoranschlag_brutto: number | null
           kostenvoranschlag_netto: number | null
-          kunde_lat: number | null
-          kunde_lng: number | null
           kunde_no_show_count: number
           kunden_konstellation: string | null
           kundenbetreuer_fallback_flag: boolean
@@ -2880,8 +2877,6 @@ export type Database = {
           lead_preis_typ: string | null
           leasinggeber_informiert: boolean | null
           leasinggeber_name: string | null
-          letzter_no_show_am: string | null
-          letzter_sv_no_show_am: string | null
           makler_id: string | null
           marketing_provision: number | null
           marketing_provision_status: string | null
@@ -3022,7 +3017,6 @@ export type Database = {
           finanzierungsgeber_vertragsnr?: string | null
           gegner_bekannt?: boolean
           gegner_versicherung_id?: string | null
-          gegnerisches_vehicle_id?: string | null
           geschaedigter_user_id?: string | null
           geschlossen_grund?: string | null
           gewerbe_flag?: boolean
@@ -3059,8 +3053,6 @@ export type Database = {
           konvertiert_am?: string | null
           kostenvoranschlag_brutto?: number | null
           kostenvoranschlag_netto?: number | null
-          kunde_lat?: number | null
-          kunde_lng?: number | null
           kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_fallback_flag?: boolean
@@ -3072,8 +3064,6 @@ export type Database = {
           lead_preis_typ?: string | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
-          letzter_no_show_am?: string | null
-          letzter_sv_no_show_am?: string | null
           makler_id?: string | null
           marketing_provision?: number | null
           marketing_provision_status?: string | null
@@ -3214,7 +3204,6 @@ export type Database = {
           finanzierungsgeber_vertragsnr?: string | null
           gegner_bekannt?: boolean
           gegner_versicherung_id?: string | null
-          gegnerisches_vehicle_id?: string | null
           geschaedigter_user_id?: string | null
           geschlossen_grund?: string | null
           gewerbe_flag?: boolean
@@ -3251,8 +3240,6 @@ export type Database = {
           konvertiert_am?: string | null
           kostenvoranschlag_brutto?: number | null
           kostenvoranschlag_netto?: number | null
-          kunde_lat?: number | null
-          kunde_lng?: number | null
           kunde_no_show_count?: number
           kunden_konstellation?: string | null
           kundenbetreuer_fallback_flag?: boolean
@@ -3264,8 +3251,6 @@ export type Database = {
           lead_preis_typ?: string | null
           leasinggeber_informiert?: boolean | null
           leasinggeber_name?: string | null
-          letzter_no_show_am?: string | null
-          letzter_sv_no_show_am?: string | null
           makler_id?: string | null
           marketing_provision?: number | null
           marketing_provision_status?: string | null
@@ -3374,13 +3359,6 @@ export type Database = {
             columns: ["gegner_versicherung_id"]
             isOneToOne: false
             referencedRelation: "versicherungen"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "claims_gegnerisches_vehicle_id_fkey"
-            columns: ["gegnerisches_vehicle_id"]
-            isOneToOne: false
-            referencedRelation: "vehicles"
             referencedColumns: ["id"]
           },
           {
@@ -7369,6 +7347,9 @@ export type Database = {
           verlegung_quelle_id: string | null
           verspaetung_minuten: number | null
           video_link: string | null
+          treffpunkt_adresse: string | null
+          treffpunkt_lat: number | null
+          treffpunkt_lng: number | null
           vorgeschlagenes_datum: string | null
           wunschtermin: string | null
         }
@@ -7488,6 +7469,9 @@ export type Database = {
           verlegung_quelle_id?: string | null
           verspaetung_minuten?: number | null
           video_link?: string | null
+          treffpunkt_adresse?: string | null
+          treffpunkt_lat?: number | null
+          treffpunkt_lng?: number | null
           vorgeschlagenes_datum?: string | null
           wunschtermin?: string | null
         }
@@ -7607,6 +7591,9 @@ export type Database = {
           verlegung_quelle_id?: string | null
           verspaetung_minuten?: number | null
           video_link?: string | null
+          treffpunkt_adresse?: string | null
+          treffpunkt_lat?: number | null
+          treffpunkt_lng?: number | null
           vorgeschlagenes_datum?: string | null
           wunschtermin?: string | null
         }
@@ -9633,6 +9620,7 @@ export type Database = {
           reminder_1_sent_at: string | null
           reminder_2_sent_at: string | null
           reminder_3_sent_at: string | null
+          reminder_4_sent_at: string | null
           reminder_token: string | null
           reparatur_werkstatt_id: string | null
           reparatur_werkstatt_quelle: string | null
@@ -9850,6 +9838,7 @@ export type Database = {
           reminder_1_sent_at?: string | null
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
+          reminder_4_sent_at?: string | null
           reminder_token?: string | null
           reparatur_werkstatt_id?: string | null
           reparatur_werkstatt_quelle?: string | null
@@ -10067,6 +10056,7 @@ export type Database = {
           reminder_1_sent_at?: string | null
           reminder_2_sent_at?: string | null
           reminder_3_sent_at?: string | null
+          reminder_4_sent_at?: string | null
           reminder_token?: string | null
           reparatur_werkstatt_id?: string | null
           reparatur_werkstatt_quelle?: string | null

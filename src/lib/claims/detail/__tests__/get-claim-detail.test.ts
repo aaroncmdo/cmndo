@@ -26,12 +26,20 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
     const claimId = (sample?.claim_id as string) ?? ''
     expect(claimId, 'kein Sample-Claim in v_claim_phase').toBeTruthy()
 
-    // Staff-Facade (admin, Core = ClaimFull via getClaimForRole '*').
-    const asAdmin = await getClaimDetail(admin, claimId, 'admin')
+    // Staff-Facade (admin) — Core = getFallById (v_faelle_mit_aktuellem_termin, faelle.id-keyed,
+    // wie sv + die /faelle-Route). Der Input ist die faelle.id, NICHT die claim_id → via Bridge.
+    const { data: staffBridge } = await admin
+      .from('faelle_claim_bridge')
+      .select('fall_id')
+      .eq('claim_id', claimId)
+      .maybeSingle()
+    const staffFallId = (staffBridge?.fall_id as string | null) ?? null
+    expect(staffFallId, 'keine faelle.id fuer Sample-Claim in der Bridge').toBeTruthy()
+    const asAdmin = await getClaimDetail(admin, staffFallId!, 'admin')
     expect(asAdmin, 'admin bekam null').not.toBeNull()
     expect(asAdmin!.rolle).toBe('admin')
-    // Dank Overload ist asAdmin bereits das staff-Member → core = ClaimFull (kein Narrowing noetig).
-    expect(asAdmin!.core.id, 'ClaimFull.core.id != claimId').toBe(claimId)
+    // Staff-Core = getFallById-Record → core.id == faelle.id (= Facade-Input).
+    expect(asAdmin!.core.id, 'staff core.id != faelleId').toBe(staffFallId)
     expect(Array.isArray(asAdmin!.auftraege)).toBe(true)
     expect(Array.isArray(asAdmin!.pflichtDokumente)).toBe(true)
     expect(asAdmin!.lifecycle.mainPhase, 'keine Phase abgeleitet').toBeTruthy()
@@ -126,7 +134,7 @@ describe.skipIf(!RUN)('getClaimDetail facade (role-routing + scoping + null-cont
     // (kunde/sv-ohne-ctx ist jetzt ein COMPILE-Fehler dank Overload — kein Runtime-Test.)
 
     process.stdout.write(
-      `\n[claim-detail] claimId=${claimId} adminCore=ClaimFull auftraege=${asAdmin!.auftraege.length} ` +
+      `\n[claim-detail] claimId=${claimId} staffFallId=${staffFallId} adminCore=v_faelle auftraege=${asAdmin!.auftraege.length} ` +
         `mainPhase=${asAdmin!.lifecycle.mainPhase} ownerId=${ownerId ? 'yes' : 'none'} ` +
         `kundeCoreLoaded=${kundeCoreLoaded} svCoreLoaded=${svCoreLoaded} ` +
         `c1PflichtParity=${c1Checked} c1Distinguishing=${c1Distinguishing}\n`,
