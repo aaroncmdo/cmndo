@@ -8,12 +8,14 @@ import { Card, Button } from '@/components/primitives'
 import EmptyState from '@/components/shared/EmptyState'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
+import type { Fit } from '@/lib/werkstatt/bedarf/types'
 
 type Props = {
-  werkstaetten: WerkstattFinderRow[]
+  werkstaetten: (WerkstattFinderRow & { fit?: Fit })[]
   onSelect: (id: string) => void
   selectedId?: string | null
   loading?: boolean
+  keineSpezialisierte?: boolean
 }
 
 function adresseZeile(w: WerkstattFinderRow): string {
@@ -26,7 +28,7 @@ function distanzLabel(distanz_km: number): string | null {
   return `${distanz_km.toFixed(1)} km entfernt`
 }
 
-export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading }: Props) {
+export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading, keineSpezialisierte }: Props) {
   if (loading) {
     return (
       <div className="space-y-3" aria-busy>
@@ -55,56 +57,86 @@ export function WerkstattFinder({ werkstaetten, onSelect, selectedId, loading }:
   const zeigeBadge = werkstaetten.some((w) => w.passt) && werkstaetten.some((w) => !w.passt)
 
   return (
-    <ul className="space-y-3">
-      {werkstaetten.map((w) => {
-        const isSelected = selectedId === w.id
-        const adresse = adresseZeile(w)
-        const distanz = distanzLabel(w.distanz_km)
-        return (
-          <li key={w.id}>
-            <Card
-              className={
-                isSelected
-                  ? 'ring-2 ring-claimondo-navy'
-                  : undefined
-              }
-            >
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <p className="font-semibold text-claimondo-navy truncate">
-                    {w.name}
-                  </p>
-                  {zeigeBadge && w.passt ? (
-                    <div className="mt-1">
-                      <StatusBadge tone="success" size="xs">
-                        Passt zu deinem Schaden
-                      </StatusBadge>
-                    </div>
-                  ) : null}
-                  {adresse ? (
-                    <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
-                      {adresse}
+    <>
+      {keineSpezialisierte && (
+        <div className="mb-3 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-4 py-3 text-sm text-claimondo-navy">
+          Keine spezialisierte Werkstatt in der Nähe — hier die nächsten.
+        </div>
+      )}
+      <ul className="space-y-3">
+        {werkstaetten.map((w) => {
+          const isSelected = selectedId === w.id
+          const adresse = adresseZeile(w)
+          const distanz = distanzLabel(w.distanz_km)
+          // Fit-Chip: wenn fit vorhanden (claim-Kontext) → 3-Zustand; sonst altes passt-Heuristik.
+          const fitChip: React.ReactNode =
+            w.fit != null ? (
+              w.fit === 'passt' ? (
+                <div className="mt-1">
+                  <StatusBadge tone="success" size="xs">
+                    Passt zu deinem Schaden
+                  </StatusBadge>
+                </div>
+              ) : w.fit === 'unbekannt' ? (
+                <div className="mt-1">
+                  <StatusBadge tone="neutral" size="xs">
+                    Leistungen auf Anfrage
+                  </StatusBadge>
+                </div>
+              ) : (
+                <div className="mt-1">
+                  <StatusBadge tone="warning" size="xs">
+                    Bietet diese Arbeit nicht an
+                  </StatusBadge>
+                </div>
+              )
+            ) : zeigeBadge && w.passt ? (
+              <div className="mt-1">
+                <StatusBadge tone="success" size="xs">
+                  Passt zu deinem Schaden
+                </StatusBadge>
+              </div>
+            ) : null
+          return (
+            <li key={w.id}>
+              <Card
+                className={
+                  isSelected
+                    ? 'ring-2 ring-claimondo-navy'
+                    : undefined
+                }
+              >
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="font-semibold text-claimondo-navy truncate">
+                      {w.name}
                     </p>
-                  ) : null}
-                  <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-claimondo-ondo">
-                    {distanz ? <span>{distanz}</span> : null}
-                    {w.telefon ? <span>{w.telefon}</span> : null}
+                    {fitChip}
+                    {adresse ? (
+                      <p className="mt-0.5 text-sm text-claimondo-ondo truncate">
+                        {adresse}
+                      </p>
+                    ) : null}
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-claimondo-ondo">
+                      {distanz ? <span>{distanz}</span> : null}
+                      {w.telefon ? <span>{w.telefon}</span> : null}
+                    </div>
+                  </div>
+                  <div className="shrink-0">
+                    <Button
+                      variant={isSelected ? 'navy' : 'ghost'}
+                      size="sm"
+                      onClick={() => onSelect(w.id)}
+                    >
+                      {isSelected ? 'Ausgewählt' : 'Auswählen'}
+                    </Button>
                   </div>
                 </div>
-                <div className="shrink-0">
-                  <Button
-                    variant={isSelected ? 'navy' : 'ghost'}
-                    size="sm"
-                    onClick={() => onSelect(w.id)}
-                  >
-                    {isSelected ? 'Ausgewählt' : 'Auswählen'}
-                  </Button>
-                </div>
-              </div>
-            </Card>
-          </li>
-        )
-      })}
-    </ul>
+              </Card>
+            </li>
+          )
+        })}
+      </ul>
+    </>
   )
 }

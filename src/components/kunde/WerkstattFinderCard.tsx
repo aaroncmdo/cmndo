@@ -24,6 +24,7 @@ export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
   const [werkstaetten, setWerkstaetten] = useState<WerkstattFinderRow[] | null>(null)
   const [center, setCenter] = useState<{ lat: number; lng: number } | null>(null)
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [keineSpezialisierte, setKeineSpezialisierte] = useState(false)
   const [isPending, startTransition] = useTransition()
 
   useEffect(() => {
@@ -33,6 +34,7 @@ export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
       if (r.ok) {
         setWerkstaetten(r.werkstaetten)
         setCenter(r.center)
+        setKeineSpezialisierte(r.keineSpezialisierte)
       } else {
         setWerkstaetten([])
       }
@@ -71,6 +73,7 @@ export default function WerkstattFinderCard({ claimId }: { claimId: string }) {
           onSelect={handleSelect}
           selectedId={selectedId}
           loading={werkstaetten === null || isPending}
+          keineSpezialisierte={keineSpezialisierte}
         />
       </div>
     </Card>
