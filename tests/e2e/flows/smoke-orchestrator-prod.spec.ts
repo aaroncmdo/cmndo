@@ -93,12 +93,15 @@ test('Orchestrator-Smoke: /admin/ai-vorschlaege rendert + Vorschlaege sichtbar +
     console.log(`[smoke] URL nach goto: ${currentUrl}`)
     expect(currentUrl, 'Darf nicht auf /login redirected haben').not.toContain('/login')
 
-    // Assert: Ueberschrift sichtbar
-    const heading = page.getByRole('heading', { name: /KI-Vorschläge/i }).or(
-      page.locator('h1').filter({ hasText: /KI-Vorschläge/i })
-    ).first()
-    await expect(heading, 'Ueberschrift KI-Vorschlaege muss sichtbar sein').toBeVisible({ timeout: 15_000 })
-    console.log('[smoke] ✓ Ueberschrift "KI-Vorschlaege" sichtbar')
+    // Assert: 308-Redirect ai-vorschlaege -> aufgaben/vorschlaege ist gelandet
+    // (Die KI-Vorschlaege-Inbox lebt jetzt als Pill unter /admin/aufgaben.)
+    expect(currentUrl, 'Muss auf /admin/aufgaben/vorschlaege redirected haben').toContain('/admin/aufgaben/vorschlaege')
+
+    // Assert: KI-Vorschlaege-Pill sichtbar. Headerless — es gibt kein <h1> mehr,
+    // die aktive Pill (ein <Link>) traegt den Titel.
+    const pill = page.getByRole('link', { name: /KI-Vorschläge/i }).first()
+    await expect(pill, 'KI-Vorschlaege-Pill muss sichtbar sein').toBeVisible({ timeout: 15_000 })
+    console.log('[smoke] ✓ KI-Vorschlaege-Pill sichtbar')
 
     // ── Step 3: Vorschlaege zaehlen ──────────────────────────────────────
     // Jede Karte hat "Annehmen" + "Verwerfen" Buttons. Verwende "Verwerfen" als Proxy.
