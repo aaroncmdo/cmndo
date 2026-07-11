@@ -20,7 +20,6 @@ import {
   Loader2Icon,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { sendChatMessage } from '@/lib/communications/send-chat'
 import { holeOderErstelleGruppenThread, sendeThreadNachricht } from '@/lib/chat/thread-actions'
 import {
   getQuickReplies,
@@ -38,11 +37,8 @@ interface Nachricht {
 }
 
 interface Props {
-  fallId: string
-  /** claim-nativ fuer den Chat-Cutover (kunde_gruppe-Thread). */
+  /** claim-nativ: der kunde_gruppe-Thread des Claims. */
   claimId?: string | null
-  /** Phase-2c Cutover-Flag: thread-nativ (kunde_gruppe) statt fall_id+kanal. */
-  chatV2?: boolean
   sessionStatus: SessionStatus
   etaMinutes: number | null
   terminAddress: string
@@ -50,24 +46,16 @@ interface Props {
   fehlendeDokumente?: string[]
   /** Aktuelle SV-User-ID — für outbound/inbound-Unterscheidung im UI. */
   currentUserId: string | null
-  /** Empfänger-ID (lead.user_id oder ähnlich), optional — sendChatMessage
-   *  kommt ohne aus wenn null. */
-  empfaengerId?: string | null
 }
 
-const KANAL = 'chat_kunde_sv' as const
-
 export default function FokusChatPanel({
-  fallId,
   claimId,
-  chatV2,
   sessionStatus,
   etaMinutes,
   terminAddress,
   customerName,
   fehlendeDokumente,
   currentUserId,
-  empfaengerId,
 }: Props) {
   const supabase = useMemo(() => createClient(), [])
   // useId-Suffix gegen Strict-Mode-Doppel-Mount-Crash (Memory
@@ -81,10 +69,10 @@ export default function FokusChatPanel({
   const [threadId, setThreadId] = useState<string | null>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
 
-  // v2: kunde_gruppe-Thread des Claims aufloesen (server-autoritativ). Bestehende
+  // kunde_gruppe-Thread des Claims aufloesen (server-autoritativ). Bestehende
   // Threads heilen dabei via syncGruppenTeilnehmer (SV wird Mitglied).
   useEffect(() => {
-    if (!chatV2 || !claimId) return
+    if (!claimId) return
     let ok = true
     void holeOderErstelleGruppenThread(claimId, 'kunde_gruppe').then((r) => {
       if (ok && r.ok) setThreadId(r.data)
@@ -92,38 +80,34 @@ export default function FokusChatPanel({
     return () => {
       ok = false
     }
-  }, [chatV2, claimId])
+  }, [claimId])
 
-  // Initial-Load + Realtime — v1: fall_id+kanal; v2 (chatV2): thread-nativ (kunde_gruppe).
-  // Thread-Nachrichten sind alle richtung='outbound' -> richtung nach sender_id normalisieren,
-  // damit die inbound/outbound-UI (isOwn/unread/lastInbound) unveraendert greift.
+  // Initial-Load + Realtime (thread-nativ, kunde_gruppe). Thread-Nachrichten sind alle
+  // richtung='outbound' -> richtung nach sender_id normalisieren, damit die
+  // inbound/outbound-UI (isOwn/unread/lastInbound) unveraendert greift.
   useEffect(() => {
-    if (chatV2 && !threadId) return // warten auf Thread-Resolution
+    if (!threadId) return // warten auf Thread-Resolution
     let cancelled = false
-    const useThread = Boolean(chatV2 && threadId)
     const normalize = (row: Nachricht): Nachricht =>
-      useThread ? { ...row, richtung: row.sender_id === currentUserId ? 'outbound' : 'inbound' } : row
+      ({ ...row, richtung: row.sender_id === currentUserId ? 'outbound' : 'inbound' })
 
-    let baseQuery = supabase
+    void supabase
       .from('nachrichten')
       .select('id, sender_id, nachricht, richtung, created_at, gelesen')
-    baseQuery = useThread
-      ? baseQuery.eq('thread_id', threadId as string)
-      : baseQuery.eq('fall_id', fallId).eq('kanal', KANAL)
-    void baseQuery.order('created_at', { ascending: true }).then(({ data }) => {
-      if (cancelled || !data) return
-      setMessages((data as Nachricht[]).map(normalize))
-    })
+      .eq('thread_id', threadId)
+      .order('created_at', { ascending: true })
+      .then(({ data }) => {
+        if (cancelled || !data) return
+        setMessages((data as Nachricht[]).map(normalize))
+      })
 
-    const filter = useThread ? `thread_id=eq.${threadId}` : `fall_id=eq.${fallId}`
     const channel = supabase
-      .channel(`fokus-chat-${useThread ? threadId : fallId}-${channelSuffix}`)
+      .channel(`fokus-chat-${threadId}-${channelSuffix}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'nachrichten', filter },
+        { event: 'INSERT', schema: 'public', table: 'nachrichten', filter: `thread_id=eq.${threadId}` },
         (payload) => {
-          const row = payload.new as Nachricht & { kanal: string | null }
-          if (!useThread && row.kanal !== KANAL) return
+          const row = payload.new as Nachricht
           setMessages((prev) => (prev.some((m) => m.id === row.id) ? prev : [...prev, normalize(row)]))
         },
       )
@@ -132,7 +116,7 @@ export default function FokusChatPanel({
       cancelled = true
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId, channelSuffix, chatV2, threadId, currentUserId])
+  }, [supabase, channelSuffix, threadId, currentUserId])
 
   // Ungelesene zählen (inbound + nicht-gelesen + nicht eigene).
   useEffect(() => {
@@ -177,13 +161,9 @@ export default function FokusChatPanel({
   const doSend = (text: string) => {
     if (!text.trim() || sending) return
     startSending(async () => {
-      const useThread = Boolean(chatV2 && threadId)
-      const res = useThread
-        ? await sendeThreadNachricht(threadId as string, text.trim())
-        : await sendChatMessage({ fallId, kanal: KANAL, nachricht: text.trim(), empfaengerId: empfaengerId ?? null })
-      const sendOk = 'ok' in res ? res.ok : res.success
-      if (!sendOk) {
-        toast.error((res as { error?: string }).error ?? 'Senden fehlgeschlagen')
+      const res = await sendeThreadNachricht(threadId as string, text.trim())
+      if (!res.ok) {
+        toast.error(res.error ?? 'Senden fehlgeschlagen')
         return
       }
       setInput('')
@@ -197,7 +177,7 @@ export default function FokusChatPanel({
               .from('nachrichten')
               .select('id, created_at')
               .eq('sender_id', currentUserId ?? '')
-            uq = chatV2 && threadId ? uq.eq('thread_id', threadId) : uq.eq('fall_id', fallId).eq('kanal', KANAL)
+            uq = uq.eq('thread_id', threadId as string)
             const { data: recent } = await uq.order('created_at', { ascending: false }).limit(1)
             const last = recent?.[0]
             if (!last) return
