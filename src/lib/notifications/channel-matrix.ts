@@ -446,6 +446,13 @@ export const EVENT_MATRIX: Record<EventType, EventConfig> = {
       admin:             ['in_app'],
     },
   },
+  // 5.19 Gast-Conversion-Reminder (AAR-826) — reiner Email-Nudge an den Gast
+  // selbst (Rolle 'kunde'). 'low' Prioritaet, kein WA/Push-Spam. Empfaenger-
+  // Aufloesung = Sonderfall in fan-out.ts (payload.userId, nicht claim-basiert).
+  'gast.conversion_reminder': {
+    priority: 'low',
+    channels: { kunde: ['email'] },
+  },
 }
 
 export function getEventConfig(eventType: EventType): EventConfig {
