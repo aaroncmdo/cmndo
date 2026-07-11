@@ -16,6 +16,14 @@ import {
   svDisplayName,
   mergeKundeIdentity,
 } from './kontakte'
+// Gutachten-Werte kanonisch aus v_gutachten_werte (geteilt mit dem Copilot).
+import {
+  type GutachtenWerte,
+  type GutachtenWerteRow,
+  GUTACHTEN_WERTE_COLUMNS,
+  EMPTY_GUTACHTEN_WERTE,
+  mapGutachtenWerte,
+} from './gutachten-werte'
 
 export type MaklerRow = {
   id: string
@@ -369,6 +377,7 @@ export async function getMaklerFallDetail(
   const full = consent.consent_scope === 'vollzugriff'
   let kunde: FallDetailKunde | null = null
   let kontakte: MaklerFallKontakte = { kundenbetreuer: null, sv: null, kanzlei: null }
+  let gutachtenWerte: GutachtenWerte = EMPTY_GUTACHTEN_WERTE
 
   if (detailClaimId) {
     const admin = createAdminClient()
@@ -384,8 +393,8 @@ export async function getMaklerFallDetail(
     const kbId = (fallRow.kundenbetreuer_id as string | null) ?? null
     const svId = (fallRow.sv_id as string | null) ?? null
 
-    // Kunde-Profil, Lead (Fallback), KB-Profil und SV-Row parallel.
-    const [kProfilRes, leadRes, kbRes, svRowRes] = await Promise.all([
+    // Kunde-Profil, Lead (Fallback), KB-Profil, SV-Row und Gutachten-Werte parallel.
+    const [kProfilRes, leadRes, kbRes, svRowRes, gwRes] = await Promise.all([
       geschaedigterId
         ? admin.from('profiles').select('id, vorname, nachname, email, telefon, adresse, plz, ort').eq('id', geschaedigterId).maybeSingle()
         : Promise.resolve({ data: null }),
@@ -398,7 +407,13 @@ export async function getMaklerFallDetail(
       svId
         ? admin.from('sachverstaendige').select('profile_id, verifiziert').eq('id', svId).maybeSingle()
         : Promise.resolve({ data: null }),
+      // Gutachten-Werte aus der kanonischen Entity (claim_id-keyed). Die v_claim_base-Spalten
+      // reparaturkosten/wertminderung sind fuer Makler rolle-gegatet -> hier ungated via admin.
+      admin.from('v_gutachten_werte').select(GUTACHTEN_WERTE_COLUMNS).eq('claim_id', detailClaimId).maybeSingle(),
     ])
+
+    // F3-Fix (Audit 2026-07-11): kanonische Gutachten-Werte (wie der Copilot) — konsistent + korrekt.
+    gutachtenWerte = mapGutachtenWerte(gwRes.data as GutachtenWerteRow)
 
     // Kunde: Profil bevorzugt, Lead-Fallback (Feld-Audit-Fix — Detail == Liste). full -> Kontakt.
     kunde = mergeKundeIdentity(
@@ -483,6 +498,9 @@ export async function getMaklerFallDetail(
     consent_scope: consent.consent_scope,
     fall: {
       ...(fall as Record<string, unknown>),
+      // F3-Fix: Gutachten-Werte aus v_gutachten_werte ueberschreiben die fuer Makler
+      // rolle-gegateten / toten v_claim_base-Spalten (reparaturkosten/wertminderung/etc.).
+      ...gutachtenWerte,
       mainPhase: phaseCell?.mainPhase ?? 'erfassung',
       subPhase: phaseCell?.subPhase ?? 'sa_offen',
     } as unknown as FallDetail['fall'],
