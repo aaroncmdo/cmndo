@@ -33,8 +33,10 @@ function payloadHaupttext(
 
 export function AiVorschlaegeClient({
   vorschlaege,
+  headerless = false,
 }: {
   vorschlaege: AiProposal[]
+  headerless?: boolean
 }) {
   // Per-Zeile Pending: nur der gerade bearbeitete Vorschlag laedt/disabled,
   // die anderen Zeilen bleiben klickbar.
@@ -61,17 +63,15 @@ export function AiVorschlaegeClient({
   if (!vorschlaege.length) {
     return (
       <div className="max-w-3xl mx-auto p-6">
-        <h1 className="text-heading-md text-claimondo-navy mb-4">KI-Vorschläge</h1>
-        <p className="text-body-sm text-claimondo-ondo">
-          Keine offenen KI-Vorschläge.
-        </p>
+        {!headerless && <h1 className="text-heading-md text-claimondo-navy mb-4">KI-Vorschläge</h1>}
+        <p className="text-body-sm text-claimondo-ondo">Keine offenen KI-Vorschläge.</p>
       </div>
     )
   }
 
   return (
     <div className="max-w-3xl mx-auto p-5 space-y-4">
-      <h1 className="text-heading-md text-claimondo-navy">KI-Vorschläge</h1>
+      {!headerless && <h1 className="text-heading-md text-claimondo-navy">KI-Vorschläge</h1>}
       <p className="text-body-sm text-claimondo-ondo">
         {vorschlaege.length} offener{vorschlaege.length !== 1 ? 'e' : ''} Vorschlag{vorschlaege.length !== 1 ? 'e' : ''}
       </p>
