@@ -12,6 +12,9 @@ import {
   type VermittlungQuelle,
   type VermittlungTarget,
 } from '@/lib/werkstatt/vermittlung-core'
+import { ermittleReparaturbedarf } from '@/lib/werkstatt/bedarf/ermittle-bedarf'
+import { qualifiziereWerkstaetten, type Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
+import type { Reparaturbedarf } from '@/lib/werkstatt/bedarf/types'
 
 type AdminClient = ReturnType<typeof createAdminClient>
 
@@ -80,6 +83,42 @@ export async function findReparaturWerkstaettenForTarget(
   }
 
   return findWerkstaetten({ lat, lng, plz, kategorie, limit: 5, nurEchte: input.nurEchte })
+}
+
+export type QualifizierteWerkstaettenResult = {
+  werkstaetten: Qualifiziert<WerkstattFinderRow>[]
+  keineSpezialisierte: boolean
+  bedarf: Reparaturbedarf
+}
+
+/**
+ * Wrapper ueber findReparaturWerkstaettenForTarget: ermittelt den Reparaturbedarf
+ * per Resolver, holt distanz-sortierte Rows OHNE Kategorie-Filter (Qualifier uebernimmt
+ * das), und qualifiziert die Rows (fit-Annotation + optionales Hart-Filtern).
+ *
+ * Gedacht fuer Claim-facing Surfaces (Kunde-Portal, Dispatch, SV). Der Caller erhaelt
+ * eine { werkstaetten, keineSpezialisierte, bedarf }-Shape statt eines rohen Arrays.
+ * Nur diese Funktion importieren statt findReparaturWerkstaettenForTarget wenn der
+ * Caller das fit-Flag anzeigen oder keineSpezialisierte ausweisen moechte.
+ */
+export async function findQualifizierteReparaturWerkstaetten(
+  input: VermittlungTarget & { nurEchte?: boolean },
+): Promise<QualifizierteWerkstaettenResult> {
+  const admin = createAdminClient()
+
+  // 1. Bedarf ermitteln (Resolver: gutachten > schadenbild > manuell > unbekannt)
+  const bedarf = await ermittleReparaturbedarf(admin, {
+    claimId: input.target === 'claim' ? input.id : undefined,
+    leadId: input.target === 'lead' ? input.id : undefined,
+  })
+
+  // 2. Distanz-sortierte Rows OHNE kategorie-Filter (Qualifier owns qualification)
+  const rows = await findReparaturWerkstaettenForTarget(input)
+
+  // 3. Qualifier annotiert fit + hart-filtert bei hoher confidence
+  const { werkstaetten, keineSpezialisierte } = qualifiziereWerkstaetten(rows, bedarf)
+
+  return { werkstaetten, keineSpezialisierte, bedarf }
 }
 
 /**
