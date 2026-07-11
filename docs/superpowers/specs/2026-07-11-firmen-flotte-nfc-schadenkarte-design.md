@@ -279,6 +279,60 @@ Ein BROADCAST-Marker kuendigt dieses Design + die beruehrten Entities den parall
 
 ---
 
+## Layer 2 — Unfallverursacher-Flow: Detail-Design (11.07. + Bestands-Audit)
+
+Aaron-Anforderungen 11.07. + Audit (SV/Kanzlei-Konsum + VS-Modell). Konkretisiert §4.3/§5/§6 fuer Plan 3/4.
+
+### Erfasste Daten (Gegner am Handy)
+- **Gestaendnis** -> digitaler Unfallbericht (Tatsachen) + explizites `haftung_vom_gegner_anerkannt`-Haekchen (rechtssicher, nicht anfechtbar — §6.1).
+- **Unfallbeschreibung** -> Freitext, **Groq-Diktat REUSE** `src/app/api/flow/voice-transcribe/route.ts` (existiert, FlowLink-token-scoped, „Unfallhergang-Diktat") + `src/lib/ai/transcribe.ts` (whisper-large-v3-turbo). KEIN neues Voice-Infra.
+- **Fotos:** Unfallort + Schaden BEIDER Autos (eigenes + Gegner).
+- **Kontaktdaten** Gegner + **Unterschrift**.
+- **Gegner-Versicherung:** Picker (`versicherungen`) + **Kennzeichen** + **Versicherungsnummer** — direkt gesetzt.
+
+### DB-Landing (alles beisammen fuer den Claim — atomar beim Submit)
+- **`unfallberichte`** (NEU): beschreibung/tatsachen + skizze + fahrer- & gegner-Unterschrift + `haftung_vom_gegner_anerkannt` + geo/timestamp/ip_hash. (Audit: heute existiert KEIN Schuld-/Signatur-Speicher -> dies ist der Home.)
+- **`claims.hergang_gegner_text`** (NEU): die Gegner-Beschreibung — distinkt von `hergang_kunde_text` (geschaedigter) + `hergang_sv_text`. (Audit-Gap: gibt's nicht.)
+- **`claim_parties`** verursacher: person_id + versicherung_id + versicherungsnummer + versicherungs_aktenzeichen + vehicle_id (Gegner-Kennzeichen-Stub) + rolle=`gegner_airdrop`. (Existiert — `v_claim_sv` liest es bereits.)
+- **`claims`**: gegner_versicherung_id + gegner_versicherungsnummer. (Existiert.)
+- **`fall_dokumente`** NEUE Katalog-Slots: `gegner_fahrzeug_fotos` (+ ggf. `unfallort_fotos`), mit `sichtbar_fuer` = `['sachverstaendiger','kanzlei', …]`. (Audit-Gap: heute kein Gegner-Kfz-Slot; nur generisches `schadensfotos`/`unfallfotos`.)
+
+### SV-Sichtbarkeit (Audit)
+`v_claim_sv` traegt hergang_kunde_text + gegner_versicherung(snummer/aktenzeichen) schon; SV-UI rendert „Unfall"+„Gegner"-Tab + Fotos (`sichtbar_fuer`⊇sachverstaendiger). **Nachziehen:** `hergang_gegner_text` in `v_claim_sv`; neue Foto-Slots `sichtbar_fuer=sachverstaendiger`; `unfallberichte` (Gestaendnis/Signatur) in die SV-Sicht joinen.
+
+### Kanzlei-Sichtbarkeit (Audit — echte Luecke, ENTSCHEIDUNG offen)
+Kanzlei hat **KEINE Detail-View** (bewusst nicht gebaut) — bekommt nur das `kanzlei_paket`-Bundle (PDF, von Claimondo kompiliert) + Mandate-Overview. Die Gegner-Flow-Daten (Gestaendnis, Gegner-Fotos, Haftpflicht+Police) muessen also **ins `kanzlei_paket`-Bundle** ODER eine Kanzlei-Detail-View muss gebaut werden. `vs_korrespondenz` ist in `v_claim_full` (JSONB), im Kanzlei-Portal aber nicht gerendert.
+
+### Kasko != Haftpflicht (Verwechslungsschutz)
+- **Haftpflicht = Gegner** (`gegner_versicherung_id`) — Primaerweg (oben).
+- **Kasko = eigene** (firma) — **GREENFIELD** (Audit: keine Kasko-Spalte auf `claims`; `leads.eigene_versicherung` nur Freitext; ABER `claims.abrechnungsweg` kennt den Wert `'kasko'` schon).
+- **NEU auf `claims`:** `eigene_versicherung_id` (FK `versicherungen`) + `eigene_versicherungsnummer`. Im Modell + UI HART getrennt von `gegner_versicherung_id` („Gegner-Haftpflicht" vs „Ihre Kasko").
+- **Kasko-Angebot:** nach dem Haftpflicht-Claim bieten wir dem Kunden an, zusaetzlich der eigenen Kasko zu melden (Vorteil: schnelle Regulierung/Regress via Quotenvorrecht; Nachteil: SB + SFR-Rueckstufung -> Kunde entscheidet). Erfassung der eigenen Kasko: **Hybrid** — optional pro Flotten-Fahrzeug hinterlegt (dann 1-Klick-Angebot) + Fallback-Abfrage im Angebot.
+
+### Groq-Voice (Audit: fertig)
+`flow/voice-transcribe` + `lib/ai/transcribe.ts` sind schon FlowLink-token-scoped fuer Unfallhergang-Diktat -> der Gegner-Flow nutzt sie direkt.
+
+### flottenmanager-Claim-Erstellung + -Verwaltung (11.07.)
+Aus der Flottenverwaltung, pro Fahrzeug „Schaden melden" (Fahrzeug + firma vorbefuellt, weil das Fahrzeug schon in der Flotte hinterlegt ist). **Drei Ausfuell-Wege in denselben Claim:**
+- (a) **NFC-Karte -> Gegner** (am Unfallort, Gegner fuellt seine Seite) — Layer-2-Kern.
+- (b) **Kanonischer FlowLink -> Fahrer** (flottenmanager schickt den Link per **WhatsApp/Link**; der Fahrer fuellt aus).
+- (c) **flottenmanager fuellt direkt** im Portal.
+
+**Sichtbarkeit am Fahrzeug (flottenmanager):** Flow GESTARTET -> „Schaden in Bearbeitung"-Indikator am Flotten-Fahrzeug; AUSGEFUELLT -> vollstaendig erfasst + **voll einsehbar** (Verursacher-Daten: Gestaendnis, Beschreibung, Fotos, Gegner-VS). Der flottenmanager ist damit **dritter Consumer** der Gegner-Flow-Daten (neben SV + Kanzlei).
+
+### Gutachter-Finder ⊥ kanonischer FlowLink (Sauberkeits-Trennung)
+- **Kanonischer FlowLink = reine Claim-Erfassung** (Unfalldaten: Hergang, Fotos, Beteiligte). Wiederverwendbar ueber kunde/fahrer/flottenmanager.
+- **Gutachter-Finder = eigener, komponierbarer Schritt** (SV finden + Termin buchen), AUF einen Claim aufgesetzt — NICHT im FlowLink verdrahtet. Grund: beide werden „repetitiv" genutzt; entkoppelt bleibt jeder sauber reusable + testbar.
+- Der **Gegner-NFC-Flow** = spezialisierter Token-Flow (Gegner-scoped, am Unfallort), Geschwister des kanonischen FlowLinks.
+- ⚠️ **KOORDINATION:** Gutachter-Finder + melde-schaden + kanonischer FlowLink sind aktive Baustelle (Sessions 2a18c1b0 melde-schaden/reservierung + 61e1d996 auf aar-956) + MCP-exponiert (`claimondo_finde_gutachter_termine` / `claimondo_melde_schaden`). Die Trennung mit diesen Lanes abstimmen, nicht trampeln.
+
+### Haftpflicht-Meldung + Hinweis (Gegner-Verursacher)
+- Der Schaden wird an die **Haftpflicht des Gegners (Verursacher)** gemeldet — Kern-Recovery-Weg.
+- **Hinweis im Flow (Pflicht-Text):** „Der Schaden wird der Haftpflichtversicherung des Unfallverursachers gemeldet" + der Gegner ist **verpflichtet, den Schaden auch selbst seiner Haftpflicht zu melden** (Hinweis an ihn).
+- Mechanik: `vs_korrespondenz` -> Unfallmitteilung an `versicherungen.schaden_email` der Gegner-Haftpflicht.
+
+---
+
 ## 11 · Offene Fragen (fuer Review)
 
 1. **firma-Partner-Registrierung:** self-signup (wie makler/werkstatt) oder admin-angelegt (kuratiert, B2B-Vertrieb)? Beeinflusst Plan 1.
