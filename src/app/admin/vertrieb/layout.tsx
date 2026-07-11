@@ -4,7 +4,14 @@
 // mit — ein zweiter Escape hier würde doppelt greifen und überlaufen.
 import Link from 'next/link'
 
-export default function VertriebKonsoleLayout({ children }: { children: React.ReactNode }) {
+export default function VertriebKonsoleLayout({
+  children,
+  drawer,
+}: {
+  children: React.ReactNode
+  // Parallel-Slot fuer die @drawer-Intercepting-Routes (Detail-Views als Drawer im Cockpit).
+  drawer: React.ReactNode
+}) {
   return (
     <div className="flex flex-col h-full">
       <div className="shrink-0 border-b border-claimondo-border bg-white px-4 md:px-6 pt-4 pb-3 flex items-start justify-between gap-2">
@@ -22,6 +29,7 @@ export default function VertriebKonsoleLayout({ children }: { children: React.Re
         </Link>
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
+      {drawer}
     </div>
   )
 }

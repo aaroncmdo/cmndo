@@ -31,6 +31,8 @@ export interface LiveOpsMapProps {
   role: LiveOpsRole
   data: LiveOpsData
   onRefresh?: () => void
+  /** Basis-Pfad fuer "SV oeffnen" im SvPopup (z.B. Cockpit-@drawer). Undefined -> Default-Verhalten. */
+  svHrefBase?: string
 }
 
 // ------------------------------------------------------------------ Layer-IDs
@@ -134,7 +136,7 @@ const DEFAULT_FILTER: FilterState = {
 
 // ------------------------------------------------------------------ Component
 
-export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
+export default function LiveOpsMap({ role, data, onRefresh, svHrefBase }: LiveOpsMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<MapboxMap | null>(null)
 
@@ -275,7 +277,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
       const root = createRoot(container)
       popupRootsRef.current.add(root)
 
-      root.render(<SvPopup sv={sv} role={role} />)
+      root.render(<SvPopup sv={sv} role={role} svHrefBase={svHrefBase} />)
 
       const popup = new mapboxgl.Popup({ offset: 12, closeButton: true })
         .setLngLat(lngLat)
@@ -287,7 +289,7 @@ export default function LiveOpsMap({ role, data, onRefresh }: LiveOpsMapProps) {
         popupRootsRef.current.delete(root)
       })
     },
-    [role],
+    [role, svHrefBase],
   )
 
   // ------ openTerminPopup: analog zu openSvPopup
