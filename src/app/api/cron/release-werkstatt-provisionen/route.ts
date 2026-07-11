@@ -5,9 +5,10 @@
 //      "abgelehnt" gekippt, wird die Provision auf
 //      status='storniert', storno_grund='fall_storniert',
 //      storniert_am=NOW() gesetzt.
-//   2. Release-Pass: Fuer alle verbleibenden pending Provisionen mit
-//      hold_until <= NOW() (und Claim nicht storniert/abgelehnt) wird
-//      der Status auf 'freigegeben' gesetzt.
+//   2. Release-Pass: pending Provisionen mit hold_until <= NOW(), Claim nicht
+//      storniert/abgelehnt werden auf 'freigegeben' gesetzt. WS6 Money-Hebel:
+//      reparatur-vermittelte Provisionen (trigger_event='reparatur_*') zusaetzlich
+//      erst nach Reparatur-Completion (kein praematures Timer-Release ohne Reparatur).
 //      Kein Email-Trigger — Werkstaetten sehen Provisionen im Portal.
 //
 // Auth: Bearer-Token via CRON_SECRET (Projekt-Konvention, analog
@@ -23,6 +24,7 @@ type PendingRow = {
   id: string
   claim_id: string | null
   hold_until: string
+  trigger_event: string | null
 }
 
 export async function GET(request: Request) {
@@ -38,7 +40,7 @@ export async function GET(request: Request) {
   // dem Cron-Run storniert wurden.
   const { data: pendingRaw, error: pendingErr } = await db
     .from('partner_provisionen')
-    .select('id, claim_id, hold_until')
+    .select('id, claim_id, hold_until, trigger_event')
     .eq('partner_typ', 'werkstatt')
     .eq('status', 'pending')
     .limit(500)
@@ -58,10 +60,11 @@ export async function GET(request: Request) {
   )
 
   const cancelledClaimIds = new Set<string>()
+  const completedClaimIds = new Set<string>()
   if (claimIds.length > 0) {
     const { data: claims, error: claimsErr } = await db
       .from('claims')
-      .select('id, operative_status')
+      .select('id, operative_status, geschlossen_grund')
       .in('id', claimIds)
     if (claimsErr) {
       return NextResponse.json({ error: claimsErr.message }, { status: 500 })
@@ -71,6 +74,21 @@ export async function GET(request: Request) {
       if (st === 'storniert' || st === 'abgelehnt') {
         cancelledClaimIds.add(c.id as string)
       }
+      // WS6 Money-Hebel: Completion-Signal fuer reparatur-vermittelte Provisionen —
+      // Claim abgeschlossen mit geschlossen_grund='reparatur_erledigt'.
+      if (st === 'abgeschlossen' && (c.geschlossen_grund as string | null) === 'reparatur_erledigt') {
+        completedClaimIds.add(c.id as string)
+      }
+    }
+    // Zweites Completion-Signal: ein erledigter reparatur_termine (Werkstatt hat "Reparatur
+    // abgeschlossen" gemeldet) — deckt Claims ab, die (noch) nicht auf abgeschlossen geflippt sind.
+    const { data: rt } = await db
+      .from('reparatur_termine')
+      .select('claim_id')
+      .eq('status', 'erledigt')
+      .in('claim_id', claimIds)
+    for (const r of rt ?? []) {
+      if (r.claim_id) completedClaimIds.add(r.claim_id as string)
     }
   }
 
@@ -96,13 +114,19 @@ export async function GET(request: Request) {
     storniert = stornoIds.length
   }
 
-  // 4) Release-Pass: verbleibende pending, hold_until <= now, Claim nicht storniert.
+  // 4) Release-Pass: pending, hold_until <= now, Claim nicht storniert. WS6 Money-Hebel:
+  // reparatur-vermittelte Provisionen (trigger_event='reparatur_*') erst nach Reparatur-
+  // Completion — die praemature 7-Tage-Timer-Freigabe OHNE Reparatur ist damit raus. QR-Inbound
+  // (claim_created = Referral-Provision) behaelt die Timer-Freigabe. Der WS6-Completion-Flip
+  // (event-driven, #4109) bleibt der schnelle Pfad; dieser Cron ist das Sicherheitsnetz.
   const stornoSet = new Set(stornoIds)
   const releaseIds = pending
     .filter((p) => {
       if (stornoSet.has(p.id)) return false
       if (p.hold_until > now) return false
       if (p.claim_id && cancelledClaimIds.has(p.claim_id)) return false
+      const istReparaturVermittelt = (p.trigger_event ?? '').startsWith('reparatur')
+      if (istReparaturVermittelt && (!p.claim_id || !completedClaimIds.has(p.claim_id))) return false
       return true
     })
     .map((p) => p.id)
