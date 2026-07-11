@@ -331,6 +331,23 @@ Aus der Flottenverwaltung, pro Fahrzeug „Schaden melden" (Fahrzeug + firma vor
 - **Hinweis im Flow (Pflicht-Text):** „Der Schaden wird der Haftpflichtversicherung des Unfallverursachers gemeldet" + der Gegner ist **verpflichtet, den Schaden auch selbst seiner Haftpflicht zu melden** (Hinweis an ihn).
 - Mechanik: `vs_korrespondenz` -> Unfallmitteilung an `versicherungen.schaden_email` der Gegner-Haftpflicht.
 
+### Weitere Anforderungen (11.07. Nachtrag) — inkl. 3 Korrekturen
+
+**Korrekturen frueherer Entscheidungen:**
+- **KORREKTUR Kasko:** **NICHT pro Fahrzeug hinterlegen.** Kasko-Meldung ist ein reiner **at-Schaden/at-Angebot**-Service (nach dem Claim). Kein Kasko-Feld am Flotten-Fahrzeug; `eigene_versicherung_id` wird erst beim Kasko-Angebot erfasst. (Loest die fruehere Hybrid-Empfehlung ab.)
+- **KORREKTUR Kanzlei:** **Kanzlei-Detail-View BAUEN** (nicht nur kanzlei_paket-Bundle) — Entscheidung getroffen.
+- **KORREKTUR Admin-Einstieg:** B2B-Partner-Verwaltung **in den VERTRIEB einbauen** (NICHT neues Nav-Item, NICHT `/admin/partner`). Der Final-Review-Fix legte den Einstieg in `PartnerHubTabs` -> umziehen in den Vertrieb-Cockpit. ⚠️ Koordination mit 386b3bd8 (vertrieb-cockpit-refine, aktiv).
+
+**Neue Anforderungen:**
+- **Karte = NFC + QR:** die physische Karte traegt NFC UND einen **QR-Code** (beide oeffnen dieselbe `/schaden/{token}`-URL; QR = Fallback wenn NFC nicht geht). -> **QR-Generierung noetig** (Muster: Vertrieb-QR / partner-referral).
+- **Karte<->Fahrzeug-Zuweisung auch via Admin-Panel** (analog QR-Zuweisung im Vertrieb) — nicht nur flottenmanager-Binding.
+- **flottenmanager „Zu welchem Fahrzeug gehoert diese Karte?"-Button:** QR scannen ODER NFC-Karte halten -> Karten-Token aufloesen -> **Fahrzeug-Detailview** anzeigen (Reverse-Lookup Karte->Fahrzeug, falls vergessen).
+- **Firmen-Partner-Provision:** **150 EUR netto pro Vermittlung MIT Gutachter-Auftrag** (Muster: makler/werkstatt `partner_provisionen`). ⚠️ Koordination mit Provisions-Lane (6f60c510).
+- **Claim-Sichtbarkeit ueber die Fahrzeug-Detailview:**
+  - Claim-Detail-View **erreichbar ueber die Fahrzeug-Detailview**.
+  - **Kleine Claim-Uebersicht** in der Fahrzeug-Detailview.
+  - **Mini-Aktionen pro Fahrzeug** in der Flotten-Liste (Schaden melden, Karte identifizieren, …).
+
 ---
 
 ## 11 · Offene Fragen (fuer Review)
