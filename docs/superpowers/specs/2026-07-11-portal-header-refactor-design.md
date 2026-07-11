@@ -1,164 +1,194 @@
-# Portal-Header-Refactor — Unified Floating Top-Bar (Admin / Dispatch / KB)
+# Portal-Header-Refactor — `PageHeader` → Weiche Floating-Card (portalweit, shared)
 
 - **Datum:** 2026-07-11
 - **Status:** Design approved (Brainstorming abgeschlossen), pre-plan
-- **Branch:** `kitta/portal-topbar-refactor` (off `origin/staging`)
-- **Autor:** Aaron + Claude (Session portal-topbar-refactor)
+- **Branch:** `kitta/pageheader-floating-card` (off `origin/staging`)
+- **Autor:** Aaron + Claude
+
+> Ersetzt einen früheren Entwurf desselben Files (globale „PortalTopBar"). Der
+> Top-Bar-Ansatz war eine Fehl-Interpretation — Aaron meint **den Seiten-Header
+> (`PageHeader`)**. Die globale Top-Bar-Idee ist **fallengelassen**; die Sidebars
+> (inkl. Logo) bleiben unangetastet.
 
 ---
 
 ## 1 · Kontext & Problem
 
-Der von Aaron beanstandete „eckige Header" ist die CSS-Utility `.glass-dark`:
+Aaron: *„dieser eckige header ist nicht gut … vor allem die page header."*
 
-```css
-.glass-dark {
-  background-color: #0D1B3E;                 /* solid navy, opak seit AAR-766 */
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  /* KEIN border-radius, KEIN backdrop-filter */
-}
+Der „eckige Header" ist der **Seiten-Header** — konkret das Muster, in dem `<PageHeader>` in eine flache, rechteckige Leiste gewrappt wird:
+
+```jsx
+// src/app/admin/finance/(hub)/page.tsx — der eckige Prototyp
+<div className="px-4 py-3 bg-white border-b border-claimondo-border flex-shrink-0">
+  <PageHeader title="Finanzen" … />
+</div>
 ```
 
-Eine flache, opake, rechteckige Navy-Leiste. Sie erscheint als:
+Weißer Kasten, **harte Unterkante** (`border-b`), eckige Ecken.
 
-| Portal | Desktop | Mobile |
-|---|---|---|
-| **Admin** | *keine Top-Bar* — Sidebar (`AdminNav`) + `fixed top-3 right-4` UpdatesNav-Pill | `md:hidden` `glass-dark`-Header |
-| **Dispatch** | *keine Top-Bar* — Sidebar + `fixed top-3 right-4` Pill | `md:hidden` `glass-dark`-Header |
-| **KB (mitarbeiter)** | **full-width `glass-dark` Top-Bar** (Logo · TasksPill · Updates · Name · Logout) | dieselbe Bar |
-| **SV (gutachter)** | *keine Top-Bar* — Floating-Sidebar + WeatherBanner-Strip | moderne **Floating-Glass-Capsule** (radius 22, `color-mix` + backdrop-blur) |
+**Zweitproblem — Wrapper-Wildwuchs.** Der shared `PageHeader`
+(`src/components/shared/PageHeader.tsx`) wird von **52 Stellen** unterschiedlich
+gewrappt: `p-6`, `py-8`, `p-4 md:p-6`, `px-4 py-6 max-w-5xl`, ~18× in der eckigen
+`bg-white border-b`-Leiste. Keine zwei Seiten framen ihren Header gleich.
 
-**Zwei Probleme:**
+**PageHeader ist bereits portalweit im Einsatz** (52 Consumer):
 
-1. **Optik-Drift.** SV + die app-weiten Floating-Sidebar-Pills nutzen längst die moderne Glass-Capsule-Sprache. Admin/Dispatch/KB hängen auf der eckigen `.glass-dark`-Bar fest.
-2. **Struktur-Drift.** Auf dem Desktop hat nur KB überhaupt eine Top-Bar. Admin/Dispatch behelfen sich mit einer schwebenden `fixed top-3 right-4`-Pill plus dem `md:pr-36`-Hack (AAR-911), der Platz reserviert, damit `PageHeader`-Actions nicht mit der Pill kollidieren.
+| Portal | Consumer |
+|---|---|
+| admin | 28 |
+| dispatch | 5 |
+| makler | 5 |
+| kanzlei | 4 |
+| kunde | 3 |
+| login (auth) | 2 |
+| werkstatt / shared-components / dev | je 1–2 |
+
+**SV (gutachter) nutzt `PageHeader` NICHT** (eigenes `SvPageChrome`, Titel wird in
+die Shell-Bar registriert). „SV = Referenz, nicht anfassen" gilt damit automatisch.
+Die **Dashboards** (`admin/page.tsx`, `mitarbeiter/page.tsx`) nutzen `PageHeader`
+ebenfalls nicht (eigene Greeting-Zeile „Guten Tag") → unberührt.
 
 ## 2 · Ziel
 
-**Eine einzige geteilte, moderne Floating-Top-Bar (`PortalTopBar`)** für Admin, Dispatch und KB — Desktop *und* Mobile. Sie ersetzt die drei eckigen Header, den `fixed`-Pill-Hack (`md:pr-36`) und die doppelten Identity-Blöcke.
+Der Seiten-Header wird **portalweit** eine **weiche, gerundete, helle Floating-Card**
+— konsistent und an **einer** Stelle definiert (dem shared `PageHeader`). Die eckigen
+`bg-white border-b`-Leisten verschwinden.
 
 ## 3 · Entscheidungen (aus dem Brainstorming)
 
-1. **Unified Floating Top-Bar.** Alle drei Portale bekommen dieselbe Bar. Admin/Dispatch bekommen dadurch erstmals eine Desktop-Top-Bar.
-2. **Inhalt = Brand + Utilities.** Links Wortmarke + Portal-Badge; rechts der Utility-Cluster. Der **Seiten-Titel bleibt im in-content `PageHeader`** — bewusst *kein* Titel-in-Bar (das wäre der verworfene „Full-App-Bar"-Ansatz mit 30+-Seiten-Migration auf `SvPageChrome`).
-3. **Optik = helles Glas (light glass)**, nicht navy. Pairt besser mit den dunklen Admin/Dispatch-Sidebars und der hellen KB-Sidebar; `UpdatesNav` läuft überall in `variant="light"`.
-4. **SV = nur Referenz.** SV-Chrome bleibt unangetastet (north star). Die Bar wird aber `--brand-*`-var-fähig gebaut, damit SV sie später ohne Rewrite adoptieren *könnte*.
+1. **Look = Weiche Floating-Card** — `rounded-ios-lg`, weicher Schatten, helles Glas,
+   schwebt auf dem Seiten-BG. (Nicht: eckige Leiste; nicht luftig-ohne-Kasten; nicht navy.)
+2. **Portalweit + shared** — die Card wird in den shared `PageHeader` **gebacken**
+   (Default), sodass alle 52 Consumer den Look **ohne Einzel-Edit** bekommen.
+3. **Top-Bar-Idee fallengelassen**, Sidebars (inkl. Logo) unangetastet.
+4. **Brand-aware** — branded Portale (kunde, makler) tinten die Card über
+   `var(--brand-surface)`.
 
-## 4 · Nicht-Ziele (Scope-Guards)
+## 4 · Nicht-Ziele
 
-- **Kein** App-Bar mit Titel; **kein** `SvPageChrome`-Rollout auf die internen Portale.
-- **SV / Kunde / Kanzlei / Makler** unangetastet.
-- KB bekommt **keine** Mobile-Bottom-Nav (pre-existing Gap — `MitarbeiterNav` ist `hidden md:flex`; eigenes Ticket).
-- **Kein** Whitelabel-Branding für die internen Portale (per AGENTS.md sind Admin/Dispatch/KB interne Tools → Claimondo-Navy).
+- **Keine** globale Top-Bar / Sidebar-Änderung.
+- **SV / Dashboards** unberührt (nutzen `PageHeader` nicht).
+- **Keine** DDL, keine Migration.
+- Kein Umbau der Seiten-Inhalte — nur der Header + sein Wrapper.
 
 ## 5 · Design
 
-### 5.1 Komponenten
+### 5.1 Shared `PageHeader` — Card by default
 
-**`src/components/shared/portal-nav/PortalTopBar.tsx`** (+ Re-Export aus `portal-nav/index.ts`).
+`src/components/shared/PageHeader.tsx` erweitern (API-kompatibel):
 
-```ts
-type PortalTopBarProps = {
-  portalLabel: string          // "Admin" | "Dispatch" | "Kundenbetreuer"
-  email?: string
-  displayName?: string
-  initials: string
-  userId: string
-  tasksHref: string            // "/admin/meine-tasks" | "/dispatch/dashboard" | "/mitarbeiter/tasks"
-  profileHref?: string         // Account-Menu → "Mein Profil" (bei Admin weglassen)
-  showOutbox?: boolean         // Admin: true; Dispatch/KB: false (matcht heutigen Stand)
-}
-```
+- Der Titelblock (`leadingSlot` + `icon` + `title` + `description` + `actions`) wird
+  in eine **Floating-Card** gerendert.
+- **Neue Props:**
+  - `children?: ReactNode` — innerhalb der Card **unter** der Titelzeile gerendert
+    (für Hub-Tabs + Untertitel → alles in **einer** Card, s. 5.3).
+  - `bare?: boolean` — Opt-out: rendert wie heute **ohne** Card (Auth/Login, Sonderfälle).
+    `align="center"` impliziert `bare` (zentrierte Auth-/Wizard-Layouts).
+  - `sticky?: boolean` — Card `sticky top-3` statt in-flow (für Hub-/Listen-Seiten, die
+    heute eine Sticky-Leiste haben, z. B. finance-hub).
+- Bestehende Props (`title/description/icon/actions/size/useBranding/leadingSlot/align`)
+  bleiben unverändert kompatibel.
 
-Rendert die Floating-Light-Glass-Capsule:
+### 5.2 Optik — `.page-header-card` Utility
 
-- **Links:** Claimondo-Wortmarke (navy „Claim" + ondo „ondo") · Portal-Badge-Chip · `TasksPill`.
-- **Rechts:** `UpdatesNav variant="light"` · `OutboxBadge` (wenn `showOutbox`) · **`PortalAccountMenu`**.
-
-**`PortalAccountMenu`** (neu, im selben File oder daneben): Avatar-Initials-Kreis öffnet ein `@/components/ui/dropdown-menu` mit „Mein Profil" (wenn `profileHref`) + „Abmelden". „Abmelden" nutzt das bestehende `<form action="/api/auth/logout" method="POST">`. Initialen via `toInitials` aus `@/components/shared/KundeAvatar` (keine neue Avatar-Logik).
-
-### 5.2 Optik — Light Glass
-
-Neue Utility `.portal-topbar` in `globals.css`, direkt neben `.glass-dark` / `.glass-light`. `--brand-*`-var-getrieben mit Claimondo-Fallback (SV-adoptierbar):
+Neue Utility in `globals.css` (neben `.glass-light`/`.glass-dark`), `--brand-*`-getrieben:
 
 ```css
-.portal-topbar {
-  background-color: color-mix(in srgb, var(--brand-surface, #ffffff) 78%, transparent);
-  backdrop-filter: saturate(180%) blur(22px);
-  -webkit-backdrop-filter: saturate(180%) blur(22px);
-  border: 1px solid color-mix(in srgb, var(--brand-primary, #0D1B3E) 10%, transparent);
+.page-header-card {
+  background-color: color-mix(in srgb, var(--brand-surface, #ffffff) 82%, transparent);
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  border: 1px solid color-mix(in srgb, var(--brand-primary, #0D1B3E) 8%, transparent);
   box-shadow:
-    0 14px 36px color-mix(in srgb, #0D1B3E 12%, transparent),
-    inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    0 8px 24px color-mix(in srgb, #0D1B3E 8%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 ```
 
-- Radius: `rounded-ios-lg` (24px).
-- Children in Dark-on-Light: Wortmarke navy/ondo, Portal-Badge als soft Chip (`bg-claimondo-navy/5 text-claimondo-ondo`), Avatar-Kreis `bg-claimondo-ondo text-white`.
-- Ergebnis: weich, gerundet, hell-transluzent, subtiler Lift — das Gegenteil des flachen `#0D1B3E`-Rechtecks.
+- Radius `rounded-ios-lg` (24px), Innen-Padding ~`px-5 py-4`.
+- Fallback `#ffffff`/`#0D1B3E` für die internen Portale (kein Brand gesetzt); branded
+  Portale tinten automatisch. Token-audit-safe (kein bracket-/inline-hex in `className`).
 
-### 5.3 Positionierung
+### 5.3 Hub-Header in EINER Card
 
-Floating-Capsule oben im Content-Bereich gepinnt, damit Notifications immer sichtbar bleiben.
+Hub-Header (`admin/faelle/(hub)/FaelleHubHeader.tsx` + analoge) rendern heute
+`<PageHeader/>`, `<RouteTabBar/>` und Untertitel als **Geschwister**. Migration →
+Tabs + Untertitel als `children`, damit die Card **Titel + Tabs + Untertitel** umschließt:
 
-- **Primär:** `sticky top-3` innerhalb des scrollenden `<main>`, mit `mx-3` (schwebt mit Rand, Content scrollt/blurrt darunter).
-- **Fallback:** Falls `sticky` mit seiten-eigenen Sticky-Sub-Headern stackt → als Flex-Child *über* `<main>` rendern (immer sichtbar, Content scrollt darunter, statisches Glas). Entscheidung per Playwright-Check auf 2–3 repräsentativen Seiten.
+```jsx
+<PageHeader title="Fälle" size="lg">
+  <RouteTabBar tabs={tabs} />
+  <p className="text-sm text-claimondo-ondo">{active.subtitle}</p>
+</PageHeader>
+```
 
-### 5.4 Per-Portal Wiring & Deletions
+### 5.4 Eckige Leisten raus + Wrapper normalisieren
 
-**Admin** (`src/app/admin/layout.tsx`)
-- `+ <PortalTopBar portalLabel="Admin" showOutbox tasksHref="/admin/meine-tasks" />` oben im Content-Column.
-- `− md:hidden` `glass-dark` `<header>`; `−` `fixed top-3 right-4`-Pill-Div; `−` `md:pr-36` auf `<main>`.
-- `AdminNav`: `headerSlot` (Wortmarke + TasksPill + E-Mail) **und** die `footerSlot`-Identity (Avatar/E-Mail/Logout) raus → alles wandert in die Bar. `SupportButton` bleibt im footer. Sidebar wird dadurch **logo-los** (konsistent mit KB) — s. §5.6.
+~18 Files wrappen `PageHeader` in die eckige `bg-white border-b border-claimondo-border`-
+Leiste (finance-hub + 3 Sub-Seiten, statistiken + ki-usage, kalender, sv-leads,
+partner-leads, werkstaetten, makler, team/incentives + leaderboard,
+sachverstaendige/basic-freigaben, kunde/profil, kunde/termine, dev/phases). Für diese:
 
-**Dispatch** (`src/app/dispatch/layout.tsx`)
-- `+ <PortalTopBar portalLabel="Dispatch" tasksHref="/dispatch/dashboard" profileHref="/mitarbeiter/profil" />` (`showOutbox` = false).
-- `−` mobile `glass-dark` `<header>`; `−` `fixed top-3 right-4`-Pill; `−` `md:pr-36`.
-- `DispatchNav`: `headerSlot` (Wortmarke + „Dispatch"-Badge + TasksPill + E-Mail) **und** die `footerSlot`-Identity (Avatar/E-Mail/„Mein Profil"/Logout) raus → in die Bar (die „Dispatch"-Badge wird zum Portal-Badge; Profil + Logout ins Account-Menu). `SupportButton` bleibt. Sidebar **logo-los** — s. §5.6.
+- Den `bg-white border-b`-Wrapper **entfernen** — die Card ersetzt ihn.
+- Sticky-Fälle (finance-hub: `h-full flex flex-col overflow-hidden` + Sticky-Header) →
+  `PageHeader sticky` (5.1) statt Leiste: bleibt scroll-fixiert, aber weich + gerundet.
+- Außen-Padding auf **ein** Muster bringen.
 
-**KB** (`src/app/mitarbeiter/layout.tsx`)
-- Full-width `glass-dark` `<header>` **ersetzt** durch `<PortalTopBar portalLabel="Kundenbetreuer" profileHref="/mitarbeiter/profil" tasksHref="/mitarbeiter/tasks" />` oben im Content-Column (Light-Sidebar bleibt im Flex-Row). KB hatte bisher keinen OutboxBadge → `showOutbox` bleibt aus.
-- `MitarbeiterNav` Sidebar-Höhe `min-h-[calc(100vh-60px)]` → volle Höhe (die 60px waren die alte Header-Höhe). KB-Sidebar ist bereits logo-los.
+### 5.5 Consumer-Migration (52)
 
-**Netto:** −3 eckige Header, −1 Floating-Pill-Hack (`md:pr-36`), −2 Sidebar-Identity-Blöcke (header + footer), +1 geteilte Komponente (+1 Account-Menu, +1 CSS-Utility). Brand-Identität lebt danach an *einem* Ort pro Portal (die Bar).
-
-### 5.6 Konsequenz: Admin/Dispatch-Sidebars werden logo-los (Review-Flag)
-
-Weil die Wortmarke jetzt in der Bar sitzt, verlieren Admin/Dispatch ihren Sidebar-Kopf (Wortmarke). Das ist **gewollt**: es macht alle drei Portale konsistent (KB-Sidebar ist bereits logo-los) und vermeidet ein doppeltes Logo (Sidebar-Top *und* Bar). **Falls unerwünscht:** Alternative wäre, die Wortmarke aus der Bar zu nehmen und links nur den Portal-Badge zu zeigen (Brand bliebe in der Sidebar). Die approbte Preview zeigt die Wortmarke *in der Bar* → Default = logo-lose Sidebars.
-
-### 5.5 Responsive
-
-- Gleiche Capsule auf Mobile, full-width (`mx-3`); E-Mail unter `sm` ausgeblendet.
-- Admin/Dispatch behalten ihre `PortalNav`-Dark-**Bottom**-Nav (`mobileItems`).
-- KB-Mobile-Verhalten unverändert (kein Bottom-Nav — s. Nicht-Ziele).
+- **Kern (0-Edit):** Card-Default in `PageHeader` → alle 52 bekommen den Look sofort.
+- **Cleanup (per-File):** die ~18 eckigen Leisten raus, Hub-`children`, Padding-Norm.
+  Priorität **admin/dispatch** (intern, kaum Kollision) → dann **makler/kanzlei/kunde**
+  (branded + andere aktive Sessions) zuletzt/optional.
 
 ## 6 · Isolation & Boundaries
 
-- **`PortalTopBar`** ist self-contained: rein via Props, keine portal-spezifische Logik intern. Jedes Layout liefert nur seine Config.
-- **`PortalAccountMenu`** isoliert (nur Avatar + Logout-Form + optional `profileHref`).
-- **`.portal-topbar`** ist die *einzige* Quelle der Glass-Werte → ein Ort für spätere SV-Adoption via Brand-Vars.
+- **Ein Ort** für den Look: `.page-header-card` + `PageHeader`. Kein Consumer muss
+  Branding oder Card-Styling kennen.
+- `bare` / `align="center"` = klare Opt-out-Grenze (Auth/Wizard boxless).
+- `sticky` = klar abgegrenzter Opt-in für Hub-/Listen-Seiten.
 
 ## 7 · Risiken & Mitigation
 
-- **Branch-Kollision** (4 Sessions auf `aar-956`): eigener Worktree/Branch (erledigt). Berührte Files: `admin/dispatch/mitarbeiter/layout.tsx`, `AdminNav.tsx` + `DispatchNav.tsx` (header- + footer-Slots) + `MitarbeiterNav.tsx` (Höhe), `globals.css`, neu `PortalTopBar.tsx` + `portal-nav/index.ts`. `PortalNav.tsx` selbst bleibt **unverändert** (nur Config via Wrapper). Diese Files werden von `aar-956` laut `git status` *nicht* angefasst (dort: cron-route, GutachterCard, KundenbetreuerCard, package-files) → geringe Merge-Kollision. Vor Implementierung Files aus dem Worktree (Basis staging) frisch re-lesen.
-- **Sticky-Stacking** mit seiten-eigenen Sub-Headern → Fallback Flex-Child (5.3); Playwright-Verifikation.
-- **Token-Audit-Ratchets:** Glass-Werte leben in der CSS-Utility (kein bracket-hex / inline-hex in `className`); `ui/dropdown-menu` = sanktioniertes Web-Rich-Primitive; keine neuen raw Status/Accent/Radii/rgba-Gradients → alle vier Ratchets sollten grün bleiben.
-- **Content-Offset:** Entfernen von `md:pr-36` — verifizieren, dass `PageHeader`-Actions sauber unter der Bar sitzen (kein Overlap mehr, da die Bar jetzt oberhalb statt overlay-rechts liegt).
-- **`glass-dark` bleibt in Benutzung?** Prüfen, ob nach dem Refactor noch Consumer existieren (Marketing/andere Portale) — Utility NICHT löschen ohne grep.
+- **Broad visual change (52 Header auf einmal):** Playwright + Screenshots über
+  admin/dispatch/makler/kanzlei/kunde + Auth; Vorher/Nachher. Edge-Cases (PageHeader
+  bereits in einer `SectionCard`, ungewöhnliche Layouts) per `bare` abfangen.
+- **Branded Portale (kunde/makler):** Card via `var(--brand-surface)` — auf einem
+  branded Kunde-Portal verifizieren, dass die Tint sitzt (nicht weiß bleibt).
+- **Auth/Login (2 Consumer):** `bare` sicherstellen — keine Card auf zentrierten
+  Auth-Cards. (`align="center"`-Count heute 0 → Login nutzt Standard-Align; explizit
+  `bare` setzen.)
+- **Kollision (andere Sessions):** Kern = **1 shared File** (`PageHeader.tsx`) + 1
+  CSS-Utility → minimal. `git status` auf `aar-956` berührt `PageHeader` nicht.
+  kunde/makler-Cleanup zuletzt/optional, um Trampeln zu vermeiden.
+- **Ratchets:** Card-Werte in CSS-Utility, `rounded-ios-lg`, keine raw hex/Status →
+  token-audit/radii/status/component-set grün. **Achtung:** finance-hub hat inline
+  `bg-emerald-50 text-emerald-600`-Status-Pills — NICHT Teil dieses Refactors, aber
+  beim Leisten-Entfernen **nicht** neu einführen/verschlimmern.
+- **Sticky-Verhalten:** finance-hub etc. — `PageHeader sticky` testen (kein Stacking
+  mit seiten-eigenem Content, korrektes `top`-Offset).
 
 ## 8 · Testing
 
-- `npx tsc --noEmit` **und** `npm run build` — Layout/Route-Änderungen → voller Build (Next 15 Validator).
-- 4 Ratchets grün: `check:token-audit`, `check:component-set`, `check:knip`.
-- **Playwright:** Admin / Dispatch / KB je Desktop + Mobile — Bar sichtbar, Updates-Popover öffnet/schließt, Logout-Form submitted, kein Overlap mit `PageHeader`-Actions.
-- Visueller Vorher/Nachher-Vergleich (Screenshots).
+- `npx tsc --noEmit` **und** `npm run build` (shared Component + viele Consumer +
+  Routen/Layouts → voller Next-15-Build).
+- 4 Ratchets grün (`check:token-audit`, `check:component-set`, `check:status-registry`, `check:knip`).
+- **Playwright:** je Portal 1–2 Seiten (admin/finance [sticky], admin/statistiken,
+  dispatch, makler, kanzlei, kunde/profil [branded], login [bare]) — Card sichtbar,
+  Hub-Tabs in Card, Auth boxless, branded Kunde tint.
+- Visuelle Vorher/Nachher-Screenshots.
 
 ## 9 · Rollout
 
-- Branch `kitta/portal-topbar-refactor` off `staging` → PR **gegen staging** → Review → Merge (Regel 1: nie direkt `main`).
-- 7-Punkte-Audit im Commit-Body (AGENTS.md).
-- Keine DDL, keine Migration.
+- Branch `kitta/pageheader-floating-card` off `staging` → PR **gegen staging** →
+  Review → Merge (Regel 1: nie direkt `main`).
+- **Phasen:** P1 = `PageHeader`-Card + `.page-header-card` + `bare`/`children`/`sticky`
+  + Hub-Migration + admin/dispatch-Leisten. P2 (optional/separat) = makler/kanzlei/kunde-
+  Leisten + Rest-Padding-Norm.
+- 7-Punkte-Audit im Commit-Body.
 
 ## 10 · Offene Fragen
 
-Keine — alle im Brainstorming geklärt (Layout-Fork, Titel-Platzierung, Optik hell/dunkel, SV-Scope).
+Keine — Look (Floating-Card), Scope (portalweit/shared), Top-Bar-Drop, Sidebar-Logo
+alle geklärt.
