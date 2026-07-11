@@ -22,7 +22,7 @@ export type FlottenKontoRow = {
   vorname: string | null
   telefon: string | null
   status: string | null
-  erstellt_am: string | null
+  created_at: string | null
 }
 
 function formatDatum(iso: string | null) {
@@ -131,7 +131,7 @@ export default function FirmenFlotteAdminClient({ konten }: { konten: FlottenKon
                   </Td>
                   <Td>
                     <span className="text-claimondo-ondo text-sm">
-                      {formatDatum(k.erstellt_am)}
+                      {formatDatum(k.created_at)}
                     </span>
                   </Td>
                 </Tr>

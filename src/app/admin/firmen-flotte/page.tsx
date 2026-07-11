@@ -25,8 +25,8 @@ export default async function FirmenFlotteAdminPage() {
 
   const { data: rawKonten } = await admin
     .from('firmen_flotten_konten')
-    .select('user_id, firma_id, status, erstellt_am')
-    .order('erstellt_am', { ascending: false })
+    .select('user_id, firma_id, status, created_at')
+    .order('created_at', { ascending: false })
 
   const kontenList: FlottenKontoRow[] = []
   if (Array.isArray(rawKonten)) {
@@ -34,7 +34,7 @@ export default async function FirmenFlotteAdminPage() {
       user_id: string
       firma_id: string
       status: string | null
-      erstellt_am: string | null
+      created_at: string | null
     }>) {
       const { data: prof } = await admin
         .from('profiles')
@@ -55,7 +55,7 @@ export default async function FirmenFlotteAdminPage() {
         vorname: (prof?.vorname as string | null) ?? null,
         telefon: (prof?.telefon as string | null) ?? null,
         status: k.status,
-        erstellt_am: k.erstellt_am,
+        created_at: k.created_at,
       })
     }
   }
