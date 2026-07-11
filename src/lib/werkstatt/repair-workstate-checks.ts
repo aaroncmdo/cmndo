@@ -88,7 +88,7 @@ export function istKeineWerkstattZugewiesen(
   if (claim.reparatur_werkstatt_id != null) return false
   if (claim.konvertiert_am == null) return false
   const alter = now.getTime() - Date.parse(claim.konvertiert_am)
-  if (Number.isNaN(alter) || alter < ZWEI_TAGE_MS) return false
+  if (Number.isNaN(alter) || alter <= ZWEI_TAGE_MS) return false
   return true
 }
 
@@ -145,9 +145,23 @@ export async function runReparaturWorkstateChecks(
         .filter(Boolean)
 
       if (erledigtClaimIds.length > 0) {
-        const { data: claims, error: claimErr } = await from('claims')
-          .select('id, operative_status')
-          .in('id', erledigtClaimIds)
+        // Chunk into batches of 200 to stay within PostgREST URL length (~8 KB limit).
+        const BATCH_SIZE = 200
+        type ClaimRow = { id: string; operative_status: string | null }
+        const allClaims: ClaimRow[] = []
+        let claimErr: { message: string } | null = null
+
+        for (let i = 0; i < erledigtClaimIds.length; i += BATCH_SIZE) {
+          const batch = erledigtClaimIds.slice(i, i + BATCH_SIZE)
+          const { data: batchData, error: batchErr } = await from('claims')
+            .select('id, operative_status')
+            .in('id', batch)
+          if (batchErr) { claimErr = batchErr; break }
+          if (batchData) allClaims.push(...(batchData as ClaimRow[]))
+        }
+
+        // shadow `claims` so the block below remains unchanged
+        const claims = allClaims
 
         if (claimErr) {
           findings.push({

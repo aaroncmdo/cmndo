@@ -63,6 +63,15 @@ describe('istErledigtNichtGeschlossen', () => {
       ),
     ).toBe(false)
   })
+
+  it('true wenn operative_status null (null ist kein Terminal-Zustand)', () => {
+    expect(
+      istErledigtNichtGeschlossen(
+        termin({ claim_id: 'c1', status: 'erledigt' }),
+        claim({ id: 'c1', operative_status: null }),
+      ),
+    ).toBe(true)
+  })
 })
 
 // ── istKeineWerkstattZugewiesen ──────────────────────────────────────────────
@@ -183,6 +192,21 @@ describe('istKeineWerkstattZugewiesen', () => {
           abrechnungsweg: 'selbstzahler',
           reparatur_werkstatt_id: null,
           konvertiert_am: null,
+          operative_status: 'in_bearbeitung',
+        }),
+        now,
+      ),
+    ).toBe(false)
+  })
+
+  it('false bei exakt 48h (Grenze: >48h noetig, exakt 48h ist noch nicht alt genug)', () => {
+    expect(
+      istKeineWerkstattZugewiesen(
+        claim({
+          id: 'c1',
+          abrechnungsweg: 'selbstzahler',
+          reparatur_werkstatt_id: null,
+          konvertiert_am: new Date(now.getTime() - 48 * 60 * 60 * 1000).toISOString(), // exactly 48h
           operative_status: 'in_bearbeitung',
         }),
         now,
