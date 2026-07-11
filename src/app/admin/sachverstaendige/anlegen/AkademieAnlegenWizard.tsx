@@ -46,8 +46,9 @@ function newSubSv(): SubSv {
   }
 }
 
-export default function AkademieAnlegenWizard({ onSuccess }: {
+export default function AkademieAnlegenWizard({ onSuccess, onCancel }: {
   onSuccess?: (info: { name: string; email: string }) => void
+  onCancel?: () => void
 } = {}) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -172,7 +173,7 @@ export default function AkademieAnlegenWizard({ onSuccess }: {
               Welcome-Mails versendet. Erst-Anzahlung: {erstAnzahlungEur.toLocaleString('de-DE', { style: 'currency', currency: 'EUR' })}.
             </p>
             <div className="mt-6 flex gap-3">
-              <button onClick={() => router.push('/admin/sachverstaendige')}
+              <button onClick={() => (onCancel ? onCancel() : router.push('/admin/sachverstaendige'))}
                 className="flex-1 py-2.5 rounded-ios-xl bg-claimondo-shield hover:bg-claimondo-ondo text-white text-sm font-semibold">
                 Zur SV-Liste
               </button>
