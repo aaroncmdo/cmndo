@@ -249,3 +249,23 @@ Deps: Route auf main deployt, `log_cron_job_run`-RPC + der `cron-call.sh`-Wrappe
 randomUUID-Anteil → der partielle Unique-Index dedupliziert Laeufe nicht). Actioned bleiben. E2E belegt
 (2 Laeufe → offen-Count 4 dann 6, nicht 9/10).
 
+## Stand 2026-07-11 — `repair-reminders` NACHGETRAGEN (Live-VPS)
+
+> WS6 Slice 2: Nudge-Cron für unbetreute Selbstzahler-Reparatur-Claims (fertig gebaut, war dormant → 404).
+> Per paramiko (Aaron-autorisiert, root, kein SSH-Key) auf den Live-VPS angewendet + verifiziert. Backup:
+> `/root/crontab-backup-pre-repair-reminders-<ts>.txt` (Rollback: `crontab <backup>`).
+
+**Umgesetzt:** nachgetragen —
+```cron
+0 * * * * /usr/local/bin/cron-call.sh /api/cron/repair-reminders
+```
+Crontab **99 → 100 Zeilen**.
+
+**Verifiziert:** Route ist auf prod deployt — unauth-Probe `https://app.claimondo.de/api/cron/repair-reminders`
+→ **HTTP 401** (fail-closed vor jeder Logik, kein Trigger). Cron ist „armed", feuert beim nächsten
+`0 * * * *`-Tick. **Bewusst NICHT manuell test-getriggert:** der Endpoint sendet kunde-gerichtete In-App-Nudges
+(3 Kohorten — keine-Werkstatt/Termin-unbestätigt/Termin-überfällig, idempotent via `mitteilungen`-Marker,
+filtert `kundenbetreuer_id IS NULL`); die Erst-Aktivierung läuft über den natürlichen Schedule statt einer
+hand-ausgelösten Batch. Auth: inline `Bearer CRON_SECRET` (kompatibel mit `cron-call.sh`, fail-open nur falls
+`CRON_SECRET` unset — auf prod gesetzt, per 60+ Crons bewiesen; Härtung auf `assertCronAuth` = optionaler Follow-up).
+

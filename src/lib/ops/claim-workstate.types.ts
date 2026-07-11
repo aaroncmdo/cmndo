@@ -32,6 +32,11 @@ export interface ClaimWorkstateRow {
   edit_notizen: string | null
   edit_interne_notizen: string | null
   edit_schadens_hoehe_netto: number | null
+  // WS6 Slice 2a: Reparatur-Tracking-Spalten (v_claim_workstate, live in DB)
+  abrechnungsweg: string | null
+  reparatur_werkstatt_id: string | null
+  reparatur_status: string | null
+  reparatur_erledigt_am: string | null
 }
 
 /** Wer ist als Nächstes am Zug. */
@@ -47,6 +52,8 @@ export type ClaimNextActionCode =
   | 'anschlussschreiben' | 'vs_nachfassen' | 'kuerzung_pruefen'
   | 'nachbesichtigung' | 'nachforderung_treiben' | 'auszahlung_pruefen'
   | 'abgeschlossen'
+  // WS6 Slice 2a: Reparatur-Aktionen
+  | 'werkstatt_waehlen' | 'reparatur_terminieren' | 'reparatur_laeuft' | 'reparatur_abschliessen'
 
 /** Das vereinheitlichte Cockpit-Item (Claim-Zweig; Lead-Zweig kommt in einem eigenen Plan). */
 export interface ClaimWorkItem {

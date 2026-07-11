@@ -396,6 +396,13 @@ describe('getClaimLifecycle — CMM-74 b2: operative Sub-Phasen (+5, v_claim_pha
     expect(mainPhaseOf('anschlussschreiben')).toBe('regulierung')
     expect(mainPhaseOf('nachbesichtigung-laeuft')).toBe('regulierung')
   })
+
+  it('mainPhaseOf: alle Reparatur-Sub-Phasen => erfassung (SQL-konsistent, Fix 2)', () => {
+    expect(mainPhaseOf('reparatur_werkstattwahl')).toBe('erfassung')
+    expect(mainPhaseOf('reparatur_terminfindung')).toBe('erfassung')
+    expect(mainPhaseOf('reparatur_laeuft')).toBe('erfassung')
+    expect(mainPhaseOf('reparatur_fertig')).toBe('erfassung')
+  })
 })
 
 // Aaron 03.07.: DATA-DRIVEN Regulierung — die KB-nativen Aktionen (kanzleiVsKontaktErfasst →

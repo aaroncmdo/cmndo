@@ -36,6 +36,11 @@ export const CLAIM_WORKFLOW_META: Record<ClaimSubPhase, ClaimWorkflowMetaEntry> 
   abgelehnt_final:           { nextActionCode: 'abgeschlossen', ownerRole: 'none',    waitingOn: 'none',    ctaLabel: 'Abgelehnt' },
   an_externe_kanzlei:        { nextActionCode: 'abgeschlossen', ownerRole: 'kanzlei', waitingOn: 'kanzlei', ctaLabel: 'Externe Kanzlei' },
   termin_durchgefuehrt:      { nextActionCode: 'abgeschlossen', ownerRole: 'none',    waitingOn: 'none',    ctaLabel: 'Termin durchgeführt' },
+  // WS6 Slice 2a: Reparatur-Lane (Selbstzahler/Kasko)
+  reparatur_werkstattwahl:   { nextActionCode: 'werkstatt_waehlen',    ownerRole: 'none', waitingOn: 'kunde',  ctaLabel: 'Werkstatt wählen' },
+  reparatur_terminfindung:   { nextActionCode: 'reparatur_terminieren', ownerRole: 'none', waitingOn: 'none',   ctaLabel: 'Reparaturtermin vereinbaren' },
+  reparatur_laeuft:          { nextActionCode: 'reparatur_laeuft',      ownerRole: 'none', waitingOn: 'none',   ctaLabel: 'Reparatur läuft' },
+  reparatur_fertig:          { nextActionCode: 'reparatur_abschliessen', ownerRole: 'intern', waitingOn: 'intern', ctaLabel: 'Reparatur abschließen' },
 }
 
 /** Default-SLA je Sub-Phase (Tage bis "ueberfaellig"). Kalibrierbar (Spec §13). */
