@@ -29,6 +29,8 @@ const mockStorage = {
 }
 const mockFrom = vi.fn()
 const mockLeadsUpdate = vi.fn()
+// Erfasst den zuletzt an leads.update() uebergebenen Payload (fuer Persist-Assertions).
+let lastLeadsUpdatePayload: Record<string, unknown> | undefined
 
 vi.mock('@/lib/supabase/admin', () => ({
   createAdminClient: vi.fn(() => ({
@@ -86,6 +88,7 @@ const mockGetStorageUrl = vi.mocked(getStorageUrl)
 
 beforeEach(() => {
   vi.clearAllMocks()
+  lastLeadsUpdatePayload = undefined
   mockStorage.getPublicUrl.mockReturnValue({ data: { publicUrl: 'https://storage.example.com/test.jpg' } })
 })
 
@@ -261,7 +264,10 @@ describe('erstelleWerkstattFinderLead', () => {
       }
       if (table === 'leads') {
         const chain = {
-          update: vi.fn().mockReturnThis(),
+          update: vi.fn((payload: Record<string, unknown>) => {
+            lastLeadsUpdatePayload = payload
+            return chain
+          }),
           eq: vi.fn().mockResolvedValue({ error: null }),
         }
         mockLeadsUpdate.mockReturnValue(chain)
@@ -314,6 +320,58 @@ describe('erstelleWerkstattFinderLead', () => {
 
     expect(result.ok).toBe(true)
     if (result.ok) expect(result.token).toBe(token)
+  })
+
+  it('Security: text/html-Foto wird im Persist-Pfad verworfen (kein Upload)', async () => {
+    setupMocks()
+    const fotos: EmbedFoto[] = [
+      { data: 'PGh0bWw+', media_type: 'text/html' }, // nicht in der Whitelist
+    ]
+
+    const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', fotos })
+
+    expect(result.ok).toBe(true)
+    // Guard verwirft das Foto → kein Storage-Upload
+    expect(mockStorage.upload).not.toHaveBeenCalled()
+  })
+
+  it('Security: >3 Fotos werden auf 3 gekappt (Count-Cap)', async () => {
+    setupMocks()
+    const fotos: EmbedFoto[] = [
+      { data: 'a', media_type: 'image/jpeg' },
+      { data: 'b', media_type: 'image/jpeg' },
+      { data: 'c', media_type: 'image/jpeg' },
+      { data: 'd', media_type: 'image/jpeg' },
+      { data: 'e', media_type: 'image/jpeg' },
+    ]
+
+    const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', fotos })
+
+    expect(result.ok).toBe(true)
+    // Nur 3 Uploads trotz 5 uebergebener Fotos
+    expect(mockStorage.upload).toHaveBeenCalledTimes(3)
+  })
+
+  it('Security: out-of-range confidence wird geclamped persistiert (kein int2-Overflow)', async () => {
+    setupMocks()
+    const bedarf = { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 32768 } as Reparaturbedarf
+
+    const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', bedarf })
+
+    expect(result.ok).toBe(true)
+    // Der an leads.update() uebergebene Payload traegt geclampte confidence (<=100).
+    expect(lastLeadsUpdatePayload?.bedarf_confidence).toBe(100)
+    expect(lastLeadsUpdatePayload?.bedarf_quelle).toBe('schadenbild')
+  })
+
+  it('Security: nicht-Gewerk-Kategorie wird vor Persist gefiltert', async () => {
+    setupMocks()
+    const bedarf = { kategorien: ['karosserie', 'hack'], quelle: 'schadenbild', confidence: 50 } as unknown as Reparaturbedarf
+
+    const result = await erstelleWerkstattFinderLead({ email: 'test@example.com', bedarf })
+
+    expect(result.ok).toBe(true)
+    expect(lastLeadsUpdatePayload?.bedarf_kategorien).toEqual(['karosserie'])
   })
 
   it('E-Mail fehlt → {ok:false}', async () => {

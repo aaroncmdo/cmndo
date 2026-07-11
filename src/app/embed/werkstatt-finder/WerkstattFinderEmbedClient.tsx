@@ -103,15 +103,19 @@ export function WerkstattFinderEmbedClient({ initialLat, initialLng, initialPlz 
     const dateien = Array.from(e.target.files ?? []).slice(0, MAX_FOTOS)
     if (dateien.length === 0) return
 
-    // Dateien zu base64 konvertieren (FileReader)
+    // Dateien zu base64 konvertieren (FileReader). Leere Fotos ({data:''}) werden
+    // vom Guard/sanitize server-seitig ohnehin verworfen — hier nur Robustheit,
+    // damit ein Lese-/Format-Fehler das Promise.all nicht haengen laesst (Spinner).
     const neueFotos = await Promise.all(
       dateien.map(
         (datei) =>
           new Promise<EmbedFoto>((resolve) => {
             const reader = new FileReader()
+            reader.onerror = () => resolve({ media_type: '', data: '' })
             reader.onload = (ev) => {
               const dataUrl = ev.target?.result as string
               // data-URL Format: "data:<media_type>;base64,<data>"
+              if (!dataUrl?.includes(',')) return resolve({ media_type: '', data: '' })
               const [header, data] = dataUrl.split(',')
               const media_type = header.replace('data:', '').replace(';base64', '')
               resolve({ media_type, data })
