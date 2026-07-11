@@ -44,7 +44,7 @@ export async function markiereReparaturErledigt(
   const admin = createAdminClient()
   const { data: claim } = await admin
     .from('claims')
-    .select('operative_status, claim_nummer')
+    .select('operative_status')
     .eq('id', claimId)
     .maybeSingle()
   if (!claim) return { ok: false, error: 'Claim nicht gefunden' }
@@ -86,25 +86,21 @@ export async function markiereReparaturErledigt(
   } as never)
   if (docErr) return { ok: false, error: `Dokument-Speicherung fehlgeschlagen: ${docErr.message}` }
 
-  // 2) Termin -> erledigt (auth-aware Client wegen RLS is_werkstatt_for_claim).
   const nowIso = new Date().toISOString()
-  const { error: stErr } = await supabase
-    .from('reparatur_termine')
-    .update({ status: 'erledigt', erledigt_am: nowIso, updated_at: nowIso } as never)
-    .eq('id', terminId)
-  if (stErr) return { ok: false, error: stErr.message }
 
-  // 3) Claim schließen — direkter Write (Praezedenz endzustand-actions.ts; state-machine erlaubt
-  //    'abgeschlossen' NICHT aus dem Reparatur-Zustand). Guard gegen Re-Close via .neq.
+  // 2) Claim schließen — CRITICAL: muss vor dem Termin-Status-Flip passieren.
+  //    Scheitert der Close, bleibt status='bestaetigt' → Werkstatt kann sauber
+  //    nochmal einreichen (istReparaturClaimAbschliessbar-Guard greift).
+  //    Guard gegen Re-Close via .neq (idempotent).
   const { error: closeErr } = await admin
     .from('claims')
     .update({ operative_status: REPARATUR_CLOSE_STATUS, abgeschlossen_am: nowIso, geschlossen_grund: REPARATUR_CLOSE_GRUND } as never)
     .eq('id', claimId)
     .neq('operative_status', REPARATUR_CLOSE_STATUS)
-  if (closeErr) console.error('[WS6] Claim-Close fehlgeschlagen:', closeErr.message)
+  if (closeErr) return { ok: false, error: closeErr.message }
 
-  // 4) Werkstatt-Provision freigeben (pending -> freigegeben), an die Fertigstellung gekoppelt.
-  //    Praematur-Release-Vermeidung im Cron = 457ab612-Naht (Marker separat).
+  // 3) Werkstatt-Provision freigeben (pending -> freigegeben), an die Fertigstellung gekoppelt.
+  //    Non-critical: Cron heilt spaeter nach (Praematur-Release-Vermeidung = 457ab612-Naht).
   const { error: provErr } = await admin
     .from('partner_provisionen')
     .update({ status: 'freigegeben' } as never)
@@ -112,6 +108,15 @@ export async function markiereReparaturErledigt(
     .eq('claim_id', claimId)
     .eq('status', 'pending')
   if (provErr) console.error('[WS6] Provisions-Freigabe fehlgeschlagen:', provErr.message)
+
+  // 4) Termin -> erledigt (auth-aware Client wegen RLS is_werkstatt_for_claim).
+  //    Non-critical: Claim + Provision sind schon committed; ein Status-Flip-Lag
+  //    ist ein reines Display-Problem, kein verlorenes Ergebnis.
+  const { error: stErr } = await supabase
+    .from('reparatur_termine')
+    .update({ status: 'erledigt', erledigt_am: nowIso, updated_at: nowIso } as never)
+    .eq('id', terminId)
+  if (stErr) console.error('[WS6] Termin-Status erledigt fehlgeschlagen:', stErr.message)
 
   revalidatePath(`/werkstatt/auftraege/${claimId}`)
   revalidatePath('/werkstatt/auftraege')

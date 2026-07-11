@@ -54,8 +54,8 @@ const INAPP_TEXT: Record<ReparaturterminEreignis, { titel: string; text: string 
     text: 'Deine Werkstatt konnte den vorgeschlagenen Termin nicht annehmen.',
   },
   erledigt: {
-    titel: 'Deine Reparatur ist abgeschlossen',
-    text: 'Die Werkstatt hat die Reparatur abgeschlossen. Den Beleg kannst du im Portal herunterladen.',
+    titel: 'Ihre Reparatur ist abgeschlossen',
+    text: 'Die Werkstatt hat die Reparatur abgeschlossen. Den Beleg können Sie im Portal herunterladen.',
   },
 }
 
@@ -90,7 +90,7 @@ export function buildKundeReparaturterminEmailHtml(args: {
       <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">die Werkstatt wird sich in Kürze telefonisch bei Ihnen melden, um einen Reparaturtermin zu vereinbaren.</p>
       <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Bitte halten Sie Ihr Telefon bereit. Bei Fragen sind wir jederzeit für Sie da.</p>`
   } else if (args.ereignis === 'erledigt') {
-    betreff = 'Deine Reparatur ist abgeschlossen'
+    betreff = 'Ihre Reparatur ist abgeschlossen'
     inhalt = `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">die Werkstatt hat die Reparatur an Ihrem Fahrzeug erfolgreich abgeschlossen.</p>
       <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Die Schlussrechnung steht Ihnen jetzt im Claimondo-Portal zum Herunterladen bereit. Melden Sie sich einfach an und rufen Sie Ihren Fall auf.</p>`
