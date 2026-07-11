@@ -75,8 +75,19 @@ export const useGlobalChatStore = create<GlobalChatState>()(
     }),
     {
       name: 'claimondo-pinned-chats',
+      // v1 (Phase 2b): PinnedChat ist jetzt claim-nativ (claimId noetig fuer den v2-Thread).
+      // Alt-Pins aus localStorage haben kein claimId -> beim Version-Bump verwerfen
+      // (Pins sind Convenience, kein kritisches Datum).
+      version: 1,
       storage: createJSONStorage(() => (typeof window !== 'undefined' ? window.localStorage : undefined as unknown as Storage)),
       partialize: (state) => ({ pinned: state.pinned, openFallId: null }),
+      migrate: (persisted) => {
+        // v0 -> v1: claimId-lose Pins rauswerfen. zustand merged den Rueckgabewert ueber
+        // den Initial-State -> die Methoden (pin/unpin/...) bleiben erhalten.
+        const state = (persisted ?? {}) as { pinned?: PinnedChat[]; openFallId?: string | null }
+        const pinned = (state.pinned ?? []).filter((p) => !!(p as Partial<PinnedChat>).claimId)
+        return { pinned, openFallId: null } as unknown as GlobalChatState
+      },
       // Pins überleben Reload, aber beim Reload ist kein Fenster offen
       // (openFallId=null) — sonst poppt beim Laden überraschend ein Chat auf.
     },

@@ -4,13 +4,13 @@
 // Rendert den aktuell offenen Pinned-Chat über der gesamten FAB-Column.
 // Es gibt IMMER nur 1 offenen Chat (store.openFallId).
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MinusIcon, XIcon } from 'lucide-react'
 import { useGlobalChatStore } from '@/lib/chat/global-chat-store'
-import MultiChannelChat from './MultiChannelChat'
 import { KundeAvatar } from '@/components/shared/KundeAvatar'
-import type { ChatKanal } from '@/lib/communications/channels'
+import { ClaimThreadChat } from '@/components/chat/ClaimThreadChat'
+import { holeOderErstelleGruppenThread } from '@/lib/chat/thread-actions'
 
 export function ChatWindowPanel({ currentUserId }: { currentUserId: string | null }) {
   const { pinned, openFallId, close, unpin } = useGlobalChatStore()
@@ -99,17 +99,57 @@ export function ChatWindowPanel({ currentUserId }: { currentUserId: string | nul
               </button>
             </div>
 
-            {/* Chat Content */}
+            {/* Chat Content — v2 Claim-Gruppen-Thread (kunde_gruppe). key=claimId
+                remountet den Slot beim Wechsel des offenen Pins (frische Thread-Resolution). */}
             <div className="flex-1 min-h-0 overflow-hidden">
-              <MultiChannelChat
-                fallId={chat.fallId}
-                currentUserId={currentUserId}
-                visibleKanaele={(chat.kanaele as ChatKanal[]).length > 0 ? (chat.kanaele as ChatKanal[]) : undefined}
-              />
+              {chat.claimId && currentUserId ? (
+                <GruppenThreadSlot key={chat.claimId} claimId={chat.claimId} currentUserId={currentUserId} />
+              ) : (
+                <div className="flex h-full items-center justify-center p-4 text-center text-body-sm text-claimondo-ondo">
+                  Dieser Chat kann nicht geöffnet werden. Bitte über den Posteingang neu anheften.
+                </div>
+              )}
             </div>
           </motion.div>
         </>
       )}
     </AnimatePresence>
   )
+}
+
+// Loest den kunde_gruppe-Thread des Claims (server-autoritativ, heilt SV/Staff-
+// Membership) und rendert die kompakte Single-Thread-UI. Muster: FokusChatPanel.
+function GruppenThreadSlot({ claimId, currentUserId }: { claimId: string; currentUserId: string }) {
+  const [threadId, setThreadId] = useState<string | null>(null)
+  const [fehler, setFehler] = useState(false)
+
+  useEffect(() => {
+    let aktiv = true
+    setThreadId(null)
+    setFehler(false)
+    void holeOderErstelleGruppenThread(claimId, 'kunde_gruppe').then((r) => {
+      if (!aktiv) return
+      if (r.ok) setThreadId(r.data)
+      else setFehler(true)
+    })
+    return () => {
+      aktiv = false
+    }
+  }, [claimId])
+
+  if (fehler) {
+    return (
+      <div className="flex h-full items-center justify-center p-4 text-center text-body-sm text-claimondo-ondo">
+        Chat konnte nicht geladen werden.
+      </div>
+    )
+  }
+  if (!threadId) {
+    return (
+      <div className="flex h-full items-center justify-center p-4 text-center text-body-sm text-claimondo-ondo/70">
+        Chat wird geladen…
+      </div>
+    )
+  }
+  return <ClaimThreadChat threadId={threadId} currentUserId={currentUserId} whatsappHinweis />
 }

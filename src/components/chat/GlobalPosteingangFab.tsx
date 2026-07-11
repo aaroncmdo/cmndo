@@ -166,12 +166,12 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
   function startNewChat(result: FallLookupResult) {
     pin({
       fallId: result.fallId,
+      claimId: result.claimId,
       fallNummer: result.fallNummer,
       kundeName: result.kundeName,
       lastMessage: '',
       lastAt: new Date().toISOString(),
       unreadCount: 0,
-      kanaele: [],
     })
     setOpen(false)
     setSearchQuery('')
