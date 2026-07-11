@@ -8,10 +8,12 @@ describe('contextAktionen', () => {
     expect(a.map((x) => x.kind)).toContain('scrape')
     expect(a.map((x) => x.kind)).toContain('csv')
   })
-  it('SV-Pill zeigt Anlegen + Basis-Freigaben', () => {
+  it('SV-Pill zeigt Anlegen + Basis-Freigaben + SV-Karte', () => {
     const a = contextAktionen('sv', 'alle')
     expect(a.map((x) => x.kind)).toContain('anlegen')
     expect(a.map((x) => x.kind)).toContain('freigaben')
+    expect(a.map((x) => x.kind)).toContain('karte')
+    expect(a.find((x) => x.kind === 'karte')?.href).toBe('/admin/vertrieb/sachverstaendige')
   })
   it('Werkstatt-Pill zeigt QR-Pool', () => {
     expect(contextAktionen('werkstatt', 'alle').map((x) => x.kind)).toContain('qrpool')
