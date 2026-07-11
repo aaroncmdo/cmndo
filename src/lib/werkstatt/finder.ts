@@ -20,6 +20,7 @@ export type WerkstattFinderRow = {
   lng: number | null
   status: string
   faehigkeiten: string[] | null
+  verifiziert: boolean
   distanz_km: number
   passt: boolean
 }
@@ -66,6 +67,7 @@ export function rankWerkstaetten(
     .filter((r) => r.status === STATUS_AKTIV)
     .map((r) => ({
       ...r,
+      verifiziert: r.verifiziert ?? false,
       distanz_km:
         r.lat !== null && r.lng !== null
           ? haversineKm(origin.lat, origin.lng, r.lat, r.lng)
@@ -75,7 +77,7 @@ export function rankWerkstaetten(
     .sort((a, b) => (a.passt === b.passt ? a.distanz_km - b.distanz_km : a.passt ? -1 : 1))
 }
 
-const SELECT_COLS = 'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten'
+const SELECT_COLS = 'id,name,adresse_strasse,adresse_plz,adresse_ort,telefon,lat,lng,status,faehigkeiten,verifiziert'
 const SELECT_COLS_INTERN = SELECT_COLS + ',email'
 
 /**
@@ -108,7 +110,7 @@ export async function findWerkstaetten(input: {
   // Cast via unknown: `faehigkeiten` ist eine Type-Lag-Spalte (nicht in den generierten
   // DB-Types) -> der select-String liefert GenericStringError[] als inferierten Typ.
   const withEmail = data as unknown as Array<
-    Omit<WerkstattFinderRow, 'distanz_km' | 'passt'> & { email: string | null }
+    Omit<WerkstattFinderRow, 'distanz_km' | 'passt'> & { email: string | null; verifiziert: boolean | null }
   >
   const gefiltert = input.nurEchte ? filterEchteWerkstaetten(withEmail) : withEmail
   const rows = gefiltert.map(({ email: _email, ...r }) => r)
@@ -121,7 +123,7 @@ export async function findWerkstaetten(input: {
   // MVP-Fallback: nur PLZ bekannt -> ohne Distanz nach Name sortiert (distanz_km = Infinity).
   if (input.plz) {
     return rows
-      .map((r) => ({ ...r, distanz_km: Infinity, passt: computePasst(r.faehigkeiten, input.kategorie) }))
+      .map((r) => ({ ...r, verifiziert: r.verifiziert ?? false, distanz_km: Infinity, passt: computePasst(r.faehigkeiten, input.kategorie) }))
       .sort((a, b) => a.name.localeCompare(b.name, 'de'))
       .slice(0, limit)
   }

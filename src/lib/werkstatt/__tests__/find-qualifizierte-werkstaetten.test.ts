@@ -50,6 +50,7 @@ function makeRow(id: string, faehigkeiten: string[] | null): WerkstattFinderRow 
     lng: 7.0,
     status: 'aktiv',
     faehigkeiten,
+    verifiziert: false,
     distanz_km: 5,
     passt: true,
   }
