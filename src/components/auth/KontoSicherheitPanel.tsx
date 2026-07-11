@@ -8,6 +8,7 @@ import { ShieldCheckIcon } from 'lucide-react'
 import { TwoFaPhoneChange } from '@/components/auth/TwoFaPhoneChange'
 import { TotpEnrollCard } from '@/components/auth/TotpEnrollCard'
 import VertrauteGeraeteSection from '@/components/shared/VertrauteGeraeteSection'
+import { PhoneLoginCard } from '@/components/auth/PhoneLoginCard'
 
 export async function KontoSicherheitPanel() {
   const supabase = await createClient()
@@ -23,23 +24,26 @@ export async function KontoSicherheitPanel() {
     .single()
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
-        <h2 className="text-sm font-semibold text-claimondo-navy">
-          Zwei-Faktor-Authentifizierung
-        </h2>
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="flex items-center gap-2">
+          <ShieldCheckIcon className="w-4 h-4 text-claimondo-ondo" />
+          <h2 className="text-sm font-semibold text-claimondo-navy">
+            Zwei-Faktor-Authentifizierung
+          </h2>
+        </div>
+        <p className="text-xs text-claimondo-ondo">
+          Schütze dein Konto mit einem zweiten Faktor — SMS-Code oder Authenticator-App. Beides ist
+          optional und kann jederzeit geändert oder entfernt werden.
+        </p>
+        <TwoFaPhoneChange
+          aktuelleTwofaTelefon={profile?.twofa_telefon ?? null}
+          fallbackTelefon={profile?.telefon ?? null}
+        />
+        <TotpEnrollCard />
+        <VertrauteGeraeteSection />
       </div>
-      <p className="text-xs text-claimondo-ondo">
-        Schütze dein Konto mit einem zweiten Faktor — SMS-Code oder Authenticator-App. Beides ist
-        optional und kann jederzeit geändert oder entfernt werden.
-      </p>
-      <TwoFaPhoneChange
-        aktuelleTwofaTelefon={profile?.twofa_telefon ?? null}
-        fallbackTelefon={profile?.telefon ?? null}
-      />
-      <TotpEnrollCard />
-      <VertrauteGeraeteSection />
+      <PhoneLoginCard aktuellePhone={user.phone || null} />
     </div>
   )
 }

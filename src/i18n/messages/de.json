@@ -98,6 +98,7 @@
       "versicherungskontakt": "Kanzlei klärt mit der Versicherung",
       "auszahlung": "Auszahlung wird vorbereitet",
       "nachforderung": "VS-Ablehnung — Nachforderung",
+      "vs-kuerzt": "Versicherung hat gekürzt — Kanzlei prüft",
       "erfolgreich_reguliert": "Erfolgreich abgeschlossen",
       "storniert": "Fall abgeschlossen",
       "klage_rechtsstreit": "An die Klage übergeben",
@@ -117,6 +118,7 @@
       "versicherungskontakt": "Versicherungskontakt",
       "auszahlung": "Auszahlung",
       "nachforderung": "VS-Ablehnung — Nachforderung",
+      "vs-kuerzt": "VS-Kürzung",
       "erfolgreich_reguliert": "Erfolgreich reguliert",
       "storniert": "Storniert",
       "klage_rechtsstreit": "Klage / Rechtsstreit",
@@ -4764,7 +4766,8 @@
         "description": "Alle Gutachter-Termine zu deinen Fällen.",
         "empty": "Aktuell keine Termine geplant",
         "kommend": "Kommend",
-        "verlauf": "Verlauf"
+        "verlauf": "Verlauf",
+        "reparatur": "Reparaturtermine"
       },
       "toggle": {
         "liste": "Liste",
@@ -4794,7 +4797,9 @@
         "bestaetigt": "Bestätigt",
         "gegenvorschlag": "Gegenvorschlag vom SV — Antwort nötig",
         "abgelehnt": "Abgelehnt",
-        "abgeschlossen": "Durchgeführt"
+        "abgeschlossen": "Durchgeführt",
+        "angefragt": "Angefragt",
+        "anruf_erbeten": "Rückruf erbeten"
       },
       "card": {
         "kundenBeratung": "Kunden-Beratung",
@@ -4802,7 +4807,10 @@
         "fallPrefix": "Fall",
         "videoTermin": "Video-Termin",
         "vorOrtTermin": "Vor-Ort-Termin",
-        "detailsOeffnen": "Details öffnen →"
+        "detailsOeffnen": "Details öffnen →",
+        "reparaturTermin": "Reparaturtermin",
+        "terminOffen": "Termin wird noch abgestimmt",
+        "zumFall": "Zum Fall"
       },
       "detail": {
         "statusLabel": {

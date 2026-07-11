@@ -4627,7 +4627,8 @@
         "description": "Wszystkie terminy wizyt rzeczoznawcy dla Państwa spraw.",
         "empty": "Brak zaplanowanych terminów",
         "kommend": "Nadchodzące",
-        "verlauf": "Historia"
+        "verlauf": "Historia",
+        "reparatur": "Terminy naprawy"
       },
       "toggle": {
         "liste": "Lista",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "Potwierdzony",
         "gegenvorschlag": "Kontrpropozycja rzeczoznawcy — wymagana odpowiedź",
         "abgelehnt": "Odrzucony",
-        "abgeschlossen": "Zrealizowany"
+        "abgeschlossen": "Zrealizowany",
+        "angefragt": "Zapytano",
+        "anruf_erbeten": "Prośba o oddzwonienie"
       },
       "card": {
         "kundenBeratung": "Konsultacja klienta",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "Sprawa",
         "videoTermin": "Wizyta wideo",
         "vorOrtTermin": "Termin na miejscu",
-        "detailsOeffnen": "Otwórz szczegóły →"
+        "detailsOeffnen": "Otwórz szczegóły →",
+        "reparaturTermin": "Termin naprawy",
+        "terminOffen": "Termin zostanie jeszcze ustalony",
+        "zumFall": "Do sprawy"
       },
       "detail": {
         "statusLabel": {
@@ -4959,6 +4965,7 @@
       "versicherungskontakt": "Kancelaria ustala z ubezpieczeniem",
       "auszahlung": "Przygotowujemy wypłatę",
       "nachforderung": "Odmowa ubezpieczyciela — roszczenie uzupełniające",
+      "vs-kuerzt": "Ubezpieczyciel obniżył wypłatę — kancelaria weryfikuje",
       "erfolgreich_reguliert": "Pomyślnie zakończono",
       "storniert": "Sprawa zamknięta",
       "klage_rechtsstreit": "Przekazano na drogę sądową",
@@ -4978,6 +4985,7 @@
       "versicherungskontakt": "Kontakt z ubezpieczeniem",
       "auszahlung": "Wypłata",
       "nachforderung": "Odmowa ubezpieczyciela — roszczenie uzupełniające",
+      "vs-kuerzt": "Obniżenie wypłaty",
       "erfolgreich_reguliert": "Pomyślnie zlikwidowano",
       "storniert": "Anulowano",
       "klage_rechtsstreit": "Postępowanie sądowe",

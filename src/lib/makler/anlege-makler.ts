@@ -1,6 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { generatePromoCode } from '@/lib/makler/promo-code'
 import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
+import { enablePhoneLogin } from '@/lib/auth/phone-login'
 
 // Gemeinsamer Kern der Makler-Anlage — von admin-createMakler UND dem Self-Signup genutzt.
 // Legt Auth-User (Random-PW + force_password_change) + profiles(rolle='makler') +
@@ -121,6 +122,11 @@ export async function anlegeMaklerKern(
 
   // 5) Standard-Staffelung (Default-Bonus-Stufen) — best-effort, non-fatal (jeder neue Makler).
   await setzeStandardStaffel(admin, 'makler', m.id as string)
+
+  // AAR-phone-login (Phase 2): passwordless Telefon-Login fuer neue Makler aktivieren
+  // (auth.users.phone = Anlage-Nummer). Best-effort/kollisionssicher, kein Outbound
+  // (phone_confirm:true). New-only per Konstruktion (Kern laeuft nur bei Anlage).
+  await enablePhoneLogin(admin, userId, input.telefon)
 
   return { ok: true, userId, maklerId: m.id as string, password }
 }

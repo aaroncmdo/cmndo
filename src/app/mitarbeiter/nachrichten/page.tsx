@@ -1,21 +1,14 @@
-// AAR-68 + AAR-102 + AAR-730: Mitarbeiter-Nachrichten, Kunden-zentriert.
-// Sidebar listet Kunden (nicht Fälle), Timeline zeigt alle Fälle dieses
-// Kunden durchmischt mit Fall-Badges pro Nachricht.
+// KB-Nachrichten (mitarbeiter-Portal): claim-natives Thread-Modell (ClaimChatInbox).
+// Scope = KB-eigene Claims (kundenbetreuer_id). KB ist Staff (is_staff -> team_intern sichtbar).
 
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import ChatWithKundenSidebar, {
-  type KundenThread,
-} from '@/components/chat/ChatWithKundenSidebar'
-import { getInboxKanaele } from '@/lib/chat/kanal-routing'
+import ClaimChatInbox from '@/components/chat/ClaimChatInbox'
+import { ladeClaimUnreadCounts } from '@/lib/chat/thread-actions'
 
 export const dynamic = 'force-dynamic'
 
-// KB-Inbox-Kanaele aus der zentralen SSoT (getInboxKanaele). Bewusst ohne
-// chat_kunde_sv — das ist Fallakte-only.
-const KB_KANAELE = getInboxKanaele('kundenbetreuer')
-
-type Search = { kunde?: string }
+type Search = { fall?: string }
 
 export default async function MitarbeiterNachrichten({
   searchParams,
@@ -27,95 +20,45 @@ export default async function MitarbeiterNachrichten({
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
 
-  // CMM-47 B.1: faelle → v_claim_full (Sync-Trigger garantiert kundenbetreuer_id-Konsistenz).
-  // fall_id statt id (id wäre claim.id, FK auf nachrichten.fall_id braucht faelle.id).
-  const { data: faelle } = await supabase
+  // KB-eigene Claims. v_claim_full: id = claim_id (ClaimChatPanel-nativ), fall_id = legacy,
+  // claim_nummer/lead_id/created_at flach. Rollen-Guard liegt im Layout (requirePortalAccess).
+  const { data: faelleRaw } = await supabase
     .from('v_claim_full')
-    .select('fall_id, claim_nummer, lead_id')
+    .select('id, fall_id, claim_nummer, lead_id, created_at')
     .eq('kundenbetreuer_id', user.id)
 
-  const fallMap = new Map((faelle ?? []).map(f => [f.fall_id as string, f]))
-  const fallIds = (faelle ?? []).map(f => f.fall_id as string)
+  const faelle = ((faelleRaw ?? []) as Array<{
+    id: string
+    fall_id: string
+    claim_nummer: string | null
+    lead_id: string | null
+    created_at: string | null
+  }>)
+    .slice()
+    .sort((a, b) => (b.created_at ?? '').localeCompare(a.created_at ?? ''))
 
-  // Nachrichten + Leads parallel.
-  const [nachrichtenRes, leadsRes] = await Promise.all([
-    fallIds.length > 0
-      ? supabase
-          .from('nachrichten')
-          .select('id, fall_id, kanal, sender_id, nachricht, gelesen, created_at')
-          .in('fall_id', fallIds)
-          .in('kanal', KB_KANAELE)
-          .order('created_at', { ascending: false })
-          .limit(800)
-      : Promise.resolve({ data: [] as Array<{ id: string; fall_id: string | null; kanal: string; sender_id: string | null; nachricht: string | null; gelesen: boolean | null; created_at: string }> }),
-    (async () => {
-      const leadIds = Array.from(new Set((faelle ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
-      if (leadIds.length === 0) return { data: [] as Array<{ id: string; vorname: string | null; nachname: string | null }> }
-      return supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-    })(),
-  ])
-  const nachrichten = nachrichtenRes.data ?? []
-  const leads = leadsRes.data ?? []
-
-  // Lead → Kundenname mappen.
-  const kundenNameByLead = new Map(
-    leads.map(l => [
-      l.id as string,
-      [l.vorname, l.nachname].filter(Boolean).join(' ') || 'Kunde',
-    ]),
-  )
-
-  // Kunden-Threads aggregieren: pro lead_id ein Eintrag.
-  const threadMap = new Map<string, KundenThread>()
-  for (const fall of faelle ?? []) {
-    const leadId = fall.lead_id as string | null
-    if (!leadId) continue
-    const kundeName = kundenNameByLead.get(leadId) ?? 'Kunde'
-    if (!threadMap.has(leadId)) {
-      threadMap.set(leadId, {
-        kundeId: leadId,
-        kundeName,
-        faelle: [],
-        lastMessage: '',
-        lastAt: '',
-        unreadCount: 0,
-      })
-    }
-    const t = threadMap.get(leadId)!
-    t.faelle.push({ fallId: fall.fall_id as string, fallNummer: (fall.claim_nummer as string | null) ?? null })
+  const leadIds = Array.from(new Set(faelle.map(f => f.lead_id).filter(Boolean) as string[]))
+  const kundenMap: Record<string, string> = {}
+  if (leadIds.length > 0) {
+    const { data: leads } = await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    for (const l of leads ?? []) kundenMap[l.id as string] = [l.vorname, l.nachname].filter(Boolean).join(' ') || 'Kunde'
   }
-
-  // Nachrichten-Last-Info pro Kunden-Thread.
-  for (const n of nachrichten) {
-    if (!n.fall_id) continue
-    const fall = fallMap.get(n.fall_id)
-    if (!fall) continue
-    const leadId = fall.lead_id as string | null
-    if (!leadId) continue
-    const t = threadMap.get(leadId)
-    if (!t) continue
-    if (!t.lastAt || n.created_at > t.lastAt) {
-      t.lastAt = n.created_at
-      t.lastMessage = (n.nachricht ?? '').slice(0, 80)
-    }
-    if (!n.gelesen && n.sender_id !== user.id) t.unreadCount++
-  }
-
-  const threads = Array.from(threadMap.values())
-    .filter(t => t.faelle.length > 0)
-    .sort((a, b) => {
-      // Threads mit Nachrichten zuerst, dann nach Zeitstempel.
-      if (a.lastAt && !b.lastAt) return -1
-      if (!a.lastAt && b.lastAt) return 1
-      return b.lastAt > a.lastAt ? 1 : -1
-    })
+  const unreadRes = await ladeClaimUnreadCounts(faelle.map(f => f.id))
+  const unread = unreadRes.ok ? unreadRes.data : {}
 
   return (
-    <ChatWithKundenSidebar
-      threads={threads}
+    <ClaimChatInbox
+      eintraege={faelle.map(f => ({
+        claimId: f.id,
+        title: f.lead_id ? (kundenMap[f.lead_id] ?? 'Kunde') : 'Kunde',
+        fallNummer: f.claim_nummer ?? null,
+        lastAt: f.created_at ?? '',
+        unreadCount: unread[f.id] ?? 0,
+      }))}
       currentUserId={user.id}
-      visibleKanaele={KB_KANAELE}
-      initialKundeId={params.kunde ?? null}
+      istStaff={true}
+      initialClaimId={faelle.find(f => f.fall_id === params.fall)?.id ?? null}
+      emptyHint="Noch keine Kunden-Nachrichten."
     />
   )
 }

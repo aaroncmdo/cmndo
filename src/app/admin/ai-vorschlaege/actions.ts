@@ -58,7 +58,7 @@ export async function annehmenVorschlag(
     userId,
   )
   if (!res.ok) return res
-  revalidatePath('/admin/ai-vorschlaege')
+  revalidatePath('/admin/aufgaben/vorschlaege')
   return { ok: true }
 }
 
@@ -71,7 +71,7 @@ export async function verwerfenVorschlag(
 
   const res = await decideProposal(id, 'verworfen', userId, feedback)
   if (!res.ok) return res
-  revalidatePath('/admin/ai-vorschlaege')
+  revalidatePath('/admin/aufgaben/vorschlaege')
   return { ok: true }
 }
 
@@ -94,7 +94,7 @@ export async function graduiereTyp(
 
   const res = await setAutoMode(vorschlagTyp, zielRolle, 'auto', userId)
   if (!res.ok) return res
-  revalidatePath('/admin/ai-vorschlaege')
+  revalidatePath('/admin/aufgaben/vorschlaege')
   return { ok: true }
 }
 
@@ -107,7 +107,7 @@ export async function zuruecksetzenTyp(
 
   const res = await setAutoMode(vorschlagTyp, zielRolle, 'manual', userId)
   if (!res.ok) return res
-  revalidatePath('/admin/ai-vorschlaege')
+  revalidatePath('/admin/aufgaben/vorschlaege')
   return { ok: true }
 }
 

@@ -4,32 +4,22 @@ import { listOpenProposals } from '@/lib/orchestrator/proposals'
 import { getTypeStats } from '@/lib/orchestrator/stats'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { GraduierungPanel } from '@/components/admin/GraduierungPanel'
-import { AiVorschlaegeClient } from './AiVorschlaegeClient'
+import { AiVorschlaegeClient } from '../../ai-vorschlaege/AiVorschlaegeClient'
 
 export const dynamic = 'force-dynamic'
 
-export default async function AiVorschlaegePage() {
-  // Admin-Guard (gleicher Aufbau wie admin/health/page.tsx)
+export default async function AufgabenVorschlaegePage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login')
-  const { data: p } = await supabase
-    .from('profiles')
-    .select('rolle')
-    .eq('id', user.id)
-    .single()
+  const { data: p } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (p?.rolle !== 'admin') redirect('/login')
 
-  const [vorschlaege, typeStats] = await Promise.all([
-    listOpenProposals(),
-    getTypeStats(),
-  ])
+  const [vorschlaege, typeStats] = await Promise.all([listOpenProposals(), getTypeStats()])
 
   return (
     <>
-      <AiVorschlaegeClient vorschlaege={vorschlaege} />
+      <AiVorschlaegeClient vorschlaege={vorschlaege} headerless />
       <div className="max-w-4xl mx-auto px-5 pb-8">
         <SectionCard
           title="Auto-Graduierung"

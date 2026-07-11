@@ -4627,7 +4627,8 @@
         "description": "Все встречи с экспертом-оценщиком по вашим делам.",
         "empty": "Запланированных встреч нет",
         "kommend": "Предстоящие",
-        "verlauf": "История"
+        "verlauf": "История",
+        "reparatur": "Записи на ремонт"
       },
       "toggle": {
         "liste": "Список",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "Подтверждено",
         "gegenvorschlag": "Встречное предложение от эксперта — требуется ответ",
         "abgelehnt": "Отклонено",
-        "abgeschlossen": "Проведено"
+        "abgeschlossen": "Проведено",
+        "angefragt": "Запрошено",
+        "anruf_erbeten": "Требуется обратный звонок"
       },
       "card": {
         "kundenBeratung": "Консультация клиента",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "Дело",
         "videoTermin": "Видеовстреча",
         "vorOrtTermin": "Встреча на месте",
-        "detailsOeffnen": "Открыть подробности →"
+        "detailsOeffnen": "Открыть подробности →",
+        "reparaturTermin": "Запись на ремонт",
+        "terminOffen": "Дата ещё согласовывается",
+        "zumFall": "К делу"
       },
       "detail": {
         "statusLabel": {
@@ -4959,6 +4965,7 @@
       "versicherungskontakt": "Юристы ведут переговоры со страховой",
       "auszahlung": "Готовим выплату",
       "nachforderung": "Отказ страховой — дополнительное требование",
+      "vs-kuerzt": "Страховая снизила выплату — юристы разбираются",
       "erfolgreich_reguliert": "Успешно завершено",
       "storniert": "Дело закрыто",
       "klage_rechtsstreit": "Передано в суд",
@@ -4978,6 +4985,7 @@
       "versicherungskontakt": "Контакт со страховой",
       "auszahlung": "Выплата",
       "nachforderung": "Отказ страховой — дополнительное требование",
+      "vs-kuerzt": "Снижение выплаты",
       "erfolgreich_reguliert": "Успешно урегулировано",
       "storniert": "Отменено",
       "klage_rechtsstreit": "Судебный спор",

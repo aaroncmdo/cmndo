@@ -4627,7 +4627,8 @@
         "description": "Davalarınıza ait tüm bilirkişi randevuları.",
         "empty": "Şu an planlanmış randevu yok",
         "kommend": "Yaklaşan",
-        "verlauf": "Geçmiş"
+        "verlauf": "Geçmiş",
+        "reparatur": "Onarım randevuları"
       },
       "toggle": {
         "liste": "Liste",
@@ -4657,7 +4658,9 @@
         "bestaetigt": "Onaylandı",
         "gegenvorschlag": "Bilirkişiden karşı öneri — yanıt gerekiyor",
         "abgelehnt": "Reddedildi",
-        "abgeschlossen": "Gerçekleştirildi"
+        "abgeschlossen": "Gerçekleştirildi",
+        "angefragt": "Talep edildi",
+        "anruf_erbeten": "Geri arama isteniyor"
       },
       "card": {
         "kundenBeratung": "Müşteri danışmanlığı",
@@ -4665,7 +4668,10 @@
         "fallPrefix": "Dava",
         "videoTermin": "Video randevusu",
         "vorOrtTermin": "Yerinde randevu",
-        "detailsOeffnen": "Detayları aç →"
+        "detailsOeffnen": "Detayları aç →",
+        "reparaturTermin": "Onarım randevusu",
+        "terminOffen": "Randevu henüz belirleniyor",
+        "zumFall": "Davaya git"
       },
       "detail": {
         "statusLabel": {
@@ -4959,6 +4965,7 @@
       "versicherungskontakt": "Hukuk bürosu sigortayla görüşüyor",
       "auszahlung": "Ödeme hazırlanıyor",
       "nachforderung": "Sigorta reddi — ek talep",
+      "vs-kuerzt": "Sigorta tazminatı kesti — hukuk bürosu inceliyor",
       "erfolgreich_reguliert": "Başarıyla tamamlandı",
       "storniert": "Dosya kapatıldı",
       "klage_rechtsstreit": "Dava sürecine devredildi",
@@ -4978,6 +4985,7 @@
       "versicherungskontakt": "Sigorta teması",
       "auszahlung": "Ödeme",
       "nachforderung": "Sigorta reddi — ek talep",
+      "vs-kuerzt": "Tazminat indirimi",
       "erfolgreich_reguliert": "Başarıyla tazmin edildi",
       "storniert": "İptal edildi",
       "klage_rechtsstreit": "Dava / hukuki ihtilaf",

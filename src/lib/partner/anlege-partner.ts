@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { buildSvInsertAusLead, type SvLeadRow } from '@/lib/sv-basic/claim-eligibility'
 import type { PartnerRolle } from '@/lib/partner/policy'
 import { setzeStandardStaffel } from '@/lib/partner/standard-staffel'
+import { enablePhoneLogin } from '@/lib/auth/phone-login'
 
 // Konsolidierter Kern der Partner-Account-Anlage (makler | sachverstaendiger | werkstatt).
 // Spiegelt anlegeMaklerKern: Auth-User (Random-PW + force_password_change) ->
@@ -243,6 +244,11 @@ export async function anlegePartnerKern(
   // haben eine Bonus-Staffel; SV nicht.
   if (rolle === 'makler') await setzeStandardStaffel(admin, 'makler', partnerId)
   else if (rolle === 'werkstatt') await setzeStandardStaffel(admin, 'werkstatt', partnerId)
+
+  // AAR-phone-login (Phase 2): passwordless Telefon-Login fuer ALLE neuen Partner
+  // (makler/werkstatt/SV) aktivieren — unbedingt, kein Rollen-Guard. Best-effort/
+  // kollisionssicher, kein Outbound (phone_confirm:true). New-only per Konstruktion.
+  await enablePhoneLogin(admin, userId, input.telefon)
 
   return { ok: true, userId, partnerId, password }
 }

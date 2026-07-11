@@ -10,7 +10,7 @@ import {
   UsersIcon, Building2Icon, SettingsIcon, ClipboardListIcon,
   FileSignatureIcon, ReceiptIcon, Code2Icon, ShieldCheckIcon,
   HandshakeIcon, ActivityIcon, Share2Icon, MessageSquareIcon,
-  NewspaperIcon, NetworkIcon, LifeBuoyIcon, SparklesIcon, ShieldAlertIcon,
+  NewspaperIcon, NetworkIcon, LifeBuoyIcon, ShieldAlertIcon,
 } from 'lucide-react'
 import { PortalUserFooter } from '@/components/shared/portal-nav/PortalUserFooter'
 import TasksPill from '@/components/shared/TasksPill'
@@ -23,7 +23,6 @@ const NAV_ITEMS: PortalNavItem[] = [
   { href: '/dispatch/dashboard', label: 'Dispatch', icon: GitBranchIcon, external: true },
   { href: '/admin/faelle', label: 'Fälle', icon: FolderOpenIcon },
   { href: '/admin/aufgaben', label: 'Aufgaben', icon: ClipboardListIcon },
-  { href: '/admin/ai-vorschlaege', label: 'KI-Vorschläge', icon: SparklesIcon },
   { href: '/admin/ki-aufsicht', label: 'KI-Aufsicht', icon: ShieldAlertIcon },
   { href: '/admin/kalender', label: 'Kalender', icon: CalendarIcon },
   // Vertrieb-Konsole (Ein-Dach): Sachverständige, Partner-Leads, Makler und Werkstätten
@@ -71,18 +70,11 @@ export default function AdminNav({
       sections={[{ items: NAV_ITEMS }]}
       mobileItems={MOBILE_ITEMS}
       renderBadge={(item) => {
-        if (item.label === 'Aufgaben' && (meineTasksCount ?? 0) > 0) {
-          return (
-            <span className="ml-auto bg-claimondo-ondo text-white text-[9px] font-bold min-w-[18px] h-[18px] flex items-center justify-center rounded-full px-1">
-              {meineTasksCount! > 99 ? '99+' : meineTasksCount}
-            </span>
-          )
+        if (item.label === 'Aufgaben') {
+          return <span className="ml-auto"><AdminAiVorschlaegeBadge /></span>
         }
         if (item.label === 'Kalender') {
           return <span className="ml-auto"><AdminNeueRueckrufeBadge /></span>
-        }
-        if (item.label === 'KI-Vorschläge') {
-          return <span className="ml-auto"><AdminAiVorschlaegeBadge /></span>
         }
         return null
       }}
