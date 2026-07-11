@@ -5,7 +5,7 @@ export type VertriebAktion = {
   key: string
   label: string
   href?: string
-  kind: 'scrape' | 'csv' | 'anlegen' | 'freigaben' | 'qrpool'
+  kind: 'scrape' | 'csv' | 'anlegen' | 'freigaben' | 'qrpool' | 'karte'
 }
 
 const ROLLE_TO_PL: Record<VertriebRolle, string> = { sv: 'sachverstaendiger', makler: 'makler', werkstatt: 'werkstatt' }
@@ -35,6 +35,7 @@ export function contextAktionen(rolle: VertriebRolle | 'alle', typ: VertriebTyp 
   if (rolle === 'sv') {
     out.push({ key: 'anlegen-sv', kind: 'anlegen', label: ANLEGEN_LABEL.sv, href: '/admin/vertrieb/sachverstaendige/anlegen' })
     out.push({ key: 'freigaben', kind: 'freigaben', label: 'Basis-Freigaben', href: '/admin/vertrieb/sachverstaendige/basic-freigaben' })
+    out.push({ key: 'sv-karte', kind: 'karte', label: 'SV-Karte (Live-Ops)', href: '/admin/vertrieb/sachverstaendige' })
   } else if (rolle === 'makler') {
     out.push({ key: 'anlegen-makler', kind: 'anlegen', label: ANLEGEN_LABEL.makler, href: '/admin/vertrieb/makler' })
   } else if (rolle === 'werkstatt') {
