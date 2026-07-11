@@ -26,7 +26,9 @@ import {
   erbitteRueckruf,
   lehneReparaturterminAb,
   oeffneGutachtenPdf,
+  schlageWerkstattTerminVor,
 } from '@/app/werkstatt/(shell)/auftraege/actions'
+import { WunschterminPicker } from '@/app/embed/gutachter-finder/_components/WunschterminPicker'
 
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -56,6 +58,9 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const [ablehnenLaden, setAblehnenLaden] = useState(false)
   const [bestätigenLaden, setBestätigenLaden] = useState(false)
   const [anrufLaden, setAnrufLaden] = useState(false)
+  const [vorschlagOffen, setVorschlagOffen] = useState(false)
+  const [neuerTermin, setNeuerTermin] = useState('')
+  const [vorschlagLaden, setVorschlagLaden] = useState(false)
 
   const terminId: string = auftrag.reparatur_termin_id ?? ''
   if (!terminId) return null
@@ -76,7 +81,19 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
       }) + ' Uhr'
     : null
 
-  const aktionOffen = status === 'angefragt' || status === 'anruf_erbeten'
+  const aktionOffen = status === 'angefragt' || status === 'anruf_erbeten' || status === 'werkstatt_vorschlag'
+
+  async function handleVorschlag() {
+    if (!neuerTermin) return
+    setVorschlagLaden(true)
+    const result = await schlageWerkstattTerminVor(auftrag.claim_id, neuerTermin)
+    setVorschlagLaden(false)
+    if (!result.ok) { toast.error(result.error ?? 'Vorschlag fehlgeschlagen'); return }
+    setVorschlagOffen(false)
+    setNeuerTermin('')
+    toast.success('Terminvorschlag gesendet – der Kunde bestätigt ihn.')
+    startTransition(() => router.refresh())
+  }
 
   async function handleBestaetigen() {
     setBestätigenLaden(true)
@@ -133,6 +150,15 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
             </p>
           )}
 
+          {auftrag.reparatur_rueckruf_wunschzeit && (
+            <p className="text-body-sm text-warning-strong">
+              Kunde bittet um Rückruf (Wunschzeit:{' '}
+              {formatBerlin(auftrag.reparatur_rueckruf_wunschzeit, {
+                weekday: 'short', day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+              })}{' '}Uhr)
+            </p>
+          )}
+
           {aktionOffen && (
             <div className="flex flex-wrap gap-2 pt-1">
               <Button
@@ -153,6 +179,9 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
               >
                 Anrufen / telefonisch klären
               </Button>
+              <Button variant="ghost" size="sm" disabled={bestätigenLaden || anrufLaden || ablehnenLaden} onClick={() => setVorschlagOffen((v) => !v)}>
+                Anderen Termin vorschlagen
+              </Button>
               <Button
                 variant="danger"
                 size="sm"
@@ -160,6 +189,15 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
                 onClick={() => setAblehnungOffen(true)}
               >
                 Ablehnen
+              </Button>
+            </div>
+          )}
+
+          {vorschlagOffen && (
+            <div className="space-y-2 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-3">
+              <WunschterminPicker value={neuerTermin} onChange={setNeuerTermin} />
+              <Button variant="navy" size="sm" disabled={!neuerTermin} loading={vorschlagLaden} onClick={handleVorschlag}>
+                Vorschlag senden
               </Button>
             </div>
           )}
