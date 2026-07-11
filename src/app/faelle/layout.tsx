@@ -14,6 +14,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeGetUser } from '@/lib/auth/safe-get-user'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
@@ -28,7 +29,9 @@ export default async function FaelleLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  // CMM-14: getUser()-Reject nicht ins Layout werfen lassen (→ lila Root-Crash).
+  // safeGetUser degradiert transiente Rejects zu null → sauberer /login-Redirect.
+  const user = await safeGetUser(() => supabase.auth.getUser())
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase

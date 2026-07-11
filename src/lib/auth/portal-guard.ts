@@ -20,6 +20,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeGetUser } from '@/lib/auth/safe-get-user'
 import type { UserRolle } from './guards'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/lib/supabase/database.types'
@@ -50,7 +51,13 @@ export async function requirePortalAccess(
   allowedRollen: UserRolle[],
 ): Promise<PortalGuardResult> {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  // CMM-14: getUser() KANN transient rejecten ("context canceled" am Post-Login-
+  // Navigations-Uebergang / Netzfehler — in Prod-Auth-Logs belegt). Ein Reject
+  // hier wuerde IM Portal-Layout werfen; da eine Segment-error.tsx nur Page+Kinder
+  // faengt (nicht das layout.tsx selbst), eskaliert der Throw zur lila Root-
+  // Boundary (= der wiederkehrende CMM-14-Crash). safeGetUser degradiert ein
+  // Reject zu null (wie die Middleware, AAR-622) → sauberer /login-Redirect.
+  const user = await safeGetUser(() => supabase.auth.getUser())
   if (!user) redirect('/login')
 
   const { data: profile, error } = await supabase

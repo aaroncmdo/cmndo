@@ -1,49 +1,75 @@
-// Token-Audit-Skip: Error-Boundary lädt vor Tailwind/CSS-Vars.
+// Token-Audit-Skip: Error-Boundary lädt vor Tailwind/CSS-Vars → inline-Hex nötig.
 //   Siehe src/lib/external-brand-colors.ts und AGENTS.md §branding-rules.
 'use client'
 
+import { useEffect } from 'react'
+import { reportBoundaryError } from '@/lib/observability/report-boundary-error'
+
+// CMM-14: global-error fängt Throws im Root-Layout selbst (ersetzt das komplette
+// Dokument). Früher rohes Diagnose-Dump — jetzt gebrandet + Capture in
+// client_error_log. window.location.reload() statt reset() (AAR-271).
+
 export default function GlobalError({
   error,
-  unstable_retry,
 }: {
   error: Error & { digest?: string }
-  unstable_retry: () => void
 }) {
+  useEffect(() => {
+    console.error(error)
+    reportBoundaryError('global', error)
+  }, [error])
+
   return (
     <html lang="de">
-      <body style={{ margin: 0, backgroundColor: '#09090b', fontFamily: "'Montserrat', system-ui, sans-serif" }}>
-        <div style={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px',
-        }}>
-          <div style={{ maxWidth: '700px', width: '100%', fontFamily: 'monospace', fontSize: 12, color: '#fff' }}>
-            <div style={{ color: '#ef4444', fontSize: 14, fontWeight: 700, marginBottom: 12 }}>
-              GLOBAL ROOT CRASH — CMM-14 diagnose
-            </div>
-            <div style={{ marginBottom: 8 }}><strong>Message:</strong> {error.message || '(leer)'}</div>
-            <div style={{ marginBottom: 8 }}><strong>Digest:</strong> {error.digest || '(keiner)'}</div>
-            <div style={{ marginBottom: 8 }}><strong>Name:</strong> {error.name}</div>
-            <pre style={{ background: '#1f1f23', padding: 12, borderRadius: 6, overflow: 'auto', maxHeight: 400, whiteSpace: 'pre-wrap', wordBreak: 'break-all', fontSize: 10 }}>
-              {error.stack || '(kein Stack)'}
-            </pre>
+      <body style={{ margin: 0, backgroundColor: '#f8f9fb', fontFamily: "'Montserrat', system-ui, sans-serif" }}>
+        <div
+          style={{
+            minHeight: '100vh',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 20,
+          }}
+        >
+          <div
+            style={{
+              maxWidth: 440,
+              width: '100%',
+              background: '#ffffff',
+              border: '1px solid #e2e8f0',
+              borderRadius: 18,
+              padding: 32,
+              textAlign: 'center',
+              boxShadow: '0 8px 30px rgba(13,27,62,0.08)',
+            }}
+          >
+            <div style={{ fontSize: 40, marginBottom: 12 }} aria-hidden>🛠️</div>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0D1B3E', margin: '0 0 8px' }}>
+              Da ist etwas schiefgelaufen
+            </h1>
+            <p style={{ fontSize: 14, color: '#4573A2', lineHeight: 1.5, margin: '0 0 24px' }}>
+              Die Anwendung konnte nicht geladen werden. Bitte lade die Seite neu.
+            </p>
             <button
-              onClick={() => unstable_retry()}
+              onClick={() => window.location.reload()}
               style={{
-                marginTop: 16,
-                padding: '10px 20px',
-                backgroundColor: '#2563eb',
-                color: '#fff',
+                padding: '12px 24px',
+                backgroundColor: '#0D1B3E',
+                color: '#ffffff',
                 border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
+                borderRadius: 12,
+                fontSize: 14,
+                fontWeight: 600,
                 cursor: 'pointer',
               }}
             >
-              Erneut versuchen
+              Seite neu laden
             </button>
+            {error.digest && (
+              <p style={{ marginTop: 20, fontSize: 11, color: '#94a3b8' }}>
+                Fehler-Referenz: {error.digest}
+              </p>
+            )}
           </div>
         </div>
       </body>
