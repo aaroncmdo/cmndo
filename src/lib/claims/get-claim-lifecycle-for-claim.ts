@@ -12,7 +12,8 @@
 //     kommen ueber den CLAIM (bit-gleich zur claims-zentrischen v_claim_phase).
 //   - auftraege/kanzlei_faelle bleiben per fall_id gekeyt (== claim_id-Menge fuer Faelle;
 //     der Loader bedient nur Fall-Detail-Routen).
-//   - sa_unterschrieben / vollmacht_signiert_am leben auf leads (via claims.lead_id).
+//   - sa_unterschrieben / vollmacht_signiert_am: FG6 liest die CLAIM-Copy (canonical
+//     post-conversion) via readClaimSigningState; leads nur pre-conversion-Fallback.
 //   - onboarding_complete wird von getClaimLifecycle NICHT genutzt -> nicht geladen.
 //
 // Liefert ein Bundle (lifecycle + auftraege + kanzleiFall), damit Detail-Pages,
@@ -22,6 +23,7 @@
 
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveClaimId } from './get-claim-for-role'
+import { readClaimSigningState } from './signing-state'
 import { getAlleAuftraege, type AuftragRow } from '@/lib/auftrag/queries'
 import { getKanzleiFall, type KanzleiFallRow } from '@/lib/kanzlei-fall/queries'
 import {
@@ -54,12 +56,17 @@ export async function getClaimLifecycleForClaim(
   if (claimId) {
     const { data: claim } = await admin
       .from('claims')
-      .select('status, lead_id, service_typ, operative_status')
+      .select('status, lead_id, service_typ, operative_status, sa_unterschrieben, sa_unterschrieben_am, vollmacht_signiert_am')
       .eq('id', claimId)
       .maybeSingle()
     claimStatus = (claim?.status as string | null) ?? null
     serviceTyp = (claim?.service_typ as string | null) ?? null
     operativeStatus = (claim?.operative_status as string | null) ?? null
+    // FG6 (dual-SSoT collapse): SA/Vollmacht liegen auf claims UND leads. Kanonisch ist
+    // die CLAIM-Copy post-conversion (readClaimSigningState); leads nur als
+    // pre-conversion-Fallback. Fixt die Divergenz getClaimLifecycle(las lead-copy) vs
+    // resolveSubphase(claim-copy) -> beide lesen jetzt dieselbe (claim-)Wahrheit.
+    let leadSigning: { sa_unterschrieben: boolean | null; vollmacht_signiert_am: string | null } | null = null
     if (claim?.lead_id) {
       const { data: leadRow } = await admin
         .from('leads')
@@ -67,12 +74,25 @@ export async function getClaimLifecycleForClaim(
         .eq('id', claim.lead_id as string)
         .maybeSingle()
       if (leadRow) {
-        lead = {
+        leadSigning = {
           sa_unterschrieben: (leadRow.sa_unterschrieben as boolean | null) ?? null,
           vollmacht_signiert_am: (leadRow.vollmacht_signiert_am as string | null) ?? null,
-          onboarding_complete: null, // von getClaimLifecycle nicht genutzt
         }
       }
+    }
+    const signing = readClaimSigningState({
+      hasClaim: true,
+      claim: {
+        sa_unterschrieben: (claim?.sa_unterschrieben as boolean | null) ?? null,
+        sa_unterschrieben_am: (claim?.sa_unterschrieben_am as string | null) ?? null,
+        vollmacht_signiert_am: (claim?.vollmacht_signiert_am as string | null) ?? null,
+      },
+      lead: leadSigning,
+    })
+    lead = {
+      sa_unterschrieben: signing.saUnterschrieben,
+      vollmacht_signiert_am: signing.vollmachtSigniertAm,
+      onboarding_complete: null, // von getClaimLifecycle nicht genutzt
     }
   }
 
