@@ -13,6 +13,7 @@ import TerminSectionCard from '@/components/kunde/TerminSectionCard'
 import GutachtenPdfButton from '@/components/kunde/GutachtenPdfButton'
 import GutachtenWeiterleitungButton from '@/components/kunde/GutachtenWeiterleitungButton'
 import FallDetailSections from '@/app/kunde/faelle/[id]/FallDetailSections'
+import { BelegePaketCard } from './BelegePaketCard'
 
 export async function DoksTermineZone({ vm }: { vm: KundeClaimViewModel }) {
   const t = await getTranslations('kunde.fall')
@@ -46,6 +47,9 @@ export async function DoksTermineZone({ vm }: { vm: KundeClaimViewModel }) {
           </div>
         </Card>
       )}
+
+      {/* Beleg-Download-Paket — KVA+Schlussrechnung+Fotos (Reparatur) bzw. Gutachten (Normal/SV). */}
+      <BelegePaketCard vm={vm} />
 
       {/* Fall-Details — Übersicht/Dokumente-Tabs (Stammdaten, Kontakte, Download-Liste). */}
       <FallDetailSections
