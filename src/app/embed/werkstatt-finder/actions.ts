@@ -9,7 +9,8 @@ import { findWerkstaetten, type WerkstattFinderRow } from '@/lib/werkstatt/finde
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
 import { pruefeEmbedFotos, type EmbedFoto } from '@/lib/werkstatt/bedarf/embed-foto-guard'
 import { klassifiziereSchadenbildBase64 } from '@/lib/werkstatt/bedarf/schadenbild-gewerke'
-import { qualifiziereWerkstaetten, type Qualifiziert } from '@/lib/werkstatt/bedarf/qualifiziere'
+import { qualifiziereWerkstaetten } from '@/lib/werkstatt/bedarf/qualifiziere'
+import { sanitizeBedarf } from '@/lib/werkstatt/bedarf/sanitize'
 import { getStorageUrl } from '@/lib/storage/url'
 import type { Reparaturbedarf, Fit } from '@/lib/werkstatt/bedarf/types'
 
@@ -57,7 +58,7 @@ export async function sucheEchteWerkstaetten(input: {
   if (!input.bedarf) {
     return { werkstaetten: rows, keineSpezialisierte: false }
   }
-  const q = qualifiziereWerkstaetten(rows, input.bedarf)
+  const q = qualifiziereWerkstaetten(rows, sanitizeBedarf(input.bedarf))
   return { werkstaetten: q.werkstaetten, keineSpezialisierte: q.keineSpezialisierte }
 }
 
@@ -80,7 +81,7 @@ export async function sucheWerkstaettenNachOrt(
   if (!bedarf) {
     return { werkstaetten: rows, center: { lat: geo.lat, lng: geo.lng }, keineSpezialisierte: false }
   }
-  const q = qualifiziereWerkstaetten(rows, bedarf)
+  const q = qualifiziereWerkstaetten(rows, sanitizeBedarf(bedarf))
   return {
     werkstaetten: q.werkstaetten,
     center: { lat: geo.lat, lng: geo.lng },
@@ -157,26 +158,31 @@ export async function erstelleWerkstattFinderLead(
   try {
     const neueUrls: string[] = []
 
+    // Security: den transienten Abuse-Guard auch im Persist-Pfad anwenden.
+    // Auf dem PUBLIC fall-dokumente-Bucket verhindert das (a) Storage-Spam durch
+    // anon Caller (Count-Cap 3, Size-Cap 5MB) und (b) client-kontrollierten
+    // contentType (nur jpeg/png/webp durch die Media-Type-Whitelist).
+    const guard = pruefeEmbedFotos(payload.fotos ?? [])
+    const sichereFotos = guard.ok ? guard.images : []
+
     // Fotos hochladen (je Foto nicht-fatal).
-    if (payload.fotos && payload.fotos.length > 0) {
-      for (const foto of payload.fotos) {
-        try {
-          const buffer = Buffer.from(foto.data, 'base64')
-          const ext = extFromMediaType(foto.media_type)
-          const rand = Math.random().toString(36).slice(2, 8)
-          const path = `leads/${leadId}/schadensfoto_${Date.now()}_${rand}.${ext}`
-          const { error: uploadErr } = await admin.storage
-            .from('fall-dokumente')
-            .upload(path, buffer, { contentType: foto.media_type })
-          if (uploadErr) {
-            console.error('[werkstatt-finder] Foto-Upload fehlgeschlagen (non-fatal):', uploadErr.message)
-            continue
-          }
-          const url = await getStorageUrl(admin, 'fall-dokumente', path)
-          if (url) neueUrls.push(url)
-        } catch (err) {
-          console.error('[werkstatt-finder] Foto-Upload-Schleife fehlgeschlagen (non-fatal):', err)
+    for (const foto of sichereFotos) {
+      try {
+        const buffer = Buffer.from(foto.data, 'base64')
+        const ext = extFromMediaType(foto.media_type)
+        const rand = Math.random().toString(36).slice(2, 8)
+        const path = `leads/${leadId}/schadensfoto_${Date.now()}_${rand}.${ext}`
+        const { error: uploadErr } = await admin.storage
+          .from('fall-dokumente')
+          .upload(path, buffer, { contentType: foto.media_type })
+        if (uploadErr) {
+          console.error('[werkstatt-finder] Foto-Upload fehlgeschlagen (non-fatal):', uploadErr.message)
+          continue
         }
+        const url = await getStorageUrl(admin, 'fall-dokumente', path)
+        if (url) neueUrls.push(url)
+      } catch (err) {
+        console.error('[werkstatt-finder] Foto-Upload-Schleife fehlgeschlagen (non-fatal):', err)
       }
     }
 
@@ -186,9 +192,12 @@ export async function erstelleWerkstattFinderLead(
       updatePayload.schadensfoto_urls = neueUrls
     }
     if (payload.bedarf) {
-      updatePayload.bedarf_kategorien = payload.bedarf.kategorien
-      updatePayload.bedarf_quelle = payload.bedarf.quelle
-      updatePayload.bedarf_confidence = payload.bedarf.confidence
+      // Sanitize: schuetzt u.a. das int2-bedarf_confidence-Update vor Overflow
+      // und filtert nicht-Gewerk-Kategorien / ungueltige quelle.
+      const b = sanitizeBedarf(payload.bedarf)
+      updatePayload.bedarf_kategorien = b.kategorien
+      updatePayload.bedarf_quelle = b.quelle
+      updatePayload.bedarf_confidence = b.confidence
       updatePayload.bedarf_ermittelt_am = new Date().toISOString()
     }
     if (Object.keys(updatePayload).length > 0) {
