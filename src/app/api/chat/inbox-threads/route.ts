@@ -1,19 +1,16 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { getInboxKanaele } from '@/lib/chat/kanal-routing'
+import { createAdminClient } from '@/lib/supabase/admin'
+import type { SupabaseClient } from '@supabase/supabase-js'
+import { ladeClaimUnreadCounts } from '@/lib/chat/thread-actions'
+import { aggregiereInbox, type AggClaimMeta, type AggMessage } from '@/lib/chat/inbox-aggregation'
 
-export type InboxThread = {
-  fallId: string
-  // claim-nativ (Phase 2b): der v2-Thread des Fensters wird ueber die claim_id aufgeloest.
-  claimId: string
-  fallNummer: string | null
-  kundeName: string
-  lastMessage: string
-  lastAt: string
-  unreadCount: number
-  kanaele: string[]
-}
+export type { InboxThread } from '@/lib/chat/inbox-aggregation'
 
+// Phase 2b DEEPER: thread-nativer globaler Posteingang. Aggregiert die kunde_gruppe-Threads
+// (= die Konversation, die das FAB-Fenster oeffnet), NICHT mehr kanal-basiert. Reine Logik in
+// aggregiereInbox (getestet); hier nur die I/O. Zugriffs-Scope unveraendert (Staff: alle,
+// SV/Kunde: eigene Claims).
 export async function GET() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -24,115 +21,91 @@ export async function GET() {
     .select('rolle')
     .eq('id', user.id)
     .single()
-
   const rolle = profile?.rolle as string | undefined
   if (!rolle) return NextResponse.json({ threads: [] })
 
-  const kanaele = getInboxKanaele(rolle)
-  if (kanaele.length === 0) return NextResponse.json({ threads: [] })
-  let fallFilter: { column: string; value: string } | null = null
+  const istStaff = rolle === 'admin' || rolle === 'kundenbetreuer' || rolle === 'dispatch'
 
-  if (rolle === 'sachverstaendiger') {
-    const { data: sv } = await supabase
-      .from('sachverstaendige')
-      .select('id')
-      .eq('profile_id', user.id)
-      // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser.
-      .order('ist_parent_account', { ascending: true, nullsFirst: true })
-      .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
-      .limit(1)
-      .maybeSingle()
-    if (sv?.id) fallFilter = { column: 'sv_id', value: sv.id }
-  } else if (rolle === 'kunde') {
-    fallFilter = { column: 'kunde_id', value: user.id }
-  }
-
-  let fallIds: string[] = []
-  if (fallFilter) {
-    // CMM-49: faelle->v_claim_full (claim-anchored SSoT). operative_status-Filter direkt
-    // auf der View (statt 2-Schritt claims->faelle.in(claim_id)); fallFilter (sv_id/kunde_id)
-    // sind Core-View-Spalten. id:fall_id-Alias liefert die fall_id-Liste.
-    const { data: faelle } = await supabase
+  // Zugriffs-Scope: Staff sieht alle Claims (kein Filter), SV/Kunde nur eigene.
+  // claim_id:id (echte claims-PK) aus der claim-anchored View v_claim_full.
+  let claimFilter: string[] | null = null // null = kein Filter (Staff)
+  if (!istStaff) {
+    let fallFilter: { column: string; value: string } | null = null
+    if (rolle === 'sachverstaendiger') {
+      const { data: sv } = await supabase
+        .from('sachverstaendige')
+        .select('id')
+        .eq('profile_id', user.id)
+        // multi-standort-safe: Ordering+limit(1) wie getGutachterForUser.
+        .order('ist_parent_account', { ascending: true, nullsFirst: true })
+        .order('paket_faelle_gesamt', { ascending: false, nullsFirst: false })
+        .limit(1)
+        .maybeSingle()
+      if (sv?.id) fallFilter = { column: 'sv_id', value: sv.id }
+    } else if (rolle === 'kunde') {
+      fallFilter = { column: 'kunde_id', value: user.id }
+    }
+    if (!fallFilter) return NextResponse.json({ threads: [] })
+    const { data: claims } = await supabase
       .from('v_claim_full')
-      .select('id:fall_id')
+      .select('claim_id:id')
       .eq(fallFilter.column, fallFilter.value)
       .not('operative_status', 'in', '("storniert")')
-      .not('fall_id', 'is', null)
-      .limit(100)
-    fallIds = (faelle ?? []).map((f) => f.id).filter(Boolean) as string[]
-    if (fallIds.length === 0) return NextResponse.json({ threads: [] })
+      .not('id', 'is', null)
+      .limit(200)
+    claimFilter = (claims ?? [])
+      .map((c) => (c as { claim_id: string | null }).claim_id)
+      .filter(Boolean) as string[]
+    if (claimFilter.length === 0) return NextResponse.json({ threads: [] })
   }
 
-  let query = supabase
+  // kunde_gruppe-Thread-Nachrichten via Service-Role, explizit auf die Zugriffs-Claims gescoped
+  // (Staff: alle). Ersetzt die fruehere kanal-Aggregation (getInboxKanaele).
+  const admin = createAdminClient() as unknown as SupabaseClient
+  // Filter VOR order/limit (order/limit liefern einen Transform-Builder ohne .in).
+  let q = admin
     .from('nachrichten')
-    .select('id, fall_id, kanal, sender_rolle, nachricht, gelesen, richtung, created_at')
-    .in('kanal', kanaele)
-    .not('fall_id', 'is', null)
-    .order('created_at', { ascending: false })
-    .limit(500)
+    .select('created_at, nachricht, chat_threads!inner(claim_id, art)')
+    .not('thread_id', 'is', null)
+    .eq('chat_threads.art', 'kunde_gruppe')
+  if (claimFilter) q = q.in('chat_threads.claim_id', claimFilter)
+  const { data: rows } = await q.order('created_at', { ascending: false }).limit(500)
 
-  if (fallIds.length > 0) {
-    query = query.in('fall_id', fallIds)
-  }
+  type Row = { created_at: string; nachricht: string | null; chat_threads: { claim_id: string } | { claim_id: string }[] }
+  const messages: AggMessage[] = ((rows ?? []) as Row[])
+    .map((r) => {
+      const ct = Array.isArray(r.chat_threads) ? r.chat_threads[0] : r.chat_threads
+      return ct?.claim_id ? { claimId: ct.claim_id, nachricht: r.nachricht, createdAt: r.created_at } : null
+    })
+    .filter(Boolean) as AggMessage[]
 
-  const { data: nachrichten } = await query
-  if (!nachrichten?.length) return NextResponse.json({ threads: [] })
+  const claimIds = Array.from(new Set(messages.map((m) => m.claimId)))
+  if (claimIds.length === 0) return NextResponse.json({ threads: [] })
 
-  const allFallIds = Array.from(new Set(nachrichten.map(n => n.fall_id).filter(Boolean) as string[]))
-
-  // CMM-49: faelle->v_claim_full. claim_nummer flach aus der View, zurueck in die
-  // claims-Embed-Form gemappt (Downstream liest fall.claims/lead_id unveraendert).
-  // id:fall_id (legacy-Key) + claim_id:id (echte claims-PK aus der claim-anchored View).
-  const { data: faelleMetaRaw } = await supabase
+  // Claim-Meta: fall_id (Store-Key des FAB) + claim_nummer + lead_id -> Kundenname.
+  const { data: metaRaw } = await admin
     .from('v_claim_full')
-    .select('id:fall_id, claim_id:id, lead_id, claim_nummer')
-    .in('fall_id', allFallIds.slice(0, 100))
-  const faelleMeta = (faelleMetaRaw ?? []).map((row) => {
-    const x = row as Record<string, unknown>
-    return { id: x.id as string | null, claimId: x.claim_id as string | null, lead_id: x.lead_id as string | null, claims: { claim_nummer: x.claim_nummer as string | null } }
-  })
+    .select('id, fall_id, claim_nummer, lead_id')
+    .in('id', claimIds.slice(0, 200))
+  type MetaRow = { id: string; fall_id: string | null; claim_nummer: string | null; lead_id: string | null }
+  const metaRows = (metaRaw ?? []) as MetaRow[]
 
-  const leadIds = Array.from(new Set((faelleMeta ?? []).map(f => f.lead_id).filter(Boolean) as string[]))
+  const leadIds = Array.from(new Set(metaRows.map((m) => m.lead_id).filter(Boolean) as string[]))
   const { data: leads } = leadIds.length
-    ? await supabase.from('leads').select('id, vorname, nachname').in('id', leadIds)
-    : { data: [] }
+    ? await admin.from('leads').select('id, vorname, nachname').in('id', leadIds)
+    : { data: [] as Array<{ id: string; vorname: string | null; nachname: string | null }> }
+  const leadMap = new Map((leads ?? []).map((l) => [l.id, l]))
 
-  const fallMap = new Map((faelleMeta ?? []).map(f => [f.id, f]))
-  const leadMap = new Map((leads ?? []).map(l => [l.id, l]))
-
-  const threadMap = new Map<string, InboxThread>()
-  for (const n of nachrichten) {
-    if (!n.fall_id) continue
-    const existing = threadMap.get(n.fall_id)
-    const fall = fallMap.get(n.fall_id)
-    const lead = fall?.lead_id ? leadMap.get(fall.lead_id) : null
-    const kundeName = lead
-      ? [lead.vorname, lead.nachname].filter(Boolean).join(' ')
-      : 'Unbekannt'
-    const isUnread = !n.gelesen && n.richtung === 'inbound'
-
-    if (!existing) {
-      const claim = fall ? (Array.isArray(fall.claims) ? fall.claims[0] : fall.claims) : null
-      threadMap.set(n.fall_id, {
-        fallId: n.fall_id,
-        claimId: fall?.claimId ?? '',
-        fallNummer: claim?.claim_nummer ?? null,
-        kundeName,
-        lastMessage: n.nachricht ?? '',
-        lastAt: n.created_at,
-        unreadCount: isUnread ? 1 : 0,
-        kanaele: [n.kanal],
-      })
-    } else {
-      if (isUnread) existing.unreadCount++
-      if (!existing.kanaele.includes(n.kanal)) existing.kanaele.push(n.kanal)
-    }
+  const claimMeta = new Map<string, AggClaimMeta>()
+  for (const m of metaRows) {
+    const lead = m.lead_id ? leadMap.get(m.lead_id) : null
+    const kundeName = lead ? [lead.vorname, lead.nachname].filter(Boolean).join(' ') || 'Unbekannt' : 'Unbekannt'
+    claimMeta.set(m.id, { claimId: m.id, fallId: m.fall_id, fallNummer: m.claim_nummer, kundeName })
   }
 
-  const threads = Array.from(threadMap.values()).sort((a, b) => {
-    if ((a.unreadCount > 0) !== (b.unreadCount > 0)) return a.unreadCount > 0 ? -1 : 1
-    return new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime()
-  })
+  const unreadRes = await ladeClaimUnreadCounts(claimIds)
+  const unread = unreadRes.ok ? unreadRes.data : {}
 
+  const threads = aggregiereInbox(messages, claimMeta, unread)
   return NextResponse.json({ threads })
 }

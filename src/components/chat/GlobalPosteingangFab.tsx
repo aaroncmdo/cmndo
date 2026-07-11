@@ -172,7 +172,6 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
       lastMessage: '',
       lastAt: new Date().toISOString(),
       unreadCount: 0,
-      kanaele: [],
     })
     setOpen(false)
     setSearchQuery('')
