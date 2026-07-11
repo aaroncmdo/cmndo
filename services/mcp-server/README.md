@@ -1,22 +1,33 @@
 # claimondo-mcp-server
 
-Ein **read-only MCP-Server** (Model Context Protocol), der Claimondos öffentliche
-Read-API als Tool für LLM-Clients (Claude Desktop, Cline, Cursor, …) bereitstellt.
-Damit kann ein LLM **in-chat** Kfz-Sachverständige in der Nähe einer deutschen PLZ
-finden — ohne dass der Nutzer die Plattform öffnet.
+Ein **MCP-Server** (Model Context Protocol), der Claimondos öffentliche `/api/v1`-API
+als Tools für LLM-Clients (claude.ai / Claude Desktop, ChatGPT-Connectors, Cline,
+Cursor, …) bereitstellt. Damit kann ein LLM **in-chat** den kompletten Einstieg
+abbilden — Kfz-Sachverständige/Gutachter nach PLZ finden, buchbare Termine zeigen,
+den Schadenersatzanspruch prüfen, Versichererbriefe erklären und — **nur nach
+ausdrücklicher Einwilligung** — einen Schaden melden bzw. einen Rückruf anfordern.
 
-Foundation-Stufe der GEO-MCP/Agentic-Funnel-Strecke (Plan #5, Phase-3-Vorgriff).
-Bewusst minimal: **anonym, keine DB, keine Schreib-Operationen.** Hintergrund +
+Teil der GEO-MCP/Agentic-Funnel-Strecke. Die **Such-/Beratungs-Tools sind anonym +
+read-only**; die **Schreib-Tools** (`claimondo_melde_schaden`, `claimondo_rueckruf`)
+legen einen Lead an und schicken dem Kunden seinen persönlichen FlowLink **per
+WhatsApp** (kein Link/keine PII zurück in den Chat) — mit Consent-Pflicht (Stage-1-
+Einwilligung) und serverseitiger Write-Abuse-Härtung (s. Auth-Abschnitt). Hintergrund +
 Roadmap: `docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md`.
 
-## Tool
+## Tools
 
-| Tool | Zweck |
-|---|---|
-| `claimondo_finde_sachverstaendige` | Partner-Kfz-Sachverständige im Umkreis einer 5-stelligen PLZ (`plz`, `radius`=1–200, `response_format`=markdown\|json). Wrappt das live `GET /api/v1/sv-in-naehe`. |
+| Tool | Typ | Zweck |
+|---|---|---|
+| `claimondo_finde_sachverstaendige` | read | Anonymisierte Partner-Kfz-Sachverständige im Umkreis einer 5-stelligen PLZ (`plz`, `radius`=1–200). Nach Entfernung sortiert + Karten-Bild-URL + interaktive Karte. Wrappt `GET /api/v1/sv-in-naehe`. |
+| `claimondo_finde_gutachter_termine` | read | **Buchbare** Gutachter MIT freien Slots nahe einer PLZ (`plz`, optional `wunschtermin`). Liefert `gutachter[].id` + `termine[]` als Buchungs-Handle — Vorstufe zu `melde_schaden`. Wrappt `GET /api/v1/gutachter-termine`. |
+| `claimondo_pruefe_anspruch` | read | Prüft die Kostenübernahme-/Schadenersatz-Lage aus der `schuldfrage` (§ 249 BGB) + Gutachter-Funnel. Wrappt `GET /api/v1/pruefe-anspruch`. |
+| `claimondo_decode_brief` | read | Erklärt einen Versicherer-/Gegner-Brief (`text`) in Klartext. Wrappt `POST /api/v1/decode-brief`. |
+| `claimondo_melde_schaden` | **write** | Legt die Schadenmeldung an (Lead) und sendet dem Kunden seinen persönlichen FlowLink **per WhatsApp**. Pflicht: `schadenart, hergang, plz, name, telefon, einwilligung_erteilt`. Optional `sv_id`+`slot_start`/`slot_end` (gewählter Gutachter/Termin → weicher Hold / Reservierung). Wrappt `POST /api/v1/melde-schaden`. |
+| `claimondo_rueckruf` | **write** | Fordert einen telefonischen Rückruf an (Lead + Dispatch-Task, **kein** Link im Chat). Pflicht: `name, telefon, einwilligung_erteilt`. Wrappt `POST /api/v1/rueckruf`. |
 
-Antwort: nach Entfernung sortierte, **anonymisierte** Trefferliste + Karten-Bild-URL
-+ interaktive Karte + Rückruf-Telefon. `readOnlyHint: true`, `openWorldHint: true`.
+Die **Schreib-Tools** setzen `einwilligung_erteilt: true` (ausdrückliche Nutzer-Zustimmung)
+voraus und geben **keinen** Link/keine PII in den Chat zurück — der Kontakt läuft über
+WhatsApp/SMS. Alle Tools sind `openWorldHint: true`; die Read-Tools zusätzlich `readOnlyHint: true`.
 
 ## Resource
 
@@ -93,7 +104,7 @@ TRANSPORT=http PORT=4002 node dist/index.js
 2. **DNS:** `mcp.claimondo.de` braucht einen **expliziten A-Record** auf die VPS-IP — `*.claimondo.de` ist KEIN Wildcard (nur `*.staging` ist es).
 3. **nginx** `mcp.claimondo.de` → `proxy_pass http://127.0.0.1:4002;` (POST `/mcp` + `/health`), SSL via certbot.
 
-> **Auth:** aktuell **offen** — der Server liefert nur öffentliche Read-Daten (wie das public `/api/v1`). API-Key-Auth + Rate-Limiting pro Plattform sind Plan-Phase-1 (`mcp_api_keys`) und kommen erst bei echtem LLM-Traffic; bis dahin schützt die bestehende `/api/v1`-IP-Rate-Limitierung den Upstream.
+> **Auth & Abuse-Schutz:** der Endpoint ist **ohne Auth** (anonyme Public-API). Zusätzlich zum bestehenden Per-IP-Limit sind die **Schreib**-Pfade (`melde-schaden`/`rueckruf`) durch die serverseitige **Write-Abuse-Härtung** gedeckelt: globaler Circuit-Breaker (`MCP_WRITE_CAP_PER_HOUR`, Default 120) + Per-Telefon-Velocity (`MCP_WRITE_CAP_PER_PHONE_24H`, Default 3), beide fail-open — s. `src/lib/api-v1/write-abuse-guard.ts`. Nötig, weil externe KI-Calls von den Egress-IPs der Plattform kommen (Per-IP allein greift dort nicht). Per-Plattform-API-Keys (`mcp_api_keys`) bleiben Roadmap für authentifizierten/priorisierten Traffic.
 
 ## Testen
 
@@ -110,8 +121,15 @@ curl -4 -s "https://claimondo.de/api/v1/sv-in-naehe?plz=50670&radius=30" | jq .a
 
 ## Discovery & Registry-Listing
 
-Der Server ist als **anonymer Remote-Endpoint** live: `https://mcp.claimondo.de/mcp` (Streamable HTTP).
-So binden ihn Clients/Verzeichnisse ein:
+Der Server ist als **anonymer Remote-Endpoint** live: `https://mcp.claimondo.de/mcp` (Streamable HTTP) —
+Such-/Beratungs-Tools read-only, Schreib-Tools consent-gated (s. o.). So binden ihn Clients/Verzeichnisse ein:
+
+> **⚠️ Vor dem öffentlichen Listen (Rechts-Gate):** Eine öffentliche Registry-Listung (offizielle
+> MCP-Registry, Smithery, mcp.so, OpenAI-App-Verzeichnis) macht den **buchungsfähigen** Connector breit
+> auffindbar. Das berührt den RDG-/DSGVO-Vorbehalt (Rechtsdienstleistung, Drittland-LLM-Transfer) aus der
+> Roadmap — vor dem Publish **produktseitig/rechtlich freigeben**. Die technische Basis (Consent-Pflicht +
+> Write-Abuse-Guard + WhatsApp-Gate) ist da; die Freigabe ist eine Produkt-/Legal-Entscheidung. Der
+> Connector ist auch **ohne** Listung voll nutzbar (URL direkt einbinden — s. claude.ai/ChatGPT unten).
 
 ### Claude.ai (Custom Connector) — direkt nutzbar
 claude.ai → **Settings → Connectors → „Add custom connector"** → URL `https://mcp.claimondo.de/mcp`
@@ -137,13 +155,13 @@ npm-Package, eigener VPS-Host). Korrekt ist daher das Listen des **bereits laufe
 > zusätzlich **CORS** auf `/mcp` und Smithery muss das Source-Package erreichen — beides ist hier bewusst
 > nicht gemacht (der Remote läuft schon auf dem eigenen VPS).
 
-## Roadmap (Q3, NICHT in dieser Foundation)
+## Roadmap
 
 Reihenfolge + Begründung im Readiness-Doc (`docs/geo/geo-mcp-funnel-phase-1-readiness-2026-05-26.md`):
 
-- **Remote-Transport** (Streamable HTTP) für `mcp.claimondo.de` — ✅ **gebaut** (`TRANSPORT=http`, siehe Abschnitt oben); fehlt nur noch VPS-Hosting + DNS.
-- **Weitere Read-Tools** — `staedte/{slug}` (braucht das aktuell data-blockte `vw_stadt_aggregat`), `case-status/{token}` (braucht Phase-2-Write-Tokens).
-- **Write-Tools** — `schaden_melden` / `termin_anfragen` via Magic-Link-Bestätigung. Erst nach Rechts-/DSGVO-Review (RDG, Drittland-Transfer).
+- **Remote-Transport** (Streamable HTTP, `mcp.claimondo.de`) — ✅ **live**.
+- **Schreib-Tools** (`claimondo_melde_schaden`, `claimondo_rueckruf`) — ✅ **live** (AAR-956), mit Stage-1-Consent + WhatsApp-Gate + Write-Abuse-Härtung. Der ursprüngliche RDG-/DSGVO-Vorbehalt (Drittland-Transfer, Rechtsdienstleistung) bleibt für die **öffentliche Registry-Listung** relevant — s. „Vor dem öffentlichen Listen" unten.
+- **Per-Plattform-API-Keys** (`mcp_api_keys`) — offen, für authentifizierten/priorisierten Traffic.
+- **Weitere Read-Tools** — `staedte/{slug}` (braucht `vw_stadt_aggregat`), `case-status/{token}`.
 
-Aktuell konsumiert der Server ausschließlich das bereits live `/api/v1/*`-Surface
-(Doc 34 Phase 0b) — **kein** `/api/public/*`-Fork, **keine** `mcp_api_keys`-Tabelle.
+Der Server konsumiert ausschließlich das live `/api/v1/*`-Surface — **kein** `/api/public/*`-Fork.
