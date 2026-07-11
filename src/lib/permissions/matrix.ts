@@ -191,6 +191,22 @@ export const PERMISSION_MATRIX: Record<UserRolle, Permission> = {
     },
     capabilities: new Set<PermissionCapability>([]),
   },
+
+  // Firmen-Flotten-Portal: Flottenmanager verwaltet Fahrzeug-Schadensfaelle
+  // der eigenen Firmen-Flotte. Lese-Zugriff auf eigene Faelle, kein Admin.
+  flottenmanager: {
+    scope: 'own',
+    resources: {
+      fall: 'read',
+      stammdaten: 'read',
+      abrechnung: 'read',
+      dokumente: 'read',
+      chat: 'write',
+      tasks: 'none',
+      prozess: 'read',
+    },
+    capabilities: new Set<PermissionCapability>([]),
+  },
 }
 
 /**
