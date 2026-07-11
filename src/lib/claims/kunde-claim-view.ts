@@ -130,6 +130,7 @@ export type KundeWerkstatt = {
   data: { name: string; adresse_strasse: string | null; adresse_plz: string | null; adresse_ort: string | null; telefon: string | null } | null
   reparaturTermin: { id: string; status: string; wunschtermin: string | null; bestaetigter_termin: string | null; absage_grund: string | null } | null
   schadensfotoUrls: string[]
+  schlussrechnungUrl: string | null
   brauchtVermittlung: boolean
 }
 
@@ -402,13 +403,15 @@ export async function getKundeClaimView(
   // zusaetzlicher Storage-Call). gutachtenUrlRaw ist bewusst NICHT freigegeben-gated (KanzleiPfad).
   const schadensfotoUrls = dokumente.filter((d) => d.typ === 'schadensfoto' && d.datei_url).map((d) => d.datei_url)
   const gutachtenUrlRaw = dokumente.filter((d) => d.typ === 'gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null
+  const schlussrechnungUrl =
+    dokumente.filter((d) => d.typ === 'schlussrechnung' && d.datei_url).slice(-1)[0]?.datei_url ?? null
   const brauchtVermittlung = brauchtWerkstattVermittlung({
     reparaturwunsch: (claimExtra?.reparaturwunsch as string | null) ?? null,
     reparatur_werkstatt_id: reparaturWerkstattId,
     werkstatt_id: (claimExtra?.werkstatt_id as string | null) ?? null,
     reparatur_vermittlung_status: (claimExtra?.reparatur_vermittlung_status as string | null) ?? null,
   })
-  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, brauchtVermittlung }
+  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, schlussrechnungUrl, brauchtVermittlung }
 
   const kanzleiRow = (kanzleiRowRes.data as { name: string | null; email: string | null; adresse: string | null } | null) ?? null
   const kanzleiAnsprechpartnerName = (fall.kanzlei_ansprechpartner_name as string | null) ?? null
