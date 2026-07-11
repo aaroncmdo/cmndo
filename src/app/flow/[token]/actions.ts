@@ -925,7 +925,7 @@ export async function signSAandCreateFall(
     status: 'umgewandelt',
     qualifizierungs_phase: 'konvertiert',
     sa_unterschrieben: true,
-    sa_datum: nowIsoSa,
+    // FG6: sa_datum retired (redundant twin von sa_unterschrieben_am; zero readers grep-verifiziert).
     sa_unterschrieben_am: nowIsoSa,
     flow_link_abgeschlossen: true,
     konvertiert_zu_fall_id: fall.id,
