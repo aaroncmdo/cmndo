@@ -2,7 +2,9 @@ import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getFlottenmanagerFirma } from '@/lib/flotte/konto-firma'
 import { getKundeFlotte } from '@/lib/kunde/firma-flotte'
+import { generateQrCodeSvg } from '@/lib/kanzlei/qr-code'
 import { SectionCard } from '@/components/shared/SectionCard'
+import { QrCodeDownloadButtons } from '@/components/shared/QrCodeDownloadButtons'
 import EmptyState from '@/components/shared/EmptyState'
 import { CarIcon } from 'lucide-react'
 
@@ -57,6 +59,12 @@ export default async function FahrzeugDetailPage({
 
   const karte = kartenData as KartenRow | null
 
+  const qrSvg = karte
+    ? await generateQrCodeSvg(`https://claimondo.de/schaden/${karte.karten_token}`, 160)
+    : null
+
+  const sanitizedKennzeichen = (fahrzeug.kennzeichen ?? 'fahrzeug').replace(/[^a-zA-Z0-9]/g, '-')
+
   return (
     <div className="mx-auto w-full max-w-2xl px-4 py-6 md:px-8 space-y-6">
       <div>
@@ -96,13 +104,25 @@ export default async function FahrzeugDetailPage({
       </SectionCard>
 
       <SectionCard title="Schadenkarte">
-        {karte ? (
-          <p className="text-sm text-claimondo-navy">
-            Karte gebunden:{' '}
-            <span className="font-mono font-medium">{karte.karten_token}</span>
-            {' '}
-            <span className="text-claimondo-shield">({karte.status})</span>
-          </p>
+        {karte && qrSvg ? (
+          <div className="space-y-4">
+            <p className="text-sm text-claimondo-navy">
+              Karte gebunden:{' '}
+              <span className="font-mono font-medium">{karte.karten_token}</span>
+              {' '}
+              <span className="text-claimondo-shield">({karte.status})</span>
+            </p>
+            <div className="inline-block rounded-ios-md border border-claimondo-border p-3 bg-white">
+              <div dangerouslySetInnerHTML={{ __html: qrSvg }} />
+            </div>
+            <p className="text-xs text-claimondo-shield">
+              QR-Code der Schadenkarte — auf die Karte kleben oder als Ersatz ausdrucken.
+            </p>
+            <QrCodeDownloadButtons
+              qrSvg={qrSvg}
+              fileBaseName={`schadenkarte-${sanitizedKennzeichen}`}
+            />
+          </div>
         ) : (
           <p className="text-sm text-claimondo-shield">Keine Karte gebunden.</p>
         )}

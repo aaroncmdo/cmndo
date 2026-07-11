@@ -160,7 +160,7 @@ describe('bindeSchadenkarteAnFahrzeug', () => {
       userId: 'u1',
     })
     expect(res.ok).toBe(false)
-    expect(res.error).toBe('Karte gehoert zu einer anderen Firma.')
+    expect(res.error).toBe('Karte gehört zu einer anderen Firma.')
   })
 
   it('returns error when card is already gebunden', async () => {

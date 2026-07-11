@@ -75,7 +75,7 @@ export async function bindeSchadenkarteAnFahrzeug(
 
   if (!row) return { ok: false, error: 'Karte nicht gefunden.' }
   if (row.firma_id !== params.firmaId) {
-    return { ok: false, error: 'Karte gehoert zu einer anderen Firma.' }
+    return { ok: false, error: 'Karte gehört zu einer anderen Firma.' }
   }
   if (row.status !== 'bestellt' && row.status !== 'frei') {
     return { ok: false, error: 'Karte ist bereits gebunden oder gesperrt.' }
