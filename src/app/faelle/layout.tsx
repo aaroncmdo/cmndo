@@ -14,6 +14,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { roleToPath } from '@/lib/auth/role-redirect'
+import { safeGetUser } from '@/lib/auth/safe-get-user'
 import AdminNav from '@/app/admin/_components/AdminNav'
 import MitarbeiterNav from '@/app/mitarbeiter/_components/MitarbeiterNav'
 import KanzleiNav from '@/app/kanzlei/_components/KanzleiNav'
@@ -28,7 +29,9 @@ export default async function FaelleLayout({
   children: React.ReactNode
 }) {
   const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
+  // CMM-14: getUser()-Reject nicht ins Layout werfen lassen (→ lila Root-Crash).
+  // safeGetUser degradiert transiente Rejects zu null → sauberer /login-Redirect.
+  const user = await safeGetUser(() => supabase.auth.getUser())
   if (!user) redirect('/login')
 
   const { data: profile } = await supabase
@@ -106,12 +109,7 @@ export default async function FaelleLayout({
         meineTasksCount={meineTasksCount ?? 0}
       />
       <div className="md:ml-56 h-screen flex flex-col relative z-10">
-        <header className="md:hidden flex items-center justify-between px-4 py-3 bg-claimondo-navy shrink-0">
-          <span className="text-lg font-bold tracking-tight">
-            <span className="text-white">Claim</span><span className="text-claimondo-light-blue">ondo</span>
-          </span>
-          <UpdatesNav variant="dark" />
-        </header>
+        {/* Mobile-Nav ist bottom-only (MobileNav-Pille + Menü-Sheet inkl. Updates) — kein Top-Bar. */}
         <div className="hidden md:flex items-center gap-2 fixed top-3 right-4 z-30">
           <OutboxBadge />
           <UpdatesNav variant="light" />

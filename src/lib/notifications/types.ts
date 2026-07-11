@@ -92,6 +92,9 @@ export type EventType =
   | 'termin.verlegung_abgelehnt'
   | 'termin.verlegung_eskalation'
   | 'termin.verschoben_durch_kunde'
+  // 5.19 Gast-Conversion-Reminder (AAR-826) — Nudge an Gast-Accounts, ihr Konto
+  // zu 'voll' zu vervollstaendigen. User-basiert (kein Claim/Fall).
+  | 'gast.conversion_reminder'
 
 // ── Payload-Shapes ────────────────────────────────────────────────────────
 export interface EventPayloads {
@@ -215,6 +218,8 @@ export interface EventPayloads {
     svVorname: string        // SV-Vorname für Anrede in WA-Nachricht
     grund?: string
   }
+  // 5.19 Gast-Conversion-Reminder (AAR-826) — user-basiert, kein Fall/Claim.
+  'gast.conversion_reminder': { userId: string; email?: string | null; name?: string | null }
 }
 
 // ── DB-Row-Shapes ─────────────────────────────────────────────────────────

@@ -8,6 +8,22 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // CMM-44 MP-4e: 4-Phasen-Modell (v_claim_phase) statt claims.phase-11-Code/Status-Label.
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import type { ClaimMainPhase, ClaimSubPhase } from '@/lib/claims/lifecycle'
+// Ansprechpartner-Mapping (KB/SV/Kanzlei) + robuste Kunden-Identitaet (Lead-Fallback).
+import {
+  type MaklerFallKontakte,
+  type KundeIdentity,
+  buildKanzleiKontakt,
+  svDisplayName,
+  mergeKundeIdentity,
+} from './kontakte'
+// Gutachten-Werte kanonisch aus v_gutachten_werte (geteilt mit dem Copilot).
+import {
+  type GutachtenWerte,
+  type GutachtenWerteRow,
+  GUTACHTEN_WERTE_COLUMNS,
+  EMPTY_GUTACHTEN_WERTE,
+  mapGutachtenWerte,
+} from './gutachten-werte'
 
 export type MaklerRow = {
   id: string
@@ -246,16 +262,9 @@ export type FallDetailProvision = {
   hold_until: string | null
 }
 
-export type FallDetailKunde = {
-  id: string
-  vorname: string | null
-  nachname: string | null
-  email: string | null
-  telefon: string | null
-  adresse: string | null
-  plz: string | null
-  ort: string | null
-}
+// Kunden-Identitaet = KundeIdentity (Lead-Fallback-Shape aus kontakte.ts). id ist
+// jetzt nullbar (Lead-only-Faelle ohne geschaedigter_user_id) — Consumer nutzen id nicht.
+export type FallDetailKunde = KundeIdentity
 
 export type FallDetail = {
   consent_scope: string
@@ -304,6 +313,8 @@ export type FallDetail = {
     abtretung_signiert_am: string | null
   }
   kunde: FallDetailKunde | null
+  /** Ansprechpartner zum Fall (KB/SV/Kanzlei) fuer die Chat-Tab-Karte. */
+  kontakte: MaklerFallKontakte
   provision: FallDetailProvision | null
   timeline: TimelineEvent[]
 }
@@ -342,6 +353,8 @@ export async function getMaklerFallDetail(
       kennzeichen, fin_vin, kilometerstand, erstzulassung,
       gegner_name, gegner_kennzeichen, gegner_schadennummer,
       gegner_versicherung, zeugen_kontakte,
+      sv_id, kundenbetreuer_id,
+      kanzlei_ansprechpartner_name, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon,
       sv_termin, gutachten_eingegangen_am, kanzlei_uebergeben_am,
       regulierung_am, reparaturkosten, wertminderung,
       nutzungsausfall_gesamt, gutachter_honorar,
@@ -351,44 +364,101 @@ export async function getMaklerFallDetail(
     .maybeSingle()
   if (!fall) return null
 
-  // claim_id fuer Phase-Read + Kunden-Lookup (View exponiert geschaedigter_user_id nicht).
+  // claim_id fuer Phase-Read + Kunden/Kontakt-Lookup (View exponiert geschaedigter_user_id nicht).
   const detailClaimId = (fall as { claim_id?: string | null }).claim_id ?? null
 
-  // Makler-PII, scope-gestaffelt: den Kunden (geschaedigter) via service-role lesen. Der Makler
-  // hat bewusst KEINE profiles-RLS auf Kunden — ein RLS-Policy-Ansatz fuehrte zu 42P17-Rekursion
-  // (profiles-Policy liest claims, dessen RLS wieder profiles liest). Authz = der oben geprüfte
-  // aktive Consent; Feld-Staffelung in der App: vollzugriff -> voller Kontakt, minimal -> nur
-  // Name (Kontaktfelder werden serverseitig genullt, bevor sie an den Makler gehen). Pattern wie
-  // getClaimPhaseMap (admin-Client, consent-vorgefiltert -> kein Leak).
+  // Makler-PII, scope-gestaffelt: Kunde (geschaedigter) + Ansprechpartner (KB/SV/Kanzlei) via
+  // service-role lesen. Der Makler hat bewusst KEINE profiles-RLS — ein RLS-Policy-Ansatz fuehrte
+  // zu 42P17-Rekursion (profiles-Policy liest claims, dessen RLS wieder profiles liest). Authz =
+  // der oben geprüfte aktive Consent (Route redirected zusaetzlich non-vollzugriff). Kunden-Kontakt
+  // ist feld-gestaffelt (vollzugriff -> voll, minimal -> nur Name); KB/SV/Kanzlei sind Claimondo-/
+  // Kanzlei-seitige Kontakte (kein Kunden-PII) und werden voll aufgeloest.
+  const fallRow = fall as Record<string, unknown>
+  const full = consent.consent_scope === 'vollzugriff'
   let kunde: FallDetailKunde | null = null
+  let kontakte: MaklerFallKontakte = { kundenbetreuer: null, sv: null, kanzlei: null }
+  let gutachtenWerte: GutachtenWerte = EMPTY_GUTACHTEN_WERTE
+
   if (detailClaimId) {
     const admin = createAdminClient()
+
+    // claims traegt geschaedigter_user_id + lead_id (die View exponiert geschaedigter nicht).
     const { data: claimRow } = await admin
       .from('claims')
-      .select('geschaedigter_user_id')
+      .select('geschaedigter_user_id, lead_id')
       .eq('id', detailClaimId)
       .maybeSingle()
     const geschaedigterId = (claimRow?.geschaedigter_user_id as string | null) ?? null
-    if (geschaedigterId) {
-      const { data: k } = await admin
+    const leadId = (claimRow?.lead_id as string | null) ?? null
+    const kbId = (fallRow.kundenbetreuer_id as string | null) ?? null
+    const svId = (fallRow.sv_id as string | null) ?? null
+
+    // Kunde-Profil, Lead (Fallback), KB-Profil, SV-Row und Gutachten-Werte parallel.
+    const [kProfilRes, leadRes, kbRes, svRowRes, gwRes] = await Promise.all([
+      geschaedigterId
+        ? admin.from('profiles').select('id, vorname, nachname, email, telefon, adresse, plz, ort').eq('id', geschaedigterId).maybeSingle()
+        : Promise.resolve({ data: null }),
+      leadId
+        ? admin.from('leads').select('vorname, nachname, telefon, email').eq('id', leadId).maybeSingle()
+        : Promise.resolve({ data: null }),
+      kbId
+        ? admin.from('profiles').select('vorname, nachname, email, telefon').eq('id', kbId).maybeSingle()
+        : Promise.resolve({ data: null }),
+      svId
+        ? admin.from('sachverstaendige').select('profile_id, verifiziert').eq('id', svId).maybeSingle()
+        : Promise.resolve({ data: null }),
+      // Gutachten-Werte aus der kanonischen Entity (claim_id-keyed). Die v_claim_base-Spalten
+      // reparaturkosten/wertminderung sind fuer Makler rolle-gegatet -> hier ungated via admin.
+      admin.from('v_gutachten_werte').select(GUTACHTEN_WERTE_COLUMNS).eq('claim_id', detailClaimId).maybeSingle(),
+    ])
+
+    // F3-Fix (Audit 2026-07-11): kanonische Gutachten-Werte (wie der Copilot) — konsistent + korrekt.
+    gutachtenWerte = mapGutachtenWerte(gwRes.data as GutachtenWerteRow)
+
+    // Kunde: Profil bevorzugt, Lead-Fallback (Feld-Audit-Fix — Detail == Liste). full -> Kontakt.
+    kunde = mergeKundeIdentity(
+      (kProfilRes.data as Partial<KundeIdentity> | null) ?? null,
+      (leadRes.data as { vorname: string | null; nachname: string | null; telefon: string | null; email: string | null } | null) ?? null,
+      full,
+    )
+
+    // Kundenbetreuer.
+    const kb = kbRes.data as { vorname: string | null; nachname: string | null; email: string | null; telefon: string | null } | null
+    const kundenbetreuer = kb
+      ? { vorname: kb.vorname ?? null, nachname: kb.nachname ?? null, email: kb.email ?? null, telefon: kb.telefon ?? null }
+      : null
+
+    // Sachverstaendiger: sachverstaendige -> profiles (+ verifiziert, anzeigename-Vorrang).
+    let sv: MaklerFallKontakte['sv'] = null
+    const svRow = svRowRes.data as { profile_id: string | null; verifiziert: boolean | null } | null
+    if (svRow?.profile_id) {
+      const { data: svProfil } = await admin
         .from('profiles')
-        .select('id, vorname, nachname, email, telefon, adresse, plz, ort')
-        .eq('id', geschaedigterId)
+        .select('vorname, nachname, email, telefon, anzeigename')
+        .eq('id', svRow.profile_id)
         .maybeSingle()
-      if (k) {
-        const full = consent.consent_scope === 'vollzugriff'
-        kunde = {
-          id: k.id,
-          vorname: k.vorname ?? null,
-          nachname: k.nachname ?? null,
-          email: full ? (k.email ?? null) : null,
-          telefon: full ? (k.telefon ?? null) : null,
-          adresse: full ? (k.adresse ?? null) : null,
-          plz: full ? (k.plz ?? null) : null,
-          ort: full ? (k.ort ?? null) : null,
+      if (svProfil) {
+        const { vorname, nachname } = svDisplayName(
+          svProfil as { anzeigename?: string | null; vorname?: string | null; nachname?: string | null },
+        )
+        sv = {
+          vorname,
+          nachname,
+          email: (svProfil.email as string | null) ?? null,
+          telefon: (svProfil.telefon as string | null) ?? null,
+          verifiziert: Boolean(svRow.verifiziert),
         }
       }
     }
+
+    // Kanzlei: direkt aus den View-Feldern (Name-only; FallKontakteCard blendet leer aus).
+    const kanzlei = buildKanzleiKontakt(
+      fallRow.kanzlei_ansprechpartner_name as string | null,
+      fallRow.kanzlei_ansprechpartner_email as string | null,
+      fallRow.kanzlei_ansprechpartner_telefon as string | null,
+    )
+
+    kontakte = { kundenbetreuer, sv, kanzlei }
   }
 
   const { data: provisionRows } = await supabase
@@ -428,10 +498,14 @@ export async function getMaklerFallDetail(
     consent_scope: consent.consent_scope,
     fall: {
       ...(fall as Record<string, unknown>),
+      // F3-Fix: Gutachten-Werte aus v_gutachten_werte ueberschreiben die fuer Makler
+      // rolle-gegateten / toten v_claim_base-Spalten (reparaturkosten/wertminderung/etc.).
+      ...gutachtenWerte,
       mainPhase: phaseCell?.mainPhase ?? 'erfassung',
       subPhase: phaseCell?.subPhase ?? 'sa_offen',
     } as unknown as FallDetail['fall'],
     kunde,
+    kontakte,
     provision,
     timeline,
   }

@@ -173,7 +173,9 @@ Ansprüche gegenüber der Versicherung geltend zu machen, und Zahlungen entgegen
     kategorie: 'unterschrift',
     quelle: 'flowlink',
     uploaded_by_kunde: true,
-    sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei', 'kunde'],
+    // AAR-956 Task C1 (11.07.): sachverstaendiger hinzugefuegt (volle Transparenz-Entscheid Aaron).
+    // BACKFILL: aeltere Rows ohne 'sachverstaendiger' muessen per Data-Update nachgezogen werden.
+    sichtbar_fuer: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kanzlei', 'kunde'],
   })
 
   return { pdfUrl: publicUrl }

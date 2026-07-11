@@ -30,7 +30,7 @@ function fmtTermin(iso: string): string {
   return `${DATETIME.format(new Date(iso))} Uhr`
 }
 
-export type ReparaturterminEreignis = 'bestaetigt' | 'anruf_erbeten' | 'abgelehnt'
+export type ReparaturterminEreignis = 'bestaetigt' | 'anruf_erbeten' | 'abgelehnt' | 'erledigt'
 
 export type NotifyKundeReparaturterminDeps = {
   sendEmail: typeof sendEmail
@@ -52,6 +52,10 @@ const INAPP_TEXT: Record<ReparaturterminEreignis, { titel: string; text: string 
   abgelehnt: {
     titel: 'Reparaturtermin abgelehnt',
     text: 'Deine Werkstatt konnte den vorgeschlagenen Termin nicht annehmen.',
+  },
+  erledigt: {
+    titel: 'Ihre Reparatur ist abgeschlossen',
+    text: 'Die Werkstatt hat die Reparatur abgeschlossen. Den Beleg können Sie im Portal herunterladen.',
   },
 }
 
@@ -85,6 +89,11 @@ export function buildKundeReparaturterminEmailHtml(args: {
     inhalt = `
       <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">die Werkstatt wird sich in Kürze telefonisch bei Ihnen melden, um einen Reparaturtermin zu vereinbaren.</p>
       <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Bitte halten Sie Ihr Telefon bereit. Bei Fragen sind wir jederzeit für Sie da.</p>`
+  } else if (args.ereignis === 'erledigt') {
+    betreff = 'Ihre Reparatur ist abgeschlossen'
+    inhalt = `
+      <p style="margin:0 0 16px;font-size:15px;line-height:1.5;">die Werkstatt hat die Reparatur an Ihrem Fahrzeug erfolgreich abgeschlossen.</p>
+      <p style="margin:0 0 8px;font-size:15px;line-height:1.5;">Die Schlussrechnung steht Ihnen jetzt im Claimondo-Portal zum Herunterladen bereit. Melden Sie sich einfach an und rufen Sie Ihren Fall auf.</p>`
   } else {
     betreff = 'Reparaturtermin konnte nicht bestätigt werden'
     inhalt = `

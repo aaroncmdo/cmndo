@@ -47,3 +47,29 @@ export async function findRecentMcpLead(telefon: string): Promise<{ leadId: stri
   }
   return data ? { leadId: data.id as string } : null
 }
+
+/**
+ * Zaehlt die ueber die MCP-Write-API (source_channel='mcp') angelegten Leads derselben
+ * Telefonnummer innerhalb der letzten `hours` Stunden. Grundlage der Per-Telefon-Velocity-
+ * Bremse (write-abuse-guard.phoneWriteCapExceeded) — begrenzt WhatsApp-Bombing derselben
+ * Opfer-Nummer ueber die 10-Min-Retry-Dedup hinaus. COUNT-only (head:true, kein Row-Transfer).
+ * Best-effort: bei DB-Fehler 0 (lieber durchlassen als den Funnel hart brechen — der globale
+ * Circuit-Breaker faengt Massen-Missbrauch trotzdem).
+ */
+export async function countRecentMcpLeadsByPhone(telefon: string, hours: number): Promise<number> {
+  const tel = telefon.trim()
+  if (!tel) return 0
+  const sinceIso = new Date(Date.now() - hours * 60 * 60_000).toISOString()
+  const admin = createAdminClient()
+  const { count, error } = await admin
+    .from('leads')
+    .select('id', { count: 'exact', head: true })
+    .eq('telefon', tel)
+    .eq('source_channel', 'mcp')
+    .gt('created_at', sinceIso)
+  if (error) {
+    console.error('[api-v1/dedup] countRecentMcpLeadsByPhone fehlgeschlagen:', error.message)
+    return 0
+  }
+  return count ?? 0
+}

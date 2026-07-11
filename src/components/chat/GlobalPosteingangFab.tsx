@@ -166,12 +166,12 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
   function startNewChat(result: FallLookupResult) {
     pin({
       fallId: result.fallId,
+      claimId: result.claimId,
       fallNummer: result.fallNummer,
       kundeName: result.kundeName,
       lastMessage: '',
       lastAt: new Date().toISOString(),
       unreadCount: 0,
-      kanaele: [],
     })
     setOpen(false)
     setSearchQuery('')
@@ -186,11 +186,9 @@ export function GlobalPosteingangFab({ currentUserId }: { currentUserId: string 
 
       <div
         data-chat-outside-ok
-        /* 2026-05-14: Mobile-Cockpit-Adjust — die SV-Tab-Bar (~68 px + safe-
-           area + 12 px Abstand) blockiert den klassischen bottom-4-FAB. Wir
-           heben den FAB auf Mobile (< lg) über die Tab-Bar, Desktop bleibt
-           bottom-4. */
-        className="fixed right-4 z-[9990] flex items-end gap-2 bottom-[calc(env(safe-area-inset-bottom,0px)+92px)] lg:bottom-4"
+        /* Ziel-A Mobile-Nav: der Posteingang-FAB ist auf Mobile ausgeblendet
+           (bottom-only Nav via geteilter MobileNav). Nur Desktop (lg+) zeigt ihn. */
+        className="hidden lg:flex fixed right-4 bottom-4 z-[9990] items-end gap-2"
       >
         {/* Angeheftete Chat-Bubbles links neben dem FAB */}
         {pinned.length > 0 && (

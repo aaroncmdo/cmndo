@@ -1,9 +1,7 @@
-// AAR-526 (A2): Fälle-Hub Layout — Tab-Nav über 5 Sub-Views.
-// Route Group `(hub)` damit /admin/faelle/[id] und /admin/faelle/anlegen
-// das Tab-Layout NICHT erben.
-
+// AAR-526 → F0: Fälle-Hub Layout. EIN Chrome-Block (FaelleHubHeader) über 5 Sub-Views.
+// Route Group `(hub)` damit /admin/faelle/[id] und /admin/faelle/anlegen das Layout NICHT erben.
 import { createAdminClient } from '@/lib/supabase/admin'
-import FaelleHubTabs from './FaelleHubTabs'
+import FaelleHubHeader from './FaelleHubHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -26,7 +24,7 @@ export default async function FaelleHubLayout({
   return (
     <div className="flex flex-col h-full">
       <div className="shrink-0 border-b border-claimondo-border bg-white px-4 md:px-6">
-        <FaelleHubTabs offeneReklamationen={offeneReklamationen} />
+        <FaelleHubHeader offeneReklamationen={offeneReklamationen} />
       </div>
       <div className="flex-1 min-h-0 overflow-y-auto">{children}</div>
     </div>

@@ -127,6 +127,7 @@ export default function StatistikenClient({
   leaderboard,
   totalLeads,
   konvertierteLeads,
+  embedded = false,
 }: {
   faelle: StatistikFall[]
   klassifizierungen: StatistikKlassifizierung[]
@@ -137,6 +138,7 @@ export default function StatistikenClient({
   leaderboard: { sv_id: string; faelle_count: number; umsatz_netto: number; rang: number }[]
   totalLeads: number
   konvertierteLeads: number
+  embedded?: boolean
 }) {
   const [zeitraum, setZeitraum] = useState(90)
   const [nurEigene, setNurEigene] = useState(rolle === 'kundenbetreuer' || rolle === 'dispatch')
@@ -481,7 +483,7 @@ export default function StatistikenClient({
       <header className="sticky top-0 z-10 bg-white border-b border-claimondo-border shadow-sm px-4 py-3">
         <div className="max-w-[1600px] mx-auto space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <PageHeader title="Statistiken" />
+            {!embedded && <PageHeader title="Statistiken" />}
             <div className="flex items-center gap-3 flex-wrap">
               {/* Zeitraum */}
               <div className="flex bg-claimondo-bg rounded-ios-lg p-0.5">

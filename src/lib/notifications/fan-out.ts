@@ -161,6 +161,18 @@ export async function computeRecipients(event: NotificationEvent): Promise<Recip
     return flatten(map, selfNotifyUserId(event))
   }
 
+  // AAR-826 Gast-Conversion-Reminder: user-basiert (kein Claim). Empfaenger =
+  // der Gast selbst (payload.userId), Rolle 'kunde' (Proto-Kunde). Channels aus
+  // der Matrix. Muss VOR dem claim-basierten Standard-Fan-Out stehen, sonst
+  // faellt das Event mangels claim_id auf 0 Empfaenger.
+  if (event.event_type === 'gast.conversion_reminder') {
+    const userId = typeof payload.userId === 'string' ? payload.userId : null
+    if (userId) {
+      addRecipient(map, userId, 'kunde', config.channels.kunde ?? [])
+    }
+    return flatten(map, selfNotifyUserId(event))
+  }
+
   // ── Standard-Fan-Out: alle Fall-Beteiligten laut Matrix ─────────────────
   // CMM-49 claim-native: gatet auf claim_id (kanonischer Key). emit setzt claim_id immer mit
   // (resolveClaimId), die Invariante „jeder Fall hat einen Claim" haelt -> aequivalent zum alten

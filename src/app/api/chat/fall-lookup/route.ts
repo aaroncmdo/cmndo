@@ -3,6 +3,8 @@ import { createClient } from '@/lib/supabase/server'
 
 export type FallLookupResult = {
   fallId: string
+  // claim-nativ (Phase 2b): "Neuer Chat" pinnt claim-nativ, damit das Fenster den v2-Thread findet.
+  claimId: string
   fallNummer: string | null
   kundeName: string
 }
@@ -35,7 +37,7 @@ export async function GET(req: NextRequest) {
   // faelle_claim_bridge spiegelt faelle-Case-Access -> gleiche Sicht. Value-neutral (SET EQUAL probed).
   const { data: byFallNr } = await supabase
     .from('faelle_claim_bridge')
-    .select('fall_id, claims:claim_id!inner(claim_nummer, lead_id)')
+    .select('fall_id, claim_id, claims:claim_id!inner(claim_nummer, lead_id)')
     .ilike('claims.claim_nummer', pattern)
     .in('claim_id', nichtStornierteClaimIds)
     .limit(5)
@@ -52,7 +54,7 @@ export async function GET(req: NextRequest) {
   const { data: byLeadRaw } = leadIdsByName.size > 0
     ? await supabase
         .from('faelle_claim_bridge')
-        .select('fall_id, claims:claim_id!inner(claim_nummer, lead_id)')
+        .select('fall_id, claim_id, claims:claim_id!inner(claim_nummer, lead_id)')
         .in('claims.lead_id', [...leadIdsByName])
         .in('claim_id', nichtStornierteClaimIds)
         .limit(10)
@@ -60,11 +62,11 @@ export async function GET(req: NextRequest) {
 
   // CMM-49: Bridge-Rows -> {fallId, fallNummer, leadId} normalisieren (claims je Cardinality
   // Array-oder-Objekt), dann dedupe nach fall_id.
-  type BridgeRow = { fall_id: string; claims: { claim_nummer: string | null; lead_id: string | null } | { claim_nummer: string | null; lead_id: string | null }[] | null }
-  const normalize = (rows: unknown): Array<{ fallId: string; fallNummer: string | null; leadId: string | null }> =>
+  type BridgeRow = { fall_id: string; claim_id: string; claims: { claim_nummer: string | null; lead_id: string | null } | { claim_nummer: string | null; lead_id: string | null }[] | null }
+  const normalize = (rows: unknown): Array<{ fallId: string; claimId: string; fallNummer: string | null; leadId: string | null }> =>
     ((rows as BridgeRow[] | null) ?? []).map((r) => {
       const c = Array.isArray(r.claims) ? r.claims[0] : r.claims
-      return { fallId: r.fall_id, fallNummer: c?.claim_nummer ?? null, leadId: c?.lead_id ?? null }
+      return { fallId: r.fall_id, claimId: r.claim_id, fallNummer: c?.claim_nummer ?? null, leadId: c?.lead_id ?? null }
     })
   const byFallNrN = normalize(byFallNr)
   const byLeadN = normalize(byLeadRaw)
@@ -87,7 +89,7 @@ export async function GET(req: NextRequest) {
     const kundeName = lead
       ? [lead.vorname, lead.nachname].filter(Boolean).join(' ')
       : 'Unbekannt'
-    return { fallId: f.fallId, fallNummer: f.fallNummer, kundeName: kundeName || 'Unbekannt' }
+    return { fallId: f.fallId, claimId: f.claimId, fallNummer: f.fallNummer, kundeName: kundeName || 'Unbekannt' }
   })
 
   return NextResponse.json({ results })
