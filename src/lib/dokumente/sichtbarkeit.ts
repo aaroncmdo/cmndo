@@ -81,7 +81,8 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   abrechnung_intern: ['admin', 'kundenbetreuer'],
 
   // Rechnungen
-  rechnung_gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger'],
+  // rechnung_gutachten: Slice 1b — 'kunde' ergaenzt damit SV-Upload in BelegePaketCard surfaced wird.
+  rechnung_gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   rechnung_kanzlei: ['admin', 'kundenbetreuer', 'kanzlei'],
 
   // Sonstige Kategorien (aus Webhook-Logik)

@@ -15,7 +15,7 @@ function belegeFor(vm: KundeClaimViewModel): Beleg[] {
     vm.werkstatt.schadensfotoUrls.forEach((url, i) => belege.push({ label: `Schadenfoto ${i + 1}`, url }))
   } else {
     if (vm.status.gutachtenUrl) belege.push({ label: 'Gutachten', url: vm.status.gutachtenUrl })
-    // SV-Rechnung: Slice 1b (heute kein kunde-sichtbares SV-Rechnungs-Dokument).
+    if (vm.werkstatt.svRechnungUrl) belege.push({ label: 'SV-Rechnung', url: vm.werkstatt.svRechnungUrl })
   }
   return belege
 }
