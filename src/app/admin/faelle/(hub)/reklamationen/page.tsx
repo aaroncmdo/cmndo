@@ -1,2 +1,7 @@
-// AAR-526 (A2): Reklamationen-Tab — re-export aus /admin/reklamationen.
-export { default } from '../../../reklamationen/page'
+// F0: Reklamationen-Tab — embedded (kein eigener Header; der Hub-Header liefert Titel + Badge),
+// geteilter Content.
+import ReklamationenContent from '@/app/admin/reklamationen/ReklamationenContent'
+
+export default function FaelleHubReklamationenPage() {
+  return <ReklamationenContent embedded />
+}

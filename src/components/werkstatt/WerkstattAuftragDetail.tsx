@@ -35,6 +35,7 @@ import { StatusBadge } from '@/components/shared/StatusBadge'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 import { Button, Modal } from '@/components/primitives'
 import { KvaHochladenModal } from '@/components/werkstatt/KvaHochladenModal'
+import { ReparaturAbschlussModal } from '@/components/werkstatt/ReparaturAbschlussModal'
 
 const EUR = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 })
 const EUR2 = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' })
@@ -61,6 +62,7 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
   const [vorschlagOffen, setVorschlagOffen] = useState(false)
   const [neuerTermin, setNeuerTermin] = useState('')
   const [vorschlagLaden, setVorschlagLaden] = useState(false)
+  const [abschlussOffen, setAbschlussOffen] = useState(false)
 
   const terminId: string = auftrag.reparatur_termin_id ?? ''
   if (!terminId) return null
@@ -199,6 +201,20 @@ function ReparaturterminSektion({ auftrag }: { auftrag: WerkstattAuftrag }) {
               <Button variant="navy" size="sm" disabled={!neuerTermin} loading={vorschlagLaden} onClick={handleVorschlag}>
                 Vorschlag senden
               </Button>
+            </div>
+          )}
+
+          {/* WS6 Slice 1 — Reparatur abschliessen (nur wenn bestaetigt, separate Aktion von aktionOffen) */}
+          {auftrag.reparatur_termin_status === 'bestaetigt' && auftrag.reparatur_termin_id && (
+            <div className="pt-2">
+              <Button variant="navy" size="sm" onClick={() => setAbschlussOffen(true)}>
+                Reparatur abschließen
+              </Button>
+              <ReparaturAbschlussModal
+                terminId={auftrag.reparatur_termin_id}
+                open={abschlussOffen}
+                onClose={() => setAbschlussOffen(false)}
+              />
             </div>
           )}
         </div>

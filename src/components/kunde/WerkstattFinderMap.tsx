@@ -24,6 +24,7 @@ type Props = {
   onSelect: (id: string) => void
   selectedId?: string | null
   loading?: boolean
+  keineSpezialisierte?: boolean
 }
 
 function firstGeo(rows: WerkstattFinderRow[]): LatLng | null {
@@ -31,7 +32,7 @@ function firstGeo(rows: WerkstattFinderRow[]): LatLng | null {
   return r && r.lat != null && r.lng != null ? { lat: r.lat, lng: r.lng } : null
 }
 
-export function WerkstattFinderMap({ werkstaetten, center, onSelect, selectedId, loading }: Props) {
+export function WerkstattFinderMap({ werkstaetten, center, onSelect, selectedId, loading, keineSpezialisierte }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<MapboxMap | null>(null)
   const markersRef = useRef<MapboxMarker[]>([])
@@ -121,6 +122,7 @@ export function WerkstattFinderMap({ werkstaetten, center, onSelect, selectedId,
         onSelect={onSelect}
         selectedId={selectedId ?? highlightId}
         loading={loading}
+        keineSpezialisierte={keineSpezialisierte}
       />
     </div>
   )
