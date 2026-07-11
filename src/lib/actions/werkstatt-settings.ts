@@ -7,7 +7,6 @@
 
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { revalidatePath } from 'next/cache'
 import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
 
@@ -188,8 +187,8 @@ export async function changeWerkstattPasswort(
 
 /**
  * Self-Service: Werkstatt pflegt eigene Faehigkeiten.
- * user_id-scoped (kein IDOR) — Admin-Client fuer den Update,
- * SSR-Client fuer Auth-Check.
+ * user_id-scoped (kein IDOR); SSR-Client -> RLS-Policy werkstaetten_self_update
+ * (user_id = auth.uid()) als Backstop, wie die Geschwister-Actions.
  */
 export async function setMeineFaehigkeiten(
   faehigkeiten: string[],
@@ -200,8 +199,7 @@ export async function setMeineFaehigkeiten(
 
   const clean = (faehigkeiten ?? []).filter((f) => (GEWERKE as readonly string[]).includes(f))
 
-  const admin = createAdminClient()
-  const { error } = await admin.from('werkstaetten').update({ faehigkeiten: clean }).eq('user_id', user.id)
+  const { error } = await supabase.from('werkstaetten').update({ faehigkeiten: clean }).eq('user_id', user.id)
   if (error) return { ok: false, error: error.message }
 
   revalidatePath('/werkstatt/einstellungen')

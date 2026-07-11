@@ -4,9 +4,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }))
 
-// Supabase SSR-Client (Benutzer-Scope)
-const updateMock = vi.fn()
+// Supabase SSR-Client (Benutzer-Scope) — schreibt via RLS-Backstop, nicht Admin-Bypass.
+// from().update().eq() Kette.
 const eqMock = vi.fn()
+const updateMock = vi.fn()
 const fromServerMock = vi.fn()
 
 const userMock = { id: 'user-123' }
@@ -20,17 +21,6 @@ vi.mock('@/lib/supabase/server', () => ({
   createClient: vi.fn(() => Promise.resolve(serverClient)),
 }))
 
-// Supabase Admin-Client (werkstatt update)
-const adminEqMock = vi.fn()
-const adminUpdateMock = vi.fn()
-const adminFromMock = vi.fn()
-const adminClient = {
-  from: adminFromMock,
-}
-vi.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: vi.fn(() => adminClient),
-}))
-
 import { setMeineFaehigkeiten } from '../werkstatt-settings'
 import { revalidatePath } from 'next/cache'
 
@@ -41,19 +31,19 @@ describe('setMeineFaehigkeiten', () => {
     // Default: Benutzer angemeldet
     serverClient.auth.getUser.mockResolvedValue({ data: { user: userMock }, error: null })
 
-    // Admin from().update().eq() chain
-    adminEqMock.mockResolvedValue({ error: null })
-    adminUpdateMock.mockReturnValue({ eq: adminEqMock })
-    adminFromMock.mockReturnValue({ update: adminUpdateMock })
+    // SSR from().update().eq() chain
+    eqMock.mockResolvedValue({ error: null })
+    updateMock.mockReturnValue({ eq: eqMock })
+    fromServerMock.mockReturnValue({ update: updateMock })
   })
 
-  it('gültige Gewerke → update mit .eq("user_id", user.id) aufgerufen', async () => {
+  it('gültige Gewerke → update via SSR-Client mit .eq("user_id", user.id) (IDOR-Guard)', async () => {
     const result = await setMeineFaehigkeiten(['karosserie', 'lackierung'])
 
     expect(result).toEqual({ ok: true })
-    expect(adminFromMock).toHaveBeenCalledWith('werkstaetten')
-    expect(adminUpdateMock).toHaveBeenCalledWith({ faehigkeiten: ['karosserie', 'lackierung'] })
-    expect(adminEqMock).toHaveBeenCalledWith('user_id', 'user-123')
+    expect(fromServerMock).toHaveBeenCalledWith('werkstaetten')
+    expect(updateMock).toHaveBeenCalledWith({ faehigkeiten: ['karosserie', 'lackierung'] })
+    expect(eqMock).toHaveBeenCalledWith('user_id', 'user-123')
     expect(revalidatePath).toHaveBeenCalledWith('/werkstatt/einstellungen')
   })
 
@@ -61,14 +51,14 @@ describe('setMeineFaehigkeiten', () => {
     const result = await setMeineFaehigkeiten(['karosserie', 'invalid_gewerk', 'xss', 'mechanik'])
 
     expect(result).toEqual({ ok: true })
-    expect(adminUpdateMock).toHaveBeenCalledWith({ faehigkeiten: ['karosserie', 'mechanik'] })
+    expect(updateMock).toHaveBeenCalledWith({ faehigkeiten: ['karosserie', 'mechanik'] })
   })
 
   it('leere Liste nach Filterung → update mit [] (alle ungültig)', async () => {
     const result = await setMeineFaehigkeiten(['invalid', 'also_invalid'])
 
     expect(result).toEqual({ ok: true })
-    expect(adminUpdateMock).toHaveBeenCalledWith({ faehigkeiten: [] })
+    expect(updateMock).toHaveBeenCalledWith({ faehigkeiten: [] })
   })
 
   it('nicht angemeldet → { ok: false }', async () => {
@@ -77,11 +67,11 @@ describe('setMeineFaehigkeiten', () => {
     const result = await setMeineFaehigkeiten(['karosserie'])
 
     expect(result.ok).toBe(false)
-    expect(adminFromMock).not.toHaveBeenCalled()
+    expect(fromServerMock).not.toHaveBeenCalled()
   })
 
   it('DB-Fehler → { ok: false, error }', async () => {
-    adminEqMock.mockResolvedValue({ error: { message: 'DB connection failed' } })
+    eqMock.mockResolvedValue({ error: { message: 'DB connection failed' } })
 
     const result = await setMeineFaehigkeiten(['mechanik'])
 
