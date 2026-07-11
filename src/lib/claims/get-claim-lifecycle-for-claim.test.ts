@@ -58,11 +58,25 @@ beforeEach(() => {
 })
 
 describe('getClaimLifecycleForClaim — Input-Assembly (MP-8b: claims-zentrisch)', () => {
-  it('baut lead aus leads-Row (via claims.lead_id) und delegiert (erfassung/vollmacht_offen)', async () => {
+  it('baut signing aus der CLAIM-Copy (FG6 canonical) und delegiert (erfassung/vollmacht_offen)', async () => {
+    // FG6: signing wird dual-written auf claims+leads; der Loader liest jetzt die claim-Copy.
     const admin = fakeAdmin({
       faelle_claim_bridge: { claim_id: 'claim-1' },
-      claims: { status: null, lead_id: 'lead-1' },
+      claims: { status: null, lead_id: 'lead-1', sa_unterschrieben: true, vollmacht_signiert_am: null },
       leads: { sa_unterschrieben: true, vollmacht_signiert_am: null },
+    })
+    const r = await getClaimLifecycleForClaim(admin, 'fall-1')
+    expect(r.lifecycle.mainPhase).toBe('erfassung')
+    expect(r.lifecycle.subPhase).toBe('vollmacht_offen')
+  })
+
+  it('FG6: liest die CLAIM signing-copy, nicht die lead-copy (Divergenz-Guard)', async () => {
+    // claim = signed, lead = NICHT signed. Vor FG6 las der Loader die lead-copy -> sa_offen.
+    // Nach FG6 (claim canonical post-conversion via readClaimSigningState) -> vollmacht_offen.
+    const admin = fakeAdmin({
+      faelle_claim_bridge: { claim_id: 'claim-1' },
+      claims: { status: null, lead_id: 'lead-1', sa_unterschrieben: true, sa_unterschrieben_am: TS, vollmacht_signiert_am: null },
+      leads: { sa_unterschrieben: false, vollmacht_signiert_am: null },
     })
     const r = await getClaimLifecycleForClaim(admin, 'fall-1')
     expect(r.lifecycle.mainPhase).toBe('erfassung')
