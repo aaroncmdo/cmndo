@@ -36,8 +36,6 @@ export interface FeldmodusClientProps {
   sv: FeldmodusSV
   stops: FeldmodusStop[]
   userId: string
-  /** Phase-2c Cutover-Flag: Fokus-Chat thread-nativ (kunde_gruppe) statt kanal-basiert. */
-  chatV2?: boolean
 }
 
 export default function FeldmodusClient({
@@ -45,7 +43,6 @@ export default function FeldmodusClient({
   sv,
   stops,
   userId,
-  chatV2,
 }: FeldmodusClientProps) {
   const router = useRouter()
 
@@ -538,9 +535,7 @@ export default function FeldmodusClient({
           Wegpunkte haben keinen Fall/Claim -> keinen Chat). */}
       {aktuellerStop && aktuellerStop.kind === 'termin' && sessionStatus !== 'finished' && (
         <FokusChatPanel
-          fallId={aktuellerStop.fall_id}
           claimId={aktuellerStop.claim_id}
-          chatV2={chatV2}
           sessionStatus={sessionStatus}
           etaMinutes={
             distanceMeters != null

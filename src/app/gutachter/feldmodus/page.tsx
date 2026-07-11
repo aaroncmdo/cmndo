@@ -75,13 +75,7 @@ function normalizeStruktur(raw: unknown): SvBriefingStruktur | null {
   }
 }
 
-export default async function FeldmodusPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ chatv2?: string }>
-}) {
-  // Phase-2c Cutover-Flag: Fokus-Chat thread-nativ (kunde_gruppe) ist jetzt DEFAULT. Escape-Hatch ?chatv2=0.
-  const chatV2 = ((await searchParams) ?? {}).chatv2 !== '0'
+export default async function FeldmodusPage() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) redirect('/login')
@@ -449,7 +443,6 @@ export default async function FeldmodusPage({
       sv={feldmodusSv}
       stops={stops}
       userId={user.id}
-      chatV2={chatV2}
     />
   )
 }
