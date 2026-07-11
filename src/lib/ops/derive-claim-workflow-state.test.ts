@@ -98,28 +98,50 @@ describe('deriveClaimWorkflowState', () => {
     expect(wi.subState).toBe('reparatur_terminfindung')
   })
 
-  it('Selbstzahler reparatur_status=bestaetigt => reparatur_laeuft, begutachtung, ownerRole:none, waitingOn:none', () => {
+  it('Selbstzahler reparatur_status=bestaetigt => reparatur_laeuft, stage=erfassung (SQL-konsistent), ownerRole:none, waitingOn:none', () => {
     const wi = deriveClaimWorkflowState(
       { ...repairBase, reparatur_werkstatt_id: 'ws1', reparatur_status: 'bestaetigt' },
       NOW,
     )
     expect(wi.subState).toBe('reparatur_laeuft')
-    expect(wi.stage).toBe('begutachtung')
+    // stage == SQL main_phase (row.main_phase='erfassung' fuer nicht-terminal-Claim)
+    expect(wi.stage).toBe('erfassung')
     expect(wi.ownerRole).toBe('none')
     expect(wi.waitingOn).toBe('none')
     expect(wi.nextActionCode).toBe('reparatur_laeuft')
   })
 
-  it('Selbstzahler reparatur_status=erledigt (nicht terminal) => reparatur_fertig, abschluss, ownerRole:intern', () => {
+  it('Selbstzahler reparatur_status=erledigt (nicht terminal) => reparatur_fertig, stage=erfassung (SQL-konsistent), ownerRole:intern', () => {
     const wi = deriveClaimWorkflowState(
       { ...repairBase, reparatur_werkstatt_id: 'ws1', reparatur_status: 'erledigt' },
       NOW,
     )
     expect(wi.subState).toBe('reparatur_fertig')
-    expect(wi.stage).toBe('abschluss')
+    // stage bleibt erfassung — der Reconciliation-Lens der Ops-Ansicht flaggt erledigt-but-not-closed
+    expect(wi.stage).toBe('erfassung')
     expect(wi.ownerRole).toBe('intern')
     expect(wi.waitingOn).toBe('intern')
     expect(wi.nextActionCode).toBe('reparatur_abschliessen')
+  })
+
+  it('Selbstzahler reparatur_status=abgelehnt => reparatur_werkstattwahl (Termin gescheitert, Kunde neu waehlen)', () => {
+    const wi = deriveClaimWorkflowState(
+      { ...repairBase, reparatur_werkstatt_id: 'ws1', reparatur_status: 'abgelehnt' },
+      NOW,
+    )
+    expect(wi.subState).toBe('reparatur_werkstattwahl')
+    expect(wi.stage).toBe('erfassung')
+    expect(wi.ownerRole).toBe('none')
+    expect(wi.waitingOn).toBe('kunde')
+  })
+
+  it('Selbstzahler reparatur_status=storniert => reparatur_werkstattwahl (analog abgelehnt)', () => {
+    const wi = deriveClaimWorkflowState(
+      { ...repairBase, reparatur_werkstatt_id: 'ws1', reparatur_status: 'storniert' },
+      NOW,
+    )
+    expect(wi.subState).toBe('reparatur_werkstattwahl')
+    expect(wi.stage).toBe('erfassung')
   })
 
   it('Kasko-Claim folgt ebenfalls der Reparatur-Lane', () => {

@@ -26,6 +26,8 @@ function deriveRepairSubState(row: ClaimWorkstateRow): ClaimSubPhase {
   const rs = row.reparatur_status
   if (rs === 'bestaetigt') return 'reparatur_laeuft'
   if (rs === 'erledigt') return 'reparatur_fertig'
+  // Termin abgelehnt/storniert -> Kunde muss neu waehlen
+  if (rs === 'abgelehnt' || rs === 'storniert') return 'reparatur_werkstattwahl'
   // angefragt | anruf_erbeten | null -> Terminfindung
   return 'reparatur_terminfindung'
 }
@@ -51,22 +53,18 @@ export function deriveClaimWorkflowState(row: ClaimWorkstateRow, now: Date = new
       overdueSinceDays = days
       isOverdue = days > sla
     }
-    // stage aus sub-Phase ableiten (reparatur_werkstattwahl/terminfindung=erfassung,
-    // reparatur_laeuft=begutachtung, reparatur_fertig=abschluss)
-    type RepairSubState = 'reparatur_werkstattwahl' | 'reparatur_terminfindung' | 'reparatur_laeuft' | 'reparatur_fertig'
-    const stageMap: Record<RepairSubState, ReturnType<typeof toClaimMainPhase>> = {
-      reparatur_werkstattwahl: 'erfassung',
-      reparatur_terminfindung: 'erfassung',
-      reparatur_laeuft: 'begutachtung',
-      reparatur_fertig: 'abschluss',
-    }
+    // stage = SQL-konsistente main_phase aus dem Row (wie der normale Pfad, Z.90).
+    // Reparatur-Claims haben in v_claim_workstate.main_phase stets die
+    // operative_status-abgeleitete Phase (z.B. ersterfassung -> erfassung).
+    // Wir weichen NICHT davon ab, damit Cockpit-Count (SQL) und Drill-In (TS) uebereinstimmen.
+    const stage = toClaimMainPhase(row.main_phase)
     return {
       kind: 'claim',
       id: row.claim_id,
       fallId: row.fall_id,
       kundenbetreuerId: row.kundenbetreuer_id,
       claimNummer: row.claim_nummer,
-      stage: stageMap[subState as RepairSubState],
+      stage,
       subState,
       nextActionCode: meta.nextActionCode,
       ownerRole: meta.ownerRole,

@@ -201,10 +201,9 @@ export function mainPhaseOf(sub: ClaimSubPhase): ClaimMainPhase {
   if (sub === 'sa_offen' || sub === 'vollmacht_offen' || sub === 'onboarding_offen') return 'erfassung'
   if (sub === 'termin' || sub === 'besichtigung' || sub === 'gutachten' || sub === 'kanzlei_uebergabe' || sub === 'filmcheck' || sub === 'qc-pruefung') return 'begutachtung'
   if (sub === 'versicherungskontakt' || sub === 'auszahlung' || sub === 'nachforderung' || sub === 'vs-kuerzt' || sub === 'anschlussschreiben' || sub === 'nachbesichtigung-laeuft') return 'regulierung'
-  // WS6 Slice 2a: Reparatur-Lane — eigene Erfassungs-/Begutachtungs-/Abschluss-Phasen
-  if (sub === 'reparatur_werkstattwahl' || sub === 'reparatur_terminfindung') return 'erfassung'
-  if (sub === 'reparatur_laeuft') return 'begutachtung'
-  if (sub === 'reparatur_fertig') return 'abschluss'
+  // WS6 Slice 2a: Reparatur-Lane — alle Sub-Phasen leben in erfassung (SQL-konsistent:
+  // operative_status=ersterfassung -> main_phase=erfassung, bis der Claim abgeschlossen wird).
+  if (sub === 'reparatur_werkstattwahl' || sub === 'reparatur_terminfindung' || sub === 'reparatur_laeuft' || sub === 'reparatur_fertig') return 'erfassung'
   return 'abschluss'
 }
 
