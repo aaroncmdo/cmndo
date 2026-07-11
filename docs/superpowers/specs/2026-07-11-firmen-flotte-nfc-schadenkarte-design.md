@@ -16,6 +16,18 @@ Der Kern ist **kein Neubau**, sondern ein Compose-Job: **3 neue Tabellen, ~8 wie
 
 ---
 
+## Update 2026-07-11 — Bestands-Verifikation (vor Plan 1)
+
+Ein Explore + File-Read hat ergeben: **`flotten_fahrzeuge` + eine komplette `/kunde/flotte`-Flottenverwaltung existieren bereits** (Migration `20260706100916`, kunde-scoped via `personen.firma_id`). Korrekturen zu §4/§7:
+
+- **`flotten_fahrzeuge` ist NICHT neu** — plain N:M (`firma_id, vehicle_id, added_by_user_id, notiz`, `UNIQUE(firma_id,vehicle_id)`), **kein** temporales `aktiv_von/aktiv_bis`. Layer 0 **reused** die Tabelle + `FlotteClient` + `createVehicleStub` + `ensureFirma`. Der `aktiv_bis`-Temporal-Entwurf entfaellt (Karten-Gating laeuft ueber die N:M + Hard-Delete: Fahrzeug raus = Zeile weg = Karte loest keine firma auf).
+- **Business-Partner = eigene Identitaet (Choice B, Aaron 11.07.):** neue `flottenmanager`-Rolle + `firmen_flotten_konten`-Link-Tabelle + `/flotte`-Portal, das den bestehenden Fleet-Kern wiederverwendet. Admin-provisioniert.
+- **DPIA-Ergebnis:** ERFORDERLICH (4 EDPB-Kriterien: sensible Daten, schutzbeduerftige Betroffene, innovative Technik, Datensatz-Kombination); gated den Launch von Layer 2; **kein** Art.-36 noetig nach Mitigation. Draft: `2026-07-11-dpia-nfc-schadenkarte-gegner-flow.md`.
+
+Die konkrete, reuse-schwere Layer-0-Umsetzung steht in **`docs/superpowers/plans/2026-07-11-firmen-flotte-layer0-fundament.md`**.
+
+---
+
 ## 2 · Nicht-Ziele / Scope-Grenzen
 
 - **NUR Haftpflicht-Schaeden** (Gegner schuld). **KEIN Eigenverschulden** (das waere die eigene VS/Kasko der Firma — ein anderer Flow, bewusst draussen). Begruendung: bei Eigenverschulden gaebe es keine Gegner-Unterschrift "die Gegenseite ist schuld"; die Karte ist definitionsgemaess das Opfer-Werkzeug gegen die Gegner-Haftpflicht.
@@ -76,7 +88,9 @@ LAYER 2 — HAFTPFLICHT-SCHADEN (aus NFC-Tap)
   vs_korrespondenz    (bestehend) -> auto Unfallmitteilung an Gegner-Haftpflicht
 ```
 
-### 4.1 · Neue Tabelle: `flotten_fahrzeuge` (Layer 0)
+### 4.1 · Bestehende Tabelle `flotten_fahrzeuge` (wiederverwendet) + NEU `firmen_flotten_konten` (Layer 0)
+
+> **Korrektur 11.07.:** `flotten_fahrzeuge` existiert bereits (Mig `20260706100916`, plain N:M, kein Temporal). Der folgende `aktiv_von/aktiv_bis`-Entwurf wurde **NICHT** umgesetzt — Layer 0 reused die Bestandstabelle + fuegt `firmen_flotten_konten` (flottenmanager <-> firma) hinzu. Siehe Update oben + Plan 1.
 
 Modelliert "firma betreibt Fahrzeug X von–bis" (Halter/Betreiber-Beziehung, **nicht** Eigentum — bei geleasten Flotten ist der Eigentuemer die Leasingbank). Haelt `vehicles` universell und schlank; Flotten-Metadaten leben hier statt als immer-NULL-Spalten auf der universellen Fahrzeug-Tabelle.
 
