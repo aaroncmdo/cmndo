@@ -118,16 +118,7 @@ export function MaklerShell({ makler, email, userId, children }: MaklerShellProp
 
       {/* Content-Bereich — Offset durch die fixe PortalNav-Sidebar (w-56) */}
       <div className="relative z-10 flex h-screen flex-col md:ml-56">
-        {/* Mobile header */}
-        <header className="flex shrink-0 items-center justify-between px-4 py-3 glass-dark shadow-ios-md md:hidden">
-          <span className="text-lg font-bold tracking-tight">
-            <span className="text-white">Claim</span>
-            <span className="text-claimondo-light-blue">ondo</span>
-          </span>
-          <span className="rounded bg-claimondo-shield px-2 py-0.5 text-[10px] uppercase tracking-wider text-claimondo-light-blue">
-            Makler
-          </span>
-        </header>
+        {/* Mobile-Nav ist bottom-only (MobileNav-Pille + Menü-Sheet) — kein Top-Bar. */}
 
         <main
           id="main-content"
