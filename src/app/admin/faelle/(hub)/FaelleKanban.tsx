@@ -99,8 +99,8 @@ export default function FaelleKanban({ faelle }: { faelle: Fall[] }) {
       {/* Header: exactly 40px. Breakout auf 100 % der Main-Breite (siehe PageContainer-Inset). */}
       <div className="flex items-center justify-between px-4 py-2 h-10 flex-shrink-0 md:w-[104.17%] md:-ml-[2.08%]">
         <div className="flex items-center gap-2">
-          <h1 className="text-sm font-semibold text-claimondo-navy">Fälle</h1>
-          <span className="text-claimondo-ondo/70 text-xs">{filtered.length}</span>
+          {/* F0: „Fälle"-Titel entfernt — der Hub-Header (FaelleHubHeader) liefert ihn jetzt. */}
+          <span className="text-claimondo-ondo/70 text-xs">{filtered.length} Fälle</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="flex gap-0.5 bg-claimondo-bg rounded-ios-lg p-0.5">
