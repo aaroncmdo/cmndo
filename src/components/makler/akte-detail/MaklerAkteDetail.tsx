@@ -33,6 +33,8 @@ import { MaklerChatTab } from './MaklerChatTab'
 import { MaklerCopilotTab } from './MaklerCopilotTab'
 import { SectionCard } from '@/components/shared/SectionCard'
 import EmptyState from '@/components/shared/EmptyState'
+// AAR-754: shared Ansprechpartner-Karte (KB/SV/Kanzlei) — rolle="makler".
+import { FallKontakteCard } from '@/components/shared/fall-kontakte'
 
 type TabKey = 'overview' | 'timeline' | 'chat' | 'copilot'
 
@@ -234,11 +236,14 @@ export function MaklerAkteDetail({
       ) : null}
       {tab === 'timeline' ? <TimelinePanel events={timeline} /> : null}
       {tab === 'chat' ? (
-        <MaklerChatTab
-          fallId={fall.id}
-          currentUserId={currentUserId}
-          initialMessages={initialChatMessages}
-        />
+        <div className="space-y-4">
+          <MaklerKontakte kontakte={detail.kontakte} />
+          <MaklerChatTab
+            fallId={fall.id}
+            currentUserId={currentUserId}
+            initialMessages={initialChatMessages}
+          />
+        </div>
       ) : null}
       {tab === 'copilot' ? (
         <MaklerCopilotTab
@@ -550,6 +555,33 @@ function TimelinePanel({ events }: { events: TimelineEvent[] }) {
         ))}
       </ol>
     </SectionCard>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Ansprechpartner-Karte (oben im Chat-Tab) — shared FallKontakteCard, rolle="makler".
+// Leerer Zustand: dezenter Hinweis statt Luecke.
+// ─────────────────────────────────────────────────────────────────────────────
+
+function MaklerKontakte({ kontakte }: { kontakte: FallDetail['kontakte'] }) {
+  const hasAny = !!(kontakte.kundenbetreuer || kontakte.sv || kontakte.kanzlei)
+  if (!hasAny) {
+    // Shared SectionCard statt handgerolltem Card-Div (component-set-Ratchet).
+    return (
+      <SectionCard title="Ansprechpartner">
+        <p className="text-sm text-claimondo-ondo">
+          Ansprechpartner werden zugewiesen, sobald Betreuer oder Gutachter feststehen.
+        </p>
+      </SectionCard>
+    )
+  }
+  return (
+    <FallKontakteCard
+      rolle="makler"
+      kundenbetreuer={kontakte.kundenbetreuer}
+      sv={kontakte.sv}
+      kanzlei={kontakte.kanzlei}
+    />
   )
 }
 
