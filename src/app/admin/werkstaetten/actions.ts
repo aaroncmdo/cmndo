@@ -155,6 +155,28 @@ export async function createWerkstatt(
   return { ok: true, email, password, werkstattId: w.id }
 }
 
+export async function setWerkstattVerifiziert(
+  werkstattId: string,
+  verifiziert: boolean,
+  notiz?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  const adminUser = await requireAdmin()
+  if (!adminUser) return { ok: false, error: 'Nur Admins dürfen Werkstätten verifizieren.' }
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('werkstaetten')
+    .update({
+      verifiziert,
+      verifiziert_am: verifiziert ? new Date().toISOString() : null,
+      verifiziert_von: verifiziert ? adminUser.id : null,
+      verifizierung_notiz: notiz ?? null,
+    } as Record<string, unknown>)
+    .eq('id', werkstattId)
+  if (error) return { ok: false, error: error.message }
+  revalidatePath('/admin/werkstaetten')
+  return { ok: true }
+}
+
 export async function sendWerkstattLoginMail(
   werkstattId: string,
 ): Promise<{ ok: boolean; error?: string }> {
