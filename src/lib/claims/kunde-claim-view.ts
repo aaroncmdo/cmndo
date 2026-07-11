@@ -14,6 +14,7 @@ import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
 import { istBankdatenPhase } from '@/lib/kunde/bankdaten-status'
 import { getStorageUrlBulk } from '@/lib/storage/url'
+import { getSichtbarFuerRolle } from '@/lib/dokumente/sichtbarkeit'
 import type { PflichtSlotForView } from '@/components/fall/PflichtdokumenteSection'
 import type { TerminSectionProps } from '@/components/kunde/TerminSectionCard'
 import { CLAIM_TERMINAL_STATUSES } from '@/lib/termine/close-nur-gutachter-termin'
@@ -131,6 +132,8 @@ export type KundeWerkstatt = {
   reparaturTermin: { id: string; status: string; wunschtermin: string | null; bestaetigter_termin: string | null; absage_grund: string | null } | null
   schadensfotoUrls: string[]
   schlussrechnungUrl: string | null
+  // Slice 1b: juengste SV-Rechnung (rechnung_gutachten, kunde-sichtbar) fuer Normal-Claim-Belege.
+  svRechnungUrl: string | null
   brauchtVermittlung: boolean
 }
 
@@ -405,13 +408,17 @@ export async function getKundeClaimView(
   const gutachtenUrlRaw = dokumente.filter((d) => d.typ === 'gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null
   const schlussrechnungUrl =
     dokumente.filter((d) => d.typ === 'schlussrechnung' && d.datei_url).slice(-1)[0]?.datei_url ?? null
+  // Slice 1b: juengste SV-Rechnung (rechnung_gutachten, kunde-sichtbar) fuer Normal-Claim-Belege.
+  // Analoges Muster zu schlussrechnungUrl und gutachtenUrlRaw.
+  const svRechnungUrl =
+    dokumente.filter((d) => d.typ === 'rechnung_gutachten' && d.datei_url).slice(-1)[0]?.datei_url ?? null
   const brauchtVermittlung = brauchtWerkstattVermittlung({
     reparaturwunsch: (claimExtra?.reparaturwunsch as string | null) ?? null,
     reparatur_werkstatt_id: reparaturWerkstattId,
     werkstatt_id: (claimExtra?.werkstatt_id as string | null) ?? null,
     reparatur_vermittlung_status: (claimExtra?.reparatur_vermittlung_status as string | null) ?? null,
   })
-  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, schlussrechnungUrl, brauchtVermittlung }
+  const werkstatt: KundeWerkstatt = { data: werkstattData, reparaturTermin, schadensfotoUrls, schlussrechnungUrl, svRechnungUrl, brauchtVermittlung }
 
   const kanzleiRow = (kanzleiRowRes.data as { name: string | null; email: string | null; adresse: string | null } | null) ?? null
   const kanzleiAnsprechpartnerName = (fall.kanzlei_ansprechpartner_name as string | null) ?? null
@@ -591,7 +598,11 @@ export async function getKundeClaimView(
       ausfall,
     },
     pflichtdokumente: { offen: pflichtOffen, slots: pflichtSlots },
-    doks: { qcLaeuft, kbTerminCard, dokumente, aktiverTermin },
+    // Rolle-Sichtbarkeits-Filter: interne Typen (abrechnung_intern, ki_kalkulation, kanzlei_paket,
+    // gutachter_fotos, vorschaden_bericht usw.) werden aus der gerenderten Liste entfernt.
+    // Die typ-spezifischen Ableitungen (schlussrechnungUrl, svRechnungUrl, kvaPdfUrl etc.) nutzen
+    // die ungefilterte lokale `dokumente`-Variable (oben) — die sind bereits typ-gated.
+    doks: { qcLaeuft, kbTerminCard, dokumente: getSichtbarFuerRolle(dokumente, 'kunde'), aktiverTermin },
     status,
     kanzlei,
     werkstatt,
