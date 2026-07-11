@@ -42,7 +42,7 @@ export default function VertriebAktionsleiste({
         {aktionen.map((a) => (
           <Button
             key={a.key}
-            variant={a.kind === 'anlegen' ? 'navy' : 'ghost'}
+            variant={a.kind === 'anlegen' ? 'navy' : 'ondo'}
             size="sm"
             onClick={() => ausloesen(a)}
           >

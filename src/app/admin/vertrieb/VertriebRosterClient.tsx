@@ -4,6 +4,7 @@
 // die passenden Aktionen. KPIs sind rollen-gescopet (computeContextKpis, DB-Daten). Filter/Sort
 // in reiner filterKontakte-Fn; Firmen-Collapse nur in der Liste (Karte behält Filialen).
 import { useMemo, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Card, Button } from '@/components/primitives'
@@ -15,6 +16,10 @@ import VertriebPillBar from './VertriebPillBar'
 import VertriebAktionsleiste from './VertriebAktionsleiste'
 import VertriebDetailDrawer from './VertriebDetailDrawer'
 import VertriebKarteClient from './karte/VertriebKarteClient'
+import VertriebLiveOpsListe from './live-ops/VertriebLiveOpsListe'
+import LiveOpsMap from '@/components/live-ops/LiveOpsMap'
+import type { LiveOpsData } from '@/components/live-ops/types'
+import type { LiveOpsRole } from '@/lib/live-ops/types'
 import {
   ALL_VERTRIEB_STUFEN,
   VERTRIEB_WORKFLOW_DEFS,
@@ -28,15 +33,21 @@ const FELD_CLS =
 
 export default function VertriebRosterClient({
   kontakte,
+  liveOps,
+  liveOpsRole,
 }: {
   kontakte: VertriebKontakt[]
   // rollup bleibt im Caller-Vertrag (getVertriebDaten liefert es), wird aber nicht mehr
   // gebraucht — KPIs kommen jetzt aus computeContextKpis(kontakte, rolle).
   rollup?: VertriebRollupZelle[]
+  // Live-Ops-Daten (SV-Karte + -Liste). Nur bei rolle=SV konsumiert; sonst ungenutzt.
+  liveOps: LiveOpsData
+  liveOpsRole: LiveOpsRole
 }) {
+  const router = useRouter()
   const [typ, setTyp] = useState<VertriebTyp | 'alle'>('alle')
   const [rolle, setRolle] = useState<VertriebRolle | 'alle'>('alle')
-  const [ansicht, setAnsicht] = useState<'liste' | 'karte'>('liste')
+  const [ansicht, setAnsicht] = useState<'liste' | 'karte' | 'liveops'>('liste')
   const [search, setSearch] = useState('')
   const [stufe, setStufe] = useState<VertriebStufe | 'alle'>('alle')
   const [selected, setSelected] = useState<VertriebKontakt | null>(null)
@@ -49,6 +60,9 @@ export default function VertriebRosterClient({
   const angezeigt = useMemo(() => collapseByFirma(gefiltert), [gefiltert])
   // KPIs rollen-gescopet auf die aktive Pill (DB-Daten, client-seitig gezählt).
   const kpi = useMemo(() => computeContextKpis(kontakte, rolle), [kontakte, rolle])
+  // Live-Ops-Ansicht gibt es nur fuer SV; wechselt die Rolle weg, faellt sie auf Liste zurueck
+  // (rein abgeleitet, kein Effect -> kein Stuck-State).
+  const effAnsicht = ansicht === 'liveops' && rolle !== 'sv' ? 'liste' : ansicht
 
   return (
     <div className="space-y-4">
@@ -61,50 +75,61 @@ export default function VertriebRosterClient({
         ))}
       </div>
 
-      {/* Rollen-Pills + Lead/Partner-Schalter + Liste/Karte-Toggle */}
+      {/* Rollen-Pills + Lead/Partner-Schalter + Liste/Karte/Live-Ops-Toggle */}
       <div className="flex flex-wrap items-start justify-between gap-2">
         <VertriebPillBar rolle={rolle} setRolle={setRolle} typ={typ} setTyp={setTyp} />
         <div className="flex gap-2">
-          <Button variant={ansicht === 'liste' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('liste')}>
+          <Button variant={effAnsicht === 'liste' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('liste')}>
             Liste
           </Button>
-          <Button variant={ansicht === 'karte' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('karte')}>
+          <Button variant={effAnsicht === 'karte' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('karte')}>
             Karte
           </Button>
+          {rolle === 'sv' && (
+            <Button
+              variant={effAnsicht === 'liveops' ? 'navy' : 'ghost'}
+              size="sm"
+              onClick={() => setAnsicht('liveops')}
+            >
+              Live-Ops
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Kontextuelle Aktions-Leiste (je Pill × Lead/Partner) */}
       <VertriebAktionsleiste rolle={rolle} typ={typ} />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <input
-          type="search"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Suche nach Name, Ort oder E-Mail…"
-          aria-label="Suche"
-          className={`${FELD_CLS} flex-1 min-w-[220px]`}
-        />
-        <select
-          value={stufe}
-          onChange={(e) => setStufe(e.target.value as VertriebStufe | 'alle')}
-          aria-label="Nach Stufe filtern"
-          className={FELD_CLS}
-        >
-          <option value="alle">Alle Stufen</option>
-          {ALL_VERTRIEB_STUFEN.map((s) => (
-            <option key={s} value={s}>
-              {VERTRIEB_WORKFLOW_DEFS[s].label}
-            </option>
-          ))}
-        </select>
-        <span className="text-caption text-claimondo-ondo/60">
-          {ansicht === 'liste' ? angezeigt.length : gefiltert.length} von {kontakte.length}
-        </span>
-      </div>
+      {effAnsicht !== 'liveops' && (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Suche nach Name, Ort oder E-Mail…"
+            aria-label="Suche"
+            className={`${FELD_CLS} flex-1 min-w-[220px]`}
+          />
+          <select
+            value={stufe}
+            onChange={(e) => setStufe(e.target.value as VertriebStufe | 'alle')}
+            aria-label="Nach Stufe filtern"
+            className={FELD_CLS}
+          >
+            <option value="alle">Alle Stufen</option>
+            {ALL_VERTRIEB_STUFEN.map((s) => (
+              <option key={s} value={s}>
+                {VERTRIEB_WORKFLOW_DEFS[s].label}
+              </option>
+            ))}
+          </select>
+          <span className="text-caption text-claimondo-ondo/60">
+            {effAnsicht === 'liste' ? angezeigt.length : gefiltert.length} von {kontakte.length}
+          </span>
+        </div>
+      )}
 
-      {ansicht === 'liste' ? (
+      {effAnsicht === 'liste' && (
         <DataTableContainer>
           <Table>
             <Thead>
@@ -144,10 +169,26 @@ export default function VertriebRosterClient({
             </Tbody>
           </Table>
         </DataTableContainer>
-      ) : (
-        <div className="h-[70vh] rounded-ios-lg overflow-hidden border border-claimondo-border">
-          <VertriebKarteClient kontakte={gefiltert} />
-        </div>
+      )}
+
+      {effAnsicht === 'karte' &&
+        (rolle === 'sv' ? (
+          <div className="h-[78vh] rounded-ios-lg overflow-hidden border border-claimondo-border">
+            <LiveOpsMap
+              role={liveOpsRole}
+              data={liveOps}
+              onRefresh={() => router.refresh()}
+              svHrefBase="/admin/vertrieb/sachverstaendige"
+            />
+          </div>
+        ) : (
+          <div className="h-[70vh] rounded-ios-lg overflow-hidden border border-claimondo-border">
+            <VertriebKarteClient kontakte={gefiltert} />
+          </div>
+        ))}
+
+      {effAnsicht === 'liveops' && (
+        <VertriebLiveOpsListe svs={liveOps.svs} termine={liveOps.termine} />
       )}
 
       <VertriebDetailDrawer kontakt={selected} onClose={() => setSelected(null)} />
