@@ -1,16 +1,18 @@
 'use client'
-// Vertrieb-CRM P2: Switch-Ansicht — Typ-Switch [Alle·Leads·Partner] + Rolle-Filter
-// [Alle·SV·Makler·Werkstatt] + Suche/Stufe + Liste/Karte-Toggle. Eine Ansicht über
-// Leads UND Partner, rollen-filterbar; die Karte folgt dem Filter (Farbe = Rolle).
-// Filter/Sort in reiner filterKontakte-Fn; Firmen-Collapse nur in der Liste (Karte behält Filialen).
+// Vertrieb-Cockpit: EINE Übersicht über Leads UND Partner. Rollen-Pills + Lead/Partner-Schalter
+// (VertriebPillBar) ersetzen die frühere Tab-Nav; die kontextuelle Aktions-Leiste zeigt je Pill
+// die passenden Aktionen. KPIs sind rollen-gescopet (computeContextKpis, DB-Daten). Filter/Sort
+// in reiner filterKontakte-Fn; Firmen-Collapse nur in der Liste (Karte behält Filialen).
 import { useMemo, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { Table, Thead, Tbody, Tr, ClickableTr, Th, Td, DataTableContainer } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Card, Button } from '@/components/primitives'
 import { filterKontakte } from './_lib/filter-kontakte'
 import { collapseByFirma } from './_lib/collapse-firmen'
+import { computeContextKpis } from './_lib/context-kpis'
 import { ROLLE_LABEL, TYP_LABEL } from './_lib/labels'
+import VertriebPillBar from './VertriebPillBar'
+import VertriebAktionsleiste from './VertriebAktionsleiste'
 import VertriebDetailDrawer from './VertriebDetailDrawer'
 import VertriebKarteClient from './karte/VertriebKarteClient'
 import {
@@ -21,32 +23,16 @@ import {
 import type { VertriebKontakt, VertriebTyp, VertriebRolle } from '@/lib/vertrieb/vertrieb-kontakt.types'
 import type { VertriebRollupZelle } from '@/lib/vertrieb/vertrieb-rollup.types'
 
-const TYP_SWITCH: { key: VertriebTyp | 'alle'; label: string }[] = [
-  { key: 'alle', label: 'Alle' },
-  { key: 'lead', label: 'Leads' },
-  { key: 'partner', label: 'Partner' },
-]
-const ROLLE_FILTER: { key: VertriebRolle | 'alle'; label: string }[] = [
-  { key: 'alle', label: 'Alle Rollen' },
-  { key: 'sv', label: 'Sachverständige' },
-  { key: 'makler', label: 'Makler' },
-  { key: 'werkstatt', label: 'Werkstätten' },
-]
-// P3b: Vertrieb-Rolle -> partner_leads.rolle (für den role-aware Prefill des gemounteten CRM).
-const ROLLE_TO_PL: Record<VertriebRolle, string> = {
-  sv: 'sachverstaendiger',
-  makler: 'makler',
-  werkstatt: 'werkstatt',
-}
 const FELD_CLS =
   'rounded-ios-md border border-claimondo-border bg-white px-3 py-2 text-sm text-claimondo-navy focus:outline-none focus:ring-2 focus:ring-claimondo-ondo/40'
 
 export default function VertriebRosterClient({
   kontakte,
-  rollup,
 }: {
   kontakte: VertriebKontakt[]
-  rollup: VertriebRollupZelle[]
+  // rollup bleibt im Caller-Vertrag (getVertriebDaten liefert es), wird aber nicht mehr
+  // gebraucht — KPIs kommen jetzt aus computeContextKpis(kontakte, rolle).
+  rollup?: VertriebRollupZelle[]
 }) {
   const [typ, setTyp] = useState<VertriebTyp | 'alle'>('alle')
   const [rolle, setRolle] = useState<VertriebRolle | 'alle'>('alle')
@@ -54,14 +40,6 @@ export default function VertriebRosterClient({
   const [search, setSearch] = useState('')
   const [stufe, setStufe] = useState<VertriebStufe | 'alle'>('alle')
   const [selected, setSelected] = useState<VertriebKontakt | null>(null)
-  const router = useRouter()
-
-  // P3b: „Neue Leads" role-aware ins gemountete partner_leads-CRM (Rolle vorbelegt).
-  function neueLeads(aktion: 'scrapen' | 'csv') {
-    const params = new URLSearchParams({ aktion })
-    if (rolle !== 'alle') params.set('rolle', ROLLE_TO_PL[rolle])
-    router.push(`/admin/vertrieb/partner-leads?${params.toString()}`)
-  }
 
   const gefiltert = useMemo(
     () => filterKontakte(kontakte, { typ, rolle, search, stufe }),
@@ -69,36 +47,24 @@ export default function VertriebRosterClient({
   )
   // Liste: Mehr-Standort-Firmen zusammenfassen. Karte nutzt gefiltert (behält Filialen).
   const angezeigt = useMemo(() => collapseByFirma(gefiltert), [gefiltert])
-  const kpi = useMemo(() => {
-    const sum = (pred: (z: VertriebRollupZelle) => boolean) =>
-      rollup.filter(pred).reduce((a, z) => a + z.anzahl, 0)
-    return {
-      Leads: sum((z) => z.kind === 'partner-lead'),
-      Onboarding: sum((z) => z.stufe === 'onboarding'),
-      Aktiv: sum((z) => z.stufe === 'aktiv'),
-      Gesperrt: sum((z) => z.stufe === 'gesperrt'),
-    }
-  }, [rollup])
+  // KPIs rollen-gescopet auf die aktive Pill (DB-Daten, client-seitig gezählt).
+  const kpi = useMemo(() => computeContextKpis(kontakte, rolle), [kontakte, rolle])
 
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {Object.entries(kpi).map(([label, n]) => (
+        {kpi.map(({ label, wert }) => (
           <Card key={label} p={4} radius="lg">
             <p className="text-caption text-claimondo-ondo/70">{label}</p>
-            <p className="text-heading-md text-claimondo-navy">{n}</p>
+            <p className="text-heading-md text-claimondo-navy">{wert}</p>
           </Card>
         ))}
       </div>
 
-      {/* Typ-Switch + Liste/Karte-Toggle */}
-      <div className="flex flex-wrap items-center gap-2">
-        {TYP_SWITCH.map((t) => (
-          <Button key={t.key} variant={typ === t.key ? 'navy' : 'ghost'} onClick={() => setTyp(t.key)}>
-            {t.label}
-          </Button>
-        ))}
-        <div className="ml-auto flex gap-2">
+      {/* Rollen-Pills + Lead/Partner-Schalter + Liste/Karte-Toggle */}
+      <div className="flex flex-wrap items-start justify-between gap-2">
+        <VertriebPillBar rolle={rolle} setRolle={setRolle} typ={typ} setTyp={setTyp} />
+        <div className="flex gap-2">
           <Button variant={ansicht === 'liste' ? 'navy' : 'ghost'} size="sm" onClick={() => setAnsicht('liste')}>
             Liste
           </Button>
@@ -108,27 +74,8 @@ export default function VertriebRosterClient({
         </div>
       </div>
 
-      {/* Rolle-Filter */}
-      <div className="flex flex-wrap gap-2">
-        {ROLLE_FILTER.map((r) => (
-          <Button key={r.key} variant={rolle === r.key ? 'navy' : 'ghost'} size="sm" onClick={() => setRolle(r.key)}>
-            {r.label}
-          </Button>
-        ))}
-      </div>
-
-      {/* P3b: Neue Leads role-aware ins gemountete CRM (Rolle vorbelegt) — nur im Leads-Modus */}
-      {typ === 'lead' && (
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-caption text-claimondo-ondo/70">Neue Leads:</span>
-          <Button variant="ghost" size="sm" onClick={() => neueLeads('scrapen')}>
-            Scrapen (Google Places)
-          </Button>
-          <Button variant="ghost" size="sm" onClick={() => neueLeads('csv')}>
-            CSV importieren
-          </Button>
-        </div>
-      )}
+      {/* Kontextuelle Aktions-Leiste (je Pill × Lead/Partner) */}
+      <VertriebAktionsleiste rolle={rolle} typ={typ} />
 
       <div className="flex flex-wrap items-center gap-2">
         <input
