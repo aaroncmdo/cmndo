@@ -10,6 +10,8 @@ import { createAdminClient } from '@/lib/supabase/admin'
 // der in MP-6c gedroppt wird. Service-Read der abgeleiteten Phase + Substate-Label.
 import { getClaimPhaseMap } from '@/lib/claims/claim-phase-map'
 import { SUBPHASE_LABEL, MAIN_PHASE_LABEL } from '@/lib/claims/lifecycle'
+// Geteilter Gutachten-Werte-Helper — identische Zahlen wie getMaklerFallDetail (Detail-Uebersicht).
+import { mapGutachtenWerte, GUTACHTEN_WERTE_COLUMNS } from './gutachten-werte'
 
 const EUR = new Intl.NumberFormat('de-DE', {
   style: 'currency',
@@ -25,14 +27,6 @@ function fmtEur(n: number | null | undefined): string {
 function fmtDate(iso: string | null | undefined): string {
   if (!iso) return '–'
   return new Date(iso).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })
-}
-
-// CMM-49: v_gutachten_werte liefert numeric/money als String — auf number coercen,
-// damit buildContextText die gesamtforderung summieren kann (filtert typeof === 'number').
-function numOrNull(v: unknown): number | null {
-  if (v === null || v === undefined) return null
-  const n = Number(v)
-  return Number.isFinite(n) ? n : null
 }
 
 export const MAKLER_COPILOT_SYSTEM_STATIC = `Du bist der Claimondo-Copilot für Makler. Du hilfst dem Makler, Kunden-Fragen
@@ -147,9 +141,7 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
   const [gutRes, phaseMap] = await Promise.all([
     admin
       .from('v_gutachten_werte')
-      .select(
-        'reparaturkosten_netto, minderwert, nutzungsausfall_tage, gutachten_nutzungsausfall_tagessatz_eur, gutachten_sv_honorar_netto',
-      )
+      .select(GUTACHTEN_WERTE_COLUMNS)
       .eq('claim_id', claimId)
       .maybeSingle(),
     getClaimPhaseMap([claimId]),
@@ -170,13 +162,11 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     leadNachname = (lead?.nachname as string | null) ?? null
   }
 
-  // nutzungsausfall_gesamt rekonstruiert die alte faelle-Gesamtspalte: Tage × Tagessatz.
-  const naTage = numOrNull(gut?.nutzungsausfall_tage)
-  const naSatz = numOrNull(gut?.gutachten_nutzungsausfall_tagessatz_eur)
-  const nutzungsausfallGesamt = naTage != null && naSatz != null ? naTage * naSatz : null
+  // Gutachten-Werte kanonisch aus der Entity (geteilter Helper mit getMaklerFallDetail —
+  // garantiert identische Zahlen in Detail & Copilot). nutzungsausfall_gesamt = Tage × Tagessatz.
+  const gw = mapGutachtenWerte(gut)
 
-  // fall-Record mit genau den Keys, die buildContextText liest. Money-Felder als number
-  // (Entity liefert numeric als String -> numOrNull) damit die gesamtforderung-Summe greift.
+  // fall-Record mit genau den Keys, die buildContextText liest.
   const fall: Record<string, unknown> = {
     claim_nummer: vcf.claim_nummer ?? null,
     service_typ: vcf.service_typ ?? null,
@@ -189,10 +179,10 @@ async function loadContext(fallId: string): Promise<LoadedContext> {
     fahrzeug_hersteller: vcf.fahrzeug_hersteller ?? null,
     fahrzeug_modell: vcf.fahrzeug_modell ?? null,
     fahrzeug_baujahr: vcf.fahrzeug_baujahr ?? null,
-    reparaturkosten: numOrNull(gut?.reparaturkosten_netto),
-    wertminderung: numOrNull(gut?.minderwert),
-    nutzungsausfall_gesamt: nutzungsausfallGesamt,
-    gutachter_honorar: numOrNull(gut?.gutachten_sv_honorar_netto),
+    reparaturkosten: gw.reparaturkosten,
+    wertminderung: gw.wertminderung,
+    nutzungsausfall_gesamt: gw.nutzungsausfall_gesamt,
+    gutachter_honorar: gw.gutachter_honorar,
     // Datenminimierung (Variante B): wiederbeschaffungswert/restwert/totalschaden
     // bewusst NICHT in den Makler-Copilot-Kontext — sonst Leak via AI-Antwort.
   }
