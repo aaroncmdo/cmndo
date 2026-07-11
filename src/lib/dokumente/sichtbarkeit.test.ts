@@ -2,8 +2,19 @@ import { describe, expect, it } from 'vitest'
 import { darfSehen, getSichtbarFuerRolle } from './sichtbarkeit'
 
 describe('sichtbarkeit', () => {
-  it('SV sieht NICHT: sa_vollmacht', () => {
-    expect(darfSehen('sa_vollmacht', 'sachverstaendiger')).toBe(false)
+  it('SV sieht: sa_vollmacht (Task C1 — volle Transparenz-Entscheid Aaron 11.07.)', () => {
+    expect(darfSehen('sa_vollmacht', 'sachverstaendiger')).toBe(true)
+  })
+
+  it('SV sieht: sicherungsabtretung (Task C1 — volle Transparenz-Entscheid Aaron 11.07.)', () => {
+    expect(darfSehen('sicherungsabtretung', 'sachverstaendiger')).toBe(true)
+  })
+
+  it('sa_vollmacht + sicherungsabtretung: andere Mandats-interne Typen NICHT veraendert', () => {
+    // kanzlei_vollmacht / mandatsvertrag / halter_vollmacht bleiben SV-NICHT
+    expect(darfSehen('kanzlei_vollmacht', 'sachverstaendiger')).toBe(false)
+    expect(darfSehen('mandatsvertrag', 'sachverstaendiger')).toBe(false)
+    expect(darfSehen('halter_vollmacht', 'sachverstaendiger')).toBe(false)
   })
 
   it('SV sieht NICHT: ki_kalkulation', () => {
@@ -39,7 +50,7 @@ describe('sichtbarkeit', () => {
     expect(darfSehen('existiert_nicht', 'sachverstaendiger')).toBe(false)
   })
 
-  it('getSichtbarFuerRolle filtert Array korrekt', () => {
+  it('getSichtbarFuerRolle filtert Array korrekt (Task C1: sa_vollmacht jetzt SV-sichtbar)', () => {
     const docs = [
       { typ: 'gutachten' },
       { typ: 'sa_vollmacht' },
@@ -47,7 +58,8 @@ describe('sichtbarkeit', () => {
       { typ: 'ki_kalkulation' },
     ]
     const svDocs = getSichtbarFuerRolle(docs, 'sachverstaendiger')
-    expect(svDocs.map((d) => d.typ)).toEqual(['gutachten', 'schadensfotos'])
+    // sa_vollmacht ist seit Task C1 SV-sichtbar; ki_kalkulation bleibt ausgeschlossen
+    expect(svDocs.map((d) => d.typ)).toEqual(['gutachten', 'sa_vollmacht', 'schadensfotos'])
   })
 
   it('getSichtbarFuerRolle unterstützt dokument_typ + kategorie', () => {

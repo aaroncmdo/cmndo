@@ -9,9 +9,15 @@
 //   - `grid` (Makler): 3-spaltiges Card-Grid mit Größe/MIME-Typ + Download-Button
 //
 // Alle Farben/Radien über Claimondo-Tokens + iOS-Radius — keine Hex-Literale.
+//
+// Task B (DokumentVorschau): opt-in enableVorschau prop (default false) —
+// Kunde/SV setzen enableVorschau={true}, Makler bleibt unverändert.
 
-import { FileTextIcon, FileIcon, ImageIcon, DownloadIcon } from 'lucide-react'
-import { Card } from '@/components/primitives'
+'use client'
+
+import { FileTextIcon, FileIcon, ImageIcon, DownloadIcon, EyeIcon } from 'lucide-react'
+import { Card, Button } from '@/components/primitives'
+import { useDokumentVorschau } from '@/components/shared/DokumentVorschau'
 
 export type DokumentItem = {
   id: string
@@ -40,6 +46,12 @@ export interface DokumenteDownloadListeProps {
   /** Rolle optional mitgegeben — aktuell nur für aria-label, reserviert für spätere Actions. */
   rolle?: 'admin' | 'kb' | 'sv' | 'kunde' | 'makler'
   className?: string
+  /**
+   * Opt-in Vorschau-Funktion (default false).
+   * Kunde + SV setzen true; Makler bleibt unverändert (default false).
+   * Bei true erscheint neben jedem Dokument mit url ein Vorschau-Button.
+   */
+  enableVorschau?: boolean
 }
 
 function formatDate(iso: string | null | undefined): string {
@@ -102,7 +114,10 @@ export default function DokumenteDownloadListe({
   emptyDescription,
   rolle,
   className = '',
+  enableVorschau = false,
 }: DokumenteDownloadListeProps) {
+  const { oeffnen, modal } = useDokumentVorschau()
+
   if (dokumente.length === 0) {
     return (
       <EmptyState
@@ -115,91 +130,123 @@ export default function DokumenteDownloadListe({
 
   if (variant === 'grid') {
     return (
-      <div
-        className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${className}`}
-        data-rolle={rolle}
-      >
-        {dokumente.map((d) => {
-          const Icon = pickIcon(d.mimeType, d.typ)
-          const size = formatSize(d.groesseBytes)
-          return (
-            <Card key={d.id} p={4}>
-              <div className="flex flex-col gap-3">
-              <div className="flex items-start gap-3">
-                <span className="shrink-0 w-10 h-10 rounded-ios-lg bg-claimondo-bg flex items-center justify-center text-claimondo-ondo">
-                  <Icon className="w-5 h-5" />
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-claimondo-navy truncate">
-                    {d.name}
-                  </p>
-                  {(d.typ || size) && (
-                    <p className="text-xs text-claimondo-ondo mt-0.5">
-                      {d.typ ?? ''}
-                      {d.typ && size ? ' · ' : ''}
-                      {size ?? ''}
+      <>
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 ${className}`}
+          data-rolle={rolle}
+        >
+          {dokumente.map((d) => {
+            const Icon = pickIcon(d.mimeType, d.typ)
+            const size = formatSize(d.groesseBytes)
+            return (
+              <Card key={d.id} p={4}>
+                <div className="flex flex-col gap-3">
+                <div className="flex items-start gap-3">
+                  <span className="shrink-0 w-10 h-10 rounded-ios-lg bg-claimondo-bg flex items-center justify-center text-claimondo-ondo">
+                    <Icon className="w-5 h-5" />
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-claimondo-navy truncate">
+                      {d.name}
                     </p>
-                  )}
-                  {d.createdAt && (
-                    <p className="text-[11px] text-claimondo-ondo mt-0.5">
-                      {formatDate(d.createdAt)}
-                    </p>
-                  )}
+                    {(d.typ || size) && (
+                      <p className="text-xs text-claimondo-ondo mt-0.5">
+                        {d.typ ?? ''}
+                        {d.typ && size ? ' · ' : ''}
+                        {size ?? ''}
+                      </p>
+                    )}
+                    {d.createdAt && (
+                      <p className="text-[11px] text-claimondo-ondo mt-0.5">
+                        {formatDate(d.createdAt)}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {d.url ? (
-                <a
-                  href={d.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-ios-lg bg-claimondo-navy text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
-                >
-                  <DownloadIcon className="w-3.5 h-3.5" />
-                  Herunterladen
-                </a>
-              ) : (
-                <span className="text-xs text-claimondo-ondo text-center py-2">
-                  Kein Zugriff
-                </span>
-              )}
-              </div>
-            </Card>
-          )
-        })}
-      </div>
+                {d.url ? (
+                  <div className="flex gap-2">
+                    <a
+                      href={d.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 inline-flex items-center justify-center gap-2 px-3 py-2 rounded-ios-lg bg-claimondo-navy text-white text-xs font-medium hover:bg-claimondo-shield transition-colors"
+                    >
+                      <DownloadIcon className="w-3.5 h-3.5" />
+                      Herunterladen
+                    </a>
+                    {enableVorschau && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        ariaLabel={`Vorschau: ${d.name}`}
+                        onClick={() => oeffnen({ url: d.url, dateiname: d.name, typ: d.typ })}
+                      >
+                        <EyeIcon className="w-3.5 h-3.5" />
+                      </Button>
+                    )}
+                  </div>
+                ) : (
+                  <span className="text-xs text-claimondo-ondo text-center py-2">
+                    Kein Zugriff
+                  </span>
+                )}
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+        {enableVorschau && modal}
+      </>
     )
   }
 
   // variant === 'list'
   return (
-    <div className={`space-y-2 ${className}`} data-rolle={rolle}>
-      {dokumente.map((d) => {
-        const Icon = pickIcon(d.mimeType, d.typ)
-        return d.url ? (
-          <a
-            key={d.id}
-            href={d.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg bg-claimondo-bg hover:bg-claimondo-border transition-colors"
-          >
-            <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
-            <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>
-            {d.createdAt && (
-              <span className="text-[10px] text-claimondo-ondo/70">{formatDate(d.createdAt)}</span>
-            )}
-          </a>
-        ) : (
-          <div
-            key={d.id}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg bg-claimondo-bg opacity-60"
-          >
-            <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
-            <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>
-            <span className="text-[10px] text-claimondo-ondo/70">Kein Zugriff</span>
-          </div>
-        )
-      })}
-    </div>
+    <>
+      <div className={`space-y-2 ${className}`} data-rolle={rolle}>
+        {dokumente.map((d) => {
+          const Icon = pickIcon(d.mimeType, d.typ)
+          return d.url ? (
+            <div
+              key={d.id}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg bg-claimondo-bg hover:bg-claimondo-border transition-colors"
+            >
+              <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
+              <a
+                href={d.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-claimondo-navy truncate flex-1"
+              >
+                {d.name}
+              </a>
+              {d.createdAt && (
+                <span className="text-[10px] text-claimondo-ondo/70">{formatDate(d.createdAt)}</span>
+              )}
+              {enableVorschau && (
+                <Button
+                  variant="bare"
+                  size="icon"
+                  ariaLabel={`Vorschau: ${d.name}`}
+                  onClick={() => oeffnen({ url: d.url, dateiname: d.name, typ: d.typ })}
+                >
+                  <EyeIcon className="w-4 h-4" />
+                </Button>
+              )}
+            </div>
+          ) : (
+            <div
+              key={d.id}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-ios-lg bg-claimondo-bg opacity-60"
+            >
+              <Icon className="w-4 h-4 text-claimondo-ondo shrink-0" />
+              <span className="text-sm text-claimondo-navy truncate flex-1">{d.name}</span>
+              <span className="text-[10px] text-claimondo-ondo/70">Kein Zugriff</span>
+            </div>
+          )
+        })}
+      </div>
+      {enableVorschau && modal}
+    </>
   )
 }

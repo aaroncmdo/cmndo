@@ -40,11 +40,14 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   'whatsapp-foto': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   'whatsapp-datei': ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
 
-  // Vollmachten / Verträge → SV sieht NICHT (Mandats-interne Dokumente)
-  sa_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  // Vollmachten / Verträge — Aaron 11.07.: volle Transparenz fuer SV:
+  // sa_vollmacht + sicherungsabtretung jetzt auch 'sachverstaendiger' sichtbar.
+  // BACKFILL: Bestehende fall_dokumente-Rows (sichtbar_fuer gesetzt OHNE sv)
+  // muessen per Data-Update nachgezogen werden (separater Ops-Step, out of scope hier).
+  sa_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   kanzlei_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
   mandatsvertrag: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
-  sicherungsabtretung: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
+  sicherungsabtretung: ['admin', 'dispatch', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei'],
   halter_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
   halter_ausweis: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
   gf_vollmacht: ['admin', 'dispatch', 'kundenbetreuer', 'kunde', 'kanzlei'],
@@ -81,7 +84,8 @@ export const DOKUMENT_SICHTBAR_FUER: Record<string, Rolle[]> = {
   abrechnung_intern: ['admin', 'kundenbetreuer'],
 
   // Rechnungen
-  rechnung_gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger'],
+  // rechnung_gutachten: Slice 1b — 'kunde' ergaenzt damit SV-Upload in BelegePaketCard surfaced wird.
+  rechnung_gutachten: ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde'],
   rechnung_kanzlei: ['admin', 'kundenbetreuer', 'kanzlei'],
 
   // Sonstige Kategorien (aus Webhook-Logik)
