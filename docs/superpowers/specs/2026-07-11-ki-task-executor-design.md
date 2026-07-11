@@ -1,97 +1,101 @@
 # KI-Task-Executor — Admin/KB-Aufgaben per Klick von der KI ausführen lassen
 
 **Datum:** 2026-07-11
-**Status:** Design freigegeben (Brainstorming abgeschlossen), bereit für Umsetzungsplan
-**Branch:** `kitta/ki-task-executor` (Worktree off `staging`, tip `51053a3e2`)
+**Status:** Design freigegeben (Brainstorming abgeschlossen + auf Prod-Daten geerdet), bereit für Umsetzungsplan
+**Branch:** `kitta/ki-task-executor` (Worktree off `staging`)
 **DB:** eine additive Migration (`ai_task_executions`), via Supabase-Plugin (Regel 2)
 
 ## Motivation
 
-Auf `staging` läuft bereits ein **AI-Claim-Orchestrator**: ein Cron reviewt stagnierende
-Claims (Anthropic Tool-Use), schreibt `ai_claim_proposals` (Shadow-Mode), ein Admin nimmt sie
-unter `/admin/ai-vorschlaege` an → `buildTaskFromProposal()` erzeugt **genau einen echten Task**.
-Phase 2 graduiert bewährte `(vorschlag_typ, ziel_rolle)`-Paare zu `auto` (Cron legt den Task
-selbst an, Rate-Cap + Auto-Revert).
+Auf `staging` läuft der **AI-Claim-Orchestrator**: ein Cron reviewt stagnierende Claims (Anthropic
+Tool-Use), schreibt `ai_claim_proposals` (Shadow-Mode), ein Admin nimmt sie unter
+`/admin/ai-vorschlaege` an → `buildTaskFromProposal()` erzeugt **einen echten Task**. Phase 2
+graduiert bewährte Paare zu `auto`.
 
-Diese Pipeline endet heute bei **„ein Mensch hat eine Aufgabe zu tun"**. Der Wunsch (Aaron,
-2026-07-11):
+Diese Pipeline endet bei **„ein Mensch hat eine Aufgabe zu tun"**. Wunsch (Aaron 2026-07-11):
 
-- KI-Vorschläge bleiben **konvertierbar** zu echten Aufgaben → ✅ bleibt unangetastet
-  (`buildTaskFromProposal`).
-- **Alle KI-fähigen** echten Aufgaben sollen per Klick **von der KI ausgeführt** werden → 🆕
-  **die fehlende zweite Hälfte**.
+- KI-Vorschläge bleiben **konvertierbar** zu Tasks → ✅ unverändert (`buildTaskFromProposal`).
+- **Alle KI-fähigen** echten Aufgaben sollen per Klick **von der KI ausgeführt** werden → 🆕.
 
-Der Kreis schließt sich zu: **KI schlägt vor → Task → KI führt aus → erledigt**, mit
-Mensch-Eingriff an beiden Toren. Die vorhandene Graduierungs-Philosophie (Phase 1 manuell →
-Phase 2 autonom) überträgt sich 1:1 auf die *Ausführung* (P3, Nicht-Ziel jetzt).
+Der Kreis schließt sich: **KI schlägt vor → Task → KI führt aus → erledigt**, mit Mensch-Eingriff
+an beiden Toren.
 
-## Entscheidungen (aus dem Brainstorming, fix)
+## Entscheidungen (Brainstorming, fix)
 
-1. **Hybrid nach Risiko.** Jedes Executor-Tool trägt eine Risiko-Klasse. *Safe*-Aktionen
-   (interne Notiz, Timeline, Task schließen) laufen sofort; *consequential*-Aktionen
-   (Outbound-Kommunikation an Kunde, Statuswechsel, SV-Zuweisung) brauchen eine Bestätigung.
-2. **Nur KI-fähige Task-Typen.** Eine **Playbook-Registry** (`task_typ → Playbook`) gatet, wo
-   der Button erscheint. Kein Playbook → kein Button (z.B. `filmcheck`, `sonstiges`).
-3. **Gebundener KI-Agent.** Anthropic Tool-Use, aber **nur** mit den Tools, die das Playbook
-   erlaubt. Das LLM plant den Ablauf und komponiert die Inhalte (exakter Nachrichtentext,
-   Ziel-Status); ein deterministischer Wrapper erzwingt Sofort-vs-Bestätigen.
-4. **Gating auf Plan-Ebene (v1-Vereinfachung).** Enthält der Plan **≥1** consequential-Aktion,
-   wartet der **ganze** Plan auf **eine** Bestätigung (keine halb-angewandten Seiteneffekte vor
-   dem Klick). Reine Safe-Pläne laufen instant (echt ein Klick). Schritt-granulares Gating ist
-   später nachrüstbar (P3).
-5. **Engine-Reuse statt Parallel-Stack.** Der Executor ist ein **neuer Consumer** der
-   geteilten `claim-ai/engine` — kein neuer Agent-Loop, kein zweiter Anthropic-Wrapper.
-6. **Audit-Spine.** Jede Ausführung wird in `ai_task_executions` + Claim-Timeline (actor=KI)
-   protokolliert — Basis für spätere Graduierung.
+1. **Hybrid nach Risiko.** Jedes Tool trägt eine Risiko-Klasse. *Safe* (interne Notiz, Timeline,
+   Task schließen) läuft sofort; *consequential* (Outbound an Kunde, Statuswechsel, SV-Zuweisung)
+   braucht eine Bestätigung.
+2. **Executable-Types-Allow-List** (keyed auf `tasks.typ`) gatet **nur den Button** — kein Button
+   auf nicht-KI-fähigen Typen (DevOps-`reliability`, SV-physisch, Lead-Pool-`dispatch`). „Nur
+   KI-fähige Typen."
+3. **General-Executor mit vollem, risiko-klassifiziertem Tool-Belt** (Aaron 2026-07-11: „eigentlich
+   alles davon, je nachdem was gebraucht wird"). Die KI bekommt je Task das **volle Belt** + Task-
+   und Claim-Kontext und wählt selbst, was gebraucht wird. **Der Schutz ist das Risiko-Gating,
+   nicht das Pro-Typ-Verengen** — die Typ-Allow-List gatet den Button, das Risiko-Gating gatet die
+   Ausführung. Die Registry erlaubt später, einen heiklen Typ doch zu verengen (Default = volles Belt).
+4. **Gating auf Plan-Ebene (v1).** Enthält der Plan ≥1 consequential-Aktion, wartet der **ganze**
+   Plan auf **eine** Bestätigung (keine halb-angewandten Effekte). Reine Safe-Pläne laufen instant.
+5. **Engine-Reuse.** Der Executor ist ein neuer Consumer der geteilten `claim-ai/engine`
+   (Single-Turn Tool-Use), **kein** neuer Agent-Loop.
+6. **Audit-Spine.** `ai_task_executions` + Claim-Timeline (actor=KI).
+7. **Comms = Template-Select, kein Freitext.** `sendFallCommunication` ist template-gebunden
+   (WhatsApp-Business-Regel: nur registrierte Templates). Das `sende_kommunikation`-Tool wählt einen
+   **erlaubten Trigger** aus `COMMUNICATION_REGISTRY` + füllt dessen Variablen; die KI komponiert
+   also *Variablen*, nicht beliebigen Text. (Freitext-Email via `sendEmail` ist ein späterer,
+   optionaler zweiter Kanal — P3.)
+
+## Geerdete Fakten (Prod-DB, 2026-07-11) — ersetzen die ursprünglichen Annahmen
+
+- **`typ` ist der Diskriminator, nicht `task_typ`.** `task_typ` ist nur auf 30/266 Tasks gesetzt;
+  `typ` auf allen 266. Der Matcher keyt auf `tasks.typ`.
+- **Reale `typ`-Verteilung** (admin/KB-relevant, claim-verankert): `dokument-pruefen` (28, KB,
+  claim), `sa_ausstehend` (21, admin-sichtbar, 11 claim), `allgemein` (3, KB/admin, claim —
+  = Orchestrator-Vorschlags-Tasks), `erster-kontakt` (1, KB, claim), `sla_breach` (71, claim,
+  interne Alerts), `reliability` (34, admin, **kein Claim**, DevOps), `sv_dokument_review` (21,
+  admin, kein Claim, SV-Onboarding), `dispatch` (71, Lead-Pool, meist kein Claim), `sv-*`
+  (SV-physisch). Die Spec-Playbooks der Erst-Version (`dokument_nachfordern` etc.) existieren in
+  den Daten **nicht** und sind verworfen.
+- **ID-Auflösung:** `tasks.fall_id` FKt auf `faelle_claim_bridge.fall_id`, `tasks.claim_id` auf
+  `claims.id`. Jeder Task hat **beide oder keins** (`fall_only=0, claim_only=0`). → **ExecCtx liest
+  `claim_id` (Claims-/Kontext-/Audit-Anker) UND `fall_id` (Comms-/Status-Anker) direkt vom Task —
+  keine Bridge-Auflösung nötig.** Tasks ohne IDs → kein Button.
+- **Templates existieren** für den Reminder/Doc-Bereich: `dokumente_nachreichen`,
+  `dokumente_upload_anfrage` u.a. — Grundlage für `sende_kommunikation`.
 
 ## Ausgangslage (verifiziert auf `staging`)
 
-Die geteilte **`claim-ai/engine`** ist explizit für mehrere Konsumenten gebaut
-(Orchestrator/Copilot/Aufsicht/Konsole „wählen ihr Verb-Subset"):
-
-- `src/lib/claim-ai/engine/verbs.ts` — `VerbDefinition<T> = { name, tool, validate }`,
-  `toolsFrom(verbs)`, `validateVerb(verbs, name, input)`. Generisch über den Draft-Typ `T`.
+Geteilte **`claim-ai/engine`** (mehrere Consumer wählen ihr Verb-Subset):
+- `src/lib/claim-ai/engine/verbs.ts` — `VerbDefinition<T> = { name, tool, validate }`, `toolsFrom`,
+  `validateVerb`.
 - `src/lib/claim-ai/engine/call.ts` — `callForProposals<T>({ model, system, tools, userContent,
-  extract, logEndpoint, logFallId })`: **Single-Turn** Tool-Use-Call (Client-im-try,
-  Usage-Log non-critical, Fehler→`[]`). `streamForProposals` als Streaming-Geschwister.
-- `src/lib/orchestrator/tools.ts` — `ORCHESTRATOR_VERBS` (`propose_task`/`flag_escalation`/
-  `suggest_next_step`) als `VerbDefinition<ProposalDraft>` — die **Vorlage** für unsere Verben.
-- `src/lib/orchestrator/run.ts` — `reviewClaim(ctx)`: nutzt `callForProposals`, extrahiert
-  Drafts aus `tool_use`-Blöcken, persistiert. **Genau das Muster**, das wir für Ausführung
-  spiegeln — nur mit seiteneffekt-tragenden Verben.
-- `src/lib/orchestrator/context.ts` — `buildClaimContext` / `summarizeClaimForPrompt` (kompakter
-  prompt-tauglicher Fall-Kontext aus Basis-Tabellen, service_role-lesbar). **Wiederverwenden.**
-- `src/lib/orchestrator/policy.ts` — `getAutoMode` / `isAutoEligible` / `isKillSwitchOn`
-  (Graduierung + Kill-Switch). Für P3 relevant; Kill-Switch-Muster jetzt schon adaptieren.
-- `src/lib/orchestrator/task-from-proposal.ts` — `buildTaskFromProposal` (Proposal→Task, bleibt).
-- `src/lib/ai/models.ts` — `AI_MODELS` (zentrale Modell-Zuordnung). Neuer Key `task_executor`.
+  extract, logEndpoint, logFallId })` (Single-Turn, wirft nie → `[]`, Usage-Log non-critical).
+- `src/lib/orchestrator/tools.ts` — `ORCHESTRATOR_VERBS` (Zod + `tool` + `validate`) = Verb-Vorlage.
+- `src/lib/orchestrator/run.ts` — `extractProposalsFromToolUse` = Extraktions-Vorlage.
+- `src/lib/orchestrator/context.ts` — `buildClaimContext(claimId): Promise<ClaimContext|null>` +
+  `summarizeClaimForPrompt(ctx)` (nutzt `createAdminClient`).
+- `src/lib/orchestrator/policy.ts` — `isKillSwitchOn()` (ENV `ORCHESTRATOR_AUTO_ENABLED`) = Muster.
+- `src/lib/ai/models.ts` — `AI_MODELS` (neuer Key `task_executor` nötig).
 
-Wiederverwendbare Aktions-Funktionen (Apply-Layer):
+Apply-Layer (wiederverwenden):
+- `sendFallCommunication(fallId, triggerName, extraData?): Promise<void>` — template-gebunden.
+- `transitionFallStatus(fallId, newStatus, metadata?): Promise<void>` — nimmt `fallId`;
+  gültige Ziel-Status aus `FALL_STATUS_TRANSITIONS`.
+- `updateTaskStatusCore(supabase, taskId, newStatus): Promise<UpdateTaskStatusResult>` — **wirft**
+  bei Fehler; nimmt einen Supabase-Client; setzt `erledigt_am` bei `'erledigt'` + `resolveGates`.
+- `findBestSV(input)` + SV-Zuweisung (P2).
+- `createAdminClient()` (`@/lib/supabase/admin`) · `createClient()` (`@/lib/supabase/server`) ·
+  Guards `requireRole(['admin'|'kundenbetreuer'])` (Result, wirft nicht).
 
-- `src/lib/communications/send-fall.ts` — `sendFallCommunication(fallId, trigger, …)` (Outbound).
-- `src/lib/faelle/state-machine.ts` — `transitionFallStatus(fallId, newStatus, meta?)` (Status +
-  Folge-Effekte).
-- `src/lib/dispatch/findBestSV.ts` — `findBestSV(input)` (SV-Matching, read-only) + SV-Zuweisung
-  (`/api/sv-zuweisung` bzw. der dahinterliegende Helper).
-- `src/lib/tasks/update-status-core.ts` — `updateTaskStatusCore()` (Task-Status + Gates + Reminder).
-- Timeline/Mitteilung — `src/lib/mitteilungen/*`, Claim-Timeline (`v_claim_timeline`).
-
-Task-Flächen (Button-Einbau):
-
-- `src/app/admin/tasks/KanbanBoard.tsx` — Admin-Kanban (P1).
-- `src/app/admin/meine-tasks/MyTasksClient.tsx` — Admin+KB „Meine Tasks" (P2).
-- `src/app/mitarbeiter/tasks/page.tsx` — KB-Portal-Liste (P2).
+Task-Flächen: `src/app/admin/tasks/KanbanBoard.tsx` (`'use client'`, Card keyt auf `task.typ`; Query
+in `page.tsx` selektiert `typ, task_typ, claim_id?`…) · `MyTasksClient.tsx` · `mitarbeiter/tasks`.
+Primitives: `Button` (`variant`, `loading`, `onClick`, `iconLeft`), `Modal` (`open/onClose/…`).
 
 ## Zielarchitektur
 
 ### A · `ActionVerb` — Engine-Erweiterung per Intersection
 
-Der Executor-Verb-Typ erweitert `VerbDefinition` um **Risiko** + **Apply** — `toolsFrom` und
-`validateVerb` bleiben unverändert nutzbar (sie lesen nur `name`/`tool`/`validate`):
-
 ```ts
 type Risk = 'safe' | 'consequential'
-
 type ActionDraft = { verb: string; args: Record<string, unknown>; begruendung?: string }
 
 type ActionVerb = VerbDefinition<ActionDraft> & {
@@ -99,100 +103,87 @@ type ActionVerb = VerbDefinition<ActionDraft> & {
   apply: (draft: ActionDraft, ctx: ExecCtx) => Promise<ActionResult>
 }
 
-type ExecCtx = { db: SupabaseAdmin; claimId: string; fallId: string | null; task: TaskRow; userId: string }
+type ExecCtx = {
+  db: SupabaseClient          // createAdminClient (nach Guard)
+  task: TaskRow               // inkl. id, typ, titel, beschreibung, claim_id, fall_id, empfaenger_rolle
+  claimId: string             // = task.claim_id (Claims-Anker)
+  fallId: string | null       // = task.fall_id (Comms/Status-Anker)
+  userId: string
+}
 type ActionResult = { ok: boolean; detail?: string; error?: string }
 ```
 
-`validate` liefert `{ ok: true, draft: { verb: name, args, begruendung } }` — der Draft trägt den
-Verb-Namen, damit Risk + Apply nach der Extraktion auffindbar sind.
+`toolsFrom`/`validateVerb` bleiben unverändert nutzbar (lesen nur `name`/`tool`/`validate`).
+`validate` liefert `{ ok: true, draft: { verb: name, args, begruendung } }`.
 
 ### B · Flow — Plan → Apply/Confirm (kein zweiter LLM-Call)
 
 ```
-Klick "Per KI erledigen" (Task mit Playbook)
-  └─ starteKiAusfuehrung(taskId)                     [Server-Action, requireAdmin/KB + RLS-Check]
-       ├─ ctx = buildClaimContext(claimId)           [reuse Orchestrator]
-       ├─ playbook = playbookForTask(task)
-       ├─ drafts = callForProposals({                [Single-Turn, tools = toolsFrom(playbook.verbs)]
-       │     model: AI_MODELS.task_executor,
-       │     system: playbook.system (+ guardrails, cache_control),
-       │     userContent: summarizeClaimForPrompt(ctx) + Task-Beschreibung,
-       │     extract: extractActions(playbook.verbs),
-       │  })
-       ├─ plan = buildPlan(drafts, playbook)          [Risk klassifizieren; schliessen als letzte]
-       ├─ Persist ai_task_executions (plan, modell, gestartet_von, begruendung)
-       └─ if plan hat 0 consequential:
-              applyPlan(plan, ctx) → status=ausgefuehrt → Task erledigt → Timeline   ← ein Klick
-          else:
-              status=warte_bestaetigung → UI zeigt Vorschau (Drawer)
+Klick "Per KI erledigen" (Task mit executable typ + claim_id)
+  └─ starteKiAusfuehrung(taskId)              [Server-Action: requireRole(['admin','kundenbetreuer']) + Task-RLS-Check]
+       ├─ ctx aus Task-Row (claimId, fallId) + buildClaimContext(claimId)
+       ├─ drafts = callForProposals({ model: AI_MODELS.task_executor,
+       │             system: EXECUTOR_SYSTEM + typHint(task.typ),
+       │             tools: toolsFrom(EXECUTOR_VERBS),       // volles Belt
+       │             userContent: summarizeClaimForPrompt(ctx) + Task-Titel/Beschreibung,
+       │             extract: extractActions(EXECUTOR_VERBS) })
+       ├─ plan = buildPlan(drafts)                          // Risk aggregieren; task_schliessen zuletzt
+       ├─ persist ai_task_executions (plan, modell, begruendung, gestartet_von)
+       └─ 0 consequential → applyPlan → status=ausgefuehrt → Task erledigt → Timeline   (ein Klick)
+          sonst           → status=warte_bestaetigung → UI-Vorschau (Modal)
 
 Klick "Bestätigen & ausführen"
-  └─ bestaetigeKiAusfuehrung(execId)                  [Server-Action, gleiche Guards]
-       └─ applyPlan(plan, ctx) → status=ausgefuehrt → Task erledigt → Timeline
-          (Args liegen im gespeicherten Plan — KEIN erneuter LLM-Call)
-
-Klick "Abbrechen"
-  └─ brichAbKiAusfuehrung(execId) → status=abgebrochen
+  └─ bestaetigeKiAusfuehrung(execId) → applyPlan (gespeicherte Args) → ausgefuehrt   (kein LLM-Call)
+Klick "Abbrechen" → brichAbKiAusfuehrung(execId) → abgebrochen
 ```
 
-`applyPlan` führt die Aktionen **in Reihenfolge** aus (`schliessen` immer zuletzt, erst nachdem
-alle anderen ok sind); bei Fehler → `status=fehler`, Stop, kein weiterer Schritt, Task bleibt offen.
-`extractActions` spiegelt `extractProposalsFromToolUse` (unbekannte/ungültige Verben still
-überspringen).
+`applyPlan` führt Aktionen in Reihenfolge aus (`task_schliessen` zuletzt), stoppt bei Fehler →
+`status=fehler`, Task bleibt offen. `extractActions` spiegelt `extractProposalsFromToolUse`.
 
-### C · Verben (v1 Tool-Layer)
+### C · Tool-Belt (voll, risiko-klassifiziert)
 
-| Verb | Risk | Apply wraps |
-|---|---|---|
-| `interne_notiz` (`text`) | safe | Timeline-Eintrag / Mitteilung (intern) |
-| `task_schliessen` (`ergebnis`) | safe | `updateTaskStatusCore(→ erledigt)` — immer letzte Aktion |
-| `sende_kommunikation` (`empfaenger`, `kanal`, `text` \| `trigger`) | **consequential** | `sendFallCommunication` |
-| `setze_status` (`neuer_status`, `grund`) | **consequential** | `transitionFallStatus` |
-| `weise_sv_zu` (`sv_id?`) | **consequential** | `findBestSV` + SV-Zuweisung *(P2)* |
+| Verb | Risk | Args (LLM komponiert) | Apply wraps |
+|---|---|---|---|
+| `interne_notiz` | safe | `text` | Timeline-/Mitteilung-Insert (intern) |
+| `task_schliessen` | safe | `ergebnis` | `updateTaskStatusCore(db, taskId, 'erledigt')` — immer letzte |
+| `sende_kommunikation` | **conseq** | `trigger` (aus Allow-List), `variablen: Record<string,string>` | `sendFallCommunication(fallId, trigger, variablen)` |
+| `setze_status` | **conseq** | `neuer_status` (aus `FALL_STATUS_TRANSITIONS`), `grund` | `transitionFallStatus(fallId, neuer_status, { grund, user_id })` |
+| `weise_sv_zu` *(P2)* | **conseq** | `sv_id?` | `findBestSV` + SV-Zuweisung |
+| `lese_dokument` *(P2)* | safe | `dokument_id?` | Storage-Fetch + OCR/Vision (`AI_MODELS.ocr`) → Text in Kontext |
 
-Exakte Apply-Signaturen (Parameter-Namen der Wrapper-Ziele) beim Bau gegen die realen Module
-verifizieren. Jeder `apply` gibt `ActionResult` zurück (kein throw); Fehler werden im Plan
-festgehalten.
+`sende_kommunikation.trigger` ist ein **enum der erlaubten Trigger** (kuratierte Teilmenge von
+`COMMUNICATION_REGISTRY`, z.B. `dokumente_nachreichen`, `dokumente_upload_anfrage`,
+Reminder-Trigger). Vorschau = Trigger + Empfänger + Variablen + Registry-`description`.
 
-### D · Playbook-Registry
+### D · Executable-Types-Registry (Button-Gate + Prompt-Hint)
 
 ```ts
-type Playbook = {
-  key: string
+type ExecutableType = {
+  typ: string                    // matcht tasks.typ
   label: string
-  matches: (task: TaskRow) => boolean   // primär task_typ; ggf. trigger_event/task_code
-  verbs: ActionVerb[]                    // Subset der Executor-Verben (harte Allow-List)
-  system: string                         // Scaffold: was diese Aufgabe ist + Guardrails
+  promptHint: string             // "was dieser Typ meist braucht"
+  toolOverride?: ActionVerb[]    // optional: heiklen Typ verengen (Default = volles Belt)
 }
-
-function playbookForTask(task: TaskRow): Playbook | null   // Button-Sichtbarkeit
+function executableTypeFor(task: TaskRow): ExecutableType | null   // + Guard: task.claim_id != null
 ```
 
-Reine Funktion (kein DB), damit Server-Component + Client identisch entscheiden können, ob der
-Button erscheint.
+`playbookForTask`-Äquivalent — reine Funktion (kein DB), Server + Client entscheiden identisch die
+Button-Sichtbarkeit.
 
-### E · Server-Actions (`{ ok, … }`-Shape, kein throw)
+**v1-Allow-List** (claim-verankert, admin/KB, vom v1-Belt bedienbar):
+`sa_ausstehend` · `allgemein` · `erster-kontakt` · `sla_breach`.
+**P2 ergänzt:** `dokument-pruefen` (sobald `lese_dokument` existiert), `sv_dokument_review`
+(SV-Kontext-Variante). **Nie:** `reliability`, `dispatch` (Lead-Pool), `sv-zum-termin`,
+`sv-onboarding`.
 
-- `starteKiAusfuehrung(taskId)` → `{ ok, execution?: { id, status, plan-preview }, error? }`
-- `bestaetigeKiAusfuehrung(execId)` → `{ ok, error? }`
-- `brichAbKiAusfuehrung(execId)` → `{ ok, error? }`
-
-Alle drei: Auth-Guard (Admin/KB), RLS-Check (Task muss für den User zugreifbar sein — via
-`can_access_fall`/Zuweisung), erst dann `createAdminClient` für die Ausführung. `revalidatePath`
-der betroffenen Task-Flächen (`/admin/tasks`, `/admin/meine-tasks`, `/mitarbeiter/tasks`, ggf.
-`/faelle/[id]`).
-
-### F · Datenmodell — Audit-Tabelle (eine Migration)
-
-Analog `ai_claim_proposals` (RLS an, kein anon/authenticated-Grant → nur service_role; Admin-
-Surface liest via `createAdminClient` nach Guard):
+### E · Datenmodell — Audit-Tabelle (eine Migration, RLS service_role-only)
 
 ```sql
 create table public.ai_task_executions (
   id uuid primary key default gen_random_uuid(),
   task_id uuid not null references public.tasks(id) on delete cascade,
   claim_id uuid references public.claims(id) on delete cascade,
-  playbook text not null,
+  typ text,
   status text not null default 'geplant'
     check (status in ('geplant','warte_bestaetigung','ausgefuehrt','abgebrochen','fehler')),
   plan jsonb not null default '[]'::jsonb,   -- [{verb, args, risk, applied, result}]
@@ -205,7 +196,6 @@ create table public.ai_task_executions (
   fehler text
 );
 create index ai_task_executions_task_idx on public.ai_task_executions(task_id);
--- Idempotenz-Lock: max. eine offene Ausführung je Task
 create unique index ai_task_executions_offen_idx
   on public.ai_task_executions(task_id) where status in ('geplant','warte_bestaetigung');
 alter table public.ai_task_executions enable row level security;
@@ -213,135 +203,98 @@ revoke all on public.ai_task_executions from anon, authenticated;
 ```
 
 Plugin-Ablauf (Regel 2): `apply_migration` → `list_migrations` → File exakt nach getrackter
-Version benennen → committen → `execute_sql` (READ) verifizieren → Typen regenerieren/aufschieben.
+Version benennen → committen → `execute_sql`(READ) verifizieren → Typen regenerieren/aufschieben.
+
+### F · Server-Actions (`{ ok, … }`-Shape, kein throw; neue Files)
+
+- `starteKiAusfuehrung(taskId)` → `{ ok, execution?: { id, status, plan }, error? }`
+- `bestaetigeKiAusfuehrung(execId)` → `{ ok, error? }`
+- `brichAbKiAusfuehrung(execId)` → `{ ok, error? }`
+
+Guard: `requireRole(['admin','kundenbetreuer'])` + Task-Zugriff über den **user-scoped** Client
+prüfen (RLS), dann `createAdminClient` für die Ausführung. `revalidatePath` der Task-Flächen.
 
 ### G · UI & Flow
 
-- **Button „✨ Per KI erledigen"** auf Task-Cards/-Zeilen — nur wenn `playbookForTask(task)` ≠ null.
-  Reuse `primitives.Button` (Component-Set-Policy; kein handgerolltes Markup). Icon = Sparkle/Bot.
-  Claimondo-Tokens, echte Umlaute (UI-String-Pflicht).
-- **All-safe-Plan** → Toast „KI hat erledigt: …", Task wandert nach *Erledigt*.
-- **Consequential-Plan** → **Bestätigungs-Drawer** (shared `primitives` Modal/Sheet): `begruendung`
-  + je geplanter Aktion eine Vorschau (Nachrichtentext / Ziel-Status / SV-Name) →
+- **Button „✨ Per KI erledigen"** auf Task-Cards — nur wenn `executableTypeFor(task) != null`.
+  `primitives.Button` (`variant="ghost"`, `iconLeft`, `loading`). Claimondo-Tokens, echte Umlaute.
+- **All-safe-Plan** → Inline-Erfolg + `router.refresh()`, Task → *Erledigt*.
+- **Consequential-Plan** → **Confirm-Modal** (`primitives.Modal`, Muster wie `NewTaskDialog` in
+  `KanbanBoard.tsx`): `begruendung` + je Aktion Vorschau (Trigger+Variablen / Ziel-Status / SV) →
   `[Abbrechen]` `[Bestätigen & ausführen]`.
-- **Idempotenz:** existiert bereits eine offene Ausführung (`warte_bestaetigung`), zeigt der Button
-  „Plan bestätigen" (öffnet den Drawer) statt neu zu planen. Button während laufender Aktion
-  disabled (`loading`).
-
-## Playbook-Set v1
-
-`task_typ → Playbook`. Button erscheint nur bei Match:
-
-| # | task_typ | Verben | Zweck |
-|---|---|---|---|
-| 1 | `dokument_nachfordern` / `dokument-pruefen` | `notiz, sende_komm, schliessen` | fehlendes Dokument freundlich anfordern |
-| 2 | `sv-termin` (Termin bestätigen) | `notiz, sende_komm, schliessen` | Termin dem Kunden bestätigen |
-| 3 | `vs_eskalation_pruefen` | `notiz, setze_status, schliessen` | VS-Frist prüfen, zusammenfassen, ggf. Status |
-| 4 | `kunde-rueckfrage` | `notiz, sende_komm, schliessen` | Kundenrückfrage beantworten |
-| 5 | `versicherung-kontakt` | `notiz, sende_komm, schliessen` | Nachricht an Versicherung entwerfen+senden |
-| 6 | `kanzlei-anschlussschreiben` / `kanzlei-nachfrage` | `notiz, sende_komm, schliessen` | Kanzlei-Schreiben |
-| 7 | `zahlung-pruefen` | `notiz, schliessen` | Zahlungsstatus prüfen (reine Safe-Task → instant) |
-
-Kein Playbook / kein Button: `filmcheck` (menschlicher Video-Check), `sonstiges`/Freitext.
-
-> **P1 baut nur Playbook #1 end-to-end.** P2 ergänzt #2–#7 (+ `weise_sv_zu`).
+- **Idempotenz:** offene Ausführung (`warte_bestaetigung`) → Button zeigt „Plan bestätigen"; während
+  Lauf `loading`. (Kein zentrales Toast-System vorhanden → Inline-Message-Muster wie im Bestand.)
 
 ## Guardrails & Sicherheit
 
-- **Tool-Allow-List je Playbook** = harte Obergrenze dessen, was das LLM überhaupt erreichen kann.
+- **Executable-Types-Allow-List** gatet den Button (nichts auf DevOps/physisch/Lead-Pool).
 - **Consequential immer Confirm** in v1 — nichts läuft autonom nach außen.
-- **Executor-Kill-Switch** (ENV, z.B. `TASK_EXECUTOR_ENABLED`) — Ops kann global abschalten;
-  Muster analog `isKillSwitchOn()`.
-- **RLS-Guard vor Admin-Client:** die Server-Action prüft Zugriff des Users auf den Task, bevor
-  `createAdminClient` ausgeführt wird.
-- **Idempotenz-Lock** (Partial-Unique-Index) verhindert doppelte/parallele Ausführung je Task →
-  kein Doppel-Send.
-- **Fail-safe LLM:** `callForProposals` wirft nie (→`[]`); leerer Plan → „KI hat keinen Vorschlag,
-  bitte manuell" (kein stiller No-Op als „erledigt").
-- **Kein throw** aus Server-Actions; Non-critical Sub-Sends (Timeline/Mitteilung) in lokalem
-  try/catch.
+- **Executor-Kill-Switch** (ENV `TASK_EXECUTOR_ENABLED`, Muster `isKillSwitchOn`) — global abschaltbar.
+- **RLS-Guard vor Admin-Client.** **Idempotenz-Lock** (Partial-Unique-Index) je Task.
+- **Fail-safe LLM:** `callForProposals` → `[]`; leerer Plan → „keine Aktion, bitte manuell" (kein
+  stiller No-Op als erledigt).
+- **Kein throw** aus Actions; `updateTaskStatusCore`/`transitionFallStatus`-Wrapper in try/catch →
+  `ActionResult`.
 
 ## Audit & Timeline
 
-- `ai_task_executions` hält Plan + Status + wer-gestartet/-bestätigt + Fehler (voller Verlauf).
-- Jede Ausführung schreibt zusätzlich einen **Claim-Timeline-Eintrag** (actor=KI): „KI hat Aufgabe
-  ‚<titel>' bearbeitet — <begruendung>". Consequential-Wrapper (`sendFallCommunication`,
-  `transitionFallStatus`) erzeugen ihre eigenen bestehenden Audit-Spuren (`email_log`, Timeline).
-
-## Graduierung (P3 — Nicht-Ziel jetzt)
-
-Über `ai_task_executions` lassen sich je Playbook Confirm-/Abbruch-/Fehler-Quoten messen. Bewährte
-Playbooks können später — exakt wie `GRADUATION` heute — consequential-Aktionen ohne Confirm
-ausführen (autonom), mit Rate-Cap + Auto-Revert. Bewusst **nicht** in v1.
+`ai_task_executions` (Plan + Status + wer + Fehler) + Claim-Timeline actor=KI. Consequential-Wrapper
+erzeugen zusätzlich ihre bestehenden Spuren (`email_log`, Timeline). Basis für P3-Graduierung
+(Confirm-/Abbruch-Quote je Typ, analog `GRADUATION`).
 
 ## Phasing
 
-- **P0 — Engine + Spine (kein UI):** Migration `ai_task_executions`; `ActionVerb`-Typ +
-  `extractActions`; Verben `interne_notiz`/`task_schliessen`/`sende_kommunikation`/`setze_status`;
-  `planTaskExecution` (reuse `callForProposals`) + `applyPlan` + Playbook-Registry mit **1**
-  Playbook (`dokument_nachfordern`); Server-Actions start/bestaetige/abbrich. TDD-schwer.
-- **P1 — Erste Fläche + Confirm-UI:** Button auf `KanbanBoard` + Bestätigungs-Drawer +
-  Timeline-Audit → **End-to-End ein Playbook** (Prod-Smoke).
-- **P2 — Verbreitern:** Playbooks #2–#7 + `weise_sv_zu`; Button auf `MyTasksClient` +
-  `mitarbeiter/tasks` (KB-Flächen).
-- **P3 (future):** Ausführungs-Graduierung zu autonom, Schritt-granulares Gating,
-  Text-Editieren vor Confirm.
+- **P0 — Engine + Spine + volles Belt (kein UI):** Migration `ai_task_executions`; `ActionVerb`-Typ
+  + `extractActions`; Verben `interne_notiz`/`task_schliessen`/`sende_kommunikation`/`setze_status`;
+  Executable-Types-Registry (v1-Allow-List) + `EXECUTOR_SYSTEM`; `planTaskExecution`/`buildPlan`/
+  `applyPlan`; Server-Actions start/bestaetige/abbrich; `AI_MODELS.task_executor`. TDD-schwer.
+- **P1 — Fläche + Confirm-UI:** Button auf `KanbanBoard` + Confirm-Modal + Timeline → **End-to-End
+  über die v1-Typen**, bewiesen an `sa_ausstehend` (consequential/Confirm) **und** `allgemein`
+  (freeform/general). Prod-Smoke.
+- **P2 — Breite:** `lese_dokument` (schaltet `dokument-pruefen` frei) + `weise_sv_zu`; KB-Flächen
+  (`MyTasksClient`, `mitarbeiter/tasks`); Pro-Typ-Prompt-Hints verfeinern.
+- **P3 (Nicht-Ziel jetzt):** Ausführungs-Graduierung zu autonom, Schritt-granulares Gating,
+  Freitext-Email-Kanal, Text-Editieren vor Confirm.
 
 ## Tests
 
-- **Verben (Unit):** jede `validate` (gültig/ungültig), `risk`-Klassifizierung korrekt.
+- **Verben (Unit):** jede `validate` (gültig/ungültig, `trigger`/`status`-Enums), `risk`-Klasse.
 - **`extractActions` (Unit):** tool_use → ActionDrafts; ungültige/unbekannte Verben übersprungen.
-- **`buildPlan` (Unit):** Risk-Aggregation (all-safe vs. hat-consequential), `schliessen` zuletzt.
-- **`applyPlan` (Unit, gemockte Wrapper):** Reihenfolge, Stop-bei-Fehler, Status-Übergänge
-  (geplant→ausgefuehrt / warte_bestaetigung→ausgefuehrt / →fehler).
+- **`buildPlan` (Unit):** all-safe vs. hat-consequential; `task_schliessen` zuletzt.
+- **`applyPlan` (Unit, gemockte Wrapper):** Reihenfolge, Stop-bei-Fehler, Status-Übergänge.
+- **`executableTypeFor` (Unit):** v1-Typen match + Guard (kein `claim_id` → null) + Nicht-Match
+  (`reliability`).
 - **Server-Actions:** Guard/RLS (fremder Task → `{ ok:false }`), Idempotenz-Lock, `{ ok }`-Shape.
-- **Playbook-Matching:** `playbookForTask` für alle v1-Typen + Nicht-Match (`filmcheck`).
-- **Playwright-Smoke (P1):** Kanban → Button → (Doku-Task) → Drawer → Bestätigen → WhatsApp-Send
-  (Mock) + Task in *Erledigt* + `ai_task_executions.status='ausgefuehrt'`.
+- **Playwright-Smoke (P1):** Kanban → Button auf `sa_ausstehend` → Confirm-Modal → Bestätigen →
+  Template-Send (Mock) + Task *Erledigt* + `ai_task_executions.status='ausgefuehrt'`; sowie ein
+  `allgemein`-Task (freeform) → Plan → Confirm/instant.
 
 ## 7-Punkte-Audit-Vorschau
 
-- **Build:** `tsc` + `npm run build` (Server-Actions/Routen berührt → voller Build Pflicht).
-- **UI-Erreichbarkeit:** Button auf Task-Cards (Admin P1, KB P2), rollen-korrekt sichtbar.
-- **Redundanz:** `claim-ai/engine` + `buildClaimContext` + Kommunikations-/State-Helper **reused**,
-  nicht kopiert; `primitives.Button`/Modal statt handgerollt.
-- **Dead-Code:** keine verwaisten Pfade; knip-Baseline prüfen (neue Files sind genutzt).
-- **Inkonsistenz:** Claimondo-Tokens, echte Umlaute in UI-Strings, `{ ok }`-Shape, `revalidatePath`
-  der Task-Flächen, DB-Spalten via Supabase-MCP verifiziert (nicht geraten).
-- **Regression:** Orchestrator/`ai-vorschlaege`/Kanban-D&D/`buildTaskFromProposal` unberührt;
-  Auth-Weichen intakt.
+- **Build:** `tsc` + `npm run build` (Server-Actions/Routen → voller Build Pflicht).
+- **UI-Erreichbarkeit:** Button auf Task-Cards (Admin P1, KB P2), rollen-korrekt.
+- **Redundanz:** `claim-ai/engine` + `buildClaimContext` + Comms/State-Helper **reused**;
+  `primitives.Button`/`Modal` statt handgerollt.
+- **Dead-Code:** knip-Baseline prüfen (neue Files genutzt).
+- **Inkonsistenz:** Claimondo-Tokens, echte Umlaute, `{ ok }`-Shape, `revalidatePath`, DB-Spalten
+  via MCP verifiziert.
+- **Regression:** Orchestrator/`ai-vorschlaege`/Kanban-D&D/`buildTaskFromProposal` unberührt; Auth intakt.
 
 ## Nicht-Ziele (YAGNI)
 
-- Keine autonome Ausführung consequential-Aktionen in v1 (P3).
-- Kein Voice-/Anruf-Automatismus (Aircall) — `filmcheck`/physische Tasks bleiben ohne Button.
-- Kein Umbau des Orchestrators oder der `ai-vorschlaege`-Fläche.
-- Kein Schritt-granulares Gating, kein Message-Editing vor Confirm (P3).
-- Kein neuer Nav-Eintrag — der Button lebt auf den bestehenden Task-Flächen.
-
-## Offene Verifikations-Punkte (beim Bau)
-
-1. **task_typ von Proposal-Tasks:** `createLinkedTask` setzt `typ` (Legacy), aber trägt ein aus
-   `buildTaskFromProposal` erzeugter Task ein spezifisches `task_typ`? Ggf. `null` → Matcher auf
-   `trigger_event`/`task_code` erweitern. **Gegen echte Daten prüfen.**
-2. **Exakte Apply-Signaturen:** `sendFallCommunication` / `transitionFallStatus` / SV-Zuweisung /
-   `updateTaskStatusCore` — Parameter-Namen + Result-Shapes.
-3. **Claim↔Fall-Auflösung im ExecCtx:** `tasks` trägt `fall_id` **und** (neu) `claim_id`? Bridge
-   (`faelle_claim_bridge`) wie in `buildTaskFromProposal` nutzen.
-4. **`AI_MODELS.task_executor`** ergänzen (Sonnet 4.6 — Planung + Textqualität), `cache_control`
-   auf dem statischen Playbook-System-Prompt.
+Keine autonome consequential-Ausführung (P3) · kein Voice/Aircall (SV-physische Tasks bleiben ohne
+Button) · kein Umbau von Orchestrator/`ai-vorschlaege` · kein Schritt-granulares Gating · kein
+Freitext-Kanal in v1 · kein neuer Nav-Eintrag.
 
 ## Koordination
 
-- **Eigener Worktree** `.claude/worktrees/ki-task-executor`, Branch `kitta/ki-task-executor` off
-  `staging`; PR gegen `staging` (Regel 1).
-- **Shared-Touch-Files** vs. Parallel-Sessions: `KanbanBoard.tsx` / `MyTasksClient.tsx` /
-  `mitarbeiter/tasks/page.tsx` — Marker gegen `386b3bd8` (SV/live-ops), `3c0b2713` (Header-Refactor),
-  `61e1d996` (Interaktions-Flags → DB-driven). Additiver Button, Konflikte klein halten.
-- Neue Files (`src/lib/task-executor/*`, Migration, Drawer-Component) kollidieren mit niemandem.
+Eigener Worktree `.claude/worktrees/ki-task-executor`, Branch `kitta/ki-task-executor` off `staging`;
+PR gegen `staging` (Regel 1). Shared-Touch (additiver Button, P1/P2): `KanbanBoard.tsx` ·
+`MyTasksClient.tsx` · `mitarbeiter/tasks/page.tsx` — Marker gegen Parallel-Sessions `386b3bd8`
+(Vertrieb-Cockpit), `3c0b2713` (Header-Refactor, portal-weit/shared), `61e1d996` (Flags→DB-driven).
+Neue Files (`src/lib/task-executor/*`, Migration, Confirm-Modal) kollidieren mit niemandem.
 
 ## Rollout
 
 Worktree off `staging` → TDD/Subagent-Bau (P0→P1) → 7-Punkte-Audit → PR gegen `staging` →
-Prod-Smoke nach Deploy (Kanban → Button → Doku-Task → Drawer → Bestätigen → Send + Erledigt +
-`ai_task_executions`-Row). P2 als Folge-PR.
+Prod-Smoke (Kanban → Button → `sa_ausstehend` → Confirm → Send + Erledigt + Audit-Row). P2 Folge-PR.
