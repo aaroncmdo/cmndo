@@ -20,6 +20,7 @@ import { NextResponse } from 'next/server'
 import { z } from 'zod'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { geocodeAdresse } from '@/lib/mapbox/geocode'
+import { klassifiziereReservierungsGrund } from './reservierung-grund'
 import { insertAnfrage } from '@/lib/embed/anfrage'
 import { issueCanonicalFlowLinkForAnfrage } from '@/lib/start-link/issue-canonical-flowlink'
 import { bucheTerminFlow } from '@/app/flow/[token]/self-service-actions'
@@ -235,6 +236,7 @@ export async function POST(req: Request) {
   // idempotent + race-safe (Engine-EXCLUSION-Constraint). NON-FATAL: bei 'belegt'/Fehler
   // bleibt der weiche Hold (gfa.wunschtermin + zugeordneter_sv_id) -> /flow terminPending.
   let reserviert = false
+  let reservierungFehler: string | null = null
   if (input.sv_id && input.slot_start && input.slot_end) {
     try {
       const buchung = await bucheTerminFlow(issued.token, input.sv_id, input.slot_start, input.slot_end)
@@ -246,9 +248,11 @@ export async function POST(req: Request) {
           .eq('id', ins.anfrageId)
         if (tidErr) console.error('[melde-schaden] gfa.termin_id-Update fehlgeschlagen:', tidErr.message)
       } else {
+        reservierungFehler = buchung.error ?? 'Reservierung nicht möglich.'
         console.error('[melde-schaden] Reservierung nicht möglich (Soft-Hold bleibt):', buchung.error)
       }
     } catch (err) {
+      reservierungFehler = err instanceof Error ? err.message : String(err)
       console.error('[melde-schaden] bucheTerminFlow-Fehler (Soft-Hold bleibt):', err)
     }
   }
@@ -263,6 +267,10 @@ export async function POST(req: Request) {
       ok: true,
       status: 'angelegt',
       reserviert,
+      // Diagnose-Luecke-Fix (Handoff 11.07.): SICHERER Grund-Code, wenn die harte
+      // Reservierung nicht feuerte — ein curl/Smoke sieht sofort z.B. 'test_sv_guard'
+      // (ohne VPS/pm2, ohne rohe DB-Message zu leaken).
+      ...(reservierungFehler ? { reservierung_grund: klassifiziereReservierungsGrund(reservierungFehler) } : {}),
       kanal: issued.kanal,
       hinweis:
         issued.kanal === 'none'
