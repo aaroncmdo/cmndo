@@ -13,7 +13,7 @@
 Im GPT-Builder → **Actions** → **Create new action** → **Import from URL**:
 
 ```
-https://claimondo.de/api/v1/openapi.json
+https://app.claimondo.de/api/v1/openapi.json
 ```
 
 - **Authentication:** None
@@ -97,7 +97,7 @@ Kann ich nach unverschuldetem Unfall einen Anwalt nehmen, ohne dass Kosten auf m
 4. **Conversation starters** (Abschnitt 3) eintragen.
 5. **Knowledge**: `llms-full.txt` hochladen (Abschnitt 5).
 6. **Capabilities** setzen (Abschnitt 6).
-7. **Actions** → Import from URL `https://claimondo.de/api/v1/openapi.json`, Auth None, Privacy `…/datenschutz` (Abschnitt 1).
+7. **Actions** → Import from URL `https://app.claimondo.de/api/v1/openapi.json`, Auth None, Privacy `…/datenschutz` (Abschnitt 1).
 8. **Test** (rechte Vorschau): die 3 Test-Konversationen aus Doc 34 §8 — prüfen, dass die Karte als Bild erscheint + die Action Treffer liefert.
 9. **Veröffentlichen** → „Jeder mit Link" oder GPT-Store. (Erst nachdem #1637 + dieser PR auf prod sind.)
 
