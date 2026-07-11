@@ -197,6 +197,12 @@ function buildTemplate(
         html: `${greet}<p>Wir haben Ihr Kanzlei-Paket${kanzlei ? ` an <strong>${kanzlei}</strong>` : ''} versendet. Die Kanzlei meldet sich in Kürze bei Ihnen.</p><p><a href="${fallLink}">Fall im Portal ansehen</a></p>${footer}`,
       }
     }
+    // AAR-826: Gast-Conversion-Reminder — Nudge, das begonnene Konto zu vervollständigen.
+    case 'gast.conversion_reminder':
+      return {
+        subject: 'Vervollständigen Sie Ihr Claimondo-Konto',
+        html: `${greet}<p>Sie haben bei Claimondo begonnen — Ihr Konto ist aber noch nicht vollständig eingerichtet. Schließen Sie die Einrichtung ab, um jederzeit auf Ihren Vorgang zuzugreifen, Dokumente hochzuladen und den Fortschritt zu verfolgen.</p><p><a href="${base}/login" style="background:#0D1B3E;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;display:inline-block">Konto vervollständigen</a></p>${footer}`,
+      }
     default:
       return {
         subject: 'Neue Benachrichtigung von Claimondo',
