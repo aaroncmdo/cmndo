@@ -12,7 +12,10 @@ import {
   UploadIcon,
   Loader2Icon,
   ExternalLinkIcon,
+  EyeIcon,
 } from 'lucide-react'
+import { Button } from '@/components/primitives'
+import { useDokumentVorschau } from '@/components/shared/DokumentVorschau'
 import { uploadDatei } from '@/app/gutachter/fall/[id]/actions'
 
 export type WeiteresDokument = {
@@ -92,6 +95,7 @@ export default function WeitereDokumenteCard({
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const inputRef = useRef<HTMLInputElement>(null)
+  const { oeffnen, modal } = useDokumentVorschau()
 
   const gruppen: Record<Kategorie, WeiteresDokument[]> = {
     gutachten: [],
@@ -185,15 +189,31 @@ export default function WeitereDokumenteCard({
                           </p>
                         </div>
                         {d.datei_url && (
-                          <a
-                            href={d.datei_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-claimondo-ondo hover:text-claimondo-navy"
-                            aria-label="Datei öffnen"
-                          >
-                            <ExternalLinkIcon className="w-4 h-4" />
-                          </a>
+                          <>
+                            <Button
+                              variant="bare"
+                              size="icon"
+                              ariaLabel={`Vorschau: ${d.datei_name ?? d.dokument_typ ?? 'Dokument'}`}
+                              onClick={() =>
+                                oeffnen({
+                                  url: d.datei_url,
+                                  dateiname: d.datei_name ?? d.dokument_typ ?? 'Dokument',
+                                  typ: d.dokument_typ,
+                                })
+                              }
+                            >
+                              <EyeIcon className="w-4 h-4" />
+                            </Button>
+                            <a
+                              href={d.datei_url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-claimondo-ondo hover:text-claimondo-navy"
+                              aria-label="Datei öffnen"
+                            >
+                              <ExternalLinkIcon className="w-4 h-4" />
+                            </a>
+                          </>
                         )}
                       </li>
                     )
@@ -233,6 +253,7 @@ export default function WeitereDokumenteCard({
           {error}
         </p>
       )}
+      {modal}
     </Wrapper>
   )
 }

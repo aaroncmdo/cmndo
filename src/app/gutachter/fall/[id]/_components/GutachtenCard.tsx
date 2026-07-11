@@ -15,6 +15,7 @@ import {
   EyeIcon,
   ChevronDownIcon,
   ChevronRightIcon,
+  ReceiptIcon,
 } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
@@ -22,6 +23,7 @@ import DokumentSlot from '@/components/fall/DokumentSlot'
 import { getSignedUrl } from '@/lib/supabase/storage'
 import type { SvSubphase } from '@/lib/gutachter/subphase'
 import { formatDatum } from '@/lib/format'
+import { SvRechnungUploadModal } from './SvRechnungUploadModal'
 
 export type GutachtenDokument = {
   id: string
@@ -74,6 +76,7 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
   const [historieOffen, setHistorieOffen] = useState(false)
   const [busyAction, setBusyAction] = useState<null | 'download' | 'view'>(null)
   const [, startTransition] = useTransition()
+  const [rechnungModalOffen, setRechnungModalOffen] = useState(false)
 
   // AAR (14.05.2026): Wenn OCR-Werte vorliegen, Card immer rendern (auch wenn
   // Subphase < 4.4), damit SV die extrahierten Werte verifizieren kann.
@@ -246,6 +249,25 @@ export function GutachtenCard({ fallId, fallNummer, subphase, gutachten, extract
             status="ausstehend"
           />
         </>
+      )}
+
+      {/* Slice 1b — Rechnung hochladen (kunde-sichtbar): sichtbar ab Gutachten-erstellen-Phase */}
+      {istAbGutachtenErstellen(subphase) && (
+        <div className="pt-3 border-t border-claimondo-border">
+          <Button
+            variant="ghost"
+            size="sm"
+            iconLeft={<ReceiptIcon className="w-3.5 h-3.5" />}
+            onClick={() => setRechnungModalOffen(true)}
+          >
+            Rechnung hochladen
+          </Button>
+          <SvRechnungUploadModal
+            fallId={fallId}
+            open={rechnungModalOffen}
+            onClose={() => setRechnungModalOffen(false)}
+          />
+        </div>
       )}
 
       {extracted && (extracted.reparaturkosten_brutto !== null || extracted.wiederbeschaffungswert !== null || extracted.minderwert !== null || extracted.gutachten_sv_honorar_brutto !== null) && (

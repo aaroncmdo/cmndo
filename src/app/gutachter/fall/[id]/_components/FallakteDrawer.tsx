@@ -18,9 +18,11 @@ import {
   UsersIcon,
   PhoneIcon,
   MailIcon,
+  EyeIcon,
 } from 'lucide-react'
 import PhoneButton from '@/components/shared/PhoneButton'
-import { Drawer } from '@/components/primitives/Drawer'
+import { Button, Drawer } from '@/components/primitives'
+import { useDokumentVorschau } from '@/components/shared/DokumentVorschau'
 
 type DocLite = {
   id?: string
@@ -282,44 +284,59 @@ function initialen(name: string): string {
 }
 
 function DateienListe({ dokumente }: { dokumente: DocLite[] }) {
+  const { oeffnen, modal } = useDokumentVorschau()
+
   if (dokumente.length === 0) {
     return <p className="text-sm text-claimondo-ondo/70 text-center py-8">Noch keine Dateien.</p>
   }
   return (
-    <ul className="space-y-2">
-      {dokumente.map((d, i) => {
-        const name = d.original_filename ?? d.datei_name ?? d.dokument_typ ?? d.typ ?? 'Datei'
-        const typ = d.dokument_typ ?? d.typ ?? d.kategorie ?? ''
-        const url = d.datei_url ?? null
-        const datum = d.hochgeladen_am ?? d.created_at
-        return (
-          <li
-            key={d.id ?? i}
-            className="flex items-center gap-3 p-3 rounded-ios-lg border border-claimondo-border bg-white hover:bg-claimondo-bg"
-          >
-            <FileTextIcon className="w-5 h-5 text-claimondo-ondo/70 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
-              <p className="text-[11px] text-claimondo-ondo">
-                {typ}
-                {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}` : ''}
-              </p>
-            </div>
-            {url && (
-              <a
-                href={url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] p-1.5"
-                aria-label={`${name} herunterladen`}
-              >
-                <DownloadIcon className="w-4 h-4" />
-              </a>
-            )}
-          </li>
-        )
-      })}
-    </ul>
+    <>
+      <ul className="space-y-2">
+        {dokumente.map((d, i) => {
+          const name = d.original_filename ?? d.datei_name ?? d.dokument_typ ?? d.typ ?? 'Datei'
+          const typ = d.dokument_typ ?? d.typ ?? d.kategorie ?? ''
+          const url = d.datei_url ?? null
+          const datum = d.hochgeladen_am ?? d.created_at
+          return (
+            <li
+              key={d.id ?? i}
+              className="flex items-center gap-3 p-3 rounded-ios-lg border border-claimondo-border bg-white hover:bg-claimondo-bg"
+            >
+              <FileTextIcon className="w-5 h-5 text-claimondo-ondo/70 shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-claimondo-navy truncate">{name}</p>
+                <p className="text-[11px] text-claimondo-ondo">
+                  {typ}
+                  {datum ? ` · ${new Date(datum).toLocaleDateString('de-DE', { timeZone: 'Europe/Berlin' })}` : ''}
+                </p>
+              </div>
+              {url && (
+                <>
+                  <Button
+                    variant="bare"
+                    size="icon"
+                    ariaLabel={`Vorschau: ${name}`}
+                    onClick={() => oeffnen({ url, dateiname: name, typ: d.dokument_typ ?? d.typ })}
+                  >
+                    <EyeIcon className="w-4 h-4" />
+                  </Button>
+                  <a
+                    href={url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[var(--brand-secondary)] hover:text-[var(--brand-primary)] p-1.5"
+                    aria-label={`${name} herunterladen`}
+                  >
+                    <DownloadIcon className="w-4 h-4" />
+                  </a>
+                </>
+              )}
+            </li>
+          )
+        })}
+      </ul>
+      {modal}
+    </>
   )
 }
 
