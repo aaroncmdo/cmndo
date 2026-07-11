@@ -228,7 +228,7 @@ export async function getKundeClaimView(
       // Ausfall-Card + P4: Kanzlei-Ansprechpartner/Uebergabe + Werkstatt-Vermittlung-Gate).
       admin
         .from('claims')
-        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status')
+        .select('reparaturwunsch, reparatur_werkstatt_id, hat_mietwagen, mietwagen_seit_datum, mietwagen_vermieter, mietwagen_limit_tage, mietwagen_rechnung_vorhanden, google_review_prompt_gezeigt_am, service_typ, status, kanzlei_ansprechpartner_email, kanzlei_ansprechpartner_telefon, kanzlei_uebergeben_am, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
         .eq('id', resolvedClaimId)
         .maybeSingle(),
       // P3 (DoksTermineZone): alle sichtbaren Fall-Dokumente (FallDetailSections + KVA-PDF-Ableitung).
@@ -359,7 +359,15 @@ export async function getKundeClaimView(
     (erstAuftrag.status === 'besichtigung' || erstAuftrag.status === 'gutachten') &&
     !erstAuftrag.gutachten_final_freigegeben
 
-  const abrechnungsweg = (fall.abrechnungsweg as string | null) ?? null
+  // abrechnungsweg ist claims-nativ + NICHT im getKundeFallDetailRecord-Core-Select (nur in claims)
+  // → aus dem claims-Read (claimExtraRes) lesen, nicht aus fall (sonst immer null → istReparaturRoute
+  // nie true → SelbstzahlerReparaturStepper + Schadensfoto-Card würden nie rendern). Über claimExtraRes.data
+  // (nicht die claimExtra-const, die erst weiter unten deklariert wird → TDZ). fall-Fallback für den Fall,
+  // dass der Core den Wert später mitträgt. (Gegentest-Fund 10.07.)
+  const abrechnungsweg =
+    ((claimExtraRes.data as Record<string, unknown> | null)?.abrechnungsweg as string | null) ??
+    (fall.abrechnungsweg as string | null) ??
+    null
   const reparaturFreigegeben = !!fall.reparatur_freigegeben_am
 
   const payout = payoutRes.data as { vs_quote_betrag_ausgezahlt: number | null; ausgezahlt_am: string | null } | null
