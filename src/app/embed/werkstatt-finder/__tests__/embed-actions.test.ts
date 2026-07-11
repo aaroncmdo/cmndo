@@ -199,7 +199,7 @@ describe('sucheWerkstaettenNachOrt', () => {
   ] as never[]
 
   it('ohne bedarf → werkstaetten + center, keineSpezialisierte:false', async () => {
-    mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0 })
+    mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0, formatted: 'Berlin', placeId: null })
     mockFindWerkstaetten.mockResolvedValue(baseRows)
 
     const result = await sucheWerkstaettenNachOrt('Berlin')
@@ -210,7 +210,7 @@ describe('sucheWerkstaettenNachOrt', () => {
   })
 
   it('mit bedarf → werkstaetten qualifiziert, center durchgereicht', async () => {
-    mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0 })
+    mockGeocodeAdresse.mockResolvedValue({ lat: 51.0, lng: 7.0, formatted: 'Köln', placeId: null })
     mockFindWerkstaetten.mockResolvedValue(baseRows)
 
     const bedarf: Reparaturbedarf = { kategorien: ['karosserie'], quelle: 'schadenbild', confidence: 75 }
@@ -249,7 +249,7 @@ describe('erstelleWerkstattFinderLead', () => {
     }
 
     if (flowOk) {
-      mockEnsureFlowLink.mockResolvedValue({ ok: true, token })
+      mockEnsureFlowLink.mockResolvedValue({ ok: true, token, wiederverwendet: false })
     } else {
       mockEnsureFlowLink.mockResolvedValue({ ok: false, error: 'FlowLink-Fehler' })
     }
