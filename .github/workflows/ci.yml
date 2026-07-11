@@ -190,6 +190,12 @@ jobs:
     if: ${{ github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     needs: build
+    # Hard-Cap gegen Runaway: die post-merge E2E-Suite (110 Tests, workers:1, 30s/Test
+    # + retries:1) laeuft strukturell 15-40 min. Ohne Cap konnte ein haengender/rot-
+    # schleifender Run bis zum GH-6h-Limit einen Runner blockieren -> CI-Stau + andere
+    # PR-Builds langsam ("Build laeuft nicht wie er soll", 11.07.). 20 min = harte Grenze;
+    # E2E ist informativ (post-merge, gated NICHT den Deploy) -> Kill-at-cap ist unkritisch.
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
