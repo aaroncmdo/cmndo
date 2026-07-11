@@ -72,7 +72,7 @@ export async function getOffeneTermine(scope: LiveOpsScope): Promise<TerminPin[]
        gps_lat_ankunft, gps_lng_ankunft,
        lead_id, fall_id,
        lead:leads!gutachter_termine_lead_id_fkey(vorname, nachname),
-       fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims:claim_id(claim_nummer))`,
+       fall:faelle_claim_bridge!gutachter_termine_fall_id_fkey(claims!fk_bridge_claim(claim_nummer))`,
     )
     .eq('assignee_typ', 'sachverstaendiger')
     .not('status', 'in', `(${ABGESCHLOSSEN_STATUSES.map((s) => `"${s}"`).join(',')})`)
