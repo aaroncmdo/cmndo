@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { headers } from 'next/headers'
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import GutachterShell from './GutachterShell'
+import { svEigenBrandingErlaubt } from '@/lib/branding/gate'
 
 export default async function GutachterLayout({
   children,
@@ -81,7 +82,7 @@ export default async function GutachterLayout({
   // AAR-419 Follow-up: hydrateTheme() statt raw-Fallback — garantiert V2-
   // Volle-Hydrierung auch für alte V1-only brand_theme-Records in der DB
   // (sonst waren primaryHover/Status/Neutrale undefined im Consumer).
-  const useBrand = !!sv?.use_custom_branding
+  const useBrand = svEigenBrandingErlaubt(sv)
   const { hydrateTheme } = await import('@/lib/branding/theme')
   const brandTheme = useBrand
     ? hydrateTheme(
