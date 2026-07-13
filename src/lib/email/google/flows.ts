@@ -796,6 +796,11 @@ export async function sendWillkommenSv(params: WillkommenSvParams): Promise<void
     fallId: null,
     empfaengerTyp: 'sv',
     template: 'arch1_willkommen_sv',
+    // B3-Parity (Go-Live-Sweep): admin-getriggerte Welcome-Mail an den SV selbst ->
+    // Send-Isolation umgehen, sonst erreicht der Zugang nie interne/Gruender-Testadressen
+    // (@claimondo.de). Gleiche Ausnahme wie Werkstatt/Makler/Mitarbeiter-Einladung; der
+    // interne Empfaenger ist die gewollte Zielperson, kein Bystander-SV.
+    allowInternalRecipient: true,
   })
 }
 
