@@ -1440,7 +1440,6 @@ export async function signSAandCreateFall(
                 .from('claims')
                 .update({ sv_id: topSv.svId })
                 .eq('id', fall.id)
-              console.log('[AAR-908] Auto-SV-Match', { fallId: fall.id, svId: topSv.svId, score: topSv.score })
             }
           }
         } catch (err) { console.error('[AAR-85/908] Dispatch-Matching:', err) }

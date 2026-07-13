@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeftIcon, SaveIcon, UserIcon, BarChart3Icon, BriefcaseIcon, ClockIcon, PhoneIcon, Trash2Icon, ShieldOffIcon } from 'lucide-react'
-import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser, clearTwoFaForUser } from '../actions'
+import { updateMitarbeiter, provisionTwilioNummer, releaseTwilioNummer, resetTwoFaForUser, clearTwoFaForUser, setPhoneLoginNummer } from '../actions'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button } from '@/components/primitives'
 import { TextField as SharedTextField } from '@/components/shared/forms'
@@ -12,10 +12,12 @@ import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/component
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 
-export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHistory }: {
+export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHistory, loginPhone }: {
   mitarbeiter: Record<string, unknown>
   stats: { leadsTotal: number; leadsKonvertiert: number; aktiveFaelle: number; abgeschlossen: number; avgDays: number; isDispatch: boolean }
   performanceHistory: Perf[]
+  /** Task B: aktuelle Handy-LOGIN-Nummer (auth.users.phone), getrennt von 2FA. */
+  loginPhone: string | null
 }) {
   const router = useRouter()
   const [saving, setSaving] = useState(false)
@@ -26,6 +28,10 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
   const [twofaLoading, setTwofaLoading] = useState(false)
   const [twofaMsg, setTwofaMsg] = useState<string | null>(null)
   const [twofaNeuePhone, setTwofaNeuePhone] = useState('')
+  // Task B: getrennte Handy-LOGIN-Nummer (auth.users.phone via enablePhoneLogin)
+  const [loginPhoneLoading, setLoginPhoneLoading] = useState(false)
+  const [loginPhoneMsg, setLoginPhoneMsg] = useState<string | null>(null)
+  const [loginPhoneInput, setLoginPhoneInput] = useState('')
   const m = mitarbeiter
 
   async function handleSave(e: React.FormEvent<HTMLFormElement>) {
@@ -287,6 +293,64 @@ export default function MitarbeiterDetail({ mitarbeiter, stats, performanceHisto
             {twofaMsg && (
               <p className={`text-xs ${twofaMsg.includes('!') || twofaMsg.includes('entfernt') ? 'text-success' : 'text-danger'}`}>
                 {twofaMsg}
+              </p>
+            )}
+          </div>
+        </div>
+
+        {/* Task B (Aaron-Fund 13.07.): getrennte Handy-LOGIN-Nummer (SMS-OTP-Login =
+            auth.users.phone). NICHT die 2FA-Nummer oben — die aktiviert KEINEN
+            Handy-Login. Setzt die Login-Nummer via enablePhoneLogin. */}
+        <div className="mt-5 bg-white border border-claimondo-border rounded-ios-lg p-5">
+          <h3 className="text-sm font-medium text-claimondo-navy mb-3 flex items-center gap-2">
+            <PhoneIcon className="w-4 h-4" /> Login per Handynummer (SMS-Code)
+          </h3>
+          <p className="text-xs text-claimondo-ondo mb-3">
+            Nummer, mit der sich der Nutzer per SMS-Code einloggen kann — getrennt von
+            der 2FA-Nummer oben (die setzt nur den Zweitfaktor, keinen Handy-Login).
+            Aktuelle Login-Nummer: <span className="font-mono">{loginPhone ?? '—'}</span>
+          </p>
+          <div className="space-y-2">
+            <input
+              type="tel"
+              value={loginPhoneInput}
+              onChange={(e) => setLoginPhoneInput(e.target.value)}
+              placeholder="Login-Handynummer inkl. Vorwahl (z. B. +49 151 1234 5678)"
+              className="w-full bg-claimondo-bg border border-claimondo-border rounded-ios-xl px-3 py-2 text-claimondo-navy text-sm focus:outline-none focus:ring-2 focus:ring-claimondo-shield"
+            />
+            <Button
+              variant="navy"
+              disabled={loginPhoneLoading}
+              iconLeft={<PhoneIcon className="w-4 h-4" />}
+              onClick={async () => {
+                if (!loginPhoneInput.trim()) {
+                  setLoginPhoneMsg('Bitte eine Nummer eingeben')
+                  return
+                }
+                if (!confirm(`Login-Handynummer auf "${loginPhoneInput.trim()}" setzen? Der Nutzer kann sich damit per SMS-Code einloggen.`)) return
+                setLoginPhoneLoading(true)
+                setLoginPhoneMsg(null)
+                try {
+                  const r = await setPhoneLoginNummer(m.id as string, loginPhoneInput)
+                  if (!r.success) {
+                    setLoginPhoneMsg(r.error ?? 'Fehler')
+                  } else {
+                    setLoginPhoneMsg('Login-Handynummer gesetzt!')
+                    setLoginPhoneInput('')
+                    router.refresh()
+                  }
+                } catch (e) {
+                  setLoginPhoneMsg(e instanceof Error ? e.message : 'Fehler')
+                } finally {
+                  setLoginPhoneLoading(false)
+                }
+              }}
+            >
+              {loginPhoneLoading ? 'Wird gesetzt …' : 'Login-Handynummer setzen'}
+            </Button>
+            {loginPhoneMsg && (
+              <p className={`text-xs ${loginPhoneMsg.includes('!') ? 'text-success' : 'text-danger'}`}>
+                {loginPhoneMsg}
               </p>
             )}
           </div>

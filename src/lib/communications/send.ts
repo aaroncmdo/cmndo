@@ -15,7 +15,7 @@ function buildMessage(description: string, data: Record<string, string>): string
 export async function sendCommunication(
   triggerName: string,
   data: Record<string, string>,
-  options?: { forceEmail?: boolean; skipWhatsapp?: boolean; locale?: string },
+  options?: { forceEmail?: boolean; skipWhatsapp?: boolean; locale?: string; allowInternalRecipient?: boolean },
 ): Promise<void> {
   // options is intentionally simple — Baileys routing is transparent to callers
   const config = COMMUNICATION_REGISTRY[triggerName]
@@ -74,6 +74,10 @@ export async function sendCommunication(
           : config.recipient === 'kanzlei' ? 'kanzlei'
           : 'admin',
         fallId: data.fall_id || null,
+        // Admin-getriggerte 1:1-Transaktionsmails (z.B. mitarbeiter_einladung) an interne
+        // @claimondo.de-Empfaenger duerfen die Send-Isolation umgehen — der interne
+        // Empfaenger IST die gewollte Zielperson (analog Makler-/Werkstatt-Login-Mail).
+        allowInternalRecipient: options?.allowInternalRecipient,
       })
     } catch (err) {
       console.error(`[COMM] Email failed for ${triggerName}:`, err)

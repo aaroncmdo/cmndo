@@ -141,15 +141,3 @@ export async function markRueckrufErledigtMitErgebnis(
   revalidateRueckrufPaths(leadId)
   return { ok: true }
 }
-
-/** @deprecated Benutze markRueckrufErledigtMitErgebnis */
-export async function markAngerufen(leadId: string) {
-  const r = await markRueckrufErledigtMitErgebnis(leadId, 'erreicht', null)
-  if (!r.ok) throw new Error(r.error)
-}
-
-/** @deprecated Benutze markRueckrufErledigtMitErgebnis */
-export async function markNichtErreicht(leadId: string) {
-  const r = await markRueckrufErledigtMitErgebnis(leadId, 'nicht_erreicht', null)
-  if (!r.ok) throw new Error(r.error)
-}
