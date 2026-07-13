@@ -50,9 +50,9 @@ export function FahrzeugSchaedenSection({ schaeden, vehicleId }: Props) {
             <li key={d.leadId} className="flex items-center gap-3 py-3">
               <DraftPill />
               <span className="flex-1 min-w-0 text-sm text-claimondo-navy truncate">
-                In Bearbeitung
+                Schaden-Entwurf
               </span>
-              <span className="text-xs text-claimondo-shield shrink-0">
+              <span className="text-body-xs text-claimondo-shield shrink-0">
                 {formatDatum(d.createdAt)}
               </span>
             </li>
