@@ -73,9 +73,10 @@ export async function createMitarbeiter(
   // Audit-Fix #8: sendCommunication darf den Mitarbeiter-Anlage-Flow nicht
   // abbrechen wenn Twilio/SMTP ausfaellt — User ist schon in der DB. Admin
   // bekommt Email+Passwort als Return-Wert und kann manuell weitergeben.
-  // AAR-auth-haertung (Befund F): Recovery-Magic-Link statt Klartext-Passwort
-  // in der Mail (Email = geloggter/weiterleitbarer Kanal). Der Eingeladene setzt
-  // sein eigenes Passwort; force_password_change=true bleibt als Fallback.
+  // Aaron-Entscheid: Fuer die interne Mitarbeiter-Anlage steht das Initial-
+  // Passwort ZUSAETZLICH zum Recovery-Magic-Link in der Mail (dokumentierte
+  // Ausnahme von Befund F — interne @claimondo.de-Empfaenger, Onboarding-
+  // Komfort). force_password_change=true erzwingt den Wechsel beim 1. Login.
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://app.claimondo.de'
   let magicLink: string | null = null
   try {
@@ -93,20 +94,28 @@ export async function createMitarbeiter(
     console.error('[createMitarbeiter] Magic-Link-Sub-Op fehlgeschlagen:', err)
   }
   try {
-    await sendCommunication('mitarbeiter_einladung', {
-      email,
-      vorname,
-      subject: 'Einladung zu Claimondo',
-      html: einladungEmailHtml({
-        vorname,
+    await sendCommunication(
+      'mitarbeiter_einladung',
+      {
         email,
-        introHtml:
-          `<p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p>` +
-          `<p>Zur Kontosicherheit empfehlen wir Ihnen, nach dem ersten Login die Zwei-Faktor-Authentifizierung einzurichten (Authenticator-App oder SMS-Code).</p>`,
-        magicLink,
-        appUrl,
-      }),
-    })
+        vorname,
+        subject: 'Einladung zu Claimondo',
+        html: einladungEmailHtml({
+          vorname,
+          email,
+          introHtml:
+            `<p>Sie wurden als <strong>${rolle}</strong> zu Claimondo eingeladen.</p>` +
+            `<p>Zur Kontosicherheit empfehlen wir Ihnen, nach dem ersten Login die Zwei-Faktor-Authentifizierung einzurichten (Authenticator-App oder SMS-Code).</p>`,
+          magicLink,
+          appUrl,
+          einmalpasswort: password,
+        }),
+      },
+      // Send-Isolation-Ausnahme: interne @claimondo.de-Staff sind die gewollten
+      // Empfaenger. Ohne dieses Flag unterdrueckt sendEmail die Mail komplett
+      // (Bug: 0 email_log-Eintraege) — analog Makler-/Werkstatt-Login-Mail (#3721).
+      { allowInternalRecipient: true },
+    )
   } catch (err) {
     console.error('[createMitarbeiter] Einladungs-Email fehlgeschlagen:', err)
   }
@@ -259,6 +268,45 @@ export async function clearTwoFaForUser(
       'Admin hat alle 2FA-Faktoren (TOTP + SMS) entfernt. Der Nutzer richtet die Zwei-Faktor-Authentifizierung beim nächsten Login neu ein.',
     erstellt_von: user?.id ?? null,
   })
+  revalidatePath('/admin/team')
+  revalidatePath(`/admin/team/${targetUserId}`)
+  return { success: true }
+}
+
+// Aaron-Fund (Mitarbeiter-Login 13.07.): Die Admin-gesetzte twofa_telefon
+// (2FA-Zweitfaktor, resetTwoFaForUser oben) aktiviert KEINEN Handy-Login — der
+// SMS-OTP-Login (signInWithOtp) loest gegen auth.users.phone auf, eine ANDERE
+// Stelle. Diese Aktion setzt die LOGIN-Nummer via enablePhoneLogin
+// (admin.updateUserById phone, kollisionssicher weil auth.users.phone UNIQUE),
+// getrennt von 2FA. Danach kann sich der Nutzer per SMS-Code einloggen.
+export async function setPhoneLoginNummer(
+  targetUserId: string,
+  phone: string,
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = await requireAdmin()
+  const clean = (phone ?? '').trim()
+  if (!clean) return { success: false, error: 'Nummer erforderlich' }
+
+  const admin = createAdminClient()
+  const { enablePhoneLogin } = await import('@/lib/auth/phone-login')
+  const ok = await enablePhoneLogin(admin, targetUserId, clean)
+  if (!ok) {
+    return {
+      success: false,
+      error:
+        'Nummer ungültig (bitte inkl. Ländervorwahl, z. B. +49 151 …) oder bereits einem anderen Konto zugewiesen.',
+    }
+  }
+
+  const actor = (await supabase.auth.getUser())?.data?.user
+  await admin.from('timeline').insert({
+    typ: 'system',
+    titel: 'Login-Handynummer (SMS-Login) gesetzt',
+    beschreibung:
+      'Admin hat die Handy-Login-Nummer (auth.users.phone) gesetzt. Der Nutzer kann sich jetzt per SMS-Code (OTP) einloggen — unabhängig von der 2FA-Nummer.',
+    erstellt_von: actor?.id ?? null,
+  })
+
   revalidatePath('/admin/team')
   revalidatePath(`/admin/team/${targetUserId}`)
   return { success: true }
