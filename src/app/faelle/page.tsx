@@ -80,7 +80,11 @@ export default async function FaelleListPage() {
     .select(
       'claim_id, claim_nummer, main_phase, sub_phase, status, schadentag, kunden_konstellation, created_at, fall_id, sv_id, faelle_kundenbetreuer_id, claim_kundenbetreuer_id, service_typ, kunde_anzeigename, kunde_vorname, kunde_nachname, kennzeichen',
     )
-    .not('status', 'eq', 'storniert')
+    // F3-Fix: NULL-safe. claims.status ist NULL bis Terminal/VS-Event; ein blankes
+    // .not('status','eq','storniert') droppt via 3-wertiger SQL-Logik ALLE frischen
+    // (NULL-status) Claims aus der Liste. .or(is.null,neq) schliesst nur echte
+    // 'storniert' aus und behaelt frische Claims.
+    .or('status.is.null,status.neq.storniert')
     .order('created_at', { ascending: false })
     .limit(200)
 
