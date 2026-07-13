@@ -2,6 +2,7 @@
 // Startet/abschliesst SLA-Eintraege und prueft Breaches → Eskalations-Tasks.
 
 import { createAdminClient } from '@/lib/supabase/admin'
+import { resolveSlaBreachTaskCancel } from './task-resolution'
 
 export type SlaTyp =
   | 'gutachter_zuweisung'
@@ -57,14 +58,34 @@ export async function startSla(fallId: string, typ: SlaTyp, startedAt?: Date): P
 
 /**
  * Schliesst pending SLA-Eintrag ab. Wenn Eintrag bereits breached → trotzdem completed.
+ * Loest ausserdem jeden verknuepften offenen sla_breach-Task auf (nicht-kritisch, kein throw).
  */
 export async function completeSla(fallId: string, typ: SlaTyp): Promise<void> {
   const db = createAdminClient()
-  await db.from('sla_tracking')
+  const { data: updated } = await db.from('sla_tracking')
     .update({ completed_at: new Date().toISOString(), status: 'completed' })
     .eq('fall_id', fallId)
     .eq('sla_typ', typ)
     .in('status', ['pending', 'breached'])
+    .select('id, eskalation_task_id')
+
+  // Verknuepfte sla_breach-Tasks als erledigt markieren (nicht-kritisch).
+  // FG7 coordination marker: 887c23ef — tasks.status write gated .eq('status','offen').
+  if (updated && updated.length > 0) {
+    try {
+      const now = new Date()
+      for (const row of updated) {
+        const taskId = (row as { id: string; eskalation_task_id: string | null }).eskalation_task_id
+        if (!taskId) continue
+        await db.from('tasks')
+          .update(resolveSlaBreachTaskCancel(now, 'SLA erfüllt — Fall weitergelaufen'))
+          .eq('id', taskId)
+          .eq('status', 'offen')
+      }
+    } catch (err) {
+      console.error('[SLA] completeSla task-cancel:', err)
+    }
+  }
 }
 
 /**
