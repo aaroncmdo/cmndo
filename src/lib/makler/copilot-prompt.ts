@@ -263,6 +263,7 @@ function buildContextText(ctx: LoadedContext, maklerFirma: string): string {
   const hasGutachten =
     reparaturkosten != null ||
     wertminderung != null ||
+    nutzungsausfall != null ||
     gutachterHonorar != null
   if (hasGutachten) {
     lines.push('')

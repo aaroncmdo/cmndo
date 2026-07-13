@@ -134,7 +134,9 @@ function statusVisual(row: MaklerProvisionRow): {
   }
 }
 
-function exportCsv(rows: MaklerProvisionRow[], monthIso: string) {
+// Exportiert ALLE geladenen Provisionen (die Tabelle ist bewusst all-time, der
+// Monats-Navigator betrifft nur die Summary-Cards) -> Dateiname all-time, nicht monatlich.
+function exportCsv(rows: MaklerProvisionRow[]) {
   const escape = (v: string | number | null | undefined) => {
     const s = v === null || v === undefined ? '' : String(v)
     return s.includes(',') || s.includes('"') || s.includes('\n')
@@ -162,7 +164,7 @@ function exportCsv(rows: MaklerProvisionRow[], monthIso: string) {
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
-  a.download = `provisionen-${monthIso}.csv`
+  a.download = 'provisionen-gesamt.csv'
   document.body.appendChild(a)
   a.click()
   a.remove()
@@ -228,7 +230,7 @@ export function MaklerAbrechnungen({
           </a>
           <button
             type="button"
-            onClick={() => exportCsv(rowsForMonth, currentMonth)}
+            onClick={() => exportCsv(rowsForMonth)}
             disabled={rowsForMonth.length === 0}
             className="inline-flex items-center gap-2 px-4 h-10 rounded-ios-lg bg-white border border-claimondo-border text-sm text-claimondo-navy hover:border-claimondo-ondo disabled:opacity-50 disabled:cursor-not-allowed"
           >
