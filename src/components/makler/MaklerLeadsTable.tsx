@@ -52,8 +52,10 @@ export function MaklerLeadsTable({ leads }: Props) {
 
   const counts = useMemo(() => {
     const alle = leads.length
-    const konvertiert = leads.filter((l) => l.fall_id !== null).length
+    // Disjunkte Buckets (disqualifiziert hat Vorrang) — sonst zaehlt ein
+    // disqualifizierter + konvertierter Lead doppelt und "offen" unterzaehlt.
     const disqualifiziert = leads.filter((l) => l.disqualifiziert).length
+    const konvertiert = leads.filter((l) => !l.disqualifiziert && l.fall_id !== null).length
     const offen = alle - konvertiert - disqualifiziert
     return { alle, offen, konvertiert, disqualifiziert }
   }, [leads])
@@ -63,7 +65,7 @@ export function MaklerLeadsTable({ leads }: Props) {
       case 'offen':
         return leads.filter((l) => !l.fall_id && !l.disqualifiziert)
       case 'konvertiert':
-        return leads.filter((l) => l.fall_id !== null)
+        return leads.filter((l) => l.fall_id !== null && !l.disqualifiziert)
       case 'disqualifiziert':
         return leads.filter((l) => l.disqualifiziert)
       default:
@@ -266,9 +268,9 @@ function LeadStatusBadge({
   return (
     <StatusBadge
       tone={
-        status === 'qualifiziert' || status === 'konvertiert'
+        status === 'umgewandelt' || status === 'umgewandelt-sv'
           ? 'success'
-          : status === 'neu'
+          : status === 'neu' || status === 'quali-offen'
             ? 'info'
             : 'neutral'
       }
