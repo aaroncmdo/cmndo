@@ -325,8 +325,13 @@ export default async function GutachterFallPage({
 
 
   // AAR-553: fall_dokumente → Legacy-Shape für FallDetailClient-Konsumenten
+  // RLS-Fix (SV-Doc-URL-Bug): signed-URLs für den locked `fall-dokumente`-Bucket brauchen den
+  // Service-Client. Mit dem User-Client (SV) schlägt createSignedUrl per storage.objects-RLS fehl
+  // → datei_url=null → weder Download-Link noch Vorschau rendern. `dokumente` ist bereits
+  // sichtbar_fuer-gefiltert (Z.146 `.contains(['sachverstaendiger'])`) → admin-Auflösung leakt
+  // nichts (identisch zum Kunde-Pfad kunde-claim-view.ts:301 `getStorageUrlBulk(admin, …)`).
   const dokUrlsLegacy = await getStorageUrlBulk(
-    supabase,
+    admin,
     (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
   )
   const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
