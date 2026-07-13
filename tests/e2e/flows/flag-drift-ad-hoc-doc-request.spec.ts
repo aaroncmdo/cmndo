@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test'
+import { execSync } from 'node:child_process'
 import {
   loginContextOrSkip,
   skipIfAuthWall,
@@ -34,6 +35,13 @@ import {
 
 test.describe.configure({ mode: 'serial' })
 test.skip(!process.env.RUN_FLAG_DRIFT_E2E, 'set RUN_FLAG_DRIFT_E2E=1 (laeuft echt gegen staging/prod)')
+
+// Fixtures (Accounts + Seed-Graph) auf Kanon-Zustand sicherstellen: die Fixture-Accounts
+// (admin/sv) + CLAIMS.c1/c2 muessen existieren, und der Ad-hoc-Test mutiert CLAIMS.c1.
+// Gleiches Muster wie golden-path-deep-prod (idempotenter Provisioner).
+test.beforeAll(() => {
+  execSync('npx tsx scripts/test-fixtures/provision.ts', { env: process.env, stdio: 'inherit' })
+})
 
 const FALL = CLAIMS.c1
 const createdAnfrageIds: string[] = []
