@@ -6,6 +6,7 @@ import { NextResponse } from 'next/server'
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { entferneKbTerminOut } from '@/lib/termine/kb-termin-sync'
 
 export async function POST(req: Request) {
   try {
@@ -96,6 +97,10 @@ export async function POST(req: Request) {
         { status: 500 },
       )
     }
+
+    // SP2c: bei KB-Beratung das externe Kalender-Event entfernen (Status 'verschoben' ist
+    // nicht aktiv -> Event soll weg, bis neu gebucht wird). SV-Termine bleiben unberuehrt. Fail-soft.
+    if (termin.typ === 'kb_beratung') await entferneKbTerminOut(termin.id)
 
     // Task für KB bzw. Dispatch (bei SV-Terminen Dispatch, bei KB-Terminen KB)
     const empfaengerRolle = termin.typ === 'kb_beratung' ? 'kundenbetreuer' : 'dispatch'

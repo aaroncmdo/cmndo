@@ -1,28 +1,27 @@
 'use server'
 
-// AAR-717: Server-Actions für den CalDAV-Connect-Flow im SV-Portal.
+// SP2a: Profil-generische Server-Actions fuer den CalDAV-Connect-Flow (SV, KB, ...).
+// Ersetzt das alte SV-spezifische src/app/gutachter/einstellungen/kalender/caldav-actions.ts.
+// Keyt auf die profile_id des eingeloggten Users (profiles.id == auth.uid) und schreibt
+// die kanonische Tabelle kalender_verbindungen (die die Sync-Engine liest) statt der
+// alten sv_kalender_verbindungen. Result-Shapes unveraendert -> CalDavConnectModal-Kompat.
 //
 // Flow:
-//   1. testConnection — User-Eingabe validieren, CalDAV-Login probieren,
-//      Kalender-Liste zurückgeben damit User einen Hauptkalender wählt.
-//   2. saveConnection — Nach Kalender-Wahl Credentials encrypten und in
-//      sv_kalender_verbindungen speichern. Bei bestehender Verbindung
-//      (gleicher Provider) wird überschrieben.
-//   3. disconnect — Zeile löschen, keine Soft-Delete.
+//   1. testCaldavConnection — User-Eingabe validieren, CalDAV-Login probieren,
+//      Kalender-Liste zurueckgeben damit User einen Hauptkalender waehlt.
+//   2. saveCaldavConnection — Credentials encrypten + in kalender_verbindungen speichern.
+//   3. disconnectCaldav — Zeile loeschen.
 
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getGutachterForUser } from '@/lib/gutachter'
 import { encrypt } from '@/lib/kalender/caldav/encryption'
 import { listCalendars, CalDavError, type CalDavCalendar } from '@/lib/kalender/caldav/client'
-import { findProvider, type CalDavProviderId } from '@/lib/kalender/caldav/provider-presets'
+import { findProvider } from '@/lib/kalender/caldav/provider-presets'
 import { revalidatePath } from 'next/cache'
 
-// AAR-722: iCloud verlangt in der Praxis oft das App-Passwort OHNE
-// Bindestriche, obwohl Apple es mit Bindestrichen anzeigt. Wir probieren
-// den User-Input zuerst wie eingegeben, bei Auth-Fail fallback ohne
-// Bindestriche + ohne Whitespace. Nur für iCloud — Custom-Server haben
-// eigene Passwort-Konventionen.
+// AAR-722: iCloud verlangt in der Praxis oft das App-Passwort OHNE Bindestriche.
+// Wir probieren den User-Input zuerst wie eingegeben, bei Auth-Fail Fallback ohne
+// Bindestriche + ohne Whitespace. Nur fuer iCloud.
 async function listCalendarsWithIcloudRetry(
   creds: { serverUrl: string; username: string; password: string },
   providerId: string,
@@ -34,7 +33,6 @@ async function listCalendarsWithIcloudRetry(
     if (!canRetry) throw err
     const stripped = creds.password.replace(/[\s-]/g, '')
     if (stripped === creds.password || stripped.length < 8) throw err
-    // Zweiter Versuch ohne Bindestriche/Whitespace.
     return {
       calendars: await listCalendars({ ...creds, password: stripped }),
       normalizedPassword: stripped,
@@ -42,13 +40,13 @@ async function listCalendarsWithIcloudRetry(
   }
 }
 
-async function requireSv() {
+// profiles.id == auth.uid -> die profile_id des eingeloggten Users ist user.id.
+// Kein Rollen-Gate: ein User verbindet seinen EIGENEN Kalender (SV, KB, ...).
+async function requireProfileId() {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
   if (!user) return { ok: false as const, error: 'Nicht angemeldet' }
-  const sv = await getGutachterForUser<{ id: string }>(supabase, user.id, 'id')
-  if (!sv) return { ok: false as const, error: 'Kein SV-Profil' }
-  return { ok: true as const, svId: sv.id, userId: user.id }
+  return { ok: true as const, profileId: user.id }
 }
 
 export async function testCaldavConnection(input: {
@@ -60,7 +58,7 @@ export async function testCaldavConnection(input: {
   | { success: true; calendars: CalDavCalendar[]; providerLabel: string }
   | { success: false; error: string; errorCode: 'auth_failed' | 'network' | 'not_found' | 'other' }
 > {
-  const auth = await requireSv()
+  const auth = await requireProfileId()
   if (!auth.ok) return { success: false, error: auth.error, errorCode: 'other' }
 
   const provider = findProvider(input.providerId)
@@ -76,11 +74,7 @@ export async function testCaldavConnection(input: {
 
   try {
     const { calendars } = await listCalendarsWithIcloudRetry(
-      {
-        serverUrl,
-        username: input.username.trim(),
-        password: input.password.trim(),
-      },
+      { serverUrl, username: input.username.trim(), password: input.password.trim() },
       input.providerId,
     )
     if (calendars.length === 0) {
@@ -107,7 +101,7 @@ export async function saveCaldavConnection(input: {
   calendarUrl: string
   calendarDisplayName: string
 }): Promise<{ success: boolean; error?: string }> {
-  const auth = await requireSv()
+  const auth = await requireProfileId()
   if (!auth.ok) return { success: false, error: auth.error }
 
   const provider = findProvider(input.providerId)
@@ -115,12 +109,8 @@ export async function saveCaldavConnection(input: {
 
   const serverUrl = (provider.serverUrl ?? input.serverUrl).trim()
 
-  // Re-Test vor dem Speichern — falls der Modal-State zwischen testConnection
-  // und saveConnection abgelaufen ist oder User den Kalender aus einer alten
-  // Session fälscht. AAR-722: Wir speichern das NORMALISIERTE Passwort
-  // (ohne Bindestriche bei iCloud) damit der Healthcheck-Cron ebenfalls
-  // mit dem exakt gleichen Passwort arbeitet und nicht auf die Retry-Logik
-  // angewiesen ist.
+  // Re-Test vor dem Speichern. AAR-722: normalisiertes Passwort speichern (ohne Bindestriche
+  // bei iCloud), damit der Healthcheck-Cron mit exakt dem gleichen Passwort arbeitet.
   let normalizedPassword: string
   try {
     const res = await listCalendarsWithIcloudRetry(
@@ -136,10 +126,10 @@ export async function saveCaldavConnection(input: {
   const db = createAdminClient()
   const encrypted = encrypt(normalizedPassword)
   const { error } = await db
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .upsert(
       {
-        sv_id: auth.svId,
+        profile_id: auth.profileId,
         provider: 'caldav' as const,
         server_url: serverUrl,
         username: input.username.trim(),
@@ -152,31 +142,30 @@ export async function saveCaldavConnection(input: {
         last_error: null,
         last_error_at: null,
       },
-      { onConflict: 'sv_id,provider' },
+      { onConflict: 'profile_id,provider' },
     )
   if (error) return { success: false, error: `Speichern fehlgeschlagen: ${error.message}` }
 
   revalidatePath('/gutachter/einstellungen/kalender')
+  revalidatePath('/gutachter/einstellungen')
   revalidatePath('/gutachter/willkommen')
+  revalidatePath('/mitarbeiter/profil')
   return { success: true }
 }
 
 export async function disconnectCaldav(): Promise<{ success: boolean; error?: string }> {
-  const auth = await requireSv()
+  const auth = await requireProfileId()
   if (!auth.ok) return { success: false, error: auth.error }
 
   const db = createAdminClient()
   const { error } = await db
-    .from('sv_kalender_verbindungen')
+    .from('kalender_verbindungen')
     .delete()
-    .eq('sv_id', auth.svId)
+    .eq('profile_id', auth.profileId)
     .eq('provider', 'caldav')
   if (error) return { success: false, error: `Trennen fehlgeschlagen: ${error.message}` }
 
   revalidatePath('/gutachter/einstellungen/kalender')
+  revalidatePath('/mitarbeiter/profil')
   return { success: true }
 }
-
-// AAR-721: kein type-Re-Export mehr aus dieser 'use server'-Datei —
-// Next.js 15+ erlaubt hier ausschließlich async-Funktionen. Consumer
-// (z.B. CalDavConnectModal) importieren Types direkt aus provider-presets.
