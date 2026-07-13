@@ -96,14 +96,15 @@ export async function applyKanzleiPaket(
   if (paket.file_upload && file instanceof File && file.size > 0) {
     const ext = file.name.split('.').pop() ?? 'pdf'
     const path = `kanzlei-pakete/${fallId}/${paket.id}-${Date.now()}.${ext}`
-    const { error: uploadErr } = await supabase.storage
+    const adminStorage = createAdminClient()
+    const { error: uploadErr } = await adminStorage.storage
       .from('fall-dokumente')
       .upload(path, file)
     if (uploadErr) {
       return { success: false, error: `Upload fehlgeschlagen: ${uploadErr.message}` }
     }
     uploadedFilePath = path
-    const url = await getStorageUrl(supabase, 'fall-dokumente', path)
+    const url = await getStorageUrl(adminStorage, 'fall-dokumente', path)
     if (!url) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
     // upload_url in den Payload-Shape der C3-Handler spiegeln
     values.upload_url = url

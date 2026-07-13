@@ -1,5 +1,5 @@
 export type ReparaturTerminStatus =
-  | 'angefragt' | 'bestaetigt' | 'anruf_erbeten' | 'abgelehnt' | 'erledigt' | 'storniert'
+  | 'angefragt' | 'werkstatt_vorschlag' | 'bestaetigt' | 'anruf_erbeten' | 'abgelehnt' | 'erledigt' | 'storniert'
 
 export interface ReparaturTerminPhase {
   key: ReparaturTerminStatus | 'kein_termin'
@@ -8,8 +8,9 @@ export interface ReparaturTerminPhase {
 }
 
 const MAP: Record<ReparaturTerminStatus, ReparaturTerminPhase> = {
-  angefragt:     { key: 'angefragt',     label: 'Wunschtermin angefragt',   ton: 'info' },
-  anruf_erbeten: { key: 'anruf_erbeten', label: 'Werkstatt meldet sich',     ton: 'info' },
+  angefragt:         { key: 'angefragt',         label: 'Wunschtermin angefragt',          ton: 'info' },
+  werkstatt_vorschlag: { key: 'werkstatt_vorschlag', label: 'Werkstatt schlägt Termin vor', ton: 'info' },
+  anruf_erbeten:     { key: 'anruf_erbeten',     label: 'Werkstatt meldet sich',           ton: 'info' },
   bestaetigt:    { key: 'bestaetigt',    label: 'Termin bestätigt',          ton: 'success' },
   erledigt:      { key: 'erledigt',      label: 'Reparatur abgeschlossen',   ton: 'success' },
   abgelehnt:     { key: 'abgelehnt',     label: 'Termin abgelehnt',          ton: 'warning' },

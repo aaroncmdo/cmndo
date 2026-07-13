@@ -20,6 +20,7 @@ import {
   type ScrapeKandidat,
   type BestandsLead,
 } from '@/lib/partner/scraping'
+import { ladeBestandsPartner } from '@/lib/partner/bestands-partner'
 import {
   sendMaklerWelcome,
   sendWillkommenWerkstatt,
@@ -173,6 +174,9 @@ export type UpdatePartnerLeadInput = {
   telefon?: string | null
   ansprechpartner_vorname?: string | null
   ansprechpartner_nachname?: string | null
+  ansprechpartner_position?: string | null
+  ansprechpartner_email?: string | null
+  ansprechpartner_telefon?: string | null
 }
 
 export async function updatePartnerLead(
@@ -228,6 +232,15 @@ export async function updatePartnerLead(
   }
   if (patch.ansprechpartner_nachname !== undefined) {
     updates.ansprechpartner_nachname = (patch.ansprechpartner_nachname ?? '').trim() || null
+  }
+  if (patch.ansprechpartner_position !== undefined) {
+    updates.ansprechpartner_position = (patch.ansprechpartner_position ?? '').trim() || null
+  }
+  if (patch.ansprechpartner_email !== undefined) {
+    updates.ansprechpartner_email = (patch.ansprechpartner_email ?? '').trim() || null
+  }
+  if (patch.ansprechpartner_telefon !== undefined) {
+    updates.ansprechpartner_telefon = (patch.ansprechpartner_telefon ?? '').trim() || null
   }
 
   const { error } = await admin.from('partner_leads').update(updates).eq('id', id)
@@ -556,7 +569,9 @@ export async function scrapePartnerLeadsVorschau(
   const scrape = await scrapeGooglePlaces({ rolle: r as PartnerRolle, region, limit })
   if (!scrape.ok) return scrape
 
-  const bestehende = await ladeBestandsLeads(r)
+  // Dedup gegen Leads UND Bestands-Partner derselben Rolle (Aaron: "keine Dupes").
+  const [bestandLeads, bestandPartner] = await Promise.all([ladeBestandsLeads(r), ladeBestandsPartner(r)])
+  const bestehende = [...bestandLeads, ...bestandPartner]
   const { neu, dubletten } = filterGegenBestand(scrape.kandidaten, bestehende)
   return { ok: true, neu, dublettenCount: dubletten.length, gefunden: scrape.kandidaten.length }
 }
@@ -583,7 +598,9 @@ export async function importScrapedLeads(
   }
 
   // Re-Dedup gegen aktuellen Bestand (Race Vorschau→Import) + innerhalb der Auswahl.
-  const bestehende = await ladeBestandsLeads(r)
+  // Dedup gegen Leads UND Bestands-Partner derselben Rolle (Aaron: "keine Dupes").
+  const [bestandLeads, bestandPartner] = await Promise.all([ladeBestandsLeads(r), ladeBestandsPartner(r)])
+  const bestehende = [...bestandLeads, ...bestandPartner]
   const { neu } = filterGegenBestand(kandidaten, bestehende)
   const zuAnlegen = dedupeInBatch(neu).filter((k) => (k.firma ?? '').trim().length > 0)
   const uebersprungen = kandidaten.length - zuAnlegen.length

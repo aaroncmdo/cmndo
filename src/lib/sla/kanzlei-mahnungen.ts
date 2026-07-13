@@ -417,24 +417,18 @@ export async function handleKanzleiBreach(slaRecord: SlaRecord): Promise<{
 
   if (!stufe) return { stufe: null, blocker: null }
 
-  // Blocker ermitteln und auf SLA-Record speichern (nur bei Stufe 1)
-  let blocker: BlockerInfo
-  if (stufe === 1) {
-    blocker = await detectBlocker(fallKtx.id, claimId, slaRecord.sla_typ)
-    await db
-      .from('sla_tracking')
-      .update({
-        status: 'breached',
-        blocker_rolle: blocker.rolle,
-        blocker_grund: blocker.grund,
-      })
-      .eq('id', slaRecord.id)
-  } else {
-    blocker = {
-      rolle: (slaRecord.blocker_rolle as BlockerInfo['rolle']) ?? 'kanzlei',
-      grund: slaRecord.blocker_grund ?? 'Unbekannt',
-    }
-  }
+  // Blocker LIVE ermitteln — JEDE Stufe neu (nicht mehr Stufe-1-Snapshot), damit
+  // Stufe 2/3 an den AKTUELLEN Blocker adressieren (z.B. nachdem der Kunde die
+  // Vollmacht unterschrieben hat, wandert der Blocker kunde -> kanzlei).
+  const blocker = await detectBlocker(fallKtx.id, claimId, slaRecord.sla_typ)
+  await db
+    .from('sla_tracking')
+    .update({
+      status: 'breached',
+      blocker_rolle: blocker.rolle,
+      blocker_grund: blocker.grund,
+    })
+    .eq('id', slaRecord.id)
 
   // ─── Mahnung je nach Blocker ────────────────────────────────────────
   if (blocker.rolle === 'kanzlei') {

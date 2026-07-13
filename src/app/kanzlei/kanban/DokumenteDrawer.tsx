@@ -5,15 +5,20 @@
 // erlaubt SELECT für Rolle kanzlei auf komplett-Pakete.
 //
 // Kanzlei-Paket wird als erster Block hervorgehoben (wenn vorhanden) —
-// alle anderen Dokumente chronologisch danach. Individuelle Download-
-// Links via Supabase-Public-URL (Storage-Bucket 'fall-dokumente'). Kein
-// ZIP-Bundle, kein Streaming — plain file per Link, wie von Aaron gewünscht.
+// alle anderen Dokumente chronologisch danach. Kein ZIP-Bundle, kein
+// Streaming — plain file per Link, wie von Aaron gewünscht.
+//
+// Storage-RLS-Rest: Liste + Download-URLs kommen aus der Server-Action
+// `listFallDokumenteMitUrls`. Der Browser kann private Buckets nicht
+// signieren (createSignedUrl -> null), und der Service-Client darf nicht in
+// den Browser. Die Action haelt den Read auf dem User-Client (RLS-Gate:
+// Migration 20260421151144 limitiert kanzlei auf service_typ='komplett')
+// und signiert nur mit dem Service-Client.
 
 import { useEffect, useState } from 'react'
 import { XIcon, FileTextIcon, DownloadIcon, FileIcon } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
 import { Drawer } from '@/components/primitives/Drawer'
-import { getStorageUrlBulk } from '@/lib/storage/url'
+import { listFallDokumenteMitUrls } from '@/lib/dokumente/fall-dokumente-urls'
 
 type FallDokument = {
   id: string
@@ -93,34 +98,19 @@ export default function DokumenteDrawer({
 
   useEffect(() => {
     let cancelled = false
-    const supabase = createClient()
     ;(async () => {
-      const { data, error: qErr } = await supabase
-        .from('fall_dokumente')
-        .select(
-          'id, dokument_typ, kategorie, storage_path, original_filename, mime_type, groesse_bytes, hochgeladen_am, beschreibung',
-        )
-        .eq('fall_id', fallId)
-        .is('geloescht_am', null)
-        // CMM-32e: KB-abgelehnte Iterationen sind nur intern für Audit relevant.
-        .is('abgelehnt_am', null)
-        .order('hochgeladen_am', { ascending: false })
+      // Rows + signierte URLs in einem Server-Roundtrip (RLS-gescopter Read,
+      // Service-Client nur zum Signieren — siehe fall-dokumente-urls.ts).
+      const res = await listFallDokumenteMitUrls(fallId)
       if (cancelled) return
-      if (qErr) {
-        setError(qErr.message)
+      if (!res.ok) {
+        setError(res.error)
         return
       }
-      const rows = (data ?? []) as FallDokument[]
-      setDokumente(rows)
-      // URLs parallel sammeln (Helper bulk; Flag default-off liefert public URLs).
-      const bulkUrls = await getStorageUrlBulk(
-        supabase,
-        rows.map((d) => ({ bucket: 'fall-dokumente', path: d.storage_path })),
-      )
+      setDokumente(res.dokumente)
       const urls: Record<string, string> = {}
-      rows.forEach((d, i) => {
-        const u = bulkUrls[i]
-        if (u) urls[d.id] = u
+      res.dokumente.forEach((d) => {
+        if (d.url) urls[d.id] = d.url
       })
       setBucketPublicUrls(urls)
     })().catch((err) => {

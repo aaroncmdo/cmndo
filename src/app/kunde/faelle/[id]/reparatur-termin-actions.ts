@@ -10,6 +10,7 @@ import { createClient, createServiceClient } from '@/lib/supabase/server'
 import { createNotification } from '@/lib/notifications'
 import { resolveWunschterminIso } from '@/app/flow/[token]/wunschtermin'
 import { revalidatePath } from 'next/cache'
+import { notifyWerkstattKundenreaktion } from '@/lib/werkstatt/notify-werkstatt-kundenreaktion'
 
 export async function schlageReparaturTerminVorPortal(
   claimId: string,
@@ -79,5 +80,78 @@ export async function schlageReparaturTerminVorPortal(
   }
 
   revalidatePath(`/kunde/faelle/${claimId}`)
+  return { ok: true }
+}
+
+/**
+ * Kunde nimmt den Werkstatt-Terminvorschlag an: werkstatt_vorschlag -> bestaetigt.
+ * RLS-Policy reparatur_termine_kunde_update erzwingt Owner + Ausgangsstatus.
+ */
+export async function akzeptiereWerkstattTermin(
+  terminId: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!terminId) return { ok: false, error: 'Kein Termin.' }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const { data, error } = await supabase
+    .from('reparatur_termine')
+    .update({ status: 'bestaetigt', updated_at: new Date().toISOString() } as never)
+    .eq('id', terminId)
+    .eq('status', 'werkstatt_vorschlag')
+    .select('claim_id, werkstatt_id')
+    .maybeSingle()
+  if (error) return { ok: false, error: error.message }
+  if (!data) return { ok: false, error: 'Termin nicht gefunden oder nicht mehr offen.' }
+
+  const row = data as unknown as { claim_id: string; werkstatt_id: string }
+  revalidatePath(`/kunde/faelle/${row.claim_id}`)
+  revalidatePath('/werkstatt/auftraege')
+  try {
+    const svc = createServiceClient()
+    await notifyWerkstattKundenreaktion({ werkstattId: row.werkstatt_id, ereignis: 'bestaetigt', svc })
+  } catch (err) {
+    console.error('[akzeptiereWerkstattTermin] Werkstatt-Notify (non-fatal):', err)
+  }
+  return { ok: true }
+}
+
+/**
+ * Kunde: der Werkstatt-Vorschlag passt nicht -> anruf_erbeten + optionale Wunsch-Rueckrufzeit.
+ * Die Werkstatt ruft zurueck (sie hat den Kalender).
+ * RLS-Policy reparatur_termine_kunde_update erzwingt Owner + Ausgangsstatus.
+ * @param rueckrufWunschzeitLokal Berlin-Wandzeit "YYYY-MM-DDTHH:mm" (optional).
+ */
+export async function werkstattTerminPasstNicht(
+  terminId: string,
+  rueckrufWunschzeitLokal?: string,
+): Promise<{ ok: boolean; error?: string }> {
+  if (!terminId) return { ok: false, error: 'Kein Termin.' }
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const rueckrufUtc = rueckrufWunschzeitLokal ? resolveWunschterminIso(rueckrufWunschzeitLokal) : null
+
+  const { data, error } = await supabase
+    .from('reparatur_termine')
+    .update({ status: 'anruf_erbeten', rueckruf_wunschzeit: rueckrufUtc, updated_at: new Date().toISOString() } as never)
+    .eq('id', terminId)
+    .eq('status', 'werkstatt_vorschlag')
+    .select('claim_id, werkstatt_id')
+    .maybeSingle()
+  if (error) return { ok: false, error: error.message }
+  if (!data) return { ok: false, error: 'Termin nicht gefunden oder nicht mehr offen.' }
+
+  const row = data as unknown as { claim_id: string; werkstatt_id: string }
+  revalidatePath(`/kunde/faelle/${row.claim_id}`)
+  revalidatePath('/werkstatt/auftraege')
+  try {
+    const svc = createServiceClient()
+    await notifyWerkstattKundenreaktion({ werkstattId: row.werkstatt_id, ereignis: 'rueckruf_erbeten', rueckrufWunschzeit: rueckrufUtc, svc })
+  } catch (err) {
+    console.error('[werkstattTerminPasstNicht] Werkstatt-Notify (non-fatal):', err)
+  }
   return { ok: true }
 }

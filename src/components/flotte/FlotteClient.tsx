@@ -8,8 +8,9 @@
 
 import { useState } from 'react'
 import type { FormEvent } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { CarIcon, Trash2Icon } from 'lucide-react'
+import { CarIcon, Trash2Icon, ChevronRightIcon } from 'lucide-react'
 import { TextField } from '@/components/shared/forms/TextField'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives/Button'
@@ -21,9 +22,11 @@ type Props = {
   onSpeichereFirma?: (form: FirmaForm) => Promise<{ ok: boolean; error?: string }>
   onFuegeHinzu: (form: FahrzeugForm) => Promise<{ ok: boolean; error?: string }>
   onEntferne: (flottenId: string) => Promise<{ ok: boolean; error?: string }>
+  /** Wenn gesetzt: Fahrzeug-Zeilen verlinken auf `${detailBasePath}/${vehicleId}` (nur flottenmanager-Portal; Kunde laesst es weg). */
+  detailBasePath?: string
 }
 
-export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne }: Props) {
+export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeHinzu, onEntferne, detailBasePath }: Props) {
   const router = useRouter()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -105,26 +108,43 @@ export default function FlotteClient({ firma, flotte, onSpeichereFirma, onFuegeH
           <p className="text-sm text-claimondo-shield">Noch keine Fahrzeuge — fügen Sie unten das erste hinzu.</p>
         ) : (
           <ul className="divide-y divide-claimondo-border">
-            {flotte.map((v) => (
-              <li key={v.flottenId} className="flex items-center gap-3 py-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-md bg-claimondo-bg">
-                  <CarIcon className="h-4 w-4 text-claimondo-ondo" />
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-claimondo-navy">{v.kennzeichen ?? '—'}</p>
-                  <p className="truncate text-xs text-claimondo-shield">
-                    {[v.hersteller, v.modell].filter(Boolean).join(' ') || 'Fahrzeug'}
-                  </p>
-                </div>
-                <Button
-                  variant="bare"
-                  size="icon"
-                  ariaLabel="Fahrzeug entfernen"
-                  onClick={() => handleEntferne(v.flottenId)}
-                  iconLeft={<Trash2Icon className="h-4 w-4" />}
-                />
-              </li>
-            ))}
+            {flotte.map((v) => {
+              const inner = (
+                <>
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-ios-md bg-claimondo-bg">
+                    <CarIcon className="h-4 w-4 text-claimondo-ondo" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-medium text-claimondo-navy">{v.kennzeichen ?? '—'}</p>
+                    <p className="truncate text-xs text-claimondo-shield">
+                      {[v.hersteller, v.modell].filter(Boolean).join(' ') || 'Fahrzeug'}
+                    </p>
+                  </div>
+                  {detailBasePath ? <ChevronRightIcon className="h-4 w-4 shrink-0 text-claimondo-ondo/60" /> : null}
+                </>
+              )
+              return (
+                <li key={v.flottenId} className="flex items-center gap-3 py-3">
+                  {detailBasePath ? (
+                    <Link
+                      href={`${detailBasePath}/${v.vehicleId}`}
+                      className="flex min-w-0 flex-1 items-center gap-3 rounded-ios-md py-1 transition-colors hover:bg-claimondo-bg"
+                    >
+                      {inner}
+                    </Link>
+                  ) : (
+                    <div className="flex min-w-0 flex-1 items-center gap-3">{inner}</div>
+                  )}
+                  <Button
+                    variant="bare"
+                    size="icon"
+                    ariaLabel="Fahrzeug entfernen"
+                    onClick={() => handleEntferne(v.flottenId)}
+                    iconLeft={<Trash2Icon className="h-4 w-4" />}
+                  />
+                </li>
+              )
+            })}
           </ul>
         )}
       </SectionCard>

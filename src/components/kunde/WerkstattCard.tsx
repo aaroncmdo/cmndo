@@ -11,7 +11,7 @@ import { WrenchIcon } from 'lucide-react'
 
 import { reparaturTerminPhase, type ReparaturTerminStatus } from '@/lib/werkstatt/reparatur-termin-phase'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
-import { schlageReparaturTerminVorPortal } from '@/app/kunde/faelle/[id]/reparatur-termin-actions'
+import { schlageReparaturTerminVorPortal, akzeptiereWerkstattTermin, werkstattTerminPasstNicht } from '@/app/kunde/faelle/[id]/reparatur-termin-actions'
 import { WunschterminPicker } from '@/app/embed/gutachter-finder/_components/WunschterminPicker'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import PhoneButton from '@/components/shared/PhoneButton'
@@ -85,6 +85,71 @@ function VorschlagsUI({ claimId }: { claimId: string }) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// Reaktions-Block fuer werkstatt_vorschlag (Passt / Passt nicht)
+// ─────────────────────────────────────────────────────────────────────────────
+
+function WerkstattVorschlagReaktion({
+  terminId,
+  telefon,
+}: {
+  terminId: string
+  telefon: string | null
+}) {
+  const router = useRouter()
+  const [isPending, startTransition] = useTransition()
+  const [passtNichtOffen, setPasstNichtOffen] = useState(false)
+  const [rueckrufzeit, setRueckrufzeit] = useState('')
+  const [busy, setBusy] = useState(false)
+
+  async function handlePasst() {
+    setBusy(true)
+    const res = await akzeptiereWerkstattTermin(terminId)
+    setBusy(false)
+    if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
+    toast.success('Termin bestätigt.')
+    startTransition(() => router.refresh())
+  }
+
+  async function handleRueckruf() {
+    setBusy(true)
+    const res = await werkstattTerminPasstNicht(terminId, rueckrufzeit || undefined)
+    setBusy(false)
+    if (!res.ok) { toast.error(res.error ?? 'Fehler'); return }
+    toast.success('Die Werkstatt ruft dich zurück.')
+    startTransition(() => router.refresh())
+  }
+
+  return (
+    <div className="space-y-3 pt-1">
+      <div className="flex flex-wrap gap-2">
+        <Button variant="navy" size="sm" loading={busy || isPending} onClick={handlePasst}>
+          Passt
+        </Button>
+        <Button variant="ghost" size="sm" disabled={busy} onClick={() => setPasstNichtOffen((v) => !v)}>
+          Passt nicht
+        </Button>
+      </div>
+
+      {passtNichtOffen && (
+        <div className="space-y-3 rounded-ios-md border border-claimondo-border bg-claimondo-bg p-3">
+          <p className="text-body-sm text-claimondo-ondo">
+            Kläre den Termin direkt mit der Werkstatt — sie hat den Kalender im Blick.
+          </p>
+          {telefon && <PhoneButton nummer={telefon} variant="card" label="Werkstatt anrufen" />}
+          <div className="space-y-2">
+            <p className="text-body-xs font-medium text-claimondo-navy">Oder Rückruf vereinbaren (optional Wunschzeit):</p>
+            <WunschterminPicker value={rueckrufzeit} onChange={setRueckrufzeit} />
+            <Button variant="ghost" size="sm" loading={busy || isPending} onClick={handleRueckruf}>
+              Rückruf buchen
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Haupt-Komponente
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -143,9 +208,16 @@ export default function WerkstattCard({ claimId, werkstatt, termin }: WerkstattC
             </div>
             {terminAnzeige && (
               <p className="text-body-sm text-claimondo-navy">
-                {termin.status === 'bestaetigt' ? 'Bestätigt: ' : 'Wunschtermin: '}
+                {termin.status === 'bestaetigt'
+                  ? 'Bestätigt: '
+                  : termin.status === 'werkstatt_vorschlag'
+                    ? 'Vorschlag der Werkstatt: '
+                    : 'Wunschtermin: '}
                 {terminAnzeige}
               </p>
+            )}
+            {termin.status === 'werkstatt_vorschlag' && (
+              <WerkstattVorschlagReaktion terminId={termin.id} telefon={werkstatt.telefon} />
             )}
           </div>
         )}

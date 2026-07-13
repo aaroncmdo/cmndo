@@ -35,6 +35,12 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import EmptyState from '@/components/shared/EmptyState'
 // AAR-754: shared Ansprechpartner-Karte (KB/SV/Kanzlei) — rolle="makler".
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
+// AAR-489 F4: Consent-Scope -> Label + Farb-Token + Vollzugriff-Check (geteilt).
+import {
+  istVollzugriff,
+  consentScopeLabel,
+  consentScopeValueClass,
+} from '@/lib/makler/consent-display'
 
 type TabKey = 'overview' | 'timeline' | 'chat' | 'copilot'
 
@@ -94,7 +100,12 @@ export function MaklerAkteDetail({
   currentUserId,
   initialChatMessages,
 }: Props) {
-  const [tab, setTab] = useState<TabKey>(initialTab)
+  const copilotVerfuegbar = istVollzugriff(detail.consent_scope)
+  // Copilot arbeitet nur bei Vollzugriff (API 403t sonst). Deep-Link ?tab=copilot
+  // ohne Vollzugriff faellt auf die Uebersicht zurueck (den Tab gibt es dann nicht).
+  const [tab, setTab] = useState<TabKey>(
+    initialTab === 'copilot' && !copilotVerfuegbar ? 'overview' : initialTab,
+  )
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -187,9 +198,9 @@ export function MaklerAkteDetail({
         />
         <QuickStat
           label="Consent"
-          value="Vollzugriff"
+          value={consentScopeLabel(detail.consent_scope)}
           icon={<ShieldCheckIcon width={16} height={16} />}
-          valueClass="text-success-strong"
+          valueClass={consentScopeValueClass(detail.consent_scope)}
         />
         <QuickStat
           label="Fall seit"
@@ -222,12 +233,14 @@ export function MaklerAkteDetail({
           label="Chat"
           icon={<MessageSquareIcon width={15} height={15} />}
         />
-        <TabButton
-          active={tab === 'copilot'}
-          onClick={() => selectTab('copilot')}
-          label="Copilot"
-          icon={<SparklesIcon width={15} height={15} />}
-        />
+        {copilotVerfuegbar ? (
+          <TabButton
+            active={tab === 'copilot'}
+            onClick={() => selectTab('copilot')}
+            label="Copilot"
+            icon={<SparklesIcon width={15} height={15} />}
+          />
+        ) : null}
       </div>
 
       {/* Panels */}
@@ -245,11 +258,11 @@ export function MaklerAkteDetail({
           />
         </div>
       ) : null}
-      {tab === 'copilot' ? (
+      {tab === 'copilot' && copilotVerfuegbar ? (
         <MaklerCopilotTab
           fallId={fall.id}
           gegnerVsName={fall.gegner_versicherung}
-          kontextLoaded
+          kontextLoaded={copilotVerfuegbar}
         />
       ) : null}
     </div>

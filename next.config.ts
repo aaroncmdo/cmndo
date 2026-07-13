@@ -268,6 +268,15 @@ const nextConfig: NextConfig = {
       { source: '/admin/tasks', destination: '/admin/aufgaben/alle', permanent: true },
       { source: '/admin/ai-vorschlaege', destination: '/admin/aufgaben/vorschlaege', permanent: true },
       { source: '/admin/aufgaben', destination: '/admin/aufgaben/alle', permanent: true },
+      // Vertrieb-Konsolidierung: Alt-Listen-Routen -> Cockpit (/admin/vertrieb).
+      // EXAKT-Match (kein :path*) -> Sub-Routen (sachverstaendige/[id], /anlegen,
+      // /basic-freigaben, werkstaetten/[id], /qr-pool) bleiben erreichbar. Die
+      // Verwaltungen selbst leben weiter unter /admin/vertrieb/<rolle> (Re-Export)
+      // und sind aus der Cockpit-Aktionsleiste verlinkt (inkl. SV-Live-Ops-Karte).
+      { source: '/admin/makler', destination: '/admin/vertrieb', permanent: true },
+      { source: '/admin/sachverstaendige', destination: '/admin/vertrieb', permanent: true },
+      { source: '/admin/werkstaetten', destination: '/admin/vertrieb', permanent: true },
+      { source: '/admin/partner-leads', destination: '/admin/vertrieb', permanent: true },
       // AAR-628: Fallakte-Route-Konsolidierung. Die Detail-Route wird
       // aus /admin/faelle/[id] rausgezogen in die neutrale Route /faelle/[id],
       // damit KB + Kanzlei ihre eigene Shell bekommen. Der Redirect muss

@@ -271,10 +271,11 @@ describe('convertLeadToClaim', () => {
     expect(payload.reparatur_werkstatt_quelle).toBeNull()
   })
 
-  it('propagiert reparaturwunsch + vermittlung_status + extern vom Lead auf den Claim-Insert', async () => {
+  it('propagiert reparaturwunsch + vermittlung_status + extern + freie_werkstattwahl vom Lead auf den Claim-Insert', async () => {
     primeResponses([
       { data: { id: 'lead-rwu', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster',
-                reparaturwunsch: 'reparatur', reparatur_vermittlung_status: 'eigene', reparatur_werkstatt_extern: 'Karosserie Müller' } },
+                reparaturwunsch: 'reparatur', reparatur_vermittlung_status: 'eigene', reparatur_werkstatt_extern: 'Karosserie Müller',
+                freie_werkstattwahl: true } },
       { data: [] },
       { data: { id: 'claim-rwu', claim_nummer: 'CLM-RWU' } },
       { data: { id: 'person-9' } },
@@ -291,6 +292,8 @@ describe('convertLeadToClaim', () => {
     expect(payload.reparaturwunsch).toBe('reparatur')
     expect(payload.reparatur_vermittlung_status).toBe('eigene')
     expect(payload.reparatur_werkstatt_extern).toBe('Karosserie Müller')
+    // convert-lead-claim-audit: freie_werkstattwahl Lead -> Claim (Trigger respektiert es)
+    expect(payload.freie_werkstattwahl).toBe(true)
   })
 
   it('setzt reparaturwunsch=null + vermittlung_status default offen wenn der Lead keinen hat', async () => {
@@ -312,6 +315,7 @@ describe('convertLeadToClaim', () => {
     expect(payload.reparaturwunsch).toBeNull()
     expect(payload.reparatur_vermittlung_status).toBe('offen')
     expect(payload.reparatur_werkstatt_extern).toBeNull()
+    expect(payload.freie_werkstattwahl).toBeNull()
   })
 
   // ─── SP2 Task 4: reparatur_termine-Insert bei Conversion ─────────────────

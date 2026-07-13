@@ -480,6 +480,11 @@ export async function convertLeadToClaim(
     (lead.reparatur_vermittlung_status as string | null) ?? 'offen'
   ;(claimsInsert as Record<string, unknown>).reparatur_werkstatt_extern =
     (lead.reparatur_werkstatt_extern as string | null) ?? null
+  // convert-lead-claim-audit (Aaron 11.07.): freie_werkstattwahl Lead -> Claim durchreichen
+  // (leads hatte es, claims nicht). Der Trigger set_reparatur_werkstatt_from_qr respektiert es
+  // (kein Auto-qr_referral-Reparateur bei freier Wahl). Record-Cast wg. Type-Lag (Mig 20260713161645).
+  ;(claimsInsert as Record<string, unknown>).freie_werkstattwahl =
+    (lead.freie_werkstattwahl as boolean | null) ?? null
   // SP1 Task 3: Schadenskategorie (Werkstatt-Matching) Lead -> Claim (Record-Cast wg. Type-Lag).
   ;(claimsInsert as Record<string, unknown>).schadenskategorie =
     (lead.schadenskategorie as string | null) ?? null

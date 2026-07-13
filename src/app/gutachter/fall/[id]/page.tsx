@@ -16,6 +16,7 @@ import FallDetailClient from './FallDetailClient'
 // Der Stepper rendert in der linken Sidebar (FallDetailClient).
 import MeinFallStatusCard from '@/components/gutachter/MeinFallStatusCard'
 import { brauchtWerkstattVermittlung, type BedarfRow } from '@/lib/werkstatt/vermittlung-core'
+import { reparaturPhaseErreicht } from '@/lib/werkstatt/reparatur-phase-erreicht'
 import { findReparaturWerkstaettenForTarget } from '@/lib/werkstatt/vermittlung-server'
 import type { WerkstattFinderRow } from '@/lib/werkstatt/finder'
 import { WerkstattVermittelnCard } from './_components/WerkstattVermittelnCard'
@@ -293,7 +294,9 @@ export default async function GutachterFallPage({
     // CMM-49 sv_id-Drop (Termin-Engine-Handoff): gutachter_termine.sv_id -> assignee (Filter)
     .eq('assignee_id', sv.id)
     .eq('assignee_typ', 'sachverstaendiger')
-    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'durchgefuehrt', 'verlegung_pending'])
+    // 'durchgefuehrt' aus dem gutachter_termine-CHECK entfernt (Completion = durchgefuehrt_am);
+    // toter Filterwert. Abgeschlossene Termine sind kein "aktiver" Termin (waren nie im Filter).
+    .in('status', ['reserviert', 'gegenvorschlag', 'bestaetigt', 'verlegung_pending'])
     .order('created_at', { ascending: false })
 
   // Priorität wie in v_faelle_mit_aktuellem_termin:
@@ -325,8 +328,13 @@ export default async function GutachterFallPage({
 
 
   // AAR-553: fall_dokumente → Legacy-Shape für FallDetailClient-Konsumenten
+  // RLS-Fix (SV-Doc-URL-Bug): signed-URLs für den locked `fall-dokumente`-Bucket brauchen den
+  // Service-Client. Mit dem User-Client (SV) schlägt createSignedUrl per storage.objects-RLS fehl
+  // → datei_url=null → weder Download-Link noch Vorschau rendern. `dokumente` ist bereits
+  // sichtbar_fuer-gefiltert (Z.146 `.contains(['sachverstaendiger'])`) → admin-Auflösung leakt
+  // nichts (identisch zum Kunde-Pfad kunde-claim-view.ts:301 `getStorageUrlBulk(admin, …)`).
   const dokUrlsLegacy = await getStorageUrlBulk(
-    supabase,
+    admin,
     (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
   )
   const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
@@ -393,10 +401,17 @@ export default async function GutachterFallPage({
   if (noShowClaimId) {
     const { data: rwGate } = await admin
       .from('claims')
-      .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status')
+      .select('reparaturwunsch, reparatur_werkstatt_id, werkstatt_id, reparatur_vermittlung_status, abrechnungsweg')
       .eq('id', noShowClaimId)
       .maybeSingle()
-    if (rwGate && brauchtWerkstattVermittlung(rwGate as BedarfRow)) {
+    if (
+      rwGate &&
+      brauchtWerkstattVermittlung(rwGate as BedarfRow) &&
+      reparaturPhaseErreicht(
+        { abrechnungsweg: (rwGate as { abrechnungsweg?: string | null }).abrechnungsweg ?? null },
+        { gutachtenAbgeschlossen: !!erstgutachtenAuftrag?.gutachten_final_freigegeben, totalschaden: null },
+      )
+    ) {
       werkstattVermittlung = {
         fallId: id,
         werkstaetten: await findReparaturWerkstaettenForTarget({ target: 'claim', id: noShowClaimId }),

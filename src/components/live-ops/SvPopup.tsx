@@ -41,9 +41,15 @@ function typLabel(typ: string): string {
 export interface SvPopupProps {
   sv: SvLiveOps
   role: string
+  /**
+   * Basis-Pfad fuer den "SV oeffnen"-Link (z.B. "/admin/vertrieb/sachverstaendige", damit der
+   * Klick im Vertrieb-Cockpit die @drawer-Intercepting-Route trifft statt full-page zu navigieren).
+   * Ohne Angabe -> unveraendertes admin/dispatch-Verhalten (die 3 Karten-Portale bleiben heil).
+   */
+  svHrefBase?: string
 }
 
-export default function SvPopup({ sv, role }: SvPopupProps) {
+export default function SvPopup({ sv, role, svHrefBase }: SvPopupProps) {
   const unterwegs =
     sv.car.mode !== 'none' &&
     sv.car.lat != null &&
@@ -142,9 +148,11 @@ export default function SvPopup({ sv, role }: SvPopupProps) {
         <div style={{ marginTop: 2, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <a
             href={
-              role === 'dispatch'
-                ? `/dispatch/sachverstaendige/${sv.id}`
-                : `/admin/sachverstaendige/${sv.id}`
+              svHrefBase
+                ? `${svHrefBase}/${sv.id}`
+                : role === 'dispatch'
+                  ? `/dispatch/sachverstaendige/${sv.id}`
+                  : `/admin/sachverstaendige/${sv.id}`
             }
             style={{
               fontSize: 11,

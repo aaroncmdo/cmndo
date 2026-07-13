@@ -128,6 +128,11 @@ export const AI_MODELS = {
    * Judgment ueber mehrere Rollen > Speed → Sonnet 4.6.
    */
   ki_aufsicht: 'claude-sonnet-4-6',
+  /**
+   * KI-Task-Executor: agentische Aufgaben-Ausfuehrung via Tool-Use (planen,
+   * bestaetigen, anwenden). Judgment ueber Risikostufen > Speed → Sonnet 4.6.
+   */
+  task_executor: 'claude-sonnet-4-6',
 } as const
 
 export type AiModelKey = keyof typeof AI_MODELS
