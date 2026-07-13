@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
 import { redirect } from 'next/navigation'
 import { listMyTasks } from '@/lib/tasks/manual-actions'
+import { isExecutorEnabled } from '@/lib/task-executor/policy'
 import MyTasksClient from './MyTasksClient'
 
 // KFZ-175: Meine-Tasks Page fuer Admin + Kundenbetreuer.
@@ -16,6 +17,7 @@ export default async function MeineTasksPage() {
   const { data: profile } = await supabase.from('profiles').select('rolle').eq('id', user.id).single()
   if (!profile || !['admin', 'kundenbetreuer', 'dispatch'].includes(profile.rolle)) redirect('/login')
 
+  const executorEnabled = isExecutorEnabled()
   const assigned = await listMyTasks('assigned')
   const created = await listMyTasks('created')
 
@@ -34,5 +36,5 @@ export default async function MeineTasksPage() {
     claim_nummer: t.fall_id ? fallMap.get(t.fall_id) ?? null : null,
   }))
 
-  return <MyTasksClient assigned={enrich(assigned)} created={enrich(created)} isAdmin={profile.rolle === 'admin'} />
+  return <MyTasksClient assigned={enrich(assigned)} created={enrich(created)} isAdmin={profile.rolle === 'admin'} executorEnabled={executorEnabled} />
 }
