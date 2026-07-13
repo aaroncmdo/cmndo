@@ -57,21 +57,43 @@ function Overlay({ text }) {
   )
 }
 
+function chunkWords(words) {
+  const chunks = []
+  let cur = []
+  for (const w of words) {
+    cur.push(w)
+    const span = w.end - (cur[0]?.start ?? w.end)
+    if (cur.length >= 5 || span >= 2.4) {
+      chunks.push(cur)
+      cur = []
+    }
+  }
+  if (cur.length) chunks.push(cur)
+  return chunks
+}
+
 function KineticCaption({ words }) {
   const f = useCurrentFrame()
   const { fps } = useVideoConfig()
   const t = f / fps
+  const chunks = chunkWords(words || [])
+  if (!chunks.length) return null
+  let ci = 0
+  for (let k = 0; k < chunks.length; k++) {
+    if (t >= (chunks[k][0]?.start ?? 0)) ci = k
+  }
+  const chunk = chunks[ci]
+  const chunkStart = chunk[0]?.start ?? 0
+  const appear = interpolate(t, [chunkStart, chunkStart + 0.22], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' })
   return (
     <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingLeft: 64, paddingRight: 64, paddingBottom: 380 }}>
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px 10px', justifyContent: 'center' }}>
-        {words.map((w, i) => {
-          const startF = w.start * fps
-          const enter = spring({ frame: Math.max(0, f - startF), fps, config: { damping: 13, stiffness: 200 }, durationInFrames: 6 })
-          if (enter <= 0.001) return null
-          const active = t >= w.start && t <= w.end + 0.1
-          const scale = (0.75 + 0.25 * Math.min(1, enter)) * (active ? 1.06 : 1)
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px 12px', justifyContent: 'center', opacity: appear, transform: `translateY(${(1 - appear) * 20}px)` }}>
+        {chunk.map((w, i) => {
+          const active = t >= w.start && t <= w.end + 0.08
+          const spoken = t >= w.start
+          const pop = active ? interpolate(t, [w.start, w.start + 0.12], [1.16, 1.06], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' }) : 1
           return (
-            <span key={i} style={{ fontFamily: FONT, fontWeight: 800, fontSize: 70, lineHeight: 1.02, transform: `scale(${scale})`, color: active ? NAVY : CREAM, background: active ? CREAM : 'transparent', padding: active ? '2px 16px' : '2px 2px', borderRadius: 16, textShadow: active ? 'none' : '0 5px 22px rgba(0,0,0,0.65)' }}>
+            <span key={`${ci}-${i}`} style={{ fontFamily: FONT, fontWeight: 800, fontSize: 76, lineHeight: 1.05, transform: `scale(${pop})`, color: active ? NAVY : CREAM, background: active ? CREAM : 'transparent', padding: active ? '2px 18px' : '2px 4px', borderRadius: 16, opacity: spoken ? 1 : 0.42, textShadow: active ? 'none' : '0 5px 22px rgba(0,0,0,0.65)' }}>
               {w.word}
             </span>
           )
