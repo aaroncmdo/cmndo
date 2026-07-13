@@ -1,32 +1,25 @@
 # Admin-Marketing Content-Studio — Slice 1 (Generierung)
 
 - **Datum:** 2026-07-13
-- **Status:** Draft (zur Review)
+- **Status:** Final (Review abgeschlossen) → bereit fuer writing-plans
 - **Branch:** `kitta/marketing-content-studio` (off `staging`)
-- **Vorgeschichte:** Evaluation des heruntergeladenen `Open-Generative-AI` (siehe §1.3)
+- **URL-Ziel:** `https://app.claimondo.de/admin/marketing`
 
 ---
 
 ## 1. Kontext & Ziel
 
 ### 1.1 Vision (End-to-End)
-Vollautomatische Content-Fabrik fuer das Marketing: **Idee → Kurzvideo → automatischer Post auf TikTok + Meta (Instagram/Facebook)**, getrieben ueber den VPS per Cron, ohne Handanlegen. Verwaltet aus einem neuen **Admin-Marketing-Bereich** der Haupt-App (`app.claimondo.de`).
+Vollautomatische Content-Fabrik fuers Marketing: **Idee → Kurzvideo → automatischer Post auf TikTok + Meta**, getrieben ueber den VPS per Cron, ohne Handanlegen. Verwaltet aus einem neuen **Admin-Marketing-Bereich** der Haupt-App.
 
-### 1.2 Zwei Haelften — und warum Slice 1 nur eine baut
-Das Ziel zerfaellt in zwei technisch getrennte Haelften:
+### 1.2 Zwei Haelften — warum Slice 1 nur eine baut
+1. **Generierung** — das Video erzeugen. ← **diese Slice**
+2. **Publishing** — automatisiert auf TikTok + Meta posten. ← spaetere Slices (§17)
 
-1. **Generierung** — das Video erzeugen. (Diese Slice.)
-2. **Publishing** — automatisiert auf TikTok + Meta hochladen. (Spaetere Slices.)
+**Value-first** (Nutzer-Entscheidung): Slice 1 liefert sofort nutzbaren Content (Team postet vorerst manuell), waehrend die buerokratisch langwierige Publishing-Haelfte (Direct-API, 2–4 Wochen Audits **je** Plattform) nachgelagert kommt. Die Audits werden **parallel** angestossen und blockieren Slice 1 nicht.
 
-Der Nutzer hat **Value-first** gewaehlt: Slice 1 liefert sofort nutzbaren Content (Team postet vorerst manuell), waehrend die buerokratisch langwierige Publishing-Haelfte (Direct-API, siehe §15) nachgelagert kommt. Die Plattform-Audits (2–4 Wochen **je** Plattform) sind der lange Pol und werden **parallel** angestossen, sobald wir starten — sie blockieren Slice 1 nicht.
-
-### 1.3 Evaluations-Ergebnis: `Open-Generative-AI` verworfen (als Engine)
-Der heruntergeladene Tool-Kandidat wurde tief evaluiert (3 Agenten, file:line-Evidenz):
-- MIT-lizenziert (Reuse erlaubt), **aber** nur eine duenne Oberflaeche vor der **kostenpflichtigen `MuAPI.ai`-Cloud** — generiert selbst nichts, jeder Call verbraucht bezahlte Credits.
-- **Kein** Publishing (kein TikTok/Meta-API, kein OAuth, kein Scheduler) — die "Auto-Publish"-Erwaehnungen sind Links zu Fremdprodukten.
-- Kein Gratis-/Local-Pfad fuer Video (Local-Inference ist Desktop-only + nur Bilder).
-
-→ **Als Engine verworfen.** Der Nutzer-Wunsch "komplett ueber Claude, mit wenigen APIs" fuehrt stattdessen zu einem **in-house Remotion + Claude + ElevenLabs**-Stack (minimaler API-Footprint, headless-faehig, ~0 € Grenzkosten pro Render). Der Download war wertvoll als Landscape-Recherche, mehr nicht.
+### 1.3 Evaluations-Ergebnis: `Open-Generative-AI` als Engine verworfen
+Tief evaluiert (3 Agenten, file:line-Evidenz): MIT-lizenziert, aber nur eine duenne Oberflaeche vor der **kostenpflichtigen `MuAPI.ai`-Cloud** (generiert selbst nichts), **kein** Publishing/OAuth/Scheduler, kein Gratis-Video-Pfad. → **Als Engine verworfen.** Der Nutzer-Wunsch "komplett ueber Claude, mit wenigen APIs" fuehrt zu einem **in-house Remotion-Stack** (Code-Video, headless, ~0 € Grenzkosten). Der Download war reine Landscape-Recherche.
 
 ---
 
@@ -34,79 +27,62 @@ Der heruntergeladene Tool-Kandidat wurde tief evaluiert (3 Agenten, file:line-Ev
 
 | Dimension | Entscheidung |
 |---|---|
-| Ort | **`src/app/admin/marketing/`** (neu, Haupt-App) |
+| Ort | **`src/app/admin/marketing/`** (neu, Haupt-App; URL `/admin/marketing`) |
 | Build-Reihenfolge | **Value-first** → Slice 1 = Generierung, manuelles Posten |
-| Content-Formate | **Ratgeber-Clips** + **Ad-Clips** → 1 Engine, 2 Skript-Templates |
-| Video-Engine | **Remotion** (Code-Video) — kein Avatar-API, kein MuAPI |
-| Skript | **Claude** (Sonnet default) → Hook + Skript + Caption + Hashtags |
-| Voiceover | **ElevenLabs** (DE-Stimme), env `ELEVENLABS_API_KEY`. Interface-getrennt → OSS-Piper spaeter als 0-API-Fallback |
-| Look | **Motion-Graphic** + **Standbild-Presenter** (beide Remotion-Compositions, kein Lip-Sync) |
+| Content-Formate | **Ratgeber** + **Ad** → 1 Engine, 2 Skript-Templates |
+| Video-Engine | **Remotion** (Code-Video) — kein Avatar, kein MuAPI |
+| Visueller Stil | **Rein grafisch, voll animiert (faceless)** — kein Mensch/Avatar (§9) |
+| Skript + Visual-Plan | **Claude Opus** (`claude-opus-4-8`; neuere Sonnet bei Bau pruefen) |
+| Voiceover | **ElevenLabs** (neutrale DE-Stimme), env `ELEVENLABS_API_KEY`; Interface-getrennt (OSS-Piper spaeter) |
+| Visuals (B-Roll) | **Visual-Prompter (Claude) + Resolver-Prioritaet: kuratierte Marken-Bibliothek → Stock (Pexels, gratis) → generische Grafik** (§7/§5-U5/§9) |
+| Marken-Bibliothek | kuratierte, getaggte **Remotion-Branded-Components** (Warndreieck, Kennzeichen-Look, Schaden-Frame, Zahlen-Motifs, Logo-Moves); waechst als Code. Upload realer Clips = spaeter |
 | Design-Tokens | Claimondo `src/lib/design-tokens.ts` |
+| API-Footprint | 2 bezahlt (Claude, ElevenLabs) + 1 gratis (Pexels) |
 | Kosten-Cap | 10–20 Clips/Woche (~25 $/Monat) |
-| Publishing | **Direct** TikTok + Meta API — spaetere Slices, Audits laufen parallel an |
+| Publishing | **Direct** TikTok + Meta API — spaetere Slices, Audits parallel |
 
 ---
 
 ## 3. Scope
 
 ### 3.1 In Scope (Slice 1)
-- Neue Admin-Sektion `admin/marketing` mit sichtbarem Nav-Einstieg (Rolle: Admin).
-- Ein Job aus **Thema + Format** → Claude-Skript → (Admin-Review/Edit) → ElevenLabs-Voiceover → Remotion-Render (9:16, untertitelt, gebrandet) → mp4 in Supabase Storage → **Preview + Download**.
-- Persistente Job-Tabelle als Single Source of Truth (SSoT) mit Status-Lifecycle.
+- Neue Admin-Sektion `/admin/marketing` mit sichtbarem Nav-Einstieg (Rolle: Admin).
+- Ein Job aus **Thema + Format** → Claude erzeugt **Skript + Visual-Plan je Segment** → (Admin-Review/Edit) → ElevenLabs-Voiceover → Visual-Resolver (Marke→Stock→Grafik) → Remotion-Render (9:16, **durchgehend animiert**, kinetische Untertitel, gebrandet) → mp4 in Supabase Storage → **Preview + Download**.
+- Erste Charge **gebrandeter Remotion-Komponenten** als Marken-Bibliothek (getaggt, resolver-faehig).
+- Persistente Job-Tabelle als SSoT mit Status-Lifecycle.
 - Guardrails ab Tag 1: **Kosten-Cap + Kill-Switch** (env).
 - **PoC-first**: 1 echter deutscher Clip end-to-end, bevor die UI ausgebaut wird.
 
-### 3.2 Out of Scope (YAGNI — bewusst NICHT)
-- **Kein** Auto-Posting / TikTok- oder Meta-Connector (Slice 2+).
+### 3.2 Out of Scope (YAGNI)
+- **Kein** Auto-Posting / TikTok/Meta-Connector (Slice 2+).
 - **Kein** Scheduler / Themen-Bank / Cron-Vollautomatik (Slice 3).
-- **Kein** Lip-Sync-Avatar, **kein** Voice-Cloning.
+- **Kein** Mensch/Avatar, **kein** Lip-Sync, **kein** Voice-Cloning, **keine** Custom-KI-Visuals (reaktiviert Bezahl-API — spaeter).
+- **Kein** DB-Upload-Asset-Management — die Marken-Bibliothek startet als **Code-Komponenten**; Upload realer Clips = spaetere Ausbaustufe.
 - **Kein** Multi-User-Approval-Workflow (nur Admin generiert + laedt herunter).
-- **Kein** B-Roll-Stock-API (Slice 1: Marken-Grafik/Text; Stock spaeter optional).
 
 ---
 
 ## 4. Architektur — Units mit klaren Grenzen
 
-Jede Unit hat: *Verantwortung / Schnittstelle / Abhaengigkeiten*. Ziel: klein, isoliert testbar.
+**U1 — Route & Nav (`/admin/marketing`)** — Einstieg + Auth-Gate (Admin), Seitengeruest. Abh.: Admin-Auth-Guards, Komponenten-Set.
 
-**U1 — Route & Nav (`admin/marketing`)**
-Verantwortung: Einstiegspunkt + Auth-Gate (Admin-Rolle), Seitengeruest.
-Schnittstelle: Next-Route + Nav-Eintrag in der Admin-Navigation.
-Abh.: bestehende Admin-Auth-Guards, Komponenten-Set (`primitives`/`shared`).
+**U2 — Datenmodell (`marketing_content_jobs` + Storage-Bucket)** — SSoT + Ablage Audio/Video. **DDL nur via Supabase-Plugin** (Regel 2, Version-Tracking + File).
 
-**U2 — Datenmodell (`marketing_content_jobs` + Storage-Bucket)**
-Verantwortung: SSoT fuer Job-Lifecycle; Ablage von Audio + Video.
-Schnittstelle: Supabase-Tabelle + Storage-Bucket `marketing-content` (oeffentlich lesbar → passend fuer spaetere Publishing-URL).
-Abh.: Supabase. **DDL ausschliesslich via Supabase-Plugin** (`apply_migration`, Regel 2), inkl. Version-Tracking-Dance + Migration-File.
+**U3 — Skript- + Visual-Plan-Generator (Server-Action, Claude Opus)** — `generiere(thema, format)` → Skript-JSON **inkl. Visual-Plan je Segment** (§7). Der "Prompter": entscheidet Stock/Grafik/Marke + erzeugt konkrete EN-Queries. Abh.: Claude API, Zod-Schema, **Compliance-Gate** (§7).
 
-**U3 — Skript-Generator (Server-Action, Claude)**
-Verantwortung: `thema + format` → strukturiertes Skript-JSON (Hook, Segmente, On-Screen-Text, Caption, Hashtags, optional Disclaimer).
-Schnittstelle: `generiereSkript(thema, format): Promise<{ ok; data?; error? }>` (Result-Object-Pattern).
-Abh.: Claude API (env-Key), Zod-Schema fuer Output-Validierung, **Compliance-Gate** (§7).
+**U4 — TTS-Adapter (ElevenLabs)** — `synthesize(text): { audio; wordTimings[] }` (Interface-getrennt). Wort-Timings → kinetische Untertitel. Abh.: `ELEVENLABS_API_KEY`.
 
-**U4 — TTS-Adapter (ElevenLabs)**
-Verantwortung: Skript-Text → mp3 + Wort-Timings (fuer Untertitel-Sync).
-Schnittstelle: `synthesize(text): Promise<{ audio: Buffer; wordTimings: WordTiming[] }>` hinter einem schmalen Interface (Impl austauschbar).
-Abh.: ElevenLabs API (`ELEVENLABS_API_KEY`, Voice-ID via Config).
+**U5 — Visual-Resolver** — `loeseVisual(plan): ClipRef` mit Prioritaet: **① Marken-Bibliothek** (getaggte Remotion-Component) → **② Stock** (Pexels/Pixabay, gratis, `PEXELS_API_KEY`) → **③ generische Grafik** (Remotion-Fallback). Nie leer → Clip bleibt gefuellt. Abh.: Marken-Registry (U6), Pexels.
 
-**U5 — Remotion-Paket (2 Compositions)**
-Verantwortung: Skript-JSON + Audio + Timings → 9:16-Video (gebrandet, eingebrannte Untertitel, Intro/Outro).
-Schnittstelle: zwei Compositions `MotionGraphicClip`, `StillPresenterClip`; Props = typisiertes Job-JSON.
-Abh.: Remotion + `@remotion/renderer` (headless), Claimondo-Tokens. **Isoliert vom Next-Client-Bundle** (server/dev-only, §16).
+**U6 — Remotion-Paket** — voll-animierte Composition `ContentClip` (§9) **+ getaggte Marken-Component-Bibliothek** (Registry). Skript + Audio + Timings + Visuals → 9:16-Video. Abh.: `@remotion/renderer` (headless), Claimondo-Tokens. **Isoliert vom Client-Bundle** (§16).
 
-**U6 — Render-Orchestrator**
-Verantwortung: fuehrt einen Job durch die Pipeline (skript → audio → render → upload), aktualisiert Status + Kosten, behandelt Fehler pro Stufe.
-Schnittstelle: `verarbeiteJob(jobId)`; jede Stufe idempotent/re-runbar ab Fehlerpunkt.
-Abh.: U3, U4, U5, Supabase Storage. **Nicht synchron im Web-Request** (Render ist schwer) → asynchron/hintergruendig; UI pollt Status.
+**U7 — Render-Orchestrator** — `verarbeiteJob(jobId)`: skript → audio → visuals → render → upload; Status/Kosten; Fehler pro Stufe isoliert, re-runbar; **asynchron**; Kosten-Cap + Kill-Switch.
 
-**U7 — Admin-UI**
-Verantwortung: Job-Liste, "Neuer Clip"-Form, Job-Detail (editierbares Skript, Regenerate, Preview-Player, Download, Status/Kosten).
-Schnittstelle: Client-Components auf `admin/marketing`.
-Abh.: U2 (Daten), Server-Actions (U3/U6), Komponenten-Set (`shared/DataTable`, `StatusBadge`, `primitives`).
+**U8 — Admin-UI** — Job-Liste, "Neuer Clip"-Form, Job-Detail (editierbares Skript, Regenerate je Stufe, Preview-Player, Download, Status/Kosten). Komponenten-Set, kein handgerolltes Markup.
 
 ---
 
-## 5. Datenmodell (Skizze — DDL folgt via Plugin in der Implementierung)
+## 5. Datenmodell (Skizze — DDL via Plugin)
 
 `marketing_content_jobs`:
 
@@ -114,155 +90,154 @@ Abh.: U2 (Daten), Server-Actions (U3/U6), Komponenten-Set (`shared/DataTable`, `
 |---|---|---|
 | `id` | uuid PK | |
 | `thema` | text | Eingabe-Thema |
-| `format` | text CHECK in ('ratgeber','ad') | Skript-Template-Wahl (§7) |
-| `vorlage` | text CHECK in ('motion_graphic','standbild_presenter') default 'motion_graphic' | waehlt die Remotion-Composition (§9) |
+| `format` | text CHECK in ('ratgeber','ad') | Skript-Template + Duktus |
 | `status` | text CHECK (siehe §6) | Lifecycle-State |
-| `skript` | jsonb | Claude-Output (validiert) |
+| `skript` | jsonb | Claude-Output inkl. Visual-Plan (validiert) |
 | `caption` | text | Post-Caption |
 | `hashtags` | text[] | |
-| `audio_url` | text | Storage-URL mp3 |
-| `video_url` | text | Storage-URL mp4 (oeffentlich) |
+| `audio_url` | text | Storage mp3 |
+| `video_url` | text | Storage mp4 (oeffentlich) |
 | `dauer_sekunden` | int | |
 | `ist_ki_generiert` | bool default true | fuer spaeteres KI-Label (§15) |
-| `kosten_cents` | int | TTS-Kosten fuer Cap/Reporting |
-| `fehler_text` | text null | bei status=failed |
-| `erstellt_von` | uuid | Admin-User |
-| `erstellt_am` / `aktualisiert_am` | timestamptz | (Naming an DB-Konvention pruefen) |
+| `kosten_cents` | int | Cap/Reporting |
+| `fehler_text` | text null | bei status=fehler |
+| `erstellt_von` | uuid | Admin |
+| `erstellt_am` / `aktualisiert_am` | timestamptz | (Naming gegen DB-Konvention verifizieren) |
 
-- **RLS:** Admin-only (analog bestehender Admin-Tabellen).
-- **Storage-Bucket** `marketing-content`: oeffentlich lesbar (Publishing-Slices brauchen eine oeffentliche URL fuer den Plattform-Pull).
-- Nach DDL: `generate_typescript_types` regenerieren (oder aufschieben bis Consumer die Spalte nutzt).
+- **RLS:** Admin-only. **Storage-Bucket** `marketing-content`: oeffentlich lesbar.
+- **Marken-Bibliothek** = Code-Registry (kein DB-Table in Slice 1). DB-gestuetzte Upload-Assets = spaetere Ausbaustufe.
 
 ---
 
-## 6. Datenfluss / Lifecycle (State Machine)
+## 6. Datenfluss / Lifecycle
 
 ```
 entwurf
-  → skript_generiert        (U3: Claude)
-    → [Admin review/edit]    (optional, U7)
-      → audio_erzeugt        (U4: ElevenLabs)
-        → video_fertig       (U5+U6: Remotion → Storage; Slice-1-Endzustand → manueller Download)
+  → skript_generiert     (U3: Claude Opus — Skript + Visual-Plan)
+    → [Admin review/edit] (optional, U8)
+      → audio_erzeugt     (U4: ElevenLabs)
+        → video_fertig    (U5+U6+U7: Visuals aufloesen → Remotion → Storage; Endzustand → manueller Download)
 fehler  (an jeder Stufe; fehler_text gesetzt; ab Fehlerstufe re-runbar)
 ```
-
-Publishing-Slices erweitern den Enum spaeter um `geplant` / `gepostet`.
+Publishing-Slices erweitern spaeter um `geplant` / `gepostet`.
 
 ---
 
-## 7. Skript-Generierung (U3)
+## 7. Skript- + Visual-Plan-Generierung (U3) — der "Prompter"
 
-- **Input:** `thema`, `format` (ratgeber | ad).
-- **Modell:** Claude **Sonnet** (Default — Qualitaet/Marken-Ton wichtig; Skripte sind kurz → Kosten trivial). Haiku als Spar-Option konfigurierbar.
+- **Input:** `thema`, `format`.
+- **Modell:** **Claude Opus** (`claude-opus-4-8`); neuere Sonnet-Version bei Bau pruefen.
 - **Output-JSON (Zod-validiert):**
   ```
   { hook: string,
-    segmente: [{ text: string, on_screen_text?: string, b_roll_hint?: string }],
-    caption: string,
-    hashtags: string[],
-    disclaimer?: string }
+    segmente: [{
+      text: string,
+      on_screen_text?: string,
+      visual: { typ: 'marke' | 'stock' | 'grafik',
+                tags?: string[],        // fuer Marken-Bibliothek-Match
+                queries?: string[] }    // konkrete EN-Stock-Queries + Fallback
+    }],
+    caption: string, hashtags: string[], disclaimer?: string }
   ```
-- **Zwei Prompt-Templates:** Ratgeber (aufklaerend, Vertrauen) vs. Ad (verkaufend, CTA).
-- **Compliance-Gate (System-Prompt, hart):** keine Rechtsberatung; bei Versicherungs-/Rechtsthemen vorsichtige, allgemeine Formulierungen + Pflicht-Disclaimer; Claimondo-Tonalitaet; Ziel-Dauer 30–60 s (Zeichen-Budget passend zum Kosten-Cap).
+  Der Visual-Plan ist der automatisierte "Prompter": konkrete Szene → `stock` mit guten EN-Queries; abstrakter Begriff → `grafik`; ikonisch/gebrandet (Warndreieck, Kennzeichen …) → `marke` mit Tags.
+- **Zwei Prompt-Templates:** Ratgeber (aufklaerend) vs. Ad (verkaufend, CTA).
+- **Compliance-Gate (hart):** keine Rechtsberatung; bei Versicherungs-/Rechtsthemen vorsichtige Formulierungen + Pflicht-Disclaimer; Claimondo-Ton; Ziel-Dauer 30–60 s.
 
 ---
 
 ## 8. TTS-Adapter (U4)
 
-- **Interface:** `synthesize(text): { audio: Buffer, wordTimings: WordTiming[] }`.
-- **Impl (Slice 1):** ElevenLabs, mehrsprachiges/Turbo-Modell, feste DE-Voice-ID (Config). Wort-Level-Timestamps ueber die ElevenLabs-Timestamps-API → speist Untertitel-Sync in U5.
-- **Key:** `ELEVENLABS_API_KEY` (env, nie hardcoded).
-- **Kosten-Messung:** Zeichenzahl → `kosten_cents` am Job (fuer Cap + Reporting).
-- **Fallback (spaeter):** self-hosted Piper (0-API) — Interface macht den Wechsel trivial.
+- **Interface:** `synthesize(text): { audio, wordTimings[] }`.
+- **Impl:** ElevenLabs, Multilingual/Turbo, feste DE-Voice-ID (Config), Wort-Timestamps → kinetische Untertitel.
+- **Key:** `ELEVENLABS_API_KEY`. Kosten → `kosten_cents`. Fallback (spaeter): Piper.
 
 ---
 
-## 9. Remotion-Paket (U5)
+## 9. Remotion-Paket (U6) — voll animiert, faceless
 
-- **Ort:** `src/remotion/` (isoliertes Verzeichnis; **nicht** ins Client-Bundle, §16).
-- **Compositions:**
-  - `MotionGraphicClip` — animierte Text-/Grafik-/B-Roll-Kacheln + Voiceover + eingebrannte Untertitel. (Format 1 = Ratgeber-tauglich.)
-  - `StillPresenterClip` — festes Marken-Gesicht (Standbild) + animierter Rahmen + Voiceover + Untertitel, **kein** Lip-Sync. (Format 2.)
-- **Props:** typisiertes Skript-JSON + Audio + `wordTimings`.
-- **Brand:** Claimondo-Tokens (Farben/Fonts), 1080×1920 (9:16), Intro/Outro-Bumper.
-- **Untertitel:** aus `wordTimings`, Phrasen-/Wort-Highlight (Standard fuer Short-Form-Retention).
-- **Render:** `@remotion/renderer` headless (Node), gebuendeltes ffmpeg, Chromium via `ensureBrowser`.
+- **Ort:** `src/remotion/` (isoliert; nicht ins Client-Bundle, §16).
+- **Composition** `ContentClip`, parametrisiert per `format`. Kein Mensch/Avatar.
+- **Qualitaets-Anspruch (verbindlich): jeder Frame gefuellt und in Bewegung** — gleichzeitige Ebenen:
+  1. **Kinetische Untertitel** (Wort-fuer-Wort, synchron zur Stimme via `wordTimings`) — Haupt-Retention-Treiber.
+  2. **Animierter Hintergrund** (Marken-Formen/Verlauf), nie flach.
+  3. **Visual-Ebene** — pro Segment aufgeloest (U5): Marken-Component / Stock-Clip / animierte Grafik; Schnitt alle 2–4 s.
+  4. **Uebergaenge** (Wipe/Zoom/Slide) + **Marken-Bumper** (Intro/Outro), Fortschrittsbalken.
+- **Marken-Bibliothek:** getaggte, wiederverwendbare Branded-Components (`src/remotion/brand-library/`), vom Resolver per Tag gezogen. Startcharge in Slice 1, waechst als Code.
+- **Format:** 1080×1920 (9:16), Claimondo-Tokens.
+- **Render:** `@remotion/renderer` headless, gebuendeltes ffmpeg, Chromium via `ensureBrowser`.
 
 ---
 
-## 10. Render-Orchestrator (U6)
+## 10. Render-Orchestrator (U7)
 
-- Server-seitig, **asynchron** (Render blockiert keinen Web-Request). Slice-1-Minimal: eine Server-Action stösst die Verarbeitung an, UI pollt `status`.
-- Stufen isoliert (Result-Object); Fehler → `status=failed` + `fehler_text`, kein Teilzustand-Verlust, Re-Run ab Stufe.
-- **Kosten-Cap:** env `MARKETING_MAX_CLIPS_PER_WEEK` (default 20) → Zaehler vor Generierung pruefen, sonst Block + Hinweis.
-- **Kill-Switch:** env `MARKETING_STUDIO_ENABLED` (default true) → global aus.
+- Server-seitig, **asynchron** (Render blockiert keinen Web-Request); UI pollt `status`.
+- Stufen isoliert (Result-Object); Fehler → `status=fehler` + `fehler_text`, Re-Run ab Stufe.
+- **Kosten-Cap:** env `MARKETING_MAX_CLIPS_PER_WEEK` (default 20). **Kill-Switch:** env `MARKETING_STUDIO_ENABLED`.
 - Upload mp3 + mp4 → Supabase Storage → URLs am Job.
 
 ---
 
-## 11. Admin-UI (U7)
+## 11. Admin-UI (U8)
 
 - **Route:** `src/app/admin/marketing/` (+ Nav-Eintrag; Admin-Rolle).
-- **Komponenten-Set:** `shared/DataTable` (Liste), `StatusBadge`, `primitives.Button`/Card, `forms/*` — **kein** handgerolltes Markup (Komponenten-Policy).
-- **Views:**
-  - Job-Liste (Status, Thema, Format, Dauer, Kosten, Datum).
-  - "Neuer Clip"-Form (Thema + Format).
-  - Job-Detail: **editierbares Skript** (Admin justiert vor Render), Regenerate-Buttons je Stufe, Video-Preview-Player, Download, Kosten/Status.
+- **Komponenten-Set:** `shared/DataTable`, `StatusBadge`, `primitives.*`, `forms/*`.
+- **Views:** Job-Liste · "Neuer Clip"-Form · Job-Detail (editierbares Skript inkl. Visual-Plan, Regenerate je Stufe, Preview-Player, Download, Kosten/Status).
 
 ---
 
-## 12. Cron-Readiness (Zukunft, nicht Slice 1)
+## 12. Cron-Readiness (Zukunft)
 
-Der Orchestrator (U6) ist bewusst headless ausloesbar. Spaeter: Cron-Route `src/app/api/cron/marketing-content-generate/` (bestehendes ~60-Routen-Muster) + Themen-Bank → Vollautomatik.
+U7 ist headless ausloesbar → spaeter Cron-Route `src/app/api/cron/marketing-content-generate/` + Themen-Bank → Vollautomatik.
 
 ---
 
 ## 13. Testing-Strategie
 
-- **Schritt 0 — PoC (zuerst!):** 1 echter deutscher Ratgeber-Clip end-to-end (Skript → TTS → Render), Qualitaet beurteilt, **bevor** die UI ausgebaut wird. Beantwortet direkt "testen wie gut das funktioniert".
-- **Unit:** Skript-JSON-Schema (Zod); TTS-Adapter (gemockt); Remotion-Props-Mapping.
-- **Render-Smoke:** eine Composition rendert ein kurzes Fixture ohne Crash.
-- **Playwright:** `admin/marketing` erreichbar + Form legt Job an (Generierung gemockt).
-- **7-Punkte-Audit** (Build gruen, UI-Erreichbarkeit, Redundanz, Dead-Code, Spec-Treue, Inkonsistenz, Regression) vor jedem Commit.
+- **Schritt 0 — PoC (zuerst!):** 1 echter deutscher Ratgeber-Clip end-to-end (Skript+Visual-Plan → TTS → Resolver → Render); Qualitaet + "durchgehend bewegt"-Anspruch beurteilt, **bevor** UI-Ausbau.
+- **Unit:** Skript+Visual-Plan-Schema (Zod); TTS-Adapter (mock); Visual-Resolver-Prioritaet (mock Pexels + Marken-Registry); Remotion-Props-Mapping.
+- **Render-Smoke:** Composition rendert Fixture ohne Crash.
+- **Playwright:** `/admin/marketing` erreichbar + Form legt Job an (Generierung gemockt).
+- **7-Punkte-Audit** vor jedem Commit.
 
 ---
 
 ## 14. Kostenmodell
 
-- **ElevenLabs Creator $22/Mo (121k Credits)** deckt 10–20 Clips/Woche (~40–80k Zeichen/Mo) mit Puffer; Turbo-Modell 0,5 Credit/Zeichen halbiert. Pro ($99/600k) erst bei 5–7× Skalierung.
-- **Claude** (Skripte): Cent-Betraege, ~1–4 $/Mo gesamt.
-- **Remotion-Render:** eigene VPS-CPU → **0 € Grenzkosten**.
-- **Summe:** ~25 $/Monat fuer die komplette Generierungs-Pipeline. TTS ist die einzige pro-Clip skalierende Kost.
+- **ElevenLabs Creator $22/Mo (121k Credits)** deckt 10–20 Clips/Woche mit Puffer; Turbo halbiert.
+- **Claude Opus** (Skript+Visual-Plan): kurze Outputs → wenige $/Mo.
+- **Pexels/Pixabay + Marken-Bibliothek (Code) + Remotion-Render:** gratis / eigene CPU → **0 € Grenzkosten**.
+- **Summe:** ~25 $/Monat fuer die komplette Generierungs-Pipeline.
 
 ---
 
-## 15. Compliance (relevant ab Publishing-Slice — aber ab jetzt tracken)
+## 15. Compliance (ab Publishing-Slice — ab jetzt tracken)
 
-- **KI-Kennzeichnung:** TikTok (ab 03/2026) und Meta (ab 02/2026) verlangen ein "KI-generiert"/"Made with AI"-Label fuer synthetische Inhalte (unsere Stimme, evtl. Standbild-Presenter). TikTok erkennt KI automatisch; unmarkiert → Reichweiten-Drosselung. → **`ist_ki_generiert` ab Generierung am Job** setzen, damit die Publishing-Slice das Flag korrekt setzt.
-- **Ratgeber-Content:** Rechts-/Versicherungsaussagen → Disclaimer + keine Rechtsberatung (Compliance-Gate §7). Strategischer Hinweis: KI-Label + Vertrauensmarke = Gegenwind; Motion-/Template-Look ist markensicherer als foto-realistische Avatare (bewusst so gewaehlt).
+- **KI-Kennzeichnung:** Faceless-Motion-Graphic hat **kein** synthetisches Gesicht (Hauptrisiko vermieden), aber die synthetische **Stimme** kann labelpflichtig sein → `ist_ki_generiert=true` tracken fuer die Publishing-Slice.
+- **Ratgeber-Content:** Rechts-/Versicherungsaussagen → Disclaimer + keine Rechtsberatung (Compliance-Gate §7).
 
 ---
 
 ## 16. Ops & Build-Integration
 
-- **VPS:** Remotion braucht Node + Headless-Chromium-Systemlibs + ffmpeg (Remotion bringt ffmpeg mit; Chromium via `ensureBrowser`). Deploy-Pipeline entsprechend ergaenzen.
-- **Client-Bundle:** Remotion-Compositions **duerfen nicht** ins Next-Client-Bundle geraten (nur Render-Zeit/Server). Sauber isolieren (eigenes Verzeichnis, keine Imports aus Client-Komponenten).
-- **DDL:** nur via Supabase-Plugin (Regel 2). **Kein** Direct-Push auf `main` (Regel 1) — PR gegen `staging`.
+- **VPS:** Remotion braucht Node + Headless-Chromium-Libs + ffmpeg (gebuendelt). Deploy-Pipeline ergaenzen.
+- **Client-Bundle:** Remotion-Compositions + Marken-Bibliothek **nicht** ins Next-Client-Bundle (nur Render-Zeit/Server). Sauber isolieren.
+- **Regeln:** DDL nur via Supabase-Plugin (Regel 2); kein Direct-Push auf `main` (Regel 1) — PR gegen `staging`.
 
 ---
 
 ## 17. Spaetere Slices (Roadmap)
 
-- **Slice 2 — Publishing-Connectors:** TikTok Content Posting API + Meta IG-Reels/FB-Video; OAuth/Token-Infra (Meta System-User-Token, TikTok Refresh-Rotation); KI-Label; Direct-Post nach bestandenem Audit. (Audits 2–4 Wochen je Plattform → parallel starten.)
+- **Slice 2 — Publishing-Connectors:** TikTok Content Posting API + Meta IG-Reels/FB-Video; OAuth/Token (Meta System-User, TikTok Refresh); KI-Label; Direct-Post nach Audit (2–4 Wo je Plattform → parallel starten).
 - **Slice 3 — Vollautomatik:** Themen-Bank + Scheduler + Cron + Redaktionskalender.
-- **Slice 4 — Rueckkanal:** Performance-Analytics je Clip.
+- **Slice 4 — Ausbaustufen:** DB-gestuetzte Upload-Marken-Bibliothek (reale Clips) + Management-UI; optional Custom-KI-Visuals; Performance-Analytics je Clip.
 
 ---
 
-## 18. Offene Annahmen (beim Review bestaetigen)
+## 18. Geloeste Review-Punkte (2026-07-13)
 
-1. **Claude-Modell** fuer Skripte = Sonnet (ok?).
-2. **DE-Stimme** (ElevenLabs Voice-ID) — konkrete Stimme spaeter waehlbar; Default = neutrale DE-Stimme.
-3. **Standbild-Presenter-Asset** (Marken-Gesicht) — habt ihr eins? Falls nein: Slice 1 startet **Motion-Graphic-only**, Standbild-Presenter als kleiner Nachzug.
-4. **Remotion im Haupt-App-Repo** unter `src/remotion/` (vs. eigenes Workspace-Package) — Default: `src/remotion/`, isoliert vom Client-Bundle.
-5. "Es gibt schon einen Marketing-Bereich": aktuell existiert **kein** `admin/marketing`-Ordner (naechstes Verwandtes: `admin/statistiken` mit Marketing-KPIs). Default = neue Sektion; alternativ an Statistiken andocken.
+1. **Claude-Modell:** Opus (`claude-opus-4-8`); Sonnet-Neuversion bei Bau pruefen.
+2. **DE-Stimme:** neutrale ElevenLabs-Stimme.
+3. **Visueller Stil:** rein grafisch, voll animiert (faceless) — kein Presenter/Avatar; "alles gefuellt + bewegt" als harter Qualitaets-Anspruch (§9).
+4. **Remotion-Ort:** `src/remotion/`, isoliert vom Client-Bundle.
+5. **Sektion:** neue eigene `/admin/marketing`-Sektion.
+6. **Visuals/B-Roll:** Visual-Prompter (Claude) + Resolver-Prioritaet **kuratierte Marken-Bibliothek (Remotion-Components) → Stock (Pexels, gratis) → generische Grafik**; Upload realer Clips + Custom-KI-Visuals bewusst spaeter.
