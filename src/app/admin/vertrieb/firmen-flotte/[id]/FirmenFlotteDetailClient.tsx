@@ -1,15 +1,20 @@
 'use client'
 
 // Firmen-Flotten-Akte — Sektions-View. Analog Werkstatt-Detail. Sektionen:
-// Stammdaten (Task 5, editierbare Notiz), Fahrzeuge (Task 6), Karten (Task 7),
-// Schaeden (Task 8), Flottenmanager-Konto (Task 9).
+// Stammdaten (Task 5), Fahrzeuge (Task 6), Karten (Task 7), Schaeden (Task 8),
+// Flottenmanager-Konto (Task 9).
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { BuildingIcon } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { Button } from '@/components/primitives'
+import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
 import { updateVertriebFeld } from '../../_actions/update-vertrieb-feld'
+import {
+  fuegeFahrzeugZuFlotteHinzu,
+  entferneFahrzeugAusFlotte,
+} from '../../_actions/firmen-flotte-fahrzeuge'
 import type { FirmenFlotteDetail } from '../../_lib/firmen-flotte-detail'
 
 const FELD_CLS =
@@ -33,6 +38,14 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
   const [fehler, setFehler] = useState<string | null>(null)
   const dirty = notiz !== (firma.notiz ?? '')
 
+  const [showAdd, setShowAdd] = useState(false)
+  const [kennzeichen, setKennzeichen] = useState('')
+  const [hersteller, setHersteller] = useState('')
+  const [modell, setModell] = useState('')
+  const [fzNotiz, setFzNotiz] = useState('')
+  const [addBusy, setAddBusy] = useState(false)
+  const [addFehler, setAddFehler] = useState<string | null>(null)
+
   const adresse =
     [firma.adresse_strasse, [firma.adresse_plz, firma.adresse_ort].filter(Boolean).join(' ')]
       .filter((t) => t && t.trim())
@@ -48,6 +61,33 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
       return
     }
     router.refresh()
+  }
+
+  async function fahrzeugAnlegen() {
+    setAddBusy(true)
+    setAddFehler(null)
+    const res = await fuegeFahrzeugZuFlotteHinzu(firma.id, {
+      kennzeichen: kennzeichen.trim(),
+      hersteller: hersteller.trim() || null,
+      modell: modell.trim() || null,
+      notiz: fzNotiz.trim() || null,
+    })
+    setAddBusy(false)
+    if (!res.ok) {
+      setAddFehler(res.error ?? 'Anlegen fehlgeschlagen.')
+      return
+    }
+    setKennzeichen('')
+    setHersteller('')
+    setModell('')
+    setFzNotiz('')
+    setShowAdd(false)
+    router.refresh()
+  }
+
+  async function fahrzeugEntfernen(flottenFahrzeugId: string) {
+    const res = await entferneFahrzeugAusFlotte(firma.id, flottenFahrzeugId)
+    if (res.ok) router.refresh()
   }
 
   return (
@@ -84,8 +124,98 @@ export default function FirmenFlotteDetailClient({ detail }: { detail: FirmenFlo
         </div>
       </SectionCard>
 
-      <SectionCard title="Fahrzeuge">
-        <p className="text-body-sm text-claimondo-ondo/60">— folgt (Task 6: Liste + Fahrzeug anlegen) —</p>
+      <SectionCard title={`Fahrzeuge (${fahrzeuge.length})`}>
+        {fahrzeuge.length === 0 ? (
+          <p className="text-body-sm text-claimondo-ondo/60">Noch keine Fahrzeuge in dieser Flotte.</p>
+        ) : (
+          <DataTableContainer>
+            <Table>
+              <Thead>
+                <Tr>
+                  <Th className="text-left">Kennzeichen</Th>
+                  <Th className="text-left">Hersteller</Th>
+                  <Th className="text-left">Modell</Th>
+                  <Th className="text-left">Status</Th>
+                  <Th className="text-right">Aktion</Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {fahrzeuge.map((f) => (
+                  <Tr key={f.flotten_fahrzeug_id}>
+                    <Td className="font-medium text-claimondo-navy">{f.kennzeichen ?? '—'}</Td>
+                    <Td>{f.hersteller ?? '—'}</Td>
+                    <Td>{f.modell ?? '—'}</Td>
+                    <Td>{f.status ?? '—'}</Td>
+                    <Td className="text-right">
+                      <Button variant="ghost" size="sm" onClick={() => fahrzeugEntfernen(f.flotten_fahrzeug_id)}>
+                        Entfernen
+                      </Button>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </Table>
+          </DataTableContainer>
+        )}
+
+        <div className="mt-3">
+          {!showAdd ? (
+            <Button variant="ondo" size="sm" onClick={() => setShowAdd(true)}>
+              + Fahrzeug hinzufügen
+            </Button>
+          ) : (
+            <div className="space-y-2 rounded-ios-lg border border-claimondo-border p-3">
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  value={kennzeichen}
+                  onChange={(e) => setKennzeichen(e.target.value)}
+                  placeholder="Kennzeichen *"
+                  className={FELD_CLS}
+                />
+                <input
+                  value={hersteller}
+                  onChange={(e) => setHersteller(e.target.value)}
+                  placeholder="Hersteller"
+                  className={FELD_CLS}
+                />
+                <input
+                  value={modell}
+                  onChange={(e) => setModell(e.target.value)}
+                  placeholder="Modell"
+                  className={FELD_CLS}
+                />
+                <input
+                  value={fzNotiz}
+                  onChange={(e) => setFzNotiz(e.target.value)}
+                  placeholder="Notiz (optional)"
+                  className={FELD_CLS}
+                />
+              </div>
+              {addFehler && <p className="text-caption text-danger-strong">{addFehler}</p>}
+              <div className="flex gap-2">
+                <Button
+                  variant="navy"
+                  size="sm"
+                  onClick={fahrzeugAnlegen}
+                  loading={addBusy}
+                  disabled={!kennzeichen.trim() || addBusy}
+                >
+                  Anlegen
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setShowAdd(false)
+                    setAddFehler(null)
+                  }}
+                >
+                  Abbrechen
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
       </SectionCard>
 
       <SectionCard title="Schaden-Karten">
