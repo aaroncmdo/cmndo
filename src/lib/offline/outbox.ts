@@ -69,6 +69,12 @@ export async function getPendingCount(): Promise<number> {
 export async function getGpsPendingCount(): Promise<number> {
   return getPendingCountByKind(['gps_position'])
 }
+// Back-compat: counts ONLY fall_dokument_upload dead ops. This matches the legacy
+// upload_outbox-only dead count AND DeadLetterDialog (which renders upload ops via
+// getOutboxItems), so the badge and the dialog stay in sync. It intentionally diverges
+// from the generalized enqueue.getDeadCount() (which counts ALL kinds). When a future
+// slice surfaces GPS/other dead ops in the badge, switch usePendingCount to
+// enqueue.getDeadCount() and extend getOutboxItems/DeadLetterDialog accordingly.
 export async function getDeadCount(): Promise<number> {
   return offlineDB.mutation_outbox
     .where('kind')
