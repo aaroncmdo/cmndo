@@ -16,9 +16,10 @@ console.log(`1/4 Skript … ("${THEMA}", ${FORMAT})`)
 const script = await generateScript(THEMA, FORMAT)
 await writeFile('./.work/script.json', JSON.stringify(script, null, 2))
 
-console.log('2/4 Voiceover (ElevenLabs) …')
+console.log('2/4 Voiceover (ElevenLabs -> Fallback Piper) …')
 const fullText = script.segmente.map((s) => s.text).join(' ')
-const { words } = await synthesize(fullText, './.work/voice.mp3')
+const { audioPath, words, engine } = await synthesize(fullText, './.work/voice')
+console.log(`   TTS-Engine: ${engine}`)
 
 console.log('3/4 B-Roll (Pexels) …')
 const segments = []
@@ -50,7 +51,7 @@ for (const seg of script.segmente) {
 const totalSecs = (words.at(-1)?.end ?? 30) + 0.8
 await writeFile(
   './.work/props.json',
-  JSON.stringify({ segments, audioPath: 'voice.mp3', durationInFrames: Math.ceil(totalSecs * FPS) }, null, 2),
+  JSON.stringify({ segments, audioPath: audioPath.split(/[\\/]/).pop(), durationInFrames: Math.ceil(totalSecs * FPS) }, null, 2),
 )
 
 console.log('4/4 Fertig. Jetzt rendern:  npm run render   → out.mp4')
