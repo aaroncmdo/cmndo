@@ -42,4 +42,10 @@ describe('fallDokumentUploadHandler', () => {
     const r = await fallDokumentUploadHandler.replay!(op)
     expect(r.outcome).toBe('retry')
   })
+  it('retry when insert returns no row', async () => {
+    uploadMock.mockResolvedValue({ error: null })
+    insertSingleMock.mockResolvedValue({ data: null, error: null })
+    const r = await fallDokumentUploadHandler.replay!(op)
+    expect(r.outcome).toBe('retry')
+  })
 })

@@ -49,7 +49,7 @@ async function replay(op: OutboxOp): Promise<ReplayResult> {
     if ((insertErr as { code?: string }).code === '23505') return { outcome: 'done' } // already synced
     return { outcome: 'retry', error: insertErr.message ?? 'DB-Insert fehlgeschlagen' }
   }
-  if (!row) return { outcome: 'retry', error: 'Kein Row zurueckgegeben' }
+  if (!row) return { outcome: 'retry', error: 'Kein Row zurückgegeben' }
 
   if (isOcrable) {
     fetch('/api/ocr-trigger', {
