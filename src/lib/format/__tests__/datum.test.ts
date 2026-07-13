@@ -15,6 +15,10 @@ describe('formatDatum', () => {
     expect(formatDatum('2026-04-17T10:00:00Z', 'kurz')).toBe('17.04.26')
   })
 
+  it('numerisch-Stil: 17.04.2026 (4-stelliges Jahr, ohne Zeit)', () => {
+    expect(formatDatum('2026-04-17T10:00:00Z', 'numerisch')).toBe('17.04.2026')
+  })
+
   it('lang-Stil enthält Monat als Text', () => {
     const out = formatDatum('2026-04-17T10:00:00Z', 'lang')
     expect(out).toContain('April')
