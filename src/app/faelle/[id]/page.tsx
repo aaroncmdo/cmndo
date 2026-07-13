@@ -330,9 +330,13 @@ export default async function FallaktePage({
     return []
   })
 
+  // Storage-Signing: private bucket 'fall-dokumente' erfordert den Service-Client.
+  // Auth-Gate: user-Check + getFallById(supabase, id) via RLS (notFound wenn kein Zugriff).
+  const adminStorage = createAdminClient()
+
   // AAR-553: fall_dokumente → Legacy-Shape für DokumenteTab + systemDokumente
   const dokUrlsLegacy = await getStorageUrlBulk(
-    supabase,
+    adminStorage,
     (dokumente ?? []).map(d => ({ bucket: 'fall-dokumente', path: (d.storage_path as string | null) ?? undefined })),
   )
   const dokumenteLegacy = (dokumente ?? []).map((d, i) => ({
@@ -470,7 +474,7 @@ export default async function FallaktePage({
     (r) => r.dokument_typ === 'kunde-nachreichung' || r.dokument_typ === 'sonstiges',
   )
   const unzugeordneteUrls = await getStorageUrlBulk(
-    supabase,
+    adminStorage,
     unzugeordneteRows.map((r) => ({ bucket: 'fall-dokumente', path: r.storage_path })),
   )
   const unzugeordneteUploads = unzugeordneteRows
@@ -496,7 +500,7 @@ export default async function FallaktePage({
       pflichtHochgeladenSlots.has(r.dokument_typ),
   )
   const zuPruefendeUrls = await getStorageUrlBulk(
-    supabase,
+    adminStorage,
     zuPruefendeRows.map((r) => ({ bucket: 'fall-dokumente', path: r.storage_path })),
   )
   const zuPruefendeUploads = zuPruefendeRows.map((r, i) => ({

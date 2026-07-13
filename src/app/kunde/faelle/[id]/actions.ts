@@ -75,10 +75,10 @@ export async function uploadPflichtdokumentKunde(
   const path = claimId
     ? `claims/${claimId}/kunde-nachreichung/${Date.now()}.${ext}`
     : `kunden-dokumente/${fallId}/${Date.now()}.${ext}`
-  const { error: uploadErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
+  const { error: uploadErr } = await admin.storage.from('fall-dokumente').upload(path, file)
   if (uploadErr) return { success: false, error: uploadErr.message }
 
-  const publicUrl = await getStorageUrl(supabase, 'fall-dokumente', path)
+  const publicUrl = await getStorageUrl(admin, 'fall-dokumente', path)
   if (!publicUrl) return { success: false, error: 'URL-Generierung fehlgeschlagen' }
   const { data: pd } = await supabase
     .from('pflichtdokumente')
