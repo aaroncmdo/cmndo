@@ -8,8 +8,8 @@ export type VertriebAktion = {
   kind: 'scrape' | 'csv' | 'anlegen' | 'freigaben' | 'qrpool'
 }
 
-const ROLLE_TO_PL: Record<VertriebRolle, string> = { sv: 'sachverstaendiger', makler: 'makler', werkstatt: 'werkstatt' }
-const ANLEGEN_LABEL: Record<VertriebRolle, string> = { sv: 'SV anlegen', makler: 'Makler anlegen', werkstatt: 'Werkstatt anlegen' }
+const ROLLE_TO_PL: Record<VertriebRolle, string> = { sv: 'sachverstaendiger', makler: 'makler', werkstatt: 'werkstatt', 'firmen-flotte': 'firmen-flotte' }
+const ANLEGEN_LABEL: Record<VertriebRolle, string> = { sv: 'SV anlegen', makler: 'Makler anlegen', werkstatt: 'Werkstatt anlegen', 'firmen-flotte': 'Firmen-Flotte anlegen' }
 
 /** Aktions-Set je aktiver Pill (Rolle) × Lead/Partner. P1: href = Deep-Link auf Bestand. */
 export function contextAktionen(rolle: VertriebRolle | 'alle', typ: VertriebTyp | 'alle'): VertriebAktion[] {
@@ -40,6 +40,8 @@ export function contextAktionen(rolle: VertriebRolle | 'alle', typ: VertriebTyp 
   } else if (rolle === 'werkstatt') {
     out.push({ key: 'anlegen-werkstatt', kind: 'anlegen', label: ANLEGEN_LABEL.werkstatt, href: '/admin/vertrieb/werkstaetten' })
     out.push({ key: 'qrpool', kind: 'qrpool', label: 'QR-Pool verwalten', href: '/admin/vertrieb/werkstaetten/qr-pool' })
+  } else if (rolle === 'firmen-flotte') {
+    out.push({ key: 'anlegen-flotte', kind: 'anlegen', label: ANLEGEN_LABEL['firmen-flotte'], href: '/admin/firmen-flotte' })
   }
   return out
 }

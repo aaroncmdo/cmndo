@@ -18,9 +18,10 @@ const LAYER_KONTAKTE = 'vk-kontakte-circle'
 /** P2: Farbe nach ROLLE (nicht Typ — der Switch trennt Partner/Lead schon).
  *  raw hex ok — Token-Audit-Skip-Header oben; Mapbox-Paint-Property. */
 const ROLLE_COLORS: Record<VertriebRolle, string> = {
-  sv: '#0D1B3E',        // claimondo-navy
-  makler: '#4573A2',    // claimondo-secondary
-  werkstatt: '#7BA3CC', // claimondo-accent
+  sv: '#0D1B3E',           // claimondo-navy
+  makler: '#4573A2',       // claimondo-secondary
+  werkstatt: '#7BA3CC',    // claimondo-accent
+  'firmen-flotte': '#94a3b8', // neutral (Firmen haben selten Geo-Daten)
 }
 
 /** Deutsche Labels je Rolle. */
@@ -28,6 +29,7 @@ const ROLLE_LABELS: Record<VertriebRolle, string> = {
   sv: 'Sachverständige',
   makler: 'Makler',
   werkstatt: 'Werkstätten',
+  'firmen-flotte': 'Firmen-Flotten',
 }
 
 // Match-Expression fuer circle-color (raw hex ok — Token-Audit-Skip-Header oben)
@@ -37,6 +39,7 @@ const ROLLE_COLOR_EXPR = [
   'sv', ROLLE_COLORS.sv,
   'makler', ROLLE_COLORS.makler,
   'werkstatt', ROLLE_COLORS.werkstatt,
+  'firmen-flotte', ROLLE_COLORS['firmen-flotte'],
   /* default */ '#94a3b8',
 ] as unknown as mapboxgl.Expression
 

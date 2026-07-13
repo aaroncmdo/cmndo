@@ -33,11 +33,17 @@
 
 ---
 
-## Task 1: Karten-Mint/-Bind Shared-Lib (Foundation, TDD)
+## Task 1: Karten-Mint/-Bind — KANONISCHE LIB ADOPTIEREN (kein Neubau — erledigt)
 
-**Files:**
-- Create: `src/lib/flotte/schadenkarten-mint.ts`
-- Create: `src/lib/flotte/schadenkarten-mint.test.ts`
+**Korrektur 13.07. (89f501f6-Boundary-Antwort):** Die Mint/-Bind-Lib existiert BEREITS (Layer 1, staging) — **NICHT neu bauen** (mein Duplikat `src/lib/flotte/schadenkarten-mint.ts` wurde verworfen/revertet). Kanonisch, 89f501f6-owned, **import-only**:
+- `src/lib/schadenkarte/schadenkarte.ts`: `mintSchadenkarten(db, {firmaId, anzahl, charge?})→{ok,tokens}` (status='bestellt') · `bindeSchadenkarteAnFahrzeug(db, {token, fahrzeugId, firmaId, userId})→{ok,error?}` (by TOKEN, firma-checked, race-safe) · `getKartenFuerFirma(db, firmaId)→{id,token,status,fahrzeugId}[]` · `resolveSchadenkarteToFahrzeug(db, token)`.
+- `src/lib/schadenkarte/token.ts`: `generateSchadenkarteToken`. QR: `generateQrCodeSvg`/`buildQrGridPdf` (schadenkarte-Bereich).
+- **Task 7-Admin-Action** ruft `mintSchadenkarten`/`bindeSchadenkarteAnFahrzeug` hinter `requireRole` auf. **Task 2** nutzt `getKartenFuerFirma`. Kein eigener Lib-Code.
+
+**Files:** keine (Adoption).
+
+<!-- OBSOLET (Duplikat verworfen): -->
+### (verworfen) ~~Karten-Mint-Shared-Lib~~
 
 **Interfaces (Produces):**
 - `mintSchadenkarten(admin, { firmaId, anzahl, charge? }): Promise<{ ok: true; tokens: string[] } | { ok: false; error: string }>` — erzeugt `anzahl` (1–200) neue `schadenkarten`-Rows mit random `karten_token`, `status='frei'`, `firma_id=firmaId`, `charge`. Token-Generierung: kryptografisch (nanoid/crypto), kollisionssicher, gut druckbar.

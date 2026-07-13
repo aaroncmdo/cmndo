@@ -3,12 +3,24 @@ import { getVertriebKontakte } from './get-vertrieb-kontakte'
 import type { VertriebKontaktRow } from './vertrieb-kontakt.types'
 
 // Der Supabase-Chain (.from().select().order()) ist thenable beim await.
+// firmen_flotten_konten und firmen geben leere Daten zurueck (kein Einfluss auf die
+// bestehenden v_vertrieb_kontakt-Tests; see firmen-flotte-specific tests below).
 function mockClient(result: { data: unknown; error: unknown }) {
+  const flotteBuilder = {
+    select: vi.fn().mockReturnThis(),
+    order: vi.fn(() => Promise.resolve({ data: [], error: null })),
+    in: vi.fn(() => Promise.resolve({ data: [], error: null })),
+  }
   const builder = {
     select: vi.fn(() => builder),
     order: vi.fn(() => Promise.resolve(result)),
   }
-  return { from: vi.fn(() => builder) } as unknown as Parameters<typeof getVertriebKontakte>[0]
+  return {
+    from: vi.fn((table: string) => {
+      if (table === 'firmen_flotten_konten' || table === 'firmen') return flotteBuilder
+      return builder
+    }),
+  } as unknown as Parameters<typeof getVertriebKontakte>[0]
 }
 
 const row = (o: Partial<VertriebKontaktRow>): VertriebKontaktRow => ({

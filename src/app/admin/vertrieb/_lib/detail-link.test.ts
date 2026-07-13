@@ -13,13 +13,20 @@ describe('detailLink (P3: gemountete Routen unter dem Dach)', () => {
     })
   })
 
+  it('Firmen-Flotte → gemountete Einzel-Akte mit firma-id', () => {
+    expect(detailLink('firmen-flotte', 'f1')).toEqual({
+      href: '/admin/vertrieb/firmen-flotte/f1',
+      label: 'Vollständige Akte öffnen',
+    })
+  })
+
   it('Makler/Partner-Lead → gemountete Liste', () => {
     expect(detailLink('makler', 'm1').href).toBe('/admin/vertrieb/makler')
     expect(detailLink('partner-lead', 'p1').href).toBe('/admin/vertrieb/partner-leads')
   })
 
   it('alle Ziele bleiben unter /admin/vertrieb (in der Konsole)', () => {
-    for (const kind of ['sv', 'werkstatt', 'makler', 'partner-lead'] as const) {
+    for (const kind of ['sv', 'werkstatt', 'makler', 'partner-lead', 'firmen-flotte'] as const) {
       expect(detailLink(kind, 'x').href.startsWith('/admin/vertrieb/')).toBe(true)
     }
   })
