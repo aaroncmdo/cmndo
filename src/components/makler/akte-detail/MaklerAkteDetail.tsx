@@ -100,7 +100,12 @@ export function MaklerAkteDetail({
   currentUserId,
   initialChatMessages,
 }: Props) {
-  const [tab, setTab] = useState<TabKey>(initialTab)
+  const copilotVerfuegbar = istVollzugriff(detail.consent_scope)
+  // Copilot arbeitet nur bei Vollzugriff (API 403t sonst). Deep-Link ?tab=copilot
+  // ohne Vollzugriff faellt auf die Uebersicht zurueck (den Tab gibt es dann nicht).
+  const [tab, setTab] = useState<TabKey>(
+    initialTab === 'copilot' && !copilotVerfuegbar ? 'overview' : initialTab,
+  )
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -228,12 +233,14 @@ export function MaklerAkteDetail({
           label="Chat"
           icon={<MessageSquareIcon width={15} height={15} />}
         />
-        <TabButton
-          active={tab === 'copilot'}
-          onClick={() => selectTab('copilot')}
-          label="Copilot"
-          icon={<SparklesIcon width={15} height={15} />}
-        />
+        {copilotVerfuegbar ? (
+          <TabButton
+            active={tab === 'copilot'}
+            onClick={() => selectTab('copilot')}
+            label="Copilot"
+            icon={<SparklesIcon width={15} height={15} />}
+          />
+        ) : null}
       </div>
 
       {/* Panels */}
@@ -251,11 +258,11 @@ export function MaklerAkteDetail({
           />
         </div>
       ) : null}
-      {tab === 'copilot' ? (
+      {tab === 'copilot' && copilotVerfuegbar ? (
         <MaklerCopilotTab
           fallId={fall.id}
           gegnerVsName={fall.gegner_versicherung}
-          kontextLoaded={istVollzugriff(detail.consent_scope)}
+          kontextLoaded={copilotVerfuegbar}
         />
       ) : null}
     </div>
