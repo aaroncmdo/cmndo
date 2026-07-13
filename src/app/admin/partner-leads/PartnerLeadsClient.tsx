@@ -6,7 +6,7 @@
 // Nutzt ausschliesslich Shared-Components (DataTable, StatusBadge, forms/*,
 // primitives Button/Modal) — kein handgerolltes Button/Card/Table-Markup.
 
-import { useEffect, useMemo, useState, useTransition } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import {
@@ -20,7 +20,6 @@ import {
   MoreHorizontal,
   Upload,
   Search,
-  X,
   type LucideIcon,
 } from 'lucide-react'
 import PageHeader from '@/components/shared/PageHeader'
@@ -45,20 +44,9 @@ import {
   updatePartnerLead,
   konvertierePartnerLead,
   protokolliereAktivitaet,
-  importCsvLeads,
-  schlageCsvMappingVor,
-  scrapePartnerLeadsVorschau,
-  importScrapedLeads,
 } from './actions'
-import {
-  parseCsv,
-  mapCsvMitMapping,
-  heuristischesMapping,
-  CSV_ZIEL_FELDER,
-  type CsvZielFeld,
-  type PartnerCsvLead,
-} from '@/lib/partner/csv-import'
-import type { ScrapeKandidat } from '@/lib/partner/scraping'
+import CsvImportPanel from './CsvImportPanel'
+import ScrapePanel from './ScrapePanel'
 import type { PartnerLeadRow, StaffOption, PartnerLeadAktivitaetRow } from './types'
 import {
   PARTNER_LEAD_STATUS,
@@ -545,34 +533,6 @@ function CreateProspectModal({
 
 // ─── CSV-Import-Modal ─────────────────────────────────────────────────────────
 
-// Deutsche Labels fuer die Mapping-Dropdowns.
-const CSV_ZIEL_FELD_LABELS: Record<CsvZielFeld, string> = {
-  firma: 'Firma',
-  email: 'E-Mail',
-  telefon: 'Telefon',
-  ansprechpartner_vorname: 'Vorname',
-  ansprechpartner_nachname: 'Nachname',
-  plz: 'PLZ',
-  ort: 'Ort',
-  datNr: 'DAT-Nr',
-  ihk: 'IHK-Nr',
-  ignorieren: 'Ignorieren',
-}
-
-// Vorschau-Zustand nach dem Datei-Parsen (clientseitig, vor dem Import).
-type CsvVorschau = {
-  dateiName: string
-  valide: PartnerCsvLead[]
-  uebersprungen: number
-}
-
-// Roh-CSV-Daten fuer das Live-Mapping (Header + Datenzeilen).
-type CsvRohdaten = {
-  dateiName: string
-  header: string[]
-  rows: string[][]
-}
-
 function ImportCsvModal({
   open,
   onClose,
@@ -584,276 +544,13 @@ function ImportCsvModal({
   onImported: () => void
   defaultRolle?: PartnerRolle
 }) {
-  const [rolle, setRolle] = useState<PartnerRolle>(defaultRolle ?? 'sachverstaendiger')
-  useEffect(() => {
-    if (open && defaultRolle) setRolle(defaultRolle)
-  }, [open, defaultRolle])
-  const [rohdaten, setRohdaten] = useState<CsvRohdaten | null>(null)
-  const [mapping, setMapping] = useState<CsvZielFeld[]>([])
-  const [mappingQuelle, setMappingQuelle] = useState<'ki' | 'heuristik' | null>(null)
-  const [parseFehler, setParseFehler] = useState<string | null>(null)
-  const [importing, setImporting] = useState(false)
-  const [mappingPending, startMappingTransition] = useTransition()
-
-  function reset() {
-    setRohdaten(null)
-    setMapping([])
-    setMappingQuelle(null)
-    setParseFehler(null)
-    setImporting(false)
-  }
-
-  function handleClose() {
-    reset()
-    onClose()
-  }
-
-  async function handleDatei(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setParseFehler(null)
-    setRohdaten(null)
-    setMapping([])
-    setMappingQuelle(null)
-    try {
-      const text = await file.text()
-      const { header, rows } = parseCsv(text)
-      if (header.length === 0) {
-        setParseFehler('Die Datei enthält keine erkennbare Kopfzeile.')
-        return
-      }
-      if (rows.length === 0) {
-        setParseFehler('Keine Datenzeilen gefunden — die Datei enthält nur eine Kopfzeile.')
-        return
-      }
-      // Heuristik sofort als Initialwert setzen (kein Flicker waehrend KI-Call).
-      const initialMapping = heuristischesMapping(header)
-      setMapping(initialMapping)
-      setRohdaten({ dateiName: file.name, header, rows })
-
-      // KI-Vorschlag asynchron nachladen (non-blocking per startTransition).
-      startMappingTransition(async () => {
-        const result = await schlageCsvMappingVor(header, rows)
-        if (result.ok) {
-          setMapping(result.mapping)
-          setMappingQuelle(result.quelle)
-        } else {
-          // Heuristik-Fallback bleibt (bereits gesetzt) — kein Fehler anzeigen.
-          setMappingQuelle('heuristik')
-        }
-      })
-    } catch {
-      setParseFehler('Datei konnte nicht gelesen werden — bitte eine gültige CSV-Datei wählen.')
-    }
-  }
-
-  function updateMapping(idx: number, zielFeld: CsvZielFeld) {
-    setMapping((prev) => {
-      const next = [...prev]
-      next[idx] = zielFeld
-      return next
-    })
-  }
-
-  // Live-Vorschau: immer aus dem aktuellen Mapping ableiten.
-  const vorschau: CsvVorschau | null = rohdaten
-    ? (() => {
-        const { valide, uebersprungen } = mapCsvMitMapping(rohdaten.rows, mapping)
-        return { dateiName: rohdaten.dateiName, valide, uebersprungen }
-      })()
-    : null
-
-  const hatFirmaSpalte = mapping.includes('firma')
-  const vorschauZeilen = vorschau?.valide.slice(0, 5) ?? []
-
-  async function handleImport() {
-    if (!vorschau || vorschau.valide.length === 0) return
-    setImporting(true)
-    try {
-      const result = await importCsvLeads(rolle, vorschau.valide)
-      if (!result.ok) {
-        toast.error(result.error)
-        return
-      }
-      toast.success(`${result.angelegt} Lead${result.angelegt === 1 ? '' : 's'} importiert.`)
-      reset()
-      onImported()
-    } catch {
-      toast.error('Import fehlgeschlagen — bitte erneut versuchen.')
-    } finally {
-      setImporting(false)
-    }
-  }
-
   return (
-    <Modal open={open} onClose={handleClose} maxWidth={680} ariaLabel="CSV importieren">
-      <h2 className="text-claimondo-navy font-semibold text-lg mb-1">CSV importieren</h2>
-      <p className="text-sm text-claimondo-ondo mb-4">
-        Leads aus einer CSV-Datei für die gewählte Rolle anlegen.
-      </p>
-
-      <div className="space-y-3">
-        <SelectField
-          label="Rolle"
-          value={rolle}
-          onChange={(e) => {
-            setRolle(e.target.value as PartnerRolle)
-            // Rolle beeinflusst nur den Insert (nicht das Mapping) — Vorschau bleibt gueltig.
-          }}
-          options={ROLLE_KEYS.map((r) => ({ value: r, label: PARTNER_ROLLE_LABELS[r] }))}
-        />
-
-        <div className="flex flex-col gap-1.5">
-          <label
-            htmlFor="csv-datei"
-            className="text-xs font-semibold text-claimondo-shield"
-          >
-            CSV-Datei
-          </label>
-          <input
-            id="csv-datei"
-            type="file"
-            accept=".csv,text/csv"
-            onChange={handleDatei}
-            className="w-full rounded-ios-sm border border-claimondo-border bg-claimondo-bg px-3 py-2.5 text-sm text-claimondo-navy file:mr-3 file:rounded-ios-sm file:border-0 file:bg-claimondo-navy file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-white hover:file:cursor-pointer focus:outline-none focus:border-claimondo-ondo focus:ring-2 focus:ring-claimondo-ondo/30"
-          />
-          <span className="text-xs text-claimondo-shield">
-            Spalten werden automatisch zugeordnet (KI-Vorschlag oder Heuristik). Nur Zeilen
-            mit Firma werden importiert.
-          </span>
-        </div>
-
-        {parseFehler && (
-          <div className="rounded-ios-md bg-danger-soft px-3 py-2 text-xs text-danger-strong">
-            {parseFehler}
-          </div>
-        )}
-
-        {/* Mapping-Panel — erscheint sobald eine Datei geladen ist */}
-        {rohdaten && rohdaten.header.length > 0 && (
-          <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
-            <div className="mb-2 flex items-center gap-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-claimondo-ondo">
-                Spalten-Zuordnung
-              </span>
-              {mappingPending && (
-                <span className="text-[11px] text-claimondo-shield">KI analysiert…</span>
-              )}
-              {!mappingPending && mappingQuelle === 'ki' && (
-                <span className="inline-flex items-center rounded-full bg-claimondo-navy/[0.08] px-2 py-0.5 text-[11px] font-medium text-claimondo-navy">
-                  KI-Vorschlag
-                </span>
-              )}
-            </div>
-            <div className="space-y-1.5">
-              {rohdaten.header.map((col, i) => (
-                <div key={i} className="flex items-center gap-2">
-                  <span className="w-32 shrink-0 truncate text-xs font-medium text-claimondo-navy" title={col}>
-                    {col}
-                  </span>
-                  <SelectField
-                    label=""
-                    value={mapping[i] ?? 'ignorieren'}
-                    onChange={(e) => updateMapping(i, e.target.value as CsvZielFeld)}
-                    options={CSV_ZIEL_FELDER.map((f) => ({
-                      value: f,
-                      label: CSV_ZIEL_FELD_LABELS[f],
-                    }))}
-                  />
-                </div>
-              ))}
-            </div>
-            {!hatFirmaSpalte && (
-              <div className="mt-2 rounded-ios-sm bg-warning-soft px-3 py-2 text-xs text-warning-strong">
-                Bitte mindestens eine Spalte auf „Firma" setzen — Zeilen ohne Firma werden
-                übersprungen.
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Vorschau-Tabelle */}
-        {vorschau && vorschau.valide.length > 0 && (
-          <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
-            <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-              <span className="font-medium text-claimondo-navy">{vorschau.dateiName}</span>
-              <span className="text-success-strong">
-                {vorschau.valide.length} valide{vorschau.valide.length === 1 ? 'r Lead' : ' Leads'}
-              </span>
-              {vorschau.uebersprungen > 0 && (
-                <span className="text-warning-strong">
-                  {vorschau.uebersprungen} übersprungen (keine Firma)
-                </span>
-              )}
-            </div>
-            <div className="overflow-x-auto">
-              <Table className="text-xs">
-                <Thead className="bg-transparent! normal-case! tracking-normal! text-claimondo-ondo!">
-                  <Tr className="border-b border-claimondo-border">
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">Firma</Th>
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">Ansprechpartner</Th>
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">E-Mail</Th>
-                    <Th className="px-0! py-1.5! font-semibold">Ort</Th>
-                  </Tr>
-                </Thead>
-                <Tbody className="divide-y-0!">
-                  {vorschauZeilen.map((l, i) => (
-                    <Tr key={i} className="border-b border-claimondo-border/40">
-                      <Td className="px-0! py-1.5! pr-3!">{l.firma}</Td>
-                      <Td className="px-0! py-1.5! pr-3! text-claimondo-ondo!">
-                        {[l.ansprechpartner_vorname, l.ansprechpartner_nachname]
-                          .filter(Boolean)
-                          .join(' ') || '—'}
-                      </Td>
-                      <Td className="px-0! py-1.5! pr-3! text-claimondo-ondo!">{l.email ?? '—'}</Td>
-                      <Td className="px-0! py-1.5! text-claimondo-ondo!">
-                        {[l.plz, l.ort].filter(Boolean).join(' ') || '—'}
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </div>
-            {vorschau.valide.length > vorschauZeilen.length && (
-              <p className="mt-2 text-xs text-claimondo-shield">
-                … und {vorschau.valide.length - vorschauZeilen.length} weitere.
-              </p>
-            )}
-          </div>
-        )}
-
-        {/* Hinweis: Datei geladen aber 0 valide Leads */}
-        {rohdaten && vorschau && vorschau.valide.length === 0 && hatFirmaSpalte && (
-          <div className="rounded-ios-md bg-warning-soft px-3 py-2 text-xs text-warning-strong">
-            {vorschau.uebersprungen > 0
-              ? `Keine gültigen Zeilen — allen ${vorschau.uebersprungen} Zeilen fehlt der Wert in der Firma-Spalte.`
-              : 'Keine Datenzeilen mit Firma-Inhalt gefunden.'}
-          </div>
-        )}
-
-        <div className="flex gap-3 pt-2">
-          <Button variant="ghost" fullWidth onClick={handleClose} type="button">
-            Abbrechen
-          </Button>
-          <Button
-            variant="navy"
-            fullWidth
-            onClick={handleImport}
-            loading={importing}
-            disabled={
-              importing ||
-              !vorschau ||
-              vorschau.valide.length === 0 ||
-              !hatFirmaSpalte ||
-              mappingPending
-            }
-          >
-            {vorschau && vorschau.valide.length > 0
-              ? `${vorschau.valide.length} importieren`
-              : 'Importieren'}
-          </Button>
-        </div>
-      </div>
+    <Modal open={open} onClose={onClose} maxWidth={680} ariaLabel="CSV importieren">
+      <CsvImportPanel
+        onClose={onClose}
+        onImported={onImported}
+        defaultRolle={defaultRolle}
+      />
     </Modal>
   )
 }
@@ -1232,12 +929,6 @@ function Feld({ label, children }: { label: string; children: React.ReactNode })
 
 // ─── Scraping-Modal (Google Places) ─────────────────────────────────────────
 
-const SCRAPE_ANZAHL_OPTIONEN = [
-  { value: '20', label: '20 (schnell)' },
-  { value: '40', label: '40' },
-  { value: '60', label: '60 (max)' },
-]
-
 function ScrapeModal({
   open,
   onClose,
@@ -1249,225 +940,13 @@ function ScrapeModal({
   onImported: () => void
   defaultRolle?: PartnerRolle
 }) {
-  const [rolle, setRolle] = useState<PartnerRolle>(defaultRolle ?? 'sachverstaendiger')
-  useEffect(() => {
-    if (open && defaultRolle) setRolle(defaultRolle)
-  }, [open, defaultRolle])
-  const [region, setRegion] = useState('')
-  const [limit, setLimit] = useState(20)
-  const [suchend, setSuchend] = useState(false)
-  const [kandidaten, setKandidaten] = useState<ScrapeKandidat[] | null>(null)
-  const [dublettenCount, setDublettenCount] = useState(0)
-  const [gefunden, setGefunden] = useState(0)
-  const [importing, setImporting] = useState(false)
-
-  function reset() {
-    setKandidaten(null)
-    setDublettenCount(0)
-    setGefunden(0)
-    setSuchend(false)
-    setImporting(false)
-  }
-
-  function handleClose() {
-    reset()
-    setRegion('')
-    onClose()
-  }
-
-  async function handleSuchen() {
-    if (region.trim().length < 2) {
-      toast.error('Bitte eine Region angeben (Stadt oder PLZ).')
-      return
-    }
-    setSuchend(true)
-    setKandidaten(null)
-    try {
-      const res = await scrapePartnerLeadsVorschau(rolle, region.trim(), limit)
-      if (!res.ok) {
-        toast.error(res.error)
-        return
-      }
-      setKandidaten(res.neu)
-      setDublettenCount(res.dublettenCount)
-      setGefunden(res.gefunden)
-      if (res.neu.length === 0) {
-        toast.info(
-          res.gefunden > 0
-            ? `${res.gefunden} gefunden — alle bereits im CRM (Dubletten).`
-            : 'Keine Treffer für diese Suche.',
-        )
-      }
-    } catch {
-      toast.error('Suche fehlgeschlagen — bitte erneut versuchen.')
-    } finally {
-      setSuchend(false)
-    }
-  }
-
-  function updateKandidat(index: number, patch: Partial<ScrapeKandidat>) {
-    setKandidaten((prev) => (prev ? prev.map((k, i) => (i === index ? { ...k, ...patch } : k)) : prev))
-  }
-
-  function entferneKandidat(index: number) {
-    setKandidaten((prev) => (prev ? prev.filter((_, i) => i !== index) : prev))
-  }
-
-  async function handleUebernehmen() {
-    if (!kandidaten || kandidaten.length === 0) return
-    setImporting(true)
-    try {
-      const res = await importScrapedLeads(rolle, kandidaten)
-      if (!res.ok) {
-        toast.error(res.error)
-        return
-      }
-      const nachricht =
-        res.uebersprungen > 0
-          ? `${res.angelegt} Lead${res.angelegt === 1 ? '' : 's'} angelegt (${res.uebersprungen} Dublette${res.uebersprungen === 1 ? '' : 'n'} übersprungen).`
-          : `${res.angelegt} Lead${res.angelegt === 1 ? '' : 's'} angelegt.`
-      toast.success(nachricht)
-      reset()
-      setRegion('')
-      onImported()
-    } catch {
-      toast.error('Übernahme fehlgeschlagen — bitte erneut versuchen.')
-    } finally {
-      setImporting(false)
-    }
-  }
-
-  const inputKlasse =
-    'w-full rounded-ios-sm border border-transparent bg-transparent px-1.5 py-1 hover:border-claimondo-border focus:border-claimondo-ondo focus:bg-white focus:outline-none'
-
   return (
-    <Modal open={open} onClose={handleClose} maxWidth={720} ariaLabel="Leads scrapen">
-      <h2 className="text-claimondo-navy font-semibold text-lg mb-1">Leads scrapen</h2>
-      <p className="text-sm text-claimondo-ondo mb-4">
-        Neue Prospects über Google Places finden. Treffer werden gegen den Bestand auf Dubletten
-        geprüft — du kannst sie vor dem Anlegen prüfen und bearbeiten.
-      </p>
-
-      <div className="space-y-3">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <SelectField
-            label="Rolle"
-            value={rolle}
-            onChange={(e) => setRolle(e.target.value as PartnerRolle)}
-            options={ROLLE_KEYS.map((r) => ({ value: r, label: PARTNER_ROLLE_LABELS[r] }))}
-          />
-          <TextField
-            label="Region (Stadt/PLZ)"
-            value={region}
-            onChange={(e) => setRegion(e.target.value)}
-            placeholder="z.B. Hamburg"
-          />
-          <SelectField
-            label="Anzahl"
-            value={String(limit)}
-            onChange={(e) => setLimit(Number(e.target.value))}
-            options={SCRAPE_ANZAHL_OPTIONEN}
-          />
-        </div>
-
-        <Button
-          variant="navy"
-          onClick={handleSuchen}
-          loading={suchend}
-          disabled={suchend || region.trim().length < 2}
-          iconLeft={<Search className="w-4 h-4" />}
-        >
-          Suchen
-        </Button>
-
-        {kandidaten && kandidaten.length > 0 && (
-          <div className="rounded-ios-md border border-claimondo-border bg-claimondo-bg/50 p-3">
-            <div className="mb-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-              <span className="font-medium text-claimondo-navy">{gefunden} gefunden</span>
-              <span className="text-success-strong">
-                {kandidaten.length} neu{kandidaten.length === 1 ? '' : 'e'}
-              </span>
-              {dublettenCount > 0 && (
-                <span className="text-warning-strong">
-                  {dublettenCount} Dublette{dublettenCount === 1 ? '' : 'n'} gefiltert
-                </span>
-              )}
-            </div>
-            <div className="overflow-x-auto">
-              <Table className="text-xs">
-                <Thead className="bg-transparent! normal-case! tracking-normal! text-claimondo-ondo!">
-                  <Tr className="border-b border-claimondo-border">
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">Firma</Th>
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">Telefon</Th>
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">PLZ</Th>
-                    <Th className="px-0! py-1.5! pr-3! font-semibold">Ort</Th>
-                    <Th className="px-0! py-1.5! font-semibold"><span className="sr-only">Entfernen</span></Th>
-                  </Tr>
-                </Thead>
-                <Tbody className="divide-y-0!">
-                  {kandidaten.map((k, i) => (
-                    <Tr key={k.google_place_id || i} className="border-b border-claimondo-border/40">
-                      <Td className="px-0! py-1! pr-3!">
-                        <input
-                          value={k.firma}
-                          onChange={(e) => updateKandidat(i, { firma: e.target.value })}
-                          className={`${inputKlasse} min-w-[9rem] text-claimondo-navy`}
-                        />
-                      </Td>
-                      <Td className="px-0! py-1! pr-3!">
-                        <input
-                          value={k.telefon ?? ''}
-                          onChange={(e) => updateKandidat(i, { telefon: e.target.value })}
-                          className={`${inputKlasse} min-w-[7rem] text-claimondo-ondo`}
-                        />
-                      </Td>
-                      <Td className="px-0! py-1! pr-3!">
-                        <input
-                          value={k.plz ?? ''}
-                          onChange={(e) => updateKandidat(i, { plz: e.target.value })}
-                          className={`${inputKlasse} w-16! text-claimondo-ondo`}
-                        />
-                      </Td>
-                      <Td className="px-0! py-1! pr-3!">
-                        <input
-                          value={k.ort ?? ''}
-                          onChange={(e) => updateKandidat(i, { ort: e.target.value })}
-                          className={`${inputKlasse} min-w-[6rem] text-claimondo-ondo`}
-                        />
-                      </Td>
-                      <Td className="px-0! py-1! text-right">
-                        <button
-                          type="button"
-                          onClick={() => entferneKandidat(i)}
-                          aria-label="Kandidat entfernen"
-                          className="rounded-ios-sm p-1 text-claimondo-shield hover:bg-danger-soft hover:text-danger-strong"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </div>
-          </div>
-        )}
-
-        <div className="flex gap-3 pt-2">
-          <Button variant="ghost" fullWidth onClick={handleClose} type="button">
-            Abbrechen
-          </Button>
-          <Button
-            variant="navy"
-            fullWidth
-            onClick={handleUebernehmen}
-            loading={importing}
-            disabled={importing || !kandidaten || kandidaten.length === 0}
-          >
-            {kandidaten && kandidaten.length > 0 ? `${kandidaten.length} übernehmen` : 'Übernehmen'}
-          </Button>
-        </div>
-      </div>
+    <Modal open={open} onClose={onClose} maxWidth={720} ariaLabel="Leads scrapen">
+      <ScrapePanel
+        onClose={onClose}
+        onImported={onImported}
+        defaultRolle={defaultRolle}
+      />
     </Modal>
   )
 }
