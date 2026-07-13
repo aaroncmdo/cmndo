@@ -16,6 +16,7 @@
 import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { istClaimStorniert, deriveCompletionTs, istReleaseBerechtigt } from '@/lib/provisionen/completion-release-gate'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,6 +24,14 @@ type PendingRow = {
   id: string
   claim_id: string | null
   hold_until: string
+}
+
+type CompletionEntry = {
+  operativeStatus: string | null
+  claimStatus: string | null
+  serviceTyp: string | null
+  abgeschlossenAm: string | null
+  terminDurchgefuehrtAm: string | null
 }
 
 export async function GET(request: Request) {
@@ -52,31 +61,54 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, storniert: 0, released: 0, checked: 0, timestamp: now })
   }
 
-  // 2) Zugehoerige Claims laden (operative_status fuer Storno-Erkennung).
+  // 2) FG4-A: Claims + Completion-Signale laden (Completion+7d-Gate statt blindem hold_until, einheitlich
+  // mit release-makler-provisionen). Voll-Claim = abgeschlossen_am; nur_gutachter = durchgeführter Termin.
   const claimIds = Array.from(
     new Set(pending.map((p) => p.claim_id).filter((x): x is string => !!x)),
   )
 
-  const cancelledClaimIds = new Set<string>()
+  const completionMap = new Map<string, CompletionEntry>()
   if (claimIds.length > 0) {
     const { data: claims, error: claimsErr } = await db
       .from('claims')
-      .select('id, operative_status')
+      .select('id, operative_status, status, service_typ, abgeschlossen_am')
       .in('id', claimIds)
     if (claimsErr) {
       return NextResponse.json({ error: claimsErr.message }, { status: 500 })
     }
     for (const c of claims ?? []) {
-      const st = (c.operative_status as string | null) ?? null
-      if (st === 'storniert' || st === 'abgelehnt') {
-        cancelledClaimIds.add(c.id as string)
+      completionMap.set(c.id as string, {
+        operativeStatus: (c.operative_status as string | null) ?? null,
+        claimStatus: (c.status as string | null) ?? null,
+        serviceTyp: (c.service_typ as string | null) ?? null,
+        abgeschlossenAm: (c.abgeschlossen_am as string | null) ?? null,
+        terminDurchgefuehrtAm: null,
+      })
+    }
+    const nurGutachterIds = Array.from(completionMap.entries())
+      .filter(([, e]) => e.serviceTyp === 'nur_gutachter')
+      .map(([id]) => id)
+    if (nurGutachterIds.length > 0) {
+      const { data: termine } = await db
+        .from('gutachter_termine')
+        .select('claim_id, durchgefuehrt_am')
+        .in('claim_id', nurGutachterIds)
+        .not('durchgefuehrt_am', 'is', null)
+        .order('durchgefuehrt_am', { ascending: false })
+      for (const t of termine ?? []) {
+        const cid = t.claim_id as string | null
+        if (!cid) continue
+        const e = completionMap.get(cid)
+        if (e && !e.terminDurchgefuehrtAm) e.terminDurchgefuehrtAm = (t.durchgefuehrt_am as string | null) ?? null
       }
     }
   }
+  const completionOf = (p: PendingRow): CompletionEntry | null =>
+    p.claim_id ? completionMap.get(p.claim_id) ?? null : null
 
-  // 3) Storno-Pass: pending deren Claim storniert/abgelehnt ist → flip.
+  // 3) Storno-Pass: Claim storniert/abgelehnt → flip (einheitlich via istClaimStorniert).
   const stornoIds = pending
-    .filter((p) => p.claim_id && cancelledClaimIds.has(p.claim_id))
+    .filter((p) => istClaimStorniert(completionOf(p)?.operativeStatus ?? null))
     .map((p) => p.id)
 
   let storniert = 0
@@ -96,14 +128,25 @@ export async function GET(request: Request) {
     storniert = stornoIds.length
   }
 
-  // 4) Release-Pass: verbleibende pending, hold_until <= now, Claim nicht storniert.
+  // 4) Release-Pass: FG4-A — nur freigeben wenn der Claim ABGESCHLOSSEN ist (Completion-Signal) UND
+  // 7 Tage seit Completion vergangen sind. Kein blinder hold_until mehr; Storno/nicht-abgeschlossen/
+  // unbekannt → HOLD. Einheitlich mit release-makler-provisionen (Aaron 13.07.).
   const stornoSet = new Set(stornoIds)
   const releaseIds = pending
     .filter((p) => {
       if (stornoSet.has(p.id)) return false
-      if (p.hold_until > now) return false
-      if (p.claim_id && cancelledClaimIds.has(p.claim_id)) return false
-      return true
+      const c = completionOf(p)
+      if (!c || istClaimStorniert(c.operativeStatus)) return false
+      return istReleaseBerechtigt(
+        deriveCompletionTs({
+          serviceTyp: c.serviceTyp,
+          operativeStatus: c.operativeStatus,
+          claimStatus: c.claimStatus,
+          abgeschlossenAm: c.abgeschlossenAm,
+          terminDurchgefuehrtAm: c.terminDurchgefuehrtAm,
+        }),
+        now,
+      )
     })
     .map((p) => p.id)
 
