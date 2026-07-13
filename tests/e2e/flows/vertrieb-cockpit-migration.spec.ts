@@ -223,3 +223,30 @@ test('8) Werkstatt-anlegen oeffnet als Drawer im Cockpit', async ({ page }) => {
 
   await page.screenshot({ path: 'test-results/vertrieb-cockpit-8-werkstatt-anlegen.png', fullPage: true }).catch(() => {})
 })
+
+// ---------------------------------------------------------------------------
+// 9 — Makler-anlegen oeffnet als Drawer im Cockpit (kein Full-Page-Weg).
+// ---------------------------------------------------------------------------
+test('9) Makler-anlegen oeffnet als Drawer im Cockpit', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+
+  // Warten bis Cockpit bereit ist
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Makler-Pill aktivieren damit die Makler-anlegen-Aktion erscheint
+  await page.getByRole('button', { name: 'Makler' }).first().click()
+
+  // Makler-anlegen-Aktion im Cockpit ausloesen
+  await page.getByRole('button', { name: 'Makler anlegen' }).first().click()
+
+  // Drawer muss sich IM Cockpit oeffnen — getByRole heading "Makler anlegen"
+  // (nicht der gleichlautende Aktions-Button; getByRole = heading-Rolle, nicht button).
+  await expect(page.getByRole('heading', { name: 'Makler anlegen' })).toBeVisible({ timeout: 60_000 })
+
+  // URL darf NICHT auf /admin/vertrieb/makler navigiert haben
+  expect(page.url()).toContain('/admin/vertrieb')
+
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-9-makler-anlegen.png', fullPage: true }).catch(() => {})
+})
