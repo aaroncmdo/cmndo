@@ -35,6 +35,7 @@ import { ensureVehicleFromFin, createVehicleStub } from '@/lib/vehicles/ensure-v
 import { ensurePersonForData } from '@/lib/personen/ensure-person'
 import { ensureFirma } from '@/lib/firmen/ensure-firma'
 import { ensureVehicleFromKennzeichen } from '@/lib/vehicles/ensure-vehicle-from-kennzeichen'
+import { deriveVermittler } from '@/lib/leads/vermittler'
 import { recordVehicleDamage } from '@/lib/vehicles/vehicle-damage'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { resolveFallEntityFks } from '@/lib/lead-fall-mapping'
@@ -461,6 +462,44 @@ export async function convertLeadToClaim(
     maklerPromoCode = (pc?.code as string | null) ?? null
   }
   ;(claimsInsert as Record<string, unknown>).makler_id = maklerId
+
+  // #8 Vermittler-SSoT Phase 2: genau EIN Vermittler (INBOUND) pro Claim => genau EINE Provision.
+  // Praezedenz makler > werkstatt-inbound > firmen_flotte (identisch zum Phase-1-Backfill).
+  // Die drei Provisions-Trigger gaten transition-safe auf vermittler_typ: ist es NULL, fallen sie
+  // auf das Roh-Signal (makler_id/werkstatt_id) zurueck — sonst feuert nur der genannte Typ.
+  // NIE outbound (reparatur_werkstatt_id / sv_id) — dafuer gibt es keine Provision.
+  // Der Flotten-Lookup laeuft NUR, wenn weder makler noch werkstatt greifen und ein Fahrzeug am
+  // Claim haengt (kein ueberfluessiger Roundtrip); er spiegelt exakt den Join in
+  // create_firmen_flotte_provision (ff.firma_id -> aktives firmen_flotten_konten).
+  // Record-Cast wg. Type-Lag (Mig 20260713195613 prod-live, generierte Types laggen).
+  const inboundWerkstattId = (lead.werkstatt_id as string | null) ?? null
+  let flotteKontoId: string | null = null
+  if (!maklerId && !inboundWerkstattId && resolvedVehicleId) {
+    const { data: flottenRows } = await admin
+      .from('flotten_fahrzeuge')
+      .select('firma_id')
+      .eq('vehicle_id', resolvedVehicleId)
+    const firmaIds = ((flottenRows ?? []) as Array<{ firma_id: string | null }>)
+      .map((r) => r.firma_id)
+      .filter((id): id is string => Boolean(id))
+    if (firmaIds.length > 0) {
+      const { data: konto } = await admin
+        .from('firmen_flotten_konten')
+        .select('id')
+        .in('firma_id', firmaIds)
+        .eq('status', 'aktiv')
+        .limit(1)
+        .maybeSingle()
+      flotteKontoId = (konto?.id as string | null) ?? null
+    }
+  }
+  const { vermittlerTyp, vermittlerId } = deriveVermittler({
+    maklerId,
+    werkstattId: inboundWerkstattId,
+    flotteKontoId,
+  })
+  ;(claimsInsert as Record<string, unknown>).vermittler_typ = vermittlerTyp
+  ;(claimsInsert as Record<string, unknown>).vermittler_id = vermittlerId
 
   // Reparatur-Werkstatt: Dispatcher-Zuweisung am Lead -> Claim uebernehmen (Record-Cast wg. Type-Lag).
   // Der Lead wird via select('*') geladen (s.o.), die reparatur_werkstatt_*-Spalten kommen also mit.

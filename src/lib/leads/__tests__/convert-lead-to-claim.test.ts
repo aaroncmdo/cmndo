@@ -447,3 +447,132 @@ describe('convertLeadToClaim', () => {
     expect(operations.filter((o) => o.table === 'profiles').length).toBeGreaterThanOrEqual(1)
   })
 })
+
+// ─── #8 Vermittler-SSoT Phase 2 ──────────────────────────────────────────────
+// Genau EIN Vermittler (INBOUND) pro Claim => genau EINE Provision.
+// Praezedenz: makler > werkstatt-inbound > firmen_flotte. Der Flotten-Lookup laeuft NUR,
+// wenn weder makler noch werkstatt greifen UND ein Fahrzeug am Claim haengt (kein
+// ueberfluessiger Roundtrip — und damit auch kein Response-Queue-Shift in den Alt-Tests).
+
+describe('convertLeadToClaim — #8 Vermittler-SSoT', () => {
+  it('Makler-Vermittlung (promotion_code) -> vermittler_typ=makler', async () => {
+    primeResponses([
+      { data: { id: 'lead-mk', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', promotion_code_id: 'promo-1' } }, // 1 leads select
+      { data: [] },                                                    // 2 profiles select
+      { data: { makler_id: 'makler-1', code: 'MK1' } },               // 3 promotion_codes select
+      { data: { id: 'claim-mk', claim_nummer: 'CLM-MK' } },           // 4 claims insert
+      { data: { id: 'person-mk' } },                                   // 5 personen insert
+      { data: null },                                                  // 6 claim_parties insert
+      { data: null },                                                  // 7 faelle_claim_bridge upsert
+      { data: null },                                                  // 8 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-mk' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.makler_id).toBe('makler-1')
+    expect(payload.vermittler_typ).toBe('makler')
+    expect(payload.vermittler_id).toBe('makler-1')
+    // Makler greift -> kein Flotten-Lookup.
+    expect(operations.filter((o) => o.table === 'flotten_fahrzeuge')).toHaveLength(0)
+  })
+
+  it('Werkstatt-Vermittlung (QR/inbound) -> vermittler_typ=werkstatt', async () => {
+    primeResponses([
+      { data: { id: 'lead-wk', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', werkstatt_id: 'werkstatt-inbound-1' } }, // 1 leads select
+      { data: [] },                                                    // 2 profiles select
+      { data: { id: 'claim-wk', claim_nummer: 'CLM-WK' } },           // 3 claims insert
+      { data: { id: 'person-wk' } },                                   // 4 personen insert
+      { data: null },                                                  // 5 claim_parties insert
+      { data: null },                                                  // 6 faelle_claim_bridge upsert
+      { data: null },                                                  // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-wk' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.werkstatt_id).toBe('werkstatt-inbound-1')
+    expect(payload.vermittler_typ).toBe('werkstatt')
+    expect(payload.vermittler_id).toBe('werkstatt-inbound-1')
+    expect(operations.filter((o) => o.table === 'flotten_fahrzeuge')).toHaveLength(0)
+  })
+
+  it('MONEY-Guard: makler UND werkstatt am Lead -> nur EIN Vermittler (makler gewinnt)', async () => {
+    // Genau dieser Fall erzeugt heute (ungegatet) ZWEI Provisionen — der partial-unique-Index
+    // (partner_typ, claim_id) verhindert nur Doubletten DESSELBEN Typs. Der SSoT-Wert ist das,
+    // worauf die drei Trigger-Gates ihn auf EINE Provision reduzieren.
+    primeResponses([
+      { data: { id: 'lead-both', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', promotion_code_id: 'promo-2', werkstatt_id: 'werkstatt-inbound-2' } }, // 1 leads select
+      { data: [] },                                                    // 2 profiles select
+      { data: { makler_id: 'makler-2', code: 'MK2' } },               // 3 promotion_codes select
+      { data: { id: 'claim-both', claim_nummer: 'CLM-BOTH' } },       // 4 claims insert
+      { data: { id: 'person-both' } },                                 // 5 personen insert
+      { data: null },                                                  // 6 claim_parties insert
+      { data: null },                                                  // 7 faelle_claim_bridge upsert
+      { data: null },                                                  // 8 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-both' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    // Beide Roh-Signale bleiben am Claim (Historie/Consent), aber der Vermittler ist EINDEUTIG.
+    expect(payload.makler_id).toBe('makler-2')
+    expect(payload.werkstatt_id).toBe('werkstatt-inbound-2')
+    expect(payload.vermittler_typ).toBe('makler')
+    expect(payload.vermittler_id).toBe('makler-2')
+  })
+
+  it('Firmen-Flotte (Fahrzeug in aktiver Flotte) -> vermittler_typ=firmen_flotte', async () => {
+    // lead.vehicle_id gesetzt -> resolvedVehicleId ohne DB-Call. Kein makler/werkstatt
+    // -> Flotten-Lookup laeuft (spiegelt den Join in create_firmen_flotte_provision).
+    primeResponses([
+      { data: { id: 'lead-ff', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster', vehicle_id: 'veh-ff-1' } }, // 1 leads select
+      { data: [] },                                                    // 2 profiles select
+      { data: [{ firma_id: 'firma-1' }] },                            // 3 flotten_fahrzeuge select
+      { data: { id: 'konto-1' } },                                     // 4 firmen_flotten_konten select
+      { data: { id: 'claim-ff', claim_nummer: 'CLM-FF' } },           // 5 claims insert
+      { data: { id: 'person-ff' } },                                   // 6 personen insert
+      { data: null },                                                  // 7 claim_parties insert
+      { data: null },                                                  // 8 (ggf. claim_vehicle_involvements)
+      { data: null },                                                  // 9 faelle_claim_bridge upsert
+      { data: null },                                                  // 10 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-ff' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.vehicle_id).toBe('veh-ff-1')
+    expect(payload.vermittler_typ).toBe('firmen_flotte')
+    expect(payload.vermittler_id).toBe('konto-1')
+  })
+
+  it('kein Vermittler -> vermittler_typ=null (und KEIN Flotten-Lookup ohne Fahrzeug)', async () => {
+    primeResponses([
+      { data: { id: 'lead-nov', schadens_art: 'haftpflicht', gegner_bekannt: false, vorname: 'Max', nachname: 'Muster' } }, // 1 leads select
+      { data: [] },                                                    // 2 profiles select
+      { data: { id: 'claim-nov', claim_nummer: 'CLM-NOV' } },         // 3 claims insert
+      { data: { id: 'person-nov' } },                                  // 4 personen insert
+      { data: null },                                                  // 5 claim_parties insert
+      { data: null },                                                  // 6 faelle_claim_bridge upsert
+      { data: null },                                                  // 7 leads update
+    ])
+
+    const { convertLeadToClaim } = await import('../convert-lead-to-claim')
+    const r = await convertLeadToClaim({ leadId: 'lead-nov' })
+    expect(r.ok).toBe(true)
+
+    const payload = operations.find((o) => o.table === 'claims' && o.op === 'insert')!.payload as Record<string, unknown>
+    expect(payload.vermittler_typ).toBeNull()
+    expect(payload.vermittler_id).toBeNull()
+    // Ohne Fahrzeug kein Flotten-Roundtrip (und damit kein Queue-Shift in den Alt-Tests).
+    expect(operations.filter((o) => o.table === 'flotten_fahrzeuge')).toHaveLength(0)
+  })
+})
