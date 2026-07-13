@@ -54,6 +54,30 @@ export default async function VerifizierungPage() {
   const qualis = (sv.qualifikationen_neu as string[] | null) ?? []
   const conditionalSlots: Array<{ slotId: string; label: string; quali: string | null; nummer: string | null; nummerLabel: string | null; pflicht: boolean }> = []
 
+  // AAR-359 Tier-2-Kern: Berufshaftpflicht + Gewerbeanmeldung sind für JEDEN SV
+  // Pflicht (14-Tage-Frist ab Anzahlung) und werden vom Reminder-Cron aktiv
+  // angemahnt. Sie laufen über denselben QualiSlotUpload-Pfad wie die übrigen
+  // Slots — damit ist der frühere „wird in Kürze freigeschaltet"-Platzhalter
+  // abgelöst und der SV kann seine Tier-2-Dokumente tatsächlich hochladen.
+  conditionalSlots.push(
+    {
+      slotId: 'sv_berufshaftpflicht',
+      label: 'Berufshaftpflicht',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+    {
+      slotId: 'sv_gewerbeanmeldung',
+      label: 'Gewerbeanmeldung',
+      quali: null,
+      nummer: null,
+      nummerLabel: null,
+      pflicht: true,
+    },
+  )
+
   // AAR-647 / AAR-714: Pflicht-Dokumente für jeden SV, unabhängig von Quali.
   // Sicherungsabtretung ODER Honorarvereinbarung reicht (Client entscheidet),
   // Datenschutz + Widerruf sind immer Pflicht.
@@ -203,7 +227,7 @@ export default async function VerifizierungPage() {
             <p className="font-medium">
               Frist: {formatDatum(sv.verifizierung_frist_bis)} — noch {tageOffen} Tag{tageOffen === 1 ? '' : 'e'} offen
             </p>
-            <p className="text-xs mt-0.5 opacity-90">Der Upload-Bereich wird in Kürze freigeschaltet.</p>
+            <p className="text-xs mt-0.5 opacity-90">Laden Sie Ihre Unterlagen weiter unten im Dokumente-Abschnitt hoch.</p>
           </div>
         )}
         {sv.verifizierung_status === 'frist_ueberschritten' && (
@@ -227,7 +251,7 @@ export default async function VerifizierungPage() {
           <div>
             <h2 className="text-base font-semibold text-[var(--brand-primary)]">Pflicht-Dokumente &amp; Qualifikations-Nachweise</h2>
             <p className="text-xs text-claimondo-ondo">
-              Abtretungen sind im Onboarding verpflichtend. Qualifikations-Nachweise erscheinen in der Kundenkommunikation erst nach Admin-Freigabe.
+              Berufshaftpflicht und Gewerbeanmeldung sind Ihre Tier-2-Pflichtnachweise, Abtretungen sind im Onboarding verpflichtend. Qualifikations-Nachweise erscheinen in der Kundenkommunikation erst nach Admin-Freigabe.
             </p>
           </div>
 
