@@ -47,6 +47,13 @@ export const AI_MODELS = {
    */
   ocr: 'claude-sonnet-4-6',
   /**
+   * Dokument-OCR (Aaron 13.07.): fall_dokumente (Fahrzeugschein/ID/Führerschein/
+   * Versicherung/Polizei — api/ocr-trigger, ersetzt Google Vision) + Gutachten-
+   * Wert-Extraktion (gutachten-ocr). Opus 4.8 — maximale Extraktions-Genauigkeit
+   * bei schwierigen Scans/PDFs; structured outputs erzwingen valides JSON.
+   */
+  doc_ocr: 'claude-opus-4-8',
+  /**
    * KFZ-??: Unfallskizze-SVG-Generator. Komplexe strukturierte Output-Generation
    * (SVG) — Sonnet 4.6 nötig.
    */
