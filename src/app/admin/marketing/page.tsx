@@ -5,7 +5,7 @@ import PageHeader from '@/components/shared/PageHeader'
 export default function MarketingPage() {
   return (
     <div className="space-y-6 py-6">
-      <PageHeader title="Marketing" description="Automatisierte Kanäle &amp; Freigaben" size="lg" />
+      <PageHeader title="Marketing" description="Automatisierte Kanäle & Freigaben" size="lg" />
       <Link href="/admin/marketing/linkedin" className="block">
         <SectionCard className="hover:bg-claimondo-bg/60 transition-colors">
           <h2 className="text-heading-sm font-semibold text-claimondo-navy">LinkedIn Auto-Posting</h2>

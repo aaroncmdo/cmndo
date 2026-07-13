@@ -89,7 +89,7 @@ export default function AnspruchSaetzeClient({ klassen, config }: { klassen: Kla
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
       <PageHeader
-        title="Anspruchsprüfer – Sätze &amp; Parameter"
+        title="Anspruchsprüfer – Sätze & Parameter"
         description="Änderungen greifen sofort für neue Ersteinschätzungen im Anspruchsprüfer. Bereits gespeicherte Schätzungen bleiben unverändert (Momentaufnahme)."
         size="lg"
       />
