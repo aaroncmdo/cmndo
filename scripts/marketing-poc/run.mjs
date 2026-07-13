@@ -31,8 +31,10 @@ for (const seg of script.segmente) {
   const start = segWords[0]?.start ?? 0
   const end = segWords.at(-1)?.end ?? start + 2
   let brollPath = null
-  if (seg.visual?.typ === 'stock') {
-    const p = await fetchBroll(seg.visual.queries || [])
+  // PoC-Resolver: 'stock' UND 'marke' holen Stock (Marken-Bibliothek kommt in Teil B;
+  // bis dahin faellt 'marke' auf Stock zurueck -> spiegelt die Resolver-Kette Marke->Stock->Grafik).
+  if ((seg.visual?.typ === 'stock' || seg.visual?.typ === 'marke') && seg.visual?.queries?.length) {
+    const p = await fetchBroll(seg.visual.queries)
     if (p) {
       const dest = `./.work/${basename(p)}`
       await copyFile(p, dest)

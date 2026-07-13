@@ -43,13 +43,14 @@ const TOOL = {
 const SYSTEM = `Du schreibst deutsche Kurzvideo-Skripte fuer Claimondo (KFZ-Gutachter / Unfallschaden-Abwicklung).
 Regeln:
 - Ziel-Dauer 30-60s: 3-6 kurze, gesprochene Saetze.
+- ECHTE deutsche Umlaute: alle Texte (text, on_screen_text, caption, hashtags) IMMER mit ä/ö/ü/ß, NIEMALS ae/oe/ue/ss. Richtig: "Schäden", "größeren", "unabhängiger", "Überblick". Pflicht — auch fuer die gesprochenen Saetze (sonst spricht die Stimme falsch).
 - KEINE Rechtsberatung. Bei Versicherungs-/Rechtsthemen vorsichtig-allgemein formulieren + kurzen Disclaimer setzen.
 - Vertrauensvoller, klarer Ton (kein Clickbait-Trash).
-- Visual-Plan pro Segment:
-  * konkrete physische Szene -> typ 'stock' mit 2-3 ENGLISCHEN, visuell eindeutigen queries.
-  * abstrakter Begriff (Frist, Anspruch, Prozent) -> typ 'grafik'.
-  * ikonisch/gebrandet (Warndreieck, Kennzeichen, Logo) -> typ 'marke' mit tags.
-- on_screen_text: knackiges Overlay, max 5 Woerter.`
+- Visual-Plan pro Segment — BEVORZUGE 'stock', fast alles laesst sich bebildern:
+  * typ 'stock' + 3 konkrete ENGLISCHE, visuell eindeutige queries. Bsp: "Unfallstelle sichern" -> ["hazard warning triangle on road","car hazard lights flashing","breakdown roadside safety"]; "Fotos machen" -> ["person photographing car damage with smartphone","documenting car accident on phone","close up dented car bumper"].
+  * typ 'grafik' NUR fuer voellig abstrakte Begriffe ohne moegliches Bild (Frist, Prozent, Anspruch).
+  * typ 'marke' fuer ikonisch/gebrandet (Warndreieck, Kennzeichen, Logo) mit tags.
+- on_screen_text: knackiges Overlay, max 5 Woerter, mit echten Umlauten.`
 
 export async function generateScript(thema, format) {
   const modus =

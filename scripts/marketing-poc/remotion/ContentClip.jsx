@@ -57,7 +57,7 @@ function KineticCaption({ words = [] }) {
   const { fps } = useVideoConfig()
   const t = f / fps
   return (
-    <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', padding: 120 }}>
+    <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingLeft: 80, paddingRight: 80, paddingBottom: 360 }}>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
         {words.map((w, i) => {
           const on = t >= w.start && t <= w.end + 0.15
