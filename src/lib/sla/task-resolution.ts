@@ -6,6 +6,7 @@ export type TaskStatus = 'offen' | 'in-bearbeitung' | 'erledigt' | 'blockiert'
 
 export interface SlaBreachTaskCancel {
   status: TaskStatus            // always 'erledigt' (no 'cancelled'/'abgebrochen' member exists)
+  erledigt_am: string           // ISO timestamp — parity with the repo auto-resolve marker (resolve-tasks.ts)
   auto_resolved_am: string      // ISO timestamp
   auto_resolved_grund: string   // human-readable reason
 }
@@ -17,6 +18,7 @@ const DEFAULT_GRUND = 'SLA erfüllt — automatisch abgeschlossen'
 export function resolveSlaBreachTaskCancel(now: Date, grund?: string): SlaBreachTaskCancel {
   return {
     status: 'erledigt',
+    erledigt_am: now.toISOString(),
     auto_resolved_am: now.toISOString(),
     auto_resolved_grund: grund ?? DEFAULT_GRUND,
   }

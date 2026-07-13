@@ -33,6 +33,12 @@ describe('resolveSlaBreachTaskCancel', () => {
     })
   })
 
+  describe('erledigt_am', () => {
+    it('equals now.toISOString() — parity with the repo auto-resolve marker (resolve-tasks.ts)', () => {
+      expect(resolveSlaBreachTaskCancel(NOW).erledigt_am).toBe('2026-07-13T10:00:00.000Z')
+    })
+  })
+
   describe('auto_resolved_grund', () => {
     it('has a non-empty default string when no grund is passed', () => {
       const { auto_resolved_grund } = resolveSlaBreachTaskCancel(NOW)
