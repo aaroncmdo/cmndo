@@ -14,8 +14,12 @@ export type QualifizierungsErgebnis<T> = {
 /**
  * 3-Zustand-Qualifizierung, confidence-gated. Erwartet distanz-sortierte rows;
  * die stabile Sortierung erhaelt die Distanz-Reihenfolge innerhalb einer fit-Gruppe.
+ *
+ * Inc-3: verifiziert optionales Feld — Sekundaer-Sort innerhalb der fit-Gruppen
+ * im hart-Pfad. Bestands-Rows ohne verifiziert-Feld (undefined) werden wie
+ * unverifiziert behandelt (kein Reorder gegenueber Inc-1).
  */
-export function qualifiziereWerkstaetten<T extends { faehigkeiten: Gewerk[] | string[] | null }>(
+export function qualifiziereWerkstaetten<T extends { faehigkeiten: Gewerk[] | string[] | null; verifiziert?: boolean }>(
   rows: T[],
   bedarf: Reparaturbedarf,
 ): QualifizierungsErgebnis<T> {
@@ -26,7 +30,9 @@ export function qualifiziereWerkstaetten<T extends { faehigkeiten: Gewerk[] | st
   const sichtbar = annotated.filter((r) => r.fit !== 'passt_nicht')
   if (sichtbar.length >= MIN_TREFFER) {
     const rang = (f: Fit) => (f === 'passt' ? 0 : 1)
-    const sortiert = [...sichtbar].sort((a, b) => rang(a.fit) - rang(b.fit)) // stabil: Distanz bleibt je Gruppe
+    const vRang = (v?: boolean) => (v ? 0 : 1)
+    // Primaer: fit-Rang; Sekundaer: verifiziert-Rang; stabil => Distanz bleibt je (fit,verifiziert)-Gruppe
+    const sortiert = [...sichtbar].sort((a, b) => (rang(a.fit) - rang(b.fit)) || (vRang(a.verifiziert) - vRang(b.verifiziert)))
     return { werkstaetten: sortiert, keineSpezialisierte: false, hartGefiltert: true }
   }
   return { werkstaetten: annotated, keineSpezialisierte: true, hartGefiltert: false }
