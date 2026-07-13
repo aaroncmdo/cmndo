@@ -8,6 +8,7 @@
 // KB-Fallakte (Admin + Kundenbetreuer dürfen).
 
 import { createClient } from '@/lib/supabase/server'
+import { requireRole } from '@/lib/auth/guards'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import type { CardentityRunResult } from '@/lib/cardentity/run-full'
@@ -281,54 +282,104 @@ export async function uploadDatei(
   return { success: true }
 }
 
-export async function uploadPflichtdokument(
-  fallId: string,
-  pflichtdokumentId: string,
-  url: string,
-): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
-
-  const { error } = await supabase
-    .from('pflichtdokumente')
-    .update({
-      status: 'hochgeladen',
-      dokument_url: url,
-      hochgeladen_am: new Date().toISOString(),
-    })
-    .eq('id', pflichtdokumentId)
-
-  if (error) return { success: false, error: error.message }
-  revalidatePath(`/faelle/${fallId}`)
-  return { success: true }
-}
+// uploadPflichtdokument (fallId, pflichtdokumentId, url) ENTFERNT — Storage-RLS-Rest.
+// Einziger Caller war DokumenteTab.handleFileUpload, der jetzt den kanonischen
+// Server-Helper `uploadDokumentToOutbox` nutzt (Storage + fall_dokumente + OCR +
+// pflichtdokumente-Sync). Die Action war zudem zweifach kaputt:
+//   - sie schrieb eine vom CLIENT uebergebene URL ungeprueft in
+//     `pflichtdokumente.dokument_url` — alle anderen Writer legen dort den
+//     storage_path ab (upload-dokument.ts:76, zuordnung.ts:107);
+//   - als 'use server'-Export war sie ein offener POST-Endpunkt ohne Fall-Bezug:
+//     jeder eingeloggte User konnte dokument_url einer BELIEBIGEN
+//     pflichtdokumente-Row auf einen beliebigen String setzen (OWASP A01).
+// Die Kunde-/Onboarding-Variante (@/app/kunde/onboarding/actions) bleibt — sie
+// ist der Pfad, den PflichtdokumenteSection nutzt.
 
 // KFZ-113: Anschlussschreiben-Upload mit OCR-Extraktion (Sendedatum + Signatur)
+//
+// Storage-RLS-Rest: Die Action nimmt jetzt die DATEI (FormData) statt einer
+// fertigen URL. Der frühere Vertrag `(fallId, fileUrl, fileName)` war an drei
+// Stellen kaputt, sobald STORAGE_USE_SIGNED_URLS=true gilt:
+//   1. Der Browser-Caller signte die URL selbst — auf dem privaten Bucket
+//      liefert createSignedUrl im Browser `null`, der Upload brach still ab.
+//   2. Der storage_path wurde aus der URL zurückgeparst, mit einem Regex der
+//      NUR `/object/public/` matcht. Eine signierte URL heißt `/object/sign/`
+//      → kein Match → storage_path fiel auf den blanken Dateinamen zurück.
+//   3. Die URL kam vom Client und wurde ungeprüft in die DB geschrieben —
+//      eine signierte URL hat zudem eine TTL und wäre nach Ablauf tot.
+// Die Datei server-seitig entgegenzunehmen löst alle drei: der Pfad ist
+// bekannt statt geraten, und OCR liest die Bytes direkt statt die eigene
+// Datei per HTTP zurückzuholen.
 export async function uploadAnschlussschreiben(
   fallId: string,
-  fileUrl: string,
-  fileName: string,
+  formData: FormData,
 ): Promise<{ success: boolean; error?: string }> {
-  const supabase = await createClient()
-  const user = (await supabase.auth.getUser())?.data?.user ?? null
-  if (!user) return { success: false, error: 'Nicht angemeldet' }
+  // Auth-Gate: spiegelt die Oberfläche (src/app/faelle/layout.tsx:47) — eine
+  // Server-Action ist ein eigenständiger POST-Endpunkt, der Layout-Guard
+  // schützt sie NICHT.
+  const guard = await requireRole(['admin', 'kundenbetreuer', 'kanzlei', 'dispatch'])
+  if (!guard.success) return { success: false, error: guard.error }
+  const { supabase, user } = guard
+
+  const file = formData.get('file')
+  if (!(file instanceof File) || file.size === 0) {
+    return { success: false, error: 'Keine Datei übergeben' }
+  }
+  if (file.size > 10 * 1024 * 1024) {
+    return { success: false, error: 'Datei zu groß (max 10 MB)' }
+  }
+  if (file.type !== 'application/pdf') {
+    return { success: false, error: 'Nur PDF erlaubt' }
+  }
+
+  const fileName = file.name
+  const storagePath = `faelle/${fallId}/anschlussschreiben_${Date.now()}.pdf`
+
+  // Claim VOR dem Upload aufloesen. Vorher lief der Upload zuerst und
+  // upsertKanzleiFall brach danach mit 'no_claim_id' ab — die Datei blieb
+  // verwaist im Bucket liegen.
+  const claimIdForAs = await resolveClaimId(supabase, fallId)
+  if (!claimIdForAs) {
+    return { success: false, error: 'Kein Claim zum Fall gefunden' }
+  }
+
+  // Upload auf dem User-Client: die Storage-INSERT-Policy ist das Gate (der
+  // Service-Client wäre hier ein unnötiger RLS-Bypass — nur das *Signieren*
+  // braucht ihn, und das passiert erst auf der Leseseite).
+  const { error: upErr } = await supabase.storage
+    .from('fall-dokumente')
+    .upload(storagePath, file, { contentType: 'application/pdf', upsert: false })
+  if (upErr) return { success: false, error: `Upload fehlgeschlagen: ${upErr.message}` }
 
   // CMM-44 SP-I2 PR2: anschlussschreiben_url lebt auf kanzlei_faelle (1:1).
-  // claim_id laden, dann via upsertKanzleiFall schreiben.
-  const claimIdForAs = await resolveClaimId(supabase, fallId)
-  const asUrlRes = await upsertKanzleiFall(supabase, claimIdForAs, { anschlussschreiben_url: fileUrl })
+  // Inhalt ist der storage_path — dieselbe Konvention wie
+  // pflichtdokumente.dokument_url (upload-dokument.ts:76, zuordnung.ts:107).
+  // Signiert wird beim Lesen (getAnschlussschreibenUrl).
+  const asUrlRes = await upsertKanzleiFall(supabase, claimIdForAs, {
+    anschlussschreiben_url: storagePath,
+  })
   if (!asUrlRes.ok) {
     return { success: false, error: asUrlRes.error ?? 'Anschlussschreiben-URL konnte nicht gespeichert werden' }
   }
   // CMM-65: Recency-Bump auf claims (SSoT) statt faelle.updated_at.
   await touchClaimRecency(supabase, claimIdForAs)
 
-  // AAR-553: fall_dokumente statt dokumente. storage_path aus public-URL
-  const pathMatch = fileUrl.match(/\/storage\/v1\/object\/public\/(?:dokumente|fall-dokumente)\/(.+)$/)
-  const storagePath = pathMatch ? decodeURIComponent(pathMatch[1]) : fileName
-  await supabase.from('fall_dokumente').insert({
+  // AAR-553: fall_dokumente statt dokumente. storage_path ist jetzt exakt
+  // bekannt — kein Rückparsen aus einer URL mehr.
+  //
+  // claim_id explizit mitgeben: die BEFORE-INSERT-Trigger
+  // (sync_fall_dokumente_claim_id / derive_claim_id_from_fall) leiten ihn zwar
+  // aus fall_id ab, aber die generierten Supabase-Typen kennen keine Trigger
+  // und fordern die NOT-NULL-Spalte. Wir haben die claim_id ohnehin — explizit
+  // ist ehrlicher als ein `as`-Cast. (Sichtbar wurde das erst, weil die Action
+  // jetzt den streng typisierten Guard-Client nutzt; createClient() aus
+  // supabase/server.ts ist ohne <Database>-Generic und pruefte Inserts nie.)
+  //
+  // Fehler wird jetzt GEPRUEFT — vorher war der Insert ein nacktes `await`.
+  // Ohne diese Zeile findet getAnschlussschreibenUrl spaeter kein Dokument.
+  const { error: dokErr } = await supabase.from('fall_dokumente').insert({
     fall_id: fallId,
+    claim_id: claimIdForAs,
     dokument_typ: 'anschlussschreiben',
     storage_path: storagePath,
     original_filename: fileName,
@@ -338,28 +389,28 @@ export async function uploadAnschlussschreiben(
     hochgeladen_von_user_id: user.id,
     sichtbar_fuer: ['admin', 'kundenbetreuer', 'kanzlei'],
   })
+  if (dokErr) {
+    return { success: false, error: `Dokument-Eintrag fehlgeschlagen: ${dokErr.message}` }
+  }
 
-  // OCR (non-critical)
+  // OCR (non-critical) — Bytes direkt aus der Datei, kein HTTP-Re-Fetch.
   try {
-    const pdfResponse = await fetch(fileUrl)
-    if (pdfResponse.ok) {
-      const buffer = Buffer.from(await pdfResponse.arrayBuffer())
-      const pdfModule = await import('pdf-parse')
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
-      const parsed = await pdfParse(buffer)
-      const text = parsed.text
+    const buffer = Buffer.from(await file.arrayBuffer())
+    const pdfModule = await import('pdf-parse')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pdfParse = ((pdfModule as any).default ?? pdfModule) as (buffer: Buffer) => Promise<{ text: string }>
+    const parsed = await pdfParse(buffer)
+    const text = parsed.text
 
-      const sendedatum = extractSendedatum(text)
-      const hatUnterschrift = checkUnterschrift(text)
+    const sendedatum = extractSendedatum(text)
+    const hatUnterschrift = checkUnterschrift(text)
 
-      // CMM-44 SP-I2 PR2: AS-OCR-Felder auf kanzlei_faelle (1:1).
-      await upsertKanzleiFall(supabase, claimIdForAs, {
-        anschlussschreiben_sendedatum: sendedatum,
-        anschlussschreiben_unterschrift: hatUnterschrift,
-        anschlussschreiben_ocr_am: new Date().toISOString(),
-      })
-    }
+    // CMM-44 SP-I2 PR2: AS-OCR-Felder auf kanzlei_faelle (1:1).
+    await upsertKanzleiFall(supabase, claimIdForAs, {
+      anschlussschreiben_sendedatum: sendedatum,
+      anschlussschreiben_unterschrift: hatUnterschrift,
+      anschlussschreiben_ocr_am: new Date().toISOString(),
+    })
   } catch { /* OCR ist nicht kritisch */ }
 
   await supabase.from('timeline').insert({

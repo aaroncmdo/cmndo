@@ -4,6 +4,7 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import type { KanzleiSlaTyp } from './blocker-detection'
+import { resolveSlaBreachTaskCancel } from './task-resolution'
 
 export const KANZLEI_SLA_LABEL: Record<KanzleiSlaTyp, string> = {
   kanzlei_as_versand: 'Anschlussschreiben-Versand (2 WT)',
@@ -80,10 +81,11 @@ export async function completeKanzleiSla(
     .update({ completed_at: new Date().toISOString(), status: 'completed' })
     .eq('id', sla.id as string)
 
-  // Pending KB-Nachfass-Tasks canceln
+  // Pending KB-Nachfass-Tasks aufloesen. Der fruehre Wert abgebrochen ist KEIN
+  // gueltiger task_status-enum-Wert (Postgres lehnte das UPDATE ab -> Cancel lief nie).
   await db
     .from('tasks')
-    .update({ status: 'abgebrochen' })
+    .update(resolveSlaBreachTaskCancel(new Date(), 'Kanzlei-SLA erfüllt — Nachfass hinfällig'))
     .eq('fall_id', fallId)
     .in('typ', ['kanzlei-nachfassen', 'kunde-erinnern-fuer-kanzlei', 'sv-nachfassen-fuer-kanzlei'])
     .in('status', ['offen', 'in-bearbeitung', 'blockiert'])

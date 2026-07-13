@@ -87,6 +87,10 @@ export async function POST(request: Request) {
       uploaded_by_kunde: true,
       ocr_extracted_data: result.extracted as unknown as Record<string, unknown>,
       ocr_processed_at: new Date().toISOString(),
+      // OCR ist hier synchron abgeschlossen (Insert läuft nur nach
+      // result.success) → ocr_status='done' statt Default 'pending'. Der
+      // Review-State lebt separat im _review-JSONB (siehe lib/beleg-review).
+      ocr_status: 'done',
       sichtbar_fuer: ['admin', 'kundenbetreuer'],
     })
     if (insErr) {

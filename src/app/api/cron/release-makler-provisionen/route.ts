@@ -14,6 +14,7 @@ import { NextResponse } from 'next/server'
 import { assertCronAuth } from '@/lib/auth/cron-auth'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { emitEvent } from '@/lib/notifications/emit'
+import { istClaimStorniert, deriveCompletionTs, istReleaseBerechtigt } from '@/lib/provisionen/completion-release-gate'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,12 +26,6 @@ type PendingRow = {
   service_typ: 'komplett' | 'nur_gutachter'
   hold_until: string
   partner_id: string
-}
-
-type FallRow = {
-  id: string
-  claim_nummer: string | null
-  status: string
 }
 
 export async function GET(request: Request) {
@@ -59,33 +54,59 @@ export async function GET(request: Request) {
     return NextResponse.json({ ok: true, storniert: 0, released: 0, notifs_emitted: 0, checked: 0 })
   }
 
-  // Zugehörige Claims laden (operative_status = CMM-74-SSoT für den Storno-Check).
+  // FG4-A: Claims + Completion-Signale laden (Completion+7d-Gate statt blindem hold_until).
+  // Voll-Claim = operative_status='abgeschlossen'/status='reguliert_vollstaendig' → abgeschlossen_am;
+  // nur_gutachter = jüngster durchgeführter Gutachter-Termin (durchgefuehrt_am).
   const claimIds = Array.from(
     new Set(pending.map((p) => p.claim_id).filter((x): x is string => !!x)),
   )
-  const fallMap = new Map<string, FallRow>()
+  type CompletionEntry = {
+    claimNummer: string | null
+    operativeStatus: string | null
+    claimStatus: string | null
+    serviceTyp: string | null
+    abgeschlossenAm: string | null
+    terminDurchgefuehrtAm: string | null
+  }
+  const completionMap = new Map<string, CompletionEntry>()
   if (claimIds.length > 0) {
     const { data: claims, error: claimsErr } = await db
       .from('claims')
-      .select('id, claim_nummer, operative_status')
+      .select('id, claim_nummer, operative_status, status, service_typ, abgeschlossen_am')
       .in('id', claimIds)
     if (claimsErr) {
       return NextResponse.json({ error: claimsErr.message }, { status: 500 })
     }
-    const claimMap = new Map<string, { claim_nummer: string | null; operative_status: string | null }>()
     for (const c of claims ?? []) {
-      claimMap.set(c.id as string, {
-        claim_nummer: (c.claim_nummer as string | null) ?? null,
-        operative_status: (c.operative_status as string | null) ?? null,
+      completionMap.set(c.id as string, {
+        claimNummer: (c.claim_nummer as string | null) ?? null,
+        operativeStatus: (c.operative_status as string | null) ?? null,
+        claimStatus: (c.status as string | null) ?? null,
+        serviceTyp: (c.service_typ as string | null) ?? null,
+        abgeschlossenAm: (c.abgeschlossen_am as string | null) ?? null,
+        terminDurchgefuehrtAm: null,
       })
     }
-    for (const p of pending) {
-      if (!p.fall_id || !p.claim_id) continue
-      const c = claimMap.get(p.claim_id)
-      if (!c) continue
-      fallMap.set(p.fall_id, { id: p.fall_id, status: c.operative_status ?? '', claim_nummer: c.claim_nummer })
+    const nurGutachterIds = Array.from(completionMap.entries())
+      .filter(([, e]) => e.serviceTyp === 'nur_gutachter')
+      .map(([id]) => id)
+    if (nurGutachterIds.length > 0) {
+      const { data: termine } = await db
+        .from('gutachter_termine')
+        .select('claim_id, durchgefuehrt_am')
+        .in('claim_id', nurGutachterIds)
+        .not('durchgefuehrt_am', 'is', null)
+        .order('durchgefuehrt_am', { ascending: false })
+      for (const t of termine ?? []) {
+        const cid = t.claim_id as string | null
+        if (!cid) continue
+        const e = completionMap.get(cid)
+        if (e && !e.terminDurchgefuehrtAm) e.terminDurchgefuehrtAm = (t.durchgefuehrt_am as string | null) ?? null
+      }
     }
   }
+  const completionOf = (p: PendingRow): CompletionEntry | null =>
+    p.claim_id ? completionMap.get(p.claim_id) ?? null : null
 
   // Value-Loop: Makler pro Provision benachrichtigen (best-effort — bricht den Cron nie).
   // N5 handhabt Kanäle (in_app/web_push/email) + Opt-Outs + Audit. fan-out targetet payload.maklerId.
@@ -112,8 +133,8 @@ export async function GET(request: Request) {
 
   let notifs_emitted = 0
 
-  // 1) Storno-Pass: pending deren Fall 'storniert' ist → flip + Makler benachrichtigen.
-  const stornoRows = pending.filter((p) => p.fall_id && fallMap.get(p.fall_id)?.status === 'storniert')
+  // 1) Storno-Pass: Claim storniert/abgelehnt → flip + Makler benachrichtigen (einheitlich via istClaimStorniert).
+  const stornoRows = pending.filter((p) => istClaimStorniert(completionOf(p)?.operativeStatus ?? null))
   const stornoIds = stornoRows.map((p) => p.id)
   let storniert = 0
   if (stornoIds.length > 0) {
@@ -131,13 +152,24 @@ export async function GET(request: Request) {
     }
   }
 
-  // 2) Release-Pass: verbleibende pending, hold_until <= now, Fall nicht storniert → freigeben.
+  // 2) Release-Pass: FG4-A — nur freigeben wenn der Claim ABGESCHLOSSEN ist (Completion-Signal) UND
+  // 7 Tage seit Completion vergangen sind. Kein blinder hold_until mehr (der gab Provisionen vor der
+  // Fall-Completion frei — Prod-Bug). Storno/nicht-abgeschlossen/unbekannt → HOLD.
   const stornoSet = new Set(stornoIds)
   const toRelease = pending.filter((p) => {
     if (stornoSet.has(p.id)) return false
-    if (p.hold_until > now) return false
-    const fallStatus = p.fall_id ? fallMap.get(p.fall_id)?.status : null
-    return fallStatus !== 'storniert'
+    const c = completionOf(p)
+    if (!c || istClaimStorniert(c.operativeStatus)) return false
+    return istReleaseBerechtigt(
+      deriveCompletionTs({
+        serviceTyp: c.serviceTyp,
+        operativeStatus: c.operativeStatus,
+        claimStatus: c.claimStatus,
+        abgeschlossenAm: c.abgeschlossenAm,
+        terminDurchgefuehrtAm: c.terminDurchgefuehrtAm,
+      }),
+      now,
+    )
   })
 
   let released = 0

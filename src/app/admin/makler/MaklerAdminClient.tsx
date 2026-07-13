@@ -3,23 +3,23 @@
 // Makler-Vermittlung: Admin-Anlage-UI. Spiegelt WerkstaettenClient (primitives Button/Modal +
 // DataTable + TextField + createdCredentials-Pattern), aber: plain Adress-Felder (kein Geo/Isochrone),
 // dual-rate, und handleCreate MIT try/catch (WerkstaettenClient hat hier einen Silent-Swallow-Bug).
+// Formular-Inhalt ist nach MaklerAnlegenForm ausgelagert — diese Datei haelt nur noch Liste + Modal-Shell.
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { UsersIcon, PlusIcon, KeyIcon, Layers3Icon, Trash2Icon, ReceiptIcon, MailIcon } from 'lucide-react'
-import { createMakler, resendMaklerWelcome } from './actions'
+import { UsersIcon, PlusIcon, Layers3Icon, Trash2Icon, ReceiptIcon, MailIcon } from 'lucide-react'
+import { resendMaklerWelcome } from './actions'
 import { getMaklerStaffel, setMaklerStaffel } from './staffel-actions'
 import { ladePartnerBilling } from '@/lib/finance/partner-billing-actions'
-import { GesellschaftSelect } from '@/components/makler/GesellschaftSelect'
-
-type GesellschaftOption = { id: string; name: string }
+import MaklerAnlegenForm from './MaklerAnlegenForm'
 import PageHeader from '@/components/shared/PageHeader'
 import { Button, Modal, CloseButton } from '@/components/primitives'
 import { DataTableContainer, Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
-import { TextField } from '@/components/shared/forms/TextField'
 import { PartnerBillingPanel } from '@/components/shared/finance/PartnerBillingPanel'
 import type { PartnerBillingRow, PartnerBillingAggregat } from '@/lib/finance/partner-billing'
+
+type GesellschaftOption = { id: string; name: string }
 
 type Makler = {
   id: string
@@ -65,10 +65,6 @@ export default function MaklerAdminClient({
 }) {
   const router = useRouter()
   const [showDialog, setShowDialog] = useState(false)
-  const [loading, setLoading] = useState(false)
-  const [createdCredentials, setCreatedCredentials] = useState<{ email: string; password: string } | null>(null)
-  const [versicherungId, setVersicherungId] = useState<string | null>(null)
-  const [maklerpoolId, setMaklerpoolId] = useState<string | null>(null)
 
   // Staffelung pro Makler (Meilenstein-Boni) — gespiegelt von WerkstaettenClient
   const [staffelFor, setStaffelFor] = useState<Makler | null>(null)
@@ -158,32 +154,7 @@ export default function MaklerAdminClient({
   }
 
   function openDialog() {
-    setCreatedCredentials(null)
-    setVersicherungId(null)
-    setMaklerpoolId(null)
     setShowDialog(true)
-  }
-
-  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setLoading(true)
-    const fd = new FormData(e.currentTarget)
-    if (versicherungId) fd.set('versicherung_id', versicherungId)
-    if (maklerpoolId) fd.set('maklerpool_id', maklerpoolId)
-    try {
-      const result = await createMakler(fd)
-      if (!result.ok) {
-        toast.error(result.error)
-        return
-      }
-      setCreatedCredentials({ email: result.email, password: result.password })
-      toast.success(`Makler angelegt: ${result.email}`)
-      router.refresh()
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Anlage fehlgeschlagen')
-    } finally {
-      setLoading(false)
-    }
   }
 
   return (
@@ -296,72 +267,12 @@ export default function MaklerAdminClient({
         </DataTableContainer>
 
         <Modal open={showDialog} onClose={() => setShowDialog(false)} maxWidth={520} ariaLabel="Neuer Makler">
-          {createdCredentials ? (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <KeyIcon className="w-5 h-5 text-success-strong" />
-                <h2 className="text-claimondo-navy font-semibold text-lg">Makler angelegt</h2>
-              </div>
-              <p className="text-claimondo-ondo text-sm">
-                Zugangsdaten einmalig anzeigen — bitte sofort an den Makler weitergeben.
-              </p>
-              <div className="bg-claimondo-bg border border-claimondo-border rounded-ios-xl p-4 space-y-2">
-                <div>
-                  <p className="text-xs text-claimondo-ondo mb-0.5">E-Mail</p>
-                  <p className="text-claimondo-navy font-medium text-sm select-all">{createdCredentials.email}</p>
-                </div>
-                <div>
-                  <p className="text-xs text-claimondo-ondo mb-0.5">Passwort (einmalig)</p>
-                  <p className="text-claimondo-navy font-mono font-medium text-sm select-all">{createdCredentials.password}</p>
-                </div>
-              </div>
-              <p className="text-xs text-claimondo-ondo">
-                Das Passwort wird beim ersten Login zur Änderung aufgefordert. Ein Promo-Code (MK-…) wurde automatisch angelegt.
-              </p>
-              <Button variant="navy" fullWidth onClick={() => { setCreatedCredentials(null); setShowDialog(false) }}>
-                Schließen
-              </Button>
-            </div>
-          ) : (
-            <>
-              <h2 className="text-claimondo-navy font-semibold text-lg mb-4">Neuer Makler</h2>
-              <form onSubmit={handleCreate} className="space-y-3">
-                <TextField label="Firma" name="firma" required placeholder="z.B. Müller Versicherungsmakler GmbH" />
-                <TextField label="E-Mail (Login)" name="email" type="email" required placeholder="makler@beispiel.de" />
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField label="Ansprechpartner Vorname" name="ansprechpartner_vorname" required placeholder="Max" />
-                  <TextField label="Nachname" name="ansprechpartner_nachname" required placeholder="Müller" />
-                </div>
-                <TextField label="Telefon (optional)" name="telefon" type="tel" placeholder="+49 221 …" />
-                <TextField label="Straße (optional)" name="adresse_strasse" placeholder="Musterstraße 1" />
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField label="PLZ" name="adresse_plz" placeholder="50667" />
-                  <TextField label="Ort" name="adresse_ort" placeholder="Köln" />
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <TextField label="Provision komplett (€)" name="provision_betrag_komplett_netto" type="number" step="0.01" min="0" defaultValue={100} />
-                  <TextField label="Provision nur Gutachter (€)" name="provision_betrag_nur_gutachter_netto" type="number" step="0.01" min="0" defaultValue={50} />
-                </div>
-                <div>
-                  <p className="text-xs font-medium text-claimondo-ondo mb-1">Gesellschaft</p>
-                  <GesellschaftSelect
-                    versicherungen={versicherungen}
-                    maklerpools={maklerpools}
-                    versicherungId={versicherungId}
-                    maklerpoolId={maklerpoolId}
-                    onChange={({ versicherungId: v, maklerpoolId: p }) => {
-                      setVersicherungId(v)
-                      setMaklerpoolId(p)
-                    }}
-                  />
-                </div>
-                <div className="flex gap-3 pt-2">
-                  <Button variant="ghost" fullWidth onClick={() => setShowDialog(false)}>Abbrechen</Button>
-                  <Button variant="navy" fullWidth type="submit" loading={loading} disabled={loading}>Anlegen</Button>
-                </div>
-              </form>
-            </>
-          )}
+          <MaklerAnlegenForm
+            versicherungen={versicherungen}
+            maklerpools={maklerpools}
+            onClose={() => setShowDialog(false)}
+            onCreated={() => router.refresh()}
+          />
         </Modal>
 
         <Modal open={staffelFor !== null} onClose={() => setStaffelFor(null)} maxWidth={520} ariaLabel="Staffelung bearbeiten">

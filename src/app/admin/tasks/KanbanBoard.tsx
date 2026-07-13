@@ -13,6 +13,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { createTask, updateTaskStatus, deleteTask } from './actions'
 import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
 import { Modal } from '@/components/primitives/Modal'
+import { KiExecuteButton } from './KiExecuteButton'
 
 type Task = {
   id: string
@@ -31,6 +32,7 @@ type Task = {
   entity_id: string | null
   auto_resolved_am: string | null
   auto_resolved_grund: string | null
+  claim_id: string | null
 }
 
 type Fall = { id: string; claim_nummer: string | null }
@@ -162,6 +164,7 @@ export default function KanbanBoard({
   svMap,
   admins,
   reassignCandidates = [],
+  executorEnabled = false,
 }: {
   tasks: Task[]
   faelle: Fall[]
@@ -171,6 +174,7 @@ export default function KanbanBoard({
   svMap: Record<string, string>
   admins: Admin[]
   reassignCandidates?: ReassignCandidate[]
+  executorEnabled?: boolean
 }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -357,6 +361,7 @@ export default function KanbanBoard({
                                   adminMap={adminMap}
                                   onDelete={handleDelete}
                                   reassignCandidates={reassignCandidates}
+                                  executorEnabled={executorEnabled}
                                 />
                               </div>
                             )}
@@ -396,12 +401,14 @@ function TaskCard({
   adminMap,
   onDelete,
   reassignCandidates,
+  executorEnabled = false,
 }: {
   task: Task
   link: { href: string; label: string; kind: 'Fall' | 'Lead' | 'SV' }
   adminMap: Record<string, string>
   onDelete: (taskId: string) => void
   reassignCandidates: ReassignCandidate[]
+  executorEnabled?: boolean
 }) {
   const overdue = isOverdue(task.faellig_am) && task.status !== 'erledigt'
   const obsoleteHint = task.status === 'offen' && task.auto_resolved_am
@@ -546,6 +553,10 @@ function TaskCard({
           />
         </div>
       )}
+      <KiExecuteButton
+        task={{ id: task.id, typ: task.typ, claim_id: task.claim_id, status: task.status }}
+        executorEnabled={executorEnabled}
+      />
     </div>
   )
 }

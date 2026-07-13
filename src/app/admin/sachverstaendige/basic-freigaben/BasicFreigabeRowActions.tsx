@@ -6,7 +6,13 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { gibBasicSvFrei, lehneBasicSvAb } from '../[id]/verifizierung-actions'
 
-export default function BasicFreigabeRowActions({ svId }: { svId: string }) {
+export default function BasicFreigabeRowActions({
+  svId,
+  onDone,
+}: {
+  svId: string
+  onDone?: () => void
+}) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [showAblehnen, setShowAblehnen] = useState(false)
@@ -24,7 +30,7 @@ export default function BasicFreigabeRowActions({ svId }: { svId: string }) {
         return
       }
       toast.success('Profil freigeschaltet')
-      router.refresh()
+      onDone ? onDone() : router.refresh()
     })
   }
 
@@ -45,7 +51,7 @@ export default function BasicFreigabeRowActions({ svId }: { svId: string }) {
       toast.success('Profil abgelehnt')
       setShowAblehnen(false)
       setAblehnGrund('')
-      router.refresh()
+      onDone ? onDone() : router.refresh()
     })
   }
 

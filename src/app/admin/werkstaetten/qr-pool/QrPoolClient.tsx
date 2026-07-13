@@ -31,9 +31,11 @@ const STATUS_TONE: Record<string, StatusBadgeTone> = {
 export function QrPoolClient({
   codes,
   werkstaetten,
+  onDataChange,
 }: {
   codes: PoolCode[]
   werkstaetten: { id: string; name: string }[]
+  onDataChange?: () => void
 }) {
   const router = useRouter()
   const [anzahl, setAnzahl] = useState(50)
@@ -60,7 +62,7 @@ export function QrPoolClient({
       return
     }
     toast.success(`${result.tokens.length} QR-Codes erzeugt.`)
-    router.refresh()
+    if (onDataChange) onDataChange(); else router.refresh()
   }
 
   async function handleZuweisung(token: string) {
@@ -77,7 +79,7 @@ export function QrPoolClient({
     }
     const name = werkstaetten.find((w) => w.id === zielWerkstatt)?.name ?? 'die Werkstatt'
     toast.success(`${token} wurde ${name} zugewiesen.`)
-    router.refresh()
+    if (onDataChange) onDataChange(); else router.refresh()
   }
 
   return (

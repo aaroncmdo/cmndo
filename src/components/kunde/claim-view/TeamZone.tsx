@@ -52,7 +52,15 @@ function KontaktRow({ name, rolle, telefon, avatarUrl, verifiziert, beschreibung
 
 export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
   const { kb, sv } = vm.team
-  if (!kb && !sv) return null
+  const werkstatt = vm.werkstatt.data
+  if (!kb && !sv && !werkstatt) return null
+
+  // #4b: vermittelte Werkstatt-Adresse als Kontakt-Beschreibung (analog SV-Profilbeschreibung).
+  const werkstattAdresse = werkstatt
+    ? [werkstatt.adresse_strasse, [werkstatt.adresse_plz, werkstatt.adresse_ort].filter(Boolean).join(' ')]
+        .filter(Boolean)
+        .join(', ') || null
+    : null
 
   return (
     <Card p={4} className="space-y-3">
@@ -74,6 +82,16 @@ export function TeamZone({ vm }: { vm: KundeClaimViewModel }) {
           avatarUrl={sv.avatarUrl}
           verifiziert={sv.verifiziert}
           beschreibung={sv.profilbeschreibung}
+        />
+      )}
+      {/* #4b: vermittelte Werkstatt als Team-Kontakt (analog SV, Aaron 13.07.). */}
+      {werkstatt && (
+        <KontaktRow
+          name={werkstatt.name}
+          rolle="Deine Werkstatt"
+          telefon={werkstatt.telefon}
+          avatarUrl={null}
+          beschreibung={werkstattAdresse}
         />
       )}
     </Card>

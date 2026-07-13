@@ -32,7 +32,6 @@ export {
   triggerFinCallForFall,
   markDokumentNachgereicht,
   uploadDatei,
-  uploadPflichtdokument,
   uploadAnschlussschreiben,
 } from './dokumente'
 

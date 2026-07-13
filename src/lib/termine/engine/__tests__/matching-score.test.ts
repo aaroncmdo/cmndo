@@ -127,6 +127,7 @@ describe('findeBestePerson — Frühausstiege (Stub-DB, kein Netzwerk)', () => {
         eq: function () { return this },
         is: function () { return this },
         not: function () { return this },
+        or: function () { return this },
         then: (resolve: (v: { data: unknown[]; error: null }) => void) => resolve({ data: [], error: null }),
       }),
     }),

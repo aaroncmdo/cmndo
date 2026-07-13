@@ -18,6 +18,7 @@
 //   - Soft-Delete: `geloescht_am IS NOT NULL`.
 
 import type { SupabaseClient } from '@supabase/supabase-js'
+import { FRIST_UEBERSCHRITTEN } from './dispatch-gate'
 
 // ─── Filter-Klauseln (deklarativ) ────────────────────────────────────────
 
@@ -30,6 +31,8 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  *   - gesperrt_seit IS NULL (kein Admin-Block)
  *   - geloescht_am IS NULL (nicht gelöscht)
  *   - ist_testaccount = false (kein interner Test-/Demo-Account)
+ *   - verifizierung_status != 'frist_ueberschritten' (NULL-safe: NULL/ausstehend/geprueft
+ *     bekommen weiter Faelle) — FG3 decision A (Aaron 2026-07-11). TS-Mirror: svDarfFaelleEmpfangen.
  *
  * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
  * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
@@ -41,12 +44,6 @@ import type { SupabaseClient } from '@supabase/supabase-js'
  * per crude firmenname-ILIKE (isTestAccount) aus Karte + LP-Count gefiltert,
  * NICHT aus Dispatch/MCP -> ein aktiver Test-SV war auto-buchbar. Das DB-Flag
  * schließt die Lücke an EINER Stelle (statt drei ILIKE-Kopien).
- *
- * Gutachter-Onboarding-Audit (Befund #1): `verifiziert=true` ist neu. Vorher
- * gated die öffentliche Karte (anon-RLS) auf `verifiziert`, Dispatch/MCP aber
- * nur auf portal_zugang -> ein bezahlter-aber-unverifizierter SV war buchbar,
- * aber unsichtbar auf der Karte (und die Engine wies unvetteten SVs Fälle zu).
- * Jetzt gilt: "auf der Karte gelistet" == "durch die Engine buchbar".
  *
  * Wird in findBestSV + gutachter-matching + sv-zuweisung genutzt.
  */
@@ -62,6 +59,7 @@ export function applyDispatchableFilter(q: any): any {
     .eq('ist_testaccount', false)
     .is('gesperrt_seit', null)
     .is('geloescht_am', null)
+    .or(`verifizierung_status.is.null,verifizierung_status.neq.${FRIST_UEBERSCHRITTEN}`)
 }
 
 /**

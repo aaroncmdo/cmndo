@@ -45,7 +45,7 @@ export function GeldZone({ vm }: { vm: KundeClaimViewModel }) {
         <SchadensfotoUploadCard claimId={vm.claimId} fotos={werkstatt.schadensfotoUrls.map((url) => ({ url }))} />
       )}
       {/* Werkstatt-Finder — Kunde ohne vermittelte Werkstatt (kanonischer brauchtWerkstattVermittlung-Gate). */}
-      {werkstatt.brauchtVermittlung && <WerkstattFinderCard claimId={vm.claimId} />}
+      {werkstatt.brauchtVermittlung && flags.reparaturPhaseErreicht && <WerkstattFinderCard claimId={vm.claimId} />}
       {/* Werkstatt-Card — bei hinterlegter Werkstatt (+ Reparaturtermin-Status). */}
       {werkstatt.data && <WerkstattCard claimId={vm.claimId} werkstatt={werkstatt.data} termin={werkstatt.reparaturTermin} />}
       {/* KVA-Loop — Reparatur-Claim (Werkstatt) mit hochgeladenem Kostenvoranschlag. */}

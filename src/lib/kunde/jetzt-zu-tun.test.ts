@@ -190,9 +190,26 @@ describe('getKundenJetztZuTun — 11 States', () => {
     expect(a?.state).not.toBe('daten-an-kanzlei')
   })
 
-  it('Storno: gibt null zurück', () => {
-    const a = getKundenJetztZuTun(makeFall({ status: 'storniert' }))
+  // FG5 Cluster 1, Task 1c: storniert claims muessen 'fall-abgeschlossen' liefern
+  // (innerhalb 30d), nicht null. Der alte Pfad gab null (kein abgeschlossen_am gesetzt
+  // von endzustand-actions) — das war der FG5-Bug.
+  it('FG5-Bug-Repro: storniert ohne abgeschlossen_am → fall-abgeschlossen (nicht null)', () => {
+    const a = getKundenJetztZuTun(makeFall({ status: 'storniert', abgeschlossen_am: null }))
+    expect(a?.state).toBe('fall-abgeschlossen')
+    expect(a?.severity).toBe('success')
+  })
+
+  it('FG5: storniert nach 30d → null (minimalisiert)', () => {
+    const alt = new Date(Date.now() - 40 * 24 * 3600 * 1000).toISOString()
+    const a = getKundenJetztZuTun(makeFall({ status: 'storniert', abgeschlossen_am: alt }))
     expect(a).toBeNull()
+  })
+
+  it('FG5: storniert ohne abgeschlossen_am benutzt now als Startzeit (innerhalb 30d)', () => {
+    // Wenn abgeschlossen_am null ist, nutzt die Implementierung now als Fallback
+    // → alterTage ~0 → soll fall-abgeschlossen liefern.
+    const a = getKundenJetztZuTun(makeFall({ status: 'storniert', abgeschlossen_am: null }))
+    expect(a?.state).toBe('fall-abgeschlossen')
   })
 
   it('termin-vor-ort via sv_termin-Fenster (kein expliziter Flag)', () => {

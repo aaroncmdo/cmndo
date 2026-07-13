@@ -21,7 +21,7 @@ export default async function FlottePage() {
         <p className="mt-1 text-sm text-claimondo-shield">Ihre Firmenfahrzeuge — Grundlage für die Schadenkarten.</p>
       </div>
       {/* onSpeichereFirma bewusst weggelassen: firma ist admin-provisioniert, kein Setup-Formular. */}
-      <FlotteClient firma={firma} flotte={flotte} onFuegeHinzu={fuegeFahrzeugHinzu} onEntferne={entferneFahrzeug} />
+      <FlotteClient firma={firma} flotte={flotte} onFuegeHinzu={fuegeFahrzeugHinzu} onEntferne={entferneFahrzeug} detailBasePath="/flotte/fahrzeug" />
       <SchadenkarteBindenSection flotte={flotte} onBinde={bindeKarte} />
     </div>
   )

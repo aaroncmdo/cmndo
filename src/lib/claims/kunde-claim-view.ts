@@ -9,6 +9,7 @@ import type { ClaimLifecycle } from '@/lib/claims/lifecycle'
 import { getClaimDetail } from '@/lib/claims/detail/get-claim-detail'
 import { getSvKontakt, getKbKontakt, type SvKontakt, type KbKontakt } from '@/lib/kunde/get-kontakt'
 import { istWerkstattReparaturWeg } from '@/lib/werkstatt/abrechnungsweg'
+import { reparaturPhaseErreicht } from '@/lib/werkstatt/reparatur-phase-erreicht'
 import { brauchtWerkstattVermittlung } from '@/lib/werkstatt/vermittlung-core'
 import { getKundeTermine, type KundeTermin } from '@/lib/claims/kunde-termine'
 import { getKundeFaelle } from '@/lib/claims/get-kunde-faelle'
@@ -180,6 +181,8 @@ export type KundeClaimViewModel = {
     istNurGutachter: boolean
     // P4: „wuerde eine Kanzlei-Karte Inhalt haben?" -> GeldZone-Sichtbarkeit (preserve-all).
     kanzleiSichtbar: boolean
+    // Task 11: WerkstattFinderCard-Gate — Haftpflicht: erst nach fertigem Gutachten; Selbstzahler/Kasko: sofort.
+    reparaturPhaseErreicht: boolean
   }
 }
 
@@ -494,6 +497,12 @@ export async function getKundeClaimView(
       }
     : null
   const gutachtenFreigegeben = !!erstAuftrag?.gutachten_final_freigegeben
+  // Task 11: WerkstattFinderCard-Phasen-Gate — Haftpflicht erst nach abgeschlossenem Gutachten.
+  // Boolean-Signal (gutachtenFreigegeben) statt v_gutachten_werte.fertiggestellt_am (Spalte existiert dort nicht).
+  const reparaturPhaseOk = reparaturPhaseErreicht(
+    { abrechnungsweg },
+    { gutachtenAbgeschlossen: gutachtenFreigegeben, totalschaden: (gw?.totalschaden as boolean | null) ?? null },
+  )
 
   // Edge-Banner: Verlegungs-Vorschlag (alter Termin-Start + SV-Vorname nachladen, wie page.tsx).
   const verlegungRow = verlegungRes.data as {
@@ -611,6 +620,7 @@ export async function getKundeClaimView(
     flags: {
       abrechnungsweg,
       istReparaturRoute: istWerkstattReparaturWeg(abrechnungsweg),
+      reparaturPhaseErreicht: reparaturPhaseOk,
       // bankdatenOffen == „Bankdaten-Banner ist in dieser Phase aktiv & noch nicht hinterlegt"
       // (istBankdatenPhase = kanonische Payout-Status-Liste, geteilt mit BankdatenBanner) — haelt
       // Aufgabe + GeldZone-Sichtbarkeit exakt synchron zum Banner.

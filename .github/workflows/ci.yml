@@ -103,6 +103,14 @@ jobs:
       - name: Redirect-Stub-Ratchet
         run: npm run check:redirect-stubs -- --ratchet
 
+      # Flag-Drift-Bremse (Ratchet): blockt NEUE CHECK-invalide Status-Literale in
+      # Supabase-Writes/Filtern (z.B. .update({status:'geplant'}) auf gutachter_termine)
+      # ggue. scripts/flag-drift-baseline.json. Postgres verwirft solche Writes -> stiller
+      # Fehlschlag (kein Build/tsc faengt das; belegt 05.07. geplant/kunde_storniert).
+      # Siehe AGENTS.md Paragraph Flag-Drift-Gate.
+      - name: Flag-Drift-Ratchet
+        run: npm run check:flag-drift -- --ratchet
+
       # i18n-Drift-Bremse (Strategie B): erzwingt identische Key-Sets ueber alle
       # 6 Locales. Verhindert, dass untersetzte i18n-Keys live gehen — next-intl
       # rendert sonst den Key-Pfad statt eines Textes. Siehe scripts/i18n/check-complete.mjs.

@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { claimNummernForFaelle } from '@/lib/claims/claim-nummer-map'
+import { isExecutorEnabled } from '@/lib/task-executor/policy'
 import KanbanBoard from './KanbanBoard'
 
 // AAR-154: Zusätzlich zu fall_id laden wir jetzt Leads + SVs für Task-
@@ -14,7 +15,7 @@ export default async function TasksPage() {
       supabase
         .from('tasks')
         .select(
-          'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund',
+          'id, fall_id, lead_id, typ, task_typ, titel, beschreibung, status, faellig_am, erledigt_am, zugewiesen_an, created_at, entity_type, entity_id, auto_resolved_am, auto_resolved_grund, claim_id',
         )
         .order('created_at', { ascending: false }),
       // CMM-49: faelle-frei — fall_id->claim_nummer via Bridge+claims (shared helper).
@@ -71,6 +72,8 @@ export default async function TasksPage() {
     rolle: p.rolle as string,
   }))
 
+  const executorEnabled = isExecutorEnabled()
+
   return (
     <KanbanBoard
       tasks={tasks ?? []}
@@ -81,6 +84,7 @@ export default async function TasksPage() {
       svMap={svMap}
       admins={admins ?? []}
       reassignCandidates={reassignCandidates}
+      executorEnabled={executorEnabled}
     />
   )
 }

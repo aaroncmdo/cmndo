@@ -539,7 +539,11 @@ export async function uploadDatei(
   const segment = kategorie === 'gutachten' ? 'gutachten' : 'sv'
   const path = `claims/${claimId}/${segment}/${Date.now()}.${ext}`
 
-  const { error: uploadErr } = await supabase.storage
+  // RLS-Fix: fall-dokumente bucket + fall_dokumente table blockieren authenticated writes.
+  // Ownership bereits oben geprueft (sv_id-Gate) — admin-Client bypassed RLS sicher.
+  const admin = createAdminClient()
+
+  const { error: uploadErr } = await admin.storage
     .from('fall-dokumente')
     .upload(path, file)
 
@@ -558,7 +562,7 @@ export async function uploadDatei(
   const sichtbar_fuer = sichtbarMap[kategorie] ?? ['admin', 'kundenbetreuer', 'sachverstaendiger', 'kunde', 'kanzlei']
 
   // AAR-553: fall_dokumente statt dokumente
-  const { error: insertErr } = await supabase.from('fall_dokumente').insert({
+  const { error: insertErr } = await admin.from('fall_dokumente').insert({
     fall_id: fallId,
     dokument_typ: kategorie,
     storage_path: path,

@@ -52,6 +52,33 @@ git status                # Working-Tree clean?
 git stash list            # Leer oder alte persistente Stashes dokumentiert?
 git log --branches --not --remotes   # Alle lokalen Commits auf Remote gepusht?
 ```
+
+## Regel 4 — Nach jedem PR ein vollständiger Prod-Playwright-Smoke
+
+Eine Aufgabe ist erst **abgeschlossen**, wenn ihre betroffenen Nutzer-Flows auf **Prod** (`https://app.claimondo.de`) per Playwright end-to-end durchgespielt wurden. Build-, `tsc`- und CI-grün beweisen **Kompilierbarkeit, nicht Verhalten** — nur der Prod-Smoke beweist, dass das Feature für echte Nutzer live funktioniert. „Build grün" reicht **nicht** als Abschluss-Kriterium.
+
+**Geltungsbereich:** Änderungen mit nutzersichtbarem/verhaltensrelevantem Impact (UI, Route, Server-Action, DB-Write-Pfad, Cron). Reine Docs-/Scripts-/Config-Änderungen ohne Runtime-Flow-Impact sind ausgenommen (im PR kurz vermerken — dieser Regel-PR selbst ist so ein Fall).
+
+**Pflicht:** Sobald die Änderung auf Prod deployed ist, einen **vollständigen** Playwright-Smoke gegen Prod fahren, der **jeden** betroffenen Flow end-to-end abdeckt:
+
+```
+PLAYWRIGHT_BASE_URL=https://app.claimondo.de npx playwright test <specs>   # oder das webapp-testing-Skill
+```
+
+**Ablauf:**
+
+1. **Im PR/Marker:** Smoke-Plan benennen — welche Flows, welche Specs, welche Test-Konten.
+2. **Nach Prod-Deploy:** vollständigen Smoke fahren; Ergebnis (grün/rot + Assertions/Screenshots) im PR/Marker dokumentieren.
+3. **Rot →** Fix nachziehen (neuer PR); **nicht** als „erledigt" markieren, solange der Prod-Smoke rot ist.
+4. **Deploy nicht in dieser Session?** Die Smoke-Pflicht **explizit im Marker** an die Merge-/Deploy-Session übergeben (Flow-Liste + Test-Konten). Die Aufgabe bleibt **offen** bis zum grünen Prod-Smoke.
+
+**Sicherheit — kein Kollateralschaden auf Prod:**
+
+* Immer **Test-Konten** nutzen (`telefon = NULL`) → es gehen **keine** echten SMS/WhatsApp/Emails an reale Kunden raus.
+* Flows, die zwingend echte Kunden-Comms oder destruktive/irreversible Writes auslösen würden: über Test-Lead/Test-Konto fahren; wenn technisch unmöglich, per Read-Surface + Live-DB-Verifikation absichern und **im Marker begründen**, warum der UI-Trigger nicht lief.
+* **Niemals** Prod-Daten echter Kunden mutieren oder löschen.
+
+Begründung: Wiederholt war „build grün" ≠ „live nutzbar" (Feature nie erreichbar, Route 500, Silent-DB-CHECK-Reject, den kein Build/`tsc` fängt). Der Prod-Smoke ist die einzige Instanz, die echtes Nutzerverhalten prüft. Codifiziert den Broadcast-Mandat (11.07., Aaron) als harte Regel.
 <!-- END:claimondo-hard-rules -->
 
 <!-- BEGIN:nextjs-agent-rules -->
@@ -318,6 +345,16 @@ Audit/Befund: `docs/superpowers/specs/2026-05-29-knip-deadcode-audit.md`.
 
 CI fährt `npm run check:redirect-stubs -- --ratchet`. Blockt **NEUE** Stubs gegen `scripts/redirect-stub-baseline.json` (Baseline = grandfatherte Bestands-Stubs, per Boy-Scout auf 0 abgebaut mit `-- --update-baseline`). Lokal (ohne Flag) `--warn` (exit 0). Pure-Logik: `scripts/lib/redirect-stub-scan.mjs` (unit-getestet). Broadcast/Details: `BROADCAST-redirect-stub-antipattern` (Memory).
 <!-- END:redirect-stub-gate -->
+
+# Flag-Drift-Gate (Ratchet)
+
+CHECK-invalide Status-Literale in Supabase-Writes/Filtern sind verboten. Ein `.update({ status: 'geplant' })` auf `gutachter_termine` (wo `'geplant'` nicht im `gutachter_termine_status_check` steht) wird von Postgres **verworfen** → **stiller Fehlschlag**, den kein Build/tsc/anderer Ratchet fängt (belegt 05.07.: `geplant` in `slots.ts`, `kunde_storniert` in `kb-booking.ts` — beide Silent-Fail-Bugs). Ebenso Filter mit toten Werten (`.eq('status','durchgefuehrt')` matcht 0 Rows).
+
+CI fährt `npm run check:flag-drift -- --ratchet`. Es blockt **NEUE** Verletzer-Files gegen `scripts/flag-drift-baseline.json`. Der Scanner (`scripts/lib/flag-drift-scan.mjs`, unit-getestet) fängt `col: 'literal'` in `.update/.insert/.upsert({...})` + `.eq/.neq/.in('col', …)`, löst die Tabelle über das `.from('<table>')` der Kette auf und prüft gegen den DB-CHECK-Snapshot `scripts/lib/status-check-constraints.json`. Bewusst hoch-präzise (nur String-Literale, nur bekannte CHECK-Spalten) → 0 False-Positives. Lokal (ohne Flag) `--warn` (exit 0).
+
+**Constraint-Snapshot regenerieren** (bei jedem neuen status-Wert): das SQL im Header von `scripts/check-flag-drift.mjs` gegen die Live-DB laufen (MCP `execute_sql`, READ) + die `columns`-Map in `status-check-constraints.json` aktualisieren. Ein NEUER Status-Wert MUSS zuerst per MCP-Migration in den CHECK, DANN in den Snapshot — nie umgekehrt.
+
+**Baseline (6 grandfathered)** sind ECHTE Drift-Funde (kein akzeptables Muster) — per Boy-Scout fixen + Baseline senken (`-- --update-baseline`): `beleg-review/actions.ts` (`ocr_status: 'approved'/'rejected'` auf fall_dokumente → approve/reject bricht), `dokumente/ad-hoc-anforderung.ts` (`status: pending/ausstehend/cancelled` auf dokument_upload_anfragen → Enum-Vokabular-Mismatch), `twilio/inbound` + `inbound/process-inbound-text` (`.in('status',[…'angefragt'])` auf gutachter_termine → toter Filterwert), `gutachter/auftraege/export-action` + `gutachter/fall/[id]/page` (`.in('status',[…'durchgefuehrt'])` → toter Filterwert). Teil des interaction-flags-Audits (`docs/superpowers/specs/2026-07-11-interaction-flags-db-driven-audit-design.md` §8, Detektor #5). Folge-Detektoren (#1 Direkt-status-Writes ausserhalb der Engine, #4 inline-Branding-Gates) sind dokumentierte spätere Phasen.
 
 <!-- BEGIN:branding-rules -->
 # Whitelabel-Branding — `var(--brand-*)` statt hardcoded `claimondo-*`

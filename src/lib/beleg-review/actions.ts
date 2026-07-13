@@ -2,11 +2,11 @@
 
 // AAR-761 Phase 3: KB/Admin-Review für Beleg-OCR-Extrakte.
 // Quelle: fall_dokumente mit kategorie='rechnung' + quelle='kunde_upload_ocr'
-// plus gefüllter ocr_extracted_data. Review-State wird in ocr_status
-// gehalten: NULL|'pending_review' → offen, 'approved' → freigegeben,
-// 'rejected' → abgelehnt. Metadata (reviewer-id, review-ts, grund) liegen
-// in ocr_extracted_data._review (jsonb), damit wir ohne Schema-Migration
-// auskommen.
+// plus gefüllter ocr_extracted_data. Der Review-State (approved/rejected/
+// offen) lebt komplett in ocr_extracted_data._review (jsonb) — NICHT in
+// ocr_status. ocr_status ist der OCR-Pipeline-Zustand mit CHECK-Constraint
+// (pending/processing/done/failed/skipped); der Review fasst ihn nicht an.
+// Die reinen Lifecycle-Helper liegen in ./review-status.
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
@@ -14,6 +14,11 @@ import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { revalidatePath } from 'next/cache'
 import type { BelegTyp, BelegExtraktion } from '@/lib/ocr-beleg/types'
 import { getStorageUrl } from '@/lib/storage/url'
+import {
+  istOffenZumReview,
+  buildApproveUpdate,
+  buildRejectUpdate,
+} from './review-status'
 
 async function requireAdminOrKb(): Promise<
   | { ok: true; userId: string }
@@ -63,10 +68,11 @@ export async function listBelegeZumReview(
 
   if (!rows) return []
 
-  const pending = rows.filter((r) => {
-    const status = (r.ocr_status as string | null) ?? null
-    return status === null || status === 'pending_review'
-  })
+  // Queue = alle noch nicht approved/rejected Belege. Der Review-State liegt
+  // im _review-JSONB, NICHT in ocr_status (das steht per Default auf 'pending').
+  const pending = rows.filter((r) =>
+    istOffenZumReview(r.ocr_extracted_data as unknown as Record<string, unknown> | null),
+  )
   return Promise.all(
     pending.map(async (r) => {
       const path = r.storage_path as string
@@ -111,23 +117,18 @@ export async function approveBeleg(
   if (!dok) return { success: false, error: 'Dokument nicht gefunden' }
 
   // Corrections mergen — die vom KB korrigierten Felder überschreiben das
-  // Claude-Extrakt. Schlüssel bleiben die aus BelegExtraktion.
-  const merged = {
-    ...((dok.ocr_extracted_data as unknown as Record<string, unknown>) ?? {}),
-    ...((input.corrections as unknown as Record<string, unknown>) ?? {}),
-    _review: {
-      status: 'approved',
-      reviewed_by: auth.userId,
-      reviewed_at: new Date().toISOString(),
-    },
-  }
+  // Claude-Extrakt. Der Review-Status landet im _review-JSONB, NICHT in
+  // ocr_status (das würde den CHECK-Constraint verletzen).
+  const update = buildApproveUpdate(
+    dok.ocr_extracted_data as unknown as Record<string, unknown> | null,
+    input.corrections as unknown as Record<string, unknown> | undefined,
+    auth.userId,
+    new Date().toISOString(),
+  )
 
   const { error: upErr } = await admin
     .from('fall_dokumente')
-    .update({
-      ocr_status: 'approved',
-      ocr_extracted_data: merged as unknown as Record<string, unknown>,
-    })
+    .update(update)
     .eq('id', input.dokumentId)
   if (upErr) return { success: false, error: upErr.message }
 
@@ -173,22 +174,16 @@ export async function rejectBeleg(
     .maybeSingle()
   if (!dok) return { success: false, error: 'Dokument nicht gefunden' }
 
-  const merged = {
-    ...((dok.ocr_extracted_data as unknown as Record<string, unknown>) ?? {}),
-    _review: {
-      status: 'rejected',
-      reviewed_by: auth.userId,
-      reviewed_at: new Date().toISOString(),
-      grund: input.grund.trim(),
-    },
-  }
+  const update = buildRejectUpdate(
+    dok.ocr_extracted_data as unknown as Record<string, unknown> | null,
+    auth.userId,
+    new Date().toISOString(),
+    input.grund.trim(),
+  )
 
   const { error: upErr } = await admin
     .from('fall_dokumente')
-    .update({
-      ocr_status: 'rejected',
-      ocr_extracted_data: merged as unknown as Record<string, unknown>,
-    })
+    .update(update)
     .eq('id', input.dokumentId)
   if (upErr) return { success: false, error: upErr.message }
 

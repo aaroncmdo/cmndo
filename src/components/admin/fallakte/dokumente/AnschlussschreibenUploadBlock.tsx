@@ -7,9 +7,13 @@
 import { useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { EyeIcon, FileTextIcon, Loader2Icon, UploadIcon } from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import { getStorageUrl } from '@/lib/storage/url'
+// Storage-RLS-Rest: Upload + Anzeige laufen server-seitig. Der Browser kann
+// den privaten Bucket 'fall-dokumente' nicht signieren (createSignedUrl ->
+// null), und der Service-Client darf nicht in den Browser. Die Action nimmt
+// die Datei direkt entgegen (kein URL-Round-Trip), die signierte Ansehen-URL
+// wird lazy beim Klick geholt.
 import { uploadAnschlussschreiben } from '../../../../app/faelle/[id]/_actions'
+import { getAnschlussschreibenUrl } from '@/lib/dokumente/fall-dokumente-urls'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 
 export type FallAS = {
@@ -28,30 +32,40 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
   const router = useRouter()
   const fileRef = useRef<HTMLInputElement>(null)
   const [uploading, setUploading] = useState(false)
+  const [oeffnet, setOeffnet] = useState(false)
+  const [fehler, setFehler] = useState<string | null>(null)
 
   async function handleUpload(file: File) {
     setUploading(true)
+    setFehler(null)
     try {
-      const supabase = createClient()
-      const ext = file.name.split('.').pop() ?? 'pdf'
-      const path = `faelle/${fallId}/anschlussschreiben_${Date.now()}.${ext}`
-      const { error: upErr } = await supabase.storage.from('fall-dokumente').upload(path, file)
-      if (upErr) {
-        setUploading(false)
-        return
-      }
-      const url = await getStorageUrl(supabase, 'fall-dokumente', path)
-      if (!url) {
-        setUploading(false)
-        return
-      }
-      const r = await uploadAnschlussschreiben(fallId, url, file.name)
+      const formData = new FormData()
+      formData.append('file', file)
+      const r = await uploadAnschlussschreiben(fallId, formData)
       if (!r.success) {
-        console.error('[AnschlussschreibenUploadBlock] uploadAnschlussschreiben:', r.error)
+        setFehler(r.error ?? 'Upload fehlgeschlagen')
+        return
       }
       router.refresh()
     } finally {
       setUploading(false)
+    }
+  }
+
+  // Die signierte URL ist kurzlebig — deshalb erst beim Klick holen, nicht
+  // beim Render vorrätig halten.
+  async function handleOeffnen() {
+    setOeffnet(true)
+    setFehler(null)
+    try {
+      const res = await getAnschlussschreibenUrl(fallId)
+      if (!res.ok) {
+        setFehler(res.error)
+        return
+      }
+      window.open(res.url, '_blank', 'noopener,noreferrer')
+    } finally {
+      setOeffnet(false)
     }
   }
 
@@ -96,21 +110,31 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
               </p>
             </div>
           </div>
-          <a
-            href={fallAS.anschlussschreiben_url ?? '#'}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy"
+          <button
+            type="button"
+            onClick={handleOeffnen}
+            disabled={oeffnet}
+            className="inline-flex items-center gap-1 text-xs text-claimondo-ondo hover:text-claimondo-navy disabled:opacity-50"
           >
-            <EyeIcon className="w-3 h-3" /> Dokument ansehen
-          </a>
+            {oeffnet ? (
+              <Loader2Icon className="w-3 h-3 animate-spin" />
+            ) : (
+              <EyeIcon className="w-3 h-3" />
+            )}
+            Dokument ansehen
+          </button>
+          {fehler && <p className="text-body-xs text-danger-strong">{fehler}</p>}
         </div>
       ) : (
         <div>
           <input
             ref={fileRef}
             type="file"
-            accept=".pdf,image/*"
+            // PDF-only, konsistent zu Button-Label, zum hartkodierten
+            // mime_type='application/pdf' im fall_dokumente-Insert und zur
+            // pdf-parse-OCR. Vorher liess der Picker `image/*` zu — ein Bild
+            // wurde dann als PDF fehletikettiert und die OCR schlug still fehl.
+            accept="application/pdf,.pdf"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0]
@@ -132,6 +156,7 @@ export function AnschlussschreibenUploadBlock({ fallId, fallAS }: Props) {
           <p className="text-[10px] text-claimondo-ondo mt-1">
             OCR extrahiert automatisch Sendedatum und Unterschrift
           </p>
+          {fehler && <p className="text-body-xs text-danger-strong mt-1">{fehler}</p>}
         </div>
       )}
     </div>
