@@ -111,7 +111,7 @@ export function MaklerCopilotTab({ fallId, gegnerVsName, kontextLoaded }: Props)
           const text = await res.text().catch(() => '')
           setErrorMsg(
             res.status === 403
-              ? 'Ihr Zugriff auf diesen Fall wurde widerrufen.'
+              ? 'Für diesen Fall besteht kein Vollzugriff mehr — bitte den Kunden erneut um Freigabe bitten.'
               : `Copilot nicht erreichbar (${res.status}).${text ? ` ${text}` : ''}`,
           )
           setMessages((prev) => prev.slice(0, -1))
