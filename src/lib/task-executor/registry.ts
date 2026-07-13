@@ -26,7 +26,7 @@ export const EXECUTABLE_TYPES: Record<string, { label: string; promptHint: strin
   },
 }
 
-export function executableTypeFor(task: TaskRow) {
+export function executableTypeFor(task: Pick<TaskRow, 'typ' | 'claim_id' | 'status'>) {
   if (!task.typ) return null
   if (!task.claim_id) return null
   if (task.status === 'erledigt') return null
