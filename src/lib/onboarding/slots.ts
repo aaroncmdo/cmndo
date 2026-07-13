@@ -196,7 +196,6 @@ export async function reserviereSlot(
   revalidatePath('/gutachter/heute')
   revalidatePath('/gutachter/feldmodus')
   revalidatePath('/dispatch/leads')
-  revalidatePath('/gutachter-finden')
 
   return { ok: true, terminId: terminData.id }
 }

@@ -67,7 +67,17 @@ export async function enrichFlowLeadByFin(token: string, fin: string): Promise<{
  */
 export async function updateLeadStammdaten(
   leadId: string,
-  data: { vorname?: string; nachname?: string; telefon?: string; email?: string; unfall_konstellation?: string; gegner_anzahl_beteiligte?: string; gegner_fahrzeugtyp?: string },
+  data: {
+    vorname?: string; nachname?: string; telefon?: string; email?: string
+    unfall_konstellation?: string; gegner_anzahl_beteiligte?: string; gegner_fahrzeugtyp?: string
+    // AAR-956: Kunde bestaetigt/korrigiert den vom Makler vorausgefuellten Besichtigungsort
+    // (Place-Picker). Koordinaten nur als Paar (lat+lng) schreiben.
+    fahrzeug_standort_adresse?: string | null
+    fahrzeug_standort_plz?: string | null
+    fahrzeug_standort_lat?: number | null
+    fahrzeug_standort_lng?: number | null
+    fahrzeug_standort_place_id?: string | null
+  },
   // IDOR-Guard: der Flow-Token, gegen den die leadId gebunden wird (sonst koennte ein
   // Caller mit fremder leadId beliebige Lead-PII ueberschreiben).
   token: string | null,
@@ -83,6 +93,12 @@ export async function updateLeadStammdaten(
   if (data.unfall_konstellation !== undefined) update.unfall_konstellation = data.unfall_konstellation
   if (data.gegner_anzahl_beteiligte !== undefined) update.gegner_anzahl_beteiligte = parseInt(data.gegner_anzahl_beteiligte) || 1
   if (data.gegner_fahrzeugtyp !== undefined) update.gegner_fahrzeugtyp = data.gegner_fahrzeugtyp
+  // AAR-956: Besichtigungsort-Korrektur durch den Kunden (Place-Picker im Flow).
+  if (data.fahrzeug_standort_adresse !== undefined) update.fahrzeug_standort_adresse = data.fahrzeug_standort_adresse
+  if (data.fahrzeug_standort_plz !== undefined) update.fahrzeug_standort_plz = data.fahrzeug_standort_plz
+  if (data.fahrzeug_standort_lat !== undefined) update.fahrzeug_standort_lat = data.fahrzeug_standort_lat
+  if (data.fahrzeug_standort_lng !== undefined) update.fahrzeug_standort_lng = data.fahrzeug_standort_lng
+  if (data.fahrzeug_standort_place_id !== undefined) update.fahrzeug_standort_place_id = data.fahrzeug_standort_place_id
   const { error } = await admin.from('leads').update(update).eq('id', leadId)
   return error ? { success: false, error: error.message } : { success: true }
 }
@@ -1440,7 +1456,6 @@ export async function signSAandCreateFall(
                 .from('claims')
                 .update({ sv_id: topSv.svId })
                 .eq('id', fall.id)
-              console.log('[AAR-908] Auto-SV-Match', { fallId: fall.id, svId: topSv.svId, score: topSv.score })
             }
           }
         } catch (err) { console.error('[AAR-85/908] Dispatch-Matching:', err) }

@@ -49,54 +49,6 @@ export async function getCurrentMakler(): Promise<MaklerRow | null> {
   return data
 }
 
-/**
- * Leads für einen Makler — über promotion_code_id → promotion_codes.makler_id.
- * Nutzt Nested-FK-Filter via `!inner`, damit Leads ohne Promo-Code (optional
- * nullable FK) für Makler unsichtbar bleiben.
- */
-export async function getMaklerLeads(maklerId: string) {
-  const supabase = await createClient()
-  const { data } = await supabase
-    .from('leads')
-    .select(`
-      id, vorname, nachname, service_typ, status, created_at,
-      promotion_code:promotion_codes!inner(id, code, makler_id)
-    `)
-    .eq('promotion_code.makler_id', maklerId)
-    .order('created_at', { ascending: false })
-  return data ?? []
-}
-
-/**
- * Fälle eines Maklers — nur mit aktivem Consent (widerrufen_am IS NULL).
- * Cardinality ist many-to-one, dennoch kann Supabase den Nested-Select je
- * nach Session als Array liefern — Consumer muss `Array.isArray(x) ? x[0] : x`
- * normalisieren.
- */
-export async function getMaklerFaelle(maklerId: string) {
-  const supabase = await createClient()
-  // CMM-49 Regression-Fix (#2688): faelle!inner via makler_fall_consent.fall_id-FK failt seit
-  // FK->bridge ("no relationship faelle"). -> faelle_claim_bridge!inner; status<-claims.operative_status,
-  // service_typ<-claims.service_typ (SSoT); fall-Shape {id,status,service_typ} rekonstruiert -> Caller unveraendert.
-  const { data } = await supabase
-    .from('makler_fall_consent')
-    .select(`
-      id, consent_scope, consent_gegeben_am, widerrufen_am,
-      fall:faelle_claim_bridge!inner(fall_id, claims:claim_id(operative_status, service_typ))
-    `)
-    .eq('makler_id', maklerId)
-    .is('widerrufen_am', null)
-    .order('consent_gegeben_am', { ascending: false })
-  return (data ?? []).map((row) => {
-    const b = Array.isArray(row.fall) ? row.fall[0] : row.fall
-    const c = b ? (Array.isArray(b.claims) ? b.claims[0] : b.claims) : null
-    return {
-      ...row,
-      fall: b ? { id: b.fall_id, status: c?.operative_status ?? null, service_typ: c?.service_typ ?? null } : null,
-    }
-  })
-}
-
 // ─────────────────────────────────────────────────────────────────────────────
 // AAR-485 (M3) — Leads mit Consent-Status
 // ─────────────────────────────────────────────────────────────────────────────
@@ -223,21 +175,6 @@ export async function getMaklerLeadsWithConsent(maklerId: string): Promise<Makle
       consent_label,
     }
   })
-}
-
-/**
- * AAR-485: Provisions-Betrag für einen Fall basierend auf Makler-Sätzen
- * und service_typ. Wenn der Fall `komplett` (Vollservice) ist → komplett-
- * Betrag, sonst Gutachter-Betrag (fallback für unbekannte Service-Typen).
- */
-export function provisionFuerServiceTyp(
-  makler: { provision_betrag_komplett_netto: number | null; provision_betrag_nur_gutachter_netto: number | null },
-  serviceTyp: string | null,
-): number {
-  const full = Number(makler.provision_betrag_komplett_netto ?? 0)
-  const partial = Number(makler.provision_betrag_nur_gutachter_netto ?? 0)
-  if (!serviceTyp) return partial
-  return serviceTyp.toLowerCase().includes('komplett') ? full : partial
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -1236,26 +1173,6 @@ export async function getFallChat(fallId: string): Promise<MaklerChatMessage[]> 
       sender_avatar_url: s?.avatar_url ?? null,
     }
   })
-}
-
-/**
- * Zählt ungelesene Gruppenchat-Nachrichten für den eingeloggten User im
- * gegebenen Fall. Nutzt die `gelesen`-Spalte auf `nachrichten` (dieselbe
- * Logik wie MultiChannelChat im Hauptportal).
- */
-export async function getUngeleseneChatCount(
-  userId: string,
-  fallId: string,
-): Promise<number> {
-  const supabase = await createClient()
-  const { count } = await supabase
-    .from('nachrichten')
-    .select('id', { count: 'exact', head: true })
-    .eq('fall_id', fallId)
-    .in('kanal', ['gruppenchat', 'chat_gruppe_mit_makler'])
-    .eq('gelesen', false)
-    .neq('sender_id', userId)
-  return count ?? 0
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

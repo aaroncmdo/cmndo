@@ -9,6 +9,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { Button, Modal } from '@/components/primitives'
 import { TextField } from '@/components/shared/forms/TextField'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { erstelleMaklerAnfrage, type MaklerAnfrageAusgang } from '@/lib/makler/erstelle-anfrage'
 
 export function NeueAnfrageDrawer() {
@@ -19,8 +20,9 @@ export function NeueAnfrageDrawer() {
   const [telefon, setTelefon] = useState('')
   const [email, setEmail] = useState('')
   const [standortOffen, setStandortOffen] = useState(false)
-  const [plz, setPlz] = useState('')
-  const [ort, setOrt] = useState('')
+  // Place-Picker: strukturierte Auswahl (mit Koordinaten) ODER Freitext-Fallback (nur Text).
+  const [standortText, setStandortText] = useState('')
+  const [standortPlace, setStandortPlace] = useState<PlaceResult | null>(null)
   const [ausgang, setAusgang] = useState<MaklerAnfrageAusgang>('rueckruf') // Default = Rueckruf
   const [rueckrufZeit, setRueckrufZeit] = useState('')
   const [notiz, setNotiz] = useState('')
@@ -29,7 +31,7 @@ export function NeueAnfrageDrawer() {
 
   function reset() {
     setVorname(''); setNachname(''); setTelefon(''); setEmail('')
-    setPlz(''); setOrt(''); setStandortOffen(false); setAusgang('rueckruf'); setRueckrufZeit('')
+    setStandortText(''); setStandortPlace(null); setStandortOffen(false); setAusgang('rueckruf'); setRueckrufZeit('')
     setNotiz(''); setConsent(false); setServiceTyp('komplett')
   }
 
@@ -43,8 +45,11 @@ export function NeueAnfrageDrawer() {
         nachname,
         telefon,
         email: email || null,
-        standortPlz: plz || null,
-        standortOrt: ort || null,
+        standortPlz: standortPlace?.plz || null,
+        standortOrt: standortPlace?.adresse || standortText.trim() || null,
+        standortLat: standortPlace?.lat ?? null,
+        standortLng: standortPlace?.lng ?? null,
+        standortPlaceId: standortPlace?.place_id || null,
         notiz: notiz || null,
         kundeEinwilligung: consent,
         serviceTyp,
@@ -98,9 +103,21 @@ export function NeueAnfrageDrawer() {
             {standortOffen ? '− Standort ausblenden' : '+ Standort hinzufügen (optional)'}
           </button>
           {standortOffen ? (
-            <div className="grid grid-cols-2 gap-3">
-              <TextField label="PLZ" value={plz} onChange={(e) => setPlz(e.target.value)} />
-              <TextField label="Ort" value={ort} onChange={(e) => setOrt(e.target.value)} />
+            <div className="space-y-1">
+              <label className="block text-xs font-semibold text-claimondo-shield">
+                Standort des Fahrzeugs
+              </label>
+              <GooglePlaceAutocomplete
+                types={['address']}
+                placeholder="Adresse oder Ort eingeben …"
+                defaultValue={standortText}
+                onSelect={(p) => { setStandortText(p.adresse); setStandortPlace(p) }}
+                onChange={(v) => { setStandortText(v); setStandortPlace(null) }}
+                scrollIntoViewOnFocus
+              />
+              <p className="text-[11px] text-claimondo-shield">
+                Adresse aus der Liste wählen — dann kommt der Kunde bereits mit dem Standort vorausgefüllt in seine Anfrage.
+              </p>
             </div>
           ) : null}
 

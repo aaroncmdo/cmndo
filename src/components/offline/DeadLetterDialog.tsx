@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react'
 import { AlertTriangleIcon, RefreshCwIcon, Trash2Icon, XIcon } from 'lucide-react'
-import { offlineDB, removeFromOutbox, resetDeadLetter, type OutboxItem } from '@/lib/offline/outbox'
+import { removeFromOutbox, resetDeadLetter, getOutboxItems, type OutboxItem } from '@/lib/offline/outbox'
 import { syncOutbox } from '@/lib/offline/sync-outbox'
 import { Modal } from '@/components/primitives'
 
@@ -22,11 +22,8 @@ export default function DeadLetterDialog({ open, onClose }: Props) {
     if (!open) return
     let cancelled = false
     const load = async () => {
-      const rows = await offlineDB.upload_outbox
-        .where('status')
-        .equals('dead')
-        .toArray()
-      if (!cancelled) setItems(rows)
+      const rows = await getOutboxItems()
+      if (!cancelled) setItems(rows.filter((r) => r.status === 'dead'))
     }
     void load()
     const id = setInterval(load, 3000)

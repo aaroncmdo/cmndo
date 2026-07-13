@@ -61,7 +61,6 @@ export async function getSvTagesplan(
     console.error('[AAR-864] getSvTagesplan failed', error)
     return []
   }
-  console.log('[AAR-864] getSvTagesplan: svId =', svId, '| Rows =', (data ?? []).length)
 
   return (data ?? []).map((row) => {
     // CMM-49: besichtigungsort_* direkt vom gutachter_termine-Row (SSoT; fall-Tier tot),

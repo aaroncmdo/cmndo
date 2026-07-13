@@ -355,6 +355,7 @@ function OverviewPanel({
   const hasGutachten =
     fall.reparaturkosten !== null ||
     fall.wertminderung !== null ||
+    fall.nutzungsausfall_gesamt !== null ||
     fall.gutachter_honorar !== null
 
   return (
