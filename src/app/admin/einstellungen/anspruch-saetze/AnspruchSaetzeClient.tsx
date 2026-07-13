@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { CoinsIcon, SlidersHorizontalIcon, CheckCircle2Icon } from 'lucide-react'
 import { Button } from '@/components/primitives/Button'
+import PageHeader from '@/components/shared/PageHeader'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { updateKlasseSatz, updateAnspruchConfigWert } from './actions'
 
@@ -87,13 +88,11 @@ function EditableRow({
 export default function AnspruchSaetzeClient({ klassen, config }: { klassen: Klasse[]; config: Config[] }) {
   return (
     <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Anspruchsprüfer – Sätze &amp; Parameter</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">
-          Änderungen greifen sofort für neue Ersteinschätzungen im Anspruchsprüfer. Bereits gespeicherte
-          Schätzungen bleiben unverändert (Momentaufnahme).
-        </p>
-      </div>
+      <PageHeader
+        title="Anspruchsprüfer – Sätze &amp; Parameter"
+        description="Änderungen greifen sofort für neue Ersteinschätzungen im Anspruchsprüfer. Bereits gespeicherte Schätzungen bleiben unverändert (Momentaufnahme)."
+        size="lg"
+      />
 
       <SectionCard
         title="Nutzungsausfall-Klassensätze (A–L)"

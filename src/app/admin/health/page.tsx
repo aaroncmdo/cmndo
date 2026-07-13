@@ -9,6 +9,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import EmptyState from '@/components/shared/EmptyState'
+import PageHeader from '@/components/shared/PageHeader'
 import { ActivityIcon } from 'lucide-react'
 import type { StatusBadgeTone } from '@/components/shared/StatusBadge'
 import type { HealthStatus } from '@/lib/health/types'
@@ -104,18 +105,21 @@ export default async function PipelineHealthPage() {
   return (
     <div className="py-8 px-2 max-w-4xl mx-auto space-y-6">
       {/* Titel + letzter Lauf-Zeitstempel */}
-      <div className="flex flex-col gap-1">
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Pipeline-Health</h1>
-        {maxRunAt ? (
-          <p className="text-body-sm text-claimondo-ondo">
-            Letzter Lauf:{' '}
-            <span className="font-semibold text-claimondo-navy">{relativZeit(maxRunAt)}</span>
-            {' '}({new Date(maxRunAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
-          </p>
-        ) : (
-          <p className="text-body-sm text-claimondo-ondo">Noch kein Lauf registriert.</p>
-        )}
-      </div>
+      <PageHeader
+        title="Pipeline-Health"
+        description={
+          maxRunAt ? (
+            <>
+              Letzter Lauf:{' '}
+              <span className="font-semibold text-claimondo-navy">{relativZeit(maxRunAt)}</span>
+              {' '}({new Date(maxRunAt).toLocaleString('de-DE', { dateStyle: 'short', timeStyle: 'short' })})
+            </>
+          ) : (
+            'Noch kein Lauf registriert.'
+          )
+        }
+        size="lg"
+      />
 
       {/* Leerzustand */}
       {latest.length === 0 && (

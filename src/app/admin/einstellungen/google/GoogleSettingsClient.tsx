@@ -4,6 +4,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { CheckCircleIcon, AlertCircleIcon } from 'lucide-react'
+import PageHeader from '@/components/shared/PageHeader'
 
 export default function GoogleSettingsClient({
   isConnected, googleEmail, connectedAt, success, error,
@@ -28,12 +29,11 @@ export default function GoogleSettingsClient({
 
   return (
     <div className="py-6 max-w-2xl mx-auto px-4 space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <h1 className="text-heading-lg font-bold text-claimondo-navy">Google Konto verbinden</h1>
-          <p className="mt-0.5 text-body-sm text-claimondo-ondo">Verbinde dein Google Konto, um Videotermine direkt aus der Fallakte zu buchen. Termine werden in deinem Google Kalender erstellt und Kunden bekommen automatisch eine Calendar-Einladung mit Meet-Link.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Google Konto verbinden"
+        description="Verbinde dein Google Konto, um Videotermine direkt aus der Fallakte zu buchen. Termine werden in deinem Google Kalender erstellt und Kunden bekommen automatisch eine Calendar-Einladung mit Meet-Link."
+        size="lg"
+      />
 
       {success && (
         <div className="bg-success-soft border border-success/30 rounded-ios-lg p-3 flex items-center gap-2 text-body-sm text-success-strong">
