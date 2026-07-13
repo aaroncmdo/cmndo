@@ -210,6 +210,8 @@ export default function AktuellerStopCard({
         replay_class: 'C',
         payload: { terminId: stop.termin_id, sessionId, via: 'beide_angekommen' },
         entity_ref: { scope: 'feldmodus-termin', id: stop.termin_id },
+      }).catch(() => {
+        besichtigungFiredRef.current = false
       })
       onArrived(
         svPosition?.lat ?? stop.lat ?? 0,
@@ -264,8 +266,11 @@ export default function AktuellerStopCard({
         replay_class: 'C',
         payload: { terminId: stop.termin_id, sessionId, via: 'manuell' },
         entity_ref: { scope: 'feldmodus-termin', id: stop.termin_id },
+      }).catch(() => {
+        besichtigungFiredRef.current = false
       })
       onArrived(svPosition?.lat ?? stop.lat ?? 0, svPosition?.lng ?? stop.lng ?? 0, 'manuell')
+      toast.success('Angekommen — wird synchronisiert sobald du online bist')
       return
     }
     startTransition(async () => {
