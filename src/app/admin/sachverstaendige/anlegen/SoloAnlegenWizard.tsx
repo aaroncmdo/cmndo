@@ -75,9 +75,10 @@ const initialState: FormState = {
   oebuv_bestellungsnummer: '',
 }
 
-export default function SoloAnlegenWizard({ onSuccess }: {
-  // ARCH-1 POLISH Befund 4: optional fuer Drawer-Verwendung.
+export default function SoloAnlegenWizard({ onSuccess, onCancel }: {
+  // ARCH-1 POLISH Befund 4: optional fuer Drawer-Verwendung (onCancel schliesst das Overlay).
   onSuccess?: (info: { name: string; email: string }) => void
+  onCancel?: () => void
 } = {}) {
   const router = useRouter()
   const [step, setStep] = useState(0)
@@ -251,7 +252,7 @@ export default function SoloAnlegenWizard({ onSuccess }: {
                 Weiteren SV anlegen
               </button>
               <button
-                onClick={() => router.push('/admin/sachverstaendige')}
+                onClick={() => (onCancel ? onCancel() : router.push('/admin/sachverstaendige'))}
                 className="px-4 py-2.5 rounded-ios-xl border border-claimondo-border text-claimondo-ondo text-sm hover:bg-claimondo-bg"
               >
                 Zur SV-Liste

@@ -29,9 +29,11 @@ const TABS: { key: TabKey; label: string; icon: typeof UserIcon; disabled: boole
   { key: 'community', label: 'Community', icon: UsersIcon, disabled: false },
 ]
 
-export default function AnlegenTabs({ onSuccess }: {
+export default function AnlegenTabs({ onSuccess, onCancel }: {
   // AAR-235: organisationen-Prop entfernt (wurde nur für Sub-SV gebraucht)
   onSuccess?: (info: { name: string; email: string }) => void
+  // onCancel: schliesst das Overlay (Drawer-Verwendung im Vertrieb-Cockpit); ohne -> router.push.
+  onCancel?: () => void
 }) {
   const [active, setActive] = useState<TabKey>('solo')
 
@@ -68,9 +70,9 @@ export default function AnlegenTabs({ onSuccess }: {
       </div>
 
       {/* Aktiver Tab */}
-      {active === 'solo' && <SoloAnlegenWizard onSuccess={onSuccess} />}
-      {active === 'buero' && <BueroAnlegenWizard onSuccess={onSuccess} />}
-      {active === 'akademie' && <AkademieAnlegenWizard onSuccess={onSuccess} />}
+      {active === 'solo' && <SoloAnlegenWizard onSuccess={onSuccess} onCancel={onCancel} />}
+      {active === 'buero' && <BueroAnlegenWizard onSuccess={onSuccess} onCancel={onCancel} />}
+      {active === 'akademie' && <AkademieAnlegenWizard onSuccess={onSuccess} onCancel={onCancel} />}
       {active === 'community' && (
         <div className="bg-white border border-claimondo-border rounded-2xl p-8 text-center">
           <h2 className="text-lg font-semibold text-claimondo-navy mb-2">Communities werden separat verwaltet</h2>

@@ -12429,7 +12429,10 @@ export type Database = {
       partner_leads: {
         Row: {
           aktualisiert_am: string
+          ansprechpartner_email: string | null
           ansprechpartner_nachname: string | null
+          ansprechpartner_position: string | null
+          ansprechpartner_telefon: string | null
           ansprechpartner_vorname: string | null
           einstufung: string | null
           email: string | null
@@ -12456,7 +12459,10 @@ export type Database = {
         }
         Insert: {
           aktualisiert_am?: string
+          ansprechpartner_email?: string | null
           ansprechpartner_nachname?: string | null
+          ansprechpartner_position?: string | null
+          ansprechpartner_telefon?: string | null
           ansprechpartner_vorname?: string | null
           einstufung?: string | null
           email?: string | null
@@ -12483,7 +12489,10 @@ export type Database = {
         }
         Update: {
           aktualisiert_am?: string
+          ansprechpartner_email?: string | null
           ansprechpartner_nachname?: string | null
+          ansprechpartner_position?: string | null
+          ansprechpartner_telefon?: string | null
           ansprechpartner_vorname?: string | null
           einstufung?: string | null
           email?: string | null
@@ -17955,6 +17964,33 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      vertrieb_mail_vorlagen: {
+        Row: {
+          aktiv: boolean
+          aktualisiert_am: string
+          betreff: string
+          body: string
+          id: string
+          typ: string
+        }
+        Insert: {
+          aktiv?: boolean
+          aktualisiert_am?: string
+          betreff: string
+          body: string
+          id?: string
+          typ: string
+        }
+        Update: {
+          aktiv?: boolean
+          aktualisiert_am?: string
+          betreff?: string
+          body?: string
+          id?: string
+          typ?: string
+        }
+        Relationships: []
       }
       werkstaetten: {
         Row: {
