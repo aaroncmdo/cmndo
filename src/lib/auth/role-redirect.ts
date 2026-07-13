@@ -14,6 +14,7 @@ export type Rolle =
   | 'kanzlei'
   | 'makler'
   | 'werkstatt'
+  | 'flottenmanager'
   | string
 
 export function roleToPath(rolle: Rolle | null | undefined): string {
@@ -51,6 +52,9 @@ export function roleToPath(rolle: Rolle | null | undefined): string {
     // weil URL und Page-Titel ("Mandate") jetzt konsistent sind.
     case 'kanzlei':
       return '/kanzlei/mandate'
+    // Business-Partner-Flotten-Portal (Firmen mit Flotte).
+    case 'flottenmanager':
+      return '/flotte'
     case 'admin':
       return '/admin'
     default:

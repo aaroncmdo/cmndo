@@ -36,6 +36,7 @@ import type { MaklerWochenReportData } from '@/lib/makler/wochenreport'
 import { wochenreportOptOutUrl } from '@/lib/makler/wochenreport-optout'
 import { PartnerOnboardingEinladung } from './templates/PartnerOnboardingEinladung'
 import { baueOnboardingIcs, formatTerminZeitpunkt, type OnboardingTerminKanal } from '@/lib/partner/onboarding-termin'
+import { FlottenmanagerWelcomeEmail, subject as flottenmanagerWelcomeSubject } from './templates/FlottenmanagerWelcome'
 
 const admin = () => createAdminClient()
 
@@ -1440,6 +1441,43 @@ export async function sendSvBasicClaimLink({
       error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
     }
   }
+}
+
+// ─── Flottenmanager Welcome ───────────────────────────────────────────────────
+
+export type FlottenmanagerWelcomeParams = {
+  to: string
+  vorname: string
+  firmaName: string
+}
+
+/**
+ * Welcome-Mail an einen vom Admin angelegten Flottenmanager.
+ * Enthaelt einen Recovery-Magic-Link zum Passwort-Setzen (analog sendMaklerWelcome).
+ * Best-effort — der Caller wickelt den Aufruf in try/catch.
+ */
+export async function sendFlottenmanagerWelcome(
+  params: FlottenmanagerWelcomeParams,
+): Promise<void> {
+  // TOKEN-HASH-FIX (analog sendMaklerWelcome): hashed_token + /api/auth/confirm
+  const magicLink = await buildWelcomeConfirmLink(params.to, 'recovery', '/passwort-zuruecksetzen')
+
+  const props = {
+    vorname: params.vorname,
+    firmaName: params.firmaName,
+    magicLink,
+  }
+  const html = await render(FlottenmanagerWelcomeEmail(props))
+  await sendEmail({
+    to: params.to,
+    subject: flottenmanagerWelcomeSubject(props),
+    html,
+    fallId: null,
+    empfaengerTyp: 'admin',
+    template: 'flottenmanager_welcome',
+    // Admin-getriggerte Anlage -> Send-Isolation umgehen (analog sendWillkommenWerkstatt).
+    allowInternalRecipient: true,
+  })
 }
 
 // ─── Partner-Onboarding-Einladung ────────────────────────────────────────────

@@ -5,7 +5,8 @@
 import { requirePortalAccess } from '@/lib/auth/portal-guard'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getKundeFirma, getKundeFlotte } from '@/lib/kunde/firma-flotte'
-import FlotteClient from './FlotteClient'
+import FlotteClient from '@/components/flotte/FlotteClient'
+import { speichereFirma, fuegeFahrzeugHinzu, entferneFahrzeug } from './actions'
 
 export const dynamic = 'force-dynamic'
 
@@ -23,7 +24,13 @@ export default async function FlottePage() {
           ? 'Ihre Firmenfahrzeuge — beim Schaden melden direkt auswählbar.'
           : 'Legen Sie Ihr Firmen-Konto an, um mehrere Fahrzeuge zentral zu verwalten.'}
       </p>
-      <FlotteClient firma={firma} flotte={flotte} />
+      <FlotteClient
+        firma={firma}
+        flotte={flotte}
+        onSpeichereFirma={speichereFirma}
+        onFuegeHinzu={fuegeFahrzeugHinzu}
+        onEntferne={entferneFahrzeug}
+      />
     </div>
   )
 }

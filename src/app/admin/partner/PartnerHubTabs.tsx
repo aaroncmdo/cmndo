@@ -10,6 +10,7 @@ const TABS = [
   { href: '/admin/partner/versicherer', label: 'Versicherer' },
   { href: '/admin/partner/communities', label: 'Communities' },
   { href: '/admin/partner/waitlist', label: 'Gutachter-Warteliste' },
+  { href: '/admin/firmen-flotte', label: 'Firmen-Flotten' },
 ]
 
 export default function PartnerHubTabs() {
