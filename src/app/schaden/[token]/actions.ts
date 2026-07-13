@@ -19,6 +19,10 @@ import {
   globalWriteCapExceeded,
   recordGlobalWrite,
 } from '@/lib/api-v1/write-abuse-guard'
+import {
+  speichereGegnerFoto,
+  speichereGegnerUnterschrift,
+} from '@/lib/schadenkarte/gegner-dokumente'
 import type { GegnerFormData } from './gegner-form-types'
 
 type SubmitResult =
@@ -125,10 +129,12 @@ export async function submitSchadenGegner(
   //   claims.hergang_kunde_text; die saubere Trennung (claims.hergang_gegner_text) folgt, sobald
   //   die claim-dokumente-kanon-Lane die claims-DDL freigibt.
   let claimId: string | undefined
+  let fallId: string | undefined
   try {
     const conv = await convertLeadToClaim({ leadId: res.leadId })
     if (conv.ok) {
       claimId = conv.claimId
+      fallId = conv.fallId
     } else {
       console.error(
         '[schaden-gegner] convertLeadToClaim fehlgeschlagen (Draft bleibt, idempotent nachholbar):',
@@ -137,6 +143,36 @@ export async function submitSchadenGegner(
     }
   } catch (err) {
     console.error('[schaden-gegner] convertLeadToClaim warf (Draft bleibt):', err)
+  }
+
+  // 5b. Foto- + Unterschrift-Upload (fail-soft).
+  //   Nur wenn der Convert erfolgreich war (fallId + claimId bekannt).
+  //   Ein fehlgeschlagener Upload darf den Gesamt-Submit NICHT abbrechen —
+  //   der Claim existiert bereits und ist idempotent nachholbar.
+  if (fallId && claimId) {
+    if (data.fotos?.length) {
+      for (const foto of data.fotos) {
+        try {
+          const fotoRes = await speichereGegnerFoto(db, fallId, claimId, foto)
+          if (!fotoRes.ok) {
+            console.error('[schaden-gegner] Foto-Upload fehlgeschlagen:', fotoRes.error, foto.typ)
+          }
+        } catch (err) {
+          console.error('[schaden-gegner] Foto-Upload warf:', err)
+        }
+      }
+    }
+
+    if (data.unterschrift) {
+      try {
+        const sigRes = await speichereGegnerUnterschrift(db, fallId, claimId, data.unterschrift)
+        if (!sigRes.ok) {
+          console.error('[schaden-gegner] Unterschrift-Upload fehlgeschlagen:', sigRes.error)
+        }
+      } catch (err) {
+        console.error('[schaden-gegner] Unterschrift-Upload warf:', err)
+      }
+    }
   }
 
   // 6. Fahrzeug-Detailseite revalidieren — dort erscheint der neue Schaden (Claim oder Draft)
