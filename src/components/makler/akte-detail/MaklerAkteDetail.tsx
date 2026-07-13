@@ -305,13 +305,11 @@ function TabButton({
   onClick,
   label,
   icon,
-  count,
 }: {
   active: boolean
   onClick: () => void
   label: string
   icon: React.ReactNode
-  count?: number
 }) {
   return (
     <button
@@ -327,15 +325,6 @@ function TabButton({
     >
       {icon}
       {label}
-      {count !== undefined && count > 0 ? (
-        <span
-          className={`inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[10px] font-medium ${
-            active ? 'bg-claimondo-navy text-white' : 'bg-claimondo-border text-claimondo-navy'
-          }`}
-        >
-          {count}
-        </span>
-      ) : null}
     </button>
   )
 }
