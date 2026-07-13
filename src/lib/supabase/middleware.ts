@@ -311,6 +311,10 @@ function isPublicPath(pathname: string): boolean {
     '/unfallskizze',
     // 2026-05-24: Stream-B.5 Cornerstone-Pillar „Unfall was tun" (Doc 26).
     '/unfall-was-tun-als-geschaedigter',
+    // Firmen-Flotte Layer 2: NFC-Schadenkarten-Flow fuer Unfallgegner (/schaden/[token]).
+    // PUBLIC/anon — Gegner hat keinen Account; der Token ist die Berechtigung
+    // (analog /flow und /upload). Ohne diesen Eintrag → 307 → /login.
+    '/schaden',
   ]
   return publicPaths.some(path => pathname.startsWith(path))
 }
