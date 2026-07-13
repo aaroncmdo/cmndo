@@ -35,6 +35,12 @@ import { SectionCard } from '@/components/shared/SectionCard'
 import EmptyState from '@/components/shared/EmptyState'
 // AAR-754: shared Ansprechpartner-Karte (KB/SV/Kanzlei) — rolle="makler".
 import { FallKontakteCard } from '@/components/shared/fall-kontakte'
+// AAR-489 F4: Consent-Scope -> Label + Farb-Token + Vollzugriff-Check (geteilt).
+import {
+  istVollzugriff,
+  consentScopeLabel,
+  consentScopeValueClass,
+} from '@/lib/makler/consent-display'
 
 type TabKey = 'overview' | 'timeline' | 'chat' | 'copilot'
 
@@ -187,9 +193,9 @@ export function MaklerAkteDetail({
         />
         <QuickStat
           label="Consent"
-          value="Vollzugriff"
+          value={consentScopeLabel(detail.consent_scope)}
           icon={<ShieldCheckIcon width={16} height={16} />}
-          valueClass="text-success-strong"
+          valueClass={consentScopeValueClass(detail.consent_scope)}
         />
         <QuickStat
           label="Fall seit"
@@ -249,7 +255,7 @@ export function MaklerAkteDetail({
         <MaklerCopilotTab
           fallId={fall.id}
           gegnerVsName={fall.gegner_versicherung}
-          kontextLoaded
+          kontextLoaded={istVollzugriff(detail.consent_scope)}
         />
       ) : null}
     </div>
