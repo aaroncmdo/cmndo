@@ -3,8 +3,8 @@
 // Muster analog lib/ocr-beleg/extract.ts (bereits Claude-Vision). Modell aus
 // AI_MODELS.doc_ocr — Upgrade = Ein-Zeilen-Change in lib/ai/models.ts.
 //
-// Feldnamen 1:1 wie die alten Regex-Parser (src/lib/dokumente/ocr-patterns.ts),
-// damit die Downstream-Verarbeitung (extractedData.parsed.*) drop-in bleibt.
+// Feldnamen bewusst wie die frueheren Regex-Parser (die Claude Vision jetzt
+// ersetzt), damit die Downstream-Verarbeitung (extractedData.parsed.*) drop-in bleibt.
 
 import Anthropic from '@anthropic-ai/sdk'
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod'
