@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import { Button, Drawer } from '@/components/primitives'
 import AnlegenTabs from '@/app/admin/sachverstaendige/anlegen/AnlegenTabs'
 import QrPoolDrawerContent from './wizards/QrPoolDrawerContent'
+import BasisFreigabenDrawerContent from './wizards/BasisFreigabenDrawerContent'
 import CsvImportPanel from '@/app/admin/partner-leads/CsvImportPanel'
 import ScrapePanel from '@/app/admin/partner-leads/ScrapePanel'
 import { contextAktionen, type VertriebAktion } from './_lib/context-aktionen'
@@ -23,6 +24,7 @@ export default function VertriebAktionsleiste({
   const router = useRouter()
   const [svAnlegen, setSvAnlegen] = useState(false)
   const [qrDrawer, setQrDrawer] = useState(false)
+  const [freigabenDrawer, setFreigabenDrawer] = useState(false)
   const [csvDrawer, setCsvDrawer] = useState(false)
   const [scrapeDrawer, setScrapeDrawer] = useState(false)
   const aktionen = contextAktionen(rolle, typ)
@@ -35,6 +37,10 @@ export default function VertriebAktionsleiste({
     }
     if (a.key === 'qrpool') {
       setQrDrawer(true)
+      return
+    }
+    if (a.key === 'freigaben') {
+      setFreigabenDrawer(true)
       return
     }
     if (a.key === 'csv') {
@@ -84,6 +90,15 @@ export default function VertriebAktionsleiste({
         ariaLabel="QR-Pool verwalten"
       >
         <QrPoolDrawerContent />
+      </Drawer>
+
+      <Drawer
+        open={freigabenDrawer}
+        onClose={() => { setFreigabenDrawer(false); router.refresh() }}
+        width={720}
+        ariaLabel="Basis-Freigaben"
+      >
+        <BasisFreigabenDrawerContent />
       </Drawer>
 
       <Drawer
