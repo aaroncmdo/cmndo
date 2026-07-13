@@ -7,6 +7,7 @@ import { CheckCircleIcon, CircleDotIcon, ClockIcon, AlertTriangleIcon, ExternalL
 import { updateManualTaskStatus } from '@/lib/tasks/manual-actions'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { Table, Thead, Tbody, Tr, Th, Td } from '@/components/shared/DataTable'
+import { KiExecuteButton } from '@/components/shared/KiExecuteButton'
 
 // KFZ-175: Meine-Tasks Client — Tabs Zugewiesen/Erstellt.
 
@@ -14,6 +15,7 @@ type TaskRow = {
   id: string; titel: string; beschreibung: string | null; status: string
   prioritaet: string | null; faellig_am: string | null; fall_id: string | null
   lead_id: string | null; auto_erstellt: boolean; created_at: string
+  typ: string | null; claim_id: string | null
   claim_nummer?: string | null
 }
 
@@ -32,9 +34,9 @@ const STATUS_ICON: Record<string, { Icon: typeof CheckCircleIcon; cls: string }>
 }
 
 export default function MyTasksClient({
-  assigned, created, isAdmin,
+  assigned, created, isAdmin, executorEnabled,
 }: {
-  assigned: TaskRow[]; created: TaskRow[]; isAdmin: boolean
+  assigned: TaskRow[]; created: TaskRow[]; isAdmin: boolean; executorEnabled: boolean
 }) {
   const [tab, setTab] = useState<'assigned' | 'created'>('assigned')
   const tasks = tab === 'assigned' ? assigned : created
@@ -81,6 +83,7 @@ export default function MyTasksClient({
                 <Th className="text-left">Priorität</Th>
                 <Th className="text-left">Fällig</Th>
                 <Th className="text-left">Status</Th>
+                <Th></Th>
               </Tr>
             </Thead>
             <Tbody>
@@ -123,6 +126,13 @@ export default function MyTasksClient({
                         <option value="erledigt">Erledigt</option>
                         <option value="blockiert">Blockiert</option>
                       </select>
+                    </Td>
+                    <Td>
+                      <KiExecuteButton
+                        compact
+                        task={{ id: t.id, typ: t.typ, claim_id: t.claim_id, status: t.status }}
+                        executorEnabled={executorEnabled}
+                      />
                     </Td>
                   </Tr>
                 )
