@@ -52,6 +52,15 @@ function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; mime: string } | n
 
 // ─── Photo upload ────────────────────────────────────────────────────────────
 
+// Server-seitige Allowlists (Hostile-Client-Schutz): der Server-Action-Boundary
+// bedeutet, ein Angreifer koennte den Wizard umgehen und beliebige Werte senden.
+//   - typ: schliesst Path-Injection (der Storage-Pfad interpoliert foto.typ)
+//   - MIME: nur echte Bilder (compressImage liefert image/jpeg)
+//   - Byte-Cap: analog Unterschrift (compressImage haelt ~200-500 KB)
+const ALLOWED_FOTO_TYPEN = new Set<GegnerFoto['typ']>(['gegner_fahrzeug', 'eigenes_fahrzeug', 'unfallort'])
+const ALLOWED_FOTO_MIME = new Set(['image/jpeg', 'image/png', 'image/webp'])
+const MAX_FOTO_BYTES = 5 * 1024 * 1024
+
 /**
  * Stores a single opponent-submitted photo in 'fall-dokumente' storage and
  * inserts a fall_dokumente row.
@@ -66,6 +75,14 @@ export async function speichereGegnerFoto(
   claimId: string,
   foto: GegnerFoto,
 ): Promise<{ ok: boolean; error?: string }> {
+  // Allowlist-Guards (Server-Boundary — Wizard-Umgehung moeglich)
+  if (!ALLOWED_FOTO_TYPEN.has(foto.typ)) {
+    return { ok: false, error: 'Ungueltiger Foto-Typ' }
+  }
+  if (!ALLOWED_FOTO_MIME.has(foto.contentType)) {
+    return { ok: false, error: 'Ungueltiges Bildformat' }
+  }
+
   // Strip optional data-URI prefix
   const b64 = foto.base64.includes(',') ? foto.base64.split(',')[1] : foto.base64
 
@@ -78,8 +95,12 @@ export async function speichereGegnerFoto(
   if (buf.length === 0) {
     return { ok: false, error: 'Bilddaten leer' }
   }
+  if (buf.length > MAX_FOTO_BYTES) {
+    return { ok: false, error: 'Bilddaten zu gross' }
+  }
 
-  const ext = foto.contentType === 'image/png' ? 'png' : 'jpg'
+  const ext =
+    foto.contentType === 'image/png' ? 'png' : foto.contentType === 'image/webp' ? 'webp' : 'jpg'
   const path = `claims/${fallId}/gegner_${foto.typ}_${Date.now()}.${ext}`
 
   const { error: upErr } = await db.storage
@@ -135,6 +156,10 @@ export async function speichereGegnerUnterschrift(
   const decoded = decodeDataUrl(dataUri)
   if (!decoded) {
     return { ok: false, error: 'Ungueltige oder zu grosse Unterschriftsdaten' }
+  }
+  // Unterschrift ist immer PNG (SignaturePadInput -> canvas PNG). MIME-Allowlist (Symmetrie zum Foto-Pfad).
+  if (decoded.mime !== 'image/png') {
+    return { ok: false, error: 'Ungueltiges Unterschriftsformat' }
   }
 
   const path = `gegner/${fallId}/unterschrift_${Date.now()}.png`

@@ -100,6 +100,13 @@ export async function submitSchadenGegner(
     {
       vehicle_id: ctx.context.fahrzeugId,
       firma_name: ctx.context.firmaName,
+      // gewerbe_flag: die Flotten-Firma IST der gewerbliche Geschaedigte. Ohne das Flag
+      //   ueberspringt convertLeadToClaim das ensureFirma (gegated auf gewerbe_flag &&
+      //   firma_name) -> die geschaedigter-Party bliebe identitaetslos (kein firma_id).
+      //   firma_name kommt exakt aus firmen.name (via Token) -> ensureFirma findet die
+      //   existierende Firma by-name -> firma_id landet auf der geschaedigter-Party.
+      //   Wichtig fuer Task C (VS-Meldung braucht eine identifizierte geschaedigte Seite).
+      gewerbe_flag: true,
       gegner_name: data.name.trim(),
       gegner_telefon: data.telefon || null,
       gegner_email: data.email || null,
