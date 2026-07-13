@@ -1,6 +1,7 @@
-// AAR-388: Shared Hook für Live-Zahl der pending/dead Outbox-Items.
-// Pollt alle 5s sowohl upload_outbox als auch gps_outbox und liefert
-// Counts plus Einzelstatus für UI-Badges (PendingBadge).
+// AAR-388: Shared Hook fuer Live-Zahl der pending/dead Outbox-Items.
+// Liest counts via getPendingCount/getGpsPendingCount/getDeadCount (./outbox)
+// -- alle delegieren an die generalisierte mutation_outbox-Schicht (db.ts).
+// useSlotPending fragt mutation_outbox direkt per idempotency_key ab.
 
 'use client'
 

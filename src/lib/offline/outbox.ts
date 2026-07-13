@@ -4,7 +4,7 @@
 // consumers (FallDokumentDropzone, useFieldTracking, OutboxBadge) keep working.
 'use client'
 import { offlineDB } from './db'
-import { enqueueOp, getPendingCountByKind, getDeadCount as getDeadCountNew, markOp, removeOp, resetDeadLetter as resetDeadLetterNew, recoverOutbox as recoverOutboxNew } from './enqueue'
+import { enqueueOp, getPendingCountByKind, markOp, removeOp, resetDeadLetter as resetDeadLetterNew, recoverOutbox as recoverOutboxNew } from './enqueue'
 import type { OutboxStatus } from './ops'
 export { offlineDB } from './db'
 export { generateUuid, MAX_RETRIES, type OutboxStatus } from './ops'
@@ -70,7 +70,11 @@ export async function getGpsPendingCount(): Promise<number> {
   return getPendingCountByKind(['gps_position'])
 }
 export async function getDeadCount(): Promise<number> {
-  return getDeadCountNew()
+  return offlineDB.mutation_outbox
+    .where('kind')
+    .equals('fall_dokument_upload')
+    .filter((op) => op.status === 'dead')
+    .count()
 }
 
 /** Map mutation_outbox upload ops back to the legacy OutboxItem shape for UI. */
