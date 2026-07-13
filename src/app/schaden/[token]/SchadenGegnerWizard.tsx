@@ -1,20 +1,23 @@
 'use client'
 
-// Firmen-Flotte Layer 2 Slice 2a Task 4 — Unfallgegner-Meldungsflow
-// Opponent (Unfallgegner, no account) taps NFC card → fills 4-step form →
-// draft lead created via submitSchadenGegner (Task 5, already done).
-//
-// Wizard-Shape mirrored from /flow/[token]/FlowWizardKfz (step-state, navigation,
-// progress indicator) without importing or editing that component.
+// Firmen-Flotte Layer 2 Slice 2b Task B — Foto+Unterschrift-Steps
+// Slice 2a built steps 1-4 (Kontakt / Fahrzeug+Haftpflicht / Unfallhergang / Bestaetigung).
+// Slice 2b inserts two steps BEFORE Bestaetigung:
+//   Step 4 — Fotos (gegner_fahrzeug / eigenes_fahrzeug / unfallort)
+//   Step 5 — Unterschrift (SignaturePadInput)
+//   Step 6 — Bestaetigung & Absenden
+// compressImage is extracted into src/lib/dokumente/compress-image.ts.
 
-import { useState } from 'react'
-import { CheckIcon } from 'lucide-react'
+import { useRef, useState } from 'react'
+import { CameraIcon, CheckIcon, ImageIcon, XIcon } from 'lucide-react'
 import { Button } from '@/components/primitives'
 import { SectionCard } from '@/components/shared/SectionCard'
 import { TextField } from '@/components/shared/forms/TextField'
 import { VersichererSelect } from '@/components/shared/VersichererSelect'
+import SignaturePadInput from '@/components/SignaturePadInput'
+import { compressImage } from '@/lib/dokumente/compress-image'
 import { submitSchadenGegner } from './actions'
-import type { GegnerFormData } from './gegner-form-types'
+import type { GegnerFoto, GegnerFormData } from './gegner-form-types'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -29,15 +32,27 @@ type Props = {
   versicherer: Array<{ id: string; name: string }>
 }
 
-type Step = 1 | 2 | 3 | 4
+type Step = 1 | 2 | 3 | 4 | 5 | 6
 
-const TOTAL_STEPS = 4
+const TOTAL_STEPS = 6
 
 const STEP_LABELS: Record<Step, string> = {
   1: 'Kontaktdaten',
   2: 'Fahrzeug & Haftpflicht',
   3: 'Unfallhergang',
-  4: 'Bestätigung',
+  4: 'Fotos',
+  5: 'Unterschrift',
+  6: 'Bestätigung',
+}
+
+// ─── Photo-picker state ──────────────────────────────────────────────────────
+
+type FotoTyp = GegnerFoto['typ']
+
+type FotoState = {
+  base64: string
+  contentType: string
+  previewUrl: string
 }
 
 // ─── Wizard ──────────────────────────────────────────────────────────────────
@@ -56,7 +71,17 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
     schadennummer: '',
     hergang: '',
     consent: false,
+    fotos: [],
+    unterschrift: undefined,
   })
+
+  // Photo state — keyed by GegnerFoto.typ
+  const [fotos, setFotos] = useState<Partial<Record<FotoTyp, FotoState>>>({})
+  const [fotoErrors, setFotoErrors] = useState<Partial<Record<FotoTyp, string>>>({})
+  const [fotoLoading, setFotoLoading] = useState<Partial<Record<FotoTyp, boolean>>>({})
+
+  // Unterschrift state
+  const [unterschrift, setUnterschrift] = useState<string | null>(null)
 
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -65,10 +90,56 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
     setData((prev) => ({ ...prev, [key]: value }))
   }
 
+  async function handleFotoChange(typ: FotoTyp, file: File) {
+    setFotoErrors((prev) => ({ ...prev, [typ]: undefined }))
+    setFotoLoading((prev) => ({ ...prev, [typ]: true }))
+    try {
+      const { base64, contentType } = await compressImage(file)
+      setFotos((prev) => ({
+        ...prev,
+        [typ]: {
+          base64,
+          contentType,
+          previewUrl: `data:${contentType};base64,${base64}`,
+        },
+      }))
+    } catch (err) {
+      setFotoErrors((prev) => ({
+        ...prev,
+        [typ]: err instanceof Error ? err.message : 'Foto konnte nicht verarbeitet werden',
+      }))
+    } finally {
+      setFotoLoading((prev) => ({ ...prev, [typ]: false }))
+    }
+  }
+
+  function removeFoto(typ: FotoTyp) {
+    setFotos((prev) => {
+      const next = { ...prev }
+      delete next[typ]
+      return next
+    })
+  }
+
   async function handleSubmit() {
+    // Assemble fotos array from state
+    const fotoArray: GegnerFoto[] = (
+      Object.entries(fotos) as [FotoTyp, FotoState][]
+    ).map(([typ, state]) => ({
+      typ,
+      base64: state.base64,
+      contentType: state.contentType,
+    }))
+
+    const submitData: GegnerFormData = {
+      ...data,
+      fotos: fotoArray.length > 0 ? fotoArray : undefined,
+      unterschrift: unterschrift ?? undefined,
+    }
+
     setSubmitting(true)
     setSubmitError(null)
-    const result = await submitSchadenGegner(token, data)
+    const result = await submitSchadenGegner(token, submitData)
     setSubmitting(false)
     if (!result.ok) {
       setSubmitError(result.error)
@@ -117,7 +188,7 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
           />
         </div>
         <div className="mx-auto flex max-w-md items-center justify-center gap-2 px-5 py-3">
-          {([1, 2, 3, 4] as Step[]).map((s, i) => (
+          {([1, 2, 3, 4, 5, 6] as Step[]).map((s, i) => (
             <div key={s} className="flex items-center gap-2">
               <div
                 style={
@@ -128,7 +199,7 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                       }
                     : undefined
                 }
-                className={`grid h-8 w-8 place-items-center rounded-full border-2 text-xs font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
+                className={`grid h-7 w-7 place-items-center rounded-full border-2 text-[10px] font-semibold tracking-[-.01em] transition-all duration-300 ease-[cubic-bezier(.32,.72,0,1)] ${
                   s < step
                     ? 'bg-claimondo-navy border-claimondo-navy text-white scale-[1.04]'
                     : s === step
@@ -136,11 +207,11 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                       : 'bg-white border-claimondo-navy/[0.10] text-claimondo-ondo/60'
                 }`}
               >
-                {s < step ? <CheckIcon className="w-3.5 h-3.5" /> : s}
+                {s < step ? <CheckIcon className="w-3 h-3" /> : s}
               </div>
               {i < TOTAL_STEPS - 1 && (
                 <div
-                  className={`h-0.5 w-6 rounded-full transition-colors ${
+                  className={`h-0.5 w-4 rounded-full transition-colors ${
                     s < step ? 'bg-claimondo-ondo' : 'bg-claimondo-navy/[0.06]'
                   }`}
                 />
@@ -256,8 +327,65 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
             </div>
           )}
 
-          {/* ═══ Schritt 4 — Bestätigung & Absenden ═══ */}
+          {/* ═══ Schritt 4 — Fotos ═══ */}
           {step === 4 && (
+            <div className="flex flex-col gap-5">
+              <div className="rounded-ios-sm border border-info/30 bg-info-soft px-4 py-3 text-body-sm text-info-strong">
+                Bitte nur Fahrzeugschäden fotografieren — keine Personen.
+              </div>
+
+              <FotoPicker
+                typ="gegner_fahrzeug"
+                label="Schaden am Fahrzeug des Unfallgegners"
+                required
+                state={fotos['gegner_fahrzeug']}
+                loading={!!fotoLoading['gegner_fahrzeug']}
+                error={fotoErrors['gegner_fahrzeug']}
+                onFile={(file) => handleFotoChange('gegner_fahrzeug', file)}
+                onRemove={() => removeFoto('gegner_fahrzeug')}
+              />
+
+              <FotoPicker
+                typ="eigenes_fahrzeug"
+                label="Schaden an Ihrem Fahrzeug"
+                state={fotos['eigenes_fahrzeug']}
+                loading={!!fotoLoading['eigenes_fahrzeug']}
+                error={fotoErrors['eigenes_fahrzeug']}
+                onFile={(file) => handleFotoChange('eigenes_fahrzeug', file)}
+                onRemove={() => removeFoto('eigenes_fahrzeug')}
+              />
+
+              <FotoPicker
+                typ="unfallort"
+                label="Unfallort (optional)"
+                state={fotos['unfallort']}
+                loading={!!fotoLoading['unfallort']}
+                error={fotoErrors['unfallort']}
+                onFile={(file) => handleFotoChange('unfallort', file)}
+                onRemove={() => removeFoto('unfallort')}
+              />
+            </div>
+          )}
+
+          {/* ═══ Schritt 5 — Unterschrift ═══ */}
+          {step === 5 && (
+            <div className="flex flex-col gap-4">
+              <p className="text-body-sm text-claimondo-ondo leading-relaxed">
+                Mit Ihrer Unterschrift bestätigen Sie die Richtigkeit Ihrer Angaben.
+              </p>
+              <SignaturePadInput
+                value={unterschrift}
+                onChange={setUnterschrift}
+                placeholder="Hier unterschreiben"
+              />
+              <p className="text-caption text-claimondo-shield">
+                Die Unterschrift ist optional — Sie können diesen Schritt überspringen.
+              </p>
+            </div>
+          )}
+
+          {/* ═══ Schritt 6 — Bestätigung & Absenden ═══ */}
+          {step === 6 && (
             <div className="flex flex-col gap-5">
               {/* Summary */}
               <div className="flex flex-col gap-2">
@@ -286,6 +414,14 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
                 {data.hergang ? (
                   <SummaryRow label="Unfallhergang" value={data.hergang} />
                 ) : null}
+                {/* Photo summary */}
+                {Object.keys(fotos).length > 0 ? (
+                  <SummaryRow
+                    label="Fotos"
+                    value={`${Object.keys(fotos).length} Foto(s) beigefügt`}
+                  />
+                ) : null}
+                {unterschrift ? <SummaryRow label="Unterschrift" value="Vorhanden" /> : null}
               </div>
 
               {/* Pflicht-Hinweis */}
@@ -354,6 +490,102 @@ export function SchadenGegnerWizard({ token, context, versicherer }: Props) {
           ) : null}
         </div>
       </div>
+    </div>
+  )
+}
+
+// ─── FotoPicker ───────────────────────────────────────────────────────────────
+
+function FotoPicker({
+  typ,
+  label,
+  required = false,
+  state,
+  loading,
+  error,
+  onFile,
+  onRemove,
+}: {
+  typ: FotoTyp
+  label: string
+  required?: boolean
+  state: FotoState | undefined
+  loading: boolean
+  error: string | undefined
+  onFile: (file: File) => void
+  onRemove: () => void
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  return (
+    <div className="flex flex-col gap-2">
+      <label className="text-xs font-semibold text-claimondo-shield">
+        {label}
+        {required && <span className="text-danger ml-1">*</span>}
+        {!required && (
+          <span className="ml-1 text-claimondo-ondo/60 font-normal">(optional)</span>
+        )}
+      </label>
+
+      {/* Hidden file input — capture=environment opens camera on mobile */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        aria-label={`Foto auswählen: ${label}`}
+        onChange={(e) => {
+          const file = e.target.files?.[0]
+          if (file) onFile(file)
+          // Reset so same file can be re-selected after remove
+          e.target.value = ''
+        }}
+      />
+
+      {state ? (
+        // Preview + remove
+        <div className="relative rounded-ios-md overflow-hidden border border-claimondo-border bg-claimondo-bg">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={state.previewUrl}
+            alt={`Vorschau: ${label}`}
+            className="w-full h-auto max-h-52 object-cover"
+          />
+          <button
+            type="button"
+            onClick={onRemove}
+            aria-label="Foto entfernen"
+            className="absolute top-2 right-2 w-7 h-7 rounded-full bg-claimondo-navy/80 flex items-center justify-center"
+          >
+            <XIcon className="w-4 h-4 text-white" />
+          </button>
+        </div>
+      ) : loading ? (
+        <div className="flex items-center justify-center gap-2 rounded-ios-md border border-claimondo-border bg-claimondo-bg px-4 py-6 text-body-sm text-claimondo-ondo">
+          <div className="w-4 h-4 border-2 border-claimondo-ondo border-t-transparent rounded-full animate-spin" />
+          Foto wird verarbeitet …
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex flex-col items-center gap-2 rounded-ios-md border-2 border-dashed border-claimondo-navy/20 bg-claimondo-bg px-4 py-6 text-body-sm text-claimondo-ondo hover:border-claimondo-ondo hover:bg-white transition-colors"
+        >
+          <div className="flex gap-3 text-claimondo-ondo/60">
+            <CameraIcon className="w-5 h-5" />
+            <ImageIcon className="w-5 h-5" />
+          </div>
+          <span className="font-semibold text-claimondo-navy">Foto aufnehmen oder auswählen</span>
+          <span className="text-caption text-claimondo-shield">
+            Kamera oder Galerie
+          </span>
+        </button>
+      )}
+
+      {error ? (
+        <p className="text-caption text-danger-strong">{error}</p>
+      ) : null}
     </div>
   )
 }
