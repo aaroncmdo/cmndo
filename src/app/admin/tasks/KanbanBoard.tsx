@@ -13,7 +13,7 @@ import { DragDropContext, Droppable, Draggable, type DropResult } from '@hello-p
 import { createTask, updateTaskStatus, deleteTask } from './actions'
 import TaskReassignDropdown, { type ReassignCandidate } from '@/components/shared/TaskReassignDropdown'
 import { Modal } from '@/components/primitives/Modal'
-import { KiExecuteButton } from './KiExecuteButton'
+import { KiExecuteButton } from '@/components/shared/KiExecuteButton'
 
 type Task = {
   id: string
