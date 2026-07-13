@@ -5,6 +5,8 @@
 // Die 11 Zustände werden nach Priority-Order ausgewertet (first match wins).
 // SLA-Records aus AAR-431 (Child 2) können passende Aktionen auf „hoch" boosten.
 
+import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
+
 export type KundeAktionsTyp =
   | 'onboarding-offen'
   | 'pflichtdokumente-offen'
@@ -144,7 +146,7 @@ export function getKundenJetztZuTun(
 
   // 10. Fall-Abschluss: permanent-minimalisiert nach 30 Tagen. Höchster Vorrang
   // vor allem anderen, weil ein abgeschlossener Fall nichts mehr auslöst.
-  if (fall.status === 'abgeschlossen' || fall.abgeschlossen_am) {
+  if (istClaimGeschlossen({ status: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) {
     const abgeschlossenAm = fall.abgeschlossen_am ? new Date(fall.abgeschlossen_am).getTime() : now
     const alterTage = (now - abgeschlossenAm) / (1000 * 60 * 60 * 24)
     if (alterTage > FALL_ABGESCHLOSSEN_MINIMAL_NACH_TAGEN) return null
