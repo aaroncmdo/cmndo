@@ -30,6 +30,9 @@ import { markArrived, pauseFokusmodus, startStop, exitArrivedToRoute } from './a
 import { recoverOutbox } from '@/lib/offline/outbox'
 import { registerOnlineSync, syncOutbox } from '@/lib/offline/sync-outbox'
 import { registerGpsOnlineSync, syncGpsOutbox } from '@/lib/offline/sync-gps-outbox'
+import { useOnlineStatus } from '@/lib/offline/use-online-status'
+import { useOfflineData } from '@/lib/offline/use-offline-data'
+import { drainOutbox } from '@/lib/offline/sync'
 
 export interface FeldmodusClientProps {
   session: SvTagesSession
@@ -46,13 +49,25 @@ export default function FeldmodusClient({
 }: FeldmodusClientProps) {
   const router = useRouter()
 
+  // Offline-First Slice 1: online-status + snapshot persistence + mount drain.
+  const online = useOnlineStatus()
+  const routeKey = `feldmodus-route:${sv.id}:${session.datum}`
+  const offlineRoute = useOfflineData<{ stops: FeldmodusStop[]; session: SvTagesSession }>(
+    routeKey,
+    { serverData: { stops, session }, scope: 'feldmodus', role: 'sv' },
+  )
+  // On mount while online, offlineRoute.data === { stops, session } (hook returns serverData live).
+  // Used below in initialIndex so the derive reads from the persisted shape (safe swap: same values online).
+  const effectiveStops = offlineRoute.data?.stops ?? stops
+  const effectiveSession = offlineRoute.data?.session ?? session
+
   const initialIndex = useMemo(() => {
-    if (!session.aktueller_termin_id) return 0
-    const idx = stops.findIndex(
-      (s) => s.termin_id === session.aktueller_termin_id,
+    if (!effectiveSession.aktueller_termin_id) return 0
+    const idx = effectiveStops.findIndex(
+      (s) => s.termin_id === effectiveSession.aktueller_termin_id,
     )
     return idx >= 0 ? idx : 0
-  }, [session.aktueller_termin_id, stops])
+  }, [effectiveSession.aktueller_termin_id, effectiveStops])
 
   const [aktuellerStopIndex, setAktuellerStopIndex] = useState(initialIndex)
   const [sessionStatus, setSessionStatus] = useState(session.status)
@@ -209,6 +224,8 @@ export default function FeldmodusClient({
   // andere Tab-Instanz) gesetzt wird, schaltet die UI ohne Reload in den
   // arrived-State und öffnet die Fallakte.
   useEffect(() => {
+    // Offline-First Slice 1: kein Realtime-Channel waehrend offline (spart Reconnect-Loops).
+    if (!online) return
     // 2026-07-08: nur echte Termine haben eine gutachter_termine-Row -> nur die subscriben.
     const terminId = aktuellerStop?.kind === 'termin' ? aktuellerStop.termin_id : null
     if (!terminId) return
@@ -238,7 +255,7 @@ export default function FeldmodusClient({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [aktuellerStop?.termin_id, feldmodusTerminChannelSuffix])
+  }, [aktuellerStop?.termin_id, feldmodusTerminChannelSuffix, online])
 
   // AAR-388: Beim Mount Recovery fahren + Sync-Listeners registrieren.
   // Hängengebliebene 'uploading'-Items aus Tab-Reload zurück auf 'pending'.
@@ -250,6 +267,10 @@ export default function FeldmodusClient({
     void syncOutbox().catch(() => {})
     void syncGpsOutbox().catch(() => {})
   }, [])
+
+  // Offline-First Slice 1: Outbox einmalig beim Mount drainen — synct queued SV-Writes
+  // sofort (z.B. nach Tab-Reload aus Offline-Session oder nach Netzrueckkehr).
+  useEffect(() => { void drainOutbox().catch(() => {}) }, [])
 
   // 2026-07-08: Index-basierter Advance über das gemischte stops-Array (Termine + Privat-Wegpunkte).
   // Für termin-only-Routen identisch zum alten findIndex(nextTerminId), weil index+1 = nächster Termin.
