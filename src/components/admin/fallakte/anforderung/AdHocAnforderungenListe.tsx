@@ -27,6 +27,7 @@ import {
   resendAdHocAnforderung,
   type AdHocAnforderungRow,
 } from '@/lib/dokumente/ad-hoc-anforderung'
+import { resolveAdhocAnforderungStatus, type AdhocToneKey } from '@/lib/dokumente/adhoc-status'
 
 type Props = {
   anforderungen: AdHocAnforderungRow[]
@@ -44,21 +45,14 @@ const KANAL_LABEL: Record<string, string> = {
   email: 'E-Mail',
 }
 
-function statusTone(
-  status: string,
-  expiresAt: string,
-): { icon: typeof ClockIcon; color: string; bg: string; label: string } {
-  const expired = new Date(expiresAt).getTime() < Date.now()
-  if (status === 'completed') {
-    return { icon: CheckCircle2Icon, color: '#059669', bg: '#ecfdf5', label: 'Erhalten' }
-  }
-  if (status === 'cancelled') {
-    return { icon: XCircleIcon, color: '#6b7280', bg: '#f3f4f6', label: 'Storniert' }
-  }
-  if (status === 'pending' && expired) {
-    return { icon: AlertTriangleIcon, color: '#dc2626', bg: '#fef2f2', label: 'Abgelaufen' }
-  }
-  return { icon: ClockIcon, color: '#d97706', bg: '#fffbeb', label: 'Ausstehend' }
+// Ton -> Icon/Farbe. Das WELCHER-Ton (+ Label + canAct) lebt in der puren,
+// getesteten resolveAdhocAnforderungStatus (drift-fest gegen das DB-Vokabular
+// gesendet/teilweise/komplett/abgelaufen).
+const TONE_STYLE: Record<AdhocToneKey, { icon: typeof ClockIcon; color: string; bg: string }> = {
+  done: { icon: CheckCircle2Icon, color: '#059669', bg: '#ecfdf5' },
+  terminal: { icon: XCircleIcon, color: '#6b7280', bg: '#f3f4f6' },
+  expired: { icon: AlertTriangleIcon, color: '#dc2626', bg: '#fef2f2' },
+  open: { icon: ClockIcon, color: '#d97706', bg: '#fffbeb' },
 }
 
 export function AdHocAnforderungenListe({ anforderungen }: Props) {
@@ -122,11 +116,12 @@ export function AdHocAnforderungenListe({ anforderungen }: Props) {
       </div>
       <Stack gap={0}>
         {anforderungen.map((a, i) => {
-          const tone = statusTone(a.status, a.expires_at)
-          const StatusIcon = tone.icon
+          const view = resolveAdhocAnforderungStatus(a.status, a.expires_at)
+          const toneStyle = TONE_STYLE[view.toneKey]
+          const StatusIcon = toneStyle.icon
           const KanalIcon = KANAL_ICON[a.kanal] ?? MessageCircleIcon
-          const expired = a.status === 'pending' && new Date(a.expires_at).getTime() < Date.now()
-          const canAct = a.status === 'pending'
+          const expired = view.expired
+          const canAct = view.canAct
           const busy = pendingId === a.id
           return (
             <div
@@ -188,12 +183,12 @@ export function AdHocAnforderungenListe({ anforderungen }: Props) {
                       paddingInline: 8,
                       paddingBlock: 3,
                       borderRadius: tokens.radius.full,
-                      color: tone.color,
-                      backgroundColor: tone.bg,
+                      color: toneStyle.color,
+                      backgroundColor: toneStyle.bg,
                     }}
                   >
                     <StatusIcon size={10} />
-                    {tone.label}
+                    {view.label}
                   </span>
 
                   {canAct && (

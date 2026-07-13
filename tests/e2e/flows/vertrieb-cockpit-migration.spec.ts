@@ -250,3 +250,29 @@ test('9) Makler-anlegen oeffnet als Drawer im Cockpit', async ({ page }) => {
 
   await page.screenshot({ path: 'test-results/vertrieb-cockpit-9-makler-anlegen.png', fullPage: true }).catch(() => {})
 })
+
+// ---------------------------------------------------------------------------
+// 10 — Firmen-Flotten (B2B) oeffnet als Drawer im Cockpit (Phase C).
+//      Dedizierter, IMMER sichtbarer Einstieg (KEIN Rollen-Pill) -> Drawer mit
+//      FirmenFlotteAdminClient (Liste + Anlage). Read-only: nur oeffnen, kein Anlegen.
+// ---------------------------------------------------------------------------
+test('10) Firmen-Flotten oeffnet als Drawer im Cockpit', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+
+  // Warten bis Cockpit bereit ist
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Firmen-Flotten ist ein globaler Einstieg — kein Pill noetig, immer sichtbar.
+  await page.getByRole('button', { name: 'Firmen-Flotten' }).first().click()
+
+  // Drawer muss sich IM Cockpit oeffnen — PageHeader-Titel aus FirmenFlotteAdminClient.
+  // exact:true trennt "Firmen-Flotten-Konten" (Drawer-Titel) vom Button "Firmen-Flotten".
+  await expect(page.getByText('Firmen-Flotten-Konten', { exact: true })).toBeVisible({ timeout: 60_000 })
+
+  // URL bleibt im Cockpit (kein Full-Page-Weg auf /admin/firmen-flotte).
+  expect(page.url()).toContain('/admin/vertrieb')
+
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-10-firmen-flotte.png', fullPage: true }).catch(() => {})
+})

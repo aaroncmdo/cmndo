@@ -51,13 +51,13 @@ async function requireKundeOfClaim(claimId: string): Promise<
   return { ok: true, userId: user.id }
 }
 
-function revalidateClaim(claimId: string, fallId: string | null) {
+function revalidateClaim(_claimId: string, fallId: string | null) {
   if (fallId) {
     revalidatePath(`/faelle/${fallId}`)
     revalidatePath(`/kunde/faelle/${fallId}`)
     revalidatePath(`/gutachter/fall/${fallId}`)
   }
-  revalidatePath(`/admin/claims/${claimId}`)
+  revalidatePath('/admin/faelle')
   // Layout (Sidebar mit LexDrive-QR-Card) rendert pro Route — wir
   // revalidieren den Layout-Root, damit die Sidebar bei einem Vollmacht-
   // Update neu rendert und die Card erscheint.

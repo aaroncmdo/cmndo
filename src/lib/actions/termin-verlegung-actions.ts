@@ -446,8 +446,6 @@ export async function getKundeTerminVorschlaegeAction(
     return { ok: false, error: `Engine-Fehler: ${e instanceof Error ? e.message : String(e)}` }
   }
 
-  console.log('[AAR-864] getKundeTerminVorschlaegeAction: vorschlaegeRaw.length =', vorschlaegeRaw.length, '| svId =', termin.assignee_id, '| fallId =', termin.fall_id, '| zielLat =', zielLat, '| zielLng =', zielLng)
-
   // Routen-Details rausfiltern — Kunde sieht nur Datum + Uhrzeit (SV-Privatsphäre)
   const vorschlaege = vorschlaegeRaw.map((v) => ({ start: v.start, end: v.end, datum: v.datum }))
   return { ok: true, vorschlaege, slotDauerMin }

@@ -14,6 +14,7 @@ import { useState, useRef, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import { createKundeAccount, updateLeadStammdaten } from './actions'
+import GooglePlaceAutocomplete, { type PlaceResult } from '@/components/GooglePlaceAutocomplete'
 import { formatBerlin } from '@/lib/google-calendar/timezone'
 // AAR-956 §3a: datengetriebener incomplete-Pfad (termin-loser Self-Service-Lead).
 import { FlowQualiStep } from './FlowQualiStep'
@@ -240,6 +241,13 @@ export default function FlowWizardKfz({
   const [editNachname, setEditNachname] = useState(lead.nachname)
   const [editTelefon, setEditTelefon] = useState(lead.telefon)
   const [editEmail, setEditEmail] = useState(lead.email)
+  // AAR-956: Vom Makler vorausgefuellter Besichtigungsort — Kunde kann bestaetigen
+  // oder via Place-Picker aendern. editStandortPlace ist gesetzt sobald eine
+  // Dropdown-Auswahl getroffen wurde (liefert neue Koordinaten); reiner Freitext
+  // laesst es null (dann nur Adress-Text, Makler-Koordinaten bleiben).
+  const standortPrefill = [lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')
+  const [editStandortText, setEditStandortText] = useState(standortPrefill)
+  const [editStandortPlace, setEditStandortPlace] = useState<PlaceResult | null>(null)
 
   // Account step — CMM-14: Account-Anlage läuft automatisch direkt nach SA.
   // Kein Edit-Form mehr — der Kunde sieht nur das Erfolgsergebnis.
@@ -468,6 +476,19 @@ export default function FlowWizardKfz({
                   </div>
                   <EditableInput label={t('step_summary.fields.telefon')} value={editTelefon} onChange={setEditTelefon} type="tel" />
                   <EditableInput label={t('step_summary.fields.email')} value={editEmail} onChange={setEditEmail} type="email" />
+                  {/* AAR-956: Besichtigungsort — vom Makler vorausgefuellt, vom Kunden bestaetig-/aenderbar. */}
+                  {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
+                    <div>
+                      <label className="block text-xs font-medium text-claimondo-ondo mb-1">{t('step_summary.labels.standort')}</label>
+                      <GooglePlaceAutocomplete
+                        types={['address']}
+                        defaultValue={standortPrefill}
+                        onSelect={(p) => { setEditStandortText(p.adresse); setEditStandortPlace(p) }}
+                        onChange={(v) => { setEditStandortText(v); setEditStandortPlace(null) }}
+                        scrollIntoViewOnFocus
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* AAR-336: Nicht-editierbare Infos (aus Dispatch-Qualifizierung) —
@@ -476,9 +497,6 @@ export default function FlowWizardKfz({
                     Vorher hatte dieser Schritt leere Dropdowns die den Kunden
                     zur Neu-Eingabe bereits erfasster Werte zwangen. */}
                 <div className="space-y-2 mb-6">
-                  {(lead.fahrzeug_standort_adresse || lead.fahrzeug_standort_plz) && (
-                    <SummaryRow label={t('step_summary.labels.standort')} value={[lead.fahrzeug_standort_adresse, lead.fahrzeug_standort_plz].filter(Boolean).join(', ')} />
-                  )}
                   {fahrzeug && <SummaryRow label={t('step_summary.labels.fahrzeug')} value={`${fahrzeug}${lead.kennzeichen ? ` (${lead.kennzeichen})` : ''}`} />}
                   {lead.schadentyp && <SummaryRow label={t('step_summary.labels.schadentyp')} value={tLabel(`step_summary.schadentyp.${lead.schadentyp}`, lead.schadentyp_freitext ?? lead.schadentyp ?? '')} />}
                   {lead.unfall_konstellation && (
@@ -893,9 +911,25 @@ export default function FlowWizardKfz({
                   return
                 }
                 // Korrigierte Stammdaten speichern
-                if (editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email) {
+                const stammChanged = editVorname !== lead.vorname || editNachname !== lead.nachname || editTelefon !== lead.telefon || editEmail !== lead.email
+                // AAR-956: Besichtigungsort geaendert? Neue Place-Auswahl ODER Adress-Text abweichend vom Prefill.
+                const standortChanged = editStandortPlace != null || editStandortText !== standortPrefill
+                if (stammChanged || standortChanged) {
                   try {
-                    await updateLeadStammdaten(lead.id, { vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail }, token)
+                    await updateLeadStammdaten(lead.id, {
+                      vorname: editVorname, nachname: editNachname, telefon: editTelefon, email: editEmail,
+                      // Koordinaten NUR bei Dropdown-Auswahl (editStandortPlace) schreiben — reiner
+                      // Freitext aktualisiert nur die Adresse, die Makler-Koordinaten bleiben erhalten.
+                      ...(standortChanged ? {
+                        fahrzeug_standort_adresse: editStandortPlace?.adresse ?? editStandortText,
+                        ...(editStandortPlace ? {
+                          fahrzeug_standort_plz: editStandortPlace.plz,
+                          fahrzeug_standort_lat: editStandortPlace.lat,
+                          fahrzeug_standort_lng: editStandortPlace.lng,
+                          fahrzeug_standort_place_id: editStandortPlace.place_id,
+                        } : {}),
+                      } : {}),
+                    }, token)
                     setAccountEmail(editEmail)
                   } catch { /* weiter trotzdem */ }
                 }

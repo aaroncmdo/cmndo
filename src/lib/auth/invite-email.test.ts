@@ -33,4 +33,22 @@ describe('einladungEmailHtml', () => {
     expect(html.toLowerCase()).toContain('passwort vergessen')
     expect(html.toLowerCase()).not.toContain('einmalpasswort')
   })
+
+  // Mitarbeiter-Flow (Aaron-Entscheid): dokumentierte Ausnahme von Befund F —
+  // das Initial-Passwort steht zusaetzlich zum Magic-Link in der Mail. Nur wenn
+  // einmalpasswort explizit gesetzt ist (Default = weiterhin KEIN Passwort).
+  it('rendert das Einmalpasswort NUR wenn einmalpasswort gesetzt ist', () => {
+    const html = einladungEmailHtml({
+      vorname: 'Max',
+      email: 'max@b.de',
+      introHtml: '<p>Sie wurden als Dispatcher eingeladen.</p>',
+      magicLink: 'https://app.claimondo.de/verify?token=abc123',
+      appUrl: 'https://app.claimondo.de',
+      einmalpasswort: 'Abc123XyzPw',
+    })
+    // Passwort UND Magic-Link beide vorhanden
+    expect(html).toContain('Abc123XyzPw')
+    expect(html.toLowerCase()).toContain('passwort')
+    expect(html).toContain('https://app.claimondo.de/verify?token=abc123')
+  })
 })

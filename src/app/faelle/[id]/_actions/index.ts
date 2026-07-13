@@ -9,7 +9,7 @@
 //   stammdaten.ts   — updateFallField, updateSchadensAdresse, saveFinVin
 //   dokumente.ts    — triggerFinCallForFall, markDokumentNachgereicht,
 //                     syncPflichtdokumenteForFall, requestCardentityTypBForFall,
-//                     uploadDatei, uploadPflichtdokument, uploadAnschlussschreiben
+//                     uploadDatei, uploadAnschlussschreiben
 //   prozess.ts      — requestTechnischeStellungnahme, freigebeTechnischeStellungnahme,
 //                     startRuege, uebergebeFallKlage, eskalation
 //   termine.ts      — createKbVideoterminByKb, createTermin, updateTerminStatus

@@ -100,6 +100,39 @@ describe('erstelleMaklerAnfrage', () => {
     expect(extra.notiz).toBe('Parkschaden, will schnell')
   })
 
+  it('flowlink: Standort-Koordinaten -> fahrzeug_standort_lat/lng/place_id + adresse/plz', async () => {
+    await erstelleMaklerAnfrage({
+      ...baseInput,
+      ausgang: 'flowlink',
+      standortPlz: '50667',
+      standortOrt: 'Hauptstraße 5, 50667 Köln',
+      standortLat: 50.9384,
+      standortLng: 6.9601,
+      standortPlaceId: 'ChIJ-test',
+    })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.fahrzeug_standort_plz).toBe('50667')
+    expect(extra.fahrzeug_standort_adresse).toBe('Hauptstraße 5, 50667 Köln')
+    expect(extra.fahrzeug_standort_lat).toBe(50.9384)
+    expect(extra.fahrzeug_standort_lng).toBe(6.9601)
+    expect(extra.fahrzeug_standort_place_id).toBe('ChIJ-test')
+  })
+
+  it('flowlink: ohne Koordinaten kein lat/lng/place_id (nur Text wie bisher)', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink', standortOrt: 'Köln' })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect(extra.fahrzeug_standort_adresse).toBe('Köln')
+    expect('fahrzeug_standort_lat' in extra).toBe(false)
+    expect('fahrzeug_standort_place_id' in extra).toBe(false)
+  })
+
+  it('flowlink: nur lat ohne lng -> keine Koordinaten geschrieben (kein Partial)', async () => {
+    await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink', standortLat: 50.9, standortLng: null })
+    const extra = createLeadMock.mock.calls[0][2] as Record<string, unknown>
+    expect('fahrzeug_standort_lat' in extra).toBe(false)
+    expect('fahrzeug_standort_lng' in extra).toBe(false)
+  })
+
   it('service_typ default komplett, nur_gutachter wird durchgereicht', async () => {
     await erstelleMaklerAnfrage({ ...baseInput, ausgang: 'flowlink' })
     expect((createLeadMock.mock.calls[0][2] as Record<string, unknown>).service_typ).toBe('komplett')
@@ -131,6 +164,23 @@ describe('erstelleMaklerAnfrage', () => {
     expect(arg.quelle).toBe('makler-anfrage-rueckruf')
     expect(createLeadMock).not.toHaveBeenCalled()
     expect(res.ok).toBe(true)
+  })
+
+  it('rueckruf: reicht Standort-Koordinaten (lat/lng/place_id) an erstelleOeffentlichenRueckruf durch', async () => {
+    await erstelleMaklerAnfrage({
+      ...baseInput,
+      ausgang: 'rueckruf',
+      standortPlz: '50667',
+      standortOrt: 'Hauptstraße 5, 50667 Köln',
+      standortLat: 50.9384,
+      standortLng: 6.9601,
+      standortPlaceId: 'ChIJ-test',
+    })
+    const arg = rueckrufMock.mock.calls[0][0] as Record<string, unknown>
+    expect(arg.standortLat).toBe(50.9384)
+    expect(arg.standortLng).toBe(6.9601)
+    expect(arg.standortPlaceId).toBe('ChIJ-test')
+    expect(arg.standortPlz).toBe('50667')
   })
 
   it('Einwilligungs-Nachweis wird als Timeline-Eintrag protokolliert', async () => {

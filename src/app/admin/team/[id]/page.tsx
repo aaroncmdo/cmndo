@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { notFound } from 'next/navigation'
 import MitarbeiterDetail from './MitarbeiterDetail'
 
@@ -27,6 +28,18 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
     gehaltsstufe: verg?.gehaltsstufe ?? null,
     gehalt_brutto: verg?.gehalt_brutto ?? null,
     eingestellt_am: verg?.eingestellt_am ?? null,
+  }
+
+  // Task B (Aaron-Fund): aktuelle Handy-LOGIN-Nummer (auth.users.phone) — getrennt
+  // von twofa_telefon. Nur der Admin-Client kann auth.users lesen; non-critical.
+  let loginPhone: string | null = null
+  try {
+    const adminDb = createAdminClient()
+    const { data: authUser } = await adminDb.auth.admin.getUserById(id)
+    const raw = authUser?.user?.phone ?? null
+    loginPhone = raw ? (raw.startsWith('+') ? raw : `+${raw}`) : null
+  } catch {
+    // ignore — Panel zeigt dann '—'
   }
 
   const now = new Date()
@@ -58,6 +71,7 @@ export default async function MitarbeiterPage({ params }: { params: Promise<{ id
       mitarbeiter={mitarbeiter}
       stats={{ leadsTotal, leadsKonvertiert, aktiveFaelle, abgeschlossen, avgDays, isDispatch }}
       performanceHistory={perf ?? []}
+      loginPhone={loginPhone}
     />
   )
 }

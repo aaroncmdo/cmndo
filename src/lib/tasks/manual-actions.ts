@@ -84,7 +84,7 @@ export async function listMyTasks(tab: 'assigned' | 'created' | 'all' = 'assigne
   id: string; titel: string; beschreibung: string | null; status: string; prioritaet: string | null
   faellig_am: string | null; fall_id: string | null; lead_id: string | null
   zugewiesen_an: string | null; erstellt_von_id: string | null; auto_erstellt: boolean
-  created_at: string; claim_nummer?: string | null
+  created_at: string; claim_id: string | null; typ: string | null; claim_nummer?: string | null
 }[]> {
   const supabase = await createClient()
   const user = (await supabase.auth.getUser())?.data?.user ?? null
@@ -92,7 +92,7 @@ export async function listMyTasks(tab: 'assigned' | 'created' | 'all' = 'assigne
 
   let query = supabase
     .from('tasks')
-    .select('id, titel, beschreibung, status, prioritaet, faellig_am, fall_id, lead_id, zugewiesen_an, erstellt_von_id, auto_erstellt, created_at')
+    .select('id, titel, beschreibung, status, prioritaet, faellig_am, fall_id, lead_id, zugewiesen_an, erstellt_von_id, auto_erstellt, created_at, claim_id, typ')
     .order('faellig_am', { ascending: true, nullsFirst: false })
     .order('created_at', { ascending: false })
     .limit(100)

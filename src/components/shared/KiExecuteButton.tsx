@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/primitives/Button'
 import { Modal } from '@/components/primitives/Modal'
 import { executableTypeFor } from '@/lib/task-executor/registry'
-import { starteKiAusfuehrung, bestaetigeKiAusfuehrung, brichAbKiAusfuehrung } from './ki-actions'
+import { starteKiAusfuehrung, bestaetigeKiAusfuehrung, brichAbKiAusfuehrung } from '@/app/admin/tasks/ki-actions'
 import type { PlanStep } from '@/lib/task-executor/types'
 
 export type KiButtonTask = { id: string; typ: string | null; claim_id: string | null; status: string }
@@ -29,9 +29,11 @@ function stepPreview(step: PlanStep): string {
 export function KiExecuteButton({
   task,
   executorEnabled,
+  compact = false,
 }: {
   task: KiButtonTask
   executorEnabled: boolean
+  compact?: boolean
 }) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -78,21 +80,21 @@ export function KiExecuteButton({
 
   return (
     <div
-      className="mt-2 pt-2 border-t border-claimondo-border"
+      className={compact ? 'inline-flex' : 'mt-2 pt-2 border-t border-claimondo-border'}
       onClick={(e) => e.stopPropagation()}
       onMouseDown={(e) => e.stopPropagation()}
     >
       <Button
         variant="ghost"
         size="sm"
-        fullWidth
+        fullWidth={!compact}
         loading={pending}
         onClick={starten}
         ariaLabel="Aufgabe per KI erledigen"
       >
         ✨ Per KI erledigen
       </Button>
-      {error && !plan && <p className="mt-1 text-danger text-body-xs">{error}</p>}
+      {error && !plan && !compact && <p className="mt-1 text-danger text-body-xs">{error}</p>}
 
       {plan && (
         <Modal open onClose={abbrechen} maxWidth={480} ariaLabel="KI-Plan bestätigen">
