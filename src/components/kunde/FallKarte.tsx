@@ -20,6 +20,7 @@ import {
   resolveAktionTexte,
   type JetztZuTunTranslator,
 } from '@/lib/kunde/jetzt-zu-tun-i18n'
+import { istClaimGeschlossen } from '@/lib/claims/terminal-status'
 
 // ─── Typen ────────────────────────────────────────────────────────────────────
 
@@ -72,8 +73,15 @@ const PHASEN: Array<{ key: PhaseKey; label: string; labelKey: string }> = [
   { key: 'abschluss',    label: 'Abschluss',    labelKey: 'phasen.abschluss'    },
 ]
 
-function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
-  if (fall.abgeschlossen_am || fall.status === 'abgeschlossen') return 'abschluss'
+// FG5 Cluster 1, Task 1b: replaced inline boolean-check with the shared helper
+// so that storniert/verjaehrt/etc. claims (set via endzustand-actions, no abgeschlossen_am)
+// correctly show the 'abschluss' phase instead of defaulting to 'erfassung'.
+export function derivePhase(fall: FallKarteProps['fall']): PhaseKey {
+  // fall.status = operative_status (set by loader: claim.operative_status ?? fall.status).
+  // Pass it as BOTH axes so the helper catches both operative closed values (abgeschlossen/storniert)
+  // AND terminal claims.status values (reguliert_vollstaendig, verjaehrt, etc.) — the loader
+  // may expose either depending on which DB column is populated.
+  if (istClaimGeschlossen({ status: fall.status, operativeStatus: fall.status, abgeschlossenAm: fall.abgeschlossen_am })) return 'abschluss'
   if (fall.gutachten_eingegangen_am || fall.regulierung_am)      return 'regulierung'
   if (fall.sa_unterschrieben)                                    return 'begutachtung'
   return 'erfassung'
