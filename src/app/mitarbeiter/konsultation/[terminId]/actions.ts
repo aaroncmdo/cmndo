@@ -10,6 +10,7 @@ import { createAdminClient } from '@/lib/supabase/admin'
 import { sendFlowLinkMultiChannelCore } from '@/lib/start-link/send-flowlink-multichannel'
 import { revalidatePath } from 'next/cache'
 import type { KonsultationDisposition } from './types'
+import { syncKbTerminOut } from '@/lib/termine/kb-termin-sync'
 
 const BERATUNG_DAUER_MIN = 30
 
@@ -86,6 +87,9 @@ export async function protokolliereKonsultation(
 
   const { error } = await ctx.admin.from('gutachter_termine').update(update).eq('id', terminId)
   if (error) return { ok: false, error: error.message }
+
+  // SP2c: bei Verlegung (Zeitaenderung) den externen KB-Kalender nachziehen. Fail-soft.
+  if (disposition === 'verschoben') await syncKbTerminOut(terminId)
 
   if (ctx.leadId) {
     try {

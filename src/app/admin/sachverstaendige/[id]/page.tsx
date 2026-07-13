@@ -71,12 +71,16 @@ export default async function SvDetailPage({
 
   // AAR-717: CalDAV-Verbindungs-Status für Admin-Banner. Wenn last_error
   // gesetzt ist, zeigen wir einen roten Hinweis im Stammdaten-Tab.
-  const { data: caldavVerbindung } = await supabase
-    .from('sv_kalender_verbindungen')
-    .select('provider_label, calendar_display_name, last_error, last_error_at, connected_at, last_sync_at')
-    .eq('sv_id', id)
-    .eq('provider', 'caldav')
-    .maybeSingle()
+  // Admin-Client: kalender_verbindungen ist RLS-locked (profile_id = auth.uid());
+  // der Admin liest hier eine FREMDE profile_id -> user-context liefe leer.
+  const { data: caldavVerbindung } = sv.profile_id
+    ? await createAdminClient()
+        .from('kalender_verbindungen')
+        .select('provider_label, calendar_display_name, last_error, last_error_at, connected_at, last_sync_at')
+        .eq('profile_id', sv.profile_id)
+        .eq('provider', 'caldav')
+        .maybeSingle()
+    : { data: null }
 
   const profileRaw = sv.profiles as unknown
   const profile = (Array.isArray(profileRaw) ? profileRaw[0] : profileRaw) as {

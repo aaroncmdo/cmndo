@@ -1,5 +1,5 @@
 // AAR-872: Aggregator fuer Privat-Events des SV an einem bestimmten Datum.
-// Vereinheitlicht Google-Calendar (primary) und CalDAV (sv_kalender_verbindungen)
+// Vereinheitlicht Google-Calendar (primary) und CalDAV (kalender_verbindungen)
 // in einen `PrivateCalendarEvent`-Array. Wird vom „Stop hinzufuegen"-Sheet
 // genutzt, damit der SV einen Privat-Termin als Tagesroute-Stop addet.
 //
@@ -9,7 +9,6 @@
 
 import { google } from 'googleapis'
 import { createAdminClient } from '@/lib/supabase/admin'
-import { getGutachterForUser } from '@/lib/gutachter'
 import { getGoogleOAuthClientForUser } from '@/lib/google/oauth-client'
 import { decrypt } from '@/lib/kalender/caldav/encryption'
 import { listAllCalendarEventsFull } from '@/lib/kalender/caldav/client'
@@ -73,13 +72,12 @@ async function fetchCaldavEvents(
 ): Promise<PrivateCalendarEvent[]> {
   try {
     const db = createAdminClient()
-    // multi-standort-safe: getGutachterForUser (Ordering+limit(1)) statt .maybeSingle().
-    const sv = await getGutachterForUser<{ id: string }>(db, profileId, 'id')
-    if (!sv) return []
+    // Universelle SSoT: kalender_verbindungen (profile_id) — Read+Write konsistent
+    // (Connect-Pfad schreibt ebenfalls hierher). Kein sv_id-Umweg mehr noetig.
     const { data: verb } = await db
-      .from('sv_kalender_verbindungen')
+      .from('kalender_verbindungen')
       .select('server_url, username, password_encrypted, calendar_url')
-      .eq('sv_id', sv.id as string)
+      .eq('profile_id', profileId)
       .eq('provider', 'caldav')
       .maybeSingle()
     if (!verb) return []

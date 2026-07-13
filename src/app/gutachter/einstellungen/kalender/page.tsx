@@ -1,4 +1,5 @@
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { redirect } from 'next/navigation'
 import { getGutachterForUser } from '@/lib/gutachter'
 import KalenderEinstellungenClient from './KalenderEinstellungenClient'
@@ -26,14 +27,17 @@ export default async function KalenderEinstellungenPage() {
   // Callback-Flow AAR-242), nicht auf sachverstaendige.
   const { data: profile } = await supabase
     .from('profiles')
-    .select('google_email')
+    .select('google_email, ms_connected_at, ms_email')
     .eq('id', user.id)
     .maybeSingle()
 
-  const { data: caldavRow } = await supabase
-    .from('sv_kalender_verbindungen')
+  // kalender_verbindungen ist RLS-locked (server-only, wie linkedin_oauth_tokens) — der
+  // User-Kontext-Client liefe leer. Admin-Client + expliziter profile_id-Self-Filter (=
+  // einzige Zugriffsgrenze, MUSS bleiben). Kein Credential-Select (password_encrypted/server_url).
+  const { data: caldavRow } = await createAdminClient()
+    .from('kalender_verbindungen')
     .select('id, provider_label, username, calendar_display_name, connected_at, last_sync_at, last_error, last_error_at')
-    .eq('sv_id', sv.id)
+    .eq('profile_id', user.id)
     .eq('provider', 'caldav')
     .maybeSingle()
 
@@ -42,6 +46,8 @@ export default async function KalenderEinstellungenPage() {
       svId={sv.id}
       googleConnected={!!sv.gcal_connected}
       googleEmail={(profile?.google_email as string | null) ?? null}
+      microsoftConnected={!!profile?.ms_connected_at}
+      microsoftEmail={(profile?.ms_email as string | null) ?? null}
       caldav={
         caldavRow
           ? {

@@ -6,6 +6,7 @@ import { KB_BERATUNG_DURATION_MIN, KB_BERATUNG_VORLAUF_H } from './constants'
 import { berlinWallClockToUtc } from '@/lib/google-calendar/timezone'
 import { resolveClaimId } from '@/lib/claims/get-claim-for-role'
 import { pruefeKbBelegt } from './kb-belegung'
+import { syncKbTerminOut, entferneKbTerminOut } from './kb-termin-sync'
 
 type BookResult =
   | { ok: true; terminId: string }
@@ -177,6 +178,9 @@ export async function bookKbTermin(
     return { ok: false, error: `Termin konnte nicht gespeichert werden: ${insertErr?.message ?? 'Unbekannter Fehler'}` }
   }
 
+  // SP2c: Termin in den externen KB-Kalender syncen (Meet-Video -> nur CalDAV). Fail-soft.
+  await syncKbTerminOut(newTermin.id as string)
+
   if (meetFallback) {
     await db.from('timeline').insert({
       fall_id: fallId,
@@ -271,6 +275,9 @@ export async function cancelKbTermin(terminId: string): Promise<CancelResult> {
     .eq('id', terminId)
 
   if (updateErr) return { ok: false, error: `Stornierung fehlgeschlagen: ${updateErr.message}` }
+
+  // SP2c: storniertes KB-Event aus Google + CalDAV entfernen. Fail-soft.
+  await entferneKbTerminOut(terminId)
 
   // 4. Timeline entry
   const { error: tlErr } = await db.from('timeline').insert({

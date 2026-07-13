@@ -99,12 +99,15 @@ export async function getAvailableKbSlots(
     end: new Date((t.end_zeit as string) ?? (t.start_zeit as string)).getTime(),
   }))
 
-  // 2b. (entfernt) Der frühere externe-Kalender-Busy-Lookup für den KB war ein
-  // No-Op: er löste die profile_id über sachverstaendige.profile_id auf — ein KB
-  // hat aber keine sachverstaendige-Zeile → immer []. KB-externe-Kalender-Busy war
-  // also nie verdrahtet (Prod-verifiziert: kein KB-auch-SV, keine KB-Termine). Wenn
-  // KB-Kalender-Integration gewünscht ist, ist das ein eigenes Feature. Damit ist
-  // kb-slots vom cache-busy-Reader-Layer entkoppelt.
+  // 2b. SP2c: externe KB-Kalender-Belegung blockt Slots. Der SP1-Cron cached
+  // Google-FreeBusy + CalDAV pro Profil in sv_kalender_events_cache; v_belegung
+  // surfaced sie als ('kundenbetreuer', kbId, belegung_typ='extern'). ladeBelegung
+  // liest genau das (kein View-Query-Detail hier). Der KB IST assignee_id = profiles.id.
+  const { ladeBelegung } = await import('@/lib/termine/engine/belegung')
+  const externFenster = await ladeBelegung({ typ: 'kundenbetreuer', id: kbId }, windowStart, windowEnd, db)
+  const externBlockedRanges: Array<{ start: number; end: number }> = externFenster
+    .filter((f) => f.belegungTyp === 'extern')
+    .map((f) => ({ start: new Date(f.start).getTime(), end: new Date(f.end).getTime() }))
 
   const slots: Array<{ datum: string; uhrzeit: string }> = []
 
@@ -141,7 +144,10 @@ export async function getAvailableKbSlots(
           const adminOverlap = adminBlockedRanges.some(
             (b) => slotStart < b.end && slotEnd > b.start,
           )
-          if (!adminOverlap) {
+          const externOverlap = externBlockedRanges.some(
+            (b) => slotStart < b.end && slotEnd > b.start,
+          )
+          if (!adminOverlap && !externOverlap) {
             const datum = slotTime.toISOString().split('T')[0]
             const uhrzeit = slotTime.toLocaleTimeString('de-DE', { timeZone: 'Europe/Berlin',
               hour: '2-digit',
