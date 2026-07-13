@@ -4,7 +4,6 @@
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSlaBreachTaskCancel } from './task-resolution'
 import { deriveSvSlaCompletion } from './sv-completion'
-import type { SvSlaTyp } from './sv-completion'
 
 export type SlaTyp =
   | 'gutachter_zuweisung'
