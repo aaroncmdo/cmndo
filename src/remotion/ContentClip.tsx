@@ -8,6 +8,7 @@ import {
   useCurrentFrame,
   useVideoConfig,
   interpolate,
+  spring,
 } from 'remotion'
 import type { WordTiming } from '../lib/marketing/tts'
 import type { ContentClipProps, RenderSegment } from './types'
@@ -16,53 +17,65 @@ import { BrandVisual } from './brand-library/BrandVisual'
 const NAVY = '#0D1B3E'
 const ACCENT = '#4573A2'
 const CREAM = '#F5F1E8'
+const FONT = 'Inter, system-ui, -apple-system, "Segoe UI", sans-serif'
 
 function AnimatedBg() {
   const f = useCurrentFrame()
-  const shift = interpolate(f % 240, [0, 240], [0, 30])
+  const shift = interpolate(f % 300, [0, 300], [0, 40])
   return (
-    <AbsoluteFill
-      style={{ background: `radial-gradient(120% 120% at ${20 + shift}% 0%, ${ACCENT}33, ${NAVY})` }}
-    />
+    <AbsoluteFill style={{ background: `radial-gradient(130% 130% at ${18 + shift}% -10%, ${ACCENT}40, ${NAVY} 62%)` }}>
+      <AbsoluteFill style={{ boxShadow: 'inset 0 0 420px rgba(0,0,0,0.55)' }} />
+    </AbsoluteFill>
   )
 }
 
-function VisualLayer({ visual }: { visual: RenderSegment['visual'] }) {
+// B-Roll mit Ken-Burns-Zoom + Fade-in + Lesbarkeits-Gradient. Brand/Grafik gefadet.
+function VisualLayer({ visual, segDuration }: { visual: RenderSegment['visual']; segDuration: number }) {
+  const f = useCurrentFrame()
+  const fade = interpolate(f, [0, 12], [0, 1], { extrapolateRight: 'clamp' })
   if (visual.kind === 'stock') {
+    const zoom = interpolate(f, [0, segDuration], [1.05, 1.18], { extrapolateRight: 'clamp' })
     return (
-      <OffthreadVideo
-        src={visual.ref}
-        muted
-        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', opacity: 0.55 }}
-      />
+      <AbsoluteFill style={{ opacity: fade }}>
+        <OffthreadVideo
+          src={visual.ref}
+          muted
+          style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', transform: `scale(${zoom})`, opacity: 0.62 }}
+        />
+        <AbsoluteFill style={{ background: `linear-gradient(180deg, ${NAVY}00 24%, ${NAVY}33 54%, ${NAVY}e0 100%)` }} />
+      </AbsoluteFill>
     )
   }
   if (visual.kind === 'brand') {
-    return <BrandVisual brandKey={visual.ref} />
+    const zoom = interpolate(f, [0, 14], [0.92, 1], { extrapolateRight: 'clamp' })
+    return (
+      <AbsoluteFill style={{ opacity: fade, transform: `scale(${zoom})` }}>
+        <BrandVisual brandKey={visual.ref} />
+      </AbsoluteFill>
+    )
   }
-  return null // 'graphic' -> nur der animierte Hintergrund
+  return null
 }
 
 function Overlay({ text }: { text?: string }) {
   const f = useCurrentFrame()
-  const y = interpolate(f, [0, 12], [40, 0], { extrapolateRight: 'clamp' })
-  const o = interpolate(f, [0, 12], [0, 1], { extrapolateRight: 'clamp' })
+  const { fps } = useVideoConfig()
+  const s = spring({ frame: f, fps, config: { damping: 14 } })
   if (!text) return null
   return (
-    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: 210 }}>
+    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'center', paddingTop: 200 }}>
       <div
         style={{
-          transform: `translateY(${y}px)`,
-          opacity: o,
-          background: NAVY,
-          color: CREAM,
-          padding: '16px 28px',
-          borderRadius: 24,
-          fontFamily: 'Inter, system-ui, sans-serif',
-          fontWeight: 700,
-          fontSize: 44,
-          maxWidth: 900,
-          textAlign: 'center',
+          transform: `translateY(${(1 - s) * 40}px) scale(${0.9 + s * 0.1})`,
+          opacity: s,
+          background: CREAM,
+          color: NAVY,
+          padding: '14px 30px',
+          borderRadius: 999,
+          fontFamily: FONT,
+          fontWeight: 800,
+          fontSize: 40,
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
         }}
       >
         {text}
@@ -71,28 +84,35 @@ function Overlay({ text }: { text?: string }) {
   )
 }
 
+// Karaoke-Captions: Woerter poppen synchron zur Stimme rein; das aktive Wort
+// bekommt eine Creme-Highlight-Box (Navy-Text) + Scale-Pop.
 function KineticCaption({ words }: { words: WordTiming[] }) {
   const f = useCurrentFrame()
   const { fps } = useVideoConfig()
   const t = f / fps
   return (
-    <AbsoluteFill
-      style={{ justifyContent: 'flex-end', alignItems: 'center', paddingLeft: 80, paddingRight: 80, paddingBottom: 360 }}
-    >
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, justifyContent: 'center' }}>
+    <AbsoluteFill style={{ justifyContent: 'flex-end', alignItems: 'center', paddingLeft: 64, paddingRight: 64, paddingBottom: 380 }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px 10px', justifyContent: 'center' }}>
         {words.map((w, i) => {
-          const on = t >= w.start && t <= w.end + 0.15
+          const startF = w.start * fps
+          const enter = spring({ frame: Math.max(0, f - startF), fps, config: { damping: 13, stiffness: 200 }, durationInFrames: 6 })
+          if (enter <= 0.001) return null // noch nicht gesprochen -> noch nicht sichtbar
+          const active = t >= w.start && t <= w.end + 0.1
+          const scale = (0.75 + 0.25 * Math.min(1, enter)) * (active ? 1.06 : 1)
           return (
             <span
               key={i}
               style={{
-                fontFamily: 'Inter, system-ui, sans-serif',
+                fontFamily: FONT,
                 fontWeight: 800,
-                fontSize: 66,
-                lineHeight: 1.1,
-                color: on ? CREAM : 'rgba(255,255,255,0.6)',
-                transform: on ? 'scale(1.08)' : 'scale(1)',
-                textShadow: '0 4px 24px rgba(0,0,0,0.55)',
+                fontSize: 70,
+                lineHeight: 1.02,
+                transform: `scale(${scale})`,
+                color: active ? NAVY : CREAM,
+                background: active ? CREAM : 'transparent',
+                padding: active ? '2px 16px' : '2px 2px',
+                borderRadius: 16,
+                textShadow: active ? 'none' : '0 5px 22px rgba(0,0,0,0.65)',
               }}
             >
               {w.word}
@@ -104,17 +124,52 @@ function KineticCaption({ words }: { words: WordTiming[] }) {
   )
 }
 
-export function ContentClip({ segments, audioSrc }: ContentClipProps) {
+function BrandWatermark() {
+  return (
+    <AbsoluteFill style={{ justifyContent: 'flex-start', alignItems: 'flex-start', padding: 46 }}>
+      <div style={{ fontFamily: FONT, fontWeight: 800, fontSize: 30, color: CREAM, opacity: 0.82, letterSpacing: 0.5 }}>
+        claimondo
+      </div>
+    </AbsoluteFill>
+  )
+}
+
+// Outro-Bumper: die letzten ~1.1s blenden auf Navy + Marke + CTA.
+function Outro({ total }: { total: number }) {
+  const f = useCurrentFrame()
+  const { fps } = useVideoConfig()
+  const start = total - 34
+  if (f < start) return null
+  const p = spring({ frame: f - start, fps, config: { damping: 15 } })
+  const alpha = Math.round(Math.min(1, p) * 235)
+    .toString(16)
+    .padStart(2, '0')
+  return (
+    <AbsoluteFill style={{ background: `${NAVY}${alpha}`, justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ opacity: p, transform: `scale(${0.9 + p * 0.1})`, textAlign: 'center' }}>
+        <div style={{ fontFamily: FONT, fontWeight: 900, fontSize: 76, color: CREAM }}>claimondo</div>
+        <div style={{ fontFamily: FONT, fontWeight: 600, fontSize: 34, color: ACCENT, marginTop: 10 }}>Mehr auf claimondo.de</div>
+      </div>
+    </AbsoluteFill>
+  )
+}
+
+export function ContentClip({ segments, audioSrc, durationInFrames }: ContentClipProps) {
   return (
     <AbsoluteFill style={{ backgroundColor: NAVY }}>
       <AnimatedBg />
-      {segments.map((s, i) => (
-        <Sequence key={i} from={s.startFrame} durationInFrames={Math.max(1, s.endFrame - s.startFrame)}>
-          <VisualLayer visual={s.visual} />
-          <Overlay text={s.on_screen_text} />
-          <KineticCaption words={s.words} />
-        </Sequence>
-      ))}
+      {segments.map((s, i) => {
+        const dur = Math.max(1, s.endFrame - s.startFrame)
+        return (
+          <Sequence key={i} from={s.startFrame} durationInFrames={dur}>
+            <VisualLayer visual={s.visual} segDuration={dur} />
+            <Overlay text={s.on_screen_text} />
+            <KineticCaption words={s.words} />
+          </Sequence>
+        )
+      })}
+      <BrandWatermark />
+      <Outro total={durationInFrames} />
       {audioSrc ? <Audio src={audioSrc} /> : null}
     </AbsoluteFill>
   )
