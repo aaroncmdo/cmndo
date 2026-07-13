@@ -819,3 +819,30 @@ gh pr create --base staging --title "P0: Detail-View Shared Foundation (EntityDe
 **3. Typ-Konsistenz:** `DetailTab` / `EntityDetailShellProps` / `variant: 'page' | 'drawer'` / `DrawerShell{children,title,width}` — in Task 1/2 definiert, in Task 3/4 identisch verwendet. Barrel-Reihenfolge-Falle (DrawerShell erst in Task 2) ist in Task 1 Step 3 explizit adressiert.
 
 **Offen (bewusst, gehört nicht in P0):** Header-Optik-Harmonisierung (PageHeader-Card vs. weisse Leiste) — gehört der portal-header-Lane (`7ca8e37c`). P0 ist visuell net-zero.
+
+---
+
+## Ausführungs-Notizen (nachträglich — was der echte Code am Plan korrigiert hat)
+
+Der Plan wurde ausgeführt; **zwei Annahmen waren falsch** und wurden im Code korrigiert:
+
+1. **`sidebar`-Prop gestrichen.** Der Plan gab `EntityDetailShell` ein `sidebar`-Prop
+   (fixe 340px-Aside). Der echte SV-Code zeigt: das Related-Panel („Offene Fälle/Tasks")
+   ist **keine Shell-Sidebar** — es liegt IM Stammdaten-Tab, mit dem Edit-Formular in
+   einem gemeinsamen `max-w-6xl`-Container (responsive: mobil darunter). Ein Shell-Prop
+   hätte es an den Viewport-Rand gepinnt = Layout-Bruch. **Die Shell schreibt jetzt kein
+   Content-Layout vor** (Shell = Header + Tabs); das Layout gehört dem Tab. Simpler und
+   flexibler. Die kanonische API steht in `docs/superpowers/detail-view-recipe.md`.
+
+2. **SV-Detail hat 3 Tabs, nicht 2** (Stammdaten/Verifizierung/**Abrechnungen**), und sein
+   Chrome ist PageHeader-Card + Underline-Tabs — **nicht** die sticky weisse Leiste, von
+   der der Plan ausging (die stammte aus einer älteren Branch-Version). Die Shell wurde an
+   das **echte** staging-Chrome angeglichen, damit der Refactor net-zero bleibt.
+
+3. **Vierter DrawerShell-Konsument** (`admin/vertrieb/@drawer/(.)sachverstaendige/[id]`),
+   den `tsc` fand — er importierte über den `@/`-Alias, ein Grep auf `'../DrawerShell'`
+   hätte ihn verfehlt. Er bekommt ebenfalls `variant="drawer"`.
+
+**Ergebnis:** tsc exit 0 · vitest 6/6 · alle 4 Ratchets 0-neu · net-zero bis auf eine
+bewusste Ausnahme (kein Zurück-Link mehr im Drawer). Prod-Smoke (Regel 4) steht nach
+Deploy aus.
