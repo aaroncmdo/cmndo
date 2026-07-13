@@ -11,6 +11,7 @@ import QrPoolDrawerContent from './wizards/QrPoolDrawerContent'
 import BasisFreigabenDrawerContent from './wizards/BasisFreigabenDrawerContent'
 import CsvImportPanel from '@/app/admin/partner-leads/CsvImportPanel'
 import ScrapePanel from '@/app/admin/partner-leads/ScrapePanel'
+import WerkstattAnlegenForm from '@/app/admin/werkstaetten/WerkstattAnlegenForm'
 import { contextAktionen, type VertriebAktion } from './_lib/context-aktionen'
 import type { VertriebRolle, VertriebTyp } from '@/lib/vertrieb/vertrieb-kontakt.types'
 
@@ -27,6 +28,7 @@ export default function VertriebAktionsleiste({
   const [freigabenDrawer, setFreigabenDrawer] = useState(false)
   const [csvDrawer, setCsvDrawer] = useState(false)
   const [scrapeDrawer, setScrapeDrawer] = useState(false)
+  const [wsAnlegen, setWsAnlegen] = useState(false)
   const aktionen = contextAktionen(rolle, typ)
   if (aktionen.length === 0) return null
 
@@ -49,6 +51,10 @@ export default function VertriebAktionsleiste({
     }
     if (a.key === 'scrape') {
       setScrapeDrawer(true)
+      return
+    }
+    if (a.key === 'anlegen-werkstatt') {
+      setWsAnlegen(true)
       return
     }
     if (a.href) router.push(a.href)
@@ -122,6 +128,18 @@ export default function VertriebAktionsleiste({
         <ScrapePanel
           onClose={() => setScrapeDrawer(false)}
           onImported={() => { setScrapeDrawer(false); router.refresh() }}
+        />
+      </Drawer>
+
+      <Drawer
+        open={wsAnlegen}
+        onClose={() => setWsAnlegen(false)}
+        width={720}
+        ariaLabel="Werkstatt anlegen"
+      >
+        <WerkstattAnlegenForm
+          onClose={() => setWsAnlegen(false)}
+          onCreated={() => { setWsAnlegen(false); router.refresh() }}
         />
       </Drawer>
     </>
