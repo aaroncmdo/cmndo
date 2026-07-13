@@ -16,15 +16,13 @@ export function FahrzeugMiniAktionen() {
         </Button>
       </Link>
 
-      {/* Schaden melden — Placeholder, wird mit Gegner-Flow (Slice 2) aktiviert */}
-      <Button
-        variant="ghost"
-        size="sm"
-        disabled
-        title="Kommt mit dem Gegner-Flow (Slice 2)"
-      >
-        Schaden melden
-      </Button>
+      {/* Schaden melden — Placeholder, wird mit Gegner-Flow (Slice 2) aktiviert.
+          title auf dem span-Wrapper: primitives/Button hat kein title-Prop. */}
+      <span title="Kommt mit dem Gegner-Flow (Slice 2)">
+        <Button variant="ghost" size="sm" disabled>
+          Schaden melden
+        </Button>
+      </span>
     </div>
   )
 }
