@@ -19,6 +19,11 @@ export type RueckrufInput = {
   promotionCodeId?: string | null
   standortPlz?: string | null
   standortOrt?: string | null
+  // Standort mit Koordinaten (Place-Picker) — analog flowlink-Zweig. Werden nur als
+  // Paar (lat+lng) geschrieben, damit Kunde-Flow-Prefill + SV-Matching konsistent sind.
+  standortLat?: number | null
+  standortLng?: number | null
+  standortPlaceId?: string | null
   notiz?: string | null
   serviceTyp?: string | null
   // Optionaler Owner (Round-Robin-Dispatcher) — sonst erster Dispatch-User.
@@ -56,6 +61,13 @@ export async function erstelleOeffentlichenRueckruf(
   const vorname = parts.shift() ?? name
   const nachname = parts.join(' ') || null
 
+  // Standort-Koordinaten: nur als Paar (lat+lng) verwerten — Prefill + SV-Matching
+  // brauchen beide. place_id ist eine unabhaengige Referenz (mirror flowlink-Zweig).
+  const koordLat = typeof input.standortLat === 'number' && Number.isFinite(input.standortLat) ? input.standortLat : null
+  const koordLng = typeof input.standortLng === 'number' && Number.isFinite(input.standortLng) ? input.standortLng : null
+  const hatKoords = koordLat != null && koordLng != null
+  const koordPlaceId = input.standortPlaceId?.trim() || null
+
   // 2. Lead anlegen — via zentrale createLead() (Writer-Konsistenz, leads-Audit
   // 15.05.2026). status='rueckruf' konsistent zu qualifizierungs_phase;
   // source_channel = Marketing-Quelle; zugewiesen_an = Dispatch-Empfänger.
@@ -76,6 +88,8 @@ export async function erstelleOeffentlichenRueckruf(
       ...(input.promotionCodeId ? { promotion_code_id: input.promotionCodeId } : {}),
       ...(input.standortPlz ? { fahrzeug_standort_plz: input.standortPlz } : {}),
       ...(input.standortOrt ? { fahrzeug_standort_adresse: input.standortOrt } : {}),
+      ...(hatKoords ? { fahrzeug_standort_lat: koordLat, fahrzeug_standort_lng: koordLng } : {}),
+      ...(koordPlaceId ? { fahrzeug_standort_place_id: koordPlaceId } : {}),
       ...(input.notiz ? { notiz: input.notiz } : {}),
       ...(input.serviceTyp ? { service_typ: input.serviceTyp } : {}),
     },
