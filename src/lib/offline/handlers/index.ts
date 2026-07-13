@@ -2,4 +2,7 @@
 // Built-in handlers self-register on import.
 import './fall-dokument-upload'
 import './gps-position'
+import './sv-notizen'
+import './sv-vor-ort'
+import './besichtigung-gestartet'
 export {}
