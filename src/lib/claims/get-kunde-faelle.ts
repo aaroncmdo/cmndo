@@ -160,8 +160,11 @@ type TerminRow = {
 // CMM-49 Display-Sweep: Quelle v_claim_full statt faelle. Aliasing haelt den Consumer-Vertrag
 // (FallRow-Shape): id<-fall_id, claim_id<-claims.id, status<-operative_status (claims-SSoT,
 // 1:1-Mirror von faelle.status, post-drop-safe). Restliche Spalten heissen in vcf identisch.
+// #2 pure-derived: abrechnungsweg ergaenzt — v_claim_full leitet es jetzt ab (derive_abrechnungsweg,
+// nicht mehr die stale claims.abrechnungsweg-Spalte). Damit traegt fall.abrechnungsweg den derived-Wert
+// (Consumer kunde-claim-view liest ihn statt der Spalte -> konsistent mit v_claim_phase).
 const FALL_SELECT =
-  'id:fall_id, claim_id:id, status:operative_status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell'
+  'id:fall_id, claim_id:id, status:operative_status, sv_id, anschlussschreiben_am, kunde_id, lead_id, kennzeichen, fahrzeug_hersteller, fahrzeug_modell, abrechnungsweg'
 
 // CMM-74 b″: operative_status (claims = SSoT, 1:1-Mirror von faelle.status) ergaenzt.
 const CLAIM_SELECT =
