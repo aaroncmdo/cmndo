@@ -17,6 +17,7 @@
 
 import { createClient } from '@/lib/supabase/server'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme, type BrandThemeV2 } from './theme'
+import { kundenBrandingErlaubt } from './gate'
 
 export type KundenThemeResult = {
   theme: BrandThemeV2
@@ -62,8 +63,7 @@ export async function resolveKundenTheme(kundeId: string): Promise<KundenThemeRe
   if (!sv) return fallback
 
   // 3) Nur bei verifiziertem SV + aktivem Custom-Branding wird das Theme ausgerollt
-  if (sv.verifiziert !== true) return fallback
-  if (sv.use_custom_branding !== true) return fallback
+  if (!kundenBrandingErlaubt(sv)) return fallback
 
   // 4) Theme hydrieren — V2 wenn vorhanden, sonst aus Legacy-Primary generieren
   const theme = hydrateTheme(
