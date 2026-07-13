@@ -11,7 +11,7 @@ Read-only verifiziert gegen prod (`paizkjajbuxxksdoycev`) + Code (staging).
 **Welt B — separate Engines** (LEGITIM getrennt, andere Geschäftsmodelle, KEIN Bug):
 - **kanzlei** — Monats-Mandats-Abrechnung (`claims.kanzlei_provision_*` + `kanzlei_abrechnungen`/`_positionen`, Monats-Cron `erstelle-abrechnung.ts`). Mandat+Zahlungseingang-basiert, nicht claim-vermittlung.
 - **marketing** — Monats-CPL (`provisionen_maik`: `marketing_partner_id, monat, cpl_actual, netto_provision`, Admin-Finance-Portal). Cost-per-Lead, nicht claim-vermittlung.
-- **SV (sachverstaendiger)** — eigene Gutschrift-Engine (nicht `partner_provisionen`).
+- **SV (sachverstaendiger)** — **OUTBOUND, umgekehrte Richtung** (SV-Audit 13.07.): der SV **ZAHLT UNS**. Onboarding-Anzahlung (Stripe) → `sachverstaendige.werbebudget_guthaben_netto`; wenn WIR ihm einen Gutachter-Fall zuweisen (`claims.sv_id`) → Lead-Gebühr (200–1081€ je Schadenhöhe, `process-case-billing.ts`), Rest `sv_nachzahlung_netto` → Monats-Rechnung (`abrechnung-erstellen`, `empfaenger_typ='sv'`). **KEIN inbound-Vermittler, KEINE Provision** — die „Gutschrift-Engine" ist das Gegenteil der partner_provisionen-Welt.
 
 → **Diese drei gehören NICHT in `partner_provisionen`.** (Meine frühere „kanzlei ist inkonsistent"-Vermutung war falsch — es ist ein anderes Modell.)
 
@@ -52,8 +52,11 @@ Alle Claim-Vermittlungs-Provisionen in `partner_provisionen`, EINE Release-Mecha
 ### P3 — `PartnerTyp` TS-Type konsistent
 `src/lib/partner-rang/types.ts:2` = `'sachverstaendiger' | 'makler' | 'werkstatt'` — kennt `firmen_flotte` nicht. Das ist der **Rang**-Type (SV-Rang etc.), NICHT der provision-partner_typ (der wird im Code als String-Literal genutzt). **Fix:** einen dedizierten `ProvisionPartnerTyp = 'makler'|'werkstatt'|'firmen_flotte'` einführen + die provision-lesenden Queries darauf typen; exhaustive Switches prüfen (keiner darf firmen_flotte silent droppen). Klein.
 
-### P4 — Vermittler-SSoT (nice-to-have, größer)
-Vermittler-Bezug ist über `werkstatt_id`/`makler_id`/`promotion_code_id` (+ flotte-via-vehicle) verstreut. **Option:** `claims.vermittler_typ` + `claims.vermittler_id` (EIN SSoT, am Convert gesetzt) → ein Trigger, eine Provision. **Sauberer, aber Refactor** (alle Writer + Trigger). **Für jetzt:** dokumentieren + Präzedenz festlegen (P1); Unify als eigenes Ticket wenn gewünscht.
+### P4 — Vermittler-SSoT ⭐ (Aaron 13.07. bestätigt: „vermittler ssot ist gut" → das ist der Kern)
+**Richtungs-Prinzip (Aaron 13.07. + SV-Audit):** Provision NUR für **INBOUND**-Vermittlung (wer hat uns DEN Claim gebracht). **NIE für OUTBOUND** (Aufträge, die WIR in eine Werkstatt / zu einem SV steuern): `reparatur_werkstatt_id` (wohin wir die Reparatur steuern) + `sv_id` (den wir zuweisen) lösen **KEINE** Provision aus — der SV zahlt sogar umgekehrt (Welt B).
+**Design:** EINE Spalte `claims.vermittler_typ` (`makler|werkstatt|firmen_flotte|NULL`) + `claims.vermittler_id` (uuid), am Convert gesetzt = der EINE inbound-Vermittler. Konsolidiert die verstreuten INBOUND-Signale (`werkstatt_id`=inbound-QR / `makler_id` / `promotion_code_id` / flotte-via-vehicle). EIN Trigger liest `vermittler_typ/_id` → EINE Provision (Betrag je Typ). Damit sind P1 (unique-index), die 3 getrennten Trigger UND die Exklusivitäts-IFs strukturell obsolet — der SSoT enforced „eine Provision pro Claim" by design.
+**⚠ Abgrenzung inbound vs outbound:** `werkstatt_id` (inbound-QR = Werkstatt, die uns vermittelt hat → Provision) ≠ `reparatur_werkstatt_id` (outbound = wohin wir die Reparatur steuern → keine Provision). Der Vermittler-SSoT nimmt NUR inbound.
+**Aufwand:** Refactor (Convert-Writer + 1 Trigger + Consumer) = die saubere Ziel-Architektur. **Empfehlung: P4 ist das Ziel; P1 (unique-index) nur als schneller Zwischenschritt, falls der SSoT-Refactor später kommt.**
 
 ## Nicht-Ziele (bewusst unangetastet)
 kanzlei / marketing (provisionen_maik) / SV-Gutschrift bleiben eigene Engines. Nur **dokumentieren**, dass sie bewusst getrennt sind (verhindert künftige „das ist inkonsistent"-Fehldiagnosen — wie meine eigene).
