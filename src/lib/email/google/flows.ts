@@ -29,6 +29,7 @@ import { WillkommenSvAnBueroEmail, subject as willkommenSvAnBueroSubject } from 
 import { FlowLinkVersandEmail, subject as flowLinkVersandSubject } from './templates/FlowLinkVersand'
 import { MiniWizardMagicLinkEmail, subject as miniWizardMagicLinkSubject } from './templates/MiniWizardMagicLink'
 import { SvBasicClaimLinkEmail, subject as svBasicClaimLinkSubject } from './templates/SvBasicClaimLink'
+import { PasswortResetEmail, subject as passwortResetSubject } from './templates/PasswortReset'
 import { MaklerWelcomeEmail, subject as maklerWelcomeSubject } from './templates/MaklerWelcome'
 import { WillkommenWerkstattEmail, subject as willkommenWerkstattSubject } from './templates/WillkommenWerkstatt'
 import { MaklerWochenReportEmail, subject as maklerWochenReportSubject } from './templates/MaklerWochenReport'
@@ -1522,4 +1523,44 @@ export async function sendePartnerOnboardingEinladung(input: {
     ],
     empfaengerTyp: 'admin',
   })
+}
+
+// ─── Passwort-vergessen: branded Reset-Mail ──────────────────────────────────
+// Loest den Supabase-Built-in-Mailer (noreply@mail.app.supabase.io) ab: generisches
+// Template + projektweites Rate-Limit (~2-4 Mails/h) + schlechte Zustellbarkeit bei
+// Firmen-Domains. Geht jetzt ueber die App-Pipeline (Resend/SMTP) wie jede andere
+// Claimondo-Mail. Kein Whitelabel-Branding (Auth-Mail, AGENTS.md §branding-rules).
+//
+// allowInternalRecipient: true ist PFLICHT — die Send-Isolation (client.ts) unterdrueckt
+// im Live-Modus sonst JEDEN @claimondo.de-Empfaenger. Wer sein EIGENES Passwort zuruecksetzt,
+// ist die gewollte Zielperson (kein Bystander-Schutzfall) = genau der dokumentierte
+// Ausnahmefall. Ohne das bekaeme interner Staff seine Reset-Mail nie.
+
+export async function sendPasswortReset({
+  to,
+  vorname,
+  actionUrl,
+}: {
+  to: string
+  vorname: string | null
+  actionUrl: string
+}): Promise<{ success: boolean; error?: string }> {
+  try {
+    const props = { vorname, actionUrl }
+    const html = await render(PasswortResetEmail(props))
+    await sendEmail({
+      to,
+      subject: passwortResetSubject(props),
+      html,
+      fallId: null,
+      template: 'passwort_reset',
+      allowInternalRecipient: true,
+    })
+    return { success: true }
+  } catch (err) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Email-Versand fehlgeschlagen',
+    }
+  }
 }
