@@ -1,5 +1,5 @@
 // src/lib/task-executor/audit.test.ts
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi } from 'vitest'
 import { insertExecution, markExecution, getOffeneExecution, getExecution } from './audit'
 import type { ExecutionPlan, PlanStep } from './types'
 

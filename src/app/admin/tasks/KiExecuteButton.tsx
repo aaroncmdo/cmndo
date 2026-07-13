@@ -70,7 +70,8 @@ export function KiExecuteButton({
     setError(null)
     if (!execId) return
     startTransition(async () => {
-      await brichAbKiAusfuehrung(execId)
+      const r = await brichAbKiAusfuehrung(execId)
+      if (!r.ok) console.error('KI-Ausfuehrung abbrechen fehlgeschlagen:', r.error)
       router.refresh()
     })
   }
