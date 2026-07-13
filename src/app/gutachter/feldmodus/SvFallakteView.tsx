@@ -27,6 +27,9 @@ import {
   type FeldmodusFallakteFall,
   type FeldmodusSlot,
 } from './_fallakte/actions'
+import { useOnlineStatus } from '@/lib/offline/use-online-status'
+import { saveSnapshot, readSnapshot } from '@/lib/offline/snapshot'
+import { enqueueOp } from '@/lib/offline/enqueue'
 import BesichtigungAbschliessenButton from './BesichtigungAbschliessenButton'
 import FeldmodusDokumentSlot from './FeldmodusDokumentSlot'
 
@@ -57,6 +60,10 @@ export default function SvFallakteView({
   const [savingNotizen, startSavingNotizen] = useTransition()
   const notizenDirtyRef = useRef(false)
 
+  const online = useOnlineStatus()
+  const snapKey = `feldmodus-fallakte:${fallId}`
+  const [staleSince, setStaleSince] = useState<number | null>(null)
+
   const supabase = useMemo(() => createClient(), [])
   // 2026-05-07: useId-Suffix verhindert „cannot add postgres_changes
   // callbacks after subscribe()"-Crash bei Strict-Mode-Doppel-Mount.
@@ -65,6 +72,21 @@ export default function SvFallakteView({
   const channelSuffix = useId()
 
   const reload = useCallback(async () => {
+    // Offline branch: read from local snapshot instead of network
+    if (!navigator.onLine) {
+      const snap = await readSnapshot(snapKey)
+      if (snap) {
+        const d = snap.data as { fall: FeldmodusFallakteFall; slots: FeldmodusSlot[] }
+        setFall(d.fall)
+        setSlots(d.slots)
+        setStaleSince(snap.saved_at)
+        if (!notizenDirtyRef.current) {
+          setNotizen(d.fall.sv_notizen_vor_ort ?? '')
+        }
+      }
+      setLoading(false)
+      return
+    }
     setLoading(true)
     setLoadError(null)
     const res = await loadFeldmodusFallakteData(fallId)
@@ -76,11 +98,13 @@ export default function SvFallakteView({
       if (!notizenDirtyRef.current) {
         setNotizen(res.fall.sv_notizen_vor_ort ?? '')
       }
+      setStaleSince(null)
+      void saveSnapshot({ key: snapKey, scope: 'feldmodus', role: 'sv', data: { fall: res.fall, slots: res.slots } })
     } else {
       setLoadError(res.error)
     }
     setLoading(false)
-  }, [fallId])
+  }, [fallId, snapKey])
 
   useEffect(() => {
     void reload()
@@ -96,6 +120,8 @@ export default function SvFallakteView({
   // fall-State; der Effect re-subscribed einmalig sobald er verfuegbar ist.
   const fallClaimId = fall?.claim_id ?? null
   useEffect(() => {
+    // Offline: do not open Realtime channels (no network, channels will fail)
+    if (!online) return
     let channel = supabase
       .channel(`feldmodus-fallakte-${fallId}-${channelSuffix}`)
       .on(
@@ -143,7 +169,7 @@ export default function SvFallakteView({
     return () => {
       void supabase.removeChannel(channel)
     }
-  }, [supabase, fallId, channelSuffix, reload, fallClaimId])
+  }, [supabase, fallId, channelSuffix, reload, fallClaimId, online])
 
   const pflichtOffen = slots.filter(
     (s) => s.istPflicht && s.status !== 'hochgeladen' && s.status !== 'geprueft',
@@ -152,6 +178,19 @@ export default function SvFallakteView({
   const handleSaveNotizen = () => {
     if (!notizenDirty || savingNotizen) return
     startSavingNotizen(async () => {
+      // Offline branch: enqueue for replay on reconnect
+      if (!navigator.onLine) {
+        await enqueueOp({
+          kind: 'sv_notizen_vor_ort',
+          replay_class: 'B',
+          payload: { fallId, notizen },
+          entity_ref: { scope: 'feldmodus-fallakte', id: fallId },
+        })
+        setNotizenDirty(false)
+        notizenDirtyRef.current = false
+        toast.success('Notizen offline gespeichert — wird synchronisiert')
+        return
+      }
       const res = await saveFeldmodusNotizen(fallId, notizen)
       if (res.success) {
         setNotizenDirty(false)
@@ -212,6 +251,11 @@ export default function SvFallakteView({
       </div>
 
       <div className="flex-1 overflow-y-auto">
+        {staleSince != null && (
+          <div className="text-body-xs text-warning-strong bg-warning-soft px-3 py-1.5 rounded-ios-md">
+            Offline — Stand {new Date(staleSince).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' })}
+          </div>
+        )}
         {loadError ? (
           <div className="p-4 text-xs text-danger bg-danger-soft/30 m-4 rounded-ios-lg">
             {loadError}
