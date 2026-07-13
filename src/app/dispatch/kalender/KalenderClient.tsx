@@ -221,57 +221,59 @@ export default function KalenderClient({
           </span>
         }
         size="lg"
-        actions={
-          <>
-            <button
-              type="button"
-              onClick={() => goWeek(-7)}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-colors"
-              aria-label="Vorherige Woche"
-            >
-              <ChevronLeftIcon className="w-4 h-4 text-claimondo-navy" />
-            </button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                const params = new URLSearchParams(searchParams.toString())
-                params.delete('woche')
-                router.replace(`${pathname}?${params.toString()}`)
-              }}
-            >
-              Heute
-            </Button>
-            <button
-              type="button"
-              onClick={() => goWeek(7)}
-              className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-colors"
-              aria-label="Nächste Woche"
-            >
-              <ChevronRightIcon className="w-4 h-4 text-claimondo-navy" />
-            </button>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => setFilterOpen((v) => !v)}
-              iconLeft={<FilterIcon className="w-3.5 h-3.5" />}
-            >
-              SV-Filter ({visibleSvIds.size}/{svList.length})
-            </Button>
-            <Button
-              type="button"
-              variant="ondo"
-              size="sm"
-              onClick={() => openSpontan()}
-              iconLeft={<PlusIcon className="w-3.5 h-3.5" />}
-            >
-              Spontan-Termin
-            </Button>
-          </>
-        }
-      />
+      >
+        {/* Toolbar bewusst in children statt actions: der actions-Slot ist
+            `shrink-0` ohne flex-wrap -> die 5 Controls (~450px) wuerden auf dem
+            Handy horizontal ueberlaufen. children ist volle Breite + darf umbrechen. */}
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            onClick={() => goWeek(-7)}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-colors"
+            aria-label="Vorherige Woche"
+          >
+            <ChevronLeftIcon className="w-4 h-4 text-claimondo-navy" />
+          </button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams.toString())
+              params.delete('woche')
+              router.replace(`${pathname}?${params.toString()}`)
+            }}
+          >
+            Heute
+          </Button>
+          <button
+            type="button"
+            onClick={() => goWeek(7)}
+            className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-claimondo-navy/[0.06] hover:bg-claimondo-navy/[0.10] transition-colors"
+            aria-label="Nächste Woche"
+          >
+            <ChevronRightIcon className="w-4 h-4 text-claimondo-navy" />
+          </button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => setFilterOpen((v) => !v)}
+            iconLeft={<FilterIcon className="w-3.5 h-3.5" />}
+          >
+            SV-Filter ({visibleSvIds.size}/{svList.length})
+          </Button>
+          <Button
+            type="button"
+            variant="ondo"
+            size="sm"
+            onClick={() => openSpontan()}
+            iconLeft={<PlusIcon className="w-3.5 h-3.5" />}
+          >
+            Spontan-Termin
+          </Button>
+        </div>
+      </PageHeader>
 
       {filterOpen && (
         <div className="rounded-ios-xl border border-claimondo-border bg-white p-3 space-y-2">
