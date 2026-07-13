@@ -9627,7 +9627,6 @@ export type Database = {
           reparatur_werkstatt_zugewiesen_am: string | null
           reparatur_werkstatt_zugewiesen_von: string | null
           rueckruf_geplant_am: string | null
-          sa_datum: string | null
           sa_unterschrieben: boolean | null
           sa_unterschrieben_am: string | null
           sachschaden_beschreibung: string | null
@@ -9845,7 +9844,6 @@ export type Database = {
           reparatur_werkstatt_zugewiesen_am?: string | null
           reparatur_werkstatt_zugewiesen_von?: string | null
           rueckruf_geplant_am?: string | null
-          sa_datum?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
           sachschaden_beschreibung?: string | null
@@ -10063,7 +10061,6 @@ export type Database = {
           reparatur_werkstatt_zugewiesen_am?: string | null
           reparatur_werkstatt_zugewiesen_von?: string | null
           rueckruf_geplant_am?: string | null
-          sa_datum?: string | null
           sa_unterschrieben?: boolean | null
           sa_unterschrieben_am?: string | null
           sachschaden_beschreibung?: string | null
