@@ -372,6 +372,9 @@ const nextConfig: NextConfig = {
       // bestaetigt). Exakt-Match -> die Token-Subroute /kunde/termin/[token] (WhatsApp-Magic-Links
       // fuer SV-Termin-Tracking) bleibt unberuehrt.
       { source: '/kunde/termin', destination: '/kunde', permanent: true },
+      // /flotte-Partner-Portal (AAR-956 Layer 0): Exakt-Match-Redirect auf die Fleet-View.
+      // Exakt (kein :path*) damit /flotte/flotte und spätere Sub-Routen (Layer 1/2) live bleiben.
+      { source: '/flotte', destination: '/flotte/flotte', permanent: false },
     ]
   },
 };
