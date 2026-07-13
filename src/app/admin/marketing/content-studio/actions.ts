@@ -45,9 +45,7 @@ export async function erstelleClip(
 
   // Hintergrund-Verarbeitung: der App-Server laeuft persistent (output:standalone + PM2 auf VPS),
   // daher ueberlebt fire-and-forget den Request. Robuster Follow-up: Cron-Worker (Slice 3).
-  void verarbeiteJob(job.id, createAdminClient()).catch((e) =>
-    console.error('[marketing] verarbeiteJob failed', e),
-  )
+  void verarbeiteJob(job.id, db).catch((e) => console.error('[marketing] verarbeiteJob failed', e))
 
   revalidatePath('/admin/marketing/content-studio')
   return { ok: true }

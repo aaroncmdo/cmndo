@@ -47,6 +47,7 @@ export async function verarbeiteJob(
   const { count } = await supabase
     .from('marketing_content_jobs')
     .select('id', { count: 'exact', head: true })
+    .neq('id', jobId) // aktuellen Job ausschliessen -> kein Off-by-one am Cap-Rand
     .gte('erstellt_am', since)
   const guard = checkGuardrails(count ?? 0)
   if (!guard.ok) return { ok: false, error: guard.error }
@@ -82,17 +83,21 @@ export async function verarbeiteJob(
     const props = buildRenderProps(script, words, visuals)
     const audioBuf = await readFile(audioPath)
     const audioKey = `${jobId}/audio${extname(audioPath)}`
-    await supabase.storage.from(BUCKET).upload(audioKey, audioBuf, {
+    const { error: audioUpErr } = await supabase.storage.from(BUCKET).upload(audioKey, audioBuf, {
       upsert: true,
       contentType: audioPath.endsWith('.wav') ? 'audio/wav' : 'audio/mpeg',
     })
+    if (audioUpErr) throw new Error(`Audio-Upload fehlgeschlagen: ${audioUpErr.message}`)
     const audioUrl = supabase.storage.from(BUCKET).getPublicUrl(audioKey).data.publicUrl
     props.audioSrc = audioUrl
 
     // 7. Render -> Storage
     const videoBuf = await deps.renderClip(props)
     const videoKey = `${jobId}/video.mp4`
-    await supabase.storage.from(BUCKET).upload(videoKey, videoBuf, { upsert: true, contentType: 'video/mp4' })
+    const { error: videoUpErr } = await supabase.storage
+      .from(BUCKET)
+      .upload(videoKey, videoBuf, { upsert: true, contentType: 'video/mp4' })
+    if (videoUpErr) throw new Error(`Video-Upload fehlgeschlagen: ${videoUpErr.message}`)
     const videoUrl = supabase.storage.from(BUCKET).getPublicUrl(videoKey).data.publicUrl
 
     // 8. Fertig

@@ -16,7 +16,8 @@ function mockSupabase(opts: { count?: number; job?: unknown } = {}) {
   const client = {
     from: vi.fn(() => ({
       select: vi.fn((_cols: string, o?: { head?: boolean }) => {
-        if (o?.head) return { gte: vi.fn().mockResolvedValue({ count: opts.count ?? 0 }) }
+        if (o?.head)
+          return { neq: vi.fn(() => ({ gte: vi.fn().mockResolvedValue({ count: opts.count ?? 0 }) })) }
         return {
           eq: vi.fn(() => ({
             single: vi.fn().mockResolvedValue({
