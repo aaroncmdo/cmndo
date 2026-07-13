@@ -8,6 +8,7 @@
 import { z } from 'zod'
 import { createClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
+import { GEWERKE } from '@/lib/werkstatt/bedarf/types'
 
 export type WerkstattActionResult = { ok: true } | { ok: false; error: string }
 
@@ -179,5 +180,28 @@ export async function changeWerkstattPasswort(
     password: parsed.data.next,
   })
   if (error) return { ok: false, error: error.message }
+  return { ok: true }
+}
+
+// ── Faehigkeiten ────────────────────────────────────────────────────────────
+
+/**
+ * Self-Service: Werkstatt pflegt eigene Faehigkeiten.
+ * user_id-scoped (kein IDOR); SSR-Client -> RLS-Policy werkstaetten_self_update
+ * (user_id = auth.uid()) als Backstop, wie die Geschwister-Actions.
+ */
+export async function setMeineFaehigkeiten(
+  faehigkeiten: string[],
+): Promise<{ ok: boolean; error?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { ok: false, error: 'Nicht angemeldet.' }
+
+  const clean = (faehigkeiten ?? []).filter((f) => (GEWERKE as readonly string[]).includes(f))
+
+  const { error } = await supabase.from('werkstaetten').update({ faehigkeiten: clean }).eq('user_id', user.id)
+  if (error) return { ok: false, error: error.message }
+
+  revalidatePath('/werkstatt/einstellungen')
   return { ok: true }
 }
