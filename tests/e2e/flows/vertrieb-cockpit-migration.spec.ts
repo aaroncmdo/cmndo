@@ -90,3 +90,29 @@ test('3) SV-Detail = Drawer im Cockpit (Migration statt Deep-Link)', async ({ pa
   await page.keyboard.press('Escape')
   await expect(page.getByText('Sachverständigen-Profil')).toBeHidden({ timeout: 10_000 })
 })
+
+// ---------------------------------------------------------------------------
+// 4 — QR-Pool oeffnet als Drawer im Cockpit (kein Full-Page-Weg).
+// ---------------------------------------------------------------------------
+test('4) QR-Pool oeffnet als Drawer im Cockpit (kein Full-Page-Weg)', async ({ page }) => {
+  test.setTimeout(120_000)
+  await login(page, ADMIN.email, ADMIN.pw)
+  await page.goto('/admin/vertrieb', { waitUntil: 'domcontentloaded' })
+
+  // Warten bis Cockpit bereit ist
+  await expect(page.getByRole('button', { name: 'Sachverständige' })).toBeVisible({ timeout: 90_000 })
+
+  // Werkstaetten-Pill aktivieren damit die QR-Pool-Aktion erscheint
+  await page.getByRole('button', { name: 'Werkstätten' }).first().click()
+
+  // QR-Pool-Aktion im Cockpit ausloesen
+  await page.getByRole('button', { name: 'QR-Pool verwalten' }).first().click()
+
+  // Drawer muss sich IM Cockpit oeffnen (Heading aus QrPoolClient)
+  await expect(page.getByRole('heading', { name: 'QR-Code-Pool' })).toBeVisible({ timeout: 60_000 })
+
+  // URL darf NICHT auf die alte Seite navigiert haben
+  expect(page.url()).toContain('/admin/vertrieb')
+
+  await page.screenshot({ path: 'test-results/vertrieb-cockpit-4-qrpool.png', fullPage: true }).catch(() => {})
+})
