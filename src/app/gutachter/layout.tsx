@@ -119,13 +119,15 @@ export default async function GutachterLayout({
           Ihr Account wurde gesperrt{sv.gesperrt_grund ? `: ${sv.gesperrt_grund}` : '.'} Bitte wenden Sie sich an den Support.
         </div>
       )}
-      {/* AAR-692: Tier-2-Banner (frist_ueberschritten + ausstehend-Countdown)
-          entfernt. Tier 2 (Berufshaftpflicht, Gewerbeanmeldung etc.) ist
-          kein Matching-Blocker — der Dispatchable-Filter lässt SVs durch
-          auch ohne Tier-2-Freigabe. Tier 2 schaltet lediglich das
-          „Verifiziert"-Badge frei (siehe Fallakte-Kunde-Anzeige). Ein
-          rotes Frist-Banner wäre irreführend. SA-Vorlage (Tier 1) bleibt
-          das einzige Hard-Gate mit sichtbarem Banner. */}
+      {/* AAR-692 / FG3: Tier-2-Banner (frist_ueberschritten + ausstehend-Countdown)
+          entfernt — ein rotes Frist-Banner wäre irreführend. FG3-Update
+          (Aaron 2026-07-11, decision A): 'frist_ueberschritten' blockt jetzt die
+          Fall-Zuweisung — der Dispatchable-Filter (applyDispatchableFilter /
+          svDarfFaelleEmpfangen) schließt solche SVs aus. 'ausstehend' und noch
+          nicht Tier-2-verifizierte SVs bekommen weiterhin Fälle. Das
+          „Verifiziert"-Badge bleibt eine separate, verifiziert-getriebene Anzeige
+          (siehe Fallakte-Kunde-Anzeige). SA-Vorlage (Tier 1) bleibt das einzige
+          Hard-Gate mit sichtbarem Banner. */}
       {/* AAR-700: AAR-512-Onboarding-Banner entfernt — verwies auf nichts
           Konkretes mehr und blieb auch nach abgeschlossenem Onboarding
           stehen. Hard-Gate liegt im Layout-Redirect (portal_zugang_
