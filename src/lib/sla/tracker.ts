@@ -3,6 +3,8 @@
 
 import { createAdminClient } from '@/lib/supabase/admin'
 import { resolveSlaBreachTaskCancel } from './task-resolution'
+import { deriveSvSlaCompletion } from './sv-completion'
+import type { SvSlaTyp } from './sv-completion'
 
 export type SlaTyp =
   | 'gutachter_zuweisung'
@@ -91,34 +93,72 @@ export async function completeSla(fallId: string, typ: SlaTyp): Promise<void> {
 /**
  * Findet alle pending SLAs deren breach_at < jetzt → Status auf 'breached' + Task erstellen.
  * Wird vom /api/sla/check-Endpoint (cron) aufgerufen.
- * Liefert Anzahl neu erkannter Breaches.
+ * Liefert Anzahl neu erkannter Breaches (nur echte Eskalationen, keine auto-completed Zeilen).
+ *
+ * FG7 (Task 4): Zwei Verbesserungen gegenueber dem alten Stand:
+ * 1. target_rolle guard: kanzlei-Zeilen werden vom Select ausgeschlossen (kanzlei traegt
+ *    eigene sla_typ-Werte die nicht im SV-SLA_LABEL stehen → undefinierter Task-Titel).
+ * 2. Live completion re-check: Vor jeder Eskalation wird deriveSvSlaCompletion() aufgerufen.
+ *    Wenn der Claim bereits weitergelaufen ist → completeSla() + continue (kein falscher Breach).
+ *    qc_filmcheck bekommt kein re-check (behaelt generische Eskalation wie bisher).
  */
 export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number; tasksErstellt: number }> {
   const db = createAdminClient()
   const now = new Date().toISOString()
 
+  // target_rolle guard: kanzlei-Zeilen ausschliessen (FG7 Task 4 — kein kanzlei-Leak).
   const { data: pending } = await db
     .from('sla_tracking')
     .select('id, fall_id, claim_id, sla_typ, breach_at')
     .eq('status', 'pending')
     .lt('breach_at', now)
+    .neq('target_rolle', 'kanzlei')
 
   if (!pending || pending.length === 0) return { neueBreaches: 0, tasksErstellt: 0 }
 
+  let neueBreaches = 0
   let tasksErstellt = 0
+  let autoCompleted = 0
+
   for (const sla of pending) {
     const fallId = sla.fall_id as string
     const claimId = sla.claim_id as string | null
     const typ = sla.sla_typ as SlaTyp
 
-    // Fallnummer fuer Task-Titel.
+    // Fallnummer fuer Task-Titel + operative_status fuer completion re-check.
     // CMM-49 (Drop-Runway, Phase D Reader-Sweep): claim_nummer direkt aus claims
     // (SSoT) statt via .from('faelle') -> claims:claim_id-Embed. sla_tracking traegt
     // claim_id nativ (FK-Re-Key, 26/26 konsistent mit faelle[fall_id].claim_id).
     let fallNr = fallId.slice(0, 8)
+    let operativeStatus: string | null = null
     if (claimId) {
-      const { data: claimRow } = await db.from('claims').select('claim_nummer').eq('id', claimId).maybeSingle()
+      const { data: claimRow } = await db
+        .from('claims')
+        .select('claim_nummer, operative_status')
+        .eq('id', claimId)
+        .maybeSingle()
       fallNr = claimRow?.claim_nummer ?? fallId.slice(0, 8)
+      operativeStatus = (claimRow?.operative_status as string | null) ?? null
+    }
+
+    // termin_bestaetigung: probe ob ein bestaetigter/abgeschlossener Termin existiert.
+    // Gate auf typ um den Extra-Query fuer alle anderen typs zu vermeiden.
+    const hasConfirmedTermin =
+      typ === 'termin_bestaetigung'
+        ? await db
+            .from('gutachter_termine')
+            .select('id', { count: 'exact', head: true })
+            .eq('fall_id', fallId)
+            .in('status', ['bestaetigt', 'abgeschlossen'])
+            .then(({ count }) => (count ?? 0) > 0)
+        : false
+
+    // Completion re-check (FG7 Task 4): qc_filmcheck behaelt generische Eskalation (kein re-check).
+    // Das typ !== 'qc_filmcheck' narrowt SlaTyp (5 Mitglieder) auf SvSlaTyp (4) → type-safe.
+    if (typ !== 'qc_filmcheck' && deriveSvSlaCompletion(typ as SvSlaTyp, { operativeStatus, hasConfirmedTermin })) {
+      await completeSla(fallId, typ)
+      autoCompleted++
+      continue
     }
 
     // Eskalations-Task erstellen
@@ -147,7 +187,13 @@ export async function checkAndEscalateBreaches(): Promise<{ neueBreaches: number
       titel: `SLA-Verletzung: ${SLA_LABEL[typ]}`,
       beschreibung: `Eskalations-Task ${task!.id} angelegt.`,
     })
+
+    neueBreaches++
   }
 
-  return { neueBreaches: pending.length, tasksErstellt }
+  if (autoCompleted > 0) {
+    console.log(`[SLA] checkAndEscalateBreaches: ${autoCompleted} auto-completed (Claim bereits weitergelaufen)`)
+  }
+
+  return { neueBreaches, tasksErstellt }
 }
