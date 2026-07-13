@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { KiExecuteButton } from '@/components/shared/KiExecuteButton'
 import { isExecutorEnabled } from '@/lib/task-executor/policy'
+import PageHeader from '@/components/shared/PageHeader'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,10 +38,7 @@ export default async function MitarbeiterTasks({ searchParams }: { searchParams:
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Tasks</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Ihnen zugewiesene Aufgaben und offene KB-Team-Aufgaben.</p>
-      </div>
+      <PageHeader title="Meine Tasks" description="Ihnen zugewiesene Aufgaben und offene KB-Team-Aufgaben." size="lg" />
 
       {/* Status-Filter */}
       <div className="flex flex-wrap gap-1.5">

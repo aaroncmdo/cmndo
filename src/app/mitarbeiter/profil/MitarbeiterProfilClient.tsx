@@ -10,6 +10,7 @@ import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
 import { useRouter } from 'next/navigation'
 import AvatarUpload from '@/components/shared/AvatarUpload'
+import PageHeader from '@/components/shared/PageHeader'
 import { updateProfilText } from '@/lib/profile/avatar'
 
 const ROLLEN_LABEL: Record<string, string> = {
@@ -60,10 +61,7 @@ export default function MitarbeiterProfilClient({
 
   return (
     <div className="max-w-3xl space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Mein Profil</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">Deine Identität und wie du im Kunden-Portal erscheinst.</p>
-      </div>
+      <PageHeader title="Mein Profil" description="Deine Identität und wie du im Kunden-Portal erscheinst." size="lg" />
 
       {/* Sektion 1 — Identitaet (read-only) */}
       <section className="rounded-ios-md border border-claimondo-border bg-white p-5 sm:p-6">

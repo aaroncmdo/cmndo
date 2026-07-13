@@ -8,6 +8,7 @@ import {
 } from 'lucide-react'
 import { StatBar, type StatBarItem } from '@/components/shared/StatBar'
 import { Panel } from '@/components/shared/Panel'
+import PageHeader from '@/components/shared/PageHeader'
 
 type Perf = { monat: string; jahr: number; leads_qualifiziert: number; leads_konvertiert: number; faelle_abgeschlossen: number; aktive_faelle: number; umsatz_generiert: number }
 type Incentive = { id: string; titel: string; beschreibung: string | null; kategorie: string; typ: string; bedingung: string; wert: number }
@@ -54,10 +55,7 @@ export default function PerformanceClient({ profile, stats, performanceHistory, 
 
   return (
     <div className="space-y-5">
-      <div>
-        <h1 className="text-heading-lg font-bold text-claimondo-navy">Meine Performance</h1>
-        <p className="mt-0.5 text-body-sm text-claimondo-ondo">{name} · {monatLabel}</p>
-      </div>
+      <PageHeader title="Meine Performance" description={`${name} · ${monatLabel}`} size="lg" />
 
       {/* Standing — Rang eskaliert (statt als 4. gleichrangige Karte vergraben) */}
       <div className="flex items-center gap-2.5 rounded-ios-md border border-claimondo-border bg-white px-4 py-2.5">
