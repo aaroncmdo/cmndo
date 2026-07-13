@@ -205,7 +205,8 @@ export async function processInboundText(
       await db.from('gutachter_termine')
         .update({ status: 'bestaetigt' })
         .eq('id', naechsterTermin.id)
-        .in('status', ['reserviert', 'angefragt'])
+        // 'angefragt' ist ein reparatur_termine-Wert (nicht im gutachter_termine-CHECK) — toter Filter.
+        .in('status', ['reserviert'])
 
       try {
         await db.from('timeline').insert({

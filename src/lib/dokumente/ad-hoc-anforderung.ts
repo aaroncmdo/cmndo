@@ -116,7 +116,9 @@ export async function requestDokumentFromKunde(
       kanal,
       token,
       expires_at: expiresAt.toISOString(),
-      status: 'pending',
+      // Kanonischer Insert-Wert (wie dokumente-anfordern.ts / ensure-zb1-anfrage.ts);
+      // CHECK dokument_upload_anfragen_status: gesendet/teilweise/komplett/abgelaufen.
+      status: 'gesendet',
       erstellt_von: user.id,
       slots: [
         {
@@ -124,7 +126,6 @@ export async function requestDokumentFromKunde(
           label: TYP_LABEL[belegTyp],
           beschreibung: begruendung,
           pflicht: true,
-          status: 'ausstehend',
         },
       ],
     })
@@ -259,7 +260,9 @@ export async function cancelAdHocAnforderung(
     .maybeSingle()
   const { error } = await admin
     .from('dokument_upload_anfragen')
-    .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+    // CHECK kennt kein 'storniert' — 'abgelaufen' = terminal-inaktiv, faellt aus der
+    // status='gesendet'-Offen-Query (DokumenteAnfordernCard) raus.
+    .update({ status: 'abgelaufen', updated_at: new Date().toISOString() })
     .eq('id', anfrageId)
   if (error) return { success: false, error: error.message }
 
@@ -292,8 +295,8 @@ export async function resendAdHocAnforderung(
     .eq('id', anfrageId)
     .maybeSingle()
   if (!anfrage) return { success: false, error: 'Anfrage nicht gefunden' }
-  if (anfrage.status !== 'pending') {
-    return { success: false, error: 'Nur pending-Anfragen können erneut gesendet werden' }
+  if (anfrage.status !== 'gesendet') {
+    return { success: false, error: 'Nur offene Anfragen können erneut gesendet werden' }
   }
 
   const slotsArr = Array.isArray(anfrage.slots) ? (anfrage.slots as Array<Record<string, unknown>>) : []
