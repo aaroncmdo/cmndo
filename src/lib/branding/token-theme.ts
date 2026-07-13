@@ -15,6 +15,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { CLAIMONDO_DEFAULT_THEME, hydrateTheme } from './theme'
 import type { KundenThemeResult } from './kunden-theme'
+import { kundenBrandingErlaubt } from './gate'
 
 const FALLBACK: KundenThemeResult = {
   theme: CLAIMONDO_DEFAULT_THEME,
@@ -30,8 +31,7 @@ async function resolveBrandingFromSvId(db: SupabaseClient, svId: string): Promis
     .eq('id', svId)
     .maybeSingle()
   if (!sv) return FALLBACK
-  if (sv.verifiziert !== true) return FALLBACK
-  if (sv.use_custom_branding !== true) return FALLBACK
+  if (!kundenBrandingErlaubt(sv)) return FALLBACK
   if (!sv.brand_primary && !sv.brand_theme) return FALLBACK
 
   return {
