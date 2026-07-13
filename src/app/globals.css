@@ -639,6 +639,20 @@ p, li, blockquote, article, .prose {
   background: #f8f9fb;
 }
 
+/* 2026-07-11 (PageHeader-Floating-Card): Weiche, helle Floating-Card fuer den
+   Seiten-Header (shared PageHeader). Brand-var-getrieben (kunde/makler branded),
+   Claimondo-Fallback fuer interne Portale. Ersetzt die eckigen
+   `bg-white border-b`-Header-Leisten. */
+.page-header-card {
+  background-color: color-mix(in srgb, var(--brand-surface, #ffffff) 82%, transparent);
+  backdrop-filter: saturate(160%) blur(16px);
+  -webkit-backdrop-filter: saturate(160%) blur(16px);
+  border: 1px solid color-mix(in srgb, var(--brand-primary, #0D1B3E) 8%, transparent);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, #0D1B3E 8%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
+}
+
 /* 2026-05-14: Floating-Sidebar-Pilot. Wenn `data-sidebar-mode="floating"` auf
    dem <aside> gesetzt ist, werden die direkten Section-Wrapper als Glass-Pills
    gerendert — Logo-Card, Nav-Sections, Profil-Card. Aktivierung via

@@ -480,10 +480,10 @@ export default function StatistikenClient({
   return (
     <div className="flex h-full flex-col">
       {/* Sticky Filter-Bar */}
-      <header className="sticky top-0 z-10 bg-white border-b border-claimondo-border shadow-sm px-4 py-3">
+      <header className="sticky top-0 z-10 bg-claimondo-bg/90 backdrop-blur px-4 pt-4 pb-3">
         <div className="max-w-[1600px] mx-auto space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            {!embedded && <PageHeader title="Statistiken" />}
+            {!embedded && <PageHeader title="Statistiken" bare />}
             <div className="flex items-center gap-3 flex-wrap">
               {/* Zeitraum */}
               <div className="flex bg-claimondo-bg rounded-ios-lg p-0.5">

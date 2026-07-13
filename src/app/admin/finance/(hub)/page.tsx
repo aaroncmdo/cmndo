@@ -768,8 +768,8 @@ export default async function FinancePage() {
 
   return (
     <div className="h-full flex flex-col overflow-hidden">
-      {/* Sticky Header */}
-      <div className="px-4 py-3 bg-white border-b border-claimondo-border flex-shrink-0">
+      {/* Header — Card via PageHeader; flex-shrink-0 haelt ihn fix ueber dem Scroll-Content */}
+      <div className="px-4 pt-4 flex-shrink-0">
         <PageHeader
           title="Finanzen"
           description="Umsatz, Provision & Kennzahlen"
