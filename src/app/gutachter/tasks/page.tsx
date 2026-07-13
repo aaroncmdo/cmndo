@@ -9,6 +9,7 @@ import {
   ExternalLinkIcon,
 } from 'lucide-react'
 import { SvPageChrome } from '@/app/gutachter/_shell/SvPageChrome'
+import { ClickableItemRow } from '@/components/shared/ClickableItemRow'
 
 const PRIO_COLORS: Record<string, string> = {
   kritisch: 'bg-danger-soft text-danger-strong border-danger/30',
@@ -88,43 +89,53 @@ export default async function GutachterTasksPage() {
             {offeneTasks.map(task => {
               const dl = formatDeadline(task.faellig_am)
               const prio = task.prioritaet ?? 'normal'
-              return (
-                <div
-                  key={task.id}
-                  className={`bg-white border rounded-2xl p-4 ${
-                    dl?.overdue ? 'border-danger/30' : 'border-claimondo-border'
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <h3 className="text-claimondo-navy text-sm font-medium">{task.titel}</h3>
-                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${PRIO_COLORS[prio]}`}>
-                          {PRIO_LABELS[prio]}
-                        </span>
-                      </div>
-                      {task.beschreibung && (
-                        <p className="text-claimondo-ondo text-xs mt-1 line-clamp-2">{task.beschreibung}</p>
+              const cardInner = (
+                <div className="flex items-start gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-claimondo-navy text-sm font-medium">{task.titel}</h3>
+                      <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded border ${PRIO_COLORS[prio]}`}>
+                        {PRIO_LABELS[prio]}
+                      </span>
+                    </div>
+                    {task.beschreibung && (
+                      <p className="text-claimondo-ondo text-xs mt-1 line-clamp-2">{task.beschreibung}</p>
+                    )}
+                    <div className="flex items-center gap-3 mt-2 text-xs text-claimondo-ondo">
+                      {task.fall_id && fallMap[task.fall_id] && (
+                        <Link
+                          href={`/gutachter/fall/${task.fall_id}`}
+                          className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] flex items-center gap-1"
+                        >
+                          #{fallMap[task.fall_id]}
+                          <ExternalLinkIcon className="w-3 h-3" />
+                        </Link>
                       )}
-                      <div className="flex items-center gap-3 mt-2 text-xs text-claimondo-ondo">
-                        {task.fall_id && fallMap[task.fall_id] && (
-                          <Link
-                            href={`/gutachter/fall/${task.fall_id}`}
-                            className="text-[var(--brand-accent)] hover:text-[var(--brand-accent)] flex items-center gap-1"
-                          >
-                            #{fallMap[task.fall_id]}
-                            <ExternalLinkIcon className="w-3 h-3" />
-                          </Link>
-                        )}
-                        {dl && (
-                          <span className={`flex items-center gap-1 ${dl.overdue ? 'text-danger' : 'text-claimondo-ondo'}`}>
-                            <ClockIcon className="w-3 h-3" />
-                            {dl.text}
-                          </span>
-                        )}
-                      </div>
+                      {dl && (
+                        <span className={`flex items-center gap-1 ${dl.overdue ? 'text-danger' : 'text-claimondo-ondo'}`}>
+                          <ClockIcon className="w-3 h-3" />
+                          {dl.text}
+                        </span>
+                      )}
                     </div>
                   </div>
+                </div>
+              )
+              const cardClassName = `bg-white border rounded-2xl p-4 ${
+                dl?.overdue ? 'border-danger/30' : 'border-claimondo-border'
+              }`
+              return task.fall_id ? (
+                <ClickableItemRow
+                  key={task.id}
+                  href={`/gutachter/fall/${task.fall_id}`}
+                  className={cardClassName}
+                  ariaLabel={`Fall ${fallMap[task.fall_id] ?? task.fall_id.slice(0, 8)} öffnen`}
+                >
+                  {cardInner}
+                </ClickableItemRow>
+              ) : (
+                <div key={task.id} className={cardClassName}>
+                  {cardInner}
                 </div>
               )
             })}
