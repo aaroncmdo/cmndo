@@ -6,6 +6,7 @@ import KundeTrackingClient from './KundeTrackingClient'
 import ClaimondoKundenHeader from '@/components/kunde/ClaimondoKundenHeader'
 import { hydrateTheme } from '@/lib/branding/theme'
 import { generateCssVars } from '@/lib/branding/css-vars'
+import { kundenBrandingErlaubt } from '@/lib/branding/gate'
 import { terminBeiKundeZuhause } from '@/lib/kunde/termin-heuristik'
 import { SheetCard } from '@/components/shared/SheetCard'
 
@@ -155,8 +156,7 @@ export default async function KundeTerminPage({
   // letzteres wird auch von Tier-2 (tier2Freigeben) gestempelt, ohne `verifiziert` zu
   // setzen, und konnte so bei einem noch nicht Tier-1-verifizierten SV Whitelabel zeigen,
   // das das Kunde-Portal (resolveKundenTheme) verweigert. Jetzt konsistent.
-  const svVerifiziert = svRow?.verifiziert === true
-  const brandEnabled = svVerifiziert && !!svRow?.use_custom_branding
+  const brandEnabled = kundenBrandingErlaubt(svRow)
 
   const brandStyle = brandEnabled
     ? generateCssVars(
