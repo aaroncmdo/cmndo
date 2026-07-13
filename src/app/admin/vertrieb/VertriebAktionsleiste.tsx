@@ -1,8 +1,8 @@
 'use client'
 // Vertrieb-Cockpit: kontextuelle Aktions-Leiste. Zeigt je aktiver Rolle-Pill x Lead/Partner
-// die passenden Aktionen. „SV anlegen" oeffnet den Onboarding-Wizard als Drawer-Overlay (D2);
-// CSV/Scrapen oeffnen als Cockpit-Drawer (kein Full-Page-Nav); die uebrigen Aktionen sind
-// Deep-Links auf die tiefe Verwaltung.
+// die passenden Aktionen. ALLE Aktionen oeffnen als Cockpit-Drawer (kein Full-Page-Nav mehr):
+// SV-/Makler-/Werkstatt-anlegen, CSV-Import, Scrapen, QR-Pool, Basis-Freigaben. Die href in
+// context-aktionen bleibt nur defensiver Fallback (jeder key wird in ausloesen() intercepted).
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button, Drawer } from '@/components/primitives'
